@@ -19656,6 +19656,7 @@ package android.net {
     method public int describeContents();
     method public java.net.InetAddress[] getAllByName(java.lang.String) throws java.net.UnknownHostException;
     method public java.net.InetAddress getByName(java.lang.String) throws java.net.UnknownHostException;
+    method public long getNetworkHandle();
     method public javax.net.SocketFactory getSocketFactory();
     method public java.net.URLConnection openConnection(java.net.URL) throws java.io.IOException;
     method public java.net.URLConnection openConnection(java.net.URL, java.net.Proxy) throws java.io.IOException;

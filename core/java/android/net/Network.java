@@ -340,6 +340,35 @@ public class Network implements Parcelable {
         }
     }
 
+    /**
+     * Returns a handle representing this {@code Network}, for use with the NDK API.
+     */
+    public long getNetworkHandle() {
+        // The network handle is explicitly not the same as the netId.
+        //
+        // The netId is an implementation detail which might be changed in the
+        // future, or which alone (i.e. in the absence of some additional
+        // context) might not be sufficient to fully identify a Network.
+        //
+        // As such, the intention is to prevent accidental misuse of the API
+        // that might result if a developer assumed that handles and netIds
+        // were identical and passing a netId to a call expecting a handle
+        // "just worked".  Such accidental misuse, if widely deployed, might
+        // prevent future changes to the semantics of the netId field or
+        // inhibit the expansion of state required for Network objects.
+        //
+        // This extra layer of indirection might be seen as paranoia, and might
+        // never end up being necessary, but the added complexity is trivial.
+        // At some future date it may be desirable to realign the handle with
+        // Multiple Provisioning Domains API recommendations, as made by the
+        // IETF mif working group.
+        //
+        // The HANDLE_MAGIC value MUST be kept in sync with the corresponding
+        // value in the native/android/net.c NDK implementation.
+        final long HANDLE_MAGIC = 0xfacade;
+        return (((long) netId) << 32) | HANDLE_MAGIC;
+    }
+
     // implement the Parcelable interface
     public int describeContents() {
         return 0;
