@@ -3940,15 +3940,21 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     }
 
     @Override
-    public void clearDeviceInitializer(String packageName) {
+    public void clearDeviceInitializer(ComponentName who) {
         if (!mHasFeature) {
             return;
         }
-        if (packageName == null) {
-            throw new NullPointerException("packageName is null");
+        Preconditions.checkNotNull(who, "ComponentName is null");
+
+        ActiveAdmin admin = getActiveAdminUncheckedLocked(who, UserHandle.getCallingUserId());
+
+        if (admin.getUid() != Binder.getCallingUid()) {
+            throw new SecurityException("Admin " + who + " is not owned by uid "
+                    + Binder.getCallingUid());
         }
 
-        if (!isDeviceInitializer(packageName) && !isDeviceOwner(packageName)) {
+        if (!isDeviceInitializer(admin.info.getPackageName())
+                && !isDeviceOwner(admin.info.getPackageName())) {
             throw new SecurityException(
                     "clearDeviceInitializer can only be called by the device initializer/owner");
         }

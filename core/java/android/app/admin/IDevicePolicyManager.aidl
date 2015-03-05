@@ -202,7 +202,7 @@ interface IDevicePolicyManager {
 
     boolean setUserEnabled(in ComponentName who);
     boolean isDeviceInitializer(String packageName);
-    void clearDeviceInitializer(String packageName);
+    void clearDeviceInitializer(in ComponentName who);
     boolean setDeviceInitializer(in ComponentName who, in ComponentName initializer, String initializerName);
     String getDeviceInitializer();
 }
