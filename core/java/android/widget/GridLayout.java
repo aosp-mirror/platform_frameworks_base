@@ -141,7 +141,9 @@ import static java.lang.Math.min;
  * view was alone in a column, that column would itself collapse to zero width if and only if
  * no gravity was defined on the view. If gravity was defined, then the gone-marked
  * view has no effect on the layout and the container should be laid out as if the view
- * had never been added to it.
+ * had never been added to it. GONE views are taken to have zero weight during excess space
+ * distribution.
+ * <p>
  * These statements apply equally to rows as well as columns, and to groups of rows or columns.
  *
  * <p>
@@ -1015,7 +1017,7 @@ public class GridLayout extends ViewGroup {
             } else {
                 boolean horizontal = (mOrientation == HORIZONTAL);
                 Spec spec = horizontal ? lp.columnSpec : lp.rowSpec;
-                if (spec.alignment == FILL) {
+                if (spec.getAbsoluteAlignment(horizontal) == FILL) {
                     Interval span = spec.span;
                     Axis axis = horizontal ? mHorizontalAxis : mVerticalAxis;
                     int[] locations = axis.getLocations();
@@ -1091,11 +1093,6 @@ public class GridLayout extends ViewGroup {
         invalidateValues();
     }
 
-    final Alignment getAlignment(Alignment alignment, boolean horizontal) {
-        return (alignment != UNDEFINED_ALIGNMENT) ? alignment :
-                (horizontal ? START : BASELINE);
-    }
-
     // Layout container
 
     /**
@@ -1150,8 +1147,8 @@ public class GridLayout extends ViewGroup {
             int pWidth = getMeasurement(c, true);
             int pHeight = getMeasurement(c, false);
 
-            Alignment hAlign = getAlignment(columnSpec.alignment, true);
-            Alignment vAlign = getAlignment(rowSpec.alignment, false);
+            Alignment hAlign = columnSpec.getAbsoluteAlignment(true);
+            Alignment vAlign = rowSpec.getAbsoluteAlignment(false);
 
             Bounds boundsX = mHorizontalAxis.getGroupBounds().getValue(i);
             Bounds boundsY = mVerticalAxis.getGroupBounds().getValue(i);
@@ -1297,7 +1294,7 @@ public class GridLayout extends ViewGroup {
                 // we must include views that are GONE here, see introductory javadoc
                 LayoutParams lp = getLayoutParams(c);
                 Spec spec = horizontal ? lp.columnSpec : lp.rowSpec;
-                Bounds bounds = getAlignment(spec.alignment, horizontal).getBounds();
+                Bounds bounds = spec.getAbsoluteAlignment(horizontal).getBounds();
                 assoc.put(spec, bounds);
             }
             return assoc.pack();
@@ -1703,7 +1700,11 @@ public class GridLayout extends ViewGroup {
 
         private boolean computeHasWeights() {
             for (int i = 0, N = getChildCount(); i < N; i++) {
-                LayoutParams lp = getLayoutParams(getChildAt(i));
+                final View child = getChildAt(i);
+                if (child.getVisibility() == View.GONE) {
+                    continue;
+                }
+                LayoutParams lp = getLayoutParams(child);
                 Spec spec = horizontal ? lp.columnSpec : lp.rowSpec;
                 if (spec.weight != 0) {
                     return true;
@@ -1743,7 +1744,10 @@ public class GridLayout extends ViewGroup {
         private void shareOutDelta(int totalDelta, float totalWeight) {
             Arrays.fill(deltas, 0);
             for (int i = 0, N = getChildCount(); i < N; i++) {
-                View c = getChildAt(i);
+                final View c = getChildAt(i);
+                if (c.getVisibility() == View.GONE) {
+                    continue;
+                }
                 LayoutParams lp = getLayoutParams(c);
                 Spec spec = horizontal ? lp.columnSpec : lp.rowSpec;
                 float weight = spec.weight;
@@ -1796,6 +1800,9 @@ public class GridLayout extends ViewGroup {
             float totalWeight = 0f;
             for (int i = 0, N = getChildCount(); i < N; i++) {
                 View c = getChildAt(i);
+                if (c.getVisibility() == View.GONE) {
+                    continue;
+                }
                 LayoutParams lp = getLayoutParams(c);
                 Spec spec = horizontal ? lp.columnSpec : lp.rowSpec;
                 totalWeight += spec.weight;
@@ -2011,7 +2018,6 @@ public class GridLayout extends ViewGroup {
                 R.styleable.ViewGroup_MarginLayout_layout_marginRight;
         private static final int BOTTOM_MARGIN =
                 R.styleable.ViewGroup_MarginLayout_layout_marginBottom;
-
         private static final int COLUMN = R.styleable.GridLayout_Layout_layout_column;
         private static final int COLUMN_SPAN = R.styleable.GridLayout_Layout_layout_columnSpan;
         private static final int COLUMN_WEIGHT = R.styleable.GridLayout_Layout_layout_columnWeight;
@@ -2405,7 +2411,7 @@ public class GridLayout extends ViewGroup {
         protected final void include(GridLayout gl, View c, Spec spec, Axis axis, int size) {
             this.flexibility &= spec.getFlexibility();
             boolean horizontal = axis.horizontal;
-            Alignment alignment = gl.getAlignment(spec.alignment, horizontal);
+            Alignment alignment = spec.getAbsoluteAlignment(axis.horizontal);
             // todo test this works correctly when the returned value is UNDEFINED
             int before = alignment.getAlignmentValue(c, size, gl.getLayoutMode());
             include(before, size - before);
@@ -2554,6 +2560,16 @@ public class GridLayout extends ViewGroup {
 
         private Spec(boolean startDefined, int start, int size, Alignment alignment, float weight) {
             this(startDefined, new Interval(start, start + size), alignment, weight);
+        }
+
+        public Alignment getAbsoluteAlignment(boolean horizontal) {
+            if (alignment != UNDEFINED_ALIGNMENT) {
+                return alignment;
+            }
+            if (weight == 0f) {
+                return horizontal ? START : BASELINE;
+            }
+            return FILL;
         }
 
         final Spec copyWriteSpan(Interval span) {
