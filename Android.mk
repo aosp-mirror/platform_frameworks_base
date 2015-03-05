@@ -238,6 +238,8 @@ LOCAL_SRC_FILES += \
 	core/java/android/service/wallpaper/IWallpaperConnection.aidl \
 	core/java/android/service/wallpaper/IWallpaperEngine.aidl \
 	core/java/android/service/wallpaper/IWallpaperService.aidl \
+	core/java/android/service/chooser/IChooserTargetService.aidl \
+	core/java/android/service/chooser/IChooserTargetResult.aidl \
 	core/java/android/view/accessibility/IAccessibilityInteractionConnection.aidl\
 	core/java/android/view/accessibility/IAccessibilityInteractionConnectionCallback.aidl\
 	core/java/android/view/accessibility/IAccessibilityManager.aidl \
@@ -545,6 +547,7 @@ aidl_files := \
 	frameworks/base/core/java/android/view/textservice/SuggestionsInfo.aidl \
 	frameworks/base/core/java/android/service/carrier/MessagePdu.aidl \
 	frameworks/base/core/java/android/service/notification/StatusBarNotification.aidl \
+	frameworks/base/core/java/android/service/chooser/ChooserTarget.aidl \
 	frameworks/base/core/java/android/speech/tts/Voice.aidl \
 	frameworks/base/core/java/android/app/usage/UsageEvents.aidl \
 	frameworks/base/core/java/android/app/Notification.aidl \

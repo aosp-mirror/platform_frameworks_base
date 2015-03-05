@@ -2892,6 +2892,14 @@
         android:description="@string/permdesc_bindNotificationListenerService"
         android:protectionLevel="signature" />
 
+    <!-- Must be required by a {@link
+         android.service.chooser.ChooserTargetService}, to ensure that
+         only the system can bind to it. -->
+    <permission android:name="android.permission.BIND_CHOOSER_TARGET_SERVICE"
+        android:label="@string/permlab_bindChooserTargetService"
+        android:description="@string/permdesc_bindChooserTargetService"
+        android:protectionLevel="signature" />
+
     <!-- @SystemApi Must be required by a {@link
          android.service.notification.ConditionProviderService},
          to ensure that only the system can bind to it.
