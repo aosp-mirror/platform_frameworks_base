@@ -16,6 +16,7 @@
 package com.android.internal.transition;
 
 import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
 import android.animation.RectEvaluator;
 import android.content.Context;
@@ -75,13 +76,13 @@ public class EpicenterClipReveal extends Visibility {
             return null;
         }
 
-        final Rect start = getEpicenter();
         final Rect end = getBestRect(endValues);
+        final Rect start = getEpicenterOrCenter(end);
 
         // Prepare the view.
         view.setClipBounds(start);
 
-        return createRectAnimator(view, start, end);
+        return createRectAnimator(view, start, end, endValues);
     }
 
     @Override
@@ -92,12 +93,23 @@ public class EpicenterClipReveal extends Visibility {
         }
 
         final Rect start = getBestRect(startValues);
-        final Rect end = getEpicenter();
+        final Rect end = getEpicenterOrCenter(start);
 
         // Prepare the view.
         view.setClipBounds(start);
 
-        return createRectAnimator(view, start, end);
+        return createRectAnimator(view, start, end, endValues);
+    }
+
+    private Rect getEpicenterOrCenter(Rect bestRect) {
+        final Rect epicenter = getEpicenter();
+        if (epicenter != null) {
+            return epicenter;
+        }
+
+        int centerX = bestRect.centerX();
+        int centerY = bestRect.centerY();
+        return new Rect(centerX, centerY, centerX, centerY);
     }
 
     private Rect getBestRect(TransitionValues values) {
@@ -108,8 +120,17 @@ public class EpicenterClipReveal extends Visibility {
         return clipRect;
     }
 
-    private Animator createRectAnimator(View view, Rect start, Rect end) {
+    private Animator createRectAnimator(final View view, Rect start, Rect end,
+            TransitionValues endValues) {
+        final Rect terminalClip = (Rect) endValues.values.get(PROPNAME_CLIP);
         final RectEvaluator evaluator = new RectEvaluator(new Rect());
-        return ObjectAnimator.ofObject(view, "clipBounds", evaluator, start, end);
+        ObjectAnimator anim = ObjectAnimator.ofObject(view, "clipBounds", evaluator, start, end);
+        anim.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                view.setClipBounds(terminalClip);
+            }
+        });
+        return anim;
     }
 }
