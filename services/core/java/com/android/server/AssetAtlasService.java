@@ -291,7 +291,7 @@ public class AssetAtlasService extends IAssetAtlas.Stub {
                         }
                         canvas.drawBitmap(bitmap, 0.0f, 0.0f, null);
                         canvas.restore();
-                        atlasMap[mapIndex++] = bitmap.mNativeBitmap;
+                        atlasMap[mapIndex++] = bitmap.getSkBitmap();
                         atlasMap[mapIndex++] = entry.x;
                         atlasMap[mapIndex++] = entry.y;
                         atlasMap[mapIndex++] = entry.rotated ? 1 : 0;

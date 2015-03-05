@@ -27,7 +27,7 @@ int AndroidBitmap_getInfo(JNIEnv* env, jobject jbitmap,
         return ANDROID_BITMAP_RESULT_BAD_PARAMETER;
     }
 
-    SkBitmap* bm = GraphicsJNI::getNativeBitmap(env, jbitmap);
+    SkBitmap* bm = GraphicsJNI::getSkBitmap(env, jbitmap);
     if (NULL == bm) {
         return ANDROID_BITMAP_RESULT_JNI_EXCEPTION;
     }
@@ -64,7 +64,7 @@ int AndroidBitmap_lockPixels(JNIEnv* env, jobject jbitmap, void** addrPtr) {
         return ANDROID_BITMAP_RESULT_BAD_PARAMETER;
     }
 
-    SkBitmap* bm = GraphicsJNI::getNativeBitmap(env, jbitmap);
+    SkBitmap* bm = GraphicsJNI::getSkBitmap(env, jbitmap);
     if (NULL == bm) {
         return ANDROID_BITMAP_RESULT_JNI_EXCEPTION;
     }
@@ -87,7 +87,7 @@ int AndroidBitmap_unlockPixels(JNIEnv* env, jobject jbitmap) {
         return ANDROID_BITMAP_RESULT_BAD_PARAMETER;
     }
 
-    SkBitmap* bm = GraphicsJNI::getNativeBitmap(env, jbitmap);
+    SkBitmap* bm = GraphicsJNI::getSkBitmap(env, jbitmap);
     if (NULL == bm) {
         return ANDROID_BITMAP_RESULT_JNI_EXCEPTION;
     }

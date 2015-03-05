@@ -16,6 +16,7 @@
 
 #include "jni.h"
 #include "JNIHelp.h"
+#include "GraphicsJNI.h"
 
 #include <math.h>
 #include <stdio.h>
@@ -147,10 +148,6 @@ int visibilityTest(float* pWS, float* pPositions, int positionsLength,
     }
 
     return result;
-}
-
-static void doThrowIAE(JNIEnv* env, const char* msg) {
-    jniThrowException(env, "java/lang/IllegalArgumentException", msg);
 }
 
 template<class JArray, class T>
@@ -548,14 +545,6 @@ void util_multiplyMV(JNIEnv *env, jclass clazz,
 
 // ---------------------------------------------------------------------------
 
-static jfieldID nativeBitmapID = 0;
-
-void nativeUtilsClassInit(JNIEnv *env, jclass clazz)
-{
-    jclass bitmapClass = env->FindClass("android/graphics/Bitmap");
-    nativeBitmapID = env->GetFieldID(bitmapClass, "mNativeBitmap", "J");
-}
-
 extern void setGLDebugLevel(int level);
 void setTracingLevel(JNIEnv *env, jclass clazz, jint level)
 {
@@ -629,16 +618,14 @@ static int getType(SkColorType colorType)
 static jint util_getInternalFormat(JNIEnv *env, jclass clazz,
         jobject jbitmap)
 {
-    SkBitmap const * nativeBitmap =
-            (SkBitmap const *)env->GetLongField(jbitmap, nativeBitmapID);
+    SkBitmap const * nativeBitmap = GraphicsJNI::getSkBitmap(env, jbitmap);
     return getInternalFormat(nativeBitmap->colorType());
 }
 
 static jint util_getType(JNIEnv *env, jclass clazz,
         jobject jbitmap)
 {
-    SkBitmap const * nativeBitmap =
-            (SkBitmap const *)env->GetLongField(jbitmap, nativeBitmapID);
+    SkBitmap const * nativeBitmap = GraphicsJNI::getSkBitmap(env, jbitmap);
     return getType(nativeBitmap->colorType());
 }
 
@@ -646,8 +633,7 @@ static jint util_texImage2D(JNIEnv *env, jclass clazz,
         jint target, jint level, jint internalformat,
         jobject jbitmap, jint type, jint border)
 {
-    SkBitmap const * nativeBitmap =
-            (SkBitmap const *)env->GetLongField(jbitmap, nativeBitmapID);
+    SkBitmap const * nativeBitmap = GraphicsJNI::getSkBitmap(env, jbitmap);
     const SkBitmap& bitmap(*nativeBitmap);
     SkColorType colorType = bitmap.colorType();
     if (internalformat < 0) {
@@ -694,8 +680,7 @@ static jint util_texSubImage2D(JNIEnv *env, jclass clazz,
         jint target, jint level, jint xoffset, jint yoffset,
         jobject jbitmap, jint format, jint type)
 {
-    SkBitmap const * nativeBitmap =
-            (SkBitmap const *)env->GetLongField(jbitmap, nativeBitmapID);
+    SkBitmap const * nativeBitmap = GraphicsJNI::getSkBitmap(env, jbitmap);
     const SkBitmap& bitmap(*nativeBitmap);
     SkColorType colorType = bitmap.colorType();
     if (format < 0) {
@@ -1014,7 +999,6 @@ static JNINativeMethod gVisibilityMethods[] = {
 };
 
 static JNINativeMethod gUtilsMethods[] = {
-    {"nativeClassInit", "()V",                          (void*)nativeUtilsClassInit },
     { "native_getInternalFormat", "(Landroid/graphics/Bitmap;)I", (void*) util_getInternalFormat },
     { "native_getType", "(Landroid/graphics/Bitmap;)I", (void*) util_getType },
     { "native_texImage2D", "(IIILandroid/graphics/Bitmap;II)I", (void*)util_texImage2D },

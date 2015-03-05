@@ -98,7 +98,7 @@ public class NinePatch {
     public NinePatch(Bitmap bitmap, byte[] chunk, String srcName) {
         mBitmap = bitmap;
         mSrcName = srcName;
-        mNativeChunk = validateNinePatchChunk(mBitmap.ni(), chunk);
+        mNativeChunk = validateNinePatchChunk(mBitmap.getSkBitmap(), chunk);
     }
 
     /**
@@ -199,12 +199,12 @@ public class NinePatch {
     }
 
     void drawSoftware(Canvas canvas, RectF location, Paint paint) {
-        nativeDraw(canvas.getNativeCanvasWrapper(), location, mBitmap.ni(), mNativeChunk,
+        nativeDraw(canvas.getNativeCanvasWrapper(), location, mBitmap.getSkBitmap(), mNativeChunk,
                 paint != null ? paint.getNativeInstance() : 0, canvas.mDensity, mBitmap.mDensity);
     }
 
     void drawSoftware(Canvas canvas, Rect location, Paint paint) {
-        nativeDraw(canvas.getNativeCanvasWrapper(), location, mBitmap.ni(), mNativeChunk,
+        nativeDraw(canvas.getNativeCanvasWrapper(), location, mBitmap.getSkBitmap(), mNativeChunk,
                 paint != null ? paint.getNativeInstance() : 0, canvas.mDensity, mBitmap.mDensity);
     }
 
@@ -252,7 +252,7 @@ public class NinePatch {
      * that are transparent.
      */
     public final Region getTransparentRegion(Rect bounds) {
-        long r = nativeGetTransparentRegion(mBitmap.ni(), mNativeChunk, bounds);
+        long r = nativeGetTransparentRegion(mBitmap.getSkBitmap(), mNativeChunk, bounds);
         return r != 0 ? new Region(r) : null;
     }
 
