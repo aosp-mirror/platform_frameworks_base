@@ -257,11 +257,9 @@ import java.util.concurrent.atomic.AtomicLong;
  * 
  * This is very central to the platform's security; please run the unit
  * tests whenever making modifications here:
- * 
-mmm frameworks/base/tests/AndroidTests
-adb install -r -f out/target/product/passion/data/app/AndroidTests.apk
-adb shell am instrument -w -e class com.android.unit_tests.PackageManagerTests com.android.unit_tests/android.test.InstrumentationTestRunner
- * 
+ *
+runtest -c android.content.pm.PackageManagerTests frameworks-core
+ *
  * {@hide}
  */
 public class PackageManagerService extends IPackageManager.Stub {
