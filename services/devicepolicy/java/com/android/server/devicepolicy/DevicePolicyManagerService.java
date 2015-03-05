@@ -4332,12 +4332,12 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             long id = Binder.clearCallingIdentity();
             try {
                 if ((flags & DevicePolicyManager.FLAG_PARENT_CAN_ACCESS_MANAGED) != 0) {
-                    pm.addCrossProfileIntentFilter(filter, who.getPackageName(),
-                            mContext.getUserId(), callingUserId, UserHandle.USER_OWNER, 0);
+                    pm.addCrossProfileIntentFilter(filter, who.getPackageName(), callingUserId,
+                            UserHandle.USER_OWNER, 0);
                 }
                 if ((flags & DevicePolicyManager.FLAG_MANAGED_CAN_ACCESS_PARENT) != 0) {
                     pm.addCrossProfileIntentFilter(filter, who.getPackageName(),
-                            mContext.getUserId(), UserHandle.USER_OWNER, callingUserId, 0);
+                            UserHandle.USER_OWNER, callingUserId, 0);
                 }
             } catch (RemoteException re) {
                 // Shouldn't happen
@@ -4355,12 +4355,12 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             IPackageManager pm = AppGlobals.getPackageManager();
             long id = Binder.clearCallingIdentity();
             try {
-                pm.clearCrossProfileIntentFilters(callingUserId, who.getPackageName(),
-                        callingUserId);
+                // Removing those that go from the managed profile to the primary user.
+                pm.clearCrossProfileIntentFilters(callingUserId, who.getPackageName());
+                // And those that go from the primary user to the managed profile.
                 // If we want to support multiple managed profiles, we will have to only remove
                 // those that have callingUserId as their target.
-                pm.clearCrossProfileIntentFilters(UserHandle.USER_OWNER, who.getPackageName(),
-                        callingUserId);
+                pm.clearCrossProfileIntentFilters(UserHandle.USER_OWNER, who.getPackageName());
             } catch (RemoteException re) {
                 // Shouldn't happen
             } finally {

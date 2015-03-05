@@ -12033,11 +12033,11 @@ public class PackageManagerService extends IPackageManager.Stub {
 
     @Override
     public void addCrossProfileIntentFilter(IntentFilter intentFilter, String ownerPackage,
-            int ownerUserId, int sourceUserId, int targetUserId, int flags) {
+            int sourceUserId, int targetUserId, int flags) {
         mContext.enforceCallingOrSelfPermission(
                         android.Manifest.permission.INTERACT_ACROSS_USERS_FULL, null);
         int callingUid = Binder.getCallingUid();
-        enforceOwnerRights(ownerPackage, ownerUserId, callingUid);
+        enforceOwnerRights(ownerPackage, callingUid);
         enforceShellRestriction(UserManager.DISALLOW_DEBUGGING_FEATURES, callingUid, sourceUserId);
         if (intentFilter.countActions() == 0) {
             Slog.w(TAG, "Cannot set a crossProfile intent filter with no filter actions");
@@ -12045,7 +12045,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
         synchronized (mPackages) {
             CrossProfileIntentFilter newFilter = new CrossProfileIntentFilter(intentFilter,
-                    ownerPackage, UserHandle.getUserId(callingUid), targetUserId, flags);
+                    ownerPackage, targetUserId, flags);
             CrossProfileIntentResolver resolver =
                     mSettings.editCrossProfileIntentResolverLPw(sourceUserId);
             ArrayList<CrossProfileIntentFilter> existing = resolver.findFilters(intentFilter);
@@ -12064,22 +12064,19 @@ public class PackageManagerService extends IPackageManager.Stub {
     }
 
     @Override
-    public void clearCrossProfileIntentFilters(int sourceUserId, String ownerPackage,
-            int ownerUserId) {
+    public void clearCrossProfileIntentFilters(int sourceUserId, String ownerPackage) {
         mContext.enforceCallingOrSelfPermission(
                         android.Manifest.permission.INTERACT_ACROSS_USERS_FULL, null);
         int callingUid = Binder.getCallingUid();
-        enforceOwnerRights(ownerPackage, ownerUserId, callingUid);
+        enforceOwnerRights(ownerPackage, callingUid);
         enforceShellRestriction(UserManager.DISALLOW_DEBUGGING_FEATURES, callingUid, sourceUserId);
-        int callingUserId = UserHandle.getUserId(callingUid);
         synchronized (mPackages) {
             CrossProfileIntentResolver resolver =
                     mSettings.editCrossProfileIntentResolverLPw(sourceUserId);
             ArraySet<CrossProfileIntentFilter> set =
                     new ArraySet<CrossProfileIntentFilter>(resolver.filterSet());
             for (CrossProfileIntentFilter filter : set) {
-                if (filter.getOwnerPackage().equals(ownerPackage)
-                        && filter.getOwnerUserId() == callingUserId) {
+                if (filter.getOwnerPackage().equals(ownerPackage)) {
                     resolver.removeFilter(filter);
                 }
             }
@@ -12088,17 +12085,12 @@ public class PackageManagerService extends IPackageManager.Stub {
     }
 
     // Enforcing that callingUid is owning pkg on userId
-    private void enforceOwnerRights(String pkg, int userId, int callingUid) {
+    private void enforceOwnerRights(String pkg, int callingUid) {
         // The system owns everything.
         if (UserHandle.getAppId(callingUid) == Process.SYSTEM_UID) {
             return;
         }
         int callingUserId = UserHandle.getUserId(callingUid);
-        if (callingUserId != userId) {
-            throw new SecurityException("calling uid " + callingUid
-                    + " pretends to own " + pkg + " on user " + userId + " but belongs to user "
-                    + callingUserId);
-        }
         PackageInfo pi = getPackageInfo(pkg, 0, callingUserId);
         if (pi == null) {
             throw new IllegalArgumentException("Unknown package " + pkg + " on user "

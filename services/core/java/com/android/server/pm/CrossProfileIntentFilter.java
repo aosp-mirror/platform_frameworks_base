@@ -33,7 +33,6 @@ import android.os.UserHandle;
 class CrossProfileIntentFilter extends IntentFilter {
     private static final String ATTR_TARGET_USER_ID = "targetUserId";
     private static final String ATTR_FLAGS = "flags";
-    private static final String ATTR_OWNER_USER_ID = "ownerUserId";
     private static final String ATTR_OWNER_PACKAGE = "ownerPackage";
     private static final String ATTR_FILTER = "filter";
 
@@ -41,15 +40,13 @@ class CrossProfileIntentFilter extends IntentFilter {
 
     // If the intent matches the IntentFilter, then it can be forwarded to this userId.
     final int mTargetUserId;
-    final int mOwnerUserId; // userId of the app which has set this CrossProfileIntentFilter.
     final String mOwnerPackage; // packageName of the app.
     final int mFlags;
 
-    CrossProfileIntentFilter(IntentFilter filter, String ownerPackage, int ownerUserId,
-            int targetUserId, int flags) {
+    CrossProfileIntentFilter(IntentFilter filter, String ownerPackage, int targetUserId,
+            int flags) {
         super(filter);
         mTargetUserId = targetUserId;
-        mOwnerUserId = ownerUserId;
         mOwnerPackage = ownerPackage;
         mFlags = flags;
     }
@@ -62,17 +59,12 @@ class CrossProfileIntentFilter extends IntentFilter {
         return mFlags;
     }
 
-    public int getOwnerUserId() {
-        return mOwnerUserId;
-    }
-
     public String getOwnerPackage() {
         return mOwnerPackage;
     }
 
     CrossProfileIntentFilter(XmlPullParser parser) throws XmlPullParserException, IOException {
         mTargetUserId = getIntFromXml(parser, ATTR_TARGET_USER_ID, UserHandle.USER_NULL);
-        mOwnerUserId = getIntFromXml(parser, ATTR_OWNER_USER_ID, UserHandle.USER_NULL);
         mOwnerPackage = getStringFromXml(parser, ATTR_OWNER_PACKAGE, "");
         mFlags = getIntFromXml(parser, ATTR_FLAGS, 0);
 
@@ -129,7 +121,6 @@ class CrossProfileIntentFilter extends IntentFilter {
     public void writeToXml(XmlSerializer serializer) throws IOException {
         serializer.attribute(null, ATTR_TARGET_USER_ID, Integer.toString(mTargetUserId));
         serializer.attribute(null, ATTR_FLAGS, Integer.toString(mFlags));
-        serializer.attribute(null, ATTR_OWNER_USER_ID, Integer.toString(mOwnerUserId));
         serializer.attribute(null, ATTR_OWNER_PACKAGE, mOwnerPackage);
         serializer.startTag(null, ATTR_FILTER);
             super.writeToXml(serializer);
@@ -144,7 +135,6 @@ class CrossProfileIntentFilter extends IntentFilter {
 
     boolean equalsIgnoreFilter(CrossProfileIntentFilter other) {
         return mTargetUserId == other.mTargetUserId
-                && mOwnerUserId == other.mOwnerUserId
                 && mOwnerPackage.equals(other.mOwnerPackage)
                 && mFlags == other.mFlags;
     }
