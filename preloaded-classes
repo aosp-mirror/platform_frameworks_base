@@ -1172,6 +1172,7 @@ android.system.StructUtsname
 android.telecom.InCallService
 android.telephony.PhoneNumberUtils
 android.telephony.Rlog
+android.telephony.SignalStrength
 android.telephony.SubscriptionManager
 android.telephony.TelephonyManager
 android.text.AndroidBidi
