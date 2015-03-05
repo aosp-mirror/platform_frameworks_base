@@ -2562,7 +2562,7 @@ public class GridLayout extends ViewGroup {
             this(startDefined, new Interval(start, start + size), alignment, weight);
         }
 
-        public Alignment getAbsoluteAlignment(boolean horizontal) {
+        private Alignment getAbsoluteAlignment(boolean horizontal) {
             if (alignment != UNDEFINED_ALIGNMENT) {
                 return alignment;
             }
