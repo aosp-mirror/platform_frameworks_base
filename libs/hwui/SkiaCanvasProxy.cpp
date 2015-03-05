@@ -22,9 +22,10 @@
 namespace android {
 namespace uirenderer {
 
-SkiaCanvasProxy::SkiaCanvasProxy(Canvas* canvas)
+SkiaCanvasProxy::SkiaCanvasProxy(Canvas* canvas, bool filterHwuiCalls)
         : INHERITED(canvas->width(), canvas->height())
-        , mCanvas(canvas) {}
+        , mCanvas(canvas)
+        , mFilterHwuiCalls(filterHwuiCalls) {}
 
 void SkiaCanvasProxy::onDrawPaint(const SkPaint& paint) {
     mCanvas->drawPaint(paint);
@@ -32,6 +33,10 @@ void SkiaCanvasProxy::onDrawPaint(const SkPaint& paint) {
 
 void SkiaCanvasProxy::onDrawPoints(PointMode pointMode, size_t count, const SkPoint pts[],
         const SkPaint& paint) {
+    if (!pts || count == 0) {
+        return;
+    }
+
     // convert the SkPoints into floats
     SK_COMPILE_ASSERT(sizeof(SkPoint) == sizeof(float)*2, SkPoint_is_no_longer_2_floats);
     const size_t floatCount = count << 1;
@@ -118,6 +123,9 @@ void SkiaCanvasProxy::onDrawSprite(const SkBitmap& bitmap, int left, int top,
 void SkiaCanvasProxy::onDrawVertices(VertexMode mode, int vertexCount, const SkPoint vertices[],
         const SkPoint texs[], const SkColor colors[], SkXfermode*, const uint16_t indices[],
         int indexCount, const SkPaint& paint) {
+    if (mFilterHwuiCalls) {
+        return;
+    }
     // convert the SkPoints into floats
     SK_COMPILE_ASSERT(sizeof(SkPoint) == sizeof(float)*2, SkPoint_is_no_longer_2_floats);
     const int floatCount = vertexCount << 1;
@@ -312,6 +320,9 @@ void SkiaCanvasProxy::onDrawTextBlob(const SkTextBlob* blob, SkScalar x, SkScala
 
 void SkiaCanvasProxy::onDrawPatch(const SkPoint cubics[12], const SkColor colors[4],
         const SkPoint texCoords[4], SkXfermode* xmode, const SkPaint& paint) {
+    if (mFilterHwuiCalls) {
+        return;
+    }
     SkPatchUtils::VertexData data;
 
     SkMatrix matrix;
