@@ -2476,12 +2476,14 @@ public class DevicePolicyManager {
     /**
      * Removes the device initializer, so that it will not be invoked on user initialization for any
      * subsequently created users. This method can be called by either the device owner or device
-     * initializer itself.
+     * initializer itself. The caller must be an active administrator.
+     *
+     * @param who Which {@link DeviceAdminReceiver} this request is associated with.
      */
-    public void clearDeviceInitializerApp() {
+    public void clearDeviceInitializerApp(ComponentName who) {
         if (mService != null) {
             try {
-                mService.clearDeviceInitializer(mContext.getPackageName());
+                mService.clearDeviceInitializer(who);
             } catch (RemoteException re) {
                 Log.w(TAG, "Failed to clear device initializer");
             }

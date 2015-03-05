@@ -5552,7 +5552,7 @@ package android.app.admin {
     method public void addPersistentPreferredActivity(android.content.ComponentName, android.content.IntentFilter, android.content.ComponentName);
     method public void addUserRestriction(android.content.ComponentName, java.lang.String);
     method public void clearCrossProfileIntentFilters(android.content.ComponentName);
-    method public void clearDeviceInitializerApp();
+    method public void clearDeviceInitializerApp(android.content.ComponentName);
     method public void clearDeviceOwnerApp(java.lang.String);
     method public void clearPackagePersistentPreferredActivities(android.content.ComponentName, java.lang.String);
     method public void clearProfileOwner(android.content.ComponentName);
