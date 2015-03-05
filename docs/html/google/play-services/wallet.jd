@@ -53,7 +53,7 @@ header.hide=1
       <p>Google Wallet provides auto-completion of addresses, minimizing user data entry. You can also
       retrieve billing and shipping addresses directly from the user’s Wallet to-do form pre-fills.<br />
       <a class="external-link"
-      href="https://developers.google.com/commerce/wallet/instant-buy/android/reference/com/google/android/gms/wallet/MaskedWallet#getBillingAddress()">Get
+      href="{@docRoot}reference/com/google/android/gms/wallet/MaskedWallet#getBillingAddress()">Get
       billing addresses</a>.</p>
   </div>
 
