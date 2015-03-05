@@ -216,7 +216,7 @@ public:
     virtual void drawVertices(SkCanvas::VertexMode vertexMode, int vertexCount,
             const float* verts, const float* tex, const int* colors,
             const uint16_t* indices, int indexCount, const SkPaint& paint) override
-        { LOG_ALWAYS_FATAL("DisplayListRenderer does not support drawVertices()"); }
+        { /* DisplayListRenderer does not support drawVertices(); ignore */ }
 
     // Bitmap-based
     virtual void drawBitmap(const SkBitmap& bitmap, float left, float top, const SkPaint* paint) override;

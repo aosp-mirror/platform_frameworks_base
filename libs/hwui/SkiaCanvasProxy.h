@@ -27,16 +27,19 @@ namespace uirenderer {
 
 /**
  * This class serves as a proxy between Skia's SkCanvas and Android Framework's
- * Canvas.  The class does not maintain any state and will pass through any request
- * directly to the Canvas provided in the constructor.
+ * Canvas.  The class does not maintain any draw-related state and will pass
+ * through most requests directly to the Canvas provided in the constructor.
  *
  * Upon construction it is expected that the provided Canvas has already been
  * prepared for recording and will continue to be in the recording state while
  * this proxy class is being used.
+ *
+ * If filterHwuiCalls is true, the proxy silently ignores away draw calls that
+ * aren't supported by HWUI.
  */
 class ANDROID_API SkiaCanvasProxy : public SkCanvas {
 public:
-    SkiaCanvasProxy(Canvas* canvas);
+    SkiaCanvasProxy(Canvas* canvas, bool filterHwuiCalls = false);
     virtual ~SkiaCanvasProxy() {}
 
 protected:
@@ -94,6 +97,7 @@ protected:
 
 private:
     Canvas* mCanvas;
+    bool mFilterHwuiCalls;
 
     typedef SkCanvas INHERITED;
 };
