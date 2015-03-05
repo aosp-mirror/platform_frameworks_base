@@ -27504,6 +27504,7 @@ package android.provider {
 
   public static final class VoicemailContract.Status implements android.provider.BaseColumns {
     method public static android.net.Uri buildSourceUri(java.lang.String);
+    method public static void setStatus(android.content.Context, android.telecom.PhoneAccountHandle, int, int, int);
     field public static final java.lang.String CONFIGURATION_STATE = "configuration_state";
     field public static final int CONFIGURATION_STATE_CAN_BE_CONFIGURED = 2; // 0x2
     field public static final int CONFIGURATION_STATE_NOT_CONFIGURED = 1; // 0x1
@@ -30520,22 +30521,6 @@ package android.telecom {
     method public android.telecom.Voicemail.Builder setSourcePackage(java.lang.String);
     method public android.telecom.Voicemail.Builder setTimestamp(long);
     method public android.telecom.Voicemail.Builder setUri(android.net.Uri);
-  }
-
-  public class VvmSyncService extends android.app.Service {
-    ctor public VvmSyncService();
-    method public android.os.IBinder onBind(android.content.Intent);
-  }
-
-  public class VvmSyncService.VvmSyncAdapter extends android.content.AbstractThreadedSyncAdapter {
-    ctor public VvmSyncService.VvmSyncAdapter(android.content.Context, boolean);
-    method protected java.util.List<android.telecom.Voicemail> downloadVoicemails();
-    method public void onPerformSync(android.accounts.Account, android.os.Bundle, java.lang.String, android.content.ContentProviderClient, android.content.SyncResult);
-    method protected void syncToServer();
-    field public static final java.lang.String NEW_VOICEMAIL_DATA = "extra_new_voicemail_data";
-    field public static final java.lang.String SYNC_EXTRA_CODE = "sync_extra_code";
-    field public static final int SYNC_EXTRA_MAILBOX_UPDATE = 2; // 0x2
-    field public static final int SYNC_EXTRA_NEW_VOICEMAIL = 1; // 0x1
   }
 
 }
