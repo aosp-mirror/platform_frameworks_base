@@ -1285,7 +1285,7 @@ public abstract class WebSettings {
      * strongly discouraged.
      *
      * @param mode The mixed content mode to use. One of {@link #MIXED_CONTENT_NEVER_ALLOW},
-     *     {@link #MIXED_CONTENT_NEVER_ALLOW} or {@link #MIXED_CONTENT_COMPATIBILITY_MODE}.
+     *     {@link #MIXED_CONTENT_ALWAYS_ALLOW} or {@link #MIXED_CONTENT_COMPATIBILITY_MODE}.
      */
     public abstract void setMixedContentMode(int mode);
 
@@ -1293,7 +1293,7 @@ public abstract class WebSettings {
      * Gets the current behavior of the WebView with regard to loading insecure content from a
      * secure origin.
      * @return The current setting, one of {@link #MIXED_CONTENT_NEVER_ALLOW},
-     *     {@link #MIXED_CONTENT_NEVER_ALLOW} or {@link #MIXED_CONTENT_COMPATIBILITY_MODE}.
+     *     {@link #MIXED_CONTENT_ALWAYS_ALLOW} or {@link #MIXED_CONTENT_COMPATIBILITY_MODE}.
      */
     public abstract int getMixedContentMode();
 
