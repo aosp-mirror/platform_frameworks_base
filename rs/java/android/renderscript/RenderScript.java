@@ -485,10 +485,12 @@ public class RenderScript {
     }
 
 
-    native void rsnAllocationData1D(long con, long id, int off, int mip, int count, Object d, int sizeBytes, int dt);
-    synchronized void nAllocationData1D(long id, int off, int mip, int count, Object d, int sizeBytes, Element.DataType dt) {
+    native void rsnAllocationData1D(long con, long id, int off, int mip, int count, Object d, int sizeBytes, int dt,
+                                    int mSize, boolean usePadding);
+    synchronized void nAllocationData1D(long id, int off, int mip, int count, Object d, int sizeBytes, Element.DataType dt,
+                                        int mSize, boolean usePadding) {
         validate();
-        rsnAllocationData1D(mContext, id, off, mip, count, d, sizeBytes, dt.mID);
+        rsnAllocationData1D(mContext, id, off, mip, count, d, sizeBytes, dt.mID, mSize, usePadding);
     }
 
     native void rsnAllocationElementData(long con,long id, int xoff, int yoff, int zoff, int mip, int compIdx, byte[] d, int sizeBytes);
@@ -518,11 +520,13 @@ public class RenderScript {
     }
 
     native void rsnAllocationData2D(long con, long id, int xoff, int yoff, int mip, int face,
-                                    int w, int h, Object d, int sizeBytes, int dt);
+                                    int w, int h, Object d, int sizeBytes, int dt,
+                                    int mSize, boolean usePadding);
     synchronized void nAllocationData2D(long id, int xoff, int yoff, int mip, int face,
-                                        int w, int h, Object d, int sizeBytes, Element.DataType dt) {
+                                        int w, int h, Object d, int sizeBytes, Element.DataType dt,
+                                        int mSize, boolean usePadding) {
         validate();
-        rsnAllocationData2D(mContext, id, xoff, yoff, mip, face, w, h, d, sizeBytes, dt.mID);
+        rsnAllocationData2D(mContext, id, xoff, yoff, mip, face, w, h, d, sizeBytes, dt.mID, mSize, usePadding);
     }
 
     native void rsnAllocationData2D(long con, long id, int xoff, int yoff, int mip, int face, Bitmap b);
@@ -550,25 +554,28 @@ public class RenderScript {
     }
 
     native void rsnAllocationData3D(long con, long id, int xoff, int yoff, int zoff, int mip,
-                                    int w, int h, int depth, Object d, int sizeBytes, int dt);
+                                    int w, int h, int depth, Object d, int sizeBytes, int dt,
+                                    int mSize, boolean usePadding);
     synchronized void nAllocationData3D(long id, int xoff, int yoff, int zoff, int mip,
-                                        int w, int h, int depth, Object d, int sizeBytes, Element.DataType dt) {
+                                        int w, int h, int depth, Object d, int sizeBytes, Element.DataType dt,
+                                        int mSize, boolean usePadding) {
         validate();
-        rsnAllocationData3D(mContext, id, xoff, yoff, zoff, mip, w, h, depth, d, sizeBytes, dt.mID);
+        rsnAllocationData3D(mContext, id, xoff, yoff, zoff, mip, w, h, depth, d, sizeBytes,
+                            dt.mID, mSize, usePadding);
     }
 
-    native void rsnAllocationRead(long con, long id, Object d, int dt);
-    synchronized void nAllocationRead(long id, Object d, Element.DataType dt) {
+    native void rsnAllocationRead(long con, long id, Object d, int dt, int mSize, boolean usePadding);
+    synchronized void nAllocationRead(long id, Object d, Element.DataType dt, int mSize, boolean usePadding) {
         validate();
-        rsnAllocationRead(mContext, id, d, dt.mID);
+        rsnAllocationRead(mContext, id, d, dt.mID, mSize, usePadding);
     }
 
     native void rsnAllocationRead1D(long con, long id, int off, int mip, int count, Object d,
-                                    int sizeBytes, int dt);
+                                    int sizeBytes, int dt, int mSize, boolean usePadding);
     synchronized void nAllocationRead1D(long id, int off, int mip, int count, Object d,
-                                        int sizeBytes, Element.DataType dt) {
+                                        int sizeBytes, Element.DataType dt, int mSize, boolean usePadding) {
         validate();
-        rsnAllocationRead1D(mContext, id, off, mip, count, d, sizeBytes, dt.mID);
+        rsnAllocationRead1D(mContext, id, off, mip, count, d, sizeBytes, dt.mID, mSize, usePadding);
     }
 
     native void rsnAllocationElementRead(long con,long id, int xoff, int yoff, int zoff,
@@ -581,19 +588,23 @@ public class RenderScript {
     }
 
     native void rsnAllocationRead2D(long con, long id, int xoff, int yoff, int mip, int face,
-                                    int w, int h, Object d, int sizeBytes, int dt);
+                                    int w, int h, Object d, int sizeBytes, int dt,
+                                    int mSize, boolean usePadding);
     synchronized void nAllocationRead2D(long id, int xoff, int yoff, int mip, int face,
-                                        int w, int h, Object d, int sizeBytes, Element.DataType dt) {
+                                        int w, int h, Object d, int sizeBytes, Element.DataType dt,
+                                        int mSize, boolean usePadding) {
         validate();
-        rsnAllocationRead2D(mContext, id, xoff, yoff, mip, face, w, h, d, sizeBytes, dt.mID);
+        rsnAllocationRead2D(mContext, id, xoff, yoff, mip, face, w, h, d, sizeBytes, dt.mID, mSize, usePadding);
     }
 
     native void rsnAllocationRead3D(long con, long id, int xoff, int yoff, int zoff, int mip,
-                                    int w, int h, int depth, Object d, int sizeBytes, int dt);
+                                    int w, int h, int depth, Object d, int sizeBytes, int dt,
+                                    int mSize, boolean usePadding);
     synchronized void nAllocationRead3D(long id, int xoff, int yoff, int zoff, int mip,
-                                        int w, int h, int depth, Object d, int sizeBytes, Element.DataType dt) {
+                                        int w, int h, int depth, Object d, int sizeBytes, Element.DataType dt,
+                                        int mSize, boolean usePadding) {
         validate();
-        rsnAllocationRead3D(mContext, id, xoff, yoff, zoff, mip, w, h, depth, d, sizeBytes, dt.mID);
+        rsnAllocationRead3D(mContext, id, xoff, yoff, zoff, mip, w, h, depth, d, sizeBytes, dt.mID, mSize, usePadding);
     }
 
     native long  rsnAllocationGetType(long con, long id);
