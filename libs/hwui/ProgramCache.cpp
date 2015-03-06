@@ -380,9 +380,9 @@ const char* gBlendOps[18] = {
         // Xor
         "return vec4(src.rgb * (1.0 - dst.a) + (1.0 - src.a) * dst.rgb, "
                 "src.a + dst.a - 2.0 * src.a * dst.a);\n",
-        // Add
+        // Plus
         "return min(src + dst, 1.0);\n",
-        // Multiply
+        // Modulate
         "return src * dst;\n",
         // Screen
         "return src + dst - src * dst;\n",
@@ -777,9 +777,6 @@ String8 ProgramCache::generateFragmentShader(const ProgramDescription& descripti
 }
 
 void ProgramCache::generateBlend(String8& shader, const char* name, SkXfermode::Mode mode) {
-    // TODO: update gBlendOps so this workaround isn't necessary
-    if (mode > SkXfermode::kPlus_Mode) mode = SkXfermode::kClear_Mode;
-
     shader.append("\nvec4 ");
     shader.append(name);
     shader.append("(vec4 src, vec4 dst) {\n");

@@ -51,7 +51,7 @@ public class PorterDuff {
              Sc*(1 - Da) + Dc*(1 - Sa) + max(Sc, Dc)] */
         LIGHTEN     (17),
         /** [Sa * Da, Sc * Dc] */
-        MULTIPLY    (24),
+        MULTIPLY    (13),
         /** [Sa + Da - Sa * Da, Sc + Dc - Sc * Dc] */
         SCREEN      (14),
         /** Saturate(S + D) */
