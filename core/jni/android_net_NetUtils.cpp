@@ -24,6 +24,14 @@
 #include <android_runtime/AndroidRuntime.h>
 #include <utils/Log.h>
 #include <arpa/inet.h>
+#include <net/if.h>
+#include <linux/filter.h>
+#include <linux/if.h>
+#include <linux/if_ether.h>
+#include <linux/if_packet.h>
+#include <net/if_ether.h>
+#include <netinet/ip.h>
+#include <netinet/udp.h>
 #include <cutils/properties.h>
 
 extern "C" {
@@ -52,6 +60,8 @@ char *dhcp_get_errmsg();
 #define NETUTILS_PKG_NAME "android/net/NetworkUtils"
 
 namespace android {
+
+static const uint16_t kDhcpClientPort = 68;
 
 /*
  * The following remembers the jfieldID's of the fields
@@ -215,6 +225,44 @@ static jstring android_net_utils_getDhcpError(JNIEnv* env, jobject clazz)
     return env->NewStringUTF(::dhcp_get_errmsg());
 }
 
+static void android_net_utils_attachDhcpFilter(JNIEnv *env, jobject clazz, jobject javaFd)
+{
+    int fd = jniGetFDFromFileDescriptor(env, javaFd);
+    uint32_t ip_offset = sizeof(ether_header);
+    uint32_t proto_offset = ip_offset + offsetof(iphdr, protocol);
+    uint32_t flags_offset = ip_offset +  offsetof(iphdr, frag_off);
+    uint32_t dport_indirect_offset = ip_offset + offsetof(udphdr, dest);
+    struct sock_filter filter_code[] = {
+        // Check the protocol is UDP.
+        BPF_STMT(BPF_LD  | BPF_B   | BPF_ABS,  proto_offset),
+        BPF_JUMP(BPF_JMP | BPF_JEQ | BPF_K,    IPPROTO_UDP, 0, 6),
+
+        // Check this is not a fragment.
+        BPF_STMT(BPF_LD  | BPF_H    | BPF_ABS, flags_offset),
+        BPF_JUMP(BPF_JMP | BPF_JSET | BPF_K,   0x1fff, 4, 0),
+
+        // Get the IP header length.
+        BPF_STMT(BPF_LDX | BPF_B    | BPF_MSH, ip_offset),
+
+        // Check the destination port.
+        BPF_STMT(BPF_LD  | BPF_H    | BPF_IND, dport_indirect_offset),
+        BPF_JUMP(BPF_JMP | BPF_JEQ  | BPF_K,   kDhcpClientPort, 0, 1),
+
+        // Accept or reject.
+        BPF_STMT(BPF_RET | BPF_K,              0xffff),
+        BPF_STMT(BPF_RET | BPF_K,              0)
+    };
+    struct sock_fprog filter = {
+        sizeof(filter_code) / sizeof(filter_code[0]),
+        filter_code,
+    };
+
+    if (setsockopt(fd, SOL_SOCKET, SO_ATTACH_FILTER, &filter, sizeof(filter)) != 0) {
+        jniThrowExceptionFmt(env, "java/net/SocketException",
+                "setsockopt(SO_ATTACH_FILTER): %s", strerror(errno));
+    }
+}
+
 static jboolean android_net_utils_bindProcessToNetwork(JNIEnv *env, jobject thiz, jint netId)
 {
     return (jboolean) !setNetworkForProcess(netId);
@@ -242,6 +290,7 @@ static jboolean android_net_utils_protectFromVpn(JNIEnv *env, jobject thiz, jint
     return (jboolean) !protectFromVpn(socket);
 }
 
+
 // ----------------------------------------------------------------------------
 
 /*
@@ -261,6 +310,7 @@ static JNINativeMethod gNetworkUtilMethods[] = {
     { "bindProcessToNetworkForHostResolution", "(I)Z", (void*) android_net_utils_bindProcessToNetworkForHostResolution },
     { "bindSocketToNetwork", "(II)I", (void*) android_net_utils_bindSocketToNetwork },
     { "protectFromVpn", "(I)Z", (void*)android_net_utils_protectFromVpn },
+    { "attachDhcpFilter", "(Ljava/io/FileDescriptor;)V", (void*) android_net_utils_attachDhcpFilter },
 };
 
 int register_android_net_NetworkUtils(JNIEnv* env)
