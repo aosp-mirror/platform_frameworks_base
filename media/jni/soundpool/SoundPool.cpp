@@ -638,7 +638,7 @@ status_t Sample::doLoad()
        goto error;
     }
 
-    if ((numChannels < 1) || (numChannels > 2)) {
+    if ((numChannels < 1) || (numChannels > 8)) {
         ALOGE("Sample channel count (%d) out of range", numChannels);
         status = BAD_VALUE;
         goto error;
@@ -702,8 +702,10 @@ void SoundChannel::play(const sp<Sample>& sample, int nextChannelID, float leftV
         size_t frameCount = 0;
 
         if (loop) {
-            frameCount = sample->size()/numChannels/
-                ((sample->format() == AUDIO_FORMAT_PCM_16_BIT) ? sizeof(int16_t) : sizeof(uint8_t));
+            const audio_format_t format = sample->format();
+            const size_t frameSize = audio_is_linear_pcm(format)
+                    ? numChannels * audio_bytes_per_sample(format) : 1;
+            frameCount = sample->size() / frameSize;
         }
 
 #ifndef USE_SHARED_MEM_BUFFER
