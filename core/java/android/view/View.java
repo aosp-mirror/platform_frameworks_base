@@ -5849,7 +5849,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *
      * @see AccessibilityDelegate
      */
-    public void setAccessibilityDelegate(AccessibilityDelegate delegate) {
+    public void setAccessibilityDelegate(@Nullable AccessibilityDelegate delegate) {
         mAccessibilityDelegate = delegate;
     }
 
