@@ -200,6 +200,18 @@ public final class MidiDeviceServer implements Closeable {
                 }
             }
         }
+
+        @Override
+        public void connectPorts(IBinder token, ParcelFileDescriptor pfd,
+                int outputPortNumber) {
+            MidiInputPort inputPort = new MidiInputPort(pfd, outputPortNumber);
+            mOutputPortDispatchers[outputPortNumber].getSender().connect(inputPort);
+            mInputPorts.add(inputPort);
+            OutputPortClient client = new OutputPortClient(token, inputPort);
+            synchronized (mPortClients) {
+                mPortClients.put(token, client);
+            }
+        }
     };
 
     /* package */ MidiDeviceServer(IMidiManager midiManager, MidiReceiver[] inputPortReceivers,

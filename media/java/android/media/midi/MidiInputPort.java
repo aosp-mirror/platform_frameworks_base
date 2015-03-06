@@ -41,7 +41,8 @@ public final class MidiInputPort extends MidiReceiver implements Closeable {
     private IMidiDeviceServer mDeviceServer;
     private final IBinder mToken;
     private final int mPortNumber;
-    private final FileOutputStream mOutputStream;
+    private ParcelFileDescriptor mParcelFileDescriptor;
+    private FileOutputStream mOutputStream;
 
     private final CloseGuard mGuard = CloseGuard.get();
     private boolean mIsClosed;
@@ -53,8 +54,9 @@ public final class MidiInputPort extends MidiReceiver implements Closeable {
             ParcelFileDescriptor pfd, int portNumber) {
         mDeviceServer = server;
         mToken = token;
+        mParcelFileDescriptor = pfd;
         mPortNumber = portNumber;
-        mOutputStream = new ParcelFileDescriptor.AutoCloseOutputStream(pfd);
+        mOutputStream = new FileOutputStream(pfd.getFileDescriptor());
         mGuard.open("close");
     }
 
@@ -89,8 +91,24 @@ public final class MidiInputPort extends MidiReceiver implements Closeable {
         }
 
         synchronized (mBuffer) {
+            if (mOutputStream == null) {
+                throw new IOException("MidiInputPort is closed");
+            }
             int length = MidiPortImpl.packMessage(msg, offset, count, timestamp, mBuffer);
             mOutputStream.write(mBuffer, 0, length);
+        }
+    }
+
+    // used by MidiDevice.connectInputPort() to connect our socket directly to another device
+    /* package */ ParcelFileDescriptor claimFileDescriptor() {
+        synchronized (mBuffer) {
+            ParcelFileDescriptor pfd = mParcelFileDescriptor;
+            if (pfd != null) {
+                IoUtils.closeQuietly(mOutputStream);
+                mParcelFileDescriptor = null;
+                mOutputStream = null;
+            }
+            return pfd;
         }
     }
 
@@ -104,7 +122,16 @@ public final class MidiInputPort extends MidiReceiver implements Closeable {
         synchronized (mGuard) {
             if (mIsClosed) return;
             mGuard.close();
-            mOutputStream.close();
+            synchronized (mBuffer) {
+                if (mParcelFileDescriptor != null) {
+                    mParcelFileDescriptor.close();
+                    mParcelFileDescriptor = null;
+                }
+                if (mOutputStream != null) {
+                    mOutputStream.close();
+                    mOutputStream = null;
+                }
+            }
             if (mDeviceServer != null) {
                 try {
                     mDeviceServer.closePort(mToken);

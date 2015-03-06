@@ -24,4 +24,7 @@ interface IMidiDeviceServer
     ParcelFileDescriptor openInputPort(IBinder token, int portNumber);
     ParcelFileDescriptor openOutputPort(IBinder token, int portNumber);
     void closePort(IBinder token);
+
+    // connects the input port pfd to the specified output port
+    void connectPorts(IBinder token, in ParcelFileDescriptor pfd, int outputPortNumber);
 }

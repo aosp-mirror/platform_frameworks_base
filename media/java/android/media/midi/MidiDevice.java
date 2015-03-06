@@ -26,6 +26,8 @@ import android.util.Log;
 
 import dalvik.system.CloseGuard;
 
+import libcore.io.IoUtils;
+
 import java.io.Closeable;
 import java.io.IOException;
 
@@ -44,7 +46,28 @@ public final class MidiDevice implements Closeable {
     private Context mContext;
     private ServiceConnection mServiceConnection;
 
+
     private final CloseGuard mGuard = CloseGuard.get();
+
+    public class MidiConnection implements Closeable {
+        private final IBinder mToken;
+        private final MidiInputPort mInputPort;
+
+        MidiConnection(IBinder token, MidiInputPort inputPort) {
+            mToken = token;
+            mInputPort = inputPort;
+        }
+
+        @Override
+        public void close() throws IOException {
+            try {
+                mDeviceServer.closePort(mToken);
+                IoUtils.closeQuietly(mInputPort);
+            } catch (RemoteException e) {
+                Log.e(TAG, "RemoteException in MidiConnection.close");
+            }
+        }
+    }
 
     /* package */ MidiDevice(MidiDeviceInfo deviceInfo, IMidiDeviceServer server) {
         this(deviceInfo, server, null, null);
@@ -104,6 +127,36 @@ public final class MidiDevice implements Closeable {
             return new MidiOutputPort(mDeviceServer, token, pfd, portNumber);
         } catch (RemoteException e) {
             Log.e(TAG, "RemoteException in openOutputPort");
+            return null;
+        }
+    }
+
+    /**
+     * Connects the supplied {@link MidiInputPort} to the output port of this device
+     * with the specified port number. Once the connection is made, the MidiInput port instance
+     * can no longer receive data via its {@link MidiReciever.receive} method.
+     * This method returns a {@link #MidiConnection} object, which can be used to close the connection
+     * @param inputPort the inputPort to connect
+     * @param outputPortNumber the port number of the output port to connect inputPort to.
+     * @return {@link #MidiConnection} object if the connection is successful, or null in case of failure
+     */
+    public MidiConnection connectPorts(MidiInputPort inputPort, int outputPortNumber) {
+        if (outputPortNumber < 0 || outputPortNumber >= mDeviceInfo.getOutputPortCount()) {
+            throw new IllegalArgumentException("outputPortNumber out of range");
+        }
+
+        ParcelFileDescriptor pfd = inputPort.claimFileDescriptor();
+        if (pfd == null) {
+            return null;
+        }
+         try {
+            IBinder token = new Binder();
+            mDeviceServer.connectPorts(token, pfd, outputPortNumber);
+            // close our copy of the file descriptor
+            IoUtils.closeQuietly(pfd);
+            return new MidiConnection(token, inputPort);
+        } catch (RemoteException e) {
+            Log.e(TAG, "RemoteException in connectPorts");
             return null;
         }
     }
