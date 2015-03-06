@@ -185,8 +185,8 @@ static jboolean clipRegion(JNIEnv* env, jobject, jlong canvasHandle, jlong devic
 }
 
 static void drawColor(JNIEnv* env, jobject, jlong canvasHandle, jint color, jint modeHandle) {
-    SkXfermode::Mode mode = static_cast<SkXfermode::Mode>(modeHandle);
-    get_canvas(canvasHandle)->drawColor(color, mode);
+     SkPorterDuff::Mode mode = static_cast<SkPorterDuff::Mode>(modeHandle);
+     get_canvas(canvasHandle)->drawColor(color, SkPorterDuff::ToXfermodeMode(mode));
 }
 
 static void drawPaint(JNIEnv* env, jobject, jlong canvasHandle, jlong paintHandle) {
