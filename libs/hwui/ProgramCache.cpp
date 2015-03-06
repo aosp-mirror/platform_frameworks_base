@@ -777,6 +777,9 @@ String8 ProgramCache::generateFragmentShader(const ProgramDescription& descripti
 }
 
 void ProgramCache::generateBlend(String8& shader, const char* name, SkXfermode::Mode mode) {
+    // TODO: update gBlendOps so this workaround isn't necessary
+    if (mode > SkXfermode::kPlus_Mode) mode = SkXfermode::kClear_Mode;
+
     shader.append("\nvec4 ");
     shader.append(name);
     shader.append("(vec4 src, vec4 dst) {\n");
@@ -830,7 +833,7 @@ void ProgramCache::printLongString(const String8& shader) const {
     while ((index = shader.find("\n", index)) > -1) {
         String8 line(str, index - lastIndex);
         if (line.length() == 0) line.append("\n");
-        PROGRAM_LOGD("%s", line.string());
+        ALOGD("%s", line.string());
         index++;
         str += (index - lastIndex);
         lastIndex = index;
