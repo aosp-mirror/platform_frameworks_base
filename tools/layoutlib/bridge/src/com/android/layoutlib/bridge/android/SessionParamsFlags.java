@@ -29,6 +29,8 @@ public final class SessionParamsFlags {
 
     public static final SessionParams.Key<String> FLAG_KEY_ROOT_TAG =
             new SessionParams.Key<String>("rootTag", String.class);
+    public static final SessionParams.Key<Boolean> FLAG_KEY_RECYCLER_VIEW_SUPPORT =
+            new SessionParams.Key<Boolean>("recyclerViewSupport", Boolean.class);
 
     // Disallow instances.
     private SessionParamsFlags() {}
