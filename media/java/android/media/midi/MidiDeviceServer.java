@@ -28,6 +28,7 @@ import libcore.io.IoUtils;
 
 import java.io.Closeable;
 import java.io.IOException;
+import java.util.HashMap;
 
 /**
  * Internal class used for providing an implementation for a MIDI device.
@@ -53,11 +54,68 @@ public final class MidiDeviceServer implements Closeable {
     // MidiOutputPorts for clients connected to our input ports
     private final MidiOutputPort[] mInputPortOutputPorts;
 
+    abstract private class PortClient implements IBinder.DeathRecipient {
+        final IBinder mToken;
+
+        PortClient(IBinder token) {
+            mToken = token;
+
+            try {
+                token.linkToDeath(this, 0);
+            } catch (RemoteException e) {
+                close();
+            }
+        }
+
+        abstract void close();
+
+        @Override
+        public void binderDied() {
+            close();
+        }
+    }
+
+    private class InputPortClient extends PortClient {
+        private final MidiOutputPort mOutputPort;
+
+        InputPortClient(IBinder token, MidiOutputPort outputPort) {
+            super(token);
+            mOutputPort = outputPort;
+        }
+
+        @Override
+        void close() {
+            mToken.unlinkToDeath(this, 0);
+            synchronized (mInputPortOutputPorts) {
+                mInputPortOutputPorts[mOutputPort.getPortNumber()] = null;
+            }
+            IoUtils.closeQuietly(mOutputPort);
+        }
+    }
+
+    private class OutputPortClient extends PortClient {
+        private final MidiInputPort mInputPort;
+
+        OutputPortClient(IBinder token, MidiInputPort inputPort) {
+            super(token);
+            mInputPort = inputPort;
+        }
+
+        @Override
+        void close() {
+            mToken.unlinkToDeath(this, 0);
+            mOutputPortDispatchers[mInputPort.getPortNumber()].getSender().disconnect(mInputPort);
+            IoUtils.closeQuietly(mInputPort);
+        }
+    }
+
+    private final HashMap<IBinder, PortClient> mPortClients = new HashMap<IBinder, PortClient>();
+
     // Binder interface stub for receiving connection requests from clients
     private final IMidiDeviceServer mServer = new IMidiDeviceServer.Stub() {
 
         @Override
-        public ParcelFileDescriptor openInputPort(int portNumber) {
+        public ParcelFileDescriptor openInputPort(IBinder token, int portNumber) {
             if (mDeviceInfo.isPrivate()) {
                 if (Binder.getCallingUid() != Process.myUid()) {
                     throw new SecurityException("Can't access private device from different UID");
@@ -78,25 +136,13 @@ public final class MidiDeviceServer implements Closeable {
                 try {
                     ParcelFileDescriptor[] pair = ParcelFileDescriptor.createSocketPair(
                                                         OsConstants.SOCK_SEQPACKET);
-                    final MidiOutputPort outputPort = new MidiOutputPort(pair[0], portNumber);
+                    MidiOutputPort outputPort = new MidiOutputPort(pair[0], portNumber);
                     mInputPortOutputPorts[portNumber] = outputPort;
-                    final int portNumberF = portNumber;
-                    final MidiReceiver inputPortReceviver = mInputPortReceivers[portNumber];
-
-                    outputPort.connect(new MidiReceiver() {
-                        @Override
-                        public void receive(byte[] msg, int offset, int count, long timestamp)
-                                throws IOException {
-                            try {
-                                inputPortReceviver.receive(msg, offset, count, timestamp);
-                            } catch (IOException e) {
-                                IoUtils.closeQuietly(mInputPortOutputPorts[portNumberF]);
-                                mInputPortOutputPorts[portNumberF] = null;
-                                // FIXME also flush the receiver
-                            }
-                        }
-                    });
-
+                    outputPort.connect(mInputPortReceivers[portNumber]);
+                    InputPortClient client = new InputPortClient(token, outputPort);
+                    synchronized (mPortClients) {
+                        mPortClients.put(token, client);
+                    }
                     return pair[1];
                 } catch (IOException e) {
                     Log.e(TAG, "unable to create ParcelFileDescriptors in openInputPort");
@@ -106,7 +152,7 @@ public final class MidiDeviceServer implements Closeable {
         }
 
         @Override
-        public ParcelFileDescriptor openOutputPort(int portNumber) {
+        public ParcelFileDescriptor openOutputPort(IBinder token, int portNumber) {
             if (mDeviceInfo.isPrivate()) {
                 if (Binder.getCallingUid() != Process.myUid()) {
                     throw new SecurityException("Can't access private device from different UID");
@@ -121,26 +167,26 @@ public final class MidiDeviceServer implements Closeable {
             try {
                 ParcelFileDescriptor[] pair = ParcelFileDescriptor.createSocketPair(
                                                     OsConstants.SOCK_SEQPACKET);
-                final MidiInputPort inputPort = new MidiInputPort(pair[0], portNumber);
-                final MidiSender sender = mOutputPortDispatchers[portNumber].getSender();
-                sender.connect(new MidiReceiver() {
-                        @Override
-                        public void receive(byte[] msg, int offset, int count, long timestamp)
-                                throws IOException {
-                            try {
-                                inputPort.receive(msg, offset, count, timestamp);
-                            } catch (IOException e) {
-                                IoUtils.closeQuietly(inputPort);
-                                sender.disconnect(this);
-                                // FIXME also flush the receiver?
-                            }
-                        }
-                    });
-
+                MidiInputPort inputPort = new MidiInputPort(pair[0], portNumber);
+                mOutputPortDispatchers[portNumber].getSender().connect(inputPort);
+                OutputPortClient client = new OutputPortClient(token, inputPort);
+                synchronized (mPortClients) {
+                    mPortClients.put(token, client);
+                }
                 return pair[1];
             } catch (IOException e) {
                 Log.e(TAG, "unable to create ParcelFileDescriptors in openOutputPort");
                 return null;
+            }
+        }
+
+        @Override
+        public void closePort(IBinder token) {
+            synchronized (mPortClients) {
+                PortClient client = mPortClients.remove(token);
+                if (client != null) {
+                    client.close();
+                }
             }
         }
     };

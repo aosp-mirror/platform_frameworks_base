@@ -21,6 +21,7 @@ import android.os.ParcelFileDescriptor;
 /** @hide */
 interface IMidiDeviceServer
 {
-    ParcelFileDescriptor openInputPort(int portNumber);
-    ParcelFileDescriptor openOutputPort(int portNumber);
+    ParcelFileDescriptor openInputPort(IBinder token, int portNumber);
+    ParcelFileDescriptor openOutputPort(IBinder token, int portNumber);
+    void closePort(IBinder token);
 }

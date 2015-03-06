@@ -18,6 +18,8 @@ package android.media.midi;
 
 import android.content.Context;
 import android.content.ServiceConnection;
+import android.os.Binder;
+import android.os.IBinder;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.util.Log;
@@ -36,13 +38,13 @@ public final class MidiDevice implements Closeable {
     private static final String TAG = "MidiDevice";
 
     private final MidiDeviceInfo mDeviceInfo;
-    private final IMidiDeviceServer mServer;
+    private final IMidiDeviceServer mDeviceServer;
     private Context mContext;
     private ServiceConnection mServiceConnection;
 
     /* package */ MidiDevice(MidiDeviceInfo deviceInfo, IMidiDeviceServer server) {
         mDeviceInfo = deviceInfo;
-        mServer = server;
+        mDeviceServer = server;
         mContext = null;
         mServiceConnection = null;
     }
@@ -50,7 +52,7 @@ public final class MidiDevice implements Closeable {
     /* package */ MidiDevice(MidiDeviceInfo deviceInfo, IMidiDeviceServer server,
             Context context, ServiceConnection serviceConnection) {
         mDeviceInfo = deviceInfo;
-        mServer = server;
+        mDeviceServer = server;
         mContext = context;
         mServiceConnection = serviceConnection;
     }
@@ -72,11 +74,12 @@ public final class MidiDevice implements Closeable {
      */
     public MidiInputPort openInputPort(int portNumber) {
         try {
-            ParcelFileDescriptor pfd = mServer.openInputPort(portNumber);
+            IBinder token = new Binder();
+            ParcelFileDescriptor pfd = mDeviceServer.openInputPort(token, portNumber);
             if (pfd == null) {
                 return null;
             }
-            return new MidiInputPort(pfd, portNumber);
+            return new MidiInputPort(mDeviceServer, token, pfd, portNumber);
         } catch (RemoteException e) {
             Log.e(TAG, "RemoteException in openInputPort");
             return null;
@@ -91,11 +94,12 @@ public final class MidiDevice implements Closeable {
      */
     public MidiOutputPort openOutputPort(int portNumber) {
         try {
-            ParcelFileDescriptor pfd = mServer.openOutputPort(portNumber);
+            IBinder token = new Binder();
+            ParcelFileDescriptor pfd = mDeviceServer.openOutputPort(token, portNumber);
             if (pfd == null) {
                 return null;
             }
-            return new MidiOutputPort(pfd, portNumber);
+            return new MidiOutputPort(mDeviceServer, token, pfd, portNumber);
         } catch (RemoteException e) {
             Log.e(TAG, "RemoteException in openOutputPort");
             return null;
