@@ -16,6 +16,7 @@
 
 package android.text.style;
 
+import android.annotation.ColorInt;
 import android.graphics.Paint;
 import android.graphics.Canvas;
 import android.os.Parcel;
@@ -34,7 +35,7 @@ public class QuoteSpan implements LeadingMarginSpan, ParcelableSpan {
         mColor = 0xff0000ff;
     }
     
-    public QuoteSpan(int color) {
+    public QuoteSpan(@ColorInt int color) {
         super();
         mColor = color;
     }
@@ -55,6 +56,7 @@ public class QuoteSpan implements LeadingMarginSpan, ParcelableSpan {
         dest.writeInt(mColor);
     }
 
+    @ColorInt
     public int getColor() {
         return mColor;
     }

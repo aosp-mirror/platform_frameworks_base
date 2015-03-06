@@ -16,6 +16,7 @@
 
 package android.text;
 
+import android.annotation.ColorInt;
 import android.graphics.Paint;
 
 /**
@@ -25,8 +26,10 @@ import android.graphics.Paint;
 public class TextPaint extends Paint {
 
     // Special value 0 means no background paint
+    @ColorInt
     public int bgColor;
     public int baselineShift;
+    @ColorInt
     public int linkColor;
     public int[] drawableState;
     public float density = 1.0f;
@@ -34,6 +37,7 @@ public class TextPaint extends Paint {
      * Special value 0 means no custom underline
      * @hide
      */
+    @ColorInt
     public int underlineColor = 0;
     /**
      * Defined as a multiplier of the default underline thickness. Use 1.0f for default thickness.

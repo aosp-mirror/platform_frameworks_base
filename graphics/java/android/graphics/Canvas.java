@@ -16,6 +16,7 @@
 
 package android.graphics;
 
+import android.annotation.ColorInt;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -1012,7 +1013,7 @@ public class Canvas {
      *
      * @param color the color to draw onto the canvas
      */
-    public void drawColor(int color) {
+    public void drawColor(@ColorInt int color) {
         native_drawColor(mNativeCanvasWrapper, color, PorterDuff.Mode.SRC_OVER.nativeInt);
     }
 
@@ -1023,7 +1024,7 @@ public class Canvas {
      * @param color the color to draw with
      * @param mode  the porter-duff mode to apply to the color
      */
-    public void drawColor(int color, @NonNull PorterDuff.Mode mode) {
+    public void drawColor(@ColorInt int color, @NonNull PorterDuff.Mode mode) {
         native_drawColor(mNativeCanvasWrapper, color, mode.nativeInt);
     }
 

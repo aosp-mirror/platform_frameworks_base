@@ -17,6 +17,7 @@
 package android.widget;
 
 import android.R;
+import android.annotation.ColorInt;
 import android.annotation.DrawableRes;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -2997,7 +2998,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * @attr ref android.R.styleable#TextView_textColor
      */
     @android.view.RemotableViewMethod
-    public void setTextColor(int color) {
+    public void setTextColor(@ColorInt int color) {
         mTextColor = ColorStateList.valueOf(color);
         updateTextColors();
     }
@@ -3038,6 +3039,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      *
      * @return Returns the current text color.
      */
+    @ColorInt
     public final int getCurrentTextColor() {
         return mCurTextColor;
     }
@@ -3048,7 +3050,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * @attr ref android.R.styleable#TextView_textColorHighlight
      */
     @android.view.RemotableViewMethod
-    public void setHighlightColor(int color) {
+    public void setHighlightColor(@ColorInt int color) {
         if (mHighlightColor != color) {
             mHighlightColor = color;
             invalidate();
@@ -3062,6 +3064,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      *
      * @attr ref android.R.styleable#TextView_textColorHighlight
      */
+    @ColorInt
     public int getHighlightColor() {
         return mHighlightColor;
     }
@@ -3156,6 +3159,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      *
      * @attr ref android.R.styleable#TextView_shadowColor
      */
+    @ColorInt
     public int getShadowColor() {
         return mShadowColor;
     }
@@ -3231,7 +3235,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * @attr ref android.R.styleable#TextView_textColorHint
      */
     @android.view.RemotableViewMethod
-    public final void setHintTextColor(int color) {
+    public final void setHintTextColor(@ColorInt int color) {
         mHintTextColor = ColorStateList.valueOf(color);
         updateTextColors();
     }
@@ -3270,6 +3274,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      *
      * @return Returns the current hint text color.
      */
+    @ColorInt
     public final int getCurrentHintTextColor() {
         return mHintTextColor != null ? mCurHintTextColor : mCurTextColor;
     }
@@ -3283,7 +3288,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * @attr ref android.R.styleable#TextView_textColorLink
      */
     @android.view.RemotableViewMethod
-    public final void setLinkTextColor(int color) {
+    public final void setLinkTextColor(@ColorInt int color) {
         mLinkTextColor = ColorStateList.valueOf(color);
         updateTextColors();
     }

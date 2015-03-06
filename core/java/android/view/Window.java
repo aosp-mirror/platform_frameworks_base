@@ -16,6 +16,7 @@
 
 package android.view;
 
+import android.annotation.ColorInt;
 import android.annotation.DrawableRes;
 import android.annotation.IdRes;
 import android.annotation.LayoutRes;
@@ -1069,7 +1070,7 @@ public abstract class Window {
     public abstract void setTitle(CharSequence title);
 
     @Deprecated
-    public abstract void setTitleColor(int textColor);
+    public abstract void setTitleColor(@ColorInt int textColor);
 
     public abstract void openPanel(int featureId, KeyEvent event);
 
@@ -1835,6 +1836,7 @@ public abstract class Window {
     /**
      * @return the color of the status bar.
      */
+    @ColorInt
     public abstract int getStatusBarColor();
 
     /**
@@ -1852,11 +1854,12 @@ public abstract class Window {
      * The transitionName for the view background will be "android:status:background".
      * </p>
      */
-    public abstract void setStatusBarColor(int color);
+    public abstract void setStatusBarColor(@ColorInt int color);
 
     /**
      * @return the color of the navigation bar.
      */
+    @ColorInt
     public abstract int getNavigationBarColor();
 
     /**
@@ -1874,7 +1877,7 @@ public abstract class Window {
      * The transitionName for the view background will be "android:navigation:background".
      * </p>
      */
-    public abstract void setNavigationBarColor(int color);
+    public abstract void setNavigationBarColor(@ColorInt int color);
 
 
 }

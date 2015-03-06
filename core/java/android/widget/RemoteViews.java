@@ -16,6 +16,7 @@
 
 package android.widget;
 
+import android.annotation.ColorInt;
 import android.app.ActivityOptions;
 import android.app.ActivityThread;
 import android.app.Application;
@@ -2263,7 +2264,7 @@ public class RemoteViews implements Parcelable, Filter {
      * @param color Sets the text color for all the states (normal, selected,
      *            focused) to be this color.
      */
-    public void setTextColor(int viewId, int color) {
+    public void setTextColor(int viewId, @ColorInt int color) {
         setInt(viewId, "setTextColor", color);
     }
 

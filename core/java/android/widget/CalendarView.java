@@ -16,6 +16,7 @@
 
 package android.widget;
 
+import android.annotation.ColorInt;
 import android.annotation.DrawableRes;
 import android.annotation.Widget;
 import android.content.Context;
@@ -140,7 +141,7 @@ public class CalendarView extends FrameLayout {
      *
      * @attr ref android.R.styleable#CalendarView_selectedWeekBackgroundColor
      */
-    public void setSelectedWeekBackgroundColor(int color) {
+    public void setSelectedWeekBackgroundColor(@ColorInt int color) {
         mDelegate.setSelectedWeekBackgroundColor(color);
     }
 
@@ -151,6 +152,7 @@ public class CalendarView extends FrameLayout {
      *
      * @attr ref android.R.styleable#CalendarView_selectedWeekBackgroundColor
      */
+    @ColorInt
     public int getSelectedWeekBackgroundColor() {
         return mDelegate.getSelectedWeekBackgroundColor();
     }
@@ -162,7 +164,7 @@ public class CalendarView extends FrameLayout {
      *
      * @attr ref android.R.styleable#CalendarView_focusedMonthDateColor
      */
-    public void setFocusedMonthDateColor(int color) {
+    public void setFocusedMonthDateColor(@ColorInt int color) {
         mDelegate.setFocusedMonthDateColor(color);
     }
 
@@ -173,6 +175,7 @@ public class CalendarView extends FrameLayout {
      *
      * @attr ref android.R.styleable#CalendarView_focusedMonthDateColor
      */
+    @ColorInt
     public int getFocusedMonthDateColor() {
         return mDelegate.getFocusedMonthDateColor();
     }
@@ -184,7 +187,7 @@ public class CalendarView extends FrameLayout {
      *
      * @attr ref android.R.styleable#CalendarView_unfocusedMonthDateColor
      */
-    public void setUnfocusedMonthDateColor(int color) {
+    public void setUnfocusedMonthDateColor(@ColorInt int color) {
         mDelegate.setUnfocusedMonthDateColor(color);
     }
 
@@ -195,6 +198,7 @@ public class CalendarView extends FrameLayout {
      *
      * @attr ref android.R.styleable#CalendarView_unfocusedMonthDateColor
      */
+    @ColorInt
     public int getUnfocusedMonthDateColor() {
         return mDelegate.getUnfocusedMonthDateColor();
     }
@@ -206,7 +210,7 @@ public class CalendarView extends FrameLayout {
      *
      * @attr ref android.R.styleable#CalendarView_weekNumberColor
      */
-    public void setWeekNumberColor(int color) {
+    public void setWeekNumberColor(@ColorInt int color) {
         mDelegate.setWeekNumberColor(color);
     }
 
@@ -217,6 +221,7 @@ public class CalendarView extends FrameLayout {
      *
      * @attr ref android.R.styleable#CalendarView_weekNumberColor
      */
+    @ColorInt
     public int getWeekNumberColor() {
         return mDelegate.getWeekNumberColor();
     }
@@ -228,7 +233,7 @@ public class CalendarView extends FrameLayout {
      *
      * @attr ref android.R.styleable#CalendarView_weekSeparatorLineColor
      */
-    public void setWeekSeparatorLineColor(int color) {
+    public void setWeekSeparatorLineColor(@ColorInt int color) {
         mDelegate.setWeekSeparatorLineColor(color);
     }
 
@@ -239,6 +244,7 @@ public class CalendarView extends FrameLayout {
      *
      * @attr ref android.R.styleable#CalendarView_weekSeparatorLineColor
      */
+    @ColorInt
     public int getWeekSeparatorLineColor() {
         return mDelegate.getWeekSeparatorLineColor();
     }

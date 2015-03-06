@@ -17,6 +17,7 @@
 package android.content.res;
 
 import android.annotation.AnyRes;
+import android.annotation.ColorInt;
 import android.annotation.Nullable;
 import android.graphics.drawable.Drawable;
 import android.os.StrictMode;
@@ -420,7 +421,8 @@ public class TypedArray {
      * @throws UnsupportedOperationException if the attribute is defined but is
      *         not an integer color or color state list.
      */
-    public int getColor(int index, int defValue) {
+    @ColorInt
+    public int getColor(int index, @ColorInt int defValue) {
         if (mRecycled) {
             throw new RuntimeException("Cannot make calls to a recycled instance!");
         }

@@ -16,6 +16,7 @@
 
 package android.view.animation;
 
+import android.annotation.ColorInt;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.RectF;
@@ -622,7 +623,7 @@ public abstract class Animation implements Cloneable {
      * @param bg The background color.  If 0, no background.  Currently must
      * be black, with any desired alpha level.
      */
-    public void setBackgroundColor(int bg) {
+    public void setBackgroundColor(@ColorInt int bg) {
         mBackgroundColor = bg;
     }
 
@@ -753,6 +754,7 @@ public abstract class Animation implements Cloneable {
     /**
      * Returns the background color behind the animation.
      */
+    @ColorInt
     public int getBackgroundColor() {
         return mBackgroundColor;
     }

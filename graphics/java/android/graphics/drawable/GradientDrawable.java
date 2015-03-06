@@ -16,6 +16,7 @@
 
 package android.graphics.drawable;
 
+import android.annotation.ColorInt;
 import android.content.res.ColorStateList;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
@@ -181,7 +182,7 @@ public class GradientDrawable extends Drawable {
      * Create a new gradient drawable given an orientation and an array
      * of colors for the gradient.
      */
-    public GradientDrawable(Orientation orientation, int[] colors) {
+    public GradientDrawable(Orientation orientation, @ColorInt int[] colors) {
         this(new GradientState(orientation, colors), null);
     }
 
@@ -250,7 +251,7 @@ public class GradientDrawable extends Drawable {
      * @see #mutate()
      * @see #setStroke(int, int, float, float)
      */
-    public void setStroke(int width, int color) {
+    public void setStroke(int width, @ColorInt int color) {
         setStroke(width, color, 0, 0);
     }
 
@@ -286,7 +287,7 @@ public class GradientDrawable extends Drawable {
      * @see #mutate()
      * @see #setStroke(int, int)
      */
-    public void setStroke(int width, int color, float dashWidth, float dashGap) {
+    public void setStroke(int width, @ColorInt int color, float dashWidth, float dashGap) {
         mGradientState.setStroke(width, ColorStateList.valueOf(color), dashWidth, dashGap);
         setStrokeInternal(width, color, dashWidth, dashGap);
     }
@@ -501,7 +502,7 @@ public class GradientDrawable extends Drawable {
      * @see #mutate()
      * @see #setColor(int)
      */
-    public void setColors(int[] colors) {
+    public void setColors(@ColorInt int[] colors) {
         mGradientState.setColors(colors);
         mGradientIsDirty = true;
         invalidateSelf();
@@ -713,7 +714,7 @@ public class GradientDrawable extends Drawable {
      * @see #mutate()
      * @see #setColors(int[])
      */
-    public void setColor(int argb) {
+    public void setColor(@ColorInt int argb) {
         mGradientState.setColorStateList(ColorStateList.valueOf(argb));
         mFillPaint.setColor(argb);
         invalidateSelf();
