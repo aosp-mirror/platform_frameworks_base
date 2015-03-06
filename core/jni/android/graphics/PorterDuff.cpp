@@ -24,7 +24,7 @@
 #include "GraphicsJNI.h"
 #include "core_jni_helpers.h"
 
-#include "SkPorterDuff.h"
+#include "SkXfermode.h"
 
 namespace android {
 
@@ -32,8 +32,28 @@ class SkPorterDuffGlue {
 public:
 
     static jlong CreateXfermode(JNIEnv* env, jobject, jint modeHandle) {
-        SkPorterDuff::Mode mode = static_cast<SkPorterDuff::Mode>(modeHandle);
-        return reinterpret_cast<jlong>(SkPorterDuff::CreateXfermode(mode));
+        // validate that the Java enum values match our expectations
+        SK_COMPILE_ASSERT(0  == SkXfermode::kClear_Mode,    xfermode_mismatch);
+        SK_COMPILE_ASSERT(1  == SkXfermode::kSrc_Mode,      xfermode_mismatch);
+        SK_COMPILE_ASSERT(2  == SkXfermode::kDst_Mode,      xfermode_mismatch);
+        SK_COMPILE_ASSERT(3  == SkXfermode::kSrcOver_Mode,  xfermode_mismatch);
+        SK_COMPILE_ASSERT(4  == SkXfermode::kDstOver_Mode,  xfermode_mismatch);
+        SK_COMPILE_ASSERT(5  == SkXfermode::kSrcIn_Mode,    xfermode_mismatch);
+        SK_COMPILE_ASSERT(6  == SkXfermode::kDstIn_Mode,    xfermode_mismatch);
+        SK_COMPILE_ASSERT(7  == SkXfermode::kSrcOut_Mode,   xfermode_mismatch);
+        SK_COMPILE_ASSERT(8  == SkXfermode::kDstOut_Mode,   xfermode_mismatch);
+        SK_COMPILE_ASSERT(9  == SkXfermode::kSrcATop_Mode,  xfermode_mismatch);
+        SK_COMPILE_ASSERT(10 == SkXfermode::kDstATop_Mode,  xfermode_mismatch);
+        SK_COMPILE_ASSERT(11 == SkXfermode::kXor_Mode,      xfermode_mismatch);
+        SK_COMPILE_ASSERT(16 == SkXfermode::kDarken_Mode,   xfermode_mismatch);
+        SK_COMPILE_ASSERT(17 == SkXfermode::kLighten_Mode,  xfermode_mismatch);
+        SK_COMPILE_ASSERT(13 == SkXfermode::kModulate_Mode, xfermode_mismatch);
+        SK_COMPILE_ASSERT(14 == SkXfermode::kScreen_Mode,   xfermode_mismatch);
+        SK_COMPILE_ASSERT(12 == SkXfermode::kPlus_Mode,     xfermode_mismatch);
+        SK_COMPILE_ASSERT(15 == SkXfermode::kOverlay_Mode,  xfermode_mismatch);
+        
+        SkXfermode::Mode mode = static_cast<SkXfermode::Mode>(modeHandle);
+        return reinterpret_cast<jlong>(SkXfermode::Create(mode));
     }
  
 };
