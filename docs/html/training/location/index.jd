@@ -81,4 +81,10 @@ startpage=true
     Learn how to convert a location's latitude and longitude into an address
     (reverse geocoding).
   </dd>
+  <dt>
+    <b><a href="geofencing.html">Creating and Monitoring Geofences</a></b>
+  </dt> <dd>
+    Learn how to define one or more geographic areas as locations of interest,
+    called geofences, and detect when the user is close to or inside a geofence.
+  </dd>
 </dl>
