@@ -18,7 +18,7 @@ package android.graphics;
 
 public class PorterDuff {
 
-    // these value must match their native equivalents. See SkXfermode.h
+    // these value must match their native equivalents. See SkPorterDuff.h
     public enum Mode {
         /** [0, 0] */
         CLEAR       (0),
@@ -46,17 +46,17 @@ public class PorterDuff {
         XOR         (11),
         /** [Sa + Da - Sa*Da,
              Sc*(1 - Da) + Dc*(1 - Sa) + min(Sc, Dc)] */
-        DARKEN      (16),
+        DARKEN      (12),
         /** [Sa + Da - Sa*Da,
              Sc*(1 - Da) + Dc*(1 - Sa) + max(Sc, Dc)] */
-        LIGHTEN     (17),
+        LIGHTEN     (13),
         /** [Sa * Da, Sc * Dc] */
-        MULTIPLY    (24),
+        MULTIPLY    (14),
         /** [Sa + Da - Sa * Da, Sc + Dc - Sc * Dc] */
-        SCREEN      (14),
+        SCREEN      (15),
         /** Saturate(S + D) */
-        ADD         (12),
-        OVERLAY     (15);
+        ADD         (16),
+        OVERLAY     (17);
 
         Mode(int nativeInt) {
             this.nativeInt = nativeInt;
