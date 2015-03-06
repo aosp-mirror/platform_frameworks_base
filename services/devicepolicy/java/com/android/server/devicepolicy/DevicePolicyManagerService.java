@@ -3065,8 +3065,11 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             long ident = Binder.clearCallingIdentity();
             try {
                 if ((flags & WIPE_RESET_PROTECTION_DATA) != 0) {
+                    boolean ownsInitialization = isDeviceInitializer(admin.info.getPackageName())
+                            && !hasUserSetupCompleted(userHandle);
                     if (userHandle != UserHandle.USER_OWNER
-                            || !isDeviceOwner(admin.info.getPackageName())) {
+                            || !(isDeviceOwner(admin.info.getPackageName())
+                                    || ownsInitialization)) {
                         throw new SecurityException(
                                "Only device owner admins can set WIPE_RESET_PROTECTION_DATA");
                     }
