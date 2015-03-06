@@ -16,9 +16,15 @@
 
 package android.os;
 
+import android.annotation.IntDef;
+import android.annotation.NonNull;
 import android.util.Log;
 import android.util.Printer;
+import android.util.SparseArray;
 
+import java.io.FileDescriptor;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 
 /**
@@ -30,6 +36,9 @@ import java.util.ArrayList;
  * {@link Looper#myQueue() Looper.myQueue()}.
  */
 public final class MessageQueue {
+    private static final String TAG = "MessageQueue";
+    private static final boolean DEBUG = false;
+
     // True if the message queue can be quit.
     private final boolean mQuitAllowed;
 
@@ -38,6 +47,7 @@ public final class MessageQueue {
 
     Message mMessages;
     private final ArrayList<IdleHandler> mIdleHandlers = new ArrayList<IdleHandler>();
+    private SparseArray<FileDescriptorRecord> mFileDescriptorRecords;
     private IdleHandler[] mPendingIdleHandlers;
     private boolean mQuitting;
 
@@ -50,9 +60,10 @@ public final class MessageQueue {
 
     private native static long nativeInit();
     private native static void nativeDestroy(long ptr);
-    private native static void nativePollOnce(long ptr, int timeoutMillis);
+    private native void nativePollOnce(long ptr, int timeoutMillis); /*non-static for callbacks*/
     private native static void nativeWake(long ptr);
     private native static boolean nativeIsPolling(long ptr);
+    private native static void nativeSetFileDescriptorEvents(long ptr, int fd, int events);
 
     MessageQueue(boolean quitAllowed) {
         mQuitAllowed = quitAllowed;
@@ -101,7 +112,7 @@ public final class MessageQueue {
      *
      * @param handler The IdleHandler to be added.
      */
-    public void addIdleHandler(IdleHandler handler) {
+    public void addIdleHandler(@NonNull IdleHandler handler) {
         if (handler == null) {
             throw new NullPointerException("Can't add a null IdleHandler");
         }
@@ -119,7 +130,7 @@ public final class MessageQueue {
      *
      * @param handler The IdleHandler to be removed.
      */
-    public void removeIdleHandler(IdleHandler handler) {
+    public void removeIdleHandler(@NonNull IdleHandler handler) {
         synchronized (this) {
             mIdleHandlers.remove(handler);
         }
@@ -146,6 +157,151 @@ public final class MessageQueue {
         // If the loop is quitting then it must not be idling.
         // We can assume mPtr != 0 when mQuitting is false.
         return !mQuitting && nativeIsPolling(mPtr);
+    }
+
+    /**
+     * Registers a file descriptor callback to receive notification when file descriptor
+     * related events occur.
+     * <p>
+     * If the file descriptor has already been registered, the specified events
+     * and callback will replace any that were previously associated with it.
+     * It is not possible to set more than one callback per file descriptor.
+     * </p><p>
+     * It is important to always unregister the callback when the file descriptor
+     * is no longer of use.
+     * </p>
+     *
+     * @param fd The file descriptor for which a callback will be registered.
+     * @param events The set of events to receive: a combination of the
+     * {@link FileDescriptorCallback#EVENT_INPUT},
+     * {@link FileDescriptorCallback#EVENT_OUTPUT}, and
+     * {@link FileDescriptorCallback#EVENT_ERROR} event masks.  If the requested
+     * set of events is zero, then the callback is unregistered.
+     * @param callback The callback to invoke when file descriptor events occur.
+     *
+     * @see FileDescriptorCallback
+     * @see #unregisterFileDescriptorCallback
+     */
+    public void registerFileDescriptorCallback(@NonNull FileDescriptor fd,
+            @FileDescriptorCallback.Events int events,
+            @NonNull FileDescriptorCallback callback) {
+        if (fd == null) {
+            throw new IllegalArgumentException("fd must not be null");
+        }
+        if (callback == null) {
+            throw new IllegalArgumentException("callback must not be null");
+        }
+
+        synchronized (this) {
+            setFileDescriptorCallbackLocked(fd, events, callback);
+        }
+    }
+
+    /**
+     * Unregisters a file descriptor callback.
+     * <p>
+     * This method does nothing if no callback has been registered for the
+     * specified file descriptor.
+     * </p>
+     *
+     * @param fd The file descriptor whose callback will be unregistered.
+     *
+     * @see FileDescriptorCallback
+     * @see #registerFileDescriptorCallback
+     */
+    public void unregisterFileDescriptorCallback(@NonNull FileDescriptor fd) {
+        if (fd == null) {
+            throw new IllegalArgumentException("fd must not be null");
+        }
+
+        synchronized (this) {
+            setFileDescriptorCallbackLocked(fd, 0, null);
+        }
+    }
+
+    private void setFileDescriptorCallbackLocked(FileDescriptor fd, int events,
+            FileDescriptorCallback callback) {
+        final int fdNum = fd.getInt$();
+
+        int index = -1;
+        FileDescriptorRecord record = null;
+        if (mFileDescriptorRecords != null) {
+            index = mFileDescriptorRecords.indexOfKey(fdNum);
+            if (index >= 0) {
+                record = mFileDescriptorRecords.valueAt(index);
+                if (record != null && record.mEvents == events) {
+                    return;
+                }
+            }
+        }
+
+        if (events != 0) {
+            events |= FileDescriptorCallback.EVENT_ERROR;
+            if (record == null) {
+                if (mFileDescriptorRecords == null) {
+                    mFileDescriptorRecords = new SparseArray<FileDescriptorRecord>();
+                }
+                record = new FileDescriptorRecord(fd, events, callback);
+                mFileDescriptorRecords.put(fdNum, record);
+            } else {
+                record.mCallback = callback;
+                record.mEvents = events;
+                record.mSeq += 1;
+            }
+            nativeSetFileDescriptorEvents(mPtr, fdNum, events);
+        } else if (record != null) {
+            record.mEvents = 0;
+            mFileDescriptorRecords.removeAt(index);
+        }
+    }
+
+    // Called from native code.
+    private int dispatchEvents(int fd, int events) {
+        // Get the file descriptor record and any state that might change.
+        final FileDescriptorRecord record;
+        final int oldWatchedEvents;
+        final FileDescriptorCallback callback;
+        final int seq;
+        synchronized (this) {
+            record = mFileDescriptorRecords.get(fd);
+            if (record == null) {
+                return 0; // spurious, no callback registered
+            }
+
+            oldWatchedEvents = record.mEvents;
+            events &= oldWatchedEvents; // filter events based on current watched set
+            if (events == 0) {
+                return oldWatchedEvents; // spurious, watched events changed
+            }
+
+            callback = record.mCallback;
+            seq = record.mSeq;
+        }
+
+        // Invoke the callback outside of the lock.
+        int newWatchedEvents = callback.onFileDescriptorEvents(
+                record.mDescriptor, events);
+        if (newWatchedEvents != 0) {
+            newWatchedEvents |= FileDescriptorCallback.EVENT_ERROR;
+        }
+
+        // Update the file descriptor record if the callback changed the set of
+        // events to watch and the callback itself hasn't been updated since.
+        if (newWatchedEvents != oldWatchedEvents) {
+            synchronized (this) {
+                int index = mFileDescriptorRecords.indexOfKey(fd);
+                if (index >= 0 && mFileDescriptorRecords.valueAt(index) == record
+                        && record.mSeq == seq) {
+                    record.mEvents = newWatchedEvents;
+                    if (newWatchedEvents == 0) {
+                        mFileDescriptorRecords.removeAt(index);
+                    }
+                }
+            }
+        }
+
+        // Return the new set of events to watch for native code to take care of.
+        return newWatchedEvents;
     }
 
     Message next() {
@@ -191,7 +347,8 @@ public final class MessageQueue {
                             mMessages = msg.next;
                         }
                         msg.next = null;
-                        if (false) Log.v("MessageQueue", "Returning message: " + msg);
+                        if (DEBUG) Log.v(TAG, "Returning message: " + msg);
+                        msg.markInUse();
                         return msg;
                     }
                 } else {
@@ -234,7 +391,7 @@ public final class MessageQueue {
                 try {
                     keep = idler.queueIdle();
                 } catch (Throwable t) {
-                    Log.wtf("MessageQueue", "IdleHandler threw exception", t);
+                    Log.wtf(TAG, "IdleHandler threw exception", t);
                 }
 
                 if (!keep) {
@@ -385,7 +542,7 @@ public final class MessageQueue {
             if (mQuitting) {
                 IllegalStateException e = new IllegalStateException(
                         msg.target + " sending message to a Handler on a dead thread");
-                Log.w("MessageQueue", e.getMessage(), e);
+                Log.w(TAG, e.getMessage(), e);
                 msg.recycle();
                 return false;
             }
@@ -626,5 +783,95 @@ public final class MessageQueue {
          * after the current time.
          */
         boolean queueIdle();
+    }
+
+    /**
+     * A callback which is invoked when file descriptor related events occur.
+     */
+    public static abstract class FileDescriptorCallback {
+        /**
+         * File descriptor event: Indicates that the file descriptor is ready for input
+         * operations, such as reading.
+         * <p>
+         * The callback should read all available data from the file descriptor
+         * then return <code>true</code> to keep the callback active or <code>false</code>
+         * to remove the callback.
+         * </p><p>
+         * In the case of a socket, this event may be generated to indicate
+         * that there is at least one incoming connection that the callback
+         * should accept.
+         * </p><p>
+         * This event will only be generated if the {@link #EVENT_INPUT} event mask was
+         * specified when the callback was added.
+         * </p>
+         */
+        public static final int EVENT_INPUT = 1 << 0;
+
+        /**
+         * File descriptor event: Indicates that the file descriptor is ready for output
+         * operations, such as writing.
+         * <p>
+         * The callback should write as much data as it needs.  If it could not
+         * write everything at once, then it should return <code>true</code> to
+         * keep the callback active.  Otherwise, it should return <code>false</code>
+         * to remove the callback then re-register it later when it needs to write
+         * something else.
+         * </p><p>
+         * This event will only be generated if the {@link #EVENT_OUTPUT} event mask was
+         * specified when the callback was added.
+         * </p>
+         */
+        public static final int EVENT_OUTPUT = 1 << 1;
+
+        /**
+         * File descriptor event: Indicates that the file descriptor encountered a
+         * fatal error.
+         * <p>
+         * File descriptor errors can occur for various reasons.  One common error
+         * is when the remote peer of a socket or pipe closes its end of the connection.
+         * </p><p>
+         * This event may be generated at any time regardless of whether the
+         * {@link #EVENT_ERROR} event mask was specified when the callback was added.
+         * </p>
+         */
+        public static final int EVENT_ERROR = 1 << 2;
+
+        /** @hide */
+        @Retention(RetentionPolicy.SOURCE)
+        @IntDef(flag=true, value={EVENT_INPUT, EVENT_OUTPUT, EVENT_ERROR})
+        public @interface Events {}
+
+        /**
+         * Called when a file descriptor receives events.
+         * <p>
+         * The default implementation does nothing and returns 0 to unregister the callback.
+         * </p>
+         *
+         * @param fd The file descriptor.
+         * @param events The set of events that occurred: a combination of the
+         * {@link #EVENT_INPUT}, {@link #EVENT_OUTPUT}, and {@link #EVENT_ERROR} event masks.
+         * @return The new set of events to watch, or 0 to unregister the callback.
+         *
+         * @see #EVENT_INPUT
+         * @see #EVENT_OUTPUT
+         * @see #EVENT_ERROR
+         */
+        public @Events int onFileDescriptorEvents(@NonNull FileDescriptor fd, @Events int events) {
+            return 0;
+        }
+    }
+
+    private static final class FileDescriptorRecord {
+        public final FileDescriptor mDescriptor;
+        public int mEvents;
+        public FileDescriptorCallback mCallback;
+        public int mSeq;
+
+        public FileDescriptorRecord(FileDescriptor descriptor,
+                int events, FileDescriptorCallback callback) {
+            mDescriptor = descriptor;
+            mEvents = events;
+            mCallback = callback;
+        }
     }
 }

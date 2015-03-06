@@ -22,7 +22,7 @@
 
 namespace android {
 
-class MessageQueue : public RefBase {
+class MessageQueue : public virtual RefBase {
 public:
     /* Gets the message queue's looper. */
     inline sp<Looper> getLooper() const {

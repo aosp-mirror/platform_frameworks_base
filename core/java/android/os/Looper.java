@@ -273,6 +273,7 @@ public final class Looper {
         mQueue.dump(pw, prefix + "  ");
     }
 
+    @Override
     public String toString() {
         return "Looper (" + mThread.getName() + ", tid " + mThread.getId()
                 + ") {" + Integer.toHexString(System.identityHashCode(this)) + "}";
