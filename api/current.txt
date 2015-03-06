@@ -29331,6 +29331,7 @@ package android.telephony {
   }
 
   public class TelephonyManager {
+    method public boolean canChangeDtmfToneLength();
     method public java.util.List<android.telephony.CellInfo> getAllCellInfo();
     method public int getCallState();
     method public android.telephony.CellLocation getCellLocation();
@@ -29366,6 +29367,7 @@ package android.telephony {
     method public boolean isNetworkRoaming();
     method public boolean isSmsCapable();
     method public boolean isVoiceCapable();
+    method public boolean isWorldPhone();
     method public void listen(android.telephony.PhoneStateListener, int);
     method public java.lang.String sendEnvelopeWithStatus(java.lang.String);
     method public boolean setLine1NumberForDisplay(java.lang.String, java.lang.String);

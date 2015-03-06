@@ -863,9 +863,23 @@ interface ITelephony {
     /**
      * Whether video calling has been enabled by the user.
      *
-     * @return {@code True} if the user has enabled video calling, {@code false} otherwise.
+     * @return {@code true} if the user has enabled video calling, {@code false} otherwise.
      */
     boolean isVideoCallingEnabled();
+
+    /**
+     * Whether the DTMF tone length can be changed.
+     *
+     * @return {@code true} if the DTMF tone length can be changed.
+     */
+    boolean canChangeDtmfToneLength();
+
+    /**
+     * Whether the device is a world phone.
+     *
+     * @return {@code true} if the devices is a world phone.
+     */
+    boolean isWorldPhone();
 
     /**
      * Get IMS Registration Status
