@@ -258,6 +258,7 @@ public abstract class BackupAgent extends ContextWrapper {
      *
      * <ul>
      * <li>The contents of the {@link #getCacheDir()} directory</li>
+     * <li>The contents of the {@link #getCodeCacheDir()} directory</li>
      * <li>The contents of the {@link #getNoBackupFilesDir()} directory</li>
      * <li>The contents of the app's shared library directory</li>
      * </ul>
@@ -285,6 +286,7 @@ public abstract class BackupAgent extends ContextWrapper {
         String databaseDir = getDatabasePath("foo").getParentFile().getCanonicalPath();
         String sharedPrefsDir = getSharedPrefsFile("foo").getParentFile().getCanonicalPath();
         String cacheDir = getCacheDir().getCanonicalPath();
+        String codeCacheDir = getCodeCacheDir().getCanonicalPath();
         String libDir = (appInfo.nativeLibraryDir != null)
                 ? new File(appInfo.nativeLibraryDir).getCanonicalPath()
                 : null;
@@ -298,6 +300,7 @@ public abstract class BackupAgent extends ContextWrapper {
             filterSet.add(libDir);
         }
         filterSet.add(cacheDir);
+        filterSet.add(codeCacheDir);
         filterSet.add(databaseDir);
         filterSet.add(sharedPrefsDir);
         filterSet.add(filesDir);
@@ -354,6 +357,7 @@ public abstract class BackupAgent extends ContextWrapper {
         String dbDir;
         String spDir;
         String cacheDir;
+        String codeCacheDir;
         String libDir;
         String efDir = null;
         String filePath;
@@ -367,6 +371,7 @@ public abstract class BackupAgent extends ContextWrapper {
             dbDir = getDatabasePath("foo").getParentFile().getCanonicalPath();
             spDir = getSharedPrefsFile("foo").getParentFile().getCanonicalPath();
             cacheDir = getCacheDir().getCanonicalPath();
+            codeCacheDir = getCodeCacheDir().getCanonicalPath();
             libDir = (appInfo.nativeLibraryDir == null)
                     ? null
                     : new File(appInfo.nativeLibraryDir).getCanonicalPath();
@@ -380,7 +385,8 @@ public abstract class BackupAgent extends ContextWrapper {
             }
 
             // Now figure out which well-defined tree the file is placed in, working from
-            // most to least specific.  We also specifically exclude the lib and cache dirs.
+            // most to least specific.  We also specifically exclude the lib, cache,
+            // and code_cache dirs.
             filePath = file.getCanonicalPath();
         } catch (IOException e) {
             Log.w(TAG, "Unable to obtain canonical paths");
@@ -388,9 +394,10 @@ public abstract class BackupAgent extends ContextWrapper {
         }
 
         if (filePath.startsWith(cacheDir)
+                || filePath.startsWith(codeCacheDir)
                 || filePath.startsWith(libDir)
                 || filePath.startsWith(nbFilesDir)) {
-            Log.w(TAG, "lib, cache, and no_backup files are not backed up");
+            Log.w(TAG, "lib, cache, code_cache, and no_backup files are not backed up");
             return;
         }
 
