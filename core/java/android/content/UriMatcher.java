@@ -20,7 +20,6 @@ import android.net.Uri;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.regex.Pattern;
 
 /**
 Utility class to aid in matching URIs in content providers.
@@ -171,7 +170,7 @@ public class UriMatcher
             if (path.length() > 0 && path.charAt(0) == '/') {
                 newPath = path.substring(1);
             }
-            tokens = PATH_SPLIT_PATTERN.split(newPath);
+            tokens = newPath.split("/");
         }
 
         int numTokens = tokens != null ? tokens.length : 0;
@@ -206,8 +205,6 @@ public class UriMatcher
         }
         node.mCode = code;
     }
-
-    static final Pattern PATH_SPLIT_PATTERN = Pattern.compile("/");
 
     /**
      * Try to match against the path in a url.
