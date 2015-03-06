@@ -31,8 +31,8 @@ page.article=true
 
     <ul>
       <li>
-        <a href="{@docRoot}shareables/auto/AndroidAuto-media-apps.pdf">
-              User Experience Guidelines: Media Apps</a>
+        <a href="{@docRoot}shareables/auto/AndroidAuto-audio-apps.pdf">
+              User Experience Guidelines: Audio Apps</a>
       </li>
       <li><a href="{@docRoot}training/managing-audio/index.html">Managing Audio
         Playback</a></li>
@@ -279,8 +279,8 @@ hierarchies depending on what client is making the query. In particular, Auto
 applications have strict limits on how large a menu they can display. This is
 intended to prevent distracting the driver, and to make it easy for the driver
 to operate the app via voice commands. For more information on the Auto user
-experience restrictions, see the <a href="{@docRoot}shareables/auto/AndroidAuto-media-apps.pdf">
-Auto Media Apps</a> guidelines.</p>
+experience restrictions, see the <a href="{@docRoot}shareables/auto/AndroidAuto-audio-apps.pdf">
+Auto Audio Apps</a> guidelines.</p>
 
 <p>Your implementation of {@link android.service.media.MediaBrowserService#onGetRoot
 onGetRoot()} returns information about the root node of the menu
