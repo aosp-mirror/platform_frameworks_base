@@ -77,7 +77,6 @@ class ZygoteConnection {
     private final DataOutputStream mSocketOutStream;
     private final BufferedReader mSocketReader;
     private final Credentials peer;
-    private final String peerSecurityContext;
     private final String abiList;
 
     /**
@@ -98,15 +97,13 @@ class ZygoteConnection {
                 new InputStreamReader(socket.getInputStream()), 256);
 
         mSocket.setSoTimeout(CONNECTION_TIMEOUT_MILLIS);
-                
+
         try {
             peer = mSocket.getPeerCredentials();
         } catch (IOException ex) {
             Log.e(TAG, "Cannot read peer credentials", ex);
             throw ex;
         }
-
-        peerSecurityContext = SELinux.getPeerContext(mSocket.getFileDescriptor());
     }
 
     /**
@@ -178,10 +175,8 @@ class ZygoteConnection {
                         ", effective=0x" + Long.toHexString(parsedArgs.effectiveCapabilities));
             }
 
-            applyUidSecurityPolicy(parsedArgs, peer, peerSecurityContext);
-            applyRlimitSecurityPolicy(parsedArgs, peer, peerSecurityContext);
-            applyInvokeWithSecurityPolicy(parsedArgs, peer, peerSecurityContext);
-            applyseInfoSecurityPolicy(parsedArgs, peer, peerSecurityContext);
+            applyUidSecurityPolicy(parsedArgs, peer);
+            applyInvokeWithSecurityPolicy(parsedArgs, peer);
 
             applyDebuggerSystemProperty(parsedArgs);
             applyInvokeWithSystemProperty(parsedArgs);
@@ -582,7 +577,7 @@ class ZygoteConnection {
         }
 
         // See bug 1092107: large argc can be used for a DOS attack
-        if (argc > MAX_ZYGOTE_ARGC) {   
+        if (argc > MAX_ZYGOTE_ARGC) {
             throw new IOException("max arg count exceeded");
         }
 
@@ -599,63 +594,30 @@ class ZygoteConnection {
     }
 
     /**
-     * Applies zygote security policy per bugs #875058 and #1082165. 
-     * Based on the credentials of the process issuing a zygote command:
-     * <ol>
-     * <li> uid 0 (root) may specify any uid, gid, and setgroups() list
-     * <li> uid 1000 (Process.SYSTEM_UID) may specify any uid &gt; 1000 in normal
+     * uid 1000 (Process.SYSTEM_UID) may specify any uid &gt; 1000 in normal
      * operation. It may also specify any gid and setgroups() list it chooses.
      * In factory test mode, it may specify any UID.
-     * <li> Any other uid may not specify any uid, gid, or setgroups list. The
-     * uid and gid will be inherited from the requesting process.
-     * </ul>
      *
      * @param args non-null; zygote spawner arguments
      * @param peer non-null; peer credentials
      * @throws ZygoteSecurityException
      */
-    private static void applyUidSecurityPolicy(Arguments args, Credentials peer,
-            String peerSecurityContext)
+    private static void applyUidSecurityPolicy(Arguments args, Credentials peer)
             throws ZygoteSecurityException {
 
-        int peerUid = peer.getUid();
-
-        if (peerUid == 0) {
-            // Root can do what it wants
-        } else if (peerUid == Process.SYSTEM_UID ) {
-            // System UID is restricted, except in factory test mode
+        if (peer.getUid() == Process.SYSTEM_UID) {
             String factoryTest = SystemProperties.get("ro.factorytest");
             boolean uidRestricted;
 
             /* In normal operation, SYSTEM_UID can only specify a restricted
              * set of UIDs. In factory test mode, SYSTEM_UID may specify any uid.
              */
-            uidRestricted  
-                 = !(factoryTest.equals("1") || factoryTest.equals("2"));
+            uidRestricted = !(factoryTest.equals("1") || factoryTest.equals("2"));
 
-            if (uidRestricted
-                    && args.uidSpecified && (args.uid < Process.SYSTEM_UID)) {
+            if (uidRestricted && args.uidSpecified && (args.uid < Process.SYSTEM_UID)) {
                 throw new ZygoteSecurityException(
                         "System UID may not launch process with UID < "
-                                + Process.SYSTEM_UID);
-            }
-        } else {
-            // Everything else
-            if (args.uidSpecified || args.gidSpecified
-                || args.gids != null) {
-                throw new ZygoteSecurityException(
-                        "App UIDs may not specify uid's or gid's");
-            }
-        }
-
-        if (args.uidSpecified || args.gidSpecified || args.gids != null) {
-            boolean allowed = SELinux.checkSELinuxAccess(peerSecurityContext,
-                                                         peerSecurityContext,
-                                                         "zygote",
-                                                         "specifyids");
-            if (!allowed) {
-                throw new ZygoteSecurityException(
-                        "Peer may not specify uid's or gid's");
+                        + Process.SYSTEM_UID);
             }
         }
 
@@ -669,7 +631,6 @@ class ZygoteConnection {
             args.gidSpecified = true;
         }
     }
-
 
     /**
      * Applies debugger system properties to the zygote arguments.
@@ -687,44 +648,6 @@ class ZygoteConnection {
     }
 
     /**
-     * Applies zygote security policy per bug #1042973. Based on the credentials
-     * of the process issuing a zygote command:
-     * <ol>
-     * <li> peers of  uid 0 (root) and uid 1000 (Process.SYSTEM_UID)
-     * may specify any rlimits.
-     * <li> All other uids may not specify rlimits.
-     * </ul>
-     * @param args non-null; zygote spawner arguments
-     * @param peer non-null; peer credentials
-     * @throws ZygoteSecurityException
-     */
-    private static void applyRlimitSecurityPolicy(
-            Arguments args, Credentials peer, String peerSecurityContext)
-            throws ZygoteSecurityException {
-
-        int peerUid = peer.getUid();
-
-        if (!(peerUid == 0 || peerUid == Process.SYSTEM_UID)) {
-            // All peers with UID other than root or SYSTEM_UID
-            if (args.rlimits != null) {
-                throw new ZygoteSecurityException(
-                        "This UID may not specify rlimits.");
-            }
-        }
-
-        if (args.rlimits != null) {
-            boolean allowed = SELinux.checkSELinuxAccess(peerSecurityContext,
-                                                         peerSecurityContext,
-                                                         "zygote",
-                                                         "specifyrlimits");
-            if (!allowed) {
-                throw new ZygoteSecurityException(
-                        "Peer may not specify rlimits");
-            }
-         }
-    }
-
-    /**
      * Applies zygote security policy.
      * Based on the credentials of the process issuing a zygote command:
      * <ol>
@@ -737,8 +660,7 @@ class ZygoteConnection {
      * @param peer non-null; peer credentials
      * @throws ZygoteSecurityException
      */
-    private static void applyInvokeWithSecurityPolicy(Arguments args, Credentials peer,
-            String peerSecurityContext)
+    private static void applyInvokeWithSecurityPolicy(Arguments args, Credentials peer)
             throws ZygoteSecurityException {
         int peerUid = peer.getUid();
 
@@ -746,52 +668,6 @@ class ZygoteConnection {
             throw new ZygoteSecurityException("Peer is not permitted to specify "
                     + "an explicit invoke-with wrapper command");
         }
-
-        if (args.invokeWith != null) {
-            boolean allowed = SELinux.checkSELinuxAccess(peerSecurityContext,
-                                                         peerSecurityContext,
-                                                         "zygote",
-                                                         "specifyinvokewith");
-            if (!allowed) {
-                throw new ZygoteSecurityException("Peer is not permitted to specify "
-                    + "an explicit invoke-with wrapper command");
-            }
-        }
-    }
-
-    /**
-     * Applies zygote security policy for SELinux information.
-     *
-     * @param args non-null; zygote spawner arguments
-     * @param peer non-null; peer credentials
-     * @throws ZygoteSecurityException
-     */
-    private static void applyseInfoSecurityPolicy(
-            Arguments args, Credentials peer, String peerSecurityContext)
-            throws ZygoteSecurityException {
-        int peerUid = peer.getUid();
-
-        if (args.seInfo == null) {
-            // nothing to check
-            return;
-        }
-
-        if (!(peerUid == 0 || peerUid == Process.SYSTEM_UID)) {
-            // All peers with UID other than root or SYSTEM_UID
-            throw new ZygoteSecurityException(
-                    "This UID may not specify SELinux info.");
-        }
-
-        boolean allowed = SELinux.checkSELinuxAccess(peerSecurityContext,
-                                                     peerSecurityContext,
-                                                     "zygote",
-                                                     "specifyseinfo");
-        if (!allowed) {
-            throw new ZygoteSecurityException(
-                    "Peer may not specify SELinux info");
-        }
-
-        return;
     }
 
     /**
@@ -801,20 +677,18 @@ class ZygoteConnection {
      */
     public static void applyInvokeWithSystemProperty(Arguments args) {
         if (args.invokeWith == null && args.niceName != null) {
-            if (args.niceName != null) {
-                String property = "wrap." + args.niceName;
-                if (property.length() > 31) {
-                    // Properties with a trailing "." are illegal.
-                    if (property.charAt(30) != '.') {
-                        property = property.substring(0, 31);
-                    } else {
-                        property = property.substring(0, 30);
-                    }
+            String property = "wrap." + args.niceName;
+            if (property.length() > 31) {
+                // Properties with a trailing "." are illegal.
+                if (property.charAt(30) != '.') {
+                    property = property.substring(0, 31);
+                } else {
+                    property = property.substring(0, 30);
                 }
-                args.invokeWith = SystemProperties.get(property);
-                if (args.invokeWith != null && args.invokeWith.length() == 0) {
-                    args.invokeWith = null;
-                }
+            }
+            args.invokeWith = SystemProperties.get(property);
+            if (args.invokeWith != null && args.invokeWith.length() == 0) {
+                args.invokeWith = null;
             }
         }
     }
