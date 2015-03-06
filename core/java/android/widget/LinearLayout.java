@@ -19,6 +19,7 @@ package android.widget;
 import com.android.internal.R;
 
 import android.annotation.IntDef;
+import android.annotation.Nullable;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
@@ -186,11 +187,11 @@ public class LinearLayout extends ViewGroup {
         this(context, null);
     }
 
-    public LinearLayout(Context context, AttributeSet attrs) {
+    public LinearLayout(Context context, @Nullable AttributeSet attrs) {
         this(context, attrs, 0);
     }
     
-    public LinearLayout(Context context, AttributeSet attrs, int defStyleAttr) {
+    public LinearLayout(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
         this(context, attrs, defStyleAttr, 0);
     }
 

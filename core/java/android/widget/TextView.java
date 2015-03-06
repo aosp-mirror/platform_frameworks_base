@@ -637,16 +637,17 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         this(context, null);
     }
 
-    public TextView(Context context, AttributeSet attrs) {
+    public TextView(Context context, @Nullable AttributeSet attrs) {
         this(context, attrs, com.android.internal.R.attr.textViewStyle);
     }
 
-    public TextView(Context context, AttributeSet attrs, int defStyleAttr) {
+    public TextView(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
         this(context, attrs, defStyleAttr, 0);
     }
 
     @SuppressWarnings("deprecation")
-    public TextView(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+    public TextView(
+            Context context, @Nullable AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
 
         mText = "";
