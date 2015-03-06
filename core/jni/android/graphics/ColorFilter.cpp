@@ -21,7 +21,7 @@
 
 #include "SkColorFilter.h"
 #include "SkColorMatrixFilter.h"
-#include "SkPorterDuff.h"
+#include "SkXfermode.h"
 
 #include <Caches.h>
 
@@ -36,10 +36,9 @@ public:
         if (filter) SkSafeUnref(filter);
     }
 
-    static jlong CreatePorterDuffFilter(JNIEnv* env, jobject, jint srcColor,
-            jint modeHandle) {
-        SkPorterDuff::Mode mode = (SkPorterDuff::Mode) modeHandle;
-        return reinterpret_cast<jlong>(SkColorFilter::CreateModeFilter(srcColor, SkPorterDuff::ToXfermodeMode(mode)));
+    static jlong CreatePorterDuffFilter(JNIEnv* env, jobject, jint srcColor, jint modeHandle) {
+        SkXfermode::Mode mode = static_cast<SkXfermode::Mode>(modeHandle);
+        return reinterpret_cast<jlong>(SkColorFilter::CreateModeFilter(srcColor, mode));
     }
 
     static jlong CreateLightingFilter(JNIEnv* env, jobject, jint mul, jint add) {
