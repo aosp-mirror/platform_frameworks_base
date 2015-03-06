@@ -54,8 +54,11 @@ public:
     void reset();
 
 private:
+    uint32_t findPercentile(int p);
+
     JankBucket mBuckets[NUM_BUCKETS];
     int64_t mThresholds[NUM_BUCKETS];
+    uint32_t mFrameCounts[128];
 
     int64_t mFrameInterval;
     uint32_t mTotalFrameCount;

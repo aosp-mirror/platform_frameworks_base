@@ -15,6 +15,7 @@
  */
 #include "JankTracker.h"
 
+#include <algorithm>
 #include <cstdio>
 #include <inttypes.h>
 
@@ -95,7 +96,12 @@ void JankTracker::addFrame(const FrameInfo& frame) {
     // Fast-path for jank-free frames
     int64_t totalDuration =
             frame[FrameInfoIndex::kFrameCompleted] - frame[FrameInfoIndex::kIntendedVsync];
+    uint32_t framebucket = std::min(
+            static_cast<typeof sizeof(mFrameCounts)>(ns2ms(totalDuration)),
+            sizeof(mFrameCounts) / sizeof(mFrameCounts[0]));
+    // Keep the fast path as fast as possible.
     if (CC_LIKELY(totalDuration < mFrameInterval)) {
+        mFrameCounts[framebucket]++;
         return;
     }
 
@@ -103,6 +109,7 @@ void JankTracker::addFrame(const FrameInfo& frame) {
         return;
     }
 
+    mFrameCounts[framebucket]++;
     mJankFrameCount++;
 
     for (int i = 0; i < NUM_BUCKETS; i++) {
@@ -119,6 +126,9 @@ void JankTracker::dump(int fd) {
     fprintf(file, "\n  Total frames rendered: %u", mTotalFrameCount);
     fprintf(file, "\n  Janky frames: %u (%.2f%%)", mJankFrameCount,
             (float) mJankFrameCount / (float) mTotalFrameCount * 100.0f);
+    fprintf(file, "\n  90th percentile: %ums", findPercentile(90));
+    fprintf(file, "\n  95th percentile: %ums", findPercentile(95));
+    fprintf(file, "\n  99th percentile: %ums", findPercentile(99));
     for (int i = 0; i < NUM_BUCKETS; i++) {
         fprintf(file, "\n   Number %s: %u", JANK_TYPE_NAMES[i], mBuckets[i].count);
     }
@@ -127,9 +137,22 @@ void JankTracker::dump(int fd) {
 }
 
 void JankTracker::reset() {
-    memset(mBuckets, 0, sizeof(JankBucket) * NUM_BUCKETS);
+    memset(mBuckets, 0, sizeof(mBuckets));
+    memset(mFrameCounts, 0, sizeof(mFrameCounts));
     mTotalFrameCount = 0;
     mJankFrameCount = 0;
+}
+
+uint32_t JankTracker::findPercentile(int percentile) {
+    int pos = percentile * mTotalFrameCount / 100;
+    int remaining = mTotalFrameCount - pos;
+    for (int i = sizeof(mFrameCounts) / sizeof(mFrameCounts[0]) - 1; i >= 0; i--) {
+        remaining -= mFrameCounts[i];
+        if (remaining <= 0) {
+            return i;
+        }
+    }
+    return 0;
 }
 
 } /* namespace uirenderer */
