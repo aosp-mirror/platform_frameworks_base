@@ -16,8 +16,6 @@
 
 package android.media.midi;
 
-import java.io.Closeable;
-
 /**
  * This class contains utilities for socket communication between a
  * MidiInputPort and MidiOutputPort
