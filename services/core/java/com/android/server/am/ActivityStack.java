@@ -16,9 +16,7 @@
 
 package com.android.server.am;
 
-import static com.android.server.am.ActivityManagerService.TAG;
-import static com.android.server.am.ActivityManagerService.localLOGV;
-import static com.android.server.am.ActivityManagerService.DEBUG_CLEANUP;
+import static com.android.server.am.ActivityManagerDebugConfig.*;
 import static com.android.server.am.ActivityManagerService.DEBUG_CONFIGURATION;
 import static com.android.server.am.ActivityManagerService.DEBUG_PAUSE;
 import static com.android.server.am.ActivityManagerService.DEBUG_RESULTS;
@@ -96,6 +94,9 @@ import java.util.Objects;
  * State and management of a single stack of activities.
  */
 final class ActivityStack {
+
+    private static final String TAG = TAG_WITH_CLASS_NAME ? "ActivityStack" : TAG_AM;
+    private static final String TAG_CLEANUP = TAG + POSTFIX_CLEANUP;
 
     // Ticks during which we check progress while waiting for an app to launch.
     static final int LAUNCH_TICK = 500;
@@ -264,9 +265,7 @@ final class ActivityStack {
     final Handler mHandler;
 
     final class ActivityStackHandler extends Handler {
-        //public Handler() {
-        //    if (localLOGV) Slog.v(TAG, "Handler started!");
-        //}
+
         ActivityStackHandler(Looper looper) {
             super(looper);
         }
@@ -2912,7 +2911,7 @@ final class ActivityStack {
 
         // Need to go through the full pause cycle to get this
         // activity into the stopped state and then finish it.
-        if (localLOGV) Slog.v(TAG, "Enqueueing pending finish: " + r);
+        if (DEBUG_ALL) Slog.v(TAG, "Enqueueing pending finish: " + r);
         mStackSupervisor.mFinishingActivities.add(r);
         r.resumeKeyDispatchingLocked();
         mStackSupervisor.getFocusedStack().resumeTopActivityLocked(null);
@@ -3435,15 +3434,14 @@ final class ActivityStack {
     private void removeHistoryRecordsForAppLocked(ArrayList<ActivityRecord> list,
             ProcessRecord app, String listName) {
         int i = list.size();
-        if (DEBUG_CLEANUP) Slog.v(
-            TAG, "Removing app " + app + " from list " + listName
-            + " with " + i + " entries");
+        if (DEBUG_CLEANUP) Slog.v(TAG_CLEANUP,
+            "Removing app " + app + " from list " + listName + " with " + i + " entries");
         while (i > 0) {
             i--;
             ActivityRecord r = list.get(i);
-            if (DEBUG_CLEANUP) Slog.v(TAG, "Record #" + i + " " + r);
+            if (DEBUG_CLEANUP) Slog.v(TAG_CLEANUP, "Record #" + i + " " + r);
             if (r.app == app) {
-                if (DEBUG_CLEANUP) Slog.v(TAG, "---> REMOVING this entry!");
+                if (DEBUG_CLEANUP) Slog.v(TAG_CLEANUP, "---> REMOVING this entry!");
                 list.remove(i);
                 removeTimeoutsForActivityLocked(r);
             }
@@ -3465,15 +3463,15 @@ final class ActivityStack {
 
         // Clean out the history list.
         int i = numActivities();
-        if (DEBUG_CLEANUP) Slog.v(
-            TAG, "Removing app " + app + " from history with " + i + " entries");
+        if (DEBUG_CLEANUP) Slog.v(TAG_CLEANUP,
+                "Removing app " + app + " from history with " + i + " entries");
         for (int taskNdx = mTaskHistory.size() - 1; taskNdx >= 0; --taskNdx) {
             final ArrayList<ActivityRecord> activities = mTaskHistory.get(taskNdx).mActivities;
             for (int activityNdx = activities.size() - 1; activityNdx >= 0; --activityNdx) {
                 final ActivityRecord r = activities.get(activityNdx);
                 --i;
-                if (DEBUG_CLEANUP) Slog.v(
-                    TAG, "Record #" + i + " " + r + ": app=" + r.app);
+                if (DEBUG_CLEANUP) Slog.v(TAG_CLEANUP,
+                        "Record #" + i + " " + r + ": app=" + r.app);
                 if (r.app == app) {
                     final boolean remove;
                     if ((!r.haveState && !r.stateNotNeeded) || r.finishing) {
@@ -3512,7 +3510,7 @@ final class ActivityStack {
                     } else {
                         // We have the current state for this activity, so
                         // it can be restarted later when needed.
-                        if (localLOGV) Slog.v(
+                        if (DEBUG_ALL) Slog.v(
                             TAG, "Keeping entry, setting app to null");
                         if (r.visible) {
                             hasVisibleActivities = true;
@@ -4048,7 +4046,7 @@ final class ActivityStack {
                     numRunning++;
                 }
 
-                if (localLOGV) Slog.v(
+                if (DEBUG_ALL) Slog.v(
                     TAG, r.intent.getComponent().flattenToShortString()
                     + ": task=" + r.task);
             }

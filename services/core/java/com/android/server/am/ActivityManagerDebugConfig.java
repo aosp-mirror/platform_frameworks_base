@@ -76,6 +76,7 @@ class ActivityManagerDebugConfig {
 
     static final String POSTFIX_BACKUP = (PREPEND_CATEGORY_NAME) ? "_Backup" : "";
     static final String POSTFIX_BROADCAST = (PREPEND_CATEGORY_NAME) ? "_Broadcast" : "";
+    static final String POSTFIX_CLEANUP = (PREPEND_CATEGORY_NAME) ? "_Cleanup" : "";
     static final String POSTFIX_MU = "_MU";
     static final String POSTFIX_SERVICE = (PREPEND_CATEGORY_NAME) ? "_Service" : "";
     static final String POSTFIX_SERVICE_EXECUTING =

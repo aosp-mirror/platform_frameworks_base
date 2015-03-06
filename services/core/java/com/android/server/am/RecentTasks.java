@@ -16,6 +16,12 @@
 
 package com.android.server.am;
 
+import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
+import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NAME;
+import static com.android.server.am.ActivityManagerService.DEBUG_RECENTS;
+import static com.android.server.am.ActivityManagerService.DEBUG_TASKS;
+import static com.android.server.am.TaskRecord.INVALID_TASK_ID;
+
 import android.app.ActivityManager;
 import android.app.AppGlobals;
 import android.content.ComponentName;
@@ -28,11 +34,6 @@ import android.os.RemoteException;
 import android.os.UserHandle;
 import android.util.Slog;
 
-import static com.android.server.am.ActivityManagerService.DEBUG_RECENTS;
-import static com.android.server.am.ActivityManagerService.DEBUG_TASKS;
-import static com.android.server.am.ActivityManagerService.TAG;
-import static com.android.server.am.TaskRecord.INVALID_TASK_ID;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -42,6 +43,7 @@ import java.util.HashMap;
  * Class for managing the recent tasks list.
  */
 class RecentTasks extends ArrayList<TaskRecord> {
+    private static final String TAG = TAG_WITH_CLASS_NAME ? "RecentTasks" : TAG_AM;
 
     // Maximum number recent bitmaps to keep in memory.
     private static final int MAX_RECENT_BITMAPS = 3;

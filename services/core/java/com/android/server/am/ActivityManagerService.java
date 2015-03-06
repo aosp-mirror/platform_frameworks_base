@@ -248,42 +248,39 @@ public final class ActivityManagerService extends ActivityManagerNative
     // File that stores last updated system version and called preboot receivers
     static final String CALLED_PRE_BOOTS_FILENAME = "called_pre_boots.dat";
 
-    static final String TAG = TAG_WITH_CLASS_NAME ? "ActivityManagerService" : TAG_AM;
+    private static final String TAG = TAG_WITH_CLASS_NAME ? "ActivityManagerService" : TAG_AM;
+    private static final String TAG_BACKUP = TAG + POSTFIX_BACKUP;
+    private static final String TAG_BROADCAST = TAG + POSTFIX_BROADCAST;
+    private static final String TAG_CLEANUP = TAG + POSTFIX_CLEANUP;
     private static final String TAG_MU = TAG + POSTFIX_MU;
 
     // TODO(ogunwale): Migrate all the constants below to use ActivityManagerDebugConfig class.
-    static final boolean localLOGV = DEBUG_ALL || false;
-    static final boolean DEBUG_BACKUP = localLOGV || false;
-    static final boolean DEBUG_BROADCAST = localLOGV || false;
-    static final boolean DEBUG_BROADCAST_LIGHT = DEBUG_BROADCAST || false;
-    static final boolean DEBUG_BACKGROUND_BROADCAST = DEBUG_BROADCAST || false;
-    static final boolean DEBUG_CLEANUP = localLOGV || false;
-    static final boolean DEBUG_CONFIGURATION = localLOGV || false;
+    static final boolean DEBUG_CONFIGURATION = DEBUG_ALL || false;
     static final boolean DEBUG_FOCUS = false;
-    static final boolean DEBUG_IMMERSIVE = localLOGV || false;
-    static final boolean DEBUG_MU = localLOGV || false;
-    static final boolean DEBUG_OOM_ADJ = localLOGV || false;
-    static final boolean DEBUG_LRU = localLOGV || false;
-    static final boolean DEBUG_PAUSE = localLOGV || false;
-    static final boolean DEBUG_POWER = localLOGV || false;
+    static final boolean DEBUG_IMMERSIVE = DEBUG_ALL || false;
+    static final boolean DEBUG_MU = DEBUG_ALL || false;
+    static final boolean DEBUG_OOM_ADJ = DEBUG_ALL || false;
+    static final boolean DEBUG_LRU = DEBUG_ALL || false;
+    static final boolean DEBUG_PAUSE = DEBUG_ALL || false;
+    static final boolean DEBUG_POWER = DEBUG_ALL || false;
     static final boolean DEBUG_POWER_QUICK = DEBUG_POWER || false;
-    static final boolean DEBUG_PROCESS_OBSERVERS = localLOGV || false;
-    static final boolean DEBUG_PROCESSES = localLOGV || false;
-    static final boolean DEBUG_PROVIDER = localLOGV || false;
-    static final boolean DEBUG_RESULTS = localLOGV || false;
-    static final boolean DEBUG_SERVICE = localLOGV || false;
-    static final boolean DEBUG_SERVICE_EXECUTING = localLOGV || false;
-    static final boolean DEBUG_STACK = localLOGV || false;
-    static final boolean DEBUG_SWITCH = localLOGV || false;
-    static final boolean DEBUG_TASKS = localLOGV || false;
-    static final boolean DEBUG_THUMBNAILS = localLOGV || false;
-    static final boolean DEBUG_TRANSITION = localLOGV || false;
-    static final boolean DEBUG_URI_PERMISSION = localLOGV || false;
-    static final boolean DEBUG_USER_LEAVING = localLOGV || false;
-    static final boolean DEBUG_VISBILITY = localLOGV || false;
-    static final boolean DEBUG_PSS = localLOGV || false;
-    static final boolean DEBUG_LOCKSCREEN = localLOGV || false;
-    static final boolean DEBUG_RECENTS = localLOGV || false;
+    static final boolean DEBUG_PROCESS_OBSERVERS = DEBUG_ALL || false;
+    static final boolean DEBUG_PROCESSES = DEBUG_ALL || false;
+    static final boolean DEBUG_PROVIDER = DEBUG_ALL || false;
+    static final boolean DEBUG_RESULTS = DEBUG_ALL || false;
+    static final boolean DEBUG_SERVICE = DEBUG_ALL || false;
+    static final boolean DEBUG_SERVICE_EXECUTING = DEBUG_ALL || false;
+    static final boolean DEBUG_STACK = DEBUG_ALL || false;
+    static final boolean DEBUG_SWITCH = DEBUG_ALL || false;
+    static final boolean DEBUG_TASKS = DEBUG_ALL || false;
+    static final boolean DEBUG_THUMBNAILS = DEBUG_ALL || false;
+    static final boolean DEBUG_TRANSITION = DEBUG_ALL || false;
+    static final boolean DEBUG_URI_PERMISSION = DEBUG_ALL || false;
+    static final boolean DEBUG_USER_LEAVING = DEBUG_ALL || false;
+    static final boolean DEBUG_VISBILITY = DEBUG_ALL || false;
+    static final boolean DEBUG_PSS = DEBUG_ALL || false;
+    static final boolean DEBUG_LOCKSCREEN = DEBUG_ALL || false;
+    static final boolean DEBUG_RECENTS = DEBUG_ALL || false;
     static final boolean VALIDATE_TOKENS = false;
     static final boolean SHOW_ACTIVITY_START_TIME = true;
 
@@ -407,11 +404,9 @@ public final class ActivityManagerService extends ActivityManagerNative
 
     BroadcastQueue broadcastQueueForIntent(Intent intent) {
         final boolean isFg = (intent.getFlags() & Intent.FLAG_RECEIVER_FOREGROUND) != 0;
-        if (DEBUG_BACKGROUND_BROADCAST) {
-            Slog.i(TAG, "Broadcast intent " + intent + " on "
-                    + (isFg ? "foreground" : "background")
-                    + " queue");
-        }
+        if (DEBUG_BROADCAST_BACKGROUND) Slog.i(TAG_BROADCAST,
+                "Broadcast intent " + intent + " on "
+                + (isFg ? "foreground" : "background") + " queue");
         return (isFg) ? mFgBroadcastQueue : mBgBroadcastQueue;
     }
 
@@ -1215,7 +1210,7 @@ public final class ActivityManagerService extends ActivityManagerNative
 
         AppDeathRecipient(ProcessRecord app, int pid,
                 IApplicationThread thread) {
-            if (localLOGV) Slog.v(
+            if (DEBUG_ALL) Slog.v(
                 TAG, "New death recipient " + this
                 + " for thread " + thread.asBinder());
             mApp = app;
@@ -1225,7 +1220,7 @@ public final class ActivityManagerService extends ActivityManagerNative
 
         @Override
         public void binderDied() {
-            if (localLOGV) Slog.v(
+            if (DEBUG_ALL) Slog.v(
                 TAG, "Death received in " + this
                 + " for thread " + mAppThread.asBinder());
             synchronized(ActivityManagerService.this) {
@@ -4316,9 +4311,8 @@ public final class ActivityManagerService extends ActivityManagerNative
                 doLowMem = false;
             }
             EventLog.writeEvent(EventLogTags.AM_PROC_DIED, app.userId, app.pid, app.processName);
-            if (DEBUG_CLEANUP) Slog.v(
-                TAG, "Dying app: " + app + ", pid: " + pid
-                + ", thread: " + thread.asBinder());
+            if (DEBUG_CLEANUP) Slog.v(TAG_CLEANUP,
+                "Dying app: " + app + ", pid: " + pid + ", thread: " + thread.asBinder());
             handleAppDiedLocked(app, false, true);
 
             if (doOomAdj) {
@@ -5499,7 +5493,7 @@ public final class ActivityManagerService extends ActivityManagerNative
 
         // Tell the process all about itself.
 
-        if (localLOGV) Slog.v(
+        if (DEBUG_ALL) Slog.v(
                 TAG, "Binding process pid " + pid + " to record " + app);
 
         final String processName = app.processName;
@@ -5535,7 +5529,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             Slog.i(TAG, "Launching preboot mode app: " + app);
         }
 
-        if (localLOGV) Slog.v(
+        if (DEBUG_ALL) Slog.v(
             TAG, "New app record " + app
             + " thread=" + thread.asBinder() + " pid=" + pid);
         try {
@@ -5656,7 +5650,8 @@ public final class ActivityManagerService extends ActivityManagerNative
 
         // Check whether the next backup agent is in this process...
         if (!badApp && mBackupTarget != null && mBackupTarget.appInfo.uid == app.uid) {
-            if (DEBUG_BACKUP) Slog.v(TAG, "New app is backup target, launching agent for " + app);
+            if (DEBUG_BACKUP) Slog.v(TAG_BACKUP,
+                    "New app is backup target, launching agent for " + app);
             ensurePackageDexOpt(mBackupTarget.appInfo.packageName);
             try {
                 thread.scheduleCreateBackupAgent(mBackupTarget.appInfo,
@@ -5939,7 +5934,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     @Override
     public final void activityStopped(IBinder token, Bundle icicle,
             PersistableBundle persistentState, CharSequence description) {
-        if (localLOGV) Slog.v(TAG, "Activity stopped: token=" + token);
+        if (DEBUG_ALL) Slog.v(TAG, "Activity stopped: token=" + token);
 
         // Refuse possible leaked file descriptors
         if (icicle != null && icicle.hasFileDescriptors()) {
@@ -7689,7 +7684,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         synchronized(this) {
             ArrayList<IAppTask> list = new ArrayList<IAppTask>();
             try {
-                if (localLOGV) Slog.v(TAG, "getAppTasks");
+                if (DEBUG_ALL) Slog.v(TAG, "getAppTasks");
 
                 final int N = mRecentTasks.size();
                 for (int i = 0; i < N; i++) {
@@ -7723,7 +7718,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         ArrayList<RunningTaskInfo> list = new ArrayList<RunningTaskInfo>();
 
         synchronized(this) {
-            if (localLOGV) Slog.v(
+            if (DEBUG_ALL) Slog.v(
                 TAG, "getTasks: max=" + maxNum + ", flags=" + flags);
 
             final boolean allowed = isGetTasksAllowed("getTasks", Binder.getCallingPid(),
@@ -9250,7 +9245,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             ContentProviderRecord cpr = mProviderMap.getProviderByName(name, userId);
             if(cpr == null) {
                 //remove from mProvidersByClass
-                if(localLOGV) Slog.v(TAG, name+" content provider not found in providers list");
+                if(DEBUG_ALL) Slog.v(TAG, name+" content provider not found in providers list");
                 return;
             }
 
@@ -9787,7 +9782,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     public final void activitySlept(IBinder token) {
-        if (localLOGV) Slog.v(TAG, "Activity slept: token=" + token);
+        if (DEBUG_ALL) Slog.v(TAG, "Activity slept: token=" + token);
 
         final long origId = Binder.clearCallingIdentity();
 
@@ -14738,7 +14733,7 @@ public final class ActivityManagerService extends ActivityManagerNative
 
         // If the app is undergoing backup, tell the backup manager about it
         if (mBackupTarget != null && app.pid == mBackupTarget.app.pid) {
-            if (DEBUG_BACKUP || DEBUG_CLEANUP) Slog.d(TAG, "App "
+            if (DEBUG_BACKUP || DEBUG_CLEANUP) Slog.d(TAG_CLEANUP, "App "
                     + mBackupTarget.appInfo + " died during backup");
             try {
                 IBackupManager bm = IBackupManager.Stub.asInterface(
@@ -14765,7 +14760,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
 
         if (!app.persistent || app.isolated) {
-            if (DEBUG_PROCESSES || DEBUG_CLEANUP) Slog.v(TAG,
+            if (DEBUG_PROCESSES || DEBUG_CLEANUP) Slog.v(TAG_CLEANUP,
                     "Removing non-persistent process during cleanup: " + app);
             mProcessNames.remove(app.processName, app.uid);
             mIsolatedProcesses.remove(app.uid);
@@ -14783,8 +14778,8 @@ public final class ActivityManagerService extends ActivityManagerNative
                 restart = true;
             }
         }
-        if ((DEBUG_PROCESSES || DEBUG_CLEANUP) && mProcessesOnHold.contains(app)) Slog.v(TAG,
-                "Clean-up removing on hold: " + app);
+        if ((DEBUG_PROCESSES || DEBUG_CLEANUP) && mProcessesOnHold.contains(app)) Slog.v(
+                TAG_CLEANUP, "Clean-up removing on hold: " + app);
         mProcessesOnHold.remove(app);
 
         if (app == mHomeProcess) {
@@ -15155,7 +15150,8 @@ public final class ActivityManagerService extends ActivityManagerNative
     // instantiated.  The backup agent will invoke backupAgentCreated() on the
     // activity manager to announce its creation.
     public boolean bindBackupAgent(ApplicationInfo app, int backupMode) {
-        if (DEBUG_BACKUP) Slog.v(TAG, "bindBackupAgent: app=" + app + " mode=" + backupMode);
+        if (DEBUG_BACKUP) Slog.v(TAG_BACKUP,
+                "bindBackupAgent: app=" + app + " mode=" + backupMode);
         enforceCallingPermission("android.permission.CONFIRM_FULL_BACKUP", "bindBackupAgent");
 
         synchronized(this) {
@@ -15198,7 +15194,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             // If the process is already attached, schedule the creation of the backup agent now.
             // If it is not yet live, this will be done when it attaches to the framework.
             if (proc.thread != null) {
-                if (DEBUG_BACKUP) Slog.v(TAG, "Agent proc already running: " + proc);
+                if (DEBUG_BACKUP) Slog.v(TAG_BACKUP, "Agent proc already running: " + proc);
                 try {
                     proc.thread.scheduleCreateBackupAgent(app,
                             compatibilityInfoForPackageLocked(app), backupMode);
@@ -15206,7 +15202,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                     // Will time out on the backup manager side
                 }
             } else {
-                if (DEBUG_BACKUP) Slog.v(TAG, "Agent proc not running, waiting for attach");
+                if (DEBUG_BACKUP) Slog.v(TAG_BACKUP, "Agent proc not running, waiting for attach");
             }
             // Invariants: at this point, the target app process exists and the application
             // is either already running or in the process of coming up.  mBackupTarget and
@@ -15219,7 +15215,7 @@ public final class ActivityManagerService extends ActivityManagerNative
 
     @Override
     public void clearPendingBackup() {
-        if (DEBUG_BACKUP) Slog.v(TAG, "clearPendingBackup");
+        if (DEBUG_BACKUP) Slog.v(TAG_BACKUP, "clearPendingBackup");
         enforceCallingPermission("android.permission.BACKUP", "clearPendingBackup");
 
         synchronized (this) {
@@ -15230,7 +15226,7 @@ public final class ActivityManagerService extends ActivityManagerNative
 
     // A backup agent has just come up
     public void backupAgentCreated(String agentPackageName, IBinder agent) {
-        if (DEBUG_BACKUP) Slog.v(TAG, "backupAgentCreated: " + agentPackageName
+        if (DEBUG_BACKUP) Slog.v(TAG_BACKUP, "backupAgentCreated: " + agentPackageName
                 + " = " + agent);
 
         synchronized(this) {
@@ -15257,7 +15253,7 @@ public final class ActivityManagerService extends ActivityManagerNative
 
     // done with this agent
     public void unbindBackupAgent(ApplicationInfo appInfo) {
-        if (DEBUG_BACKUP) Slog.v(TAG, "unbindBackupAgent: " + appInfo);
+        if (DEBUG_BACKUP) Slog.v(TAG_BACKUP, "unbindBackupAgent: " + appInfo);
         if (appInfo == null) {
             Slog.w(TAG, "unbind backup agent for null app");
             return;
@@ -15400,7 +15396,7 @@ public final class ActivityManagerService extends ActivityManagerNative
 
         // The first sticky in the list is returned directly back to the client.
         Intent sticky = allSticky != null ? allSticky.get(0) : null;
-        if (DEBUG_BROADCAST) Slog.v(TAG, "Register receiver " + filter + ": " + sticky);
+        if (DEBUG_BROADCAST) Slog.v(TAG_BROADCAST, "Register receiver " + filter + ": " + sticky);
         if (receiver == null) {
             return sticky;
         }
@@ -15470,7 +15466,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     public void unregisterReceiver(IIntentReceiver receiver) {
-        if (DEBUG_BROADCAST) Slog.v(TAG, "Unregister receiver: " + receiver);
+        if (DEBUG_BROADCAST) Slog.v(TAG_BROADCAST, "Unregister receiver: " + receiver);
 
         final long origId = Binder.clearCallingIdentity();
         try {
@@ -15621,9 +15617,9 @@ public final class ActivityManagerService extends ActivityManagerNative
         // By default broadcasts do not go to stopped apps.
         intent.addFlags(Intent.FLAG_EXCLUDE_STOPPED_PACKAGES);
 
-        if (DEBUG_BROADCAST_LIGHT) Slog.v(
-            TAG, (sticky ? "Broadcast sticky: ": "Broadcast: ") + intent
-            + " ordered=" + ordered + " userid=" + userId);
+        if (DEBUG_BROADCAST_LIGHT) Slog.v(TAG_BROADCAST,
+                (sticky ? "Broadcast sticky: ": "Broadcast: ") + intent
+                + " ordered=" + ordered + " userid=" + userId);
         if ((resultTo != null) && !ordered) {
             Slog.w(TAG, "Broadcast " + intent + " not ordered but result callback requested!");
         }
@@ -15945,7 +15941,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         final boolean replacePending =
                 (intent.getFlags()&Intent.FLAG_RECEIVER_REPLACE_PENDING) != 0;
 
-        if (DEBUG_BROADCAST) Slog.v(TAG, "Enqueing broadcast: " + intent.getAction()
+        if (DEBUG_BROADCAST) Slog.v(TAG_BROADCAST, "Enqueing broadcast: " + intent.getAction()
                 + " replacePending=" + replacePending);
 
         int NR = registeredReceivers != null ? registeredReceivers.size() : 0;
@@ -15958,8 +15954,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                     callerPackage, callingPid, callingUid, resolvedType, requiredPermission,
                     appOp, registeredReceivers, resultTo, resultCode, resultData, map,
                     ordered, sticky, false, userId);
-            if (DEBUG_BROADCAST) Slog.v(
-                    TAG, "Enqueueing parallel broadcast " + r);
+            if (DEBUG_BROADCAST) Slog.v(TAG_BROADCAST, "Enqueueing parallel broadcast " + r);
             final boolean replaced = replacePending && queue.replaceParallelBroadcastLocked(r);
             if (!replaced) {
                 queue.enqueueParallelBroadcastLocked(r);
@@ -16049,11 +16044,10 @@ public final class ActivityManagerService extends ActivityManagerNative
                     requiredPermission, appOp, receivers, resultTo, resultCode,
                     resultData, map, ordered, sticky, false, userId);
 
-            if (DEBUG_BROADCAST) Slog.v(
-                    TAG, "Enqueueing ordered broadcast " + r
+            if (DEBUG_BROADCAST) Slog.v(TAG_BROADCAST, "Enqueueing ordered broadcast " + r
                     + ": prev had " + queue.mOrderedBroadcasts.size());
-            if (DEBUG_BROADCAST) Slog.i(
-                    TAG, "Enqueueing broadcast " + r.intent.getAction());
+            if (DEBUG_BROADCAST) Slog.i(TAG_BROADCAST,
+                    "Enqueueing broadcast " + r.intent.getAction());
 
             boolean replaced = replacePending && queue.replaceOrderedBroadcastLocked(r);
             if (!replaced) {
@@ -16182,7 +16176,7 @@ public final class ActivityManagerService extends ActivityManagerNative
 
     public void finishReceiver(IBinder who, int resultCode, String resultData,
             Bundle resultExtras, boolean resultAbort, int flags) {
-        if (DEBUG_BROADCAST) Slog.v(TAG, "Finish receiver: " + who);
+        if (DEBUG_BROADCAST) Slog.v(TAG_BROADCAST, "Finish receiver: " + who);
 
         // Refuse possible leaked file descriptors
         if (resultExtras != null && resultExtras.hasFileDescriptors()) {
@@ -16948,7 +16942,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         if (mBackupTarget != null && app == mBackupTarget.app) {
             // If possible we want to avoid killing apps while they're being backed up
             if (adj > ProcessList.BACKUP_APP_ADJ) {
-                if (DEBUG_BACKUP) Slog.v(TAG, "oom BACKUP_APP_ADJ for " + app);
+                if (DEBUG_BACKUP) Slog.v(TAG_BACKUP, "oom BACKUP_APP_ADJ for " + app);
                 adj = ProcessList.BACKUP_APP_ADJ;
                 if (procState > ActivityManager.PROCESS_STATE_IMPORTANT_BACKGROUND) {
                     procState = ActivityManager.PROCESS_STATE_IMPORTANT_BACKGROUND;

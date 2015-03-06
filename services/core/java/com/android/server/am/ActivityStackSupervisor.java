@@ -21,7 +21,6 @@ import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 import static android.content.Intent.FLAG_ACTIVITY_TASK_ON_HOME;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static com.android.server.am.ActivityManagerDebugConfig.*;
-import static com.android.server.am.ActivityManagerService.localLOGV;
 import static com.android.server.am.ActivityManagerService.DEBUG_CONFIGURATION;
 import static com.android.server.am.ActivityManagerService.DEBUG_FOCUS;
 import static com.android.server.am.ActivityManagerService.DEBUG_PAUSE;
@@ -32,7 +31,6 @@ import static com.android.server.am.ActivityManagerService.DEBUG_SWITCH;
 import static com.android.server.am.ActivityManagerService.DEBUG_TASKS;
 import static com.android.server.am.ActivityManagerService.DEBUG_USER_LEAVING;
 import static com.android.server.am.ActivityManagerService.FIRST_SUPERVISOR_STACK_MSG;
-import static com.android.server.am.ActivityManagerService.TAG;
 import static com.android.server.am.ActivityRecord.HOME_ACTIVITY_TYPE;
 import static com.android.server.am.ActivityRecord.RECENTS_ACTIVITY_TYPE;
 import static com.android.server.am.ActivityRecord.APPLICATION_ACTIVITY_TYPE;
@@ -117,6 +115,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public final class ActivityStackSupervisor implements DisplayListener {
+    private static final String TAG = TAG_WITH_CLASS_NAME ? "ActivityStackSupervisor" : TAG_AM;
+
     static final boolean DEBUG = DEBUG_ALL || false;
     static final boolean DEBUG_ADD_REMOVE = DEBUG || false;
     static final boolean DEBUG_APP = DEBUG || false;
@@ -1141,7 +1141,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
         r.launchCount++;
         r.lastLaunchTime = SystemClock.uptimeMillis();
 
-        if (localLOGV) Slog.v(TAG, "Launching: " + r);
+        if (DEBUG_ALL) Slog.v(TAG, "Launching: " + r);
 
         int idx = app.activities.indexOf(r);
         if (idx < 0) {
@@ -2297,7 +2297,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
     // Checked.
     final ActivityRecord activityIdleInternalLocked(final IBinder token, boolean fromTimeout,
             Configuration config) {
-        if (localLOGV) Slog.v(TAG, "Activity idle: " + token);
+        if (DEBUG_ALL) Slog.v(TAG, "Activity idle: " + token);
 
         ArrayList<ActivityRecord> stops = null;
         ArrayList<ActivityRecord> finishes = null;
@@ -3178,7 +3178,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
         for (int activityNdx = mStoppingActivities.size() - 1; activityNdx >= 0; --activityNdx) {
             ActivityRecord s = mStoppingActivities.get(activityNdx);
             final boolean waitingVisible = mWaitingVisibleActivities.contains(s);
-            if (localLOGV) Slog.v(TAG, "Stopping " + s + ": nowVisible=" + nowVisible
+            if (DEBUG_ALL) Slog.v(TAG, "Stopping " + s + ": nowVisible=" + nowVisible
                     + " waitingVisible=" + waitingVisible + " finishing=" + s.finishing);
             if (waitingVisible && nowVisible) {
                 mWaitingVisibleActivities.remove(s);
@@ -3188,12 +3188,12 @@ public final class ActivityStackSupervisor implements DisplayListener {
                     // so get rid of it.  Otherwise, we need to go through the
                     // normal flow and hide it once we determine that it is
                     // hidden by the activities in front of it.
-                    if (localLOGV) Slog.v(TAG, "Before stopping, can hide: " + s);
+                    if (DEBUG_ALL) Slog.v(TAG, "Before stopping, can hide: " + s);
                     mWindowManager.setAppVisibility(s.appToken, false);
                 }
             }
             if ((!waitingVisible || mService.isSleepingOrShuttingDown()) && remove) {
-                if (localLOGV) Slog.v(TAG, "Ready to stop: " + s);
+                if (DEBUG_ALL) Slog.v(TAG, "Ready to stop: " + s);
                 if (stops == null) {
                     stops = new ArrayList<>();
                 }
