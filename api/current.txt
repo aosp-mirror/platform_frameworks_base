@@ -4464,10 +4464,10 @@ package android.app {
     method public void setInTouchMode(boolean);
     method public void start();
     method public android.app.Activity startActivitySync(android.content.Intent);
-    method public void startAllocCounting();
+    method public deprecated void startAllocCounting();
     method public void startPerformanceSnapshot();
     method public void startProfiling();
-    method public void stopAllocCounting();
+    method public deprecated void stopAllocCounting();
     method public void stopProfiling();
     method public void waitForIdle(java.lang.Runnable);
     method public void waitForIdleSync();
@@ -22041,47 +22041,47 @@ package android.os {
     method public static final int getBinderProxyObjectCount();
     method public static int getBinderReceivedTransactions();
     method public static int getBinderSentTransactions();
-    method public static int getGlobalAllocCount();
-    method public static int getGlobalAllocSize();
-    method public static int getGlobalClassInitCount();
-    method public static int getGlobalClassInitTime();
+    method public static deprecated int getGlobalAllocCount();
+    method public static deprecated int getGlobalAllocSize();
+    method public static deprecated int getGlobalClassInitCount();
+    method public static deprecated int getGlobalClassInitTime();
     method public static deprecated int getGlobalExternalAllocCount();
     method public static deprecated int getGlobalExternalAllocSize();
     method public static deprecated int getGlobalExternalFreedCount();
     method public static deprecated int getGlobalExternalFreedSize();
-    method public static int getGlobalFreedCount();
-    method public static int getGlobalFreedSize();
-    method public static int getGlobalGcInvocationCount();
+    method public static deprecated int getGlobalFreedCount();
+    method public static deprecated int getGlobalFreedSize();
+    method public static deprecated int getGlobalGcInvocationCount();
     method public static int getLoadedClassCount();
     method public static void getMemoryInfo(android.os.Debug.MemoryInfo);
     method public static long getNativeHeapAllocatedSize();
     method public static long getNativeHeapFreeSize();
     method public static long getNativeHeapSize();
     method public static long getPss();
-    method public static int getThreadAllocCount();
-    method public static int getThreadAllocSize();
+    method public static deprecated int getThreadAllocCount();
+    method public static deprecated int getThreadAllocSize();
     method public static deprecated int getThreadExternalAllocCount();
     method public static deprecated int getThreadExternalAllocSize();
-    method public static int getThreadGcInvocationCount();
+    method public static deprecated int getThreadGcInvocationCount();
     method public static boolean isDebuggerConnected();
     method public static void printLoadedClasses(int);
-    method public static void resetAllCounts();
-    method public static void resetGlobalAllocCount();
-    method public static void resetGlobalAllocSize();
-    method public static void resetGlobalClassInitCount();
-    method public static void resetGlobalClassInitTime();
+    method public static deprecated void resetAllCounts();
+    method public static deprecated void resetGlobalAllocCount();
+    method public static deprecated void resetGlobalAllocSize();
+    method public static deprecated void resetGlobalClassInitCount();
+    method public static deprecated void resetGlobalClassInitTime();
     method public static deprecated void resetGlobalExternalAllocCount();
     method public static deprecated void resetGlobalExternalAllocSize();
     method public static deprecated void resetGlobalExternalFreedCount();
     method public static deprecated void resetGlobalExternalFreedSize();
-    method public static void resetGlobalFreedCount();
-    method public static void resetGlobalFreedSize();
-    method public static void resetGlobalGcInvocationCount();
-    method public static void resetThreadAllocCount();
-    method public static void resetThreadAllocSize();
+    method public static deprecated void resetGlobalFreedCount();
+    method public static deprecated void resetGlobalFreedSize();
+    method public static deprecated void resetGlobalGcInvocationCount();
+    method public static deprecated void resetThreadAllocCount();
+    method public static deprecated void resetThreadAllocSize();
     method public static deprecated void resetThreadExternalAllocCount();
     method public static deprecated void resetThreadExternalAllocSize();
-    method public static void resetThreadGcInvocationCount();
+    method public static deprecated void resetThreadGcInvocationCount();
     method public static deprecated int setAllocationLimit(int);
     method public static deprecated int setGlobalAllocationLimit(int);
     method public static deprecated void startAllocCounting();
@@ -22100,7 +22100,7 @@ package android.os {
     field public static final int SHOW_CLASSLOADER = 2; // 0x2
     field public static final int SHOW_FULL_DETAIL = 1; // 0x1
     field public static final int SHOW_INITIALIZED = 4; // 0x4
-    field public static final int TRACE_COUNT_ALLOCS = 1; // 0x1
+    field public static final deprecated int TRACE_COUNT_ALLOCS = 1; // 0x1
   }
 
   public static deprecated class Debug.InstructionCount {

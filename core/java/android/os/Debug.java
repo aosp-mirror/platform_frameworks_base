@@ -63,7 +63,10 @@ public final class Debug
      *
      * TRACE_COUNT_ALLOCS adds the results from startAllocCounting to the
      * trace key file.
+     *
+     * @deprecated Accurate counting is a burden on the runtime and may be removed.
      */
+    @Deprecated
     public static final int TRACE_COUNT_ALLOCS  = VMDebug.TRACE_COUNT_ALLOCS;
 
     /**
@@ -760,7 +763,7 @@ href="{@docRoot}guide/developing/tools/traceview.html">Traceview: A Graphical Lo
     /**
      * Stop counting the number and aggregate size of memory allocations.
      *
-     * @see #startAllocCounting()
+     * @deprecated Accurate counting is a burden on the runtime and may be removed.
      */
     @Deprecated
     public static void stopAllocCounting() {
@@ -770,7 +773,10 @@ href="{@docRoot}guide/developing/tools/traceview.html">Traceview: A Graphical Lo
     /**
      * Returns the global count of objects allocated by the runtime between a
      * {@link #startAllocCounting() start} and {@link #stopAllocCounting() stop}.
+     *
+     * @deprecated Accurate counting is a burden on the runtime and may be removed.
      */
+    @Deprecated
     public static int getGlobalAllocCount() {
         return VMDebug.getAllocCount(VMDebug.KIND_GLOBAL_ALLOCATED_OBJECTS);
     }
@@ -778,7 +784,10 @@ href="{@docRoot}guide/developing/tools/traceview.html">Traceview: A Graphical Lo
     /**
      * Clears the global count of objects allocated.
      * @see #getGlobalAllocCount()
+     *
+     * @deprecated Accurate counting is a burden on the runtime and may be removed.
      */
+    @Deprecated
     public static void resetGlobalAllocCount() {
         VMDebug.resetAllocCount(VMDebug.KIND_GLOBAL_ALLOCATED_OBJECTS);
     }
@@ -786,7 +795,10 @@ href="{@docRoot}guide/developing/tools/traceview.html">Traceview: A Graphical Lo
     /**
      * Returns the global size, in bytes, of objects allocated by the runtime between a
      * {@link #startAllocCounting() start} and {@link #stopAllocCounting() stop}.
+     *
+     * @deprecated Accurate counting is a burden on the runtime and may be removed.
      */
+    @Deprecated
     public static int getGlobalAllocSize() {
         return VMDebug.getAllocCount(VMDebug.KIND_GLOBAL_ALLOCATED_BYTES);
     }
@@ -794,7 +806,10 @@ href="{@docRoot}guide/developing/tools/traceview.html">Traceview: A Graphical Lo
     /**
      * Clears the global size of objects allocated.
      * @see #getGlobalAllocSize()
+     *
+     * @deprecated Accurate counting is a burden on the runtime and may be removed.
      */
+    @Deprecated
     public static void resetGlobalAllocSize() {
         VMDebug.resetAllocCount(VMDebug.KIND_GLOBAL_ALLOCATED_BYTES);
     }
@@ -802,7 +817,10 @@ href="{@docRoot}guide/developing/tools/traceview.html">Traceview: A Graphical Lo
     /**
      * Returns the global count of objects freed by the runtime between a
      * {@link #startAllocCounting() start} and {@link #stopAllocCounting() stop}.
+     *
+     * @deprecated Accurate counting is a burden on the runtime and may be removed.
      */
+    @Deprecated
     public static int getGlobalFreedCount() {
         return VMDebug.getAllocCount(VMDebug.KIND_GLOBAL_FREED_OBJECTS);
     }
@@ -810,7 +828,10 @@ href="{@docRoot}guide/developing/tools/traceview.html">Traceview: A Graphical Lo
     /**
      * Clears the global count of objects freed.
      * @see #getGlobalFreedCount()
+     *
+     * @deprecated Accurate counting is a burden on the runtime and may be removed.
      */
+    @Deprecated
     public static void resetGlobalFreedCount() {
         VMDebug.resetAllocCount(VMDebug.KIND_GLOBAL_FREED_OBJECTS);
     }
@@ -818,7 +839,10 @@ href="{@docRoot}guide/developing/tools/traceview.html">Traceview: A Graphical Lo
     /**
      * Returns the global size, in bytes, of objects freed by the runtime between a
      * {@link #startAllocCounting() start} and {@link #stopAllocCounting() stop}.
+     *
+     * @deprecated Accurate counting is a burden on the runtime and may be removed.
      */
+    @Deprecated
     public static int getGlobalFreedSize() {
         return VMDebug.getAllocCount(VMDebug.KIND_GLOBAL_FREED_BYTES);
     }
@@ -826,7 +850,10 @@ href="{@docRoot}guide/developing/tools/traceview.html">Traceview: A Graphical Lo
     /**
      * Clears the global size of objects freed.
      * @see #getGlobalFreedSize()
+     *
+     * @deprecated Accurate counting is a burden on the runtime and may be removed.
      */
+    @Deprecated
     public static void resetGlobalFreedSize() {
         VMDebug.resetAllocCount(VMDebug.KIND_GLOBAL_FREED_BYTES);
     }
@@ -834,7 +861,10 @@ href="{@docRoot}guide/developing/tools/traceview.html">Traceview: A Graphical Lo
     /**
      * Returns the number of non-concurrent GC invocations between a
      * {@link #startAllocCounting() start} and {@link #stopAllocCounting() stop}.
+     *
+     * @deprecated Accurate counting is a burden on the runtime and may be removed.
      */
+    @Deprecated
     public static int getGlobalGcInvocationCount() {
         return VMDebug.getAllocCount(VMDebug.KIND_GLOBAL_GC_INVOCATIONS);
     }
@@ -842,7 +872,10 @@ href="{@docRoot}guide/developing/tools/traceview.html">Traceview: A Graphical Lo
     /**
      * Clears the count of non-concurrent GC invocations.
      * @see #getGlobalGcInvocationCount()
+     *
+     * @deprecated Accurate counting is a burden on the runtime and may be removed.
      */
+    @Deprecated
     public static void resetGlobalGcInvocationCount() {
         VMDebug.resetAllocCount(VMDebug.KIND_GLOBAL_GC_INVOCATIONS);
     }
@@ -851,7 +884,10 @@ href="{@docRoot}guide/developing/tools/traceview.html">Traceview: A Graphical Lo
      * Returns the number of classes successfully initialized (ie those that executed without
      * throwing an exception) between a {@link #startAllocCounting() start} and
      * {@link #stopAllocCounting() stop}.
+     *
+     * @deprecated Accurate counting is a burden on the runtime and may be removed.
      */
+    @Deprecated
     public static int getGlobalClassInitCount() {
         return VMDebug.getAllocCount(VMDebug.KIND_GLOBAL_CLASS_INIT_COUNT);
     }
@@ -859,7 +895,10 @@ href="{@docRoot}guide/developing/tools/traceview.html">Traceview: A Graphical Lo
     /**
      * Clears the count of classes initialized.
      * @see #getGlobalClassInitCount()
+     *
+     * @deprecated Accurate counting is a burden on the runtime and may be removed.
      */
+    @Deprecated
     public static void resetGlobalClassInitCount() {
         VMDebug.resetAllocCount(VMDebug.KIND_GLOBAL_CLASS_INIT_COUNT);
     }
@@ -867,7 +906,10 @@ href="{@docRoot}guide/developing/tools/traceview.html">Traceview: A Graphical Lo
     /**
      * Returns the time spent successfully initializing classes between a
      * {@link #startAllocCounting() start} and {@link #stopAllocCounting() stop}.
+     *
+     * @deprecated Accurate counting is a burden on the runtime and may be removed.
      */
+    @Deprecated
     public static int getGlobalClassInitTime() {
         /* cumulative elapsed time for class initialization, in usec */
         return VMDebug.getAllocCount(VMDebug.KIND_GLOBAL_CLASS_INIT_TIME);
@@ -876,7 +918,10 @@ href="{@docRoot}guide/developing/tools/traceview.html">Traceview: A Graphical Lo
     /**
      * Clears the count of time spent initializing classes.
      * @see #getGlobalClassInitTime()
+     *
+     * @deprecated Accurate counting is a burden on the runtime and may be removed.
      */
+    @Deprecated
     public static void resetGlobalClassInitTime() {
         VMDebug.resetAllocCount(VMDebug.KIND_GLOBAL_CLASS_INIT_TIME);
     }
@@ -948,7 +993,10 @@ href="{@docRoot}guide/developing/tools/traceview.html">Traceview: A Graphical Lo
     /**
      * Returns the thread-local count of objects allocated by the runtime between a
      * {@link #startAllocCounting() start} and {@link #stopAllocCounting() stop}.
+     *
+     * @deprecated Accurate counting is a burden on the runtime and may be removed.
      */
+    @Deprecated
     public static int getThreadAllocCount() {
         return VMDebug.getAllocCount(VMDebug.KIND_THREAD_ALLOCATED_OBJECTS);
     }
@@ -956,7 +1004,10 @@ href="{@docRoot}guide/developing/tools/traceview.html">Traceview: A Graphical Lo
     /**
      * Clears the thread-local count of objects allocated.
      * @see #getThreadAllocCount()
+     *
+     * @deprecated Accurate counting is a burden on the runtime and may be removed.
      */
+    @Deprecated
     public static void resetThreadAllocCount() {
         VMDebug.resetAllocCount(VMDebug.KIND_THREAD_ALLOCATED_OBJECTS);
     }
@@ -965,7 +1016,10 @@ href="{@docRoot}guide/developing/tools/traceview.html">Traceview: A Graphical Lo
      * Returns the thread-local size of objects allocated by the runtime between a
      * {@link #startAllocCounting() start} and {@link #stopAllocCounting() stop}.
      * @return The allocated size in bytes.
+     *
+     * @deprecated Accurate counting is a burden on the runtime and may be removed.
      */
+    @Deprecated
     public static int getThreadAllocSize() {
         return VMDebug.getAllocCount(VMDebug.KIND_THREAD_ALLOCATED_BYTES);
     }
@@ -973,7 +1027,10 @@ href="{@docRoot}guide/developing/tools/traceview.html">Traceview: A Graphical Lo
     /**
      * Clears the thread-local count of objects allocated.
      * @see #getThreadAllocSize()
+     *
+     * @deprecated Accurate counting is a burden on the runtime and may be removed.
      */
+    @Deprecated
     public static void resetThreadAllocSize() {
         VMDebug.resetAllocCount(VMDebug.KIND_THREAD_ALLOCATED_BYTES);
     }
@@ -1013,7 +1070,10 @@ href="{@docRoot}guide/developing/tools/traceview.html">Traceview: A Graphical Lo
     /**
      * Returns the number of thread-local non-concurrent GC invocations between a
      * {@link #startAllocCounting() start} and {@link #stopAllocCounting() stop}.
+     *
+     * @deprecated Accurate counting is a burden on the runtime and may be removed.
      */
+    @Deprecated
     public static int getThreadGcInvocationCount() {
         return VMDebug.getAllocCount(VMDebug.KIND_THREAD_GC_INVOCATIONS);
     }
@@ -1021,7 +1081,10 @@ href="{@docRoot}guide/developing/tools/traceview.html">Traceview: A Graphical Lo
     /**
      * Clears the thread-local count of non-concurrent GC invocations.
      * @see #getThreadGcInvocationCount()
+     *
+     * @deprecated Accurate counting is a burden on the runtime and may be removed.
      */
+    @Deprecated
     public static void resetThreadGcInvocationCount() {
         VMDebug.resetAllocCount(VMDebug.KIND_THREAD_GC_INVOCATIONS);
     }
@@ -1029,7 +1092,10 @@ href="{@docRoot}guide/developing/tools/traceview.html">Traceview: A Graphical Lo
     /**
      * Clears all the global and thread-local memory allocation counters.
      * @see #startAllocCounting()
+     *
+     * @deprecated Accurate counting is a burden on the runtime and may be removed.
      */
+    @Deprecated
     public static void resetAllCounts() {
         VMDebug.resetAllocCount(VMDebug.KIND_ALL_COUNTS);
     }
