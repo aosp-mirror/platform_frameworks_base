@@ -21,7 +21,6 @@ import android.media.midi.MidiDeviceInfo;
 import android.media.midi.MidiDeviceServer;
 import android.media.midi.MidiDispatcher;
 import android.media.midi.MidiManager;
-import android.media.midi.MidiPort;
 import android.media.midi.MidiReceiver;
 import android.media.midi.MidiSender;
 import android.os.Bundle;
@@ -45,6 +44,8 @@ public final class UsbMidiDevice implements Closeable {
     private MidiDeviceServer mServer;
 
     private final MidiReceiver[] mInputPortReceivers;
+
+    private static final int BUFFER_SIZE = 512;
 
     // for polling multiple FileDescriptors for MIDI events
     private final StructPollfd[] mPollFDs;
@@ -102,7 +103,7 @@ public final class UsbMidiDevice implements Closeable {
             final int portF = port;
             mInputPortReceivers[port] = new MidiReceiver() {
                 @Override
-                public void post(byte[] data, int offset, int count, long timestamp)
+                public void receive(byte[] data, int offset, int count, long timestamp)
                         throws IOException {
                     // FIXME - timestamps are ignored, future posting not supported yet.
                     mOutputStreams[portF].write(data, offset, count);
@@ -130,7 +131,7 @@ public final class UsbMidiDevice implements Closeable {
         new Thread() {
             @Override
             public void run() {
-                byte[] buffer = new byte[MidiPort.MAX_PACKET_DATA_SIZE];
+                byte[] buffer = new byte[BUFFER_SIZE];
                 try {
                     boolean done = false;
                     while (!done) {
@@ -143,7 +144,7 @@ public final class UsbMidiDevice implements Closeable {
 
                                 int count = mInputStreams[index].read(buffer);
                                 long timestamp = System.nanoTime();
-                                outputReceivers[index].post(buffer, 0, count, timestamp);
+                                outputReceivers[index].receive(buffer, 0, count, timestamp);
                             } else if ((pfd.revents & (OsConstants.POLLERR
                                                         | OsConstants.POLLHUP)) != 0) {
                                 done = true;

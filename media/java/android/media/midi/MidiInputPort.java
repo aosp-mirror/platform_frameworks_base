@@ -16,10 +16,16 @@
 
 package android.media.midi;
 
+import android.os.IBinder;
 import android.os.ParcelFileDescriptor;
+import android.os.RemoteException;
+import android.util.Log;
+
+import dalvik.system.CloseGuard;
 
 import libcore.io.IoUtils;
 
+import java.io.Closeable;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
@@ -29,52 +35,88 @@ import java.io.IOException;
  * CANDIDATE FOR PUBLIC API
  * @hide
  */
-public class MidiInputPort extends MidiPort implements MidiReceiver {
+public class MidiInputPort extends MidiReceiver implements Closeable {
+    private static final String TAG = "MidiInputPort";
 
+    private final IMidiDeviceServer mDeviceServer;
+    private final IBinder mToken;
+    private final int mPortNumber;
     private final FileOutputStream mOutputStream;
 
-    // buffer to use for sending messages out our output stream
-    private final byte[] mBuffer = new byte[MAX_PACKET_SIZE];
+    private final CloseGuard mGuard = CloseGuard.get();
 
-  /* package */ MidiInputPort(ParcelFileDescriptor pfd, int portNumber) {
-        super(portNumber);
+    // buffer to use for sending data out our output stream
+    private final byte[] mBuffer = new byte[MidiPortImpl.MAX_PACKET_SIZE];
+
+    /* package */ MidiInputPort(IMidiDeviceServer server, IBinder token,
+            ParcelFileDescriptor pfd, int portNumber) {
+        mDeviceServer = server;
+        mToken = token;
+        mPortNumber = portNumber;
         mOutputStream = new ParcelFileDescriptor.AutoCloseOutputStream(pfd);
+        mGuard.open("close");
+    }
+
+    /* package */ MidiInputPort(ParcelFileDescriptor pfd, int portNumber) {
+        this(null, null, pfd, portNumber);
     }
 
     /**
-     * Writes a MIDI message to the input port
+     * Returns the port number of this port
      *
-     * @param msg byte array containing the message
-     * @param offset offset of first byte of the message in msg byte array
-     * @param count size of the message in bytes
-     * @param timestamp future time to post the message (based on
+     * @return the port's port number
+     */
+    public final int getPortNumber() {
+        return mPortNumber;
+    }
+
+    /**
+     * Writes MIDI data to the input port
+     *
+     * @param msg byte array containing the data
+     * @param offset offset of first byte of the data in msg byte array
+     * @param count size of the data in bytes
+     * @param timestamp future time to post the data (based on
      *                  {@link java.lang.System#nanoTime}
      */
-    public void post(byte[] msg, int offset, int count, long timestamp) throws IOException {
+    public void receive(byte[] msg, int offset, int count, long timestamp) throws IOException {
         assert(offset >= 0 && count >= 0 && offset + count <= msg.length);
 
         synchronized (mBuffer) {
-            try {
-                while (count > 0) {
-                    int length = packMessage(msg, offset, count, timestamp, mBuffer);
-                    mOutputStream.write(mBuffer, 0, length);
-                    int sent = getMessageSize(mBuffer, length);
-                    assert(sent >= 0 && sent <= length);
+            while (count > 0) {
+                int length = MidiPortImpl.packMessage(msg, offset, count, timestamp, mBuffer);
+                mOutputStream.write(mBuffer, 0, length);
+                int sent = MidiPortImpl.getMessageSize(mBuffer, length);
+                assert(sent >= 0 && sent <= length);
 
-                    offset += sent;
-                    count -= sent;
-                }
-            } catch (IOException e) {
-                IoUtils.closeQuietly(mOutputStream);
-                // report I/O failure
-                onIOException();
-                throw e;
+                offset += sent;
+                count -= sent;
             }
         }
     }
 
     @Override
     public void close() throws IOException {
+        mGuard.close();
         mOutputStream.close();
+        if (mDeviceServer != null) {
+            try {
+                mDeviceServer.closePort(mToken);
+            } catch (RemoteException e) {
+                Log.e(TAG, "RemoteException in MidiInputPort.close()");
+            }
+        }
+    }
+
+    @Override
+    protected void finalize() throws Throwable {
+        try {
+            if (mGuard != null) {
+                mGuard.warnIfOpen();
+            }
+            close();
+        } finally {
+            super.finalize();
+        }
     }
 }

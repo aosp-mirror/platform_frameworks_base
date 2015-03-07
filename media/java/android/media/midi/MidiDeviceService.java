@@ -55,6 +55,7 @@ abstract public class MidiDeviceService extends Service {
 
     private IMidiManager mMidiManager;
     private MidiDeviceServer mServer;
+    private MidiDeviceInfo mDeviceInfo;
 
     @Override
     public void onCreate() {
@@ -64,6 +65,11 @@ abstract public class MidiDeviceService extends Service {
         try {
             MidiDeviceInfo deviceInfo = mMidiManager.getServiceDeviceInfo(getPackageName(),
                     this.getClass().getName());
+            if (deviceInfo == null) {
+                Log.e(TAG, "Could not find MidiDeviceInfo for MidiDeviceService " + this);
+                return;
+            }
+            mDeviceInfo = deviceInfo;
             MidiReceiver[] inputPortReceivers = getInputPortReceivers();
             if (inputPortReceivers == null) {
                 inputPortReceivers = new MidiReceiver[0];
@@ -98,6 +104,14 @@ abstract public class MidiDeviceService extends Service {
         } else {
             return mServer.getOutputPortReceivers();
         }
+    }
+
+    /**
+     * returns the {@link MidiDeviceInfo} instance for this service
+     * @return our MidiDeviceInfo
+     */
+    public MidiDeviceInfo getDeviceInfo() {
+        return mDeviceInfo;
     }
 
     @Override

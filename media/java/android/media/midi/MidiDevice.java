@@ -16,9 +16,16 @@
 
 package android.media.midi;
 
+import android.content.Context;
+import android.content.ServiceConnection;
+import android.os.Binder;
+import android.os.IBinder;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.util.Log;
+
+import java.io.Closeable;
+import java.io.IOException;
 
 /**
  * This class is used for sending and receiving data to and from an MIDI device
@@ -27,19 +34,27 @@ import android.util.Log;
  * CANDIDATE FOR PUBLIC API
  * @hide
  */
-public final class MidiDevice {
+public final class MidiDevice implements Closeable {
     private static final String TAG = "MidiDevice";
 
     private final MidiDeviceInfo mDeviceInfo;
-    private final IMidiDeviceServer mServer;
+    private final IMidiDeviceServer mDeviceServer;
+    private Context mContext;
+    private ServiceConnection mServiceConnection;
 
-   /**
-     * MidiDevice should only be instantiated by MidiManager
-     * @hide
-     */
-    public MidiDevice(MidiDeviceInfo deviceInfo, IMidiDeviceServer server) {
+    /* package */ MidiDevice(MidiDeviceInfo deviceInfo, IMidiDeviceServer server) {
         mDeviceInfo = deviceInfo;
-        mServer = server;
+        mDeviceServer = server;
+        mContext = null;
+        mServiceConnection = null;
+    }
+
+    /* package */ MidiDevice(MidiDeviceInfo deviceInfo, IMidiDeviceServer server,
+            Context context, ServiceConnection serviceConnection) {
+        mDeviceInfo = deviceInfo;
+        mDeviceServer = server;
+        mContext = context;
+        mServiceConnection = serviceConnection;
     }
 
     /**
@@ -59,11 +74,12 @@ public final class MidiDevice {
      */
     public MidiInputPort openInputPort(int portNumber) {
         try {
-            ParcelFileDescriptor pfd = mServer.openInputPort(portNumber);
+            IBinder token = new Binder();
+            ParcelFileDescriptor pfd = mDeviceServer.openInputPort(token, portNumber);
             if (pfd == null) {
                 return null;
             }
-            return new MidiInputPort(pfd, portNumber);
+            return new MidiInputPort(mDeviceServer, token, pfd, portNumber);
         } catch (RemoteException e) {
             Log.e(TAG, "RemoteException in openInputPort");
             return null;
@@ -78,14 +94,24 @@ public final class MidiDevice {
      */
     public MidiOutputPort openOutputPort(int portNumber) {
         try {
-            ParcelFileDescriptor pfd = mServer.openOutputPort(portNumber);
+            IBinder token = new Binder();
+            ParcelFileDescriptor pfd = mDeviceServer.openOutputPort(token, portNumber);
             if (pfd == null) {
                 return null;
             }
-            return new MidiOutputPort(pfd, portNumber);
+            return new MidiOutputPort(mDeviceServer, token, pfd, portNumber);
         } catch (RemoteException e) {
             Log.e(TAG, "RemoteException in openOutputPort");
             return null;
+        }
+    }
+
+    @Override
+    public void close() throws IOException {
+        if (mContext != null && mServiceConnection != null) {
+            mContext.unbindService(mServiceConnection);
+            mContext = null;
+            mServiceConnection = null;
         }
     }
 
