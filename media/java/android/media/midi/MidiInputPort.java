@@ -35,15 +35,16 @@ import java.io.IOException;
  * CANDIDATE FOR PUBLIC API
  * @hide
  */
-public class MidiInputPort extends MidiReceiver implements Closeable {
+public final class MidiInputPort extends MidiReceiver implements Closeable {
     private static final String TAG = "MidiInputPort";
 
-    private final IMidiDeviceServer mDeviceServer;
+    private IMidiDeviceServer mDeviceServer;
     private final IBinder mToken;
     private final int mPortNumber;
     private final FileOutputStream mOutputStream;
 
     private final CloseGuard mGuard = CloseGuard.get();
+    private boolean mIsClosed;
 
     // buffer to use for sending data out our output stream
     private final byte[] mBuffer = new byte[MidiPortImpl.MAX_PACKET_SIZE];
@@ -97,23 +98,27 @@ public class MidiInputPort extends MidiReceiver implements Closeable {
 
     @Override
     public void close() throws IOException {
-        mGuard.close();
-        mOutputStream.close();
-        if (mDeviceServer != null) {
-            try {
-                mDeviceServer.closePort(mToken);
-            } catch (RemoteException e) {
-                Log.e(TAG, "RemoteException in MidiInputPort.close()");
+        synchronized (mGuard) {
+            if (mIsClosed) return;
+            mGuard.close();
+            mOutputStream.close();
+            if (mDeviceServer != null) {
+                try {
+                    mDeviceServer.closePort(mToken);
+                } catch (RemoteException e) {
+                    Log.e(TAG, "RemoteException in MidiInputPort.close()");
+                }
             }
+            mIsClosed = true;
         }
     }
 
     @Override
     protected void finalize() throws Throwable {
         try {
-            if (mGuard != null) {
-                mGuard.warnIfOpen();
-            }
+            mGuard.warnIfOpen();
+            // not safe to make binder calls from finalize()
+            mDeviceServer = null;
             close();
         } finally {
             super.finalize();

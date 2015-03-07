@@ -35,16 +35,17 @@ import java.io.IOException;
  * CANDIDATE FOR PUBLIC API
  * @hide
  */
-public class MidiOutputPort extends MidiSender implements Closeable {
+public final class MidiOutputPort extends MidiSender implements Closeable {
     private static final String TAG = "MidiOutputPort";
 
-    private final IMidiDeviceServer mDeviceServer;
+    private IMidiDeviceServer mDeviceServer;
     private final IBinder mToken;
     private final int mPortNumber;
     private final FileInputStream mInputStream;
     private final MidiDispatcher mDispatcher = new MidiDispatcher();
 
     private final CloseGuard mGuard = CloseGuard.get();
+    private boolean mIsClosed;
 
     // This thread reads MIDI events from a socket and distributes them to the list of
     // MidiReceivers attached to this device.
@@ -113,23 +114,28 @@ public class MidiOutputPort extends MidiSender implements Closeable {
 
     @Override
     public void close() throws IOException {
-        mGuard.close();
-        mInputStream.close();
-        if (mDeviceServer != null) {
-            try {
-                mDeviceServer.closePort(mToken);
-            } catch (RemoteException e) {
-                Log.e(TAG, "RemoteException in MidiOutputPort.close()");
+        synchronized (mGuard) {
+            if (mIsClosed) return;
+
+            mGuard.close();
+            mInputStream.close();
+            if (mDeviceServer != null) {
+                try {
+                    mDeviceServer.closePort(mToken);
+                } catch (RemoteException e) {
+                    Log.e(TAG, "RemoteException in MidiOutputPort.close()");
+                }
             }
+            mIsClosed = true;
         }
     }
 
     @Override
     protected void finalize() throws Throwable {
         try {
-            if (mGuard != null) {
-                mGuard.warnIfOpen();
-            }
+            mGuard.warnIfOpen();
+            // not safe to make binder calls from finalize()
+            mDeviceServer = null;
             close();
         } finally {
             super.finalize();
