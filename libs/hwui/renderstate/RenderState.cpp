@@ -259,7 +259,7 @@ void RenderState::render(const Glop& glop) {
     // indices
     meshState().bindIndicesBufferInternal(indices.bufferObject);
 
-    if (vertices.flags & VertexAttribFlags::kTextureCoord) {
+    if (vertices.attribFlags & VertexAttribFlags::kTextureCoord) {
         const Glop::Fill::TextureData& texture = fill.texture;
         // texture always takes slot 0, shader samplers increment from there
         mCaches->textureState().activateTexture(0);
@@ -283,13 +283,13 @@ void RenderState::render(const Glop& glop) {
         meshState().disableTexCoordsVertexArray();
     }
     int colorLocation = -1;
-    if (vertices.flags & VertexAttribFlags::kColor) {
+    if (vertices.attribFlags & VertexAttribFlags::kColor) {
         colorLocation = fill.program->getAttrib("colors");
         glEnableVertexAttribArray(colorLocation);
         glVertexAttribPointer(colorLocation, 4, GL_FLOAT, GL_FALSE, vertices.stride, vertices.color);
     }
     int alphaLocation = -1;
-    if (vertices.flags & VertexAttribFlags::kAlpha) {
+    if (vertices.attribFlags & VertexAttribFlags::kAlpha) {
         // NOTE: alpha vertex position is computed assuming no VBO
         const void* alphaCoords = ((const GLbyte*) vertices.position) + kVertexAlphaOffset;
         alphaLocation = fill.program->getAttrib("vtxAlpha");
@@ -317,7 +317,7 @@ void RenderState::render(const Glop& glop) {
 
             // rebind pointers without forcing, since initial bind handled above
             meshState().bindPositionVertexPointer(false, vertexData, vertices.stride);
-            if (vertices.flags & VertexAttribFlags::kTextureCoord) {
+            if (vertices.attribFlags & VertexAttribFlags::kTextureCoord) {
                 meshState().bindTexCoordsVertexPointer(false,
                         vertexData + kMeshTextureOffset, vertices.stride);
             }
@@ -335,10 +335,10 @@ void RenderState::render(const Glop& glop) {
     // -----------------------------------
     // ---------- Mesh teardown ----------
     // -----------------------------------
-    if (vertices.flags & VertexAttribFlags::kAlpha) {
+    if (vertices.attribFlags & VertexAttribFlags::kAlpha) {
         glDisableVertexAttribArray(alphaLocation);
     }
-    if (vertices.flags & VertexAttribFlags::kColor) {
+    if (vertices.attribFlags & VertexAttribFlags::kColor) {
         glDisableVertexAttribArray(colorLocation);
     }
 }

@@ -78,7 +78,7 @@ struct Glop {
         // TODO: enforce mutual exclusion with restricted setters and/or unions
         struct Vertices {
             GLuint bufferObject;
-            VertexAttribFlags flags;
+            int attribFlags;
             const void* position;
             const void* texCoord;
             const void* color;
