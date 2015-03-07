@@ -16,6 +16,7 @@
 
 package android.widget;
 
+import android.annotation.Nullable;
 import android.content.Context;
 import android.database.DataSetObserver;
 import android.os.Parcelable;
@@ -276,7 +277,7 @@ public abstract class AdapterView<T extends Adapter> extends ViewGroup {
      *
      * @param listener The callback that will be invoked.
      */
-    public void setOnItemClickListener(OnItemClickListener listener) {
+    public void setOnItemClickListener(@Nullable OnItemClickListener listener) {
         mOnItemClickListener = listener;
     }
 
@@ -284,6 +285,7 @@ public abstract class AdapterView<T extends Adapter> extends ViewGroup {
      * @return The callback to be invoked with an item in this AdapterView has
      *         been clicked, or null id no callback has been set.
      */
+    @Nullable
     public final OnItemClickListener getOnItemClickListener() {
         return mOnItemClickListener;
     }
@@ -394,10 +396,11 @@ public abstract class AdapterView<T extends Adapter> extends ViewGroup {
      *
      * @param listener The callback that will run
      */
-    public void setOnItemSelectedListener(OnItemSelectedListener listener) {
+    public void setOnItemSelectedListener(@Nullable OnItemSelectedListener listener) {
         mOnItemSelectedListener = listener;
     }
 
+    @Nullable
     public final OnItemSelectedListener getOnItemSelectedListener() {
         return mOnItemSelectedListener;
     }
