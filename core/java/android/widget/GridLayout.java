@@ -1012,8 +1012,6 @@ public class GridLayout extends ViewGroup {
             LayoutParams lp = getLayoutParams(c);
             if (firstPass) {
                 measureChildWithMargins2(c, widthSpec, heightSpec, lp.width, lp.height);
-                mHorizontalAxis.recordOriginalMeasurement(i);
-                mVerticalAxis.recordOriginalMeasurement(i);
             } else {
                 boolean horizontal = (mOrientation == HORIZONTAL);
                 Spec spec = horizontal ? lp.columnSpec : lp.rowSpec;
@@ -1231,7 +1229,6 @@ public class GridLayout extends ViewGroup {
 
         public boolean hasWeights;
         public boolean hasWeightsValid = false;
-        public int[] originalMeasurements;
         public int[] deltas;
 
         boolean orderPreserved = DEFAULT_ORDER_PRESERVED;
@@ -1310,9 +1307,8 @@ public class GridLayout extends ViewGroup {
                 // we must include views that are GONE here, see introductory javadoc
                 LayoutParams lp = getLayoutParams(c);
                 Spec spec = horizontal ? lp.columnSpec : lp.rowSpec;
-                int size = (spec.weight == 0) ?
-                        getMeasurementIncludingMargin(c, horizontal) :
-                        getOriginalMeasurements()[i] + getDeltas()[i];
+                int size = getMeasurementIncludingMargin(c, horizontal) +
+                        ((spec.weight == 0) ? 0 : getDeltas()[i]);
                 groupBounds.getValue(i).include(GridLayout.this, c, spec, this, size);
             }
         }
@@ -1721,19 +1717,6 @@ public class GridLayout extends ViewGroup {
             return hasWeights;
         }
 
-        public int[] getOriginalMeasurements() {
-            if (originalMeasurements == null) {
-                originalMeasurements = new int[getChildCount()];
-            }
-            return originalMeasurements;
-        }
-
-        private void recordOriginalMeasurement(int i) {
-            if (hasWeights()) {
-                getOriginalMeasurements()[i] = getMeasurementIncludingMargin(getChildAt(i), horizontal);
-            }
-        }
-
         public int[] getDeltas() {
             if (deltas == null) {
                 deltas = new int[getChildCount()];
@@ -1898,7 +1881,6 @@ public class GridLayout extends ViewGroup {
 
             locations = null;
 
-            originalMeasurements = null;
             deltas = null;
             hasWeightsValid = false;
 
