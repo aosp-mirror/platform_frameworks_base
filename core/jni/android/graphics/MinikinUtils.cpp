@@ -26,10 +26,10 @@
 
 namespace android {
 
-void MinikinUtils::doLayout(Layout* layout, const Paint* paint, int bidiFlags, TypefaceImpl* typeface,
-        const uint16_t* buf, size_t start, size_t count, size_t bufSize) {
-    TypefaceImpl* resolvedFace = TypefaceImpl_resolveDefault(typeface);
-    layout->setFontCollection(resolvedFace->fFontCollection);
+FontStyle MinikinUtils::prepareMinikinPaint(MinikinPaint* minikinPaint, FontCollection** pFont,
+        const Paint* paint, TypefaceImpl* typeface) {
+    const TypefaceImpl* resolvedFace = TypefaceImpl_resolveDefault(typeface);
+    *pFont = resolvedFace->fFontCollection;
     FontStyle resolved = resolvedFace->fStyle;
 
     /* Prepare minikin FontStyle */
@@ -40,15 +40,26 @@ void MinikinUtils::doLayout(Layout* layout, const Paint* paint, int bidiFlags, T
     FontStyle minikinStyle(minikinLang, minikinVariant, resolved.getWeight(), resolved.getItalic());
 
     /* Prepare minikin Paint */
-    MinikinPaint minikinPaint;
-    minikinPaint.size = (int)/*WHY?!*/paint->getTextSize();
-    minikinPaint.scaleX = paint->getTextScaleX();
-    minikinPaint.skewX = paint->getTextSkewX();
-    minikinPaint.letterSpacing = paint->getLetterSpacing();
-    minikinPaint.paintFlags = MinikinFontSkia::packPaintFlags(paint);
-    minikinPaint.fontFeatureSettings = paint->getFontFeatureSettings();
-    minikinPaint.hyphenEdit = HyphenEdit(paint->getHyphenEdit());
+    // Note: it would be nice to handle fractional size values (it would improve smooth zoom
+    // behavior), but historically size has been treated as an int.
+    // TODO: explore whether to enable fractional sizes, possibly when linear text flag is set.
+    minikinPaint->size = (int)paint->getTextSize();
+    minikinPaint->scaleX = paint->getTextScaleX();
+    minikinPaint->skewX = paint->getTextSkewX();
+    minikinPaint->letterSpacing = paint->getLetterSpacing();
+    minikinPaint->paintFlags = MinikinFontSkia::packPaintFlags(paint);
+    minikinPaint->fontFeatureSettings = paint->getFontFeatureSettings();
+    minikinPaint->hyphenEdit = HyphenEdit(paint->getHyphenEdit());
+    return minikinStyle;
+}
 
+void MinikinUtils::doLayout(Layout* layout, const Paint* paint, int bidiFlags,
+        TypefaceImpl* typeface, const uint16_t* buf, size_t start, size_t count,
+        size_t bufSize) {
+    FontCollection *font;
+    MinikinPaint minikinPaint;
+    FontStyle minikinStyle = prepareMinikinPaint(&minikinPaint, &font, paint, typeface);
+    layout->setFontCollection(font);
     layout->doLayout(buf, start, count, bufSize, bidiFlags, minikinStyle, minikinPaint);
 }
 
