@@ -30,7 +30,7 @@ namespace android {
 
 class ScopedBreakIterator {
     public:
-        ScopedBreakIterator(JNIEnv* env, BreakIterator* breakIterator, jcharArray inputText,
+        ScopedBreakIterator(JNIEnv* env, icu::BreakIterator* breakIterator, jcharArray inputText,
                             jint length) : mBreakIterator(breakIterator), mChars(env, inputText) {
             UErrorCode status = U_ZERO_ERROR;
             mUText = utext_openUChars(NULL, mChars.get(), length, &status);
@@ -41,7 +41,7 @@ class ScopedBreakIterator {
             mBreakIterator->setText(mUText, status);
         }
 
-        inline BreakIterator* operator->() {
+        inline icu::BreakIterator* operator->() {
             return mBreakIterator;
         }
 
@@ -50,7 +50,7 @@ class ScopedBreakIterator {
             delete mBreakIterator;
         }
     private:
-        BreakIterator* mBreakIterator;
+        icu::BreakIterator* mBreakIterator;
         ScopedCharArrayRO mChars;
         UText* mUText;
 
@@ -68,14 +68,14 @@ static jintArray nLineBreakOpportunities(JNIEnv* env, jclass, jstring javaLocale
     ScopedIcuLocale icuLocale(env, javaLocaleName);
     if (icuLocale.valid()) {
         UErrorCode status = U_ZERO_ERROR;
-        BreakIterator* it = BreakIterator::createLineInstance(icuLocale.locale(), status);
+        icu::BreakIterator* it = icu::BreakIterator::createLineInstance(icuLocale.locale(), status);
         if (!U_SUCCESS(status) || it == NULL) {
             if (it) {
                 delete it;
             }
         } else {
             ScopedBreakIterator breakIterator(env, it, inputText, length);
-            for (int loc = breakIterator->first(); loc != BreakIterator::DONE;
+            for (int loc = breakIterator->first(); loc != icu::BreakIterator::DONE;
                     loc = breakIterator->next()) {
                 breaks.push_back(loc);
             }
