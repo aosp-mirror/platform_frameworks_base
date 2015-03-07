@@ -101,15 +101,16 @@ public class FrameLayout extends ViewGroup {
         super(context);
     }
     
-    public FrameLayout(Context context, AttributeSet attrs) {
+    public FrameLayout(Context context, @Nullable AttributeSet attrs) {
         this(context, attrs, 0);
     }
 
-    public FrameLayout(Context context, AttributeSet attrs, int defStyleAttr) {
+    public FrameLayout(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
         this(context, attrs, defStyleAttr, 0);
     }
 
-    public FrameLayout(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+    public FrameLayout(
+            Context context, @Nullable AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
 
         final TypedArray a = context.obtainStyledAttributes(
