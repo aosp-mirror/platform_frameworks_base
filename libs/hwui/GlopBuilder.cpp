@@ -66,7 +66,7 @@ GlopBuilder& GlopBuilder::setMeshUnitQuad() {
     mOutGlop->mesh.indices = { 0, nullptr };
     mOutGlop->mesh.vertices = {
             mRenderState.meshState().getUnitQuadVBO(),
-            VertexAttribFlags::kNone,
+            static_cast<int>(VertexAttribFlags::kNone),
             nullptr, nullptr, nullptr,
             kTextureVertexStride };
     mOutGlop->mesh.elementCount = 4;
@@ -85,7 +85,7 @@ GlopBuilder& GlopBuilder::setMeshTexturedUnitQuad(const UvMapper* uvMapper) {
     mOutGlop->mesh.indices = { 0, nullptr };
     mOutGlop->mesh.vertices = {
             mRenderState.meshState().getUnitQuadVBO(),
-            VertexAttribFlags::kTextureCoord,
+            static_cast<int>(VertexAttribFlags::kTextureCoord),
             nullptr, (const void*) kMeshTextureOffset, nullptr,
             kTextureVertexStride };
     mOutGlop->mesh.elementCount = 4;
@@ -105,7 +105,7 @@ GlopBuilder& GlopBuilder::setMeshTexturedUvQuad(const UvMapper* uvMapper, Rect u
     mOutGlop->mesh.indices = { 0, nullptr };
     mOutGlop->mesh.vertices = {
             0,
-            VertexAttribFlags::kTextureCoord,
+            static_cast<int>(VertexAttribFlags::kTextureCoord),
             &textureVertex[0].x, &textureVertex[0].u, nullptr,
             kTextureVertexStride };
     mOutGlop->mesh.elementCount = 4;
@@ -119,7 +119,7 @@ GlopBuilder& GlopBuilder::setMeshIndexedQuads(Vertex* vertexData, int quadCount)
     mOutGlop->mesh.indices = { mRenderState.meshState().getQuadListIBO(), nullptr };
     mOutGlop->mesh.vertices = {
             0,
-            VertexAttribFlags::kNone,
+            static_cast<int>(VertexAttribFlags::kNone),
             vertexData, nullptr, nullptr,
             kVertexStride };
     mOutGlop->mesh.elementCount = 6 * quadCount;
@@ -133,7 +133,7 @@ GlopBuilder& GlopBuilder::setMeshTexturedIndexedQuads(TextureVertex* vertexData,
     mOutGlop->mesh.indices = { mRenderState.meshState().getQuadListIBO(), nullptr };
     mOutGlop->mesh.vertices = {
             0,
-            VertexAttribFlags::kTextureCoord,
+            static_cast<int>(VertexAttribFlags::kTextureCoord),
             &vertexData[0].x, &vertexData[0].u, nullptr,
             kTextureVertexStride };
     mOutGlop->mesh.elementCount = elementCount;
@@ -147,7 +147,7 @@ GlopBuilder& GlopBuilder::setMeshTexturedMesh(TextureVertex* vertexData, int ele
     mOutGlop->mesh.indices = { 0, nullptr };
     mOutGlop->mesh.vertices = {
             0,
-            VertexAttribFlags::kTextureCoord,
+            static_cast<int>(VertexAttribFlags::kTextureCoord),
             &vertexData[0].x, &vertexData[0].u, nullptr,
             kTextureVertexStride };
     mOutGlop->mesh.elementCount = elementCount;
@@ -161,7 +161,7 @@ GlopBuilder& GlopBuilder::setMeshColoredTexturedMesh(ColorTextureVertex* vertexD
     mOutGlop->mesh.indices = { 0, nullptr };
     mOutGlop->mesh.vertices = {
             0,
-            static_cast<VertexAttribFlags>(VertexAttribFlags::kTextureCoord | VertexAttribFlags::kColor),
+            VertexAttribFlags::kTextureCoord | VertexAttribFlags::kColor,
             &vertexData[0].x, &vertexData[0].u, &vertexData[0].r,
             kColorTextureVertexStride };
     mOutGlop->mesh.elementCount = elementCount;
@@ -180,7 +180,7 @@ GlopBuilder& GlopBuilder::setMeshVertexBuffer(const VertexBuffer& vertexBuffer, 
     mOutGlop->mesh.indices = { 0, vertexBuffer.getIndices() };
     mOutGlop->mesh.vertices = {
             0,
-            alphaVertex ? VertexAttribFlags::kAlpha : VertexAttribFlags::kNone,
+            static_cast<int>(alphaVertex ? VertexAttribFlags::kAlpha : VertexAttribFlags::kNone),
             vertexBuffer.getBuffer(), nullptr, nullptr,
             alphaVertex ? kAlphaVertexStride : kVertexStride };
     mOutGlop->mesh.elementCount = indices
@@ -197,7 +197,7 @@ GlopBuilder& GlopBuilder::setMeshPatchQuads(const Patch& patch) {
     mOutGlop->mesh.indices = { mRenderState.meshState().getQuadListIBO(), nullptr };
     mOutGlop->mesh.vertices = {
             mCaches.patchCache.getMeshBuffer(),
-            VertexAttribFlags::kTextureCoord,
+            static_cast<int>(VertexAttribFlags::kTextureCoord),
             (void*)patch.positionOffset, (void*)patch.textureOffset, nullptr,
             kTextureVertexStride };
     mOutGlop->mesh.elementCount = patch.indexCount;
@@ -230,7 +230,7 @@ void GlopBuilder::setFill(int color, float alphaScale, SkXfermode::Mode mode,
 
     mOutGlop->blend = { GL_ZERO, GL_ZERO };
     if (mOutGlop->fill.color.a < 1.0f
-            || (mOutGlop->mesh.vertices.flags & VertexAttribFlags::kAlpha)
+            || (mOutGlop->mesh.vertices.attribFlags & VertexAttribFlags::kAlpha)
             || (mOutGlop->fill.texture.texture && mOutGlop->fill.texture.texture->blend)
             || mOutGlop->roundRectClipState
             || PaintUtils::isBlendedShader(shader)
@@ -324,7 +324,7 @@ GlopBuilder& GlopBuilder::setFillTexturePaint(Texture& texture, int textureFillF
 
         const bool SWAP_SRC_DST = false;
         if (alphaScale < 1.0f
-                || (mOutGlop->mesh.vertices.flags & VertexAttribFlags::kAlpha)
+                || (mOutGlop->mesh.vertices.attribFlags & VertexAttribFlags::kAlpha)
                 || texture.blend
                 || mOutGlop->roundRectClipState) {
             Blend::getFactors(SkXfermode::kSrcOver_Mode, SWAP_SRC_DST,
@@ -540,12 +540,25 @@ GlopBuilder& GlopBuilder::setRoundRectClipState(const RoundRectClipState* roundR
 ////////////////////////////////////////////////////////////////////////////////
 
 void verify(const ProgramDescription& description, const Glop& glop) {
-    bool hasTexture = glop.fill.texture.texture != nullptr;
-    LOG_ALWAYS_FATAL_IF(description.hasTexture && description.hasExternalTexture);
-    LOG_ALWAYS_FATAL_IF((description.hasTexture || description.hasExternalTexture )!= hasTexture);
-    LOG_ALWAYS_FATAL_IF((glop.mesh.vertices.flags & VertexAttribFlags::kTextureCoord) != hasTexture);
+    if (glop.fill.texture.texture != nullptr) {
+        LOG_ALWAYS_FATAL_IF(((description.hasTexture && description.hasExternalTexture)
+                        || (!description.hasTexture && !description.hasExternalTexture)
+                        || ((glop.mesh.vertices.attribFlags & VertexAttribFlags::kTextureCoord) == 0)),
+                "Texture %p, hT%d, hET %d, attribFlags %x",
+                glop.fill.texture.texture,
+                description.hasTexture, description.hasExternalTexture,
+                glop.mesh.vertices.attribFlags);
+    } else {
+        LOG_ALWAYS_FATAL_IF((description.hasTexture
+                        || description.hasExternalTexture
+                        || ((glop.mesh.vertices.attribFlags & VertexAttribFlags::kTextureCoord) != 0)),
+                "No texture, hT%d, hET %d, attribFlags %x",
+                description.hasTexture, description.hasExternalTexture,
+                glop.mesh.vertices.attribFlags);
+    }
 
-    if ((glop.mesh.vertices.flags & VertexAttribFlags::kAlpha) && glop.mesh.vertices.bufferObject) {
+    if ((glop.mesh.vertices.attribFlags & VertexAttribFlags::kAlpha)
+            && glop.mesh.vertices.bufferObject) {
         LOG_ALWAYS_FATAL("VBO and alpha attributes are not currently compatible");
     }
 
@@ -556,12 +569,12 @@ void verify(const ProgramDescription& description, const Glop& glop) {
 
 void GlopBuilder::build() {
     REQUIRE_STAGES(kAllStages);
-    if (mOutGlop->mesh.vertices.flags & VertexAttribFlags::kTextureCoord) {
+    if (mOutGlop->mesh.vertices.attribFlags & VertexAttribFlags::kTextureCoord) {
         mDescription.hasTexture = mOutGlop->fill.texture.target == GL_TEXTURE_2D;
         mDescription.hasExternalTexture = mOutGlop->fill.texture.target == GL_TEXTURE_EXTERNAL_OES;
     }
-    mDescription.hasColors = mOutGlop->mesh.vertices.flags & VertexAttribFlags::kColor;
-    mDescription.hasVertexAlpha = mOutGlop->mesh.vertices.flags & VertexAttribFlags::kAlpha;
+    mDescription.hasColors = mOutGlop->mesh.vertices.attribFlags & VertexAttribFlags::kColor;
+    mDescription.hasVertexAlpha = mOutGlop->mesh.vertices.attribFlags & VertexAttribFlags::kAlpha;
 
     // serialize shader info into ShaderData
     GLuint textureUnit = mOutGlop->fill.texture.texture ? 1 : 0;
