@@ -25,26 +25,6 @@ import android.os.Parcelable;
  * @hide
  */
 public class ImsReasonInfo implements Parcelable {
-
-    /**
-     * Reason types, defines the error category.
-     *    UNSPECIFIED - unknown error reason
-     *    LOCAL - indicates the local/device error reason
-     *    LOCAL_TIMEOUT - indicates the local error reason when a specific timer is expired
-     *    STATUSCODE - indicates the interworking error reason by SIP status code received
-     *        from the network
-     *    MEDIA - indicates the media error reason (local resource, SDP parameter, etc.)
-     *    USER - indicates the error reason by the local or remote user
-     *    UT - indicates the error reason for the supplementary service configuration
-     */
-    public static final int TYPE_UNSPECIFIED = 0;
-    public static final int TYPE_LOCAL = 1;
-    public static final int TYPE_TIMEOUT = 2;
-    public static final int TYPE_STATUSCODE = 3;
-    public static final int TYPE_MEDIA = 4;
-    public static final int TYPE_USER = 5;
-    public static final int TYPE_UT = 8;
-
     /**
      * Specific code of each types
      */
@@ -229,23 +209,37 @@ public class ImsReasonInfo implements Parcelable {
     public static final int CODE_ECBM_NOT_SUPPORTED = 901;
 
     /**
+     * Ims Registration error code
+     */
+    public static final int CODE_REGISTRATION_ERROR = 1000;
+
+    /**
+     * CALL DROP error codes (Call could drop because of many reasons like Network not available,
+     *  handover, failed, etc)
+     */
+
+    /**
+     * CALL DROP error code for the case when a device is ePDG capable and when the user is on an
+     * active wifi call and at the edge of coverage and there is no qualified LTE network available
+     * to handover the call to. We get a handover NOT_TRIGERRED message from the modem. This error
+     * code is received as part of the handover message.
+     */
+    public static final int CODE_CALL_DROP_IWLAN_TO_LTE_UNAVAILABLE = 1100;
+
+    /**
      * Network string error messages.
      * mExtraMessage may have these values.
      */
     public static final String EXTRA_MSG_SERVICE_NOT_AUTHORIZED
             = "Forbidden. Not Authorized for Service";
 
-    // For reason type
-    public int mReasonType;
     // For main reason code
     public int mCode;
     // For the extra code value; it depends on the code value.
     public int mExtraCode;
     // For the additional message of the reason info.
     public String mExtraMessage;
-
     public ImsReasonInfo() {
-        mReasonType = TYPE_UNSPECIFIED;
         mCode = CODE_UNSPECIFIED;
         mExtraCode = CODE_UNSPECIFIED;
         mExtraMessage = null;
@@ -256,14 +250,12 @@ public class ImsReasonInfo implements Parcelable {
     }
 
     public ImsReasonInfo(int code, int extraCode) {
-        mReasonType = (int) (code / 100);
         mCode = code;
         mExtraCode = extraCode;
         mExtraMessage = null;
     }
 
     public ImsReasonInfo(int code, int extraCode, String extraMessage) {
-        mReasonType = (int) (code / 100);
         mCode = code;
         mExtraCode = extraCode;
         mExtraMessage = extraMessage;
@@ -291,20 +283,12 @@ public class ImsReasonInfo implements Parcelable {
     }
 
     /**
-     *
-     */
-    public int getReasonType() {
-        return mReasonType;
-    }
-
-    /**
      * Returns the string format of {@link ImsReasonInfo}
      *
      * @return the string format of {@link ImsReasonInfo}
      */
     public String toString() {
-        return "ImsReasonInfo :: {" + mReasonType + ", "
-                + mCode + ", " + mExtraCode + ", " + mExtraMessage + "}";
+        return "ImsReasonInfo :: {" + mCode + ", " + mExtraCode + ", " + mExtraMessage + "}";
     }
 
     @Override
@@ -314,14 +298,12 @@ public class ImsReasonInfo implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel out, int flags) {
-        out.writeInt(mReasonType);
         out.writeInt(mCode);
         out.writeInt(mExtraCode);
         out.writeString(mExtraMessage);
     }
 
     private void readFromParcel(Parcel in) {
-        mReasonType = in.readInt();
         mCode = in.readInt();
         mExtraCode = in.readInt();
         mExtraMessage = in.readString();
