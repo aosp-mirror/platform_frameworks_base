@@ -417,6 +417,11 @@ public class WifiScanner {
         public void onPeriodChanged(int periodInMs);
         /**
          * reports results retrieved from background scan and single shot scans
+         * @deprecated in favor of {@link #onResults(ScanData[])}
+         */
+        public void onResults(ScanResult[] results);
+        /**
+         * reports results retrieved from background scan and single shot scans
          */
         public void onResults(ScanData[] results);
         /**
@@ -447,12 +452,12 @@ public class WifiScanner {
     }
     /**
      * reports currently available scan results on appropriate listeners
-     * @return true if all scan results were reported correctly
      */
-    public boolean getScanResults() {
+    public ScanResult[] getScanResults() {
         validateChannel();
         Message reply = sAsyncChannel.sendMessageSynchronously(CMD_GET_SCAN_RESULTS, 0);
-        return reply.what == CMD_OP_SUCCEEDED;
+        // return reply.what == CMD_OP_SUCCEEDED;
+        return null;
     }
 
     /**

@@ -19334,6 +19334,8 @@ package android.net.wifi {
     field public java.util.BitSet allowedKeyManagement;
     field public java.util.BitSet allowedPairwiseCiphers;
     field public java.util.BitSet allowedProtocols;
+    field public int apBand;
+    field public int apChannel;
     field public int creatorUid;
     field public android.net.wifi.WifiEnterpriseConfig enterpriseConfig;
     field public boolean hiddenSSID;
@@ -19344,6 +19346,8 @@ package android.net.wifi {
     field public int numScorerOverrideAndSwitchedNetwork;
     field public java.lang.String preSharedKey;
     field public int priority;
+    field public java.lang.String providerFriendlyName;
+    field public java.util.HashSet<java.lang.Long> roamingConsortiumIds;
     field public int status;
     field public java.lang.String[] wepKeys;
     field public int wepTxKeyIndex;
@@ -19416,6 +19420,7 @@ package android.net.wifi {
     ctor public WifiEnterpriseConfig();
     ctor public WifiEnterpriseConfig(android.net.wifi.WifiEnterpriseConfig);
     method public int describeContents();
+    method public java.lang.String getAltSubjectMatch();
     method public java.lang.String getAnonymousIdentity();
     method public java.security.cert.X509Certificate getCaCertificate();
     method public java.security.cert.X509Certificate getClientCertificate();
@@ -19423,7 +19428,10 @@ package android.net.wifi {
     method public java.lang.String getIdentity();
     method public java.lang.String getPassword();
     method public int getPhase2Method();
-    method public java.lang.String getSubjectMatch();
+    method public java.lang.String getPlmn();
+    method public java.lang.String getRealm();
+    method public deprecated java.lang.String getSubjectMatch();
+    method public void setAltSubjectMatch(java.lang.String);
     method public void setAnonymousIdentity(java.lang.String);
     method public void setCaCertificate(java.security.cert.X509Certificate);
     method public void setClientKeyEntry(java.security.PrivateKey, java.security.cert.X509Certificate);
@@ -19431,7 +19439,9 @@ package android.net.wifi {
     method public void setIdentity(java.lang.String);
     method public void setPassword(java.lang.String);
     method public void setPhase2Method(int);
-    method public void setSubjectMatch(java.lang.String);
+    method public void setPlmn(java.lang.String);
+    method public void setRealm(java.lang.String);
+    method public deprecated void setSubjectMatch(java.lang.String);
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator<android.net.wifi.WifiEnterpriseConfig> CREATOR;
   }
@@ -19595,9 +19605,11 @@ package android.net.wifi {
     method public void configureWifiChange(android.net.wifi.WifiScanner.WifiChangeSettings);
     method public android.net.wifi.ScanResult[] getScanResults();
     method public void startBackgroundScan(android.net.wifi.WifiScanner.ScanSettings, android.net.wifi.WifiScanner.ScanListener);
+    method public void startScan(android.net.wifi.WifiScanner.ScanSettings, android.net.wifi.WifiScanner.ScanListener);
     method public void startTrackingBssids(android.net.wifi.WifiScanner.BssidInfo[], int, android.net.wifi.WifiScanner.BssidListener);
     method public void startTrackingWifiChange(android.net.wifi.WifiScanner.WifiChangeListener);
     method public void stopBackgroundScan(android.net.wifi.WifiScanner.ScanListener);
+    method public void stopScan(android.net.wifi.WifiScanner.ScanListener);
     method public void stopTrackingBssids(android.net.wifi.WifiScanner.BssidListener);
     method public void stopTrackingWifiChange(android.net.wifi.WifiScanner.WifiChangeListener);
     field public static final int MAX_SCAN_PERIOD_MS = 1024000; // 0xfa000
@@ -19634,6 +19646,7 @@ package android.net.wifi {
 
   public static abstract interface WifiScanner.BssidListener implements android.net.wifi.WifiScanner.ActionListener {
     method public abstract void onFound(android.net.wifi.ScanResult[]);
+    method public abstract void onLost(android.net.wifi.ScanResult[]);
   }
 
   public static class WifiScanner.ChannelSpec {
@@ -19649,10 +19662,37 @@ package android.net.wifi {
     field public android.net.wifi.WifiScanner.BssidInfo[] bssidInfos;
   }
 
+  public static class WifiScanner.ParcelableScanData implements android.os.Parcelable {
+    ctor public WifiScanner.ParcelableScanData(android.net.wifi.WifiScanner.ScanData[]);
+    method public int describeContents();
+    method public android.net.wifi.WifiScanner.ScanData[] getResults();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public android.net.wifi.WifiScanner.ScanData[] mResults;
+  }
+
+  public static class WifiScanner.ParcelableScanResults implements android.os.Parcelable {
+    ctor public WifiScanner.ParcelableScanResults(android.net.wifi.ScanResult[]);
+    method public int describeContents();
+    method public android.net.wifi.ScanResult[] getResults();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public android.net.wifi.ScanResult[] mResults;
+  }
+
+  public static class WifiScanner.ScanData implements android.os.Parcelable {
+    ctor public WifiScanner.ScanData(int, int, android.net.wifi.ScanResult[]);
+    ctor public WifiScanner.ScanData(android.net.wifi.WifiScanner.ScanData);
+    method public int describeContents();
+    method public int getFlags();
+    method public int getId();
+    method public android.net.wifi.ScanResult[] getResults();
+    method public void writeToParcel(android.os.Parcel, int);
+  }
+
   public static abstract interface WifiScanner.ScanListener implements android.net.wifi.WifiScanner.ActionListener {
     method public abstract void onFullResult(android.net.wifi.ScanResult);
     method public abstract void onPeriodChanged(int);
-    method public abstract void onResults(android.net.wifi.ScanResult[]);
+    method public abstract deprecated void onResults(android.net.wifi.ScanResult[]);
+    method public abstract void onResults(android.net.wifi.WifiScanner.ScanData[]);
   }
 
   public static class WifiScanner.ScanSettings implements android.os.Parcelable {
@@ -19661,6 +19701,7 @@ package android.net.wifi {
     method public void writeToParcel(android.os.Parcel, int);
     field public int band;
     field public android.net.wifi.WifiScanner.ChannelSpec[] channels;
+    field public int maxScansToCache;
     field public int numBssidsPerScan;
     field public int periodInMs;
     field public int reportEvents;
