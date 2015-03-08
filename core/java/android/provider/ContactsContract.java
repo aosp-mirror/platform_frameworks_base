@@ -4809,6 +4809,14 @@ public final class ContactsContract {
                 Uri.withAppendedPath(AUTHORITY_URI, "raw_contact_entities");
 
         /**
+        * The content:// style URI for this table in corp profile
+        *
+        * @hide
+        */
+        public static final Uri CORP_CONTENT_URI =
+                Uri.withAppendedPath(AUTHORITY_URI, "raw_contact_entities_corp");
+
+        /**
          * The content:// style URI for this table, specific to the user's profile.
          */
         public static final Uri PROFILE_CONTENT_URI =
