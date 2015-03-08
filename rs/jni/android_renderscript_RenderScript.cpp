@@ -1311,6 +1311,8 @@ nAllocationElementRead(JNIEnv *_env, jobject _this, jlong con, jlong _alloc,
         ALOGD("nAllocationElementRead, con(%p), alloc(%p), xoff(%i), yoff(%i), zoff(%i), comp(%i), "
               "sizeBytes(%i)", (RsContext)con, alloc, xoff, yoff, zoff, compIdx, sizeBytes);
     }
+    int mSize = sizeBytes;
+    int count = 0;
     PER_ARRAY_TYPE(0, rsAllocationElementRead, false, (RsContext)con, alloc,
                    xoff, yoff, zoff, lod, ptr, sizeBytes, compIdx);
 }
