@@ -60,6 +60,7 @@ public class Allocation extends BaseObj {
 
     boolean mReadAllowed = true;
     boolean mWriteAllowed = true;
+    boolean mAutoPadding = false;
     int mSelectedX;
     int mSelectedY;
     int mSelectedZ;
@@ -267,6 +268,17 @@ public class Allocation extends BaseObj {
      */
     public int getUsage() {
         return mUsage;
+    }
+
+    /**
+     * @hide
+     * Enable/Disable AutoPadding for Vec3 elements.
+     *
+     * @param useAutoPadding True: enable AutoPadding; flase: disable AutoPadding
+     *
+     */
+    public void setAutoPadding(boolean useAutoPadding) {
+        mAutoPadding = useAutoPadding;
     }
 
     /**
@@ -851,7 +863,7 @@ public class Allocation extends BaseObj {
                                    component_number, data, data_length);
     }
 
-    private void data1DChecks(int off, int count, int len, int dataSize) {
+    private void data1DChecks(int off, int count, int len, int dataSize, boolean usePadding) {
         mRS.validate();
         if(off < 0) {
             throw new RSIllegalArgumentException("Offset must be >= 0.");
@@ -863,8 +875,14 @@ public class Allocation extends BaseObj {
             throw new RSIllegalArgumentException("Overflow, Available count " + mCurrentCount +
                                                ", got " + count + " at offset " + off + ".");
         }
-        if(len < dataSize) {
-            throw new RSIllegalArgumentException("Array too small for allocation type.");
+        if(usePadding) {
+            if(len < dataSize / 4 * 3) {
+                throw new RSIllegalArgumentException("Array too small for allocation type.");
+            }
+        } else {
+            if(len < dataSize) {
+                throw new RSIllegalArgumentException("Array too small for allocation type.");
+            }
         }
     }
 
@@ -886,8 +904,14 @@ public class Allocation extends BaseObj {
                                           Element.DataType dt, int arrayLen) {
         Trace.traceBegin(RenderScript.TRACE_TAG, "copy1DRangeFromUnchecked");
         final int dataSize = mType.mElement.getBytesSize() * count;
-        data1DChecks(off, count, arrayLen * dt.mSize, dataSize);
-        mRS.nAllocationData1D(getIDSafe(), off, mSelectedLOD, count, array, dataSize, dt);
+        // AutoPadding for Vec3 Element
+        boolean usePadding = false;
+        if (mAutoPadding && (mType.getElement().getVectorSize() == 3)) {
+            usePadding = true;
+        }
+        data1DChecks(off, count, arrayLen * dt.mSize, dataSize, usePadding);
+        mRS.nAllocationData1D(getIDSafe(), off, mSelectedLOD, count, array, dataSize, dt,
+                              mType.mElement.mType.mSize, usePadding);
         Trace.traceEnd(RenderScript.TRACE_TAG);
     }
 
@@ -1064,8 +1088,24 @@ public class Allocation extends BaseObj {
         Trace.traceBegin(RenderScript.TRACE_TAG, "copy2DRangeFromUnchecked");
         mRS.validate();
         validate2DRange(xoff, yoff, w, h);
+        final int dataSize = mType.mElement.getBytesSize() * w * h;
+        // AutoPadding for Vec3 Element
+        boolean usePadding = false;
+        int sizeBytes = arrayLen * dt.mSize;
+        if (mAutoPadding && (mType.getElement().getVectorSize() == 3)) {
+            if (dataSize / 4 * 3 > sizeBytes) {
+                throw new RSIllegalArgumentException("Array too small for allocation type.");
+            }
+            usePadding = true;
+            sizeBytes = dataSize;
+        } else {
+            if (dataSize > sizeBytes) {
+                throw new RSIllegalArgumentException("Array too small for allocation type.");
+            }
+        }
         mRS.nAllocationData2D(getIDSafe(), xoff, yoff, mSelectedLOD, mSelectedFace.mID, w, h,
-                              array, arrayLen * dt.mSize, dt);
+                              array, sizeBytes, dt,
+                              mType.mElement.mType.mSize, usePadding);
         Trace.traceEnd(RenderScript.TRACE_TAG);
     }
 
@@ -1226,8 +1266,24 @@ public class Allocation extends BaseObj {
         Trace.traceBegin(RenderScript.TRACE_TAG, "copy3DRangeFromUnchecked");
         mRS.validate();
         validate3DRange(xoff, yoff, zoff, w, h, d);
+        final int dataSize = mType.mElement.getBytesSize() * w * h * d;
+        // AutoPadding for Vec3 Element
+        boolean usePadding = false;
+        int sizeBytes = arrayLen * dt.mSize;
+        if (mAutoPadding && (mType.getElement().getVectorSize() == 3)) {
+            if (dataSize / 4 * 3 > sizeBytes) {
+                throw new RSIllegalArgumentException("Array too small for allocation type.");
+            }
+            usePadding = true;
+            sizeBytes = dataSize;
+        } else {
+            if (dataSize > sizeBytes) {
+                throw new RSIllegalArgumentException("Array too small for allocation type.");
+            }
+        }
         mRS.nAllocationData3D(getIDSafe(), xoff, yoff, zoff, mSelectedLOD, w, h, d,
-                              array, arrayLen * dt.mSize, dt);
+                              array, sizeBytes, dt,
+                              mType.mElement.mType.mSize, usePadding);
         Trace.traceEnd(RenderScript.TRACE_TAG);
     }
 
@@ -1242,7 +1298,7 @@ public class Allocation extends BaseObj {
      * @param w Width of the region to update
      * @param h Height of the region to update
      * @param d Depth of the region to update
-     * @param data to be placed into the allocation
+     * @param array to be placed into the allocation
      */
     public void copy3DRangeFrom(int xoff, int yoff, int zoff, int w, int h, int d, Object array) {
         Trace.traceBegin(RenderScript.TRACE_TAG, "copy3DRangeFrom");
@@ -1300,7 +1356,11 @@ public class Allocation extends BaseObj {
                 "Size of output array cannot be smaller than size of allocation.");
         }
         mRS.validate();
-        mRS.nAllocationRead(getID(mRS), array, dt);
+        boolean usePadding = false;
+        if (mAutoPadding && (mType.getElement().getVectorSize() == 3)) {
+            usePadding = true;
+        }
+        mRS.nAllocationRead(getID(mRS), array, dt, mType.mElement.mType.mSize, usePadding);
         Trace.traceEnd(RenderScript.TRACE_TAG);
     }
 
@@ -1469,8 +1529,14 @@ public class Allocation extends BaseObj {
                                         Element.DataType dt, int arrayLen) {
         Trace.traceBegin(RenderScript.TRACE_TAG, "copy1DRangeToUnchecked");
         final int dataSize = mType.mElement.getBytesSize() * count;
-        data1DChecks(off, count, arrayLen * dt.mSize, dataSize);
-        mRS.nAllocationRead1D(getIDSafe(), off, mSelectedLOD, count, array, dataSize, dt);
+        // AutoPadding for Vec3 Element
+        boolean usePadding = false;
+        if (mAutoPadding && (mType.getElement().getVectorSize() == 3)) {
+            usePadding = true;
+        }
+        data1DChecks(off, count, arrayLen * dt.mSize, dataSize, usePadding);
+        mRS.nAllocationRead1D(getIDSafe(), off, mSelectedLOD, count, array, dataSize, dt,
+                              mType.mElement.mType.mSize, usePadding);
         Trace.traceEnd(RenderScript.TRACE_TAG);
     }
 
@@ -1624,8 +1690,23 @@ public class Allocation extends BaseObj {
         Trace.traceBegin(RenderScript.TRACE_TAG, "copy2DRangeToUnchecked");
         mRS.validate();
         validate2DRange(xoff, yoff, w, h);
+        final int dataSize = mType.mElement.getBytesSize() * w * h;
+        // AutoPadding for Vec3 Element
+        boolean usePadding = false;
+        int sizeBytes = arrayLen * dt.mSize;
+        if (mAutoPadding && (mType.getElement().getVectorSize() == 3)) {
+            if (dataSize / 4 * 3 > sizeBytes) {
+                throw new RSIllegalArgumentException("Array too small for allocation type.");
+            }
+            usePadding = true;
+            sizeBytes = dataSize;
+        } else {
+            if (dataSize > sizeBytes) {
+                throw new RSIllegalArgumentException("Array too small for allocation type.");
+            }
+        }
         mRS.nAllocationRead2D(getIDSafe(), xoff, yoff, mSelectedLOD, mSelectedFace.mID, w, h,
-                              array, arrayLen * dt.mSize, dt);
+                              array, sizeBytes, dt, mType.mElement.mType.mSize, usePadding);
         Trace.traceEnd(RenderScript.TRACE_TAG);
     }
 
@@ -1653,7 +1734,7 @@ public class Allocation extends BaseObj {
      * @param yoff Y offset of the region to copy in this Allocation
      * @param w Width of the region to copy
      * @param h Height of the region to copy
-     * @param array Dest Array to be copied into
+     * @param data Dest Array to be copied into
      */
     public void copy2DRangeTo(int xoff, int yoff, int w, int h, byte[] data) {
         validateIsInt8();
@@ -1669,7 +1750,7 @@ public class Allocation extends BaseObj {
      * @param yoff Y offset of the region to copy in this Allocation
      * @param w Width of the region to copy
      * @param h Height of the region to copy
-     * @param array Dest Array to be copied into
+     * @param data Dest Array to be copied into
      */
     public void copy2DRangeTo(int xoff, int yoff, int w, int h, short[] data) {
         validateIsInt16();
@@ -1685,7 +1766,7 @@ public class Allocation extends BaseObj {
      * @param yoff Y offset of the region to copy in this Allocation
      * @param w Width of the region to copy
      * @param h Height of the region to copy
-     * @param array Dest Array to be copied into
+     * @param data Dest Array to be copied into
      */
     public void copy2DRangeTo(int xoff, int yoff, int w, int h, int[] data) {
         validateIsInt32();
@@ -1701,7 +1782,7 @@ public class Allocation extends BaseObj {
      * @param yoff Y offset of the region to copy in this Allocation
      * @param w Width of the region to copy
      * @param h Height of the region to copy
-     * @param array Dest Array to be copied into
+     * @param data Dest Array to be copied into
      */
     public void copy2DRangeTo(int xoff, int yoff, int w, int h, float[] data) {
         validateIsFloat32();
@@ -1719,8 +1800,23 @@ public class Allocation extends BaseObj {
         Trace.traceBegin(RenderScript.TRACE_TAG, "copy3DRangeToUnchecked");
         mRS.validate();
         validate3DRange(xoff, yoff, zoff, w, h, d);
+        final int dataSize = mType.mElement.getBytesSize() * w * h * d;
+        // AutoPadding for Vec3 Element
+        boolean usePadding = false;
+        int sizeBytes = arrayLen * dt.mSize;
+        if (mAutoPadding && (mType.getElement().getVectorSize() == 3)) {
+            if (dataSize / 4 * 3 > sizeBytes) {
+                throw new RSIllegalArgumentException("Array too small for allocation type.");
+            }
+            usePadding = true;
+            sizeBytes = dataSize;
+        } else {
+            if (dataSize > sizeBytes) {
+                throw new RSIllegalArgumentException("Array too small for allocation type.");
+            }
+        }
         mRS.nAllocationRead3D(getIDSafe(), xoff, yoff, zoff, mSelectedLOD, w, h, d,
-                              array, arrayLen * dt.mSize, dt);
+                              array, sizeBytes, dt, mType.mElement.mType.mSize, usePadding);
         Trace.traceEnd(RenderScript.TRACE_TAG);
     }
 

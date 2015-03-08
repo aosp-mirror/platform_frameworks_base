@@ -53,10 +53,12 @@ void UNUSED(T... t) {}
 #define PER_ARRAY_TYPE(flag, fnc, readonly, ...) {                                      \
     jint len = 0;                                                                       \
     void *ptr = nullptr;                                                                \
+    void *srcPtr = nullptr;                                                             \
     size_t typeBytes = 0;                                                               \
     jint relFlag = 0;                                                                   \
     if (readonly) {                                                                     \
         /* The on-release mode should only be JNI_ABORT for read-only accesses. */      \
+        /* readonly = true, also indicates we are copying to the allocation   . */      \
         relFlag = JNI_ABORT;                                                            \
     }                                                                                   \
     switch(dataType) {                                                                  \
@@ -64,14 +66,50 @@ void UNUSED(T... t) {}
         len = _env->GetArrayLength((jfloatArray)data);                                  \
         ptr = _env->GetFloatArrayElements((jfloatArray)data, flag);                     \
         typeBytes = 4;                                                                  \
-        fnc(__VA_ARGS__);                                                               \
+        if (usePadding) {                                                               \
+            srcPtr = ptr;                                                               \
+            len = len / 3 * 4;                                                          \
+            if (count == 0) {                                                           \
+                count = len / 4;                                                        \
+            }                                                                           \
+            ptr = malloc (len * typeBytes);                                             \
+            if (readonly) {                                                             \
+                copyWithPadding(ptr, srcPtr, mSize, count);                             \
+                fnc(__VA_ARGS__);                                                       \
+            } else {                                                                    \
+                fnc(__VA_ARGS__);                                                       \
+                copyWithUnPadding(srcPtr, ptr, mSize, count);                           \
+            }                                                                           \
+            free(ptr);                                                                  \
+            ptr = srcPtr;                                                               \
+        } else {                                                                        \
+            fnc(__VA_ARGS__);                                                           \
+        }                                                                               \
         _env->ReleaseFloatArrayElements((jfloatArray)data, (jfloat *)ptr, relFlag);     \
         return;                                                                         \
     case RS_TYPE_FLOAT_64:                                                              \
         len = _env->GetArrayLength((jdoubleArray)data);                                 \
         ptr = _env->GetDoubleArrayElements((jdoubleArray)data, flag);                   \
         typeBytes = 8;                                                                  \
-        fnc(__VA_ARGS__);                                                               \
+        if (usePadding) {                                                               \
+            srcPtr = ptr;                                                               \
+            len = len / 3 * 4;                                                          \
+            if (count == 0) {                                                           \
+                count = len / 4;                                                        \
+            }                                                                           \
+            ptr = malloc (len * typeBytes);                                             \
+            if (readonly) {                                                             \
+                copyWithPadding(ptr, srcPtr, mSize, count);                             \
+                fnc(__VA_ARGS__);                                                       \
+            } else {                                                                    \
+                fnc(__VA_ARGS__);                                                       \
+                copyWithUnPadding(srcPtr, ptr, mSize, count);                           \
+            }                                                                           \
+            free(ptr);                                                                  \
+            ptr = srcPtr;                                                               \
+        } else {                                                                        \
+            fnc(__VA_ARGS__);                                                           \
+        }                                                                               \
         _env->ReleaseDoubleArrayElements((jdoubleArray)data, (jdouble *)ptr, relFlag);  \
         return;                                                                         \
     case RS_TYPE_SIGNED_8:                                                              \
@@ -79,7 +117,25 @@ void UNUSED(T... t) {}
         len = _env->GetArrayLength((jbyteArray)data);                                   \
         ptr = _env->GetByteArrayElements((jbyteArray)data, flag);                       \
         typeBytes = 1;                                                                  \
-        fnc(__VA_ARGS__);                                                               \
+        if (usePadding) {                                                               \
+            srcPtr = ptr;                                                               \
+            len = len / 3 * 4;                                                          \
+            if (count == 0) {                                                           \
+                count = len / 4;                                                        \
+            }                                                                           \
+            ptr = malloc (len * typeBytes);                                             \
+            if (readonly) {                                                             \
+                copyWithPadding(ptr, srcPtr, mSize, count);                             \
+                fnc(__VA_ARGS__);                                                       \
+            } else {                                                                    \
+                fnc(__VA_ARGS__);                                                       \
+                copyWithUnPadding(srcPtr, ptr, mSize, count);                           \
+            }                                                                           \
+            free(ptr);                                                                  \
+            ptr = srcPtr;                                                               \
+        } else {                                                                        \
+            fnc(__VA_ARGS__);                                                           \
+        }                                                                               \
         _env->ReleaseByteArrayElements((jbyteArray)data, (jbyte*)ptr, relFlag);         \
         return;                                                                         \
     case RS_TYPE_SIGNED_16:                                                             \
@@ -87,7 +143,25 @@ void UNUSED(T... t) {}
         len = _env->GetArrayLength((jshortArray)data);                                  \
         ptr = _env->GetShortArrayElements((jshortArray)data, flag);                     \
         typeBytes = 2;                                                                  \
-        fnc(__VA_ARGS__);                                                               \
+        if (usePadding) {                                                               \
+            srcPtr = ptr;                                                               \
+            len = len / 3 * 4;                                                          \
+            if (count == 0) {                                                           \
+                count = len / 4;                                                        \
+            }                                                                           \
+            ptr = malloc (len * typeBytes);                                             \
+            if (readonly) {                                                             \
+                copyWithPadding(ptr, srcPtr, mSize, count);                             \
+                fnc(__VA_ARGS__);                                                       \
+            } else {                                                                    \
+                fnc(__VA_ARGS__);                                                       \
+                copyWithUnPadding(srcPtr, ptr, mSize, count);                           \
+            }                                                                           \
+            free(ptr);                                                                  \
+            ptr = srcPtr;                                                               \
+        } else {                                                                        \
+            fnc(__VA_ARGS__);                                                           \
+        }                                                                               \
         _env->ReleaseShortArrayElements((jshortArray)data, (jshort *)ptr, relFlag);     \
         return;                                                                         \
     case RS_TYPE_SIGNED_32:                                                             \
@@ -95,7 +169,25 @@ void UNUSED(T... t) {}
         len = _env->GetArrayLength((jintArray)data);                                    \
         ptr = _env->GetIntArrayElements((jintArray)data, flag);                         \
         typeBytes = 4;                                                                  \
-        fnc(__VA_ARGS__);                                                               \
+        if (usePadding) {                                                               \
+            srcPtr = ptr;                                                               \
+            len = len / 3 * 4;                                                          \
+            if (count == 0) {                                                           \
+                count = len / 4;                                                        \
+            }                                                                           \
+            ptr = malloc (len * typeBytes);                                             \
+            if (readonly) {                                                             \
+                copyWithPadding(ptr, srcPtr, mSize, count);                             \
+                fnc(__VA_ARGS__);                                                       \
+            } else {                                                                    \
+                fnc(__VA_ARGS__);                                                       \
+                copyWithUnPadding(srcPtr, ptr, mSize, count);                           \
+            }                                                                           \
+            free(ptr);                                                                  \
+            ptr = srcPtr;                                                               \
+        } else {                                                                        \
+            fnc(__VA_ARGS__);                                                           \
+        }                                                                               \
         _env->ReleaseIntArrayElements((jintArray)data, (jint *)ptr, relFlag);           \
         return;                                                                         \
     case RS_TYPE_SIGNED_64:                                                             \
@@ -103,13 +195,31 @@ void UNUSED(T... t) {}
         len = _env->GetArrayLength((jlongArray)data);                                   \
         ptr = _env->GetLongArrayElements((jlongArray)data, flag);                       \
         typeBytes = 8;                                                                  \
-        fnc(__VA_ARGS__);                                                               \
+        if (usePadding) {                                                               \
+            srcPtr = ptr;                                                               \
+            len = len / 3 * 4;                                                          \
+            if (count == 0) {                                                           \
+                count = len / 4;                                                        \
+            }                                                                           \
+            ptr = malloc (len * typeBytes);                                             \
+            if (readonly) {                                                             \
+                copyWithPadding(ptr, srcPtr, mSize, count);                             \
+                fnc(__VA_ARGS__);                                                       \
+            } else {                                                                    \
+                fnc(__VA_ARGS__);                                                       \
+                copyWithUnPadding(srcPtr, ptr, mSize, count);                           \
+            }                                                                           \
+            free(ptr);                                                                  \
+            ptr = srcPtr;                                                               \
+        } else {                                                                        \
+            fnc(__VA_ARGS__);                                                           \
+        }                                                                               \
         _env->ReleaseLongArrayElements((jlongArray)data, (jlong *)ptr, relFlag);        \
         return;                                                                         \
     default:                                                                            \
         break;                                                                          \
     }                                                                                   \
-    UNUSED(len, ptr, typeBytes, relFlag);                                               \
+    UNUSED(len, ptr, srcPtr, typeBytes, relFlag);                                       \
 }
 
 
@@ -179,6 +289,32 @@ static void _nInit(JNIEnv *_env, jclass _this)
 
 // ---------------------------------------------------------------------------
 
+static void copyWithPadding(void* ptr, void* srcPtr, int mSize, int count) {
+    int sizeBytesPad = mSize * 4;
+    int sizeBytes = mSize * 3;
+    uint8_t *dst = static_cast<uint8_t *>(ptr);
+    uint8_t *src = static_cast<uint8_t *>(srcPtr);
+    for (int i = 0; i < count; i++) {
+        memcpy(dst, src, sizeBytes);
+        dst += sizeBytesPad;
+        src += sizeBytes;
+    }
+}
+
+static void copyWithUnPadding(void* ptr, void* srcPtr, int mSize, int count) {
+    int sizeBytesPad = mSize * 4;
+    int sizeBytes = mSize * 3;
+    uint8_t *dst = static_cast<uint8_t *>(ptr);
+    uint8_t *src = static_cast<uint8_t *>(srcPtr);
+    for (int i = 0; i < count; i++) {
+        memcpy(dst, src, sizeBytes);
+        dst += sizeBytes;
+        src += sizeBytesPad;
+    }
+}
+
+
+// ---------------------------------------------------------------------------
 static void
 nContextFinish(JNIEnv *_env, jobject _this, jlong con)
 {
@@ -1009,7 +1145,8 @@ nAllocationCopyToBitmap(JNIEnv *_env, jobject _this, jlong con, jlong alloc, job
 // Copies from the Java object data into the Allocation pointed to by _alloc.
 static void
 nAllocationData1D(JNIEnv *_env, jobject _this, jlong con, jlong _alloc, jint offset, jint lod,
-                  jint count, jobject data, jint sizeBytes, jint dataType)
+                  jint count, jobject data, jint sizeBytes, jint dataType, jint mSize,
+                  jboolean usePadding)
 {
     RsAllocation *alloc = (RsAllocation *)_alloc;
     if (kLogApi) {
@@ -1017,8 +1154,8 @@ nAllocationData1D(JNIEnv *_env, jobject _this, jlong con, jlong _alloc, jint off
               "dataType(%i)", (RsContext)con, (RsAllocation)alloc, offset, count, sizeBytes,
               dataType);
     }
-    PER_ARRAY_TYPE(nullptr, rsAllocation1DData, true, (RsContext)con, alloc, offset, lod, count,
-                   ptr, sizeBytes);
+    PER_ARRAY_TYPE(nullptr, rsAllocation1DData, true,
+                   (RsContext)con, alloc, offset, lod, count, ptr, sizeBytes);
 }
 
 static void
@@ -1043,7 +1180,8 @@ nAllocationElementData(JNIEnv *_env, jobject _this, jlong con, jlong alloc,
 // Copies from the Java object data into the Allocation pointed to by _alloc.
 static void
 nAllocationData2D(JNIEnv *_env, jobject _this, jlong con, jlong _alloc, jint xoff, jint yoff, jint lod, jint _face,
-                  jint w, jint h, jobject data, jint sizeBytes, jint dataType)
+                  jint w, jint h, jobject data, jint sizeBytes, jint dataType, jint mSize,
+                  jboolean usePadding)
 {
     RsAllocation *alloc = (RsAllocation *)_alloc;
     RsAllocationCubemapFace face = (RsAllocationCubemapFace)_face;
@@ -1051,7 +1189,9 @@ nAllocationData2D(JNIEnv *_env, jobject _this, jlong con, jlong _alloc, jint xof
         ALOGD("nAllocation2DData, con(%p), adapter(%p), xoff(%i), yoff(%i), w(%i), h(%i), len(%i) "
               "type(%i)", (RsContext)con, alloc, xoff, yoff, w, h, sizeBytes, dataType);
     }
-    PER_ARRAY_TYPE(nullptr, rsAllocation2DData, true, (RsContext)con, alloc, xoff, yoff, lod, face, w, h, ptr, sizeBytes, 0);
+    int count = w * h;
+    PER_ARRAY_TYPE(nullptr, rsAllocation2DData, true,
+                   (RsContext)con, alloc, xoff, yoff, lod, face, w, h, ptr, sizeBytes, 0);
 }
 
 // Copies from the Allocation pointed to by srcAlloc into the Allocation
@@ -1085,7 +1225,8 @@ nAllocationData2D_alloc(JNIEnv *_env, jobject _this, jlong con,
 // Copies from the Java object data into the Allocation pointed to by _alloc.
 static void
 nAllocationData3D(JNIEnv *_env, jobject _this, jlong con, jlong _alloc, jint xoff, jint yoff, jint zoff, jint lod,
-                    jint w, jint h, jint d, jobject data, int sizeBytes, int dataType)
+                  jint w, jint h, jint d, jobject data, jint sizeBytes, jint dataType,
+                  jint mSize, jboolean usePadding)
 {
     RsAllocation *alloc = (RsAllocation *)_alloc;
     if (kLogApi) {
@@ -1093,7 +1234,9 @@ nAllocationData3D(JNIEnv *_env, jobject _this, jlong con, jlong _alloc, jint xof
               " h(%i), d(%i), sizeBytes(%i)", (RsContext)con, (RsAllocation)alloc, xoff, yoff, zoff,
               lod, w, h, d, sizeBytes);
     }
-    PER_ARRAY_TYPE(nullptr, rsAllocation3DData, true, (RsContext)con, alloc, xoff, yoff, zoff, lod, w, h, d, ptr, sizeBytes, 0);
+    int count = w * h * d;
+    PER_ARRAY_TYPE(nullptr, rsAllocation3DData, true,
+                   (RsContext)con, alloc, xoff, yoff, zoff, lod, w, h, d, ptr, sizeBytes, 0);
 }
 
 // Copies from the Allocation pointed to by srcAlloc into the Allocation
@@ -1125,26 +1268,31 @@ nAllocationData3D_alloc(JNIEnv *_env, jobject _this, jlong con,
 
 // Copies from the Allocation pointed to by _alloc into the Java object data.
 static void
-nAllocationRead(JNIEnv *_env, jobject _this, jlong con, jlong _alloc, jobject data, int dataType)
+nAllocationRead(JNIEnv *_env, jobject _this, jlong con, jlong _alloc, jobject data, jint dataType,
+                jint mSize, jboolean usePadding)
 {
     RsAllocation *alloc = (RsAllocation *)_alloc;
     if (kLogApi) {
         ALOGD("nAllocationRead, con(%p), alloc(%p)", (RsContext)con, (RsAllocation)alloc);
     }
-    PER_ARRAY_TYPE(0, rsAllocationRead, false, (RsContext)con, alloc, ptr, len * typeBytes);
+    int count = 0;
+    PER_ARRAY_TYPE(0, rsAllocationRead, false,
+                   (RsContext)con, alloc, ptr, len * typeBytes);
 }
 
 // Copies from the Allocation pointed to by _alloc into the Java object data.
 static void
 nAllocationRead1D(JNIEnv *_env, jobject _this, jlong con, jlong _alloc, jint offset, jint lod,
-                  jint count, jobject data, int sizeBytes, int dataType)
+                  jint count, jobject data, jint sizeBytes, jint dataType,
+                  jint mSize, jboolean usePadding)
 {
     RsAllocation *alloc = (RsAllocation *)_alloc;
     if (kLogApi) {
         ALOGD("nAllocation1DRead, con(%p), adapter(%p), offset(%i), count(%i), sizeBytes(%i), "
               "dataType(%i)", (RsContext)con, alloc, offset, count, sizeBytes, dataType);
     }
-    PER_ARRAY_TYPE(0, rsAllocation1DRead, false, (RsContext)con, alloc, offset, lod, count, ptr, sizeBytes);
+    PER_ARRAY_TYPE(0, rsAllocation1DRead, false,
+                   (RsContext)con, alloc, offset, lod, count, ptr, sizeBytes);
 }
 
 // Copies from the Element in the Allocation pointed to by _alloc into the Java array data.
@@ -1165,7 +1313,8 @@ nAllocationElementRead(JNIEnv *_env, jobject _this, jlong con, jlong _alloc,
 // Copies from the Allocation pointed to by _alloc into the Java object data.
 static void
 nAllocationRead2D(JNIEnv *_env, jobject _this, jlong con, jlong _alloc, jint xoff, jint yoff, jint lod, jint _face,
-                  jint w, jint h, jobject data, int sizeBytes, int dataType)
+                  jint w, jint h, jobject data, jint sizeBytes, jint dataType,
+                  jint mSize, jboolean usePadding)
 {
     RsAllocation *alloc = (RsAllocation *)_alloc;
     RsAllocationCubemapFace face = (RsAllocationCubemapFace)_face;
@@ -1173,13 +1322,16 @@ nAllocationRead2D(JNIEnv *_env, jobject _this, jlong con, jlong _alloc, jint xof
         ALOGD("nAllocation2DRead, con(%p), adapter(%p), xoff(%i), yoff(%i), w(%i), h(%i), len(%i) "
               "type(%i)", (RsContext)con, alloc, xoff, yoff, w, h, sizeBytes, dataType);
     }
-    PER_ARRAY_TYPE(0, rsAllocation2DRead, false, (RsContext)con, alloc, xoff, yoff, lod, face, w, h,
-                   ptr, sizeBytes, 0);
+    int count = w * h;
+    PER_ARRAY_TYPE(0, rsAllocation2DRead, false,
+                   (RsContext)con, alloc, xoff, yoff, lod, face, w, h, ptr, sizeBytes, 0);
 }
+
 // Copies from the Allocation pointed to by _alloc into the Java object data.
 static void
 nAllocationRead3D(JNIEnv *_env, jobject _this, jlong con, jlong _alloc, jint xoff, jint yoff, jint zoff, jint lod,
-                  jint w, jint h, jint d, jobject data, int sizeBytes, int dataType)
+                  jint w, jint h, jint d, jobject data, int sizeBytes, int dataType,
+                  jint mSize, jboolean usePadding)
 {
     RsAllocation *alloc = (RsAllocation *)_alloc;
     if (kLogApi) {
@@ -1187,8 +1339,9 @@ nAllocationRead3D(JNIEnv *_env, jobject _this, jlong con, jlong _alloc, jint xof
               " h(%i), d(%i), sizeBytes(%i)", (RsContext)con, (RsAllocation)alloc, xoff, yoff, zoff,
               lod, w, h, d, sizeBytes);
     }
-    PER_ARRAY_TYPE(0, rsAllocation3DRead, false, (RsContext)con, alloc, xoff, yoff, zoff, lod, w, h, d,
-                   ptr, sizeBytes, 0);
+    int count = w * h * d;
+    PER_ARRAY_TYPE(nullptr, rsAllocation3DRead, false,
+                   (RsContext)con, alloc, xoff, yoff, zoff, lod, w, h, d, ptr, sizeBytes, 0);
 }
 
 static jlong
@@ -2209,17 +2362,17 @@ static JNINativeMethod methods[] = {
 {"rsnAllocationSetSurface",          "(JJLandroid/view/Surface;)V",           (void*)nAllocationSetSurface },
 {"rsnAllocationIoSend",              "(JJ)V",                                 (void*)nAllocationIoSend },
 {"rsnAllocationIoReceive",           "(JJ)V",                                 (void*)nAllocationIoReceive },
-{"rsnAllocationData1D",              "(JJIIILjava/lang/Object;II)V",          (void*)nAllocationData1D },
+{"rsnAllocationData1D",              "(JJIIILjava/lang/Object;IIIZ)V",        (void*)nAllocationData1D },
 {"rsnAllocationElementData",         "(JJIIIII[BI)V",                         (void*)nAllocationElementData },
-{"rsnAllocationData2D",              "(JJIIIIIILjava/lang/Object;II)V",       (void*)nAllocationData2D },
+{"rsnAllocationData2D",              "(JJIIIIIILjava/lang/Object;IIIZ)V",     (void*)nAllocationData2D },
 {"rsnAllocationData2D",              "(JJIIIIIIJIIII)V",                      (void*)nAllocationData2D_alloc },
-{"rsnAllocationData3D",              "(JJIIIIIIILjava/lang/Object;II)V",      (void*)nAllocationData3D },
+{"rsnAllocationData3D",              "(JJIIIIIIILjava/lang/Object;IIIZ)V",    (void*)nAllocationData3D },
 {"rsnAllocationData3D",              "(JJIIIIIIIJIIII)V",                     (void*)nAllocationData3D_alloc },
-{"rsnAllocationRead",                "(JJLjava/lang/Object;I)V",              (void*)nAllocationRead },
-{"rsnAllocationRead1D",              "(JJIIILjava/lang/Object;II)V",          (void*)nAllocationRead1D },
+{"rsnAllocationRead",                "(JJLjava/lang/Object;IIZ)V",            (void*)nAllocationRead },
+{"rsnAllocationRead1D",              "(JJIIILjava/lang/Object;IIIZ)V",        (void*)nAllocationRead1D },
 {"rsnAllocationElementRead",         "(JJIIIIILjava/lang/Object;II)V",        (void*)nAllocationElementRead },
-{"rsnAllocationRead2D",              "(JJIIIIIILjava/lang/Object;II)V",       (void*)nAllocationRead2D },
-{"rsnAllocationRead3D",              "(JJIIIIIIILjava/lang/Object;II)V",      (void*)nAllocationRead3D },
+{"rsnAllocationRead2D",              "(JJIIIIIILjava/lang/Object;IIIZ)V",     (void*)nAllocationRead2D },
+{"rsnAllocationRead3D",              "(JJIIIIIIILjava/lang/Object;IIIZ)V",    (void*)nAllocationRead3D },
 {"rsnAllocationGetType",             "(JJ)J",                                 (void*)nAllocationGetType},
 {"rsnAllocationResize1D",            "(JJI)V",                                (void*)nAllocationResize1D },
 {"rsnAllocationGenerateMipmaps",     "(JJ)V",                                 (void*)nAllocationGenerateMipmaps },
