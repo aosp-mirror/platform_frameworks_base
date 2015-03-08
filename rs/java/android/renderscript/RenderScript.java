@@ -578,12 +578,11 @@ public class RenderScript {
     }
 
     native void rsnAllocationElementRead(long con,long id, int xoff, int yoff, int zoff,
-                                         int mip, int compIdx, Object d, int sizeBytes, int dt);
+                                         int mip, int compIdx, byte[] d, int sizeBytes);
     synchronized void nAllocationElementRead(long id, int xoff, int yoff, int zoff,
-                                             int mip, int compIdx, Object d, int sizeBytes,
-                                             Element.DataType dt) {
+                                             int mip, int compIdx, byte[] d, int sizeBytes) {
         validate();
-        rsnAllocationElementRead(mContext, id, xoff, yoff, zoff, mip, compIdx, d, sizeBytes, dt.mID);
+        rsnAllocationElementRead(mContext, id, xoff, yoff, zoff, mip, compIdx, d, sizeBytes);
     }
 
     native void rsnAllocationRead2D(long con, long id, int xoff, int yoff, int mip, int face,
