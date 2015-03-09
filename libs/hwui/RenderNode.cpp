@@ -139,7 +139,7 @@ void RenderNode::damageSelf(TreeInfo& info) {
 
 void RenderNode::prepareLayer(TreeInfo& info, uint32_t dirtyMask) {
     LayerType layerType = properties().layerProperties().type();
-    if (CC_UNLIKELY(layerType == kLayerTypeRenderLayer)) {
+    if (CC_UNLIKELY(layerType == LayerType::RenderLayer)) {
         // Damage applied so far needs to affect our parent, but does not require
         // the layer to be updated. So we pop/push here to clear out the current
         // damage and get a clean state for display list or children updates to
@@ -156,7 +156,7 @@ void RenderNode::pushLayerUpdate(TreeInfo& info) {
     LayerType layerType = properties().layerProperties().type();
     // If we are not a layer OR we cannot be rendered (eg, view was detached)
     // we need to destroy any Layers we may have had previously
-    if (CC_LIKELY(layerType != kLayerTypeRenderLayer) || CC_UNLIKELY(!isRenderable())) {
+    if (CC_LIKELY(layerType != LayerType::RenderLayer) || CC_UNLIKELY(!isRenderable())) {
         if (CC_UNLIKELY(mLayer)) {
             LayerRenderer::destroyLayer(mLayer);
             mLayer = nullptr;
@@ -384,7 +384,7 @@ void RenderNode::setViewProperties(OpenGLRenderer& renderer, T& handler) {
             renderer.concatMatrix(*properties().getTransformMatrix());
         }
     }
-    const bool isLayer = properties().layerProperties().type() != kLayerTypeNone;
+    const bool isLayer = properties().layerProperties().type() != LayerType::None;
     int clipFlags = properties().getClippingFlags();
     if (properties().getAlpha() < 1) {
         if (isLayer) {

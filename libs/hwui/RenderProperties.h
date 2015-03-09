@@ -49,12 +49,12 @@ class RenderProperties;
 #define RP_SET_AND_DIRTY(a, b) RP_SET(a, b, mPrimitiveFields.mMatrixOrPivotDirty = true)
 
 // Keep in sync with View.java:LAYER_TYPE_*
-enum LayerType {
-    kLayerTypeNone = 0,
+enum class LayerType {
+    None = 0,
     // Although we cannot build the software layer directly (must be done at
     // record time), this information is used when applying alpha.
-    kLayerTypeSoftware = 1,
-    kLayerTypeRenderLayer = 2,
+    Software = 1,
+    RenderLayer = 2,
     // TODO: LayerTypeSurfaceTexture? Maybe?
 };
 
@@ -124,12 +124,12 @@ private:
 
     friend class RenderProperties;
 
-    LayerType mType;
+    LayerType mType = LayerType::None;
     // Whether or not that Layer's content is opaque, doesn't include alpha
     bool mOpaque;
     uint8_t mAlpha;
     SkXfermode::Mode mMode;
-    SkColorFilter* mColorFilter;
+    SkColorFilter* mColorFilter = nullptr;
 };
 
 /*

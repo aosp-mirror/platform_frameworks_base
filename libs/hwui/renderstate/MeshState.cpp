@@ -37,7 +37,7 @@ MeshState::MeshState()
 
     mCurrentBuffer = mUnitQuadBuffer;
 
-    std::unique_ptr<uint16_t[]> regionIndices(new uint16_t[kMaxNumberOfQuads * 6]);
+    uint16_t regionIndices[kMaxNumberOfQuads * 6];
     for (uint32_t i = 0; i < kMaxNumberOfQuads; i++) {
         uint16_t quad = i * 4;
         int index = i * 6;
@@ -50,8 +50,7 @@ MeshState::MeshState()
     }
     glGenBuffers(1, &mQuadListIndices);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mQuadListIndices);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, kMaxNumberOfQuads * 6 * sizeof(uint16_t),
-            regionIndices.get(), GL_STATIC_DRAW);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(regionIndices), regionIndices, GL_STATIC_DRAW);
     mCurrentIndicesBuffer = mQuadListIndices;
 
     // position attribute always enabled

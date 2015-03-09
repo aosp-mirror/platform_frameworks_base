@@ -29,11 +29,18 @@ namespace uirenderer {
 class Blend {
     friend class RenderState;
 public:
-    void enable(SkXfermode::Mode mode, bool swapSrcDst);
+    // dictates whether to swap src/dst
+    enum class ModeOrderSwap {
+        NoSwap,
+        Swap,
+    };
+
+    void enable(SkXfermode::Mode mode, ModeOrderSwap modeUsage);
     void disable();
     void syncEnabled();
 
-    static void getFactors(SkXfermode::Mode mode, bool swapSrcDst, GLenum* outSrc, GLenum* outDst);
+    static void getFactors(SkXfermode::Mode mode, ModeOrderSwap modeUsage,
+            GLenum* outSrc, GLenum* outDst);
     void setFactors(GLenum src, GLenum dst);
 
     void dump();
