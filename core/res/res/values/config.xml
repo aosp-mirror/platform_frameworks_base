@@ -530,6 +530,8 @@
     <bool name="config_allowTheaterModeWakeFromWindowLayout">false</bool>
     <!-- If this is true, go to sleep when theater mode is enabled from button press -->
     <bool name="config_goToSleepOnButtonPressTheaterMode">true</bool>
+    <!-- If this is true, long press on power button will be available from the non-interactive state -->
+    <bool name="config_supportLongPressPowerWhenNonInteractive">false</bool>
 
     <!-- Auto-rotation behavior -->
 
