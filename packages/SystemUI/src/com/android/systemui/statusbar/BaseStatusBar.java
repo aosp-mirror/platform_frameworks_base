@@ -24,6 +24,7 @@ import android.app.ActivityManagerNative;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.app.RemoteInput;
 import android.app.TaskStackBuilder;
 import android.app.admin.DevicePolicyManager;
 import android.content.BroadcastReceiver;
@@ -49,6 +50,7 @@ import android.os.Message;
 import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.Settings;
@@ -98,6 +100,7 @@ import com.android.systemui.statusbar.phone.NavigationBarView;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 import com.android.systemui.statusbar.policy.HeadsUpNotificationView;
 import com.android.systemui.statusbar.policy.PreviewInflater;
+import com.android.systemui.statusbar.policy.RemoteInputView;
 import com.android.systemui.statusbar.stack.NotificationStackScrollLayout;
 
 import java.util.ArrayList;
@@ -116,6 +119,9 @@ public abstract class BaseStatusBar extends SystemUI implements
 
     // STOPSHIP disable once we resolve b/18102199
     private static final boolean NOTIFICATION_CLICK_DEBUG = true;
+
+    public static final boolean ENABLE_REMOTE_INPUT =
+            Build.IS_DEBUGGABLE && SystemProperties.getBoolean("debug.enable_remote_input", false);
 
     protected static final int MSG_SHOW_RECENT_APPS = 1019;
     protected static final int MSG_HIDE_RECENT_APPS = 1020;
@@ -410,6 +416,7 @@ public abstract class BaseStatusBar extends SystemUI implements
                 @Override
                 public void run() {
                     for (StatusBarNotification sbn : notifications) {
+                        processForRemoteInput(sbn.getNotification());
                         addNotification(sbn, currentRanking);
                     }
                 }
@@ -424,6 +431,7 @@ public abstract class BaseStatusBar extends SystemUI implements
                 mHandler.post(new Runnable() {
                     @Override
                     public void run() {
+                        processForRemoteInput(sbn.getNotification());
                         Notification n = sbn.getNotification();
                         boolean isUpdate = mNotificationData.get(sbn.getKey()) != null
                                 || isHeadsUp(sbn.getKey());
@@ -1357,6 +1365,9 @@ public abstract class BaseStatusBar extends SystemUI implements
                 (NotificationContentView) row.findViewById(R.id.expandedPublic);
 
         row.setDescendantFocusability(ViewGroup.FOCUS_BLOCK_DESCENDANTS);
+        if (ENABLE_REMOTE_INPUT) {
+            row.setDescendantFocusability(ViewGroup.FOCUS_BEFORE_DESCENDANTS);
+        }
 
         PendingIntent contentIntent = sbn.getNotification().contentIntent;
         if (contentIntent != null) {
@@ -1518,7 +1529,101 @@ public abstract class BaseStatusBar extends SystemUI implements
         }
         row.setUserLocked(userLocked);
         row.setStatusBarNotification(entry.notification);
+        applyRemoteInput(entry);
         return true;
+    }
+
+    /**
+     * Adds RemoteInput actions from the WearableExtender; to be removed once more apps support this
+     * via first-class API.
+     *
+     * TODO: Remove once enough apps specify remote inputs on their own.
+     */
+    private void processForRemoteInput(Notification n) {
+        if (!ENABLE_REMOTE_INPUT) return;
+
+        if (n.extras != null && n.extras.containsKey("android.wearable.EXTENSIONS") &&
+                (n.actions == null || n.actions.length == 0)) {
+            Notification.Action viableAction = null;
+            Notification.WearableExtender we = new Notification.WearableExtender(n);
+
+            List<Notification.Action> actions = we.getActions();
+            final int numActions = actions.size();
+
+            for (int i = 0; i < numActions; i++) {
+                Notification.Action action = actions.get(i);
+                RemoteInput[] remoteInputs = action.getRemoteInputs();
+                for (RemoteInput ri : action.getRemoteInputs()) {
+                    if (ri.getAllowFreeFormInput()) {
+                        viableAction = action;
+                        break;
+                    }
+                }
+                if (viableAction != null) {
+                    break;
+                }
+            }
+
+            if (viableAction != null) {
+                Notification stripped = n.clone();
+                Notification.Builder.stripForDelivery(stripped);
+                stripped.actions = new Notification.Action[] { viableAction };
+                stripped.extras.putBoolean("android.rebuild.contentView", true);
+                stripped.contentView = null;
+                stripped.extras.putBoolean("android.rebuild.bigView", true);
+                stripped.bigContentView = null;
+
+                // Don't create the HUN input view for now because input doesn't work there yet.
+                // TODO: Enable once HUNs can take remote input correctly.
+                if (false) {
+                    stripped.extras.putBoolean("android.rebuild.hudView", true);
+                    stripped.headsUpContentView = null;
+                }
+
+                Notification rebuilt = Notification.Builder.rebuild(mContext, stripped);
+
+                n.actions = rebuilt.actions;
+                n.bigContentView = rebuilt.bigContentView;
+                n.headsUpContentView = rebuilt.headsUpContentView;
+                n.publicVersion = rebuilt.publicVersion;
+            }
+        }
+    }
+
+    private void applyRemoteInput(final Entry entry) {
+        if (!ENABLE_REMOTE_INPUT) return;
+
+        RemoteInput remoteInput = null;
+
+        // See if the notification has exactly one action and this action allows free-form input
+        // TODO: relax restrictions once we support more than one remote input action.
+        Notification.Action[] actions = entry.notification.getNotification().actions;
+        if (actions != null && actions.length == 1) {
+            if (actions[0].getRemoteInputs() != null) {
+                for (RemoteInput ri : actions[0].getRemoteInputs()) {
+                    if (ri.getAllowFreeFormInput()) {
+                        remoteInput = ri;
+                        break;
+                    }
+                }
+            }
+        }
+
+        // See if we have somewhere to put that remote input
+        ViewGroup actionContainer = null;
+        if (remoteInput != null && entry.expandedBig != null) {
+            View actionContainerCandidate = entry.expandedBig
+                    .findViewById(com.android.internal.R.id.actions);
+            if (actionContainerCandidate instanceof ViewGroup) {
+                actionContainer = (ViewGroup) actionContainerCandidate;
+            }
+        }
+
+        if (actionContainer != null) {
+            actionContainer.removeAllViews();
+            actionContainer.addView(
+                    RemoteInputView.inflate(mContext, actionContainer, actions[0], remoteInput));
+        }
     }
 
     public NotificationClicker makeClicker(PendingIntent intent, String notificationKey) {
@@ -2037,6 +2142,8 @@ public abstract class BaseStatusBar extends SystemUI implements
         entry.row.setStatusBarNotification(notification);
         entry.row.notifyContentUpdated();
         entry.row.resetHeight();
+
+        applyRemoteInput(entry);
     }
 
     protected void notifyHeadsUpScreenOn(boolean screenOn) {

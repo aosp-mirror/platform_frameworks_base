@@ -211,6 +211,11 @@
         <item name="android:colorControlActivated">@color/system_accent_color</item>
     </style>
 
+    <style name="systemui_theme_light" parent="@android:style/Theme.DeviceDefault.Light">
+        <item name="android:colorPrimary">@color/system_primary_color</item>
+        <item name="android:colorControlActivated">@color/system_accent_color</item>
+    </style>
+
     <style name="Theme.SystemUI.Dialog" parent="@android:style/Theme.DeviceDefault.Light.Dialog">
         <item name="android:colorPrimary">@color/system_primary_color</item>
         <item name="android:colorControlActivated">@color/system_accent_color</item>
