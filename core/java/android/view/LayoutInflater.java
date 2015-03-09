@@ -532,10 +532,10 @@ public abstract class LayoutInflater {
                 InflateException ex = new InflateException(e.getMessage());
                 ex.initCause(e);
                 throw ex;
-            } catch (IOException e) {
+            } catch (Exception e) {
                 InflateException ex = new InflateException(
                         parser.getPositionDescription()
-                        + ": " + e.getMessage());
+                                + ": " + e.getMessage());
                 ex.initCause(e);
                 throw ex;
             } finally {
