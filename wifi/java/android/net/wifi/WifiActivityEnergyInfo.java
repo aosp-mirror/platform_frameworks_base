@@ -21,37 +21,37 @@ import android.os.Parcelable;
 
 /**
  * Record of energy and activity information from controller and
- * underlying wifi stack state.Timestamp the record with system
- * time
+ * underlying wifi stack state. Timestamp the record with elapsed
+ * real-time.
  * @hide
  */
 public final class WifiActivityEnergyInfo implements Parcelable {
+    private final long mTimestamp;
     private final int mStackState;
     private final int mControllerTxTimeMs;
     private final int mControllerRxTimeMs;
     private final int mControllerIdleTimeMs;
     private final int mControllerEnergyUsed;
-    private final long timestamp;
 
     public static final int STACK_STATE_INVALID = 0;
     public static final int STACK_STATE_STATE_ACTIVE = 1;
     public static final int STACK_STATE_STATE_SCANNING = 2;
     public static final int STACK_STATE_STATE_IDLE = 3;
 
-    public WifiActivityEnergyInfo(int stackState, int txTime, int rxTime,
-                                  int idleTime, int energyUsed) {
+    public WifiActivityEnergyInfo(long timestamp, int stackState,
+                                  int txTime, int rxTime, int idleTime, int energyUsed) {
+        mTimestamp = timestamp;
         mStackState = stackState;
         mControllerTxTimeMs = txTime;
         mControllerRxTimeMs = rxTime;
         mControllerIdleTimeMs = idleTime;
         mControllerEnergyUsed = energyUsed;
-        timestamp = System.currentTimeMillis();
     }
 
     @Override
     public String toString() {
         return "WifiActivityEnergyInfo{"
-            + " timestamp=" + timestamp
+            + " timestamp=" + mTimestamp
             + " mStackState=" + mStackState
             + " mControllerTxTimeMs=" + mControllerTxTimeMs
             + " mControllerRxTimeMs=" + mControllerRxTimeMs
@@ -63,13 +63,14 @@ public final class WifiActivityEnergyInfo implements Parcelable {
     public static final Parcelable.Creator<WifiActivityEnergyInfo> CREATOR =
             new Parcelable.Creator<WifiActivityEnergyInfo>() {
         public WifiActivityEnergyInfo createFromParcel(Parcel in) {
+            long timestamp = in.readLong();
             int stackState = in.readInt();
             int txTime = in.readInt();
             int rxTime = in.readInt();
             int idleTime = in.readInt();
             int energyUsed = in.readInt();
-            return new WifiActivityEnergyInfo(stackState, txTime, rxTime,
-                    idleTime, energyUsed);
+            return new WifiActivityEnergyInfo(timestamp, stackState,
+                    txTime, rxTime, idleTime, energyUsed);
         }
         public WifiActivityEnergyInfo[] newArray(int size) {
             return new WifiActivityEnergyInfo[size];
@@ -77,6 +78,7 @@ public final class WifiActivityEnergyInfo implements Parcelable {
     };
 
     public void writeToParcel(Parcel out, int flags) {
+        out.writeLong(mTimestamp);
         out.writeInt(mStackState);
         out.writeInt(mControllerTxTimeMs);
         out.writeInt(mControllerRxTimeMs);
@@ -127,7 +129,7 @@ public final class WifiActivityEnergyInfo implements Parcelable {
      * @return timestamp(wall clock) of record creation
      */
     public long getTimeStamp() {
-        return timestamp;
+        return mTimestamp;
     }
 
     /**
