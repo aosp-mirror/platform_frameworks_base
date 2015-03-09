@@ -16,6 +16,7 @@
 
 package android.provider;
 
+import android.annotation.SystemApi;
 import android.content.Context;
 
 import java.util.Locale;
@@ -27,6 +28,7 @@ import java.util.Locale;
  *
  * @hide
  */
+@SystemApi
 public abstract class SearchIndexableData {
 
     /**

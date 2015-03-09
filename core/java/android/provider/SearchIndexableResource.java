@@ -16,6 +16,7 @@
 
 package android.provider;
 
+import android.annotation.SystemApi;
 import android.content.Context;
 
 /**
@@ -31,6 +32,7 @@ import android.content.Context;
  *
  * @hide
  */
+@SystemApi
 public class SearchIndexableResource extends SearchIndexableData {
 
     /**

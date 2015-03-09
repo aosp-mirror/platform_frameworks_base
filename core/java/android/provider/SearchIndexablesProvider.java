@@ -16,6 +16,7 @@
 
 package android.provider;
 
+import android.annotation.SystemApi;
 import android.content.ContentProvider;
 import android.content.ContentValues;
 import android.content.Context;
@@ -61,6 +62,7 @@ import android.net.Uri;
  *
  * @hide
  */
+@SystemApi
 public abstract class SearchIndexablesProvider extends ContentProvider {
     private static final String TAG = "IndexablesProvider";
 
