@@ -24,6 +24,7 @@ import android.os.RemoteException;
 import android.provider.Settings.Global;
 import android.service.notification.Condition;
 import android.service.notification.IConditionProvider;
+import android.service.notification.NotificationListenerService;
 import android.service.notification.ZenModeConfig;
 import android.util.Slog;
 
@@ -56,6 +57,8 @@ public class ZenLog {
     private static final int TYPE_CONFIG = 11;
     private static final int TYPE_NOT_INTERCEPTED = 12;
     private static final int TYPE_DISABLE_EFFECTS = 13;
+    private static final int TYPE_SUPPRESSOR_CHANGED = 14;
+    private static final int TYPE_LISTENER_HINTS_CHANGED = 15;
 
     private static int sNext;
     private static int sSize;
@@ -120,6 +123,17 @@ public class ZenLog {
         append(TYPE_DISABLE_EFFECTS, record.getKey() + "," + reason);
     }
 
+    public static void traceEffectsSuppressorChanged(ComponentName oldSuppressor,
+            ComponentName newSuppressor) {
+        append(TYPE_SUPPRESSOR_CHANGED, componentToString(oldSuppressor) + "->"
+            + componentToString(newSuppressor));
+    }
+
+    public static void traceListenerHintsChanged(int oldHints, int newHints, int listenerCount) {
+        append(TYPE_LISTENER_HINTS_CHANGED, hintsToString(oldHints) + "->"
+            + hintsToString(newHints) + ",listeners=" + listenerCount);
+    }
+
     private static String subscribeResult(IConditionProvider provider, RemoteException e) {
         return provider == null ? "no provider" : e != null ? e.getMessage() : "ok";
     }
@@ -139,6 +153,8 @@ public class ZenLog {
             case TYPE_CONFIG: return "config";
             case TYPE_NOT_INTERCEPTED: return "not_intercepted";
             case TYPE_DISABLE_EFFECTS: return "disable_effects";
+            case TYPE_SUPPRESSOR_CHANGED: return "suppressor_changed";
+            case TYPE_LISTENER_HINTS_CHANGED: return "listener_hints_changed";
             default: return "unknown";
         }
     }
@@ -158,6 +174,14 @@ public class ZenLog {
             case Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS: return "important_interruptions";
             case Global.ZEN_MODE_NO_INTERRUPTIONS: return "no_interruptions";
             default: return "unknown";
+        }
+    }
+
+    private static String hintsToString(int hints) {
+        switch (hints) {
+            case 0 : return "none";
+            case NotificationListenerService.HINT_HOST_DISABLE_EFFECTS : return "disable_effects";
+            default: return Integer.toString(hints);
         }
     }
 

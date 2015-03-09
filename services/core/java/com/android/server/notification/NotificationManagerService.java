@@ -1026,6 +1026,7 @@ public class NotificationManagerService extends SystemService {
     private void updateListenerHintsLocked() {
         final int hints = mListenersDisablingEffects.isEmpty() ? 0 : HINT_HOST_DISABLE_EFFECTS;
         if (hints == mListenerHints) return;
+        ZenLog.traceListenerHintsChanged(mListenerHints, hints, mListenersDisablingEffects.size());
         mListenerHints = hints;
         scheduleListenerHintsChanged(hints);
     }
@@ -1034,6 +1035,7 @@ public class NotificationManagerService extends SystemService {
         final ComponentName suppressor = !mListenersDisablingEffects.isEmpty()
                 ? mListenersDisablingEffects.valueAt(0).component : null;
         if (Objects.equals(suppressor, mEffectsSuppressor)) return;
+        ZenLog.traceEffectsSuppressorChanged(mEffectsSuppressor, suppressor);
         mEffectsSuppressor = suppressor;
         mZenModeHelper.setEffectsSuppressed(suppressor != null);
         getContext().sendBroadcast(new Intent(NotificationManager.ACTION_EFFECTS_SUPPRESSOR_CHANGED)
