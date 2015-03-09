@@ -202,6 +202,12 @@ page.type=about
 
           <div class="landing-partners cols">
             <div class="col-4">
+              <img src="/wear/images/partners/acer.png" alt="Acer">
+            </div>
+            <div class="col-4">
+              <img src="/wear/images/partners/arm.png" alt="ARM">
+            </div>
+            <div class="col-4">
               <img src="/wear/images/partners/asus.png" alt="Asus">
             </div>
             <div class="col-4">
@@ -212,6 +218,9 @@ page.type=about
             </div>
             <div class="col-4">
               <img src="/wear/images/partners/htc.png" alt="HTC">
+            </div>
+            <div class="col-4">
+              <img src="/wear/images/partners/huawei.png" alt="Huawei">
             </div>
             <div class="col-4">
               <img src="/wear/images/partners/intel.png" alt="Intel">
