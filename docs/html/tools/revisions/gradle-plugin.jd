@@ -39,6 +39,36 @@ href="http://tools.android.com/knownissues">http://tools.android.com/knownissues
 <div class="toggle-content opened">
   <p><a href="#" onclick="return toggleContent(this)">
     <img src="{@docRoot}assets/images/triangle-opened.png" class="toggle-content-img"
+      alt=""/>Android Plugin for Gradle, Revision 1.1.3</a> <em>(March 2015)</em>
+  </p>
+
+  <div class="toggle-content-toggleme">
+
+    <dl>
+    <dt>Dependencies:</dt>
+
+    <dd>
+      <ul>
+        <li>Gradle 2.2.1 or higher.</li>
+        <li>Build Tools 21.1.1 or higher.</li>
+      </ul>
+    </dd>
+
+    <dt>General Notes:</dt>
+    <dd>
+    <ul>
+      <li>Fixed issue with duplicated dependencies on a test app that triggered a ProGuard failure. </li>
+      <li>Fixed Comparator implementation which did not comply with the JDK Comparator contract and
+      generated a JDK 7 error.</li>
+    </ul>
+    </dd>
+  </div>
+</div>
+
+
+<div class="toggle-content closed">
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
       alt=""/>Android Plugin for Gradle, Revision 1.1.2</a> <em>(February 2015)</em>
   </p>
 
@@ -65,7 +95,6 @@ href="http://tools.android.com/knownissues">http://tools.android.com/knownissues
     </dd>
   </div>
 </div>
-
 
 
 
