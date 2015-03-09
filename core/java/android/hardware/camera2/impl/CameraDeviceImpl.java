@@ -28,6 +28,7 @@ import android.hardware.camera2.CaptureFailure;
 import android.hardware.camera2.ICameraDeviceCallbacks;
 import android.hardware.camera2.ICameraDeviceUser;
 import android.hardware.camera2.TotalCaptureResult;
+import android.hardware.camera2.params.OutputConfiguration;
 import android.hardware.camera2.utils.CameraBinderDecorator;
 import android.hardware.camera2.utils.CameraRuntimeException;
 import android.hardware.camera2.utils.LongParcelable;
@@ -417,6 +418,18 @@ public class CameraDeviceImpl extends CameraDevice {
     public void createCaptureSession(List<Surface> outputs,
             CameraCaptureSession.StateCallback callback, Handler handler)
             throws CameraAccessException {
+        List<OutputConfiguration> outConfigurations = new ArrayList<>(outputs.size());
+        for (Surface surface : outputs) {
+            outConfigurations.add(new OutputConfiguration(surface));
+        }
+        createCaptureSessionByOutputConfiguration(outConfigurations, callback, handler);
+    }
+
+    @Override
+    public void createCaptureSessionByOutputConfiguration(
+            List<OutputConfiguration> outputConfigurations,
+            CameraCaptureSession.StateCallback callback, Handler handler)
+            throws CameraAccessException {
         synchronized(mInterfaceLock) {
             if (DEBUG) {
                 Log.d(TAG, "createCaptureSession");
@@ -433,8 +446,12 @@ public class CameraDeviceImpl extends CameraDevice {
             // TODO: dont block for this
             boolean configureSuccess = true;
             CameraAccessException pendingException = null;
+            List<Surface> outSurfaces = new ArrayList<>(outputConfigurations.size());
+            for (OutputConfiguration config : outputConfigurations) {
+                outSurfaces.add(config.getSurface());
+            }
             try {
-                configureSuccess = configureOutputsChecked(outputs); // and then block until IDLE
+                configureSuccess = configureOutputsChecked(outSurfaces); // and then block until IDLE
             } catch (CameraAccessException e) {
                 configureSuccess = false;
                 pendingException = e;
@@ -446,7 +463,7 @@ public class CameraDeviceImpl extends CameraDevice {
             // Fire onConfigured if configureOutputs succeeded, fire onConfigureFailed otherwise.
             CameraCaptureSessionImpl newSession =
                     new CameraCaptureSessionImpl(mNextSessionId++,
-                            outputs, callback, handler, this, mDeviceHandler,
+                            outSurfaces, callback, handler, this, mDeviceHandler,
                             configureSuccess);
 
             // TODO: wait until current session closes, then create the new session
