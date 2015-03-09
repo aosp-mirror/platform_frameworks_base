@@ -76,6 +76,11 @@ public class PowerProfile {
     public static final String POWER_WIFI_ACTIVE = "wifi.active";
 
     /**
+     * Operating voltage of the WiFi controller.
+     */
+    public static final String OPERATING_VOLTAGE_WIFI = "wifi.voltage";
+
+    /**
      * Power consumption when GPS is on.
      */
     public static final String POWER_GPS_ON = "gps.on";
@@ -94,6 +99,11 @@ public class PowerProfile {
      * Power consumption when Bluetooth driver gets an AT command.
      */
     public static final String POWER_BLUETOOTH_AT_CMD = "bluetooth.at";
+
+    /**
+     * Operating voltage of the Bluetooth controller.
+     */
+    public static final String OPERATING_VOLTAGE_BLUETOOTH = "bluetooth.voltage";
 
     /**
      * Power consumption when screen is on, not including the backlight power.
@@ -224,11 +234,13 @@ public class PowerProfile {
     }
 
     /**
-     * Returns the average current in mA consumed by the subsystem 
+     * Returns the average current in mA consumed by the subsystem, or the given
+     * default value if the subsystem has no recorded value.
      * @param type the subsystem type
+     * @param defaultValue the value to return if the subsystem has no recorded value.
      * @return the average current in milliAmps.
      */
-    public double getAveragePower(String type) {
+    public double getAveragePowerOrDefault(String type, double defaultValue) {
         if (sPowerMap.containsKey(type)) {
             Object data = sPowerMap.get(type);
             if (data instanceof Double[]) {
@@ -237,8 +249,17 @@ public class PowerProfile {
                 return (Double) sPowerMap.get(type);
             }
         } else {
-            return 0;
+            return defaultValue;
         }
+    }
+
+    /**
+     * Returns the average current in mA consumed by the subsystem
+     * @param type the subsystem type
+     * @return the average current in milliAmps.
+     */
+    public double getAveragePower(String type) {
+        return getAveragePowerOrDefault(type, 0);
     }
     
     /**

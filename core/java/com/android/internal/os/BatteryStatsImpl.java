@@ -20,11 +20,15 @@ import static android.net.NetworkStats.UID_ALL;
 import static com.android.server.NetworkManagementSocketTagger.PROP_QTAGUID_ENABLED;
 
 import android.app.ActivityManager;
+import android.bluetooth.BluetoothActivityEnergyInfo;
+import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothHeadset;
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkStats;
+import android.net.wifi.IWifiManager;
+import android.net.wifi.WifiActivityEnergyInfo;
 import android.net.wifi.WifiManager;
 import android.os.BadParcelableException;
 import android.os.BatteryManager;
@@ -38,6 +42,8 @@ import android.os.Parcel;
 import android.os.ParcelFormatException;
 import android.os.Parcelable;
 import android.os.Process;
+import android.os.RemoteException;
+import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.WorkSource;
@@ -331,6 +337,12 @@ public final class BatteryStatsImpl extends BatteryStats {
             new LongSamplingCounter[NUM_NETWORK_ACTIVITY_TYPES];
     final LongSamplingCounter[] mNetworkPacketActivityCounters =
             new LongSamplingCounter[NUM_NETWORK_ACTIVITY_TYPES];
+
+    final LongSamplingCounter[] mBluetoothActivityCounters =
+            new LongSamplingCounter[NUM_CONTROLLER_ACTIVITY_TYPES];
+
+    final LongSamplingCounter[] mWifiActivityCounters =
+            new LongSamplingCounter[NUM_CONTROLLER_ACTIVITY_TYPES];
 
     boolean mWifiOn;
     StopwatchTimer mWifiOnTimer;
@@ -4307,6 +4319,20 @@ public final class BatteryStatsImpl extends BatteryStats {
         return mBluetoothStateTimer[bluetoothState].getCountLocked(which);
     }
 
+    @Override public long getBluetoothControllerActivity(int type, int which) {
+        if (type >= 0 && type < mBluetoothActivityCounters.length) {
+            return mBluetoothActivityCounters[type].getCountLocked(which);
+        }
+        return 0;
+    }
+
+    @Override public long getWifiControllerActivity(int type, int which) {
+        if (type >= 0 && type < mWifiActivityCounters.length) {
+            return mWifiActivityCounters[type].getCountLocked(which);
+        }
+        return 0;
+    }
+
     @Override public long getFlashlightOnTime(long elapsedRealtimeUs, int which) {
         return mFlashlightOnTimer.getTotalTimeLocked(elapsedRealtimeUs, which);
     }
@@ -6652,6 +6678,10 @@ public final class BatteryStatsImpl extends BatteryStats {
             mNetworkByteActivityCounters[i] = new LongSamplingCounter(mOnBatteryTimeBase);
             mNetworkPacketActivityCounters[i] = new LongSamplingCounter(mOnBatteryTimeBase);
         }
+        for (int i = 0; i < NUM_CONTROLLER_ACTIVITY_TYPES; i++) {
+            mBluetoothActivityCounters[i] = new LongSamplingCounter(mOnBatteryTimeBase);
+            mWifiActivityCounters[i] = new LongSamplingCounter(mOnBatteryTimeBase);
+        }
         mMobileRadioActiveTimer = new StopwatchTimer(null, -400, null, mOnBatteryTimeBase);
         mMobileRadioActivePerAppTimer = new StopwatchTimer(null, -401, null, mOnBatteryTimeBase);
         mMobileRadioActiveAdjustedTime = new LongSamplingCounter(mOnBatteryTimeBase);
@@ -7239,6 +7269,10 @@ public final class BatteryStatsImpl extends BatteryStats {
         for (int i=0; i< NUM_BLUETOOTH_STATES; i++) {
             mBluetoothStateTimer[i].reset(false);
         }
+        for (int i=0; i< NUM_CONTROLLER_ACTIVITY_TYPES; i++) {
+            mBluetoothActivityCounters[i].reset(false);
+            mWifiActivityCounters[i].reset(false);
+        }
         mNumConnectivityChange = mLoadedNumConnectivityChange = mUnpluggedNumConnectivityChange = 0;
 
         for (int i=0; i<mUidStats.size(); i++) {
@@ -7325,6 +7359,9 @@ public final class BatteryStatsImpl extends BatteryStats {
     public void pullPendingStateUpdatesLocked() {
         updateKernelWakelocksLocked();
         updateNetworkActivityLocked(NET_UPDATE_ALL, SystemClock.elapsedRealtime());
+        // TODO(adamlesinski): enable when bluedroid stops deadlocking. b/19248786
+        // updateBluetoothControllerActivityLocked();
+        updateWifiControllerActivityLocked();
         if (mOnBatteryInternal) {
             final boolean screenOn = mScreenState == Display.STATE_ON;
             updateDischargeScreenLevelsLocked(screenOn, screenOn);
@@ -7759,6 +7796,65 @@ public final class BatteryStatsImpl extends BatteryStats {
                 }
             }
         }
+    }
+
+    private void updateBluetoothControllerActivityLocked() {
+        BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
+        if (adapter == null) {
+            return;
+        }
+
+        // We read the data even if we are not on battery. Each read clears
+        // the previous data, so we must always read to make sure the
+        // data is for the current interval.
+        BluetoothActivityEnergyInfo info = adapter.getControllerActivityEnergyInfo(
+                BluetoothAdapter.ACTIVITY_ENERGY_INFO_REFRESHED);
+        if (info == null || !info.isValid() || !mOnBatteryInternal) {
+            // Bad info or we are not on battery.
+            return;
+        }
+
+        mBluetoothActivityCounters[CONTROLLER_RX_TIME].addCountLocked(
+                info.getControllerRxTimeMillis());
+        mBluetoothActivityCounters[CONTROLLER_TX_TIME].addCountLocked(
+                info.getControllerTxTimeMillis());
+        mBluetoothActivityCounters[CONTROLLER_IDLE_TIME].addCountLocked(
+                info.getControllerIdleTimeMillis());
+        mBluetoothActivityCounters[CONTROLLER_ENERGY].addCountLocked(
+                info.getControllerEnergyUsed());
+    }
+
+    private void updateWifiControllerActivityLocked() {
+        IWifiManager wifiManager = IWifiManager.Stub.asInterface(
+                ServiceManager.getService(Context.WIFI_SERVICE));
+        if (wifiManager == null) {
+            return;
+        }
+
+        WifiActivityEnergyInfo info;
+        try {
+            // We read the data even if we are not on battery. Each read clears
+            // the previous data, so we must always read to make sure the
+            // data is for the current interval.
+            info = wifiManager.reportActivityInfo();
+        } catch (RemoteException e) {
+            // Nothing to report, WiFi is dead.
+            return;
+        }
+
+        if (info == null || !info.isValid() || !mOnBatteryInternal) {
+            // Bad info or we are not on battery.
+            return;
+        }
+
+        mWifiActivityCounters[CONTROLLER_RX_TIME].addCountLocked(
+                info.getControllerRxTimeMillis());
+        mWifiActivityCounters[CONTROLLER_TX_TIME].addCountLocked(
+                info.getControllerTxTimeMillis());
+        mWifiActivityCounters[CONTROLLER_IDLE_TIME].addCountLocked(
+                info.getControllerIdleTimeMillis());
+        mWifiActivityCounters[CONTROLLER_ENERGY].addCountLocked(
+                info.getControllerEnergyUsed());
     }
 
     public long getAwakeTimeBattery() {
@@ -8475,6 +8571,15 @@ public final class BatteryStatsImpl extends BatteryStats {
         for (int i=0; i< NUM_BLUETOOTH_STATES; i++) {
             mBluetoothStateTimer[i].readSummaryFromParcelLocked(in);
         }
+
+        for (int i = 0; i < NUM_CONTROLLER_ACTIVITY_TYPES; i++) {
+            mBluetoothActivityCounters[i].readSummaryFromParcelLocked(in);
+        }
+
+        for (int i = 0; i < NUM_CONTROLLER_ACTIVITY_TYPES; i++) {
+            mWifiActivityCounters[i].readSummaryFromParcelLocked(in);
+        }
+
         mNumConnectivityChange = mLoadedNumConnectivityChange = in.readInt();
         mFlashlightOn = false;
         mFlashlightOnTimer.readSummaryFromParcelLocked(in);
@@ -8762,6 +8867,12 @@ public final class BatteryStatsImpl extends BatteryStats {
         mBluetoothOnTimer.writeSummaryFromParcelLocked(out, NOWREAL_SYS);
         for (int i=0; i< NUM_BLUETOOTH_STATES; i++) {
             mBluetoothStateTimer[i].writeSummaryFromParcelLocked(out, NOWREAL_SYS);
+        }
+        for (int i=0; i< NUM_CONTROLLER_ACTIVITY_TYPES; i++) {
+            mBluetoothActivityCounters[i].writeSummaryFromParcelLocked(out);
+        }
+        for (int i=0; i< NUM_CONTROLLER_ACTIVITY_TYPES; i++) {
+            mWifiActivityCounters[i].writeSummaryFromParcelLocked(out);
         }
         out.writeInt(mNumConnectivityChange);
         mFlashlightOnTimer.writeSummaryFromParcelLocked(out, NOWREAL_SYS);
@@ -9067,6 +9178,15 @@ public final class BatteryStatsImpl extends BatteryStats {
             mBluetoothStateTimer[i] = new StopwatchTimer(null, -500-i,
                     null, mOnBatteryTimeBase, in);
         }
+
+        for (int i = 0; i < NUM_CONTROLLER_ACTIVITY_TYPES; i++) {
+            mBluetoothActivityCounters[i] = new LongSamplingCounter(mOnBatteryTimeBase, in);
+        }
+
+        for (int i = 0; i < NUM_CONTROLLER_ACTIVITY_TYPES; i++) {
+            mWifiActivityCounters[i] = new LongSamplingCounter(mOnBatteryTimeBase, in);
+        }
+
         mNumConnectivityChange = in.readInt();
         mLoadedNumConnectivityChange = in.readInt();
         mUnpluggedNumConnectivityChange = in.readInt();
@@ -9211,6 +9331,12 @@ public final class BatteryStatsImpl extends BatteryStats {
         mBluetoothOnTimer.writeToParcel(out, uSecRealtime);
         for (int i=0; i< NUM_BLUETOOTH_STATES; i++) {
             mBluetoothStateTimer[i].writeToParcel(out, uSecRealtime);
+        }
+        for (int i=0; i< NUM_CONTROLLER_ACTIVITY_TYPES; i++) {
+            mBluetoothActivityCounters[i].writeToParcel(out);
+        }
+        for (int i=0; i< NUM_CONTROLLER_ACTIVITY_TYPES; i++) {
+            mWifiActivityCounters[i].writeToParcel(out);
         }
         out.writeInt(mNumConnectivityChange);
         out.writeInt(mLoadedNumConnectivityChange);

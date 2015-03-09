@@ -441,14 +441,14 @@ public abstract class BatteryStats implements Parcelable {
             public abstract boolean isActive();
 
             /**
-             * Returns the total time (in 1/100 sec) spent executing in user code.
+             * Returns the total time (in milliseconds) spent executing in user code.
              *
              * @param which one of STATS_SINCE_CHARGED, STATS_SINCE_UNPLUGGED, or STATS_CURRENT.
              */
             public abstract long getUserTime(int which);
 
             /**
-             * Returns the total time (in 1/100 sec) spent executing in system code.
+             * Returns the total time (in milliseconds) spent executing in system code.
              *
              * @param which one of STATS_SINCE_CHARGED, STATS_SINCE_UNPLUGGED, or STATS_CURRENT.
              */
@@ -476,14 +476,14 @@ public abstract class BatteryStats implements Parcelable {
             public abstract int getNumAnrs(int which);
 
             /**
-             * Returns the cpu time spent in microseconds while the process was in the foreground.
+             * Returns the cpu time (milliseconds) spent while the process was in the foreground.
              * @param which one of STATS_SINCE_CHARGED, STATS_SINCE_UNPLUGGED, or STATS_CURRENT.
              * @return foreground cpu time in microseconds
              */
             public abstract long getForegroundTime(int which);
 
             /**
-             * Returns the approximate cpu time spent in microseconds, at a certain CPU speed.
+             * Returns the approximate cpu time (in milliseconds) spent at a certain CPU speed.
              * @param speedStep the index of the CPU speed. This is not the actual speed of the
              * CPU.
              * @param which one of STATS_SINCE_CHARGED, STATS_SINCE_UNPLUGGED, or STATS_CURRENT.
@@ -1858,6 +1858,15 @@ public abstract class BatteryStats implements Parcelable {
     public abstract long getNetworkActivityBytes(int type, int which);
     public abstract long getNetworkActivityPackets(int type, int which);
 
+    public static final int CONTROLLER_IDLE_TIME = 0;
+    public static final int CONTROLLER_RX_TIME = 1;
+    public static final int CONTROLLER_TX_TIME = 2;
+    public static final int CONTROLLER_ENERGY = 3;
+    public static final int NUM_CONTROLLER_ACTIVITY_TYPES = CONTROLLER_ENERGY + 1;
+
+    public abstract long getBluetoothControllerActivity(int type, int which);
+    public abstract long getWifiControllerActivity(int type, int which);
+
     /**
      * Return the wall clock time when battery stats data collection started.
      */
@@ -3142,6 +3151,35 @@ public abstract class BatteryStats implements Parcelable {
         if (!didOne) sb.append(" (no activity)");
         pw.println(sb.toString());
 
+        final long wifiIdleTimeMs = getBluetoothControllerActivity(CONTROLLER_IDLE_TIME, which);
+        final long wifiRxTimeMs = getBluetoothControllerActivity(CONTROLLER_RX_TIME, which);
+        final long wifiTxTimeMs = getBluetoothControllerActivity(CONTROLLER_TX_TIME, which);
+        final long wifiTotalTimeMs = wifiIdleTimeMs + wifiRxTimeMs + wifiTxTimeMs;
+
+        sb.setLength(0);
+        sb.append(prefix);
+        sb.append("  WiFi Idle time: "); formatTimeMs(sb, wifiIdleTimeMs);
+        sb.append(" (");
+        sb.append(formatRatioLocked(wifiIdleTimeMs, wifiTotalTimeMs));
+        sb.append(")");
+        pw.println(sb.toString());
+
+        sb.setLength(0);
+        sb.append(prefix);
+        sb.append("  WiFi Rx time:   "); formatTimeMs(sb, wifiRxTimeMs);
+        sb.append(" (");
+        sb.append(formatRatioLocked(wifiRxTimeMs, wifiTotalTimeMs));
+        sb.append(")");
+        pw.println(sb.toString());
+
+        sb.setLength(0);
+        sb.append(prefix);
+        sb.append("  WiFi Tx time:   "); formatTimeMs(sb, wifiTxTimeMs);
+        sb.append(" (");
+        sb.append(formatRatioLocked(wifiTxTimeMs, wifiTotalTimeMs));
+        sb.append(")");
+        pw.println(sb.toString());
+
         sb.setLength(0);
         sb.append(prefix);
                 sb.append("  Bluetooth on: "); formatTimeMs(sb, bluetoothOnTime / 1000);
@@ -3169,7 +3207,39 @@ public abstract class BatteryStats implements Parcelable {
             sb.append(getPhoneDataConnectionCount(i, which));
             sb.append("x");
         }
+
         if (!didOne) sb.append(" (no activity)");
+        pw.println(sb.toString());
+
+        final long bluetoothIdleTimeMs =
+                getBluetoothControllerActivity(CONTROLLER_IDLE_TIME, which);
+        final long bluetoothRxTimeMs = getBluetoothControllerActivity(CONTROLLER_RX_TIME, which);
+        final long bluetoothTxTimeMs = getBluetoothControllerActivity(CONTROLLER_TX_TIME, which);
+        final long bluetoothTotalTimeMs = bluetoothIdleTimeMs + bluetoothRxTimeMs +
+                bluetoothTxTimeMs;
+
+        sb.setLength(0);
+        sb.append(prefix);
+        sb.append("  Bluetooth Idle time: "); formatTimeMs(sb, bluetoothIdleTimeMs);
+        sb.append(" (");
+        sb.append(formatRatioLocked(bluetoothIdleTimeMs, bluetoothTotalTimeMs));
+        sb.append(")");
+        pw.println(sb.toString());
+
+        sb.setLength(0);
+        sb.append(prefix);
+        sb.append("  Bluetooth Rx time:   "); formatTimeMs(sb, bluetoothRxTimeMs);
+        sb.append(" (");
+        sb.append(formatRatioLocked(bluetoothRxTimeMs, bluetoothTotalTimeMs));
+        sb.append(")");
+        pw.println(sb.toString());
+
+        sb.setLength(0);
+        sb.append(prefix);
+        sb.append("  Bluetooth Tx time:   "); formatTimeMs(sb, bluetoothTxTimeMs);
+        sb.append(" (");
+        sb.append(formatRatioLocked(bluetoothTxTimeMs, bluetoothTotalTimeMs));
+        sb.append(")");
         pw.println(sb.toString());
 
         pw.println();
