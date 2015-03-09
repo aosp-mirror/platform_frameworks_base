@@ -18,6 +18,7 @@ package android.hardware.camera2;
 
 import android.hardware.camera2.params.StreamConfigurationMap;
 import android.graphics.ImageFormat;
+import android.hardware.camera2.params.OutputConfiguration;
 import android.os.Handler;
 import android.view.Surface;
 
@@ -377,6 +378,20 @@ public abstract class CameraDevice implements AutoCloseable {
      * @see StreamConfigurationMap#getOutputSizes(Class)
      */
     public abstract void createCaptureSession(List<Surface> outputs,
+            CameraCaptureSession.StateCallback callback, Handler handler)
+            throws CameraAccessException;
+
+    /**
+     * <p>Create a new camera capture session by providing the target output set of Surfaces and
+     * its corresponding surface configuration to the camera device.</p>
+     *
+     * @see #createCaptureSession
+     * @see OutputConfiguration
+     *
+     * @hide
+     */
+    public abstract void createCaptureSessionByOutputConfiguration(
+            List<OutputConfiguration> outputConfigurations,
             CameraCaptureSession.StateCallback callback, Handler handler)
             throws CameraAccessException;
 
