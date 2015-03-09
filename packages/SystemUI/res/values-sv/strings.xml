@@ -303,7 +303,7 @@
     <string name="description_direction_left" msgid="7207478719805562165">"Dra åt vänster för <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> ."</string>
     <string name="zen_no_interruptions_with_warning" msgid="4396898053735625287">"Inga avbrott. Inte ens alarm."</string>
     <string name="zen_no_interruptions" msgid="7970973750143632592">"Inga avbrott"</string>
-    <string name="zen_important_interruptions" msgid="3477041776609757628">"Endast prioriterade avbrott"</string>
+    <string name="zen_important_interruptions" msgid="3477041776609757628">"Endast prioriterade samtal och aviseringar"</string>
     <string name="zen_alarm_information_time" msgid="5235772206174372272">"Nästa alarm är kl. <xliff:g id="ALARM_TIME">%s</xliff:g>"</string>
     <string name="zen_alarm_information_day_time" msgid="8422733576255047893">"Nästa alarm är <xliff:g id="ALARM_DAY_AND_TIME">%s</xliff:g>"</string>
     <string name="zen_alarm_warning" msgid="6873910860111498041">"Alarmet kommer inte att höras kl. <xliff:g id="ALARM_TIME">%s</xliff:g>"</string>
