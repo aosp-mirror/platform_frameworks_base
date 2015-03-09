@@ -796,6 +796,8 @@
     <string name="permdesc_accessNotifications" msgid="458457742683431387">"دوسرے ایپس کے ذریعے شائع کردہ کے بشمول ایپ کو اطلاعات کی بازیابی، تفتیش اور انہیں صاف کرنے کی اجازت دیتا ہے۔"</string>
     <string name="permlab_bindNotificationListenerService" msgid="7057764742211656654">"اطلاع سننے والی سروس کے پابند بنیں"</string>
     <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"حامل کو اطلاع سننے والی سروس کے اعلی سطحی انٹرفیس کا پابند ہونے کی اجازت دیتا ہے۔ عام ایپس کیلئے کبھی بھی اس کی ضرورت نہيں ہونی چاہئے۔"</string>
+    <string name="permlab_bindChooserTargetService" msgid="3443261076710185673">"ایک انتخاب کنندہ کی اہدافی سروس کا پابند بنائیں"</string>
+    <string name="permdesc_bindChooserTargetService" msgid="1413908999583734970">"حامل کو ایک انتخاب کنندہ کی اہدافی سروس کے اعلی سطحی انٹرفیس کا پابند بنانے کی اجازت دیتا ہے۔ عام اطلاقات کیلئے کبھی بھی اس کی ضرورت نہيں ہونی چاہئے۔"</string>
     <string name="permlab_bindConditionProviderService" msgid="1180107672332704641">"شرط فراہم کرنے والی ایک سروس کے پابند بنیں"</string>
     <string name="permdesc_bindConditionProviderService" msgid="1680513931165058425">"حامل کو شرط فراہم کنندہ کی سروس کے اعلی سطحی انٹرفیس کا پابند ہونے کی اجازت دیتا ہے۔ عام ایپس کیلئے کبھی بھی اس کی ضرورت نہيں ہونی چاہئے۔"</string>
     <string name="permlab_bindMediaRouteService" msgid="6637740382272686835">"میڈیا روٹ سروس کا پابند بنیں"</string>
@@ -1263,6 +1265,14 @@
     <string name="old_app_description" msgid="2082094275580358049">"نئی ایپ شروع نہ کریں۔"</string>
     <string name="new_app_action" msgid="5472756926945440706">"<xliff:g id="OLD_APP">%1$s</xliff:g> شروع کریں"</string>
     <string name="new_app_description" msgid="1932143598371537340">"محفوظ کیے بغیر پرانی ایپ بند کریں۔"</string>
+    <!-- no translation found for dump_heap_notification (2618183274836056542) -->
+    <skip />
+    <!-- no translation found for dump_heap_notification_detail (2075673362317481664) -->
+    <skip />
+    <!-- no translation found for dump_heap_title (5864292264307651673) -->
+    <skip />
+    <!-- no translation found for dump_heap_text (4809417337240334941) -->
+    <skip />
     <string name="sendText" msgid="5209874571959469142">"متن کیلئے ایک کارروائی منتخب کریں"</string>
     <string name="volume_ringtone" msgid="6885421406845734650">"رنگر والیوم"</string>
     <string name="volume_music" msgid="5421651157138628171">"میڈیا والیوم"</string>
@@ -1776,7 +1786,9 @@
       <item quantity="one">1 سیکنڈ میں دوبارہ کوشش کریں</item>
     </plurals>
     <string name="restr_pin_try_later" msgid="973144472490532377">"بعد میں دوبارہ کوشش کریں"</string>
-    <string name="immersive_mode_confirmation" msgid="7227416894979047467">"مکمل اسکرین سے نکلنے کیلئے اوپر سے نیچے سوائپ کریں۔"</string>
+    <string name="immersive_cling_title" msgid="8394201622932303336">"پوری اسکرین میں دیکھ رہے ہیں"</string>
+    <string name="immersive_cling_description" msgid="3482371193207536040">"خارج ہونے کیلئے اوپر سے نیچے سوائپ کریں۔"</string>
+    <string name="immersive_cling_positive" msgid="5016839404568297683">"سمجھ آ گئی"</string>
     <string name="done_label" msgid="2093726099505892398">"ہو گیا"</string>
     <string name="hour_picker_description" msgid="6698199186859736512">"گھنٹوں کا سرکلر سلائیڈر"</string>
     <string name="minute_picker_description" msgid="8606010966873791190">"منٹس سرکلر سلائیڈر"</string>
@@ -1791,7 +1803,8 @@
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"دفتر <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="lock_to_app_toast" msgid="7570091317001980053">"اس اسکرین سے پن ہٹانے کیلئے، واپس جائیں اور مجموعی جائزہ کو ایک ساتھ ٹچ کریں اور دبا کر رکھیں۔"</string>
     <string name="lock_to_app_toast_accessible" msgid="8239120109365070664">"اس اسکرین سے پن ہٹانے کیلئے، مجموعی جائزہ کو ٹچ کریں اور دبا کر رکھیں۔"</string>
-    <string name="lock_to_app_toast_locked" msgid="8739004135132606329">"اسکرین کو پن کر دیا گیا ہے۔ آپ کی تنظیم کی جانب سے پن ہٹانے کی اجازت نہیں ہے۔"</string>
+    <!-- no translation found for lock_to_app_toast_locked (9125176335701699164) -->
+    <skip />
     <string name="lock_to_app_start" msgid="6643342070839862795">"اسکرین کو پن کر دیا گیا"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"اسکرین کا پن ہٹا دیا گیا"</string>
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"‏پن ہٹانے سے پہلے PIN طلب کریں"</string>

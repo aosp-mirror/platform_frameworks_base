@@ -196,9 +196,9 @@
     <string name="global_action_toggle_silent_mode" msgid="8219525344246810925">"Stille modus"</string>
     <string name="global_action_silent_mode_on_status" msgid="3289841937003758806">"Geluid is UIT"</string>
     <string name="global_action_silent_mode_off_status" msgid="1506046579177066419">"Geluid is AAN"</string>
-    <string name="global_actions_toggle_airplane_mode" msgid="5884330306926307456">"Vliegmodus"</string>
-    <string name="global_actions_airplane_mode_on_status" msgid="2719557982608919750">"Vliegmodus is AAN"</string>
-    <string name="global_actions_airplane_mode_off_status" msgid="5075070442854490296">"Vliegmodus is UIT"</string>
+    <string name="global_actions_toggle_airplane_mode" msgid="5884330306926307456">"Vliegtuigmodus"</string>
+    <string name="global_actions_airplane_mode_on_status" msgid="2719557982608919750">"Vliegtuigmodus is AAN"</string>
+    <string name="global_actions_airplane_mode_off_status" msgid="5075070442854490296">"Vliegtuigmodus is UIT"</string>
     <string name="global_action_settings" msgid="1756531602592545966">"Instellingen"</string>
     <string name="global_action_voice_assist" msgid="7751191495200504480">"Spraakassistent"</string>
     <string name="global_action_lockdown" msgid="8751542514724332873">"Nu vergrendelen"</string>
@@ -796,6 +796,8 @@
     <string name="permdesc_accessNotifications" msgid="458457742683431387">"Hiermee kan de app meldingen ophalen, onderzoeken en wissen, waaronder meldingen die zijn verzonden door andere apps."</string>
     <string name="permlab_bindNotificationListenerService" msgid="7057764742211656654">"koppelen aan een listener-service voor meldingen"</string>
     <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"Hiermee kan de houder koppelen aan de hoofdinterface van een listener-service voor meldingen. Nooit vereist voor normale apps."</string>
+    <string name="permlab_bindChooserTargetService" msgid="3443261076710185673">"verbinding maken met een doelservice voor kiezers"</string>
+    <string name="permdesc_bindChooserTargetService" msgid="1413908999583734970">"Hiermee kan de houder verbinding maken met de hoofdinterface van een doelservice voor kiezers. Nooit vereist voor normale apps."</string>
     <string name="permlab_bindConditionProviderService" msgid="1180107672332704641">"binden aan de service van een provider van voorwaarden"</string>
     <string name="permdesc_bindConditionProviderService" msgid="1680513931165058425">"Hiermee kan de houder binden aan de hoofdinterface van de service van een provider van voorwaarden. Nooit vereist voor normale apps."</string>
     <string name="permlab_bindMediaRouteService" msgid="6637740382272686835">"binden aan een service voor mediaroutering"</string>
@@ -1263,6 +1265,14 @@
     <string name="old_app_description" msgid="2082094275580358049">"De nieuwe app niet starten."</string>
     <string name="new_app_action" msgid="5472756926945440706">"<xliff:g id="OLD_APP">%1$s</xliff:g> starten"</string>
     <string name="new_app_description" msgid="1932143598371537340">"De oude app stoppen zonder opslaan."</string>
+    <!-- no translation found for dump_heap_notification (2618183274836056542) -->
+    <skip />
+    <!-- no translation found for dump_heap_notification_detail (2075673362317481664) -->
+    <skip />
+    <!-- no translation found for dump_heap_title (5864292264307651673) -->
+    <skip />
+    <!-- no translation found for dump_heap_text (4809417337240334941) -->
+    <skip />
     <string name="sendText" msgid="5209874571959469142">"Een actie voor tekst selecteren"</string>
     <string name="volume_ringtone" msgid="6885421406845734650">"Belvolume"</string>
     <string name="volume_music" msgid="5421651157138628171">"Mediavolume"</string>
@@ -1776,7 +1786,9 @@
       <item quantity="one">Probeer het over 1 seconde opnieuw</item>
     </plurals>
     <string name="restr_pin_try_later" msgid="973144472490532377">"Probeer het later opnieuw"</string>
-    <string name="immersive_mode_confirmation" msgid="7227416894979047467">"Veeg omlaag vanaf de bovenkant om het volledige scherm te sluiten."</string>
+    <string name="immersive_cling_title" msgid="8394201622932303336">"Volledig scherm wordt weergegeven"</string>
+    <string name="immersive_cling_description" msgid="3482371193207536040">"Veeg omlaag vanaf de bovenkant van het scherm om af te sluiten."</string>
+    <string name="immersive_cling_positive" msgid="5016839404568297683">"Ik snap het"</string>
     <string name="done_label" msgid="2093726099505892398">"Gereed"</string>
     <string name="hour_picker_description" msgid="6698199186859736512">"Ronde schuifregelaar voor uren"</string>
     <string name="minute_picker_description" msgid="8606010966873791190">"Ronde schuifregelaar voor minuten"</string>
@@ -1791,7 +1803,8 @@
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"Werk <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="lock_to_app_toast" msgid="7570091317001980053">"Blijf \'Terug\' en \'Overzicht\' tegelijk aanraken om dit scherm los te maken."</string>
     <string name="lock_to_app_toast_accessible" msgid="8239120109365070664">"Blijf \'Overzicht\' aanraken om dit scherm los te maken."</string>
-    <string name="lock_to_app_toast_locked" msgid="8739004135132606329">"Scherm is vastgezet. Losmaken is niet toegestaan door uw organisatie."</string>
+    <!-- no translation found for lock_to_app_toast_locked (9125176335701699164) -->
+    <skip />
     <string name="lock_to_app_start" msgid="6643342070839862795">"Scherm vastgezet"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"Scherm losgemaakt"</string>
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Vragen om pincode voordat items worden losgemaakt"</string>

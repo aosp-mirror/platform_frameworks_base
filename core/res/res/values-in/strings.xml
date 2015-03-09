@@ -796,6 +796,8 @@
     <string name="permdesc_accessNotifications" msgid="458457742683431387">"Mengizinkan aplikasi mengambil, memeriksa, dan menghapus pemberitahuan, termasuk pemberitahuan yang diposkan oleh aplikasi lain."</string>
     <string name="permlab_bindNotificationListenerService" msgid="7057764742211656654">"mengikat layanan pendengar pemberitahuan"</string>
     <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"Memungkinkan pemegang mengikat antarmuka tingkat teratas dari suatu layanan pendengar pemberitahuan. Tidak pernah diperlukan oleh aplikasi normal."</string>
+    <string name="permlab_bindChooserTargetService" msgid="3443261076710185673">"mengikat ke layanan sasaran pemilik"</string>
+    <string name="permdesc_bindChooserTargetService" msgid="1413908999583734970">"Memungkinkan pemegang mengikat antarmuka tingkat tinggi dari layanan interaksi suara. Tidak pernah diperlukan oleh aplikasi normal."</string>
     <string name="permlab_bindConditionProviderService" msgid="1180107672332704641">"mengikat ke layanan penyedia ketentuan"</string>
     <string name="permdesc_bindConditionProviderService" msgid="1680513931165058425">"Memungkinkan pemegang mengikat antarmuka tingkat tinggi dari layanan penyedia ketentuan. Tidak pernah diperlukan oleh aplikasi normal."</string>
     <string name="permlab_bindMediaRouteService" msgid="6637740382272686835">"mengikat ke layanan rute media"</string>
@@ -1263,6 +1265,14 @@
     <string name="old_app_description" msgid="2082094275580358049">"Jangan memulai aplikasi baru."</string>
     <string name="new_app_action" msgid="5472756926945440706">"Mulai <xliff:g id="OLD_APP">%1$s</xliff:g>"</string>
     <string name="new_app_description" msgid="1932143598371537340">"Hentikan apl lama tanpa menyimpan."</string>
+    <!-- no translation found for dump_heap_notification (2618183274836056542) -->
+    <skip />
+    <!-- no translation found for dump_heap_notification_detail (2075673362317481664) -->
+    <skip />
+    <!-- no translation found for dump_heap_title (5864292264307651673) -->
+    <skip />
+    <!-- no translation found for dump_heap_text (4809417337240334941) -->
+    <skip />
     <string name="sendText" msgid="5209874571959469142">"Pilih tindakan untuk teks"</string>
     <string name="volume_ringtone" msgid="6885421406845734650">"Volume dering"</string>
     <string name="volume_music" msgid="5421651157138628171">"Volume media"</string>
@@ -1776,7 +1786,9 @@
       <item quantity="one">Coba 1 detik lagi</item>
     </plurals>
     <string name="restr_pin_try_later" msgid="973144472490532377">"Coba lagi nanti"</string>
-    <string name="immersive_mode_confirmation" msgid="7227416894979047467">"Gesek dari atas ke bawah untuk keluar dari layar penuh."</string>
+    <string name="immersive_cling_title" msgid="8394201622932303336">"Melihat layar penuh"</string>
+    <string name="immersive_cling_description" msgid="3482371193207536040">"Untuk keluar, gesek ke bawah dari atas."</string>
+    <string name="immersive_cling_positive" msgid="5016839404568297683">"Mengerti"</string>
     <string name="done_label" msgid="2093726099505892398">"Selesai"</string>
     <string name="hour_picker_description" msgid="6698199186859736512">"Penggeser putar jam"</string>
     <string name="minute_picker_description" msgid="8606010966873791190">"Penggeser putar menit"</string>
@@ -1791,7 +1803,8 @@
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"Kantor <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="lock_to_app_toast" msgid="7570091317001980053">"Untuk melepas pin layar ini, sentuh lama tombol Kembali dan Ringkasan secara bersamaan."</string>
     <string name="lock_to_app_toast_accessible" msgid="8239120109365070664">"Untuk melepas pin layar ini, sentuh lama tombol Ringkasan."</string>
-    <string name="lock_to_app_toast_locked" msgid="8739004135132606329">"Layar disematkan. Pelepasan sematan tidak diizinkan oleh organisasi Anda."</string>
+    <!-- no translation found for lock_to_app_toast_locked (9125176335701699164) -->
+    <skip />
     <string name="lock_to_app_start" msgid="6643342070839862795">"Layar disematkan"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"Layar dicopot sematannya"</string>
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Meminta PIN sebelum melepas sematan"</string>

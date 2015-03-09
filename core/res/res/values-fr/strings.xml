@@ -620,7 +620,7 @@
     <string name="permdesc_hardware_test" msgid="6597964191208016605">"Permet à l\'application de contrôler différents périphériques à des fins de test matériel."</string>
     <string name="permlab_fm" msgid="8749504526866832">"accéder aux radios FM"</string>
     <string name="permdesc_fm" msgid="4145699441237962818">"Permet à l\'application d\'accéder aux radios FM afin d\'écouter des programmes."</string>
-    <string name="permlab_callPhone" msgid="3925836347681847954">"Appeler directement les numéros de téléphone"</string>
+    <string name="permlab_callPhone" msgid="3925836347681847954">"appeler directement les numéros de téléphone"</string>
     <string name="permdesc_callPhone" msgid="3740797576113760827">"Permet à l\'application d\'appeler des numéros de téléphone sans votre intervention. Cette autorisation peut entraîner des frais ou des appels imprévus et ne permet pas à l\'application d\'appeler des numéros d\'urgence. Les applications malveillantes peuvent générer des frais en passant des appels sans votre consentement."</string>
     <string name="permlab_callPrivileged" msgid="4198349211108497879">"Appel direct de tout numéro de téléphone"</string>
     <string name="permdesc_callPrivileged" msgid="1689024901509996810">"Permet à l\'application d\'appeler n\'importe quel numéro de téléphone, y compris les numéros d\'urgence, sans votre intervention. Des applications malveillantes peuvent passer des appels inutiles et interdits aux services d\'urgence."</string>
@@ -694,7 +694,7 @@
     <string name="permdesc_createNetworkSockets" msgid="3403062187779724185">"Permet à l\'application de créer des sockets réseau et d\'utiliser des protocoles réseau personnalisés. Le navigateur et d\'autres applications permettent d\'envoyer des données sur Internet. Cette autorisation n\'est donc pas nécessaire pour envoyer des données sur Internet."</string>
     <string name="permlab_writeApnSettings" msgid="505660159675751896">"changer/intercepter les paramètres et le trafic du réseau"</string>
     <string name="permdesc_writeApnSettings" msgid="5333798886412714193">"Permet à l\'application de modifier les paramètres réseau, ainsi que d\'intercepter et de surveiller tout le trafic réseau ayant pour but de modifier le proxy et le port d\'un APN, par exemple. Des applications malveillantes peuvent exploiter cette fonctionnalité pour surveiller, rediriger ou modifier les paquets réseau à votre insu."</string>
-    <string name="permlab_changeNetworkState" msgid="958884291454327309">"Modification de la connectivité du réseau"</string>
+    <string name="permlab_changeNetworkState" msgid="958884291454327309">"modifier la connectivité réseau"</string>
     <string name="permdesc_changeNetworkState" msgid="6789123912476416214">"Permet à l\'application de modifier l\'état de la connectivité du réseau."</string>
     <string name="permlab_changeTetherState" msgid="5952584964373017960">"changer la connectivité du partage de connexion"</string>
     <string name="permdesc_changeTetherState" msgid="1524441344412319780">"Permet à l\'application de modifier l\'état de la connectivité du partage de connexion."</string>
@@ -738,14 +738,10 @@
     <string name="permdesc_nfc" msgid="7120611819401789907">"Permet à l\'application de communiquer avec des tags, des cartes et des lecteurs compatibles avec la technologie NFC (communication en champ proche)."</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"désactiver le verrouillage de l\'écran"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"Permet à l\'application de désactiver le verrouillage des touches et toute mesure de sécurité via mot de passe associée. Par exemple, votre téléphone désactive le verrouillage des touches lorsque vous recevez un appel, puis le réactive lorsque vous raccrochez."</string>
-    <!-- no translation found for permlab_manageFingerprint (5640858826254575638) -->
-    <skip />
-    <!-- no translation found for permdesc_manageFingerprint (178208705828055464) -->
-    <skip />
-    <!-- no translation found for permlab_useFingerprint (3150478619915124905) -->
-    <skip />
-    <!-- no translation found for permdesc_useFingerprint (9165097460730684114) -->
-    <skip />
+    <string name="permlab_manageFingerprint" msgid="5640858826254575638">"Gérer le matériel d\'empreintes digitales"</string>
+    <string name="permdesc_manageFingerprint" msgid="178208705828055464">"Autoriser l\'application à invoquer des méthodes pour ajouter et supprimer des modèles d\'empreintes digitales"</string>
+    <string name="permlab_useFingerprint" msgid="3150478619915124905">"Utiliser le matériel d\'empreintes digitales"</string>
+    <string name="permdesc_useFingerprint" msgid="9165097460730684114">"Autoriser l\'application à utiliser le matériel d\'empreintes digitales pour l\'authentification"</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"lire les paramètres de synchronisation"</string>
     <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"Permet à l\'application d\'accéder aux paramètres de synchronisation d\'un compte. Par exemple, cette autorisation peut permettre de déterminer si l\'application Contacts est synchronisée avec un compte ou non."</string>
     <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"activer/désactiver la synchronisation"</string>
@@ -800,6 +796,8 @@
     <string name="permdesc_accessNotifications" msgid="458457742683431387">"Permet aux applications de récupérer, d\'examiner et d\'autoriser les notifications, y compris celles envoyées par d\'autres applications."</string>
     <string name="permlab_bindNotificationListenerService" msgid="7057764742211656654">"s\'associer à l\'interface de niveau supérieur d\'un service d\'écoute des notifications"</string>
     <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"Permet à l\'application de s\'associer à l\'interface de niveau supérieur d\'un service d\'écoute des notifications. Ne devrait jamais être nécessaire pour les applications normales."</string>
+    <string name="permlab_bindChooserTargetService" msgid="3443261076710185673">"S\'associer à un service de cible d\'un sélecteur"</string>
+    <string name="permdesc_bindChooserTargetService" msgid="1413908999583734970">"Permet à l\'application autorisée de s\'associer à l\'interface de niveau supérieur du service de cible d\'un sélecteur. Cette fonctionnalité ne devrait pas être nécessaire pour les applications standards."</string>
     <string name="permlab_bindConditionProviderService" msgid="1180107672332704641">"s\'associer à un service de fournisseur de conditions"</string>
     <string name="permdesc_bindConditionProviderService" msgid="1680513931165058425">"Permet à l\'application de s\'associer à l\'interface de niveau supérieur d\'un service de fournisseur de conditions. Ne devrait pas être nécessaire pour les applications standards."</string>
     <string name="permlab_bindMediaRouteService" msgid="6637740382272686835">"s\'associer à un service d\'itinéraires médias"</string>
@@ -1267,6 +1265,14 @@
     <string name="old_app_description" msgid="2082094275580358049">"Ne pas lancer la nouvelle application"</string>
     <string name="new_app_action" msgid="5472756926945440706">"Démarrer <xliff:g id="OLD_APP">%1$s</xliff:g>"</string>
     <string name="new_app_description" msgid="1932143598371537340">"Arrêtez l\'ancienne application sans enregistrer."</string>
+    <!-- no translation found for dump_heap_notification (2618183274836056542) -->
+    <skip />
+    <!-- no translation found for dump_heap_notification_detail (2075673362317481664) -->
+    <skip />
+    <!-- no translation found for dump_heap_title (5864292264307651673) -->
+    <skip />
+    <!-- no translation found for dump_heap_text (4809417337240334941) -->
+    <skip />
     <string name="sendText" msgid="5209874571959469142">"Sélectionner une action pour le texte"</string>
     <string name="volume_ringtone" msgid="6885421406845734650">"Volume de la sonnerie"</string>
     <string name="volume_music" msgid="5421651157138628171">"Volume"</string>
@@ -1780,7 +1786,9 @@
       <item quantity="other">Réessayer dans <xliff:g id="COUNT">%d</xliff:g> secondes</item>
     </plurals>
     <string name="restr_pin_try_later" msgid="973144472490532377">"Veuillez réessayer ultérieurement."</string>
-    <string name="immersive_mode_confirmation" msgid="7227416894979047467">"Faites glisser le doigt vers le bas pour quitter le mode plein écran."</string>
+    <string name="immersive_cling_title" msgid="8394201622932303336">"Affichage en plein écran"</string>
+    <string name="immersive_cling_description" msgid="3482371193207536040">"Pour quitter, balayez l\'écran du haut vers le bas."</string>
+    <string name="immersive_cling_positive" msgid="5016839404568297683">"OK"</string>
     <string name="done_label" msgid="2093726099505892398">"OK"</string>
     <string name="hour_picker_description" msgid="6698199186859736512">"Curseur circulaire des heures"</string>
     <string name="minute_picker_description" msgid="8606010966873791190">"Curseur circulaire des minutes"</string>
@@ -1795,7 +1803,8 @@
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"<xliff:g id="LABEL">%1$s</xliff:g> (travail)"</string>
     <string name="lock_to_app_toast" msgid="7570091317001980053">"Pour annuler l\'épinglage, appuyez de manière prolongée et simultanée sur \"Retour\" et \"Aperçu\"."</string>
     <string name="lock_to_app_toast_accessible" msgid="8239120109365070664">"Pour annuler l\'épinglage, appuyez de manière prolongée sur \"Aperçu\"."</string>
-    <string name="lock_to_app_toast_locked" msgid="8739004135132606329">"L\'écran est épinglé. L\'annulation de l\'épinglage n\'est pas autorisée par votre organisation."</string>
+    <!-- no translation found for lock_to_app_toast_locked (9125176335701699164) -->
+    <skip />
     <string name="lock_to_app_start" msgid="6643342070839862795">"Écran épinglé."</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"Épinglage d\'écran annulé."</string>
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Demander le code PIN avant d\'annuler l\'épinglage"</string>

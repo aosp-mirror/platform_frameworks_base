@@ -798,6 +798,8 @@
     <string name="permdesc_accessNotifications" msgid="458457742683431387">"Umožňuje aplikacím načítat, zobrazovat a mazat oznámení včetně těch přidaných jinými aplikacemi."</string>
     <string name="permlab_bindNotificationListenerService" msgid="7057764742211656654">"navázání na službu pro poslouchání oznámení"</string>
     <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"Umožňuje držiteli navázat se na nejvyšší úroveň služby pro poslouchání oznámení. Běžné aplikace by toto oprávnění neměly nikdy požadovat."</string>
+    <string name="permlab_bindChooserTargetService" msgid="3443261076710185673">"navázat se na cílovou službu nástroje pro výběr"</string>
+    <string name="permdesc_bindChooserTargetService" msgid="1413908999583734970">"Umožňuje držiteli navázat se na rozhraní nejvyšší úrovně cílové služby nástroje pro výběr. Běžné aplikace by toto oprávnění neměly nikdy potřebovat."</string>
     <string name="permlab_bindConditionProviderService" msgid="1180107672332704641">"navázání na službu poskytovatele podmínky"</string>
     <string name="permdesc_bindConditionProviderService" msgid="1680513931165058425">"Umožňuje držiteli navázat se na nejvyšší úroveň rozhraní služby poskytovatele podmínky. Běžné aplikace by toto oprávnění neměly nikdy potřebovat."</string>
     <string name="permlab_bindMediaRouteService" msgid="6637740382272686835">"navázání na službu směrování médií"</string>
@@ -1273,6 +1275,14 @@
     <string name="old_app_description" msgid="2082094275580358049">"Nespouštět novou aplikaci."</string>
     <string name="new_app_action" msgid="5472756926945440706">"Spustit aplikaci <xliff:g id="OLD_APP">%1$s</xliff:g>"</string>
     <string name="new_app_description" msgid="1932143598371537340">"Zastavit starou aplikaci bez uložení."</string>
+    <!-- no translation found for dump_heap_notification (2618183274836056542) -->
+    <skip />
+    <!-- no translation found for dump_heap_notification_detail (2075673362317481664) -->
+    <skip />
+    <!-- no translation found for dump_heap_title (5864292264307651673) -->
+    <skip />
+    <!-- no translation found for dump_heap_text (4809417337240334941) -->
+    <skip />
     <string name="sendText" msgid="5209874571959469142">"Vyberte akci pro text"</string>
     <string name="volume_ringtone" msgid="6885421406845734650">"Hlasitost vyzvánění"</string>
     <string name="volume_music" msgid="5421651157138628171">"Hlasitost médií"</string>
@@ -1794,7 +1804,9 @@
       <item quantity="one">Zkuste to znovu za 1 sekundu</item>
     </plurals>
     <string name="restr_pin_try_later" msgid="973144472490532377">"Zkuste to znovu později"</string>
-    <string name="immersive_mode_confirmation" msgid="7227416894979047467">"Režim celé obrazovky ukončíte přejetím dolů."</string>
+    <string name="immersive_cling_title" msgid="8394201622932303336">"Zobrazení celé obrazovky"</string>
+    <string name="immersive_cling_description" msgid="3482371193207536040">"Režim ukončíte přejetím prstem shora dolů."</string>
+    <string name="immersive_cling_positive" msgid="5016839404568297683">"Rozumím"</string>
     <string name="done_label" msgid="2093726099505892398">"Hotovo"</string>
     <string name="hour_picker_description" msgid="6698199186859736512">"Kruhový posuvník hodin"</string>
     <string name="minute_picker_description" msgid="8606010966873791190">"Kruhový posuvník minut"</string>
@@ -1809,7 +1821,8 @@
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"Pracovní <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="lock_to_app_toast" msgid="7570091317001980053">"Chcete-li tuto obrazovku uvolnit, klepněte současně na možnosti Zpět a Přehled a podržte je."</string>
     <string name="lock_to_app_toast_accessible" msgid="8239120109365070664">"Chcete-li tuto obrazovku uvolnit, klepněte na možnost Přehled a podržte ji."</string>
-    <string name="lock_to_app_toast_locked" msgid="8739004135132606329">"Obrazovka je připnuta. Vaše organizace uvolnění zakázala."</string>
+    <!-- no translation found for lock_to_app_toast_locked (9125176335701699164) -->
+    <skip />
     <string name="lock_to_app_start" msgid="6643342070839862795">"Obrazovka připnuta"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"Obrazovka uvolněna"</string>
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Před uvolněním požádat o kód PIN"</string>

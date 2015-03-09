@@ -796,6 +796,8 @@
     <string name="permdesc_accessNotifications" msgid="458457742683431387">"Võimaldab rakendusel tuua, kontrollida ja kustutada märguandeid, sh neid, mille on postitanud teised rakendused."</string>
     <string name="permlab_bindNotificationListenerService" msgid="7057764742211656654">"seo märguannete kuulamisteenusega"</string>
     <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"Võimaldab omanikul siduda märguannete kuulamisteenuse ülemise taseme kasutajaliidese. Seda ei tohiks tavarakenduste puhul kunagi vaja olla."</string>
+    <string name="permlab_bindChooserTargetService" msgid="3443261076710185673">"valija sihtteenusega sidumine"</string>
+    <string name="permdesc_bindChooserTargetService" msgid="1413908999583734970">"Võimaldab omanikul siduda valija sihtteenuse ülataseme liidesega. Tavarakenduste puhul ei peaks seda kunagi vaja minema."</string>
     <string name="permlab_bindConditionProviderService" msgid="1180107672332704641">"seo tingimuse pakkuja teenusega"</string>
     <string name="permdesc_bindConditionProviderService" msgid="1680513931165058425">"Lubab omanikul siduda tingimuse pakkuja teenuse ülataseme liidesega. Pole kunagi vajalik tavaliste rakenduste puhul."</string>
     <string name="permlab_bindMediaRouteService" msgid="6637740382272686835">"meediumi marsruutimise teenusega sidumine"</string>
@@ -1263,6 +1265,14 @@
     <string name="old_app_description" msgid="2082094275580358049">"Ärge käivitage uut rakendust."</string>
     <string name="new_app_action" msgid="5472756926945440706">"Käivitage rakendus <xliff:g id="OLD_APP">%1$s</xliff:g>"</string>
     <string name="new_app_description" msgid="1932143598371537340">"Peatage vana rakendus salvestamata."</string>
+    <!-- no translation found for dump_heap_notification (2618183274836056542) -->
+    <skip />
+    <!-- no translation found for dump_heap_notification_detail (2075673362317481664) -->
+    <skip />
+    <!-- no translation found for dump_heap_title (5864292264307651673) -->
+    <skip />
+    <!-- no translation found for dump_heap_text (4809417337240334941) -->
+    <skip />
     <string name="sendText" msgid="5209874571959469142">"Valige teksti jaoks toiming"</string>
     <string name="volume_ringtone" msgid="6885421406845734650">"Helina helitugevus"</string>
     <string name="volume_music" msgid="5421651157138628171">"Meediumi helitugevus"</string>
@@ -1776,7 +1786,9 @@
       <item quantity="one">Proovige uuesti 1 sekundi pärast</item>
     </plurals>
     <string name="restr_pin_try_later" msgid="973144472490532377">"Proovige hiljem uuesti"</string>
-    <string name="immersive_mode_confirmation" msgid="7227416894979047467">"Täisekraanilt väljumiseks pühkige ülevalt alla."</string>
+    <string name="immersive_cling_title" msgid="8394201622932303336">"Kuvamine täisekraanil"</string>
+    <string name="immersive_cling_description" msgid="3482371193207536040">"Väljumiseks pühkige ülevalt alla."</string>
+    <string name="immersive_cling_positive" msgid="5016839404568297683">"Selge"</string>
     <string name="done_label" msgid="2093726099505892398">"Valmis"</string>
     <string name="hour_picker_description" msgid="6698199186859736512">"Ringikujuline tunniliugur"</string>
     <string name="minute_picker_description" msgid="8606010966873791190">"Ringikujuline minutiliugur"</string>
@@ -1791,7 +1803,8 @@
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"Töö <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="lock_to_app_toast" msgid="7570091317001980053">"Ekraanikuva vabastamiseks puudutage pikalt samal ajal nuppe Tagasi ja Ülevaade."</string>
     <string name="lock_to_app_toast_accessible" msgid="8239120109365070664">"Ekraanikuva vabastamiseks puudutage pikalt nuppu Ülevaade."</string>
-    <string name="lock_to_app_toast_locked" msgid="8739004135132606329">"Ekraan on kinnitatud. Teie organisatsioon ei luba vabastamist."</string>
+    <!-- no translation found for lock_to_app_toast_locked (9125176335701699164) -->
+    <skip />
     <string name="lock_to_app_start" msgid="6643342070839862795">"Ekraan on kinnitatud"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"Ekraan on vabastatud"</string>
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Enne vabastamist küsi PIN-koodi"</string>

@@ -797,6 +797,8 @@
     <string name="permdesc_accessNotifications" msgid="458457742683431387">"Permite aplicației să recupereze, să examineze și să șteargă notificări, inclusiv pe cele postate de alte aplicații."</string>
     <string name="permlab_bindNotificationListenerService" msgid="7057764742211656654">"conectare la un serviciu de citire a notificărilor"</string>
     <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"Permite proprietarului să se conecteze la interfața de nivel superior a unui serviciu de citire a notificărilor. În mod normal aplicațiile nu ar trebui să aibă nevoie de această permisiune."</string>
+    <string name="permlab_bindChooserTargetService" msgid="3443261076710185673">"se conectează la un serviciu de alegere a țintei"</string>
+    <string name="permdesc_bindChooserTargetService" msgid="1413908999583734970">"Permite aplicației să se conecteze la interfața de nivel superior a unui serviciu de alegere a țintei. Nu ar trebui să fie necesară pentru aplicațiile obișnuite."</string>
     <string name="permlab_bindConditionProviderService" msgid="1180107672332704641">"conectare la un serviciu furnizor de condiții"</string>
     <string name="permdesc_bindConditionProviderService" msgid="1680513931165058425">"Permite proprietarului să se conecteze la interfața de nivel superior a unui serviciu furnizor de condiții. Nu ar trebui să fie necesară pentru aplicațiile obișnuite."</string>
     <string name="permlab_bindMediaRouteService" msgid="6637740382272686835">"se conectează la un serviciu de trasee multimedia"</string>
@@ -1268,6 +1270,14 @@
     <string name="old_app_description" msgid="2082094275580358049">"Nu porniţi aplicaţia nouă."</string>
     <string name="new_app_action" msgid="5472756926945440706">"Porniţi <xliff:g id="OLD_APP">%1$s</xliff:g>"</string>
     <string name="new_app_description" msgid="1932143598371537340">"Opriţi vechea aplicaţie fără să salvaţi."</string>
+    <!-- no translation found for dump_heap_notification (2618183274836056542) -->
+    <skip />
+    <!-- no translation found for dump_heap_notification_detail (2075673362317481664) -->
+    <skip />
+    <!-- no translation found for dump_heap_title (5864292264307651673) -->
+    <skip />
+    <!-- no translation found for dump_heap_text (4809417337240334941) -->
+    <skip />
     <string name="sendText" msgid="5209874571959469142">"Alegeţi o acţiune pentru text"</string>
     <string name="volume_ringtone" msgid="6885421406845734650">"Volum sonerie"</string>
     <string name="volume_music" msgid="5421651157138628171">"Volum media"</string>
@@ -1785,7 +1795,9 @@
       <item quantity="one">Reîncercați într-o secundă</item>
     </plurals>
     <string name="restr_pin_try_later" msgid="973144472490532377">"Reîncercați mai târziu"</string>
-    <string name="immersive_mode_confirmation" msgid="7227416894979047467">"Glisați în jos pentru a ieși din ecran complet."</string>
+    <string name="immersive_cling_title" msgid="8394201622932303336">"Vizualizare pe ecran complet"</string>
+    <string name="immersive_cling_description" msgid="3482371193207536040">"Pentru a ieși, glisați de sus în jos."</string>
+    <string name="immersive_cling_positive" msgid="5016839404568297683">"Am înțeles"</string>
     <string name="done_label" msgid="2093726099505892398">"Terminat"</string>
     <string name="hour_picker_description" msgid="6698199186859736512">"Selector circular pentru ore"</string>
     <string name="minute_picker_description" msgid="8606010966873791190">"Selector circular pentru minute"</string>
@@ -1800,7 +1812,8 @@
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"<xliff:g id="LABEL">%1$s</xliff:g> de serviciu"</string>
     <string name="lock_to_app_toast" msgid="7570091317001980053">"Pentru a anula fixarea pe ecran, apăsați lung, simultan, pe Înapoi și pe Vizualizare generală."</string>
     <string name="lock_to_app_toast_accessible" msgid="8239120109365070664">"Pentru a anula fixarea pe ecran, apăsați lung pe Vizualizare generală."</string>
-    <string name="lock_to_app_toast_locked" msgid="8739004135132606329">"Ecranul este fixat. Anularea fixării nu este permisă de organizația dvs."</string>
+    <!-- no translation found for lock_to_app_toast_locked (9125176335701699164) -->
+    <skip />
     <string name="lock_to_app_start" msgid="6643342070839862795">"Ecran fixat"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"Fixarea ecranului anulată"</string>
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Solicită codul PIN înainte de a anula fixarea"</string>

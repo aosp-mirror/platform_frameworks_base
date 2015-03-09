@@ -800,6 +800,8 @@
     <string name="permdesc_accessNotifications" msgid="458457742683431387">"يتيح للتطبيق استرجاع الإشعارات وفحصها ومسحها، بما في ذلك تلك التي نشرتها تطبيقات أخرى."</string>
     <string name="permlab_bindNotificationListenerService" msgid="7057764742211656654">"الربط بخدمة تلقّي الإشعارات الصوتية"</string>
     <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"يتيح للمالك الربط بواجهة المستوى العلوي لخدمة تلقّي الإشعارات الصوتية. ولن تكون هناك حاجة إليه مطلقًا مع التطبيقات العادية."</string>
+    <string name="permlab_bindChooserTargetService" msgid="3443261076710185673">"الربط بخدمة اختيار الهدف"</string>
+    <string name="permdesc_bindChooserTargetService" msgid="1413908999583734970">"للسماح للمالك بالربط بواجهة المستوى العلوي لخدمة اختيار الهدف. لن تكون هناك حاجة إليه مطلقًا مع التطبيقات العادية."</string>
     <string name="permlab_bindConditionProviderService" msgid="1180107672332704641">"الربط بخدمة موفر الحالة"</string>
     <string name="permdesc_bindConditionProviderService" msgid="1680513931165058425">"للسماح للمالك بالربط بواجهة المستوى العلوي لخدمة موفر الحالة. لن تكون هناك حاجة إلى هذا الإعداد مطلقًا مع التطبيقات العادية."</string>
     <string name="permlab_bindMediaRouteService" msgid="6637740382272686835">"الربط بخدمة توجيه الوسائط"</string>
@@ -1283,6 +1285,14 @@
     <string name="old_app_description" msgid="2082094275580358049">"عدم بدء التطبيق الجديد."</string>
     <string name="new_app_action" msgid="5472756926945440706">"بدء <xliff:g id="OLD_APP">%1$s</xliff:g>"</string>
     <string name="new_app_description" msgid="1932143598371537340">"إيقاف التطبيق القديم بدون الحفظ."</string>
+    <!-- no translation found for dump_heap_notification (2618183274836056542) -->
+    <skip />
+    <!-- no translation found for dump_heap_notification_detail (2075673362317481664) -->
+    <skip />
+    <!-- no translation found for dump_heap_title (5864292264307651673) -->
+    <skip />
+    <!-- no translation found for dump_heap_text (4809417337240334941) -->
+    <skip />
     <string name="sendText" msgid="5209874571959469142">"اختيار إجراء للنص"</string>
     <string name="volume_ringtone" msgid="6885421406845734650">"مستوى صوت الرنين"</string>
     <string name="volume_music" msgid="5421651157138628171">"مستوى صوت الوسائط"</string>
@@ -1812,7 +1822,9 @@
       <item quantity="one">حاول مرة أخرى خلال ثانية واحدة</item>
     </plurals>
     <string name="restr_pin_try_later" msgid="973144472490532377">"أعد المحاولة لاحقًا"</string>
-    <string name="immersive_mode_confirmation" msgid="7227416894979047467">"مرر بسرعة من أعلى لأسفل للخروج من وضع ملء الشاشة."</string>
+    <string name="immersive_cling_title" msgid="8394201622932303336">"جارٍ العرض بملء الشاشة"</string>
+    <string name="immersive_cling_description" msgid="3482371193207536040">"للخروج، مرر بسرعة من أعلى إلى أسفل."</string>
+    <string name="immersive_cling_positive" msgid="5016839404568297683">"حسنًا"</string>
     <string name="done_label" msgid="2093726099505892398">"تم"</string>
     <string name="hour_picker_description" msgid="6698199186859736512">"شريط التمرير الدائري للساعات"</string>
     <string name="minute_picker_description" msgid="8606010966873791190">"شريط التمرير الدائري للدقائق"</string>
@@ -1827,7 +1839,8 @@
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"<xliff:g id="LABEL">%1$s</xliff:g> المخصص للعمل"</string>
     <string name="lock_to_app_toast" msgid="7570091317001980053">"لإلغاء تثبيت هذه الشاشة، يمكنك لمس \"رجوع\" و\"نظرة عامة\" في آن واحد مع الاستمرار."</string>
     <string name="lock_to_app_toast_accessible" msgid="8239120109365070664">"لإلغاء تثبيت هذه الشاشة، يمكنك لمس \"نظرة عامة\" مع الاستمرار."</string>
-    <string name="lock_to_app_toast_locked" msgid="8739004135132606329">"الشاشة مثبتة. لا تسمح منظمتك بإلغاء التثبيت."</string>
+    <!-- no translation found for lock_to_app_toast_locked (9125176335701699164) -->
+    <skip />
     <string name="lock_to_app_start" msgid="6643342070839862795">"تم تثبيت الشاشة"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"تم إلغاء تثبيت الشاشة"</string>
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"المطالبة برقم التعريف الشخصي قبل إزالة التثبيت"</string>

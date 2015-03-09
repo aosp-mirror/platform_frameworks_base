@@ -528,7 +528,7 @@
     <string name="permdesc_readSocialStream" product="default" msgid="4255706027172050872">"あなたや友だちのソーシャル更新情報へのアクセスと同期をアプリに許可します。情報の共有は慎重に行ってください。これを許可すると、あなたと友だちがソーシャルネットワークで行ったやり取りを、機密性に関係なくアプリから読み取ることができるようになります。注: この許可は、一部のソーシャルネットワークでは適用されない場合があります。"</string>
     <string name="permlab_writeSocialStream" product="default" msgid="3504179222493235645">"ソーシャルストリームに書く"</string>
     <string name="permdesc_writeSocialStream" product="default" msgid="3086557552204114849">"友だちのソーシャル更新情報の表示をアプリに許可します。情報の共有は慎重に行ってください。これによりアプリは、友だちから発信されたかのようなメッセージを作成できるようになります。注: この許可は、一部のソーシャルネットワークでは適用されない場合があります。"</string>
-    <string name="permlab_readCalendar" msgid="5972727560257612398">"カレンダーの予定と機密情報を読み取る"</string>
+    <string name="permlab_readCalendar" msgid="5972727560257612398">"カレンダーの予定と機密情報の読み取り"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="4216462049057658723">"タブレットに保存されているカレンダーの予定（友だちや同僚の予定も含めすべて）を読み取ることをアプリに許可します。これにより、アプリがカレンダーのデータを機密性に関係なく共有または保存できるようになる可能性があります。"</string>
     <string name="permdesc_readCalendar" product="tv" msgid="3191352452242394196">"テレビに保存されているカレンダーの予定（友だちや同僚の予定も含めすべて）を読み取ることをアプリに許可します。これにより、アプリがカレンダーのデータを機密性に関係なく共有または保存できるようになる可能性があります。"</string>
     <string name="permdesc_readCalendar" product="default" msgid="7434548682470851583">"携帯端末に保存されているカレンダーの予定（友だちや同僚の予定も含めすべて）を読み取ることをアプリに許可します。これにより、アプリがカレンダーのデータを機密性に関係なく共有または保存できるようになる可能性があります。"</string>
@@ -738,14 +738,10 @@
     <string name="permdesc_nfc" msgid="7120611819401789907">"NFCタグ、カード、リーダーとの通信をアプリに許可します。"</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"画面ロックの無効化"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"キーロックとキーロックに関連付けられたパスワードのセキュリティを無効にすることをアプリに許可します。たとえば、かかってきた電話を受ける際にキーロックを無効にし、通話が終了したらキーロックを再度有効にする場合などに使用します。"</string>
-    <!-- no translation found for permlab_manageFingerprint (5640858826254575638) -->
-    <skip />
-    <!-- no translation found for permdesc_manageFingerprint (178208705828055464) -->
-    <skip />
-    <!-- no translation found for permlab_useFingerprint (3150478619915124905) -->
-    <skip />
-    <!-- no translation found for permdesc_useFingerprint (9165097460730684114) -->
-    <skip />
+    <string name="permlab_manageFingerprint" msgid="5640858826254575638">"指紋ハードウェアの管理"</string>
+    <string name="permdesc_manageFingerprint" msgid="178208705828055464">"使用する指紋テンプレートの追加や削除を行う方法の呼び出しをアプリに許可します。"</string>
+    <string name="permlab_useFingerprint" msgid="3150478619915124905">"指紋ハードウェアの使用"</string>
+    <string name="permdesc_useFingerprint" msgid="9165097460730684114">"指紋ハードウェアを認証に使用することをアプリに許可します"</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"同期設定の読み取り"</string>
     <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"アカウントの同期設定の読み取りをアプリに許可します。たとえば、連絡帳アプリがアカウントと同期しているかどうかをアプリから特定できるようになります。"</string>
     <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"同期のON/OFFの切り替え"</string>
@@ -800,6 +796,8 @@
     <string name="permdesc_accessNotifications" msgid="458457742683431387">"通知（他のアプリから投稿されたものも含む）を取得、調査、クリアすることをアプリに許可します。"</string>
     <string name="permlab_bindNotificationListenerService" msgid="7057764742211656654">"通知リスナーサービスにバインド"</string>
     <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"通知リスナーサービスのトップレベルインターフェースにバインドすることを所有者に許可します。通常のアプリでは不要です。"</string>
+    <string name="permlab_bindChooserTargetService" msgid="3443261076710185673">"選択した対象サービスへのバインド"</string>
+    <string name="permdesc_bindChooserTargetService" msgid="1413908999583734970">"選択した対象サービスのトップレベルインターフェースにバインドすることを所有者に許可します。通常のアプリでは不要です。"</string>
     <string name="permlab_bindConditionProviderService" msgid="1180107672332704641">"コンディションプロバイダサービスへのバインド"</string>
     <string name="permdesc_bindConditionProviderService" msgid="1680513931165058425">"コンディションプロバイダサービスのトップレベルインターフェースにバインドすることを所有者に許可します。通常のアプリでは不要です。"</string>
     <string name="permlab_bindMediaRouteService" msgid="6637740382272686835">"メディアルートサービスへのバインド"</string>
@@ -1267,6 +1265,14 @@
     <string name="old_app_description" msgid="2082094275580358049">"新しいアプリを起動しません。"</string>
     <string name="new_app_action" msgid="5472756926945440706">"<xliff:g id="OLD_APP">%1$s</xliff:g>を起動"</string>
     <string name="new_app_description" msgid="1932143598371537340">"古いアプリを保存せずに停止します。"</string>
+    <!-- no translation found for dump_heap_notification (2618183274836056542) -->
+    <skip />
+    <!-- no translation found for dump_heap_notification_detail (2075673362317481664) -->
+    <skip />
+    <!-- no translation found for dump_heap_title (5864292264307651673) -->
+    <skip />
+    <!-- no translation found for dump_heap_text (4809417337240334941) -->
+    <skip />
     <string name="sendText" msgid="5209874571959469142">"アプリケーションを選択"</string>
     <string name="volume_ringtone" msgid="6885421406845734650">"着信音量"</string>
     <string name="volume_music" msgid="5421651157138628171">"メディアの音量"</string>
@@ -1780,7 +1786,9 @@
       <item quantity="one">1秒後にもう一度お試しください</item>
     </plurals>
     <string name="restr_pin_try_later" msgid="973144472490532377">"しばらくしてから再試行"</string>
-    <string name="immersive_mode_confirmation" msgid="7227416894979047467">"全画面表示を終了するには、上から下にスワイプ"</string>
+    <string name="immersive_cling_title" msgid="8394201622932303336">"全画面表示"</string>
+    <string name="immersive_cling_description" msgid="3482371193207536040">"終了するには、上部から下にスワイプします。"</string>
+    <string name="immersive_cling_positive" msgid="5016839404568297683">"OK"</string>
     <string name="done_label" msgid="2093726099505892398">"完了"</string>
     <string name="hour_picker_description" msgid="6698199186859736512">"円形スライダー（時）"</string>
     <string name="minute_picker_description" msgid="8606010966873791190">"円形スライダー（分）"</string>
@@ -1795,7 +1803,8 @@
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"仕事の<xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="lock_to_app_toast" msgid="7570091317001980053">"この画面の固定を解除するには[戻る]と[最近]を同時に押し続けます。"</string>
     <string name="lock_to_app_toast_accessible" msgid="8239120109365070664">"この画面の固定を解除するには[最近]を押し続けます。"</string>
-    <string name="lock_to_app_toast_locked" msgid="8739004135132606329">"画面が固定されています。会社/組織により解除は許可されていません。"</string>
+    <!-- no translation found for lock_to_app_toast_locked (9125176335701699164) -->
+    <skip />
     <string name="lock_to_app_start" msgid="6643342070839862795">"画面を固定しました"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"画面固定を解除しました"</string>
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"オフライン再生を解除する前にPINの入力を求める"</string>

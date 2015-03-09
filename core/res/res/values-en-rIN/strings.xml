@@ -796,6 +796,8 @@
     <string name="permdesc_accessNotifications" msgid="458457742683431387">"Allows the app to retrieve, examine, and clear notifications, including those posted by other apps."</string>
     <string name="permlab_bindNotificationListenerService" msgid="7057764742211656654">"bind to a notification listener service"</string>
     <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"Allows the holder to bind to the top-level interface of a notification listener service. Should never be needed for normal apps."</string>
+    <string name="permlab_bindChooserTargetService" msgid="3443261076710185673">"bind to a chooser target service"</string>
+    <string name="permdesc_bindChooserTargetService" msgid="1413908999583734970">"Allows the holder to bind to the top-level interface of a chooser target service. Should never be needed for normal apps."</string>
     <string name="permlab_bindConditionProviderService" msgid="1180107672332704641">"bind to a condition provider service"</string>
     <string name="permdesc_bindConditionProviderService" msgid="1680513931165058425">"Allows the holder to bind to the top-level interface of a condition provider service. Should never be needed for normal apps."</string>
     <string name="permlab_bindMediaRouteService" msgid="6637740382272686835">"bind to a media route service"</string>
@@ -1263,6 +1265,14 @@
     <string name="old_app_description" msgid="2082094275580358049">"Don\'t start the new app."</string>
     <string name="new_app_action" msgid="5472756926945440706">"Start <xliff:g id="OLD_APP">%1$s</xliff:g>"</string>
     <string name="new_app_description" msgid="1932143598371537340">"Stop the old app without saving."</string>
+    <!-- no translation found for dump_heap_notification (2618183274836056542) -->
+    <skip />
+    <!-- no translation found for dump_heap_notification_detail (2075673362317481664) -->
+    <skip />
+    <!-- no translation found for dump_heap_title (5864292264307651673) -->
+    <skip />
+    <!-- no translation found for dump_heap_text (4809417337240334941) -->
+    <skip />
     <string name="sendText" msgid="5209874571959469142">"Choose an action for text"</string>
     <string name="volume_ringtone" msgid="6885421406845734650">"Ringer volume"</string>
     <string name="volume_music" msgid="5421651157138628171">"Media volume"</string>
@@ -1776,7 +1786,9 @@
       <item quantity="one">Try again in 1 second</item>
     </plurals>
     <string name="restr_pin_try_later" msgid="973144472490532377">"Try again later"</string>
-    <string name="immersive_mode_confirmation" msgid="7227416894979047467">"Swipe down from the top to exit full screen."</string>
+    <string name="immersive_cling_title" msgid="8394201622932303336">"Viewing full screen"</string>
+    <string name="immersive_cling_description" msgid="3482371193207536040">"To exit, swipe down from the top."</string>
+    <string name="immersive_cling_positive" msgid="5016839404568297683">"Got it"</string>
     <string name="done_label" msgid="2093726099505892398">"Done"</string>
     <string name="hour_picker_description" msgid="6698199186859736512">"Hours circular slider"</string>
     <string name="minute_picker_description" msgid="8606010966873791190">"Minutes circular slider"</string>
@@ -1791,7 +1803,8 @@
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"Work <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="lock_to_app_toast" msgid="7570091317001980053">"To unpin this screen, touch and hold Back and Overview at the same time."</string>
     <string name="lock_to_app_toast_accessible" msgid="8239120109365070664">"To unpin this screen, touch and hold Overview."</string>
-    <string name="lock_to_app_toast_locked" msgid="8739004135132606329">"Screen is pinned. Unpinning isn\'t allowed by your organisation."</string>
+    <!-- no translation found for lock_to_app_toast_locked (9125176335701699164) -->
+    <skip />
     <string name="lock_to_app_start" msgid="6643342070839862795">"Screen pinned"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"Screen unpinned"</string>
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Ask for PIN before unpinning"</string>

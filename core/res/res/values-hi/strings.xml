@@ -738,10 +738,10 @@
     <string name="permdesc_nfc" msgid="7120611819401789907">"ऐप्स  को नियर फ़ील्ड कम्यूनिकेशन (NFC) टैग, कार्ड, और रीडर के साथ संचार करने देता है."</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"अपना स्‍क्रीन लॉक अक्षम करें"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"ऐप्स को कीलॉक और कोई भी संबद्ध पासवर्ड सुरक्षा अक्षम करने देता है. उदाहरण के लिए, इनकमिंग फ़ोन कॉल प्राप्त करते समय फ़ोन, कीलॉक को अक्षम कर देता है, फिर कॉल समाप्त होने पर कीलॉक को पुन: सक्षम कर देता है."</string>
-    <string name="permlab_manageFingerprint" msgid="5640858826254575638">"फ़िंगरप्रिंट हार्डवेयर को प्रबंधित करें"</string>
-    <string name="permdesc_manageFingerprint" msgid="178208705828055464">"फ़िंगरप्रिंट टेम्पलेट का उपयोग करने के लिए जोड़ने और हटाने हेतु ऐप को विधियां प्रारंभ करने देती है."</string>
-    <string name="permlab_useFingerprint" msgid="3150478619915124905">"फ़िंगरप्रिंट हार्डवेयर का उपयोग करें"</string>
-    <string name="permdesc_useFingerprint" msgid="9165097460730684114">"ऐप के प्रमाणीकरण के लिए फ़िंगरप्रिंट हार्डवेयर का उपयोग करने देती है"</string>
+    <string name="permlab_manageFingerprint" msgid="5640858826254575638">"अंगुली की छाप के लिए हार्डवेयर को प्रबंधित करें"</string>
+    <string name="permdesc_manageFingerprint" msgid="178208705828055464">"अंगुली की छाप वाले टेम्पलेट का उपयोग करने के लिए जोड़ने और हटाने हेतु ऐप को विधियां प्रारंभ करने देती है."</string>
+    <string name="permlab_useFingerprint" msgid="3150478619915124905">"अंगुली की छाप के लिए हार्डवेयर का उपयोग करें"</string>
+    <string name="permdesc_useFingerprint" msgid="9165097460730684114">"ऐप के प्रमाणीकरण के लिए अंगुली की छाप हार्डवेयर का उपयोग करने देती है"</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"समन्वयन सेटिंग पढ़ें"</string>
     <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"ऐप्स  को किसी खाते की समन्वयन सेटिंग पढ़ने देता है. उदाहरण के लिए, इससे यह निर्धारित किया जा सकता है कि लोग ऐप्स  किसी खाते के साथ समन्‍वयित है या नहीं."</string>
     <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"समन्‍वयन बंद या चालू टॉगल करें"</string>
@@ -796,6 +796,8 @@
     <string name="permdesc_accessNotifications" msgid="458457742683431387">"ऐप्स  को नोटिफिकेशन को प्राप्त करने, जांच करने, और साफ़ करने देता है, जिनमें अन्य ऐप्स  के द्वारा पोस्ट की गई सूचनाएं भी शामिल हैं."</string>
     <string name="permlab_bindNotificationListenerService" msgid="7057764742211656654">"नोटिफिकेशन श्रवणकर्ता सेवा से जुड़ें"</string>
     <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"धारक को नोटिफिकेशन श्रवणकर्ता सेवा के शीर्ष स्तरीय इंटरफ़ेस से जुड़ने देती है. सामान्य ऐप्स  के लिए कभी भी आवश्यक नहीं होनी चाहिए."</string>
+    <string name="permlab_bindChooserTargetService" msgid="3443261076710185673">"किसी चयनकर्ता लक्ष्य सेवा से आबद्ध हों"</string>
+    <string name="permdesc_bindChooserTargetService" msgid="1413908999583734970">"धारक को किसी चयनकर्ता लक्ष्य सेवा के शीर्ष-स्तरीय इंटरफ़ेस से आबद्ध होने देती है. सामान्‍य ऐप्‍स के लिए कभी भी आवश्यक नहीं होना चाहिए."</string>
     <string name="permlab_bindConditionProviderService" msgid="1180107672332704641">"किसी स्थिति प्रदाता सेवा से आबद्ध हों"</string>
     <string name="permdesc_bindConditionProviderService" msgid="1680513931165058425">"धारक को किसी स्थिति प्रदाता सेवा के शीर्ष-स्तर के इंटरफ़ेस से आबद्ध होने देती है. सामान्य ऐप्स के लिए कभी भी आवश्यक नहीं होना चाहिए."</string>
     <string name="permlab_bindMediaRouteService" msgid="6637740382272686835">"मीडिया रूट सेवा से आबद्ध हों"</string>
@@ -1263,6 +1265,14 @@
     <string name="old_app_description" msgid="2082094275580358049">"नया ऐप्स प्रारंभ न करें."</string>
     <string name="new_app_action" msgid="5472756926945440706">"<xliff:g id="OLD_APP">%1$s</xliff:g> प्रारंभ करें"</string>
     <string name="new_app_description" msgid="1932143598371537340">"पुराने ऐप्स को बिना सहेजे बंद करें."</string>
+    <!-- no translation found for dump_heap_notification (2618183274836056542) -->
+    <skip />
+    <!-- no translation found for dump_heap_notification_detail (2075673362317481664) -->
+    <skip />
+    <!-- no translation found for dump_heap_title (5864292264307651673) -->
+    <skip />
+    <!-- no translation found for dump_heap_text (4809417337240334941) -->
+    <skip />
     <string name="sendText" msgid="5209874571959469142">"लेख के लिए किसी क्रिया को चुनें"</string>
     <string name="volume_ringtone" msgid="6885421406845734650">"रिंगर वॉल्‍यूम"</string>
     <string name="volume_music" msgid="5421651157138628171">"मीडिया वॉल्‍यूम"</string>
@@ -1776,7 +1786,9 @@
       <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> सेकंड में पुन: प्रयास करें</item>
     </plurals>
     <string name="restr_pin_try_later" msgid="973144472490532377">"बाद में फिर से प्रयास करें"</string>
-    <string name="immersive_mode_confirmation" msgid="7227416894979047467">"पूर्ण स्क्रीन से बाहर आने के लिए ऊपर से नीचे स्वाइप करें."</string>
+    <string name="immersive_cling_title" msgid="8394201622932303336">"पूर्ण स्क्रीन में देखें"</string>
+    <string name="immersive_cling_description" msgid="3482371193207536040">"बाहर निकलने के लिए, ऊपर से नीचे स्वा‍इप करें."</string>
+    <string name="immersive_cling_positive" msgid="5016839404568297683">"समझ लिया"</string>
     <string name="done_label" msgid="2093726099505892398">"पूर्ण"</string>
     <string name="hour_picker_description" msgid="6698199186859736512">"घंटो का चक्राकार स्लाइडर"</string>
     <string name="minute_picker_description" msgid="8606010966873791190">"मिनटों का चक्राकार स्लाइडर"</string>
@@ -1791,7 +1803,8 @@
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"कार्यस्थल का <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="lock_to_app_toast" msgid="7570091317001980053">"इस स्क्रीन को अनपिन करने के लिए, एक ही समय में वापस जाएं और अवलोकन को स्पर्श करके रखें."</string>
     <string name="lock_to_app_toast_accessible" msgid="8239120109365070664">"इस स्क्रीन को अनपिन करने के लिए, अवलोकन को स्पर्श करके रखें."</string>
-    <string name="lock_to_app_toast_locked" msgid="8739004135132606329">"स्‍क्रीन पिन की गई है. आपके संगठन के द्वारा अनपिन करने की अनुमति नहीं है."</string>
+    <!-- no translation found for lock_to_app_toast_locked (9125176335701699164) -->
+    <skip />
     <string name="lock_to_app_start" msgid="6643342070839862795">"स्‍क्रीन पिन की गई"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"स्‍क्रीन अनपिन की गई"</string>
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"अनपिन करने से पहले पिन के लिए पूछें"</string>

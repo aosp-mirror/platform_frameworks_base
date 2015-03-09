@@ -796,6 +796,8 @@
     <string name="permdesc_accessNotifications" msgid="458457742683431387">"अनुप्रयोगाला इतर अ‍ॅप्‍सद्वारे पोस्‍ट केलेल्‍यांसह पुनर्प्राप्त करण्‍याची, तपासण्‍याची आणि सूचना साफ करण्‍याची अनुमती देते."</string>
     <string name="permlab_bindNotificationListenerService" msgid="7057764742211656654">"सूचना ऐकणार्‍या सेवेशी प्रतिबद्ध"</string>
     <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"होल्‍डरला सूचना ऐकणार्‍या सेवेच्‍या शीर्ष-दर्जाच्या इंटरफेसशी प्रतिबद्ध करण्‍याची अनुमती देते. सामान्‍य अ‍ॅप्‍ससाठी कधीही आवश्‍यक नसावे."</string>
+    <string name="permlab_bindChooserTargetService" msgid="3443261076710185673">"एका निवडकर्ता लक्ष्य सेवेसाठी प्रतिबद्ध करा"</string>
+    <string name="permdesc_bindChooserTargetService" msgid="1413908999583734970">"धारकास निवडकर्ता लक्ष्य सेवेच्या शीर्ष-स्‍तराच्या इंटरफेसशी प्रतिबद्ध करण्‍यास अनुमती देते. सामान्‍य अ‍ॅप्‍सकरिता कधीही आवश्‍यक नसते."</string>
     <string name="permlab_bindConditionProviderService" msgid="1180107672332704641">"एका अट प्रदाता सेवेवर प्रतिबद्ध करा"</string>
     <string name="permdesc_bindConditionProviderService" msgid="1680513931165058425">"स्थिती प्रदाता सेवेचा शीर्ष-स्तर इंटरफेस प्रतिबद्ध करण्यासाठी होल्डरला अनुमती देते. सामान्य अॅप्सकरिता कधीही आवश्यक नसते."</string>
     <string name="permlab_bindMediaRouteService" msgid="6637740382272686835">"मीडिया मार्ग सेवेशी प्रतिबद्ध व्हा"</string>
@@ -1263,6 +1265,14 @@
     <string name="old_app_description" msgid="2082094275580358049">"नवीन अॅप प्रारंभ करू नका."</string>
     <string name="new_app_action" msgid="5472756926945440706">"<xliff:g id="OLD_APP">%1$s</xliff:g> प्रारंभ करा"</string>
     <string name="new_app_description" msgid="1932143598371537340">"जतन न करता जुना अॅप थांबवा."</string>
+    <!-- no translation found for dump_heap_notification (2618183274836056542) -->
+    <skip />
+    <!-- no translation found for dump_heap_notification_detail (2075673362317481664) -->
+    <skip />
+    <!-- no translation found for dump_heap_title (5864292264307651673) -->
+    <skip />
+    <!-- no translation found for dump_heap_text (4809417337240334941) -->
+    <skip />
     <string name="sendText" msgid="5209874571959469142">"मजकुरासाठी क्रिया निवडा"</string>
     <string name="volume_ringtone" msgid="6885421406845734650">"रिंगर व्हॉल्यूम"</string>
     <string name="volume_music" msgid="5421651157138628171">"मीडिया व्हॉल्यूम"</string>
@@ -1776,7 +1786,9 @@
       <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> सेकंदांमध्ये पुन्हा प्रयत्न करा</item>
     </plurals>
     <string name="restr_pin_try_later" msgid="973144472490532377">"नंतर पुन्हा प्रयत्न करा"</string>
-    <string name="immersive_mode_confirmation" msgid="7227416894979047467">"पूर्ण स्क्रीनमधून निर्गमन करण्‍यासाठी शीर्षावरून खाली स्‍वाइप करा."</string>
+    <string name="immersive_cling_title" msgid="8394201622932303336">"पूर्ण स्क्रीन पाहत आहे"</string>
+    <string name="immersive_cling_description" msgid="3482371193207536040">"बाहेर पडण्यासाठी, वरून खाली स्वाइप करा."</string>
+    <string name="immersive_cling_positive" msgid="5016839404568297683">"समजले"</string>
     <string name="done_label" msgid="2093726099505892398">"पूर्ण झाले"</string>
     <string name="hour_picker_description" msgid="6698199186859736512">"तास परिपत्रक स्लायडर"</string>
     <string name="minute_picker_description" msgid="8606010966873791190">"मिनिटे परिपत्रक स्लायडर"</string>
@@ -1791,7 +1803,8 @@
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"कार्य <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="lock_to_app_toast" msgid="7570091317001980053">"ही स्क्रीन अनपिन करण्यासाठी, एकाच वेळी परत आणि विहंगावलोकनास स्पर्श करा आणि धरून ठेवा."</string>
     <string name="lock_to_app_toast_accessible" msgid="8239120109365070664">"ही स्क्रीन अनपिन करण्यासाठी, विहंगावलोकनास स्पर्श करा आणि धरून ठेवा."</string>
-    <string name="lock_to_app_toast_locked" msgid="8739004135132606329">"स्क्रीन पिन केली आहे. आपल्या संस्थेद्वारे अनपिन करण्यास अनुमती नाही."</string>
+    <!-- no translation found for lock_to_app_toast_locked (9125176335701699164) -->
+    <skip />
     <string name="lock_to_app_start" msgid="6643342070839862795">"स्क्रीन पिन केली"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"स्क्रीन अनपिन केली"</string>
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"अनपिन करण्‍यापूर्वी पिन साठी विचारा"</string>

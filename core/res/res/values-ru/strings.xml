@@ -740,14 +740,10 @@
     <string name="permdesc_nfc" msgid="7120611819401789907">"Приложение сможет обмениваться данными с NFC-метками, картами и устройствами считывания, используя связь малого радиуса действия."</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"Отключение функции блокировки экрана"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"Приложение сможет отключать блокировку экрана и другие функции защиты. Например, блокировка экрана будет отключаться при получении входящего вызова и включаться после завершения разговора."</string>
-    <!-- no translation found for permlab_manageFingerprint (5640858826254575638) -->
-    <skip />
-    <!-- no translation found for permdesc_manageFingerprint (178208705828055464) -->
-    <skip />
-    <!-- no translation found for permlab_useFingerprint (3150478619915124905) -->
-    <skip />
-    <!-- no translation found for permdesc_useFingerprint (9165097460730684114) -->
-    <skip />
+    <string name="permlab_manageFingerprint" msgid="5640858826254575638">"управление сканером отпечатков"</string>
+    <string name="permdesc_manageFingerprint" msgid="178208705828055464">"Приложение сможет добавлять и удалять шаблоны отпечатков пальцев."</string>
+    <string name="permlab_useFingerprint" msgid="3150478619915124905">"использование сканера отпечатков"</string>
+    <string name="permdesc_useFingerprint" msgid="9165097460730684114">"Приложение сможет использовать сканер отпечатков пальцев для аутентификации."</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"Просмотр настроек синхронизации"</string>
     <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"Приложение сможет просматривать настройки синхронизации аккаунта, например определять, включена ли синхронизация для приложения \"Контакты\"."</string>
     <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"Включение/выключение синхронизации"</string>
@@ -802,6 +798,8 @@
     <string name="permdesc_accessNotifications" msgid="458457742683431387">"Приложение сможет получать, проверять и удалять уведомления, включая те, что опубликованы другими приложениями."</string>
     <string name="permlab_bindNotificationListenerService" msgid="7057764742211656654">"Подключение к службе просмотра уведомлений"</string>
     <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"Приложение сможет подключаться к базовому интерфейсу службы просмотра уведомлений. Это разрешение не используется обычными приложениями."</string>
+    <string name="permlab_bindChooserTargetService" msgid="3443261076710185673">"Подключение к сервису выбора цели"</string>
+    <string name="permdesc_bindChooserTargetService" msgid="1413908999583734970">"Подключение к базовому интерфейсу для выбора цели. Это разрешение не требуется для работы обычных приложений."</string>
     <string name="permlab_bindConditionProviderService" msgid="1180107672332704641">"Подключение к серверам поставщиков условий"</string>
     <string name="permdesc_bindConditionProviderService" msgid="1680513931165058425">"Приложение сможет подключаться к базовому интерфейсу поставщиков условий. Это разрешение обычно используется только специальными приложениями."</string>
     <string name="permlab_bindMediaRouteService" msgid="6637740382272686835">"Привязка к средству передачи медиафайлов"</string>
@@ -1277,6 +1275,14 @@
     <string name="old_app_description" msgid="2082094275580358049">"Не запускать новое приложение."</string>
     <string name="new_app_action" msgid="5472756926945440706">"Запустить приложение <xliff:g id="OLD_APP">%1$s</xliff:g>"</string>
     <string name="new_app_description" msgid="1932143598371537340">"Остановить старое приложение без сохранения изменений."</string>
+    <!-- no translation found for dump_heap_notification (2618183274836056542) -->
+    <skip />
+    <!-- no translation found for dump_heap_notification_detail (2075673362317481664) -->
+    <skip />
+    <!-- no translation found for dump_heap_title (5864292264307651673) -->
+    <skip />
+    <!-- no translation found for dump_heap_text (4809417337240334941) -->
+    <skip />
     <string name="sendText" msgid="5209874571959469142">"Выберите действие для текста"</string>
     <string name="volume_ringtone" msgid="6885421406845734650">"Громкость звонка"</string>
     <string name="volume_music" msgid="5421651157138628171">"Громкость мультимедиа"</string>
@@ -1798,7 +1804,9 @@
       <item quantity="other">Повторите попытку через <xliff:g id="COUNT">%d</xliff:g> секунд</item>
     </plurals>
     <string name="restr_pin_try_later" msgid="973144472490532377">"Повторите попытку позже."</string>
-    <string name="immersive_mode_confirmation" msgid="7227416894979047467">"Чтобы вернуться в обычный режим, проведите пальцем вниз."</string>
+    <string name="immersive_cling_title" msgid="8394201622932303336">"Полноэкранный режим"</string>
+    <string name="immersive_cling_description" msgid="3482371193207536040">"Чтобы выйти, проведите по экрану сверху вниз."</string>
+    <string name="immersive_cling_positive" msgid="5016839404568297683">"ОК"</string>
     <string name="done_label" msgid="2093726099505892398">"Готово"</string>
     <string name="hour_picker_description" msgid="6698199186859736512">"Выбор часов на циферблате"</string>
     <string name="minute_picker_description" msgid="8606010966873791190">"Выбор минут на циферблате"</string>
@@ -1813,7 +1821,8 @@
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"Рабочий <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="lock_to_app_toast" msgid="7570091317001980053">"Чтобы открепить экран, нажмите и удерживайте кнопки \"Назад\" и \"Обзор\" одновременно."</string>
     <string name="lock_to_app_toast_accessible" msgid="8239120109365070664">"Чтобы открепить экран, нажмите и удерживайте кнопку \"Обзор\"."</string>
-    <string name="lock_to_app_toast_locked" msgid="8739004135132606329">"Блокировка включена. Ее отключение запрещено правилами организации."</string>
+    <!-- no translation found for lock_to_app_toast_locked (9125176335701699164) -->
+    <skip />
     <string name="lock_to_app_start" msgid="6643342070839862795">"Блокировка включена"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"Блокировка выключена"</string>
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Запрашивать PIN-код для отключения блокировки"</string>
