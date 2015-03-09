@@ -16,6 +16,7 @@
 
 package android.media;
 
+import android.annotation.SystemApi;
 import android.app.ActivityThread;
 import android.hardware.Camera;
 import android.os.Handler;
@@ -222,12 +223,11 @@ public class MediaRecorder
         public static final int REMOTE_SUBMIX = 8;
 
         /**
-         * Audio source for FM, which is used to capture current FM tuner output by FMRadio app.
-         * There are two use cases, one is for record FM stream for later listening, another is
-         * for FM indirect mode(the routing except FM to headset(headphone) device routing).
+         * Audio source for capturing broadcast radio tuner output.
          * @hide
          */
-        public static final int FM_TUNER = 1998;
+        @SystemApi
+        public static final int RADIO_TUNER = 1998;
 
         /**
          * Audio source for preemptible, low-priority software hotword detection
@@ -240,7 +240,8 @@ public class MediaRecorder
          * This is a hidden audio source.
          * @hide
          */
-        protected static final int HOTWORD = 1999;
+        @SystemApi
+        public static final int HOTWORD = 1999;
     }
 
     /**

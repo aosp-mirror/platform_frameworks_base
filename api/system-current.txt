@@ -15139,6 +15139,7 @@ package android.media {
 
   public final class AudioAttributes implements android.os.Parcelable {
     method public int describeContents();
+    method public int getAllFlags();
     method public int getCapturePreset();
     method public int getContentType();
     method public int getFlags();
@@ -15180,6 +15181,7 @@ package android.media {
     method public android.media.AudioAttributes.Builder setCapturePreset(int);
     method public android.media.AudioAttributes.Builder setContentType(int);
     method public android.media.AudioAttributes.Builder setFlags(int);
+    method public android.media.AudioAttributes.Builder setInternalCapturePreset(int);
     method public android.media.AudioAttributes.Builder setLegacyStreamType(int);
     method public android.media.AudioAttributes.Builder setUsage(int);
   }
@@ -15412,6 +15414,7 @@ package android.media {
 
   public class AudioRecord {
     ctor public AudioRecord(int, int, int, int, int) throws java.lang.IllegalArgumentException;
+    ctor public AudioRecord(android.media.AudioAttributes, android.media.AudioFormat, int, int) throws java.lang.IllegalArgumentException;
     method public int getAudioFormat();
     method public int getAudioSessionId();
     method public int getAudioSource();
@@ -16550,7 +16553,9 @@ package android.media {
   public final class MediaRecorder.AudioSource {
     field public static final int CAMCORDER = 5; // 0x5
     field public static final int DEFAULT = 0; // 0x0
+    field public static final int HOTWORD = 1999; // 0x7cf
     field public static final int MIC = 1; // 0x1
+    field public static final int RADIO_TUNER = 1998; // 0x7ce
     field public static final int REMOTE_SUBMIX = 8; // 0x8
     field public static final int VOICE_CALL = 4; // 0x4
     field public static final int VOICE_COMMUNICATION = 7; // 0x7

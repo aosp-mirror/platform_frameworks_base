@@ -279,6 +279,7 @@ public final class AudioAttributes implements Parcelable {
      * Internal use only
      * @return a combined mask of all flags
      */
+    @SystemApi
     public int getAllFlags() {
         return (mFlags & FLAG_ALL);
     }
@@ -541,14 +542,15 @@ public final class AudioAttributes implements Parcelable {
         /**
          * @hide
          * Same as {@link #setCapturePreset(int)} but authorizes the use of HOTWORD,
-         * REMOTE_SUBMIX and FM_TUNER.
+         * REMOTE_SUBMIX and RADIO_TUNER.
          * @param preset
          * @return the same Builder instance.
          */
+        @SystemApi
         public Builder setInternalCapturePreset(int preset) {
             if ((preset == MediaRecorder.AudioSource.HOTWORD)
                     || (preset == MediaRecorder.AudioSource.REMOTE_SUBMIX)
-                    || (preset == MediaRecorder.AudioSource.FM_TUNER)) {
+                    || (preset == MediaRecorder.AudioSource.RADIO_TUNER)) {
                 mSource = preset;
             } else {
                 setCapturePreset(preset);
