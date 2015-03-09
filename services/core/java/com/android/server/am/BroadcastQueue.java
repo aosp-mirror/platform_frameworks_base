@@ -305,17 +305,16 @@ public final class BroadcastQueue {
                     r.resultExtras, r.resultAbort, false);
             reschedule = true;
         }
-
-        r = mPendingBroadcast;
-        if (r != null && r.curApp == app) {
+        if (r == null && mPendingBroadcast != null && mPendingBroadcast.curApp == app) {
             if (DEBUG_BROADCAST) Slog.v(TAG_BROADCAST,
                     "[" + mQueueName + "] skip & discard pending app " + r);
+            r = mPendingBroadcast;
+        }
+
+        if (r != null) {
             logBroadcastReceiverDiscardLocked(r);
             finishReceiverLocked(r, r.resultCode, r.resultData,
                     r.resultExtras, r.resultAbort, false);
-            reschedule = true;
-        }
-        if (reschedule) {
             scheduleBroadcastsLocked();
         }
     }
@@ -512,10 +511,11 @@ public final class BroadcastQueue {
                 }
             }
             try {
-                if (DEBUG_BROADCAST_LIGHT) Slog.i(TAG_BROADCAST, "Delivering to " + filter + " : " + r);
+                if (DEBUG_BROADCAST_LIGHT) Slog.i(TAG_BROADCAST,
+                        "Delivering to " + filter + " : " + r);
                 performReceiveLocked(filter.receiverList.app, filter.receiverList.receiver,
-                    new Intent(r.intent), r.resultCode, r.resultData,
-                    r.resultExtras, r.ordered, r.initialSticky, r.userId);
+                        new Intent(r.intent), r.resultCode, r.resultData,
+                        r.resultExtras, r.ordered, r.initialSticky, r.userId);
                 if (ordered) {
                     r.state = BroadcastRecord.CALL_DONE_RECEIVE;
                 }
@@ -574,11 +574,9 @@ public final class BroadcastQueue {
             // broadcast, then do nothing at this point.  Just in case, we
             // check that the process we're waiting for still exists.
             if (mPendingBroadcast != null) {
-                if (DEBUG_BROADCAST_LIGHT) {
-                    Slog.v(TAG_BROADCAST, "processNextBroadcast ["
-                            + mQueueName + "]: waiting for "
-                            + mPendingBroadcast.curApp);
-                }
+                if (DEBUG_BROADCAST_LIGHT) Slog.v(TAG_BROADCAST,
+                        "processNextBroadcast [" + mQueueName + "]: waiting for "
+                        + mPendingBroadcast.curApp);
 
                 boolean isDead;
                 synchronized (mService.mPidsSelfLocked) {
@@ -677,8 +675,8 @@ public final class BroadcastQueue {
                     if (DEBUG_BROADCAST) Slog.v(TAG_BROADCAST, "Cancelling BROADCAST_TIMEOUT_MSG");
                     cancelBroadcastTimeoutLocked();
 
-                    if (DEBUG_BROADCAST_LIGHT) Slog.v(TAG_BROADCAST, "Finished with ordered broadcast "
-                            + r);
+                    if (DEBUG_BROADCAST_LIGHT) Slog.v(TAG_BROADCAST,
+                            "Finished with ordered broadcast " + r);
 
                     // ... and on to the next...
                     addBroadcastToHistoryLocked(r);
@@ -834,19 +832,18 @@ public final class BroadcastQueue {
                             + info.activityInfo.packageName, e);
                 }
                 if (!isAvailable) {
-                    if (DEBUG_BROADCAST) {
-                        Slog.v(TAG_BROADCAST, "Skipping delivery to " + info.activityInfo.packageName
-                                + " / " + info.activityInfo.applicationInfo.uid
-                                + " : package no longer available");
-                    }
+                    if (DEBUG_BROADCAST) Slog.v(TAG_BROADCAST,
+                            "Skipping delivery to " + info.activityInfo.packageName + " / "
+                            + info.activityInfo.applicationInfo.uid
+                            + " : package no longer available");
                     skip = true;
                 }
             }
 
             if (skip) {
                 if (DEBUG_BROADCAST)  Slog.v(TAG_BROADCAST,
-                        "Skipping delivery of ordered ["
-                        + mQueueName + "] " + r + " for whatever reason");
+                        "Skipping delivery of ordered [" + mQueueName + "] "
+                        + r + " for whatever reason");
                 r.receiver = null;
                 r.curFilter = null;
                 r.state = BroadcastRecord.IDLE;
