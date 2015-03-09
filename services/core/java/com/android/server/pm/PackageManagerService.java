@@ -4771,6 +4771,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
 
         final boolean vmSafeMode = (pkg.applicationInfo.flags & ApplicationInfo.FLAG_VM_SAFE_MODE) != 0;
+        final boolean debuggable = (pkg.applicationInfo.flags & ApplicationInfo.FLAG_DEBUGGABLE) != 0;
 
         final List<String> paths = pkg.getAllCodePathsExcludingResourceOnly();
         boolean performedDexOpt = false;
@@ -4796,10 +4797,10 @@ public class PackageManagerService extends IPackageManager.Stub {
                     if (forceDex || (!defer && isDexOptNeeded == DexFile.DEXOPT_NEEDED)) {
                         Log.i(TAG, "Running dexopt on: " + path + " pkg="
                                 + pkg.applicationInfo.packageName + " isa=" + dexCodeInstructionSet
-                                + " vmSafeMode=" + vmSafeMode);
+                                + " vmSafeMode=" + vmSafeMode + " debuggable=" + debuggable);
                         final int sharedGid = UserHandle.getSharedAppGid(pkg.applicationInfo.uid);
                         final int ret = mInstaller.dexopt(path, sharedGid, !isForwardLocked(pkg),
-                                pkg.packageName, dexCodeInstructionSet, vmSafeMode);
+                                pkg.packageName, dexCodeInstructionSet, vmSafeMode, debuggable);
 
                         if (ret < 0) {
                             // Don't bother running dexopt again if we failed, it will probably
