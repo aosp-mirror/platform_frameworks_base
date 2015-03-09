@@ -3620,7 +3620,9 @@ public class AudioService extends IAudioService.Stub {
             pw.print("   Devices: ");
             final int devices = AudioSystem.getDevicesForStream(mStreamType);
             int device, i = 0, n = 0;
-            while ((device = 1 << i) <= AudioSystem.DEVICE_OUT_DEFAULT) {
+            // iterate all devices from 1 to DEVICE_OUT_DEFAULT exclusive
+            // (the default device is not returned by getDevicesForStream)
+            while ((device = 1 << i) != AudioSystem.DEVICE_OUT_DEFAULT) {
                 if ((devices & device) != 0) {
                     if (n++ > 0) {
                         pw.print(", ");
