@@ -10,11 +10,12 @@ LOCAL_SRC_FILES:= \
     android_media_MediaDrm.cpp \
     android_media_MediaExtractor.cpp \
     android_media_MediaHTTPConnection.cpp \
+    android_media_MediaMetadataRetriever.cpp \
     android_media_MediaMuxer.cpp \
     android_media_MediaPlayer.cpp \
     android_media_MediaRecorder.cpp \
     android_media_MediaScanner.cpp \
-    android_media_MediaMetadataRetriever.cpp \
+    android_media_MediaSync.cpp \
     android_media_ResampleInputStream.cpp \
     android_media_MediaProfiles.cpp \
     android_media_AmrInputStream.cpp \

@@ -15966,6 +15966,23 @@ package android.media {
     method public abstract void onScanCompleted(java.lang.String, android.net.Uri);
   }
 
+  public final class MediaSync {
+    ctor public MediaSync();
+    method public void configureAudioTrack(android.media.AudioTrack, int);
+    method public void configureSurface(android.view.Surface);
+    method public final android.view.Surface createInputSurface();
+    method public void queueAudio(java.nio.ByteBuffer, int, int, long);
+    method public final void release();
+    method public void setCallback(android.media.MediaSync.Callback, android.os.Handler);
+    method public void setPlaybackRate(float, int);
+    field public static final int PLAYBACK_RATE_AUDIO_MODE_RESAMPLE = 0; // 0x0
+  }
+
+  public static abstract class MediaSync.Callback {
+    ctor public MediaSync.Callback();
+    method public abstract void onReturnAudioBuffer(android.media.MediaSync, java.nio.ByteBuffer, int);
+  }
+
   public class MediaSyncEvent {
     method public static android.media.MediaSyncEvent createEvent(int) throws java.lang.IllegalArgumentException;
     method public int getAudioSessionId();

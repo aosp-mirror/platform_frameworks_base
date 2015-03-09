@@ -17,6 +17,8 @@
 
 #define LOG_TAG "AudioTrack-JNI"
 
+#include "android_media_AudioTrack.h"
+
 #include <JNIHelp.h>
 #include <JniConstants.h>
 #include "core_jni_helpers.h"
@@ -181,6 +183,12 @@ static sp<AudioTrack> setAudioTrack(JNIEnv* env, jobject thiz, const sp<AudioTra
     env->SetLongField(thiz, javaAudioTrackFields.nativeTrackInJavaObj, (jlong)at.get());
     return old;
 }
+
+// ----------------------------------------------------------------------------
+sp<AudioTrack> android_media_AudioTrack_getAudioTrack(JNIEnv* env, jobject audioTrackObj) {
+    return getAudioTrack(env, audioTrackObj);
+}
+
 // ----------------------------------------------------------------------------
 static jint
 android_media_AudioTrack_setup(JNIEnv *env, jobject thiz, jobject weak_this,
