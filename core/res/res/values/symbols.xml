@@ -2049,6 +2049,9 @@
   <java-symbol type="array" name="config_clockTickVibePattern" />
   <java-symbol type="array" name="config_calendarDateVibePattern" />
 
+  <!-- From KeyguardServiceDelegate -->
+  <java-symbol type="string" name="config_keyguardComponent" />
+
   <!-- From various Material changes -->
   <java-symbol type="attr" name="titleTextAppearance" />
   <java-symbol type="attr" name="subtitleTextAppearance" />

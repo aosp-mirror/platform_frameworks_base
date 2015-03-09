@@ -2080,4 +2080,7 @@
 
     <!-- Specifies the maximum burn-in offset vertically. -->
     <integer name="config_burnInProtectionMaxVerticalOffset">0</integer>
+
+    <!-- Keyguard component -->
+    <string name="config_keyguardComponent" translatable="false">com.android.systemui/com.android.systemui.keyguard.KeyguardService</string>
 </resources>

@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.pm.ActivityInfo;
+import android.content.res.Resources;
 import android.graphics.PixelFormat;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -27,9 +28,6 @@ import com.android.internal.policy.IKeyguardShowCallback;
  * local or remote instances of keyguard.
  */
 public class KeyguardServiceDelegate {
-    public static final String KEYGUARD_PACKAGE = "com.android.systemui";
-    public static final String KEYGUARD_CLASS = "com.android.systemui.keyguard.KeyguardService";
-
     private static final String TAG = "KeyguardServiceDelegate";
     private static final boolean DEBUG = true;
 
@@ -111,10 +109,15 @@ public class KeyguardServiceDelegate {
 
     public void bindService(Context context) {
         Intent intent = new Intent();
-        intent.setClassName(KEYGUARD_PACKAGE, KEYGUARD_CLASS);
+        final Resources resources = context.getApplicationContext().getResources();
+
+        final ComponentName keyguardComponent = ComponentName.unflattenFromString(
+                resources.getString(com.android.internal.R.string.config_keyguardComponent));
+        intent.setComponent(keyguardComponent);
+
         if (!context.bindServiceAsUser(intent, mKeyguardConnection,
                 Context.BIND_AUTO_CREATE, UserHandle.OWNER)) {
-            Log.v(TAG, "*** Keyguard: can't bind to " + KEYGUARD_CLASS);
+            Log.v(TAG, "*** Keyguard: can't bind to " + keyguardComponent);
             mKeyguardState.showing = false;
             mKeyguardState.showingAndNotOccluded = false;
             mKeyguardState.secure = false;
