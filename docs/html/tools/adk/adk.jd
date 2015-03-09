@@ -331,7 +331,7 @@ href="http://arduino.cc/en/Main/ArduinoBoardADK">Arduino Mega ADK</a> (for EU na
     <li>Install the application to your device.</li>
 
     <li>Connect the ADK board (USB-A) to your Android-powered device (micro-USB). Ensure that the
-    power cable to the accessory is plugged in or that the micro-USB port on the accesory is
+    power cable to the accessory is plugged in or that the micro-USB port on the accessory is
     connected to your computer for power (this also allows you to <a href="#monitoring">monitor the
     ADK board</a>). When connected, accept the prompt that asks for whether or not to open the
     DemoKit application to connect to the accessory. If the prompt does not show up, connect and
