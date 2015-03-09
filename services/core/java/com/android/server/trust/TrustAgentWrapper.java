@@ -395,6 +395,7 @@ public class TrustAgentWrapper {
     }
 
     public void destroy() {
+        mContext.unregisterReceiver(mBroadcastReceiver);
         mHandler.removeMessages(MSG_RESTART_TIMEOUT);
 
         if (!mBound) {
