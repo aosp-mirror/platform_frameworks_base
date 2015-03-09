@@ -453,6 +453,16 @@ public:
         }
     }
 
+    static jint getHyphenEdit(JNIEnv* env, jobject clazz, jlong paintHandle, jint hyphen) {
+        Paint* paint = reinterpret_cast<Paint*>(paintHandle);
+        return paint->getHyphenEdit();
+    }
+
+    static void setHyphenEdit(JNIEnv* env, jobject clazz, jlong paintHandle, jint hyphen) {
+        Paint* paint = reinterpret_cast<Paint*>(paintHandle);
+        paint->setHyphenEdit((uint32_t)hyphen);
+    }
+
     static SkScalar getMetricsInternal(JNIEnv* env, jobject jpaint, Paint::FontMetrics *metrics) {
         const int kElegantTop = 2500;
         const int kElegantBottom = -1000;
@@ -1009,6 +1019,8 @@ static JNINativeMethod methods[] = {
     {"native_getLetterSpacing","!(J)F", (void*) PaintGlue::getLetterSpacing},
     {"native_setLetterSpacing","!(JF)V", (void*) PaintGlue::setLetterSpacing},
     {"native_setFontFeatureSettings","(JLjava/lang/String;)V", (void*) PaintGlue::setFontFeatureSettings},
+    {"native_getHyphenEdit", "!(J)I", (void*) PaintGlue::getHyphenEdit},
+    {"native_setHyphenEdit", "!(JI)V", (void*) PaintGlue::setHyphenEdit},
     {"ascent","!()F", (void*) PaintGlue::ascent},
     {"descent","!()F", (void*) PaintGlue::descent},
 

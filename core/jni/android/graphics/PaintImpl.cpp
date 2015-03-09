@@ -28,7 +28,8 @@ Paint::Paint() : SkPaint(),
 
 Paint::Paint(const Paint& paint) : SkPaint(paint),
         mLetterSpacing(paint.mLetterSpacing), mFontFeatureSettings(paint.mFontFeatureSettings),
-        mTextLocale(paint.mTextLocale), mFontVariant(paint.mFontVariant) {
+        mTextLocale(paint.mTextLocale), mFontVariant(paint.mFontVariant),
+        mHyphenEdit(paint.mHyphenEdit) {
 }
 
 Paint::~Paint() {
@@ -40,6 +41,7 @@ Paint& Paint::operator=(const Paint& other) {
     mFontFeatureSettings = other.mFontFeatureSettings;
     mTextLocale = other.mTextLocale;
     mFontVariant = other.mFontVariant;
+    mHyphenEdit = other.mHyphenEdit;
     return *this;
 }
 
@@ -48,7 +50,8 @@ bool operator==(const Paint& a, const Paint& b) {
             && a.mLetterSpacing == b.mLetterSpacing
             && a.mFontFeatureSettings == b.mFontFeatureSettings
             && a.mTextLocale == b.mTextLocale
-            && a.mFontVariant == b.mFontVariant;
+            && a.mFontVariant == b.mFontVariant
+            && a.mHyphenEdit == b.mHyphenEdit;
 }
 
 }

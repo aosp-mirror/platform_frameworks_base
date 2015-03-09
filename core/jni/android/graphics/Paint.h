@@ -69,11 +69,20 @@ public:
         return mFontVariant;
     }
 
+    void setHyphenEdit(uint32_t hyphen) {
+        mHyphenEdit = hyphen;
+    }
+
+    uint32_t getHyphenEdit() const {
+        return mHyphenEdit;
+    }
+
 private:
-    float mLetterSpacing;
+    float mLetterSpacing = 0;
     std::string mFontFeatureSettings;
     std::string mTextLocale;
     FontVariant mFontVariant;
+    uint32_t mHyphenEdit = 0;
 };
 
 }  // namespace android

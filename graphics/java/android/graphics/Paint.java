@@ -1331,6 +1331,29 @@ public class Paint {
     }
 
     /**
+     * Get the current value of hyphen edit.
+     *
+     * @return the current hyphen edit value
+     *
+     * @hide
+     */
+    public int getHyphenEdit() {
+        return native_getHyphenEdit(mNativePaint);
+    }
+
+    /**
+     * Set a hyphen edit on the paint (causes a hyphen to be added to text when
+     * measured or drawn).
+     *
+     * @param hyphen 0 for no edit, 1 for adding a hyphen (other values in future)
+     *
+     * @hide
+     */
+    public void setHyphenEdit(int hyphen) {
+        native_setHyphenEdit(mNativePaint, hyphen);
+    }
+
+    /**
      * Return the distance above (negative) the baseline (ascent) based on the
      * current typeface and text size.
      *
@@ -2309,4 +2332,6 @@ public class Paint {
                                                        float letterSpacing);
     private static native void native_setFontFeatureSettings(long native_object,
                                                              String settings);
+    private static native int native_getHyphenEdit(long native_object);
+    private static native void native_setHyphenEdit(long native_object, int hyphen);
 }
