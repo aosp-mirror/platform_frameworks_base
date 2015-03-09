@@ -40,6 +40,7 @@ import android.util.Slog;
 import android.service.trust.ITrustAgentService;
 import android.service.trust.ITrustAgentServiceCallback;
 
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -359,6 +360,8 @@ public class TrustAgentWrapper {
                         mSetTrustAgentFeaturesToken = new Binder();
                         mTrustAgentService.onConfigure(config, mSetTrustAgentFeaturesToken);
                     }
+                } else {
+                    mTrustAgentService.onConfigure(Collections.EMPTY_LIST, null);
                 }
                 final long maxTimeToLock = dpm.getMaximumTimeToLock(null);
                 if (maxTimeToLock != mMaximumTimeToLock) {
