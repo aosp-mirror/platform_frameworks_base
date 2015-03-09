@@ -44,7 +44,7 @@
     <string name="battery_saver_start_action" msgid="5576697451677486320">"Accubesparing inschakelen"</string>
     <string name="status_bar_settings_settings_button" msgid="3023889916699270224">"Instellingen"</string>
     <string name="status_bar_settings_wifi_button" msgid="1733928151698311923">"Wifi"</string>
-    <string name="status_bar_settings_airplane" msgid="4879879698500955300">"Vliegmodus"</string>
+    <string name="status_bar_settings_airplane" msgid="4879879698500955300">"Vliegtuigmodus"</string>
     <string name="status_bar_settings_auto_rotation" msgid="3790482541357798421">"Scherm automatisch draaien"</string>
     <string name="status_bar_settings_mute_label" msgid="554682549917429396">"DEMPEN"</string>
     <string name="status_bar_settings_auto_brightness_label" msgid="511453614962324674">"AUTO"</string>
@@ -144,7 +144,7 @@
     <string name="accessibility_data_connection_wifi" msgid="2324496756590645221">"Wifi"</string>
     <string name="accessibility_no_sim" msgid="8274017118472455155">"Geen simkaart."</string>
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Bluetooth-tethering."</string>
-    <string name="accessibility_airplane_mode" msgid="834748999790763092">"Vliegmodus."</string>
+    <string name="accessibility_airplane_mode" msgid="834748999790763092">"Vliegtuigmodus."</string>
     <string name="accessibility_battery_level" msgid="7451474187113371965">"Accu: <xliff:g id="NUMBER">%d</xliff:g> procent."</string>
     <string name="accessibility_settings_button" msgid="799583911231893380">"Systeeminstellingen."</string>
     <string name="accessibility_notifications_button" msgid="4498000369779421892">"Meldingen."</string>
@@ -172,10 +172,10 @@
     <string name="accessibility_quick_settings_wifi_changed_on" msgid="6440117170789528622">"Wifi ingeschakeld."</string>
     <string name="accessibility_quick_settings_mobile" msgid="4876806564086241341">"Mobiel <xliff:g id="SIGNAL">%1$s</xliff:g>. <xliff:g id="TYPE">%2$s</xliff:g>. <xliff:g id="NETWORK">%3$s</xliff:g>."</string>
     <string name="accessibility_quick_settings_battery" msgid="1480931583381408972">"Accu: <xliff:g id="STATE">%s</xliff:g>."</string>
-    <string name="accessibility_quick_settings_airplane_off" msgid="7786329360056634412">"Vliegmodus uit."</string>
-    <string name="accessibility_quick_settings_airplane_on" msgid="6406141469157599296">"Vliegmodus aan."</string>
-    <string name="accessibility_quick_settings_airplane_changed_off" msgid="66846307818850664">"Vliegmodus uitgeschakeld."</string>
-    <string name="accessibility_quick_settings_airplane_changed_on" msgid="8983005603505087728">"Vliegmodus ingeschakeld."</string>
+    <string name="accessibility_quick_settings_airplane_off" msgid="7786329360056634412">"Vliegtuigmodus uit."</string>
+    <string name="accessibility_quick_settings_airplane_on" msgid="6406141469157599296">"Vliegtuigmodus aan."</string>
+    <string name="accessibility_quick_settings_airplane_changed_off" msgid="66846307818850664">"Vliegtuigmodus uitgeschakeld."</string>
+    <string name="accessibility_quick_settings_airplane_changed_on" msgid="8983005603505087728">"Vliegtuigmodus ingeschakeld."</string>
     <string name="accessibility_quick_settings_dnd_priority_on" msgid="1448402297221249355">"Niet storen aan, alleen prioriteit."</string>
     <string name="accessibility_quick_settings_dnd_none_on" msgid="5910777408232088752">"Niet storen aan, geen onderbrekingen."</string>
     <string name="accessibility_quick_settings_dnd_off" msgid="2371832603753738581">"Niet storen uit."</string>
@@ -228,7 +228,7 @@
     <string name="dessert_case" msgid="1295161776223959221">"Dessertshowcase"</string>
     <string name="start_dreams" msgid="7219575858348719790">"Dagdroom"</string>
     <string name="ethernet_label" msgid="7967563676324087464">"Ethernet"</string>
-    <string name="quick_settings_airplane_mode_label" msgid="5510520633448831350">"Vliegmodus"</string>
+    <string name="quick_settings_airplane_mode_label" msgid="5510520633448831350">"Vliegtuigmodus"</string>
     <string name="quick_settings_dnd_label" msgid="8735855737575028208">"Niet storen"</string>
     <string name="quick_settings_dnd_priority_label" msgid="483232950670692036">"Alleen prioriteit"</string>
     <string name="quick_settings_dnd_none_label" msgid="7309935569360609114">"Geen onderbrekingen"</string>
