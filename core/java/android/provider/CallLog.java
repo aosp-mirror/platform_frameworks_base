@@ -328,6 +328,14 @@ public class CallLog {
         public static final String CACHED_PHOTO_ID = "photo_id";
 
         /**
+         * The cached photo URI of the picture associated with the phone number, if it exists.
+         * This value may not be current if the contact information associated with this number
+         * has changed.
+         * <P>Type: TEXT (URI)</P>
+         */
+        public static final String CACHED_PHOTO_URI = "photo_uri";
+
+        /**
          * The cached phone number, formatted with formatting rules based on the country the
          * user was in when the call was made or received.
          * This value is not guaranteed to be present, and may not be current if the contact

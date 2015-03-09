@@ -25660,6 +25660,7 @@ package android.provider {
     field public static final java.lang.String CACHED_NUMBER_LABEL = "numberlabel";
     field public static final java.lang.String CACHED_NUMBER_TYPE = "numbertype";
     field public static final java.lang.String CACHED_PHOTO_ID = "photo_id";
+    field public static final java.lang.String CACHED_PHOTO_URI = "photo_uri";
     field public static final android.net.Uri CONTENT_FILTER_URI;
     field public static final java.lang.String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/calls";
     field public static final java.lang.String CONTENT_TYPE = "vnd.android.cursor.dir/calls";
