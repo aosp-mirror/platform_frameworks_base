@@ -1,6 +1,7 @@
 package android.text;
 
 import com.android.annotations.NonNull;
+import com.android.layoutlib.bridge.impl.DelegateManager;
 import com.android.tools.layoutlib.annotations.LayoutlibDelegate;
 
 import android.text.StaticLayout.LineBreaks;
@@ -27,14 +28,19 @@ public class StaticLayout_Delegate {
     private static final char CHAR_NEWLINE   = 0x0A;
     private static final char CHAR_ZWSP      = 0x200B;  // Zero width space.
 
+    // ---- Builder delegate manager ----
+    private static final DelegateManager<Builder> sBuilderManager =
+        new DelegateManager<Builder>(Builder.class);
+
     @LayoutlibDelegate
-    /*package*/ static int nComputeLineBreaks(String locale, char[] inputText, float[] widths,
+    /*package*/ static int nComputeLineBreaks(long nativeBuilder, char[] inputText, float[] widths,
             int length, float firstWidth, int firstWidthLineCount, float restWidth,
             int[] variableTabStops, int defaultTabStop, boolean optimize, LineBreaks recycle,
             int[] recycleBreaks, float[] recycleWidths, boolean[] recycleFlags, int recycleLength) {
 
+        Builder builder = sBuilderManager.getDelegate(nativeBuilder);
         // compute all possible breakpoints.
-        BreakIterator it = BreakIterator.getLineInstance(new ULocale(locale));
+        BreakIterator it = BreakIterator.getLineInstance(new ULocale(builder.mLocale));
         it.setText(new Segment(inputText, 0, length));
         // average word length in english is 5. So, initialize the possible breaks with a guess.
         List<Integer> breaks = new ArrayList<Integer>((int) Math.ceil(length / 5d));
@@ -96,5 +102,33 @@ public class StaticLayout_Delegate {
         primitives.add(
                 PrimitiveType.PENALTY.getNewPrimitive(length, 0, -PrimitiveType.PENALTY_INFINITY));
         return primitives;
+    }
+
+    @LayoutlibDelegate
+    /*package*/ static long nNewBuilder() {
+        return sBuilderManager.addNewDelegate(new Builder());
+    }
+
+    @LayoutlibDelegate
+    /*package*/ static void nFinishBuilder(long nativeBuilder) {
+    }
+
+    @LayoutlibDelegate
+    /*package*/ static void nFreeBuilder(long nativeBuilder) {
+        sBuilderManager.removeJavaReferenceFor(nativeBuilder);
+    }
+
+    @LayoutlibDelegate
+    /*package*/ static void nBuilderSetLocale(long nativeBuilder, String locale) {
+        Builder builder = sBuilderManager.getDelegate(nativeBuilder);
+        builder.mLocale = locale;
+    }
+
+    /**
+     * Java representation of the native Builder class. It currently only stores the locale
+     * set by nBuilderSetLocale.
+     */
+    static class Builder {
+        String mLocale;
     }
 }
