@@ -2401,7 +2401,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                                     }
                                     ps.addCpuTimeLocked(st.rel_utime - otherUTime,
                                             st.rel_stime - otherSTime, cpuSpeedTimes);
-                                    pr.curCpuTime += (st.rel_utime+st.rel_stime) * 10;
+                                    pr.curCpuTime += st.rel_utime + st.rel_stime;
                                 } else {
                                     BatteryStatsImpl.Uid.Proc ps = st.batteryStats;
                                     if (ps == null || !ps.isActive()) {

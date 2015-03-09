@@ -425,8 +425,8 @@ public final class BatteryStatsHelper {
                     final long userTime = ps.getUserTime(which);
                     final long systemTime = ps.getSystemTime(which);
                     final long foregroundTime = ps.getForegroundTime(which);
-                    cpuFgTime += foregroundTime * 10; // convert to millis
-                    final long tmpCpuTime = (userTime + systemTime) * 10; // convert to millis
+                    cpuFgTime += foregroundTime;
+                    final long tmpCpuTime = userTime + systemTime;
                     int totalTimeAtSpeeds = 0;
                     // Get the total first
                     for (int step = 0; step < speedSteps; step++) {
