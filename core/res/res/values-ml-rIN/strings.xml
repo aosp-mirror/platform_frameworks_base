@@ -738,9 +738,9 @@
     <string name="permdesc_nfc" msgid="7120611819401789907">"നിയർ ഫീൽഡ് കമ്മ്യൂണിക്കേഷൻ (NFC) ടാഗുകളുമായും കാർഡുകളുമായും റീഡറുകളുമായുള്ള ആശയവിനിമയത്തിന് അപ്ലിക്കേഷനുകളെ അനുവദിക്കുന്നു."</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"നിങ്ങളുടെ സ്‌ക്രീൻ ലോക്ക് പ്രവർത്തനരഹിതമാക്കുക"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"കീലോക്കും ഏതെങ്കിലും അനുബന്ധ പാസ്‌വേഡ് സുരക്ഷയും പ്രവർത്തനരഹിതമാക്കാൻ അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു. ഉദാഹരണത്തിന്, ഒരു ഇൻകമിംഗ് കോൾ സ്വീകരിക്കുമ്പോൾ ഫോൺ കീലോക്ക് പ്രവർത്തനരഹിതമാക്കുന്നു, കോൾ അവസാനിക്കുമ്പോൾ കീലോക്ക് വീണ്ടും പ്രവർത്തനക്ഷമമാകുന്നു."</string>
-    <string name="permlab_manageFingerprint" msgid="5640858826254575638">"വിരലടയാള ഹാർഡ്‌വെയർ നിയന്ത്രിക്കുക"</string>
+    <string name="permlab_manageFingerprint" msgid="5640858826254575638">"ഫിംഗർപ്രിന്റ് ഹാർഡ്‌വെയർ നിയന്ത്രിക്കുക"</string>
     <string name="permdesc_manageFingerprint" msgid="178208705828055464">"ഉപയോഗിക്കാനായി വിരലടയാള ടെംപ്ലേറ്റുകൾ ചേർക്കാനും ഇല്ലാതാക്കാനുമുള്ള രീതികൾ അഭ്യർത്ഥിക്കാൻ അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
-    <string name="permlab_useFingerprint" msgid="3150478619915124905">"വിരലടയാള ഹാർഡ്‌വെയർ ഉപയോഗിക്കുക"</string>
+    <string name="permlab_useFingerprint" msgid="3150478619915124905">"ഫിംഗർപ്രിന്റ് ഹാർഡ്‌വെയർ ഉപയോഗിക്കുക"</string>
     <string name="permdesc_useFingerprint" msgid="9165097460730684114">"പ്രാമാണീകരണത്തിനായി വിരലടയാളം ഉപയോഗിക്കാൻ അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു"</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"സമന്വയ ക്രമീകരണങ്ങൾ റീഡുചെയ്യുക"</string>
     <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"ഒരു അക്കൗണ്ടിനായി സമന്വയ ക്രമീകരണങ്ങൾ റീഡുചെയ്യാൻ അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു. ഉദാഹരണത്തിന്, ആളുകൾ അപ്ലിക്കേഷൻ ഒരു അക്കൗണ്ടിൽ സമന്വയിപ്പിച്ചിട്ടുണ്ടോയെന്നത് നിർണ്ണയിക്കാൻ ഇതിനാകും."</string>
@@ -796,6 +796,8 @@
     <string name="permdesc_accessNotifications" msgid="458457742683431387">"മറ്റ് അപ്ലിക്കേഷനുകൾ പോസ്റ്റുചെയ്‌തവയുൾപ്പെടെയുള്ള, അറിയിപ്പുകൾ വീണ്ടെടുക്കാനും പരിശോധിക്കാനും മായ്‌ക്കാനും അപ്ലിക്കേഷനുകളെ അനുവദിക്കുന്നു."</string>
     <string name="permlab_bindNotificationListenerService" msgid="7057764742211656654">"ഒരു അറിയിപ്പ് ലിസണർ സേവനവുമായി ബന്ധിപ്പിക്കുക"</string>
     <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"ഒരു അറിയിപ്പ് ലിസണർ സേവനത്തിന്റെ ഉയർന്ന നിലയിലുള്ള ഇന്റർഫേസിലേക്ക് ബന്ധിപ്പിക്കാൻ ഹോൾഡറിനെ അനുവദിക്കുന്നു. സാധാരണ അപ്ലിക്കേഷനുകൾക്ക് ഒരിക്കലും ആവശ്യമില്ല."</string>
+    <string name="permlab_bindChooserTargetService" msgid="3443261076710185673">"ഒരു ചൂസർ ടാർഗെറ്റ് സേവനത്തിലേക്ക് ബന്ധിപ്പിക്കുക"</string>
+    <string name="permdesc_bindChooserTargetService" msgid="1413908999583734970">"ഒരു ചൂസർ ടാർഗെറ്റ് സേവനത്തിന്റെ ഉയർന്ന ലെവൽ ഇന്റർഫേസിലേക്ക് ബന്ധിപ്പിക്കാൻ ഉടമയെ അനുവദിക്കുന്നു. സാധാരണ അപ്ലിക്കേഷനുകൾക്ക് ഒരിക്കലും ആവശ്യമില്ല."</string>
     <string name="permlab_bindConditionProviderService" msgid="1180107672332704641">"കണ്ടീഷൻ പ്രൊവൈഡർ സേവനവുമായി ബന്ധിപ്പിക്കുക"</string>
     <string name="permdesc_bindConditionProviderService" msgid="1680513931165058425">"ഒരു കണ്ടീഷൻ പ്രൊവൈഡർ സേവനത്തിന്റെ ഉയർന്ന നിലയിലുള്ള ഇന്റർഫേസിലേക്ക് ബന്ധിപ്പിക്കാൻ ഹോൾഡറിനെ അനുവദിക്കുന്നു. സാധാരണ അപ്ലിക്കേഷനുകൾക്ക് ഒരിക്കലും ആവശ്യമില്ല."</string>
     <string name="permlab_bindMediaRouteService" msgid="6637740382272686835">"മീഡിയ റൂട്ട് സേവനവുമായി ബന്ധിപ്പിക്കുക"</string>
@@ -1263,6 +1265,14 @@
     <string name="old_app_description" msgid="2082094275580358049">"പുതിയ അപ്ലിക്കേഷൻ ആരംഭിക്കരുത്."</string>
     <string name="new_app_action" msgid="5472756926945440706">"<xliff:g id="OLD_APP">%1$s</xliff:g> ആരംഭിക്കുക"</string>
     <string name="new_app_description" msgid="1932143598371537340">"സംരക്ഷിക്കാതെ തന്നെ പഴയ അപ്ലിക്കേഷൻ നിർത്തുക."</string>
+    <!-- no translation found for dump_heap_notification (2618183274836056542) -->
+    <skip />
+    <!-- no translation found for dump_heap_notification_detail (2075673362317481664) -->
+    <skip />
+    <!-- no translation found for dump_heap_title (5864292264307651673) -->
+    <skip />
+    <!-- no translation found for dump_heap_text (4809417337240334941) -->
+    <skip />
     <string name="sendText" msgid="5209874571959469142">"വാചകസന്ദേശത്തിനായി ഒരു പ്രവർത്തനം തിരഞ്ഞെടുക്കുക"</string>
     <string name="volume_ringtone" msgid="6885421406845734650">"റിംഗർ വോളിയം"</string>
     <string name="volume_music" msgid="5421651157138628171">"മീഡിയ വോളിയം"</string>
@@ -1776,7 +1786,9 @@
       <item quantity="one">ഒരു സെക്കൻഡിനുള്ളിൽ വീണ്ടും ശ്രമിക്കുക</item>
     </plurals>
     <string name="restr_pin_try_later" msgid="973144472490532377">"പിന്നീട് വീണ്ടും ശ്രമിക്കുക"</string>
-    <string name="immersive_mode_confirmation" msgid="7227416894979047467">"പൂർണ്ണസ്‌ക്രീനിൽനിന്നും പുറത്തുകടക്കുന്നതിന് മുകളിൽ നിന്നും താഴേക്ക് സ്വൈപ്പുചെയ്യുക."</string>
+    <string name="immersive_cling_title" msgid="8394201622932303336">"പൂർണ്ണ സ്‌ക്രീനിൽ കാണുന്നു"</string>
+    <string name="immersive_cling_description" msgid="3482371193207536040">"അവസാനിപ്പിക്കാൻ, മുകളിൽ നിന്ന് താഴോട്ട് സ്വൈപ്പുചെയ്യുക."</string>
+    <string name="immersive_cling_positive" msgid="5016839404568297683">"മനസ്സിലായി"</string>
     <string name="done_label" msgid="2093726099505892398">"പൂർത്തിയാക്കി"</string>
     <string name="hour_picker_description" msgid="6698199186859736512">"ചാക്രികമായി മണിക്കൂറുകൾ ദൃശ്യമാകുന്ന സ്ലൈഡർ"</string>
     <string name="minute_picker_description" msgid="8606010966873791190">"ചാക്രികമായി മിനിറ്റുകൾ ദൃശ്യമാകുന്ന സ്ലൈഡർ"</string>
@@ -1791,7 +1803,8 @@
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"ഔദ്യോഗികം <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="lock_to_app_toast" msgid="7570091317001980053">"ഈ സ്‌ക്രീൻ അൺപിൻ ചെയ്യാൻ \'മടങ്ങുക\', \'കാഴ്ച\' എന്നിവ ഒരേ സമയം സ്‌പർശിച്ച് പിടിക്കുക."</string>
     <string name="lock_to_app_toast_accessible" msgid="8239120109365070664">"ഈ സ്‌ക്രീൻ അൺപിൻ ചെയ്യാൻ, കാഴ്ച സ്‌പർശിച്ച് പിടിക്കുക."</string>
-    <string name="lock_to_app_toast_locked" msgid="8739004135132606329">"സ്ക്രീൻ പിൻ ചെയ്തിരിക്കുന്നു. നിങ്ങളുടെ ഓർഗനൈസേഷൻ അൺപിൻ ചെയ്യൽ അനുവദിക്കുന്നില്ല."</string>
+    <!-- no translation found for lock_to_app_toast_locked (9125176335701699164) -->
+    <skip />
     <string name="lock_to_app_start" msgid="6643342070839862795">"സ്ക്രീൻ പിൻ ചെയ്തു"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"സ്ക്രീൻ അൺപിൻ ചെയ്തു"</string>
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"അൺപിൻ ചെയ്യുന്നതിനുമുമ്പ് പിൻ ആവശ്യപ്പെടുക"</string>

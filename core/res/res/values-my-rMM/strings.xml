@@ -796,6 +796,8 @@
     <string name="permdesc_accessNotifications" msgid="458457742683431387">"အပလီကေးရှင်းကို အကြောင်းကြားချက်များအား ထုတ်လုပ်ရန်၊ လေ့လာရန်၊ ဖျက်ပစ်ရန် ခွင့်ပြုခြင်း။ တခြား အပလီကေးရှင်းများမှ သတိပေးချက်များလည်း ပါဝင်ပါသည်"</string>
     <string name="permlab_bindNotificationListenerService" msgid="7057764742211656654">"သတိပေးချက် နားထောင်ခြင်း ဆားဗစ် နှင့် ပူးပေါင်းခြင်း"</string>
     <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"ဖုန်းကိုင်ထားသူနှင့် အကြောင်းကြားချက် နားစွင့်သော ဆားဗစ်မှ ထိပ်ပိုင်းအင်တာဖေ့စ် ကို ပူးပေါင်းခွင့်ပေးခြင်း။ ပုံမှန် အပလီကေးရှင်းများမှာ မလိုအပ်ပါ"</string>
+    <string name="permlab_bindChooserTargetService" msgid="3443261076710185673">"ရွေးချယ်သူဦးစားပေး ဝန်ဆောင်မှုနှင့် ပူးပေါင်းခြင်း"</string>
+    <string name="permdesc_bindChooserTargetService" msgid="1413908999583734970">"လက်ဝယ်ရှိသူအား ရွေးချယ်သူဦးစားပေး ဝန်ဆောင်မှု၏ ထိပ်သီးအဆင့် အင်တာဖေ့စ်သို့ ချိတ်တွဲခွင့်ပြုပါ။ သာမန် app များ အတွက် မည်သည့်အခါမျှ မလိုအပ်ပါ။"</string>
     <string name="permlab_bindConditionProviderService" msgid="1180107672332704641">"အခြေအနေ စီမံပေးရေး ဝန်ဆောင်မှု တစ်ခုဆီသို့ ချိတ်တွဲခြင်း"</string>
     <string name="permdesc_bindConditionProviderService" msgid="1680513931165058425">"စွဲကိုင်ထားသူအား အခြေအနေကို စီမံပေးသူ၏ ထိပ်သီး အဆင့် အင်တာဖေ့စ်သို့ ချိတ်တွဲခွင့်ကို ပေးသည်။ သာမန် appများ အတွက် ဘယ်တော့မှ မလိုအပ်နိုင်ပါ။"</string>
     <string name="permlab_bindMediaRouteService" msgid="6637740382272686835">"မီဒီယာ လမ်းကြောင်း ဝန်ဆောင်မှုသို့ တွဲချည်ရန်"</string>
@@ -1263,6 +1265,14 @@
     <string name="old_app_description" msgid="2082094275580358049">"pp အသစ်ကို မစတင်ပါနှင့်။"</string>
     <string name="new_app_action" msgid="5472756926945440706">"<xliff:g id="OLD_APP">%1$s</xliff:g>စတင်ပါ"</string>
     <string name="new_app_description" msgid="1932143598371537340">"app အဟောင်းကို မသိမ်းဆည်းဘဲ ရပ်လိုက်ပါ။"</string>
+    <!-- no translation found for dump_heap_notification (2618183274836056542) -->
+    <skip />
+    <!-- no translation found for dump_heap_notification_detail (2075673362317481664) -->
+    <skip />
+    <!-- no translation found for dump_heap_title (5864292264307651673) -->
+    <skip />
+    <!-- no translation found for dump_heap_text (4809417337240334941) -->
+    <skip />
     <string name="sendText" msgid="5209874571959469142">"စာတိုအတွက် လုပ်ဆောင်ချက် ရေးပါ"</string>
     <string name="volume_ringtone" msgid="6885421406845734650">"ဖုန်းမြည်သံအတိုးအကျယ်"</string>
     <string name="volume_music" msgid="5421651157138628171">"မီဒီယာအသံအတိုးအကျယ်"</string>
@@ -1776,7 +1786,9 @@
       <item quantity="one">1 စက္ကန့်အတွင်း ထပ်မံကြိုးစားပါ</item>
     </plurals>
     <string name="restr_pin_try_later" msgid="973144472490532377">"နောက်မှ ပြန်ကြိုးစားပါ"</string>
-    <string name="immersive_mode_confirmation" msgid="7227416894979047467">"မျက်နှာပြင်အပြည့်ကနေ ပြန်ပြောင်းရန် အပေါ်အောက် ဆွဲချပါ"</string>
+    <string name="immersive_cling_title" msgid="8394201622932303336">"မျက်နှာပြင်အပြည့် ကြည့်နေစဉ်"</string>
+    <string name="immersive_cling_description" msgid="3482371193207536040">"ထွက်ရန်၊ ထိပ်ဘက်မှ အောက်ဘက်သို့ ဆွဲချပါ။"</string>
+    <string name="immersive_cling_positive" msgid="5016839404568297683">"ရပါပြီ"</string>
     <string name="done_label" msgid="2093726099505892398">"ပြီးပါပြီ"</string>
     <string name="hour_picker_description" msgid="6698199186859736512">"နာရီရွေးချက်စရာ"</string>
     <string name="minute_picker_description" msgid="8606010966873791190">"မိနစ်လှည့်သော ရွေ့လျားတန်"</string>
@@ -1791,7 +1803,8 @@
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"အလုပ် <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="lock_to_app_toast" msgid="7570091317001980053">"ဒီမျက်နှာပြင် ပင်ထိုးမှုကို ဖြုတ်ရန်၊ နောက်သို့ နှင့် ခြုံကြည့်မှု ခလုတ်များကို တစ်ချိန်တည်း ထိကိုင်ထားပါ။"</string>
     <string name="lock_to_app_toast_accessible" msgid="8239120109365070664">"ဒီမျက်နှာပြင် ပင်ထိုးမှုကို ဖြုတ်ရန် ခြုံကြည့်မှု ခလုတ်ကို ထိကိုင်ထားပါ။"</string>
-    <string name="lock_to_app_toast_locked" msgid="8739004135132606329">"မျက်နှာပြင်ကို ပင်ထိုးထားသည်။ ပင်ထိုးထားမှု ဖြုတ်ခြင်းကို သင့် အဖွဲ့အစည်းက ခွင့် မပြုပါ။"</string>
+    <!-- no translation found for lock_to_app_toast_locked (9125176335701699164) -->
+    <skip />
     <string name="lock_to_app_start" msgid="6643342070839862795">"မျက်နှာပြင်ကို ပင်ထိုးထား"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"မျက်နှာပြင် ပင်ထိုးမှု ဖြတ်လိုက်ပြီ"</string>
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"ပင်မဖြုတ်မီမှာ PIN ကို မေးကြည့်ရန်"</string>

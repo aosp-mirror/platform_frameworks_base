@@ -796,6 +796,8 @@
     <string name="permdesc_accessNotifications" msgid="458457742683431387">"பிற பயன்பாடுகளால் இடுகையிடப்பட்ட அறிவிப்புகள் உள்பட எல்லா அறிவிப்புகளையும் பெற, பார்க்க மற்றும் அழிக்கப் பயன்பாட்டை அனுமதிக்கிறது."</string>
     <string name="permlab_bindNotificationListenerService" msgid="7057764742211656654">"அறிவிப்புகளைக் கண்காணிக்கும் சேவையுடன் இணைத்தல்"</string>
     <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"அறிவிப்புகளைக் கண்காணிக்கும் சேவையின் உயர் நிலை இடைமுகத்துடன் இணைப்பதற்கு ஹோல்டரை அனுமதிக்கிறது. இயல்பான பயன்பாடுகளுக்கு எப்போதுமே தேவைப்படாது."</string>
+    <string name="permlab_bindChooserTargetService" msgid="3443261076710185673">"பயனர் தேர்வுசெய்த இடச் சேவையுடன் இணைக்கும்"</string>
+    <string name="permdesc_bindChooserTargetService" msgid="1413908999583734970">"பயனர் தேர்வுசெய்த இடச் சேவையின் உயர் நிலை இடைமுகத்துடன் இணைப்பதற்கு, ஹோல்டரை அனுமதிக்கும். இயல்பான பயன்பாடுகளுக்கு எப்போதுமே தேவைப்படாது."</string>
     <string name="permlab_bindConditionProviderService" msgid="1180107672332704641">"நிபந்தனை வழங்குநர் சேவையுடன் இணைத்தல்"</string>
     <string name="permdesc_bindConditionProviderService" msgid="1680513931165058425">"நிபந்தனை வழங்குநர் சேவையின் உயர் நிலை இடைமுகத்துடன் இணைப்பதற்கு ஹோல்டரை அனுமதிக்கிறது. சாதாரண பயன்பாடுகளுக்கு எப்போதுமே தேவைப்படாது."</string>
     <string name="permlab_bindMediaRouteService" msgid="6637740382272686835">"மீடியா வழிச் சேவையுடன் இணைத்தல்"</string>
@@ -1263,6 +1265,14 @@
     <string name="old_app_description" msgid="2082094275580358049">"புதிய பயன்பாட்டைத் தொடங்க வேண்டாம்."</string>
     <string name="new_app_action" msgid="5472756926945440706">"<xliff:g id="OLD_APP">%1$s</xliff:g> ஐத் தொடங்கு"</string>
     <string name="new_app_description" msgid="1932143598371537340">"சேமிக்காமல், பழைய பயன்பாட்டை நிறுத்தவும்."</string>
+    <!-- no translation found for dump_heap_notification (2618183274836056542) -->
+    <skip />
+    <!-- no translation found for dump_heap_notification_detail (2075673362317481664) -->
+    <skip />
+    <!-- no translation found for dump_heap_title (5864292264307651673) -->
+    <skip />
+    <!-- no translation found for dump_heap_text (4809417337240334941) -->
+    <skip />
     <string name="sendText" msgid="5209874571959469142">"உரைக்கான செயலைத் தேர்வுசெய்யவும்"</string>
     <string name="volume_ringtone" msgid="6885421406845734650">"ரிங்கரின் ஒலியளவு"</string>
     <string name="volume_music" msgid="5421651157138628171">"மீடியாவின் ஒலியளவு"</string>
@@ -1776,7 +1786,9 @@
       <item quantity="one">1 வினாடி கழித்து முயற்சிக்கவும்</item>
     </plurals>
     <string name="restr_pin_try_later" msgid="973144472490532377">"மீண்டும் முயற்சிக்கவும்"</string>
-    <string name="immersive_mode_confirmation" msgid="7227416894979047467">"முழுத் திரையிலிருந்து வெளியேற மேலிருந்து கீழே ஸ்வைப் செய்யவும்."</string>
+    <string name="immersive_cling_title" msgid="8394201622932303336">"முழுத் திரையில் காட்டுகிறது"</string>
+    <string name="immersive_cling_description" msgid="3482371193207536040">"வெளியேற, மேலிருந்து கீழே ஸ்வைப் செய்யவும்"</string>
+    <string name="immersive_cling_positive" msgid="5016839404568297683">"புரிந்தது"</string>
     <string name="done_label" msgid="2093726099505892398">"முடிந்தது"</string>
     <string name="hour_picker_description" msgid="6698199186859736512">"மணிநேர வட்ட வடிவ ஸ்லைடர்"</string>
     <string name="minute_picker_description" msgid="8606010966873791190">"நிமிடங்களுக்கான வட்டவடிவ ஸ்லைடர்"</string>
@@ -1791,7 +1803,8 @@
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"பணியிடம் <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="lock_to_app_toast" msgid="7570091317001980053">"இந்தத் திரையை விலக்க, பின் மற்றும் மேலோட்டப் பார்வையை ஒரே நேரத்தில் தொட்டுப் பிடித்திருக்கவும்."</string>
     <string name="lock_to_app_toast_accessible" msgid="8239120109365070664">"இந்தத் திரையை விலக்க, மேலோட்டப் பார்வையைத் தொட்டுப் பிடித்திருக்கவும்."</string>
-    <string name="lock_to_app_toast_locked" msgid="8739004135132606329">"திரை பின் செய்யப்பட்டது. பின்னை அகற்ற உங்கள் நிறுவனம் ஆதரிக்கவில்லை."</string>
+    <!-- no translation found for lock_to_app_toast_locked (9125176335701699164) -->
+    <skip />
     <string name="lock_to_app_start" msgid="6643342070839862795">"திரை பின் செய்யப்பட்டது"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"திரையின் பின் அகற்றப்பட்டது"</string>
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"அகற்றும் முன் PINஐக் கேள்"</string>

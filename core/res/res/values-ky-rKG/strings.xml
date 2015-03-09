@@ -1007,6 +1007,8 @@
     <string name="permdesc_accessNotifications" msgid="458457742683431387">"Колдонмого (башка колдонмолор жайгаштырган дагы) эскертүүлөрдү алуу, изилдөө, жана аларды тазалоо мүмкүнчүлүгүн берет."</string>
     <string name="permlab_bindNotificationListenerService" msgid="7057764742211656654">"эскертүү тыңшагыч кызматына байланыштыруу"</string>
     <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"Ээсине эскертүү тыңшагыч кызматтын жогорку деңгээл интерфейсине туташуу мүмкүнчүлүгүн берет. Жөнөкөй колдонмолордо эч качан керектелбейт."</string>
+    <string name="permlab_bindChooserTargetService" msgid="3443261076710185673">"тандоочунун каалоосу кызматына туташуу"</string>
+    <string name="permdesc_bindChooserTargetService" msgid="1413908999583734970">"Кармоочуга тандоочунун каалоосу кызматынын жогорку деңгээл интерфейсин жалгаштырууга мүмкүндүк берет. Кадимки колдонмолорго эч качан талап кылынбайт."</string>
     <string name="permlab_bindConditionProviderService" msgid="1180107672332704641">"шарт түзүүчү кызматына жалгаштыруу"</string>
     <string name="permdesc_bindConditionProviderService" msgid="1680513931165058425">"Кармоочуга шарт түзүүчү кызматтын жогорку деңгээлдеги интерфейсине жалгашуу мүмкүнчүлүгүн берет. Кадимки колдонмолорго эч качан талап кылынбайт."</string>
     <string name="permlab_bindMediaRouteService" msgid="6637740382272686835">"медиа жол кызматына жалгаштыруу"</string>
@@ -1655,6 +1657,14 @@
     <!-- no translation found for new_app_action (5472756926945440706) -->
     <skip />
     <string name="new_app_description" msgid="1932143598371537340">"Эски колдонмону сактабастан токтотуу."</string>
+    <!-- no translation found for dump_heap_notification (2618183274836056542) -->
+    <skip />
+    <!-- no translation found for dump_heap_notification_detail (2075673362317481664) -->
+    <skip />
+    <!-- no translation found for dump_heap_title (5864292264307651673) -->
+    <skip />
+    <!-- no translation found for dump_heap_text (4809417337240334941) -->
+    <skip />
     <string name="sendText" msgid="5209874571959469142">"Текст үчүн аракет тандаңыз"</string>
     <!-- no translation found for volume_ringtone (6885421406845734650) -->
     <skip />
@@ -2291,7 +2301,9 @@
       <item quantity="one">1 секунддан кийин кайталаңыз</item>
     </plurals>
     <string name="restr_pin_try_later" msgid="973144472490532377">"Кийинчерээк кайталаңыз"</string>
-    <string name="immersive_mode_confirmation" msgid="7227416894979047467">"Толук экран абалынан чыгуу үчүн жогорудан төмөн сүрүңүз."</string>
+    <string name="immersive_cling_title" msgid="8394201622932303336">"Толук экранды көрүүдө"</string>
+    <string name="immersive_cling_description" msgid="3482371193207536040">"Чыгуу үчүн, жогурдан төмөн сүрүңүз."</string>
+    <string name="immersive_cling_positive" msgid="5016839404568297683">"Түшүндүм"</string>
     <string name="done_label" msgid="2093726099505892398">"Даяр"</string>
     <string name="hour_picker_description" msgid="6698199186859736512">"Саат жебеси"</string>
     <string name="minute_picker_description" msgid="8606010966873791190">"Мүнөт жебеси"</string>
@@ -2306,7 +2318,8 @@
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"Жумуш <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="lock_to_app_toast" msgid="7570091317001980053">"Бул экранды бошотуу үчүн Артка жана Көз жүгүртүүнү чогуу басып, кармап туруңуз."</string>
     <string name="lock_to_app_toast_accessible" msgid="8239120109365070664">"Бул экранды бошотуу үчүн Көз жүгүртүүнү басып, кармап туруңуз."</string>
-    <string name="lock_to_app_toast_locked" msgid="8739004135132606329">"Экран кадалды. Уюмуңуздун уруксатысыз бошото албайсыз."</string>
+    <!-- no translation found for lock_to_app_toast_locked (9125176335701699164) -->
+    <skip />
     <string name="lock_to_app_start" msgid="6643342070839862795">"Экран кадалды"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"Экран бошотулду"</string>
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Бошотуудан мурун PIN суралсын"</string>

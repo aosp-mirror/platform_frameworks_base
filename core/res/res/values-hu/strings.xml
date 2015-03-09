@@ -796,6 +796,8 @@
     <string name="permdesc_accessNotifications" msgid="458457742683431387">"Lehetővé teszi, hogy az alkalmazás értesítéseket kérdezzen le, vizsgáljon és tisztítson meg, beleértve az egyéb alkalmazások által közzétett értesítéseket is."</string>
     <string name="permlab_bindNotificationListenerService" msgid="7057764742211656654">"csatlakozzon értesítésfigyelő szolgáltatáshoz"</string>
     <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"Lehetővé teszi a használó számára, hogy csatlakozzon egy értesítésfigyelő szolgáltatás legfelső szintű felületéhez. A normál alkalmazásoknak erre soha nincs szükségük."</string>
+    <string name="permlab_bindChooserTargetService" msgid="3443261076710185673">"csatlakozás célválasztó szolgáltatáshoz"</string>
+    <string name="permdesc_bindChooserTargetService" msgid="1413908999583734970">"Lehetővé teszi a használó számára, hogy csatlakozzon egy célválasztó szolgáltatás legfelső szintű kezelőfelületéhez. A normál alkalmazásoknak erre soha nincs szükségük."</string>
     <string name="permlab_bindConditionProviderService" msgid="1180107672332704641">"csatlakozás egy feltételbiztosító szolgáltatáshoz"</string>
     <string name="permdesc_bindConditionProviderService" msgid="1680513931165058425">"Lehetővé teszi a használó számára, hogy csatlakozzon egy feltételbiztosító szolgáltatás legfelső szintű kezelőfelületéhez. A normál alkalmazásoknak erre soha nincs szükségük."</string>
     <string name="permlab_bindMediaRouteService" msgid="6637740382272686835">"csatlakozás egy médiaútvonal-szolgáltatáshoz"</string>
@@ -1263,6 +1265,14 @@
     <string name="old_app_description" msgid="2082094275580358049">"Ne indítsa el az új alkalmazást."</string>
     <string name="new_app_action" msgid="5472756926945440706">"<xliff:g id="OLD_APP">%1$s</xliff:g> indítása"</string>
     <string name="new_app_description" msgid="1932143598371537340">"A régi alkalmazás leállítása mentés nélkül."</string>
+    <!-- no translation found for dump_heap_notification (2618183274836056542) -->
+    <skip />
+    <!-- no translation found for dump_heap_notification_detail (2075673362317481664) -->
+    <skip />
+    <!-- no translation found for dump_heap_title (5864292264307651673) -->
+    <skip />
+    <!-- no translation found for dump_heap_text (4809417337240334941) -->
+    <skip />
     <string name="sendText" msgid="5209874571959469142">"Válasszon ki egy műveletet a szöveghez"</string>
     <string name="volume_ringtone" msgid="6885421406845734650">"Csengetés hangereje"</string>
     <string name="volume_music" msgid="5421651157138628171">"Média hangereje"</string>
@@ -1776,7 +1786,9 @@
       <item quantity="one">Próbálja újra 1 másodperc múlva</item>
     </plurals>
     <string name="restr_pin_try_later" msgid="973144472490532377">"Próbálkozzon később"</string>
-    <string name="immersive_mode_confirmation" msgid="7227416894979047467">"A teljes képernyős nézetből való kilépéshez húzza ujját a képernyő tetejétől lefelé."</string>
+    <string name="immersive_cling_title" msgid="8394201622932303336">"Megtekintése teljes képernyőn"</string>
+    <string name="immersive_cling_description" msgid="3482371193207536040">"Kilépéshez csúsztassa ujját fentről lefelé."</string>
+    <string name="immersive_cling_positive" msgid="5016839404568297683">"Értem"</string>
     <string name="done_label" msgid="2093726099505892398">"Kész"</string>
     <string name="hour_picker_description" msgid="6698199186859736512">"Óra kör alakú csúszkája"</string>
     <string name="minute_picker_description" msgid="8606010966873791190">"Perc kör alakú csúszkája"</string>
@@ -1791,7 +1803,8 @@
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"Munkahelyi <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="lock_to_app_toast" msgid="7570091317001980053">"A képernyő rögzítésének feloldásához tartsa lenyomva a Vissza és az Áttekintés lehetőséget egyszerre."</string>
     <string name="lock_to_app_toast_accessible" msgid="8239120109365070664">"A képernyő rögzítésének feloldásához tartsa lenyomva az Áttekintés lehetőséget."</string>
-    <string name="lock_to_app_toast_locked" msgid="8739004135132606329">"A képernyő rögzítve van. Szervezete nem engedélyezi a rögzítés feloldását."</string>
+    <!-- no translation found for lock_to_app_toast_locked (9125176335701699164) -->
+    <skip />
     <string name="lock_to_app_start" msgid="6643342070839862795">"Képernyő rögzítve"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"Képernyő rögzítése feloldva"</string>
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"PIN kód kérése a rögzítés feloldásához"</string>

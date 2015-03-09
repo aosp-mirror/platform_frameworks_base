@@ -738,14 +738,10 @@
     <string name="permdesc_nfc" msgid="7120611819401789907">"앱이 NFC(근거리 무선 통신) 태그, 카드 및 리더와 통신할 수 있도록 허용합니다."</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"화면 잠금 사용 중지"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"앱이 키 잠금 및 관련 비밀번호 보안을 사용중지할 수 있도록 허용합니다. 예를 들어, 휴대전화가 수신전화를 받을 때 키 잠금을 사용중지했다가 통화가 끝나면 키 잠금을 다시 사용할 수 있습니다."</string>
-    <!-- no translation found for permlab_manageFingerprint (5640858826254575638) -->
-    <skip />
-    <!-- no translation found for permdesc_manageFingerprint (178208705828055464) -->
-    <skip />
-    <!-- no translation found for permlab_useFingerprint (3150478619915124905) -->
-    <skip />
-    <!-- no translation found for permdesc_useFingerprint (9165097460730684114) -->
-    <skip />
+    <string name="permlab_manageFingerprint" msgid="5640858826254575638">"지문 하드웨어 관리"</string>
+    <string name="permdesc_manageFingerprint" msgid="178208705828055464">"사용할 지문 템플릿의 추가 및 삭제 메소드를 앱에서 실행하도록 허용합니다."</string>
+    <string name="permlab_useFingerprint" msgid="3150478619915124905">"지문 하드웨어 사용"</string>
+    <string name="permdesc_useFingerprint" msgid="9165097460730684114">"앱에서 지문 하드웨어를 인증에 사용하도록 허용합니다."</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"동기화 설정 읽기"</string>
     <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"앱이 계정의 동기화 설정을 읽을 수 있도록 허용합니다. 예를 들어, 계정에서 주소록 앱을 동기화할지 여부를 확인할 수 있습니다."</string>
     <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"동기화 사용 및 사용 중지 전환"</string>
@@ -800,6 +796,8 @@
     <string name="permdesc_accessNotifications" msgid="458457742683431387">"앱이 다른 앱에서 게시한 알림을 비롯하여 알림을 검색하고 살펴보며 삭제할 수 있도록 허용합니다."</string>
     <string name="permlab_bindNotificationListenerService" msgid="7057764742211656654">"알림 수신기 서비스 사용"</string>
     <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"권한을 가진 프로그램이 알림 수신기 서비스에 대한 최상위 인터페이스를 사용하도록 허용합니다. 일반 앱에는 필요하지 않습니다."</string>
+    <string name="permlab_bindChooserTargetService" msgid="3443261076710185673">"선택기 타겟 서비스 사용"</string>
+    <string name="permdesc_bindChooserTargetService" msgid="1413908999583734970">"권한을 가진 프로그램이 선택기 타겟 서비스에 대한 최상위 인터페이스를 사용하도록 허용합니다. 일반 앱에는 필요하지 않습니다."</string>
     <string name="permlab_bindConditionProviderService" msgid="1180107672332704641">"조건 제공자 서비스 사용"</string>
     <string name="permdesc_bindConditionProviderService" msgid="1680513931165058425">"권한을 가진 프로그램이 조건 제공자 서비스의 최상위 인터페이스를 사용하도록 합니다. 일반 앱에는 필요하지 않습니다."</string>
     <string name="permlab_bindMediaRouteService" msgid="6637740382272686835">"미디어 경로 서비스 사용"</string>
@@ -1267,6 +1265,14 @@
     <string name="old_app_description" msgid="2082094275580358049">"새 앱을 시작하지 마세요."</string>
     <string name="new_app_action" msgid="5472756926945440706">"<xliff:g id="OLD_APP">%1$s</xliff:g> 시작"</string>
     <string name="new_app_description" msgid="1932143598371537340">"저장하지 않고 이전 앱을 중단합니다."</string>
+    <!-- no translation found for dump_heap_notification (2618183274836056542) -->
+    <skip />
+    <!-- no translation found for dump_heap_notification_detail (2075673362317481664) -->
+    <skip />
+    <!-- no translation found for dump_heap_title (5864292264307651673) -->
+    <skip />
+    <!-- no translation found for dump_heap_text (4809417337240334941) -->
+    <skip />
     <string name="sendText" msgid="5209874571959469142">"텍스트에 대한 작업 선택"</string>
     <string name="volume_ringtone" msgid="6885421406845734650">"벨소리 볼륨"</string>
     <string name="volume_music" msgid="5421651157138628171">"미디어 볼륨"</string>
@@ -1780,7 +1786,9 @@
       <item quantity="one">1초 후에 다시 시도하세요.</item>
     </plurals>
     <string name="restr_pin_try_later" msgid="973144472490532377">"나중에 다시 시도"</string>
-    <string name="immersive_mode_confirmation" msgid="7227416894979047467">"전체화면을 종료하려면 위에서 아래로 스와이프하세요."</string>
+    <string name="immersive_cling_title" msgid="8394201622932303336">"전체 화면 보기"</string>
+    <string name="immersive_cling_description" msgid="3482371193207536040">"종료하려면 위에서 아래로 스와이프합니다."</string>
+    <string name="immersive_cling_positive" msgid="5016839404568297683">"확인"</string>
     <string name="done_label" msgid="2093726099505892398">"완료"</string>
     <string name="hour_picker_description" msgid="6698199186859736512">"시간 원형 슬라이더"</string>
     <string name="minute_picker_description" msgid="8606010966873791190">"분 원형 슬라이더"</string>
@@ -1795,7 +1803,8 @@
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"업무용 <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="lock_to_app_toast" msgid="7570091317001980053">"화면 고정을 해제하려면 \'뒤로\'와 \'개요\'를 동시에 길게 터치합니다."</string>
     <string name="lock_to_app_toast_accessible" msgid="8239120109365070664">"화면 고정을 해제하려면 \'개요\'를 길게 터치합니다."</string>
-    <string name="lock_to_app_toast_locked" msgid="8739004135132606329">"화면이 고정되었습니다. 소속된 조직에서 고정 해제를 허용하지 않습니다."</string>
+    <!-- no translation found for lock_to_app_toast_locked (9125176335701699164) -->
+    <skip />
     <string name="lock_to_app_start" msgid="6643342070839862795">"화면 고정됨"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"화면 고정 해제됨"</string>
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"고정 해제 이전에 PIN 요청"</string>

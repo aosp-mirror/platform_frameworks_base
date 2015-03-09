@@ -796,6 +796,8 @@
     <string name="permdesc_accessNotifications" msgid="458457742683431387">"অ্যাপ্লিকেশানটিকে অন্যান্য অ্যাপ্লিকেশান যেগুলি পোস্ট করে সেগুলি সমেত, বিজ্ঞপ্তিগুলি পুনরুদ্ধার করতে, পরীক্ষা করতে এবং সাফ করার অনুমতি দেয়৷"</string>
     <string name="permlab_bindNotificationListenerService" msgid="7057764742211656654">"একটি বিজ্ঞপ্তি শ্রোতা পরিষেবাতে সংলগ্ন করে"</string>
     <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"ধারককে, একটি বিজ্ঞপ্তি শ্রোতা পরিষেবার উচ্চ স্তরের ইন্টারফেসে জুড়তে অনুমতি দেয়৷ সধারণ অ্যাপ্লিকেশানগুলির জন্য কখনই প্রয়োজন হয় না৷"</string>
+    <string name="permlab_bindChooserTargetService" msgid="3443261076710185673">"একটি লক্ষ চয়নকারী পরিষেবাতে আবদ্ধ করুন"</string>
+    <string name="permdesc_bindChooserTargetService" msgid="1413908999583734970">"ধারককে, একটি লক্ষ্য চয়নকারী পরিষেবার উচ্চ স্তরের ইন্টারফেসে জুড়তে অনুমতি দেয়৷ সধারণ অ্যাপ্লিকেশানগুলির জন্য কখনই প্রয়োজন হয় না৷"</string>
     <string name="permlab_bindConditionProviderService" msgid="1180107672332704641">"একটি শর্ত প্রদানকারীর পরিষেবা বাঁধাই করে"</string>
     <string name="permdesc_bindConditionProviderService" msgid="1680513931165058425">"ধারককে, একটি শর্ত প্রদানকারী পরিষেবার উচ্চ স্তরের ইন্টারফেসে জুড়তে অনুমতি দেয়৷ সধারণ অ্যাপ্লিকেশানগুলির জন্য কখনই প্রয়োজন হয় না৷"</string>
     <string name="permlab_bindMediaRouteService" msgid="6637740382272686835">"একটি মিডিয়া রুট পরিষেবায় জুড়ুন"</string>
@@ -1263,6 +1265,14 @@
     <string name="old_app_description" msgid="2082094275580358049">"নতুন অ্যাপ্লিকেশান চালু করবেন না৷"</string>
     <string name="new_app_action" msgid="5472756926945440706">"<xliff:g id="OLD_APP">%1$s</xliff:g> শুরু করুন"</string>
     <string name="new_app_description" msgid="1932143598371537340">"সংরক্ষণ না করেই পুরোনো অ্যাপ্লিকেশানটি বন্ধ করুন৷"</string>
+    <!-- no translation found for dump_heap_notification (2618183274836056542) -->
+    <skip />
+    <!-- no translation found for dump_heap_notification_detail (2075673362317481664) -->
+    <skip />
+    <!-- no translation found for dump_heap_title (5864292264307651673) -->
+    <skip />
+    <!-- no translation found for dump_heap_text (4809417337240334941) -->
+    <skip />
     <string name="sendText" msgid="5209874571959469142">"পাঠ্যের জন্য একটি কাজ বেছে নিন"</string>
     <string name="volume_ringtone" msgid="6885421406845734650">"রিং ভলিউম"</string>
     <string name="volume_music" msgid="5421651157138628171">"মিডিয়ার ভলিউম"</string>
@@ -1776,7 +1786,9 @@
       <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> সেকেন্ডের মধ্যে আবার চেষ্টা করুন</item>
     </plurals>
     <string name="restr_pin_try_later" msgid="973144472490532377">"পরে আবার চেষ্টা করুন"</string>
-    <string name="immersive_mode_confirmation" msgid="7227416894979047467">"পূর্ণস্ক্রীণ থেকে প্রস্থান করতে উপর থেকে নীচের দিকে সোয়াইপ করুন৷"</string>
+    <string name="immersive_cling_title" msgid="8394201622932303336">"পূর্ণ স্ক্রীণে দেখা হচ্ছে"</string>
+    <string name="immersive_cling_description" msgid="3482371193207536040">"প্রস্থান করতে উপর থেকে নীচের দিকে সোয়াইপ করুন"</string>
+    <string name="immersive_cling_positive" msgid="5016839404568297683">"বুঝেছি"</string>
     <string name="done_label" msgid="2093726099505892398">"সম্পন্ন হয়েছে"</string>
     <string name="hour_picker_description" msgid="6698199186859736512">"বৃত্তাকার ঘন্টা নির্বাচকের স্লাইডার"</string>
     <string name="minute_picker_description" msgid="8606010966873791190">"বৃত্তাকার মিনিট নির্বাচকের স্লাইডার"</string>
@@ -1791,7 +1803,8 @@
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"কর্মক্ষেত্র <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="lock_to_app_toast" msgid="7570091317001980053">"এই স্ক্রীনটিকে আনপিন করতে, \'ফিরুন\' এবং \'এক নজরে\' একসাথে স্পর্শ করুন এবং ধরে রাখুন৷"</string>
     <string name="lock_to_app_toast_accessible" msgid="8239120109365070664">"এই স্ক্রীনটিকে আনপিন করতে, \'এক নজরে\' স্পর্শ করুন এবং ধরে রাখুন৷"</string>
-    <string name="lock_to_app_toast_locked" msgid="8739004135132606329">"স্ক্রীন পিন করা আছে। আপনার প্রতিষ্ঠান এটিকে পিনমুক্ত করার অনুমতি দেয়নি।"</string>
+    <!-- no translation found for lock_to_app_toast_locked (9125176335701699164) -->
+    <skip />
     <string name="lock_to_app_start" msgid="6643342070839862795">"স্ক্রীন পিন করা হয়েছে"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"পিন না করা স্ক্রীন"</string>
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"আনপিন করার আগে PIN চান"</string>

@@ -796,6 +796,8 @@
     <string name="permdesc_accessNotifications" msgid="458457742683431387">"ອະນຸຍາດໃຫ້ແອັບຯດຶງຂໍ້ມູນ, ກວດສອບ ແລະລຶບລ້າງການແຈ້ງເຕືອນ ຮວມທັງພວກທີ່ໂພສໂດຍແອັບຯອື່ນໆນຳ."</string>
     <string name="permlab_bindNotificationListenerService" msgid="7057764742211656654">"ເຊື່ອມໂຍງກັບບໍລິການໂຕຟັງການແຈ້ງເຕືອນ"</string>
     <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"ອະນຸຍາດໃຫ້ເຈົ້າຂອງເຊື່ອມໂຍງສ່ວນຕິດຕໍ່ລະດັບເທິງສຸດ ຂອງຜູ່ຟັງບໍລິການການແຈ້ງເຕືອນ. ບໍ່ຈຳເປັນສຳລັບແອັບຯທົ່ວໄປ."</string>
+    <string name="permlab_bindChooserTargetService" msgid="3443261076710185673">"ຜູກ​ພັນ​ກັບ​ເປົ້າ​ໝາຍ​ການ​ບໍ​ລິ​ການ​ຜູ້​ເລືອກ"</string>
+    <string name="permdesc_bindChooserTargetService" msgid="1413908999583734970">"ອະນຸຍາດໃຫ້ຜູ້ຖືຜູກ​ພັນ​ກັບຕົວ​ປະ​ສານລະດັບສູງສຸດຂອງການບໍລິການເປົ້າ​ໝາຍ​ຜູ້​ເລືອກ. ບໍ່ຈຳເປັນສຳລັບແອັບຯທົ່ວໄປ."</string>
     <string name="permlab_bindConditionProviderService" msgid="1180107672332704641">"ເຊື່ອມ​ໂຍງ​ກັບ​ບໍ​ລິ​ການ​ຜູ່​ສະ​ໜອງ​ເງື່ອນ​ໄຂ"</string>
     <string name="permdesc_bindConditionProviderService" msgid="1680513931165058425">"ອະນຸຍາດ​ໃຫ້​ເຈົ້າຂອງ​ເຊື່ອມໂຍງ​ສ່ວນຕິດຕໍ່​ລະດັບ​ສູງສຸດ​ຂອງ​ບໍ​ລິ​ການ​ສະ​ໜອງ​ເງື່ອນ​ໄຂ. ບໍ່ຈຳເປັນ​ສຳລັບ​ແອັບຯທົ່ວໄປ."</string>
     <string name="permlab_bindMediaRouteService" msgid="6637740382272686835">"​ເຊື່ອມ​ໂຍງ​ກັບ​ບໍ​ລິ​ການ​ເສັ້ນ​ທາງ​ມີ​ເດຍ"</string>
@@ -1263,6 +1265,14 @@
     <string name="old_app_description" msgid="2082094275580358049">"ຫ້າມເປີດແອັບຯໃໝ່."</string>
     <string name="new_app_action" msgid="5472756926945440706">"ເລີ່ມຕົ້ນ <xliff:g id="OLD_APP">%1$s</xliff:g>"</string>
     <string name="new_app_description" msgid="1932143598371537340">"ຢຸດແອັບຯເກົ່າໂດຍບໍ່ຕ້ອງບັນທຶກ."</string>
+    <!-- no translation found for dump_heap_notification (2618183274836056542) -->
+    <skip />
+    <!-- no translation found for dump_heap_notification_detail (2075673362317481664) -->
+    <skip />
+    <!-- no translation found for dump_heap_title (5864292264307651673) -->
+    <skip />
+    <!-- no translation found for dump_heap_text (4809417337240334941) -->
+    <skip />
     <string name="sendText" msgid="5209874571959469142">"ເລືອກການເຮັດວຽກຂອງຂໍ້ຄວາມ"</string>
     <string name="volume_ringtone" msgid="6885421406845734650">"ລະດັບສຽງເອີ້ນເຂົ້າ"</string>
     <string name="volume_music" msgid="5421651157138628171">"ລະດັບສຽງຂອງສື່"</string>
@@ -1776,7 +1786,9 @@
       <item quantity="one">ລອງໃໝ່ໃນອີກ 1 ວິນາທີ</item>
     </plurals>
     <string name="restr_pin_try_later" msgid="973144472490532377">"ລອງໃໝ່ອີກຄັ້ງໃນພາຍຫລັງ."</string>
-    <string name="immersive_mode_confirmation" msgid="7227416894979047467">"ປັດລົງມາຈາກທາງເທິງເພື່ອອອກຈາກໂໝດເຕັມໜ້າຈໍ."</string>
+    <string name="immersive_cling_title" msgid="8394201622932303336">"ການ​ເບິ່ງ​ເຕັມ​ໜ້າ​ຈໍ"</string>
+    <string name="immersive_cling_description" msgid="3482371193207536040">"ເພື່ອ​ອອກ, ຮູດ​ລົງ​ລຸ່ມ​ຈາກ​ດ້ານ​ເທິງ."</string>
+    <string name="immersive_cling_positive" msgid="5016839404568297683">"ໄດ້​ແລ້ວ"</string>
     <string name="done_label" msgid="2093726099505892398">"ແລ້ວໆ"</string>
     <string name="hour_picker_description" msgid="6698199186859736512">"ໂຕໝຸນປັບຊົ່ວໂມງ"</string>
     <string name="minute_picker_description" msgid="8606010966873791190">"ໂຕໝຸນປັບນາທີ"</string>
@@ -1791,7 +1803,8 @@
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"​ບ່ອນ​ເຮັດ​ວຽກ <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="lock_to_app_toast" msgid="7570091317001980053">"ເພື່ອ​ຖອດ​ການ​ປັກ​ໝຸດ​ໜ້າ​ຈໍ​ນີ້, ສຳ​ຜັດປຸ່ມ ​ກັບ​ຄືນ ແລະ ພາບ​ຮວມ ຄ້າງ​ໄວ້​ພ້ອມ​ກັນ."</string>
     <string name="lock_to_app_toast_accessible" msgid="8239120109365070664">"ເພື່ອ​ຖອດ​ການ​ປັກ​ໝຸດໜ້າ​ຈໍ​ນີ້, ສຳ​ຜັດ​ປຸ່ມ ພາບ​ຮວມ ຄ້າງ​ໄວ້."</string>
-    <string name="lock_to_app_toast_locked" msgid="8739004135132606329">"ໜ້າ​ຈໍ​ຖືກ​ປັກ​ໝຸດ​ໄວ້. ​ອົງ​ກອນ​ຂອງ​ທ່ານບໍ່​​ອະ​ນຸ​ຍາດ​ໃຫ້​ຍົກ​ເລີກ​ການ​ປັກ​ໝຸດ​ໄດ້."</string>
+    <!-- no translation found for lock_to_app_toast_locked (9125176335701699164) -->
+    <skip />
     <string name="lock_to_app_start" msgid="6643342070839862795">"​ປັກ​ໝຸດ​ໜ້າ​ຈໍ​ແລ້ວ"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"ຍົກ​ເລີກ​ການ​ປັກ​ໝຸນ​​ຫນ້າ​ຈໍ​ແລ້ວ"</string>
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"​ຖາມ​ຫາ PIN ກ່ອນ​ຍົກ​ເລີກ​ການປັກ​ໝຸດ"</string>

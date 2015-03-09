@@ -798,6 +798,8 @@
     <string name="permdesc_accessNotifications" msgid="458457742683431387">"Dovoli aplikaciji, da prenese, razišče in izbriše obvestila, tudi tista, ki so jih objavile druge aplikacije."</string>
     <string name="permlab_bindNotificationListenerService" msgid="7057764742211656654">"poveži se s storitvijo poslušalca obvestil"</string>
     <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"Lastniku omogoča povezovanje z vmesnikom storitve poslušalca obvestil najvišje ravni. Tega nikoli ni treba uporabiti za navadne aplikacije."</string>
+    <string name="permlab_bindChooserTargetService" msgid="3443261076710185673">"povezava s storitvijo izbirnika cilja"</string>
+    <string name="permdesc_bindChooserTargetService" msgid="1413908999583734970">"Imetniku omogoča povezovanje z vmesnikom storitve izbirnika cilja najvišje ravni. Nikoli ni potrebno za navadne aplikacije."</string>
     <string name="permlab_bindConditionProviderService" msgid="1180107672332704641">"povezovanje s storitvijo ponudnika pogojev"</string>
     <string name="permdesc_bindConditionProviderService" msgid="1680513931165058425">"Imetniku omogoča povezovanje z vmesnikom storitve ponudnika pogojev najvišje ravni. Tega ni treba nikoli uporabiti za navadne aplikacije."</string>
     <string name="permlab_bindMediaRouteService" msgid="6637740382272686835">"povezovanje s storitvijo poti predstavnosti"</string>
@@ -1273,6 +1275,14 @@
     <string name="old_app_description" msgid="2082094275580358049">"Ne zaženite nove aplikacije."</string>
     <string name="new_app_action" msgid="5472756926945440706">"Začni <xliff:g id="OLD_APP">%1$s</xliff:g>"</string>
     <string name="new_app_description" msgid="1932143598371537340">"Ustavi prejšnjo aplikacijo brez shranjevanja."</string>
+    <!-- no translation found for dump_heap_notification (2618183274836056542) -->
+    <skip />
+    <!-- no translation found for dump_heap_notification_detail (2075673362317481664) -->
+    <skip />
+    <!-- no translation found for dump_heap_title (5864292264307651673) -->
+    <skip />
+    <!-- no translation found for dump_heap_text (4809417337240334941) -->
+    <skip />
     <string name="sendText" msgid="5209874571959469142">"Izberite dejanje za besedilo"</string>
     <string name="volume_ringtone" msgid="6885421406845734650">"Glasnost zvonjenja"</string>
     <string name="volume_music" msgid="5421651157138628171">"Glasnost predstavnosti"</string>
@@ -1794,7 +1804,9 @@
       <item quantity="other">Poskusite znova čez <xliff:g id="COUNT">%d</xliff:g> sekund</item>
     </plurals>
     <string name="restr_pin_try_later" msgid="973144472490532377">"Poskusite znova pozneje"</string>
-    <string name="immersive_mode_confirmation" msgid="7227416894979047467">"Povlecite z vrha, da zaprete celozaslonski način."</string>
+    <string name="immersive_cling_title" msgid="8394201622932303336">"Celozaslonski način"</string>
+    <string name="immersive_cling_description" msgid="3482371193207536040">"Zaprete tako, da z vrha s prstom povlečete navzdol."</string>
+    <string name="immersive_cling_positive" msgid="5016839404568297683">"Razumem"</string>
     <string name="done_label" msgid="2093726099505892398">"Dokončano"</string>
     <string name="hour_picker_description" msgid="6698199186859736512">"Okrogli drsnik za ure"</string>
     <string name="minute_picker_description" msgid="8606010966873791190">"Okrogli drsnik za minute"</string>
@@ -1809,7 +1821,8 @@
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"<xliff:g id="LABEL">%1$s</xliff:g> za delo"</string>
     <string name="lock_to_app_toast" msgid="7570091317001980053">"Če želite odpeti ta zaslon, se hkrati dotaknite tipk Nazaj in Pregled ter ju pridržite."</string>
     <string name="lock_to_app_toast_accessible" msgid="8239120109365070664">"Če želite odpeti ta zaslon, se dotaknite tipke Pregled in jo pridržite."</string>
-    <string name="lock_to_app_toast_locked" msgid="8739004135132606329">"Zaslon je pripet. Vaša organizacija ne dovoli odpenjanja."</string>
+    <!-- no translation found for lock_to_app_toast_locked (9125176335701699164) -->
+    <skip />
     <string name="lock_to_app_start" msgid="6643342070839862795">"Zaslon je pripet"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"Zaslon je odpet"</string>
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Pred odpenjanjem vprašaj za PIN"</string>

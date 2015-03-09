@@ -786,7 +786,7 @@
     <string name="permdesc_bind_connection_service" msgid="4008754499822478114">"Tillader, at appen kan interagere med telefonitjenester for at foretage/modtage opkald."</string>
     <string name="permlab_control_incall_experience" msgid="9061024437607777619">"leverer brugeroplevelsen under opkald"</string>
     <string name="permdesc_control_incall_experience" msgid="915159066039828124">"Tillader, at appen leverer brugeroplevelsen under opkald."</string>
-    <string name="permlab_readNetworkUsageHistory" msgid="7862593283611493232">"læse oversigt over netværksbrug"</string>
+    <string name="permlab_readNetworkUsageHistory" msgid="7862593283611493232">"læse historisk netværksbrug"</string>
     <string name="permdesc_readNetworkUsageHistory" msgid="7689060749819126472">"Tillader, at appen kan læse historisk netværksbrug for specifikke netværk og apps."</string>
     <string name="permlab_manageNetworkPolicy" msgid="2562053592339859990">"administrer netværkspolitik"</string>
     <string name="permdesc_manageNetworkPolicy" msgid="7537586771559370668">"Tillader, at appen kan administrere netværkspolitikker og definere appspecifikke regler."</string>
@@ -796,6 +796,8 @@
     <string name="permdesc_accessNotifications" msgid="458457742683431387">"Tillader, at appen kan hente, undersøge og rydde underretninger, f.eks. dem, der er sendt af andre apps."</string>
     <string name="permlab_bindNotificationListenerService" msgid="7057764742211656654">"forpligte sig til en underretningslyttertjeneste"</string>
     <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"Tillader brugeren at forpligte sig til en underretningslyttertjenestes grænseflade på øverste niveau. Bør aldrig være nødvendigt til almindelige apps."</string>
+    <string name="permlab_bindChooserTargetService" msgid="3443261076710185673">"knytte sig til en tjeneste til valg af mål"</string>
+    <string name="permdesc_bindChooserTargetService" msgid="1413908999583734970">"Tillader, at appen kan knytte sig til det øverste grænsefladeniveau for en tjeneste til valg af mål. Dette bør aldrig være nødvendigt for almindelige apps."</string>
     <string name="permlab_bindConditionProviderService" msgid="1180107672332704641">"oprette binding til en tjeneste til formidling af betingelser"</string>
     <string name="permdesc_bindConditionProviderService" msgid="1680513931165058425">"Tillader, at brugeren opretter en binding til det øverste niveau af grænsefladen i en tjeneste til formidling af betingelser. Dette bør aldrig være nødvendigt for almindelige apps."</string>
     <string name="permlab_bindMediaRouteService" msgid="6637740382272686835">"opret binding til en medierutetjeneste"</string>
@@ -1263,6 +1265,14 @@
     <string name="old_app_description" msgid="2082094275580358049">"Åbn ikke den nye app."</string>
     <string name="new_app_action" msgid="5472756926945440706">"Start <xliff:g id="OLD_APP">%1$s</xliff:g>"</string>
     <string name="new_app_description" msgid="1932143598371537340">"Stop den gamle app uden at gemme."</string>
+    <!-- no translation found for dump_heap_notification (2618183274836056542) -->
+    <skip />
+    <!-- no translation found for dump_heap_notification_detail (2075673362317481664) -->
+    <skip />
+    <!-- no translation found for dump_heap_title (5864292264307651673) -->
+    <skip />
+    <!-- no translation found for dump_heap_text (4809417337240334941) -->
+    <skip />
     <string name="sendText" msgid="5209874571959469142">"Vælg en handling for teksten"</string>
     <string name="volume_ringtone" msgid="6885421406845734650">"Lydstyrke for opkald"</string>
     <string name="volume_music" msgid="5421651157138628171">"Lydstyrke for medier"</string>
@@ -1776,7 +1786,9 @@
       <item quantity="other">Prøv igen om <xliff:g id="COUNT">%d</xliff:g> sekunder</item>
     </plurals>
     <string name="restr_pin_try_later" msgid="973144472490532377">"Prøv igen senere"</string>
-    <string name="immersive_mode_confirmation" msgid="7227416894979047467">"Stryg ned fra toppen for at afslutte fuld skærm"</string>
+    <string name="immersive_cling_title" msgid="8394201622932303336">"Visning i fuld skærm"</string>
+    <string name="immersive_cling_description" msgid="3482371193207536040">"Stryg ned fra toppen for at afslutte."</string>
+    <string name="immersive_cling_positive" msgid="5016839404568297683">"OK, det er forstået"</string>
     <string name="done_label" msgid="2093726099505892398">"Udfør"</string>
     <string name="hour_picker_description" msgid="6698199186859736512">"Cirkulær timevælger"</string>
     <string name="minute_picker_description" msgid="8606010966873791190">"Cirkulær minutvælger"</string>
@@ -1791,7 +1803,8 @@
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"<xliff:g id="LABEL">%1$s</xliff:g> – arbejde"</string>
     <string name="lock_to_app_toast" msgid="7570091317001980053">"Hvis du vil frigøre dette skærmbillede, skal du trykke på Tilbage og Oversigt på samme tid og holde fingeren nede."</string>
     <string name="lock_to_app_toast_accessible" msgid="8239120109365070664">"Hvis du vil frigøre dette skærmbillede, skal du trykke på Oversigt og holde fingeren nede."</string>
-    <string name="lock_to_app_toast_locked" msgid="8739004135132606329">"Skærmen er fastgjort. Frigørelse er ikke tilladt af din organisation."</string>
+    <!-- no translation found for lock_to_app_toast_locked (9125176335701699164) -->
+    <skip />
     <string name="lock_to_app_start" msgid="6643342070839862795">"Skærmen blev fastgjort"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"Skærmen blev frigjort"</string>
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Bed om pinkode inden frigørelse"</string>

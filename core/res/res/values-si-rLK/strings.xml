@@ -739,7 +739,7 @@
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"ඔබගේ තිරයේ අගුල අබල කරන්න"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"යතුරු අගුල සහ ඕනෑම සම්බන්ධිත මුරපද ආරක්ෂාවක් අබල කිරීමට යෙදුමට අවසර දෙන්න. මෙහි උදාහරණයක් වන්නේ පැමිණෙන ඇමතුමක් ලැබෙද්දී, දුරකථනය අක්‍රිය වන අතර ඇමතුම අවසාන වන විට යතුරු අගුල නැවත සක්‍රිය වෙයි."</string>
     <string name="permlab_manageFingerprint" msgid="5640858826254575638">"ඇඟිලි සලකුණු දෘඩාංග කළමනාකරණය කිරීම."</string>
-    <string name="permdesc_manageFingerprint" msgid="178208705828055464">"ඇඟිලි සලකුණු සැකිලි එක් කිරීමට සහ ඉවත් කිරීමට අදාළ විධික්‍රම භාවිතය සඳහා මෙම යෙදුමට අවසර දෙයි."</string>
+    <string name="permdesc_manageFingerprint" msgid="178208705828055464">"ඇඟිලි සලකුණු සැකිලි එකතු කිරීමට සහ ඉවත් කිරීමට අදාළ විධික්‍රම භාවිතය සඳහා මෙම යෙදුමට අවසර දෙයි."</string>
     <string name="permlab_useFingerprint" msgid="3150478619915124905">"ඇඟිලි සලකුණු දෘඩාංග භාවිතා කරන්න."</string>
     <string name="permdesc_useFingerprint" msgid="9165097460730684114">"අනන්‍යතාවය තහවුරු කරගැනීමට ඇඟිලි සලකුණු දෘඩාංග භාවිතා කිරීමට මෙම යෙදුමට ඉඩ දෙන්න."</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"සමමුහුර්ත සැකසීම් කියවන්න"</string>
@@ -796,6 +796,8 @@
     <string name="permdesc_accessNotifications" msgid="458457742683431387">"වෙනත් යෙදුම් විසින් කළ පල කිරීම්ද ඇතුළත්ව දැන්වීම් ලබා ගැනීමට, පරීක්ෂා කිරීමට සහ හිස් කිරීමට යෙදුමට අවසර දෙන්න."</string>
     <string name="permlab_bindNotificationListenerService" msgid="7057764742211656654">"දැනුම්දීම ඇහුම්කන් දීම් සේවාවක් වෙත බඳින්න"</string>
     <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"දැනුම්දීම් අසන්නාගේ සේවාවේ ඉහළ මට්ටමේ අතුරුමුහුණතට බැඳීමට දරන්නාට අවසර දේ. සාමාන්‍ය යෙදුම් සඳහා කිසිසේත් අවශ්‍ය නොවේ."</string>
+    <string name="permlab_bindChooserTargetService" msgid="3443261076710185673">"තෝරන්නා ඉලක්ක කරගත් සේවාවකට සම්බන්ධ කරන්න"</string>
+    <string name="permdesc_bindChooserTargetService" msgid="1413908999583734970">"තෝරන්නා ඉලක්ක කරගත් සේවාවක ඉහළ මට්ට‍‍‍මේ අතුරු මුහුණත වෙත සම්බන්ධ වීමට ධාරකයාට ඉඩ‍‍දෙන්න. සාමාන්ය යෙදුම් සඳහා කිසිදා අවශ්ය නොවනු ඇත."</string>
     <string name="permlab_bindConditionProviderService" msgid="1180107672332704641">"තත්ත්වය සපයන්නාගේ සේවාවට බඳින්න"</string>
     <string name="permdesc_bindConditionProviderService" msgid="1680513931165058425">"තත්ත්වය සපයන්නාගේ සේවාවට ඉහළ-මට්ටමේ අතුරු මුහුණතක් බැඳිමට ධාරකයාට අවසර දෙන්න. සාමාන්‍ය යෙදුම් සඳහා කවදාවත් අවශ්‍යය නොවෙයි."</string>
     <string name="permlab_bindMediaRouteService" msgid="6637740382272686835">"මාධ්‍ය ගමන් කරන සේවාව බඳින්න"</string>
@@ -1265,6 +1267,14 @@
     <string name="old_app_description" msgid="2082094275580358049">"නව යෙදුම ආරම්භ නොකරන්න."</string>
     <string name="new_app_action" msgid="5472756926945440706">"<xliff:g id="OLD_APP">%1$s</xliff:g> අරඹන්න"</string>
     <string name="new_app_description" msgid="1932143598371537340">"සුරැකීමකින් තොරව පරණ යෙදුම නවත්වන්න."</string>
+    <!-- no translation found for dump_heap_notification (2618183274836056542) -->
+    <skip />
+    <!-- no translation found for dump_heap_notification_detail (2075673362317481664) -->
+    <skip />
+    <!-- no translation found for dump_heap_title (5864292264307651673) -->
+    <skip />
+    <!-- no translation found for dump_heap_text (4809417337240334941) -->
+    <skip />
     <string name="sendText" msgid="5209874571959469142">"පෙළ සඳහා ක්‍රියාව තෝරන්න"</string>
     <string name="volume_ringtone" msgid="6885421406845734650">"හඬ නඟනයේ ශබ්දය"</string>
     <string name="volume_music" msgid="5421651157138628171">"මාධ්‍ය ශබ්දය"</string>
@@ -1778,7 +1788,9 @@
       <item quantity="other">තත්පර <xliff:g id="COUNT">%d</xliff:g> කින් නැවත උත්සාහ කරන්න</item>
     </plurals>
     <string name="restr_pin_try_later" msgid="973144472490532377">"පසුව නැවත උත්සාහ කරන්න"</string>
-    <string name="immersive_mode_confirmation" msgid="7227416894979047467">"උඩ සිට පහළට ස්වයිප් කර පූර්ණ තිරයෙන් ඉවත්වන්න."</string>
+    <string name="immersive_cling_title" msgid="8394201622932303336">"මුළු තිරය ​​නරඹමින්"</string>
+    <string name="immersive_cling_description" msgid="3482371193207536040">"ඉවත් වීමට, ඉහළ සිට පහළට ස්වයිප් කරන්න"</string>
+    <string name="immersive_cling_positive" msgid="5016839404568297683">"වැටහුණි"</string>
     <string name="done_label" msgid="2093726099505892398">"අවසන්"</string>
     <string name="hour_picker_description" msgid="6698199186859736512">"පැය කවාකාර සර්පනය"</string>
     <string name="minute_picker_description" msgid="8606010966873791190">"මිනිත්තු කවාකාර සර්පනය"</string>
@@ -1793,7 +1805,8 @@
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"වැඩ <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="lock_to_app_toast" msgid="7570091317001980053">"මෙම තීරයේ ඇමුණුම ඉවත් කිරීමට, ආපසු සහ දළ විශ්ලේෂණය එකම වේලාවේ ස්පර්ශ කර අල්ලා සිටින්න."</string>
     <string name="lock_to_app_toast_accessible" msgid="8239120109365070664">"මෙම තීරයේ ඇමුණුම ඉවත් කිරීමට, දළ විශ්ලේෂණය ස්පර්ශ කර අල්ලා සිටින්න."</string>
-    <string name="lock_to_app_toast_locked" msgid="8739004135132606329">"තිරය අගුළු දමා ඇත. ඔබගේ සංවිධානය විසින් අගුළු ඇරීමට ඉඩ නොදෙයි."</string>
+    <!-- no translation found for lock_to_app_toast_locked (9125176335701699164) -->
+    <skip />
     <string name="lock_to_app_start" msgid="6643342070839862795">"තිරය අගුළු දමා ඇත"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"තිරයේ අගුළු ඇර ඇත"</string>
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"ගැලවීමට පෙර PIN විමසන්න"</string>

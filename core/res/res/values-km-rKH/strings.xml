@@ -796,6 +796,8 @@
     <string name="permdesc_accessNotifications" msgid="458457742683431387">"ឲ្យ​កម្មវិធី​ទៅ​យក ពិនិត្យ និង​សម្អាត​ការ​ជូន​ដំណឹង រួមមាន​​ប្រកាស​ដោយ​កម្មវិធី​ផ្សេងៗ។"</string>
     <string name="permlab_bindNotificationListenerService" msgid="7057764742211656654">"ចង​ទៅ​សេវាកម្ម​ស្ដាប់​ការ​ជូន​ដំណឹង"</string>
     <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"ឲ្យ​ម្ចាស់​ចង​ចំណុច​ប្រទាក់​កម្រិត​កំពូល​នៃ​សេវាកម្ម​កម្មវិធី​ស្ដាប់​ការ​ជូន​ដំណឹង។ មិន​គួរ​ចាំបាច់​សម្រាប់​កម្មវិធី​ធម្មតា​​ទេ។"</string>
+    <string name="permlab_bindChooserTargetService" msgid="3443261076710185673">"ចងភ្ជាប់ទៅសេវាកម្មគោលដៅជ្រើសរើស"</string>
+    <string name="permdesc_bindChooserTargetService" msgid="1413908999583734970">"អនុញ្ញាតឲ្យអ្នកប្រើចងភ្ជាប់ទៅអ៊ីនធឺហ្វេសកម្រិតខ្ពស់នៃសេវាកម្មគោលដៅជ្រើសរើស។ អាចនឹងមិនចាំបាច់សម្រាប់កម្មវិធីធម្មតាទេ។"</string>
     <string name="permlab_bindConditionProviderService" msgid="1180107672332704641">"ភ្ជាប់​ទៅ​សេវាកម្ម​ក្រុមហ៊ុន​ផ្ដល់​លក្ខខណ្ឌ"</string>
     <string name="permdesc_bindConditionProviderService" msgid="1680513931165058425">"អនុញ្ញាត​ឲ្យ​ម្ចាស់​ភ្ជាប់​ទៅ​ចំណុច​ប្រទាក់​កម្រិត​កំពូល​​របស់​សេវាកម្ម​ក្រុមហ៊ុន​ផ្ដល់​លក្ខខណ្ឌ។ មិន​គួរ​ចាំបាច់​សម្រាប់​កម្មវិធី​ធម្មតា​ទេ។"</string>
     <string name="permlab_bindMediaRouteService" msgid="6637740382272686835">"ភ្ជាប់​​ទៅ​សេវា​ផ្លូវ​មេឌៀ"</string>
@@ -1265,6 +1267,14 @@
     <string name="old_app_description" msgid="2082094275580358049">"កុំ​ចាប់ផ្ដើម​កម្មវិធី​ថ្មី។"</string>
     <string name="new_app_action" msgid="5472756926945440706">"ចាប់ផ្ដើម <xliff:g id="OLD_APP">%1$s</xliff:g>"</string>
     <string name="new_app_description" msgid="1932143598371537340">"បញ្ឈប់​កម្មវិធី​ចាស់​ដោយ​មិន​រក្សាទុក"</string>
+    <!-- no translation found for dump_heap_notification (2618183274836056542) -->
+    <skip />
+    <!-- no translation found for dump_heap_notification_detail (2075673362317481664) -->
+    <skip />
+    <!-- no translation found for dump_heap_title (5864292264307651673) -->
+    <skip />
+    <!-- no translation found for dump_heap_text (4809417337240334941) -->
+    <skip />
     <string name="sendText" msgid="5209874571959469142">"ជ្រើស​សកម្មភាព​សម្រាប់​អត្ថបទ"</string>
     <string name="volume_ringtone" msgid="6885421406845734650">"កម្រិត​សំឡេង​រោទ៍"</string>
     <string name="volume_music" msgid="5421651157138628171">"កម្រិត​សំឡេង​មេឌៀ"</string>
@@ -1778,7 +1788,9 @@
       <item quantity="one">ព្យាយាមម្តងទៀតក្នុងរយៈពេល 1 វិនាទី</item>
     </plurals>
     <string name="restr_pin_try_later" msgid="973144472490532377">"សូម​ព្យាយាម​ម្ដងទៀត​នៅ​ពេល​ក្រោយ។"</string>
-    <string name="immersive_mode_confirmation" msgid="7227416894979047467">"អូស​​​​ពីលើ​ចុះក្រោម ដើម្បី​ចេញ​ពី​ការ​បង្ហាញ​ពេញ​អេក្រង់។"</string>
+    <string name="immersive_cling_title" msgid="8394201622932303336">"កំពុងមើលពេញអេក្រង់"</string>
+    <string name="immersive_cling_description" msgid="3482371193207536040">"ដើម្បីចាកចេញ សូមអូសពីលើចុះក្រោម។"</string>
+    <string name="immersive_cling_positive" msgid="5016839404568297683">"យល់ហើយ"</string>
     <string name="done_label" msgid="2093726099505892398">"រួចរាល់"</string>
     <string name="hour_picker_description" msgid="6698199186859736512">"គ្រាប់​រំកិល​រង្វង់​ម៉ោង"</string>
     <string name="minute_picker_description" msgid="8606010966873791190">"គ្រាប់​រំកិល​រង្វង់​នាទី"</string>
@@ -1793,7 +1805,8 @@
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"កន្លែង​ធ្វើការ <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="lock_to_app_toast" msgid="7570091317001980053">"ដើម្បី​មិន​ភ្ជាប់​អេក្រង់​នេះ ប៉ះ ហើយ​សង្កត់​ថយក្រោយ និង​ទិដ្ឋភាព​នៅ​ពេល​តែ​មួយ។"</string>
     <string name="lock_to_app_toast_accessible" msgid="8239120109365070664">"ដើម្បី​មិន​ភ្ជាប់​អេក្រង់​នេះ ប៉ះ ហើយ​សង្កត់​ទិដ្ឋភាព។"</string>
-    <string name="lock_to_app_toast_locked" msgid="8739004135132606329">"អេក្រង់​ត្រូវ​បាន​ភ្ជាប់។ ការ​ផ្ដាច់​មិន​​ត្រូវ​បាន​អនុញ្ញាត​ដោយ​ស្ថាប័ន​របស់​អ្នក។"</string>
+    <!-- no translation found for lock_to_app_toast_locked (9125176335701699164) -->
+    <skip />
     <string name="lock_to_app_start" msgid="6643342070839862795">"បាន​ភ្ជាប់​អេក្រង់"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"មិន​បាន​ភ្ជាប់​អេក្រង់"</string>
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"សួរ​រក​កូដ PIN មុន​ពេល​ផ្ដាច់"</string>

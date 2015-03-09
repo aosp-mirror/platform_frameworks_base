@@ -796,6 +796,8 @@
     <string name="permdesc_accessNotifications" msgid="458457742683431387">"መተግበሪያው ማሳወቂያዎችን እንዲያስመጣ፣ እንዲመረምር እና እንዲያጸዳ ያስችለዋል፣ በሌሎች መተግበሪያዎች የተለጠፉትንም ጨምሮ።"</string>
     <string name="permlab_bindNotificationListenerService" msgid="7057764742211656654">"ከአንድ የማሳወቂያ አዳማጭ አገልግሎት ጋር ይሰሩ"</string>
     <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"ያዢው የማሳወቂያ አዳማጭ አገልግሎቱን ከከፍተኛ-ደረጃ በይነገጹ ጋር እንዲያስር ያስችለዋል። ለመደበኛ መተግበሪያዎች በጭራሽ አያስፈልግም።"</string>
+    <string name="permlab_bindChooserTargetService" msgid="3443261076710185673">"ከመራጭ ዒላማ አገልግሎት ጋር ይሰሩ"</string>
+    <string name="permdesc_bindChooserTargetService" msgid="1413908999583734970">"ያዢው የመራጩን ዒላማ አገልግሎቱን ከከፍተኛ-ደረጃ በይነገጽ ጋር እንዲያስር ይፈቅዳል። ለመደበኛ መተግበሪያዎች በጭራሽ ሊያስፈልግ አይገባም።"</string>
     <string name="permlab_bindConditionProviderService" msgid="1180107672332704641">"ከአንድ የሁኔታ አቅራቢ አገልግሎት ጋር ይሰሩ"</string>
     <string name="permdesc_bindConditionProviderService" msgid="1680513931165058425">"ያዢው የአንድ የሁኔታ አቅራቢ አገልግሎት የከፍተኛ ደረጃ በይነገጽ እንዲያስር ያስችለዋል። ለመደበኛ መተግበሪያዎች በጭራሽ አያስፈልግም።"</string>
     <string name="permlab_bindMediaRouteService" msgid="6637740382272686835">"ከአንድ ማህደረመረጃ ማዞር አገልግሎት ጋር ያስተሳስራል"</string>
@@ -1263,6 +1265,14 @@
     <string name="old_app_description" msgid="2082094275580358049">"አዲሱን መተግበሪያ አትጀምር።"</string>
     <string name="new_app_action" msgid="5472756926945440706">"ጀምር <xliff:g id="OLD_APP">%1$s</xliff:g>"</string>
     <string name="new_app_description" msgid="1932143598371537340">"የድሮውን ትግበራ ሳታስቀምጥ አቁም።"</string>
+    <!-- no translation found for dump_heap_notification (2618183274836056542) -->
+    <skip />
+    <!-- no translation found for dump_heap_notification_detail (2075673362317481664) -->
+    <skip />
+    <!-- no translation found for dump_heap_title (5864292264307651673) -->
+    <skip />
+    <!-- no translation found for dump_heap_text (4809417337240334941) -->
+    <skip />
     <string name="sendText" msgid="5209874571959469142">"ለፅሁፍ ድርጊት ምረጥ"</string>
     <string name="volume_ringtone" msgid="6885421406845734650">"የስልክ ጥሪ ድምፅ"</string>
     <string name="volume_music" msgid="5421651157138628171">" ማህደረ መረጃ  ክፍልፍል"</string>
@@ -1776,7 +1786,9 @@
       <item quantity="other">በ<xliff:g id="COUNT">%d</xliff:g> ሰከንዶች ውስጥ እንደገና ይሞክሩ</item>
     </plurals>
     <string name="restr_pin_try_later" msgid="973144472490532377">"ቆይተው እንደገና ይሞክሩ"</string>
-    <string name="immersive_mode_confirmation" msgid="7227416894979047467">"ከሙሉ ገጽ ማያ ለመውጣት ጣትዎን ከላይ ወደታች ያንሸራትቱ።"</string>
+    <string name="immersive_cling_title" msgid="8394201622932303336">"ሙሉ ገጽ በማሳየት ላይ"</string>
+    <string name="immersive_cling_description" msgid="3482371193207536040">"ለመውጣት፣ ከላይ ወደታች ጠረግ ያድርጉ።"</string>
+    <string name="immersive_cling_positive" msgid="5016839404568297683">"ገባኝ"</string>
     <string name="done_label" msgid="2093726099505892398">"ተከናውኗል"</string>
     <string name="hour_picker_description" msgid="6698199186859736512">"የሰዓታት ክብ ተንሸራታች"</string>
     <string name="minute_picker_description" msgid="8606010966873791190">"የደቂቃዎች ክብ ተንሸራታች"</string>
@@ -1791,7 +1803,8 @@
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"ስራ <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="lock_to_app_toast" msgid="7570091317001980053">"ይህን ማያ ገጽ ለመንቀል ተመለስን እና አጠቃላይ እይታን በተመሳሳይ ይንኳቸውና ይያዟቸው።"</string>
     <string name="lock_to_app_toast_accessible" msgid="8239120109365070664">"ይህን ማያ ገጽ ለመንቀል አጠቃላይ እይታን ይንኩትና ይያዙት።"</string>
-    <string name="lock_to_app_toast_locked" msgid="8739004135132606329">"ማያ ገጽ ተሰክቷል። መንቀል በድርጅትዎ አይፈቀድም።"</string>
+    <!-- no translation found for lock_to_app_toast_locked (9125176335701699164) -->
+    <skip />
     <string name="lock_to_app_start" msgid="6643342070839862795">"ማያ ገጽ ተሰክቷል"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"ማያ ገጽ ተነቅሏል"</string>
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"ከመንቀል በፊት ፒን ጠይቅ"</string>

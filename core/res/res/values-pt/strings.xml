@@ -738,14 +738,10 @@
     <string name="permdesc_nfc" msgid="7120611819401789907">"Permite que o app se comunique com leitores, cartões e etiqueta NFC (Comunicação a curta distância)."</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"desativar o bloqueio de tela"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"Permite que o app desative o bloqueio de teclas e qualquer segurança por senha associada. Por exemplo, o telefone desativa o bloqueio de telas ao receber uma chamada e o reativa quando a chamada é finalizada."</string>
-    <!-- no translation found for permlab_manageFingerprint (5640858826254575638) -->
-    <skip />
-    <!-- no translation found for permdesc_manageFingerprint (178208705828055464) -->
-    <skip />
-    <!-- no translation found for permlab_useFingerprint (3150478619915124905) -->
-    <skip />
-    <!-- no translation found for permdesc_useFingerprint (9165097460730684114) -->
-    <skip />
+    <string name="permlab_manageFingerprint" msgid="5640858826254575638">"gerenciar hardware de impressão digital"</string>
+    <string name="permdesc_manageFingerprint" msgid="178208705828055464">"Permite que o app execute métodos para adicionar e excluir modelos de impressão digital para uso."</string>
+    <string name="permlab_useFingerprint" msgid="3150478619915124905">"usar hardware de impressão digital"</string>
+    <string name="permdesc_useFingerprint" msgid="9165097460730684114">"Permite que o app use hardware de impressão digital para autenticação."</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"ler as configurações de sincronização"</string>
     <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"Permite que o app leia as configurações de sincronização de uma conta. Por exemplo, pode determinar se o app People está sincronizado com uma conta."</string>
     <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"ativar e desativar sincronização"</string>
@@ -800,6 +796,8 @@
     <string name="permdesc_accessNotifications" msgid="458457742683431387">"Permite que o app recupere, examine e limpe notificações, inclusive as postadas por outros apps."</string>
     <string name="permlab_bindNotificationListenerService" msgid="7057764742211656654">"sujeitar a um serviço ouvinte de notificações"</string>
     <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"Permite que o proprietário sujeite a interface de nível superior a um serviço ouvinte de notificações. Não deve ser necessário para apps comuns."</string>
+    <string name="permlab_bindChooserTargetService" msgid="3443261076710185673">"associar a um serviço seletor alvo"</string>
+    <string name="permdesc_bindChooserTargetService" msgid="1413908999583734970">"Permite que o sistema se associe à interface de nível superior de um serviço seletor alvo. Não deve ser necessário para apps comuns."</string>
     <string name="permlab_bindConditionProviderService" msgid="1180107672332704641">"associar a um serviço provedor de condições"</string>
     <string name="permdesc_bindConditionProviderService" msgid="1680513931165058425">"Permite que o proprietário use a interface de nível superior de um serviço provedor de condições. Não deve ser necessário para apps comuns."</string>
     <string name="permlab_bindMediaRouteService" msgid="6637740382272686835">"usar serviço de roteamento de mídia"</string>
@@ -1267,6 +1265,14 @@
     <string name="old_app_description" msgid="2082094275580358049">"Não inicie o novo app."</string>
     <string name="new_app_action" msgid="5472756926945440706">"Iniciar <xliff:g id="OLD_APP">%1$s</xliff:g>"</string>
     <string name="new_app_description" msgid="1932143598371537340">"Parar o app antigo sem salvar."</string>
+    <!-- no translation found for dump_heap_notification (2618183274836056542) -->
+    <skip />
+    <!-- no translation found for dump_heap_notification_detail (2075673362317481664) -->
+    <skip />
+    <!-- no translation found for dump_heap_title (5864292264307651673) -->
+    <skip />
+    <!-- no translation found for dump_heap_text (4809417337240334941) -->
+    <skip />
     <string name="sendText" msgid="5209874571959469142">"Escolha uma ação para o texto"</string>
     <string name="volume_ringtone" msgid="6885421406845734650">"Volume da campainha"</string>
     <string name="volume_music" msgid="5421651157138628171">"Volume da mídia"</string>
@@ -1780,7 +1786,9 @@
       <item quantity="other">Tente novamente em <xliff:g id="COUNT">%d</xliff:g> segundos</item>
     </plurals>
     <string name="restr_pin_try_later" msgid="973144472490532377">"Tente novamente mais tarde"</string>
-    <string name="immersive_mode_confirmation" msgid="7227416894979047467">"Deslize de cima para baixo para sair da tela inteira"</string>
+    <string name="immersive_cling_title" msgid="8394201622932303336">"Visualização em tela cheia"</string>
+    <string name="immersive_cling_description" msgid="3482371193207536040">"Para sair, deslize de cima para baixo."</string>
+    <string name="immersive_cling_positive" msgid="5016839404568297683">"Entendi"</string>
     <string name="done_label" msgid="2093726099505892398">"Concluído"</string>
     <string name="hour_picker_description" msgid="6698199186859736512">"Controle deslizante circular das horas"</string>
     <string name="minute_picker_description" msgid="8606010966873791190">"Controle deslizante circular dos minutos"</string>
@@ -1795,7 +1803,8 @@
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"Trabalho: <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="lock_to_app_toast" msgid="7570091317001980053">"Para liberar esta tela, toque e mantenha pressionados \"Voltar\" e \"Visão geral\" ao mesmo tempo."</string>
     <string name="lock_to_app_toast_accessible" msgid="8239120109365070664">"Para liberar esta tela, toque e mantenha pressionado \"Visão geral\"."</string>
-    <string name="lock_to_app_toast_locked" msgid="8739004135132606329">"A tela está fixada. A liberação não é permitida por sua organização."</string>
+    <!-- no translation found for lock_to_app_toast_locked (9125176335701699164) -->
+    <skip />
     <string name="lock_to_app_start" msgid="6643342070839862795">"Tela fixada"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"Tela liberada"</string>
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Pedir PIN antes de liberar"</string>

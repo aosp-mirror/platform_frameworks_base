@@ -738,14 +738,10 @@
     <string name="permdesc_nfc" msgid="7120611819401789907">"Ermöglicht der App die Kommunikation mit Tags für die Nahfeldkommunikation, Karten und Readern"</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"Displaysperre deaktivieren"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"Ermöglicht der App, die Tastensperre sowie den damit verbundenen Passwortschutz zu deaktivieren. Das Telefon deaktiviert die Tastensperre beispielsweise, wenn ein Anruf eingeht, und aktiviert sie wieder, nachdem das Gespräch beendet wurde."</string>
-    <!-- no translation found for permlab_manageFingerprint (5640858826254575638) -->
-    <skip />
-    <!-- no translation found for permdesc_manageFingerprint (178208705828055464) -->
-    <skip />
-    <!-- no translation found for permlab_useFingerprint (3150478619915124905) -->
-    <skip />
-    <!-- no translation found for permdesc_useFingerprint (9165097460730684114) -->
-    <skip />
+    <string name="permlab_manageFingerprint" msgid="5640858826254575638">"Fingerabdruckhardware verwalten"</string>
+    <string name="permdesc_manageFingerprint" msgid="178208705828055464">"Erlaubt der App, Methoden zum Hinzufügen und Löschen zu verwendender Fingerabdruckvorlagen aufzurufen"</string>
+    <string name="permlab_useFingerprint" msgid="3150478619915124905">"Fingerabdruckhardware verwenden"</string>
+    <string name="permdesc_useFingerprint" msgid="9165097460730684114">"Erlaubt der App, Fingerabdruckhardware zur Authentifizierung zu verwenden"</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"Synchronisierungseinstellungen lesen"</string>
     <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"Ermöglicht der App, die Synchronisierungseinstellungen eines Kontos zu lesen. Beispielsweise kann damit festgestellt werden, ob Kontakte mit einem Konto synchronisiert werden."</string>
     <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"Synchronisierung aktivieren oder deaktivieren"</string>
@@ -800,6 +796,8 @@
     <string name="permdesc_accessNotifications" msgid="458457742683431387">"Ermöglicht der App das Abrufen, Überprüfen und Löschen von Benachrichtigungen, einschließlich Benachrichtigungen, die von anderen Apps gepostet wurden"</string>
     <string name="permlab_bindNotificationListenerService" msgid="7057764742211656654">"An Benachrichtigungs-Listener-Dienst binden"</string>
     <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"Ermöglicht dem Inhaber, sich an die Oberfläche der obersten Ebene eines Benachrichtigungs-Listener-Dienstes zu binden. Sollte nie für normale Apps benötigt werden."</string>
+    <string name="permlab_bindChooserTargetService" msgid="3443261076710185673">"An einen Zielauswahldienst binden"</string>
+    <string name="permdesc_bindChooserTargetService" msgid="1413908999583734970">"Ermöglicht dem Inhaber, sich an die Oberfläche eines Zielauswahldienstes auf oberster Ebene zu binden. Für normale Apps sollte dies nie erforderlich sein."</string>
     <string name="permlab_bindConditionProviderService" msgid="1180107672332704641">"An einen Bedingungsproviderdienst binden"</string>
     <string name="permdesc_bindConditionProviderService" msgid="1680513931165058425">"Ermöglicht dem Inhaber, sich an die Oberfläche eines Bedingungsproviderdienstes auf oberster Ebene zu binden. Für normale Apps sollte dies nie erforderlich sein."</string>
     <string name="permlab_bindMediaRouteService" msgid="6637740382272686835">"An Mediarouting-Dienst binden"</string>
@@ -1267,6 +1265,14 @@
     <string name="old_app_description" msgid="2082094275580358049">"Neue App nicht starten"</string>
     <string name="new_app_action" msgid="5472756926945440706">"<xliff:g id="OLD_APP">%1$s</xliff:g> starten"</string>
     <string name="new_app_description" msgid="1932143598371537340">"Alte App beenden, ohne zu speichern"</string>
+    <!-- no translation found for dump_heap_notification (2618183274836056542) -->
+    <skip />
+    <!-- no translation found for dump_heap_notification_detail (2075673362317481664) -->
+    <skip />
+    <!-- no translation found for dump_heap_title (5864292264307651673) -->
+    <skip />
+    <!-- no translation found for dump_heap_text (4809417337240334941) -->
+    <skip />
     <string name="sendText" msgid="5209874571959469142">"Aktion für Text auswählen"</string>
     <string name="volume_ringtone" msgid="6885421406845734650">"Klingeltonlautstärke"</string>
     <string name="volume_music" msgid="5421651157138628171">"Medienlautstärke"</string>
@@ -1780,7 +1786,9 @@
       <item quantity="one">In 1 Sek. wiederholen</item>
     </plurals>
     <string name="restr_pin_try_later" msgid="973144472490532377">"Später erneut versuchen"</string>
-    <string name="immersive_mode_confirmation" msgid="7227416894979047467">"Zum Schließen des Vollbilds von oben nach unten wischen"</string>
+    <string name="immersive_cling_title" msgid="8394201622932303336">"Vollbildmodus wird aktiviert"</string>
+    <string name="immersive_cling_description" msgid="3482371193207536040">"Zum Beenden von oben nach unten wischen"</string>
+    <string name="immersive_cling_positive" msgid="5016839404568297683">"OK"</string>
     <string name="done_label" msgid="2093726099505892398">"Fertig"</string>
     <string name="hour_picker_description" msgid="6698199186859736512">"Kreisförmiger Schieberegler für Stunden"</string>
     <string name="minute_picker_description" msgid="8606010966873791190">"Kreisförmiger Schieberegler für Minuten"</string>
@@ -1795,7 +1803,8 @@
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"<xliff:g id="LABEL">%1$s</xliff:g> (geschäftlich)"</string>
     <string name="lock_to_app_toast" msgid="7570091317001980053">"Um die Fixierung dieses Bildschirms aufzuheben, berühren und halten Sie gleichzeitig \"Zurück\" und \"Übersicht\"."</string>
     <string name="lock_to_app_toast_accessible" msgid="8239120109365070664">"Um die Fixierung dieses Bildschirms aufzuheben, berühren und halten Sie \"Übersicht\"."</string>
-    <string name="lock_to_app_toast_locked" msgid="8739004135132606329">"Der Bildschirm ist fixiert. Sie sind nicht berechtigt, diese Einstellung zu beenden."</string>
+    <!-- no translation found for lock_to_app_toast_locked (9125176335701699164) -->
+    <skip />
     <string name="lock_to_app_start" msgid="6643342070839862795">"Bildschirm fixiert"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"Bildschirm gelöst"</string>
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Vor dem Beenden nach PIN fragen"</string>
