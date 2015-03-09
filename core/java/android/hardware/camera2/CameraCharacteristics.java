@@ -2493,6 +2493,83 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
     public static final Key<Integer> SYNC_MAX_LATENCY =
             new Key<Integer>("android.sync.maxLatency", int.class);
 
+    /**
+     * <p>The available depth dataspace stream
+     * configurations that this camera device supports
+     * (i.e. format, width, height, output/input stream).</p>
+     * <p>These are output stream configurations for use with
+     * dataSpace HAL_DATASPACE_DEPTH. The configurations are
+     * listed as <code>(format, width, height, input?)</code> tuples.</p>
+     * <p>Only devices that support depth output for at least
+     * the HAL_PIXEL_FORMAT_Y16 dense depth map may include
+     * this entry.</p>
+     * <p>A device that also supports the HAL_PIXEL_FORMAT_BLOB
+     * sparse depth point cloud must report a single entry for
+     * the format in this list as <code>(HAL_PIXEL_FORMAT_BLOB,
+     * android.depth.maxDepthSamples, 1, OUTPUT)</code> in addition to
+     * the entries for HAL_PIXEL_FORMAT_Y16.</p>
+     * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
+     * <p><b>Limited capability</b> -
+     * Present on all camera devices that report being at least {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL_LIMITED HARDWARE_LEVEL_LIMITED} devices in the
+     * {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL android.info.supportedHardwareLevel} key</p>
+     *
+     * @see CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL
+     * @hide
+     */
+    public static final Key<android.hardware.camera2.params.StreamConfiguration[]> DEPTH_AVAILABLE_DEPTH_STREAM_CONFIGURATIONS =
+            new Key<android.hardware.camera2.params.StreamConfiguration[]>("android.depth.availableDepthStreamConfigurations", android.hardware.camera2.params.StreamConfiguration[].class);
+
+    /**
+     * <p>This lists the minimum frame duration for each
+     * format/size combination for depth output formats.</p>
+     * <p>This should correspond to the frame duration when only that
+     * stream is active, with all processing (typically in android.*.mode)
+     * set to either OFF or FAST.</p>
+     * <p>When multiple streams are used in a request, the minimum frame
+     * duration will be max(individual stream min durations).</p>
+     * <p>The minimum frame duration of a stream (of a particular format, size)
+     * is the same regardless of whether the stream is input or output.</p>
+     * <p>See {@link CaptureRequest#SENSOR_FRAME_DURATION android.sensor.frameDuration} and
+     * android.scaler.availableStallDurations for more details about
+     * calculating the max frame rate.</p>
+     * <p>(Keep in sync with
+     * StreamConfigurationMap#getOutputMinFrameDuration)</p>
+     * <p><b>Units</b>: (format, width, height, ns) x n</p>
+     * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
+     * <p><b>Limited capability</b> -
+     * Present on all camera devices that report being at least {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL_LIMITED HARDWARE_LEVEL_LIMITED} devices in the
+     * {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL android.info.supportedHardwareLevel} key</p>
+     *
+     * @see CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL
+     * @see CaptureRequest#SENSOR_FRAME_DURATION
+     * @hide
+     */
+    public static final Key<android.hardware.camera2.params.StreamConfigurationDuration[]> DEPTH_AVAILABLE_DEPTH_MIN_FRAME_DURATIONS =
+            new Key<android.hardware.camera2.params.StreamConfigurationDuration[]>("android.depth.availableDepthMinFrameDurations", android.hardware.camera2.params.StreamConfigurationDuration[].class);
+
+    /**
+     * <p>This lists the maximum stall duration for each
+     * format/size combination for depth streams.</p>
+     * <p>A stall duration is how much extra time would get added
+     * to the normal minimum frame duration for a repeating request
+     * that has streams with non-zero stall.</p>
+     * <p>This functions similarly to
+     * android.scaler.availableStallDurations for depth
+     * streams.</p>
+     * <p>All depth output stream formats may have a nonzero stall
+     * duration.</p>
+     * <p><b>Units</b>: (format, width, height, ns) x n</p>
+     * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
+     * <p><b>Limited capability</b> -
+     * Present on all camera devices that report being at least {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL_LIMITED HARDWARE_LEVEL_LIMITED} devices in the
+     * {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL android.info.supportedHardwareLevel} key</p>
+     *
+     * @see CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL
+     * @hide
+     */
+    public static final Key<android.hardware.camera2.params.StreamConfigurationDuration[]> DEPTH_AVAILABLE_DEPTH_STALL_DURATIONS =
+            new Key<android.hardware.camera2.params.StreamConfigurationDuration[]>("android.depth.availableDepthStallDurations", android.hardware.camera2.params.StreamConfigurationDuration[].class);
+
     /*~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~
      * End generated code
      *~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~O@*/
