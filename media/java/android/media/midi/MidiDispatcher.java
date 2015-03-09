@@ -55,11 +55,11 @@ public final class MidiDispatcher extends MidiReceiver {
     };
 
     /**
-     * Returns whether this dispatcher contains any receivers.
-     * @return true if the receiver list is not empty
+     * Returns the number of {@link MidiReceiver}s this dispatcher contains.
+     * @return the number of receivers
      */
-    public boolean hasReceivers() {
-        return mReceivers.size() > 0;
+    public int getReceiverCount() {
+        return mReceivers.size();
     }
 
     /**

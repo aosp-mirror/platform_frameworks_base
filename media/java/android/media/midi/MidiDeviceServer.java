@@ -16,8 +16,8 @@
 
 package android.media.midi;
 
-import android.os.IBinder;
 import android.os.Binder;
+import android.os.IBinder;
 import android.os.ParcelFileDescriptor;
 import android.os.Process;
 import android.os.RemoteException;
@@ -61,7 +61,25 @@ public final class MidiDeviceServer implements Closeable {
     private final CopyOnWriteArrayList<MidiInputPort> mInputPorts
             = new CopyOnWriteArrayList<MidiInputPort>();
 
+
+    // for reporting device status
+    private final IBinder mDeviceStatusToken = new Binder();
+    private final boolean[] mInputPortBusy;
+    private final int[] mOutputPortOpenCount;
+
     private final CloseGuard mGuard = CloseGuard.get();
+    private boolean mIsClosed;
+
+    private final Callback mCallback;
+
+    public interface Callback {
+        /**
+         * Called to notify when an our device status has changed
+         * @param server the {@link MidiDeviceServer} that changed
+         * @param status the {@link MidiDeviceStatus} for the device
+         */
+        public void onDeviceStatusChanged(MidiDeviceServer server, MidiDeviceStatus status);
+    }
 
     abstract private class PortClient implements IBinder.DeathRecipient {
         final IBinder mToken;
@@ -96,7 +114,10 @@ public final class MidiDeviceServer implements Closeable {
         void close() {
             mToken.unlinkToDeath(this, 0);
             synchronized (mInputPortOutputPorts) {
-                mInputPortOutputPorts[mOutputPort.getPortNumber()] = null;
+                int portNumber = mOutputPort.getPortNumber();
+                mInputPortOutputPorts[portNumber] = null;
+                mInputPortBusy[portNumber] = false;
+                updateDeviceStatus();
             }
             IoUtils.closeQuietly(mOutputPort);
         }
@@ -113,7 +134,15 @@ public final class MidiDeviceServer implements Closeable {
         @Override
         void close() {
             mToken.unlinkToDeath(this, 0);
-            mOutputPortDispatchers[mInputPort.getPortNumber()].getSender().disconnect(mInputPort);
+            int portNumber = mInputPort.getPortNumber();
+            MidiDispatcher dispatcher = mOutputPortDispatchers[portNumber];
+            synchronized (dispatcher) {
+                dispatcher.getSender().disconnect(mInputPort);
+                int openCount = dispatcher.getReceiverCount();
+                mOutputPortOpenCount[portNumber] = openCount;
+                updateDeviceStatus();
+           }
+
             mInputPorts.remove(mInputPort);
             IoUtils.closeQuietly(mInputPort);
         }
@@ -153,6 +182,8 @@ public final class MidiDeviceServer implements Closeable {
                     synchronized (mPortClients) {
                         mPortClients.put(token, client);
                     }
+                    mInputPortBusy[portNumber] = true;
+                    updateDeviceStatus();
                     return pair[1];
                 } catch (IOException e) {
                     Log.e(TAG, "unable to create ParcelFileDescriptors in openInputPort");
@@ -178,7 +209,14 @@ public final class MidiDeviceServer implements Closeable {
                 ParcelFileDescriptor[] pair = ParcelFileDescriptor.createSocketPair(
                                                     OsConstants.SOCK_SEQPACKET);
                 MidiInputPort inputPort = new MidiInputPort(pair[0], portNumber);
-                mOutputPortDispatchers[portNumber].getSender().connect(inputPort);
+                MidiDispatcher dispatcher = mOutputPortDispatchers[portNumber];
+                synchronized (dispatcher) {
+                    dispatcher.getSender().connect(inputPort);
+                    int openCount = dispatcher.getReceiverCount();
+                    mOutputPortOpenCount[portNumber] = openCount;
+                    updateDeviceStatus();
+                }
+
                 mInputPorts.add(inputPort);
                 OutputPortClient client = new OutputPortClient(token, inputPort);
                 synchronized (mPortClients) {
@@ -215,11 +253,12 @@ public final class MidiDeviceServer implements Closeable {
     };
 
     /* package */ MidiDeviceServer(IMidiManager midiManager, MidiReceiver[] inputPortReceivers,
-            int numOutputPorts) {
+            int numOutputPorts, Callback callback) {
         mMidiManager = midiManager;
         mInputPortReceivers = inputPortReceivers;
         mInputPortCount = inputPortReceivers.length;
         mOutputPortCount = numOutputPorts;
+        mCallback = callback;
 
         mInputPortOutputPorts = new MidiOutputPort[mInputPortCount];
 
@@ -227,6 +266,9 @@ public final class MidiDeviceServer implements Closeable {
         for (int i = 0; i < numOutputPorts; i++) {
             mOutputPortDispatchers[i] = new MidiDispatcher();
         }
+
+        mInputPortBusy = new boolean[mInputPortCount];
+        mOutputPortOpenCount = new int[numOutputPorts];
 
         mGuard.open("close");
     }
@@ -242,9 +284,28 @@ public final class MidiDeviceServer implements Closeable {
         mDeviceInfo = deviceInfo;
     }
 
+    private void updateDeviceStatus() {
+        // clear calling identity, since we may be in a Binder call from one of our clients
+        long identityToken = Binder.clearCallingIdentity();
+
+        MidiDeviceStatus status = new MidiDeviceStatus(mDeviceInfo, mInputPortBusy,
+                mOutputPortOpenCount);
+        if (mCallback != null) {
+            mCallback.onDeviceStatusChanged(this, status);
+        }
+        try {
+            mMidiManager.setDeviceStatus(mDeviceStatusToken, status);
+        } catch (RemoteException e) {
+            Log.e(TAG, "RemoteException in updateDeviceStatus");
+        } finally {
+            Binder.restoreCallingIdentity(identityToken);
+        }
+    }
+
     @Override
     public void close() throws IOException {
         synchronized (mGuard) {
+            if (mIsClosed) return;
             mGuard.close();
 
             for (int i = 0; i < mInputPortCount; i++) {
@@ -263,6 +324,7 @@ public final class MidiDeviceServer implements Closeable {
             } catch (RemoteException e) {
                 Log.e(TAG, "RemoteException in unregisterDeviceServer");
             }
+            mIsClosed = true;
         }
     }
 

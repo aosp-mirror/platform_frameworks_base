@@ -62,6 +62,7 @@ public final class MidiManager {
             mHandler = handler;
         }
 
+        @Override
         public void onDeviceAdded(MidiDeviceInfo device) {
             if (mHandler != null) {
                 final MidiDeviceInfo deviceF = device;
@@ -75,6 +76,7 @@ public final class MidiManager {
             }
         }
 
+        @Override
         public void onDeviceRemoved(MidiDeviceInfo device) {
             if (mHandler != null) {
                 final MidiDeviceInfo deviceF = device;
@@ -87,25 +89,49 @@ public final class MidiManager {
                 mCallback.onDeviceRemoved(device);
             }
         }
+
+        @Override
+        public void onDeviceStatusChanged(MidiDeviceStatus status) {
+            if (mHandler != null) {
+                final MidiDeviceStatus statusF = status;
+                mHandler.post(new Runnable() {
+                        @Override public void run() {
+                            mCallback.onDeviceStatusChanged(statusF);
+                        }
+                    });
+            } else {
+                mCallback.onDeviceStatusChanged(status);
+            }
+        }
     }
 
     /**
      * Callback class used for clients to receive MIDI device added and removed notifications
      */
-    abstract public static class DeviceCallback {
+    public static class DeviceCallback {
         /**
          * Called to notify when a new MIDI device has been added
          *
          * @param device a {@link MidiDeviceInfo} for the newly added device
          */
-        abstract public void onDeviceAdded(MidiDeviceInfo device);
+        public void onDeviceAdded(MidiDeviceInfo device) {
+        }
 
         /**
          * Called to notify when a MIDI device has been removed
          *
          * @param device a {@link MidiDeviceInfo} for the removed device
          */
-        abstract public void onDeviceRemoved(MidiDeviceInfo device);
+        public void onDeviceRemoved(MidiDeviceInfo device) {
+        }
+
+        /**
+         * Called to notify when the status of a MIDI device has changed
+         *
+         * @param device a {@link MidiDeviceStatus} for the changed device
+         */
+        public void onDeviceStatusChanged(MidiDeviceStatus status) {
+        }
     }
 
     /**
@@ -251,10 +277,10 @@ public final class MidiManager {
 
     /** @hide */
     public MidiDeviceServer createDeviceServer(MidiReceiver[] inputPortReceivers,
-            int numOutputPorts, Bundle properties, int type) {
+            int numOutputPorts, Bundle properties, int type, MidiDeviceServer.Callback callback) {
         try {
             MidiDeviceServer server = new MidiDeviceServer(mService, inputPortReceivers,
-                    numOutputPorts);
+                    numOutputPorts, callback);
             MidiDeviceInfo deviceInfo = mService.registerDeviceServer(server.getBinderInterface(),
                     inputPortReceivers.length, numOutputPorts, properties, type);
             if (deviceInfo == null) {

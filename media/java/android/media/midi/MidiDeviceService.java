@@ -57,6 +57,13 @@ abstract public class MidiDeviceService extends Service {
     private MidiDeviceServer mServer;
     private MidiDeviceInfo mDeviceInfo;
 
+    private final MidiDeviceServer.Callback mCallback = new MidiDeviceServer.Callback() {
+        @Override
+        public void onDeviceStatusChanged(MidiDeviceServer server, MidiDeviceStatus status) {
+            MidiDeviceService.this.onDeviceStatusChanged(status);
+        }
+    };
+
     @Override
     public void onCreate() {
         mMidiManager = IMidiManager.Stub.asInterface(
@@ -75,7 +82,7 @@ abstract public class MidiDeviceService extends Service {
                 inputPortReceivers = new MidiReceiver[0];
             }
             server = new MidiDeviceServer(mMidiManager, inputPortReceivers,
-                    deviceInfo.getOutputPortCount());
+                    deviceInfo.getOutputPortCount(), mCallback);
             server.setDeviceInfo(deviceInfo);
         } catch (RemoteException e) {
             Log.e(TAG, "RemoteException in IMidiManager.getServiceDeviceInfo");
@@ -112,6 +119,13 @@ abstract public class MidiDeviceService extends Service {
      */
     public MidiDeviceInfo getDeviceInfo() {
         return mDeviceInfo;
+    }
+
+    /**
+     * Called to notify when an our {@link MidiDeviceStatus} has changed
+     * @param status the number of the port that was opened
+     */
+    public void onDeviceStatusChanged(MidiDeviceStatus status) {
     }
 
     @Override
