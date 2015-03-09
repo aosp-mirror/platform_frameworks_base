@@ -109,7 +109,11 @@ public class DevicePolicyManager {
      * Provisioning adds a managed profile and sets the MDM as the profile owner who has full
      * control over the profile.
      *
-     * <p>This intent must contain the extra {@link #EXTRA_PROVISIONING_DEVICE_ADMIN_PACKAGE_NAME}.
+     * In version {@link android.os.Build.VERSION_CODES#LOLLIPOP}, this intent must contain the
+     * extra {@link #EXTRA_PROVISIONING_DEVICE_ADMIN_PACKAGE_NAME}.
+     * As of {@link android.os.Build.VERSION_CODES#MNC}, it should contain the extra
+     * {@link #EXTRA_PROVISIONING_DEVICE_ADMIN_COMPONENT_NAME} instead, although specifying only
+     * {@link #EXTRA_PROVISIONING_DEVICE_ADMIN_PACKAGE_NAME} is still supported.
      *
      * <p> When managed provisioning has completed, broadcasts are sent to the application specified
      * in the provisioning intent. The
@@ -150,9 +154,34 @@ public class DevicePolicyManager {
      *
      * <p>This package is set as device owner when device owner provisioning is started by an NFC
      * message containing an NFC record with MIME type {@link #MIME_TYPE_PROVISIONING_NFC}.
+     *
+     * <p> When this extra is set, the application must have exactly one device admin receiver.
+     * This receiver will be set as the profile or device owner and active admin.</p>
+
+     * @see DeviceAdminReceiver
+     * @deprecated Use {@link #EXTRA_PROVISIONING_DEVICE_ADMIN_COMPONENT_NAME}. This extra is still
+     * supported.
      */
+    @Deprecated
     public static final String EXTRA_PROVISIONING_DEVICE_ADMIN_PACKAGE_NAME
         = "android.app.extra.PROVISIONING_DEVICE_ADMIN_PACKAGE_NAME";
+
+    /**
+     * A ComponentName extra indicating the device admin receiver of the mobile device management
+     * application that will be set as the profile owner or device owner and active admin.
+     *
+     * <p>If an application starts provisioning directly via an intent with action
+     * {@link #ACTION_PROVISION_MANAGED_PROFILE} the package name of this component has to match the
+     * package name of the application that started provisioning.
+     *
+     * <p>This component is set as device owner and active admin when device owner provisioning is
+     * started by an NFC message containing an NFC record with MIME type
+     * {@link #MIME_TYPE_PROVISIONING_NFC}.
+     *
+     * @see DeviceAdminReceiver
+     */
+    public static final String EXTRA_PROVISIONING_DEVICE_ADMIN_COMPONENT_NAME
+        = "android.app.extra.PROVISIONING_DEVICE_ADMIN_COMPONENT_NAME";
 
     /**
      * An {@link android.accounts.Account} extra holding the account to migrate during managed
@@ -419,7 +448,6 @@ public class DevicePolicyManager {
      * <p>The NFC record must contain a serialized {@link java.util.Properties} object which
      * contains the following properties:
      * <ul>
-     * <li>{@link #EXTRA_PROVISIONING_DEVICE_ADMIN_PACKAGE_NAME}</li>
      * <li>{@link #EXTRA_PROVISIONING_DEVICE_ADMIN_PACKAGE_DOWNLOAD_LOCATION}</li>
      * <li>{@link #EXTRA_PROVISIONING_DEVICE_ADMIN_PACKAGE_DOWNLOAD_COOKIE_HEADER}, optional</li>
      * <li>{@link #EXTRA_PROVISIONING_DEVICE_ADMIN_PACKAGE_CHECKSUM}</li>
@@ -435,6 +463,15 @@ public class DevicePolicyManager {
      * <li>{@link #EXTRA_PROVISIONING_WIFI_PROXY_BYPASS}, optional</li>
      * <li>{@link #EXTRA_PROVISIONING_WIFI_PAC_URL}, optional</li>
      * <li>{@link #EXTRA_PROVISIONING_SKIP_ENCRYPTION}, optional</li></ul>
+     *
+     * <p>
+     * In version {@link android.os.Build.VERSION_CODES#LOLLIPOP}, it should also contain
+     * {@link #EXTRA_PROVISIONING_DEVICE_ADMIN_PACKAGE_NAME}.
+     * As of {@link android.os.Build.VERSION_CODES#MNC}, it should contain
+     * {@link #EXTRA_PROVISIONING_DEVICE_ADMIN_COMPONENT_NAME} instead, (although
+     * specifying only {@link #EXTRA_PROVISIONING_DEVICE_ADMIN_PACKAGE_NAME} is still supported).
+     * This componentName must have been converted to a String via
+     * {@link android.content.ComponentName#flattenToString()}
      *
      * <p> When device owner provisioning has completed, an intent of the type
      * {@link DeviceAdminReceiver#ACTION_PROFILE_PROVISIONING_COMPLETE} is broadcasted to the
