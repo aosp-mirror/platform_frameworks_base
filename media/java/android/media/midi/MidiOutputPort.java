@@ -68,7 +68,7 @@ public final class MidiOutputPort extends MidiSender implements Closeable {
                     long timestamp = MidiPortImpl.getMessageTimeStamp(buffer, count);
 
                     // dispatch to all our receivers
-                    mDispatcher.receive(buffer, offset, size, timestamp);
+                    mDispatcher.send(buffer, offset, size, timestamp);
                 }
             } catch (IOException e) {
                 // FIXME report I/O failure?

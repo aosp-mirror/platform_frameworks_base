@@ -75,9 +75,9 @@ public final class MidiDispatcher extends MidiReceiver {
     public void receive(byte[] msg, int offset, int count, long timestamp) throws IOException {
        for (MidiReceiver receiver : mReceivers) {
             try {
-                receiver.receive(msg, offset, count, timestamp);
+                receiver.send(msg, offset, count, timestamp);
             } catch (IOException e) {
-                // if the receiver fails we remove the receiver but do not propogate the exception
+                // if the receiver fails we remove the receiver but do not propagate the exception
                 mReceivers.remove(receiver);
             }
         }
