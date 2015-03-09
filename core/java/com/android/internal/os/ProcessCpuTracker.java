@@ -22,11 +22,13 @@ import android.os.FileUtils;
 import android.os.Process;
 import android.os.StrictMode;
 import android.os.SystemClock;
+import android.system.OsConstants;
 import android.util.Slog;
 
 import com.android.internal.util.FastPrintWriter;
 
 import libcore.io.IoUtils;
+import libcore.io.Libcore;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -129,6 +131,9 @@ public class ProcessCpuTracker {
     private final float[] mLoadAverageData = new float[3];
 
     private final boolean mIncludeThreads;
+
+    // How long a CPU jiffy is in milliseconds.
+    private final long mJiffyMillis;
 
     private float mLoad1 = 0;
     private float mLoad5 = 0;
@@ -269,6 +274,8 @@ public class ProcessCpuTracker {
 
     public ProcessCpuTracker(boolean includeThreads) {
         mIncludeThreads = includeThreads;
+        long jiffyHz = Libcore.os.sysconf(OsConstants._SC_CLK_TCK);
+        mJiffyMillis = 1000/jiffyHz;
     }
 
     public void onLoadChanged(float load1, float load5, float load15) {
@@ -294,15 +301,15 @@ public class ProcessCpuTracker {
         if (Process.readProcFile("/proc/stat", SYSTEM_CPU_FORMAT,
                 null, sysCpu, null)) {
             // Total user time is user + nice time.
-            final long usertime = sysCpu[0]+sysCpu[1];
+            final long usertime = (sysCpu[0]+sysCpu[1]) * mJiffyMillis;
             // Total system time is simply system time.
-            final long systemtime = sysCpu[2];
+            final long systemtime = sysCpu[2] * mJiffyMillis;
             // Total idle time is simply idle time.
-            final long idletime = sysCpu[3];
+            final long idletime = sysCpu[3] * mJiffyMillis;
             // Total irq time is iowait + irq + softirq time.
-            final long iowaittime = sysCpu[4];
-            final long irqtime = sysCpu[5];
-            final long softirqtime = sysCpu[6];
+            final long iowaittime = sysCpu[4] * mJiffyMillis;
+            final long irqtime = sysCpu[5] * mJiffyMillis;
+            final long softirqtime = sysCpu[6] * mJiffyMillis;
 
             // This code is trying to avoid issues with idle time going backwards,
             // but currently it gets into situations where it triggers most of the time. :(
@@ -318,10 +325,11 @@ public class ProcessCpuTracker {
                 mRelStatsAreGood = true;
 
                 if (DEBUG) {
-                    Slog.i("Load", "Total U:" + sysCpu[0] + " N:" + sysCpu[1]
-                          + " S:" + sysCpu[2] + " I:" + sysCpu[3]
-                          + " W:" + sysCpu[4] + " Q:" + sysCpu[5]
-                          + " O:" + sysCpu[6]);
+                    Slog.i("Load", "Total U:" + (sysCpu[0]*mJiffyMillis)
+                          + " N:" + (sysCpu[1]*mJiffyMillis)
+                          + " S:" + (sysCpu[2]*mJiffyMillis) + " I:" + (sysCpu[3]*mJiffyMillis)
+                          + " W:" + (sysCpu[4]*mJiffyMillis) + " Q:" + (sysCpu[5]*mJiffyMillis)
+                          + " O:" + (sysCpu[6]*mJiffyMillis));
                     Slog.i("Load", "Rel U:" + mRelUserTime + " S:" + mRelSystemTime
                           + " I:" + mRelIdleTime + " Q:" + mRelIrqTime);
                 }
@@ -414,8 +422,8 @@ public class ProcessCpuTracker {
 
                     final long minfaults = procStats[PROCESS_STAT_MINOR_FAULTS];
                     final long majfaults = procStats[PROCESS_STAT_MAJOR_FAULTS];
-                    final long utime = procStats[PROCESS_STAT_UTIME];
-                    final long stime = procStats[PROCESS_STAT_STIME];
+                    final long utime = procStats[PROCESS_STAT_UTIME] * mJiffyMillis;
+                    final long stime = procStats[PROCESS_STAT_STIME] * mJiffyMillis;
 
                     if (utime == st.base_utime && stime == st.base_stime) {
                         st.rel_utime = 0;
@@ -489,8 +497,8 @@ public class ProcessCpuTracker {
                         st.baseName = procStatsString[0];
                         st.base_minfaults = procStats[PROCESS_FULL_STAT_MINOR_FAULTS];
                         st.base_majfaults = procStats[PROCESS_FULL_STAT_MAJOR_FAULTS];
-                        st.base_utime = procStats[PROCESS_FULL_STAT_UTIME];
-                        st.base_stime = procStats[PROCESS_FULL_STAT_STIME];
+                        st.base_utime = procStats[PROCESS_FULL_STAT_UTIME] * mJiffyMillis;
+                        st.base_stime = procStats[PROCESS_FULL_STAT_STIME] * mJiffyMillis;
                     } else {
                         Slog.i(TAG, "Skipping kernel process pid " + pid
                                 + " name " + procStatsString[0]);
@@ -576,7 +584,7 @@ public class ProcessCpuTracker {
                     null, statsData, null)) {
                 long time = statsData[PROCESS_STAT_UTIME]
                         + statsData[PROCESS_STAT_STIME];
-                return time;
+                return time * mJiffyMillis;
             }
             return 0;
         }
@@ -777,7 +785,7 @@ public class ProcessCpuTracker {
         for (int i=0; i<N; i++) {
             Stats st = mWorkingProcs.get(i);
             printProcessCPU(pw, st.added ? " +" : (st.removed ? " -": "  "),
-                    st.pid, st.name, (int)(st.rel_uptime+5)/10,
+                    st.pid, st.name, (int)st.rel_uptime,
                     st.rel_utime, st.rel_stime, 0, 0, 0, st.rel_minfaults, st.rel_majfaults);
             if (!st.removed && st.workingThreads != null) {
                 int M = st.workingThreads.size();
@@ -785,7 +793,7 @@ public class ProcessCpuTracker {
                     Stats tst = st.workingThreads.get(j);
                     printProcessCPU(pw,
                             tst.added ? "   +" : (tst.removed ? "   -": "    "),
-                            tst.pid, tst.name, (int)(st.rel_uptime+5)/10,
+                            tst.pid, tst.name, (int)st.rel_uptime,
                             tst.rel_utime, tst.rel_stime, 0, 0, 0, 0, 0);
                 }
             }

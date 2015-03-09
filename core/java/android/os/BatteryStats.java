@@ -86,10 +86,10 @@ public abstract class BatteryStats implements Parcelable {
      */
     public static final int WIFI_SCAN = 6;
 
-     /**
-      * A constant indicating a wifi multicast timer
-      */
-     public static final int WIFI_MULTICAST_ENABLED = 7;
+    /**
+     * A constant indicating a wifi multicast timer
+     */
+    public static final int WIFI_MULTICAST_ENABLED = 7;
 
     /**
      * A constant indicating a video turn on timer
@@ -353,7 +353,9 @@ public abstract class BatteryStats implements Parcelable {
         public abstract long getWifiRunningTime(long elapsedRealtimeUs, int which);
         public abstract long getFullWifiLockTime(long elapsedRealtimeUs, int which);
         public abstract long getWifiScanTime(long elapsedRealtimeUs, int which);
+        public abstract int getWifiScanCount(int which);
         public abstract long getWifiBatchedScanTime(int csphBin, long elapsedRealtimeUs, int which);
+        public abstract int getWifiBatchedScanCount(int csphBin, int which);
         public abstract long getWifiMulticastTime(long elapsedRealtimeUs, int which);
         public abstract long getAudioTurnedOnTime(long elapsedRealtimeUs, int which);
         public abstract long getVideoTurnedOnTime(long elapsedRealtimeUs, int which);
@@ -2140,13 +2142,6 @@ public abstract class BatteryStats implements Parcelable {
         }
     }
 
-    public final static void formatTime(StringBuilder sb, long time) {
-        long sec = time / 100;
-        formatTimeRaw(sb, sec);
-        sb.append((time - (sec * 100)) * 10);
-        sb.append("ms ");
-    }
-
     public final static void formatTimeMs(StringBuilder sb, long time) {
         long sec = time / 1000;
         formatTimeRaw(sb, sec);
@@ -2572,6 +2567,7 @@ public abstract class BatteryStats implements Parcelable {
             long wifiPacketsTx = u.getNetworkActivityPackets(NETWORK_WIFI_TX_DATA, which);
             long fullWifiLockOnTime = u.getFullWifiLockTime(rawRealtime, which);
             long wifiScanTime = u.getWifiScanTime(rawRealtime, which);
+            int wifiScanCount = u.getWifiScanCount(which);
             long uidWifiRunningTime = u.getWifiRunningTime(rawRealtime, which);
 
             if (mobileBytesRx > 0 || mobileBytesTx > 0 || wifiBytesRx > 0 || wifiBytesTx > 0
@@ -2584,10 +2580,10 @@ public abstract class BatteryStats implements Parcelable {
                         mobileActiveTime, mobileActiveCount);
             }
 
-            if (fullWifiLockOnTime != 0 || wifiScanTime != 0
+            if (fullWifiLockOnTime != 0 || wifiScanTime != 0 || wifiScanCount != 0
                     || uidWifiRunningTime != 0) {
                 dumpLine(pw, uid, category, WIFI_DATA,
-                        fullWifiLockOnTime, wifiScanTime, uidWifiRunningTime);
+                        fullWifiLockOnTime, wifiScanTime, uidWifiRunningTime, wifiScanCount);
             }
 
             if (u.hasUserActivity()) {
@@ -2705,9 +2701,9 @@ public abstract class BatteryStats implements Parcelable {
                         : processStats.entrySet()) {
                     Uid.Proc ps = ent.getValue();
 
-                    final long userMillis = ps.getUserTime(which) * 10;
-                    final long systemMillis = ps.getSystemTime(which) * 10;
-                    final long foregroundMillis = ps.getForegroundTime(which) * 10;
+                    final long userMillis = ps.getUserTime(which);
+                    final long systemMillis = ps.getSystemTime(which);
+                    final long foregroundMillis = ps.getForegroundTime(which);
                     final int starts = ps.getStarts(which);
                     final int numCrashes = ps.getNumCrashes(which);
                     final int numAnrs = ps.getNumAnrs(which);
@@ -3420,6 +3416,7 @@ public abstract class BatteryStats implements Parcelable {
             long wifiTxPackets = u.getNetworkActivityPackets(NETWORK_WIFI_TX_DATA, which);
             long fullWifiLockOnTime = u.getFullWifiLockTime(rawRealtime, which);
             long wifiScanTime = u.getWifiScanTime(rawRealtime, which);
+            int wifiScanCount = u.getWifiScanCount(which);
             long uidWifiRunningTime = u.getWifiRunningTime(rawRealtime, which);
 
             if (mobileRxBytes > 0 || mobileTxBytes > 0
@@ -3455,7 +3452,7 @@ public abstract class BatteryStats implements Parcelable {
                         pw.print(" received, "); pw.print(wifiTxPackets); pw.println(" sent)");
             }
 
-            if (fullWifiLockOnTime != 0 || wifiScanTime != 0
+            if (fullWifiLockOnTime != 0 || wifiScanTime != 0 || wifiScanCount != 0
                     || uidWifiRunningTime != 0) {
                 sb.setLength(0);
                 sb.append(prefix); sb.append("    Wifi Running: ");
@@ -3469,7 +3466,9 @@ public abstract class BatteryStats implements Parcelable {
                 sb.append(prefix); sb.append("    Wifi Scan: ");
                         formatTimeMs(sb, wifiScanTime / 1000);
                         sb.append("("); sb.append(formatRatioLocked(wifiScanTime,
-                                whichBatteryRealtime)); sb.append(")");
+                                whichBatteryRealtime)); sb.append(") ");
+                                sb.append(wifiScanCount);
+                                sb.append("x");
                 pw.println(sb.toString());
             }
 
@@ -3728,9 +3727,9 @@ public abstract class BatteryStats implements Parcelable {
                         sb.append(prefix); sb.append("    Proc ");
                                 sb.append(ent.getKey()); sb.append(":\n");
                         sb.append(prefix); sb.append("      CPU: ");
-                                formatTime(sb, userTime); sb.append("usr + ");
-                                formatTime(sb, systemTime); sb.append("krn ; ");
-                                formatTime(sb, foregroundTime); sb.append("fg");
+                                formatTimeMs(sb, userTime); sb.append("usr + ");
+                                formatTimeMs(sb, systemTime); sb.append("krn ; ");
+                                formatTimeMs(sb, foregroundTime); sb.append("fg");
                         if (starts != 0 || numCrashes != 0 || numAnrs != 0) {
                             sb.append("\n"); sb.append(prefix); sb.append("      ");
                             boolean hasOne = false;

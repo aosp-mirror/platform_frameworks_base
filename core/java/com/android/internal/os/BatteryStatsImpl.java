@@ -4749,12 +4749,29 @@ public final class BatteryStatsImpl extends BatteryStats {
         }
 
         @Override
+        public int getWifiScanCount(int which) {
+            if (mWifiScanTimer == null) {
+                return 0;
+            }
+            return mWifiScanTimer.getCountLocked(which);
+        }
+
+        @Override
         public long getWifiBatchedScanTime(int csphBin, long elapsedRealtimeUs, int which) {
             if (csphBin < 0 || csphBin >= NUM_WIFI_BATCHED_SCAN_BINS) return 0;
             if (mWifiBatchedScanTimer[csphBin] == null) {
                 return 0;
             }
             return mWifiBatchedScanTimer[csphBin].getTotalTimeLocked(elapsedRealtimeUs, which);
+        }
+
+        @Override
+        public int getWifiBatchedScanCount(int csphBin, int which) {
+            if (csphBin < 0 || csphBin >= NUM_WIFI_BATCHED_SCAN_BINS) return 0;
+            if (mWifiBatchedScanTimer[csphBin] == null) {
+                return 0;
+            }
+            return mWifiBatchedScanTimer[csphBin].getCountLocked(which);
         }
 
         @Override
@@ -5601,17 +5618,17 @@ public final class BatteryStatsImpl extends BatteryStats {
             boolean mActive = true;
 
             /**
-             * Total time (in 1/100 sec) spent executing in user code.
+             * Total time (in ms) spent executing in user code.
              */
             long mUserTime;
 
             /**
-             * Total time (in 1/100 sec) spent executing in kernel code.
+             * Total time (in ms) spent executing in kernel code.
              */
             long mSystemTime;
 
             /**
-             * Amount of time the process was running in the foreground.
+             * Amount of time (in ms) the process was running in the foreground.
              */
             long mForegroundTime;
 
