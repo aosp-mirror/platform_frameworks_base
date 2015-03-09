@@ -1054,6 +1054,50 @@ public final class TvContract {
         public static final String COLUMN_INTERNAL_PROVIDER_DATA = "internal_provider_data";
 
         /**
+         * Internal integer flag used by individual TV input services.
+         * <p>
+         * This is internal to the provider that inserted it, and should not be decoded by other
+         * apps.
+         * </p><p>
+         * Type: INTEGER
+         * </p>
+         */
+        public static final String COLUMN_INTERNAL_PROVIDER_FLAG1 = "internal_provider_flag1";
+
+        /**
+         * Internal integer flag used by individual TV input services.
+         * <p>
+         * This is internal to the provider that inserted it, and should not be decoded by other
+         * apps.
+         * </p><p>
+         * Type: INTEGER
+         * </p>
+         */
+        public static final String COLUMN_INTERNAL_PROVIDER_FLAG2 = "internal_provider_flag2";
+
+        /**
+         * Internal integer flag used by individual TV input services.
+         * <p>
+         * This is internal to the provider that inserted it, and should not be decoded by other
+         * apps.
+         * </p><p>
+         * Type: INTEGER
+         * </p>
+         */
+        public static final String COLUMN_INTERNAL_PROVIDER_FLAG3 = "internal_provider_flag3";
+
+        /**
+         * Internal integer flag used by individual TV input services.
+         * <p>
+         * This is internal to the provider that inserted it, and should not be decoded by other
+         * apps.
+         * </p><p>
+         * Type: INTEGER
+         * </p>
+         */
+        public static final String COLUMN_INTERNAL_PROVIDER_FLAG4 = "internal_provider_flag4";
+
+        /**
          * The version number of this row entry used by TV input services.
          * <p>
          * This is best used by sync adapters to identify the rows to update. The number can be
