@@ -16,6 +16,7 @@
 
 package android.view;
 
+import android.annotation.NonNull;
 import android.graphics.Bitmap;
 import android.graphics.CanvasProperty;
 import android.graphics.NinePatch;
@@ -24,19 +25,50 @@ import android.graphics.Path;
 import android.graphics.Picture;
 import android.graphics.Rect;
 import android.graphics.RectF;
+import android.util.Pools.SynchronizedPool;
 
 /**
- * An implementation of Canvas on top of OpenGL ES 2.0.
+ * An implementation of a GL canvas that records drawing operations.
+ * This is intended for use with a DisplayList. This class keeps a list of all the Paint and
+ * Bitmap objects that it draws, preventing the backing memory of Bitmaps from being freed while
+ * the DisplayList is still holding a native reference to the memory.
  */
-class GLES20Canvas extends HardwareCanvas {
+class DisplayListCanvas extends HardwareCanvas {
+    // The recording canvas pool should be large enough to handle a deeply nested
+    // view hierarchy because display lists are generated recursively.
+    private static final int POOL_LIMIT = 25;
+
+    private static final SynchronizedPool<DisplayListCanvas> sPool =
+            new SynchronizedPool<DisplayListCanvas>(POOL_LIMIT);
+
+    RenderNode mNode;
     private int mWidth;
     private int mHeight;
 
-    private float[] mPoint;
-    private float[] mLine;
 
-    private Rect mClipBounds;
-    private RectF mPathBounds;
+    static DisplayListCanvas obtain(@NonNull RenderNode node) {
+        if (node == null) throw new IllegalArgumentException("node cannot be null");
+        DisplayListCanvas canvas = sPool.acquire();
+        if (canvas == null) {
+            canvas = new DisplayListCanvas();
+        }
+        canvas.mNode = node;
+        return canvas;
+    }
+
+    void recycle() {
+        mNode = null;
+        sPool.release(this);
+    }
+
+    long finishRecording() {
+        return nFinishRecording(mNativeCanvasWrapper);
+    }
+
+    @Override
+    public boolean isRecordingFor(Object o) {
+        return o == mNode;
+    }
 
     ///////////////////////////////////////////////////////////////////////////
     // JNI
@@ -53,8 +85,8 @@ class GLES20Canvas extends HardwareCanvas {
     // Constructors
     ///////////////////////////////////////////////////////////////////////////
 
-    // TODO: Merge with GLES20RecordingCanvas
-    protected GLES20Canvas() {
+
+    private DisplayListCanvas() {
         super(nCreateDisplayListRenderer());
     }
 

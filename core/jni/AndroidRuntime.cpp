@@ -127,16 +127,16 @@ extern int register_android_graphics_pdf_PdfDocument(JNIEnv* env);
 extern int register_android_graphics_pdf_PdfEditor(JNIEnv* env);
 extern int register_android_graphics_pdf_PdfRenderer(JNIEnv* env);
 extern int register_android_view_DisplayEventReceiver(JNIEnv* env);
+extern int register_android_view_DisplayListCanvas(JNIEnv* env);
+extern int register_android_view_GraphicBuffer(JNIEnv* env);
+extern int register_android_view_HardwareLayer(JNIEnv* env);
 extern int register_android_view_RenderNode(JNIEnv* env);
 extern int register_android_view_RenderNodeAnimator(JNIEnv* env);
-extern int register_android_view_GraphicBuffer(JNIEnv* env);
-extern int register_android_view_GLES20Canvas(JNIEnv* env);
-extern int register_android_view_HardwareLayer(JNIEnv* env);
-extern int register_android_view_ThreadedRenderer(JNIEnv* env);
 extern int register_android_view_Surface(JNIEnv* env);
 extern int register_android_view_SurfaceControl(JNIEnv* env);
 extern int register_android_view_SurfaceSession(JNIEnv* env);
 extern int register_android_view_TextureView(JNIEnv* env);
+extern int register_android_view_ThreadedRenderer(JNIEnv* env);
 extern int register_com_android_internal_view_animation_NativeInterpolatorFactoryHelper(JNIEnv *env);
 extern int register_android_database_CursorWindow(JNIEnv* env);
 extern int register_android_database_SQLiteConnection(JNIEnv* env);
@@ -1179,7 +1179,7 @@ static const RegJNIRec gRegJNI[] = {
     REG_JNI(register_android_view_RenderNode),
     REG_JNI(register_android_view_RenderNodeAnimator),
     REG_JNI(register_android_view_GraphicBuffer),
-    REG_JNI(register_android_view_GLES20Canvas),
+    REG_JNI(register_android_view_DisplayListCanvas),
     REG_JNI(register_android_view_HardwareLayer),
     REG_JNI(register_android_view_ThreadedRenderer),
     REG_JNI(register_android_view_Surface),

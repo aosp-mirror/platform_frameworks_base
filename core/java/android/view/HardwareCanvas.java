@@ -119,6 +119,6 @@ public abstract class HardwareCanvas extends Canvas {
             CanvasProperty<Paint> paint);
 
     public static void setProperty(String name, String value) {
-        GLES20Canvas.setProperty(name, value);
+        DisplayListCanvas.setProperty(name, value);
     }
 }
