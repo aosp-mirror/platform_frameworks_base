@@ -576,8 +576,12 @@ void verify(const ProgramDescription& description, const Glop& glop) {
 void GlopBuilder::build() {
     REQUIRE_STAGES(kAllStages);
     if (mOutGlop->mesh.vertices.attribFlags & VertexAttribFlags::kTextureCoord) {
-        mDescription.hasTexture = mOutGlop->fill.texture.target == GL_TEXTURE_2D;
-        mDescription.hasExternalTexture = mOutGlop->fill.texture.target == GL_TEXTURE_EXTERNAL_OES;
+        if (mOutGlop->fill.texture.target == GL_TEXTURE_2D) {
+            mDescription.hasTexture = true;
+        } else {
+            mDescription.hasExternalTexture = true;
+        }
+
     }
     mDescription.hasColors = mOutGlop->mesh.vertices.attribFlags & VertexAttribFlags::kColor;
     mDescription.hasVertexAlpha = mOutGlop->mesh.vertices.attribFlags & VertexAttribFlags::kAlpha;

@@ -59,6 +59,10 @@ public:
         if (texture.get() != mSurfaceTexture.get()) {
             mNeedsGLContextAttach = needsAttach;
             mSurfaceTexture = texture;
+
+            GLenum target = texture->getCurrentTextureTarget();
+            LOG_ALWAYS_FATAL_IF(target != GL_TEXTURE_2D && target != GL_TEXTURE_EXTERNAL_OES,
+                    "set unsupported GLConsumer with target %x", target);
         }
     }
 
