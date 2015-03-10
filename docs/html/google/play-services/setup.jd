@@ -9,7 +9,7 @@ page.title=Setting Up Google Play Services
 <h2>In this document</h2>
 <ol>
   <li><a href="#Setup">Add Google Play Services to Your Project</a></li>
-  <li><a href="#Proguard">Create a Proguard Exception</a></li>
+  <li><a href="#Proguard">Create a ProGuard Exception</a></li>
   <li><a href="#ensure">Ensure Devices Have the Google Play services APK</a></li>
 </ol>
 
@@ -192,6 +192,17 @@ you include an API that does have a separate library.)</p>
 
 </table>
 
+<p class="note"><strong>Note:</strong> ProGuard directives are included in the Play services
+client libraries to preserve the required classes. The
+<a href="{@docRoot}tools/building/plugin-for-gradle.html">Android Plugin for Gradle</a>
+automatically appends ProGuard configuration files in an AAR (Android ARchive) package and appends
+that package to your ProGuard configuration. During project creation, Android Studio automatically
+creates the ProGuard configuration files and <code>build.gradle</code> properties for ProGuard use.
+To use ProGuard with Android Studio, you must enable the ProGuard setting in your
+<code>build.gradle</code>  <code>buildTypes</code>. For more information, see the
+<a href="{@docRoot}tools/help/proguard.html">ProGuard</a> topic. </p>
+
+
 </div><!-- end studio -->
 
 <div class="select-ide eclipse">
@@ -226,6 +237,33 @@ element:
 you can begin developing features with the
 <a href="{@docRoot}reference/gms-packages.html">Google Play services APIs</a>.</p>
 
+
+<h2 id="Proguard">Create a ProGuard Exception</h2>
+
+<p>To prevent <a href="{@docRoot}tools/help/proguard.html">ProGuard</a> from stripping away
+required classes, add the following lines in the
+<code>&lt;project_directory&gt;/proguard-project.txt</code> file:
+<pre>
+-keep class * extends java.util.ListResourceBundle {
+    protected Object[][] getContents();
+}
+
+-keep public class com.google.android.gms.common.internal.safeparcel.SafeParcelable {
+    public static final *** NULL;
+}
+
+-keepnames &#64;com.google.android.gms.common.annotation.KeepName class *
+-keepclassmembernames class * {
+    &#64;com.google.android.gms.common.annotation.KeepName *;
+}
+
+-keepnames class * implements android.os.Parcelable {
+    public static final ** CREATOR;
+}
+</pre>
+
+
+
 </div><!-- end eclipse -->
 
 <div class="select-ide other">
@@ -256,8 +294,6 @@ workspace&mdash;you should not reference the library directly from the Android S
 you can begin developing features with the
 <a href="{@docRoot}reference/gms-packages.html">Google Play services APIs</a>.</p>
 
-</div><!-- end other -->
-
 
 <h2 id="Proguard">Create a Proguard Exception</h2>
 
@@ -283,11 +319,9 @@ required classes, add the following lines in the
 }
 </pre>
 
-<p class="note"><strong>Note:</strong> When using Android Studio, you must add Proguard
-to your <code>build.gradle</code> file's build types. For more information, see the
-<a href="http://tools.android.com/tech-docs/new-build-system/user-guide#TOC-Running-ProGuard"
->Gradle Plugin User Guide</a>.
-</ol>
+
+</div><!-- end other -->
+
 
 
 <h2 id="ensure">Ensure Devices Have the Google Play services APK</h2>
