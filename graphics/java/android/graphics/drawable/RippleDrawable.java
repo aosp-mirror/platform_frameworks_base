@@ -137,7 +137,7 @@ public class RippleDrawable extends LayerDrawable {
     private boolean mBackgroundActive;
 
     /** The current ripple. May be actively animating or pending entry. */
-    private Ripple mRipple;
+    private RippleForeground mRipple;
 
     /** Whether we expect to draw a ripple when visible. */
     private boolean mRippleActive;
@@ -151,7 +151,7 @@ public class RippleDrawable extends LayerDrawable {
      * Lazily-created array of actively animating ripples. Inactive ripples are
      * pruned during draw(). The locations of these will not change.
      */
-    private Ripple[] mExitingRipples;
+    private RippleForeground[] mExitingRipples;
     private int mExitingRipplesCount = 0;
 
     /** Paint used to control appearance of ripples. */
@@ -204,11 +204,11 @@ public class RippleDrawable extends LayerDrawable {
         super.jumpToCurrentState();
 
         if (mRipple != null) {
-            mRipple.jump();
+            mRipple.end();
         }
 
         if (mBackground != null) {
-            mBackground.jump();
+            mBackground.end();
         }
 
         cancelExitingRipples();
@@ -219,10 +219,13 @@ public class RippleDrawable extends LayerDrawable {
         boolean needsDraw = false;
 
         final int count = mExitingRipplesCount;
-        final Ripple[] ripples = mExitingRipples;
+        final RippleForeground[] ripples = mExitingRipples;
         for (int i = 0; i < count; i++) {
+            // If the ripple is animating on the hardware thread, we'll need to
+            // draw an additional frame after canceling to restore the software
+            // drawing path.
             needsDraw |= ripples[i].isHardwareAnimating();
-            ripples[i].cancel();
+            ripples[i].end();
         }
 
         if (ripples != null) {
@@ -264,11 +267,9 @@ public class RippleDrawable extends LayerDrawable {
         for (int state : stateSet) {
             if (state == R.attr.state_enabled) {
                 enabled = true;
-            }
-            if (state == R.attr.state_focused) {
+            } else if (state == R.attr.state_focused) {
                 focused = true;
-            }
-            if (state == R.attr.state_pressed) {
+            } else if (state == R.attr.state_pressed) {
                 pressed = true;
             }
         }
@@ -563,11 +564,11 @@ public class RippleDrawable extends LayerDrawable {
                 x = mHotspotBounds.exactCenterX();
                 y = mHotspotBounds.exactCenterY();
             }
-            mRipple = new Ripple(this, mHotspotBounds, x, y);
+            mRipple = new RippleForeground(this, mHotspotBounds, x, y);
         }
 
         mRipple.setup(mState.mMaxRadius, mDensity);
-        mRipple.enter();
+        mRipple.enter(false);
     }
 
     /**
@@ -577,7 +578,7 @@ public class RippleDrawable extends LayerDrawable {
     private void tryRippleExit() {
         if (mRipple != null) {
             if (mExitingRipples == null) {
-                mExitingRipples = new Ripple[MAX_RIPPLES];
+                mExitingRipples = new RippleForeground[MAX_RIPPLES];
             }
             mExitingRipples[mExitingRipplesCount++] = mRipple;
             mRipple.exit();
@@ -591,13 +592,13 @@ public class RippleDrawable extends LayerDrawable {
      */
     private void clearHotspots() {
         if (mRipple != null) {
-            mRipple.cancel();
+            mRipple.end();
             mRipple = null;
             mRippleActive = false;
         }
 
         if (mBackground != null) {
-            mBackground.cancel();
+            mBackground.end();
             mBackground = null;
             mBackgroundActive = false;
         }
@@ -624,7 +625,7 @@ public class RippleDrawable extends LayerDrawable {
      */
     private void onHotspotBoundsChanged() {
         final int count = mExitingRipplesCount;
-        final Ripple[] ripples = mExitingRipples;
+        final RippleForeground[] ripples = mExitingRipples;
         for (int i = 0; i < count; i++) {
             ripples[i].onHotspotBoundsChanged();
         }
@@ -662,6 +663,8 @@ public class RippleDrawable extends LayerDrawable {
      */
     @Override
     public void draw(@NonNull Canvas canvas) {
+        pruneRipples();
+
         // Clip to the dirty bounds, which will be the drawable bounds if we
         // have a mask or content and the ripple bounds if we're projecting.
         final Rect bounds = getDirtyBounds();
@@ -680,6 +683,26 @@ public class RippleDrawable extends LayerDrawable {
 
         // Force the mask to update on the next draw().
         mHasValidMask = false;
+    }
+
+    private void pruneRipples() {
+        int remaining = 0;
+
+        // Move remaining entries into pruned spaces.
+        final RippleForeground[] ripples = mExitingRipples;
+        final int count = mExitingRipplesCount;
+        for (int i = 0; i < count; i++) {
+            if (!ripples[i].hasFinishedExit()) {
+                ripples[remaining++] = ripples[i];
+            }
+        }
+
+        // Null out the remaining entries.
+        for (int i = remaining; i < count; i++) {
+            ripples[i] = null;
+        }
+
+        mExitingRipplesCount = remaining;
     }
 
     /**
@@ -747,7 +770,7 @@ public class RippleDrawable extends LayerDrawable {
 
     private int getMaskType() {
         if (mRipple == null && mExitingRipplesCount <= 0
-                && (mBackground == null || !mBackground.shouldDraw())) {
+                && (mBackground == null || !mBackground.isVisible())) {
             // We might need a mask later.
             return MASK_UNKNOWN;
         }
@@ -774,36 +797,6 @@ public class RippleDrawable extends LayerDrawable {
         return MASK_NONE;
     }
 
-    /**
-     * Removes a ripple from the exiting ripple list.
-     *
-     * @param ripple the ripple to remove
-     */
-    void removeRipple(Ripple ripple) {
-        // Ripple ripple ripple ripple. Ripple ripple.
-        final Ripple[] ripples = mExitingRipples;
-        final int count = mExitingRipplesCount;
-        final int index = getRippleIndex(ripple);
-        if (index >= 0) {
-            System.arraycopy(ripples, index + 1, ripples, index, count - (index + 1));
-            ripples[count - 1] = null;
-            mExitingRipplesCount--;
-
-            invalidateSelf();
-        }
-    }
-
-    private int getRippleIndex(Ripple ripple) {
-        final Ripple[] ripples = mExitingRipples;
-        final int count = mExitingRipplesCount;
-        for (int i = 0; i < count; i++) {
-            if (ripples[i] == ripple) {
-                return i;
-            }
-        }
-        return -1;
-    }
-
     private void drawContent(Canvas canvas) {
         // Draw everything except the mask.
         final ChildDrawable[] array = mLayerState.mChildren;
@@ -816,10 +809,10 @@ public class RippleDrawable extends LayerDrawable {
     }
 
     private void drawBackgroundAndRipples(Canvas canvas) {
-        final Ripple active = mRipple;
+        final RippleForeground active = mRipple;
         final RippleBackground background = mBackground;
         final int count = mExitingRipplesCount;
-        if (active == null && count <= 0 && (background == null || !background.shouldDraw())) {
+        if (active == null && count <= 0 && (background == null || !background.isVisible())) {
             // Move along, nothing to draw here.
             return;
         }
@@ -859,12 +852,12 @@ public class RippleDrawable extends LayerDrawable {
             p.setShader(null);
         }
 
-        if (background != null && background.shouldDraw()) {
+        if (background != null && background.isVisible()) {
             background.draw(canvas, p);
         }
 
         if (count > 0) {
-            final Ripple[] ripples = mExitingRipples;
+            final RippleForeground[] ripples = mExitingRipples;
             for (int i = 0; i < count; i++) {
                 ripples[i].draw(canvas, p);
             }
@@ -902,7 +895,7 @@ public class RippleDrawable extends LayerDrawable {
             final int cY = (int) mHotspotBounds.exactCenterY();
             final Rect rippleBounds = mTempRect;
 
-            final Ripple[] activeRipples = mExitingRipples;
+            final RippleForeground[] activeRipples = mExitingRipples;
             final int N = mExitingRipplesCount;
             for (int i = 0; i < N; i++) {
                 activeRipples[i].getBounds(rippleBounds);
