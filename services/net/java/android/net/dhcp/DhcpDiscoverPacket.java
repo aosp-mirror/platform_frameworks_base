@@ -42,7 +42,7 @@ class DhcpDiscoverPacket extends DhcpPacket {
     public ByteBuffer buildPacket(int encap, short destUdp, short srcUdp) {
         ByteBuffer result = ByteBuffer.allocate(MAX_LENGTH);
         fillInPacket(encap, INADDR_BROADCAST, INADDR_ANY, destUdp,
-                srcUdp, result, DHCP_BOOTREQUEST, true);
+                srcUdp, result, DHCP_BOOTREQUEST, mBroadcast);
         result.flip();
         return result;
     }
@@ -52,6 +52,7 @@ class DhcpDiscoverPacket extends DhcpPacket {
      */
     void finishPacket(ByteBuffer buffer) {
         addTlv(buffer, DHCP_MESSAGE_TYPE, DHCP_MESSAGE_TYPE_DISCOVER);
+        addCommonClientTlvs(buffer);
         addTlv(buffer, DHCP_PARAMETER_LIST, mRequestedParams);
         addTlvEnd(buffer);
     }

@@ -9,6 +9,7 @@ import android.system.OsConstants;
 
 import java.net.Inet4Address;
 import java.net.UnknownHostException;
+import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.charset.StandardCharsets;
@@ -32,8 +33,6 @@ abstract class DhcpPacket {
             (byte) 0xff, (byte) 0xff, (byte) 0xff,
             (byte) 0xff, (byte) 0xff, (byte) 0xff,
     };
-    // Minimum length of a DHCP packet w/o options: Ethernet header, IP header, fixed bootp format.
-    public static final int MIN_PACKET_LENGTH_L2 = 14 + 20 + 300;
 
     /**
      * Packet encapsulations.
@@ -129,6 +128,12 @@ abstract class DhcpPacket {
     protected String mDomainName;
 
     /**
+     * DHCP Optional Type: DHCP Interface MTU
+     */
+    protected static final byte DHCP_MTU = 26;
+    protected Short mMtu;
+
+    /**
      * DHCP Optional Type: DHCP BROADCAST ADDRESS
      */
     protected static final byte DHCP_BROADCAST_ADDRESS = 28;
@@ -178,9 +183,22 @@ abstract class DhcpPacket {
     protected String mMessage;
 
     /**
+     * DHCP Optional Type: Maximum DHCP Message Size
+     */
+    protected static final byte DHCP_MAX_MESSAGE_SIZE = 57;
+    protected Short mMaxMessageSize;
+
+    /**
      * DHCP Optional Type: DHCP Renewal Time Value
      */
     protected static final byte DHCP_RENEWAL_TIME = 58;
+    protected Integer mT1;
+
+    /**
+     * DHCP Optional Type: Rebinding Time Value
+     */
+    protected static final byte DHCP_REBINDING_TIME = 59;
+    protected Integer mT2;
 
     /**
      * DHCP Optional Type: Vendor Class Identifier
@@ -437,7 +455,7 @@ abstract class DhcpPacket {
     /**
      * Adds an optional parameter containing a single byte value.
      */
-    protected void addTlv(ByteBuffer buf, byte type, byte value) {
+    protected static void addTlv(ByteBuffer buf, byte type, byte value) {
         buf.put(type);
         buf.put((byte) 1);
         buf.put(value);
@@ -446,7 +464,7 @@ abstract class DhcpPacket {
     /**
      * Adds an optional parameter containing an array of bytes.
      */
-    protected void addTlv(ByteBuffer buf, byte type, byte[] payload) {
+    protected static void addTlv(ByteBuffer buf, byte type, byte[] payload) {
         if (payload != null) {
             buf.put(type);
             buf.put((byte) payload.length);
@@ -457,7 +475,7 @@ abstract class DhcpPacket {
     /**
      * Adds an optional parameter containing an IP address.
      */
-    protected void addTlv(ByteBuffer buf, byte type, Inet4Address addr) {
+    protected static void addTlv(ByteBuffer buf, byte type, Inet4Address addr) {
         if (addr != null) {
             addTlv(buf, type, addr.getAddress());
         }
@@ -466,7 +484,7 @@ abstract class DhcpPacket {
     /**
      * Adds an optional parameter containing a list of IP addresses.
      */
-    protected void addTlv(ByteBuffer buf, byte type, List<Inet4Address> addrs) {
+    protected static void addTlv(ByteBuffer buf, byte type, List<Inet4Address> addrs) {
         if (addrs != null && addrs.size() > 0) {
             buf.put(type);
             buf.put((byte)(4 * addrs.size()));
@@ -478,9 +496,20 @@ abstract class DhcpPacket {
     }
 
     /**
+     * Adds an optional parameter containing a short integer
+     */
+    protected static void addTlv(ByteBuffer buf, byte type, Short value) {
+        if (value != null) {
+            buf.put(type);
+            buf.put((byte) 2);
+            buf.putShort(value.shortValue());
+        }
+    }
+
+    /**
      * Adds an optional parameter containing a simple integer
      */
-    protected void addTlv(ByteBuffer buf, byte type, Integer value) {
+    protected static void addTlv(ByteBuffer buf, byte type, Integer value) {
         if (value != null) {
             buf.put(type);
             buf.put((byte) 4);
@@ -491,7 +520,7 @@ abstract class DhcpPacket {
     /**
      * Adds an optional parameter containing and ASCII string.
      */
-    protected void addTlv(ByteBuffer buf, byte type, String str) {
+    protected static void addTlv(ByteBuffer buf, byte type, String str) {
         if (str != null) {
             buf.put(type);
             buf.put((byte) str.length());
@@ -505,8 +534,20 @@ abstract class DhcpPacket {
     /**
      * Adds the special end-of-optional-parameters indicator.
      */
-    protected void addTlvEnd(ByteBuffer buf) {
+    protected static void addTlvEnd(ByteBuffer buf) {
         buf.put((byte) 0xFF);
+    }
+
+    /**
+     * Adds common client TLVs.
+     *
+     * TODO: Does this belong here? The alternative would be to modify all the buildXyzPacket
+     * methods to take them.
+     */
+    protected void addCommonClientTlvs(ByteBuffer buf) {
+        addTlv(buf, DHCP_MAX_MESSAGE_SIZE, (short) MAX_LENGTH);
+        addTlv(buf, DHCP_VENDOR_CLASS_ID, "android-dhcp-" + Build.VERSION.RELEASE);
+        addTlv(buf, DHCP_HOST_NAME, SystemProperties.get("net.hostname"));
     }
 
     /**
@@ -585,7 +626,6 @@ abstract class DhcpPacket {
         byte[] clientMac;
         List<Inet4Address> dnsServers = new ArrayList<Inet4Address>();
         Inet4Address gateway = null; // aka router
-        Integer leaseTime = null;
         Inet4Address serverIdentifier = null;
         Inet4Address netMask = null;
         String message = null;
@@ -598,6 +638,16 @@ abstract class DhcpPacket {
         Inet4Address bcAddr = null;
         Inet4Address requestedIp = null;
 
+        // The following are all unsigned integers. Internally we store them as signed integers of
+        // the same length because that way we're guaranteed that they can't be out of the range of
+        // the unsigned field in the packet. Callers wanting to pass in an unsigned value will need
+        // to cast it.
+        Short mtu = null;
+        Short maxMessageSize = null;
+        Integer leaseTime = null;
+        Integer T1 = null;
+        Integer T2 = null;
+
         // dhcp options
         byte dhcpType = (byte) 0xFF;
 
@@ -605,7 +655,6 @@ abstract class DhcpPacket {
 
         // check to see if we need to parse L2, IP, and UDP encaps
         if (pktType == ENCAP_L2) {
-            // System.out.println("buffer len " + packet.limit());
             byte[] l2dst = new byte[6];
             byte[] l2src = new byte[6];
 
@@ -618,8 +667,7 @@ abstract class DhcpPacket {
                 return null;
         }
 
-        if ((pktType == ENCAP_L2) || (pktType == ENCAP_L3)) {
-            // assume l2type is 0x0800, i.e. IP
+        if (pktType <= ENCAP_L3) {
             byte ipTypeAndLength = packet.get();
             int ipVersion = (ipTypeAndLength & 0xf0) >> 4;
             if (ipVersion != 4) {
@@ -658,7 +706,6 @@ abstract class DhcpPacket {
                 return null;
         }
 
-        // assume bootp
         byte type = packet.get();
         byte hwType = packet.get();
         byte addrLen = packet.get();
@@ -728,6 +775,10 @@ abstract class DhcpPacket {
                         expectedLen = optionLen;
                         hostName = readAsciiString(packet, optionLen);
                         break;
+                    case DHCP_MTU:
+                        expectedLen = 2;
+                        mtu = Short.valueOf(packet.getShort());
+                        break;
                     case DHCP_DOMAIN_NAME:
                         expectedLen = optionLen;
                         domainName = readAsciiString(packet, optionLen);
@@ -760,6 +811,18 @@ abstract class DhcpPacket {
                     case DHCP_MESSAGE:
                         expectedLen = optionLen;
                         message = readAsciiString(packet, optionLen);
+                        break;
+                    case DHCP_MAX_MESSAGE_SIZE:
+                        expectedLen = 2;
+                        maxMessageSize = Short.valueOf(packet.getShort());
+                        break;
+                    case DHCP_RENEWAL_TIME:
+                        expectedLen = 4;
+                        T1 = Integer.valueOf(packet.getInt());
+                        break;
+                    case DHCP_REBINDING_TIME:
+                        expectedLen = 4;
+                        T2 = Integer.valueOf(packet.getInt());
                         break;
                     case DHCP_VENDOR_CLASS_ID:
                         expectedLen = optionLen;
@@ -831,10 +894,14 @@ abstract class DhcpPacket {
         newPacket.mHostName = hostName;
         newPacket.mLeaseTime = leaseTime;
         newPacket.mMessage = message;
+        newPacket.mMtu = mtu;
         newPacket.mRequestedIp = requestedIp;
         newPacket.mRequestedParams = expectedParams;
         newPacket.mServerIdentifier = serverIdentifier;
         newPacket.mSubnetMask = netMask;
+        newPacket.mMaxMessageSize = maxMessageSize;
+        newPacket.mT1 = T1;
+        newPacket.mT2 = T2;
         newPacket.mVendorId = vendorId;
         return newPacket;
     }
