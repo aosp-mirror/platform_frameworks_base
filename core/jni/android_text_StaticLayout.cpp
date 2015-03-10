@@ -48,10 +48,10 @@ class Builder {
             delete mBreakIterator;
         }
 
-        void setLocale(const Locale& locale) {
+        void setLocale(const icu::Locale& locale) {
             delete mBreakIterator;
             UErrorCode status = U_ZERO_ERROR;
-            mBreakIterator = BreakIterator::createLineInstance(locale, status);
+            mBreakIterator = icu::BreakIterator::createLineInstance(locale, status);
             // TODO: check status
         }
 
@@ -77,13 +77,13 @@ class Builder {
             }
         }
 
-        BreakIterator* breakIterator() const {
+        icu::BreakIterator* breakIterator() const {
             return mBreakIterator;
         }
 
     private:
         const size_t MAX_TEXT_BUF_RETAIN = 32678;
-        BreakIterator* mBreakIterator = nullptr;
+        icu::BreakIterator* mBreakIterator = nullptr;
         UText mUText = UTEXT_INITIALIZER;
         std::vector<uint16_t>mTextBuf;
 };
@@ -560,9 +560,9 @@ static jint nComputeLineBreaks(JNIEnv* env, jclass, jlong nativePtr,
     // TODO: this array access is pretty inefficient, but we'll replace it anyway
     ScopedFloatArrayRO widthsScopedArr(env, widths);
 
-    BreakIterator* breakIterator = b->breakIterator();
+    icu::BreakIterator* breakIterator = b->breakIterator();
     int loc = breakIterator->first();
-    while ((loc = breakIterator->next()) != BreakIterator::DONE) {
+    while ((loc = breakIterator->next()) != icu::BreakIterator::DONE) {
         breaks.push_back(loc);
     }
 
