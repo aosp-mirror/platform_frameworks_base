@@ -17,20 +17,14 @@
 package com.android.systemui.statusbar.policy;
 
 import android.content.Context;
-import android.graphics.SurfaceTexture;
 import android.hardware.camera2.CameraAccessException;
-import android.hardware.camera2.CameraCaptureSession;
 import android.hardware.camera2.CameraCharacteristics;
-import android.hardware.camera2.CameraDevice;
 import android.hardware.camera2.CameraManager;
-import android.hardware.camera2.CameraMetadata;
-import android.hardware.camera2.CaptureRequest;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Process;
+import android.text.TextUtils;
 import android.util.Log;
-import android.util.Size;
-import android.view.Surface;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
@@ -44,7 +38,7 @@ public class FlashlightController {
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
     private static final int DISPATCH_ERROR = 0;
-    private static final int DISPATCH_OFF = 1;
+    private static final int DISPATCH_CHANGED = 1;
     private static final int DISPATCH_AVAILABILITY_CHANGED = 2;
 
     private final CameraManager mCameraManager;
@@ -57,52 +51,50 @@ public class FlashlightController {
     /** Lock on {@code this} when accessing */
     private boolean mFlashlightEnabled;
 
-    private String mCameraId;
-    private boolean mCameraAvailable;
-    private CameraDevice mCameraDevice;
-    private CaptureRequest mFlashlightRequest;
-    private CameraCaptureSession mSession;
-    private SurfaceTexture mSurfaceTexture;
-    private Surface mSurface;
+    private final String mCameraId;
+    private boolean mTorchAvailable;
 
     public FlashlightController(Context mContext) {
         mCameraManager = (CameraManager) mContext.getSystemService(Context.CAMERA_SERVICE);
-        initialize();
-    }
 
-    public void initialize() {
+        String cameraId = null;
         try {
-            mCameraId = getCameraId();
+            cameraId = getCameraId();
         } catch (Throwable e) {
             Log.e(TAG, "Couldn't initialize.", e);
             return;
+        } finally {
+            mCameraId = cameraId;
         }
 
         if (mCameraId != null) {
             ensureHandler();
-            mCameraManager.registerAvailabilityCallback(mAvailabilityCallback, mHandler);
+            mCameraManager.registerTorchCallback(mTorchCallback, mHandler);
         }
     }
 
-    public synchronized void setFlashlight(boolean enabled) {
-        if (mFlashlightEnabled != enabled) {
-            mFlashlightEnabled = enabled;
-            postUpdateFlashlight();
-        }
-    }
-
-    public void killFlashlight() {
-        boolean enabled;
+    public void setFlashlight(boolean enabled) {
+        boolean pendingError = false;
         synchronized (this) {
-            enabled = mFlashlightEnabled;
+            if (mFlashlightEnabled != enabled) {
+                mFlashlightEnabled = enabled;
+                try {
+                    mCameraManager.setTorchMode(mCameraId, enabled);
+                } catch (CameraAccessException e) {
+                    Log.e(TAG, "Couldn't set torch mode", e);
+                    mFlashlightEnabled = false;
+                    pendingError = true;
+                }
+            }
         }
-        if (enabled) {
-            mHandler.post(mKillFlashlightRunnable);
+        dispatchModeChanged(mFlashlightEnabled);
+        if (pendingError) {
+            dispatchError();
         }
     }
 
     public synchronized boolean isAvailable() {
-        return mCameraAvailable;
+        return mTorchAvailable;
     }
 
     public void addListener(FlashlightListener l) {
@@ -126,42 +118,6 @@ public class FlashlightController {
         }
     }
 
-    private void startDevice() throws CameraAccessException {
-        mCameraManager.openCamera(getCameraId(), mCameraListener, mHandler);
-    }
-
-    private void startSession() throws CameraAccessException {
-        mSurfaceTexture = new SurfaceTexture(false);
-        Size size = getSmallestSize(mCameraDevice.getId());
-        mSurfaceTexture.setDefaultBufferSize(size.getWidth(), size.getHeight());
-        mSurface = new Surface(mSurfaceTexture);
-        ArrayList<Surface> outputs = new ArrayList<>(1);
-        outputs.add(mSurface);
-        mCameraDevice.createCaptureSession(outputs, mSessionListener, mHandler);
-    }
-
-    private Size getSmallestSize(String cameraId) throws CameraAccessException {
-        Size[] outputSizes = mCameraManager.getCameraCharacteristics(cameraId)
-                .get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP)
-                .getOutputSizes(SurfaceTexture.class);
-        if (outputSizes == null || outputSizes.length == 0) {
-            throw new IllegalStateException(
-                    "Camera " + cameraId + "doesn't support any outputSize.");
-        }
-        Size chosen = outputSizes[0];
-        for (Size s : outputSizes) {
-            if (chosen.getWidth() >= s.getWidth() && chosen.getHeight() >= s.getHeight()) {
-                chosen = s;
-            }
-        }
-        return chosen;
-    }
-
-    private void postUpdateFlashlight() {
-        ensureHandler();
-        mHandler.post(mUpdateFlashlightRunnable);
-    }
-
     private String getCameraId() throws CameraAccessException {
         String[] ids = mCameraManager.getCameraIdList();
         for (String id : ids) {
@@ -176,70 +132,12 @@ public class FlashlightController {
         return null;
     }
 
-    private void updateFlashlight(boolean forceDisable) {
-        try {
-            boolean enabled;
-            synchronized (this) {
-                enabled = mFlashlightEnabled && !forceDisable;
-            }
-            if (enabled) {
-                if (mCameraDevice == null) {
-                    startDevice();
-                    return;
-                }
-                if (mSession == null) {
-                    startSession();
-                    return;
-                }
-                if (mFlashlightRequest == null) {
-                    CaptureRequest.Builder builder = mCameraDevice.createCaptureRequest(
-                            CameraDevice.TEMPLATE_PREVIEW);
-                    builder.set(CaptureRequest.FLASH_MODE, CameraMetadata.FLASH_MODE_TORCH);
-                    builder.addTarget(mSurface);
-                    CaptureRequest request = builder.build();
-                    mSession.capture(request, null, mHandler);
-                    mFlashlightRequest = request;
-                }
-            } else {
-                if (mCameraDevice != null) {
-                    mCameraDevice.close();
-                    teardown();
-                }
-            }
-
-        } catch (CameraAccessException|IllegalStateException|UnsupportedOperationException e) {
-            Log.e(TAG, "Error in updateFlashlight", e);
-            handleError();
-        }
-    }
-
-    private void teardown() {
-        mCameraDevice = null;
-        mSession = null;
-        mFlashlightRequest = null;
-        if (mSurface != null) {
-            mSurface.release();
-            mSurfaceTexture.release();
-        }
-        mSurface = null;
-        mSurfaceTexture = null;
-    }
-
-    private void handleError() {
-        synchronized (this) {
-            mFlashlightEnabled = false;
-        }
-        dispatchError();
-        dispatchOff();
-        updateFlashlight(true /* forceDisable */);
-    }
-
-    private void dispatchOff() {
-        dispatchListeners(DISPATCH_OFF, false /* argument (ignored) */);
+    private void dispatchModeChanged(boolean enabled) {
+        dispatchListeners(DISPATCH_CHANGED, enabled);
     }
 
     private void dispatchError() {
-        dispatchListeners(DISPATCH_ERROR, false /* argument (ignored) */);
+        dispatchListeners(DISPATCH_CHANGED, false /* argument (ignored) */);
     }
 
     private void dispatchAvailabilityChanged(boolean available) {
@@ -255,8 +153,8 @@ public class FlashlightController {
                 if (l != null) {
                     if (message == DISPATCH_ERROR) {
                         l.onFlashlightError();
-                    } else if (message == DISPATCH_OFF) {
-                        l.onFlashlightOff();
+                    } else if (message == DISPATCH_CHANGED) {
+                        l.onFlashlightChanged(argument);
                     } else if (message == DISPATCH_AVAILABILITY_CHANGED) {
                         l.onFlashlightAvailabilityChanged(argument);
                     }
@@ -279,96 +177,45 @@ public class FlashlightController {
         }
     }
 
-    private final CameraDevice.StateListener mCameraListener = new CameraDevice.StateListener() {
-        @Override
-        public void onOpened(CameraDevice camera) {
-            mCameraDevice = camera;
-            postUpdateFlashlight();
-        }
+    private final CameraManager.TorchCallback mTorchCallback =
+            new CameraManager.TorchCallback() {
 
         @Override
-        public void onDisconnected(CameraDevice camera) {
-            if (mCameraDevice == camera) {
-                dispatchOff();
-                teardown();
-            }
-        }
-
-        @Override
-        public void onError(CameraDevice camera, int error) {
-            Log.e(TAG, "Camera error: camera=" + camera + " error=" + error);
-            if (camera == mCameraDevice || mCameraDevice == null) {
-                handleError();
-            }
-        }
-    };
-
-    private final CameraCaptureSession.StateListener mSessionListener =
-            new CameraCaptureSession.StateListener() {
-        @Override
-        public void onConfigured(CameraCaptureSession session) {
-            if (session.getDevice() == mCameraDevice) {
-                mSession = session;
-            } else {
-                session.close();
-            }
-            postUpdateFlashlight();
-        }
-
-        @Override
-        public void onConfigureFailed(CameraCaptureSession session) {
-            Log.e(TAG, "Configure failed.");
-            if (mSession == null || mSession == session) {
-                handleError();
-            }
-        }
-    };
-
-    private final Runnable mUpdateFlashlightRunnable = new Runnable() {
-        @Override
-        public void run() {
-            updateFlashlight(false /* forceDisable */);
-        }
-    };
-
-    private final Runnable mKillFlashlightRunnable = new Runnable() {
-        @Override
-        public void run() {
-            synchronized (this) {
-                mFlashlightEnabled = false;
-            }
-            updateFlashlight(true /* forceDisable */);
-            dispatchOff();
-        }
-    };
-
-    private final CameraManager.AvailabilityCallback mAvailabilityCallback =
-            new CameraManager.AvailabilityCallback() {
-        @Override
-        public void onCameraAvailable(String cameraId) {
-            if (DEBUG) Log.d(TAG, "onCameraAvailable(" + cameraId + ")");
-            if (cameraId.equals(mCameraId)) {
-                setCameraAvailable(true);
-            }
-        }
-
-        @Override
-        public void onCameraUnavailable(String cameraId) {
-            if (DEBUG) Log.d(TAG, "onCameraUnavailable(" + cameraId + ")");
-            if (cameraId.equals(mCameraId)) {
+        public void onTorchModeUnavailable(String cameraId) {
+            if (TextUtils.equals(cameraId, mCameraId)) {
                 setCameraAvailable(false);
+            }
+        }
+
+        @Override
+        public void onTorchModeChanged(String cameraId, boolean enabled) {
+            if (TextUtils.equals(cameraId, mCameraId)) {
+                setCameraAvailable(true);
+                setTorchMode(enabled);
             }
         }
 
         private void setCameraAvailable(boolean available) {
             boolean changed;
             synchronized (FlashlightController.this) {
-                changed = mCameraAvailable != available;
-                mCameraAvailable = available;
+                changed = mTorchAvailable != available;
+                mTorchAvailable = available;
             }
             if (changed) {
                 if (DEBUG) Log.d(TAG, "dispatchAvailabilityChanged(" + available + ")");
                 dispatchAvailabilityChanged(available);
+            }
+        }
+
+        private void setTorchMode(boolean enabled) {
+            boolean changed;
+            synchronized (FlashlightController.this) {
+                changed = mFlashlightEnabled != enabled;
+                mFlashlightEnabled = enabled;
+            }
+            if (changed) {
+                if (DEBUG) Log.d(TAG, "dispatchModeChanged(" + enabled + ")");
+                dispatchModeChanged(enabled);
             }
         }
     };
@@ -376,9 +223,11 @@ public class FlashlightController {
     public interface FlashlightListener {
 
         /**
-         * Called when the flashlight turns off unexpectedly.
+         * Called when the flashlight was turned off or on.
+         * @param enabled true if the flashlight is currently turned on.
          */
-        void onFlashlightOff();
+        void onFlashlightChanged(boolean enabled);
+
 
         /**
          * Called when there is an error that turns the flashlight off.
