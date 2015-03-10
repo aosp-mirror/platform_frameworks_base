@@ -2286,12 +2286,12 @@ public final class ViewRootImpl implements ViewParent,
     final Paint mResizePaint = new Paint();
 
     @Override
-    public void onHardwarePreDraw(HardwareCanvas canvas) {
+    public void onHardwarePreDraw(DisplayListCanvas canvas) {
         canvas.translate(-mHardwareXOffset, -mHardwareYOffset);
     }
 
     @Override
-    public void onHardwarePostDraw(HardwareCanvas canvas) {
+    public void onHardwarePostDraw(DisplayListCanvas canvas) {
         if (mResizeBuffer != null) {
             mResizePaint.setAlpha(mResizeAlpha);
             canvas.drawHardwareLayer(mResizeBuffer, mHardwareXOffset, mHardwareYOffset,

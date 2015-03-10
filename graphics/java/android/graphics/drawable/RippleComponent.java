@@ -20,7 +20,7 @@ import android.animation.Animator;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Rect;
-import android.view.HardwareCanvas;
+import android.view.DisplayListCanvas;
 import android.view.RenderNodeAnimator;
 
 import java.util.ArrayList;
@@ -36,7 +36,7 @@ abstract class RippleComponent {
     protected final Rect mBounds;
 
     /** Whether we can use hardware acceleration for the exit animation. */
-    private boolean mHasHardwareCanvas;
+    private boolean mHasDisplayListCanvas;
 
     private boolean mHasPendingHardwareAnimator;
     private RenderNodeAnimatorSet mHardwareAnimator;
@@ -91,7 +91,7 @@ abstract class RippleComponent {
     public final void exit() {
         cancel();
 
-        if (mHasHardwareCanvas) {
+        if (mHasDisplayListCanvas) {
             // We don't have access to a canvas here, but we expect one on the
             // next frame. We'll start the render thread animation then.
             mHasPendingHardwareAnimator = true;
@@ -130,19 +130,19 @@ abstract class RippleComponent {
      * @return {@code true} if something was drawn, {@code false} otherwise
      */
     public boolean draw(Canvas c, Paint p) {
-        final boolean hasHardwareCanvas = c.isHardwareAccelerated()
-                && c instanceof HardwareCanvas;
-        if (mHasHardwareCanvas != hasHardwareCanvas) {
-            mHasHardwareCanvas = hasHardwareCanvas;
+        final boolean hasDisplayListCanvas = c.isHardwareAccelerated()
+                && c instanceof DisplayListCanvas;
+        if (mHasDisplayListCanvas != hasDisplayListCanvas) {
+            mHasDisplayListCanvas = hasDisplayListCanvas;
 
-            if (!hasHardwareCanvas) {
+            if (!hasDisplayListCanvas) {
                 // We've switched from hardware to non-hardware mode. Panic.
                 endHardwareAnimations();
             }
         }
 
-        if (hasHardwareCanvas) {
-            final HardwareCanvas hw = (HardwareCanvas) c;
+        if (hasDisplayListCanvas) {
+            final DisplayListCanvas hw = (DisplayListCanvas) c;
             startPendingAnimation(hw, p);
 
             if (mHardwareAnimator != null) {
@@ -171,7 +171,7 @@ abstract class RippleComponent {
      * @param hw hardware canvas on which the animation should draw
      * @param p paint whose properties the hardware canvas should use
      */
-    private void startPendingAnimation(HardwareCanvas hw, Paint p) {
+    private void startPendingAnimation(DisplayListCanvas hw, Paint p) {
         if (mHasPendingHardwareAnimator) {
             mHasPendingHardwareAnimator = false;
 
@@ -264,7 +264,7 @@ abstract class RippleComponent {
 
     protected abstract RenderNodeAnimatorSet createHardwareExit(Paint p);
 
-    protected abstract boolean drawHardware(HardwareCanvas c);
+    protected abstract boolean drawHardware(DisplayListCanvas c);
 
     protected abstract boolean drawSoftware(Canvas c, Paint p);
 
@@ -285,7 +285,7 @@ abstract class RippleComponent {
             mAnimators.clear();
         }
 
-        public void start(HardwareCanvas target) {
+        public void start(DisplayListCanvas target) {
             if (target == null) {
                 throw new IllegalArgumentException("Hardware canvas must be non-null");
             }

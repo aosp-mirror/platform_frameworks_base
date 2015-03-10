@@ -27,7 +27,7 @@ import android.graphics.Paint;
 import android.graphics.Rect;
 import android.util.FloatProperty;
 import android.util.MathUtils;
-import android.view.HardwareCanvas;
+import android.view.DisplayListCanvas;
 import android.view.RenderNodeAnimator;
 import android.view.animation.LinearInterpolator;
 
@@ -111,7 +111,7 @@ class RippleForeground extends RippleComponent {
     }
 
     @Override
-    protected boolean drawHardware(HardwareCanvas c) {
+    protected boolean drawHardware(DisplayListCanvas c) {
         c.drawCircle(mPropX, mPropY, mPropRadius, mPropPaint);
         return true;
     }

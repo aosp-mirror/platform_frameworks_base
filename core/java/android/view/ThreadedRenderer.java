@@ -282,7 +282,7 @@ public class ThreadedRenderer extends HardwareRenderer {
         updateViewTreeDisplayList(view);
 
         if (mRootNodeNeedsUpdate || !mRootNode.isValid()) {
-            HardwareCanvas canvas = mRootNode.start(mSurfaceWidth, mSurfaceHeight);
+            DisplayListCanvas canvas = mRootNode.start(mSurfaceWidth, mSurfaceHeight);
             try {
                 final int saveCount = canvas.save();
                 canvas.translate(mInsetLeft, mInsetTop);

@@ -18,6 +18,7 @@ package android.view;
 
 import android.annotation.NonNull;
 import android.graphics.Bitmap;
+import android.graphics.Canvas;
 import android.graphics.CanvasProperty;
 import android.graphics.NinePatch;
 import android.graphics.Paint;
@@ -32,8 +33,10 @@ import android.util.Pools.SynchronizedPool;
  * This is intended for use with a DisplayList. This class keeps a list of all the Paint and
  * Bitmap objects that it draws, preventing the backing memory of Bitmaps from being freed while
  * the DisplayList is still holding a native reference to the memory.
+ *
+ * @hide
  */
-class DisplayListCanvas extends HardwareCanvas {
+public class DisplayListCanvas extends Canvas {
     // The recording canvas pool should be large enough to handle a deeply nested
     // view hierarchy because display lists are generated recursively.
     private static final int POOL_LIMIT = 25;
@@ -85,7 +88,6 @@ class DisplayListCanvas extends HardwareCanvas {
     // Constructors
     ///////////////////////////////////////////////////////////////////////////
 
-
     private DisplayListCanvas() {
         super(nCreateDisplayListRenderer());
     }
@@ -101,6 +103,16 @@ class DisplayListCanvas extends HardwareCanvas {
     ///////////////////////////////////////////////////////////////////////////
     // Canvas management
     ///////////////////////////////////////////////////////////////////////////
+
+    @Override
+    public boolean isHardwareAccelerated() {
+        return true;
+    }
+
+    @Override
+    public void setBitmap(Bitmap bitmap) {
+        throw new UnsupportedOperationException();
+    }
 
     @Override
     public boolean isOpaque() {
@@ -171,7 +183,11 @@ class DisplayListCanvas extends HardwareCanvas {
 
     private static native void nInsertReorderBarrier(long renderer, boolean enableReorder);
 
-    @Override
+    /**
+     * Invoked before any drawing operation is performed in this canvas.
+     *
+     * @param dirty The dirty rectangle to update, can be null.
+     */
     public void onPreDraw(Rect dirty) {
         if (dirty != null) {
             nPrepareDirty(mNativeCanvasWrapper, dirty.left, dirty.top, dirty.right, dirty.bottom);
@@ -183,7 +199,9 @@ class DisplayListCanvas extends HardwareCanvas {
     private static native void nPrepare(long renderer);
     private static native void nPrepareDirty(long renderer, int left, int top, int right, int bottom);
 
-    @Override
+    /**
+     * Invoked after all drawing operation have been performed.
+     */
     public void onPostDraw() {
         nFinish(mNativeCanvasWrapper);
     }
@@ -194,7 +212,13 @@ class DisplayListCanvas extends HardwareCanvas {
     // Functor
     ///////////////////////////////////////////////////////////////////////////
 
-    @Override
+    /**
+     * Calls the function specified with the drawGLFunction function pointer. This is
+     * functionality used by webkit for calling into their renderer from our display lists.
+     * This function may return true if an invalidation is needed after the call.
+     *
+     * @param drawGLFunction A native function pointer
+     */
     public void callDrawGLFunction2(long drawGLFunction) {
         nCallDrawGLFunction(mNativeCanvasWrapper, drawGLFunction);
     }
@@ -207,7 +231,23 @@ class DisplayListCanvas extends HardwareCanvas {
 
     protected static native long nFinishRecording(long renderer);
 
-    @Override
+    /**
+     * Draws the specified display list onto this canvas. The display list can only
+     * be drawn if {@link android.view.RenderNode#isValid()} returns true.
+     *
+     * @param renderNode The RenderNode to replay.
+     */
+    public void drawRenderNode(RenderNode renderNode) {
+        drawRenderNode(renderNode, RenderNode.FLAG_CLIP_CHILDREN);
+    }
+
+    /**
+     * Draws the specified display list onto this canvas.
+     *
+     * @param renderNode The RenderNode to replay.
+     * @param flags Optional flags about drawing, see {@link RenderNode} for
+     *              the possible flags.
+     */
     public void drawRenderNode(RenderNode renderNode, int flags) {
         nDrawRenderNode(mNativeCanvasWrapper, renderNode.getNativeDisplayList(), flags);
     }
@@ -219,6 +259,14 @@ class DisplayListCanvas extends HardwareCanvas {
     // Hardware layer
     ///////////////////////////////////////////////////////////////////////////
 
+    /**
+     * Draws the specified layer onto this canvas.
+     *
+     * @param layer The layer to composite on this canvas
+     * @param x The left coordinate of the layer
+     * @param y The top coordinate of the layer
+     * @param paint The paint used to draw the layer
+     */
     void drawHardwareLayer(HardwareLayer layer, float x, float y, Paint paint) {
         layer.setLayerPaint(paint);
         nDrawLayer(mNativeCanvasWrapper, layer.getLayerHandle(), x, y);
@@ -253,7 +301,6 @@ class DisplayListCanvas extends HardwareCanvas {
     private static native void nDrawPatch(long renderer, long bitmap, long chunk,
             float left, float top, float right, float bottom, long paint);
 
-    @Override
     public void drawCircle(CanvasProperty<Float> cx, CanvasProperty<Float> cy,
             CanvasProperty<Float> radius, CanvasProperty<Paint> paint) {
         nDrawCircle(mNativeCanvasWrapper, cx.getNativeContainer(), cy.getNativeContainer(),
@@ -263,7 +310,6 @@ class DisplayListCanvas extends HardwareCanvas {
     private static native void nDrawCircle(long renderer, long propCx,
             long propCy, long propRadius, long propPaint);
 
-    @Override
     public void drawRoundRect(CanvasProperty<Float> left, CanvasProperty<Float> top,
             CanvasProperty<Float> right, CanvasProperty<Float> bottom, CanvasProperty<Float> rx,
             CanvasProperty<Float> ry, CanvasProperty<Paint> paint) {
