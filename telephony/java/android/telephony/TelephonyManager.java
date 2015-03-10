@@ -3744,12 +3744,32 @@ public class TelephonyManager {
     }
 
     /**
-     * This function retrieves value for setting "name+subId", and if that is not found
-     * retrieves value for setting "name", and if that is not found uses def as default
+     * Whether the phone supports TTY mode.
      *
-     * @hide */
-    public static int getIntWithSubId(ContentResolver cr, String name, int subId, int def) {
-        return Settings.Global.getInt(cr, name + subId, Settings.Global.getInt(cr, name, def));
+     * @return {@code true} if the device supports TTY mode, and {@code false} otherwise.
+     */
+    public boolean isTtyModeSupported() {
+        try {
+            return getITelephony().isTtyModeSupported();
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error calling ITelephony#isTtyModeSupported", e);
+        }
+        return false;
+    }
+
+    /**
+     * Whether the phone supports hearing aid compatibility.
+     *
+     * @return {@code true} if the device supports hearing aid compatibility, and {@code false}
+     * otherwise.
+     */
+    public boolean isHearingAidCompatibilitySupported() {
+        try {
+            return getITelephony().isHearingAidCompatibilitySupported();
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error calling ITelephony#isHearingAidCompatibilitySupported", e);
+        }
+        return false;
     }
 
     /**

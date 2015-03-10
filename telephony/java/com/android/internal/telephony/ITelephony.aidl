@@ -882,6 +882,20 @@ interface ITelephony {
     boolean isWorldPhone();
 
     /**
+     * Whether the phone supports TTY mode.
+     *
+     * @return {@code true} if the device supports TTY mode.
+     */
+    boolean isTtyModeSupported();
+
+    /**
+     * Whether the phone supports hearing aid compatibility.
+     *
+     * @return {@code true} if the device supports hearing aid compatibility.
+     */
+    boolean isHearingAidCompatibilitySupported();
+
+    /**
      * Get IMS Registration Status
      */
     boolean isImsRegistered();

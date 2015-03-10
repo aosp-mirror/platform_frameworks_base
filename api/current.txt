@@ -29370,8 +29370,10 @@ package android.telephony {
     method public android.telephony.IccOpenLogicalChannelResponse iccOpenLogicalChannel(java.lang.String);
     method public java.lang.String iccTransmitApduBasicChannel(int, int, int, int, int, java.lang.String);
     method public java.lang.String iccTransmitApduLogicalChannel(int, int, int, int, int, int, java.lang.String);
+    method public boolean isHearingAidCompatibilitySupported();
     method public boolean isNetworkRoaming();
     method public boolean isSmsCapable();
+    method public boolean isTtyModeSupported();
     method public boolean isVoiceCapable();
     method public boolean isWorldPhone();
     method public void listen(android.telephony.PhoneStateListener, int);
