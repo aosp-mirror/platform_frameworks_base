@@ -72,8 +72,8 @@ private:
     volatile int32_t    mRefCount;
     uint16_t            mSampleID;
     uint16_t            mSampleRate;
-    uint8_t             mState : 3;
-    uint8_t             mNumChannels : 2;
+    uint8_t             mState;
+    uint8_t             mNumChannels;
     audio_format_t      mFormat;
     int                 mFd;
     int64_t             mOffset;
