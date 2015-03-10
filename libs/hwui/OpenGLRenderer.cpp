@@ -908,15 +908,35 @@ void OpenGLRenderer::composeLayerRect(Layer* layer, const Rect& rect, bool swap)
         resetDrawTextureTexCoords(0.0f, 0.0f, 1.0f, 1.0f);
     } else {
         EVENT_LOGD("composeHardwareLayerRect");
+
+        if (USE_GLOPS) {
+            Blend::ModeOrderSwap modeUsage = swap ?
+                    Blend::ModeOrderSwap::Swap : Blend::ModeOrderSwap::NoSwap;
+            const Matrix4& transform = swap ? Matrix4::identity() : *currentTransform();
+            bool snap = !swap
+                    && layer->getWidth() == static_cast<uint32_t>(rect.getWidth())
+                    && layer->getHeight() == static_cast<uint32_t>(rect.getHeight());
+            Glop glop;
+            GlopBuilder(mRenderState, mCaches, &glop)
+                    .setMeshTexturedUvQuad(nullptr, layer->texCoords)
+                    .setFillLayer(layer->getTexture(), layer->getColorFilter(), getLayerAlpha(layer), layer->getMode(), modeUsage)
+                    .setTransform(currentSnapshot()->getOrthoMatrix(), transform, false)
+                    .setModelViewMapUnitToRectOptionalSnap(snap, rect)
+                    .setRoundRectClipState(currentSnapshot()->roundRectClipState)
+                    .build();
+            renderGlop(glop);
+            return;
+        }
+
         const Rect& texCoords = layer->texCoords;
         resetDrawTextureTexCoords(texCoords.left, texCoords.top,
                 texCoords.right, texCoords.bottom);
 
         float x = rect.left;
         float y = rect.top;
-        bool simpleTransform = currentTransform()->isPureTranslate() &&
-                layer->getWidth() == (uint32_t) rect.getWidth() &&
-                layer->getHeight() == (uint32_t) rect.getHeight();
+        bool simpleTransform = currentTransform()->isPureTranslate()
+                && layer->getWidth() == (uint32_t) rect.getWidth()
+                && layer->getHeight() == (uint32_t) rect.getHeight();
 
         if (simpleTransform) {
             // When we're swapping, the layer is already in screen coordinates
@@ -1053,10 +1073,41 @@ void OpenGLRenderer::composeLayerRegion(Layer* layer, const Rect& rect) {
         rects = safeRegion.getArray(&count);
     }
 
-    const float alpha = getLayerAlpha(layer);
     const float texX = 1.0f / float(layer->getWidth());
     const float texY = 1.0f / float(layer->getHeight());
     const float height = rect.getHeight();
+
+    if (USE_GLOPS) {
+        TextureVertex quadVertices[count * 4];
+        //std::unique_ptr<TextureVertex[]> quadVertices(new TextureVertex[count * 4]);
+        TextureVertex* mesh = &quadVertices[0];
+        for (size_t i = 0; i < count; i++) {
+            const android::Rect* r = &rects[i];
+
+            const float u1 = r->left * texX;
+            const float v1 = (height - r->top) * texY;
+            const float u2 = r->right * texX;
+            const float v2 = (height - r->bottom) * texY;
+
+            // TODO: Reject quads outside of the clip
+            TextureVertex::set(mesh++, r->left, r->top, u1, v1);
+            TextureVertex::set(mesh++, r->right, r->top, u2, v1);
+            TextureVertex::set(mesh++, r->left, r->bottom, u1, v2);
+            TextureVertex::set(mesh++, r->right, r->bottom, u2, v2);
+        }
+        Glop glop;
+        GlopBuilder(mRenderState, mCaches, &glop)
+                .setMeshTexturedIndexedQuads(&quadVertices[0], count * 6)
+                .setFillLayer(layer->getTexture(), layer->getColorFilter(), getLayerAlpha(layer), layer->getMode(), Blend::ModeOrderSwap::NoSwap)
+                .setTransform(currentSnapshot()->getOrthoMatrix(), *currentTransform(), false)
+                .setModelViewOffsetRectSnap(0, 0, rect)
+                .setRoundRectClipState(currentSnapshot()->roundRectClipState)
+                .build();
+        DRAW_DOUBLE_STENCIL_IF(!layer->hasDrawnSinceUpdate, renderGlop(glop));
+        return;
+    }
+
+    const float alpha = getLayerAlpha(layer);
 
     setupDraw();
 
@@ -3110,7 +3161,7 @@ void OpenGLRenderer::drawLayer(Layer* layer, float x, float y) {
                 Glop glop;
                 GlopBuilder(mRenderState, mCaches, &glop)
                         .setMeshTexturedIndexedQuads(layer->mesh, layer->meshElementCount)
-                        .setFillLayer(layer->getTexture(), layer->getColorFilter(), getLayerAlpha(layer), layer->getMode())
+                        .setFillLayer(layer->getTexture(), layer->getColorFilter(), getLayerAlpha(layer), layer->getMode(), Blend::ModeOrderSwap::NoSwap)
                         .setTransform(currentSnapshot()->getOrthoMatrix(), *currentTransform(), false)
                         .setModelViewOffsetRectSnap(x, y, Rect(0, 0, layer->layer.getWidth(), layer->layer.getHeight()))
                         .setRoundRectClipState(currentSnapshot()->roundRectClipState)
@@ -3596,7 +3647,8 @@ void OpenGLRenderer::chooseBlending(bool blend, SkXfermode::Mode mode,
                 mode = SkXfermode::kSrcOver_Mode;
             }
         }
-        mRenderState.blend().enable(mode, swapSrcDst);
+        mRenderState.blend().enable(mode,
+                swapSrcDst ? Blend::ModeOrderSwap::Swap : Blend::ModeOrderSwap::NoSwap);
     } else {
         mRenderState.blend().disable();
     }

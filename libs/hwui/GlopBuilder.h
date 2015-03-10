@@ -18,6 +18,7 @@
 
 #include "OpenGLRenderer.h"
 #include "Program.h"
+#include "renderstate/Blend.h"
 #include "utils/Macros.h"
 
 class SkPaint;
@@ -65,7 +66,7 @@ public:
     GlopBuilder& setFillBlack();
     GlopBuilder& setFillClear();
     GlopBuilder& setFillLayer(Texture& texture, const SkColorFilter* colorFilter,
-            float alpha, SkXfermode::Mode mode);
+            float alpha, SkXfermode::Mode mode, Blend::ModeOrderSwap modeUsage);
     GlopBuilder& setFillTextureLayer(Layer& layer, float alpha);
 
     GlopBuilder& setTransform(const Matrix4& ortho, const Matrix4& transform, bool fudgingOffset);
@@ -94,7 +95,8 @@ public:
 
     void build();
 private:
-    void setFill(int color, float alphaScale, SkXfermode::Mode mode,
+    void setFill(int color, float alphaScale,
+            SkXfermode::Mode mode, Blend::ModeOrderSwap modeUsage,
             const SkShader* shader, const SkColorFilter* colorFilter);
 
     enum StageFlags {

@@ -78,10 +78,10 @@ Blend::Blend()
     // gl blending off by default
 }
 
-void Blend::enable(SkXfermode::Mode mode, bool swapSrcDst) {
+void Blend::enable(SkXfermode::Mode mode, ModeOrderSwap modeUsage) {
     GLenum srcMode;
     GLenum dstMode;
-    getFactors(mode, swapSrcDst, &srcMode, &dstMode);
+    getFactors(mode, modeUsage, &srcMode, &dstMode);
     setFactors(srcMode, dstMode);
 }
 
@@ -105,9 +105,9 @@ void Blend::syncEnabled() {
     }
 }
 
-void Blend::getFactors(SkXfermode::Mode mode, bool swapSrcDst, GLenum* outSrc, GLenum* outDst) {
-    *outSrc = swapSrcDst ? kBlendsSwap[mode].src : kBlends[mode].src;
-    *outDst = swapSrcDst ? kBlendsSwap[mode].dst : kBlends[mode].dst;
+void Blend::getFactors(SkXfermode::Mode mode, ModeOrderSwap modeUsage, GLenum* outSrc, GLenum* outDst) {
+    *outSrc = (modeUsage == ModeOrderSwap::Swap) ? kBlendsSwap[mode].src : kBlends[mode].src;
+    *outDst = (modeUsage == ModeOrderSwap::Swap) ? kBlendsSwap[mode].dst : kBlends[mode].dst;
 }
 
 void Blend::setFactors(GLenum srcMode, GLenum dstMode) {

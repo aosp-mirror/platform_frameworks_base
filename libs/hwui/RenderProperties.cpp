@@ -33,14 +33,12 @@
 namespace android {
 namespace uirenderer {
 
-LayerProperties::LayerProperties()
-        : mType(kLayerTypeNone)
-        , mColorFilter(nullptr) {
+LayerProperties::LayerProperties() {
     reset();
 }
 
 LayerProperties::~LayerProperties() {
-    setType(kLayerTypeNone);
+    setType(LayerType::None);
 }
 
 void LayerProperties::reset() {
@@ -146,7 +144,7 @@ void RenderProperties::debugOutputProperties(const int level) const {
         }
     }
 
-    const bool isLayer = layerProperties().type() != kLayerTypeNone;
+    const bool isLayer = layerProperties().type() != LayerType::None;
     int clipFlags = getClippingFlags();
     if (mPrimitiveFields.mAlpha < 1) {
         if (isLayer) {
