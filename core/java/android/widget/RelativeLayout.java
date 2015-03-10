@@ -515,6 +515,23 @@ public class RelativeLayout extends ViewGroup {
             }
         }
 
+        // Use the top-start-most laid out view as the baseline. RTL offsets are
+        // applied later, so we can use the left-most edge as the starting edge.
+        View baselineView = null;
+        LayoutParams baselineParams = null;
+        for (int i = 0; i < count; i++) {
+            final View child = getChildAt(i);
+            if (child.getVisibility() != GONE) {
+                final LayoutParams childParams = (LayoutParams) child.getLayoutParams();
+                if (baselineView == null || baselineParams == null
+                        || compareLayoutPosition(childParams, baselineParams) < 0) {
+                    baselineView = child;
+                    baselineParams = childParams;
+                }
+            }
+        }
+        mBaselineView = baselineView;
+
         if (isWrapContentWidth) {
             // Width already has left padding in it since it was calculated by looking at
             // the right of each child view
@@ -616,22 +633,21 @@ public class RelativeLayout extends ViewGroup {
             }
         }
 
-        // Use the bottom-most laid out view as the baseline.
-        View baselineView = null;
-        int baseline = 0;
-        for (int i = 0; i < count; i++) {
-            final View child = getChildAt(i);
-            if (child.getVisibility() != GONE) {
-                final int childBaseline = child.getBaseline();
-                if (childBaseline >= baseline) {
-                    baselineView = child;
-                    baseline = childBaseline;
-                }
-            }
-        }
-        mBaselineView = baselineView;
-
         setMeasuredDimension(width, height);
+    }
+
+    /**
+     * @return a negative number if the top of {@code p1} is above the top of
+     *         {@code p2} or if they have identical top values and the left of
+     *         {@code p1} is to the left of {@code p2}, or a positive number
+     *         otherwise
+     */
+    private int compareLayoutPosition(LayoutParams p1, LayoutParams p2) {
+        final int topDiff = p1.mTop - p2.mTop;
+        if (topDiff != 0) {
+            return topDiff;
+        }
+        return p1.mLeft - p2.mLeft;
     }
 
     /**
