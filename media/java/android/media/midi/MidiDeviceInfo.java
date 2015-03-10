@@ -31,7 +31,7 @@ import android.os.Parcelable;
  * CANDIDATE FOR PUBLIC API
  * @hide
  */
-public class MidiDeviceInfo implements Parcelable {
+public final class MidiDeviceInfo implements Parcelable {
 
     private static final String TAG = "MidiDeviceInfo";
 

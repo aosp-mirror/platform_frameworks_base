@@ -24,11 +24,14 @@ import android.os.RemoteException;
 import android.system.OsConstants;
 import android.util.Log;
 
+import dalvik.system.CloseGuard;
+
 import libcore.io.IoUtils;
 
 import java.io.Closeable;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * Internal class used for providing an implementation for a MIDI device.
@@ -53,6 +56,12 @@ public final class MidiDeviceServer implements Closeable {
 
     // MidiOutputPorts for clients connected to our input ports
     private final MidiOutputPort[] mInputPortOutputPorts;
+
+    // List of all MidiInputPorts we created
+    private final CopyOnWriteArrayList<MidiInputPort> mInputPorts
+            = new CopyOnWriteArrayList<MidiInputPort>();
+
+    private final CloseGuard mGuard = CloseGuard.get();
 
     abstract private class PortClient implements IBinder.DeathRecipient {
         final IBinder mToken;
@@ -105,6 +114,7 @@ public final class MidiDeviceServer implements Closeable {
         void close() {
             mToken.unlinkToDeath(this, 0);
             mOutputPortDispatchers[mInputPort.getPortNumber()].getSender().disconnect(mInputPort);
+            mInputPorts.remove(mInputPort);
             IoUtils.closeQuietly(mInputPort);
         }
     }
@@ -169,6 +179,7 @@ public final class MidiDeviceServer implements Closeable {
                                                     OsConstants.SOCK_SEQPACKET);
                 MidiInputPort inputPort = new MidiInputPort(pair[0], portNumber);
                 mOutputPortDispatchers[portNumber].getSender().connect(inputPort);
+                mInputPorts.add(inputPort);
                 OutputPortClient client = new OutputPortClient(token, inputPort);
                 synchronized (mPortClients) {
                     mPortClients.put(token, client);
@@ -204,6 +215,8 @@ public final class MidiDeviceServer implements Closeable {
         for (int i = 0; i < numOutputPorts; i++) {
             mOutputPortDispatchers[i] = new MidiDispatcher();
         }
+
+        mGuard.open("close");
     }
 
     /* package */ IMidiDeviceServer getBinderInterface() {
@@ -219,11 +232,35 @@ public final class MidiDeviceServer implements Closeable {
 
     @Override
     public void close() throws IOException {
+        synchronized (mGuard) {
+            mGuard.close();
+
+            for (int i = 0; i < mInputPortCount; i++) {
+                MidiOutputPort outputPort = mInputPortOutputPorts[i];
+                if (outputPort != null) {
+                    IoUtils.closeQuietly(outputPort);
+                    mInputPortOutputPorts[i] = null;
+                }
+            }
+            for (MidiInputPort inputPort : mInputPorts) {
+                IoUtils.closeQuietly(inputPort);
+            }
+            mInputPorts.clear();
+            try {
+                mMidiManager.unregisterDeviceServer(mServer);
+            } catch (RemoteException e) {
+                Log.e(TAG, "RemoteException in unregisterDeviceServer");
+            }
+        }
+    }
+
+    @Override
+    protected void finalize() throws Throwable {
         try {
-            // FIXME - close input and output ports too?
-            mMidiManager.unregisterDeviceServer(mServer);
-        } catch (RemoteException e) {
-            Log.e(TAG, "RemoteException in unregisterDeviceServer");
+            mGuard.warnIfOpen();
+            close();
+        } finally {
+            super.finalize();
         }
     }
 

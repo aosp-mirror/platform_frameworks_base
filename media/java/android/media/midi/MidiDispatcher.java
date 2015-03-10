@@ -17,7 +17,7 @@
 package android.media.midi;
 
 import java.io.IOException;
-import java.util.ArrayList;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * Utility class for dispatching MIDI data to a list of {@link MidiReceiver}s.
@@ -29,9 +29,10 @@ import java.util.ArrayList;
  * CANDIDATE FOR PUBLIC API
  * @hide
  */
-public class MidiDispatcher extends MidiReceiver {
+public final class MidiDispatcher extends MidiReceiver {
 
-    private final ArrayList<MidiReceiver> mReceivers = new ArrayList<MidiReceiver>();
+    private final CopyOnWriteArrayList<MidiReceiver> mReceivers
+            = new CopyOnWriteArrayList<MidiReceiver>();
 
     private final MidiSender mSender = new MidiSender() {
         /**
@@ -72,17 +73,12 @@ public class MidiDispatcher extends MidiReceiver {
 
     @Override
     public void receive(byte[] msg, int offset, int count, long timestamp) throws IOException {
-        synchronized (mReceivers) {
-           for (int i = 0; i < mReceivers.size(); ) {
-                MidiReceiver receiver = mReceivers.get(i);
-                try {
-                    receiver.receive(msg, offset, count, timestamp);
-                    i++;    // increment only on success. on failure we remove the receiver
-                            // so i should not be incremented
-                } catch (IOException e) {
-                    // if the receiver fails we remove the receiver but do not propogate the exception
-                    mSender.disconnect(receiver);
-                }
+       for (MidiReceiver receiver : mReceivers) {
+            try {
+                receiver.receive(msg, offset, count, timestamp);
+            } catch (IOException e) {
+                // if the receiver fails we remove the receiver but do not propogate the exception
+                mReceivers.remove(receiver);
             }
         }
     }

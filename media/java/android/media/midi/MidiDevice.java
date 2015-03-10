@@ -24,11 +24,13 @@ import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.util.Log;
 
+import dalvik.system.CloseGuard;
+
 import java.io.Closeable;
 import java.io.IOException;
 
 /**
- * This class is used for sending and receiving data to and from an MIDI device
+ * This class is used for sending and receiving data to and from a MIDI device
  * Instances of this class are created by {@link MidiManager#openDevice}.
  *
  * CANDIDATE FOR PUBLIC API
@@ -42,11 +44,10 @@ public final class MidiDevice implements Closeable {
     private Context mContext;
     private ServiceConnection mServiceConnection;
 
+    private final CloseGuard mGuard = CloseGuard.get();
+
     /* package */ MidiDevice(MidiDeviceInfo deviceInfo, IMidiDeviceServer server) {
-        mDeviceInfo = deviceInfo;
-        mDeviceServer = server;
-        mContext = null;
-        mServiceConnection = null;
+        this(deviceInfo, server, null, null);
     }
 
     /* package */ MidiDevice(MidiDeviceInfo deviceInfo, IMidiDeviceServer server,
@@ -55,6 +56,7 @@ public final class MidiDevice implements Closeable {
         mDeviceServer = server;
         mContext = context;
         mServiceConnection = serviceConnection;
+        mGuard.open("close");
     }
 
     /**
@@ -108,10 +110,23 @@ public final class MidiDevice implements Closeable {
 
     @Override
     public void close() throws IOException {
-        if (mContext != null && mServiceConnection != null) {
-            mContext.unbindService(mServiceConnection);
-            mContext = null;
-            mServiceConnection = null;
+        synchronized (mGuard) {
+            mGuard.close();
+            if (mContext != null && mServiceConnection != null) {
+                mContext.unbindService(mServiceConnection);
+                mContext = null;
+                mServiceConnection = null;
+            }
+        }
+    }
+
+    @Override
+    protected void finalize() throws Throwable {
+        try {
+            mGuard.warnIfOpen();
+            close();
+        } finally {
+            super.finalize();
         }
     }
 

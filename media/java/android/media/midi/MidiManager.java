@@ -42,7 +42,7 @@ import java.util.HashMap;
  * CANDIDATE FOR PUBLIC API
  * @hide
  */
-public class MidiManager {
+public final class MidiManager {
     private static final String TAG = "MidiManager";
 
     private final Context mContext;
