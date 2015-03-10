@@ -19294,9 +19294,18 @@ package android.net.wifi {
     method public int describeContents();
     method public void writeToParcel(android.os.Parcel, int);
     field public java.lang.String BSSID;
+    field public static final int CHANNEL_WIDTH_160MHZ = 3; // 0x3
+    field public static final int CHANNEL_WIDTH_20MHZ = 0; // 0x0
+    field public static final int CHANNEL_WIDTH_40MHZ = 1; // 0x1
+    field public static final int CHANNEL_WIDTH_80MHZ = 2; // 0x2
+    field public static final int CHANNEL_WIDTH_80MHZ_PLUS_MHZ = 4; // 0x4
     field public java.lang.String SSID;
     field public java.lang.String capabilities;
+    field public int centerFreq0;
+    field public int centerFreq1;
+    field public int channelWidth;
     field public int frequency;
+    field public boolean is80211McRTTResponder;
     field public int level;
     field public long timestamp;
   }
