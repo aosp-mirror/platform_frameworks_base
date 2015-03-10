@@ -109,6 +109,9 @@ void DeferredLayerUpdater::doUpdateTexImage() {
         mSurfaceTexture->getTransformMatrix(transform);
         GLenum renderTarget = mSurfaceTexture->getCurrentTextureTarget();
 
+        LOG_ALWAYS_FATAL_IF(renderTarget != GL_TEXTURE_2D && renderTarget != GL_TEXTURE_EXTERNAL_OES,
+                "doUpdateTexImage target %x, 2d %x, EXT %x",
+                renderTarget, GL_TEXTURE_2D, GL_TEXTURE_EXTERNAL_OES);
         LayerRenderer::updateTextureLayer(mLayer, mWidth, mHeight,
                 !mBlend, forceFilter, renderTarget, transform);
     }
