@@ -26,12 +26,15 @@ public class BatterySipper implements Comparable<BatterySipper> {
     public double value;
     public double[] values;
     public DrainType drainType;
+
+    // Measured in milliseconds.
     public long usageTime;
     public long cpuTime;
     public long gpsTime;
     public long wifiRunningTime;
     public long cpuFgTime;
     public long wakeLockTime;
+
     public long mobileRxPackets;
     public long mobileTxPackets;
     public long mobileActive;
@@ -47,6 +50,14 @@ public class BatterySipper implements Comparable<BatterySipper> {
     public double noCoveragePercent;
     public String[] mPackages;
     public String packageWithHighestDrain;
+
+    // Measured in mAh (milli-ampere per hour).
+    public double wifiPower;
+    public double cpuPower;
+    public double wakeLockPower;
+    public double mobileRadioPower;
+    public double gpsPower;
+    public double sensorPower;
 
     public enum DrainType {
         IDLE,
@@ -106,5 +117,32 @@ public class BatterySipper implements Comparable<BatterySipper> {
             return 0;
         }
         return uidObj.getUid();
+    }
+
+    /**
+     * Add stats from other to this BatterySipper.
+     */
+    public void add(BatterySipper other) {
+        cpuTime += other.cpuTime;
+        gpsTime += other.gpsTime;
+        wifiRunningTime += other.wifiRunningTime;
+        cpuFgTime += other.cpuFgTime;
+        wakeLockTime += other.wakeLockTime;
+        mobileRxPackets += other.mobileRxPackets;
+        mobileTxPackets += other.mobileTxPackets;
+        mobileActive += other.mobileActive;
+        mobileActiveCount += other.mobileActiveCount;
+        wifiRxPackets += other.wifiRxPackets;
+        wifiTxPackets += other.wifiTxPackets;
+        mobileRxBytes += other.mobileRxBytes;
+        mobileTxBytes += other.mobileTxBytes;
+        wifiRxBytes += other.wifiRxBytes;
+        wifiTxBytes += other.wifiTxBytes;
+        wifiPower += other.wifiPower;
+        gpsPower += other.gpsPower;
+        cpuPower += other.cpuPower;
+        sensorPower += other.sensorPower;
+        mobileRadioPower += other.mobileRadioPower;
+        wakeLockPower += other.wakeLockPower;
     }
 }
