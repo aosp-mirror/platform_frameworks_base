@@ -69,7 +69,6 @@ abstract class RippleComponent {
 
         mDensity = density;
 
-        onSetup();
         onTargetRadiusChanged(mTargetRadius);
     }
 
@@ -82,7 +81,10 @@ abstract class RippleComponent {
         cancel();
 
         mSoftwareAnimator = createSoftwareEnter(fast);
-        mSoftwareAnimator.start();
+
+        if (mSoftwareAnimator != null) {
+            mSoftwareAnimator.start();
+        }
     }
 
     /**
@@ -247,14 +249,6 @@ abstract class RippleComponent {
      * @param targetRadius the new target radius
      */
     protected void onTargetRadiusChanged(float targetRadius) {
-        // Stub.
-    }
-
-    /**
-     * Called during ripple setup, which occurs before the first enter
-     * animation.
-     */
-    protected void onSetup() {
         // Stub.
     }
 
