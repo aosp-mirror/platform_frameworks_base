@@ -238,12 +238,21 @@ class LockSettingsStorage {
 
     public void writePatternHash(byte[] hash, int userId) {
         writeFile(getLockPatternFilename(userId), hash);
+        clearPasswordHash(userId);
+    }
+
+    private void clearPatternHash(int userId) {
+        writeFile(getLockPatternFilename(userId), null);
     }
 
     public void writePasswordHash(byte[] hash, int userId) {
         writeFile(getLockPasswordFilename(userId), hash);
+        clearPatternHash(userId);
     }
 
+    private void clearPasswordHash(int userId) {
+        writeFile(getLockPasswordFilename(userId), null);
+    }
 
     @VisibleForTesting
     String getLockPatternFilename(int userId) {
@@ -279,16 +288,15 @@ class LockSettingsStorage {
         return userId;
     }
 
-
     public void removeUser(int userId) {
         SQLiteDatabase db = mOpenHelper.getWritableDatabase();
 
         final UserManager um = (UserManager) mContext.getSystemService(USER_SERVICE);
         final UserInfo parentInfo = um.getProfileParent(userId);
 
-        synchronized (mFileWriteLock) {
-            if (parentInfo == null) {
-                // This user owns its lock settings files - safe to delete them
+        if (parentInfo == null) {
+            // This user owns its lock settings files - safe to delete them
+            synchronized (mFileWriteLock) {
                 String name = getLockPasswordFilename(userId);
                 File file = new File(name);
                 if (file.exists()) {
