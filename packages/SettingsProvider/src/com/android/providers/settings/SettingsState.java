@@ -354,6 +354,7 @@ final class SettingsState {
 
             XmlSerializer serializer = Xml.newSerializer();
             serializer.setOutput(out, "utf-8");
+            serializer.setFeature("http://xmlpull.org/v1/doc/features.html#indent-output", true);
             serializer.startDocument(null, true);
             serializer.startTag(null, TAG_SETTINGS);
             serializer.attribute(null, ATTR_VERSION, String.valueOf(version));
@@ -383,7 +384,7 @@ final class SettingsState {
             }
 
         } catch (IOException e) {
-            Slog.w(LOG_TAG, "Failed to write settings, restoring backup", e);
+            Slog.wtf(LOG_TAG, "Failed to write settings, restoring backup", e);
             destination.failWrite(out);
         } finally {
             IoUtils.closeQuietly(out);
