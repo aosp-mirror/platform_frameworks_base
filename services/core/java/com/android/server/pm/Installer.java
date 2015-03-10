@@ -83,13 +83,14 @@ public final class Installer extends SystemService {
     }
 
     public int dexopt(String apkPath, int uid, boolean isPublic, String pkgName,
-            String instructionSet, boolean vmSafeMode) {
+            String instructionSet, boolean vmSafeMode, boolean debuggable) {
         if (!isValidInstructionSet(instructionSet)) {
             Slog.e(TAG, "Invalid instruction set: " + instructionSet);
             return -1;
         }
 
-        return mInstaller.dexopt(apkPath, uid, isPublic, pkgName, instructionSet, vmSafeMode);
+        return mInstaller.dexopt(apkPath, uid, isPublic, pkgName, instructionSet, vmSafeMode,
+                debuggable);
     }
 
     public int idmap(String targetApkPath, String overlayApkPath, int uid) {

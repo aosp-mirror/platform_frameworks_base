@@ -91,11 +91,11 @@ public class InstallerConnection {
     }
 
     public int dexopt(String apkPath, int uid, boolean isPublic, String instructionSet) {
-        return dexopt(apkPath, uid, isPublic, "*", instructionSet, false);
+        return dexopt(apkPath, uid, isPublic, "*", instructionSet, false, false);
     }
 
     public int dexopt(String apkPath, int uid, boolean isPublic, String pkgName,
-            String instructionSet, boolean vmSafeMode) {
+            String instructionSet, boolean vmSafeMode, boolean debuggable) {
         StringBuilder builder = new StringBuilder("dexopt");
         builder.append(' ');
         builder.append(apkPath);
@@ -106,8 +106,8 @@ public class InstallerConnection {
         builder.append(pkgName);
         builder.append(' ');
         builder.append(instructionSet);
-        builder.append(' ');
         builder.append(vmSafeMode ? " 1" : " 0");
+        builder.append(debuggable ? " 1" : " 0");
         return execute(builder.toString());
     }
 
