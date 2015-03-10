@@ -47,6 +47,7 @@ import android.media.IAudioService;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.media.session.MediaSessionLegacyHelper;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Debug;
 import android.os.FactoryTest;
@@ -91,6 +92,7 @@ import android.view.MotionEvent;
 import android.view.Surface;
 import android.view.View;
 import android.view.ViewConfiguration;
+import android.view.ViewRootImpl;
 import android.view.Window;
 import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
@@ -1187,6 +1189,12 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
     };
 
+    private boolean isRoundWindow() {
+        return mContext.getResources().getBoolean(com.android.internal.R.bool.config_windowIsRound)
+                || (Build.HARDWARE.contains("goldfish")
+                && SystemProperties.getBoolean(ViewRootImpl.PROPERTY_EMULATOR_CIRCULAR, false));
+    }
+
     /** {@inheritDoc} */
     @Override
     public void init(Context context, IWindowManager windowManager,
@@ -1196,9 +1204,40 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         mWindowManagerFuncs = windowManagerFuncs;
         mWindowManagerInternal = LocalServices.getService(WindowManagerInternal.class);
         mDreamManagerInternal = LocalServices.getService(DreamManagerInternal.class);
-        if (context.getResources().getBoolean(
-                com.android.internal.R.bool.config_enableBurnInProtection)){
-            mBurnInProtectionHelper = new BurnInProtectionHelper(context);
+
+        // Init display burn-in protection
+        boolean burnInProtectionEnabled = context.getResources().getBoolean(
+                com.android.internal.R.bool.config_enableBurnInProtection);
+        // Allow a system property to override this. Used by developer settings.
+        boolean burnInProtectionDevMode =
+                SystemProperties.getBoolean("persist.debug.force_burn_in", false);
+        if (burnInProtectionEnabled || burnInProtectionDevMode) {
+            final int minHorizontal;
+            final int maxHorizontal;
+            final int minVertical;
+            final int maxVertical;
+            final int maxRadius;
+            if (burnInProtectionDevMode) {
+                minHorizontal = -8;
+                maxHorizontal = 8;
+                minVertical = -8;
+                maxVertical = -4;
+                maxRadius = (isRoundWindow()) ? 6 : -1;
+            } else {
+                Resources resources = context.getResources();
+                minHorizontal = resources.getInteger(
+                        com.android.internal.R.integer.config_burnInProtectionMinHorizontalOffset);
+                maxHorizontal = resources.getInteger(
+                        com.android.internal.R.integer.config_burnInProtectionMaxHorizontalOffset);
+                minVertical = resources.getInteger(
+                        com.android.internal.R.integer.config_burnInProtectionMinVerticalOffset);
+                maxVertical = resources.getInteger(
+                        com.android.internal.R.integer.config_burnInProtectionMaxVerticalOffset);
+                maxRadius = resources.getInteger(
+                        com.android.internal.R.integer.config_burnInProtectionMaxRadius);
+            }
+            mBurnInProtectionHelper = new BurnInProtectionHelper(
+                    context, minHorizontal, maxHorizontal, minVertical, maxVertical, maxRadius);
         }
 
         mHandler = new PolicyHandler();
