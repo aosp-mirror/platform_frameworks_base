@@ -238,74 +238,72 @@ page.type=about
                    width="120" height="120" class="img-logo" style="margin-top:30px" />
             </div>
             <div class="col-4">
-              <img src="{@docRoot}auto/images/logos/apps/mlb.png"
-                   width="160" height="160" class="img-logo" />
+              <img src="{@docRoot}auto/images/logos/apps/tunein.png"
+                   width="160" height="160" class="img-logo"
+                   />
             </div>
           </div>
 
           <div class="cols">
             <div class="col-4">
-              <img src="{@docRoot}auto/images/logos/apps/pandora.png"
-                   width="160" height="160" class="img-logo" />
+              <img src="{@docRoot}auto/images/logos/apps/talkray.png"
+                   width="120" height="44" class="img-logo" style="margin-top:40px"
+                   />
             </div>
             <div class="col-4">
-              <img src="{@docRoot}auto/images/logos/apps/pocketcasts.png"
-                   width="160" height="160" class="img-logo" />
+              <img src="{@docRoot}auto/images/logos/apps/icq.png"
+                   width="150" height="53" class="img-logo" style="margin-top:40px"
+                   />
             </div>
             <div class="col-4">
-              <img src="{@docRoot}auto/images/logos/apps/songza.png"
-                   width="160" height="160" class="img-logo" />
+              <img src="{@docRoot}auto/images/logos/apps/stitcher.png"
+                   width="160" height="160" class="img-logo" style="margin-top:-20px"
+                   />
             </div>
             <div class="col-4">
-              <img src="/auto/images/logos/apps/soundcloud.png"
-                   width="100" height="100" class="img-logo"
-                   style="margin-top:30px" />
+              <img src="/auto/images/logos/apps/pocketcasts.png"
+                   width="160" height="160" class="img-logo" style="margin-top:-10px"
+                   />
             </div>
           </div>
 
           <div class="cols">
+            <div class="col-4">
+              <img src="/auto/images/logos/apps/threema.png"
+                   width="100" height="91" class="img-logo" style="margin-top:30px"
+                   />
+            </div>
+            <div class="col-4">
+              <img src="{@docRoot}auto/images/logos/apps/umano.png"
+                   width="160" height="160" class="img-logo" />
+            </div>
             <div class="col-4">
               <img src="/auto/images/logos/apps/spotify.png"
                    width="160" height="160" class="img-logo" />
             </div>
             <div class="col-4">
-              <img src="{@docRoot}auto/images/logos/apps/stitcher.png"
-                   width="160" height="160" class="img-logo" />
-            </div>
-            <div class="col-4">
-              <img src="/auto/images/logos/apps/TextMe.png"
-                   width="100" height="100" class="img-logo" style="margin-top:30px" />
-            </div>
-            <div class="col-4">
               <img src="/auto/images/logos/apps/textplus.png"
-                   width="120" height="24" class="img-logo" style="margin-top:70px" />
+                   width="120" height="24" class="img-logo" style="margin-top:60px"
+                   />
             </div>
           </div>
 
           <div class="cols">
             <div class="col-4">
-              <img src="{@docRoot}auto/images/logos/apps/tunein.png"
-                   width="160" height="160" class="img-logo" style="margin-left:160px" />
+              <img src="{@docRoot}auto/images/logos/apps/contacts.png"
+                   width="160" height="160" class="img-logo" style="margin-left:140px"
+                   />
             </div>
             <div class="col-4">
-              <img src="{@docRoot}auto/images/logos/apps/umano.png"
-                   width="160" height="160" class="img-logo" style="margin-left:370px" />
+              <img src="{@docRoot}auto/images/logos/apps/skype.png"
+                   width="160" height="70" class="img-logo" style="margin-top:40px; margin-left:160px"
+                   />
             </div>
-          </div>
-
-          <div class="cols" style="margin-top:40px">
-              <div class="col-4">
-                <img src="/auto/images/logos/apps/whatsapp.png"
-                     width="120" height="120" class="img-logo" />
-              </div>
-              <div class="col-8">
-                <p><em>
-                "We were able to get messaging functionality for text
-                implemented easily on Android Auto, with minimal development
-                effort. We're excited to participate in Android Auto which
-                provides a notification interface for the car that is both
-                user-friendly and highly safety-minded."</em></p>
-              </div>
+            <div class="col-4">
+              <img src="{@docRoot}auto/images/logos/apps/textme.png"
+                   width="80" height="80" class="img-logo" style="margin-top:30px;margin-left:200px"
+                   />
+            </div>
           </div>
 
           <div class="cols" style="margin-top:60px">
