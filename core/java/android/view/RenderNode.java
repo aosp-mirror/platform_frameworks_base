@@ -225,7 +225,7 @@ public class RenderNode {
      * @see #isValid()
      */
     public HardwareCanvas start(int width, int height) {
-        HardwareCanvas canvas = GLES20RecordingCanvas.obtain(this);
+        HardwareCanvas canvas = DisplayListCanvas.obtain(this);
         canvas.setViewport(width, height);
         // The dirty rect should always be null for a display list
         canvas.onPreDraw(null);
@@ -241,11 +241,11 @@ public class RenderNode {
      * @see #isValid()
      */
     public void end(HardwareCanvas endCanvas) {
-        if (!(endCanvas instanceof GLES20RecordingCanvas)) {
+        if (!(endCanvas instanceof DisplayListCanvas)) {
             throw new IllegalArgumentException("Passed an invalid canvas to end!");
         }
 
-        GLES20RecordingCanvas canvas = (GLES20RecordingCanvas) endCanvas;
+        DisplayListCanvas canvas = (DisplayListCanvas) endCanvas;
         canvas.onPostDraw();
         long renderNodeData = canvas.finishRecording();
         nSetDisplayListData(mNativeRenderNode, renderNodeData);

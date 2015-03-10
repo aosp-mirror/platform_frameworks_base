@@ -205,7 +205,7 @@ public abstract class HardwareRenderer {
      *         false otherwise
      */
     public static boolean isAvailable() {
-        return GLES20Canvas.isAvailable();
+        return DisplayListCanvas.isAvailable();
     }
 
     /**
@@ -423,7 +423,7 @@ public abstract class HardwareRenderer {
      */
     static HardwareRenderer create(Context context, boolean translucent) {
         HardwareRenderer renderer = null;
-        if (GLES20Canvas.isAvailable()) {
+        if (DisplayListCanvas.isAvailable()) {
             renderer = new ThreadedRenderer(context, translucent);
         }
         return renderer;

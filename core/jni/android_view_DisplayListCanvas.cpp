@@ -50,43 +50,43 @@ static struct {
 // Setup
 // ----------------------------------------------------------------------------
 
-static void android_view_GLES20Canvas_setViewport(JNIEnv* env, jobject clazz,
+static void android_view_DisplayListCanvas_setViewport(JNIEnv* env, jobject clazz,
         jlong rendererPtr, jint width, jint height) {
     DisplayListRenderer* renderer = reinterpret_cast<DisplayListRenderer*>(rendererPtr);
     renderer->setViewport(width, height);
 }
 
-static void android_view_GLES20Canvas_setHighContrastText(JNIEnv* env, jobject clazz,
+static void android_view_DisplayListCanvas_setHighContrastText(JNIEnv* env, jobject clazz,
         jlong rendererPtr, jboolean highContrastText) {
     DisplayListRenderer* renderer = reinterpret_cast<DisplayListRenderer*>(rendererPtr);
     renderer->setHighContrastText(highContrastText);
 }
 
-static void android_view_GLES20Canvas_insertReorderBarrier(JNIEnv* env, jobject clazz,
+static void android_view_DisplayListCanvas_insertReorderBarrier(JNIEnv* env, jobject clazz,
         jlong rendererPtr, jboolean reorderEnable) {
     DisplayListRenderer* renderer = reinterpret_cast<DisplayListRenderer*>(rendererPtr);
     renderer->insertReorderBarrier(reorderEnable);
 }
 
-static void android_view_GLES20Canvas_prepare(JNIEnv* env, jobject clazz,
+static void android_view_DisplayListCanvas_prepare(JNIEnv* env, jobject clazz,
         jlong rendererPtr) {
     DisplayListRenderer* renderer = reinterpret_cast<DisplayListRenderer*>(rendererPtr);
     renderer->prepare();
 }
 
-static void android_view_GLES20Canvas_prepareDirty(JNIEnv* env, jobject clazz,
+static void android_view_DisplayListCanvas_prepareDirty(JNIEnv* env, jobject clazz,
         jlong rendererPtr, jint left, jint top, jint right, jint bottom) {
     DisplayListRenderer* renderer = reinterpret_cast<DisplayListRenderer*>(rendererPtr);
     renderer->prepareDirty(left, top, right, bottom);
 }
 
-static void android_view_GLES20Canvas_finish(JNIEnv* env, jobject clazz,
+static void android_view_DisplayListCanvas_finish(JNIEnv* env, jobject clazz,
         jlong rendererPtr) {
     DisplayListRenderer* renderer = reinterpret_cast<DisplayListRenderer*>(rendererPtr);
     renderer->finish();
 }
 
-static void android_view_GLES20Canvas_setProperty(JNIEnv* env,
+static void android_view_DisplayListCanvas_setProperty(JNIEnv* env,
         jobject clazz, jstring name, jstring value) {
     if (!Caches::hasInstance()) {
         ALOGW("can't set property, no Caches instance");
@@ -108,7 +108,7 @@ static void android_view_GLES20Canvas_setProperty(JNIEnv* env,
 // Functor
 // ----------------------------------------------------------------------------
 
-static void android_view_GLES20Canvas_callDrawGLFunction(JNIEnv* env, jobject clazz,
+static void android_view_DisplayListCanvas_callDrawGLFunction(JNIEnv* env, jobject clazz,
         jlong rendererPtr, jlong functorPtr) {
     DisplayListRenderer* renderer = reinterpret_cast<DisplayListRenderer*>(rendererPtr);
     Functor* functor = reinterpret_cast<Functor*>(functorPtr);
@@ -120,11 +120,11 @@ static void android_view_GLES20Canvas_callDrawGLFunction(JNIEnv* env, jobject cl
 // Misc
 // ----------------------------------------------------------------------------
 
-static jint android_view_GLES20Canvas_getMaxTextureWidth(JNIEnv* env, jobject clazz) {
+static jint android_view_DisplayListCanvas_getMaxTextureWidth(JNIEnv* env, jobject clazz) {
     return Caches::getInstance().maxTextureSize;
 }
 
-static jint android_view_GLES20Canvas_getMaxTextureHeight(JNIEnv* env, jobject clazz) {
+static jint android_view_DisplayListCanvas_getMaxTextureHeight(JNIEnv* env, jobject clazz) {
     return Caches::getInstance().maxTextureSize;
 }
 
@@ -132,7 +132,7 @@ static jint android_view_GLES20Canvas_getMaxTextureHeight(JNIEnv* env, jobject c
 // Drawing
 // ----------------------------------------------------------------------------
 
-static void android_view_GLES20Canvas_drawPatch(JNIEnv* env, jobject clazz,
+static void android_view_DisplayListCanvas_drawPatch(JNIEnv* env, jobject clazz,
         jlong rendererPtr, jlong bitmapPtr, jlong patchPtr,
         float left, float top, float right, float bottom, jlong paintPtr) {
     SkBitmap* bitmap = reinterpret_cast<SkBitmap*>(bitmapPtr);
@@ -143,7 +143,7 @@ static void android_view_GLES20Canvas_drawPatch(JNIEnv* env, jobject clazz,
     renderer->drawPatch(bitmap, patch, left, top, right, bottom, paint);
 }
 
-static void android_view_GLES20Canvas_drawRoundRectProps(JNIEnv* env, jobject clazz,
+static void android_view_DisplayListCanvas_drawRoundRectProps(JNIEnv* env, jobject clazz,
         jlong rendererPtr, jlong leftPropPtr, jlong topPropPtr, jlong rightPropPtr,
         jlong bottomPropPtr, jlong rxPropPtr, jlong ryPropPtr, jlong paintPropPtr) {
     DisplayListRenderer* renderer = reinterpret_cast<DisplayListRenderer*>(rendererPtr);
@@ -157,7 +157,7 @@ static void android_view_GLES20Canvas_drawRoundRectProps(JNIEnv* env, jobject cl
     renderer->drawRoundRect(leftProp, topProp, rightProp, bottomProp, rxProp, ryProp, paintProp);
 }
 
-static void android_view_GLES20Canvas_drawCircleProps(JNIEnv* env, jobject clazz,
+static void android_view_DisplayListCanvas_drawCircleProps(JNIEnv* env, jobject clazz,
         jlong rendererPtr, jlong xPropPtr, jlong yPropPtr, jlong radiusPropPtr, jlong paintPropPtr) {
     DisplayListRenderer* renderer = reinterpret_cast<DisplayListRenderer*>(rendererPtr);
     CanvasPropertyPrimitive* xProp = reinterpret_cast<CanvasPropertyPrimitive*>(xPropPtr);
@@ -167,7 +167,7 @@ static void android_view_GLES20Canvas_drawCircleProps(JNIEnv* env, jobject clazz
     renderer->drawCircle(xProp, yProp, radiusProp, paintProp);
 }
 
-static void android_view_GLES20Canvas_drawRegionAsRects(JNIEnv* env, jobject clazz,
+static void android_view_DisplayListCanvas_drawRegionAsRects(JNIEnv* env, jobject clazz,
         jlong rendererPtr, jlong regionPtr, jlong paintPtr) {
     DisplayListRenderer* renderer = reinterpret_cast<DisplayListRenderer*>(rendererPtr);
     SkRegion* region = reinterpret_cast<SkRegion*>(regionPtr);
@@ -201,17 +201,17 @@ static void android_view_GLES20Canvas_drawRegionAsRects(JNIEnv* env, jobject cla
 // Display lists
 // ----------------------------------------------------------------------------
 
-static jlong android_view_GLES20Canvas_finishRecording(JNIEnv* env,
+static jlong android_view_DisplayListCanvas_finishRecording(JNIEnv* env,
         jobject clazz, jlong rendererPtr) {
     DisplayListRenderer* renderer = reinterpret_cast<DisplayListRenderer*>(rendererPtr);
     return reinterpret_cast<jlong>(renderer->finishRecording());
 }
 
-static jlong android_view_GLES20Canvas_createDisplayListRenderer(JNIEnv* env, jobject clazz) {
+static jlong android_view_DisplayListCanvas_createDisplayListRenderer(JNIEnv* env, jobject clazz) {
     return reinterpret_cast<jlong>(new DisplayListRenderer);
 }
 
-static void android_view_GLES20Canvas_drawRenderNode(JNIEnv* env,
+static void android_view_DisplayListCanvas_drawRenderNode(JNIEnv* env,
         jobject clazz, jlong rendererPtr, jlong renderNodePtr,
         jint flags) {
     DisplayListRenderer* renderer = reinterpret_cast<DisplayListRenderer*>(rendererPtr);
@@ -224,7 +224,7 @@ static void android_view_GLES20Canvas_drawRenderNode(JNIEnv* env,
 // Layers
 // ----------------------------------------------------------------------------
 
-static void android_view_GLES20Canvas_drawLayer(JNIEnv* env, jobject clazz,
+static void android_view_DisplayListCanvas_drawLayer(JNIEnv* env, jobject clazz,
         jlong rendererPtr, jlong layerPtr, jfloat x, jfloat y) {
     DisplayListRenderer* renderer = reinterpret_cast<DisplayListRenderer*>(rendererPtr);
     DeferredLayerUpdater* layer = reinterpret_cast<DeferredLayerUpdater*>(layerPtr);
@@ -235,7 +235,7 @@ static void android_view_GLES20Canvas_drawLayer(JNIEnv* env, jobject clazz,
 // Common
 // ----------------------------------------------------------------------------
 
-static jboolean android_view_GLES20Canvas_isAvailable(JNIEnv* env, jobject clazz) {
+static jboolean android_view_DisplayListCanvas_isAvailable(JNIEnv* env, jobject clazz) {
     char prop[PROPERTY_VALUE_MAX];
     if (property_get("ro.kernel.qemu", prop, NULL) == 0) {
         // not in the emulator
@@ -261,36 +261,36 @@ android_app_ActivityThread_dumpGraphics(JNIEnv* env, jobject clazz, jobject java
 // JNI Glue
 // ----------------------------------------------------------------------------
 
-const char* const kClassPathName = "android/view/GLES20Canvas";
+const char* const kClassPathName = "android/view/DisplayListCanvas";
 
 static JNINativeMethod gMethods[] = {
-    { "nIsAvailable",       "()Z",             (void*) android_view_GLES20Canvas_isAvailable },
-    { "nSetViewport",       "(JII)V",          (void*) android_view_GLES20Canvas_setViewport },
-    { "nSetHighContrastText","(JZ)V",          (void*) android_view_GLES20Canvas_setHighContrastText },
-    { "nInsertReorderBarrier","(JZ)V",         (void*) android_view_GLES20Canvas_insertReorderBarrier },
-    { "nPrepare",           "(J)V",            (void*) android_view_GLES20Canvas_prepare },
-    { "nPrepareDirty",      "(JIIII)V",        (void*) android_view_GLES20Canvas_prepareDirty },
-    { "nFinish",            "(J)V",            (void*) android_view_GLES20Canvas_finish },
+    { "nIsAvailable",       "()Z",             (void*) android_view_DisplayListCanvas_isAvailable },
+    { "nSetViewport",       "(JII)V",          (void*) android_view_DisplayListCanvas_setViewport },
+    { "nSetHighContrastText","(JZ)V",          (void*) android_view_DisplayListCanvas_setHighContrastText },
+    { "nInsertReorderBarrier","(JZ)V",         (void*) android_view_DisplayListCanvas_insertReorderBarrier },
+    { "nPrepare",           "(J)V",            (void*) android_view_DisplayListCanvas_prepare },
+    { "nPrepareDirty",      "(JIIII)V",        (void*) android_view_DisplayListCanvas_prepareDirty },
+    { "nFinish",            "(J)V",            (void*) android_view_DisplayListCanvas_finish },
     { "nSetProperty",       "(Ljava/lang/String;Ljava/lang/String;)V",
-            (void*) android_view_GLES20Canvas_setProperty },
+            (void*) android_view_DisplayListCanvas_setProperty },
 
-    { "nCallDrawGLFunction", "(JJ)V",          (void*) android_view_GLES20Canvas_callDrawGLFunction },
+    { "nCallDrawGLFunction", "(JJ)V",          (void*) android_view_DisplayListCanvas_callDrawGLFunction },
 
-    { "nDrawPatch",         "(JJJFFFFJ)V",     (void*) android_view_GLES20Canvas_drawPatch },
+    { "nDrawPatch",         "(JJJFFFFJ)V",     (void*) android_view_DisplayListCanvas_drawPatch },
 
-    { "nDrawRects",         "(JJJ)V",          (void*) android_view_GLES20Canvas_drawRegionAsRects },
-    { "nDrawRoundRect",     "(JJJJJJJJ)V",     (void*) android_view_GLES20Canvas_drawRoundRectProps },
-    { "nDrawCircle",        "(JJJJJ)V",        (void*) android_view_GLES20Canvas_drawCircleProps },
+    { "nDrawRects",         "(JJJ)V",          (void*) android_view_DisplayListCanvas_drawRegionAsRects },
+    { "nDrawRoundRect",     "(JJJJJJJJ)V",     (void*) android_view_DisplayListCanvas_drawRoundRectProps },
+    { "nDrawCircle",        "(JJJJJ)V",        (void*) android_view_DisplayListCanvas_drawCircleProps },
 
-    { "nFinishRecording",   "(J)J",            (void*) android_view_GLES20Canvas_finishRecording },
-    { "nDrawRenderNode",    "(JJI)V",          (void*) android_view_GLES20Canvas_drawRenderNode },
+    { "nFinishRecording",   "(J)J",            (void*) android_view_DisplayListCanvas_finishRecording },
+    { "nDrawRenderNode",    "(JJI)V",          (void*) android_view_DisplayListCanvas_drawRenderNode },
 
-    { "nCreateDisplayListRenderer", "()J",     (void*) android_view_GLES20Canvas_createDisplayListRenderer },
+    { "nCreateDisplayListRenderer", "()J",     (void*) android_view_DisplayListCanvas_createDisplayListRenderer },
 
-    { "nDrawLayer",               "(JJFF)V",   (void*) android_view_GLES20Canvas_drawLayer },
+    { "nDrawLayer",               "(JJFF)V",   (void*) android_view_DisplayListCanvas_drawLayer },
 
-    { "nGetMaximumTextureWidth",  "()I",       (void*) android_view_GLES20Canvas_getMaxTextureWidth },
-    { "nGetMaximumTextureHeight", "()I",       (void*) android_view_GLES20Canvas_getMaxTextureHeight },
+    { "nGetMaximumTextureWidth",  "()I",       (void*) android_view_DisplayListCanvas_getMaxTextureWidth },
+    { "nGetMaximumTextureHeight", "()I",       (void*) android_view_DisplayListCanvas_getMaxTextureHeight },
 };
 
 static JNINativeMethod gActivityThreadMethods[] = {
@@ -298,7 +298,7 @@ static JNINativeMethod gActivityThreadMethods[] = {
                                                (void*) android_app_ActivityThread_dumpGraphics }
 };
 
-int register_android_view_GLES20Canvas(JNIEnv* env) {
+int register_android_view_DisplayListCanvas(JNIEnv* env) {
     jclass clazz = FindClassOrDie(env, "android/graphics/Rect");
     gRectClassInfo.set = GetMethodIDOrDie(env, clazz, "set", "(IIII)V");
 

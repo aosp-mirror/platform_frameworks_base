@@ -33,7 +33,7 @@ public class Utilities {
     private static Method sPropertyMethod;
     static {
         try {
-            Class<?> c = Class.forName("android.view.GLES20Canvas");
+            Class<?> c = Class.forName("android.view.DisplayListCanvas");
             sPropertyMethod = c.getDeclaredMethod("setProperty", String.class, String.class);
             if (!sPropertyMethod.isAccessible()) sPropertyMethod.setAccessible(true);
         } catch (ClassNotFoundException e) {
