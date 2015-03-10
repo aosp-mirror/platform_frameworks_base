@@ -4887,9 +4887,10 @@ public class Editor {
                     text.insert(newTextInsertAt, newText);
                 }
             }
-            // Restore the cursor position.
+            // Restore the cursor position. If there wasn't an old cursor (newCursorPos == -1) then
+            // don't explicitly set it and rely on SpannableStringBuilder to position it.
             // TODO: Select all the text that was undone.
-            if (newCursorPos <= text.length()) {
+            if (0 <= newCursorPos && newCursorPos <= text.length()) {
                 Selection.setSelection(text, newCursorPos);
             }
         }
