@@ -3495,9 +3495,14 @@ public class DevicePolicyManager {
     /**
      * Check whether the current user has been blocked by device policy from uninstalling a package.
      * Requires the caller to be the profile owner if checking a specific admin's policy.
+     * <p>
+     * <strong>Note:</strong> Starting from {@link android.os.Build.VERSION_CODES#LOLLIPOP_MR1}, the
+     * behavior of this API is changed such that passing <code>null</code> as the <code>admin</code>
+     * parameter will return if any admin has blocked the uninstallation. Before L MR1, passing
+     * <code>null</code> will cause a NullPointerException to be raised.
      *
      * @param admin The name of the admin component whose blocking policy will be checked, or null
-     *        to check if any admin has blocked the uninstallation.
+     *            to check if any admin has blocked the uninstallation.
      * @param packageName package to check.
      * @return true if uninstallation is blocked.
      */
