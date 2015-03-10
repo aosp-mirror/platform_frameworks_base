@@ -78,8 +78,6 @@ struct AaptLocaleValue {
 
      void writeTo(ResTable_config* out) const;
 
-     String8 toDirName() const;
-
      int compare(const AaptLocaleValue& other) const {
          return memcmp(this, &other, sizeof(AaptLocaleValue));
      }

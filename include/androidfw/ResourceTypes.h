@@ -1195,6 +1195,12 @@ struct ResTable_config
     // Example: en-US, en-Latn-US, en-POSIX.
     void getBcp47Locale(char* out) const;
 
+    // Append to str the resource-qualifer string representation of the
+    // locale component of this Config. If the locale is only country
+    // and language, it will look like en-rUS. If it has scripts and
+    // variants, it will be a modified bcp47 tag: b+en+Latn+US.
+    void appendDirLocale(String8& str) const;
+
     // Sets the values of language, region, script and variant to the
     // well formed BCP-47 locale contained in |in|. The input locale is
     // assumed to be valid and no validation is performed.
