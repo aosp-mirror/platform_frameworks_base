@@ -5872,4 +5872,26 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
         return admin.info.usesPolicy(DeviceAdminInfo.USES_POLICY_LIMIT_PASSWORD);
     }
+
+    @Override
+    public void setOtaPolicy(ComponentName who, PersistableBundle policy) {
+        synchronized (this) {
+            getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_DEVICE_OWNER);
+            if (policy == null) {
+                mDeviceOwner.clearOtaPolicy();
+            } else {
+                mDeviceOwner.setOtaPolicy(policy);
+            }
+            mDeviceOwner.writeOwnerFile();
+        }
+        mContext.sendBroadcastAsUser(new Intent(DevicePolicyManager.ACTION_OTA_POLICY_CHANGED),
+                UserHandle.OWNER);
+    }
+
+    @Override
+    public PersistableBundle getOtaPolicy() {
+        synchronized (this) {
+            return mDeviceOwner.getOtaPolicy();
+        }
+    }
 }

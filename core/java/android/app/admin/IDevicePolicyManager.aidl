@@ -215,4 +215,6 @@ interface IDevicePolicyManager {
     void setUserIcon(in ComponentName admin, in Bitmap icon);
 
     void sendDeviceInitializerStatus(int statusCode, String description);
+    void setOtaPolicy(in ComponentName who, in PersistableBundle policy);
+    PersistableBundle getOtaPolicy();
 }

@@ -754,6 +754,14 @@ public class DevicePolicyManager {
     public static final int FLAG_MANAGED_CAN_ACCESS_PARENT = 0x0002;
 
     /**
+     * Broadcast action: notify that a new local OTA policy has been set by the device owner.
+     * The new policy can be retrieved by {@link #getOtaPolicy()}.
+     */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_OTA_POLICY_CHANGED = "android.app.action.OTA_POLICY_CHANGED";
+
+
+    /**
      * Return true if the given administrator component is currently
      * active (enabled) in the system.
      */
@@ -4066,5 +4074,50 @@ public class DevicePolicyManager {
         } catch (RemoteException re) {
             Log.w(TAG, "Could not send device initializer status", re);
         }
+    }
+
+    /*
+     * Called by device owners to set a local OTA update policy. When a new OTA policy is set,
+     * {@link #ACTION_OTA_POLICY_CHANGED} is broadcasted.
+     *
+     * @param who Which {@link DeviceAdminReceiver} this request is associated with. All components
+     * in the device owner package can set OTA policies and the most recent policy takes effect.
+     * @param policy the new OTA policy, or null to clear the current policy.
+     * @see OtaPolicy
+     */
+    public void setOtaPolicy(ComponentName who, OtaPolicy policy) {
+        if (mService != null) {
+            try {
+                if (policy != null) {
+                    mService.setOtaPolicy(who, policy.getPolicyBundle());
+                } else {
+                    mService.setOtaPolicy(who, null);
+                }
+            } catch (RemoteException re) {
+                Log.w(TAG, "Error calling setOtaPolicy", re);
+            }
+        }
+    }
+
+    /**
+     * Retrieve a local OTA update policy set previously by {@link #setOtaPolicy}.
+     *
+     * @return The current OTA policy object, or null if no policy is set or the system does not
+     * support managed OTA.
+     */
+    public OtaPolicy getOtaPolicy() {
+        if (mService != null) {
+            try {
+                PersistableBundle bundle = mService.getOtaPolicy();
+                if (bundle != null) {
+                    return new OtaPolicy(bundle);
+                } else {
+                    return null;
+                }
+            } catch (RemoteException re) {
+                Log.w(TAG, "Error calling getOtaPolicy", re);
+            }
+        }
+        return null;
     }
 }
