@@ -808,6 +808,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
             }
             if (typeChanged) {
                 mService.onSessionPlaybackTypeChanged(MediaSessionRecord.this);
+                mHandler.post(MessageHandler.MSG_UPDATE_VOLUME);
             }
         }
 
@@ -822,6 +823,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
             }
             if (typeChanged) {
                 mService.onSessionPlaybackTypeChanged(MediaSessionRecord.this);
+                mHandler.post(MessageHandler.MSG_UPDATE_VOLUME);
             }
         }
     }
