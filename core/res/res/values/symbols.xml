@@ -745,6 +745,9 @@
   <java-symbol type="string" name="phoneTypeWork" />
   <java-symbol type="string" name="phoneTypeWorkMobile" />
   <java-symbol type="string" name="phoneTypeWorkPager" />
+  <java-symbol type="string" name="wfcRegErrorTitle" />
+  <java-symbol type="array" name="wfcOperatorErrorCodes" />
+  <java-symbol type="array" name="wfcOperatorErrorMessages" />
   <java-symbol type="string" name="policydesc_disableCamera" />
   <java-symbol type="string" name="policydesc_encryptedStorage" />
   <java-symbol type="string" name="policydesc_expirePassword" />
