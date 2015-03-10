@@ -1,5 +1,10 @@
 package android.net.dhcp;
 
+import android.net.DhcpResults;
+import android.net.LinkAddress;
+import android.net.NetworkUtils;
+import android.os.Build;
+import android.os.SystemProperties;
 import android.system.OsConstants;
 
 import java.net.Inet4Address;
@@ -27,6 +32,8 @@ abstract class DhcpPacket {
             (byte) 0xff, (byte) 0xff, (byte) 0xff,
             (byte) 0xff, (byte) 0xff, (byte) 0xff,
     };
+    // Minimum length of a DHCP packet w/o options: Ethernet header, IP header, fixed bootp format.
+    public static final int MIN_PACKET_LENGTH_L2 = 14 + 20 + 300;
 
     /**
      * Packet encapsulations.
@@ -179,6 +186,7 @@ abstract class DhcpPacket {
      * DHCP Optional Type: Vendor Class Identifier
      */
     protected static final byte DHCP_VENDOR_CLASS_ID = 60;
+    protected String mVendorId;
 
     /**
      * DHCP Optional Type: DHCP Client Identifier
@@ -240,6 +248,13 @@ abstract class DhcpPacket {
      */
     public int getTransactionId() {
         return mTransId;
+    }
+
+    /**
+     * Returns the client MAC.
+     */
+    public byte[] getClientMac() {
+        return mClientMac;
     }
 
     /**
@@ -820,16 +835,56 @@ abstract class DhcpPacket {
         newPacket.mRequestedParams = expectedParams;
         newPacket.mServerIdentifier = serverIdentifier;
         newPacket.mSubnetMask = netMask;
+        newPacket.mVendorId = vendorId;
         return newPacket;
     }
 
     /**
-     * Parse a packet from an array of bytes.
+     * Parse a packet from an array of bytes, stopping at the given length.
      */
-    public static DhcpPacket decodeFullPacket(byte[] packet, int pktType)
+    public static DhcpPacket decodeFullPacket(byte[] packet, int length, int pktType)
     {
-        ByteBuffer buffer = ByteBuffer.wrap(packet).order(ByteOrder.BIG_ENDIAN);
+        ByteBuffer buffer = ByteBuffer.wrap(packet, 0, length).order(ByteOrder.BIG_ENDIAN);
         return decodeFullPacket(buffer, pktType);
+    }
+
+    /**
+     *  Construct a DhcpResults object from a DHCP reply packet.
+     */
+    public DhcpResults toDhcpResults() {
+        Inet4Address ipAddress = mYourIp;
+        if (ipAddress == Inet4Address.ANY) {
+            ipAddress = mClientIp;
+            if (ipAddress == Inet4Address.ANY) {
+                return null;
+            }
+        }
+
+        int prefixLength;
+        if (mSubnetMask != null) {
+            try {
+                prefixLength = NetworkUtils.netmaskToPrefixLength(mSubnetMask);
+            } catch (IllegalArgumentException e) {
+                // Non-contiguous netmask.
+                return null;
+            }
+        } else {
+            prefixLength = NetworkUtils.getImplicitNetmask(ipAddress);
+        }
+
+        DhcpResults results = new DhcpResults();
+        try {
+            results.ipAddress = new LinkAddress(ipAddress, prefixLength);
+        } catch (IllegalArgumentException e) {
+            return null;
+        }
+        results.gateway = mGateway;
+        results.dnsServers.addAll(mDnsServers);
+        results.domains = mDomainName;
+        results.serverAddress = mServerIdentifier;
+        results.vendorInfo = mVendorId;
+        results.leaseDuration = mLeaseTime;
+        return results;
     }
 
     /**
