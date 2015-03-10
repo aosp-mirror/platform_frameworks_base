@@ -51,7 +51,7 @@ import com.android.okhttp.OkHttpClient;
  * {@link ConnectivityManager#registerNetworkCallback} calls.
  * It is used to direct traffic to the given {@code Network}, either on a {@link Socket} basis
  * through a targeted {@link SocketFactory} or process-wide via
- * {@link ConnectivityManager#setProcessDefaultNetwork}.
+ * {@link ConnectivityManager#bindProcessToNetwork}.
  */
 public class Network implements Parcelable {
 
@@ -245,7 +245,10 @@ public class Network implements Parcelable {
      * @see java.net.URL#openConnection()
      */
     public URLConnection openConnection(URL url) throws IOException {
-        final ConnectivityManager cm = ConnectivityManager.getInstance();
+        final ConnectivityManager cm = ConnectivityManager.getInstanceOrNull();
+        if (cm == null) {
+            throw new IOException("No ConnectivityManager yet constructed, please construct one");
+        }
         // TODO: Should this be optimized to avoid fetching the global proxy for every request?
         ProxyInfo proxyInfo = cm.getGlobalProxy();
         if (proxyInfo == null) {
@@ -299,7 +302,7 @@ public class Network implements Parcelable {
     /**
      * Binds the specified {@link DatagramSocket} to this {@code Network}. All data traffic on the
      * socket will be sent on this {@code Network}, irrespective of any process-wide network binding
-     * set by {@link ConnectivityManager#setProcessDefaultNetwork}. The socket must not be
+     * set by {@link ConnectivityManager#bindProcessToNetwork}. The socket must not be
      * connected.
      */
     public void bindSocket(DatagramSocket socket) throws IOException {
@@ -316,7 +319,7 @@ public class Network implements Parcelable {
     /**
      * Binds the specified {@link Socket} to this {@code Network}. All data traffic on the socket
      * will be sent on this {@code Network}, irrespective of any process-wide network binding set by
-     * {@link ConnectivityManager#setProcessDefaultNetwork}. The socket must not be connected.
+     * {@link ConnectivityManager#bindProcessToNetwork}. The socket must not be connected.
      */
     public void bindSocket(Socket socket) throws IOException {
         // Apparently, the kernel doesn't update a connected TCP socket's routing upon mark changes.

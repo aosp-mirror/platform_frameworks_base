@@ -268,7 +268,7 @@ static jboolean android_net_utils_bindProcessToNetwork(JNIEnv *env, jobject thiz
     return (jboolean) !setNetworkForProcess(netId);
 }
 
-static jint android_net_utils_getNetworkBoundToProcess(JNIEnv *env, jobject thiz)
+static jint android_net_utils_getBoundNetworkForProcess(JNIEnv *env, jobject thiz)
 {
     return getNetworkForProcess();
 }
@@ -306,7 +306,7 @@ static JNINativeMethod gNetworkUtilMethods[] = {
     { "releaseDhcpLease", "(Ljava/lang/String;)Z",  (void *)android_net_utils_releaseDhcpLease },
     { "getDhcpError", "()Ljava/lang/String;", (void*) android_net_utils_getDhcpError },
     { "bindProcessToNetwork", "(I)Z", (void*) android_net_utils_bindProcessToNetwork },
-    { "getNetworkBoundToProcess", "()I", (void*) android_net_utils_getNetworkBoundToProcess },
+    { "getBoundNetworkForProcess", "()I", (void*) android_net_utils_getBoundNetworkForProcess },
     { "bindProcessToNetworkForHostResolution", "(I)Z", (void*) android_net_utils_bindProcessToNetworkForHostResolution },
     { "bindSocketToNetwork", "(II)I", (void*) android_net_utils_bindSocketToNetwork },
     { "protectFromVpn", "(I)Z", (void*)android_net_utils_protectFromVpn },

@@ -18215,16 +18215,18 @@ package android.net {
 
   public class ConnectivityManager {
     method public void addDefaultNetworkActiveListener(android.net.ConnectivityManager.OnNetworkActiveListener);
+    method public boolean bindProcessToNetwork(android.net.Network);
     method public android.net.NetworkInfo getActiveNetworkInfo();
     method public android.net.NetworkInfo[] getAllNetworkInfo();
     method public android.net.Network[] getAllNetworks();
     method public deprecated boolean getBackgroundDataSetting();
+    method public android.net.Network getBoundNetworkForProcess();
     method public android.net.LinkProperties getLinkProperties(android.net.Network);
     method public android.net.NetworkCapabilities getNetworkCapabilities(android.net.Network);
     method public android.net.NetworkInfo getNetworkInfo(int);
     method public android.net.NetworkInfo getNetworkInfo(android.net.Network);
     method public deprecated int getNetworkPreference();
-    method public static android.net.Network getProcessDefaultNetwork();
+    method public static deprecated android.net.Network getProcessDefaultNetwork();
     method public boolean isActiveNetworkMetered();
     method public boolean isDefaultNetworkActive();
     method public static boolean isNetworkTypeValid(int);
@@ -18236,7 +18238,7 @@ package android.net {
     method public void requestNetwork(android.net.NetworkRequest, android.app.PendingIntent);
     method public deprecated boolean requestRouteToHost(int, int);
     method public deprecated void setNetworkPreference(int);
-    method public static boolean setProcessDefaultNetwork(android.net.Network);
+    method public static deprecated boolean setProcessDefaultNetwork(android.net.Network);
     method public deprecated int startUsingNetworkFeature(int, java.lang.String);
     method public deprecated int stopUsingNetworkFeature(int, java.lang.String);
     method public void unregisterNetworkCallback(android.net.ConnectivityManager.NetworkCallback);
