@@ -1584,31 +1584,87 @@ results."
             >Creating Apps with Material Design</a>
         </div>
         <ul>
-          <li><a href="<?cs var:toroot ?>training/material/get-started.html">
+          <li><a href="<?cs var:toroot ?>training/material/get-started.html"
+            zh-cn-lang="入门指南"
+            zh-tw-lang="開始使用"
+            ja-lang="スタート ガイド"
+            es-lang="Comencemos"
+            pt-br-lang="Como iniciar"
+            ko-lang="시작하기"
+            ru-lang="Начало работы"
+            >
             Getting Started
           </a>
           </li>
-          <li><a href="<?cs var:toroot ?>training/material/theme.html">
+          <li><a href="<?cs var:toroot ?>training/material/theme.html"
+            zh-cn-lang="使用材料主题"
+            zh-tw-lang="使用材料設計風格"
+            ja-lang="マテリアル テーマの使用"
+            es-lang="Usar el tema Material"
+            pt-br-lang="Como usar o tema do Material"
+            ko-lang="머티어리얼 테마 사용"
+            ru-lang="Использование темы Material Design"
+            >
             Using the Material Theme
           </a>
           </li>
-          <li><a href="<?cs var:toroot ?>training/material/lists-cards.html">
+          <li><a href="<?cs var:toroot ?>training/material/lists-cards.html"
+            zh-cn-lang="创建列表与卡片"
+            zh-tw-lang="建立清單和卡片"
+            ja-lang="リストとカードの作成"
+            es-lang="Crear listas y tarjetas"
+            pt-br-lang="Como criar listas e cartões"
+            ko-lang="목록 및 카드 생성"
+            ru-lang="Создание списков и подсказок"
+            >
             Creating Lists and Cards
           </a>
           </li>
-          <li><a href="<?cs var:toroot ?>training/material/shadows-clipping.html">
+          <li><a href="<?cs var:toroot ?>training/material/shadows-clipping.html"
+            zh-cn-lang="定义阴影与裁剪视图"
+            zh-tw-lang="定義陰影和裁剪檢視"
+            ja-lang="シャドウとクリッピング ビューの定義"
+            es-lang="Definir vistas de recorte y sombras"
+            pt-br-lang="Como definir sombras e recortar visualizações"
+            ko-lang="그림자 정의 및 뷰 클리핑"
+            ru-lang="Определение теней и обрезка представлений"
+            >
             Defining Shadows and Clipping Views
           </a>
           </li>
-          <li><a href="<?cs var:toroot ?>training/material/drawables.html">
+          <li><a href="<?cs var:toroot ?>training/material/drawables.html"
+            zh-cn-lang="使用 Drawables"
+            zh-tw-lang="使用可繪項目"
+            ja-lang="ドローアブルの使用"
+            es-lang="Trabajar con interfaces dibujables"
+            pt-br-lang="Como trabalhar com desenháveis"
+            ko-lang="Drawable 사용"
+            ru-lang="Работа с элементами дизайна"
+            >
             Working with Drawables
           </a>
           </li>
-          <li><a href="<?cs var:toroot ?>training/material/animations.html">
+          <li><a href="<?cs var:toroot ?>training/material/animations.html"
+            zh-cn-lang="定义定制动画"
+            zh-tw-lang="定義自訂動畫"
+            ja-lang="カスタム アニメーションの定義"
+            es-lang="Definir animaciones personalizadas"
+            pt-br-lang="Como definir animações personalizadas"
+            ko-lang="사용자지정 애니메이션 정의"
+            ru-lang="Определение настраиваемой анимации"
+            >
             Defining Custom Animations
           </a>
           </li>
-          <li><a href="<?cs var:toroot ?>training/material/compatibility.html">
+          <li><a href="<?cs var:toroot ?>training/material/compatibility.html"
+            zh-cn-lang="维护兼容性"
+            zh-tw-lang="維持相容性"
+            ja-lang="互換性の維持"
+            es-lang="Mantener la compatibilidad"
+            pt-br-lang="Como manter a compatibilidade"
+            ko-lang="호환성 유지"
+            ru-lang="Обеспечение совместимости"
+            >
             Maintaining Compatibility
           </a>
           </li>
