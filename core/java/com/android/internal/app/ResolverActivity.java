@@ -342,6 +342,9 @@ public class ResolverActivity extends Activity implements AdapterView.OnItemClic
                         return;
                     }
 
+                    // Do not show the profile switch message anymore.
+                    mProfileSwitchMessageId = -1;
+
                     final Intent intent = intentForDisplayResolveInfo(dri);
                     onIntentSelected(dri.ri, intent, false);
                     finish();
