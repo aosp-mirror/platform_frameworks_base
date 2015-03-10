@@ -259,7 +259,7 @@ public class AudioManager {
             "android.intent.action.HEADSET_PLUG";
 
     /**
-     * Broadcast Action: A sticky broadcast indicating an HMDI cable was plugged or unplugged
+     * Broadcast Action: A sticky broadcast indicating an HDMI cable was plugged or unplugged.
      *
      * The intent will have the following extra values: {@link #EXTRA_AUDIO_PLUG_STATE},
      * {@link #EXTRA_MAX_CHANNEL_COUNT}, {@link #EXTRA_ENCODINGS}.
