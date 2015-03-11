@@ -275,8 +275,10 @@ final class PendingIntentRecord extends IIntentSender.Stub {
                         }
                         break;
                     case ActivityManager.INTENT_SENDER_ACTIVITY_RESULT:
-                        key.activity.task.stack.sendActivityResultLocked(-1, key.activity,
-                                key.who, key.requestCode, code, finalIntent);
+                        if (key.activity.task.stack != null) {
+                            key.activity.task.stack.sendActivityResultLocked(-1, key.activity,
+                                    key.who, key.requestCode, code, finalIntent);
+                        }
                         break;
                     case ActivityManager.INTENT_SENDER_BROADCAST:
                         try {

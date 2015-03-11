@@ -17,6 +17,7 @@
 package com.android.server.am;
 
 import static com.android.server.am.ActivityManagerDebugConfig.*;
+import static com.android.server.am.ActivityManagerService.DEBUG_SWITCH;
 import static com.android.server.am.ActivityManagerService.DEBUG_THUMBNAILS;
 import static com.android.server.am.TaskPersister.DEBUG_PERSISTER;
 import static com.android.server.am.TaskPersister.DEBUG_RESTORER;
@@ -319,44 +320,83 @@ final class ActivityRecord {
     }
 
     static class Token extends IApplicationToken.Stub {
-        final WeakReference<ActivityRecord> weakActivity;
+        private final WeakReference<ActivityRecord> weakActivity;
+        private final ActivityManagerService mService;
 
-        Token(ActivityRecord activity) {
+        Token(ActivityRecord activity, ActivityManagerService service) {
             weakActivity = new WeakReference<>(activity);
+            mService = service;
         }
 
-        @Override public void windowsDrawn() {
-            ActivityRecord activity = weakActivity.get();
-            if (activity != null) {
-                activity.windowsDrawn();
+        @Override
+        public void windowsDrawn() {
+            synchronized (mService) {
+                ActivityRecord r = tokenToActivityRecordLocked(this);
+                if (r != null) {
+                    r.windowsDrawnLocked();
+                }
             }
         }
 
-        @Override public void windowsVisible() {
-            ActivityRecord activity = weakActivity.get();
-            if (activity != null) {
-                activity.windowsVisible();
+        @Override
+        public void windowsVisible() {
+            synchronized (mService) {
+                ActivityRecord r = tokenToActivityRecordLocked(this);
+                if (r != null) {
+                    r.windowsVisibleLocked();
+                }
             }
         }
 
-        @Override public void windowsGone() {
-            ActivityRecord activity = weakActivity.get();
-            if (activity != null) {
-                activity.windowsGone();
+        @Override
+        public void windowsGone() {
+            synchronized (mService) {
+                ActivityRecord r = tokenToActivityRecordLocked(this);
+                if (r != null) {
+                    if (DEBUG_SWITCH) Log.v(TAG, "windowsGone(): " + r);
+                    r.nowVisible = false;
+                    return;
+                }
             }
         }
 
-        @Override public boolean keyDispatchingTimedOut(String reason) {
-            ActivityRecord activity = weakActivity.get();
-            return activity != null && activity.keyDispatchingTimedOut(reason);
+        @Override
+        public boolean keyDispatchingTimedOut(String reason) {
+            ActivityRecord r;
+            ActivityRecord anrActivity;
+            ProcessRecord anrApp;
+            synchronized (mService) {
+                r = tokenToActivityRecordLocked(this);
+                if (r == null) {
+                    return false;
+                }
+                anrActivity = r.getWaitingHistoryRecordLocked();
+                anrApp = r != null ? r.app : null;
+            }
+            return mService.inputDispatchingTimedOut(anrApp, anrActivity, r, false, reason);
         }
 
-        @Override public long getKeyDispatchingTimeout() {
-            ActivityRecord activity = weakActivity.get();
-            if (activity != null) {
-                return activity.getKeyDispatchingTimeout();
+        @Override
+        public long getKeyDispatchingTimeout() {
+            synchronized (mService) {
+                ActivityRecord r = tokenToActivityRecordLocked(this);
+                if (r == null) {
+                    return 0;
+                }
+                r = r.getWaitingHistoryRecordLocked();
+                return ActivityManagerService.getInputDispatchingTimeoutLocked(r);
             }
-            return 0;
+        }
+
+        private static final ActivityRecord tokenToActivityRecordLocked(Token token) {
+            if (token == null) {
+                return null;
+            }
+            ActivityRecord r = token.weakActivity.get();
+            if (r == null || r.task == null || r.task.stack == null) {
+                return null;
+            }
+            return r;
         }
 
         @Override
@@ -371,9 +411,9 @@ final class ActivityRecord {
         }
     }
 
-    static ActivityRecord forToken(IBinder token) {
+    static ActivityRecord forTokenLocked(IBinder token) {
         try {
-            return token != null ? ((Token)token).weakActivity.get() : null;
+            return Token.tokenToActivityRecordLocked((Token)token);
         } catch (ClassCastException e) {
             Slog.w(TAG, "Bad activity token: " + token, e);
             return null;
@@ -391,7 +431,7 @@ final class ActivityRecord {
             boolean _componentSpecified, ActivityStackSupervisor supervisor,
             ActivityContainer container, Bundle options) {
         service = _service;
-        appToken = new Token(this);
+        appToken = new Token(this, service);
         info = aInfo;
         launchedFromUid = _launchedFromUid;
         launchedFromPackage = _launchedFromPackage;
@@ -528,13 +568,8 @@ final class ActivityRecord {
     }
 
     void setTask(TaskRecord newTask, TaskRecord taskToAffiliateWith) {
-        if (task != null && task.removeActivity(this)) {
-            if (task != newTask) {
-                task.stack.removeTask(task, "setTask");
-            } else {
-                Slog.d(TAG, "!!! REMOVE THIS LOG !!! setTask: nearly removed stack=" +
-                        (newTask == null ? null : newTask.stack));
-            }
+        if (task != null && task.removeActivity(this) && task != newTask && task.stack != null) {
+            task.stack.removeTask(task, "setTask");
         }
         task = newTask;
         setTaskToAffiliateWith(taskToAffiliateWith);
@@ -580,6 +615,10 @@ final class ActivityRecord {
         return inHistory;
     }
 
+    boolean isInStackLocked() {
+        return task != null && task.stack != null && task.stack.isInStackLocked(this) != null;
+    }
+
     boolean isHomeActivity() {
         return mActivityType == HOME_ACTIVITY_TYPE;
     }
@@ -599,9 +638,10 @@ final class ActivityRecord {
                         (intent.getFlags() & Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS) == 0);
     }
 
-    void makeFinishing() {
+    void makeFinishingLocked() {
         if (!finishing) {
-            if (this == task.stack.getVisibleBehindActivity()) {
+            if (task != null && task.stack != null
+                    && this == task.stack.getVisibleBehindActivity()) {
                 // A finishing activity should not remain as visible in the background
                 mStackSupervisor.requestVisibleBehindLocked(this, false);
             }
@@ -670,8 +710,9 @@ final class ActivityRecord {
         // stack.
         final ReferrerIntent rintent = new ReferrerIntent(intent, referrer);
         boolean unsent = true;
-        if ((state == ActivityState.RESUMED || (service.isSleeping()
-                        && task.stack.topRunningActivityLocked(null) == this))
+        if ((state == ActivityState.RESUMED
+                || (service.isSleeping() && task.stack != null
+                    && task.stack.topRunningActivityLocked(null) == this))
                 && app != null && app.thread != null) {
             try {
                 ArrayList<ReferrerIntent> ar = new ArrayList<>(1);
@@ -842,19 +883,27 @@ final class ActivityRecord {
     }
 
     boolean continueLaunchTickingLocked() {
-        if (launchTickTime != 0) {
-            final ActivityStack stack = task.stack;
-            Message msg = stack.mHandler.obtainMessage(ActivityStack.LAUNCH_TICK_MSG, this);
-            stack.mHandler.removeMessages(ActivityStack.LAUNCH_TICK_MSG);
-            stack.mHandler.sendMessageDelayed(msg, ActivityStack.LAUNCH_TICK);
-            return true;
+        if (launchTickTime == 0) {
+            return false;
         }
-        return false;
+
+        final ActivityStack stack = task.stack;
+        if (stack == null) {
+            return false;
+        }
+
+        Message msg = stack.mHandler.obtainMessage(ActivityStack.LAUNCH_TICK_MSG, this);
+        stack.mHandler.removeMessages(ActivityStack.LAUNCH_TICK_MSG);
+        stack.mHandler.sendMessageDelayed(msg, ActivityStack.LAUNCH_TICK);
+        return true;
     }
 
     void finishLaunchTickingLocked() {
         launchTickTime = 0;
-        task.stack.mHandler.removeMessages(ActivityStack.LAUNCH_TICK_MSG);
+        final ActivityStack stack = task.stack;
+        if (stack != null) {
+            stack.mHandler.removeMessages(ActivityStack.LAUNCH_TICK_MSG);
+        }
     }
 
     // IApplicationToken
@@ -885,8 +934,8 @@ final class ActivityRecord {
         if (displayStartTime != 0) {
             reportLaunchTimeLocked(curTime);
         }
-        if (fullyDrawnStartTime != 0) {
-            final ActivityStack stack = task.stack;
+        final ActivityStack stack = task.stack;
+        if (fullyDrawnStartTime != 0 && stack != null) {
             final long thisTime = curTime - fullyDrawnStartTime;
             final long totalTime = stack.mFullyDrawnStartTime != 0
                     ? (curTime - stack.mFullyDrawnStartTime) : thisTime;
@@ -911,13 +960,16 @@ final class ActivityRecord {
             if (totalTime > 0) {
                 //service.mUsageStatsService.noteFullyDrawnTime(realActivity, (int) totalTime);
             }
-            fullyDrawnStartTime = 0;
             stack.mFullyDrawnStartTime = 0;
         }
+        fullyDrawnStartTime = 0;
     }
 
     private void reportLaunchTimeLocked(final long curTime) {
         final ActivityStack stack = task.stack;
+        if (stack == null) {
+            return;
+        }
         final long thisTime = curTime - displayStartTime;
         final long totalTime = stack.mLaunchStartTime != 0
                 ? (curTime - stack.mLaunchStartTime) : thisTime;
@@ -947,60 +999,47 @@ final class ActivityRecord {
         stack.mLaunchStartTime = 0;
     }
 
-    public void windowsDrawn() {
-        synchronized(service) {
-            if (displayStartTime != 0) {
-                reportLaunchTimeLocked(SystemClock.uptimeMillis());
-            }
-            mStackSupervisor.sendWaitingVisibleReportLocked(this);
-            startTime = 0;
-            finishLaunchTickingLocked();
-            if (task != null) {
-                task.hasBeenVisible = true;
-            }
+    void windowsDrawnLocked() {
+        if (displayStartTime != 0) {
+            reportLaunchTimeLocked(SystemClock.uptimeMillis());
+        }
+        mStackSupervisor.sendWaitingVisibleReportLocked(this);
+        startTime = 0;
+        finishLaunchTickingLocked();
+        if (task != null) {
+            task.hasBeenVisible = true;
         }
     }
 
-    public void windowsVisible() {
-        synchronized(service) {
-            mStackSupervisor.reportActivityVisibleLocked(this);
-            if (ActivityManagerService.DEBUG_SWITCH) Log.v(TAG, "windowsVisible(): " + this);
-            if (!nowVisible) {
-                nowVisible = true;
-                lastVisibleTime = SystemClock.uptimeMillis();
-                if (!idle) {
-                    // Instead of doing the full stop routine here, let's just
-                    // hide any activities we now can, and let them stop when
-                    // the normal idle happens.
-                    mStackSupervisor.processStoppingActivitiesLocked(false);
-                } else {
-                    // If this activity was already idle, then we now need to
-                    // make sure we perform the full stop of any activities
-                    // that are waiting to do so.  This is because we won't
-                    // do that while they are still waiting for this one to
-                    // become visible.
-                    final int N = mStackSupervisor.mWaitingVisibleActivities.size();
-                    if (N > 0) {
-                        for (int i=0; i<N; i++) {
-                            ActivityRecord r = mStackSupervisor.mWaitingVisibleActivities.get(i);
-                            if (ActivityManagerService.DEBUG_SWITCH) Log.v(TAG,
-                                    "Was waiting for visible: " + r);
-                        }
-                        mStackSupervisor.mWaitingVisibleActivities.clear();
-                        mStackSupervisor.scheduleIdleLocked();
+    void windowsVisibleLocked() {
+        mStackSupervisor.reportActivityVisibleLocked(this);
+        if (DEBUG_SWITCH) Log.v(TAG, "windowsVisibleLocked(): " + this);
+        if (!nowVisible) {
+            nowVisible = true;
+            lastVisibleTime = SystemClock.uptimeMillis();
+            if (!idle) {
+                // Instead of doing the full stop routine here, let's just hide any activities
+                // we now can, and let them stop when the normal idle happens.
+                mStackSupervisor.processStoppingActivitiesLocked(false);
+            } else {
+                // If this activity was already idle, then we now need to make sure we perform
+                // the full stop of any activities that are waiting to do so. This is because
+                // we won't do that while they are still waiting for this one to become visible.
+                final int size = mStackSupervisor.mWaitingVisibleActivities.size();
+                if (size > 0) {
+                    for (int i = 0; i < size; i++) {
+                        ActivityRecord r = mStackSupervisor.mWaitingVisibleActivities.get(i);
+                        if (DEBUG_SWITCH) Log.v(TAG, "Was waiting for visible: " + r);
                     }
+                    mStackSupervisor.mWaitingVisibleActivities.clear();
+                    mStackSupervisor.scheduleIdleLocked();
                 }
-                service.scheduleAppGcsLocked();
             }
+            service.scheduleAppGcsLocked();
         }
     }
 
-    public void windowsGone() {
-        if (ActivityManagerService.DEBUG_SWITCH) Log.v(TAG, "windowsGone(): " + this);
-        nowVisible = false;
-    }
-
-    private ActivityRecord getWaitingHistoryRecordLocked() {
+    ActivityRecord getWaitingHistoryRecordLocked() {
         // First find the real culprit...  if we are waiting
         // for another app to start, then we have paused dispatching
         // for this activity.
@@ -1019,24 +1058,6 @@ final class ActivityRecord {
         }
 
         return r;
-    }
-
-    public boolean keyDispatchingTimedOut(String reason) {
-        ActivityRecord r;
-        ProcessRecord anrApp;
-        synchronized(service) {
-            r = getWaitingHistoryRecordLocked();
-            anrApp = r != null ? r.app : null;
-        }
-        return service.inputDispatchingTimedOut(anrApp, r, this, false, reason);
-    }
-
-    /** Returns the key dispatching timeout for this application token. */
-    public long getKeyDispatchingTimeout() {
-        synchronized(service) {
-            ActivityRecord r = getWaitingHistoryRecordLocked();
-            return ActivityManagerService.getInputDispatchingTimeoutLocked(r);
-        }
     }
 
     /**
@@ -1066,14 +1087,14 @@ final class ActivityRecord {
     }
 
     static void activityResumedLocked(IBinder token) {
-        final ActivityRecord r = ActivityRecord.forToken(token);
+        final ActivityRecord r = ActivityRecord.forTokenLocked(token);
         if (DEBUG_SAVED_STATE) Slog.i(TAG, "Resumed activity; dropping state of: " + r);
         r.icicle = null;
         r.haveState = false;
     }
 
     static int getTaskForActivityLocked(IBinder token, boolean onlyRoot) {
-        final ActivityRecord r = ActivityRecord.forToken(token);
+        final ActivityRecord r = ActivityRecord.forTokenLocked(token);
         if (r == null) {
             return INVALID_TASK_ID;
         }
@@ -1086,7 +1107,7 @@ final class ActivityRecord {
     }
 
     static ActivityRecord isInStackLocked(IBinder token) {
-        final ActivityRecord r = ActivityRecord.forToken(token);
+        final ActivityRecord r = ActivityRecord.forTokenLocked(token);
         return (r != null) ? r.task.stack.isInStackLocked(r) : null;
     }
 

@@ -500,10 +500,12 @@ final class TaskRecord {
     }
 
     ActivityRecord topRunningActivityLocked(ActivityRecord notTop) {
-        for (int activityNdx = mActivities.size() - 1; activityNdx >= 0; --activityNdx) {
-            ActivityRecord r = mActivities.get(activityNdx);
-            if (!r.finishing && r != notTop && stack.okToShowLocked(r)) {
-                return r;
+        if (stack != null) {
+            for (int activityNdx = mActivities.size() - 1; activityNdx >= 0; --activityNdx) {
+                ActivityRecord r = mActivities.get(activityNdx);
+                if (!r.finishing && r != notTop && stack.okToShowLocked(r)) {
+                    return r;
+                }
             }
         }
         return null;
@@ -666,7 +668,7 @@ final class TaskRecord {
                     if (opts != null) {
                         ret.updateOptionsLocked(opts);
                     }
-                    if (stack.finishActivityLocked(
+                    if (stack != null && stack.finishActivityLocked(
                             r, Activity.RESULT_CANCELED, null, "clear-task-stack", false)) {
                         --activityNdx;
                         --numActivities;
@@ -679,8 +681,10 @@ final class TaskRecord {
                 if (ret.launchMode == ActivityInfo.LAUNCH_MULTIPLE
                         && (launchFlags & Intent.FLAG_ACTIVITY_SINGLE_TOP) == 0) {
                     if (!ret.finishing) {
-                        stack.finishActivityLocked(
-                                ret, Activity.RESULT_CANCELED, null, "clear-task-top", false);
+                        if (stack != null) {
+                            stack.finishActivityLocked(
+                                    ret, Activity.RESULT_CANCELED, null, "clear-task-top", false);
+                        }
                         return null;
                     }
                 }
