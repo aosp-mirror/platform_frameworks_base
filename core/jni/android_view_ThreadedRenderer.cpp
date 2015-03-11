@@ -239,16 +239,18 @@ static void android_view_ThreadedRenderer_deleteProxy(JNIEnv* env, jobject clazz
     delete proxy;
 }
 
-static void android_view_ThreadedRenderer_setFrameInterval(JNIEnv* env, jobject clazz,
-        jlong proxyPtr, jlong frameIntervalNanos) {
-    RenderProxy* proxy = reinterpret_cast<RenderProxy*>(proxyPtr);
-    proxy->setFrameInterval(frameIntervalNanos);
-}
-
 static jboolean android_view_ThreadedRenderer_loadSystemProperties(JNIEnv* env, jobject clazz,
         jlong proxyPtr) {
     RenderProxy* proxy = reinterpret_cast<RenderProxy*>(proxyPtr);
     return proxy->loadSystemProperties();
+}
+
+static void android_view_ThreadedRenderer_setName(JNIEnv* env, jobject clazz,
+        jlong proxyPtr, jstring jname) {
+    RenderProxy* proxy = reinterpret_cast<RenderProxy*>(proxyPtr);
+    const char* name = env->GetStringUTFChars(jname, NULL);
+    proxy->setName(name);
+    env->ReleaseStringUTFChars(jname, name);
 }
 
 static jboolean android_view_ThreadedRenderer_initialize(JNIEnv* env, jobject clazz,
@@ -284,7 +286,7 @@ static void android_view_ThreadedRenderer_setup(JNIEnv* env, jobject clazz, jlon
         jint ambientShadowAlpha, jint spotShadowAlpha, jfloat density) {
     RenderProxy* proxy = reinterpret_cast<RenderProxy*>(proxyPtr);
     proxy->setup(width, height, (Vector3){lightX, lightY, lightZ}, lightRadius,
-            ambientShadowAlpha, spotShadowAlpha, density);
+            ambientShadowAlpha, spotShadowAlpha);
 }
 
 static void android_view_ThreadedRenderer_setOpaque(JNIEnv* env, jobject clazz,
@@ -424,12 +426,12 @@ static JNINativeMethod gMethods[] = {
     { "nCreateRootRenderNode", "()J", (void*) android_view_ThreadedRenderer_createRootRenderNode },
     { "nCreateProxy", "(ZJ)J", (void*) android_view_ThreadedRenderer_createProxy },
     { "nDeleteProxy", "(J)V", (void*) android_view_ThreadedRenderer_deleteProxy },
-    { "nSetFrameInterval", "(JJ)V", (void*) android_view_ThreadedRenderer_setFrameInterval },
     { "nLoadSystemProperties", "(J)Z", (void*) android_view_ThreadedRenderer_loadSystemProperties },
+    { "nSetName", "(JLjava/lang/String;)V", (void*) android_view_ThreadedRenderer_setName },
     { "nInitialize", "(JLandroid/view/Surface;)Z", (void*) android_view_ThreadedRenderer_initialize },
     { "nUpdateSurface", "(JLandroid/view/Surface;)V", (void*) android_view_ThreadedRenderer_updateSurface },
     { "nPauseSurface", "(JLandroid/view/Surface;)Z", (void*) android_view_ThreadedRenderer_pauseSurface },
-    { "nSetup", "(JIIFFFFIIF)V", (void*) android_view_ThreadedRenderer_setup },
+    { "nSetup", "(JIIFFFFII)V", (void*) android_view_ThreadedRenderer_setup },
     { "nSetOpaque", "(JZ)V", (void*) android_view_ThreadedRenderer_setOpaque },
     { "nSyncAndDrawFrame", "(J[JI)I", (void*) android_view_ThreadedRenderer_syncAndDrawFrame },
     { "nDestroy", "(J)V", (void*) android_view_ThreadedRenderer_destroy },

@@ -34,7 +34,6 @@ namespace renderthread {
 DrawFrameTask::DrawFrameTask()
         : mRenderThread(nullptr)
         , mContext(nullptr)
-        , mDensity(1.0f) // safe enough default
         , mSyncResult(kSync_OK) {
 }
 
@@ -84,7 +83,6 @@ void DrawFrameTask::postAndWait() {
 void DrawFrameTask::run() {
     ATRACE_NAME("DrawFrame");
 
-    mContext->profiler().setDensity(mDensity);
     mContext->profiler().startFrame();
 
     bool canUnblockUiThread;

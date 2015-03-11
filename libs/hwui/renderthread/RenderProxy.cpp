@@ -97,18 +97,6 @@ void RenderProxy::destroyContext() {
     }
 }
 
-CREATE_BRIDGE2(setFrameInterval, RenderThread* thread, nsecs_t frameIntervalNanos) {
-    args->thread->setFrameInterval(args->frameIntervalNanos);
-    return nullptr;
-}
-
-void RenderProxy::setFrameInterval(nsecs_t frameIntervalNanos) {
-    SETUP_TASK(setFrameInterval);
-    args->thread = &mRenderThread;
-    args->frameIntervalNanos = frameIntervalNanos;
-    post(task);
-}
-
 CREATE_BRIDGE2(setSwapBehavior, CanvasContext* context, SwapBehavior swapBehavior) {
     args->context->setSwapBehavior(args->swapBehavior);
     return nullptr;
@@ -136,6 +124,18 @@ bool RenderProxy::loadSystemProperties() {
     SETUP_TASK(loadSystemProperties);
     args->context = mContext;
     return (bool) postAndWait(task);
+}
+
+CREATE_BRIDGE2(setName, CanvasContext* context, const char* name) {
+    args->context->setName(std::string(args->name));
+    return nullptr;
+}
+
+void RenderProxy::setName(const char* name) {
+    SETUP_TASK(setName);
+    args->context = mContext;
+    args->name = name;
+    post(task);
 }
 
 CREATE_BRIDGE2(initialize, CanvasContext* context, ANativeWindow* window) {
@@ -181,8 +181,7 @@ CREATE_BRIDGE7(setup, CanvasContext* context, int width, int height,
 }
 
 void RenderProxy::setup(int width, int height, const Vector3& lightCenter, float lightRadius,
-        uint8_t ambientShadowAlpha, uint8_t spotShadowAlpha, float density) {
-    mDrawFrameTask.setDensity(density);
+        uint8_t ambientShadowAlpha, uint8_t spotShadowAlpha) {
     SETUP_TASK(setup);
     args->context = mContext;
     args->width = width;

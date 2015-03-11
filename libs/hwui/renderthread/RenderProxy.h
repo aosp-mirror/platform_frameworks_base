@@ -62,16 +62,16 @@ public:
     ANDROID_API RenderProxy(bool translucent, RenderNode* rootNode, IContextFactory* contextFactory);
     ANDROID_API virtual ~RenderProxy();
 
-    ANDROID_API void setFrameInterval(nsecs_t frameIntervalNanos);
     // Won't take effect until next EGLSurface creation
     ANDROID_API void setSwapBehavior(SwapBehavior swapBehavior);
     ANDROID_API bool loadSystemProperties();
+    ANDROID_API void setName(const char* name);
 
     ANDROID_API bool initialize(const sp<ANativeWindow>& window);
     ANDROID_API void updateSurface(const sp<ANativeWindow>& window);
     ANDROID_API bool pauseSurface(const sp<ANativeWindow>& window);
     ANDROID_API void setup(int width, int height, const Vector3& lightCenter, float lightRadius,
-            uint8_t ambientShadowAlpha, uint8_t spotShadowAlpha, float density);
+            uint8_t ambientShadowAlpha, uint8_t spotShadowAlpha);
     ANDROID_API void setOpaque(bool opaque);
     ANDROID_API int64_t* frameInfo();
     ANDROID_API int syncAndDrawFrame();

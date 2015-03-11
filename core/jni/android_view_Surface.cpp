@@ -489,7 +489,7 @@ static jlong create(JNIEnv* env, jclass clazz, jlong rootNodePtr, jlong surfaceP
     proxy->initialize(surface);
     // Shadows can't be used via this interface, so just set the light source
     // to all 0s. (and width & height are unused, TODO remove them)
-    proxy->setup(0, 0, (Vector3){0, 0, 0}, 0, 0, 0, 1.0f);
+    proxy->setup(0, 0, (Vector3){0, 0, 0}, 0, 0, 0);
     return (jlong) proxy;
 }
 

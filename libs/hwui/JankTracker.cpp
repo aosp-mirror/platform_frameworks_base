@@ -97,8 +97,8 @@ void JankTracker::addFrame(const FrameInfo& frame) {
     int64_t totalDuration =
             frame[FrameInfoIndex::kFrameCompleted] - frame[FrameInfoIndex::kIntendedVsync];
     uint32_t framebucket = std::min(
-            static_cast<typeof sizeof(mFrameCounts)>(ns2ms(totalDuration)),
-            sizeof(mFrameCounts) / sizeof(mFrameCounts[0]));
+            static_cast<typeof mFrameCounts.size()>(ns2ms(totalDuration)),
+            mFrameCounts.size());
     // Keep the fast path as fast as possible.
     if (CC_LIKELY(totalDuration < mFrameInterval)) {
         mFrameCounts[framebucket]++;
@@ -137,8 +137,8 @@ void JankTracker::dump(int fd) {
 }
 
 void JankTracker::reset() {
-    memset(mBuckets, 0, sizeof(mBuckets));
-    memset(mFrameCounts, 0, sizeof(mFrameCounts));
+    mBuckets.fill({0});
+    mFrameCounts.fill(0);
     mTotalFrameCount = 0;
     mJankFrameCount = 0;
 }
@@ -146,7 +146,7 @@ void JankTracker::reset() {
 uint32_t JankTracker::findPercentile(int percentile) {
     int pos = percentile * mTotalFrameCount / 100;
     int remaining = mTotalFrameCount - pos;
-    for (int i = sizeof(mFrameCounts) / sizeof(mFrameCounts[0]) - 1; i >= 0; i--) {
+    for (int i = mFrameCounts.size() - 1; i >= 0; i--) {
         remaining -= mFrameCounts[i];
         if (remaining <= 0) {
             return i;

@@ -33,6 +33,7 @@
 #include <utils/Vector.h>
 
 #include <set>
+#include <string>
 
 namespace android {
 namespace uirenderer {
@@ -106,6 +107,9 @@ public:
     void dumpFrames(int fd);
     void resetFrameStats();
 
+    void setName(const std::string&& name) { mName = name; }
+    const std::string& name() { return mName; }
+
 private:
     friend class RegisterFrameCallbackTask;
     // TODO: Replace with something better for layer & other GL object
@@ -139,6 +143,7 @@ private:
     FrameInfo* mCurrentFrameInfo;
     // Ring buffer large enough for 1 second worth of frames
     RingBuffer<FrameInfo, 60> mFrames;
+    std::string mName;
 
     std::set<RenderNode*> mPrefetechedLayers;
 };

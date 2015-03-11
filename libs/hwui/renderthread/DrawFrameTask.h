@@ -62,7 +62,6 @@ public:
     void pushLayerUpdate(DeferredLayerUpdater* layer);
     void removeLayerUpdate(DeferredLayerUpdater* layer);
 
-    void setDensity(float density) { mDensity = density; }
     int drawFrame();
 
     int64_t* frameInfo() { return mFrameInfo; }
@@ -83,7 +82,6 @@ private:
     /*********************************************
      *  Single frame data
      *********************************************/
-    float mDensity;
     std::vector< sp<DeferredLayerUpdater> > mLayers;
 
     int mSyncResult;
