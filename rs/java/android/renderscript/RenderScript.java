@@ -908,12 +908,6 @@ public class RenderScript {
         rsnMeshGetIndices(mContext, id, idxIds, primitives, vtxIdCount);
     }
 
-    native long rsnPathCreate(long con, int prim, boolean isStatic, long vtx, long loop, float q);
-    synchronized long nPathCreate(int prim, boolean isStatic, long vtx, long loop, float q) {
-        validate();
-        return rsnPathCreate(mContext, prim, isStatic, vtx, loop, q);
-    }
-
     native void rsnScriptIntrinsicBLAS_Single(long con, long id, int func, int TransA,
                                               int TransB, int Side, int Uplo, int Diag, int M, int N, int K,
                                               float alpha, long A, long B, float beta, long C, int incX, int incY,
