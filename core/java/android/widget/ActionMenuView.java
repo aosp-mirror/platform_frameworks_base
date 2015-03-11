@@ -15,6 +15,7 @@
  */
 package android.widget;
 
+import android.annotation.StyleRes;
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.content.res.Configuration;
@@ -86,7 +87,7 @@ public class ActionMenuView extends LinearLayout implements MenuBuilder.ItemInvo
      * @param resId theme used to inflate popup menus
      * @see #getPopupTheme()
      */
-    public void setPopupTheme(int resId) {
+    public void setPopupTheme(@StyleRes int resId) {
         if (mPopupTheme != resId) {
             mPopupTheme = resId;
             if (resId == 0) {

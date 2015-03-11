@@ -17,6 +17,7 @@
 package android.widget;
 
 
+import android.annotation.AnimRes;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.util.AttributeSet;
@@ -309,7 +310,7 @@ public class ViewAnimator extends FrameLayout {
      * @see #getInAnimation()
      * @see #setInAnimation(android.view.animation.Animation)
      */
-    public void setInAnimation(Context context, int resourceID) {
+    public void setInAnimation(Context context, @AnimRes int resourceID) {
         setInAnimation(AnimationUtils.loadAnimation(context, resourceID));
     }
 
@@ -322,7 +323,7 @@ public class ViewAnimator extends FrameLayout {
      * @see #getOutAnimation()
      * @see #setOutAnimation(android.view.animation.Animation)
      */
-    public void setOutAnimation(Context context, int resourceID) {
+    public void setOutAnimation(Context context, @AnimRes int resourceID) {
         setOutAnimation(AnimationUtils.loadAnimation(context, resourceID));
     }
 

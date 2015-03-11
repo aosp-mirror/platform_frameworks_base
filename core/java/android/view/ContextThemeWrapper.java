@@ -16,6 +16,7 @@
 
 package android.view;
 
+import android.annotation.StyleRes;
 import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.res.Configuration;
@@ -36,7 +37,7 @@ public class ContextThemeWrapper extends ContextWrapper {
         super(null);
     }
 
-    public ContextThemeWrapper(Context base, int themeResId) {
+    public ContextThemeWrapper(Context base, @StyleRes int themeResId) {
         super(base);
         mThemeResource = themeResId;
     }

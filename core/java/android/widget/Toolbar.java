@@ -17,8 +17,12 @@
 package android.widget;
 
 import android.annotation.ColorInt;
+import android.annotation.DrawableRes;
+import android.annotation.MenuRes;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.StringRes;
+import android.annotation.StyleRes;
 import android.app.ActionBar;
 import android.content.Context;
 import android.content.res.ColorStateList;
@@ -296,7 +300,7 @@ public class Toolbar extends ViewGroup {
      * @param resId theme used to inflate popup menus
      * @see #getPopupTheme()
      */
-    public void setPopupTheme(int resId) {
+    public void setPopupTheme(@StyleRes int resId) {
         if (mPopupTheme != resId) {
             mPopupTheme = resId;
             if (resId == 0) {
@@ -331,7 +335,7 @@ public class Toolbar extends ViewGroup {
      *
      * @param resId ID of a drawable resource
      */
-    public void setLogo(int resId) {
+    public void setLogo(@DrawableRes int resId) {
         setLogo(getContext().getDrawable(resId));
     }
 
@@ -481,7 +485,7 @@ public class Toolbar extends ViewGroup {
      *
      * @param resId String resource id
      */
-    public void setLogoDescription(int resId) {
+    public void setLogoDescription(@StringRes int resId) {
         setLogoDescription(getContext().getText(resId));
     }
 
@@ -566,7 +570,7 @@ public class Toolbar extends ViewGroup {
      *
      * @param resId Resource ID of a string to set as the title
      */
-    public void setTitle(int resId) {
+    public void setTitle(@StringRes int resId) {
         setTitle(getContext().getText(resId));
     }
 
@@ -621,7 +625,7 @@ public class Toolbar extends ViewGroup {
      *
      * @param resId String resource ID
      */
-    public void setSubtitle(int resId) {
+    public void setSubtitle(@StringRes int resId) {
         setSubtitle(getContext().getText(resId));
     }
 
@@ -663,7 +667,7 @@ public class Toolbar extends ViewGroup {
      * Sets the text color, size, style, hint color, and highlight color
      * from the specified TextAppearance resource.
      */
-    public void setTitleTextAppearance(Context context, int resId) {
+    public void setTitleTextAppearance(Context context, @StyleRes int resId) {
         mTitleTextAppearance = resId;
         if (mTitleTextView != null) {
             mTitleTextView.setTextAppearance(context, resId);
@@ -674,7 +678,7 @@ public class Toolbar extends ViewGroup {
      * Sets the text color, size, style, hint color, and highlight color
      * from the specified TextAppearance resource.
      */
-    public void setSubtitleTextAppearance(Context context, int resId) {
+    public void setSubtitleTextAppearance(Context context, @StyleRes int resId) {
         mSubtitleTextAppearance = resId;
         if (mSubtitleTextView != null) {
             mSubtitleTextView.setTextAppearance(context, resId);
@@ -729,7 +733,7 @@ public class Toolbar extends ViewGroup {
      *
      * @attr ref android.R.styleable#Toolbar_navigationContentDescription
      */
-    public void setNavigationContentDescription(int resId) {
+    public void setNavigationContentDescription(@StringRes int resId) {
         setNavigationContentDescription(resId != 0 ? getContext().getText(resId) : null);
     }
 
@@ -766,7 +770,7 @@ public class Toolbar extends ViewGroup {
      *
      * @attr ref android.R.styleable#Toolbar_navigationIcon
      */
-    public void setNavigationIcon(int resId) {
+    public void setNavigationIcon(@DrawableRes int resId) {
         setNavigationIcon(getContext().getDrawable(resId));
     }
 
@@ -972,7 +976,7 @@ public class Toolbar extends ViewGroup {
      *
      * @param resId ID of a menu resource to inflate
      */
-    public void inflateMenu(int resId) {
+    public void inflateMenu(@MenuRes int resId) {
         getMenuInflater().inflate(resId, getMenu());
     }
 

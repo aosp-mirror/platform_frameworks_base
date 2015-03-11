@@ -22,6 +22,7 @@ import android.annotation.IdRes;
 import android.annotation.LayoutRes;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.StyleRes;
 import android.annotation.SystemApi;
 import android.content.Context;
 import android.content.res.Configuration;
@@ -738,7 +739,7 @@ public abstract class Window {
      * 0 here will override the animations the window would
      * normally retrieve from its theme.
      */
-    public void setWindowAnimations(int resId) {
+    public void setWindowAnimations(@StyleRes int resId) {
         final WindowManager.LayoutParams attrs = getAttributes();
         attrs.windowAnimations = resId;
         dispatchWindowAttributesChanged(attrs);
