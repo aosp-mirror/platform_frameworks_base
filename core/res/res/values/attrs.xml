@@ -31,8 +31,10 @@
         <attr name="colorForeground" format="color" />
         <!-- Default color of foreground imagery on an inverted background. -->
         <attr name="colorForegroundInverse" format="color" />
-        <!-- Color that matches (as closely as possible) the window background. -->
+        <!-- Default color of background imagery, ex. full-screen windows. -->
         <attr name="colorBackground" format="color" />
+        <!-- Default color of background imagery for floating components, ex. dialogs, popups, and cards. -->
+        <attr name="colorBackgroundFloating" format="color" />
         <!-- This is a hint for a solid color that can be used for caching
              rendered views.  This should be the color of the background when
              there is a solid background color; it should be null when the
