@@ -16,6 +16,9 @@
 
 package com.android.server.am;
 
+import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
+import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NAME;
+
 import android.util.ArraySet;
 import android.util.DebugUtils;
 import android.util.EventLog;
@@ -49,6 +52,8 @@ import java.util.ArrayList;
  * is currently running.
  */
 final class ProcessRecord {
+    private static final String TAG = TAG_WITH_CLASS_NAME ? "ProcessRecord" : TAG_AM;
+
     private final BatteryStatsImpl mBatteryStats; // where to collect runtime statistics
     final ApplicationInfo info; // all about the first app in the process
     final boolean isolated;     // true if this is a special isolated process
@@ -472,7 +477,7 @@ final class ProcessRecord {
         }
         return false;
     }
-    
+
     public void stopFreezingAllLocked() {
         int i = activities.size();
         while (i > 0) {
@@ -480,7 +485,7 @@ final class ProcessRecord {
             activities.get(i).stopFreezingScreenLocked(true);
         }
     }
-    
+
     public void unlinkDeathRecipient() {
         if (deathRecipient != null && thread != null) {
             thread.asBinder().unlinkToDeath(deathRecipient, 0);
@@ -524,8 +529,7 @@ final class ProcessRecord {
     void kill(String reason, boolean noisy) {
         if (!killedByAm) {
             if (noisy) {
-                Slog.i(ActivityManagerService.TAG, "Killing " + toShortString() + " (adj " + setAdj
-                        + "): " + reason);
+                Slog.i(TAG, "Killing " + toShortString() + " (adj " + setAdj + "): " + reason);
             }
             EventLog.writeEvent(EventLogTags.AM_KILL, userId, pid, processName, setAdj, reason);
             Process.killProcessQuiet(pid);

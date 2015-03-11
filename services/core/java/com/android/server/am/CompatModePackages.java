@@ -16,6 +16,8 @@
 
 package com.android.server.am;
 
+import static com.android.server.am.ActivityManagerDebugConfig.*;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -43,7 +45,7 @@ import android.util.Slog;
 import android.util.Xml;
 
 public final class CompatModePackages {
-    private final String TAG = ActivityManagerService.TAG;
+    private static final String TAG = TAG_WITH_CLASS_NAME ? "CompatModePackages" : TAG_AM;
     private final boolean DEBUG_CONFIGURATION = ActivityManagerService.DEBUG_CONFIGURATION;
 
     private final ActivityManagerService mService;

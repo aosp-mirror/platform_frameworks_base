@@ -16,7 +16,8 @@
 
 package com.android.server.am;
 
-import static com.android.server.am.ActivityManagerService.TAG;
+import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
+import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.am.ActivityRecord.HOME_ACTIVITY_TYPE;
 import static com.android.server.am.ActivityRecord.APPLICATION_ACTIVITY_TYPE;
 import static com.android.server.am.ActivityRecord.RECENTS_ACTIVITY_TYPE;
@@ -54,6 +55,8 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 
 final class TaskRecord {
+    private static final String TAG = TAG_WITH_CLASS_NAME ? "TaskRecord" : TAG_AM;
+
     static final String ATTR_TASKID = "task_id";
     private static final String TAG_INTENT = "intent";
     private static final String TAG_AFFINITYINTENT = "affinity_intent";
@@ -307,7 +310,7 @@ final class TaskRecord {
                     _intent.setSourceBounds(null);
                 }
             }
-            if (ActivityManagerService.DEBUG_TASKS) Slog.v(ActivityManagerService.TAG,
+            if (ActivityManagerService.DEBUG_TASKS) Slog.v(TAG,
                     "Setting Intent of " + this + " to " + _intent);
             intent = _intent;
             realActivity = _intent != null ? _intent.getComponent() : null;
@@ -320,7 +323,7 @@ final class TaskRecord {
                 targetIntent.setComponent(targetComponent);
                 targetIntent.setSelector(null);
                 targetIntent.setSourceBounds(null);
-                if (ActivityManagerService.DEBUG_TASKS) Slog.v(ActivityManagerService.TAG,
+                if (ActivityManagerService.DEBUG_TASKS) Slog.v(TAG,
                         "Setting Intent of " + this + " to target " + targetIntent);
                 intent = targetIntent;
                 realActivity = targetComponent;

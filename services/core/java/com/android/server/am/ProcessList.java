@@ -16,6 +16,9 @@
 
 package com.android.server.am;
 
+import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
+import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NAME;
+
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
@@ -38,6 +41,8 @@ import android.view.Display;
  * Activity manager code dealing with processes.
  */
 final class ProcessList {
+    private static final String TAG = TAG_WITH_CLASS_NAME ? "ProcessList" : TAG_AM;
+
     // The minimum time we allow between crashes, for us to consider this
     // application to be bad and stop and its services and reject broadcasts.
     static final int MIN_CRASH_INTERVAL = 60*1000;
@@ -633,8 +638,7 @@ final class ProcessList {
                         LocalSocketAddress.Namespace.RESERVED));
             sLmkdOutputStream = sLmkdSocket.getOutputStream();
         } catch (IOException ex) {
-            Slog.w(ActivityManagerService.TAG,
-                   "lowmemorykiller daemon socket open failed");
+            Slog.w(TAG, "lowmemorykiller daemon socket open failed");
             sLmkdSocket = null;
             return false;
         }
@@ -659,8 +663,7 @@ final class ProcessList {
                 sLmkdOutputStream.write(buf.array(), 0, buf.position());
                 return;
             } catch (IOException ex) {
-                Slog.w(ActivityManagerService.TAG,
-                       "Error writing to lowmemorykiller socket");
+                Slog.w(TAG, "Error writing to lowmemorykiller socket");
 
                 try {
                     sLmkdSocket.close();

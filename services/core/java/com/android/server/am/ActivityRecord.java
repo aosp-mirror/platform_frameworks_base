@@ -16,6 +16,8 @@
 
 package com.android.server.am;
 
+import static com.android.server.am.ActivityManagerDebugConfig.*;
+import static com.android.server.am.ActivityManagerService.DEBUG_THUMBNAILS;
 import static com.android.server.am.TaskPersister.DEBUG_PERSISTER;
 import static com.android.server.am.TaskPersister.DEBUG_RESTORER;
 import static com.android.server.am.TaskRecord.INVALID_TASK_ID;
@@ -71,7 +73,8 @@ import java.util.Objects;
  * An entry in the history stack, representing an activity.
  */
 final class ActivityRecord {
-    static final String TAG = ActivityManagerService.TAG;
+    private static final String TAG = TAG_WITH_CLASS_NAME ? "ActivityRecord" : TAG_AM;
+
     static final boolean DEBUG_SAVED_STATE = ActivityStackSupervisor.DEBUG_SAVED_STATE;
     final public static String RECENTS_PACKAGE_NAME = "com.android.systemui.recents";
 
@@ -319,7 +322,7 @@ final class ActivityRecord {
         final WeakReference<ActivityRecord> weakActivity;
 
         Token(ActivityRecord activity) {
-            weakActivity = new WeakReference<ActivityRecord>(activity);
+            weakActivity = new WeakReference<>(activity);
         }
 
         @Override public void windowsDrawn() {
@@ -372,7 +375,7 @@ final class ActivityRecord {
         try {
             return token != null ? ((Token)token).weakActivity.get() : null;
         } catch (ClassCastException e) {
-            Slog.w(ActivityManagerService.TAG, "Bad activity token: " + token, e);
+            Slog.w(TAG, "Bad activity token: " + token, e);
             return null;
         }
     }
@@ -676,11 +679,9 @@ final class ActivityRecord {
                 app.thread.scheduleNewIntent(ar, appToken);
                 unsent = false;
             } catch (RemoteException e) {
-                Slog.w(ActivityManagerService.TAG,
-                        "Exception thrown sending new intent to " + this, e);
+                Slog.w(TAG, "Exception thrown sending new intent to " + this, e);
             } catch (NullPointerException e) {
-                Slog.w(ActivityManagerService.TAG,
-                        "Exception thrown sending new intent to " + this, e);
+                Slog.w(TAG, "Exception thrown sending new intent to " + this, e);
             }
         }
         if (unsent) {
@@ -820,7 +821,7 @@ final class ActivityRecord {
 
     void updateThumbnailLocked(Bitmap newThumbnail, CharSequence description) {
         if (newThumbnail != null) {
-            if (ActivityManagerService.DEBUG_THUMBNAILS) Slog.i(ActivityManagerService.TAG,
+            if (DEBUG_THUMBNAILS) Slog.i(TAG,
                     "Setting thumbnail of " + this + " to " + newThumbnail);
             boolean thumbnailUpdated = task.setLastThumbnail(newThumbnail);
             if (thumbnailUpdated && isPersistable()) {
@@ -905,7 +906,7 @@ final class ActivityRecord {
                     TimeUtils.formatDuration(totalTime, sb);
                     sb.append(")");
                 }
-                Log.i(ActivityManagerService.TAG, sb.toString());
+                Log.i(TAG, sb.toString());
             }
             if (totalTime > 0) {
                 //service.mUsageStatsService.noteFullyDrawnTime(realActivity, (int) totalTime);
@@ -936,7 +937,7 @@ final class ActivityRecord {
                 TimeUtils.formatDuration(totalTime, sb);
                 sb.append(")");
             }
-            Log.i(ActivityManagerService.TAG, sb.toString());
+            Log.i(TAG, sb.toString());
         }
         mStackSupervisor.reportActivityLaunchedLocked(false, this, thisTime, totalTime);
         if (totalTime > 0) {
@@ -963,8 +964,7 @@ final class ActivityRecord {
     public void windowsVisible() {
         synchronized(service) {
             mStackSupervisor.reportActivityVisibleLocked(this);
-            if (ActivityManagerService.DEBUG_SWITCH) Log.v(
-                    ActivityManagerService.TAG, "windowsVisible(): " + this);
+            if (ActivityManagerService.DEBUG_SWITCH) Log.v(TAG, "windowsVisible(): " + this);
             if (!nowVisible) {
                 nowVisible = true;
                 lastVisibleTime = SystemClock.uptimeMillis();
@@ -983,8 +983,7 @@ final class ActivityRecord {
                     if (N > 0) {
                         for (int i=0; i<N; i++) {
                             ActivityRecord r = mStackSupervisor.mWaitingVisibleActivities.get(i);
-                            if (ActivityManagerService.DEBUG_SWITCH) Log.v(
-                                    ActivityManagerService.TAG,
+                            if (ActivityManagerService.DEBUG_SWITCH) Log.v(TAG,
                                     "Was waiting for visible: " + r);
                         }
                         mStackSupervisor.mWaitingVisibleActivities.clear();
@@ -997,8 +996,7 @@ final class ActivityRecord {
     }
 
     public void windowsGone() {
-        if (ActivityManagerService.DEBUG_SWITCH) Log.v(
-                ActivityManagerService.TAG, "windowsGone(): " + this);
+        if (ActivityManagerService.DEBUG_SWITCH) Log.v(TAG, "windowsGone(): " + this);
         nowVisible = false;
     }
 

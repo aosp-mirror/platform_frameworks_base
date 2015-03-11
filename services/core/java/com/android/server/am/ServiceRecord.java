@@ -47,10 +47,15 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
+import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NAME;
+
 /**
  * A running application service.
  */
 final class ServiceRecord extends Binder {
+    private static final String TAG = TAG_WITH_CLASS_NAME ? "ServiceRecord" : TAG_AM;
+
     // Maximum number of delivery attempts before giving up.
     static final int MAX_DELIVERY_COUNT = 3;
 
@@ -487,8 +492,7 @@ final class ServiceRecord extends Binder {
                                 appUid, appPid, null, localForegroundId, localForegroundNoti,
                                 outId, userId);
                     } catch (RuntimeException e) {
-                        Slog.w(ActivityManagerService.TAG,
-                                "Error showing notification for service", e);
+                        Slog.w(TAG, "Error showing notification for service", e);
                         // If it gave us a garbage notification, it doesn't
                         // get to be foreground.
                         ams.setServiceForeground(name, ServiceRecord.this,
@@ -517,8 +521,7 @@ final class ServiceRecord extends Binder {
                         inm.cancelNotificationWithTag(localPackageName, null,
                                 localForegroundId, userId);
                     } catch (RuntimeException e) {
-                        Slog.w(ActivityManagerService.TAG,
-                                "Error canceling notification for service", e);
+                        Slog.w(TAG, "Error canceling notification for service", e);
                     } catch (RemoteException e) {
                     }
                 }

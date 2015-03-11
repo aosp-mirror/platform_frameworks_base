@@ -16,6 +16,9 @@
 
 package com.android.server.am;
 
+import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
+import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NAME;
+
 import android.app.ActivityManager;
 import android.app.IActivityContainer;
 import android.content.IIntentSender;
@@ -35,6 +38,8 @@ import java.io.PrintWriter;
 import java.lang.ref.WeakReference;
 
 final class PendingIntentRecord extends IIntentSender.Stub {
+    private static final String TAG = TAG_WITH_CLASS_NAME ? "PendingIntentRecord" : TAG_AM;
+
     final ActivityManagerService owner;
     final Key key;
     final int uid;
@@ -45,7 +50,7 @@ final class PendingIntentRecord extends IIntentSender.Stub {
     String stringName;
     String lastTagPrefix;
     String lastTag;
-    
+
     final static class Key {
         final int type;
         final String packageName;
@@ -266,8 +271,7 @@ final class PendingIntentRecord extends IIntentSender.Stub {
                                         options, userId, container, null);
                             }
                         } catch (RuntimeException e) {
-                            Slog.w(ActivityManagerService.TAG,
-                                    "Unable to send startActivity intent", e);
+                            Slog.w(TAG, "Unable to send startActivity intent", e);
                         }
                         break;
                     case ActivityManager.INTENT_SENDER_ACTIVITY_RESULT:
@@ -286,8 +290,7 @@ final class PendingIntentRecord extends IIntentSender.Stub {
                                 sendFinish = false;
                             }
                         } catch (RuntimeException e) {
-                            Slog.w(ActivityManagerService.TAG,
-                                    "Unable to send startActivity intent", e);
+                            Slog.w(TAG, "Unable to send startActivity intent", e);
                         }
                         break;
                     case ActivityManager.INTENT_SENDER_SERVICE:
@@ -295,12 +298,11 @@ final class PendingIntentRecord extends IIntentSender.Stub {
                             owner.startServiceInPackage(uid,
                                     finalIntent, resolvedType, userId);
                         } catch (RuntimeException e) {
-                            Slog.w(ActivityManagerService.TAG,
-                                    "Unable to send startService intent", e);
+                            Slog.w(TAG, "Unable to send startService intent", e);
                         }
                         break;
                 }
-                
+
                 if (sendFinish) {
                     try {
                         finishedReceiver.performReceive(new Intent(finalIntent), 0,
