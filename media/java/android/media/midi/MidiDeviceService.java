@@ -26,7 +26,7 @@ import android.util.Log;
 
 /**
  * A service that implements a virtual MIDI device.
- * Subclasses must implement the {@link #getInputPortReceivers} method to provide a
+ * Subclasses must implement the {@link #onGetInputPortReceivers} method to provide a
  * list of {@link MidiReceiver}s to receive data sent to the device's input ports.
  * Similarly, subclasses can call {@link #getOutputPortReceivers} to fetch a list
  * of {@link MidiReceiver}s for sending data out the output ports.
@@ -44,9 +44,6 @@ import android.util.Log;
  *           &lt;meta-data android:name="android.media.midi.MidiDeviceService"
                 android:resource="@xml/device_info" />
  * &lt;/service></pre>
- *
- * CANDIDATE FOR PUBLIC API
- * @hide
  */
 abstract public class MidiDeviceService extends Service {
     private static final String TAG = "MidiDeviceService";
@@ -77,7 +74,7 @@ abstract public class MidiDeviceService extends Service {
                 return;
             }
             mDeviceInfo = deviceInfo;
-            MidiReceiver[] inputPortReceivers = getInputPortReceivers();
+            MidiReceiver[] inputPortReceivers = onGetInputPortReceivers();
             if (inputPortReceivers == null) {
                 inputPortReceivers = new MidiReceiver[0];
             }
@@ -98,14 +95,14 @@ abstract public class MidiDeviceService extends Service {
      * the device has no input ports.
      * @return array of MidiReceivers
      */
-    abstract public MidiReceiver[] getInputPortReceivers();
+    abstract public MidiReceiver[] onGetInputPortReceivers();
 
     /**
      * Returns an array of {@link MidiReceiver} for the device's output ports.
      * These can be used to send data out the device's output ports.
      * @return array of MidiReceivers
      */
-    public MidiReceiver[] getOutputPortReceivers() {
+    public final MidiReceiver[] getOutputPortReceivers() {
         if (mServer == null) {
             return null;
         } else {
@@ -117,7 +114,7 @@ abstract public class MidiDeviceService extends Service {
      * returns the {@link MidiDeviceInfo} instance for this service
      * @return our MidiDeviceInfo
      */
-    public MidiDeviceInfo getDeviceInfo() {
+    public final MidiDeviceInfo getDeviceInfo() {
         return mDeviceInfo;
     }
 

@@ -19,9 +19,6 @@ package android.media.midi;
 /**
  * Interface provided by a device to allow attaching
  * MidiReceivers to a MIDI device.
- *
- * CANDIDATE FOR PUBLIC API
- * @hide
  */
 abstract public class MidiSender {
     /**

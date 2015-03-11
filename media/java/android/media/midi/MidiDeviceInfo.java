@@ -27,9 +27,6 @@ import android.os.Parcelable;
  *
  * This class is just an immutable object to encapsulate the MIDI device description.
  * Use the MidiDevice class to actually communicate with devices.
- *
- * CANDIDATE FOR PUBLIC API
- * @hide
  */
 public final class MidiDeviceInfo implements Parcelable {
 

@@ -103,7 +103,7 @@ public final class UsbMidiDevice implements Closeable {
             final int portF = port;
             mInputPortReceivers[port] = new MidiReceiver() {
                 @Override
-                public void receive(byte[] data, int offset, int count, long timestamp)
+                public void onReceive(byte[] data, int offset, int count, long timestamp)
                         throws IOException {
                     // FIXME - timestamps are ignored, future posting not supported yet.
                     mOutputStreams[portF].write(data, offset, count);
@@ -143,8 +143,7 @@ public final class UsbMidiDevice implements Closeable {
                                 pfd.revents = 0;
 
                                 int count = mInputStreams[index].read(buffer);
-                                long timestamp = System.nanoTime();
-                                outputReceivers[index].send(buffer, 0, count, timestamp);
+                                outputReceivers[index].send(buffer, 0, count);
                             } else if ((pfd.revents & (OsConstants.POLLERR
                                                         | OsConstants.POLLHUP)) != 0) {
                                 done = true;

@@ -21,44 +21,40 @@ import android.os.Parcelable;
 
 /**
  * This is an immutable class that describes the current status of a MIDI device's ports.
- *
- * CANDIDATE FOR PUBLIC API
- * @hide
  */
 public final class MidiDeviceStatus implements Parcelable {
 
     private static final String TAG = "MidiDeviceStatus";
 
     private final MidiDeviceInfo mDeviceInfo;
-    // true if input ports are busy
-    private final boolean mInputPortBusy[];
+    // true if input ports are open
+    private final boolean mInputPortOpen[];
     // open counts for output ports
     private final int mOutputPortOpenCount[];
 
     /**
      * @hide
      */
-    public MidiDeviceStatus(MidiDeviceInfo deviceInfo, boolean inputPortBusy[],
+    public MidiDeviceStatus(MidiDeviceInfo deviceInfo, boolean inputPortOpen[],
             int outputPortOpenCount[]) {
         // MidiDeviceInfo is immutable so we can share references
         mDeviceInfo = deviceInfo;
 
         // make copies of the arrays
-        mInputPortBusy = new boolean[inputPortBusy.length];
-        System.arraycopy(inputPortBusy, 0, mInputPortBusy, 0, inputPortBusy.length);
+        mInputPortOpen = new boolean[inputPortOpen.length];
+        System.arraycopy(inputPortOpen, 0, mInputPortOpen, 0, inputPortOpen.length);
         mOutputPortOpenCount = new int[outputPortOpenCount.length];
         System.arraycopy(outputPortOpenCount, 0, mOutputPortOpenCount, 0,
                 outputPortOpenCount.length);
     }
 
     /**
-     * Creates a MidiDeviceStatus with false for all input port busy values
-     * and zero for all output port open counts
+     * Creates a MidiDeviceStatus with zero for all port open counts
      * @hide
      */
     public MidiDeviceStatus(MidiDeviceInfo deviceInfo) {
         mDeviceInfo = deviceInfo;
-        mInputPortBusy = new boolean[deviceInfo.getInputPortCount()];
+        mInputPortOpen = new boolean[deviceInfo.getInputPortCount()];
         mOutputPortOpenCount = new int[deviceInfo.getOutputPortCount()];
     }
 
@@ -72,19 +68,19 @@ public final class MidiDeviceStatus implements Parcelable {
     }
 
     /**
-     * Returns true if an input port is busy.
+     * Returns true if an input port is open.
      *
-     * @param input port's port number
-     * @return input port busy status
+     * @param portNumber the input port's port number
+     * @return input port open status
      */
-    public boolean isInputPortBusy(int portNumber) {
-        return mInputPortBusy[portNumber];
+    public boolean isInputPortOpen(int portNumber) {
+        return mInputPortOpen[portNumber];
     }
 
     /**
      * Returns the open count for an output port.
      *
-     * @param output port's port number
+     * @param portNumber the output port's port number
      * @return output port open count
      */
     public int getOutputPortOpenCount(int portNumber) {
@@ -96,9 +92,9 @@ public final class MidiDeviceStatus implements Parcelable {
         StringBuilder builder = new StringBuilder(mDeviceInfo.toString());
         int inputPortCount = mDeviceInfo.getInputPortCount();
         int outputPortCount = mDeviceInfo.getOutputPortCount();
-        builder.append(" mInputPortBusy=[");
+        builder.append(" mInputPortOpen=[");
         for (int i = 0; i < inputPortCount; i++) {
-            builder.append(mInputPortBusy[i]);
+            builder.append(mInputPortOpen[i]);
             if (i < inputPortCount -1) {
                 builder.append(",");
             }
@@ -119,9 +115,9 @@ public final class MidiDeviceStatus implements Parcelable {
         public MidiDeviceStatus createFromParcel(Parcel in) {
             ClassLoader classLoader = MidiDeviceInfo.class.getClassLoader();
             MidiDeviceInfo deviceInfo = in.readParcelable(classLoader);
-            boolean[] inputPortBusy = in.createBooleanArray();
+            boolean[] inputPortOpen = in.createBooleanArray();
             int[] outputPortOpenCount = in.createIntArray();
-            return new MidiDeviceStatus(deviceInfo, inputPortBusy, outputPortOpenCount);
+            return new MidiDeviceStatus(deviceInfo, inputPortOpen, outputPortOpenCount);
         }
 
         public MidiDeviceStatus[] newArray(int size) {
@@ -135,7 +131,7 @@ public final class MidiDeviceStatus implements Parcelable {
 
     public void writeToParcel(Parcel parcel, int flags) {
         parcel.writeParcelable(mDeviceInfo, flags);
-        parcel.writeBooleanArray(mInputPortBusy);
+        parcel.writeBooleanArray(mInputPortOpen);
         parcel.writeIntArray(mOutputPortOpenCount);
    }
 }

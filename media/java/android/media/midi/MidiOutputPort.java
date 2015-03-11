@@ -31,9 +31,6 @@ import java.io.IOException;
 
 /**
  * This class is used for receiving data from a port on a MIDI device
- *
- * CANDIDATE FOR PUBLIC API
- * @hide
  */
 public final class MidiOutputPort extends MidiSender implements Closeable {
     private static final String TAG = "MidiOutputPort";
@@ -68,7 +65,7 @@ public final class MidiOutputPort extends MidiSender implements Closeable {
                     long timestamp = MidiPortImpl.getMessageTimeStamp(buffer, count);
 
                     // dispatch to all our receivers
-                    mDispatcher.send(buffer, offset, size, timestamp);
+                    mDispatcher.sendWithTimestamp(buffer, offset, size, timestamp);
                 }
             } catch (IOException e) {
                 // FIXME report I/O failure?
