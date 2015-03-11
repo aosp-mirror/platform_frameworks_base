@@ -29,6 +29,7 @@ import android.media.midi.IMidiDeviceServer;
 import android.media.midi.IMidiManager;
 import android.media.midi.MidiDeviceInfo;
 import android.media.midi.MidiDeviceService;
+import android.media.midi.MidiDeviceStatus;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -147,6 +148,19 @@ public class MidiService extends IMidiManager.Stub {
             }
         }
 
+        public void deviceStatusChanged(Device device, MidiDeviceStatus status) {
+            // ignore private devices that our client cannot access
+            if (!device.isUidAllowed(mUid)) return;
+
+            try {
+                for (IMidiDeviceListener listener : mListeners) {
+                    listener.onDeviceStatusChanged(status);
+                }
+            } catch (RemoteException e) {
+                Log.e(TAG, "remote exception", e);
+            }
+        }
+
         public void binderDied() {
             removeClient(mToken);
         }
@@ -187,6 +201,8 @@ public class MidiService extends IMidiManager.Stub {
     private final class Device implements IBinder.DeathRecipient {
         private final IMidiDeviceServer mServer;
         private final MidiDeviceInfo mDeviceInfo;
+        private MidiDeviceStatus mDeviceStatus;
+        private IBinder mDeviceStatusToken;
         // ServiceInfo for the device's MidiDeviceServer implementation (virtual devices only)
         private final ServiceInfo mServiceInfo;
         // UID of device implementation
@@ -204,6 +220,33 @@ public class MidiService extends IMidiManager.Stub {
             return mDeviceInfo;
         }
 
+        public MidiDeviceStatus getDeviceStatus() {
+            return mDeviceStatus;
+        }
+
+        public void setDeviceStatus(IBinder token, MidiDeviceStatus status) {
+            mDeviceStatus = status;
+
+            if (mDeviceStatusToken == null && token != null) {
+                // register a death recipient so we can clear the status when the device dies
+                try {
+                    token.linkToDeath(new IBinder.DeathRecipient() {
+                        @Override
+                        public void binderDied() {
+                            // reset to default status and clear the token
+                            mDeviceStatus = new MidiDeviceStatus(mDeviceInfo);
+                            mDeviceStatusToken = null;
+                            notifyDeviceStatusChanged(Device.this, mDeviceStatus);
+                        }
+                    }, 0);
+                    mDeviceStatusToken = token;
+                } catch (RemoteException e) {
+                    // reset to default status
+                    mDeviceStatus = new MidiDeviceStatus(mDeviceInfo);
+                }
+            }
+        }
+
         public IMidiDeviceServer getDeviceServer() {
             return mServer;
         }
@@ -214,6 +257,10 @@ public class MidiService extends IMidiManager.Stub {
 
         public String getPackageName() {
             return (mServiceInfo == null ? null : mServiceInfo.packageName);
+        }
+
+        public int getUid() {
+            return mUid;
         }
 
         public boolean isUidAllowed(int uid) {
@@ -302,13 +349,14 @@ public class MidiService extends IMidiManager.Stub {
     @Override
     public MidiDeviceInfo registerDeviceServer(IMidiDeviceServer server, int numInputPorts,
             int numOutputPorts, Bundle properties, int type) {
-        if (type != MidiDeviceInfo.TYPE_VIRTUAL && Binder.getCallingUid() != Process.SYSTEM_UID) {
+        int uid = Binder.getCallingUid();
+        if (type != MidiDeviceInfo.TYPE_VIRTUAL && uid != Process.SYSTEM_UID) {
             throw new SecurityException("only system can create non-virtual devices");
         }
 
         synchronized (mDevicesByInfo) {
             return addDeviceLocked(type, numInputPorts, numOutputPorts, properties,
-            server, null, false, -1);
+            server, null, false, uid);
         }
     }
 
@@ -334,6 +382,39 @@ public class MidiService extends IMidiManager.Stub {
                 }
             }
             return null;
+        }
+    }
+
+    @Override
+    public MidiDeviceStatus getDeviceStatus(MidiDeviceInfo deviceInfo) {
+        Device device = mDevicesByInfo.get(deviceInfo);
+        if (device == null) {
+            throw new IllegalArgumentException("no such device for " + deviceInfo);
+        }
+        return device.getDeviceStatus();
+    }
+
+    @Override
+    public void setDeviceStatus(IBinder token, MidiDeviceStatus status) {
+        MidiDeviceInfo deviceInfo = status.getDeviceInfo();
+        Device device = mDevicesByInfo.get(deviceInfo);
+        if (device == null) {
+            // Just return quietly here if device no longer exists
+            return;
+        }
+        if (Binder.getCallingUid() != device.getUid()) {
+            throw new SecurityException("setDeviceStatus() caller UID " + Binder.getCallingUid()
+                    + " does not match device's UID " + device.getUid());
+        }
+        device.setDeviceStatus(token, status);
+        notifyDeviceStatusChanged(device, status);
+    }
+
+    private void notifyDeviceStatusChanged(Device device, MidiDeviceStatus status) {
+        synchronized (mClients) {
+            for (Client c : mClients.values()) {
+                c.deviceStatusChanged(device, status);
+            }
         }
     }
 
@@ -469,17 +550,15 @@ public class MidiService extends IMidiManager.Stub {
                                 continue;
                             }
 
-                            int uid = -1;
-                            if (isPrivate) {
-                                try {
-                                    ApplicationInfo appInfo = mPackageManager.getApplicationInfo(
-                                            serviceInfo.packageName, 0);
-                                    uid = appInfo.uid;
-                                } catch (PackageManager.NameNotFoundException e) {
-                                    Log.e(TAG, "could not fetch ApplicationInfo for "
-                                            + serviceInfo.packageName);
-                                    continue;
-                                }
+                            int uid;
+                            try {
+                                ApplicationInfo appInfo = mPackageManager.getApplicationInfo(
+                                        serviceInfo.packageName, 0);
+                                uid = appInfo.uid;
+                            } catch (PackageManager.NameNotFoundException e) {
+                                Log.e(TAG, "could not fetch ApplicationInfo for "
+                                        + serviceInfo.packageName);
+                                continue;
                             }
 
                             synchronized (mDevicesByInfo) {

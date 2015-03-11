@@ -19,6 +19,7 @@ package android.media.midi;
 import android.media.midi.IMidiDeviceListener;
 import android.media.midi.IMidiDeviceServer;
 import android.media.midi.MidiDeviceInfo;
+import android.media.midi.MidiDeviceStatus;
 import android.os.Bundle;
 import android.os.IBinder;
 
@@ -44,4 +45,11 @@ interface IMidiManager
     // used by MidiDeviceService to access the MidiDeviceInfo that was created based on its
     // manifest's meta-data
     MidiDeviceInfo getServiceDeviceInfo(String packageName, String className);
+
+    // used for client's to retrieve a device's MidiDeviceStatus
+    MidiDeviceStatus getDeviceStatus(in MidiDeviceInfo deviceInfo);
+
+    // used by MIDI devices to report their status
+    // the token is used by MidiService for death notification
+    void setDeviceStatus(IBinder token, in MidiDeviceStatus status);
 }
