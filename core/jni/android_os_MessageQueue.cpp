@@ -149,7 +149,7 @@ int NativeMessageQueue::handleEvent(int fd, int looperEvents, void* data) {
     if (looperEvents & (Looper::EVENT_ERROR | Looper::EVENT_HANGUP | Looper::EVENT_INVALID)) {
         events |= CALLBACK_EVENT_ERROR;
     }
-    int oldWatchedEvents = reinterpret_cast<int>(data);
+    int oldWatchedEvents = reinterpret_cast<intptr_t>(data);
     int newWatchedEvents = mPollEnv->CallIntMethod(mPollObj,
             gMessageQueueClassInfo.dispatchEvents, fd, events);
     if (!newWatchedEvents) {
