@@ -3512,6 +3512,7 @@ package android.app {
     method public void onPrepareNavigateUpTaskStack(android.app.TaskStackBuilder);
     method public boolean onPrepareOptionsMenu(android.view.Menu);
     method public boolean onPreparePanel(int, android.view.View, android.view.Menu);
+    method public void onProvideAssistContent(android.app.AssistContent);
     method public void onProvideAssistData(android.os.Bundle);
     method protected void onRestart();
     method protected void onRestoreInstanceState(android.os.Bundle);
@@ -4047,20 +4048,33 @@ package android.app {
     field public java.lang.String serviceDetails;
   }
 
-  public final class AssistData implements android.os.Parcelable {
+  public class AssistContent implements android.os.Parcelable {
+    ctor public AssistContent();
     method public int describeContents();
-    method public android.content.ComponentName getActivityComponent();
-    method public static android.app.AssistData getAssistData(android.os.Bundle);
-    method public void getWindowAt(int, android.app.AssistData.ViewNode);
-    method public int getWindowCount();
+    method public static android.app.AssistContent getAssistContent(android.os.Bundle);
+    method public android.content.ClipData getClipData();
+    method public android.content.Intent getIntent();
+    method public void setClipData(android.content.ClipData);
+    method public void setIntent(android.content.Intent);
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final java.lang.String ASSIST_KEY = "android:assist";
-    field public static final android.os.Parcelable.Creator<android.app.AssistData> CREATOR;
+    field public static final java.lang.String ASSIST_KEY = "android:assist_content";
+    field public static final android.os.Parcelable.Creator<android.app.AssistContent> CREATOR;
   }
 
-  public static class AssistData.ViewNode {
-    ctor public AssistData.ViewNode();
-    method public void getChildAt(int, android.app.AssistData.ViewNode);
+  public final class AssistStructure implements android.os.Parcelable {
+    method public int describeContents();
+    method public android.content.ComponentName getActivityComponent();
+    method public static android.app.AssistStructure getAssistStructure(android.os.Bundle);
+    method public void getWindowAt(int, android.app.AssistStructure.ViewNode);
+    method public int getWindowCount();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final java.lang.String ASSIST_KEY = "android:assist_structure";
+    field public static final android.os.Parcelable.Creator<android.app.AssistStructure> CREATOR;
+  }
+
+  public static class AssistStructure.ViewNode {
+    ctor public AssistStructure.ViewNode();
+    method public void getChildAt(int, android.app.AssistStructure.ViewNode);
     method public int getChildCount();
     method public java.lang.String getClassName();
     method public java.lang.String getContentDescription();
@@ -4070,9 +4084,13 @@ package android.app {
     method public int getLeft();
     method public int getScrollX();
     method public int getScrollY();
-    method public java.lang.String getText();
+    method public java.lang.CharSequence getText();
+    method public int getTextBackgroundColor();
+    method public int getTextColor();
     method public int getTextSelectionEnd();
     method public int getTextSelectionStart();
+    method public float getTextSize();
+    method public int getTextStyle();
     method public int getTop();
     method public int getVisibility();
     method public int getWidth();
@@ -4086,6 +4104,11 @@ package android.app {
     method public boolean isFocused();
     method public boolean isLongClickable();
     method public boolean isSelected();
+    field public static final int TEXT_COLOR_UNDEFINED = 1; // 0x1
+    field public static final int TEXT_STYLE_BOLD = 1; // 0x1
+    field public static final int TEXT_STYLE_ITALIC = 2; // 0x2
+    field public static final int TEXT_STYLE_STRIKE_THRU = 8; // 0x8
+    field public static final int TEXT_STYLE_UNDERLINE = 4; // 0x4
   }
 
   public class DatePickerDialog extends android.app.AlertDialog implements android.widget.DatePicker.OnDateChangedListener android.content.DialogInterface.OnClickListener {
@@ -8134,6 +8157,7 @@ package android.content {
     field public static final java.lang.String EXTRA_ASSIST_CONTEXT = "android.intent.extra.ASSIST_CONTEXT";
     field public static final java.lang.String EXTRA_ASSIST_INPUT_HINT_KEYBOARD = "android.intent.extra.ASSIST_INPUT_HINT_KEYBOARD";
     field public static final java.lang.String EXTRA_ASSIST_PACKAGE = "android.intent.extra.ASSIST_PACKAGE";
+    field public static final java.lang.String EXTRA_ASSIST_UID = "android.intent.extra.ASSIST_UID";
     field public static final java.lang.String EXTRA_BCC = "android.intent.extra.BCC";
     field public static final java.lang.String EXTRA_BUG_REPORT = "android.intent.extra.BUG_REPORT";
     field public static final java.lang.String EXTRA_CC = "android.intent.extra.CC";
@@ -36469,7 +36493,7 @@ package android.view {
     method protected void onMeasure(int, int);
     method protected void onOverScrolled(int, int, boolean, boolean);
     method public void onPopulateAccessibilityEvent(android.view.accessibility.AccessibilityEvent);
-    method public void onProvideAssistData(android.view.ViewAssistData, android.os.Bundle);
+    method public void onProvideAssistStructure(android.view.ViewAssistStructure, android.os.Bundle);
     method protected void onRestoreInstanceState(android.os.Parcelable);
     method public void onRtlPropertiesChanged(int);
     method protected android.os.Parcelable onSaveInstanceState();
@@ -36872,8 +36896,8 @@ package android.view {
     method public static android.animation.Animator createCircularReveal(android.view.View, int, int, float, float);
   }
 
-  public abstract class ViewAssistData {
-    ctor public ViewAssistData();
+  public abstract class ViewAssistStructure {
+    ctor public ViewAssistStructure();
     method public abstract java.lang.CharSequence getHint();
     method public abstract java.lang.CharSequence getText();
     method public abstract int getTextSelectionEnd();
@@ -36881,6 +36905,7 @@ package android.view {
     method public abstract void setHint(java.lang.CharSequence);
     method public abstract void setText(java.lang.CharSequence);
     method public abstract void setText(java.lang.CharSequence, int, int);
+    method public abstract void setTextPaint(android.text.TextPaint);
   }
 
   public class ViewConfiguration {

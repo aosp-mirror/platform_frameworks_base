@@ -2519,6 +2519,17 @@ public final class ActivityThread {
         if (r != null) {
             r.activity.getApplication().dispatchOnProvideAssistData(r.activity, data);
             r.activity.onProvideAssistData(data);
+            if (cmd.requestType == ActivityManager.ASSIST_CONTEXT_FULL) {
+                data.putParcelable(AssistStructure.ASSIST_KEY, new AssistStructure(r.activity));
+                AssistContent content = new AssistContent();
+                Intent intent = new Intent(r.activity.getIntent());
+                intent.setFlags(intent.getFlags() & ~(Intent.FLAG_GRANT_WRITE_URI_PERMISSION
+                        | Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION));
+                intent.removeUnsafeExtras();
+                content.setIntent(intent);
+                r.activity.onProvideAssistContent(content);
+                data.putParcelable(AssistContent.ASSIST_KEY, content);
+            }
         }
         if (data.isEmpty()) {
             data = null;

@@ -1547,17 +1547,35 @@ public class Activity extends ContextThemeWrapper
      * {@link Intent#ACTION_ASSIST} Intent with all of the context of the current
      * application.  You can override this method to place into the bundle anything
      * you would like to appear in the {@link Intent#EXTRA_ASSIST_CONTEXT} part
-     * of the assist Intent.  The default implementation automatically generates a
-     * {@link AssistData} from your activity and places it in to the Bundle; if you
-     * don't want your UI reported to the assistant, don't call this default
-     * implementation.
+     * of the assist Intent.
      *
      * <p>This function will be called after any global assist callbacks that had
      * been registered with {@link Application#registerOnProvideAssistDataListener
      * Application.registerOnProvideAssistDataListener}.
      */
     public void onProvideAssistData(Bundle data) {
-        data.putParcelable(AssistData.ASSIST_KEY, new AssistData(this));
+    }
+
+    /**
+     * This is called when the user is requesting an assist, to provide references
+     * to content related to the current activity.  Before being called, the
+     * {@code outContent} Intent is filled with the base Intent of the activity (the Intent
+     * returned by {@link #getIntent()}).  The Intent's extras are stripped of any types
+     * that are not valid for {@link PersistableBundle} or non-framework Parcelables, and
+     * the flags {@link Intent#FLAG_GRANT_WRITE_URI_PERMISSION} and
+     * {@link Intent#FLAG_GRANT_PERSISTABLE_URI_PERMISSION} are cleared from the Intent.
+     *
+     * <p>Custom implementation may adjust the content intent to better reflect the top-level
+     * context of the activity, and fill in its ClipData with additional content of
+     * interest that the user is currently viewing.  For example, an image gallery application
+     * that has launched in to an activity allowing the user to swipe through pictures should
+     * modify the intent to reference the current image they are looking it; such an
+     * application when showing a list of pictures should add a ClipData that has
+     * references to all of the pictures currently visible on screen.</p>
+     *
+     * @param outContent The assist content to return.
+     */
+    public void onProvideAssistContent(AssistContent outContent) {
     }
 
     /**

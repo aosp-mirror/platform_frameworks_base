@@ -969,7 +969,7 @@ public class SearchManager
             intent.setComponent(comp);
             if (inclContext) {
                 IActivityManager am = ActivityManagerNative.getDefault();
-                Bundle extras = am.getAssistContextExtras(0);
+                Bundle extras = am.getAssistContextExtras(ActivityManager.ASSIST_CONTEXT_BASIC);
                 if (extras != null) {
                     intent.replaceExtras(extras);
                 }
@@ -985,12 +985,12 @@ public class SearchManager
      * Launch an assist action for the current top activity.
      * @hide
      */
-    public boolean launchAssistAction(int requestType, String hint, int userHandle) {
+    public boolean launchAssistAction(String hint, int userHandle) {
         try {
             if (mService == null) {
                 return false;
             }
-            return mService.launchAssistAction(requestType, hint, userHandle);
+            return mService.launchAssistAction(hint, userHandle);
         } catch (RemoteException re) {
             Log.e(TAG, "launchAssistAction() failed: " + re);
             return false;

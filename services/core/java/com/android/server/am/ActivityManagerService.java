@@ -10149,16 +10149,13 @@ public final class ActivityManagerService extends ActivityManagerNative
     private PendingAssistExtras enqueueAssistContext(int requestType, Intent intent, String hint,
             IResultReceiver receiver, int userHandle) {
         enforceCallingPermission(android.Manifest.permission.GET_TOP_ACTIVITY_INFO,
-                "getAssistContextExtras()");
-        PendingAssistExtras pae;
-        Bundle extras = new Bundle();
+                "enqueueAssistContext()");
         synchronized (this) {
-            ActivityRecord activity = getFocusedStack().mResumedActivity;
+            ActivityRecord activity = getFocusedStack().topActivity();
             if (activity == null) {
-                Slog.w(TAG, "getAssistContextExtras failed: no resumed activity");
+                Slog.w(TAG, "getAssistContextExtras failed: no top activity");
                 return null;
             }
-            extras.putString(Intent.EXTRA_ASSIST_PACKAGE, activity.packageName);
             if (activity.app == null || activity.app.thread == null) {
                 Slog.w(TAG, "getAssistContextExtras failed: no process for " + activity);
                 return null;
@@ -10167,6 +10164,10 @@ public final class ActivityManagerService extends ActivityManagerNative
                 Slog.w(TAG, "getAssistContextExtras failed: request process same as " + activity);
                 return null;
             }
+            PendingAssistExtras pae;
+            Bundle extras = new Bundle();
+            extras.putString(Intent.EXTRA_ASSIST_PACKAGE, activity.packageName);
+            extras.putInt(Intent.EXTRA_ASSIST_UID, activity.app.uid);
             pae = new PendingAssistExtras(activity, extras, intent, hint, receiver, userHandle);
             try {
                 activity.app.thread.requestAssistContextExtras(activity.appToken, pae,

@@ -5620,12 +5620,12 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
-     * Called when assist data is being retrieved from a view as part of
+     * Called when assist structure is being retrieved from a view as part of
      * {@link android.app.Activity#onProvideAssistData Activity.onProvideAssistData}.
-     * @param data
-     * @param extras
+     * @param structure Additional standard structured view structure to supply.
+     * @param extras Non-standard extensions.
      */
-    public void onProvideAssistData(ViewAssistData data, Bundle extras) {
+    public void onProvideAssistStructure(ViewAssistStructure structure, Bundle extras) {
     }
 
     /**

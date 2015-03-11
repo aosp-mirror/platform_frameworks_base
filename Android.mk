@@ -550,6 +550,8 @@ aidl_files := \
 	frameworks/base/core/java/android/service/chooser/ChooserTarget.aidl \
 	frameworks/base/core/java/android/speech/tts/Voice.aidl \
 	frameworks/base/core/java/android/app/usage/UsageEvents.aidl \
+	frameworks/base/core/java/android/app/AssistStructure.aidl \
+	frameworks/base/core/java/android/app/AssistContent.aidl \
 	frameworks/base/core/java/android/app/Notification.aidl \
 	frameworks/base/core/java/android/app/WallpaperInfo.aidl \
 	frameworks/base/core/java/android/app/AppOpsManager.aidl \

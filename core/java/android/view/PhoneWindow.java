@@ -4158,7 +4158,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                 & Configuration.UI_MODE_TYPE_MASK) == Configuration.UI_MODE_TYPE_TELEVISION) {
             // On TVs, if the app doesn't implement search, we want to launch assist.
             return ((SearchManager)getContext().getSystemService(Context.SEARCH_SERVICE))
-                    .launchAssistAction(0, null, UserHandle.myUserId());
+                    .launchAssistAction(null, UserHandle.myUserId());
         }
         return result;
     }

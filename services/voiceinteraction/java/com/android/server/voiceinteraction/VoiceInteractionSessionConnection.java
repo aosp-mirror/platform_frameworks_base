@@ -16,12 +16,17 @@
 
 package com.android.server.voiceinteraction;
 
+import android.app.ActivityManager;
 import android.app.ActivityManagerNative;
+import android.app.AssistContent;
 import android.app.IActivityManager;
+import android.content.ClipData;
 import android.content.ComponentName;
+import android.content.ContentProvider;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.net.Uri;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -53,6 +58,7 @@ final class VoiceInteractionSessionConnection implements ServiceConnection {
     final int mCallingUid;
     final IActivityManager mAm;
     final IWindowManager mIWindowManager;
+    final IBinder mPermissionOwner;
     boolean mShown;
     Bundle mShowArgs;
     int mShowFlags;
@@ -83,15 +89,9 @@ final class VoiceInteractionSessionConnection implements ServiceConnection {
         public void send(int resultCode, Bundle resultData) throws RemoteException {
             synchronized (mLock) {
                 if (mShown) {
-                    if (mSession != null) {
-                        try {
-                            mSession.handleAssist(resultData);
-                        } catch (RemoteException e) {
-                        }
-                    } else {
-                        mHaveAssistData = true;
-                        mAssistData = resultData;
-                    }
+                    mHaveAssistData = true;
+                    mAssistData = resultData;
+                    deliverAssistData();
                 }
             }
         }
@@ -109,6 +109,14 @@ final class VoiceInteractionSessionConnection implements ServiceConnection {
         mAm = ActivityManagerNative.getDefault();
         mIWindowManager = IWindowManager.Stub.asInterface(
                 ServiceManager.getService(Context.WINDOW_SERVICE));
+        IBinder permOwner = null;
+        try {
+            permOwner = mAm.newUriPermissionOwner("voicesession:"
+                    + component.flattenToShortString());
+        } catch (RemoteException e) {
+            Slog.w("voicesession", "AM dead", e);
+        }
+        mPermissionOwner = permOwner;
         mBindIntent = new Intent(VoiceInteractionService.SERVICE_INTERFACE);
         mBindIntent.setComponent(mSessionComponentName);
         mBound = mContext.bindServiceAsUser(mBindIntent, this,
@@ -138,7 +146,8 @@ final class VoiceInteractionSessionConnection implements ServiceConnection {
             mShowFlags = flags;
             if ((flags&VoiceInteractionService.START_WITH_ASSIST) != 0) {
                 try {
-                    mAm.requestAssistContextExtras(0, mAssistReceiver);
+                    mAm.requestAssistContextExtras(ActivityManager.ASSIST_CONTEXT_FULL,
+                            mAssistReceiver);
                 } catch (RemoteException e) {
                 }
             } else {
@@ -152,18 +161,89 @@ final class VoiceInteractionSessionConnection implements ServiceConnection {
                     mShowFlags = 0;
                 } catch (RemoteException e) {
                 }
-                if (mHaveAssistData) {
-                    try {
-                        mSession.handleAssist(mAssistData);
-                        mAssistData = null;
-                        mHaveAssistData = false;
-                    } catch (RemoteException e) {
-                    }
-                }
+                deliverAssistData();
             }
             return true;
         }
         return false;
+    }
+
+    void grantUriPermission(Uri uri, int mode, int srcUid, int destUid, String destPkg) {
+        if (!"content".equals(uri.getScheme())) {
+            return;
+        }
+        long ident = Binder.clearCallingIdentity();
+        try {
+            // This will throw SecurityException for us.
+            mAm.checkGrantUriPermission(srcUid, null, ContentProvider.getUriWithoutUserId(uri),
+                    mode, ContentProvider.getUserIdFromUri(uri, UserHandle.getUserId(srcUid)));
+            // No security exception, do the grant.
+            int sourceUserId = ContentProvider.getUserIdFromUri(uri, mUser);
+            uri = ContentProvider.getUriWithoutUserId(uri);
+            mAm.grantUriPermissionFromOwner(mPermissionOwner, srcUid, destPkg,
+                    uri, Intent.FLAG_GRANT_READ_URI_PERMISSION, sourceUserId, mUser);
+        } catch (RemoteException e) {
+        } catch (SecurityException e) {
+            Slog.w(TAG, "Can't propagate permission", e);
+        } finally {
+            Binder.restoreCallingIdentity(ident);
+        }
+
+    }
+
+    void grantClipDataItemPermission(ClipData.Item item, int mode, int srcUid, int destUid,
+            String destPkg) {
+        if (item.getUri() != null) {
+            grantUriPermission(item.getUri(), mode, srcUid, destUid, destPkg);
+        }
+        Intent intent = item.getIntent();
+        if (intent != null && intent.getData() != null) {
+            grantUriPermission(intent.getData(), mode, srcUid, destUid, destPkg);
+        }
+    }
+
+    void grantClipDataPermissions(ClipData data, int mode, int srcUid, int destUid,
+            String destPkg) {
+        final int N = data.getItemCount();
+        for (int i=0; i<N; i++) {
+            grantClipDataItemPermission(data.getItemAt(i), mode, srcUid, destUid, destPkg);
+        }
+    }
+
+    void deliverAssistData() {
+        if (mSession == null || !mHaveAssistData) {
+            return;
+        }
+        if (mAssistData != null) {
+            int uid = mAssistData.getInt(Intent.EXTRA_ASSIST_UID, -1);
+            if (uid >= 0) {
+                Bundle assistContext = mAssistData.getBundle(Intent.EXTRA_ASSIST_CONTEXT);
+                if (assistContext != null) {
+                    AssistContent content = AssistContent.getAssistContent(assistContext);
+                    if (content != null) {
+                        Intent intent = content.getIntent();
+                        if (intent != null) {
+                            ClipData data = intent.getClipData();
+                            if (data != null && Intent.isAccessUriMode(intent.getFlags())) {
+                                grantClipDataPermissions(data, intent.getFlags(), uid,
+                                        mCallingUid, mSessionComponentName.getPackageName());
+                            }
+                        }
+                        ClipData data = content.getClipData();
+                        if (data != null) {
+                            grantClipDataPermissions(data, Intent.FLAG_GRANT_READ_URI_PERMISSION,
+                                    uid, mCallingUid, mSessionComponentName.getPackageName());
+                        }
+                    }
+                }
+            }
+        }
+        try {
+            mSession.handleAssist(mAssistData);
+            mAssistData = null;
+            mHaveAssistData = false;
+        } catch (RemoteException e) {
+        }
     }
 
     public boolean hideLocked() {
@@ -179,6 +259,13 @@ final class VoiceInteractionSessionConnection implements ServiceConnection {
                         mSession.hide();
                     } catch (RemoteException e) {
                     }
+                }
+                try {
+                    mAm.revokeUriPermissionFromOwner(mPermissionOwner, null,
+                            Intent.FLAG_GRANT_READ_URI_PERMISSION
+                                    | Intent.FLAG_GRANT_WRITE_URI_PERMISSION,
+                            mUser);
+                } catch (RemoteException e) {
                 }
             }
             if (mFullyBound) {

@@ -17,7 +17,7 @@
 package com.android.test.voiceinteraction;
 
 import android.annotation.Nullable;
-import android.app.AssistData;
+import android.app.AssistStructure;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Paint;
@@ -31,7 +31,7 @@ import java.util.ArrayList;
 public class AssistVisualizer extends View {
     static final String TAG = "AssistVisualizer";
 
-    AssistData mAssistData;
+    AssistStructure mAssistStructure;
     final Paint mFramePaint = new Paint();
     final ArrayList<Rect> mTextRects = new ArrayList<>();
     final int[] mTmpLocation = new int[2];
@@ -44,25 +44,25 @@ public class AssistVisualizer extends View {
         mFramePaint.setStrokeWidth(0);
     }
 
-    public void setAssistData(AssistData ad) {
-        mAssistData = ad;
+    public void setAssistStructure(AssistStructure as) {
+        mAssistStructure = as;
         mTextRects.clear();
-        final int N = ad.getWindowCount();
+        final int N = as.getWindowCount();
         if (N > 0) {
-            AssistData.ViewNode window = new AssistData.ViewNode();
+            AssistStructure.ViewNode window = new AssistStructure.ViewNode();
             for (int i=0; i<N; i++) {
-                ad.getWindowAt(i, window);
+                as.getWindowAt(i, window);
                 buildTextRects(window, 0, 0);
             }
         }
     }
 
     public void clearAssistData() {
-        mAssistData = null;
+        mAssistStructure = null;
         mTextRects.clear();
     }
 
-    void buildTextRects(AssistData.ViewNode root, int parentLeft, int parentTop) {
+    void buildTextRects(AssistStructure.ViewNode root, int parentLeft, int parentTop) {
         if (root.getVisibility() != View.VISIBLE) {
             return;
         }
@@ -78,7 +78,7 @@ public class AssistVisualizer extends View {
         if (N > 0) {
             left -= root.getScrollX();
             top -= root.getScrollY();
-            AssistData.ViewNode child = new AssistData.ViewNode();
+            AssistStructure.ViewNode child = new AssistStructure.ViewNode();
             for (int i=0; i<N; i++) {
                 root.getChildAt(i, child);
                 buildTextRects(child, left, top);
