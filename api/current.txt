@@ -36925,6 +36925,26 @@ package android.webkit {
     method public abstract void onReceivedIcon(java.lang.String, android.graphics.Bitmap);
   }
 
+  public class WebMessage {
+    ctor public WebMessage(java.lang.String);
+    ctor public WebMessage(java.lang.String, android.webkit.WebMessagePort[]);
+    method public java.lang.String getData();
+    method public android.webkit.WebMessagePort[] getPorts();
+  }
+
+  public abstract class WebMessagePort {
+    ctor public WebMessagePort();
+    method public abstract void close();
+    method public abstract void postMessage(android.webkit.WebMessage);
+    method public abstract void setWebMessageCallback(android.webkit.WebMessagePort.WebMessageCallback);
+    method public abstract void setWebMessageCallback(android.webkit.WebMessagePort.WebMessageCallback, android.os.Handler);
+  }
+
+  public static abstract class WebMessagePort.WebMessageCallback {
+    ctor public WebMessagePort.WebMessageCallback();
+    method public void onMessage(android.webkit.WebMessagePort, android.webkit.WebMessage);
+  }
+
   public abstract class WebResourceError {
     ctor public WebResourceError();
     method public abstract java.lang.String getDescription();
@@ -37168,6 +37188,7 @@ package android.webkit {
     method public android.webkit.WebBackForwardList copyBackForwardList();
     method public deprecated android.print.PrintDocumentAdapter createPrintDocumentAdapter();
     method public android.print.PrintDocumentAdapter createPrintDocumentAdapter(java.lang.String);
+    method public android.webkit.WebMessagePort[] createWebMessageChannel();
     method public void destroy();
     method public void documentHasImages(android.os.Message);
     method public static void enableSlowWholeDocumentDraw();
@@ -37208,6 +37229,7 @@ package android.webkit {
     method public boolean pageDown(boolean);
     method public boolean pageUp(boolean);
     method public void pauseTimers();
+    method public void postMessageToMainFrame(android.webkit.WebMessage, android.net.Uri);
     method public void postUrl(java.lang.String, byte[]);
     method public void reload();
     method public void removeJavascriptInterface(java.lang.String);
