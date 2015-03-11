@@ -144,7 +144,7 @@ public final class UsbMidiDevice implements Closeable {
 
                                 int count = mInputStreams[index].read(buffer);
                                 long timestamp = System.nanoTime();
-                                outputReceivers[index].receive(buffer, 0, count, timestamp);
+                                outputReceivers[index].send(buffer, 0, count, timestamp);
                             } else if ((pfd.revents & (OsConstants.POLLERR
                                                         | OsConstants.POLLHUP)) != 0) {
                                 done = true;

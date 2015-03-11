@@ -81,19 +81,22 @@ public final class MidiInputPort extends MidiReceiver implements Closeable {
      *                  {@link java.lang.System#nanoTime}
      */
     public void receive(byte[] msg, int offset, int count, long timestamp) throws IOException {
-        assert(offset >= 0 && count >= 0 && offset + count <= msg.length);
+        if (offset < 0 || count < 0 || offset + count > msg.length) {
+            throw new IllegalArgumentException("offset or count out of range");
+        }
+        if (count > MidiPortImpl.MAX_PACKET_DATA_SIZE) {
+            throw new IllegalArgumentException("count exceeds max message size");
+        }
 
         synchronized (mBuffer) {
-            while (count > 0) {
-                int length = MidiPortImpl.packMessage(msg, offset, count, timestamp, mBuffer);
-                mOutputStream.write(mBuffer, 0, length);
-                int sent = MidiPortImpl.getMessageSize(mBuffer, length);
-                assert(sent >= 0 && sent <= length);
-
-                offset += sent;
-                count -= sent;
-            }
+            int length = MidiPortImpl.packMessage(msg, offset, count, timestamp, mBuffer);
+            mOutputStream.write(mBuffer, 0, length);
         }
+    }
+
+    @Override
+    public int getMaxMessageSize() {
+        return MidiPortImpl.MAX_PACKET_DATA_SIZE;
     }
 
     @Override
