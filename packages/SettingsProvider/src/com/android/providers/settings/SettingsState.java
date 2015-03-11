@@ -470,7 +470,7 @@ final class SettingsState {
     private void skipEmptyTextTags(XmlPullParser parser)
             throws IOException, XmlPullParserException {
         while (accept(parser, XmlPullParser.TEXT, null)
-                && "\n".equals(parser.getText())) {
+                && parser.isWhitespace()) {
             parser.next();
         }
     }
