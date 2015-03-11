@@ -8006,7 +8006,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         long ident = Binder.clearCallingIdentity();
         try {
             synchronized (this) {
-                TaskRecord task = mStackSupervisor.anyTaskForIdLocked(taskId, true);
+                TaskRecord task = mStackSupervisor.anyTaskForIdLocked(taskId);
                 if (task == null) {
                     Slog.w(TAG, "resizeTask: taskId=" + taskId + " not found");
                     return;
