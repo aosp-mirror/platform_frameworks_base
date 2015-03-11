@@ -50,5 +50,5 @@ public class BridgeConstants {
     public final static String WRAP_CONTENT = "wrap_content";
 
     /** Attribute in the tools namespace used to specify layout manager for RecyclerView. */
-    public static final String ATTR_LAYOUT_MANAGER_TYPE = "layoutManagerType";
+    public static final String ATTR_LAYOUT_MANAGER_TYPE = "layoutManager";
 }
