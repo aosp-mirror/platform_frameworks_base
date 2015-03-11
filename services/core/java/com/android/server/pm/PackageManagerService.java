@@ -9956,7 +9956,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             PackageParser.Package newPackage = scanPackageLI(pkg, parseFlags, scanFlags,
                     System.currentTimeMillis(), user);
 
-            updateSettingsLI(newPackage, installerPackageName, null, null, res);
+            updateSettingsLI(newPackage, installerPackageName, null, null, res, user);
             // delete the partially installed application. the data directory will have to be
             // restored if it was already existing
             if (res.returnCode != PackageManager.INSTALL_SUCCEEDED) {
@@ -10078,7 +10078,8 @@ public class PackageManagerService extends IPackageManager.Stub {
             try {
                 final PackageParser.Package newPackage = scanPackageLI(pkg, parseFlags,
                         scanFlags | SCAN_UPDATE_TIME, System.currentTimeMillis(), user);
-                updateSettingsLI(newPackage, installerPackageName, allUsers, perUserInstalled, res);
+                updateSettingsLI(newPackage, installerPackageName, allUsers, perUserInstalled, res,
+                        user);
                 updatedSettings = true;
             } catch (PackageManagerException e) {
                 res.setError("Package couldn't be installed in " + pkg.codePath, e);
@@ -10208,7 +10209,8 @@ public class PackageManagerService extends IPackageManager.Stub {
             }
 
             if (res.returnCode == PackageManager.INSTALL_SUCCEEDED) {
-                updateSettingsLI(newPackage, installerPackageName, allUsers, perUserInstalled, res);
+                updateSettingsLI(newPackage, installerPackageName, allUsers, perUserInstalled, res,
+                        user);
                 updatedSettings = true;
             }
 
@@ -10244,7 +10246,7 @@ public class PackageManagerService extends IPackageManager.Stub {
 
     private void updateSettingsLI(PackageParser.Package newPackage, String installerPackageName,
             int[] allUsers, boolean[] perUserInstalled,
-            PackageInstalledInfo res) {
+            PackageInstalledInfo res, UserHandle user) {
         String pkgName = newPackage.packageName;
         synchronized (mPackages) {
             //write settings. the installStatus will be incomplete at this stage.
@@ -10263,13 +10265,13 @@ public class PackageManagerService extends IPackageManager.Stub {
             // For system-bundled packages, we assume that installing an upgraded version
             // of the package implies that the user actually wants to run that new code,
             // so we enable the package.
-            if (isSystemApp(newPackage)) {
-                // NB: implicit assumption that system package upgrades apply to all users
-                if (DEBUG_INSTALL) {
-                    Slog.d(TAG, "Implicitly enabling system package on upgrade: " + pkgName);
-                }
-                PackageSetting ps = mSettings.mPackages.get(pkgName);
-                if (ps != null) {
+            PackageSetting ps = mSettings.mPackages.get(pkgName);
+            if (ps != null) {
+                if (isSystemApp(newPackage)) {
+                    // NB: implicit assumption that system package upgrades apply to all users
+                    if (DEBUG_INSTALL) {
+                        Slog.d(TAG, "Implicitly enabling system package on upgrade: " + pkgName);
+                    }
                     if (res.origUsers != null) {
                         for (int userHandle : res.origUsers) {
                             ps.setEnabled(COMPONENT_ENABLED_STATE_DEFAULT,
@@ -10288,6 +10290,13 @@ public class PackageManagerService extends IPackageManager.Stub {
                         // these install state changes will be persisted in the
                         // upcoming call to mSettings.writeLPr().
                     }
+                }
+                // It's implied that when a user requests installation, they want the app to be
+                // installed and enabled.
+                int userId = user.getIdentifier();
+                if (userId != UserHandle.USER_ALL) {
+                    ps.setInstalled(true, userId);
+                    ps.setEnabled(COMPONENT_ENABLED_STATE_DEFAULT, userId, installerPackageName);
                 }
             }
             res.name = pkgName;
