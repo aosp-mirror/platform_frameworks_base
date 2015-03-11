@@ -121,7 +121,7 @@ public final class UsbMidiDevice implements Closeable {
 
         int outputCount = mOutputStreams.length;
         mServer = midiManager.createDeviceServer(mInputPortReceivers, outputCount,
-                properties, MidiDeviceInfo.TYPE_USB, null);
+                null, null, properties, MidiDeviceInfo.TYPE_USB, null);
         if (mServer == null) {
             return false;
         }

@@ -394,9 +394,19 @@ public final class UsbAlsaManager {
                 AlsaDevice alsaDevice = waitForAlsaDevice(addedCard, device, AlsaDevice.TYPE_MIDI);
                 if (alsaDevice != null) {
                     Bundle properties = new Bundle();
-                    properties.putString(MidiDeviceInfo.PROPERTY_MANUFACTURER,
-                            usbDevice.getManufacturerName());
-                    properties.putString(MidiDeviceInfo.PROPERTY_MODEL, usbDevice.getProductName());
+                    String manufacturer = usbDevice.getManufacturerName();
+                    String product = usbDevice.getProductName();
+                    String name;
+                    if (manufacturer == null || manufacturer.isEmpty()) {
+                        name = product;
+                    } else if (product == null || product.isEmpty()) {
+                        name = manufacturer;
+                    } else {
+                        name = manufacturer + " " + product;
+                    }
+                    properties.putString(MidiDeviceInfo.PROPERTY_NAME, name);
+                    properties.putString(MidiDeviceInfo.PROPERTY_MANUFACTURER, manufacturer);
+                    properties.putString(MidiDeviceInfo.PROPERTY_PRODUCT, product);
                     properties.putString(MidiDeviceInfo.PROPERTY_SERIAL_NUMBER,
                             usbDevice.getSerialNumber());
                     properties.putInt(MidiDeviceInfo.PROPERTY_ALSA_CARD, alsaDevice.mCard);
@@ -454,7 +464,7 @@ public final class UsbAlsaManager {
             Resources r = mContext.getResources();
             properties.putString(MidiDeviceInfo.PROPERTY_MANUFACTURER, r.getString(
                     com.android.internal.R.string.usb_midi_peripheral_manufacturer_name));
-            properties.putString(MidiDeviceInfo.PROPERTY_MODEL, r.getString(
+            properties.putString(MidiDeviceInfo.PROPERTY_PRODUCT, r.getString(
                     com.android.internal.R.string.usb_midi_peripheral_model_name));
             properties.putInt(MidiDeviceInfo.PROPERTY_ALSA_CARD, card);
             properties.putInt(MidiDeviceInfo.PROPERTY_ALSA_DEVICE, device);

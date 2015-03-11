@@ -316,6 +316,8 @@ public class MidiService extends IMidiManager.Stub {
         client.removeListener(listener);
     }
 
+    private static final MidiDeviceInfo[] EMPTY_DEVICE_INFO_ARRAY = new MidiDeviceInfo[0];
+
     public MidiDeviceInfo[] getDeviceList() {
         ArrayList<MidiDeviceInfo> deviceInfos = new ArrayList<MidiDeviceInfo>();
         int uid = Binder.getCallingUid();
@@ -328,7 +330,7 @@ public class MidiService extends IMidiManager.Stub {
             }
         }
 
-        return deviceInfos.toArray(new MidiDeviceInfo[0]);
+        return deviceInfos.toArray(EMPTY_DEVICE_INFO_ARRAY);
     }
 
     @Override
@@ -348,15 +350,16 @@ public class MidiService extends IMidiManager.Stub {
 
     @Override
     public MidiDeviceInfo registerDeviceServer(IMidiDeviceServer server, int numInputPorts,
-            int numOutputPorts, Bundle properties, int type) {
+            int numOutputPorts, String[] inputPortNames, String[] outputPortNames,
+            Bundle properties, int type) {
         int uid = Binder.getCallingUid();
         if (type != MidiDeviceInfo.TYPE_VIRTUAL && uid != Process.SYSTEM_UID) {
             throw new SecurityException("only system can create non-virtual devices");
         }
 
         synchronized (mDevicesByInfo) {
-            return addDeviceLocked(type, numInputPorts, numOutputPorts, properties,
-            server, null, false, uid);
+            return addDeviceLocked(type, numInputPorts, numOutputPorts, inputPortNames,
+                    outputPortNames, properties, server, null, false, uid);
         }
     }
 
@@ -420,12 +423,13 @@ public class MidiService extends IMidiManager.Stub {
 
     // synchronize on mDevicesByInfo
     private MidiDeviceInfo addDeviceLocked(int type, int numInputPorts, int numOutputPorts,
-            Bundle properties, IMidiDeviceServer server, ServiceInfo serviceInfo,
+            String[] inputPortNames, String[] outputPortNames, Bundle properties,
+            IMidiDeviceServer server, ServiceInfo serviceInfo,
             boolean isPrivate, int uid) {
 
         int id = mNextDeviceId++;
         MidiDeviceInfo deviceInfo = new MidiDeviceInfo(type, id, numInputPorts, numOutputPorts,
-                properties, isPrivate);
+                inputPortNames, outputPortNames, properties, isPrivate);
         Device device = new Device(server, deviceInfo, serviceInfo, uid);
 
         if (server != null) {
@@ -482,6 +486,8 @@ public class MidiService extends IMidiManager.Stub {
         }
     }
 
+    private static final String[] EMPTY_STRING_ARRAY = new String[0];
+
     private void addPackageDeviceServer(ServiceInfo serviceInfo) {
         XmlResourceParser parser = null;
 
@@ -494,6 +500,8 @@ public class MidiService extends IMidiManager.Stub {
             int numInputPorts = 0;
             int numOutputPorts = 0;
             boolean isPrivate = false;
+            ArrayList<String> inputPortNames = new ArrayList<String>();
+            ArrayList<String> outputPortNames = new ArrayList<String>();
 
             while (true) {
                 int eventType = parser.next();
@@ -530,7 +538,18 @@ public class MidiService extends IMidiManager.Stub {
                             continue;
                         }
                         numInputPorts++;
-                        // TODO - add support for port properties
+
+                        String portName = null;
+                        int count = parser.getAttributeCount();
+                        for (int i = 0; i < count; i++) {
+                            String name = parser.getAttributeName(i);
+                            String value = parser.getAttributeValue(i);
+                            if ("name".equals(name)) {
+                                portName = value;
+                                break;
+                            }
+                        }
+                        inputPortNames.add(portName);
                     } else if ("output-port".equals(tagName)) {
                         if (properties == null) {
                             Log.w(TAG, "<output-port> outside of <device> in metadata for "
@@ -538,7 +557,18 @@ public class MidiService extends IMidiManager.Stub {
                             continue;
                         }
                         numOutputPorts++;
-                        // TODO - add support for port properties
+
+                        String portName = null;
+                        int count = parser.getAttributeCount();
+                        for (int i = 0; i < count; i++) {
+                            String name = parser.getAttributeName(i);
+                            String value = parser.getAttributeValue(i);
+                            if ("name".equals(name)) {
+                                portName = value;
+                                break;
+                            }
+                        }
+                        outputPortNames.add(portName);
                     }
                 } else if (eventType == XmlPullParser.END_TAG) {
                     String tagName = parser.getName();
@@ -563,12 +593,16 @@ public class MidiService extends IMidiManager.Stub {
 
                             synchronized (mDevicesByInfo) {
                                 addDeviceLocked(MidiDeviceInfo.TYPE_VIRTUAL,
-                                    numInputPorts, numOutputPorts, properties,
-                                    null, serviceInfo, isPrivate, uid);
+                                    numInputPorts, numOutputPorts,
+                                    inputPortNames.toArray(EMPTY_STRING_ARRAY),
+                                    outputPortNames.toArray(EMPTY_STRING_ARRAY),
+                                    properties, null, serviceInfo, isPrivate, uid);
                             }
                             // setting properties to null signals that we are no longer
                             // processing a <device>
                             properties = null;
+                            inputPortNames.clear();
+                            outputPortNames.clear();
                         }
                     }
                 }

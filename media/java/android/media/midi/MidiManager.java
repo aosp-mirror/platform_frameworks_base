@@ -277,12 +277,14 @@ public final class MidiManager {
 
     /** @hide */
     public MidiDeviceServer createDeviceServer(MidiReceiver[] inputPortReceivers,
-            int numOutputPorts, Bundle properties, int type, MidiDeviceServer.Callback callback) {
+            int numOutputPorts, String[] inputPortNames, String[] outputPortNames,
+            Bundle properties, int type, MidiDeviceServer.Callback callback) {
         try {
             MidiDeviceServer server = new MidiDeviceServer(mService, inputPortReceivers,
                     numOutputPorts, callback);
             MidiDeviceInfo deviceInfo = mService.registerDeviceServer(server.getBinderInterface(),
-                    inputPortReceivers.length, numOutputPorts, properties, type);
+                    inputPortReceivers.length, numOutputPorts, inputPortNames, outputPortNames,
+                    properties, type);
             if (deviceInfo == null) {
                 Log.e(TAG, "registerVirtualDevice failed");
                 return null;
