@@ -29,6 +29,8 @@ import static java.lang.annotation.RetentionPolicy.SOURCE;
  * int, {@code AARRGGBB}. If applied to an int array, every element
  * in the array represents a color integer.
  * <p>
+ * Example:
+ * <pre>{@code
  *  public abstract void setTextColor(&#64;ColorInt int color);
  * }</pre>
  *
