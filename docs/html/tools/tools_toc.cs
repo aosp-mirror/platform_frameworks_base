@@ -165,39 +165,11 @@ class="en">Tools Help</span></a></div>
       <li><a href="<?cs var:toroot ?>tools/help/lint.html">lint</span></a></li>
       <li><a href="<?cs var:toroot ?>tools/help/logcat.html">logcat</a></li>
       <li><a href="<?cs var:toroot ?>tools/help/mksdcard.html">mksdcard</a></li>
-      <li><a href="<?cs var:toroot ?>tools/help/monkey.html">monkey</a></li>
-      <li class="nav-section">
-        <div class="nav-section-header"><a href="<?cs var:toroot
-?>tools/help/monkeyrunner_concepts.html"><span class="en">monkeyrunner</span></a></div>
-        <ul>
-          <li><a href="<?cs var:toroot ?>tools/help/MonkeyDevice.html"><span
-class="en">MonkeyDevice</span></a></li>
-          <li><a href="<?cs var:toroot ?>tools/help/MonkeyImage.html"><span
-class="en">MonkeyImage</span></a></li>
-          <li><a href="<?cs var:toroot ?>tools/help/MonkeyRunner.html"><span
-class="en">MonkeyRunner</span></a></li>
-        </ul>
-      </li>
        <li><a href="<?cs var:toroot ?>tools/help/proguard.html" zh-cn-lang="ProGuard">ProGuard</a></li>
        <li><a href="<?cs var:toroot ?>tools/help/sdk-manager.html">SDK Manager</a></li>
        <li><a href="<?cs var:toroot ?>tools/help/systrace.html">Systrace</a></li>
        <li><a href="<?cs var:toroot ?>tools/help/gltracer.html">Tracer for OpenGL ES</a></li>
        <li><a href="<?cs var:toroot ?>tools/help/traceview.html">Traceview</a></li>
-       <li class="nav-section">
-          <div class="nav-section-header"><a href="<?cs var:toroot ?>tools/help/uiautomator/index.html"><span class="en">uiautomator</span></a></div>
-          <ul>
-             <li><a href="<?cs var:toroot ?>tools/help/uiautomator/Configurator.html"><span class="en">Configurator</span></a></li>
-             <li><a href="<?cs var:toroot ?>tools/help/uiautomator/IAutomationSupport.html"><span class="en">IAutomationSupport</span></a></li>
-             <li><a href="<?cs var:toroot ?>tools/help/uiautomator/UiAutomatorTestCase.html"><span class="en">UiAutomatorTestCase</span></a></li>
-             <li><a href="<?cs var:toroot ?>tools/help/uiautomator/UiCollection.html"><span class="en">UiCollection</span></a></li>
-             <li><a href="<?cs var:toroot ?>tools/help/uiautomator/UiDevice.html"><span class="en">UiDevice</span></a></li>
-             <li><a href="<?cs var:toroot ?>tools/help/uiautomator/UiObject.html"><span class="en">UiObject</span></a></li>
-             <li><a href="<?cs var:toroot ?>tools/help/uiautomator/UiObjectNotFoundException.html"><span class="en">UiObjectNotFoundException</span></a></li>
-             <li><a href="<?cs var:toroot ?>tools/help/uiautomator/UiScrollable.html"><span class="en">UiScrollable</span></a></li>
-             <li><a href="<?cs var:toroot ?>tools/help/uiautomator/UiSelector.html"><span class="en">UiSelector</span></a></li>
-             <li><a href="<?cs var:toroot ?>tools/help/uiautomator/UiWatcher.html"><span class="en">UiWatcher</span></a></li>
-          </ul>
-       </li>
        <li><a href="<?cs var:toroot ?>tools/help/zipalign.html">zipalign</a></li>
     </ul>
   </li>
@@ -220,6 +192,34 @@ class="en">MonkeyRunner</span></a></li>
         <span class="en">Apps Over 65K Methods</span></a></li>
       </ul>
   </li><!-- end of build system -->
+
+  <!-- Testing Tools menu-->
+
+  <li class="nav-section">
+    <div class="nav-section-header"><a href="<?cs var:toroot ?>tools/testing/testing-tools.html""><span class="en">Testing Tools</span></a></div>
+    <ul>
+      <li class="nav-section">
+         <div class="nav-section-header"><a href="<?cs var:toroot ?>tools/testing-support-library/index.html"><span
+class="en">Testing Support Library</span></a></div>
+         <ul>
+            <li><a href="<?cs var:toroot ?>reference/android/support/test/package-summary.html">API Reference</a></li>
+         </ul>
+      </li>
+      <li><a href="<?cs var:toroot ?>tools/help/monkey.html">monkey</a></li>
+      <li class="nav-section">
+        <div class="nav-section-header"><a href="<?cs var:toroot
+?>tools/help/monkeyrunner_concepts.html"><span class="en">monkeyrunner</span></a></div>
+        <ul>
+          <li><a href="<?cs var:toroot ?>tools/help/MonkeyDevice.html"><span
+class="en">MonkeyDevice</span></a></li>
+          <li><a href="<?cs var:toroot ?>tools/help/MonkeyImage.html"><span
+class="en">MonkeyImage</span></a></li>
+          <li><a href="<?cs var:toroot ?>tools/help/MonkeyRunner.html"><span
+class="en">MonkeyRunner</span></a></li>
+        </ul>
+      </li>
+    </ul>
+  </li><!-- end of testing support library -->
 
 
 <!-- Support Library menu-->
