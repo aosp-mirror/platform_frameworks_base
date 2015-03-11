@@ -25,7 +25,11 @@ import android.content.IntentFilter;
 import android.content.res.Resources;
 import android.hardware.display.DisplayManager;
 import android.hardware.display.DisplayManagerInternal;
+import android.os.Build;
+import android.os.Handler;
 import android.os.SystemClock;
+import android.os.SystemProperties;
+import android.util.Log;
 import android.view.Display;
 
 import com.android.server.LocalServices;
@@ -37,7 +41,7 @@ public class BurnInProtectionHelper implements DisplayManager.DisplayListener {
     private static final String TAG = "BurnInProtection";
 
     // Default value when max burnin radius is not set.
-    public static final int BURN_IN_RADIUS_MAX_DEFAULT = -1;
+    public static final int BURN_IN_MAX_RADIUS_DEFAULT = -1;
 
     private static final long BURNIN_PROTECTION_WAKEUP_INTERVAL_MS = TimeUnit.MINUTES.toMillis(1);
     private static final long BURNIN_PROTECTION_MINIMAL_INTERVAL_MS = TimeUnit.SECONDS.toMillis(10);
@@ -74,23 +78,19 @@ public class BurnInProtectionHelper implements DisplayManager.DisplayListener {
             updateBurnInProtection();
         }
     };
-
-    public BurnInProtectionHelper(Context context) {
+    
+    public BurnInProtectionHelper(Context context, int minHorizontalOffset,
+            int maxHorizontalOffset, int minVerticalOffset, int maxVerticalOffset,
+            int maxOffsetRadius) {
         final Resources resources = context.getResources();
-        mMinHorizontalBurnInOffset = resources.getInteger(
-                com.android.internal.R.integer.config_burnInProtectionMinHorizontalOffset);
-        mMaxHorizontalBurnInOffset = resources.getInteger(
-                com.android.internal.R.integer.config_burnInProtectionMaxHorizontalOffset);
-        mMinVerticalBurnInOffset = resources.getInteger(
-                com.android.internal.R.integer.config_burnInProtectionMinVerticalOffset);
-        mMaxVerticalBurnInOffset = resources.getInteger(
-                com.android.internal.R.integer.config_burnInProtectionMaxVerticalOffset);
-        int burnInRadiusMax = resources.getInteger(
-                com.android.internal.R.integer.config_burnInProtectionMaxRadius);
-        if (burnInRadiusMax != BURN_IN_RADIUS_MAX_DEFAULT) {
-            mBurnInRadiusMaxSquared = burnInRadiusMax * burnInRadiusMax;
+        mMinHorizontalBurnInOffset = minHorizontalOffset;
+        mMaxHorizontalBurnInOffset = maxHorizontalOffset;
+        mMinVerticalBurnInOffset = minVerticalOffset;
+        mMaxVerticalBurnInOffset = maxHorizontalOffset;
+        if (maxOffsetRadius != BURN_IN_MAX_RADIUS_DEFAULT) {
+            mBurnInRadiusMaxSquared = maxOffsetRadius * maxOffsetRadius;
         } else {
-            mBurnInRadiusMaxSquared = BURN_IN_RADIUS_MAX_DEFAULT;
+            mBurnInRadiusMaxSquared = BURN_IN_MAX_RADIUS_DEFAULT;
         }
 
         mDisplayManagerInternal = LocalServices.getService(DisplayManagerInternal.class);
@@ -175,7 +175,7 @@ public class BurnInProtectionHelper implements DisplayManager.DisplayListener {
                 }
             }
             // If we are outside of the radius, let's try again.
-        } while (mBurnInRadiusMaxSquared != BURN_IN_RADIUS_MAX_DEFAULT
+        } while (mBurnInRadiusMaxSquared != BURN_IN_MAX_RADIUS_DEFAULT
                 && mLastBurnInXOffset * mLastBurnInXOffset + mLastBurnInYOffset * mLastBurnInYOffset
                         > mBurnInRadiusMaxSquared);
     }
