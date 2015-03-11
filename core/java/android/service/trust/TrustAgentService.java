@@ -122,12 +122,14 @@ public class TrustAgentService extends Service {
                 case MSG_CONFIGURE:
                     ConfigurationData data = (ConfigurationData) msg.obj;
                     boolean result = onConfigure(data.options);
-                    try {
-                        synchronized (mLock) {
-                            mCallback.onConfigureCompleted(result, data.token);
+                    if (data.token != null) {
+                        try {
+                            synchronized (mLock) {
+                                mCallback.onConfigureCompleted(result, data.token);
+                            }
+                        } catch (RemoteException e) {
+                            onError("calling onSetTrustAgentFeaturesEnabledCompleted()");
                         }
-                    } catch (RemoteException e) {
-                        onError("calling onSetTrustAgentFeaturesEnabledCompleted()");
                     }
                     break;
                 case MSG_TRUST_TIMEOUT:
@@ -203,7 +205,7 @@ public class TrustAgentService extends Service {
      * PersistableBundle)}.
      * <p>Agents that support configuration options should overload this method and return 'true'.
      *
-     * @param options bundle containing all options or null if none.
+     * @param options The aggregated list of options or an empty list if no restrictions apply.
      * @return true if the {@link TrustAgentService} supports configuration options.
      */
     public boolean onConfigure(List<PersistableBundle> options) {
