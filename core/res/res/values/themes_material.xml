@@ -45,6 +45,7 @@ please see themes_device_defaults.xml.
         <item name="colorForeground">@color/foreground_material_dark</item>
         <item name="colorForegroundInverse">@color/foreground_material_light</item>
         <item name="colorBackground">@color/background_material_dark</item>
+        <item name="colorBackgroundFloating">@color/background_floating_material_dark</item>
         <item name="colorBackgroundCacheHint">@color/background_cache_hint_selector_material_dark</item>
         <item name="disabledAlpha">@dimen/disabled_alpha_material_dark</item>
         <item name="backgroundDimAmount">0.6</item>
@@ -398,6 +399,7 @@ please see themes_device_defaults.xml.
         <item name="colorForeground">@color/foreground_material_light</item>
         <item name="colorForegroundInverse">@color/foreground_material_dark</item>
         <item name="colorBackground">@color/background_material_light</item>
+        <item name="colorBackgroundFloating">@color/background_floating_material_light</item>
         <item name="colorBackgroundCacheHint">@color/background_cache_hint_selector_material_light</item>
         <item name="disabledAlpha">@dimen/disabled_alpha_material_light</item>
         <item name="backgroundDimAmount">0.6</item>
@@ -770,6 +772,7 @@ please see themes_device_defaults.xml.
         <item name="colorForeground">@color/foreground_material_light</item>
         <item name="colorForegroundInverse">@color/foreground_material_dark</item>
         <item name="colorBackground">@color/background_material_light</item>
+        <item name="colorBackgroundFloating">@color/background_floating_material_light</item>
         <item name="colorBackgroundCacheHint">@color/background_cache_hint_selector_material_light</item>
 
         <item name="textColorPrimary">@color/primary_text_material_light</item>
@@ -806,6 +809,7 @@ please see themes_device_defaults.xml.
         <item name="colorForeground">@color/foreground_material_dark</item>
         <item name="colorForegroundInverse">@color/foreground_material_light</item>
         <item name="colorBackground">@color/background_material_dark</item>
+        <item name="colorBackgroundFloating">@color/background_floating_material_dark</item>
         <item name="colorBackgroundCacheHint">@color/background_cache_hint_selector_material_dark</item>
 
         <item name="textColorPrimary">@color/primary_text_material_dark</item>
@@ -852,7 +856,6 @@ please see themes_device_defaults.xml.
 
     <!-- Theme overlay that overrides window properties to display as a dialog. -->
     <style name="ThemeOverlay.Material.Dialog">
-        <item name="colorBackground">@color/background_floating_material_light</item>
         <item name="colorBackgroundCacheHint">@null</item>
 
         <item name="windowFrame">@null</item>
@@ -1044,7 +1047,7 @@ please see themes_device_defaults.xml.
     <eat-comment />
 
     <style name="Theme.Material.BaseDialog">
-        <item name="colorBackground">@color/background_floating_material_dark</item>
+        <item name="colorBackground">?attr/colorBackgroundFloating</item>
 
         <item name="windowFrame">@null</item>
         <item name="windowTitleStyle">@style/DialogWindowTitle.Material</item>
@@ -1155,7 +1158,7 @@ please see themes_device_defaults.xml.
     <!-- Light material dialog themes -->
 
     <style name="Theme.Material.Light.BaseDialog">
-        <item name="colorBackground">@color/background_floating_material_light</item>
+        <item name="colorBackground">?attr/colorBackgroundFloating</item>
 
         <item name="windowFrame">@null</item>
         <item name="windowTitleStyle">@style/DialogWindowTitle.Material.Light</item>

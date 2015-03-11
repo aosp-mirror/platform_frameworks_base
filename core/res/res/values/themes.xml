@@ -45,6 +45,7 @@ please see themes_device_defaults.xml.
         <item name="colorForeground">@color/bright_foreground_dark</item>
         <item name="colorForegroundInverse">@color/bright_foreground_dark_inverse</item>
         <item name="colorBackground">@color/background_dark</item>
+        <item name="colorBackgroundFloating">?attr/colorBackground</item>
         <item name="colorBackgroundCacheHint">?attr/colorBackground</item>
 
         <item name="colorPressedHighlight">@color/legacy_pressed_highlight</item>

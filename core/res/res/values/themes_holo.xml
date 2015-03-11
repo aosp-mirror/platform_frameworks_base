@@ -65,6 +65,7 @@ please see themes_device_defaults.xml.
         <item name="colorForeground">@color/bright_foreground_holo_dark</item>
         <item name="colorForegroundInverse">@color/bright_foreground_inverse_holo_dark</item>
         <item name="colorBackground">@color/background_holo_dark</item>
+        <item name="colorBackgroundFloating">@color/background_holo_dark</item>
         <item name="colorBackgroundCacheHint">@color/background_cache_hint_selector_holo_dark</item>
         <item name="disabledAlpha">0.5</item>
         <item name="backgroundDimAmount">0.6</item>
@@ -404,6 +405,7 @@ please see themes_device_defaults.xml.
         <item name="colorForeground">@color/bright_foreground_holo_light</item>
         <item name="colorForegroundInverse">@color/bright_foreground_inverse_holo_light</item>
         <item name="colorBackground">@color/background_holo_light</item>
+        <item name="colorBackgroundFloating">@color/background_holo_light</item>
         <item name="colorBackgroundCacheHint">@color/background_cache_hint_selector_holo_light</item>
         <item name="disabledAlpha">0.5</item>
         <item name="backgroundDimAmount">0.6</item>
