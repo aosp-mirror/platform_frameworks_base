@@ -34,7 +34,6 @@ groupByMutualExclusivity(const Vector<SplitDescription>& splits) {
     // Find mutually exclusive splits and group them.
     KeyedVector<SplitDescription, SortedVector<SplitDescription> > densityGroups;
     KeyedVector<SplitDescription, SortedVector<SplitDescription> > abiGroups;
-    KeyedVector<SplitDescription, SortedVector<SplitDescription> > localeGroups;
     const size_t splitCount = splits.size();
     for (size_t i = 0; i < splitCount; i++) {
         const SplitDescription& split = splits[i];
@@ -47,10 +46,6 @@ groupByMutualExclusivity(const Vector<SplitDescription>& splits) {
             SplitDescription key(split);
             key.abi = abi::Variant_none;
             appendValue(abiGroups, key, split);
-        } else if (split.config.locale != 0) {
-            SplitDescription key(split);
-            key.config.clearLocale();
-            appendValue(localeGroups, key, split);
         } else {
             groups.add();
             groups.editTop().add(split);
@@ -67,10 +62,6 @@ groupByMutualExclusivity(const Vector<SplitDescription>& splits) {
         groups.add(abiGroups[i]);
     }
 
-    const size_t localeCount = localeGroups.size();
-    for (size_t i = 0; i < localeCount; i++) {
-        groups.add(localeGroups[i]);
-    }
     return groups;
 }
 
