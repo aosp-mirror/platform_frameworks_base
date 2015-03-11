@@ -18221,6 +18221,7 @@ package android.net {
     method public android.net.Network[] getAllNetworks();
     method public deprecated boolean getBackgroundDataSetting();
     method public android.net.Network getBoundNetworkForProcess();
+    method public android.net.ProxyInfo getDefaultProxy();
     method public android.net.LinkProperties getLinkProperties(android.net.Network);
     method public android.net.NetworkCapabilities getNetworkCapabilities(android.net.Network);
     method public android.net.NetworkInfo getNetworkInfo(int);
@@ -18541,7 +18542,7 @@ package android.net {
     method public static final deprecated int getDefaultPort();
     method public static final deprecated java.lang.String getHost(android.content.Context);
     method public static final deprecated int getPort(android.content.Context);
-    field public static final java.lang.String EXTRA_PROXY_INFO = "android.intent.extra.PROXY_INFO";
+    field public static final deprecated java.lang.String EXTRA_PROXY_INFO = "android.intent.extra.PROXY_INFO";
     field public static final java.lang.String PROXY_CHANGE_ACTION = "android.intent.action.PROXY_CHANGE";
   }
 

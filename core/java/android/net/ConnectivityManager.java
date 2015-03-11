@@ -1783,7 +1783,6 @@ public class ConnectivityManager {
      *
      * @return the {@link ProxyInfo} for the current HTTP proxy, or {@code null} if no
      *        HTTP proxy is active.
-     * @hide
      */
     public ProxyInfo getDefaultProxy() {
         final Network network = getBoundNetworkForProcess();

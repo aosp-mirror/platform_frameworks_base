@@ -44,14 +44,9 @@ public final class Proxy {
     private static final ProxySelector sDefaultProxySelector;
 
     /**
-     * Used to notify an app that's caching the default connection proxy
-     * that either the default connection or its proxy has changed.
-     * The intent will have the following extra value:</p>
-     * <ul>
-     *   <li><em>EXTRA_PROXY_INFO</em> - The ProxyProperties for the proxy.  Non-null,
-     *                                   though if the proxy is undefined the host string
-     *                                   will be empty.
-     * </ul>
+     * Used to notify an app that's caching the proxy that either the default
+     * connection has changed or any connection's proxy has changed. The new
+     * proxy should be queried using {@link ConnectivityManager#getDefaultProxy()}.
      *
      * <p class="note">This is a protected intent that can only be sent by the system
      */
@@ -60,6 +55,11 @@ public final class Proxy {
     /**
      * Intent extra included with {@link #PROXY_CHANGE_ACTION} intents.
      * It describes the new proxy being used (as a {@link ProxyInfo} object).
+     * @deprecated Because {@code PROXY_CHANGE_ACTION} is sent whenever the proxy
+     * for any network on the system changes, applications should always use
+     * {@link ConnectivityManager#getDefaultProxy()} or
+     * {@link ConnectivityManager#getLinkProperties(Network)}.{@link LinkProperties#getHttpProxy()}
+     * to get the proxy for the Network(s) they are using.
      */
     public static final String EXTRA_PROXY_INFO = "android.intent.extra.PROXY_INFO";
 
