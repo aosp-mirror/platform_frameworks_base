@@ -29,6 +29,8 @@ import android.os.Build;
 import android.os.IBinder;
 import android.transition.Transition;
 import android.transition.Transition.EpicenterCallback;
+import android.transition.Transition.TransitionListener;
+import android.transition.Transition.TransitionListenerAdapter;
 import android.transition.TransitionInflater;
 import android.transition.TransitionManager;
 import android.transition.TransitionSet;
@@ -39,12 +41,13 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnTouchListener;
 import android.view.ViewGroup;
+import android.view.ViewParent;
 import android.view.ViewTreeObserver;
+import android.view.ViewTreeObserver.OnGlobalLayoutListener;
 import android.view.ViewTreeObserver.OnScrollChangedListener;
 import android.view.WindowManager;
 
 import java.lang.ref.WeakReference;
-import java.util.List;
 
 /**
  * <p>A popup window that can be used to display an arbitrary view. The popup
@@ -96,13 +99,11 @@ public class PopupWindow {
     private WindowManager mWindowManager;
 
     private boolean mIsShowing;
+    private boolean mIsTransitioningToDismiss;
     private boolean mIsDropdown;
 
     /** View that handles event dispatch and content transitions. */
     private PopupDecorView mDecorView;
-
-    /** View that holds the popup background. May be the content view. */
-    private View mBackgroundView;
 
     /** The contents of the popup. */
     private View mContentView;
@@ -1183,23 +1184,30 @@ public class PopupWindow {
                     + "calling setContentView() before attempting to show the popup.");
         }
 
-        // When a background is available, we embed the content view within
-        // another view that owns the background drawable.
-        if (mBackground != null) {
-            mBackgroundView = createBackgroundView(mContentView);
-            mBackgroundView.setBackground(mBackground);
-        } else {
-            mBackgroundView = mContentView;
+        // The old decor view may be transitioning out. Make sure it finishes
+        // and cleans up before we try to create another one.
+        if (mDecorView != null) {
+            mDecorView.cancelTransitions();
         }
 
-        mDecorView = createDecorView(mBackgroundView);
+        // When a background is available, we embed the content view within
+        // another view that owns the background drawable.
+        final View backgroundView;
+        if (mBackground != null) {
+            backgroundView = createBackgroundView(mContentView);
+            backgroundView.setBackground(mBackground);
+        } else {
+            backgroundView = mContentView;
+        }
+
+        mDecorView = createDecorView(backgroundView);
 
         // The background owner should be elevated so that it casts a shadow.
-        mBackgroundView.setElevation(mElevation);
+        backgroundView.setElevation(mElevation);
 
         // We may wrap that in another view, so we'll need to manually specify
         // the surface insets.
-        final int surfaceInset = (int) Math.ceil(mBackgroundView.getZ() * 2);
+        final int surfaceInset = (int) Math.ceil(backgroundView.getZ() * 2);
         p.surfaceInsets.set(surfaceInset, surfaceInset, surfaceInset, surfaceInset);
         p.hasManualSurfaceInsets = true;
 
@@ -1268,26 +1276,13 @@ public class PopupWindow {
             p.packageName = mContext.getPackageName();
         }
 
-        final View rootView = mContentView.getRootView();
-        rootView.setFitsSystemWindows(mLayoutInsetDecor);
+        final PopupDecorView decorView = mDecorView;
+        decorView.setFitsSystemWindows(mLayoutInsetDecor);
+        decorView.requestEnterTransition(mEnterTransition);
+
         setLayoutDirectionFromAnchor();
 
-        mWindowManager.addView(rootView, p);
-
-        // Postpone enter transition until the scene root has been laid out.
-        if (mEnterTransition != null) {
-            mEnterTransition.addTarget(mBackgroundView);
-            mEnterTransition.addListener(new Transition.TransitionListenerAdapter() {
-                @Override
-                public void onTransitionEnd(Transition transition) {
-                    transition.removeListener(this);
-                    transition.removeTarget(mBackgroundView);
-                }
-            });
-
-            mDecorView.getViewTreeObserver().addOnGlobalLayoutListener(
-                    new PostLayoutTransitionListener(mDecorView, mEnterTransition));
-        }
+        mWindowManager.addView(decorView, p);
     }
 
     private void setLayoutDirectionFromAnchor() {
@@ -1591,35 +1586,38 @@ public class PopupWindow {
      * @see #showAsDropDown(android.view.View)
      */
     public void dismiss() {
-        if (!isShowing()) {
+        if (!isShowing() || mIsTransitioningToDismiss) {
             return;
         }
+
+        final PopupDecorView decorView = mDecorView;
+        final View contentView = mContentView;
+
+        final ViewGroup contentHolder;
+        final ViewParent contentParent = contentView.getParent();
+        if (contentParent instanceof ViewGroup) {
+            contentHolder = ((ViewGroup) contentParent);
+        } else {
+            contentHolder = null;
+        }
+
+        // Ensure any ongoing or pending transitions are canceled.
+        decorView.cancelTransitions();
 
         unregisterForScrollChanged();
 
         mIsShowing = false;
+        mIsTransitioningToDismiss = true;
 
-        if (mExitTransition != null) {
-            // Cache the content view, since it may change without notice.
-            final View contentView = mContentView;
-
-            mExitTransition.addTarget(mBackgroundView);
-            mExitTransition.addListener(new Transition.TransitionListenerAdapter() {
+        if (mExitTransition != null && decorView.isLaidOut()) {
+            decorView.startExitTransition(mExitTransition, new TransitionListenerAdapter() {
                 @Override
                 public void onTransitionEnd(Transition transition) {
-                    transition.removeListener(this);
-                    transition.removeTarget(mBackgroundView);
-
-                    dismissImmediate(contentView);
+                    dismissImmediate(decorView, contentHolder, contentView);
                 }
             });
-
-            TransitionManager.beginDelayedTransition(mDecorView, mExitTransition);
-
-            // Transition to invisible.
-            mBackgroundView.setVisibility(View.INVISIBLE);
         } else {
-            dismissImmediate(mContentView);
+            dismissImmediate(decorView, contentHolder, contentView);
         }
 
         if (mOnDismissListener != null) {
@@ -1631,24 +1629,22 @@ public class PopupWindow {
      * Removes the popup from the window manager and tears down the supporting
      * view hierarchy, if necessary.
      */
-    private void dismissImmediate(View contentView) {
-        if (mDecorView == null || mBackgroundView == null) {
-            throw new RuntimeException("Popup window already dismissed");
+    private void dismissImmediate(View decorView, ViewGroup contentHolder, View contentView) {
+        // If this method gets called and the decor view doesn't have a parent,
+        // then it was either never added or was already removed. That should
+        // never happen, but it's worth checking to avoid potential crashes.
+        if (decorView.getParent() != null) {
+            mWindowManager.removeViewImmediate(decorView);
         }
 
-        try {
-            if (mDecorView.isAttachedToWindow()) {
-                mWindowManager.removeViewImmediate(mDecorView);
-            }
-        } finally {
-            mDecorView.removeView(mBackgroundView);
-            mDecorView = null;
-
-            if (mBackgroundView != contentView) {
-                ((ViewGroup) mBackgroundView).removeView(contentView);
-            }
-            mBackgroundView = null;
+        if (contentHolder != null) {
+            contentHolder.removeView(contentView);
         }
+
+        // This needs to stay until after all transitions have ended since we
+        // need the reference to cancel transitions in preparePopup().
+        mDecorView = null;
+        mIsTransitioningToDismiss = false;
     }
 
     /**
@@ -1909,47 +1905,9 @@ public class PopupWindow {
         mAnchoredGravity = gravity;
     }
 
-    /**
-     * Layout listener used to run a transition immediately after a view is
-     * laid out. Forces the view to transition from invisible to visible.
-     */
-    private static class PostLayoutTransitionListener implements
-            ViewTreeObserver.OnGlobalLayoutListener {
-        private final ViewGroup mSceneRoot;
-        private final Transition mTransition;
-
-        public PostLayoutTransitionListener(ViewGroup sceneRoot, Transition transition) {
-            mSceneRoot = sceneRoot;
-            mTransition = transition;
-        }
-
-        @Override
-        public void onGlobalLayout() {
-            final ViewTreeObserver observer = mSceneRoot.getViewTreeObserver();
-            if (observer == null) {
-                // View has been detached.
-                return;
-            }
-
-            observer.removeOnGlobalLayoutListener(this);
-
-            // Set all targets to be initially invisible.
-            final List<View> targets = mTransition.getTargets();
-            final int N = targets.size();
-            for (int i = 0; i < N; i++) {
-                targets.get(i).setVisibility(View.INVISIBLE);
-            }
-
-            TransitionManager.beginDelayedTransition(mSceneRoot, mTransition);
-
-            // Transition targets to visible.
-            for (int i = 0; i < N; i++) {
-                targets.get(i).setVisibility(View.VISIBLE);
-            }
-        }
-    }
-
     private class PopupDecorView extends FrameLayout {
+        private TransitionListenerAdapter mPendingExitListener;
+
         public PopupDecorView(Context context) {
             super(context);
         }
@@ -2002,6 +1960,100 @@ public class PopupWindow {
                 return true;
             } else {
                 return super.onTouchEvent(event);
+            }
+        }
+
+        /**
+         * Requests that an enter transition run after the next layout pass.
+         */
+        public void requestEnterTransition(Transition transition) {
+            final ViewTreeObserver observer = getViewTreeObserver();
+            if (observer != null && transition != null) {
+                final Transition enterTransition = transition.clone();
+
+                // Postpone the enter transition after the first layout pass.
+                observer.addOnGlobalLayoutListener(new OnGlobalLayoutListener() {
+                    @Override
+                    public void onGlobalLayout() {
+                        final ViewTreeObserver observer = getViewTreeObserver();
+                        if (observer != null) {
+                            observer.removeOnGlobalLayoutListener(this);
+                        }
+
+                        startEnterTransition(enterTransition);
+                    }
+                });
+            }
+        }
+
+        /**
+         * Starts the pending enter transition, if one is set.
+         */
+        private void startEnterTransition(Transition enterTransition) {
+            final int count = getChildCount();
+            for (int i = 0; i < count; i++) {
+                final View child = getChildAt(i);
+                enterTransition.addTarget(child);
+                child.setVisibility(View.INVISIBLE);
+            }
+
+            TransitionManager.beginDelayedTransition(this, enterTransition);
+
+            for (int i = 0; i < count; i++) {
+                final View child = getChildAt(i);
+                child.setVisibility(View.VISIBLE);
+            }
+        }
+
+        /**
+         * Starts an exit transition immediately.
+         * <p>
+         * <strong>Note:</strong> The transition listener is guaranteed to have
+         * its {@code onTransitionEnd} method called even if the transition
+         * never starts; however, it may be called with a {@code null} argument.
+         */
+        public void startExitTransition(Transition transition, final TransitionListener listener) {
+            if (transition == null) {
+                return;
+            }
+
+            // The exit listener MUST be called for cleanup, even if the
+            // transition never starts or ends. Stash it for later.
+            mPendingExitListener = new TransitionListenerAdapter() {
+                @Override
+                public void onTransitionEnd(Transition transition) {
+                    listener.onTransitionEnd(transition);
+
+                    // The listener was called. Our job here is done.
+                    mPendingExitListener = null;
+                }
+            };
+
+            final Transition exitTransition = transition.clone();
+            exitTransition.addListener(mPendingExitListener);
+
+            final int count = getChildCount();
+            for (int i = 0; i < count; i++) {
+                final View child = getChildAt(i);
+                exitTransition.addTarget(child);
+            }
+
+            TransitionManager.beginDelayedTransition(this, exitTransition);
+
+            for (int i = 0; i < count; i++) {
+                final View child = getChildAt(i);
+                child.setVisibility(View.INVISIBLE);
+            }
+        }
+
+        /**
+         * Cancels all pending or current transitions.
+         */
+        public void cancelTransitions() {
+            TransitionManager.endTransitions(this);
+
+            if (mPendingExitListener != null) {
+                mPendingExitListener.onTransitionEnd(null);
             }
         }
     }
