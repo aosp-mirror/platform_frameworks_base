@@ -1315,7 +1315,7 @@ nAllocationElementRead(JNIEnv *_env, jobject _this, jlong con, jlong alloc,
     jbyte *ptr = _env->GetByteArrayElements(data, nullptr);
     rsAllocationElementRead((RsContext)con, (RsAllocation)alloc,
                             xoff, yoff, zoff,
-                            lod, ptr, sizeBytes, compIdx);    
+                            lod, ptr, sizeBytes, compIdx);
     _env->ReleaseByteArrayElements(data, ptr, JNI_ABORT);
 }
 
@@ -2184,18 +2184,6 @@ nSamplerCreate(JNIEnv *_env, jobject _this, jlong con, jint magFilter, jint minF
 // ---------------------------------------------------------------------------
 
 static jlong
-nPathCreate(JNIEnv *_env, jobject _this, jlong con, jint prim, jboolean isStatic, jlong _vtx, jlong _loop, jfloat q) {
-    if (kLogApi) {
-        ALOGD("nPathCreate, con(%p)", (RsContext)con);
-    }
-
-    jlong id = (jlong)(uintptr_t)rsPathCreate((RsContext)con, (RsPathPrimitive)prim, isStatic,
-                                   (RsAllocation)_vtx,
-                                   (RsAllocation)_loop, q);
-    return id;
-}
-
-static jlong
 nMeshCreate(JNIEnv *_env, jobject _this, jlong con, jlongArray _vtx, jlongArray _idx, jintArray _prim)
 {
     if (kLogApi) {
@@ -2444,7 +2432,6 @@ static JNINativeMethod methods[] = {
 
 {"rsnSamplerCreate",                 "(JIIIIIF)J",                            (void*)nSamplerCreate },
 
-{"rsnPathCreate",                    "(JIZJJF)J",                             (void*)nPathCreate },
 {"rsnMeshCreate",                    "(J[J[J[I)J",                            (void*)nMeshCreate },
 
 {"rsnMeshGetVertexBufferCount",      "(JJ)I",                                 (void*)nMeshGetVertexBufferCount },
