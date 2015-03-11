@@ -977,7 +977,9 @@ public class AppTransition implements Dump {
                             + " anim=" + a + " nextAppTransition=ANIM_CUSTOM_IN_PLACE"
                             + " transit=" + transit + " Callers=" + Debug.getCallers(3));
         } else if (mNextAppTransitionType == NEXT_TRANSIT_TYPE_CLIP_REVEAL) {
-            a = createClipRevealAnimationLocked(transit, enter, appWidth, appHeight);
+            a = createClipRevealAnimationLocked(transit, enter,
+                    containingFrame.right - containingFrame.left,
+                    containingFrame.bottom - containingFrame.top);
             if (DEBUG_APP_TRANSITIONS || DEBUG_ANIM) Slog.v(TAG,
                     "applyAnimation:"
                             + " anim=" + a + " nextAppTransition=ANIM_CLIP_REVEAL"
