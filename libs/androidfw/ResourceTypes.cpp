@@ -3116,7 +3116,8 @@ ResTable::Theme::package_info* ResTable::Theme::copy_package(package_info* pi)
         size_t cnt = pi->types[j].numEntries;
         newpi->types[j].numEntries = cnt;
         theme_entry* te = pi->types[j].entries;
-        if (te != NULL) {
+        size_t cnt_max = SIZE_MAX / sizeof(theme_entry);
+        if (te != NULL && (cnt < 0xFFFFFFFF-1) && (cnt < cnt_max)) {
             theme_entry* newte = (theme_entry*)malloc(cnt*sizeof(theme_entry));
             newpi->types[j].entries = newte;
             memcpy(newte, te, cnt*sizeof(theme_entry));
@@ -3183,9 +3184,12 @@ status_t ResTable::Theme::applyStyle(uint32_t resID, bool force)
             if (curEntries == NULL) {
                 PackageGroup* const grp = mTable.mPackageGroups[curPackageIndex];
                 const TypeList& typeList = grp->types[t];
-                int cnt = typeList.isEmpty() ? 0 : typeList[0]->entryCount;
-                curEntries = (theme_entry*)malloc(cnt*sizeof(theme_entry));
-                memset(curEntries, Res_value::TYPE_NULL, cnt*sizeof(theme_entry));
+                size_t cnt = typeList.isEmpty() ? 0 : typeList[0]->entryCount;
+                size_t cnt_max = SIZE_MAX / sizeof(theme_entry);
+                size_t buff_size = (cnt < cnt_max && cnt < 0xFFFFFFFF-1) ?
+                                          cnt*sizeof(theme_entry) : 0;
+                curEntries = (theme_entry*)malloc(buff_size);
+                memset(curEntries, Res_value::TYPE_NULL, buff_size);
                 curPI->types[t].numEntries = cnt;
                 curPI->types[t].entries = curEntries;
             }
