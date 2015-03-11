@@ -1,0 +1,56 @@
+page.title=Android Testing Tools
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+  <h2>See also</h2>
+  <ol>
+    <li><a href="{@docRoot}training/testing.html">Best Practices for Testing</a></li>
+  </ol>
+</div>
+</div>
+
+  <p>
+    Testing is a critical software development activity because it helps you
+    improve the quality of your apps, ensure better user satisfaction, and
+    reduce overall development time spent on fixing defects.
+  </p>
+
+  <p>The following sections describe tools that help
+  you test your mobile apps for the Android platform.</a>
+
+<dl>
+  <dt><strong><a href="{@docRoot}tools/testing-support-library/index.html">Android
+  Testing Support Library</a></strong></dt>
+    <dd>This library provides a set of APIs that allow
+    you to quickly build and run test code for your apps, including JUnit 4 and functional user
+    interface (UI) tests. The Android Testing Support Library includes the following test automation
+    tools:
+
+  <ul>
+    <li><a href="{@docRoot}tools/testing-support-library/index.html#AndroidJUnitRunner">AndroidJUnitRunner</a>:
+      JUnit 4-compatible test runner for Android
+    </li>
+
+    <li><a href="{@docRoot}tools/testing-support-library/index.html#Espresso">Espresso</a>:
+    UI testing framework; suitable for functional UI testing within an app
+    </li>
+
+    <li><a href="{@docRoot}tools/testing-support-library/index.html#UIAutomator">UI Automator</a>:
+    UI testing framework; suitable for cross-app functional UI testing across system and installed apps
+    </li>
+  </ul>
+    </dd>
+
+    <dt><strong><a href="{@docRoot}tools/help/monkey.html">Monkey</a></strong></dt>
+    <dd>This tool runs on your emulator or device and generates pseudo-random streams of user
+events such as clicks, touches, or gestures, as well as a number of  system-level events. You can
+use the Monkey tool to stress-test applications that you are developing, in a random yet
+repeatable manner.
+     </dd>
+
+  <dt><strong><a href="{@docRoot}tools/help/monkeyrunner_concepts.html">monkeyrunner</a></strong></dt>
+    <dd>This testing system provides an API for writing programs that control an Android device or
+emulator from outside of Android code.</dd>
+
+</dl>
