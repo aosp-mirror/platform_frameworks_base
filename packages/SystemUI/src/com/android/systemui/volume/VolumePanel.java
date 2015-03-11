@@ -253,6 +253,7 @@ public class VolumePanel extends Handler implements DemoMode {
         int iconRes;
         int iconMuteRes;
         int iconSuppressedRes;
+        int minVolume;
     }
 
     // Synchronize when accessing this
@@ -558,6 +559,14 @@ public class VolumePanel extends Handler implements DemoMode {
         }
     }
 
+    private int getStreamMinVolume(int streamType) {
+        if (streamType == STREAM_REMOTE_MUSIC) {
+            return 0;
+        } else {
+            return mAudioManager.getStreamMinVolume(streamType);
+        }
+    }
+
     private int getStreamMaxVolume(int streamType) {
         if (streamType == STREAM_REMOTE_MUSIC) {
             if (mStreamControls != null) {
@@ -661,9 +670,8 @@ public class VolumePanel extends Handler implements DemoMode {
                     }
                 });
             }
-            final int plusOne = (streamType == AudioSystem.STREAM_BLUETOOTH_SCO ||
-                    streamType == AudioSystem.STREAM_VOICE_CALL) ? 1 : 0;
-            sc.seekbarView.setMax(getStreamMaxVolume(streamType) + plusOne);
+            sc.minVolume = getStreamMinVolume(streamType);
+            sc.seekbarView.setMax(getStreamMaxVolume(streamType) - sc.minVolume);
             sc.seekbarView.setOnSeekBarChangeListener(mSeekListener);
             sc.seekbarView.setTag(sc);
             mStreamControls.put(streamType, sc);
@@ -706,7 +714,7 @@ public class VolumePanel extends Handler implements DemoMode {
         if (progress < 0) {
             progress = getStreamVolume(sc.streamType);
         }
-        sc.seekbarView.setProgress(progress);
+        sc.seekbarView.setProgress(progress - sc.minVolume);
         if (isRinger) {
             mLastRingerProgress = progress;
         }
@@ -1034,7 +1042,7 @@ public class VolumePanel extends Handler implements DemoMode {
 
         // get max volume for progress bar
 
-        int max = getStreamMaxVolume(streamType);
+        int max = getStreamMaxVolume(streamType) - getStreamMinVolume(streamType);
         StreamControl sc = mStreamControls.get(streamType);
 
         switch (streamType) {
@@ -1061,17 +1069,6 @@ public class VolumePanel extends Handler implements DemoMode {
                 break;
             }
 
-            case AudioManager.STREAM_VOICE_CALL: {
-                /*
-                 * For in-call voice call volume, there is no inaudible volume.
-                 * Rescale the UI control so the progress bar doesn't go all
-                 * the way to zero and don't show the mute icon.
-                 */
-                index++;
-                max++;
-                break;
-            }
-
             case AudioManager.STREAM_ALARM: {
                 break;
             }
@@ -1082,17 +1079,6 @@ public class VolumePanel extends Handler implements DemoMode {
                 if (ringuri == null) {
                     mRingIsSilent = true;
                 }
-                break;
-            }
-
-            case AudioManager.STREAM_BLUETOOTH_SCO: {
-                /*
-                 * For in-call voice call volume, there is no inaudible volume.
-                 * Rescale the UI control so the progress bar doesn't go all
-                 * the way to zero and don't show the mute icon.
-                 */
-                index++;
-                max++;
                 break;
             }
 
@@ -1493,7 +1479,7 @@ public class VolumePanel extends Handler implements DemoMode {
             final Object tag = seekBar.getTag();
             if (fromUser && tag instanceof StreamControl) {
                 StreamControl sc = (StreamControl) tag;
-                setStreamVolume(sc, progress,
+                setStreamVolume(sc, progress + sc.minVolume,
                         AudioManager.FLAG_SHOW_UI | AudioManager.FLAG_VIBRATE);
             }
             resetTimeout();

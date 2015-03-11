@@ -866,6 +866,24 @@ public class AudioManager {
     }
 
     /**
+     * Returns the minimum volume index for a particular stream.
+     *
+     * @param streamType The stream type whose minimum volume index is returned.
+     * @return The minimum valid volume index for the stream.
+     * @see #getStreamVolume(int)
+     * @hide
+     */
+    public int getStreamMinVolume(int streamType) {
+        IAudioService service = getService();
+        try {
+            return service.getStreamMinVolume(streamType);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Dead object in getStreamMinVolume", e);
+            return 0;
+        }
+    }
+
+    /**
      * Returns the current volume index for a particular stream.
      *
      * @param streamType The stream type whose volume index is returned.
