@@ -3862,6 +3862,14 @@ public class BackupManagerService {
                             Slog.d(TAG, "Ignoring non-agent system package " + pkg);
                         }
                         continue;
+                    } else if ((info.applicationInfo.flags & ApplicationInfo.FLAG_STOPPED) != 0) {
+                        // Cull any packages in the 'stopped' state: they've either just been
+                        // installed or have explicitly been force-stopped by the user.  In both
+                        // cases we do not want to launch them for backup.
+                        if (MORE_DEBUG) {
+                            Slog.d(TAG, "Ignoring stopped package " + pkg);
+                        }
+                        continue;
                     }
                     mPackages.add(info);
                 } catch (NameNotFoundException e) {
