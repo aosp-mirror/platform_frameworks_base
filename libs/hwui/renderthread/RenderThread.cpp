@@ -22,6 +22,8 @@
 #include "RenderProxy.h"
 
 #include <gui/DisplayEventReceiver.h>
+#include <gui/ISurfaceComposer.h>
+#include <gui/SurfaceComposerClient.h>
 #include <sys/resource.h>
 #include <utils/Log.h>
 
@@ -151,11 +153,6 @@ RenderThread::~RenderThread() {
     LOG_ALWAYS_FATAL("Can't destroy the render thread");
 }
 
-void RenderThread::setFrameInterval(nsecs_t frameInterval) {
-    mTimeLord.setFrameInterval(frameInterval);
-    mJankTracker->setFrameInterval(frameInterval);
-}
-
 void RenderThread::initializeDisplayEventReceiver() {
     LOG_ALWAYS_FATAL_IF(mDisplayEventReceiver, "Initializing a second DisplayEventReceiver?");
     mDisplayEventReceiver = new DisplayEventReceiver();
@@ -169,10 +166,16 @@ void RenderThread::initializeDisplayEventReceiver() {
 }
 
 void RenderThread::initThreadLocals() {
+    sp<IBinder> dtoken(SurfaceComposerClient::getBuiltInDisplay(
+            ISurfaceComposer::eDisplayIdMain));
+    status_t status = SurfaceComposerClient::getDisplayInfo(dtoken, &mDisplayInfo);
+    LOG_ALWAYS_FATAL_IF(status, "Failed to get display info\n");
+    nsecs_t frameIntervalNanos = static_cast<nsecs_t>(1000000000 / mDisplayInfo.fps);
+    mTimeLord.setFrameInterval(frameIntervalNanos);
     initializeDisplayEventReceiver();
     mEglManager = new EglManager(*this);
     mRenderState = new RenderState(*this);
-    mJankTracker = new JankTracker(mTimeLord.frameIntervalNanos());
+    mJankTracker = new JankTracker(frameIntervalNanos);
 }
 
 int RenderThread::displayEventReceiverCallback(int fd, int events, void* data) {

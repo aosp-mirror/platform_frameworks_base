@@ -102,7 +102,6 @@ public class ThreadedRenderer extends HardwareRenderer {
     private final float mLightRadius;
     private final int mAmbientShadowAlpha;
     private final int mSpotShadowAlpha;
-    private final float mDensity;
 
     private long mNativeProxy;
     private boolean mInitialized = false;
@@ -119,7 +118,6 @@ public class ThreadedRenderer extends HardwareRenderer {
                 (int) (255 * a.getFloat(R.styleable.Lighting_ambientShadowAlpha, 0) + 0.5f);
         mSpotShadowAlpha = (int) (255 * a.getFloat(R.styleable.Lighting_spotShadowAlpha, 0) + 0.5f);
         a.recycle();
-        mDensity = context.getResources().getDisplayMetrics().density;
 
         long rootNodePtr = nCreateRootRenderNode();
         mRootNode = RenderNode.adopt(rootNodePtr);
@@ -127,10 +125,6 @@ public class ThreadedRenderer extends HardwareRenderer {
         mNativeProxy = nCreateProxy(translucent, rootNodePtr);
 
         AtlasInitializer.sInstance.init(context, mNativeProxy);
-
-        // Setup timing
-        mChoreographer = Choreographer.getInstance();
-        nSetFrameInterval(mNativeProxy, mChoreographer.getFrameIntervalNanos());
 
         loadSystemProperties();
     }
@@ -224,7 +218,7 @@ public class ThreadedRenderer extends HardwareRenderer {
         mRootNode.setLeftTopRightBottom(-mInsetLeft, -mInsetTop, mSurfaceWidth, mSurfaceHeight);
         nSetup(mNativeProxy, mSurfaceWidth, mSurfaceHeight,
                 lightX, mLightY, mLightZ, mLightRadius,
-                mAmbientShadowAlpha, mSpotShadowAlpha, mDensity);
+                mAmbientShadowAlpha, mSpotShadowAlpha);
     }
 
     @Override
@@ -379,6 +373,7 @@ public class ThreadedRenderer extends HardwareRenderer {
 
     @Override
     void setName(String name) {
+        nSetName(mNativeProxy, name);
     }
 
     @Override
@@ -487,15 +482,15 @@ public class ThreadedRenderer extends HardwareRenderer {
     private static native long nCreateProxy(boolean translucent, long rootRenderNode);
     private static native void nDeleteProxy(long nativeProxy);
 
-    private static native void nSetFrameInterval(long nativeProxy, long frameIntervalNanos);
     private static native boolean nLoadSystemProperties(long nativeProxy);
+    private static native void nSetName(long nativeProxy, String name);
 
     private static native boolean nInitialize(long nativeProxy, Surface window);
     private static native void nUpdateSurface(long nativeProxy, Surface window);
     private static native boolean nPauseSurface(long nativeProxy, Surface window);
     private static native void nSetup(long nativeProxy, int width, int height,
             float lightX, float lightY, float lightZ, float lightRadius,
-            int ambientShadowAlpha, int spotShadowAlpha, float density);
+            int ambientShadowAlpha, int spotShadowAlpha);
     private static native void nSetOpaque(long nativeProxy, boolean opaque);
     private static native int nSyncAndDrawFrame(long nativeProxy, long[] frameInfo, int size);
     private static native void nDestroy(long nativeProxy);

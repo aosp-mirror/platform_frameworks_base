@@ -20,6 +20,7 @@
 #include "renderthread/TimeLord.h"
 #include "utils/RingBuffer.h"
 
+#include <array>
 #include <memory>
 
 namespace android {
@@ -56,9 +57,9 @@ public:
 private:
     uint32_t findPercentile(int p);
 
-    JankBucket mBuckets[NUM_BUCKETS];
-    int64_t mThresholds[NUM_BUCKETS];
-    uint32_t mFrameCounts[128];
+    std::array<JankBucket, NUM_BUCKETS> mBuckets;
+    std::array<int64_t, NUM_BUCKETS> mThresholds;
+    std::array<uint32_t, 128> mFrameCounts;
 
     int64_t mFrameInterval;
     uint32_t mTotalFrameCount;

@@ -51,6 +51,7 @@ CanvasContext::CanvasContext(RenderThread& thread, bool translucent,
         , mRootRenderNode(rootRenderNode)
         , mCurrentFrameInfo(nullptr) {
     mRenderThread.renderState().registerCanvasContext(this);
+    mProfiler.setDensity(mRenderThread.mainDisplayInfo().density);
 }
 
 CanvasContext::~CanvasContext() {

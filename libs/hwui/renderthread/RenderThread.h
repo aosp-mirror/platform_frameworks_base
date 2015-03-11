@@ -23,6 +23,7 @@
 #include "TimeLord.h"
 
 #include <cutils/compiler.h>
+#include <ui/DisplayInfo.h>
 #include <utils/Looper.h>
 #include <utils/Mutex.h>
 #include <utils/Singleton.h>
@@ -86,12 +87,12 @@ public:
     // the next vsync. If it is not currently registered this does nothing.
     void pushBackFrameCallback(IFrameCallback* callback);
 
-    void setFrameInterval(nsecs_t frameInterval);
-
     TimeLord& timeLord() { return mTimeLord; }
     RenderState& renderState() { return *mRenderState; }
     EglManager& eglManager() { return *mEglManager; }
     JankTracker& jankTracker() { return *mJankTracker; }
+
+    const DisplayInfo& mainDisplayInfo() { return mDisplayInfo; }
 
 protected:
     virtual bool threadLoop() override;
@@ -121,6 +122,8 @@ private:
 
     nsecs_t mNextWakeup;
     TaskQueue mQueue;
+
+    DisplayInfo mDisplayInfo;
 
     DisplayEventReceiver* mDisplayEventReceiver;
     bool mVsyncRequested;

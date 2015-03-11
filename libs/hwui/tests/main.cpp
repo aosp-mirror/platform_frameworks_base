@@ -85,7 +85,7 @@ public:
         proxy->initialize(surface);
         float lightX = width / 2.0;
         proxy->setup(width, height, (Vector3){lightX, dp(-200.0f), dp(800.0f)},
-                dp(800.0f), 255 * 0.075, 255 * 0.15, gDisplay.density);
+                dp(800.0f), 255 * 0.075, 255 * 0.15);
 
         android::uirenderer::Rect DUMMY;
 
