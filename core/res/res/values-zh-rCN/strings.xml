@@ -796,10 +796,8 @@
     <string name="permdesc_accessNotifications" msgid="458457742683431387">"允许该应用检索、检查并清除通知，包括其他应用发布的通知。"</string>
     <string name="permlab_bindNotificationListenerService" msgid="7057764742211656654">"绑定到通知侦听器服务"</string>
     <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"允许应用绑定到通知侦听器服务的顶级接口（普通应用绝不需要此权限）。"</string>
-    <!-- no translation found for permlab_bindChooserTargetService (3443261076710185673) -->
-    <skip />
-    <!-- no translation found for permdesc_bindChooserTargetService (1413908999583734970) -->
-    <skip />
+    <string name="permlab_bindChooserTargetService" msgid="3443261076710185673">"绑定到选择器目标服务"</string>
+    <string name="permdesc_bindChooserTargetService" msgid="1413908999583734970">"允许该应用绑定到选择器目标服务的顶级接口。普通应用绝不需要此权限。"</string>
     <string name="permlab_bindConditionProviderService" msgid="1180107672332704641">"绑定到条件提供程序服务"</string>
     <string name="permdesc_bindConditionProviderService" msgid="1680513931165058425">"允许应用绑定到条件提供程序服务的顶级接口。普通应用绝不需要此权限。"</string>
     <string name="permlab_bindMediaRouteService" msgid="6637740382272686835">"绑定至媒体转接服务"</string>
@@ -1788,12 +1786,9 @@
       <item quantity="one">1 秒后重试</item>
     </plurals>
     <string name="restr_pin_try_later" msgid="973144472490532377">"稍后重试"</string>
-    <!-- no translation found for immersive_cling_title (8394201622932303336) -->
-    <skip />
-    <!-- no translation found for immersive_cling_description (3482371193207536040) -->
-    <skip />
-    <!-- no translation found for immersive_cling_positive (5016839404568297683) -->
-    <skip />
+    <string name="immersive_cling_title" msgid="8394201622932303336">"正在全屏模式下查看"</string>
+    <string name="immersive_cling_description" msgid="3482371193207536040">"要退出，请从顶部向下滑动。"</string>
+    <string name="immersive_cling_positive" msgid="5016839404568297683">"知道了"</string>
     <string name="done_label" msgid="2093726099505892398">"完成"</string>
     <string name="hour_picker_description" msgid="6698199186859736512">"小时转盘"</string>
     <string name="minute_picker_description" msgid="8606010966873791190">"分钟转盘"</string>

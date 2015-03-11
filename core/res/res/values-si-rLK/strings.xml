@@ -796,8 +796,8 @@
     <string name="permdesc_accessNotifications" msgid="458457742683431387">"වෙනත් යෙදුම් විසින් කළ පල කිරීම්ද ඇතුළත්ව දැන්වීම් ලබා ගැනීමට, පරීක්ෂා කිරීමට සහ හිස් කිරීමට යෙදුමට අවසර දෙන්න."</string>
     <string name="permlab_bindNotificationListenerService" msgid="7057764742211656654">"දැනුම්දීම ඇහුම්කන් දීම් සේවාවක් වෙත බඳින්න"</string>
     <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"දැනුම්දීම් අසන්නාගේ සේවාවේ ඉහළ මට්ටමේ අතුරුමුහුණතට බැඳීමට දරන්නාට අවසර දේ. සාමාන්‍ය යෙදුම් සඳහා කිසිසේත් අවශ්‍ය නොවේ."</string>
-    <string name="permlab_bindChooserTargetService" msgid="3443261076710185673">"තෝරන්නා ඉලක්ක කරගත් සේවාවකට සම්බන්ධ කරන්න"</string>
-    <string name="permdesc_bindChooserTargetService" msgid="1413908999583734970">"තෝරන්නා ඉලක්ක කරගත් සේවාවක ඉහළ මට්ට‍‍‍මේ අතුරු මුහුණත වෙත සම්බන්ධ වීමට ධාරකයාට ඉඩ‍‍දෙන්න. සාමාන්ය යෙදුම් සඳහා කිසිදා අවශ්ය නොවනු ඇත."</string>
+    <string name="permlab_bindChooserTargetService" msgid="3443261076710185673">"තෝරන්නා ඉලක්ක කරගත් සේවාවකට සම්බන්ධ කරන්න"</string>
+    <string name="permdesc_bindChooserTargetService" msgid="1413908999583734970">"තෝරන්නා ඉලක්ක කරගත් සේවාවක ඉහළ මට්ට‍‍‍මේ අතුරු මුහුණත වෙත සම්බන්ධ වීමට ධාරකයාට ඉඩ‍‍දෙන්න. සාමාන්ය යෙදුම් සඳහා කිසිදා අවශ්ය නොවනු ඇත."</string>
     <string name="permlab_bindConditionProviderService" msgid="1180107672332704641">"තත්ත්වය සපයන්නාගේ සේවාවට බඳින්න"</string>
     <string name="permdesc_bindConditionProviderService" msgid="1680513931165058425">"තත්ත්වය සපයන්නාගේ සේවාවට ඉහළ-මට්ටමේ අතුරු මුහුණතක් බැඳිමට ධාරකයාට අවසර දෙන්න. සාමාන්‍ය යෙදුම් සඳහා කවදාවත් අවශ්‍යය නොවෙයි."</string>
     <string name="permlab_bindMediaRouteService" msgid="6637740382272686835">"මාධ්‍ය ගමන් කරන සේවාව බඳින්න"</string>
@@ -1788,7 +1788,7 @@
       <item quantity="other">තත්පර <xliff:g id="COUNT">%d</xliff:g> කින් නැවත උත්සාහ කරන්න</item>
     </plurals>
     <string name="restr_pin_try_later" msgid="973144472490532377">"පසුව නැවත උත්සාහ කරන්න"</string>
-    <string name="immersive_cling_title" msgid="8394201622932303336">"මුළු තිරය ​​නරඹමින්"</string>
+    <string name="immersive_cling_title" msgid="8394201622932303336">"මුළු තිරය බලමින්"</string>
     <string name="immersive_cling_description" msgid="3482371193207536040">"ඉවත් වීමට, ඉහළ සිට පහළට ස්වයිප් කරන්න"</string>
     <string name="immersive_cling_positive" msgid="5016839404568297683">"වැටහුණි"</string>
     <string name="done_label" msgid="2093726099505892398">"අවසන්"</string>

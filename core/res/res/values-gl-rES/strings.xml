@@ -796,8 +796,8 @@
     <string name="permdesc_accessNotifications" msgid="458457742683431387">"Permite á aplicación recuperar, examinar e borrar notificacións, incluídas as publicadas por outras aplicacións."</string>
     <string name="permlab_bindNotificationListenerService" msgid="7057764742211656654">"vincular a un servizo de axente de escoita de notificacións"</string>
     <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"Permite ao propietario vincularse á interface de nivel superior dun servizo axente de escoita de notificacións.  Non debería ser nunca necesario para as aplicacións normais."</string>
-    <string name="permlab_bindChooserTargetService" msgid="3443261076710185673">"vincular a un servizo de segmento de seleccionador"</string>
-    <string name="permdesc_bindChooserTargetService" msgid="1413908999583734970">"Permite ao propietario vincularse á interface de nivel superior dun servizo de segmento de seleccionador. Non debería ser nunca necesario para as aplicacións normais."</string>
+    <string name="permlab_bindChooserTargetService" msgid="3443261076710185673">"vincular a un servizo de destino de selector"</string>
+    <string name="permdesc_bindChooserTargetService" msgid="1413908999583734970">"Permite ao propietario vincularse á interface de nivel superior dun servizo de destino de selector. Non se debería necesitar para as aplicacións normais."</string>
     <string name="permlab_bindConditionProviderService" msgid="1180107672332704641">"vincular a un servizo de provedor de condicións"</string>
     <string name="permdesc_bindConditionProviderService" msgid="1680513931165058425">"Permite ao propietario vincularse á interface de nivel superior dun servizo provedor de condicións. As aplicacións normais non deberían necesitar este permiso."</string>
     <string name="permlab_bindMediaRouteService" msgid="6637740382272686835">"vincular a un servizo de ruta de medios"</string>
