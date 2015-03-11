@@ -540,7 +540,7 @@ public class StaticLayout extends Layout {
                 while (breakIndex < breakCount && paraStart + breaks[breakIndex] <= spanEnd) {
                     int endPos = paraStart + breaks[breakIndex];
 
-                    boolean moreChars = (endPos < paraEnd); // XXX is this the right way to calculate this?
+                    boolean moreChars = (endPos < bufEnd);
 
                     v = out(source, here, endPos,
                             fmAscent, fmDescent, fmTop, fmBottom,
