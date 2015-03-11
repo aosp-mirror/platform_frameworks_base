@@ -484,6 +484,9 @@
     <!-- Wifi driver stop delay, in milliseconds.
          Default value is 2 minutes. -->
     <integer translatable="false" name="config_wifi_driver_stop_delay">120000</integer>
+    
+    <!-- Integer indicating wpa_supplicant scan intervel when WFD session established in milliseconds -->
+    <integer translatable="false" name="config_wifi_scan_interval_wfd_connected">300000</integer>
 
     <!-- Wifi driver supports batched scan -->
     <bool translatable="false" name="config_wifi_batched_scan_supported">false</bool>
