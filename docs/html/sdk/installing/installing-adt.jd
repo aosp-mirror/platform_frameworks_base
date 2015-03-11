@@ -1,8 +1,8 @@
 page.title=Installing the Eclipse Plugin
-adt.zip.version=23.0.4
-adt.zip.download=ADT-23.0.4.zip
-adt.zip.bytes=103336810
-adt.zip.checksum=91a43dcf686ab73dec2c08b77243492b
+adt.zip.version=23.0.6
+adt.zip.download=ADT-23.0.6.zip
+adt.zip.bytes=103344298
+adt.zip.checksum=f64b7e50c84799f41c642218c35f1bbe
 
 @jd:body
 
@@ -142,7 +142,7 @@ to follow these steps again instead of the default update instructions.</p>
 
 <p>Note that there are features of ADT that require some optional
 Eclipse packages (for example, WST). If you encounter an error when
-installing ADT, your Eclipse installion might not include these packages.
+installing ADT, your Eclipse installation might not include these packages.
 For information about how to quickly add the necessary packages to your
 Eclipse installation, see the troubleshooting topic
 <a href="{@docRoot}resources/faq/troubleshooting.html#installeclipsecomponents">ADT
