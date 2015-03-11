@@ -881,6 +881,13 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
     /**
      * @hide
      */
+    public boolean isForwardLocked() {
+        return (privateFlags & ApplicationInfo.PRIVATE_FLAG_FORWARD_LOCK) != 0;
+    }
+
+    /**
+     * @hide
+     */
     @Override protected ApplicationInfo getApplicationInfo() {
         return this;
     }
