@@ -94,6 +94,7 @@ import java.util.Map;
 /**
  * Custom implementation of Context/Activity to handle non compiled resources.
  */
+@SuppressWarnings("deprecation")  // For use of Pair.
 public final class BridgeContext extends Context {
 
     /** The map adds cookies to each view so that IDE can link xml tags to views. */
@@ -569,7 +570,7 @@ public final class BridgeContext extends Context {
 
         // Hint: for XmlPullParser, attach source //DEVICE_SRC/dalvik/libcore/xml/src/java
         if (set instanceof BridgeXmlBlockParser) {
-            BridgeXmlBlockParser parser = null;
+            BridgeXmlBlockParser parser;
             parser = (BridgeXmlBlockParser)set;
 
             isPlatformFile = parser.isPlatformFile();
@@ -590,7 +591,7 @@ public final class BridgeContext extends Context {
         } else if (set != null) { // null parser is ok
             // really this should not be happening since its instantiated in Bridge
             Bridge.getLog().error(LayoutLog.TAG_BROKEN,
-                    "Parser is not a BridgeXmlBlockParser!", null /*data*/);
+                    "Parser is not a BridgeXmlBlockParser!", null);
             return null;
         }
 
@@ -602,7 +603,7 @@ public final class BridgeContext extends Context {
         // look for a custom style.
         String customStyle = null;
         if (set != null) {
-            customStyle = set.getAttributeValue(null /* namespace*/, "style");
+            customStyle = set.getAttributeValue(null, "style");
         }
 
         StyleResourceValue customStyleValues = null;
@@ -625,31 +626,39 @@ public final class BridgeContext extends Context {
             // get the name from the int.
             Pair<String, Boolean> defStyleAttribute = searchAttr(defStyleAttr);
 
-            if (defaultPropMap != null) {
-                String defStyleName = defStyleAttribute.getFirst();
-                if (defStyleAttribute.getSecond()) {
-                    defStyleName = "android:" + defStyleName;
-                }
-                defaultPropMap.put("style", defStyleName);
-            }
-
-            // look for the style in the current theme, and its parent:
-            ResourceValue item = mRenderResources.findItemInTheme(defStyleAttribute.getFirst(),
-                    defStyleAttribute.getSecond());
-
-            if (item != null) {
-                // item is a reference to a style entry. Search for it.
-                item = mRenderResources.findResValue(item.getValue(), item.isFramework());
-
-                if (item instanceof StyleResourceValue) {
-                    defStyleValues = (StyleResourceValue)item;
-                }
+            if (defStyleAttribute == null) {
+                // This should be rare. Happens trying to map R.style.foo to @style/foo fails.
+                // This will happen if the user explicitly used a non existing int value for
+                // defStyleAttr or there's something wrong with the project structure/build.
+                Bridge.getLog().error(LayoutLog.TAG_RESOURCES_RESOLVE,
+                        "Failed to find the style corresponding to the id " + defStyleAttr, null);
             } else {
-                Bridge.getLog().error(LayoutLog.TAG_RESOURCES_RESOLVE_THEME_ATTR,
-                        String.format(
-                                "Failed to find style '%s' in current theme",
-                                defStyleAttribute.getFirst()),
-                        null /*data*/);
+                if (defaultPropMap != null) {
+                    String defStyleName = defStyleAttribute.getFirst();
+                    if (defStyleAttribute.getSecond()) {
+                        defStyleName = "android:" + defStyleName;
+                    }
+                    defaultPropMap.put("style", defStyleName);
+                }
+
+                // look for the style in the current theme, and its parent:
+                ResourceValue item = mRenderResources.findItemInTheme(defStyleAttribute.getFirst(),
+                        defStyleAttribute.getSecond());
+
+                if (item != null) {
+                    // item is a reference to a style entry. Search for it.
+                    item = mRenderResources.findResValue(item.getValue(), item.isFramework());
+
+                    if (item instanceof StyleResourceValue) {
+                        defStyleValues = (StyleResourceValue) item;
+                    }
+                } else {
+                    Bridge.getLog().error(LayoutLog.TAG_RESOURCES_RESOLVE_THEME_ATTR,
+                            String.format(
+                                    "Failed to find style '%s' in current theme",
+                                    defStyleAttribute.getFirst()),
+                            null);
+                }
             }
         } else if (defStyleRes != 0) {
             boolean isFrameworkRes = true;
