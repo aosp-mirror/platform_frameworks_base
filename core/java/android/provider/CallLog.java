@@ -454,7 +454,6 @@ public class CallLog {
                 long start, int duration, Long dataUsage, boolean addForAllUsers) {
             final ContentResolver resolver = context.getContentResolver();
             int numberPresentation = PRESENTATION_ALLOWED;
-            boolean isHidden = false;
 
             TelecomManager tm = null;
             try {
@@ -469,12 +468,6 @@ public class CallLog {
                     if (address != null) {
                         accountAddress = address.getSchemeSpecificPart();
                     }
-                } else {
-                    // We could not find the account through telecom. For call log entries that
-                    // are added with a phone account which is not registered, we automatically
-                    // mark them as hidden. They are unhidden once the account is registered.
-                    Log.i(LOG_TAG, "Marking call log entry as hidden.");
-                    isHidden = true;
                 }
             }
 
@@ -520,7 +513,6 @@ public class CallLog {
             values.put(PHONE_ACCOUNT_COMPONENT_NAME, accountComponentString);
             values.put(PHONE_ACCOUNT_ID, accountId);
             values.put(PHONE_ACCOUNT_ADDRESS, accountAddress);
-            values.put(PHONE_ACCOUNT_HIDDEN, Integer.valueOf(isHidden ? 1 : 0));
             values.put(NEW, Integer.valueOf(1));
 
             if (callType == MISSED_TYPE) {
