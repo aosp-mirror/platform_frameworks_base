@@ -5,7 +5,7 @@
     </CLASSES>
     <JAVADOC />
     <SOURCES>
-      <root url="file://$ANDROID_SRC$/tools/base/layoutlib-api/src/main/java" />
+      <root url="jar://$PROJECT_DIR$/../../../../prebuilts/misc/common/layoutlib_api/layoutlib_api-sources.jar!/" />
     </SOURCES>
   </library>
 </component>
