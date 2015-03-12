@@ -62,7 +62,6 @@ import android.net.NetworkUtils;
 import android.net.Proxy;
 import android.net.ProxyInfo;
 import android.net.RouteInfo;
-import android.net.SamplingDataTracker;
 import android.net.UidRange;
 import android.net.Uri;
 import android.os.Binder;
