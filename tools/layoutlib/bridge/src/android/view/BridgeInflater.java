@@ -233,11 +233,13 @@ public final class BridgeInflater extends LayoutInflater {
                 String type = attrs.getAttributeValue(BridgeConstants.NS_RESOURCES,
                                 BridgeConstants.ATTR_LAYOUT_MANAGER_TYPE);
                 if (type != null) {
-                    LayoutManagerType layoutManagerType = LayoutManagerType.getByDisplayName(type);
+                    LayoutManagerType layoutManagerType = LayoutManagerType.getByLogicalName(type);
                     if (layoutManagerType == null) {
-                        Bridge.getLog().warning(LayoutLog.TAG_UNSUPPORTED,
-                                "LayoutManager (" + type + ") not found, falling back to " +
-                                        "LinearLayoutManager", null);
+                        layoutManagerType = LayoutManagerType.getByClassName(type);
+                    }
+                    if (layoutManagerType == null) {
+                        // add the classname itself.
+                        bc.addCookie(view, type);
                     } else {
                         bc.addCookie(view, layoutManagerType);
                     }
