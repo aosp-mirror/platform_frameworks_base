@@ -132,7 +132,7 @@ public class InputMethodUtils {
         return containsSubtypeOf(imi, ENGLISH_LOCALE.getLanguage(), SUBTYPE_MODE_KEYBOARD);
     }
 
-    private static boolean isSystemImeThatHasSubtypeOf(final InputMethodInfo imi,
+    public static boolean isSystemImeThatHasSubtypeOf(final InputMethodInfo imi,
             final Context context, final boolean checkDefaultAttribute,
             @Nullable final Locale requiredLocale, final boolean checkCountry,
             final String requiredSubtypeMode) {
