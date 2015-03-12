@@ -320,6 +320,12 @@ public class FingerprintService extends SystemService {
             checkPermission(USE_FINGERPRINT);
             return mHalDeviceId != 0;
         }
+
+        @Override
+        public void rename(int fpId, String name) {
+            checkPermission(MANAGE_FINGERPRINT);
+            // TODO
+        }
     }
 
     @Override

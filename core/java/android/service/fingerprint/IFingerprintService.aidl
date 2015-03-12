@@ -41,4 +41,7 @@ interface IFingerprintService {
 
     // Determine if HAL is loaded and ready
     boolean isHardwareDetected();
+
+    // Rename the given fingerprint id
+    void rename(int fpId, String name);
 }

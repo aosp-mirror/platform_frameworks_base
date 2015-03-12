@@ -98,8 +98,8 @@ public class FingerprintManager {
     };
 
     public static final class FingerprintItem {
-        CharSequence name;
-        int id;
+        public CharSequence name;
+        public int id;
         FingerprintItem(CharSequence name, int id) {
             this.name = name;
             this.id = id;
@@ -290,5 +290,24 @@ public class FingerprintManager {
             Log.w(TAG, "isFingerprintHardwareDetected(): Service not connected!");
         }
         return false;
+    }
+
+    /**
+     * Renames the given fingerprint template
+     * @param fpId the fingerprint id
+     * @param newName the new name
+     * @hide
+     */
+    public void rename(int fpId, String newName) {
+        // Renames the given fpId
+        if (mService != null) {
+            try {
+                mService.rename(fpId, newName);
+            } catch (RemoteException e) {
+                Log.v(TAG, "Remote exception in rename(): ", e);
+            }
+        } else {
+            Log.w(TAG, "rename(): Service not connected!");
+        }
     }
 }
