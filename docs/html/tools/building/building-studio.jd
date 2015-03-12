@@ -52,10 +52,10 @@ progress of the build:</p>
 
 <p>Click <img src="{@docRoot}images/tools/as-gradlebutton.png" alt=""
 style="vertical-align:bottom;margin:0;"/> on the bottom
-right part of the window to show the <em>Gradle Console</em>, as shown in figure 2.</p>
+right part of the window to show the <em>Gradle Console</em>, as shown in figure 1.</p>
 
-<img src="{@docRoot}images/tools/as-gradleconsole.png" alt="" />
-<p class="img-caption"><strong>Figure 2.</strong> The Gradle Console in Android Studio.</p>
+<img src="{@docRoot}images/tools/studio-gradle-console.png" alt="" />
+<p class="img-caption"><strong>Figure 1.</strong> The Gradle Console in Android Studio.</p>
 
 <p>The Gradle Console shows the build tasks and subtasks that the build system runs for
 Android Studio. If the build fails, you can find more details on the console. To hide the Gradle
@@ -68,11 +68,11 @@ selected build variant. For more information, see the
 
 <p>To view the list of all available build tasks in Android Studio, click <strong>Gradle</strong>
 on the right side of the IDE window. The <em>Gradle tasks</em> panel appears as shown in
-figure 3. Double-click any build task to run it in Android Studio. To hide the <em>Gradle tasks</em>
+figure 2. Double-click any build task to run it in Android Studio. To hide the <em>Gradle tasks</em>
 panel, click <strong>Gradle</strong> again.</p>
 
-<img src="{@docRoot}images/tools/as-gradlepanel.png" alt="" />
-<p class="img-caption"><strong>Figure 3.</strong> The list of build tasks in Android Studio.</p>
+<img src="{@docRoot}images/tools/studio-gradle-panel.png" alt="" />
+<p class="img-caption"><strong>Figure 2.</strong> The list of build tasks in Android Studio.</p>
 
 <h3 id="buildRelease">Build a release version</h3>
 
