@@ -395,11 +395,6 @@ public abstract class BaseStatusBar extends SystemUI implements
                                 Toast.LENGTH_SHORT).show();
                     }
                 }
-            } else if (DevicePolicyManager.ACTION_DEVICE_POLICY_MANAGER_STATE_CHANGED.equals(
-                    action)) {
-                mUsersAllowingPrivateNotifications.clear();
-                updateLockscreenNotificationSetting();
-                updateNotifications();
             } else if (BANNER_ACTION_CANCEL.equals(action) || BANNER_ACTION_SETUP.equals(action)) {
                 NotificationManager noMan = (NotificationManager)
                         mContext.getSystemService(Context.NOTIFICATION_SERVICE);
@@ -415,6 +410,19 @@ public abstract class BaseStatusBar extends SystemUI implements
 
                     );
                 }
+            }
+        }
+    };
+
+    private final BroadcastReceiver mAllUsersReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String action = intent.getAction();
+            if (DevicePolicyManager.ACTION_DEVICE_POLICY_MANAGER_STATE_CHANGED.equals(action) &&
+                    isCurrentProfile(getSendingUserId())) {
+                mUsersAllowingPrivateNotifications.clear();
+                updateLockscreenNotificationSetting();
+                updateNotifications();
             }
         }
     };
@@ -631,9 +639,13 @@ public abstract class BaseStatusBar extends SystemUI implements
         filter.addAction(Intent.ACTION_USER_PRESENT);
         filter.addAction(BANNER_ACTION_CANCEL);
         filter.addAction(BANNER_ACTION_SETUP);
-        filter.addAction(DevicePolicyManager.ACTION_DEVICE_POLICY_MANAGER_STATE_CHANGED);
         mContext.registerReceiver(mBroadcastReceiver, filter);
 
+        IntentFilter allUsersFilter = new IntentFilter();
+        allUsersFilter.addAction(
+                DevicePolicyManager.ACTION_DEVICE_POLICY_MANAGER_STATE_CHANGED);
+        mContext.registerReceiverAsUser(mAllUsersReceiver, UserHandle.ALL, allUsersFilter,
+                null, null);
         updateCurrentProfilesCache();
     }
 
