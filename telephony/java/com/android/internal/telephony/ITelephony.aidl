@@ -872,6 +872,18 @@ interface ITelephony {
     boolean isImsRegistered();
 
     /**
+     * Returns the Status of Wi-Fi Calling
+     *@hide
+     */
+    boolean isWifiCallingEnabled();
+
+     /**
+     * Returns the Status of Volte
+     *@hide
+     */
+    boolean isVolteEnabled();
+
+    /**
       * Returns the unique device ID of phone, for example, the IMEI for
       * GSM and the MEID for CDMA phones. Return null if device ID is not available.
       *

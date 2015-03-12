@@ -3792,6 +3792,34 @@ public class TelephonyManager {
    }
 
    /**
+    * Returns the Status of Volte
+    *@hide
+    */
+   public boolean isVolteEnabled() {
+       try {
+           return getITelephony().isVolteEnabled();
+       } catch (RemoteException ex) {
+           return false;
+       } catch (NullPointerException ex) {
+           return false;
+       }
+   }
+
+   /**
+    * Returns the Status of Wi-Fi Calling
+    *@hide
+    */
+   public boolean isWifiCallingEnabled() {
+       try {
+           return getITelephony().isWifiCallingEnabled();
+       } catch (RemoteException ex) {
+           return false;
+       } catch (NullPointerException ex) {
+           return false;
+       }
+   }
+
+   /**
     * Set TelephonyProperties.PROPERTY_ICC_OPERATOR_NUMERIC for the default phone.
     *
     * @hide
