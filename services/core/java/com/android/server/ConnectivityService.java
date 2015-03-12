@@ -48,7 +48,6 @@ import android.net.INetworkPolicyManager;
 import android.net.INetworkStatsService;
 import android.net.LinkProperties;
 import android.net.LinkProperties.CompareResult;
-import android.net.MobileDataStateTracker;
 import android.net.Network;
 import android.net.NetworkAgent;
 import android.net.NetworkCapabilities;
@@ -59,7 +58,6 @@ import android.net.NetworkMisc;
 import android.net.NetworkQuotaInfo;
 import android.net.NetworkRequest;
 import android.net.NetworkState;
-import android.net.NetworkStateTracker;
 import android.net.NetworkUtils;
 import android.net.Proxy;
 import android.net.ProxyInfo;
@@ -153,9 +151,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
     private static final boolean DBG = true;
     private static final boolean VDBG = false;
 
-    // network sampling debugging
-    private static final boolean SAMPLE_DBG = false;
-
     private static final boolean LOGD_RULES = false;
 
     // TODO: create better separation between radio types and network types
@@ -166,32 +161,9 @@ public class ConnectivityService extends IConnectivityManager.Stub
     private static final String NETWORK_RESTORE_DELAY_PROP_NAME =
             "android.telephony.apn-restore";
 
-    // Default value if FAIL_FAST_TIME_MS is not set
-    private static final int DEFAULT_FAIL_FAST_TIME_MS = 1 * 60 * 1000;
-    // system property that can override DEFAULT_FAIL_FAST_TIME_MS
-    private static final String FAIL_FAST_TIME_MS =
-            "persist.radio.fail_fast_time_ms";
-
-    private static final String ACTION_PKT_CNT_SAMPLE_INTERVAL_ELAPSED =
-            "android.net.ConnectivityService.action.PKT_CNT_SAMPLE_INTERVAL_ELAPSED";
-
-    private static final int SAMPLE_INTERVAL_ELAPSED_REQUEST_CODE = 0;
-
     // How long to delay to removal of a pending intent based request.
     // See Settings.Secure.CONNECTIVITY_RELEASE_PENDING_INTENT_DELAY_MS
     private final int mReleasePendingIntentDelayMs;
-
-    private PendingIntent mSampleIntervalElapsedIntent;
-
-    // Set network sampling interval at 12 minutes, this way, even if the timers get
-    // aggregated, it will fire at around 15 minutes, which should allow us to
-    // aggregate this timer with other timers (specially the socket keep alive timers)
-    private static final int DEFAULT_SAMPLING_INTERVAL_IN_SECONDS = (SAMPLE_DBG ? 30 : 12 * 60);
-
-    // start network sampling a minute after booting ...
-    private static final int DEFAULT_START_SAMPLING_INTERVAL_IN_SECONDS = (SAMPLE_DBG ? 30 : 60);
-
-    AlarmManager mAlarmManager;
 
     private Tethering mTethering;
 
@@ -211,13 +183,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
     private SparseIntArray mUidRules = new SparseIntArray();
     /** Set of ifaces that are costly. */
     private HashSet<String> mMeteredIfaces = Sets.newHashSet();
-
-    /**
-     * Sometimes we want to refer to the individual network state
-     * trackers separately, and sometimes we just want to treat them
-     * abstractly.
-     */
-    private NetworkStateTracker mNetTrackers[];
 
     private Context mContext;
     private int mNetworkPreference;
@@ -278,26 +243,9 @@ public class ConnectivityService extends IConnectivityManager.Stub
     private static final int EVENT_APPLY_GLOBAL_HTTP_PROXY = 9;
 
     /**
-     * used internally to set external dependency met/unmet
-     * arg1 = ENABLED (met) or DISABLED (unmet)
-     * arg2 = NetworkType
-     */
-    private static final int EVENT_SET_DEPENDENCY_MET = 10;
-
-    /**
      * used internally to send a sticky broadcast delayed.
      */
     private static final int EVENT_SEND_STICKY_BROADCAST_INTENT = 11;
-
-    /**
-     * Used internally to disable fail fast of mobile data
-     */
-    private static final int EVENT_ENABLE_FAIL_FAST_MOBILE_DATA = 14;
-
-    /**
-     * used internally to indicate that data sampling interval is up
-     */
-    private static final int EVENT_SAMPLE_INTERVAL_ELAPSED = 15;
 
     /**
      * PAC manager has received new port.
@@ -418,8 +366,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
     List mProtectedNetworks;
 
     private DataConnectionStats mDataConnectionStats;
-
-    private AtomicInteger mEnableFailFastMobileDataTag = new AtomicInteger(0);
 
     TelephonyManager mTelephonyManager;
 
@@ -650,9 +596,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 com.android.internal.R.integer.config_networkTransitionTimeout);
         mPendingIntentWakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, TAG);
 
-        mNetTrackers = new NetworkStateTracker[
-                ConnectivityManager.MAX_NETWORK_TYPE+1];
-
         mNetConfigs = new NetworkConfig[ConnectivityManager.MAX_NETWORK_TYPE+1];
 
         // TODO: What is the "correct" way to do determine if this is a wifi only device?
@@ -740,23 +683,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
         mDataConnectionStats = new DataConnectionStats(mContext);
         mDataConnectionStats.startMonitoring();
 
-        mAlarmManager = (AlarmManager)mContext.getSystemService(Context.ALARM_SERVICE);
-
-        IntentFilter filter = new IntentFilter();
-        filter.addAction(ACTION_PKT_CNT_SAMPLE_INTERVAL_ELAPSED);
-        mContext.registerReceiver(
-                new BroadcastReceiver() {
-                    @Override
-                    public void onReceive(Context context, Intent intent) {
-                        String action = intent.getAction();
-                        if (action.equals(ACTION_PKT_CNT_SAMPLE_INTERVAL_ELAPSED)) {
-                            mHandler.sendMessage(mHandler.obtainMessage
-                                    (EVENT_SAMPLE_INTERVAL_ELAPSED));
-                        }
-                    }
-                },
-                new IntentFilter(filter));
-
         mPacManager = new PacManager(mContext, mHandler, EVENT_PROXY_HAS_CHANGED);
 
         mUserManager = (UserManager) context.getSystemService(Context.USER_SERVICE);
@@ -780,15 +706,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
             }
         }
         throw new IllegalStateException("No free netIds");
-    }
-
-    private boolean teardown(NetworkStateTracker netTracker) {
-        if (netTracker.teardown()) {
-            netTracker.setTeardownRequested(true);
-            return true;
-        } else {
-            return false;
-        }
     }
 
     private NetworkState getFilteredNetworkState(int networkType, int uid) {
@@ -1350,22 +1267,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
         return true;
     }
 
-    public void setDataDependency(int networkType, boolean met) {
-        enforceConnectivityInternalPermission();
-
-        mHandler.sendMessage(mHandler.obtainMessage(EVENT_SET_DEPENDENCY_MET,
-                (met ? ENABLED : DISABLED), networkType));
-    }
-
-    private void handleSetDependencyMet(int networkType, boolean met) {
-        if (mNetTrackers[networkType] != null) {
-            if (DBG) {
-                log("handleSetDependencyMet(" + networkType + ", " + met + ")");
-            }
-            mNetTrackers[networkType].setDependencyMet(met);
-        }
-    }
-
     private INetworkPolicyListener mPolicyListener = new INetworkPolicyListener.Stub() {
         @Override
         public void onUidRulesChanged(int uid, int uidRules) {
@@ -1406,21 +1307,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
             if (LOGD_RULES) {
                 log("onRestrictBackgroundChanged(restrictBackground=" + restrictBackground + ")");
             }
-
-            // kick off connectivity change broadcast for active network, since
-            // global background policy change is radical.
-            // TODO: Dead code; remove.
-            //
-            // final int networkType = mActiveDefaultNetwork;
-            // if (isNetworkTypeValid(networkType)) {
-            //     final NetworkStateTracker tracker = mNetTrackers[networkType];
-            //     if (tracker != null) {
-            //         final NetworkInfo info = tracker.getNetworkInfo();
-            //         if (info != null && info.isConnected()) {
-            //             sendConnectedBroadcast(info);
-            //         }
-            //     }
-            // }
         }
     };
 
@@ -1536,14 +1422,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
     }
 
     void systemReady() {
-        // start network sampling ..
-        Intent intent = new Intent(ACTION_PKT_CNT_SAMPLE_INTERVAL_ELAPSED);
-        intent.setPackage(mContext.getPackageName());
-
-        mSampleIntervalElapsedIntent = PendingIntent.getBroadcast(mContext,
-                SAMPLE_INTERVAL_ELAPSED_REQUEST_CODE, intent, 0);
-        setAlarm(DEFAULT_START_SAMPLING_INTERVAL_IN_SECONDS * 1000, mSampleIntervalElapsedIntent);
-
         loadGlobalProxy();
 
         synchronized(this) {
@@ -2015,66 +1893,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
                     }
                     break;
                 }
-                case NetworkStateTracker.EVENT_STATE_CHANGED: {
-                    info = (NetworkInfo) msg.obj;
-                    NetworkInfo.State state = info.getState();
-
-                    if (VDBG || (state == NetworkInfo.State.CONNECTED) ||
-                            (state == NetworkInfo.State.DISCONNECTED) ||
-                            (state == NetworkInfo.State.SUSPENDED)) {
-                        log("ConnectivityChange for " +
-                            info.getTypeName() + ": " +
-                            state + "/" + info.getDetailedState());
-                    }
-
-                    EventLogTags.writeConnectivityStateChanged(
-                            info.getType(), info.getSubtype(), info.getDetailedState().ordinal());
-
-                    if (info.isConnectedToProvisioningNetwork()) {
-                        /**
-                         * TODO: Create ConnectivityManager.TYPE_MOBILE_PROVISIONING
-                         * for now its an in between network, its a network that
-                         * is actually a default network but we don't want it to be
-                         * announced as such to keep background applications from
-                         * trying to use it. It turns out that some still try so we
-                         * take the additional step of clearing any default routes
-                         * to the link that may have incorrectly setup by the lower
-                         * levels.
-                         */
-                        LinkProperties lp = getLinkPropertiesForType(info.getType());
-                        if (DBG) {
-                            log("EVENT_STATE_CHANGED: connected to provisioning network, lp=" + lp);
-                        }
-
-                        // Clear any default routes setup by the radio so
-                        // any activity by applications trying to use this
-                        // connection will fail until the provisioning network
-                        // is enabled.
-                        /*
-                        for (RouteInfo r : lp.getRoutes()) {
-                            removeRoute(lp, r, TO_DEFAULT_TABLE,
-                                        mNetTrackers[info.getType()].getNetwork().netId);
-                        }
-                        */
-                    } else if (state == NetworkInfo.State.DISCONNECTED) {
-                    } else if (state == NetworkInfo.State.SUSPENDED) {
-                    } else if (state == NetworkInfo.State.CONNECTED) {
-                    //    handleConnect(info);
-                    }
-                    notifyLockdownVpn(null);
-                    break;
-                }
-                case NetworkStateTracker.EVENT_CONFIGURATION_CHANGED: {
-                    info = (NetworkInfo) msg.obj;
-                    // TODO: Temporary allowing network configuration
-                    //       change not resetting sockets.
-                    //       @see bug/4455071
-                    /*
-                    handleConnectivityChange(info.getType(), mCurrentLinkProperties[info.getType()],
-                            false);
-                    */
-                    break;
-                }
             }
         }
     }
@@ -2439,32 +2257,9 @@ public class ConnectivityService extends IConnectivityManager.Stub
                     handleDeprecatedGlobalHttpProxy();
                     break;
                 }
-                case EVENT_SET_DEPENDENCY_MET: {
-                    boolean met = (msg.arg1 == ENABLED);
-                    handleSetDependencyMet(msg.arg2, met);
-                    break;
-                }
                 case EVENT_SEND_STICKY_BROADCAST_INTENT: {
                     Intent intent = (Intent)msg.obj;
                     sendStickyBroadcast(intent);
-                    break;
-                }
-                case EVENT_ENABLE_FAIL_FAST_MOBILE_DATA: {
-                    int tag = mEnableFailFastMobileDataTag.get();
-                    if (msg.arg1 == tag) {
-                        MobileDataStateTracker mobileDst =
-                            (MobileDataStateTracker) mNetTrackers[ConnectivityManager.TYPE_MOBILE];
-                        if (mobileDst != null) {
-                            mobileDst.setEnableFailFastMobileData(msg.arg2);
-                        }
-                    } else {
-                        log("EVENT_ENABLE_FAIL_FAST_MOBILE_DATA: stale arg1:" + msg.arg1
-                                + " != tag:" + tag);
-                    }
-                    break;
-                }
-                case EVENT_SAMPLE_INTERVAL_ELAPSED: {
-                    handleNetworkSamplingTimeout();
                     break;
                 }
                 case EVENT_PROXY_HAS_CHANGED: {
@@ -3066,14 +2861,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
         }
     }
 
-    public void supplyMessenger(int networkType, Messenger messenger) {
-        enforceConnectivityInternalPermission();
-
-        if (isNetworkTypeValid(networkType) && mNetTrackers[networkType] != null) {
-            mNetTrackers[networkType].supplyMessenger(messenger);
-        }
-    }
-
     public int findConnectionTypeForIface(String iface) {
         enforceConnectivityInternalPermission();
 
@@ -3089,23 +2876,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
             }
         }
         return ConnectivityManager.TYPE_NONE;
-    }
-
-    /**
-     * Have mobile data fail fast if enabled.
-     *
-     * @param enabled DctConstants.ENABLED/DISABLED
-     */
-    private void setEnableFailFastMobileData(int enabled) {
-        int tag;
-
-        if (enabled == DctConstants.ENABLED) {
-            tag = mEnableFailFastMobileDataTag.incrementAndGet();
-        } else {
-            tag = mEnableFailFastMobileDataTag.get();
-        }
-        mHandler.sendMessage(mHandler.obtainMessage(EVENT_ENABLE_FAIL_FAST_MOBILE_DATA, tag,
-                         enabled));
     }
 
     @Override
@@ -3391,69 +3161,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
             }
         }
     };
-
-    /* Infrastructure for network sampling */
-
-    private void handleNetworkSamplingTimeout() {
-
-        if (SAMPLE_DBG) log("Sampling interval elapsed, updating statistics ..");
-
-        // initialize list of interfaces ..
-        Map<String, SamplingDataTracker.SamplingSnapshot> mapIfaceToSample =
-                new HashMap<String, SamplingDataTracker.SamplingSnapshot>();
-        for (NetworkStateTracker tracker : mNetTrackers) {
-            if (tracker != null) {
-                String ifaceName = tracker.getNetworkInterfaceName();
-                if (ifaceName != null) {
-                    mapIfaceToSample.put(ifaceName, null);
-                }
-            }
-        }
-
-        // Read samples for all interfaces
-        SamplingDataTracker.getSamplingSnapshots(mapIfaceToSample);
-
-        // process samples for all networks
-        for (NetworkStateTracker tracker : mNetTrackers) {
-            if (tracker != null) {
-                String ifaceName = tracker.getNetworkInterfaceName();
-                SamplingDataTracker.SamplingSnapshot ss = mapIfaceToSample.get(ifaceName);
-                if (ss != null) {
-                    // end the previous sampling cycle
-                    tracker.stopSampling(ss);
-                    // start a new sampling cycle ..
-                    tracker.startSampling(ss);
-                }
-            }
-        }
-
-        if (SAMPLE_DBG) log("Done.");
-
-        int samplingIntervalInSeconds = Settings.Global.getInt(mContext.getContentResolver(),
-                Settings.Global.CONNECTIVITY_SAMPLING_INTERVAL_IN_SECONDS,
-                DEFAULT_SAMPLING_INTERVAL_IN_SECONDS);
-
-        if (SAMPLE_DBG) {
-            log("Setting timer for " + String.valueOf(samplingIntervalInSeconds) + "seconds");
-        }
-
-        setAlarm(samplingIntervalInSeconds * 1000, mSampleIntervalElapsedIntent);
-    }
-
-    /**
-     * Sets a network sampling alarm.
-     */
-    void setAlarm(int timeoutInMilliseconds, PendingIntent intent) {
-        long wakeupTime = SystemClock.elapsedRealtime() + timeoutInMilliseconds;
-        int alarmType;
-        if (Resources.getSystem().getBoolean(
-                R.bool.config_networkSamplingWakesDevice)) {
-            alarmType = AlarmManager.ELAPSED_REALTIME_WAKEUP;
-        } else {
-            alarmType = AlarmManager.ELAPSED_REALTIME;
-        }
-        mAlarmManager.set(alarmType, wakeupTime, intent);
-    }
 
     private final HashMap<Messenger, NetworkFactoryInfo> mNetworkFactoryInfos =
             new HashMap<Messenger, NetworkFactoryInfo>();

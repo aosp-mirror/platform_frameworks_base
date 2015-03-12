@@ -1793,25 +1793,6 @@ public class ConnectivityManager {
     }
 
     /**
-     * Sets a secondary requirement bit for the given networkType.
-     * This requirement bit is generally under the control of the carrier
-     * or its agents and is not directly controlled by the user.
-     *
-     * @param networkType The network who's dependence has changed
-     * @param met Boolean - true if network use is OK, false if not
-     *
-     * <p>This method requires the call to hold the permission
-     * {@link android.Manifest.permission#CONNECTIVITY_INTERNAL}.
-     * {@hide}
-     */
-    public void setDataDependency(int networkType, boolean met) {
-        try {
-            mService.setDataDependency(networkType, met);
-        } catch (RemoteException e) {
-        }
-    }
-
-    /**
      * Returns true if the hardware supports the given network type
      * else it returns false.  This doesn't indicate we have coverage
      * or are authorized onto a network, just whether or not the
@@ -1887,20 +1868,6 @@ public class ConnectivityManager {
     public void captivePortalCheckCompleted(NetworkInfo info, boolean isCaptivePortal) {
         try {
             mService.captivePortalCheckCompleted(info, isCaptivePortal);
-        } catch (RemoteException e) {
-        }
-    }
-
-    /**
-     * Supply the backend messenger for a network tracker
-     *
-     * @param networkType NetworkType to set
-     * @param messenger {@link Messenger}
-     * {@hide}
-     */
-    public void supplyMessenger(int networkType, Messenger messenger) {
-        try {
-            mService.supplyMessenger(networkType, messenger);
         } catch (RemoteException e) {
         }
     }
