@@ -15,6 +15,7 @@
  */
 package com.android.databinding.reflection.annotation;
 
+import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
 
 import com.android.databinding.reflection.Callable;
@@ -244,6 +245,8 @@ public class AnnotationAnalyzer extends ModelAnalyzer {
 
     @Override
     public Callable findMethodOrField(ModelClass modelClass, String name, boolean staticAccess) {
+        Preconditions.checkNotNull(modelClass, "trying to find method %s on empty mode class.",
+                name);
         AnnotationClass annotationClass = (AnnotationClass) modelClass;
         for (String methodName :
                 new String[]{"get" + StringUtils.capitalize(name),

@@ -19,6 +19,7 @@ package com.android.databinding.expr;
 import com.android.databinding.reflection.ModelAnalyzer;
 import com.android.databinding.reflection.Callable;
 import com.android.databinding.reflection.ModelClass;
+import com.android.databinding.util.L;
 
 import java.util.List;
 
@@ -97,7 +98,10 @@ public class FieldAccessExpr extends Expr {
             Expr child = getChild();
             child.resolveType(modelAnalyzer);
             boolean isStatic = child instanceof StaticIdentifierExpr;
-            mGetter = modelAnalyzer.findMethodOrField(child.getResolvedType(), mName, isStatic);
+            ModelClass resolvedType = child.getResolvedType();
+            L.d("resolving %s. Resolved type: %s", this, resolvedType);
+
+            mGetter = modelAnalyzer.findMethodOrField(resolvedType, mName, isStatic);
             if (modelAnalyzer.isObservableField(mGetter.resolvedType)) {
                 // Make this the ".get()" and add an extra field access for the observable field
                 child.getParents().remove(this);

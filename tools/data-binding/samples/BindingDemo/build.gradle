@@ -18,7 +18,9 @@
 buildscript {
     repositories {
         jcenter()
-        mavenLocal()
+        maven {
+            url "$projectDir/../../maven-repo"
+        }
         mavenCentral()
     }
     dependencies {
@@ -32,7 +34,9 @@ buildscript {
 allprojects {
     repositories {
         jcenter()
-        mavenLocal()
+        maven {
+            url "$projectDir/../../../maven-repo"
+        }
         mavenCentral()
     }
 }

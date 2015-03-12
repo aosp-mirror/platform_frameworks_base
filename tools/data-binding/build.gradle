@@ -1,15 +1,61 @@
 ext.kotlinVersion = '0.10.195'
 ext.releaseVersion = "0.3"
 ext.snapshotVersion = "0.3-SNAPSHOT"
-ext.androidPluginVersion = "1.0.0"
+ext.androidPluginVersion = "1.0.1"
 ext.javaTargetCompatibility = 1.6
 ext.javaSourceCompatibility = 1.6
-
+ext.mavenRepoDir = "${projectDir}/maven-repo"
+println "local maven repo is ${ext.mavenRepoDir}."
+new File(ext.mavenRepoDir).mkdir()
 subprojects {
+    apply plugin: 'maven'
     group = 'com.android.databinding'
     version = '0.3-SNAPSHOT'
     repositories {
-        mavenLocal()
         mavenCentral()
+        maven {
+            url "file://$mavenRepoDir"
+        }
     }
+    uploadArchives {
+        repositories {
+            mavenDeployer {
+                repository(url: "file://$mavenRepoDir")
+            }
+        }
+    }
+}
+
+task deleteRepo(type: Delete) {
+    delete "$mavenRepoDir"
+}
+
+file('integration-tests').listFiles().findAll { it.isDirectory() }.each {
+    println("${it.getAbsolutePath()}")
+    def testTask = project.tasks.create "runTestsOf${it.getName().capitalize()}", Exec
+    testTask.workingDir 'integration-tests/TestApp'
+    //on linux
+    testTask.commandLine './gradlew'
+    testTask.args 'clean', 'connectedCheck', '--info'
+    testTask.dependsOn subprojects.uploadArchives
+}
+
+task runIntegrationTests {
+    dependsOn tasks.findAll { task -> task.name.startsWith('runTestsOf') }
+}
+
+task runAllTests {
+    dependsOn runIntegrationTests
+}
+
+allprojects {
+    afterEvaluate { project ->
+        runAllTests.dependsOn project.tasks.findAll {task -> task.name.equals('test')}
+    }
+}
+
+
+task rebuildRepo() {
+    dependsOn deleteRepo
+    dependsOn subprojects.uploadArchives
 }

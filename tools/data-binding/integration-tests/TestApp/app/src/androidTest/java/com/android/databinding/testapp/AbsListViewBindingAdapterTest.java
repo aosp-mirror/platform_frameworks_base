@@ -20,6 +20,7 @@ import com.android.databinding.testapp.vo.AbsListViewBindingObject;
 
 import android.graphics.drawable.ColorDrawable;
 import android.os.Build;
+import android.os.Debug;
 import android.widget.ListView;
 
 public class AbsListViewBindingAdapterTest

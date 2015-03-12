@@ -11,7 +11,7 @@
  * limitations under the License.
  */
 
-package com.android.databinding.testapp.com.android.databinding.testapp.vo;
+package com.android.databinding.testapp;
 
 import com.android.databinding.testapp.BaseDataBinderTest;
 import com.android.databinding.testapp.R;
