@@ -1,5 +1,7 @@
 package android.net.dhcp;
 
+import android.system.OsConstants;
+
 import java.net.Inet4Address;
 import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
@@ -21,6 +23,10 @@ abstract class DhcpPacket {
 
     public static final Inet4Address INADDR_ANY = (Inet4Address) Inet4Address.ANY;
     public static final Inet4Address INADDR_BROADCAST = (Inet4Address) Inet4Address.ALL;
+    public static final byte[] ETHER_BROADCAST = new byte[] {
+            (byte) 0xff, (byte) 0xff, (byte) 0xff,
+            (byte) 0xff, (byte) 0xff, (byte) 0xff,
+    };
 
     /**
      * Packet encapsulations.
@@ -246,6 +252,7 @@ abstract class DhcpPacket {
         byte requestCode, boolean broadcast) {
         byte[] destIpArray = destIp.getAddress();
         byte[] srcIpArray = srcIp.getAddress();
+        int ipHeaderOffset = 0;
         int ipLengthOffset = 0;
         int ipChecksumOffset = 0;
         int endIpHeader = 0;
@@ -256,11 +263,17 @@ abstract class DhcpPacket {
         buf.clear();
         buf.order(ByteOrder.BIG_ENDIAN);
 
+        if (encap == ENCAP_L2) {
+            buf.put(ETHER_BROADCAST);
+            buf.put(mClientMac);
+            buf.putShort((short) OsConstants.ETH_P_IP);
+        }
+
         // if a full IP packet needs to be generated, put the IP & UDP
         // headers in place, and pre-populate with artificial values
         // needed to seed the IP checksum.
-        if (encap == ENCAP_L3) {
-            // fake IP header, used in the IP-header checksum
+        if (encap <= ENCAP_L3) {
+            ipHeaderOffset = buf.position();
             buf.put(IP_VERSION_HEADER_LEN);
             buf.put(IP_TOS_LOWDELAY);    // tos: IPTOS_LOWDELAY
             ipLengthOffset = buf.position();
@@ -319,7 +332,7 @@ abstract class DhcpPacket {
 
         // If an IP packet is being built, the IP & UDP checksums must be
         // computed.
-        if (encap == ENCAP_L3) {
+        if (encap <= ENCAP_L3) {
             // fix UDP header: insert length
             short udpLen = (short)(buf.position() - udpHeaderOffset);
             buf.putShort(udpLengthOffset, udpLen);
@@ -342,10 +355,10 @@ abstract class DhcpPacket {
                                                              udpHeaderOffset,
                                                              buf.position()));
             // fix IP header: insert length
-            buf.putShort(ipLengthOffset, (short)buf.position());
+            buf.putShort(ipLengthOffset, (short)(buf.position() - ipHeaderOffset));
             // fixup IP-header checksum
             buf.putShort(ipChecksumOffset,
-                         (short) checksum(buf, 0, 0, endIpHeader));
+                         (short) checksum(buf, 0, ipHeaderOffset, endIpHeader));
         }
     }
 
@@ -586,13 +599,18 @@ abstract class DhcpPacket {
 
             short l2type = packet.getShort();
 
-            if (l2type != 0x0800)
+            if (l2type != OsConstants.ETH_P_IP)
                 return null;
         }
 
         if ((pktType == ENCAP_L2) || (pktType == ENCAP_L3)) {
             // assume l2type is 0x0800, i.e. IP
-            byte ipType = packet.get();
+            byte ipTypeAndLength = packet.get();
+            int ipVersion = (ipTypeAndLength & 0xf0) >> 4;
+            if (ipVersion != 4) {
+                return null;
+            }
+
             // System.out.println("ipType is " + ipType);
             byte ipDiffServicesField = packet.get();
             short ipTotalLength = packet.getShort();
@@ -608,6 +626,12 @@ abstract class DhcpPacket {
 
             if (ipProto != IP_TYPE_UDP) // UDP
                 return null;
+
+            // Skip options.
+            int optionWords = ((ipTypeAndLength & 0x0f) - 5);
+            for (int i = 0; i < optionWords; i++) {
+                packet.getInt();
+            }
 
             // assume UDP
             short udpSrcPort = packet.getShort();
