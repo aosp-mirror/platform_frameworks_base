@@ -15101,6 +15101,7 @@ package android.media {
     field public static final int EVENT_KEY_EXPIRED = 3; // 0x3
     field public static final int EVENT_KEY_REQUIRED = 2; // 0x2
     field public static final int EVENT_PROVISION_REQUIRED = 1; // 0x1
+    field public static final int EVENT_SESSION_RECLAIMED = 5; // 0x5
     field public static final int EVENT_VENDOR_DEFINED = 4; // 0x4
     field public static final int KEY_TYPE_OFFLINE = 2; // 0x2
     field public static final int KEY_TYPE_RELEASE = 3; // 0x3
