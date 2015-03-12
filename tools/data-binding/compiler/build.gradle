@@ -19,6 +19,8 @@ apply plugin: "kotlin"
 apply plugin: 'maven'
 
 
+sourceCompatibility = javaTargetCompatibility
+targetCompatibility = javaSourceCompatibility
 
 buildscript {
     repositories {
@@ -42,6 +44,13 @@ dependencies {
     compile project(":xmlGrammar")
     testCompile "com.android.databinding:library:$version@jar"
 }
+
+task fatJar(type: Jar) {
+    baseName = project.name + '-all'
+    from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
+    with jar
+}
+
 uploadArchives {
     repositories {
         mavenDeployer {

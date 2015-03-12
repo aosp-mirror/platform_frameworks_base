@@ -199,7 +199,7 @@ public class JavaClass implements ModelClass {
     @Override
     public ModelMethod[] getMethods(String name, int numParameters) {
         Method[] methods = mClass.getMethods();
-        ArrayList<JavaMethod> matching = new ArrayList<>();
+        ArrayList<JavaMethod> matching = new ArrayList<JavaMethod>();
         for (Method method : methods) {
             if (method.getName().equals(name) &&
                     method.getParameterTypes().length == numParameters) {
@@ -211,6 +211,9 @@ public class JavaClass implements ModelClass {
 
     @Override
     public ModelClass getSuperclass() {
+        if (mClass.getSuperclass() == null) {
+            return null;
+        }
         return new JavaClass(mClass.getSuperclass());
     }
 

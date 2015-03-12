@@ -68,7 +68,7 @@ class AnnotationClass implements ModelClass {
             for (ModelMethod method : getMethods("get", 1)) {
                 ModelClass parameter = method.getParameterTypes()[0];
                 if (parameter.isInt() || parameter.isLong()) {
-                    ArrayList<ModelClass> parameters = new ArrayList<>(1);
+                    ArrayList<ModelClass> parameters = new ArrayList<ModelClass>(1);
                     parameters.add(parameter);
                     return (AnnotationClass) method.getReturnType(parameters);
                 }
@@ -92,7 +92,7 @@ class AnnotationClass implements ModelClass {
         if (typeUtil.isSameType(interfaceType, typeUtil.erasure(mTypeMirror))) {
             foundInterface = mTypeMirror;
         } else {
-            ArrayList<TypeMirror> toCheck = new ArrayList<>();
+            ArrayList<TypeMirror> toCheck = new ArrayList<TypeMirror>();
             toCheck.add(mTypeMirror);
             while (!toCheck.isEmpty()) {
                 TypeMirror typeMirror = toCheck.remove(0);
@@ -251,7 +251,7 @@ class AnnotationClass implements ModelClass {
 
     @Override
     public ModelMethod[] getMethods(String name, int numParameters) {
-        ArrayList<AnnotationMethod> matching = new ArrayList<>();
+        ArrayList<AnnotationMethod> matching = new ArrayList<AnnotationMethod>();
         if (mTypeMirror.getKind() == TypeKind.DECLARED) {
             DeclaredType declaredType = (DeclaredType) mTypeMirror;
             getMethods(declaredType, matching, name, numParameters);

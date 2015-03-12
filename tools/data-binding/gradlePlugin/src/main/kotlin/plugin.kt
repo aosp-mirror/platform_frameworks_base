@@ -52,10 +52,12 @@ import java.io.FileWriter
 import java.io.ByteArrayOutputStream
 import org.apache.commons.codec.binary.Base64
 import com.android.builder.model.ApiVersion
+import com.android.databinding.util.Log
+import org.gradle.api.Action
 
 class DataBinderPlugin : Plugin<Project> {
 
-    inner class GradleFileWriter(var outputBase : String) : JavaFileWriter {
+    inner class GradleFileWriter(var outputBase: String) : JavaFileWriter {
         override fun writeToFile(canonicalName: String, contents: String) {
             val f = File("$outputBase/${canonicalName.replaceAll("\\.", "/")}.java")
             log("Asked to write to ${canonicalName}. outputting to:${f.getAbsolutePath()}")
@@ -65,28 +67,28 @@ class DataBinderPlugin : Plugin<Project> {
     }
 
     var xmlProcessor: LayoutXmlProcessor by Delegates.notNull()
-    var project : Project by Delegates.notNull()
+    var project: Project by Delegates.notNull()
 
-    var generatedBinderSrc : File by Delegates.notNull()
+    var generatedBinderSrc: File by Delegates.notNull()
 
-    var generatedBinderOut : File by Delegates.notNull()
+    var generatedBinderOut: File by Delegates.notNull()
 
-    var androidJar : File by Delegates.notNull()
+    var androidJar: File by Delegates.notNull()
 
-    var variantData : ApplicationVariantData by Delegates.notNull()
+    var variantData: ApplicationVariantData by Delegates.notNull()
 
-    var codeGenTargetFolder : File by Delegates.notNull()
+    var codeGenTargetFolder: File by Delegates.notNull()
 
-    var viewBinderSource : File by Delegates.notNull()
+    var viewBinderSource: File by Delegates.notNull()
 
-    var sdkDir : File by Delegates.notNull()
+    var sdkDir: File by Delegates.notNull()
 
     val viewBinderSourceRoot by Delegates.lazy {
         File(project.getBuildDir(), "databinder")
     }
 
 
-    var fileWriter : GradleFileWriter by Delegates.notNull()
+    var fileWriter: GradleFileWriter by Delegates.notNull()
 
     val viewBinderCompileOutput by Delegates.lazy { File(viewBinderSourceRoot, "out") }
 
@@ -102,15 +104,33 @@ class DataBinderPlugin : Plugin<Project> {
             log("after eval")
             //processDebugResources
             variants.forEach { variant ->
-//                val preTasks = it.getTasksByName("pre${variant}Build", true)
-//                preTasks.forEach {
-//                    it.doLast (generateAttr)
-//                }
                 val processResTasks = it.getTasksByName("process${variant}Resources", true)
                 processResTasks.forEach {
-                    it.doFirst(preprocessLayoutFiles)
-                    it.doLast(generateIntermediateFile)
+                    Log.d { "${it} depends on ${it.getDependsOn()}" }
                 }
+                project.getTasks().create("processDataBinding${variant}Resources",
+                        javaClass<DataBindingProcessLayoutsTask>(),
+                        object : Action<DataBindingProcessLayoutsTask> {
+                            override fun execute(task: DataBindingProcessLayoutsTask) {
+                                task.xmlProcessor = xmlProcessor
+                                task.sdkDir = sdkDir
+                                processResTasks.forEach {
+                                    // until we add these as a new source folder,
+                                    // do it the old way
+
+                                    // TODO uncomment this and comment below
+                                    // it.dependsOn(task)
+                                    it.doFirst(preprocessLayoutFiles)
+                                    it.doLast(generateIntermediateFile)
+                                }
+                                processResTasks.forEach {
+                                    it.getDependsOn().filterNot { it == task }.forEach {
+                                        Log.d { "adding dependency on ${it} for ${task}" }
+                                        task.dependsOn(it)
+                                    }
+                                }
+                            }
+                        });
             }
         }
     }
@@ -123,7 +143,8 @@ class DataBinderPlugin : Plugin<Project> {
         val ss = p.getExtensions().getByName("android") as AppExtension
         sdkDir = ss.getSdkDirectory()
         val minSdkVersion = ss.getDefaultConfig().getMinSdkVersion()
-        androidJar = File(ss.getSdkDirectory().getAbsolutePath() + "/platforms/${ss.getCompileSdkVersion()}/android.jar")
+        androidJar = File(ss.getSdkDirectory().getAbsolutePath()
+                + "/platforms/${ss.getCompileSdkVersion()}/android.jar")
         log("creating parser!")
         log("project build dir:${p.getBuildDir()}")
         val clazz = javaClass<ApplicationVariantImpl>()
@@ -152,7 +173,9 @@ class DataBinderPlugin : Plugin<Project> {
         log("compile options: ${options.optionMap()}")
         viewBinderSource = File(viewBinderSourceRoot.getAbsolutePath() + "/src")
         viewBinderSource.mkdirs()
-        variantData.registerJavaGeneratingTask(project.task("dataBinderDummySourceGenTask", MethodClosure(this,"dummySourceGenTask" )), File(viewBinderSourceRoot.getAbsolutePath() + "/src/"))
+        variantData.registerJavaGeneratingTask(project.task("dataBinderDummySourceGenTask",
+                MethodClosure(this, "dummySourceGenTask")),
+                        File(viewBinderSourceRoot.getAbsolutePath() + "/src/"))
         viewBinderCompileOutput.mkdirs()
         log("view binder source will be ${viewBinderSource}")
         log("adding out dir to input files ${viewBinderCompileOutput}")
@@ -165,21 +188,20 @@ class DataBinderPlugin : Plugin<Project> {
         }
         inputFiles.add(viewBinderCompileOutput)
         dexTask.setInputFiles(inputFiles)
-        log("updated dexTask input files ${dexTask.getInputFiles()} vs ${inputFiles} vs dir ${dexTask.getInputDir()}")
 
         dexTask.doFirst(MethodClosure(this, "preDexAnalysis"))
         val writerOutBase = codeGenTargetFolder.getAbsolutePath();
         fileWriter = GradleFileWriter(writerOutBase)
-        return LayoutXmlProcessor(packageName, resourceFolders, fileWriter, minSdkVersion.getApiLevel())
+        return LayoutXmlProcessor(packageName, resourceFolders, fileWriter,
+                minSdkVersion.getApiLevel())
     }
 
 
-
-    fun dummySourceGenTask(o : Any?) {
+    fun dummySourceGenTask(o: Any?) {
         System.out.println("running dummySourceGenTask")
     }
 
-    fun preDexAnalysis(o : Any?) {
+    fun preDexAnalysis(o: Any?) {
         val jCompileTask = variantData.javaCompileTask
         val dexTask = variantData.dexTask
         log("dex task files: ${dexTask.getInputFiles()} ${dexTask.getInputFiles().javaClass}")
@@ -189,7 +211,6 @@ class DataBinderPlugin : Plugin<Project> {
         val cpFiles = arrayListOf<File>()
         cpFiles.addAll(dexTask.getInputFiles())
         cpFiles.addAll(jCompileTask.getClasspath().getFiles())
-        //project.task("compileGenerated", MethodClosure(this, "compileGenerated"))
     }
 
     fun preprocessLayoutFiles(o: Any?) {

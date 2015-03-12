@@ -88,6 +88,10 @@ public class LayoutXmlProcessor {
         return true;
     }
 
+    public ResourceBundle getResourceBundle() {
+        return mResourceBundle;
+    }
+
     public void writeIntermediateFile(File sdkDir) throws JAXBException {
         if (mWritten) {
             return;

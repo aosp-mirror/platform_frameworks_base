@@ -30,7 +30,7 @@ import java.util.Set;
  * The main class that handles parsing files and generating classes.
  */
 public class DataBinder {
-    List<LayoutBinder> mLayoutBinders = new ArrayList<>();
+    List<LayoutBinder> mLayoutBinders = new ArrayList<LayoutBinder>();
 
     private JavaFileWriter mFileWriter;
 
@@ -48,7 +48,7 @@ public class DataBinder {
     }
     
     public void writerBinderInterfaces() {
-        Set<String> writtenFiles = new HashSet<>();
+        Set<String> writtenFiles = new HashSet<String>();
         for (LayoutBinder layoutBinder : mLayoutBinders) {
             String interfaceName = layoutBinder.getInterfaceName();
             if (writtenFiles.contains(interfaceName)) {

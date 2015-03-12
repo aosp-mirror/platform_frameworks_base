@@ -47,7 +47,7 @@ public class LayoutBinder {
     private String mPackage;
     private String mProjectPackage;
     private String mBaseClassName;
-    private final HashMap<String, String> mUserDefinedVariables = new HashMap<>();
+    private final HashMap<String, String> mUserDefinedVariables = new HashMap<String, String>();
 
     private LayoutBinderWriter mWriter;
     private ResourceBundle.LayoutFileBundle mBundle;
@@ -56,7 +56,7 @@ public class LayoutBinder {
             ResourceBundle.LayoutFileBundle layoutBundle) {
         mExprModel = new ExprModel();
         mExpressionParser = new ExpressionParser(mExprModel);
-        mBindingTargets = new ArrayList<>();
+        mBindingTargets = new ArrayList<BindingTarget>();
         mBundle = layoutBundle;
         mProjectPackage = resourceBundle.getAppPackage();
         mPackage = mProjectPackage + ".generated";
@@ -79,7 +79,7 @@ public class LayoutBinder {
     }
 
     public void resolveWhichExpressionsAreUsed() {
-        List<Expr> used = new ArrayList<>();
+        List<Expr> used = new ArrayList<Expr>();
         for (BindingTarget target : mBindingTargets) {
             for (Binding binding : target.getBindings()) {
                 binding.getExpr().setIsUsed(true);

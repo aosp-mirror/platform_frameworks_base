@@ -34,10 +34,10 @@ import java.util.List;
 abstract public class Expr {
 
     public static final int NO_ID = -1;
-    protected List<Expr> mChildren = new ArrayList<>();
+    protected List<Expr> mChildren = new ArrayList<Expr>();
 
     // any expression that refers to this. Useful if this expr is duplicate and being replaced
-    private List<Expr> mParents = new ArrayList<>();
+    private List<Expr> mParents = new ArrayList<Expr>();
 
     private Boolean mIsDynamic;
 
@@ -295,7 +295,7 @@ abstract public class Expr {
      * conditionals.
      */
     protected List<Dependency> constructDynamicChildrenDependencies() {
-        List<Dependency> dependencies = new ArrayList<>();
+        List<Dependency> dependencies = new ArrayList<Dependency>();
         for (Expr node : mChildren) {
             if (!node.isDynamic()) {
                 continue;
@@ -582,7 +582,7 @@ abstract public class Expr {
     static class Node {
 
         BitSet mBitSet = new BitSet();
-        List<Node> mParents = new ArrayList<>();
+        List<Node> mParents = new ArrayList<Node>();
         int mConditionFlag = -1;
 
         public boolean areAllPathsSatisfied(BitSet readSoFar) {

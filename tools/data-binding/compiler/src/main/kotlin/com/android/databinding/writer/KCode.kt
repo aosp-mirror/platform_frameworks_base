@@ -19,6 +19,8 @@ class KCode (private val s : String? = null){
 
     private var sameLine = false
 
+    private val lineSeparator = System.getProperty("line.separator")
+
     class Appendix(val glue : String, val code : KCode)
 
     private val nodes = arrayListOf<Any>()
@@ -141,7 +143,7 @@ class KCode (private val s : String? = null){
             is KCode -> {
                 val childTab = n + (if(it.sameLine) 0 else 1)
                 if (addedChild || newlineFirstNode) {
-                    sb.append(System.lineSeparator())
+                    sb.append(lineSeparator)
                     sb.append("${indent(childTab)}")
                 }
                 it.toS(childTab, sb)

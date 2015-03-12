@@ -18,8 +18,8 @@ apply plugin: 'java'
 apply plugin: 'maven'
 apply plugin: 'application'
 
-sourceCompatibility = 1.7
-mainClassName = "org.antlr.v4.Tool"
+sourceCompatibility = javaTargetCompatibility
+targetCompatibility = javaSourceCompatibility
 
 buildscript {
     repositories {

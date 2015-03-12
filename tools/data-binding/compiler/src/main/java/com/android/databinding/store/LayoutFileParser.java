@@ -20,6 +20,7 @@ import com.android.databinding.util.ParserHelper;
 import com.android.databinding.util.XmlEditor;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.NamedNodeMap;
@@ -57,9 +58,10 @@ public class LayoutFileParser {
     public ResourceBundle.LayoutFileBundle parseXml(File xml, String pkg, int layoutId)
             throws ParserConfigurationException, IOException, SAXException,
             XPathExpressionException {
-        final File original = stripFileAndGetOriginal(xml, "" + layoutId);
+        File original = stripFileAndGetOriginal(xml, "" + layoutId);
         if (original == null) {
-            return null;
+            L.d("assuming the file is the original for %s", xml.getAbsoluteFile());
+            original = xml;
         }
         L.d("parsing file %s", xml.getAbsolutePath());
 
@@ -177,7 +179,7 @@ public class LayoutFileParser {
     }
 
     private List<Node> toList(NodeList nodeList) {
-        List<Node> result = new ArrayList<>();
+        List<Node> result = new ArrayList<Node>();
         for (int i = 0; i < nodeList.getLength(); i ++) {
             result.add(nodeList.item(i));
         }
@@ -186,8 +188,8 @@ public class LayoutFileParser {
 
     private String getFullViewClassName(String viewName) {
         if (viewName.indexOf('.') == -1) {
-            if (Objects.equals(viewName, "View") || Objects.equals(viewName, "ViewGroup") ||
-                    Objects.equals(viewName, "ViewStub")) {
+            if (ObjectUtils.equals(viewName, "View") || ObjectUtils.equals(viewName, "ViewGroup") ||
+                    ObjectUtils.equals(viewName, "ViewStub")) {
                 return "android.view." + viewName;
             }
             return "android.widget." + viewName;

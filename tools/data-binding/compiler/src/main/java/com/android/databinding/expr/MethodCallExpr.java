@@ -45,7 +45,7 @@ public class MethodCallExpr extends Expr {
     @Override
     protected ModelClass resolveType(ModelAnalyzer modelAnalyzer) {
         if (mGetter == null) {
-            List<ModelClass> args = new ArrayList<>();
+            List<ModelClass> args = new ArrayList<ModelClass>();
             for (Expr expr : getArgs()) {
                 args.add(expr.getResolvedType());
             }

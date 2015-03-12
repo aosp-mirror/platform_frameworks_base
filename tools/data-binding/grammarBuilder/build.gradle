@@ -18,7 +18,9 @@ apply plugin: 'java'
 apply plugin: 'application'
 apply plugin: 'maven'
 
-sourceCompatibility = 1.7
+sourceCompatibility = javaTargetCompatibility
+targetCompatibility = javaSourceCompatibility
+
 mainClassName = "org.antlr.v4.Tool"
 
 run {

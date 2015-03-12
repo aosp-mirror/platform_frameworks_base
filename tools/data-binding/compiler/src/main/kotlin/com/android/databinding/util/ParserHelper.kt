@@ -16,7 +16,7 @@ package com.android.databinding.util
 object ParserHelper {
     public fun toClassName(name:String) : String  {
 
-        return stripExtension(name).split("[_-]").map { "${it.substring(0,1).toUpperCase()}${it.substring(1)}" }.join("")
+        return stripExtension(name).split("[_-]").map { it.capitalize() }.join("")
     }
 
 

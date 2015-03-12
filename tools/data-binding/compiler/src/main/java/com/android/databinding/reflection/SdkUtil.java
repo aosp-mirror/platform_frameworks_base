@@ -72,7 +72,7 @@ public class SdkUtil {
 
     private static class ApiChecker {
 
-        private Map<String, Integer> mFullLookup = new HashMap<>();
+        private Map<String, Integer> mFullLookup = new HashMap<String, Integer>();
 
         private Document mDoc;
 
@@ -116,7 +116,6 @@ public class SdkUtil {
                         String methodDesc = child.getAttributes().getNamedItem("name")
                                 .getNodeValue();
                         String key = cacheKey(classDesc, methodDesc);
-                        L.d("adding method lookup %s as %s", key, since);
                         mFullLookup.put(key, since);
                     }
                 }

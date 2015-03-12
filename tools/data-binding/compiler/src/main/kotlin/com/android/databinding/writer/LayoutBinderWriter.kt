@@ -38,6 +38,7 @@ import com.android.databinding.expr.ResourceExpr
 import com.android.databinding.expr.BracketExpr
 import com.android.databinding.reflection.Callable
 import com.android.databinding.expr.CastExpr
+import com.android.databinding.reflection.ModelAnalyzer
 
 fun String.stripNonJava() = this.split("[^a-zA-Z0-9]").map{ it.trim() }.joinToCamelCaseAsVar()
 
@@ -717,7 +718,8 @@ class LayoutBinderWriter(val layoutBinder : LayoutBinder) {
             variables.forEach {
                 if (it.getUserDefinedType() != null) {
                     tab("@Bindable")
-                    val type = it.getResolvedType().toJavaCode();
+                    //it.getExpandedUserDefinedType(ModelAnalyzer.getInstance());
+                    val type = ModelAnalyzer.getInstance().applyImports(it.getUserDefinedType(), model.getImports())
                     tab("public void ${it.setterName}(${type} ${it.readableUniqueName});")
                 }
             }

@@ -1,6 +1,7 @@
 package com.android.example.bindingdemo;
 
 import android.binding.Bindable;
+import android.binding.BinderBundle;
 import android.binding.Observable;
 import android.binding.OnPropertyChangedListener;
 import android.support.v7.app.ActionBarActivity;

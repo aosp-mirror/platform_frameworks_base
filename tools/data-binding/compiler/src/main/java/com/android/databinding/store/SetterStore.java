@@ -130,7 +130,7 @@ public class SetterStore {
             TypeElement declaredOn) {
         HashMap<String, MethodDescription> renamed = mStore.renamedMethods.get(attribute);
         if (renamed == null) {
-            renamed = new HashMap<>();
+            renamed = new HashMap<String, MethodDescription>();
             mStore.renamedMethods.put(attribute, renamed);
         }
         MethodDescription methodDescription =
@@ -142,7 +142,7 @@ public class SetterStore {
         HashMap<AccessorKey, MethodDescription> adapters = mStore.adapterMethods.get(attribute);
 
         if (adapters == null) {
-            adapters = new HashMap<>();
+            adapters = new HashMap<AccessorKey, MethodDescription>();
             mStore.adapterMethods.put(attribute, adapters);
         }
         List<? extends VariableElement> parameters = bindingMethod.getParameters();
@@ -193,14 +193,14 @@ public class SetterStore {
         MethodDescription methodDescription = new MethodDescription(conversionMethod);
         HashMap<String, MethodDescription> convertTo = mStore.conversionMethods.get(fromType);
         if (convertTo == null) {
-            convertTo = new HashMap<>();
+            convertTo = new HashMap<String, MethodDescription>();
             mStore.conversionMethods.put(fromType, convertTo);
         }
         convertTo.put(toType, methodDescription);
     }
 
     public void clear(Set<String> classes) {
-        ArrayList<AccessorKey> removedAccessorKeys = new ArrayList<>();
+        ArrayList<AccessorKey> removedAccessorKeys = new ArrayList<AccessorKey>();
         for (HashMap<AccessorKey, MethodDescription> adapters : mStore.adapterMethods.values()) {
             for (AccessorKey key : adapters.keySet()) {
                 MethodDescription description = adapters.get(key);
@@ -211,7 +211,7 @@ public class SetterStore {
             removeFromMap(adapters, removedAccessorKeys);
         }
 
-        ArrayList<String> removedRenamed = new ArrayList<>();
+        ArrayList<String> removedRenamed = new ArrayList<String>();
         for (HashMap<String, MethodDescription> renamed : mStore.renamedMethods.values()) {
             for (String key : renamed.keySet()) {
                 if (classes.contains(renamed.get(key).type)) {
@@ -221,7 +221,7 @@ public class SetterStore {
             removeFromMap(renamed, removedRenamed);
         }
 
-        ArrayList<String> removedConversions = new ArrayList<>();
+        ArrayList<String> removedConversions = new ArrayList<String>();
         for (HashMap<String, MethodDescription> convertTos : mStore.conversionMethods.values()) {
             for (String toType : convertTos.keySet()) {
                 MethodDescription methodDescription = convertTos.get(toType);
@@ -232,7 +232,7 @@ public class SetterStore {
             removeFromMap(convertTos, removedConversions);
         }
 
-        ArrayList<String> removedUntaggable = new ArrayList<>();
+        ArrayList<String> removedUntaggable = new ArrayList<String>();
         for (String typeName : mStore.untaggableTypes.keySet()) {
             if (classes.contains(mStore.untaggableTypes.get(typeName))) {
                 removedUntaggable.add(typeName);
@@ -334,7 +334,7 @@ public class SetterStore {
 
     private ModelMethod getBestSetter(ModelClass viewType, ModelClass argumentType,
             String attribute, Map<String, String> imports) {
-        List<String> setterCandidates = new ArrayList<>();
+        List<String> setterCandidates = new ArrayList<String>();
         HashMap<String, MethodDescription> renamed = mStore.renamedMethods.get(attribute);
         if (renamed != null) {
             for (String className : renamed.keySet()) {
@@ -357,7 +357,7 @@ public class SetterStore {
             ModelMethod[] methods = viewType.getMethods(name, 1);
             ModelClass bestParameterType = null;
 
-            List<ModelClass> args = new ArrayList<>();
+            List<ModelClass> args = new ArrayList<ModelClass>();
             args.add(argumentType);
             for (ModelMethod method : methods) {
                 ModelClass[] parameterTypes = method.getParameterTypes();
@@ -626,12 +626,12 @@ public class SetterStore {
     private static class IntermediateV1 implements Serializable, Intermediate {
         private static final long serialVersionUID = 1;
         public final HashMap<String, HashMap<AccessorKey, MethodDescription>> adapterMethods =
-                new HashMap<>();
+                new HashMap<String, HashMap<AccessorKey, MethodDescription>>();
         public final HashMap<String, HashMap<String, MethodDescription>> renamedMethods =
-                new HashMap<>();
+                new HashMap<String, HashMap<String, MethodDescription>>();
         public final HashMap<String, HashMap<String, MethodDescription>> conversionMethods =
-                new HashMap<>();
-        public final HashMap<String, String> untaggableTypes = new HashMap<>();
+                new HashMap<String, HashMap<String, MethodDescription>>();
+        public final HashMap<String, String> untaggableTypes = new HashMap<String, String>();
 
         public IntermediateV1() {
         }

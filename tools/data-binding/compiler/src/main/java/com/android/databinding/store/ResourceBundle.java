@@ -44,7 +44,8 @@ public class ResourceBundle implements Serializable {
 
     private String mAppPackage;
 
-    private HashMap<String, List<LayoutFileBundle>> mLayoutBundles = new HashMap<>();
+    private HashMap<String, List<LayoutFileBundle>> mLayoutBundles
+            = new HashMap<String, List<LayoutFileBundle>>();
 
     public ResourceBundle(String appPackage) {
         mAppPackage = appPackage;
@@ -80,8 +81,8 @@ public class ResourceBundle implements Serializable {
         for (Map.Entry<String, List<LayoutFileBundle>> bundles : multiResLayouts) {
             // validate all ids are in correct view types
             // and all variables have the same name
-            Map<String, String> variableTypes = new HashMap<>();
-            Map<String, String> importTypes = new HashMap<>();
+            Map<String, String> variableTypes = new HashMap<String, String>();
+            Map<String, String> importTypes = new HashMap<String, String>();
 
             for (LayoutFileBundle bundle : bundles.getValue()) {
                 bundle.mHasVariations = true;
@@ -123,9 +124,9 @@ public class ResourceBundle implements Serializable {
                 }
             }
 
-            Set<String> includeBindingIds = new HashSet<>();
-            Set<String> viewBindingIds = new HashSet<>();
-            Map<String, String> viewTypes = new HashMap<>();
+            Set<String> includeBindingIds = new HashSet<String>();
+            Set<String> viewBindingIds = new HashSet<String>();
+            Map<String, String> viewTypes = new HashMap<String, String>();
             L.d("validating ids for %s", bundles.getKey());
             for (LayoutFileBundle bundle : bundles.getValue()) {
                 for (BindingTargetBundle target : bundle.mBindingTargetBundles) {
@@ -207,15 +208,15 @@ public class ResourceBundle implements Serializable {
 
         @XmlElement(name="Variables")
         @XmlJavaTypeAdapter(NameTypeAdapter.class)
-        public Map<String, String> mVariables = new HashMap<>();
+        public Map<String, String> mVariables = new HashMap<String, String>();
 
         @XmlElement(name="Imports")
         @XmlJavaTypeAdapter(NameTypeAdapter.class)
-        public Map<String, String> mImports = new HashMap<>();
+        public Map<String, String> mImports = new HashMap<String, String>();
 
         @XmlElementWrapper(name="Targets")
         @XmlElement(name="Target")
-        public List<BindingTargetBundle> mBindingTargetBundles = new ArrayList<>();
+        public List<BindingTargetBundle> mBindingTargetBundles = new ArrayList<BindingTargetBundle>();
 
         // for XML binding
         public LayoutFileBundle() {
@@ -317,7 +318,7 @@ public class ResourceBundle implements Serializable {
         public boolean mUsed = true;
         @XmlElementWrapper(name="Expressions")
         @XmlElement(name="Expression")
-        public List<BindingBundle> mBindingBundleList = new ArrayList<>();
+        public List<BindingBundle> mBindingBundleList = new ArrayList<BindingBundle>();
         @XmlAttribute(name="include")
         public String mIncludedLayout;
         private String mInterfaceType;
@@ -420,7 +421,7 @@ public class ResourceBundle implements Serializable {
 
         @Override
         public HashMap<String, String> unmarshal(MarshalledMapType v) throws Exception {
-            HashMap<String, String> map = new HashMap<>();
+            HashMap<String, String> map = new HashMap<String, String>();
             if (v.entries != null) {
                 for (MarshalledNameType entry : v.entries) {
                     map.put(entry.name, entry.type);
@@ -435,7 +436,7 @@ public class ResourceBundle implements Serializable {
                 return null;
             }
             MarshalledMapType marshalled = new MarshalledMapType();
-            marshalled.entries = new ArrayList<>();
+            marshalled.entries = new ArrayList<MarshalledNameType>();
             for (String name : v.keySet()) {
                 MarshalledNameType nameType = new MarshalledNameType();
                 nameType.name = name;

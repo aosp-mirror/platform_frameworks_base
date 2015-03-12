@@ -34,9 +34,9 @@ import java.util.Map;
 
 public class ExprModel {
 
-    Map<String, Expr> mExprMap = new HashMap<>();
+    Map<String, Expr> mExprMap = new HashMap<String, Expr>();
 
-    List<Expr> mBindingExpressions = new ArrayList<>();
+    List<Expr> mBindingExpressions = new ArrayList<Expr>();
 
     private int mInvalidateableFieldLimit = 0;
 
@@ -62,7 +62,7 @@ public class ExprModel {
 
     private List<Expr> mObservables;
 
-    private Map<String, String> mImports = new HashMap<>();
+    private Map<String, String> mImports = new HashMap<String, String>();
 
     /**
      * Adds the expression to the list of expressions and returns it.
@@ -216,11 +216,11 @@ public class ExprModel {
      * Give id to each expression. Will be useful if we serialize.
      */
     public void seal() {
-        List<Expr> notifiableExpressions = new ArrayList<>();
+        List<Expr> notifiableExpressions = new ArrayList<Expr>();
         //ensure class analyzer. We need to know observables at this point
         final ModelAnalyzer modelAnalyzer = ModelAnalyzer.getInstance();
 
-        ArrayList<Expr> exprs = new ArrayList<>(mBindingExpressions);
+        ArrayList<Expr> exprs = new ArrayList<Expr>(mBindingExpressions);
         for (Expr expr: exprs) {
             expr.updateExpr(modelAnalyzer);
         }

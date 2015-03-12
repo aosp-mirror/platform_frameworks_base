@@ -122,6 +122,63 @@ public abstract class ModelAnalyzer {
         sAnalyzer = annotationAnalyzer;
     }
 
+    /**
+     * Takes a raw className (potentially w/ generics and arrays) and expands definitions using
+     * the import statements.
+     * <p>
+     * For instance, this allows user to define variables
+     * <variable type="User" name="user"/>
+     * if they previously imported User.
+     * <import name="com.example.User"/>
+     */
+    public String applyImports(String className, Map<String, String> imports) {
+        className = className.trim();
+        int numDimensions = 0;
+        String generic = null;
+        // handle array
+        while (className.endsWith("[]")) {
+            numDimensions++;
+            className = className.substring(0, className.length() - 2);
+        }
+        // handle generics
+        final int lastCharIndex = className.length() - 1;
+        if ('>' == className.charAt(lastCharIndex)) {
+            // has generic.
+            int open = className.indexOf('<');
+            if (open == -1) {
+                L.e("un-matching generic syntax for %s", className);
+                return className;
+            }
+            generic = applyImports(className.substring(open + 1, lastCharIndex), imports);
+            className = className.substring(0, open);
+        }
+        int dotIndex = className.indexOf('.');
+        final String qualifier;
+        final String rest;
+        if (dotIndex == -1) {
+            qualifier = className;
+            rest = null;
+        } else {
+            qualifier = className.substring(0, dotIndex);
+            rest = className.substring(dotIndex); // includes dot
+        }
+        final String expandedQualifier = imports.get(qualifier);
+        String result;
+        if (expandedQualifier != null) {
+            result = rest == null ? expandedQualifier : expandedQualifier + rest;
+        } else {
+            result = className; // no change
+        }
+        // now append back dimension and generics
+        if (generic != null) {
+            result = result + "<" + applyImports(generic, imports) + ">";
+        }
+        while (numDimensions-- > 0) {
+            result = result + "[]";
+        }
+        return result;
+    }
+
     public String getDefaultValue(String className) {
         if ("int".equals(className)) {
             return "0";

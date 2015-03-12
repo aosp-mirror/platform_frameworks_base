@@ -28,7 +28,7 @@ import java.util.List;
 import java.util.Map;
 
 public class BindingTarget {
-    List<Binding> mBindings = new ArrayList<>();
+    List<Binding> mBindings = new ArrayList<Binding>();
     ExprModel mModel;
     ModelClass mResolvedClass;
     // if this target presents itself in multiple layout files with different view types,

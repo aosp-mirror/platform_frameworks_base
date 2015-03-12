@@ -21,6 +21,7 @@ import com.google.common.collect.Lists;
 
 import com.android.databinding.reflection.ModelAnalyzer;
 import com.android.databinding.reflection.ModelClass;
+import com.android.databinding.util.L;
 
 import java.util.List;
 
@@ -50,6 +51,16 @@ public class IdentifierExpr extends Expr {
 
     public String getUserDefinedType() {
         return mUserDefinedType;
+    }
+
+    public String getExpandedUserDefinedType(ModelAnalyzer modelAnalyzer) {
+        Preconditions.checkNotNull(mUserDefinedType,
+                "Identifiers must have user defined types from the XML file. %s is missing it",
+                mName);
+        final String expanded = modelAnalyzer
+                .applyImports(mUserDefinedType, getModel().getImports());
+        L.d("expanded version of %s is %s", mUserDefinedType, expanded);
+        return expanded;
     }
 
     @Override

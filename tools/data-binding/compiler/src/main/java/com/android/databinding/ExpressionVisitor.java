@@ -23,15 +23,18 @@ import com.android.databinding.expr.ExprModel;
 import com.android.databinding.expr.StaticIdentifierExpr;
 import com.android.databinding.reflection.ModelAnalyzer;
 import com.android.databinding.reflection.ModelClass;
+import com.android.databinding.util.L;
 
 import org.antlr.v4.runtime.misc.NotNull;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.TerminalNode;
+import org.apache.commons.lang3.ObjectUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
-import java.util.Objects;
+import java.util.Map;
 
 public class ExpressionVisitor extends BindingExpressionBaseVisitor<Expr> {
     private final ExprModel mModel;
@@ -69,7 +72,7 @@ public class ExpressionVisitor extends BindingExpressionBaseVisitor<Expr> {
         } catch (Exception e) {
             System.out.println("Error while parsing! " + ctx.getText());
             e.printStackTrace();
-            throw e;
+            throw new RuntimeException(e);
         }
     }
 
@@ -144,10 +147,10 @@ public class ExpressionVisitor extends BindingExpressionBaseVisitor<Expr> {
     @Override
     public Expr visitMethodInvocation(
             @NotNull BindingExpressionParser.MethodInvocationContext ctx) {
-        List<Expr> args = new ArrayList<>();
+        List<Expr> args = new ArrayList<Expr>();
         if (ctx.args != null) {
             for (ParseTree item : ctx.args.children) {
-                if (Objects.equals(item.getText(), ",")) {
+                if (ObjectUtils.equals(item.getText(), ",")) {
                     continue;
                 }
                 args.add(item.accept(this));
@@ -164,10 +167,10 @@ public class ExpressionVisitor extends BindingExpressionBaseVisitor<Expr> {
 
     @Override
     public Expr visitResources(@NotNull BindingExpressionParser.ResourcesContext ctx) {
-        final List<Expr> args = new ArrayList<>();
+        final List<Expr> args = new ArrayList<Expr>();
         if (ctx.resourceParameters() != null) {
             for (ParseTree item : ctx.resourceParameters().expressionList().children) {
-                if (Objects.equals(item.getText(), ",")) {
+                if (ObjectUtils.equals(item.getText(), ",")) {
                     continue;
                 }
                 args.add(item.accept(this));

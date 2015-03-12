@@ -38,6 +38,9 @@ public class ResourceExpr extends Expr {
                     .put("typedArray", "array")
                     .build();
 
+    // lazily initialized
+    private Map<String, ModelClass> mResourceToTypeMapping;
+
     protected final String mPackage;
 
     protected final String mResourceType;
@@ -56,63 +59,61 @@ public class ResourceExpr extends Expr {
         mResourceId = resourceName;
     }
 
+    private Map<String, ModelClass> getResourceToTypeMapping(ModelAnalyzer modelAnalyzer) {
+        if (mResourceToTypeMapping == null) {
+            final Map<String, String> imports = getModel().getImports();
+            mResourceToTypeMapping = ImmutableMap.<String, ModelClass>builder()
+                    .put("anim", modelAnalyzer.findClass("android.view.animation.Animation",
+                            imports))
+                    .put("animator", modelAnalyzer.findClass("android.animation.Animator",
+                            imports))
+                    .put("colorStateList",
+                            modelAnalyzer.findClass("android.content.res.ColorStateList",
+                                    imports))
+                    .put("drawable", modelAnalyzer.findClass("android.graphics.drawable.Drawable",
+                            imports))
+                    .put("stateListAnimator",
+                            modelAnalyzer.findClass("android.animation.StateListAnimator",
+                                    imports))
+                    .put("transition", modelAnalyzer.findClass("android.transition.Transition",
+                            imports))
+                    .put("typedArray", modelAnalyzer.findClass("android.content.res.TypedArray",
+                            imports))
+                    .put("interpolator",
+                            modelAnalyzer.findClass("android.view.animation.Interpolator", imports))
+                    .put("bool", modelAnalyzer.findClass(boolean.class))
+                    .put("color", modelAnalyzer.findClass(int.class))
+                    .put("dimenOffset", modelAnalyzer.findClass(int.class))
+                    .put("dimenSize", modelAnalyzer.findClass(int.class))
+                    .put("id", modelAnalyzer.findClass(int.class))
+                    .put("integer", modelAnalyzer.findClass(int.class))
+                    .put("layout", modelAnalyzer.findClass(int.class))
+                    .put("dimen", modelAnalyzer.findClass(float.class))
+                    .put("fraction", modelAnalyzer.findClass(float.class))
+                    .put("intArray", modelAnalyzer.findClass(int[].class))
+                    .put("string", modelAnalyzer.findClass(String.class))
+                    .put("stringArray", modelAnalyzer.findClass(String[].class))
+                    .build();
+        }
+        return mResourceToTypeMapping;
+    }
+
     @Override
     protected ModelClass resolveType(ModelAnalyzer modelAnalyzer) {
-        String type;
-        switch (mResourceType) {
-            case "anim":
-                type = "android.view.animation.Animation";
-                break;
-            case "animator":
-                type = "android.animation.Animator";
-                break;
-            case "bool":
-                return modelAnalyzer.findClass(boolean.class);
-            case "color":
-            case "dimenOffset":
-            case "dimenSize":
-            case "id":
-            case "integer":
-            case "layout":
-                return modelAnalyzer.findClass(int.class);
-            case "plurals":
-                if (getChildren().isEmpty()) {
-                    return modelAnalyzer.findClass(int.class);
-                } else {
-                    return modelAnalyzer.findClass(String.class);
-                }
-            case "colorStateList":
-                type = "android.content.res.ColorStateList";
-                break;
-            case "dimen":
-            case "fraction":
-                return modelAnalyzer.findClass(float.class);
-            case "drawable":
-                type = "android.graphics.drawable.Drawable";
-                break;
-            case "intArray":
-                return modelAnalyzer.findClass(int[].class);
-            case "interpolator":
-                type = "";
-                break;
-            case "stateListAnimator":
-                type = "android.animation.StateListAnimator";
-                break;
-            case "string":
-                return modelAnalyzer.findClass(String.class);
-            case "stringArray":
-                return modelAnalyzer.findClass(String[].class);
-            case "transition":
-                type = "android.transition.Transition";
-                break;
-            case "typedArray":
-                type = "android.content.res.TypedArray";
-                break;
-            default:
-                type = mResourceType;
-                break;
+        final Map<String, ModelClass> mapping = getResourceToTypeMapping(
+                modelAnalyzer);
+        final ModelClass modelClass = mapping.get(mResourceType);
+        if (modelClass != null) {
+            return modelClass;
         }
-        return modelAnalyzer.findClass(type, getModel().getImports());
+        if ("plurals".equals(mResourceType)) {
+            if (getChildren().isEmpty()) {
+                return modelAnalyzer.findClass(int.class);
+            } else {
+                return modelAnalyzer.findClass(String.class);
+            }
+        }
+        return modelAnalyzer.findClass(mResourceType, getModel().getImports());
     }
 
     @Override
@@ -139,40 +140,38 @@ public class ResourceExpr extends Expr {
         final String context = "getRoot().getContext()";
         final String resources = "getRoot().getResources()";
         final String resourceName = mPackage + "R." + getResourceObject() + "." + mResourceId;
-        switch (mResourceType) {
-            case "anim": return "android.view.animation.AnimationUtils.loadAnimation(" + context + ", " + resourceName + ")";
-            case "animator": return "android.animation.AnimatorInflater.loadAnimator(" + context + ", " + resourceName + ")";
-            case "bool": return resources + ".getBoolean(" + resourceName + ")";
-            case "color": return resources + ".getColor(" + resourceName + ")";
-            case "colorStateList": return resources + ".getColorStateList(" + resourceName + ")";
-            case "dimen": return resources + ".getDimension(" + resourceName + ")";
-            case "dimenOffset": return resources + ".getDimensionPixelOffset(" + resourceName + ")";
-            case "dimenSize": return resources + ".getDimensionPixelSize(" + resourceName + ")";
-            case "drawable": return resources + ".getDrawable(" + resourceName + ")";
-            case "fraction": {
-                String base = getChildCode(0, "1");
-                String pbase = getChildCode(1, "1");
-                return resources + ".getFraction(" + resourceName + ", " + base + ", " + pbase +
-                        ")";
-            }
-            case "id": return resourceName;
-            case "intArray": return resources + ".getIntArray(" + resourceName + ")";
-            case "integer": return resources + ".getInteger(" + resourceName + ")";
-            case "interpolator":  return "android.view.animation.AnimationUtils.loadInterpolator(" + context + ", " + resourceName + ")";
-            case "layout": return resourceName;
-            case "plurals": {
-                if (getChildren().isEmpty()) {
-                    return resourceName;
-                } else {
-                    return makeParameterCall(resourceName, "getQuantityString");
-                }
-            }
-            case "stateListAnimator": return "android.animation.AnimatorInflater.loadStateListAnimator(" + context + ", " + resourceName + ")";
-            case "string": return makeParameterCall(resourceName, "getString");
-            case "stringArray": return resources + ".getStringArray(" + resourceName + ")";
-            case "transition": return "android.transition.TransitionInflater.from(" + context + ").inflateTransition(" + resourceName + ")";
-            case "typedArray": return resources + ".obtainTypedArray(" + resourceName + ")";
+        if ("anim".equals(mResourceType)) return "android.view.animation.AnimationUtils.loadAnimation(" + context + ", " + resourceName + ")";
+        if ("animator".equals(mResourceType)) return "android.animation.AnimatorInflater.loadAnimator(" + context + ", " + resourceName + ")";
+        if ("bool".equals(mResourceType)) return resources + ".getBoolean(" + resourceName + ")";
+        if ("color".equals(mResourceType)) return resources + ".getColor(" + resourceName + ")";
+        if ("colorStateList".equals(mResourceType)) return resources + ".getColorStateList(" + resourceName + ")";
+        if ("dimen".equals(mResourceType)) return resources + ".getDimension(" + resourceName + ")";
+        if ("dimenOffset".equals(mResourceType)) return resources + ".getDimensionPixelOffset(" + resourceName + ")";
+        if ("dimenSize".equals(mResourceType)) return resources + ".getDimensionPixelSize(" + resourceName + ")";
+        if ("drawable".equals(mResourceType)) return resources + ".getDrawable(" + resourceName + ")";
+        if ("fraction".equals(mResourceType)) {
+            String base = getChildCode(0, "1");
+            String pbase = getChildCode(1, "1");
+            return resources + ".getFraction(" + resourceName + ", " + base + ", " + pbase +
+                    ")";
         }
+        if ("id".equals(mResourceType)) return resourceName;
+        if ("intArray".equals(mResourceType)) return resources + ".getIntArray(" + resourceName + ")";
+        if ("integer".equals(mResourceType)) return resources + ".getInteger(" + resourceName + ")";
+        if ("interpolator".equals(mResourceType))  return "android.view.animation.AnimationUtils.loadInterpolator(" + context + ", " + resourceName + ")";
+        if ("layout".equals(mResourceType)) return resourceName;
+        if ("plurals".equals(mResourceType)) {
+            if (getChildren().isEmpty()) {
+                return resourceName;
+            } else {
+                return makeParameterCall(resourceName, "getQuantityString");
+            }
+        }
+        if ("stateListAnimator".equals(mResourceType)) return "android.animation.AnimatorInflater.loadStateListAnimator(" + context + ", " + resourceName + ")";
+        if ("string".equals(mResourceType)) return makeParameterCall(resourceName, "getString");
+        if ("stringArray".equals(mResourceType)) return resources + ".getStringArray(" + resourceName + ")";
+        if ("transition".equals(mResourceType)) return "android.transition.TransitionInflater.from(" + context + ").inflateTransition(" + resourceName + ")";
+        if ("typedArray".equals(mResourceType)) return resources + ".obtainTypedArray(" + resourceName + ")";
         final String property = Character.toUpperCase(mResourceType.charAt(0)) +
                 mResourceType.substring(1);
         return resources + ".get" + property + "(" + resourceName + ")";

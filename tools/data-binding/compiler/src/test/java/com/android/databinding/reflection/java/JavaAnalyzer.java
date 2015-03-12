@@ -58,7 +58,7 @@ public class JavaAnalyzer extends ModelAnalyzer {
                     .build();
     private static final String BINDABLE_ANNOTATION_NAME = "android.binding.Bindable";
 
-    private HashMap<String, JavaClass> mClassCache = new HashMap<>();
+    private HashMap<String, JavaClass> mClassCache = new HashMap<String, JavaClass>();
 
     private final ClassLoader mClassLoader;
 
@@ -110,7 +110,7 @@ public class JavaAnalyzer extends ModelAnalyzer {
     public Callable findMethod(ModelClass modelClass, String name, List<ModelClass> argClasses,
             boolean staticAccess) {
         Class klass = ((JavaClass) modelClass).mClass;
-        ArrayList<Class> args = new ArrayList<>(argClasses.size());
+        ArrayList<Class> args = new ArrayList<Class>(argClasses.size());
         for (int i = 0; i < argClasses.size(); i++) {
             args.add(((JavaClass) argClasses.get(i)).mClass);
         }

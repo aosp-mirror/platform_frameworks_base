@@ -413,7 +413,7 @@ public class AnnotationAnalyzer extends ModelAnalyzer {
     }
 
     private ArrayList<String> splitTemplateParameters(String templateParameters) {
-        ArrayList<String> list = new ArrayList<>();
+        ArrayList<String> list = new ArrayList<String>();
         int index = 0;
         int openCount = 0;
         StringBuilder arg = new StringBuilder();
@@ -438,7 +438,7 @@ public class AnnotationAnalyzer extends ModelAnalyzer {
 
     @Override
     public List<URL> getResources(String name) {
-        ArrayList<URL> urls = new ArrayList<>();
+        ArrayList<URL> urls = new ArrayList<URL>();
         try {
             Enumeration<URL> resources = getClass().getClassLoader().getResources(name);
             while (resources.hasMoreElements()) {
