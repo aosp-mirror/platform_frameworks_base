@@ -1516,8 +1516,14 @@ public final class ContactsContract {
         /**
          * Build a {@link #CONTENT_LOOKUP_URI} lookup {@link Uri} using the
          * given {@link ContactsContract.Contacts#_ID} and {@link #LOOKUP_KEY}.
+         * <p>
+         * Returns null if unable to construct a valid lookup URI from the
+         * provided parameters.
          */
         public static Uri getLookupUri(long contactId, String lookupKey) {
+            if (TextUtils.isEmpty(lookupKey)) {
+                return null;
+            }
             return ContentUris.withAppendedId(Uri.withAppendedPath(Contacts.CONTENT_LOOKUP_URI,
                     lookupKey), contactId);
         }
