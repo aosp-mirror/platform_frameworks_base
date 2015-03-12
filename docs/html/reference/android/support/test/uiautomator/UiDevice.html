@@ -1,0 +1,4889 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<html>
+<head>
+
+
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="viewport" content="width=device-width" />
+
+<link rel="shortcut icon" type="image/x-icon" href="../../../../../favicon.ico" />
+<title>UiDevice | Android Developers</title>
+
+<!-- STYLESHEETS -->
+<link rel="stylesheet"
+href="http://fonts.googleapis.com/css?family=Roboto+Condensed">
+<link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Roboto:light,regular,medium,thin,italic,mediumitalic,bold"
+  title="roboto">
+<link href="../../../../../assets/css/default.css?v=2" rel="stylesheet" type="text/css">
+
+
+<!-- FULLSCREEN STYLESHEET -->
+<link href="../../../../../assets/css/fullscreen.css" rel="stylesheet" class="fullscreen"
+type="text/css">
+
+
+<!-- JAVASCRIPT -->
+<script src="http://www.google.com/jsapi" type="text/javascript"></script>
+<script src="../../../../../assets/js/android_3p-bundle.js" type="text/javascript"></script>
+<script type="text/javascript">
+  var toRoot = "../../../../../";
+  var metaTags = [];
+  var devsite = false;
+</script>
+<script src="../../../../../assets/js/docs.js?v=2" type="text/javascript"></script>
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-5831155-1', 'android.com');
+  ga('create', 'UA-49880327-2', 'android.com', {'name': 'universal'});  // New tracker);
+  ga('send', 'pageview');
+  ga('universal.send', 'pageview'); // Send page view for new tracker.
+</script>
+
+</head>
+
+<body class="gc-documentation
+  develop reference" itemscope itemtype="http://schema.org/Article">
+  <div id="doc-api-level" class="" style="display:none"></div>
+  <a name="top"></a>
+
+
+<a name="top"></a>
+
+  <!-- Header -->
+  <div id="header-wrapper">
+    <div id="header">
+
+
+
+
+      <div class="wrap" id="header-wrap">
+        <div class="col-3 logo">
+          <a href="../../../../../index.html">
+            <img src="../../../../../assets/images/dac_logo.png"
+                srcset="../../../../../assets/images/dac_logo@2x.png 2x"
+                width="123" height="25" alt="Android Developers" />
+          </a>
+          <div class="btn-quicknav" id="btn-quicknav">
+            <a href="#" class="arrow-inactive">Quicknav</a>
+            <a href="#" class="arrow-active">Quicknav</a>
+          </div>
+        </div>
+        <ul class="nav-x col-9">
+            <li class="design">
+              <a href="../../../../../design/index.html"
+              zh-tw-lang="設計"
+              zh-cn-lang="设计"
+              ru-lang="Проектирование"
+              ko-lang="디자인"
+              ja-lang="設計"
+              es-lang="Diseñar"
+              >Design</a></li>
+            <li class="develop"><a href="../../../../../develop/index.html"
+              zh-tw-lang="開發"
+              zh-cn-lang="开发"
+              ru-lang="Разработка"
+              ko-lang="개발"
+              ja-lang="開発"
+              es-lang="Desarrollar"
+              >Develop</a></li>
+            <li class="distribute last"><a href="../../../../../distribute/index.html"
+              zh-tw-lang="發佈"
+              zh-cn-lang="分发"
+              ru-lang="Распространение"
+              ko-lang="배포"
+              ja-lang="配布"
+              es-lang="Distribuir"
+              >Distribute</a></li>
+        </ul>
+
+
+
+
+<div class="menu-container">
+  <div class="moremenu">
+    <div id="more-btn"></div>
+  </div>
+  <div class="morehover" id="moremenu">
+    <div class="top"></div>
+    <div class="mid">
+      <div class="header">Links</div>
+      <ul>
+        <li><a href="https://play.google.com/apps/publish/" target="_googleplay">Google Play Developer Console</a></li>
+        <li><a href="http://android-developers.blogspot.com/">Android Developers Blog</a></li>
+        <li><a href="../../../../../about/index.html">About Android</a></li>
+      </ul>
+      <div class="header">Android Sites</div>
+      <ul>
+        <li><a href="http://www.android.com">Android.com</a></li>
+        <li class="active"><a>Android Developers</a></li>
+        <li><a href="http://source.android.com">Android Open Source Project</a></li>
+      </ul>
+
+
+
+
+      <br class="clearfix" />
+    </div><!-- end 'mid' -->
+    <div class="bottom"></div>
+  </div><!-- end 'moremenu' -->
+
+  <div class="search" id="search-container">
+    <div class="search-inner">
+      <div id="search-btn"></div>
+      <div class="left"></div>
+      <form onsubmit="return submit_search()">
+        <input id="search_autocomplete" type="text" value="" autocomplete="off" name="q"
+          onfocus="search_focus_changed(this, true)" onblur="search_focus_changed(this, false)"
+          onkeydown="return search_changed(event, true, '../../../../../')"
+          onkeyup="return search_changed(event, false, '../../../../../')" />
+      </form>
+      <div class="right"></div>
+      <a class="close hide">close</a>
+      <div class="left"></div>
+      <div class="right"></div>
+    </div><!-- end search-inner -->
+  </div><!-- end search-container -->
+
+  <div class="search_filtered_wrapper reference">
+    <div class="suggest-card reference no-display">
+      <ul class="search_filtered">
+      </ul>
+    </div>
+  </div>
+
+  <div class="search_filtered_wrapper docs">
+    <div class="suggest-card dummy no-display">&nbsp;</div>
+    <div class="suggest-card develop no-display">
+      <ul class="search_filtered">
+      </ul>
+      <div class="child-card guides no-display">
+      </div>
+      <div class="child-card training no-display">
+      </div>
+      <div class="child-card samples no-display">
+      </div>
+    </div>
+    <div class="suggest-card design no-display">
+      <ul class="search_filtered">
+      </ul>
+    </div>
+    <div class="suggest-card distribute no-display">
+      <ul class="search_filtered">
+      </ul>
+    </div>
+  </div>
+</div><!-- end menu-container (search and menu widget) -->
+
+
+
+        <!-- Expanded quicknav -->
+        <div id="quicknav" class="col-13">
+          <ul>
+            <li class="about">
+              <ul>
+                <li><a href="../../../../../about/index.html">About</a></li>
+                <li><a href="../../../../../wear/index.html">Wear</a></li>
+                <li><a href="../../../../../tv/index.html">TV</a></li>
+                <li><a href="../../../../../auto/index.html">Auto</a></li>
+              </ul>
+            </li>
+            <li class="design">
+              <ul>
+                <li><a href="../../../../../design/index.html">Get Started</a></li>
+                <li><a href="../../../../../design/devices.html">Devices</a></li>
+                <li><a href="../../../../../design/style/index.html">Style</a></li>
+                <li><a href="../../../../../design/patterns/index.html">Patterns</a></li>
+                <li><a href="../../../../../design/building-blocks/index.html">Building Blocks</a></li>
+                <li><a href="../../../../../design/downloads/index.html">Downloads</a></li>
+                <li><a href="../../../../../design/videos/index.html">Videos</a></li>
+              </ul>
+            </li>
+            <li class="develop">
+              <ul>
+                <li><a href="../../../../../training/index.html"
+                  zh-tw-lang="訓練課程"
+                  zh-cn-lang="培训"
+                  ru-lang="Курсы"
+                  ko-lang="교육"
+                  ja-lang="トレーニング"
+                  es-lang="Capacitación"
+                  >Training</a></li>
+                <li><a href="../../../../../guide/index.html"
+                  zh-tw-lang="API 指南"
+                  zh-cn-lang="API 指南"
+                  ru-lang="Руководства по API"
+                  ko-lang="API 가이드"
+                  ja-lang="API ガイド"
+                  es-lang="Guías de la API"
+                  >API Guides</a></li>
+                <li><a href="../../../../../reference/packages.html"
+                  zh-tw-lang="參考資源"
+                  zh-cn-lang="参考"
+                  ru-lang="Справочник"
+                  ko-lang="참조문서"
+                  ja-lang="リファレンス"
+                  es-lang="Referencia"
+                  >Reference</a></li>
+                <li><a href="../../../../../sdk/index.html"
+                  zh-tw-lang="相關工具"
+                  zh-cn-lang="工具"
+                  ru-lang="Инструменты"
+                  ko-lang="도구"
+                  ja-lang="ツール"
+                  es-lang="Herramientas"
+                  >Tools</a>
+                </li>
+                <li><a href="../../../../../google/index.html">Google Services</a>
+                </li>
+
+              </ul>
+            </li>
+            <li class="distribute last">
+              <ul>
+                <li><a href="../../../../../distribute/googleplay/index.html">Google Play</a></li>
+                <li><a href="../../../../../distribute/essentials/index.html">Essentials</a></li>
+                <li><a href="../../../../../distribute/users/index.html">Get Users</a></li>
+                <li><a href="../../../../../distribute/engage/index.html">Engage &amp; Retain</a></li>
+                <li><a href="../../../../../distribute/monetize/index.html">Monetize</a></li>
+                <li><a href="../../../../../distribute/tools/index.html">Tools &amp; Reference</a></li>
+                <li><a href="../../../../../distribute/stories/index.html">Developer Stories</a></li>
+              </ul>
+            </li>
+          </ul>
+        </div><!-- /Expanded quicknav -->
+      </div><!-- end header-wrap.wrap -->
+    </div><!-- end header -->
+
+
+    <!-- Secondary x-nav -->
+    <div id="nav-x">
+        <div class="wrap" style="position:relative;z-index:1">
+
+
+            <a id="helpoutsLink" class="resource resource-card resource-card-6x2x3 resource-card-6x2 helpouts-card"
+              href="http://helpouts.google.com/partner/landing/provider/googledevelopers" target="_blank">
+              <div class="card-bg helpouts-card-bg"></div>
+              <div class="card-info">
+                <div class="helpouts-description">
+                  <div class="text">Help developers solve problems<br/>
+                    <span id="helpoutsLinkText" class="link-color" style="display:block;padding-top:5px;text-align:right">Learn more</span>
+                  </div>
+                </div>
+              </div>
+            </a>
+            <script>
+              var textA = "LEARN MORE";
+              var linkA = "http://helpouts.google.com/partner/landing/provider/googledevelopers?utm_source=android_banner1&utm_medium=banner&utm_campaign=android_provider_banner1";
+              var textB = "SIGN UP NOW";
+              var linkB = "http://helpouts.google.com/partner/landing/provider/googledevelopers?utm_source=android_banner2&utm_medium=banner&utm_campaign=android_provider_banner2";
+
+              if (Math.floor(1/Math.random()) > 1) {
+                $("a#helpoutsLink").attr('href', linkA);
+                $("span#helpoutsLinkText").text(textA);
+              } else {
+                $("a#helpoutsLink").attr('href', linkB);
+                $("span#helpoutsLinkText").text(textB);
+              }
+            </script>
+
+
+            <ul class="nav-x col-9 develop" style="width:100%">
+                <li class="training"><a href="../../../../../training/index.html"
+                  zh-tw-lang="訓練課程"
+                  zh-cn-lang="培训"
+                  ru-lang="Курсы"
+                  ko-lang="교육"
+                  ja-lang="トレーニング"
+                  es-lang="Capacitación"
+                  >Training</a></li>
+                <li class="guide"><a href="../../../../../guide/index.html"
+                  zh-tw-lang="API 指南"
+                  zh-cn-lang="API 指南"
+                  ru-lang="Руководства по API"
+                  ko-lang="API 가이드"
+                  ja-lang="API ガイド"
+                  es-lang="Guías de la API"
+                  >API Guides</a></li>
+                <li class="reference"><a href="../../../../../reference/packages.html"
+                  zh-tw-lang="參考資源"
+                  zh-cn-lang="参考"
+                  ru-lang="Справочник"
+                  ko-lang="참조문서"
+                  ja-lang="リファレンス"
+                  es-lang="Referencia"
+                  >Reference</a></li>
+                <li class="tools"><a href="../../../../../sdk/index.html"
+                  zh-tw-lang="相關工具"
+                  zh-cn-lang="工具"
+                  ru-lang="Инструменты"
+                  ko-lang="도구"
+                  ja-lang="ツール"
+                  es-lang="Herramientas"
+                  >Tools</a></li>
+                <li class="google"><a href="../../../../../google/index.html"
+                  >Google Services</a>
+                </li>
+
+            </ul>
+        </div>
+    </div>
+    <!-- /Sendondary x-nav DEVELOP -->
+
+
+
+    <div id="searchResults" class="wrap" style="display:none;">
+      <h2 id="searchTitle">Results</h2>
+      <div id="leftSearchControl" class="search-control">Loading...</div>
+    </div>
+  </div> <!--end header-wrapper -->
+
+  <div id="sticky-header">
+    <div>
+      <a class="logo" href="#top"></a>
+      <a class="top" href="#top"></a>
+      <ul class="breadcrumb">
+
+        <li class="current">UiDevice</li>
+      </ul>
+    </div>
+  </div>
+
+
+
+
+
+  <div class="wrap clearfix" id="body-content">
+    <div class="col-4" id="side-nav" itemscope itemtype="http://schema.org/SiteNavigationElement">
+      <div id="devdoc-nav">
+      <div id="api-nav-header">
+        <div id="api-level-toggle">
+          <label for="apiLevelCheckbox" class="disabled"
+            title="Select your target API level to dim unavailable APIs">API level: </label>
+          <div class="select-wrapper">
+            <select id="apiLevelSelector">
+              <!-- option elements added by buildApiLevelSelector() -->
+            </select>
+          </div>
+        </div><!-- end toggle -->
+        <div id="api-nav-title">Android APIs</div>
+        </div><!-- end nav header -->
+      <script>
+        var SINCE_DATA = [  ];
+        buildApiLevelSelector();
+      </script>
+
+      <div id="swapper">
+        <div id="nav-panels">
+          <div id="resize-packages-nav">
+            <div id="packages-nav" class="scroll-pane">
+
+              <ul>
+
+    <li class="api apilevel-">
+  <a href="../../../../../reference/android/support/test/package-summary.html">android.support.test</a></li>
+    <li class="api apilevel-">
+  <a href="../../../../../reference/android/support/test/espresso/package-summary.html">android.support.test.espresso</a></li>
+    <li class="api apilevel-">
+  <a href="../../../../../reference/android/support/test/espresso/action/package-summary.html">android.support.test.espresso.action</a></li>
+    <li class="api apilevel-">
+  <a href="../../../../../reference/android/support/test/espresso/assertion/package-summary.html">android.support.test.espresso.assertion</a></li>
+    <li class="api apilevel-">
+  <a href="../../../../../reference/android/support/test/espresso/base/package-summary.html">android.support.test.espresso.base</a></li>
+    <li class="api apilevel-">
+  <a href="../../../../../reference/android/support/test/espresso/contrib/package-summary.html">android.support.test.espresso.contrib</a></li>
+    <li class="api apilevel-">
+  <a href="../../../../../reference/android/support/test/espresso/matcher/package-summary.html">android.support.test.espresso.matcher</a></li>
+    <li class="api apilevel-">
+  <a href="../../../../../reference/android/support/test/espresso/util/package-summary.html">android.support.test.espresso.util</a></li>
+    <li class="api apilevel-">
+  <a href="../../../../../reference/android/support/test/filters/package-summary.html">android.support.test.filters</a></li>
+    <li class="api apilevel-">
+  <a href="../../../../../reference/android/support/test/runner/package-summary.html">android.support.test.runner</a></li>
+    <li class="api apilevel-">
+  <a href="../../../../../reference/android/support/test/runner/lifecycle/package-summary.html">android.support.test.runner.lifecycle</a></li>
+    <li class="selected api apilevel-">
+  <a href="../../../../../reference/android/support/test/uiautomator/package-summary.html">android.support.test.uiautomator</a></li>
+              </ul><br/>
+
+            </div> <!-- end packages-nav -->
+          </div> <!-- end resize-packages -->
+          <div id="classes-nav" class="scroll-pane">
+
+
+
+            <ul>
+
+
+    <li><h2>Interfaces</h2>
+      <ul>
+          <li class="api apilevel-"><a href="../../../../../reference/android/support/test/uiautomator/IAutomationSupport.html">IAutomationSupport</a></li>
+          <li class="api apilevel-"><a href="../../../../../reference/android/support/test/uiautomator/UiWatcher.html">UiWatcher</a></li>
+      </ul>
+    </li>
+
+    <li><h2>Classes</h2>
+      <ul>
+          <li class="api apilevel-"><a href="../../../../../reference/android/support/test/uiautomator/By.html">By</a></li>
+          <li class="api apilevel-"><a href="../../../../../reference/android/support/test/uiautomator/BySelector.html">BySelector</a></li>
+          <li class="api apilevel-"><a href="../../../../../reference/android/support/test/uiautomator/Configurator.html">Configurator</a></li>
+          <li class="api apilevel-"><a href="../../../../../reference/android/support/test/uiautomator/EventCondition.html">EventCondition</a></li>
+          <li class="api apilevel-"><a href="../../../../../reference/android/support/test/uiautomator/SearchCondition.html">SearchCondition</a></li>
+          <li class="api apilevel-"><a href="../../../../../reference/android/support/test/uiautomator/UiAutomatorInstrumentationTestRunner.html">UiAutomatorInstrumentationTestRunner</a></li>
+          <li class="api apilevel-"><a href="../../../../../reference/android/support/test/uiautomator/UiAutomatorTestCase.html">UiAutomatorTestCase</a></li>
+          <li class="api apilevel-"><a href="../../../../../reference/android/support/test/uiautomator/UiCollection.html">UiCollection</a></li>
+          <li class="selected api apilevel-"><a href="../../../../../reference/android/support/test/uiautomator/UiDevice.html">UiDevice</a></li>
+          <li class="api apilevel-"><a href="../../../../../reference/android/support/test/uiautomator/UiObject.html">UiObject</a></li>
+          <li class="api apilevel-"><a href="../../../../../reference/android/support/test/uiautomator/UiObject2.html">UiObject2</a></li>
+          <li class="api apilevel-"><a href="../../../../../reference/android/support/test/uiautomator/UiObject2Condition.html">UiObject2Condition</a></li>
+          <li class="api apilevel-"><a href="../../../../../reference/android/support/test/uiautomator/UiScrollable.html">UiScrollable</a></li>
+          <li class="api apilevel-"><a href="../../../../../reference/android/support/test/uiautomator/UiSelector.html">UiSelector</a></li>
+          <li class="api apilevel-"><a href="../../../../../reference/android/support/test/uiautomator/Until.html">Until</a></li>
+      </ul>
+    </li>
+
+    <li><h2>Enums</h2>
+      <ul>
+          <li class="api apilevel-"><a href="../../../../../reference/android/support/test/uiautomator/Direction.html">Direction</a></li>
+      </ul>
+    </li>
+
+    <li><h2>Exceptions</h2>
+      <ul>
+          <li class="api apilevel-"><a href="../../../../../reference/android/support/test/uiautomator/StaleObjectException.html">StaleObjectException</a></li>
+          <li class="api apilevel-"><a href="../../../../../reference/android/support/test/uiautomator/UiObjectNotFoundException.html">UiObjectNotFoundException</a></li>
+      </ul>
+    </li>
+
+            </ul><br/>
+
+
+          </div><!-- end classes -->
+        </div><!-- end nav-panels -->
+        <div id="nav-tree" style="display:none" class="scroll-pane">
+          <div id="tree-list"></div>
+        </div><!-- end nav-tree -->
+      </div><!-- end swapper -->
+      <div id="nav-swap">
+      <a class="fullscreen">fullscreen</a>
+      <a href='#' onclick='swapNav();return false;'><span id='tree-link'>Use Tree Navigation</span><span id='panel-link' style='display:none'>Use Panel Navigation</span></a>
+      </div>
+    </div> <!-- end devdoc-nav -->
+    </div> <!-- end side-nav -->
+    <script type="text/javascript">
+      // init fullscreen based on user pref
+      var fullscreen = readCookie("fullscreen");
+      if (fullscreen != 0) {
+        if (fullscreen == "false") {
+          toggleFullscreen(false);
+        } else {
+          toggleFullscreen(true);
+        }
+      }
+      // init nav version for mobile
+      if (isMobile) {
+        swapNav(); // tree view should be used on mobile
+        $('#nav-swap').hide();
+      } else {
+        chooseDefaultNav();
+        if ($("#nav-tree").is(':visible')) {
+          init_default_navtree("../../../../../");
+        }
+      }
+      // scroll the selected page into view
+      $(document).ready(function() {
+        scrollIntoView("packages-nav");
+        scrollIntoView("classes-nav");
+        });
+    </script>
+
+
+
+
+
+<div class="col-12"  id="doc-col">
+
+<div id="api-info-block">
+
+
+
+
+
+
+
+
+
+
+
+<div class="sum-details-links">
+
+Summary:
+
+
+
+
+
+
+
+
+
+
+
+  <a href="#pubmethods">Methods</a>
+
+
+
+
+  &#124; <a href="#inhmethods">Inherited Methods</a>
+
+&#124; <a href="#" onclick="return toggleAllClassInherited()" id="toggleAllClassInherited">[Expand All]</a>
+
+</div><!-- end sum-details-links -->
+<div class="api-level">
+
+
+
+
+</div>
+</div><!-- end api-info-block -->
+
+
+<!-- ======== START OF CLASS DATA ======== -->
+
+<div id="jd-header">
+    public
+
+
+
+    class
+<h1 itemprop="name">UiDevice</h1>
+
+
+
+
+    extends Object<br/>
+
+
+
+
+
+
+
+
+
+
+
+
+</div><!-- end header -->
+
+<div id="naMessage"></div>
+
+<div id="jd-content" class="api apilevel-">
+<table class="jd-inheritance-table">
+
+
+    <tr>
+
+        <td colspan="2" class="jd-inheritance-class-cell">java.lang.Object</td>
+    </tr>
+
+
+    <tr>
+
+            <td class="jd-inheritance-space">&nbsp;&nbsp;&nbsp;&#x21b3;</td>
+
+        <td colspan="1" class="jd-inheritance-class-cell">android.support.test.uiautomator.UiDevice</td>
+    </tr>
+
+
+</table>
+
+
+
+
+
+
+
+<div class="jd-descr">
+
+
+<h2>Class Overview</h2>
+<p itemprop="articleBody">UiDevice provides access to state information about the device.
+ You can also use this class to simulate user actions on the device,
+ such as pressing the d-pad or pressing the Home and Menu buttons.</p>
+
+
+
+
+
+</div><!-- jd-descr -->
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="jd-descr">
+
+
+<h2>Summary</h2>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!-- ========== METHOD SUMMARY =========== -->
+<table id="pubmethods" class="jd-sumtable"><tr><th colspan="12">Public Methods</th></tr>
+
+
+
+
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="../../../../../reference/android/support/test/uiautomator/UiDevice.html#clearLastTraversedText()">clearLastTraversedText</a></span>()</nobr>
+
+        <div class="jd-descrdiv">
+          Clears the text from the last UI traversal event.
+
+
+
+        </div>
+
+  </td></tr>
+
+
+
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            boolean</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="../../../../../reference/android/support/test/uiautomator/UiDevice.html#click(int, int)">click</a></span>(int x, int y)</nobr>
+
+        <div class="jd-descrdiv">
+          Perform a click at arbitrary coordinates specified by the user
+
+
+
+        </div>
+
+  </td></tr>
+
+
+
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            boolean</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="../../../../../reference/android/support/test/uiautomator/UiDevice.html#drag(int, int, int, int, int)">drag</a></span>(int startX, int startY, int endX, int endY, int steps)</nobr>
+
+        <div class="jd-descrdiv">
+          Performs a swipe from one coordinate to another coordinate.
+
+
+
+        </div>
+
+  </td></tr>
+
+
+
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="../../../../../reference/android/support/test/uiautomator/UiDevice.html#dumpWindowHierarchy(java.lang.String)">dumpWindowHierarchy</a></span>(String fileName)</nobr>
+
+        <div class="jd-descrdiv">
+          Helper method used for debugging to dump the current window's layout hierarchy.
+
+
+
+        </div>
+
+  </td></tr>
+
+
+
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            <a href="../../../../../reference/android/support/test/uiautomator/UiObject2.html">UiObject2</a></nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="../../../../../reference/android/support/test/uiautomator/UiDevice.html#findObject(android.support.test.uiautomator.BySelector)">findObject</a></span>(<a href="../../../../../reference/android/support/test/uiautomator/BySelector.html">BySelector</a> selector)</nobr>
+
+        <div class="jd-descrdiv">
+          Returns the first object to match the <code>selector</code> criteria.
+
+
+
+        </div>
+
+  </td></tr>
+
+
+
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            <a href="../../../../../reference/android/support/test/uiautomator/UiObject.html">UiObject</a></nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="../../../../../reference/android/support/test/uiautomator/UiDevice.html#findObject(android.support.test.uiautomator.UiSelector)">findObject</a></span>(<a href="../../../../../reference/android/support/test/uiautomator/UiSelector.html">UiSelector</a> selector)</nobr>
+
+        <div class="jd-descrdiv">
+          Returns a UiObject which represents a view that matches the specified selector criteria.
+
+
+
+        </div>
+
+  </td></tr>
+
+
+
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            List&lt;<a href="../../../../../reference/android/support/test/uiautomator/UiObject2.html">UiObject2</a>&gt;</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="../../../../../reference/android/support/test/uiautomator/UiDevice.html#findObjects(android.support.test.uiautomator.BySelector)">findObjects</a></span>(<a href="../../../../../reference/android/support/test/uiautomator/BySelector.html">BySelector</a> selector)</nobr>
+
+        <div class="jd-descrdiv">
+          Returns all objects that match the <code>selector</code> criteria.
+
+
+
+        </div>
+
+  </td></tr>
+
+
+
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="../../../../../reference/android/support/test/uiautomator/UiDevice.html#freezeRotation()">freezeRotation</a></span>()</nobr>
+
+        <div class="jd-descrdiv">
+          Disables the sensors and freezes the device rotation at its
+ current rotation state.
+
+
+
+        </div>
+
+  </td></tr>
+
+
+
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            String</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="../../../../../reference/android/support/test/uiautomator/UiDevice.html#getCurrentActivityName()">getCurrentActivityName</a></span>()</nobr>
+
+        <div class="jd-descrdiv">
+          <em>
+      This method is deprecated.
+    The results returned should be considered unreliable</em>
+
+
+
+        </div>
+
+  </td></tr>
+
+
+
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            String</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="../../../../../reference/android/support/test/uiautomator/UiDevice.html#getCurrentPackageName()">getCurrentPackageName</a></span>()</nobr>
+
+        <div class="jd-descrdiv">
+          Retrieves the name of the last package to report accessibility events.
+
+
+
+        </div>
+
+  </td></tr>
+
+
+
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            int</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="../../../../../reference/android/support/test/uiautomator/UiDevice.html#getDisplayHeight()">getDisplayHeight</a></span>()</nobr>
+
+        <div class="jd-descrdiv">
+          Gets the height of the display, in pixels.
+
+
+
+        </div>
+
+  </td></tr>
+
+
+
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            int</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="../../../../../reference/android/support/test/uiautomator/UiDevice.html#getDisplayRotation()">getDisplayRotation</a></span>()</nobr>
+
+        <div class="jd-descrdiv">
+          Returns the current rotation of the display, as defined in <code><a href="../../../../../reference/android/view/Surface.html">Surface</a></code>
+
+
+
+        </div>
+
+  </td></tr>
+
+
+
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            Point</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="../../../../../reference/android/support/test/uiautomator/UiDevice.html#getDisplaySizeDp()">getDisplaySizeDp</a></span>()</nobr>
+
+        <div class="jd-descrdiv">
+          Returns the display size in dp (device-independent pixel)
+
+ The returned display size is adjusted per screen rotation.
+
+
+
+        </div>
+
+  </td></tr>
+
+
+
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            int</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="../../../../../reference/android/support/test/uiautomator/UiDevice.html#getDisplayWidth()">getDisplayWidth</a></span>()</nobr>
+
+        <div class="jd-descrdiv">
+          Gets the width of the display, in pixels.
+
+
+
+        </div>
+
+  </td></tr>
+
+
+
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+
+            static
+
+            <a href="../../../../../reference/android/support/test/uiautomator/UiDevice.html">UiDevice</a></nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="../../../../../reference/android/support/test/uiautomator/UiDevice.html#getInstance(android.app.Instrumentation)">getInstance</a></span>(Instrumentation instrumentation)</nobr>
+
+        <div class="jd-descrdiv">
+          Retrieves a singleton instance of UiDevice
+
+
+
+        </div>
+
+  </td></tr>
+
+
+
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+
+            static
+
+            <a href="../../../../../reference/android/support/test/uiautomator/UiDevice.html">UiDevice</a></nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="../../../../../reference/android/support/test/uiautomator/UiDevice.html#getInstance()">getInstance</a></span>()</nobr>
+
+        <div class="jd-descrdiv">
+          <em>
+      This method is deprecated.
+    Should use <code><a href="../../../../../reference/android/support/test/uiautomator/UiDevice.html#getInstance(android.app.Instrumentation)">getInstance(Instrumentation)</a></code> instead. This version hides
+ UiDevice's dependency on having an Instrumentation reference and is prone to misuse.</em>
+
+
+
+        </div>
+
+  </td></tr>
+
+
+
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            String</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="../../../../../reference/android/support/test/uiautomator/UiDevice.html#getLastTraversedText()">getLastTraversedText</a></span>()</nobr>
+
+        <div class="jd-descrdiv">
+          Retrieves the text from the last UI traversal event received.
+
+
+
+        </div>
+
+  </td></tr>
+
+
+
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            String</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="../../../../../reference/android/support/test/uiautomator/UiDevice.html#getProductName()">getProductName</a></span>()</nobr>
+
+        <div class="jd-descrdiv">
+          Retrieves the product name of the device.
+
+
+
+        </div>
+
+  </td></tr>
+
+
+
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            boolean</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="../../../../../reference/android/support/test/uiautomator/UiDevice.html#hasAnyWatcherTriggered()">hasAnyWatcherTriggered</a></span>()</nobr>
+
+        <div class="jd-descrdiv">
+          Checks if any registered <code><a href="../../../../../reference/android/support/test/uiautomator/UiWatcher.html">UiWatcher</a></code> have triggered.
+
+
+
+        </div>
+
+  </td></tr>
+
+
+
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            boolean</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="../../../../../reference/android/support/test/uiautomator/UiDevice.html#hasObject(android.support.test.uiautomator.BySelector)">hasObject</a></span>(<a href="../../../../../reference/android/support/test/uiautomator/BySelector.html">BySelector</a> selector)</nobr>
+
+        <div class="jd-descrdiv">
+          Returns whether there is a match for the given <code>selector</code> criteria.
+
+
+
+        </div>
+
+  </td></tr>
+
+
+
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            boolean</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="../../../../../reference/android/support/test/uiautomator/UiDevice.html#hasWatcherTriggered(java.lang.String)">hasWatcherTriggered</a></span>(String watcherName)</nobr>
+
+        <div class="jd-descrdiv">
+          Checks if a specific registered  <code><a href="../../../../../reference/android/support/test/uiautomator/UiWatcher.html">UiWatcher</a></code> has triggered.
+
+
+
+        </div>
+
+  </td></tr>
+
+
+
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            boolean</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="../../../../../reference/android/support/test/uiautomator/UiDevice.html#isNaturalOrientation()">isNaturalOrientation</a></span>()</nobr>
+
+        <div class="jd-descrdiv">
+          Check if the device is in its natural orientation.
+
+
+
+        </div>
+
+  </td></tr>
+
+
+
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            boolean</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="../../../../../reference/android/support/test/uiautomator/UiDevice.html#isScreenOn()">isScreenOn</a></span>()</nobr>
+
+        <div class="jd-descrdiv">
+          Checks the power manager if the screen is ON.
+
+
+
+        </div>
+
+  </td></tr>
+
+
+
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            boolean</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="../../../../../reference/android/support/test/uiautomator/UiDevice.html#openNotification()">openNotification</a></span>()</nobr>
+
+        <div class="jd-descrdiv">
+          Opens the notification shade.
+
+
+
+        </div>
+
+  </td></tr>
+
+
+
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            boolean</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="../../../../../reference/android/support/test/uiautomator/UiDevice.html#openQuickSettings()">openQuickSettings</a></span>()</nobr>
+
+        <div class="jd-descrdiv">
+          Opens the Quick Settings shade.
+
+
+
+        </div>
+
+  </td></tr>
+
+
+
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+
+
+            &lt;R&gt;
+            R</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="../../../../../reference/android/support/test/uiautomator/UiDevice.html#performActionAndWait(java.lang.Runnable, android.support.test.uiautomator.EventCondition<R>, long)">performActionAndWait</a></span>(Runnable action, <a href="../../../../../reference/android/support/test/uiautomator/EventCondition.html">EventCondition</a>&lt;R&gt; condition, long timeout)</nobr>
+
+        <div class="jd-descrdiv">
+          Performs the provided <code>action</code> and waits for the <code>condition</code> to be met.
+
+
+
+        </div>
+
+  </td></tr>
+
+
+
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            boolean</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="../../../../../reference/android/support/test/uiautomator/UiDevice.html#pressBack()">pressBack</a></span>()</nobr>
+
+        <div class="jd-descrdiv">
+          Simulates a short press on the BACK button.
+
+
+
+        </div>
+
+  </td></tr>
+
+
+
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            boolean</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="../../../../../reference/android/support/test/uiautomator/UiDevice.html#pressDPadCenter()">pressDPadCenter</a></span>()</nobr>
+
+        <div class="jd-descrdiv">
+          Simulates a short press on the CENTER button.
+
+
+
+        </div>
+
+  </td></tr>
+
+
+
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            boolean</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="../../../../../reference/android/support/test/uiautomator/UiDevice.html#pressDPadDown()">pressDPadDown</a></span>()</nobr>
+
+        <div class="jd-descrdiv">
+          Simulates a short press on the DOWN button.
+
+
+
+        </div>
+
+  </td></tr>
+
+
+
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            boolean</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="../../../../../reference/android/support/test/uiautomator/UiDevice.html#pressDPadLeft()">pressDPadLeft</a></span>()</nobr>
+
+        <div class="jd-descrdiv">
+          Simulates a short press on the LEFT button.
+
+
+
+        </div>
+
+  </td></tr>
+
+
+
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            boolean</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="../../../../../reference/android/support/test/uiautomator/UiDevice.html#pressDPadRight()">pressDPadRight</a></span>()</nobr>
+
+        <div class="jd-descrdiv">
+          Simulates a short press on the RIGHT button.
+
+
+
+        </div>
+
+  </td></tr>
+
+
+
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            boolean</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="../../../../../reference/android/support/test/uiautomator/UiDevice.html#pressDPadUp()">pressDPadUp</a></span>()</nobr>
+
+        <div class="jd-descrdiv">
+          Simulates a short press on the UP button.
+
+
+
+        </div>
+
+  </td></tr>
+
+
+
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            boolean</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="../../../../../reference/android/support/test/uiautomator/UiDevice.html#pressDelete()">pressDelete</a></span>()</nobr>
+
+        <div class="jd-descrdiv">
+          Simulates a short press on the DELETE key.
+
+
+
+        </div>
+
+  </td></tr>
+
+
+
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            boolean</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="../../../../../reference/android/support/test/uiautomator/UiDevice.html#pressEnter()">pressEnter</a></span>()</nobr>
+
+        <div class="jd-descrdiv">
+          Simulates a short press on the ENTER key.
+
+
+
+        </div>
+
+  </td></tr>
+
+
+
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            boolean</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="../../../../../reference/android/support/test/uiautomator/UiDevice.html#pressHome()">pressHome</a></span>()</nobr>
+
+        <div class="jd-descrdiv">
+          Simulates a short press on the HOME button.
+
+
+
+        </div>
+
+  </td></tr>
+
+
+
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            boolean</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="../../../../../reference/android/support/test/uiautomator/UiDevice.html#pressKeyCode(int, int)">pressKeyCode</a></span>(int keyCode, int metaState)</nobr>
+
+        <div class="jd-descrdiv">
+          Simulates a short press using a key code.
+
+
+
+        </div>
+
+  </td></tr>
+
+
+
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            boolean</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="../../../../../reference/android/support/test/uiautomator/UiDevice.html#pressKeyCode(int)">pressKeyCode</a></span>(int keyCode)</nobr>
+
+        <div class="jd-descrdiv">
+          Simulates a short press using a key code.
+
+
+
+        </div>
+
+  </td></tr>
+
+
+
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            boolean</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="../../../../../reference/android/support/test/uiautomator/UiDevice.html#pressMenu()">pressMenu</a></span>()</nobr>
+
+        <div class="jd-descrdiv">
+          Simulates a short press on the MENU button.
+
+
+
+        </div>
+
+  </td></tr>
+
+
+
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            boolean</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="../../../../../reference/android/support/test/uiautomator/UiDevice.html#pressRecentApps()">pressRecentApps</a></span>()</nobr>
+
+        <div class="jd-descrdiv">
+          Simulates a short press on the Recent Apps button.
+
+
+
+        </div>
+
+  </td></tr>
+
+
+
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            boolean</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="../../../../../reference/android/support/test/uiautomator/UiDevice.html#pressSearch()">pressSearch</a></span>()</nobr>
+
+        <div class="jd-descrdiv">
+          Simulates a short press on the SEARCH button.
+
+
+
+        </div>
+
+  </td></tr>
+
+
+
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="../../../../../reference/android/support/test/uiautomator/UiDevice.html#registerWatcher(java.lang.String, android.support.test.uiautomator.UiWatcher)">registerWatcher</a></span>(String name, <a href="../../../../../reference/android/support/test/uiautomator/UiWatcher.html">UiWatcher</a> watcher)</nobr>
+
+        <div class="jd-descrdiv">
+          Registers a <code><a href="../../../../../reference/android/support/test/uiautomator/UiWatcher.html">UiWatcher</a></code> to run automatically when the testing framework is unable to
+ find a match using a <code><a href="../../../../../reference/android/support/test/uiautomator/UiSelector.html">UiSelector</a></code>.
+
+
+
+        </div>
+
+  </td></tr>
+
+
+
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="../../../../../reference/android/support/test/uiautomator/UiDevice.html#removeWatcher(java.lang.String)">removeWatcher</a></span>(String name)</nobr>
+
+        <div class="jd-descrdiv">
+          Removes a previously registered <code><a href="../../../../../reference/android/support/test/uiautomator/UiWatcher.html">UiWatcher</a></code>.
+
+
+
+        </div>
+
+  </td></tr>
+
+
+
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="../../../../../reference/android/support/test/uiautomator/UiDevice.html#resetWatcherTriggers()">resetWatcherTriggers</a></span>()</nobr>
+
+        <div class="jd-descrdiv">
+          Resets a <code><a href="../../../../../reference/android/support/test/uiautomator/UiWatcher.html">UiWatcher</a></code> that has been triggered.
+
+
+
+        </div>
+
+  </td></tr>
+
+
+
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="../../../../../reference/android/support/test/uiautomator/UiDevice.html#runWatchers()">runWatchers</a></span>()</nobr>
+
+        <div class="jd-descrdiv">
+          This method forces all registered watchers to run.
+
+
+
+        </div>
+
+  </td></tr>
+
+
+
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="../../../../../reference/android/support/test/uiautomator/UiDevice.html#setCompressedLayoutHeirarchy(boolean)">setCompressedLayoutHeirarchy</a></span>(boolean compressed)</nobr>
+
+        <div class="jd-descrdiv">
+          Enables or disables layout hierarchy compression.
+
+
+
+        </div>
+
+  </td></tr>
+
+
+
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="../../../../../reference/android/support/test/uiautomator/UiDevice.html#setOrientationLeft()">setOrientationLeft</a></span>()</nobr>
+
+        <div class="jd-descrdiv">
+          Simulates orienting the device to the left and also freezes rotation
+ by disabling the sensors.
+
+
+
+        </div>
+
+  </td></tr>
+
+
+
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="../../../../../reference/android/support/test/uiautomator/UiDevice.html#setOrientationNatural()">setOrientationNatural</a></span>()</nobr>
+
+        <div class="jd-descrdiv">
+          Simulates orienting the device into its natural orientation and also freezes rotation
+ by disabling the sensors.
+
+
+
+        </div>
+
+  </td></tr>
+
+
+
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="../../../../../reference/android/support/test/uiautomator/UiDevice.html#setOrientationRight()">setOrientationRight</a></span>()</nobr>
+
+        <div class="jd-descrdiv">
+          Simulates orienting the device to the right and also freezes rotation
+ by disabling the sensors.
+
+
+
+        </div>
+
+  </td></tr>
+
+
+
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="../../../../../reference/android/support/test/uiautomator/UiDevice.html#sleep()">sleep</a></span>()</nobr>
+
+        <div class="jd-descrdiv">
+          This method simply presses the power button if the screen is ON else
+ it does nothing if the screen is already OFF.
+
+
+
+        </div>
+
+  </td></tr>
+
+
+
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            boolean</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="../../../../../reference/android/support/test/uiautomator/UiDevice.html#swipe(android.graphics.Point[], int)">swipe</a></span>(Point[] segments, int segmentSteps)</nobr>
+
+        <div class="jd-descrdiv">
+          Performs a swipe between points in the Point array.
+
+
+
+        </div>
+
+  </td></tr>
+
+
+
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            boolean</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="../../../../../reference/android/support/test/uiautomator/UiDevice.html#swipe(int, int, int, int, int)">swipe</a></span>(int startX, int startY, int endX, int endY, int steps)</nobr>
+
+        <div class="jd-descrdiv">
+          Performs a swipe from one coordinate to another using the number of steps
+ to determine smoothness and speed.
+
+
+
+        </div>
+
+  </td></tr>
+
+
+
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            boolean</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="../../../../../reference/android/support/test/uiautomator/UiDevice.html#takeScreenshot(java.io.File)">takeScreenshot</a></span>(File storePath)</nobr>
+
+        <div class="jd-descrdiv">
+          Take a screenshot of current window and store it as PNG
+
+ Default scale of 1.0f (original size) and 90% quality is used
+ The screenshot is adjusted per screen rotation
+
+
+
+        </div>
+
+  </td></tr>
+
+
+
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            boolean</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="../../../../../reference/android/support/test/uiautomator/UiDevice.html#takeScreenshot(java.io.File, float, int)">takeScreenshot</a></span>(File storePath, float scale, int quality)</nobr>
+
+        <div class="jd-descrdiv">
+          Take a screenshot of current window and store it as PNG
+
+ The screenshot is adjusted per screen rotation
+
+
+
+        </div>
+
+  </td></tr>
+
+
+
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="../../../../../reference/android/support/test/uiautomator/UiDevice.html#unfreezeRotation()">unfreezeRotation</a></span>()</nobr>
+
+        <div class="jd-descrdiv">
+          Re-enables the sensors and un-freezes the device rotation allowing its contents
+ to rotate with the device physical rotation.
+
+
+
+        </div>
+
+  </td></tr>
+
+
+
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+
+
+            &lt;R&gt;
+            R</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="../../../../../reference/android/support/test/uiautomator/UiDevice.html#wait(android.support.test.uiautomator.SearchCondition<R>, long)">wait</a></span>(<a href="../../../../../reference/android/support/test/uiautomator/SearchCondition.html">SearchCondition</a>&lt;R&gt; condition, long timeout)</nobr>
+
+        <div class="jd-descrdiv">
+          Waits for given the <code>condition</code> to be met.
+
+
+
+        </div>
+
+  </td></tr>
+
+
+
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="../../../../../reference/android/support/test/uiautomator/UiDevice.html#waitForIdle(long)">waitForIdle</a></span>(long timeout)</nobr>
+
+        <div class="jd-descrdiv">
+          Waits for the current application to idle.
+
+
+
+        </div>
+
+  </td></tr>
+
+
+
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="../../../../../reference/android/support/test/uiautomator/UiDevice.html#waitForIdle()">waitForIdle</a></span>()</nobr>
+
+        <div class="jd-descrdiv">
+          Waits for the current application to idle.
+
+
+
+        </div>
+
+  </td></tr>
+
+
+
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            boolean</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="../../../../../reference/android/support/test/uiautomator/UiDevice.html#waitForWindowUpdate(java.lang.String, long)">waitForWindowUpdate</a></span>(String packageName, long timeout)</nobr>
+
+        <div class="jd-descrdiv">
+          Waits for a window content update event to occur.
+
+
+
+        </div>
+
+  </td></tr>
+
+
+
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="../../../../../reference/android/support/test/uiautomator/UiDevice.html#wakeUp()">wakeUp</a></span>()</nobr>
+
+        <div class="jd-descrdiv">
+          This method simulates pressing the power button if the screen is OFF else
+ it does nothing if the screen is already ON.
+
+
+
+        </div>
+
+  </td></tr>
+
+
+
+</table>
+
+
+
+
+
+
+
+<!-- ========== METHOD SUMMARY =========== -->
+<table id="inhmethods" class="jd-sumtable"><tr><th>
+  <a href="#" class="toggle-all" onclick="return toggleAllInherited(this, null)">[Expand]</a>
+  <div style="clear:left;">Inherited Methods</div></th></tr>
+
+
+<tr class="api apilevel-" >
+<td colspan="12">
+  <a href="#" onclick="return toggleInherited(this, null)" id="inherited-methods-java.lang.Object" class="jd-expando-trigger closed"
+          ><img id="inherited-methods-java.lang.Object-trigger"
+          src="../../../../../assets/images/triangle-closed.png"
+          class="jd-expando-trigger-img" /></a>
+From class
+
+  java.lang.Object
+
+<div id="inherited-methods-java.lang.Object">
+  <div id="inherited-methods-java.lang.Object-list"
+        class="jd-inheritedlinks">
+  </div>
+  <div id="inherited-methods-java.lang.Object-summary" style="display: none;">
+    <table class="jd-sumtable-expando">
+
+
+
+
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            Object</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad">clone</span>()</nobr>
+
+  </td></tr>
+
+
+
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            boolean</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad">equals</span>(Object arg0)</nobr>
+
+  </td></tr>
+
+
+
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad">finalize</span>()</nobr>
+
+  </td></tr>
+
+
+
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+            final
+
+
+            Class&lt;?&gt;</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad">getClass</span>()</nobr>
+
+  </td></tr>
+
+
+
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            int</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad">hashCode</span>()</nobr>
+
+  </td></tr>
+
+
+
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+            final
+
+
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad">notify</span>()</nobr>
+
+  </td></tr>
+
+
+
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+            final
+
+
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad">notifyAll</span>()</nobr>
+
+  </td></tr>
+
+
+
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            String</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad">toString</span>()</nobr>
+
+  </td></tr>
+
+
+
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+            final
+
+
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad">wait</span>()</nobr>
+
+  </td></tr>
+
+
+
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+            final
+
+
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad">wait</span>(long arg0, int arg1)</nobr>
+
+  </td></tr>
+
+
+
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+            final
+
+
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad">wait</span>(long arg0)</nobr>
+
+  </td></tr>
+
+
+</table>
+  </div>
+</div>
+</td></tr>
+
+
+</table>
+
+
+</div><!-- jd-descr (summary) -->
+
+<!-- Details -->
+
+
+
+
+
+
+
+
+<!-- XML Attributes -->
+
+
+<!-- Enum Values -->
+
+
+<!-- Constants -->
+
+
+<!-- Fields -->
+
+
+<!-- Public ctors -->
+
+
+
+<!-- ========= CONSTRUCTOR DETAIL ======== -->
+<!-- Protected ctors -->
+
+
+
+<!-- ========= METHOD DETAIL ======== -->
+<!-- Public methdos -->
+
+<h2>Public Methods</h2>
+
+
+
+<A NAME="clearLastTraversedText()"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+
+
+
+
+        void
+      </span>
+      <span class="sympad">clearLastTraversedText</span>
+      <span class="normal">()</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+
+
+
+  <div class="jd-tagdata jd-tagdescr"><p>Clears the text from the last UI traversal event.
+ See <code><a href="../../../../../reference/android/support/test/uiautomator/UiDevice.html#getLastTraversedText()">getLastTraversedText()</a></code>.</p></div>
+
+    </div>
+</div>
+
+
+<A NAME="click(int, int)"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+
+
+
+
+        boolean
+      </span>
+      <span class="sympad">click</span>
+      <span class="normal">(int x, int y)</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+
+
+
+  <div class="jd-tagdata jd-tagdescr"><p>Perform a click at arbitrary coordinates specified by the user</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>x</td>
+          <td>coordinate</td>
+        </tr>
+        <tr>
+          <th>y</td>
+          <td>coordinate</td>
+        </tr>
+      </table>
+  </div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li>true if the click succeeded else false</li></ul>
+  </div>
+
+    </div>
+</div>
+
+
+<A NAME="drag(int, int, int, int, int)"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+
+
+
+
+        boolean
+      </span>
+      <span class="sympad">drag</span>
+      <span class="normal">(int startX, int startY, int endX, int endY, int steps)</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+
+
+
+  <div class="jd-tagdata jd-tagdescr"><p>Performs a swipe from one coordinate to another coordinate. You can control
+ the smoothness and speed of the swipe by specifying the number of steps.
+ Each step execution is throttled to 5 milliseconds per step, so for a 100
+ steps, the swipe will take around 0.5 seconds to complete.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>startX</td>
+          <td>X-axis value for the starting coordinate</td>
+        </tr>
+        <tr>
+          <th>startY</td>
+          <td>Y-axis value for the starting coordinate</td>
+        </tr>
+        <tr>
+          <th>endX</td>
+          <td>X-axis value for the ending coordinate</td>
+        </tr>
+        <tr>
+          <th>endY</td>
+          <td>Y-axis value for the ending coordinate</td>
+        </tr>
+        <tr>
+          <th>steps</td>
+          <td>is the number of steps for the swipe action</td>
+        </tr>
+      </table>
+  </div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li>true if swipe is performed, false if the operation fails
+ or the coordinates are invalid</li></ul>
+  </div>
+
+    </div>
+</div>
+
+
+<A NAME="dumpWindowHierarchy(java.lang.String)"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+
+
+
+
+        void
+      </span>
+      <span class="sympad">dumpWindowHierarchy</span>
+      <span class="normal">(String fileName)</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+
+
+
+  <div class="jd-tagdata jd-tagdescr"><p>Helper method used for debugging to dump the current window's layout hierarchy.
+ Relative file paths are stored the application's internal private storage location.</p></div>
+
+    </div>
+</div>
+
+
+<A NAME="findObject(android.support.test.uiautomator.BySelector)"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+
+
+
+
+        <a href="../../../../../reference/android/support/test/uiautomator/UiObject2.html">UiObject2</a>
+      </span>
+      <span class="sympad">findObject</span>
+      <span class="normal">(<a href="../../../../../reference/android/support/test/uiautomator/BySelector.html">BySelector</a> selector)</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+
+
+
+  <div class="jd-tagdata jd-tagdescr"><p>Returns the first object to match the <code>selector</code> criteria. </p></div>
+
+    </div>
+</div>
+
+
+<A NAME="findObject(android.support.test.uiautomator.UiSelector)"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+
+
+
+
+        <a href="../../../../../reference/android/support/test/uiautomator/UiObject.html">UiObject</a>
+      </span>
+      <span class="sympad">findObject</span>
+      <span class="normal">(<a href="../../../../../reference/android/support/test/uiautomator/UiSelector.html">UiSelector</a> selector)</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+
+
+
+  <div class="jd-tagdata jd-tagdescr"><p>Returns a UiObject which represents a view that matches the specified selector criteria.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li>UiObject object
+</li></ul>
+  </div>
+
+    </div>
+</div>
+
+
+<A NAME="findObjects(android.support.test.uiautomator.BySelector)"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+
+
+
+
+        List&lt;<a href="../../../../../reference/android/support/test/uiautomator/UiObject2.html">UiObject2</a>&gt;
+      </span>
+      <span class="sympad">findObjects</span>
+      <span class="normal">(<a href="../../../../../reference/android/support/test/uiautomator/BySelector.html">BySelector</a> selector)</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+
+
+
+  <div class="jd-tagdata jd-tagdescr"><p>Returns all objects that match the <code>selector</code> criteria. </p></div>
+
+    </div>
+</div>
+
+
+<A NAME="freezeRotation()"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+
+
+
+
+        void
+      </span>
+      <span class="sympad">freezeRotation</span>
+      <span class="normal">()</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+
+
+
+  <div class="jd-tagdata jd-tagdescr"><p>Disables the sensors and freezes the device rotation at its
+ current rotation state.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Throws</h5>
+      <table class="jd-tagtable">
+        <tr>
+            <th></td>
+            <td>RemoteException</td>
+        </tr>
+        <tr>
+            <th>RemoteException</td>
+            <td></td>
+        </tr>
+      </table>
+  </div>
+
+    </div>
+</div>
+
+
+<A NAME="getCurrentActivityName()"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+
+
+
+
+        String
+      </span>
+      <span class="sympad">getCurrentActivityName</span>
+      <span class="normal">()</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+
+
+      <p>
+  <p class="caution"><strong>
+      This method is deprecated.</strong><br/>
+    The results returned should be considered unreliable
+  </p>
+  <div class="jd-tagdata jd-tagdescr"><p>Retrieves the last activity to report accessibility events.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li>String name of activity</li></ul>
+  </div>
+
+    </div>
+</div>
+
+
+<A NAME="getCurrentPackageName()"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+
+
+
+
+        String
+      </span>
+      <span class="sympad">getCurrentPackageName</span>
+      <span class="normal">()</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+
+
+
+  <div class="jd-tagdata jd-tagdescr"><p>Retrieves the name of the last package to report accessibility events.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li>String name of package</li></ul>
+  </div>
+
+    </div>
+</div>
+
+
+<A NAME="getDisplayHeight()"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+
+
+
+
+        int
+      </span>
+      <span class="sympad">getDisplayHeight</span>
+      <span class="normal">()</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+
+
+
+  <div class="jd-tagdata jd-tagdescr"><p>Gets the height of the display, in pixels. The size is adjusted based
+ on the current orientation of the display.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li>height in pixels or zero on failure</li></ul>
+  </div>
+
+    </div>
+</div>
+
+
+<A NAME="getDisplayRotation()"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+
+
+
+
+        int
+      </span>
+      <span class="sympad">getDisplayRotation</span>
+      <span class="normal">()</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+
+
+
+  <div class="jd-tagdata jd-tagdescr"><p>Returns the current rotation of the display, as defined in <code><a href="../../../../../reference/android/view/Surface.html">Surface</a></code></p></div>
+
+    </div>
+</div>
+
+
+<A NAME="getDisplaySizeDp()"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+
+
+
+
+        Point
+      </span>
+      <span class="sympad">getDisplaySizeDp</span>
+      <span class="normal">()</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+
+
+
+  <div class="jd-tagdata jd-tagdescr"><p>Returns the display size in dp (device-independent pixel)
+
+ The returned display size is adjusted per screen rotation. Also this will return the actual
+ size of the screen, rather than adjusted per system decorations (like status bar).</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li>a Point containing the display size in dp
+</li></ul>
+  </div>
+
+    </div>
+</div>
+
+
+<A NAME="getDisplayWidth()"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+
+
+
+
+        int
+      </span>
+      <span class="sympad">getDisplayWidth</span>
+      <span class="normal">()</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+
+
+
+  <div class="jd-tagdata jd-tagdescr"><p>Gets the width of the display, in pixels. The width and height details
+ are reported based on the current orientation of the display.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li>width in pixels or zero on failure</li></ul>
+  </div>
+
+    </div>
+</div>
+
+
+<A NAME="getInstance(android.app.Instrumentation)"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+        static
+
+
+
+        <a href="../../../../../reference/android/support/test/uiautomator/UiDevice.html">UiDevice</a>
+      </span>
+      <span class="sympad">getInstance</span>
+      <span class="normal">(Instrumentation instrumentation)</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+
+
+
+  <div class="jd-tagdata jd-tagdescr"><p>Retrieves a singleton instance of UiDevice</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li>UiDevice instance
+</li></ul>
+  </div>
+
+    </div>
+</div>
+
+
+<A NAME="getInstance()"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+        static
+
+
+
+        <a href="../../../../../reference/android/support/test/uiautomator/UiDevice.html">UiDevice</a>
+      </span>
+      <span class="sympad">getInstance</span>
+      <span class="normal">()</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+
+
+      <p>
+  <p class="caution"><strong>
+      This method is deprecated.</strong><br/>
+    Should use <code><a href="../../../../../reference/android/support/test/uiautomator/UiDevice.html#getInstance(android.app.Instrumentation)">getInstance(Instrumentation)</a></code> instead. This version hides
+ UiDevice's dependency on having an Instrumentation reference and is prone to misuse.
+  </p>
+  <div class="jd-tagdata jd-tagdescr"><p>Retrieves a singleton instance of UiDevice</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li>UiDevice instance</li></ul>
+  </div>
+
+    </div>
+</div>
+
+
+<A NAME="getLastTraversedText()"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+
+
+
+
+        String
+      </span>
+      <span class="sympad">getLastTraversedText</span>
+      <span class="normal">()</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+
+
+
+  <div class="jd-tagdata jd-tagdescr"><p>Retrieves the text from the last UI traversal event received.
+
+ You can use this method to read the contents in a WebView container
+ because the accessibility framework fires events
+ as each text is highlighted. You can write a test to perform
+ directional arrow presses to focus on different elements inside a WebView,
+ and call this method to get the text from each traversed element.
+ If you are testing a view container that can return a reference to a
+ Document Object Model (DOM) object, your test should use the view's
+ DOM instead.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li>text of the last traversal event, else return an empty string</li></ul>
+  </div>
+
+    </div>
+</div>
+
+
+<A NAME="getProductName()"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+
+
+
+
+        String
+      </span>
+      <span class="sympad">getProductName</span>
+      <span class="normal">()</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+
+
+
+  <div class="jd-tagdata jd-tagdescr"><p>Retrieves the product name of the device.
+
+ This method provides information on what type of device the test is running on. This value is
+ the same as returned by invoking #adb shell getprop ro.product.name.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li>product name of the device</li></ul>
+  </div>
+
+    </div>
+</div>
+
+
+<A NAME="hasAnyWatcherTriggered()"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+
+
+
+
+        boolean
+      </span>
+      <span class="sympad">hasAnyWatcherTriggered</span>
+      <span class="normal">()</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+
+
+
+  <div class="jd-tagdata jd-tagdescr"><p>Checks if any registered <code><a href="../../../../../reference/android/support/test/uiautomator/UiWatcher.html">UiWatcher</a></code> have triggered.
+
+ See <code><a href="../../../../../reference/android/support/test/uiautomator/UiDevice.html#registerWatcher(java.lang.String, android.support.test.uiautomator.UiWatcher)">registerWatcher(String, UiWatcher)</a></code>
+ See <code><a href="../../../../../reference/android/support/test/uiautomator/UiDevice.html#hasWatcherTriggered(java.lang.String)">hasWatcherTriggered(String)</a></code></p></div>
+
+    </div>
+</div>
+
+
+<A NAME="hasObject(android.support.test.uiautomator.BySelector)"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+
+
+
+
+        boolean
+      </span>
+      <span class="sympad">hasObject</span>
+      <span class="normal">(<a href="../../../../../reference/android/support/test/uiautomator/BySelector.html">BySelector</a> selector)</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+
+
+
+  <div class="jd-tagdata jd-tagdescr"><p>Returns whether there is a match for the given <code>selector</code> criteria. </p></div>
+
+    </div>
+</div>
+
+
+<A NAME="hasWatcherTriggered(java.lang.String)"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+
+
+
+
+        boolean
+      </span>
+      <span class="sympad">hasWatcherTriggered</span>
+      <span class="normal">(String watcherName)</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+
+
+
+  <div class="jd-tagdata jd-tagdescr"><p>Checks if a specific registered  <code><a href="../../../../../reference/android/support/test/uiautomator/UiWatcher.html">UiWatcher</a></code> has triggered.
+ See <code><a href="../../../../../reference/android/support/test/uiautomator/UiDevice.html#registerWatcher(java.lang.String, android.support.test.uiautomator.UiWatcher)">registerWatcher(String, UiWatcher)</a></code>. If a UiWatcher runs and its
+ <code><a href="../../../../../reference/android/support/test/uiautomator/UiWatcher.html#checkForCondition()">checkForCondition()</a></code> call returned <code>true</code>, then
+ the UiWatcher is considered triggered. This is helpful if a watcher is detecting errors
+ from ANR or crash dialogs and the test needs to know if a UiWatcher has been triggered.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li>true if triggered else false</li></ul>
+  </div>
+
+    </div>
+</div>
+
+
+<A NAME="isNaturalOrientation()"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+
+
+
+
+        boolean
+      </span>
+      <span class="sympad">isNaturalOrientation</span>
+      <span class="normal">()</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+
+
+
+  <div class="jd-tagdata jd-tagdescr"><p>Check if the device is in its natural orientation. This is determined by checking if the
+ orientation is at 0 or 180 degrees.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li>true if it is in natural orientation</li></ul>
+  </div>
+
+    </div>
+</div>
+
+
+<A NAME="isScreenOn()"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+
+
+
+
+        boolean
+      </span>
+      <span class="sympad">isScreenOn</span>
+      <span class="normal">()</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+
+
+
+  <div class="jd-tagdata jd-tagdescr"><p>Checks the power manager if the screen is ON.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li>true if the screen is ON else false</li></ul>
+  </div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Throws</h5>
+      <table class="jd-tagtable">
+        <tr>
+            <th></td>
+            <td>RemoteException</td>
+        </tr>
+        <tr>
+            <th>RemoteException</td>
+            <td></td>
+        </tr>
+      </table>
+  </div>
+
+    </div>
+</div>
+
+
+<A NAME="openNotification()"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+
+
+
+
+        boolean
+      </span>
+      <span class="sympad">openNotification</span>
+      <span class="normal">()</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+
+
+
+  <div class="jd-tagdata jd-tagdescr"><p>Opens the notification shade.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li>true if successful, else return false</li></ul>
+  </div>
+
+    </div>
+</div>
+
+
+<A NAME="openQuickSettings()"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+
+
+
+
+        boolean
+      </span>
+      <span class="sympad">openQuickSettings</span>
+      <span class="normal">()</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+
+
+
+  <div class="jd-tagdata jd-tagdescr"><p>Opens the Quick Settings shade.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li>true if successful, else return false</li></ul>
+  </div>
+
+    </div>
+</div>
+
+
+<A NAME="performActionAndWait(java.lang.Runnable, android.support.test.uiautomator.EventCondition<R>, long)"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+
+
+
+
+        R
+      </span>
+      <span class="sympad">performActionAndWait</span>
+      <span class="normal">(Runnable action, <a href="../../../../../reference/android/support/test/uiautomator/EventCondition.html">EventCondition</a>&lt;R&gt; condition, long timeout)</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+
+
+
+  <div class="jd-tagdata jd-tagdescr"><p>Performs the provided <code>action</code> and waits for the <code>condition</code> to be met.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>action</td>
+          <td>The <code><a href="../../../../../reference/java/lang/Runnable.html">Runnable</a></code> action to perform.</td>
+        </tr>
+        <tr>
+          <th>condition</td>
+          <td>The <code><a href="../../../../../reference/android/support/test/uiautomator/EventCondition.html">EventCondition</a></code> to evaluate.</td>
+        </tr>
+        <tr>
+          <th>timeout</td>
+          <td>Maximum amount of time to wait in milliseconds.</td>
+        </tr>
+      </table>
+  </div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li>The final result returned by the condition.
+</li></ul>
+  </div>
+
+    </div>
+</div>
+
+
+<A NAME="pressBack()"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+
+
+
+
+        boolean
+      </span>
+      <span class="sympad">pressBack</span>
+      <span class="normal">()</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+
+
+
+  <div class="jd-tagdata jd-tagdescr"><p>Simulates a short press on the BACK button.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li>true if successful, else return false</li></ul>
+  </div>
+
+    </div>
+</div>
+
+
+<A NAME="pressDPadCenter()"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+
+
+
+
+        boolean
+      </span>
+      <span class="sympad">pressDPadCenter</span>
+      <span class="normal">()</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+
+
+
+  <div class="jd-tagdata jd-tagdescr"><p>Simulates a short press on the CENTER button.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li>true if successful, else return false</li></ul>
+  </div>
+
+    </div>
+</div>
+
+
+<A NAME="pressDPadDown()"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+
+
+
+
+        boolean
+      </span>
+      <span class="sympad">pressDPadDown</span>
+      <span class="normal">()</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+
+
+
+  <div class="jd-tagdata jd-tagdescr"><p>Simulates a short press on the DOWN button.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li>true if successful, else return false</li></ul>
+  </div>
+
+    </div>
+</div>
+
+
+<A NAME="pressDPadLeft()"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+
+
+
+
+        boolean
+      </span>
+      <span class="sympad">pressDPadLeft</span>
+      <span class="normal">()</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+
+
+
+  <div class="jd-tagdata jd-tagdescr"><p>Simulates a short press on the LEFT button.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li>true if successful, else return false</li></ul>
+  </div>
+
+    </div>
+</div>
+
+
+<A NAME="pressDPadRight()"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+
+
+
+
+        boolean
+      </span>
+      <span class="sympad">pressDPadRight</span>
+      <span class="normal">()</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+
+
+
+  <div class="jd-tagdata jd-tagdescr"><p>Simulates a short press on the RIGHT button.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li>true if successful, else return false</li></ul>
+  </div>
+
+    </div>
+</div>
+
+
+<A NAME="pressDPadUp()"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+
+
+
+
+        boolean
+      </span>
+      <span class="sympad">pressDPadUp</span>
+      <span class="normal">()</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+
+
+
+  <div class="jd-tagdata jd-tagdescr"><p>Simulates a short press on the UP button.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li>true if successful, else return false</li></ul>
+  </div>
+
+    </div>
+</div>
+
+
+<A NAME="pressDelete()"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+
+
+
+
+        boolean
+      </span>
+      <span class="sympad">pressDelete</span>
+      <span class="normal">()</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+
+
+
+  <div class="jd-tagdata jd-tagdescr"><p>Simulates a short press on the DELETE key.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li>true if successful, else return false</li></ul>
+  </div>
+
+    </div>
+</div>
+
+
+<A NAME="pressEnter()"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+
+
+
+
+        boolean
+      </span>
+      <span class="sympad">pressEnter</span>
+      <span class="normal">()</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+
+
+
+  <div class="jd-tagdata jd-tagdescr"><p>Simulates a short press on the ENTER key.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li>true if successful, else return false</li></ul>
+  </div>
+
+    </div>
+</div>
+
+
+<A NAME="pressHome()"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+
+
+
+
+        boolean
+      </span>
+      <span class="sympad">pressHome</span>
+      <span class="normal">()</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+
+
+
+  <div class="jd-tagdata jd-tagdescr"><p>Simulates a short press on the HOME button.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li>true if successful, else return false</li></ul>
+  </div>
+
+    </div>
+</div>
+
+
+<A NAME="pressKeyCode(int, int)"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+
+
+
+
+        boolean
+      </span>
+      <span class="sympad">pressKeyCode</span>
+      <span class="normal">(int keyCode, int metaState)</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+
+
+
+  <div class="jd-tagdata jd-tagdescr"><p>Simulates a short press using a key code.
+
+ See <code><a href="../../../../../reference/android/view/KeyEvent.html">KeyEvent</a></code>.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>keyCode</td>
+          <td>the key code of the event.</td>
+        </tr>
+        <tr>
+          <th>metaState</td>
+          <td>an integer in which each bit set to 1 represents a pressed meta key</td>
+        </tr>
+      </table>
+  </div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li>true if successful, else return false</li></ul>
+  </div>
+
+    </div>
+</div>
+
+
+<A NAME="pressKeyCode(int)"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+
+
+
+
+        boolean
+      </span>
+      <span class="sympad">pressKeyCode</span>
+      <span class="normal">(int keyCode)</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+
+
+
+  <div class="jd-tagdata jd-tagdescr"><p>Simulates a short press using a key code.
+
+ See <code><a href="../../../../../reference/android/view/KeyEvent.html">KeyEvent</a></code></p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li>true if successful, else return false</li></ul>
+  </div>
+
+    </div>
+</div>
+
+
+<A NAME="pressMenu()"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+
+
+
+
+        boolean
+      </span>
+      <span class="sympad">pressMenu</span>
+      <span class="normal">()</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+
+
+
+  <div class="jd-tagdata jd-tagdescr"><p>Simulates a short press on the MENU button.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li>true if successful, else return false</li></ul>
+  </div>
+
+    </div>
+</div>
+
+
+<A NAME="pressRecentApps()"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+
+
+
+
+        boolean
+      </span>
+      <span class="sympad">pressRecentApps</span>
+      <span class="normal">()</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+
+
+
+  <div class="jd-tagdata jd-tagdescr"><p>Simulates a short press on the Recent Apps button.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li>true if successful, else return false</li></ul>
+  </div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Throws</h5>
+      <table class="jd-tagtable">
+        <tr>
+            <th></td>
+            <td>RemoteException</td>
+        </tr>
+        <tr>
+            <th>RemoteException</td>
+            <td></td>
+        </tr>
+      </table>
+  </div>
+
+    </div>
+</div>
+
+
+<A NAME="pressSearch()"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+
+
+
+
+        boolean
+      </span>
+      <span class="sympad">pressSearch</span>
+      <span class="normal">()</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+
+
+
+  <div class="jd-tagdata jd-tagdescr"><p>Simulates a short press on the SEARCH button.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li>true if successful, else return false</li></ul>
+  </div>
+
+    </div>
+</div>
+
+
+<A NAME="registerWatcher(java.lang.String, android.support.test.uiautomator.UiWatcher)"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+
+
+
+
+        void
+      </span>
+      <span class="sympad">registerWatcher</span>
+      <span class="normal">(String name, <a href="../../../../../reference/android/support/test/uiautomator/UiWatcher.html">UiWatcher</a> watcher)</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+
+
+
+  <div class="jd-tagdata jd-tagdescr"><p>Registers a <code><a href="../../../../../reference/android/support/test/uiautomator/UiWatcher.html">UiWatcher</a></code> to run automatically when the testing framework is unable to
+ find a match using a <code><a href="../../../../../reference/android/support/test/uiautomator/UiSelector.html">UiSelector</a></code>. See <code><a href="../../../../../reference/android/support/test/uiautomator/UiDevice.html#runWatchers()">runWatchers()</a></code></p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>name</td>
+          <td>to register the UiWatcher</td>
+        </tr>
+        <tr>
+          <th>watcher</td>
+          <td><code><a href="../../../../../reference/android/support/test/uiautomator/UiWatcher.html">UiWatcher</a></code></td>
+        </tr>
+      </table>
+  </div>
+
+    </div>
+</div>
+
+
+<A NAME="removeWatcher(java.lang.String)"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+
+
+
+
+        void
+      </span>
+      <span class="sympad">removeWatcher</span>
+      <span class="normal">(String name)</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+
+
+
+  <div class="jd-tagdata jd-tagdescr"><p>Removes a previously registered <code><a href="../../../../../reference/android/support/test/uiautomator/UiWatcher.html">UiWatcher</a></code>.
+
+ See <code><a href="../../../../../reference/android/support/test/uiautomator/UiDevice.html#registerWatcher(java.lang.String, android.support.test.uiautomator.UiWatcher)">registerWatcher(String, UiWatcher)</a></code></p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>name</td>
+          <td>used to register the UiWatcher</td>
+        </tr>
+      </table>
+  </div>
+
+    </div>
+</div>
+
+
+<A NAME="resetWatcherTriggers()"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+
+
+
+
+        void
+      </span>
+      <span class="sympad">resetWatcherTriggers</span>
+      <span class="normal">()</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+
+
+
+  <div class="jd-tagdata jd-tagdescr"><p>Resets a <code><a href="../../../../../reference/android/support/test/uiautomator/UiWatcher.html">UiWatcher</a></code> that has been triggered.
+ If a UiWatcher runs and its <code><a href="../../../../../reference/android/support/test/uiautomator/UiWatcher.html#checkForCondition()">checkForCondition()</a></code> call
+ returned <code>true</code>, then the UiWatcher is considered triggered.
+ See <code><a href="../../../../../reference/android/support/test/uiautomator/UiDevice.html#registerWatcher(java.lang.String, android.support.test.uiautomator.UiWatcher)">registerWatcher(String, UiWatcher)</a></code></p></div>
+
+    </div>
+</div>
+
+
+<A NAME="runWatchers()"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+
+
+
+
+        void
+      </span>
+      <span class="sympad">runWatchers</span>
+      <span class="normal">()</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+
+
+
+  <div class="jd-tagdata jd-tagdescr"><p>This method forces all registered watchers to run.
+ See <code><a href="../../../../../reference/android/support/test/uiautomator/UiDevice.html#registerWatcher(java.lang.String, android.support.test.uiautomator.UiWatcher)">registerWatcher(String, UiWatcher)</a></code></p></div>
+
+    </div>
+</div>
+
+
+<A NAME="setCompressedLayoutHeirarchy(boolean)"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+
+
+
+
+        void
+      </span>
+      <span class="sympad">setCompressedLayoutHeirarchy</span>
+      <span class="normal">(boolean compressed)</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+
+
+
+  <div class="jd-tagdata jd-tagdescr"><p>Enables or disables layout hierarchy compression.
+
+ If compression is enabled, the layout hierarchy derived from the Acessibility
+ framework will only contain nodes that are important for uiautomator
+ testing. Any unnecessary surrounding layout nodes that make viewing
+ and searching the hierarchy inefficient are removed.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>compressed</td>
+          <td>true to enable compression; else, false to disable</td>
+        </tr>
+      </table>
+  </div>
+
+    </div>
+</div>
+
+
+<A NAME="setOrientationLeft()"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+
+
+
+
+        void
+      </span>
+      <span class="sympad">setOrientationLeft</span>
+      <span class="normal">()</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+
+
+
+  <div class="jd-tagdata jd-tagdescr"><p>Simulates orienting the device to the left and also freezes rotation
+ by disabling the sensors.
+
+ If you want to un-freeze the rotation and re-enable the sensors
+ see <code><a href="../../../../../reference/android/support/test/uiautomator/UiDevice.html#unfreezeRotation()">unfreezeRotation()</a></code>.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Throws</h5>
+      <table class="jd-tagtable">
+        <tr>
+            <th></td>
+            <td>RemoteException</td>
+        </tr>
+        <tr>
+            <th>RemoteException</td>
+            <td></td>
+        </tr>
+      </table>
+  </div>
+
+    </div>
+</div>
+
+
+<A NAME="setOrientationNatural()"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+
+
+
+
+        void
+      </span>
+      <span class="sympad">setOrientationNatural</span>
+      <span class="normal">()</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+
+
+
+  <div class="jd-tagdata jd-tagdescr"><p>Simulates orienting the device into its natural orientation and also freezes rotation
+ by disabling the sensors.
+
+ If you want to un-freeze the rotation and re-enable the sensors
+ see <code><a href="../../../../../reference/android/support/test/uiautomator/UiDevice.html#unfreezeRotation()">unfreezeRotation()</a></code>.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Throws</h5>
+      <table class="jd-tagtable">
+        <tr>
+            <th></td>
+            <td>RemoteException</td>
+        </tr>
+        <tr>
+            <th>RemoteException</td>
+            <td></td>
+        </tr>
+      </table>
+  </div>
+
+    </div>
+</div>
+
+
+<A NAME="setOrientationRight()"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+
+
+
+
+        void
+      </span>
+      <span class="sympad">setOrientationRight</span>
+      <span class="normal">()</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+
+
+
+  <div class="jd-tagdata jd-tagdescr"><p>Simulates orienting the device to the right and also freezes rotation
+ by disabling the sensors.
+
+ If you want to un-freeze the rotation and re-enable the sensors
+ see <code><a href="../../../../../reference/android/support/test/uiautomator/UiDevice.html#unfreezeRotation()">unfreezeRotation()</a></code>.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Throws</h5>
+      <table class="jd-tagtable">
+        <tr>
+            <th></td>
+            <td>RemoteException</td>
+        </tr>
+        <tr>
+            <th>RemoteException</td>
+            <td></td>
+        </tr>
+      </table>
+  </div>
+
+    </div>
+</div>
+
+
+<A NAME="sleep()"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+
+
+
+
+        void
+      </span>
+      <span class="sympad">sleep</span>
+      <span class="normal">()</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+
+
+
+  <div class="jd-tagdata jd-tagdescr"><p>This method simply presses the power button if the screen is ON else
+ it does nothing if the screen is already OFF.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Throws</h5>
+      <table class="jd-tagtable">
+        <tr>
+            <th></td>
+            <td>RemoteException</td>
+        </tr>
+        <tr>
+            <th>RemoteException</td>
+            <td></td>
+        </tr>
+      </table>
+  </div>
+
+    </div>
+</div>
+
+
+<A NAME="swipe(android.graphics.Point[], int)"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+
+
+
+
+        boolean
+      </span>
+      <span class="sympad">swipe</span>
+      <span class="normal">(Point[] segments, int segmentSteps)</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+
+
+
+  <div class="jd-tagdata jd-tagdescr"><p>Performs a swipe between points in the Point array. Each step execution is throttled
+ to 5ms per step. So for a 100 steps, the swipe will take about 1/2 second to complete</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>segments</td>
+          <td>is Point array containing at least one Point object</td>
+        </tr>
+        <tr>
+          <th>segmentSteps</td>
+          <td>steps to inject between two Points</td>
+        </tr>
+      </table>
+  </div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li>true on success</li></ul>
+  </div>
+
+    </div>
+</div>
+
+
+<A NAME="swipe(int, int, int, int, int)"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+
+
+
+
+        boolean
+      </span>
+      <span class="sympad">swipe</span>
+      <span class="normal">(int startX, int startY, int endX, int endY, int steps)</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+
+
+
+  <div class="jd-tagdata jd-tagdescr"><p>Performs a swipe from one coordinate to another using the number of steps
+ to determine smoothness and speed. Each step execution is throttled to 5ms
+ per step. So for a 100 steps, the swipe will take about 1/2 second to complete.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>steps</td>
+          <td>is the number of move steps sent to the system</td>
+        </tr>
+      </table>
+  </div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li>false if the operation fails or the coordinates are invalid</li></ul>
+  </div>
+
+    </div>
+</div>
+
+
+<A NAME="takeScreenshot(java.io.File)"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+
+
+
+
+        boolean
+      </span>
+      <span class="sympad">takeScreenshot</span>
+      <span class="normal">(File storePath)</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+
+
+
+  <div class="jd-tagdata jd-tagdescr"><p>Take a screenshot of current window and store it as PNG
+
+ Default scale of 1.0f (original size) and 90% quality is used
+ The screenshot is adjusted per screen rotation</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>storePath</td>
+          <td>where the PNG should be written to</td>
+        </tr>
+      </table>
+  </div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li>true if screen shot is created successfully, false otherwise</li></ul>
+  </div>
+
+    </div>
+</div>
+
+
+<A NAME="takeScreenshot(java.io.File, float, int)"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+
+
+
+
+        boolean
+      </span>
+      <span class="sympad">takeScreenshot</span>
+      <span class="normal">(File storePath, float scale, int quality)</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+
+
+
+  <div class="jd-tagdata jd-tagdescr"><p>Take a screenshot of current window and store it as PNG
+
+ The screenshot is adjusted per screen rotation</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>storePath</td>
+          <td>where the PNG should be written to</td>
+        </tr>
+        <tr>
+          <th>scale</td>
+          <td>scale the screenshot down if needed; 1.0f for original size</td>
+        </tr>
+        <tr>
+          <th>quality</td>
+          <td>quality of the PNG compression; range: 0-100</td>
+        </tr>
+      </table>
+  </div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li>true if screen shot is created successfully, false otherwise</li></ul>
+  </div>
+
+    </div>
+</div>
+
+
+<A NAME="unfreezeRotation()"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+
+
+
+
+        void
+      </span>
+      <span class="sympad">unfreezeRotation</span>
+      <span class="normal">()</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+
+
+
+  <div class="jd-tagdata jd-tagdescr"><p>Re-enables the sensors and un-freezes the device rotation allowing its contents
+ to rotate with the device physical rotation. During a test execution, it is best to
+ keep the device frozen in a specific orientation until the test case execution has completed.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Throws</h5>
+      <table class="jd-tagtable">
+        <tr>
+            <th>RemoteException</td>
+            <td></td>
+        </tr>
+      </table>
+  </div>
+
+    </div>
+</div>
+
+
+<A NAME="wait(android.support.test.uiautomator.SearchCondition<R>, long)"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+
+
+
+
+        R
+      </span>
+      <span class="sympad">wait</span>
+      <span class="normal">(<a href="../../../../../reference/android/support/test/uiautomator/SearchCondition.html">SearchCondition</a>&lt;R&gt; condition, long timeout)</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+
+
+
+  <div class="jd-tagdata jd-tagdescr"><p>Waits for given the <code>condition</code> to be met.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>condition</td>
+          <td>The <code><a href="../../../../../reference/android/support/test/uiautomator/SearchCondition.html">SearchCondition</a></code> to evaluate.</td>
+        </tr>
+        <tr>
+          <th>timeout</td>
+          <td>Maximum amount of time to wait in milliseconds.</td>
+        </tr>
+      </table>
+  </div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li>The final result returned by the condition.
+</li></ul>
+  </div>
+
+    </div>
+</div>
+
+
+<A NAME="waitForIdle(long)"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+
+
+
+
+        void
+      </span>
+      <span class="sympad">waitForIdle</span>
+      <span class="normal">(long timeout)</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+
+
+
+  <div class="jd-tagdata jd-tagdescr"><p>Waits for the current application to idle.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>timeout</td>
+          <td>in milliseconds</td>
+        </tr>
+      </table>
+  </div>
+
+    </div>
+</div>
+
+
+<A NAME="waitForIdle()"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+
+
+
+
+        void
+      </span>
+      <span class="sympad">waitForIdle</span>
+      <span class="normal">()</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+
+
+
+  <div class="jd-tagdata jd-tagdescr"><p>Waits for the current application to idle.
+ Default wait timeout is 10 seconds</p></div>
+
+    </div>
+</div>
+
+
+<A NAME="waitForWindowUpdate(java.lang.String, long)"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+
+
+
+
+        boolean
+      </span>
+      <span class="sympad">waitForWindowUpdate</span>
+      <span class="normal">(String packageName, long timeout)</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+
+
+
+  <div class="jd-tagdata jd-tagdescr"><p>Waits for a window content update event to occur.
+
+ If a package name for the window is specified, but the current window
+ does not have the same package name, the function returns immediately.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>packageName</td>
+          <td>the specified window package name (can be <code>null</code>).
+        If <code>null</code>, a window update from any front-end window will end the wait</td>
+        </tr>
+        <tr>
+          <th>timeout</td>
+          <td>the timeout for the wait</td>
+        </tr>
+      </table>
+  </div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li>true if a window update occurred, false if timeout has elapsed or if the current
+         window does not have the specified package name</li></ul>
+  </div>
+
+    </div>
+</div>
+
+
+<A NAME="wakeUp()"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+
+
+
+
+        void
+      </span>
+      <span class="sympad">wakeUp</span>
+      <span class="normal">()</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+
+
+
+  <div class="jd-tagdata jd-tagdescr"><p>This method simulates pressing the power button if the screen is OFF else
+ it does nothing if the screen is already ON.
+
+ If the screen was OFF and it just got turned ON, this method will insert a 500ms delay
+ to allow the device time to wake up and accept input.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Throws</h5>
+      <table class="jd-tagtable">
+        <tr>
+            <th></td>
+            <td>RemoteException</td>
+        </tr>
+        <tr>
+            <th>RemoteException</td>
+            <td></td>
+        </tr>
+      </table>
+  </div>
+
+    </div>
+</div>
+
+
+
+
+
+<!-- ========= METHOD DETAIL ======== -->
+
+
+
+<!-- ========= END OF CLASS DATA ========= -->
+<A NAME="navbar_top"></A>
+
+<div id="footer" class="wrap" >
+
+
+  <div id="copyright">
+
+  Except as noted, this content is licensed under <a
+  href="http://www.apache.org/licenses/LICENSE-2.0">Apache 2.0</a>.
+  For details and restrictions, see the <a href="../../../../../license.html">
+  Content License</a>.
+  </div>
+  <div id="build_info">
+
+    Android &nbsp;r &mdash;
+<script src="../../../../../timestamp.js" type="text/javascript"></script>
+<script>document.write(BUILD_TIMESTAMP)</script>
+
+  </div>
+
+
+  <div id="footerlinks">
+
+  <p>
+    <a href="../../../../../about/index.html">About Android</a>&nbsp;&nbsp;|&nbsp;
+    <a href="../../../../../legal.html">Legal</a>&nbsp;&nbsp;|&nbsp;
+    <a href="../../../../../support.html">Support</a>
+  </p>
+  </div>
+
+</div> <!-- end footer -->
+</div> <!-- jd-content -->
+
+</div><!-- end doc-content -->
+
+</div> <!-- end body-content -->
+
+
+
+
+
+
+</body>
+</html>
