@@ -79,7 +79,8 @@ public class CameraDeviceImpl extends CameraDevice {
     private int mRepeatingRequestId = REQUEST_ID_NONE;
     private final ArrayList<Integer> mRepeatingRequestIdDeletedList = new ArrayList<Integer>();
     // Map stream IDs to Surfaces
-    private final SparseArray<Surface> mConfiguredOutputs = new SparseArray<Surface>();
+    private final SparseArray<OutputConfiguration> mConfiguredOutputs =
+            new SparseArray<OutputConfiguration>();
 
     private final String mCameraId;
     private final CameraCharacteristics mCharacteristics;
@@ -315,7 +316,11 @@ public class CameraDeviceImpl extends CameraDevice {
 
     public void configureOutputs(List<Surface> outputs) throws CameraAccessException {
         // Leave this here for backwards compatibility with older code using this directly
-        configureOutputsChecked(outputs);
+        ArrayList<OutputConfiguration> outputConfigs = new ArrayList<>(outputs.size());
+        for (Surface s : outputs) {
+            outputConfigs.add(new OutputConfiguration(s));
+        }
+        configureOutputsChecked(outputConfigs);
     }
 
     /**
@@ -334,28 +339,30 @@ public class CameraDeviceImpl extends CameraDevice {
      *
      * @throws CameraAccessException if there were any unexpected problems during configuration
      */
-    public boolean configureOutputsChecked(List<Surface> outputs) throws CameraAccessException {
+    public boolean configureOutputsChecked(List<OutputConfiguration> outputs)
+            throws CameraAccessException {
         // Treat a null input the same an empty list
         if (outputs == null) {
-            outputs = new ArrayList<Surface>();
+            outputs = new ArrayList<OutputConfiguration>();
         }
         boolean success = false;
 
         synchronized(mInterfaceLock) {
             checkIfCameraClosedOrInError();
-
-            HashSet<Surface> addSet = new HashSet<Surface>(outputs);    // Streams to create
-            List<Integer> deleteList = new ArrayList<Integer>();        // Streams to delete
+            // Streams to create
+            HashSet<OutputConfiguration> addSet = new HashSet<OutputConfiguration>(outputs);
+         // Streams to delete
+            List<Integer> deleteList = new ArrayList<Integer>();
 
             // Determine which streams need to be created, which to be deleted
             for (int i = 0; i < mConfiguredOutputs.size(); ++i) {
                 int streamId = mConfiguredOutputs.keyAt(i);
-                Surface s = mConfiguredOutputs.valueAt(i);
+                OutputConfiguration outConfig = mConfiguredOutputs.valueAt(i);
 
-                if (!outputs.contains(s)) {
+                if (!outputs.contains(outConfig)) {
                     deleteList.add(streamId);
                 } else {
-                    addSet.remove(s);  // Don't create a stream previously created
+                    addSet.remove(outConfig);  // Don't create a stream previously created
                 }
             }
 
@@ -373,9 +380,11 @@ public class CameraDeviceImpl extends CameraDevice {
                 }
 
                 // Add all new streams
-                for (Surface s : addSet) {
-                    int streamId = mRemoteDevice.createStream(s);
-                    mConfiguredOutputs.put(streamId, s);
+                for (OutputConfiguration outConfig : outputs) {
+                    if (addSet.contains(outConfig)) {
+                        int streamId = mRemoteDevice.createStream(outConfig);
+                        mConfiguredOutputs.put(streamId, outConfig);
+                    }
                 }
 
                 try {
@@ -444,12 +453,9 @@ public class CameraDeviceImpl extends CameraDevice {
             // TODO: dont block for this
             boolean configureSuccess = true;
             CameraAccessException pendingException = null;
-            List<Surface> outSurfaces = new ArrayList<>(outputConfigurations.size());
-            for (OutputConfiguration config : outputConfigurations) {
-                outSurfaces.add(config.getSurface());
-            }
             try {
-                configureSuccess = configureOutputsChecked(outSurfaces); // and then block until IDLE
+                // configure outputs and then block until IDLE
+                configureSuccess = configureOutputsChecked(outputConfigurations);
             } catch (CameraAccessException e) {
                 configureSuccess = false;
                 pendingException = e;
@@ -458,6 +464,10 @@ public class CameraDeviceImpl extends CameraDevice {
                 }
             }
 
+            List<Surface> outSurfaces = new ArrayList<>(outputConfigurations.size());
+            for (OutputConfiguration config : outputConfigurations) {
+                outSurfaces.add(config.getSurface());
+            }
             // Fire onConfigured if configureOutputs succeeded, fire onConfigureFailed otherwise.
             CameraCaptureSessionImpl newSession =
                     new CameraCaptureSessionImpl(mNextSessionId++,

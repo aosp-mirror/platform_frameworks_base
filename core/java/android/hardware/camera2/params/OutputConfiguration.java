@@ -18,19 +18,22 @@
 package android.hardware.camera2.params;
 
 import android.hardware.camera2.CameraDevice;
+import android.util.Log;
 import android.view.Surface;
+import android.os.Parcel;
+import android.os.Parcelable;
 
 import static com.android.internal.util.Preconditions.*;
 
 /**
- * Immutable class for describing camera output, which contains a {@link Surface} and its specific
+ * A class for describing camera output, which contains a {@link Surface} and its specific
  * configuration for creating capture session.
  *
  * @see CameraDevice#createCaptureSession
  *
  * @hide
  */
-public final class OutputConfiguration {
+public final class OutputConfiguration implements Parcelable {
 
     /**
      * Rotation constant: 0 degree rotation (no rotation)
@@ -93,6 +96,18 @@ public final class OutputConfiguration {
     }
 
     /**
+     * Create an OutputConfiguration from Parcel.
+     */
+    private OutputConfiguration(Parcel source) {
+        int rotation = source.readInt();
+        Surface surface = Surface.CREATOR.createFromParcel(source);
+        checkNotNull(surface, "Surface must not be null");
+        checkArgumentInRange(rotation, ROTATION_0, ROTATION_270, "Rotation constant");
+        mSurface = surface;
+        mRotation = rotation;
+    }
+
+    /**
      * Get the {@link Surface} associated with this {@link OutputConfiguration}.
      *
      * @return the {@link Surface} associated with this {@link OutputConfiguration}.
@@ -111,6 +126,40 @@ public final class OutputConfiguration {
         return mRotation;
     }
 
+    public static final Parcelable.Creator<OutputConfiguration> CREATOR =
+            new Parcelable.Creator<OutputConfiguration>() {
+        @Override
+        public OutputConfiguration createFromParcel(Parcel source) {
+            try {
+                OutputConfiguration outputConfiguration = new OutputConfiguration(source);
+                return outputConfiguration;
+            } catch (Exception e) {
+                Log.e(TAG, "Exception creating OutputConfiguration from parcel", e);
+                return null;
+            }
+        }
+
+        @Override
+        public OutputConfiguration[] newArray(int size) {
+            return new OutputConfiguration[size];
+        }
+    };
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        if (dest == null) {
+            throw new IllegalArgumentException("dest must not be null");
+        }
+        dest.writeInt(mRotation);
+        mSurface.writeToParcel(dest, flags);
+    }
+
+    private static final String TAG = "OutputConfiguration";
     private final Surface mSurface;
     private final int mRotation;
 }
