@@ -52,6 +52,7 @@ import android.graphics.Rect;
 import android.os.BatteryStats;
 import android.os.PersistableBundle;
 import android.os.PowerManager;
+import android.os.TransactionTooLargeException;
 import android.os.WorkSource;
 import android.os.storage.IMountService;
 import android.os.storage.StorageManager;
@@ -3583,10 +3584,10 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     @Override
-    public int startActivityIntentSender(IApplicationThread caller,
-            IntentSender intent, Intent fillInIntent, String resolvedType,
-            IBinder resultTo, String resultWho, int requestCode,
-            int flagsMask, int flagsValues, Bundle options) {
+    public int startActivityIntentSender(IApplicationThread caller, IntentSender intent,
+            Intent fillInIntent, String resolvedType, IBinder resultTo, String resultWho,
+            int requestCode, int flagsMask, int flagsValues, Bundle options)
+            throws TransactionTooLargeException {
         enforceNotIsolatedCaller("startActivityIntentSender");
         // Refuse possible leaked file descriptors
         if (fillInIntent != null && fillInIntent.hasFileDescriptors()) {
@@ -14891,7 +14892,7 @@ public final class ActivityManagerService extends ActivityManagerNative
 
     @Override
     public ComponentName startService(IApplicationThread caller, Intent service,
-            String resolvedType, int userId) {
+            String resolvedType, int userId) throws TransactionTooLargeException {
         enforceNotIsolatedCaller("startService");
         // Refuse possible leaked file descriptors
         if (service != null && service.hasFileDescriptors() == true) {
@@ -14911,8 +14912,8 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
     }
 
-    ComponentName startServiceInPackage(int uid,
-            Intent service, String resolvedType, int userId) {
+    ComponentName startServiceInPackage(int uid, Intent service, String resolvedType, int userId)
+            throws TransactionTooLargeException {
         synchronized(this) {
             if (DEBUG_SERVICE)
                 Slog.v(TAG, "startServiceInPackage: " + service + " type=" + resolvedType);
@@ -15116,9 +15117,9 @@ public final class ActivityManagerService extends ActivityManagerNative
                         == PackageManager.PERMISSION_GRANTED;
     }
 
-    public int bindService(IApplicationThread caller, IBinder token,
-            Intent service, String resolvedType,
-            IServiceConnection connection, int flags, int userId) {
+    public int bindService(IApplicationThread caller, IBinder token, Intent service,
+            String resolvedType, IServiceConnection connection, int flags, int userId)
+            throws TransactionTooLargeException {
         enforceNotIsolatedCaller("bindService");
 
         // Refuse possible leaked file descriptors

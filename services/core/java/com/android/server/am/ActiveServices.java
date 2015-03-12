@@ -33,6 +33,7 @@ import android.os.DeadObjectException;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.SystemProperties;
+import android.os.TransactionTooLargeException;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 
@@ -249,7 +250,11 @@ public final class ActiveServices {
                     }
                 }
                 r.delayed = false;
-                startServiceInnerLocked(this, r.pendingStarts.get(0).intent, r, false, true);
+                try {
+                    startServiceInnerLocked(this, r.pendingStarts.get(0).intent, r, false, true);
+                } catch (TransactionTooLargeException e) {
+                    // Ignore, nobody upstack cares.
+                }
             }
             if (mStartingBackground.size() > 0) {
                 ServiceRecord next = mStartingBackground.get(0);
@@ -301,9 +306,9 @@ public final class ActiveServices {
         return getServiceMap(callingUser).mServicesByName;
     }
 
-    ComponentName startServiceLocked(IApplicationThread caller,
-            Intent service, String resolvedType,
-            int callingPid, int callingUid, int userId) {
+    ComponentName startServiceLocked(IApplicationThread caller, Intent service,
+            String resolvedType, int callingPid, int callingUid, int userId)
+            throws TransactionTooLargeException {
         if (DEBUG_DELAYED_STARTS) Slog.v(TAG_SERVICE, "startService: " + service
                 + " type=" + resolvedType + " args=" + service.getExtras());
 
@@ -418,8 +423,8 @@ public final class ActiveServices {
         return startServiceInnerLocked(smap, service, r, callerFg, addToStarting);
     }
 
-    ComponentName startServiceInnerLocked(ServiceMap smap, Intent service,
-            ServiceRecord r, boolean callerFg, boolean addToStarting) {
+    ComponentName startServiceInnerLocked(ServiceMap smap, Intent service, ServiceRecord r,
+            boolean callerFg, boolean addToStarting) throws TransactionTooLargeException {
         ProcessStats.ServiceState stracker = r.getTracker();
         if (stracker != null) {
             stracker.setStarted(true, mAm.mProcessStats.getMemFactorLocked(), r.lastActivity);
@@ -692,9 +697,9 @@ public final class ActiveServices {
         return false;
     }
 
-    int bindServiceLocked(IApplicationThread caller, IBinder token,
-            Intent service, String resolvedType,
-            IServiceConnection connection, int flags, int userId) {
+    int bindServiceLocked(IApplicationThread caller, IBinder token, Intent service,
+            String resolvedType, IServiceConnection connection, int flags, int userId)
+            throws TransactionTooLargeException {
         if (DEBUG_SERVICE) Slog.v(TAG_SERVICE, "bindService: " + service
                 + " type=" + resolvedType + " conn=" + connection.asBinder()
                 + " flags=0x" + Integer.toHexString(flags));
@@ -971,7 +976,11 @@ public final class ActiveServices {
                                 break;
                             }
                         }
-                        requestServiceBindingLocked(r, b, inFg, true);
+                        try {
+                            requestServiceBindingLocked(r, b, inFg, true);
+                        } catch (TransactionTooLargeException e) {
+                            // Don't pass this back to ActivityThread, it's unrelated.
+                        }
                     } else {
                         // Note to tell the service the next time there is
                         // a new client.
@@ -1145,8 +1154,8 @@ public final class ActiveServices {
         r.executingStart = now;
     }
 
-    private final boolean requestServiceBindingLocked(ServiceRecord r,
-            IntentBindRecord i, boolean execInFg, boolean rebind) {
+    private final boolean requestServiceBindingLocked(ServiceRecord r, IntentBindRecord i,
+            boolean execInFg, boolean rebind) throws TransactionTooLargeException {
         if (r.app == null || r.app.thread == null) {
             // If service is not currently running, can't yet bind.
             return false;
@@ -1162,8 +1171,17 @@ public final class ActiveServices {
                 }
                 i.hasBound = true;
                 i.doRebind = false;
+            } catch (TransactionTooLargeException e) {
+                // Keep the executeNesting count accurate.
+                if (DEBUG_SERVICE) Slog.v(TAG_SERVICE, "Crashed while binding " + r, e);
+                final boolean inDestroying = mDestroyingServices.contains(r);
+                serviceDoneExecutingLocked(r, inDestroying, inDestroying);
+                throw e;
             } catch (RemoteException e) {
                 if (DEBUG_SERVICE) Slog.v(TAG_SERVICE, "Crashed while binding " + r);
+                // Keep the executeNesting count accurate.
+                final boolean inDestroying = mDestroyingServices.contains(r);
+                serviceDoneExecutingLocked(r, inDestroying, inDestroying);
                 return false;
             }
         }
@@ -1288,7 +1306,11 @@ public final class ActiveServices {
         if (!mRestartingServices.contains(r)) {
             return;
         }
-        bringUpServiceLocked(r, r.intent.getIntent().getFlags(), r.createdFromFg, true);
+        try {
+            bringUpServiceLocked(r, r.intent.getIntent().getFlags(), r.createdFromFg, true);
+        } catch (TransactionTooLargeException e) {
+            // Ignore, it's been logged and nothing upstack cares.
+        }
     }
 
     private final boolean unscheduleServiceRestartLocked(ServiceRecord r, int callingUid,
@@ -1329,8 +1351,8 @@ public final class ActiveServices {
         }
     }
 
-    private final String bringUpServiceLocked(ServiceRecord r,
-            int intentFlags, boolean execInFg, boolean whileRestarting) {
+    private final String bringUpServiceLocked(ServiceRecord r, int intentFlags, boolean execInFg,
+            boolean whileRestarting) throws TransactionTooLargeException {
         //Slog.i(TAG, "Bring up service:");
         //r.dump("  ");
 
@@ -1395,6 +1417,8 @@ public final class ActiveServices {
                     app.addPackage(r.appInfo.packageName, r.appInfo.versionCode, mAm.mProcessStats);
                     realStartServiceLocked(r, app, execInFg);
                     return null;
+                } catch (TransactionTooLargeException e) {
+                    throw e;
                 } catch (RemoteException e) {
                     Slog.w(TAG, "Exception when starting service " + r.shortName, e);
                 }
@@ -1447,7 +1471,8 @@ public final class ActiveServices {
         return null;
     }
 
-    private final void requestServiceBindingsLocked(ServiceRecord r, boolean execInFg) {
+    private final void requestServiceBindingsLocked(ServiceRecord r, boolean execInFg)
+            throws TransactionTooLargeException {
         for (int i=r.bindings.size()-1; i>=0; i--) {
             IntentBindRecord ibr = r.bindings.valueAt(i);
             if (!requestServiceBindingLocked(r, ibr, execInFg, false)) {
@@ -1467,7 +1492,7 @@ public final class ActiveServices {
         r.app = app;
         r.restartTime = r.lastActivity = SystemClock.uptimeMillis();
 
-        app.services.add(r);
+        final boolean newService = app.services.add(r);
         bumpServiceExecutingLocked(r, execInFg, "create");
         mAm.updateLruProcessLocked(app, false, null);
         mAm.updateOomAdjLocked();
@@ -1496,10 +1521,20 @@ public final class ActiveServices {
             mAm.appDiedLocked(app);
         } finally {
             if (!created) {
-                app.services.remove(r);
-                r.app = null;
-                scheduleServiceRestartLocked(r, false);
-                return;
+                // Keep the executeNesting count accurate.
+                final boolean inDestroying = mDestroyingServices.contains(r);
+                serviceDoneExecutingLocked(r, inDestroying, inDestroying);
+
+                // Cleanup.
+                if (newService) {
+                    app.services.remove(r);
+                    r.app = null;
+                }
+
+                // Retry.
+                if (!inDestroying) {
+                    scheduleServiceRestartLocked(r, false);
+                }
             }
         }
 
@@ -1535,15 +1570,17 @@ public final class ActiveServices {
     }
 
     private final void sendServiceArgsLocked(ServiceRecord r, boolean execInFg,
-            boolean oomAdjusted) {
+            boolean oomAdjusted) throws TransactionTooLargeException {
         final int N = r.pendingStarts.size();
         if (N == 0) {
             return;
         }
 
         while (r.pendingStarts.size() > 0) {
+            Exception caughtException = null;
+            ServiceRecord.StartItem si;
             try {
-                ServiceRecord.StartItem si = r.pendingStarts.remove(0);
+                si = r.pendingStarts.remove(0);
                 if (DEBUG_SERVICE) Slog.v(TAG_SERVICE, "Sending arguments to: "
                         + r + " " + r.intent + " args=" + si.intent);
                 if (si.intent == null && N > 1) {
@@ -1573,13 +1610,26 @@ public final class ActiveServices {
                     flags |= Service.START_FLAG_REDELIVERY;
                 }
                 r.app.thread.scheduleServiceArgs(r, si.taskRemoved, si.id, flags, si.intent);
+            } catch (TransactionTooLargeException e) {
+                if (DEBUG_SERVICE) Slog.v(TAG_SERVICE, "Transaction too large: intent="
+                        + si.intent);
+                caughtException = e;
             } catch (RemoteException e) {
-                // Remote process gone...  we'll let the normal cleanup take
-                // care of this.
-                if (DEBUG_SERVICE) Slog.v(TAG_SERVICE, "Crashed while scheduling start: " + r);
-                break;
+                // Remote process gone...  we'll let the normal cleanup take care of this.
+                if (DEBUG_SERVICE) Slog.v(TAG_SERVICE, "Crashed while sending args: " + r);
+                caughtException = e;
             } catch (Exception e) {
                 Slog.w(TAG, "Unexpected exception", e);
+                caughtException = e;
+            }
+
+            if (caughtException != null) {
+                // Keep nesting count correct
+                final boolean inDestroying = mDestroyingServices.contains(r);
+                serviceDoneExecutingLocked(r, inDestroying, inDestroying);
+                if (caughtException instanceof TransactionTooLargeException) {
+                    throw (TransactionTooLargeException)caughtException;
+                }
                 break;
             }
         }
@@ -1887,6 +1937,7 @@ public final class ActiveServices {
                 } else if (r.executeNesting != 1) {
                     Slog.wtfStack(TAG, "Service done with onDestroy, but executeNesting="
                             + r.executeNesting + ": " + r);
+                    // Fake it to keep from ANR due to orphaned entry.
                     r.executeNesting = 1;
                 }
             }
@@ -2102,7 +2153,11 @@ public final class ActiveServices {
                     if (sr.app != null && sr.app.thread != null) {
                         // We always run in the foreground, since this is called as
                         // part of the "remove task" UI operation.
-                        sendServiceArgsLocked(sr, true, false);
+                        try {
+                            sendServiceArgsLocked(sr, true, false);
+                        } catch (TransactionTooLargeException e) {
+                            // Ignore, keep going.
+                        }
                     }
                 }
             }
