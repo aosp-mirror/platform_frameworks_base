@@ -28,6 +28,8 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.bluetooth.BluetoothAdapter;
 
+import com.android.settingslib.R;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -783,5 +785,63 @@ public final class CachedBluetoothDevice implements Comparable<CachedBluetoothDe
             // No separate prompt is displayed after pairing.
             setPhonebookPermissionChoice(CachedBluetoothDevice.ACCESS_ALLOWED);
         }
+    }
+
+    public int getMaxConnectionState() {
+        int maxState = BluetoothProfile.STATE_DISCONNECTED;
+        for (LocalBluetoothProfile profile : getProfiles()) {
+            int connectionStatus = getProfileConnectionState(profile);
+            if (connectionStatus > maxState) {
+                maxState = connectionStatus;
+            }
+        }
+        return maxState;
+    }
+
+    /**
+     * @return resource for string that discribes the connection state of this device.
+     */
+    public int getConnectionSummary() {
+        boolean profileConnected = false;       // at least one profile is connected
+        boolean a2dpNotConnected = false;       // A2DP is preferred but not connected
+        boolean headsetNotConnected = false;    // Headset is preferred but not connected
+
+        for (LocalBluetoothProfile profile : getProfiles()) {
+            int connectionStatus = getProfileConnectionState(profile);
+
+            switch (connectionStatus) {
+                case BluetoothProfile.STATE_CONNECTING:
+                case BluetoothProfile.STATE_DISCONNECTING:
+                    return Utils.getConnectionStateSummary(connectionStatus);
+
+                case BluetoothProfile.STATE_CONNECTED:
+                    profileConnected = true;
+                    break;
+
+                case BluetoothProfile.STATE_DISCONNECTED:
+                    if (profile.isProfileReady()) {
+                        if (profile instanceof A2dpProfile) {
+                            a2dpNotConnected = true;
+                        } else if (profile instanceof HeadsetProfile) {
+                            headsetNotConnected = true;
+                        }
+                    }
+                    break;
+            }
+        }
+
+        if (profileConnected) {
+            if (a2dpNotConnected && headsetNotConnected) {
+                return R.string.bluetooth_connected_no_headset_no_a2dp;
+            } else if (a2dpNotConnected) {
+                return R.string.bluetooth_connected_no_a2dp;
+            } else if (headsetNotConnected) {
+                return R.string.bluetooth_connected_no_headset;
+            } else {
+                return R.string.bluetooth_connected;
+            }
+        }
+
+        return getBondState() == BluetoothDevice.BOND_BONDING ? R.string.bluetooth_pairing : 0;
     }
 }

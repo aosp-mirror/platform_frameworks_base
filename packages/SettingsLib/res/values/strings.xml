@@ -76,6 +76,17 @@
     <string name="bluetooth_connecting">Connecting\u2026</string>
     <!-- Bluetooth settings.  Message when connected to a device. [CHAR LIMIT=40] -->
     <string name="bluetooth_connected">Connected</string>
+    <!--Bluetooth settings screen, summary text under individual Bluetooth devices when pairing -->
+    <string name="bluetooth_pairing">Pairing\u2026</string>
+
+    <!-- Bluetooth settings.  Message when connected to a device, except for phone audio. [CHAR LIMIT=40] -->
+    <string name="bluetooth_connected_no_headset">Connected (no phone)</string>
+    <!-- Bluetooth settings.  Message when connected to a device, except for media audio. [CHAR LIMIT=40] -->
+    <string name="bluetooth_connected_no_a2dp">Connected (no media)</string>
+    <!-- Bluetooth settings.  Message when connected to a device, except for map. [CHAR LIMIT=40] -->
+    <string name="bluetooth_connected_no_map">Connected (no message access)</string>
+    <!-- Bluetooth settings.  Message when connected to a device, except for phone/media audio. [CHAR LIMIT=40] -->
+    <string name="bluetooth_connected_no_headset_no_a2dp">Connected (no phone or media)</string>
 
     <!-- Bluetooth settings.  The user-visible string that is used whenever referring to the A2DP profile. -->
     <string name="bluetooth_profile_a2dp">Media audio</string>

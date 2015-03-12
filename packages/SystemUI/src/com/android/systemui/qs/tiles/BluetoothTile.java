@@ -16,6 +16,8 @@
 
 package com.android.systemui.qs.tiles;
 
+import android.bluetooth.BluetoothDevice;
+import android.bluetooth.BluetoothProfile;
 import android.content.Context;
 import android.content.Intent;
 import android.provider.Settings;
@@ -23,13 +25,14 @@ import android.text.TextUtils;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.android.settingslib.bluetooth.CachedBluetoothDevice;
 import com.android.systemui.R;
 import com.android.systemui.qs.QSDetailItems;
 import com.android.systemui.qs.QSDetailItems.Item;
 import com.android.systemui.qs.QSTile;
 import com.android.systemui.statusbar.policy.BluetoothController;
-import com.android.systemui.statusbar.policy.BluetoothController.PairedDevice;
 
+import java.util.Collection;
 import java.util.Set;
 
 /** Quick settings tile: Bluetooth **/
@@ -143,7 +146,7 @@ public class BluetoothTile extends QSTile<QSTile.BooleanState>  {
             refreshState();
         }
         @Override
-        public void onBluetoothPairedDevicesChanged() {
+        public void onBluetoothDevicesChanged() {
             mUiHandler.post(new Runnable() {
                 @Override
                 public void run() {
@@ -199,19 +202,21 @@ public class BluetoothTile extends QSTile<QSTile.BooleanState>  {
         private void updateItems() {
             if (mItems == null) return;
             Item[] items = null;
-            final Set<PairedDevice> devices = mController.getPairedDevices();
+            final Collection<CachedBluetoothDevice> devices = mController.getDevices();
             if (devices != null) {
-                items = new Item[devices.size()];
+                items = new Item[getBondedCount(devices)];
                 int i = 0;
-                for (PairedDevice device : devices) {
+                for (CachedBluetoothDevice device : devices) {
+                    if (device.getBondState() == BluetoothDevice.BOND_NONE) continue;
                     final Item item = new Item();
                     item.icon = R.drawable.ic_qs_bluetooth_on;
-                    item.line1 = device.name;
-                    if (device.state == PairedDevice.STATE_CONNECTED) {
+                    item.line1 = device.getName();
+                    int state = device.getMaxConnectionState();
+                    if (state == BluetoothProfile.STATE_CONNECTED) {
                         item.icon = R.drawable.ic_qs_bluetooth_connected;
                         item.line2 = mContext.getString(R.string.quick_settings_connected);
                         item.canDisconnect = true;
-                    } else if (device.state == PairedDevice.STATE_CONNECTING) {
+                    } else if (state == BluetoothProfile.STATE_CONNECTING) {
                         item.icon = R.drawable.ic_qs_bluetooth_connecting;
                         item.line2 = mContext.getString(R.string.quick_settings_connecting);
                     }
@@ -222,11 +227,22 @@ public class BluetoothTile extends QSTile<QSTile.BooleanState>  {
             mItems.setItems(items);
         }
 
+        private int getBondedCount(Collection<CachedBluetoothDevice> devices) {
+            int ct = 0;
+            for (CachedBluetoothDevice device : devices) {
+                if (device.getBondState() != BluetoothDevice.BOND_NONE) {
+                    ct++;
+                }
+            }
+            return ct;
+        }
+
         @Override
         public void onDetailItemClick(Item item) {
             if (item == null || item.tag == null) return;
-            final PairedDevice device = (PairedDevice) item.tag;
-            if (device != null && device.state == PairedDevice.STATE_DISCONNECTED) {
+            final CachedBluetoothDevice device = (CachedBluetoothDevice) item.tag;
+            if (device != null && device.getMaxConnectionState()
+                    == BluetoothProfile.STATE_DISCONNECTED) {
                 mController.connect(device);
             }
         }
@@ -234,7 +250,7 @@ public class BluetoothTile extends QSTile<QSTile.BooleanState>  {
         @Override
         public void onDetailItemDisconnect(Item item) {
             if (item == null || item.tag == null) return;
-            final PairedDevice device = (PairedDevice) item.tag;
+            final CachedBluetoothDevice device = (CachedBluetoothDevice) item.tag;
             if (device != null) {
                 mController.disconnect(device);
             }

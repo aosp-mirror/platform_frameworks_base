@@ -122,6 +122,10 @@ public final class LocalBluetoothAdapter {
         return mAdapter.isEnabled();
     }
 
+    public int getConnectionState() {
+        return mAdapter.getConnectionState();
+    }
+
     public void setDiscoverableTimeout(int timeout) {
         mAdapter.setDiscoverableTimeout(timeout);
     }
