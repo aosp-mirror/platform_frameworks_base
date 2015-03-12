@@ -18243,6 +18243,7 @@ package android.media.tv {
     method public android.content.pm.ServiceInfo getServiceInfo();
     method public int getType();
     method public boolean isConnectedToHdmiSwitch();
+    method public boolean isHardwareInput();
     method public boolean isHidden(android.content.Context);
     method public boolean isPassthroughInput();
     method public java.lang.CharSequence loadCustomLabel(android.content.Context);
