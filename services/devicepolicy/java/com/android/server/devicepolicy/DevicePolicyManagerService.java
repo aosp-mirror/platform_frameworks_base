@@ -17,6 +17,7 @@
 package com.android.server.devicepolicy;
 
 import static android.Manifest.permission.MANAGE_CA_CERTIFICATES;
+import static android.app.admin.DevicePolicyManager.PASSWORD_QUALITY_COMPLEX;
 import static android.app.admin.DevicePolicyManager.WIPE_EXTERNAL_STORAGE;
 import static android.app.admin.DevicePolicyManager.WIPE_RESET_PROTECTION_DATA;
 import static android.content.pm.PackageManager.GET_UNINSTALLED_PACKAGES;
@@ -2351,6 +2352,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 final int N = policy.mAdminList.size();
                 for (int i=0; i<N; i++) {
                     ActiveAdmin admin = policy.mAdminList.get(i);
+                    if (!isLimitPasswordAllowed(admin, PASSWORD_QUALITY_COMPLEX)) {
+                        continue;
+                    }
                     if (length < admin.minimumPasswordLetters) {
                         length = admin.minimumPasswordLetters;
                     }
@@ -2396,6 +2400,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 final int N = policy.mAdminList.size();
                 for (int i = 0; i < N; i++) {
                     ActiveAdmin admin = policy.mAdminList.get(i);
+                    if (!isLimitPasswordAllowed(admin, PASSWORD_QUALITY_COMPLEX)) {
+                        continue;
+                    }
                     if (length < admin.minimumPasswordNumeric) {
                         length = admin.minimumPasswordNumeric;
                     }
@@ -2441,6 +2448,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 final int N = policy.mAdminList.size();
                 for (int i=0; i<N; i++) {
                     ActiveAdmin admin = policy.mAdminList.get(i);
+                    if (!isLimitPasswordAllowed(admin, PASSWORD_QUALITY_COMPLEX)) {
+                        continue;
+                    }
                     if (length < admin.minimumPasswordSymbols) {
                         length = admin.minimumPasswordSymbols;
                     }
@@ -2486,6 +2496,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 final int N = policy.mAdminList.size();
                 for (int i=0; i<N; i++) {
                     ActiveAdmin admin = policy.mAdminList.get(i);
+                    if (!isLimitPasswordAllowed(admin, PASSWORD_QUALITY_COMPLEX)) {
+                        continue;
+                    }
                     if (length < admin.minimumPasswordNonLetter) {
                         length = admin.minimumPasswordNonLetter;
                     }
@@ -5617,5 +5630,16 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 listener.onCrossProfileWidgetProvidersChanged(userId, packages);
             }
         }
+    }
+
+    /**
+     * Returns true if specified admin is allowed to limit passwords and has a
+     * {@code passwordQuality} of at least {@code minPasswordQuality}
+     */
+    private static boolean isLimitPasswordAllowed(ActiveAdmin admin, int minPasswordQuality) {
+        if (admin.passwordQuality < minPasswordQuality) {
+            return false;
+        }
+        return admin.info.usesPolicy(DeviceAdminInfo.USES_POLICY_LIMIT_PASSWORD);
     }
 }
