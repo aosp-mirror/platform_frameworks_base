@@ -23,6 +23,8 @@ import static com.android.ide.common.rendering.api.Result.Status.ERROR_UNKNOWN;
 import static com.android.ide.common.rendering.api.Result.Status.ERROR_VIEWGROUP_NO_CHILDREN;
 import static com.android.ide.common.rendering.api.Result.Status.SUCCESS;
 
+import com.android.annotations.NonNull;
+import com.android.annotations.Nullable;
 import com.android.ide.common.rendering.api.AdapterBinding;
 import com.android.ide.common.rendering.api.HardwareConfig;
 import com.android.ide.common.rendering.api.IAnimationListener;
@@ -51,6 +53,7 @@ import com.android.layoutlib.bridge.android.BridgeContext;
 import com.android.layoutlib.bridge.android.BridgeLayoutParamsMapAttributes;
 import com.android.layoutlib.bridge.android.BridgeXmlBlockParser;
 import com.android.layoutlib.bridge.android.SessionParamsFlags;
+import com.android.layoutlib.bridge.android.support.RecyclerViewUtil;
 import com.android.layoutlib.bridge.bars.BridgeActionBar;
 import com.android.layoutlib.bridge.bars.AppCompatActionBar;
 import com.android.layoutlib.bridge.bars.Config;
@@ -1327,6 +1330,8 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
                     }
                 }
             }
+        } else if (isInstanceOf(view, RecyclerViewUtil.CN_RECYCLER_VIEW)) {
+            RecyclerViewUtil.setAdapter(view, getContext(), getParams());
         } else if (view instanceof ViewGroup) {
             ViewGroup group = (ViewGroup) view;
             final int count = group.getChildCount();
@@ -1335,6 +1340,22 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
                 postInflateProcess(child, projectCallback, skip);
             }
         }
+    }
+
+    /**
+     * Check if the object is an instance of a class named {@code className}. This doesn't work
+     * for interfaces.
+     */
+    public static boolean isInstanceOf(Object object, String className) {
+        Class superClass = object.getClass();
+        while (superClass != null) {
+            String name = superClass.getName();
+            if (name.equals(className)) {
+                return true;
+            }
+            superClass = superClass.getSuperclass();
+        }
+        return false;
     }
 
     /**
@@ -1494,6 +1515,7 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
      * @return an array of length two, with ViewInfo at index 0 is without offset and ViewInfo at
      *         index 1 is with the offset.
      */
+    @NonNull
     private ViewInfo[] visitContentRoot(View view, int offset, boolean setExtendedInfo) {
         ViewInfo[] result = new ViewInfo[2];
         if (view == null) {
@@ -1589,6 +1611,7 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
      * The cookie for menu items are stored in menu item and not in the map from View stored in
      * BridgeContext.
      */
+    @Nullable
     private Object getViewKey(View view) {
         BridgeContext context = getContext();
         if (!(view instanceof MenuView.ItemView)) {
