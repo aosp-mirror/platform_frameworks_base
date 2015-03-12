@@ -5857,13 +5857,15 @@ public class WindowManagerService extends IWindowManager.Stub
                     if (mCircularDisplayMask == null) {
                         int screenOffset = mContext.getResources().getDimensionPixelSize(
                                 com.android.internal.R.dimen.circular_display_mask_offset);
+                        int maskThickness = mContext.getResources().getDimensionPixelSize(
+                                com.android.internal.R.dimen.circular_display_mask_thickness);
 
                         mCircularDisplayMask = new CircularDisplayMask(
                                 getDefaultDisplayContentLocked().getDisplay(),
                                 mFxSession,
                                 mPolicy.windowTypeToLayerLw(
                                         WindowManager.LayoutParams.TYPE_POINTER)
-                                        * TYPE_LAYER_MULTIPLIER + 10, screenOffset);
+                                        * TYPE_LAYER_MULTIPLIER + 10, screenOffset, maskThickness);
                     }
                     mCircularDisplayMask.setVisibility(true);
                 } else if (mCircularDisplayMask != null) {
