@@ -128,7 +128,7 @@ public class LayoutFileParser {
                 // generated.
                 String layoutName = includeValue.substring(LAYOUT_PREFIX.length());
                 className = pkg + ".generated." +
-                        ParserHelper.INSTANCE$.toClassName(layoutName) + "Binder";
+                        ParserHelper.INSTANCE$.toClassName(layoutName) + "Binding";
                 includedLayoutName = layoutName;
             } else {
                 className = getFullViewClassName(nodeName);

@@ -15,7 +15,7 @@
  */
 package com.android.databinding.testapp;
 
-import com.android.databinding.testapp.generated.TextViewAdapterTestBinder;
+import com.android.databinding.testapp.generated.TextViewAdapterTestBinding;
 import com.android.databinding.testapp.vo.TextViewBindingObject;
 
 import android.annotation.TargetApi;
@@ -33,10 +33,10 @@ import android.text.method.TextKeyListener;
 import android.widget.TextView;
 
 public class TextViewBindingAdapterTest
-        extends BindingAdapterTestBase<TextViewAdapterTestBinder, TextViewBindingObject> {
+        extends BindingAdapterTestBase<TextViewAdapterTestBinding, TextViewBindingObject> {
 
     public TextViewBindingAdapterTest() {
-        super(TextViewAdapterTestBinder.class, TextViewBindingObject.class,
+        super(TextViewAdapterTestBinding.class, TextViewBindingObject.class,
                 R.layout.text_view_adapter_test);
     }
 
@@ -161,7 +161,7 @@ public class TextViewBindingAdapterTest
             @Override
             public void run() {
                 mBindingObject.setCapitalize(TextKeyListener.Capitalize.CHARACTERS);
-                mBinder.rebindDirty();
+                mBinder.executePendingBindings();
             }
         });
 
@@ -171,7 +171,7 @@ public class TextViewBindingAdapterTest
             @Override
             public void run() {
                 mBindingObject.setCapitalize(TextKeyListener.Capitalize.WORDS);
-                mBinder.rebindDirty();
+                mBinder.executePendingBindings();
             }
         });
 

@@ -13,17 +13,17 @@
 
 package com.android.databinding.testapp;
 
-import com.android.databinding.testapp.generated.ObservableFieldTestBinder;
+import com.android.databinding.testapp.generated.ObservableFieldTestBinding;
 import com.android.databinding.testapp.vo.ObservableFieldBindingObject;
 
 import android.test.UiThreadTest;
 import android.widget.TextView;
 
-public class ObservableFieldTest extends BaseDataBinderTest<ObservableFieldTestBinder> {
+public class ObservableFieldTest extends BaseDataBinderTest<ObservableFieldTestBinding> {
     private ObservableFieldBindingObject mObj;
 
     public ObservableFieldTest() {
-        super(ObservableFieldTestBinder.class, R.layout.observable_field_test);
+        super(ObservableFieldTestBinding.class);
     }
 
     @Override
@@ -35,7 +35,7 @@ public class ObservableFieldTest extends BaseDataBinderTest<ObservableFieldTestB
                 public void run() {
                     mObj = new ObservableFieldBindingObject();
                     mBinder.setObj(mObj);
-                    mBinder.rebindDirty();
+                    mBinder.executePendingBindings();
                 }
             });
         } catch (Throwable throwable) {
@@ -49,7 +49,7 @@ public class ObservableFieldTest extends BaseDataBinderTest<ObservableFieldTestB
         assertEquals("false", view.getText());
 
         mObj.bField.set(true);
-        mBinder.rebindDirty();
+        mBinder.executePendingBindings();
 
         assertEquals("true", view.getText());
     }
@@ -60,7 +60,7 @@ public class ObservableFieldTest extends BaseDataBinderTest<ObservableFieldTestB
         assertEquals("0", view.getText());
 
         mObj.tField.set((byte) 1);
-        mBinder.rebindDirty();
+        mBinder.executePendingBindings();
 
         assertEquals("1", view.getText());
     }
@@ -71,7 +71,7 @@ public class ObservableFieldTest extends BaseDataBinderTest<ObservableFieldTestB
         assertEquals("0", view.getText());
 
         mObj.sField.set((short) 1);
-        mBinder.rebindDirty();
+        mBinder.executePendingBindings();
 
         assertEquals("1", view.getText());
     }
@@ -82,7 +82,7 @@ public class ObservableFieldTest extends BaseDataBinderTest<ObservableFieldTestB
         assertEquals("\u0000", view.getText());
 
         mObj.cField.set('A');
-        mBinder.rebindDirty();
+        mBinder.executePendingBindings();
 
         assertEquals("A", view.getText());
     }
@@ -93,7 +93,7 @@ public class ObservableFieldTest extends BaseDataBinderTest<ObservableFieldTestB
         assertEquals("0", view.getText());
 
         mObj.iField.set(1);
-        mBinder.rebindDirty();
+        mBinder.executePendingBindings();
 
         assertEquals("1", view.getText());
     }
@@ -104,7 +104,7 @@ public class ObservableFieldTest extends BaseDataBinderTest<ObservableFieldTestB
         assertEquals("0", view.getText());
 
         mObj.lField.set(1);
-        mBinder.rebindDirty();
+        mBinder.executePendingBindings();
 
         assertEquals("1", view.getText());
     }
@@ -115,7 +115,7 @@ public class ObservableFieldTest extends BaseDataBinderTest<ObservableFieldTestB
         assertEquals("0.0", view.getText());
 
         mObj.fField.set(1);
-        mBinder.rebindDirty();
+        mBinder.executePendingBindings();
 
         assertEquals("1.0", view.getText());
     }
@@ -126,7 +126,7 @@ public class ObservableFieldTest extends BaseDataBinderTest<ObservableFieldTestB
         assertEquals("0.0", view.getText());
 
         mObj.dField.set(1);
-        mBinder.rebindDirty();
+        mBinder.executePendingBindings();
 
         assertEquals("1.0", view.getText());
     }
@@ -137,7 +137,7 @@ public class ObservableFieldTest extends BaseDataBinderTest<ObservableFieldTestB
         assertEquals("Hello", view.getText());
 
         mObj.oField.set("World");
-        mBinder.rebindDirty();
+        mBinder.executePendingBindings();
 
         assertEquals("World", view.getText());
     }

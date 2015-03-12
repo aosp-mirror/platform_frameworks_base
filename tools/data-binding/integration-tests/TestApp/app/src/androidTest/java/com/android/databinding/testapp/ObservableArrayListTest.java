@@ -16,14 +16,14 @@
 package com.android.databinding.testapp;
 
 import com.android.databinding.library.ObservableArrayList;
-import com.android.databinding.testapp.generated.BasicBindingBinder;
+import com.android.databinding.testapp.generated.BasicBindingBinding;
 
 import android.binding.ObservableList;
 import android.binding.OnListChangedListener;
 
 import java.util.ArrayList;
 
-public class ObservableArrayListTest extends BaseDataBinderTest<BasicBindingBinder> {
+public class ObservableArrayListTest extends BaseDataBinderTest<BasicBindingBinding> {
 
     private static final int ALL = 0;
 
@@ -96,7 +96,7 @@ public class ObservableArrayListTest extends BaseDataBinderTest<BasicBindingBind
     }
 
     public ObservableArrayListTest() {
-        super(BasicBindingBinder.class, R.layout.basic_binding);
+        super(BasicBindingBinding.class);
     }
 
     @Override

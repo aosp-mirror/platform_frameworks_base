@@ -16,7 +16,7 @@
 package com.android.databinding.testapp;
 
 import com.android.databinding.library.ObservableArrayMap;
-import com.android.databinding.testapp.generated.BasicBindingBinder;
+import com.android.databinding.testapp.generated.BasicBindingBinding;
 
 import android.binding.ObservableMap;
 import android.binding.OnMapChangedListener;
@@ -26,7 +26,7 @@ import android.support.v4.util.SimpleArrayMap;
 import java.util.ArrayList;
 import java.util.Map;
 
-public class ObservableArrayMapTest extends BaseDataBinderTest<BasicBindingBinder> {
+public class ObservableArrayMapTest extends BaseDataBinderTest<BasicBindingBinding> {
 
     private ObservableArrayMap<String, String> mObservable;
 
@@ -41,7 +41,7 @@ public class ObservableArrayMapTest extends BaseDataBinderTest<BasicBindingBinde
     };
 
     public ObservableArrayMapTest() {
-        super(BasicBindingBinder.class, R.layout.basic_binding);
+        super(BasicBindingBinding.class);
     }
 
     @Override

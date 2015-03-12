@@ -21,6 +21,6 @@ package com.android.databinding.library;
  */
 public class DataBinderTrojan {
     public static void setBuildSdkInt(int level) {
-        DataBinder.SDK_INT = level;
+        ViewDataBinding.SDK_INT = level;
     }
 }

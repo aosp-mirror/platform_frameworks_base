@@ -15,12 +15,12 @@ import android.view.ViewGroup;
 
 import android.binding.BR;
 
+import com.android.databinding.library.DataBindingUtil;
 import com.android.databinding.library.PropertyChangeRegistry;
-import com.android.example.bindingdemo.generated.ListItemBinder;
-import com.android.example.bindingdemo.generated.MainActivityBinder;
+import com.android.example.bindingdemo.generated.ListItemBinding;
+import com.android.example.bindingdemo.generated.MainActivityBinding;
 import com.android.example.bindingdemo.vo.User;
 import com.android.example.bindingdemo.vo.Users;
-import com.android.databinding.library.DataBinder;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -33,7 +33,7 @@ public class MainActivity extends ActionBarActivity implements Observable {
     @Bindable
     UserAdapter robotAdapter;
     @Bindable
-    MainActivityBinder dataBinder;
+    MainActivityBinding dataBinder;
     @Bindable
     User selected;
 
@@ -49,7 +49,7 @@ public class MainActivity extends ActionBarActivity implements Observable {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        dataBinder = DataBinder.createBinder(MainActivityBinder.class, this, R.layout.main_activity, null);
+        dataBinder =  MainActivityBinding.inflate(this);
         setContentView(dataBinder.getRoot());
         dataBinder.getRobotList().setHasFixedSize(true);
         dataBinder.getToolkittyList().setHasFixedSize(true);
@@ -58,7 +58,7 @@ public class MainActivity extends ActionBarActivity implements Observable {
         dataBinder.getToolkittyList().setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
         dataBinder.getRobotList().setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
         dataBinder.setActivity(this);
-        dataBinder.rebindDirty();
+        dataBinder.executePendingBindings();
     }
 
     public UserAdapter getTkAdapter() {
@@ -156,26 +156,26 @@ public class MainActivity extends ActionBarActivity implements Observable {
         mListeners.remove(listener);
     }
 
-    public class UserAdapter extends DataBoundAdapter<ListItemBinder> implements View.OnClickListener, Observable {
+    public class UserAdapter extends DataBoundAdapter<ListItemBinding> implements View.OnClickListener, Observable {
         final private List<User> userList = new ArrayList<>();
         final private PropertyChangeRegistry mListeners = new PropertyChangeRegistry();
 
         public UserAdapter(User[] toolkities) {
-            super(R.layout.list_item, ListItemBinder.class);
+            super(R.layout.list_item, ListItemBinding.class);
             userList.addAll(Arrays.asList(toolkities));
         }
 
         @Override
-        public DataBoundViewHolder<ListItemBinder> onCreateViewHolder(ViewGroup viewGroup, int type) {
-            DataBoundViewHolder<ListItemBinder> vh = super.onCreateViewHolder(viewGroup, type);
+        public DataBoundViewHolder<ListItemBinding> onCreateViewHolder(ViewGroup viewGroup, int type) {
+            DataBoundViewHolder<ListItemBinding> vh = super.onCreateViewHolder(viewGroup, type);
             vh.dataBinder.setClickListener(this);
             return vh;
         }
 
         @Override
-        public void onBindViewHolder(DataBoundViewHolder<ListItemBinder> vh, int index) {
+        public void onBindViewHolder(DataBoundViewHolder<ListItemBinding> vh, int index) {
             vh.dataBinder.setUser(userList.get(index));
-            vh.dataBinder.rebindDirty();
+            vh.dataBinder.executePendingBindings();
         }
 
         @Bindable

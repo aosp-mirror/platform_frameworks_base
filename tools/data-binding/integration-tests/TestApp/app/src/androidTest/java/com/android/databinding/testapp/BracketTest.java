@@ -13,7 +13,7 @@
 
 package com.android.databinding.testapp;
 
-import com.android.databinding.testapp.generated.BracketTestBinder;
+import com.android.databinding.testapp.generated.BracketTestBinding;
 
 import android.test.UiThreadTest;
 import android.util.LongSparseArray;
@@ -21,10 +21,8 @@ import android.util.SparseArray;
 import android.util.SparseBooleanArray;
 import android.util.SparseIntArray;
 import android.util.SparseLongArray;
-import android.widget.LinearLayout;
-import android.widget.TextView;
 
-public class BracketTest extends BaseDataBinderTest<BracketTestBinder> {
+public class BracketTest extends BaseDataBinderTest<BracketTestBinding> {
     private String[] mArray = {
             "Hello World"
     };
@@ -36,7 +34,7 @@ public class BracketTest extends BaseDataBinderTest<BracketTestBinder> {
     private LongSparseArray<String> mLongSparseArray = new LongSparseArray<>();
 
     public BracketTest() {
-        super(BracketTestBinder.class, R.layout.bracket_test);
+        super(BracketTestBinding.class);
         mSparseArray.put(0, "Hello");
         mLongSparseArray.put(0, "World");
         mSparseIntArray.put(0, 100);
@@ -58,7 +56,7 @@ public class BracketTest extends BaseDataBinderTest<BracketTestBinder> {
                     mBinder.setSparseLongArray(mSparseLongArray);
                     mBinder.setLongSparseArray(mLongSparseArray);
 
-                    mBinder.rebindDirty();
+                    mBinder.executePendingBindings();
                 }
             });
         } catch (Throwable throwable) {

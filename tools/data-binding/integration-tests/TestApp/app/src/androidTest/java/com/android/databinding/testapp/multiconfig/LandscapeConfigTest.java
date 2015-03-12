@@ -13,27 +13,28 @@
 
 package com.android.databinding.testapp.multiconfig;
 
-import com.android.databinding.library.IViewDataBinder;
+import com.android.databinding.library.ViewDataBinding;
 import com.android.databinding.testapp.BaseLandDataBinderTest;
 import com.android.databinding.testapp.R;
-import com.android.databinding.testapp.generated.BasicBindingBinder;
-import com.android.databinding.testapp.generated.ConditionalBindingBinder;
-import com.android.databinding.testapp.generated.IncludedLayoutBinder;
-import com.android.databinding.testapp.generated.MultiResLayoutBinder;
+import com.android.databinding.testapp.generated.BasicBindingBinding;
+import com.android.databinding.testapp.generated.ConditionalBindingBinding;
+import com.android.databinding.testapp.generated.IncludedLayoutBinding;
+import com.android.databinding.testapp.generated.MultiResLayoutBinding;
 import com.android.databinding.testapp.vo.NotBindableVo;
 
+import android.content.pm.ActivityInfo;
 import android.view.View;
 import android.widget.TextView;
 
-public class LandscapeConfigTest extends BaseLandDataBinderTest<MultiResLayoutBinder> {
+public class LandscapeConfigTest extends BaseLandDataBinderTest<MultiResLayoutBinding> {
 
     public LandscapeConfigTest() {
-        super(MultiResLayoutBinder.class, R.layout.multi_res_layout);
+        super(MultiResLayoutBinding.class, ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
     }
 
     public void testSharedViewIdAndVariableInheritance()
             throws InterruptedException, NoSuchMethodException, NoSuchFieldException {
-        assertEquals("MultiResLayoutBinderLandImpl", mBinder.getClass().getSimpleName());
+        assertEquals("MultiResLayoutBindingLandImpl", mBinder.getClass().getSimpleName());
         assertMethod(TextView.class, "getObjectInLandTextView");
         assertMethod(TextView.class, "getObjectInDefaultTextView");
         assertMethod(View.class, "getObjectInDefaultTextView2");
@@ -46,14 +47,14 @@ public class LandscapeConfigTest extends BaseLandDataBinderTest<MultiResLayoutBi
         assertField(NotBindableVo.class, "mObjectInDefault");
 
         // includes
-        assertMethod(IViewDataBinder.class, "getIncludedLayoutConflict");
-        assertMethod(BasicBindingBinder.class, "getIncludedLayoutShared");
-        assertMethod(ConditionalBindingBinder.class, "getIncludedLayoutPort");
-        assertMethod(ConditionalBindingBinder.class, "getIncludedLayoutLand");
+        assertMethod(ViewDataBinding.class, "getIncludedLayoutConflict");
+        assertMethod(BasicBindingBinding.class, "getIncludedLayoutShared");
+        assertMethod(ConditionalBindingBinding.class, "getIncludedLayoutPort");
+        assertMethod(ConditionalBindingBinding.class, "getIncludedLayoutLand");
 
-        assertField(IncludedLayoutBinder.class, "mIncludedLayoutConflict");
-        assertField(BasicBindingBinder.class, "mIncludedLayoutShared");
-        assertField(ConditionalBindingBinder.class, "mIncludedLayoutLand");
+        assertField(IncludedLayoutBinding.class, "mIncludedLayoutConflict");
+        assertField(BasicBindingBinding.class, "mIncludedLayoutShared");
+        assertField(ConditionalBindingBinding.class, "mIncludedLayoutLand");
 
         assertNoField("mIncludedLayoutPort");
     }

@@ -15,13 +15,13 @@
  */
 package com.android.databinding.testapp;
 
-import com.android.databinding.library.IViewDataBinder;
+import com.android.databinding.library.ViewDataBinding;
 import com.android.databinding.testapp.vo.BindingAdapterBindingObject;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
-public class BindingAdapterTestBase<T extends IViewDataBinder, V extends BindingAdapterBindingObject>
+public class BindingAdapterTestBase<T extends ViewDataBinding, V extends BindingAdapterBindingObject>
         extends BaseDataBinderTest<T> {
     private Class<V> mBindingObjectClass;
 
@@ -30,7 +30,7 @@ public class BindingAdapterTestBase<T extends IViewDataBinder, V extends Binding
     private Method mSetMethod;
 
     public BindingAdapterTestBase(Class<T> binderClass, Class<V> observableClass, int layoutId) {
-        super(binderClass, layoutId);
+        super(binderClass);
         mBindingObjectClass = observableClass;
         try {
             mSetMethod = binderClass.getDeclaredMethod("setObj", observableClass);
@@ -49,7 +49,7 @@ public class BindingAdapterTestBase<T extends IViewDataBinder, V extends Binding
                     try {
                         mBindingObject = mBindingObjectClass.newInstance();
                         mSetMethod.invoke(mBinder, mBindingObject);
-                        mBinder.rebindDirty();
+                        mBinder.executePendingBindings();
                     } catch (IllegalAccessException e) {
                         throw new RuntimeException(e);
                     } catch (InvocationTargetException e) {
@@ -69,7 +69,7 @@ public class BindingAdapterTestBase<T extends IViewDataBinder, V extends Binding
             @Override
             public void run() {
                 mBindingObject.changeValues();
-                mBinder.rebindDirty();
+                mBinder.executePendingBindings();
             }
         });
     }

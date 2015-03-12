@@ -62,8 +62,8 @@ public abstract class ModelAnalyzer {
             "com.android.databinding.library.ObservableField",
     };
 
-    public static final String I_VIEW_DATA_BINDER
-            = "com.android.databinding.library.IViewDataBinder";
+    public static final String VIEW_DATA_BINDING =
+            "com.android.databinding.library.ViewDataBinding";
 
     private static ModelAnalyzer sAnalyzer;
 

@@ -13,29 +13,27 @@
 
 package com.android.databinding.testapp;
 
-import com.android.databinding.testapp.generated.BindToFinalBinder;
-import com.android.databinding.testapp.generated.BindToFinalObservableBinder;
-import com.android.databinding.testapp.vo.PublicFinalTestVo;
+import com.android.databinding.testapp.generated.BindToFinalObservableBinding;
 import com.android.databinding.testapp.vo.PublicFinalWithObservableTestVo;
 
 import android.test.UiThreadTest;
 import android.widget.TextView;
 
-public class BindToFinalObservableFieldTest extends BaseDataBinderTest<BindToFinalObservableBinder>{
+public class BindToFinalObservableFieldTest extends BaseDataBinderTest<BindToFinalObservableBinding>{
 
     public BindToFinalObservableFieldTest() {
-        super(BindToFinalObservableBinder.class, R.layout.bind_to_final_observable);
+        super(BindToFinalObservableBinding.class);
     }
 
     @UiThreadTest
     public void testSimple() {
         final PublicFinalWithObservableTestVo vo = new PublicFinalWithObservableTestVo(R.string.app_name);
         mBinder.setObj(vo);
-        mBinder.rebindDirty();
+        mBinder.executePendingBindings();
         final TextView textView = (TextView) mBinder.getRoot().findViewById(R.id.text_view);
         assertEquals(getActivity().getResources().getString(R.string.app_name), textView.getText().toString());
         vo.myFinalVo.setVal(R.string.rain);
-        mBinder.rebindDirty();
+        mBinder.executePendingBindings();
         assertEquals("The field should be observed and its notify event should've invalidated"
                         + " binder flags.", getActivity().getResources().getString(R.string.rain),
                 textView.getText().toString());

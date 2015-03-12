@@ -22,7 +22,12 @@ import android.binding.ObservableMap;
 import android.binding.OnListChangedListener;
 import android.binding.OnMapChangedListener;
 import android.binding.OnPropertyChangedListener;
-import android.util.SparseArray;
+import android.content.Context;
+import android.os.Build;
+import android.os.Build.VERSION;
+import android.os.Build.VERSION_CODES;
+import android.util.SparseIntArray;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -30,54 +35,119 @@ import java.lang.Override;
 import java.lang.Runnable;
 import java.lang.ref.WeakReference;
 
-abstract public class ViewDataBinder {
+public abstract class ViewDataBinding {
+
+    /**
+     * Instead of directly accessing Build.VERSION.SDK_INT, generated code uses this value so that
+     * we can test API dependent behavior.
+     */
+    static int SDK_INT = VERSION.SDK_INT;
+
+    /**
+     * Prefix for android:tag on Views with binding. The root View and include tags will not have
+     * android:tag attributes and will use ids instead.
+     */
     public static final String BINDING_TAG_PREFIX = "bindingTag";
+
+    // The length of BINDING_TAG_PREFIX prevents calling length repeatedly.
     private static final int BINDING_NUMBER_START = BINDING_TAG_PREFIX.length();
 
+    /**
+     * Method object extracted out to attach a listener to a bound Observable object.
+     */
     private static final CreateWeakListener CREATE_PROPERTY_LISTENER = new CreateWeakListener() {
         @Override
-        public WeakListener create(ViewDataBinder viewDataBinder, int localFieldId) {
-            return new WeakPropertyListener(viewDataBinder, localFieldId);
+        public WeakListener create(ViewDataBinding viewDataBinding, int localFieldId) {
+            return new WeakPropertyListener(viewDataBinding, localFieldId);
         }
     };
 
+    /**
+     * Method object extracted out to attach a listener to a bound ObservableList object.
+     */
     private static final CreateWeakListener CREATE_LIST_LISTENER = new CreateWeakListener() {
         @Override
-        public WeakListener create(ViewDataBinder viewDataBinder, int localFieldId) {
-            return new WeakListListener(viewDataBinder, localFieldId);
+        public WeakListener create(ViewDataBinding viewDataBinding, int localFieldId) {
+            return new WeakListListener(viewDataBinding, localFieldId);
         }
     };
 
+    /**
+     * Method object extracted out to attach a listener to a bound ObservableMap object.
+     */
     private static final CreateWeakListener CREATE_MAP_LISTENER = new CreateWeakListener() {
         @Override
-        public WeakListener create(ViewDataBinder viewDataBinder, int localFieldId) {
-            return new WeakMapListener(viewDataBinder, localFieldId);
+        public WeakListener create(ViewDataBinding viewDataBinding, int localFieldId) {
+            return new WeakMapListener(viewDataBinding, localFieldId);
         }
     };
 
-    WeakListener[] mLocalFieldObservers;
-    protected abstract boolean onFieldChange(int mLocalFieldId, Object object, int fieldId);
-    public abstract boolean setVariable(int variableId, Object variable);
-    public abstract void rebindDirty();
-    private final View mRoot;
-
-    private boolean mPendingRebind = false;
+    /**
+     * Runnable executed on animation heartbeat to rebind the dirty Views.
+     */
     private Runnable mRebindRunnable = new Runnable() {
         @Override
         public void run() {
-            rebindDirty();
-            mPendingRebind = false;
+            if (mPendingRebind) {
+                mPendingRebind = false;
+                executePendingBindings();
+            }
         }
     };
 
-    public ViewDataBinder(View root, int localFieldCount) {
+    /**
+     * Flag indicates that there are pending bindings that need to be reevaluated.
+     */
+    private boolean mPendingRebind = false;
+
+    /**
+     * The observed expressions.
+     */
+    private WeakListener[] mLocalFieldObservers;
+
+    /**
+     * The root View that this Binding is associated with.
+     */
+    private final View mRoot;
+
+    protected ViewDataBinding(View root, int localFieldCount) {
         mLocalFieldObservers = new WeakListener[localFieldCount];
-        mRoot = root;
-        mRoot.setTag(this);
+        this.mRoot = root;
+        // TODO: When targeting ICS and above, use setTag(id, this) instead
+        this.mRoot.setTag(this);
     }
 
-    @Override
-    protected void finalize() throws Throwable {
+    public static int getBuildSdkInt() {
+        return SDK_INT;
+    }
+
+    /**
+     * Called when an observed object changes. Sets the appropriate dirty flag if applicable.
+     * @param localFieldId The index into mLocalFieldObservers that this Object resides in.
+     * @param object The object that has changed.
+     * @param fieldId The android.binding.BR ID of the field being changed or _all if
+     *                no specific field is being notified.
+     * @return true if this change should cause a change to the UI.
+     */
+    protected abstract boolean onFieldChange(int localFieldId, Object object, int fieldId);
+
+    public abstract boolean setVariable(int variableId, Object variable);
+
+    /**
+     * Evaluates the pending bindings, updating any Views that have expressions bound to
+     * modified variables. This <b>must</b> be run on the UI thread.
+     */
+    public abstract void executePendingBindings();
+
+    /**
+     * Used internally to invalidate flags of included layouts.
+     */
+    public abstract void invalidateAll();
+
+    /**
+     * Removes binding listeners to expression variables.
+     */
+    public void unbind() {
         for (WeakListener weakListener : mLocalFieldObservers) {
             if (weakListener != null) {
                 weakListener.unregister();
@@ -85,6 +155,15 @@ abstract public class ViewDataBinder {
         }
     }
 
+    @Override
+    protected void finalize() throws Throwable {
+        unbind();
+    }
+
+    /**
+     * Returns the outermost View in the layout file associated with the Binding.
+     * @return the outermost View in the layout file associated with the Binding.
+     */
     public View getRoot() {
         return mRoot;
     }
@@ -109,7 +188,11 @@ abstract public class ViewDataBinder {
             return;
         }
         mPendingRebind = true;
-        mRoot.postOnAnimation(mRebindRunnable);
+        if (VERSION.SDK_INT >= VERSION_CODES.JELLY_BEAN) {
+            mRoot.postOnAnimation(mRebindRunnable);
+        } else {
+            mRoot.post(mRebindRunnable);
+        }
     }
 
     protected Object getObservedField(int localFieldId) {
@@ -163,27 +246,46 @@ abstract public class ViewDataBinder {
         listener.setTarget(observable);
     }
 
-    protected static void mapTaggedChildViews(View root, View[] views,
-            SparseArray<View> binders) {
+    /**
+     * Walk all children of root and assign tagged Views to associated indices in views.
+     *
+     * @param root The base of the View hierarchy to walk.
+     * @param views An array of all Views with binding expressions and all Views with IDs. This
+     *              will start empty and will contain the found Views when this method completes.
+     * @param includes A mapping of include tag IDs to the index into the views array.
+     * @param viewsWithIds A mapping of views with IDs but without expressions to the index
+     *                     into the views array.
+     */
+    protected static void mapTaggedChildViews(View root, View[] views, SparseIntArray includes,
+            SparseIntArray viewsWithIds) {
         if (root instanceof ViewGroup) {
             ViewGroup viewGroup = (ViewGroup) root;
             for (int i = viewGroup.getChildCount() - 1; i >= 0; i--) {
-                mapTaggedViews(viewGroup.getChildAt(i), views, binders);
+                mapTaggedViews(viewGroup.getChildAt(i), views, includes, viewsWithIds);
             }
         }
     }
 
-    private static void mapTaggedViews(View view, View[] views, SparseArray<View> binders) {
+    private static void mapTaggedViews(View view, View[] views, SparseIntArray includes,
+            SparseIntArray viewsWithIds) {
+        boolean visitChildren = true;
         String tag = (String) view.getTag();
-        System.out.println("tagged with " + tag + " is " + view);
+        int id;
         if (tag != null && tag.startsWith(BINDING_TAG_PREFIX)) {
             int tagIndex = parseTagInt(tag);
-            System.out.println("tag id is " + tagIndex);
             views[tagIndex] = view;
-        } else if (view.getId() > 0 && binders != null) {
-            binders.put(view.getId(), view);
+        } else if ((id = view.getId()) > 0) {
+            int index;
+            if (viewsWithIds != null && (index = viewsWithIds.get(id, -1)) >= 0) {
+                views[index] = view;
+            } else if (includes != null && (index = includes.get(id, -1)) >= 0) {
+                views[index] = view;
+                visitChildren = false;
+            }
         }
-        mapTaggedChildViews(view, views, binders);
+        if (visitChildren) {
+            mapTaggedChildViews(view, views, includes, viewsWithIds);
+        }
     }
 
     /**
@@ -203,13 +305,13 @@ abstract public class ViewDataBinder {
         return val;
     }
 
-    protected static abstract class WeakListener<T> {
-        private final WeakReference<ViewDataBinder> mBinder;
+    private static abstract class WeakListener<T> {
+        private final WeakReference<ViewDataBinding> mBinder;
         protected final int mLocalFieldId;
         private T mTarget;
 
-        public WeakListener(ViewDataBinder binder, int localFieldId) {
-            mBinder = new WeakReference<ViewDataBinder>(binder);
+        public WeakListener(ViewDataBinding binder, int localFieldId) {
+            mBinder = new WeakReference<ViewDataBinding>(binder);
             mLocalFieldId = localFieldId;
         }
 
@@ -235,8 +337,8 @@ abstract public class ViewDataBinder {
             return mTarget;
         }
 
-        protected ViewDataBinder getBinder() {
-            ViewDataBinder binder = mBinder.get();
+        protected ViewDataBinding getBinder() {
+            ViewDataBinding binder = mBinder.get();
             if (binder == null) {
                 unregister(); // The binder is dead
             }
@@ -247,9 +349,9 @@ abstract public class ViewDataBinder {
         protected abstract void removeListener(T target);
     }
 
-    protected static class WeakPropertyListener extends WeakListener<Observable>
+    private static class WeakPropertyListener extends WeakListener<Observable>
             implements OnPropertyChangedListener {
-        public WeakPropertyListener(ViewDataBinder binder, int localFieldId) {
+        public WeakPropertyListener(ViewDataBinding binder, int localFieldId) {
             super(binder, localFieldId);
         }
 
@@ -265,7 +367,7 @@ abstract public class ViewDataBinder {
 
         @Override
         public void onPropertyChanged(Observable sender, int fieldId) {
-            ViewDataBinder binder = getBinder();
+            ViewDataBinding binder = getBinder();
             if (binder == null) {
                 return;
             }
@@ -277,16 +379,16 @@ abstract public class ViewDataBinder {
         }
     }
 
-    protected static class WeakListListener extends WeakListener<ObservableList>
+    private static class WeakListListener extends WeakListener<ObservableList>
             implements OnListChangedListener {
 
-        public WeakListListener(ViewDataBinder binder, int localFieldId) {
+        public WeakListListener(ViewDataBinding binder, int localFieldId) {
             super(binder, localFieldId);
         }
 
         @Override
         public void onChanged() {
-            ViewDataBinder binder = getBinder();
+            ViewDataBinding binder = getBinder();
             if (binder == null) {
                 return;
             }
@@ -328,9 +430,9 @@ abstract public class ViewDataBinder {
         }
     }
 
-    protected static class WeakMapListener extends WeakListener<ObservableMap>
+    private static class WeakMapListener extends WeakListener<ObservableMap>
             implements OnMapChangedListener {
-        public WeakMapListener(ViewDataBinder binder, int localFieldId) {
+        public WeakMapListener(ViewDataBinding binder, int localFieldId) {
             super(binder, localFieldId);
         }
 
@@ -346,7 +448,7 @@ abstract public class ViewDataBinder {
 
         @Override
         public void onMapChanged(ObservableMap sender, Object key) {
-            ViewDataBinder binder = getBinder();
+            ViewDataBinding binder = getBinder();
             if (binder == null || sender != getTarget()) {
                 return;
             }
@@ -355,6 +457,6 @@ abstract public class ViewDataBinder {
     }
 
     private interface CreateWeakListener {
-        WeakListener create(ViewDataBinder viewDataBinder, int localFieldId);
+        WeakListener create(ViewDataBinding viewDataBinding, int localFieldId);
     }
 }

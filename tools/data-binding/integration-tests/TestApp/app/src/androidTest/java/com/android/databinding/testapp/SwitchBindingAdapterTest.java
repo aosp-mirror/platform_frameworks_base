@@ -15,7 +15,7 @@
  */
 package com.android.databinding.testapp;
 
-import com.android.databinding.testapp.generated.SwitchAdapterTestBinder;
+import com.android.databinding.testapp.generated.SwitchAdapterTestBinding;
 import com.android.databinding.testapp.vo.SwitchBindingObject;
 
 import android.graphics.drawable.ColorDrawable;
@@ -23,12 +23,12 @@ import android.os.Build;
 import android.widget.Switch;
 
 public class SwitchBindingAdapterTest
-        extends BindingAdapterTestBase<SwitchAdapterTestBinder, SwitchBindingObject> {
+        extends BindingAdapterTestBase<SwitchAdapterTestBinding, SwitchBindingObject> {
 
     Switch mView;
 
     public SwitchBindingAdapterTest() {
-        super(SwitchAdapterTestBinder.class, SwitchBindingObject.class,
+        super(SwitchAdapterTestBinding.class, SwitchBindingObject.class,
                 R.layout.switch_adapter_test);
     }
 

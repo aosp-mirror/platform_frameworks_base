@@ -15,17 +15,17 @@
  */
 package com.android.databinding.testapp;
 
-import com.android.databinding.testapp.generated.FindMethodTestBinder;
+import com.android.databinding.testapp.generated.FindMethodTestBinding;
 import com.android.databinding.testapp.vo.FindMethodBindingObject;
 
 import android.test.UiThreadTest;
 import android.widget.TextView;
 
 public class FindMethodTest
-        extends BindingAdapterTestBase<FindMethodTestBinder, FindMethodBindingObject> {
+        extends BindingAdapterTestBase<FindMethodTestBinding, FindMethodBindingObject> {
 
     public FindMethodTest() {
-        super(FindMethodTestBinder.class, FindMethodBindingObject.class, R.layout.find_method_test);
+        super(FindMethodTestBinding.class, FindMethodBindingObject.class, R.layout.find_method_test);
     }
 
     public void testNoArg() throws Throwable {
@@ -96,7 +96,7 @@ public class FindMethodTest
     @UiThreadTest
     public void testImports() throws Throwable {
         mBinder.setObj2(new FindMethodBindingObject.Bar<String>());
-        mBinder.rebindDirty();
+        mBinder.executePendingBindings();
         TextView textView = mBinder.getTextView15();
         assertEquals("hello", textView.getText().toString());
     }

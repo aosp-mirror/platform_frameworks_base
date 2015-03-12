@@ -13,23 +13,23 @@
 
 package com.android.databinding.testapp;
 
-import com.android.databinding.testapp.generated.LayoutWithIncludeBinder;
+import com.android.databinding.testapp.generated.LayoutWithIncludeBinding;
 import com.android.databinding.testapp.vo.NotBindableVo;
 
 import android.test.UiThreadTest;
 import android.widget.TextView;
 
-public class IncludeTagTest extends BaseDataBinderTest<LayoutWithIncludeBinder> {
+public class IncludeTagTest extends BaseDataBinderTest<LayoutWithIncludeBinding> {
 
     public IncludeTagTest() {
-        super(LayoutWithIncludeBinder.class, R.layout.layout_with_include);
+        super(LayoutWithIncludeBinding.class);
     }
 
     @UiThreadTest
     public void testIncludeTag() {
         NotBindableVo vo = new NotBindableVo(3, "a");
         mBinder.setOuterObject(vo);
-        mBinder.rebindDirty();
+        mBinder.executePendingBindings();
         final TextView outerText = (TextView) mBinder.getRoot().findViewById(R.id.outerTextView);
         assertEquals("a", outerText.getText());
         final TextView innerText = (TextView) mBinder.getRoot().findViewById(R.id.innerTextView);
@@ -38,7 +38,7 @@ public class IncludeTagTest extends BaseDataBinderTest<LayoutWithIncludeBinder> 
         vo.setIntValue(5);
         vo.setStringValue("b");
         mBinder.invalidateAll();
-        mBinder.rebindDirty();
+        mBinder.executePendingBindings();
         assertEquals("b", outerText.getText());
         assertEquals("modified 5b", innerText.getText().toString());
     }

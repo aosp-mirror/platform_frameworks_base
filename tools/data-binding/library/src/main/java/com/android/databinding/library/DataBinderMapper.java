@@ -19,6 +19,6 @@ package com.android.databinding.library;
 import android.view.View;
 
 public interface DataBinderMapper {
-    ViewDataBinder getDataBinder(View view, int layoutId);
+    public ViewDataBinding getDataBinder(View view, int layoutId);
     public int getId(String key);
 }

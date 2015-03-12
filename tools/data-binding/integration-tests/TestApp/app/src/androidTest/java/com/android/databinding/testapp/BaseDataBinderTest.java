@@ -13,28 +13,28 @@
 
 package com.android.databinding.testapp;
 
-import com.android.databinding.library.DataBinder;
-import com.android.databinding.library.IViewDataBinder;
+import com.android.databinding.library.ViewDataBinding;
 
+import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.os.Looper;
 import android.test.ActivityInstrumentationTestCase2;
 
-public class BaseDataBinderTest<T extends IViewDataBinder>
+import java.lang.reflect.Method;
+
+public class BaseDataBinderTest<T extends ViewDataBinding>
         extends ActivityInstrumentationTestCase2<TestActivity> {
     protected Class<T> mBinderClass;
-    private int mLayoutId;
     private int mOrientation;
     protected T mBinder;
 
-    public BaseDataBinderTest(final Class<T> binderClass, final int layoutId) {
-        this(binderClass, layoutId, ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+    public BaseDataBinderTest(final Class<T> binderClass) {
+        this(binderClass, ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
     }
 
-    public BaseDataBinderTest(final Class<T> binderClass, final int layoutId, final int orientation) {
+    public BaseDataBinderTest(final Class<T> binderClass, final int orientation) {
         super(TestActivity.class);
         mBinderClass = binderClass;
-        mLayoutId = layoutId;
         mOrientation = orientation;
     }
 
@@ -54,8 +54,14 @@ public class BaseDataBinderTest<T extends IViewDataBinder>
         getActivity().runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                mBinder = DataBinder.createBinder(mBinderClass, getActivity(), mLayoutId, null);
-                getActivity().setContentView(mBinder.getRoot());
+                Method method = null;
+                try {
+                    method = mBinderClass.getMethod("inflate", Context.class);
+                    mBinder = (T) method.invoke(null, getActivity());
+                    getActivity().setContentView(mBinder.getRoot());
+                } catch (Exception e) {
+                    fail("Error creating binder");
+                }
             }
         });
         if (!isMainThread()) {

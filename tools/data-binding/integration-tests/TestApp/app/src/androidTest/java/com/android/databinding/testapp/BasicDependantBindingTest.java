@@ -13,7 +13,7 @@
 
 package com.android.databinding.testapp;
 
-import com.android.databinding.testapp.generated.BasicDependantBindingBinder;
+import com.android.databinding.testapp.generated.BasicDependantBindingBinding;
 import com.android.databinding.testapp.vo.NotBindableVo;
 
 import android.test.UiThreadTest;
@@ -21,10 +21,10 @@ import android.test.UiThreadTest;
 import java.util.ArrayList;
 import java.util.List;
 
-public class BasicDependantBindingTest extends BaseDataBinderTest<BasicDependantBindingBinder> {
+public class BasicDependantBindingTest extends BaseDataBinderTest<BasicDependantBindingBinding> {
 
     public BasicDependantBindingTest() {
-        super(BasicDependantBindingBinder.class, R.layout.basic_dependant_binding);
+        super(BasicDependantBindingBinding.class);
     }
 
     public List<NotBindableVo> permutations(String value) {
@@ -44,7 +44,7 @@ public class BasicDependantBindingTest extends BaseDataBinderTest<BasicDependant
                 createBinder(); //get a new one
                 testWith(obj1, obj2);
                 createBinder();
-                mBinder.rebindDirty();
+                mBinder.executePendingBindings();
                 testWith(obj1, obj2);
             }
         }
@@ -53,7 +53,7 @@ public class BasicDependantBindingTest extends BaseDataBinderTest<BasicDependant
     private void testWith(NotBindableVo obj1, NotBindableVo obj2) {
         mBinder.setObj1(obj1);
         mBinder.setObj2(obj2);
-        mBinder.rebindDirty();
+        mBinder.executePendingBindings();
         assertValues(safeGet(obj1), safeGet(obj2),
                 obj1 == null ? "" : obj1.mergeStringFields(obj2),
                 obj2 == null ? "" : obj2.mergeStringFields(obj1),

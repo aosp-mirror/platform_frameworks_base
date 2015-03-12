@@ -15,26 +15,26 @@ package com.android.databinding.testapp;
 
 import com.android.databinding.testapp.BaseDataBinderTest;
 import com.android.databinding.testapp.R;
-import com.android.databinding.testapp.generated.ObservableWithNotBindableFieldBinder;
+import com.android.databinding.testapp.generated.ObservableWithNotBindableFieldBinding;
 import com.android.databinding.testapp.vo.ObservableWithNotBindableFieldObject;
 
 import android.test.UiThreadTest;
 
-public class ObservableWithNotBindableFieldObjectTest extends BaseDataBinderTest<ObservableWithNotBindableFieldBinder> {
+public class ObservableWithNotBindableFieldObjectTest extends BaseDataBinderTest<ObservableWithNotBindableFieldBinding> {
 
 
     public ObservableWithNotBindableFieldObjectTest() {
-        super(ObservableWithNotBindableFieldBinder.class, R.layout.observable_with_not_bindable_field);
+        super(ObservableWithNotBindableFieldBinding.class);
     }
 
     @UiThreadTest
     public void testSimple() {
         ObservableWithNotBindableFieldObject obj = new ObservableWithNotBindableFieldObject();
         mBinder.setObj(obj);
-        mBinder.rebindDirty();
+        mBinder.executePendingBindings();
         assertEquals("", mBinder.getTextView().getText().toString());
         obj.update("100");
-        mBinder.rebindDirty();
+        mBinder.executePendingBindings();
         assertEquals("100", mBinder.getTextView().getText().toString());
     }
 }

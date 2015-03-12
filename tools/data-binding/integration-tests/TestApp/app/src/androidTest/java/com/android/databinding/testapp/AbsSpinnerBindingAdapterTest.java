@@ -15,7 +15,7 @@
  */
 package com.android.databinding.testapp;
 
-import com.android.databinding.testapp.generated.AbsSpinnerAdapterTestBinder;
+import com.android.databinding.testapp.generated.AbsSpinnerAdapterTestBinding;
 import com.android.databinding.testapp.vo.AbsSpinnerBindingObject;
 
 import android.os.Build;
@@ -23,12 +23,12 @@ import android.widget.Spinner;
 import android.widget.SpinnerAdapter;
 
 public class AbsSpinnerBindingAdapterTest
-        extends BindingAdapterTestBase<AbsSpinnerAdapterTestBinder, AbsSpinnerBindingObject> {
+        extends BindingAdapterTestBase<AbsSpinnerAdapterTestBinding, AbsSpinnerBindingObject> {
 
     Spinner mView;
 
     public AbsSpinnerBindingAdapterTest() {
-        super(AbsSpinnerAdapterTestBinder.class, AbsSpinnerBindingObject.class,
+        super(AbsSpinnerAdapterTestBinding.class, AbsSpinnerBindingObject.class,
                 R.layout.abs_spinner_adapter_test);
     }
 

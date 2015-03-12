@@ -15,19 +15,19 @@
  */
 package com.android.databinding.testapp;
 
-import com.android.databinding.testapp.generated.AbsSeekBarAdapterTestBinder;
+import com.android.databinding.testapp.generated.AbsSeekBarAdapterTestBinding;
 import com.android.databinding.testapp.vo.AbsSeekBarBindingObject;
 
 import android.os.Build;
 import android.widget.SeekBar;
 
 public class AbsSeekBarBindingAdapterTest
-        extends BindingAdapterTestBase<AbsSeekBarAdapterTestBinder, AbsSeekBarBindingObject> {
+        extends BindingAdapterTestBase<AbsSeekBarAdapterTestBinding, AbsSeekBarBindingObject> {
 
     SeekBar mView;
 
     public AbsSeekBarBindingAdapterTest() {
-        super(AbsSeekBarAdapterTestBinder.class, AbsSeekBarBindingObject.class,
+        super(AbsSeekBarAdapterTestBinding.class, AbsSeekBarBindingObject.class,
                 R.layout.abs_seek_bar_adapter_test);
     }
 

@@ -15,19 +15,19 @@
  */
 package com.android.databinding.testapp;
 
-import com.android.databinding.testapp.generated.CastTestBinder;
+import com.android.databinding.testapp.generated.CastTestBinding;
 
 import android.support.v4.util.ArrayMap;
 import android.test.UiThreadTest;
 
 import java.util.ArrayList;
 
-public class CastTest extends BaseDataBinderTest<CastTestBinder> {
+public class CastTest extends BaseDataBinderTest<CastTestBinding> {
     ArrayList<String> mValues = new ArrayList<>();
     ArrayMap<String, String> mMap = new ArrayMap<>();
 
     public CastTest() {
-        super(CastTestBinder.class, R.layout.cast_test);
+        super(CastTestBinding.class);
     }
 
     @Override
@@ -46,7 +46,7 @@ public class CastTest extends BaseDataBinderTest<CastTestBinder> {
                     mMap.put("world", "hello");
                     mBinder.setList(mValues);
                     mBinder.setMap(mMap);
-                    mBinder.rebindDirty();
+                    mBinder.executePendingBindings();
                 }
             });
         } catch (Throwable throwable) {

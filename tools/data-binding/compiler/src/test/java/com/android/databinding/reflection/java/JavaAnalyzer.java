@@ -81,7 +81,7 @@ public class JavaAnalyzer extends ModelAnalyzer {
         mClassLoader = classLoader;
         mTestMode = testMode;
         try {
-            mIViewDataBinder = classLoader.loadClass(I_VIEW_DATA_BINDER);
+            mIViewDataBinder = classLoader.loadClass(VIEW_DATA_BINDING);
             mObservable = Observable.class;
             mObservableList = ObservableList.class;
             mObservableMap = ObservableMap.class;

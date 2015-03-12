@@ -15,18 +15,18 @@
  */
 package com.android.databinding.testapp;
 
-import com.android.databinding.testapp.generated.CompoundButtonAdapterTestBinder;
+import com.android.databinding.testapp.generated.CompoundButtonAdapterTestBinding;
 import com.android.databinding.testapp.vo.CompoundButtonBindingObject;
 
 import android.widget.CompoundButton;
 
 public class CompoundButtonBindingAdapterTest extends
-        BindingAdapterTestBase<CompoundButtonAdapterTestBinder, CompoundButtonBindingObject> {
+        BindingAdapterTestBase<CompoundButtonAdapterTestBinding, CompoundButtonBindingObject> {
 
     CompoundButton mView;
 
     public CompoundButtonBindingAdapterTest() {
-        super(CompoundButtonAdapterTestBinder.class, CompoundButtonBindingObject.class,
+        super(CompoundButtonAdapterTestBinding.class, CompoundButtonBindingObject.class,
                 R.layout.compound_button_adapter_test);
     }
 

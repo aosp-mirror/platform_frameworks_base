@@ -19,14 +19,12 @@ package com.android.databinding;
 import com.google.common.base.Preconditions;
 
 import com.android.databinding.expr.Dependency;
-import com.android.databinding.store.ResourceBundle;
-import com.android.databinding.util.ParserHelper;
-import com.android.databinding.writer.LayoutBinderWriter;
 import com.android.databinding.expr.Expr;
 import com.android.databinding.expr.ExprModel;
 import com.android.databinding.expr.IdentifierExpr;
-import com.android.databinding.expr.StaticIdentifierExpr;
-import com.android.databinding.util.L;
+import com.android.databinding.store.ResourceBundle;
+import com.android.databinding.util.ParserHelper;
+import com.android.databinding.writer.LayoutBinderWriter;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -60,7 +58,7 @@ public class LayoutBinder {
         mBundle = layoutBundle;
         mProjectPackage = resourceBundle.getAppPackage();
         mPackage = mProjectPackage + ".generated";
-        mBaseClassName = ParserHelper.INSTANCE$.toClassName(layoutBundle.getFileName()) + "Binder";
+        mBaseClassName = ParserHelper.INSTANCE$.toClassName(layoutBundle.getFileName()) + "Binding";
         // copy over data.
         for (Map.Entry<String, String> variable : mBundle.getVariables().entrySet()) {
             addVariable(variable.getKey(), variable.getValue());
@@ -144,7 +142,7 @@ public class LayoutBinder {
 
     public String writeViewBinderInterface() {
         ensureWriter();
-        return mWriter.writeInterface();
+        return mWriter.writeBaseClass();
     }
 
 

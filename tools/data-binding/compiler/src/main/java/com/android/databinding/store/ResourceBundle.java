@@ -150,7 +150,7 @@ public class ResourceBundle implements Serializable {
                         if (target.isBinder()) {
                             L.d("overriding %s as base binder", target.getId());
                             viewTypes.put(target.mId,
-                                    "com.android.databinding.library.IViewDataBinder");
+                                    "com.android.databinding.library.ViewDataBinding");
                         } else {
                             L.d("overriding %s as base view", target.getId());
                             viewTypes.put(target.mId, "android.view.View");

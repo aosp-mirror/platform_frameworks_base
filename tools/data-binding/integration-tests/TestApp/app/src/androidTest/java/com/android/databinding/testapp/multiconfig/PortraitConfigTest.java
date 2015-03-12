@@ -13,13 +13,12 @@
 
 package com.android.databinding.testapp.multiconfig;
 
-import com.android.databinding.library.IViewDataBinder;
+import com.android.databinding.library.ViewDataBinding;
 import com.android.databinding.testapp.BaseDataBinderTest;
-import com.android.databinding.testapp.R;
-import com.android.databinding.testapp.generated.BasicBindingBinder;
-import com.android.databinding.testapp.generated.ConditionalBindingBinder;
-import com.android.databinding.testapp.generated.IncludedLayoutBinder;
-import com.android.databinding.testapp.generated.MultiResLayoutBinder;
+import com.android.databinding.testapp.generated.BasicBindingBinding;
+import com.android.databinding.testapp.generated.ConditionalBindingBinding;
+import com.android.databinding.testapp.generated.IncludedLayoutBinding;
+import com.android.databinding.testapp.generated.MultiResLayoutBinding;
 import com.android.databinding.testapp.vo.NotBindableVo;
 
 import android.content.pm.ActivityInfo;
@@ -27,15 +26,15 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
 
-public class PortraitConfigTest extends BaseDataBinderTest<MultiResLayoutBinder> {
+public class PortraitConfigTest extends BaseDataBinderTest<MultiResLayoutBinding> {
     public PortraitConfigTest() {
-        super(MultiResLayoutBinder.class, R.layout.multi_res_layout, ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+        super(MultiResLayoutBinding.class, ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
     }
 
     public void testSharedViewIdAndVariableInheritance()
             throws InterruptedException, NoSuchMethodException, NoSuchFieldException {
-        assertEquals("MultiResLayoutBinderImpl", mBinder.getClass().getSimpleName());
-        assertEquals("MultiResLayoutBinderImpl", mBinder.getClass().getSimpleName());
+        assertEquals("MultiResLayoutBindingImpl", mBinder.getClass().getSimpleName());
+        assertEquals("MultiResLayoutBindingImpl", mBinder.getClass().getSimpleName());
         assertMethod(TextView.class, "getObjectInLandTextView");
         assertMethod(TextView.class, "getObjectInDefaultTextView");
         assertMethod(View.class, "getObjectInDefaultTextView2");
@@ -49,14 +48,14 @@ public class PortraitConfigTest extends BaseDataBinderTest<MultiResLayoutBinder>
 
 
         // includes
-        assertMethod(IViewDataBinder.class, "getIncludedLayoutConflict");
-        assertMethod(BasicBindingBinder.class, "getIncludedLayoutShared");
-        assertMethod(ConditionalBindingBinder.class, "getIncludedLayoutPort");
-        assertMethod(ConditionalBindingBinder.class, "getIncludedLayoutLand");
+        assertMethod(ViewDataBinding.class, "getIncludedLayoutConflict");
+        assertMethod(BasicBindingBinding.class, "getIncludedLayoutShared");
+        assertMethod(ConditionalBindingBinding.class, "getIncludedLayoutPort");
+        assertMethod(ConditionalBindingBinding.class, "getIncludedLayoutLand");
 
-        assertField(BasicBindingBinder.class, "mIncludedLayoutConflict");
-        assertField(BasicBindingBinder.class, "mIncludedLayoutShared");
-        assertField(ConditionalBindingBinder.class, "mIncludedLayoutPort");
+        assertField(BasicBindingBinding.class, "mIncludedLayoutConflict");
+        assertField(BasicBindingBinding.class, "mIncludedLayoutShared");
+        assertField(ConditionalBindingBinding.class, "mIncludedLayoutPort");
 
         assertNoField("mIncludedLayoutLand");
     }

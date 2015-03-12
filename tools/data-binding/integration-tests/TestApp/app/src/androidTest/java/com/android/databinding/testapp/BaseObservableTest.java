@@ -16,14 +16,14 @@
 package com.android.databinding.testapp;
 
 import com.android.databinding.library.BaseObservable;
-import com.android.databinding.testapp.generated.BasicBindingBinder;
+import com.android.databinding.testapp.generated.BasicBindingBinding;
 
 import android.binding.Observable;
 import android.binding.OnPropertyChangedListener;
 
 import java.util.ArrayList;
 
-public class BaseObservableTest extends BaseDataBinderTest<BasicBindingBinder> {
+public class BaseObservableTest extends BaseDataBinderTest<BasicBindingBinding> {
     private BaseObservable mObservable;
     private ArrayList<Integer> mNotifications = new ArrayList<>();
     private OnPropertyChangedListener mListener = new OnPropertyChangedListener() {
@@ -35,7 +35,7 @@ public class BaseObservableTest extends BaseDataBinderTest<BasicBindingBinder> {
     };
 
     public BaseObservableTest() {
-        super(BasicBindingBinder.class, R.layout.basic_binding);
+        super(BasicBindingBinding.class);
     }
 
     @Override

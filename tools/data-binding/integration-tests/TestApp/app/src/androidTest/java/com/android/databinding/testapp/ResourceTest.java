@@ -15,15 +15,15 @@
  */
 package com.android.databinding.testapp;
 
-import com.android.databinding.testapp.generated.ResourceTestBinder;
+import com.android.databinding.testapp.generated.ResourceTestBinding;
 
 import android.test.UiThreadTest;
 import android.widget.TextView;
 
-public class ResourceTest extends BaseDataBinderTest<ResourceTestBinder> {
+public class ResourceTest extends BaseDataBinderTest<ResourceTestBinding> {
 
     public ResourceTest() {
-        super(ResourceTestBinder.class, R.layout.resource_test);
+        super(ResourceTestBinding.class);
     }
 
     @Override
@@ -38,7 +38,7 @@ public class ResourceTest extends BaseDataBinderTest<ResourceTestBinder> {
             runTestOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    mBinder.rebindDirty();
+                    mBinder.executePendingBindings();
                 }
             });
         } catch (Throwable throwable) {
@@ -52,7 +52,7 @@ public class ResourceTest extends BaseDataBinderTest<ResourceTestBinder> {
         assertEquals("Mrs. Doubtfire", view.getText().toString());
 
         mBinder.setTitle("Mr.");
-        mBinder.rebindDirty();
+        mBinder.executePendingBindings();
         assertEquals("Mr. Doubtfire", view.getText().toString());
     }
 
@@ -62,7 +62,7 @@ public class ResourceTest extends BaseDataBinderTest<ResourceTestBinder> {
         assertEquals("oranges", view.getText().toString());
 
         mBinder.setCount(1);
-        mBinder.rebindDirty();
+        mBinder.executePendingBindings();
         assertEquals("orange", view.getText().toString());
     }
 

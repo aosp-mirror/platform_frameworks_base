@@ -15,19 +15,19 @@
  */
 package com.android.databinding.testapp;
 
-import com.android.databinding.testapp.generated.LinearLayoutAdapterTestBinder;
+import com.android.databinding.testapp.generated.LinearLayoutAdapterTestBinding;
 import com.android.databinding.testapp.vo.LinearLayoutBindingObject;
 
 import android.os.Build;
 import android.widget.LinearLayout;
 
 public class LinearLayoutBindingAdapterTest
-        extends BindingAdapterTestBase<LinearLayoutAdapterTestBinder, LinearLayoutBindingObject> {
+        extends BindingAdapterTestBase<LinearLayoutAdapterTestBinding, LinearLayoutBindingObject> {
 
     LinearLayout mView;
 
     public LinearLayoutBindingAdapterTest() {
-        super(LinearLayoutAdapterTestBinder.class, LinearLayoutBindingObject.class,
+        super(LinearLayoutAdapterTestBinding.class, LinearLayoutBindingObject.class,
                 R.layout.linear_layout_adapter_test);
     }
 

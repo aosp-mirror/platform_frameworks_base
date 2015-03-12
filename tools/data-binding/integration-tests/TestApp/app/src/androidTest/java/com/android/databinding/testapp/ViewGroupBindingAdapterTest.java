@@ -15,19 +15,19 @@
  */
 package com.android.databinding.testapp;
 
-import com.android.databinding.testapp.generated.ViewGroupAdapterTestBinder;
+import com.android.databinding.testapp.generated.ViewGroupAdapterTestBinding;
 import com.android.databinding.testapp.vo.ViewGroupBindingObject;
 
 import android.os.Build;
 import android.view.ViewGroup;
 
 public class ViewGroupBindingAdapterTest
-        extends BindingAdapterTestBase<ViewGroupAdapterTestBinder, ViewGroupBindingObject> {
+        extends BindingAdapterTestBase<ViewGroupAdapterTestBinding, ViewGroupBindingObject> {
 
     ViewGroup mView;
 
     public ViewGroupBindingAdapterTest() {
-        super(ViewGroupAdapterTestBinder.class, ViewGroupBindingObject.class,
+        super(ViewGroupAdapterTestBinding.class, ViewGroupBindingObject.class,
                 R.layout.view_group_adapter_test);
     }
 

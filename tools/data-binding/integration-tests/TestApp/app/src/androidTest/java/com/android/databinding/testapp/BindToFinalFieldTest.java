@@ -13,23 +13,23 @@
 
 package com.android.databinding.testapp;
 
-import com.android.databinding.testapp.generated.BindToFinalBinder;
+import com.android.databinding.testapp.generated.BindToFinalBinding;
 import com.android.databinding.testapp.vo.PublicFinalTestVo;
 
 import android.test.UiThreadTest;
 import android.widget.TextView;
 
-public class BindToFinalFieldTest extends BaseDataBinderTest<BindToFinalBinder>{
+public class BindToFinalFieldTest extends BaseDataBinderTest<BindToFinalBinding>{
 
     public BindToFinalFieldTest() {
-        super(BindToFinalBinder.class, R.layout.bind_to_final);
+        super(BindToFinalBinding.class);
     }
 
     @UiThreadTest
     public void testSimple() {
         final PublicFinalTestVo vo = new PublicFinalTestVo(R.string.app_name);
         mBinder.setObj(vo);
-        mBinder.rebindDirty();
+        mBinder.executePendingBindings();
         final TextView textView = (TextView) mBinder.getRoot().findViewById(R.id.text_view);
         assertEquals(getActivity().getResources().getString(R.string.app_name), textView.getText().toString());
     }

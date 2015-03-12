@@ -48,7 +48,6 @@ import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.ElementFilter;
 import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
-import javax.tools.Diagnostic;
 
 public class AnnotationAnalyzer extends ModelAnalyzer {
 
@@ -143,7 +142,7 @@ public class AnnotationAnalyzer extends ModelAnalyzer {
 
     private AnnotationClass getIViewDataBinderType() {
         if (mIViewDataBinderType == null) {
-            mIViewDataBinderType = new AnnotationClass(findType(I_VIEW_DATA_BINDER).asType());
+            mIViewDataBinderType = new AnnotationClass(findType(VIEW_DATA_BINDING).asType());
         }
         return mIViewDataBinderType;
     }

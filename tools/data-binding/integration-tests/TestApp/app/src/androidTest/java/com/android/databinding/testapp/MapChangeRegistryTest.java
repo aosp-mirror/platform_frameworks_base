@@ -17,17 +17,17 @@ package com.android.databinding.testapp;
 
 import com.android.databinding.library.MapChangeRegistry;
 import com.android.databinding.library.ObservableArrayMap;
-import com.android.databinding.testapp.generated.BasicBindingBinder;
+import com.android.databinding.testapp.generated.BasicBindingBinding;
 
 import android.binding.ObservableMap;
 import android.binding.OnMapChangedListener;
 
-public class MapChangeRegistryTest extends BaseDataBinderTest<BasicBindingBinder> {
+public class MapChangeRegistryTest extends BaseDataBinderTest<BasicBindingBinding> {
 
     private int notificationCount = 0;
 
     public MapChangeRegistryTest() {
-        super(BasicBindingBinder.class, R.layout.basic_binding);
+        super(BasicBindingBinding.class);
     }
 
     public void testNotifyAllChanged() {

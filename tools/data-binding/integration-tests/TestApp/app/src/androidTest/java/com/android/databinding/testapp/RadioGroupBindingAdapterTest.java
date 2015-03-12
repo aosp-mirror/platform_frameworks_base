@@ -15,18 +15,18 @@
  */
 package com.android.databinding.testapp;
 
-import com.android.databinding.testapp.generated.RadioGroupAdapterTestBinder;
+import com.android.databinding.testapp.generated.RadioGroupAdapterTestBinding;
 import com.android.databinding.testapp.vo.RadioGroupBindingObject;
 
 import android.widget.RadioGroup;
 
 public class RadioGroupBindingAdapterTest
-        extends BindingAdapterTestBase<RadioGroupAdapterTestBinder, RadioGroupBindingObject> {
+        extends BindingAdapterTestBase<RadioGroupAdapterTestBinding, RadioGroupBindingObject> {
 
     RadioGroup mView;
 
     public RadioGroupBindingAdapterTest() {
-        super(RadioGroupAdapterTestBinder.class, RadioGroupBindingObject.class,
+        super(RadioGroupAdapterTestBinding.class, RadioGroupBindingObject.class,
                 R.layout.radio_group_adapter_test);
     }
 

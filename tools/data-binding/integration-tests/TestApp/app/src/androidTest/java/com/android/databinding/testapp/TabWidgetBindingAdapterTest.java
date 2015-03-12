@@ -15,7 +15,7 @@
  */
 package com.android.databinding.testapp;
 
-import com.android.databinding.testapp.generated.TabWidgetAdapterTestBinder;
+import com.android.databinding.testapp.generated.TabWidgetAdapterTestBinding;
 import com.android.databinding.testapp.vo.TabWidgetBindingObject;
 
 import android.graphics.drawable.ColorDrawable;
@@ -23,12 +23,12 @@ import android.os.Build;
 import android.widget.TabWidget;
 
 public class TabWidgetBindingAdapterTest
-        extends BindingAdapterTestBase<TabWidgetAdapterTestBinder, TabWidgetBindingObject> {
+        extends BindingAdapterTestBase<TabWidgetAdapterTestBinding, TabWidgetBindingObject> {
 
     TabWidget mView;
 
     public TabWidgetBindingAdapterTest() {
-        super(TabWidgetAdapterTestBinder.class, TabWidgetBindingObject.class,
+        super(TabWidgetAdapterTestBinding.class, TabWidgetBindingObject.class,
                 R.layout.tab_widget_adapter_test);
     }
 

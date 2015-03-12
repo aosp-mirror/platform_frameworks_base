@@ -15,18 +15,18 @@
  */
 package com.android.databinding.testapp;
 
-import com.android.databinding.testapp.generated.ViewStubAdapterTestBinder;
+import com.android.databinding.testapp.generated.ViewStubAdapterTestBinding;
 import com.android.databinding.testapp.vo.ViewStubBindingObject;
 
 import android.view.ViewStub;
 
 public class ViewStubBindingAdapterTest
-        extends BindingAdapterTestBase<ViewStubAdapterTestBinder, ViewStubBindingObject> {
+        extends BindingAdapterTestBase<ViewStubAdapterTestBinding, ViewStubBindingObject> {
 
     ViewStub mView;
 
     public ViewStubBindingAdapterTest() {
-        super(ViewStubAdapterTestBinder.class, ViewStubBindingObject.class,
+        super(ViewStubAdapterTestBinding.class, ViewStubBindingObject.class,
                 R.layout.view_stub_adapter_test);
     }
 

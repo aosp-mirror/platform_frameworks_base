@@ -15,19 +15,15 @@
  */
 package com.android.databinding.testapp;
 
-import com.android.databinding.library.PropertyChangeRegistry;
-import com.android.databinding.testapp.generated.BasicBindingBinder;
+import com.android.databinding.testapp.generated.BasicBindingBinding;
 
-import android.binding.Observable;
-import android.binding.OnPropertyChangedListener;
 import android.util.ArrayMap;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
-import java.util.ArrayList;
 import java.util.HashSet;
 
-public class ProcessBindableTest extends BaseDataBinderTest<BasicBindingBinder> {
+public class ProcessBindableTest extends BaseDataBinderTest<BasicBindingBinding> {
     private static String[] EXPECTED_BINDING_NAMES = {
             "bindableField1",
             "bindableField2",
@@ -40,7 +36,7 @@ public class ProcessBindableTest extends BaseDataBinderTest<BasicBindingBinder> 
     };
 
     public ProcessBindableTest() {
-        super(BasicBindingBinder.class, R.layout.basic_binding);
+        super(BasicBindingBinding.class);
     }
 
     public void testFieldsGenerated() throws IllegalAccessException {

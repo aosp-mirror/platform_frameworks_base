@@ -13,13 +13,13 @@
 
 package com.android.databinding.testapp;
 
-import com.android.databinding.library.IViewDataBinder;
+import com.android.databinding.library.ViewDataBinding;
 
 import android.content.pm.ActivityInfo;
 
-public class BaseLandDataBinderTest<T extends IViewDataBinder> extends BaseDataBinderTest<T> {
+public class BaseLandDataBinderTest<T extends ViewDataBinding> extends BaseDataBinderTest<T> {
 
     public BaseLandDataBinderTest(Class<T> binderClass, int layoutId) {
-        super(binderClass, layoutId, ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+        super(binderClass, ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
     }
 }

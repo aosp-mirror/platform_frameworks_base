@@ -15,7 +15,7 @@
  */
 package com.android.databinding.testapp;
 
-import com.android.databinding.testapp.generated.CheckedTextViewAdapterTestBinder;
+import com.android.databinding.testapp.generated.CheckedTextViewAdapterTestBinding;
 import com.android.databinding.testapp.vo.CheckedTextViewBindingObject;
 
 import android.graphics.drawable.ColorDrawable;
@@ -23,12 +23,12 @@ import android.os.Build;
 import android.widget.CheckedTextView;
 
 public class CheckedTextViewBindingAdapterTest extends
-        BindingAdapterTestBase<CheckedTextViewAdapterTestBinder, CheckedTextViewBindingObject> {
+        BindingAdapterTestBase<CheckedTextViewAdapterTestBinding, CheckedTextViewBindingObject> {
 
     CheckedTextView mView;
 
     public CheckedTextViewBindingAdapterTest() {
-        super(CheckedTextViewAdapterTestBinder.class, CheckedTextViewBindingObject.class,
+        super(CheckedTextViewAdapterTestBinding.class, CheckedTextViewBindingObject.class,
                 R.layout.checked_text_view_adapter_test);
     }
 

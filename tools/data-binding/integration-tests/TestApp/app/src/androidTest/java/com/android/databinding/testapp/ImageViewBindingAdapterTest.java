@@ -15,18 +15,18 @@
  */
 package com.android.databinding.testapp;
 
-import com.android.databinding.testapp.generated.ImageViewAdapterTestBinder;
+import com.android.databinding.testapp.generated.ImageViewAdapterTestBinding;
 import com.android.databinding.testapp.vo.ImageViewBindingObject;
 
 import android.widget.ImageView;
 
 public class ImageViewBindingAdapterTest
-        extends BindingAdapterTestBase<ImageViewAdapterTestBinder, ImageViewBindingObject> {
+        extends BindingAdapterTestBase<ImageViewAdapterTestBinding, ImageViewBindingObject> {
 
     ImageView mView;
 
     public ImageViewBindingAdapterTest() {
-        super(ImageViewAdapterTestBinder.class, ImageViewBindingObject.class,
+        super(ImageViewAdapterTestBinding.class, ImageViewBindingObject.class,
                 R.layout.image_view_adapter_test);
     }
 

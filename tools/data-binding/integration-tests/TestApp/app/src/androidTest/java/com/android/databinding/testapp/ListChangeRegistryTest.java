@@ -16,18 +16,18 @@
 package com.android.databinding.testapp;
 
 import com.android.databinding.library.ListChangeRegistry;
-import com.android.databinding.testapp.generated.BasicBindingBinder;
+import com.android.databinding.testapp.generated.BasicBindingBinding;
 
 import android.binding.OnListChangedListener;
 
-public class ListChangeRegistryTest extends BaseDataBinderTest<BasicBindingBinder> {
+public class ListChangeRegistryTest extends BaseDataBinderTest<BasicBindingBinding> {
 
     private ListChangeRegistry mListChangeRegistry;
 
     private int mCallCount;
 
     public ListChangeRegistryTest() {
-        super(BasicBindingBinder.class, R.layout.basic_binding);
+        super(BasicBindingBinding.class);
     }
 
     @Override

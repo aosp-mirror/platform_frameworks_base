@@ -14,21 +14,18 @@
 package com.android.databinding.testapp;
 
 import com.android.databinding.library.DataBinderTrojan;
-import com.android.databinding.testapp.generated.NewApiLayoutBinder;
+import com.android.databinding.testapp.generated.NewApiLayoutBinding;
 
-import android.content.Context;
 import android.os.Build;
 import android.test.UiThreadTest;
-import android.util.AttributeSet;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.TextView;
 
 import java.util.ArrayList;
 
-public class NewApiTest extends BaseDataBinderTest<NewApiLayoutBinder> {
+public class NewApiTest extends BaseDataBinderTest<NewApiLayoutBinding> {
     public NewApiTest() {
-        super(NewApiLayoutBinder.class, R.layout.new_api_layout);
+        super(NewApiLayoutBinding.class);
     }
 
     @UiThreadTest
@@ -36,7 +33,7 @@ public class NewApiTest extends BaseDataBinderTest<NewApiLayoutBinder> {
         mBinder.setElevation(3);
         mBinder.setName("foo");
         mBinder.setChildren(new ArrayList<View>());
-        mBinder.rebindDirty();
+        mBinder.executePendingBindings();
         assertEquals("foo", mBinder.getTextView().getText().toString());
         assertEquals(3f, mBinder.getTextView().getElevation());
     }
@@ -49,7 +46,7 @@ public class NewApiTest extends BaseDataBinderTest<NewApiLayoutBinder> {
             float originalElevation = textView.getElevation();
             mBinder.setElevation(3);
             mBinder.setName("foo2");
-            mBinder.rebindDirty();
+            mBinder.executePendingBindings();
             assertEquals("foo2", textView.getText().toString());
             assertEquals(originalElevation, textView.getElevation());
         } finally {
@@ -61,7 +58,7 @@ public class NewApiTest extends BaseDataBinderTest<NewApiLayoutBinder> {
     public void testGeneric() {
         ArrayList<View> views = new ArrayList<>();
         mBinder.setChildren(views);
-        mBinder.rebindDirty();
+        mBinder.executePendingBindings();
         assertEquals(1, views.size());
         assertSame(mBinder.getTextView(), views.get(0));
     }
@@ -72,7 +69,7 @@ public class NewApiTest extends BaseDataBinderTest<NewApiLayoutBinder> {
         try {
             ArrayList<View> views = new ArrayList<>();
             mBinder.setChildren(views);
-            mBinder.rebindDirty();
+            mBinder.executePendingBindings();
             // we should not call the api on older platforms.
             assertEquals(0, views.size());
         } finally {

@@ -1,5 +1,5 @@
 Properties databindingProperties = new Properties()
-databindingProperties.load(new FileInputStream("databinding.properties"))
+databindingProperties.load(new FileInputStream("${projectDir}/databinding.properties"))
 databindingProperties.mavenRepoDir = "${projectDir}/${databindingProperties.mavenRepoName}"
 ext.config = databindingProperties
 

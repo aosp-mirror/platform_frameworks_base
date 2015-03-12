@@ -15,7 +15,7 @@
  */
 package com.android.databinding.testapp;
 
-import com.android.databinding.testapp.generated.AutoCompleteTextViewAdapterTestBinder;
+import com.android.databinding.testapp.generated.AutoCompleteTextViewAdapterTestBinding;
 import com.android.databinding.testapp.vo.AutoCompleteTextViewBindingObject;
 
 import android.graphics.drawable.ColorDrawable;
@@ -23,13 +23,13 @@ import android.os.Build;
 import android.widget.AutoCompleteTextView;
 
 public class AutoCompleteTextViewBindingAdapterTest extends
-        BindingAdapterTestBase<AutoCompleteTextViewAdapterTestBinder,
+        BindingAdapterTestBase<AutoCompleteTextViewAdapterTestBinding,
                 AutoCompleteTextViewBindingObject> {
 
     AutoCompleteTextView mView;
 
     public AutoCompleteTextViewBindingAdapterTest() {
-        super(AutoCompleteTextViewAdapterTestBinder.class, AutoCompleteTextViewBindingObject.class,
+        super(AutoCompleteTextViewAdapterTestBinding.class, AutoCompleteTextViewBindingObject.class,
                 R.layout.auto_complete_text_view_adapter_test);
     }
 

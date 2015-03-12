@@ -15,7 +15,7 @@
  */
 package com.android.databinding.testapp;
 
-import com.android.databinding.testapp.generated.AbsListViewAdapterTestBinder;
+import com.android.databinding.testapp.generated.AbsListViewAdapterTestBinding;
 import com.android.databinding.testapp.vo.AbsListViewBindingObject;
 
 import android.graphics.drawable.ColorDrawable;
@@ -24,12 +24,12 @@ import android.os.Debug;
 import android.widget.ListView;
 
 public class AbsListViewBindingAdapterTest
-        extends BindingAdapterTestBase<AbsListViewAdapterTestBinder, AbsListViewBindingObject> {
+        extends BindingAdapterTestBase<AbsListViewAdapterTestBinding, AbsListViewBindingObject> {
 
     ListView mView;
 
     public AbsListViewBindingAdapterTest() {
-        super(AbsListViewAdapterTestBinder.class, AbsListViewBindingObject.class,
+        super(AbsListViewAdapterTestBinding.class, AbsListViewBindingObject.class,
                 R.layout.abs_list_view_adapter_test);
     }
 

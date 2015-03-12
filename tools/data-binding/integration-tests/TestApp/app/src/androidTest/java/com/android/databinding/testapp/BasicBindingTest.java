@@ -13,13 +13,13 @@
 
 package com.android.databinding.testapp;
 
-import com.android.databinding.testapp.generated.BasicBindingBinder;
+import com.android.databinding.testapp.generated.BasicBindingBinding;
 
 import android.test.UiThreadTest;
 
-public class BasicBindingTest extends BaseDataBinderTest<BasicBindingBinder> {
+public class BasicBindingTest extends BaseDataBinderTest<BasicBindingBinding> {
     public BasicBindingTest() {
-        super(BasicBindingBinder.class, R.layout.basic_binding);
+        super(BasicBindingBinding.class);
     }
 
     @UiThreadTest
@@ -69,7 +69,7 @@ public class BasicBindingTest extends BaseDataBinderTest<BasicBindingBinder> {
     }
 
     private void rebindAndAssert(String text) {
-        mBinder.rebindDirty();
+        mBinder.executePendingBindings();
         assertEquals(text, mBinder.getTextView().getText().toString());
     }
 }

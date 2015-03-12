@@ -15,19 +15,19 @@
  */
 package com.android.databinding.testapp;
 
-import com.android.databinding.testapp.generated.ProgressBarAdapterTestBinder;
+import com.android.databinding.testapp.generated.ProgressBarAdapterTestBinding;
 import com.android.databinding.testapp.vo.ProgressBarBindingObject;
 
 import android.os.Build;
 import android.widget.ProgressBar;
 
 public class ProgressBarBindingAdapterTest
-        extends BindingAdapterTestBase<ProgressBarAdapterTestBinder, ProgressBarBindingObject> {
+        extends BindingAdapterTestBase<ProgressBarAdapterTestBinding, ProgressBarBindingObject> {
 
     ProgressBar mView;
 
     public ProgressBarBindingAdapterTest() {
-        super(ProgressBarAdapterTestBinder.class, ProgressBarBindingObject.class,
+        super(ProgressBarAdapterTestBinding.class, ProgressBarBindingObject.class,
                 R.layout.progress_bar_adapter_test);
     }
 

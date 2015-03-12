@@ -15,7 +15,7 @@
  */
 package com.android.databinding.testapp;
 
-import com.android.databinding.testapp.generated.SpinnerAdapterTestBinder;
+import com.android.databinding.testapp.generated.SpinnerAdapterTestBinding;
 import com.android.databinding.testapp.vo.SpinnerBindingObject;
 
 import android.graphics.drawable.ColorDrawable;
@@ -23,12 +23,12 @@ import android.os.Build;
 import android.widget.Spinner;
 
 public class SpinnerBindingAdapterTest
-        extends BindingAdapterTestBase<SpinnerAdapterTestBinder, SpinnerBindingObject> {
+        extends BindingAdapterTestBase<SpinnerAdapterTestBinding, SpinnerBindingObject> {
 
     Spinner mView;
 
     public SpinnerBindingAdapterTest() {
-        super(SpinnerAdapterTestBinder.class, SpinnerBindingObject.class,
+        super(SpinnerAdapterTestBinding.class, SpinnerBindingObject.class,
                 R.layout.spinner_adapter_test);
     }
 

@@ -1,14 +1,14 @@
 package com.android.databinding.testapp;
 
-import com.android.databinding.testapp.generated.ConditionalBindingBinder;
+import com.android.databinding.testapp.generated.ConditionalBindingBinding;
 import com.android.databinding.testapp.vo.NotBindableVo;
 
 import android.test.UiThreadTest;
 
-public class ConditionalBindingTest extends BaseDataBinderTest<ConditionalBindingBinder>{
+public class ConditionalBindingTest extends BaseDataBinderTest<ConditionalBindingBinding>{
 
     public ConditionalBindingTest() {
-        super(ConditionalBindingBinder.class, R.layout.conditional_binding);
+        super(ConditionalBindingBinding.class);
     }
 
     @UiThreadTest
@@ -25,7 +25,7 @@ public class ConditionalBindingTest extends BaseDataBinderTest<ConditionalBindin
         mBinder.setObj3(o3);
         mBinder.setCond1(cond1);
         mBinder.setCond2(cond2);
-        mBinder.rebindDirty();
+        mBinder.executePendingBindings();
         final String text = mBinder.getTextView().getText().toString();
         assertEquals(cond1 && cond2, "a".equals(text));
         assertEquals(cond1 && !cond2, "b".equals(text));

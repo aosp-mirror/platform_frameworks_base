@@ -16,17 +16,17 @@
 package com.android.databinding.testapp;
 
 import com.android.databinding.library.PropertyChangeRegistry;
-import com.android.databinding.testapp.generated.BasicBindingBinder;
+import com.android.databinding.testapp.generated.BasicBindingBinding;
 
 import android.binding.Observable;
 import android.binding.OnPropertyChangedListener;
 
-public class PropertyChangeRegistryTest extends BaseDataBinderTest<BasicBindingBinder> {
+public class PropertyChangeRegistryTest extends BaseDataBinderTest<BasicBindingBinding> {
 
     private int notificationCount = 0;
 
     public PropertyChangeRegistryTest() {
-        super(BasicBindingBinder.class, R.layout.basic_binding);
+        super(BasicBindingBinding.class);
     }
 
     public void testNotifyChanged() {

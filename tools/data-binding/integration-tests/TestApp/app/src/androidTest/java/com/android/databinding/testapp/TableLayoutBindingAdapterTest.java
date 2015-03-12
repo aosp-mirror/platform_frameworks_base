@@ -15,7 +15,7 @@
  */
 package com.android.databinding.testapp;
 
-import com.android.databinding.testapp.generated.TableLayoutAdapterTestBinder;
+import com.android.databinding.testapp.generated.TableLayoutAdapterTestBinding;
 import com.android.databinding.testapp.vo.TableLayoutBindingObject;
 
 import android.graphics.drawable.ColorDrawable;
@@ -23,12 +23,12 @@ import android.os.Build;
 import android.widget.TableLayout;
 
 public class TableLayoutBindingAdapterTest
-        extends BindingAdapterTestBase<TableLayoutAdapterTestBinder, TableLayoutBindingObject> {
+        extends BindingAdapterTestBase<TableLayoutAdapterTestBinding, TableLayoutBindingObject> {
 
     TableLayout mView;
 
     public TableLayoutBindingAdapterTest() {
-        super(TableLayoutAdapterTestBinder.class, TableLayoutBindingObject.class,
+        super(TableLayoutAdapterTestBinding.class, TableLayoutBindingObject.class,
                 R.layout.table_layout_adapter_test);
     }
 

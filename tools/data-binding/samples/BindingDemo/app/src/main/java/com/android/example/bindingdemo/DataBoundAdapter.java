@@ -3,10 +3,10 @@ package com.android.example.bindingdemo;
 import android.support.v7.widget.RecyclerView;
 import android.view.ViewGroup;
 
-import com.android.databinding.library.DataBinder;
-import com.android.databinding.library.IViewDataBinder;
+import com.android.databinding.library.DataBindingUtil;
+import com.android.databinding.library.ViewDataBinding;
 
-abstract public class DataBoundAdapter<T extends IViewDataBinder>
+abstract public class DataBoundAdapter<T extends ViewDataBinding>
         extends RecyclerView.Adapter<DataBoundAdapter.DataBoundViewHolder<T>> {
     final int mLayoutId;
     final Class<T> mBinderInterface;
@@ -17,11 +17,11 @@ abstract public class DataBoundAdapter<T extends IViewDataBinder>
 
     @Override
     public DataBoundAdapter.DataBoundViewHolder<T> onCreateViewHolder(ViewGroup viewGroup, int type) {
-        T binder = DataBinder.createBinder(mBinderInterface, viewGroup.getContext(), mLayoutId, viewGroup);
-        return new DataBoundViewHolder<T>(binder);
+        T binder = DataBindingUtil.inflate(viewGroup.getContext(), mLayoutId, viewGroup, false);
+        return new DataBoundViewHolder(binder);
     }
 
-    static class DataBoundViewHolder<T extends IViewDataBinder> extends RecyclerView.ViewHolder {
+    static class DataBoundViewHolder<T extends ViewDataBinding> extends RecyclerView.ViewHolder {
         public final T dataBinder;
         public DataBoundViewHolder(T mViewBinder) {
             super(mViewBinder.getRoot());

@@ -15,7 +15,7 @@
  */
 package com.android.databinding.testapp;
 
-import com.android.databinding.testapp.generated.ViewAdapterTestBinder;
+import com.android.databinding.testapp.generated.ViewAdapterTestBinding;
 import com.android.databinding.testapp.vo.ViewBindingObject;
 
 import android.content.res.ColorStateList;
@@ -23,10 +23,10 @@ import android.os.Build;
 import android.test.UiThreadTest;
 import android.view.View;
 
-public class ViewBindingAdapterTest extends BindingAdapterTestBase<ViewAdapterTestBinder, ViewBindingObject> {
+public class ViewBindingAdapterTest extends BindingAdapterTestBase<ViewAdapterTestBinding, ViewBindingObject> {
 
     public ViewBindingAdapterTest() {
-        super(ViewAdapterTestBinder.class, ViewBindingObject.class, R.layout.view_adapter_test);
+        super(ViewAdapterTestBinding.class, ViewBindingObject.class, R.layout.view_adapter_test);
     }
 
     @Override

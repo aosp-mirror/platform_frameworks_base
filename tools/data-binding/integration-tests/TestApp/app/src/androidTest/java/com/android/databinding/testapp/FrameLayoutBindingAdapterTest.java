@@ -15,19 +15,19 @@
  */
 package com.android.databinding.testapp;
 
-import com.android.databinding.testapp.generated.FrameLayoutAdapterTestBinder;
+import com.android.databinding.testapp.generated.FrameLayoutAdapterTestBinding;
 import com.android.databinding.testapp.vo.FrameLayoutBindingObject;
 
 import android.os.Build;
 import android.widget.FrameLayout;
 
 public class FrameLayoutBindingAdapterTest
-        extends BindingAdapterTestBase<FrameLayoutAdapterTestBinder, FrameLayoutBindingObject> {
+        extends BindingAdapterTestBase<FrameLayoutAdapterTestBinding, FrameLayoutBindingObject> {
 
     FrameLayout mView;
 
     public FrameLayoutBindingAdapterTest() {
-        super(FrameLayoutAdapterTestBinder.class, FrameLayoutBindingObject.class,
+        super(FrameLayoutAdapterTestBinding.class, FrameLayoutBindingObject.class,
                 R.layout.frame_layout_adapter_test);
     }
 

@@ -13,15 +13,15 @@
 
 package com.android.databinding.testapp;
 
-import com.android.databinding.testapp.generated.NoIdTestBinder;
+import com.android.databinding.testapp.generated.NoIdTestBinding;
 
 import android.test.UiThreadTest;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-public class NoIdTest extends BaseDataBinderTest<NoIdTestBinder> {
+public class NoIdTest extends BaseDataBinderTest<NoIdTestBinding> {
     public NoIdTest() {
-        super(NoIdTestBinder.class, R.layout.no_id_test);
+        super(NoIdTestBinding.class);
     }
 
     @Override
@@ -33,7 +33,7 @@ public class NoIdTest extends BaseDataBinderTest<NoIdTestBinder> {
                 public void run() {
                     mBinder.setName("hello");
                     mBinder.setOrientation(LinearLayout.VERTICAL);
-                    mBinder.rebindDirty();
+                    mBinder.executePendingBindings();
                 }
             });
         } catch (Throwable throwable) {
@@ -46,7 +46,7 @@ public class NoIdTest extends BaseDataBinderTest<NoIdTestBinder> {
         LinearLayout linearLayout = (LinearLayout) mBinder.getRoot();
         assertEquals(LinearLayout.VERTICAL, linearLayout.getOrientation());
         mBinder.setOrientation(LinearLayout.HORIZONTAL);
-        mBinder.rebindDirty();
+        mBinder.executePendingBindings();
         assertEquals(LinearLayout.HORIZONTAL, linearLayout.getOrientation());
     }
 
@@ -57,7 +57,7 @@ public class NoIdTest extends BaseDataBinderTest<NoIdTestBinder> {
         assertEquals("hello world", view.getTag());
         assertEquals("hello", view.getText().toString());
         mBinder.setName("world");
-        mBinder.rebindDirty();
+        mBinder.executePendingBindings();
         assertEquals("world", view.getText().toString());
     }
 
