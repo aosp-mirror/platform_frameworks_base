@@ -380,6 +380,7 @@ void TessellationCache::precacheShadows(const Matrix4* drawTransform, const Rect
         const Vector3& lightCenter, float lightRadius) {
     ShadowDescription key(casterPerimeter, drawTransform);
 
+    if (mShadowCache.get(key)) return;
     sp<ShadowTask> task = new ShadowTask(drawTransform, localClip, opaque,
             casterPerimeter, transformXY, transformZ, lightCenter, lightRadius);
     if (mShadowProcessor == NULL) {
