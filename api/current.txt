@@ -34162,6 +34162,7 @@ package android.view {
     method protected float getRightFadingEdgeStrength();
     method protected int getRightPaddingOffset();
     method public android.view.View getRootView();
+    method public android.view.WindowInsets getRootWindowInsets();
     method public float getRotation();
     method public float getRotationX();
     method public float getRotationY();

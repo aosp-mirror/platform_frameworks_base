@@ -265,6 +265,8 @@ public final class ViewRootImpl implements ViewParent,
     final Rect mDispatchContentInsets = new Rect();
     final Rect mDispatchStableInsets = new Rect();
 
+    private WindowInsets mLastWindowInsets;
+
     final Configuration mLastConfiguration = new Configuration();
     final Configuration mPendingConfiguration = new Configuration();
 
@@ -550,6 +552,11 @@ public final class ViewRootImpl implements ViewParent,
                 mPendingContentInsets.set(mAttachInfo.mContentInsets);
                 mPendingStableInsets.set(mAttachInfo.mStableInsets);
                 mPendingVisibleInsets.set(0, 0, 0, 0);
+                try {
+                    relayoutWindow(attrs, getHostVisibility(), false);
+                } catch (RemoteException e) {
+                    if (DEBUG_LAYOUT) Log.e(TAG, "failed to relayoutWindow", e);
+                }
                 if (DEBUG_LAYOUT) Log.v(TAG, "Added window " + mWindow);
                 if (res < WindowManagerGlobal.ADD_OKAY) {
                     mAttachInfo.mRootView = null;
@@ -1227,13 +1234,29 @@ public final class ViewRootImpl implements ViewParent,
         m.postTranslate(-mAttachInfo.mWindowLeft, -mAttachInfo.mWindowTop);
     }
 
+    /* package */ WindowInsets getWindowInsets(boolean forceConstruct) {
+        if (mLastWindowInsets == null || forceConstruct) {
+            mDispatchContentInsets.set(mAttachInfo.mContentInsets);
+            mDispatchStableInsets.set(mAttachInfo.mStableInsets);
+            Rect contentInsets = mDispatchContentInsets;
+            Rect stableInsets = mDispatchStableInsets;
+            // For dispatch we preserve old logic, but for direct requests from Views we allow to
+            // immediately use pending insets.
+            if (!forceConstruct
+                    && (!mPendingContentInsets.equals(contentInsets) ||
+                        !mPendingStableInsets.equals(stableInsets))) {
+                contentInsets = mPendingContentInsets;
+                stableInsets = mPendingStableInsets;
+            }
+            final boolean isRound = (mIsEmulator && mIsCircularEmulator) || mWindowIsRound;
+            mLastWindowInsets = new WindowInsets(contentInsets,
+                    null /* windowDecorInsets */, stableInsets, isRound);
+        }
+        return mLastWindowInsets;
+    }
+
     void dispatchApplyInsets(View host) {
-        mDispatchContentInsets.set(mAttachInfo.mContentInsets);
-        mDispatchStableInsets.set(mAttachInfo.mStableInsets);
-        final boolean isRound = (mIsEmulator && mIsCircularEmulator) || mWindowIsRound;
-        host.dispatchApplyWindowInsets(new WindowInsets(
-                mDispatchContentInsets, null /* windowDecorInsets */,
-                mDispatchStableInsets, isRound));
+        host.dispatchApplyWindowInsets(getWindowInsets(true /* forceConstruct */));
     }
 
     private void performTraversals() {
