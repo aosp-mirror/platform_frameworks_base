@@ -701,6 +701,12 @@ const char16_t* ResStringPool::stringAt(size_t idx, size_t* u16len) const
 
                 *u16len = decodeLength(&str);
                 if ((uint32_t)(str+*u16len-strings) < mStringPoolSize) {
+                    // Reject malformed (non null-terminated) strings
+                    if (str[*u16len] != 0x0000) {
+                        ALOGW("Bad string block: string #%d is not null-terminated",
+                              (int)idx);
+                        return NULL;
+                    }
                     return reinterpret_cast<const char16_t*>(str);
                 } else {
                     ALOGW("Bad string block: string #%d extends to %d, past end at %d\n",
@@ -745,6 +751,13 @@ const char16_t* ResStringPool::stringAt(size_t idx, size_t* u16len) const
                         ALOGW("Bad string block: string #%lld decoded length is not correct "
                                 "%lld vs %llu\n",
                                 (long long)idx, (long long)actualLen, (long long)*u16len);
+                        return NULL;
+                    }
+
+                    // Reject malformed (non null-terminated) strings
+                    if (u8str[u8len] != 0x00) {
+                        ALOGW("Bad string block: string #%d is not null-terminated",
+                              (int)idx);
                         return NULL;
                     }
 
