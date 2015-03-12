@@ -25,6 +25,7 @@ import android.hardware.camera2.ICameraDeviceCallbacks;
 import android.hardware.camera2.ICameraDeviceUser;
 import android.hardware.camera2.impl.CameraMetadataNative;
 import android.hardware.camera2.impl.CaptureResultExtras;
+import android.hardware.camera2.params.OutputConfiguration;
 import android.hardware.camera2.utils.BinderHolder;
 import android.media.Image;
 import android.media.ImageReader;
@@ -67,6 +68,7 @@ public class CameraDeviceBinderTest extends AndroidTestCase {
     private CameraBinderTestUtils mUtils;
     private ICameraDeviceCallbacks.Stub mMockCb;
     private Surface mSurface;
+    private OutputConfiguration mOutputConfiguration;
     private HandlerThread mHandlerThread;
     private Handler mHandler;
     ImageReader mImageReader;
@@ -147,6 +149,7 @@ public class CameraDeviceBinderTest extends AndroidTestCase {
                         MAX_NUM_IMAGES);
         mImageReader.setOnImageAvailableListener(new ImageDropperListener(), mHandler);
         mSurface = mImageReader.getSurface();
+        mOutputConfiguration = new OutputConfiguration(mSurface);
     }
 
     private CaptureRequest.Builder createDefaultBuilder(boolean needStream) throws Exception {
@@ -161,7 +164,7 @@ public class CameraDeviceBinderTest extends AndroidTestCase {
         assertFalse(request.isEmpty());
         assertFalse(metadata.isEmpty());
         if (needStream) {
-            int streamId = mCameraUser.createStream(mSurface);
+            int streamId = mCameraUser.createStream(mOutputConfiguration);
             assertEquals(0, streamId);
             request.addTarget(mSurface);
         }
@@ -234,11 +237,11 @@ public class CameraDeviceBinderTest extends AndroidTestCase {
 
     @SmallTest
     public void testCreateStream() throws Exception {
-        int streamId = mCameraUser.createStream(mSurface);
+        int streamId = mCameraUser.createStream(mOutputConfiguration);
         assertEquals(0, streamId);
 
         assertEquals(CameraBinderTestUtils.ALREADY_EXISTS,
-                mCameraUser.createStream(mSurface));
+                mCameraUser.createStream(mOutputConfiguration));
 
         assertEquals(CameraBinderTestUtils.NO_ERROR, mCameraUser.deleteStream(streamId));
     }
@@ -255,18 +258,19 @@ public class CameraDeviceBinderTest extends AndroidTestCase {
     public void testCreateStreamTwo() throws Exception {
 
         // Create first stream
-        int streamId = mCameraUser.createStream(mSurface);
+        int streamId = mCameraUser.createStream(mOutputConfiguration);
         assertEquals(0, streamId);
 
         assertEquals(CameraBinderTestUtils.ALREADY_EXISTS,
-                mCameraUser.createStream(mSurface));
+                mCameraUser.createStream(mOutputConfiguration));
 
         // Create second stream with a different surface.
         SurfaceTexture surfaceTexture = new SurfaceTexture(/* ignored */0);
         surfaceTexture.setDefaultBufferSize(640, 480);
         Surface surface2 = new Surface(surfaceTexture);
+        OutputConfiguration output2 = new OutputConfiguration(surface2);
 
-        int streamId2 = mCameraUser.createStream(surface2);
+        int streamId2 = mCameraUser.createStream(output2);
         assertEquals(1, streamId2);
 
         // Clean up streams

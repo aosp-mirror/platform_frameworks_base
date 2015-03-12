@@ -16,7 +16,7 @@
 
 package android.hardware.camera2;
 
-import android.view.Surface;
+import android.hardware.camera2.params.OutputConfiguration;
 import android.hardware.camera2.impl.CameraMetadataNative;
 import android.hardware.camera2.CaptureRequest;
 
@@ -66,7 +66,7 @@ interface ICameraDeviceUser
     int deleteStream(int streamId);
 
     // non-negative value is the stream ID. negative value is status_t
-    int createStream(in Surface surface);
+    int createStream(in OutputConfiguration outputConfiguration);
 
     int createDefaultRequest(int templateId, out CameraMetadataNative request);
 

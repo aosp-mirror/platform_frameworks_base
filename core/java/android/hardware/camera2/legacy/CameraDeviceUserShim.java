@@ -26,6 +26,7 @@ import android.hardware.camera2.ICameraDeviceUser;
 import android.hardware.camera2.utils.LongParcelable;
 import android.hardware.camera2.impl.CameraMetadataNative;
 import android.hardware.camera2.impl.CaptureResultExtras;
+import android.hardware.camera2.params.OutputConfiguration;
 import android.hardware.camera2.utils.CameraBinderDecorator;
 import android.hardware.camera2.utils.CameraRuntimeException;
 import android.os.ConditionVariable;
@@ -504,7 +505,7 @@ public class CameraDeviceUserShim implements ICameraDeviceUser {
     }
 
     @Override
-    public int createStream(Surface surface) {
+    public int createStream(OutputConfiguration outputConfiguration) {
         if (DEBUG) {
             Log.d(TAG, "createStream called.");
         }
@@ -518,8 +519,12 @@ public class CameraDeviceUserShim implements ICameraDeviceUser {
                 Log.e(TAG, "Cannot create stream, beginConfigure hasn't been called yet.");
                 return CameraBinderDecorator.INVALID_OPERATION;
             }
+            if (outputConfiguration.getRotation() != OutputConfiguration.ROTATION_0) {
+                Log.e(TAG, "Cannot create stream, stream rotation is not supported.");
+                return CameraBinderDecorator.INVALID_OPERATION;
+            }
             int id = ++mSurfaceIdCounter;
-            mSurfaces.put(id, surface);
+            mSurfaces.put(id, outputConfiguration.getSurface());
             return id;
         }
     }
