@@ -2596,7 +2596,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     voiceIntent = new Intent(RecognizerIntent.ACTION_VOICE_SEARCH_HANDS_FREE);
                     voiceIntent.putExtra(RecognizerIntent.EXTRA_SECURE, true);
                 }
-                mContext.startActivityAsUser(voiceIntent, UserHandle.CURRENT_OR_SELF);
+                startActivityAsUser(voiceIntent, UserHandle.CURRENT_OR_SELF);
             }
         } else if (keyCode == KeyEvent.KEYCODE_SYSRQ) {
             if (down && repeatCount == 0) {
@@ -2636,7 +2636,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 Settings.System.putIntForUser(mContext.getContentResolver(),
                         Settings.System.SCREEN_BRIGHTNESS, brightness,
                         UserHandle.USER_CURRENT_OR_SELF);
-                mContext.startActivityAsUser(new Intent(Intent.ACTION_SHOW_BRIGHTNESS_DIALOG),
+                startActivityAsUser(new Intent(Intent.ACTION_SHOW_BRIGHTNESS_DIALOG),
                         UserHandle.CURRENT_OR_SELF);
             }
             return -1;
@@ -2664,7 +2664,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     if (shortcutIntent != null) {
                         shortcutIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                         try {
-                            mContext.startActivityAsUser(shortcutIntent, UserHandle.CURRENT);
+                            startActivityAsUser(shortcutIntent, UserHandle.CURRENT);
                         } catch (ActivityNotFoundException ex) {
                             Slog.w(TAG, "Dropping shortcut key combination because "
                                     + "the activity to which it is registered was not found: "
@@ -2690,7 +2690,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 if (shortcutIntent != null) {
                     shortcutIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                     try {
-                        mContext.startActivityAsUser(shortcutIntent, UserHandle.CURRENT);
+                        startActivityAsUser(shortcutIntent, UserHandle.CURRENT);
                     } catch (ActivityNotFoundException ex) {
                         Slog.w(TAG, "Dropping shortcut key combination because "
                                 + "the activity to which it is registered was not found: "
@@ -2708,7 +2708,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 Intent intent = Intent.makeMainSelectorActivity(Intent.ACTION_MAIN, category);
                 intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 try {
-                    mContext.startActivityAsUser(intent, UserHandle.CURRENT);
+                    startActivityAsUser(intent, UserHandle.CURRENT);
                 } catch (ActivityNotFoundException ex) {
                     Slog.w(TAG, "Dropping application launch key because "
                             + "the activity to which it is registered was not found: "
@@ -2858,7 +2858,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             if (searchManager != null) {
                 searchManager.stopSearch();
             }
-            mContext.startActivityAsUser(intent, UserHandle.CURRENT);
+            startActivityAsUser(intent, UserHandle.CURRENT);
         } catch (ActivityNotFoundException e) {
             Slog.w(TAG, "No activity to handle assist long press action.", e);
         }
@@ -2880,10 +2880,18 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     | Intent.FLAG_ACTIVITY_SINGLE_TOP
                     | Intent.FLAG_ACTIVITY_CLEAR_TOP);
             try {
-                mContext.startActivityAsUser(intent, UserHandle.CURRENT);
+                startActivityAsUser(intent, UserHandle.CURRENT);
             } catch (ActivityNotFoundException e) {
                 Slog.w(TAG, "No activity to handle assist action.", e);
             }
+        }
+    }
+
+    private void startActivityAsUser(Intent intent, UserHandle handle) {
+        if (isUserSetupComplete()) {
+            mContext.startActivityAsUser(intent, handle);
+        } else {
+            Slog.i(TAG, "Not starting activity because user setup is in progress: " + intent);
         }
     }
 
@@ -4358,7 +4366,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 intent = new Intent(MediaStore.INTENT_ACTION_STILL_IMAGE_CAMERA);
             }
             wakeUp(whenNanos / 1000000, mAllowTheaterModeWakeFromCameraLens);
-            mContext.startActivityAsUser(intent, UserHandle.CURRENT_OR_SELF);
+            startActivityAsUser(intent, UserHandle.CURRENT_OR_SELF);
         }
         mCameraLensCoverState = lensCoverState;
     }
@@ -4913,7 +4921,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         Intent voiceIntent =
             new Intent(RecognizerIntent.ACTION_VOICE_SEARCH_HANDS_FREE);
         voiceIntent.putExtra(RecognizerIntent.EXTRA_SECURE, keyguardActive);
-        mContext.startActivityAsUser(voiceIntent, UserHandle.CURRENT_OR_SELF);
+        startActivityAsUser(voiceIntent, UserHandle.CURRENT_OR_SELF);
         mBroadcastWakeLock.release();
     }
 
@@ -5833,13 +5841,13 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         Intent dock = createHomeDockIntent();
         if (dock != null) {
             try {
-                mContext.startActivityAsUser(dock, UserHandle.CURRENT);
+                startActivityAsUser(dock, UserHandle.CURRENT);
                 return;
             } catch (ActivityNotFoundException e) {
             }
         }
 
-        mContext.startActivityAsUser(mHomeIntent, UserHandle.CURRENT);
+        startActivityAsUser(mHomeIntent, UserHandle.CURRENT);
     }
 
     /**
@@ -5847,6 +5855,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
      * @return whether it did anything
      */
     boolean goHome() {
+        if (!isUserSetupComplete()) {
+            Slog.i(TAG, "Not going home because user setup is in progress.");
+            return false;
+        }
         if (false) {
             // This code always brings home to the front.
             try {
