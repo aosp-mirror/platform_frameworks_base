@@ -19,13 +19,11 @@ package android.os;
 import static android.system.OsConstants.AF_UNIX;
 import static android.system.OsConstants.SEEK_SET;
 import static android.system.OsConstants.SOCK_STREAM;
-import static android.system.OsConstants.SOCK_SEQPACKET;
 import static android.system.OsConstants.S_ISLNK;
 import static android.system.OsConstants.S_ISREG;
 
 import android.content.BroadcastReceiver;
 import android.content.ContentProvider;
-import android.os.MessageQueue.FileDescriptorCallback;
 import android.system.ErrnoException;
 import android.system.Os;
 import android.system.OsConstants;
@@ -33,6 +31,7 @@ import android.system.StructStat;
 import android.util.Log;
 
 import dalvik.system.CloseGuard;
+
 import libcore.io.IoUtils;
 import libcore.io.Memory;
 
@@ -221,8 +220,8 @@ public class ParcelFileDescriptor implements Parcelable, Closeable {
      *             be opened with the requested mode.
      * @see #parseMode(String)
      */
-    public static ParcelFileDescriptor open(File file, int mode, Handler handler,
-            final OnCloseListener listener) throws IOException {
+    public static ParcelFileDescriptor open(
+            File file, int mode, Handler handler, OnCloseListener listener) throws IOException {
         if (handler == null) {
             throw new IllegalArgumentException("Handler must not be null");
         }
@@ -236,25 +235,10 @@ public class ParcelFileDescriptor implements Parcelable, Closeable {
         final FileDescriptor[] comm = createCommSocketPair();
         final ParcelFileDescriptor pfd = new ParcelFileDescriptor(fd, comm[0]);
 
-        handler.getLooper().getQueue().registerFileDescriptorCallback(comm[1],
-                FileDescriptorCallback.EVENT_INPUT, new FileDescriptorCallback() {
-            @Override
-            public int onFileDescriptorEvents(FileDescriptor fd, int events) {
-                Status status = null;
-                if ((events & FileDescriptorCallback.EVENT_INPUT) != 0) {
-                    final byte[] buf = new byte[MAX_STATUS];
-                    status = readCommStatus(fd, buf);
-                } else if ((events & FileDescriptorCallback.EVENT_ERROR) != 0) {
-                    status = new Status(Status.DEAD);
-                }
-                if (status != null) {
-                    IoUtils.closeQuietly(fd);
-                    listener.onClose(status.asIOException());
-                    return 0; // unregister the callback
-                }
-                return EVENT_INPUT;
-            }
-        });
+        // Kick off thread to watch for status updates
+        IoUtils.setBlocking(comm[1], true);
+        final ListenerBridge bridge = new ListenerBridge(comm[1], handler.getLooper(), listener);
+        bridge.start();
 
         return pfd;
     }
@@ -462,12 +446,9 @@ public class ParcelFileDescriptor implements Parcelable, Closeable {
 
     private static FileDescriptor[] createCommSocketPair() throws IOException {
         try {
-            // Use SOCK_SEQPACKET so that we have a guarantee that the status
-            // is written and read atomically as one unit and is not split
-            // across multiple IO operations.
             final FileDescriptor comm1 = new FileDescriptor();
             final FileDescriptor comm2 = new FileDescriptor();
-            Os.socketpair(AF_UNIX, SOCK_SEQPACKET, 0, comm1, comm2);
+            Os.socketpair(AF_UNIX, SOCK_STREAM, 0, comm1, comm2);
             IoUtils.setBlocking(comm1, false);
             IoUtils.setBlocking(comm2, false);
             return new FileDescriptor[] { comm1, comm2 };
@@ -728,7 +709,6 @@ public class ParcelFileDescriptor implements Parcelable, Closeable {
                     writePtr += len;
                 }
 
-                // Must write the entire status as a single operation.
                 Os.write(mCommFd, buf, 0, writePtr);
             } catch (ErrnoException e) {
                 // Reporting status is best-effort
@@ -746,7 +726,6 @@ public class ParcelFileDescriptor implements Parcelable, Closeable {
 
     private static Status readCommStatus(FileDescriptor comm, byte[] buf) {
         try {
-            // Must read the entire status as a single operation.
             final int n = Os.read(comm, buf, 0, buf.length);
             if (n == 0) {
                 // EOF means they're dead
@@ -1035,10 +1014,39 @@ public class ParcelFileDescriptor implements Parcelable, Closeable {
                     return new IOException("Unknown status: " + status);
             }
         }
+    }
+
+    /**
+     * Bridge to watch for remote status, and deliver to listener. Currently
+     * requires that communication socket is <em>blocking</em>.
+     */
+    private static final class ListenerBridge extends Thread {
+        // TODO: switch to using Looper to avoid burning a thread
+
+        private FileDescriptor mCommFd;
+        private final Handler mHandler;
+
+        public ListenerBridge(FileDescriptor comm, Looper looper, final OnCloseListener listener) {
+            mCommFd = comm;
+            mHandler = new Handler(looper) {
+                @Override
+                public void handleMessage(Message msg) {
+                    final Status s = (Status) msg.obj;
+                    listener.onClose(s != null ? s.asIOException() : null);
+                }
+            };
+        }
 
         @Override
-        public String toString() {
-            return "{" + status + ": " + msg + "}";
+        public void run() {
+            try {
+                final byte[] buf = new byte[MAX_STATUS];
+                final Status status = readCommStatus(mCommFd, buf);
+                mHandler.obtainMessage(0, status).sendToTarget();
+            } finally {
+                IoUtils.closeQuietly(mCommFd);
+                mCommFd = null;
+            }
         }
     }
 }
