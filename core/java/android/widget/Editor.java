@@ -3877,7 +3877,7 @@ public class Editor {
                     }
                 }
                 mPrevOffset = offset;
-                mTouchWordOffset = trueOffset - offset;
+                mTouchWordOffset = Math.max(trueOffset - offset, 0);
                 mInWord = !isStartBoundary(offset);
                 positionCursor = true;
             } else if (offset - mTouchWordOffset > mPrevOffset) {
@@ -3981,7 +3981,7 @@ public class Editor {
                     }
                 }
                 mPrevOffset = offset;
-                mTouchWordOffset = offset - trueOffset;
+                mTouchWordOffset = Math.max(offset - trueOffset, 0);
                 mInWord = !isEndBoundary(offset);
                 positionCursor = true;
             } else if (offset + mTouchWordOffset < mPrevOffset) {
