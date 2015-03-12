@@ -37,30 +37,23 @@ import java.awt.image.WritableRaster;
  */
 public final class BlendComposite implements Composite {
     public enum BlendingMode {
-        MULTIPLY(Multiply),
-        SCREEN(Screen),
-        DARKEN(Darken),
-        LIGHTEN(Lighten),
-        OVERLAY(Overlay),
-        ADD(Add);
+        MULTIPLY(),
+        SCREEN(),
+        DARKEN(),
+        LIGHTEN(),
+        OVERLAY(),
+        ADD();
 
-        private BlendComposite mComposite;
+        private final BlendComposite mComposite;
 
-        BlendingMode(BlendComposite composite) {
-            mComposite = composite;
+        BlendingMode() {
+            mComposite = new BlendComposite(this);
         }
 
         BlendComposite getBlendComposite() {
             return mComposite;
         }
     }
-
-    public static final BlendComposite Multiply = new BlendComposite(BlendingMode.MULTIPLY);
-    public static final BlendComposite Screen = new BlendComposite(BlendingMode.SCREEN);
-    public static final BlendComposite Darken = new BlendComposite(BlendingMode.DARKEN);
-    public static final BlendComposite Lighten = new BlendComposite(BlendingMode.LIGHTEN);
-    public static final BlendComposite Overlay = new BlendComposite(BlendingMode.OVERLAY);
-    public static final BlendComposite Add = new BlendComposite(BlendingMode.ADD);
 
     private float alpha;
     private BlendingMode mode;
