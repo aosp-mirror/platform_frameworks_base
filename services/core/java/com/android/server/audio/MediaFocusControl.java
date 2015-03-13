@@ -653,6 +653,7 @@ public class MediaFocusControl implements OnFinished {
                 return;
             } else {
                 mFocusFollowers.add(ff);
+                notifyExtPolicyCurrentFocusAsync(ff);
             }
         }
     }
@@ -672,6 +673,32 @@ public class MediaFocusControl implements OnFinished {
     }
 
     /**
+     * @param pcb non null
+     */
+    void notifyExtPolicyCurrentFocusAsync(IAudioPolicyCallback pcb) {
+        final IAudioPolicyCallback pcb2 = pcb;
+        final Thread thread = new Thread() {
+            @Override
+            public void run() {
+                synchronized(mAudioFocusLock) {
+                    if (mFocusStack.isEmpty()) {
+                        return;
+                    }
+                    try {
+                        pcb2.notifyAudioFocusGrant(mFocusStack.peek().toAudioFocusInfo(),
+                                // top of focus stack always has focus
+                                AudioManager.AUDIOFOCUS_REQUEST_GRANTED);
+                    } catch (RemoteException e) {
+                        Log.e(TAG, "Can't call notifyAudioFocusGrant() on IAudioPolicyCallback "
+                                + pcb2.asBinder(), e);
+                    }
+                }
+            }
+        };
+        thread.start();
+    }
+
+    /**
      * Called synchronized on mAudioFocusLock
      */
     void notifyExtPolicyFocusGrant_syncAf(AudioFocusInfo afi, int requestResult) {
@@ -680,7 +707,7 @@ public class MediaFocusControl implements OnFinished {
                 // oneway
                 pcb.notifyAudioFocusGrant(afi, requestResult);
             } catch (RemoteException e) {
-                Log.e(TAG, "Can't call newAudioFocusLoser() on IAudioPolicyCallback "
+                Log.e(TAG, "Can't call notifyAudioFocusGrant() on IAudioPolicyCallback "
                         + pcb.asBinder(), e);
             }
         }
@@ -695,7 +722,7 @@ public class MediaFocusControl implements OnFinished {
                 // oneway
                 pcb.notifyAudioFocusLoss(afi, wasDispatched);
             } catch (RemoteException e) {
-                Log.e(TAG, "Can't call newAudioFocusLoser() on IAudioPolicyCallback "
+                Log.e(TAG, "Can't call notifyAudioFocusLoss() on IAudioPolicyCallback "
                         + pcb.asBinder(), e);
             }
         }
