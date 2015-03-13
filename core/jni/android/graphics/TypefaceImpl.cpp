@@ -24,7 +24,6 @@
 
 #include "jni.h"  // for jlong, remove when being passed proper type
 
-#include "SkStream.h"
 #include "SkTypeface.h"
 
 #include <vector>

@@ -36,9 +36,7 @@
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 #include <SkImageEncoder.h>
-#include <SkBitmap.h>
 #include <SkData.h>
-#include <SkStream.h>
 #pragma GCC diagnostic pop
 
 using namespace android;
@@ -198,14 +196,11 @@ int main(int argc, char** argv)
         if (png) {
             const SkImageInfo info = SkImageInfo::Make(w, h, flinger2skia(f),
                                                        kPremul_SkAlphaType);
-            SkBitmap b;
-            b.installPixels(info, const_cast<void*>(base), s*bytesPerPixel(f));
-            SkDynamicMemoryWStream stream;
-            SkImageEncoder::EncodeStream(&stream, b,
-                    SkImageEncoder::kPNG_Type, SkImageEncoder::kDefaultQuality);
-            SkData* streamData = stream.copyToData();
-            write(fd, streamData->data(), streamData->size());
-            streamData->unref();
+            SkAutoTUnref<SkData> data(SkImageEncoder::EncodeData(info, base, s*bytesPerPixel(f),
+                    SkImageEncoder::kPNG_Type, SkImageEncoder::kDefaultQuality));
+            if (data.get()) {
+                write(fd, data->data(), data->size());
+            }
             if (fn != NULL) {
                 notifyMediaScanner(fn);
             }

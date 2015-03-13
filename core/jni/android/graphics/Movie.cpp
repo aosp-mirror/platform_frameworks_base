@@ -84,7 +84,7 @@ static void movie_draw(JNIEnv* env, jobject movie, jlong canvasHandle,
 static jobject movie_decodeAsset(JNIEnv* env, jobject clazz, jlong native_asset) {
     android::Asset* asset = reinterpret_cast<android::Asset*>(native_asset);
     if (asset == NULL) return NULL;
-    SkAutoTUnref<SkStreamRewindable> stream(new android::AssetStreamAdaptor(asset));
+    SkAutoTDelete<SkStreamRewindable> stream(new android::AssetStreamAdaptor(asset));
     SkMovie* moov = SkMovie::DecodeStream(stream.get());
     return create_jmovie(env, moov);
 }
@@ -104,11 +104,11 @@ static jobject movie_decodeStream(JNIEnv* env, jobject clazz, jobject istream) {
     // trying to determine the stream's format. The only decoder for movies is GIF, which
     // will only read 6.
     // FIXME: Get this number from SkImageDecoder
-    SkAutoTUnref<SkStreamRewindable> bufferedStream(SkFrontBufferedStream::Create(strm, 6));
+    // bufferedStream takes ownership of strm
+    SkAutoTDelete<SkStreamRewindable> bufferedStream(SkFrontBufferedStream::Create(strm, 6));
     SkASSERT(bufferedStream.get() != NULL);
 
     SkMovie* moov = SkMovie::DecodeStream(bufferedStream);
-    strm->unref();
     return create_jmovie(env, moov);
 }
 

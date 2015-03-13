@@ -69,10 +69,13 @@ private:
     int fHeight;
 };
 
+// Takes ownership of the SkStreamRewindable. For consistency, deletes stream even
+// when returning null.
 static jobject createBitmapRegionDecoder(JNIEnv* env, SkStreamRewindable* stream) {
     SkImageDecoder* decoder = SkImageDecoder::Factory(stream);
     int width, height;
     if (NULL == decoder) {
+        SkDELETE(stream);
         doThrowIOE(env, "Image format not supported");
         return nullObjectReturn("SkImageDecoder::Factory returned null");
     }
@@ -81,6 +84,7 @@ static jobject createBitmapRegionDecoder(JNIEnv* env, SkStreamRewindable* stream
     decoder->setAllocator(javaAllocator);
     javaAllocator->unref();
 
+    // This call passes ownership of stream to the decoder, or deletes on failure.
     if (!decoder->buildTileIndex(stream, &width, &height)) {
         char msg[100];
         snprintf(msg, sizeof(msg), "Image failed to decode using %s decoder",
@@ -103,8 +107,8 @@ static jobject nativeNewInstanceFromByteArray(JNIEnv* env, jobject, jbyteArray b
     AutoJavaByteArray ar(env, byteArray);
     SkMemoryStream* stream = new SkMemoryStream(ar.ptr() + offset, length, true);
 
+    // the decoder owns the stream.
     jobject brd = createBitmapRegionDecoder(env, stream);
-    SkSafeUnref(stream); // the decoder now holds a reference
     return brd;
 }
 
@@ -123,8 +127,8 @@ static jobject nativeNewInstanceFromFileDescriptor(JNIEnv* env, jobject clazz,
     SkAutoTUnref<SkData> data(SkData::NewFromFD(descriptor));
     SkMemoryStream* stream = new SkMemoryStream(data);
 
+    // the decoder owns the stream.
     jobject brd = createBitmapRegionDecoder(env, stream);
-    SkSafeUnref(stream); // the decoder now holds a reference
     return brd;
 }
 
@@ -137,8 +141,8 @@ static jobject nativeNewInstanceFromStream(JNIEnv* env, jobject clazz,
     SkStreamRewindable* stream = CopyJavaInputStream(env, is, storage);
 
     if (stream) {
+        // the decoder owns the stream.
         brd = createBitmapRegionDecoder(env, stream);
-        stream->unref(); // the decoder now holds a reference
     }
     return brd;
 }
@@ -147,13 +151,13 @@ static jobject nativeNewInstanceFromAsset(JNIEnv* env, jobject clazz,
                                  jlong native_asset, // Asset
                                  jboolean isShareable) {
     Asset* asset = reinterpret_cast<Asset*>(native_asset);
-    SkAutoTUnref<SkMemoryStream> stream(CopyAssetToStream(asset));
-    if (NULL == stream.get()) {
+    SkMemoryStream* stream = CopyAssetToStream(asset);
+    if (NULL == stream) {
         return NULL;
     }
 
-    jobject brd = createBitmapRegionDecoder(env, stream.get());
-    // The decoder now holds a reference to stream.
+    // the decoder owns the stream.
+    jobject brd = createBitmapRegionDecoder(env, stream);
     return brd;
 }
 

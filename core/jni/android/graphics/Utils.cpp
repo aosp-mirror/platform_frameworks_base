@@ -16,6 +16,7 @@
 
 #include "Utils.h"
 #include "SkUtils.h"
+#include "SkData.h"
 
 using namespace android;
 
@@ -87,27 +88,26 @@ SkMemoryStream* android::CopyAssetToStream(Asset* asset) {
         return NULL;
     }
 
-    off64_t size = asset->seek(0, SEEK_SET);
-    if ((off64_t)-1 == size) {
+    const off64_t seekReturnVal = asset->seek(0, SEEK_SET);
+    if ((off64_t)-1 == seekReturnVal) {
         SkDebugf("---- copyAsset: asset rewind failed\n");
         return NULL;
     }
 
-    size = asset->getLength();
+    const off64_t size = asset->getLength();
     if (size <= 0) {
         SkDebugf("---- copyAsset: asset->getLength() returned %d\n", size);
         return NULL;
     }
 
-    SkMemoryStream* stream = new SkMemoryStream(size);
-    void* data = const_cast<void*>(stream->getMemoryBase());
-    off64_t len = asset->read(data, size);
+    SkAutoTUnref<SkData> data(SkData::NewUninitialized(size));
+    const off64_t len = asset->read(data->writable_data(), size);
     if (len != size) {
         SkDebugf("---- copyAsset: asset->read(%d) returned %d\n", size, len);
-        delete stream;
-        stream = NULL;
+        return NULL;
     }
-    return stream;
+
+    return new SkMemoryStream(data);
 }
 
 jobject android::nullObjectReturn(const char msg[]) {
