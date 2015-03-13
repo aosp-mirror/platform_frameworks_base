@@ -235,8 +235,8 @@ public class ParcelFileDescriptor implements Parcelable, Closeable {
 
         final FileDescriptor[] comm = createCommSocketPair();
         final ParcelFileDescriptor pfd = new ParcelFileDescriptor(fd, comm[0]);
-
-        handler.getLooper().getQueue().registerFileDescriptorCallback(comm[1],
+        final MessageQueue queue = handler.getLooper().getQueue();
+        queue.registerFileDescriptorCallback(comm[1],
                 FileDescriptorCallback.EVENT_INPUT, new FileDescriptorCallback() {
             @Override
             public int onFileDescriptorEvents(FileDescriptor fd, int events) {
@@ -248,9 +248,10 @@ public class ParcelFileDescriptor implements Parcelable, Closeable {
                     status = new Status(Status.DEAD);
                 }
                 if (status != null) {
+                    queue.unregisterFileDescriptorCallback(fd);
                     IoUtils.closeQuietly(fd);
                     listener.onClose(status.asIOException());
-                    return 0; // unregister the callback
+                    return 0;
                 }
                 return EVENT_INPUT;
             }
