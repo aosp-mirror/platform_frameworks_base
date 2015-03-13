@@ -19197,7 +19197,8 @@ package android.net.wifi {
   }
 
   public class RttManager {
-    method public android.net.wifi.RttManager.Capabilities getCapabilities();
+    method public deprecated android.net.wifi.RttManager.Capabilities getCapabilities();
+    method public android.net.wifi.RttManager.RttCapabilities getRttCapabilities();
     method public void startRanging(android.net.wifi.RttManager.RttParams[], android.net.wifi.RttManager.RttListener);
     method public void stopRanging(android.net.wifi.RttManager.RttListener);
     field public static final int BASE = 160256; // 0x27200
@@ -19207,10 +19208,19 @@ package android.net.wifi {
     field public static final int CMD_OP_STOP_RANGING = 160257; // 0x27201
     field public static final int CMD_OP_SUCCEEDED = 160259; // 0x27203
     field public static final java.lang.String DESCRIPTION_KEY = "android.net.wifi.RttManager.Description";
+    field public static final int PREAMBLE_HT = 2; // 0x2
+    field public static final int PREAMBLE_LEGACY = 1; // 0x1
+    field public static final int PREAMBLE_VHT = 4; // 0x4
     field public static final int REASON_INVALID_LISTENER = -3; // 0xfffffffd
     field public static final int REASON_INVALID_REQUEST = -4; // 0xfffffffc
     field public static final int REASON_NOT_AVAILABLE = -2; // 0xfffffffe
     field public static final int REASON_UNSPECIFIED = -1; // 0xffffffff
+    field public static final int RTT_BW_10_SUPPORT = 2; // 0x2
+    field public static final int RTT_BW_160_SUPPORT = 32; // 0x20
+    field public static final int RTT_BW_20_SUPPORT = 4; // 0x4
+    field public static final int RTT_BW_40_SUPPORT = 8; // 0x8
+    field public static final int RTT_BW_5_SUPPORT = 1; // 0x1
+    field public static final int RTT_BW_80_SUPPORT = 16; // 0x10
     field public static final int RTT_CHANNEL_WIDTH_10 = 6; // 0x6
     field public static final int RTT_CHANNEL_WIDTH_160 = 3; // 0x3
     field public static final int RTT_CHANNEL_WIDTH_20 = 0; // 0x0
@@ -19218,26 +19228,31 @@ package android.net.wifi {
     field public static final int RTT_CHANNEL_WIDTH_5 = 5; // 0x5
     field public static final int RTT_CHANNEL_WIDTH_80 = 2; // 0x2
     field public static final int RTT_CHANNEL_WIDTH_80P80 = 4; // 0x4
-    field public static final int RTT_CHANNEL_WIDTH_UNSPECIFIED = -1; // 0xffffffff
+    field public static final deprecated int RTT_CHANNEL_WIDTH_UNSPECIFIED = -1; // 0xffffffff
     field public static final int RTT_PEER_TYPE_AP = 1; // 0x1
     field public static final int RTT_PEER_TYPE_STA = 2; // 0x2
     field public static final int RTT_PEER_TYPE_UNSPECIFIED = 0; // 0x0
     field public static final int RTT_STATUS_ABORTED = 8; // 0x8
     field public static final int RTT_STATUS_FAILURE = 1; // 0x1
     field public static final int RTT_STATUS_FAIL_AP_ON_DIFF_CHANNEL = 6; // 0x6
+    field public static final int RTT_STATUS_FAIL_BUSY_TRY_LATER = 12; // 0xc
+    field public static final int RTT_STATUS_FAIL_INVALID_TS = 9; // 0x9
     field public static final int RTT_STATUS_FAIL_NOT_SCHEDULED_YET = 4; // 0x4
     field public static final int RTT_STATUS_FAIL_NO_CAPABILITY = 7; // 0x7
     field public static final int RTT_STATUS_FAIL_NO_RSP = 2; // 0x2
+    field public static final int RTT_STATUS_FAIL_PROTOCOL = 10; // 0xa
     field public static final int RTT_STATUS_FAIL_REJECTED = 3; // 0x3
+    field public static final int RTT_STATUS_FAIL_SCHEDULE = 11; // 0xb
     field public static final int RTT_STATUS_FAIL_TM_TIMEOUT = 5; // 0x5
     field public static final int RTT_STATUS_SUCCESS = 0; // 0x0
-    field public static final int RTT_TYPE_11_MC = 4; // 0x4
-    field public static final int RTT_TYPE_11_V = 2; // 0x2
+    field public static final deprecated int RTT_TYPE_11_MC = 4; // 0x4
+    field public static final deprecated int RTT_TYPE_11_V = 2; // 0x2
     field public static final int RTT_TYPE_ONE_SIDED = 1; // 0x1
-    field public static final int RTT_TYPE_UNSPECIFIED = 0; // 0x0
+    field public static final int RTT_TYPE_TWO_SIDED = 4; // 0x4
+    field public static final deprecated int RTT_TYPE_UNSPECIFIED = 0; // 0x0
   }
 
-  public class RttManager.Capabilities {
+  public deprecated class RttManager.Capabilities {
     ctor public RttManager.Capabilities();
     field public int supportedPeerType;
     field public int supportedType;
@@ -19256,6 +19271,20 @@ package android.net.wifi {
     field public android.net.wifi.RttManager.RttResult[] mResults;
   }
 
+  public static class RttManager.RttCapabilities implements android.os.Parcelable {
+    ctor public RttManager.RttCapabilities();
+    method public int describeContents();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public int bwSupported;
+    field public boolean lciSupported;
+    field public boolean lcrSupported;
+    field public boolean oneSidedRttSupported;
+    field public int preambleSupported;
+    field public deprecated boolean supportedPeerType;
+    field public deprecated boolean supportedType;
+    field public boolean twoSided11McRttSupported;
+  }
+
   public static abstract interface RttManager.RttListener {
     method public abstract void onAborted();
     method public abstract void onFailure(int, java.lang.String);
@@ -19264,30 +19293,64 @@ package android.net.wifi {
 
   public static class RttManager.RttParams {
     ctor public RttManager.RttParams();
+    field public boolean LCIRequest;
+    field public boolean LCRRequest;
+    field public int bandwidth;
     field public java.lang.String bssid;
+    field public int burstTimeout;
+    field public int centerFreq0;
+    field public int centerFreq1;
     field public int channelWidth;
     field public int deviceType;
     field public int frequency;
-    field public int num_retries;
-    field public int num_samples;
+    field public int interval;
+    field public int numRetriesPerFTMR;
+    field public int numRetriesPerMeasurementFrame;
+    field public int numSamplesPerBurst;
+    field public deprecated int num_retries;
+    field public deprecated int num_samples;
+    field public int numberBurst;
+    field public int preamble;
     field public int requestType;
   }
 
   public static class RttManager.RttResult {
     ctor public RttManager.RttResult();
     field public java.lang.String bssid;
-    field public int distance_cm;
-    field public int distance_sd_cm;
-    field public int distance_spread_cm;
-    field public int requestType;
+    field public int burstDuration;
+    field public int burstNumber;
+    field public int distance;
+    field public int distanceSpread;
+    field public int distanceStandardDeviation;
+    field public deprecated int distance_cm;
+    field public deprecated int distance_sd_cm;
+    field public deprecated int distance_spread_cm;
+    field public int frameNumberPerBurstPeer;
+    field public int measurementFrameNumber;
+    field public int measurementType;
+    field public deprecated int requestType;
+    field public int retryAfterDuration;
     field public int rssi;
-    field public int rssi_spread;
-    field public long rtt_ns;
-    field public long rtt_sd_ns;
-    field public long rtt_spread_ns;
+    field public int rssiSpread;
+    field public deprecated int rssi_spread;
+    field public long rtt;
+    field public long rttSpread;
+    field public long rttStandardDeviation;
+    field public deprecated long rtt_ns;
+    field public deprecated long rtt_sd_ns;
+    field public deprecated long rtt_spread_ns;
+    field public int rxRate;
     field public int status;
+    field public int successMeasurementFrameNumber;
     field public long ts;
-    field public int tx_rate;
+    field public int txRate;
+    field public deprecated int tx_rate;
+  }
+
+  public class RttManager.wifiInformationElement {
+    ctor public RttManager.wifiInformationElement();
+    field public java.lang.String data;
+    field public int id;
   }
 
   public class ScanResult implements android.os.Parcelable {

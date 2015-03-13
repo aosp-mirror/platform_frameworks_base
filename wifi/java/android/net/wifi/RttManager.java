@@ -26,10 +26,19 @@ public class RttManager {
     private static final boolean DBG = true;
     private static final String TAG = "RttManager";
 
-    public static final int RTT_TYPE_UNSPECIFIED    = 0;
-    public static final int RTT_TYPE_ONE_SIDED      = 1;
-    public static final int RTT_TYPE_11_V           = 2;
-    public static final int RTT_TYPE_11_MC          = 4;
+    /** @deprecated Type must be specified*/
+    @Deprecated
+    public static final int RTT_TYPE_UNSPECIFIED        = 0;
+    public static final int RTT_TYPE_ONE_SIDED          = 1;
+
+    /** @deprecated It is not supported*/
+    @Deprecated
+    public static final int RTT_TYPE_11_V               = 2;
+    public static final int RTT_TYPE_TWO_SIDED          = 4;
+
+    /** @deprecated It is not supported*/
+    @Deprecated
+    public static final int RTT_TYPE_11_MC              = 4;
 
     public static final int RTT_PEER_TYPE_UNSPECIFIED    = 0;
     public static final int RTT_PEER_TYPE_AP             = 1;
@@ -42,6 +51,9 @@ public class RttManager {
     public static final int RTT_CHANNEL_WIDTH_80P80   = 4;
     public static final int RTT_CHANNEL_WIDTH_5       = 5;
     public static final int RTT_CHANNEL_WIDTH_10      = 6;
+
+    /** @deprecated channel info must be specified*/
+    @Deprecated
     public static final int RTT_CHANNEL_WIDTH_UNSPECIFIED = -1;
 
     public static final int RTT_STATUS_SUCCESS                  = 0;
@@ -53,6 +65,12 @@ public class RttManager {
     public static final int RTT_STATUS_FAIL_AP_ON_DIFF_CHANNEL  = 6;
     public static final int RTT_STATUS_FAIL_NO_CAPABILITY       = 7;
     public static final int RTT_STATUS_ABORTED                  = 8;
+    //if the T1-T4 or TOD/TOA Timestamp is illegal
+    public static final int RTT_STATUS_FAIL_INVALID_TS          = 9;
+    //11mc protocol failed, eg, unrecognized FTMR/FTM
+    public static final int RTT_STATUS_FAIL_PROTOCOL            = 10;
+    public static final int RTT_STATUS_FAIL_SCHEDULE            = 11;
+    public static final int RTT_STATUS_FAIL_BUSY_TRY_LATER      = 12;
 
     public static final int REASON_UNSPECIFIED              = -1;
     public static final int REASON_NOT_AVAILABLE            = -2;
@@ -61,41 +79,269 @@ public class RttManager {
 
     public static final String DESCRIPTION_KEY  = "android.net.wifi.RttManager.Description";
 
+    /**
+     * RTT BW supported bit mask
+     */
+    public static final int RTT_BW_5_SUPPORT   = 0x1;
+    public static final int RTT_BW_10_SUPPORT  = 0x2;
+    public static final int RTT_BW_20_SUPPORT  = 0x4;
+    public static final int RTT_BW_40_SUPPORT  = 0x8;
+    public static final int RTT_BW_80_SUPPORT  = 0x10;
+    public static final int RTT_BW_160_SUPPORT = 0x20;
+
+    /**
+     * RTT Preamble Support bit mask
+     */
+    public static final int PREAMBLE_LEGACY  = 0x1;
+    public static final int PREAMBLE_HT      = 0x2;
+    public static final int PREAMBLE_VHT     = 0x4;
+
+    /** @deprecated It has been replaced by RttCapabilities*/
+    @Deprecated
     public class Capabilities {
         public int supportedType;
         public int supportedPeerType;
     }
 
+    /** @deprecated It has been replaced by getRttCapabilities*/
+    @Deprecated
     public Capabilities getCapabilities() {
         return new Capabilities();
     }
 
+    /**
+     * This class describe the RTT capability of the Hardware
+     */
+    public static class RttCapabilities implements Parcelable {
+        /** @deprecated It is not supported*/
+        @Deprecated
+        public boolean supportedType;
+        /** @deprecated It is not supported*/
+        @Deprecated
+        public boolean supportedPeerType;
+        //1-sided rtt measurement is supported
+        public boolean oneSidedRttSupported;
+        //11mc 2-sided rtt measurement is supported
+        public boolean twoSided11McRttSupported;
+        //location configuration information supported
+        public boolean lciSupported;
+        //location civic records supported
+        public boolean lcrSupported;
+        //preamble supported, see bit mask definition above
+        public int preambleSupported;
+        //RTT bandwidth supported
+        public int bwSupported;
+
+        @Override
+        public String toString() {
+            StringBuffer sb = new StringBuffer();
+            sb.append("oneSidedRtt ").
+            append(oneSidedRttSupported ? "is Supported. " : "is not supported. ").
+            append("twoSided11McRtt ").
+            append(twoSided11McRttSupported ? "is Supported. " : "is not supported. ").
+            append("lci ").
+            append(lciSupported ? "is Supported. " : "is not supported. ").
+            append("lcr ").
+            append(lcrSupported ? "is Supported. " : "is not supported. ");
+
+            if ((preambleSupported & PREAMBLE_LEGACY) != 0) {
+                sb.append("Legacy ");
+            }
+
+            if ((preambleSupported & PREAMBLE_HT) != 0) {
+                sb.append("HT ");
+            }
+
+            if ((preambleSupported & PREAMBLE_VHT) != 0) {
+                sb.append("VHT ");
+            }
+
+            sb.append("is supported. \n");
+
+            if ((bwSupported & RTT_BW_5_SUPPORT) != 0) {
+                sb.append("5 MHz ");
+            }
+
+            if ((bwSupported & RTT_BW_10_SUPPORT) != 0) {
+                sb.append("10 MHz ");
+            }
+
+            if ((bwSupported & RTT_BW_20_SUPPORT) != 0) {
+                sb.append("20 MHz ");
+            }
+
+            if ((bwSupported & RTT_BW_40_SUPPORT) != 0) {
+                sb.append("40 MHz ");
+            }
+
+            if ((bwSupported & RTT_BW_80_SUPPORT) != 0) {
+                sb.append("80 MHz ");
+            }
+
+            if ((bwSupported & RTT_BW_160_SUPPORT) != 0) {
+                sb.append("160 MHz ");
+            }
+
+            sb.append("is supported.");
+
+            return sb.toString();
+        }
+        /** Implement the Parcelable interface {@hide} */
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+
+        /** Implement the Parcelable interface {@hide} */
+        @Override
+        public void writeToParcel(Parcel dest, int flags) {
+            dest.writeInt(oneSidedRttSupported ? 1 : 0);
+            dest.writeInt(twoSided11McRttSupported ? 1 : 0);
+            dest.writeInt(lciSupported ? 1 : 0);
+            dest.writeInt(lcrSupported ? 1 : 0);
+            dest.writeInt(preambleSupported);
+            dest.writeInt(bwSupported);
+
+        }
+
+        /** Implement the Parcelable interface {@hide} */
+        public static final Creator<RttCapabilities> CREATOR =
+            new Creator<RttCapabilities>() {
+               public RttCapabilities createFromParcel(Parcel in) {
+                    RttCapabilities capabilities = new RttCapabilities();
+                    capabilities.oneSidedRttSupported = in.readInt() == 1 ? true : false;
+                        capabilities.twoSided11McRttSupported = in.readInt() == 1 ? true : false;
+                        capabilities.lciSupported = in.readInt() == 1 ? true : false;
+                        capabilities.lcrSupported = in.readInt() == 1 ? true : false;
+                        capabilities.preambleSupported = in.readInt();
+                        capabilities.bwSupported = in.readInt();
+                        return capabilities;
+                    }
+                /** Implement the Parcelable interface {@hide} */
+                @Override
+                public RttCapabilities[] newArray(int size) {
+                    return new RttCapabilities[size];
+                }
+             };
+    }
+
+    public RttCapabilities getRttCapabilities() {
+        synchronized (sCapabilitiesLock) {
+            if (mRttCapabilities == null) {
+                try {
+                    mRttCapabilities = mService.getRttCapabilities();
+                } catch (RemoteException e) {
+                    Log.e(TAG, "Can not get RTT Capabilities");
+                }
+            }
+            return mRttCapabilities;
+        }
+    }
+
     /** specifies parameters for RTT request */
     public static class RttParams {
-
-        /** type of device being ranged; one of RTT_PEER_TYPE_AP or RTT_PEER_TYPE_STA */
+        /**
+         * type of destination device being ranged; one of RTT_PEER_TYPE_AP or RTT_PEER_TYPE_STA
+         */
         public int deviceType;
 
-        /** type of RTT being sought; one of RTT_TYPE_ONE_SIDED
-         *  RTT_TYPE_11_V or RTT_TYPE_11_MC or RTT_TYPE_UNSPECIFIED */
+        /**
+         * type of RTT measurement method; one of RTT_TYPE_ONE_SIDED or RTT_TYPE_TWO_SIDED.
+         */
         public int requestType;
 
         /** mac address of the device being ranged */
         public String bssid;
 
-        /** channel frequency that the device is on; optional */
+        /**
+         * The primary 20 MHz frequency (in MHz) of the channel over which the client is
+         * communicating with the access point.Similar as ScanResult.frequency
+         */
         public int frequency;
 
-        /** optional channel width. wider channels result in better accuracy,
-         *  but they take longer time, and even get aborted may times; use
-         *  RTT_CHANNEL_WIDTH_UNSPECIFIED if not specifying */
+        /**
+         * channel width used for RTT measurement. User need verify the highest BW the destination
+         * support (from scan result etc) before set this value. Wider channels result usually give
+         * better accuracy. However, the frame loss can increase. Similar as ScanResult.channelWidth
+         */
         public int channelWidth;
 
-        /** number of samples to be taken */
+        /**
+         * Not used if the AP bandwidth is 20 MHz
+         * If the AP use 40, 80 or 160 MHz, this is the center frequency
+         * if the AP use 80 + 80 MHz, this is the center frequency of the first segment
+         * similar as ScanResult.centerFreq0
+         */
+         public int centerFreq0;
+
+         /**
+          * Only used if the AP bandwidth is 80 + 80 MHz
+          * if the AP use 80 + 80 MHz, this is the center frequency of the second segment
+          * similar as ScanResult.centerFreq1
+          */
+          public int centerFreq1;
+        /**
+         * number of samples to be taken
+         * @deprecated  It has been replaced by numSamplesPerBurst
+         */
+        @Deprecated
         public int num_samples;
 
-        /** number of retries if a sample fails */
+        /**
+         * number of retries if a sample fails
+         * @deprecated It has been replaced by numRetriesPerMeasurementFrame
+         */
+        @Deprecated
         public int num_retries;
+
+        /** Number of burst. fixed to 1 for single side RTT*/
+        public int numberBurst;
+
+        /** valid only if numberBurst > 1, interval between burst(ms). Not used by singe side RTT */
+        public int interval;
+
+        /** number of samples to be taken in one burst*/
+        public int numSamplesPerBurst;
+
+        /** number of retries for each measurement frame if a sample fails
+         *  Only used by single side RTT
+         */
+        public int numRetriesPerMeasurementFrame;
+
+        /** number of retries for FTMR frame if fails Only used by 80211MC double side RTT */
+        public int numRetriesPerFTMR;
+
+        /** Request LCI information */
+        public boolean LCIRequest;
+
+        /** Request LCR information */
+        public boolean LCRRequest;
+
+        /** Timeout for each burst, unit of 250 us*/
+        public int burstTimeout;
+
+        /** preamble used for RTT measurement
+         *  should be one of PREAMBLE_LEGACY, PREAMBLE_HT, PREAMBLE_VHT
+         */
+        public int preamble;
+
+        /** bandWidth used for RTT measurement.User need verify the highest BW the destination
+         * support (from scan result etc) before set this value. Wider channels result usually give
+         * better accuracy. However, the frame loss can increase too.
+         * should be one of RTT_CHANNEL_WIDTH_20 to RTT_CHANNEL_WIDTH_80
+         */
+        public int bandwidth;
+
+        public RttParams() {
+            //provide initial value for RttParams
+            deviceType = RTT_PEER_TYPE_AP;
+            numberBurst = 1;
+            numSamplesPerBurst = 8;
+            numRetriesPerMeasurementFrame  = 0;
+            burstTimeout = 40 + numSamplesPerBurst *4;
+            preamble = PREAMBLE_LEGACY;
+            bandwidth = RTT_CHANNEL_WIDTH_20;
+        }
     }
 
     /** pseudo-private class used to parcel arguments */
@@ -121,10 +367,20 @@ public class RttManager {
                     dest.writeInt(params.deviceType);
                     dest.writeInt(params.requestType);
                     dest.writeString(params.bssid);
-                    dest.writeInt(params.frequency);
                     dest.writeInt(params.channelWidth);
-                    dest.writeInt(params.num_samples);
-                    dest.writeInt(params.num_retries);
+                    dest.writeInt(params.frequency);
+                    dest.writeInt(params.centerFreq0);
+                    dest.writeInt(params.centerFreq1);
+                    dest.writeInt(params.numberBurst);
+                    dest.writeInt(params.interval);
+                    dest.writeInt(params.numSamplesPerBurst);
+                    dest.writeInt(params.numRetriesPerMeasurementFrame);
+                    dest.writeInt(params.numRetriesPerFTMR);
+                    dest.writeInt(params.LCIRequest ? 1 : 0);
+                    dest.writeInt(params.LCRRequest ? 1 : 0);
+                    dest.writeInt(params.burstTimeout);
+                    dest.writeInt(params.preamble);
+                    dest.writeInt(params.bandwidth);
                 }
             } else {
                 dest.writeInt(0);
@@ -148,11 +404,20 @@ public class RttManager {
                             params[i].deviceType = in.readInt();
                             params[i].requestType = in.readInt();
                             params[i].bssid = in.readString();
-                            params[i].frequency = in.readInt();
                             params[i].channelWidth = in.readInt();
-                            params[i].num_samples = in.readInt();
-                            params[i].num_retries = in.readInt();
-
+                            params[i].frequency = in.readInt();
+                            params[i].centerFreq0 = in.readInt();
+                            params[i].centerFreq1 = in.readInt();
+                            params[i].numberBurst = in.readInt();
+                            params[i].interval = in.readInt();
+                            params[i].numSamplesPerBurst = in.readInt();
+                            params[i].numRetriesPerMeasurementFrame = in.readInt();
+                            params[i].numRetriesPerFTMR = in.readInt();
+                            params[i].LCIRequest = in.readInt() == 1 ? true : false;
+                            params[i].LCRRequest = in.readInt() == 1 ? true : false;
+                            params[i].burstTimeout = in.readInt();
+                            params[i].preamble = in.readInt();
+                            params[i].bandwidth = in.readInt();
                         }
 
                         ParcelableRttParams parcelableParams = new ParcelableRttParams(params);
@@ -165,46 +430,143 @@ public class RttManager {
                 };
     }
 
+    public class wifiInformationElement {
+        /** Information Element ID*/
+        public int id;
+        public String data;
+    }
     /** specifies RTT results */
     public static class RttResult {
         /** mac address of the device being ranged */
         public String bssid;
 
+        /** # of burst for this measurement*/
+        public int burstNumber;
+
+        /** total number of measurement frames in this measurement*/
+        public int measurementFrameNumber;
+
+        /** total successful number of measurement frames in this measurement*/
+        public int successMeasurementFrameNumber;
+
+        /** Maximum number of frames per burst supported by peer */
+        public int frameNumberPerBurstPeer;
+
         /** status of the request */
         public int status;
 
-        /** type of the request used */
+        /**
+         * type of the request used
+         * @deprecated It has been replaced by measurementType
+         */
+        @Deprecated
         public int requestType;
+
+        /** RTT measurement method type used, shoudl be one of RTT_TYPE_ONE_SIDED or
+         *  RTT_TYPE_TWO_SIDED.
+         */
+        public int measurementType;
+
+        /** please retry RTT measurement after this S since peer indicate busy at ths moment*/
+        public int retryAfterDuration;
 
         /** timestamp of completion, in microsecond since boot */
         public long ts;
 
-        /** average RSSI observed */
+        /** average RSSI observed, unit of 0.5 dB */
         public int rssi;
 
-        /** RSSI spread (i.e. max - min) */
+        /**
+         * RSSI spread (i.e. max - min)
+         * @deprecated It has been replaced by rssi_spread
+         */
+        @Deprecated
         public int rssi_spread;
 
-        /** average transmit rate */
+        /**RSSI spread (i.e. max - min), unit of 0.5 dB */
+        public int rssiSpread;
+
+        /**
+         * average transmit rate
+         * @deprecated It has been replaced by txRate
+         */
+        @Deprecated
         public int tx_rate;
 
-        /** average round trip time in nano second */
+        /** average transmit rate */
+        public int txRate;
+
+        /** average receiving rate */
+        public int rxRate;
+
+       /**
+        * average round trip time in nano second
+        * @deprecated  It has been replaced by rtt
+        */
+        @Deprecated
         public long rtt_ns;
 
-        /** standard deviation observed in round trip time */
+        /** average round trip time in 0.1 nano second */
+        public long rtt;
+
+        /**
+         * standard deviation observed in round trip time
+         * @deprecated It has been replaced by rttStandardDeviation
+         */
+        @Deprecated
         public long rtt_sd_ns;
 
-        /** spread (i.e. max - min) round trip time */
+        /** standard deviation of RTT in 0.1 ns */
+        public long rttStandardDeviation;
+
+        /**
+         * spread (i.e. max - min) round trip time
+         * @deprecated It has been replaced by rttSpread
+         */
+        @Deprecated
         public long rtt_spread_ns;
 
-        /** average distance in centimeter, computed based on rtt_ns */
+        /** spread (i.e. max - min) RTT in 0.1 ns */
+        public long rttSpread;
+
+        /**
+         * average distance in centimeter, computed based on rtt_ns
+         * @deprecated It has been replaced by distance
+         */
+        @Deprecated
         public int distance_cm;
 
-        /** standard deviation observed in distance */
+        /** average distance in cm, computed based on rtt */
+        public int distance;
+
+        /**
+         * standard deviation observed in distance
+         * @deprecated It has been replaced with distanceStandardDeviation
+         */
+        @Deprecated
         public int distance_sd_cm;
 
-        /** spread (i.e. max - min) distance */
+        /** standard deviation observed in distance in cm*/
+        public int distanceStandardDeviation;
+
+        /**
+         * spread (i.e. max - min) distance
+         * @deprecated It has been replaced by distanceSpread
+         */
+        @Deprecated
         public int distance_spread_cm;
+
+        /** spread (i.e. max - min) distance in cm */
+        public int distanceSpread;
+
+        /** the duration of this measurement burst*/
+        public int burstDuration;
+
+        /** LCI information Element*/
+        wifiInformationElement LCI;
+
+        /** LCR information Element*/
+        wifiInformationElement LCR;
     }
 
 
@@ -228,18 +590,28 @@ public class RttManager {
                 dest.writeInt(mResults.length);
                 for (RttResult result : mResults) {
                     dest.writeString(result.bssid);
+                    dest.writeInt(result.burstNumber);
+                    dest.writeInt(result.measurementFrameNumber);
+                    dest.writeInt(result.successMeasurementFrameNumber);
+                    dest.writeInt(result.frameNumberPerBurstPeer);
                     dest.writeInt(result.status);
-                    dest.writeInt(result.requestType);
+                    dest.writeInt(result.measurementType);
+                    dest.writeInt(result.retryAfterDuration);
                     dest.writeLong(result.ts);
                     dest.writeInt(result.rssi);
-                    dest.writeInt(result.rssi_spread);
-                    dest.writeInt(result.tx_rate);
-                    dest.writeLong(result.rtt_ns);
-                    dest.writeLong(result.rtt_sd_ns);
-                    dest.writeLong(result.rtt_spread_ns);
-                    dest.writeInt(result.distance_cm);
-                    dest.writeInt(result.distance_sd_cm);
-                    dest.writeInt(result.distance_spread_cm);
+                    dest.writeInt(result.rssiSpread);
+                    dest.writeInt(result.txRate);
+                    dest.writeLong(result.rtt);
+                    dest.writeLong(result.rttStandardDeviation);
+                    dest.writeLong(result.rttSpread);
+                    dest.writeInt(result.distance);
+                    dest.writeInt(result.distanceStandardDeviation);
+                    dest.writeInt(result.distanceSpread);
+                    dest.writeInt(result.burstDuration);
+                    //dest.writeInt(result.LCI.id);
+                    //dest.writeString(result.LCI.data);
+                    //dest.writeInt(result.LCR.id);
+                    //dest.writeString(result.LCR.data);
                 }
             } else {
                 dest.writeInt(0);
@@ -261,18 +633,28 @@ public class RttManager {
                         for (int i = 0; i < num; i++) {
                             results[i] = new RttResult();
                             results[i].bssid = in.readString();
+                            results[i].burstNumber = in.readInt();
+                            results[i].measurementFrameNumber = in.readInt();
+                            results[i].successMeasurementFrameNumber = in.readInt();
+                            results[i].frameNumberPerBurstPeer = in.readInt();
                             results[i].status = in.readInt();
-                            results[i].requestType = in.readInt();
+                            results[i].measurementType = in.readInt();
+                            results[i].retryAfterDuration = in.readInt();
                             results[i].ts = in.readLong();
                             results[i].rssi = in.readInt();
-                            results[i].rssi_spread = in.readInt();
-                            results[i].tx_rate = in.readInt();
-                            results[i].rtt_ns = in.readLong();
-                            results[i].rtt_sd_ns = in.readLong();
-                            results[i].rtt_spread_ns = in.readLong();
-                            results[i].distance_cm = in.readInt();
-                            results[i].distance_sd_cm = in.readInt();
-                            results[i].distance_spread_cm = in.readInt();
+                            results[i].rssiSpread = in.readInt();
+                            results[i].txRate = in.readInt();
+                            results[i].rtt = in.readLong();
+                            results[i].rttStandardDeviation = in.readLong();
+                            results[i].rttSpread = in.readLong();
+                            results[i].distance = in.readInt();
+                            results[i].distanceStandardDeviation = in.readInt();
+                            results[i].distanceSpread = in.readInt();
+                            results[i].burstDuration = in.readInt();
+                            //results[i].LCI.id = in.readInt();
+                            //results[i].LCI.data = in.readString();
+                            //results[i].LCR.id = in.readInt();
+                            //results[i].LCR.data = in.readString();
                         }
 
                         ParcelableRttResults parcelableResults = new ParcelableRttResults(results);
@@ -292,7 +674,70 @@ public class RttManager {
         public void onAborted();
     }
 
+    private boolean rttParamSanity(RttParams params, int index) {
+        if (mRttCapabilities == null) {
+            if(getRttCapabilities() == null) {
+                Log.e(TAG, "Can not get RTT capabilities");
+                //throw new IllegalStateException("RTT chip is not working");
+            }
+        }
+
+        if (params.deviceType != RTT_PEER_TYPE_AP) {
+            return false;
+        } else if (params.requestType != RTT_TYPE_ONE_SIDED && params.requestType !=
+                RTT_TYPE_TWO_SIDED) {
+            Log.e(TAG, "Request " + index + ": Illegal Request Type: " + params.requestType);
+            return false;
+        } else if (params.requestType == RTT_TYPE_ONE_SIDED &&
+                !mRttCapabilities.oneSidedRttSupported) {
+            Log.e(TAG, "Request " + index + ": One side RTT is not supported");
+            return false;
+        } else if (params.requestType == RTT_TYPE_TWO_SIDED &&
+                !mRttCapabilities.twoSided11McRttSupported) {
+            Log.e(TAG, "Request " + index + ": two side RTT is not supported");
+            return false;
+        } else if ( params.numberBurst <= 0 ) {
+            Log.e(TAG, "Request " + index + ": Illegal number of burst: " + params.numberBurst);
+            return false;
+        } else if (params.numberBurst >  1 && params.interval <= 0) {
+            Log.e(TAG, "Request " + index + ": Illegal interval value: " + params.interval);
+            return false;
+        } else if (params.numSamplesPerBurst <= 0) {
+            Log.e(TAG, "Request " + index + ": Illegal sample number per burst: " +
+                    params.numSamplesPerBurst);
+            return false;
+        } else if (params.numRetriesPerMeasurementFrame < 0 || params.numRetriesPerFTMR < 0) {
+            Log.e(TAG, "Request " + index + ": Illegal retry number");
+            return false;
+        } else if (params.LCIRequest && !mRttCapabilities.lciSupported) {
+            Log.e(TAG, "Request " + index + ": LCI is not supported");
+            return false;
+        } else if (params.LCRRequest && !mRttCapabilities.lcrSupported) {
+            Log.e(TAG, "Request " + index + ": LCR is not supported");
+            return false;
+        } else if (params.burstTimeout <= 0){
+            Log.e(TAG, "Request " + index + ": Illegal burst timeout: " + params.burstTimeout);
+            return false;
+        } else if ((params.preamble & mRttCapabilities.preambleSupported) == 0) {
+            Log.e(TAG, "Request " + index + ": Do not support this preamble: " + params.preamble);
+            return false;
+        } else if ((params.bandwidth & mRttCapabilities.bwSupported) == 0) {
+            Log.e(TAG, "Request " + index + ": Do not support this bandwidth: " + params.bandwidth);
+            return false;
+        }
+
+        return true;
+    }
+
     public void startRanging(RttParams[] params, RttListener listener) {
+        int index  = 0;
+        for(RttParams rttParam : params) {
+            if (!rttParamSanity(rttParam, index)) {
+                throw new IllegalArgumentException("RTT Request Parameter Illegal");
+            }
+            index++;
+        }
+
         validateChannel();
         ParcelableRttParams parcelableParams = new ParcelableRttParams(params);
         sAsyncChannel.sendMessage(CMD_OP_START_RANGING,
@@ -315,12 +760,14 @@ public class RttManager {
 
     private Context mContext;
     private IRttManager mService;
+    private RttCapabilities mRttCapabilities;
 
     private static final int INVALID_KEY = 0;
     private static int sListenerKey = 1;
 
     private static final SparseArray sListenerMap = new SparseArray();
     private static final Object sListenerMapLock = new Object();
+    private static final Object sCapabilitiesLock = new Object();
 
     private static AsyncChannel sAsyncChannel;
     private static CountDownLatch sConnected;
