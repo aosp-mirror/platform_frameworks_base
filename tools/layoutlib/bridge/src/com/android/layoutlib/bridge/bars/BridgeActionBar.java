@@ -44,6 +44,7 @@ public abstract class BridgeActionBar {
     private final View mDecorContent;
     private final ActionBarCallback mCallback;
 
+    @SuppressWarnings("NullableProblems")  // Should be initialized by subclasses.
     @NonNull private FrameLayout mContentRoot;
 
     public BridgeActionBar(@NonNull BridgeContext context, @NonNull SessionParams params,
@@ -91,7 +92,7 @@ public abstract class BridgeActionBar {
      */
     protected abstract ResourceValue getLayoutResource(BridgeContext context);
 
-    protected void setContentRoot(FrameLayout contentRoot) {
+    protected void setContentRoot(@NonNull FrameLayout contentRoot) {
         mContentRoot = contentRoot;
     }
 
