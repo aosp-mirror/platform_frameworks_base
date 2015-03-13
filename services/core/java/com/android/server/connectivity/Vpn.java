@@ -69,6 +69,7 @@ import android.util.Log;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.net.LegacyVpnInfo;
 import com.android.internal.net.VpnConfig;
+import com.android.internal.net.VpnInfo;
 import com.android.internal.net.VpnProfile;
 import com.android.server.net.BaseNetworkObserver;
 
@@ -806,6 +807,21 @@ public class Vpn {
             return null;
         }
         return mConfig.underlyingNetworks;
+    }
+
+    /**
+     * This method should only be called by ConnectivityService. Because it doesn't
+     * have enough data to fill VpnInfo.primaryUnderlyingIface field.
+     */
+    public synchronized VpnInfo getVpnInfo() {
+        if (!isRunningLocked()) {
+            return null;
+        }
+
+        VpnInfo info = new VpnInfo();
+        info.ownerUid = mOwnerUID;
+        info.vpnIface = mInterface;
+        return info;
     }
 
     public synchronized boolean appliesToUid(int uid) {

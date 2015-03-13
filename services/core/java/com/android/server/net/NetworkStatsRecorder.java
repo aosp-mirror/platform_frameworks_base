@@ -31,6 +31,7 @@ import android.util.Log;
 import android.util.MathUtils;
 import android.util.Slog;
 
+import com.android.internal.net.VpnInfo;
 import com.android.internal.util.FileRotator;
 import com.android.internal.util.IndentingPrintWriter;
 import com.google.android.collect.Sets;
@@ -163,7 +164,8 @@ public class NetworkStatsRecorder {
      * snapshot is considered bootstrap, and is not counted as delta.
      */
     public void recordSnapshotLocked(NetworkStats snapshot,
-            Map<String, NetworkIdentitySet> ifaceIdent, long currentTimeMillis) {
+            Map<String, NetworkIdentitySet> ifaceIdent, VpnInfo[] vpnArray,
+            long currentTimeMillis) {
         final HashSet<String> unknownIfaces = Sets.newHashSet();
 
         // skip recording when snapshot missing
@@ -181,6 +183,12 @@ public class NetworkStatsRecorder {
                 snapshot, mLastSnapshot, mObserver, mCookie);
         final long end = currentTimeMillis;
         final long start = end - delta.getElapsedRealtime();
+
+        if (vpnArray != null) {
+            for (VpnInfo info : vpnArray) {
+                delta.migrateTun(info.ownerUid, info.vpnIface, info.primaryUnderlyingIface);
+            }
+        }
 
         NetworkStats.Entry entry = null;
         for (int i = 0; i < delta.size(); i++) {

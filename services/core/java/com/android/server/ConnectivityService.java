@@ -26,6 +26,7 @@ import static android.net.ConnectivityManager.isNetworkTypeValid;
 import static android.net.NetworkPolicyManager.RULE_ALLOW_ALL;
 import static android.net.NetworkPolicyManager.RULE_REJECT_METERED;
 
+import android.annotation.Nullable;
 import android.app.AlarmManager;
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -100,6 +101,7 @@ import com.android.internal.app.IBatteryStats;
 import com.android.internal.net.LegacyVpnInfo;
 import com.android.internal.net.NetworkStatsFactory;
 import com.android.internal.net.VpnConfig;
+import com.android.internal.net.VpnInfo;
 import com.android.internal.net.VpnProfile;
 import com.android.internal.telephony.DctConstants;
 import com.android.internal.util.AsyncChannel;
@@ -2978,7 +2980,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
      * Return the information of the ongoing legacy VPN. This method is used
      * by VpnSettings and not available in ConnectivityManager. Permissions
      * are checked in Vpn class.
-     * @hide
      */
     @Override
     public LegacyVpnInfo getLegacyVpnInfo() {
@@ -2987,6 +2988,56 @@ public class ConnectivityService extends IConnectivityManager.Stub
         synchronized(mVpns) {
             return mVpns.get(user).getLegacyVpnInfo();
         }
+    }
+
+    /**
+     * Return the information of all ongoing VPNs. This method is used by NetworkStatsService
+     * and not available in ConnectivityManager.
+     */
+    @Override
+    public VpnInfo[] getAllVpnInfo() {
+        enforceConnectivityInternalPermission();
+        if (mLockdownEnabled) {
+            return new VpnInfo[0];
+        }
+
+        synchronized(mVpns) {
+            List<VpnInfo> infoList = new ArrayList<>();
+            for (int i = 0; i < mVpns.size(); i++) {
+                VpnInfo info = createVpnInfo(mVpns.valueAt(i));
+                if (info != null) {
+                    infoList.add(info);
+                }
+            }
+            return infoList.toArray(new VpnInfo[infoList.size()]);
+        }
+    }
+
+    /**
+     * @return VPN information for accounting, or null if we can't retrieve all required
+     *         information, e.g primary underlying iface.
+     */
+    @Nullable
+    private VpnInfo createVpnInfo(Vpn vpn) {
+        VpnInfo info = vpn.getVpnInfo();
+        if (info == null) {
+            return null;
+        }
+        Network[] underlyingNetworks = vpn.getUnderlyingNetworks();
+        // see VpnService.setUnderlyingNetworks()'s javadoc about how to interpret
+        // the underlyingNetworks list.
+        if (underlyingNetworks == null) {
+            NetworkAgentInfo defaultNetwork = getDefaultNetwork();
+            if (defaultNetwork != null && defaultNetwork.linkProperties != null) {
+                info.primaryUnderlyingIface = getDefaultNetwork().linkProperties.getInterfaceName();
+            }
+        } else if (underlyingNetworks.length > 0) {
+            LinkProperties linkProperties = getLinkProperties(underlyingNetworks[0]);
+            if (linkProperties != null) {
+                info.primaryUnderlyingIface = linkProperties.getInterfaceName();
+            }
+        }
+        return info.primaryUnderlyingIface == null ? null : info;
     }
 
     /**
@@ -4512,8 +4563,13 @@ public class ConnectivityService extends IConnectivityManager.Stub
     public boolean setUnderlyingNetworksForVpn(Network[] networks) {
         throwIfLockdownEnabled();
         int user = UserHandle.getUserId(Binder.getCallingUid());
+        boolean success;
         synchronized (mVpns) {
-            return mVpns.get(user).setUnderlyingNetworks(networks);
+            success = mVpns.get(user).setUnderlyingNetworks(networks);
         }
+        if (success) {
+            notifyIfacesChanged();
+        }
+        return success;
     }
 }

@@ -33,6 +33,7 @@ import android.os.ResultReceiver;
 
 import com.android.internal.net.LegacyVpnInfo;
 import com.android.internal.net.VpnConfig;
+import com.android.internal.net.VpnInfo;
 import com.android.internal.net.VpnProfile;
 
 /**
@@ -115,6 +116,8 @@ interface IConnectivityManager
     void startLegacyVpn(in VpnProfile profile);
 
     LegacyVpnInfo getLegacyVpnInfo();
+
+    VpnInfo[] getAllVpnInfo();
 
     boolean updateLockdownVpn();
 
