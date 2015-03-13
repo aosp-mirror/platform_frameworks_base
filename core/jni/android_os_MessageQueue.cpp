@@ -79,7 +79,7 @@ NativeMessageQueue::NativeMessageQueue() :
         mPollEnv(NULL), mPollObj(NULL), mExceptionObj(NULL) {
     mLooper = Looper::getForThread();
     if (mLooper == NULL) {
-        mLooper = new Looper(true);
+        mLooper = new Looper(false);
         Looper::setForThread(mLooper);
     }
 }
