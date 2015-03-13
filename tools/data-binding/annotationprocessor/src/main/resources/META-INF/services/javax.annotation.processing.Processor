@@ -1,3 +1,1 @@
-com.android.databinding.annotationprocessor.ProcessBindable
-com.android.databinding.annotationprocessor.ProcessMethodAdapters
-com.android.databinding.annotationprocessor.ProcessExpressions
+com.android.databinding.annotationprocessor.ProcessDataBinding

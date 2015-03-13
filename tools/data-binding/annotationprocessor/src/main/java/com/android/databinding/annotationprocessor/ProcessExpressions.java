@@ -19,114 +19,171 @@ package com.android.databinding.annotationprocessor;
 import com.android.databinding.CompilerChef;
 import com.android.databinding.reflection.SdkUtil;
 import com.android.databinding.store.ResourceBundle;
+import com.android.databinding.util.GenerationalClassUtil;
 import com.android.databinding.util.L;
-import com.android.databinding.writer.AnnotationJavaFileWriter;
 
-import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 
-import android.binding.BinderBundle;
-import android.binding.BindingAppInfo;
+import android.binding.BindingBuildInfo;
 
-import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.FilenameFilter;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
-import java.io.Reader;
-import java.io.StringWriter;
-import java.util.Set;
+import java.io.InputStream;
+import java.io.Serializable;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
-import javax.annotation.processing.AbstractProcessor;
+import javax.annotation.processing.ProcessingEnvironment;
 import javax.annotation.processing.RoundEnvironment;
-import javax.annotation.processing.SupportedAnnotationTypes;
-import javax.annotation.processing.SupportedSourceVersion;
-import javax.lang.model.SourceVersion;
-import javax.lang.model.element.Element;
-import javax.lang.model.element.ElementKind;
-import javax.lang.model.element.TypeElement;
-import javax.tools.Diagnostic;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 
-@SupportedAnnotationTypes({"android.binding.BinderBundle", "android.binding.BindingAppInfo"})
-@SupportedSourceVersion(SourceVersion.RELEASE_7)
-public class ProcessExpressions extends AbstractProcessor {
+public class ProcessExpressions extends ProcessDataBinding.ProcessingStep {
 
-    public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
-        ResourceBundle resourceBundle = null;
-        for (Element element : roundEnv.getElementsAnnotatedWith(BindingAppInfo.class)) {
-            final BindingAppInfo appInfo = element.getAnnotation(BindingAppInfo.class);
-            if (appInfo == null) {
-                continue; // It gets confused between BindingAppInfo and BinderBundle
-            }
-            SdkUtil.initialize(appInfo.minSdk(), new File(appInfo.sdkRoot()));
-            if (element.getKind() != ElementKind.CLASS) {
-                processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR,
-                        "BindingAppInfo associated with wrong type. Should be a class.", element);
-                continue;
-            }
-            if (resourceBundle == null) {
-                resourceBundle = new ResourceBundle(appInfo.applicationPackage());
-                processLayouts(resourceBundle, roundEnv);
-            } else {
-                processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR,
-                        "BindingAppInfo must be applied to only one class.", element);
-            }
+    private static final String LAYOUT_INFO_FILE_SUFFIX = "-layoutinfo.bin";
+
+    @Override
+    public boolean onHandleStep(RoundEnvironment roundEnvironment,
+            ProcessingEnvironment processingEnvironment, BindingBuildInfo buildInfo) {
+        ResourceBundle resourceBundle;
+        SdkUtil.initialize(buildInfo.minSdk(), new File(buildInfo.sdkRoot()));
+        resourceBundle = new ResourceBundle(buildInfo.modulePackage());
+        List<Intermediate> intermediateList =
+                GenerationalClassUtil.loadObjects(getClass().getClassLoader(),
+                        new GenerationalClassUtil.ExtensionFilter(LAYOUT_INFO_FILE_SUFFIX));
+        IntermediateV1 mine = createIntermediateFromLayouts(buildInfo.layoutInfoDir());
+        if (mine != null) {
+            mine.removeOverridden(intermediateList);
+            intermediateList.add(mine);
+            saveIntermediate(processingEnvironment, buildInfo, mine);
         }
-
+        // generate them here so that bindable parser can read
+        try {
+            generateBinders(resourceBundle, buildInfo, intermediateList);
+        } catch (Throwable t) {
+            L.e(t, "cannot generate view binders");
+        }
         return true;
     }
 
-    private void processLayouts(ResourceBundle resourceBundle, RoundEnvironment roundEnv) {
-        Unmarshaller unmarshaller = null;
-        for (Element element : roundEnv.getElementsAnnotatedWith(BinderBundle.class)) {
-            final BinderBundle binderBundle = element.getAnnotation(BinderBundle.class);
-            if (binderBundle == null) {
-                continue;
-            }
-            if (element.getKind() != ElementKind.CLASS) {
-                processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR,
-                        "BinderBundle associated with wrong type. Should be a class.", element);
-                continue;
-            }
-            ByteArrayInputStream in = null;
-            try {
-                if (unmarshaller == null) {
-                    JAXBContext context =
-                            JAXBContext.newInstance(ResourceBundle.LayoutFileBundle.class);
-                    unmarshaller = context.createUnmarshaller();
-                }
-                String binderBundle64 = binderBundle.value();
-                byte[] buf = Base64.decodeBase64(binderBundle64);
-                in = new ByteArrayInputStream(buf);
-                Reader reader = new InputStreamReader(in);
-                ResourceBundle.LayoutFileBundle layoutFileBundle
-                        = (ResourceBundle.LayoutFileBundle)
-                        unmarshaller.unmarshal(reader);
-                resourceBundle
-                        .addLayoutBundle(layoutFileBundle, layoutFileBundle.getLayoutId());
-            } catch (Exception e) {
-                StringWriter stringWriter = new StringWriter();
-                e.printStackTrace(new PrintWriter(stringWriter));
-                processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR,
-                        "Could not generate Binders from binder data store: " +
-                                stringWriter.getBuffer().toString(), element);
-            } finally {
-                if (in != null) {
-                    IOUtils.closeQuietly(in);
-                }
-            }
+    private void saveIntermediate(ProcessingEnvironment processingEnvironment,
+            BindingBuildInfo buildInfo, IntermediateV1 intermediate) {
+        GenerationalClassUtil.writeIntermediateFile(processingEnvironment,
+                buildInfo.modulePackage(), buildInfo.modulePackage() + LAYOUT_INFO_FILE_SUFFIX,
+                intermediate);
+    }
 
+    @Override
+    public void onProcessingOver(RoundEnvironment roundEnvironment,
+            ProcessingEnvironment processingEnvironment, BindingBuildInfo buildInfo) {
+
+    }
+
+    private void generateBinders(ResourceBundle resourceBundle, BindingBuildInfo buildInfo,
+            List<Intermediate> intermediates)
+            throws Throwable {
+        for (Intermediate intermediate : intermediates) {
+            intermediate.appendTo(resourceBundle);
+        }
+        writeResourceBundle(resourceBundle, buildInfo.isLibrary());
+    }
+
+    private IntermediateV1 createIntermediateFromLayouts(String layoutInfoFolderPath) {
+        final File layoutInfoFolder = new File(layoutInfoFolderPath);
+        if (!layoutInfoFolder.isDirectory()) {
+            L.d("layout info folder does not exist, skipping for %s", layoutInfoFolderPath);
+            return null;
+        }
+        IntermediateV1 result = new IntermediateV1();
+        for (File layoutFile : layoutInfoFolder.listFiles(new FilenameFilter() {
+            @Override
+            public boolean accept(File dir, String name) {
+                return name.endsWith(".xml");
+            }
+        })) {
+            try {
+                result.addEntry(layoutFile.getName(), FileUtils.readFileToString(layoutFile));
+            } catch (IOException e) {
+                L.e(e, "cannot load layout file information. Try a clean build");
+            }
+        }
+        return result;
+    }
+
+    private void writeResourceBundle(ResourceBundle resourceBundle, boolean forLibraryModule)
+            throws JAXBException {
+        CompilerChef compilerChef = CompilerChef.createChef(resourceBundle, getWriter());
+        if (compilerChef.hasAnythingToGenerate()) {
+            compilerChef.writeViewBinderInterfaces();
+            if (!forLibraryModule) {
+                compilerChef.writeDbrFile();
+                compilerChef.writeViewBinders();
+            }
+        }
+    }
+
+    public static interface Intermediate extends Serializable {
+
+        Intermediate upgrade();
+
+        public void appendTo(ResourceBundle resourceBundle) throws Throwable;
+    }
+
+    public static class IntermediateV1 implements Intermediate {
+
+        transient Unmarshaller mUnmarshaller;
+
+        // name to xml content map
+        Map<String, String> mLayoutInfoMap = new HashMap<>();
+
+        @Override
+        public Intermediate upgrade() {
+            return this;
         }
 
-        CompilerChef compilerChef = CompilerChef.createChef(resourceBundle,
-                new AnnotationJavaFileWriter(processingEnv));
-        if (compilerChef.hasAnythingToGenerate()) {
-            compilerChef.writeDbrFile();
-            compilerChef.writeViewBinderInterfaces();
-            compilerChef.writeViewBinders();
+        @Override
+        public void appendTo(ResourceBundle resourceBundle) throws JAXBException {
+            if (mUnmarshaller == null) {
+                JAXBContext context = JAXBContext
+                        .newInstance(ResourceBundle.LayoutFileBundle.class);
+                mUnmarshaller = context.createUnmarshaller();
+            }
+            for (String content : mLayoutInfoMap.values()) {
+                final InputStream is = IOUtils.toInputStream(content);
+                try {
+                    final ResourceBundle.LayoutFileBundle bundle
+                            = (ResourceBundle.LayoutFileBundle) mUnmarshaller.unmarshal(is);
+                    resourceBundle.addLayoutBundle(bundle, bundle.getLayoutId());
+                    L.d("loaded layout info file %s", bundle);
+                } finally {
+                    IOUtils.closeQuietly(is);
+                }
+            }
+        }
+
+        public void addEntry(String name, String contents) {
+            mLayoutInfoMap.put(name, contents);
+        }
+
+        public void removeOverridden(List<Intermediate> existing) {
+            // this is the way we get rid of files that are copied from previous modules
+            // it is important to do this before saving the intermediate file
+            for (Intermediate old : existing) {
+                if (old instanceof IntermediateV1) {
+                    IntermediateV1 other = (IntermediateV1) old;
+                    for (String key : other.mLayoutInfoMap.keySet()) {
+                        // TODO we should consider the original file as the key here
+                        // but aapt probably cannot provide that information
+                        if (mLayoutInfoMap.remove(key) != null) {
+                            L.d("removing %s from bundle because it came from another module", key);
+                        }
+                    }
+                }
+            }
         }
     }
 }

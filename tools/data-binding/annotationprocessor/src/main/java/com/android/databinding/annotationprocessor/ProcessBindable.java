@@ -1,30 +1,39 @@
+/*
+ * Copyright (C) 2015 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.android.databinding.annotationprocessor;
 
-import com.android.databinding.reflection.ModelAnalyzer;
+import com.google.common.base.Preconditions;
 
-import org.apache.commons.io.IOUtils;
+import com.android.databinding.util.GenerationalClassUtil;
+import com.android.databinding.util.L;
 
 import android.binding.Bindable;
+import android.binding.BindingBuildInfo;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.io.Serializable;
-import java.io.Writer;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
-import javax.annotation.processing.AbstractProcessor;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.annotation.processing.RoundEnvironment;
-import javax.annotation.processing.SupportedAnnotationTypes;
 import javax.annotation.processing.SupportedSourceVersion;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Element;
@@ -34,89 +43,98 @@ import javax.lang.model.element.Name;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
 import javax.lang.model.type.TypeKind;
-import javax.tools.Diagnostic;
-import javax.tools.FileObject;
-import javax.tools.JavaFileObject;
-import javax.tools.StandardLocation;
 
-@SupportedAnnotationTypes({"android.binding.Bindable"})
+// binding app info and library info are necessary to trigger this.
 @SupportedSourceVersion(SourceVersion.RELEASE_7)
-public class ProcessBindable extends AbstractProcessor {
-    Intermediate mProperties = new IntermediateV1();
-
-    public ProcessBindable() {
-    }
+public class ProcessBindable extends ProcessDataBinding.ProcessingStep {
+    private static final String INTERMEDIATE_FILE_EXT = "-br.bin";
+    Intermediate mProperties;
 
     @Override
-    public synchronized void init(ProcessingEnvironment processingEnv) {
-        super.init(processingEnv);
-        ModelAnalyzer.setProcessingEnvironment(processingEnv);
-    }
-
-    @Override
-    public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
+    public boolean onHandleStep(RoundEnvironment roundEnv, ProcessingEnvironment processingEnv,
+            BindingBuildInfo buildInfo) {
+        if (mProperties == null) {
+            mProperties = new IntermediateV1(buildInfo.modulePackage());
+        }
         for (Element element : roundEnv.getElementsAnnotatedWith(Bindable.class)) {
             Element enclosingElement = element.getEnclosingElement();
             ElementKind kind = enclosingElement.getKind();
             if (kind != ElementKind.CLASS && kind != ElementKind.INTERFACE) {
-                processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR,
-                        "Bindable must be on a member field or method. The enclosing type is " +
-                            enclosingElement.getKind(), element);
-                continue;
+                L.e("Bindable must be on a member field or method. The enclosing type is %s",
+                        enclosingElement.getKind());
             }
             TypeElement enclosing = (TypeElement) enclosingElement;
             String name = getPropertyName(element);
             if (name != null) {
+                Preconditions.checkNotNull(mProperties, "Must receive app / library info before "
+                        + "Bindable fields.");
                 mProperties.addProperty(enclosing.getQualifiedName().toString(), name);
             }
         }
-        if (roundEnv.processingOver()) {
-            writeIntermediateFile(mProperties);
-            generateBR(mProperties);
-        }
-        return true;
+        return false;
     }
 
-    private void generateBR(Intermediate intermediate) {
-        processingEnv.getMessager().printMessage(Diagnostic.Kind.NOTE,
-                "************* Generating BR file from Bindable attributes");
-        HashSet<String> properties = new HashSet<>();
-        intermediate.captureProperties(properties);
-        mergeClassPathResources(properties);
-        try {
-            ArrayList<String> sortedProperties = new ArrayList<String>();
-            sortedProperties.addAll(properties);
-            Collections.sort(sortedProperties);
-
-            JavaFileObject fileObject = processingEnv.getFiler()
-                    .createSourceFile("android.binding.BR");
-            Writer writer = fileObject.openWriter();
-            writer.write("package android.binding;\n\n" +
-                            "public final class BR {\n" +
-                            "    public static final int _all = 0;\n"
-            );
-            int id = 0;
-            for (String property : sortedProperties) {
-                id++;
-                writer.write("    public static final int " + property + " = " + id + ";\n");
-            }
-            writer.write("    public static int getId(String key) {\n");
-            writer.write("        switch(key) {\n");
-            id = 0;
-            for (String property : sortedProperties) {
-                id++;
-                writer.write("            case \"" + property + "\": return " + id + ";\n");
-            }
-            writer.write("        }\n");
-            writer.write("        return -1;\n");
-            writer.write("    }");
-            writer.write("}\n");
-
-            writer.close();
-        } catch (IOException e) {
-            processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR,
-                    "Could not generate BR file " + e.getLocalizedMessage());
+    @Override
+    public void onProcessingOver(RoundEnvironment roundEnvironment,
+            ProcessingEnvironment processingEnvironment, BindingBuildInfo buildInfo) {
+        if (mProperties != null) {
+            GenerationalClassUtil.writeIntermediateFile(processingEnvironment,
+                    mProperties.getPackage(),
+                    createIntermediateFileName(mProperties.getPackage()), mProperties);
+            generateBRClasses(!buildInfo.isLibrary(), mProperties.getPackage());
         }
+    }
+
+    private String createIntermediateFileName(String appPkg) {
+        return appPkg + INTERMEDIATE_FILE_EXT;
+    }
+
+    private void generateBRClasses(boolean useFinalFields, String pkg) {
+        L.d("************* Generating BR file %s. use final: %s", pkg, useFinalFields);
+        HashSet<String> properties = new HashSet<>();
+        mProperties.captureProperties(properties);
+        List<Intermediate> previousIntermediates = loadPreviousBRFiles();
+        for (Intermediate intermediate : previousIntermediates) {
+            intermediate.captureProperties(properties);
+        }
+        writeBRClass(useFinalFields, pkg, properties);
+        if (useFinalFields) {
+            // generate BR for all previous packages
+            for (Intermediate intermediate : previousIntermediates) {
+                writeBRClass(true, intermediate.getPackage(),
+                        properties);
+            }
+        }
+    }
+
+    private void writeBRClass(boolean useFinalFields, String pkg, HashSet<String> properties) {
+        ArrayList<String> sortedProperties = new ArrayList<String>();
+        sortedProperties.addAll(properties);
+        Collections.sort(sortedProperties);
+        StringBuilder out = new StringBuilder();
+        String modifier = "public static " + (useFinalFields ? "final" : "") + " int ";
+        out.append("package " + pkg + ";\n\n" +
+                        "public class BR {\n" +
+                        "    " + modifier + "_all = 0;\n"
+        );
+        int id = 0;
+        for (String property : sortedProperties) {
+            id++;
+            out.append("    " + modifier + property + " = " + id + ";\n");
+        }
+        out.append("    public static int getId(String key) {\n");
+        out.append("        switch(key) {\n");
+        id = 0;
+        for (String property : sortedProperties) {
+            id++;
+            out.append("            case \"" + property + "\": return " + id + ";\n");
+        }
+        out.append("        }\n");
+        out.append("        return -1;\n");
+        out.append("    }");
+        out.append("}\n");
+
+        getWriter().writeToFile(pkg + ".BR", out.toString() );
     }
 
     private String getPropertyName(Element element) {
@@ -126,8 +144,7 @@ public class ProcessBindable extends AbstractProcessor {
             case METHOD:
                 return stripPrefixFromMethod((ExecutableElement) element);
             default:
-                processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR,
-                        "@Bindable is not allowed on " + element.getKind(), element);
+                L.e("@Bindable is not allowed on %s", element.getKind());
                 return null;
         }
     }
@@ -159,8 +176,7 @@ public class ProcessBindable extends AbstractProcessor {
         } else if (isBooleanGetter(element)) {
             propertyName = name.subSequence(2, name.length());
         } else {
-            processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR,
-                    "@Bindable associated with method must follow JavaBeans convention", element);
+            L.e("@Bindable associated with method must follow JavaBeans convention %s", element);
             return null;
         }
         char firstChar = propertyName.charAt(0);
@@ -207,101 +223,31 @@ public class ProcessBindable extends AbstractProcessor {
                 element.getReturnType().getKind() == TypeKind.BOOLEAN;
     }
 
-    private Intermediate readIntermediateFile() {
-        Intermediate properties = null;
-        ObjectInputStream in = null;
-        try {
-            FileObject intermediate = processingEnv.getFiler()
-                    .getResource(StandardLocation.CLASS_OUTPUT,
-                            ProcessBindable.class.getPackage().getName(), "binding_properties.bin");
-            if (new File(intermediate.getName()).exists()) {
-                in = new ObjectInputStream(intermediate.openInputStream());
-                properties = (Intermediate) in.readObject();
-            }
-        } catch (IOException e) {
-            processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR,
-                    "Could not read Binding properties intermediate file: " +
-                    e.getLocalizedMessage());
-        } catch (ClassNotFoundException e) {
-            processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR,
-                    "Could not read Binding properties intermediate file: " +
-                            e.getLocalizedMessage());
-        } finally {
-            try {
-                if (in != null) {
-                    in.close();
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-        if (properties == null) {
-            properties = new IntermediateV1();
-        }
-        return properties;
+    private List<Intermediate> loadPreviousBRFiles() {
+        return GenerationalClassUtil
+                .loadObjects(getClass().getClassLoader(),
+                        new GenerationalClassUtil.ExtensionFilter(INTERMEDIATE_FILE_EXT));
     }
 
-    private void mergeClassPathResources(HashSet<String> intermediateProperties) {
-        try {
-            String resourcePath = ProcessBindable.class.getPackage().getName()
-                    .replace('.', '/') + "/binding_properties.bin";
-            Enumeration<URL> resources = getClass().getClassLoader()
-                    .getResources(resourcePath);
-            while (resources.hasMoreElements()) {
-                URL url = resources.nextElement();
-                processingEnv.getMessager().printMessage(Diagnostic.Kind.NOTE,
-                        "Merging binding adapters from " + url);
-                InputStream inputStream = null;
-                try {
-                    inputStream = url.openStream();
-                    ObjectInputStream in = new ObjectInputStream(inputStream);
-                    Intermediate properties = (Intermediate) in.readObject();
-                    if (properties != null) {
-                        properties.captureProperties(intermediateProperties);
-                    }
-                } catch (IOException e) {
-                    processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR,
-                            "Could not merge in Bindables from " + url + ": " +
-                                    e.getLocalizedMessage());
-                } catch (ClassNotFoundException e) {
-                    processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR,
-                            "Could not read Binding properties intermediate file: " +
-                                    e.getLocalizedMessage());
-                } finally {
-                    IOUtils.closeQuietly(inputStream);
-                }
-            }
-        } catch (IOException e) {
-            processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR,
-                    "Could not read Binding properties intermediate file: " +
-                            e.getLocalizedMessage());
-        }
-    }
+    private interface Intermediate extends Serializable {
 
-    private void writeIntermediateFile(Intermediate properties) {
-        try {
-            FileObject intermediate = processingEnv.getFiler().createResource(
-                    StandardLocation.CLASS_OUTPUT, ProcessBindable.class.getPackage().getName(),
-                    "binding_properties.bin");
-            ObjectOutputStream out = new ObjectOutputStream(intermediate.openOutputStream());
-            out.writeObject(properties);
-            out.close();
-        } catch (IOException e) {
-            processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR,
-                    "Could not write to intermediate file: " + e.getLocalizedMessage());
-        }
-    }
-
-    private interface Intermediate {
         void captureProperties(Set<String> properties);
 
         void addProperty(String className, String propertyName);
+
+        String getPackage();
     }
 
     private static class IntermediateV1 implements Serializable, Intermediate {
-        private static final long serialVersionUID = 1L;
 
+        private static final long serialVersionUID = 2L;
+
+        private String mPackage;
         private final HashMap<String, HashSet<String>> mProperties = new HashMap<>();
+
+        public IntermediateV1(String aPackage) {
+            mPackage = aPackage;
+        }
 
         @Override
         public void captureProperties(Set<String> properties) {
@@ -318,6 +264,11 @@ public class ProcessBindable extends AbstractProcessor {
                 mProperties.put(className, properties);
             }
             properties.add(propertyName);
+        }
+
+        @Override
+        public String getPackage() {
+            return mPackage;
         }
     }
 }

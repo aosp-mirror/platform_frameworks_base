@@ -13,8 +13,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
-import android.binding.BR;
-
 import com.android.databinding.library.DataBindingUtil;
 import com.android.databinding.library.PropertyChangeRegistry;
 import com.android.example.bindingdemo.generated.ListItemBinding;
@@ -26,7 +24,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-
+import  com.android.example.bindingdemo.BR;
 public class MainActivity extends ActionBarActivity implements Observable {
     @Bindable
     UserAdapter tkAdapter;
@@ -78,7 +76,7 @@ public class MainActivity extends ActionBarActivity implements Observable {
             return;
         }
         this.selected = selected;
-        mListeners.notifyChange(this, android.binding.BR.selected);
+        mListeners.notifyChange(this, BR.selected);
     }
 
     @Bindable
@@ -190,7 +188,7 @@ public class MainActivity extends ActionBarActivity implements Observable {
             }
             userList.add(user);
             notifyItemInserted(userList.size() - 1);
-            mListeners.notifyChange(this, android.binding.BR.itemCount);
+            mListeners.notifyChange(this, BR.itemCount);
         }
 
         public void remove(User user) {
@@ -200,7 +198,7 @@ public class MainActivity extends ActionBarActivity implements Observable {
             }
             userList.remove(i);
             notifyItemRemoved(i);
-            mListeners.notifyChange(this, android.binding.BR.itemCount);
+            mListeners.notifyChange(this, BR.itemCount);
         }
 
         @Override

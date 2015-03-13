@@ -19,6 +19,6 @@ public class MockLayoutBinder extends LayoutBinder {
 
     public MockLayoutBinder() {
         super(new ResourceBundle("com.test"),
-                new ResourceBundle.LayoutFileBundle("blah.xml", 1, "."));
+                new ResourceBundle.LayoutFileBundle("blah.xml", 1, ".", "com.test.submodule"));
     }
 }

@@ -25,6 +25,7 @@ import android.text.util.Linkify;
 import android.view.KeyEvent;
 import android.view.View;
 import android.widget.TextView;
+import com.android.databinding.testapp.BR;
 
 public class TextViewBindingObject extends BindingAdapterBindingObject {
 
@@ -236,7 +237,7 @@ public class TextViewBindingObject extends BindingAdapterBindingObject {
 
     public void setCapitalize(TextKeyListener.Capitalize capitalize) {
         mCapitalize = capitalize;
-        notifyPropertyChanged(android.binding.BR.capitalize);
+        notifyPropertyChanged(BR.capitalize);
     }
 
     public boolean isPhoneNumber() {

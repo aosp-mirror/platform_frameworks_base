@@ -4,6 +4,7 @@ import android.binding.Bindable;
 import android.graphics.Color;
 
 import com.android.databinding.library.BaseObservable;
+import com.android.example.bindingdemo.BR;
 
 import java.util.Objects;
 
@@ -33,7 +34,7 @@ public class User extends BaseObservable {
             return;
         }
         this.group = group;
-        notifyPropertyChanged(android.binding.BR.group);
+        notifyPropertyChanged(BR.group);
     }
 
     public int getGroup() {
@@ -49,7 +50,7 @@ public class User extends BaseObservable {
             return;
         }
         this.name = name;
-        notifyPropertyChanged(android.binding.BR.name);
+        notifyPropertyChanged(BR.name);
     }
 
     public String getLastName() {
@@ -61,7 +62,7 @@ public class User extends BaseObservable {
             return;
         }
         this.lastName = lastName;
-        notifyPropertyChanged(android.binding.BR.lastName);
+        notifyPropertyChanged(BR.lastName);
     }
 
     public int getPhotoResource() {
@@ -73,7 +74,7 @@ public class User extends BaseObservable {
             return;
         }
         this.photoResource = photoResource;
-        notifyPropertyChanged(android.binding.BR.photoResource);
+        notifyPropertyChanged(BR.photoResource);
     }
 
     public int getFavoriteColor() {

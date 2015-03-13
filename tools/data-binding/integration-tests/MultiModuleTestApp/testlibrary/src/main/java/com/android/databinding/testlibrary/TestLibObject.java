@@ -13,15 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package android.binding;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+package com.android.databinding.testlibrary;
 
-@Target({ElementType.TYPE})
-@Retention(RetentionPolicy.SOURCE)
-public @interface BinderBundle {
-    String value();
+import android.binding.Bindable;
+
+public class TestLibObject {
+    @Bindable
+    private String mField;
+
+    public String getField() {
+        return mField;
+    }
+
+    public void setField(String field) {
+        this.mField = field;
+    }
 }

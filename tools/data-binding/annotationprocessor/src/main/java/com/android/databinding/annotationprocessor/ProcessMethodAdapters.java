@@ -15,24 +15,25 @@
  */
 package com.android.databinding.annotationprocessor;
 
+import com.google.common.base.Preconditions;
+
 import android.binding.BindingAdapter;
+import android.binding.BindingBuildInfo;
 import android.binding.BindingConversion;
 import android.binding.BindingMethod;
 import android.binding.BindingMethods;
 import android.binding.Untaggable;
 
+import com.android.databinding.reflection.ModelAnalyzer;
 import com.android.databinding.store.SetterStore;
+import com.android.databinding.util.L;
 
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
-import javax.annotation.processing.AbstractProcessor;
+import javax.annotation.processing.ProcessingEnvironment;
 import javax.annotation.processing.RoundEnvironment;
-import javax.annotation.processing.SupportedAnnotationTypes;
-import javax.annotation.processing.SupportedSourceVersion;
-import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
@@ -42,50 +43,46 @@ import javax.lang.model.element.VariableElement;
 import javax.lang.model.type.TypeKind;
 import javax.tools.Diagnostic;
 
-@SupportedAnnotationTypes({
-        "android.binding.BindingAdapter",
-        "android.binding.Untaggable",
-        "android.binding.BindingMethods",
-        "android.binding.BindingConversion"})
-@SupportedSourceVersion(SourceVersion.RELEASE_7)
-public class ProcessMethodAdapters extends AbstractProcessor {
-    private boolean mProcessed;
-
+public class ProcessMethodAdapters extends ProcessDataBinding.ProcessingStep {
     public ProcessMethodAdapters() {
     }
 
     @Override
-    public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
-        if (mProcessed) {
-            return true;
-        }
-
-        SetterStore store = SetterStore.get(processingEnv);
+    public boolean onHandleStep(RoundEnvironment roundEnv,
+            ProcessingEnvironment processingEnvironment, BindingBuildInfo buildInfo) {
+        L.d("processing adapters");
+        final ModelAnalyzer modelAnalyzer = ModelAnalyzer.getInstance();
+        Preconditions.checkNotNull(modelAnalyzer, "Model analyzer should be"
+                + " initialized first");
+        SetterStore store = SetterStore.get(modelAnalyzer);
         clearIncrementalClasses(roundEnv, store);
 
-        addBindingAdapters(roundEnv, store);
-        addRenamed(roundEnv, store);
-        addConversions(roundEnv, store);
-        addUntaggable(roundEnv, store);
+        addBindingAdapters(roundEnv, processingEnvironment, store);
+        addRenamed(roundEnv, processingEnvironment, store);
+        addConversions(roundEnv, processingEnvironment, store);
+        addUntaggable(roundEnv, processingEnvironment, store);
 
         try {
-            store.write(processingEnv);
+            store.write(buildInfo.modulePackage(), processingEnvironment);
         } catch (IOException e) {
-            processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR,
-                    "Could not write BindingAdapter intermediate file: " + e.getLocalizedMessage());
-            e.printStackTrace();
+            L.e(e, "Could not write BindingAdapter intermediate file.");
         }
-        mProcessed = true;
         return true;
     }
 
-    private void addBindingAdapters(RoundEnvironment roundEnv, SetterStore store) {
+    @Override
+    public void onProcessingOver(RoundEnvironment roundEnvironment,
+            ProcessingEnvironment processingEnvironment, BindingBuildInfo buildInfo) {
+
+    }
+
+    private void addBindingAdapters(RoundEnvironment roundEnv, ProcessingEnvironment
+            processingEnv, SetterStore store) {
         for (Element element : roundEnv.getElementsAnnotatedWith(BindingAdapter.class)) {
             if (element.getKind() != ElementKind.METHOD ||
                     !element.getModifiers().contains(Modifier.STATIC) ||
                     !element.getModifiers().contains(Modifier.PUBLIC)) {
-                processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR,
-                        "@BindingAdapter on invalid element: " + element);
+                L.e("@BindingAdapter on invalid element: %s", element);
                 continue;
             }
             BindingAdapter bindingAdapter = element.getAnnotation(BindingAdapter.class);
@@ -93,22 +90,20 @@ public class ProcessMethodAdapters extends AbstractProcessor {
             ExecutableElement executableElement = (ExecutableElement) element;
             List<? extends VariableElement> parameters = executableElement.getParameters();
             if (parameters.size() != 2) {
-                processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR,
-                        "@BindingAdapter does not take two parameters: " + element);
+                L.e("@BindingAdapter does not take two parameters: %s",element);
                 continue;
             }
             try {
-                processingEnv.getMessager().printMessage(Diagnostic.Kind.NOTE,
-                        "------------------ @BindingAdapter for " + element);
+                L.d("------------------ @BindingAdapter for %s", element);
                 store.addBindingAdapter(bindingAdapter.value(), executableElement);
             } catch (IllegalArgumentException e) {
-                processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR,
-                        "@BindingAdapter for duplicate View and parameter type: " + element);
+                L.e(e, "@BindingAdapter for duplicate View and parameter type: %s", element);
             }
         }
     }
 
-    private void addRenamed(RoundEnvironment roundEnv, SetterStore store) {
+    private void addRenamed(RoundEnvironment roundEnv, ProcessingEnvironment processingEnv,
+            SetterStore store) {
         for (Element element : roundEnv.getElementsAnnotatedWith(BindingMethods.class)) {
             BindingMethods bindingMethods = element.getAnnotation(BindingMethods.class);
             for (BindingMethod bindingMethod : bindingMethods.value()) {
@@ -118,7 +113,8 @@ public class ProcessMethodAdapters extends AbstractProcessor {
         }
     }
 
-    private void addConversions(RoundEnvironment roundEnv, SetterStore store) {
+    private void addConversions(RoundEnvironment roundEnv,
+            ProcessingEnvironment processingEnv, SetterStore store) {
         for (Element element : roundEnv.getElementsAnnotatedWith(BindingConversion.class)) {
             if (element.getKind() != ElementKind.METHOD ||
                     !element.getModifiers().contains(Modifier.STATIC) ||
@@ -145,7 +141,8 @@ public class ProcessMethodAdapters extends AbstractProcessor {
         }
     }
 
-    private void addUntaggable(RoundEnvironment roundEnv, SetterStore store) {
+    private void addUntaggable(RoundEnvironment roundEnv,
+            ProcessingEnvironment processingEnv, SetterStore store) {
         for (Element element : roundEnv.getElementsAnnotatedWith(Untaggable.class)) {
             Untaggable untaggable = element.getAnnotation(Untaggable.class);
             store.addUntaggableTypes(untaggable.value(), (TypeElement) element);

@@ -439,21 +439,6 @@ public class AnnotationAnalyzer extends ModelAnalyzer {
     }
 
     @Override
-    public List<URL> getResources(String name) {
-        ArrayList<URL> urls = new ArrayList<URL>();
-        try {
-            Enumeration<URL> resources = getClass().getClassLoader().getResources(name);
-            while (resources.hasMoreElements()) {
-                urls.add(resources.nextElement());
-            }
-        } catch (IOException e) {
-            L.e(e, "IOException while getting resources:");
-        }
-
-        return urls;
-    }
-
-    @Override
     public ModelClass findClass(Class classType) {
         return findClass(classType.getCanonicalName(), null);
     }

@@ -59,9 +59,6 @@ dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
     compile project(":baseLibrary")
     compile 'com.android.support:support-v4:+'
-    provided project(":annotationprocessor")
-    provided 'com.android.support:cardview-v7:+'
-    provided 'com.android.support:appcompat-v7:+'
 }
 
 configurations {

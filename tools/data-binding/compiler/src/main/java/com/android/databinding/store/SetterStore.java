@@ -18,6 +18,7 @@ package com.android.databinding.store;
 import com.android.databinding.reflection.ModelAnalyzer;
 import com.android.databinding.reflection.ModelClass;
 import com.android.databinding.reflection.ModelMethod;
+import com.android.databinding.util.GenerationalClassUtil;
 import com.android.databinding.util.L;
 
 import org.apache.commons.lang3.StringUtils;
@@ -30,6 +31,7 @@ import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -50,7 +52,7 @@ import javax.tools.StandardLocation;
 
 public class SetterStore {
 
-    public static final String SETTER_STORE_FILE_NAME = "setter_store.bin";
+    public static final String SETTER_STORE_FILE_EXT = "-setter_store.bin";
 
     private static SetterStore sStore;
 
@@ -62,68 +64,22 @@ public class SetterStore {
         mStore = store;
     }
 
-    public static SetterStore get(ProcessingEnvironment processingEnvironment) {
-        if (sStore == null) {
-            InputStream in = null;
-            try {
-                Filer filer = processingEnvironment.getFiler();
-                FileObject resource = filer.getResource(StandardLocation.CLASS_OUTPUT,
-                        SetterStore.class.getPackage().getName(), SETTER_STORE_FILE_NAME);
-                if (resource != null && new File(resource.getName()).exists()) {
-                    in = resource.openInputStream();
-                    if (in != null) {
-                        sStore = load(in);
-                    }
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-            } catch (ClassNotFoundException e) {
-                e.printStackTrace();
-            } finally {
-                if (in != null) {
-                    try {
-                        in.close();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
-            if (sStore == null) {
-                sStore = new SetterStore(null, new IntermediateV1());
-            }
-        }
-        return sStore;
-    }
-
     public static SetterStore get(ModelAnalyzer modelAnalyzer) {
         if (sStore == null) {
-            sStore = load(modelAnalyzer);
+            sStore = load(modelAnalyzer, SetterStore.class.getClassLoader());
         }
         return sStore;
     }
 
-    private static SetterStore load(ModelAnalyzer modelAnalyzer) {
+    private static SetterStore load(ModelAnalyzer modelAnalyzer, ClassLoader classLoader) {
         IntermediateV1 store = new IntermediateV1();
-        String resourceName = SetterStore.class.getPackage().getName().replace('.', '/') +
-                '/' + SETTER_STORE_FILE_NAME;
-        try {
-            for (URL resource : modelAnalyzer.getResources(resourceName)) {
-                merge(store, resource);
-            }
-            return new SetterStore(modelAnalyzer, store);
-        } catch (IOException e) {
-            L.e(e, "Could not read SetterStore intermediate file");
-        } catch (ClassNotFoundException e) {
-            L.e(e, "Could not read SetterStore intermediate file");
+        List<Intermediate> previousStores = GenerationalClassUtil
+                .loadObjects(classLoader,
+                        new GenerationalClassUtil.ExtensionFilter(SETTER_STORE_FILE_EXT));
+        for (Intermediate intermediate : previousStores) {
+            merge(store, intermediate);
         }
         return new SetterStore(modelAnalyzer, store);
-    }
-
-    private static SetterStore load(InputStream inputStream)
-            throws IOException, ClassNotFoundException {
-        ObjectInputStream in = new ObjectInputStream(inputStream);
-        Intermediate intermediate = (Intermediate) in.readObject();
-        return new SetterStore(null, (IntermediateV1) intermediate.upgrade());
     }
 
     public void addRenamedMethod(String attribute, String declaringClass, String method,
@@ -135,10 +91,12 @@ public class SetterStore {
         }
         MethodDescription methodDescription =
                 new MethodDescription(declaredOn.getQualifiedName().toString(), method);
+        L.d("STORE addmethod desc %s", methodDescription);
         renamed.put(declaringClass, methodDescription);
     }
 
     public void addBindingAdapter(String attribute, ExecutableElement bindingMethod) {
+        L.d("STORE addBindingAdapter %s %s", attribute, bindingMethod);
         HashMap<AccessorKey, MethodDescription> adapters = mStore.adapterMethods.get(attribute);
 
         if (adapters == null) {
@@ -158,6 +116,7 @@ public class SetterStore {
     }
 
     public void addUntaggableTypes(String[] typeNames, TypeElement declaredOn) {
+        L.d("STORE addUntaggableTypes %s %s", Arrays.toString(typeNames), declaredOn);
         String declaredType = declaredOn.getQualifiedName().toString();
         for (String type : typeNames) {
             mStore.untaggableTypes.put(type, declaredType);
@@ -187,6 +146,7 @@ public class SetterStore {
     }
 
     public void addConversionMethod(ExecutableElement conversionMethod) {
+        L.d("STORE addConversionMethod %s", conversionMethod);
         List<? extends VariableElement> parameters = conversionMethod.getParameters();
         String fromType = getQualifiedName(parameters.get(0).asType());
         String toType = getQualifiedName(conversionMethod.getReturnType());
@@ -248,21 +208,10 @@ public class SetterStore {
         keys.clear();
     }
 
-    public void write(ProcessingEnvironment processingEnvironment) throws IOException {
-        Filer filer = processingEnvironment.getFiler();
-        FileObject resource = filer.createResource(StandardLocation.CLASS_OUTPUT,
-                SetterStore.class.getPackage().getName(), "setter_store.bin");
-        L.d("============= Writing intermediate file: %s", resource.getName());
-        ObjectOutputStream out = null;
-        try {
-            out = new ObjectOutputStream(resource.openOutputStream());
-
-            out.writeObject(mStore);
-        } finally {
-            if (out != null) {
-                out.close();
-            }
-        }
+    public void write(String projectPackage, ProcessingEnvironment processingEnvironment)
+            throws IOException {
+        GenerationalClassUtil.writeIntermediateFile(processingEnvironment,
+                projectPackage, projectPackage + SETTER_STORE_FILE_EXT, mStore);
     }
 
     public SetterCall getSetterCall(String attribute, ModelClass viewType,
@@ -503,27 +452,12 @@ public class SetterStore {
         }
     }
 
-    private static void merge(IntermediateV1 store,
-            URL nextUrl) throws IOException, ClassNotFoundException {
-        InputStream inputStream = null;
-        JarFile jarFile = null;
-        try {
-            inputStream = nextUrl.openStream();
-            ObjectInputStream in = new ObjectInputStream(inputStream);
-            Intermediate intermediate = (Intermediate) in.readObject();
-            IntermediateV1 intermediateV1 = (IntermediateV1) intermediate.upgrade();
-            merge(store.adapterMethods, intermediateV1.adapterMethods);
-            merge(store.renamedMethods, intermediateV1.renamedMethods);
-            merge(store.conversionMethods, intermediateV1.conversionMethods);
-            store.untaggableTypes.putAll(intermediateV1.untaggableTypes);
-        } finally {
-            if (inputStream != null) {
-                inputStream.close();
-            }
-            if (jarFile != null) {
-                jarFile.close();
-            }
-        }
+    private static void merge(IntermediateV1 store, Intermediate dumpStore) {
+        IntermediateV1 intermediateV1 = (IntermediateV1) dumpStore.upgrade();
+        merge(store.adapterMethods, intermediateV1.adapterMethods);
+        merge(store.renamedMethods, intermediateV1.renamedMethods);
+        merge(store.conversionMethods, intermediateV1.conversionMethods);
+        store.untaggableTypes.putAll(intermediateV1.untaggableTypes);
     }
 
     private static <K, V> void merge(HashMap<K, HashMap<V, MethodDescription>> first,
@@ -619,7 +553,7 @@ public class SetterStore {
         }
     }
 
-    private interface Intermediate {
+    private interface Intermediate extends Serializable {
         Intermediate upgrade();
     }
 

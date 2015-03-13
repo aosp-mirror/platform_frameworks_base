@@ -331,7 +331,8 @@ class LayoutBinderWriter(val layoutBinder : LayoutBinder) {
     public fun write() : String  {
         layoutBinder.resolveWhichExpressionsAreUsed()
         return kcode("package ${layoutBinder.getPackage()};") {
-            nl("import ${layoutBinder.getProjectPackage()}.R;")
+            nl("import ${layoutBinder.getModulePackage()}.R;")
+            nl("import ${layoutBinder.getModulePackage()}.BR;")
             nl("import android.view.View;")
             nl("public class ${className} extends ${baseClassName} {") {
                 tab(declareIncludeViews())
@@ -401,7 +402,7 @@ class LayoutBinderWriter(val layoutBinder : LayoutBinder) {
                         if (originalTag != null) {
                             tagValue = "\"${originalTag}\""
                             if (originalTag.startsWith("@")) {
-                                var packageName = layoutBinder.getProjectPackage()
+                                var packageName = layoutBinder.getModulePackage()
                                 if (originalTag.startsWith("@android:")) {
                                     packageName = "android"
                                 }
@@ -749,15 +750,15 @@ class LayoutBinderWriter(val layoutBinder : LayoutBinder) {
             }
             nl("")
             tab("public static ${baseClassName} inflate(android.view.ViewGroup root) {") {
-                tab("return DataBindingUtil.<${baseClassName}>inflate(root.getContext(), ${layoutBinder.getProjectPackage()}.R.layout.${layoutBinder.getLayoutname()}, root, true);")
+                tab("return DataBindingUtil.<${baseClassName}>inflate(root.getContext(), ${layoutBinder.getModulePackage()}.R.layout.${layoutBinder.getLayoutname()}, root, true);")
             }
             tab("}")
             tab("public static ${baseClassName} inflate(android.content.Context context) {") {
-                tab("return DataBindingUtil.<${baseClassName}>inflate(context, ${layoutBinder.getProjectPackage()}.R.layout.${layoutBinder.getLayoutname()}, null, false);")
+                tab("return DataBindingUtil.<${baseClassName}>inflate(context, ${layoutBinder.getModulePackage()}.R.layout.${layoutBinder.getLayoutname()}, null, false);")
             }
             tab("}")
             tab("public static ${baseClassName} bind(android.view.View view) {") {
-                tab("return (${baseClassName})DataBindingUtil.bindTo(view, ${layoutBinder.getProjectPackage()}.R.layout.${layoutBinder.getLayoutname()});")
+                tab("return (${baseClassName})DataBindingUtil.bindTo(view, ${layoutBinder.getModulePackage()}.R.layout.${layoutBinder.getLayoutname()});")
             }
             tab("}")
             nl("}")

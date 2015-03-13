@@ -131,7 +131,8 @@ object XmlEditor {
         Preconditions.checkNotNull(rootNodeContext, "Cannot find root node for ${f.getName()}")
         Preconditions.checkState(rootNodeHasTag == false, """You cannot set a tag in the layout
         root if you are using binding. Invalid file: ${f}""")
-        val rootNodeBounds = Pair(rootNodeContext!!.getStart().toPosition(), rootNodeContext!!.getStop().toEndPosition())
+        val rootNodeBounds = Pair(rootNodeContext!!.getStart().toPosition(),
+                rootNodeContext!!.getStop().toEndPosition())
 
         log { "root node bounds: ${rootNodeBounds}" }
         val out = StringBuilder()

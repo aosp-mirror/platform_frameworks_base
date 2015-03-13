@@ -1,4 +1,4 @@
-include ':baseLibrary'
+include ':baseLibrary', ':app'
 include ':library'
 include ':compiler'
 include ':gradlePlugin'

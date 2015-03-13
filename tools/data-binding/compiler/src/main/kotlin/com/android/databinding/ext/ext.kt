@@ -77,4 +77,4 @@ public fun String.toCamelCaseAsVar() : String {
 }
 
 public fun String.br() : String =
-    "android.binding.BR.${if (this == "") "_all" else this}"
+    "BR.${if (this == "") "_all" else this}"

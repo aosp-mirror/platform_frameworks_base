@@ -57,7 +57,15 @@ public class ResourceBundle implements Serializable {
             mLayoutBundles.put(bundle.mFileName, new ArrayList<LayoutFileBundle>());
         }
         bundle.mLayoutId = layoutId;
-        mLayoutBundles.get(bundle.mFileName).add(bundle);
+        final List<LayoutFileBundle> bundles = mLayoutBundles.get(bundle.mFileName);
+        for (LayoutFileBundle existing : bundles) {
+            if (existing.equals(bundle)) {
+                L.d("skipping layout bundle %s because it already exists.", bundle);
+                return;
+            }
+        }
+        L.d("adding bundle %s", bundle);
+        bundles.add(bundle);
     }
 
     public HashMap<String, List<LayoutFileBundle>> getLayoutBundles() {
@@ -200,6 +208,8 @@ public class ResourceBundle implements Serializable {
         public int mLayoutId;
         @XmlAttribute(name="layout", required = true)
         public String mFileName;
+        @XmlAttribute(name="modulePackage", required = true)
+        public String mModulePackage;
         private String mConfigName;
 
         @XmlAttribute(name="directory", required = true)
@@ -222,10 +232,12 @@ public class ResourceBundle implements Serializable {
         public LayoutFileBundle() {
         }
 
-        public LayoutFileBundle(String fileName, int layoutId, String directory) {
+        public LayoutFileBundle(String fileName, int layoutId, String directory,
+                String modulePackage) {
             mFileName = fileName;
             mLayoutId = layoutId;
             mDirectory = directory;
+            mModulePackage = modulePackage;
         }
 
         public void addVariable(String name, String type) {
@@ -287,6 +299,57 @@ public class ResourceBundle implements Serializable {
 
         public List<BindingTargetBundle> getBindingTargetBundles() {
             return mBindingTargetBundles;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) {
+                return true;
+            }
+            if (o == null || getClass() != o.getClass()) {
+                return false;
+            }
+
+            LayoutFileBundle bundle = (LayoutFileBundle) o;
+
+            if (mConfigName != null ? !mConfigName.equals(bundle.mConfigName)
+                    : bundle.mConfigName != null) {
+                return false;
+            }
+            if (mDirectory != null ? !mDirectory.equals(bundle.mDirectory)
+                    : bundle.mDirectory != null) {
+                return false;
+            }
+            if (mFileName != null ? !mFileName.equals(bundle.mFileName)
+                    : bundle.mFileName != null) {
+                return false;
+            }
+
+            return true;
+        }
+
+        @Override
+        public int hashCode() {
+            int result = mFileName != null ? mFileName.hashCode() : 0;
+            result = 31 * result + (mConfigName != null ? mConfigName.hashCode() : 0);
+            result = 31 * result + (mDirectory != null ? mDirectory.hashCode() : 0);
+            return result;
+        }
+
+        @Override
+        public String toString() {
+            return "LayoutFileBundle{" +
+                    "mHasVariations=" + mHasVariations +
+                    ", mDirectory='" + mDirectory + '\'' +
+                    ", mConfigName='" + mConfigName + '\'' +
+                    ", mModulePackage='" + mModulePackage + '\'' +
+                    ", mFileName='" + mFileName + '\'' +
+                    ", mLayoutId=" + mLayoutId +
+                    '}';
+        }
+
+        public String getModulePackage() {
+            return mModulePackage;
         }
     }
 

@@ -67,7 +67,7 @@ public class LayoutFileParser {
 
         ResourceBundle.LayoutFileBundle bundle = new ResourceBundle.LayoutFileBundle(
                 ParserHelper.INSTANCE$.stripExtension(xml.getName()), layoutId,
-                xml.getParentFile().getName());
+                xml.getParentFile().getName(), pkg);
 
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
         final DocumentBuilder builder = factory.newDocumentBuilder();

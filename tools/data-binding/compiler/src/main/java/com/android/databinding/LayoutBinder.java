@@ -43,6 +43,7 @@ public class LayoutBinder {
     private final ExpressionParser mExpressionParser;
     private final List<BindingTarget> mBindingTargets;
     private String mPackage;
+    private String mModulePackage;
     private String mProjectPackage;
     private String mBaseClassName;
     private final HashMap<String, String> mUserDefinedVariables = new HashMap<String, String>();
@@ -57,7 +58,8 @@ public class LayoutBinder {
         mBindingTargets = new ArrayList<BindingTarget>();
         mBundle = layoutBundle;
         mProjectPackage = resourceBundle.getAppPackage();
-        mPackage = mProjectPackage + ".generated";
+        mModulePackage = layoutBundle.getModulePackage();
+        mPackage = layoutBundle.getModulePackage() + ".generated";
         mBaseClassName = ParserHelper.INSTANCE$.toClassName(layoutBundle.getFileName()) + "Binding";
         // copy over data.
         for (Map.Entry<String, String> variable : mBundle.getVariables().entrySet()) {
@@ -157,6 +159,10 @@ public class LayoutBinder {
 
     public String getPackage() {
         return mPackage;
+    }
+
+    public String getModulePackage() {
+        return mModulePackage;
     }
 
     public void setPackage(String aPackage) {

@@ -13,6 +13,23 @@
 
 package com.android.databinding.writer;
 
-public interface JavaFileWriter {
-    public void writeToFile(String canonicalName, String contents);
+import com.android.databinding.util.L;
+
+import org.apache.commons.io.FileUtils;
+
+import java.io.File;
+import java.io.IOException;
+
+public abstract class JavaFileWriter {
+    public abstract void writeToFile(String canonicalName, String contents);
+    public void writeToFile(File exactPath, String contents) {
+        File parent = exactPath.getParentFile();
+        parent.mkdirs();
+        try {
+            L.d("writing file %s", exactPath.getAbsoluteFile());
+            FileUtils.writeStringToFile(exactPath, contents);
+        } catch (IOException e) {
+            L.e(e, "Could not write to %s", exactPath);
+        }
+    }
 }

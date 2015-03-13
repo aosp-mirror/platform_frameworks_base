@@ -30,8 +30,7 @@
 
     <include layout="@layout/included_layout" android:id="@+id/includedLayoutConflict"
              bind:innerObject="@{objectInLand}"
-             bind:innerValue="@{`modified ` + objectInLand.intValue}"
-            />
+             bind:innerValue='@{"modified " + objectInLand.intValue}' />
     <include layout="@layout/basic_binding" android:id="@+id/includedLayoutShared"
              bind:a="@{objectInDefault.stringValue}"
             />

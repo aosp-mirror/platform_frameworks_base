@@ -15,8 +15,14 @@
  */
 package com.android.databinding.writer;
 
+import com.google.common.base.Preconditions;
+
+import com.android.databinding.util.L;
+
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.Writer;
 
@@ -24,7 +30,7 @@ import javax.annotation.processing.ProcessingEnvironment;
 import javax.tools.Diagnostic;
 import javax.tools.JavaFileObject;
 
-public class AnnotationJavaFileWriter implements JavaFileWriter {
+public class AnnotationJavaFileWriter extends JavaFileWriter {
     private final ProcessingEnvironment mProcessingEnvironment;
 
     public AnnotationJavaFileWriter(ProcessingEnvironment processingEnvironment) {
@@ -35,13 +41,13 @@ public class AnnotationJavaFileWriter implements JavaFileWriter {
     public void writeToFile(String canonicalName, String contents) {
         Writer writer = null;
         try {
+            L.d("writing file %s", canonicalName);
             JavaFileObject javaFileObject =
                     mProcessingEnvironment.getFiler().createSourceFile(canonicalName);
             writer = javaFileObject.openWriter();
             writer.write(contents);
         } catch (IOException e) {
-            mProcessingEnvironment.getMessager().printMessage(Diagnostic.Kind.ERROR,
-                    "Could not write to " + canonicalName + ": " + e.getLocalizedMessage());
+            L.e(e, "Could not write to %s", canonicalName);
         } finally {
             if (writer != null) {
                 IOUtils.closeQuietly(writer);

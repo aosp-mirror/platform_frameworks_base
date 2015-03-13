@@ -209,8 +209,6 @@ public abstract class ModelAnalyzer {
 
     public abstract ModelClass findClass(String className, Map<String, String> imports);
 
-    public abstract List<URL> getResources(String name);
-
     public abstract ModelClass findClass(Class classType);
 
     public abstract TypeUtil createTypeUtil();

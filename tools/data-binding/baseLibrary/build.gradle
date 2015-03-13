@@ -46,7 +46,6 @@ sourceSets {
 }
 
 dependencies {
-    compile 'com.tunnelvisionlabs:antlr4:4.4'
     testCompile 'junit:junit:4.11'
 }
 

@@ -20,15 +20,16 @@ import com.android.databinding.store.LayoutFileParser;
 import com.android.databinding.store.ResourceBundle;
 import com.android.databinding.writer.JavaFileWriter;
 
-import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.xml.sax.SAXException;
+
+import android.binding.BindingBuildInfo;
 
 import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.StringWriter;
-import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -44,24 +45,51 @@ import javax.xml.xpath.XPathExpressionException;
  * processor to work with.
  */
 public class LayoutXmlProcessor {
-
-    public static final String RESOURCE_BUNDLE_PACKAGE = "com.android.databinding.layouts.";
-    public static final String APPLICATION_INFO_CLASS = "ApplicationBindingInfo";
+    // hardcoded in baseAdapters
+    public static final String RESOURCE_BUNDLE_PACKAGE = "com.android.databinding.layouts";
+    public static final String CLASS_NAME = "DataBindingInfo";
     private final JavaFileWriter mFileWriter;
     private final ResourceBundle mResourceBundle;
     private final int mMinSdk;
 
     private boolean mProcessingComplete;
     private boolean mWritten;
+    private final boolean mIsLibrary;
     private final String mBuildId = UUID.randomUUID().toString();
-    private final List<File> mResourceFolders;
+    // can be a list of xml files or folders that contain XML files
+    private final List<File> mResources;
 
-    public LayoutXmlProcessor(String applicationPackage, List<File> resourceFolders,
-            JavaFileWriter fileWriter, int minSdk) {
+    public LayoutXmlProcessor(String applicationPackage, List<File> resources,
+            JavaFileWriter fileWriter, int minSdk, boolean isLibrary) {
         mFileWriter = fileWriter;
         mResourceBundle = new ResourceBundle(applicationPackage);
-        mResourceFolders = resourceFolders;
+        mResources = resources;
         mMinSdk = minSdk;
+        mIsLibrary = isLibrary;
+    }
+
+    public static List<File> getLayoutFiles(List<File> resources) {
+        List<File> result = new ArrayList<File>();
+        for (File resource : Iterables.filter(resources, fileExists)) {
+            if (resource.isDirectory()) {
+                for (File layoutFolder : resource.listFiles(layoutFolderFilter)) {
+                    for (File xmlFile : layoutFolder.listFiles(xmlFileFilter)) {
+                        result.add(xmlFile);
+                    }
+
+                }
+            } else if (xmlFileFilter.accept(resource.getParentFile(), resource.getName())) {
+                result.add(resource);
+            }
+        }
+        return result;
+    }
+
+    /**
+     * used by the studio plugin
+     */
+    public ResourceBundle getResourceBundle() {
+        return mResourceBundle;
     }
 
     public boolean processResources()
@@ -72,92 +100,101 @@ public class LayoutXmlProcessor {
         }
         LayoutFileParser layoutFileParser = new LayoutFileParser();
         int layoutId = 0;
-        for (File resFolder : Iterables.filter(mResourceFolders, fileExists)) {
-            for (File layoutFolder : resFolder.listFiles(layoutFolderFilter)) {
-                for (File xmlFile : layoutFolder.listFiles(xmlFileFilter)) {
-                    final ResourceBundle.LayoutFileBundle bindingLayout = layoutFileParser
-                            .parseXml(xmlFile, mResourceBundle.getAppPackage(), layoutId);
-                    if (bindingLayout != null && !bindingLayout.isEmpty()) {
-                        mResourceBundle.addLayoutBundle(bindingLayout, layoutId);
-                        layoutId++;
-                    }
-                }
+        for (File xmlFile : getLayoutFiles(mResources)) {
+            final ResourceBundle.LayoutFileBundle bindingLayout = layoutFileParser
+                    .parseXml(xmlFile, mResourceBundle.getAppPackage(), layoutId);
+            if (bindingLayout != null && !bindingLayout.isEmpty()) {
+                mResourceBundle.addLayoutBundle(bindingLayout, layoutId);
+                layoutId++;
             }
         }
         mProcessingComplete = true;
         return true;
     }
 
-    public ResourceBundle getResourceBundle() {
-        return mResourceBundle;
-    }
-
-    public void writeIntermediateFile(File sdkDir) throws JAXBException {
+    public void writeIntermediateFile(File sdkDir, File xmlOutDir) throws JAXBException {
         if (mWritten) {
             return;
         }
         JAXBContext context = JAXBContext.newInstance(ResourceBundle.LayoutFileBundle.class);
         Marshaller marshaller = context.createMarshaller();
-        writeAppInfo(marshaller, sdkDir);
+        writeInfoClass(marshaller, sdkDir, xmlOutDir);
         for (List<ResourceBundle.LayoutFileBundle> layouts : mResourceBundle.getLayoutBundles()
                 .values()) {
             for (ResourceBundle.LayoutFileBundle layout : layouts) {
-                writeAnnotatedFile(layout, marshaller);
+                writeXmlFile(xmlOutDir, layout, marshaller);
             }
         }
         mWritten = true;
     }
 
-    private void writeAnnotatedFile(ResourceBundle.LayoutFileBundle layout, Marshaller marshaller)
+    private void writeXmlFile(File xmlOutDir, ResourceBundle.LayoutFileBundle layout,
+            Marshaller marshaller) throws JAXBException {
+        String filename = generateExportFileName(layout) + ".xml";
+        String xml = toXML(layout, marshaller);
+        mFileWriter.writeToFile(new File(xmlOutDir, filename), xml);
+    }
+
+    public String getInfoClassFullName() {
+        return RESOURCE_BUNDLE_PACKAGE + "." + CLASS_NAME;
+    }
+
+    private String toXML(ResourceBundle.LayoutFileBundle layout, Marshaller marshaller)
             throws JAXBException {
-        StringBuilder className = new StringBuilder(layout.getFileName());
-        className.append('-').append(layout.getDirectory());
-        for (int i = className.length() - 1; i >= 0; i--) {
-            char c = className.charAt(i);
-            if (c == '-') {
-                className.deleteCharAt(i);
-                c = Character.toUpperCase(className.charAt(i));
-                className.setCharAt(i, c);
-            }
-        }
-        className.setCharAt(0, Character.toUpperCase(className.charAt(0)));
         StringWriter writer = new StringWriter();
         marshaller.marshal(layout, writer);
-        String xml = writer.getBuffer().toString();
-        String classString = "import android.binding.BinderBundle;\n\n" +
-                "@BinderBundle(\"" +
-                Base64.encodeBase64String(xml.getBytes(StandardCharsets.UTF_8)) +
-                "\")\n" +
-                "public class " + className + " {}\n";
-        mFileWriter.writeToFile(RESOURCE_BUNDLE_PACKAGE + className, classString);
+        return writer.getBuffer().toString();
     }
 
-    private void writeAppInfo(Marshaller marshaller, File sdkDir) {
+    /**
+     * Generates a string identifier that can uniquely identify the given layout bundle.
+     * This identifier can be used when we need to export data about this layout bundle.
+     */
+    private String generateExportFileName(ResourceBundle.LayoutFileBundle layout) {
+        StringBuilder name = new StringBuilder(layout.getFileName());
+        name.append('-').append(layout.getDirectory());
+        for (int i = name.length() - 1; i >= 0; i--) {
+            char c = name.charAt(i);
+            if (c == '-') {
+                name.deleteCharAt(i);
+                c = Character.toUpperCase(name.charAt(i));
+                name.setCharAt(i, c);
+            }
+        }
+        return name.toString();
+    }
+
+    private void writeInfoClass(Marshaller marshaller, File sdkDir, File xmlOutDir) {
         final String sdkPath = StringEscapeUtils.escapeJava(sdkDir.getAbsolutePath());
-        String classString = "import android.binding.BindingAppInfo;\n\n" +
-                "@BindingAppInfo(buildId=\"" + mBuildId + "\", " +
-                "applicationPackage=\"" + mResourceBundle.getAppPackage() + "\", " +
+        final Class annotation = BindingBuildInfo.class;
+        final String layoutInfoPath = StringEscapeUtils.escapeJava(xmlOutDir.getAbsolutePath());
+        String classString = "package " + RESOURCE_BUNDLE_PACKAGE + ";\n\n" +
+                "import " + annotation.getCanonicalName() + ";\n\n" +
+                "@" + annotation.getSimpleName() + "(buildId=\"" + mBuildId + "\", " +
+                "modulePackage=\"" + mResourceBundle.getAppPackage() + "\", " +
                 "sdkRoot=\"" + sdkPath + "\", " +
+                "layoutInfoDir=\"" + layoutInfoPath + "\"," +
+                "isLibrary=" + mIsLibrary + "," +
                 "minSdk=" + mMinSdk + ")\n" +
-                "public class " + APPLICATION_INFO_CLASS + " {}\n";
-        mFileWriter.writeToFile(RESOURCE_BUNDLE_PACKAGE + APPLICATION_INFO_CLASS, classString);
+                "public class " + CLASS_NAME + " {}\n";
+        mFileWriter.writeToFile(mResourceBundle.getAppPackage() + "." + CLASS_NAME, classString);
     }
 
-    private final Predicate<File> fileExists = new Predicate<File>() {
+    private static final Predicate<File> fileExists = new Predicate<File>() {
         @Override
         public boolean apply(File input) {
             return input.exists() && input.canRead();
         }
     };
 
-    private final FilenameFilter layoutFolderFilter = new FilenameFilter() {
+    private static final FilenameFilter layoutFolderFilter = new FilenameFilter() {
         @Override
         public boolean accept(File dir, String name) {
             return name.startsWith("layout");
         }
     };
 
-    private final FilenameFilter xmlFileFilter = new FilenameFilter() {
+    private static final FilenameFilter xmlFileFilter = new FilenameFilter() {
         @Override
         public boolean accept(File dir, String name) {
             return name.toLowerCase().endsWith(".xml");

@@ -19,13 +19,13 @@ class DataBinderWriter(val pkg: String, val projectPackage: String, val classNam
     fun write() =
             kcode("") {
                 nl("package $pkg;")
-                nl("import $projectPackage.R;")
+                nl("import $projectPackage.BR;")
                 nl("public class $className implements com.android.databinding.library.DataBinderMapper {") {
                     tab("@Override")
                     tab("public com.android.databinding.library.ViewDataBinding getDataBinder(android.view.View view, int layoutId) {") {
                         tab("switch(layoutId) {") {
                             layoutBinders.groupBy{it.getLayoutname()}.forEach {
-                                tab("case R.layout.${it.value.first!!.getLayoutname()}:") {
+                                tab("case ${it.value.first!!.getModulePackage()}.R.layout.${it.value.first!!.getLayoutname()}:") {
                                     if (it.value.size() == 1) {
                                         tab("return new ${it.value.first!!.getPackage()}.${it.value.first!!.getClassName()}(view);")
                                     } else {
@@ -51,7 +51,7 @@ class DataBinderWriter(val pkg: String, val projectPackage: String, val classNam
                     tab("}")
 
                     tab("public int getId(String key) {") {
-                        tab("return android.binding.BR.getId(key);")
+                        tab("return BR.getId(key);")
                     } tab("}")
                 }
                 nl("}")

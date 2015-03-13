@@ -22,7 +22,7 @@ import android.util.ArrayMap;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.HashSet;
-
+import com.android.databinding.testapp.BR;
 public class ProcessBindableTest extends BaseDataBinderTest<BasicBindingBinding> {
     private static String[] EXPECTED_BINDING_NAMES = {
             "bindableField1",
@@ -40,7 +40,7 @@ public class ProcessBindableTest extends BaseDataBinderTest<BasicBindingBinding>
     }
 
     public void testFieldsGenerated() throws IllegalAccessException {
-        Field[] fields = android.binding.BR.class.getFields();
+        Field[] fields = BR.class.getFields();
 
         ArrayMap<String, Integer> fieldValues = new ArrayMap<>();
         int modifiers = Modifier.PUBLIC | Modifier.STATIC | Modifier.FINAL;

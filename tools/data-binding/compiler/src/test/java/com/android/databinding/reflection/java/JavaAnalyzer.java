@@ -314,23 +314,6 @@ public class JavaAnalyzer extends ModelAnalyzer {
         }
     }
 
-    @Override
-    public List<URL> getResources(String name) {
-        List<URL> urlList = new ArrayList<URL>();
-        Enumeration<URL> urls = null;
-        try {
-            urls = mClassLoader.getResources(name);
-            if (urls != null) {
-                while (urls.hasMoreElements()) {
-                    urlList.add(urls.nextElement());
-                }
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return urlList;
-    }
-
     public static void initForTests() {
         Map<String, String> env = System.getenv();
         for (Map.Entry<String, String> entry : env.entrySet()) {

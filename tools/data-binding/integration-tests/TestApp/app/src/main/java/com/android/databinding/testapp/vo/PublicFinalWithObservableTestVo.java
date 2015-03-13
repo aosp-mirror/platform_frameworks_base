@@ -17,6 +17,7 @@ import com.android.databinding.library.BaseObservable;
 import com.android.databinding.testapp.R;
 
 import android.binding.Bindable;
+import com.android.databinding.testapp.BR;
 
 public class PublicFinalWithObservableTestVo {
     public final int myField;
@@ -36,7 +37,7 @@ public class PublicFinalWithObservableTestVo {
 
         public void setVal(int val) {
             this.val = val;
-            notifyPropertyChanged(android.binding.BR.val);
+            notifyPropertyChanged(BR.val);
         }
     }
 }

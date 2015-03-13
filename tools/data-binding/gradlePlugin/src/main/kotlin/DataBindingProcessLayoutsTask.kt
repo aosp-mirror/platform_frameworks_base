@@ -32,6 +32,9 @@ open class DataBindingProcessLayoutsTask : DefaultTask() {
     public fun doIt() {
         Log.d {"running process layouts task"}
         xmlProcessor.processResources()
-        xmlProcessor.writeIntermediateFile(sdkDir)
+    }
+
+    public fun writeFiles(xmlOutFolder : File) {
+        xmlProcessor.writeIntermediateFile(sdkDir, xmlOutFolder)
     }
 }

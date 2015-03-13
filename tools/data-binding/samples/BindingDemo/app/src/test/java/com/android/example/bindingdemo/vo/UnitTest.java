@@ -12,6 +12,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 
+import com.android.example.bindingdemo.BR;
 public class UnitTest {
 
     private User testUser;
@@ -33,7 +34,7 @@ public class UnitTest {
         OnPropertyChangedListener mockListener = mock(OnPropertyChangedListener.class);
         testUser.addOnPropertyChangedListener(mockListener);
         testUser.setName("Tom");
-        verify(mockListener).onPropertyChanged(testUser, android.binding.BR.name);
+        verify(mockListener).onPropertyChanged(testUser, BR.name);
         verifyNoMoreInteractions(mockListener);
     }
 }

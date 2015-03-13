@@ -3,13 +3,12 @@ databindingProperties.load(new FileInputStream("${projectDir}/databinding.proper
 databindingProperties.mavenRepoDir = "${projectDir}/${databindingProperties.mavenRepoName}"
 ext.config = databindingProperties
 
-
 println "local maven repo is ${ext.config.mavenRepoDir}."
 
 new File(ext.config.mavenRepoDir).mkdir()
 subprojects {
     apply plugin: 'maven'
-    group = 'com.android.databinding'
+    group = config.group
     version = config.snapshotVersion
     repositories {
         mavenCentral()
@@ -30,14 +29,22 @@ task deleteRepo(type: Delete) {
     delete "${config.mavenRepoDir}"
 }
 
+def buildExtensionsTask = project.tasks.create "buildExtensionsTask", Exec
+buildExtensionsTask.workingDir file('extensions').getAbsolutePath()
+//on linux
+buildExtensionsTask.commandLine './gradlew'
+buildExtensionsTask.args 'clean', 'uploadArchives', '--info', '--stacktrace'
+buildExtensionsTask.dependsOn subprojects.uploadArchives
+
 file('integration-tests').listFiles().findAll { it.isDirectory() }.each {
-    println("${it.getAbsolutePath()}")
+    println("Creating run test task for  ${it.getAbsolutePath()}.")
     def testTask = project.tasks.create "runTestsOf${it.getName().capitalize()}", Exec
-    testTask.workingDir 'integration-tests/TestApp'
+    testTask.workingDir it.getAbsolutePath()
     //on linux
     testTask.commandLine './gradlew'
-    testTask.args 'clean', 'connectedCheck', '--info'
+    testTask.args 'clean', 'connectedCheck', '--info', '--stacktrace'
     testTask.dependsOn subprojects.uploadArchives
+    testTask.dependsOn buildExtensionsTask
 }
 
 task runIntegrationTests {
@@ -51,11 +58,17 @@ task runAllTests {
 allprojects {
     afterEvaluate { project ->
         runAllTests.dependsOn project.tasks.findAll {task -> task.name.equals('test')}
+        runAllTests.dependsOn project.tasks.findAll {task -> task.name.equals('connectedCheck')}
     }
 }
+
+subprojects.uploadArchives.each { it.shouldRunAfter deleteRepo  }
+buildExtensionsTask.shouldRunAfter deleteRepo
+tasks['runTestsOfMultiModuleTestApp'].shouldRunAfter tasks['runTestsOfIndependentLibrary']
 
 
 task rebuildRepo() {
     dependsOn deleteRepo
     dependsOn subprojects.uploadArchives
+    dependsOn buildExtensionsTask
 }
