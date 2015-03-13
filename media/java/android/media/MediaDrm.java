@@ -82,6 +82,10 @@ import android.util.Log;
  * encrypted content, the samples returned from the extractor remain encrypted, they
  * are only decrypted when the samples are delivered to the decoder.
  * <p>
+ * MediaDrm methods throw {@link java.lang.IllegalStateException}
+ * when a method is called on a MediaDrm object that is in an invalid or inoperable
+ * state. This is typically due to incorrect application API usage, but may also
+ * be due to an unrecoverable failure in the DRM plugin or security hardware.
  * <a name="Callbacks"></a>
  * <h3>Callbacks</h3>
  * <p>Applications should register for informational events in order
@@ -460,7 +464,6 @@ public final class MediaDrm {
      * reprovisioning is required
      * @throws DeniedByServerException if the response indicates that the
      * server rejected the request
-     * @throws ResourceBusyException if required resources are in use
      */
     public native byte[] provideKeyResponse(byte[] scope, byte[] response)
             throws NotProvisionedException, DeniedByServerException;
