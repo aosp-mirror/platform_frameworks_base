@@ -169,6 +169,65 @@ public final class Debug
         public int otherSwappedOut;
 
         /** @hide */
+        public static final int HEAP_UNKNOWN = 0;
+        /** @hide */
+        public static final int HEAP_DALVIK = 1;
+        /** @hide */
+        public static final int HEAP_NATIVE = 2;
+
+        /** @hide */
+        public static final int OTHER_DALVIK_OTHER = 0;
+        /** @hide */
+        public static final int OTHER_STACK = 1;
+        /** @hide */
+        public static final int OTHER_CURSOR = 2;
+        /** @hide */
+        public static final int OTHER_ASHMEM = 3;
+        /** @hide */
+        public static final int OTHER_GL_DEV = 4;
+        /** @hide */
+        public static final int OTHER_UNKNOWN_DEV = 5;
+        /** @hide */
+        public static final int OTHER_SO = 6;
+        /** @hide */
+        public static final int OTHER_JAR = 7;
+        /** @hide */
+        public static final int OTHER_APK = 8;
+        /** @hide */
+        public static final int OTHER_TTF = 9;
+        /** @hide */
+        public static final int OTHER_DEX = 10;
+        /** @hide */
+        public static final int OTHER_OAT = 11;
+        /** @hide */
+        public static final int OTHER_ART = 12;
+        /** @hide */
+        public static final int OTHER_UNKNOWN_MAP = 13;
+        /** @hide */
+        public static final int OTHER_GRAPHICS = 14;
+        /** @hide */
+        public static final int OTHER_GL = 15;
+        /** @hide */
+        public static final int OTHER_OTHER_MEMTRACK = 16;
+
+        /** @hide */
+        public static final int OTHER_DALVIK_NORMAL = 17;
+        /** @hide */
+        public static final int OTHER_DALVIK_LARGE = 18;
+        /** @hide */
+        public static final int OTHER_DALVIK_LINEARALLOC = 19;
+        /** @hide */
+        public static final int OTHER_DALVIK_ACCOUNTING = 20;
+        /** @hide */
+        public static final int OTHER_DALVIK_CODE_CACHE = 21;
+        /** @hide */
+        public static final int OTHER_DALVIK_ZYGOTE = 22;
+        /** @hide */
+        public static final int OTHER_DALVIK_NON_MOVING = 23;
+        /** @hide */
+        public static final int OTHER_DALVIK_INDIRECT_REFERENCE_TABLE = 24;
+
+        /** @hide */
         public static final int NUM_OTHER_STATS = 17;
 
         /** @hide */
@@ -284,6 +343,11 @@ public final class Debug
         }
 
         /** @hide */
+        public int getOtherPrivate(int which) {
+          return getOtherPrivateClean(which) + getOtherPrivateDirty(which);
+        }
+
+        /** @hide */
         public int getOtherSharedClean(int which) {
             return otherStats[which*NUM_CATEGORIES + offsetSharedClean];
         }
@@ -296,33 +360,155 @@ public final class Debug
         /** @hide */
         public static String getOtherLabel(int which) {
             switch (which) {
-                case 0: return "Dalvik Other";
-                case 1: return "Stack";
-                case 2: return "Cursor";
-                case 3: return "Ashmem";
-                case 4: return "Gfx dev";
-                case 5: return "Other dev";
-                case 6: return ".so mmap";
-                case 7: return ".jar mmap";
-                case 8: return ".apk mmap";
-                case 9: return ".ttf mmap";
-                case 10: return ".dex mmap";
-                case 11: return ".oat mmap";
-                case 12: return ".art mmap";
-                case 13: return "Other mmap";
-                case 14: return "EGL mtrack";
-                case 15: return "GL mtrack";
-                case 16: return "Other mtrack";
-                case 17: return ".Heap";
-                case 18: return ".LOS";
-                case 19: return ".LinearAlloc";
-                case 20: return ".GC";
-                case 21: return ".JITCache";
-                case 22: return ".Zygote";
-                case 23: return ".NonMoving";
-                case 24: return ".IndirectRef";
+                case OTHER_DALVIK_OTHER: return "Dalvik Other";
+                case OTHER_STACK: return "Stack";
+                case OTHER_CURSOR: return "Cursor";
+                case OTHER_ASHMEM: return "Ashmem";
+                case OTHER_GL_DEV: return "Gfx dev";
+                case OTHER_UNKNOWN_DEV: return "Other dev";
+                case OTHER_SO: return ".so mmap";
+                case OTHER_JAR: return ".jar mmap";
+                case OTHER_APK: return ".apk mmap";
+                case OTHER_TTF: return ".ttf mmap";
+                case OTHER_DEX: return ".dex mmap";
+                case OTHER_OAT: return ".oat mmap";
+                case OTHER_ART: return ".art mmap";
+                case OTHER_UNKNOWN_MAP: return "Other mmap";
+                case OTHER_GRAPHICS: return "EGL mtrack";
+                case OTHER_GL: return "GL mtrack";
+                case OTHER_OTHER_MEMTRACK: return "Other mtrack";
+                case OTHER_DALVIK_NORMAL: return ".Heap";
+                case OTHER_DALVIK_LARGE: return ".LOS";
+                case OTHER_DALVIK_LINEARALLOC: return ".LinearAlloc";
+                case OTHER_DALVIK_ACCOUNTING: return ".GC";
+                case OTHER_DALVIK_CODE_CACHE: return ".JITCache";
+                case OTHER_DALVIK_ZYGOTE: return ".Zygote";
+                case OTHER_DALVIK_NON_MOVING: return ".NonMoving";
+                case OTHER_DALVIK_INDIRECT_REFERENCE_TABLE: return ".IndirectRef";
                 default: return "????";
             }
+        }
+
+        /**
+         * Pss of Java Heap bytes in KB due to the application.
+         * Notes:
+         *  * OTHER_ART is the boot image. Anything private here is blamed on
+         *    the application, not the system.
+         *  * dalvikPrivateDirty includes private zygote, which means the
+         *    application dirtied something allocated by the zygote. We blame
+         *    the application for that memory, not the system.
+         *  * Does not include OTHER_DALVIK_OTHER, which is considered VM
+         *    Overhead and lumped into Private Other.
+         *  * We don't include dalvikPrivateClean, because there should be no
+         *    such thing as private clean for the Java Heap.
+         * @hide
+         */
+        public int getSummaryJavaHeap() {
+            return dalvikPrivateDirty + getOtherPrivate(OTHER_ART);
+        }
+
+        /**
+         * Pss of Native Heap bytes in KB due to the application.
+         * Notes:
+         *  * Includes private dirty malloc space.
+         *  * We don't include nativePrivateClean, because there should be no
+         *    such thing as private clean for the Native Heap.
+         * @hide
+         */
+        public int getSummaryNativeHeap() {
+            return nativePrivateDirty;
+        }
+
+        /**
+         * Pss of code and other static resource bytes in KB due to
+         * the application.
+         * @hide
+         */
+        public int getSummaryCode() {
+            return getOtherPrivate(OTHER_SO)
+              + getOtherPrivate(OTHER_JAR)
+              + getOtherPrivate(OTHER_APK)
+              + getOtherPrivate(OTHER_TTF)
+              + getOtherPrivate(OTHER_DEX)
+              + getOtherPrivate(OTHER_OAT);
+        }
+
+        /**
+         * Pss in KB of the stack due to the application.
+         * Notes:
+         *  * Includes private dirty stack, which includes both Java and Native
+         *    stack.
+         *  * Does not include private clean stack, because there should be no
+         *    such thing as private clean for the stack.
+         * @hide
+         */
+        public int getSummaryStack() {
+            return getOtherPrivateDirty(OTHER_STACK);
+        }
+
+        /**
+         * Pss in KB of graphics due to the application.
+         * Notes:
+         *  * Includes private Gfx, EGL, and GL.
+         *  * Warning: These numbers can be misreported by the graphics drivers.
+         *  * We don't include shared graphics. It may make sense to, because
+         *    shared graphics are likely buffers due to the application
+         *    anyway, but it's simpler to implement to just group all shared
+         *    memory into the System category.
+         * @hide
+         */
+        public int getSummaryGraphics() {
+            return getOtherPrivate(OTHER_GL_DEV)
+              + getOtherPrivate(OTHER_GRAPHICS)
+              + getOtherPrivate(OTHER_GL);
+        }
+
+        /**
+         * Pss in KB due to the application that haven't otherwise been
+         * accounted for.
+         * @hide
+         */
+        public int getSummaryPrivateOther() {
+            return getTotalPrivateClean()
+              + getTotalPrivateDirty()
+              - getSummaryJavaHeap()
+              - getSummaryNativeHeap()
+              - getSummaryCode()
+              - getSummaryStack()
+              - getSummaryGraphics();
+        }
+
+        /**
+         * Pss in KB due to the system.
+         * Notes:
+         *  * Includes all shared memory.
+         * @hide
+         */
+        public int getSummarySystem() {
+            return getTotalPss()
+              - getTotalPrivateClean()
+              - getTotalPrivateDirty();
+        }
+
+        /**
+         * Total Pss in KB.
+         * @hide
+         */
+        public int getSummaryTotalPss() {
+            return getTotalPss();
+        }
+
+        /**
+         * Total Swap in KB.
+         * Notes:
+         *  * Some of this memory belongs in other categories, but we don't
+         *    know if the Swap memory is shared or private, so we don't know
+         *    what to blame on the application and what on the system.
+         *    For now, just lump all the Swap in one place.
+         * @hide
+         */
+        public int getSummaryTotalSwap() {
+            return getTotalSwappedOut();
         }
 
         public int describeContents() {
