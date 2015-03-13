@@ -344,6 +344,10 @@
   <java-symbol type="integer" name="config_wifi_framework_current_network_boost" />
   <java-symbol type="integer" name="config_bluetooth_max_advertisers" />
   <java-symbol type="integer" name="config_bluetooth_max_scan_filters" />
+  <java-symbol type="integer" name="config_bluetooth_idle_cur_ma" />
+  <java-symbol type="integer" name="config_bluetooth_rx_cur_ma" />
+  <java-symbol type="integer" name="config_bluetooth_tx_cur_ma" />
+  <java-symbol type="integer" name="config_bluetooth_operating_voltage_mv" />
   <java-symbol type="integer" name="config_cursorWindowSize" />
   <java-symbol type="integer" name="config_doublePressOnPowerBehavior" />
   <java-symbol type="integer" name="config_extraFreeKbytesAdjust" />
