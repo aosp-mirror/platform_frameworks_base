@@ -153,6 +153,10 @@ interface IWifiManager
 
     void setAllowScansWithTraffic(int enabled);
 
+    boolean getAllowScansWhileAssociated();
+
+    void setAllowScansWhileAssociated(boolean enabled);
+
     WifiConnectionStatistics getConnectionStatistics();
 
     void disableEphemeralNetwork(String SSID);
