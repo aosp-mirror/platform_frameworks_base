@@ -16,7 +16,8 @@
 
 package com.android.test.voiceinteraction;
 
-import android.app.AssistData;
+import android.app.AssistContent;
+import android.app.AssistStructure;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
@@ -41,7 +42,7 @@ public class MainInteractionSession extends VoiceInteractionSession
     Button mCompleteButton;
     Button mAbortButton;
 
-    AssistData mAssistData;
+    AssistStructure mAssistStructure;
 
     static final int STATE_IDLE = 0;
     static final int STATE_LAUNCHING = 1;
@@ -68,8 +69,9 @@ public class MainInteractionSession extends VoiceInteractionSession
         super.onShow(args, showFlags);
         mState = STATE_IDLE;
         mStartIntent = args.getParcelable("intent");
-        Bundle assist = args.getBundle("assist");
-        parseAssistData(assist);
+        if (mAssistVisualizer != null) {
+            mAssistVisualizer.clearAssistData();
+        }
         updateState();
     }
 
@@ -87,8 +89,8 @@ public class MainInteractionSession extends VoiceInteractionSession
     public View onCreateContentView() {
         mContentView = getLayoutInflater().inflate(R.layout.voice_interaction_session, null);
         mAssistVisualizer = (AssistVisualizer)mContentView.findViewById(R.id.assist_visualizer);
-        if (mAssistData != null) {
-            mAssistVisualizer.setAssistData(mAssistData);
+        if (mAssistStructure != null) {
+            mAssistVisualizer.setAssistStructure(mAssistStructure);
         }
         mTopContent = mContentView.findViewById(R.id.top_content);
         mBottomContent = mContentView.findViewById(R.id.bottom_content);
@@ -117,10 +119,17 @@ public class MainInteractionSession extends VoiceInteractionSession
         if (assistBundle != null) {
             Bundle assistContext = assistBundle.getBundle(Intent.EXTRA_ASSIST_CONTEXT);
             if (assistContext != null) {
-                mAssistData = AssistData.getAssistData(assistContext);
-                mAssistData.dump();
-                if (mAssistVisualizer != null) {
-                    mAssistVisualizer.setAssistData(mAssistData);
+                mAssistStructure = AssistStructure.getAssistStructure(assistContext);
+                if (mAssistStructure != null) {
+                    mAssistStructure.dump();
+                    if (mAssistVisualizer != null) {
+                        mAssistVisualizer.setAssistStructure(mAssistStructure);
+                    }
+                }
+                AssistContent content = AssistContent.getAssistContent(assistContext);
+                if (content != null) {
+                    Log.i(TAG, "Assist intent: " + content.getIntent());
+                    Log.i(TAG, "Assist clipdata: " + content.getClipData());
                 }
                 return;
             }

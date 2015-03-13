@@ -1239,6 +1239,13 @@ public class Intent implements Parcelable, Cloneable {
             = "android.intent.extra.ASSIST_PACKAGE";
 
     /**
+     * An optional field on {@link #ACTION_ASSIST} containing the uid of the current foreground
+     * application package at the time the assist was invoked.
+     */
+    public static final String EXTRA_ASSIST_UID
+            = "android.intent.extra.ASSIST_UID";
+
+    /**
      * An optional field on {@link #ACTION_ASSIST} and containing additional contextual
      * information supplied by the current foreground app at the time of the assist request.
      * This is a {@link Bundle} of additional data.
@@ -5383,6 +5390,16 @@ public class Intent implements Parcelable, Cloneable {
         return (mExtras != null)
                 ? new Bundle(mExtras)
                 : null;
+    }
+
+    /**
+     * Filter extras to only basic types.
+     * @hide
+     */
+    public void removeUnsafeExtras() {
+        if (mExtras != null) {
+            mExtras.filterValues();
+        }
     }
 
     /**

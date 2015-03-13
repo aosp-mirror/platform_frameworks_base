@@ -20,6 +20,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Bitmap.CompressFormat;
 import android.net.Uri;
+import android.util.ArrayMap;
 import android.util.Base64;
 import android.util.Xml;
 
@@ -822,7 +823,36 @@ public class XmlUtils {
         int eventType = parser.getEventType();
         do {
             if (eventType == parser.START_TAG) {
-                Object val = readThisValueXml(parser, name, callback);
+                Object val = readThisValueXml(parser, name, callback, false);
+                map.put(name[0], val);
+            } else if (eventType == parser.END_TAG) {
+                if (parser.getName().equals(endTag)) {
+                    return map;
+                }
+                throw new XmlPullParserException(
+                    "Expected " + endTag + " end tag at: " + parser.getName());
+            }
+            eventType = parser.next();
+        } while (eventType != parser.END_DOCUMENT);
+
+        throw new XmlPullParserException(
+            "Document ended before " + endTag + " end tag");
+    }
+
+    /**
+     * Like {@link #readThisMapXml}, but returns an ArrayMap instead of HashMap.
+     * @hide
+     */
+    public static final ArrayMap<String, ?> readThisArrayMapXml(XmlPullParser parser, String endTag,
+            String[] name, ReadMapCallback callback)
+            throws XmlPullParserException, java.io.IOException
+    {
+        ArrayMap<String, Object> map = new ArrayMap<>();
+
+        int eventType = parser.getEventType();
+        do {
+            if (eventType == parser.START_TAG) {
+                Object val = readThisValueXml(parser, name, callback, true);
                 map.put(name[0], val);
             } else if (eventType == parser.END_TAG) {
                 if (parser.getName().equals(endTag)) {
@@ -854,7 +884,7 @@ public class XmlUtils {
      */
     public static final ArrayList readThisListXml(XmlPullParser parser, String endTag,
             String[] name) throws XmlPullParserException, java.io.IOException {
-        return readThisListXml(parser, endTag, name, null);
+        return readThisListXml(parser, endTag, name, null, false);
     }
 
     /**
@@ -872,14 +902,14 @@ public class XmlUtils {
      * @see #readListXml
      */
     private static final ArrayList readThisListXml(XmlPullParser parser, String endTag,
-            String[] name, ReadMapCallback callback)
+            String[] name, ReadMapCallback callback, boolean arrayMap)
             throws XmlPullParserException, java.io.IOException {
         ArrayList list = new ArrayList();
 
         int eventType = parser.getEventType();
         do {
             if (eventType == parser.START_TAG) {
-                Object val = readThisValueXml(parser, name, callback);
+                Object val = readThisValueXml(parser, name, callback, arrayMap);
                 list.add(val);
                 //System.out.println("Adding to list: " + val);
             } else if (eventType == parser.END_TAG) {
@@ -915,7 +945,7 @@ public class XmlUtils {
      */
     public static final HashSet readThisSetXml(XmlPullParser parser, String endTag, String[] name)
             throws XmlPullParserException, java.io.IOException {
-        return readThisSetXml(parser, endTag, name, null);
+        return readThisSetXml(parser, endTag, name, null, false);
     }
 
     /**
@@ -937,13 +967,14 @@ public class XmlUtils {
      * @hide
      */
     private static final HashSet readThisSetXml(XmlPullParser parser, String endTag, String[] name,
-            ReadMapCallback callback) throws XmlPullParserException, java.io.IOException {
+            ReadMapCallback callback, boolean arrayMap)
+            throws XmlPullParserException, java.io.IOException {
         HashSet set = new HashSet();
         
         int eventType = parser.getEventType();
         do {
             if (eventType == parser.START_TAG) {
-                Object val = readThisValueXml(parser, name, callback);
+                Object val = readThisValueXml(parser, name, callback, arrayMap);
                 set.add(val);
                 //System.out.println("Adding to set: " + val);
             } else if (eventType == parser.END_TAG) {
@@ -1292,7 +1323,7 @@ public class XmlUtils {
         int eventType = parser.getEventType();
         do {
             if (eventType == parser.START_TAG) {
-                return readThisValueXml(parser, name, null);
+                return readThisValueXml(parser, name, null, false);
             } else if (eventType == parser.END_TAG) {
                 throw new XmlPullParserException(
                     "Unexpected end tag at: " + parser.getName());
@@ -1308,7 +1339,8 @@ public class XmlUtils {
     }
 
     private static final Object readThisValueXml(XmlPullParser parser, String[] name,
-            ReadMapCallback callback)  throws XmlPullParserException, java.io.IOException {
+            ReadMapCallback callback, boolean arrayMap)
+            throws XmlPullParserException, java.io.IOException {
         final String valueName = parser.getAttributeValue(null, "name");
         final String tagName = parser.getName();
 
@@ -1368,19 +1400,21 @@ public class XmlUtils {
             return res;
         } else if (tagName.equals("map")) {
             parser.next();
-            res = readThisMapXml(parser, "map", name);
+            res = arrayMap
+                    ? readThisArrayMapXml(parser, "map", name, callback)
+                    : readThisMapXml(parser, "map", name, callback);
             name[0] = valueName;
             //System.out.println("Returning value for " + valueName + ": " + res);
             return res;
         } else if (tagName.equals("list")) {
             parser.next();
-            res = readThisListXml(parser, "list", name);
+            res = readThisListXml(parser, "list", name, callback, arrayMap);
             name[0] = valueName;
             //System.out.println("Returning value for " + valueName + ": " + res);
             return res;
         } else if (tagName.equals("set")) {
             parser.next();
-            res = readThisSetXml(parser, "set", name);
+            res = readThisSetXml(parser, "set", name, callback, arrayMap);
             name[0] = valueName;
             //System.out.println("Returning value for " + valueName + ": " + res);
             return res;

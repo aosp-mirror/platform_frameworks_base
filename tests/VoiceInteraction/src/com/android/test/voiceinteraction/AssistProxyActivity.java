@@ -28,7 +28,6 @@ public class AssistProxyActivity extends Activity {
         finish();
         Intent intent = new Intent(this, MainInteractionService.class);
         intent.setAction(Intent.ACTION_ASSIST);
-        intent.putExtras(getIntent());
         startService(intent);
     }
 }

@@ -115,7 +115,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.ViewAssistData;
+import android.view.ViewAssistStructure;
 import android.view.ViewConfiguration;
 import android.view.ViewDebug;
 import android.view.ViewGroup.LayoutParams;
@@ -8580,13 +8580,14 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     @Override
-    public void onProvideAssistData(ViewAssistData data, Bundle extras) {
-        super.onProvideAssistData(data, extras);
+    public void onProvideAssistStructure(ViewAssistStructure structure, Bundle extras) {
+        super.onProvideAssistStructure(structure, extras);
         final boolean isPassword = hasPasswordTransformationMethod();
         if (!isPassword) {
-            data.setText(getText(), getSelectionStart(), getSelectionEnd());
+            structure.setText(getText(), getSelectionStart(), getSelectionEnd());
+            structure.setTextPaint(mTextPaint);
         }
-        data.setHint(getHint());
+        structure.setHint(getHint());
     }
 
     /** @hide */

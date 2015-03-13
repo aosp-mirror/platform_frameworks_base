@@ -46,7 +46,7 @@ import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.SoundEffectConstants;
 import android.view.VelocityTracker;
-import android.view.ViewAssistData;
+import android.view.ViewAssistStructure;
 import android.view.ViewConfiguration;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
@@ -1363,18 +1363,19 @@ public class Switch extends CompoundButton {
     }
 
     @Override
-    public void onProvideAssistData(ViewAssistData data, Bundle extras) {
-        super.onProvideAssistData(data, extras);
+    public void onProvideAssistStructure(ViewAssistStructure structure, Bundle extras) {
+        super.onProvideAssistStructure(structure, extras);
         CharSequence switchText = isChecked() ? mTextOn : mTextOff;
         if (!TextUtils.isEmpty(switchText)) {
-            CharSequence oldText = data.getText();
+            CharSequence oldText = structure.getText();
             if (TextUtils.isEmpty(oldText)) {
-                data.setText(switchText);
+                structure.setText(switchText);
             } else {
                 StringBuilder newText = new StringBuilder();
                 newText.append(oldText).append(' ').append(switchText);
-                data.setText(newText);
+                structure.setText(newText);
             }
+            structure.setTextPaint(mTextPaint);
         }
     }
 

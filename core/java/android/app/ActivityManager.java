@@ -309,6 +309,12 @@ public class ActivityManager {
     /** @hide Process is being cached for later use and is empty. */
     public static final int PROCESS_STATE_CACHED_EMPTY = 13;
 
+    /** @hide requestType for assist context: only basic information. */
+    public static final int ASSIST_CONTEXT_BASIC = 0;
+
+    /** @hide requestType for assist context: generate full AssistStructure. */
+    public static final int ASSIST_CONTEXT_FULL = 1;
+
     /**
      * Lock task mode is not active.
      */

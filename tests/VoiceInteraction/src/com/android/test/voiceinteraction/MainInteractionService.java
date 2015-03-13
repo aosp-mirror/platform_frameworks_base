@@ -79,12 +79,7 @@ public class MainInteractionService extends VoiceInteractionService {
             Bundle args = new Bundle();
             args.putParcelable("intent", new Intent(this, TestInteractionActivity.class));
             args.putBundle("assist", intent.getExtras());
-            Bundle assistContext = intent.getBundleExtra(Intent.EXTRA_ASSIST_CONTEXT);
-            int startFlags = 0;
-            if (assistContext == null) {
-                startFlags |= START_WITH_ASSIST;
-            }
-            startSession(args, startFlags);
+            startSession(args, START_WITH_ASSIST);
         } else {
             Log.w(TAG, "Not starting -- not current voice interaction service");
         }

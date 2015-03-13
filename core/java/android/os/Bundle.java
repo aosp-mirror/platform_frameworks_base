@@ -252,6 +252,29 @@ public final class Bundle extends BaseBundle implements Cloneable, Parcelable {
     }
 
     /**
+     * Filter values in Bundle to only basic types.
+     * @hide
+     */
+    public void filterValues() {
+        unparcel();
+        if (mMap != null) {
+            for (int i = mMap.size() - 1; i >= 0; i--) {
+                Object value = mMap.valueAt(i);
+                if (PersistableBundle.isValidType(value)) {
+                    continue;
+                }
+                if (value instanceof Bundle) {
+                    ((Bundle)value).filterValues();
+                }
+                if (value.getClass().getName().startsWith("android.")) {
+                    continue;
+                }
+                mMap.removeAt(i);
+            }
+        }
+    }
+
+    /**
      * Inserts a byte value into the mapping of this Bundle, replacing
      * any existing value for the given key.
      *

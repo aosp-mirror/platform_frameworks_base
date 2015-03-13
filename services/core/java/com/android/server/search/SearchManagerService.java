@@ -264,7 +264,7 @@ public class SearchManagerService extends ISearchManager.Stub {
     }
 
     @Override
-    public boolean launchAssistAction(int requestType, String hint, int userHandle) {
+    public boolean launchAssistAction(String hint, int userHandle) {
         ComponentName comp = getAssistIntent(userHandle);
         if (comp == null) {
             return false;
@@ -274,7 +274,8 @@ public class SearchManagerService extends ISearchManager.Stub {
             Intent intent = new Intent(Intent.ACTION_ASSIST);
             intent.setComponent(comp);
             IActivityManager am = ActivityManagerNative.getDefault();
-            return am.launchAssistIntent(intent, requestType, hint, userHandle);
+            return am.launchAssistIntent(intent, ActivityManager.ASSIST_CONTEXT_BASIC, hint,
+                    userHandle);
         } catch (RemoteException e) {
         } finally {
             Binder.restoreCallingIdentity(ident);
