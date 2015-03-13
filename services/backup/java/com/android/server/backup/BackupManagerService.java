@@ -3909,6 +3909,16 @@ public class BackupManagerService {
                     return;
                 }
 
+                // Don't proceed unless we have already established package metadata
+                // for the current dataset via a key/value backup pass.
+                File stateDir = new File(mBaseStateDir, transport.transportDirName());
+                File pmState = new File(stateDir, PACKAGE_MANAGER_SENTINEL);
+                if (pmState.length() <= 0) {
+                    Slog.i(TAG, "Full backup requested but dataset not yet initialized "
+                            + "via k/v backup pass; ignoring");
+                    return;
+                }
+
                 // Set up to send data to the transport
                 final int N = mPackages.size();
                 for (int i = 0; i < N; i++) {
