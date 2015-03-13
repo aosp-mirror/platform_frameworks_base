@@ -21,24 +21,35 @@ import android.os.Parcelable;
 
 /** @hide */
 public final class VolumePolicy implements Parcelable {
-    public static final VolumePolicy DEFAULT = new VolumePolicy(false, false, true);
+    public static final VolumePolicy DEFAULT = new VolumePolicy(false, false, true, 400);
 
+    /** Allow volume adjustments lower from vibrate to enter ringer mode = silent */
     public final boolean volumeDownToEnterSilent;
+
+    /** Allow volume adjustments higher to exit ringer mode = silent */
     public final boolean volumeUpToExitSilent;
+
+    /** Automatically enter do not disturb when ringer mode = silent */
     public final boolean doNotDisturbWhenSilent;
 
+    /** Only allow volume adjustment from vibrate to silent after this
+        number of milliseconds since an adjustment from normal to vibrate. */
+    public final int vibrateToSilentDebounce;
+
     public VolumePolicy(boolean volumeDownToEnterSilent, boolean volumeUpToExitSilent,
-            boolean doNotDisturbWhenSilent) {
+            boolean doNotDisturbWhenSilent, int vibrateToSilentDebounce) {
         this.volumeDownToEnterSilent = volumeDownToEnterSilent;
         this.volumeUpToExitSilent = volumeUpToExitSilent;
         this.doNotDisturbWhenSilent = doNotDisturbWhenSilent;
+        this.vibrateToSilentDebounce = vibrateToSilentDebounce;
     }
 
     @Override
     public String toString() {
         return "VolumePolicy[volumeDownToEnterSilent=" + volumeDownToEnterSilent
                 + ",volumeUpToExitSilent=" + volumeUpToExitSilent
-                + ",doNotDisturbWhenSilent=" + doNotDisturbWhenSilent + "]";
+                + ",doNotDisturbWhenSilent=" + doNotDisturbWhenSilent
+                + ",vibrateToSilentDebounce=" + vibrateToSilentDebounce + "]";
     }
 
     @Override
@@ -51,13 +62,17 @@ public final class VolumePolicy implements Parcelable {
         dest.writeInt(volumeDownToEnterSilent ? 1 : 0);
         dest.writeInt(volumeUpToExitSilent ? 1 : 0);
         dest.writeInt(doNotDisturbWhenSilent ? 1 : 0);
+        dest.writeInt(vibrateToSilentDebounce);
     }
 
     public static final Parcelable.Creator<VolumePolicy> CREATOR
             = new Parcelable.Creator<VolumePolicy>() {
         @Override
         public VolumePolicy createFromParcel(Parcel p) {
-            return new VolumePolicy(p.readInt() != 0, p.readInt() != 0, p.readInt() != 0);
+            return new VolumePolicy(p.readInt() != 0,
+                    p.readInt() != 0,
+                    p.readInt() != 0,
+                    p.readInt());
         }
 
         @Override
