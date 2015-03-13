@@ -18,8 +18,8 @@ apply plugin: 'java'
 apply plugin: 'maven'
 apply plugin: 'application'
 
-sourceCompatibility = javaTargetCompatibility
-targetCompatibility = javaSourceCompatibility
+sourceCompatibility = config.javaTargetCompatibility
+targetCompatibility = config.javaSourceCompatibility
 
 buildscript {
     repositories {

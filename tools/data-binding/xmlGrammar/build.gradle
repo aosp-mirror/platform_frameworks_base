@@ -3,8 +3,8 @@ apply plugin: 'kotlin'
 apply plugin: 'application'
 apply plugin: 'maven'
 
-sourceCompatibility = javaTargetCompatibility
-targetCompatibility = javaSourceCompatibility
+sourceCompatibility = config.javaTargetCompatibility
+targetCompatibility = config.javaSourceCompatibility
 
 mainClassName = "org.antlr.v4.Tool"
 
@@ -19,7 +19,7 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion"
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:${config.kotlinVersion}"
     }
 }
 
@@ -30,7 +30,7 @@ run {
 }
 
 dependencies {
-    compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
+    compile "org.jetbrains.kotlin:kotlin-stdlib:${config.kotlinVersion}"
     compile 'com.tunnelvisionlabs:antlr4:4.4'
 }
 

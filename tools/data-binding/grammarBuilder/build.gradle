@@ -18,8 +18,8 @@ apply plugin: 'java'
 apply plugin: 'application'
 apply plugin: 'maven'
 
-sourceCompatibility = javaTargetCompatibility
-targetCompatibility = javaSourceCompatibility
+sourceCompatibility = config.javaTargetCompatibility
+targetCompatibility = config.javaSourceCompatibility
 
 mainClassName = "org.antlr.v4.Tool"
 
