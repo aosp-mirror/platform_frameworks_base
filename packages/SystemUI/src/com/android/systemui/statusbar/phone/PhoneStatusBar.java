@@ -136,6 +136,7 @@ import com.android.systemui.statusbar.NotificationOverflowContainer;
 import com.android.systemui.statusbar.ScrimView;
 import com.android.systemui.statusbar.SignalClusterView;
 import com.android.systemui.statusbar.SpeedBumpView;
+import com.android.systemui.statusbar.StatusBarIconView;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.phone.UnlockMethodCache.OnUnlockMethodChangedListener;
 import com.android.systemui.statusbar.policy.AccessibilityController;
@@ -1158,11 +1159,19 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     }
 
     @Override
-    public void addNotification(StatusBarNotification notification, RankingMap ranking) {
+    public void addNotification(StatusBarNotification notification, RankingMap ranking,
+            Entry oldEntry) {
         if (DEBUG) Log.d(TAG, "addNotification key=" + notification.getKey());
         if (mUseHeadsUp && shouldInterrupt(notification)) {
             if (DEBUG) Log.d(TAG, "launching notification in heads up mode");
-            Entry interruptionCandidate = new Entry(notification, null);
+            Entry interruptionCandidate = oldEntry;
+            if (interruptionCandidate == null) {
+                final StatusBarIconView iconView = createIcon(notification);
+                if (iconView == null) {
+                    return;
+                }
+                interruptionCandidate = new Entry(notification, iconView);
+            }
             ViewGroup holder = mHeadsUpNotificationView.getHolder();
             if (inflateViewsForHeadsUp(interruptionCandidate, holder)) {
                 // 1. Populate mHeadsUpNotificationView
@@ -1197,12 +1206,12 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         setAreThereNotifications();
     }
 
-    public void displayNotificationFromHeadsUp(StatusBarNotification notification) {
-        NotificationData.Entry shadeEntry = createNotificationViews(notification);
-        if (shadeEntry == null) {
-            return;
-        }
+    public void displayNotificationFromHeadsUp(Entry shadeEntry) {
+
+        // The notification comes from the headsup, let's inflate the normal layout again
+        inflateViews(shadeEntry, mStackScroller);
         shadeEntry.setInterruption();
+        shadeEntry.row.setHeadsUp(false);
 
         addNotificationViews(shadeEntry, null);
         // Recalculate the position of the sliding windows and the titles.

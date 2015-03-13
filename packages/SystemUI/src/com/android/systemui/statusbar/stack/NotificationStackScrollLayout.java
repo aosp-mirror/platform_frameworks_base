@@ -213,6 +213,7 @@ public class NotificationStackScrollLayout extends ViewGroup
     };
     private PhoneStatusBar mPhoneStatusBar;
     private int[] mTempInt2 = new int[2];
+    private boolean mRemoveAnimationEnabled;
 
     public NotificationStackScrollLayout(Context context) {
         this(context, null);
@@ -1551,11 +1552,16 @@ public class NotificationStackScrollLayout extends ViewGroup
         ((ExpandableView) child).setOnHeightChangedListener(null);
         mCurrentStackScrollState.removeViewStateForView(child);
         updateScrollStateForRemovedChild(child);
-        boolean animationGenerated = generateRemoveAnimation(child);
-        if (animationGenerated && !mSwipedOutViews.contains(child)) {
-            // Add this view to an overlay in order to ensure that it will still be temporary
-            // drawn when removed
-            getOverlay().add(child);
+        if (mRemoveAnimationEnabled) {
+            boolean animationGenerated = generateRemoveAnimation(child);
+            if (animationGenerated && !mSwipedOutViews.contains(child)) {
+                // Add this view to an overlay in order to ensure that it will still be temporary
+                // drawn when removed
+                getOverlay().add(child);
+            }
+        } else {
+            // TODO: handle this more cleanly when HEADS-up and the shade are merged
+            requestAnimateEverything();
         }
         updateAnimationState(false, child);
 
@@ -2392,8 +2398,13 @@ public class NotificationStackScrollLayout extends ViewGroup
     }
 
     public void onGoToKeyguard() {
+        requestAnimateEverything();
+    }
+
+    private void requestAnimateEverything() {
         if (mIsExpanded && mAnimationsEnabled) {
             mEverythingNeedsAnimation = true;
+            mNeedsAnimation = true;
             requestChildrenUpdate();
         }
     }
@@ -2414,6 +2425,10 @@ public class NotificationStackScrollLayout extends ViewGroup
                     && mDismissView.isOnEmptySpace(touchX - mDismissView.getX(),
                     touchY - dismissY));
         }
+    }
+
+    public void setRemoveAnimationEnabled(boolean enabled) {
+        mRemoveAnimationEnabled = enabled;
     }
 
     /**

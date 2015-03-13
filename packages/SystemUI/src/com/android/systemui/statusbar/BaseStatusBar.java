@@ -416,8 +416,7 @@ public abstract class BaseStatusBar extends SystemUI implements
                 @Override
                 public void run() {
                     for (StatusBarNotification sbn : notifications) {
-                        processForRemoteInput(sbn.getNotification());
-                        addNotification(sbn, currentRanking);
+                        addNotification(sbn, currentRanking, null /* oldEntry */);
                     }
                 }
             });
@@ -456,7 +455,7 @@ public abstract class BaseStatusBar extends SystemUI implements
                         if (isUpdate) {
                             updateNotification(sbn, rankingMap);
                         } else {
-                            addNotification(sbn, rankingMap);
+                            addNotification(sbn, rankingMap, null /* oldEntry */);
                         }
                     }
                 });
@@ -1292,12 +1291,12 @@ public abstract class BaseStatusBar extends SystemUI implements
     protected void workAroundBadLayerDrawableOpacity(View v) {
     }
 
-    private boolean inflateViews(NotificationData.Entry entry, ViewGroup parent) {
+    protected boolean inflateViews(NotificationData.Entry entry, ViewGroup parent) {
             return inflateViews(entry, parent, false);
     }
 
     protected boolean inflateViewsForHeadsUp(NotificationData.Entry entry, ViewGroup parent) {
-            return inflateViews(entry, parent, true);
+        return inflateViews(entry, parent, true);
     }
 
     private boolean inflateViews(NotificationData.Entry entry, ViewGroup parent, boolean isHeadsUp) {
@@ -1338,6 +1337,7 @@ public abstract class BaseStatusBar extends SystemUI implements
             hasUserChangedExpansion = row.hasUserChangedExpansion();
             userExpanded = row.isUserExpanded();
             userLocked = row.isUserLocked();
+            entry.row.setHeadsUp(isHeadsUp);
             entry.reset();
             if (hasUserChangedExpansion) {
                 row.setUserExpanded(userExpanded);
@@ -1793,6 +1793,21 @@ public abstract class BaseStatusBar extends SystemUI implements
         if (DEBUG) {
             Log.d(TAG, "createNotificationViews(notification=" + sbn);
         }
+        final StatusBarIconView iconView = createIcon(sbn);
+        if (iconView == null) {
+            return null;
+        }
+
+        // Construct the expanded view.
+        NotificationData.Entry entry = new NotificationData.Entry(sbn, iconView);
+        if (!inflateViews(entry, mStackScroller)) {
+            handleNotificationError(sbn, "Couldn't expand RemoteViews for: " + sbn);
+            return null;
+        }
+        return entry;
+    }
+
+    protected StatusBarIconView createIcon(StatusBarNotification sbn) {
         // Construct the icon.
         Notification n = sbn.getNotification();
         final StatusBarIconView iconView = new StatusBarIconView(mContext,
@@ -1809,13 +1824,7 @@ public abstract class BaseStatusBar extends SystemUI implements
             handleNotificationError(sbn, "Couldn't create icon: " + ic);
             return null;
         }
-        // Construct the expanded view.
-        NotificationData.Entry entry = new NotificationData.Entry(sbn, iconView);
-        if (!inflateViews(entry, mStackScroller)) {
-            handleNotificationError(sbn, "Couldn't expand RemoteViews for: " + sbn);
-            return null;
-        }
-        return entry;
+        return iconView;
     }
 
     protected void addNotificationViews(Entry entry, RankingMap ranking) {
@@ -1918,7 +1927,7 @@ public abstract class BaseStatusBar extends SystemUI implements
     protected abstract boolean shouldDisableNavbarGestures();
 
     public abstract void addNotification(StatusBarNotification notification,
-            RankingMap ranking);
+            RankingMap ranking, Entry oldEntry);
     protected abstract void updateNotificationRanking(RankingMap ranking);
     public abstract void removeNotification(String key, RankingMap ranking);
 
@@ -2034,8 +2043,10 @@ public abstract class BaseStatusBar extends SystemUI implements
                     }
                 } else {
                     if (shouldInterrupt && alertAgain) {
+                        mStackScroller.setRemoveAnimationEnabled(false);
                         removeNotificationViews(key, ranking);
-                        addNotification(notification, ranking);  //this will pop the headsup
+                        mStackScroller.setRemoveAnimationEnabled(true);
+                        addNotification(notification, ranking, oldEntry);  //this will pop the headsup
                     } else {
                         updateNotificationViews(oldEntry, notification);
                     }
@@ -2053,10 +2064,9 @@ public abstract class BaseStatusBar extends SystemUI implements
             if (DEBUG) Log.d(TAG, "not reusing notification for key: " + key);
             if (wasHeadsUp) {
                 if (DEBUG) Log.d(TAG, "rebuilding heads up for key: " + key);
-                Entry newEntry = new Entry(notification, null);
                 ViewGroup holder = mHeadsUpNotificationView.getHolder();
-                if (inflateViewsForHeadsUp(newEntry, holder)) {
-                    mHeadsUpNotificationView.updateNotification(newEntry, alertAgain);
+                if (inflateViewsForHeadsUp(oldEntry, holder)) {
+                    mHeadsUpNotificationView.updateNotification(oldEntry, alertAgain);
                 } else {
                     Log.w(TAG, "Couldn't create new updated headsup for package "
                             + contentView.getPackage());
@@ -2070,8 +2080,10 @@ public abstract class BaseStatusBar extends SystemUI implements
             } else {
                 if (shouldInterrupt && alertAgain) {
                     if (DEBUG) Log.d(TAG, "reposting to invoke heads up for key: " + key);
+                    mStackScroller.setRemoveAnimationEnabled(false);
                     removeNotificationViews(key, ranking);
-                    addNotification(notification, ranking);  //this will pop the headsup
+                    mStackScroller.setRemoveAnimationEnabled(true);
+                    addNotification(notification, ranking, oldEntry);  //this will pop the headsup
                 } else {
                     if (DEBUG) Log.d(TAG, "rebuilding update in place for key: " + key);
                     oldEntry.notification = notification;

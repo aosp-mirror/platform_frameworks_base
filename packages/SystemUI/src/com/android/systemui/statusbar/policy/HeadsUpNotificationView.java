@@ -168,6 +168,7 @@ public class HeadsUpNotificationView extends FrameLayout implements SwipeHelper.
         invalidate();
 
         if (mHeadsUp == headsUp) {
+            resetViewForHeadsup();
             // This is an in-place update.  Noting more to do.
             return;
         }
@@ -180,12 +181,8 @@ public class HeadsUpNotificationView extends FrameLayout implements SwipeHelper.
 
         if (mHeadsUp != null) {
             mMostRecentPackageName = mHeadsUp.notification.getPackageName();
-            if (mHeadsUp.row != null) {  // only null in tests
-                mHeadsUp.row.setSystemExpanded(true);
-                mHeadsUp.row.setSensitive(false);
-                mHeadsUp.row.setHeadsUp(true);
-                mHeadsUp.row.setHideSensitive(
-                        false, false /* animated */, 0 /* delay */, 0 /* duration */);
+            if (mHeadsUp.row != null) {
+                resetViewForHeadsup();
             }
 
             mStartTouchTime = SystemClock.elapsedRealtime() + mTouchSensitivityDelay;
@@ -204,6 +201,16 @@ public class HeadsUpNotificationView extends FrameLayout implements SwipeHelper.
             // Make sure the heads up window is open.
             mBar.scheduleHeadsUpOpen();
         }
+    }
+
+    private void resetViewForHeadsup() {
+        mHeadsUp.row.setSystemExpanded(true);
+        mHeadsUp.row.setSensitive(false);
+        mHeadsUp.row.setHeadsUp(true);
+        mHeadsUp.row.setTranslationY(0);
+        mHeadsUp.row.setTranslationZ(0);
+        mHeadsUp.row.setHideSensitive(
+                false, false /* animated */, 0 /* delay */, 0 /* duration */);
     }
 
     /**
@@ -253,7 +260,8 @@ public class HeadsUpNotificationView extends FrameLayout implements SwipeHelper.
     public void releaseImmediately() {
         if (DEBUG) Log.v(TAG, "releaseImmediately");
         if (mHeadsUp != null) {
-            mBar.displayNotificationFromHeadsUp(mHeadsUp.notification);
+            mContentHolder.removeView(mHeadsUp.row);
+            mBar.displayNotificationFromHeadsUp(mHeadsUp);
         }
         mHeadsUp = null;
         mBar.scheduleHeadsUpClose();

@@ -33,9 +33,9 @@ import java.util.ArrayList;
  */
 public abstract class ExpandableView extends FrameLayout {
 
-    private final int mMaxNotificationHeight;
 
     private OnHeightChangedListener mOnHeightChangedListener;
+    protected int mMaxViewHeight;
     private int mActualHeight;
     protected int mClipTopAmount;
     private boolean mActualHeightInitialized;
@@ -44,13 +44,13 @@ public abstract class ExpandableView extends FrameLayout {
 
     public ExpandableView(Context context, AttributeSet attrs) {
         super(context, attrs);
-        mMaxNotificationHeight = getResources().getDimensionPixelSize(
+        mMaxViewHeight = getResources().getDimensionPixelSize(
                 R.dimen.notification_max_height);
     }
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        int ownMaxHeight = mMaxNotificationHeight;
+        int ownMaxHeight = mMaxViewHeight;
         int heightMode = MeasureSpec.getMode(heightMeasureSpec);
         boolean hasFixedHeight = heightMode == MeasureSpec.EXACTLY;
         boolean isHeightLimited = heightMode == MeasureSpec.AT_MOST;
@@ -81,7 +81,8 @@ public abstract class ExpandableView extends FrameLayout {
                 mMatchParentViews.add(child);
             }
         }
-        int ownHeight = hasFixedHeight ? ownMaxHeight : maxChildHeight;
+        int ownHeight = hasFixedHeight ? ownMaxHeight :
+                isHeightLimited ? Math.min(ownMaxHeight, maxChildHeight) : maxChildHeight;
         newHeightSpec = MeasureSpec.makeMeasureSpec(ownHeight, MeasureSpec.EXACTLY);
         for (View child : mMatchParentViews) {
             child.measure(getChildMeasureSpec(
