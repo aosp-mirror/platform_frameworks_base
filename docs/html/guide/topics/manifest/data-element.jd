@@ -24,7 +24,7 @@ just a URI, or both a data type and a URI.  A URI is specified by separate
 attributes for each of its parts:
 
 <p style="margin-left: 2em">
-{@code &lt;scheme>://&lt;host>:&lt;port>/[&lt;path>|&lt;pathPrefix>|&lt;pathPattern>]}</p>
+{@code &lt;scheme>://&lt;host>:&lt;port>[&lt;path>|&lt;pathPrefix>|&lt;pathPattern>]}</p>
 
 <p>
 These attributes that specify the URL format are optional, but also mutually dependent:
@@ -115,7 +115,8 @@ the filter.</dd>
 <dt><a name="path"></a>{@code android:path}
 <br/>{@code android:pathPrefix}
 <br/>{@code android:pathPattern}</dt>
-<dd>The path part of a URI.  The {@code path} attribute specifies a complete
+<dd>The path part of a URI which must begin with a /.
+The {@code path} attribute specifies a complete
 path that is matched against the complete path in an Intent object.  The
 {@code pathPrefix} attribute specifies a partial path that is matched against
 only the initial part of the path in the Intent object.  The {@code pathPattern}
