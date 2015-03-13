@@ -102,9 +102,8 @@ public class MediaFocusControl implements OnFinished {
 
         PowerManager pm = (PowerManager)mContext.getSystemService(Context.POWER_SERVICE);
         mMediaEventWakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "handleMediaEvent");
-        mMainRemote = new RemotePlaybackState(-1,
-                AudioService.getMaxStreamVolume(AudioManager.STREAM_MUSIC),
-                AudioService.getMaxStreamVolume(AudioManager.STREAM_MUSIC));
+        int maxMusicLevel = as.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
+        mMainRemote = new RemotePlaybackState(-1, maxMusicLevel, maxMusicLevel);
 
         // Register for phone state monitoring
         TelephonyManager tmgr = (TelephonyManager)

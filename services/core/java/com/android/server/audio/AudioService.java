@@ -249,7 +249,7 @@ public class AudioService extends IAudioService.Stub {
      * uses soundpool (second column) */
     private final int[][] SOUND_EFFECT_FILES_MAP = new int[AudioManager.NUM_SOUND_EFFECTS][2];
 
-   /** @hide Maximum volume index values for audio streams */
+   /** Maximum volume index values for audio streams */
     private static int[] MAX_STREAM_VOLUME = new int[] {
         5,  // STREAM_VOICE_CALL
         7,  // STREAM_SYSTEM
@@ -261,6 +261,20 @@ public class AudioService extends IAudioService.Stub {
         7,  // STREAM_SYSTEM_ENFORCED
         15, // STREAM_DTMF
         15  // STREAM_TTS
+    };
+
+    /** Minimum volume index values for audio streams */
+    private static int[] MIN_STREAM_VOLUME = new int[] {
+        1,  // STREAM_VOICE_CALL
+        0,  // STREAM_SYSTEM
+        0,  // STREAM_RING
+        0,  // STREAM_MUSIC
+        0,  // STREAM_ALARM
+        0,  // STREAM_NOTIFICATION
+        1,  // STREAM_BLUETOOTH_SCO
+        0,  // STREAM_SYSTEM_ENFORCED
+        0,  // STREAM_DTMF
+        0   // STREAM_TTS
     };
 
     /* mStreamVolumeAlias[] indicates for each stream if it uses the volume settings
@@ -565,7 +579,7 @@ public class AudioService extends IAudioService.Stub {
         Vibrator vibrator = (Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE);
         mHasVibrator = vibrator == null ? false : vibrator.hasVibrator();
 
-       // Intialized volume
+        // Initialize volume
         int maxVolume = SystemProperties.getInt("ro.config.vc_call_vol_steps",
                 MAX_STREAM_VOLUME[AudioSystem.STREAM_VOICE_CALL]);
         if (maxVolume != MAX_STREAM_VOLUME[AudioSystem.STREAM_VOICE_CALL]) {
@@ -585,9 +599,6 @@ public class AudioService extends IAudioService.Stub {
         mForcedUseForComm = AudioSystem.FORCE_NONE;
 
         createAudioSystemThread();
-
-        mMediaFocusControl = new MediaFocusControl(mAudioHandler.getLooper(),
-                mContext, mVolumeController, this);
 
         AudioSystem.setErrorCallback(mAudioSystemCallback);
 
@@ -619,6 +630,9 @@ public class AudioService extends IAudioService.Stub {
         readPersistedSettings();
         mSettingsObserver = new SettingsObserver();
         createStreamStates();
+
+        mMediaFocusControl = new MediaFocusControl(mAudioHandler.getLooper(),
+                mContext, mVolumeController, this);
 
         readAndSetLowRamDevice();
 
@@ -765,6 +779,16 @@ public class AudioService extends IAudioService.Stub {
         mStreamStates[streamType].checkFixedVolumeDevices();
     }
 
+    private void checkMuteAffectedStreams() {
+        // any stream with a min level > 0 is not muteable by definition
+        for (int i = 0; i < mStreamStates.length; i++) {
+            final VolumeStreamState vss = mStreamStates[i];
+            if (vss.mIndexMin > 0) {
+                mMuteAffectedStreams &= ~(1 << vss.mStreamType);
+            }
+        }
+    }
+
     private void createStreamStates() {
         int numStreamTypes = AudioSystem.getNumStreamTypes();
         VolumeStreamState[] streams = mStreamStates = new VolumeStreamState[numStreamTypes];
@@ -775,6 +799,7 @@ public class AudioService extends IAudioService.Stub {
 
         checkAllFixedVolumeDevices();
         checkAllAliasStreamVolumes();
+        checkMuteAffectedStreams();
     }
 
     private void dumpStreamStates(PrintWriter pw) {
@@ -1617,10 +1642,6 @@ public class AudioService extends IAudioService.Stub {
         setMasterMuteInternal(mute, flags, callingPackage, Binder.getCallingUid());
     }
 
-    protected static int getMaxStreamVolume(int streamType) {
-        return MAX_STREAM_VOLUME[streamType];
-    }
-
     /** @see AudioManager#getStreamVolume(int) */
     public int getStreamVolume(int streamType) {
         ensureValidStreamType(streamType);
@@ -1644,6 +1665,12 @@ public class AudioService extends IAudioService.Stub {
     public int getStreamMaxVolume(int streamType) {
         ensureValidStreamType(streamType);
         return (mStreamStates[streamType].getMaxIndex() + 5) / 10;
+    }
+
+    /** @see AudioManager#getStreamMinVolume(int) */
+    public int getStreamMinVolume(int streamType) {
+        ensureValidStreamType(streamType);
+        return (mStreamStates[streamType].getMinIndex() + 5) / 10;
     }
 
     /** Get last audible volume before stream was muted. */
@@ -2279,6 +2306,7 @@ public class AudioService extends IAudioService.Stub {
 
         checkAllFixedVolumeDevices();
         checkAllAliasStreamVolumes();
+        checkMuteAffectedStreams();
 
         synchronized (mSafeMediaVolumeState) {
             mMusicActiveMs = MathUtils.constrain(Settings.Secure.getIntForUser(mContentResolver,
@@ -3370,10 +3398,12 @@ public class AudioService extends IAudioService.Stub {
     //  5         mCameraSoundForced
     public class VolumeStreamState {
         private final int mStreamType;
+        private final int mIndexMin;
+        private final int mIndexMax;
 
         private boolean mIsMuted;
         private String mVolumeIndexSettingName;
-        private int mIndexMax;
+
         private final SparseIntArray mIndexMap = new SparseIntArray(8);
         private final Intent mVolumeChanged;
 
@@ -3382,9 +3412,9 @@ public class AudioService extends IAudioService.Stub {
             mVolumeIndexSettingName = settingName;
 
             mStreamType = streamType;
-            mIndexMax = MAX_STREAM_VOLUME[streamType];
-            AudioSystem.initStreamVolume(streamType, 0, mIndexMax);
-            mIndexMax *= 10;
+            mIndexMin = MIN_STREAM_VOLUME[streamType] * 10;
+            mIndexMax = MAX_STREAM_VOLUME[streamType] * 10;
+            AudioSystem.initStreamVolume(streamType, mIndexMin / 10, mIndexMax / 10);
 
             readSettings();
             mVolumeChanged = new Intent(AudioManager.VOLUME_CHANGED_ACTION);
@@ -3564,6 +3594,10 @@ public class AudioService extends IAudioService.Stub {
             return mIndexMax;
         }
 
+        public int getMinIndex() {
+            return mIndexMin;
+        }
+
         public void setAllIndexes(VolumeStreamState srcStream, String caller) {
             synchronized (VolumeStreamState.class) {
                 int srcStreamType = srcStream.getStreamType();
@@ -3643,8 +3677,8 @@ public class AudioService extends IAudioService.Stub {
         }
 
         private int getValidIndex(int index) {
-            if (index < 0) {
-                return 0;
+            if (index < mIndexMin) {
+                return mIndexMin;
             } else if (mUseFixedVolume || index > mIndexMax) {
                 return mIndexMax;
             }
@@ -3655,6 +3689,8 @@ public class AudioService extends IAudioService.Stub {
         private void dump(PrintWriter pw) {
             pw.print("   Muted: ");
             pw.println(mIsMuted);
+            pw.print("   Min: ");
+            pw.println((mIndexMin + 5) / 10);
             pw.print("   Max: ");
             pw.println((mIndexMax + 5) / 10);
             pw.print("   Current: ");
