@@ -84,7 +84,6 @@ public class LocalTransport extends BackupTransport {
     private File mRestoreSetDir;
     private File mRestoreSetIncrementalDir;
     private File mRestoreSetFullDir;
-    private long mRestoreToken;
 
     // Additional bookkeeping for full backup
     private String mFullTargetPackage;
@@ -93,20 +92,22 @@ public class LocalTransport extends BackupTransport {
     private BufferedOutputStream mFullBackupOutputStream;
     private byte[] mFullBackupBuffer;
 
-    private File mFullRestoreSetDir;
-    private HashSet<String> mFullRestorePackages;
     private FileInputStream mCurFullRestoreStream;
     private FileOutputStream mFullRestoreSocketStream;
     private byte[] mFullRestoreBuffer;
 
-    public LocalTransport(Context context) {
-        mContext = context;
+    private void makeDataDirs() {
         mCurrentSetDir.mkdirs();
-        mCurrentSetFullDir.mkdir();
-        mCurrentSetIncrementalDir.mkdir();
         if (!SELinux.restorecon(mCurrentSetDir)) {
             Log.e(TAG, "SELinux restorecon failed for " + mCurrentSetDir);
         }
+        mCurrentSetFullDir.mkdir();
+        mCurrentSetIncrementalDir.mkdir();
+    }
+
+    public LocalTransport(Context context) {
+        mContext = context;
+        makeDataDirs();
     }
 
     @Override
@@ -151,6 +152,7 @@ public class LocalTransport extends BackupTransport {
     public int initializeDevice() {
         if (DEBUG) Log.v(TAG, "wiping all data");
         deleteContents(mCurrentSetDir);
+        makeDataDirs();
         return TRANSPORT_OK;
     }
 
