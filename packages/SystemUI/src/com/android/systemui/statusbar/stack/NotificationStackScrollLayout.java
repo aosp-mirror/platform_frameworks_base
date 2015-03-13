@@ -2410,21 +2410,32 @@ public class NotificationStackScrollLayout extends ViewGroup
     }
 
     private boolean isBelowLastNotification(float touchX, float touchY) {
-        ExpandableView lastChildNotGone = (ExpandableView) getLastChildNotGone();
-        if (lastChildNotGone == null) {
-            return touchY > mIntrinsicPadding;
+        int childCount = getChildCount();
+        for (int i = childCount - 1; i >= 0; i--) {
+            ExpandableView child = (ExpandableView) getChildAt(i);
+            if (child.getVisibility() != View.GONE) {
+                float childTop = child.getY();
+                if (childTop > touchY) {
+                    // we are above a notification entirely let's abort
+                    return false;
+                }
+                boolean belowChild = touchY > childTop + child.getActualHeight();
+                if (child == mDismissView) {
+                    if(!belowChild && !mDismissView.isOnEmptySpace(touchX - mDismissView.getX(),
+                                    touchY - childTop)) {
+                        // We clicked on the dismiss button
+                        return false;
+                    }
+                } else if (child == mEmptyShadeView) {
+                    // We arrived at the empty shade view, for which we accept all clicks
+                    return true;
+                } else if (!belowChild){
+                    // We are on a child
+                    return false;
+                }
+            }
         }
-        if (lastChildNotGone != mDismissView && lastChildNotGone != mEmptyShadeView) {
-            return touchY > lastChildNotGone.getY() + lastChildNotGone.getActualHeight();
-        } else if (lastChildNotGone == mEmptyShadeView) {
-            return touchY > mEmptyShadeView.getY();
-        } else {
-            float dismissY = mDismissView.getY();
-            boolean belowDismissView = touchY > dismissY + mDismissView.getActualHeight();
-            return belowDismissView || (touchY > dismissY
-                    && mDismissView.isOnEmptySpace(touchX - mDismissView.getX(),
-                    touchY - dismissY));
-        }
+        return touchY > mIntrinsicPadding;
     }
 
     public void setRemoveAnimationEnabled(boolean enabled) {
