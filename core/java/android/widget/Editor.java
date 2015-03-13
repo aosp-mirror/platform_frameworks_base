@@ -309,7 +309,7 @@ public class Editor {
             mTextView.setHasTransientState(false);
 
             // We had an active selection from before, start the selection mode.
-            startSelectionActionMode();
+            startSelectionActionModeWithSelection();
         }
 
         getPositionListener().addSubscriber(mCursorAnchorInfoNotifier, true);
@@ -976,14 +976,15 @@ public class Editor {
     }
 
     public boolean performLongClick(boolean handled) {
-        // Long press in empty space moves cursor and shows the Paste affordance if available.
+        // Long press in empty space moves cursor and starts the selection action mode.
         if (!handled && !isPositionOnText(mLastDownPositionX, mLastDownPositionY) &&
                 mInsertionControllerEnabled) {
             final int offset = mTextView.getOffsetForPosition(mLastDownPositionX,
                     mLastDownPositionY);
             stopSelectionActionMode();
             Selection.setSelection((Spannable) mTextView.getText(), offset);
-            getInsertionController().showWithActionPopup();
+            getInsertionController().show();
+            startSelectionActionModeWithoutSelection();
             handled = true;
         }
 
@@ -999,14 +1000,14 @@ public class Editor {
                 stopSelectionActionMode();
             } else {
                 stopSelectionActionMode();
-                startSelectionActionMode();
+                startSelectionActionModeWithSelection();
             }
             handled = true;
         }
 
         // Start a new selection
         if (!handled) {
-            handled = startSelectionActionMode();
+            handled = startSelectionActionModeWithSelection();
         }
 
         return handled;
@@ -1657,7 +1658,20 @@ public class Editor {
     /**
      * @return true if the selection mode was actually started.
      */
-    boolean startSelectionActionMode() {
+    private boolean startSelectionActionModeWithoutSelection() {
+        if (mSelectionActionMode != null) {
+            // Selection action mode is already started
+            return false;
+        }
+        ActionMode.Callback actionModeCallback = new SelectionActionModeCallback();
+        mSelectionActionMode = mTextView.startActionMode(actionModeCallback);
+        return mSelectionActionMode != null;
+    }
+
+    /**
+     * @return true if the selection mode was actually started.
+     */
+    boolean startSelectionActionModeWithSelection() {
         if (mSelectionActionMode != null) {
             // Selection action mode is already started
             return false;
@@ -4203,7 +4217,7 @@ public class Editor {
                             boolean stayedInArea = distanceSquared < doubleTapSlop * doubleTapSlop;
 
                             if (stayedInArea && isPositionOnText(x, y)) {
-                                startSelectionActionMode();
+                                startSelectionActionModeWithSelection();
                                 mDiscardNextActionUp = true;
                             }
                         }
