@@ -16,8 +16,6 @@
 
 package android.net.wifi;
 
-import android.net.wifi.passpoint.WifiPasspointInfo;
-import android.net.wifi.passpoint.WifiPasspointManager;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -215,11 +213,19 @@ public class ScanResult implements Parcelable {
     public int distanceSdCm;
 
     /**
-     * Passpoint ANQP information. This is not fetched automatically.
-     * Use {@link WifiPasspointManager#requestAnqpInfo} to request ANQP info.
-     * {@hide}
+     * Indicates if the scan result represents a passpoint AP
      */
-    public WifiPasspointInfo passpoint;
+    public boolean passpointNetwork;
+
+    /**
+     * Indicates if venue name
+     */
+    public String venueName;
+
+    /**
+     * Indicates operator name
+     */
+    public String operatorFriendlyName;
 
     /**
      * {@hide}
@@ -292,6 +298,7 @@ public class ScanResult implements Parcelable {
         this.centerFreq0 = UNSPECIFIED;
         this.centerFreq1 = UNSPECIFIED;
         this.is80211McRTTResponder = false;
+        this.passpointNetwork = false;
     }
 
     /** {@hide} */
@@ -310,6 +317,7 @@ public class ScanResult implements Parcelable {
         this.centerFreq0 = UNSPECIFIED;
         this.centerFreq1 = UNSPECIFIED;
         this.is80211McRTTResponder = false;
+        this.passpointNetwork = false;
     }
 
     /** {@hide} */
@@ -329,6 +337,7 @@ public class ScanResult implements Parcelable {
         this.centerFreq0 = centerFreq0;
         this.centerFreq1 = centerFreq1;
         this.is80211McRTTResponder = is80211McRTTResponder;
+        this.passpointNetwork = false;
     }
 
     /** copy constructor {@hide} */
@@ -348,13 +357,15 @@ public class ScanResult implements Parcelable {
             distanceCm = source.distanceCm;
             distanceSdCm = source.distanceSdCm;
             seen = source.seen;
-            passpoint = source.passpoint;
             autoJoinStatus = source.autoJoinStatus;
             untrusted = source.untrusted;
             numConnection = source.numConnection;
             numUsage = source.numUsage;
             numIpConfigFailures = source.numIpConfigFailures;
             isAutoJoinCandidate = source.isAutoJoinCandidate;
+            passpointNetwork = source.passpointNetwork;
+            venueName = source.venueName;
+            operatorFriendlyName = source.operatorFriendlyName;
         }
     }
 
@@ -388,7 +399,7 @@ public class ScanResult implements Parcelable {
         sb.append(", distanceSd: ").append((distanceSdCm != UNSPECIFIED ? distanceSdCm : "?")).
                 append("(cm)");
 
-        sb.append(", passpoint: ").append(passpoint != null ? "yes" : "no");
+        sb.append(", passpoint: ").append(passpointNetwork ? "yes" : "no");
         if (autoJoinStatus != 0) {
             sb.append(", status: ").append(autoJoinStatus);
         }
@@ -431,12 +442,10 @@ public class ScanResult implements Parcelable {
         dest.writeInt(numUsage);
         dest.writeInt(numIpConfigFailures);
         dest.writeInt(isAutoJoinCandidate);
-        if (passpoint != null) {
-            dest.writeInt(1);
-            passpoint.writeToParcel(dest, flags);
-        } else {
-            dest.writeInt(0);
-        }
+        dest.writeInt(passpointNetwork ? 1 : 0);
+        dest.writeString(venueName);
+        dest.writeString(operatorFriendlyName);
+
         if (informationElements != null) {
             dest.writeInt(informationElements.length);
             for (int i = 0; i < informationElements.length; i++) {
@@ -478,9 +487,9 @@ public class ScanResult implements Parcelable {
                 sr.numUsage = in.readInt();
                 sr.numIpConfigFailures = in.readInt();
                 sr.isAutoJoinCandidate = in.readInt();
-                if (in.readInt() == 1) {
-                    sr.passpoint = WifiPasspointInfo.CREATOR.createFromParcel(in);
-                }
+                sr.passpointNetwork = in.readInt() == 1;
+                sr.venueName = in.readString();
+                sr.operatorFriendlyName = in.readString();
                 int n = in.readInt();
                 if (n != 0) {
                     sr.informationElements = new InformationElement[n];
