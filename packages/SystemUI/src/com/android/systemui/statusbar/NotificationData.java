@@ -22,8 +22,9 @@ import android.service.notification.NotificationListenerService.Ranking;
 import android.service.notification.NotificationListenerService.RankingMap;
 import android.service.notification.StatusBarNotification;
 import android.util.ArrayMap;
-import android.util.ArraySet;
 import android.view.View;
+
+import com.android.systemui.statusbar.phone.NotificationGroupManager;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -91,10 +92,12 @@ public class NotificationData {
 
     private final ArrayMap<String, Entry> mEntries = new ArrayMap<>();
     private final ArrayList<Entry> mSortedAndFiltered = new ArrayList<>();
-    private ArraySet<String> mGroupsWithSummaries = new ArraySet<>();
+
+    private NotificationGroupManager mGroupManager;
 
     private RankingMap mRankingMap;
     private final Ranking mTmpRanking = new Ranking();
+
     private final Comparator<Entry> mRankingComparator = new Comparator<Entry>() {
         private final Ranking mRankingA = new Ranking();
         private final Ranking mRankingB = new Ranking();
@@ -141,6 +144,7 @@ public class NotificationData {
 
     public NotificationData(Environment environment) {
         mEnvironment = environment;
+        mGroupManager = environment.getGroupManager();
     }
 
     /**
@@ -163,12 +167,14 @@ public class NotificationData {
     public void add(Entry entry, RankingMap ranking) {
         mEntries.put(entry.notification.getKey(), entry);
         updateRankingAndSort(ranking);
+        mGroupManager.onEntryAdded(entry);
     }
 
     public Entry remove(String key, RankingMap ranking) {
         Entry removed = mEntries.remove(key);
         if (removed == null) return null;
         updateRankingAndSort(ranking);
+        mGroupManager.onEntryRemoved(removed);
         return removed;
     }
 
@@ -203,7 +209,6 @@ public class NotificationData {
     // anything changed, and this class should call back the UI so it updates itself.
     public void filterAndSort() {
         mSortedAndFiltered.clear();
-        mGroupsWithSummaries.clear();
 
         final int N = mEntries.size();
         for (int i = 0; i < N; i++) {
@@ -214,30 +219,10 @@ public class NotificationData {
                 continue;
             }
 
-            if (sbn.getNotification().isGroupSummary()) {
-                mGroupsWithSummaries.add(sbn.getGroupKey());
-            }
             mSortedAndFiltered.add(entry);
         }
 
-        // Second pass: Filter out group children with summary.
-        if (!mGroupsWithSummaries.isEmpty()) {
-            final int M = mSortedAndFiltered.size();
-            for (int i = M - 1; i >= 0; i--) {
-                Entry ent = mSortedAndFiltered.get(i);
-                StatusBarNotification sbn = ent.notification;
-                if (sbn.getNotification().isGroupChild() &&
-                        mGroupsWithSummaries.contains(sbn.getGroupKey())) {
-                    mSortedAndFiltered.remove(i);
-                }
-            }
-        }
-
         Collections.sort(mSortedAndFiltered, mRankingComparator);
-    }
-
-    public boolean isGroupWithSummary(String groupKey) {
-        return mGroupsWithSummaries.contains(groupKey);
     }
 
     boolean shouldFilterOut(StatusBarNotification sbn) {
@@ -252,6 +237,10 @@ public class NotificationData {
 
         if (sbn.getNotification().visibility == Notification.VISIBILITY_SECRET &&
                 mEnvironment.shouldHideSensitiveContents(sbn.getUserId())) {
+            return true;
+        }
+
+        if (mGroupManager.isChildInGroupWithSummary(sbn)) {
             return true;
         }
         return false;
@@ -328,5 +317,6 @@ public class NotificationData {
         public boolean isDeviceProvisioned();
         public boolean isNotificationForCurrentProfiles(StatusBarNotification sbn);
         public String getCurrentMediaNotificationKey();
+        public NotificationGroupManager getGroupManager();
     }
 }
