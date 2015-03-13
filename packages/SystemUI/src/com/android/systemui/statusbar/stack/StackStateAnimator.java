@@ -118,7 +118,7 @@ public class StackStateAnimator {
                 continue;
             }
 
-            child.setClipBounds(null);
+            child.setClipTopOptimization(0);
             startStackAnimations(child, viewState, finalState, i, -1 /* fixedDelay */);
         }
         if (!isRunning()) {
