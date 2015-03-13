@@ -33,8 +33,8 @@ import java.util.ArrayList;
  */
 public abstract class ExpandableView extends FrameLayout {
 
-
-    private OnHeightChangedListener mOnHeightChangedListener;
+    private final int mBottomDecorHeight;
+    protected OnHeightChangedListener mOnHeightChangedListener;
     protected int mMaxViewHeight;
     private int mActualHeight;
     protected int mClipTopAmount;
@@ -48,6 +48,12 @@ public abstract class ExpandableView extends FrameLayout {
         super(context, attrs);
         mMaxViewHeight = getResources().getDimensionPixelSize(
                 R.dimen.notification_max_height);
+        mBottomDecorHeight = resolveBottomDecorHeight();
+    }
+
+    protected int resolveBottomDecorHeight() {
+        return getResources().getDimensionPixelSize(
+                R.dimen.notification_bottom_decor_height);
     }
 
     @Override
@@ -65,6 +71,9 @@ public abstract class ExpandableView extends FrameLayout {
         int childCount = getChildCount();
         for (int i = 0; i < childCount; i++) {
             View child = getChildAt(i);
+            if (child.getVisibility() == GONE || isChildInvisible(child)) {
+                continue;
+            }
             int childHeightSpec = newHeightSpec;
             ViewGroup.LayoutParams layoutParams = child.getLayoutParams();
             if (layoutParams.height != ViewGroup.LayoutParams.MATCH_PARENT) {
@@ -93,6 +102,10 @@ public abstract class ExpandableView extends FrameLayout {
         }
         mMatchParentViews.clear();
         int width = MeasureSpec.getSize(widthMeasureSpec);
+        if (canHaveBottomDecor()) {
+            // We always account for the expandAction as well.
+            ownHeight += mBottomDecorHeight;
+        }
         setMeasuredDimension(width, ownHeight);
     }
 
@@ -102,7 +115,7 @@ public abstract class ExpandableView extends FrameLayout {
         if (!mActualHeightInitialized && mActualHeight == 0) {
             int initialHeight = getInitialHeight();
             if (initialHeight != 0) {
-                setActualHeight(initialHeight);
+                setContentHeight(initialHeight);
             }
         }
     }
@@ -145,12 +158,12 @@ public abstract class ExpandableView extends FrameLayout {
         mActualHeight = actualHeight;
         updateClipping();
         if (notifyListeners) {
-            notifyHeightChanged();
+            notifyHeightChanged(false  /* needsAnimation */);
         }
     }
 
-    public void setActualHeight(int actualHeight) {
-        setActualHeight(actualHeight, true);
+    public void setContentHeight(int contentHeight) {
+        setActualHeight(contentHeight + getBottomDecorHeight(), true);
     }
 
     /**
@@ -163,14 +176,39 @@ public abstract class ExpandableView extends FrameLayout {
     }
 
     /**
+     * This view may have a bottom decor which will be placed below the content. If it has one, this
+     * view will be layouted higher than just the content by {@link #mBottomDecorHeight}.
+     * @return the height of the decor if it currently has one
+     */
+    public int getBottomDecorHeight() {
+        return hasBottomDecor() ? mBottomDecorHeight : 0;
+    }
+
+    /**
+     * @return whether this view may have a bottom decor at all. This will force the view to layout
+     *         itself higher than just it's content
+     */
+    protected boolean canHaveBottomDecor() {
+        return false;
+    }
+
+    /**
+     * @return whether this view has a decor view below it's content. This will make the intrinsic
+     *         height from {@link #getIntrinsicHeight()} higher as well
+     */
+    protected boolean hasBottomDecor() {
+        return false;
+    }
+
+    /**
      * @return The maximum height of this notification.
      */
-    public int getMaxHeight() {
+    public int getMaxContentHeight() {
         return getHeight();
     }
 
     /**
-     * @return The minimum height of this notification.
+     * @return The minimum content height of this notification.
      */
     public int getMinHeight() {
         return getHeight();
@@ -249,9 +287,9 @@ public abstract class ExpandableView extends FrameLayout {
         return false;
     }
 
-    public void notifyHeightChanged() {
+    public void notifyHeightChanged(boolean needsAnimation) {
         if (mOnHeightChangedListener != null) {
-            mOnHeightChangedListener.onHeightChanged(this);
+            mOnHeightChangedListener.onHeightChanged(this, needsAnimation);
         }
     }
 
@@ -302,6 +340,21 @@ public abstract class ExpandableView extends FrameLayout {
         outRect.top += getTranslationY() + getClipTopAmount();
     }
 
+    public int getContentHeight() {
+        return mActualHeight - getBottomDecorHeight();
+    }
+
+    /**
+     * @return whether the given child can be ignored for layouting and measuring purposes
+     */
+    protected boolean isChildInvisible(View child) {
+        return false;
+    }
+
+    public boolean areChildrenExpanded() {
+        return false;
+    }
+
     private void updateClipping() {
         mClipRect.set(0, mClipTopOptimization, getWidth(), getActualHeight());
         setClipBounds(mClipRect);
@@ -330,8 +383,9 @@ public abstract class ExpandableView extends FrameLayout {
         /**
          * @param view the view for which the height changed, or {@code null} if just the top
          *             padding or the padding between the elements changed
+         * @param needsAnimation whether the view height needs to be animated
          */
-        void onHeightChanged(ExpandableView view);
+        void onHeightChanged(ExpandableView view, boolean needsAnimation);
 
         /**
          * Called when the view is reset and therefore the height will change abruptly

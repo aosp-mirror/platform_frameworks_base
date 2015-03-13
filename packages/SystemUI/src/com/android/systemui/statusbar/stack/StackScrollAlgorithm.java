@@ -27,6 +27,7 @@ import com.android.systemui.statusbar.ExpandableNotificationRow;
 import com.android.systemui.statusbar.ExpandableView;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * The Algorithm of the {@link com.android.systemui.statusbar.stack
@@ -171,6 +172,19 @@ public class StackScrollAlgorithm {
         updateDimmedActivatedHideSensitive(ambientState, resultState, algorithmState);
         updateClipping(resultState, algorithmState);
         updateSpeedBumpState(resultState, algorithmState, ambientState.getSpeedBumpIndex());
+        getNotificationChildrenStates(resultState, algorithmState);
+    }
+
+    private void getNotificationChildrenStates(StackScrollState resultState,
+            StackScrollAlgorithmState algorithmState) {
+        int childCount = algorithmState.visibleChildren.size();
+        for (int i = 0; i < childCount; i++) {
+            ExpandableView v = algorithmState.visibleChildren.get(i);
+            if (v instanceof ExpandableNotificationRow) {
+                ExpandableNotificationRow row = (ExpandableNotificationRow) v;
+                row.getChildrenStates(resultState);
+            }
+        }
     }
 
     private void updateSpeedBumpState(StackScrollState resultState,
@@ -328,6 +342,23 @@ public class StackScrollAlgorithm {
                 viewState.notGoneIndex = notGoneIndex;
                 state.visibleChildren.add(v);
                 notGoneIndex++;
+
+                // handle the notgoneIndex for the children as well
+                if (v instanceof ExpandableNotificationRow) {
+                    ExpandableNotificationRow row = (ExpandableNotificationRow) v;
+                    List<ExpandableNotificationRow> children =
+                            row.getNotificationChildren();
+                    if (row.areChildrenExpanded() && children != null) {
+                        for (ExpandableNotificationRow childRow : children) {
+                            if (childRow.getVisibility() != View.GONE) {
+                                StackViewState childState
+                                        = resultState.getViewStateForView(childRow);
+                                childState.notGoneIndex = notGoneIndex;
+                                notGoneIndex++;
+                            }
+                        }
+                    }
+                }
             }
         }
     }

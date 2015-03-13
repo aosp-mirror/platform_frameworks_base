@@ -170,6 +170,7 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -524,6 +525,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             goToLockedShade(null);
         }
     };
+    private HashMap<ExpandableNotificationRow, List<ExpandableNotificationRow>> mTmpChildOrderMap
+            = new HashMap<>();
 
     @Override
     public void start() {
@@ -664,6 +667,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                 R.id.notification_stack_scroller);
         mStackScroller.setLongPressListener(getNotificationLongClicker());
         mStackScroller.setPhoneStatusBar(this);
+        mStackScroller.setGroupManager(mGroupManager);
+        mGroupManager.setOnGroupChangeListener(mStackScroller);
 
         mKeyguardIconOverflowContainer =
                 (NotificationOverflowContainer) LayoutInflater.from(mContext).inflate(
@@ -855,9 +860,20 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         final ArrayList<View> viewsToHide = new ArrayList<View>(numChildren);
         for (int i = 0; i < numChildren; i++) {
             final View child = mStackScroller.getChildAt(i);
-            if (mStackScroller.canChildBeDismissed(child)) {
-                if (child.getVisibility() == View.VISIBLE) {
-                    viewsToHide.add(child);
+            if (child instanceof ExpandableNotificationRow) {
+                if (mStackScroller.canChildBeDismissed(child)) {
+                    if (child.getVisibility() == View.VISIBLE) {
+                        viewsToHide.add(child);
+                    }
+                }
+                ExpandableNotificationRow row = (ExpandableNotificationRow) child;
+                List<ExpandableNotificationRow> children = row.getNotificationChildren();
+                if (row.areChildrenExpanded() && children != null) {
+                    for (ExpandableNotificationRow childRow : children) {
+                        if (childRow.getVisibility() == View.VISIBLE) {
+                            viewsToHide.add(childRow);
+                        }
+                    }
                 }
             }
         }
@@ -1296,10 +1312,23 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                     ent.row.setShowingLegacyBackground(true);
                 }
             }
-            toShow.add(ent.row);
+            if (mGroupManager.isChildInGroupWithSummary(ent.row.getStatusBarNotification())) {
+                ExpandableNotificationRow summary = mGroupManager.getGroupSummary(
+                        ent.row.getStatusBarNotification());
+                List<ExpandableNotificationRow> orderedChildren =
+                        mTmpChildOrderMap.get(summary);
+                if (orderedChildren == null) {
+                    orderedChildren = new ArrayList<>();
+                    mTmpChildOrderMap.put(summary, orderedChildren);
+                }
+                orderedChildren.add(ent.row);
+            } else {
+                toShow.add(ent.row);
+            }
+
         }
 
-        ArrayList<View> toRemove = new ArrayList<View>();
+        ArrayList<View> toRemove = new ArrayList<>();
         for (int i=0; i< mStackScroller.getChildCount(); i++) {
             View child = mStackScroller.getChildAt(i);
             if (!toShow.contains(child) && child instanceof ExpandableNotificationRow) {
@@ -1328,17 +1357,22 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                 continue;
             }
 
-            if (child == toShow.get(j)) {
-                // Everything is well, advance both lists.
-                j++;
-                continue;
+            ExpandableNotificationRow targetChild = toShow.get(j);
+            if (child != targetChild) {
+                // Oops, wrong notification at this position. Put the right one
+                // here and advance both lists.
+                mStackScroller.changeViewPosition(targetChild, i);
             }
-
-            // Oops, wrong notification at this position. Put the right one
-            // here and advance both lists.
-            mStackScroller.changeViewPosition(toShow.get(j), i);
             j++;
+
         }
+
+        // lets handle the child notifications now
+        updateNotificationShadeForChildren();
+
+        // clear the map again for the next usage
+        mTmpChildOrderMap.clear();
+
         updateRowStates();
         updateSpeedbump();
         updateClearAll();
@@ -1351,6 +1385,52 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                 && (mUserSetup || mUserSwitcherController == null
                         || !mUserSwitcherController.isSimpleUserSwitcher()));
         mShadeUpdates.check();
+    }
+
+    private void updateNotificationShadeForChildren() {
+        ArrayList<ExpandableNotificationRow> toRemove = new ArrayList<>();
+        boolean orderChanged = false;
+        for (int i = 0; i < mStackScroller.getChildCount(); i++) {
+            View view = mStackScroller.getChildAt(i);
+            if (!(view instanceof ExpandableNotificationRow)) {
+                // We don't care about non-notification views.
+                continue;
+            }
+
+            ExpandableNotificationRow parent = (ExpandableNotificationRow) view;
+            List<ExpandableNotificationRow> children = parent.getNotificationChildren();
+            List<ExpandableNotificationRow> orderedChildren = mTmpChildOrderMap.get(parent);
+
+            // lets first remove all undesired children
+            if (children != null) {
+                toRemove.clear();
+                for (ExpandableNotificationRow childRow : children) {
+                    if (orderedChildren == null || !orderedChildren.contains(childRow)) {
+                        toRemove.add(childRow);
+                    }
+                }
+                for (ExpandableNotificationRow remove : toRemove) {
+                    parent.removeChildNotification(remove);
+                    mStackScroller.notifyGroupChildRemoved(remove);
+                }
+            }
+
+            // We now add all the children which are not in there already
+            for (int childIndex = 0; orderedChildren != null && childIndex < orderedChildren.size();
+                    childIndex++) {
+                ExpandableNotificationRow childView = orderedChildren.get(childIndex);
+                if (children == null || !children.contains(childView)) {
+                    parent.addChildNotification(childView, childIndex);
+                    mStackScroller.notifyGroupChildAdded(childView);
+                }
+            }
+
+            // Finally after removing and adding has been beformed we can apply the order.
+            orderChanged |= parent.applyChildOrder(orderedChildren);
+        }
+        if (orderChanged) {
+            mStackScroller.generateChildOrderChangedEvent();
+        }
     }
 
     private boolean packageHasVisibilityOverride(String key) {
@@ -1379,6 +1459,10 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         final int N = activeNotifications.size();
         for (int i = 0; i < N; i++) {
             Entry entry = activeNotifications.get(i);
+            boolean isChild = !isTopLevelChild(entry);
+            if (isChild) {
+                continue;
+            }
             if (entry.row.getVisibility() != View.GONE &&
                     mNotificationData.isAmbient(entry.key)) {
                 speedbumpIndex = currentIndex;
@@ -1387,6 +1471,10 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             currentIndex++;
         }
         mStackScroller.updateSpeedBumpIndex(speedbumpIndex);
+    }
+
+    public static boolean isTopLevelChild(Entry entry) {
+        return entry.row.getParent() instanceof NotificationStackScrollLayout;
     }
 
     @Override
@@ -3074,7 +3162,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         mLeaveOpenOnKeyguardHide = false;
         if (mDraggedDownRow != null) {
             mDraggedDownRow.setUserLocked(false);
-            mDraggedDownRow.notifyHeightChanged();
+            mDraggedDownRow.notifyHeightChanged(false  /* needsAnimation */);
             mDraggedDownRow = null;
         }
     }

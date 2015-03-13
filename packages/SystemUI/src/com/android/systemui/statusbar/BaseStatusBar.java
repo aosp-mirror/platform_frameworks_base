@@ -122,6 +122,8 @@ public abstract class BaseStatusBar extends SystemUI implements
 
     public static final boolean ENABLE_REMOTE_INPUT =
             Build.IS_DEBUGGABLE && SystemProperties.getBoolean("debug.enable_remote_input", false);
+    public static final boolean ENABLE_CHILD_NOTIFICATIONS = Build.IS_DEBUGGABLE
+                    && SystemProperties.getBoolean("debug.child_notifs", false);
 
     protected static final int MSG_SHOW_RECENT_APPS = 1019;
     protected static final int MSG_HIDE_RECENT_APPS = 1020;
@@ -437,10 +439,12 @@ public abstract class BaseStatusBar extends SystemUI implements
                         boolean isUpdate = mNotificationData.get(sbn.getKey()) != null
                                 || isHeadsUp(sbn.getKey());
 
-                        // Ignore children of notifications that have a summary, since we're not
-                        // going to show them anyway. This is true also when the summary is canceled,
+                        // In case we don't allow child notifications, we ignore children of
+                        // notifications that have a summary, since we're not going to show them
+                        // anyway. This is true also when the summary is canceled,
                         // because children are automatically canceled by NoMan in that case.
-                        if (mGroupManager.isChildInGroupWithSummary(sbn)) {
+                        if (!ENABLE_CHILD_NOTIFICATIONS
+                            && mGroupManager.isChildInGroupWithSummary(sbn)) {
                             if (DEBUG) {
                                 Log.d(TAG, "Ignoring group child due to existing summary: " + sbn);
                             }
@@ -1352,6 +1356,7 @@ public abstract class BaseStatusBar extends SystemUI implements
             row = (ExpandableNotificationRow) inflater.inflate(R.layout.status_bar_notification_row,
                     parent, false);
             row.setExpansionLogger(this, entry.notification.getKey());
+            row.setGroupManager(mGroupManager);
         }
 
         workAroundBadLayerDrawableOpacity(row);
@@ -1867,22 +1872,25 @@ public abstract class BaseStatusBar extends SystemUI implements
                     entry.row.setSystemExpanded(top);
                 }
             }
+            boolean isInvisibleChild = !mGroupManager.isVisible(entry.notification);
             boolean showOnKeyguard = shouldShowOnKeyguard(entry.notification);
             if ((isLockscreenPublicMode() && !mShowLockscreenNotifications) ||
                     (onKeyguard && (visibleNotifications >= maxKeyguardNotifications
-                            || !showOnKeyguard))) {
+                            || !showOnKeyguard || isInvisibleChild))) {
                 entry.row.setVisibility(View.GONE);
-                if (onKeyguard && showOnKeyguard) {
+                if (onKeyguard && showOnKeyguard && !isInvisibleChild) {
                     mKeyguardIconOverflowContainer.getIconsView().addNotification(entry);
                 }
             } else {
                 boolean wasGone = entry.row.getVisibility() == View.GONE;
                 entry.row.setVisibility(View.VISIBLE);
-                if (wasGone) {
-                    // notify the scroller of a child addition
-                    mStackScroller.generateAddAnimation(entry.row, true /* fromMoreCard */);
+                if (!isInvisibleChild) {
+                    if (wasGone) {
+                        // notify the scroller of a child addition
+                        mStackScroller.generateAddAnimation(entry.row, true /* fromMoreCard */);
+                    }
+                    visibleNotifications++;
                 }
-                visibleNotifications++;
             }
         }
 

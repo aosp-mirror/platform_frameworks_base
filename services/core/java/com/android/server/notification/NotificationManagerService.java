@@ -55,6 +55,7 @@ import android.media.AudioSystem;
 import android.media.IRingtonePlayer;
 import android.net.Uri;
 import android.os.Binder;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
@@ -65,6 +66,7 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.Process;
 import android.os.RemoteException;
+import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.Vibrator;
 import android.provider.Settings;
@@ -125,6 +127,8 @@ import java.util.Objects;
 public class NotificationManagerService extends SystemService {
     static final String TAG = "NotificationService";
     static final boolean DBG = Log.isLoggable(TAG, Log.DEBUG);
+    public static final boolean ENABLE_CHILD_NOTIFICATIONS = Build.IS_DEBUGGABLE
+            && SystemProperties.getBoolean("debug.child_notifs", false);
 
     static final int MAX_PACKAGE_NOTIFICATIONS = 50;
 
@@ -2007,35 +2011,37 @@ public class NotificationManagerService extends SystemService {
      */
     private boolean removeUnusedGroupedNotificationLocked(NotificationRecord r,
             NotificationRecord old, int callingUid, int callingPid) {
-        // No optimizations are possible if listeners want groups.
-        if (mListeners.notificationGroupsDesired()) {
-            return false;
-        }
-
-        StatusBarNotification sbn = r.sbn;
-        String group = sbn.getGroupKey();
-        boolean isSummary = sbn.getNotification().isGroupSummary();
-        boolean isChild = sbn.getNotification().isGroupChild();
-
-        NotificationRecord summary = mSummaryByGroupKey.get(group);
-        if (isChild && summary != null) {
-            // Child with an active summary -> ignore
-            if (DBG) {
-                Slog.d(TAG, "Ignoring group child " + sbn.getKey() + " due to existing summary "
-                        + summary.getKey());
+        if (!ENABLE_CHILD_NOTIFICATIONS) {
+            // No optimizations are possible if listeners want groups.
+            if (mListeners.notificationGroupsDesired()) {
+                return false;
             }
-            // Make sure we don't leave an old version of the notification around.
-            if (old != null) {
+
+            StatusBarNotification sbn = r.sbn;
+            String group = sbn.getGroupKey();
+            boolean isSummary = sbn.getNotification().isGroupSummary();
+            boolean isChild = sbn.getNotification().isGroupChild();
+
+            NotificationRecord summary = mSummaryByGroupKey.get(group);
+            if (isChild && summary != null) {
+                // Child with an active summary -> ignore
                 if (DBG) {
-                    Slog.d(TAG, "Canceling old version of ignored group child " + sbn.getKey());
+                    Slog.d(TAG, "Ignoring group child " + sbn.getKey() + " due to existing summary "
+                            + summary.getKey());
                 }
-                cancelNotificationLocked(old, false, REASON_GROUP_OPTIMIZATION);
+                // Make sure we don't leave an old version of the notification around.
+                if (old != null) {
+                    if (DBG) {
+                        Slog.d(TAG, "Canceling old version of ignored group child " + sbn.getKey());
+                    }
+                    cancelNotificationLocked(old, false, REASON_GROUP_OPTIMIZATION);
+                }
+                return true;
+            } else if (isSummary) {
+                // Summary -> cancel children
+                cancelGroupChildrenLocked(r, callingUid, callingPid, null,
+                        REASON_GROUP_OPTIMIZATION);
             }
-            return true;
-        } else if (isSummary) {
-            // Summary -> cancel children
-            cancelGroupChildrenLocked(r, callingUid, callingPid, null,
-                    REASON_GROUP_OPTIMIZATION);
         }
         return false;
     }

@@ -94,7 +94,7 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
             = new PathInterpolator(0, 0, 0.5f, 1);
     private final int mTintedRippleColor;
     private final int mLowPriorityRippleColor;
-    private final int mNormalRippleColor;
+    protected final int mNormalRippleColor;
 
     private boolean mDimmed;
     private boolean mDark;
@@ -115,7 +115,7 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
     private OnActivatedListener mOnActivatedListener;
 
     private final Interpolator mLinearOutSlowInInterpolator;
-    private final Interpolator mFastOutSlowInInterpolator;
+    protected final Interpolator mFastOutSlowInInterpolator;
     private final Interpolator mSlowOutFastInInterpolator;
     private final Interpolator mSlowOutLinearInInterpolator;
     private final Interpolator mLinearInterpolator;
@@ -678,7 +678,7 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
         }
     }
 
-    private int getRippleColor() {
+    protected int getRippleColor() {
         if (mBgTint != 0) {
             return mTintedRippleColor;
         } else if (mShowingLegacyBackground) {

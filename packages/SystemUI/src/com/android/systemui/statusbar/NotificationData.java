@@ -240,7 +240,8 @@ public class NotificationData {
             return true;
         }
 
-        if (mGroupManager.isChildInGroupWithSummary(sbn)) {
+        if (!BaseStatusBar.ENABLE_CHILD_NOTIFICATIONS
+                && mGroupManager.isChildInGroupWithSummary(sbn)) {
             return true;
         }
         return false;

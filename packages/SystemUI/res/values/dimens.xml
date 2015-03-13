@@ -376,6 +376,18 @@
     <!-- radius of the corners of the material rounded rect background but negative-->
     <dimen name="notification_material_rounded_rect_radius_negative">-2dp</dimen>
 
+    <!-- height of the bottom decor below the notification if present (eg. an expand action) -->
+    <dimen name="notification_bottom_decor_height">48dp</dimen>
+
+    <!-- The padding between notification children -->
+    <dimen name="notification_children_padding">2dp</dimen>
+
+    <!-- The height of the divider between the notfication children -->
+    <dimen name="notification_children_divider_height">1dp</dimen>
+
+    <!-- The vertical distance from which the notification appear when children are expanded -->
+    <dimen name="notification_appear_distance">140dp</dimen>
+
     <!-- end margin for multi user switch in expanded quick settings -->
     <dimen name="multi_user_switch_expanded_margin">8dp</dimen>
 

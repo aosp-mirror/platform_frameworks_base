@@ -158,11 +158,14 @@ public class StatusBarIconController {
         final int N = activeNotifications.size();
         ArrayList<StatusBarIconView> toShow = new ArrayList<>(N);
 
-        // Filter out ambient notifications.
+        // Filter out ambient notifications and notification children.
         for (int i = 0; i < N; i++) {
             NotificationData.Entry ent = activeNotifications.get(i);
             if (notificationData.isAmbient(ent.key)
                     && !NotificationData.showNotificationEvenIfUnprovisioned(ent.notification)) {
+                continue;
+            }
+            if (!PhoneStatusBar.isTopLevelChild(ent)) {
                 continue;
             }
             toShow.add(ent.icon);

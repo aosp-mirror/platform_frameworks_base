@@ -26,6 +26,7 @@ import android.view.animation.AnimationUtils;
 import android.view.animation.Interpolator;
 
 import com.android.systemui.R;
+import com.android.systemui.statusbar.ExpandableNotificationRow;
 import com.android.systemui.statusbar.ExpandableView;
 import com.android.systemui.statusbar.SpeedBumpView;
 
@@ -42,12 +43,15 @@ public class StackStateAnimator {
     public static final int ANIMATION_DURATION_STANDARD = 360;
     public static final int ANIMATION_DURATION_GO_TO_FULL_SHADE = 448;
     public static final int ANIMATION_DURATION_APPEAR_DISAPPEAR = 464;
+    public static final int ANIMATION_DURATION_EXPAND_CLICKED = 360;
     public static final int ANIMATION_DURATION_DIMMED_ACTIVATED = 220;
     public static final int ANIMATION_DELAY_PER_ELEMENT_INTERRUPTING = 80;
+    public static final int ANIMATION_DELAY_PER_ELEMENT_EXPAND_CHILDREN = 54;
     public static final int ANIMATION_DELAY_PER_ELEMENT_MANUAL = 32;
     public static final int ANIMATION_DELAY_PER_ELEMENT_GO_TO_FULL_SHADE = 48;
     public static final int ANIMATION_DELAY_PER_ELEMENT_DARK = 24;
-    private static final int DELAY_EFFECT_MAX_INDEX_DIFFERENCE = 2;
+    public static final int DELAY_EFFECT_MAX_INDEX_DIFFERENCE = 2;
+    public static final int DELAY_EFFECT_MAX_INDEX_DIFFERENCE_CHILDREN = 3;
 
     private static final int TAG_ANIMATOR_TRANSLATION_Y = R.id.translation_y_animator_tag;
     private static final int TAG_ANIMATOR_TRANSLATION_Z = R.id.translation_z_animator_tag;
@@ -85,6 +89,7 @@ public class StackStateAnimator {
 
     private ValueAnimator mTopOverScrollAnimator;
     private ValueAnimator mBottomOverScrollAnimator;
+    private ExpandableNotificationRow mChildExpandingView;
 
     public StackStateAnimator(NotificationStackScrollLayout hostLayout) {
         mHostLayout = hostLayout;
@@ -127,6 +132,7 @@ public class StackStateAnimator {
         }
         mNewEvents.clear();
         mNewAddChildren.clear();
+        mChildExpandingView = null;
     }
 
     private int findLastNotAddedIndex(StackScrollState finalState) {
@@ -216,6 +222,10 @@ public class StackStateAnimator {
         if (child instanceof SpeedBumpView) {
             finalState.performSpeedBumpAnimation(i, (SpeedBumpView) child, viewState,
                     delay + duration);
+        } else if (child instanceof ExpandableNotificationRow) {
+            ExpandableNotificationRow row = (ExpandableNotificationRow) child;
+            row.startChildAnimation(finalState, this, child == mChildExpandingView, delay,
+                    duration);
         }
     }
 
@@ -813,6 +823,11 @@ public class StackStateAnimator {
                 // A race condition can trigger the view to be added to the overlay even though
                 // it is swiped out. So let's remove it
                 mHostLayout.getOverlay().remove(changingView);
+            } else if (event.animationType == NotificationStackScrollLayout
+                    .AnimationEvent.ANIMATION_TYPE_GROUP_EXPANSION_CHANGED) {
+                ExpandableNotificationRow row = (ExpandableNotificationRow) event.changingView;
+                row.prepareExpansionChanged(finalState);
+                mChildExpandingView = row;
             }
             mNewEvents.add(event);
         }

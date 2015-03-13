@@ -53,6 +53,22 @@
         />
 
     <ViewStub
+        android:layout="@layout/notification_children_container"
+        android:id="@+id/child_container_stub"
+        android:inflatedId="@+id/notification_children_container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        />
+
+    <ViewStub
+        android:layout="@layout/notification_expand_button"
+        android:id="@+id/more_button_stub"
+        android:inflatedId="@+id/notification_more_button_container"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/notification_bottom_decor_height"
+        />
+
+    <ViewStub
         android:layout="@layout/notification_guts"
         android:id="@+id/notification_guts_stub"
         android:inflatedId="@+id/notification_guts"

@@ -204,6 +204,9 @@ public class HeadsUpNotificationView extends FrameLayout implements SwipeHelper.
     }
 
     private void resetViewForHeadsup() {
+        if (mHeadsUp.row.areChildrenExpanded()) {
+            mHeadsUp.row.setChildrenExpanded(false /* expanded */, false /* animated */);
+        }
         mHeadsUp.row.setSystemExpanded(true);
         mHeadsUp.row.setSensitive(false);
         mHeadsUp.row.setHeadsUp(true);
