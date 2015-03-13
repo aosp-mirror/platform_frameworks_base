@@ -16,8 +16,6 @@
 
 package com.android.layoutlib.bridge.android;
 
-import android.os.IBinder;
-
 import com.android.annotations.Nullable;
 import com.android.ide.common.rendering.api.AssetRepository;
 import com.android.ide.common.rendering.api.ILayoutPullParser;
@@ -65,6 +63,7 @@ import android.hardware.display.DisplayManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.IBinder;
 import android.os.Looper;
 import android.os.PowerManager;
 import android.os.UserHandle;
