@@ -4064,6 +4064,8 @@ public class WindowManagerService extends IWindowManager.Stub
                 mAppTransition.prepare();
                 mStartingIconInTransition = false;
                 mSkipAppTransitionAnimation = false;
+            }
+            if (mAppTransition.isTransitionSet()) {
                 mH.removeMessages(H.APP_TRANSITION_TIMEOUT);
                 mH.sendEmptyMessageDelayed(H.APP_TRANSITION_TIMEOUT, 5000);
             }
@@ -7819,8 +7821,12 @@ public class WindowManagerService extends IWindowManager.Stub
 
                 case APP_TRANSITION_TIMEOUT: {
                     synchronized (mWindowMap) {
-                        if (mAppTransition.isTransitionSet()) {
-                            if (DEBUG_APP_TRANSITIONS) Slog.v(TAG, "*** APP TRANSITION TIMEOUT");
+                        if (mAppTransition.isTransitionSet() || !mOpeningApps.isEmpty()
+                                    || !mClosingApps.isEmpty()) {
+                            if (DEBUG_APP_TRANSITIONS) Slog.v(TAG, "*** APP TRANSITION TIMEOUT."
+                                    + " isTransitionSet()=" + mAppTransition.isTransitionSet()
+                                    + " mOpeningApps.size()=" + mOpeningApps.size()
+                                    + " mClosingApps.size()=" + mClosingApps.size());
                             mAppTransition.setTimeout();
                             performLayoutAndPlaceSurfacesLocked();
                         }
@@ -8967,10 +8973,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 "Checking " + NN + " opening apps (frozen="
                 + mDisplayFrozen + " timeout="
                 + mAppTransition.isTimeout() + ")...");
-        if (!mDisplayFrozen && !mAppTransition.isTimeout()) {
-            // If the display isn't frozen, wait to do anything until
-            // all of the apps are ready.  Otherwise just go because
-            // we'll unfreeze the display when everyone is ready.
+        if (!mAppTransition.isTimeout()) {
             for (i=0; i<NN && goodToGo; i++) {
                 AppWindowToken wtoken = mOpeningApps.valueAt(i);
                 if (DEBUG_APP_TRANSITIONS) Slog.v(TAG,
@@ -10587,12 +10590,13 @@ public class WindowManagerService extends IWindowManager.Stub
 
         if (mWaitingForConfig || mAppsFreezingScreen > 0
                 || mWindowsFreezingScreen == WINDOWS_FREEZING_SCREENS_ACTIVE
-                || mClientFreezingScreen) {
+                || mClientFreezingScreen || !mOpeningApps.isEmpty()) {
             if (DEBUG_ORIENTATION) Slog.d(TAG,
                 "stopFreezingDisplayLocked: Returning mWaitingForConfig=" + mWaitingForConfig
                 + ", mAppsFreezingScreen=" + mAppsFreezingScreen
                 + ", mWindowsFreezingScreen=" + mWindowsFreezingScreen
-                + ", mClientFreezingScreen=" + mClientFreezingScreen);
+                + ", mClientFreezingScreen=" + mClientFreezingScreen
+                + ", mOpeningApps.size()=" + mOpeningApps.size());
             return;
         }
 
