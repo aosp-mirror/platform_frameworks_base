@@ -17,6 +17,7 @@
 package com.android.providers.settings;
 
 import android.os.Handler;
+import android.os.HandlerThread;
 import android.os.Message;
 import android.os.SystemClock;
 import android.provider.Settings;
@@ -26,7 +27,6 @@ import android.util.AtomicFile;
 import android.util.Slog;
 import android.util.Xml;
 import com.android.internal.annotations.GuardedBy;
-import com.android.internal.os.BackgroundThread;
 import libcore.io.IoUtils;
 import libcore.util.Objects;
 import org.xmlpull.v1.XmlPullParser;
@@ -153,7 +153,7 @@ final class SettingsState {
         final int settingCount = mSettings.size();
         for (int i = settingCount - 1; i >= 0; i--) {
             String name = mSettings.keyAt(i);
-            // Settings defined by use are never dropped.
+            // Settings defined by us are never dropped.
             if (Settings.System.PUBLIC_SETTINGS.contains(name)
                     || Settings.System.PRIVATE_SETTINGS.contains(name)) {
                 continue;
@@ -494,7 +494,7 @@ final class SettingsState {
         public static final int MSG_PERSIST_SETTINGS = 1;
 
         public MyHandler() {
-            super(BackgroundThread.getHandler().getLooper());
+            super(PersistThread.getInstance().getLooper());
         }
 
         @Override
@@ -572,6 +572,26 @@ final class SettingsState {
             this.packageName = packageName;
             this.id = String.valueOf(mNextId++);
             return true;
+        }
+    }
+
+    private static final class PersistThread extends HandlerThread {
+        private static final Object sLock = new Object();
+
+        private static PersistThread sInstance;
+
+        private PersistThread() {
+            super("settings.persist");
+        }
+
+        public static PersistThread getInstance() {
+            synchronized (sLock) {
+                if (sInstance == null) {
+                    sInstance = new PersistThread();
+                    sInstance.start();
+                }
+                return sInstance;
+            }
         }
     }
 }
