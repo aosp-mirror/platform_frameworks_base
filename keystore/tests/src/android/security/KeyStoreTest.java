@@ -17,16 +17,28 @@
 package android.security;
 
 import android.app.Activity;
+import android.os.Binder;
+import android.os.IBinder;
 import android.os.Process;
+import android.os.ServiceManager;
 import android.security.KeyStore;
+import android.security.keymaster.ExportResult;
+import android.security.keymaster.KeyCharacteristics;
+import android.security.keymaster.KeymasterArguments;
+import android.security.keymaster.KeymasterDefs;
+import android.security.keymaster.OperationResult;
 import android.test.ActivityUnitTestCase;
 import android.test.AssertionFailedError;
+import android.test.MoreAsserts;
 import android.test.suitebuilder.annotation.MediumTest;
 import com.android.org.conscrypt.NativeCrypto;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
+
+import android.util.Log;
+import android.util.Base64;
 
 /**
  * Junit / Instrumentation test case for KeyStore class
@@ -103,6 +115,8 @@ public class KeyStoreTest extends ActivityUnitTestCase<Activity> {
             "286BDA73F629296F5FA9146D8976357D3C751E75148696A40B74685C82CE30902D639D72" +
             "4FF24D5E2E9407EE34EDED2E3B4DF65AA9BCFEB6DF28D07BA6903F165768");
 
+    private static final byte[] AES256_BYTES = hexToBytes(
+            "0CC175B9C0F1B6A831C399E269772661CEC520EA51EA0A47E87295FA3245A605");
 
     private static byte[] hexToBytes(String s) {
         int len = s.length();
@@ -688,5 +702,209 @@ public class KeyStoreTest extends ActivityUnitTestCase<Activity> {
 
         assertEquals("-1 should be returned for non-existent key",
                 -1L, mKeyStore.getmtime(TEST_KEYNAME2));
+    }
+
+    private KeyCharacteristics generateRsaKey(String name) throws Exception {
+        KeymasterArguments args = new KeymasterArguments();
+        args.addInt(KeymasterDefs.KM_TAG_PURPOSE, KeymasterDefs.KM_PURPOSE_ENCRYPT);
+        args.addInt(KeymasterDefs.KM_TAG_PURPOSE, KeymasterDefs.KM_PURPOSE_DECRYPT);
+        args.addInt(KeymasterDefs.KM_TAG_ALGORITHM, KeymasterDefs.KM_ALGORITHM_RSA);
+        args.addInt(KeymasterDefs.KM_TAG_PADDING, KeymasterDefs.KM_PAD_NONE);
+        args.addInt(KeymasterDefs.KM_TAG_KEY_SIZE, 2048);
+        args.addBlob(KeymasterDefs.KM_TAG_APPLICATION_ID, null);
+        args.addBlob(KeymasterDefs.KM_TAG_APPLICATION_DATA, null);
+
+        KeyCharacteristics outCharacteristics = new KeyCharacteristics();
+        int result = mKeyStore.generateKey(name, args, 0, outCharacteristics);
+        assertEquals("generateRsaKey should succeed", KeyStore.NO_ERROR, result);
+        return outCharacteristics;
+    }
+
+    public void testGenerateKey() throws Exception {
+        generateRsaKey("test");
+        mKeyStore.delete("test");
+    }
+    public void testGenerateAndDelete() throws Exception {
+        generateRsaKey("test");
+        assertTrue("delete should succeed", mKeyStore.delete("test"));
+    }
+
+    public void testGetKeyCharacteristicsSuccess() throws Exception {
+        mKeyStore.password(TEST_PASSWD);
+        String name = "test";
+        KeyCharacteristics gen = generateRsaKey(name);
+        KeyCharacteristics call = new KeyCharacteristics();
+        int result = mKeyStore.getKeyCharacteristics(name, null, null, call);
+        assertEquals("getKeyCharacteristics should succeed", KeyStore.NO_ERROR, result);
+        mKeyStore.delete("test");
+    }
+
+    public void testAppId() throws Exception {
+        String name = "test";
+        KeymasterArguments args = new KeymasterArguments();
+        args.addInt(KeymasterDefs.KM_TAG_PURPOSE, KeymasterDefs.KM_PURPOSE_ENCRYPT);
+        args.addInt(KeymasterDefs.KM_TAG_PURPOSE, KeymasterDefs.KM_PURPOSE_DECRYPT);
+        args.addInt(KeymasterDefs.KM_TAG_ALGORITHM, KeymasterDefs.KM_ALGORITHM_RSA);
+        args.addInt(KeymasterDefs.KM_TAG_PADDING, KeymasterDefs.KM_PAD_NONE);
+        args.addInt(KeymasterDefs.KM_TAG_KEY_SIZE, 2048);
+        args.addInt(KeymasterDefs.KM_TAG_BLOCK_MODE, KeymasterDefs.KM_MODE_ECB);
+        args.addBlob(KeymasterDefs.KM_TAG_APPLICATION_ID, new byte[] {0x01, 0x02, 0x03});
+        args.addBlob(KeymasterDefs.KM_TAG_APPLICATION_DATA, null);
+
+        KeyCharacteristics outCharacteristics = new KeyCharacteristics();
+        int result = mKeyStore.generateKey(name, args, 0, outCharacteristics);
+        assertEquals("generateRsaKey should succeed", KeyStore.NO_ERROR, result);
+        assertEquals("getKeyCharacteristics should fail without application ID",
+                KeymasterDefs.KM_ERROR_INVALID_KEY_BLOB,
+                mKeyStore.getKeyCharacteristics(name, null, null, outCharacteristics));
+        assertEquals("getKeyCharacteristics should succeed with application ID",
+                KeyStore.NO_ERROR,
+                mKeyStore.getKeyCharacteristics(name, new byte[] {0x01, 0x02, 0x03}, null,
+                    outCharacteristics));
+    }
+
+
+    public void testExportRsa() throws Exception {
+        String name = "test";
+        generateRsaKey(name);
+        ExportResult result = mKeyStore.exportKey(name, KeymasterDefs.KM_KEY_FORMAT_X509, null,
+                null);
+        assertEquals("Export success", KeyStore.NO_ERROR, result.resultCode);
+        // TODO: Verify we have an RSA public key that's well formed.
+    }
+
+    public void testAesOcbEncryptSuccess() throws Exception {
+        String name = "test";
+        KeymasterArguments args = new KeymasterArguments();
+        args.addInt(KeymasterDefs.KM_TAG_PURPOSE, KeymasterDefs.KM_PURPOSE_ENCRYPT);
+        args.addInt(KeymasterDefs.KM_TAG_PURPOSE, KeymasterDefs.KM_PURPOSE_DECRYPT);
+        args.addInt(KeymasterDefs.KM_TAG_ALGORITHM, KeymasterDefs.KM_ALGORITHM_AES);
+        args.addInt(KeymasterDefs.KM_TAG_PADDING, KeymasterDefs.KM_PAD_NONE);
+        args.addInt(KeymasterDefs.KM_TAG_KEY_SIZE, 256);
+        args.addInt(KeymasterDefs.KM_TAG_BLOCK_MODE, KeymasterDefs.KM_MODE_OCB);
+        args.addInt(KeymasterDefs.KM_TAG_CHUNK_LENGTH, 4096);
+        args.addInt(KeymasterDefs.KM_TAG_MAC_LENGTH, 16);
+        args.addBlob(KeymasterDefs.KM_TAG_APPLICATION_ID, null);
+        args.addBlob(KeymasterDefs.KM_TAG_APPLICATION_DATA, null);
+
+        KeyCharacteristics outCharacteristics = new KeyCharacteristics();
+        int rc = mKeyStore.generateKey(name, args, 0, outCharacteristics);
+        assertEquals("Generate should succeed", KeyStore.NO_ERROR, rc);
+
+        KeymasterArguments out = new KeymasterArguments();
+        args = new KeymasterArguments();
+        args.addBlob(KeymasterDefs.KM_TAG_APPLICATION_ID, null);
+        args.addBlob(KeymasterDefs.KM_TAG_APPLICATION_DATA, null);
+        OperationResult result = mKeyStore.begin(name, KeymasterDefs.KM_PURPOSE_ENCRYPT,
+                true, args, out);
+        IBinder token = result.token;
+        assertEquals("Begin should succeed", KeyStore.NO_ERROR, result.resultCode);
+        result = mKeyStore.update(token, null, new byte[] {0x01, 0x02, 0x03, 0x04});
+        assertEquals("Update should succeed", KeyStore.NO_ERROR, result.resultCode);
+        assertEquals("Finish should succeed", KeyStore.NO_ERROR,
+                mKeyStore.finish(token, null, null).resultCode);
+    }
+
+    public void testBadToken() throws Exception {
+        IBinder token = new Binder();
+        OperationResult result = mKeyStore.update(token, null, new byte[] {0x01});
+        assertEquals("Update with invalid token should fail",
+                KeymasterDefs.KM_ERROR_INVALID_OPERATION_HANDLE, result.resultCode);
+    }
+
+    private int importAesKey(String name, byte[] key, int size, int mode) {
+        KeymasterArguments args = new KeymasterArguments();
+        args.addInt(KeymasterDefs.KM_TAG_PURPOSE, KeymasterDefs.KM_PURPOSE_ENCRYPT);
+        args.addInt(KeymasterDefs.KM_TAG_PURPOSE, KeymasterDefs.KM_PURPOSE_DECRYPT);
+        args.addInt(KeymasterDefs.KM_TAG_ALGORITHM, KeymasterDefs.KM_ALGORITHM_AES);
+        args.addInt(KeymasterDefs.KM_TAG_PADDING, KeymasterDefs.KM_PAD_NONE);
+        args.addInt(KeymasterDefs.KM_TAG_BLOCK_MODE, mode);
+        args.addInt(KeymasterDefs.KM_TAG_KEY_SIZE, size);
+        return mKeyStore.importKey(name, args, KeymasterDefs.KM_KEY_FORMAT_RAW, key, 0,
+                new KeyCharacteristics());
+    }
+    private byte[] doOperation(String name, int purpose, byte[] in, KeymasterArguments beginArgs) {
+        KeymasterArguments out = new KeymasterArguments();
+        OperationResult result = mKeyStore.begin(name, purpose,
+                true, beginArgs, out);
+        assertEquals("Begin should succeed", KeyStore.NO_ERROR, result.resultCode);
+        IBinder token = result.token;
+        result = mKeyStore.update(token, null, in);
+        assertEquals("Update should succeed", KeyStore.NO_ERROR, result.resultCode);
+        assertEquals("All data should be consumed", in.length, result.inputConsumed);
+        assertEquals("Finish should succeed", KeyStore.NO_ERROR,
+                mKeyStore.finish(token, null, null).resultCode);
+        return result.output;
+    }
+
+    public void testImportAes() throws Exception {
+        int result = importAesKey("aes", AES256_BYTES, 256, KeymasterDefs.KM_MODE_ECB);
+        assertEquals("import should succeed", KeyStore.NO_ERROR, result);
+        mKeyStore.delete("aes");
+    }
+
+    public void testAes256Ecb() throws Exception {
+        byte[] key =
+                hexToBytes("603deb1015ca71be2b73aef0857d77811f352c073b6108d72d9810a30914dff4");
+        String name = "aes";
+        assertEquals(KeyStore.NO_ERROR, importAesKey(name, key, 256, KeymasterDefs.KM_MODE_ECB));
+        byte[][] testVectors = new byte[][] {
+            hexToBytes("6bc1bee22e409f96e93d7e117393172a"),
+            hexToBytes("ae2d8a571e03ac9c9eb76fac45af8e51"),
+            hexToBytes("30c81c46a35ce411e5fbc1191a0a52ef"),
+            hexToBytes("f69f2445df4f9b17ad2b417be66c3710")};
+        byte[][] cipherVectors = new byte[][] {
+            hexToBytes("f3eed1bdb5d2a03c064b5a7e3db181f8"),
+            hexToBytes("591ccb10d410ed26dc5ba74a31362870"),
+            hexToBytes("b6ed21b99ca6f4f9f153e7b1beafed1d"),
+            hexToBytes("23304b7a39f9f3ff067d8d8f9e24ecc7")};
+        for (int i = 0; i < testVectors.length; i++) {
+            byte[] cipherText = doOperation(name, KeymasterDefs.KM_PURPOSE_ENCRYPT, testVectors[i],
+                    new KeymasterArguments());
+            MoreAsserts.assertEquals(cipherVectors[i], cipherText);
+        }
+        for (int i = 0; i < testVectors.length; i++) {
+            byte[] plainText = doOperation(name, KeymasterDefs.KM_PURPOSE_DECRYPT,
+                    cipherVectors[i], new KeymasterArguments());
+            MoreAsserts.assertEquals(testVectors[i], plainText);
+        }
+    }
+
+    // This is a very implementation specific test and should be thrown out eventually, however it
+    // is nice for now to test that keystore is properly pruning operations.
+    public void testOperationPruning() throws Exception {
+        String name = "test";
+        KeymasterArguments args = new KeymasterArguments();
+        args.addInt(KeymasterDefs.KM_TAG_PURPOSE, KeymasterDefs.KM_PURPOSE_ENCRYPT);
+        args.addInt(KeymasterDefs.KM_TAG_PURPOSE, KeymasterDefs.KM_PURPOSE_DECRYPT);
+        args.addInt(KeymasterDefs.KM_TAG_ALGORITHM, KeymasterDefs.KM_ALGORITHM_AES);
+        args.addInt(KeymasterDefs.KM_TAG_PADDING, KeymasterDefs.KM_PAD_NONE);
+        args.addInt(KeymasterDefs.KM_TAG_KEY_SIZE, 256);
+        args.addInt(KeymasterDefs.KM_TAG_BLOCK_MODE, KeymasterDefs.KM_MODE_OCB);
+        args.addInt(KeymasterDefs.KM_TAG_CHUNK_LENGTH, 4096);
+        args.addInt(KeymasterDefs.KM_TAG_MAC_LENGTH, 16);
+        args.addBlob(KeymasterDefs.KM_TAG_APPLICATION_ID, null);
+        args.addBlob(KeymasterDefs.KM_TAG_APPLICATION_DATA, null);
+
+        KeyCharacteristics outCharacteristics = new KeyCharacteristics();
+        int rc = mKeyStore.generateKey(name, args, 0, outCharacteristics);
+        assertEquals("Generate should succeed", KeyStore.NO_ERROR, rc);
+
+        KeymasterArguments out = new KeymasterArguments();
+        args = new KeymasterArguments();
+        args.addBlob(KeymasterDefs.KM_TAG_APPLICATION_ID, null);
+        args.addBlob(KeymasterDefs.KM_TAG_APPLICATION_DATA, null);
+        OperationResult result = mKeyStore.begin(name, KeymasterDefs.KM_PURPOSE_ENCRYPT,
+                true, args, out);
+        assertEquals("Begin should succeed", KeyStore.NO_ERROR, result.resultCode);
+        IBinder first = result.token;
+        // Implementation detail: softkeymaster supports 16 concurrent operations
+        for (int i = 0; i < 16; i++) {
+            result = mKeyStore.begin(name, KeymasterDefs.KM_PURPOSE_ENCRYPT, true, args, out);
+            assertEquals("Begin should succeed", KeyStore.NO_ERROR, result.resultCode);
+        }
+        // At this point the first operation should be pruned.
+        assertEquals("Operation should be pruned", KeymasterDefs.KM_ERROR_INVALID_OPERATION_HANDLE,
+                mKeyStore.update(first, null, new byte[] {0x01}).resultCode);
     }
 }
