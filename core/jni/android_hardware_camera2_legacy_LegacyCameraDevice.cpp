@@ -373,8 +373,7 @@ static sp<ANativeWindow> getNativeWindow(JNIEnv* env, jobject surface) {
         return NULL;
     }
     if (anw == NULL) {
-        jniThrowExceptionFmt(env, "java/lang/IllegalArgumentException",
-                "Surface had no valid native window.");
+        ALOGE("%s: Surface had no valid native window.", __FUNCTION__);
         return NULL;
     }
     return anw;

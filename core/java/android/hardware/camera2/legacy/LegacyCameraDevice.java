@@ -292,6 +292,10 @@ public class LegacyCameraDevice implements AutoCloseable {
                     Log.e(TAG, "configureOutputs - null outputs are not allowed");
                     return BAD_VALUE;
                 }
+                if (!output.isValid()) {
+                    Log.e(TAG, "configureOutputs - invalid output surfaces are not allowed");
+                    return BAD_VALUE;
+                }
                 StreamConfigurationMap streamConfigurations = mStaticCharacteristics.
                         get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP);
 
@@ -522,7 +526,7 @@ public class LegacyCameraDevice implements AutoCloseable {
      * @return the width and height of the surface
      *
      * @throws NullPointerException if the {@code surface} was {@code null}
-     * @throws IllegalStateException if the {@code surface} was invalid
+     * @throws BufferQueueAbandonedException if the {@code surface} was invalid
      */
     public static Size getSurfaceSize(Surface surface) throws BufferQueueAbandonedException {
         checkNotNull(surface);
