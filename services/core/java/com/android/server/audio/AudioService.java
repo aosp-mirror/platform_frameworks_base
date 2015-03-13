@@ -62,6 +62,7 @@ import android.media.IRingtonePlayer;
 import android.media.IVolumeController;
 import android.media.MediaPlayer;
 import android.media.SoundPool;
+import android.media.VolumePolicy;
 import android.media.MediaPlayer.OnCompletionListener;
 import android.media.MediaPlayer.OnErrorListener;
 import android.media.audiopolicy.AudioPolicy;
@@ -144,12 +145,6 @@ public class AudioService extends IAudioService.Stub {
 
     /** debug calls to devices APIs */
     protected static final boolean DEBUG_DEVICES = Log.isLoggable(TAG + ".DEVICES", Log.DEBUG);
-
-    /** Allow volume changes to set ringer mode to silent? */
-    private static final boolean VOLUME_SETS_RINGER_MODE_SILENT = false;
-
-    /** In silent mode, are volume adjustments (raises) prevented? */
-    private static final boolean PREVENT_VOLUME_ADJUSTMENT_IF_SILENT = true;
 
     /** How long to delay before persisting a change in volume/ringer mode. */
     private static final int PERSIST_DELAY = 500;
@@ -534,6 +529,7 @@ public class AudioService extends IAudioService.Stub {
     private static Long mLastDeviceConnectMsgTime = new Long(0);
 
     private AudioManagerInternal.RingerModeDelegate mRingerModeDelegate;
+    private VolumePolicy mVolumePolicy = VolumePolicy.DEFAULT;
 
     // Intent "extra" data keys.
     public static final String CONNECT_INTENT_KEY_PORT_NAME = "portName";
@@ -1133,8 +1129,10 @@ public class AudioService extends IAudioService.Stub {
                         // unmute immediately for volume up
                         streamState.mute(false);
                     } else if (direction == AudioManager.ADJUST_LOWER) {
-                        sendMsg(mAudioHandler, MSG_UNMUTE_STREAM, SENDMSG_QUEUE,
-                                streamTypeAlias, flags, null, UNMUTE_STREAM_DELAY);
+                        if (mPlatformType == AudioSystem.PLATFORM_TELEVISION) {
+                            sendMsg(mAudioHandler, MSG_UNMUTE_STREAM, SENDMSG_QUEUE,
+                                    streamTypeAlias, flags, null, UNMUTE_STREAM_DELAY);
+                        }
                     }
                 }
                 sendMsg(mAudioHandler,
@@ -1234,7 +1232,7 @@ public class AudioService extends IAudioService.Stub {
             int newRingerMode;
             if (index == 0) {
                 newRingerMode = mHasVibrator ? AudioManager.RINGER_MODE_VIBRATE
-                        : VOLUME_SETS_RINGER_MODE_SILENT ? AudioManager.RINGER_MODE_SILENT
+                        : mVolumePolicy.volumeDownToEnterSilent ? AudioManager.RINGER_MODE_SILENT
                         : AudioManager.RINGER_MODE_NORMAL;
             } else {
                 newRingerMode = AudioManager.RINGER_MODE_NORMAL;
@@ -1730,7 +1728,7 @@ public class AudioService extends IAudioService.Stub {
                     setRingerModeExt(ringerMode);
                     if (mRingerModeDelegate != null) {
                         ringerMode = mRingerModeDelegate.onSetRingerModeExternal(ringerModeExternal,
-                                ringerMode, caller, ringerModeInternal);
+                                ringerMode, caller, ringerModeInternal, mVolumePolicy);
                     }
                     if (ringerMode != ringerModeInternal) {
                         setRingerModeInt(ringerMode, true /*persist*/);
@@ -1741,7 +1739,7 @@ public class AudioService extends IAudioService.Stub {
                     }
                     if (mRingerModeDelegate != null) {
                         ringerMode = mRingerModeDelegate.onSetRingerModeInternal(ringerModeInternal,
-                                ringerMode, caller, ringerModeExternal);
+                                ringerMode, caller, ringerModeExternal, mVolumePolicy);
                     }
                     setRingerModeExt(ringerMode);
                 }
@@ -1785,12 +1783,12 @@ public class AudioService extends IAudioService.Stub {
                 if ((isPlatformVoice() || mHasVibrator) &&
                         mStreamVolumeAlias[streamType] == AudioSystem.STREAM_RING) {
                     synchronized (VolumeStreamState.class) {
-                        SparseIntArray indexMap = mStreamStates[streamType].mIndexMap;
-                        for (int i = 0; i < indexMap.size(); i++) {
-                            int device = indexMap.keyAt(i);
-                            int value = indexMap.valueAt(i);
+                        final VolumeStreamState vss = mStreamStates[streamType];
+                        for (int i = 0; i < vss.mIndexMap.size(); i++) {
+                            int device = vss.mIndexMap.keyAt(i);
+                            int value = vss.mIndexMap.valueAt(i);
                             if (value == 0) {
-                                indexMap.put(device, 10);
+                                vss.setIndex(10, device, TAG);
                             }
                         }
                         // Persist volume for stream ring when it is changed here
@@ -2933,7 +2931,8 @@ public class AudioService extends IAudioService.Stub {
      * adjusting volume. If so, this will set the proper ringer mode and volume
      * indices on the stream states.
      */
-    private int checkForRingerModeChange(int oldIndex, int direction,  int step, boolean isMuted) {
+    private int checkForRingerModeChange(int oldIndex, int direction, int step, boolean isMuted) {
+        final boolean isTv = mPlatformType == AudioSystem.PLATFORM_TELEVISION;
         int result = FLAG_ADJUST_VOLUME;
         int ringerMode = getRingerModeInternal();
 
@@ -2952,13 +2951,13 @@ public class AudioService extends IAudioService.Stub {
                 } else {
                     // (oldIndex < step) is equivalent to (old UI index == 0)
                     if ((oldIndex < step)
-                            && VOLUME_SETS_RINGER_MODE_SILENT
+                            && mVolumePolicy.volumeDownToEnterSilent
                             && mPrevVolDirection != AudioManager.ADJUST_LOWER) {
                         ringerMode = RINGER_MODE_SILENT;
                     }
                 }
-            } else if (direction == AudioManager.ADJUST_TOGGLE_MUTE
-                    || direction == AudioManager.ADJUST_MUTE) {
+            } else if (isTv && (direction == AudioManager.ADJUST_TOGGLE_MUTE
+                    || direction == AudioManager.ADJUST_MUTE)) {
                 if (mHasVibrator) {
                     ringerMode = RINGER_MODE_VIBRATE;
                 } else {
@@ -2976,10 +2975,10 @@ public class AudioService extends IAudioService.Stub {
             }
             if ((direction == AudioManager.ADJUST_LOWER)) {
                 // This is the case we were muted with the volume turned up
-                if (oldIndex >= 2 * step && isMuted) {
+                if (isTv && oldIndex >= 2 * step && isMuted) {
                     ringerMode = RINGER_MODE_NORMAL;
                 } else if (mPrevVolDirection != AudioManager.ADJUST_LOWER) {
-                    if (VOLUME_SETS_RINGER_MODE_SILENT) {
+                    if (mVolumePolicy.volumeDownToEnterSilent) {
                         ringerMode = RINGER_MODE_SILENT;
                     } else {
                         result |= AudioManager.FLAG_SHOW_VIBRATE_HINT;
@@ -2993,13 +2992,13 @@ public class AudioService extends IAudioService.Stub {
             result &= ~FLAG_ADJUST_VOLUME;
             break;
         case RINGER_MODE_SILENT:
-            if (direction == AudioManager.ADJUST_LOWER && oldIndex >= 2 * step && isMuted) {
+            if (isTv && direction == AudioManager.ADJUST_LOWER && oldIndex >= 2 * step && isMuted) {
                 // This is the case we were muted with the volume turned up
                 ringerMode = RINGER_MODE_NORMAL;
             } else if (direction == AudioManager.ADJUST_RAISE
                     || direction == AudioManager.ADJUST_TOGGLE_MUTE
                     || direction == AudioManager.ADJUST_UNMUTE) {
-                if (PREVENT_VOLUME_ADJUSTMENT_IF_SILENT) {
+                if (!mVolumePolicy.volumeUpToExitSilent) {
                     result |= AudioManager.FLAG_SHOW_SILENT_HINT;
                 } else {
                   if (mHasVibrator && direction == AudioManager.ADJUST_RAISE) {
@@ -5418,6 +5417,7 @@ public class AudioService extends IAudioService.Stub {
         pw.print("  mCameraSoundForced="); pw.println(mCameraSoundForced);
         pw.print("  mHasVibrator="); pw.println(mHasVibrator);
         pw.print("  mControllerService="); pw.println(mControllerService);
+        pw.print("  mVolumePolicy="); pw.println(mVolumePolicy);
 
         dumpAudioPolicies(pw);
     }
@@ -5491,6 +5491,14 @@ public class AudioService extends IAudioService.Stub {
 
         mVolumeController.setVisible(visible);
         if (DEBUG_VOL) Log.d(TAG, "Volume controller visible: " + visible);
+    }
+
+    @Override
+    public void setVolumePolicy(VolumePolicy policy) {
+        enforceVolumeController("set volume policy");
+        if (policy != null) {
+            mVolumePolicy = policy;
+        }
     }
 
     public static class VolumeController {

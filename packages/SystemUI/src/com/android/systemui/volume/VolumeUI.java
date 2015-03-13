@@ -31,6 +31,7 @@ import android.content.res.Configuration;
 import android.media.AudioManager;
 import android.media.IRemoteVolumeController;
 import android.media.IVolumeController;
+import android.media.VolumePolicy;
 import android.media.session.ISessionController;
 import android.media.session.MediaController;
 import android.media.session.MediaSessionManager;
@@ -114,6 +115,7 @@ public class VolumeUI extends SystemUI {
         if (register) {
             if (LOGD) Log.d(TAG, "Registering default volume controller");
             mAudioManager.setVolumeController(mVolumeController);
+            mAudioManager.setVolumePolicy(VolumePolicy.DEFAULT);
             mMediaSessionManager.setRemoteVolumeController(mRemoteVolumeController);
             DndTile.setVisible(mContext, false);
         } else {

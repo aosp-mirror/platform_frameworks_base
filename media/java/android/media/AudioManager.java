@@ -3217,6 +3217,18 @@ public class AudioManager {
     }
 
     /**
+     * Only useful for volume controllers.
+     * @hide
+     */
+    public void setVolumePolicy(VolumePolicy policy) {
+        try {
+            getService().setVolumePolicy(policy);
+        } catch (RemoteException e) {
+            Log.w(TAG, "Error calling setVolumePolicy", e);
+        }
+    }
+
+    /**
      * Set Hdmi Cec system audio mode.
      *
      * @param on whether to be on system audio mode
