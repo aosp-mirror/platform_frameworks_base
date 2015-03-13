@@ -211,6 +211,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         GLOBAL_SETTINGS_WHITELIST.add(Settings.Global.NETWORK_PREFERENCE);
         GLOBAL_SETTINGS_WHITELIST.add(Settings.Global.USB_MASS_STORAGE_ENABLED);
         GLOBAL_SETTINGS_WHITELIST.add(Settings.Global.WIFI_SLEEP_POLICY);
+        GLOBAL_SETTINGS_WHITELIST.add(Settings.Global.STAY_ON_WHILE_PLUGGED_IN);
     }
 
     final Context mContext;
@@ -5434,6 +5435,14 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                         && !Settings.Global.WIFI_ON.equals(setting)) {
                     throw new SecurityException(String.format(
                             "Permission denial: device owners cannot update %1$s", setting));
+                }
+            }
+
+            if (Settings.Global.STAY_ON_WHILE_PLUGGED_IN.equals(setting)) {
+                // ignore if it contradicts an existing policy
+                long timeMs = getMaximumTimeToLock(who, UserHandle.getCallingUserId());
+                if (timeMs > 0 && timeMs < Integer.MAX_VALUE) {
+                    return;
                 }
             }
 
