@@ -50,13 +50,6 @@ public class SELinux {
     public static final native boolean isSELinuxEnforced();
 
     /**
-     * Set whether SELinux is permissive or enforcing.
-     * @param value representing whether to set SELinux to enforcing
-     * @return a boolean representing whether the desired mode was set
-     */
-    public static final native boolean setSELinuxEnforce(boolean value);
-
-    /**
      * Sets the security context for newly created file objects.
      * @param context a security context given as a String.
      * @return a boolean indicating whether the operation succeeded.
@@ -97,27 +90,6 @@ public class SELinux {
      * @return a String representing the security context of the given pid.
      */
     public static final native String getPidContext(int pid);
-
-    /**
-     * Gets a list of the SELinux boolean names.
-     * @return an array of strings containing the SELinux boolean names.
-     */
-    public static final native String[] getBooleanNames();
-
-    /**
-     * Gets the value for the given SELinux boolean name.
-     * @param name The name of the SELinux boolean.
-     * @return a boolean indicating whether the SELinux boolean is set.
-     */
-    public static final native boolean getBooleanValue(String name);
-
-    /**
-     * Sets the value for the given SELinux boolean name.
-     * @param name The name of the SELinux boolean.
-     * @param value The new value of the SELinux boolean.
-     * @return a boolean indicating whether or not the operation succeeded.
-     */
-    public static final native boolean setBooleanValue(String name, boolean value);
 
     /**
      * Check permissions between two security contexts.
