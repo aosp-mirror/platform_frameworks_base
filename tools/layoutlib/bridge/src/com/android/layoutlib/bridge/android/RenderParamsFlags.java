@@ -31,6 +31,8 @@ public final class RenderParamsFlags {
             new Key<String>("rootTag", String.class);
     public static final Key<Boolean> FLAG_KEY_DISABLE_BITMAP_CACHING =
             new Key<Boolean>("disableBitmapCaching", Boolean.class);
+    public static final Key<Boolean> FLAG_KEY_RECYCLER_VIEW_SUPPORT =
+            new Key<Boolean>("recyclerViewSupport", Boolean.class);
     public static final Key<Boolean> FLAG_KEY_RENDER_ALL_DRAWABLE_STATES =
             new Key<Boolean>("renderAllDrawableStates", Boolean.class);
 
