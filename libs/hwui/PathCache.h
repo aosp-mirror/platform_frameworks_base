@@ -59,7 +59,19 @@ class Caches;
  * Alpha texture used to represent a path.
  */
 struct PathTexture: public Texture {
-    PathTexture(Caches& caches): Texture(caches) {
+    PathTexture(Caches& caches, float left, float top,
+            float offset, int width, int height, int generation)
+            : Texture(caches)
+            , left(left)
+            , top(top)
+            , offset(offset) {
+        this->width = width;
+        this->height = height;
+        this->generation = generation;
+    }
+    PathTexture(Caches& caches, int generation)
+        : Texture(caches) {
+        this->generation = generation;
     }
 
     ~PathTexture() {
@@ -69,15 +81,15 @@ struct PathTexture: public Texture {
     /**
      * Left coordinate of the path bounds.
      */
-    float left;
+    float left = 0;
     /**
      * Top coordinate of the path bounds.
      */
-    float top;
+    float top = 0;
     /**
      * Offset to draw the path at the correct origin.
      */
-    float offset;
+    float offset = 0;
 
     sp<Task<SkBitmap*> > task() const {
         return mTask;

@@ -59,7 +59,9 @@ public:
         , paint(paint) {
     }
 
-    status_t setup(GLenum glyphFormat);
+    void setup(GLenum glyphFormat);
+
+    void draw(CacheTexture& texture, bool linearFiltering);
 
     OpenGLRenderer* renderer;
     float x;

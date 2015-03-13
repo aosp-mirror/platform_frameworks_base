@@ -109,13 +109,17 @@ CacheBlock* CacheBlock::removeBlock(CacheBlock* head, CacheBlock* blockToRemove)
 // CacheTexture
 ///////////////////////////////////////////////////////////////////////////////
 
-CacheTexture::CacheTexture(uint16_t width, uint16_t height, GLenum format, uint32_t maxQuadCount) :
-            mTexture(nullptr), mTextureId(0), mWidth(width), mHeight(height), mFormat(format),
-            mLinearFiltering(false), mDirty(false), mNumGlyphs(0),
-            mMesh(nullptr), mCurrentQuad(0), mMaxQuadCount(maxQuadCount),
-            mCaches(Caches::getInstance()) {
+CacheTexture::CacheTexture(uint16_t width, uint16_t height, GLenum format, uint32_t maxQuadCount)
+        : mTexture(Caches::getInstance())
+        , mFormat(format)
+        , mMaxQuadCount(maxQuadCount)
+        , mCaches(Caches::getInstance()) {
+    mTexture.width = width;
+    mTexture.height = height;
+    mTexture.blend = true;
+
     mCacheBlocks = new CacheBlock(TEXTURE_BORDER_SIZE, TEXTURE_BORDER_SIZE,
-            mWidth - TEXTURE_BORDER_SIZE, mHeight - TEXTURE_BORDER_SIZE);
+            getWidth() - TEXTURE_BORDER_SIZE, getHeight() - TEXTURE_BORDER_SIZE);
 
     // OpenGL ES 3.0+ lets us specify the row length for unpack operations such
     // as glTexSubImage2D(). This allows us to upload a sub-rectangle of a texture.
@@ -125,7 +129,7 @@ CacheTexture::CacheTexture(uint16_t width, uint16_t height, GLenum format, uint3
 
 CacheTexture::~CacheTexture() {
     releaseMesh();
-    releaseTexture();
+    releasePixelBuffer();
     reset();
 }
 
@@ -144,35 +148,28 @@ void CacheTexture::init() {
     // reset, then create a new remainder space to start again
     reset();
     mCacheBlocks = new CacheBlock(TEXTURE_BORDER_SIZE, TEXTURE_BORDER_SIZE,
-            mWidth - TEXTURE_BORDER_SIZE, mHeight - TEXTURE_BORDER_SIZE);
+            getWidth() - TEXTURE_BORDER_SIZE, getHeight() - TEXTURE_BORDER_SIZE);
 }
 
 void CacheTexture::releaseMesh() {
     delete[] mMesh;
 }
 
-void CacheTexture::releaseTexture() {
-    if (mTexture) {
-        delete mTexture;
-        mTexture = nullptr;
+void CacheTexture::releasePixelBuffer() {
+    if (mPixelBuffer) {
+        delete mPixelBuffer;
+        mPixelBuffer = nullptr;
     }
-    if (mTextureId) {
-        mCaches.textureState().deleteTexture(mTextureId);
-        mTextureId = 0;
+    if (mTexture.id) {
+        mCaches.textureState().deleteTexture(mTexture.id);
+        mTexture.id = 0;
     }
     mDirty = false;
     mCurrentQuad = 0;
 }
 
-void CacheTexture::setLinearFiltering(bool linearFiltering, bool bind) {
-   if (linearFiltering != mLinearFiltering) {
-       mLinearFiltering = linearFiltering;
-
-       const GLenum filtering = linearFiltering ? GL_LINEAR : GL_NEAREST;
-       if (bind) mCaches.textureState().bindTexture(getTextureId());
-       glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, filtering);
-       glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, filtering);
-   }
+void CacheTexture::setLinearFiltering(bool linearFiltering) {
+    mTexture.setFilter(linearFiltering ? GL_LINEAR : GL_NEAREST);
 }
 
 void CacheTexture::allocateMesh() {
@@ -181,18 +178,18 @@ void CacheTexture::allocateMesh() {
     }
 }
 
-void CacheTexture::allocateTexture() {
-    if (!mTexture) {
-        mTexture = PixelBuffer::create(mFormat, mWidth, mHeight);
+void CacheTexture::allocatePixelBuffer() {
+    if (!mPixelBuffer) {
+        mPixelBuffer = PixelBuffer::create(mFormat, getWidth(), getHeight());
     }
 
-    if (!mTextureId) {
-        glGenTextures(1, &mTextureId);
+    if (!mTexture.id) {
+        glGenTextures(1, &mTexture.id);
 
-        mCaches.textureState().bindTexture(mTextureId);
+        mCaches.textureState().bindTexture(mTexture.id);
         glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
         // Initialize texture dimensions
-        glTexImage2D(GL_TEXTURE_2D, 0, mFormat, mWidth, mHeight, 0,
+        glTexImage2D(GL_TEXTURE_2D, 0, mFormat, getWidth(), getHeight(), 0,
                 mFormat, GL_UNSIGNED_BYTE, nullptr);
 
         const GLenum filtering = getLinearFiltering() ? GL_LINEAR : GL_NEAREST;
@@ -209,16 +206,16 @@ bool CacheTexture::upload() {
 
     uint32_t x = mHasUnpackRowLength ? dirtyRect.left : 0;
     uint32_t y = dirtyRect.top;
-    uint32_t width = mHasUnpackRowLength ? dirtyRect.getWidth() : mWidth;
+    uint32_t width = mHasUnpackRowLength ? dirtyRect.getWidth() : getWidth();
     uint32_t height = dirtyRect.getHeight();
 
     // The unpack row length only needs to be specified when a new
     // texture is bound
     if (mHasUnpackRowLength) {
-        glPixelStorei(GL_UNPACK_ROW_LENGTH, mWidth);
+        glPixelStorei(GL_UNPACK_ROW_LENGTH, getWidth());
     }
 
-    mTexture->upload(x, y, width, height);
+    mPixelBuffer->upload(x, y, width, height);
     setDirty(false);
 
     return mHasUnpackRowLength;
@@ -258,7 +255,7 @@ bool CacheTexture::fitBitmap(const SkGlyph& glyph, uint32_t* retOriginX, uint32_
             return false;
     }
 
-    if (glyph.fHeight + TEXTURE_BORDER_SIZE * 2 > mHeight) {
+    if (glyph.fHeight + TEXTURE_BORDER_SIZE * 2 > getHeight()) {
         return false;
     }
 
@@ -295,10 +292,10 @@ bool CacheTexture::fitBitmap(const SkGlyph& glyph, uint32_t* retOriginX, uint32_
                 cacheBlock->mWidth -= roundedUpW;
                 cacheBlock->mX += roundedUpW;
 
-                if (mHeight - glyphH >= glyphH) {
+                if (getHeight() - glyphH >= glyphH) {
                     // There's enough height left over to create a new CacheBlock
                     CacheBlock* newBlock = new CacheBlock(oldX, glyphH + TEXTURE_BORDER_SIZE,
-                            roundedUpW, mHeight - glyphH - TEXTURE_BORDER_SIZE);
+                            roundedUpW, getHeight() - glyphH - TEXTURE_BORDER_SIZE);
 #if DEBUG_FONT_RENDERER
                     ALOGD("fitBitmap: Created new block: this, x, y, w, h = %p, %d, %d, %d, %d",
                             newBlock, newBlock->mX, newBlock->mY,

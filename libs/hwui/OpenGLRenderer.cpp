@@ -2935,27 +2935,27 @@ int OpenGLRenderer::save(int flags) {
 }
 
 void OpenGLRenderer::restore() {
-    return mState.restore();
+    mState.restore();
 }
 
 void OpenGLRenderer::restoreToCount(int saveCount) {
-    return mState.restoreToCount(saveCount);
+    mState.restoreToCount(saveCount);
 }
 
 void OpenGLRenderer::translate(float dx, float dy, float dz) {
-    return mState.translate(dx, dy, dz);
+    mState.translate(dx, dy, dz);
 }
 
 void OpenGLRenderer::rotate(float degrees) {
-    return mState.rotate(degrees);
+    mState.rotate(degrees);
 }
 
 void OpenGLRenderer::scale(float sx, float sy) {
-    return mState.scale(sx, sy);
+    mState.scale(sx, sy);
 }
 
 void OpenGLRenderer::skew(float sx, float sy) {
-    return mState.skew(sx, sy);
+    mState.skew(sx, sy);
 }
 
 void OpenGLRenderer::setMatrix(const Matrix4& matrix) {
