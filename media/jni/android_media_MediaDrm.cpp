@@ -438,9 +438,11 @@ static String8 JStringToString8(JNIEnv *env, jstring const &jstr) {
     Entry e = s.next();
 */
 
-static KeyedVector<String8, String8> HashMapToKeyedVector(JNIEnv *env, jobject &hashMap) {
+static KeyedVector<String8, String8> HashMapToKeyedVector(
+    JNIEnv *env, jobject &hashMap, bool* pIsOK) {
     jclass clazz = gFields.stringClassId;
     KeyedVector<String8, String8> keyedVector;
+    *pIsOK = true;
 
     jobject entrySet = env->CallObjectMethod(hashMap, gFields.hashmap.entrySet);
     if (entrySet) {
@@ -451,16 +453,22 @@ static KeyedVector<String8, String8> HashMapToKeyedVector(JNIEnv *env, jobject &
                 jobject entry = env->CallObjectMethod(iterator, gFields.iterator.next);
                 if (entry) {
                     jobject obj = env->CallObjectMethod(entry, gFields.entry.getKey);
-                    if (!env->IsInstanceOf(obj, clazz)) {
+                    if (obj == NULL || !env->IsInstanceOf(obj, clazz)) {
                         jniThrowException(env, "java/lang/IllegalArgumentException",
                                           "HashMap key is not a String");
+                        env->DeleteLocalRef(entry);
+                        *pIsOK = false;
+                        break;
                     }
                     jstring jkey = static_cast<jstring>(obj);
 
                     obj = env->CallObjectMethod(entry, gFields.entry.getValue);
-                    if (!env->IsInstanceOf(obj, clazz)) {
+                    if (obj == NULL || !env->IsInstanceOf(obj, clazz)) {
                         jniThrowException(env, "java/lang/IllegalArgumentException",
                                           "HashMap value is not a String");
+                        env->DeleteLocalRef(entry);
+                        *pIsOK = false;
+                        break;
                     }
                     jstring jvalue = static_cast<jstring>(obj);
 
@@ -763,7 +771,11 @@ static jobject android_media_MediaDrm_getKeyRequest(
 
     KeyedVector<String8, String8> optParams;
     if (joptParams != NULL) {
-        optParams = HashMapToKeyedVector(env, joptParams);
+        bool isOK;
+        optParams = HashMapToKeyedVector(env, joptParams, &isOK);
+        if (!isOK) {
+            return NULL;
+        }
     }
 
     Vector<uint8_t> request;
