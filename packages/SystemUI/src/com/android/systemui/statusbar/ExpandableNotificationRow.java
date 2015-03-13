@@ -69,6 +69,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
 
     private StatusBarNotification mStatusBarNotification;
     private boolean mIsHeadsUp;
+    private ViewStub mGutsStub;
 
     public void setIconAnimationRunning(boolean running) {
         setIconAnimationRunning(running, mPublicLayout);
@@ -128,6 +129,10 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
         mIsHeadsUp = isHeadsUp;
     }
 
+    public NotificationGuts getGuts() {
+        return mGuts;
+    }
+
     public interface ExpansionLogger {
         public void logNotificationExpansion(String key, boolean userAction, boolean expanded);
     }
@@ -179,16 +184,23 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
         super.onFinishInflate();
         mPublicLayout = (NotificationContentView) findViewById(R.id.expandedPublic);
         mPrivateLayout = (NotificationContentView) findViewById(R.id.expanded);
-        ViewStub gutsStub = (ViewStub) findViewById(R.id.notification_guts_stub);
-        gutsStub.setOnInflateListener(new ViewStub.OnInflateListener() {
+        mGutsStub = (ViewStub) findViewById(R.id.notification_guts_stub);
+        mGutsStub.setOnInflateListener(new ViewStub.OnInflateListener() {
             @Override
             public void onInflate(ViewStub stub, View inflated) {
                 mGuts = (NotificationGuts) inflated;
                 mGuts.setClipTopAmount(getClipTopAmount());
                 mGuts.setActualHeight(getActualHeight());
+                mGutsStub = null;
             }
         });
         mVetoButton = findViewById(R.id.veto);
+    }
+
+    public void inflateGuts() {
+        if (mGuts == null) {
+            mGutsStub.inflate();
+        }
     }
 
     @Override

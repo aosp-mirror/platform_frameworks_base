@@ -73,7 +73,6 @@ import android.view.ViewAnimationUtils;
 import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
 import android.view.ViewParent;
-import android.view.ViewStub;
 import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
 import android.view.accessibility.AccessibilityManager;
@@ -846,16 +845,13 @@ public abstract class BaseStatusBar extends SystemUI implements
         }, false /* afterKeyguardGone */);
     }
 
-    private void inflateGuts(ExpandableNotificationRow row) {
-        ViewStub stub = (ViewStub) row.findViewById(R.id.notification_guts_stub);
-        if (stub != null) {
-            stub.inflate();
-        }
+    private void bindGuts(ExpandableNotificationRow row) {
+        row.inflateGuts();
         final StatusBarNotification sbn = row.getStatusBarNotification();
         PackageManager pmUser = getPackageManagerForUser(
                 sbn.getUser().getIdentifier());
         row.setTag(sbn.getPackageName());
-        final View guts = row.findViewById(R.id.notification_guts);
+        final View guts = row.getGuts();
         final String pkg = sbn.getPackageName();
         String appname = pkg;
         Drawable pkgicon = null;
@@ -933,11 +929,11 @@ public abstract class BaseStatusBar extends SystemUI implements
                     return false;
                 }
 
-                inflateGuts((ExpandableNotificationRow) v);
+                ExpandableNotificationRow row = (ExpandableNotificationRow) v;
+                bindGuts(row);
 
                 // Assume we are a status_bar_notification_row
-                final NotificationGuts guts = (NotificationGuts) v.findViewById(
-                        R.id.notification_guts);
+                final NotificationGuts guts = row.getGuts();
                 if (guts == null) {
                     // This view has no guts. Examples are the more card or the dismiss all view
                     return false;
