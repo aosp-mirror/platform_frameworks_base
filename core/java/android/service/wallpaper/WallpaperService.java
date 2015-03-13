@@ -17,15 +17,12 @@
 package android.service.wallpaper;
 
 import android.content.res.TypedArray;
-import android.os.Build;
 import android.os.SystemProperties;
-import android.util.DisplayMetrics;
-import android.util.TypedValue;
-import android.view.ViewRootImpl;
 import android.view.WindowInsets;
 
 import com.android.internal.R;
 import com.android.internal.os.HandlerCaller;
+import com.android.internal.util.ScreenShapeHelper;
 import com.android.internal.view.BaseIWindow;
 import com.android.internal.view.BaseSurfaceHolder;
 
@@ -63,8 +60,6 @@ import android.view.WindowManagerGlobal;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
-
-import static android.view.WindowManager.LayoutParams.FLAG_FULLSCREEN;
 
 /**
  * A wallpaper service is responsible for showing a live wallpaper behind
@@ -160,7 +155,7 @@ public abstract class WallpaperService extends Service {
                 WindowManager.LayoutParams.PRIVATE_FLAG_WANTS_OFFSET_NOTIFICATIONS;
         int mCurWindowFlags = mWindowFlags;
         int mCurWindowPrivateFlags = mWindowPrivateFlags;
-        TypedValue mOutsetBottom;
+        int mOutsetBottomPx;
         final Rect mVisibleInsets = new Rect();
         final Rect mWinFrame = new Rect();
         final Rect mOverscanInsets = new Rect();
@@ -173,8 +168,6 @@ public abstract class WallpaperService extends Service {
         final Rect mFinalStableInsets = new Rect();
         final Configuration mConfiguration = new Configuration();
 
-        private boolean mIsEmulator;
-        private boolean mIsCircularEmulator;
         private boolean mWindowIsRound;
 
         final WindowManager.LayoutParams mLayout
@@ -639,22 +632,12 @@ public abstract class WallpaperService extends Service {
                         final Display display = windowService.getDefaultDisplay();
                         final boolean shouldUseBottomOutset =
                                 display.getDisplayId() == Display.DEFAULT_DISPLAY;
-                        if (shouldUseBottomOutset && windowStyle.hasValue(
-                                R.styleable.Window_windowOutsetBottom)) {
-                            if (mOutsetBottom == null) mOutsetBottom = new TypedValue();
-                            windowStyle.getValue(R.styleable.Window_windowOutsetBottom,
-                                    mOutsetBottom);
-                        } else {
-                            mOutsetBottom = null;
+                        if (shouldUseBottomOutset) {
+                            mOutsetBottomPx = ScreenShapeHelper.getWindowOutsetBottomPx(
+                                    getResources().getDisplayMetrics(), windowStyle);
                         }
-                        mWindowIsRound = getResources().getBoolean(
-                                com.android.internal.R.bool.config_windowIsRound);
+                        mWindowIsRound = ScreenShapeHelper.getWindowIsRound(getResources());
                         windowStyle.recycle();
-
-                        // detect emulator
-                        mIsEmulator = Build.HARDWARE.contains("goldfish");
-                        mIsCircularEmulator = SystemProperties.getBoolean(
-                                ViewRootImpl.PROPERTY_EMULATOR_CIRCULAR, false);
 
                         // Add window
                         mLayout.type = mIWallpaperEngine.mWindowType;
@@ -785,18 +768,14 @@ public abstract class WallpaperService extends Service {
                             mDispatchedOverscanInsets.set(mOverscanInsets);
                             mDispatchedContentInsets.set(mContentInsets);
                             mDispatchedStableInsets.set(mStableInsets);
-                            final boolean isRound = (mIsEmulator && mIsCircularEmulator)
-                                    || mWindowIsRound;
                             mFinalSystemInsets.set(mDispatchedOverscanInsets);
                             mFinalStableInsets.set(mDispatchedStableInsets);
-                            if (mOutsetBottom != null) {
-                                final DisplayMetrics metrics = getResources().getDisplayMetrics();
+                            if (mOutsetBottomPx != 0) {
                                 mFinalSystemInsets.bottom =
-                                        ( (int) mOutsetBottom.getDimension(metrics) )
-                                        + mIWallpaperEngine.mDisplayPadding.bottom;
+                                        mIWallpaperEngine.mDisplayPadding.bottom + mOutsetBottomPx;
                             }
                             WindowInsets insets = new WindowInsets(mFinalSystemInsets,
-                                    null, mFinalStableInsets, isRound);
+                                    null, mFinalStableInsets, mWindowIsRound);
                             onApplyWindowInsets(insets);
                         }
 
