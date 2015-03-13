@@ -73,8 +73,15 @@ public class RecyclerViewUtil {
     private static void setLayoutManager(@NonNull View recyclerView, @NonNull BridgeContext context,
             @NonNull IProjectCallback callback) throws ReflectionException {
         Object cookie = context.getCookie(recyclerView);
-        assert cookie == null || cookie instanceof LayoutManagerType;
-        if (cookie == null) {
+        assert cookie == null || cookie instanceof LayoutManagerType || cookie instanceof String;
+        if (!(cookie instanceof LayoutManagerType)) {
+            if (cookie != null) {
+                // TODO: When layoutlib API is updated, try to load the class with a null
+                // constructor or a constructor taking one argument - the context.
+                Bridge.getLog().warning(LayoutLog.TAG_UNSUPPORTED,
+                        "LayoutManager (" + cookie + ") not found, falling back to " +
+                                "LinearLayoutManager", null);
+            }
             cookie = LayoutManagerType.getDefault();
         }
         Object layoutManager = createLayoutManager((LayoutManagerType) cookie, context, callback);
@@ -152,22 +159,13 @@ public class RecyclerViewUtil {
                 "android.support.v7.widget.StaggeredGridLayoutManager",
                 new Class[]{int.class, int.class}, new Object[]{2, LinearLayout.VERTICAL});
 
-        private String mDisplayName;
+        private String mLogicalName;
         private String mClassName;
         private Class[] mSignature;
         private Object[] mArgs;
 
-        private static final HashMap<String, LayoutManagerType> sDisplayNameLookup =
-                new HashMap<String, LayoutManagerType>();
-
-        static {
-            for (LayoutManagerType type : LayoutManagerType.values()) {
-                sDisplayNameLookup.put(type.mDisplayName, type);
-            }
-        }
-
-        LayoutManagerType(String displayName, String className, Class[] signature, Object[] args) {
-            mDisplayName = displayName;
+        LayoutManagerType(String logicalName, String className, Class[] signature, Object[] args) {
+            mLogicalName = logicalName;
             mClassName = className;
             mSignature = signature;
             mArgs = args;
@@ -199,8 +197,23 @@ public class RecyclerViewUtil {
         }
 
         @Nullable
-        public static LayoutManagerType getByDisplayName(@Nullable String className) {
-            return sDisplayNameLookup.get(className);
+        public static LayoutManagerType getByLogicalName(@NonNull String logicalName) {
+            for (LayoutManagerType type : values()) {
+                if (logicalName.equals(type.mLogicalName)) {
+                    return type;
+                }
+            }
+            return null;
+        }
+
+        @Nullable
+        public static LayoutManagerType getByClassName(@NonNull String className) {
+            for (LayoutManagerType type : values()) {
+                if (className.equals(type.mClassName)) {
+                    return type;
+                }
+            }
+            return null;
         }
     }
 }
