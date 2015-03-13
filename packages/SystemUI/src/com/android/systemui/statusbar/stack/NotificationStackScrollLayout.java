@@ -46,7 +46,6 @@ import com.android.systemui.statusbar.StackScrollerDecorView;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.phone.PhoneStatusBar;
 import com.android.systemui.statusbar.policy.ScrollAdapter;
-import com.android.systemui.statusbar.stack.StackScrollState.ViewState;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -375,15 +374,15 @@ public class NotificationStackScrollLayout extends ViewGroup
      * Returns the location the given child is currently rendered at.
      *
      * @param child the child to get the location for
-     * @return one of {@link ViewState}'s <code>LOCATION_*</code> constants
+     * @return one of {@link StackViewState}'s <code>LOCATION_*</code> constants
      */
     public int getChildLocation(View child) {
-        ViewState childViewState = mCurrentStackScrollState.getViewStateForView(child);
+        StackViewState childViewState = mCurrentStackScrollState.getViewStateForView(child);
         if (childViewState == null) {
-            return ViewState.LOCATION_UNKNOWN;
+            return StackViewState.LOCATION_UNKNOWN;
         }
         if (childViewState.gone) {
-            return ViewState.LOCATION_GONE;
+            return StackViewState.LOCATION_GONE;
         }
         return childViewState.location;
     }

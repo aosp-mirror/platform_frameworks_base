@@ -113,13 +113,13 @@ public class StackStateAnimator {
         for (int i = 0; i < childCount; i++) {
             final ExpandableView child = (ExpandableView) mHostLayout.getChildAt(i);
 
-            StackScrollState.ViewState viewState = finalState.getViewStateForView(child);
+            StackViewState viewState = finalState.getViewStateForView(child);
             if (viewState == null || child.getVisibility() == View.GONE) {
                 continue;
             }
 
             child.setClipBounds(null);
-            startAnimations(child, viewState, finalState, i);
+            startStackAnimations(child, viewState, finalState, i, -1 /* fixedDelay */);
         }
         if (!isRunning()) {
             // no child has preformed any animation, lets finish
@@ -134,7 +134,7 @@ public class StackStateAnimator {
         for (int i = childCount - 1; i >= 0; i--) {
             final ExpandableView child = (ExpandableView) mHostLayout.getChildAt(i);
 
-            StackScrollState.ViewState viewState = finalState.getViewStateForView(child);
+            StackViewState viewState = finalState.getViewStateForView(child);
             if (viewState == null || child.getVisibility() == View.GONE) {
                 continue;
             }
@@ -145,18 +145,29 @@ public class StackStateAnimator {
         return -1;
     }
 
-    /**
-     * Start an animation to the given viewState
-     */
-    private void startAnimations(final ExpandableView child, StackScrollState.ViewState viewState,
-            StackScrollState finalState, int i) {
-        int childVisibility = child.getVisibility();
-        boolean wasVisible = childVisibility == View.VISIBLE;
-        final float alpha = viewState.alpha;
-        if (!wasVisible && alpha != 0 && !viewState.gone) {
-            child.setVisibility(View.VISIBLE);
-        }
 
+    /**
+     * Start an animation to the given  {@link StackViewState}.
+     *
+     * @param child the child to start the animation on
+     * @param viewState the {@link StackViewState} of the view to animate to
+     * @param finalState the final state after the animation
+     * @param i the index of the view; only relevant if the view is the speed bump and is
+     *          ignored otherwise
+     * @param fixedDelay a fixed delay if desired or -1 if the delay should be calculated
+     */
+    public void startStackAnimations(final ExpandableView child, StackViewState viewState,
+            StackScrollState finalState, int i, long fixedDelay) {
+        final float alpha = viewState.alpha;
+        boolean wasAdded = mNewAddChildren.contains(child);
+        long duration = mCurrentLength;
+        if (wasAdded && mAnimationFilter.hasGoToFullShadeEvent) {
+            child.setTranslationY(child.getTranslationY() + mGoToFullShadeAppearingTranslation);
+            float longerDurationFactor = viewState.notGoneIndex - mCurrentLastNotAddedIndex;
+            longerDurationFactor = (float) Math.pow(longerDurationFactor, 0.7f);
+            duration = ANIMATION_DURATION_APPEAR_DISAPPEAR + 50 +
+                    (long) (100 * longerDurationFactor);
+        }
         boolean yTranslationChanging = child.getTranslationY() != viewState.yTranslation;
         boolean zTranslationChanging = child.getTranslationZ() != viewState.zTranslation;
         boolean scaleChanging = child.getScaleX() != viewState.scale;
@@ -164,94 +175,40 @@ public class StackStateAnimator {
         boolean heightChanging = viewState.height != child.getActualHeight();
         boolean darkChanging = viewState.dark != child.isDark();
         boolean topInsetChanging = viewState.clipTopAmount != child.getClipTopAmount();
-        boolean wasAdded = mNewAddChildren.contains(child);
         boolean hasDelays = mAnimationFilter.hasDelays;
         boolean isDelayRelevant = yTranslationChanging || zTranslationChanging || scaleChanging ||
                 alphaChanging || heightChanging || topInsetChanging || darkChanging;
-        boolean noAnimation = wasAdded;
         long delay = 0;
-        long duration = mCurrentLength;
-        if (hasDelays && isDelayRelevant || wasAdded) {
+        if (fixedDelay != -1) {
+            delay = fixedDelay;
+        } else if (hasDelays && isDelayRelevant || wasAdded) {
             delay = mCurrentAdditionalDelay + calculateChildAnimationDelay(viewState, finalState);
         }
 
-        if (wasAdded && mAnimationFilter.hasGoToFullShadeEvent) {
-            child.setTranslationY(child.getTranslationY() + mGoToFullShadeAppearingTranslation);
-            yTranslationChanging = true;
-            float longerDurationFactor = viewState.notGoneIndex - mCurrentLastNotAddedIndex;
-            longerDurationFactor = (float) Math.pow(longerDurationFactor, 0.7f);
-            duration = ANIMATION_DURATION_APPEAR_DISAPPEAR + 50 +
-                    (long) (100 * longerDurationFactor);
-        }
-
-        // start translationY animation
-        if (yTranslationChanging) {
-            if (noAnimation && !mAnimationFilter.hasGoToFullShadeEvent) {
-                child.setTranslationY(viewState.yTranslation);
-            } else {
-                startYTranslationAnimation(child, viewState, duration, delay);
-            }
-        }
-
-        // start translationZ animation
-        if (zTranslationChanging) {
-            if (noAnimation) {
-                child.setTranslationZ(viewState.zTranslation);
-            } else {
-                startZTranslationAnimation(child, viewState, duration, delay);
-            }
-        }
-
-        // start scale animation
-        if (scaleChanging) {
-            if (noAnimation) {
-                child.setScaleX(viewState.scale);
-                child.setScaleY(viewState.scale);
-            } else {
-                startScaleAnimation(child, viewState, duration);
-            }
-        }
-
-        // start alpha animation
-        if (alphaChanging && child.getTranslationX() == 0) {
-            if (noAnimation) {
-                child.setAlpha(viewState.alpha);
-            } else {
-                startAlphaAnimation(child, viewState, duration, delay);
-            }
-        }
+        startViewAnimations(child, viewState, delay, duration);
 
         // start height animation
         if (heightChanging && child.getActualHeight() != 0) {
-            if (noAnimation) {
-                child.setActualHeight(viewState.height, false);
-            } else {
-                startHeightAnimation(child, viewState, duration, delay);
-            }
+            startHeightAnimation(child, viewState, duration, delay);
         }
 
         // start top inset animation
         if (topInsetChanging) {
-            if (noAnimation) {
-                child.setClipTopAmount(viewState.clipTopAmount);
-            } else {
-                startInsetAnimation(child, viewState, duration, delay);
-            }
+            startInsetAnimation(child, viewState, duration, delay);
         }
 
         // start dimmed animation
-        child.setDimmed(viewState.dimmed, mAnimationFilter.animateDimmed && !wasAdded
-                && !noAnimation);
+        child.setDimmed(viewState.dimmed, mAnimationFilter.animateDimmed);
 
         // start dark animation
-        child.setDark(viewState.dark, mAnimationFilter.animateDark && !noAnimation, delay);
+        child.setDark(viewState.dark, mAnimationFilter.animateDark, delay);
 
         // apply speed bump state
         child.setBelowSpeedBump(viewState.belowSpeedBump);
 
         // start hiding sensitive animation
-        child.setHideSensitive(viewState.hideSensitive, mAnimationFilter.animateHideSensitive &&
-                !wasAdded && !noAnimation, delay, duration);
+        child.setHideSensitive(viewState.hideSensitive, mAnimationFilter.animateHideSensitive,
+                delay, duration);
 
         if (wasAdded) {
             child.performAddAnimation(delay, mCurrentLength);
@@ -262,7 +219,48 @@ public class StackStateAnimator {
         }
     }
 
-    private long calculateChildAnimationDelay(StackScrollState.ViewState viewState,
+    /**
+     * Start an animation to a new {@link ViewState}.
+     *
+     * @param child the child to start the animation on
+     * @param viewState the  {@link StackViewState} of the view to animate to
+     * @param delay a fixed delay
+     * @param duration the duration of the animation
+     */
+    public void startViewAnimations(View child, ViewState viewState, long delay, long duration) {
+        boolean wasVisible = child.getVisibility() == View.VISIBLE;
+        final float alpha = viewState.alpha;
+        if (!wasVisible && alpha != 0 && !viewState.gone) {
+            child.setVisibility(View.VISIBLE);
+        }
+        boolean yTranslationChanging = child.getTranslationY() != viewState.yTranslation;
+        boolean zTranslationChanging = child.getTranslationZ() != viewState.zTranslation;
+        boolean scaleChanging = child.getScaleX() != viewState.scale;
+        float childAlpha = child.getVisibility() == View.INVISIBLE ? 0.0f : child.getAlpha();
+        boolean alphaChanging = viewState.alpha != childAlpha;
+
+        // start translationY animation
+        if (yTranslationChanging) {
+            startYTranslationAnimation(child, viewState, duration, delay);
+        }
+
+        // start translationZ animation
+        if (zTranslationChanging) {
+            startZTranslationAnimation(child, viewState, duration, delay);
+        }
+
+        // start scale animation
+        if (scaleChanging) {
+            startScaleAnimation(child, viewState, duration);
+        }
+
+        // start alpha animation
+        if (alphaChanging && child.getTranslationX() == 0) {
+            startAlphaAnimation(child, viewState, duration, delay);
+        }
+    }
+
+    private long calculateChildAnimationDelay(StackViewState viewState,
             StackScrollState finalState) {
         if (mAnimationFilter.hasDarkEvent) {
             return calculateDelayDark(viewState);
@@ -314,7 +312,7 @@ public class StackStateAnimator {
         return minDelay;
     }
 
-    private long calculateDelayDark(StackScrollState.ViewState viewState) {
+    private long calculateDelayDark(StackViewState viewState) {
         int referenceIndex;
         if (mAnimationFilter.darkAnimationOriginIndex ==
                 NotificationStackScrollLayout.AnimationEvent.DARK_ANIMATION_ORIGIN_INDEX_ABOVE) {
@@ -328,14 +326,14 @@ public class StackStateAnimator {
         return Math.abs(referenceIndex - viewState.notGoneIndex) * ANIMATION_DELAY_PER_ELEMENT_DARK;
     }
 
-    private long calculateDelayGoToFullShade(StackScrollState.ViewState viewState) {
+    private long calculateDelayGoToFullShade(StackViewState viewState) {
         float index = viewState.notGoneIndex;
         index = (float) Math.pow(index, 0.7f);
         return (long) (index * ANIMATION_DELAY_PER_ELEMENT_GO_TO_FULL_SHADE);
     }
 
     private void startHeightAnimation(final ExpandableView child,
-            StackScrollState.ViewState viewState, long duration, long delay) {
+            StackViewState viewState, long duration, long delay) {
         Integer previousStartValue = getChildTag(child, TAG_START_HEIGHT);
         Integer previousEndValue = getChildTag(child, TAG_END_HEIGHT);
         int newEndValue = viewState.height;
@@ -394,7 +392,7 @@ public class StackStateAnimator {
     }
 
     private void startInsetAnimation(final ExpandableView child,
-            StackScrollState.ViewState viewState, long duration, long delay) {
+            StackViewState viewState, long duration, long delay) {
         Integer previousStartValue = getChildTag(child, TAG_START_TOP_INSET);
         Integer previousEndValue = getChildTag(child, TAG_END_TOP_INSET);
         int newEndValue = viewState.clipTopAmount;
@@ -451,8 +449,8 @@ public class StackStateAnimator {
         child.setTag(TAG_END_TOP_INSET, newEndValue);
     }
 
-    private void startAlphaAnimation(final ExpandableView child,
-            final StackScrollState.ViewState viewState, long duration, long delay) {
+    private void startAlphaAnimation(final View child,
+            final ViewState viewState, long duration, long delay) {
         Float previousStartValue = getChildTag(child,TAG_START_ALPHA);
         Float previousEndValue = getChildTag(child,TAG_END_ALPHA);
         final float newEndValue = viewState.alpha;
@@ -525,8 +523,8 @@ public class StackStateAnimator {
         child.setTag(TAG_END_ALPHA, newEndValue);
     }
 
-    private void startZTranslationAnimation(final ExpandableView child,
-            final StackScrollState.ViewState viewState, long duration, long delay) {
+    private void startZTranslationAnimation(final View child,
+            final ViewState viewState, long duration, long delay) {
         Float previousStartValue = getChildTag(child,TAG_START_TRANSLATION_Z);
         Float previousEndValue = getChildTag(child,TAG_END_TRANSLATION_Z);
         float newEndValue = viewState.zTranslation;
@@ -577,8 +575,8 @@ public class StackStateAnimator {
         child.setTag(TAG_END_TRANSLATION_Z, newEndValue);
     }
 
-    private void startYTranslationAnimation(final ExpandableView child,
-            StackScrollState.ViewState viewState, long duration, long delay) {
+    private void startYTranslationAnimation(final View child,
+            ViewState viewState, long duration, long delay) {
         Float previousStartValue = getChildTag(child,TAG_START_TRANSLATION_Y);
         Float previousEndValue = getChildTag(child,TAG_END_TRANSLATION_Y);
         float newEndValue = viewState.yTranslation;
@@ -630,8 +628,8 @@ public class StackStateAnimator {
         child.setTag(TAG_END_TRANSLATION_Y, newEndValue);
     }
 
-    private void startScaleAnimation(final ExpandableView child,
-            StackScrollState.ViewState viewState, long duration) {
+    private void startScaleAnimation(final View child,
+            ViewState viewState, long duration) {
         Float previousStartValue = getChildTag(child, TAG_START_SCALE);
         Float previousEndValue = getChildTag(child, TAG_END_SCALE);
         float newEndValue = viewState.scale;
@@ -765,7 +763,7 @@ public class StackStateAnimator {
                     NotificationStackScrollLayout.AnimationEvent.ANIMATION_TYPE_ADD) {
 
                 // This item is added, initialize it's properties.
-                StackScrollState.ViewState viewState = finalState
+                StackViewState viewState = finalState
                         .getViewStateForView(changingView);
                 if (viewState == null) {
                     // The position for this child was never generated, let's continue.
@@ -776,10 +774,7 @@ public class StackStateAnimator {
                     finalState.removeViewStateForView(changingView);
                     continue;
                 }
-                changingView.setAlpha(viewState.alpha);
-                changingView.setTranslationY(viewState.yTranslation);
-                changingView.setTranslationZ(viewState.zTranslation);
-                changingView.setActualHeight(viewState.height, false);
+                finalState.applyState(changingView, viewState);
                 mNewAddChildren.add(changingView);
 
             } else if (event.animationType ==
@@ -791,7 +786,7 @@ public class StackStateAnimator {
 
                 // Find the amount to translate up. This is needed in order to understand the
                 // direction of the remove animation (either downwards or upwards)
-                StackScrollState.ViewState viewState = finalState
+                StackViewState viewState = finalState
                         .getViewStateForView(event.viewAfterChangingView);
                 int actualHeight = changingView.getActualHeight();
                 // upwards by default
@@ -813,7 +808,7 @@ public class StackStateAnimator {
                         mHostLayout.getOverlay().remove(changingView);
                     }
                 });
-            }  else if (event.animationType ==
+            } else if (event.animationType ==
                 NotificationStackScrollLayout.AnimationEvent.ANIMATION_TYPE_REMOVE_SWIPED_OUT) {
                 // A race condition can trigger the view to be added to the overlay even though
                 // it is swiped out. So let's remove it
