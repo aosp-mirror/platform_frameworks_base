@@ -16,7 +16,7 @@
 
 package android.net.dhcp;
 
-import java.net.InetAddress;
+import java.net.Inet4Address;
 import java.nio.ByteBuffer;
 
 /**
@@ -26,8 +26,8 @@ class DhcpInformPacket extends DhcpPacket {
     /**
      * Generates an INFORM packet with the specified parameters.
      */
-    DhcpInformPacket(int transId, InetAddress clientIp, InetAddress yourIp,
-                     InetAddress nextIp, InetAddress relayIp,
+    DhcpInformPacket(int transId, Inet4Address clientIp, Inet4Address yourIp,
+                     Inet4Address nextIp, Inet4Address relayIp,
                      byte[] clientMac) {
         super(transId, clientIp, yourIp, nextIp, relayIp, clientMac, false);
     }
@@ -61,16 +61,5 @@ class DhcpInformPacket extends DhcpPacket {
         addTlv(buffer, DHCP_MESSAGE_TYPE, DHCP_MESSAGE_TYPE_REQUEST);
         addTlv(buffer, DHCP_PARAMETER_LIST, mRequestedParams);
         addTlvEnd(buffer);
-    }
-
-    /**
-     * Informs the state machine of the arrival of an INFORM packet.  Not
-     * used currently.
-     */
-    public void doNextOp(DhcpStateMachine machine) {
-        InetAddress clientRequest =
-            mRequestedIp == null ? mClientIp : mRequestedIp;
-        machine.onInformReceived(mTransId, mClientMac, clientRequest,
-            mRequestedParams);
     }
 }
