@@ -364,6 +364,12 @@ public final class PowerManager {
     public static final int GO_TO_SLEEP_REASON_HDMI = 5;
 
     /**
+     * Go to sleep reason code: Going to sleep due to the sleep button being pressed.
+     * @hide
+     */
+    public static final int GO_TO_SLEEP_REASON_SLEEP_BUTTON = 6;
+
+    /**
      * Go to sleep flag: Skip dozing state and directly go to full sleep.
      * @hide
      */
