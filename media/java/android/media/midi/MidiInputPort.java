@@ -31,9 +31,6 @@ import java.io.IOException;
 
 /**
  * This class is used for sending data to a port on a MIDI device
- *
- * CANDIDATE FOR PUBLIC API
- * @hide
  */
 public final class MidiInputPort extends MidiReceiver implements Closeable {
     private static final String TAG = "MidiInputPort";
@@ -73,16 +70,8 @@ public final class MidiInputPort extends MidiReceiver implements Closeable {
         return mPortNumber;
     }
 
-    /**
-     * Writes MIDI data to the input port
-     *
-     * @param msg byte array containing the data
-     * @param offset offset of first byte of the data in msg byte array
-     * @param count size of the data in bytes
-     * @param timestamp future time to post the data (based on
-     *                  {@link java.lang.System#nanoTime}
-     */
-    public void receive(byte[] msg, int offset, int count, long timestamp) throws IOException {
+    @Override
+    public void onReceive(byte[] msg, int offset, int count, long timestamp) throws IOException {
         if (offset < 0 || count < 0 || offset + count > msg.length) {
             throw new IllegalArgumentException("offset or count out of range");
         }

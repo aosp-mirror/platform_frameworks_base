@@ -24,9 +24,8 @@ import java.util.concurrent.CopyOnWriteArrayList;
  * This class subclasses {@link MidiReceiver} and dispatches any data it receives
  * to its receiver list. Any receivers that throw an exception upon receiving data will
  * be automatically removed from the receiver list, but no IOException will be returned
- * from the dispatcher's {@link #receive} in that case.
+ * from the dispatcher's {@link #onReceive} in that case.
  *
- * CANDIDATE FOR PUBLIC API
  * @hide
  */
 public final class MidiDispatcher extends MidiReceiver {
@@ -72,10 +71,10 @@ public final class MidiDispatcher extends MidiReceiver {
     }
 
     @Override
-    public void receive(byte[] msg, int offset, int count, long timestamp) throws IOException {
+    public void onReceive(byte[] msg, int offset, int count, long timestamp) throws IOException {
        for (MidiReceiver receiver : mReceivers) {
             try {
-                receiver.send(msg, offset, count, timestamp);
+                receiver.sendWithTimestamp(msg, offset, count, timestamp);
             } catch (IOException e) {
                 // if the receiver fails we remove the receiver but do not propagate the exception
                 mReceivers.remove(receiver);

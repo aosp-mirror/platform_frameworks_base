@@ -17583,6 +17583,85 @@ package android.media.effect {
 
 }
 
+package android.media.midi {
+
+  public final class MidiDeviceInfo implements android.os.Parcelable {
+    method public int describeContents();
+    method public int getId();
+    method public int getInputPortCount();
+    method public android.media.midi.MidiDeviceInfo.PortInfo getInputPortInfo(int);
+    method public int getOutputPortCount();
+    method public android.media.midi.MidiDeviceInfo.PortInfo getOutputPortInfo(int);
+    method public android.os.Bundle getProperties();
+    method public int getType();
+    method public boolean isPrivate();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator<android.media.midi.MidiDeviceInfo> CREATOR;
+    field public static final java.lang.String PROPERTY_MANUFACTURER = "manufacturer";
+    field public static final java.lang.String PROPERTY_NAME = "name";
+    field public static final java.lang.String PROPERTY_PRODUCT = "product";
+    field public static final java.lang.String PROPERTY_SERIAL_NUMBER = "serial_number";
+    field public static final java.lang.String PROPERTY_USB_DEVICE = "usb_device";
+    field public static final int TYPE_USB = 1; // 0x1
+    field public static final int TYPE_VIRTUAL = 2; // 0x2
+  }
+
+  public static final class MidiDeviceInfo.PortInfo {
+    method public java.lang.String getName();
+    method public int getPortNumber();
+    method public int getType();
+    field public static final int TYPE_INPUT = 1; // 0x1
+    field public static final int TYPE_OUTPUT = 2; // 0x2
+  }
+
+  public abstract class MidiDeviceService extends android.app.Service {
+    ctor public MidiDeviceService();
+    method public final android.media.midi.MidiDeviceInfo getDeviceInfo();
+    method public final android.media.midi.MidiReceiver[] getOutputPortReceivers();
+    method public android.os.IBinder onBind(android.content.Intent);
+    method public void onDeviceStatusChanged(android.media.midi.MidiDeviceStatus);
+    method public abstract android.media.midi.MidiReceiver[] onGetInputPortReceivers();
+    field public static final java.lang.String SERVICE_INTERFACE = "android.media.midi.MidiDeviceService";
+  }
+
+  public final class MidiDeviceStatus implements android.os.Parcelable {
+    method public int describeContents();
+    method public android.media.midi.MidiDeviceInfo getDeviceInfo();
+    method public int getOutputPortOpenCount(int);
+    method public boolean isInputPortOpen(int);
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator<android.media.midi.MidiDeviceStatus> CREATOR;
+  }
+
+  public final class MidiInputPort extends android.media.midi.MidiReceiver implements java.io.Closeable {
+    method public void close() throws java.io.IOException;
+    method public final int getPortNumber();
+    method public void onReceive(byte[], int, int, long) throws java.io.IOException;
+  }
+
+  public final class MidiOutputPort extends android.media.midi.MidiSender implements java.io.Closeable {
+    method public void close() throws java.io.IOException;
+    method public void connect(android.media.midi.MidiReceiver);
+    method public void disconnect(android.media.midi.MidiReceiver);
+    method public final int getPortNumber();
+  }
+
+  public abstract class MidiReceiver {
+    ctor public MidiReceiver();
+    method public int getMaxMessageSize();
+    method public abstract void onReceive(byte[], int, int, long) throws java.io.IOException;
+    method public void send(byte[], int, int) throws java.io.IOException;
+    method public void sendWithTimestamp(byte[], int, int, long) throws java.io.IOException;
+  }
+
+  public abstract class MidiSender {
+    ctor public MidiSender();
+    method public abstract void connect(android.media.midi.MidiReceiver);
+    method public abstract void disconnect(android.media.midi.MidiReceiver);
+  }
+
+}
+
 package android.media.projection {
 
   public final class MediaProjection {

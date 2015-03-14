@@ -64,7 +64,7 @@ public final class MidiDeviceServer implements Closeable {
 
     // for reporting device status
     private final IBinder mDeviceStatusToken = new Binder();
-    private final boolean[] mInputPortBusy;
+    private final boolean[] mInputPortOpen;
     private final int[] mOutputPortOpenCount;
 
     private final CloseGuard mGuard = CloseGuard.get();
@@ -116,7 +116,7 @@ public final class MidiDeviceServer implements Closeable {
             synchronized (mInputPortOutputPorts) {
                 int portNumber = mOutputPort.getPortNumber();
                 mInputPortOutputPorts[portNumber] = null;
-                mInputPortBusy[portNumber] = false;
+                mInputPortOpen[portNumber] = false;
                 updateDeviceStatus();
             }
             IoUtils.closeQuietly(mOutputPort);
@@ -182,7 +182,7 @@ public final class MidiDeviceServer implements Closeable {
                     synchronized (mPortClients) {
                         mPortClients.put(token, client);
                     }
-                    mInputPortBusy[portNumber] = true;
+                    mInputPortOpen[portNumber] = true;
                     updateDeviceStatus();
                     return pair[1];
                 } catch (IOException e) {
@@ -267,7 +267,7 @@ public final class MidiDeviceServer implements Closeable {
             mOutputPortDispatchers[i] = new MidiDispatcher();
         }
 
-        mInputPortBusy = new boolean[mInputPortCount];
+        mInputPortOpen = new boolean[mInputPortCount];
         mOutputPortOpenCount = new int[numOutputPorts];
 
         mGuard.open("close");
@@ -288,7 +288,7 @@ public final class MidiDeviceServer implements Closeable {
         // clear calling identity, since we may be in a Binder call from one of our clients
         long identityToken = Binder.clearCallingIdentity();
 
-        MidiDeviceStatus status = new MidiDeviceStatus(mDeviceInfo, mInputPortBusy,
+        MidiDeviceStatus status = new MidiDeviceStatus(mDeviceInfo, mInputPortOpen,
                 mOutputPortOpenCount);
         if (mCallback != null) {
             mCallback.onDeviceStatusChanged(this, status);
