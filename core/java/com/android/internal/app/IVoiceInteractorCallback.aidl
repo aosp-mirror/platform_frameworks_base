@@ -16,6 +16,7 @@
 
 package com.android.internal.app;
 
+import android.app.VoiceInteractor;
 import android.os.Bundle;
 
 import com.android.internal.app.IVoiceInteractorRequest;
@@ -26,8 +27,10 @@ import com.android.internal.app.IVoiceInteractorRequest;
 oneway interface IVoiceInteractorCallback {
     void deliverConfirmationResult(IVoiceInteractorRequest request, boolean confirmed,
             in Bundle result);
+    void deliverPickOptionResult(IVoiceInteractorRequest request, boolean finished,
+            in VoiceInteractor.PickOptionRequest.Option[] selections, in Bundle result);
     void deliverCompleteVoiceResult(IVoiceInteractorRequest request, in Bundle result);
     void deliverAbortVoiceResult(IVoiceInteractorRequest request, in Bundle result);
-    void deliverCommandResult(IVoiceInteractorRequest request, boolean complete, in Bundle result);
+    void deliverCommandResult(IVoiceInteractorRequest request, boolean finished, in Bundle result);
     void deliverCancel(IVoiceInteractorRequest request);
 }

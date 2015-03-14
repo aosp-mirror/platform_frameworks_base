@@ -174,6 +174,18 @@ class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConne
         }
     }
 
+    public void setKeepAwakeLocked(int callingPid, int callingUid, IBinder token,
+            boolean keepAwake) {
+        try {
+            if (mActiveSession == null || token != mActiveSession.mToken) {
+                Slog.w(TAG, "setKeepAwake does not match active session");
+                return;
+            }
+            mAm.setVoiceKeepAwake(mActiveSession.mSession, keepAwake);
+        } catch (RemoteException e) {
+            throw new IllegalStateException("Unexpected remote error", e);
+        }
+    }
 
     public void finishLocked(int callingPid, int callingUid, IBinder token) {
         if (mActiveSession == null || token != mActiveSession.mToken) {

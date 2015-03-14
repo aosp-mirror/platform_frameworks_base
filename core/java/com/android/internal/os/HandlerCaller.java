@@ -164,6 +164,15 @@ public class HandlerCaller {
         return mH.obtainMessage(what, arg1, 0, args);
     }
 
+    public Message obtainMessageIIOOO(int what, int arg1, int arg2, Object arg3, Object arg4,
+            Object arg5) {
+        SomeArgs args = SomeArgs.obtain();
+        args.arg1 = arg3;
+        args.arg2 = arg4;
+        args.arg3 = arg5;
+        return mH.obtainMessage(what, arg1, arg2, args);
+    }
+
     public Message obtainMessageOO(int what, Object arg1, Object arg2) {
         SomeArgs args = SomeArgs.obtain();
         args.arg1 = arg1;

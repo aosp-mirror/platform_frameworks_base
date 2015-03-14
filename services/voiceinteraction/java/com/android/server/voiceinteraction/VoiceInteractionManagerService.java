@@ -479,6 +479,24 @@ public class VoiceInteractionManagerService extends SystemService {
         }
 
         @Override
+        public void setKeepAwake(IBinder token, boolean keepAwake) {
+            synchronized (this) {
+                if (mImpl == null) {
+                    Slog.w(TAG, "setKeepAwake without running voice interaction service");
+                    return;
+                }
+                final int callingPid = Binder.getCallingPid();
+                final int callingUid = Binder.getCallingUid();
+                final long caller = Binder.clearCallingIdentity();
+                try {
+                    mImpl.setKeepAwakeLocked(callingPid, callingUid, token, keepAwake);
+                } finally {
+                    Binder.restoreCallingIdentity(caller);
+                }
+            }
+        }
+
+        @Override
         public void finish(IBinder token) {
             synchronized (this) {
                 if (mImpl == null) {

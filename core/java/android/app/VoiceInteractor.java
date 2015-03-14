@@ -21,6 +21,8 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.os.RemoteException;
 import android.util.ArrayMap;
 import android.util.Log;
@@ -69,6 +71,7 @@ public class VoiceInteractor {
         public void executeMessage(Message msg) {
             SomeArgs args = (SomeArgs)msg.obj;
             Request request;
+            boolean complete;
             switch (msg.what) {
                 case MSG_CONFIRMATION_RESULT:
                     request = pullRequest((IVoiceInteractorRequest)args.arg1, true);
@@ -81,13 +84,28 @@ public class VoiceInteractor {
                         request.clear();
                     }
                     break;
+                case MSG_PICK_OPTION_RESULT:
+                    complete = msg.arg1 != 0;
+                    request = pullRequest((IVoiceInteractorRequest)args.arg1, complete);
+                    if (DEBUG) Log.d(TAG, "onPickOptionResult: req="
+                            + ((IVoiceInteractorRequest)args.arg1).asBinder() + "/" + request
+                            + " finished=" + complete + " selection=" + args.arg2
+                            + " result=" + args.arg3);
+                    if (request != null) {
+                        ((PickOptionRequest)request).onPickOptionResult(complete,
+                                (PickOptionRequest.Option[]) args.arg2, (Bundle) args.arg3);
+                        if (complete) {
+                            request.clear();
+                        }
+                    }
+                    break;
                 case MSG_COMPLETE_VOICE_RESULT:
                     request = pullRequest((IVoiceInteractorRequest)args.arg1, true);
                     if (DEBUG) Log.d(TAG, "onCompleteVoice: req="
                             + ((IVoiceInteractorRequest)args.arg1).asBinder() + "/" + request
                             + " result=" + args.arg1);
                     if (request != null) {
-                        ((CompleteVoiceRequest)request).onCompleteResult((Bundle) args.arg2);
+                        ((CompleteVoiceRequest)request).onCompleteResult((Bundle) args.arg1);
                         request.clear();
                     }
                     break;
@@ -95,21 +113,22 @@ public class VoiceInteractor {
                     request = pullRequest((IVoiceInteractorRequest)args.arg1, true);
                     if (DEBUG) Log.d(TAG, "onAbortVoice: req="
                             + ((IVoiceInteractorRequest)args.arg1).asBinder() + "/" + request
-                            + " result=" + args.arg1);
+                            + " result=" + args.arg2);
                     if (request != null) {
                         ((AbortVoiceRequest)request).onAbortResult((Bundle) args.arg2);
                         request.clear();
                     }
                     break;
                 case MSG_COMMAND_RESULT:
-                    request = pullRequest((IVoiceInteractorRequest)args.arg1, msg.arg1 != 0);
+                    complete = msg.arg1 != 0;
+                    request = pullRequest((IVoiceInteractorRequest)args.arg1, complete);
                     if (DEBUG) Log.d(TAG, "onCommandResult: req="
                             + ((IVoiceInteractorRequest)args.arg1).asBinder() + "/" + request
                             + " completed=" + msg.arg1 + " result=" + args.arg2);
                     if (request != null) {
                         ((CommandRequest)request).onCommandResult(msg.arg1 != 0,
                                 (Bundle) args.arg2);
-                        if (msg.arg1 != 0) {
+                        if (complete) {
                             request.clear();
                         }
                     }
@@ -129,10 +148,17 @@ public class VoiceInteractor {
 
     final IVoiceInteractorCallback.Stub mCallback = new IVoiceInteractorCallback.Stub() {
         @Override
-        public void deliverConfirmationResult(IVoiceInteractorRequest request, boolean confirmed,
+        public void deliverConfirmationResult(IVoiceInteractorRequest request, boolean finished,
                 Bundle result) {
             mHandlerCaller.sendMessage(mHandlerCaller.obtainMessageIOO(
-                    MSG_CONFIRMATION_RESULT, confirmed ? 1 : 0, request, result));
+                    MSG_CONFIRMATION_RESULT, finished ? 1 : 0, request, result));
+        }
+
+        @Override
+        public void deliverPickOptionResult(IVoiceInteractorRequest request,
+                boolean finished, PickOptionRequest.Option[] options, Bundle result) {
+            mHandlerCaller.sendMessage(mHandlerCaller.obtainMessageIOOO(
+                    MSG_PICK_OPTION_RESULT, finished ? 1 : 0, request, options, result));
         }
 
         @Override
@@ -164,17 +190,22 @@ public class VoiceInteractor {
     final ArrayMap<IBinder, Request> mActiveRequests = new ArrayMap<IBinder, Request>();
 
     static final int MSG_CONFIRMATION_RESULT = 1;
-    static final int MSG_COMPLETE_VOICE_RESULT = 2;
-    static final int MSG_ABORT_VOICE_RESULT = 3;
-    static final int MSG_COMMAND_RESULT = 4;
-    static final int MSG_CANCEL_RESULT = 5;
+    static final int MSG_PICK_OPTION_RESULT = 2;
+    static final int MSG_COMPLETE_VOICE_RESULT = 3;
+    static final int MSG_ABORT_VOICE_RESULT = 4;
+    static final int MSG_COMMAND_RESULT = 5;
+    static final int MSG_CANCEL_RESULT = 6;
 
+    /**
+     * Base class for voice interaction requests that can be submitted to the interactor.
+     * Do not instantiate this directly -- instead, use the appropriate subclass.
+     */
     public static abstract class Request {
         IVoiceInteractorRequest mRequestInterface;
         Context mContext;
         Activity mActivity;
 
-        public Request() {
+        Request() {
         }
 
         public void cancel() {
@@ -212,22 +243,25 @@ public class VoiceInteractor {
                 String packageName, IVoiceInteractorCallback callback) throws RemoteException;
     }
 
+    /**
+     * Confirms an operation with the user via the trusted system
+     * VoiceInteractionService.  This allows an Activity to complete an unsafe operation that
+     * would require the user to touch the screen when voice interaction mode is not enabled.
+     * The result of the confirmation will be returned through an asynchronous call to
+     * either {@link #onConfirmationResult(boolean, android.os.Bundle)} or
+     * {@link #onCancel()}.
+     *
+     * <p>In some cases this may be a simple yes / no confirmation or the confirmation could
+     * include context information about how the action will be completed
+     * (e.g. booking a cab might include details about how long until the cab arrives)
+     * so the user can give a confirmation.
+     */
     public static class ConfirmationRequest extends Request {
         final CharSequence mPrompt;
         final Bundle mExtras;
 
         /**
-         * Confirms an operation with the user via the trusted system
-         * VoiceInteractionService.  This allows an Activity to complete an unsafe operation that
-         * would require the user to touch the screen when voice interaction mode is not enabled.
-         * The result of the confirmation will be returned through an asynchronous call to
-         * either {@link #onConfirmationResult(boolean, android.os.Bundle)} or
-         * {@link #onCancel()}.
-         *
-         * <p>In some cases this may be a simple yes / no confirmation or the confirmation could
-         * include context information about how the action will be completed
-         * (e.g. booking a cab might include details about how long until the cab arrives)
-         * so the user can give a confirmation.
+         * Create a new confirmation request.
          * @param prompt Optional confirmation text to read to the user as the action being
          * confirmed.
          * @param extras Additional optional information.
@@ -246,19 +280,155 @@ public class VoiceInteractor {
         }
     }
 
+    /**
+     * Select a single option from multiple potential options with the user via the trusted system
+     * VoiceInteractionService. Typically, the application would present this visually as
+     * a list view to allow selecting the option by touch.
+     * The result of the confirmation will be returned through an asynchronous call to
+     * either {@link #onPickOptionResult} or {@link #onCancel()}.
+     */
+    public static class PickOptionRequest extends Request {
+        final CharSequence mPrompt;
+        final Option[] mOptions;
+        final Bundle mExtras;
+
+        /**
+         * Represents a single option that the user may select using their voice.
+         */
+        public static final class Option implements Parcelable {
+            final CharSequence mLabel;
+            ArrayList<CharSequence> mSynonyms;
+            Bundle mExtras;
+
+            /**
+             * Creates an option that a user can select with their voice by matching the label
+             * or one of several synonyms.
+             * @param label The label that will both be matched against what the user speaks
+             * and displayed visually.
+             */
+            public Option(CharSequence label) {
+                mLabel = label;
+            }
+
+            /**
+             * Add a synonym term to the option to indicate an alternative way the content
+             * may be matched.
+             * @param synonym The synonym that will be matched against what the user speaks,
+             * but not displayed.
+             */
+            public Option addSynonym(CharSequence synonym) {
+                if (mSynonyms == null) {
+                    mSynonyms = new ArrayList<>();
+                }
+                mSynonyms.add(synonym);
+                return this;
+            }
+
+            public CharSequence getLabel() {
+                return mLabel;
+            }
+
+            public int countSynonyms() {
+                return mSynonyms != null ? mSynonyms.size() : 0;
+            }
+
+            public CharSequence getSynonymAt(int index) {
+                return mSynonyms != null ? mSynonyms.get(index) : null;
+            }
+
+            /**
+             * Set optional extra information associated with this option.  Note that this
+             * method takes ownership of the supplied extras Bundle.
+             */
+            public void setExtras(Bundle extras) {
+                mExtras = extras;
+            }
+
+            /**
+             * Return any optional extras information associated with this option, or null
+             * if there is none.  Note that this method returns a reference to the actual
+             * extras Bundle in the option, so modifications to it will directly modify the
+             * extras in the option.
+             */
+            public Bundle getExtras() {
+                return mExtras;
+            }
+
+            Option(Parcel in) {
+                mLabel = in.readCharSequence();
+                mSynonyms = in.readCharSequenceList();
+                mExtras = in.readBundle();
+            }
+
+            @Override
+            public int describeContents() {
+                return 0;
+            }
+
+            @Override
+            public void writeToParcel(Parcel dest, int flags) {
+                dest.writeCharSequence(mLabel);
+                dest.writeCharSequenceList(mSynonyms);
+                dest.writeBundle(mExtras);
+            }
+
+            public static final Parcelable.Creator<Option> CREATOR
+                    = new Parcelable.Creator<Option>() {
+                public Option createFromParcel(Parcel in) {
+                    return new Option(in);
+                }
+
+                public Option[] newArray(int size) {
+                    return new Option[size];
+                }
+            };
+        };
+
+        /**
+         * Create a new pick option request.
+         * @param prompt Optional question to be spoken to the user via text to speech.
+         * @param options The set of {@link Option}s the user is selecting from.
+         * @param extras Additional optional information.
+         */
+        public PickOptionRequest(CharSequence prompt, Option[] options, Bundle extras) {
+            mPrompt = prompt;
+            mOptions = options;
+            mExtras = extras;
+        }
+
+        /**
+         * Called when a single option is confirmed or narrowed to one of several options.
+         * @param finished True if the voice interaction has finished making a selection, in
+         * which case {@code selections} contains the final result.  If false, this request is
+         * still active and you will continue to get calls on it.
+         * @param selections Either a single {@link Option} or one of several {@link Option}s the
+         * user has narrowed the choices down to.
+         * @param result Additional optional information.
+         */
+        public void onPickOptionResult(boolean finished, Option[] selections, Bundle result) {
+        }
+
+        IVoiceInteractorRequest submit(IVoiceInteractor interactor, String packageName,
+                IVoiceInteractorCallback callback) throws RemoteException {
+            return interactor.startPickOption(packageName, callback, mPrompt, mOptions, mExtras);
+        }
+    }
+
+    /**
+     * Reports that the current interaction was successfully completed with voice, so the
+     * application can report the final status to the user. When the response comes back, the
+     * voice system has handled the request and is ready to switch; at that point the
+     * application can start a new non-voice activity or finish.  Be sure when starting the new
+     * activity to use {@link android.content.Intent#FLAG_ACTIVITY_NEW_TASK
+     * Intent.FLAG_ACTIVITY_NEW_TASK} to keep the new activity out of the current voice
+     * interaction task.
+     */
     public static class CompleteVoiceRequest extends Request {
         final CharSequence mMessage;
         final Bundle mExtras;
 
         /**
-         * Reports that the current interaction was successfully completed with voice, so the
-         * application can report the final status to the user. When the response comes back, the
-         * voice system has handled the request and is ready to switch; at that point the
-         * application can start a new non-voice activity or finish.  Be sure when starting the new
-         * activity to use {@link android.content.Intent#FLAG_ACTIVITY_NEW_TASK
-         * Intent.FLAG_ACTIVITY_NEW_TASK} to keep the new activity out of the current voice
-         * interaction task.
-         *
+         * Create a new completed voice interaction request.
          * @param message Optional message to tell user about the completion status of the task.
          * @param extras Additional optional information.
          */
@@ -276,21 +446,23 @@ public class VoiceInteractor {
         }
     }
 
+    /**
+     * Reports that the current interaction can not be complete with voice, so the
+     * application will need to switch to a traditional input UI.  Applications should
+     * only use this when they need to completely bail out of the voice interaction
+     * and switch to a traditional UI.  When the response comes back, the voice
+     * system has handled the request and is ready to switch; at that point the application
+     * can start a new non-voice activity.  Be sure when starting the new activity
+     * to use {@link android.content.Intent#FLAG_ACTIVITY_NEW_TASK
+     * Intent.FLAG_ACTIVITY_NEW_TASK} to keep the new activity out of the current voice
+     * interaction task.
+     */
     public static class AbortVoiceRequest extends Request {
         final CharSequence mMessage;
         final Bundle mExtras;
 
         /**
-         * Reports that the current interaction can not be complete with voice, so the
-         * application will need to switch to a traditional input UI.  Applications should
-         * only use this when they need to completely bail out of the voice interaction
-         * and switch to a traditional UI.  When the response comes back, the voice
-         * system has handled the request and is ready to switch; at that point the application
-         * can start a new non-voice activity.  Be sure when starting the new activity
-         * to use {@link android.content.Intent#FLAG_ACTIVITY_NEW_TASK
-         * Intent.FLAG_ACTIVITY_NEW_TASK} to keep the new activity out of the current voice
-         * interaction task.
-         *
+         * Create a new voice abort request.
          * @param message Optional message to tell user about not being able to complete
          * the interaction with voice.
          * @param extras Additional optional information.
@@ -309,25 +481,27 @@ public class VoiceInteractor {
         }
     }
 
+    /**
+     * Execute an extended command using the trusted system VoiceInteractionService.
+     * This allows an Activity to request additional information from the user needed to
+     * complete an action (e.g. booking a table might have several possible times that the
+     * user could select from or an app might need the user to agree to a terms of service).
+     * The result of the confirmation will be returned through an asynchronous call to
+     * either {@link #onCommandResult(boolean, android.os.Bundle)} or
+     * {@link #onCancel()}.
+     *
+     * <p>The command is a string that describes the generic operation to be performed.
+     * The command will determine how the properties in extras are interpreted and the set of
+     * available commands is expected to grow over time.  An example might be
+     * "com.google.voice.commands.REQUEST_NUMBER_BAGS" to request the number of bags as part of
+     * airline check-in.  (This is not an actual working example.)
+     */
     public static class CommandRequest extends Request {
         final String mCommand;
         final Bundle mArgs;
 
         /**
-         * Execute a command using the trusted system VoiceInteractionService.
-         * This allows an Activity to request additional information from the user needed to
-         * complete an action (e.g. booking a table might have several possible times that the
-         * user could select from or an app might need the user to agree to a terms of service).
-         * The result of the confirmation will be returned through an asynchronous call to
-         * either {@link #onCommandResult(boolean, android.os.Bundle)} or
-         * {@link #onCancel()}.
-         *
-         * <p>The command is a string that describes the generic operation to be performed.
-         * The command will determine how the properties in extras are interpreted and the set of
-         * available commands is expected to grow over time.  An example might be
-         * "com.google.voice.commands.REQUEST_NUMBER_BAGS" to request the number of bags as part of
-         * airline check-in.  (This is not an actual working example.)
-         *
+         * Create a new generic command request.
          * @param command The desired command to perform.
          * @param args Additional arguments to control execution of the command.
          */

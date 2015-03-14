@@ -16,6 +16,7 @@
 
 package com.android.internal.app;
 
+import android.app.VoiceInteractor;
 import android.os.Bundle;
 
 import com.android.internal.app.IVoiceInteractorCallback;
@@ -27,6 +28,9 @@ import com.android.internal.app.IVoiceInteractorRequest;
 interface IVoiceInteractor {
     IVoiceInteractorRequest startConfirmation(String callingPackage,
             IVoiceInteractorCallback callback, CharSequence prompt, in Bundle extras);
+    IVoiceInteractorRequest startPickOption(String callingPackage,
+            IVoiceInteractorCallback callback, CharSequence prompt,
+            in VoiceInteractor.PickOptionRequest.Option[] options, in Bundle extras);
     IVoiceInteractorRequest startCompleteVoice(String callingPackage,
             IVoiceInteractorCallback callback, CharSequence message, in Bundle extras);
     IVoiceInteractorRequest startAbortVoice(String callingPackage,

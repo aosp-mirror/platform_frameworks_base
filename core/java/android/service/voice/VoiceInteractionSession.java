@@ -18,6 +18,7 @@ package android.service.voice;
 
 import android.app.Dialog;
 import android.app.Instrumentation;
+import android.app.VoiceInteractor;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.TypedArray;
@@ -101,6 +102,17 @@ public abstract class VoiceInteractionSession implements KeyEvent.Callback {
             mHandlerCaller.sendMessage(mHandlerCaller.obtainMessageOOOO(MSG_START_CONFIRMATION,
                     new Caller(callingPackage, Binder.getCallingUid()), request,
                     prompt, extras));
+            return request.mInterface;
+        }
+
+        @Override
+        public IVoiceInteractorRequest startPickOption(String callingPackage,
+                IVoiceInteractorCallback callback, CharSequence prompt,
+                VoiceInteractor.PickOptionRequest.Option[] options, Bundle extras) {
+            Request request = newRequest(callback);
+            mHandlerCaller.sendMessage(mHandlerCaller.obtainMessageOOOOO(MSG_START_PICK_OPTION,
+                    new Caller(callingPackage, Binder.getCallingUid()), request,
+                    prompt, options, extras));
             return request.mInterface;
         }
 
@@ -232,6 +244,20 @@ public abstract class VoiceInteractionSession implements KeyEvent.Callback {
             }
         }
 
+        public void sendPickOptionResult(boolean finished,
+                VoiceInteractor.PickOptionRequest.Option[] selections, Bundle result) {
+            try {
+                if (DEBUG) Log.d(TAG, "sendPickOptionResult: req=" + mInterface
+                        + " finished=" + finished + " selections=" + selections
+                        + " result=" + result);
+                if (finished) {
+                    finishRequest();
+                }
+                mCallback.deliverPickOptionResult(mInterface, finished, selections, result);
+            } catch (RemoteException e) {
+            }
+        }
+
         public void sendCompleteVoiceResult(Bundle result) {
             try {
                 if (DEBUG) Log.d(TAG, "sendCompleteVoiceResult: req=" + mInterface
@@ -252,12 +278,14 @@ public abstract class VoiceInteractionSession implements KeyEvent.Callback {
             }
         }
 
-        public void sendCommandResult(boolean complete, Bundle result) {
+        public void sendCommandResult(boolean finished, Bundle result) {
             try {
                 if (DEBUG) Log.d(TAG, "sendCommandResult: req=" + mInterface
                         + " result=" + result);
-                finishRequest();
-                mCallback.deliverCommandResult(mInterface, complete, result);
+                if (finished) {
+                    finishRequest();
+                }
+                mCallback.deliverCommandResult(mInterface, finished, result);
             } catch (RemoteException e) {
             }
         }
@@ -283,11 +311,12 @@ public abstract class VoiceInteractionSession implements KeyEvent.Callback {
     }
 
     static final int MSG_START_CONFIRMATION = 1;
-    static final int MSG_START_COMPLETE_VOICE = 2;
-    static final int MSG_START_ABORT_VOICE = 3;
-    static final int MSG_START_COMMAND = 4;
-    static final int MSG_SUPPORTS_COMMANDS = 5;
-    static final int MSG_CANCEL = 6;
+    static final int MSG_START_PICK_OPTION = 2;
+    static final int MSG_START_COMPLETE_VOICE = 3;
+    static final int MSG_START_ABORT_VOICE = 4;
+    static final int MSG_START_COMMAND = 5;
+    static final int MSG_SUPPORTS_COMMANDS = 6;
+    static final int MSG_CANCEL = 7;
 
     static final int MSG_TASK_STARTED = 100;
     static final int MSG_TASK_FINISHED = 101;
@@ -308,6 +337,15 @@ public abstract class VoiceInteractionSession implements KeyEvent.Callback {
                             + " prompt=" + args.arg3 + " extras=" + args.arg4);
                     onConfirm((Caller)args.arg1, (Request)args.arg2, (CharSequence)args.arg3,
                             (Bundle)args.arg4);
+                    break;
+                case MSG_START_PICK_OPTION:
+                    args = (SomeArgs)msg.obj;
+                    if (DEBUG) Log.d(TAG, "onPickOption: req=" + ((Request) args.arg2).mInterface
+                            + " prompt=" + args.arg3 + " options=" + args.arg4
+                            + " extras=" + args.arg5);
+                    onPickOption((Caller)args.arg1, (Request)args.arg2, (CharSequence)args.arg3,
+                            (VoiceInteractor.PickOptionRequest.Option[])args.arg4,
+                            (Bundle)args.arg5);
                     break;
                 case MSG_START_COMPLETE_VOICE:
                     args = (SomeArgs)msg.obj;
@@ -614,6 +652,26 @@ public abstract class VoiceInteractionSession implements KeyEvent.Callback {
     }
 
     /**
+     * Set whether this session will keep the device awake while it is running a voice
+     * activity.  By default, the system holds a wake lock for it while in this state,
+     * so that it can work even if the screen is off.  Setting this to false removes that
+     * wake lock, allowing the CPU to go to sleep.  This is typically used if the
+     * session decides it has been waiting too long for a response from the user and
+     * doesn't want to let this continue to drain the battery.
+     *
+     * <p>Passing false here will release the wake lock, and you can call later with
+     * true to re-acquire it.  It will also be automatically re-acquired for you each
+     * time you start a new voice activity task -- that is when you call
+     * {@link #startVoiceActivity}.</p>
+     */
+    public void setKeepAwake(boolean keepAwake) {
+        try {
+            mSystemService.setKeepAwake(mToken, keepAwake);
+        } catch (RemoteException e) {
+        }
+    }
+
+    /**
      * Convenience for inflating views.
      */
     public LayoutInflater getLayoutInflater() {
@@ -812,6 +870,22 @@ public abstract class VoiceInteractionSession implements KeyEvent.Callback {
      */
     public abstract void onConfirm(Caller caller, Request request, CharSequence prompt,
             Bundle extras);
+
+    /**
+     * Request for the user to pick one of N options, corresponding to a
+     * {@link android.app.VoiceInteractor.PickOptionRequest VoiceInteractor.PickOptionRequest}.
+     *
+     * @param caller Who is making the request.
+     * @param request The active request.
+     * @param prompt The prompt informing the user of what they are picking, as per
+     * {@link android.app.VoiceInteractor.PickOptionRequest VoiceInteractor.PickOptionRequest}.
+     * @param options The set of options the user is picking from, as per
+     * {@link android.app.VoiceInteractor.PickOptionRequest VoiceInteractor.PickOptionRequest}.
+     * @param extras Any additional information, as per
+     * {@link android.app.VoiceInteractor.PickOptionRequest VoiceInteractor.PickOptionRequest}.
+     */
+    public abstract void onPickOption(Caller caller, Request request, CharSequence prompt,
+            VoiceInteractor.PickOptionRequest.Option[] options, Bundle extras);
 
     /**
      * Request to complete the voice interaction session because the voice activity successfully

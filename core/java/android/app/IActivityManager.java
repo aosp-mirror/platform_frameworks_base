@@ -485,6 +485,9 @@ public interface IActivityManager extends IInterface {
     public void setDumpHeapDebugLimit(String processName, long maxMemSize) throws RemoteException;
     public void dumpHeapFinished(String path) throws RemoteException;
 
+    public void setVoiceKeepAwake(IVoiceInteractionSession session, boolean keepAwake)
+            throws RemoteException;
+
     /*
      * Private non-Binder interfaces
      */
@@ -818,4 +821,5 @@ public interface IActivityManager extends IInterface {
     int GET_LOCK_TASK_MODE_STATE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+286;
     int SET_DUMP_HEAP_DEBUG_LIMIT_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+287;
     int DUMP_HEAP_FINISHED_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+288;
+    int SET_VOICE_KEEP_AWAKE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+289;
 }

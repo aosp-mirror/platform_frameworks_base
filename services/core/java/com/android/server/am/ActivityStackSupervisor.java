@@ -84,6 +84,7 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.UserHandle;
+import android.os.WorkSource;
 import android.provider.Settings;
 import android.provider.Settings.SettingNotFoundException;
 import android.service.voice.IVoiceInteractionSession;
@@ -316,8 +317,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
     void initPowerManagement() {
         PowerManager pm = (PowerManager)mService.mContext.getSystemService(Context.POWER_SERVICE);
         mGoingToSleep = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "ActivityManager-Sleep");
-        mLaunchingActivity =
-                pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "ActivityManager-Launch");
+        mLaunchingActivity = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "*launch*");
         mLaunchingActivity.setReferenceCounted(false);
     }
 
@@ -2271,6 +2271,10 @@ public final class ActivityStackSupervisor implements DisplayListener {
                 mPendingActivityLaunches.remove(palNdx);
             }
         }
+    }
+
+    void setLaunchSource(int uid) {
+        mLaunchingActivity.setWorkSource(new WorkSource(uid));
     }
 
     void acquireLaunchWakelock() {
