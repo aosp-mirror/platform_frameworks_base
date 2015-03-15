@@ -3399,10 +3399,11 @@ public final class ProcessStats implements Parcelable {
                             + pkgList.keyAt(index) + "/" + proc.mUid
                             + " for multi-proc " + proc.mName + " version " + proc.mVersion);
                 }
+                String savedName = proc.mName;
                 proc = pkg.mProcesses.get(proc.mName);
                 if (proc == null) {
                     throw new IllegalStateException("Didn't create per-package process "
-                            + proc.mName + " in pkg " + pkg.mPackageName + "/" + pkg.mUid);
+                            + savedName + " in pkg " + pkg.mPackageName + "/" + pkg.mUid);
                 }
                 holder.state = proc;
             }
