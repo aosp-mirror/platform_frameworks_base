@@ -106,28 +106,42 @@ public abstract class Connection implements IConferenceable {
     public static final int CAPABILITY_MANAGE_CONFERENCE = 0x00000080;
 
     /**
-     * Local device supports video telephony.
+     * Local device supports receiving video.
      * @hide
      */
-    public static final int CAPABILITY_SUPPORTS_VT_LOCAL = 0x00000100;
+    public static final int CAPABILITY_SUPPORTS_VT_LOCAL_RX = 0x00000100;
 
     /**
-     * Remote device supports video telephony.
+     * Local device supports transmitting video.
      * @hide
      */
-    public static final int CAPABILITY_SUPPORTS_VT_REMOTE = 0x00000200;
+    public static final int CAPABILITY_SUPPORTS_VT_LOCAL_TX = 0x00000200;
 
     /**
-     * Connection is using high definition audio.
+     * Local device supports bidirectional video calling.
      * @hide
      */
-    public static final int CAPABILITY_HIGH_DEF_AUDIO = 0x00000400;
+    public static final int CAPABILITY_SUPPORTS_VT_LOCAL =
+            CAPABILITY_SUPPORTS_VT_LOCAL_RX | CAPABILITY_SUPPORTS_VT_LOCAL_TX;
 
     /**
-     * Connection is using WIFI.
+     * Remote device supports receiving video.
      * @hide
      */
-    public static final int CAPABILITY_WIFI = 0x00000800;
+    public static final int CAPABILITY_SUPPORTS_VT_REMOTE_RX = 0x00000400;
+
+    /**
+     * Remote device supports transmitting video.
+     * @hide
+     */
+    public static final int CAPABILITY_SUPPORTS_VT_REMOTE_TX = 0x00000800;
+
+    /**
+     * Remote device supports bidirectional video calling.
+     * @hide
+     */
+    public static final int CAPABILITY_SUPPORTS_VT_REMOTE =
+            CAPABILITY_SUPPORTS_VT_REMOTE_RX | CAPABILITY_SUPPORTS_VT_REMOTE_TX;
 
     /**
      * Connection is able to be separated from its parent {@code Conference}, if any.
@@ -146,6 +160,22 @@ public abstract class Connection implements IConferenceable {
      * @hide
      */
     public static final int CAPABILITY_GENERIC_CONFERENCE = 0x00004000;
+
+    /**
+     * Connection is using high definition audio.
+     * @hide
+     */
+    public static final int CAPABILITY_HIGH_DEF_AUDIO = 0x00008000;
+
+    /**
+     * Connection is using WIFI.
+     * @hide
+     */
+    public static final int CAPABILITY_WIFI = 0x000010000;
+
+    //**********************************************************************************************
+    // Next CAPABILITY value: 0x00020000
+    //**********************************************************************************************
 
     // Flag controlling whether PII is emitted into the logs
     private static final boolean PII_DEBUG = Log.isLoggable(android.util.Log.DEBUG);
@@ -218,8 +248,20 @@ public abstract class Connection implements IConferenceable {
         if (can(capabilities, CAPABILITY_MANAGE_CONFERENCE)) {
             builder.append(" CAPABILITY_MANAGE_CONFERENCE");
         }
+        if (can(capabilities, CAPABILITY_SUPPORTS_VT_LOCAL_RX)) {
+            builder.append(" CAPABILITY_SUPPORTS_VT_LOCAL_RX");
+        }
+        if (can(capabilities, CAPABILITY_SUPPORTS_VT_LOCAL_TX)) {
+            builder.append(" CAPABILITY_SUPPORTS_VT_LOCAL_TX");
+        }
         if (can(capabilities, CAPABILITY_SUPPORTS_VT_LOCAL)) {
             builder.append(" CAPABILITY_SUPPORTS_VT_LOCAL");
+        }
+        if (can(capabilities, CAPABILITY_SUPPORTS_VT_REMOTE_RX)) {
+            builder.append(" CAPABILITY_SUPPORTS_VT_REMOTE_RX");
+        }
+        if (can(capabilities, CAPABILITY_SUPPORTS_VT_REMOTE_TX)) {
+            builder.append(" CAPABILITY_SUPPORTS_VT_REMOTE_TX");
         }
         if (can(capabilities, CAPABILITY_SUPPORTS_VT_REMOTE)) {
             builder.append(" CAPABILITY_SUPPORTS_VT_REMOTE");
