@@ -19,10 +19,16 @@ package android.provider;
 import android.Manifest;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
+import android.content.ContentResolver;
+import android.content.ContentValues;
+import android.content.Context;
 import android.content.Intent;
 import android.database.ContentObserver;
 import android.net.Uri;
 import android.provider.CallLog.Calls;
+import android.telecom.Voicemail;
+
+import java.util.List;
 
 /**
  * The contract between the voicemail provider and applications. Contains
@@ -199,13 +205,100 @@ public class VoicemailContract {
          */
         public static final String _DATA = "_data";
 
+        // Note: PHONE_ACCOUNT_* constant values are "subscription_*" due to a historic naming
+        // that was encoded into call log databases.
+
+        /**
+         * The component name of the account in string form.
+         * <P>Type: TEXT</P>
+         */
+        public static final String PHONE_ACCOUNT_COMPONENT_NAME = "subscription_component_name";
+
+        /**
+         * The identifier of a account that is unique to a specified component.
+         * <P>Type: TEXT</P>
+         */
+        public static final String PHONE_ACCOUNT_ID = "subscription_id";
+
+        /**
+         * Flag used to indicate that local, unsynced changes are present.
+         * Currently, this is used to indicate that the voicemail was read or deleted.
+         * The value will be 1 if dirty is true, 0 if false.
+         * <P>Type: INTEGER (boolean)</P>
+         */
+        public static final String DIRTY = "dirty";
+
+        /**
+         * Flag used to indicate that the voicemail was deleted but not synced to the server.
+         * A deleted row should be ignored.
+         * The value will be 1 if deleted is true, 0 if false.
+         * <P>Type: INTEGER (boolean)</P>
+         */
+        public static final String DELETED = "deleted";
+
         /**
          * A convenience method to build voicemail URI specific to a source package by appending
          * {@link VoicemailContract#PARAM_KEY_SOURCE_PACKAGE} param to the base URI.
          */
         public static Uri buildSourceUri(String packageName) {
             return Voicemails.CONTENT_URI.buildUpon()
-                    .appendQueryParameter(PARAM_KEY_SOURCE_PACKAGE, packageName).build();
+                    .appendQueryParameter(PARAM_KEY_SOURCE_PACKAGE, packageName)
+                    .build();
+        }
+
+        /**
+         * Inserts a new voicemail into the voicemail content provider.
+         *
+         * @param context The context of the app doing the inserting
+         * @param voicemail Data to be inserted
+         * @return {@link Uri} of the newly inserted {@link Voicemail}
+         */
+        public static Uri insert(Context context, Voicemail voicemail) {
+            ContentResolver contentResolver = context.getContentResolver();
+            ContentValues contentValues = getContentValues(voicemail);
+            return contentResolver.insert(Voicemails.CONTENT_URI, contentValues);
+        }
+
+        /**
+         * Inserts a list of voicemails into the voicemail content provider.
+         *
+         * @param context The context of the app doing the inserting
+         * @param voicemails Data to be inserted
+         * @return the number of voicemails inserted
+         */
+        public static int insert(Context context, List<Voicemail> voicemails) {
+            ContentResolver contentResolver = context.getContentResolver();
+            int count = voicemails.size();
+            for (int i = 0; i < count; i++) {
+                ContentValues contentValues = getContentValues(voicemails.get(i));
+                contentResolver.insert(Voicemails.CONTENT_URI, contentValues);
+            }
+            return count;
+        }
+
+        /**
+         * Clears all voicemails accessible to this voicemail content provider for the calling
+         * package. By default, a package only has permission to delete voicemails it inserted.
+         *
+         * @return the number of voicemails deleted
+         */
+        public static int deleteAll(Context context) {
+            return context.getContentResolver().delete(
+                    buildSourceUri(context.getPackageName()), "", new String[0]);
+        }
+
+        /**
+         * Maps structured {@link Voicemail} to {@link ContentValues} in content provider.
+         */
+        private static ContentValues getContentValues(Voicemail voicemail) {
+            ContentValues contentValues = new ContentValues();
+            contentValues.put(Voicemails.DATE, String.valueOf(voicemail.getTimestampMillis()));
+            contentValues.put(Voicemails.NUMBER, voicemail.getNumber());
+            contentValues.put(Voicemails.DURATION, String.valueOf(voicemail.getDuration()));
+            contentValues.put(Voicemails.SOURCE_PACKAGE, voicemail.getSourcePackage());
+            contentValues.put(Voicemails.SOURCE_DATA, voicemail.getSourceData());
+            contentValues.put(Voicemails.IS_READ, voicemail.isRead() ? 1 : 0);
+            return contentValues;
         }
     }
 
