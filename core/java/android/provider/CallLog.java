@@ -361,16 +361,6 @@ public class CallLog {
         public static final String PHONE_ACCOUNT_ID = "subscription_id";
 
         /**
-         * Indicates that the entry will be hidden from all queries until the associated
-         * {@link android.telecom.PhoneAccount} is registered with the system.
-         * <P>Type: INTEGER</P>
-         *
-         * @Deprecated
-         * @hide
-         */
-        public static final String PHONE_ACCOUNT_HIDDEN = "phone_account_hidden";
-
-        /**
          * The address associated with the account used to place or receive the call; in string
          * form. For SIM-based calls, this is the user's own phone number.
          * <P>Type: TEXT</P>

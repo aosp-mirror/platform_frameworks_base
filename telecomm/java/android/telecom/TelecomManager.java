@@ -519,7 +519,6 @@ public class TelecomManager {
      * @see #EXTRA_PHONE_ACCOUNT_HANDLE
      * @return A list of {@code PhoneAccountHandle} objects.
      *
-     * @hide
      */
     public List<PhoneAccountHandle> getCallCapablePhoneAccounts() {
         try {
