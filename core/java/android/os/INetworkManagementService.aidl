@@ -178,6 +178,18 @@ interface INetworkManagementService
     String[] getDnsForwarders();
 
     /**
+     * Enables unidirectional packet forwarding from {@code fromIface} to
+     * {@code toIface}.
+     */
+    void startInterfaceForwarding(String fromIface, String toIface);
+
+    /**
+     * Disables unidirectional packet forwarding from {@code fromIface} to
+     * {@code toIface}.
+     */
+    void stopInterfaceForwarding(String fromIface, String toIface);
+
+    /**
      *  Enables Network Address Translation between two interfaces.
      *  The address and netmask of the external interface is used for
      *  the NAT'ed network.
