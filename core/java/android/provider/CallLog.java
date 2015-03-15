@@ -374,6 +374,7 @@ public class CallLog {
          * {@link android.telecom.PhoneAccount} is registered with the system.
          * <P>Type: INTEGER</P>
          *
+         * @Deprecated
          * @hide
          */
         public static final String PHONE_ACCOUNT_HIDDEN = "phone_account_hidden";
