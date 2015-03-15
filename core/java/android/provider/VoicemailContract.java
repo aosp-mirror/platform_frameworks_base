@@ -24,8 +24,10 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.database.ContentObserver;
+import android.database.Cursor;
 import android.net.Uri;
 import android.provider.CallLog.Calls;
+import android.telecom.PhoneAccountHandle;
 import android.telecom.Voicemail;
 
 import java.util.List;
@@ -427,6 +429,51 @@ public class VoicemailContract {
         public static Uri buildSourceUri(String packageName) {
             return Status.CONTENT_URI.buildUpon()
                     .appendQueryParameter(PARAM_KEY_SOURCE_PACKAGE, packageName).build();
+        }
+
+        /**
+         * A helper method to set the status of a voicemail source.
+         *
+         * @param context The context from the package calling the method. This will be the source.
+         * @param accountHandle The handle for the account the source is associated with.
+         * @param configurationState See {@link Status#CONFIGURATION_STATE}
+         * @param dataChannelState See {@link Status#DATA_CHANNEL_STATE}
+         * @param notificationChannelState See {@link Status#NOTIFICATION_CHANNEL_STATE}
+         */
+        public static void setStatus(Context context, PhoneAccountHandle accountHandle,
+                int configurationState, int dataChannelState, int notificationChannelState) {
+            ContentResolver contentResolver = context.getContentResolver();
+            Uri statusUri = buildSourceUri(context.getPackageName());
+            ContentValues values = new ContentValues();
+            values.put(Status.PHONE_ACCOUNT_COMPONENT_NAME,
+                    accountHandle.getComponentName().toString());
+            values.put(Status.PHONE_ACCOUNT_ID, accountHandle.getId());
+            values.put(Status.CONFIGURATION_STATE, configurationState);
+            values.put(Status.DATA_CHANNEL_STATE, dataChannelState);
+            values.put(Status.NOTIFICATION_CHANNEL_STATE, notificationChannelState);
+
+            if (isStatusPresent(contentResolver, statusUri)) {
+                contentResolver.update(statusUri, values, null, null);
+            } else {
+                contentResolver.insert(statusUri, values);
+            }
+        }
+
+        /**
+         * Determines if a voicemail source exists in the status table.
+         *
+         * @param contentResolver A content resolver constructed from the appropriate context.
+         * @param statusUri The content uri for the source.
+         * @return {@code true} if a status entry for this source exists
+         */
+        private static boolean isStatusPresent(ContentResolver contentResolver, Uri statusUri) {
+            Cursor cursor = null;
+            try {
+                cursor = contentResolver.query(statusUri, null, null, null, null);
+                return cursor != null && cursor.getCount() != 0;
+            } finally {
+                if (cursor != null) cursor.close();
+            }
         }
     }
 }
