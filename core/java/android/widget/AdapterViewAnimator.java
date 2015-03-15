@@ -403,12 +403,11 @@ public abstract class AdapterViewAnimator extends AdapterView<Adapter>
      }
 
     LayoutParams createOrReuseLayoutParams(View v) {
-        final ViewGroup.LayoutParams currentLp = v.getLayoutParams();
-        if (currentLp instanceof ViewGroup.LayoutParams) {
-            LayoutParams lp = (LayoutParams) currentLp;
-            return lp;
+        final LayoutParams currentLp = v.getLayoutParams();
+        if (currentLp != null) {
+            return currentLp;
         }
-        return new ViewGroup.LayoutParams(0, 0);
+        return new LayoutParams(0, 0);
     }
 
     void refreshChildren() {
