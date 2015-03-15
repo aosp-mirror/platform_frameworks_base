@@ -25,16 +25,13 @@ import android.net.StaticIpConfiguration;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
-import android.util.Log;
-import android.annotation.SystemApi;
 
-import java.util.Random;
-import java.util.Calendar;
 import java.util.HashMap;
 import java.util.BitSet;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashSet;
 
 /**
  * A class representing a configured Wi-Fi network, including the
@@ -254,18 +251,6 @@ public class WifiConfiguration implements Parcelable {
     public int apChannel = 0;
 
     /**
-     * Fully qualified domain name (FQDN) of AAA server or RADIUS server
-     * e.g. {@code "mail.example.com"}.
-     */
-    public String FQDN;
-    /**
-     * Network access identifier (NAI) realm, for Passpoint credential.
-     * e.g. {@code "myhost.example.com"}.
-     * @hide
-     */
-    public String naiRealm;
-
-    /**
      * Pre-shared key for use with WPA-PSK.
      * <p/>
      * When the value of this key is read, the actual key is
@@ -346,6 +331,21 @@ public class WifiConfiguration implements Parcelable {
      * certificates and other settings associated with the EAP.
      */
     public WifiEnterpriseConfig enterpriseConfig;
+
+    /**
+     * Fully qualified domain name of a passpoint configuration
+     */
+    public String FQDN;
+
+    /**
+     * Service provider name, for Passpoint credential.
+     */
+    public String providerFriendlyName;
+
+    /**
+     * Roaming Consortium Id, for Passpoint credential.
+     */
+    public HashSet<Long> roamingConsortiumIds;
 
     /**
      * @hide
@@ -926,7 +926,7 @@ public class WifiConfiguration implements Parcelable {
         SSID = null;
         BSSID = null;
         FQDN = null;
-        naiRealm = null;
+        roamingConsortiumIds = new HashSet<Long>();
         priority = 0;
         hiddenSSID = false;
         disableReason = DISABLED_UNKNOWN_REASON;
@@ -969,6 +969,17 @@ public class WifiConfiguration implements Parcelable {
             }
             if ((allowedKeyManagement.get(KeyMgmt.IEEE8021X) == false)
                     && (allowedKeyManagement.get(KeyMgmt.WPA_PSK) == false)) {
+                return false;
+            }
+        }
+
+        if (FQDN != null) {
+            /* must have a providerFriendlyName */
+            if (providerFriendlyName == null) {
+                return false;
+            }
+            /* this is passpoint configuration; it must have enterprise config */
+            if (enterpriseConfig == null) {
                 return false;
             }
         }
@@ -1117,8 +1128,9 @@ public class WifiConfiguration implements Parcelable {
             sbuf.append("- DSBLE ");
         }
         sbuf.append("ID: ").append(this.networkId).append(" SSID: ").append(this.SSID).
+                append(" PROVIDER-NAME: ").append(this.providerFriendlyName).
                 append(" BSSID: ").append(this.BSSID).append(" FQDN: ").append(this.FQDN).
-                append(" REALM: ").append(this.naiRealm).append(" PRIO: ").append(this.priority).
+                append(" PRIO: ").append(this.priority).
                 append('\n');
         if (this.numConnectionFailures > 0) {
             sbuf.append(" numConnectFailures ").append(this.numConnectionFailures).append("\n");
@@ -1477,6 +1489,8 @@ public class WifiConfiguration implements Parcelable {
         String key;
         if (allowCached && mCachedConfigKey != null) {
             key = mCachedConfigKey;
+        } else if (providerFriendlyName != null) {
+            key = FQDN + KeyMgmt.strings[KeyMgmt.WPA_EAP];
         } else {
             if (allowedKeyManagement.get(KeyMgmt.WPA_PSK)) {
                 key = SSID + KeyMgmt.strings[KeyMgmt.WPA_PSK];
@@ -1592,7 +1606,12 @@ public class WifiConfiguration implements Parcelable {
             SSID = source.SSID;
             BSSID = source.BSSID;
             FQDN = source.FQDN;
-            naiRealm = source.naiRealm;
+            roamingConsortiumIds = new HashSet<Long>();
+            for (Long roamingConsortiumId : source.roamingConsortiumIds) {
+                roamingConsortiumIds.add(roamingConsortiumId);
+            }
+
+            providerFriendlyName = source.providerFriendlyName;
             preSharedKey = source.preSharedKey;
 
             apBand = source.apBand;
@@ -1697,7 +1716,11 @@ public class WifiConfiguration implements Parcelable {
         dest.writeInt(apChannel);
         dest.writeString(autoJoinBSSID);
         dest.writeString(FQDN);
-        dest.writeString(naiRealm);
+        dest.writeString(providerFriendlyName);
+        dest.writeInt(roamingConsortiumIds.size());
+        for (Long roamingConsortiumId : roamingConsortiumIds) {
+            dest.writeLong(roamingConsortiumId);
+        }
         dest.writeString(preSharedKey);
         for (String wepKey : wepKeys) {
             dest.writeString(wepKey);
@@ -1767,7 +1790,11 @@ public class WifiConfiguration implements Parcelable {
                 config.apChannel = in.readInt();
                 config.autoJoinBSSID = in.readString();
                 config.FQDN = in.readString();
-                config.naiRealm = in.readString();
+                config.providerFriendlyName = in.readString();
+                int numRoamingConsortiumIds = in.readInt();
+                for (int i = 0; i < numRoamingConsortiumIds; i++) {
+                    config.roamingConsortiumIds.add(in.readLong());
+                }
                 config.preSharedKey = in.readString();
                 for (int i = 0; i < config.wepKeys.length; i++) {
                     config.wepKeys[i] = in.readString();
