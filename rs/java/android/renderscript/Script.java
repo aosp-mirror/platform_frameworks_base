@@ -239,8 +239,10 @@ public class Script extends BaseObj {
                            FieldPacker v, LaunchOptions sc) {
         // TODO: Is this necessary if nScriptForEach calls validate as well?
         mRS.validate();
-        for (Allocation ain : ains) {
-          mRS.validateObject(ain);
+        if (ains != null) {
+            for (Allocation ain : ains) {
+                mRS.validateObject(ain);
+            }
         }
         mRS.validateObject(aout);
 
