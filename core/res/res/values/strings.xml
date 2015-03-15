@@ -245,6 +245,12 @@
     <string name="roamingText12">Roaming Banner Off</string>
     <string name="roamingTextSearching">Searching for Service</string>
 
+    <!-- Displayed when WFC registration fails -->
+    <string name="wfcRegErrorTitle">Wi-Fi Calling</string>
+    <!-- WFC Operator Error Codes -->
+    <string-array name="wfcOperatorErrorCodes" translatable="false" />
+    <!-- WFC Operator Error Messages -->
+    <string-array name="wfcOperatorErrorMessages" />
 
     <!--
         {0} is one of "bearerServiceCode*"
