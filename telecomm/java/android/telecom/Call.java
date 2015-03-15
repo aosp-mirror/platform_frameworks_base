@@ -212,6 +212,13 @@ public final class Call {
         // Next CAPABILITY value: 0x00020000
         //******************************************************************************************
 
+        /**
+         * Indicates that the current device callback number should be shown.
+         *
+         * @hide
+         */
+        public static final int CAPABILITY_SHOW_CALLBACK_NUMBER = 0x00008000;
+
         private final Uri mHandle;
         private final int mHandlePresentation;
         private final String mCallerDisplayName;
@@ -305,6 +312,9 @@ public final class Call {
             }
             if (can(capabilities, CAPABILITY_GENERIC_CONFERENCE)) {
                 builder.append(" CAPABILITY_GENERIC_CONFERENCE");
+            }
+            if (can(capabilities, CAPABILITY_SHOW_CALLBACK_NUMBER)) {
+                builder.append(" CAPABILITY_SHOW_CALLBACK_NUMBER");
             }
             builder.append("]");
             return builder.toString();
