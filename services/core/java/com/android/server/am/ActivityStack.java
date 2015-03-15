@@ -1594,7 +1594,8 @@ final class ActivityStack {
                         "resumeTopActivityLocked: Launching home next");
                 final int returnTaskType = prevTask == null || !prevTask.isOverHomeStack() ?
                         HOME_ACTIVITY_TYPE : prevTask.getTaskToReturnTo();
-                return mStackSupervisor.resumeHomeStackTask(returnTaskType, prev, "prevFinished");
+                return isOnHomeDisplay() &&
+                        mStackSupervisor.resumeHomeStackTask(returnTaskType, prev, "prevFinished");
             }
         }
 
