@@ -587,14 +587,14 @@ public final class MediaFormat {
      * Sets the value of an integer key.
      */
     public final void setInteger(String name, int value) {
-        mMap.put(name, new Integer(value));
+        mMap.put(name, Integer.valueOf(value));
     }
 
     /**
      * Sets the value of a long key.
      */
     public final void setLong(String name, long value) {
-        mMap.put(name, new Long(value));
+        mMap.put(name, Long.valueOf(value));
     }
 
     /**
