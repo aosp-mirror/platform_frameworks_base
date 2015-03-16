@@ -230,6 +230,25 @@ public class NetworkUtils {
     }
 
     /**
+     * Convert an IPv4 netmask to a prefix length, checking that the netmask is contiguous.
+     * @param netmask as a {@code Inet4Address}.
+     * @return the network prefix length
+     * @throws IllegalArgumentException the specified netmask was not contiguous.
+     * @hide
+     */
+    public static int netmaskToPrefixLength(Inet4Address netmask) {
+        // inetAddressToInt returns an int in *network* byte order.
+        int i = Integer.reverseBytes(inetAddressToInt(netmask));
+        int prefixLength = Integer.bitCount(i);
+        int trailingZeros = Integer.numberOfTrailingZeros(i);
+        if (trailingZeros != 32 - prefixLength) {
+            throw new IllegalArgumentException("Non-contiguous netmask: " + Integer.toHexString(i));
+        }
+        return prefixLength;
+    }
+
+
+    /**
      * Create an InetAddress from a string where the string must be a standard
      * representation of a V4 or V6 address.  Avoids doing a DNS lookup on failure
      * but it will throw an IllegalArgumentException in that case.
@@ -306,6 +325,22 @@ public class NetworkUtils {
             throw new RuntimeException("getNetworkPart error - " + e.toString());
         }
         return netPart;
+    }
+
+    /**
+     * Returns the implicit netmask of an IPv4 address, as was the custom before 1993.
+     */
+    public static int getImplicitNetmask(Inet4Address address) {
+        int firstByte = address.getAddress()[0] & 0xff;  // Convert to an unsigned value.
+        if (firstByte < 128) {
+            return 8;
+        } else if (firstByte < 192) {
+            return 16;
+        } else if (firstByte < 224) {
+            return 24;
+        } else {
+            return 32;  // Will likely not end well for other reasons.
+        }
     }
 
     /**
