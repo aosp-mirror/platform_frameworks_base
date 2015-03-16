@@ -5355,8 +5355,25 @@ package android.app {
     method public void onConfirmationResult(boolean, android.os.Bundle);
   }
 
+  public static class VoiceInteractor.PickOptionRequest extends android.app.VoiceInteractor.Request {
+    ctor public VoiceInteractor.PickOptionRequest(java.lang.CharSequence, android.app.VoiceInteractor.PickOptionRequest.Option[], android.os.Bundle);
+    method public void onPickOptionResult(boolean, android.app.VoiceInteractor.PickOptionRequest.Option[], android.os.Bundle);
+  }
+
+  public static final class VoiceInteractor.PickOptionRequest.Option implements android.os.Parcelable {
+    ctor public VoiceInteractor.PickOptionRequest.Option(java.lang.CharSequence);
+    method public android.app.VoiceInteractor.PickOptionRequest.Option addSynonym(java.lang.CharSequence);
+    method public int countSynonyms();
+    method public int describeContents();
+    method public android.os.Bundle getExtras();
+    method public java.lang.CharSequence getLabel();
+    method public java.lang.CharSequence getSynonymAt(int);
+    method public void setExtras(android.os.Bundle);
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator<android.app.VoiceInteractor.PickOptionRequest.Option> CREATOR;
+  }
+
   public static abstract class VoiceInteractor.Request {
-    ctor public VoiceInteractor.Request();
     method public void cancel();
     method public android.app.Activity getActivity();
     method public android.content.Context getContext();
@@ -27895,10 +27912,12 @@ package android.service.voice {
     method public boolean onKeyLongPress(int, android.view.KeyEvent);
     method public boolean onKeyMultiple(int, int, android.view.KeyEvent);
     method public boolean onKeyUp(int, android.view.KeyEvent);
+    method public abstract void onPickOption(android.service.voice.VoiceInteractionSession.Caller, android.service.voice.VoiceInteractionSession.Request, java.lang.CharSequence, android.app.VoiceInteractor.PickOptionRequest.Option[], android.os.Bundle);
     method public void onShow(android.os.Bundle, int);
     method public void onTaskFinished(android.content.Intent, int);
     method public void onTaskStarted(android.content.Intent, int);
     method public void setContentView(android.view.View);
+    method public void setKeepAwake(boolean);
     method public void setTheme(int);
     method public void show();
     method public void showWindow();
@@ -27924,6 +27943,7 @@ package android.service.voice {
     method public void sendCommandResult(boolean, android.os.Bundle);
     method public void sendCompleteVoiceResult(android.os.Bundle);
     method public void sendConfirmResult(boolean, android.os.Bundle);
+    method public void sendPickOptionResult(boolean, android.app.VoiceInteractor.PickOptionRequest.Option[], android.os.Bundle);
   }
 
   public abstract class VoiceInteractionSessionService extends android.app.Service {

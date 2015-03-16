@@ -2440,6 +2440,16 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             reply.writeNoException();
             return true;
         }
+
+        case SET_VOICE_KEEP_AWAKE_TRANSACTION: {
+            data.enforceInterface(IActivityManager.descriptor);
+            IVoiceInteractionSession session = IVoiceInteractionSession.Stub.asInterface(
+                    data.readStrongBinder());
+            boolean keepAwake = data.readInt() != 0;
+            setVoiceKeepAwake(session, keepAwake);
+            reply.writeNoException();
+            return true;
+        }
         }
 
         return super.onTransact(code, data, reply, flags);
@@ -5653,6 +5663,20 @@ class ActivityManagerProxy implements IActivityManager
         data.writeInterfaceToken(IActivityManager.descriptor);
         data.writeString(path);
         mRemote.transact(DUMP_HEAP_FINISHED_TRANSACTION, data, reply, 0);
+        reply.readException();
+        data.recycle();
+        reply.recycle();
+    }
+
+    @Override
+    public void setVoiceKeepAwake(IVoiceInteractionSession session, boolean keepAwake)
+            throws RemoteException {
+        Parcel data = Parcel.obtain();
+        Parcel reply = Parcel.obtain();
+        data.writeInterfaceToken(IActivityManager.descriptor);
+        data.writeStrongBinder(session.asBinder());
+        data.writeInt(keepAwake ? 1 : 0);
+        mRemote.transact(SET_VOICE_KEEP_AWAKE_TRANSACTION, data, reply, 0);
         reply.readException();
         data.recycle();
         reply.recycle();

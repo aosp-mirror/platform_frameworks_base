@@ -51,6 +51,8 @@ import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.BatteryStats;
 import android.os.PersistableBundle;
+import android.os.PowerManager;
+import android.os.WorkSource;
 import android.os.storage.IMountService;
 import android.os.storage.StorageManager;
 import android.service.voice.IVoiceInteractionSession;
@@ -991,7 +993,14 @@ public final class ActivityManagerService extends ActivityManagerNative
      * Set while we are running a voice interaction.  This overrides
      * sleeping while it is active.
      */
-    private boolean mRunningVoice = false;
+    private IVoiceInteractionSession mRunningVoice;
+
+    /**
+     * We want to hold a wake lock while running a voice interaction session, since
+     * this may happen with the screen off and we need to keep the CPU running to
+     * be able to continue to interact with the user.
+     */
+    PowerManager.WakeLock mVoiceWakeLock;
 
     /**
      * State of external calls telling us if the device is awake or asleep.
@@ -2269,6 +2278,9 @@ public final class ActivityManagerService extends ActivityManagerNative
     public void initPowerManagement() {
         mStackSupervisor.initPowerManagement();
         mBatteryStatsService.initPowerManagement();
+        PowerManager pm = (PowerManager)mContext.getSystemService(Context.POWER_SERVICE);
+        mVoiceWakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "*voice*");
+        mVoiceWakeLock.setReferenceCounted(false);
     }
 
     @Override
@@ -2472,7 +2484,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             if (DEBUG_FOCUS) Slog.d(TAG, "setFocusedActivityLocked: r=" + r);
             mFocusedActivity = r;
             if (r.task != null && r.task.voiceInteractor != null) {
-                startRunningVoiceLocked();
+                startRunningVoiceLocked(r.task.voiceSession, r.info.applicationInfo.uid);
             } else {
                 finishRunningVoiceLocked();
             }
@@ -3625,6 +3637,19 @@ public final class ActivityManagerService extends ActivityManagerNative
         return mStackSupervisor.startActivityMayWait(null, callingUid, callingPackage, intent,
                 resolvedType, session, interactor, null, null, 0, startFlags, profilerInfo, null,
                 null, options, userId, null, null);
+    }
+
+    @Override
+    public void setVoiceKeepAwake(IVoiceInteractionSession session, boolean keepAwake) {
+        synchronized (this) {
+            if (mRunningVoice != null && mRunningVoice.asBinder() == session.asBinder()) {
+                if (keepAwake) {
+                    mVoiceWakeLock.acquire();
+                } else {
+                    mVoiceWakeLock.release();
+                }
+            }
+        }
     }
 
     @Override
@@ -9685,8 +9710,8 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     void finishRunningVoiceLocked() {
-        if (mRunningVoice) {
-            mRunningVoice = false;
+        if (mRunningVoice != null) {
+            mRunningVoice = null;
             updateSleepIfNeededLocked();
         }
     }
@@ -9709,7 +9734,7 @@ public final class ActivityManagerService extends ActivityManagerNative
 
     private boolean shouldSleepLocked() {
         // Resume applications while running a voice interactor.
-        if (mRunningVoice) {
+        if (mRunningVoice != null) {
             return false;
         }
 
@@ -9810,10 +9835,14 @@ public final class ActivityManagerService extends ActivityManagerNative
                 + " mSleeping=" + mSleeping);
     }
 
-    void startRunningVoiceLocked() {
-        if (!mRunningVoice) {
-            mRunningVoice = true;
-            updateSleepIfNeededLocked();
+    void startRunningVoiceLocked(IVoiceInteractionSession session, int targetUid) {
+        mVoiceWakeLock.setWorkSource(new WorkSource(targetUid));
+        if (mRunningVoice == null || mRunningVoice.asBinder() != session.asBinder()) {
+            if (mRunningVoice == null) {
+                mVoiceWakeLock.acquire();
+                updateSleepIfNeededLocked();
+            }
+            mRunningVoice = session;
         }
     }
 
@@ -12813,8 +12842,11 @@ public final class ActivityManagerService extends ActivityManagerNative
                     + PowerManagerInternal.wakefulnessToString(mWakefulness));
             pw.println("  mSleeping=" + mSleeping + " mLockScreenShown="
                     + lockScreenShownToString());
-            pw.println("  mShuttingDown=" + mShuttingDown + " mRunningVoice=" + mRunningVoice
-                    + " mTestPssMode=" + mTestPssMode);
+            pw.println("  mShuttingDown=" + mShuttingDown + " mTestPssMode=" + mTestPssMode);
+            if (mRunningVoice != null) {
+                pw.println("  mRunningVoice=" + mRunningVoice);
+                pw.println("  mVoiceWakeLock" + mVoiceWakeLock);
+            }
         }
         if (mDebugApp != null || mOrigDebugApp != null || mDebugTransient
                 || mOrigWaitForDebugger) {

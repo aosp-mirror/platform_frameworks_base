@@ -41,6 +41,13 @@
         android:text="@string/completeVoice"
         />
 
+    <Button android:id="@+id/pick"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="@string/pickVoice"
+        />
+
     <Button android:id="@+id/abort"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

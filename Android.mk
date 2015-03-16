@@ -559,6 +559,7 @@ aidl_files := \
 	frameworks/base/core/java/android/app/PendingIntent.aidl \
 	frameworks/base/core/java/android/app/AlarmManager.aidl \
 	frameworks/base/core/java/android/app/SearchableInfo.aidl \
+	frameworks/base/core/java/android/app/VoiceInteractor.aidl \
 	frameworks/base/core/java/android/app/job/JobParameters.aidl \
 	frameworks/base/core/java/android/app/job/JobInfo.aidl \
 	frameworks/base/core/java/android/appwidget/AppWidgetProviderInfo.aidl \

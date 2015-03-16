@@ -869,7 +869,7 @@ final class ActivityStack {
 
         // If we are not going to sleep, we want to ensure the device is
         // awake until the next activity is started.
-        if (!mService.isSleepingOrShuttingDown()) {
+        if (!uiSleeping && !mService.isSleepingOrShuttingDown()) {
             mStackSupervisor.acquireLaunchWakelock();
         }
 
@@ -1670,6 +1670,8 @@ final class ActivityStack {
                 mLastStartedActivity = next;
             }
         }
+
+        mStackSupervisor.setLaunchSource(next.info.applicationInfo.uid);
 
         // We need to start pausing the current activity so the top one
         // can be resumed...

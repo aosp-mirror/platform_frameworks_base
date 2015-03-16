@@ -1059,6 +1059,21 @@ public final class Parcel {
         }
     }
 
+    /**
+     * @hide
+     */
+    public final void writeCharSequenceList(ArrayList<CharSequence> val) {
+        if (val != null) {
+            int N = val.size();
+            writeInt(N);
+            for (int i=0; i<N; i++) {
+                writeCharSequence(val.get(i));
+            }
+        } else {
+            writeInt(-1);
+        }
+    }
+
     public final IBinder[] createBinderArray() {
         int N = readInt();
         if (N >= 0) {
@@ -1821,6 +1836,25 @@ public final class Parcel {
             for (int i = 0 ; i < length ; i++)
             {
                 array[i] = readCharSequence();
+            }
+        }
+
+        return array;
+    }
+
+    /**
+     * Read and return an ArrayList&lt;CharSequence&gt; object from the parcel.
+     * {@hide}
+     */
+    public final ArrayList<CharSequence> readCharSequenceList() {
+        ArrayList<CharSequence> array = null;
+
+        int length = readInt();
+        if (length >= 0) {
+            array = new ArrayList<CharSequence>(length);
+
+            for (int i = 0 ; i < length ; i++) {
+                array.add(readCharSequence());
             }
         }
 
