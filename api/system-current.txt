@@ -16414,6 +16414,9 @@ package android.media {
     field public static final java.lang.String PROPERTY_DEVICE_UNIQUE_ID = "deviceUniqueId";
     field public static final java.lang.String PROPERTY_VENDOR = "vendor";
     field public static final java.lang.String PROPERTY_VERSION = "version";
+    field public static final int REQUEST_TYPE_INITIAL = 0; // 0x0
+    field public static final int REQUEST_TYPE_RELEASE = 2; // 0x2
+    field public static final int REQUEST_TYPE_RENEWAL = 1; // 0x1
   }
 
   public final class MediaDrm.CryptoSession {
@@ -16426,6 +16429,7 @@ package android.media {
   public static final class MediaDrm.KeyRequest {
     method public byte[] getData();
     method public java.lang.String getDefaultUrl();
+    method public int getRequestType();
   }
 
   public static final class MediaDrm.MediaDrmStateException extends java.lang.IllegalStateException {

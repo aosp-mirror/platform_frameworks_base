@@ -383,11 +383,27 @@ public final class MediaDrm {
     public static final int KEY_TYPE_RELEASE = 3;
 
     /**
+     * Key request type is initial license request
+     */
+    public static final int REQUEST_TYPE_INITIAL = 0;
+
+    /**
+     * Key request type is license renewal
+     */
+    public static final int REQUEST_TYPE_RENEWAL = 1;
+
+    /**
+     * Key request type is license release
+     */
+    public static final int REQUEST_TYPE_RELEASE = 2;
+
+    /**
      * Contains the opaque data an app uses to request keys from a license server
      */
     public final static class KeyRequest {
         private byte[] mData;
         private String mDefaultUrl;
+        private int mRequestType;
 
         KeyRequest() {}
 
@@ -402,6 +418,11 @@ public final class MediaDrm {
          * server URL from other sources.
          */
         public String getDefaultUrl() { return mDefaultUrl; }
+
+        /**
+         * Get the type of the request
+         */
+        public int getRequestType() { return mRequestType; }
     };
 
     /**
