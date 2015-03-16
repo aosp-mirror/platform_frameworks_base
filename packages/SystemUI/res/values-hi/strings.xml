@@ -301,7 +301,7 @@
     <string name="interruption_level_none" msgid="3831278883136066646">"कोई नहीं"</string>
     <string name="interruption_level_priority" msgid="6517366750688942030">"प्राथमिकता"</string>
     <string name="interruption_level_all" msgid="1330581184930945764">"सभी"</string>
-    <string name="keyguard_indication_charging_time" msgid="1757251776872835768">"चार्ज हो रहा है (पूर्ण होने में <xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> शेष)"</string>
+    <string name="keyguard_indication_charging_time" msgid="1757251776872835768">"चार्ज हो रहा है (पूरा होने में <xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> बाकी)"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="7305948938141024937">"उपयोगकर्ता स्विच करें"</string>
     <string name="accessibility_multi_user_switch_switcher_with_current" msgid="8434880595284601601">"उपयोगकर्ता स्विच करें, वर्तमान उपयोगकर्ता <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
     <string name="accessibility_multi_user_switch_quick_contact" msgid="3020367729287990475">"प्रोफ़ाइल दिखाएं"</string>
