@@ -4,5 +4,6 @@
     <string name="app_name" msgid="5934709770924185752">"CaptivePortalLogin"</string>
     <string name="action_use_network" msgid="6076184727448466030">"依現況使用這個網路"</string>
     <string name="action_do_not_use_network" msgid="4577366536956516683">"不使用這個網路"</string>
-    <string name="action_bar_label" msgid="2573986763322074279">"登入網路"</string>
+    <!-- no translation found for action_bar_label (917235635415966620) -->
+    <skip />
 </resources>
