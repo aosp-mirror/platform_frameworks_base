@@ -162,11 +162,6 @@ public class HeadsUpNotificationView extends FrameLayout implements SwipeHelper.
     public void updateNotification(NotificationData.Entry headsUp, boolean alert) {
         if (DEBUG) Log.v(TAG, "updateNotification");
 
-        if (alert) {
-            mBar.scheduleHeadsUpDecay(mHeadsUpNotificationDecay);
-        }
-        invalidate();
-
         if (mHeadsUp == headsUp) {
             resetViewForHeadsup();
             // This is an in-place update.  Noting more to do.
@@ -197,9 +192,11 @@ public class HeadsUpNotificationView extends FrameLayout implements SwipeHelper.
             }
 
             mHeadsUp.setInterruption();
-
+        }
+        if (alert) {
             // Make sure the heads up window is open.
             mBar.scheduleHeadsUpOpen();
+            mBar.scheduleHeadsUpDecay(mHeadsUpNotificationDecay);
         }
     }
 
