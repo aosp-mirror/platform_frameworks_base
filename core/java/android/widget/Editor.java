@@ -1661,6 +1661,7 @@ public class Editor {
     private boolean startSelectionActionModeWithoutSelection() {
         if (mSelectionActionMode != null) {
             // Selection action mode is already started
+            // TODO: revisit invocations to minimize this case.
             return false;
         }
         ActionMode.Callback actionModeCallback = new SelectionActionModeCallback();
@@ -3334,14 +3335,10 @@ public class Editor {
         private float mIdealVerticalOffset;
         // Parent's (TextView) previous position in window
         private int mLastParentX, mLastParentY;
-        // Transient action popup window for Paste and Replace actions
-        protected ActionPopupWindow mActionPopupWindow;
         // Previous text character offset
         private int mPreviousOffset = -1;
         // Previous text character offset
         private boolean mPositionHasChanged = true;
-        // Used to delay the appearance of the action popup window
-        private Runnable mActionPopupShower;
         // Minimum touch target size for handles
         private int mMinSize;
         // Indicates the line of text that the handle is on.
@@ -3443,8 +3440,6 @@ public class Editor {
             // Make sure the offset is always considered new, even when focusing at same position
             mPreviousOffset = -1;
             positionAtCursorOffset(getCurrentCursorOffset(), false);
-
-            hideActionPopupWindow();
         }
 
         protected void dismiss() {
@@ -3457,31 +3452,6 @@ public class Editor {
             dismiss();
 
             getPositionListener().removeSubscriber(this);
-        }
-
-        void showActionPopupWindow(int delay) {
-            if (mActionPopupWindow == null) {
-                mActionPopupWindow = new ActionPopupWindow();
-            }
-            if (mActionPopupShower == null) {
-                mActionPopupShower = new Runnable() {
-                    public void run() {
-                        mActionPopupWindow.show();
-                    }
-                };
-            } else {
-                mTextView.removeCallbacks(mActionPopupShower);
-            }
-            mTextView.postDelayed(mActionPopupShower, delay);
-        }
-
-        protected void hideActionPopupWindow() {
-            if (mActionPopupShower != null) {
-                mTextView.removeCallbacks(mActionPopupShower);
-            }
-            if (mActionPopupWindow != null) {
-                mActionPopupWindow.hide();
-            }
         }
 
         public boolean isShowing() {
@@ -3684,13 +3654,9 @@ public class Editor {
             return mIsDragging;
         }
 
-        void onHandleMoved() {
-            hideActionPopupWindow();
-        }
+        void onHandleMoved() {}
 
-        public void onDetached() {
-            hideActionPopupWindow();
-        }
+        public void onDetached() {}
     }
 
     private class InsertionHandleView extends HandleView {
@@ -3918,10 +3884,6 @@ public class Editor {
             }
         }
 
-        public ActionPopupWindow getActionPopupWindow() {
-            return mActionPopupWindow;
-        }
-
         @Override
         public boolean onTouchEvent(MotionEvent event) {
             boolean superResult = super.onTouchEvent(event);
@@ -4020,10 +3982,6 @@ public class Editor {
                 }
                 positionAtCursorOffset(offset, false);
             }
-        }
-
-        public void setActionPopupWindow(ActionPopupWindow actionPopupWindow) {
-            mActionPopupWindow = actionPopupWindow;
         }
 
         @Override
@@ -4153,11 +4111,6 @@ public class Editor {
 
             mStartHandle.show();
             mEndHandle.show();
-
-            // Make sure both left and right handles share the same ActionPopupWindow (so that
-            // moving any of the handles hides the action popup).
-            mStartHandle.showActionPopupWindow(DELAY_BEFORE_REPLACE_ACTION);
-            mEndHandle.setActionPopupWindow(mStartHandle.getActionPopupWindow());
 
             hideInsertionPointCursorController();
         }
