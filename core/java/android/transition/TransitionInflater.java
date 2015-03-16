@@ -16,6 +16,7 @@
 
 package android.transition;
 
+import android.annotation.TransitionRes;
 import com.android.internal.R;
 
 import org.xmlpull.v1.XmlPullParser;
@@ -71,7 +72,8 @@ public class TransitionInflater {
      * @throws android.content.res.Resources.NotFoundException when the
      * transition cannot be loaded
      */
-    public Transition inflateTransition(int resource) {
+    public Transition inflateTransition(@TransitionRes int resource) {
+        //noinspection ResourceType
         XmlResourceParser parser =  mContext.getResources().getXml(resource);
         try {
             return createTransitionFromXml(parser, Xml.asAttributeSet(parser), null);
@@ -98,7 +100,9 @@ public class TransitionInflater {
      * @throws android.content.res.Resources.NotFoundException when the
      * transition manager cannot be loaded
      */
-    public TransitionManager inflateTransitionManager(int resource, ViewGroup sceneRoot) {
+    public TransitionManager inflateTransitionManager(@TransitionRes int resource,
+            ViewGroup sceneRoot) {
+        //noinspection ResourceType
         XmlResourceParser parser =  mContext.getResources().getXml(resource);
         try {
             return createTransitionManagerFromXml(parser, Xml.asAttributeSet(parser), sceneRoot);
