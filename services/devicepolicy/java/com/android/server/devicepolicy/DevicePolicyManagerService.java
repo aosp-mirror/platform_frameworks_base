@@ -3527,8 +3527,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
     /**
      * Hook to low-levels:  Reporting the current status of encryption.
-     * @return A value such as {@link DevicePolicyManager#ENCRYPTION_STATUS_UNSUPPORTED} or
-     * {@link DevicePolicyManager#ENCRYPTION_STATUS_INACTIVE} or
+     * @return A value such as {@link DevicePolicyManager#ENCRYPTION_STATUS_UNSUPPORTED},
+     * {@link DevicePolicyManager#ENCRYPTION_STATUS_INACTIVE},
+     * {@link DevicePolicyManager#ENCRYPTION_STATUS_ACTIVE_DEFAULT_KEY}, or
      * {@link DevicePolicyManager#ENCRYPTION_STATUS_ACTIVE}.
      */
     private int getEncryptionStatus() {
@@ -3538,7 +3539,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             try {
                 return LockPatternUtils.isDeviceEncrypted()
                         ? DevicePolicyManager.ENCRYPTION_STATUS_ACTIVE
-                        : DevicePolicyManager.ENCRYPTION_STATUS_INACTIVE;
+                        : DevicePolicyManager.ENCRYPTION_STATUS_ACTIVE_DEFAULT_KEY;
             } finally {
                 Binder.restoreCallingIdentity(token);
             }
