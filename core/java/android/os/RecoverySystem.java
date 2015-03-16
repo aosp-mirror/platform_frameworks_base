@@ -513,5 +513,5 @@ public class RecoverySystem {
         return arg;
     }
 
-    private void RecoverySystem() { }  // Do not instantiate
+    private RecoverySystem() { }  // Do not instantiate
 }
