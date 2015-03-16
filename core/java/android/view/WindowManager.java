@@ -1989,7 +1989,8 @@ public interface WindowManager extends ViewManager {
             if (userActivityTimeout >= 0) {
                 sb.append(" userActivityTimeout=").append(userActivityTimeout);
             }
-            if (!surfaceInsets.equals(Insets.NONE) || hasManualSurfaceInsets) {
+            if (surfaceInsets.left != 0 || surfaceInsets.top != 0 || surfaceInsets.right != 0 ||
+                    surfaceInsets.bottom != 0 || hasManualSurfaceInsets) {
                 sb.append(" surfaceInsets=").append(surfaceInsets);
                 if (hasManualSurfaceInsets) {
                     sb.append(" (manual)");
