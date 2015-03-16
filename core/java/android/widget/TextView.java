@@ -2644,94 +2644,92 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     /**
+     * Sets the text appearance from the specified style resource.
+     * <p>
+     * Use a framework-defined {@code TextAppearance} style like
+     * {@link android.R.style#TextAppearance_Material_Body1 @android:style/TextAppearance.Material.Body1}
+     * or see {@link android.R.styleable#TextAppearance TextAppearance} for the
+     * set of attributes that can be used in a custom style.
+     *
+     * @param resId the resource identifier of the style to apply
+     * @attr ref android.R.styleable#TextView_textAppearance
+     */
+    @SuppressWarnings("deprecation")
+    public void setTextAppearance(@StyleRes int resId) {
+        setTextAppearance(mContext, resId);
+    }
+
+    /**
      * Sets the text color, size, style, hint color, and highlight color
      * from the specified TextAppearance resource.
+     *
+     * @deprecated Use {@link #setTextAppearance(int)} instead.
      */
-    public void setTextAppearance(Context context, @StyleRes int resid) {
-        TypedArray appearance =
-            context.obtainStyledAttributes(resid,
-                                           com.android.internal.R.styleable.TextAppearance);
+    @Deprecated
+    public void setTextAppearance(Context context, @StyleRes int resId) {
+        final TypedArray ta = context.obtainStyledAttributes(resId, R.styleable.TextAppearance);
 
-        int color;
-        ColorStateList colors;
-        int ts;
-
-        color = appearance.getColor(
-                com.android.internal.R.styleable.TextAppearance_textColorHighlight, 0);
-        if (color != 0) {
-            setHighlightColor(color);
+        final int textColorHighlight = ta.getColor(
+                R.styleable.TextAppearance_textColorHighlight, 0);
+        if (textColorHighlight != 0) {
+            setHighlightColor(textColorHighlight);
         }
 
-        colors = appearance.getColorStateList(com.android.internal.R.styleable.
-                                              TextAppearance_textColor);
-        if (colors != null) {
-            setTextColor(colors);
+        final ColorStateList textColor = ta.getColorStateList(R.styleable.TextAppearance_textColor);
+        if (textColor != null) {
+            setTextColor(textColor);
         }
 
-        ts = appearance.getDimensionPixelSize(com.android.internal.R.styleable.
-                                              TextAppearance_textSize, 0);
-        if (ts != 0) {
-            setRawTextSize(ts);
+        final int textSize = ta.getDimensionPixelSize(R.styleable.TextAppearance_textSize, 0);
+        if (textSize != 0) {
+            setRawTextSize(textSize);
         }
 
-        colors = appearance.getColorStateList(com.android.internal.R.styleable.
-                                              TextAppearance_textColorHint);
-        if (colors != null) {
-            setHintTextColor(colors);
+        final ColorStateList textColorHint = ta.getColorStateList(
+                R.styleable.TextAppearance_textColorHint);
+        if (textColorHint != null) {
+            setHintTextColor(textColorHint);
         }
 
-        colors = appearance.getColorStateList(com.android.internal.R.styleable.
-                                              TextAppearance_textColorLink);
-        if (colors != null) {
-            setLinkTextColor(colors);
+        final ColorStateList textColorLink = ta.getColorStateList(
+                R.styleable.TextAppearance_textColorLink);
+        if (textColorLink != null) {
+            setLinkTextColor(textColorLink);
         }
 
-        String familyName;
-        int typefaceIndex, styleIndex;
+        final String fontFamily = ta.getString(R.styleable.TextAppearance_fontFamily);
+        final int typefaceIndex = ta.getInt(R.styleable.TextAppearance_typeface, -1);
+        final int styleIndex = ta.getInt(R.styleable.TextAppearance_textStyle, -1);
+        setTypefaceFromAttrs(fontFamily, typefaceIndex, styleIndex);
 
-        familyName = appearance.getString(com.android.internal.R.styleable.
-                                          TextAppearance_fontFamily);
-        typefaceIndex = appearance.getInt(com.android.internal.R.styleable.
-                                          TextAppearance_typeface, -1);
-        styleIndex = appearance.getInt(com.android.internal.R.styleable.
-                                       TextAppearance_textStyle, -1);
-
-        setTypefaceFromAttrs(familyName, typefaceIndex, styleIndex);
-
-        final int shadowcolor = appearance.getInt(
-                com.android.internal.R.styleable.TextAppearance_shadowColor, 0);
-        if (shadowcolor != 0) {
-            final float dx = appearance.getFloat(
-                    com.android.internal.R.styleable.TextAppearance_shadowDx, 0);
-            final float dy = appearance.getFloat(
-                    com.android.internal.R.styleable.TextAppearance_shadowDy, 0);
-            final float r = appearance.getFloat(
-                    com.android.internal.R.styleable.TextAppearance_shadowRadius, 0);
-
-            setShadowLayer(r, dx, dy, shadowcolor);
+        final int shadowColor = ta.getInt(R.styleable.TextAppearance_shadowColor, 0);
+        if (shadowColor != 0) {
+            final float dx = ta.getFloat(R.styleable.TextAppearance_shadowDx, 0);
+            final float dy = ta.getFloat(R.styleable.TextAppearance_shadowDy, 0);
+            final float r = ta.getFloat(R.styleable.TextAppearance_shadowRadius, 0);
+            setShadowLayer(r, dx, dy, shadowColor);
         }
 
-        if (appearance.getBoolean(com.android.internal.R.styleable.TextAppearance_textAllCaps,
-                false)) {
+        if (ta.getBoolean(R.styleable.TextAppearance_textAllCaps, false)) {
             setTransformationMethod(new AllCapsTransformationMethod(getContext()));
         }
 
-        if (appearance.hasValue(com.android.internal.R.styleable.TextAppearance_elegantTextHeight)) {
-            setElegantTextHeight(appearance.getBoolean(
-                com.android.internal.R.styleable.TextAppearance_elegantTextHeight, false));
+        if (ta.hasValue(R.styleable.TextAppearance_elegantTextHeight)) {
+            setElegantTextHeight(ta.getBoolean(
+                R.styleable.TextAppearance_elegantTextHeight, false));
         }
 
-        if (appearance.hasValue(com.android.internal.R.styleable.TextAppearance_letterSpacing)) {
-            setLetterSpacing(appearance.getFloat(
-                com.android.internal.R.styleable.TextAppearance_letterSpacing, 0));
+        if (ta.hasValue(R.styleable.TextAppearance_letterSpacing)) {
+            setLetterSpacing(ta.getFloat(
+                R.styleable.TextAppearance_letterSpacing, 0));
         }
 
-        if (appearance.hasValue(com.android.internal.R.styleable.TextAppearance_fontFeatureSettings)) {
-            setFontFeatureSettings(appearance.getString(
-                com.android.internal.R.styleable.TextAppearance_fontFeatureSettings));
+        if (ta.hasValue(R.styleable.TextAppearance_fontFeatureSettings)) {
+            setFontFeatureSettings(ta.getString(
+                R.styleable.TextAppearance_fontFeatureSettings));
         }
 
-        appearance.recycle();
+        ta.recycle();
     }
 
     /**
