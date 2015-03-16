@@ -254,15 +254,14 @@ public final class ActivityManagerService extends ActivityManagerNative
     private static final String TAG_BACKUP = TAG + POSTFIX_BACKUP;
     private static final String TAG_BROADCAST = TAG + POSTFIX_BROADCAST;
     private static final String TAG_CLEANUP = TAG + POSTFIX_CLEANUP;
+    private static final String TAG_CONFIGURATION = TAG + POSTFIX_CONFIGURATION;
+    private static final String TAG_FOCUS = TAG + POSTFIX_FOCUS;
+    private static final String TAG_IMMERSIVE = TAG + POSTFIX_IMMERSIVE;
+    private static final String TAG_LRU = TAG + POSTFIX_LRU;
     private static final String TAG_MU = TAG + POSTFIX_MU;
+    private static final String TAG_OOM_ADJ = TAG + POSTFIX_OOM_ADJ;
 
     // TODO(ogunwale): Migrate all the constants below to use ActivityManagerDebugConfig class.
-    static final boolean DEBUG_CONFIGURATION = DEBUG_ALL || false;
-    static final boolean DEBUG_FOCUS = false;
-    static final boolean DEBUG_IMMERSIVE = DEBUG_ALL || false;
-    static final boolean DEBUG_MU = DEBUG_ALL || false;
-    static final boolean DEBUG_OOM_ADJ = DEBUG_ALL || false;
-    static final boolean DEBUG_LRU = DEBUG_ALL || false;
     static final boolean DEBUG_PAUSE = DEBUG_ALL || false;
     static final boolean DEBUG_POWER = DEBUG_ALL || false;
     static final boolean DEBUG_POWER_QUICK = DEBUG_POWER || false;
@@ -283,8 +282,6 @@ public final class ActivityManagerService extends ActivityManagerNative
     static final boolean DEBUG_PSS = DEBUG_ALL || false;
     static final boolean DEBUG_LOCKSCREEN = DEBUG_ALL || false;
     static final boolean DEBUG_RECENTS = DEBUG_ALL || false;
-    static final boolean VALIDATE_TOKENS = false;
-    static final boolean SHOW_ACTIVITY_START_TIME = true;
 
     // Control over CPU and battery monitoring.
     static final long BATTERY_STATS_TIME = 30*60*1000;      // write battery stats every 30 minutes.
@@ -1705,10 +1702,9 @@ public final class ActivityManagerService extends ActivityManagerNative
             case IMMERSIVE_MODE_LOCK_MSG: {
                 final boolean nextState = (msg.arg1 != 0);
                 if (mUpdateLock.isHeld() != nextState) {
-                    if (DEBUG_IMMERSIVE) {
-                        final ActivityRecord r = (ActivityRecord) msg.obj;
-                        Slog.d(TAG, "Applying new update lock state '" + nextState + "' for " + r);
-                    }
+                    if (DEBUG_IMMERSIVE) Slog.d(TAG_IMMERSIVE,
+                            "Applying new update lock state '" + nextState
+                            + "' for " + (ActivityRecord)msg.obj);
                     if (nextState) {
                         mUpdateLock.acquire();
                     } else {
@@ -2481,7 +2477,7 @@ public final class ActivityManagerService extends ActivityManagerNative
 
     final void setFocusedActivityLocked(ActivityRecord r, String reason) {
         if (r != null && mFocusedActivity != r) {
-            if (DEBUG_FOCUS) Slog.d(TAG, "setFocusedActivityLocked: r=" + r);
+            if (DEBUG_FOCUS) Slog.d(TAG_FOCUS, "setFocusedActivityLocked: r=" + r);
             mFocusedActivity = r;
             if (r.task != null && r.task.voiceInteractor != null) {
                 startRunningVoiceLocked(r.task.voiceSession, r.info.applicationInfo.uid);
@@ -2505,7 +2501,7 @@ public final class ActivityManagerService extends ActivityManagerNative
 
     @Override
     public void setFocusedStack(int stackId) {
-        if (DEBUG_FOCUS) Slog.d(TAG, "setFocusedStack: stackId=" + stackId);
+        if (DEBUG_FOCUS) Slog.d(TAG_FOCUS, "setFocusedStack: stackId=" + stackId);
         synchronized (ActivityManagerService.this) {
             ActivityStack stack = mStackSupervisor.getStack(stackId);
             if (stack != null) {
@@ -2587,7 +2583,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         if (index > 0) {
             index--;
         }
-        if (DEBUG_LRU) Slog.d(TAG, "Moving dep from " + lrui + " to " + index
+        if (DEBUG_LRU) Slog.d(TAG_LRU, "Moving dep from " + lrui + " to " + index
                 + " in LRU list: " + app);
         mLruProcesses.add(index, app);
         return index;
@@ -2633,13 +2629,13 @@ public final class ActivityManagerService extends ActivityManagerNative
         if (hasActivity) {
             final int N = mLruProcesses.size();
             if (N > 0 && mLruProcesses.get(N-1) == app) {
-                if (DEBUG_LRU) Slog.d(TAG, "Not moving, already top activity: " + app);
+                if (DEBUG_LRU) Slog.d(TAG_LRU, "Not moving, already top activity: " + app);
                 return;
             }
         } else {
             if (mLruProcessServiceStart > 0
                     && mLruProcesses.get(mLruProcessServiceStart-1) == app) {
-                if (DEBUG_LRU) Slog.d(TAG, "Not moving, already top other: " + app);
+                if (DEBUG_LRU) Slog.d(TAG_LRU, "Not moving, already top other: " + app);
                 return;
             }
         }
@@ -2649,7 +2645,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         if (app.persistent && lrui >= 0) {
             // We don't care about the position of persistent processes, as long as
             // they are in the list.
-            if (DEBUG_LRU) Slog.d(TAG, "Not moving, persistent: " + app);
+            if (DEBUG_LRU) Slog.d(TAG_LRU, "Not moving, persistent: " + app);
             return;
         }
 
@@ -2718,27 +2714,29 @@ public final class ActivityManagerService extends ActivityManagerNative
         int nextIndex;
         if (hasActivity) {
             final int N = mLruProcesses.size();
-            if (app.activities.size() == 0 && mLruProcessActivityStart < (N-1)) {
+            if (app.activities.size() == 0 && mLruProcessActivityStart < (N - 1)) {
                 // Process doesn't have activities, but has clients with
                 // activities...  move it up, but one below the top (the top
                 // should always have a real activity).
-                if (DEBUG_LRU) Slog.d(TAG, "Adding to second-top of LRU activity list: " + app);
-                mLruProcesses.add(N-1, app);
+                if (DEBUG_LRU) Slog.d(TAG_LRU,
+                        "Adding to second-top of LRU activity list: " + app);
+                mLruProcesses.add(N - 1, app);
                 // To keep it from spamming the LRU list (by making a bunch of clients),
                 // we will push down any other entries owned by the app.
                 final int uid = app.info.uid;
-                for (int i=N-2; i>mLruProcessActivityStart; i--) {
+                for (int i = N - 2; i > mLruProcessActivityStart; i--) {
                     ProcessRecord subProc = mLruProcesses.get(i);
                     if (subProc.info.uid == uid) {
                         // We want to push this one down the list.  If the process after
                         // it is for the same uid, however, don't do so, because we don't
                         // want them internally to be re-ordered.
-                        if (mLruProcesses.get(i-1).info.uid != uid) {
-                            if (DEBUG_LRU) Slog.d(TAG, "Pushing uid " + uid + " swapping at " + i
-                                    + ": " + mLruProcesses.get(i) + " : " + mLruProcesses.get(i-1));
+                        if (mLruProcesses.get(i - 1).info.uid != uid) {
+                            if (DEBUG_LRU) Slog.d(TAG_LRU,
+                                    "Pushing uid " + uid + " swapping at " + i + ": "
+                                    + mLruProcesses.get(i) + " : " + mLruProcesses.get(i - 1));
                             ProcessRecord tmp = mLruProcesses.get(i);
-                            mLruProcesses.set(i, mLruProcesses.get(i-1));
-                            mLruProcesses.set(i-1, tmp);
+                            mLruProcesses.set(i, mLruProcesses.get(i - 1));
+                            mLruProcesses.set(i - 1, tmp);
                             i--;
                         }
                     } else {
@@ -2748,13 +2746,13 @@ public final class ActivityManagerService extends ActivityManagerNative
                 }
             } else {
                 // Process has activities, put it at the very tipsy-top.
-                if (DEBUG_LRU) Slog.d(TAG, "Adding to top of LRU activity list: " + app);
+                if (DEBUG_LRU) Slog.d(TAG_LRU, "Adding to top of LRU activity list: " + app);
                 mLruProcesses.add(app);
             }
             nextIndex = mLruProcessServiceStart;
         } else if (hasService) {
             // Process has services, put it at the top of the service list.
-            if (DEBUG_LRU) Slog.d(TAG, "Adding to top of LRU service list: " + app);
+            if (DEBUG_LRU) Slog.d(TAG_LRU, "Adding to top of LRU service list: " + app);
             mLruProcesses.add(mLruProcessActivityStart, app);
             nextIndex = mLruProcessServiceStart;
             mLruProcessActivityStart++;
@@ -2765,7 +2763,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 // If there is a client, don't allow the process to be moved up higher
                 // in the list than that client.
                 int clientIndex = mLruProcesses.lastIndexOf(client);
-                if (DEBUG_LRU && clientIndex < 0) Slog.d(TAG, "Unknown client " + client
+                if (DEBUG_LRU && clientIndex < 0) Slog.d(TAG_LRU, "Unknown client " + client
                         + " when updating " + app);
                 if (clientIndex <= lrui) {
                     // Don't allow the client index restriction to push it down farther in the
@@ -2776,7 +2774,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                     index = clientIndex;
                 }
             }
-            if (DEBUG_LRU) Slog.d(TAG, "Adding at " + index + " of LRU list: " + app);
+            if (DEBUG_LRU) Slog.d(TAG_LRU, "Adding at " + index + " of LRU list: " + app);
             mLruProcesses.add(index, app);
             nextIndex = index-1;
             mLruProcessActivityStart++;
@@ -5599,7 +5597,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             if (app.instrumentationClass != null) {
                 ensurePackageDexOpt(app.instrumentationClass.getPackageName());
             }
-            if (DEBUG_CONFIGURATION) Slog.v(TAG, "Binding proc "
+            if (DEBUG_CONFIGURATION) Slog.v(TAG_CONFIGURATION, "Binding proc "
                     + processName + " with config " + mConfiguration);
             ApplicationInfo appInfo = app.instrumentationInfo != null
                     ? app.instrumentationInfo : app.info;
@@ -6137,8 +6135,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             int callingUid, int userId, IBinder token, String resultWho,
             int requestCode, Intent[] intents, String[] resolvedTypes, int flags,
             Bundle options) {
-        if (DEBUG_MU)
-            Slog.v(TAG_MU, "getIntentSenderLocked(): uid=" + callingUid);
+        if (DEBUG_MU) Slog.v(TAG_MU, "getIntentSenderLocked(): uid=" + callingUid);
         ActivityRecord activity = null;
         if (type == ActivityManager.INTENT_SENDER_ACTIVITY_RESULT) {
             activity = ActivityRecord.isInStackLocked(token);
@@ -8616,8 +8613,8 @@ public final class ActivityManagerService extends ActivityManagerNative
                         STOCK_PM_FLAGS | PackageManager.GET_URI_PERMISSION_PATTERNS);
         } catch (RemoteException ex) {
         }
-        if (DEBUG_MU)
-            Slog.v(TAG_MU, "generateApplicationProvidersLocked, app.info.uid = " + app.uid);
+        if (DEBUG_MU) Slog.v(TAG_MU,
+                "generateApplicationProvidersLocked, app.info.uid = " + app.uid);
         int userId = app.userId;
         if (providers != null) {
             int N = providers.size();
@@ -8644,8 +8641,8 @@ public final class ActivityManagerService extends ActivityManagerNative
                     cpr = new ContentProviderRecord(this, cpi, app.info, comp, singleton);
                     mProviderMap.putProviderByClass(comp, cpr);
                 }
-                if (DEBUG_MU)
-                    Slog.v(TAG_MU, "generateApplicationProvidersLocked, cpi.uid = " + cpr.uid);
+                if (DEBUG_MU) Slog.v(TAG_MU,
+                        "generateApplicationProvidersLocked, cpi.uid = " + cpr.uid);
                 app.pubProviders.put(cpi.name, cpr);
                 if (!cpi.multiprocess || !"android".equals(cpi.packageName)) {
                     // Don't add this if it is a platform component that is marked
@@ -9174,10 +9171,9 @@ public final class ActivityManagerService extends ActivityManagerNative
                     return null;
                 }
                 try {
-                    if (DEBUG_MU) {
-                        Slog.v(TAG_MU, "Waiting to start provider " + cpr + " launchingApp="
-                                + cpr.launchingApp);
-                    }
+                    if (DEBUG_MU) Slog.v(TAG_MU,
+                            "Waiting to start provider " + cpr
+                            + " launchingApp=" + cpr.launchingApp);
                     if (conn != null) {
                         conn.waiting = true;
                     }
@@ -9299,8 +9295,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         enforceNotIsolatedCaller("publishContentProviders");
         synchronized (this) {
             final ProcessRecord r = getRecordForAppLocked(caller);
-            if (DEBUG_MU)
-                Slog.v(TAG_MU, "ProcessRecord uid = " + r.uid);
+            if (DEBUG_MU) Slog.v(TAG_MU, "ProcessRecord uid = " + r.uid);
             if (r == null) {
                 throw new SecurityException(
                         "Unable to find app for caller " + caller
@@ -9317,8 +9312,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                     continue;
                 }
                 ContentProviderRecord dst = r.pubProviders.get(src.info.name);
-                if (DEBUG_MU)
-                    Slog.v(TAG_MU, "ContentProviderRecord uid = " + dst.uid);
+                if (DEBUG_MU) Slog.v(TAG_MU, "ContentProviderRecord uid = " + dst.uid);
                 if (dst != null) {
                     ComponentName comp = new ComponentName(dst.info.packageName, dst.info.name);
                     mProviderMap.putProviderByClass(comp, dst);
@@ -10400,9 +10394,7 @@ public final class ActivityManagerService extends ActivityManagerNative
 
             // update associated state if we're frontmost
             if (r == mFocusedActivity) {
-                if (DEBUG_IMMERSIVE) {
-                    Slog.d(TAG, "Frontmost changed immersion: "+ r);
-                }
+                if (DEBUG_IMMERSIVE) Slog.d(TAG_IMMERSIVE, "Frontmost changed immersion: "+ r);
                 applyUpdateLockStateLocked(r);
             }
         }
@@ -10751,7 +10743,8 @@ public final class ActivityManagerService extends ActivityManagerNative
             // This happens before any activities are started, so we can
             // change mConfiguration in-place.
             updateConfigurationLocked(configuration, null, false, true);
-            if (DEBUG_CONFIGURATION) Slog.v(TAG, "Initial config: " + mConfiguration);
+            if (DEBUG_CONFIGURATION) Slog.v(TAG_CONFIGURATION,
+                    "Initial config: " + mConfiguration);
         }
     }
 
@@ -15094,10 +15087,9 @@ public final class ActivityManagerService extends ActivityManagerNative
             result = UserHandle.isSameApp(aInfo.uid, Process.PHONE_UID)
                     || (aInfo.flags & ApplicationInfo.FLAG_PERSISTENT) != 0;
         }
-        if (DEBUG_MU) {
-            Slog.v(TAG, "isSingleton(" + componentProcessName + ", " + aInfo
-                    + ", " + className + ", 0x" + Integer.toHexString(flags) + ") = " + result);
-        }
+        if (DEBUG_MU) Slog.v(TAG_MU,
+                "isSingleton(" + componentProcessName + ", " + aInfo + ", " + className + ", 0x"
+                + Integer.toHexString(flags) + ") = " + result);
         return result;
     }
 
@@ -16484,9 +16476,8 @@ public final class ActivityManagerService extends ActivityManagerNative
             Configuration newConfig = new Configuration(mConfiguration);
             changes = newConfig.updateFrom(values);
             if (changes != 0) {
-                if (DEBUG_SWITCH || DEBUG_CONFIGURATION) {
-                    Slog.i(TAG, "Updating configuration to: " + values);
-                }
+                if (DEBUG_SWITCH || DEBUG_CONFIGURATION) Slog.i(TAG_CONFIGURATION,
+                        "Updating configuration to: " + values);
 
                 EventLog.writeEvent(EventLogTags.CONFIGURATION_CHANGED, changes);
 
@@ -16537,7 +16528,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                     ProcessRecord app = mLruProcesses.get(i);
                     try {
                         if (app.thread != null) {
-                            if (DEBUG_CONFIGURATION) Slog.v(TAG, "Sending to proc "
+                            if (DEBUG_CONFIGURATION) Slog.v(TAG_CONFIGURATION, "Sending to proc "
                                     + app.processName + " new config " + mConfiguration);
                             app.thread.scheduleConfigurationChanged(configCopy);
                         }
@@ -17740,15 +17731,15 @@ public final class ActivityManagerService extends ActivityManagerNative
 
         if (app.curAdj != app.setAdj) {
             ProcessList.setOomAdj(app.pid, app.info.uid, app.curAdj);
-            if (DEBUG_SWITCH || DEBUG_OOM_ADJ) Slog.v(
-                TAG, "Set " + app.pid + " " + app.processName +
-                " adj " + app.curAdj + ": " + app.adjType);
+            if (DEBUG_SWITCH || DEBUG_OOM_ADJ) Slog.v(TAG_OOM_ADJ,
+                    "Set " + app.pid + " " + app.processName + " adj " + app.curAdj + ": "
+                    + app.adjType);
             app.setAdj = app.curAdj;
         }
 
         if (app.setSchedGroup != app.curSchedGroup) {
             app.setSchedGroup = app.curSchedGroup;
-            if (DEBUG_SWITCH || DEBUG_OOM_ADJ) Slog.v(TAG,
+            if (DEBUG_SWITCH || DEBUG_OOM_ADJ) Slog.v(TAG_OOM_ADJ,
                     "Setting process group of " + app.processName
                     + " to " + app.curSchedGroup);
             if (app.waitingToKill != null &&
@@ -17832,7 +17823,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             }
         }
         if (app.setProcState != app.curProcState) {
-            if (DEBUG_SWITCH || DEBUG_OOM_ADJ) Slog.v(TAG,
+            if (DEBUG_SWITCH || DEBUG_OOM_ADJ) Slog.v(TAG_OOM_ADJ,
                     "Proc state change of " + app.processName
                     + " to " + app.curProcState);
             boolean setImportant = app.setProcState < ActivityManager.PROCESS_STATE_SERVICE;
@@ -18097,7 +18088,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                             // step that cached level.
                             app.curRawAdj = curCachedAdj;
                             app.curAdj = app.modifyRawOomAdj(curCachedAdj);
-                            if (DEBUG_LRU && false) Slog.d(TAG, "Assigning activity LRU #" + i
+                            if (DEBUG_LRU && false) Slog.d(TAG_LRU, "Assigning activity LRU #" + i
                                     + " adj: " + app.curAdj + " (curCachedAdj=" + curCachedAdj
                                     + ")");
                             if (curCachedAdj != nextCachedAdj) {
@@ -18120,7 +18111,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                             // state is still as a service), which is what we want.
                             app.curRawAdj = curEmptyAdj;
                             app.curAdj = app.modifyRawOomAdj(curEmptyAdj);
-                            if (DEBUG_LRU && false) Slog.d(TAG, "Assigning empty LRU #" + i
+                            if (DEBUG_LRU && false) Slog.d(TAG_LRU, "Assigning empty LRU #" + i
                                     + " adj: " + app.curAdj + " (curEmptyAdj=" + curEmptyAdj
                                     + ")");
                             if (curEmptyAdj != nextEmptyAdj) {
@@ -18210,13 +18201,13 @@ public final class ActivityManagerService extends ActivityManagerNative
         // We always allow the memory level to go up (better).  We only allow it to go
         // down if we are in a state where that is allowed, *and* the total number of processes
         // has gone down since last time.
-        if (DEBUG_OOM_ADJ) Slog.d(TAG, "oom: memFactor=" + memFactor + " last=" + mLastMemoryLevel
-                + " allowLow=" + mAllowLowerMemLevel + " numProcs=" + mLruProcesses.size()
-                + " last=" + mLastNumProcesses);
+        if (DEBUG_OOM_ADJ) Slog.d(TAG_OOM_ADJ, "oom: memFactor=" + memFactor
+                + " last=" + mLastMemoryLevel + " allowLow=" + mAllowLowerMemLevel
+                + " numProcs=" + mLruProcesses.size() + " last=" + mLastNumProcesses);
         if (memFactor > mLastMemoryLevel) {
             if (!mAllowLowerMemLevel || mLruProcesses.size() >= mLastNumProcesses) {
                 memFactor = mLastMemoryLevel;
-                if (DEBUG_OOM_ADJ) Slog.d(TAG, "Keeping last mem factor!");
+                if (DEBUG_OOM_ADJ) Slog.d(TAG_OOM_ADJ, "Keeping last mem factor!");
             }
         }
         mLastMemoryLevel = memFactor;
@@ -18256,9 +18247,8 @@ public final class ActivityManagerService extends ActivityManagerNative
                         && !app.killedByAm) {
                     if (app.trimMemoryLevel < curLevel && app.thread != null) {
                         try {
-                            if (DEBUG_SWITCH || DEBUG_OOM_ADJ) Slog.v(TAG,
-                                    "Trimming memory of " + app.processName
-                                    + " to " + curLevel);
+                            if (DEBUG_SWITCH || DEBUG_OOM_ADJ) Slog.v(TAG_OOM_ADJ,
+                                    "Trimming memory of " + app.processName + " to " + curLevel);
                             app.thread.scheduleTrimMemory(curLevel);
                         } catch (RemoteException e) {
                         }
@@ -18293,7 +18283,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                     if (app.trimMemoryLevel < ComponentCallbacks2.TRIM_MEMORY_BACKGROUND
                             && app.thread != null) {
                         try {
-                            if (DEBUG_SWITCH || DEBUG_OOM_ADJ) Slog.v(TAG,
+                            if (DEBUG_SWITCH || DEBUG_OOM_ADJ) Slog.v(TAG_OOM_ADJ,
                                     "Trimming memory of heavy-weight " + app.processName
                                     + " to " + ComponentCallbacks2.TRIM_MEMORY_BACKGROUND);
                             app.thread.scheduleTrimMemory(
@@ -18311,7 +18301,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                         final int level = ComponentCallbacks2.TRIM_MEMORY_UI_HIDDEN;
                         if (app.trimMemoryLevel < level && app.thread != null) {
                             try {
-                                if (DEBUG_SWITCH || DEBUG_OOM_ADJ) Slog.v(TAG,
+                                if (DEBUG_SWITCH || DEBUG_OOM_ADJ) Slog.v(TAG_OOM_ADJ,
                                         "Trimming memory of bg-ui " + app.processName
                                         + " to " + level);
                                 app.thread.scheduleTrimMemory(level);
@@ -18322,7 +18312,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                     }
                     if (app.trimMemoryLevel < fgTrimLevel && app.thread != null) {
                         try {
-                            if (DEBUG_SWITCH || DEBUG_OOM_ADJ) Slog.v(TAG,
+                            if (DEBUG_SWITCH || DEBUG_OOM_ADJ) Slog.v(TAG_OOM_ADJ,
                                     "Trimming memory of fg " + app.processName
                                     + " to " + fgTrimLevel);
                             app.thread.scheduleTrimMemory(fgTrimLevel);
@@ -18348,7 +18338,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                     if (app.trimMemoryLevel < ComponentCallbacks2.TRIM_MEMORY_UI_HIDDEN
                             && app.thread != null) {
                         try {
-                            if (DEBUG_SWITCH || DEBUG_OOM_ADJ) Slog.v(TAG,
+                            if (DEBUG_SWITCH || DEBUG_OOM_ADJ) Slog.v(TAG_OOM_ADJ,
                                     "Trimming memory of ui hidden " + app.processName
                                     + " to " + ComponentCallbacks2.TRIM_MEMORY_UI_HIDDEN);
                             app.thread.scheduleTrimMemory(
@@ -18383,12 +18373,12 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
 
         if (DEBUG_OOM_ADJ) {
+            final long duration = SystemClock.uptimeMillis() - now;
             if (false) {
-                RuntimeException here = new RuntimeException("here");
-                here.fillInStackTrace();
-                Slog.d(TAG, "Did OOM ADJ in " + (SystemClock.uptimeMillis()-now) + "ms", here);
+                Slog.d(TAG_OOM_ADJ, "Did OOM ADJ in " + duration + "ms",
+                        new RuntimeException("here").fillInStackTrace());
             } else {
-                Slog.d(TAG, "Did OOM ADJ in " + (SystemClock.uptimeMillis()-now) + "ms");
+                Slog.d(TAG_OOM_ADJ, "Did OOM ADJ in " + duration + "ms");
             }
         }
     }

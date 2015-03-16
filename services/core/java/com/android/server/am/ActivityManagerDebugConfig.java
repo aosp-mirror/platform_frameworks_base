@@ -30,10 +30,10 @@ class ActivityManagerDebugConfig {
     // will be tagged with their class names instead fot the generic tag.
     static final boolean TAG_WITH_CLASS_NAME = false;
 
-    // While debugging it is sometimes useful to have the category name of the log prepended to the
+    // While debugging it is sometimes useful to have the category name of the log appended to the
     // base log tag to make sifting through logs with the same base tag easier. By setting this
-    // constant to true, the category name of the log point will be prepended to the log tag.
-    static final boolean PREPEND_CATEGORY_NAME = false;
+    // constant to true, the category name of the log point will be appended to the log tag.
+    static final boolean APPEND_CATEGORY_NAME = false;
 
     // Default log tag for the activity manager package.
     static final String TAG_AM = "ActivityManager";
@@ -74,12 +74,17 @@ class ActivityManagerDebugConfig {
     static final boolean DEBUG_USER_LEAVING = DEBUG_ALL || false;
     static final boolean DEBUG_VISBILITY = DEBUG_ALL || false;
 
-    static final String POSTFIX_BACKUP = (PREPEND_CATEGORY_NAME) ? "_Backup" : "";
-    static final String POSTFIX_BROADCAST = (PREPEND_CATEGORY_NAME) ? "_Broadcast" : "";
-    static final String POSTFIX_CLEANUP = (PREPEND_CATEGORY_NAME) ? "_Cleanup" : "";
+    static final String POSTFIX_BACKUP = (APPEND_CATEGORY_NAME) ? "_Backup" : "";
+    static final String POSTFIX_BROADCAST = (APPEND_CATEGORY_NAME) ? "_Broadcast" : "";
+    static final String POSTFIX_CLEANUP = (APPEND_CATEGORY_NAME) ? "_Cleanup" : "";
+    static final String POSTFIX_CONFIGURATION = (APPEND_CATEGORY_NAME) ? "_Configuration" : "";
+    static final String POSTFIX_FOCUS = (APPEND_CATEGORY_NAME) ? "_Focus" : "";
+    static final String POSTFIX_IMMERSIVE = (APPEND_CATEGORY_NAME) ? "_Immersive" : "";
+    static final String POSTFIX_LRU = (APPEND_CATEGORY_NAME) ? "_LRU" : "";
     static final String POSTFIX_MU = "_MU";
-    static final String POSTFIX_SERVICE = (PREPEND_CATEGORY_NAME) ? "_Service" : "";
+    static final String POSTFIX_OOM_ADJ = (APPEND_CATEGORY_NAME) ? "_OomAdj" : "";
+    static final String POSTFIX_SERVICE = (APPEND_CATEGORY_NAME) ? "_Service" : "";
     static final String POSTFIX_SERVICE_EXECUTING =
-            (PREPEND_CATEGORY_NAME) ? "_ServiceExecuting" : "";
+            (APPEND_CATEGORY_NAME) ? "_ServiceExecuting" : "";
 
 }

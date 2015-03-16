@@ -17,7 +17,6 @@
 package com.android.server.am;
 
 import static com.android.server.am.ActivityManagerDebugConfig.*;
-import static com.android.server.am.ActivityManagerService.DEBUG_CONFIGURATION;
 import static com.android.server.am.ActivityManagerService.DEBUG_PAUSE;
 import static com.android.server.am.ActivityManagerService.DEBUG_RESULTS;
 import static com.android.server.am.ActivityManagerService.DEBUG_STACK;
@@ -26,7 +25,6 @@ import static com.android.server.am.ActivityManagerService.DEBUG_TASKS;
 import static com.android.server.am.ActivityManagerService.DEBUG_TRANSITION;
 import static com.android.server.am.ActivityManagerService.DEBUG_USER_LEAVING;
 import static com.android.server.am.ActivityManagerService.DEBUG_VISBILITY;
-import static com.android.server.am.ActivityManagerService.VALIDATE_TOKENS;
 
 import static com.android.server.am.ActivityRecord.HOME_ACTIVITY_TYPE;
 import static com.android.server.am.ActivityRecord.APPLICATION_ACTIVITY_TYPE;
@@ -97,6 +95,9 @@ final class ActivityStack {
 
     private static final String TAG = TAG_WITH_CLASS_NAME ? "ActivityStack" : TAG_AM;
     private static final String TAG_CLEANUP = TAG + POSTFIX_CLEANUP;
+    private static final String TAG_CONFIGURATION = TAG + POSTFIX_CONFIGURATION;
+
+    private static final boolean VALIDATE_TOKENS = false;
 
     // Ticks during which we check progress while waiting for an app to launch.
     static final int LAUNCH_TICK = 500;
@@ -3747,12 +3748,12 @@ final class ActivityStack {
     final boolean ensureActivityConfigurationLocked(ActivityRecord r,
             int globalChanges) {
         if (mConfigWillChange) {
-            if (DEBUG_SWITCH || DEBUG_CONFIGURATION) Slog.v(TAG,
+            if (DEBUG_SWITCH || DEBUG_CONFIGURATION) Slog.v(TAG_CONFIGURATION,
                     "Skipping config check (will change): " + r);
             return true;
         }
 
-        if (DEBUG_SWITCH || DEBUG_CONFIGURATION) Slog.v(TAG,
+        if (DEBUG_SWITCH || DEBUG_CONFIGURATION) Slog.v(TAG_CONFIGURATION,
                 "Ensuring correct configuration: " + r);
 
         // Make sure the current stack override configuration is supported by the top task
@@ -3765,7 +3766,7 @@ final class ActivityStack {
                     mWindowManager.forceStackToFullscreen(mStackId, !topTask.mResizeable);
             updateOverrideConfiguration(newOverrideConfig);
             mForcedFullscreen = !prevFullscreen && mFullscreen;
-            if (DEBUG_SWITCH || DEBUG_CONFIGURATION) Slog.v(TAG,
+            if (DEBUG_SWITCH || DEBUG_CONFIGURATION) Slog.v(TAG_CONFIGURATION,
                     "Updated stack config to support task=" + topTask
                             + " resizeable=" + topTask.mResizeable
                             + " mForcedFullscreen=" + mForcedFullscreen
@@ -3779,14 +3780,14 @@ final class ActivityStack {
         if (r.configuration == newConfig
                 && r.stackConfigOverride == mOverrideConfig
                 && !r.forceNewConfig) {
-            if (DEBUG_SWITCH || DEBUG_CONFIGURATION) Slog.v(TAG,
+            if (DEBUG_SWITCH || DEBUG_CONFIGURATION) Slog.v(TAG_CONFIGURATION,
                     "Configuration unchanged in " + r);
             return true;
         }
 
         // We don't worry about activities that are finishing.
         if (r.finishing) {
-            if (DEBUG_SWITCH || DEBUG_CONFIGURATION) Slog.v(TAG,
+            if (DEBUG_SWITCH || DEBUG_CONFIGURATION) Slog.v(TAG_CONFIGURATION,
                     "Configuration doesn't matter in finishing " + r);
             r.stopFreezingScreenLocked(false);
             return true;
@@ -3820,7 +3821,7 @@ final class ActivityStack {
         }
         final int changes = oldConfig.diff(newConfig) | stackChanges;
         if (changes == 0 && !r.forceNewConfig) {
-            if (DEBUG_SWITCH || DEBUG_CONFIGURATION) Slog.v(TAG,
+            if (DEBUG_SWITCH || DEBUG_CONFIGURATION) Slog.v(TAG_CONFIGURATION,
                     "Configuration no differences in " + r);
             return true;
         }
@@ -3828,7 +3829,7 @@ final class ActivityStack {
         // If the activity isn't currently running, just leave the new
         // configuration and it will pick that up next time it starts.
         if (r.app == null || r.app.thread == null) {
-            if (DEBUG_SWITCH || DEBUG_CONFIGURATION) Slog.v(TAG,
+            if (DEBUG_SWITCH || DEBUG_CONFIGURATION) Slog.v(TAG_CONFIGURATION,
                     "Configuration doesn't matter not running " + r);
             r.stopFreezingScreenLocked(false);
             r.forceNewConfig = false;
@@ -3836,26 +3837,25 @@ final class ActivityStack {
         }
 
         // Figure out how to handle the changes between the configurations.
-        if (DEBUG_SWITCH || DEBUG_CONFIGURATION) {
-            Slog.v(TAG, "Checking to restart " + r.info.name + ": changed=0x"
-                    + Integer.toHexString(changes) + ", handles=0x"
-                    + Integer.toHexString(r.info.getRealConfigChanged())
-                    + ", newConfig=" + newConfig);
-        }
+        if (DEBUG_SWITCH || DEBUG_CONFIGURATION) Slog.v(TAG_CONFIGURATION,
+                "Checking to restart " + r.info.name + ": changed=0x"
+                + Integer.toHexString(changes) + ", handles=0x"
+                + Integer.toHexString(r.info.getRealConfigChanged()) + ", newConfig=" + newConfig);
+
         if ((changes&(~r.info.getRealConfigChanged())) != 0 || r.forceNewConfig) {
             // Aha, the activity isn't handling the change, so DIE DIE DIE.
             r.configChangeFlags |= changes;
             r.startFreezingScreenLocked(r.app, globalChanges);
             r.forceNewConfig = false;
             if (r.app == null || r.app.thread == null) {
-                if (DEBUG_SWITCH || DEBUG_CONFIGURATION) Slog.v(TAG,
+                if (DEBUG_SWITCH || DEBUG_CONFIGURATION) Slog.v(TAG_CONFIGURATION,
                         "Config is destroying non-running " + r);
                 destroyActivityLocked(r, true, "config");
             } else if (r.state == ActivityState.PAUSING) {
                 // A little annoying: we are waiting for this activity to
                 // finish pausing.  Let's not do anything now, but just
                 // flag that it needs to be restarted when done pausing.
-                if (DEBUG_SWITCH || DEBUG_CONFIGURATION) Slog.v(TAG,
+                if (DEBUG_SWITCH || DEBUG_CONFIGURATION) Slog.v(TAG_CONFIGURATION,
                         "Config is skipping already pausing " + r);
                 r.configDestroy = true;
                 return true;
@@ -3864,12 +3864,12 @@ final class ActivityStack {
                 // and we need to restart the top, resumed activity.
                 // Instead of doing the normal handshaking, just say
                 // "restart!".
-                if (DEBUG_SWITCH || DEBUG_CONFIGURATION) Slog.v(TAG,
+                if (DEBUG_SWITCH || DEBUG_CONFIGURATION) Slog.v(TAG_CONFIGURATION,
                         "Config is relaunching resumed " + r);
                 relaunchActivityLocked(r, r.configChangeFlags, true);
                 r.configChangeFlags = 0;
             } else {
-                if (DEBUG_SWITCH || DEBUG_CONFIGURATION) Slog.v(TAG,
+                if (DEBUG_SWITCH || DEBUG_CONFIGURATION) Slog.v(TAG_CONFIGURATION,
                         "Config is relaunching non-resumed " + r);
                 relaunchActivityLocked(r, r.configChangeFlags, false);
                 r.configChangeFlags = 0;
@@ -3886,7 +3886,7 @@ final class ActivityStack {
         // system level configuration it last got.
         if (r.app != null && r.app.thread != null) {
             try {
-                if (DEBUG_CONFIGURATION) Slog.v(TAG, "Sending new config to " + r);
+                if (DEBUG_CONFIGURATION) Slog.v(TAG_CONFIGURATION, "Sending new config to " + r);
                 r.app.thread.scheduleActivityConfigurationChanged(
                         r.appToken, new Configuration(mOverrideConfig));
             } catch (RemoteException e) {
