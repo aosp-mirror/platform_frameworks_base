@@ -173,8 +173,16 @@ public final class MidiDeviceInfo implements Parcelable {
         mId = id;
         mInputPortCount = numInputPorts;
         mOutputPortCount = numOutputPorts;
-        mInputPortNames = inputPortNames;
-        mOutputPortNames = outputPortNames;
+        if (inputPortNames == null) {
+            mInputPortNames = new String[numInputPorts];
+        } else {
+            mInputPortNames = inputPortNames;
+        }
+        if (outputPortNames == null) {
+            mOutputPortNames = new String[numOutputPorts];
+        } else {
+            mOutputPortNames = outputPortNames;
+        }
         mProperties = properties;
         mIsPrivate = isPrivate;
     }
