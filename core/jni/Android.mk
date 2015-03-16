@@ -140,6 +140,7 @@ LOCAL_SRC_FILES:= \
     android_hardware_camera2_legacy_LegacyCameraDevice.cpp \
     android_hardware_camera2_legacy_PerfMeasurement.cpp \
     android_hardware_camera2_DngCreator.cpp \
+    android_hardware_Radio.cpp \
     android_hardware_SensorManager.cpp \
     android_hardware_SerialPort.cpp \
     android_hardware_SoundTrigger.cpp \
@@ -236,10 +237,12 @@ LOCAL_SHARED_LIBRARIES := \
     libpdfium \
     libimg_utils \
     libnetd_client \
+    libradio \
     libsoundtrigger \
     libminikin \
     libprocessgroup \
-    libnativebridge
+    libnativebridge \
+    libradio_metadata
 
 LOCAL_SHARED_LIBRARIES += \
     libhwui \
