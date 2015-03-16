@@ -973,6 +973,8 @@ public class PackageManagerService extends IPackageManager.Stub {
                         filter.hasDataScheme(IntentFilter.SCHEME_HTTPS));
     }
 
+    ArrayList<ComponentName> mDisabledComponentsList;
+
     // Set of pending broadcasts for aggregating enable/disable of components.
     static class PendingPackageBroadcasts {
         // for each user id, a map of <package name -> components within that package>
@@ -2584,9 +2586,11 @@ public class PackageManagerService extends IPackageManager.Stub {
             }
 
             // Disable components marked for disabling at build-time
+            mDisabledComponentsList = new ArrayList<ComponentName>();
             for (String name : mContext.getResources().getStringArray(
                     com.android.internal.R.array.config_disabledComponents)) {
                 ComponentName cn = ComponentName.unflattenFromString(name);
+                mDisabledComponentsList.add(cn);
                 Slog.v(TAG, "Disabling " + name);
                 String className = cn.getClassName();
                 PackageSetting pkgSetting = mSettings.mPackages.get(cn.getPackageName());
@@ -2596,6 +2600,21 @@ public class PackageManagerService extends IPackageManager.Stub {
                     continue;
                 }
                 pkgSetting.disableComponentLPw(className, UserHandle.USER_OWNER);
+            }
+
+            // Enable components marked for forced-enable at build-time
+            for (String name : mContext.getResources().getStringArray(
+                    com.android.internal.R.array.config_forceEnabledComponents)) {
+                ComponentName cn = ComponentName.unflattenFromString(name);
+                Slog.v(TAG, "Enabling " + name);
+                String className = cn.getClassName();
+                PackageSetting pkgSetting = mSettings.mPackages.get(cn.getPackageName());
+                if (pkgSetting == null || pkgSetting.pkg == null
+                        || !pkgSetting.pkg.hasComponentClassName(className)) {
+                    Slog.w(TAG, "Unable to enable " + name);
+                    continue;
+                }
+                pkgSetting.enableComponentLPw(className, UserHandle.USER_OWNER);
             }
 
             // Prepare storage for system user really early during boot,
@@ -17917,6 +17936,12 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
     public void setComponentEnabledSetting(ComponentName componentName,
             int newState, int flags, int userId) {
         if (!sUserManager.exists(userId)) return;
+        // Don't allow to enable components marked for disabling at build-time
+        if (mDisabledComponentsList.contains(componentName)) {
+            Slog.d(TAG, "Ignoring attempt to set enabled state of disabled component "
+                    + componentName.flattenToString());
+            return;
+        }
         setEnabledSetting(componentName.getPackageName(),
                 componentName.getClassName(), newState, flags, userId, null);
     }
