@@ -320,7 +320,7 @@ static void drawBitmap(JNIEnv* env, jobject jcanvas, jlong canvasHandle, jlong b
             if (paint) {
                 filteredPaint = *paint;
             }
-            filteredPaint.setFilterLevel(Paint::kLow_FilterLevel);
+            filteredPaint.setFilterQuality(kLow_SkFilterQuality);
             canvas->drawBitmap(*bitmap, left, top, &filteredPaint);
         } else {
             canvas->drawBitmap(*bitmap, left, top, paint);
@@ -335,7 +335,7 @@ static void drawBitmap(JNIEnv* env, jobject jcanvas, jlong canvasHandle, jlong b
         if (paint) {
             filteredPaint = *paint;
         }
-        filteredPaint.setFilterLevel(Paint::kLow_FilterLevel);
+        filteredPaint.setFilterQuality(kLow_SkFilterQuality);
 
         canvas->drawBitmap(*bitmap, 0, 0, &filteredPaint);
         canvas->restore();
@@ -363,7 +363,7 @@ static void drawBitmapRect(JNIEnv* env, jobject, jlong canvasHandle, jlong bitma
         if (paint) {
             filteredPaint = *paint;
         }
-        filteredPaint.setFilterLevel(Paint::kLow_FilterLevel);
+        filteredPaint.setFilterQuality(kLow_SkFilterQuality);
         canvas->drawBitmap(*bitmap, srcLeft, srcTop, srcRight, srcBottom,
                            dstLeft, dstTop, dstRight, dstBottom, &filteredPaint);
     } else {

@@ -132,7 +132,7 @@ public:
         Paint* nativePaint = getNativePaint(env, paint);
         uint32_t result = nativePaint->getFlags();
         result &= ~sFilterBitmapFlag; // Filtering no longer stored in this bit. Mask away.
-        if (nativePaint->getFilterLevel() != Paint::kNone_FilterLevel) {
+        if (nativePaint->getFilterQuality() != kNone_SkFilterQuality) {
             result |= sFilterBitmapFlag;
         }
         return static_cast<jint>(result);
@@ -142,9 +142,9 @@ public:
         NPE_CHECK_RETURN_VOID(env, paint);
         Paint* nativePaint = getNativePaint(env, paint);
         // Instead of modifying 0x02, change the filter level.
-        nativePaint->setFilterLevel(flags & sFilterBitmapFlag
-                ? Paint::kLow_FilterLevel
-                : Paint::kNone_FilterLevel);
+        nativePaint->setFilterQuality(flags & sFilterBitmapFlag
+                ? kLow_SkFilterQuality
+                : kNone_SkFilterQuality);
         // Don't pass through filter flag, which is no longer stored in paint's flags.
         flags &= ~sFilterBitmapFlag;
         // Use the existing value for 0x02.
@@ -197,8 +197,8 @@ public:
 
     static void setFilterBitmap(JNIEnv* env, jobject paint, jboolean filterBitmap) {
         NPE_CHECK_RETURN_VOID(env, paint);
-        getNativePaint(env, paint)->setFilterLevel(
-                filterBitmap ? Paint::kLow_FilterLevel : Paint::kNone_FilterLevel);
+        getNativePaint(env, paint)->setFilterQuality(
+                filterBitmap ? kLow_SkFilterQuality : kNone_SkFilterQuality);
     }
 
     static void setDither(JNIEnv* env, jobject paint, jboolean dither) {
