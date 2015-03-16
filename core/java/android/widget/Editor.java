@@ -3697,7 +3697,7 @@ public class Editor {
         private static final int DELAY_BEFORE_HANDLE_FADES_OUT = 4000;
         private static final int RECENT_CUT_COPY_DURATION = 15 * 1000; // seconds
 
-        // Used to detect taps on the insertion handle, which will affect the ActionPopupWindow
+        // Used to detect taps on the insertion handle, which will affect the selection action mode
         private float mDownPositionX, mDownPositionY;
         private Runnable mHider;
 
@@ -3712,15 +3712,10 @@ public class Editor {
             final long durationSinceCutOrCopy =
                     SystemClock.uptimeMillis() - TextView.LAST_CUT_OR_COPY_TIME;
             if (durationSinceCutOrCopy < RECENT_CUT_COPY_DURATION) {
-                showActionPopupWindow(0);
+                startSelectionActionModeWithoutSelection();
             }
 
             hideAfterDelay();
-        }
-
-        public void showWithActionPopup() {
-            show();
-            showActionPopupWindow(0);
         }
 
         private void hideAfterDelay() {
@@ -3784,11 +3779,11 @@ public class Editor {
                         final int touchSlop = viewConfiguration.getScaledTouchSlop();
 
                         if (distanceSquared < touchSlop * touchSlop) {
-                            if (mActionPopupWindow != null && mActionPopupWindow.isShowing()) {
-                                // Tapping on the handle dismisses the displayed action popup
-                                mActionPopupWindow.hide();
+                            // Tapping on the handle toggles the selection action mode.
+                            if (mSelectionActionMode != null) {
+                                mSelectionActionMode.finish();
                             } else {
-                                showWithActionPopup();
+                                startSelectionActionModeWithoutSelection();
                             }
                         }
                     }
@@ -4071,10 +4066,6 @@ public class Editor {
 
         public void show() {
             getHandle().show();
-        }
-
-        public void showWithActionPopup() {
-            getHandle().showWithActionPopup();
         }
 
         public void hide() {
