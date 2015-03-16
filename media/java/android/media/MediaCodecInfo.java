@@ -1974,7 +1974,7 @@ public final class MediaCodecInfo {
                     (Integer)map.get(MediaFormat.KEY_FLAC_COMPRESSION_LEVEL);
                 if (complexity == null) {
                     complexity = flacComplexity;
-                } else if (flacComplexity != null && complexity != flacComplexity) {
+                } else if (flacComplexity != null && !complexity.equals(flacComplexity)) {
                     throw new IllegalArgumentException(
                             "conflicting values for complexity and " +
                             "flac-compression-level");
@@ -1987,7 +1987,7 @@ public final class MediaCodecInfo {
                 Integer aacProfile = (Integer)map.get(MediaFormat.KEY_AAC_PROFILE);
                 if (profile == null) {
                     profile = aacProfile;
-                } else if (aacProfile != null && aacProfile != profile) {
+                } else if (aacProfile != null && !aacProfile.equals(profile)) {
                     throw new IllegalArgumentException(
                             "conflicting values for profile and aac-profile");
                 }
