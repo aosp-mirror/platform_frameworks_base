@@ -453,7 +453,7 @@ public final class DngCreator implements AutoCloseable {
                     height + ") passed to write");
         }
         long capacity = pixels.capacity();
-        long totalSize = rowStride * height + offset;
+        long totalSize = ((long) rowStride) * height + offset;
         if (capacity < totalSize) {
             throw new IllegalArgumentException("Image size " + capacity +
                     " is too small (must be larger than " + totalSize + ")");
