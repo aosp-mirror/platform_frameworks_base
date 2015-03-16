@@ -45,7 +45,7 @@ public class FallbackLUTInterpolator implements NativeInterpolatorFactory, TimeI
     private static float[] createLUT(TimeInterpolator interpolator, long duration) {
         long frameIntervalNanos = Choreographer.getInstance().getFrameIntervalNanos();
         int animIntervalMs = (int) (frameIntervalNanos / TimeUtils.NANOS_PER_MS);
-        int numAnimFrames = (int) Math.ceil(duration / animIntervalMs);
+        int numAnimFrames = (int) Math.ceil(((double) duration) / animIntervalMs);
         float values[] = new float[numAnimFrames];
         float lastFrame = numAnimFrames - 1;
         for (int i = 0; i < numAnimFrames; i++) {
