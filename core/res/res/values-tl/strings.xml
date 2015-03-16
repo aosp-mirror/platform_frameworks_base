@@ -123,6 +123,10 @@
     <string name="roamingText11" msgid="4154476854426920970">"Naka-on ang Banner ng Roaming"</string>
     <string name="roamingText12" msgid="1189071119992726320">"Naka-off ang Banner ng Roaming"</string>
     <string name="roamingTextSearching" msgid="8360141885972279963">"Naghahanap ng Serbisyo"</string>
+    <!-- no translation found for wfcRegErrorTitle (2301376280632110664) -->
+    <skip />
+  <string-array name="wfcOperatorErrorMessages">
+  </string-array>
     <string name="cfTemplateNotForwarded" msgid="1683685883841272560">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: Hindi naipasa"</string>
     <string name="cfTemplateForwarded" msgid="1302922117498590521">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
     <string name="cfTemplateForwardedTime" msgid="9206251736527085256">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g> pagkatapos ng <xliff:g id="TIME_DELAY">{2}</xliff:g> (na) segundo"</string>
@@ -1265,14 +1269,10 @@
     <string name="old_app_description" msgid="2082094275580358049">"Huwag simulan ang bagong app."</string>
     <string name="new_app_action" msgid="5472756926945440706">"Simulan ang <xliff:g id="OLD_APP">%1$s</xliff:g>"</string>
     <string name="new_app_description" msgid="1932143598371537340">"Ihinto ang lumang app nang hindi nagse-save."</string>
-    <!-- no translation found for dump_heap_notification (2618183274836056542) -->
-    <skip />
-    <!-- no translation found for dump_heap_notification_detail (2075673362317481664) -->
-    <skip />
-    <!-- no translation found for dump_heap_title (5864292264307651673) -->
-    <skip />
-    <!-- no translation found for dump_heap_text (4809417337240334941) -->
-    <skip />
+    <string name="dump_heap_notification" msgid="2618183274836056542">"Lumampas ang <xliff:g id="PROC">%1$s</xliff:g> sa limitasyon ng memory"</string>
+    <string name="dump_heap_notification_detail" msgid="2075673362317481664">"Nakolekta ang heap dump; pindutin upang ibahagi"</string>
+    <string name="dump_heap_title" msgid="5864292264307651673">"Ibahagi ang heap dump?"</string>
+    <string name="dump_heap_text" msgid="4809417337240334941">"Lumampas ang proseso na <xliff:g id="PROC">%1$s</xliff:g> sa limitasyon ng memory ng proseso nito na <xliff:g id="SIZE">%2$s</xliff:g>. Available ang isang heap dump upang iyong ibahagi sa developer nito. Maging maingat: maaaring naglalaman ang heap dump na ito ng anuman sa iyong personal na impormasyon na naa-access ng application."</string>
     <string name="sendText" msgid="5209874571959469142">"Pumili ng pagkilos para sa teksto"</string>
     <string name="volume_ringtone" msgid="6885421406845734650">"Lakas ng tunog ng ringer"</string>
     <string name="volume_music" msgid="5421651157138628171">"Lakas ng tunog ng media"</string>
@@ -1301,8 +1301,9 @@
       <item quantity="one">Available ang mga bukas na Wi-Fi network</item>
       <item quantity="other">Available ang mga bukas na Wi-Fi network</item>
     </plurals>
-    <string name="wifi_available_sign_in" msgid="4029489716605255386">"Mag-sign in sa network ng Wi-Fi"</string>
-    <string name="network_available_sign_in" msgid="8495155593358054676">"Mag-sign in sa network"</string>
+    <string name="wifi_available_sign_in" msgid="9157196203958866662">"Mag-sign in sa Wi-Fi network"</string>
+    <!-- no translation found for network_available_sign_in (1848877297365446605) -->
+    <skip />
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
     <skip />
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"Hindi makakonekta sa Wi-Fi"</string>
@@ -1803,8 +1804,7 @@
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"<xliff:g id="LABEL">%1$s</xliff:g> sa Trabaho"</string>
     <string name="lock_to_app_toast" msgid="7570091317001980053">"Upang i-unpin ang screen na ito, pindutin nang matagal ang Bumalik at Overview nang sabay-sabay."</string>
     <string name="lock_to_app_toast_accessible" msgid="8239120109365070664">"Upang i-unpin ang screen na ito, pindutin nang matagal ang Overview."</string>
-    <!-- no translation found for lock_to_app_toast_locked (9125176335701699164) -->
-    <skip />
+    <string name="lock_to_app_toast_locked" msgid="9125176335701699164">"Naka-pin ang app: Hindi pinapayagan ang pag-a-unpin sa device na ito."</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"Naka-pin ang screen"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"Naka-unpin ang screen"</string>
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Humingi ng PIN bago mag-unpin"</string>

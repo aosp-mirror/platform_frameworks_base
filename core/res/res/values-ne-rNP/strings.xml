@@ -123,6 +123,10 @@
     <string name="roamingText11" msgid="4154476854426920970">"रोमिङ ध्वजा चालु छ"</string>
     <string name="roamingText12" msgid="1189071119992726320">"रोमिङ ब्यानर बन्द छ"</string>
     <string name="roamingTextSearching" msgid="8360141885972279963">"सेवाको खोजी गर्दै…"</string>
+    <!-- no translation found for wfcRegErrorTitle (2301376280632110664) -->
+    <skip />
+  <string-array name="wfcOperatorErrorMessages">
+  </string-array>
     <string name="cfTemplateNotForwarded" msgid="1683685883841272560">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: अगाडि पठाइएको छैन"</string>
     <string name="cfTemplateForwarded" msgid="1302922117498590521">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
     <string name="cfTemplateForwardedTime" msgid="9206251736527085256">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g> पछि <xliff:g id="TIME_DELAY">{2}</xliff:g> सेकेन्ड"</string>
@@ -1271,14 +1275,10 @@
     <string name="old_app_description" msgid="2082094275580358049">"नयाँ अनुप्रयोग सुरु नगर्नुहोस्।"</string>
     <string name="new_app_action" msgid="5472756926945440706">"<xliff:g id="OLD_APP">%1$s</xliff:g> सुरु गर्नुहोस्"</string>
     <string name="new_app_description" msgid="1932143598371537340">"बचत नगरी पुरानो अनुप्रयोग रोक्नुहोस्।"</string>
-    <!-- no translation found for dump_heap_notification (2618183274836056542) -->
-    <skip />
-    <!-- no translation found for dump_heap_notification_detail (2075673362317481664) -->
-    <skip />
-    <!-- no translation found for dump_heap_title (5864292264307651673) -->
-    <skip />
-    <!-- no translation found for dump_heap_text (4809417337240334941) -->
-    <skip />
+    <string name="dump_heap_notification" msgid="2618183274836056542">"<xliff:g id="PROC">%1$s</xliff:g> ले मेमोरी सीमा नाघ्यो"</string>
+    <string name="dump_heap_notification_detail" msgid="2075673362317481664">"हिप डम्प सङ्कलन गरिएको छ; साझेदारी गर्न छुनुहोस्"</string>
+    <string name="dump_heap_title" msgid="5864292264307651673">"हिप डम्प साझेदारी गर्नुहुन्छ?"</string>
+    <string name="dump_heap_text" msgid="4809417337240334941">"प्रक्रिया <xliff:g id="PROC">%1$s</xliff:g>ले यसको प्रक्रिया मेमोरी सीमा <xliff:g id="SIZE">%2$s</xliff:g> नाघेको छ। तपाईँको लागि विकासकर्तासँग साझेदारी गर्न एउटा हिप डम्प उपलब्ध छ। होसियार हुनुहोस्: यो हिप डम्पमा अनुप्रयोगको पहुँच भएको तपाईँको कुनै पनि व्यक्तिगत जानकारी हुन सक्छ।"</string>
     <string name="sendText" msgid="5209874571959469142">"पाठको लागि एउटा प्रकार्य छान्नुहोस्"</string>
     <string name="volume_ringtone" msgid="6885421406845734650">"बजाउने मात्रा"</string>
     <string name="volume_music" msgid="5421651157138628171">"मिडियाको मात्रा"</string>
@@ -1307,8 +1307,9 @@
       <item quantity="other"> खुल्ला Wi-Fi सञ्जालहरू उपलब्ध छन्</item>
       <item quantity="one">खुल्ला Wi-Fi सञ्जाल उपलब्ध छ</item>
     </plurals>
-    <string name="wifi_available_sign_in" msgid="4029489716605255386">"वाइफाइ नेटवर्कमा साइन गर्नुहोस्"</string>
-    <string name="network_available_sign_in" msgid="8495155593358054676">"नेटवर्कमा साइन गर्नुहोस्।"</string>
+    <string name="wifi_available_sign_in" msgid="9157196203958866662">"वाइफाइ नेटवर्कमा साइन इन गर्नुहोस्"</string>
+    <!-- no translation found for network_available_sign_in (1848877297365446605) -->
+    <skip />
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
     <skip />
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"वाइ-फाइसँग जडान गर्न सकेन"</string>
@@ -1809,8 +1810,7 @@
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"कार्य <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="lock_to_app_toast" msgid="7570091317001980053">"यस पर्दालाई अनपिन गर्न एकै समय फिर्ता र सारांशलाई छोई पक्डिनुहोस्।"</string>
     <string name="lock_to_app_toast_accessible" msgid="8239120109365070664">"यस पर्दालाई अनपिन गर्न सारांशलाई छुनुहोस् र पक्डनुहोस्।"</string>
-    <!-- no translation found for lock_to_app_toast_locked (9125176335701699164) -->
-    <skip />
+    <string name="lock_to_app_toast_locked" msgid="9125176335701699164">"अनुप्रयोग पिन गरियो: यस यन्त्रमा अनपिन गर्ने अनुमति छैन।"</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"स्क्रिन पिन गरियो"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"स्क्रिन अनपिन गरियो"</string>
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"पिन निकाल्नुअघि PIN सोध्नुहोस्"</string>

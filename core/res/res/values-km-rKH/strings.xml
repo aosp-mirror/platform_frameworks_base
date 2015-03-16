@@ -123,6 +123,10 @@
     <string name="roamingText11" msgid="4154476854426920970">"បើក​បដា​រ៉ូមីង"</string>
     <string name="roamingText12" msgid="1189071119992726320">"បិទ​បដា​រ៉ូមីង"</string>
     <string name="roamingTextSearching" msgid="8360141885972279963">"​ស្វែង​រក​សេវាកម្ម"</string>
+    <!-- no translation found for wfcRegErrorTitle (2301376280632110664) -->
+    <skip />
+  <string-array name="wfcOperatorErrorMessages">
+  </string-array>
     <string name="cfTemplateNotForwarded" msgid="1683685883841272560">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g> ៖ មិន​បាន​បញ្ជូន​បន្ត"</string>
     <string name="cfTemplateForwarded" msgid="1302922117498590521">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
     <string name="cfTemplateForwardedTime" msgid="9206251736527085256">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g> បន្ទាប់​ពី <xliff:g id="TIME_DELAY">{2}</xliff:g> វិនាទី"</string>
@@ -1267,14 +1271,10 @@
     <string name="old_app_description" msgid="2082094275580358049">"កុំ​ចាប់ផ្ដើម​កម្មវិធី​ថ្មី។"</string>
     <string name="new_app_action" msgid="5472756926945440706">"ចាប់ផ្ដើម <xliff:g id="OLD_APP">%1$s</xliff:g>"</string>
     <string name="new_app_description" msgid="1932143598371537340">"បញ្ឈប់​កម្មវិធី​ចាស់​ដោយ​មិន​រក្សាទុក"</string>
-    <!-- no translation found for dump_heap_notification (2618183274836056542) -->
-    <skip />
-    <!-- no translation found for dump_heap_notification_detail (2075673362317481664) -->
-    <skip />
-    <!-- no translation found for dump_heap_title (5864292264307651673) -->
-    <skip />
-    <!-- no translation found for dump_heap_text (4809417337240334941) -->
-    <skip />
+    <string name="dump_heap_notification" msgid="2618183274836056542">"<xliff:g id="PROC">%1$s</xliff:g> លើសពីកម្រិតកំណត់មេម៉ូរី"</string>
+    <string name="dump_heap_notification_detail" msgid="2075673362317481664">"Heap dump ត្រូវបានប្រមូល ប៉ះដើម្បីចែករំលែក"</string>
+    <string name="dump_heap_title" msgid="5864292264307651673">"ចែករំលែក heap dump?"</string>
+    <string name="dump_heap_text" msgid="4809417337240334941">"ដំណើរការ <xliff:g id="PROC">%1$s</xliff:g> បានលើសកម្រិតកំណត់មេម៉ូរីរបស់វាដែលមានទំហំ <xliff:g id="SIZE">%2$s</xliff:g>។ Heap dump មានផ្តល់ជូនដល់អ្នកដើម្បីចែករំលែកជាមួយអ្នកអភិវឌ្ឍន៍របស់វា។ ត្រូវប្រុងប្រយ័ត្ន៖ Heap dump នេះអាចផ្ទុកព័ត៌មានផ្ទាល់ខ្លួនរបស់អ្នកណាមួយ ដែលកម្មវិធីអាចចូលប្រើបាន។"</string>
     <string name="sendText" msgid="5209874571959469142">"ជ្រើស​សកម្មភាព​សម្រាប់​អត្ថបទ"</string>
     <string name="volume_ringtone" msgid="6885421406845734650">"កម្រិត​សំឡេង​រោទ៍"</string>
     <string name="volume_music" msgid="5421651157138628171">"កម្រិត​សំឡេង​មេឌៀ"</string>
@@ -1303,8 +1303,9 @@
       <item quantity="other">បើកបណ្តាញ Wi-Fi ដែលមាន</item>
       <item quantity="one">បើកបណ្តាញ Wi-Fi ដែលមាន</item>
     </plurals>
-    <string name="wifi_available_sign_in" msgid="4029489716605255386">"ចូល​បណ្ដាញ​វ៉ាយហ្វាយ"</string>
-    <string name="network_available_sign_in" msgid="8495155593358054676">"ចូល​ក្នុង​បណ្ដាញ"</string>
+    <string name="wifi_available_sign_in" msgid="9157196203958866662">"ចូល​បណ្ដាញ​វ៉ាយហ្វាយ"</string>
+    <!-- no translation found for network_available_sign_in (1848877297365446605) -->
+    <skip />
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
     <skip />
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"មិន​​អាច​តភ្ជាប់​វ៉ាយហ្វាយ"</string>
@@ -1805,8 +1806,7 @@
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"កន្លែង​ធ្វើការ <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="lock_to_app_toast" msgid="7570091317001980053">"ដើម្បី​មិន​ភ្ជាប់​អេក្រង់​នេះ ប៉ះ ហើយ​សង្កត់​ថយក្រោយ និង​ទិដ្ឋភាព​នៅ​ពេល​តែ​មួយ។"</string>
     <string name="lock_to_app_toast_accessible" msgid="8239120109365070664">"ដើម្បី​មិន​ភ្ជាប់​អេក្រង់​នេះ ប៉ះ ហើយ​សង្កត់​ទិដ្ឋភាព។"</string>
-    <!-- no translation found for lock_to_app_toast_locked (9125176335701699164) -->
-    <skip />
+    <string name="lock_to_app_toast_locked" msgid="9125176335701699164">"កម្មវិធីនេះត្រូវបានខ្ទាស់។ មិនអនុញ្ញាតឲ្យដោះការខ្ទាស់នៅលើឧបករណ៍នេះទេ។"</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"បាន​ភ្ជាប់​អេក្រង់"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"មិន​បាន​ភ្ជាប់​អេក្រង់"</string>
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"សួរ​រក​កូដ PIN មុន​ពេល​ផ្ដាច់"</string>

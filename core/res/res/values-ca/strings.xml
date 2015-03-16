@@ -123,6 +123,10 @@
     <string name="roamingText11" msgid="4154476854426920970">"Bàner d\'itinerància activat"</string>
     <string name="roamingText12" msgid="1189071119992726320">"Bàner d\'itinerància desactivat"</string>
     <string name="roamingTextSearching" msgid="8360141885972279963">"S\'està cercant el servei"</string>
+    <!-- no translation found for wfcRegErrorTitle (2301376280632110664) -->
+    <skip />
+  <string-array name="wfcOperatorErrorMessages">
+  </string-array>
     <string name="cfTemplateNotForwarded" msgid="1683685883841272560">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: no s\'ha desviat"</string>
     <string name="cfTemplateForwarded" msgid="1302922117498590521">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
     <string name="cfTemplateForwardedTime" msgid="9206251736527085256">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g> després de <xliff:g id="TIME_DELAY">{2}</xliff:g> segons"</string>
@@ -1265,14 +1269,10 @@
     <string name="old_app_description" msgid="2082094275580358049">"No iniciïs l\'aplicació nova."</string>
     <string name="new_app_action" msgid="5472756926945440706">"Inicia <xliff:g id="OLD_APP">%1$s</xliff:g>"</string>
     <string name="new_app_description" msgid="1932143598371537340">"Atura l\'aplicació antiga sense desar."</string>
-    <!-- no translation found for dump_heap_notification (2618183274836056542) -->
-    <skip />
-    <!-- no translation found for dump_heap_notification_detail (2075673362317481664) -->
-    <skip />
-    <!-- no translation found for dump_heap_title (5864292264307651673) -->
-    <skip />
-    <!-- no translation found for dump_heap_text (4809417337240334941) -->
-    <skip />
+    <string name="dump_heap_notification" msgid="2618183274836056542">"<xliff:g id="PROC">%1$s</xliff:g> ha superat el límit de memòria"</string>
+    <string name="dump_heap_notification_detail" msgid="2075673362317481664">"S\'ha recopilat un procés \"heap dump\"; toca per compartir"</string>
+    <string name="dump_heap_title" msgid="5864292264307651673">"Vols compartir el \"heap dump\"?"</string>
+    <string name="dump_heap_text" msgid="4809417337240334941">"El procés <xliff:g id="PROC">%1$s</xliff:g> ha superat el límit de <xliff:g id="SIZE">%2$s</xliff:g> de memòria del procés. Hi ha un procés \"heap dump\" disponible perquè el comparteixis amb el desenvolupador. Vés amb compte: aquest \"heap dump\" pot contenir les dades personals a les quals l\'aplicació tingui accés."</string>
     <string name="sendText" msgid="5209874571959469142">"Tria una acció per al text"</string>
     <string name="volume_ringtone" msgid="6885421406845734650">"Volum del timbre"</string>
     <string name="volume_music" msgid="5421651157138628171">"Volum de multimèdia"</string>
@@ -1301,8 +1301,9 @@
       <item quantity="other">Xarxes Wi-Fi obertes disponibles</item>
       <item quantity="one">Xarxa Wi-Fi oberta disponible</item>
     </plurals>
-    <string name="wifi_available_sign_in" msgid="4029489716605255386">"Inicia la sessió a la xarxa Wi-Fi"</string>
-    <string name="network_available_sign_in" msgid="8495155593358054676">"Inicia la sessió a la xarxa"</string>
+    <string name="wifi_available_sign_in" msgid="9157196203958866662">"Inicia la sessió a la xarxa Wi-Fi"</string>
+    <!-- no translation found for network_available_sign_in (1848877297365446605) -->
+    <skip />
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
     <skip />
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"No s\'ha pogut connectar a la Wi-Fi"</string>
@@ -1803,8 +1804,7 @@
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"<xliff:g id="LABEL">%1$s</xliff:g> de la feina"</string>
     <string name="lock_to_app_toast" msgid="7570091317001980053">"Per anul·lar la fixació d\'aquesta pantalla, mantén premudes les opcions Enrere i Visió general alhora."</string>
     <string name="lock_to_app_toast_accessible" msgid="8239120109365070664">"Per anul·lar la fixació d\'aquesta pantalla, mantén premuda l\'opció Visió general."</string>
-    <!-- no translation found for lock_to_app_toast_locked (9125176335701699164) -->
-    <skip />
+    <string name="lock_to_app_toast_locked" msgid="9125176335701699164">"S\'ha fixat l\'aplicació. En aquest dispositiu no es permet anul·lar-ne la fixació."</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"Pantalla fixada"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"Fixació de la pantalla anul·lada"</string>
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Demana el codi PIN abans d\'anul·lar la fixació"</string>

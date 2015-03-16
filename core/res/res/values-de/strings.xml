@@ -123,6 +123,10 @@
     <string name="roamingText11" msgid="4154476854426920970">"Roaming-Banner ein"</string>
     <string name="roamingText12" msgid="1189071119992726320">"Roaming-Banner aus"</string>
     <string name="roamingTextSearching" msgid="8360141885972279963">"Suche nach Dienst"</string>
+    <!-- no translation found for wfcRegErrorTitle (2301376280632110664) -->
+    <skip />
+  <string-array name="wfcOperatorErrorMessages">
+  </string-array>
     <string name="cfTemplateNotForwarded" msgid="1683685883841272560">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: Nicht weitergeleitet"</string>
     <string name="cfTemplateForwarded" msgid="1302922117498590521">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
     <string name="cfTemplateForwardedTime" msgid="9206251736527085256">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g><xliff:g id="DIALING_NUMBER">{1}</xliff:g> nach <xliff:g id="TIME_DELAY">{2}</xliff:g> Sekunden."</string>
@@ -1265,14 +1269,10 @@
     <string name="old_app_description" msgid="2082094275580358049">"Neue App nicht starten"</string>
     <string name="new_app_action" msgid="5472756926945440706">"<xliff:g id="OLD_APP">%1$s</xliff:g> starten"</string>
     <string name="new_app_description" msgid="1932143598371537340">"Alte App beenden, ohne zu speichern"</string>
-    <!-- no translation found for dump_heap_notification (2618183274836056542) -->
-    <skip />
-    <!-- no translation found for dump_heap_notification_detail (2075673362317481664) -->
-    <skip />
-    <!-- no translation found for dump_heap_title (5864292264307651673) -->
-    <skip />
-    <!-- no translation found for dump_heap_text (4809417337240334941) -->
-    <skip />
+    <string name="dump_heap_notification" msgid="2618183274836056542">"Speicherlimit für \"<xliff:g id="PROC">%1$s</xliff:g>\" überschritten"</string>
+    <string name="dump_heap_notification_detail" msgid="2075673362317481664">"Heap-Dump wurde erfasst, zum Teilen tippen"</string>
+    <string name="dump_heap_title" msgid="5864292264307651673">"Heap-Dump teilen?"</string>
+    <string name="dump_heap_text" msgid="4809417337240334941">"Für den Prozess \"<xliff:g id="PROC">%1$s</xliff:g>\" wurde das Prozessspeicherlimit von <xliff:g id="SIZE">%2$s</xliff:g> überschritten. Es steht ein Heap-Dump zur Verfügung, den Sie mit dem Entwickler teilen können. Beachten Sie jedoch unbedingt, dass der Heap-Dump personenbezogene Daten von Ihnen enthalten kann, auf die die App zugreifen kann."</string>
     <string name="sendText" msgid="5209874571959469142">"Aktion für Text auswählen"</string>
     <string name="volume_ringtone" msgid="6885421406845734650">"Klingeltonlautstärke"</string>
     <string name="volume_music" msgid="5421651157138628171">"Medienlautstärke"</string>
@@ -1301,8 +1301,9 @@
       <item quantity="other">Verfügbare WLAN-Netzwerke öffnen</item>
       <item quantity="one">Verfügbares WLAN-Netzwerk öffnen</item>
     </plurals>
-    <string name="wifi_available_sign_in" msgid="4029489716605255386">"Im WLAN-Netzwerk anmelden"</string>
-    <string name="network_available_sign_in" msgid="8495155593358054676">"Im Netzwerk anmelden"</string>
+    <string name="wifi_available_sign_in" msgid="9157196203958866662">"In WLAN-Netzwerk anmelden"</string>
+    <!-- no translation found for network_available_sign_in (1848877297365446605) -->
+    <skip />
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
     <skip />
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"Es konnte keine WLAN-Verbindung hergestellt werden."</string>
@@ -1803,8 +1804,7 @@
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"<xliff:g id="LABEL">%1$s</xliff:g> (geschäftlich)"</string>
     <string name="lock_to_app_toast" msgid="7570091317001980053">"Um die Fixierung dieses Bildschirms aufzuheben, berühren und halten Sie gleichzeitig \"Zurück\" und \"Übersicht\"."</string>
     <string name="lock_to_app_toast_accessible" msgid="8239120109365070664">"Um die Fixierung dieses Bildschirms aufzuheben, berühren und halten Sie \"Übersicht\"."</string>
-    <!-- no translation found for lock_to_app_toast_locked (9125176335701699164) -->
-    <skip />
+    <string name="lock_to_app_toast_locked" msgid="9125176335701699164">"Die App ist fixiert. Das Aufheben der Fixierung ist auf diesem Gerät nicht zulässig."</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"Bildschirm fixiert"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"Bildschirm gelöst"</string>
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Vor dem Beenden nach PIN fragen"</string>
