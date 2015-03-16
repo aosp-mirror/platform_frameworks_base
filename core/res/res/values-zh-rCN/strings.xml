@@ -123,6 +123,10 @@
     <string name="roamingText11" msgid="4154476854426920970">"启用漫游横幅"</string>
     <string name="roamingText12" msgid="1189071119992726320">"禁用漫游横幅"</string>
     <string name="roamingTextSearching" msgid="8360141885972279963">"正在搜索服务"</string>
+    <!-- no translation found for wfcRegErrorTitle (2301376280632110664) -->
+    <skip />
+  <string-array name="wfcOperatorErrorMessages">
+  </string-array>
     <string name="cfTemplateNotForwarded" msgid="1683685883841272560">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>：无法转接"</string>
     <string name="cfTemplateForwarded" msgid="1302922117498590521">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>：<xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
     <string name="cfTemplateForwardedTime" msgid="9206251736527085256">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>：<xliff:g id="TIME_DELAY">{2}</xliff:g>秒后<xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
@@ -1265,14 +1269,10 @@
     <string name="old_app_description" msgid="2082094275580358049">"不启动新的应用。"</string>
     <string name="new_app_action" msgid="5472756926945440706">"启动<xliff:g id="OLD_APP">%1$s</xliff:g>"</string>
     <string name="new_app_description" msgid="1932143598371537340">"停止旧的应用，但不保存。"</string>
-    <!-- no translation found for dump_heap_notification (2618183274836056542) -->
-    <skip />
-    <!-- no translation found for dump_heap_notification_detail (2075673362317481664) -->
-    <skip />
-    <!-- no translation found for dump_heap_title (5864292264307651673) -->
-    <skip />
-    <!-- no translation found for dump_heap_text (4809417337240334941) -->
-    <skip />
+    <string name="dump_heap_notification" msgid="2618183274836056542">"<xliff:g id="PROC">%1$s</xliff:g>所占的内存已超出限制"</string>
+    <string name="dump_heap_notification_detail" msgid="2075673362317481664">"已收集堆转储；触摸即可共享"</string>
+    <string name="dump_heap_title" msgid="5864292264307651673">"要共享堆转储吗？"</string>
+    <string name="dump_heap_text" msgid="4809417337240334941">"<xliff:g id="PROC">%1$s</xliff:g>进程所占的内存已超出限制 (<xliff:g id="SIZE">%2$s</xliff:g>)。您可以将收集的堆转储共享给相应的开发者。请注意：此堆转储中可能包含该应用有权存取的您的个人信息。"</string>
     <string name="sendText" msgid="5209874571959469142">"选择要对文字执行的操作"</string>
     <string name="volume_ringtone" msgid="6885421406845734650">"铃声音量"</string>
     <string name="volume_music" msgid="5421651157138628171">"媒体音量"</string>
@@ -1301,8 +1301,9 @@
       <item quantity="other">有可用的开放 WLAN 网络</item>
       <item quantity="one">有可用的开放 WLAN 网络</item>
     </plurals>
-    <string name="wifi_available_sign_in" msgid="4029489716605255386">"登录到WLAN网络"</string>
-    <string name="network_available_sign_in" msgid="8495155593358054676">"登录网络"</string>
+    <string name="wifi_available_sign_in" msgid="9157196203958866662">"登录到WLAN网络"</string>
+    <!-- no translation found for network_available_sign_in (1848877297365446605) -->
+    <skip />
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
     <skip />
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"无法连接到WLAN"</string>
@@ -1803,8 +1804,7 @@
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"工作<xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="lock_to_app_toast" msgid="7570091317001980053">"要取消固定此屏幕，请同时触摸并按住“返回”和“概览”按钮。"</string>
     <string name="lock_to_app_toast_accessible" msgid="8239120109365070664">"要取消固定此屏幕，请触摸并按住概览按钮。"</string>
-    <!-- no translation found for lock_to_app_toast_locked (9125176335701699164) -->
-    <skip />
+    <string name="lock_to_app_toast_locked" msgid="9125176335701699164">"应用处于固定状态：在此设备上不允许退出该模式。"</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"已固定屏幕"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"已取消固定屏幕"</string>
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"取消时要求输入PIN码"</string>

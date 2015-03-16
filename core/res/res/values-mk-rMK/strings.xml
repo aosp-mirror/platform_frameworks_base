@@ -123,6 +123,10 @@
     <string name="roamingText11" msgid="4154476854426920970">"Банерот со роаминг е вклучен"</string>
     <string name="roamingText12" msgid="1189071119992726320">"Банерот со роаминг е исклучен"</string>
     <string name="roamingTextSearching" msgid="8360141885972279963">"Пребарување за услуга"</string>
+    <!-- no translation found for wfcRegErrorTitle (2301376280632110664) -->
+    <skip />
+  <string-array name="wfcOperatorErrorMessages">
+  </string-array>
     <string name="cfTemplateNotForwarded" msgid="1683685883841272560">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: не е препратено"</string>
     <string name="cfTemplateForwarded" msgid="1302922117498590521">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
     <string name="cfTemplateForwardedTime" msgid="9206251736527085256">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g> по <xliff:g id="TIME_DELAY">{2}</xliff:g> секунди"</string>
@@ -1021,7 +1025,7 @@
     <string name="lockscreen_forgot_pattern_button_text" msgid="2626999449610695930">"Ја заборавивте шемата?"</string>
     <string name="lockscreen_glogin_forgot_pattern" msgid="2588521501166032747">"Отклучи сметка"</string>
     <string name="lockscreen_glogin_too_many_attempts" msgid="2751368605287288808">"Премногу обиди со шема"</string>
-    <string name="lockscreen_glogin_instructions" msgid="3931816256100707784">"За да го отклучите, пријавете се со вашата сметка на Google."</string>
+    <string name="lockscreen_glogin_instructions" msgid="3931816256100707784">"За да го отклучите, најавете се со вашата сметка на Google."</string>
     <string name="lockscreen_glogin_username_hint" msgid="8846881424106484447">"Корисничко име (e-пошта)"</string>
     <string name="lockscreen_glogin_password_hint" msgid="5958028383954738528">"Лозинка"</string>
     <string name="lockscreen_glogin_submit_button" msgid="7130893694795786300">"Најави се"</string>
@@ -1265,14 +1269,10 @@
     <string name="old_app_description" msgid="2082094275580358049">"Не стартувајте ја новата апликација."</string>
     <string name="new_app_action" msgid="5472756926945440706">"Вклучи <xliff:g id="OLD_APP">%1$s</xliff:g>"</string>
     <string name="new_app_description" msgid="1932143598371537340">"Запрете ја старата апликација без зачувување."</string>
-    <!-- no translation found for dump_heap_notification (2618183274836056542) -->
-    <skip />
-    <!-- no translation found for dump_heap_notification_detail (2075673362317481664) -->
-    <skip />
-    <!-- no translation found for dump_heap_title (5864292264307651673) -->
-    <skip />
-    <!-- no translation found for dump_heap_text (4809417337240334941) -->
-    <skip />
+    <string name="dump_heap_notification" msgid="2618183274836056542">"<xliff:g id="PROC">%1$s</xliff:g> го надмина ограничувањето на меморијата"</string>
+    <string name="dump_heap_notification_detail" msgid="2075673362317481664">"Сликата од меморијата е собрана; допрете за да споделите"</string>
+    <string name="dump_heap_title" msgid="5864292264307651673">"Сподели слика од меморија?"</string>
+    <string name="dump_heap_text" msgid="4809417337240334941">"Процесот <xliff:g id="PROC">%1$s</xliff:g> го надмина ограничувањето на меморијата на својот процес од <xliff:g id="SIZE">%2$s</xliff:g>. Достапна ви е слика од меморијата да ја споделите со неговиот програмер. Бидете внимателни: сликата од меморијата може да содржи кои било од вашите лични информации до кои апликацијата има пристап."</string>
     <string name="sendText" msgid="5209874571959469142">"Избери дејство за текст"</string>
     <string name="volume_ringtone" msgid="6885421406845734650">"Јачина на звук на ѕвонче"</string>
     <string name="volume_music" msgid="5421651157138628171">"Јачина на звук на медиуми"</string>
@@ -1301,8 +1301,10 @@
       <item quantity="one">Отворени Wi-Fi мрежи се достапни</item>
       <item quantity="other">Отворени Wi-Fi мрежи се достапни</item>
     </plurals>
-    <string name="wifi_available_sign_in" msgid="4029489716605255386">"Пријави се на Wi-Fi мрежа"</string>
-    <string name="network_available_sign_in" msgid="8495155593358054676">"Пријави се на мрежа"</string>
+    <!-- no translation found for wifi_available_sign_in (9157196203958866662) -->
+    <skip />
+    <!-- no translation found for network_available_sign_in (1848877297365446605) -->
+    <skip />
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
     <skip />
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"Не можеше да се поврзе со Wi-Fi"</string>
@@ -1653,10 +1655,10 @@
     <string name="kg_invalid_puk" msgid="3638289409676051243">"Повторно внесете го точниот ПУК код. Повторните обиди трајно ќе ја оневозможат СИМ картичката."</string>
     <string name="kg_invalid_confirm_pin_hint" product="default" msgid="7003469261464593516">"ПИН кодовите не се совпаѓаат"</string>
     <string name="kg_login_too_many_attempts" msgid="6486842094005698475">"Премногу обиди со шема"</string>
-    <string name="kg_login_instructions" msgid="1100551261265506448">"За да го отклучите, пријавете се со вашата сметка на Google."</string>
+    <string name="kg_login_instructions" msgid="1100551261265506448">"За да го отклучите, најавете се со вашата сметка на Google."</string>
     <string name="kg_login_username_hint" msgid="5718534272070920364">"Корисничко име (е-пошта)"</string>
     <string name="kg_login_password_hint" msgid="9057289103827298549">"Лозинка"</string>
-    <string name="kg_login_submit_button" msgid="5355904582674054702">"Пријави се"</string>
+    <string name="kg_login_submit_button" msgid="5355904582674054702">"Најави се"</string>
     <string name="kg_login_invalid_input" msgid="5754664119319872197">"Неважечко корисничко име или лозинка."</string>
     <string name="kg_login_account_recovery_hint" msgid="5690709132841752974">"Го заборави своето корисничко име или лозинката?\nПосети"<b>"google.com/accounts/recovery"</b>"."</string>
     <string name="kg_login_checking_password" msgid="1052685197710252395">"Сметката се проверува..."</string>
@@ -1805,8 +1807,7 @@
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"Работа <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="lock_to_app_toast" msgid="7570091317001980053">"За да го откачите екранот, допрете и задржете Назад и Краток преглед во исто време."</string>
     <string name="lock_to_app_toast_accessible" msgid="8239120109365070664">"За да го откачите екранот, допрете и задржете Краток преглед."</string>
-    <!-- no translation found for lock_to_app_toast_locked (9125176335701699164) -->
-    <skip />
+    <string name="lock_to_app_toast_locked" msgid="9125176335701699164">"Апликацијата е закачена: откачување не е дозволено на уредов."</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"Екранот е закачен"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"Екранот е откачен"</string>
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Прашај за ПИН пред откачување"</string>

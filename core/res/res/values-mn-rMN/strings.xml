@@ -123,6 +123,10 @@
     <string name="roamingText11" msgid="4154476854426920970">"Рүүминг Баннер Асаалттай"</string>
     <string name="roamingText12" msgid="1189071119992726320">"Баннергүй рүүминг"</string>
     <string name="roamingTextSearching" msgid="8360141885972279963">"Үйлчилгээг хайж байна…"</string>
+    <!-- no translation found for wfcRegErrorTitle (2301376280632110664) -->
+    <skip />
+  <string-array name="wfcOperatorErrorMessages">
+  </string-array>
     <string name="cfTemplateNotForwarded" msgid="1683685883841272560">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: дамжуулагдаагүй"</string>
     <string name="cfTemplateForwarded" msgid="1302922117498590521">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
     <string name="cfTemplateForwardedTime" msgid="9206251736527085256">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g> <xliff:g id="TIME_DELAY">{2}</xliff:g> секундын дараа"</string>
@@ -1265,14 +1269,10 @@
     <string name="old_app_description" msgid="2082094275580358049">"Шинэ апп-г эхлүүлж болохгүй."</string>
     <string name="new_app_action" msgid="5472756926945440706">"<xliff:g id="OLD_APP">%1$s</xliff:g> эхлүүлэх"</string>
     <string name="new_app_description" msgid="1932143598371537340">"Хуучин апп-г хадгалахгүйгээр зогсооно уу."</string>
-    <!-- no translation found for dump_heap_notification (2618183274836056542) -->
-    <skip />
-    <!-- no translation found for dump_heap_notification_detail (2075673362317481664) -->
-    <skip />
-    <!-- no translation found for dump_heap_title (5864292264307651673) -->
-    <skip />
-    <!-- no translation found for dump_heap_text (4809417337240334941) -->
-    <skip />
+    <string name="dump_heap_notification" msgid="2618183274836056542">"<xliff:g id="PROC">%1$s</xliff:g> санах ойн хязгаараас давсан"</string>
+    <string name="dump_heap_notification_detail" msgid="2075673362317481664">"Хэт их хуримтлагдсан мэдээллүүдийг цуглуулсан байна; хуваалцахаар бол дарна уу"</string>
+    <string name="dump_heap_title" msgid="5864292264307651673">"Хэт их хуримтлагдсан мэдээллийг хуваалцах уу?"</string>
+    <string name="dump_heap_text" msgid="4809417337240334941">"Энэ үйл явц <xliff:g id="PROC">%1$s</xliff:g> нь үйл ажиллагааны санах ойн хязгаар болох <xliff:g id="SIZE">%2$s</xliff:g> хэмжээг давсан байна. Та хэт их хуримтлагдсан мэдээллийг тэдгээрийн өөрсдийнх нь хөгжүүлэгчтэй хуваалцах боломжтой. Болгоомжтой байгаарай: энэхүү хэт их хуримтлагдсан мэдээлэлд аппликейшнаас нэвтрэх боломжтой таны хувийн мэдээлэл агуулагдсан байж болно."</string>
     <string name="sendText" msgid="5209874571959469142">"Текст илгээх үйлдлийг сонгох"</string>
     <string name="volume_ringtone" msgid="6885421406845734650">"Хонхны аяны хэмжээ"</string>
     <string name="volume_music" msgid="5421651157138628171">"Медиа дууны хэмжээ"</string>
@@ -1301,8 +1301,9 @@
       <item quantity="other">Нээлттэй Wi-Fi сүлжээ ашиглах боломжтой</item>
       <item quantity="one">Нээлттэй Wi-Fi сүлжээ ашиглах боломжтой</item>
     </plurals>
-    <string name="wifi_available_sign_in" msgid="4029489716605255386">"Wi-Fi сүлжээнд нэвтэрнэ үү"</string>
-    <string name="network_available_sign_in" msgid="8495155593358054676">"Сүлжээнд нэвтрэх"</string>
+    <string name="wifi_available_sign_in" msgid="9157196203958866662">"Wi-Fi сүлжээнд нэвтэрнэ үү"</string>
+    <!-- no translation found for network_available_sign_in (1848877297365446605) -->
+    <skip />
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
     <skip />
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"Wi-Fi-д холбогдож чадсангүй"</string>
@@ -1803,8 +1804,7 @@
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"Ажлын <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="lock_to_app_toast" msgid="7570091317001980053">"Энэ дэлгэцийг цуцлахын тулд Буцах болон Тойм-д зэрэг хүрч барина."</string>
     <string name="lock_to_app_toast_accessible" msgid="8239120109365070664">"Энэ дэлгэцийг цуцлахын тулд Тойм харагдацанд хүрч барина."</string>
-    <!-- no translation found for lock_to_app_toast_locked (9125176335701699164) -->
-    <skip />
+    <string name="lock_to_app_toast_locked" msgid="9125176335701699164">"App-ыг тусгайлан тэмдэглэсэн байна: Энэ төхөөрөмж дээр тусгайлан тэмдэглэсэн сонголтыг устгах боломжгүй."</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"Дэлгэцийг тогтоосон"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"Дэлгэцийг сулласан"</string>
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Тогтоосныг суллахаас өмнө PIN асуух"</string>

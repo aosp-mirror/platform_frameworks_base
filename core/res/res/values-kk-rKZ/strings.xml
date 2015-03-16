@@ -123,6 +123,10 @@
     <string name="roamingText11" msgid="4154476854426920970">"Роуминг баннері қосулы"</string>
     <string name="roamingText12" msgid="1189071119992726320">"Роуминг баннері өшірулі"</string>
     <string name="roamingTextSearching" msgid="8360141885972279963">"Қызметті іздеу"</string>
+    <!-- no translation found for wfcRegErrorTitle (2301376280632110664) -->
+    <skip />
+  <string-array name="wfcOperatorErrorMessages">
+  </string-array>
     <string name="cfTemplateNotForwarded" msgid="1683685883841272560">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: Басқа нөмірге бағытталмады"</string>
     <string name="cfTemplateForwarded" msgid="1302922117498590521">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
     <string name="cfTemplateForwardedTime" msgid="9206251736527085256">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>  <xliff:g id="TIME_DELAY">{2}</xliff:g> секундтан кейін"</string>
@@ -1265,14 +1269,10 @@
     <string name="old_app_description" msgid="2082094275580358049">"Жаңа қолданбаны іске қоспау."</string>
     <string name="new_app_action" msgid="5472756926945440706">"<xliff:g id="OLD_APP">%1$s</xliff:g> қолданбасын қосу"</string>
     <string name="new_app_description" msgid="1932143598371537340">"Ескі қолданбаны сақтаусыз тоқтату."</string>
-    <!-- no translation found for dump_heap_notification (2618183274836056542) -->
-    <skip />
-    <!-- no translation found for dump_heap_notification_detail (2075673362317481664) -->
-    <skip />
-    <!-- no translation found for dump_heap_title (5864292264307651673) -->
-    <skip />
-    <!-- no translation found for dump_heap_text (4809417337240334941) -->
-    <skip />
+    <string name="dump_heap_notification" msgid="2618183274836056542">"<xliff:g id="PROC">%1$s</xliff:g> жад шегінен асты"</string>
+    <string name="dump_heap_notification_detail" msgid="2075673362317481664">"Үйінді дамп жиналды; бөлісу үшін басыңыз"</string>
+    <string name="dump_heap_title" msgid="5864292264307651673">"Үйінді дамппен бөлісу қажет пе?"</string>
+    <string name="dump_heap_text" msgid="4809417337240334941">"<xliff:g id="PROC">%1$s</xliff:g> процесі <xliff:g id="SIZE">%2$s</xliff:g> процесс жады шегінен асып кетті. Үйінді дамп оның әзірлеушісімен ​​бөлісуге қолжетімді. Абай болыңыз: бұл үйінді дампта бағдарлама кіре алатын кейбір жеке ақпараттарыңыз болуы мүмкін."</string>
     <string name="sendText" msgid="5209874571959469142">"Мәтін үшін әрекет таңдау"</string>
     <string name="volume_ringtone" msgid="6885421406845734650">"Қоңырау шырылының қаттылығы"</string>
     <string name="volume_music" msgid="5421651157138628171">"Meдиа дыбысының қаттылығы"</string>
@@ -1301,8 +1301,10 @@
       <item quantity="other">Ашық Wi-Fi желілері қол жетімді</item>
       <item quantity="one">Ашық Wi-Fi желісі қол жетімді</item>
     </plurals>
-    <string name="wifi_available_sign_in" msgid="4029489716605255386">"Wi-Fi желісіне кіру"</string>
-    <string name="network_available_sign_in" msgid="8495155593358054676">"Желіге кіру"</string>
+    <!-- no translation found for wifi_available_sign_in (9157196203958866662) -->
+    <skip />
+    <!-- no translation found for network_available_sign_in (1848877297365446605) -->
+    <skip />
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
     <skip />
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"Wi-Fi желісіне қосыла алмады"</string>
@@ -1803,8 +1805,7 @@
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"Жұмыс <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="lock_to_app_toast" msgid="7570091317001980053">"Осы экранды босату үшін «Кері» және «Шолу» пәрмендерін бір уақытта түртіп, ұстап тұрыңыз."</string>
     <string name="lock_to_app_toast_accessible" msgid="8239120109365070664">"Осы экранды босату үшін «Шолу» пәрменін түртіп, ұстап тұрыңыз."</string>
-    <!-- no translation found for lock_to_app_toast_locked (9125176335701699164) -->
-    <skip />
+    <string name="lock_to_app_toast_locked" msgid="9125176335701699164">"Бағдарлама белгіленді: Бұл құрылғыда белгіні алуға рұқсат берілмейді."</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"Экран түйрелді"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"Экран босатылды"</string>
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Босату алдында PIN кодын сұрау"</string>

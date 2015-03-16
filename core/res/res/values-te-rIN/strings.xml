@@ -123,6 +123,10 @@
     <string name="roamingText11" msgid="4154476854426920970">"రోమింగ్ బ్యానర్ ఆన్‌లో ఉంది"</string>
     <string name="roamingText12" msgid="1189071119992726320">"రోమింగ్ బ్యానర్ ఆఫ్‌లో ఉంది"</string>
     <string name="roamingTextSearching" msgid="8360141885972279963">"సేవ కోసం శోధిస్తోంది"</string>
+    <!-- no translation found for wfcRegErrorTitle (2301376280632110664) -->
+    <skip />
+  <string-array name="wfcOperatorErrorMessages">
+  </string-array>
     <string name="cfTemplateNotForwarded" msgid="1683685883841272560">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: ఫార్వార్డ్ చేయబడలేదు"</string>
     <string name="cfTemplateForwarded" msgid="1302922117498590521">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
     <string name="cfTemplateForwardedTime" msgid="9206251736527085256">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="TIME_DELAY">{2}</xliff:g> సెకన్ల తర్వాత <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
@@ -1265,14 +1269,10 @@
     <string name="old_app_description" msgid="2082094275580358049">"కొత్త అనువర్తనాన్ని ప్రారంభించవద్దు."</string>
     <string name="new_app_action" msgid="5472756926945440706">"<xliff:g id="OLD_APP">%1$s</xliff:g>ని ప్రారంభించండి"</string>
     <string name="new_app_description" msgid="1932143598371537340">"పాత అనువర్తనాన్ని సేవ్ చేయకుండానే ఆపివేయండి."</string>
-    <!-- no translation found for dump_heap_notification (2618183274836056542) -->
-    <skip />
-    <!-- no translation found for dump_heap_notification_detail (2075673362317481664) -->
-    <skip />
-    <!-- no translation found for dump_heap_title (5864292264307651673) -->
-    <skip />
-    <!-- no translation found for dump_heap_text (4809417337240334941) -->
-    <skip />
+    <string name="dump_heap_notification" msgid="2618183274836056542">"<xliff:g id="PROC">%1$s</xliff:g> మెమరీ పరిమితిని మించిపోయింది"</string>
+    <string name="dump_heap_notification_detail" msgid="2075673362317481664">"హీప్ డంప్ సేకరించబడింది; భాగస్వామ్యం చేయడానికి తాకండి"</string>
+    <string name="dump_heap_title" msgid="5864292264307651673">"హీప్ డంప్‌ను భాగస్వామ్యం చేయాలా?"</string>
+    <string name="dump_heap_text" msgid="4809417337240334941">"<xliff:g id="PROC">%1$s</xliff:g> ప్రాసెస్ దాని <xliff:g id="SIZE">%2$s</xliff:g> ప్రాసెస్ మెమరీ పరిమితిని మించిపోయింది. మీకు దాని డెవలపర్‌తో భాగస్వామ్యం చేయడానికి హీప్ డంప్ అందుబాటులో ఉంది. జాగ్రత్తగా ఉండండి: ఈ హీప్ డంప్‌లో అనువర్తనం ప్రాప్యత కలిగి ఉన్న మీ వ్యక్తిగత సమాచారం ఏదైనా ఉండవచ్చు."</string>
     <string name="sendText" msgid="5209874571959469142">"వచనం కోసం చర్యను ఎంచుకోండి"</string>
     <string name="volume_ringtone" msgid="6885421406845734650">"రింగర్ వాల్యూమ్"</string>
     <string name="volume_music" msgid="5421651157138628171">"మీడియా వాల్యూమ్"</string>
@@ -1301,8 +1301,10 @@
       <item quantity="other">ఓపెన్ Wi-Fi నెట్‌వర్క్‌లు అందుబాటులో ఉన్నాయి</item>
       <item quantity="one">ఓపెన్ Wi-Fi నెట్‌వర్క్ అందుబాటులో ఉంది</item>
     </plurals>
-    <string name="wifi_available_sign_in" msgid="4029489716605255386">"Wi-Fi నెట్‌వర్క్‌కు సైన్ ఇన్ చేయండి"</string>
-    <string name="network_available_sign_in" msgid="8495155593358054676">"నెట్‌వర్క్‌కు సైన్ ఇన్ చేయండి"</string>
+    <!-- no translation found for wifi_available_sign_in (9157196203958866662) -->
+    <skip />
+    <!-- no translation found for network_available_sign_in (1848877297365446605) -->
+    <skip />
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
     <skip />
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"Wi-Fiకి కనెక్ట్ చేయడం సాధ్యపడలేదు"</string>
@@ -1803,8 +1805,7 @@
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"కార్యాలయం <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="lock_to_app_toast" msgid="7570091317001980053">"ఈ స్క్రీన్‌ను అన్‌పిన్ చేయడానికి, వెనుకకు మరియు అవలోకనం బటన్‌లను ఒకేసారి నొక్కి, ఉంచండి."</string>
     <string name="lock_to_app_toast_accessible" msgid="8239120109365070664">"ఈ స్క్రీన్‌ని అన్‌పిన్ చేయడానికి, అవలోకనం నొక్కి, ఉంచండి."</string>
-    <!-- no translation found for lock_to_app_toast_locked (9125176335701699164) -->
-    <skip />
+    <string name="lock_to_app_toast_locked" msgid="9125176335701699164">"అనువర్తనం పిన్ చేయబడింది: ఈ పరికరంలో అన్‌పిన్ చేయడానికి అనుమతి లేదు."</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"స్క్రీన్ పిన్ చేయబడింది"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"స్క్రీన్ అన్‌పిన్ చేయబడింది"</string>
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"అన్‌పిన్ చేయడానికి ముందు పిన్‌ కోసం అడుగు"</string>

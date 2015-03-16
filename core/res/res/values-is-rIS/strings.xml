@@ -123,6 +123,10 @@
     <string name="roamingText11" msgid="4154476854426920970">"Kveikt á reikiborða"</string>
     <string name="roamingText12" msgid="1189071119992726320">"Slökkt á reikiborða"</string>
     <string name="roamingTextSearching" msgid="8360141885972279963">"Leitar að þjónustu"</string>
+    <!-- no translation found for wfcRegErrorTitle (2301376280632110664) -->
+    <skip />
+  <string-array name="wfcOperatorErrorMessages">
+  </string-array>
     <string name="cfTemplateNotForwarded" msgid="1683685883841272560">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: Ekki áframsent"</string>
     <string name="cfTemplateForwarded" msgid="1302922117498590521">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
     <string name="cfTemplateForwardedTime" msgid="9206251736527085256">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g> eftir <xliff:g id="TIME_DELAY">{2}</xliff:g> sekúndur"</string>
@@ -1265,14 +1269,10 @@
     <string name="old_app_description" msgid="2082094275580358049">"Ekki ræsa nýja forritið."</string>
     <string name="new_app_action" msgid="5472756926945440706">"Ræsa <xliff:g id="OLD_APP">%1$s</xliff:g>"</string>
     <string name="new_app_description" msgid="1932143598371537340">"Stöðva gamla forritið án þess að vista."</string>
-    <!-- no translation found for dump_heap_notification (2618183274836056542) -->
-    <skip />
-    <!-- no translation found for dump_heap_notification_detail (2075673362317481664) -->
-    <skip />
-    <!-- no translation found for dump_heap_title (5864292264307651673) -->
-    <skip />
-    <!-- no translation found for dump_heap_text (4809417337240334941) -->
-    <skip />
+    <string name="dump_heap_notification" msgid="2618183274836056542">"<xliff:g id="PROC">%1$s</xliff:g> er yfir minnishámarki"</string>
+    <string name="dump_heap_notification_detail" msgid="2075673362317481664">"Minnisgögnum hefur verið safnað, snertu til að deila"</string>
+    <string name="dump_heap_title" msgid="5864292264307651673">"Deila minnisgögnum?"</string>
+    <string name="dump_heap_text" msgid="4809417337240334941">"Ferlið <xliff:g id="PROC">%1$s</xliff:g> er komið yfir <xliff:g id="SIZE">%2$s</xliff:g> minnishámark sitt. Þú getur deilt minnisgögnum (heap dump) með þróunaraðilanum. Athugaðu að minnisgögnin kunna að innihalda allar þær persónuupplýsingar sem forritið hefur aðgang að um þig."</string>
     <string name="sendText" msgid="5209874571959469142">"Veldu aðgerð fyrir texta"</string>
     <string name="volume_ringtone" msgid="6885421406845734650">"Hljóðstyrkur hringingar"</string>
     <string name="volume_music" msgid="5421651157138628171">"Hljóðstyrkur efnisspilunar"</string>
@@ -1301,8 +1301,10 @@
       <item quantity="one">Opin Wi-Fi net í boði</item>
       <item quantity="other">Opin Wi-Fi net í boði</item>
     </plurals>
-    <string name="wifi_available_sign_in" msgid="4029489716605255386">"Skrá inn á Wi-Fi net"</string>
-    <string name="network_available_sign_in" msgid="8495155593358054676">"Skrá inn á net"</string>
+    <!-- no translation found for wifi_available_sign_in (9157196203958866662) -->
+    <skip />
+    <!-- no translation found for network_available_sign_in (1848877297365446605) -->
+    <skip />
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
     <skip />
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"Ekki var hægt að tengjast Wi-Fi"</string>
@@ -1803,8 +1805,7 @@
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"<xliff:g id="LABEL">%1$s</xliff:g> í vinnu"</string>
     <string name="lock_to_app_toast" msgid="7570091317001980053">"Til að taka lásinn af þessari skjámynd skaltu halda inni Til baka og Yfirliti samtímis."</string>
     <string name="lock_to_app_toast_accessible" msgid="8239120109365070664">"Til að taka lásinn af þessari skjámynd skaltu halda inni Yfirliti."</string>
-    <!-- no translation found for lock_to_app_toast_locked (9125176335701699164) -->
-    <skip />
+    <string name="lock_to_app_toast_locked" msgid="9125176335701699164">"Forritið er fest: Ekki er hægt að losa forrit í þessu tæki."</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"Skjár festur"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"Skjár opnaður"</string>
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Biðja um PIN-númer til að losa"</string>

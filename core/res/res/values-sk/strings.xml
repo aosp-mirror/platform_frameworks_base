@@ -125,6 +125,10 @@
     <string name="roamingText11" msgid="4154476854426920970">"Banner roamingu je zapnutý"</string>
     <string name="roamingText12" msgid="1189071119992726320">"Banner roamingu je vypnutý"</string>
     <string name="roamingTextSearching" msgid="8360141885972279963">"Vyhľadávanie služby"</string>
+    <!-- no translation found for wfcRegErrorTitle (2301376280632110664) -->
+    <skip />
+  <string-array name="wfcOperatorErrorMessages">
+  </string-array>
     <string name="cfTemplateNotForwarded" msgid="1683685883841272560">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: Nepresmerované"</string>
     <string name="cfTemplateForwarded" msgid="1302922117498590521">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
     <string name="cfTemplateForwardedTime" msgid="9206251736527085256">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g> po <xliff:g id="TIME_DELAY">{2}</xliff:g> s"</string>
@@ -1275,14 +1279,10 @@
     <string name="old_app_description" msgid="2082094275580358049">"Nespúšťať novú aplikáciu."</string>
     <string name="new_app_action" msgid="5472756926945440706">"Spustiť <xliff:g id="OLD_APP">%1$s</xliff:g>"</string>
     <string name="new_app_description" msgid="1932143598371537340">"Zastaviť starú aplikáciu bez uloženia."</string>
-    <!-- no translation found for dump_heap_notification (2618183274836056542) -->
-    <skip />
-    <!-- no translation found for dump_heap_notification_detail (2075673362317481664) -->
-    <skip />
-    <!-- no translation found for dump_heap_title (5864292264307651673) -->
-    <skip />
-    <!-- no translation found for dump_heap_text (4809417337240334941) -->
-    <skip />
+    <string name="dump_heap_notification" msgid="2618183274836056542">"Proces <xliff:g id="PROC">%1$s</xliff:g> prekročil limit pamäte"</string>
+    <string name="dump_heap_notification_detail" msgid="2075673362317481664">"Boli zhromaždené zálohy údajov; zdieľajte ich klepnutím"</string>
+    <string name="dump_heap_title" msgid="5864292264307651673">"Chcete zdieľať zálohy údajov?"</string>
+    <string name="dump_heap_text" msgid="4809417337240334941">"Proces <xliff:g id="PROC">%1$s</xliff:g> prekročil limit <xliff:g id="SIZE">%2$s</xliff:g> pre pamäť procesu. Máte k dispozícii zálohy údajov, ktoré môžete zdieľať s vývojárom. Postupujte opatrne: tieto zálohy údajov nesmú obsahovať žiadne osobné informácie, ku ktorým má táto aplikácia prístup."</string>
     <string name="sendText" msgid="5209874571959469142">"Zvoľte akciu pre text"</string>
     <string name="volume_ringtone" msgid="6885421406845734650">"Hlasitosť vyzváňania"</string>
     <string name="volume_music" msgid="5421651157138628171">"Hlasitosť médií"</string>
@@ -1315,8 +1315,9 @@
       <item quantity="other">K dispozícii sú verejné siete Wi-Fi</item>
       <item quantity="one">K dispozícii je verejná sieť Wi-Fi</item>
     </plurals>
-    <string name="wifi_available_sign_in" msgid="4029489716605255386">"Prihlásenie sa do siete Wi-Fi"</string>
-    <string name="network_available_sign_in" msgid="8495155593358054676">"Prihláste sa do siete"</string>
+    <string name="wifi_available_sign_in" msgid="9157196203958866662">"Prihlásiť sa do siete Wi-Fi"</string>
+    <!-- no translation found for network_available_sign_in (1848877297365446605) -->
+    <skip />
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
     <skip />
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"Nepodarilo sa pripojiť k sieti Wi-Fi"</string>
@@ -1821,8 +1822,7 @@
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"Práca – <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="lock_to_app_toast" msgid="7570091317001980053">"Ak chcete uvoľniť túto obrazovku, súčasne klepnite na tlačidlá Späť a Prehľad a podržte ich."</string>
     <string name="lock_to_app_toast_accessible" msgid="8239120109365070664">"Ak chcete uvoľniť túto obrazovku, klepnite na tlačidlo Prehľad a podržte ho."</string>
-    <!-- no translation found for lock_to_app_toast_locked (9125176335701699164) -->
-    <skip />
+    <string name="lock_to_app_toast_locked" msgid="9125176335701699164">"Aplikácia je pripnutá. Uvoľnenie nie je na tomto zariadení povolené."</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"Obrazovka bola pripnutá"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"Obrazovka bola uvoľnená"</string>
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Pred uvoľnením požiadať o číslo PIN"</string>
