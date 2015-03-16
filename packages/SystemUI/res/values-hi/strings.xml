@@ -316,7 +316,7 @@
     <string name="interruption_level_none" msgid="3831278883136066646">"कोई नहीं"</string>
     <string name="interruption_level_priority" msgid="6517366750688942030">"प्राथमिकता"</string>
     <string name="interruption_level_all" msgid="1330581184930945764">"सभी"</string>
-    <string name="keyguard_indication_charging_time" msgid="1757251776872835768">"चार्ज हो रहा है (पूर्ण होने में <xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> शेष)"</string>
+    <string name="keyguard_indication_charging_time" msgid="1757251776872835768">"चार्ज हो रहा है (पूरा होने में <xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> बाकी)"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="7305948938141024937">"उपयोगकर्ता स्विच करें"</string>
     <string name="accessibility_multi_user_switch_switcher_with_current" msgid="8434880595284601601">"उपयोगकर्ता स्विच करें, वर्तमान उपयोगकर्ता <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
     <string name="accessibility_multi_user_switch_quick_contact" msgid="3020367729287990475">"प्रोफ़ाइल दिखाएं"</string>
@@ -367,6 +367,10 @@
     <string name="hidden_notifications_text" msgid="2326409389088668981">"आपके द्वारा उन्हें अनलॉक किए जाने से पहले देखें"</string>
     <string name="hidden_notifications_cancel" msgid="3690709735122344913">"नहीं धन्यवाद"</string>
     <string name="hidden_notifications_setup" msgid="41079514801976810">"सेट करें"</string>
+    <!-- no translation found for notification_expand_button_text (1037425494153780718) -->
+    <skip />
+    <!-- no translation found for notification_collapse_button_text (6883253262134328057) -->
+    <skip />
     <string name="zen_mode_and_condition" msgid="4462471036429759903">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
     <string name="screen_pinning_title" msgid="3273740381976175811">"स्‍क्रीन पिन कर दी गई है"</string>
     <string name="screen_pinning_description" msgid="1346522416878235405">"इससे वह तब तक दृश्‍य में रहता है जब तक कि आप उसे अनपिन नहीं कर देते. अनपिन करने के लिए वापस जाएं और अवलोकन करें को एक ही समय पर स्‍पर्श करके रखें."</string>

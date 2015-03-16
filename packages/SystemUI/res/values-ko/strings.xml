@@ -367,6 +367,10 @@
     <string name="hidden_notifications_text" msgid="2326409389088668981">"잠금 해제하기 전에 알림을 봅니다."</string>
     <string name="hidden_notifications_cancel" msgid="3690709735122344913">"사용 안함"</string>
     <string name="hidden_notifications_setup" msgid="41079514801976810">"설정"</string>
+    <!-- no translation found for notification_expand_button_text (1037425494153780718) -->
+    <skip />
+    <!-- no translation found for notification_collapse_button_text (6883253262134328057) -->
+    <skip />
     <string name="zen_mode_and_condition" msgid="4462471036429759903">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
     <string name="screen_pinning_title" msgid="3273740381976175811">"화면 고정됨"</string>
     <string name="screen_pinning_description" msgid="1346522416878235405">"고정 해제하기 전까지 계속 표시됩니다. 고정 해제하려면 뒤로와 개요를 동시에 길게 터치합니다."</string>

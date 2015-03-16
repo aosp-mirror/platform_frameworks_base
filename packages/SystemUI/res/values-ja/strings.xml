@@ -369,6 +369,10 @@
     <string name="hidden_notifications_text" msgid="2326409389088668981">"ロックを解除する前にご確認ください"</string>
     <string name="hidden_notifications_cancel" msgid="3690709735122344913">"キャンセル"</string>
     <string name="hidden_notifications_setup" msgid="41079514801976810">"設定"</string>
+    <!-- no translation found for notification_expand_button_text (1037425494153780718) -->
+    <skip />
+    <!-- no translation found for notification_collapse_button_text (6883253262134328057) -->
+    <skip />
     <string name="zen_mode_and_condition" msgid="4462471036429759903">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>。<xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
     <string name="screen_pinning_title" msgid="3273740381976175811">"画面が固定されました"</string>
     <string name="screen_pinning_description" msgid="1346522416878235405">"固定を解除するまで画面が常に表示されるようになります。[戻る]と[最近]を同時に押し続けると固定が解除されます。"</string>

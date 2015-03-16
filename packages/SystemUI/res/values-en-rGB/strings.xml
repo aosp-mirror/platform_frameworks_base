@@ -367,6 +367,8 @@
     <string name="hidden_notifications_text" msgid="2326409389088668981">"See them before you unlock"</string>
     <string name="hidden_notifications_cancel" msgid="3690709735122344913">"No, thanks"</string>
     <string name="hidden_notifications_setup" msgid="41079514801976810">"Setup"</string>
+    <string name="notification_expand_button_text" msgid="1037425494153780718">"See all"</string>
+    <string name="notification_collapse_button_text" msgid="6883253262134328057">"Hide all"</string>
     <string name="zen_mode_and_condition" msgid="4462471036429759903">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
     <string name="screen_pinning_title" msgid="3273740381976175811">"Screen is pinned"</string>
     <string name="screen_pinning_description" msgid="1346522416878235405">"This keeps it in view until you unpin. Touch and hold Back and Overview at the same time to unpin."</string>

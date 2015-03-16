@@ -367,6 +367,10 @@
     <string name="hidden_notifications_text" msgid="2326409389088668981">"ເບິ່ງພວກ​ມັນກ່ອນ​ທ່ານຈະ​ປົດລັອກ"</string>
     <string name="hidden_notifications_cancel" msgid="3690709735122344913">"ບໍ່, ຂອບໃຈ"</string>
     <string name="hidden_notifications_setup" msgid="41079514801976810">"ຕັ້ງຄ່າ"</string>
+    <!-- no translation found for notification_expand_button_text (1037425494153780718) -->
+    <skip />
+    <!-- no translation found for notification_collapse_button_text (6883253262134328057) -->
+    <skip />
     <string name="zen_mode_and_condition" msgid="4462471036429759903">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
     <string name="screen_pinning_title" msgid="3273740381976175811">"ປັກ​ໝຸດໜ້າ​ຈໍ​ແລ້ວ"</string>
     <string name="screen_pinning_description" msgid="1346522416878235405">"ມັນ​ຈະ​ຮັກ​ສາ​ໜ້າ​ຈໍ​ໄວ້​ໃນ​ມຸມມອງ​ຂອງ​ທ່ານ​ຈົນ​ກວ່າ​ທ່ານ​ຈະ​ຖອດ​ໝຸດ. ​ແຕະ​ປຸ່ມ ກັບ​ຄືນ ແລະ ພາບ​ຮວມ​ ຄ້າງ​ໄວ້​ພ້ອມ​ກັນ​ເພື່ອ​ຖອດ​ໝຸດ."</string>

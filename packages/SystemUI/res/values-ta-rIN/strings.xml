@@ -367,6 +367,10 @@
     <string name="hidden_notifications_text" msgid="2326409389088668981">"திறக்கும் முன் அவற்றைப் பார்க்கவும்"</string>
     <string name="hidden_notifications_cancel" msgid="3690709735122344913">"வேண்டாம்"</string>
     <string name="hidden_notifications_setup" msgid="41079514801976810">"அமை"</string>
+    <!-- no translation found for notification_expand_button_text (1037425494153780718) -->
+    <skip />
+    <!-- no translation found for notification_collapse_button_text (6883253262134328057) -->
+    <skip />
     <string name="zen_mode_and_condition" msgid="4462471036429759903">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
     <string name="screen_pinning_title" msgid="3273740381976175811">"திரை பொருத்தப்பட்டது"</string>
     <string name="screen_pinning_description" msgid="1346522416878235405">"பொருத்தியதை விலக்கும்வரை இதைக் காட்சியில் வைக்கும். விலக்க, பின் மற்றும் மேலோட்டப் பார்வையை ஒரே நேரத்தில் தொட்டுப் பிடிக்கவும்."</string>

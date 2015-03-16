@@ -367,6 +367,10 @@
     <string name="hidden_notifications_text" msgid="2326409389088668981">"അൺലോക്കുചെയ്യുന്നതിന് മുമ്പ് അവ കാണുക"</string>
     <string name="hidden_notifications_cancel" msgid="3690709735122344913">"വേണ്ട, നന്ദി"</string>
     <string name="hidden_notifications_setup" msgid="41079514801976810">"സജ്ജീകരിക്കുക"</string>
+    <!-- no translation found for notification_expand_button_text (1037425494153780718) -->
+    <skip />
+    <!-- no translation found for notification_collapse_button_text (6883253262134328057) -->
+    <skip />
     <string name="zen_mode_and_condition" msgid="4462471036429759903">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
     <string name="screen_pinning_title" msgid="3273740381976175811">"സ്‌ക്രീൻ പിൻ ചെയ്‌തു"</string>
     <string name="screen_pinning_description" msgid="1346522416878235405">"നിങ്ങൾ അൺപിൻ ചെയ്യുന്നതുവരെ ഇത് കാണുന്ന വിധത്തിൽ നിലനിർത്തുന്നു. അൺപിൻ ചെയ്യാൻ \'മടങ്ങുക\', \'ചുരുക്കവിവരണം\' എന്നിവ ഒരേ സമയം സ്‌പർശിച്ച് പിടിക്കുക."</string>
