@@ -42,6 +42,7 @@ public final class TvTrackInfo implements Parcelable {
     private final int mType;
     private final String mId;
     private final String mLanguage;
+    private final String mDescription;
     private final int mAudioChannelCount;
     private final int mAudioSampleRate;
     private final int mVideoWidth;
@@ -49,12 +50,13 @@ public final class TvTrackInfo implements Parcelable {
     private final float mVideoFrameRate;
     private final Bundle mExtra;
 
-    private TvTrackInfo(int type, String id, String language, int audioChannelCount,
-            int audioSampleRate, int videoWidth, int videoHeight, float videoFrameRate,
-            Bundle extra) {
+    private TvTrackInfo(int type, String id, String language, String description,
+            int audioChannelCount, int audioSampleRate, int videoWidth, int videoHeight,
+            float videoFrameRate, Bundle extra) {
         mType = type;
         mId = id;
         mLanguage = language;
+        mDescription = description;
         mAudioChannelCount = audioChannelCount;
         mAudioSampleRate = audioSampleRate;
         mVideoWidth = videoWidth;
@@ -67,6 +69,7 @@ public final class TvTrackInfo implements Parcelable {
         mType = in.readInt();
         mId = in.readString();
         mLanguage = in.readString();
+        mDescription = in.readString();
         mAudioChannelCount = in.readInt();
         mAudioSampleRate = in.readInt();
         mVideoWidth = in.readInt();
@@ -96,6 +99,13 @@ public final class TvTrackInfo implements Parcelable {
      */
     public final String getLanguage() {
         return mLanguage;
+    }
+
+    /**
+     * Returns a user readable description for the current track.
+     */
+    public final String getDescription() {
+        return mDescription;
     }
 
     /**
@@ -174,6 +184,7 @@ public final class TvTrackInfo implements Parcelable {
         dest.writeInt(mType);
         dest.writeString(mId);
         dest.writeString(mLanguage);
+        dest.writeString(mDescription);
         dest.writeInt(mAudioChannelCount);
         dest.writeInt(mAudioSampleRate);
         dest.writeInt(mVideoWidth);
@@ -202,6 +213,7 @@ public final class TvTrackInfo implements Parcelable {
         private final String mId;
         private final int mType;
         private String mLanguage;
+        private String mDescription;
         private int mAudioChannelCount;
         private int mAudioSampleRate;
         private int mVideoWidth;
@@ -237,6 +249,16 @@ public final class TvTrackInfo implements Parcelable {
          */
         public final Builder setLanguage(String language) {
             mLanguage = language;
+            return this;
+        }
+
+        /**
+         * Sets a user readable description for the current track.
+         *
+         * @param description The user readable description.
+         */
+        public final Builder setDescription(String description) {
+            mDescription = description;
             return this;
         }
 
@@ -325,8 +347,8 @@ public final class TvTrackInfo implements Parcelable {
          * @return The new {@link TvTrackInfo} instance
          */
         public TvTrackInfo build() {
-            return new TvTrackInfo(mType, mId, mLanguage, mAudioChannelCount, mAudioSampleRate,
-                    mVideoWidth, mVideoHeight, mVideoFrameRate, mExtra);
+            return new TvTrackInfo(mType, mId, mLanguage, mDescription, mAudioChannelCount,
+                    mAudioSampleRate, mVideoWidth, mVideoHeight, mVideoFrameRate, mExtra);
         }
     }
 }
