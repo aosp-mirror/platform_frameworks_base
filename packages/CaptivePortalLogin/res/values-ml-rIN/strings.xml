@@ -4,5 +4,6 @@
     <string name="app_name" msgid="5934709770924185752">"CaptivePortalLogin"</string>
     <string name="action_use_network" msgid="6076184727448466030">"ഈ നെറ്റ്‌വർക്ക് മാറ്റമൊന്നും വരുത്താതെ ഉപയോഗിക്കുക"</string>
     <string name="action_do_not_use_network" msgid="4577366536956516683">"ഈ നെറ്റ്‌വർക്ക് ഉപയോഗിക്കരുത്"</string>
-    <string name="action_bar_label" msgid="2573986763322074279">"നെറ്റ്‌വർക്കിൽ സൈൻ ഇൻ ചെയ്യുക"</string>
+    <!-- no translation found for action_bar_label (917235635415966620) -->
+    <skip />
 </resources>
