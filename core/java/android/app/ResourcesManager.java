@@ -27,6 +27,7 @@ import android.content.res.ResourcesKey;
 import android.hardware.display.DisplayManagerGlobal;
 import android.util.ArrayMap;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.util.Pair;
 import android.util.Slog;
 import android.view.Display;
@@ -164,7 +165,7 @@ public class ResourcesManager {
 
             WeakReference<Resources> wr = mActiveResources.get(key);
             r = wr != null ? wr.get() : null;
-            //if (r != null) Slog.i(TAG, "isUpToDate " + resDir + ": " + r.getAssets().isUpToDate());
+            //if (r != null) Log.i(TAG, "isUpToDate " + resDir + ": " + r.getAssets().isUpToDate());
             if (r != null && r.getAssets().isUpToDate()) {
                 if (DEBUG) Slog.w(TAG, "Returning cached resources " + r + " " + resDir
                         + ": appScale=" + r.getCompatibilityInfo().applicationScale
@@ -174,7 +175,7 @@ public class ResourcesManager {
         }
 
         //if (r != null) {
-        //    Slog.w(TAG, "Throwing away out-of-date resources!!!! "
+        //    Log.w(TAG, "Throwing away out-of-date resources!!!! "
         //            + r + " " + resDir);
         //}
 
@@ -204,14 +205,18 @@ public class ResourcesManager {
 
         if (libDirs != null) {
             for (String libDir : libDirs) {
-                if (assets.addAssetPath(libDir) == 0) {
-                    Slog.w(TAG, "Asset path '" + libDir +
-                            "' does not exist or contains no resources.");
+                if (libDir.endsWith(".apk")) {
+                    // Avoid opening files we know do not have resources,
+                    // like code-only .jar files.
+                    if (assets.addAssetPath(libDir) == 0) {
+                        Log.w(TAG, "Asset path '" + libDir +
+                                "' does not exist or contains no resources.");
+                    }
                 }
             }
         }
 
-        //Slog.i(TAG, "Resource: key=" + key + ", display metrics=" + metrics);
+        //Log.i(TAG, "Resource: key=" + key + ", display metrics=" + metrics);
         DisplayMetrics dm = getDisplayMetricsLocked(displayId);
         Configuration config;
         final boolean isDefaultDisplay = (displayId == Display.DEFAULT_DISPLAY);
