@@ -420,6 +420,25 @@ public final class MediaFormat {
     public static final String KEY_QUALITY = "quality";
 
     /**
+     * A key describing the desired codec priority.
+     * <p>
+     * The associated value is an integer. Higher value means lower priority.
+     * <p>
+     * Currently, only two levels are supported:<br>
+     * 0: realtime priority - meaning that the codec shall support the given
+     *    performance configuration (e.g. framerate) at realtime. This should
+     *    only be used by media playback, capture, and possibly by realtime
+     *    communication scenarios if best effort performance is not suitable.<br>
+     * 1: non-realtime priority (best effort).
+     * <p>
+     * This is a hint used at codec configuration and resource planning - to understand
+     * the realtime requirements of the application; however, due to the nature of
+     * media components, performance is not guaranteed.
+     *
+     */
+    public static final String KEY_PRIORITY = "priority";
+
+    /**
      * A key describing the desired profile to be used by an encoder.
      * Constants are declared in {@link MediaCodecInfo.CodecProfileLevel}.
      * This key is only supported for codecs that specify a profile.
