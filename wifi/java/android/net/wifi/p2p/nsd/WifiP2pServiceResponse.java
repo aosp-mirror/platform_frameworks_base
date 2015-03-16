@@ -334,7 +334,7 @@ public class WifiP2pServiceResponse implements Parcelable {
         result = 31 * result + mTransId;
         result = 31 * result + (mDevice.deviceAddress == null ?
                 0 : mDevice.deviceAddress.hashCode());
-        result = 31 * result + (mData == null ? 0 : mData.hashCode());
+        result = 31 * result + (mData == null ? 0 : Arrays.hashCode(mData));
         return result;
     }
 
