@@ -22,9 +22,9 @@
     <string name="app_label" msgid="7164937344850004466">"UI sistem"</string>
     <string name="status_bar_clear_all_button" msgid="7774721344716731603">"Ștergeţi"</string>
     <string name="status_bar_recent_remove_item_title" msgid="6026395868129852968">"Eliminaţi din listă"</string>
-    <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"Informaţii despre aplicaţie"</string>
+    <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"Informaţii despre aplicație"</string>
     <string name="status_bar_no_recent_apps" msgid="7374907845131203189">"Ecranele dvs. recente apar aici"</string>
-    <string name="status_bar_accessibility_dismiss_recents" msgid="4576076075226540105">"Renunţaţi la aplicaţiile recente"</string>
+    <string name="status_bar_accessibility_dismiss_recents" msgid="4576076075226540105">"Renunţaţi la aplicațiile recente"</string>
   <plurals name="status_bar_accessibility_recent_apps">
     <item quantity="one" msgid="3969335317929254918">"1 ecran în Vizualizare generală"</item>
     <item quantity="other" msgid="5523506463832158203">"%d ecrane în Vizualizare generală"</item>
@@ -52,8 +52,8 @@
     <string name="bluetooth_tethered" msgid="7094101612161133267">"Conectat prin tethering prin Bluetooth"</string>
     <string name="status_bar_input_method_settings_configure_input_methods" msgid="3504292471512317827">"Setaţi metode introducere text"</string>
     <string name="status_bar_use_physical_keyboard" msgid="7551903084416057810">"Tastatură fizică"</string>
-    <string name="usb_device_permission_prompt" msgid="834698001271562057">"Permiteţi aplicaţiei <xliff:g id="APPLICATION">%1$s</xliff:g> să acceseze dispozitivul USB?"</string>
-    <string name="usb_accessory_permission_prompt" msgid="5171775411178865750">"Permiteţi aplicaţiei <xliff:g id="APPLICATION">%1$s</xliff:g> să acceseze accesoriul USB?"</string>
+    <string name="usb_device_permission_prompt" msgid="834698001271562057">"Permiteţi aplicației <xliff:g id="APPLICATION">%1$s</xliff:g> să acceseze dispozitivul USB?"</string>
+    <string name="usb_accessory_permission_prompt" msgid="5171775411178865750">"Permiteţi aplicației <xliff:g id="APPLICATION">%1$s</xliff:g> să acceseze accesoriul USB?"</string>
     <string name="usb_device_confirm_prompt" msgid="5161205258635253206">"Deschideţi <xliff:g id="ACTIVITY">%1$s</xliff:g> la conectarea acestui dispozitiv USB?"</string>
     <string name="usb_accessory_confirm_prompt" msgid="3808984931830229888">"Deschideţi <xliff:g id="ACTIVITY">%1$s</xliff:g> la conectarea acestui accesoriu USB?"</string>
     <string name="usb_accessory_uri_prompt" msgid="513450621413733343">"Aplic. instal. nu funcţ. cu acest acces. USB. Aflaţi despre acest accesoriu la <xliff:g id="URL">%1$s</xliff:g>"</string>
