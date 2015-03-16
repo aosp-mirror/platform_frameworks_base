@@ -16,6 +16,8 @@
 
 package android.widget;
 
+import android.annotation.IdRes;
+import android.annotation.LayoutRes;
 import android.content.Context;
 import android.content.res.Resources;
 import android.view.ContextThemeWrapper;
@@ -82,7 +84,7 @@ public class SimpleAdapter extends BaseAdapter implements Filterable, Spinner.Th
      *        in the from parameter.
      */
     public SimpleAdapter(Context context, List<? extends Map<String, ?>> data,
-            int resource, String[] from, int[] to) {
+            @LayoutRes int resource, String[] from, @IdRes int[] to) {
         mData = data;
         mResource = mDropDownResource = resource;
         mFrom = from;

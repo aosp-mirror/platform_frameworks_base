@@ -17,6 +17,7 @@
 package android.preference;
 
 import android.annotation.Nullable;
+import android.annotation.XmlRes;
 import android.app.Activity;
 import android.app.Fragment;
 import android.content.Intent;
@@ -294,7 +295,7 @@ public abstract class PreferenceFragment extends Fragment implements
      *
      * @param preferencesResId The XML resource ID to inflate.
      */
-    public void addPreferencesFromResource(int preferencesResId) {
+    public void addPreferencesFromResource(@XmlRes int preferencesResId) {
         requirePreferenceManager();
 
         setPreferenceScreen(mPreferenceManager.inflateFromResource(getActivity(),

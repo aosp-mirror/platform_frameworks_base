@@ -918,7 +918,7 @@ public class TextToSpeech {
      *
      * @return Code indicating success or failure. See {@link #ERROR} and {@link #SUCCESS}.
      */
-    public int addSpeech(CharSequence text, String packagename, int resourceId) {
+    public int addSpeech(CharSequence text, String packagename, @RawRes int resourceId) {
         synchronized (mStartLock) {
             mUtterances.put(text, makeResourceUri(packagename, resourceId));
             return SUCCESS;

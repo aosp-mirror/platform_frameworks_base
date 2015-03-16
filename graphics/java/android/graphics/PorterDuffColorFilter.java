@@ -16,6 +16,7 @@
 
 package android.graphics;
 
+import android.annotation.ColorInt;
 import android.annotation.NonNull;
 
 /**
@@ -36,7 +37,7 @@ public class PorterDuffColorFilter extends ColorFilter {
      * @see #setColor(int)
      * @see #setMode(android.graphics.PorterDuff.Mode)
      */
-    public PorterDuffColorFilter(int color, @NonNull PorterDuff.Mode mode) {
+    public PorterDuffColorFilter(@ColorInt int color, @NonNull PorterDuff.Mode mode) {
         mColor = color;
         mMode = mode;
         update();
