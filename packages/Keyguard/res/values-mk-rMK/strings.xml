@@ -123,10 +123,10 @@
     <string name="kg_invalid_puk" msgid="3638289409676051243">"Повторно внесете го точниот ПУК код. Повторните обиди трајно ќе ја оневозможат СИМ картичката."</string>
     <string name="kg_invalid_confirm_pin_hint" product="default" msgid="7003469261464593516">"ПИН кодовите не се совпаѓаат"</string>
     <string name="kg_login_too_many_attempts" msgid="6486842094005698475">"Премногу обиди со шема"</string>
-    <string name="kg_login_instructions" msgid="1100551261265506448">"За да го отклучите, пријавете се со вашата сметка на Google."</string>
+    <string name="kg_login_instructions" msgid="1100551261265506448">"За да го отклучите, најавете се со вашата сметка на Google."</string>
     <string name="kg_login_username_hint" msgid="5718534272070920364">"Корисничко име (е-пошта)"</string>
     <string name="kg_login_password_hint" msgid="9057289103827298549">"Лозинка"</string>
-    <string name="kg_login_submit_button" msgid="5355904582674054702">"Пријави се"</string>
+    <string name="kg_login_submit_button" msgid="5355904582674054702">"Најави се"</string>
     <string name="kg_login_invalid_input" msgid="5754664119319872197">"Неважечко корисничко име или лозинка."</string>
     <string name="kg_login_account_recovery_hint" msgid="5690709132841752974">"Го заборави своето корисничко име или лозинката?\nПосети"<b>"google.com/accounts/recovery"</b>"."</string>
     <string name="kg_login_checking_password" msgid="1052685197710252395">"Сметката се проверува..."</string>
