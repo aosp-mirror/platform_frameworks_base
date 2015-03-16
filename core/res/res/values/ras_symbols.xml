@@ -5,4 +5,5 @@
     <java-symbol type="integer" name="ras_config_kill_app_long_press_back_key_timeout" />
     <!-- Package Manager -->
     <java-symbol type="array" name="config_disabledComponents" />
+    <java-symbol type="array" name="config_forceEnabledComponents" />
 </resources>
