@@ -37,6 +37,7 @@
 
 #include <SkPath.h>
 #include <SkPaint.h>
+#include <SkGeometry.h> // WARNING: Internal Skia Header
 
 #include <stdlib.h>
 #include <stdint.h>
@@ -951,6 +952,21 @@ bool PathTessellator::approximatePathOutlineVertices(const SkPath& path, bool fo
                         pts[2].x(), pts[2].y(),
                         sqrInvScaleX, sqrInvScaleY, thresholdSquared, outputVertices);
                 break;
+            case SkPath::kConic_Verb: {
+                ALOGV("kConic_Verb");
+                SkAutoConicToQuads converter;
+                const SkPoint* quads = converter.computeQuads(pts, iter.conicWeight(),
+                        thresholdSquared);
+                for (int i = 0; i < converter.countQuads(); ++i) {
+                    const int offset = 2 * i;
+                    recursiveQuadraticBezierVertices(
+                            quads[offset].x(), quads[offset].y(),
+                            quads[offset+2].x(), quads[offset+2].y(),
+                            quads[offset+1].x(), quads[offset+1].y(),
+                            sqrInvScaleX, sqrInvScaleY, thresholdSquared, outputVertices);
+                }
+                break;
+            }
             default:
                 break;
             }
