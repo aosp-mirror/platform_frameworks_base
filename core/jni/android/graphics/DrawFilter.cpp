@@ -32,23 +32,23 @@
 
 namespace android {
 
-// Custom version of SkPaintFlagsDrawFilter that also calls setFilterLevel.
+// Custom version of SkPaintFlagsDrawFilter that also calls setFilterQuality.
 class CompatFlagsDrawFilter : public SkPaintFlagsDrawFilter {
 public:
     CompatFlagsDrawFilter(uint32_t clearFlags, uint32_t setFlags,
-            SkPaint::FilterLevel desiredLevel)
+            SkFilterQuality desiredQuality)
     : SkPaintFlagsDrawFilter(clearFlags, setFlags)
-    , fDesiredLevel(desiredLevel) {
+    , fDesiredQuality(desiredQuality) {
     }
 
     virtual bool filter(SkPaint* paint, Type type) {
         SkPaintFlagsDrawFilter::filter(paint, type);
-        paint->setFilterLevel(fDesiredLevel);
+        paint->setFilterQuality(fDesiredQuality);
         return true;
     }
 
 private:
-    const SkPaint::FilterLevel fDesiredLevel;
+    const SkFilterQuality fDesiredQuality;
 };
 
 // Returns whether flags contains FILTER_BITMAP_FLAG. If flags does, remove it.
@@ -74,7 +74,7 @@ public:
         if (clearFlags | setFlags) {
             // Mask both groups of flags to remove FILTER_BITMAP_FLAG, which no
             // longer has a Skia equivalent flag (instead it corresponds to
-            // calling setFilterLevel), and keep track of which group(s), if
+            // calling setFilterQuality), and keep track of which group(s), if
             // any, had the flag set.
             const bool turnFilteringOn = hadFiltering(setFlags);
             const bool turnFilteringOff = hadFiltering(clearFlags);
@@ -83,10 +83,10 @@ public:
             if (turnFilteringOn) {
                 // Turning filtering on overrides turning it off.
                 filter = new CompatFlagsDrawFilter(clearFlags, setFlags,
-                        SkPaint::kLow_FilterLevel);
+                        kLow_SkFilterQuality);
             } else if (turnFilteringOff) {
                 filter = new CompatFlagsDrawFilter(clearFlags, setFlags,
-                        SkPaint::kNone_FilterLevel);
+                        kNone_SkFilterQuality);
             } else {
                 filter = new SkPaintFlagsDrawFilter(clearFlags, setFlags);
             }

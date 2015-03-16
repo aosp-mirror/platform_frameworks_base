@@ -38,7 +38,7 @@ public:
     }
 
     static inline GLenum getFilter(const SkPaint* paint) {
-        if (!paint || paint->getFilterLevel() != SkPaint::kNone_FilterLevel) {
+        if (!paint || paint->getFilterQuality() != kNone_SkFilterQuality) {
             return GL_LINEAR;
         }
         return GL_NEAREST;
