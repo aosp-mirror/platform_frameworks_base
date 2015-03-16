@@ -352,6 +352,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
         intentFilter.addAction(Intent.ACTION_USER_SWITCHED);
         intentFilter.addAction(Intent.ACTION_USER_REMOVED);
         intentFilter.addAction(Intent.ACTION_USER_PRESENT);
+        intentFilter.addAction(Intent.ACTION_SETTING_RESTORED);
 
         mContext.registerReceiverAsUser(new BroadcastReceiver() {
             @Override
@@ -367,6 +368,15 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                     if (userState.mUiAutomationService == null) {
                         if (readConfigurationForUserStateLocked(userState)) {
                             onUserStateChangedLocked(userState);
+                        }
+                    }
+                } else if (Intent.ACTION_SETTING_RESTORED.equals(action)) {
+                    final String which = intent.getStringExtra(Intent.EXTRA_SETTING_NAME);
+                    if (Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES.equals(which)) {
+                        synchronized (mLock) {
+                            restoreEnabledAccessibilityServicesLocked(
+                                    intent.getStringExtra(Intent.EXTRA_SETTING_PREVIOUS_VALUE),
+                                    intent.getStringExtra(Intent.EXTRA_SETTING_NEW_VALUE));
                         }
                     }
                 }
@@ -857,6 +867,21 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
         }
     }
 
+    // Called only during settings restore; currently supports only the owner user
+    void restoreEnabledAccessibilityServicesLocked(String oldSetting, String newSetting) {
+        readComponentNamesFromStringLocked(oldSetting, mTempComponentNameSet, false);
+        readComponentNamesFromStringLocked(newSetting, mTempComponentNameSet, true);
+
+        UserState userState = getUserStateLocked(UserHandle.USER_OWNER);
+        userState.mEnabledServices.clear();
+        userState.mEnabledServices.addAll(mTempComponentNameSet);
+        persistComponentNamesToSettingLocked(
+                Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES,
+                userState.mEnabledServices,
+                UserHandle.USER_OWNER);
+        onUserStateChangedLocked(userState);
+    }
+
     private InteractionBridge getInteractionBridgeLocked() {
         if (mInteractionBridge == null) {
             mInteractionBridge = new InteractionBridge();
@@ -1129,10 +1154,27 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
             Set<ComponentName> outComponentNames) {
         String settingValue = Settings.Secure.getStringForUser(mContext.getContentResolver(),
                 settingName, userId);
-        outComponentNames.clear();
-        if (settingValue != null) {
+        readComponentNamesFromStringLocked(settingValue, outComponentNames, false);
+    }
+
+    /**
+     * Populates a set with the {@link ComponentName}s contained in a colon-delimited string.
+     *
+     * @param names The colon-delimited string to parse.
+     * @param outComponentNames The set of component names to be populated based on
+     *    the contents of the <code>names</code> string.
+     * @param doMerge If true, the parsed component names will be merged into the output
+     *    set, rather than replacing the set's existing contents entirely.
+     */
+    private void readComponentNamesFromStringLocked(String names,
+            Set<ComponentName> outComponentNames,
+            boolean doMerge) {
+        if (!doMerge) {
+            outComponentNames.clear();
+        }
+        if (names != null) {
             TextUtils.SimpleStringSplitter splitter = mStringColonSplitter;
-            splitter.setString(settingValue);
+            splitter.setString(names);
             while (splitter.hasNext()) {
                 String str = splitter.next();
                 if (str == null || str.length() <= 0) {
