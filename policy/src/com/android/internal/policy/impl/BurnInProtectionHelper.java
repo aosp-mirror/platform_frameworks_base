@@ -1,27 +1,26 @@
 package com.android.internal.policy.impl;
 
+import android.animation.Animator;
+import android.animation.ValueAnimator;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.res.Resources;
 import android.hardware.display.DisplayManager;
 import android.hardware.display.DisplayManagerInternal;
-import android.os.Build;
-import android.os.Handler;
 import android.os.SystemClock;
-import android.os.SystemProperties;
-import android.util.Log;
 import android.view.Display;
+import android.view.animation.LinearInterpolator;
 
 import com.android.server.LocalServices;
 
 import java.io.PrintWriter;
 import java.util.concurrent.TimeUnit;
 
-public class BurnInProtectionHelper implements DisplayManager.DisplayListener {
+public class BurnInProtectionHelper implements DisplayManager.DisplayListener,
+        Animator.AnimatorListener, ValueAnimator.AnimatorUpdateListener {
     private static final String TAG = "BurnInProtection";
 
     // Default value when max burnin radius is not set.
@@ -34,8 +33,11 @@ public class BurnInProtectionHelper implements DisplayManager.DisplayListener {
             "android.internal.policy.action.BURN_IN_PROTECTION";
 
     private static final int BURN_IN_SHIFT_STEP = 2;
+    private static final long CENTERING_ANIMATION_DURATION_MS = 100;
+    private final ValueAnimator mCenteringAnimator;
 
     private boolean mBurnInProtectionActive;
+    private boolean mFirstUpdate;
 
     private final int mMinHorizontalBurnInOffset;
     private final int mMaxHorizontalBurnInOffset;
@@ -66,11 +68,10 @@ public class BurnInProtectionHelper implements DisplayManager.DisplayListener {
     public BurnInProtectionHelper(Context context, int minHorizontalOffset,
             int maxHorizontalOffset, int minVerticalOffset, int maxVerticalOffset,
             int maxOffsetRadius) {
-        final Resources resources = context.getResources();
         mMinHorizontalBurnInOffset = minHorizontalOffset;
         mMaxHorizontalBurnInOffset = maxHorizontalOffset;
         mMinVerticalBurnInOffset = minVerticalOffset;
-        mMaxVerticalBurnInOffset = maxHorizontalOffset;
+        mMaxVerticalBurnInOffset = maxVerticalOffset;
         if (maxOffsetRadius != BURN_IN_MAX_RADIUS_DEFAULT) {
             mBurnInRadiusMaxSquared = maxOffsetRadius * maxOffsetRadius;
         } else {
@@ -90,20 +91,35 @@ public class BurnInProtectionHelper implements DisplayManager.DisplayListener {
                 (DisplayManager) context.getSystemService(Context.DISPLAY_SERVICE);
         mDisplay = displayManager.getDisplay(Display.DEFAULT_DISPLAY);
         displayManager.registerDisplayListener(this, null /* handler */);
+
+        mCenteringAnimator = ValueAnimator.ofFloat(1f, 0f);
+        mCenteringAnimator.setDuration(CENTERING_ANIMATION_DURATION_MS);
+        mCenteringAnimator.setInterpolator(new LinearInterpolator());
+        mCenteringAnimator.addListener(this);
+        mCenteringAnimator.addUpdateListener(this);
     }
 
     public void startBurnInProtection() {
         if (!mBurnInProtectionActive) {
             mBurnInProtectionActive = true;
+            mFirstUpdate = true;
+            mCenteringAnimator.cancel();
             updateBurnInProtection();
         }
     }
 
     private void updateBurnInProtection() {
         if (mBurnInProtectionActive) {
-            adjustOffsets();
-            mDisplayManagerInternal.setDisplayOffsets(mDisplay.getDisplayId(),
-                    mLastBurnInXOffset, mLastBurnInYOffset);
+            // We don't want to adjust offsets immediately after the device goes into ambient mode.
+            // Instead, we want to wait until it's more likely that the user is not observing the
+            // screen anymore.
+            if (mFirstUpdate) {
+                mFirstUpdate = false;
+            } else {
+                adjustOffsets();
+                mDisplayManagerInternal.setDisplayOffsets(mDisplay.getDisplayId(),
+                        mLastBurnInXOffset, mLastBurnInYOffset);
+            }
             // Next adjustment at least ten seconds in the future.
             long next = SystemClock.elapsedRealtime() + BURNIN_PROTECTION_MINIMAL_INTERVAL_MS;
             // And aligned to the minute.
@@ -112,7 +128,7 @@ public class BurnInProtectionHelper implements DisplayManager.DisplayListener {
             mAlarmManager.set(AlarmManager.ELAPSED_REALTIME, next, mBurnInProtectionIntent);
         } else {
             mAlarmManager.cancel(mBurnInProtectionIntent);
-            mDisplayManagerInternal.setDisplayOffsets(mDisplay.getDisplayId(), 0, 0);
+            mCenteringAnimator.start();
         }
     }
 
@@ -196,6 +212,35 @@ public class BurnInProtectionHelper implements DisplayManager.DisplayListener {
             } else {
                 cancelBurnInProtection();
             }
+        }
+    }
+
+    @Override
+    public void onAnimationStart(Animator animator) {
+    }
+
+    @Override
+    public void onAnimationEnd(Animator animator) {
+        if (animator == mCenteringAnimator && !mBurnInProtectionActive) {
+            // No matter how the animation finishes, we want to zero the offsets.
+            mDisplayManagerInternal.setDisplayOffsets(mDisplay.getDisplayId(), 0, 0);
+        }
+    }
+
+    @Override
+    public void onAnimationCancel(Animator animator) {
+    }
+
+    @Override
+    public void onAnimationRepeat(Animator animator) {
+    }
+
+    @Override
+    public void onAnimationUpdate(ValueAnimator valueAnimator) {
+        if (!mBurnInProtectionActive) {
+            final float value = (Float) valueAnimator.getAnimatedValue();
+            mDisplayManagerInternal.setDisplayOffsets(mDisplay.getDisplayId(),
+                    (int) (mLastBurnInXOffset * value), (int) (mLastBurnInYOffset * value));
         }
     }
 }
