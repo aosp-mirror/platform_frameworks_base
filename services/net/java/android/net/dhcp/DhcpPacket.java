@@ -1,6 +1,6 @@
 package android.net.dhcp;
 
-import java.net.InetAddress;
+import java.net.Inet4Address;
 import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -8,6 +8,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.ShortBuffer;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -17,6 +18,9 @@ import java.util.List;
  */
 abstract class DhcpPacket {
     protected static final String TAG = "DhcpPacket";
+
+    public static final Inet4Address INADDR_ANY = (Inet4Address) Inet4Address.ANY;
+    public static final Inet4Address INADDR_BROADCAST = (Inet4Address) Inet4Address.ALL;
 
     /**
      * Packet encapsulations.
@@ -85,19 +89,19 @@ abstract class DhcpPacket {
      * DHCP Optional Type: DHCP Subnet Mask
      */
     protected static final byte DHCP_SUBNET_MASK = 1;
-    protected InetAddress mSubnetMask;
+    protected Inet4Address mSubnetMask;
 
     /**
      * DHCP Optional Type: DHCP Router
      */
     protected static final byte DHCP_ROUTER = 3;
-    protected InetAddress mGateway;
+    protected Inet4Address mGateway;
 
     /**
      * DHCP Optional Type: DHCP DNS Server
      */
     protected static final byte DHCP_DNS_SERVER = 6;
-    protected List<InetAddress> mDnsServers;
+    protected List<Inet4Address> mDnsServers;
 
     /**
      * DHCP Optional Type: DHCP Host Name
@@ -115,13 +119,13 @@ abstract class DhcpPacket {
      * DHCP Optional Type: DHCP BROADCAST ADDRESS
      */
     protected static final byte DHCP_BROADCAST_ADDRESS = 28;
-    protected InetAddress mBroadcastAddress;
+    protected Inet4Address mBroadcastAddress;
 
     /**
      * DHCP Optional Type: DHCP Requested IP Address
      */
     protected static final byte DHCP_REQUESTED_IP = 50;
-    protected InetAddress mRequestedIp;
+    protected Inet4Address mRequestedIp;
 
     /**
      * DHCP Optional Type: DHCP Lease Time
@@ -146,7 +150,7 @@ abstract class DhcpPacket {
      * DHCP Optional Type: DHCP Server Identifier
      */
     protected static final byte DHCP_SERVER_IDENTIFIER = 54;
-    protected InetAddress mServerIdentifier;
+    protected Inet4Address mServerIdentifier;
 
     /**
      * DHCP Optional Type: DHCP Parameter List
@@ -185,10 +189,10 @@ abstract class DhcpPacket {
      * proposed by the client (from an earlier DHCP negotiation) or
      * supplied by the server.
      */
-    protected final InetAddress mClientIp;
-    protected final InetAddress mYourIp;
-    private final InetAddress mNextIp;
-    private final InetAddress mRelayIp;
+    protected final Inet4Address mClientIp;
+    protected final Inet4Address mYourIp;
+    private final Inet4Address mNextIp;
+    private final Inet4Address mRelayIp;
 
     /**
      * Does the client request a broadcast response?
@@ -199,13 +203,6 @@ abstract class DhcpPacket {
      * The six-octet MAC of the client.
      */
     protected final byte[] mClientMac;
-
-    /**
-     * Asks the packet object to signal the next operation in the DHCP
-     * protocol.  The available actions are methods defined in the
-     * DhcpStateMachine interface.
-     */
-    public abstract void doNextOp(DhcpStateMachine stateMachine);
 
     /**
      * Asks the packet object to create a ByteBuffer serialization of
@@ -220,8 +217,8 @@ abstract class DhcpPacket {
      */
     abstract void finishPacket(ByteBuffer buffer);
 
-    protected DhcpPacket(int transId, InetAddress clientIp, InetAddress yourIp,
-                         InetAddress nextIp, InetAddress relayIp,
+    protected DhcpPacket(int transId, Inet4Address clientIp, Inet4Address yourIp,
+                         Inet4Address nextIp, Inet4Address relayIp,
                          byte[] clientMac, boolean broadcast) {
         mTransId = transId;
         mClientIp = clientIp;
@@ -244,8 +241,8 @@ abstract class DhcpPacket {
      * DHCP udp packet.  This method relies upon the delegated method
      * finishPacket() to insert the per-packet contents.
      */
-    protected void fillInPacket(int encap, InetAddress destIp,
-        InetAddress srcIp, short destUdp, short srcUdp, ByteBuffer buf,
+    protected void fillInPacket(int encap, Inet4Address destIp,
+        Inet4Address srcIp, short destUdp, short srcUdp, ByteBuffer buf,
         byte requestCode, boolean broadcast) {
         byte[] destIpArray = destIp.getAddress();
         byte[] srcIpArray = srcIp.getAddress();
@@ -432,7 +429,7 @@ abstract class DhcpPacket {
     /**
      * Adds an optional parameter containing an IP address.
      */
-    protected void addTlv(ByteBuffer buf, byte type, InetAddress addr) {
+    protected void addTlv(ByteBuffer buf, byte type, Inet4Address addr) {
         if (addr != null) {
             addTlv(buf, type, addr.getAddress());
         }
@@ -441,12 +438,12 @@ abstract class DhcpPacket {
     /**
      * Adds an optional parameter containing a list of IP addresses.
      */
-    protected void addTlv(ByteBuffer buf, byte type, List<InetAddress> addrs) {
+    protected void addTlv(ByteBuffer buf, byte type, List<Inet4Address> addrs) {
         if (addrs != null && addrs.size() > 0) {
             buf.put(type);
             buf.put((byte)(4 * addrs.size()));
 
-            for (InetAddress addr : addrs) {
+            for (Inet4Address addr : addrs) {
                 buf.put(addr.getAddress());
             }
         }
@@ -515,13 +512,13 @@ abstract class DhcpPacket {
      * Reads a four-octet value from a ByteBuffer and construct
      * an IPv4 address from that value.
      */
-    private static InetAddress readIpAddress(ByteBuffer packet) {
-        InetAddress result = null;
+    private static Inet4Address readIpAddress(ByteBuffer packet) {
+        Inet4Address result = null;
         byte[] ipAddr = new byte[4];
         packet.get(ipAddr);
 
         try {
-            result = InetAddress.getByAddress(ipAddr);
+            result = (Inet4Address) Inet4Address.getByAddress(ipAddr);
         } catch (UnknownHostException ex) {
             // ipAddr is numeric, so this should not be
             // triggered.  However, if it is, just nullify
@@ -553,25 +550,25 @@ abstract class DhcpPacket {
     {
         // bootp parameters
         int transactionId;
-        InetAddress clientIp;
-        InetAddress yourIp;
-        InetAddress nextIp;
-        InetAddress relayIp;
+        Inet4Address clientIp;
+        Inet4Address yourIp;
+        Inet4Address nextIp;
+        Inet4Address relayIp;
         byte[] clientMac;
-        List<InetAddress> dnsServers = new ArrayList<InetAddress>();
-        InetAddress gateway = null; // aka router
+        List<Inet4Address> dnsServers = new ArrayList<Inet4Address>();
+        Inet4Address gateway = null; // aka router
         Integer leaseTime = null;
-        InetAddress serverIdentifier = null;
-        InetAddress netMask = null;
+        Inet4Address serverIdentifier = null;
+        Inet4Address netMask = null;
         String message = null;
         String vendorId = null;
         byte[] expectedParams = null;
         String hostName = null;
         String domainName = null;
-        InetAddress ipSrc = null;
-        InetAddress ipDst = null;
-        InetAddress bcAddr = null;
-        InetAddress requestedIp = null;
+        Inet4Address ipSrc = null;
+        Inet4Address ipDst = null;
+        Inet4Address bcAddr = null;
+        Inet4Address requestedIp = null;
 
         // dhcp options
         byte dhcpType = (byte) 0xFF;
@@ -635,13 +632,13 @@ abstract class DhcpPacket {
 
         try {
             packet.get(ipv4addr);
-            clientIp = InetAddress.getByAddress(ipv4addr);
+            clientIp = (Inet4Address) Inet4Address.getByAddress(ipv4addr);
             packet.get(ipv4addr);
-            yourIp = InetAddress.getByAddress(ipv4addr);
+            yourIp = (Inet4Address) Inet4Address.getByAddress(ipv4addr);
             packet.get(ipv4addr);
-            nextIp = InetAddress.getByAddress(ipv4addr);
+            nextIp = (Inet4Address) Inet4Address.getByAddress(ipv4addr);
             packet.get(ipv4addr);
-            relayIp = InetAddress.getByAddress(ipv4addr);
+            relayIp = (Inet4Address) Inet4Address.getByAddress(ipv4addr);
         } catch (UnknownHostException ex) {
             return null;
         }
@@ -828,10 +825,10 @@ abstract class DhcpPacket {
      * parameters.
      */
     public static ByteBuffer buildOfferPacket(int encap, int transactionId,
-        boolean broadcast, InetAddress serverIpAddr, InetAddress clientIpAddr,
-        byte[] mac, Integer timeout, InetAddress netMask, InetAddress bcAddr,
-        InetAddress gateway, List<InetAddress> dnsServers,
-        InetAddress dhcpServerIdentifier, String domainName) {
+        boolean broadcast, Inet4Address serverIpAddr, Inet4Address clientIpAddr,
+        byte[] mac, Integer timeout, Inet4Address netMask, Inet4Address bcAddr,
+        Inet4Address gateway, List<Inet4Address> dnsServers,
+        Inet4Address dhcpServerIdentifier, String domainName) {
         DhcpPacket pkt = new DhcpOfferPacket(
             transactionId, broadcast, serverIpAddr, clientIpAddr, mac);
         pkt.mGateway = gateway;
@@ -848,10 +845,10 @@ abstract class DhcpPacket {
      * Builds a DHCP-ACK packet from the required specified parameters.
      */
     public static ByteBuffer buildAckPacket(int encap, int transactionId,
-        boolean broadcast, InetAddress serverIpAddr, InetAddress clientIpAddr,
-        byte[] mac, Integer timeout, InetAddress netMask, InetAddress bcAddr,
-        InetAddress gateway, List<InetAddress> dnsServers,
-        InetAddress dhcpServerIdentifier, String domainName) {
+        boolean broadcast, Inet4Address serverIpAddr, Inet4Address clientIpAddr,
+        byte[] mac, Integer timeout, Inet4Address netMask, Inet4Address bcAddr,
+        Inet4Address gateway, List<Inet4Address> dnsServers,
+        Inet4Address dhcpServerIdentifier, String domainName) {
         DhcpPacket pkt = new DhcpAckPacket(
             transactionId, broadcast, serverIpAddr, clientIpAddr, mac);
         pkt.mGateway = gateway;
@@ -868,7 +865,7 @@ abstract class DhcpPacket {
      * Builds a DHCP-NAK packet from the required specified parameters.
      */
     public static ByteBuffer buildNakPacket(int encap, int transactionId,
-        InetAddress serverIpAddr, InetAddress clientIpAddr, byte[] mac) {
+        Inet4Address serverIpAddr, Inet4Address clientIpAddr, byte[] mac) {
         DhcpPacket pkt = new DhcpNakPacket(transactionId, clientIpAddr,
             serverIpAddr, serverIpAddr, serverIpAddr, mac);
         pkt.mMessage = "requested address not available";
@@ -880,9 +877,9 @@ abstract class DhcpPacket {
      * Builds a DHCP-REQUEST packet from the required specified parameters.
      */
     public static ByteBuffer buildRequestPacket(int encap,
-        int transactionId, InetAddress clientIp, boolean broadcast,
-        byte[] clientMac, InetAddress requestedIpAddress,
-        InetAddress serverIdentifier, byte[] requestedParams, String hostName) {
+        int transactionId, Inet4Address clientIp, boolean broadcast,
+        byte[] clientMac, Inet4Address requestedIpAddress,
+        Inet4Address serverIdentifier, byte[] requestedParams, String hostName) {
         DhcpPacket pkt = new DhcpRequestPacket(transactionId, clientIp,
             clientMac, broadcast);
         pkt.mRequestedIp = requestedIpAddress;

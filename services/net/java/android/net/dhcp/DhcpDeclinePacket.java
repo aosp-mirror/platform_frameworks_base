@@ -16,7 +16,7 @@
 
 package android.net.dhcp;
 
-import java.net.InetAddress;
+import java.net.Inet4Address;
 import java.nio.ByteBuffer;
 
 /**
@@ -26,8 +26,8 @@ class DhcpDeclinePacket extends DhcpPacket {
     /**
      * Generates a DECLINE packet with the specified parameters.
      */
-    DhcpDeclinePacket(int transId, InetAddress clientIp, InetAddress yourIp,
-                      InetAddress nextIp, InetAddress relayIp,
+    DhcpDeclinePacket(int transId, Inet4Address clientIp, Inet4Address yourIp,
+                      Inet4Address nextIp, Inet4Address relayIp,
                       byte[] clientMac) {
         super(transId, clientIp, yourIp, nextIp, relayIp, clientMac, false);
     }
@@ -54,12 +54,5 @@ class DhcpDeclinePacket extends DhcpPacket {
      */
     void finishPacket(ByteBuffer buffer) {
         // None needed
-    }
-
-    /**
-     * Informs the state machine of the arrival of a DECLINE packet.
-     */
-    public void doNextOp(DhcpStateMachine machine) {
-        machine.onDeclineReceived(mClientMac, mRequestedIp);
     }
 }

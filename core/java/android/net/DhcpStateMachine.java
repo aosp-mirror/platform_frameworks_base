@@ -47,7 +47,7 @@ import android.util.Log;
  *
  * @hide
  */
-public class DhcpStateMachine extends StateMachine {
+public class DhcpStateMachine extends BaseDhcpStateMachine {
 
     private static final String TAG = "DhcpStateMachine";
     private static final boolean DBG = false;
@@ -161,6 +161,7 @@ public class DhcpStateMachine extends StateMachine {
      * This is used by Wifi at this time for the purpose of doing BT-Wifi coex
      * handling during Dhcp
      */
+    @Override
     public void registerForPreDhcpNotification() {
         mRegisteredForPreDhcpNotification = true;
     }
@@ -170,6 +171,7 @@ public class DhcpStateMachine extends StateMachine {
      *
      * @hide
      */
+    @Override
     public void doQuit() {
         quit();
     }

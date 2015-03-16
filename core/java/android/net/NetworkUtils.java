@@ -16,9 +16,11 @@
 
 package android.net;
 
+import java.io.FileDescriptor;
 import java.net.InetAddress;
 import java.net.Inet4Address;
 import java.net.Inet6Address;
+import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.util.Collection;
 import java.util.Locale;
@@ -137,6 +139,11 @@ public class NetworkUtils {
      * @return the most recent error message, if any
      */
     public native static String getDhcpError();
+
+    /**
+     * Attaches a socket filter that accepts DHCP packets to the given socket.
+     */
+    public native static void attachDhcpFilter(FileDescriptor fd) throws SocketException;
 
     /**
      * Binds the current process to the network designated by {@code netId}.  All sockets created

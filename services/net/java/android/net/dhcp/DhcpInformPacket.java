@@ -16,56 +16,50 @@
 
 package android.net.dhcp;
 
-import java.net.InetAddress;
 import java.net.Inet4Address;
 import java.nio.ByteBuffer;
 
 /**
- * This class implements the DHCP-DISCOVER packet.
+ * This class implements the (unused) DHCP-INFORM packet.
  */
-class DhcpDiscoverPacket extends DhcpPacket {
+class DhcpInformPacket extends DhcpPacket {
     /**
-     * Generates a DISCOVER packet with the specified parameters.
+     * Generates an INFORM packet with the specified parameters.
      */
-    DhcpDiscoverPacket(int transId, byte[] clientMac, boolean broadcast) {
-        super(transId, Inet4Address.ANY, Inet4Address.ANY, Inet4Address.ANY,
-            Inet4Address.ANY, clientMac, broadcast);
+    DhcpInformPacket(int transId, Inet4Address clientIp, Inet4Address yourIp,
+                     Inet4Address nextIp, Inet4Address relayIp,
+                     byte[] clientMac) {
+        super(transId, clientIp, yourIp, nextIp, relayIp, clientMac, false);
     }
 
     public String toString() {
         String s = super.toString();
-        return s + " DISCOVER " +
-                (mBroadcast ? "broadcast " : "unicast ");
+        return s + " INFORM";
     }
 
     /**
-     * Fills in a packet with the requested DISCOVER parameters.
+     * Builds an INFORM packet.
      */
     public ByteBuffer buildPacket(int encap, short destUdp, short srcUdp) {
         ByteBuffer result = ByteBuffer.allocate(MAX_LENGTH);
-        InetAddress destIp = Inet4Address.ALL;
 
-        fillInPacket(encap, Inet4Address.ALL, Inet4Address.ANY, destUdp, srcUdp,
-            result, DHCP_BOOTREQUEST, true);
+        fillInPacket(encap, mClientIp, mYourIp, destUdp, srcUdp, result,
+            DHCP_BOOTREQUEST, false);
         result.flip();
         return result;
     }
 
     /**
-     * Adds optional parameters to a DISCOVER packet.
+     * Adds additional parameters to the INFORM packet.
      */
     void finishPacket(ByteBuffer buffer) {
-        addTlv(buffer, DHCP_MESSAGE_TYPE, DHCP_MESSAGE_TYPE_DISCOVER);
+        byte[] clientId = new byte[7];
+
+        clientId[0] = CLIENT_ID_ETHER;
+        System.arraycopy(mClientMac, 0, clientId, 1, 6);
+
+        addTlv(buffer, DHCP_MESSAGE_TYPE, DHCP_MESSAGE_TYPE_REQUEST);
         addTlv(buffer, DHCP_PARAMETER_LIST, mRequestedParams);
         addTlvEnd(buffer);
-    }
-
-    /**
-     * Informs the state machine of the arrival of a DISCOVER packet.
-     */
-    public void doNextOp(DhcpStateMachine machine) {
-        // currently omitted: host name
-        machine.onDiscoverReceived(mBroadcast, mTransId, mClientMac,
-            mRequestedParams);
     }
 }

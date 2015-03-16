@@ -24,6 +24,7 @@ services := \
     appwidget \
     backup \
     devicepolicy \
+    net \
     print \
     restrictions \
     usage \
