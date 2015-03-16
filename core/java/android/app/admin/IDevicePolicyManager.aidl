@@ -223,4 +223,5 @@ interface IDevicePolicyManager {
     PersistableBundle getOtaPolicy();
 
     boolean setKeyguardEnabledState(in ComponentName admin, boolean enabled);
+    void setStatusBarEnabledState(in ComponentName who, boolean enabled);
 }
