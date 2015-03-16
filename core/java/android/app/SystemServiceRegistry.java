@@ -49,6 +49,7 @@ import android.hardware.hdmi.IHdmiControlService;
 import android.hardware.input.InputManager;
 import android.hardware.usb.IUsbManager;
 import android.hardware.usb.UsbManager;
+import android.hardware.radio.RadioManager;
 import android.location.CountryDetector;
 import android.location.ICountryDetector;
 import android.location.ILocationManager;
@@ -682,6 +683,13 @@ final class SystemServiceRegistry {
             public MidiManager createService(ContextImpl ctx) {
                 IBinder b = ServiceManager.getService(Context.MIDI_SERVICE);
                 return new MidiManager(ctx, IMidiManager.Stub.asInterface(b));
+            }});
+
+        registerService(Context.RADIO_SERVICE, RadioManager.class,
+                new CachedServiceFetcher<RadioManager>() {
+            @Override
+            public RadioManager createService(ContextImpl ctx) {
+                return new RadioManager(ctx);
             }});
     }
 

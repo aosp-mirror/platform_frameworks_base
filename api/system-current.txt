@@ -14189,6 +14189,195 @@ package android.hardware.location {
 
 }
 
+package android.hardware.radio {
+
+  public class RadioManager {
+    method public int listModules(java.util.List<android.hardware.radio.RadioManager.ModuleProperties>);
+    method public android.hardware.radio.RadioTuner openTuner(int, android.hardware.radio.RadioManager.BandConfig, boolean, android.hardware.radio.RadioTuner.Callback, android.os.Handler);
+    field public static final int BAND_AM = 0; // 0x0
+    field public static final int BAND_AM_HD = 3; // 0x3
+    field public static final int BAND_FM = 1; // 0x1
+    field public static final int BAND_FM_HD = 2; // 0x2
+    field public static final int CLASS_AM_FM = 0; // 0x0
+    field public static final int CLASS_DT = 2; // 0x2
+    field public static final int CLASS_SAT = 1; // 0x1
+    field public static final int REGION_ITU_1 = 0; // 0x0
+    field public static final int REGION_ITU_2 = 1; // 0x1
+    field public static final int REGION_JAPAN = 3; // 0x3
+    field public static final int REGION_KOREA = 4; // 0x4
+    field public static final int REGION_OIRT = 2; // 0x2
+    field public static final int STATUS_BAD_VALUE = -22; // 0xffffffea
+    field public static final int STATUS_DEAD_OBJECT = -32; // 0xffffffe0
+    field public static final int STATUS_ERROR = -2147483648; // 0x80000000
+    field public static final int STATUS_INVALID_OPERATION = -38; // 0xffffffda
+    field public static final int STATUS_NO_INIT = -19; // 0xffffffed
+    field public static final int STATUS_OK = 0; // 0x0
+    field public static final int STATUS_PERMISSION_DENIED = -1; // 0xffffffff
+    field public static final int STATUS_TIMED_OUT = -110; // 0xffffff92
+  }
+
+  public static class RadioManager.AmBandConfig extends android.hardware.radio.RadioManager.BandConfig {
+    method public boolean getStereo();
+    field public static final android.os.Parcelable.Creator<android.hardware.radio.RadioManager.AmBandConfig> CREATOR;
+  }
+
+  public static class RadioManager.AmBandConfig.Builder {
+    ctor public RadioManager.AmBandConfig.Builder(android.hardware.radio.RadioManager.AmBandDescriptor);
+    ctor public RadioManager.AmBandConfig.Builder(android.hardware.radio.RadioManager.AmBandConfig);
+    method public android.hardware.radio.RadioManager.AmBandConfig build();
+    method public android.hardware.radio.RadioManager.AmBandConfig.Builder setStereo(boolean);
+  }
+
+  public static class RadioManager.AmBandDescriptor extends android.hardware.radio.RadioManager.BandDescriptor {
+    method public boolean isStereoSupported();
+    field public static final android.os.Parcelable.Creator<android.hardware.radio.RadioManager.AmBandDescriptor> CREATOR;
+  }
+
+  public static class RadioManager.BandConfig implements android.os.Parcelable {
+    method public int describeContents();
+    method public int getLowerLimit();
+    method public int getRegion();
+    method public int getSpacing();
+    method public int getType();
+    method public int getUpperLimit();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator<android.hardware.radio.RadioManager.BandConfig> CREATOR;
+  }
+
+  public static class RadioManager.BandDescriptor implements android.os.Parcelable {
+    method public int describeContents();
+    method public int getLowerLimit();
+    method public int getRegion();
+    method public int getSpacing();
+    method public int getType();
+    method public int getUpperLimit();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator<android.hardware.radio.RadioManager.BandDescriptor> CREATOR;
+  }
+
+  public static class RadioManager.FmBandConfig extends android.hardware.radio.RadioManager.BandConfig {
+    method public boolean getAf();
+    method public boolean getRds();
+    method public boolean getStereo();
+    method public boolean getTa();
+    field public static final android.os.Parcelable.Creator<android.hardware.radio.RadioManager.FmBandConfig> CREATOR;
+  }
+
+  public static class RadioManager.FmBandConfig.Builder {
+    ctor public RadioManager.FmBandConfig.Builder(android.hardware.radio.RadioManager.FmBandDescriptor);
+    ctor public RadioManager.FmBandConfig.Builder(android.hardware.radio.RadioManager.FmBandConfig);
+    method public android.hardware.radio.RadioManager.FmBandConfig build();
+    method public android.hardware.radio.RadioManager.FmBandConfig.Builder setAf(boolean);
+    method public android.hardware.radio.RadioManager.FmBandConfig.Builder setRds(boolean);
+    method public android.hardware.radio.RadioManager.FmBandConfig.Builder setStereo(boolean);
+    method public android.hardware.radio.RadioManager.FmBandConfig.Builder setTa(boolean);
+  }
+
+  public static class RadioManager.FmBandDescriptor extends android.hardware.radio.RadioManager.BandDescriptor {
+    method public boolean isAfSupported();
+    method public boolean isRdsSupported();
+    method public boolean isStereoSupported();
+    method public boolean isTaSupported();
+    field public static final android.os.Parcelable.Creator<android.hardware.radio.RadioManager.FmBandDescriptor> CREATOR;
+  }
+
+  public static class RadioManager.ModuleProperties implements android.os.Parcelable {
+    method public int describeContents();
+    method public android.hardware.radio.RadioManager.BandDescriptor[] getBands();
+    method public int getClassId();
+    method public int getId();
+    method public java.lang.String getImplementor();
+    method public int getNumAudioSources();
+    method public int getNumTuners();
+    method public java.lang.String getProduct();
+    method public java.lang.String getSerial();
+    method public java.lang.String getVersion();
+    method public boolean isCaptureSupported();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator<android.hardware.radio.RadioManager.ModuleProperties> CREATOR;
+  }
+
+  public static class RadioManager.ProgramInfo implements android.os.Parcelable {
+    method public int describeContents();
+    method public int getChannel();
+    method public android.hardware.radio.RadioMetadata getMetadata();
+    method public int getSignalStrength();
+    method public int getSubChannel();
+    method public boolean isDigital();
+    method public boolean isStereo();
+    method public boolean isTuned();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator<android.hardware.radio.RadioManager.ProgramInfo> CREATOR;
+  }
+
+  public final class RadioMetadata implements android.os.Parcelable {
+    method public boolean containsKey(java.lang.String);
+    method public int describeContents();
+    method public android.graphics.Bitmap getBitmap(java.lang.String);
+    method public int getInt(java.lang.String);
+    method public java.lang.String getString(java.lang.String);
+    method public java.util.Set<java.lang.String> keySet();
+    method public int size();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator<android.hardware.radio.RadioMetadata> CREATOR;
+    field public static final java.lang.String METADATA_KEY_ALBUM = "android.hardware.radio.metadata.ALBUM";
+    field public static final java.lang.String METADATA_KEY_ART = "android.hardware.radio.metadata.ART";
+    field public static final java.lang.String METADATA_KEY_ARTIST = "android.hardware.radio.metadata.ARTIST";
+    field public static final java.lang.String METADATA_KEY_GENRE = "android.hardware.radio.metadata.GENRE";
+    field public static final java.lang.String METADATA_KEY_ICON = "android.hardware.radio.metadata.ICON";
+    field public static final java.lang.String METADATA_KEY_RBDS_PTY = "android.hardware.radio.metadata.RBDS_PTY";
+    field public static final java.lang.String METADATA_KEY_RDS_PI = "android.hardware.radio.metadata.RDS_PI";
+    field public static final java.lang.String METADATA_KEY_RDS_PS = "android.hardware.radio.metadata.RDS_PS";
+    field public static final java.lang.String METADATA_KEY_RDS_PTY = "android.hardware.radio.metadata.RDS_PTY";
+    field public static final java.lang.String METADATA_KEY_RDS_RT = "android.hardware.radio.metadata.RDS_RT";
+    field public static final java.lang.String METADATA_KEY_TITLE = "android.hardware.radio.metadata.TITLE";
+  }
+
+  public static final class RadioMetadata.Builder {
+    ctor public RadioMetadata.Builder();
+    ctor public RadioMetadata.Builder(android.hardware.radio.RadioMetadata);
+    method public android.hardware.radio.RadioMetadata build();
+    method public android.hardware.radio.RadioMetadata.Builder putBitmap(java.lang.String, android.graphics.Bitmap);
+    method public android.hardware.radio.RadioMetadata.Builder putInt(java.lang.String, int);
+    method public android.hardware.radio.RadioMetadata.Builder putString(java.lang.String, java.lang.String);
+  }
+
+  public abstract class RadioTuner {
+    ctor public RadioTuner();
+    method public abstract int cancel();
+    method public abstract void close();
+    method public abstract int getConfiguration(android.hardware.radio.RadioManager.BandConfig[]);
+    method public abstract boolean getMute();
+    method public abstract int getProgramInformation(android.hardware.radio.RadioManager.ProgramInfo[]);
+    method public abstract boolean hasControl();
+    method public abstract boolean isAntennaConnected();
+    method public abstract int scan(int, boolean);
+    method public abstract int setConfiguration(android.hardware.radio.RadioManager.BandConfig);
+    method public abstract int setMute(boolean);
+    method public abstract int step(int, boolean);
+    method public abstract int tune(int, int);
+    field public static final int DIRECTION_DOWN = 1; // 0x1
+    field public static final int DIRECTION_UP = 0; // 0x0
+    field public static final int ERROR_CANCELLED = 2; // 0x2
+    field public static final int ERROR_CONFIG = 4; // 0x4
+    field public static final int ERROR_HARDWARE_FAILURE = 0; // 0x0
+    field public static final int ERROR_SCAN_TIMEOUT = 3; // 0x3
+    field public static final int ERROR_SERVER_DIED = 1; // 0x1
+  }
+
+  public static abstract class RadioTuner.Callback {
+    ctor public RadioTuner.Callback();
+    method public void onAntennaState(boolean);
+    method public void onConfigurationChanged(android.hardware.radio.RadioManager.BandConfig);
+    method public void onControlChanged(boolean);
+    method public void onError(int);
+    method public void onMetadataChanged(android.hardware.radio.RadioMetadata);
+    method public void onProgramInfoChanged(android.hardware.radio.RadioManager.ProgramInfo);
+    method public void onTrafficAnnouncement(boolean);
+  }
+
+}
+
 package android.hardware.usb {
 
   public class UsbAccessory implements android.os.Parcelable {

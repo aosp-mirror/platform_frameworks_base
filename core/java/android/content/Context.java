@@ -2200,6 +2200,7 @@ public abstract class Context {
             //@hide: PERSISTENT_DATA_BLOCK_SERVICE,
             MEDIA_PROJECTION_SERVICE,
             MIDI_SERVICE,
+            RADIO_SERVICE,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface ServiceName {}
@@ -3025,6 +3026,17 @@ public abstract class Context {
      * @hide
      */
     public static final String MIDI_SERVICE = "midi";
+
+
+    /**
+     * Use with {@link #getSystemService} to retrieve a
+     * {@link android.hardware.radio.RadioManager} for accessing the broadcast radio service.
+     *
+     * @see #getSystemService
+     * @hide
+     */
+    public static final String RADIO_SERVICE = "radio";
+
 
     /**
      * Determine whether the given permission is allowed for a particular
