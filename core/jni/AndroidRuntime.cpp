@@ -648,9 +648,9 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv)
     /*
      * JIT related options.
      */
-    parseRuntimeOption("dalvik.vm.usejit", usejitOptsBuf, "-Xusejit:");
-    parseRuntimeOption("dalvik.vm.jitcodecachesize", jitcodecachesizeOptsBuf, "-Xjitcodecachesize:");
-    parseRuntimeOption("dalvik.vm.jitthreshold", jitthresholdOptsBuf, "-Xjitthreshold:");
+    parseRuntimeOption("debug.dalvik.vm.usejit", usejitOptsBuf, "-Xusejit:");
+    parseRuntimeOption("debug.dalvik.vm.jitcodecachesize", jitcodecachesizeOptsBuf, "-Xjitcodecachesize:");
+    parseRuntimeOption("debug.dalvik.vm.jitthreshold", jitthresholdOptsBuf, "-Xjitthreshold:");
 
     property_get("ro.config.low_ram", propBuf, "");
     if (strcmp(propBuf, "true") == 0) {
