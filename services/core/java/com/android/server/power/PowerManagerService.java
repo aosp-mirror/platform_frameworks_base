@@ -1080,6 +1080,9 @@ public final class PowerManagerService extends SystemService
                 case PowerManager.GO_TO_SLEEP_REASON_POWER_BUTTON:
                     Slog.i(TAG, "Going to sleep due to power button (uid " + uid +")...");
                     break;
+                case PowerManager.GO_TO_SLEEP_REASON_SLEEP_BUTTON:
+                    Slog.i(TAG, "Going to sleep due to sleep button (uid " + uid +")...");
+                    break;
                 case PowerManager.GO_TO_SLEEP_REASON_HDMI:
                     Slog.i(TAG, "Going to sleep due to HDMI standby (uid " + uid +")...");
                     break;
