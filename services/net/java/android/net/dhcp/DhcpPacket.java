@@ -7,6 +7,7 @@ import android.os.Build;
 import android.os.SystemProperties;
 import android.system.OsConstants;
 
+import java.io.UnsupportedEncodingException;
 import java.net.Inet4Address;
 import java.net.UnknownHostException;
 import java.nio.BufferUnderflowException;
@@ -48,6 +49,7 @@ abstract class DhcpPacket {
     public static final int MIN_PACKET_LENGTH_L3 = MIN_PACKET_LENGTH_BOOTP + 20 + 8;
     public static final int MIN_PACKET_LENGTH_L2 = MIN_PACKET_LENGTH_L3 + 14;
 
+    public static final int MAX_OPTION_LEN = 255;
     /**
      * IP layer definitions.
      */
@@ -468,6 +470,10 @@ abstract class DhcpPacket {
      */
     protected static void addTlv(ByteBuffer buf, byte type, byte[] payload) {
         if (payload != null) {
+            if (payload.length > MAX_OPTION_LEN) {
+                throw new IllegalArgumentException("DHCP option too long: "
+                        + payload.length + " vs. " + MAX_OPTION_LEN);
+            }
             buf.put(type);
             buf.put((byte) payload.length);
             buf.put(payload);
@@ -487,13 +493,19 @@ abstract class DhcpPacket {
      * Adds an optional parameter containing a list of IP addresses.
      */
     protected static void addTlv(ByteBuffer buf, byte type, List<Inet4Address> addrs) {
-        if (addrs != null && addrs.size() > 0) {
-            buf.put(type);
-            buf.put((byte)(4 * addrs.size()));
+        if (addrs == null || addrs.size() == 0) return;
 
-            for (Inet4Address addr : addrs) {
-                buf.put(addr.getAddress());
-            }
+        int optionLen = 4 * addrs.size();
+        if (optionLen > MAX_OPTION_LEN) {
+            throw new IllegalArgumentException("DHCP option too long: "
+                    + optionLen + " vs. " + MAX_OPTION_LEN);
+        }
+
+        buf.put(type);
+        buf.put((byte)(optionLen));
+
+        for (Inet4Address addr : addrs) {
+            buf.put(addr.getAddress());
         }
     }
 
@@ -520,16 +532,13 @@ abstract class DhcpPacket {
     }
 
     /**
-     * Adds an optional parameter containing and ASCII string.
+     * Adds an optional parameter containing an ASCII string.
      */
     protected static void addTlv(ByteBuffer buf, byte type, String str) {
-        if (str != null) {
-            buf.put(type);
-            buf.put((byte) str.length());
-
-            for (int i = 0; i < str.length(); i++) {
-                buf.put((byte) str.charAt(i));
-            }
+        try {
+            addTlv(buf, type, str.getBytes("US-ASCII"));
+        } catch (UnsupportedEncodingException e) {
+           throw new IllegalArgumentException("String is not US-ASCII: " + str);
         }
     }
 
