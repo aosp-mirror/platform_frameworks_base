@@ -18,6 +18,7 @@ package android.view;
 
 
 import android.annotation.StringRes;
+import android.graphics.Rect;
 
 /**
  * Represents a contextual mode of the user interface. Action modes can be used to provide
@@ -197,6 +198,15 @@ public abstract class ActionMode {
     public abstract void invalidate();
 
     /**
+     * Invalidate the content rect associated to this ActionMode. This only makes sense for
+     * action modes that support dynamic positioning on the screen, and provides a more efficient
+     * way to reposition it without invalidating the whole action mode.
+     *
+     * @see Callback2#onGetContentRect(ActionMode, View, Rect) .
+     */
+    public void invalidateContentRect() {}
+
+    /**
      * Finish and close this action mode. The action mode's {@link ActionMode.Callback} will
      * have its {@link Callback#onDestroyActionMode(ActionMode)} method called.
      */
@@ -297,5 +307,32 @@ public abstract class ActionMode {
          * @param mode The current ActionMode being destroyed
          */
         public void onDestroyActionMode(ActionMode mode);
+    }
+
+    /**
+     * Extension of {@link ActionMode.Callback} to provide content rect information. This is
+     * required for ActionModes with dynamic positioning such as the ones with type
+     * {@link ActionMode#TYPE_FLOATING} to ensure the positioning doesn't obscure app content. If
+     * an app fails to provide a subclass of this class, a default implementation will be used.
+     */
+    public static abstract class Callback2 implements ActionMode.Callback {
+
+        /**
+         * Called when an ActionMode needs to be positioned on screen, potentially occluding view
+         * content. Note this may be called on a per-frame basis.
+         *
+         * @param mode The ActionMode that requires positioning.
+         * @param view The View that originated the ActionMode, in whose coordinates the Rect should
+         *          be provided.
+         * @param outRect The Rect to be populated with the content position.
+         */
+        public void onGetContentRect(ActionMode mode, View view, Rect outRect) {
+            if (view != null) {
+                outRect.set(0, 0, view.getWidth(), view.getHeight());
+            } else {
+                outRect.set(0, 0, 0, 0);
+            }
+        }
+
     }
 }
