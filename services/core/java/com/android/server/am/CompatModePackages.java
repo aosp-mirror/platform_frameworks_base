@@ -46,7 +46,7 @@ import android.util.Xml;
 
 public final class CompatModePackages {
     private static final String TAG = TAG_WITH_CLASS_NAME ? "CompatModePackages" : TAG_AM;
-    private final boolean DEBUG_CONFIGURATION = ActivityManagerService.DEBUG_CONFIGURATION;
+    private static final String TAG_CONFIGURATION = TAG + POSTFIX_CONFIGURATION;
 
     private final ActivityManagerService mService;
     private final AtomicFile mFile;
@@ -334,7 +334,7 @@ public final class CompatModePackages {
                 }
                 try {
                     if (app.thread != null) {
-                        if (DEBUG_CONFIGURATION) Slog.v(TAG, "Sending to proc "
+                        if (DEBUG_CONFIGURATION) Slog.v(TAG_CONFIGURATION, "Sending to proc "
                                 + app.processName + " new compat " + ci);
                         app.thread.updatePackageCompatibilityInfo(packageName, ci);
                     }
