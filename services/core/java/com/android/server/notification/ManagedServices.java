@@ -18,10 +18,12 @@ package com.android.server.notification;
 
 import android.app.ActivityManager;
 import android.app.PendingIntent;
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
@@ -51,6 +53,7 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -74,6 +77,7 @@ abstract public class ManagedServices {
     private final UserProfiles mUserProfiles;
     private final SettingsObserver mSettingsObserver;
     private final Config mConfig;
+    private ArraySet<String> mRestored;
 
     // contains connections to all connected services, including app services
     // and system services
@@ -91,6 +95,8 @@ abstract public class ManagedServices {
     // user change).
     private int[] mLastSeenProfileIds;
 
+    private final BroadcastReceiver mRestoreReceiver;
+
     public ManagedServices(Context context, Handler handler, Object mutex,
             UserProfiles userProfiles) {
         mContext = context;
@@ -98,6 +104,24 @@ abstract public class ManagedServices {
         mUserProfiles = userProfiles;
         mConfig = getConfig();
         mSettingsObserver = new SettingsObserver(handler);
+
+        mRestoreReceiver = new SettingRestoredReceiver();
+        IntentFilter filter = new IntentFilter(Intent.ACTION_SETTING_RESTORED);
+        context.registerReceiver(mRestoreReceiver, filter);
+    }
+
+    class SettingRestoredReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (Intent.ACTION_SETTING_RESTORED.equals(intent.getAction())) {
+                String element = intent.getStringExtra(Intent.EXTRA_SETTING_NAME);
+                if (Objects.equals(element, mConfig.secureSettingName)) {
+                    String prevValue = intent.getStringExtra(Intent.EXTRA_SETTING_PREVIOUS_VALUE);
+                    String newValue = intent.getStringExtra(Intent.EXTRA_SETTING_NEW_VALUE);
+                    settingRestored(element, prevValue, newValue, getSendingUserId());
+                }
+            }
+        }
     }
 
     abstract protected Config getConfig();
@@ -137,6 +161,31 @@ abstract public class ManagedServices {
             pw.println("      " + info.component
                     + " (user " + info.userid + "): " + info.service
                     + (info.isSystem?" SYSTEM":""));
+        }
+    }
+
+    // By convention, restored settings are replicated to another settings
+    // entry, named similarly but with a disambiguation suffix.
+    public static final String restoredSettingName(Config config) {
+        return config.secureSettingName + ":restored";
+    }
+
+    // The OS has done a restore of this service's saved state.  We clone it to the
+    // 'restored' reserve, and then once we return and the actual write to settings is
+    // performed, our observer will do the work of maintaining the restored vs live
+    // settings data.
+    public void settingRestored(String element, String oldValue, String newValue, int userid) {
+        if (DEBUG) Slog.d(TAG, "Restored managed service setting: " + element
+                + " ovalue=" + oldValue + " nvalue=" + newValue);
+        if (mConfig.secureSettingName.equals(element)) {
+            if (element != null) {
+                mRestored = null;
+                Settings.Secure.putStringForUser(mContext.getContentResolver(),
+                        restoredSettingName(mConfig),
+                        newValue,
+                        userid);
+                disableNonexistentServices(userid);
+            }
         }
     }
 
@@ -211,8 +260,23 @@ abstract public class ManagedServices {
     }
 
     private void disableNonexistentServices(int userId) {
+        final ContentResolver cr = mContext.getContentResolver();
+        boolean restoredChanged = false;
+        if (mRestored == null) {
+            String restoredSetting = Settings.Secure.getStringForUser(
+                    cr,
+                    restoredSettingName(mConfig),
+                    userId);
+            if (!TextUtils.isEmpty(restoredSetting)) {
+                if (DEBUG) Slog.d(TAG, "restored: " + restoredSetting);
+                String[] restored = restoredSetting.split(ENABLED_SERVICES_SEPARATOR);
+                mRestored = new ArraySet<String>(Arrays.asList(restored));
+            } else {
+                mRestored = new ArraySet<String>();
+            }
+        }
         String flatIn = Settings.Secure.getStringForUser(
-                mContext.getContentResolver(),
+                cr,
                 mConfig.secureSettingName,
                 userId);
         if (!TextUtils.isEmpty(flatIn)) {
@@ -228,14 +292,16 @@ abstract public class ManagedServices {
                 ResolveInfo resolveInfo = installedServices.get(i);
                 ServiceInfo info = resolveInfo.serviceInfo;
 
+                ComponentName component = new ComponentName(info.packageName, info.name);
                 if (!mConfig.bindPermission.equals(info.permission)) {
                     Slog.w(TAG, "Skipping " + getCaption() + " service "
                             + info.packageName + "/" + info.name
                             + ": it does not require the permission "
                             + mConfig.bindPermission);
+                    restoredChanged |= mRestored.remove(component.flattenToString());
                     continue;
                 }
-                installed.add(new ComponentName(info.packageName, info.name));
+                installed.add(component);
             }
 
             String flatOut = "";
@@ -246,15 +312,26 @@ abstract public class ManagedServices {
                     ComponentName enabledComponent = ComponentName.unflattenFromString(enabled[i]);
                     if (installed.contains(enabledComponent)) {
                         remaining.add(enabled[i]);
+                        restoredChanged |= mRestored.remove(enabled[i]);
                     }
                 }
+                remaining.addAll(mRestored);
                 flatOut = TextUtils.join(ENABLED_SERVICES_SEPARATOR, remaining);
             }
             if (DEBUG) Slog.v(TAG, "flat after: " + flatOut);
             if (!flatIn.equals(flatOut)) {
-                Settings.Secure.putStringForUser(mContext.getContentResolver(),
+                Settings.Secure.putStringForUser(cr,
                         mConfig.secureSettingName,
                         flatOut, userId);
+            }
+            if (restoredChanged) {
+                if (DEBUG) Slog.d(TAG, "restored changed; rewriting");
+                final String flatRestored = TextUtils.join(ENABLED_SERVICES_SEPARATOR,
+                        mRestored.toArray());
+                Settings.Secure.putStringForUser(cr,
+                        restoredSettingName(mConfig),
+                        flatRestored,
+                        userId);
             }
         }
     }

@@ -2790,6 +2790,31 @@ public class Intent implements Parcelable, Cloneable {
     /** {@hide} */
     public static final String ACTION_MASTER_CLEAR = "android.intent.action.MASTER_CLEAR";
 
+    /**
+     * Broadcast action: report that a settings element is being restored from backup.  The intent
+     * contains three extras: EXTRA_SETTING_NAME is a string naming the restored setting,
+     * EXTRA_SETTING_NEW_VALUE is the value being restored, and EXTRA_SETTING_PREVIOUS_VALUE
+     * is the value of that settings entry prior to the restore operation.  All of these values are
+     * represented as strings.
+     *
+     * <p>This broadcast is sent only for settings provider entries known to require special handling
+     * around restore time.  These entries are found in the BROADCAST_ON_RESTORE table within
+     * the provider's backup agent implementation.
+     *
+     * @see #EXTRA_SETTING_NAME
+     * @see #EXTRA_SETTING_PREVIOUS_VALUE
+     * @see #EXTRA_SETTING_NEW_VALUE
+     * {@hide}
+     */
+    public static final String ACTION_SETTING_RESTORED = "android.os.action.SETTING_RESTORED";
+
+    /** {@hide} */
+    public static final String EXTRA_SETTING_NAME = "setting_name";
+    /** {@hide} */
+    public static final String EXTRA_SETTING_PREVIOUS_VALUE = "previous_value";
+    /** {@hide} */
+    public static final String EXTRA_SETTING_NEW_VALUE = "new_value";
+
     // ---------------------------------------------------------------------
     // ---------------------------------------------------------------------
     // Standard intent categories (see addCategory()).

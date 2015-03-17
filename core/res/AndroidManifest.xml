@@ -90,6 +90,8 @@
     <protected-broadcast android:name="android.appwidget.action.APPWIDGET_HOST_RESTORED" />
     <protected-broadcast android:name="android.appwidget.action.APPWIDGET_RESTORED" />
 
+    <protected-broadcast android:name="android.os.action.SETTING_RESTORED" />
+
     <protected-broadcast android:name="android.backup.intent.RUN" />
     <protected-broadcast android:name="android.backup.intent.CLEAR" />
     <protected-broadcast android:name="android.backup.intent.INIT" />
