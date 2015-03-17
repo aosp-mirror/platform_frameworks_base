@@ -60,7 +60,7 @@ public class LegacyExceptionUtils {
             case CameraBinderDecorator.NO_ERROR: {
                 return CameraBinderDecorator.NO_ERROR;
             }
-            case CameraBinderDecorator.ENODEV: {
+            case CameraBinderDecorator.BAD_VALUE: {
                 throw new BufferQueueAbandonedException();
             }
         }

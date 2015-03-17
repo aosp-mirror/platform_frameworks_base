@@ -443,6 +443,7 @@ public class ImageReader implements AutoCloseable {
     @Override
     public void close() {
         setOnImageAvailableListener(null, null);
+        if (mSurface != null) mSurface.release();
         nativeClose();
     }
 

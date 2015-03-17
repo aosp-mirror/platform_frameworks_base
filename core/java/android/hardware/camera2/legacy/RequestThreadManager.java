@@ -498,6 +498,10 @@ public class RequestThreadManager {
             return;
         }
         for(Surface s : surfaces) {
+            if (s == null || !s.isValid()) {
+                Log.w(TAG, "Jpeg surface is invalid, skipping...");
+                continue;
+            }
             try {
                 LegacyCameraDevice.setSurfaceFormat(s, LegacyMetadataMapper.HAL_PIXEL_FORMAT_BLOB);
             } catch (LegacyExceptionUtils.BufferQueueAbandonedException e) {
