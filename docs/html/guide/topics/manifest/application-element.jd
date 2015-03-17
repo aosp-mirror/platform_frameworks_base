@@ -449,9 +449,13 @@ href="{@docRoot}guide/topics/ui/actionbar.html">Action Bar</a> developer guide.<
 <dt><a name="vmSafeMode"></a>{@code android:vmSafeMode}</dt>
 <dd>Indicates whether the app would like the virtual machine (VM) to operate
 in safe mode. The default value is {@code "false"}.
+
+<p> This attribute was added in API level 8 where a value of "true"
+disabled the Dalvik just-in-time (JIT) compiler. </p>
+
+<p> This attribute was adapted in API level 22 where a value of "true"
+disabled the ART ahead-of-time (AOT) compiler. </p>
 </dd>
-
-
 
 
 </dl></dd>
