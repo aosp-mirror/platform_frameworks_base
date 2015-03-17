@@ -61,7 +61,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         public void onTaskStackFilterTriggered();
         public void onTaskStackUnfilterTriggered();
 
-        public void onMultiStackMoveTask(Task t);
+        public void onTaskResize(Task t);
     }
 
     RecentsConfiguration mConfig;
@@ -1339,9 +1339,9 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     }
 
     @Override
-    public void onMultiStackMoveTask(TaskView tv) {
+    public void onTaskResize(TaskView tv) {
         if (mCb != null) {
-            mCb.onMultiStackMoveTask(tv.getTask());
+            mCb.onTaskResize(tv.getTask());
         }
     }
 
