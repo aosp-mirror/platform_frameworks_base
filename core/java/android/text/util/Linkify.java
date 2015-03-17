@@ -522,10 +522,6 @@ public class Linkify {
 
                 return 0;
             }
-
-            public final boolean equals(Object o) {
-                return false;
-            }
         };
 
         Collections.sort(links, c);
