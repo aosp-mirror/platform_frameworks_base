@@ -114,9 +114,6 @@ public class ImsCallProfile implements Parcelable {
     public static final String EXTRA_CALL_MODE_CHANGEABLE = "call_mode_changeable";
     public static final String EXTRA_CONFERENCE_AVAIL = "conference_avail";
 
-    // Extra string for internal use only. OEMs should not use
-    // this for packing extras.
-    public static final String EXTRA_OEM_EXTRAS = "OemCallExtras";
 
     /**
      * Integer extra properties
