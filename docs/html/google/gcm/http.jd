@@ -83,6 +83,32 @@ See
 <a href="server-ref.html#params">the Server Reference</a> for a list of all the
 parameters your JSON or plain text message can contain.</p>
 
+<h3 id="checkAPIkey">Checking the validity of an API key</h3>
+
+<p>If you receive authentication errors when sending messages, check the validity
+of your API key. For example, on Android, run the following command:</p>
+
+<pre># api_key=YOUR_API_KEY
+
+# curl --header "Authorization: key=$api_key" \
+       --header Content-Type:"application/json" \
+       https://android.googleapis.com/gcm/send \
+       -d "{\"registration_ids\":[\"ABC\"]}"</pre>
+
+<p>
+If you receive a 401 HTTP status code, your API key is not valid. Otherwise you
+should see something like this:</p>
+
+<pre>
+{"multicast_id":6782339717028231855,"success":0,"failure":1,
+"canonical_ids":0,"results":[{"error":"InvalidRegistration"}]}
+</pre>
+
+<p>
+If you want to confirm the validity of a registration ID, you can do so by
+replacing "ABC" with the registration ID.
+</p>
+
 
   <h2 id="request">Request Format</h2>
 
@@ -157,53 +183,10 @@ the body contains more information about the status of the message (including po
 non-200 status code (such as 400, 401 or 5xx).</li>
 </ul>
 
-<h3 id="success">Interpreting a success response</h3>
-<p>When a JSON request is successful (HTTP status code 200), the response body
-contains a JSON object with the following fields:</p>
-<table>
-  <tr>
-    <th>Field</th>
-    <th>Description</th>
-  </tr>
-  <tr>
-    <td><code>multicast_id</code></td>
-    <td>Unique ID (number) identifying the multicast message.</td>
-  </tr>
-  <tr>
-    <td><code>success</code></td>
-    <td>Number of messages that were processed without an error.</td>
-  </tr>
-  <tr>
-    <td><code>failure</code></td>
-    <td>Number of messages that could not be processed.</td>
-  </tr>
-  <tr>
-    <td><code>canonical_ids</code></td>
-    <td>Number of results that contain a canonical registration ID. See
-<a href="adv.html#canonical">Advanced Topics</a> for more discussion of this topic.</td>
-  </tr>
-  <tr>
-    <td><code>results</code></td>
-    <td>Array of objects representing the status of the messages processed. The
-objects are listed in the same order as the request (i.e., for each registration
-ID in the request, its result is listed in the same index in the response) and
-they can have these fields:<br>
-      <ul>
-        <li><code>message_id</code>: String representing the message when it was
-successfully processed.</li>
-        <li><code>registration_id</code>: If set,  means that GCM processed the
-message but it has another canonical registration ID for that device, so sender
-should replace the IDs on future requests (otherwise they might be rejected).
-This field is never set if there is an error in the request.
-        </li>
-        <li><code>error</code>: String describing an error that occurred while
-processing the message for that recipient. The possible values are the same as
-documented in the above table, plus &quot;Unavailable&quot;  (meaning GCM servers
-were busy and could not process the message for that  particular recipient, so
-it could be retried).</li>
-    </ul></td>
-  </tr>
-</table>
+<p>When a JSON request is successful (HTTP status code 200), the JSON object returned
+contains the <a href="{@docRoot}google/gcm/server-ref.html#table4">
+Downstream HTTP message response body</a>.</p>
+
 <p>If the value of <code>failure</code> and <code>canonical_ids</code> is 0, it's
 not necessary to parse the remainder of the response. Otherwise, we recommend
 that you iterate through the results field and do the following for each object
@@ -227,8 +210,9 @@ device, or the client app isn't configured to receive
 messages.</li>
       <li>Otherwise, there is something wrong in the registration ID passed in
 the request; it is probably a non-recoverable error that will also require removing
-the registration from the server database. See <a href="#error_codes">Interpreting
-an error response</a> for all possible error values.</li>
+the registration from the server database. See
+<a href="{@docRoot}google/gcm/server-ref.html#error-codes">Downstream message error response
+  codes</a> for all possible error values.</li>
     </ul>
   </li>
 </ul>
@@ -260,147 +244,6 @@ error code, they would have returned a 500 HTTP status instead).</li>
   </li>
 </ul>
 
-<h3 id="error_codes">Interpreting an error response</h3>
-<p>Here are the recommendations for handling the different types of error that
-might occur when trying to send a message to a device:</p>
-
-<dl>
-<dt id="missing_reg"><strong>Missing Registration ID</strong></dt>
-<dd>Check that the request contains a registration ID (either in the
-<code>registration_id</code> parameter in a plain text message, or in the
-<code>registration_ids</code> field in JSON).
-<br/>Happens when error code is <code>MissingRegistration</code>.</dd>
-
-<dt id="invalid_reg"><strong>Invalid Registration ID</strong></dt>
-<dd>Check the formatting of the registration ID that you pass to the server. Make
-sure it matches the registration ID the client app receives and that you're
-not truncating it or adding additional characters.
-<br/>Happens when error code is <code>InvalidRegistration</code>.</dd>
-
-<dt id="mismatched_sender"><strong>Mismatched Sender</strong></dt>
-<dd>A registration ID is tied to a certain group of senders. When an application
-registers for GCM usage, it must specify which senders are allowed to send messages.
-Make sure you're using one of those when trying to send messages to the device.
-If you switch to a different sender, the existing registration IDs won't work.
-Happens when error code is <code>MismatchSenderId</code>.</dd>
-
-<dt id="unreg_device"><strong>Unregistered Device</strong></dt>
-<dd>An existing registration ID may cease to be valid in a number of scenarios, including:
-<ul>
-  <li>If the application manually unregisters.</li>
-  <li>If the application is automatically unregistered, which can happen
-(but is not guaranteed) if the user uninstalls the application.</li>
-  <li>If the registration ID expires. Google might decide to refresh registration
-IDs. </li>
-  <li>If the application is updated but the new version is not configured to receive
-messages.</li>
-</ul>
-For all these cases, you should remove this registration ID from the 3rd-party
-server and stop using it to send
-messages.
-<br/>Happens when error code is <code>NotRegistered</code>.</dd>
-
-<dt id="big_msg"><strong>Message Too Big</strong></dt>
-  <dd>The total size of the payload data that is included in a message can't
-exceed 4096 bytes. Note that this includes both the size of the keys as well
-as the values.
-<br/>Happens when error code is <code>MessageTooBig</code>.</dd>
-
-<dt id="invalid_datakey"><strong>Invalid Data Key</strong></dt>
-<dd>The payload data contains a key (such as <code>from</code> or any value
-prefixed by <code>google.</code>) that is used internally by GCM and therefore cannot be used.
-Note that some words (such as <code>collapse_key</code>) are also used by GCM
-but are allowed in the payload, in which case the payload value will be
-overridden by the GCM value.
-<br />
-Happens when the error code is <code>InvalidDataKey</code>.</dd>
-
-<dt id="ttl_error"><strong>Invalid Time To Live</strong></dt>
-  <dd>The value for the Time to Live field must be an integer representing
-a duration in seconds between 0 and 2,419,200 (4 weeks). Happens when error code
-is <code>InvalidTtl</code>.
-</dd>
-
-  <dt id="auth_error"><strong>Authentication Error</strong></dt>
-  <dd>The sender account that you're trying to use to send a message couldn't be
-authenticated. Possible causes are: <ul>
-<li>Authorization header missing or with invalid syntax.</li>
-<li>Invalid project number sent as key.</li>
-<li>Key valid but with GCM service disabled.</li>
-<li>Request originated from a server not whitelisted in the Server Key IPs.</li>
-
-</ul>
-When there is an Authentication Error, you can check the validity of your API key by running You can check the validity
-of your API key by running the following command (this example shows what you
-would do on Android; see the documentation for your platform):<br/>
-
-<pre># api_key=YOUR_API_KEY
-
-# curl --header "Authorization: key=$api_key" --header Content-Type:"application/json" https://android.googleapis.com/gcm/send  -d "{\"registration_ids\":[\"ABC\"]}"</pre>
-
-
-
-If you receive a 401 HTTP status code, your API key is not valid. Otherwise you
-should see something like this:<br/>
-
-<pre>
-{"multicast_id":6782339717028231855,"success":0,"failure":1,"canonical_ids":0,"results":[{"error":"InvalidRegistration"}]}
-</pre>
-If you want to confirm the validity of a registration ID, you can do so by
-replacing "ABC" with the registration ID.
-<br/>
-Happens when the HTTP status code is 401.
-
-  <dt id="timeout"><strong>Timeout</strong></dt>
-
-<dd>The server couldn't process the request in time. You should retry the
-same request, but you MUST obey the following requirements:
-
-<ul>
-
-<li>Honor the <code>Retry-After</code> header if it's included in the response
-from the GCM server.</li>
-
-
-<li>Implement exponential back-off in your retry mechanism. This means an
-exponentially increasing delay after each failed retry (e.g. if you waited one
-second before the first retry, wait at least two second before the next one,
-then 4 seconds and so on). If you're sending multiple messages, delay each one
-independently by an additional random amount to avoid issuing a new request for
-all messages at the same time.</li>
-
-
-Senders that cause problems risk being blacklisted.
-<br />
-Happens when the HTTP status code is between 501 and 599, or when the
-<code>error</code> field of a JSON object in the results array is <code>Unavailable</code>.
-</dd>
-
-<dt id="internal_error"><strong>Internal Server Error</strong></dt>
-
-<dd>
-The server encountered an error while trying to process the request. You
-could retry the same request (obeying the requirements listed in the <a href="#timeout">Timeout</a>
-section), but if the error persists, please report the problem to Google.
-<br />
-Happens when the HTTP status code is 500, or when the <code>error</code> field of a JSON
-object in the results array is <code>InternalServerError</code>.
-</dd>
-
-<dt id="restricted_package_name"><strong>Invalid Package Name</strong></dt>
-
-<dd>
-A message was addressed to a registration ID whose package name did not match
-the value passed in the request. Happens when error code is
-<code>InvalidPackageName</code>.
-</dd>
-
-<dt id="big_msg"><strong>Device Message Rate Exceeded</strong></dt>
-  <dd>The rate of messages to a particular device is too high. You should reduce the number
-of messages sent to this device and should not retry sending to this device immediately.
-<br/>Happens when error code is <code>DeviceMessageRateExceeded</code>.</dd>
-
-</dl>
 
 <h3 id="example-responses">Example responses</h3>
 <p>This section shows a few examples of responses indicating messages that were
