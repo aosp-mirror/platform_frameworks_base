@@ -122,9 +122,7 @@ public class ViewGroup_Delegate {
     @NonNull
     private static DisplayMetrics getMetrics(View view) {
         Context context = view.getContext();
-        while (context instanceof ContextThemeWrapper) {
-            context = ((ContextThemeWrapper) context).getBaseContext();
-        }
+        context = BridgeContext.getBaseContext(context);
         if (context instanceof BridgeContext) {
             return ((BridgeContext) context).getMetrics();
         }
