@@ -233,23 +233,6 @@ public class SystemServicesProxy {
         return null;
     }
 
-    /** Returns a list of all the launcher apps sorted by name. */
-    public List<ResolveInfo> getLauncherApps() {
-        if (mPm == null) return new ArrayList<ResolveInfo>();
-
-        final Intent mainIntent = new Intent(Intent.ACTION_MAIN, null);
-        mainIntent.addCategory(Intent.CATEGORY_LAUNCHER);
-        List<ResolveInfo> activities = mPm.queryIntentActivities(mainIntent, 0 /* flags */);
-        Collections.sort(activities, new Comparator<ResolveInfo>() {
-            @Override
-            public int compare(ResolveInfo o1, ResolveInfo o2) {
-                return getActivityLabel(o1.activityInfo).compareTo(
-                        getActivityLabel(o2.activityInfo));
-            }
-        });
-        return activities;
-    }
-
     /** Returns whether the recents is currently running */
     public boolean isRecentsTopMost(ActivityManager.RunningTaskInfo topTask,
             AtomicBoolean isHomeTopMost) {
@@ -272,27 +255,20 @@ public class SystemServicesProxy {
         return false;
     }
 
-    /** Create a new stack. */
-    public void createNewStack(int displayId, Rect bounds, Intent activity) {
-        try {
-            IActivityContainer container = mIam.createStackOnDisplay(displayId);
-            if (container != null) {
-                // Resize the stack
-                resizeStack(container.getStackId(), bounds);
-                // Start the new activity on that stack
-                container.startActivity(activity);
-            }
-        } catch (RemoteException e) {
-            e.printStackTrace();
-        }
+    /** Get the bounds of a stack / task. */
+    public Rect getTaskBounds(int stackId) {
+        ActivityManager.StackInfo info = getAllStackInfos().get(stackId);
+        if (info != null)
+          return getAllStackInfos().get(stackId).bounds;
+        return new Rect();
     }
 
-    /** Resizes a stack. */
-    public void resizeStack(int stackId, Rect bounds) {
+    /** Resize a given task. */
+    public void resizeTask(int taskId, Rect bounds) {
         if (mIam == null) return;
 
         try {
-            mIam.resizeStack(stackId, bounds);
+            mIam.resizeTask(taskId, bounds);
         } catch (RemoteException e) {
             e.printStackTrace();
         }
@@ -403,18 +379,6 @@ public class SystemServicesProxy {
                     opts.toBundle());
         } else {
             mAm.moveTaskToFront(taskId, ActivityManager.MOVE_TASK_WITH_HOME);
-        }
-    }
-
-    /** Moves a task to another stack. */
-    public void moveTaskToStack(int taskId, int stackId, boolean toTop) {
-        if (mIam == null) return;
-        if (Constants.DebugFlags.App.EnableSystemServicesProxy) return;
-
-        try {
-            mIam.moveTaskToStack(taskId, stackId, toTop);
-        } catch (RemoteException e) {
-            e.printStackTrace();
         }
     }
 

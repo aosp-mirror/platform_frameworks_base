@@ -46,7 +46,7 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
         public void onTaskViewClipStateChanged(TaskView tv);
         public void onTaskViewFocusChanged(TaskView tv, boolean focused);
 
-        public void onMultiStackMoveTask(TaskView tv);
+        public void onTaskResize(TaskView tv);
     }
 
     RecentsConfiguration mConfig;
@@ -732,7 +732,7 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
                         dismissTask();
                     } else if (v == mHeaderView.mMoveTaskButton) {
                         if (mCb != null) {
-                            mCb.onMultiStackMoveTask(tv);
+                            mCb.onTaskResize(tv);
                         }
                     }
                 }
