@@ -474,4 +474,34 @@ public class KeyStore {
             return SYSTEM_ERROR;
         }
     }
+
+    /**
+     * Check if the operation referenced by {@code token} is currently authorized.
+     *
+     * @param token An operation token returned by a call to {@link KeyStore.begin}.
+     */
+    public boolean isOperationAuthorized(IBinder token) {
+        try {
+            return mBinder.isOperationAuthorized(token);
+        } catch (RemoteException e) {
+            Log.w(TAG, "Cannot connect to keystore", e);
+            return false;
+        }
+    }
+
+    /**
+     * Add an authentication record to the keystore authorization table.
+     *
+     * @param authToken The packed bytes of a hw_auth_token_t to be provided to keymaster.
+     * @return {@code KeyStore.NO_ERROR} on success, otherwise an error value corresponding to
+     * a {@code KeymasterDefs.KM_ERROR_} value or {@code KeyStore} ResponseCode.
+     */
+    public int addAuthToken(byte[] authToken) {
+        try {
+            return mBinder.addAuthToken(authToken);
+        } catch (RemoteException e) {
+            Log.w(TAG, "Cannot connect to keystore", e);
+            return SYSTEM_ERROR;
+        }
+    }
 }
