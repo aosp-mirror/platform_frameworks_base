@@ -322,7 +322,7 @@ class ZygoteConnection {
 
         /**
          * From --enable-debugger, --enable-checkjni, --enable-assert,
-         * --enable-safemode, and --enable-jni-logging.
+         * --enable-safemode, --enable-jit, and --enable-jni-logging.
          */
         int debugFlags;
 
@@ -432,6 +432,8 @@ class ZygoteConnection {
                     debugFlags |= Zygote.DEBUG_ENABLE_SAFEMODE;
                 } else if (arg.equals("--enable-checkjni")) {
                     debugFlags |= Zygote.DEBUG_ENABLE_CHECKJNI;
+                } else if (arg.equals("--enable-jit")) {
+                    debugFlags |= Zygote.DEBUG_ENABLE_JIT;
                 } else if (arg.equals("--enable-jni-logging")) {
                     debugFlags |= Zygote.DEBUG_ENABLE_JNI_LOGGING;
                 } else if (arg.equals("--enable-assert")) {
