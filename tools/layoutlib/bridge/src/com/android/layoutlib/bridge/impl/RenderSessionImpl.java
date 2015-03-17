@@ -1117,8 +1117,7 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
             }
         } else {
             // action bar overrides title bar so only look for this one if action bar is hidden
-            boolean windowNoTitle = getBooleanThemeValue(resources,
-                    "windowNoTitle", false, !isThemeAppCompat(resources));
+            boolean windowNoTitle = getBooleanThemeValue(resources, "windowNoTitle", false, true);
 
             if (!windowNoTitle) {
 

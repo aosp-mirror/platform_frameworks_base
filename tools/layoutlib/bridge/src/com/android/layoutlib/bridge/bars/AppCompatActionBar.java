@@ -55,7 +55,7 @@ public class AppCompatActionBar extends BridgeActionBar {
         View contentView = getDecorContent().findViewById(contentRootId);
         if (contentView != null) {
             assert contentView instanceof FrameLayout;
-            setContentRoot(((FrameLayout) contentView));
+            setContentRoot((FrameLayout) contentView);
         } else {
             // Something went wrong. Create a new FrameLayout in the enclosing layout.
             FrameLayout contentRoot = new FrameLayout(context);
@@ -104,8 +104,8 @@ public class AppCompatActionBar extends BridgeActionBar {
     protected void setIcon(String icon) {
         // Do this only if the action bar doesn't already have an icon.
         if (icon != null && !icon.isEmpty() && mWindowDecorActionBar != null) {
-            if (((Boolean) invoke(getMethod(mWindowActionBarClass, "hasIcon"), mWindowDecorActionBar)
-            )) {
+            if (invoke(getMethod(mWindowActionBarClass, "hasIcon"), mWindowDecorActionBar)
+                    == Boolean.TRUE) {
                 Drawable iconDrawable = getDrawable(icon, false);
                 if (iconDrawable != null) {
                     Method setIcon = getMethod(mWindowActionBarClass, "setIcon", Drawable.class);
