@@ -79,7 +79,7 @@ public class HttpsConnection extends Connection {
                 cache = FileClientSessionCache.usingDirectory(sessionDir);
             }
 
-            OpenSSLContextImpl sslContext = new OpenSSLContextImpl();
+            OpenSSLContextImpl sslContext = OpenSSLContextImpl.getPreferred();
 
             // here, trust managers is a single trust-all manager
             TrustManager[] trustManagers = new TrustManager[] {
