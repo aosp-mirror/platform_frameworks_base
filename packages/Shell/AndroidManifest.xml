@@ -105,6 +105,18 @@
                 android:resource="@xml/file_provider_paths" />
         </provider>
 
+        <provider
+            android:name=".BugreportStorageProvider"
+            android:authorities="com.android.shell.documents"
+            android:grantUriPermissions="true"
+            android:exported="true"
+            android:permission="android.permission.MANAGE_DOCUMENTS"
+            android:enabled="false">
+            <intent-filter>
+                <action android:name="android.content.action.DOCUMENTS_PROVIDER" />
+            </intent-filter>
+        </provider>
+
         <activity
             android:name=".BugreportWarningActivity"
             android:theme="@*android:style/Theme.DeviceDefault.Light.Dialog.Alert"
