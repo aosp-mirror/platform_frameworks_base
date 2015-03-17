@@ -212,7 +212,7 @@ public final class PrintDocumentInfo implements Parcelable {
         result = prime * result + mContentType;
         result = prime * result + mPageCount;
         result = prime * result + (int) mDataSize;
-        result = prime * result + (int) mDataSize >> 32;
+        result = prime * result + (int) (mDataSize >> 32);
         return result;
     }
 
