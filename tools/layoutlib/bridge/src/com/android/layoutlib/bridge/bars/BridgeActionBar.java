@@ -81,7 +81,7 @@ public abstract class BridgeActionBar {
         }
 
         // Inflate action bar layout.
-        mDecorContent = LayoutInflater.from(context).inflate(layoutId, mEnclosingLayout, true);
+        mDecorContent = getInflater(context).inflate(layoutId, mEnclosingLayout, true);
 
     }
 
@@ -91,6 +91,10 @@ public abstract class BridgeActionBar {
      * be inflated.
      */
     protected abstract ResourceValue getLayoutResource(BridgeContext context);
+
+    protected LayoutInflater getInflater(BridgeContext context) {
+        return LayoutInflater.from(context);
+    }
 
     protected void setContentRoot(@NonNull FrameLayout contentRoot) {
         mContentRoot = contentRoot;
