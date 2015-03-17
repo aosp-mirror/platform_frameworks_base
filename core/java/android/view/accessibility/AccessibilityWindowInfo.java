@@ -573,7 +573,7 @@ public final class AccessibilityWindowInfo implements Parcelable {
         if (other.mType != mType) {
             throw new IllegalArgumentException("Not same type.");
         }
-        if (!mBoundsInScreen.equals(mBoundsInScreen)) {
+        if (!mBoundsInScreen.equals(other.mBoundsInScreen)) {
             return true;
         }
         if (mLayer != other.mLayer) {
