@@ -41,6 +41,7 @@ import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.ContextWrapper;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.IntentSender;
@@ -932,6 +933,13 @@ public final class BridgeContext extends Context {
         }
 
         return defValue;
+    }
+
+    public static Context getBaseContext(Context context) {
+        while (context instanceof ContextWrapper) {
+            context = ((ContextWrapper) context).getBaseContext();
+        }
+        return context;
     }
 
     //------------ NOT OVERRIDEN --------------------

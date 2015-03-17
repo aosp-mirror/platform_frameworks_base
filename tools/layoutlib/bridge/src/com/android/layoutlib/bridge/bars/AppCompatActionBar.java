@@ -21,11 +21,15 @@ import com.android.annotations.Nullable;
 import com.android.ide.common.rendering.api.RenderResources;
 import com.android.ide.common.rendering.api.ResourceValue;
 import com.android.ide.common.rendering.api.SessionParams;
+import com.android.ide.common.rendering.api.StyleResourceValue;
 import com.android.layoutlib.bridge.android.BridgeContext;
 import com.android.layoutlib.bridge.impl.ResourceHelper;
 import com.android.resources.ResourceType;
 
+import android.content.Context;
 import android.graphics.drawable.Drawable;
+import android.view.ContextThemeWrapper;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
@@ -82,6 +86,27 @@ public class AppCompatActionBar extends BridgeActionBar {
         // We always assume that the app has requested the action bar.
         return context.getRenderResources().getProjectResource(ResourceType.LAYOUT,
                 "abc_screen_toolbar");
+    }
+
+    @Override
+    protected LayoutInflater getInflater(BridgeContext context) {
+        // Other than the resource resolution part, the code has been taken from the support
+        // library. see code from line 269 onwards in
+        // https://android.googlesource.com/platform/frameworks/support/+/android-5.1.0_r1/v7/appcompat/src/android/support/v7/app/ActionBarActivityDelegateBase.java
+        Context themedContext = context;
+        RenderResources resources = context.getRenderResources();
+        ResourceValue actionBarTheme = resources.findItemInTheme("actionBarTheme", false);
+        if (actionBarTheme != null) {
+            // resolve it, if needed.
+            actionBarTheme = resources.resolveResValue(actionBarTheme);
+        }
+        if (actionBarTheme instanceof StyleResourceValue) {
+            int styleId = context.getDynamicIdByStyle(((StyleResourceValue) actionBarTheme));
+            if (styleId != 0) {
+                themedContext = new ContextThemeWrapper(context, styleId);
+            }
+        }
+        return LayoutInflater.from(themedContext);
     }
 
     @Override
