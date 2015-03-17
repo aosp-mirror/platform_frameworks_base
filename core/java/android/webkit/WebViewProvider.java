@@ -40,6 +40,8 @@ import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputConnection;
 import android.webkit.WebView.HitTestResult;
 import android.webkit.WebView.PictureListener;
+import android.webkit.WebView.VisualStateCallback;
+
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -145,6 +147,8 @@ public interface WebViewProvider {
     public boolean pageUp(boolean top);
 
     public boolean pageDown(boolean bottom);
+
+    public void insertVisualStateCallback(long requestId, VisualStateCallback callback);
 
     public void clearView();
 

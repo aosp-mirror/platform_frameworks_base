@@ -364,6 +364,20 @@ public class WebView extends AbsoluteLayout
     }
 
     /**
+     * Callback interface supplied to {@link #insertVisualStateCallback} for receiving
+     * notifications about the visual state.
+     */
+    public static abstract class VisualStateCallback {
+        /**
+         * Invoked when the visual state is ready to be drawn in the next {@link #onDraw}.
+         *
+         * @param requestId the id supplied to the corresponding {@link #insertVisualStateCallback}
+         * request
+         */
+        public abstract void onComplete(long requestId);
+    }
+
+    /**
      * Interface to listen for new pictures as they change.
      *
      * @deprecated This interface is now obsolete.
@@ -1141,6 +1155,60 @@ public class WebView extends AbsoluteLayout
         checkThread();
         if (TRACE) Log.d(LOGTAG, "pageDown");
         return mProvider.pageDown(bottom);
+    }
+
+    /**
+     * Inserts a {@link VisualStateCallback}.
+     *
+     * <p>Updates to the the DOM are reflected asynchronously such that when the DOM is updated the
+     * subsequent {@link WebView#onDraw} invocation might not reflect those updates. The
+     * {@link VisualStateCallback} provides a mechanism to notify the caller when the contents of
+     * the DOM at the current time are ready to be drawn the next time the {@link WebView} draws.
+     * By current time we mean the time at which this API was called. The next draw after the
+     * callback completes is guaranteed to reflect all the updates to the DOM applied before the
+     * current time, but it may also contain updates applied after the current time.</p>
+     *
+     * <p>The state of the DOM covered by this API includes the following:
+     * <ul>
+     * <li>primitive HTML elements (div, img, span, etc..)</li>
+     * <li>images</li>
+     * <li>CSS animations</li>
+     * <li>WebGL</li>
+     * <li>canvas</li>
+     * </ul>
+     * It does not include the state of:
+     * <ul>
+     * <li>the video tag</li>
+     * </ul></p>
+     *
+     * <p>To guarantee that the {@link WebView} will successfully render the first frame
+     * after the {@link VisualStateCallback#onComplete} method has been called a set of conditions
+     * must be met:
+     * <ul>
+     * <li>If the {@link WebView}'s visibility is set to {@link View#VISIBLE VISIBLE} then
+     * the {@link WebView} must be attached to the view hierarchy.</li>
+     * <li>If the {@link WebView}'s visibility is set to {@link View#INVISIBLE INVISIBLE}
+     * then the {@link WebView} must be attached to the view hierarchy and must be made
+     * {@link View#VISIBLE VISIBLE} from the {@link VisualStateCallback#onComplete} method.</li>
+     * <li>If the {@link WebView}'s visibility is set to {@link View#GONE GONE} then the
+     * {@link WebView} must be attached to the view hierarchy and its
+     * {@link AbsoluteLayout.LayoutParams LayoutParams}'s width and height need to be set to fixed
+     * values and must be made {@link View#VISIBLE VISIBLE} from the
+     * {@link VisualStateCallback#onComplete} method.</li>
+     * </ul></p>
+     *
+     * <p>When using this API it is also recommended to enable pre-rasterization if the
+     * {@link WebView} is offscreen to avoid flickering. See WebSettings#setOffscreenPreRaster for
+     * more details and do consider its caveats.</p>
+     *
+     * @param requestId an id that will be returned in the callback to allow callers to match
+     * requests with callbacks.
+     * @param callback the callback to be invoked.
+     */
+    public void insertVisualStateCallback(long requestId, VisualStateCallback callback) {
+        checkThread();
+        if (TRACE) Log.d(LOGTAG, "insertVisualStateCallback");
+        mProvider.insertVisualStateCallback(requestId, callback);
     }
 
     /**
