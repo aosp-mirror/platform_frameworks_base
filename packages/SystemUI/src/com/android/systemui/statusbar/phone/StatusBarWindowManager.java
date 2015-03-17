@@ -130,7 +130,7 @@ public class StatusBarWindowManager {
 
     private void applyHeight(State state) {
         boolean expanded = state.isKeyguardShowingAndNotOccluded() || state.statusBarExpanded
-                || state.keyguardFadingAway || state.bouncerShowing;
+                || state.keyguardFadingAway || state.bouncerShowing || state.headsUpShowing;
         if (expanded) {
             mLpChanged.height = ViewGroup.LayoutParams.MATCH_PARENT;
         } else {
@@ -218,6 +218,11 @@ public class StatusBarWindowManager {
         apply(mCurrentState);
     }
 
+    public void setHeadsUpShowing(boolean showing) {
+        mCurrentState.headsUpShowing = showing;
+        apply(mCurrentState);
+    }
+
     /**
      * @param state The {@link StatusBarState} of the status bar.
      */
@@ -235,6 +240,7 @@ public class StatusBarWindowManager {
         boolean bouncerShowing;
         boolean keyguardFadingAway;
         boolean qsExpanded;
+        boolean headsUpShowing;
 
         /**
          * The {@link BaseStatusBar} state from the status bar.

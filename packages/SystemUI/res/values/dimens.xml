@@ -330,7 +330,6 @@
          keyguard_clock_height_fraction_* for the difference between min and max.-->
     <dimen name="keyguard_clock_notifications_margin_min">24dp</dimen>
     <dimen name="keyguard_clock_notifications_margin_max">36dp</dimen>
-    <dimen name="heads_up_window_height">250dp</dimen>
 
     <!-- The minimum amount the user needs to swipe to go to the camera / phone. -->
     <dimen name="keyguard_min_swipe_amount">110dp</dimen>

@@ -108,6 +108,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
                     !mChildrenExpanded);
         }
     };
+    private boolean mInShade;
 
     public void setIconAnimationRunning(boolean running) {
         setIconAnimationRunning(running, mPublicLayout);
@@ -162,6 +163,10 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
 
     public StatusBarNotification getStatusBarNotification() {
         return mStatusBarNotification;
+    }
+
+    public boolean isHeadsUp() {
+        return mIsHeadsUp;
     }
 
     public void setHeadsUp(boolean isHeadsUp) {
@@ -261,6 +266,19 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
         }
         realActualHeight = Math.max(getMinHeight(), realActualHeight);
         return realActualHeight;
+    }
+
+    public void setInShade(boolean inShade) {
+        mInShade = inShade;
+    }
+
+    public boolean isInShade() {
+        return mInShade;
+    }
+
+    public int getHeadsUpHeight() {
+        // TODO: improve this logic
+        return getIntrinsicHeight();
     }
 
     public interface ExpansionLogger {

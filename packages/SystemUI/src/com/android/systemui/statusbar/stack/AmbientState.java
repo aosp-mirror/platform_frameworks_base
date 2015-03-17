@@ -18,8 +18,10 @@ package com.android.systemui.statusbar.stack;
 
 import android.view.View;
 import com.android.systemui.statusbar.ActivatableNotificationView;
+import com.android.systemui.statusbar.policy.HeadsUpManager;
 
 import java.util.ArrayList;
+import java.util.TreeMap;
 
 /**
  * A global state to track all input states for the algorithm.
@@ -34,6 +36,12 @@ public class AmbientState {
     private int mSpeedBumpIndex = -1;
     private boolean mDark;
     private boolean mHideSensitive;
+    private HeadsUpManager mHeadsUpManager;
+    private float mPaddingOffset;
+    private int mLayoutHeight;
+    private int mTopPadding;
+    private boolean mShadeExpanded;
+    private float mMaxHeadsUpTranslation;
 
     public int getScrollY() {
         return mScrollY;
@@ -114,5 +122,57 @@ public class AmbientState {
 
     public void setSpeedBumpIndex(int speedBumpIndex) {
         mSpeedBumpIndex = speedBumpIndex;
+    }
+
+    public void setHeadsUpManager(HeadsUpManager headsUpManager) {
+        mHeadsUpManager = headsUpManager;
+    }
+
+    public TreeMap<String, HeadsUpManager.HeadsUpEntry> getHeadsUpEntries() {
+        return mHeadsUpManager.getEntries();
+    }
+
+    public float getPaddingOffset() {
+        return mPaddingOffset;
+    }
+
+    public void setPaddingOffset(float paddingOffset) {
+        mPaddingOffset = paddingOffset;
+    }
+
+    public int getLayoutHeight() {
+        return mLayoutHeight;
+    }
+
+    public void setLayoutHeight(int layoutHeight) {
+        mLayoutHeight = layoutHeight;
+    }
+
+    public int getTopPadding() {
+        return mTopPadding;
+    }
+
+    public void setTopPadding(int topPadding) {
+        mTopPadding = topPadding;
+    }
+
+    public int getInnerHeight() {
+        return mLayoutHeight - mTopPadding;
+    }
+
+    public boolean isShadeExpanded() {
+        return mShadeExpanded;
+    }
+
+    public void setShadeExpanded(boolean shadeExpanded) {
+        mShadeExpanded = shadeExpanded;
+    }
+
+    public void setMaxHeadsUpTranslation(float maxHeadsUpTranslation) {
+        mMaxHeadsUpTranslation = maxHeadsUpTranslation;
+    }
+
+    public float getMaxHeadsUpTranslation() {
+        return mMaxHeadsUpTranslation;
     }
 }

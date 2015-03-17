@@ -25,9 +25,11 @@ import android.view.ViewGroup;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.ExpandableNotificationRow;
 import com.android.systemui.statusbar.ExpandableView;
+import com.android.systemui.statusbar.policy.HeadsUpManager;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.TreeMap;
 
 /**
  * The Algorithm of the {@link com.android.systemui.statusbar.stack
@@ -54,11 +56,6 @@ public class StackScrollAlgorithm {
     private StackIndentationFunctor mTopStackIndentationFunctor;
     private StackIndentationFunctor mBottomStackIndentationFunctor;
 
-    private int mLayoutHeight;
-
-    /** mLayoutHeight - mTopPadding */
-    private int mInnerHeight;
-    private int mTopPadding;
     private StackScrollAlgorithmState mTempAlgorithmState = new StackScrollAlgorithmState();
     private boolean mIsExpansionChanging;
     private int mFirstChildMaxHeight;
@@ -157,13 +154,13 @@ public class StackScrollAlgorithm {
         scrollY = Math.max(0, scrollY);
         algorithmState.scrollY = (int) (scrollY + mCollapsedSize + bottomOverScroll);
 
-        updateVisibleChildren(resultState, algorithmState);
+        updateVisibleChildren(resultState, algorithmState, ambientState);
 
         // Phase 1:
-        findNumberOfItemsInTopStackAndUpdateState(resultState, algorithmState);
+        findNumberOfItemsInTopStackAndUpdateState(resultState, algorithmState, ambientState);
 
         // Phase 2:
-        updatePositionsForState(resultState, algorithmState);
+        updatePositionsForState(resultState, algorithmState, ambientState);
 
         // Phase 3:
         updateZValuesForState(resultState, algorithmState);
@@ -329,23 +326,30 @@ public class StackScrollAlgorithm {
      * Update the visible children on the state.
      */
     private void updateVisibleChildren(StackScrollState resultState,
-            StackScrollAlgorithmState state) {
+            StackScrollAlgorithmState state, AmbientState ambientState) {
         ViewGroup hostView = resultState.getHostView();
         int childCount = hostView.getChildCount();
         state.visibleChildren.clear();
         state.visibleChildren.ensureCapacity(childCount);
         int notGoneIndex = 0;
+        TreeMap<String, HeadsUpManager.HeadsUpEntry> headsUpEntries =
+                ambientState.getHeadsUpEntries();
+        for (String key: headsUpEntries.keySet()) {
+            ExpandableView v = headsUpEntries.get(key).entry.row;
+            notGoneIndex = updateNotGoneIndex(resultState, state, notGoneIndex, v);
+        }
         for (int i = 0; i < childCount; i++) {
             ExpandableView v = (ExpandableView) hostView.getChildAt(i);
             if (v.getVisibility() != View.GONE) {
-                StackViewState viewState = resultState.getViewStateForView(v);
-                viewState.notGoneIndex = notGoneIndex;
-                state.visibleChildren.add(v);
-                notGoneIndex++;
 
-                // handle the notgoneIndex for the children as well
                 if (v instanceof ExpandableNotificationRow) {
                     ExpandableNotificationRow row = (ExpandableNotificationRow) v;
+                    if (row.isHeadsUp()) {
+                        continue;
+                    }
+                    notGoneIndex = updateNotGoneIndex(resultState, state, notGoneIndex, v);
+
+                    // handle the notgoneIndex for the children as well
                     List<ExpandableNotificationRow> children =
                             row.getNotificationChildren();
                     if (row.areChildrenExpanded() && children != null) {
@@ -358,22 +362,35 @@ public class StackScrollAlgorithm {
                             }
                         }
                     }
+                } else {
+                    notGoneIndex = updateNotGoneIndex(resultState, state, notGoneIndex, v);
                 }
             }
         }
     }
 
+    private int updateNotGoneIndex(StackScrollState resultState,
+            StackScrollAlgorithmState state, int notGoneIndex,
+            ExpandableView v) {
+        StackViewState viewState = resultState.getViewStateForView(v);
+        viewState.notGoneIndex = notGoneIndex;
+        state.visibleChildren.add(v);
+        notGoneIndex++;
+        return notGoneIndex;
+    }
+
     /**
      * Determine the positions for the views. This is the main part of the algorithm.
      *
-     * @param resultState The result state to update if a change to the properties of a child occurs
+     *  @param resultState The result state to update if a change to the properties of a child occurs
      * @param algorithmState The state in which the current pass of the algorithm is currently in
+     * @param ambientState The current ambient state
      */
     private void updatePositionsForState(StackScrollState resultState,
-            StackScrollAlgorithmState algorithmState) {
+            StackScrollAlgorithmState algorithmState, AmbientState ambientState) {
 
         // The starting position of the bottom stack peek
-        float bottomPeekStart = mInnerHeight - mBottomStackPeekSize;
+        float bottomPeekStart = ambientState.getInnerHeight() - mBottomStackPeekSize;
 
         // The position where the bottom stack starts.
         float bottomStackStart = bottomPeekStart - mBottomStackSlowDownLength;
@@ -427,7 +444,8 @@ public class StackScrollAlgorithm {
                             bottomPeekStart, childViewState.yTranslation, childViewState,
                             childHeight);
                 }
-                clampPositionToBottomStackStart(childViewState, childViewState.height);
+                clampPositionToBottomStackStart(childViewState, childViewState.height,
+                        ambientState);
             } else if (nextYPosition >= bottomStackStart) {
                 // Case 2:
                 // We are in the bottom stack.
@@ -435,7 +453,7 @@ public class StackScrollAlgorithm {
                     // According to the regular scroll view we are fully translated out of the
                     // bottom of the screen so we are fully in the bottom stack
                     updateStateForChildFullyInBottomStack(algorithmState,
-                            bottomStackStart, childViewState, childHeight);
+                            bottomStackStart, childViewState, childHeight, ambientState);
                 } else {
                     // According to the regular scroll view we are currently translating out of /
                     // into the bottom of the screen
@@ -447,7 +465,7 @@ public class StackScrollAlgorithm {
                 // Case 3:
                 // We are in the regular scroll area.
                 childViewState.location = StackViewState.LOCATION_MAIN_AREA;
-                clampYTranslation(childViewState, childHeight);
+                clampYTranslation(childViewState, childHeight, ambientState);
             }
 
             // The first card is always rendered.
@@ -468,7 +486,44 @@ public class StackScrollAlgorithm {
             currentYPosition = childViewState.yTranslation + childHeight + mPaddingBetweenElements;
             yPositionInScrollView = yPositionInScrollViewAfterElement;
 
-            childViewState.yTranslation += mTopPadding;
+            childViewState.yTranslation += ambientState.getTopPadding()
+                    + ambientState.getPaddingOffset();
+
+            updateHeadsUpStates(resultState, algorithmState, ambientState);
+        }
+    }
+
+    private void updateHeadsUpStates(StackScrollState resultState,
+            StackScrollAlgorithmState algorithmState, AmbientState ambientState) {
+        TreeMap<String, HeadsUpManager.HeadsUpEntry> headsUpEntries =
+                ambientState.getHeadsUpEntries();
+        boolean hasPinnedHeadsUp = false;
+        for (String key: headsUpEntries.keySet()) {
+            ExpandableNotificationRow row = headsUpEntries.get(key).entry.row;
+            StackViewState childState = resultState.getViewStateForView(row);
+            if (!row.isInShade()) {
+                childState.yTranslation = Math.max(childState.yTranslation, 0);
+                hasPinnedHeadsUp = true;
+            }
+            childState.height = Math.max(childState.height, row.getHeadsUpHeight());
+            childState.yTranslation = Math.min(childState.yTranslation,
+                    ambientState.getMaxHeadsUpTranslation() - childState.height);
+        }
+        if (hasPinnedHeadsUp && !ambientState.isShadeExpanded()) {
+            // Let's hide all normal views
+            int childCount = algorithmState.visibleChildren.size();
+            for (int i = 0; i < childCount; i++) {
+                ExpandableView child = algorithmState.visibleChildren.get(i);
+                StackViewState state = resultState.getViewStateForView(child);
+                boolean hideView = true;
+                if (child instanceof ExpandableNotificationRow) {
+                    ExpandableNotificationRow row = (ExpandableNotificationRow) child;
+                    hideView = !row.isHeadsUp();
+                }
+                if (hideView) {
+                    state.alpha = 0.0f;
+                }
+            }
         }
     }
 
@@ -478,8 +533,9 @@ public class StackScrollAlgorithm {
      * @param childViewState the view state of the child
      * @param childHeight the height of this child
      */
-    private void clampYTranslation(StackViewState childViewState, int childHeight) {
-        clampPositionToBottomStackStart(childViewState, childHeight);
+    private void clampYTranslation(StackViewState childViewState, int childHeight,
+            AmbientState ambientState) {
+        clampPositionToBottomStackStart(childViewState, childHeight, ambientState);
         clampPositionToTopStackEnd(childViewState, childHeight);
     }
 
@@ -491,9 +547,10 @@ public class StackScrollAlgorithm {
      * @param childHeight the height of this child
      */
     private void clampPositionToBottomStackStart(StackViewState childViewState,
-            int childHeight) {
+            int childHeight, AmbientState ambientState) {
         childViewState.yTranslation = Math.min(childViewState.yTranslation,
-                mInnerHeight - mBottomStackPeekSize - mCollapseSecondCardPadding - childHeight);
+                ambientState.getInnerHeight() - mBottomStackPeekSize - mCollapseSecondCardPadding
+                        - childHeight);
     }
 
     /**
@@ -548,8 +605,7 @@ public class StackScrollAlgorithm {
 
     private void updateStateForChildFullyInBottomStack(StackScrollAlgorithmState algorithmState,
             float transitioningPositionStart, StackViewState childViewState,
-            int childHeight) {
-
+            int childHeight, AmbientState ambientState) {
         float currentYPosition;
         algorithmState.itemsInBottomStack += 1.0f;
         if (algorithmState.itemsInBottomStack < MAX_ITEMS_IN_BOTTOM_STACK) {
@@ -567,7 +623,7 @@ public class StackScrollAlgorithm {
                 childViewState.alpha = 1.0f - algorithmState.partialInBottom;
             }
             childViewState.location = StackViewState.LOCATION_BOTTOM_STACK_HIDDEN;
-            currentYPosition = mInnerHeight;
+            currentYPosition = ambientState.getInnerHeight();
         }
         childViewState.yTranslation = currentYPosition - childHeight;
         clampPositionToTopStackEnd(childViewState, childHeight);
@@ -629,7 +685,7 @@ public class StackScrollAlgorithm {
      * @param algorithmState The state in which the current pass of the algorithm is currently in
      */
     private void findNumberOfItemsInTopStackAndUpdateState(StackScrollState resultState,
-            StackScrollAlgorithmState algorithmState) {
+            StackScrollAlgorithmState algorithmState, AmbientState ambientState) {
 
         // The y Position if the element would be in a regular scrollView
         float yPositionInScrollView = 0.0f;
@@ -647,7 +703,7 @@ public class StackScrollAlgorithm {
                 if (i == 0 && algorithmState.scrollY <= mCollapsedSize) {
 
                     // The starting position of the bottom stack peek
-                    int bottomPeekStart = mInnerHeight - mBottomStackPeekSize -
+                    int bottomPeekStart = ambientState.getInnerHeight() - mBottomStackPeekSize -
                             mCollapseSecondCardPadding;
                     // Collapse and expand the first child while the shade is being expanded
                     float maxHeight = mIsExpansionChanging && child == mFirstChildWhileExpanding
@@ -743,21 +799,6 @@ public class StackScrollAlgorithm {
             }
         }
     }
-
-    public void setLayoutHeight(int layoutHeight) {
-        this.mLayoutHeight = layoutHeight;
-        updateInnerHeight();
-    }
-
-    public void setTopPadding(int topPadding) {
-        mTopPadding = topPadding;
-        updateInnerHeight();
-    }
-
-    private void updateInnerHeight() {
-        mInnerHeight = mLayoutHeight - mTopPadding;
-    }
-
 
     /**
      * Update whether the device is very small, i.e. Notifications can be in both the top and the

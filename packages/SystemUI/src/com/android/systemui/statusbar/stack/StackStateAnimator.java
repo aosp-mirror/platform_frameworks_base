@@ -45,6 +45,8 @@ public class StackStateAnimator {
     public static final int ANIMATION_DURATION_APPEAR_DISAPPEAR = 464;
     public static final int ANIMATION_DURATION_EXPAND_CLICKED = 360;
     public static final int ANIMATION_DURATION_DIMMED_ACTIVATED = 220;
+    public static final int ANIMATION_DURATION_HEADS_UP_APPEAR = 280;
+    public static final int ANIMATION_DURATION_HEADS_UP_DISAPPEAR = 220;
     public static final int ANIMATION_DELAY_PER_ELEMENT_INTERRUPTING = 80;
     public static final int ANIMATION_DELAY_PER_ELEMENT_EXPAND_CHILDREN = 54;
     public static final int ANIMATION_DELAY_PER_ELEMENT_MANUAL = 32;
@@ -90,6 +92,7 @@ public class StackStateAnimator {
     private ValueAnimator mTopOverScrollAnimator;
     private ValueAnimator mBottomOverScrollAnimator;
     private ExpandableNotificationRow mChildExpandingView;
+    private StackViewState mTmpState = new StackViewState();
 
     public StackStateAnimator(NotificationStackScrollLayout hostLayout) {
         mHostLayout = hostLayout;
@@ -828,6 +831,13 @@ public class StackStateAnimator {
                 ExpandableNotificationRow row = (ExpandableNotificationRow) event.changingView;
                 row.prepareExpansionChanged(finalState);
                 mChildExpandingView = row;
+            } else if (event.animationType == NotificationStackScrollLayout
+                    .AnimationEvent.ANIMATION_TYPE_HEADS_UP_APPEAR) {
+                // This item is added, initialize it's properties.
+                StackViewState viewState = finalState.getViewStateForView(changingView);
+                mTmpState.copyFrom(viewState);
+                mTmpState.yTranslation = -mTmpState.height;
+                finalState.applyState(changingView, mTmpState);
             }
             mNewEvents.add(event);
         }
