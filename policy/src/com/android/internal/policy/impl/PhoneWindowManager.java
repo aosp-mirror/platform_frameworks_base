@@ -175,6 +175,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     static final int DOUBLE_TAP_HOME_NOTHING = 0;
     static final int DOUBLE_TAP_HOME_RECENT_SYSTEM_UI = 1;
 
+    static final int SHORT_PRESS_SLEEP_GO_TO_SLEEP = 0;
+    static final int SHORT_PRESS_SLEEP_GO_TO_SLEEP_AND_GO_HOME = 1;
+
     static final int APPLICATION_MEDIA_SUBLAYER = -2;
     static final int APPLICATION_MEDIA_OVERLAY_SUBLAYER = -1;
     static final int APPLICATION_PANEL_SUBLAYER = 1;
@@ -370,6 +373,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     int mLongPressOnPowerBehavior;
     int mDoublePressOnPowerBehavior;
     int mTriplePressOnPowerBehavior;
+    int mShortPressOnSleepBehavior;
     boolean mAwake;
     boolean mScreenOnEarly;
     boolean mScreenOnFully;
@@ -1059,6 +1063,20 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
     }
 
+    private void sleepPress(KeyEvent event) {
+        switch (mShortPressOnSleepBehavior) {
+            case SHORT_PRESS_SLEEP_GO_TO_SLEEP:
+                mPowerManager.goToSleep(event.getEventTime(),
+                        PowerManager.GO_TO_SLEEP_REASON_SLEEP_BUTTON, 0);
+                break;
+            case SHORT_PRESS_SLEEP_GO_TO_SLEEP_AND_GO_HOME:
+                launchHomeFromHotKey(false /* awakenDreams */);
+                mPowerManager.goToSleep(event.getEventTime(),
+                        PowerManager.GO_TO_SLEEP_REASON_SLEEP_BUTTON, 0);
+                break;
+        }
+    }
+
     private int getResolvedLongPressOnPowerBehavior() {
         if (FactoryTest.isLongPressOnPowerOffEnabled()) {
             return LONG_PRESS_POWER_SHUT_OFF_NO_CONFIRM;
@@ -1324,6 +1342,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 com.android.internal.R.integer.config_doublePressOnPowerBehavior);
         mTriplePressOnPowerBehavior = mContext.getResources().getInteger(
                 com.android.internal.R.integer.config_triplePressOnPowerBehavior);
+        mShortPressOnSleepBehavior = mContext.getResources().getInteger(
+                com.android.internal.R.integer.config_shortPressOnSleepBehavior);
 
         readConfigurationDependentBehaviors();
 
@@ -3035,11 +3055,15 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
     }
 
+    void launchHomeFromHotKey() {
+        launchHomeFromHotKey(true /* awakenFromDreams */);
+    }
+
     /**
      * A home key -> launch home action was detected.  Take the appropriate action
      * given the situation with the keyguard.
      */
-    void launchHomeFromHotKey() {
+    void launchHomeFromHotKey(final boolean awakenFromDreams) {
         if (isKeyguardShowingAndNotOccluded()) {
             // don't launch home if keyguard showing
         } else if (!mHideLockScreen && mKeyguardDelegate.isInputRestricted()) {
@@ -3054,7 +3078,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                         } catch (RemoteException e) {
                         }
                         sendCloseSystemWindows(SYSTEM_DIALOG_REASON_HOME_KEY);
-                        startDockOrHome(true /*fromHomeKey*/);
+                        startDockOrHome(true /*fromHomeKey*/, awakenFromDreams);
                     }
                 }
             });
@@ -3066,13 +3090,15 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             }
             if (mRecentsVisible) {
                 // Hide Recents and notify it to launch Home
-                awakenDreams();
+                if (awakenFromDreams) {
+                    awakenDreams();
+                }
                 sendCloseSystemWindows(SYSTEM_DIALOG_REASON_HOME_KEY);
                 hideRecentApps(false, true);
             } else {
                 // Otherwise, just launch Home
                 sendCloseSystemWindows(SYSTEM_DIALOG_REASON_HOME_KEY);
-                startDockOrHome(true /*fromHomeKey*/);
+                startDockOrHome(true /*fromHomeKey*/, awakenFromDreams);
             }
         }
     }
@@ -4729,12 +4755,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
             case KeyEvent.KEYCODE_SLEEP: {
                 result &= ~ACTION_PASS_TO_USER;
+                isWakeKey = false;
                 if (!mPowerManager.isInteractive()) {
                     useHapticFeedback = false; // suppress feedback if already non-interactive
                 }
-                mPowerManager.goToSleep(event.getEventTime(),
-                        PowerManager.GO_TO_SLEEP_REASON_POWER_BUTTON, 0);
-                isWakeKey = false;
+                sleepPress(event);
                 break;
             }
 
@@ -5884,8 +5909,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         return null;
     }
 
-    void startDockOrHome(boolean fromHomeKey) {
-        awakenDreams();
+    void startDockOrHome(boolean fromHomeKey, boolean awakenFromDreams) {
+        if (awakenFromDreams) {
+            awakenDreams();
+        }
 
         Intent dock = createHomeDockIntent();
         if (dock != null) {
@@ -5923,7 +5950,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             } catch (RemoteException e) {
             }
             sendCloseSystemWindows();
-            startDockOrHome(false /*fromHomeKey*/);
+            startDockOrHome(false /*fromHomeKey*/, true /* awakenFromDreams */);
         } else {
             // This code brings home to the front or, if it is already
             // at the front, puts the device to sleep.
