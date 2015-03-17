@@ -4905,7 +4905,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             return;
         }
         int keyCode = event.getKeyCode();
-        int flags = AudioManager.FLAG_SHOW_UI | AudioManager.FLAG_PLAY_SOUND;
+        int flags = AudioManager.FLAG_SHOW_UI | AudioManager.FLAG_PLAY_SOUND
+                | AudioManager.FLAG_FROM_KEY;
         String pkgName = mContext.getOpPackageName();
         switch (keyCode) {
             case KeyEvent.KEYCODE_VOLUME_UP:

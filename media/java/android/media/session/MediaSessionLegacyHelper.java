@@ -197,17 +197,17 @@ public class MediaSessionLegacyHelper {
                 break;
         }
         if (down || up) {
-            int flags;
+            int flags = AudioManager.FLAG_FROM_KEY;
             if (musicOnly) {
                 // This flag is used when the screen is off to only affect
                 // active media
-                flags = AudioManager.FLAG_ACTIVE_MEDIA_ONLY;
+                flags |= AudioManager.FLAG_ACTIVE_MEDIA_ONLY;
             } else {
                 // These flags are consistent with the home screen
                 if (up) {
-                    flags = AudioManager.FLAG_PLAY_SOUND | AudioManager.FLAG_VIBRATE;
+                    flags |= AudioManager.FLAG_PLAY_SOUND | AudioManager.FLAG_VIBRATE;
                 } else {
-                    flags = AudioManager.FLAG_SHOW_UI | AudioManager.FLAG_VIBRATE;
+                    flags |= AudioManager.FLAG_SHOW_UI | AudioManager.FLAG_VIBRATE;
                 }
             }
             if (direction != 0) {
