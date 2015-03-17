@@ -39,6 +39,8 @@ import android.util.AttributeSet;
 
 import java.io.File;
 
+import static com.android.layoutlib.bridge.android.BridgeContext.getBaseContext;
+
 /**
  * Custom implementation of {@link LayoutInflater} to handle custom views.
  */
@@ -60,7 +62,12 @@ public final class BridgeInflater extends LayoutInflater {
 
     protected BridgeInflater(LayoutInflater original, Context newContext) {
         super(original, newContext);
-        mProjectCallback = null;
+        newContext = getBaseContext(newContext);
+        if (newContext instanceof BridgeContext) {
+            mProjectCallback = ((BridgeContext) newContext).getProjectCallback();
+        } else {
+            mProjectCallback = null;
+        }
     }
 
     /**
@@ -154,9 +161,7 @@ public final class BridgeInflater extends LayoutInflater {
     @Override
     public View inflate(int resource, ViewGroup root) {
         Context context = getContext();
-        while (context instanceof ContextThemeWrapper) {
-            context = ((ContextThemeWrapper) context).getBaseContext();
-        }
+        context = getBaseContext(context);
         if (context instanceof BridgeContext) {
             BridgeContext bridgeContext = (BridgeContext)context;
 
@@ -219,9 +224,7 @@ public final class BridgeInflater extends LayoutInflater {
 
     private void setupViewInContext(View view, AttributeSet attrs) {
         Context context = getContext();
-        while (context instanceof ContextThemeWrapper) {
-            context = ((ContextThemeWrapper) context).getBaseContext();
-        }
+        context = getBaseContext(context);
         if (context instanceof BridgeContext) {
             BridgeContext bc = (BridgeContext) context;
             // get the view key

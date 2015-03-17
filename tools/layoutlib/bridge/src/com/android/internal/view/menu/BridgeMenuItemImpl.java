@@ -19,7 +19,6 @@ package com.android.internal.view.menu;
 import com.android.layoutlib.bridge.android.BridgeContext;
 
 import android.content.Context;
-import android.view.ContextThemeWrapper;
 import android.view.View;
 
 /**
@@ -42,9 +41,7 @@ public class BridgeMenuItemImpl extends MenuItemImpl {
             CharSequence title, int showAsAction) {
         super(menu, group, id, categoryOrder, ordering, title, showAsAction);
         Context context = menu.getContext();
-        while (context instanceof ContextThemeWrapper) {
-            context = ((ContextThemeWrapper) context).getBaseContext();
-        }
+        context = BridgeContext.getBaseContext(context);
         if (context instanceof BridgeContext) {
             mContext = ((BridgeContext) context);
         }
