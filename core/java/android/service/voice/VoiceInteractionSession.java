@@ -22,6 +22,7 @@ import android.app.VoiceInteractor;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.TypedArray;
+import android.graphics.Bitmap;
 import android.graphics.Rect;
 import android.graphics.Region;
 import android.inputmethodservice.SoftInputWindow;
@@ -179,6 +180,12 @@ public abstract class VoiceInteractionSession implements KeyEvent.Callback {
         }
 
         @Override
+        public void handleScreenshot(Bitmap screenshot) {
+            mHandlerCaller.sendMessage(mHandlerCaller.obtainMessageO(MSG_HANDLE_SCREENSHOT,
+                    screenshot));
+        }
+
+        @Override
         public void taskStarted(Intent intent, int taskId) {
             mHandlerCaller.sendMessage(mHandlerCaller.obtainMessageIO(MSG_TASK_STARTED,
                     taskId, intent));
@@ -323,8 +330,9 @@ public abstract class VoiceInteractionSession implements KeyEvent.Callback {
     static final int MSG_CLOSE_SYSTEM_DIALOGS = 102;
     static final int MSG_DESTROY = 103;
     static final int MSG_HANDLE_ASSIST = 104;
-    static final int MSG_SHOW = 105;
-    static final int MSG_HIDE = 106;
+    static final int MSG_HANDLE_SCREENSHOT = 105;
+    static final int MSG_SHOW = 106;
+    static final int MSG_HIDE = 107;
 
     class MyCallbacks implements HandlerCaller.Callback, SoftInputWindow.Callback {
         @Override
@@ -396,8 +404,12 @@ public abstract class VoiceInteractionSession implements KeyEvent.Callback {
                     doDestroy();
                     break;
                 case MSG_HANDLE_ASSIST:
-                    if (DEBUG) Log.d(TAG, "onHandleAssist: " + (Bundle)msg.obj);
+                    if (DEBUG) Log.d(TAG, "onHandleAssist: " + msg.obj);
                     onHandleAssist((Bundle) msg.obj);
+                    break;
+                case MSG_HANDLE_SCREENSHOT:
+                    if (DEBUG) Log.d(TAG, "onHandleScreenshot: " + msg.obj);
+                    onHandleScreenshot((Bitmap) msg.obj);
                     break;
                 case MSG_SHOW:
                     if (DEBUG) Log.d(TAG, "doShow: args=" + msg.obj
@@ -766,6 +778,9 @@ public abstract class VoiceInteractionSession implements KeyEvent.Callback {
     }
 
     public void onHandleAssist(Bundle assistBundle) {
+    }
+
+    public void onHandleScreenshot(Bitmap screenshot) {
     }
 
     public boolean onKeyDown(int keyCode, KeyEvent event) {

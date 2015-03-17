@@ -132,8 +132,6 @@ final class ActivityStack {
     // convertToTranslucent().
     static final long TRANSLUCENT_CONVERSION_TIMEOUT = 2000;
 
-    static final boolean SCREENSHOT_FORCE_565 = ActivityManager.isLowRamDeviceStatic();
-
     enum ActivityState {
         INITIALIZING,
         RESUMED,
@@ -790,7 +788,7 @@ final class ActivityStack {
         if (w > 0) {
             if (DEBUG_SCREENSHOTS) Slog.d(TAG, "\tTaking screenshot");
             return mWindowManager.screenshotApplications(who.appToken, Display.DEFAULT_DISPLAY,
-                    w, h, SCREENSHOT_FORCE_565);
+                    w, h);
         }
         Slog.e(TAG, "Invalid thumbnail dimensions: " + w + "x" + h);
         return null;

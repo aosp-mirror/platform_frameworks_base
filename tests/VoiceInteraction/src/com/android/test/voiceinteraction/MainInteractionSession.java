@@ -21,11 +21,13 @@ import android.app.AssistStructure;
 import android.app.VoiceInteractor;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.service.voice.VoiceInteractionSession;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 public class MainInteractionSession extends VoiceInteractionSession
@@ -39,6 +41,7 @@ public class MainInteractionSession extends VoiceInteractionSession
     View mBottomContent;
     TextView mText;
     Button mStartButton;
+    ImageView mScreenshot;
     Button mConfirmButton;
     Button mCompleteButton;
     Button mAbortButton;
@@ -76,6 +79,7 @@ public class MainInteractionSession extends VoiceInteractionSession
         if (mAssistVisualizer != null) {
             mAssistVisualizer.clearAssistData();
         }
+        onHandleScreenshot(null);
         updateState();
     }
 
@@ -101,6 +105,7 @@ public class MainInteractionSession extends VoiceInteractionSession
         mText = (TextView)mContentView.findViewById(R.id.text);
         mStartButton = (Button)mContentView.findViewById(R.id.start);
         mStartButton.setOnClickListener(this);
+        mScreenshot = (ImageView)mContentView.findViewById(R.id.screenshot);
         mConfirmButton = (Button)mContentView.findViewById(R.id.confirm);
         mConfirmButton.setOnClickListener(this);
         mCompleteButton = (Button)mContentView.findViewById(R.id.complete);
@@ -116,6 +121,18 @@ public class MainInteractionSession extends VoiceInteractionSession
             parseAssistData(assistBundle);
         } else {
             Log.i(TAG, "onHandleAssist: NO ASSIST BUNDLE");
+        }
+    }
+
+    @Override
+    public void onHandleScreenshot(Bitmap screenshot) {
+        if (screenshot != null) {
+            mScreenshot.setImageBitmap(screenshot);
+            mScreenshot.setAdjustViewBounds(true);
+            mScreenshot.setMaxWidth(screenshot.getWidth()/3);
+            mScreenshot.setMaxHeight(screenshot.getHeight()/3);
+        } else {
+            mScreenshot.setImageDrawable(null);
         }
     }
 

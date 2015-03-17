@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 The Android Open Source Project
+ * Copyright (C) 2015 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,22 +14,11 @@
  * limitations under the License.
  */
 
-package android.service.voice;
+package com.android.internal.app;
 
-import android.content.Intent;
 import android.graphics.Bitmap;
-import android.os.Bundle;
 
-/**
- * @hide
- */
-oneway interface IVoiceInteractionSession {
-    void show(in Bundle sessionArgs, int flags);
-    void hide();
-    void handleAssist(in Bundle assistData);
-    void handleScreenshot(in Bitmap screenshot);
-    void taskStarted(in Intent intent, int taskId);
-    void taskFinished(in Intent intent, int taskId);
-    void closeSystemDialogs();
-    void destroy();
+/** @hide */
+oneway interface IAssistScreenshotReceiver {
+    void send(in Bitmap screenshot);
 }

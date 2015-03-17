@@ -16,6 +16,7 @@
 
 package android.view;
 
+import com.android.internal.app.IAssistScreenshotReceiver;
 import com.android.internal.view.IInputContext;
 import com.android.internal.view.IInputMethodClient;
 
@@ -220,10 +221,14 @@ interface IWindowManager
     boolean isRotationFrozen();
 
     /**
+     * Used only for assist -- request a screenshot of the current application.
+     */
+    boolean requestAssistScreenshot(IAssistScreenshotReceiver receiver);
+
+    /**
      * Create a screenshot of the applications currently displayed.
      */
-    Bitmap screenshotApplications(IBinder appToken, int displayId, int maxWidth,
-            int maxHeight, boolean force565);
+    Bitmap screenshotApplications(IBinder appToken, int displayId, int maxWidth, int maxHeight);
 
     /**
      * Called by the status bar to notify Views of changes to System UI visiblity.

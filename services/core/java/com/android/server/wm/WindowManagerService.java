@@ -29,6 +29,7 @@ import android.view.IWindowId;
 
 import android.view.IWindowSessionCallback;
 import android.view.WindowContentFrameStats;
+import com.android.internal.app.IAssistScreenshotReceiver;
 import com.android.internal.app.IBatteryStats;
 import com.android.internal.util.FastPrintWriter;
 import com.android.internal.view.IInputContext;
@@ -38,6 +39,7 @@ import com.android.internal.view.WindowManagerPolicyThread;
 import com.android.server.AttributeCache;
 import com.android.server.DisplayThread;
 import com.android.server.EventLogTags;
+import com.android.server.FgThread;
 import com.android.server.LocalServices;
 import com.android.server.UiThread;
 import com.android.server.Watchdog;
@@ -5997,26 +5999,57 @@ public class WindowManagerService extends IWindowManager.Stub
      * Takes a snapshot of the screen.  In landscape mode this grabs the whole screen.
      * In portrait mode, it grabs the upper region of the screen based on the vertical dimension
      * of the target image.
+     */
+    @Override
+    public boolean requestAssistScreenshot(final IAssistScreenshotReceiver receiver) {
+        if (!checkCallingPermission(Manifest.permission.READ_FRAME_BUFFER,
+                "requestAssistScreenshot()")) {
+            throw new SecurityException("Requires READ_FRAME_BUFFER permission");
+        }
+
+        FgThread.getHandler().post(new Runnable() {
+            @Override
+            public void run() {
+                Bitmap bm = screenshotApplicationsInner(null, Display.DEFAULT_DISPLAY, -1, -1,
+                        true);
+                try {
+                    receiver.send(bm);
+                } catch (RemoteException e) {
+                }
+            }
+        });
+
+        return true;
+    }
+
+    /**
+     * Takes a snapshot of the screen.  In landscape mode this grabs the whole screen.
+     * In portrait mode, it grabs the upper region of the screen based on the vertical dimension
+     * of the target image.
      *
      * @param displayId the Display to take a screenshot of.
      * @param width the width of the target bitmap
      * @param height the height of the target bitmap
-     * @param force565 if true the returned bitmap will be RGB_565, otherwise it
-     *                 will be the same config as the surface
      */
     @Override
-    public Bitmap screenshotApplications(IBinder appToken, int displayId, int width,
-            int height, boolean force565) {
+    public Bitmap screenshotApplications(IBinder appToken, int displayId, int width, int height) {
         if (!checkCallingPermission(Manifest.permission.READ_FRAME_BUFFER,
                 "screenshotApplications()")) {
             throw new SecurityException("Requires READ_FRAME_BUFFER permission");
         }
+        return screenshotApplicationsInner(appToken, displayId, width, height, false);
+    }
 
-        final DisplayContent displayContent = getDisplayContentLocked(displayId);
-        if (displayContent == null) {
-            if (DEBUG_SCREENSHOT) Slog.i(TAG, "Screenshot of " + appToken
-                    + ": returning null. No Display for displayId=" + displayId);
-            return null;
+    Bitmap screenshotApplicationsInner(IBinder appToken, int displayId, int width, int height,
+            boolean includeFullDisplay) {
+        final DisplayContent displayContent;
+        synchronized(mWindowMap) {
+            displayContent = getDisplayContentLocked(displayId);
+            if (displayContent == null) {
+                if (DEBUG_SCREENSHOT) Slog.i(TAG, "Screenshot of " + appToken
+                        + ": returning null. No Display for displayId=" + displayId);
+                return null;
+            }
         }
         final DisplayInfo displayInfo = displayContent.getDisplayInfo();
         int dw = displayInfo.logicalWidth;
@@ -6032,9 +6065,6 @@ public class WindowManagerService extends IWindowManager.Stub
         int maxLayer = 0;
         final Rect frame = new Rect();
         final Rect stackBounds = new Rect();
-
-        float scale = 0;
-        int rot = Surface.ROTATION_0;
 
         boolean screenshotReady;
         int minLayer;
@@ -6116,7 +6146,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     }
 
                     // Don't include wallpaper in bounds calculation
-                    if (!ws.mIsWallpaper) {
+                    if (!includeFullDisplay && !ws.mIsWallpaper) {
                         final Rect wf = ws.mFrame;
                         final Rect cr = ws.mContentInsets;
                         int left = wf.left + cr.left;
@@ -6170,8 +6200,21 @@ public class WindowManagerService extends IWindowManager.Stub
                     return null;
                 }
 
-                // Constrain frame to the screen size.
-                frame.intersect(0, 0, dw, dh);
+                if (!includeFullDisplay) {
+                    // Constrain frame to the screen size.
+                    frame.intersect(0, 0, dw, dh);
+                } else {
+                    // Caller just wants entire display.
+                    frame.set(0, 0, dw, dh);
+                }
+
+
+                if (width < 0) {
+                    width = frame.width();
+                }
+                if (height < 0) {
+                    height = frame.height();
+                }
 
                 // Tell surface flinger what part of the image to crop. Take the top
                 // right part of the application, and crop the larger dimension to fit.
@@ -6185,7 +6228,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 }
 
                 // The screenshot API does not apply the current screen rotation.
-                rot = getDefaultDisplayContentLocked().getDisplay().getRotation();
+                int rot = getDefaultDisplayContentLocked().getDisplay().getRotation();
 
                 if (rot == Surface.ROTATION_90 || rot == Surface.ROTATION_270) {
                     rot = (rot == Surface.ROTATION_90) ? Surface.ROTATION_270 : Surface.ROTATION_90;

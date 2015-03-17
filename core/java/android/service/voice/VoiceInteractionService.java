@@ -71,10 +71,16 @@ public class VoiceInteractionService extends Service {
     public static final String SERVICE_META_DATA = "android.voice_interaction";
 
     /**
-     * Flag for use with {@link #showSession: request that the session be started with
+     * Flag for use with {@link #showSession}: request that the session be started with
      * assist data from the currently focused activity.
      */
     public static final int START_WITH_ASSIST = 1<<0;
+
+    /**
+     * Flag for use with {@link #showSession}: request that the session be started with
+     * a screen shot of the currently focused activity.
+     */
+    public static final int START_WITH_SCREENSHOT = 1<<1;
 
     IVoiceInteractionService mInterface = new IVoiceInteractionService.Stub() {
         @Override public void ready() {

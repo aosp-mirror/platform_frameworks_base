@@ -55,6 +55,7 @@ public class AssistVisualizer extends View {
                 buildTextRects(window, 0, 0);
             }
         }
+        invalidate();
     }
 
     public void clearAssistData() {
