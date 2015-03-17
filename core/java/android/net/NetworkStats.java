@@ -50,12 +50,19 @@ public class NetworkStats implements Parcelable {
     public static final int UID_ALL = -1;
     /** {@link #tag} value matching any tag. */
     public static final int TAG_ALL = -1;
-    /** {@link #set} value when all sets combined. */
+    /** {@link #set} value when all sets combined, not including debug sets. */
     public static final int SET_ALL = -1;
     /** {@link #set} value where background data is accounted. */
     public static final int SET_DEFAULT = 0;
     /** {@link #set} value where foreground data is accounted. */
     public static final int SET_FOREGROUND = 1;
+    /** All {@link #set} value greater than SET_DEBUG_START are debug {@link #set} values. */
+    public static final int SET_DEBUG_START = 1000;
+    /** Debug {@link #set} value when the VPN stats are moved in. */
+    public static final int SET_DBG_VPN_IN = 1001;
+    /** Debug {@link #set} value when the VPN stats are moved out of a vpn UID. */
+    public static final int SET_DBG_VPN_OUT = 1002;
+
     /** {@link #tag} value for total data across all tags. */
     public static final int TAG_NONE = 0;
 
@@ -729,6 +736,10 @@ public class NetworkStats implements Parcelable {
                 return "DEFAULT";
             case SET_FOREGROUND:
                 return "FOREGROUND";
+            case SET_DBG_VPN_IN:
+                return "DBG_VPN_IN";
+            case SET_DBG_VPN_OUT:
+                return "DBG_VPN_OUT";
             default:
                 return "UNKNOWN";
         }
@@ -745,9 +756,24 @@ public class NetworkStats implements Parcelable {
                 return "def";
             case SET_FOREGROUND:
                 return "fg";
+            case SET_DBG_VPN_IN:
+                return "vpnin";
+            case SET_DBG_VPN_OUT:
+                return "vpnout";
             default:
                 return "unk";
         }
+    }
+
+    /**
+     * @return true if the querySet matches the dataSet.
+     */
+    public static boolean setMatches(int querySet, int dataSet) {
+        if (querySet == dataSet) {
+            return true;
+        }
+        // SET_ALL matches all non-debugging sets.
+        return querySet == SET_ALL && dataSet < SET_DEBUG_START;
     }
 
     /**
@@ -843,6 +869,9 @@ public class NetworkStats implements Parcelable {
             if (recycle.uid == UID_ALL) {
                 throw new IllegalStateException(
                         "Cannot adjust VPN accounting on an iface aggregated NetworkStats.");
+            } if (recycle.set == SET_DBG_VPN_IN || recycle.set == SET_DBG_VPN_OUT) {
+                throw new IllegalStateException(
+                        "Cannot adjust VPN accounting on a NetworkStats containing SET_DBG_VPN_*");
             }
 
             if (recycle.uid == tunUid && recycle.tag == TAG_NONE
@@ -906,6 +935,9 @@ public class NetworkStats implements Parcelable {
                 combineValues(tmpEntry);
                 if (tag[i] == TAG_NONE) {
                     moved.add(tmpEntry);
+                    // Add debug info
+                    tmpEntry.set = SET_DBG_VPN_IN;
+                    combineValues(tmpEntry);
                 }
             }
         }
@@ -913,6 +945,13 @@ public class NetworkStats implements Parcelable {
     }
 
     private void deductTrafficFromVpnApp(int tunUid, String underlyingIface, Entry moved) {
+        // Add debug info
+        moved.uid = tunUid;
+        moved.set = SET_DBG_VPN_OUT;
+        moved.tag = TAG_NONE;
+        moved.iface = underlyingIface;
+        combineValues(moved);
+
         // Caveat: if the vpn software uses tag, the total tagged traffic may be greater than
         // the TAG_NONE traffic.
         int idxVpnBackground = findIndex(underlyingIface, tunUid, SET_DEFAULT, TAG_NONE);

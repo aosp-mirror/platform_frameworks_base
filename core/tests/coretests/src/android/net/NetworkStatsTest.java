@@ -18,6 +18,8 @@ package android.net;
 
 import static android.net.NetworkStats.SET_DEFAULT;
 import static android.net.NetworkStats.SET_FOREGROUND;
+import static android.net.NetworkStats.SET_DBG_VPN_IN;
+import static android.net.NetworkStats.SET_DBG_VPN_OUT;
 import static android.net.NetworkStats.SET_ALL;
 import static android.net.NetworkStats.IFACE_ALL;
 import static android.net.NetworkStats.TAG_NONE;
@@ -346,7 +348,7 @@ public class NetworkStatsTest extends TestCase {
             .addValues(underlyingIface, tunUid, SET_FOREGROUND, TAG_NONE, 0L, 0L, 0L, 0L, 0L);
 
         assertTrue(delta.migrateTun(tunUid, tunIface, underlyingIface));
-        assertEquals(17, delta.size());
+        assertEquals(21, delta.size());
 
         // tunIface and TEST_IFACE entries are not changed.
         assertValues(delta, 0, tunIface, 10100, SET_DEFAULT, TAG_NONE,
@@ -377,14 +379,33 @@ public class NetworkStatsTest extends TestCase {
                 0L, 0L, 0L, 0L, 0L);
 
         // New entries are added for new application's underlying Iface traffic
-        assertValues(delta, 13, underlyingIface, 10120, SET_DEFAULT, TAG_NONE,
+        assertContains(delta, underlyingIface, 10120, SET_DEFAULT, TAG_NONE,
                 72667L, 197L, 41872l, 219L, 0L);
-        assertValues(delta, 14, underlyingIface, 10120, SET_FOREGROUND, TAG_NONE,
+        assertContains(delta, underlyingIface, 10120, SET_FOREGROUND, TAG_NONE,
                 9297L, 17L, 3936, 19L, 0L);
-        assertValues(delta, 15, underlyingIface, 10120, SET_DEFAULT, testTag1,
+        assertContains(delta, underlyingIface, 10120, SET_DEFAULT, testTag1,
                 21691L, 41L, 13179L, 46L, 0L);
-        assertValues(delta, 16, underlyingIface, 10120, SET_FOREGROUND, testTag1,
+        assertContains(delta, underlyingIface, 10120, SET_FOREGROUND, testTag1,
                 1281L, 2L, 634L, 1L, 0L);
+
+        // New entries are added for debug purpose
+        assertContains(delta, underlyingIface, 10100, SET_DBG_VPN_IN, TAG_NONE,
+                39605L, 46L, 11690, 49, 0);
+        assertContains(delta, underlyingIface, 10120, SET_DBG_VPN_IN, TAG_NONE,
+                81964, 214, 45808, 238, 0);
+        assertContains(delta, underlyingIface, tunUid, SET_DBG_VPN_IN, TAG_NONE,
+                4983, 10, 1717, 10, 0);
+        assertContains(delta, underlyingIface, tunUid, SET_DBG_VPN_OUT, TAG_NONE,
+                126552, 270, 59215, 297, 0);
+
+    }
+
+    private static void assertContains(NetworkStats stats,  String iface, int uid, int set,
+            int tag, long rxBytes, long rxPackets, long txBytes, long txPackets, long operations) {
+        int index = stats.findIndex(iface, uid, set, tag);
+        assertTrue(index != -1);
+        assertValues(stats, index, iface, uid, set, tag,
+                rxBytes, rxPackets, txBytes, txPackets, operations);
     }
 
     private static void assertValues(NetworkStats stats, int index, String iface, int uid, int set,

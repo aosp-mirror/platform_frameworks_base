@@ -182,8 +182,7 @@ public class NetworkStatsCollection implements FileRotator.Reader {
 
         for (int i = 0; i < mStats.size(); i++) {
             final Key key = mStats.keyAt(i);
-            final boolean setMatches = set == SET_ALL || key.set == set;
-            if (key.uid == uid && setMatches && key.tag == tag
+            if (key.uid == uid && NetworkStats.setMatches(set, key.set) && key.tag == tag
                     && templateMatches(template, key.ident)) {
                 final NetworkStatsHistory value = mStats.valueAt(i);
                 combined.recordHistory(value, start, end);
@@ -209,7 +208,8 @@ public class NetworkStatsCollection implements FileRotator.Reader {
         final int callerUid = Binder.getCallingUid();
         for (int i = 0; i < mStats.size(); i++) {
             final Key key = mStats.keyAt(i);
-            if (templateMatches(template, key.ident) && isAccessibleToUser(key.uid, callerUid)) {
+            if (templateMatches(template, key.ident) && isAccessibleToUser(key.uid, callerUid)
+                    && key.set < NetworkStats.SET_DEBUG_START) {
                 final NetworkStatsHistory value = mStats.valueAt(i);
                 historyEntry = value.getValues(start, end, now, historyEntry);
 
@@ -542,6 +542,7 @@ public class NetworkStatsCollection implements FileRotator.Reader {
             final NetworkStatsHistory value = mStats.valueAt(i);
 
             if (!templateMatches(groupTemplate, key.ident)) continue;
+            if (key.set >= NetworkStats.SET_DEBUG_START) continue;
 
             final Key groupKey = new Key(null, key.uid, key.set, key.tag);
             NetworkStatsHistory groupHistory = grouped.get(groupKey);
