@@ -507,6 +507,8 @@ final class ActivityStack {
                 mStacks.remove(this);
                 mStacks.add(this);
             }
+            // TODO(multi-display): Focus stack currently adjusted in call to move home stack.
+            // Needs to also work if focus is moving to the non-home display.
             if (isOnHomeDisplay()) {
                 mStackSupervisor.moveHomeStack(homeStack, reason, lastFocusStack);
             }
@@ -2573,7 +2575,11 @@ final class ActivityStack {
                     }
                     // Move the home stack to the top if this stack is fullscreen or there is no
                     // other visible stack.
-                    mStackSupervisor.moveHomeStackTaskToTop(task.getTaskToReturnTo(), myReason);
+                    if (mStackSupervisor.moveHomeStackTaskToTop(
+                            task.getTaskToReturnTo(), myReason)) {
+                        // Activity focus was already adjusted. Nothing else to do...
+                        return;
+                    }
                 }
             }
 
@@ -3575,7 +3581,6 @@ final class ActivityStack {
                 mTaskHistory.remove(taskNdx);
                 mTaskHistory.add(top, task);
                 updateTaskMovement(task, true);
-                mWindowManager.moveTaskToTop(task.taskId);
                 return;
             }
         }
@@ -3600,12 +3605,14 @@ final class ActivityStack {
         // Shift all activities with this task up to the top
         // of the stack, keeping them in the same internal order.
         insertTaskAtTop(tr);
-        moveToFront(reason);
+
+        // Set focus to the top running activity of this stack.
+        ActivityRecord r = topRunningActivityLocked(null);
+        mService.setFocusedActivityLocked(r, reason);
 
         if (DEBUG_TRANSITION) Slog.v(TAG, "Prepare to front transition: task=" + tr);
         if (noAnimation) {
             mWindowManager.prepareAppTransition(AppTransition.TRANSIT_NONE, false);
-            ActivityRecord r = topRunningActivityLocked(null);
             if (r != null) {
                 mNoAnimActivities.add(r);
             }

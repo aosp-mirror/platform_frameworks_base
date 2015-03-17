@@ -17,6 +17,8 @@
 package com.android.server.am;
 
 import static android.Manifest.permission.START_ANY_ACTIVITY;
+import static android.content.Intent.FLAG_ACTIVITY_CLEAR_TASK;
+import static android.content.Intent.FLAG_ACTIVITY_CLEAR_TOP;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 import static android.content.Intent.FLAG_ACTIVITY_TASK_ON_HOME;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
@@ -441,13 +443,21 @@ public final class ActivityStackSupervisor implements DisplayListener {
         }
     }
 
-    void moveHomeStackTaskToTop(int homeStackTaskType, String reason) {
+    /** Returns true if the focus activity was adjusted to the home stack top activity. */
+    boolean moveHomeStackTaskToTop(int homeStackTaskType, String reason) {
         if (homeStackTaskType == RECENTS_ACTIVITY_TYPE) {
             mWindowManager.showRecentApps();
-            return;
+            return false;
         }
-        moveHomeStack(true, reason);
+
         mHomeStack.moveHomeStackTaskToTop(homeStackTaskType);
+
+        final ActivityRecord top = mHomeStack.topRunningActivityLocked(null);
+        if (top == null) {
+            return false;
+        }
+        mService.setFocusedActivityLocked(top, reason);
+        return true;
     }
 
     boolean resumeHomeStackTask(int homeStackTaskType, ActivityRecord prev, String reason) {
@@ -460,14 +470,13 @@ public final class ActivityStackSupervisor implements DisplayListener {
             mWindowManager.showRecentApps();
             return false;
         }
-        moveHomeStackTaskToTop(homeStackTaskType, reason);
+
         if (prev != null) {
             prev.task.setTaskToReturnTo(APPLICATION_ACTIVITY_TYPE);
         }
 
         ActivityRecord r = mHomeStack.topRunningActivityLocked(null);
-        // if (r != null && (r.isHomeActivity() || r.isRecentsActivity())) {
-        if (r != null && r.isHomeActivity()) {
+        if (r != null) {
             mService.setFocusedActivityLocked(r, reason);
             return resumeTopActivitiesLocked(mHomeStack, prev, null);
         }
@@ -1874,11 +1883,6 @@ public final class ActivityStackSupervisor implements DisplayListener {
                     if (r.task == null) {
                         r.task = intentActivity.task;
                     }
-                    targetStack = intentActivity.task.stack;
-                    targetStack.mLastPausedActivity = null;
-                    if (DEBUG_TASKS) Slog.d(TAG, "Bring to front target: " + targetStack
-                            + " from " + intentActivity);
-                    targetStack.moveToFront("intentActivityFound");
                     if (intentActivity.task.intent == null) {
                         // This task was started because of movement of
                         // the activity based on affinity...  now that we
@@ -1886,29 +1890,31 @@ public final class ActivityStackSupervisor implements DisplayListener {
                         // base intent.
                         intentActivity.task.setIntent(r);
                     }
+                    targetStack = intentActivity.task.stack;
+                    targetStack.mLastPausedActivity = null;
                     // If the target task is not in the front, then we need
                     // to bring it to the front...  except...  well, with
                     // SINGLE_TASK_LAUNCH it's not entirely clear.  We'd like
                     // to have the same behavior as if a new instance was
                     // being started, which means not bringing it to the front
                     // if the caller is not itself in the front.
-                    final ActivityStack lastStack = getLastStack();
-                    ActivityRecord curTop = lastStack == null?
-                            null : lastStack.topRunningNonDelayedActivityLocked(notTop);
+                    final ActivityStack focusStack = getFocusedStack();
+                    ActivityRecord curTop = (focusStack == null)
+                            ? null : focusStack.topRunningNonDelayedActivityLocked(notTop);
                     boolean movedToFront = false;
                     if (curTop != null && (curTop.task != intentActivity.task ||
-                            curTop.task != lastStack.topTask())) {
+                            curTop.task != focusStack.topTask())) {
                         r.intent.addFlags(Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT);
                         if (sourceRecord == null || (sourceStack.topActivity() != null &&
                                 sourceStack.topActivity().task == sourceRecord.task)) {
-                            // We really do want to push this one into the
-                            // user's face, right now.
+                            // We really do want to push this one into the user's face, right now.
                             if (launchTaskBehind && sourceRecord != null) {
                                 intentActivity.setTaskToAffiliateWith(sourceRecord.task);
                             }
                             movedHome = true;
                             targetStack.moveTaskToFrontLocked(intentActivity.task, noAnimation,
                                     options, "bringingFoundTaskToFront");
+                            movedToFront = true;
                             if ((launchFlags &
                                     (FLAG_ACTIVITY_NEW_TASK | FLAG_ACTIVITY_TASK_ON_HOME))
                                     == (FLAG_ACTIVITY_NEW_TASK | FLAG_ACTIVITY_TASK_ON_HOME)) {
@@ -1916,9 +1922,14 @@ public final class ActivityStackSupervisor implements DisplayListener {
                                 intentActivity.task.setTaskToReturnTo(HOME_ACTIVITY_TYPE);
                             }
                             options = null;
-                            movedToFront = true;
                         }
                     }
+                    if (!movedToFront) {
+                        if (DEBUG_TASKS) Slog.d(TAG, "Bring to front target: " + targetStack
+                                + " from " + intentActivity);
+                        targetStack.moveToFront("intentActivityFound");
+                    }
+
                     // If the caller has requested that the target task be
                     // reset, then do so.
                     if ((launchFlags&Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED) != 0) {
@@ -1943,15 +1954,15 @@ public final class ActivityStackSupervisor implements DisplayListener {
                         return ActivityManager.START_RETURN_INTENT_TO_CALLER;
                     }
                     if ((launchFlags &
-                            (Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_ACTIVITY_CLEAR_TASK))
-                            == (Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_ACTIVITY_CLEAR_TASK)) {
+                            (FLAG_ACTIVITY_NEW_TASK | FLAG_ACTIVITY_CLEAR_TASK))
+                            == (FLAG_ACTIVITY_NEW_TASK | FLAG_ACTIVITY_CLEAR_TASK)) {
                         // The caller has requested to completely replace any
                         // existing task with its new activity.  Well that should
                         // not be too hard...
                         reuseTask = intentActivity.task;
                         reuseTask.performClearTaskLocked();
                         reuseTask.setIntent(r);
-                    } else if ((launchFlags&Intent.FLAG_ACTIVITY_CLEAR_TOP) != 0
+                    } else if ((launchFlags & FLAG_ACTIVITY_CLEAR_TOP) != 0
                             || launchSingleInstance || launchSingleTask) {
                         // In this situation we want to remove all activities
                         // from the task up to the one being started.  In most
@@ -2120,8 +2131,8 @@ public final class ActivityStackSupervisor implements DisplayListener {
             }
             if (!movedHome) {
                 if ((launchFlags &
-                        (Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_ACTIVITY_TASK_ON_HOME))
-                        == (Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_ACTIVITY_TASK_ON_HOME)) {
+                        (FLAG_ACTIVITY_NEW_TASK | FLAG_ACTIVITY_TASK_ON_HOME))
+                        == (FLAG_ACTIVITY_NEW_TASK | FLAG_ACTIVITY_TASK_ON_HOME)) {
                     // Caller wants to appear on home activity, so before starting
                     // their own activity we will bring home to the front.
                     r.task.setTaskToReturnTo(HOME_ACTIVITY_TYPE);

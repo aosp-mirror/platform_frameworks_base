@@ -2480,7 +2480,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     final void setFocusedActivityLocked(ActivityRecord r, String reason) {
-        if (mFocusedActivity != r) {
+        if (r != null && mFocusedActivity != r) {
             if (DEBUG_FOCUS) Slog.d(TAG, "setFocusedActivityLocked: r=" + r);
             mFocusedActivity = r;
             if (r.task != null && r.task.voiceInteractor != null) {
@@ -2488,7 +2488,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             } else {
                 finishRunningVoiceLocked();
             }
-            if (r != null && mStackSupervisor.setFocusedStack(r, reason + " setFocusedActivity")) {
+            if (mStackSupervisor.setFocusedStack(r, reason + " setFocusedActivity")) {
                 mWindowManager.setFocusedApp(r.appToken, true);
             }
             applyUpdateLockStateLocked(r);
