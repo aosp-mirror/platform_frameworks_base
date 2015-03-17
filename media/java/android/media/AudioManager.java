@@ -438,6 +438,12 @@ public class AudioManager {
      */
     public static final int FLAG_SHOW_VIBRATE_HINT = 1 << 11;
 
+    /**
+     * Adjusting the volume due to a hardware key press.
+     * @hide
+     */
+    public static final int FLAG_FROM_KEY = 1 << 12;
+
     private static final String[] FLAG_NAMES = {
         "FLAG_SHOW_UI",
         "FLAG_ALLOW_RINGER_MODES",
@@ -451,6 +457,7 @@ public class AudioManager {
         "FLAG_ACTIVE_MEDIA_ONLY",
         "FLAG_SHOW_UI_WARNINGS",
         "FLAG_SHOW_VIBRATE_HINT",
+        "FLAG_FROM_KEY",
     };
 
     /** @hide */

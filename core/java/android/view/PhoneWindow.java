@@ -1759,7 +1759,8 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                 } else {
                     MediaSessionLegacyHelper.getHelper(getContext()).sendAdjustVolumeBy(
                             mVolumeControlStreamType, direction,
-                            AudioManager.FLAG_SHOW_UI | AudioManager.FLAG_VIBRATE);
+                            AudioManager.FLAG_SHOW_UI | AudioManager.FLAG_VIBRATE
+                                    | AudioManager.FLAG_FROM_KEY);
                 }
                 return true;
             }
@@ -1837,15 +1838,15 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         switch (keyCode) {
             case KeyEvent.KEYCODE_VOLUME_UP:
             case KeyEvent.KEYCODE_VOLUME_DOWN: {
+                final int flags = AudioManager.FLAG_PLAY_SOUND | AudioManager.FLAG_VIBRATE
+                        | AudioManager.FLAG_FROM_KEY;
                 // If we have a session send it the volume command, otherwise
                 // use the suggested stream.
                 if (mMediaController != null) {
-                    mMediaController.adjustVolume(0, AudioManager.FLAG_PLAY_SOUND
-                            | AudioManager.FLAG_VIBRATE);
+                    mMediaController.adjustVolume(0, flags);
                 } else {
                     MediaSessionLegacyHelper.getHelper(getContext()).sendAdjustVolumeBy(
-                            mVolumeControlStreamType, 0,
-                            AudioManager.FLAG_PLAY_SOUND | AudioManager.FLAG_VIBRATE);
+                            mVolumeControlStreamType, 0, flags);
                 }
                 return true;
             }
