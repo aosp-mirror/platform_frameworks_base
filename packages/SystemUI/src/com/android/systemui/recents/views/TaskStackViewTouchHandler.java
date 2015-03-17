@@ -24,6 +24,7 @@ import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.ViewParent;
 import com.android.systemui.recents.Constants;
+import com.android.systemui.recents.Recents;
 import com.android.systemui.recents.RecentsConfiguration;
 
 import java.util.List;
@@ -53,6 +54,8 @@ class TaskStackViewTouchHandler implements SwipeHelper.Callback {
     int mScrollTouchSlop;
     // The page touch slop is used to calculate when we start swiping
     float mPagingTouchSlop;
+    // Used to calculate when a tap is outside a task view rectangle.
+    final int mWindowTouchSlop;
 
     SwipeHelper mSwipeHelper;
     boolean mInterceptedBySwipeHelper;
@@ -64,6 +67,7 @@ class TaskStackViewTouchHandler implements SwipeHelper.Callback {
         mMaximumVelocity = configuration.getScaledMaximumFlingVelocity();
         mScrollTouchSlop = configuration.getScaledTouchSlop();
         mPagingTouchSlop = configuration.getScaledPagingTouchSlop();
+        mWindowTouchSlop = configuration.getScaledWindowTouchSlop();
         mSv = sv;
         mScroller = scroller;
         mConfig = config;
@@ -314,6 +318,9 @@ class TaskStackViewTouchHandler implements SwipeHelper.Callback {
                 } else if (mScroller.isScrollOutOfBounds()) {
                     // Animate the scroll back into bounds
                     mScroller.animateBoundScroll();
+                } else if (mActiveTaskView == null) {
+                    // This tap didn't start on a task.
+                    maybeHideRecentsFromBackgroundTap((int) ev.getX(), (int) ev.getY());
                 }
 
                 mActivePointerId = INACTIVE_POINTER_ID;
@@ -349,6 +356,34 @@ class TaskStackViewTouchHandler implements SwipeHelper.Callback {
             }
         }
         return true;
+    }
+
+    /** Hides recents if the up event at (x, y) is a tap on the background area. */
+    void maybeHideRecentsFromBackgroundTap(int x, int y) {
+        // Ignore the up event if it's too far from its start position. The user might have been
+        // trying to scroll or swipe.
+        int dx = Math.abs(mInitialMotionX - x);
+        int dy = Math.abs(mInitialMotionY - y);
+        if (dx > mScrollTouchSlop || dy > mScrollTouchSlop) {
+            return;
+        }
+
+        // Shift the tap position toward the center of the task stack and check to see if it would
+        // have hit a view. The user might have tried to tap on a task and missed slightly.
+        int shiftedX = x;
+        if (x > mSv.getTouchableRegion().centerX()) {
+            shiftedX -= mWindowTouchSlop;
+        } else {
+            shiftedX += mWindowTouchSlop;
+        }
+        if (findViewAtPoint(shiftedX, y) != null) {
+            return;
+        }
+
+        // The user intentionally tapped on the background, which is like a tap on the "desktop".
+        // Hide recents and transition to the launcher.
+        Recents recents = Recents.getInstanceAndStartIfNeeded(mSv.getContext());
+        recents.hideRecents(false /* altTab */, true /* homeKey */);
     }
 
     /** Handles generic motion events */
