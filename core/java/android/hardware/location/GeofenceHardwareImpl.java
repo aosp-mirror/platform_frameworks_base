@@ -436,7 +436,7 @@ public final class GeofenceHardwareImpl {
             int monitoringType,
             int sourcesUsed) {
         if(location == null) {
-            Log.e(TAG, String.format("Invalid Geofence Transition: location=%p", location));
+            Log.e(TAG, String.format("Invalid Geofence Transition: location=null"));
             return;
         }
         if(DEBUG) {
