@@ -42,6 +42,13 @@ abstract class DhcpPacket {
     public static final int ENCAP_BOOTP = 2; // BOOTP contents only
 
     /**
+     * Minimum length of a DHCP packet, excluding options, in the above encapsulations.
+     */
+    public static final int MIN_PACKET_LENGTH_BOOTP = 236;  // See diagram in RFC 2131, section 2.
+    public static final int MIN_PACKET_LENGTH_L3 = MIN_PACKET_LENGTH_BOOTP + 20 + 8;
+    public static final int MIN_PACKET_LENGTH_L2 = MIN_PACKET_LENGTH_L3 + 14;
+
+    /**
      * IP layer definitions.
      */
     private static final byte IP_TYPE_UDP = (byte) 0x11;
@@ -399,13 +406,8 @@ abstract class DhcpPacket {
      * Converts a signed short value to an unsigned int value.  Needed
      * because Java does not have unsigned types.
      */
-    private int intAbs(short v) {
-        if (v < 0) {
-            int r = v + 65536;
-            return r;
-        } else {
-            return(v);
-        }
+    private static int intAbs(short v) {
+        return v & 0xFFFF;
     }
 
     /**
@@ -655,6 +657,10 @@ abstract class DhcpPacket {
 
         // check to see if we need to parse L2, IP, and UDP encaps
         if (pktType == ENCAP_L2) {
+            if (packet.remaining() < MIN_PACKET_LENGTH_L2) {
+                return null;
+            }
+
             byte[] l2dst = new byte[6];
             byte[] l2src = new byte[6];
 
@@ -668,6 +674,10 @@ abstract class DhcpPacket {
         }
 
         if (pktType <= ENCAP_L3) {
+            if (packet.remaining() < MIN_PACKET_LENGTH_L3) {
+                return null;
+            }
+
             byte ipTypeAndLength = packet.get();
             int ipVersion = (ipTypeAndLength & 0xf0) >> 4;
             if (ipVersion != 4) {
@@ -690,7 +700,9 @@ abstract class DhcpPacket {
             if (ipProto != IP_TYPE_UDP) // UDP
                 return null;
 
-            // Skip options.
+            // Skip options. This cannot cause us to read beyond the end of the buffer because the
+            // IPv4 header cannot be more than (0x0f * 4) = 60 bytes long, and that is less than
+            // MIN_PACKET_LENGTH_L3.
             int optionWords = ((ipTypeAndLength & 0x0f) - 5);
             for (int i = 0; i < optionWords; i++) {
                 packet.getInt();
@@ -704,6 +716,11 @@ abstract class DhcpPacket {
 
             if ((udpSrcPort != DHCP_SERVER) && (udpSrcPort != DHCP_CLIENT))
                 return null;
+        }
+
+        // We need to check the length even for ENCAP_L3 because the IPv4 header is variable-length.
+        if (pktType > ENCAP_BOOTP || packet.remaining() < MIN_PACKET_LENGTH_BOOTP) {
+            return null;
         }
 
         byte type = packet.get();
@@ -746,104 +763,105 @@ abstract class DhcpPacket {
         boolean notFinishedOptions = true;
 
         while ((packet.position() < packet.limit()) && notFinishedOptions) {
-            byte optionType = packet.get();
+            try {
+                byte optionType = packet.get();
 
-            if (optionType == (byte) 0xFF) {
-                notFinishedOptions = false;
-            } else {
-                byte optionLen = packet.get();
-                int expectedLen = 0;
+                if (optionType == (byte) 0xFF) {
+                    notFinishedOptions = false;
+                } else {
+                    int optionLen = packet.get() & 0xFF;
+                    int expectedLen = 0;
 
-                switch(optionType) {
-                    case DHCP_SUBNET_MASK:
-                        netMask = readIpAddress(packet);
-                        expectedLen = 4;
-                        break;
-                    case DHCP_ROUTER:
-                        gateway = readIpAddress(packet);
-                        expectedLen = 4;
-                        break;
-                    case DHCP_DNS_SERVER:
-                        expectedLen = 0;
+                    switch(optionType) {
+                        case DHCP_SUBNET_MASK:
+                            netMask = readIpAddress(packet);
+                            expectedLen = 4;
+                            break;
+                        case DHCP_ROUTER:
+                            gateway = readIpAddress(packet);
+                            expectedLen = 4;
+                            break;
+                        case DHCP_DNS_SERVER:
+                            for (expectedLen = 0; expectedLen < optionLen; expectedLen += 4) {
+                                dnsServers.add(readIpAddress(packet));
+                            }
+                            break;
+                        case DHCP_HOST_NAME:
+                            expectedLen = optionLen;
+                            hostName = readAsciiString(packet, optionLen);
+                            break;
+                        case DHCP_MTU:
+                            expectedLen = 2;
+                            mtu = Short.valueOf(packet.getShort());
+                            break;
+                        case DHCP_DOMAIN_NAME:
+                            expectedLen = optionLen;
+                            domainName = readAsciiString(packet, optionLen);
+                            break;
+                        case DHCP_BROADCAST_ADDRESS:
+                            bcAddr = readIpAddress(packet);
+                            expectedLen = 4;
+                            break;
+                        case DHCP_REQUESTED_IP:
+                            requestedIp = readIpAddress(packet);
+                            expectedLen = 4;
+                            break;
+                        case DHCP_LEASE_TIME:
+                            leaseTime = Integer.valueOf(packet.getInt());
+                            expectedLen = 4;
+                            break;
+                        case DHCP_MESSAGE_TYPE:
+                            dhcpType = packet.get();
+                            expectedLen = 1;
+                            break;
+                        case DHCP_SERVER_IDENTIFIER:
+                            serverIdentifier = readIpAddress(packet);
+                            expectedLen = 4;
+                            break;
+                        case DHCP_PARAMETER_LIST:
+                            expectedParams = new byte[optionLen];
+                            packet.get(expectedParams);
+                            expectedLen = optionLen;
+                            break;
+                        case DHCP_MESSAGE:
+                            expectedLen = optionLen;
+                            message = readAsciiString(packet, optionLen);
+                            break;
+                        case DHCP_MAX_MESSAGE_SIZE:
+                            expectedLen = 2;
+                            maxMessageSize = Short.valueOf(packet.getShort());
+                            break;
+                        case DHCP_RENEWAL_TIME:
+                            expectedLen = 4;
+                            T1 = Integer.valueOf(packet.getInt());
+                            break;
+                        case DHCP_REBINDING_TIME:
+                            expectedLen = 4;
+                            T2 = Integer.valueOf(packet.getInt());
+                            break;
+                        case DHCP_VENDOR_CLASS_ID:
+                            expectedLen = optionLen;
+                            vendorId = readAsciiString(packet, optionLen);
+                            break;
+                        case DHCP_CLIENT_IDENTIFIER: { // Client identifier
+                            byte[] id = new byte[optionLen];
+                            packet.get(id);
+                            expectedLen = optionLen;
+                        } break;
+                        default:
+                            // ignore any other parameters
+                            for (int i = 0; i < optionLen; i++) {
+                                expectedLen++;
+                                byte throwaway = packet.get();
+                            }
+                    }
 
-                        for (expectedLen = 0; expectedLen < optionLen;
-                             expectedLen += 4) {
-                            dnsServers.add(readIpAddress(packet));
-                        }
-                        break;
-                    case DHCP_HOST_NAME:
-                        expectedLen = optionLen;
-                        hostName = readAsciiString(packet, optionLen);
-                        break;
-                    case DHCP_MTU:
-                        expectedLen = 2;
-                        mtu = Short.valueOf(packet.getShort());
-                        break;
-                    case DHCP_DOMAIN_NAME:
-                        expectedLen = optionLen;
-                        domainName = readAsciiString(packet, optionLen);
-                        break;
-                    case DHCP_BROADCAST_ADDRESS:
-                        bcAddr = readIpAddress(packet);
-                        expectedLen = 4;
-                        break;
-                    case DHCP_REQUESTED_IP:
-                        requestedIp = readIpAddress(packet);
-                        expectedLen = 4;
-                        break;
-                    case DHCP_LEASE_TIME:
-                        leaseTime = Integer.valueOf(packet.getInt());
-                        expectedLen = 4;
-                        break;
-                    case DHCP_MESSAGE_TYPE:
-                        dhcpType = packet.get();
-                        expectedLen = 1;
-                        break;
-                    case DHCP_SERVER_IDENTIFIER:
-                        serverIdentifier = readIpAddress(packet);
-                        expectedLen = 4;
-                        break;
-                    case DHCP_PARAMETER_LIST:
-                        expectedParams = new byte[optionLen];
-                        packet.get(expectedParams);
-                        expectedLen = optionLen;
-                        break;
-                    case DHCP_MESSAGE:
-                        expectedLen = optionLen;
-                        message = readAsciiString(packet, optionLen);
-                        break;
-                    case DHCP_MAX_MESSAGE_SIZE:
-                        expectedLen = 2;
-                        maxMessageSize = Short.valueOf(packet.getShort());
-                        break;
-                    case DHCP_RENEWAL_TIME:
-                        expectedLen = 4;
-                        T1 = Integer.valueOf(packet.getInt());
-                        break;
-                    case DHCP_REBINDING_TIME:
-                        expectedLen = 4;
-                        T2 = Integer.valueOf(packet.getInt());
-                        break;
-                    case DHCP_VENDOR_CLASS_ID:
-                        expectedLen = optionLen;
-                        vendorId = readAsciiString(packet, optionLen);
-                        break;
-                    case DHCP_CLIENT_IDENTIFIER: { // Client identifier
-                        byte[] id = new byte[optionLen];
-                        packet.get(id);
-                        expectedLen = optionLen;
-                    } break;
-                    default:
-                        // ignore any other parameters
-                        for (int i = 0; i < optionLen; i++) {
-                            expectedLen++;
-                            byte throwaway = packet.get();
-                        }
+                    if (expectedLen != optionLen) {
+                        return null;
+                    }
                 }
-
-                if (expectedLen != optionLen) {
-                    return null;
-                }
+            } catch (BufferUnderflowException e) {
+                return null;
             }
         }
 
