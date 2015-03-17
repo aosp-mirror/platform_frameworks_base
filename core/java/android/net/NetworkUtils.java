@@ -178,6 +178,15 @@ public class NetworkUtils {
     public native static int bindSocketToNetwork(int socketfd, int netId);
 
     /**
+     * Protect {@code fd} from VPN connections.  After protecting, data sent through
+     * this socket will go directly to the underlying network, so its traffic will not be
+     * forwarded through the VPN.
+     */
+    public static boolean protectFromVpn(FileDescriptor fd) {
+        return protectFromVpn(fd.getInt$());
+    }
+
+    /**
      * Protect {@code socketfd} from VPN connections.  After protecting, data sent through
      * this socket will go directly to the underlying network, so its traffic will not be
      * forwarded through the VPN.
