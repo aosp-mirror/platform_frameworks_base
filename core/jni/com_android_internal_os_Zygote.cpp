@@ -65,9 +65,7 @@ static jmethodID gCallPostForkChildHooks;
 // Must match values in com.android.internal.os.Zygote.
 enum MountExternalKind {
   MOUNT_EXTERNAL_NONE = 0,
-  MOUNT_EXTERNAL_SINGLEUSER = 1,
-  MOUNT_EXTERNAL_MULTIUSER = 2,
-  MOUNT_EXTERNAL_MULTIUSER_ALL = 3,
+  MOUNT_EXTERNAL_DEFAULT = 1,
 };
 
 static void RuntimeAbort(JNIEnv* env) {
@@ -269,57 +267,16 @@ static bool MountEmulatedStorage(uid_t uid, jint mount_mode, bool force_mount_na
   // See storage config details at http://source.android.com/tech/storage/
   userid_t user_id = multiuser_get_user_id(uid);
 
-  // Create bind mounts to expose external storage
-  if (mount_mode == MOUNT_EXTERNAL_MULTIUSER || mount_mode == MOUNT_EXTERNAL_MULTIUSER_ALL) {
-    // These paths must already be created by init.rc
-    const char* source = getenv("EMULATED_STORAGE_SOURCE");
-    const char* target = getenv("EMULATED_STORAGE_TARGET");
-    const char* legacy = getenv("EXTERNAL_STORAGE");
-    if (source == NULL || target == NULL || legacy == NULL) {
-      ALOGW("Storage environment undefined; unable to provide external storage");
-      return false;
-    }
+  // Bind mount user-specific storage into place
+  const String8 source(String8::format("/mnt/user/%d", user_id));
+  const String8 target(String8::format("/storage/self"));
 
-    // Prepare source paths
+  if (fs_prepare_dir(source.string(), 0755, 0, 0) == -1) {
+    return false;
+  }
 
-    // /mnt/shell/emulated/0
-    const String8 source_user(String8::format("%s/%d", source, user_id));
-    // /storage/emulated/0
-    const String8 target_user(String8::format("%s/%d", target, user_id));
-
-    if (fs_prepare_dir(source_user.string(), 0000, 0, 0) == -1
-        || fs_prepare_dir(target_user.string(), 0000, 0, 0) == -1) {
-      return false;
-    }
-
-    if (mount_mode == MOUNT_EXTERNAL_MULTIUSER_ALL) {
-      // Mount entire external storage tree for all users
-      if (TEMP_FAILURE_RETRY(mount(source, target, NULL, MS_BIND, NULL)) == -1) {
-        ALOGW("Failed to mount %s to %s: %s", source, target, strerror(errno));
-        return false;
-      }
-    } else {
-      // Only mount user-specific external storage
-      if (TEMP_FAILURE_RETRY(mount(source_user.string(), target_user.string(), NULL,
-                                   MS_BIND, NULL)) == -1) {
-        ALOGW("Failed to mount %s to %s: %s", source_user.string(), target_user.string(),
-              strerror(errno));
-        return false;
-      }
-    }
-
-    if (fs_prepare_dir(legacy, 0000, 0, 0) == -1) {
-        return false;
-    }
-
-    // Finally, mount user-specific path into place for legacy users
-    if (TEMP_FAILURE_RETRY(
-            mount(target_user.string(), legacy, NULL, MS_BIND | MS_REC, NULL)) == -1) {
-      ALOGW("Failed to mount %s to %s: %s", target_user.string(), legacy, strerror(errno));
-      return false;
-    }
-  } else {
-    ALOGW("Mount mode %d unsupported", mount_mode);
+  if (TEMP_FAILURE_RETRY(mount(source.string(), target.string(), NULL, MS_BIND, NULL)) == -1) {
+    ALOGW("Failed to mount %s to %s: %s", source.string(), target.string(), strerror(errno));
     return false;
   }
 

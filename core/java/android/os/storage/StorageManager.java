@@ -18,18 +18,22 @@ package android.os.storage;
 
 import static android.net.TrafficStats.MB_IN_BYTES;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.os.Environment;
+import android.os.FileUtils;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
-import android.os.Parcelable;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.provider.Settings;
 import android.util.Log;
 import android.util.SparseArray;
+
+import libcore.util.EmptyArray;
 
 import com.android.internal.util.Preconditions;
 
@@ -60,6 +64,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class StorageManager {
     private static final String TAG = "StorageManager";
 
+    private final Context mContext;
     private final ContentResolver mResolver;
 
     /*
@@ -311,8 +316,9 @@ public class StorageManager {
      *
      * @hide
      */
-    public StorageManager(ContentResolver resolver, Looper tgtLooper) throws RemoteException {
-        mResolver = resolver;
+    public StorageManager(Context context, Looper tgtLooper) {
+        mContext = context;
+        mResolver = context.getContentResolver();
         mTgtLooper = tgtLooper;
         mMountService = IMountService.Stub.asInterface(ServiceManager.getService("mount"));
         if (mMountService == null) {
@@ -548,17 +554,46 @@ public class StorageManager {
         return null;
     }
 
+    /** {@hide} */
+    public @Nullable StorageVolume getStorageVolume(File file) {
+        return getStorageVolume(getVolumeList(), file);
+    }
+
+    /** {@hide} */
+    public static @Nullable StorageVolume getStorageVolume(File file, int userId) {
+        return getStorageVolume(getVolumeList(userId), file);
+    }
+
+    /** {@hide} */
+    private static @Nullable StorageVolume getStorageVolume(StorageVolume[] volumes, File file) {
+        File canonicalFile = null;
+        try {
+            canonicalFile = file.getCanonicalFile();
+        } catch (IOException ignored) {
+            canonicalFile = null;
+        }
+        for (StorageVolume volume : volumes) {
+            if (volume.getPathFile().equals(file)) {
+                return volume;
+            }
+            if (FileUtils.contains(volume.getPathFile(), canonicalFile)) {
+                return volume;
+            }
+        }
+        return null;
+    }
+
     /**
      * Gets the state of a volume via its mountpoint.
      * @hide
      */
-    public String getVolumeState(String mountPoint) {
-         if (mMountService == null) return Environment.MEDIA_REMOVED;
-        try {
-            return mMountService.getVolumeState(mountPoint);
-        } catch (RemoteException e) {
-            Log.e(TAG, "Failed to get volume state", e);
-            return null;
+    @Deprecated
+    public @NonNull String getVolumeState(String mountPoint) {
+        final StorageVolume vol = getStorageVolume(new File(mountPoint));
+        if (vol != null) {
+            return vol.getState();
+        } else {
+            return Environment.MEDIA_UNKNOWN;
         }
     }
 
@@ -566,20 +601,22 @@ public class StorageManager {
      * Returns list of all mountable volumes.
      * @hide
      */
-    public StorageVolume[] getVolumeList() {
-        if (mMountService == null) return new StorageVolume[0];
+    public @NonNull StorageVolume[] getVolumeList() {
         try {
-            Parcelable[] list = mMountService.getVolumeList();
-            if (list == null) return new StorageVolume[0];
-            int length = list.length;
-            StorageVolume[] result = new StorageVolume[length];
-            for (int i = 0; i < length; i++) {
-                result[i] = (StorageVolume)list[i];
-            }
-            return result;
+            return mMountService.getVolumeList(mContext.getUserId());
         } catch (RemoteException e) {
-            Log.e(TAG, "Failed to get volume list", e);
-            return null;
+            throw e.rethrowAsRuntimeException();
+        }
+    }
+
+    /** {@hide} */
+    public static @NonNull StorageVolume[] getVolumeList(int userId) {
+        final IMountService mountService = IMountService.Stub.asInterface(
+                ServiceManager.getService("mount"));
+        try {
+            return mountService.getVolumeList(userId);
+        } catch (RemoteException e) {
+            throw e.rethrowAsRuntimeException();
         }
     }
 
@@ -587,9 +624,9 @@ public class StorageManager {
      * Returns list of paths for all mountable volumes.
      * @hide
      */
-    public String[] getVolumePaths() {
+    @Deprecated
+    public @NonNull String[] getVolumePaths() {
         StorageVolume[] volumes = getVolumeList();
-        if (volumes == null) return null;
         int count = volumes.length;
         String[] paths = new String[count];
         for (int i = 0; i < count; i++) {
@@ -599,21 +636,21 @@ public class StorageManager {
     }
 
     /** {@hide} */
-    public StorageVolume getPrimaryVolume() {
+    public @NonNull StorageVolume getPrimaryVolume() {
         return getPrimaryVolume(getVolumeList());
     }
 
     /** {@hide} */
-    public static StorageVolume getPrimaryVolume(StorageVolume[] volumes) {
+    public static @NonNull StorageVolume getPrimaryVolume(StorageVolume[] volumes) {
         for (StorageVolume volume : volumes) {
             if (volume.isPrimary()) {
                 return volume;
             }
         }
-        Log.w(TAG, "No primary storage defined");
-        return null;
+        throw new IllegalStateException("Missing primary storage");
     }
 
+    /** {@hide} */
     private static final int DEFAULT_THRESHOLD_PERCENTAGE = 10;
     private static final long DEFAULT_THRESHOLD_MAX_BYTES = 500 * MB_IN_BYTES;
     private static final long DEFAULT_FULL_THRESHOLD_BYTES = MB_IN_BYTES;

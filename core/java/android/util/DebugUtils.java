@@ -17,8 +17,10 @@
 package android.util;
 
 import java.io.PrintWriter;
-import java.lang.reflect.Method;
+import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.Locale;
 
 /**
@@ -202,5 +204,58 @@ public class DebugUtils {
         outBuilder.append(value);
         outBuilder.append(suffix);
         return outBuilder.toString();
+    }
+
+    /**
+     * Use prefixed constants (static final values) on given class to turn value
+     * into human-readable string.
+     *
+     * @hide
+     */
+    public static String valueToString(Class<?> clazz, String prefix, int value) {
+        for (Field field : clazz.getDeclaredFields()) {
+            final int modifiers = field.getModifiers();
+            if (Modifier.isStatic(modifiers) && Modifier.isFinal(modifiers)
+                    && field.getType().equals(int.class) && field.getName().startsWith(prefix)) {
+                try {
+                    if (value == field.getInt(null)) {
+                        return field.getName().substring(prefix.length());
+                    }
+                } catch (IllegalAccessException ignored) {
+                }
+            }
+        }
+        return Integer.toString(value);
+    }
+
+    /**
+     * Use prefixed constants (static final values) on given class to turn flags
+     * into human-readable string.
+     *
+     * @hide
+     */
+    public static String flagsToString(Class<?> clazz, String prefix, int flags) {
+        final StringBuilder res = new StringBuilder();
+
+        for (Field field : clazz.getDeclaredFields()) {
+            final int modifiers = field.getModifiers();
+            if (Modifier.isStatic(modifiers) && Modifier.isFinal(modifiers)
+                    && field.getType().equals(int.class) && field.getName().startsWith(prefix)) {
+                try {
+                    final int value = field.getInt(null);
+                    if ((flags & value) != 0) {
+                        flags &= ~value;
+                        res.append(field.getName().substring(prefix.length())).append('|');
+                    }
+                } catch (IllegalAccessException ignored) {
+                }
+            }
+        }
+        if (flags != 0 || res.length() == 0) {
+            res.append(Integer.toHexString(flags));
+        } else {
+            res.deleteCharAt(res.length() - 1);
+        }
+        return res.toString();
     }
 }
