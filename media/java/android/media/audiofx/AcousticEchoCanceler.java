@@ -68,9 +68,8 @@ public class AcousticEchoCanceler extends AudioEffect {
             Log.w(TAG, "not enough resources");
         } catch (RuntimeException e) {
             Log.w(TAG, "not enough memory");
-        } finally {
-            return aec;
         }
+        return aec;
     }
 
     /**
