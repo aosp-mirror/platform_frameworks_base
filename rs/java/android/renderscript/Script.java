@@ -251,9 +251,14 @@ public class Script extends BaseObj {
                 "At least one of ain or aout is required to be non-null.");
         }
 
-        long[] in_ids = new long[ains.length];
-        for (int index = 0; index < ains.length; ++index) {
-            in_ids[index] = ains[index].getID(mRS);
+        long[] in_ids;
+        if (ains != null) {
+            in_ids = new long[ains.length];
+            for (int index = 0; index < ains.length; ++index) {
+                in_ids[index] = ains[index].getID(mRS);
+            }
+        } else {
+            in_ids = null;
         }
 
         long out_id = 0;
