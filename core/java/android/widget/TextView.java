@@ -111,8 +111,6 @@ import android.view.Gravity;
 import android.view.HapticFeedbackConstants;
 import android.view.KeyCharacterMap;
 import android.view.KeyEvent;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewAssistStructure;
@@ -8957,9 +8955,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      *
      * A custom implementation can add new entries in the default menu in its
      * {@link android.view.ActionMode.Callback#onPrepareActionMode(ActionMode, Menu)} method. The
-     * default actions can also be removed from the menu using {@link Menu#removeItem(int)} and
-     * passing {@link android.R.id#selectAll}, {@link android.R.id#cut}, {@link android.R.id#copy}
-     * or {@link android.R.id#paste} ids as parameters.
+     * default actions can also be removed from the menu using
+     * {@link android.view.Menu#removeItem(int)} and passing {@link android.R.id#selectAll},
+     * {@link android.R.id#cut}, {@link android.R.id#copy} or {@link android.R.id#paste} ids as
+     * parameters.
      *
      * Returning false from
      * {@link android.view.ActionMode.Callback#onCreateActionMode(ActionMode, Menu)} will prevent
@@ -9534,7 +9533,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         // TODO: Add an option to configure this
         private static final float MARQUEE_DELTA_MAX = 0.07f;
         private static final int MARQUEE_DELAY = 1200;
-        private static final int MARQUEE_RESTART_DELAY = 1200;
         private static final int MARQUEE_DP_PER_SECOND = 30;
 
         private static final byte MARQUEE_STOPPED = 0x0;

@@ -30802,6 +30802,7 @@ package android.text {
     method public int getSpanStart(java.lang.Object);
     method public T[] getSpans(int, int, java.lang.Class<T>);
     method public deprecated int getTextRunCursor(int, int, int, int, int, android.graphics.Paint);
+    method public int getTextWatcherDepth();
     method public android.text.SpannableStringBuilder insert(int, java.lang.CharSequence, int, int);
     method public android.text.SpannableStringBuilder insert(int, java.lang.CharSequence);
     method public int length();
