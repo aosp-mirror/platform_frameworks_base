@@ -209,7 +209,7 @@ public final class NotificationRecord {
         return mContactAffinity;
     }
 
-    public void setRecentlyIntusive(boolean recentlyIntrusive) {
+    public void setRecentlyIntrusive(boolean recentlyIntrusive) {
         mRecentlyIntrusive = recentlyIntrusive;
     }
 

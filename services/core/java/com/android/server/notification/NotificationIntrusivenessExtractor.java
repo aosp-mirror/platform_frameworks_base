@@ -18,6 +18,7 @@ package com.android.server.notification;
 
 import android.app.Notification;
 import android.content.Context;
+import android.util.Log;
 import android.util.Slog;
 
 /**
@@ -25,8 +26,8 @@ import android.util.Slog;
  * notifications and marks them to get a temporary ranking bump.
  */
 public class NotificationIntrusivenessExtractor implements NotificationSignalExtractor {
-    private static final String TAG = "NotificationNoiseExtractor";
-    private static final boolean DBG = false;
+    private static final String TAG = "IntrusivenessExtractor";
+    private static final boolean DBG = Log.isLoggable(TAG, Log.DEBUG);
 
     /** Length of time (in milliseconds) that an intrusive or noisy notification will stay at
     the top of the ranking order, before it falls back to its natural position. */
@@ -48,7 +49,7 @@ public class NotificationIntrusivenessExtractor implements NotificationSignalExt
                 (notification.defaults & Notification.DEFAULT_SOUND) != 0 ||
                 notification.sound != null ||
                 notification.fullScreenIntent != null) {
-            record.setRecentlyIntusive(true);
+            record.setRecentlyIntrusive(true);
         }
 
         return new RankingReconsideration(record.getKey(), HANG_TIME_MS) {
@@ -59,7 +60,7 @@ public class NotificationIntrusivenessExtractor implements NotificationSignalExt
 
             @Override
             public void applyChangesLocked(NotificationRecord record) {
-                record.setRecentlyIntusive(false);
+                record.setRecentlyIntrusive(false);
             }
         };
     }

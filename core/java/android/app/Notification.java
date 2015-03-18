@@ -1840,6 +1840,26 @@ public class Notification implements Parcelable
     }
 
     /**
+     * {@hide}
+     */
+    public static String priorityToString(@Priority int pri) {
+        switch (pri) {
+            case PRIORITY_MIN:
+                return "MIN";
+            case PRIORITY_LOW:
+                return "LOW";
+            case PRIORITY_DEFAULT:
+                return "DEFAULT";
+            case PRIORITY_HIGH:
+                return "HIGH";
+            case PRIORITY_MAX:
+                return "MAX";
+            default:
+                return "UNKNOWN(" + String.valueOf(pri) + ")";
+        }
+    }
+
+    /**
      * @hide
      */
     public boolean isValid() {
