@@ -1270,7 +1270,7 @@
     <string name="new_app_action" msgid="5472756926945440706">"<xliff:g id="OLD_APP">%1$s</xliff:g> শুরু করুন"</string>
     <string name="new_app_description" msgid="1932143598371537340">"সংরক্ষণ না করেই পুরোনো অ্যাপ্লিকেশানটি বন্ধ করুন৷"</string>
     <string name="dump_heap_notification" msgid="2618183274836056542">"<xliff:g id="PROC">%1$s</xliff:g> মেমরি সীমা অতিক্রম করেছে"</string>
-    <string name="dump_heap_notification_detail" msgid="2075673362317481664">"হিপ ডাম্প সংগ্রহ করা হয়েছে; ভাগ করার জন্য স্পর্শ করুন"</string>
+    <string name="dump_heap_notification_detail" msgid="2075673362317481664">"অনেক ডাটা সংগ্রহ করা হয়েছে; ভাগ করার জন্য স্পর্শ করুন"</string>
     <string name="dump_heap_title" msgid="5864292264307651673">"হিপ ডাম্প ভাগ করবেন?"</string>
     <string name="dump_heap_text" msgid="4809417337240334941">"<xliff:g id="PROC">%1$s</xliff:g> প্রক্রিয়াটি তার <xliff:g id="SIZE">%2$s</xliff:g> এর মেমরি সীমা অতিক্রম করেছে৷ তার বিকাশকারীর সাথে ভাগ করার জন্য একটি হিপ ডাম্প উপলব্ধ৷ সতর্কতা অবলম্বন করুন: এই হিপ ডাম্পে অ্যাপ্লিকেশানটির অ্যাক্সেস আছে এমন আপনার যেকোন ব্যক্তিগত তথ্য থাকতে পারে৷"</string>
     <string name="sendText" msgid="5209874571959469142">"পাঠ্যের জন্য একটি কাজ বেছে নিন"</string>

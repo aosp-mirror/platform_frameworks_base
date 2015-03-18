@@ -125,8 +125,7 @@
     <string name="roamingText11" msgid="4154476854426920970">"מודעת באנר נודדת מופעלת"</string>
     <string name="roamingText12" msgid="1189071119992726320">"מודעת באנר נודדת כבויה"</string>
     <string name="roamingTextSearching" msgid="8360141885972279963">"מחפש שירות"</string>
-    <!-- no translation found for wfcRegErrorTitle (2301376280632110664) -->
-    <skip />
+    <string name="wfcRegErrorTitle" msgid="2301376280632110664">"‏שיחות ב-Wi-Fi"</string>
   <string-array name="wfcOperatorErrorMessages">
   </string-array>
     <string name="cfTemplateNotForwarded" msgid="1683685883841272560">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: ללא העברה"</string>
@@ -1316,8 +1315,7 @@
       <item quantity="one">‏יש רשת Wi-Fi פתוחה וזמינה</item>
     </plurals>
     <string name="wifi_available_sign_in" msgid="9157196203958866662">"‏היכנס לרשת Wi-Fi"</string>
-    <!-- no translation found for network_available_sign_in (1848877297365446605) -->
-    <skip />
+    <string name="network_available_sign_in" msgid="1848877297365446605">"היכנס לרשת"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
     <skip />
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"‏אין אפשרות להתחבר ל-Wi-Fi"</string>

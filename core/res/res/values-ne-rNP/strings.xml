@@ -123,8 +123,7 @@
     <string name="roamingText11" msgid="4154476854426920970">"रोमिङ ध्वजा चालु छ"</string>
     <string name="roamingText12" msgid="1189071119992726320">"रोमिङ ब्यानर बन्द छ"</string>
     <string name="roamingTextSearching" msgid="8360141885972279963">"सेवाको खोजी गर्दै…"</string>
-    <!-- no translation found for wfcRegErrorTitle (2301376280632110664) -->
-    <skip />
+    <string name="wfcRegErrorTitle" msgid="2301376280632110664">"Wi-Fi कलिङ्"</string>
   <string-array name="wfcOperatorErrorMessages">
   </string-array>
     <string name="cfTemplateNotForwarded" msgid="1683685883841272560">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: अगाडि पठाइएको छैन"</string>
@@ -1308,8 +1307,7 @@
       <item quantity="one">खुल्ला Wi-Fi सञ्जाल उपलब्ध छ</item>
     </plurals>
     <string name="wifi_available_sign_in" msgid="9157196203958866662">"वाइफाइ नेटवर्कमा साइन इन गर्नुहोस्"</string>
-    <!-- no translation found for network_available_sign_in (1848877297365446605) -->
-    <skip />
+    <string name="network_available_sign_in" msgid="1848877297365446605">"सञ्जालमा साइन इन गर्नुहोस्"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
     <skip />
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"वाइ-फाइसँग जडान गर्न सकेन"</string>

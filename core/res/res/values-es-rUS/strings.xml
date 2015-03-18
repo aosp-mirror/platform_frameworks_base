@@ -123,8 +123,7 @@
     <string name="roamingText11" msgid="4154476854426920970">"Banner de roaming activado"</string>
     <string name="roamingText12" msgid="1189071119992726320">"Banner de roaming desactivado"</string>
     <string name="roamingTextSearching" msgid="8360141885972279963">"Buscando servicio"</string>
-    <!-- no translation found for wfcRegErrorTitle (2301376280632110664) -->
-    <skip />
+    <string name="wfcRegErrorTitle" msgid="2301376280632110664">"Llamada por Wi-Fi"</string>
   <string-array name="wfcOperatorErrorMessages">
   </string-array>
     <string name="cfTemplateNotForwarded" msgid="1683685883841272560">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: no se ha remitido"</string>
@@ -1270,7 +1269,7 @@
     <string name="new_app_action" msgid="5472756926945440706">"Inicio <xliff:g id="OLD_APP">%1$s</xliff:g>"</string>
     <string name="new_app_description" msgid="1932143598371537340">"Interrumpe la aplicación anterior sin guardar los cambios."</string>
     <string name="dump_heap_notification" msgid="2618183274836056542">"<xliff:g id="PROC">%1$s</xliff:g> superó el límite de memoria."</string>
-    <string name="dump_heap_notification_detail" msgid="2075673362317481664">"Se recopiló el volcado de pila, toca para compartir."</string>
+    <string name="dump_heap_notification_detail" msgid="2075673362317481664">"Se recopiló el volcado de pila. Toca para compartir."</string>
     <string name="dump_heap_title" msgid="5864292264307651673">"¿Compartir volcado de pila?"</string>
     <string name="dump_heap_text" msgid="4809417337240334941">"El proceso <xliff:g id="PROC">%1$s</xliff:g> superó el límite de memoria de proceso de <xliff:g id="SIZE">%2$s</xliff:g>. Hay un volcado de pila disponible para que puedas compartirlo con el programador. Ten cuidado, este volcado de pila puede contener información personal a la que la aplicación tiene acceso."</string>
     <string name="sendText" msgid="5209874571959469142">"Seleccionar una acción para el texto"</string>
@@ -1302,8 +1301,7 @@
       <item quantity="one">Abrir red de Wi-Fi disponible</item>
     </plurals>
     <string name="wifi_available_sign_in" msgid="9157196203958866662">"Accede a una red Wi-Fi."</string>
-    <!-- no translation found for network_available_sign_in (1848877297365446605) -->
-    <skip />
+    <string name="network_available_sign_in" msgid="1848877297365446605">"Acceder a la red"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
     <skip />
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"No se pudo conectar a la red Wi-Fi."</string>

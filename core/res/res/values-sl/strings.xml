@@ -1282,7 +1282,7 @@
     <string name="dump_heap_notification" msgid="2618183274836056542">"Proces <xliff:g id="PROC">%1$s</xliff:g> je presegel omejitev pomnilnika"</string>
     <string name="dump_heap_notification_detail" msgid="2075673362317481664">"Izvoz kopice je zbran; dotaknite se za deljenje z drugimi"</string>
     <string name="dump_heap_title" msgid="5864292264307651673">"Deljenje izvoza kopice z drugimi?"</string>
-    <string name="dump_heap_text" msgid="4809417337240334941">"Proces <xliff:g id="PROC">%1$s</xliff:g> je presegel <xliff:g id="SIZE">%2$s</xliff:g> omejitve pomnilnika za procese. Izvoz kopice je na voljo, da ga delite z razvijalcem. Previdno: izvoz kopica lahko vsebuje vaše osebne podatke, do katerih ima aplikacija dostop."</string>
+    <string name="dump_heap_text" msgid="4809417337240334941">"Proces <xliff:g id="PROC">%1$s</xliff:g> je presegel <xliff:g id="SIZE">%2$s</xliff:g> omejitve pomnilnika za proces. Izvoz kopice je na voljo, da ga delite z razvijalcem. Previdno: izvoz kopice lahko vsebuje vaše osebne podatke, do katerih ima aplikacija dostop."</string>
     <string name="sendText" msgid="5209874571959469142">"Izberite dejanje za besedilo"</string>
     <string name="volume_ringtone" msgid="6885421406845734650">"Glasnost zvonjenja"</string>
     <string name="volume_music" msgid="5421651157138628171">"Glasnost predstavnosti"</string>

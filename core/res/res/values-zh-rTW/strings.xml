@@ -1270,9 +1270,9 @@
     <string name="new_app_action" msgid="5472756926945440706">"啟動 <xliff:g id="OLD_APP">%1$s</xliff:g>"</string>
     <string name="new_app_description" msgid="1932143598371537340">"停止舊的應用程式且不儲存。"</string>
     <string name="dump_heap_notification" msgid="2618183274836056542">"<xliff:g id="PROC">%1$s</xliff:g> 已超出記憶體上限"</string>
-    <string name="dump_heap_notification_detail" msgid="2075673362317481664">"已收集堆積傾印文件；輕觸即可分享"</string>
-    <string name="dump_heap_title" msgid="5864292264307651673">"分享堆積傾印文件？"</string>
-    <string name="dump_heap_text" msgid="4809417337240334941">"程序「<xliff:g id="PROC">%1$s</xliff:g>」已超出 <xliff:g id="SIZE">%2$s</xliff:g> 的程序記憶體上限。已有堆積傾印文件可供您與開發人員分享。請注意：這份堆積傾印文件可能包含應用程式可存取的個人資訊。"</string>
+    <string name="dump_heap_notification_detail" msgid="2075673362317481664">"已取得記憶體快照資料；輕觸這裡即可分享"</string>
+    <string name="dump_heap_title" msgid="5864292264307651673">"分享記憶體快照資料？"</string>
+    <string name="dump_heap_text" msgid="4809417337240334941">"程序「<xliff:g id="PROC">%1$s</xliff:g>」已超出 <xliff:g id="SIZE">%2$s</xliff:g> 的程序記憶體上限。系統已產生記憶體快照資料，可供您與開發人員分享。請注意：記憶體快照資料中可能包含應用程式可存取的個人資訊。"</string>
     <string name="sendText" msgid="5209874571959469142">"選取傳送文字內容的方式"</string>
     <string name="volume_ringtone" msgid="6885421406845734650">"鈴聲音量"</string>
     <string name="volume_music" msgid="5421651157138628171">"媒體音量"</string>

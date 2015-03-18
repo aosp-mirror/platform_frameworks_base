@@ -123,8 +123,7 @@
     <string name="roamingText11" msgid="4154476854426920970">"Kveikt á reikiborða"</string>
     <string name="roamingText12" msgid="1189071119992726320">"Slökkt á reikiborða"</string>
     <string name="roamingTextSearching" msgid="8360141885972279963">"Leitar að þjónustu"</string>
-    <!-- no translation found for wfcRegErrorTitle (2301376280632110664) -->
-    <skip />
+    <string name="wfcRegErrorTitle" msgid="2301376280632110664">"Wi-Fi símtöl"</string>
   <string-array name="wfcOperatorErrorMessages">
   </string-array>
     <string name="cfTemplateNotForwarded" msgid="1683685883841272560">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: Ekki áframsent"</string>
@@ -1301,10 +1300,8 @@
       <item quantity="one">Opin Wi-Fi net í boði</item>
       <item quantity="other">Opin Wi-Fi net í boði</item>
     </plurals>
-    <!-- no translation found for wifi_available_sign_in (9157196203958866662) -->
-    <skip />
-    <!-- no translation found for network_available_sign_in (1848877297365446605) -->
-    <skip />
+    <string name="wifi_available_sign_in" msgid="9157196203958866662">"Skrá inn á Wi-Fi net"</string>
+    <string name="network_available_sign_in" msgid="1848877297365446605">"Skrá inn á net"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
     <skip />
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"Ekki var hægt að tengjast Wi-Fi"</string>
