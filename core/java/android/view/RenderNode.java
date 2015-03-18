@@ -26,7 +26,7 @@ import android.graphics.Rect;
 /**
  * <p>A display list records a series of graphics related operations and can replay
  * them later. Display lists are usually built by recording operations on a
- * {@link HardwareCanvas}. Replaying the operations from a display list avoids
+ * {@link DisplayListCanvas}. Replaying the operations from a display list avoids
  * executing application code on every frame, and is thus much more efficient.</p>
  *
  * <p>Display lists are used internally for all views by default, and are not
@@ -43,7 +43,7 @@ import android.graphics.Rect;
  * affected paragraph needs to be recorded again.</p>
  *
  * <h3>Hardware acceleration</h3>
- * <p>Display lists can only be replayed using a {@link HardwareCanvas}. They are not
+ * <p>Display lists can only be replayed using a {@link DisplayListCanvas}. They are not
  * supported in software. Always make sure that the {@link android.graphics.Canvas}
  * you are using to render a display list is hardware accelerated using
  * {@link android.graphics.Canvas#isHardwareAccelerated()}.</p>
@@ -53,7 +53,7 @@ import android.graphics.Rect;
  *     HardwareRenderer renderer = myView.getHardwareRenderer();
  *     if (renderer != null) {
  *         DisplayList displayList = renderer.createDisplayList();
- *         HardwareCanvas canvas = displayList.start(width, height);
+ *         DisplayListCanvas canvas = displayList.start(width, height);
  *         try {
  *             // Draw onto the canvas
  *             // For instance: canvas.drawBitmap(...);
@@ -67,8 +67,8 @@ import android.graphics.Rect;
  * <pre class="prettyprint">
  *     protected void onDraw(Canvas canvas) {
  *         if (canvas.isHardwareAccelerated()) {
- *             HardwareCanvas hardwareCanvas = (HardwareCanvas) canvas;
- *             hardwareCanvas.drawDisplayList(mDisplayList);
+ *             DisplayListCanvas displayListCanvas = (DisplayListCanvas) canvas;
+ *             displayListCanvas.drawDisplayList(mDisplayList);
  *         }
  *     }
  * </pre>
@@ -92,7 +92,7 @@ import android.graphics.Rect;
  * <pre class="prettyprint">
  *     private void createDisplayList() {
  *         mDisplayList = DisplayList.create("MyDisplayList");
- *         HardwareCanvas canvas = mDisplayList.start(width, height);
+ *         DisplayListCanvas canvas = mDisplayList.start(width, height);
  *         try {
  *             for (Bitmap b : mBitmaps) {
  *                 canvas.drawBitmap(b, 0.0f, 0.0f, null);
@@ -105,8 +105,8 @@ import android.graphics.Rect;
  *
  *     protected void onDraw(Canvas canvas) {
  *         if (canvas.isHardwareAccelerated()) {
- *             HardwareCanvas hardwareCanvas = (HardwareCanvas) canvas;
- *             hardwareCanvas.drawDisplayList(mDisplayList);
+ *             DisplayListCanvas displayListCanvas = (DisplayListCanvas) canvas;
+ *             displayListCanvas.drawDisplayList(mDisplayList);
  *         }
  *     }
  *
@@ -128,7 +128,7 @@ import android.graphics.Rect;
 public class RenderNode {
     /**
      * Flag used when calling
-     * {@link HardwareCanvas#drawRenderNode(RenderNode, android.graphics.Rect, int)}
+     * {@link DisplayListCanvas#drawRenderNode
      * When this flag is set, draw operations lying outside of the bounds of the
      * display list will be culled early. It is recommeneded to always set this
      * flag.
@@ -140,29 +140,29 @@ public class RenderNode {
     /**
      * Indicates that the display list is done drawing.
      *
-     * @see HardwareCanvas#drawRenderNode(RenderNode, android.graphics.Rect, int)
+     * @see DisplayListCanvas#drawRenderNode(RenderNode, int)
      */
     public static final int STATUS_DONE = 0x0;
 
     /**
      * Indicates that the display list needs another drawing pass.
      *
-     * @see HardwareCanvas#drawRenderNode(RenderNode, android.graphics.Rect, int)
+     * @see DisplayListCanvas#drawRenderNode(RenderNode, int)
      */
     public static final int STATUS_DRAW = 0x1;
 
     /**
      * Indicates that the display list needs to re-execute its GL functors.
      *
-     * @see HardwareCanvas#drawRenderNode(RenderNode, android.graphics.Rect, int)
-     * @see HardwareCanvas#callDrawGLFunction(long)
+     * @see DisplayListCanvas#drawRenderNode(RenderNode, int)
+     * @see DisplayListCanvas#callDrawGLFunction2(long)
      */
     public static final int STATUS_INVOKE = 0x2;
 
     /**
      * Indicates that the display list performed GL drawing operations.
      *
-     * @see HardwareCanvas#drawRenderNode(RenderNode, android.graphics.Rect, int)
+     * @see DisplayListCanvas#drawRenderNode(RenderNode, int)
      */
     public static final int STATUS_DREW = 0x4;
 
@@ -213,7 +213,7 @@ public class RenderNode {
      * stored in this display list.
      *
      * Calling this method will mark the render node invalid until
-     * {@link #end(HardwareCanvas)} is called.
+     * {@link #end(DisplayListCanvas)} is called.
      * Only valid render nodes can be replayed.
      *
      * @param width The width of the recording viewport
@@ -221,11 +221,11 @@ public class RenderNode {
      *
      * @return A canvas to record drawing operations.
      *
-     * @see #end(HardwareCanvas)
+     * @see #end(DisplayListCanvas)
      * @see #isValid()
      */
-    public HardwareCanvas start(int width, int height) {
-        HardwareCanvas canvas = DisplayListCanvas.obtain(this);
+    public DisplayListCanvas start(int width, int height) {
+        DisplayListCanvas canvas = DisplayListCanvas.obtain(this);
         canvas.setViewport(width, height);
         // The dirty rect should always be null for a display list
         canvas.onPreDraw(null);
@@ -240,7 +240,7 @@ public class RenderNode {
      * @see #start(int, int)
      * @see #isValid()
      */
-    public void end(HardwareCanvas endCanvas) {
+    public void end(DisplayListCanvas endCanvas) {
         if (!(endCanvas instanceof DisplayListCanvas)) {
             throw new IllegalArgumentException("Passed an invalid canvas to end!");
         }

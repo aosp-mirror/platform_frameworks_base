@@ -24,7 +24,7 @@ import android.graphics.Paint;
 import android.graphics.Paint.Style;
 import android.os.Bundle;
 import android.os.Trace;
-import android.view.HardwareCanvas;
+import android.view.DisplayListCanvas;
 import android.view.RenderNodeAnimator;
 import android.view.View;
 import android.widget.LinearLayout;
@@ -88,8 +88,8 @@ public class CirclePropActivity extends Activity {
             super.onDraw(canvas);
 
             if (canvas.isHardwareAccelerated()) {
-                HardwareCanvas hwcanvas = (HardwareCanvas) canvas;
-                hwcanvas.drawCircle(mX, mY, mRadius, mPaint);
+                DisplayListCanvas displayListCanvas = (DisplayListCanvas) canvas;
+                displayListCanvas.drawCircle(mX, mY, mRadius, mPaint);
             }
         }
 
