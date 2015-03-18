@@ -4994,14 +4994,16 @@ public final class ContactsContract {
                 "phone_lookup");
 
         /**
-         * URI used for the "enterprise caller-id".
+         * <p>URI used for the "enterprise caller-id".</p>
          *
+         * <p>
          * It supports the same semantics as {@link #CONTENT_FILTER_URI} and returns the same
          * columns.  If the device has no corp profile that is linked to the current profile, it
          * behaves in the exact same way as {@link #CONTENT_FILTER_URI}.  If there is a corp profile
          * linked to the current profile, it first queries against the personal contact database,
          * and if no matching contacts are found there, then queries against the
          * corp contacts database.
+         * </p>
          * <p>
          * If a result is from the corp profile, it makes the following changes to the data:
          * <ul>
@@ -5982,6 +5984,45 @@ public final class ContactsContract {
              */
             public static final Uri CONTENT_LOOKUP_URI = Uri.withAppendedPath(CONTENT_URI,
                     "lookup");
+
+            /**
+            * <p>URI used for enterprise email lookup.</p>
+            *
+            * <p>
+            * It supports the same semantics as {@link #CONTENT_LOOKUP_URI} and returns the same
+            * columns.  If the device has no corp profile that is linked to the current profile, it
+            * behaves in the exact same way as {@link #CONTENT_LOOKUP_URI}.  If there is a
+            * corp profile linked to the current profile, it first queries against the personal contact database,
+            * and if no matching contacts are found there, then queries against the
+            * corp contacts database.
+            * </p>
+            * <p>
+            * If a result is from the corp profile, it makes the following changes to the data:
+            * <ul>
+            *     <li>
+            *     {@link #PHOTO_THUMBNAIL_URI} and {@link #PHOTO_URI} will be rewritten to special
+            *     URIs.  Use {@link ContentResolver#openAssetFileDescriptor} or its siblings to
+            *     load pictures from them.
+            *     {@link #PHOTO_ID} and {@link #PHOTO_FILE_ID} will be set to null.  Do not
+            *     use them.
+            *     </li>
+            *     <li>
+            *     Corp contacts will get artificial {@link #CONTACT_ID}s.  In order to tell whether
+            *     a contact
+            *     is from the corp profile, use
+            *     {@link ContactsContract.Contacts#isEnterpriseContactId(long)}.
+            *     </li>
+            * </ul>
+            * <p>
+            * This URI does NOT support selection nor order-by.
+            *
+            * <pre>
+            * Uri lookupUri = Uri.withAppendedPath(Email.ENTERPRISE_CONTENT_LOOKUP_URI,
+            *         Uri.encode(email));
+            * </pre>
+            */
+            public static final Uri ENTERPRISE_CONTENT_LOOKUP_URI =
+                    Uri.withAppendedPath(CONTENT_URI, "lookup_enterprise");
 
             /**
              * <p>
