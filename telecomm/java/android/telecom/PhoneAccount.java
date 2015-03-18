@@ -94,7 +94,6 @@ public class PhoneAccount implements Parcelable {
      * <p>
      * See {@link #getCapabilities}
      */
-    @SystemApi
     public static final int CAPABILITY_VIDEO_CALLING = 0x8;
 
     /**
