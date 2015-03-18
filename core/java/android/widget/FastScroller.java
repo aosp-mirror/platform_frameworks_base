@@ -753,13 +753,13 @@ class FastScroller {
         final View track = mTrackImage;
         final View thumb = mThumbImage;
         final Rect container = mContainerRect;
-        final int containerWidth = container.width();
-        final int widthMeasureSpec = MeasureSpec.makeMeasureSpec(containerWidth, MeasureSpec.AT_MOST);
+        final int maxWidth = container.width();
+        final int widthMeasureSpec = MeasureSpec.makeMeasureSpec(maxWidth, MeasureSpec.AT_MOST);
         final int heightMeasureSpec = MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED);
         track.measure(widthMeasureSpec, heightMeasureSpec);
 
         final int trackWidth = track.getMeasuredWidth();
-        final int thumbHalfHeight = thumb == null ? 0 : thumb.getHeight() / 2;
+        final int thumbHalfHeight = thumb.getHeight() / 2;
         final int left = thumb.getLeft() + (thumb.getWidth() - trackWidth) / 2;
         final int right = left + trackWidth;
         final int top = container.top + thumbHalfHeight;
