@@ -631,6 +631,9 @@ public class Process {
             if ((debugFlags & Zygote.DEBUG_ENABLE_CHECKJNI) != 0) {
                 argsForZygote.add("--enable-checkjni");
             }
+            if ((debugFlags & Zygote.DEBUG_ENABLE_JIT) != 0) {
+                argsForZygote.add("--enable-jit");
+            }
             if ((debugFlags & Zygote.DEBUG_ENABLE_ASSERT) != 0) {
                 argsForZygote.add("--enable-assert");
             }
