@@ -811,9 +811,7 @@ public class Mesh extends BaseObj {
 
             sm.getVertexAllocation(0).copy1DRangeFromUnchecked(0, mMaxIndex, mVtxData);
             if(uploadToBufferObject) {
-                if (uploadToBufferObject) {
-                    sm.getVertexAllocation(0).syncAll(Allocation.USAGE_SCRIPT);
-                }
+                sm.getVertexAllocation(0).syncAll(Allocation.USAGE_SCRIPT);
             }
 
             sm.getIndexSetAllocation(0).copy1DRangeFromUnchecked(0, mIndexCount, mIndexData);
