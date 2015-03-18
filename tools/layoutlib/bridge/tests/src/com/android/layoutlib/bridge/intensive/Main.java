@@ -300,7 +300,8 @@ public class Main {
         FolderConfiguration config = configGenerator.getFolderConfig();
         ResourceResolver resourceResolver =
                 ResourceResolver.create(mProjectResources.getConfiguredResources(config),
-                        mFrameworkRepo.getConfiguredResources(config), "Theme.Material", false);
+                        mFrameworkRepo.getConfiguredResources(config),
+                        "Theme.Material.Light.DarkActionBar", false);
 
         return new SessionParams(
                 layoutParser,
@@ -320,7 +321,7 @@ public class Main {
                 @Override
                 public void warning(String tag, String message, Object data) {
                     System.out.println("Warning " + tag + ": " + message);
-                    fail(message);
+                    failWithMsg(message);
                 }
 
                 @Override
@@ -330,13 +331,13 @@ public class Main {
                     if (throwable != null) {
                         throwable.printStackTrace();
                     }
-                    fail(message);
+                    failWithMsg(message);
                 }
 
                 @Override
                 public void error(String tag, String message, Object data) {
                     System.out.println("Error " + tag + ": " + message);
-                    fail(message);
+                    failWithMsg(message);
                 }
 
                 @Override
@@ -345,7 +346,7 @@ public class Main {
                     if (throwable != null) {
                         throwable.printStackTrace();
                     }
-                    fail(message);
+                    failWithMsg(message);
                 }
             };
         }
@@ -360,12 +361,12 @@ public class Main {
                     if (t != null) {
                         t.printStackTrace();
                     }
-                    fail(String.format(msgFormat, args));
+                    failWithMsg(msgFormat, args);
                 }
 
                 @Override
                 public void warning(String msgFormat, Object... args) {
-                    fail(String.format(msgFormat, args));
+                    failWithMsg(msgFormat, args);
                 }
 
                 @Override
@@ -380,5 +381,9 @@ public class Main {
             };
         }
         return mLogger;
+    }
+
+    private static void failWithMsg(String msgFormat, Object... args) {
+        fail(msgFormat == null || args == null ? "" : String.format(msgFormat, args));
     }
 }
