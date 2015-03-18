@@ -84,7 +84,7 @@ var RESOURCE_COLLECTIONS = {
   },
   "distribute/gp/gpfelanding": {
     "resources": [
-      "distribute/googleplay/guide.html",
+      "distribute/googleplay/auto.html",
       "distribute/googleplay/tv.html",
       "distribute/googleplay/wear.html",
       "distribute/googleplay/edu/about.html"
@@ -1074,6 +1074,14 @@ var RESOURCE_COLLECTIONS = {
       "https://support.google.com/googleplay/answer/2651410"
     ]
   },
+  "autolanding": {
+    "title": "",
+    "resources": [
+      "auto/index.html",
+      "design/auto/index.html",
+      "training/auto/index.html"
+    ]
+  },
   "tvlanding": {
     "title": "",
     "resources": [
@@ -1099,7 +1107,7 @@ var RESOURCE_COLLECTIONS = {
   "design/auto/auto_ui_guidelines": {
     "title": "",
     "resources": [
-      "shareables/auto/AndroidAuto-media-apps.pdf",
+      "shareables/auto/AndroidAuto-audio-apps.pdf",
       "shareables/auto/AndroidAuto-messaging-apps.pdf",
       "shareables/auto/AndroidAuto-custom-colors.pdf"
     ]

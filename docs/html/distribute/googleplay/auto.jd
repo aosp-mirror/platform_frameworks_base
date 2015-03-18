@@ -1,0 +1,237 @@
+page.title=Distributing to Android Auto
+page.image=/design/auto/images/auto-overview.png
+meta.tags="auto", "publish", "quality"
+page.tags="auto", "publish", "googleplay"
+page.metaDescription=Distribute your apps and content to Android Auto.
+
+@jd:body
+
+<div id="qv-wrapper"><div id="qv">
+<h2>How to Participate</h2>
+<ol>
+<li><a href="#understand_guidelines">Understand the guidelines</a></li>
+<li><a href="#develop_app">Develop a great app for Auto</a></li>
+<li><a href="#test_app">Test for Auto App Quality</a></li>
+<li><a href="#opt_in">Agree to terms</a></li>
+<li><a href="#track_review">Track your review</a></li>
+</ol>
+
+<h2>You Should Also Read</h2>
+<ol>
+<li><a href="{@docRoot}distribute/essentials/quality/auto.html">Auto App Quality</a></li>
+</ol>
+
+</div></div>
+
+<p>
+  If you've got a great app, Android Auto and Google Play can help you
+  bring it to users right in their vehicles. You can
+  extend your new or existing apps for Auto and then publish them using familiar
+  tools and processes in Google Play.
+</p>
+
+<p>
+  To get started, review the sections in this document to learn how to
+  distribute your Auto apps to users through Google Play. Be sure to read
+  <a href="{@docRoot}distribute/essentials/quality/auto.html">Auto App Quality</a>
+  for information on the usability, quality, and safety-related guidelines that your apps should
+  meet. When your app is ready, you can accept the terms in the Developer Console and upload your
+  APK for review.
+</p>
+
+<h2 id="how_to_participate">
+  How to Participate
+</h2>
+
+<p>
+  Google Play lets you deliver apps for use in vehicles. You can develop and publish using your
+  existing Developer Console account and your current distribution and pricing settings. It's easy
+  to participate — the sections below outline the process.
+</p>
+
+<div style="float:right;margin:1em 0 1.5em 2em;">
+  <img src="{@docRoot}images/gp-auto-process.png">
+</div>
+
+<h3 id="understand_guidelines">
+  1. Understand guidelines and requirements
+</h3>
+
+<p>
+  To prepare for a successful launch on Android Auto, start by reviewing the
+  guidelines for creating great experiences on Auto. See the <a href=
+  "{@docRoot}design/auto/index.html">Android Auto design guidelines</a> for ideas
+  on extending your app for Auto and details on design and usability.
+</p>
+
+<p>
+  As you get started designing your Auto experience, make sure to read and
+  understand the quality criteria for Auto apps. Only apps that are usable on Auto
+  will be designated as Auto apps on Google Play &mdash; your apps can participate
+  if they meet a set of basic quality criteria. See
+  <a href="{@docRoot}distribute/essentials/quality/auto.html">Auto
+  App Quality</a> for details.
+</p>
+
+<h3 id="develop_app">2. Develop a great app for Auto</h3>
+
+<p>
+  A great app for Auto is designed for vehicle use and takes advantage of the
+  capabilities of Android Auto. The app offers a high-quality experience while the user is on the
+  go such as providing playback for audio content or accessing messages.
+</p>
+
+<p>
+  As you consider your Auto app, review the <a href=
+  "{@docRoot}training/auto/start/index.html">developer documentation</a> and
+  usability guidelines and plan on supporting them to the greatest extent
+  possible. Make sure to design a great experience and adhere to our guidelines for preventing
+  driver distraction.
+</p>
+
+<p>
+  You must deliver your Auto experience as part of your existing app for phones, tablets, and other
+  devices, using the same package name and store listing.
+</p>
+
+<h3 id="test_app">3. Test for Auto App Quality</h3>
+
+<p>
+  Your Auto apps should be designed to perform well, look great in the car,
+  and offer the best user experience possible. Google Play will showcase selected high-quality
+  Auto apps for easy discovery by users in Google Play. Here’s how you
+  can participate and deliver an Android Auto app that users will enjoy:
+</p>
+
+<ul>
+  <li>Meet <a href="{@docRoot}distribute/essentials/quality/auto.html">Auto App
+  Quality</a> guidelines
+    <ul>
+      <li>Follow our best practices for <a href="{@docRoot}training/auto/index.html">
+      Auto app development</a></li>
+      <li>Make sure your app meets all of the <a href=
+      "{@docRoot}distribute/essentials/quality/auto.html">Auto App Quality</a> criteria</li>
+    </ul>
+  </li>
+</ul>
+
+<h3 id="opt_in">4. Agree to Android Auto terms and publish</h3>
+
+<p>
+  Before you can upload your APK and publish the app for review, the developer account owner
+  must agree to the
+  <a href="https://play.google.com/about/auto/developer-distribution-agreement-addendum.html">Android
+  Auto terms</a> from the <strong>Pricing and Distribution</strong> section of the
+  Developer Console. Agreeing to the terms means that you want your app to be made available
+  to Android Auto users through Google Play, and that
+  your app meets <a href="{@docRoot}distribute/essentials/quality/auto.html">Auto
+  App Quality</a> guidelines.
+</p>
+
+<p>
+  Your Auto app can be uploaded only after you have agreed to the terms. The following describes
+  which apps are determined to be Auto apps:
+</p>
+
+<ul>
+  <li>Your app manifest must declare the <code>com.google.android.gms.car.application</code>
+  metadata entry in the manifest with auto capabilities that the app uses. For more information
+  about configuring your app for use with Android Auto, see
+  <a href="{@docRoot}training/auto/start/index.html#auto-metadata">Getting Started with Auto</a>.
+  </li>
+</ul>
+
+<p>
+  When you've built your release-ready APK and tested to ensure that it meets
+  all of the <a href="{@docRoot}distribute/essentials/quality/auto.html">Auto App
+  Quality</a> guidelines, upload it to the Developer Console. Update your store
+  listing with any additional Auto functionality information, and set distribution options as
+  needed. If you aren't familiar with how to prepare for launch on Google Play,
+  see the <a href=
+  "{@docRoot}distribute/googleplay/publish/preparing.html">Launch
+  Checklist.</a>
+</p>
+
+<p>
+  After you agree to the terms and save the changes, you can upload and publish your app as usual.
+  Before making the app available to Android Auto users, Google Play submits
+  your app for review against the <a href=
+  "{@docRoot}distribute/essentials/quality/auto.html">Auto App Quality</a> criteria
+  and notifies you of the result. If your app is approved, Google Play makes that app
+  available to Android Auto users. See the next section for details on how to track the approval
+  status of your app.
+</p>
+
+<p>
+  Note that the review affects the availability of your app to other devices in
+  Google Play Store &mdash; on phones and tablets, for example.
+  If you have an existing app that includes updates to the phone/tablet component,
+  the Android Auto component must pass review before the updated app
+  is made available on the Google Play Store.
+</p>
+
+<p>
+  Here are the steps to agree to Android Auto terms in the Developer Console:
+</p>
+
+<ol>
+  <li>Make sure your app meets all <a href=
+  "{@docRoot}distribute/essentials/quality/auto.html">Auto App Quality</a> criteria
+  </li>
+
+  <li>In the <strong>All Applications</strong> page, click the app you want to publish.
+  </li>
+
+  <li>Under <strong>Pricing and Distribution</strong>, scroll down to find <em>Android Auto</em> and the
+  link to the terms.
+  </li>
+
+  <li>Click the <em>terms</em> link.
+  </li>
+
+  <li>Read through the terms and click <em>Agree</em>.
+  </li>
+</ol>
+
+<div style="padding-top:1em">
+  <img style="border:2px solid #ddd;" src="{@docRoot}images/gp-auto-opt-in.png">
+  <p class="caption">
+    <strong>Agree to terms for Auto:</strong> Include your app in Android Auto by agreeing to the
+    terms from the Developer Console.
+  </p>
+</div>
+
+<h3 id="track_review">5. Track your review</h3>
+
+<p>
+  Your app will be reviewed for compliance with driver distraction guidelines and the
+  technical and quality criteria described above. This detailed review process may take
+  more time than you are accustomed to when submitting phone/tablet apps.
+  Until your app is approved, your app or app update won’t be published to the Google Play Store.
+  After a successful review, your app will be published and made available on the Google Play
+  Store.
+</p>
+
+<p>If your app is not accepted, you’ll receive a <strong>notification email sent to your
+  developer account address</strong>, with a summary of the areas that you need to address. When
+  you’ve made the necessary adjustments, you can upload a new version of your app to the Developer
+  Console.
+</p>
+
+<p>
+  Note that if the submitted app is an update to an existing app and your updated app does not meet
+  the review criteria, the update is rejected and the existing app remains published in the Google
+  Play Store.
+</p>
+
+<p>To understand how your apps are evaluated, please see the <a href=
+"{@docRoot}distribute/essentials/quality/auto.html">Auto App Quality</a> document. </p>
+
+
+  <h3>Related resources</h3>
+
+  <div class="resource-widget resource-flow-layout col-16"
+    data-query="collection:autolanding"
+    data-cardSizes="9x6, 6x3x2"
+    data-maxResults="6">
+  </div>

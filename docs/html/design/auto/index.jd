@@ -13,8 +13,8 @@ page.tags="design","Auto"
 <div class="sidebox">
   <h2><strong>UI Guidelines</strong></h2>
   <ul>
-  <li><a href="{@docRoot}shareables/auto/AndroidAuto-media-apps.pdf">
-    <strong>Auto Media Apps (PDF)</strong></a>
+  <li><a href="{@docRoot}shareables/auto/AndroidAuto-audio-apps.pdf">
+    <strong>Auto Audio Apps (PDF)</strong></a>
   </li>
   <li><a href="{@docRoot}shareables/auto/AndroidAuto-messaging-apps.pdf">
     <strong>Auto Messaging Apps (PDF)</strong></a>
