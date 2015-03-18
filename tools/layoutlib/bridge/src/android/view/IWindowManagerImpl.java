@@ -17,6 +17,7 @@
 package android.view;
 
 import android.graphics.Point;
+import com.android.internal.app.IAssistScreenshotReceiver;
 import com.android.internal.view.IInputContext;
 import com.android.internal.view.IInputMethodClient;
 
@@ -275,8 +276,15 @@ public class IWindowManagerImpl implements IWindowManager {
     }
 
     @Override
-    public Bitmap screenshotApplications(IBinder arg0, int displayId, int arg1,
-            int arg2, boolean arg3) throws RemoteException {
+    public boolean requestAssistScreenshot(IAssistScreenshotReceiver receiver)
+            throws RemoteException {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
+    @Override
+    public Bitmap screenshotApplications(IBinder appToken, int displayId, int maxWidth,
+            int maxHeight) throws RemoteException {
         // TODO Auto-generated method stub
         return null;
     }
