@@ -513,5 +513,9 @@ public class RecoverySystem {
         return arg;
     }
 
-    private void RecoverySystem() { }  // Do not instantiate
+
+    /**
+     * @removed Was previously made visible by accident.
+     */
+    public RecoverySystem() { }
 }
