@@ -148,9 +148,9 @@ public final class NetworkCapabilities implements Parcelable {
      */
     public static final int NET_CAPABILITY_TRUSTED        = 14;
 
-    /*
+    /**
      * Indicates that this network is not a VPN.  This capability is set by default and should be
-     * explicitly cleared when creating VPN networks.
+     * explicitly cleared for VPN networks.
      */
     public static final int NET_CAPABILITY_NOT_VPN        = 15;
 
