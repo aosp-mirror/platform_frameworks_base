@@ -23,7 +23,9 @@ import android.content.res.TypedArray;
 import android.graphics.Bitmap;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
+import android.os.Binder;
 import android.os.IBinder;
+import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.Trace;
@@ -124,7 +126,7 @@ public class ThreadedRenderer extends HardwareRenderer {
         mRootNode.setClipToBounds(false);
         mNativeProxy = nCreateProxy(translucent, rootNodePtr);
 
-        AtlasInitializer.sInstance.init(context, mNativeProxy);
+        ProcessInitializer.sInstance.init(context, mNativeProxy);
 
         loadSystemProperties();
     }
@@ -410,15 +412,44 @@ public class ThreadedRenderer extends HardwareRenderer {
         nTrimMemory(level);
     }
 
-    private static class AtlasInitializer {
-        static AtlasInitializer sInstance = new AtlasInitializer();
+    public static void dumpProfileData(byte[] data, FileDescriptor fd) {
+        nDumpProfileData(data, fd);
+    }
+
+    private static class ProcessInitializer {
+        static ProcessInitializer sInstance = new ProcessInitializer();
+        static IGraphicsStats sGraphicsStatsService;
+        private static IBinder sProcToken;
 
         private boolean mInitialized = false;
 
-        private AtlasInitializer() {}
+        private ProcessInitializer() {}
 
         synchronized void init(Context context, long renderProxy) {
             if (mInitialized) return;
+            mInitialized = true;
+            initGraphicsStats(context, renderProxy);
+            initAssetAtlas(context, renderProxy);
+        }
+
+        private static void initGraphicsStats(Context context, long renderProxy) {
+            IBinder binder = ServiceManager.getService("graphicsstats");
+            if (binder == null) return;
+
+            sGraphicsStatsService = IGraphicsStats.Stub.asInterface(binder);
+            sProcToken = new Binder();
+            try {
+                final String pkg = context.getApplicationInfo().packageName;
+                ParcelFileDescriptor pfd = sGraphicsStatsService.
+                        requestBufferForProcess(pkg, sProcToken);
+                nSetProcessStatsBuffer(renderProxy, pfd.getFd());
+                pfd.close();
+            } catch (Exception e) {
+                Log.w(LOG_TAG, "Could not acquire gfx stats buffer", e);
+            }
+        }
+
+        private static void initAssetAtlas(Context context, long renderProxy) {
             IBinder binder = ServiceManager.getService("assetatlas");
             if (binder == null) return;
 
@@ -432,7 +463,6 @@ public class ThreadedRenderer extends HardwareRenderer {
                             // TODO Remove after fixing b/15425820
                             validateMap(context, map);
                             nSetAtlas(renderProxy, buffer, map);
-                            mInitialized = true;
                         }
                         // If IAssetAtlas is not the same class as the IBinder
                         // we are using a remote service and we can safely
@@ -477,6 +507,7 @@ public class ThreadedRenderer extends HardwareRenderer {
     static native void setupShadersDiskCache(String cacheFile);
 
     private static native void nSetAtlas(long nativeProxy, GraphicBuffer buffer, long[] map);
+    private static native void nSetProcessStatsBuffer(long nativeProxy, int fd);
 
     private static native long nCreateRootRenderNode();
     private static native long nCreateProxy(boolean translucent, long rootRenderNode);
@@ -514,4 +545,5 @@ public class ThreadedRenderer extends HardwareRenderer {
 
     private static native void nDumpProfileInfo(long nativeProxy, FileDescriptor fd,
             @DumpFlags int dumpFlags);
+    private static native void nDumpProfileData(byte[] data, FileDescriptor fd);
 }

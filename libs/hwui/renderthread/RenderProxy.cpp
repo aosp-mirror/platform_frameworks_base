@@ -440,6 +440,19 @@ void RenderProxy::setTextureAtlas(const sp<GraphicBuffer>& buffer, int64_t* map,
     post(task);
 }
 
+CREATE_BRIDGE2(setProcessStatsBuffer, RenderThread* thread, int fd) {
+    args->thread->jankTracker().switchStorageToAshmem(args->fd);
+    close(args->fd);
+    return nullptr;
+}
+
+void RenderProxy::setProcessStatsBuffer(int fd) {
+    SETUP_TASK(setProcessStatsBuffer);
+    args->thread = &mRenderThread;
+    args->fd = dup(fd);
+    post(task);
+}
+
 void RenderProxy::post(RenderTask* task) {
     mRenderThread.queue(task);
 }

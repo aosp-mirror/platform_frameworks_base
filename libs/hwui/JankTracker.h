@@ -20,6 +20,8 @@
 #include "renderthread/TimeLord.h"
 #include "utils/RingBuffer.h"
 
+#include <cutils/compiler.h>
+
 #include <array>
 #include <memory>
 
@@ -37,33 +39,45 @@ enum JankType {
     NUM_BUCKETS,
 };
 
-struct JankBucket {
-    // Number of frames that hit this bucket
-    uint32_t count;
+// Try to keep as small as possible, should match ASHMEM_SIZE in
+// GraphicsStatsService.java
+struct ProfileData {
+    std::array<uint32_t, NUM_BUCKETS> jankTypeCounts;
+    // See comments on kBucket* constants for what this holds
+    std::array<uint32_t, 57> frameCounts;
+
+    uint32_t totalFrameCount;
+    uint32_t jankFrameCount;
 };
 
 // TODO: Replace DrawProfiler with this
 class JankTracker {
 public:
     JankTracker(nsecs_t frameIntervalNanos);
-
-    void setFrameInterval(nsecs_t frameIntervalNanos);
+    ~JankTracker();
 
     void addFrame(const FrameInfo& frame);
 
-    void dump(int fd);
+    void dump(int fd) { dumpData(mData, fd); }
     void reset();
 
+    void switchStorageToAshmem(int ashmemfd);
+
+    uint32_t findPercentile(int p) { return findPercentile(mData, p); }
+
+    ANDROID_API static void dumpBuffer(const void* buffer, size_t bufsize, int fd);
+
 private:
-    uint32_t findPercentile(int p);
+    void freeData();
+    void setFrameInterval(nsecs_t frameIntervalNanos);
 
-    std::array<JankBucket, NUM_BUCKETS> mBuckets;
+    static uint32_t findPercentile(const ProfileData* data, int p);
+    static void dumpData(const ProfileData* data, int fd);
+
     std::array<int64_t, NUM_BUCKETS> mThresholds;
-    std::array<uint32_t, 128> mFrameCounts;
-
     int64_t mFrameInterval;
-    uint32_t mTotalFrameCount;
-    uint32_t mJankFrameCount;
+    ProfileData* mData;
+    bool mIsMapped = false;
 };
 
 } /* namespace uirenderer */

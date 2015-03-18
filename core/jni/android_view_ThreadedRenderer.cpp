@@ -21,6 +21,7 @@
 #include "jni.h"
 #include <nativehelper/JNIHelp.h>
 #include "core_jni_helpers.h"
+#include <ScopedPrimitiveArray.h>
 
 #include <EGL/egl.h>
 #include <EGL/eglext.h>
@@ -35,6 +36,7 @@
 #include <Animator.h>
 #include <AnimationContext.h>
 #include <IContextFactory.h>
+#include <JankTracker.h>
 #include <RenderNode.h>
 #include <renderthread/CanvasContext.h>
 #include <renderthread/RenderProxy.h>
@@ -217,6 +219,12 @@ static void android_view_ThreadedRenderer_setAtlas(JNIEnv* env, jobject clazz,
 
     RenderProxy* proxy = reinterpret_cast<RenderProxy*>(proxyPtr);
     proxy->setTextureAtlas(buffer, map, len);
+}
+
+static void android_view_ThreadedRenderer_setProcessStatsBuffer(JNIEnv* env, jobject clazz,
+        jlong proxyPtr, jint fd) {
+    RenderProxy* proxy = reinterpret_cast<RenderProxy*>(proxyPtr);
+    proxy->setProcessStatsBuffer(fd);
 }
 
 static jlong android_view_ThreadedRenderer_createRootRenderNode(JNIEnv* env, jobject clazz) {
@@ -403,6 +411,16 @@ static void android_view_ThreadedRenderer_dumpProfileInfo(JNIEnv* env, jobject c
     proxy->dumpProfileInfo(fd, dumpFlags);
 }
 
+static void android_view_ThreadedRenderer_dumpProfileData(JNIEnv* env, jobject clazz,
+        jbyteArray jdata, jobject javaFileDescriptor) {
+    int fd = jniGetFDFromFileDescriptor(env, javaFileDescriptor);
+    ScopedByteArrayRO buffer(env, jdata);
+    if (buffer.get()) {
+        JankTracker::dumpBuffer(buffer.get(), buffer.size(), fd);
+    }
+}
+
+
 // ----------------------------------------------------------------------------
 // Shaders
 // ----------------------------------------------------------------------------
@@ -423,6 +441,7 @@ const char* const kClassPathName = "android/view/ThreadedRenderer";
 
 static JNINativeMethod gMethods[] = {
     { "nSetAtlas", "(JLandroid/view/GraphicBuffer;[J)V",   (void*) android_view_ThreadedRenderer_setAtlas },
+    { "nSetProcessStatsBuffer", "(JI)V", (void*) android_view_ThreadedRenderer_setProcessStatsBuffer },
     { "nCreateRootRenderNode", "()J", (void*) android_view_ThreadedRenderer_createRootRenderNode },
     { "nCreateProxy", "(ZJ)J", (void*) android_view_ThreadedRenderer_createProxy },
     { "nDeleteProxy", "(J)V", (void*) android_view_ThreadedRenderer_deleteProxy },
@@ -449,6 +468,7 @@ static JNINativeMethod gMethods[] = {
     { "nStopDrawing", "(J)V", (void*) android_view_ThreadedRenderer_stopDrawing },
     { "nNotifyFramePending", "(J)V", (void*) android_view_ThreadedRenderer_notifyFramePending },
     { "nDumpProfileInfo", "(JLjava/io/FileDescriptor;I)V", (void*) android_view_ThreadedRenderer_dumpProfileInfo },
+    { "nDumpProfileData", "([BLjava/io/FileDescriptor;)V", (void*) android_view_ThreadedRenderer_dumpProfileData },
     { "setupShadersDiskCache", "(Ljava/lang/String;)V",
                 (void*) android_view_ThreadedRenderer_setupShadersDiskCache },
 };

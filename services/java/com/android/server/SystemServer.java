@@ -925,6 +925,11 @@ public final class SystemServer {
                 }
             }
 
+            if (!disableNonCoreServices) {
+                ServiceManager.addService(GraphicsStatsService.GRAPHICS_STATS_SERVICE,
+                        new GraphicsStatsService(context));
+            }
+
             if (mPackageManager.hasSystemFeature(PackageManager.FEATURE_PRINTING)) {
                 mSystemServiceManager.startService(PRINT_MANAGER_SERVICE_CLASS);
             }
