@@ -6662,6 +6662,7 @@ package android.bluetooth.le {
     field public static final int SCAN_MODE_BALANCED = 1; // 0x1
     field public static final int SCAN_MODE_LOW_LATENCY = 2; // 0x2
     field public static final int SCAN_MODE_LOW_POWER = 0; // 0x0
+    field public static final int SCAN_MODE_OPPORTUNISTIC = -1; // 0xffffffff
   }
 
   public static final class ScanSettings.Builder {
