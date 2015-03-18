@@ -2550,6 +2550,12 @@ public class PackageParser {
         }
 
         if (sa.getBoolean(
+                com.android.internal.R.styleable.AndroidManifestApplication_usesCleartextTraffic,
+                true)) {
+            ai.flags |= ApplicationInfo.FLAG_USES_CLEARTEXT_TRAFFIC;
+        }
+
+        if (sa.getBoolean(
                 com.android.internal.R.styleable.AndroidManifestApplication_supportsRtl,
                 false /* default is no RTL support*/)) {
             ai.flags |= ApplicationInfo.FLAG_SUPPORTS_RTL;
