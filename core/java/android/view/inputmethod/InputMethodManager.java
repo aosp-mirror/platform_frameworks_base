@@ -1993,8 +1993,8 @@ public final class InputMethodManager {
                 List<Object> info = mService.getShortcutInputMethodsAndSubtypes();
                 // "info" has imi1, subtype1, subtype2, imi2, subtype2, imi3, subtype3..in the list
                 ArrayList<InputMethodSubtype> subtypes = null;
-                final int N = info.size();
-                if (info != null && N > 0) {
+                if (info != null && !info.isEmpty()) {
+                    final int N = info.size();
                     for (int i = 0; i < N; ++i) {
                         Object o = info.get(i);
                         if (o instanceof InputMethodInfo) {
