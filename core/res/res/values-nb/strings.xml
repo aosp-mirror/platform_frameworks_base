@@ -1271,7 +1271,7 @@
     <string name="new_app_description" msgid="1932143598371537340">"Stopp den gamle appen uten å lagre."</string>
     <string name="dump_heap_notification" msgid="2618183274836056542">"<xliff:g id="PROC">%1$s</xliff:g> er over minnegrensen"</string>
     <string name="dump_heap_notification_detail" msgid="2075673362317481664">"Minnedumpen («heap dump») er samlet inn – trykk for å dele"</string>
-    <string name="dump_heap_title" msgid="5864292264307651673">"Vil du dele minnedumpen? («heap dump»)"</string>
+    <string name="dump_heap_title" msgid="5864292264307651673">"Vil du dele minnedumpen («heap dump»)?"</string>
     <string name="dump_heap_text" msgid="4809417337240334941">"<xliff:g id="PROC">%1$s</xliff:g>-prosessen er <xliff:g id="SIZE">%2$s</xliff:g> over grensen for prosessminne. En minnedump («heap dump») er tilgjengelig for deling med utvikleren. Vær forsiktig – denne minnedumpen kan inneholde noen av de personlige opplysningene dine som appen har tilgang til."</string>
     <string name="sendText" msgid="5209874571959469142">"Velg handling for tekst"</string>
     <string name="volume_ringtone" msgid="6885421406845734650">"Ringetonevolum"</string>

@@ -123,8 +123,7 @@
     <string name="roamingText11" msgid="4154476854426920970">"ရုန်းမင်းစာတမ်းဖွင့်ရန်"</string>
     <string name="roamingText12" msgid="1189071119992726320">"ရုန်းမင်းစာတမ်းပိတ်ထားရန်"</string>
     <string name="roamingTextSearching" msgid="8360141885972279963">"ဆားဗစ်အားရှာဖွေနေသည်"</string>
-    <!-- no translation found for wfcRegErrorTitle (2301376280632110664) -->
-    <skip />
+    <string name="wfcRegErrorTitle" msgid="2301376280632110664">"ဝိုင်ဖိုင် ခေါ်ဆိုမှု"</string>
   <string-array name="wfcOperatorErrorMessages">
   </string-array>
     <string name="cfTemplateNotForwarded" msgid="1683685883841272560">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: ထပ်ဆင့်မပို့နိုင်ပါ"</string>
@@ -1301,10 +1300,8 @@
       <item quantity="other">Wi-Fi ကွန်ယက်များရရှိနိုင်သည်အား ဖွင့်ပါ</item>
       <item quantity="one">Wi-Fi ကွန်ယက်ရရှိနိုင်သည်အား ဖွင့်ပါ</item>
     </plurals>
-    <!-- no translation found for wifi_available_sign_in (9157196203958866662) -->
-    <skip />
-    <!-- no translation found for network_available_sign_in (1848877297365446605) -->
-    <skip />
+    <string name="wifi_available_sign_in" msgid="9157196203958866662">"ဝိုင်ဖိုင်ကွန်ရက်သို့ လက်မှတ်ထိုးဝင်ပါ"</string>
+    <string name="network_available_sign_in" msgid="1848877297365446605">"ကွန်ယက်သို့ လက်မှတ်ထိုးဝင်ရန်"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
     <skip />
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"ဝိုင်ဖိုင်ကိုချိတ်ဆက်မရပါ"</string>
