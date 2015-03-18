@@ -257,7 +257,8 @@
     <string name="quick_settings_wifi_no_network" msgid="2221993077220856376">"کوئی نیٹ ورک نہیں ہے"</string>
     <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"‏Wi-Fi آف ہے"</string>
     <string name="quick_settings_wifi_detail_empty_text" msgid="2831702993995222755">"کوئی محفوظ کردہ نیٹ ورکس دستیاب نہیں ہیں"</string>
-    <string name="quick_settings_cast_title" msgid="1893629685050355115">"کاسٹ اسکرین"</string>
+    <!-- no translation found for quick_settings_cast_title (7709016546426454729) -->
+    <skip />
     <string name="quick_settings_casting" msgid="6601710681033353316">"کاسٹنگ"</string>
     <string name="quick_settings_cast_device_default_name" msgid="5367253104742382945">"بغیر نام والا آلہ"</string>
     <string name="quick_settings_cast_device_default_description" msgid="2484573682378634413">"کاسٹ کرنے کیلئے تیار"</string>
@@ -287,9 +288,6 @@
     <string name="recents_search_bar_label" msgid="8074997400187836677">"تلاش کریں"</string>
     <string name="recents_launch_error_message" msgid="2969287838120550506">"<xliff:g id="APP">%s</xliff:g> کو شروع نہیں کیا جا سکا۔"</string>
     <string name="recents_dismiss_all_message" msgid="8495275386693095768">"سبھی ایپلیکیشنز کو برخاست کریں"</string>
-    <string name="recents_multistack_add_stack" msgid="5044995965068125420">"+"</string>
-    <string name="recents_multistack_remove_stack" msgid="3014058144068028841">"-"</string>
-    <string name="recents_multistack_resize_stack" msgid="5511174284568497822">"[]"</string>
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"بلحاظ افقی الگ کریں"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"بلحاظ عمودی الگ کریں"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"بلحاظ حسب ضرورت الگ کریں"</string>
@@ -367,10 +365,8 @@
     <string name="hidden_notifications_text" msgid="2326409389088668981">"غیر مقفل کرنے سے پہلے انہیں دیکھیں"</string>
     <string name="hidden_notifications_cancel" msgid="3690709735122344913">"نہیں شکریہ"</string>
     <string name="hidden_notifications_setup" msgid="41079514801976810">"ترتیب دیں"</string>
-    <!-- no translation found for notification_expand_button_text (1037425494153780718) -->
-    <skip />
-    <!-- no translation found for notification_collapse_button_text (6883253262134328057) -->
-    <skip />
+    <string name="notification_expand_button_text" msgid="1037425494153780718">"سبھی دیکھیں"</string>
+    <string name="notification_collapse_button_text" msgid="6883253262134328057">"سبھی چھپائیں"</string>
     <string name="zen_mode_and_condition" msgid="4462471036429759903">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>۔ <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
     <string name="screen_pinning_title" msgid="3273740381976175811">"اسکرین پن کردہ ہے"</string>
     <string name="screen_pinning_description" msgid="1346522416878235405">"یہ اس کو اس وقت تک منظر میں رکھتا ہے جب تک آپ اس سے پن نہیں ہٹا دیتے۔ پن ہٹانے کیلئے واپس اور عمومی جائزہ کو ایک ساتھ ٹچ کریں اور پکڑ کر رکھیں۔"</string>

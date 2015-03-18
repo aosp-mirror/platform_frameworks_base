@@ -257,7 +257,8 @@
     <string name="quick_settings_wifi_no_network" msgid="2221993077220856376">"ကွန်ရက်မရှိပါ"</string>
     <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"ဝိုင်ဖိုင်ပိတ်ရန်"</string>
     <string name="quick_settings_wifi_detail_empty_text" msgid="2831702993995222755">"သိမ်းဆည်းထား ကွန်ရက်များ မရှိ"</string>
-    <string name="quick_settings_cast_title" msgid="1893629685050355115">"ကာစ်တ် မျက်နှာပြင်"</string>
+    <!-- no translation found for quick_settings_cast_title (7709016546426454729) -->
+    <skip />
     <string name="quick_settings_casting" msgid="6601710681033353316">"ကာစ်တင်"</string>
     <string name="quick_settings_cast_device_default_name" msgid="5367253104742382945">"အမည်မတပ် ကိရိယာ"</string>
     <string name="quick_settings_cast_device_default_description" msgid="2484573682378634413">"ကာစ်တ် လုပ်ရန် အသင့် ရှိနေပြီ"</string>
@@ -287,9 +288,6 @@
     <string name="recents_search_bar_label" msgid="8074997400187836677">"ရှာဖွေရန်"</string>
     <string name="recents_launch_error_message" msgid="2969287838120550506">"<xliff:g id="APP">%s</xliff:g> ကို မစနိုင်ပါ။"</string>
     <string name="recents_dismiss_all_message" msgid="8495275386693095768">"အပလီကေးရှင်းများအားလုံး ဖယ်ထုတ်မည်"</string>
-    <string name="recents_multistack_add_stack" msgid="5044995965068125420">"+"</string>
-    <string name="recents_multistack_remove_stack" msgid="3014058144068028841">"−"</string>
-    <string name="recents_multistack_resize_stack" msgid="5511174284568497822">"..."</string>
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"ရေပြင်ညီ ပိုင်းမည်"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"ဒေါင်လိုက်ပိုင်းမည်"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"စိတ်ကြိုက် ပိုင်းမည်"</string>
@@ -367,10 +365,8 @@
     <string name="hidden_notifications_text" msgid="2326409389088668981">"မဖွင့်ခင် ၎င်းတို့ကို ကြည့်ပါ"</string>
     <string name="hidden_notifications_cancel" msgid="3690709735122344913">"မလိုအပ်ပါ"</string>
     <string name="hidden_notifications_setup" msgid="41079514801976810">"သတ်မှတ်ရန်"</string>
-    <!-- no translation found for notification_expand_button_text (1037425494153780718) -->
-    <skip />
-    <!-- no translation found for notification_collapse_button_text (6883253262134328057) -->
-    <skip />
+    <string name="notification_expand_button_text" msgid="1037425494153780718">"အားလုံးကို ကြည့်ရန်"</string>
+    <string name="notification_collapse_button_text" msgid="6883253262134328057">"အားလုံး ဝှက်ထားရန်"</string>
     <string name="zen_mode_and_condition" msgid="4462471036429759903">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>။ <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
     <string name="screen_pinning_title" msgid="3273740381976175811">"မျက်နှာပြင် ပင်ထိုးပြီးပါပြီ"</string>
     <string name="screen_pinning_description" msgid="1346522416878235405">"သင်ပင်ဖြုတ်သည့် တိုင်အောင် ၎င်းအား မြင်ကွင်းတွင် ထားရှိပါမည်။ ပင်ဖြုတ်ရန် အနောက်နှင့် ခြုံငုံကြည့်ခြင်းကို ဖိ၍ နှိပ်ထားနိုင်သည်။"</string>
