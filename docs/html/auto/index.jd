@@ -3,6 +3,7 @@ page.viewport_width=970
 fullpage=true
 no_footer_links=true
 page.type=about
+page.image=/auto/images/hero.jpg
 
 @jd:body
 
