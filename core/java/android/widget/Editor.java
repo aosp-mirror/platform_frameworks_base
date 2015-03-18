@@ -2939,7 +2939,24 @@ public class Editor {
      * The default callback provides a subset of Select All, Cut, Copy and Paste actions, depending
      * on which of these this TextView supports.
      */
-    private class SelectionActionModeCallback implements ActionMode.Callback {
+    private class SelectionActionModeCallback extends ActionMode.Callback2 {
+        private final Path mSelectionPath = new Path();
+        private final RectF mSelectionBounds = new RectF();
+
+        private int mSelectionHandleHeight;
+        private int mInsertionHandleHeight;
+
+        public SelectionActionModeCallback() {
+            SelectionModifierCursorController selectionController = getSelectionController();
+            if (selectionController.mStartHandle == null) {
+                selectionController.initDrawables();
+                selectionController.initHandles();
+            }
+            mSelectionHandleHeight = Math.max(
+                    mSelectHandleLeft.getMinimumHeight(), mSelectHandleRight.getMinimumHeight());
+            getInsertionController().getHandle();
+            mInsertionHandleHeight = mSelectHandleCenter.getMinimumHeight();
+        }
 
         @Override
         public boolean onCreateActionMode(ActionMode mode, Menu menu) {
@@ -3056,6 +3073,40 @@ public class Editor {
             }
 
             mSelectionActionMode = null;
+        }
+
+        @Override
+        public void onGetContentRect(ActionMode mode, View view, Rect outRect) {
+            if (!view.equals(mTextView) || mTextView.getLayout() == null) {
+                super.onGetContentRect(mode, view, outRect);
+                return;
+            }
+            if (mTextView.getSelectionStart() != mTextView.getSelectionEnd()) {
+                // We have a selection.
+                mSelectionPath.reset();
+                mTextView.getLayout().getSelectionPath(
+                        mTextView.getSelectionStart(), mTextView.getSelectionEnd(), mSelectionPath);
+                mSelectionPath.computeBounds(mSelectionBounds, true);
+                mSelectionBounds.bottom += mSelectionHandleHeight;
+            } else {
+                // We have a single cursor.
+                int line = mTextView.getLayout().getLineForOffset(mTextView.getSelectionStart());
+                float primaryHorizontal =
+                        mTextView.getLayout().getPrimaryHorizontal(mTextView.getSelectionStart());
+                mSelectionBounds.set(
+                        primaryHorizontal,
+                        mTextView.getLayout().getLineTop(line),
+                        primaryHorizontal + 1,
+                        mTextView.getLayout().getLineTop(line + 1) + mInsertionHandleHeight);
+            }
+            // Take TextView's padding and scroll into account.
+            int textHorizontalOffset = mTextView.viewportToContentHorizontalOffset();
+            int textVerticalOffset = mTextView.viewportToContentVerticalOffset();
+            outRect.set(
+                    (int) Math.floor(mSelectionBounds.left + textHorizontalOffset),
+                    (int) Math.floor(mSelectionBounds.top + textVerticalOffset),
+                    (int) Math.ceil(mSelectionBounds.right + textHorizontalOffset),
+                    (int) Math.ceil(mSelectionBounds.bottom + textVerticalOffset));
         }
     }
 
