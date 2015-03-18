@@ -118,7 +118,7 @@ static jboolean android_net_utils_getDhcpResults(JNIEnv* env, jobject clazz, jst
     result = ::dhcp_get_results(nameStr, ipaddr, gateway, &prefixLength,
             dns, server, &lease, vendorInfo, domains, mtu);
     if (result != 0) {
-        ALOGD("dhcp_get_results failed : %s (%s)", nameStr);
+        ALOGD("dhcp_get_results failed : %s (%s)", nameStr, ::dhcp_get_errmsg());
     }
 
     env->ReleaseStringUTFChars(ifname, nameStr);
