@@ -208,16 +208,22 @@ public final class Call {
          */
         public static final int CAPABILITY_WIFI = 0x00010000;
 
-        //******************************************************************************************
-        // Next CAPABILITY value: 0x00020000
-        //******************************************************************************************
-
         /**
          * Indicates that the current device callback number should be shown.
          *
          * @hide
          */
-        public static final int CAPABILITY_SHOW_CALLBACK_NUMBER = 0x00008000;
+        public static final int CAPABILITY_SHOW_CALLBACK_NUMBER = 0x00020000;
+
+        /**
+         * Speed up audio setup for MT call.
+         * @hide
+         */
+        public static final int CAPABILITY_SPEED_UP_MT_AUDIO = 0x00040000;
+
+        //**********************************************************************************************
+        // Next CAPABILITY value: 0x00080000
+        //**********************************************************************************************
 
         private final Uri mHandle;
         private final int mHandlePresentation;
@@ -315,6 +321,9 @@ public final class Call {
             }
             if (can(capabilities, CAPABILITY_SHOW_CALLBACK_NUMBER)) {
                 builder.append(" CAPABILITY_SHOW_CALLBACK_NUMBER");
+            }
+            if (can(capabilities, CAPABILITY_SPEED_UP_MT_AUDIO)) {
+                builder.append(" CAPABILITY_SPEED_UP_IMS_MT_AUDIO");
             }
             builder.append("]");
             return builder.toString();
