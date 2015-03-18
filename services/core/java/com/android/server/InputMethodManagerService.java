@@ -86,7 +86,10 @@ import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.Settings;
 import android.text.TextUtils;
+import android.text.TextUtils.SimpleStringSplitter;
 import android.text.style.SuggestionSpan;
+import android.util.ArrayMap;
+import android.util.ArraySet;
 import android.util.AtomicFile;
 import android.util.EventLog;
 import android.util.LruCache;
@@ -125,6 +128,7 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 
@@ -134,7 +138,11 @@ import java.util.Locale;
 public class InputMethodManagerService extends IInputMethodManager.Stub
         implements ServiceConnection, Handler.Callback {
     static final boolean DEBUG = false;
+    static final boolean DEBUG_RESTORE = DEBUG || false;
     static final String TAG = "InputMethodManagerService";
+
+    private static final char INPUT_METHOD_SEPARATOR = ':';
+    private static final char INPUT_METHOD_SUBTYPE_SEPARATOR = ';';
 
     static final int MSG_SHOW_IM_PICKER = 1;
     static final int MSG_SHOW_IM_SUBTYPE_PICKER = 2;
@@ -466,10 +474,99 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                     || Intent.ACTION_USER_REMOVED.equals(action)) {
                 updateCurrentProfileIds();
                 return;
+            } else if (Intent.ACTION_SETTING_RESTORED.equals(action)) {
+                final String name = intent.getStringExtra(Intent.EXTRA_SETTING_NAME);
+                if (Settings.Secure.ENABLED_INPUT_METHODS.equals(name)) {
+                    final String prevValue = intent.getStringExtra(
+                            Intent.EXTRA_SETTING_PREVIOUS_VALUE);
+                    final String newValue = intent.getStringExtra(
+                            Intent.EXTRA_SETTING_NEW_VALUE);
+                    restoreEnabledInputMethods(mContext, prevValue, newValue);
+                }
             } else {
                 Slog.w(TAG, "Unexpected intent " + intent);
             }
         }
+    }
+
+    // Apply the results of a restore operation to the set of enabled IMEs.  Note that this
+    // does not attempt to validate on the fly with any installed device policy, so must only
+    // be run in the context of initial device setup.
+    //
+    // TODO: Move this method to InputMethodUtils with adding unit tests.
+    static void restoreEnabledInputMethods(Context context, String prevValue, String newValue) {
+        if (DEBUG_RESTORE) {
+            Slog.i(TAG, "Restoring enabled input methods:");
+            Slog.i(TAG, "prev=" + prevValue);
+            Slog.i(TAG, " new=" + newValue);
+        }
+        // 'new' is the just-restored state, 'prev' is what was in settings prior to the restore
+        ArrayMap<String, ArraySet<String>> prevMap = parseInputMethodsAndSubtypesString(prevValue);
+        ArrayMap<String, ArraySet<String>> newMap = parseInputMethodsAndSubtypesString(newValue);
+
+        // Merge the restored ime+subtype enabled states into the live state
+        for (ArrayMap.Entry<String, ArraySet<String>> entry : newMap.entrySet()) {
+            final String imeId = entry.getKey();
+            ArraySet<String> prevSubtypes = prevMap.get(imeId);
+            if (prevSubtypes == null) {
+                prevSubtypes = new ArraySet<String>(2);
+                prevMap.put(imeId, prevSubtypes);
+            }
+            prevSubtypes.addAll(entry.getValue());
+        }
+
+        final String mergedImesAndSubtypesString = buildInputMethodsAndSubtypesString(prevMap);
+        if (DEBUG_RESTORE) {
+            Slog.i(TAG, "Merged IME string:");
+            Slog.i(TAG, "     " + mergedImesAndSubtypesString);
+        }
+        Settings.Secure.putString(context.getContentResolver(),
+                Settings.Secure.ENABLED_INPUT_METHODS, mergedImesAndSubtypesString);
+    }
+
+    // TODO: Move this method to InputMethodUtils with adding unit tests.
+    static String buildInputMethodsAndSubtypesString(ArrayMap<String, ArraySet<String>> map) {
+        // we want to use the canonical InputMethodSettings implementation,
+        // so we convert data structures first.
+        List<Pair<String, ArrayList<String>>> imeMap =
+                new ArrayList<Pair<String, ArrayList<String>>>(4);
+        for (ArrayMap.Entry<String, ArraySet<String>> entry : map.entrySet()) {
+            final String imeName = entry.getKey();
+            final ArraySet<String> subtypeSet = entry.getValue();
+            final ArrayList<String> subtypes = new ArrayList<String>(2);
+            if (subtypeSet != null) {
+                subtypes.addAll(subtypeSet);
+            }
+            imeMap.add(new Pair<String, ArrayList<String>>(imeName, subtypes));
+        }
+        return InputMethodSettings.buildInputMethodsSettingString(imeMap);
+    }
+
+    // TODO: Move this method to InputMethodUtils with adding unit tests.
+    static ArrayMap<String, ArraySet<String>> parseInputMethodsAndSubtypesString(
+            final String inputMethodsAndSubtypesString) {
+        final ArrayMap<String, ArraySet<String>> imeMap =
+                new ArrayMap<String, ArraySet<String>>();
+        if (TextUtils.isEmpty(inputMethodsAndSubtypesString)) {
+            return imeMap;
+        }
+
+        final SimpleStringSplitter typeSplitter =
+                new SimpleStringSplitter(INPUT_METHOD_SEPARATOR);
+        final SimpleStringSplitter subtypeSplitter =
+                new SimpleStringSplitter(INPUT_METHOD_SUBTYPE_SEPARATOR);
+        List<Pair<String, ArrayList<String>>> allImeSettings =
+                InputMethodSettings.buildInputMethodsAndSubtypeList(inputMethodsAndSubtypesString,
+                        typeSplitter,
+                        subtypeSplitter);
+        for (Pair<String, ArrayList<String>> ime : allImeSettings) {
+            ArraySet<String> subtypes = new ArraySet<String>();
+            if (ime.second != null) {
+                subtypes.addAll(ime.second);
+            }
+            imeMap.put(ime.first, subtypes);
+        }
+        return imeMap;
     }
 
     class MyPackageMonitor extends PackageMonitor {
@@ -675,6 +772,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         broadcastFilter.addAction(Intent.ACTION_CLOSE_SYSTEM_DIALOGS);
         broadcastFilter.addAction(Intent.ACTION_USER_ADDED);
         broadcastFilter.addAction(Intent.ACTION_USER_REMOVED);
+        broadcastFilter.addAction(Intent.ACTION_SETTING_RESTORED);
         mContext.registerReceiver(new ImmsBroadcastReceiver(), broadcastFilter);
 
         mNotificationShown = false;

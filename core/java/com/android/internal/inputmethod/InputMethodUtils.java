@@ -764,15 +764,53 @@ public class InputMethodUtils {
         private int[] mCurrentProfileIds = new int[0];
 
         private static void buildEnabledInputMethodsSettingString(
-                StringBuilder builder, Pair<String, ArrayList<String>> pair) {
-            String id = pair.first;
-            ArrayList<String> subtypes = pair.second;
-            builder.append(id);
+                StringBuilder builder, Pair<String, ArrayList<String>> ime) {
+            builder.append(ime.first);
             // Inputmethod and subtypes are saved in the settings as follows:
             // ime0;subtype0;subtype1:ime1;subtype0:ime2:ime3;subtype0;subtype1
-            for (String subtypeId: subtypes) {
+            for (String subtypeId: ime.second) {
                 builder.append(INPUT_METHOD_SUBTYPE_SEPARATER).append(subtypeId);
             }
+        }
+
+        public static String buildInputMethodsSettingString(
+                List<Pair<String, ArrayList<String>>> allImeSettingsMap) {
+            final StringBuilder b = new StringBuilder();
+            boolean needsSeparator = false;
+            for (Pair<String, ArrayList<String>> ime : allImeSettingsMap) {
+                if (needsSeparator) {
+                    b.append(INPUT_METHOD_SEPARATER);
+                }
+                buildEnabledInputMethodsSettingString(b, ime);
+                needsSeparator = true;
+            }
+            return b.toString();
+        }
+
+        public static List<Pair<String, ArrayList<String>>> buildInputMethodsAndSubtypeList(
+                String enabledInputMethodsStr,
+                TextUtils.SimpleStringSplitter inputMethodSplitter,
+                TextUtils.SimpleStringSplitter subtypeSplitter) {
+            ArrayList<Pair<String, ArrayList<String>>> imsList =
+                    new ArrayList<Pair<String, ArrayList<String>>>();
+            if (TextUtils.isEmpty(enabledInputMethodsStr)) {
+                return imsList;
+            }
+            inputMethodSplitter.setString(enabledInputMethodsStr);
+            while (inputMethodSplitter.hasNext()) {
+                String nextImsStr = inputMethodSplitter.next();
+                subtypeSplitter.setString(nextImsStr);
+                if (subtypeSplitter.hasNext()) {
+                    ArrayList<String> subtypeHashes = new ArrayList<String>();
+                    // The first element is ime id.
+                    String imeId = subtypeSplitter.next();
+                    while (subtypeSplitter.hasNext()) {
+                        subtypeHashes.add(subtypeSplitter.next());
+                    }
+                    imsList.add(new Pair<String, ArrayList<String>>(imeId, subtypeHashes));
+                }
+            }
+            return imsList;
         }
 
         public InputMethodSettings(
@@ -875,27 +913,9 @@ public class InputMethodUtils {
         }
 
         public List<Pair<String, ArrayList<String>>> getEnabledInputMethodsAndSubtypeListLocked() {
-            ArrayList<Pair<String, ArrayList<String>>> imsList
-                    = new ArrayList<Pair<String, ArrayList<String>>>();
-            final String enabledInputMethodsStr = getEnabledInputMethodsStr();
-            if (TextUtils.isEmpty(enabledInputMethodsStr)) {
-                return imsList;
-            }
-            mInputMethodSplitter.setString(enabledInputMethodsStr);
-            while (mInputMethodSplitter.hasNext()) {
-                String nextImsStr = mInputMethodSplitter.next();
-                mSubtypeSplitter.setString(nextImsStr);
-                if (mSubtypeSplitter.hasNext()) {
-                    ArrayList<String> subtypeHashes = new ArrayList<String>();
-                    // The first element is ime id.
-                    String imeId = mSubtypeSplitter.next();
-                    while (mSubtypeSplitter.hasNext()) {
-                        subtypeHashes.add(mSubtypeSplitter.next());
-                    }
-                    imsList.add(new Pair<String, ArrayList<String>>(imeId, subtypeHashes));
-                }
-            }
-            return imsList;
+            return buildInputMethodsAndSubtypeList(getEnabledInputMethodsStr(),
+                    mInputMethodSplitter,
+                    mSubtypeSplitter);
         }
 
         public void appendAndPutEnabledInputMethodLocked(String id, boolean reloadInputMethodStr) {

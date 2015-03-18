@@ -62,9 +62,10 @@ public class SettingsHelper {
      */
     private static final ArraySet<String> sBroadcastOnRestore;
     static {
-        sBroadcastOnRestore = new ArraySet<String>(2);
+        sBroadcastOnRestore = new ArraySet<String>(3);
         sBroadcastOnRestore.add(Settings.Secure.ENABLED_NOTIFICATION_LISTENERS);
         sBroadcastOnRestore.add(Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES);
+        sBroadcastOnRestore.add(Settings.Secure.ENABLED_INPUT_METHODS);
     }
 
     private interface SettingsLookup {
