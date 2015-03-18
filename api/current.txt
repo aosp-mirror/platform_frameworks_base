@@ -16963,14 +16963,14 @@ package android.net {
     method public boolean bindProcessToNetwork(android.net.Network);
     method public android.net.Network getActiveNetwork();
     method public android.net.NetworkInfo getActiveNetworkInfo();
-    method public android.net.NetworkInfo[] getAllNetworkInfo();
+    method public deprecated android.net.NetworkInfo[] getAllNetworkInfo();
     method public android.net.Network[] getAllNetworks();
     method public deprecated boolean getBackgroundDataSetting();
     method public android.net.Network getBoundNetworkForProcess();
     method public android.net.ProxyInfo getDefaultProxy();
     method public android.net.LinkProperties getLinkProperties(android.net.Network);
     method public android.net.NetworkCapabilities getNetworkCapabilities(android.net.Network);
-    method public android.net.NetworkInfo getNetworkInfo(int);
+    method public deprecated android.net.NetworkInfo getNetworkInfo(int);
     method public android.net.NetworkInfo getNetworkInfo(android.net.Network);
     method public deprecated int getNetworkPreference();
     method public static deprecated android.net.Network getProcessDefaultNetwork();
