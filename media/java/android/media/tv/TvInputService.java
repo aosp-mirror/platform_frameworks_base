@@ -241,7 +241,7 @@ public abstract class TvInputService extends Service {
         final Handler mHandler;
         private WindowManager.LayoutParams mWindowParams;
         private Surface mSurface;
-        private Context mContext;
+        private final Context mContext;
         private FrameLayout mOverlayViewContainer;
         private View mOverlayView;
         private OverlayViewCleanUpTask mOverlayViewCleanUpTask;
@@ -249,11 +249,11 @@ public abstract class TvInputService extends Service {
         private IBinder mWindowToken;
         private Rect mOverlayFrame;
 
-        private Object mLock = new Object();
+        private final Object mLock = new Object();
         // @GuardedBy("mLock")
         private ITvInputSessionCallback mSessionCallback;
         // @GuardedBy("mLock")
-        private List<Runnable> mPendingActions = new ArrayList<>();
+        private final List<Runnable> mPendingActions = new ArrayList<>();
 
         /**
          * Creates a new Session.
@@ -614,16 +614,17 @@ public abstract class TvInputService extends Service {
         public void onSetMain(boolean isMain) {
         }
 
-    /**
-     * Sets the {@link Surface} for the current input session on which the TV input renders video.
-     * <p>
-     * When {@code setSurface(null)} is called, the implementation should stop using the Surface
-     * object previously given and release any references to it.
-     *
-     * @param surface possibly {@code null} {@link Surface} an application passes to this TV input
-     *        session.
-     * @return {@code true} if the surface was set, {@code false} otherwise.
-     */
+        /**
+         * Sets the {@link Surface} for the current input session on which the TV input renders
+         * video.
+         * <p>
+         * When {@code setSurface(null)} is called, the implementation should stop using the Surface
+         * object previously given and release any references to it.
+         *
+         * @param surface possibly {@code null} {@link Surface} an application passes to this TV
+         *            input session.
+         * @return {@code true} if the surface was set, {@code false} otherwise.
+         */
         public abstract boolean onSetSurface(Surface surface);
 
         /**
@@ -662,11 +663,11 @@ public abstract class TvInputService extends Service {
 
         /**
          * Tunes to a given channel. When the video is available, {@link #notifyVideoAvailable()}
-         * should be called. Also, {@link #notifyVideoUnavailable(int)} should be called when the
-         * TV input cannot continue playing the given channel.
+         * should be called. Also, {@link #notifyVideoUnavailable(int)} should be called when the TV
+         * input cannot continue playing the given channel.
          *
          * @param channelUri The URI of the channel.
-         * @return {@code true} the tuning was successful, {@code false} otherwise.
+         * @return {@code true} if the tuning was successful, {@code false} otherwise.
          */
         public abstract boolean onTune(Uri channelUri);
 
@@ -675,7 +676,7 @@ public abstract class TvInputService extends Service {
          *
          * @param channelUri The URI of the channel.
          * @param params The extra parameters from other applications.
-         * @return {@code true} the tuning was successful, {@code false} otherwise.
+         * @return {@code true} if the tuning was successful, {@code false} otherwise.
          * @hide
          */
         @SystemApi
@@ -711,10 +712,10 @@ public abstract class TvInputService extends Service {
         }
 
         /**
-         * Select a given track.
+         * Selects a given track.
          * <p>
          * If this is done successfully, the implementation should call {@link #notifyTrackSelected}
-         * to help applications maintain the selcted track lists.
+         * to help applications maintain the up-to-date list of the selected tracks.
          * </p>
          *
          * @param trackId The ID of the track to select. {@code null} means to unselect the current
@@ -722,6 +723,7 @@ public abstract class TvInputService extends Service {
          * @param type The type of the track to select. The type can be
          *            {@link TvTrackInfo#TYPE_AUDIO}, {@link TvTrackInfo#TYPE_VIDEO} or
          *            {@link TvTrackInfo#TYPE_SUBTITLE}.
+         * @return {@code true} if the track selection was successful, {@code false} otherwise.
          * @see #notifyTrackSelected
          */
         public boolean onSelectTrack(int type, String trackId) {
