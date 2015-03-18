@@ -262,7 +262,7 @@ public class WifiPasspointManager {
                 for (ScanResult sr : mAnqpRequest)
                     if (sr.BSSID.equals(result.bssid)) {
                         Log.d(TAG, "find hit " + result.bssid);
-                        sr.passpoint = result;
+                        /* sr.passpoint = result; */
                         mAnqpRequest.remove(sr);
                         Log.d(TAG, "mAnqpRequest.len=" + mAnqpRequest.size());
                         break;
