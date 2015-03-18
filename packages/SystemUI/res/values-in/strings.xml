@@ -31,7 +31,7 @@
   </plurals>
     <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"Tidak ada pemberitahuan"</string>
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"Berkelanjutan"</string>
-    <string name="status_bar_latest_events_title" msgid="6594767438577593172">"Pemberitahuan"</string>
+    <string name="status_bar_latest_events_title" msgid="6594767438577593172">"Notifikasi"</string>
     <string name="battery_low_title" msgid="6456385927409742437">"Baterai lemah"</string>
     <string name="battery_low_percent_format" msgid="2900940511201380775">"Tersisa <xliff:g id="PERCENTAGE">%s</xliff:g>"</string>
     <string name="battery_low_percent_format_saver_started" msgid="6859235584035338833">"Tersisa <xliff:g id="PERCENTAGE">%s</xliff:g>. Penghemat baterai aktif."</string>
@@ -48,7 +48,7 @@
     <string name="status_bar_settings_auto_rotation" msgid="3790482541357798421">"Rotasi layar otomatis"</string>
     <string name="status_bar_settings_mute_label" msgid="554682549917429396">"BUNGKAM"</string>
     <string name="status_bar_settings_auto_brightness_label" msgid="511453614962324674">"AUTO"</string>
-    <string name="status_bar_settings_notifications" msgid="397146176280905137">"Pemberitahuan"</string>
+    <string name="status_bar_settings_notifications" msgid="397146176280905137">"Notifikasi"</string>
     <string name="bluetooth_tethered" msgid="7094101612161133267">"Bluetooth tertambat"</string>
     <string name="status_bar_input_method_settings_configure_input_methods" msgid="3504292471512317827">"Menyiapkan metode masukan"</string>
     <string name="status_bar_use_physical_keyboard" msgid="7551903084416057810">"Keyboard fisik"</string>
@@ -147,7 +147,7 @@
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"Mode pesawat."</string>
     <string name="accessibility_battery_level" msgid="7451474187113371965">"Baterai <xliff:g id="NUMBER">%d</xliff:g> persen."</string>
     <string name="accessibility_settings_button" msgid="799583911231893380">"Setelan sistem."</string>
-    <string name="accessibility_notifications_button" msgid="4498000369779421892">"Pemberitahuan."</string>
+    <string name="accessibility_notifications_button" msgid="4498000369779421892">"Notifikasi."</string>
     <string name="accessibility_remove_notification" msgid="3603099514902182350">"Menghapus pemberitahuan."</string>
     <string name="accessibility_gps_enabled" msgid="3511469499240123019">"GPS diaktifkan."</string>
     <string name="accessibility_gps_acquiring" msgid="8959333351058967158">"Memperoleh GPS."</string>
@@ -159,7 +159,7 @@
     <string name="accessibility_recents_item_will_be_dismissed" msgid="395770242498031481">"Menyingkirkan <xliff:g id="APP">%s</xliff:g>."</string>
     <string name="accessibility_recents_item_dismissed" msgid="6803574935084867070">"<xliff:g id="APP">%s</xliff:g> disingkirkan."</string>
     <string name="accessibility_recents_item_launched" msgid="7616039892382525203">"Memulai <xliff:g id="APP">%s</xliff:g>."</string>
-    <string name="accessibility_notification_dismissed" msgid="854211387186306927">"Pemberitahuan disingkirkan."</string>
+    <string name="accessibility_notification_dismissed" msgid="854211387186306927">"Notifikasi disingkirkan."</string>
     <string name="accessibility_desc_notification_shade" msgid="4690274844447504208">"Bayangan pemberitahuan."</string>
     <string name="accessibility_desc_quick_settings" msgid="6186378411582437046">"Setelan cepat."</string>
     <string name="accessibility_desc_lock_screen" msgid="5625143713611759164">"Layar kunci."</string>
@@ -264,7 +264,7 @@
     <string name="quick_settings_connecting" msgid="47623027419264404">"Menyambung..."</string>
     <string name="quick_settings_tethering_label" msgid="7153452060448575549">"Menambatkan"</string>
     <string name="quick_settings_hotspot_label" msgid="6046917934974004879">"Hotspot"</string>
-    <string name="quick_settings_notifications_label" msgid="4818156442169154523">"Pemberitahuan"</string>
+    <string name="quick_settings_notifications_label" msgid="4818156442169154523">"Notifikasi"</string>
     <string name="quick_settings_flashlight_label" msgid="2133093497691661546">"Lampu senter"</string>
     <string name="quick_settings_cellular_detail_title" msgid="8575062783675171695">"Data seluler"</string>
     <string name="quick_settings_cellular_detail_data_usage" msgid="1964260360259312002">"Penggunaan data"</string>
@@ -293,7 +293,7 @@
     <string name="zen_alarm_information_day_time" msgid="8422733576255047893">"Alarm Anda berikutnya hari <xliff:g id="ALARM_DAY_AND_TIME">%s</xliff:g>"</string>
     <string name="zen_alarm_warning" msgid="6873910860111498041">"Anda tidak akan mendengar alarm pukul <xliff:g id="ALARM_TIME">%s</xliff:g>"</string>
     <string name="keyguard_more_overflow_text" msgid="9195222469041601365">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
-    <string name="speed_bump_explanation" msgid="1288875699658819755">"Pemberitahuan kurang darurat di bawah"</string>
+    <string name="speed_bump_explanation" msgid="1288875699658819755">"Notifikasi kurang darurat di bawah"</string>
     <string name="notification_tap_again" msgid="8524949573675922138">"Sentuh lagi untuk membuka"</string>
     <string name="keyguard_unlock" msgid="8043466894212841998">"Gesek ke atas untuk membuka kunci"</string>
     <string name="phone_hint" msgid="3101468054914424646">"Gesek ke kanan untuk menelepon"</string>
@@ -357,7 +357,7 @@
     <string name="screen_pinning_description" msgid="1346522416878235405">"Ini akan terus ditampilkan sampai Anda melepas pin. Sentuh dan tahan tombol Kembali dan Ringkasan secara bersamaan untuk melepas pin."</string>
     <string name="screen_pinning_description_accessible" msgid="8518446209564202557">"Ini akan terus ditampilkan sampai Anda melepas pin. Sentuh dan tahan tombol Ringkasan untuk melepas pin."</string>
     <string name="screen_pinning_positive" msgid="3783985798366751226">"Mengerti"</string>
-    <string name="screen_pinning_negative" msgid="3741602308343880268">"Tidak, terima kasih"</string>
+    <string name="screen_pinning_negative" msgid="3741602308343880268">"Lain kali"</string>
     <string name="quick_settings_reset_confirmation_title" msgid="748792586749897883">"Sembunyikan <xliff:g id="TILE_LABEL">%1$s</xliff:g>?"</string>
     <string name="quick_settings_reset_confirmation_message" msgid="2235970126803317374">"Ini akan muncul kembali saat Anda mengaktifkannya dalam setelan."</string>
     <string name="quick_settings_reset_confirmation_button" msgid="2660339101868367515">"Sembunyikan"</string>
