@@ -187,7 +187,7 @@ public final class Call {
          * Call is able to be individually disconnected when in a {@code Conference}.
          */
         public static final int CAPABILITY_DISCONNECT_FROM_CONFERENCE = 0x00002000;
-
+        
         /**
          * Whether the call is a generic conference, where we do not know the precise state of
          * participants in the conference (eg. on CDMA).
@@ -217,7 +217,17 @@ public final class Call {
          *
          * @hide
          */
-        public static final int CAPABILITY_SHOW_CALLBACK_NUMBER = 0x00008000;
+        public static final int CAPABILITY_SHOW_CALLBACK_NUMBER = 0x00020000;
+
+        /**
+         * Speed up audio setup for MT call.
+         * @hide
+         */
+        public static final int CAPABILITY_SPEED_UP_MT_AUDIO = 0x00040000;
+
+        //******************************************************************************************
+        // Next CAPABILITY value: 0x00080000
+        //******************************************************************************************
 
         private final Uri mHandle;
         private final int mHandlePresentation;
@@ -315,6 +325,9 @@ public final class Call {
             }
             if (can(capabilities, CAPABILITY_SHOW_CALLBACK_NUMBER)) {
                 builder.append(" CAPABILITY_SHOW_CALLBACK_NUMBER");
+            }
+            if (can(capabilities, CAPABILITY_SPEED_UP_MT_AUDIO)) {
+                builder.append(" CAPABILITY_SPEED_UP_MT_AUDIO");
             }
             builder.append("]");
             return builder.toString();
