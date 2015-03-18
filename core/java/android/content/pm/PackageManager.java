@@ -3692,11 +3692,11 @@ public abstract class PackageManager {
      * {@link #addPreferredActivity}, that are
      * currently registered with the system.
      *
-     * @param outFilters A list in which to place the filters of all of the
-     * preferred activities, or null for none.
-     * @param outActivities A list in which to place the component names of
-     * all of the preferred activities, or null for none.
-     * @param packageName An option package in which you would like to limit
+     * @param outFilters A required list in which to place the filters of all of the
+     * preferred activities.
+     * @param outActivities A required list in which to place the component names of
+     * all of the preferred activities.
+     * @param packageName An optional package in which you would like to limit
      * the list.  If null, all activities will be returned; if non-null, only
      * those activities in the given package are returned.
      *
@@ -3704,8 +3704,8 @@ public abstract class PackageManager {
      * (the number of distinct IntentFilter records, not the number of unique
      * activity components) that were found.
      */
-    public abstract int getPreferredActivities(List<IntentFilter> outFilters,
-            List<ComponentName> outActivities, String packageName);
+    public abstract int getPreferredActivities(@NonNull List<IntentFilter> outFilters,
+            @NonNull List<ComponentName> outActivities, String packageName);
 
     /**
      * Ask for the set of available 'home' activities and the current explicit
