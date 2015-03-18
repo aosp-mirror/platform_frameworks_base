@@ -32,6 +32,9 @@ import android.util.Log;
 public final class HdmiPlaybackClient extends HdmiClient {
     private static final String TAG = "HdmiPlaybackClient";
 
+    // Logical address of TV. The secondary TV is not handled.
+    private static final int ADDR_TV = 0;
+
     /**
      * Listener used by the client to get the result of one touch play operation.
      */
@@ -100,6 +103,17 @@ public final class HdmiPlaybackClient extends HdmiClient {
             mService.queryDisplayStatus(getCallbackWrapper(callback));
         } catch (RemoteException e) {
             Log.e(TAG, "queryDisplayStatus threw exception ", e);
+        }
+    }
+
+    /**
+     * Sends a &lt;Standby&gt; command to TV.
+     */
+    public void sendStandby() {
+        try {
+            mService.sendStandby(getDeviceType(), HdmiDeviceInfo.idForCecDevice(ADDR_TV));
+        } catch (RemoteException e) {
+            Log.e(TAG, "sendStandby threw exception ", e);
         }
     }
 

@@ -13889,6 +13889,7 @@ package android.hardware.hdmi {
     method public int getDeviceType();
     method public void oneTouchPlay(android.hardware.hdmi.HdmiPlaybackClient.OneTouchPlayCallback);
     method public void queryDisplayStatus(android.hardware.hdmi.HdmiPlaybackClient.DisplayStatusCallback);
+    method public void sendStandby();
   }
 
   public static abstract interface HdmiPlaybackClient.DisplayStatusCallback {
@@ -13997,6 +13998,7 @@ package android.hardware.hdmi {
     method public int getDeviceType();
     method public void portSelect(int, android.hardware.hdmi.HdmiTvClient.SelectCallback);
     method public void sendMhlVendorCommand(int, int, int, byte[]);
+    method public void sendStandby(int);
     method public void setHdmiMhlVendorCommandListener(android.hardware.hdmi.HdmiTvClient.HdmiMhlVendorCommandListener);
     method public void setInputChangeListener(android.hardware.hdmi.HdmiTvClient.InputChangeListener);
     method public void setRecordListener(android.hardware.hdmi.HdmiRecordListener);
