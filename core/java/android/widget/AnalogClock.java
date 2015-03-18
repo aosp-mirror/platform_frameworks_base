@@ -40,8 +40,10 @@ import java.util.TimeZone;
  * @attr ref android.R.styleable#AnalogClock_dial
  * @attr ref android.R.styleable#AnalogClock_hand_hour
  * @attr ref android.R.styleable#AnalogClock_hand_minute
+ * @deprecated This widget is no longer supported.
  */
 @RemoteView
+@Deprecated
 public class AnalogClock extends View {
     private Time mCalendar;
 

@@ -312,7 +312,7 @@ class TimePickerClockDelegate extends TimePicker.AbstractTimePickerDelegate impl
      * Set the current hour.
      */
     @Override
-    public void setCurrentHour(Integer currentHour) {
+    public void setCurrentHour(int currentHour) {
         if (mInitialHourOfDay == currentHour) {
             return;
         }
@@ -329,7 +329,7 @@ class TimePickerClockDelegate extends TimePicker.AbstractTimePickerDelegate impl
      * @return The current hour in the range (0-23).
      */
     @Override
-    public Integer getCurrentHour() {
+    public int getCurrentHour() {
         int currentHour = mRadialTimePickerView.getCurrentHour();
         if (mIs24HourView) {
             return currentHour;
@@ -348,7 +348,7 @@ class TimePickerClockDelegate extends TimePicker.AbstractTimePickerDelegate impl
      * Set the current minute (0-59).
      */
     @Override
-    public void setCurrentMinute(Integer currentMinute) {
+    public void setCurrentMinute(int currentMinute) {
         if (mInitialMinute == currentMinute) {
             return;
         }
@@ -363,7 +363,7 @@ class TimePickerClockDelegate extends TimePicker.AbstractTimePickerDelegate impl
      * @return The current minute.
      */
     @Override
-    public Integer getCurrentMinute() {
+    public int getCurrentMinute() {
         return mRadialTimePickerView.getCurrentMinute();
     }
 
@@ -373,7 +373,7 @@ class TimePickerClockDelegate extends TimePicker.AbstractTimePickerDelegate impl
      * @param is24HourView True = 24 hour mode. False = AM/PM.
      */
     @Override
-    public void setIs24HourView(Boolean is24HourView) {
+    public void setIs24HourView(boolean is24HourView) {
         if (is24HourView == mIs24HourView) {
             return;
         }
