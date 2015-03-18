@@ -167,6 +167,14 @@ import java.util.Objects;
  *         <td>TV content rating system for Brazil</td>
  *     </tr>
  *     <tr>
+ *         <td>CA_TV_EN</td>
+ *         <td>TV content rating system for Canada (English)</td>
+ *     </tr>
+ *     <tr>
+ *         <td>CA_TV_FR</td>
+ *         <td>TV content rating system for Canada (French)</td>
+ *     </tr>
+ *     <tr>
  *         <td>DVB</td>
  *         <td>DVB content rating system</td>
  *     </tr>
@@ -189,6 +197,10 @@ import java.util.Objects;
  *     <tr>
  *         <td>SG_TV</td>
  *         <td>TV content rating system for Singapore</td>
+ *     </tr>
+ *     <tr>
+ *         <td>US_MV</td>
+ *         <td>Movie content rating system for the United States</td>
  *     </tr>
  *     <tr>
  *         <td>US_TV</td>
@@ -284,6 +296,60 @@ import java.util.Objects;
  *     <tr>
  *         <td>BR_TV_18</td>
  *         <td>Content suitable for viewers over the age of 18</td>
+ *     </tr>
+ *     <tr>
+ *         <td valign="top" rowspan="7">CA_TV_EN</td>
+ *         <td>CA_TV_EN_EXEMPT</td>
+ *         <td>Exempt from ratings</td>
+ *     </tr>
+ *     <tr>
+ *         <td>CA_TV_EN_C</td>
+ *         <td>Suitable for children ages 2&#8211;7</td>
+ *     </tr>
+ *     <tr>
+ *         <td>CA_TV_EN_C8</td>
+ *         <td>Suitable for children ages 8 and older</td>
+ *     </tr>
+ *     <tr>
+ *         <td>CA_TV_EN_G</td>
+ *         <td>Suitable for the entire family</td>
+ *     </tr>
+ *     <tr>
+ *         <td>CA_TV_EN_PG</td>
+ *         <td>May contain moderate violence, profanity, nudity, and sexual references</td>
+ *     </tr>
+ *     <tr>
+ *         <td>CA_TV_EN_14</td>
+ *         <td>Intended for viewers ages 14 and older</td>
+ *     </tr>
+ *     <tr>
+ *         <td>CA_TV_EN_18</td>
+ *         <td>Intended for viewers ages 18 and older</td>
+ *     </tr>
+ *     <tr>
+ *         <td valign="top" rowspan="6">CA_TV_FR</td>
+ *         <td>CA_TV_FR_E</td>
+ *         <td>Exempt from ratings</td>
+ *     </tr>
+ *     <tr>
+ *         <td>CA_TV_FR_G</td>
+ *         <td>Appropriate for all ages</td>
+ *     </tr>
+ *     <tr>
+ *         <td>CA_TV_FR_8</td>
+ *         <td>Appropriate for children 8</td>
+ *     </tr>
+ *     <tr>
+ *         <td>CA_TV_FR_13</td>
+ *         <td>Suitable for children 13</td>
+ *     </tr>
+ *     <tr>
+ *         <td>CA_TV_FR_16</td>
+ *         <td>Recommended for children over the age of 16</td>
+ *     </tr>
+ *     <tr>
+ *         <td>CA_TV_FR_18</td>
+ *         <td>Only to be viewed by adults</td>
  *     </tr>
  *     <tr>
  *         <td valign="top" rowspan="15">DVB</td>
@@ -602,6 +668,27 @@ import java.util.Objects;
  *     <tr>
  *         <td>SG_TV_R21</td>
  *         <td>Suitable for adults aged 21 and above</td>
+ *     </tr>
+ *     <tr>
+ *         <td valign="top" rowspan="5">US_MV</td>
+ *         <td>US_MV_G</td>
+ *         <td>General audiences</td>
+ *     </tr>
+ *     <tr>
+ *         <td>US_MV_PG</td>
+ *         <td>Parental guidance suggested</td>
+ *     </tr>
+ *     <tr>
+ *         <td>US_MV_PG13</td>
+ *         <td>Parents strongly cautioned</td>
+ *     </tr>
+ *     <tr>
+ *         <td>US_MV_R</td>
+ *         <td>Restricted, under 17 requires accompanying parent or adult guardian</td>
+ *     </tr>
+ *     <tr>
+ *         <td>US_MV_NC17</td>
+ *         <td>No one 17 and under admitted</td>
  *     </tr>
  *     <tr>
  *         <td valign="top" rowspan="6">US_TV</td>
