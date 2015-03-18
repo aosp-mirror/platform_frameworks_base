@@ -417,13 +417,15 @@ public final class ActivityStackSupervisor implements DisplayListener {
         if (topNdx <= 0) {
             return;
         }
-        ActivityStack topStack = stacks.get(topNdx);
-        final boolean homeInFront = topStack == mHomeStack;
-        if (homeInFront != toFront) {
+
+        // The home stack should either be at the top or bottom of the stack list.
+        if ((toFront && (stacks.get(topNdx) != mHomeStack))
+                || (!toFront && (stacks.get(0) != mHomeStack))) {
+            if (DEBUG_STACK) Slog.d(TAG, "moveHomeTask: topStack old="
+                    + ((lastFocusedStack != null) ? lastFocusedStack : stacks.get(topNdx))
+                    + " new=" + mFocusedStack);
             stacks.remove(mHomeStack);
             stacks.add(toFront ? topNdx : 0, mHomeStack);
-            if (DEBUG_STACK) Slog.d(TAG, "moveHomeTask: topStack old=" + topStack + " new="
-                    + mFocusedStack);
         }
 
         if (lastFocusedStack != null) {
