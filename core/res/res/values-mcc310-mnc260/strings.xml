@@ -29,4 +29,6 @@
     <string-array name="wfcOperatorErrorMessages">
         <item>Wi-Fi Calling isn\&apos;t available. Contact your carrier to enable Wi-Fi Calling.</item>
     </string-array>
+    <!-- Template for showing cellular network operator name while WFC is active -->
+    <string name="wfcSpnFormat">%s Wi-Fi Calling</string>
 </resources>
