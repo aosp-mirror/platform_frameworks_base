@@ -8673,6 +8673,7 @@ package android.content.pm {
     field public int descriptionRes;
     field public boolean enabled;
     field public int flags;
+    field public boolean hardwareAccelerated;
     field public int largestWidthLimitDp;
     field public java.lang.String manageSpaceActivityName;
     field public java.lang.String nativeLibraryDir;
