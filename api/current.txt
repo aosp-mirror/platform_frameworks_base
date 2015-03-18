@@ -39959,7 +39959,8 @@ package android.widget {
     method public final void setText(char[], int, int);
     method public final void setText(int);
     method public final void setText(int, android.widget.TextView.BufferType);
-    method public void setTextAppearance(android.content.Context, int);
+    method public void setTextAppearance(int);
+    method public deprecated void setTextAppearance(android.content.Context, int);
     method public void setTextColor(int);
     method public void setTextColor(android.content.res.ColorStateList);
     method public void setTextIsSelectable(boolean);
