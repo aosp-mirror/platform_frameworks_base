@@ -109,7 +109,7 @@ public final class BatteryStatsImpl extends BatteryStats {
     private static final int MAGIC = 0xBA757475; // 'BATSTATS'
 
     // Current on-disk Parcel version
-    private static final int VERSION = 119 + (USE_OLD_HISTORY ? 1000 : 0);
+    private static final int VERSION = 120 + (USE_OLD_HISTORY ? 1000 : 0);
 
     // Maximum number of items we will record in the history.
     private static final int MAX_HISTORY_ITEMS = 2000;
@@ -307,8 +307,11 @@ public final class BatteryStatsImpl extends BatteryStats {
     boolean mInteractive;
     StopwatchTimer mInteractiveTimer;
 
-    boolean mLowPowerModeEnabled;
-    StopwatchTimer mLowPowerModeEnabledTimer;
+    boolean mPowerSaveModeEnabled;
+    StopwatchTimer mPowerSaveModeEnabledTimer;
+
+    boolean mDeviceIdleModeEnabled;
+    StopwatchTimer mDeviceIdleModeEnabledTimer;
 
     boolean mPhoneOn;
     StopwatchTimer mPhoneOnTimer;
@@ -1775,17 +1778,18 @@ public final class BatteryStatsImpl extends BatteryStats {
     private final Map<String, KernelWakelockStats> readKernelWakelockStats() {
 
         FileInputStream is;
-        byte[] buffer = new byte[8192];
+        byte[] buffer = new byte[32*1024];
         int len;
-        boolean wakeup_sources = false;
+        boolean wakeup_sources;
 
         try {
             try {
-                is = new FileInputStream("/proc/wakelocks");
+                is = new FileInputStream("/d/wakeup_sources");
+                wakeup_sources = true;
             } catch (java.io.FileNotFoundException e) {
                 try {
-                    is = new FileInputStream("/d/wakeup_sources");
-                    wakeup_sources = true;
+                    is = new FileInputStream("/proc/wakelocks");
+                    wakeup_sources = false;
                 } catch (java.io.FileNotFoundException e2) {
                     return null;
                 }
@@ -1798,6 +1802,9 @@ public final class BatteryStatsImpl extends BatteryStats {
         }
 
         if (len > 0) {
+            if (len >= buffer.length) {
+                Slog.wtf(TAG, "Kernel wake locks exceeded buffer size " + buffer.length);
+            }
             int i;
             for (i=0; i<len; i++) {
                 if (buffer[i] == '\0') {
@@ -3386,27 +3393,71 @@ public final class BatteryStatsImpl extends BatteryStats {
         }
     }
 
-    public void noteLowPowerMode(boolean enabled) {
-        if (mLowPowerModeEnabled != enabled) {
+    public void notePowerSaveMode(boolean enabled) {
+        if (mPowerSaveModeEnabled != enabled) {
             int stepState = enabled ? STEP_LEVEL_MODE_POWER_SAVE : 0;
             mModStepMode |= (mCurStepMode&STEP_LEVEL_MODE_POWER_SAVE) ^ stepState;
             mCurStepMode = (mCurStepMode&~STEP_LEVEL_MODE_POWER_SAVE) | stepState;
             final long elapsedRealtime = SystemClock.elapsedRealtime();
             final long uptime = SystemClock.uptimeMillis();
-            mLowPowerModeEnabled = enabled;
+            mPowerSaveModeEnabled = enabled;
             if (enabled) {
-                mHistoryCur.states2 |= HistoryItem.STATE2_LOW_POWER_FLAG;
-                if (DEBUG_HISTORY) Slog.v(TAG, "Low power mode enabled to: "
+                mHistoryCur.states2 |= HistoryItem.STATE2_POWER_SAVE_FLAG;
+                if (DEBUG_HISTORY) Slog.v(TAG, "Power save mode enabled to: "
                         + Integer.toHexString(mHistoryCur.states2));
-                mLowPowerModeEnabledTimer.startRunningLocked(elapsedRealtime);
+                mPowerSaveModeEnabledTimer.startRunningLocked(elapsedRealtime);
             } else {
-                mHistoryCur.states2 &= ~HistoryItem.STATE2_LOW_POWER_FLAG;
-                if (DEBUG_HISTORY) Slog.v(TAG, "Low power mode disabled to: "
+                mHistoryCur.states2 &= ~HistoryItem.STATE2_POWER_SAVE_FLAG;
+                if (DEBUG_HISTORY) Slog.v(TAG, "Power save mode disabled to: "
                         + Integer.toHexString(mHistoryCur.states2));
-                mLowPowerModeEnabledTimer.stopRunningLocked(elapsedRealtime);
+                mPowerSaveModeEnabledTimer.stopRunningLocked(elapsedRealtime);
             }
             addHistoryRecordLocked(elapsedRealtime, uptime);
         }
+    }
+
+    public void noteDeviceIdleModeLocked(boolean enabled, boolean fromActive, boolean fromMotion) {
+        if (mDeviceIdleModeEnabled != enabled) {
+            final long elapsedRealtime = SystemClock.elapsedRealtime();
+            final long uptime = SystemClock.uptimeMillis();
+            mDeviceIdleModeEnabled = enabled;
+            if (fromMotion) {
+                addHistoryEventLocked(elapsedRealtime, uptime, HistoryItem.EVENT_SIGNIFICANT_MOTION,
+                        "", 0);
+            }
+            if (fromActive) {
+                addHistoryEventLocked(elapsedRealtime, uptime, HistoryItem.EVENT_ACTIVE,
+                        "", 0);
+            }
+            if (enabled) {
+                mHistoryCur.states2 |= HistoryItem.STATE2_DEVICE_IDLE_FLAG;
+                if (DEBUG_HISTORY) Slog.v(TAG, "Device idle mode enabled to: "
+                        + Integer.toHexString(mHistoryCur.states2));
+                mDeviceIdleModeEnabledTimer.startRunningLocked(elapsedRealtime);
+            } else {
+                mHistoryCur.states2 &= ~HistoryItem.STATE2_DEVICE_IDLE_FLAG;
+                if (DEBUG_HISTORY) Slog.v(TAG, "Device idle mode disabled to: "
+                        + Integer.toHexString(mHistoryCur.states2));
+                mDeviceIdleModeEnabledTimer.stopRunningLocked(elapsedRealtime);
+            }
+            addHistoryRecordLocked(elapsedRealtime, uptime);
+        }
+    }
+
+    public void notePackageInstalledLocked(String pkgName, int versionCode) {
+        final long elapsedRealtime = SystemClock.elapsedRealtime();
+        final long uptime = SystemClock.uptimeMillis();
+        addHistoryEventLocked(elapsedRealtime, uptime, HistoryItem.EVENT_PACKAGE_INSTALLED,
+                pkgName, versionCode);
+        mNumConnectivityChange++;
+    }
+
+    public void notePackageUninstalledLocked(String pkgName) {
+        final long elapsedRealtime = SystemClock.elapsedRealtime();
+        final long uptime = SystemClock.uptimeMillis();
+        addHistoryEventLocked(elapsedRealtime, uptime, HistoryItem.EVENT_PACKAGE_UNINSTALLED,
+                pkgName, 0);
+        mNumConnectivityChange++;
     }
 
     public void notePhoneOnLocked() {
@@ -4195,12 +4246,20 @@ public final class BatteryStatsImpl extends BatteryStats {
         return mInteractiveTimer.getTotalTimeLocked(elapsedRealtimeUs, which);
     }
 
-    @Override public long getLowPowerModeEnabledTime(long elapsedRealtimeUs, int which) {
-        return mLowPowerModeEnabledTimer.getTotalTimeLocked(elapsedRealtimeUs, which);
+    @Override public long getPowerSaveModeEnabledTime(long elapsedRealtimeUs, int which) {
+        return mPowerSaveModeEnabledTimer.getTotalTimeLocked(elapsedRealtimeUs, which);
     }
 
-    @Override public int getLowPowerModeEnabledCount(int which) {
-        return mLowPowerModeEnabledTimer.getCountLocked(which);
+    @Override public int getPowerSaveModeEnabledCount(int which) {
+        return mPowerSaveModeEnabledTimer.getCountLocked(which);
+    }
+
+    @Override public long getDeviceIdleModeEnabledTime(long elapsedRealtimeUs, int which) {
+        return mDeviceIdleModeEnabledTimer.getTotalTimeLocked(elapsedRealtimeUs, which);
+    }
+
+    @Override public int getDeviceIdleModeEnabledCount(int which) {
+        return mDeviceIdleModeEnabledTimer.getCountLocked(which);
     }
 
     @Override public int getNumConnectivityChange(int which) {
@@ -6662,8 +6721,9 @@ public final class BatteryStatsImpl extends BatteryStats {
         for (int i=0; i<NUM_SCREEN_BRIGHTNESS_BINS; i++) {
             mScreenBrightnessTimer[i] = new StopwatchTimer(null, -100-i, null, mOnBatteryTimeBase);
         }
-        mInteractiveTimer = new StopwatchTimer(null, -9, null, mOnBatteryTimeBase);
-        mLowPowerModeEnabledTimer = new StopwatchTimer(null, -2, null, mOnBatteryTimeBase);
+        mInteractiveTimer = new StopwatchTimer(null, -10, null, mOnBatteryTimeBase);
+        mPowerSaveModeEnabledTimer = new StopwatchTimer(null, -2, null, mOnBatteryTimeBase);
+        mDeviceIdleModeEnabledTimer = new StopwatchTimer(null, -11, null, mOnBatteryTimeBase);
         mPhoneOnTimer = new StopwatchTimer(null, -3, null, mOnBatteryTimeBase);
         for (int i=0; i<SignalStrength.NUM_SIGNAL_STRENGTH_BINS; i++) {
             mPhoneSignalStrengthsTimer[i] = new StopwatchTimer(null, -200-i, null,
@@ -7233,7 +7293,8 @@ public final class BatteryStatsImpl extends BatteryStats {
             mScreenBrightnessTimer[i].reset(false);
         }
         mInteractiveTimer.reset(false);
-        mLowPowerModeEnabledTimer.reset(false);
+        mPowerSaveModeEnabledTimer.reset(false);
+        mDeviceIdleModeEnabledTimer.reset(false);
         mPhoneOnTimer.reset(false);
         mAudioOnTimer.reset(false);
         mVideoOnTimer.reset(false);
@@ -8534,7 +8595,8 @@ public final class BatteryStatsImpl extends BatteryStats {
         mInteractive = false;
         mInteractiveTimer.readSummaryFromParcelLocked(in);
         mPhoneOn = false;
-        mLowPowerModeEnabledTimer.readSummaryFromParcelLocked(in);
+        mPowerSaveModeEnabledTimer.readSummaryFromParcelLocked(in);
+        mDeviceIdleModeEnabledTimer.readSummaryFromParcelLocked(in);
         mPhoneOnTimer.readSummaryFromParcelLocked(in);
         for (int i=0; i<SignalStrength.NUM_SIGNAL_STRENGTH_BINS; i++) {
             mPhoneSignalStrengthsTimer[i].readSummaryFromParcelLocked(in);
@@ -8835,7 +8897,8 @@ public final class BatteryStatsImpl extends BatteryStats {
             mScreenBrightnessTimer[i].writeSummaryFromParcelLocked(out, NOWREAL_SYS);
         }
         mInteractiveTimer.writeSummaryFromParcelLocked(out, NOWREAL_SYS);
-        mLowPowerModeEnabledTimer.writeSummaryFromParcelLocked(out, NOWREAL_SYS);
+        mPowerSaveModeEnabledTimer.writeSummaryFromParcelLocked(out, NOWREAL_SYS);
+        mDeviceIdleModeEnabledTimer.writeSummaryFromParcelLocked(out, NOWREAL_SYS);
         mPhoneOnTimer.writeSummaryFromParcelLocked(out, NOWREAL_SYS);
         for (int i=0; i<SignalStrength.NUM_SIGNAL_STRENGTH_BINS; i++) {
             mPhoneSignalStrengthsTimer[i].writeSummaryFromParcelLocked(out, NOWREAL_SYS);
@@ -9132,9 +9195,10 @@ public final class BatteryStatsImpl extends BatteryStats {
                     in);
         }
         mInteractive = false;
-        mInteractiveTimer = new StopwatchTimer(null, -9, null, mOnBatteryTimeBase, in);
+        mInteractiveTimer = new StopwatchTimer(null, -10, null, mOnBatteryTimeBase, in);
         mPhoneOn = false;
-        mLowPowerModeEnabledTimer = new StopwatchTimer(null, -2, null, mOnBatteryTimeBase, in);
+        mPowerSaveModeEnabledTimer = new StopwatchTimer(null, -2, null, mOnBatteryTimeBase, in);
+        mDeviceIdleModeEnabledTimer = new StopwatchTimer(null, -11, null, mOnBatteryTimeBase, in);
         mPhoneOnTimer = new StopwatchTimer(null, -3, null, mOnBatteryTimeBase, in);
         for (int i=0; i<SignalStrength.NUM_SIGNAL_STRENGTH_BINS; i++) {
             mPhoneSignalStrengthsTimer[i] = new StopwatchTimer(null, -200-i,
@@ -9299,7 +9363,8 @@ public final class BatteryStatsImpl extends BatteryStats {
             mScreenBrightnessTimer[i].writeToParcel(out, uSecRealtime);
         }
         mInteractiveTimer.writeToParcel(out, uSecRealtime);
-        mLowPowerModeEnabledTimer.writeToParcel(out, uSecRealtime);
+        mPowerSaveModeEnabledTimer.writeToParcel(out, uSecRealtime);
+        mDeviceIdleModeEnabledTimer.writeToParcel(out, uSecRealtime);
         mPhoneOnTimer.writeToParcel(out, uSecRealtime);
         for (int i=0; i<SignalStrength.NUM_SIGNAL_STRENGTH_BINS; i++) {
             mPhoneSignalStrengthsTimer[i].writeToParcel(out, uSecRealtime);
@@ -9436,8 +9501,10 @@ public final class BatteryStatsImpl extends BatteryStats {
             }
             pr.println("*** Interactive timer:");
             mInteractiveTimer.logState(pr, "  ");
-            pr.println("*** Low power mode timer:");
-            mLowPowerModeEnabledTimer.logState(pr, "  ");
+            pr.println("*** Power save mode timer:");
+            mPowerSaveModeEnabledTimer.logState(pr, "  ");
+            pr.println("*** Device idle mode timer:");
+            mDeviceIdleModeEnabledTimer.logState(pr, "  ");
             pr.println("*** Phone timer:");
             mPhoneOnTimer.logState(pr, "  ");
             for (int i=0; i<SignalStrength.NUM_SIGNAL_STRENGTH_BINS; i++) {

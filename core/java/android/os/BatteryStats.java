@@ -30,7 +30,6 @@ import android.content.pm.ApplicationInfo;
 import android.telephony.SignalStrength;
 import android.text.format.DateFormat;
 import android.util.Printer;
-import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
 import android.util.TimeUtils;
@@ -1044,14 +1043,15 @@ public abstract class BatteryStats implements Parcelable {
         public static final int STATE2_WIFI_SIGNAL_STRENGTH_MASK =
                 0x7 << STATE2_WIFI_SIGNAL_STRENGTH_SHIFT;
 
-        public static final int STATE2_LOW_POWER_FLAG = 1<<31;
+        public static final int STATE2_POWER_SAVE_FLAG = 1<<31;
         public static final int STATE2_VIDEO_ON_FLAG = 1<<30;
         public static final int STATE2_WIFI_RUNNING_FLAG = 1<<29;
         public static final int STATE2_WIFI_ON_FLAG = 1<<28;
         public static final int STATE2_FLASHLIGHT_FLAG = 1<<27;
+        public static final int STATE2_DEVICE_IDLE_FLAG = 1<<26;
 
         public static final int MOST_INTERESTING_STATES2 =
-            STATE2_LOW_POWER_FLAG | STATE2_WIFI_ON_FLAG;
+            STATE2_POWER_SAVE_FLAG | STATE2_WIFI_ON_FLAG | STATE2_DEVICE_IDLE_FLAG;
 
         public int states2;
 
@@ -1086,10 +1086,18 @@ public abstract class BatteryStats implements Parcelable {
         public static final int EVENT_USER_RUNNING = 0x0007;
         // Events for foreground user.
         public static final int EVENT_USER_FOREGROUND = 0x0008;
-        // Events for connectivity changed.
+        // Event for connectivity changed.
         public static final int EVENT_CONNECTIVITY_CHANGED = 0x0009;
+        // Event for significant motion taking us out of idle mode.
+        public static final int EVENT_SIGNIFICANT_MOTION = 0x000a;
+        // Event for becoming active taking us out of idle mode.
+        public static final int EVENT_ACTIVE = 0x000b;
+        // Event for a package being installed.
+        public static final int EVENT_PACKAGE_INSTALLED = 0x000c;
+        // Event for a package being uninstalled.
+        public static final int EVENT_PACKAGE_UNINSTALLED = 0x000d;
         // Number of event types.
-        public static final int EVENT_COUNT = 0x000a;
+        public static final int EVENT_COUNT = 0x000e;
         // Mask to extract out only the type part of the event.
         public static final int EVENT_TYPE_MASK = ~(EVENT_FLAG_START|EVENT_FLAG_FINISH);
 
@@ -1486,19 +1494,34 @@ public abstract class BatteryStats implements Parcelable {
             long elapsedRealtimeUs, int which);
 
     /**
-     * Returns the time in microseconds that low power mode has been enabled while the device was
+     * Returns the time in microseconds that power save mode has been enabled while the device was
      * running on battery.
      *
      * {@hide}
      */
-    public abstract long getLowPowerModeEnabledTime(long elapsedRealtimeUs, int which);
+    public abstract long getPowerSaveModeEnabledTime(long elapsedRealtimeUs, int which);
 
     /**
-     * Returns the number of times that low power mode was enabled.
+     * Returns the number of times that power save mode was enabled.
      *
      * {@hide}
      */
-    public abstract int getLowPowerModeEnabledCount(int which);
+    public abstract int getPowerSaveModeEnabledCount(int which);
+
+    /**
+     * Returns the time in microseconds that device has been in idle mode while
+     * running on battery.
+     *
+     * {@hide}
+     */
+    public abstract long getDeviceIdleModeEnabledTime(long elapsedRealtimeUs, int which);
+
+    /**
+     * Returns the number of times that the devie has gone in to idle mode.
+     *
+     * {@hide}
+     */
+    public abstract int getDeviceIdleModeEnabledCount(int which);
 
     /**
      * Returns the number of times that connectivity state changed.
@@ -1692,11 +1715,12 @@ public abstract class BatteryStats implements Parcelable {
 
     public static final BitDescription[] HISTORY_STATE2_DESCRIPTIONS
             = new BitDescription[] {
-        new BitDescription(HistoryItem.STATE2_LOW_POWER_FLAG, "low_power", "lp"),
+        new BitDescription(HistoryItem.STATE2_POWER_SAVE_FLAG, "power_save", "ps"),
         new BitDescription(HistoryItem.STATE2_VIDEO_ON_FLAG, "video", "v"),
         new BitDescription(HistoryItem.STATE2_WIFI_RUNNING_FLAG, "wifi_running", "Wr"),
         new BitDescription(HistoryItem.STATE2_WIFI_ON_FLAG, "wifi", "W"),
         new BitDescription(HistoryItem.STATE2_FLASHLIGHT_FLAG, "flashlight", "fl"),
+        new BitDescription(HistoryItem.STATE2_DEVICE_IDLE_FLAG, "device_idle", "di"),
         new BitDescription(HistoryItem.STATE2_WIFI_SIGNAL_STRENGTH_MASK,
                 HistoryItem.STATE2_WIFI_SIGNAL_STRENGTH_SHIFT, "wifi_signal_strength", "Wss",
                 new String[] { "0", "1", "2", "3", "4" },
@@ -1707,11 +1731,13 @@ public abstract class BatteryStats implements Parcelable {
     };
 
     public static final String[] HISTORY_EVENT_NAMES = new String[] {
-            "null", "proc", "fg", "top", "sync", "wake_lock_in", "job", "user", "userfg", "conn"
+            "null", "proc", "fg", "top", "sync", "wake_lock_in", "job", "user", "userfg", "conn",
+            "motion", "active", "pkginst", "pkgunin"
     };
 
     public static final String[] HISTORY_EVENT_CHECKIN_NAMES = new String[] {
-            "Enl", "Epr", "Efg", "Etp", "Esy", "Ewl", "Ejb", "Eur", "Euf", "Ecn"
+            "Enl", "Epr", "Efg", "Etp", "Esy", "Ewl", "Ejb", "Eur", "Euf", "Ecn",
+            "Esm", "Eac", "Epi", "Epu"
     };
 
     /**
@@ -2310,7 +2336,8 @@ public abstract class BatteryStats implements Parcelable {
         final long totalUptime = computeUptime(rawUptime, which);
         final long screenOnTime = getScreenOnTime(rawRealtime, which);
         final long interactiveTime = getInteractiveTime(rawRealtime, which);
-        final long lowPowerModeEnabledTime = getLowPowerModeEnabledTime(rawRealtime, which);
+        final long powerSaveModeEnabledTime = getPowerSaveModeEnabledTime(rawRealtime, which);
+        final long deviceIdleModeEnabledTime = getDeviceIdleModeEnabledTime(rawRealtime, which);
         final int connChanges = getNumConnectivityChange(which);
         final long phoneOnTime = getPhoneOnTime(rawRealtime, which);
         final long wifiOnTime = getWifiOnTime(rawRealtime, which);
@@ -2382,7 +2409,8 @@ public abstract class BatteryStats implements Parcelable {
                 fullWakeLockTimeTotal / 1000, partialWakeLockTimeTotal / 1000,
                 0 /*legacy input event count*/, getMobileRadioActiveTime(rawRealtime, which) / 1000,
                 getMobileRadioActiveAdjustedTime(which) / 1000, interactiveTime / 1000,
-                lowPowerModeEnabledTime / 1000, connChanges);
+                powerSaveModeEnabledTime / 1000, connChanges, deviceIdleModeEnabledTime / 1000,
+                getDeviceIdleModeEnabledCount(which));
         
         // Dump screen brightness stats
         Object[] args = new Object[NUM_SCREEN_BRIGHTNESS_BINS];
@@ -2849,7 +2877,8 @@ public abstract class BatteryStats implements Parcelable {
 
         final long screenOnTime = getScreenOnTime(rawRealtime, which);
         final long interactiveTime = getInteractiveTime(rawRealtime, which);
-        final long lowPowerModeEnabledTime = getLowPowerModeEnabledTime(rawRealtime, which);
+        final long powerSaveModeEnabledTime = getPowerSaveModeEnabledTime(rawRealtime, which);
+        final long deviceIdleModeEnabledTime = getDeviceIdleModeEnabledTime(rawRealtime, which);
         final long phoneOnTime = getPhoneOnTime(rawRealtime, which);
         final long wifiRunningTime = getGlobalWifiRunningTime(rawRealtime, which);
         final long wifiOnTime = getWifiOnTime(rawRealtime, which);
@@ -2884,14 +2913,25 @@ public abstract class BatteryStats implements Parcelable {
         }
         if (!didOne) sb.append(" (no activity)");
         pw.println(sb.toString());
-        if (lowPowerModeEnabledTime != 0) {
+        if (powerSaveModeEnabledTime != 0) {
             sb.setLength(0);
             sb.append(prefix);
-                    sb.append("  Low power mode enabled: ");
-                    formatTimeMs(sb, lowPowerModeEnabledTime / 1000);
+                    sb.append("  Power save mode enabled: ");
+                    formatTimeMs(sb, powerSaveModeEnabledTime / 1000);
                     sb.append("(");
-                    sb.append(formatRatioLocked(lowPowerModeEnabledTime, whichBatteryRealtime));
+                    sb.append(formatRatioLocked(powerSaveModeEnabledTime, whichBatteryRealtime));
                     sb.append(")");
+            pw.println(sb.toString());
+        }
+        if (deviceIdleModeEnabledTime != 0) {
+            sb.setLength(0);
+            sb.append(prefix);
+                    sb.append("  Device idling: ");
+                    formatTimeMs(sb, deviceIdleModeEnabledTime / 1000);
+                    sb.append("(");
+                    sb.append(formatRatioLocked(deviceIdleModeEnabledTime, whichBatteryRealtime));
+                    sb.append(") "); sb.append(getDeviceIdleModeEnabledCount(which));
+                    sb.append("x");
             pw.println(sb.toString());
         }
         if (phoneOnTime != 0) {
@@ -2899,7 +2939,7 @@ public abstract class BatteryStats implements Parcelable {
             sb.append(prefix);
                     sb.append("  Active phone call: "); formatTimeMs(sb, phoneOnTime / 1000);
                     sb.append("("); sb.append(formatRatioLocked(phoneOnTime, whichBatteryRealtime));
-                    sb.append(") "); sb.append(getPhoneOnCount(which));
+                    sb.append(") "); sb.append(getPhoneOnCount(which)); sb.append("x");
         }
         int connChanges = getNumConnectivityChange(which);
         if (connChanges != 0) {
@@ -4721,7 +4761,7 @@ public abstract class BatteryStats implements Parcelable {
         prepareForDumpLocked();
 
         dumpLine(pw, 0 /* uid */, "i" /* category */, VERSION_DATA,
-                "12", getParcelVersion(), getStartPlatformVersion(), getEndPlatformVersion());
+                "13", getParcelVersion(), getStartPlatformVersion(), getEndPlatformVersion());
 
         long now = getHistoryBaseTime() + SystemClock.elapsedRealtime();
 

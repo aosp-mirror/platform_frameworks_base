@@ -86,7 +86,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub
     public void initPowerManagement() {
         mPowerManagerInternal = LocalServices.getService(PowerManagerInternal.class);
         mPowerManagerInternal.registerLowPowerModeObserver(this);
-        mStats.noteLowPowerMode(mPowerManagerInternal.getLowPowerModeEnabled());
+        mStats.notePowerSaveMode(mPowerManagerInternal.getLowPowerModeEnabled());
         (new WakeupReasonThread()).start();
     }
 
@@ -109,7 +109,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub
     @Override
     public void onLowPowerModeChanged(boolean enabled) {
         synchronized (mStats) {
-            mStats.noteLowPowerMode(enabled);
+            mStats.notePowerSaveMode(enabled);
         }
     }
 
@@ -683,6 +683,28 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         enforceCallingPermission();
         synchronized (mStats) {
             mStats.noteNetworkStatsEnabledLocked();
+        }
+    }
+
+    @Override
+    public void noteDeviceIdleMode(boolean enabled, boolean fromActive, boolean fromMotion) {
+        enforceCallingPermission();
+        synchronized (mStats) {
+            mStats.noteDeviceIdleModeLocked(enabled, fromActive, fromMotion);
+        }
+    }
+
+    public void notePackageInstalled(String pkgName, int versionCode) {
+        enforceCallingPermission();
+        synchronized (mStats) {
+            mStats.notePackageInstalledLocked(pkgName, versionCode);
+        }
+    }
+
+    public void notePackageUninstalled(String pkgName) {
+        enforceCallingPermission();
+        synchronized (mStats) {
+            mStats.notePackageUninstalledLocked(pkgName);
         }
     }
 

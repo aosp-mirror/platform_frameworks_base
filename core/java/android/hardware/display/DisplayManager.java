@@ -472,7 +472,8 @@ public final class DisplayManager {
     /**
      * Creates a virtual display.
      *
-     * @see #createVirtualDisplay(String, int, int, int, Surface, int, VirtualDisplay.Callback)
+     * @see #createVirtualDisplay(String, int, int, int, Surface, int,
+     * VirtualDisplay.Callback, Handler)
      */
     public VirtualDisplay createVirtualDisplay(@NonNull String name,
             int width, int height, int densityDpi, @Nullable Surface surface, int flags) {

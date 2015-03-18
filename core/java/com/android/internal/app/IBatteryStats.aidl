@@ -111,6 +111,7 @@ interface IBatteryStats {
     void noteWifiMulticastDisabledFromSource(in WorkSource ws);
     void noteNetworkInterfaceType(String iface, int type);
     void noteNetworkStatsEnabled();
+    void noteDeviceIdleMode(boolean enabled, boolean fromActive, boolean fromMotion);
     void setBatteryState(int status, int health, int plugType, int level, int temp, int volt);
     long getAwakeTimeBattery();
     long getAwakeTimePlugged();
