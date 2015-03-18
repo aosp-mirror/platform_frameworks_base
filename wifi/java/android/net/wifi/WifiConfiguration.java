@@ -926,13 +926,18 @@ public class WifiConfiguration implements Parcelable {
             }
         }
 
-        if (FQDN != null) {
-            /* must have a providerFriendlyName */
-            if (providerFriendlyName == null) {
+        if (TextUtils.isEmpty(FQDN) == false) {
+            /* this is passpoint configuration; it must not have an SSID */
+            if (TextUtils.isEmpty(SSID) == false) {
+                return false;
+            }
+            /* this is passpoint configuration; it must have a providerFriendlyName */
+            if (TextUtils.isEmpty(providerFriendlyName)) {
                 return false;
             }
             /* this is passpoint configuration; it must have enterprise config */
-            if (enterpriseConfig == null) {
+            if (enterpriseConfig == null
+                    || enterpriseConfig.getEapMethod() == WifiEnterpriseConfig.Eap.NONE ) {
                 return false;
             }
         }
