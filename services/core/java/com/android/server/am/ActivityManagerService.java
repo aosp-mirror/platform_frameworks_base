@@ -3102,6 +3102,15 @@ public final class ActivityManagerService extends ActivityManagerNative
             if ("1".equals(SystemProperties.get("debug.checkjni"))) {
                 debugFlags |= Zygote.DEBUG_ENABLE_CHECKJNI;
             }
+            String jitDebugProperty = SystemProperties.get("debug.usejit");
+            if ("true".equals(jitDebugProperty)) {
+                debugFlags |= Zygote.DEBUG_ENABLE_JIT;
+            } else if (!"false".equals(jitDebugProperty)) {
+                // If we didn't force disable by setting false, defer to the dalvik vm options.
+                if ("true".equals(SystemProperties.get("dalvik.vm.usejit"))) {
+                    debugFlags |= Zygote.DEBUG_ENABLE_JIT;
+                }
+            }
             if ("1".equals(SystemProperties.get("debug.jni.logging"))) {
                 debugFlags |= Zygote.DEBUG_ENABLE_JNI_LOGGING;
             }

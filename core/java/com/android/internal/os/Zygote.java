@@ -34,10 +34,13 @@ public final class Zygote {
     public static final int DEBUG_ENABLE_CHECKJNI   = 1 << 1;
     /** enable Java programming language "assert" statements */
     public static final int DEBUG_ENABLE_ASSERT     = 1 << 2;
-    /** disable the JIT compiler */
+    /** disable the AOT compiler and JIT */
     public static final int DEBUG_ENABLE_SAFEMODE   = 1 << 3;
     /** Enable logging of third-party JNI activity. */
     public static final int DEBUG_ENABLE_JNI_LOGGING = 1 << 4;
+    /** enable the JIT compiler */
+    public static final int DEBUG_ENABLE_JIT         = 1 << 5;
+
 
     /** No external storage should be mounted. */
     public static final int MOUNT_EXTERNAL_NONE = 0;
