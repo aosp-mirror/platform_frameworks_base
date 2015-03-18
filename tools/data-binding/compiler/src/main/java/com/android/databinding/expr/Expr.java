@@ -145,7 +145,7 @@ abstract public class Expr {
     }
 
     public boolean isObservable() {
-        return ModelAnalyzer.getInstance().isObservable(getResolvedType());
+        return getResolvedType().isObservable();
     }
 
     public BitSet getShouldReadFlags() {

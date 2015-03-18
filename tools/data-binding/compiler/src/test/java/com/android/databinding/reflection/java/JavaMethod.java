@@ -19,11 +19,13 @@ import com.android.databinding.reflection.ModelMethod;
 import com.android.databinding.reflection.SdkUtil;
 import com.android.databinding.reflection.TypeUtil;
 
+import android.binding.Bindable;
+
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.List;
 
-public class JavaMethod implements ModelMethod {
+public class JavaMethod extends ModelMethod {
     public final Method mMethod;
 
     public JavaMethod(Method method) {
@@ -57,6 +59,11 @@ public class JavaMethod implements ModelMethod {
     }
 
     @Override
+    public boolean isVoid() {
+        return void.class.equals(mMethod.getReturnType());
+    }
+
+    @Override
     public boolean isPublic() {
         return Modifier.isPublic(mMethod.getModifiers());
     }
@@ -67,6 +74,11 @@ public class JavaMethod implements ModelMethod {
     }
 
     @Override
+    public boolean isBindable() {
+        return mMethod.getAnnotation(Bindable.class) != null;
+    }
+
+    @Override
     public int getMinApi() {
         return SdkUtil.getMinApi(this);
     }
@@ -74,5 +86,10 @@ public class JavaMethod implements ModelMethod {
     @Override
     public String getJniDescription() {
         return TypeUtil.getInstance().getDescription(this);
+    }
+
+    @Override
+    public boolean isVarArgs() {
+        return false;
     }
 }

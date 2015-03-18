@@ -223,7 +223,6 @@ public class SetterStore {
             }
         }
         SetterCall setterCall = null;
-        MethodDescription adapter = null;
         MethodDescription conversionMethod = null;
         if (viewType != null) {
             HashMap<AccessorKey, MethodDescription> adapters = mStore.adapterMethods.get(attribute);
@@ -251,7 +250,7 @@ public class SetterStore {
                                         isBetterView, imports)) {
                                     bestViewType = adapterViewType;
                                     bestValueType = adapterValueType;
-                                    adapter = adapters.get(key);
+                                    MethodDescription adapter = adapters.get(key);
                                     setterCall = new AdapterSetter(adapter);
                                 }
 
@@ -266,6 +265,9 @@ public class SetterStore {
             }
 
             conversionMethod = getConversionMethod(valueType, bestValueType, imports);
+            if (valueType.isObject() && setterCall != null && bestValueType.isNullable()) {
+                setterCall.setCast(bestValueType);
+            }
         }
         if (setterCall == null) {
             setterCall = new DummySetter(getDefaultSetter(attribute));
@@ -302,22 +304,19 @@ public class SetterStore {
         setterCandidates.add(trimAttributeNamespace(attribute));
 
         ModelMethod bestMethod = null;
+        ModelClass bestParameterType = null;
+        List<ModelClass> args = new ArrayList<ModelClass>();
+        args.add(argumentType);
         for (String name : setterCandidates) {
             ModelMethod[] methods = viewType.getMethods(name, 1);
-            ModelClass bestParameterType = null;
 
-            List<ModelClass> args = new ArrayList<ModelClass>();
-            args.add(argumentType);
             for (ModelMethod method : methods) {
                 ModelClass[] parameterTypes = method.getParameterTypes();
-                if (method.getReturnType(args).isVoid() && !method.isStatic() && method
-                        .isPublic()) {
-                    ModelClass param = parameterTypes[0];
-                    if (isBetterParameter(argumentType, param, bestParameterType, true, imports)) {
-                        bestParameterType = param;
-                        bestMethod = method;
-
-                    }
+                ModelClass param = parameterTypes[0];
+                if (method.isVoid() &&
+                        isBetterParameter(argumentType, param, bestParameterType, true, imports)) {
+                    bestParameterType = param;
+                    bestMethod = method;
                 }
             }
         }
@@ -342,16 +341,17 @@ public class SetterStore {
         } else if (argument.equals(parameter)) {
             // Exact match
             return true;
-        } else if (!isBetterViewTypeMatch && isBoxingConversion(oldParameter, argument)) {
+        } else if (!isBetterViewTypeMatch &&
+                ModelMethod.isBoxingConversion(oldParameter, argument)) {
             return false;
-        } else if (isBoxingConversion(parameter, argument)) {
+        } else if (ModelMethod.isBoxingConversion(parameter, argument)) {
             // Boxing/unboxing is second best
             return true;
         } else {
-            int oldConversionLevel = getConversionLevel(oldParameter);
-            if (isImplicitConversion(argument, parameter)) {
+            int oldConversionLevel = ModelMethod.getImplicitConversionLevel(oldParameter);
+            if (ModelMethod.isImplicitConversion(argument, parameter)) {
                 // Better implicit conversion
-                int conversionLevel = getConversionLevel(parameter);
+                int conversionLevel = ModelMethod.getImplicitConversionLevel(parameter);
                 return oldConversionLevel < 0 || conversionLevel < oldConversionLevel;
             } else if (oldConversionLevel >= 0) {
                 return false;
@@ -373,19 +373,6 @@ public class SetterStore {
                 }
                 return argument.isObject() && !parameter.isPrimitive();
             }
-        }
-    }
-
-    private static boolean isImplicitConversion(ModelClass from, ModelClass to) {
-        if (from != null && to != null && from.isPrimitive() && to.isPrimitive()) {
-            if (from.isBoolean() || to.isBoolean() || to.isChar()) {
-                return false;
-            }
-            int fromConversionLevel = getConversionLevel(from);
-            int toConversionLevel = getConversionLevel(to);
-            return fromConversionLevel < toConversionLevel;
-        } else {
-            return false;
         }
     }
 
@@ -419,37 +406,8 @@ public class SetterStore {
     }
 
     private boolean canUseForConversion(ModelClass from, ModelClass to) {
-        return from.equals(to) || isBoxingConversion(from, to) || to.isAssignableFrom(from);
-    }
-
-    private static int getConversionLevel(ModelClass primitive) {
-        if (primitive == null) {
-            return -1;
-        } else if (primitive.isByte()) {
-            return 0;
-        } else if (primitive.isChar()) {
-            return 1;
-        } else if (primitive.isShort()) {
-            return 2;
-        } else if (primitive.isInt()) {
-            return 3;
-        } else if (primitive.isLong()) {
-            return 4;
-        } else if (primitive.isFloat()) {
-            return 5;
-        } else if (primitive.isDouble()) {
-            return 6;
-        } else {
-            return -1;
-        }
-    }
-
-    public static boolean isBoxingConversion(ModelClass class1, ModelClass class2) {
-        if (class1.isPrimitive() != class2.isPrimitive()) {
-            return (class1.box().equals(class2.box()));
-        } else {
-            return false;
-        }
+        return from.equals(to) || ModelMethod.isBoxingConversion(from, to) ||
+                to.isAssignableFrom(from);
     }
 
     private static void merge(IntermediateV1 store, Intermediate dumpStore) {
@@ -592,8 +550,6 @@ public class SetterStore {
         public int getMinApi() {
             return 1;
         }
-
-
     }
 
     public static class AdapterSetter extends SetterCall {
@@ -606,7 +562,7 @@ public class SetterStore {
         @Override
         public String toJavaInternal(String viewExpression, String valueExpression) {
             return mAdapter.type + "." + mAdapter.method + "(" + viewExpression + ", " +
-                    valueExpression + ")";
+                    mCastString + valueExpression + ")";
         }
 
         @Override
@@ -624,7 +580,8 @@ public class SetterStore {
 
         @Override
         public String toJavaInternal(String viewExpression, String valueExpression) {
-            return viewExpression + "." + mModelMethod.getName() + "(" + valueExpression + ")";
+            return viewExpression + "." + mModelMethod.getName() + "(" + mCastString +
+                    valueExpression + ")";
         }
 
         @Override
@@ -635,6 +592,7 @@ public class SetterStore {
 
     public static abstract class SetterCall {
         private MethodDescription mConverter;
+        protected String mCastString = "";
 
         public SetterCall() {
         }
@@ -655,5 +613,9 @@ public class SetterStore {
         }
 
         abstract public int getMinApi();
+
+        public void setCast(ModelClass castTo) {
+            mCastString = "(" + castTo.toJavaCode() + ") ";
+        }
     }
 }

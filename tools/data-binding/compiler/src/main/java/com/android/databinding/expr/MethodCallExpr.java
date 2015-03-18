@@ -18,9 +18,12 @@ package com.android.databinding.expr;
 
 import com.google.common.collect.Iterables;
 
+import com.android.databinding.reflection.Callable.Type;
 import com.android.databinding.reflection.ModelAnalyzer;
 import com.android.databinding.reflection.Callable;
 import com.android.databinding.reflection.ModelClass;
+import com.android.databinding.reflection.ModelMethod;
+import com.android.databinding.util.L;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -52,7 +55,17 @@ public class MethodCallExpr extends Expr {
 
             Expr target = getTarget();
             boolean isStatic = target instanceof StaticIdentifierExpr;
-            mGetter = modelAnalyzer.findMethod(target.getResolvedType(), mName, args, isStatic);
+            ModelMethod method = target.getResolvedType().getMethod(mName, args, isStatic);
+            if (method == null) {
+                String message = "cannot find method '" + mName + "' in class " +
+                        target.getResolvedType().toJavaCode();
+                IllegalArgumentException e = new IllegalArgumentException(message);
+                L.e(e, "cannot find method %s in class %s", mName,
+                        target.getResolvedType().toJavaCode());
+                throw e;
+            }
+            mGetter = new Callable(Type.METHOD, method.getName(), method.getReturnType(args), true,
+                    false);
         }
         return mGetter.resolvedType;
     }

@@ -13,14 +13,48 @@
 
 package com.android.databinding.reflection.java;
 
+import com.android.databinding.reflection.ModelClass;
 import com.android.databinding.reflection.ModelField;
 
-import java.lang.reflect.Field;
+import android.binding.Bindable;
 
-public class JavaField implements ModelField {
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
+
+public class JavaField extends ModelField {
     public final Field mField;
 
     public JavaField(Field field) {
         mField = field;
+    }
+
+    @Override
+    public boolean isBindable() {
+        return mField.getAnnotation(Bindable.class) != null;
+    }
+
+    @Override
+    public String getName() {
+        return mField.getName();
+    }
+
+    @Override
+    public boolean isPublic() {
+        return Modifier.isPublic(mField.getModifiers());
+    }
+
+    @Override
+    public boolean isStatic() {
+        return Modifier.isStatic(mField.getModifiers());
+    }
+
+    @Override
+    public boolean isFinal() {
+        return Modifier.isFinal(mField.getModifiers());
+    }
+
+    @Override
+    public ModelClass getFieldType() {
+        return new JavaClass(mField.getType());
     }
 }

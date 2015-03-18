@@ -20,16 +20,19 @@ import com.android.databinding.reflection.ModelMethod;
 import com.android.databinding.reflection.SdkUtil;
 import com.android.databinding.reflection.TypeUtil;
 
+import android.binding.Bindable;
+
 import java.util.List;
 
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.ExecutableType;
+import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.Types;
 
-class AnnotationMethod implements ModelMethod {
+class AnnotationMethod extends ModelMethod {
     final ExecutableType mMethod;
     final DeclaredType mDeclaringType;
     final ExecutableElement mExecutableElement;
@@ -71,6 +74,11 @@ class AnnotationMethod implements ModelMethod {
     }
 
     @Override
+    public boolean isVoid() {
+        return mMethod.getReturnType().getKind() == TypeKind.VOID;
+    }
+
+    @Override
     public boolean isPublic() {
         return mExecutableElement.getModifiers().contains(Modifier.PUBLIC);
     }
@@ -78,6 +86,11 @@ class AnnotationMethod implements ModelMethod {
     @Override
     public boolean isStatic() {
         return mExecutableElement.getModifiers().contains(Modifier.STATIC);
+    }
+
+    @Override
+    public boolean isBindable() {
+        return mExecutableElement.getAnnotation(Bindable.class) != null;
     }
 
     @Override
@@ -91,6 +104,11 @@ class AnnotationMethod implements ModelMethod {
     @Override
     public String getJniDescription() {
         return TypeUtil.getInstance().getDescription(this);
+    }
+
+    @Override
+    public boolean isVarArgs() {
+        return mExecutableElement.isVarArgs();
     }
 
     @Override

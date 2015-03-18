@@ -15,7 +15,9 @@
  */
 package com.android.databinding.reflection.annotation;
 
+import com.android.databinding.reflection.ModelAnalyzer;
 import com.android.databinding.reflection.ModelClass;
+import com.android.databinding.reflection.ModelField;
 import com.android.databinding.reflection.ModelMethod;
 import com.android.databinding.reflection.SdkUtil;
 import com.android.databinding.reflection.TypeUtil;
@@ -24,6 +26,7 @@ import com.android.databinding.util.L;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
@@ -35,9 +38,12 @@ import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.ElementFilter;
 import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
-import javax.tools.Diagnostic;
 
-class AnnotationClass implements ModelClass {
+/**
+ * This is the implementation of ModelClass for the annotation
+ * processor. It relies on AnnotationAnalyzer.
+ */
+class AnnotationClass extends ModelClass {
 
     final TypeMirror mTypeMirror;
 
@@ -47,11 +53,7 @@ class AnnotationClass implements ModelClass {
 
     @Override
     public String toJavaCode() {
-        return toJavaCode(mTypeMirror);
-    }
-
-    private static String toJavaCode(TypeMirror typeElement) {
-        return typeElement.toString();
+        return mTypeMirror.toString();
     }
 
     @Override
@@ -76,7 +78,8 @@ class AnnotationClass implements ModelClass {
             // no "get" call found!
             return null;
         } else {
-            DeclaredType mapType = findInterface(getMapType().mTypeMirror);
+            AnnotationClass mapClass = (AnnotationClass) ModelAnalyzer.getInstance().getMapType();
+            DeclaredType mapType = findInterface(mapClass.mTypeMirror);
             if (mapType == null) {
                 return null;
             }
@@ -105,39 +108,16 @@ class AnnotationClass implements ModelClass {
             }
             if (foundInterface == null) {
                 L.e("Detected " + interfaceType + " type for " + mTypeMirror +
-                                ", but not able to find the implemented interface.");
+                        ", but not able to find the implemented interface.");
                 return null;
             }
         }
         if (foundInterface.getKind() != TypeKind.DECLARED) {
             L.e("Found " + interfaceType + " type for " + mTypeMirror +
-                            ", but it isn't a declared type: " + foundInterface);
+                    ", but it isn't a declared type: " + foundInterface);
             return null;
         }
         return (DeclaredType) foundInterface;
-    }
-
-    @Override
-    public boolean isList() {
-        for (AnnotationClass listType : getListTypes()) {
-            if (listType != null) {
-                if (listType.isAssignableFrom(this)) {
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
-
-    @Override
-    public boolean isMap() {
-        Types typeUtil = getTypeUtils();
-        return typeUtil.isAssignable(typeUtil.erasure(mTypeMirror), getMapType().mTypeMirror);
-    }
-
-    @Override
-    public boolean isString() {
-        return getTypeUtils().isSameType(mTypeMirror, getStringType().mTypeMirror);
     }
 
     @Override
@@ -210,11 +190,6 @@ class AnnotationClass implements ModelClass {
     }
 
     @Override
-    public boolean isObject() {
-        return getTypeUtils().isSameType(mTypeMirror, getObjectType().mTypeMirror);
-    }
-
-    @Override
     public boolean isVoid() {
         return mTypeMirror.getKind() == TypeKind.VOID;
     }
@@ -250,28 +225,22 @@ class AnnotationClass implements ModelClass {
     }
 
     @Override
-    public ModelMethod[] getMethods(String name, int numParameters) {
-        ArrayList<AnnotationMethod> matching = new ArrayList<AnnotationMethod>();
+    public ModelMethod[] getDeclaredMethods() {
+        final ModelMethod[] declaredMethods;
         if (mTypeMirror.getKind() == TypeKind.DECLARED) {
             DeclaredType declaredType = (DeclaredType) mTypeMirror;
-            getMethods(declaredType, matching, name, numParameters);
-        }
-        return matching.toArray(new ModelMethod[matching.size()]);
-    }
-
-    private static void getMethods(DeclaredType declaredType, ArrayList<AnnotationMethod> methods,
-            String name, int numParameters) {
-        Elements elementUtils = getElementUtils();
-        for (ExecutableElement element :
-                ElementFilter.methodsIn(elementUtils.getAllMembers((TypeElement)declaredType.asElement()))) {
-            if (element.getSimpleName().toString().equals(name)) {
-                List<? extends VariableElement> parameters = element.getParameters();
-                if (parameters.size() == numParameters ||
-                        (element.isVarArgs() && parameters.size() <= numParameters - 1)) {
-                    methods.add(new AnnotationMethod(declaredType, element));
-                }
+            Elements elementUtils = getElementUtils();
+            TypeElement typeElement = (TypeElement) declaredType.asElement();
+            List<? extends Element> members = elementUtils.getAllMembers(typeElement);
+            List<ExecutableElement> methods = ElementFilter.methodsIn(members);
+            declaredMethods = new ModelMethod[methods.size()];
+            for (int i = 0; i < declaredMethods.length; i++) {
+                declaredMethods[i] = new AnnotationMethod(declaredType, methods.get(i));
             }
+        } else {
+            declaredMethods = new ModelMethod[0];
         }
+        return declaredMethods;
     }
 
     @Override
@@ -293,13 +262,37 @@ class AnnotationClass implements ModelClass {
     }
 
     @Override
-    public int getMinApi() {
-        return SdkUtil.getMinApi(this);
+    public ModelClass erasure() {
+        final TypeMirror erasure = getTypeUtils().erasure(mTypeMirror);
+        if (erasure == mTypeMirror) {
+            return this;
+        } else {
+            return new AnnotationClass(erasure);
+        }
     }
 
     @Override
     public String getJniDescription() {
         return TypeUtil.getInstance().getDescription(this);
+    }
+
+    @Override
+    protected ModelField[] getDeclaredFields() {
+        final ModelField[] declaredFields;
+        if (mTypeMirror.getKind() == TypeKind.DECLARED) {
+            DeclaredType declaredType = (DeclaredType) mTypeMirror;
+            Elements elementUtils = getElementUtils();
+            TypeElement typeElement = (TypeElement) declaredType.asElement();
+            List<? extends Element> members = elementUtils.getAllMembers(typeElement);
+            List<VariableElement> fields = ElementFilter.fieldsIn(members);
+            declaredFields = new ModelField[fields.size()];
+            for (int i = 0; i < declaredFields.length; i++) {
+                declaredFields[i] = new AnnotationField(typeElement, fields.get(i));
+            }
+        } else {
+            declaredFields = new ModelField[0];
+        }
+        return declaredFields;
     }
 
     @Override
@@ -322,22 +315,6 @@ class AnnotationClass implements ModelClass {
 
     private static Elements getElementUtils() {
         return AnnotationAnalyzer.get().mProcessingEnv.getElementUtils();
-    }
-
-    private static AnnotationClass[] getListTypes() {
-        return AnnotationAnalyzer.get().getListTypes();
-    }
-
-    private static AnnotationClass getMapType() {
-        return AnnotationAnalyzer.get().getMapType();
-    }
-
-    private static AnnotationClass getStringType() {
-        return AnnotationAnalyzer.get().getStringType();
-    }
-
-    private static AnnotationClass getObjectType() {
-        return AnnotationAnalyzer.get().getObjectType();
     }
 
     @Override

@@ -14,16 +14,18 @@
 package com.android.databinding.reflection.java;
 
 import com.android.databinding.reflection.ModelClass;
+import com.android.databinding.reflection.ModelField;
 import com.android.databinding.reflection.ModelMethod;
 import com.android.databinding.reflection.SdkUtil;
 import com.android.databinding.reflection.TypeUtil;
 
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-public class JavaClass implements ModelClass {
+public class JavaClass extends ModelClass {
     public final Class mClass;
 
     public JavaClass(Class clazz) {
@@ -58,21 +60,6 @@ public class JavaClass implements ModelClass {
         } else {
             return null;
         }
-    }
-
-    @Override
-    public boolean isList() {
-        return List.class.isAssignableFrom(mClass);
-    }
-
-    @Override
-    public boolean isMap() {
-        return Map.class.isAssignableFrom(mClass);
-    }
-
-    @Override
-    public boolean isString() {
-        return String.class.equals(mClass);
     }
 
     @Override
@@ -123,11 +110,6 @@ public class JavaClass implements ModelClass {
     @Override
     public boolean isDouble() {
         return double.class.equals(mClass);
-    }
-
-    @Override
-    public boolean isObject() {
-        return Object.class.equals(mClass);
     }
 
     @Override
@@ -197,19 +179,6 @@ public class JavaClass implements ModelClass {
     }
 
     @Override
-    public ModelMethod[] getMethods(String name, int numParameters) {
-        Method[] methods = mClass.getMethods();
-        ArrayList<JavaMethod> matching = new ArrayList<JavaMethod>();
-        for (Method method : methods) {
-            if (method.getName().equals(name) &&
-                    method.getParameterTypes().length == numParameters) {
-                matching.add(new JavaMethod(method));
-            }
-        }
-        return matching.toArray(new JavaMethod[matching.size()]);
-    }
-
-    @Override
     public ModelClass getSuperclass() {
         if (mClass.getSuperclass() == null) {
             return null;
@@ -223,13 +192,42 @@ public class JavaClass implements ModelClass {
     }
 
     @Override
-    public int getMinApi() {
-        return SdkUtil.getMinApi(this);
+    public ModelClass erasure() {
+        return this;
     }
 
     @Override
     public String getJniDescription() {
         return TypeUtil.getInstance().getDescription(this);
+    }
+
+    @Override
+    protected ModelField[] getDeclaredFields() {
+        Field[] fields = mClass.getDeclaredFields();
+        ModelField[] modelFields;
+        if (fields == null) {
+            modelFields = new ModelField[0];
+        } else {
+            modelFields = new ModelField[fields.length];
+            for (int i = 0; i < fields.length; i++) {
+                modelFields[i] = new JavaField(fields[i]);
+            }
+        }
+        return modelFields;
+    }
+
+    @Override
+    protected ModelMethod[] getDeclaredMethods() {
+        Method[] methods = mClass.getDeclaredMethods();
+        if (methods == null) {
+            return new ModelMethod[0];
+        } else {
+            ModelMethod[] classMethods = new ModelMethod[methods.length];
+            for (int i = 0; i < methods.length; i++) {
+                classMethods[i] = new JavaMethod(methods[i]);
+            }
+            return classMethods;
+        }
     }
 
     @Override

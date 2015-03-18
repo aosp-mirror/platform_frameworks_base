@@ -74,4 +74,29 @@
             android:id="@+id/textView15"
             android:layout_width="wrap_content" android:layout_height="wrap_content"
             android:text="@{obj2.method(`hello`)}"/>
+    <!-- confusing parameters may interfere with compile step -->
+    <TextView
+            android:id="@+id/textView16"
+            android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:text="@{obj.confusingPrimitive((Integer)1)}"/>
+    <TextView
+            android:id="@+id/textView17"
+            android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:text="@{`` + (obj.confusingPrimitive(2) / 2)}"/>
+    <TextView
+            android:id="@+id/textView18"
+            android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:text="@{obj.confusingInheritance(`hello`)}"/>
+    <TextView
+            android:id="@+id/textView19"
+            android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:text="@{obj.confusingTypeArgs(obj.getMap())}"/>
+    <TextView
+            android:id="@+id/textView20"
+            android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:text="@{obj.confusingParam(`hello`)}"/>
+    <TextView
+            android:id="@+id/textView21"
+            android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:text="@{obj.getList()[0]}"/>
 </LinearLayout>

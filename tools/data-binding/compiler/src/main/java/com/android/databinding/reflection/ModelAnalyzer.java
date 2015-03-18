@@ -19,11 +19,20 @@ import com.google.common.base.Preconditions;
 import com.android.databinding.reflection.annotation.AnnotationAnalyzer;
 import com.android.databinding.util.L;
 
+import java.io.IOException;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.List;
 import java.util.Map;
 import javax.annotation.processing.ProcessingEnvironment;
+import javax.lang.model.util.Types;
 
+/**
+ * This is the base class for several implementations of something that
+ * acts like a ClassLoader. Different implementations work with the Annotation
+ * Processor, ClassLoader, and an Android Studio plugin.
+ */
 public abstract class ModelAnalyzer {
 
     public static final String[] LIST_CLASS_NAMES = {
@@ -41,8 +50,6 @@ public abstract class ModelAnalyzer {
     public static final String STRING_CLASS_NAME = "java.lang.String";
 
     public static final String OBJECT_CLASS_NAME = "java.lang.Object";
-
-    static ModelAnalyzer instance;
 
     public static final String OBSERVABLE_CLASS_NAME = "android.binding.Observable";
 
@@ -65,27 +72,21 @@ public abstract class ModelAnalyzer {
     public static final String VIEW_DATA_BINDING =
             "com.android.databinding.library.ViewDataBinding";
 
+    private ModelClass[] mListTypes;
+    private ModelClass mMapType;
+    private ModelClass mStringType;
+    private ModelClass mObjectType;
+    private ModelClass mObservableType;
+    private ModelClass mObservableListType;
+    private ModelClass mObservableMapType;
+    private ModelClass[] mObservableFieldTypes;
+    private ModelClass mViewBindingType;
+
     private static ModelAnalyzer sAnalyzer;
 
     protected void setInstance(ModelAnalyzer analyzer) {
         sAnalyzer = analyzer;
     }
-
-    public abstract boolean isDataBinder(ModelClass modelClass);
-
-    public abstract Callable findMethod(ModelClass modelClass, String name,
-            List<ModelClass> args, boolean staticAccess);
-
-    public abstract boolean isObservable(ModelClass modelClass);
-
-    public abstract boolean isObservableField(ModelClass modelClass);
-
-    public abstract boolean isBindable(ModelField field);
-
-    public abstract boolean isBindable(ModelMethod method);
-
-    public abstract Callable findMethodOrField(ModelClass modelClass, String name,
-            boolean staticAccess);
 
     public ModelClass findCommonParentOf(ModelClass modelClass1,
             ModelClass modelClass2) {
@@ -212,4 +213,80 @@ public abstract class ModelAnalyzer {
     public abstract ModelClass findClass(Class classType);
 
     public abstract TypeUtil createTypeUtil();
+
+    ModelClass[] getListTypes() {
+        if (mListTypes == null) {
+            mListTypes = new ModelClass[LIST_CLASS_NAMES.length];
+            for (int i = 0; i < mListTypes.length; i++) {
+                final ModelClass modelClass = findClass(LIST_CLASS_NAMES[i], null);
+                if (modelClass != null) {
+                    mListTypes[i] = modelClass.erasure();
+                }
+            }
+        }
+        return mListTypes;
+    }
+
+    public ModelClass getMapType() {
+        if (mMapType == null) {
+            mMapType = loadClassErasure(MAP_CLASS_NAME);
+        }
+        return mMapType;
+    }
+
+    ModelClass getStringType() {
+        if (mStringType == null) {
+            mStringType = findClass(STRING_CLASS_NAME, null);
+        }
+        return mStringType;
+    }
+
+    ModelClass getObjectType() {
+        if (mObjectType == null) {
+            mObjectType = findClass(OBJECT_CLASS_NAME, null);
+        }
+        return mObjectType;
+    }
+
+    ModelClass getObservableType() {
+        if (mObservableType == null) {
+            mObservableType = findClass(OBSERVABLE_CLASS_NAME, null);
+        }
+        return mObservableType;
+    }
+
+    ModelClass getObservableListType() {
+        if (mObservableListType == null) {
+            mObservableListType = loadClassErasure(OBSERVABLE_LIST_CLASS_NAME);
+        }
+        return mObservableListType;
+    }
+
+    ModelClass getObservableMapType() {
+        if (mObservableMapType == null) {
+            mObservableMapType = loadClassErasure(OBSERVABLE_MAP_CLASS_NAME);
+        }
+        return mObservableMapType;
+    }
+
+    ModelClass getViewDataBindingType() {
+        if (mViewBindingType == null) {
+            mViewBindingType = findClass(VIEW_DATA_BINDING, null);
+        }
+        return mViewBindingType;
+    }
+
+    ModelClass[] getObservableFieldTypes() {
+        if (mObservableFieldTypes == null) {
+            mObservableFieldTypes = new ModelClass[OBSERVABLE_FIELDS.length];
+            for (int i = 0; i < OBSERVABLE_FIELDS.length; i++) {
+                mObservableFieldTypes[i] = loadClassErasure(OBSERVABLE_FIELDS[i]);
+            }
+        }
+        return mObservableFieldTypes;
+    }
+
+    private ModelClass loadClassErasure(String className) {
+        return findClass(className, null).erasure();
+    }
 }

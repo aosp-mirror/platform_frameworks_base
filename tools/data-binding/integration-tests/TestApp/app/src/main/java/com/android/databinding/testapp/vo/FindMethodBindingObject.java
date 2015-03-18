@@ -15,6 +15,12 @@
  */
 package com.android.databinding.testapp.vo;
 
+import android.util.ArrayMap;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
 public class FindMethodBindingObject extends FindMethodBindingObjectBase {
     public String method() { return "no arg"; }
 
@@ -29,6 +35,27 @@ public class FindMethodBindingObject extends FindMethodBindingObjectBase {
     public static Foo foo = new Foo();
 
     public static Bar<String> bar = new Bar<>();
+
+    public float confusingParam(int i) { return i; }
+    public String confusingParam(Object o) { return o.toString(); }
+
+    public int confusingPrimitive(int i) { return i; }
+    public String confusingPrimitive(Integer i) { return i.toString(); }
+
+    public float confusingInheritance(Object o) { return 0; }
+    public String confusingInheritance(String s) { return s; }
+    public int confusingInheritance(Integer i) { return i; }
+
+    public int confusingTypeArgs(List<String> s) { return 0; }
+    public String confusingTypeArgs(Map<String, String> s) { return "yay"; }
+
+    public ArrayMap<String, String> getMap() { return null; }
+
+    public List getList() {
+        ArrayList<String> vals = new ArrayList<>();
+        vals.add("hello");
+        return vals;
+    }
 
     public static class Foo {
         public final String bar = "hello world";

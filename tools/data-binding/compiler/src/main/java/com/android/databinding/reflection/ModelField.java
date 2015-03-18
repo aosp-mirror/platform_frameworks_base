@@ -15,5 +15,35 @@
  */
 package com.android.databinding.reflection;
 
-public interface ModelField {
+public abstract class ModelField {
+
+    /**
+     * @return Whether this field has been annotated with Bindable.
+     */
+    public abstract boolean isBindable();
+
+    /**
+     * @return The field name.
+     */
+    public abstract String getName();
+
+    /**
+     * @return true if this field is marked public.
+     */
+    public abstract boolean isPublic();
+
+    /**
+     * @return true if this is a static field.
+     */
+    public abstract boolean isStatic();
+
+    /**
+     * @return true if the field was declared final.
+     */
+    public abstract boolean isFinal();
+
+    /**
+     * @return The declared type of the field variable.
+     */
+    public abstract ModelClass getFieldType();
 }

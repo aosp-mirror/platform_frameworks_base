@@ -101,8 +101,8 @@ public class FieldAccessExpr extends Expr {
             ModelClass resolvedType = child.getResolvedType();
             L.d("resolving %s. Resolved type: %s", this, resolvedType);
 
-            mGetter = modelAnalyzer.findMethodOrField(resolvedType, mName, isStatic);
-            if (modelAnalyzer.isObservableField(mGetter.resolvedType)) {
+            mGetter = resolvedType.findGetterOrField(mName, isStatic);
+            if (mGetter.resolvedType.isObservableField()) {
                 // Make this the ".get()" and add an extra field access for the observable field
                 child.getParents().remove(this);
                 getChildren().remove(child);
@@ -112,7 +112,7 @@ public class FieldAccessExpr extends Expr {
 
                 getChildren().add(observableField);
                 observableField.getParents().add(this);
-                mGetter = modelAnalyzer.findMethodOrField(mGetter.resolvedType, "get", false);
+                mGetter = mGetter.resolvedType.findGetterOrField("get", false);
                 mName = "";
             }
         }

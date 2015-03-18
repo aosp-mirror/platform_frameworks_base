@@ -100,4 +100,14 @@ public class FindMethodTest
         TextView textView = mBinder.getTextView15();
         assertEquals("hello", textView.getText().toString());
     }
+
+    @UiThreadTest
+    public void testConfusingMethods() throws Throwable {
+        assertEquals("1", mBinder.getTextView16().getText().toString());
+        assertEquals("1", mBinder.getTextView17().getText().toString());
+        assertEquals("hello", mBinder.getTextView18().getText().toString());
+        assertEquals("yay", mBinder.getTextView19().getText().toString());
+        assertEquals("hello", mBinder.getTextView20().getText().toString());
+        assertEquals("hello", mBinder.getTextView21().getText().toString());
+    }
 }

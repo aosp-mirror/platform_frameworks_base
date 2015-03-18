@@ -14,34 +14,18 @@
 package com.android.databinding.reflection.java;
 
 import com.google.common.collect.ImmutableMap;
-import com.android.databinding.reflection.Callable;
+
 import com.android.databinding.reflection.ModelAnalyzer;
 import com.android.databinding.reflection.ModelClass;
-import com.android.databinding.reflection.ModelField;
-import com.android.databinding.reflection.ModelMethod;
 import com.android.databinding.reflection.SdkUtil;
 import com.android.databinding.reflection.TypeUtil;
 import com.android.databinding.util.L;
 
-import org.apache.commons.lang3.StringUtils;
-
-import android.binding.Bindable;
-import android.binding.Observable;
-import android.binding.ObservableList;
-import android.binding.ObservableMap;
-
 import java.io.File;
-import java.io.IOException;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.util.ArrayList;
-import java.util.Enumeration;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 public class JavaAnalyzer extends ModelAnalyzer {
@@ -56,192 +40,14 @@ public class JavaAnalyzer extends ModelAnalyzer {
                     .put("float", float.class)
                     .put("double", double.class)
                     .build();
-    private static final String BINDABLE_ANNOTATION_NAME = "android.binding.Bindable";
 
     private HashMap<String, JavaClass> mClassCache = new HashMap<String, JavaClass>();
 
     private final ClassLoader mClassLoader;
 
-    private final Class mObservable;
-
-    private final Class mObservableList;
-
-    private final Class mObservableMap;
-
-    private final Class[] mObservableFields;
-
-    private final Class mBindable;
-
-    private final boolean mTestMode;
-
-    private final Class mIViewDataBinder;
-
-    public JavaAnalyzer(ClassLoader classLoader, boolean testMode) {
+    public JavaAnalyzer(ClassLoader classLoader) {
         setInstance(this);
         mClassLoader = classLoader;
-        mTestMode = testMode;
-        try {
-            mIViewDataBinder = classLoader.loadClass(VIEW_DATA_BINDING);
-            mObservable = Observable.class;
-            mObservableList = ObservableList.class;
-            mObservableMap = ObservableMap.class;
-            mBindable = Bindable.class;
-            mObservableFields = new Class[OBSERVABLE_FIELDS.length];
-            for (int i = 0; i < OBSERVABLE_FIELDS.length; i++) {
-                mObservableFields[i] = classLoader.loadClass(getClassName(OBSERVABLE_FIELDS[i]));
-            }
-
-        } catch (ClassNotFoundException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    private String getClassName(String name) {
-        return name;
-    }
-
-    @Override
-    public boolean isDataBinder(ModelClass reflectionClass) {
-        JavaClass javaClass = (JavaClass) reflectionClass;
-        return mIViewDataBinder.isAssignableFrom(javaClass.mClass);
-    }
-
-    @Override
-    public Callable findMethod(ModelClass modelClass, String name, List<ModelClass> argClasses,
-            boolean staticAccess) {
-        Class klass = ((JavaClass) modelClass).mClass;
-        ArrayList<Class> args = new ArrayList<Class>(argClasses.size());
-        for (int i = 0; i < argClasses.size(); i++) {
-            args.add(((JavaClass) argClasses.get(i)).mClass);
-        }
-        // TODO implement properly
-        for (String methodName :  new String[]{"set" + StringUtils.capitalize(name), name}) {
-            for (Method method : klass.getMethods()) {
-                if (methodName.equals(method.getName()) && args.size() == method
-                        .getParameterTypes().length) {
-                    return new Callable(Callable.Type.METHOD, methodName,
-                            new JavaClass(method.getReturnType()), true, false);
-                }
-            }
-        }
-        L.e(new Exception(), "cannot find method %s in %s", name, klass);
-        throw new IllegalArgumentException(
-                "cannot find method " + name + " at class " + klass.getSimpleName());
-    }
-
-    @Override
-    public boolean isObservable(ModelClass modelClass) {
-        Class klass = ((JavaClass) modelClass).mClass;
-        return isObservable(klass);
-    }
-
-    private boolean isObservable(Class klass) {
-        return mObservable.isAssignableFrom(klass) || mObservableList.isAssignableFrom(klass) ||
-                mObservableMap.isAssignableFrom(klass);
-    }
-
-    @Override
-    public boolean isObservableField(ModelClass reflectionClass) {
-        Class klass = ((JavaClass) reflectionClass).mClass;
-        for (Class observableField : mObservableFields) {
-            if (observableField.isAssignableFrom(klass)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    @Override
-    public boolean isBindable(ModelField reflectionField) {
-        Field field = ((JavaField) reflectionField).mField;
-        return isBindable(field);
-    }
-
-    @Override
-    public boolean isBindable(ModelMethod reflectionMethod) {
-        Method method = ((JavaMethod) reflectionMethod).mMethod;
-        return isBindable(method);
-    }
-
-    private boolean isBindable(Field field) {
-        return field.getAnnotation(mBindable) != null;
-    }
-
-    private boolean isBindable(Method method) {
-        return method.getAnnotation(mBindable) != null;
-    }
-
-    @Override
-    public Callable findMethodOrField(ModelClass modelClass, String name, boolean staticAccess) {
-        final Class klass = ((JavaClass) modelClass).mClass;
-        for (String methodName :
-                new String[]{"get" + StringUtils.capitalize(name),
-                        "is" + StringUtils.capitalize(name), name}) {
-            try {
-                Method method = klass.getMethod(methodName);
-                Field backingField = findField(klass, name, true);
-                if (Modifier.isPublic(method.getModifiers())) {
-                    final Callable result = new Callable(Callable.Type.METHOD, methodName,
-                            new JavaClass(method.getReturnType()), true,
-                            isBindable(method) || (backingField != null && isBindable(backingField)) );
-                    L.d("backing field for %s is %s", result, backingField);
-                    return result;
-                }
-            } catch (Throwable t) {
-
-            }
-        }
-        try {
-            Field field = findField(klass, name, false);
-            if (Modifier.isPublic(field.getModifiers())) {
-                return new Callable(Callable.Type.FIELD, name, new JavaClass(field.getType()),
-                        !Modifier.isFinal(field.getModifiers())
-                                || isObservable(field.getType()), isBindable(field));
-            }
-        } catch (Throwable t) {
-
-        }
-        throw new IllegalArgumentException(
-                "cannot find " + name + " in " + klass.getCanonicalName());
-    }
-
-    private Field findField(Class klass, String name, boolean allowNonPublic) {
-        try {
-            return getField(klass, name, allowNonPublic);
-        } catch (NoSuchFieldException e) {
-
-        }
-        String capitalizedName = StringUtils.capitalize(name);
-
-        try {
-            return getField(klass, "m" + capitalizedName, allowNonPublic);
-        } catch (Throwable t){}
-        try {
-            return getField(klass, "_" + name, allowNonPublic);
-        } catch (Throwable t){}
-        try {
-            return getField(klass, "_" + capitalizedName, allowNonPublic);
-        } catch (Throwable t){}
-        try {
-            return getField(klass, "m_" + name, allowNonPublic);
-        } catch (Throwable t){}
-        try {
-            return getField(klass, "m_" + capitalizedName, allowNonPublic);
-        } catch (Throwable t){}
-        return null;
-    }
-
-    private Field getField(Class klass, String exactName, boolean allowNonPublic)
-            throws NoSuchFieldException {
-        try {
-            return klass.getField(exactName);
-        } catch (NoSuchFieldException e) {
-            if (allowNonPublic) {
-                return klass.getDeclaredField(exactName);
-            } else {
-                throw e;
-            }
-        }
     }
 
     @Override
@@ -321,8 +127,9 @@ public class JavaAnalyzer extends ModelAnalyzer {
         }
         String androidHome = env.get("ANDROID_HOME");
         if (androidHome == null) {
-            throw new IllegalStateException("you need to have ANDROID_HOME set in your environment"
-                    + " to run compiler tests");
+            throw new IllegalStateException(
+                    "you need to have ANDROID_HOME set in your environment"
+                            + " to run compiler tests");
         }
         File androidJar = new File(androidHome + "/platforms/android-21/android.jar");
         if (!androidJar.exists() || !androidJar.canRead()) {
@@ -334,7 +141,7 @@ public class JavaAnalyzer extends ModelAnalyzer {
         try {
             ClassLoader classLoader = new URLClassLoader(new URL[]{androidJar.toURI().toURL()},
                     ModelAnalyzer.class.getClassLoader());
-            new JavaAnalyzer(classLoader, true);
+            new JavaAnalyzer(classLoader);
         } catch (MalformedURLException e) {
             throw new RuntimeException("cannot create class loader", e);
         }

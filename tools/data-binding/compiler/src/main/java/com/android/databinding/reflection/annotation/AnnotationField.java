@@ -15,12 +15,16 @@
  */
 package com.android.databinding.reflection.annotation;
 
+import com.android.databinding.reflection.ModelClass;
 import com.android.databinding.reflection.ModelField;
 
+import android.binding.Bindable;
+
+import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
 
-class AnnotationField implements ModelField {
+class AnnotationField extends ModelField {
 
     final VariableElement mField;
 
@@ -34,6 +38,36 @@ class AnnotationField implements ModelField {
     @Override
     public String toString() {
         return mField.toString();
+    }
+
+    @Override
+    public boolean isBindable() {
+        return mField.getAnnotation(Bindable.class) != null;
+    }
+
+    @Override
+    public String getName() {
+        return mField.getSimpleName().toString();
+    }
+
+    @Override
+    public boolean isPublic() {
+        return mField.getModifiers().contains(Modifier.PUBLIC);
+    }
+
+    @Override
+    public boolean isStatic() {
+        return mField.getModifiers().contains(Modifier.STATIC);
+    }
+
+    @Override
+    public boolean isFinal() {
+        return mField.getModifiers().contains(Modifier.FINAL);
+    }
+
+    @Override
+    public ModelClass getFieldType() {
+        return new AnnotationClass(mField.asType());
     }
 
     @Override
