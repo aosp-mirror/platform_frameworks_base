@@ -3233,9 +3233,9 @@ public abstract class BatteryStats implements Parcelable {
         if (!didOne) sb.append(" (no activity)");
         pw.println(sb.toString());
 
-        final long wifiIdleTimeMs = getBluetoothControllerActivity(CONTROLLER_IDLE_TIME, which);
-        final long wifiRxTimeMs = getBluetoothControllerActivity(CONTROLLER_RX_TIME, which);
-        final long wifiTxTimeMs = getBluetoothControllerActivity(CONTROLLER_TX_TIME, which);
+        final long wifiIdleTimeMs = getWifiControllerActivity(CONTROLLER_IDLE_TIME, which);
+        final long wifiRxTimeMs = getWifiControllerActivity(CONTROLLER_RX_TIME, which);
+        final long wifiTxTimeMs = getWifiControllerActivity(CONTROLLER_TX_TIME, which);
         final long wifiTotalTimeMs = wifiIdleTimeMs + wifiRxTimeMs + wifiTxTimeMs;
 
         sb.setLength(0);

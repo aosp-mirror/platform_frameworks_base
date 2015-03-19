@@ -16,20 +16,26 @@
 
 package com.android.server.am;
 
+import android.bluetooth.BluetoothActivityEnergyInfo;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothHeadset;
 import android.bluetooth.BluetoothProfile;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
+import android.net.wifi.IWifiManager;
+import android.net.wifi.WifiActivityEnergyInfo;
 import android.os.BatteryStats;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.Looper;
+import android.os.Message;
 import android.os.Parcel;
 import android.os.ParcelFileDescriptor;
 import android.os.PowerManagerInternal;
 import android.os.Process;
+import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.UserHandle;
@@ -38,10 +44,12 @@ import android.telephony.SignalStrength;
 import android.telephony.TelephonyManager;
 import android.util.Slog;
 
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.app.IBatteryStats;
 import com.android.internal.os.BatteryStatsHelper;
 import com.android.internal.os.BatteryStatsImpl;
 import com.android.internal.os.PowerProfile;
+import com.android.server.FgThread;
 import com.android.server.LocalServices;
 
 import java.io.File;
@@ -59,15 +67,52 @@ public final class BatteryStatsService extends IBatteryStats.Stub
     static final String TAG = "BatteryStatsService";
 
     static IBatteryStats sService;
-    
     final BatteryStatsImpl mStats;
+    final BatteryStatsHandler mHandler;
     Context mContext;
     private boolean mBluetoothPendingStats;
     private BluetoothHeadset mBluetoothHeadset;
     PowerManagerInternal mPowerManagerInternal;
 
+    class BatteryStatsHandler extends Handler implements BatteryStatsImpl.ExternalStatsSync {
+        public static final int MSG_SYNC_EXTERNAL_STATS = 1;
+        public static final int MSG_WRITE_TO_DISK = 2;
+
+        public BatteryStatsHandler(Looper looper) {
+            super(looper);
+        }
+
+        @Override
+        public void handleMessage(Message msg) {
+            switch (msg.what) {
+                case MSG_SYNC_EXTERNAL_STATS:
+                    updateExternalStats();
+                    break;
+
+                case MSG_WRITE_TO_DISK:
+                    updateExternalStats();
+                    synchronized (mStats) {
+                        mStats.writeAsyncLocked();
+                    }
+                    break;
+            }
+        }
+
+        @Override
+        public void scheduleSync() {
+            if (!hasMessages(MSG_SYNC_EXTERNAL_STATS)) {
+                sendEmptyMessage(MSG_SYNC_EXTERNAL_STATS);
+            }
+        }
+    }
+
     BatteryStatsService(File systemDir, Handler handler) {
-        mStats = new BatteryStatsImpl(systemDir, handler);
+        // Our handler here will be accessing the disk, use a different thread than
+        // what the ActivityManagerService gave us (no I/O on that one!).
+        mHandler = new BatteryStatsHandler(FgThread.getHandler().getLooper());
+
+        // BatteryStatsImpl expects the ActivityManagerService handler, so pass that one through.
+        mStats = new BatteryStatsImpl(systemDir, handler, mHandler);
     }
     
     public void publish(Context context) {
@@ -92,6 +137,8 @@ public final class BatteryStatsService extends IBatteryStats.Stub
 
     public void shutdown() {
         Slog.w("BatteryStats", "Writing battery stats before shutdown...");
+
+        updateExternalStats();
         synchronized (mStats) {
             mStats.shutdownLocked();
         }
@@ -120,6 +167,14 @@ public final class BatteryStatsService extends IBatteryStats.Stub
      */
     public BatteryStatsImpl getActiveStatistics() {
         return mStats;
+    }
+
+    /**
+     * Schedules a write to disk to occur. This will cause the BatteryStatsImpl
+     * object to update with the latest info, then write to disk.
+     */
+    public void scheduleWriteToDisk() {
+        mHandler.sendEmptyMessage(BatteryStatsHandler.MSG_WRITE_TO_DISK);
     }
 
     // These are for direct use by the activity manager...
@@ -174,7 +229,10 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         //Slog.i("foo", "SENDING BATTERY INFO:");
         //mStats.dumpLocked(new LogPrinter(Log.INFO, "foo", Log.LOG_ID_SYSTEM));
         Parcel out = Parcel.obtain();
-        mStats.writeToParcel(out, 0);
+        updateExternalStats();
+        synchronized (mStats) {
+            mStats.writeToParcel(out, 0);
+        }
         byte[] data = out.marshall();
         out.recycle();
         return data;
@@ -186,7 +244,10 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         //Slog.i("foo", "SENDING BATTERY INFO:");
         //mStats.dumpLocked(new LogPrinter(Log.INFO, "foo", Log.LOG_ID_SYSTEM));
         Parcel out = Parcel.obtain();
-        mStats.writeToParcel(out, 0);
+        updateExternalStats();
+        synchronized (mStats) {
+            mStats.writeToParcel(out, 0);
+        }
         byte[] data = out.marshall();
         out.recycle();
         try {
@@ -663,6 +724,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         }
     }
 
+    @Override
     public void noteWifiMulticastDisabledFromSource(WorkSource ws) {
         enforceCallingPermission();
         synchronized (mStats) {
@@ -671,10 +733,10 @@ public final class BatteryStatsService extends IBatteryStats.Stub
     }
 
     @Override
-    public void noteNetworkInterfaceType(String iface, int type) {
+    public void noteNetworkInterfaceType(String iface, int networkType) {
         enforceCallingPermission();
         synchronized (mStats) {
-            mStats.noteNetworkInterfaceTypeLocked(iface, type);
+            mStats.noteNetworkInterfaceTypeLocked(iface, networkType);
         }
     }
 
@@ -715,7 +777,22 @@ public final class BatteryStatsService extends IBatteryStats.Stub
     public void setBatteryState(int status, int health, int plugType, int level,
             int temp, int volt) {
         enforceCallingPermission();
-        mStats.setBatteryState(status, health, plugType, level, temp, volt);
+        synchronized (mStats) {
+            final boolean onBattery = plugType == BatteryStatsImpl.BATTERY_PLUGGED_NONE;
+            if (mStats.isOnBattery() == onBattery) {
+                // The battery state has not changed, so we don't need to sync external
+                // stats immediately.
+                mStats.setBatteryStateLocked(status, health, plugType, level, temp, volt);
+                return;
+            }
+        }
+
+        // Sync external stats first as the battery has changed states. If we don't sync
+        // immediately here, we may not collect the relevant data later.
+        updateExternalStats();
+        synchronized (mStats) {
+            mStats.setBatteryStateLocked(status, health, plugType, level, temp, volt);
+        }
     }
     
     public long getAwakeTimeBattery() {
@@ -817,6 +894,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         return i;
     }
 
+
     @Override
     protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.DUMP)
@@ -865,7 +943,9 @@ public final class BatteryStatsService extends IBatteryStats.Stub
                         pw.println("Battery stats reset.");
                         noOutput = true;
                     }
+                    updateExternalStats();
                 } else if ("--write".equals(arg)) {
+                    updateExternalStats();
                     synchronized (mStats) {
                         mStats.writeSyncLocked();
                         pw.println("Battery stats written.");
@@ -934,6 +1014,10 @@ public final class BatteryStatsService extends IBatteryStats.Stub
                 flags &= ~BatteryStats.DUMP_INCLUDE_HISTORY;
             }
         }
+
+        // Fetch data from external sources and update the BatteryStatsImpl object with them.
+        updateExternalStats();
+
         if (useCheckinFormat) {
             List<ApplicationInfo> apps = mContext.getPackageManager().getInstalledApplications(0);
             if (isRealCheckin) {
@@ -948,7 +1032,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub
                                 in.unmarshall(raw, 0, raw.length);
                                 in.setDataPosition(0);
                                 BatteryStatsImpl checkinStats = new BatteryStatsImpl(
-                                        null, mStats.mHandler);
+                                        null, mStats.mHandler, null);
                                 checkinStats.readSummaryFromParcel(in);
                                 in.recycle();
                                 checkinStats.dumpCheckinLocked(mContext, pw, apps, flags,
@@ -975,6 +1059,87 @@ public final class BatteryStatsService extends IBatteryStats.Stub
                 if (writeData) {
                     mStats.writeAsyncLocked();
                 }
+            }
+        }
+    }
+
+    // Objects for extracting data from external sources.
+    private final Object mExternalStatsLock = new Object();
+
+    @GuardedBy("mExternalStatsLock")
+    private IWifiManager mWifiManager;
+
+    // WiFi keeps an accumulated total of stats, unlike Bluetooth.
+    // Keep the last WiFi stats so we can compute a delta.
+    @GuardedBy("mExternalStatsLock")
+    private WifiActivityEnergyInfo mLastInfo = new WifiActivityEnergyInfo(0, 0, 0, 0, 0, 0);
+
+    @GuardedBy("mExternalStatsLock")
+    private WifiActivityEnergyInfo pullWifiEnergyInfoLocked() {
+        if (mWifiManager == null) {
+            mWifiManager = IWifiManager.Stub.asInterface(
+                    ServiceManager.getService(Context.WIFI_SERVICE));
+            if (mWifiManager == null) {
+                return null;
+            }
+        }
+
+        try {
+            // We read the data even if we are not on battery. This is so that we keep the
+            // correct delta from when we should start reading (aka when we are on battery).
+            WifiActivityEnergyInfo info = mWifiManager.reportActivityInfo();
+            if (info != null && info.isValid()) {
+                // We will modify the last info object to be the delta, and store the new
+                // WifiActivityEnergyInfo object as our last one.
+                final WifiActivityEnergyInfo result = mLastInfo;
+                result.mTimestamp = info.getTimeStamp();
+                result.mStackState = info.getStackState();
+                result.mControllerTxTimeMs =
+                        info.getControllerTxTimeMillis()- mLastInfo.mControllerTxTimeMs;
+                result.mControllerRxTimeMs =
+                        info.getControllerRxTimeMillis() - mLastInfo.mControllerRxTimeMs;
+                result.mControllerIdleTimeMs =
+                        info.getControllerIdleTimeMillis() - mLastInfo.mControllerIdleTimeMs;
+                result.mControllerEnergyUsed =
+                        info.getControllerEnergyUsed() - mLastInfo.mControllerEnergyUsed;
+                mLastInfo = info;
+                return result;
+            }
+        } catch (RemoteException e) {
+            // Nothing to report, WiFi is dead.
+        }
+        return null;
+    }
+
+    @GuardedBy("mExternalStatsLock")
+    private BluetoothActivityEnergyInfo pullBluetoothEnergyInfoLocked() {
+        BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
+        if (adapter != null) {
+            BluetoothActivityEnergyInfo info = adapter.getControllerActivityEnergyInfo(
+                    BluetoothAdapter.ACTIVITY_ENERGY_INFO_REFRESHED);
+            if (info != null && info.isValid()) {
+                return info;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Fetches data from external sources (WiFi controller, bluetooth chipset) and updates
+     * batterystats with that information.
+     *
+     * We first grab a lock specific to this method, then once all the data has been collected,
+     * we grab the mStats lock and update the data.
+     */
+    void updateExternalStats() {
+        synchronized (mExternalStatsLock) {
+            final WifiActivityEnergyInfo wifiEnergyInfo = pullWifiEnergyInfoLocked();
+            final BluetoothActivityEnergyInfo bluetoothEnergyInfo = pullBluetoothEnergyInfoLocked();
+            synchronized (mStats) {
+                mStats.updateKernelWakelocksLocked();
+                mStats.updateMobileRadioStateLocked(SystemClock.elapsedRealtime());
+                mStats.updateWifiStateLocked(wifiEnergyInfo);
+                mStats.updateBluetoothStateLocked(bluetoothEnergyInfo);
             }
         }
     }

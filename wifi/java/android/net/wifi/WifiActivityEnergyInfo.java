@@ -26,12 +26,35 @@ import android.os.Parcelable;
  * @hide
  */
 public final class WifiActivityEnergyInfo implements Parcelable {
-    private final long mTimestamp;
-    private final int mStackState;
-    private final int mControllerTxTimeMs;
-    private final int mControllerRxTimeMs;
-    private final int mControllerIdleTimeMs;
-    private final int mControllerEnergyUsed;
+    /**
+     * @hide
+     */
+    public long mTimestamp;
+
+    /**
+     * @hide
+     */
+    public int mStackState;
+
+    /**
+     * @hide
+     */
+    public int mControllerTxTimeMs;
+
+    /**
+     * @hide
+     */
+    public int mControllerRxTimeMs;
+
+    /**
+     * @hide
+     */
+    public int mControllerIdleTimeMs;
+
+    /**
+     * @hide
+     */
+    public int mControllerEnergyUsed;
 
     public static final int STACK_STATE_INVALID = 0;
     public static final int STACK_STATE_STATE_ACTIVE = 1;
