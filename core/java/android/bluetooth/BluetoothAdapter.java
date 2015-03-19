@@ -18,6 +18,7 @@ package android.bluetooth;
 
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
+import android.annotation.SystemApi;
 import android.bluetooth.le.BluetoothLeAdvertiser;
 import android.bluetooth.le.BluetoothLeScanner;
 import android.bluetooth.le.ScanCallback;
@@ -207,6 +208,23 @@ public final class BluetoothAdapter {
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_REQUEST_ENABLE =
             "android.bluetooth.adapter.action.REQUEST_ENABLE";
+
+    /**
+     * Activity Action: Show a system activity that allows user to enable BLE scans even when
+     * Bluetooth is turned off.<p>
+     *
+     * Notification of result of this activity is posted using
+     * {@link android.app.Activity#onActivityResult}. The <code>resultCode</code> will be
+     * {@link android.app.Activity#RESULT_OK} if BLE scan always available setting is turned on or
+     * {@link android.app.Activity#RESULT_CANCELED} if the user has rejected the request or an
+     * error occurred.
+     *
+     * @hide
+     */
+    @SystemApi
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_REQUEST_BLE_SCAN_ALWAYS_AVAILABLE =
+            "android.bluetooth.adapter.action.REQUEST_BLE_SCAN_ALWAYS_AVAILABLE";
 
     /**
      * Broadcast Action: Indicates the Bluetooth scan mode of the local Adapter
@@ -915,6 +933,22 @@ public final class BluetoothAdapter {
         } catch (RemoteException e) {
             Log.e(TAG, "failed to get isMultipleAdvertisementSupported, error: ", e);
         }
+        return false;
+    }
+
+    /**
+     * Returns {@code true} if BLE scan is always available, {@code false} otherwise. <p>
+     *
+     * If this returns {@code true}, application can issue {@link BluetoothLeScanner#startScan} and
+     * fetch scan results even when Bluetooth is turned off.<p>
+     *
+     * To change this setting, use {@link #ACTION_REQUEST_BLE_SCAN_ALWAYS_AVAILABLE}.
+     *
+     * @hide
+     */
+    @SystemApi
+    public boolean isBleScanAlwaysAvailable() {
+        // TODO: implement after Settings UI change.
         return false;
     }
 
