@@ -96,6 +96,8 @@
 
 
 
+
+
 <html>
 <head>
 
@@ -111,7 +113,7 @@
 href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Roboto:light,regular,medium,thin,italic,mediumitalic,bold"
   title="roboto">
-<link href="/assets/css/default.css?v=4" rel="stylesheet" type="text/css">
+<link href="/assets/css/default.css?v=5" rel="stylesheet" type="text/css">
 
 
 
@@ -412,6 +414,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
                 <li><a href="/distribute/users/index.html">Get Users</a></li>
                 <li><a href="/distribute/engage/index.html">Engage &amp; Retain</a></li>
                 <li><a href="/distribute/monetize/index.html">Monetize</a></li>
+                <li><a href="/distribute/analyze/index.html">Analyze</a></li>
                 <li><a href="/distribute/tools/index.html">Tools &amp; Reference</a></li>
                 <li><a href="/distribute/stories/index.html">Developer Stories</a></li>
               </ul>
@@ -593,14 +596,14 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
 
   <li class="nav-section">
-    <div class="nav-section-header"><a href="/google/play/billing/index.html">
+    <div class="nav-section-header"><a href="/google/play/billing/index.html" zh-cn-lang="应用内结算">
       <span class="en">Google Play In-app Billing</span></a>
     </div>
     <ul>
-      <li><a href="/google/play/billing/billing_overview.html">
+      <li><a href="/google/play/billing/billing_overview.html" zh-cn-lang="应用内结算概述">
               <span class="en">Overview</span></a>
       </li>
-      <li class="nav-section"><div class="nav-section-header"><a href="/google/play/billing/api.html">
+      <li class="nav-section"><div class="nav-section-header"><a href="/google/play/billing/api.html" zh-cn-lang="应用内结算 API">
               <span class="en">Version 3 API</span></a></div>
               <ul>
               <li><a href="/google/play/billing/billing_integrate.html">
@@ -623,13 +626,13 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       <li><a href="/google/play/billing/billing_subscriptions.html">
               <span class="en">Subscriptions</span></a>
       </li>
-      <li><a href="/google/play/billing/billing_best_practices.html">
+      <li><a href="/google/play/billing/billing_best_practices.html" zh-cn-lang="安全性和设计">
               <span class="en">Security and Design</span></a>
       </li>
-      <li><a href="/google/play/billing/billing_testing.html">
+      <li><a href="/google/play/billing/billing_testing.html" zh-cn-lang="测试应用内结算">
               <span class="en">Testing In-app Billing</span></a>
       </li>
-      <li><a href="/google/play/billing/billing_admin.html">
+      <li><a href="/google/play/billing/billing_admin.html" zh-cn-lang="管理应用内结算">
               <span class="en">Administering In-app Billing</span></a>
       </li>
       <li><a href="/google/play/billing/versions.html">
@@ -663,21 +666,14 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
               <span class="en">HTTP</span></a></li>
               </ul>
         </li>
+        <li><a href="/google/gcm/server-ref.html">
+            <span class="en">Server Reference</span></a>
+        </li>
         <li><a href="/google/gcm/notifications.html">
               <span class="en">User Notifications</span></a>
         </li>
-        <li><a href="/google/gcm/adv.html">
-            <span class="en">Advanced Topics</span></a>
-        </li>
         <li><a href="/google/gcm/c2dm.html">
             <span class="en">Migration</span></a>
-        </li>
-        <li id="gcm-tree-list" class="nav-section">
-          <div class="nav-section-header">
-            <a href="/reference/gcm-packages.html">
-              <span class="en">Reference</span>
-            </a>
-          <div>
         </li>
       </ul>
   </li>
@@ -1024,7 +1020,7 @@ Summary:
         <span class="sympad"><a href="/reference/com/google/android/gms/appindexing/Action.Builder.html#put(java.lang.String, com.google.android.gms.appindexing.Thing)">put</a></span>(String key, <a href="/reference/com/google/android/gms/appindexing/Thing.html">Thing</a> value)</nobr>
         
         <div class="jd-descrdiv">
-          Specify optional properties of the content.
+          Sets a property of the action.
           
     
 
@@ -1047,7 +1043,7 @@ Summary:
         <span class="sympad"><a href="/reference/com/google/android/gms/appindexing/Action.Builder.html#put(java.lang.String, java.lang.String)">put</a></span>(String key, String value)</nobr>
         
         <div class="jd-descrdiv">
-          Specify optional properties of the content.
+          Sets a property of the action.
           
     
 
@@ -1067,10 +1063,10 @@ Summary:
             <a href="/reference/com/google/android/gms/appindexing/Action.Builder.html">Action.Builder</a></nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/appindexing/Action.Builder.html#setName(java.lang.String)">setName</a></span>(String name)</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/appindexing/Action.Builder.html#setActionStatus(java.lang.String)">setActionStatus</a></span>(String actionStatusType)</nobr>
         
         <div class="jd-descrdiv">
-          Specify the name of the content.
+          Specify the status of the action.
           
     
 
@@ -1090,10 +1086,10 @@ Summary:
             <a href="/reference/com/google/android/gms/appindexing/Action.Builder.html">Action.Builder</a></nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/appindexing/Action.Builder.html#setObject(com.google.android.gms.appindexing.Thing)">setObject</a></span>(<a href="/reference/com/google/android/gms/appindexing/Thing.html">Thing</a> thing)</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/appindexing/Action.Builder.html#setName(java.lang.String)">setName</a></span>(String name)</nobr>
         
         <div class="jd-descrdiv">
-          Specify the object of the action.
+          Sets the name of the action.
           
     
 
@@ -1113,10 +1109,33 @@ Summary:
             <a href="/reference/com/google/android/gms/appindexing/Action.Builder.html">Action.Builder</a></nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/appindexing/Action.Builder.html#setUrl(android.net.Uri)">setUrl</a></span>(Uri webUrl)</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/appindexing/Action.Builder.html#setObject(com.google.android.gms.appindexing.Thing)">setObject</a></span>(<a href="/reference/com/google/android/gms/appindexing/Thing.html">Thing</a> thing)</nobr>
         
         <div class="jd-descrdiv">
-          Specify the native app URL of the content.
+          Sets the object of the action.
+
+
+
+        </div>
+
+  </td></tr>
+
+
+
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            <a href="/reference/com/google/android/gms/appindexing/Action.Builder.html">Action.Builder</a></nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/appindexing/Action.Builder.html#setUrl(android.net.Uri)">setUrl</a></span>(Uri url)</nobr>
+
+        <div class="jd-descrdiv">
+          Sets the app URI of the action.
           
     
 
@@ -1196,7 +1215,7 @@ From class
         <span class="sympad"><a href="/reference/com/google/android/gms/appindexing/Thing.Builder.html#put(java.lang.String, com.google.android.gms.appindexing.Thing)">put</a></span>(String key, <a href="/reference/com/google/android/gms/appindexing/Thing.html">Thing</a> value)</nobr>
         
         <div class="jd-descrdiv">
-          Specify optional properties of the content.
+          Sets a property of the content.
           
     
 
@@ -1219,7 +1238,7 @@ From class
         <span class="sympad"><a href="/reference/com/google/android/gms/appindexing/Thing.Builder.html#put(java.lang.String, java.lang.String)">put</a></span>(String key, String value)</nobr>
         
         <div class="jd-descrdiv">
-          Specify optional properties of the content.
+          Sets a property of the content.
           
     
 
@@ -1242,7 +1261,7 @@ From class
         <span class="sympad"><a href="/reference/com/google/android/gms/appindexing/Thing.Builder.html#setDescription(java.lang.String)">setDescription</a></span>(String description)</nobr>
         
         <div class="jd-descrdiv">
-          Specify the optional description of the content.
+          Sets the optional description of the content.
           
     
 
@@ -1265,7 +1284,7 @@ From class
         <span class="sympad"><a href="/reference/com/google/android/gms/appindexing/Thing.Builder.html#setId(java.lang.String)">setId</a></span>(String id)</nobr>
         
         <div class="jd-descrdiv">
-          Specify the optional web URL of the content.
+          Sets the optional web URL of the content.
           
     
 
@@ -1288,7 +1307,7 @@ From class
         <span class="sympad"><a href="/reference/com/google/android/gms/appindexing/Thing.Builder.html#setName(java.lang.String)">setName</a></span>(String name)</nobr>
         
         <div class="jd-descrdiv">
-          Specify the name of the content.
+          Sets the name of the content.
           
     
 
@@ -1311,7 +1330,7 @@ From class
         <span class="sympad"><a href="/reference/com/google/android/gms/appindexing/Thing.Builder.html#setType(java.lang.String)">setType</a></span>(String type)</nobr>
         
         <div class="jd-descrdiv">
-          Specify optional schema.org type of the content.
+          Sets the schema.org type of the content.
           
     
 
@@ -1334,7 +1353,7 @@ From class
         <span class="sympad"><a href="/reference/com/google/android/gms/appindexing/Thing.Builder.html#setUrl(android.net.Uri)">setUrl</a></span>(Uri url)</nobr>
         
         <div class="jd-descrdiv">
-          Specify the native app URL of the content.
+          Sets the app URI of the content.
           
     
 
@@ -1691,7 +1710,7 @@ From class
     
 
       
-  <div class="jd-tagdata jd-tagdescr"><p>Specify optional properties of the content.</p></div>
+  <div class="jd-tagdata jd-tagdescr"><p>Sets a property of the action.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
       <table class="jd-tagtable">
@@ -1738,7 +1757,7 @@ From class
     
 
       
-  <div class="jd-tagdata jd-tagdescr"><p>Specify optional properties of the content.</p></div>
+  <div class="jd-tagdata jd-tagdescr"><p>Sets a property of the action.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
       <table class="jd-tagtable">
@@ -1754,6 +1773,39 @@ From class
         </tr>
       </table>
   </div>
+
+    </div>
+</div>
+
+
+<A NAME="setActionStatus(java.lang.String)"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+
+
+
+
+        <a href="/reference/com/google/android/gms/appindexing/Action.Builder.html">Action.Builder</a>
+      </span>
+      <span class="sympad">setActionStatus</span>
+      <span class="normal">(String actionStatusType)</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+
+
+
+  <div class="jd-tagdata jd-tagdescr"><p>Specify the status of the action.
+</p></div>
 
     </div>
 </div>
@@ -1785,13 +1837,13 @@ From class
     
 
       
-  <div class="jd-tagdata jd-tagdescr"><p>Specify the name of the content.</p></div>
+  <div class="jd-tagdata jd-tagdescr"><p>Sets the name of the action.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
       <table class="jd-tagtable">
         <tr>
           <th>name</td>
-          <td>Name of the content.
+          <td>The name of the action.
 </td>
         </tr>
       </table>
@@ -1827,8 +1879,17 @@ From class
     
 
       
-  <div class="jd-tagdata jd-tagdescr"><p>Specify the object of the action.
-</p></div>
+  <div class="jd-tagdata jd-tagdescr"><p>Sets the object of the action.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>thing</td>
+          <td>The object of the action. Must not be null.
+</td>
+        </tr>
+      </table>
+  </div>
 
     </div>
 </div>
@@ -1847,7 +1908,7 @@ From class
         <a href="/reference/com/google/android/gms/appindexing/Action.Builder.html">Action.Builder</a>
       </span>
       <span class="sympad">setUrl</span>
-      <span class="normal">(Uri webUrl)</span>
+      <span class="normal">(Uri url)</span>
     </h4>
       <div class="api-level">
         <div></div>
@@ -1860,13 +1921,13 @@ From class
     
 
       
-  <div class="jd-tagdata jd-tagdescr"><p>Specify the native app URL of the content.</p></div>
+  <div class="jd-tagdata jd-tagdescr"><p>Sets the app URI of the action.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
       <table class="jd-tagtable">
         <tr>
-          <th>webUrl</td>
-          <td>Set the deep-link in the
+          <th>url</td>
+          <td>The app URI of the action in the
  <a href="https://developers.google.com/app-indexing/">App Indexing</a> format.
 </td>
         </tr>
