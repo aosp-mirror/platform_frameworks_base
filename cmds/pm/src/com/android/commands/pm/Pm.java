@@ -892,6 +892,8 @@ public final class Pm {
                 installFlags |= PackageManager.INSTALL_INTERNAL;
             } else if (opt.equals("-d")) {
                 installFlags |= PackageManager.INSTALL_ALLOW_DOWNGRADE;
+            } else if (opt.equals("-g")) {
+                installFlags |= PackageManager.INSTALL_GRANT_RUNTIME_PERMISSIONS;
             } else if (opt.equals("--originating-uri")) {
                 originatingUriString = nextOptionData();
                 if (originatingUriString == null) {
@@ -1878,6 +1880,7 @@ public final class Pm {
         System.err.println("    -f: install application on internal flash");
         System.err.println("    -d: allow version code downgrade");
         System.err.println("    -p: partial application install");
+        System.err.println("    -g: grant all runtime permissions");
         System.err.println("    -S: size in bytes of entire session");
         System.err.println("");
         System.err.println("pm install-write: write a package into existing session; path may");

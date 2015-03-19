@@ -1014,6 +1014,15 @@ public class PackageManagerService extends IPackageManager.Stub {
                             res.removedInfo.sendBroadcast(false, true, false);
                             Bundle extras = new Bundle(1);
                             extras.putInt(Intent.EXTRA_UID, res.uid);
+
+                            // Now that we successfully installed the package, grant runtime
+                            // permissions if requested before broadcasting the install.
+                            if ((args.installFlags
+                                    & PackageManager.INSTALL_GRANT_RUNTIME_PERMISSIONS) != 0) {
+                                grantRequestedRuntimePermissions(res.pkg,
+                                        args.user.getIdentifier());
+                            }
+
                             // Determine the set of users who are adding this
                             // package for the first time vs. those who are seeing
                             // an update.
@@ -1230,6 +1239,32 @@ public class PackageManagerService extends IPackageManager.Stub {
 
                     break;
                 }
+            }
+        }
+    }
+
+    private void grantRequestedRuntimePermissions(PackageParser.Package pkg, int userId) {
+        if (userId >= UserHandle.USER_OWNER) {
+            grantRequestedRuntimePermissionsForUser(pkg, userId);
+        } else if (userId == UserHandle.USER_ALL) {
+            for (int someUserId : UserManagerService.getInstance().getUserIds()) {
+                grantRequestedRuntimePermissionsForUser(pkg, someUserId);
+            }
+        }
+    }
+
+    private void grantRequestedRuntimePermissionsForUser(PackageParser.Package pkg, int userId) {
+        SettingBase sb = (SettingBase) pkg.mExtras;
+        if (sb == null) {
+            return;
+        }
+
+        PermissionsState permissionsState = sb.getPermissionsState();
+
+        for (String permission : pkg.requestedPermissions) {
+            BasePermission bp = mSettings.mPermissions.get(permission);
+            if (bp != null && bp.isRuntime()) {
+                permissionsState.grantRuntimePermission(bp, userId);
             }
         }
     }

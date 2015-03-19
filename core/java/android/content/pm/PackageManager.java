@@ -378,6 +378,16 @@ public abstract class PackageManager {
     public static final int INSTALL_ALLOW_DOWNGRADE = 0x00000080;
 
     /**
+     * Flag parameter for {@link #installPackage} to indicate that all runtime
+     * permissions should be granted to the package. If {@link #INSTALL_ALL_USERS}
+     * is set the runtime permissions will be granted to all users, otherwise
+     * only to the owner.
+     *
+     * @hide
+     */
+    public static final int INSTALL_GRANT_RUNTIME_PERMISSIONS = 0x00000100;
+
+    /**
      * Flag parameter for
      * {@link #setComponentEnabledSetting(android.content.ComponentName, int, int)} to indicate
      * that you don't want to kill the app containing the component.  Be careful when you set this
