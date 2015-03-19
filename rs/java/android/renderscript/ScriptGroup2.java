@@ -345,11 +345,22 @@ public class ScriptGroup2 extends BaseObj {
     /**
        @hide Pending Android public API approval.
     */
+    public static final class Binding {
+        public Script.FieldID mField;
+        public Object mValue;
+        public Binding(Script.FieldID field, Object value) {
+            mField = field;
+            mValue = value;
+        }
+    }
+
+    /**
+       @hide Pending Android public API approval.
+    */
     public static final class Builder {
         RenderScript mRS;
         List<Closure> mClosures;
         List<UnboundValue> mInputs;
-
         private static final String TAG = "ScriptGroup2.Builder";
 
         public Builder(RenderScript rs) {
@@ -378,9 +389,49 @@ public class ScriptGroup2 extends BaseObj {
             return unbound;
         }
 
+        public Closure addKernel(Script.KernelID k, Type returnType, Object... argsAndBindings) {
+            ArrayList<Object> args = new ArrayList<Object>();
+            Map<Script.FieldID, Object> bindingMap = new HashMap<Script.FieldID, Object>();
+            if (!seperateArgsAndBindings(argsAndBindings, args, bindingMap)) {
+                return null;
+            }
+            return addKernel(k, returnType, args.toArray(), bindingMap);
+        }
+
+        public Closure addInvoke(Script.InvokeID invoke, Object... argsAndBindings) {
+            ArrayList<Object> args = new ArrayList<Object>();
+            Map<Script.FieldID, Object> bindingMap = new HashMap<Script.FieldID, Object>();
+            if (!seperateArgsAndBindings(argsAndBindings, args, bindingMap)) {
+                return null;
+            }
+            return addInvoke(invoke, args.toArray(), bindingMap);
+        }
+
         public ScriptGroup2 create(Future... outputs) {
             ScriptGroup2 ret = new ScriptGroup2(mRS, mClosures, mInputs, outputs);
             return ret;
+        }
+
+        private boolean seperateArgsAndBindings(Object[] argsAndBindings,
+                                                ArrayList<Object> args,
+                                                Map<Script.FieldID, Object> bindingMap) {
+            int i;
+            for (i = 0; i < argsAndBindings.length; i++) {
+                if (argsAndBindings[i] instanceof Binding) {
+                    break;
+                }
+                args.add(argsAndBindings[i]);
+            }
+
+            for (; i < argsAndBindings.length; i++) {
+                if (!(argsAndBindings[i] instanceof Binding)) {
+                    return false;
+                }
+                Binding b = (Binding)argsAndBindings[i];
+                bindingMap.put(b.mField, b.mValue);
+            }
+
+            return true;
         }
 
     }
