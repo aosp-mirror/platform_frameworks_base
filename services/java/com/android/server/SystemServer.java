@@ -561,6 +561,10 @@ public final class SystemServer {
             }
         }
 
+        // We start this here so that we update our configuration to set watch or television
+        // as appropriate.
+        mSystemServiceManager.startService(UiModeManagerService.class);
+
         try {
             mPackageManagerService.performBootDexOpt();
         } catch (Throwable e) {
@@ -836,8 +840,6 @@ public final class SystemServer {
             }
 
             mSystemServiceManager.startService(TwilightService.class);
-
-            mSystemServiceManager.startService(UiModeManagerService.class);
 
             mSystemServiceManager.startService(JobSchedulerService.class);
 
