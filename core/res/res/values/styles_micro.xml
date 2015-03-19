@@ -16,7 +16,7 @@
 <resources>
     <style name="Animation.Micro"/>
 
-    <style name="Animation.Micro.Activity" parent="Animation.Holo.Activity">
+    <style name="Animation.Micro.Activity" parent="Animation.Material.Activity">
         <item name="activityOpenEnterAnimation">@anim/slide_in_micro</item>
         <item name="activityOpenExitAnimation">@null</item>
         <item name="activityCloseEnterAnimation">@null</item>
@@ -35,7 +35,7 @@
         <item name="wallpaperIntraCloseExitAnimation">@null</item>
     </style>
 
-    <style name="AlertDialog.Micro" parent="AlertDialog.Holo.Light">
+    <style name="AlertDialog.Micro" parent="AlertDialog.Material.Light">
         <item name="fullDark">@null</item>
         <item name="topDark">@null</item>
         <item name="centerDark">@null</item>
@@ -55,19 +55,19 @@
         <item name="textAppearance">@style/TextAppearance.Micro.DialogWindowTitle</item>
     </style>
 
-    <style name="TextAppearance.Micro" parent="TextAppearance.Holo">
+    <style name="TextAppearance.Micro" parent="TextAppearance.Material">
         <item name="textSize">20sp</item>
         <item name="fontFamily">sans-serif-condensed-light</item>
         <item name="textColor">@color/micro_text_light</item>
     </style>
 
-    <style name="TextAppearance.Micro.DialogWindowTitle" parent="TextAppearance.Holo.DialogWindowTitle">
+    <style name="TextAppearance.Micro.DialogWindowTitle" parent="TextAppearance.Material.DialogWindowTitle">
         <item name="textSize">20sp</item>
         <item name="fontFamily">sans-serif-condensed-light</item>
         <item name="textColor">@color/micro_text_light</item>
     </style>
 
-    <style name="Widget.Micro" parent="Widget.Holo" />
+    <style name="Widget.Micro" parent="Widget.Material" />
 
     <style name="Widget.Micro.TextView">
         <item name="fontFamily">sans-serif-condensed</item>
