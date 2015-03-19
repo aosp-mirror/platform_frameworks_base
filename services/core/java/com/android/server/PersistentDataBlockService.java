@@ -70,6 +70,7 @@ public class PersistentDataBlockService extends SystemService {
     // Limit to 100k as blocks larger than this might cause strain on Binder.
     private static final int MAX_DATA_BLOCK_SIZE = 1024 * 100;
     public static final int DIGEST_SIZE_BYTES = 32;
+    private static final String OEM_UNLOCK_PROP = "sys.oem_unlock_allowed";
 
     private final Context mContext;
     private final String mDataBlockFile;
@@ -108,12 +109,15 @@ public class PersistentDataBlockService extends SystemService {
     }
 
     private void formatIfOemUnlockEnabled() {
-        if (doGetOemUnlockEnabled()) {
+        boolean enabled = doGetOemUnlockEnabled();
+        if (enabled) {
             synchronized (mLock) {
                 formatPartitionLocked();
                 doSetOemUnlockEnabledLocked(true);
             }
         }
+
+        SystemProperties.set(OEM_UNLOCK_PROP, enabled ? "1" : "0");
     }
 
     private void enforceOemUnlockPermission() {
@@ -133,7 +137,6 @@ public class PersistentDataBlockService extends SystemService {
             throw new SecurityException("Only the Owner is allowed to change OEM unlock state");
         }
     }
-
     private int getTotalDataSizeLocked(DataInputStream inputStream) throws IOException {
         // skip over checksum
         inputStream.skipBytes(DIGEST_SIZE_BYTES);
@@ -291,6 +294,7 @@ public class PersistentDataBlockService extends SystemService {
             Slog.e(TAG, "unable to access persistent partition", e);
             return;
         } finally {
+            SystemProperties.set(OEM_UNLOCK_PROP, enabled ? "1" : "0");
             IoUtils.closeQuietly(outputStream);
         }
     }
