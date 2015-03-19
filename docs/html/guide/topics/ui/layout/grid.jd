@@ -181,7 +181,7 @@ file.</p>
 <li>Run the application.</li>
 </ol>
 <p>You should see the following:</p>
-<img src="images/hello-tablelayout.png" width="150px" />
+<img src="{@docRoot}guide/topics/ui/images/hello-tablelayout.png" width="150px" />
 
 
 
