@@ -52,8 +52,7 @@ for REST APIs</a>.</p>
 
 <p class="note">
 <strong>Note:</strong> If you have an existing app that connects to Google Play services with a
-subclass of <a
-href="{@docRoot}reference/com/google/android/gms/common/GooglePlayServicesClient.html">{@code GooglePlayServicesClient}</a>, you should migrate to <a
+subclass of {@code GooglePlayServicesClient}, you should migrate to <a
 href="{@docRoot}reference/com/google/android/gms/common/api/GoogleApiClient.html">{@code
 GoogleApiClient}</a> as soon as possible.</p>
 
@@ -133,7 +132,9 @@ succeeds, fails, or becomes suspended.</p>
 API Client:</p>
 
 <pre>
-import gms.common.api.*;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.GoogleApiClient.ConnectionCallbacks;
+import com.google.android.gms.common.api.GoogleApiClient.OnConnectionFailedListener;
 import gms.drive.*;
 import android.support.v4.app.FragmentActivity;
 
@@ -206,20 +207,18 @@ href="{@docRoot}reference/com/google/android/gms/common/api/GoogleApiClient.html
 
 <p>However, if you run this code, there's a good chance it will fail and your app will receive a call
 to <a
-href="{@docRoot}reference/com/google/android/gms/common/GooglePlayServicesClient.OnConnectionFailedListener.html#onConnectionFailed(com.google.android.gms.common.ConnectionResult)"
+href="{@docRoot}reference/com/google/android/gms/common/api/GoogleApiClient.OnConnectionFailedListener.html#onConnectionFailed(com.google.android.gms.common.ConnectionResult)"
 >{@code onConnectionFailed()}</a> with the <a
 href="{@docRoot}reference/com/google/android/gms/common/ConnectionResult.html#SIGN_IN_REQUIRED"
 >{@code SIGN_IN_REQUIRED}</a> error because the user account
 has not been specified. The next section shows how to handle this error and others.</p>
 
 
-
-
 <h3 id="HandlingFailures">Handle connection failures</h3>
 
-<p>When you receive a call to the <a
-href="{@docRoot}reference/com/google/android/gms/common/GooglePlayServicesClient.OnConnectionFailedListener.html#onConnectionFailed(com.google.android.gms.common.ConnectionResult)"
->{@code onConnectionFailed()}</a> callback, you should call <a
+<p>When you receive a call to the
+<a href="{@docRoot}reference/com/google/android/gms/common/api/GoogleApiClient.OnConnectionFailedListener.html#onConnectionFailed(com.google.android.gms.common.ConnectionResult)">
+{@code onConnectionFailed()}</a> callback, you should call <a
 href="{@docRoot}reference/com/google/android/gms/common/ConnectionResult.html#hasResolution()"
 >{@code hasResolution()}</a> on the provided <a
 href="{@docRoot}reference/com/google/android/gms/common/ConnectionResult.html"
@@ -244,8 +243,9 @@ dialog may simply provide a message explaining the error, but it may also provid
 launch an activity that can resolve the error (such as when the user needs to install a newer
 version of Google Play services).</p>
 
-<p>For example, your <a
-href="{@docRoot}reference/com/google/android/gms/common/GooglePlayServicesClient.OnConnectionFailedListener.html#onConnectionFailed(com.google.android.gms.common.ConnectionResult)"
+<p>For example, your
+<a
+href="{@docRoot}reference/com/google/android/gms/common/api/GoogleApiClient.OnConnectionFailedListener.html#onConnectionFailed(com.google.android.gms.common.ConnectionResult)"
 >{@code onConnectionFailed()}</a> callback method should now look like this:</p>
 
 <pre>
@@ -365,9 +365,9 @@ if retained across activity instances, though. The next section explains further
 
 <h3 id="MaintainingState">Maintain state while resolving an error</h3>
 
-<p>To avoid executing the code in <a
-href="{@docRoot}reference/com/google/android/gms/common/GooglePlayServicesClient.OnConnectionFailedListener.html#onConnectionFailed(com.google.android.gms.common.ConnectionResult)"
->{@code onConnectionFailed()}</a> while a previous attempt to resolve an
+<p>To avoid executing the code in
+<a href="{@docRoot}reference/com/google/android/gms/common/api/GoogleApiClient.OnConnectionFailedListener.html#onConnectionFailed(com.google.android.gms.common.ConnectionResult)">
+{@code onConnectionFailed()}</a> while a previous attempt to resolve an
 error is ongoing, you need to retain a boolean that tracks whether your app is already attempting
 to resolve an error.</p>
 
