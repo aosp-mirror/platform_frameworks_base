@@ -85,8 +85,6 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
     // Runnables to finish the Recents activity
     FinishRecentsRunnable mFinishLaunchHomeRunnable;
 
-    private PhoneStatusBar mStatusBar;
-
     /**
      * A common Runnable to finish Recents either by calling finish() (with a custom animation) or
      * launching Home with some ActivityOptions.  Generally we always launch home when we exit
@@ -381,8 +379,6 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
         mEmptyViewStub = (ViewStub) findViewById(R.id.empty_view_stub);
         mDebugOverlayStub = (ViewStub) findViewById(R.id.debug_overlay_stub);
         mScrimViews = new SystemBarScrimViews(this, mConfig);
-        mStatusBar = ((SystemUIApplication) getApplication())
-                .getComponent(PhoneStatusBar.class);
         inflateDebugOverlay();
 
         // Bind the search app widget when we first start up
@@ -650,9 +646,9 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
 
     @Override
     public void onScreenPinningRequest() {
-        if (mStatusBar != null) {
-            mStatusBar.showScreenPinningRequest(false);
-        }
+        RecentsTaskLoader loader = RecentsTaskLoader.getInstance();
+        SystemServicesProxy ssp = loader.getSystemServicesProxy();
+        Recents.startScreenPinning(this, ssp);
     }
 
     /**** RecentsAppWidgetHost.RecentsAppWidgetHostCallbacks Implementation ****/

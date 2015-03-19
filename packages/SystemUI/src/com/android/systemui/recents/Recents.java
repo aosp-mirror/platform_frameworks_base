@@ -42,6 +42,7 @@ import android.view.View;
 import com.android.systemui.R;
 import com.android.systemui.RecentsComponent;
 import com.android.systemui.SystemUI;
+import com.android.systemui.SystemUIApplication;
 import com.android.systemui.recents.misc.Console;
 import com.android.systemui.recents.misc.SystemServicesProxy;
 import com.android.systemui.recents.model.RecentsTaskLoadPlan;
@@ -53,6 +54,7 @@ import com.android.systemui.recents.views.TaskStackView;
 import com.android.systemui.recents.views.TaskStackViewLayoutAlgorithm;
 import com.android.systemui.recents.views.TaskViewHeader;
 import com.android.systemui.recents.views.TaskViewTransform;
+import com.android.systemui.statusbar.phone.PhoneStatusBar;
 
 import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -79,6 +81,8 @@ public class Recents extends SystemUI
     // Owner proxy events
     final public static String ACTION_PROXY_NOTIFY_RECENTS_VISIBLITY_TO_OWNER =
             "action_notify_recents_visibility_change";
+    final public static String ACTION_PROXY_SCREEN_PINNING_REQUEST_TO_OWNER =
+            "action_screen_pinning_request";
 
     final public static String ACTION_START_ENTER_ANIMATION = "action_start_enter_animation";
     final public static String ACTION_TOGGLE_RECENTS_ACTIVITY = "action_toggle_recents_activity";
@@ -147,6 +151,9 @@ public class Recents extends SystemUI
             switch (intent.getAction()) {
                 case ACTION_PROXY_NOTIFY_RECENTS_VISIBLITY_TO_OWNER:
                     visibilityChanged(intent.getBooleanExtra(EXTRA_RECENTS_VISIBILITY, false));
+                    break;
+                case ACTION_PROXY_SCREEN_PINNING_REQUEST_TO_OWNER:
+                    onStartScreenPinning(context);
                     break;
             }
         }
@@ -234,6 +241,7 @@ public class Recents extends SystemUI
             mProxyBroadcastReceiver = new RecentsOwnerEventProxyReceiver();
             IntentFilter filter = new IntentFilter();
             filter.addAction(Recents.ACTION_PROXY_NOTIFY_RECENTS_VISIBLITY_TO_OWNER);
+            filter.addAction(Recents.ACTION_PROXY_SCREEN_PINNING_REQUEST_TO_OWNER);
             mContext.registerReceiverAsUser(mProxyBroadcastReceiver, UserHandle.CURRENT, filter,
                     null, mHandler);
         }
@@ -798,6 +806,27 @@ public class Recents extends SystemUI
     static void visibilityChanged(boolean visible) {
         if (sRecentsComponentCallbacks != null) {
             sRecentsComponentCallbacks.onVisibilityChanged(visible);
+        }
+    }
+
+    /** Notifies the status bar to trigger screen pinning. */
+    @ProxyFromAnyToPrimaryUser
+    public static void startScreenPinning(Context context, SystemServicesProxy ssp) {
+        if (ssp.isForegroundUserOwner()) {
+            onStartScreenPinning(context);
+        } else {
+            Intent intent = createLocalBroadcastIntent(context,
+                    ACTION_PROXY_SCREEN_PINNING_REQUEST_TO_OWNER);
+            context.sendBroadcastAsUser(intent, UserHandle.OWNER);
+        }
+    }
+    static void onStartScreenPinning(Context context) {
+        // For the primary user, the context for the SystemUI component is the SystemUIApplication
+        SystemUIApplication app = (SystemUIApplication)
+                getInstanceAndStartIfNeeded(context).mContext;
+        PhoneStatusBar statusBar = app.getComponent(PhoneStatusBar.class);
+        if (statusBar != null) {
+            statusBar.showScreenPinningRequest(false);
         }
     }
 
