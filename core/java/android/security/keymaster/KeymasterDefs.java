@@ -37,6 +37,7 @@ public final class KeymasterDefs {
     public static final int KM_BOOL = 7 << 28;
     public static final int KM_BIGNUM = 8 << 28;
     public static final int KM_BYTES = 9 << 28;
+    public static final int KM_LONG_REP = 10 << 28;
 
     // Tag values.
     public static final int KM_TAG_INVALID = KM_INVALID | 0;
@@ -66,9 +67,10 @@ public final class KeymasterDefs {
 
     public static final int KM_TAG_ALL_USERS = KM_BOOL | 500;
     public static final int KM_TAG_USER_ID = KM_INT | 501;
-    public static final int KM_TAG_NO_AUTH_REQUIRED = KM_BOOL | 502;
-    public static final int KM_TAG_USER_AUTH_ID = KM_INT_REP | 503;
-    public static final int KM_TAG_AUTH_TIMEOUT = KM_INT | 504;
+    public static final int KM_TAG_USER_SECURE_ID = KM_LONG_REP | 502;
+    public static final int KM_TAG_NO_AUTH_REQUIRED = KM_BOOL | 503;
+    public static final int KM_TAG_USER_AUTH_ID = KM_INT_REP | 504;
+    public static final int KM_TAG_AUTH_TIMEOUT = KM_INT | 505;
 
     public static final int KM_TAG_ALL_APPLICATIONS = KM_BOOL | 600;
     public static final int KM_TAG_APPLICATION_ID = KM_BYTES | 601;
@@ -82,6 +84,7 @@ public final class KeymasterDefs {
     public static final int KM_TAG_ASSOCIATED_DATA = KM_BYTES | 1000;
     public static final int KM_TAG_NONCE = KM_BYTES | 1001;
     public static final int KM_TAG_CHUNK_LENGTH = KM_INT | 1002;
+    public static final int KM_TAG_AUTH_TOKEN = KM_BYTES | 1003;
 
     // Algorithm values.
     public static final int KM_ALGORITHM_RSA = 1;
