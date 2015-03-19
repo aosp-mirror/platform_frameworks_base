@@ -24,6 +24,7 @@ import com.android.server.wm.WindowManagerService.H;
 import android.content.ClipData;
 import android.content.ClipDescription;
 import android.graphics.Point;
+import android.graphics.Rect;
 import android.graphics.Region;
 import android.os.IBinder;
 import android.os.Message;
@@ -63,6 +64,7 @@ class DragState {
     Display mDisplay;
 
     private final Region mTmpRegion = new Region();
+    private final Rect mTmpRect = new Rect();
 
     DragState(WindowManagerService service, IBinder token, SurfaceControl surface,
             int flags, IBinder localWin) {
@@ -408,6 +410,12 @@ class DragState {
             }
             if ((flags & WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE) != 0) {
                 // not touchable == don't tell about drags
+                continue;
+            }
+
+            child.getStackBounds(mTmpRect);
+            if (!mTmpRect.contains(x, y)) {
+                // outside of this window's activity stack == don't tell about drags
                 continue;
             }
 
