@@ -12,24 +12,25 @@ header.hide=1
 
 <div class="col-6">
 
-<h1 itemprop="name" style="margin-bottom:0;">Location APIs</h1>
+<h1 itemprop="name" style="margin-bottom:0;">Location &amp; Places</h1>
 <p itemprop="description">
     The location APIs make it easy for you to build location-aware applications, without needing to
-    focus on the details of the underlying location technology. They also let you minimize
-    power consumption by using all of the capabilities of the device hardware.
+    focus on the details of the underlying location technology. The related Places APIs also help
+    your app identify real-world points of interest near the user.
 </p>
-
 <p>
     To get started, first <a href="{@docRoot}google/play-services/setup.html">set up</a>
-    the Google Play services SDK. You can learn how to use the APIs in the training
-    class <a href="{@docRoot}training/location/index.html">Making Your App Location Aware</a>, 
-    and details are available in the <a href="{@docRoot}reference/com/google/android/gms/location/package-summary.html">Location API reference</a>. <!-- To look at a code example, <a href="">download the sample app</a>. -->
+    the Google Play services SDK. To learn how to identify the user's location, see
+    <a href="{@docRoot}training/location/index.html">Making Your App Location Aware</a>, or to
+    identify nearby places, see the
+<a href="https://developers.google.com/places/android">Google Places API for Android</a>
+developer guide.
 </p>
 </div>
 </div>
 <div class="landing-docs">
   <h3 style="clear:left">Key Developer Features</h3>
-  <div class="layout-content-row">
+  <div class="layout-content-row normal-links">
   <div class="layout-content-col span-6">
 
 
@@ -74,9 +75,37 @@ header.hide=1
 </div>
 
 <div class="layout-content-col span-6">
+
+<h4 style="font-weight:bold">Places API</h4>
+
+<p>The <a href="https://developers.google.com/places/android/">Google
+Places API for Android</a> helps you build location-aware apps
+that respond contextually to the local businesses and other places near the
+device:</p>
+
+<ul>
+<li>Use the built-in
+  <a href="https://developers.google.com/places/android/placepicker">place
+  picker</a> UI widget, allowing users to select a place on an interactive
+  map.</li>
+<li>Identify the user's
+  <a href="https://developers.google.com/places/android/current-place">current
+  place</a>, such as a local business, point of interest, or other geographic location.</li>
+<li>Retrieve and display rich
+  <a href="https://developers.google.com/places/android/place-details">information
+  about a place</a>.</li>
+<li>Make it easy to enter place names and addresses, by
+  <a href="https://developers.google.com/places/android/autocomplete">autocompleting</a>
+  your users' queries as they type.</li>
+<li>Differentiate your app by supplying up-to-date local information, and
+  <a href="https://developers.google.com/places/android/add-place">adding
+  places</a> to Google's Places database.</li>
+</ul>
+
+
 <h4 style="font-weight:bold">Activity recognition</h4>
 
-<p>With apps becoming increasingly contextual, understanding what the user is doing is critical to surfacing the right content. The Activity recognition API makes it easy to check the user’s current activity&mdash;still, walking, cycling, and in-vehicle&mdash;with very efficient use of the battery.</p>
+<p>The Activity recognition API makes it easy to check the user’s current activity&mdash;still, walking, cycling, and in-vehicle&mdash;with very efficient use of the battery:</p>
 <ul>
     <li>
         <em>Optimized for battery</em>: Uses low-power sensors to recognize the user's current physical activity.
@@ -87,8 +116,8 @@ header.hide=1
         navigation app can request more frequent updates when the user is driving.
     </li>
     <li>
-        <em>Features for advanced applications</em>: For advanced applications that want to do their own
-        post-processing, this API also makes available confidence values for each of the activities.
+        <em>Advanced activity detection</em>: For apps that want to do their own
+        post-processing, the activity APIs provide confidence values for each of the activities.
         It also includes two activities that indicate unreliable measurements: unknown and tilt.
     </li>
 </ul>
