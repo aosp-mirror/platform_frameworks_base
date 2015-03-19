@@ -40,7 +40,6 @@
 #include <rsEnv.h>
 #include <gui/Surface.h>
 #include <gui/GLConsumer.h>
-#include <gui/Surface.h>
 #include <android_runtime/android_graphics_SurfaceTexture.h>
 
 //#define LOG_API ALOGE
