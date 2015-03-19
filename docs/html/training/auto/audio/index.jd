@@ -466,10 +466,4 @@ to be played over the car's speakers.</p>
 <p>For more information about playing audio content, see
 <a href="{@docRoot}guide/topics/media/mediaplayer.html">Media Playback</a>,
 <a href="{@docRoot}training/managing-audio/index.html">Managing Audio Playback</a>, and
-<a href="{@docRoot}guide/topics/media/exoplayer.html">ExoPlayer</a>.
-
-
-(for example, by using a {@link
-android.media.MediaPlayer} or <a
-href="{@docRoot}guide/topics/media/exoplayer.html">ExoPlayer</a>). If the phone
-is connected to an Auto device, .</p>
+<a href="{@docRoot}guide/topics/media/exoplayer.html">ExoPlayer</a>.</p>
