@@ -1,0 +1,369 @@
+page.title=Getting Started with SafetyNet
+parent.title=SafetyNet for Android
+parent.link=index.html
+@jd:body
+
+
+<div id="qv-wrapper">
+<div id="qv">
+
+  <h2>In this document</h2>
+  <ol>
+  <li><a href="#tos">Additional Terms of Service</a></li>
+  <li><a href="#connect-play">Connect to Play Services</a></li>
+  <li><a href="#cts-check">Requesting a Compatibility Check</a>
+    <ol>
+      <li><a href="#single-use-token">Obtain Single Use Token</a></li>
+      <li><a href="#compat-check-request">Send Compatibility Check Request</a></li>
+      <li><a href="#compat-check-response">Read Compatibility Check Response</a></li>
+      <li><a href="#verify-compat-check">Verify Compatibility Check Response</a></li>
+    </ol>
+  </li>
+  </ol>
+
+</div>
+</div>
+
+<p>
+  SafetyNet provides services for analyzing the configuration of a particular device, to make sure
+  that apps function properly on a particular device and that users have a great experience.
+</p>
+
+<p>
+  The service provides an API your app can use to analyze the device where it is installed. The API
+  uses software and hardware information on the device where your app is installed to create a
+  profile of that device. The service then attempts to match it to a list of device models that
+  have passed Android compatibility testing. This check can help you decide if the device is
+  configured in a way that is consistent with the Android platform specifications and has the
+  capabilities to run your app.
+</p>
+
+<p>
+  This document shows you how to use SafetyNet for analyzing a device and help you determine if
+  your app will function as expected on that device.
+</p>
+
+<h2 id="tos">
+  Additional Terms of Service
+</h2>
+
+<p>
+  By accessing or using the SafetyNet APIs, you agree to the <a href=
+  "https://developers.google.com/terms/">Google APIs Terms of Service</a>, and to these Additional
+  Terms. Please read and understand all applicable terms and policies before accessing the APIs.
+</p>
+
+<div class="sdk-terms" onfocus="this.blur()" style="width:678px">
+<h3 class="norule">SafetyNet Terms of Service</h3>
+As with any data collected in large volume from in-the-field observation, there is a chance of
+both false positives and false negatives. We are presenting the data to the best of our
+understanding. We extensively test our detection mechanisms to ensure accuracy, and we are
+committed to improving those methods over time to ensure they continue to remain accurate.
+
+You agree to comply with all applicable law, regulation, and third party rights (including
+without limitation laws regarding the import or export of data or software, privacy, and local
+laws). You will not use the APIs to encourage or promote illegal activity or violation of third
+party rights. You will not violate any other terms of service with Google (or its affiliates).
+
+You acknowledge and understand that the SafetyNet API works by collecting hardware and software
+information, such as device and application data and the results of integrity checks, and sending
+that data to Google for analysis. Pursuant to Section 3(d) of the
+<a href= "https://developers.google.com/terms/">Google APIs Terms of Service</a>, you agree that if you use the APIs that it is your responsibility to provide any necessary notices or consents for the collection and sharing of this data with Google.
+</div>
+
+<h2 id="connect-play">
+  Connect to Google Play Services
+</h2>
+
+<p>
+  The SafetyNet API is part of Google Play services. To connect to the API, you need to create an
+  instance of the Google Play services API client. For details about using the client in your app,
+  see <a href="{@docRoot}google/auth/api-client.html#Starting">Accessing Google
+  APIs</a>. Once you have established a connection to Google Play services, you can use the Google
+  API client classes to connect to the SafetyNet API.
+</p>
+
+<p>
+  To connect to the API, in your activity's <a href=
+  "{@docRoot}reference/android/app/Activity.html#onCreate(android.os.Bundle)">onCreate()</a>
+  method, create an instance of Google API Client using <a href=
+  "{@docRoot}reference/com/google/android/gms/common/api/GoogleApiClient.Builder.html">
+  {@code GoogleApiClient.Builder}</a>. Use the builder to add the SafetyNet API, as shown in the
+  following code example:
+</p>
+
+<pre>
+protected synchronized void buildGoogleApiClient() {
+    mGoogleApiClient = new GoogleApiClient.Builder(this)
+            .addApi(SafetyNet.API)
+            .addConnectionCallbacks(myMainActivity.this)
+            .build();
+}
+</pre>
+
+<p class="note">
+  <strong>Note:</strong> You can only call these methods after your app has established a connection to
+  Google Play services by receiving the <a href=
+  "{@docRoot}reference/com/google/android/gms/common/api/GoogleApiClient.ConnectionCallbacks.html#onConnected(android.os.Bundle)">
+  {@code onConnected()}</a> callback. For details about listening for a completed client connection,
+  see <a href="{@docRoot}google/auth/api-client.html#Starting">Accessing Google APIs</a>.
+</p>
+
+<h2 id="cts-check">
+  Requesting a Compatibility Check
+</h2>
+
+<p>
+  A SafetyNet compatibility check allows your app to check if the device where it is running
+  matches the profile of a device that has passed Android compatibility testing. The compatibility
+  check creates a device profile by gathering information about the device hardware and software
+  characteristics, including the platform build.
+</p>
+
+<p>
+  Using the API to perform a check requires a few implementation steps in your app. Once you have
+  established a connection to Google Play services and requested the SafetyNet API from the Google
+  API client, your app can then perform the following steps to use the service:
+</p>
+
+<ul>
+  <li>Obtain a single use token
+  </li>
+
+  <li>Send the compatibility check request
+  </li>
+
+  <li>Read the response
+  </li>
+
+  <li>Validate the response
+  </li>
+</ul>
+
+<p>
+  For more information about Android compatibility testing, see <a href=
+  "https://source.android.com/compatibility/index.html" class="external-link">
+  Android Compatibility</a> and the <a href=
+  "https://source.android.com/compatibility/cts-intro.html" class="external-link">
+  Compatibility Testing Suite</a> (CTS).
+</p>
+
+<p>
+  SafetyNet checks use network resources, and so the speed of responses to requests can vary,
+  depending on a device's network connection status. The code described in this section should be
+  executed outside of your app's main execution thread, to avoid pauses and unresponsiveness in
+  your app user interface. For more information about using separate execution threads, see
+  <a href="{@docRoot}training/multiple-threads/index.html">Sending Operations
+  to Multiple Threads</a>.
+</p>
+
+<h3 id="single-use-token">
+  Obtain a single use token
+</h3>
+
+<p>
+  The SafetyNet API uses security techniques to help you verify the integrity of the communications
+  between your app and the service. When you request a compatibility check, you must provide a
+  single use token in the form of a number used once, or <em>nonce</em>, as part of your request. A
+  nonce is a random token generated in a cryptographically secure manner.
+</p>
+
+<p>
+  You can obtain a nonce by generating one within your app each time you make a compatibility check
+  request. As a more secure option, you can obtain a nonce from your own server, using a secure
+  connection.
+</p>
+
+<p>
+  A nonce used with a SafetyNet request should be at least 16 bytes in length. After you make a
+  check request, the response from the SafetyNet service includes your nonce, so you can verify it
+  against the one you sent. As the name indicates, you should only use a nonce value once, for a
+  single check request. Use a different nonce for any subsequent check requests. For tips on using
+  cryptography functions, see <a href=
+  "{@docRoot}training/articles/security-tips.html#Crypto">Security Tips</a>.
+</p>
+
+<h3 id="compat-check-request">
+  Send the compatibility check request
+</h3>
+
+<p>
+  After you have established a connection to Google Play services and created a nonce, you are
+  ready to make a compatibility check request. Since the response to your request may not be
+  immediate, you set up a callback listener to catch the response from the service, as shown in the
+  following code example:
+</p>
+
+<pre>
+byte[] nonce = getRequestNonce(); // Should be at least 16 bytes in length.
+SafetyNet.SafetyNetApi.attest(mGoogleApiClient, nonce)
+        .setResultCallback(new ResultCallback&lt;SafetyNetApi.AttestationResult&gt;() {
+
+    &#64;Override
+    public void onResult(SafetyNetApi.AttestationResult result) {
+        Status status = result.getStatus();
+        if (status.isSuccess()) {
+            // Indicates communication with the service was successful.
+            // result.getJwsResult() contains the result data
+        } else {
+            // An error occurred while communicating with the service
+        }
+    }
+});
+</pre>
+
+<p>
+  The <a href=
+  "{@docRoot}reference/com/google/android/gms/common/api/Status.html#isSuccess()">
+  {@code isSuccess()}</a>
+  method indicates whether or not communication with the service was successful, but does not
+  indicate if the device has passed the compatibility check. The next section discusses how to read
+  the check result and verify its integrity.
+</p>
+
+<h3 id="compat-check-response">
+  Read the compatibility check response
+</h3>
+
+<p>
+  When your app communicates with SafetyNet, the service provides a response containing the result
+  and additional information to help you verify the integrity of the message. The result is
+  provided as a <a href=
+  "{@docRoot}reference/com/google/android/gms/safetynet/SafetyNetApi.html">
+  {@code AttestationResult}</a>
+  object. Use the <a href=
+  "{@docRoot}reference/com/google/android/gms/safetynet/SafetyNetApi.AttestationResult.html#getJwsResult()">
+{@code getJwsResult()}</a> method of this object to obtain the data of the request. The response is
+  formatted as a <a href="https://tools.ietf.org/html/draft-ietf-jose-json-web-signature-36" class="external-link">
+  JSON Web Signature</a> (JWS), the following JWS excerpt shows the format of the payload data:
+</p>
+
+<pre>
+{
+"nonce": "R2Rra24fVm5xa2Mg",
+"timestampMs": 9860437986543,
+"apkPackageName": "com.package.name.of.requesting.app",
+"apkCertificateDigestSha256": ["base64 encoded, SHA-256 hash of the
+certificate used to sign requesting app"],
+"apkDigestSha256": "base64 encoded, SHA-256 hash of the app's APK",
+"ctsProfileMatch": true,
+}
+</pre>
+
+<p>
+  If the value of {@code ctsProfileMatch} is {@code true}, this indicates that the device
+  profile matches a device that has passed Android compatibility testing. If the output of the
+  <a href=
+  "{@docRoot}reference/com/google/android/gms/safetynet/SafetyNetApi.AttestationResult.html#getJwsResult()">
+{@code getJwsResult()}</a> method is null or contains an {@code error:} field, then communication
+  with the service failed and should be retried. You should use an <a href=
+  "{@docRoot}google/gcm/gcm.html#retry">exponential backoff</a> technique for
+  retries, to avoid flooding the service with additional requests.
+</p>
+
+<h3 id="verify-compat-check">
+  Verify the compatibility check response
+</h3>
+
+<p>
+  You should take steps to make sure the response received by your app actually came from the
+  SafetyNet service and matches the request data you provided. Follow these steps to verify the
+  origin of the JWS message:
+</p>
+
+<ul>
+  <li>Extract the SSL certificate chain from the JWS message.
+  </li>
+
+  <li>Validate the SSL certificate chain and use SSL hostname matching to verify that the leaf
+  certificate was issued to the hostname {@code attest.android.com}.
+  </li>
+
+  <li>Use the certificate to verify the signature of the JWS message.
+  </li>
+</ul>
+
+<p>
+  After completing this validation, you should also check the data of the JWS message to make sure
+  it matches your original request, including the nonce, timestamp, package name, and the SHA-256
+  hashes. You can perform these validation steps within your app, or as a more secure option, send
+  the entire JWS response to your own server for verification, via a secure connection.
+</p>
+
+<h4>
+  Validating the response with Google APIs
+</h4>
+
+<p>
+  Google provides an Android Device Verification API for validating the output of the SafetyNet
+  compatibility check. This API performs a validation check on the JWS message returned from the
+  SafetyNet service.
+</p>
+
+<p>
+  To enable access to the Android Device Verification API:
+</p>
+
+<ol>
+  <li>Go to the <a href="https://console.developers.google.com/" class="external-link">
+    Google Developers Console</a>.
+  </li>
+
+  <li>Select a project, or create a new one.
+  </li>
+
+  <li>In the sidebar on the left, expand <strong>APIs &amp; auth</strong>.
+    Next, click <strong>APIs</strong>. In the
+  list of APIs, make sure all of the APIs you are using show a status of <strong>ON</strong>.
+  </li>
+
+  <li>In the <strong>Browse APIs</strong> list, find the
+    <strong>Android Device Verification API</strong> and turn it
+  on.
+  </li>
+
+  <li>Obtain your API key by expanding <strong>APIs &amp; auth</strong> and
+    clicking <strong>Credentials</strong>.
+  Record the <strong>API KEY</strong> value on this page for later use.
+  </li>
+</ol>
+
+<p>
+  After enabling this API for your project, you can call the verification service from your app or
+  server. You need the contents of the JWS message from the SafetyNet API and your API key to call
+  the verification API and get a result.
+</p>
+
+<p>
+  To use the Android Device Verification API:
+</p>
+
+<ol>
+  <li>Create a JSON message containing the entire contents of the JWS message in the following
+  format:
+<pre>
+{ "signedAttestation": "&lt;output of getJwsResult()&gt;" }
+</pre>
+  </li>
+
+  <li>Use an HTTP POST request to send the message with a Content-Type of {@code "application/json"}
+  to the following URL:
+<pre>
+https&#58;&#47;&#47;www.googleapis.com/androidcheck/v1/attestations/verify?key=&lt;your API key&gt;
+</pre>
+  </li>
+
+  <li>The service validates the integrity of the message, and if the message is valid, it returns a
+  JSON message with the following contents:
+
+<pre>
+{ “isValidSignature”: true }
+</pre>
+  </li>
+</ol>
+
+<p>
+  <strong>Important:</strong> This use of the Android Device Verification API only validates that the
+  provided JWS message was received from the SafetyNet service. It <em>does not</em> verify that the
+  payload data matches your original compatibility check request.
+</p>
