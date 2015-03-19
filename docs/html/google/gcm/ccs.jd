@@ -13,16 +13,14 @@ page.title=GCM Cloud Connection Server (XMPP)
       <li><a href="#auth">Authentication</a></li>
       </ol>
       </li>
-    <li><a href="#format">Message Format</a>
+    <li><a href="#format">Downstream Messages</a>
       <ol class="toc">
         <li><a href="#request">Request format</a></li>
         <li><a href="#response">Response format</a></li>
+        <li><a href="#receipts">Receive delivery receipts</a></li>
       </ol>
       </li>
   <li><a href="#upstream">Upstream Messages</a>
-    <ol>
-      <li><a href="#receipts">Receive delivery receipts</a></li>
-    </ol>
   </li>
   <li><a href="#flow">Flow Control</a> </li>
   <li><a href="#implement">Implementing an XMPP-based App Server</a>
@@ -138,7 +136,7 @@ mFTeUIzcmNaTmtmbnFLZEZiOW1oekNCaVlwT1JEQTJKV1d0dw==&lt;/auth&gt;
 <h4>Server</h4>
 <pre>&lt;success xmlns=&quot;urn:ietf:params:xml:ns:xmpp-sasl&quot;/&gt;</pre>
 
-<h2 id="format">Message Format</h2>
+<h2 id="format">Downstream Messages</h2>
 <p>Once the XMPP connection is established, CCS and your server use normal XMPP
 <code>&lt;message&gt;</code> stanzas to send JSON-encoded messages back and
 forth. The body of the <code>&lt;message&gt;</code> must be:</p>
@@ -169,7 +167,8 @@ unknown {@code message_type} can be ignored by your server.</p>
 <p>For each device message your app server receives from CCS, it needs to send
 an ACK message.
 It never needs to send a NACK message. If you don't send an ACK for a message,
-CCS will just resend it.
+CCS resends it the next time a new XMPP connection is established, unless the
+message expires first.
 </p>
 <p>CCS also sends an ACK or NACK for each server-to-device message. If you do not
 receive either, it means that the TCP connection was closed in the middle of the
@@ -316,7 +315,7 @@ connection, but allowing whatever is already in the pipeline to continue. When y
 a {@code CONNECTION_DRAINING} message, you should immediately begin sending messages to another CCS
 connection, opening a new connection if necessary. You should, however, keep the original
 connection open and continue receiving messages that may come over the connection (and
-ACKing them)&mdash;CCS will handle initiating a connection close when it is ready.</p>
+ACKing them)&mdash;CCS handles initiating a connection close when it is ready.</p>
 
 <p>The {@code CONNECTION_DRAINING} message looks like this:</p>
 <pre>&lt;message&gt;
@@ -330,66 +329,11 @@ ACKing them)&mdash;CCS will handle initiating a connection close when it is read
 
 <p>{@code CONNECTION_DRAINING} is currently the only {@code control_type} supported.</p>
 
-<h2 id="upstream">Upstream Messages</h2>
-
-<p>Using CCS and the
-<a href="{@docRoot}reference/com/google/android/gms/gcm/GoogleCloudMessaging.html">
-{@code GoogleCloudMessaging}</a>
-API, you can send messages from a user's device to the cloud.</p>
-
-<p>Here is how you send an upstream message using the
-<a href="{@docRoot}reference/com/google/android/gms/gcm/GoogleCloudMessaging.html">
-{@code GoogleCloudMessaging}</a>
-API. For a complete example, see <a href="client.html">Implementing GCM Client</a>:</p>
-
-<pre>GoogleCloudMessaging gcm = GoogleCloudMessaging.get(context);
-String GCM_SENDER_ID = "Your-Sender-ID";
-AtomicInteger msgId = new AtomicInteger();
-String id = Integer.toString(msgId.incrementAndGet());
-Bundle data = new Bundle();
-// Bundle data consists of a key-value pair
-data.putString("hello", "world");
-// "time to live" parameter
-// This is optional. It specifies a value in seconds up to 24 hours.
-int ttl = [0 seconds, 24 hours]
-
-gcm.send(GCM_SENDER_ID + "&#64;gcm.googleapis.com", id, ttl, data);
-</pre>
-
-<p>This call generates the necessary XMPP stanza for sending the upstream message.
-The message goes from the app on the device to CCS to the 3rd-party app server.
-The stanza has the following format:</p>
-
-<pre>&lt;message id=&quot;&quot;&gt;
-  &lt;gcm xmlns=&quot;google:mobile:data&quot;&gt;
-  {
-      &quot;category&quot;:&quot;com.example.yourapp&quot;, // to know which app sent it
-      &quot;data&quot;:
-      {
-          &quot;hello&quot;:&quot;world&quot;,
-      },
-      &quot;message_id&quot;:&quot;m-123&quot;,
-      &quot;from&quot;:&quot;REGID&quot;
-  }
-  &lt;/gcm&gt;
-&lt;/message&gt;</pre>
-
-<p>Here is the format of the ACK expected by CCS from 3rd-party app servers in
-response to the above message:</p>
-
-<pre>&lt;message id=&quot;&quot;&gt;
-  &lt;gcm xmlns=&quot;google:mobile:data&quot;&gt;
-  {
-      &quot;to&quot;:&quot;REGID&quot;,
-      &quot;message_id&quot;:&quot;m-123&quot;
-      &quot;message_type&quot;:&quot;ack&quot;
-  }
-  &lt;/gcm&gt;
-&lt;/message&gt;</pre>
+<!--Delivery receipts section-->
 
 <h3 id="receipts">Receive delivery receipts</h3>
 
-<p>You can use upstream messaging to get delivery receipts (sent from CCS to
+<p>You can get delivery receipts (sent from CCS to
 your 3rd party app server) when
 a device confirms that it received a message sent by CCS.</p>
 
@@ -452,7 +396,67 @@ app server that a device received a message that CCS sent it:</p>
 which in this example is {@code dr2:m-1366082849205}.</li>
   <li>The original message ID, the device registration ID, and the status are inside the
 {@code &quot;data&quot;} field.</li>
+<li>If the connection between CCS and the device is poor, GCM may send multiple, duplicate delivery
+ receipts. You can safely ignore such duplicates.</li>
 </ul>
+
+<h2 id="upstream">Upstream Messages</h2>
+
+<p>Using CCS and the
+<a href="{@docRoot}reference/com/google/android/gms/gcm/GoogleCloudMessaging.html">
+{@code GoogleCloudMessaging}</a>
+API, you can send messages from a user's device to the cloud.</p>
+
+<p>Here is how you send an upstream message using the
+<a href="{@docRoot}reference/com/google/android/gms/gcm/GoogleCloudMessaging.html">
+{@code GoogleCloudMessaging}</a>
+API. For a complete example, see <a href="client.html">Implementing GCM Client</a>:</p>
+
+<pre>GoogleCloudMessaging gcm = GoogleCloudMessaging.get(context);
+String GCM_SENDER_ID = "Your-Sender-ID";
+AtomicInteger msgId = new AtomicInteger();
+String id = Integer.toString(msgId.incrementAndGet());
+Bundle data = new Bundle();
+// Bundle data consists of a key-value pair
+data.putString("hello", "world");
+// "time to live" parameter
+// This is optional. It specifies a value in seconds up to 24 hours.
+int ttl = [0 seconds, 24 hours]
+
+gcm.send(GCM_SENDER_ID + "&#64;gcm.googleapis.com", id, ttl, data);
+</pre>
+
+<p>This call generates the necessary XMPP stanza for sending the upstream message.
+The message goes from the app on the device to CCS to the 3rd-party app server.
+The stanza has the following format:</p>
+
+<pre>&lt;message id=&quot;&quot;&gt;
+  &lt;gcm xmlns=&quot;google:mobile:data&quot;&gt;
+  {
+      &quot;category&quot;:&quot;com.example.yourapp&quot;, // to know which app sent it
+      &quot;data&quot;:
+      {
+          &quot;hello&quot;:&quot;world&quot;,
+      },
+      &quot;message_id&quot;:&quot;m-123&quot;,
+      &quot;from&quot;:&quot;REGID&quot;
+  }
+  &lt;/gcm&gt;
+&lt;/message&gt;</pre>
+
+<p>Here is the format of the ACK expected by CCS from 3rd-party app servers in
+response to the above message:</p>
+
+<pre>&lt;message id=&quot;&quot;&gt;
+  &lt;gcm xmlns=&quot;google:mobile:data&quot;&gt;
+  {
+      &quot;to&quot;:&quot;REGID&quot;,
+      &quot;message_id&quot;:&quot;m-123&quot;
+      &quot;message_type&quot;:&quot;ack&quot;
+  }
+  &lt;/gcm&gt;
+&lt;/message&gt;</pre>
+
 
 <h2 id="flow">Flow Control</h2>
 
@@ -468,7 +472,7 @@ figure 1:</p>
   <strong>Figure 1.</strong> Message/ack flow.
 </p>
 
-<p>Conversely, to avoid overloading the 3rd-party app server, CCS will stop sending
+<p>Conversely, to avoid overloading the 3rd-party app server, CCS stops sending
 if there are too many unacknowledged messages. Therefore, the 3rd-party app server
 should "ACK" upstream messages, received from the client application via CCS, as soon as possible
 to maintain a constant flow of incoming messages. The aforementioned pending message limit doesn't
@@ -663,7 +667,7 @@ public class SmackCcsClient {
      * Creates a JSON encoded GCM message.
      *
      * &#64;param to RegistrationId of the target device (Required).
-     * &#64;param messageId Unique messageId for which CCS will send an
+     * &#64;param messageId Unique messageId for which CCS sends an
      *         &quot;ack/nack&quot; (Required).
      * &#64;param payload Message content intended for the application. (Optional).
      * &#64;param collapseKey GCM collapse_key parameter (Optional).
