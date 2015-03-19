@@ -49,6 +49,7 @@ public final class InputDevice implements Parcelable {
     private final String mName;
     private final int mVendorId;
     private final int mProductId;
+    private final String mUniqueId;
     private final String mDescriptor;
     private final InputDeviceIdentifier mIdentifier;
     private final boolean mIsExternal;
@@ -356,14 +357,16 @@ public final class InputDevice implements Parcelable {
 
     // Called by native code.
     private InputDevice(int id, int generation, int controllerNumber, String name, int vendorId,
-            int productId, String descriptor, boolean isExternal, int sources, int keyboardType,
-            KeyCharacterMap keyCharacterMap, boolean hasVibrator, boolean hasButtonUnderPad) {
+            int productId, String uniqueId, String descriptor, boolean isExternal, int sources,
+            int keyboardType, KeyCharacterMap keyCharacterMap, boolean hasVibrator,
+            boolean hasButtonUnderPad) {
         mId = id;
         mGeneration = generation;
         mControllerNumber = controllerNumber;
         mName = name;
         mVendorId = vendorId;
         mProductId = productId;
+        mUniqueId = uniqueId;
         mDescriptor = descriptor;
         mIsExternal = isExternal;
         mSources = sources;
@@ -381,6 +384,7 @@ public final class InputDevice implements Parcelable {
         mName = in.readString();
         mVendorId = in.readInt();
         mProductId = in.readInt();
+        mUniqueId = in.readString();
         mDescriptor = in.readString();
         mIsExternal = in.readInt() != 0;
         mSources = in.readInt();
@@ -502,6 +506,23 @@ public final class InputDevice implements Parcelable {
      */
     public int getProductId() {
         return mProductId;
+    }
+
+    /**
+     * Gets the vendor's unique id for the given device, if available.
+     * <p>
+     * A vendor may assign a unique id to a device (e.g., MAC address for
+     * Bluetooth devices). A null value will be assigned where a unique id is
+     * not available.
+     * </p><p>
+     * This method is dependent on the vendor, whereas {@link #getDescriptor}
+     * attempts to create a unique id even when the vendor has not provided one.
+     * </p>
+     *
+     * @return The unique id of a given device
+     */
+    public String getUniqueId() {
+        return mUniqueId;
     }
 
     /**
@@ -843,6 +864,7 @@ public final class InputDevice implements Parcelable {
         out.writeString(mName);
         out.writeInt(mVendorId);
         out.writeInt(mProductId);
+        out.writeString(mUniqueId);
         out.writeString(mDescriptor);
         out.writeInt(mIsExternal ? 1 : 0);
         out.writeInt(mSources);
