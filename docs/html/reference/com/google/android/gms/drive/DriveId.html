@@ -96,6 +96,8 @@
 
 
 
+
+
 <html>
 <head>
 
@@ -111,7 +113,7 @@
 href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Roboto:light,regular,medium,thin,italic,mediumitalic,bold"
   title="roboto">
-<link href="/assets/css/default.css?v=4" rel="stylesheet" type="text/css">
+<link href="/assets/css/default.css?v=5" rel="stylesheet" type="text/css">
 
 
 
@@ -412,6 +414,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
                 <li><a href="/distribute/users/index.html">Get Users</a></li>
                 <li><a href="/distribute/engage/index.html">Engage &amp; Retain</a></li>
                 <li><a href="/distribute/monetize/index.html">Monetize</a></li>
+                <li><a href="/distribute/analyze/index.html">Analyze</a></li>
                 <li><a href="/distribute/tools/index.html">Tools &amp; Reference</a></li>
                 <li><a href="/distribute/stories/index.html">Developer Stories</a></li>
               </ul>
@@ -593,14 +596,14 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
 
   <li class="nav-section">
-    <div class="nav-section-header"><a href="/google/play/billing/index.html">
+    <div class="nav-section-header"><a href="/google/play/billing/index.html" zh-cn-lang="应用内结算">
       <span class="en">Google Play In-app Billing</span></a>
     </div>
     <ul>
-      <li><a href="/google/play/billing/billing_overview.html">
+      <li><a href="/google/play/billing/billing_overview.html" zh-cn-lang="应用内结算概述">
               <span class="en">Overview</span></a>
       </li>
-      <li class="nav-section"><div class="nav-section-header"><a href="/google/play/billing/api.html">
+      <li class="nav-section"><div class="nav-section-header"><a href="/google/play/billing/api.html" zh-cn-lang="应用内结算 API">
               <span class="en">Version 3 API</span></a></div>
               <ul>
               <li><a href="/google/play/billing/billing_integrate.html">
@@ -623,13 +626,13 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       <li><a href="/google/play/billing/billing_subscriptions.html">
               <span class="en">Subscriptions</span></a>
       </li>
-      <li><a href="/google/play/billing/billing_best_practices.html">
+      <li><a href="/google/play/billing/billing_best_practices.html" zh-cn-lang="安全性和设计">
               <span class="en">Security and Design</span></a>
       </li>
-      <li><a href="/google/play/billing/billing_testing.html">
+      <li><a href="/google/play/billing/billing_testing.html" zh-cn-lang="测试应用内结算">
               <span class="en">Testing In-app Billing</span></a>
       </li>
-      <li><a href="/google/play/billing/billing_admin.html">
+      <li><a href="/google/play/billing/billing_admin.html" zh-cn-lang="管理应用内结算">
               <span class="en">Administering In-app Billing</span></a>
       </li>
       <li><a href="/google/play/billing/versions.html">
@@ -663,21 +666,14 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
               <span class="en">HTTP</span></a></li>
               </ul>
         </li>
+        <li><a href="/google/gcm/server-ref.html">
+            <span class="en">Server Reference</span></a>
+        </li>
         <li><a href="/google/gcm/notifications.html">
               <span class="en">User Notifications</span></a>
         </li>
-        <li><a href="/google/gcm/adv.html">
-            <span class="en">Advanced Topics</span></a>
-        </li>
         <li><a href="/google/gcm/c2dm.html">
             <span class="en">Migration</span></a>
-        </li>
-        <li id="gcm-tree-list" class="nav-section">
-          <div class="nav-section-header">
-            <a href="/reference/gcm-packages.html">
-              <span class="en">Reference</span>
-            </a>
-          <div>
         </li>
       </ul>
   </li>
@@ -802,8 +798,11 @@ Summary:
 
 
 
+  <a href="#constants">Constants</a>
 
-  <a href="#inhconstants">Inherited Constants</a>
+
+
+  &#124; <a href="#inhconstants">Inherited Constants</a>
   
 
 
@@ -898,7 +897,11 @@ Summary:
 
 
 <h2>Class Overview</h2>
-<p itemprop="articleBody">A canonical identifier for a Drive resource.
+<p itemprop="articleBody">A canonical identifier for a Drive resource.   The identifier can be converted to a String
+ representation for storage using <code><a href="/reference/com/google/android/gms/drive/DriveId.html#encodeToString()">encodeToString()</a></code> and then later converted back
+ to the ID representation using <code><a href="/reference/com/google/android/gms/drive/DriveId.html#decodeFromString(java.lang.String)">decodeFromString(String)</a></code>.
+ <code><a href="/reference/com/google/android/gms/drive/DriveId.html#equals(java.lang.Object)">equals(Object)</a></code> can be used to see if two different identifiers refer to the
+ same resource.
 </p>
 
 
@@ -937,6 +940,52 @@ Summary:
 
 
 
+
+
+<!-- =========== ENUM CONSTANT SUMMARY =========== -->
+<table id="constants" class="jd-sumtable"><tr><th colspan="12">Constants</th></tr>
+
+
+
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol">int</td>
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/drive/DriveId.html#RESOURCE_TYPE_FILE">RESOURCE_TYPE_FILE</a></td>
+        <td class="jd-descrcol" width="100%">
+          A file resource type, meaning the <code><a href="/reference/com/google/android/gms/drive/DriveId.html">DriveId</a></code> corresponds to a file.
+
+
+
+        </td>
+    </tr>
+
+
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol">int</td>
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/drive/DriveId.html#RESOURCE_TYPE_FOLDER">RESOURCE_TYPE_FOLDER</a></td>
+        <td class="jd-descrcol" width="100%">
+          A folder resource type, meaning the <code><a href="/reference/com/google/android/gms/drive/DriveId.html">DriveId</a></code> corresponds to a folder.
+
+
+
+        </td>
+    </tr>
+
+
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol">int</td>
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/drive/DriveId.html#RESOURCE_TYPE_UNKNOWN">RESOURCE_TYPE_UNKNOWN</a></td>
+        <td class="jd-descrcol" width="100%">
+          An unknown resource type, meaning the <code><a href="/reference/com/google/android/gms/drive/DriveId.html">DriveId</a></code> corresponds to either a file or a
+ folder.
+
+
+
+        </td>
+    </tr>
+
+
+
+</table>
 
 
 
@@ -1095,8 +1144,8 @@ android.os.Parcelable
         
         <div class="jd-descrdiv">
           Returns a String representation of this <code><a href="/reference/com/google/android/gms/drive/DriveId.html">DriveId</a></code> that can be safely
- persisted, and from which an equal <code><a href="/reference/com/google/android/gms/drive/DriveId.html">DriveId</a></code> can later be
- reconstructed via <code><a href="/reference/com/google/android/gms/drive/DriveId.html#decodeFromString(java.lang.String)">decodeFromString(String)</a></code>.
+ persisted, and from which an equivalent <code><a href="/reference/com/google/android/gms/drive/DriveId.html">DriveId</a></code> can later be
+ reconstructed using <code><a href="/reference/com/google/android/gms/drive/DriveId.html#decodeFromString(java.lang.String)">decodeFromString(String)</a></code>.
           
     
 
@@ -1155,8 +1204,15 @@ android.os.Parcelable
             int</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/drive/DriveId.html#hashCode()">hashCode</a></span>()</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/drive/DriveId.html#getResourceType()">getResourceType</a></span>()</nobr>
         
+        <div class="jd-descrdiv">
+          Returns the resource type corresponding to this <code><a href="/reference/com/google/android/gms/drive/DriveId.html">DriveId</a></code>.
+
+
+
+        </div>
+
   </td></tr>
 
 
@@ -1168,16 +1224,39 @@ android.os.Parcelable
             
             
             
+            int</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/drive/DriveId.html#hashCode()">hashCode</a></span>()</nobr>
+
+  </td></tr>
+
+
+
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
             String</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/drive/DriveId.html#toString()">toString</a></span>()</nobr>
         
+        <div class="jd-descrdiv">
+          Returns a String representation of the ID.
+
+
+
+        </div>
+
   </td></tr>
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -1489,6 +1568,140 @@ From interface
 <!-- Constants -->
 
 
+<!-- ========= ENUM CONSTANTS DETAIL ======== -->
+<h2>Constants</h2>
+
+
+
+
+<A NAME="RESOURCE_TYPE_FILE"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+        static
+        final
+        int
+      </span>
+        RESOURCE_TYPE_FILE
+    </h4>
+      <div class="api-level">
+
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+
+
+
+  <div class="jd-tagdata jd-tagdescr"><p>A file resource type, meaning the <code><a href="/reference/com/google/android/gms/drive/DriveId.html">DriveId</a></code> corresponds to a file.
+</p></div>
+
+
+        <div class="jd-tagdata">
+        <span class="jd-tagtitle">Constant Value: </span>
+        <span>
+
+                0
+                (0x00000000)
+
+        </span>
+        </div>
+
+    </div>
+</div>
+
+
+
+<A NAME="RESOURCE_TYPE_FOLDER"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+        static
+        final
+        int
+      </span>
+        RESOURCE_TYPE_FOLDER
+    </h4>
+      <div class="api-level">
+
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+
+
+
+  <div class="jd-tagdata jd-tagdescr"><p>A folder resource type, meaning the <code><a href="/reference/com/google/android/gms/drive/DriveId.html">DriveId</a></code> corresponds to a folder.
+</p></div>
+
+
+        <div class="jd-tagdata">
+        <span class="jd-tagtitle">Constant Value: </span>
+        <span>
+
+                1
+                (0x00000001)
+
+        </span>
+        </div>
+
+    </div>
+</div>
+
+
+
+<A NAME="RESOURCE_TYPE_UNKNOWN"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+        static
+        final
+        int
+      </span>
+        RESOURCE_TYPE_UNKNOWN
+    </h4>
+      <div class="api-level">
+
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+
+
+
+  <div class="jd-tagdata jd-tagdescr"><p>An unknown resource type, meaning the <code><a href="/reference/com/google/android/gms/drive/DriveId.html">DriveId</a></code> corresponds to either a file or a
+ folder.
+</p></div>
+
+
+        <div class="jd-tagdata">
+        <span class="jd-tagtitle">Constant Value: </span>
+        <span>
+
+                -1
+                (0xffffffff)
+
+        </span>
+        </div>
+
+    </div>
+</div>
+
+
+
+
 <!-- Fields -->
 
 
@@ -1648,8 +1861,13 @@ From interface
 
       
   <div class="jd-tagdata jd-tagdescr"><p>Returns a String representation of this <code><a href="/reference/com/google/android/gms/drive/DriveId.html">DriveId</a></code> that can be safely
- persisted, and from which an equal <code><a href="/reference/com/google/android/gms/drive/DriveId.html">DriveId</a></code> can later be
- reconstructed via <code><a href="/reference/com/google/android/gms/drive/DriveId.html#decodeFromString(java.lang.String)">decodeFromString(String)</a></code>.
+ persisted, and from which an equivalent <code><a href="/reference/com/google/android/gms/drive/DriveId.html">DriveId</a></code> can later be
+ reconstructed using <code><a href="/reference/com/google/android/gms/drive/DriveId.html#decodeFromString(java.lang.String)">decodeFromString(String)</a></code>.
+ <p>
+ The String representation is not guaranteed to be stable over time for a given resource so
+ should never be compared for equality.   Always use <code><a href="/reference/com/google/android/gms/drive/DriveId.html#decodeFromString(java.lang.String)">decodeFromString(String)</a></code> and
+ then <code><a href="/reference/com/google/android/gms/drive/DriveId.html#equals(java.lang.Object)">equals(Object)</a></code> to compare two identifiers to see if they refer to the
+ same resource.
 </p></div>
 
     </div>
@@ -1722,6 +1940,47 @@ From interface
 </div>
 
 
+<A NAME="getResourceType()"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+
+
+
+
+        int
+      </span>
+      <span class="sympad">getResourceType</span>
+      <span class="normal">()</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+
+
+
+  <div class="jd-tagdata jd-tagdescr"><p>Returns the resource type corresponding to this <code><a href="/reference/com/google/android/gms/drive/DriveId.html">DriveId</a></code>. Possible values are
+ <code><a href="/reference/com/google/android/gms/drive/DriveId.html#RESOURCE_TYPE_FILE">RESOURCE_TYPE_FILE</a></code>, <code><a href="/reference/com/google/android/gms/drive/DriveId.html#RESOURCE_TYPE_FOLDER">RESOURCE_TYPE_FOLDER</a></code> or <code><a href="/reference/com/google/android/gms/drive/DriveId.html#RESOURCE_TYPE_UNKNOWN">RESOURCE_TYPE_UNKNOWN</a></code>.
+
+ <p>
+ The <code><a href="/reference/com/google/android/gms/drive/DriveId.html#RESOURCE_TYPE_UNKNOWN">RESOURCE_TYPE_UNKNOWN</a></code> will only be returned if the <code><a href="/reference/com/google/android/gms/drive/DriveId.html">DriveId</a></code> instance has
+ been created using <code><a href="/reference/com/google/android/gms/drive/DriveId.html#decodeFromString(java.lang.String)">decodeFromString(String)</a></code>, with an old string that was generated and
+ persisted by the client with an old version of Google Play Services. If the client is not
+ encoding, persisting and decoding <code><a href="/reference/com/google/android/gms/drive/DriveId.html">DriveId</a></code>s, this method will always return either
+ <code><a href="/reference/com/google/android/gms/drive/DriveId.html#RESOURCE_TYPE_FILE">RESOURCE_TYPE_FILE</a></code> or <code><a href="/reference/com/google/android/gms/drive/DriveId.html#RESOURCE_TYPE_FOLDER">RESOURCE_TYPE_FOLDER</a></code>.
+</p></div>
+
+    </div>
+</div>
+
+
 <A NAME="hashCode()"></A>
 
 <div class="jd-details api apilevel-"> 
@@ -1780,7 +2039,9 @@ From interface
     
 
       
-  <div class="jd-tagdata jd-tagdescr"><p></p></div>
+  <div class="jd-tagdata jd-tagdescr"><p>Returns a String representation of the ID.  Use <code><a href="/reference/com/google/android/gms/drive/DriveId.html#encodeToString()">encodeToString()</a></code> to obtain a
+ String representation that can decoded back to a <code><a href="/reference/com/google/android/gms/drive/DriveId.html">DriveId</a></code>.
+</p></div>
 
     </div>
 </div>
