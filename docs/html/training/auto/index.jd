@@ -1,9 +1,84 @@
 page.title=Building Apps for Auto
-page.trainingcourse=true
+page.article=true
+
+meta.tags="auto"
+page.tags="auto"
+
 page.metaDescription=Starting point for building apps for Auto, with guidelines, information, and examples.
-page.image=design/tv/images/focus.png
+
 @jd:body
 
+<iframe width="448" height="252" src="//www.youtube.com/embed/ctiaVxgclsg?autohide=1&amp;showinfo=0" frameborder="0" allowfullscreen="" style="float: right; margin: 0 0 20px 20px;"></iframe>
+
+<p>
+  The Android platform enables you to extend your app to work with in-vehicle console systems
+  running Android Auto. These systems provide a simplified interface for apps that can be used in
+  a car, allowing users to take your app with them on the way to the grocery store or on a long
+  road trip.
+</p>
+
+<p>
+  Apps that work with Android Auto consoles run on a connected device, such as a phone or
+  tablet. The app communicates via specific APIs with the in-dash console, which provides a user
+  interface for the connected app that is designed for use in a car.
+</p>
+
+<p>
+  For more information, follow the links below to learn how to extend your Android app to support
+  use in vehicles.
+</p>
 
 
-<p>These classes teach you how to build and extend apps to work with Auto devices.</p>
+<h2 id="overview">Get Started</h2>
+
+<p>
+  Learn the basics of extending your app for use in vehicles, with information about app
+  configuration and user interface design considerations:
+</p>
+
+<div class="resource-widget resource-flow-layout col-12"
+  data-query="collection:training/auto/overview"
+  data-cardSizes="12x6, 6x3x2"
+  data-maxresults="6">
+</div>
+
+
+<h2 id="media">Audio Apps</h2>
+
+<p>
+  Learn how to extend your audio app to enable content navigation and playback through a vehicle
+  console:
+</p>
+
+<div class="resource-widget resource-flow-layout landing col-12"
+  data-query="collection:training/auto/media"
+  data-cardSizes="9x6, 9x3x2"
+  data-maxResults="4">
+</div>
+
+
+<h2 id="messaging">Messaging Apps</h2>
+
+<p>
+  Learn how to extend your messaging app to provide text communication services through a vehicle
+  console:
+</p>
+
+<div class="resource-widget resource-flow-layout landing col-12"
+  data-query="collection:training/auto/messaging"
+  data-cardSizes="9x6, 9x3x2"
+  data-maxResults="6">
+</div>
+
+
+<h2 id="distribute">App Quality and Distribution</h2>
+
+<p>
+  Learn how to distribute your Auto app and how apps are evaluated for quality and driver safety:
+</p>
+
+<div class="resource-widget resource-flow-layout landing col-12"
+  data-query="collection:training/auto/distribute"
+  data-cardSizes="9x3"
+  data-maxResults="6">
+</div>

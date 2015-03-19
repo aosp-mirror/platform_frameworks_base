@@ -1112,6 +1112,37 @@ var RESOURCE_COLLECTIONS = {
       "shareables/auto/AndroidAuto-custom-colors.pdf"
     ]
   },
+  "training/auto/overview": {
+    "title": "",
+    "resources": [
+      "training/auto/start/index.html",
+      "design/auto/index.html",
+      "shareables/auto/AndroidAuto-custom-colors.pdf"
+    ]
+  },
+  "training/auto/messaging": {
+    "title": "",
+    "resources": [
+      "training/auto/messaging/index.html",
+      "shareables/auto/AndroidAuto-messaging-apps.pdf",
+      "samples/MessagingService/index.html"
+    ]
+  },
+  "training/auto/media": {
+    "title": "",
+    "resources": [
+      "training/auto/audio/index.html",
+      "shareables/auto/AndroidAuto-audio-apps.pdf",
+      "samples/MediaBrowserService/index.html"
+    ]
+  },
+  "training/auto/distribute": {
+    "title": "",
+    "resources": [
+      "distribute/essentials/quality/auto.html",
+      "distribute/googleplay/auto.html"
+    ]
+  },
   "distribute/stories/games": {
     "title": "",
     "resources": [
