@@ -70,8 +70,10 @@ public void onCreate(Bundle savedInstanceState) {
     gridview.setAdapter(new ImageAdapter(this));
 
     gridview.setOnItemClickListener(new OnItemClickListener() {
-        public void onItemClick(AdapterView&lt;?> parent, View v, int position, long id) {
-            Toast.makeText(HelloGridView.this, "" + position, Toast.LENGTH_SHORT).show();
+        public void onItemClick(AdapterView&lt;?> parent, View v,
+                int position, long id) {
+            Toast.makeText(HelloGridView.this, "" + position,
+                    Toast.LENGTH_SHORT).show();
         }
     });
 }
@@ -118,7 +120,8 @@ public class ImageAdapter extends BaseAdapter {
     // create a new ImageView for each item referenced by the Adapter
     public View getView(int position, View convertView, ViewGroup parent) {
         ImageView imageView;
-        if (convertView == null) {  // if it's not recycled, initialize some attributes
+        if (convertView == null) {
+            // if it's not recycled, initialize some attributes
             imageView = new ImageView(mContext);
             imageView.setLayoutParams(new GridView.LayoutParams(85, 85));
             imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
