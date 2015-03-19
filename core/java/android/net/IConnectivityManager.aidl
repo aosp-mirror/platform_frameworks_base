@@ -102,8 +102,6 @@ interface IConnectivityManager
 
     ProxyInfo getDefaultProxy();
 
-    void setDataDependency(int networkType, boolean met);
-
     boolean prepareVpn(String oldPackage, String newPackage);
 
     void setVpnPackageAuthorization(boolean authorized);
@@ -119,8 +117,6 @@ interface IConnectivityManager
     boolean updateLockdownVpn();
 
     void captivePortalCheckCompleted(in NetworkInfo info, boolean isCaptivePortal);
-
-    void supplyMessenger(int networkType, in Messenger messenger);
 
     int findConnectionTypeForIface(in String iface);
 
