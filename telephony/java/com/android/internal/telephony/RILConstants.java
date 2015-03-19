@@ -69,6 +69,16 @@ public interface RILConstants {
     int SS_MODIFIED_TO_USSD = 25;             /* SS request modified to USSD */
     int SUBSCRIPTION_NOT_SUPPORTED = 26;      /* Subscription not supported */
     int SS_MODIFIED_TO_SS = 27;               /* SS request modified to different SS request */
+    
+	int SIM_NOT_READY = 28;
+
+    int SIM_ALREADY_POWERED_OFF = 29;         /* SAP: 0x03, Error card aleready powered off */
+    int SIM_ALREADY_POWERED_ON = 30;          /* SAP: 0x05, Error card already powered on */
+    int SIM_DATA_NOT_AVAILABLE = 31;          /* SAP: 0x06, Error data not available */
+    int SIM_SAP_CONNECT_FAILURE = 32;
+    int SIM_SAP_MSG_SIZE_TOO_LARGE = 33;
+    int SIM_SAP_MSG_SIZE_TOO_SMALL = 34;
+    int SIM_SAP_CONNECT_OK_CALL_ONGOING = 35;
 
 
     /* NETWORK_MODE_* See ril.h RIL_REQUEST_SET_PREFERRED_NETWORK_TYPE */

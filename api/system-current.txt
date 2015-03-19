@@ -6701,6 +6701,7 @@ package android.bluetooth {
     field public static final int GATT_SERVER = 8; // 0x8
     field public static final int HEADSET = 1; // 0x1
     field public static final int HEALTH = 3; // 0x3
+    field public static final int SAP = 10; // 0xa
     field public static final int STATE_CONNECTED = 2; // 0x2
     field public static final int STATE_CONNECTING = 1; // 0x1
     field public static final int STATE_DISCONNECTED = 0; // 0x0
@@ -6710,6 +6711,25 @@ package android.bluetooth {
   public static abstract interface BluetoothProfile.ServiceListener {
     method public abstract void onServiceConnected(int, android.bluetooth.BluetoothProfile);
     method public abstract void onServiceDisconnected(int);
+  }
+
+  public final class BluetoothSap implements android.bluetooth.BluetoothProfile {
+    method public synchronized void close();
+    method public boolean connect(android.bluetooth.BluetoothDevice);
+    method public boolean disconnect(android.bluetooth.BluetoothDevice);
+    method public android.bluetooth.BluetoothDevice getClient();
+    method public java.util.List<android.bluetooth.BluetoothDevice> getConnectedDevices();
+    method public int getConnectionState(android.bluetooth.BluetoothDevice);
+    method public java.util.List<android.bluetooth.BluetoothDevice> getDevicesMatchingConnectionStates(int[]);
+    method public int getPriority(android.bluetooth.BluetoothDevice);
+    method public int getState();
+    method public boolean isConnected(android.bluetooth.BluetoothDevice);
+    method public boolean setPriority(android.bluetooth.BluetoothDevice, int);
+    field public static final java.lang.String ACTION_CONNECTION_STATE_CHANGED = "android.bluetooth.sap.profile.action.CONNECTION_STATE_CHANGED";
+    field public static final int RESULT_CANCELED = 2; // 0x2
+    field public static final int RESULT_FAILURE = 0; // 0x0
+    field public static final int RESULT_SUCCESS = 1; // 0x1
+    field public static final int STATE_ERROR = -1; // 0xffffffff
   }
 
   public final class BluetoothServerSocket implements java.io.Closeable {

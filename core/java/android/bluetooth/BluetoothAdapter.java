@@ -1746,6 +1746,9 @@ public final class BluetoothAdapter {
         } else if (profile == BluetoothProfile.HEADSET_CLIENT) {
             BluetoothHeadsetClient headsetClient = new BluetoothHeadsetClient(context, listener);
             return true;
+        } else if (profile == BluetoothProfile.SAP) {
+            BluetoothSap sap = new BluetoothSap(context, listener);
+            return true;
         } else {
             return false;
         }
@@ -1809,6 +1812,10 @@ public final class BluetoothAdapter {
             case BluetoothProfile.HEADSET_CLIENT:
                 BluetoothHeadsetClient headsetClient = (BluetoothHeadsetClient)proxy;
                 headsetClient.close();
+                break;
+            case BluetoothProfile.SAP:
+                BluetoothSap sap = (BluetoothSap)proxy;
+                sap.close();
                 break;
         }
     }
