@@ -8,7 +8,9 @@ parent.link=index.html
       <h2>In this document</h2>
 
       <ol>
-        <li><a href="#enabling">Enabling ProGuard</a></li>
+        <li><a href="#enabling-gradle">Enabling ProGuard (Gradle Builds)</a></li>
+
+        <li><a href="#enabling">Enabling ProGuard (Ant Builds)</a></li>
 
         <li><a href="#configuring">Configuring ProGuard</a></li>
 
@@ -37,7 +39,10 @@ parent.link=index.html
     </div>
   </div>
 
-  <p>The ProGuard tool shrinks, optimizes, and obfuscates your code by removing unused code and
+
+ 
+  <p>The <a href="http://proguard.sourceforge.net">ProGuard</a> tool shrinks, optimizes, and
+  obfuscates your code by removing unused code and
   renaming classes, fields, and methods with semantically obscure names. The result is a smaller
   sized <code>.apk</code> file that is more difficult to reverse engineer. Because ProGuard makes your
   application harder to reverse engineer, it is important that you use it
@@ -45,43 +50,101 @@ parent.link=index.html
   <a href="{@docRoot}google/play/licensing/index.html">Licensing Your Applications</a>.</p>
 
   <p>ProGuard is integrated into the Android build system, so you do not have to invoke it
-  manually. ProGuard runs only when you build your application in release mode, so you do not 
-  have to deal with obfuscated code when you build your application in debug mode. 
+  manually. ProGuard runs only when you build your application in release mode, so you do not
+  have to deal with obfuscated code when you build your application in debug mode.
   Having ProGuard run is completely optional, but highly recommended.</p>
-  
+
   <p>This document describes how to enable and configure ProGuard as well as use the
   <code>retrace</code> tool to decode obfuscated stack traces.</p>
 
-  <h2 id="enabling">Enabling ProGuard</h2>
+
+ <h2 id="enabling-gradle">Enabling ProGuard (Gradle Builds)</h2>
+  <p>When you create a project in Android Studio or with the Gradle build system, the
+  <code>minifyEnabled</code> property in the <code>build.gradle</code> file enables and disables
+  ProGuard for release builds. The <code>minifyEnabled</code> property is part of the
+  <code>buildTypes</code> <code>release</code> block that controls the settings applied to
+  release builds. Set the <code>minifyEnabled</code> property to <code>true</code> to enable
+  ProGuard, as shown in this example. </p>
+
+  <pre class="no-pretty-print">
+  android {
+   ...
+ 
+    buildTypes {
+        release {
+            minifyEnabled true
+            proguardFiles getDefaultProguardFile('proguard-android.txt'),
+            'proguard-rules.pro'
+        }
+    }
+  }
+  </pre>
+
+  <p>The <code>getDefaultProguardFile('proguard-android.txt')</code> method obtains the default
+  ProGuard settings from the Android SDK <code>tools/proguard/</code> folder. The
+  <code>proguard-android-optimize.txt</code> file is also available in this Android SDK
+  folder with the same rules but with optimizations enabled. ProGuard optimizations perform
+  analysis at the bytecode level, inside and across methods to help make your app smaller and run
+  faster. Android Studio adds the <code>proguard-rules.pro</code> file at the root of the module,
+  so you can also easily add custom ProGuard rules specific to the current module. </p>
+
+  <p>You can also add ProGuard files to the <code>getDefaultProguardFile</code>
+  directive for all release builds or as part of the <code>productFlavor</code> settings in the
+  <code>build.gradle</code> file to customize the settings applied to build variants. This example
+  adds the <code>proguard-rules-new.pro</code> to the <code>proguardFiles</code>
+  directive and the <code>other-rules.pro</code> file to the <code>flavor2</code> product flavor. </p>
+
+<pre class="no-pretty-print">
+    android {
+   ...
+ 
+    buildTypes {
+        release {
+            minifyEnabled true
+            proguardFiles getDefaultProguardFile('proguard-android.txt'),
+            'proguard-rules.pro', 'proguard-rules-new.pro'
+        }
+    }
+ 
+   productFlavors {
+        flavor1 {
+        }
+        flavor2 {
+            proguardFile 'other-rules.pro'
+        }
+    }
+ }
+  </pre>
+
+
+
+  <h2 id="enabling">Enabling ProGuard (Ant Builds)</h2>
 
   <p>When you create an Android project, a <code>proguard.cfg</code> file is automatically
   generated in the root directory of the project. This file defines how ProGuard optimizes and
   obfuscates your code, so it is very important that you understand how to customize it for your
   needs. The default configuration file only covers general cases, so you most likely have to edit
-  it for your own needs. See the following section about <a href="#configuring">Configuring ProGuard</a> for information on 
-  customizing the ProGuard configuration file.</p>
+  it for your own needs. See the following section about <a href="#configuring">Configuring
+  ProGuard</a> for information on customizing the ProGuard configuration file.</p>
 
   <p>To enable ProGuard so that it runs as part of an Ant or Eclipse build, set the
   <code>proguard.config</code> property in the <code>&lt;project_root&gt;/project.properties</code>
   file. The path can be an absolute path or a path relative to the project's root.</p>
 
-<p class="note"><strong>Note:</strong> When using Android Studio, you must add Proguard
-to your <code>gradle.build</code> file's build types. For more information, see the
-<a href="http://tools.android.com/tech-docs/new-build-system/user-guide#TOC-Running-ProGuard"
->Gradle Plugin User Guide</a>.
+  <p>If you left the <code>proguard.cfg</code> file in its default location (the project's root
+  directory), you can specify its location like this:</p>
 
-<p>If you left the <code>proguard.cfg</code> file in its default location (the project's root directory),
-you can specify its location like this:</p>
 <pre class="no-pretty-print">
 proguard.config=proguard.cfg
 </pre>
+
 <p>
 You can also move the the file to anywhere you want, and specify the absolute path to it:
 </p>
+
 <pre class="no-pretty-print">
 proguard.config=/path/to/proguard.cfg
 </pre>
-
 
   <p>When you build your application in release mode, either by running <code>ant release</code> or
   by using the <em>Export Wizard</em> in Eclipse, the build system automatically checks to see if
@@ -116,19 +179,19 @@ proguard.config=/path/to/proguard.cfg
     <li><code>&lt;project_root&gt;/proguard</code> if you are using Eclipse.</li>
   </ul>
 
-  
+
   <p class="caution"><strong>Caution:</strong> Every time you run a build in release mode, these files are
   overwritten with the latest files generated by ProGuard. Save a copy of them each time you release your
-  application in order to de-obfuscate bug reports from your release builds. 
-  For more information on why saving these files is important, see 
+  application in order to de-obfuscate bug reports from your release builds.
+  For more information on why saving these files is important, see
   <a href="#considerations">Debugging considerations for published applications</a>.
   </p>
 
   <h2 id="configuring">Configuring ProGuard</h2>
 
-  <p>For some situations, the default configurations in the <code>proguard.cfg</code> file will
-  suffice. However, many situations are hard for ProGuard to analyze correctly and it might remove code
-  that it thinks is not used, but your application actually needs. Some examples include:</p>
+  <p>For some situations, the default configurations in the ProGuard configuration file will
+  suffice. However, many situations are hard for ProGuard to analyze correctly and it might remove
+  code that it thinks is not used, but your application actually needs. Some examples include:</p>
 
   <ul>
     <li>a class that is referenced only in the <code>AndroidManifest.xml</code> file</li>
@@ -138,61 +201,63 @@ proguard.config=/path/to/proguard.cfg
     <li>dynamically referenced fields and methods</li>
   </ul>
 
-  <p>The default <code>proguard.cfg</code> file tries to cover general cases, but you might
+  <p>The default ProGuard configuration file tries to cover general cases, but you might
   encounter exceptions such as <code>ClassNotFoundException</code>, which happens when ProGuard
   strips away an entire class that your application calls.</p>
 
   <p>You can fix errors when ProGuard strips away your code by adding a <code>-keep</code> line in
-  the <code>proguard.cfg</code> file. For example:</p>
+  the ProGuard configuration file. For example:</p>
   <pre>
 -keep public class &lt;MyClass&gt;
 </pre>
 
   <p>There are many options and considerations when using the <code>-keep</code> option, so it is
-  highly recommended that you read the 
+  highly recommended that you read the
   <a href="http://stuff.mit.edu/afs/sipb/project/android/sdk/android-sdk-linux/tools/proguard/docs/index.html#manual/introduction.html">ProGuard
-  Manual</a> for more information about customizing your configuration file. The 
-  <em>Overview of Keep options</em> and <em>Examples</em> sections are particularly helpful. 
+  Manual</a> for more information about customizing your configuration file. The
+  <em>Overview of Keep options</em> and <em>Examples</em> sections are particularly helpful.
   The <a href=
   "http://stuff.mit.edu/afs/sipb/project/android/sdk/android-sdk-linux/tools/proguard/docs/index.html#manual/troubleshooting.html">Troubleshooting
-  </a> section of the ProGuard Manual outlines other common problems you might encounter 
+  </a> section of the ProGuard Manual outlines other common problems you might encounter
   when your code gets stripped away.</p>
 
   <h2 id="decoding">Decoding Obfuscated Stack Traces</h2>
 
   <p>When your obfuscated code outputs a stack trace, the method names are obfuscated, which makes
   debugging hard, if not impossible. Fortunately, whenever ProGuard runs, it outputs a
-  <code>&lt;project_root&gt;/bin/proguard/mapping.txt</code> file, which shows you the original
-  class, method, and field names mapped to their obfuscated names.</p>
+  <code>mapping.txt</code> file, which shows you the original class, method, and field names
+  mapped to their obfuscated names.</p>
 
   <p>The <code>retrace.bat</code> script on Windows or the <code>retrace.sh</code> script on Linux
-  or Mac OS X can convert an obfuscated stack trace to a readable one. It is located in the
-  <code>&lt;sdk_root&gt;/tools/proguard/</code> directory. The syntax for executing the 
+  or Mac OS X can convert an obfuscated stack trace to a readable one. It is located
+  in the <code>&lt;sdk_root&gt;/tools/proguard/</code> directory. The syntax for executing the
   <code>retrace</code> tool is:</p>
   <pre>retrace.bat|retrace.sh [-verbose] mapping.txt [&lt;stacktrace_file&gt;]</pre>
   <p>For example:</p>
-  
+
   <pre>retrace.bat -verbose mapping.txt obfuscated_trace.txt</pre>
-  
+
   <p>If you do not specify a value for <em>&lt;stacktrace_file&gt;</em>, the <code>retrace</code> tool reads
   from standard input.</p>
 
   <h3 id="considerations">Debugging considerations for published applications</h3>
 
-  <p>Save the <code>mapping.txt</code> file for every release that you publish to your users. 
-  By retaining a copy of the <code>mapping.txt</code> file for each release build, 
+  <p>Save the <code>mapping.txt</code> file for every release that you publish to your users.
+  By retaining a copy of the <code>mapping.txt</code> file for each release build,
   you ensure that you can debug a problem if a user encounters a bug and submits an obfuscated stack trace.
   A project's <code>mapping.txt</code> file is overwritten every time you do a release build, so you must be
-  careful about saving the versions that you need.</p>
+  careful about saving the versions that you need. For Eclipse, this file is stored in
+  <code>&lt;project_root&gt;/bin/proguard/</code>. For Android Studio, this file is stored in
+  the app <code>build/outs/</code> folder. </p>
 
   <p>For example, say you publish an application and continue developing new features of
   the application for a new version. You then do a release build using ProGuard soon after. The
   build overwrites the previous <code>mapping.txt</code> file. A user submits a bug report
-  containing a stack trace from the application that is currently published. You no longer have a way 
+  containing a stack trace from the application that is currently published. You no longer have a way
   of debugging the user's stack trace, because the <code>mapping.txt</code> file associated with the version
   on the user's device is gone. There are other situations where your <code>mapping.txt</code> file can be overwritten, so
   ensure that you save a copy for every release that you anticipate you have to debug.</p>
 
-  <p>How you save the <code>mapping.txt</code> file is your decision. For example, you can rename them to
-  include a version or build number, or you can version control them along with your source
-  code.</p>
+  <p>How you save the <code>mapping.txt</code> files is your decision. For example, you can rename
+  the files to include a version or build number, or you can version control them along with your
+  source code.</p>
