@@ -279,7 +279,7 @@ receives match the logged in user.</li>
 
 <h4 id="unreg-how">How unregistration works</h4>
 
-<p>An app can be automatically unregistered after it is uninstalled.
+<p>A client app can be automatically unregistered after it is uninstalled.
 However, this process does not happen right away. What happens in
 this scenario is as follows:</p>
 <ol>
