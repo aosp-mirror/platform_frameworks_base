@@ -96,8 +96,6 @@
 
 
 
-
-
 <html>
 <head>
 
@@ -113,7 +111,7 @@
 href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Roboto:light,regular,medium,thin,italic,mediumitalic,bold"
   title="roboto">
-<link href="/assets/css/default.css?v=5" rel="stylesheet" type="text/css">
+<link href="/assets/css/default.css?v=4" rel="stylesheet" type="text/css">
 
 
 
@@ -414,7 +412,6 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
                 <li><a href="/distribute/users/index.html">Get Users</a></li>
                 <li><a href="/distribute/engage/index.html">Engage &amp; Retain</a></li>
                 <li><a href="/distribute/monetize/index.html">Monetize</a></li>
-                <li><a href="/distribute/analyze/index.html">Analyze</a></li>
                 <li><a href="/distribute/tools/index.html">Tools &amp; Reference</a></li>
                 <li><a href="/distribute/stories/index.html">Developer Stories</a></li>
               </ul>
@@ -596,14 +593,14 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
 
   <li class="nav-section">
-    <div class="nav-section-header"><a href="/google/play/billing/index.html" zh-cn-lang="应用内结算">
+    <div class="nav-section-header"><a href="/google/play/billing/index.html">
       <span class="en">Google Play In-app Billing</span></a>
     </div>
     <ul>
-      <li><a href="/google/play/billing/billing_overview.html" zh-cn-lang="应用内结算概述">
+      <li><a href="/google/play/billing/billing_overview.html">
               <span class="en">Overview</span></a>
       </li>
-      <li class="nav-section"><div class="nav-section-header"><a href="/google/play/billing/api.html" zh-cn-lang="应用内结算 API">
+      <li class="nav-section"><div class="nav-section-header"><a href="/google/play/billing/api.html">
               <span class="en">Version 3 API</span></a></div>
               <ul>
               <li><a href="/google/play/billing/billing_integrate.html">
@@ -626,13 +623,13 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       <li><a href="/google/play/billing/billing_subscriptions.html">
               <span class="en">Subscriptions</span></a>
       </li>
-      <li><a href="/google/play/billing/billing_best_practices.html" zh-cn-lang="安全性和设计">
+      <li><a href="/google/play/billing/billing_best_practices.html">
               <span class="en">Security and Design</span></a>
       </li>
-      <li><a href="/google/play/billing/billing_testing.html" zh-cn-lang="测试应用内结算">
+      <li><a href="/google/play/billing/billing_testing.html">
               <span class="en">Testing In-app Billing</span></a>
       </li>
-      <li><a href="/google/play/billing/billing_admin.html" zh-cn-lang="管理应用内结算">
+      <li><a href="/google/play/billing/billing_admin.html">
               <span class="en">Administering In-app Billing</span></a>
       </li>
       <li><a href="/google/play/billing/versions.html">
@@ -666,14 +663,21 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
               <span class="en">HTTP</span></a></li>
               </ul>
         </li>
-        <li><a href="/google/gcm/server-ref.html">
-            <span class="en">Server Reference</span></a>
-        </li>
         <li><a href="/google/gcm/notifications.html">
               <span class="en">User Notifications</span></a>
         </li>
+        <li><a href="/google/gcm/adv.html">
+            <span class="en">Advanced Topics</span></a>
+        </li>
         <li><a href="/google/gcm/c2dm.html">
             <span class="en">Migration</span></a>
+        </li>
+        <li id="gcm-tree-list" class="nav-section">
+          <div class="nav-section-header">
+            <a href="/reference/gcm-packages.html">
+              <span class="en">Reference</span>
+            </a>
+          <div>
         </li>
       </ul>
   </li>
@@ -838,7 +842,7 @@ Summary:
   
 
   
-    extends <a href="/reference/com/google/android/gms/analytics/HitBuilders.HitBuilder.html">HitBuilder</a>&lt;<a href="/reference/com/google/android/gms/analytics/HitBuilders.ScreenViewBuilder.html">HitBuilders.ScreenViewBuilder</a>&gt;<br/>
+    extends <a href="/reference/com/google/android/gms/analytics/HitBuilders.HitBuilder.html">HitBuilders.HitBuilder</a>&lt;T&nbsp;extends&nbsp;<a href="/reference/com/google/android/gms/analytics/HitBuilders.HitBuilder.html">HitBuilder</a>&gt;<br/>
   
   
   
@@ -869,7 +873,7 @@ Summary:
         
             <td class="jd-inheritance-space">&nbsp;&nbsp;&nbsp;&#x21b3;</td>
          	
-        <td colspan="2" class="jd-inheritance-class-cell"><a href="/reference/com/google/android/gms/analytics/HitBuilders.HitBuilder.html">com.google.android.gms.analytics.HitBuilders.HitBuilder</a>&lt;<a href="/reference/com/google/android/gms/analytics/HitBuilders.ScreenViewBuilder.html">com.google.android.gms.analytics.HitBuilders.ScreenViewBuilder</a>&gt;</td>
+        <td colspan="2" class="jd-inheritance-class-cell"><a href="/reference/com/google/android/gms/analytics/HitBuilders.HitBuilder.html">com.google.android.gms.analytics.HitBuilders.HitBuilder</a>&lt;T&nbsp;extends&nbsp;<a href="/reference/com/google/android/gms/analytics/HitBuilders.HitBuilder.html">com.google.android.gms.analytics.HitBuilders.HitBuilder</a>&gt;</td>
     </tr>
     
 
@@ -1014,7 +1018,7 @@ From class
             
             
             
-            <a href="/reference/com/google/android/gms/analytics/HitBuilders.ScreenViewBuilder.html">HitBuilders.ScreenViewBuilder</a></nobr>
+            T</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/analytics/HitBuilders.HitBuilder.html#addImpression(com.google.android.gms.analytics.ecommerce.Product, java.lang.String)">addImpression</a></span>(<a href="/reference/com/google/android/gms/analytics/ecommerce/Product.html">Product</a> product, String impressionList)</nobr>
@@ -1037,7 +1041,7 @@ From class
             
             
             
-            <a href="/reference/com/google/android/gms/analytics/HitBuilders.ScreenViewBuilder.html">HitBuilders.ScreenViewBuilder</a></nobr>
+            T</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/analytics/HitBuilders.HitBuilder.html#addProduct(com.google.android.gms.analytics.ecommerce.Product)">addProduct</a></span>(<a href="/reference/com/google/android/gms/analytics/ecommerce/Product.html">Product</a> product)</nobr>
@@ -1060,7 +1064,7 @@ From class
             
             
             
-            <a href="/reference/com/google/android/gms/analytics/HitBuilders.ScreenViewBuilder.html">HitBuilders.ScreenViewBuilder</a></nobr>
+            T</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/analytics/HitBuilders.HitBuilder.html#addPromotion(com.google.android.gms.analytics.ecommerce.Promotion)">addPromotion</a></span>(<a href="/reference/com/google/android/gms/analytics/ecommerce/Promotion.html">Promotion</a> promotion)</nobr>
@@ -1123,7 +1127,7 @@ From class
             final
             
             
-            <a href="/reference/com/google/android/gms/analytics/HitBuilders.ScreenViewBuilder.html">HitBuilders.ScreenViewBuilder</a></nobr>
+            T</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/analytics/HitBuilders.HitBuilder.html#set(java.lang.String, java.lang.String)">set</a></span>(String paramName, String paramValue)</nobr>
@@ -1146,7 +1150,7 @@ From class
             final
             
             
-            <a href="/reference/com/google/android/gms/analytics/HitBuilders.ScreenViewBuilder.html">HitBuilders.ScreenViewBuilder</a></nobr>
+            T</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/analytics/HitBuilders.HitBuilder.html#setAll(java.util.Map<java.lang.String, java.lang.String>)">setAll</a></span>(Map&lt;String,&nbsp;String&gt; params)</nobr>
@@ -1169,7 +1173,7 @@ From class
             
             
             
-            <a href="/reference/com/google/android/gms/analytics/HitBuilders.ScreenViewBuilder.html">HitBuilders.ScreenViewBuilder</a></nobr>
+            T</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/analytics/HitBuilders.HitBuilder.html#setCampaignParamsFromUrl(java.lang.String)">setCampaignParamsFromUrl</a></span>(String utmParams)</nobr>
@@ -1193,7 +1197,7 @@ From class
             
             
             
-            <a href="/reference/com/google/android/gms/analytics/HitBuilders.ScreenViewBuilder.html">HitBuilders.ScreenViewBuilder</a></nobr>
+            T</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/analytics/HitBuilders.HitBuilder.html#setCustomDimension(int, java.lang.String)">setCustomDimension</a></span>(int index, String dimension)</nobr>
@@ -1216,7 +1220,7 @@ From class
             
             
             
-            <a href="/reference/com/google/android/gms/analytics/HitBuilders.ScreenViewBuilder.html">HitBuilders.ScreenViewBuilder</a></nobr>
+            T</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/analytics/HitBuilders.HitBuilder.html#setCustomMetric(int, float)">setCustomMetric</a></span>(int index, float metric)</nobr>
@@ -1239,7 +1243,7 @@ From class
             
             
             
-            <a href="/reference/com/google/android/gms/analytics/HitBuilders.ScreenViewBuilder.html">HitBuilders.ScreenViewBuilder</a></nobr>
+            T</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/analytics/HitBuilders.HitBuilder.html#setHitType(java.lang.String)">setHitType</a></span>(String hitType)</nobr>
@@ -1262,7 +1266,7 @@ From class
             
             
             
-            <a href="/reference/com/google/android/gms/analytics/HitBuilders.ScreenViewBuilder.html">HitBuilders.ScreenViewBuilder</a></nobr>
+            T</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/analytics/HitBuilders.HitBuilder.html#setNewSession()">setNewSession</a></span>()</nobr>
@@ -1278,7 +1282,7 @@ From class
             
             
             
-            <a href="/reference/com/google/android/gms/analytics/HitBuilders.ScreenViewBuilder.html">HitBuilders.ScreenViewBuilder</a></nobr>
+            T</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/analytics/HitBuilders.HitBuilder.html#setNonInteraction(boolean)">setNonInteraction</a></span>(boolean nonInteraction)</nobr>
@@ -1294,7 +1298,7 @@ From class
             
             
             
-            <a href="/reference/com/google/android/gms/analytics/HitBuilders.ScreenViewBuilder.html">HitBuilders.ScreenViewBuilder</a></nobr>
+            T</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/analytics/HitBuilders.HitBuilder.html#setProductAction(com.google.android.gms.analytics.ecommerce.ProductAction)">setProductAction</a></span>(<a href="/reference/com/google/android/gms/analytics/ecommerce/ProductAction.html">ProductAction</a> action)</nobr>
@@ -1317,7 +1321,7 @@ From class
             
             
             
-            <a href="/reference/com/google/android/gms/analytics/HitBuilders.ScreenViewBuilder.html">HitBuilders.ScreenViewBuilder</a></nobr>
+            T</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/analytics/HitBuilders.HitBuilder.html#setPromotionAction(java.lang.String)">setPromotionAction</a></span>(String action)</nobr>

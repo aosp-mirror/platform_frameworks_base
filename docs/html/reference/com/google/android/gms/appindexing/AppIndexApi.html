@@ -96,8 +96,6 @@
 
 
 
-
-
 <html>
 <head>
 
@@ -113,7 +111,7 @@
 href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Roboto:light,regular,medium,thin,italic,mediumitalic,bold"
   title="roboto">
-<link href="/assets/css/default.css?v=5" rel="stylesheet" type="text/css">
+<link href="/assets/css/default.css?v=4" rel="stylesheet" type="text/css">
 
 
 
@@ -414,7 +412,6 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
                 <li><a href="/distribute/users/index.html">Get Users</a></li>
                 <li><a href="/distribute/engage/index.html">Engage &amp; Retain</a></li>
                 <li><a href="/distribute/monetize/index.html">Monetize</a></li>
-                <li><a href="/distribute/analyze/index.html">Analyze</a></li>
                 <li><a href="/distribute/tools/index.html">Tools &amp; Reference</a></li>
                 <li><a href="/distribute/stories/index.html">Developer Stories</a></li>
               </ul>
@@ -596,14 +593,14 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
 
   <li class="nav-section">
-    <div class="nav-section-header"><a href="/google/play/billing/index.html" zh-cn-lang="应用内结算">
+    <div class="nav-section-header"><a href="/google/play/billing/index.html">
       <span class="en">Google Play In-app Billing</span></a>
     </div>
     <ul>
-      <li><a href="/google/play/billing/billing_overview.html" zh-cn-lang="应用内结算概述">
+      <li><a href="/google/play/billing/billing_overview.html">
               <span class="en">Overview</span></a>
       </li>
-      <li class="nav-section"><div class="nav-section-header"><a href="/google/play/billing/api.html" zh-cn-lang="应用内结算 API">
+      <li class="nav-section"><div class="nav-section-header"><a href="/google/play/billing/api.html">
               <span class="en">Version 3 API</span></a></div>
               <ul>
               <li><a href="/google/play/billing/billing_integrate.html">
@@ -626,13 +623,13 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       <li><a href="/google/play/billing/billing_subscriptions.html">
               <span class="en">Subscriptions</span></a>
       </li>
-      <li><a href="/google/play/billing/billing_best_practices.html" zh-cn-lang="安全性和设计">
+      <li><a href="/google/play/billing/billing_best_practices.html">
               <span class="en">Security and Design</span></a>
       </li>
-      <li><a href="/google/play/billing/billing_testing.html" zh-cn-lang="测试应用内结算">
+      <li><a href="/google/play/billing/billing_testing.html">
               <span class="en">Testing In-app Billing</span></a>
       </li>
-      <li><a href="/google/play/billing/billing_admin.html" zh-cn-lang="管理应用内结算">
+      <li><a href="/google/play/billing/billing_admin.html">
               <span class="en">Administering In-app Billing</span></a>
       </li>
       <li><a href="/google/play/billing/versions.html">
@@ -666,14 +663,21 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
               <span class="en">HTTP</span></a></li>
               </ul>
         </li>
-        <li><a href="/google/gcm/server-ref.html">
-            <span class="en">Server Reference</span></a>
-        </li>
         <li><a href="/google/gcm/notifications.html">
               <span class="en">User Notifications</span></a>
         </li>
+        <li><a href="/google/gcm/adv.html">
+            <span class="en">Advanced Topics</span></a>
+        </li>
         <li><a href="/google/gcm/c2dm.html">
             <span class="en">Migration</span></a>
+        </li>
+        <li id="gcm-tree-list" class="nav-section">
+          <div class="nav-section-header">
+            <a href="/reference/gcm-packages.html">
+              <span class="en">Reference</span>
+            </a>
+          <div>
         </li>
       </ul>
   </li>
@@ -847,14 +851,12 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
  protected void onStart() {
      super.onStart();
      mClient.connect();
-     Action viewAction = Action.newAction(Action.TYPE_VIEW, title, appUri);
-     AppIndex.AppIndexApi.start(mClient, viewAction);
+     AppIndex.AppIndexApi.view(mClient, this, appIndexingUrl, title, webUrl, outLinks);
      ...
  &#125;
 
  protected void onStop() {
-  *  Action viewAction = Action.newAction(Action.TYPE_VIEW, title, appUri);
-     AppIndex.AppIndexApi.end(mClient, viewAction);
+     AppIndex.AppIndexApi.viewEnd(mClient, this, appIndexingUrl);
      mClient.disconnect();
      super.onStop();
      ...
@@ -905,11 +907,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         interface</nobr></td>
       <td class="jd-linkcol"><a href="/reference/com/google/android/gms/appindexing/AppIndexApi.ActionResult.html">AppIndexApi.ActionResult</a></td>
       <td class="jd-descrcol" width="100%">
-        <em>
-      This interface is deprecated.
-    Use <code><a href="/reference/com/google/android/gms/appindexing/AppIndexApi.html#start(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.appindexing.Action)">start(GoogleApiClient, Action)</a></code> and
-             <code><a href="/reference/com/google/android/gms/appindexing/AppIndexApi.html#end(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.appindexing.Action)">end(GoogleApiClient, Action)</a></code>.
-</em>&nbsp;
+        Represents the result of writing an <code><a href="/reference/com/google/android/gms/appindexing/Action.html">Action</a></code>.&nbsp;
         
     
 
@@ -980,56 +978,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         <span class="sympad"><a href="/reference/com/google/android/gms/appindexing/AppIndexApi.html#action(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.appindexing.Action)">action</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient, <a href="/reference/com/google/android/gms/appindexing/Action.html">Action</a> action)</nobr>
         
         <div class="jd-descrdiv">
-          <em>
-      This method is deprecated.
-    Use <code><a href="/reference/com/google/android/gms/appindexing/AppIndexApi.html#start(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.appindexing.Action)">start(GoogleApiClient, Action)</a></code> instead.
-</em>
-
-
-
-        </div>
-
-  </td></tr>
-
-
-
-    <tr class=" api apilevel-" >
-        <td class="jd-typecol"><nobr>
-            abstract
-
-
-
-
-            <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/common/api/Status.html">Status</a>&gt;</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/appindexing/AppIndexApi.html#end(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.appindexing.Action)">end</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient, <a href="/reference/com/google/android/gms/appindexing/Action.html">Action</a> action)</nobr>
-
-        <div class="jd-descrdiv">
-          Indicates that the user has ended a specific action in your app.
-
-
-
-        </div>
-
-  </td></tr>
-
-
-
-    <tr class="alt-color api apilevel-" >
-        <td class="jd-typecol"><nobr>
-            abstract
-
-
-
-
-            <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/common/api/Status.html">Status</a>&gt;</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/appindexing/AppIndexApi.html#start(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.appindexing.Action)">start</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient, <a href="/reference/com/google/android/gms/appindexing/Action.html">Action</a> action)</nobr>
-
-        <div class="jd-descrdiv">
-          Indicates that the user has started a specific action in your app.
+          Indicates that the user has performed a specific action in your app.
           
     
 
@@ -1054,7 +1003,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         <div class="jd-descrdiv">
           <em>
       This method is deprecated.
-    Use <code><a href="/reference/com/google/android/gms/appindexing/AppIndexApi.html#start(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.appindexing.Action)">start(GoogleApiClient, Action)</a></code> instead.
+    Use <code><a href="/reference/com/google/android/gms/appindexing/AppIndexApi.html#view(com.google.android.gms.common.api.GoogleApiClient, android.app.Activity, android.net.Uri, java.lang.String, android.net.Uri, java.util.List<com.google.android.gms.appindexing.AppIndexApi.AppIndexingLink>)">view(GoogleApiClient, Activity, Uri, String, Uri, List)</a></code> instead.
 </em>
           
     
@@ -1075,13 +1024,10 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
             <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/common/api/Status.html">Status</a>&gt;</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/appindexing/AppIndexApi.html#view(com.google.android.gms.common.api.GoogleApiClient, android.app.Activity, android.net.Uri, java.lang.String, android.net.Uri, java.util.List<com.google.android.gms.appindexing.AppIndexApi.AppIndexingLink>)">view</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient, Activity activity, Uri appUri, String title, Uri webUrl, List&lt;<a href="/reference/com/google/android/gms/appindexing/AppIndexApi.AppIndexingLink.html">AppIndexApi.AppIndexingLink</a>&gt; outLinks)</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/appindexing/AppIndexApi.html#view(com.google.android.gms.common.api.GoogleApiClient, android.app.Activity, android.net.Uri, java.lang.String, android.net.Uri, java.util.List<com.google.android.gms.appindexing.AppIndexApi.AppIndexingLink>)">view</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient, Activity activity, Uri appIndexingUrl, String title, Uri webUrl, List&lt;<a href="/reference/com/google/android/gms/appindexing/AppIndexApi.AppIndexingLink.html">AppIndexApi.AppIndexingLink</a>&gt; outLinks)</nobr>
         
         <div class="jd-descrdiv">
-          <em>
-      This method is deprecated.
-    Use <code><a href="/reference/com/google/android/gms/appindexing/AppIndexApi.html#start(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.appindexing.Action)">start(GoogleApiClient, Action)</a></code> instead.
-</em>
+          Indicates that the user is viewing a piece of content in the app.
           
     
 
@@ -1101,13 +1047,10 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
             <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/common/api/Status.html">Status</a>&gt;</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/appindexing/AppIndexApi.html#viewEnd(com.google.android.gms.common.api.GoogleApiClient, android.app.Activity, android.net.Uri)">viewEnd</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient, Activity activity, Uri appUri)</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/appindexing/AppIndexApi.html#viewEnd(com.google.android.gms.common.api.GoogleApiClient, android.app.Activity, android.net.Uri)">viewEnd</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient, Activity activity, Uri appIndexingUrl)</nobr>
         
         <div class="jd-descrdiv">
-          <em>
-      This method is deprecated.
-    Use <code><a href="/reference/com/google/android/gms/appindexing/AppIndexApi.html#start(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.appindexing.Action)">start(GoogleApiClient, Action)</a></code> instead.
-</em>
+          Indicates that the user has stopped viewing a piece of content in the app.
           
     
 
@@ -1132,7 +1075,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         <div class="jd-descrdiv">
           <em>
       This method is deprecated.
-    Use <code><a href="/reference/com/google/android/gms/appindexing/AppIndexApi.html#end(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.appindexing.Action)">end(GoogleApiClient, Action)</a></code> instead.
+    Use <code><a href="/reference/com/google/android/gms/appindexing/AppIndexApi.html#viewEnd(com.google.android.gms.common.api.GoogleApiClient, android.app.Activity, android.net.Uri)">viewEnd(GoogleApiClient, Activity, Uri)</a></code> instead.
 </em>
           
     
@@ -1215,100 +1158,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       
     
 
-      <p>
-  <p class="caution"><strong>
-      This method is deprecated.</strong><br/>
-    Use <code><a href="/reference/com/google/android/gms/appindexing/AppIndexApi.html#start(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.appindexing.Action)">start(GoogleApiClient, Action)</a></code> instead.
-
-  </p>
-  <div class="jd-tagdata jd-tagdescr"><p></p></div>
-
-    </div>
-</div>
-
-
-<A NAME="end(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.appindexing.Action)"></A>
-
-<div class="jd-details api apilevel-">
-    <h4 class="jd-details-title">
-      <span class="normal">
-        public
-
-
-        abstract
-
-        <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/common/api/Status.html">Status</a>&gt;
-      </span>
-      <span class="sympad">end</span>
-      <span class="normal">(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient, <a href="/reference/com/google/android/gms/appindexing/Action.html">Action</a> action)</span>
-    </h4>
-      <div class="api-level">
-        <div></div>
-
-
-
-      </div>
-    <div class="jd-details-descr">
-
-
-
-
-  <div class="jd-tagdata jd-tagdescr"><p>Indicates that the user has ended a specific action in your app.
- <p>
- This method should be called for instantaneous actions such as <code><a href="/reference/com/google/android/gms/appindexing/Action.html#TYPE_BOOKMARK">TYPE_BOOKMARK</a></code>,
- <code><a href="/reference/com/google/android/gms/appindexing/Action.html#TYPE_LIKE">TYPE_LIKE</a></code>, <code><a href="/reference/com/google/android/gms/appindexing/Action.html#TYPE_WANT">TYPE_WANT</a></code>.</p></div>
-  <div class="jd-tagdata">
-      <h5 class="jd-tagtitle">Parameters</h5>
-      <table class="jd-tagtable">
-        <tr>
-          <th>apiClient</td>
-          <td>The <code><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a></code> configured to use the
- <code><a href="/reference/com/google/android/gms/appindexing/AppIndex.html#API">API</a></code>. The client should be connecting or connected.</td>
-        </tr>
-        <tr>
-          <th>action</td>
-          <td>The <code><a href="/reference/com/google/android/gms/appindexing/Action.html">Action</a></code> performed by the user within the app.</td>
-        </tr>
-      </table>
-  </div>
-  <div class="jd-tagdata">
-      <h5 class="jd-tagtitle">Returns</h5>
-      <ul class="nolist"><li>The <code><a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a></code> which can optionally be used to determine if the call
- succeeded.
-</li></ul>
-  </div>
-
-    </div>
-</div>
-
-
-<A NAME="start(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.appindexing.Action)"></A>
-
-<div class="jd-details api apilevel-">
-    <h4 class="jd-details-title">
-      <span class="normal">
-        public
-
-
-        abstract
-
-        <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/common/api/Status.html">Status</a>&gt;
-      </span>
-      <span class="sympad">start</span>
-      <span class="normal">(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient, <a href="/reference/com/google/android/gms/appindexing/Action.html">Action</a> action)</span>
-    </h4>
-      <div class="api-level">
-        <div></div>
-
-
-
-      </div>
-    <div class="jd-details-descr">
-
-
-
       
-  <div class="jd-tagdata jd-tagdescr"><p>Indicates that the user has started a specific action in your app.</p></div>
+  <div class="jd-tagdata jd-tagdescr"><p>Indicates that the user has performed a specific action in your app.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
       <table class="jd-tagtable">
@@ -1325,8 +1176,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   </div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
-      <ul class="nolist"><li>The <code><a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a></code> which can optionally be used to determine if the call
- succeeded.
+      <ul class="nolist"><li>The <code><a href="/reference/com/google/android/gms/appindexing/AppIndexApi.ActionResult.html">AppIndexApi.ActionResult</a></code> containing the result of writing an <code><a href="/reference/com/google/android/gms/appindexing/Action.html">Action</a></code>.
 </li></ul>
   </div>
 
@@ -1362,7 +1212,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       <p>
   <p class="caution"><strong>
       This method is deprecated.</strong><br/>
-    Use <code><a href="/reference/com/google/android/gms/appindexing/AppIndexApi.html#start(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.appindexing.Action)">start(GoogleApiClient, Action)</a></code> instead.
+    Use <code><a href="/reference/com/google/android/gms/appindexing/AppIndexApi.html#view(com.google.android.gms.common.api.GoogleApiClient, android.app.Activity, android.net.Uri, java.lang.String, android.net.Uri, java.util.List<com.google.android.gms.appindexing.AppIndexApi.AppIndexingLink>)">view(GoogleApiClient, Activity, Uri, String, Uri, List)</a></code> instead.
 
   </p>
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
@@ -1384,7 +1234,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/common/api/Status.html">Status</a>&gt;
       </span>
       <span class="sympad">view</span>
-      <span class="normal">(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient, Activity activity, Uri appUri, String title, Uri webUrl, List&lt;<a href="/reference/com/google/android/gms/appindexing/AppIndexApi.AppIndexingLink.html">AppIndexApi.AppIndexingLink</a>&gt; outLinks)</span>
+      <span class="normal">(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient, Activity activity, Uri appIndexingUrl, String title, Uri webUrl, List&lt;<a href="/reference/com/google/android/gms/appindexing/AppIndexApi.AppIndexingLink.html">AppIndexApi.AppIndexingLink</a>&gt; outLinks)</span>
     </h4>
       <div class="api-level">
         <div></div>
@@ -1396,13 +1246,52 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       
     
 
-      <p>
-  <p class="caution"><strong>
-      This method is deprecated.</strong><br/>
-    Use <code><a href="/reference/com/google/android/gms/appindexing/AppIndexApi.html#start(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.appindexing.Action)">start(GoogleApiClient, Action)</a></code> instead.
-
-  </p>
-  <div class="jd-tagdata jd-tagdescr"><p></p></div>
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Indicates that the user is viewing a piece of content in the app. Call this method when the
+ content becomes visible (for example, from the <code><a href="/reference/android/app/Activity.html#onStart()">onStart()</a></code> handler).
+ <p>
+ The <code><a href="/reference/android/app/Activity.html">Activity</a></code> registered to handle the specified <code>appIndexingUrl</code> must be
+ stable and <a href="https://developers.google.com/app-indexing/webmasters/app">exported</a>
+ in the app.
+ </p></p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>apiClient</td>
+          <td>The <code><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a></code> configured to use the
+ <code><a href="/reference/com/google/android/gms/appindexing/AppIndex.html#API">API</a></code>. The client should be connecting or connected.</td>
+        </tr>
+        <tr>
+          <th>activity</td>
+          <td>The app's <code><a href="/reference/android/app/Activity.html">Activity</a></code> where this content is viewed.</td>
+        </tr>
+        <tr>
+          <th>appIndexingUrl</td>
+          <td>The deep link in the
+ <a href="https://developers.google.com/app-indexing/">App Indexing</a> format.</td>
+        </tr>
+        <tr>
+          <th>title</td>
+          <td>The title of the content.</td>
+        </tr>
+        <tr>
+          <th>webUrl</td>
+          <td>The equivalent web url for the content. See
+ <a href="https://developers.google.com/app-indexing/">App Indexing</a>. Can be null.</td>
+        </tr>
+        <tr>
+          <th>outLinks</td>
+          <td>The list of outbound links on the screen. Can be null.</td>
+        </tr>
+      </table>
+  </div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li>The <code><a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a></code> which can optionally be used to determine if the call
+ succeeded.
+</li></ul>
+  </div>
 
     </div>
 </div>
@@ -1421,7 +1310,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/common/api/Status.html">Status</a>&gt;
       </span>
       <span class="sympad">viewEnd</span>
-      <span class="normal">(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient, Activity activity, Uri appUri)</span>
+      <span class="normal">(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient, Activity activity, Uri appIndexingUrl)</span>
     </h4>
       <div class="api-level">
         <div></div>
@@ -1433,13 +1322,35 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       
     
 
-      <p>
-  <p class="caution"><strong>
-      This method is deprecated.</strong><br/>
-    Use <code><a href="/reference/com/google/android/gms/appindexing/AppIndexApi.html#start(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.appindexing.Action)">start(GoogleApiClient, Action)</a></code> instead.
-
-  </p>
-  <div class="jd-tagdata jd-tagdescr"><p></p></div>
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Indicates that the user has stopped viewing a piece of content in the app. Call this
+ method when the content becomes hidden from the user (for example, from the
+ <code><a href="/reference/android/app/Activity.html#onStop()">onStop()</a></code> handler).</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>apiClient</td>
+          <td>The <code><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a></code> configured to use the
+ <code><a href="/reference/com/google/android/gms/appindexing/AppIndex.html#API">API</a></code>. The client should be connecting or connected.</td>
+        </tr>
+        <tr>
+          <th>activity</td>
+          <td>The app's <code><a href="/reference/android/app/Activity.html">Activity</a></code> where this content is viewed.</td>
+        </tr>
+        <tr>
+          <th>appIndexingUrl</td>
+          <td>The deep link in the
+ <a href="https://developers.google.com/app-indexing/">App Indexing</a> format.</td>
+        </tr>
+      </table>
+  </div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li>The <code><a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a></code> which can optionally be used to determine if the call
+ succeeded.
+</li></ul>
+  </div>
 
     </div>
 </div>
@@ -1473,7 +1384,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       <p>
   <p class="caution"><strong>
       This method is deprecated.</strong><br/>
-    Use <code><a href="/reference/com/google/android/gms/appindexing/AppIndexApi.html#end(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.appindexing.Action)">end(GoogleApiClient, Action)</a></code> instead.
+    Use <code><a href="/reference/com/google/android/gms/appindexing/AppIndexApi.html#viewEnd(com.google.android.gms.common.api.GoogleApiClient, android.app.Activity, android.net.Uri)">viewEnd(GoogleApiClient, Activity, Uri)</a></code> instead.
 
   </p>
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
