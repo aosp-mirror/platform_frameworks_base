@@ -160,8 +160,9 @@ public class RadialGradient_Delegate extends Gradient_Delegate {
 
             @Override
             public java.awt.image.Raster getRaster(int x, int y, int w, int h) {
-                java.awt.image.BufferedImage image = new java.awt.image.BufferedImage(w, h,
-                        java.awt.image.BufferedImage.TYPE_INT_ARGB);
+                java.awt.image.BufferedImage image = new java.awt.image.BufferedImage(
+                    mColorModel, mColorModel.createCompatibleWritableRaster(w, h),
+                    mColorModel.isAlphaPremultiplied(), null);
 
                 int[] data = new int[w*h];
 

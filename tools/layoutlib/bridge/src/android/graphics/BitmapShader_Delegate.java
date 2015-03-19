@@ -23,6 +23,8 @@ import com.android.tools.layoutlib.annotations.LayoutlibDelegate;
 
 import android.graphics.Shader.TileMode;
 
+import java.awt.image.ColorModel;
+
 /**
  * Delegate implementing the native methods of android.graphics.BitmapShader
  *
@@ -124,6 +126,11 @@ public class BitmapShader_Delegate extends Shader_Delegate {
                 localMatrix = new java.awt.geom.AffineTransform();
             }
 
+            if (!colorModel.isCompatibleRaster(mImage.getRaster())) {
+                // Fallback to the default ARGB color model
+                colorModel = ColorModel.getRGBdefault();
+            }
+
             return new BitmapShaderContext(canvasMatrix, localMatrix, colorModel);
         }
 
@@ -153,8 +160,9 @@ public class BitmapShader_Delegate extends Shader_Delegate {
 
             @Override
             public java.awt.image.Raster getRaster(int x, int y, int w, int h) {
-                java.awt.image.BufferedImage image = new java.awt.image.BufferedImage(w, h,
-                        java.awt.image.BufferedImage.TYPE_INT_ARGB);
+                java.awt.image.BufferedImage image = new java.awt.image.BufferedImage(
+                    mColorModel, mColorModel.createCompatibleWritableRaster(w, h),
+                    mColorModel.isAlphaPremultiplied(), null);
 
                 int[] data = new int[w*h];
 
