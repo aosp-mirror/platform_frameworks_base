@@ -327,7 +327,7 @@ public class StorageNotification extends SystemUI {
                 pi = PendingIntent.getBroadcastAsUser(mContext, 0, intent, 0,
                         UserHandle.CURRENT);
             }
-            mUsbStorageNotification.color = mContext.getResources().getColor(
+            mUsbStorageNotification.color = mContext.getColor(
                     com.android.internal.R.color.system_notification_accent_color);
             mUsbStorageNotification.setLatestEventInfo(mContext, title, message, pi);
             mUsbStorageNotification.visibility = Notification.VISIBILITY_PUBLIC;
@@ -422,7 +422,7 @@ public class StorageNotification extends SystemUI {
             }
 
             mMediaStorageNotification.icon = icon;
-            mMediaStorageNotification.color = mContext.getResources().getColor(
+            mMediaStorageNotification.color = mContext.getColor(
                     com.android.internal.R.color.system_notification_accent_color);
             mMediaStorageNotification.setLatestEventInfo(mContext, title, message, pi);
             mMediaStorageNotification.visibility = Notification.VISIBILITY_PUBLIC;

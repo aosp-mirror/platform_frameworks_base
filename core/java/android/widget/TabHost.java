@@ -603,7 +603,7 @@ mTabHost.addTab(TAB_TAG_1, "Hello, world!", "Tab 1");
             if (context.getApplicationInfo().targetSdkVersion <= Build.VERSION_CODES.DONUT) {
                 // Donut apps get old color scheme
                 tabIndicator.setBackgroundResource(R.drawable.tab_indicator_v4);
-                tv.setTextColor(context.getResources().getColorStateList(R.color.tab_indicator_text_v4));
+                tv.setTextColor(context.getColorStateList(R.color.tab_indicator_text_v4));
             }
 
             return tabIndicator;
@@ -648,7 +648,7 @@ mTabHost.addTab(TAB_TAG_1, "Hello, world!", "Tab 1");
             if (context.getApplicationInfo().targetSdkVersion <= Build.VERSION_CODES.DONUT) {
                 // Donut apps get old color scheme
                 tabIndicator.setBackgroundResource(R.drawable.tab_indicator_v4);
-                tv.setTextColor(context.getResources().getColorStateList(R.color.tab_indicator_text_v4));
+                tv.setTextColor(context.getColorStateList(R.color.tab_indicator_text_v4));
             }
 
             return tabIndicator;

@@ -87,7 +87,7 @@ public final class PrintContentView extends ViewGroup implements View.OnClickLis
         super(context, attrs);
         mDragger = ViewDragHelper.create(this, new DragCallbacks());
 
-        mScrimColor = context.getResources().getColor(R.color.print_preview_scrim_color);
+        mScrimColor = context.getColor(R.color.print_preview_scrim_color);
 
         // The options view is sliding under the static header but appears
         // after it in the layout, so we will draw in opposite order.

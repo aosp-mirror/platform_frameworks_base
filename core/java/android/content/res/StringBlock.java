@@ -328,7 +328,7 @@ final class StringBlock {
                 String name = color.substring(1);
                 int colorRes = res.getIdentifier(name, "color", "android");
                 if (colorRes != 0) {
-                    ColorStateList colors = res.getColorStateList(colorRes);
+                    ColorStateList colors = res.getColorStateList(colorRes, null);
                     if (foreground) {
                         return new TextAppearanceSpan(null, 0, 0, colors, null);
                     } else {

@@ -269,9 +269,9 @@ public class LockPatternView extends View {
         mPathPaint.setAntiAlias(true);
         mPathPaint.setDither(true);
 
-        mRegularColor = getResources().getColor(R.color.lock_pattern_view_regular_color);
-        mErrorColor = getResources().getColor(R.color.lock_pattern_view_error_color);
-        mSuccessColor = getResources().getColor(R.color.lock_pattern_view_success_color);
+        mRegularColor = context.getColor(R.color.lock_pattern_view_regular_color);
+        mErrorColor = context.getColor(R.color.lock_pattern_view_error_color);
+        mSuccessColor = context.getColor(R.color.lock_pattern_view_success_color);
         mRegularColor = a.getColor(R.styleable.LockPatternView_regularColor, mRegularColor);
         mErrorColor = a.getColor(R.styleable.LockPatternView_errorColor, mErrorColor);
         mSuccessColor = a.getColor(R.styleable.LockPatternView_successColor, mSuccessColor);

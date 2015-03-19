@@ -2870,7 +2870,7 @@ public class Notification implements Parcelable
                     contentView.setProgressBar(
                             R.id.progress, mProgressMax, mProgress, mProgressIndeterminate);
                     contentView.setProgressBackgroundTintList(
-                            R.id.progress, ColorStateList.valueOf(mContext.getResources().getColor(
+                            R.id.progress, ColorStateList.valueOf(mContext.getColor(
                                     R.color.notification_progress_background_color)));
                     if (mColor != COLOR_DEFAULT) {
                         ColorStateList colorStateList = ColorStateList.valueOf(mColor);
@@ -3044,7 +3044,7 @@ public class Notification implements Parcelable
         private void processLegacyAction(Action action, RemoteViews button) {
             if (!isLegacy() || mColorUtil.isGrayscaleIcon(mContext, action.icon)) {
                 button.setTextViewCompoundDrawablesRelativeColorFilter(R.id.action0, 0,
-                        mContext.getResources().getColor(R.color.notification_action_color_filter),
+                        mContext.getColor(R.color.notification_action_color_filter),
                         PorterDuff.Mode.MULTIPLY);
             }
         }
@@ -3142,7 +3142,7 @@ public class Notification implements Parcelable
 
         private int resolveColor() {
             if (mColor == COLOR_DEFAULT) {
-                return mContext.getResources().getColor(R.color.notification_icon_bg_color);
+                return mContext.getColor(R.color.notification_icon_bg_color);
             }
             return mColor;
         }
@@ -4321,9 +4321,9 @@ public class Notification implements Parcelable
          * Applies the special text colors for media notifications to all text views.
          */
         private void styleText(RemoteViews contentView) {
-            int primaryColor = mBuilder.mContext.getResources().getColor(
+            int primaryColor = mBuilder.mContext.getColor(
                     R.color.notification_media_primary_color);
-            int secondaryColor = mBuilder.mContext.getResources().getColor(
+            int secondaryColor = mBuilder.mContext.getColor(
                     R.color.notification_media_secondary_color);
             contentView.setTextColor(R.id.title, primaryColor);
             if (mBuilder.showsTimeOrChronometer()) {

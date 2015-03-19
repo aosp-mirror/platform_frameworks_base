@@ -478,7 +478,7 @@ public class Tethering extends BaseNetworkObserver {
         mTetheredNotification.flags = Notification.FLAG_ONGOING_EVENT;
         mTetheredNotification.tickerText = title;
         mTetheredNotification.visibility = Notification.VISIBILITY_PUBLIC;
-        mTetheredNotification.color = mContext.getResources().getColor(
+        mTetheredNotification.color = mContext.getColor(
                 com.android.internal.R.color.system_notification_accent_color);
         mTetheredNotification.setLatestEventInfo(mContext, title, message, pi);
         mTetheredNotification.category = Notification.CATEGORY_STATUS;

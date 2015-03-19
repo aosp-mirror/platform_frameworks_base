@@ -124,9 +124,8 @@ public class ZenModePanel extends LinearLayout {
         mPrefs = new Prefs();
         mInflater = LayoutInflater.from(mContext.getApplicationContext());
         mIconPulser = new IconPulser(mContext);
-        final Resources res = mContext.getResources();
-        mSubheadWarningColor = res.getColor(R.color.system_warning_color);
-        mSubheadColor = res.getColor(R.color.qs_subhead);
+        mSubheadWarningColor = context.getColor(R.color.system_warning_color);
+        mSubheadColor = context.getColor(R.color.qs_subhead);
         mInterpolator = AnimationUtils.loadInterpolator(mContext,
                 com.android.internal.R.interpolator.fast_out_slow_in);
         mForeverId = Condition.newId(mContext).appendPath("forever").build();

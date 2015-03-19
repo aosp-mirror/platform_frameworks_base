@@ -1736,7 +1736,7 @@ public class AccountManagerService
         }
         UserHandle user = new UserHandle(userId);
         Context contextForUser = getContextForUser(user);
-        n.color = contextForUser.getResources().getColor(
+        n.color = contextForUser.getColor(
                 com.android.internal.R.color.system_notification_accent_color);
         n.setLatestEventInfo(contextForUser, title, subtitle,
                 PendingIntent.getActivityAsUser(mContext, 0, intent,
@@ -3009,7 +3009,7 @@ public class AccountManagerService
                 Context contextForUser = getContextForUser(user);
                 final String notificationTitleFormat =
                         contextForUser.getText(R.string.notification_title).toString();
-                n.color = contextForUser.getResources().getColor(
+                n.color = contextForUser.getColor(
                         com.android.internal.R.color.system_notification_accent_color);
                 n.setLatestEventInfo(contextForUser,
                         String.format(notificationTitleFormat, account.name),

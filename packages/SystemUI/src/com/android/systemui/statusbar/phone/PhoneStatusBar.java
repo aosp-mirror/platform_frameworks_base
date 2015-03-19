@@ -535,8 +535,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         updateDisplaySize();
         mScrimSrcModeEnabled = mContext.getResources().getBoolean(
                 R.bool.config_status_bar_scrim_behind_use_src);
-        mLightModeIconColor = mContext.getResources().getColor(R.color.light_mode_icon_color,
-                mContext.getTheme());
+        mLightModeIconColor = mContext.getColor(R.color.light_mode_icon_color);
 
         super.start(); // calls createAndAddWindows()
 
@@ -613,7 +612,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
 
         if (!ActivityManager.isHighEndGfx()) {
             mStatusBarWindow.setBackground(null);
-            mNotificationPanel.setBackground(new FastColorDrawable(context.getResources().getColor(
+            mNotificationPanel.setBackground(new FastColorDrawable(context.getColor(
                     R.color.notification_panel_solid_background)));
         }
         if (ENABLE_HEADS_UP) {

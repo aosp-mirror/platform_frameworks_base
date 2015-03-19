@@ -268,7 +268,7 @@ public class IconUtils {
     public static Drawable applyTintColor(Context context, int drawableId, int tintColorId) {
         final Drawable icon = context.getDrawable(drawableId);
         icon.mutate();
-        icon.setTintList(context.getResources().getColorStateList(tintColorId));
+        icon.setTintList(context.getColorStateList(tintColorId));
         return icon;
     }
 

@@ -771,7 +771,7 @@ public class UsbDeviceManager {
                                     "com.android.settings.UsbSettings"));
                     PendingIntent pi = PendingIntent.getActivityAsUser(mContext, 0,
                             intent, 0, null, UserHandle.CURRENT);
-                    notification.color = mContext.getResources().getColor(
+                    notification.color = mContext.getColor(
                             com.android.internal.R.color.system_notification_accent_color);
                     notification.setLatestEventInfo(mContext, title, message, pi);
                     notification.visibility = Notification.VISIBILITY_PUBLIC;
@@ -809,7 +809,7 @@ public class UsbDeviceManager {
                                     "com.android.settings.DevelopmentSettings"));
                     PendingIntent pi = PendingIntent.getActivityAsUser(mContext, 0,
                             intent, 0, null, UserHandle.CURRENT);
-                    notification.color = mContext.getResources().getColor(
+                    notification.color = mContext.getColor(
                             com.android.internal.R.color.system_notification_accent_color);
                     notification.setLatestEventInfo(mContext, title, message, pi);
                     notification.visibility = Notification.VISIBILITY_PUBLIC;

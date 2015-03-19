@@ -669,7 +669,7 @@ final class AccessibilityController {
                     TypedValue typedValue = new TypedValue();
                     context.getTheme().resolveAttribute(R.attr.colorActivatedHighlight,
                             typedValue, true);
-                    final int borderColor = context.getResources().getColor(typedValue.resourceId);
+                    final int borderColor = context.getColor(typedValue.resourceId);
 
                     mPaint.setStyle(Paint.Style.STROKE);
                     mPaint.setStrokeWidth(mBorderWidth);

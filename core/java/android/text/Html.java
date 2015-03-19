@@ -672,7 +672,7 @@ class HtmlToSpannedConverter implements ContentHandler {
                     String name = f.mColor.substring(1);
                     int colorRes = res.getIdentifier(name, "color", "android");
                     if (colorRes != 0) {
-                        ColorStateList colors = res.getColorStateList(colorRes);
+                        ColorStateList colors = res.getColorStateList(colorRes, null);
                         text.setSpan(new TextAppearanceSpan(null, 0, 0, colors, null),
                                 where, len,
                                 Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);

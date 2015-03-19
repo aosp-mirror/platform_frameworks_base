@@ -330,7 +330,7 @@ public class VolumeUI extends SystemUI {
                                     PendingIntent.FLAG_UPDATE_CURRENT))
                             .setPriority(Notification.PRIORITY_MIN)
                             .setVisibility(Notification.VISIBILITY_PUBLIC)
-                            .setColor(mContext.getResources().getColor(
+                            .setColor(mContext.getColor(
                                     com.android.internal.R.color.system_notification_accent_color))
                             .build());
         }

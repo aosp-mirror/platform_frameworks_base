@@ -661,7 +661,7 @@ public abstract class BaseStatusBar extends SystemUI implements
                     .setContentText(mContext.getString(R.string.hidden_notifications_text))
                     .setPriority(Notification.PRIORITY_HIGH)
                     .setOngoing(true)
-                    .setColor(res.getColor(colorRes))
+                    .setColor(mContext.getColor(colorRes))
                     .setContentIntent(setupIntent)
                     .addAction(R.drawable.ic_close,
                             mContext.getString(R.string.hidden_notifications_cancel),
@@ -789,7 +789,7 @@ public abstract class BaseStatusBar extends SystemUI implements
             final int color = sbn.getNotification().color;
             if (isMediaNotification(entry)) {
                 entry.row.setTintColor(color == Notification.COLOR_DEFAULT
-                        ? mContext.getResources().getColor(
+                        ? mContext.getColor(
                                 R.color.notification_material_background_media_default_color)
                         : color);
             }

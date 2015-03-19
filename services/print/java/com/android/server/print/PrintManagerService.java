@@ -761,7 +761,7 @@ public final class PrintManagerService extends SystemService {
                     .setWhen(System.currentTimeMillis())
                     .setAutoCancel(true)
                     .setShowWhen(true)
-                    .setColor(mContext.getResources().getColor(
+                    .setColor(mContext.getColor(
                             com.android.internal.R.color.system_notification_accent_color));
 
             NotificationManager notificationManager = (NotificationManager) mContext

@@ -96,7 +96,7 @@ public class DataUsageDetailView extends LinearLayout {
         title.setText(titleId);
         final TextView usage = (TextView) findViewById(R.id.usage_text);
         usage.setText(formatBytes(bytes));
-        usage.setTextColor(res.getColor(usageColor));
+        usage.setTextColor(mContext.getColor(usageColor));
         final DataUsageGraph graph = (DataUsageGraph) findViewById(R.id.usage_graph);
         graph.setLevels(info.limitLevel, info.warningLevel, info.usageLevel);
         final TextView carrier = (TextView) findViewById(R.id.usage_carrier_text);
