@@ -96,6 +96,8 @@
 
 
 
+
+
 <html>
 <head>
 
@@ -111,7 +113,7 @@
 href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Roboto:light,regular,medium,thin,italic,mediumitalic,bold"
   title="roboto">
-<link href="/assets/css/default.css?v=4" rel="stylesheet" type="text/css">
+<link href="/assets/css/default.css?v=5" rel="stylesheet" type="text/css">
 
 
 
@@ -412,6 +414,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
                 <li><a href="/distribute/users/index.html">Get Users</a></li>
                 <li><a href="/distribute/engage/index.html">Engage &amp; Retain</a></li>
                 <li><a href="/distribute/monetize/index.html">Monetize</a></li>
+                <li><a href="/distribute/analyze/index.html">Analyze</a></li>
                 <li><a href="/distribute/tools/index.html">Tools &amp; Reference</a></li>
                 <li><a href="/distribute/stories/index.html">Developer Stories</a></li>
               </ul>
@@ -593,14 +596,14 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
 
   <li class="nav-section">
-    <div class="nav-section-header"><a href="/google/play/billing/index.html">
+    <div class="nav-section-header"><a href="/google/play/billing/index.html" zh-cn-lang="应用内结算">
       <span class="en">Google Play In-app Billing</span></a>
     </div>
     <ul>
-      <li><a href="/google/play/billing/billing_overview.html">
+      <li><a href="/google/play/billing/billing_overview.html" zh-cn-lang="应用内结算概述">
               <span class="en">Overview</span></a>
       </li>
-      <li class="nav-section"><div class="nav-section-header"><a href="/google/play/billing/api.html">
+      <li class="nav-section"><div class="nav-section-header"><a href="/google/play/billing/api.html" zh-cn-lang="应用内结算 API">
               <span class="en">Version 3 API</span></a></div>
               <ul>
               <li><a href="/google/play/billing/billing_integrate.html">
@@ -623,13 +626,13 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       <li><a href="/google/play/billing/billing_subscriptions.html">
               <span class="en">Subscriptions</span></a>
       </li>
-      <li><a href="/google/play/billing/billing_best_practices.html">
+      <li><a href="/google/play/billing/billing_best_practices.html" zh-cn-lang="安全性和设计">
               <span class="en">Security and Design</span></a>
       </li>
-      <li><a href="/google/play/billing/billing_testing.html">
+      <li><a href="/google/play/billing/billing_testing.html" zh-cn-lang="测试应用内结算">
               <span class="en">Testing In-app Billing</span></a>
       </li>
-      <li><a href="/google/play/billing/billing_admin.html">
+      <li><a href="/google/play/billing/billing_admin.html" zh-cn-lang="管理应用内结算">
               <span class="en">Administering In-app Billing</span></a>
       </li>
       <li><a href="/google/play/billing/versions.html">
@@ -663,21 +666,14 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
               <span class="en">HTTP</span></a></li>
               </ul>
         </li>
+        <li><a href="/google/gcm/server-ref.html">
+            <span class="en">Server Reference</span></a>
+        </li>
         <li><a href="/google/gcm/notifications.html">
               <span class="en">User Notifications</span></a>
         </li>
-        <li><a href="/google/gcm/adv.html">
-            <span class="en">Advanced Topics</span></a>
-        </li>
         <li><a href="/google/gcm/c2dm.html">
             <span class="en">Migration</span></a>
-        </li>
-        <li id="gcm-tree-list" class="nav-section">
-          <div class="nav-section-header">
-            <a href="/reference/gcm-packages.html">
-              <span class="en">Reference</span>
-            </a>
-          <div>
         </li>
       </ul>
   </li>
@@ -2262,7 +2258,8 @@ From interface
     
 
       
-  <div class="jd-tagdata jd-tagdescr"><p>A status indicating that a request was canceled. </p></div>
+  <div class="jd-tagdata jd-tagdescr"><p>A status indicating that a request was canceled.
+</p></div>
 
     
         <div class="jd-tagdata">
@@ -2303,7 +2300,8 @@ From interface
     
 
       
-  <div class="jd-tagdata jd-tagdescr"><p>A status indicating that a request failed. </p></div>
+  <div class="jd-tagdata jd-tagdescr"><p>A status indicating that a request failed. Equivalent to <code><a href="/reference/com/google/android/gms/cast/CastStatusCodes.html#FAILED">CastStatusCodes.FAILED</a></code>.
+</p></div>
 
     
         <div class="jd-tagdata">
@@ -2347,7 +2345,7 @@ From interface
   <div class="jd-tagdata jd-tagdescr"><p>A status indicating that the request's progress is no longer being tracked because another
  request of the same type has been made before the first request completed. This applies to
  requests such as volume change, where a new request invalidates the results of a previous
- one.
+ one. Equivalent to <code><a href="/reference/com/google/android/gms/cast/CastStatusCodes.html#REPLACED">CastStatusCodes.REPLACED</a></code>.
 </p></div>
 
     
@@ -2389,7 +2387,9 @@ From interface
     
 
       
-  <div class="jd-tagdata jd-tagdescr"><p>A status indicating that a request completed successfully. </p></div>
+  <div class="jd-tagdata jd-tagdescr"><p>A status indicating that a request completed successfully. Equivalent to
+ <code><a href="/reference/com/google/android/gms/cast/CastStatusCodes.html#SUCCESS">CastStatusCodes.SUCCESS</a></code>.
+</p></div>
 
     
         <div class="jd-tagdata">
@@ -2430,7 +2430,8 @@ From interface
     
 
       
-  <div class="jd-tagdata jd-tagdescr"><p>A status indicating that a request has timed out. </p></div>
+  <div class="jd-tagdata jd-tagdescr"><p>A status indicating that a request has timed out.
+</p></div>
 
     
         <div class="jd-tagdata">
@@ -3490,7 +3491,8 @@ From interface
         </tr>
         <tr>
           <th>trackIds</td>
-          <td>The media track IDs. Must not be <code>null</code> or empty.</td>
+          <td>The media track IDs. If an empty array, the current set of active
+            <code>trackIds</code> will be removed.</td>
         </tr>
       </table>
   </div>
@@ -3503,7 +3505,7 @@ From interface
       <table class="jd-tagtable">  
         <tr>
             <th>IllegalArgumentException</td>
-            <td>If <code>trackIds</code> is <code>null</code> or an empty array.
+            <td>If <code>trackIds</code> is <code>null</code>.
 </td>
         </tr>
       </table>

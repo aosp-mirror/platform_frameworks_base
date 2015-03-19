@@ -96,6 +96,8 @@
 
 
 
+
+
 <html>
 <head>
 
@@ -111,7 +113,7 @@
 href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Roboto:light,regular,medium,thin,italic,mediumitalic,bold"
   title="roboto">
-<link href="/assets/css/default.css?v=4" rel="stylesheet" type="text/css">
+<link href="/assets/css/default.css?v=5" rel="stylesheet" type="text/css">
 
 
 
@@ -412,6 +414,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
                 <li><a href="/distribute/users/index.html">Get Users</a></li>
                 <li><a href="/distribute/engage/index.html">Engage &amp; Retain</a></li>
                 <li><a href="/distribute/monetize/index.html">Monetize</a></li>
+                <li><a href="/distribute/analyze/index.html">Analyze</a></li>
                 <li><a href="/distribute/tools/index.html">Tools &amp; Reference</a></li>
                 <li><a href="/distribute/stories/index.html">Developer Stories</a></li>
               </ul>
@@ -593,14 +596,14 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
 
   <li class="nav-section">
-    <div class="nav-section-header"><a href="/google/play/billing/index.html">
+    <div class="nav-section-header"><a href="/google/play/billing/index.html" zh-cn-lang="应用内结算">
       <span class="en">Google Play In-app Billing</span></a>
     </div>
     <ul>
-      <li><a href="/google/play/billing/billing_overview.html">
+      <li><a href="/google/play/billing/billing_overview.html" zh-cn-lang="应用内结算概述">
               <span class="en">Overview</span></a>
       </li>
-      <li class="nav-section"><div class="nav-section-header"><a href="/google/play/billing/api.html">
+      <li class="nav-section"><div class="nav-section-header"><a href="/google/play/billing/api.html" zh-cn-lang="应用内结算 API">
               <span class="en">Version 3 API</span></a></div>
               <ul>
               <li><a href="/google/play/billing/billing_integrate.html">
@@ -623,13 +626,13 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       <li><a href="/google/play/billing/billing_subscriptions.html">
               <span class="en">Subscriptions</span></a>
       </li>
-      <li><a href="/google/play/billing/billing_best_practices.html">
+      <li><a href="/google/play/billing/billing_best_practices.html" zh-cn-lang="安全性和设计">
               <span class="en">Security and Design</span></a>
       </li>
-      <li><a href="/google/play/billing/billing_testing.html">
+      <li><a href="/google/play/billing/billing_testing.html" zh-cn-lang="测试应用内结算">
               <span class="en">Testing In-app Billing</span></a>
       </li>
-      <li><a href="/google/play/billing/billing_admin.html">
+      <li><a href="/google/play/billing/billing_admin.html" zh-cn-lang="管理应用内结算">
               <span class="en">Administering In-app Billing</span></a>
       </li>
       <li><a href="/google/play/billing/versions.html">
@@ -663,21 +666,14 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
               <span class="en">HTTP</span></a></li>
               </ul>
         </li>
+        <li><a href="/google/gcm/server-ref.html">
+            <span class="en">Server Reference</span></a>
+        </li>
         <li><a href="/google/gcm/notifications.html">
               <span class="en">User Notifications</span></a>
         </li>
-        <li><a href="/google/gcm/adv.html">
-            <span class="en">Advanced Topics</span></a>
-        </li>
         <li><a href="/google/gcm/c2dm.html">
             <span class="en">Migration</span></a>
-        </li>
-        <li id="gcm-tree-list" class="nav-section">
-          <div class="nav-section-header">
-            <a href="/reference/gcm-packages.html">
-              <span class="en">Reference</span>
-            </a>
-          <div>
         </li>
       </ul>
   </li>
@@ -982,22 +978,6 @@ Summary:
           static
           
           int</nobr></td>
-          <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.attr.html#allowShortcuts">allowShortcuts</a></td>
-          <td class="jd-descrcol" width="100%">
-            <p>Must be a boolean value, either "<code>true</code>" or "<code>false</code>".
-            
-    
-
-          </td>
-      </tr>
-      
-    
-      <tr class="alt-color api apilevel-" >
-          <td class="jd-typecol"><nobr>
-          public
-          static
-          
-          int</nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.attr.html#appTheme">appTheme</a></td>
           <td class="jd-descrcol" width="100%">
             <p>Must be one of the following constant values.
@@ -1008,7 +988,7 @@ Summary:
       </tr>
       
     
-      <tr class=" api apilevel-" >
+      <tr class="alt-color api apilevel-" >
           <td class="jd-typecol"><nobr>
           public
           static
@@ -1024,7 +1004,7 @@ Summary:
       </tr>
       
     
-      <tr class="alt-color api apilevel-" >
+      <tr class=" api apilevel-" >
           <td class="jd-typecol"><nobr>
           public
           static
@@ -1040,7 +1020,7 @@ Summary:
       </tr>
       
     
-      <tr class=" api apilevel-" >
+      <tr class="alt-color api apilevel-" >
           <td class="jd-typecol"><nobr>
           public
           static
@@ -1056,7 +1036,7 @@ Summary:
       </tr>
       
     
-      <tr class="alt-color api apilevel-" >
+      <tr class=" api apilevel-" >
           <td class="jd-typecol"><nobr>
           public
           static
@@ -1072,7 +1052,7 @@ Summary:
       </tr>
       
     
-      <tr class=" api apilevel-" >
+      <tr class="alt-color api apilevel-" >
           <td class="jd-typecol"><nobr>
           public
           static
@@ -1088,7 +1068,7 @@ Summary:
       </tr>
       
     
-      <tr class="alt-color api apilevel-" >
+      <tr class=" api apilevel-" >
           <td class="jd-typecol"><nobr>
           public
           static
@@ -1104,7 +1084,7 @@ Summary:
       </tr>
       
     
-      <tr class=" api apilevel-" >
+      <tr class="alt-color api apilevel-" >
           <td class="jd-typecol"><nobr>
           public
           static
@@ -1120,7 +1100,7 @@ Summary:
       </tr>
       
     
-      <tr class="alt-color api apilevel-" >
+      <tr class=" api apilevel-" >
           <td class="jd-typecol"><nobr>
           public
           static
@@ -1136,7 +1116,7 @@ Summary:
       </tr>
       
     
-      <tr class=" api apilevel-" >
+      <tr class="alt-color api apilevel-" >
           <td class="jd-typecol"><nobr>
           public
           static
@@ -1152,7 +1132,7 @@ Summary:
       </tr>
       
     
-      <tr class="alt-color api apilevel-" >
+      <tr class=" api apilevel-" >
           <td class="jd-typecol"><nobr>
           public
           static
@@ -1168,125 +1148,13 @@ Summary:
       </tr>
       
     
-      <tr class=" api apilevel-" >
-          <td class="jd-typecol"><nobr>
-          public
-          static
-          
-          int</nobr></td>
-          <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.attr.html#contentProviderUri">contentProviderUri</a></td>
-          <td class="jd-descrcol" width="100%">
-            <p>Must be a string value, using '\\;' to escape characters such as '\\n' or '\\uxxxx' for a unicode character.
-            
-    
-
-          </td>
-      </tr>
-      
-    
       <tr class="alt-color api apilevel-" >
-          <td class="jd-typecol"><nobr>
-          public
-          static
-          
-          int</nobr></td>
-          <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.attr.html#corpusId">corpusId</a></td>
-          <td class="jd-descrcol" width="100%">
-            <p>Must be a string value, using '\\;' to escape characters such as '\\n' or '\\uxxxx' for a unicode character.
-            
-    
-
-          </td>
-      </tr>
-      
-    
-      <tr class=" api apilevel-" >
-          <td class="jd-typecol"><nobr>
-          public
-          static
-          
-          int</nobr></td>
-          <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.attr.html#corpusVersion">corpusVersion</a></td>
-          <td class="jd-descrcol" width="100%">
-            <p>Must be a string value, using '\\;' to escape characters such as '\\n' or '\\uxxxx' for a unicode character.
-            
-    
-
-          </td>
-      </tr>
-      
-    
-      <tr class="alt-color api apilevel-" >
-          <td class="jd-typecol"><nobr>
-          public
-          static
-          
-          int</nobr></td>
-          <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.attr.html#defaultIntentAction">defaultIntentAction</a></td>
-          <td class="jd-descrcol" width="100%">
-            <p>Must be a string value, using '\\;' to escape characters such as '\\n' or '\\uxxxx' for a unicode character.
-            
-    
-
-          </td>
-      </tr>
-      
-    
-      <tr class=" api apilevel-" >
-          <td class="jd-typecol"><nobr>
-          public
-          static
-          
-          int</nobr></td>
-          <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.attr.html#defaultIntentActivity">defaultIntentActivity</a></td>
-          <td class="jd-descrcol" width="100%">
-            <p>Must be a string value, using '\\;' to escape characters such as '\\n' or '\\uxxxx' for a unicode character.
-            
-    
-
-          </td>
-      </tr>
-      
-    
-      <tr class="alt-color api apilevel-" >
-          <td class="jd-typecol"><nobr>
-          public
-          static
-          
-          int</nobr></td>
-          <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.attr.html#defaultIntentData">defaultIntentData</a></td>
-          <td class="jd-descrcol" width="100%">
-            <p>Must be a string value, using '\\;' to escape characters such as '\\n' or '\\uxxxx' for a unicode character.
-            
-    
-
-          </td>
-      </tr>
-      
-    
-      <tr class=" api apilevel-" >
           <td class="jd-typecol"><nobr>
           public
           static
           
           int</nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.attr.html#environment">environment</a></td>
-          <td class="jd-descrcol" width="100%">
-            <p>Must be one of the following constant values.
-            
-    
-
-          </td>
-      </tr>
-      
-    
-      <tr class="alt-color api apilevel-" >
-          <td class="jd-typecol"><nobr>
-          public
-          static
-          
-          int</nobr></td>
-          <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.attr.html#featureType">featureType</a></td>
           <td class="jd-descrcol" width="100%">
             <p>Must be one of the following constant values.
             
@@ -1354,38 +1222,6 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.attr.html#imageAspectRatioAdjust">imageAspectRatioAdjust</a></td>
           <td class="jd-descrcol" width="100%">
             <p>Must be one of the following constant values.
-            
-    
-
-          </td>
-      </tr>
-      
-    
-      <tr class=" api apilevel-" >
-          <td class="jd-typecol"><nobr>
-          public
-          static
-          
-          int</nobr></td>
-          <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.attr.html#indexPrefixes">indexPrefixes</a></td>
-          <td class="jd-descrcol" width="100%">
-            <p>Must be a boolean value, either "<code>true</code>" or "<code>false</code>".
-            
-    
-
-          </td>
-      </tr>
-      
-    
-      <tr class="alt-color api apilevel-" >
-          <td class="jd-typecol"><nobr>
-          public
-          static
-          
-          int</nobr></td>
-          <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.attr.html#inputEnabled">inputEnabled</a></td>
-          <td class="jd-descrcol" width="100%">
-            <p>Must be a boolean value, either "<code>true</code>" or "<code>false</code>".
             
     
 
@@ -1549,278 +1385,6 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
           static
           
           int</nobr></td>
-          <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.attr.html#noIndex">noIndex</a></td>
-          <td class="jd-descrcol" width="100%">
-            <p>Must be a boolean value, either "<code>true</code>" or "<code>false</code>".
-            
-    
-
-          </td>
-      </tr>
-      
-    
-      <tr class=" api apilevel-" >
-          <td class="jd-typecol"><nobr>
-          public
-          static
-          
-          int</nobr></td>
-          <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.attr.html#paramName">paramName</a></td>
-          <td class="jd-descrcol" width="100%">
-            <p>Must be a string value, using '\\;' to escape characters such as '\\n' or '\\uxxxx' for a unicode character.
-            
-    
-
-          </td>
-      </tr>
-      
-    
-      <tr class="alt-color api apilevel-" >
-          <td class="jd-typecol"><nobr>
-          public
-          static
-          
-          int</nobr></td>
-          <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.attr.html#paramValue">paramValue</a></td>
-          <td class="jd-descrcol" width="100%">
-            <p>Must be a string value, using '\\;' to escape characters such as '\\n' or '\\uxxxx' for a unicode character.
-            
-    
-
-          </td>
-      </tr>
-      
-    
-      <tr class=" api apilevel-" >
-          <td class="jd-typecol"><nobr>
-          public
-          static
-          
-          int</nobr></td>
-          <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.attr.html#schemaOrgProperty">schemaOrgProperty</a></td>
-          <td class="jd-descrcol" width="100%">
-            <p>Must be a string value, using '\\;' to escape characters such as '\\n' or '\\uxxxx' for a unicode character.
-            
-    
-
-          </td>
-      </tr>
-      
-    
-      <tr class="alt-color api apilevel-" >
-          <td class="jd-typecol"><nobr>
-          public
-          static
-          
-          int</nobr></td>
-          <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.attr.html#schemaOrgType">schemaOrgType</a></td>
-          <td class="jd-descrcol" width="100%">
-            <p>Must be a string value, using '\\;' to escape characters such as '\\n' or '\\uxxxx' for a unicode character.
-            
-    
-
-          </td>
-      </tr>
-      
-    
-      <tr class=" api apilevel-" >
-          <td class="jd-typecol"><nobr>
-          public
-          static
-          
-          int</nobr></td>
-          <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.attr.html#searchEnabled">searchEnabled</a></td>
-          <td class="jd-descrcol" width="100%">
-            <p>Must be a boolean value, either "<code>true</code>" or "<code>false</code>".
-            
-    
-
-          </td>
-      </tr>
-      
-    
-      <tr class="alt-color api apilevel-" >
-          <td class="jd-typecol"><nobr>
-          public
-          static
-          
-          int</nobr></td>
-          <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.attr.html#searchLabel">searchLabel</a></td>
-          <td class="jd-descrcol" width="100%">
-            <p>Must be a string value, using '\\;' to escape characters such as '\\n' or '\\uxxxx' for a unicode character.
-            
-    
-
-          </td>
-      </tr>
-      
-    
-      <tr class=" api apilevel-" >
-          <td class="jd-typecol"><nobr>
-          public
-          static
-          
-          int</nobr></td>
-          <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.attr.html#sectionContent">sectionContent</a></td>
-          <td class="jd-descrcol" width="100%">
-            <p>Must be a string value, using '\\;' to escape characters such as '\\n' or '\\uxxxx' for a unicode character.
-            
-    
-
-          </td>
-      </tr>
-      
-    
-      <tr class="alt-color api apilevel-" >
-          <td class="jd-typecol"><nobr>
-          public
-          static
-          
-          int</nobr></td>
-          <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.attr.html#sectionFormat">sectionFormat</a></td>
-          <td class="jd-descrcol" width="100%">
-            <p>Must be one of the following constant values.
-            
-    
-
-          </td>
-      </tr>
-      
-    
-      <tr class=" api apilevel-" >
-          <td class="jd-typecol"><nobr>
-          public
-          static
-          
-          int</nobr></td>
-          <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.attr.html#sectionId">sectionId</a></td>
-          <td class="jd-descrcol" width="100%">
-            <p>Must be a string value, using '\\;' to escape characters such as '\\n' or '\\uxxxx' for a unicode character.
-            
-    
-
-          </td>
-      </tr>
-      
-    
-      <tr class="alt-color api apilevel-" >
-          <td class="jd-typecol"><nobr>
-          public
-          static
-          
-          int</nobr></td>
-          <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.attr.html#sectionType">sectionType</a></td>
-          <td class="jd-descrcol" width="100%">
-            <p>Must be one of the following constant values.
-            
-    
-
-          </td>
-      </tr>
-      
-    
-      <tr class=" api apilevel-" >
-          <td class="jd-typecol"><nobr>
-          public
-          static
-          
-          int</nobr></td>
-          <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.attr.html#sectionWeight">sectionWeight</a></td>
-          <td class="jd-descrcol" width="100%">
-            <p>Must be an integer value, such as "<code>100</code>".
-            
-    
-
-          </td>
-      </tr>
-      
-    
-      <tr class="alt-color api apilevel-" >
-          <td class="jd-typecol"><nobr>
-          public
-          static
-          
-          int</nobr></td>
-          <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.attr.html#settingsDescription">settingsDescription</a></td>
-          <td class="jd-descrcol" width="100%">
-            <p>Must be a string value, using '\\;' to escape characters such as '\\n' or '\\uxxxx' for a unicode character.
-            
-    
-
-          </td>
-      </tr>
-      
-    
-      <tr class=" api apilevel-" >
-          <td class="jd-typecol"><nobr>
-          public
-          static
-          
-          int</nobr></td>
-          <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.attr.html#sourceClass">sourceClass</a></td>
-          <td class="jd-descrcol" width="100%">
-            <p>Must be one of the following constant values.
-            
-    
-
-          </td>
-      </tr>
-      
-    
-      <tr class="alt-color api apilevel-" >
-          <td class="jd-typecol"><nobr>
-          public
-          static
-          
-          int</nobr></td>
-          <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.attr.html#subsectionSeparator">subsectionSeparator</a></td>
-          <td class="jd-descrcol" width="100%">
-            <p>Must be a string value, using '\\;' to escape characters such as '\\n' or '\\uxxxx' for a unicode character.
-            
-    
-
-          </td>
-      </tr>
-      
-    
-      <tr class=" api apilevel-" >
-          <td class="jd-typecol"><nobr>
-          public
-          static
-          
-          int</nobr></td>
-          <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.attr.html#toAddressesSection">toAddressesSection</a></td>
-          <td class="jd-descrcol" width="100%">
-            <p>Must be a string value, using '\\;' to escape characters such as '\\n' or '\\uxxxx' for a unicode character.
-            
-    
-
-          </td>
-      </tr>
-      
-    
-      <tr class="alt-color api apilevel-" >
-          <td class="jd-typecol"><nobr>
-          public
-          static
-          
-          int</nobr></td>
-          <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.attr.html#trimmable">trimmable</a></td>
-          <td class="jd-descrcol" width="100%">
-            <p>Must be a boolean value, either "<code>true</code>" or "<code>false</code>".
-            
-    
-
-          </td>
-      </tr>
-      
-    
-      <tr class=" api apilevel-" >
-          <td class="jd-typecol"><nobr>
-          public
-          static
-          
-          int</nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.attr.html#uiCompass">uiCompass</a></td>
           <td class="jd-descrcol" width="100%">
             <p>Must be a boolean value, either "<code>true</code>" or "<code>false</code>".
@@ -1831,7 +1395,7 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
       </tr>
       
     
-      <tr class="alt-color api apilevel-" >
+      <tr class=" api apilevel-" >
           <td class="jd-typecol"><nobr>
           public
           static
@@ -1847,7 +1411,7 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
       </tr>
       
     
-      <tr class=" api apilevel-" >
+      <tr class="alt-color api apilevel-" >
           <td class="jd-typecol"><nobr>
           public
           static
@@ -1863,7 +1427,7 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
       </tr>
       
     
-      <tr class="alt-color api apilevel-" >
+      <tr class=" api apilevel-" >
           <td class="jd-typecol"><nobr>
           public
           static
@@ -1879,7 +1443,7 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
       </tr>
       
     
-      <tr class=" api apilevel-" >
+      <tr class="alt-color api apilevel-" >
           <td class="jd-typecol"><nobr>
           public
           static
@@ -1895,7 +1459,7 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
       </tr>
       
     
-      <tr class="alt-color api apilevel-" >
+      <tr class=" api apilevel-" >
           <td class="jd-typecol"><nobr>
           public
           static
@@ -1911,7 +1475,7 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
       </tr>
       
     
-      <tr class=" api apilevel-" >
+      <tr class="alt-color api apilevel-" >
           <td class="jd-typecol"><nobr>
           public
           static
@@ -1927,7 +1491,7 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
       </tr>
       
     
-      <tr class="alt-color api apilevel-" >
+      <tr class=" api apilevel-" >
           <td class="jd-typecol"><nobr>
           public
           static
@@ -1943,31 +1507,15 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
       </tr>
       
     
-      <tr class=" api apilevel-" >
-          <td class="jd-typecol"><nobr>
-          public
-          static
-          
-          int</nobr></td>
-          <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.attr.html#userInputSection">userInputSection</a></td>
-          <td class="jd-descrcol" width="100%">
-            <p>Must be a string value, using '\\;' to escape characters such as '\\n' or '\\uxxxx' for a unicode character.
-            
-    
-
-          </td>
-      </tr>
-      
-    
       <tr class="alt-color api apilevel-" >
           <td class="jd-typecol"><nobr>
           public
           static
           
           int</nobr></td>
-          <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.attr.html#userInputTag">userInputTag</a></td>
+          <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.attr.html#windowTransitionStyle">windowTransitionStyle</a></td>
           <td class="jd-descrcol" width="100%">
-            <p>Must be a string value, using '\\;' to escape characters such as '\\n' or '\\uxxxx' for a unicode character.
+            <p>Must be one of the following constant values.
             
     
 
@@ -1976,22 +1524,6 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
       
     
       <tr class=" api apilevel-" >
-          <td class="jd-typecol"><nobr>
-          public
-          static
-          
-          int</nobr></td>
-          <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.attr.html#userInputValue">userInputValue</a></td>
-          <td class="jd-descrcol" width="100%">
-            <p>Must be a string value, using '\\;' to escape characters such as '\\n' or '\\uxxxx' for a unicode character.
-            
-    
-
-          </td>
-      </tr>
-      
-    
-      <tr class="alt-color api apilevel-" >
           <td class="jd-typecol"><nobr>
           public
           static
@@ -2387,43 +1919,6 @@ containing a value of this type.
 
       
   <div class="jd-tagdata jd-tagdescr"><p><p>Must be a string value, using '\\;' to escape characters such as '\\n' or '\\uxxxx' for a unicode character.
-<p>This may also be a reference to a resource (in the form
-"<code>@[<i>package</i>:]<i>type</i>:<i>name</i></code>") or
-theme attribute (in the form
-"<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>")
-containing a value of this type.
-</p></div>
-
-    
-    </div>
-</div>
-
-
-
-<A NAME="allowShortcuts"></A>
-
-<div class="jd-details api apilevel-"> 
-    <h4 class="jd-details-title">
-      <span class="normal">
-        public 
-        static 
-         
-        int
-      </span>
-        allowShortcuts
-    </h4>
-      <div class="api-level">
-        
-        
-  
-
-      </div>
-    <div class="jd-details-descr">
-      
-    
-
-      
-  <div class="jd-tagdata jd-tagdescr"><p><p>Must be a boolean value, either "<code>true</code>" or "<code>false</code>".
 <p>This may also be a reference to a resource (in the form
 "<code>@[<i>package</i>:]<i>type</i>:<i>name</i></code>") or
 theme attribute (in the form
@@ -2878,228 +2373,6 @@ containing a value of this type.
 
 
 
-<A NAME="contentProviderUri"></A>
-
-<div class="jd-details api apilevel-"> 
-    <h4 class="jd-details-title">
-      <span class="normal">
-        public 
-        static 
-         
-        int
-      </span>
-        contentProviderUri
-    </h4>
-      <div class="api-level">
-        
-        
-  
-
-      </div>
-    <div class="jd-details-descr">
-      
-    
-
-      
-  <div class="jd-tagdata jd-tagdescr"><p><p>Must be a string value, using '\\;' to escape characters such as '\\n' or '\\uxxxx' for a unicode character.
-<p>This may also be a reference to a resource (in the form
-"<code>@[<i>package</i>:]<i>type</i>:<i>name</i></code>") or
-theme attribute (in the form
-"<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>")
-containing a value of this type.
-</p></div>
-
-    
-    </div>
-</div>
-
-
-
-<A NAME="corpusId"></A>
-
-<div class="jd-details api apilevel-"> 
-    <h4 class="jd-details-title">
-      <span class="normal">
-        public 
-        static 
-         
-        int
-      </span>
-        corpusId
-    </h4>
-      <div class="api-level">
-        
-        
-  
-
-      </div>
-    <div class="jd-details-descr">
-      
-    
-
-      
-  <div class="jd-tagdata jd-tagdescr"><p><p>Must be a string value, using '\\;' to escape characters such as '\\n' or '\\uxxxx' for a unicode character.
-<p>This may also be a reference to a resource (in the form
-"<code>@[<i>package</i>:]<i>type</i>:<i>name</i></code>") or
-theme attribute (in the form
-"<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>")
-containing a value of this type.
-</p></div>
-
-    
-    </div>
-</div>
-
-
-
-<A NAME="corpusVersion"></A>
-
-<div class="jd-details api apilevel-"> 
-    <h4 class="jd-details-title">
-      <span class="normal">
-        public 
-        static 
-         
-        int
-      </span>
-        corpusVersion
-    </h4>
-      <div class="api-level">
-        
-        
-  
-
-      </div>
-    <div class="jd-details-descr">
-      
-    
-
-      
-  <div class="jd-tagdata jd-tagdescr"><p><p>Must be a string value, using '\\;' to escape characters such as '\\n' or '\\uxxxx' for a unicode character.
-<p>This may also be a reference to a resource (in the form
-"<code>@[<i>package</i>:]<i>type</i>:<i>name</i></code>") or
-theme attribute (in the form
-"<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>")
-containing a value of this type.
-</p></div>
-
-    
-    </div>
-</div>
-
-
-
-<A NAME="defaultIntentAction"></A>
-
-<div class="jd-details api apilevel-"> 
-    <h4 class="jd-details-title">
-      <span class="normal">
-        public 
-        static 
-         
-        int
-      </span>
-        defaultIntentAction
-    </h4>
-      <div class="api-level">
-        
-        
-  
-
-      </div>
-    <div class="jd-details-descr">
-      
-    
-
-      
-  <div class="jd-tagdata jd-tagdescr"><p><p>Must be a string value, using '\\;' to escape characters such as '\\n' or '\\uxxxx' for a unicode character.
-<p>This may also be a reference to a resource (in the form
-"<code>@[<i>package</i>:]<i>type</i>:<i>name</i></code>") or
-theme attribute (in the form
-"<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>")
-containing a value of this type.
-</p></div>
-
-    
-    </div>
-</div>
-
-
-
-<A NAME="defaultIntentActivity"></A>
-
-<div class="jd-details api apilevel-"> 
-    <h4 class="jd-details-title">
-      <span class="normal">
-        public 
-        static 
-         
-        int
-      </span>
-        defaultIntentActivity
-    </h4>
-      <div class="api-level">
-        
-        
-  
-
-      </div>
-    <div class="jd-details-descr">
-      
-    
-
-      
-  <div class="jd-tagdata jd-tagdescr"><p><p>Must be a string value, using '\\;' to escape characters such as '\\n' or '\\uxxxx' for a unicode character.
-<p>This may also be a reference to a resource (in the form
-"<code>@[<i>package</i>:]<i>type</i>:<i>name</i></code>") or
-theme attribute (in the form
-"<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>")
-containing a value of this type.
-</p></div>
-
-    
-    </div>
-</div>
-
-
-
-<A NAME="defaultIntentData"></A>
-
-<div class="jd-details api apilevel-"> 
-    <h4 class="jd-details-title">
-      <span class="normal">
-        public 
-        static 
-         
-        int
-      </span>
-        defaultIntentData
-    </h4>
-      <div class="api-level">
-        
-        
-  
-
-      </div>
-    <div class="jd-details-descr">
-      
-    
-
-      
-  <div class="jd-tagdata jd-tagdescr"><p><p>Must be a string value, using '\\;' to escape characters such as '\\n' or '\\uxxxx' for a unicode character.
-<p>This may also be a reference to a resource (in the form
-"<code>@[<i>package</i>:]<i>type</i>:<i>name</i></code>") or
-theme attribute (in the form
-"<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>")
-containing a value of this type.
-</p></div>
-
-    
-    </div>
-</div>
-
-
-
 <A NAME="environment"></A>
 
 <div class="jd-details api apilevel-"> 
@@ -3132,49 +2405,6 @@ containing a value of this type.
 <tr><td><code>production</code></td><td>1</td><td></td></tr>
 <tr><td><code>sandbox</code></td><td>0</td><td></td></tr>
 <tr><td><code>strict_sandbox</code></td><td>2</td><td></td></tr>
-</table>
-</p></div>
-
-    
-    </div>
-</div>
-
-
-
-<A NAME="featureType"></A>
-
-<div class="jd-details api apilevel-"> 
-    <h4 class="jd-details-title">
-      <span class="normal">
-        public 
-        static 
-         
-        int
-      </span>
-        featureType
-    </h4>
-      <div class="api-level">
-        
-        
-  
-
-      </div>
-    <div class="jd-details-descr">
-      
-    
-
-      
-  <div class="jd-tagdata jd-tagdescr"><p><p>Must be one of the following constant values.</p>
-<table>
-<colgroup align="left" />
-<colgroup align="left" />
-<colgroup align="left" />
-<tr><th>Constant</th><th>Value</th><th>Description</th></tr>
-<tr><td><code>match_global_nicknames</code></td><td>1</td><td></td></tr>
-<tr><td><code>demote_common_words</code></td><td>2</td><td></td></tr>
-<tr><td><code>demote_rfc822_hostnames</code></td><td>3</td><td></td></tr>
-<tr><td><code>omnibox_url_section</code></td><td>4</td><td></td></tr>
-<tr><td><code>omnibox_title_section</code></td><td>5</td><td></td></tr>
 </table>
 </p></div>
 
@@ -3327,80 +2557,6 @@ containing a value of this type.
 <tr><td><code>adjust_width</code></td><td>1</td><td></td></tr>
 <tr><td><code>adjust_height</code></td><td>2</td><td></td></tr>
 </table>
-</p></div>
-
-    
-    </div>
-</div>
-
-
-
-<A NAME="indexPrefixes"></A>
-
-<div class="jd-details api apilevel-"> 
-    <h4 class="jd-details-title">
-      <span class="normal">
-        public 
-        static 
-         
-        int
-      </span>
-        indexPrefixes
-    </h4>
-      <div class="api-level">
-        
-        
-  
-
-      </div>
-    <div class="jd-details-descr">
-      
-    
-
-      
-  <div class="jd-tagdata jd-tagdescr"><p><p>Must be a boolean value, either "<code>true</code>" or "<code>false</code>".
-<p>This may also be a reference to a resource (in the form
-"<code>@[<i>package</i>:]<i>type</i>:<i>name</i></code>") or
-theme attribute (in the form
-"<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>")
-containing a value of this type.
-</p></div>
-
-    
-    </div>
-</div>
-
-
-
-<A NAME="inputEnabled"></A>
-
-<div class="jd-details api apilevel-"> 
-    <h4 class="jd-details-title">
-      <span class="normal">
-        public 
-        static 
-         
-        int
-      </span>
-        inputEnabled
-    </h4>
-      <div class="api-level">
-        
-        
-  
-
-      </div>
-    <div class="jd-details-descr">
-      
-    
-
-      
-  <div class="jd-tagdata jd-tagdescr"><p><p>Must be a boolean value, either "<code>true</code>" or "<code>false</code>".
-<p>This may also be a reference to a resource (in the form
-"<code>@[<i>package</i>:]<i>type</i>:<i>name</i></code>") or
-theme attribute (in the form
-"<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>")
-containing a value of this type.
 </p></div>
 
     
@@ -3736,654 +2892,6 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
 
 
 
-<A NAME="noIndex"></A>
-
-<div class="jd-details api apilevel-"> 
-    <h4 class="jd-details-title">
-      <span class="normal">
-        public 
-        static 
-         
-        int
-      </span>
-        noIndex
-    </h4>
-      <div class="api-level">
-        
-        
-  
-
-      </div>
-    <div class="jd-details-descr">
-      
-    
-
-      
-  <div class="jd-tagdata jd-tagdescr"><p><p>Must be a boolean value, either "<code>true</code>" or "<code>false</code>".
-<p>This may also be a reference to a resource (in the form
-"<code>@[<i>package</i>:]<i>type</i>:<i>name</i></code>") or
-theme attribute (in the form
-"<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>")
-containing a value of this type.
-</p></div>
-
-    
-    </div>
-</div>
-
-
-
-<A NAME="paramName"></A>
-
-<div class="jd-details api apilevel-"> 
-    <h4 class="jd-details-title">
-      <span class="normal">
-        public 
-        static 
-         
-        int
-      </span>
-        paramName
-    </h4>
-      <div class="api-level">
-        
-        
-  
-
-      </div>
-    <div class="jd-details-descr">
-      
-    
-
-      
-  <div class="jd-tagdata jd-tagdescr"><p><p>Must be a string value, using '\\;' to escape characters such as '\\n' or '\\uxxxx' for a unicode character.
-<p>This may also be a reference to a resource (in the form
-"<code>@[<i>package</i>:]<i>type</i>:<i>name</i></code>") or
-theme attribute (in the form
-"<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>")
-containing a value of this type.
-</p></div>
-
-    
-    </div>
-</div>
-
-
-
-<A NAME="paramValue"></A>
-
-<div class="jd-details api apilevel-"> 
-    <h4 class="jd-details-title">
-      <span class="normal">
-        public 
-        static 
-         
-        int
-      </span>
-        paramValue
-    </h4>
-      <div class="api-level">
-        
-        
-  
-
-      </div>
-    <div class="jd-details-descr">
-      
-    
-
-      
-  <div class="jd-tagdata jd-tagdescr"><p><p>Must be a string value, using '\\;' to escape characters such as '\\n' or '\\uxxxx' for a unicode character.
-<p>This may also be a reference to a resource (in the form
-"<code>@[<i>package</i>:]<i>type</i>:<i>name</i></code>") or
-theme attribute (in the form
-"<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>")
-containing a value of this type.
-</p></div>
-
-    
-    </div>
-</div>
-
-
-
-<A NAME="schemaOrgProperty"></A>
-
-<div class="jd-details api apilevel-"> 
-    <h4 class="jd-details-title">
-      <span class="normal">
-        public 
-        static 
-         
-        int
-      </span>
-        schemaOrgProperty
-    </h4>
-      <div class="api-level">
-        
-        
-  
-
-      </div>
-    <div class="jd-details-descr">
-      
-    
-
-      
-  <div class="jd-tagdata jd-tagdescr"><p><p>Must be a string value, using '\\;' to escape characters such as '\\n' or '\\uxxxx' for a unicode character.
-<p>This may also be a reference to a resource (in the form
-"<code>@[<i>package</i>:]<i>type</i>:<i>name</i></code>") or
-theme attribute (in the form
-"<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>")
-containing a value of this type.
-</p></div>
-
-    
-    </div>
-</div>
-
-
-
-<A NAME="schemaOrgType"></A>
-
-<div class="jd-details api apilevel-"> 
-    <h4 class="jd-details-title">
-      <span class="normal">
-        public 
-        static 
-         
-        int
-      </span>
-        schemaOrgType
-    </h4>
-      <div class="api-level">
-        
-        
-  
-
-      </div>
-    <div class="jd-details-descr">
-      
-    
-
-      
-  <div class="jd-tagdata jd-tagdescr"><p><p>Must be a string value, using '\\;' to escape characters such as '\\n' or '\\uxxxx' for a unicode character.
-<p>This may also be a reference to a resource (in the form
-"<code>@[<i>package</i>:]<i>type</i>:<i>name</i></code>") or
-theme attribute (in the form
-"<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>")
-containing a value of this type.
-</p></div>
-
-    
-    </div>
-</div>
-
-
-
-<A NAME="searchEnabled"></A>
-
-<div class="jd-details api apilevel-"> 
-    <h4 class="jd-details-title">
-      <span class="normal">
-        public 
-        static 
-         
-        int
-      </span>
-        searchEnabled
-    </h4>
-      <div class="api-level">
-        
-        
-  
-
-      </div>
-    <div class="jd-details-descr">
-      
-    
-
-      
-  <div class="jd-tagdata jd-tagdescr"><p><p>Must be a boolean value, either "<code>true</code>" or "<code>false</code>".
-<p>This may also be a reference to a resource (in the form
-"<code>@[<i>package</i>:]<i>type</i>:<i>name</i></code>") or
-theme attribute (in the form
-"<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>")
-containing a value of this type.
-</p></div>
-
-    
-    </div>
-</div>
-
-
-
-<A NAME="searchLabel"></A>
-
-<div class="jd-details api apilevel-"> 
-    <h4 class="jd-details-title">
-      <span class="normal">
-        public 
-        static 
-         
-        int
-      </span>
-        searchLabel
-    </h4>
-      <div class="api-level">
-        
-        
-  
-
-      </div>
-    <div class="jd-details-descr">
-      
-    
-
-      
-  <div class="jd-tagdata jd-tagdescr"><p><p>Must be a string value, using '\\;' to escape characters such as '\\n' or '\\uxxxx' for a unicode character.
-<p>This may also be a reference to a resource (in the form
-"<code>@[<i>package</i>:]<i>type</i>:<i>name</i></code>") or
-theme attribute (in the form
-"<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>")
-containing a value of this type.
-</p></div>
-
-    
-    </div>
-</div>
-
-
-
-<A NAME="sectionContent"></A>
-
-<div class="jd-details api apilevel-"> 
-    <h4 class="jd-details-title">
-      <span class="normal">
-        public 
-        static 
-         
-        int
-      </span>
-        sectionContent
-    </h4>
-      <div class="api-level">
-        
-        
-  
-
-      </div>
-    <div class="jd-details-descr">
-      
-    
-
-      
-  <div class="jd-tagdata jd-tagdescr"><p><p>Must be a string value, using '\\;' to escape characters such as '\\n' or '\\uxxxx' for a unicode character.
-<p>This may also be a reference to a resource (in the form
-"<code>@[<i>package</i>:]<i>type</i>:<i>name</i></code>") or
-theme attribute (in the form
-"<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>")
-containing a value of this type.
-</p></div>
-
-    
-    </div>
-</div>
-
-
-
-<A NAME="sectionFormat"></A>
-
-<div class="jd-details api apilevel-"> 
-    <h4 class="jd-details-title">
-      <span class="normal">
-        public 
-        static 
-         
-        int
-      </span>
-        sectionFormat
-    </h4>
-      <div class="api-level">
-        
-        
-  
-
-      </div>
-    <div class="jd-details-descr">
-      
-    
-
-      
-  <div class="jd-tagdata jd-tagdescr"><p><p>Must be one of the following constant values.</p>
-<table>
-<colgroup align="left" />
-<colgroup align="left" />
-<colgroup align="left" />
-<tr><th>Constant</th><th>Value</th><th>Description</th></tr>
-<tr><td><code>plain</code></td><td>0</td><td></td></tr>
-<tr><td><code>html</code></td><td>1</td><td></td></tr>
-<tr><td><code>rfc822</code></td><td>2</td><td></td></tr>
-<tr><td><code>url</code></td><td>3</td><td></td></tr>
-</table>
-</p></div>
-
-    
-    </div>
-</div>
-
-
-
-<A NAME="sectionId"></A>
-
-<div class="jd-details api apilevel-"> 
-    <h4 class="jd-details-title">
-      <span class="normal">
-        public 
-        static 
-         
-        int
-      </span>
-        sectionId
-    </h4>
-      <div class="api-level">
-        
-        
-  
-
-      </div>
-    <div class="jd-details-descr">
-      
-    
-
-      
-  <div class="jd-tagdata jd-tagdescr"><p><p>Must be a string value, using '\\;' to escape characters such as '\\n' or '\\uxxxx' for a unicode character.
-<p>This may also be a reference to a resource (in the form
-"<code>@[<i>package</i>:]<i>type</i>:<i>name</i></code>") or
-theme attribute (in the form
-"<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>")
-containing a value of this type.
-</p></div>
-
-    
-    </div>
-</div>
-
-
-
-<A NAME="sectionType"></A>
-
-<div class="jd-details api apilevel-"> 
-    <h4 class="jd-details-title">
-      <span class="normal">
-        public 
-        static 
-         
-        int
-      </span>
-        sectionType
-    </h4>
-      <div class="api-level">
-        
-        
-  
-
-      </div>
-    <div class="jd-details-descr">
-      
-    
-
-      
-  <div class="jd-tagdata jd-tagdescr"><p><p>Must be one of the following constant values.</p>
-<table>
-<colgroup align="left" />
-<colgroup align="left" />
-<colgroup align="left" />
-<tr><th>Constant</th><th>Value</th><th>Description</th></tr>
-<tr><td><code>text1</code></td><td>0</td><td></td></tr>
-<tr><td><code>text2</code></td><td>1</td><td></td></tr>
-<tr><td><code>icon_uri</code></td><td>2</td><td></td></tr>
-<tr><td><code>intent_action</code></td><td>3</td><td></td></tr>
-<tr><td><code>intent_data</code></td><td>4</td><td></td></tr>
-<tr><td><code>intent_data_id</code></td><td>5</td><td></td></tr>
-<tr><td><code>intent_extra_data</code></td><td>6</td><td></td></tr>
-<tr><td><code>large_icon_uri</code></td><td>7</td><td></td></tr>
-<tr><td><code>intent_activity</code></td><td>8</td><td></td></tr>
-</table>
-</p></div>
-
-    
-    </div>
-</div>
-
-
-
-<A NAME="sectionWeight"></A>
-
-<div class="jd-details api apilevel-"> 
-    <h4 class="jd-details-title">
-      <span class="normal">
-        public 
-        static 
-         
-        int
-      </span>
-        sectionWeight
-    </h4>
-      <div class="api-level">
-        
-        
-  
-
-      </div>
-    <div class="jd-details-descr">
-      
-    
-
-      
-  <div class="jd-tagdata jd-tagdescr"><p><p>Must be an integer value, such as "<code>100</code>".
-<p>This may also be a reference to a resource (in the form
-"<code>@[<i>package</i>:]<i>type</i>:<i>name</i></code>") or
-theme attribute (in the form
-"<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>")
-containing a value of this type.
-</p></div>
-
-    
-    </div>
-</div>
-
-
-
-<A NAME="settingsDescription"></A>
-
-<div class="jd-details api apilevel-"> 
-    <h4 class="jd-details-title">
-      <span class="normal">
-        public 
-        static 
-         
-        int
-      </span>
-        settingsDescription
-    </h4>
-      <div class="api-level">
-        
-        
-  
-
-      </div>
-    <div class="jd-details-descr">
-      
-    
-
-      
-  <div class="jd-tagdata jd-tagdescr"><p><p>Must be a string value, using '\\;' to escape characters such as '\\n' or '\\uxxxx' for a unicode character.
-<p>This may also be a reference to a resource (in the form
-"<code>@[<i>package</i>:]<i>type</i>:<i>name</i></code>") or
-theme attribute (in the form
-"<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>")
-containing a value of this type.
-</p></div>
-
-    
-    </div>
-</div>
-
-
-
-<A NAME="sourceClass"></A>
-
-<div class="jd-details api apilevel-"> 
-    <h4 class="jd-details-title">
-      <span class="normal">
-        public 
-        static 
-         
-        int
-      </span>
-        sourceClass
-    </h4>
-      <div class="api-level">
-        
-        
-  
-
-      </div>
-    <div class="jd-details-descr">
-      
-    
-
-      
-  <div class="jd-tagdata jd-tagdescr"><p><p>Must be one of the following constant values.</p>
-<table>
-<colgroup align="left" />
-<colgroup align="left" />
-<colgroup align="left" />
-<tr><th>Constant</th><th>Value</th><th>Description</th></tr>
-<tr><td><code>email</code></td><td>0</td><td></td></tr>
-<tr><td><code>contact</code></td><td>1</td><td></td></tr>
-<tr><td><code>instant_message</code></td><td>2</td><td></td></tr>
-</table>
-</p></div>
-
-    
-    </div>
-</div>
-
-
-
-<A NAME="subsectionSeparator"></A>
-
-<div class="jd-details api apilevel-"> 
-    <h4 class="jd-details-title">
-      <span class="normal">
-        public 
-        static 
-         
-        int
-      </span>
-        subsectionSeparator
-    </h4>
-      <div class="api-level">
-        
-        
-  
-
-      </div>
-    <div class="jd-details-descr">
-      
-    
-
-      
-  <div class="jd-tagdata jd-tagdescr"><p><p>Must be a string value, using '\\;' to escape characters such as '\\n' or '\\uxxxx' for a unicode character.
-<p>This may also be a reference to a resource (in the form
-"<code>@[<i>package</i>:]<i>type</i>:<i>name</i></code>") or
-theme attribute (in the form
-"<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>")
-containing a value of this type.
-</p></div>
-
-    
-    </div>
-</div>
-
-
-
-<A NAME="toAddressesSection"></A>
-
-<div class="jd-details api apilevel-"> 
-    <h4 class="jd-details-title">
-      <span class="normal">
-        public 
-        static 
-         
-        int
-      </span>
-        toAddressesSection
-    </h4>
-      <div class="api-level">
-        
-        
-  
-
-      </div>
-    <div class="jd-details-descr">
-      
-    
-
-      
-  <div class="jd-tagdata jd-tagdescr"><p><p>Must be a string value, using '\\;' to escape characters such as '\\n' or '\\uxxxx' for a unicode character.
-<p>This may also be a reference to a resource (in the form
-"<code>@[<i>package</i>:]<i>type</i>:<i>name</i></code>") or
-theme attribute (in the form
-"<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>")
-containing a value of this type.
-</p></div>
-
-    
-    </div>
-</div>
-
-
-
-<A NAME="trimmable"></A>
-
-<div class="jd-details api apilevel-"> 
-    <h4 class="jd-details-title">
-      <span class="normal">
-        public 
-        static 
-         
-        int
-      </span>
-        trimmable
-    </h4>
-      <div class="api-level">
-        
-        
-  
-
-      </div>
-    <div class="jd-details-descr">
-      
-    
-
-      
-  <div class="jd-tagdata jd-tagdescr"><p><p>Must be a boolean value, either "<code>true</code>" or "<code>false</code>".
-<p>This may also be a reference to a resource (in the form
-"<code>@[<i>package</i>:]<i>type</i>:<i>name</i></code>") or
-theme attribute (in the form
-"<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>")
-containing a value of this type.
-</p></div>
-
-    
-    </div>
-</div>
-
-
-
 <A NAME="uiCompass"></A>
 
 <div class="jd-details api apilevel-"> 
@@ -4680,7 +3188,7 @@ containing a value of this type.
 
 
 
-<A NAME="userInputSection"></A>
+<A NAME="windowTransitionStyle"></A>
 
 <div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
@@ -4690,7 +3198,7 @@ containing a value of this type.
          
         int
       </span>
-        userInputSection
+        windowTransitionStyle
     </h4>
       <div class="api-level">
         
@@ -4703,86 +3211,15 @@ containing a value of this type.
     
 
       
-  <div class="jd-tagdata jd-tagdescr"><p><p>Must be a string value, using '\\;' to escape characters such as '\\n' or '\\uxxxx' for a unicode character.
-<p>This may also be a reference to a resource (in the form
-"<code>@[<i>package</i>:]<i>type</i>:<i>name</i></code>") or
-theme attribute (in the form
-"<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>")
-containing a value of this type.
-</p></div>
-
-    
-    </div>
-</div>
-
-
-
-<A NAME="userInputTag"></A>
-
-<div class="jd-details api apilevel-"> 
-    <h4 class="jd-details-title">
-      <span class="normal">
-        public 
-        static 
-         
-        int
-      </span>
-        userInputTag
-    </h4>
-      <div class="api-level">
-        
-        
-  
-
-      </div>
-    <div class="jd-details-descr">
-      
-    
-
-      
-  <div class="jd-tagdata jd-tagdescr"><p><p>Must be a string value, using '\\;' to escape characters such as '\\n' or '\\uxxxx' for a unicode character.
-<p>This may also be a reference to a resource (in the form
-"<code>@[<i>package</i>:]<i>type</i>:<i>name</i></code>") or
-theme attribute (in the form
-"<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>")
-containing a value of this type.
-</p></div>
-
-    
-    </div>
-</div>
-
-
-
-<A NAME="userInputValue"></A>
-
-<div class="jd-details api apilevel-"> 
-    <h4 class="jd-details-title">
-      <span class="normal">
-        public 
-        static 
-         
-        int
-      </span>
-        userInputValue
-    </h4>
-      <div class="api-level">
-        
-        
-  
-
-      </div>
-    <div class="jd-details-descr">
-      
-    
-
-      
-  <div class="jd-tagdata jd-tagdescr"><p><p>Must be a string value, using '\\;' to escape characters such as '\\n' or '\\uxxxx' for a unicode character.
-<p>This may also be a reference to a resource (in the form
-"<code>@[<i>package</i>:]<i>type</i>:<i>name</i></code>") or
-theme attribute (in the form
-"<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>")
-containing a value of this type.
+  <div class="jd-tagdata jd-tagdescr"><p><p>Must be one of the following constant values.</p>
+<table>
+<colgroup align="left" />
+<colgroup align="left" />
+<colgroup align="left" />
+<tr><th>Constant</th><th>Value</th><th>Description</th></tr>
+<tr><td><code>slide</code></td><td>1</td><td></td></tr>
+<tr><td><code>none</code></td><td>2</td><td></td></tr>
+</table>
 </p></div>
 
     
