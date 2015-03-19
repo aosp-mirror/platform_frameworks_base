@@ -227,7 +227,7 @@ public final class UiAutomationConnection extends IUiAutomationConnection.Stub {
     }
 
     @Override
-    public void executeShellCommand(String command, ParcelFileDescriptor sink)
+    public void executeShellCommand(final String command, final ParcelFileDescriptor sink)
             throws RemoteException {
         synchronized (mLock) {
             throwIfCalledByNotTrustedUidLocked();
@@ -235,30 +235,35 @@ public final class UiAutomationConnection extends IUiAutomationConnection.Stub {
             throwIfNotConnectedLocked();
         }
 
-        InputStream in = null;
-        OutputStream out = null;
+        Thread streamReader = new Thread() {
+            public void run() {
+                InputStream in = null;
+                OutputStream out = null;
 
-        try {
-            java.lang.Process process = Runtime.getRuntime().exec(command);
+                try {
+                    java.lang.Process process = Runtime.getRuntime().exec(command);
 
-            in = process.getInputStream();
-            out = new FileOutputStream(sink.getFileDescriptor());
+                    in = process.getInputStream();
+                    out = new FileOutputStream(sink.getFileDescriptor());
 
-            final byte[] buffer = new byte[8192];
-            while (true) {
-                final int readByteCount = in.read(buffer);
-                if (readByteCount < 0) {
-                    break;
+                    final byte[] buffer = new byte[8192];
+                    while (true) {
+                        final int readByteCount = in.read(buffer);
+                        if (readByteCount < 0) {
+                            break;
+                        }
+                        out.write(buffer, 0, readByteCount);
+                    }
+                } catch (IOException ioe) {
+                    throw new RuntimeException("Error running shell command", ioe);
+                } finally {
+                    IoUtils.closeQuietly(in);
+                    IoUtils.closeQuietly(out);
+                    IoUtils.closeQuietly(sink);
                 }
-                out.write(buffer, 0, readByteCount);
-            }
-        } catch (IOException ioe) {
-            throw new RuntimeException("Error running shell command", ioe);
-        } finally {
-            IoUtils.closeQuietly(in);
-            IoUtils.closeQuietly(out);
-            IoUtils.closeQuietly(sink);
-        }
+            };
+        };
+        streamReader.start();
     }
 
     @Override
