@@ -24,6 +24,12 @@
     </div>
   </li>
   <li class="nav-section">
+    <div class="nav-section-header empty" style="font-weight:normal"><a href="<?cs var:toroot?>distribute/googleplay/auto.html">
+          <span class="en">Distributing to <span style="white-space:nowrap">Android Auto</span></span>
+        </a>
+    </div>
+  </li>
+  <li class="nav-section">
     <div class="nav-section-header empty" style="font-weight:normal"><a href="<?cs var:toroot?>distribute/googleplay/tv.html">
           <span class="en">Distributing to <span style="white-space:nowrap">Android TV</span></span>
         </a>
