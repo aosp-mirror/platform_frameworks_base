@@ -508,8 +508,10 @@ void FontRenderer::checkTextureUpdate() {
 void FontRenderer::issueDrawCommand(Vector<CacheTexture*>& cacheTextures) {
     if (!mFunctor) return;
 
+#if !USE_GLOPS
     Caches& caches = mFunctor->renderer->getCaches();
     RenderState& renderState = mFunctor->renderer->renderState();
+#endif
 
     bool first = true;
     bool forceRebind = false;
