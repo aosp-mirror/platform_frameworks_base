@@ -96,8 +96,6 @@
 
 
 
-
-
 <html>
 <head>
 
@@ -113,7 +111,7 @@
 href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Roboto:light,regular,medium,thin,italic,mediumitalic,bold"
   title="roboto">
-<link href="/assets/css/default.css?v=5" rel="stylesheet" type="text/css">
+<link href="/assets/css/default.css?v=4" rel="stylesheet" type="text/css">
 
 
 
@@ -414,7 +412,6 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
                 <li><a href="/distribute/users/index.html">Get Users</a></li>
                 <li><a href="/distribute/engage/index.html">Engage &amp; Retain</a></li>
                 <li><a href="/distribute/monetize/index.html">Monetize</a></li>
-                <li><a href="/distribute/analyze/index.html">Analyze</a></li>
                 <li><a href="/distribute/tools/index.html">Tools &amp; Reference</a></li>
                 <li><a href="/distribute/stories/index.html">Developer Stories</a></li>
               </ul>
@@ -596,14 +593,14 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
 
   <li class="nav-section">
-    <div class="nav-section-header"><a href="/google/play/billing/index.html" zh-cn-lang="应用内结算">
+    <div class="nav-section-header"><a href="/google/play/billing/index.html">
       <span class="en">Google Play In-app Billing</span></a>
     </div>
     <ul>
-      <li><a href="/google/play/billing/billing_overview.html" zh-cn-lang="应用内结算概述">
+      <li><a href="/google/play/billing/billing_overview.html">
               <span class="en">Overview</span></a>
       </li>
-      <li class="nav-section"><div class="nav-section-header"><a href="/google/play/billing/api.html" zh-cn-lang="应用内结算 API">
+      <li class="nav-section"><div class="nav-section-header"><a href="/google/play/billing/api.html">
               <span class="en">Version 3 API</span></a></div>
               <ul>
               <li><a href="/google/play/billing/billing_integrate.html">
@@ -626,13 +623,13 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       <li><a href="/google/play/billing/billing_subscriptions.html">
               <span class="en">Subscriptions</span></a>
       </li>
-      <li><a href="/google/play/billing/billing_best_practices.html" zh-cn-lang="安全性和设计">
+      <li><a href="/google/play/billing/billing_best_practices.html">
               <span class="en">Security and Design</span></a>
       </li>
-      <li><a href="/google/play/billing/billing_testing.html" zh-cn-lang="测试应用内结算">
+      <li><a href="/google/play/billing/billing_testing.html">
               <span class="en">Testing In-app Billing</span></a>
       </li>
-      <li><a href="/google/play/billing/billing_admin.html" zh-cn-lang="管理应用内结算">
+      <li><a href="/google/play/billing/billing_admin.html">
               <span class="en">Administering In-app Billing</span></a>
       </li>
       <li><a href="/google/play/billing/versions.html">
@@ -666,14 +663,21 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
               <span class="en">HTTP</span></a></li>
               </ul>
         </li>
-        <li><a href="/google/gcm/server-ref.html">
-            <span class="en">Server Reference</span></a>
-        </li>
         <li><a href="/google/gcm/notifications.html">
               <span class="en">User Notifications</span></a>
         </li>
+        <li><a href="/google/gcm/adv.html">
+            <span class="en">Advanced Topics</span></a>
+        </li>
         <li><a href="/google/gcm/c2dm.html">
             <span class="en">Migration</span></a>
+        </li>
+        <li id="gcm-tree-list" class="nav-section">
+          <div class="nav-section-header">
+            <a href="/reference/gcm-packages.html">
+              <span class="en">Reference</span>
+            </a>
+          <div>
         </li>
       </ul>
   </li>
@@ -923,7 +927,7 @@ Summary:
           // Start the user recoverable action using the intent returned by
           // <code><a href="/reference/com/google/android/gms/auth/UserRecoverableAuthException.html#getIntent()">getIntent()</a></code>
           myActivity.startActivityForResult(
-                  userAuthEx.getIntent(),
+                  userAuthEx.buildIntent(),
                   MY_ACTIVITYS_AUTH_REQUEST_CODE);
           return;
        } catch (IOException transientEx) {
@@ -1200,18 +1204,8 @@ Summary:
             String</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/auth/GoogleAuthUtil.html#getToken(android.content.Context, java.lang.String, java.lang.String)">getToken</a></span>(Context context, String accountName, String scope)</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/auth/GoogleAuthUtil.html#getAppCert(android.content.Context, java.lang.String)">getAppCert</a></span>(Context context, String packageNameToCertify)</nobr>
         
-        <div class="jd-descrdiv">
-          <em>
-      This method is deprecated.
-    Use <code><a href="/reference/com/google/android/gms/auth/GoogleAuthUtil.html#getToken(android.content.Context, android.accounts.Account, java.lang.String)">getToken(Context, Account, String)</a></code> instead.
-</em>
-
-
-
-        </div>
-
   </td></tr>
 
 
@@ -1226,11 +1220,10 @@ Summary:
             String</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/auth/GoogleAuthUtil.html#getToken(android.content.Context, android.accounts.Account, java.lang.String, android.os.Bundle)">getToken</a></span>(Context context, Account account, String scope, Bundle extras)</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/auth/GoogleAuthUtil.html#getToken(android.content.Context, java.lang.String, java.lang.String)">getToken</a></span>(Context context, String accountName, String scope)</nobr>
         
         <div class="jd-descrdiv">
-          Gets a token to be consumed by some specified services on behalf of a
- specified user account.
+          See <code><a href="/reference/com/google/android/gms/auth/GoogleAuthUtil.html#getToken(android.content.Context, java.lang.String, java.lang.String, android.os.Bundle)">getToken(Context, String, String, Bundle)</a></code>.
           
     
 
@@ -1253,10 +1246,8 @@ Summary:
         <span class="sympad"><a href="/reference/com/google/android/gms/auth/GoogleAuthUtil.html#getToken(android.content.Context, java.lang.String, java.lang.String, android.os.Bundle)">getToken</a></span>(Context context, String accountName, String scope, Bundle extras)</nobr>
         
         <div class="jd-descrdiv">
-          <em>
-      This method is deprecated.
-    Use <code><a href="/reference/com/google/android/gms/auth/GoogleAuthUtil.html#getToken(android.content.Context, android.accounts.Account, java.lang.String, android.os.Bundle)">getToken(Context, Account, String, Bundle)</a></code> instead.
-</em>
+          Gets a token to be consumed by some specified services on behalf of a
+ specified user account.
           
     
 
@@ -1273,120 +1264,23 @@ Summary:
             
             static
             
-            String</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/auth/GoogleAuthUtil.html#getToken(android.content.Context, android.accounts.Account, java.lang.String)">getToken</a></span>(Context context, Account account, String scope)</nobr>
-
-  </td></tr>
-
-
-
-    <tr class=" api apilevel-" >
-        <td class="jd-typecol"><nobr>
-
-
-
-            static
-
-            String</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/auth/GoogleAuthUtil.html#getTokenWithNotification(android.content.Context, java.lang.String, java.lang.String, android.os.Bundle, android.content.Intent)">getTokenWithNotification</a></span>(Context context, String accountName, String scope, Bundle extras, Intent callback)</nobr>
-
-        <div class="jd-descrdiv">
-          <em>
-      This method is deprecated.
-    Use <code><a href="/reference/com/google/android/gms/auth/GoogleAuthUtil.html#getTokenWithNotification(android.content.Context, android.accounts.Account, java.lang.String, android.os.Bundle, android.content.Intent)">getTokenWithNotification(Context, Account, String, Bundle, Intent)</a></code>
-     instead.
-</em>
-
-
-
-        </div>
-
-  </td></tr>
-
-
-
-    <tr class="alt-color api apilevel-" >
-        <td class="jd-typecol"><nobr>
-
-
-
-            static
-
-            String</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/auth/GoogleAuthUtil.html#getTokenWithNotification(android.content.Context, java.lang.String, java.lang.String, android.os.Bundle, java.lang.String, android.os.Bundle)">getTokenWithNotification</a></span>(Context context, String accountName, String scope, Bundle extras, String authority, Bundle syncBundle)</nobr>
-
-        <div class="jd-descrdiv">
-          <em>
-      This method is deprecated.
-    Use
-     <code><a href="/reference/com/google/android/gms/auth/GoogleAuthUtil.html#getTokenWithNotification(android.content.Context, android.accounts.Account, java.lang.String, android.os.Bundle, java.lang.String, android.os.Bundle)">getTokenWithNotification(Context, Account, String, Bundle, String, Bundle)</a></code>
-     instead.
-</em>
-
-
-
-        </div>
-
-  </td></tr>
-
-
-
-    <tr class=" api apilevel-" >
-        <td class="jd-typecol"><nobr>
-
-
-
-            static
-
-            String</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/auth/GoogleAuthUtil.html#getTokenWithNotification(android.content.Context, android.accounts.Account, java.lang.String, android.os.Bundle, java.lang.String, android.os.Bundle)">getTokenWithNotification</a></span>(Context context, Account account, String scope, Bundle extras, String authority, Bundle syncBundle)</nobr>
-        
-        <div class="jd-descrdiv">
-          Authenticates the user and returns a valid Google authentication token, or throws an
- <code><a href="/reference/java/lang/Exception.html">Exception</a></code> if there was an error while getting the token.
-          
-    
-
-        </div>
-  
-  </td></tr>
-
-
-	 
-    <tr class="alt-color api apilevel-" >
-        <td class="jd-typecol"><nobr>
-
-
-
-            static
-
             String</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/auth/GoogleAuthUtil.html#getTokenWithNotification(android.content.Context, java.lang.String, java.lang.String, android.os.Bundle)">getTokenWithNotification</a></span>(Context context, String accountName, String scope, Bundle extras)</nobr>
-
+        
         <div class="jd-descrdiv">
-          <em>
-      This method is deprecated.
-    Use <code><a href="/reference/com/google/android/gms/auth/GoogleAuthUtil.html#getTokenWithNotification(android.content.Context, android.accounts.Account, java.lang.String, android.os.Bundle)">getTokenWithNotification(Context, Account, String, Bundle)</a></code> instead.
-</em>
-
-
+          Authenticates the user and returns a valid Google authentication token, or throws an
+ <code><a href="/reference/java/lang/Exception.html">Exception</a></code> if there was an error while getting the token.
+          
+    
 
         </div>
-
+  
   </td></tr>
 
 
-
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             
@@ -1397,7 +1291,7 @@ Summary:
             String</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/auth/GoogleAuthUtil.html#getTokenWithNotification(android.content.Context, android.accounts.Account, java.lang.String, android.os.Bundle)">getTokenWithNotification</a></span>(Context context, Account account, String scope, Bundle extras)</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/auth/GoogleAuthUtil.html#getTokenWithNotification(android.content.Context, java.lang.String, java.lang.String, android.os.Bundle, android.content.Intent)">getTokenWithNotification</a></span>(Context context, String accountName, String scope, Bundle extras, Intent callback)</nobr>
         
         <div class="jd-descrdiv">
           Authenticates the user and returns a valid Google authentication token, or throws an
@@ -1421,7 +1315,7 @@ Summary:
             String</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/auth/GoogleAuthUtil.html#getTokenWithNotification(android.content.Context, android.accounts.Account, java.lang.String, android.os.Bundle, android.content.Intent)">getTokenWithNotification</a></span>(Context context, Account account, String scope, Bundle extras, Intent callback)</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/auth/GoogleAuthUtil.html#getTokenWithNotification(android.content.Context, java.lang.String, java.lang.String, android.os.Bundle, java.lang.String, android.os.Bundle)">getTokenWithNotification</a></span>(Context context, String accountName, String scope, Bundle extras, String authority, Bundle syncBundle)</nobr>
         
         <div class="jd-descrdiv">
           Authenticates the user and returns a valid Google authentication token, or throws an
@@ -1951,7 +1845,7 @@ From class
      Bundle bundle = new Bundle();
      bundle.putString(GoogleAuthUtil.KEY_REQUEST_ACTIONS,
               "http://schemas.google.com/AddActivity http://schemas.google.com/BuyActivity");
-     String token = GoogleAuthUtil.getToken(context, account, Scopes.PLUS_LOGIN, bundle);
+     String token = GoogleAuthUtil.getToken(context, accountName, Scopes.PLUS_LOGIN, bundle);
  </pre>
 </p></div>
 
@@ -2273,6 +2167,38 @@ From class
 </div>
 
 
+<A NAME="getAppCert(android.content.Context, java.lang.String)"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+        static 
+         
+         
+         
+        String
+      </span>
+      <span class="sympad">getAppCert</span>
+      <span class="normal">(Context context, String packageNameToCertify)</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+    
+
+      
+  <div class="jd-tagdata jd-tagdescr"><p></p></div>
+
+    </div>
+</div>
+
+
 <A NAME="getToken(android.content.Context, java.lang.String, java.lang.String)"></A>
 
 <div class="jd-details api apilevel-"> 
@@ -2298,13 +2224,9 @@ From class
       
     
 
-      <p>
-  <p class="caution"><strong>
-      This method is deprecated.</strong><br/>
-    Use <code><a href="/reference/com/google/android/gms/auth/GoogleAuthUtil.html#getToken(android.content.Context, android.accounts.Account, java.lang.String)">getToken(Context, Account, String)</a></code> instead.
-
-  </p>
-  <div class="jd-tagdata jd-tagdescr"><p></p></div>
+      
+  <div class="jd-tagdata jd-tagdescr"><p>See <code><a href="/reference/com/google/android/gms/auth/GoogleAuthUtil.html#getToken(android.content.Context, java.lang.String, java.lang.String, android.os.Bundle)">getToken(Context, String, String, Bundle)</a></code>.
+</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Throws</h5>
       <table class="jd-tagtable">  
@@ -2319,156 +2241,6 @@ From class
         <tr>
             <th><a href="/reference/com/google/android/gms/auth/GoogleAuthException.html">GoogleAuthException</a></td>
             <td></td>
-        </tr>
-      </table>
-  </div>
-  <div class="jd-tagdata">
-      <h5 class="jd-tagtitle">See Also</h5>
-      <ul class="nolist"><li><code><a href="/reference/com/google/android/gms/auth/GoogleAuthUtil.html#getToken(android.content.Context, java.lang.String, java.lang.String, android.os.Bundle)">getToken(Context, String, String, Bundle)</a></code></li>
-      </ul>
-  </div>
-
-    </div>
-</div>
-
-
-<A NAME="getToken(android.content.Context, android.accounts.Account, java.lang.String, android.os.Bundle)"></A>
-
-<div class="jd-details api apilevel-"> 
-    <h4 class="jd-details-title">
-      <span class="normal">
-        public 
-        static 
-         
-         
-         
-        String
-      </span>
-      <span class="sympad">getToken</span>
-      <span class="normal">(Context context, Account account, String scope, Bundle extras)</span>
-    </h4>
-      <div class="api-level">
-        <div></div>
-        
-  
-
-      </div>
-    <div class="jd-details-descr">
-      
-    
-
-      
-  <div class="jd-tagdata jd-tagdescr"><p>Gets a token to be consumed by some specified services on behalf of a
- specified user account. How the token is consumed depends
- on the scope string provided. Note that this method requires substantial
- network IO and thus should be run off the UI thread.  In the event of an
- error, one of several <code><a href="/reference/java/lang/Exception.html">Exception</a></code>s will be thrown.
- <p>
- In the case of a transient (typically network related) error a
- <code><a href="/reference/java/io/IOException.html">IOException</a></code> will be thrown. It is left to clients to implement
- a backoff/abandonment strategy appropriate to their latency
- requirements. If user intervention is required to provide consent, enter
- a password, etc, a <code><a href="/reference/com/google/android/gms/auth/UserRecoverableAuthException.html">UserRecoverableAuthException</a></code> will be thrown.
- To initiate the user recovery workflow, clients must start the
- <code><a href="/reference/android/content/Intent.html">Intent</a></code> returned by
- <code><a href="/reference/com/google/android/gms/auth/UserRecoverableAuthException.html#getIntent()">getIntent()</a></code> for result. Upon
- successfully returning a client should invoke this method again to get
- a token. In the cases of errors that are neither transient nor
- recoverable by the the user, a <code><a href="/reference/com/google/android/gms/auth/GoogleAuthException.html">GoogleAuthException</a></code> will be
- thrown.  These errors will typically result from client errors (e.g.
- providing an invalid scope).
- <p>
- By way of example, client code might have a block of code executing in a
- locally declared implementation of <code><a href="/reference/java/lang/Thread.html">Thread</a></code> or
- <code><a href="/reference/android/os/AsyncTask.html">AsyncTask</a></code> as follows:
- <pre>
- String token = null;
- try {
-     token = GoogleAuthUtil.getToken(context, account, scope, bundle);
- } catch (GooglePlayServicesAvailabilityException playEx) {
-     Dialog dialog = GooglePlayServicesUtil.getErrorDialog(
-         playEx.getConnectionStatusCode(),
-         Activity.this,
-         AUTH_REQUEST_CODE);
-     // Use the dialog to present to the user.
- } catch (UserRecoverableAuthException recoverableException) {
-     Intent recoveryIntent = recoverableException.getIntent();
-     // Use the intent in a custom dialog or just startActivityForResult.
-     Activity.this.startActivityForResult(recoveryIntent, REQUEST_CODE);
- } catch (GoogleAuthException authEx) {
-     // This is likely unrecoverable.
-     Log.e(TAG, "Unrecoverable authentication exception: " + authEx.getMessage(), authEx);
-     return;
- } catch (IOException ioEx) {
-     Log.i(TAG, "transient error encountered: " + ioEx.getMessage());
-     doExponentialBackoff();
-     return;
- }
- if (token != null) {
-     makeNetworkApiCallwithToken(token);
- }
- </pre>
- <p>
- Those clients that have their own splash screens may wish to suppress
- the progress screen provided by Google Play services.  The
- "Signing in..." progress screen provided by Google Play services by
- including setting <code><a href="/reference/com/google/android/gms/auth/GoogleAuthUtil.html#KEY_SUPPRESS_PROGRESS_SCREEN">KEY_SUPPRESS_PROGRESS_SCREEN</a></code> to true
- in the supplied options <code><a href="/reference/android/os/Bundle.html">Bundle</a></code>.</p></div>
-  <div class="jd-tagdata">
-      <h5 class="jd-tagtitle">Parameters</h5>
-      <table class="jd-tagtable">
-        <tr>
-          <th>context</td>
-          <td>Context associated with the desired token.</td>
-        </tr>
-        <tr>
-          <th>account</td>
-          <td>Authenticating user account.</td>
-        </tr>
-        <tr>
-          <th>scope</td>
-          <td>String representing the authentication scope.  To specify
-        multiple scopes, separate them with a space (for example,
-        "oauth2:scope1 scope2 scope3").</td>
-        </tr>
-        <tr>
-          <th>extras</td>
-          <td>Bundle containing additional information that may be
-               relevant to the authentication scope.</td>
-        </tr>
-      </table>
-  </div>
-  <div class="jd-tagdata">
-      <h5 class="jd-tagtitle">Returns</h5>
-      <ul class="nolist"><li>String containing a valid token.</li></ul>
-  </div>
-  <div class="jd-tagdata">
-      <h5 class="jd-tagtitle">Throws</h5>
-      <table class="jd-tagtable">  
-        <tr>
-            <th><a href="/reference/com/google/android/gms/auth/GooglePlayServicesAvailabilityException.html">GooglePlayServicesAvailabilityException</a></td>
-            <td>containing the appropriate
-         connection status error code.</td>
-        </tr>  
-        <tr>
-            <th><a href="/reference/com/google/android/gms/auth/UserRecoverableAuthException.html">UserRecoverableAuthException</a></td>
-            <td>wrapping an Intent for initiating
-         user intervention. The wrapped intent must be called with <code><a href="/reference/android/app/Activity.html#startActivityForResult(android.content.Intent, int)">startActivityForResult(Intent, int)</a></code>.</td>
-        </tr>  
-        <tr>
-            <th><a href="/reference/com/google/android/gms/auth/GoogleAuthException.html">GoogleAuthException</a></td>
-            <td>signaling a potentially unrecoverable
-         authentication error.</td>
-        </tr>  
-        <tr>
-            <th>IOException</td>
-            <td>signaling a potentially transient error.</td>
-        </tr>  
-        <tr>
-            <th>IllegalStateException</td>
-            <td>if the method is invoked in the main
-         event thread.
-</td>
         </tr>
       </table>
   </div>
@@ -2502,12 +2274,7 @@ From class
       
     
 
-      <p>
-  <p class="caution"><strong>
-      This method is deprecated.</strong><br/>
-    Use <code><a href="/reference/com/google/android/gms/auth/GoogleAuthUtil.html#getToken(android.content.Context, android.accounts.Account, java.lang.String, android.os.Bundle)">getToken(Context, Account, String, Bundle)</a></code> instead.
-
-  </p>
+      
   <div class="jd-tagdata jd-tagdescr"><p>Gets a token to be consumed by some specified services on behalf of a
  specified user account. How the token is consumed depends
  on the scope string provided. Note that this method requires substantial
@@ -2542,7 +2309,7 @@ From class
          AUTH_REQUEST_CODE);
      // Use the dialog to present to the user.
  } catch (UserRecoverableAuthException recoverableException) {
-     Intent recoveryIntent = recoverableException.getIntent();
+     Intent recoveryIntent = recoverableException.buildIntent();
      // Use the intent in a custom dialog or just startActivityForResult.
      Activity.this.startActivityForResult(recoveryIntent, REQUEST_CODE);
  } catch (GoogleAuthException authEx) {
@@ -2599,7 +2366,7 @@ From class
             <th><a href="/reference/com/google/android/gms/auth/GooglePlayServicesAvailabilityException.html">GooglePlayServicesAvailabilityException</a></td>
             <td>containing the appropriate
          connection status error code.</td>
-        </tr>
+        </tr>  
         <tr>
             <th><a href="/reference/com/google/android/gms/auth/UserRecoverableAuthException.html">UserRecoverableAuthException</a></td>
             <td>wrapping an Intent for initiating
@@ -2617,7 +2384,8 @@ From class
         <tr>
             <th>IllegalStateException</td>
             <td>if the method is invoked in the main
-         event thread.</td>
+         event thread.
+</td>
         </tr>
       </table>
   </div>
@@ -2626,7 +2394,7 @@ From class
 </div>
 
 
-<A NAME="getToken(android.content.Context, android.accounts.Account, java.lang.String)"></A>
+<A NAME="getTokenWithNotification(android.content.Context, java.lang.String, java.lang.String, android.os.Bundle)"></A>
 
 <div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
@@ -2638,8 +2406,8 @@ From class
          
         String
       </span>
-      <span class="sympad">getToken</span>
-      <span class="normal">(Context context, Account account, String scope)</span>
+      <span class="sympad">getTokenWithNotification</span>
+      <span class="normal">(Context context, String accountName, String scope, Bundle extras)</span>
     </h4>
       <div class="api-level">
         <div></div>
@@ -2652,28 +2420,86 @@ From class
     
 
       
-  <div class="jd-tagdata jd-tagdescr"><p></p></div>
+  <div class="jd-tagdata jd-tagdescr"><p>Authenticates the user and returns a valid Google authentication token, or throws an
+ <code><a href="/reference/java/lang/Exception.html">Exception</a></code> if there was an error while getting the token.
+ <p>
+ This method is specifically provided for background tasks. In the event of an error that
+ needs user intervention, this method takes care of pushing relevant notification.
+ <p>
+ The exception thrown depends upon the underlying error and support for
+ recovery. <code><a href="/reference/com/google/android/gms/auth/UserRecoverableNotifiedException.html">UserRecoverableNotifiedException</a></code> will be thrown if the error can be
+ resolved by user intervention and a notification has already been posted to address it.
+ <code><a href="/reference/java/io/IOException.html">IOException</a></code>s will be thrown if the underlying error
+ might be solved by some intelligent retry strategy. Alternatively,
+ <code><a href="/reference/com/google/android/gms/auth/GoogleAuthException.html">GoogleAuthException</a></code>s represent a broad class of
+ <code><a href="/reference/java/lang/Exception.html">Exception</a></code>s that cannot be recovered programmatically.
+
+ <pre>
+ String token;
+ try {
+     token = GoogleAuthUtil.getTokenWithNotification(context, accountName, scope, extras);
+ } catch (UserRecoverableNotifiedException userNotifiedException) {
+     // Notification has already been pushed.
+     // Continue without token or stop background task.
+ } catch (GoogleAuthException authEx) {
+     // This is likely unrecoverable.
+     Log.e(TAG, "Unrecoverable authentication exception: " + authEx.getMessage(), authEx);
+ } catch (IOException ioEx) {
+     Log.i(TAG, "transient error encountered: " + ioEx.getMessage());
+     doExponentialBackoff();
+ }
+ </pre></p></div>
   <div class="jd-tagdata">
-      <h5 class="jd-tagtitle">Throws</h5>
+      <h5 class="jd-tagtitle">Parameters</h5>
       <table class="jd-tagtable">
         <tr>
-            <th>IOException</td>
-            <td></td>
+          <th>context</td>
+          <td>Context associated with the desired token.</td>
         </tr>
         <tr>
-            <th><a href="/reference/com/google/android/gms/auth/UserRecoverableAuthException.html">UserRecoverableAuthException</a></td>
-            <td></td>
+          <th>accountName</td>
+          <td>String representing the authenticating user account.</td>
         </tr>
         <tr>
-            <th><a href="/reference/com/google/android/gms/auth/GoogleAuthException.html">GoogleAuthException</a></td>
-            <td></td>
+          <th>scope</td>
+          <td>String representing the authentication scope.  To specify multiple scopes,
+        separate them with a space (for example, "oauth2:scope1 scope2 scope3").</td>
+        </tr>
+        <tr>
+          <th>extras</td>
+          <td>Bundle containing additional information that may be
+               relevant to the authentication scope.</td>
         </tr>
       </table>
   </div>
   <div class="jd-tagdata">
-      <h5 class="jd-tagtitle">See Also</h5>
-      <ul class="nolist"><li><code><a href="/reference/com/google/android/gms/auth/GoogleAuthUtil.html#getToken(android.content.Context, android.accounts.Account, java.lang.String, android.os.Bundle)">getToken(Context, Account, String, Bundle)</a></code></li>
-      </ul>
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li>String containing a valid token.</li></ul>
+  </div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Throws</h5>
+      <table class="jd-tagtable">  
+        <tr>
+            <th><a href="/reference/com/google/android/gms/auth/UserRecoverableNotifiedException.html">UserRecoverableNotifiedException</a></td>
+            <td>if a user addressable error occurred and a
+         notification was pushed.</td>
+        </tr>  
+        <tr>
+            <th><a href="/reference/com/google/android/gms/auth/GoogleAuthException.html">GoogleAuthException</a></td>
+            <td>signaling a potentially unrecoverable
+         authentication error.</td>
+        </tr>  
+        <tr>
+            <th>IOException</td>
+            <td>signaling a potentially transient error.</td>
+        </tr>  
+        <tr>
+            <th>IllegalStateException</td>
+            <td>if the method is invoked in the main
+         event thread.
+</td>
+        </tr>
+      </table>
   </div>
 
     </div>
@@ -2682,14 +2508,14 @@ From class
 
 <A NAME="getTokenWithNotification(android.content.Context, java.lang.String, java.lang.String, android.os.Bundle, android.content.Intent)"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-        static
-
-
-
+        public 
+        static 
+         
+         
+         
         String
       </span>
       <span class="sympad">getTokenWithNotification</span>
@@ -2697,21 +2523,15 @@ From class
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
-
-
-      <p>
-  <p class="caution"><strong>
-      This method is deprecated.</strong><br/>
-    Use <code><a href="/reference/com/google/android/gms/auth/GoogleAuthUtil.html#getTokenWithNotification(android.content.Context, android.accounts.Account, java.lang.String, android.os.Bundle, android.content.Intent)">getTokenWithNotification(Context, Account, String, Bundle, Intent)</a></code>
-     instead.
-
-  </p>
+      
   <div class="jd-tagdata jd-tagdescr"><p>Authenticates the user and returns a valid Google authentication token, or throws an
  <code><a href="/reference/java/lang/Exception.html">Exception</a></code> if there was an error while getting the token.
  <p>
@@ -2798,7 +2618,8 @@ From class
         <tr>
             <th>IllegalStateException</td>
             <td>if the method is invoked in the main
-         event thread.</td>
+         event thread.
+</td>
         </tr>
       </table>
   </div>
@@ -2832,14 +2653,7 @@ From class
       
     
 
-      <p>
-  <p class="caution"><strong>
-      This method is deprecated.</strong><br/>
-    Use
-     <code><a href="/reference/com/google/android/gms/auth/GoogleAuthUtil.html#getTokenWithNotification(android.content.Context, android.accounts.Account, java.lang.String, android.os.Bundle, java.lang.String, android.os.Bundle)">getTokenWithNotification(Context, Account, String, Bundle, String, Bundle)</a></code>
-     instead.
-
-  </p>
+      
   <div class="jd-tagdata jd-tagdescr"><p>Authenticates the user and returns a valid Google authentication token, or throws an
  <code><a href="/reference/java/lang/Exception.html">Exception</a></code> if there was an error while getting the token.
  <p>
@@ -2926,480 +2740,6 @@ From class
             <th>IOException</td>
             <td>signaling a potentially transient error.</td>
         </tr>  
-        <tr>
-            <th>IllegalStateException</td>
-            <td>if the method is invoked in the main
-         event thread.</td>
-        </tr>
-      </table>
-  </div>
-
-    </div>
-</div>
-
-
-<A NAME="getTokenWithNotification(android.content.Context, android.accounts.Account, java.lang.String, android.os.Bundle, java.lang.String, android.os.Bundle)"></A>
-
-<div class="jd-details api apilevel-">
-    <h4 class="jd-details-title">
-      <span class="normal">
-        public
-        static
-
-
-
-        String
-      </span>
-      <span class="sympad">getTokenWithNotification</span>
-      <span class="normal">(Context context, Account account, String scope, Bundle extras, String authority, Bundle syncBundle)</span>
-    </h4>
-      <div class="api-level">
-        <div></div>
-
-
-
-      </div>
-    <div class="jd-details-descr">
-
-
-
-
-  <div class="jd-tagdata jd-tagdescr"><p>Authenticates the user and returns a valid Google authentication token, or throws an
- <code><a href="/reference/java/lang/Exception.html">Exception</a></code> if there was an error while getting the token.
- <p>
- This method is specifically provided for sync adaptors. In the event of an error that
- needs user intervention, this method takes care of pushing relevant notification. After the
- user addresses the notification, a sync request will be kicked off using the given params.
- If the user cancels then the sync is not fired.
- <p>
- The exception thrown depends upon the underlying error and support for
- recovery. <code><a href="/reference/com/google/android/gms/auth/UserRecoverableNotifiedException.html">UserRecoverableNotifiedException</a></code> will be thrown if the error can be
- resolved by user intervention and a notification has already been posted to address it.
- <code><a href="/reference/java/io/IOException.html">IOException</a></code>s will be thrown if the underlying error
- might be solved by some intelligent retry strategy. Alternatively,
- <code><a href="/reference/com/google/android/gms/auth/GoogleAuthException.html">GoogleAuthException</a></code>s represent a broad class of
- <code><a href="/reference/java/lang/Exception.html">Exception</a></code>s that cannot be recovered programmatically.
-
- <pre>
- String token;
- try {
-     token = GoogleAuthUtil.getTokenWithNotification(
-         context, account, scope, extras, authority, syncBundle);
- } catch (UserRecoverableNotifiedException userNotifiedException) {
-     // Notification has already been pushed.
-     // Continue without token or stop background task.
- } catch (GoogleAuthException authEx) {
-     // This is likely unrecoverable.
-     Log.e(TAG, "Unrecoverable authentication exception: " + authEx.getMessage(), authEx);
- } catch (IOException ioEx) {
-     Log.i(TAG, "transient error encountered: " + ioEx.getMessage());
-     doExponentialBackoff();
- }
- </pre></p></div>
-  <div class="jd-tagdata">
-      <h5 class="jd-tagtitle">Parameters</h5>
-      <table class="jd-tagtable">
-        <tr>
-          <th>context</td>
-          <td>Context associated with the desired token.</td>
-        </tr>
-        <tr>
-          <th>account</td>
-          <td>Authenticating user account.</td>
-        </tr>
-        <tr>
-          <th>scope</td>
-          <td>String representing the authentication scope.  To specify multiple scopes,
-        separate them with a space (for example, "oauth2:scope1 scope2 scope3").</td>
-        </tr>
-        <tr>
-          <th>extras</td>
-          <td>Bundle containing additional information that may be
-               relevant to the authentication scope.</td>
-        </tr>
-        <tr>
-          <th>authority</td>
-          <td>Authority for firing a sync request. Must not be empty or null.</td>
-        </tr>
-        <tr>
-          <th>syncBundle</td>
-          <td>extras for firing a sync request. This bundle must pass
-     ContentResolver.validateSyncExtrasBundle(). If no extras are needed can a null value
-     can be passed.</td>
-        </tr>
-      </table>
-  </div>
-  <div class="jd-tagdata">
-      <h5 class="jd-tagtitle">Returns</h5>
-      <ul class="nolist"><li>String containing a valid token.</li></ul>
-  </div>
-  <div class="jd-tagdata">
-      <h5 class="jd-tagtitle">Throws</h5>
-      <table class="jd-tagtable">
-        <tr>
-            <th><a href="/reference/com/google/android/gms/auth/UserRecoverableNotifiedException.html">UserRecoverableNotifiedException</a></td>
-            <td>if a user addressable error occurred and a
-         notification was pushed.</td>
-        </tr>
-        <tr>
-            <th><a href="/reference/com/google/android/gms/auth/GoogleAuthException.html">GoogleAuthException</a></td>
-            <td>signaling a potentially unrecoverable
-         authentication error.</td>
-        </tr>
-        <tr>
-            <th>IOException</td>
-            <td>signaling a potentially transient error.</td>
-        </tr>
-        <tr>
-            <th>IllegalStateException</td>
-            <td>if the method is invoked in the main
-         event thread.
-</td>
-        </tr>
-      </table>
-  </div>
-
-    </div>
-</div>
-
-
-<A NAME="getTokenWithNotification(android.content.Context, java.lang.String, java.lang.String, android.os.Bundle)"></A>
-
-<div class="jd-details api apilevel-">
-    <h4 class="jd-details-title">
-      <span class="normal">
-        public
-        static
-
-
-
-        String
-      </span>
-      <span class="sympad">getTokenWithNotification</span>
-      <span class="normal">(Context context, String accountName, String scope, Bundle extras)</span>
-    </h4>
-      <div class="api-level">
-        <div></div>
-
-
-
-      </div>
-    <div class="jd-details-descr">
-
-
-
-      <p>
-  <p class="caution"><strong>
-      This method is deprecated.</strong><br/>
-    Use <code><a href="/reference/com/google/android/gms/auth/GoogleAuthUtil.html#getTokenWithNotification(android.content.Context, android.accounts.Account, java.lang.String, android.os.Bundle)">getTokenWithNotification(Context, Account, String, Bundle)</a></code> instead.
-
-  </p>
-  <div class="jd-tagdata jd-tagdescr"><p>Authenticates the user and returns a valid Google authentication token, or throws an
- <code><a href="/reference/java/lang/Exception.html">Exception</a></code> if there was an error while getting the token.
- <p>
- This method is specifically provided for background tasks. In the event of an error that
- needs user intervention, this method takes care of pushing relevant notification.
- <p>
- The exception thrown depends upon the underlying error and support for
- recovery. <code><a href="/reference/com/google/android/gms/auth/UserRecoverableNotifiedException.html">UserRecoverableNotifiedException</a></code> will be thrown if the error can be
- resolved by user intervention and a notification has already been posted to address it.
- <code><a href="/reference/java/io/IOException.html">IOException</a></code>s will be thrown if the underlying error
- might be solved by some intelligent retry strategy. Alternatively,
- <code><a href="/reference/com/google/android/gms/auth/GoogleAuthException.html">GoogleAuthException</a></code>s represent a broad class of
- <code><a href="/reference/java/lang/Exception.html">Exception</a></code>s that cannot be recovered programmatically.
-
- <pre>
- String token;
- try {
-     token = GoogleAuthUtil.getTokenWithNotification(context, accountName, scope, extras);
- } catch (UserRecoverableNotifiedException userNotifiedException) {
-     // Notification has already been pushed.
-     // Continue without token or stop background task.
- } catch (GoogleAuthException authEx) {
-     // This is likely unrecoverable.
-     Log.e(TAG, "Unrecoverable authentication exception: " + authEx.getMessage(), authEx);
- } catch (IOException ioEx) {
-     Log.i(TAG, "transient error encountered: " + ioEx.getMessage());
-     doExponentialBackoff();
- }
- </pre></p></div>
-  <div class="jd-tagdata">
-      <h5 class="jd-tagtitle">Parameters</h5>
-      <table class="jd-tagtable">
-        <tr>
-          <th>context</td>
-          <td>Context associated with the desired token.</td>
-        </tr>
-        <tr>
-          <th>accountName</td>
-          <td>String representing the authenticating user account.</td>
-        </tr>
-        <tr>
-          <th>scope</td>
-          <td>String representing the authentication scope.  To specify multiple scopes,
-        separate them with a space (for example, "oauth2:scope1 scope2 scope3").</td>
-        </tr>
-        <tr>
-          <th>extras</td>
-          <td>Bundle containing additional information that may be
-               relevant to the authentication scope.</td>
-        </tr>
-      </table>
-  </div>
-  <div class="jd-tagdata">
-      <h5 class="jd-tagtitle">Returns</h5>
-      <ul class="nolist"><li>String containing a valid token.</li></ul>
-  </div>
-  <div class="jd-tagdata">
-      <h5 class="jd-tagtitle">Throws</h5>
-      <table class="jd-tagtable">
-        <tr>
-            <th><a href="/reference/com/google/android/gms/auth/UserRecoverableNotifiedException.html">UserRecoverableNotifiedException</a></td>
-            <td>if a user addressable error occurred and a
-         notification was pushed.</td>
-        </tr>
-        <tr>
-            <th><a href="/reference/com/google/android/gms/auth/GoogleAuthException.html">GoogleAuthException</a></td>
-            <td>signaling a potentially unrecoverable
-         authentication error.</td>
-        </tr>
-        <tr>
-            <th>IOException</td>
-            <td>signaling a potentially transient error.</td>
-        </tr>
-        <tr>
-            <th>IllegalStateException</td>
-            <td>if the method is invoked in the main
-         event thread.</td>
-        </tr>
-      </table>
-  </div>
-
-    </div>
-</div>
-
-
-<A NAME="getTokenWithNotification(android.content.Context, android.accounts.Account, java.lang.String, android.os.Bundle)"></A>
-
-<div class="jd-details api apilevel-">
-    <h4 class="jd-details-title">
-      <span class="normal">
-        public
-        static
-
-
-
-        String
-      </span>
-      <span class="sympad">getTokenWithNotification</span>
-      <span class="normal">(Context context, Account account, String scope, Bundle extras)</span>
-    </h4>
-      <div class="api-level">
-        <div></div>
-
-
-
-      </div>
-    <div class="jd-details-descr">
-
-
-
-
-  <div class="jd-tagdata jd-tagdescr"><p>Authenticates the user and returns a valid Google authentication token, or throws an
- <code><a href="/reference/java/lang/Exception.html">Exception</a></code> if there was an error while getting the token.
- <p>
- This method is specifically provided for background tasks. In the event of an error that
- needs user intervention, this method takes care of pushing relevant notification.
- <p>
- The exception thrown depends upon the underlying error and support for
- recovery. <code><a href="/reference/com/google/android/gms/auth/UserRecoverableNotifiedException.html">UserRecoverableNotifiedException</a></code> will be thrown if the error can be
- resolved by user intervention and a notification has already been posted to address it.
- <code><a href="/reference/java/io/IOException.html">IOException</a></code>s will be thrown if the underlying error
- might be solved by some intelligent retry strategy. Alternatively,
- <code><a href="/reference/com/google/android/gms/auth/GoogleAuthException.html">GoogleAuthException</a></code>s represent a broad class of
- <code><a href="/reference/java/lang/Exception.html">Exception</a></code>s that cannot be recovered programmatically.
-
- <pre>
- String token;
- try {
-     token = GoogleAuthUtil.getTokenWithNotification(context, account, scope, extras);
- } catch (UserRecoverableNotifiedException userNotifiedException) {
-     // Notification has already been pushed.
-     // Continue without token or stop background task.
- } catch (GoogleAuthException authEx) {
-     // This is likely unrecoverable.
-     Log.e(TAG, "Unrecoverable authentication exception: " + authEx.getMessage(), authEx);
- } catch (IOException ioEx) {
-     Log.i(TAG, "transient error encountered: " + ioEx.getMessage());
-     doExponentialBackoff();
- }
- </pre></p></div>
-  <div class="jd-tagdata">
-      <h5 class="jd-tagtitle">Parameters</h5>
-      <table class="jd-tagtable">
-        <tr>
-          <th>context</td>
-          <td>Context associated with the desired token.</td>
-        </tr>
-        <tr>
-          <th>account</td>
-          <td>Authenticating user account.</td>
-        </tr>
-        <tr>
-          <th>scope</td>
-          <td>String representing the authentication scope.  To specify multiple scopes,
-        separate them with a space (for example, "oauth2:scope1 scope2 scope3").</td>
-        </tr>
-        <tr>
-          <th>extras</td>
-          <td>Bundle containing additional information that may be
-               relevant to the authentication scope.</td>
-        </tr>
-      </table>
-  </div>
-  <div class="jd-tagdata">
-      <h5 class="jd-tagtitle">Returns</h5>
-      <ul class="nolist"><li>String containing a valid token.</li></ul>
-  </div>
-  <div class="jd-tagdata">
-      <h5 class="jd-tagtitle">Throws</h5>
-      <table class="jd-tagtable">
-        <tr>
-            <th><a href="/reference/com/google/android/gms/auth/UserRecoverableNotifiedException.html">UserRecoverableNotifiedException</a></td>
-            <td>if a user addressable error occurred and a
-         notification was pushed.</td>
-        </tr>
-        <tr>
-            <th><a href="/reference/com/google/android/gms/auth/GoogleAuthException.html">GoogleAuthException</a></td>
-            <td>signaling a potentially unrecoverable
-         authentication error.</td>
-        </tr>
-        <tr>
-            <th>IOException</td>
-            <td>signaling a potentially transient error.</td>
-        </tr>
-        <tr>
-            <th>IllegalStateException</td>
-            <td>if the method is invoked in the main
-         event thread.
-</td>
-        </tr>
-      </table>
-  </div>
-
-    </div>
-</div>
-
-
-<A NAME="getTokenWithNotification(android.content.Context, android.accounts.Account, java.lang.String, android.os.Bundle, android.content.Intent)"></A>
-
-<div class="jd-details api apilevel-">
-    <h4 class="jd-details-title">
-      <span class="normal">
-        public
-        static
-
-
-
-        String
-      </span>
-      <span class="sympad">getTokenWithNotification</span>
-      <span class="normal">(Context context, Account account, String scope, Bundle extras, Intent callback)</span>
-    </h4>
-      <div class="api-level">
-        <div></div>
-
-
-
-      </div>
-    <div class="jd-details-descr">
-
-
-
-
-  <div class="jd-tagdata jd-tagdescr"><p>Authenticates the user and returns a valid Google authentication token, or throws an
- <code><a href="/reference/java/lang/Exception.html">Exception</a></code> if there was an error while getting the token.
- <p>
- This method is specifically provided for background tasks. In the event of an error that
- needs user intervention, this method takes care of pushing relevant notification. After the
- user addresses the notification, the callback is broadcasted. If the user cancels then the
- callback is not fired.
- <p>
- The exception thrown depends upon the underlying error and support for
- recovery. <code><a href="/reference/com/google/android/gms/auth/UserRecoverableNotifiedException.html">UserRecoverableNotifiedException</a></code> will be thrown if the error can be
- resolved by user intervention and a notification has already been posted to address it.
- <code><a href="/reference/java/io/IOException.html">IOException</a></code>s will be thrown if the underlying error
- might be solved by some intelligent retry strategy. Alternatively,
- <code><a href="/reference/com/google/android/gms/auth/GoogleAuthException.html">GoogleAuthException</a></code>s represent a broad class of
- <code><a href="/reference/java/lang/Exception.html">Exception</a></code>s that cannot be recovered programmatically.
-
- <pre>
- String token;
- try {
-     token = GoogleAuthUtil.getTokenWithNotification(
-         context, account, scope, extras, callback);
- } catch (UserRecoverableNotifiedException userNotifiedException) {
-     // Notification has already been pushed.
-     // Continue without token or stop background task.
- } catch (GoogleAuthException authEx) {
-     // This is likely unrecoverable.
-     Log.e(TAG, "Unrecoverable authentication exception: " + authEx.getMessage(), authEx);
- } catch (IOException ioEx) {
-     Log.i(TAG, "transient error encountered: " + ioEx.getMessage());
-     doExponentialBackoff();
- }
- </pre></p></div>
-  <div class="jd-tagdata">
-      <h5 class="jd-tagtitle">Parameters</h5>
-      <table class="jd-tagtable">
-        <tr>
-          <th>context</td>
-          <td>Context associated with the desired token.</td>
-        </tr>
-        <tr>
-          <th>account</td>
-          <td>Authenticating user account.</td>
-        </tr>
-        <tr>
-          <th>scope</td>
-          <td>String representing the authentication scope.  To specify multiple scopes,
-        separate them with a space (for example, "oauth2:scope1 scope2 scope3").</td>
-        </tr>
-        <tr>
-          <th>extras</td>
-          <td>Bundle containing additional information that may be
-               relevant to the authentication scope.</td>
-        </tr>
-        <tr>
-          <th>callback</td>
-          <td>A broadcast intent with a valid receiver that has been exported for other
-     apps to send broadcasts to it. This intent must be serializable using
-     toUri(Intent.URI_INTENT_SCHEME) and Intent.parseUri(intentUri, Intent.URI_INTENT_SCHEME).
-     Cannot be null.</td>
-        </tr>
-      </table>
-  </div>
-  <div class="jd-tagdata">
-      <h5 class="jd-tagtitle">Returns</h5>
-      <ul class="nolist"><li>String containing a valid token.</li></ul>
-  </div>
-  <div class="jd-tagdata">
-      <h5 class="jd-tagtitle">Throws</h5>
-      <table class="jd-tagtable">
-        <tr>
-            <th><a href="/reference/com/google/android/gms/auth/UserRecoverableNotifiedException.html">UserRecoverableNotifiedException</a></td>
-            <td>if a user addressable error occurred and a
-         notification was pushed.</td>
-        </tr>
-        <tr>
-            <th><a href="/reference/com/google/android/gms/auth/GoogleAuthException.html">GoogleAuthException</a></td>
-            <td>signaling a potentially unrecoverable
-         authentication error.</td>
-        </tr>
-        <tr>
-            <th>IOException</td>
-            <td>signaling a potentially transient error.</td>
-        </tr>
         <tr>
             <th>IllegalStateException</td>
             <td>if the method is invoked in the main
