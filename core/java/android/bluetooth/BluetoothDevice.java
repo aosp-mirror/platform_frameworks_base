@@ -382,6 +382,9 @@ public final class BluetoothDevice implements Parcelable {
     /**@hide*/
     public static final int REQUEST_TYPE_MESSAGE_ACCESS = 3;
 
+    /**@hide*/
+    public static final int REQUEST_TYPE_SIM_ACCESS = 4;
+
     /**
      * Used as an extra field in {@link #ACTION_CONNECTION_ACCESS_REQUEST} intents,
      * Contains package name to return reply intent to.
@@ -1269,6 +1272,44 @@ public final class BluetoothDevice implements Parcelable {
         return false;
     }
 
+    /**
+     * Requires {@link android.Manifest.permission#BLUETOOTH}.
+     * @return Whether the Sim access is allowed to this device. Can be
+     *         {@link #ACCESS_UNKNOWN}, {@link #ACCESS_ALLOWED} or {@link #ACCESS_REJECTED}.
+     * @hide
+     */
+    public int getSimAccessPermission() {
+        if (sService == null) {
+            return ACCESS_UNKNOWN;
+        }
+        try {
+            return sService.getSimAccessPermission(this);
+        } catch (RemoteException e) {
+            Log.e(TAG, "", e);
+        }
+        return ACCESS_UNKNOWN;
+    }
+
+    /**
+     * Sets whether the Sim access is allowed to this device.
+     * <p>Requires {@link android.Manifest.permission#BLUETOOTH_PRIVILEGED}.
+     * @param value Can be {@link #ACCESS_UNKNOWN}, {@link #ACCESS_ALLOWED} or
+     *              {@link #ACCESS_REJECTED}.
+     * @return Whether the value has been successfully set.
+     * @hide
+     */
+    public boolean setSimAccessPermission(int value) {
+        if (sService == null) {
+            return false;
+        }
+        try {
+            return sService.setSimAccessPermission(this, value);
+        } catch (RemoteException e) {
+            Log.e(TAG, "", e);
+        }
+        return false;
+    }    
+    
     /**
      * Create an RFCOMM {@link BluetoothSocket} ready to start a secure
      * outgoing connection to this remote device on given channel.

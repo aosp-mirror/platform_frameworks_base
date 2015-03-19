@@ -6960,6 +6960,9 @@ public final class Settings {
         /** {@hide} */
         public static final String
                 BLUETOOTH_MAP_PRIORITY_PREFIX = "bluetooth_map_priority_";
+        /** {@hide} */
+        public static final String
+                BLUETOOTH_SAP_PRIORITY_PREFIX = "bluetooth_sap_priority_";
 
         /**
          * Get the key that retrieves a bluetooth headset's priority.
@@ -6992,6 +6995,15 @@ public final class Settings {
         public static final String getBluetoothMapPriorityKey(String address) {
             return BLUETOOTH_MAP_PRIORITY_PREFIX + address.toUpperCase(Locale.ROOT);
         }
+
+        /**
+         * Get the key that retrieves a bluetooth map priority.
+         * @hide
+         */
+        public static final String getBluetoothSapPriorityKey(String address) {
+            return BLUETOOTH_SAP_PRIORITY_PREFIX + address.toUpperCase(Locale.ROOT);
+        }
+
         /**
          * Scaling factor for normal window animations. Setting to 0 will
          * disable window animations.

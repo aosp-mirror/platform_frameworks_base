@@ -76,7 +76,9 @@ public final class BluetoothUuid {
             ParcelUuid.fromString("00001133-0000-1000-8000-00805F9B34FB");
     public static final ParcelUuid MAS =
             ParcelUuid.fromString("00001132-0000-1000-8000-00805F9B34FB");
-
+  public static final ParcelUuid SAP =
+            ParcelUuid.fromString("0000112D-0000-1000-8000-00805F9B34FB");
+			
     public static final ParcelUuid BASE_UUID =
             ParcelUuid.fromString("00000000-0000-1000-8000-00805F9B34FB");
 
@@ -89,7 +91,7 @@ public final class BluetoothUuid {
 
     public static final ParcelUuid[] RESERVED_UUIDS = {
         AudioSink, AudioSource, AdvAudioDist, HSP, Handsfree, AvrcpController, AvrcpTarget,
-        ObexObjectPush, PANU, NAP, MAP, MNS, MAS};
+        ObexObjectPush, PANU, NAP, MAP, MNS, MAS, SAP};
 
     public static boolean isAudioSource(ParcelUuid uuid) {
         return uuid.equals(AudioSource);
@@ -142,6 +144,9 @@ public final class BluetoothUuid {
     }
     public static boolean isMas(ParcelUuid uuid) {
         return uuid.equals(MAS);
+    }
+    public static boolean isSap(ParcelUuid uuid) {
+        return uuid.equals(SAP);
     }
 
     /**

@@ -79,6 +79,8 @@ interface IBluetooth
     boolean setPhonebookAccessPermission(in BluetoothDevice device, int value);
     int getMessageAccessPermission(in BluetoothDevice device);
     boolean setMessageAccessPermission(in BluetoothDevice device, int value);
+    int getSimAccessPermission(in BluetoothDevice device);
+    boolean setSimAccessPermission(in BluetoothDevice device, int value);
 
     void sendConnectionStateChange(in BluetoothDevice device, int profile, int state, int prevState);
 
