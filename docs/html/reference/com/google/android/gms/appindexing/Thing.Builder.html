@@ -96,8 +96,6 @@
 
 
 
-
-
 <html>
 <head>
 
@@ -113,7 +111,7 @@
 href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Roboto:light,regular,medium,thin,italic,mediumitalic,bold"
   title="roboto">
-<link href="/assets/css/default.css?v=5" rel="stylesheet" type="text/css">
+<link href="/assets/css/default.css?v=4" rel="stylesheet" type="text/css">
 
 
 
@@ -414,7 +412,6 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
                 <li><a href="/distribute/users/index.html">Get Users</a></li>
                 <li><a href="/distribute/engage/index.html">Engage &amp; Retain</a></li>
                 <li><a href="/distribute/monetize/index.html">Monetize</a></li>
-                <li><a href="/distribute/analyze/index.html">Analyze</a></li>
                 <li><a href="/distribute/tools/index.html">Tools &amp; Reference</a></li>
                 <li><a href="/distribute/stories/index.html">Developer Stories</a></li>
               </ul>
@@ -596,14 +593,14 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
 
   <li class="nav-section">
-    <div class="nav-section-header"><a href="/google/play/billing/index.html" zh-cn-lang="应用内结算">
+    <div class="nav-section-header"><a href="/google/play/billing/index.html">
       <span class="en">Google Play In-app Billing</span></a>
     </div>
     <ul>
-      <li><a href="/google/play/billing/billing_overview.html" zh-cn-lang="应用内结算概述">
+      <li><a href="/google/play/billing/billing_overview.html">
               <span class="en">Overview</span></a>
       </li>
-      <li class="nav-section"><div class="nav-section-header"><a href="/google/play/billing/api.html" zh-cn-lang="应用内结算 API">
+      <li class="nav-section"><div class="nav-section-header"><a href="/google/play/billing/api.html">
               <span class="en">Version 3 API</span></a></div>
               <ul>
               <li><a href="/google/play/billing/billing_integrate.html">
@@ -626,13 +623,13 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       <li><a href="/google/play/billing/billing_subscriptions.html">
               <span class="en">Subscriptions</span></a>
       </li>
-      <li><a href="/google/play/billing/billing_best_practices.html" zh-cn-lang="安全性和设计">
+      <li><a href="/google/play/billing/billing_best_practices.html">
               <span class="en">Security and Design</span></a>
       </li>
-      <li><a href="/google/play/billing/billing_testing.html" zh-cn-lang="测试应用内结算">
+      <li><a href="/google/play/billing/billing_testing.html">
               <span class="en">Testing In-app Billing</span></a>
       </li>
-      <li><a href="/google/play/billing/billing_admin.html" zh-cn-lang="管理应用内结算">
+      <li><a href="/google/play/billing/billing_admin.html">
               <span class="en">Administering In-app Billing</span></a>
       </li>
       <li><a href="/google/play/billing/versions.html">
@@ -666,14 +663,21 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
               <span class="en">HTTP</span></a></li>
               </ul>
         </li>
-        <li><a href="/google/gcm/server-ref.html">
-            <span class="en">Server Reference</span></a>
-        </li>
         <li><a href="/google/gcm/notifications.html">
               <span class="en">User Notifications</span></a>
         </li>
+        <li><a href="/google/gcm/adv.html">
+            <span class="en">Advanced Topics</span></a>
+        </li>
         <li><a href="/google/gcm/c2dm.html">
             <span class="en">Migration</span></a>
+        </li>
+        <li id="gcm-tree-list" class="nav-section">
+          <div class="nav-section-header">
+            <a href="/reference/gcm-packages.html">
+              <span class="en">Reference</span>
+            </a>
+          <div>
         </li>
       </ul>
   </li>
@@ -1040,7 +1044,7 @@ Summary:
         <span class="sympad"><a href="/reference/com/google/android/gms/appindexing/Thing.Builder.html#put(java.lang.String, com.google.android.gms.appindexing.Thing)">put</a></span>(String key, <a href="/reference/com/google/android/gms/appindexing/Thing.html">Thing</a> value)</nobr>
         
         <div class="jd-descrdiv">
-          Sets a property of the content.
+          Specify optional properties of the content.
           
     
 
@@ -1063,7 +1067,7 @@ Summary:
         <span class="sympad"><a href="/reference/com/google/android/gms/appindexing/Thing.Builder.html#put(java.lang.String, java.lang.String)">put</a></span>(String key, String value)</nobr>
         
         <div class="jd-descrdiv">
-          Sets a property of the content.
+          Specify optional properties of the content.
           
     
 
@@ -1086,7 +1090,7 @@ Summary:
         <span class="sympad"><a href="/reference/com/google/android/gms/appindexing/Thing.Builder.html#setDescription(java.lang.String)">setDescription</a></span>(String description)</nobr>
         
         <div class="jd-descrdiv">
-          Sets the optional description of the content.
+          Specify the optional description of the content.
           
     
 
@@ -1109,7 +1113,7 @@ Summary:
         <span class="sympad"><a href="/reference/com/google/android/gms/appindexing/Thing.Builder.html#setId(java.lang.String)">setId</a></span>(String id)</nobr>
         
         <div class="jd-descrdiv">
-          Sets the optional web URL of the content.
+          Specify the optional web URL of the content.
           
     
 
@@ -1132,7 +1136,7 @@ Summary:
         <span class="sympad"><a href="/reference/com/google/android/gms/appindexing/Thing.Builder.html#setName(java.lang.String)">setName</a></span>(String name)</nobr>
         
         <div class="jd-descrdiv">
-          Sets the name of the content.
+          Specify the name of the content.
           
     
 
@@ -1155,7 +1159,7 @@ Summary:
         <span class="sympad"><a href="/reference/com/google/android/gms/appindexing/Thing.Builder.html#setType(java.lang.String)">setType</a></span>(String type)</nobr>
         
         <div class="jd-descrdiv">
-          Sets the schema.org type of the content.
+          Specify optional schema.org type of the content.
           
     
 
@@ -1178,7 +1182,7 @@ Summary:
         <span class="sympad"><a href="/reference/com/google/android/gms/appindexing/Thing.Builder.html#setUrl(android.net.Uri)">setUrl</a></span>(Uri url)</nobr>
         
         <div class="jd-descrdiv">
-          Sets the app URI of the content.
+          Specify the native app URL of the content.
           
     
 
@@ -1543,7 +1547,7 @@ From class
     
 
       
-  <div class="jd-tagdata jd-tagdescr"><p>Sets a property of the content.</p></div>
+  <div class="jd-tagdata jd-tagdescr"><p>Specify optional properties of the content.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
       <table class="jd-tagtable">
@@ -1590,7 +1594,7 @@ From class
     
 
       
-  <div class="jd-tagdata jd-tagdescr"><p>Sets a property of the content.</p></div>
+  <div class="jd-tagdata jd-tagdescr"><p>Specify optional properties of the content.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
       <table class="jd-tagtable">
@@ -1637,13 +1641,13 @@ From class
     
 
       
-  <div class="jd-tagdata jd-tagdescr"><p>Sets the optional description of the content.</p></div>
+  <div class="jd-tagdata jd-tagdescr"><p>Specify the optional description of the content.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
       <table class="jd-tagtable">
         <tr>
           <th>description</td>
-          <td>The description of the content.
+          <td>Description of the content.
 </td>
         </tr>
       </table>
@@ -1679,13 +1683,14 @@ From class
     
 
       
-  <div class="jd-tagdata jd-tagdescr"><p>Sets the optional web URL of the content.</p></div>
+  <div class="jd-tagdata jd-tagdescr"><p>Specify the optional web URL of the content.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
       <table class="jd-tagtable">
         <tr>
           <th>id</td>
-          <td>Set the equivalent web url for the content.
+          <td>Set the equivalent web url for the content. See
+ <a href="https://developers.google.com/app-indexing/">App Indexing</a>.
 </td>
         </tr>
       </table>
@@ -1721,13 +1726,13 @@ From class
     
 
       
-  <div class="jd-tagdata jd-tagdescr"><p>Sets the name of the content.</p></div>
+  <div class="jd-tagdata jd-tagdescr"><p>Specify the name of the content.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
       <table class="jd-tagtable">
         <tr>
           <th>name</td>
-          <td>The name of the content. Must not be null.
+          <td>Name of the content.
 </td>
         </tr>
       </table>
@@ -1763,7 +1768,7 @@ From class
     
 
       
-  <div class="jd-tagdata jd-tagdescr"><p>Sets the schema.org type of the content.</p></div>
+  <div class="jd-tagdata jd-tagdescr"><p>Specify optional schema.org type of the content.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
       <table class="jd-tagtable">
@@ -1805,13 +1810,13 @@ From class
     
 
       
-  <div class="jd-tagdata jd-tagdescr"><p>Sets the app URI of the content.</p></div>
+  <div class="jd-tagdata jd-tagdescr"><p>Specify the native app URL of the content.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
       <table class="jd-tagtable">
         <tr>
           <th>url</td>
-          <td>The app URI of the content in the
+          <td>Set the deep-link in the
  <a href="https://developers.google.com/app-indexing/">App Indexing</a> format.
 </td>
         </tr>
