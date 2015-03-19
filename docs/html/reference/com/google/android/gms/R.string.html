@@ -96,6 +96,8 @@
 
 
 
+
+
 <html>
 <head>
 
@@ -111,7 +113,7 @@
 href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Roboto:light,regular,medium,thin,italic,mediumitalic,bold"
   title="roboto">
-<link href="/assets/css/default.css?v=4" rel="stylesheet" type="text/css">
+<link href="/assets/css/default.css?v=5" rel="stylesheet" type="text/css">
 
 
 
@@ -412,6 +414,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
                 <li><a href="/distribute/users/index.html">Get Users</a></li>
                 <li><a href="/distribute/engage/index.html">Engage &amp; Retain</a></li>
                 <li><a href="/distribute/monetize/index.html">Monetize</a></li>
+                <li><a href="/distribute/analyze/index.html">Analyze</a></li>
                 <li><a href="/distribute/tools/index.html">Tools &amp; Reference</a></li>
                 <li><a href="/distribute/stories/index.html">Developer Stories</a></li>
               </ul>
@@ -593,14 +596,14 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
 
   <li class="nav-section">
-    <div class="nav-section-header"><a href="/google/play/billing/index.html">
+    <div class="nav-section-header"><a href="/google/play/billing/index.html" zh-cn-lang="应用内结算">
       <span class="en">Google Play In-app Billing</span></a>
     </div>
     <ul>
-      <li><a href="/google/play/billing/billing_overview.html">
+      <li><a href="/google/play/billing/billing_overview.html" zh-cn-lang="应用内结算概述">
               <span class="en">Overview</span></a>
       </li>
-      <li class="nav-section"><div class="nav-section-header"><a href="/google/play/billing/api.html">
+      <li class="nav-section"><div class="nav-section-header"><a href="/google/play/billing/api.html" zh-cn-lang="应用内结算 API">
               <span class="en">Version 3 API</span></a></div>
               <ul>
               <li><a href="/google/play/billing/billing_integrate.html">
@@ -623,13 +626,13 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       <li><a href="/google/play/billing/billing_subscriptions.html">
               <span class="en">Subscriptions</span></a>
       </li>
-      <li><a href="/google/play/billing/billing_best_practices.html">
+      <li><a href="/google/play/billing/billing_best_practices.html" zh-cn-lang="安全性和设计">
               <span class="en">Security and Design</span></a>
       </li>
-      <li><a href="/google/play/billing/billing_testing.html">
+      <li><a href="/google/play/billing/billing_testing.html" zh-cn-lang="测试应用内结算">
               <span class="en">Testing In-app Billing</span></a>
       </li>
-      <li><a href="/google/play/billing/billing_admin.html">
+      <li><a href="/google/play/billing/billing_admin.html" zh-cn-lang="管理应用内结算">
               <span class="en">Administering In-app Billing</span></a>
       </li>
       <li><a href="/google/play/billing/versions.html">
@@ -663,21 +666,14 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
               <span class="en">HTTP</span></a></li>
               </ul>
         </li>
+        <li><a href="/google/gcm/server-ref.html">
+            <span class="en">Server Reference</span></a>
+        </li>
         <li><a href="/google/gcm/notifications.html">
               <span class="en">User Notifications</span></a>
         </li>
-        <li><a href="/google/gcm/adv.html">
-            <span class="en">Advanced Topics</span></a>
-        </li>
         <li><a href="/google/gcm/c2dm.html">
             <span class="en">Migration</span></a>
-        </li>
-        <li id="gcm-tree-list" class="nav-section">
-          <div class="nav-section-header">
-            <a href="/reference/gcm-packages.html">
-              <span class="en">Reference</span>
-            </a>
-          <div>
         </li>
       </ul>
   </li>
@@ -1254,6 +1250,38 @@ Summary:
           static
           
           int</nobr></td>
+          <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.string.html#common_google_play_services_sign_in_failed_text">common_google_play_services_sign_in_failed_text</a></td>
+          <td class="jd-descrcol" width="100%">
+
+
+
+
+          </td>
+      </tr>
+
+
+      <tr class=" api apilevel-" >
+          <td class="jd-typecol"><nobr>
+          public
+          static
+
+          int</nobr></td>
+          <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.string.html#common_google_play_services_sign_in_failed_title">common_google_play_services_sign_in_failed_title</a></td>
+          <td class="jd-descrcol" width="100%">
+
+
+
+
+          </td>
+      </tr>
+
+
+      <tr class="alt-color api apilevel-" >
+          <td class="jd-typecol"><nobr>
+          public
+          static
+
+          int</nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.string.html#common_google_play_services_unknown_issue">common_google_play_services_unknown_issue</a></td>
           <td class="jd-descrcol" width="100%">
             
@@ -1398,7 +1426,7 @@ Summary:
           static
           
           int</nobr></td>
-          <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.string.html#create_calendar_message">create_calendar_message</a></td>
+          <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.string.html#commono_google_play_services_api_unavailable_text">commono_google_play_services_api_unavailable_text</a></td>
           <td class="jd-descrcol" width="100%">
             
             
@@ -1409,6 +1437,22 @@ Summary:
       
     
       <tr class="alt-color api apilevel-" >
+          <td class="jd-typecol"><nobr>
+          public
+          static
+          
+          int</nobr></td>
+          <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.string.html#create_calendar_message">create_calendar_message</a></td>
+          <td class="jd-descrcol" width="100%">
+            
+            
+    
+
+          </td>
+      </tr>
+      
+    
+      <tr class=" api apilevel-" >
           <td class="jd-typecol"><nobr>
           public
           static
@@ -1424,7 +1468,7 @@ Summary:
       </tr>
       
     
-      <tr class=" api apilevel-" >
+      <tr class="alt-color api apilevel-" >
           <td class="jd-typecol"><nobr>
           public
           static
@@ -1440,7 +1484,7 @@ Summary:
       </tr>
       
     
-      <tr class="alt-color api apilevel-" >
+      <tr class=" api apilevel-" >
           <td class="jd-typecol"><nobr>
           public
           static
@@ -1456,7 +1500,7 @@ Summary:
       </tr>
       
     
-      <tr class=" api apilevel-" >
+      <tr class="alt-color api apilevel-" >
           <td class="jd-typecol"><nobr>
           public
           static
@@ -1464,19 +1508,19 @@ Summary:
           int</nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.string.html#store_picture_title">store_picture_title</a></td>
           <td class="jd-descrcol" width="100%">
-            
-            
-    
+
+
+
 
           </td>
       </tr>
-      
-    
-      <tr class="alt-color api apilevel-" >
+
+
+      <tr class=" api apilevel-" >
           <td class="jd-typecol"><nobr>
           public
           static
-          
+
           int</nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.string.html#wallet_buy_button_place_holder">wallet_buy_button_place_holder</a></td>
           <td class="jd-descrcol" width="100%">
@@ -2390,6 +2434,68 @@ From class
 
 
 
+<A NAME="common_google_play_services_sign_in_failed_text"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+        static
+
+        int
+      </span>
+        common_google_play_services_sign_in_failed_text
+    </h4>
+      <div class="api-level">
+
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+
+
+
+  <div class="jd-tagdata jd-tagdescr"><p></p></div>
+
+
+    </div>
+</div>
+
+
+
+<A NAME="common_google_play_services_sign_in_failed_title"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+        static
+
+        int
+      </span>
+        common_google_play_services_sign_in_failed_title
+    </h4>
+      <div class="api-level">
+
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+
+
+
+  <div class="jd-tagdata jd-tagdescr"><p></p></div>
+
+
+    </div>
+</div>
+
+
+
 <A NAME="common_google_play_services_unknown_issue"></A>
 
 <div class="jd-details api apilevel-"> 
@@ -2664,6 +2770,37 @@ From class
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
     
+    </div>
+</div>
+
+
+
+<A NAME="commono_google_play_services_api_unavailable_text"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+        static
+
+        int
+      </span>
+        commono_google_play_services_api_unavailable_text
+    </h4>
+      <div class="api-level">
+
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+
+
+
+  <div class="jd-tagdata jd-tagdescr"><p></p></div>
+
+
     </div>
 </div>
 

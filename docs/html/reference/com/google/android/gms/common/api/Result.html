@@ -96,6 +96,8 @@
 
 
 
+
+
 <html>
 <head>
 
@@ -111,7 +113,7 @@
 href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Roboto:light,regular,medium,thin,italic,mediumitalic,bold"
   title="roboto">
-<link href="/assets/css/default.css?v=4" rel="stylesheet" type="text/css">
+<link href="/assets/css/default.css?v=5" rel="stylesheet" type="text/css">
 
 
 
@@ -412,6 +414,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
                 <li><a href="/distribute/users/index.html">Get Users</a></li>
                 <li><a href="/distribute/engage/index.html">Engage &amp; Retain</a></li>
                 <li><a href="/distribute/monetize/index.html">Monetize</a></li>
+                <li><a href="/distribute/analyze/index.html">Analyze</a></li>
                 <li><a href="/distribute/tools/index.html">Tools &amp; Reference</a></li>
                 <li><a href="/distribute/stories/index.html">Developer Stories</a></li>
               </ul>
@@ -593,14 +596,14 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
 
   <li class="nav-section">
-    <div class="nav-section-header"><a href="/google/play/billing/index.html">
+    <div class="nav-section-header"><a href="/google/play/billing/index.html" zh-cn-lang="应用内结算">
       <span class="en">Google Play In-app Billing</span></a>
     </div>
     <ul>
-      <li><a href="/google/play/billing/billing_overview.html">
+      <li><a href="/google/play/billing/billing_overview.html" zh-cn-lang="应用内结算概述">
               <span class="en">Overview</span></a>
       </li>
-      <li class="nav-section"><div class="nav-section-header"><a href="/google/play/billing/api.html">
+      <li class="nav-section"><div class="nav-section-header"><a href="/google/play/billing/api.html" zh-cn-lang="应用内结算 API">
               <span class="en">Version 3 API</span></a></div>
               <ul>
               <li><a href="/google/play/billing/billing_integrate.html">
@@ -623,13 +626,13 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       <li><a href="/google/play/billing/billing_subscriptions.html">
               <span class="en">Subscriptions</span></a>
       </li>
-      <li><a href="/google/play/billing/billing_best_practices.html">
+      <li><a href="/google/play/billing/billing_best_practices.html" zh-cn-lang="安全性和设计">
               <span class="en">Security and Design</span></a>
       </li>
-      <li><a href="/google/play/billing/billing_testing.html">
+      <li><a href="/google/play/billing/billing_testing.html" zh-cn-lang="测试应用内结算">
               <span class="en">Testing In-app Billing</span></a>
       </li>
-      <li><a href="/google/play/billing/billing_admin.html">
+      <li><a href="/google/play/billing/billing_admin.html" zh-cn-lang="管理应用内结算">
               <span class="en">Administering In-app Billing</span></a>
       </li>
       <li><a href="/google/play/billing/versions.html">
@@ -663,21 +666,14 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
               <span class="en">HTTP</span></a></li>
               </ul>
         </li>
+        <li><a href="/google/gcm/server-ref.html">
+            <span class="en">Server Reference</span></a>
+        </li>
         <li><a href="/google/gcm/notifications.html">
               <span class="en">User Notifications</span></a>
         </li>
-        <li><a href="/google/gcm/adv.html">
-            <span class="en">Advanced Topics</span></a>
-        </li>
         <li><a href="/google/gcm/c2dm.html">
             <span class="en">Migration</span></a>
-        </li>
-        <li id="gcm-tree-list" class="nav-section">
-          <div class="nav-section-header">
-            <a href="/reference/gcm-packages.html">
-              <span class="en">Reference</span>
-            </a>
-          <div>
         </li>
       </ul>
   </li>
@@ -923,7 +919,7 @@ Summary:
             
               
               and
-                <a href="#" onclick="return toggleInherited(document.getElementById('subclasses-indirect', null))">46 others.</a>
+                <a href="#" onclick="return toggleInherited(document.getElementById('subclasses-indirect', null))">52 others.</a>
               
             
           
@@ -1014,6 +1010,17 @@ Summary:
       
     
       <tr class=" api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/location/places/AutocompletePredictionBuffer.html">AutocompletePredictionBuffer</a></td>
+        <td class="jd-descrcol" width="100%">
+          A <code>DataBuffer</code> that represents a list of AutocompletePredictionEntitys.&nbsp;
+
+
+
+        </td>
+      </tr>
+
+
+      <tr class="alt-color api apilevel-" >
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/common/api/BatchResult.html">BatchResult</a></td>
         <td class="jd-descrcol" width="100%">
           The result of a batch operation.&nbsp;
@@ -1024,7 +1031,7 @@ Summary:
       </tr>
       
     
-      <tr class="alt-color api apilevel-" >
+      <tr class=" api apilevel-" >
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/result/BleDevicesResult.html">BleDevicesResult</a></td>
         <td class="jd-descrcol" width="100%">
           Result of <code><a href="/reference/com/google/android/gms/fitness/BleApi.html#listClaimedBleDevices(com.google.android.gms.common.api.GoogleApiClient)">listClaimedBleDevices(GoogleApiClient)</a></code>.&nbsp;
@@ -1035,7 +1042,7 @@ Summary:
       </tr>
       
     
-      <tr class=" api apilevel-" >
+      <tr class="alt-color api apilevel-" >
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/cast/Cast.ApplicationConnectionResult.html">Cast.ApplicationConnectionResult</a></td>
         <td class="jd-descrcol" width="100%">
           When a connection to a receiver application has been established, this object contains
@@ -1048,6 +1055,17 @@ Summary:
       </tr>
       
     
+      <tr class=" api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/nearby/connection/Connections.StartAdvertisingResult.html">Connections.StartAdvertisingResult</a></td>
+        <td class="jd-descrcol" width="100%">
+          Result delivered when a local endpoint starts being advertised.&nbsp;
+
+
+
+        </td>
+      </tr>
+
+
       <tr class="alt-color api apilevel-" >
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/tagmanager/ContainerHolder.html">ContainerHolder</a></td>
         <td class="jd-descrcol" width="100%">
@@ -1314,6 +1332,19 @@ Summary:
       
     
       <tr class="alt-color api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/location/LocationSettingsResult.html">LocationSettingsResult</a></td>
+        <td class="jd-descrcol" width="100%">
+          Result of checking settings via <code><a href="/reference/com/google/android/gms/location/SettingsApi.html#checkLocationSettings(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.location.LocationSettingsRequest)">checkLocationSettings(GoogleApiClient, LocationSettingsRequest)</a></code>,
+ indicates whether a dialog should be shown to ask the user's consent to
+ change their settings.&nbsp;
+
+
+
+        </td>
+      </tr>
+
+
+      <tr class=" api apilevel-" >
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/wearable/MessageApi.SendMessageResult.html">MessageApi.SendMessageResult</a></td>
         <td class="jd-descrcol" width="100%">
           Contains the request id assigned to the message.&nbsp;
@@ -1324,7 +1355,7 @@ Summary:
       </tr>
       
     
-      <tr class=" api apilevel-" >
+      <tr class="alt-color api apilevel-" >
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/plus/Moments.LoadMomentsResult.html">Moments.LoadMomentsResult</a></td>
         <td class="jd-descrcol" width="100%">
           Information about the set of moments that was loaded.&nbsp;
@@ -1335,7 +1366,7 @@ Summary:
       </tr>
       
     
-      <tr class="alt-color api apilevel-" >
+      <tr class=" api apilevel-" >
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/wearable/NodeApi.GetConnectedNodesResult.html">NodeApi.GetConnectedNodesResult</a></td>
         <td class="jd-descrcol" width="100%">
           Contains a list of connected nodes.&nbsp;
@@ -1346,7 +1377,7 @@ Summary:
       </tr>
       
     
-      <tr class=" api apilevel-" >
+      <tr class="alt-color api apilevel-" >
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/wearable/NodeApi.GetLocalNodeResult.html">NodeApi.GetLocalNodeResult</a></td>
         <td class="jd-descrcol" width="100%">
           Contains the name and id that represents this device.&nbsp;
@@ -1357,7 +1388,7 @@ Summary:
       </tr>
       
     
-      <tr class="alt-color api apilevel-" >
+      <tr class=" api apilevel-" >
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/panorama/PanoramaApi.PanoramaResult.html">PanoramaApi.PanoramaResult</a></td>
         <td class="jd-descrcol" width="100%">
           Result interface for loading panorama info.&nbsp;
@@ -1368,7 +1399,7 @@ Summary:
       </tr>
       
     
-      <tr class=" api apilevel-" >
+      <tr class="alt-color api apilevel-" >
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/plus/People.LoadPeopleResult.html">People.LoadPeopleResult</a></td>
         <td class="jd-descrcol" width="100%">
           Information about the set of people that was loaded.&nbsp;
@@ -1379,7 +1410,29 @@ Summary:
       </tr>
       
     
+      <tr class=" api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/location/places/PlaceBuffer.html">PlaceBuffer</a></td>
+        <td class="jd-descrcol" width="100%">
+          Data structure providing access to a list of <code><a href="/reference/com/google/android/gms/location/places/Place.html">Places</a></code>.&nbsp;
+
+
+
+        </td>
+      </tr>
+
+
       <tr class="alt-color api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/location/places/PlaceLikelihoodBuffer.html">PlaceLikelihoodBuffer</a></td>
+        <td class="jd-descrcol" width="100%">
+          A <code>DataBuffer</code> that represents a list of <code>PlaceLikelihood</code>s.&nbsp;
+
+
+
+        </td>
+      </tr>
+
+
+      <tr class=" api apilevel-" >
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/Players.LoadPlayersResult.html">Players.LoadPlayersResult</a></td>
         <td class="jd-descrcol" width="100%">
           Result delivered when player data has been loaded.&nbsp;
@@ -1390,7 +1443,7 @@ Summary:
       </tr>
       
     
-      <tr class=" api apilevel-" >
+      <tr class="alt-color api apilevel-" >
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/Players.LoadProfileSettingsResult.html">Players.LoadProfileSettingsResult</a></td>
         <td class="jd-descrcol" width="100%">
           Result delivered when the profile settings of the signed-in player have been loaded.&nbsp;
@@ -1401,7 +1454,7 @@ Summary:
       </tr>
       
     
-      <tr class="alt-color api apilevel-" >
+      <tr class=" api apilevel-" >
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/quest/Quests.AcceptQuestResult.html">Quests.AcceptQuestResult</a></td>
         <td class="jd-descrcol" width="100%">
           Result delivered when accepting a quest.&nbsp;
@@ -1412,7 +1465,7 @@ Summary:
       </tr>
       
     
-      <tr class=" api apilevel-" >
+      <tr class="alt-color api apilevel-" >
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/quest/Quests.ClaimMilestoneResult.html">Quests.ClaimMilestoneResult</a></td>
         <td class="jd-descrcol" width="100%">
           Result delivered when claiming a milestone.&nbsp;
@@ -1423,7 +1476,7 @@ Summary:
       </tr>
       
     
-      <tr class="alt-color api apilevel-" >
+      <tr class=" api apilevel-" >
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/quest/Quests.LoadQuestsResult.html">Quests.LoadQuestsResult</a></td>
         <td class="jd-descrcol" width="100%">
           Result delivered when quest data has been loaded.&nbsp;
@@ -1434,7 +1487,7 @@ Summary:
       </tr>
       
     
-      <tr class=" api apilevel-" >
+      <tr class="alt-color api apilevel-" >
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/cast/RemoteMediaPlayer.MediaChannelResult.html">RemoteMediaPlayer.MediaChannelResult</a></td>
         <td class="jd-descrcol" width="100%">
           Result of a media command.&nbsp;
@@ -1445,7 +1498,7 @@ Summary:
       </tr>
       
     
-      <tr class="alt-color api apilevel-" >
+      <tr class=" api apilevel-" >
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/request/Requests.LoadRequestsResult.html">Requests.LoadRequestsResult</a></td>
         <td class="jd-descrcol" width="100%">
           Result delivered when requests have loaded.&nbsp;
@@ -1456,7 +1509,7 @@ Summary:
       </tr>
       
     
-      <tr class=" api apilevel-" >
+      <tr class="alt-color api apilevel-" >
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/request/Requests.UpdateRequestsResult.html">Requests.UpdateRequestsResult</a></td>
         <td class="jd-descrcol" width="100%">
           Result delivered when requests are updated.&nbsp;
@@ -1467,6 +1520,17 @@ Summary:
       </tr>
       
     
+      <tr class=" api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/safetynet/SafetyNetApi.AttestationResult.html">SafetyNetApi.AttestationResult</a></td>
+        <td class="jd-descrcol" width="100%">
+          Result that contains an attestation result.&nbsp;
+
+
+
+        </td>
+      </tr>
+
+
       <tr class="alt-color api apilevel-" >
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/result/SessionReadResult.html">SessionReadResult</a></td>
         <td class="jd-descrcol" width="100%">

@@ -96,6 +96,8 @@
 
 
 
+
+
 <html>
 <head>
 
@@ -111,7 +113,7 @@
 href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Roboto:light,regular,medium,thin,italic,mediumitalic,bold"
   title="roboto">
-<link href="/assets/css/default.css?v=4" rel="stylesheet" type="text/css">
+<link href="/assets/css/default.css?v=5" rel="stylesheet" type="text/css">
 
 
 
@@ -412,6 +414,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
                 <li><a href="/distribute/users/index.html">Get Users</a></li>
                 <li><a href="/distribute/engage/index.html">Engage &amp; Retain</a></li>
                 <li><a href="/distribute/monetize/index.html">Monetize</a></li>
+                <li><a href="/distribute/analyze/index.html">Analyze</a></li>
                 <li><a href="/distribute/tools/index.html">Tools &amp; Reference</a></li>
                 <li><a href="/distribute/stories/index.html">Developer Stories</a></li>
               </ul>
@@ -593,14 +596,14 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
 
   <li class="nav-section">
-    <div class="nav-section-header"><a href="/google/play/billing/index.html">
+    <div class="nav-section-header"><a href="/google/play/billing/index.html" zh-cn-lang="应用内结算">
       <span class="en">Google Play In-app Billing</span></a>
     </div>
     <ul>
-      <li><a href="/google/play/billing/billing_overview.html">
+      <li><a href="/google/play/billing/billing_overview.html" zh-cn-lang="应用内结算概述">
               <span class="en">Overview</span></a>
       </li>
-      <li class="nav-section"><div class="nav-section-header"><a href="/google/play/billing/api.html">
+      <li class="nav-section"><div class="nav-section-header"><a href="/google/play/billing/api.html" zh-cn-lang="应用内结算 API">
               <span class="en">Version 3 API</span></a></div>
               <ul>
               <li><a href="/google/play/billing/billing_integrate.html">
@@ -623,13 +626,13 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       <li><a href="/google/play/billing/billing_subscriptions.html">
               <span class="en">Subscriptions</span></a>
       </li>
-      <li><a href="/google/play/billing/billing_best_practices.html">
+      <li><a href="/google/play/billing/billing_best_practices.html" zh-cn-lang="安全性和设计">
               <span class="en">Security and Design</span></a>
       </li>
-      <li><a href="/google/play/billing/billing_testing.html">
+      <li><a href="/google/play/billing/billing_testing.html" zh-cn-lang="测试应用内结算">
               <span class="en">Testing In-app Billing</span></a>
       </li>
-      <li><a href="/google/play/billing/billing_admin.html">
+      <li><a href="/google/play/billing/billing_admin.html" zh-cn-lang="管理应用内结算">
               <span class="en">Administering In-app Billing</span></a>
       </li>
       <li><a href="/google/play/billing/versions.html">
@@ -663,21 +666,14 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
               <span class="en">HTTP</span></a></li>
               </ul>
         </li>
+        <li><a href="/google/gcm/server-ref.html">
+            <span class="en">Server Reference</span></a>
+        </li>
         <li><a href="/google/gcm/notifications.html">
               <span class="en">User Notifications</span></a>
         </li>
-        <li><a href="/google/gcm/adv.html">
-            <span class="en">Advanced Topics</span></a>
-        </li>
         <li><a href="/google/gcm/c2dm.html">
             <span class="en">Migration</span></a>
-        </li>
-        <li id="gcm-tree-list" class="nav-section">
-          <div class="nav-section-header">
-            <a href="/reference/gcm-packages.html">
-              <span class="en">Reference</span>
-            </a>
-          <div>
         </li>
       </ul>
   </li>
@@ -791,13 +787,6 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   
   
 
-  
-   
-  
-  
-  
-  
-
 
 <div class="sum-details-links">
 
@@ -838,26 +827,20 @@ Summary:
     public
      
      
-    abstract
-    class
+
+    interface
 <h1 itemprop="name">DataBuffer</h1>
 
 
 
   
-    extends Object<br/>
-  
-  
-  
-
-  
   
       implements 
       
-        <a href="/reference/com/google/android/gms/common/api/Releasable.html">Releasable</a> 
-      
         Iterable&lt;T&gt; 
       
+        <a href="/reference/com/google/android/gms/common/api/Releasable.html">Releasable</a>
+
   
   
 
@@ -875,14 +858,6 @@ Summary:
 
     <tr>
          	
-        <td colspan="2" class="jd-inheritance-class-cell">java.lang.Object</td>
-    </tr>
-    
-
-    <tr>
-        
-            <td class="jd-inheritance-space">&nbsp;&nbsp;&nbsp;&#x21b3;</td>
-         	
         <td colspan="1" class="jd-inheritance-class-cell">com.google.android.gms.common.data.DataBuffer&lt;T&gt;</td>
     </tr>
     
@@ -892,69 +867,102 @@ Summary:
 
 
 
+
+
 <table class="jd-sumtable jd-sumtable-subclasses"><tr><td colspan="12" style="border:none;margin:0;padding:0;">
 
-  <a href="#" onclick="return toggleInherited(this, null)" id="subclasses-direct" class="jd-expando-trigger closed"
-          ><img id="subclasses-direct-trigger"
+  <a href="#" onclick="return toggleInherited(this, null)" id="subclasses-indirect" class="jd-expando-trigger closed"
+          ><img id="subclasses-indirect-trigger"
           src="/assets/images/triangle-closed.png"
-          class="jd-expando-trigger-img" /></a>Known Direct Subclasses
+          class="jd-expando-trigger-img" /></a>Known Indirect Subclasses
 
-  <div id="subclasses-direct">
-      <div id="subclasses-direct-list"
+  <div id="subclasses-indirect">
+      <div id="subclasses-indirect-list"
               class="jd-inheritedlinks"
               
               >
           
             
-              <a href="/reference/com/google/android/gms/games/achievement/AchievementBuffer.html">AchievementBuffer</a>,
             
-              <a href="/reference/com/google/android/gms/appstate/AppStateBuffer.html">AppStateBuffer</a>,
+
+                <a href="/reference/com/google/android/gms/common/data/AbstractDataBuffer.html">AbstractDataBuffer</a>&lt;T&gt;,
+
+
             
-              <a href="/reference/com/google/android/gms/wearable/DataEventBuffer.html">DataEventBuffer</a>,
+
+                <a href="/reference/com/google/android/gms/games/achievement/AchievementBuffer.html">AchievementBuffer</a>,
+
+
             
-              <a href="/reference/com/google/android/gms/wearable/DataItemBuffer.html">DataItemBuffer</a>,
+
+
             
-              <a href="/reference/com/google/android/gms/deviceconnection/features/DeviceFeatureBuffer.html">DeviceFeatureBuffer</a>,
+
+
             
-              <a href="/reference/com/google/android/gms/games/event/EventBuffer.html">EventBuffer</a>,
+
+                <a href="/reference/com/google/android/gms/appstate/AppStateBuffer.html">AppStateBuffer</a>,
+
+
             
-              <a href="/reference/com/google/android/gms/games/GameBuffer.html">GameBuffer</a>,
+
+
             
-              <a href="/reference/com/google/android/gms/games/request/GameRequestBuffer.html">GameRequestBuffer</a>,
+
+                <a href="/reference/com/google/android/gms/location/places/AutocompletePredictionBuffer.html">AutocompletePredictionBuffer</a>,
+
+
             
-              <a href="/reference/com/google/android/gms/games/multiplayer/InvitationBuffer.html">InvitationBuffer</a>,
+
+
             
-              <a href="/reference/com/google/android/gms/games/leaderboard/LeaderboardBuffer.html">LeaderboardBuffer</a>,
+
+
             
-              <a href="/reference/com/google/android/gms/games/leaderboard/LeaderboardScoreBuffer.html">LeaderboardScoreBuffer</a>,
+
+
             
-              <a href="/reference/com/google/android/gms/drive/MetadataBuffer.html">MetadataBuffer</a>,
+
+
             
-              <a href="/reference/com/google/android/gms/games/quest/MilestoneBuffer.html">MilestoneBuffer</a>,
+
+
             
-              <a href="/reference/com/google/android/gms/plus/model/moments/MomentBuffer.html">MomentBuffer</a>,
+
+
             
-              <a href="/reference/com/google/android/gms/games/multiplayer/ParticipantBuffer.html">ParticipantBuffer</a>,
+
+                <a href="/reference/com/google/android/gms/wearable/DataEventBuffer.html">DataEventBuffer</a>,
+
+
             
-              <a href="/reference/com/google/android/gms/plus/model/people/PersonBuffer.html">PersonBuffer</a>,
-            
-              <a href="/reference/com/google/android/gms/games/PlayerBuffer.html">PlayerBuffer</a>,
-            
-              <a href="/reference/com/google/android/gms/games/quest/QuestBuffer.html">QuestBuffer</a>,
-            
-              <a href="/reference/com/google/android/gms/games/snapshot/SnapshotMetadataBuffer.html">SnapshotMetadataBuffer</a>,
-            
-              <a href="/reference/com/google/android/gms/games/multiplayer/turnbased/TurnBasedMatchBuffer.html">TurnBasedMatchBuffer</a>
+
+                <a href="/reference/com/google/android/gms/wearable/DataItemBuffer.html">DataItemBuffer</a>,
+
+              and
+                <a href="#" onclick="return toggleInherited(document.getElementById('subclasses-indirect', null))">8 others.</a>
+
             
           
       </div>
-      <div id="subclasses-direct-summary"
+      <div id="subclasses-indirect-summary"
               style="display: none;"
               >
   
   <table class="jd-sumtable-expando">
     
       <tr class="alt-color api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/common/data/AbstractDataBuffer.html">AbstractDataBuffer</a>&lt;T&gt;</td>
+        <td class="jd-descrcol" width="100%">
+          Default implementation of DataBuffer.&nbsp;
+          
+    
+
+        </td>
+      </tr>
+      
+    
+      <tr class=" api apilevel-" >
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/achievement/AchievementBuffer.html">AchievementBuffer</a></td>
         <td class="jd-descrcol" width="100%">
           Data structure providing access to a list of achievements.&nbsp;
@@ -965,10 +973,21 @@ Summary:
       </tr>
       
     
-      <tr class=" api apilevel-" >
+      <tr class="alt-color api apilevel-" >
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/appstate/AppStateBuffer.html">AppStateBuffer</a></td>
         <td class="jd-descrcol" width="100%">
           Data structure providing access to a list of app states.&nbsp;
+          
+    
+
+        </td>
+      </tr>
+      
+    
+      <tr class=" api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/location/places/AutocompletePredictionBuffer.html">AutocompletePredictionBuffer</a></td>
+        <td class="jd-descrcol" width="100%">
+          A <code>DataBuffer</code> that represents a list of AutocompletePredictionEntitys.&nbsp;
           
     
 
@@ -991,25 +1010,14 @@ Summary:
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/wearable/DataItemBuffer.html">DataItemBuffer</a></td>
         <td class="jd-descrcol" width="100%">
           Data structure holding reference to a set of <code><a href="/reference/com/google/android/gms/wearable/DataItem.html">DataItem</a></code>s.&nbsp;
-          
-    
+
+
 
         </td>
       </tr>
-      
-    
+
+
       <tr class="alt-color api apilevel-" >
-        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/deviceconnection/features/DeviceFeatureBuffer.html">DeviceFeatureBuffer</a></td>
-        <td class="jd-descrcol" width="100%">
-          Data structure providing access to a list of <code><a href="/reference/com/google/android/gms/deviceconnection/features/DeviceFeature.html">DeviceFeature</a></code> objects.&nbsp;
-          
-    
-
-        </td>
-      </tr>
-      
-    
-      <tr class=" api apilevel-" >
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/event/EventBuffer.html">EventBuffer</a></td>
         <td class="jd-descrcol" width="100%">
           Data structure providing access to a list of events.&nbsp;
@@ -1020,7 +1028,7 @@ Summary:
       </tr>
       
     
-      <tr class="alt-color api apilevel-" >
+      <tr class=" api apilevel-" >
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/GameBuffer.html">GameBuffer</a></td>
         <td class="jd-descrcol" width="100%">
           Data structure providing access to a list of games.&nbsp;
@@ -1031,10 +1039,11 @@ Summary:
       </tr>
       
     
-      <tr class=" api apilevel-" >
+      <tr class="alt-color api apilevel-" >
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/request/GameRequestBuffer.html">GameRequestBuffer</a></td>
         <td class="jd-descrcol" width="100%">
-          <code><a href="/reference/com/google/android/gms/common/data/DataBuffer.html">DataBuffer</a></code> implementation containing Request details.&nbsp;
+          EntityBuffer implementation containing
+ Request details.&nbsp;
           
     
 
@@ -1042,21 +1051,10 @@ Summary:
       </tr>
       
     
-      <tr class="alt-color api apilevel-" >
+      <tr class=" api apilevel-" >
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/multiplayer/InvitationBuffer.html">InvitationBuffer</a></td>
         <td class="jd-descrcol" width="100%">
-          <code><a href="/reference/com/google/android/gms/common/data/DataBuffer.html">DataBuffer</a></code> implementation containing Invitation data.&nbsp;
-          
-    
-
-        </td>
-      </tr>
-      
-    
-      <tr class=" api apilevel-" >
-        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/leaderboard/LeaderboardBuffer.html">LeaderboardBuffer</a></td>
-        <td class="jd-descrcol" width="100%">
-          <code><a href="/reference/com/google/android/gms/common/data/DataBuffer.html">DataBuffer</a></code> containing Leaderboard data.&nbsp;
+          EntityBuffer implementation containing Invitation data.&nbsp;
           
     
 
@@ -1065,9 +1063,9 @@ Summary:
       
     
       <tr class="alt-color api apilevel-" >
-        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/leaderboard/LeaderboardScoreBuffer.html">LeaderboardScoreBuffer</a></td>
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/leaderboard/LeaderboardBuffer.html">LeaderboardBuffer</a></td>
         <td class="jd-descrcol" width="100%">
-          <code><a href="/reference/com/google/android/gms/common/data/DataBuffer.html">DataBuffer</a></code> containing LeaderboardScore data.&nbsp;
+          EntityBuffer containing Leaderboard data.&nbsp;
           
     
 
@@ -1076,6 +1074,17 @@ Summary:
       
     
       <tr class=" api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/leaderboard/LeaderboardScoreBuffer.html">LeaderboardScoreBuffer</a></td>
+        <td class="jd-descrcol" width="100%">
+          <code><a href="/reference/com/google/android/gms/common/data/AbstractDataBuffer.html">AbstractDataBuffer</a></code> containing LeaderboardScore data.&nbsp;
+          
+    
+
+        </td>
+      </tr>
+      
+    
+      <tr class="alt-color api apilevel-" >
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/drive/MetadataBuffer.html">MetadataBuffer</a></td>
         <td class="jd-descrcol" width="100%">
           A data buffer that points to Metadata entries.&nbsp;
@@ -1086,10 +1095,10 @@ Summary:
       </tr>
       
     
-      <tr class="alt-color api apilevel-" >
+      <tr class=" api apilevel-" >
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/quest/MilestoneBuffer.html">MilestoneBuffer</a></td>
         <td class="jd-descrcol" width="100%">
-          <code><a href="/reference/com/google/android/gms/common/data/DataBuffer.html">DataBuffer</a></code> implementation containing quest
+          <code><a href="/reference/com/google/android/gms/common/data/AbstractDataBuffer.html">AbstractDataBuffer</a></code> implementation containing quest
  milestone data.&nbsp;
           
     
@@ -1098,7 +1107,7 @@ Summary:
       </tr>
       
     
-      <tr class=" api apilevel-" >
+      <tr class="alt-color api apilevel-" >
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/plus/model/moments/MomentBuffer.html">MomentBuffer</a></td>
         <td class="jd-descrcol" width="100%">
           Data structure providing access to a list of <code><a href="/reference/com/google/android/gms/plus/model/moments/Moment.html">Moment</a></code> objects.&nbsp;
@@ -1109,10 +1118,10 @@ Summary:
       </tr>
       
     
-      <tr class="alt-color api apilevel-" >
+      <tr class=" api apilevel-" >
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/multiplayer/ParticipantBuffer.html">ParticipantBuffer</a></td>
         <td class="jd-descrcol" width="100%">
-          <code><a href="/reference/com/google/android/gms/common/data/DataBuffer.html">DataBuffer</a></code> implementation containing match participant data.&nbsp;
+          <code><a href="/reference/com/google/android/gms/common/data/AbstractDataBuffer.html">AbstractDataBuffer</a></code> implementation containing match participant data.&nbsp;
           
     
 
@@ -1120,7 +1129,7 @@ Summary:
       </tr>
       
     
-      <tr class=" api apilevel-" >
+      <tr class="alt-color api apilevel-" >
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/plus/model/people/PersonBuffer.html">PersonBuffer</a></td>
         <td class="jd-descrcol" width="100%">
           Data structure providing access to a list of <code><a href="/reference/com/google/android/gms/plus/model/people/Person.html">Person</a></code> objects.&nbsp;
@@ -1131,7 +1140,29 @@ Summary:
       </tr>
       
     
+      <tr class=" api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/location/places/PlaceBuffer.html">PlaceBuffer</a></td>
+        <td class="jd-descrcol" width="100%">
+          Data structure providing access to a list of <code><a href="/reference/com/google/android/gms/location/places/Place.html">Places</a></code>.&nbsp;
+
+
+
+        </td>
+      </tr>
+
+
       <tr class="alt-color api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/location/places/PlaceLikelihoodBuffer.html">PlaceLikelihoodBuffer</a></td>
+        <td class="jd-descrcol" width="100%">
+          A <code>DataBuffer</code> that represents a list of <code>PlaceLikelihood</code>s.&nbsp;
+
+
+
+        </td>
+      </tr>
+
+
+      <tr class=" api apilevel-" >
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/PlayerBuffer.html">PlayerBuffer</a></td>
         <td class="jd-descrcol" width="100%">
           Data structure providing access to a list of players.&nbsp;
@@ -1142,10 +1173,10 @@ Summary:
       </tr>
       
     
-      <tr class=" api apilevel-" >
+      <tr class="alt-color api apilevel-" >
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/quest/QuestBuffer.html">QuestBuffer</a></td>
         <td class="jd-descrcol" width="100%">
-          <code><a href="/reference/com/google/android/gms/common/data/DataBuffer.html">DataBuffer</a></code> implementation containing Quest details.&nbsp;
+          EntityBuffer implementation containing Quest details.&nbsp;
           
     
 
@@ -1153,7 +1184,7 @@ Summary:
       </tr>
       
     
-      <tr class="alt-color api apilevel-" >
+      <tr class=" api apilevel-" >
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/snapshot/SnapshotMetadataBuffer.html">SnapshotMetadataBuffer</a></td>
         <td class="jd-descrcol" width="100%">
           Data structure providing access to a list of snapshots.&nbsp;
@@ -1164,10 +1195,10 @@ Summary:
       </tr>
       
     
-      <tr class=" api apilevel-" >
+      <tr class="alt-color api apilevel-" >
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/multiplayer/turnbased/TurnBasedMatchBuffer.html">TurnBasedMatchBuffer</a></td>
         <td class="jd-descrcol" width="100%">
-          <code><a href="/reference/com/google/android/gms/common/data/DataBuffer.html">DataBuffer</a></code> implementation containing TurnBasedMatch details.&nbsp;
+          EntityBuffer implementation containing TurnBasedMatch details.&nbsp;
           
     
 
@@ -1182,14 +1213,11 @@ Summary:
 </td></tr></table>
 
 
-
-
 <div class="jd-descr">
 
 
 <h2>Class Overview</h2>
-<p itemprop="articleBody">Base class for a buffer of typed data. A <code>DataBuffer</code> wraps data provided across the binder
- from Google Play services.
+<p itemprop="articleBody">Interface for a buffer of typed data.
 </p>
 
 
@@ -1252,9 +1280,9 @@ Summary:
 	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
+            abstract
             
             
-            final
             
             
             void</nobr>
@@ -1278,22 +1306,6 @@ Summary:
 	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
-            
-            
-            
-            
-            
-            int</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/common/data/DataBuffer.html#describeContents()">describeContents</a></span>()</nobr>
-        
-  </td></tr>
-
-
-	 
-    <tr class="alt-color api apilevel-" >
-        <td class="jd-typecol"><nobr>
             abstract
             
             
@@ -1305,7 +1317,7 @@ Summary:
         <span class="sympad"><a href="/reference/com/google/android/gms/common/data/DataBuffer.html#get(int)">get</a></span>(int position)</nobr>
         
         <div class="jd-descrdiv">
-          Get the item at the specified position.
+          Returns an element on specified position.
           
     
 
@@ -1315,9 +1327,9 @@ Summary:
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-            
+            abstract
             
             
             
@@ -1331,9 +1343,9 @@ Summary:
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
-            
+            abstract
             
             
             
@@ -1357,9 +1369,9 @@ Summary:
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-            
+            abstract
             
             
             
@@ -1373,9 +1385,9 @@ Summary:
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
-            
+            abstract
             
             
             
@@ -1396,9 +1408,9 @@ Summary:
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-            
+            abstract
             
             
             
@@ -1409,8 +1421,7 @@ Summary:
         <span class="sympad"><a href="/reference/com/google/android/gms/common/data/DataBuffer.html#singleRefIterator()">singleRefIterator</a></span>()</nobr>
         
         <div class="jd-descrdiv">
-          In order to use this one should correctly override setDataRow(int)
- in his DataBufferRef implementation.
+          In order to use this iterator it should be supported by particular <code>DataBuffer</code>.
           
     
 
@@ -1436,19 +1447,19 @@ Summary:
 
 <tr class="api apilevel-" >
 <td colspan="12">
-  <a href="#" onclick="return toggleInherited(this, null)" id="inherited-methods-java.lang.Object" class="jd-expando-trigger closed"
-          ><img id="inherited-methods-java.lang.Object-trigger"
+  <a href="#" onclick="return toggleInherited(this, null)" id="inherited-methods-java.lang.Iterable" class="jd-expando-trigger closed"
+          ><img id="inherited-methods-java.lang.Iterable-trigger"
           src="/assets/images/triangle-closed.png"
           class="jd-expando-trigger-img" /></a>
-From class
+From interface
 
-  java.lang.Object
+  java.lang.Iterable
 
-<div id="inherited-methods-java.lang.Object">
-  <div id="inherited-methods-java.lang.Object-list"
+<div id="inherited-methods-java.lang.Iterable">
+  <div id="inherited-methods-java.lang.Iterable-list"
         class="jd-inheritedlinks">
   </div>
-  <div id="inherited-methods-java.lang.Object-summary" style="display: none;">
+  <div id="inherited-methods-java.lang.Iterable-summary" style="display: none;">
     <table class="jd-sumtable-expando">
     
 
@@ -1456,175 +1467,15 @@ From class
 	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
+            abstract
             
             
             
             
-            
-            Object</nobr>
+            Iterator&lt;T&gt;</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">clone</span>()</nobr>
-        
-  </td></tr>
-
-
-	 
-    <tr class=" api apilevel-" >
-        <td class="jd-typecol"><nobr>
-            
-            
-            
-            
-            
-            boolean</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">equals</span>(Object arg0)</nobr>
-        
-  </td></tr>
-
-
-	 
-    <tr class="alt-color api apilevel-" >
-        <td class="jd-typecol"><nobr>
-            
-            
-            
-            
-            
-            void</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">finalize</span>()</nobr>
-        
-  </td></tr>
-
-
-	 
-    <tr class=" api apilevel-" >
-        <td class="jd-typecol"><nobr>
-            
-            
-            final
-            
-            
-            Class&lt;?&gt;</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">getClass</span>()</nobr>
-        
-  </td></tr>
-
-
-	 
-    <tr class="alt-color api apilevel-" >
-        <td class="jd-typecol"><nobr>
-            
-            
-            
-            
-            
-            int</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">hashCode</span>()</nobr>
-        
-  </td></tr>
-
-
-	 
-    <tr class=" api apilevel-" >
-        <td class="jd-typecol"><nobr>
-            
-            
-            final
-            
-            
-            void</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">notify</span>()</nobr>
-        
-  </td></tr>
-
-
-	 
-    <tr class="alt-color api apilevel-" >
-        <td class="jd-typecol"><nobr>
-            
-            
-            final
-            
-            
-            void</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">notifyAll</span>()</nobr>
-        
-  </td></tr>
-
-
-	 
-    <tr class=" api apilevel-" >
-        <td class="jd-typecol"><nobr>
-            
-            
-            
-            
-            
-            String</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">toString</span>()</nobr>
-        
-  </td></tr>
-
-
-	 
-    <tr class="alt-color api apilevel-" >
-        <td class="jd-typecol"><nobr>
-            
-            
-            final
-            
-            
-            void</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">wait</span>()</nobr>
-        
-  </td></tr>
-
-
-	 
-    <tr class=" api apilevel-" >
-        <td class="jd-typecol"><nobr>
-            
-            
-            final
-            
-            
-            void</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">wait</span>(long arg0, int arg1)</nobr>
-        
-  </td></tr>
-
-
-	 
-    <tr class="alt-color api apilevel-" >
-        <td class="jd-typecol"><nobr>
-            
-            
-            final
-            
-            
-            void</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">wait</span>(long arg0)</nobr>
+        <span class="sympad">iterator</span>()</nobr>
         
   </td></tr>
 
@@ -1667,48 +1518,6 @@ From interface
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/common/api/Releasable.html#release()">release</a></span>()</nobr>
-        
-  </td></tr>
-
-
-</table>
-  </div>
-</div>
-</td></tr>
-
-
-
-<tr class="api apilevel-" >
-<td colspan="12">
-  <a href="#" onclick="return toggleInherited(this, null)" id="inherited-methods-java.lang.Iterable" class="jd-expando-trigger closed"
-          ><img id="inherited-methods-java.lang.Iterable-trigger"
-          src="/assets/images/triangle-closed.png"
-          class="jd-expando-trigger-img" /></a>
-From interface
-
-  java.lang.Iterable
-
-<div id="inherited-methods-java.lang.Iterable">
-  <div id="inherited-methods-java.lang.Iterable-list"
-        class="jd-inheritedlinks">
-  </div>
-  <div id="inherited-methods-java.lang.Iterable-summary" style="display: none;">
-    <table class="jd-sumtable-expando">
-    
-
-
-	 
-    <tr class="alt-color api apilevel-" >
-        <td class="jd-typecol"><nobr>
-            abstract
-            
-            
-            
-            
-            Iterator&lt;T&gt;</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">iterator</span>()</nobr>
         
   </td></tr>
 
@@ -1768,8 +1577,8 @@ From interface
       <span class="normal">
         public 
          
-        final 
          
+        abstract
          
         void
       </span>
@@ -1792,38 +1601,6 @@ From interface
     use <code><a href="/reference/com/google/android/gms/common/data/DataBuffer.html#release()">release()</a></code> instead
 
   </p>
-  <div class="jd-tagdata jd-tagdescr"><p></p></div>
-
-    </div>
-</div>
-
-
-<A NAME="describeContents()"></A>
-
-<div class="jd-details api apilevel-"> 
-    <h4 class="jd-details-title">
-      <span class="normal">
-        public 
-         
-         
-         
-         
-        int
-      </span>
-      <span class="sympad">describeContents</span>
-      <span class="normal">()</span>
-    </h4>
-      <div class="api-level">
-        <div></div>
-        
-  
-
-      </div>
-    <div class="jd-details-descr">
-      
-    
-
-      
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
     </div>
@@ -1856,27 +1633,8 @@ From interface
     
 
       
-  <div class="jd-tagdata jd-tagdescr"><p>Get the item at the specified position. Note that the objects returned from subsequent
- invocations of this method for the same position may not be identical objects, but will be
- equal in value. In other words:
- <p>
- <code>buffer.get(i) == buffer.get(i)</code> may return false.
- <p>
- <code>buffer.get(i).equals(buffer.get(i))</code> will return true.</p></div>
-  <div class="jd-tagdata">
-      <h5 class="jd-tagtitle">Parameters</h5>
-      <table class="jd-tagtable">
-        <tr>
-          <th>position</td>
-          <td>The position of the item to retrieve.</td>
-        </tr>
-      </table>
-  </div>
-  <div class="jd-tagdata">
-      <h5 class="jd-tagtitle">Returns</h5>
-      <ul class="nolist"><li>the item at <code>position</code> in this buffer.
-</li></ul>
-  </div>
+  <div class="jd-tagdata jd-tagdescr"><p>Returns an element on specified position.
+</p></div>
 
     </div>
 </div>
@@ -1890,7 +1648,7 @@ From interface
         public 
          
          
-         
+        abstract
          
         int
       </span>
@@ -1922,7 +1680,7 @@ From interface
         public 
          
          
-         
+        abstract
          
         boolean
       </span>
@@ -1959,7 +1717,7 @@ From interface
         public 
          
          
-         
+        abstract
          
         Iterator&lt;T&gt;
       </span>
@@ -1991,7 +1749,7 @@ From interface
         public 
          
          
-         
+        abstract
          
         void
       </span>
@@ -2024,7 +1782,7 @@ From interface
         public 
          
          
-         
+        abstract
          
         Iterator&lt;T&gt;
       </span>
@@ -2042,15 +1800,10 @@ From interface
     
 
       
-  <div class="jd-tagdata jd-tagdescr"><p>In order to use this one should correctly override setDataRow(int)
- in his DataBufferRef implementation.
- Be careful: there will be single DataBufferRef while iterating.
- If you are not sure - DO NOT USE this iterator.</p></div>
-  <div class="jd-tagdata">
-      <h5 class="jd-tagtitle">See Also</h5>
-      <ul class="nolist"><li>SingleRefDataBufferIterator</li>
-      </ul>
-  </div>
+  <div class="jd-tagdata jd-tagdescr"><p>In order to use this iterator it should be supported by particular <code>DataBuffer</code>.
+ Be careful: there will be single reference while iterating.
+ If you are not sure - DO NOT USE this iterator.
+</p></div>
 
     </div>
 </div>
