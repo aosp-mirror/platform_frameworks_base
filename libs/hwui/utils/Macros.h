@@ -36,8 +36,8 @@
         #Type " must have standard layout")
 
 #define MAKE_FLAGS_ENUM(enumType) \
-        inline int operator|=(int lhs, enumType rhs) { \
-            return lhs | static_cast<int>(rhs); \
+        inline void operator|=(int& lhs, enumType rhs) { \
+            lhs |= static_cast<int>(rhs); \
         } \
         inline int operator|(int lhs, enumType rhs) { \
             return lhs | static_cast<int>(rhs); \
@@ -48,8 +48,8 @@
         inline int operator|(enumType lhs, enumType rhs) { \
             return static_cast<int>(lhs) | static_cast<int>(rhs); \
         } \
-        inline int operator&=(int lhs, enumType rhs) { \
-            return lhs & static_cast<int>(rhs); \
+        inline void operator&=(int& lhs, enumType rhs) { \
+            lhs &= static_cast<int>(rhs); \
         } \
         inline int operator&(int lhs, enumType rhs) { \
             return lhs & static_cast<int>(rhs); \

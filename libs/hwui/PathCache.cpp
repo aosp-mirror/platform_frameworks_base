@@ -40,25 +40,25 @@ namespace uirenderer {
 // Cache entries
 ///////////////////////////////////////////////////////////////////////////////
 
-PathDescription::PathDescription():
-        type(kShapeNone),
-        join(SkPaint::kDefault_Join),
-        cap(SkPaint::kDefault_Cap),
-        style(SkPaint::kFill_Style),
-        miter(4.0f),
-        strokeWidth(1.0f),
-        pathEffect(nullptr) {
+PathDescription::PathDescription()
+        : type(kShapeNone)
+        , join(SkPaint::kDefault_Join)
+        , cap(SkPaint::kDefault_Cap)
+        , style(SkPaint::kFill_Style)
+        , miter(4.0f)
+        , strokeWidth(1.0f)
+        , pathEffect(nullptr) {
     memset(&shape, 0, sizeof(Shape));
 }
 
-PathDescription::PathDescription(ShapeType type, const SkPaint* paint):
-        type(type),
-        join(paint->getStrokeJoin()),
-        cap(paint->getStrokeCap()),
-        style(paint->getStyle()),
-        miter(paint->getStrokeMiter()),
-        strokeWidth(paint->getStrokeWidth()),
-        pathEffect(paint->getPathEffect()) {
+PathDescription::PathDescription(ShapeType type, const SkPaint* paint)
+        : type(type)
+        , join(paint->getStrokeJoin())
+        , cap(paint->getStrokeCap())
+        , style(paint->getStyle())
+        , miter(paint->getStrokeMiter())
+        , strokeWidth(paint->getStrokeWidth())
+        , pathEffect(paint->getPathEffect()) {
     memset(&shape, 0, sizeof(Shape));
 }
 
@@ -130,18 +130,6 @@ static void drawPath(const SkPath *path, const SkPaint* paint, SkBitmap& bitmap,
     SkCanvas canvas(bitmap);
     canvas.translate(-left + offset, -top + offset);
     canvas.drawPath(*path, pathPaint);
-}
-
-static PathTexture* createTexture(float left, float top, float offset,
-        uint32_t width, uint32_t height, uint32_t id) {
-    PathTexture* texture = new PathTexture(Caches::getInstance());
-    texture->left = left;
-    texture->top = top;
-    texture->offset = offset;
-    texture->width = width;
-    texture->height = height;
-    texture->generation = id;
-    return texture;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -267,7 +255,8 @@ PathTexture* PathCache::addTexture(const PathDescription& entry, const SkPath *p
     SkBitmap bitmap;
     drawPath(path, paint, bitmap, left, top, offset, width, height);
 
-    PathTexture* texture = createTexture(left, top, offset, width, height,
+    PathTexture* texture = new PathTexture(Caches::getInstance(),
+            left, top, offset, width, height,
             path->getGenerationID());
     generateTexture(entry, &bitmap, texture);
 
@@ -441,7 +430,7 @@ void PathCache::precache(const SkPath* path, const SkPaint* paint) {
     if (generate) {
         // It is important to specify the generation ID so we do not
         // attempt to precache the same path several times
-        texture = createTexture(0.0f, 0.0f, 0.0f, 0, 0, path->getGenerationID());
+        texture = new PathTexture(Caches::getInstance(), path->getGenerationID());
         sp<PathTask> task = new PathTask(path, paint, texture);
         texture->setTask(task);
 

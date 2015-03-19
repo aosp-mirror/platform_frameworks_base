@@ -19,6 +19,8 @@
 #include "Caches.h"
 #include "Debug.h"
 #include "Extensions.h"
+#include "Glop.h"
+#include "GlopBuilder.h"
 #include "OpenGLRenderer.h"
 #include "PixelBuffer.h"
 #include "Rect.h"
@@ -44,10 +46,12 @@ namespace uirenderer {
 // blur inputs smaller than this constant will bypass renderscript
 #define RS_MIN_INPUT_CUTOFF 10000
 
+#define USE_GLOPS true
+
 ///////////////////////////////////////////////////////////////////////////////
 // TextSetupFunctor
 ///////////////////////////////////////////////////////////////////////////////
-status_t TextSetupFunctor::setup(GLenum glyphFormat) {
+void TextSetupFunctor::setup(GLenum glyphFormat) {
     renderer->setupDraw();
     renderer->setupDrawTextGamma(paint);
     renderer->setupDrawDirtyRegionsDisabled();
@@ -84,8 +88,24 @@ status_t TextSetupFunctor::setup(GLenum glyphFormat) {
     renderer->setupDrawColorFilterUniforms(paint->getColorFilter());
     renderer->setupDrawShaderUniforms(paint->getShader(), pureTranslate);
     renderer->setupDrawTextGammaUniforms();
+}
 
-    return NO_ERROR;
+void TextSetupFunctor::draw(CacheTexture& texture, bool linearFiltering) {
+    int textureFillFlags = static_cast<int>(texture.getFormat() == GL_ALPHA
+            ? TextureFillFlags::kIsAlphaMaskTexture : TextureFillFlags::kNone);
+    if (linearFiltering) {
+        textureFillFlags |= TextureFillFlags::kForceFilter;
+    }
+    const Matrix4& transform = pureTranslate ? Matrix4::identity() : *(renderer->currentTransform());
+    Glop glop;
+    GlopBuilder(renderer->mRenderState, renderer->mCaches, &glop)
+            .setMeshTexturedIndexedQuads(texture.mesh(), texture.meshElementCount())
+            .setFillTexturePaint(texture.getTexture(), textureFillFlags, paint, renderer->currentSnapshot()->alpha)
+            .setTransform(renderer->currentSnapshot()->getOrthoMatrix(), transform, false)
+            .setModelViewOffsetRect(0, 0, Rect(0, 0, 0, 0))
+            .setRoundRectClipState(renderer->currentSnapshot()->roundRectClipState)
+            .build();
+    renderer->renderGlop(glop);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -196,7 +216,7 @@ void FontRenderer::flushLargeCaches(Vector<CacheTexture*>& cacheTextures) {
             while (it.next()) {
                 it.value()->invalidateTextureCache(cacheTexture);
             }
-            cacheTexture->releaseTexture();
+            cacheTexture->releasePixelBuffer();
         }
     }
 }
@@ -290,7 +310,7 @@ void FontRenderer::cacheBitmap(const SkGlyph& glyph, CachedGlyphInfo* cachedGlyp
     if (!cacheTexture->getPixelBuffer()) {
         Caches::getInstance().textureState().activateTexture(0);
         // Large-glyph texture memory is allocated only as needed
-        cacheTexture->allocateTexture();
+        cacheTexture->allocatePixelBuffer();
     }
     if (!cacheTexture->mesh()) {
         cacheTexture->allocateMesh();
@@ -402,7 +422,7 @@ CacheTexture* FontRenderer::createCacheTexture(int width, int height, GLenum for
 
     if (allocate) {
         Caches::getInstance().textureState().activateTexture(0);
-        cacheTexture->allocateTexture();
+        cacheTexture->allocatePixelBuffer();
         cacheTexture->allocateMesh();
     }
 
@@ -497,9 +517,10 @@ void FontRenderer::issueDrawCommand(Vector<CacheTexture*>& cacheTextures) {
         CacheTexture* texture = cacheTextures[i];
         if (texture->canDraw()) {
             if (first) {
+                checkTextureUpdate();
+#if !USE_GLOPS
                 mFunctor->setup(texture->getFormat());
 
-                checkTextureUpdate();
                 renderState.meshState().bindQuadIndicesBuffer();
 
                 // If returns true, a VBO was bound and we must
@@ -508,12 +529,17 @@ void FontRenderer::issueDrawCommand(Vector<CacheTexture*>& cacheTextures) {
                 forceRebind = renderState.meshState().unbindMeshBuffer();
 
                 caches.textureState().activateTexture(0);
+#endif
                 first = false;
                 mDrawn = true;
             }
+#if USE_GLOPS
+            mFunctor->draw(*texture, mLinearFiltering);
+#endif
 
+#if !USE_GLOPS
             caches.textureState().bindTexture(texture->getTextureId());
-            texture->setLinearFiltering(mLinearFiltering, false);
+            texture->setLinearFiltering(mLinearFiltering);
 
             TextureVertex* mesh = texture->mesh();
             MeshState& meshState = renderState.meshState();
@@ -522,7 +548,7 @@ void FontRenderer::issueDrawCommand(Vector<CacheTexture*>& cacheTextures) {
 
             glDrawElements(GL_TRIANGLES, texture->meshElementCount(),
                     GL_UNSIGNED_SHORT, texture->indices());
-
+#endif
             texture->resetMesh();
             forceRebind = false;
         }

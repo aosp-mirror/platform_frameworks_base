@@ -78,7 +78,7 @@ public:
     /**
      * Indicates whether this texture should be cleaned up after use.
      */
-    bool cleanup= false;
+    bool cleanup = false;
     /**
      * Optional, size of the original bitmap.
      */
