@@ -19,8 +19,8 @@ page.image=/distribute/images/gp-auto-quality.png
       Core App Quality</a></li>
     <li><a href="{@docRoot}distribute/essentials/optimizing-your-app.html">
       Optimize Your App</a></li>
-    <li><a href="{@docRoot}shareables/auto/AndroidAuto-media-apps.pdf">Android Auto UX Guidelines
-      for Media Applications</a></li>
+    <li><a href="{@docRoot}shareables/auto/AndroidAuto-audio-apps.pdf">Android Auto UX Guidelines
+      for Audio Applications</a></li>
     <li><a href="{@docRoot}shareables/auto/AndroidAuto-messaging-apps.pdf">Android Auto UX Guidelines
       for Messaging Applications</a></li>
   </ol>
@@ -43,8 +43,8 @@ page.image=/distribute/images/gp-auto-quality.png
 </p>
 
 <p class="caution">
-  <strong>Important:</strong> The criteria listed in this page apply to your app's user interface 
-  and behavior when running on devices connected to an Android Auto screen. Apps must meet these 
+  <strong>Important:</strong> The criteria listed in this page apply to your app's user interface
+  and behavior when running on devices connected to an Android Auto screen. Apps must meet these
   criteria to qualify as an Android Auto app on Google Play.
 </p>
 
@@ -94,7 +94,7 @@ page.image=/distribute/images/gp-auto-quality.png
 </tr>
 
 <tr>
-  <td rowspan="4" id="safety">
+  <td rowspan="5" id="safety">
     Driver Attention
   </td>
 
@@ -127,9 +127,9 @@ page.image=/distribute/images/gp-auto-quality.png
   </td>
   <td>
     <p style="margin-bottom:.5em;">
-    App elements do not display any images on the Auto screen. Exceptions include: app may display 
+    App elements do not display any images on the Auto screen. Exceptions include: app may display
     a single static image for
-    content context in the background of the consumption screen, such as album art, and app may 
+    content context in the background of the consumption screen, such as album art, and app may
     display icons in the content navigation drawer.
     </p>
   </td>
@@ -146,14 +146,25 @@ page.image=/distribute/images/gp-auto-quality.png
   </td>
 </tr>
 
+<tr>
+  <td id="AU-VI">
+    AU-VI
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+    App never presents any form of visual information (notifications, toasts, video, images,
+    advertising, etc.) on the phone screen while the app is active in Android Auto.
+    </p>
+  </td>
+</tr>
+
 
 
 <tr>
-  <td rowspan="4" id="layout">
+  <td rowspan="3" id="layout">
     Layout
   </td>
 
-<tr>
   <td id="AU-SC">
     AU-SC
   </td>
@@ -188,20 +199,57 @@ page.image=/distribute/images/gp-auto-quality.png
 </tr>
 
 <tr>
-  <td id="contrast">
+  <td rowspan="4" id="contrast">
     Visual Contrast
   </td>
 
+  <td id="AU-DM">
+    AU-DM
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+     App supports day mode, which renders dark text and controls on a light background.
+     (<a href="{@docRoot}shareables/auto/AndroidAuto-custom-colors.pdf">Learn How</a>)
+    </p>
+  </td>
+</tr>
+
+<tr>
   <td id="AU-NM">
     AU-NM
   </td>
   <td>
     <p style="margin-bottom:.5em;">
-     App supports night mode, rendering light text and controls on a dark background.
+     App supports night mode, which renders light text and controls on a dark background.
+     (<a href="{@docRoot}shareables/auto/AndroidAuto-custom-colors.pdf">Learn How</a>)
     </p>
   </td>
 </tr>
 
+<tr>
+  <td id="AU-WI">
+    AU-WI
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+     App provides white icon sets that the system colorizes to provide automatic
+     contrast compensation.
+     (<a href="{@docRoot}shareables/auto/AndroidAuto-custom-colors.pdf">Learn How</a>)
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td id="AU-OC">
+    AU-OC
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+     App provides colors that the system can optimize for easy in-vehicle readability.
+     (<a href="{@docRoot}shareables/auto/AndroidAuto-custom-colors.pdf">Learn How</a>)
+    </p>
+  </td>
+</tr>
 
 <tr>
   <td rowspan="2" id="interaction">
@@ -269,10 +317,32 @@ data-sortorder="-timestamp" data-cardsizes="9x3" data-maxresults="6">
 </tr>
 
 <tr>
-  <td rowspan="2" id="general">
+  <td rowspan="5" id="general">
    General
   </td>
 
+  <td id="AU-LT">
+    AU-LT
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+     App loads in no more than 10 seconds.
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td id="AU-FP">
+    AU-FP
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+     Auto app functionality works as expected or described in the app's Google Play Store listing.
+    </p>
+  </td>
+</tr>
+
+<tr>
   <td id="AU-RL">
     AU-RL
   </td>
@@ -284,14 +354,24 @@ data-sortorder="-timestamp" data-cardsizes="9x3" data-maxresults="6">
   </td>
 </tr>
 
-
-</tr>
+<tr>
   <td id="AU-SS">
     AU-SS
   </td>
   <td>
     <p style="margin-bottom:.5em;">
      No tasks in the app take more than six steps to complete.
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td id="AU-GO">
+    AU-GO
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+     Any app button which is non-functional or disabled must be grayed out.
     </p>
   </td>
 </tr>
@@ -309,9 +389,8 @@ data-sortorder="-timestamp" data-cardsizes="9x3" data-maxresults="6">
   <td>
     <p style="margin-bottom:.5em;">
      App has no more than four primary actions plus one optional action overflow toggle (or five if
-     no action overflow is used). For more information, see details on the media control card in the
-     <a href="{@docRoot}shareables/auto/AndroidAuto-media-apps.pdf">Android Auto UX Guidelines
-      for Media Applications</a>.
+     no action overflow is used).
+     (<a href="{@docRoot}shareables/auto/AndroidAuto-audio-apps.pdf">Learn How</a>)
     </p>
   </td>
 </tr>
@@ -322,10 +401,8 @@ data-sortorder="-timestamp" data-cardsizes="9x3" data-maxresults="6">
   </td>
   <td>
     <p style="margin-bottom:.5em;">
-     App has no more than four optional secondary actions plus one action overflow toggle. For more
-     information, see details on the media control card in the
-     <a href="{@docRoot}shareables/auto/AndroidAuto-media-apps.pdf">Android Auto UX Guidelines
-      for Media Applications</a>.
+     App has no more than four optional secondary actions plus one action overflow toggle.
+     (<a href="{@docRoot}shareables/auto/AndroidAuto-audio-apps.pdf">Learn How</a>)
     </p>
   </td>
 </tr>
@@ -401,11 +478,11 @@ data-sortorder="-timestamp" data-cardsizes="9x3" data-maxresults="6">
   review, and will not be
   available for distribution until the app is approved. Because this is the same APK as
   for phones and tablets, your Play Store updates for those devices will not be available until the
-  Auto approval process is complete.  
+  Auto approval process is complete.
 </p>
 
 <p class="caution">
   <strong>Important:</strong> Due to this restriction, you should not use your production APK
-  for Auto support prototyping. 
+  for Auto support prototyping.
 </p>
 
