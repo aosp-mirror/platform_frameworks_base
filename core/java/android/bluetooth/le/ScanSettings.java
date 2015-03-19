@@ -29,8 +29,6 @@ public final class ScanSettings implements Parcelable {
     /**
      * A special Bluetooth LE scan mode. Applications using this scan mode will passively listen for
      * other scan results without starting BLE scans themselves.
-     *
-     * @hide
      */
     public static final int SCAN_MODE_OPPORTUNISTIC = -1;
 
