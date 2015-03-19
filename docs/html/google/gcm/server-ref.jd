@@ -665,7 +665,8 @@ matches the value passed in the request.</td>
 </ul>
     Check that the token you're sending inside the Authentication header is
 the correct API key associated with your project. See
-<a href="{@docRoot}google/gcm/http.html">GCM HTTP Connection Server</a> for details.</td>
+<a href="{@docRoot}google/gcm/http.html#checkAPIkey">Checking the validity of an API Key
+</a> for details.</td>
   </tr>
   <tr>
     <td>Mismatched Sender</td>
