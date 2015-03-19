@@ -69,7 +69,7 @@ public final class KeymasterDefs {
     public static final int KM_TAG_USER_ID = KM_INT | 501;
     public static final int KM_TAG_USER_SECURE_ID = KM_LONG_REP | 502;
     public static final int KM_TAG_NO_AUTH_REQUIRED = KM_BOOL | 503;
-    public static final int KM_TAG_USER_AUTH_ID = KM_INT_REP | 504;
+    public static final int KM_TAG_USER_AUTH_TYPE = KM_ENUM | 504;
     public static final int KM_TAG_AUTH_TIMEOUT = KM_INT | 505;
 
     public static final int KM_TAG_ALL_APPLICATIONS = KM_BOOL | 600;
