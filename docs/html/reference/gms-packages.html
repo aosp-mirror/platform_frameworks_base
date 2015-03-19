@@ -88,6 +88,8 @@
 
 
 
+
+
 <html>
 <head>
 
@@ -103,7 +105,7 @@
 href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Roboto:light,regular,medium,thin,italic,mediumitalic,bold"
   title="roboto">
-<link href="/assets/css/default.css?v=4" rel="stylesheet" type="text/css">
+<link href="/assets/css/default.css?v=5" rel="stylesheet" type="text/css">
 
 
 
@@ -403,6 +405,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
                 <li><a href="/distribute/users/index.html">Get Users</a></li>
                 <li><a href="/distribute/engage/index.html">Engage &amp; Retain</a></li>
                 <li><a href="/distribute/monetize/index.html">Monetize</a></li>
+                <li><a href="/distribute/analyze/index.html">Analyze</a></li>
                 <li><a href="/distribute/tools/index.html">Tools &amp; Reference</a></li>
                 <li><a href="/distribute/stories/index.html">Developer Stories</a></li>
               </ul>
@@ -584,14 +587,14 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
 
   <li class="nav-section">
-    <div class="nav-section-header"><a href="/google/play/billing/index.html">
+    <div class="nav-section-header"><a href="/google/play/billing/index.html" zh-cn-lang="应用内结算">
       <span class="en">Google Play In-app Billing</span></a>
     </div>
     <ul>
-      <li><a href="/google/play/billing/billing_overview.html">
+      <li><a href="/google/play/billing/billing_overview.html" zh-cn-lang="应用内结算概述">
               <span class="en">Overview</span></a>
       </li>
-      <li class="nav-section"><div class="nav-section-header"><a href="/google/play/billing/api.html">
+      <li class="nav-section"><div class="nav-section-header"><a href="/google/play/billing/api.html" zh-cn-lang="应用内结算 API">
               <span class="en">Version 3 API</span></a></div>
               <ul>
               <li><a href="/google/play/billing/billing_integrate.html">
@@ -614,13 +617,13 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       <li><a href="/google/play/billing/billing_subscriptions.html">
               <span class="en">Subscriptions</span></a>
       </li>
-      <li><a href="/google/play/billing/billing_best_practices.html">
+      <li><a href="/google/play/billing/billing_best_practices.html" zh-cn-lang="安全性和设计">
               <span class="en">Security and Design</span></a>
       </li>
-      <li><a href="/google/play/billing/billing_testing.html">
+      <li><a href="/google/play/billing/billing_testing.html" zh-cn-lang="测试应用内结算">
               <span class="en">Testing In-app Billing</span></a>
       </li>
-      <li><a href="/google/play/billing/billing_admin.html">
+      <li><a href="/google/play/billing/billing_admin.html" zh-cn-lang="管理应用内结算">
               <span class="en">Administering In-app Billing</span></a>
       </li>
       <li><a href="/google/play/billing/versions.html">
@@ -654,21 +657,14 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
               <span class="en">HTTP</span></a></li>
               </ul>
         </li>
+        <li><a href="/google/gcm/server-ref.html">
+            <span class="en">Server Reference</span></a>
+        </li>
         <li><a href="/google/gcm/notifications.html">
               <span class="en">User Notifications</span></a>
         </li>
-        <li><a href="/google/gcm/adv.html">
-            <span class="en">Advanced Topics</span></a>
-        </li>
         <li><a href="/google/gcm/c2dm.html">
             <span class="en">Migration</span></a>
-        </li>
-        <li id="gcm-tree-list" class="nav-section">
-          <div class="nav-section-header">
-            <a href="/reference/gcm-packages.html">
-              <span class="en">Reference</span>
-            </a>
-          <div>
         </li>
       </ul>
   </li>
@@ -787,7 +783,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
     <tr class=" api apilevel-" >
         <td class="jd-linkcol">
   <a href="/reference/com/google/android/gms/actions/package-summary.html">com.google.android.gms.actions</a></td>
-        <td class="jd-descrcol" width="100%"></td>
+        <td class="jd-descrcol" width="100%">Contains classes for Google Search Actions.</td>
     </tr>
 
 
@@ -926,217 +922,245 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
     <tr class=" api apilevel-" >
         <td class="jd-linkcol">
-  <a href="/reference/com/google/android/gms/deviceconnection/features/package-summary.html">com.google.android.gms.deviceconnection.features</a></td>
-        <td class="jd-descrcol" width="100%">Contains data classes for device features.</td>
-    </tr>
-
-
-    <tr class="alt-color api apilevel-" >
-        <td class="jd-linkcol">
   <a href="/reference/com/google/android/gms/drive/package-summary.html">com.google.android.gms.drive</a></td>
         <td class="jd-descrcol" width="100%"></td>
     </tr>
 
 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-linkcol">
   <a href="/reference/com/google/android/gms/drive/events/package-summary.html">com.google.android.gms.drive.events</a></td>
         <td class="jd-descrcol" width="100%"></td>
     </tr>
 
 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-linkcol">
   <a href="/reference/com/google/android/gms/drive/metadata/package-summary.html">com.google.android.gms.drive.metadata</a></td>
         <td class="jd-descrcol" width="100%"></td>
     </tr>
 
 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-linkcol">
   <a href="/reference/com/google/android/gms/drive/query/package-summary.html">com.google.android.gms.drive.query</a></td>
         <td class="jd-descrcol" width="100%"></td>
     </tr>
 
 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-linkcol">
   <a href="/reference/com/google/android/gms/drive/widget/package-summary.html">com.google.android.gms.drive.widget</a></td>
         <td class="jd-descrcol" width="100%"></td>
     </tr>
 
 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-linkcol">
   <a href="/reference/com/google/android/gms/fitness/package-summary.html">com.google.android.gms.fitness</a></td>
         <td class="jd-descrcol" width="100%">Contains the Google Fit APIs.</td>
     </tr>
 
 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-linkcol">
   <a href="/reference/com/google/android/gms/fitness/data/package-summary.html">com.google.android.gms.fitness.data</a></td>
         <td class="jd-descrcol" width="100%">Contains the Google Fit data model.</td>
     </tr>
 
 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-linkcol">
   <a href="/reference/com/google/android/gms/fitness/request/package-summary.html">com.google.android.gms.fitness.request</a></td>
         <td class="jd-descrcol" width="100%">Contains request objects used in Google Fit API methods.</td>
     </tr>
 
 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-linkcol">
   <a href="/reference/com/google/android/gms/fitness/result/package-summary.html">com.google.android.gms.fitness.result</a></td>
         <td class="jd-descrcol" width="100%">Contains response objects used in Google Fit API methods.</td>
     </tr>
 
 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-linkcol">
   <a href="/reference/com/google/android/gms/fitness/service/package-summary.html">com.google.android.gms.fitness.service</a></td>
         <td class="jd-descrcol" width="100%">Contains APIs for exposing third-party sensors to Google Fit using a service.</td>
     </tr>
 
 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-linkcol">
   <a href="/reference/com/google/android/gms/games/package-summary.html">com.google.android.gms.games</a></td>
         <td class="jd-descrcol" width="100%">Contains the games client class.</td>
     </tr>
 
 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-linkcol">
   <a href="/reference/com/google/android/gms/games/achievement/package-summary.html">com.google.android.gms.games.achievement</a></td>
         <td class="jd-descrcol" width="100%">Contains classes for loading and updating achievements.</td>
     </tr>
 
 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-linkcol">
   <a href="/reference/com/google/android/gms/games/event/package-summary.html">com.google.android.gms.games.event</a></td>
         <td class="jd-descrcol" width="100%"></td>
     </tr>
 
 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-linkcol">
   <a href="/reference/com/google/android/gms/games/leaderboard/package-summary.html">com.google.android.gms.games.leaderboard</a></td>
         <td class="jd-descrcol" width="100%">Contains data classes for leaderboards.</td>
     </tr>
 
 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-linkcol">
   <a href="/reference/com/google/android/gms/games/multiplayer/package-summary.html">com.google.android.gms.games.multiplayer</a></td>
         <td class="jd-descrcol" width="100%">Contains data classes for multiplayer functionality.</td>
     </tr>
 
 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-linkcol">
   <a href="/reference/com/google/android/gms/games/multiplayer/realtime/package-summary.html">com.google.android.gms.games.multiplayer.realtime</a></td>
         <td class="jd-descrcol" width="100%">Contains data classes for real-time multiplayer functionality.</td>
     </tr>
 
 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-linkcol">
   <a href="/reference/com/google/android/gms/games/multiplayer/turnbased/package-summary.html">com.google.android.gms.games.multiplayer.turnbased</a></td>
         <td class="jd-descrcol" width="100%">Contains data classes for turn-based multiplayer functionality.</td>
     </tr>
 
 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-linkcol">
   <a href="/reference/com/google/android/gms/games/quest/package-summary.html">com.google.android.gms.games.quest</a></td>
         <td class="jd-descrcol" width="100%"></td>
     </tr>
 
 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-linkcol">
   <a href="/reference/com/google/android/gms/games/request/package-summary.html">com.google.android.gms.games.request</a></td>
         <td class="jd-descrcol" width="100%"></td>
     </tr>
 
 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-linkcol">
   <a href="/reference/com/google/android/gms/games/snapshot/package-summary.html">com.google.android.gms.games.snapshot</a></td>
         <td class="jd-descrcol" width="100%">Contains data classes for snapshot functionality.</td>
     </tr>
 
 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-linkcol">
   <a href="/reference/com/google/android/gms/gcm/package-summary.html">com.google.android.gms.gcm</a></td>
         <td class="jd-descrcol" width="100%"></td>
     </tr>
 
 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-linkcol">
   <a href="/reference/com/google/android/gms/identity/intents/package-summary.html">com.google.android.gms.identity.intents</a></td>
         <td class="jd-descrcol" width="100%"></td>
     </tr>
 
 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-linkcol">
   <a href="/reference/com/google/android/gms/identity/intents/model/package-summary.html">com.google.android.gms.identity.intents.model</a></td>
         <td class="jd-descrcol" width="100%"></td>
     </tr>
 
 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-linkcol">
   <a href="/reference/com/google/android/gms/location/package-summary.html">com.google.android.gms.location</a></td>
         <td class="jd-descrcol" width="100%"></td>
     </tr>
 
 
+    <tr class=" api apilevel-" >
+        <td class="jd-linkcol">
+  <a href="/reference/com/google/android/gms/location/places/package-summary.html">com.google.android.gms.location.places</a></td>
+        <td class="jd-descrcol" width="100%"></td>
+    </tr>
+
+
     <tr class="alt-color api apilevel-" >
+        <td class="jd-linkcol">
+  <a href="/reference/com/google/android/gms/location/places/ui/package-summary.html">com.google.android.gms.location.places.ui</a></td>
+        <td class="jd-descrcol" width="100%"></td>
+    </tr>
+
+
+    <tr class=" api apilevel-" >
         <td class="jd-linkcol">
   <a href="/reference/com/google/android/gms/maps/package-summary.html">com.google.android.gms.maps</a></td>
         <td class="jd-descrcol" width="100%">Contains the Google Maps Android API classes.</td>
     </tr>
 
 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-linkcol">
   <a href="/reference/com/google/android/gms/maps/model/package-summary.html">com.google.android.gms.maps.model</a></td>
         <td class="jd-descrcol" width="100%">Contains the Google Maps Android API model classes.</td>
     </tr>
 
 
+    <tr class=" api apilevel-" >
+        <td class="jd-linkcol">
+  <a href="/reference/com/google/android/gms/nearby/package-summary.html">com.google.android.gms.nearby</a></td>
+        <td class="jd-descrcol" width="100%"></td>
+    </tr>
+
+
     <tr class="alt-color api apilevel-" >
+        <td class="jd-linkcol">
+  <a href="/reference/com/google/android/gms/nearby/connection/package-summary.html">com.google.android.gms.nearby.connection</a></td>
+        <td class="jd-descrcol" width="100%"></td>
+    </tr>
+
+
+    <tr class=" api apilevel-" >
         <td class="jd-linkcol">
   <a href="/reference/com/google/android/gms/panorama/package-summary.html">com.google.android.gms.panorama</a></td>
         <td class="jd-descrcol" width="100%"></td>
     </tr>
 
 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-linkcol">
   <a href="/reference/com/google/android/gms/plus/package-summary.html">com.google.android.gms.plus</a></td>
         <td class="jd-descrcol" width="100%">Contains the Google+ platform for Android.</td>
     </tr>
 
 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-linkcol">
   <a href="/reference/com/google/android/gms/plus/model/moments/package-summary.html">com.google.android.gms.plus.model.moments</a></td>
         <td class="jd-descrcol" width="100%"></td>
     </tr>
 
 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-linkcol">
   <a href="/reference/com/google/android/gms/plus/model/people/package-summary.html">com.google.android.gms.plus.model.people</a></td>
+        <td class="jd-descrcol" width="100%"></td>
+    </tr>
+
+
+    <tr class=" api apilevel-" >
+        <td class="jd-linkcol">
+  <a href="/reference/com/google/android/gms/safetynet/package-summary.html">com.google.android.gms.safetynet</a></td>
         <td class="jd-descrcol" width="100%"></td>
     </tr>
 
