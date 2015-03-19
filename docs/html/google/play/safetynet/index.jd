@@ -1,0 +1,82 @@
+page.title=SafetyNet for Android
+page.tags=compatibility, CTS
+header.hide=1
+
+@jd:body
+
+<div>
+
+<div>
+
+<h1 itemprop="name" style="margin-bottom:0;">
+  Android SafetyNet API
+</h1>
+
+<p itemprop="description">
+  SafetyNet provides access to Google services that help you assess the health and safety of an
+  Android device. The wide variety of Android devices and configurations can make it difficult to
+  know if your app will behave as you expect on all available devices. The SafetyNet API helps you
+  determine if your app will function properly on a device by analyzing its compatibility with the
+  Android platform specifications.
+</p>
+
+</div>
+</div>
+
+<div class="landing-docs">
+  <div class="col-6 normal-links">
+    <h3 style="clear:left">Key Developer Features</h3>
+
+<h4>
+  Device Profile Compatibility Check
+</h4>
+
+<p>
+  Check if your app is running on a device that matches a device model that has passed Android
+  compatibility testing. This analysis can help you determine if your app will work as expected on
+  the device where it is installed. The service evaluates both software and hardware
+  characteristics of the device, and may use hardware roots of trust, when available.
+</p>
+
+</div>
+
+<div class="col-6 normal-links">
+<h3 style="clear:left">
+  Getting Started
+</h3>
+
+  <h4>
+    1. Review the Terms of Service
+  </h4>
+
+  <p>
+    Use of SafetyNet is governed by specific terms of service, in addition to the <a href=
+    "https://developers.google.com/terms/" class="external-link">Google APIs Terms of Service</a>.
+    Before using this API, review the <a href="{@docRoot}google/play/safetynet/start.html#tos">
+    Additional Terms of Service</a>.
+  </p>
+
+  <h4>
+    2. Get the Google Play services SDK
+  </h4>
+
+  <p>
+    SafetyNet is part of the Google Play services platform. To get started, follow the instructions
+    for <a href="{@docRoot}google/play-services/setup.html">Setting
+    up Google Play services</a>.
+  </p>
+
+  <h4>
+    3. Read the documentation
+  </h4>
+
+  <p>
+    Learn how to use SafetyNet in your app by reading the <a href=
+    "{@docRoot}google/play/safetynet/start.html">Getting Started</a> instructions. For more
+    details on the API, see the <a href=
+    "{@docRoot}reference/com/google/android/gms/safetynet/package-summary.html">
+    SafetyNet</a> reference documentation.
+  </p>
+
+</div>
+</div>
