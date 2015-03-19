@@ -96,6 +96,8 @@
 
 
 
+
+
 <html>
 <head>
 
@@ -111,7 +113,7 @@
 href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Roboto:light,regular,medium,thin,italic,mediumitalic,bold"
   title="roboto">
-<link href="/assets/css/default.css?v=4" rel="stylesheet" type="text/css">
+<link href="/assets/css/default.css?v=5" rel="stylesheet" type="text/css">
 
 
 
@@ -412,6 +414,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
                 <li><a href="/distribute/users/index.html">Get Users</a></li>
                 <li><a href="/distribute/engage/index.html">Engage &amp; Retain</a></li>
                 <li><a href="/distribute/monetize/index.html">Monetize</a></li>
+                <li><a href="/distribute/analyze/index.html">Analyze</a></li>
                 <li><a href="/distribute/tools/index.html">Tools &amp; Reference</a></li>
                 <li><a href="/distribute/stories/index.html">Developer Stories</a></li>
               </ul>
@@ -593,14 +596,14 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
 
   <li class="nav-section">
-    <div class="nav-section-header"><a href="/google/play/billing/index.html">
+    <div class="nav-section-header"><a href="/google/play/billing/index.html" zh-cn-lang="应用内结算">
       <span class="en">Google Play In-app Billing</span></a>
     </div>
     <ul>
-      <li><a href="/google/play/billing/billing_overview.html">
+      <li><a href="/google/play/billing/billing_overview.html" zh-cn-lang="应用内结算概述">
               <span class="en">Overview</span></a>
       </li>
-      <li class="nav-section"><div class="nav-section-header"><a href="/google/play/billing/api.html">
+      <li class="nav-section"><div class="nav-section-header"><a href="/google/play/billing/api.html" zh-cn-lang="应用内结算 API">
               <span class="en">Version 3 API</span></a></div>
               <ul>
               <li><a href="/google/play/billing/billing_integrate.html">
@@ -623,13 +626,13 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       <li><a href="/google/play/billing/billing_subscriptions.html">
               <span class="en">Subscriptions</span></a>
       </li>
-      <li><a href="/google/play/billing/billing_best_practices.html">
+      <li><a href="/google/play/billing/billing_best_practices.html" zh-cn-lang="安全性和设计">
               <span class="en">Security and Design</span></a>
       </li>
-      <li><a href="/google/play/billing/billing_testing.html">
+      <li><a href="/google/play/billing/billing_testing.html" zh-cn-lang="测试应用内结算">
               <span class="en">Testing In-app Billing</span></a>
       </li>
-      <li><a href="/google/play/billing/billing_admin.html">
+      <li><a href="/google/play/billing/billing_admin.html" zh-cn-lang="管理应用内结算">
               <span class="en">Administering In-app Billing</span></a>
       </li>
       <li><a href="/google/play/billing/versions.html">
@@ -663,21 +666,14 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
               <span class="en">HTTP</span></a></li>
               </ul>
         </li>
+        <li><a href="/google/gcm/server-ref.html">
+            <span class="en">Server Reference</span></a>
+        </li>
         <li><a href="/google/gcm/notifications.html">
               <span class="en">User Notifications</span></a>
         </li>
-        <li><a href="/google/gcm/adv.html">
-            <span class="en">Advanced Topics</span></a>
-        </li>
         <li><a href="/google/gcm/c2dm.html">
             <span class="en">Migration</span></a>
-        </li>
-        <li id="gcm-tree-list" class="nav-section">
-          <div class="nav-section-header">
-            <a href="/reference/gcm-packages.html">
-              <span class="en">Reference</span>
-            </a>
-          <div>
         </li>
       </ul>
   </li>
@@ -881,29 +877,36 @@ Summary:
 
 
 <h2>Class Overview</h2>
-<p itemprop="articleBody">Constants representing different user activities, such as walking, running, and cycling. 
- Activities are used in <code><a href="/reference/com/google/android/gms/fitness/data/Session.html">Sessions</a></code>, <code><a href="/reference/com/google/android/gms/fitness/data/DataType.html">DataTypes</a></code> and in
- <code><a href="/reference/com/google/android/gms/fitness/request/DataReadRequest.html">read queries</a></code>.
+<p itemprop="articleBody">Constants representing different user activities, such as walking, running, and cycling.
+ Activities are used in <code><a href="/reference/com/google/android/gms/fitness/data/Session.html">Sessions</a></code>,
+ <code><a href="/reference/com/google/android/gms/fitness/data/DataType.html">DataTypes</a></code> and in
+ <a href="/reference/com/google/android/gms/fitness/request/DataReadRequest.html">read queries</a></a>.
  <p/>
- A <code><a href="/reference/com/google/android/gms/fitness/data/Session.html">Session</a></code> associates an activity with all data that was recorded during a time interval,
- such as <code><a href="/reference/com/google/android/gms/fitness/data/DataType.html#TYPE_HEART_RATE_BPM">heart rate samples</a></code> taken while the user was doing
- <code><a href="/reference/com/google/android/gms/fitness/FitnessActivities.html#AEROBICS">aerobics</a></code>, or <code><a href="/reference/com/google/android/gms/fitness/data/DataType.html#TYPE_CYCLING_WHEEL_RPM">wheel RPM</a></code> measured
+ A <code><a href="/reference/com/google/android/gms/fitness/data/Session.html">Session</a></code> associates an activity with all data that
+ was recorded during a time interval, such as
+ <code><a href="/reference/com/google/android/gms/fitness/data/DataType.html#TYPE_HEART_RATE_BPM">heart rate samples</a></code>
+ taken while the user was doing <code><a href="/reference/com/google/android/gms/fitness/FitnessActivities.html#AEROBICS">aerobics</a></code>, or
+ <code><a href="/reference/com/google/android/gms/fitness/data/DataType.html#TYPE_CYCLING_WHEEL_RPM">wheel RPM</a></code> measured
  while <code><a href="/reference/com/google/android/gms/fitness/FitnessActivities.html#BIKING">biking</a></code>.
  <p/>
- Activities be stored and read using the <code><a href="/reference/com/google/android/gms/fitness/data/DataType.html#TYPE_ACTIVITY_SAMPLE">activity sample</a></code> and
- <code><a href="/reference/com/google/android/gms/fitness/data/DataType.html#TYPE_ACTIVITY_SEGMENT">activity segment</a></code> data types.  When samples are stored, 
- these are automatically converted into segments by the platform's default data source.
+ Activities be stored and read using the
+ <code><a href="/reference/com/google/android/gms/fitness/data/DataType.html#TYPE_ACTIVITY_SAMPLE">activity sample</a></code> and
+ <code><a href="/reference/com/google/android/gms/fitness/data/DataType.html#TYPE_ACTIVITY_SEGMENT">activity segment</a></code> data
+ types.  When samples are stored, these are automatically converted into segments by the
+ platform's default data source.
  <p/>
- When reading data, the <code><a href="/reference/com/google/android/gms/fitness/data/Bucket.html#TYPE_ACTIVITY_SEGMENT">activity segment</a></code> and
- <code><a href="/reference/com/google/android/gms/fitness/data/Bucket.html#TYPE_ACTIVITY_TYPE">activity type</a></code> bucketing strategies can be used to aggregate
- data by the activities happening at the time data was collected.  This would allow, for instance, 
- aggregating step counts taken during running and those taken during walking separately,
- or to query the average heart rate during each activity.
+ When reading data, the
+ <a href="/reference/com/google/android/gms/fitness/data/Bucket.html#TYPE_ACTIVITY_SEGMENT">activity segment</a></a>
+ and <code><a href="/reference/com/google/android/gms/fitness/data/Bucket.html#TYPE_ACTIVITY_TYPE">activity type</a></code> bucketing
+ strategies can be used to aggregate data by the activities happening at the time data was
+ collected.  This would allow, for instance, aggregating step counts taken during running and
+ those taken during walking separately, or to query the average heart rate during each activity.
  <p/>
  Each activity is represented by its name, which is a string constant.  These constants are also
  used in intents for tracking and visualizing activity data.  Internally, activities are stored as
- integers inside of <code><a href="/reference/com/google/android/gms/fitness/data/DataPoint.html">DataPoint</a></code> for efficiency.  You can convert between the
- string and int representations for storage using <code><a href="/reference/com/google/android/gms/fitness/data/Value.html#setActivity(java.lang.String)">setActivity(String)</a></code> and
+ integers inside of <code><a href="/reference/com/google/android/gms/fitness/data/DataPoint.html">DataPoint</a></code> for efficiency.  You can
+ convert between the <code>String</code> and <code>int</code> representations for storage using
+ <code><a href="/reference/com/google/android/gms/fitness/data/Value.html#setActivity(java.lang.String)">setActivity(String)</a></code> and
  <code><a href="/reference/com/google/android/gms/fitness/data/Value.html#asActivity()">asActivity()</a></code>.
  <p/>
  A subset of the activities can be detected by
@@ -1880,6 +1883,54 @@ Summary:
     
     <tr class=" api apilevel-" >
         <td class="jd-typecol">String</td>
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/FitnessActivities.html#SLEEP_AWAKE">SLEEP_AWAKE</a></td>
+        <td class="jd-descrcol" width="100%">
+          The user is in an awake period in the middle of sleep.
+
+
+
+        </td>
+    </tr>
+
+
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol">String</td>
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/FitnessActivities.html#SLEEP_DEEP">SLEEP_DEEP</a></td>
+        <td class="jd-descrcol" width="100%">
+          The user is in a deep sleep cycle.
+
+
+
+        </td>
+    </tr>
+
+
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol">String</td>
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/FitnessActivities.html#SLEEP_LIGHT">SLEEP_LIGHT</a></td>
+        <td class="jd-descrcol" width="100%">
+          The user is in a light sleep cycle.
+
+
+
+        </td>
+    </tr>
+
+
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol">String</td>
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/FitnessActivities.html#SLEEP_REM">SLEEP_REM</a></td>
+        <td class="jd-descrcol" width="100%">
+          The user is in a REM sleep cycle.
+
+
+
+        </td>
+    </tr>
+
+
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/FitnessActivities.html#SNOWBOARDING">SNOWBOARDING</a></td>
         <td class="jd-descrcol" width="100%">
           The user is snowboarding.
@@ -2339,66 +2390,6 @@ Summary:
         
         <div class="jd-descrdiv">
           Returns the MIME type for a particular activity.
-          
-    
-
-        </div>
-  
-  </td></tr>
-
-
-	 
-    <tr class=" api apilevel-" >
-        <td class="jd-typecol"><nobr>
-            
-            
-            
-            static
-            
-            String</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/fitness/FitnessActivities.html#getValue(com.google.android.gms.fitness.data.DataPoint)">getValue</a></span>(<a href="/reference/com/google/android/gms/fitness/data/DataPoint.html">DataPoint</a> dataPoint)</nobr>
-        
-        <div class="jd-descrdiv">
-          <em>
-      This method is deprecated.
-    Use <code><a href="/reference/com/google/android/gms/fitness/data/Value.html#asActivity()">asActivity()</a></code> instead.  This method will be removed in
- an upcoming release.  New usage:
- <pre>
-     dataPoint.getValue(FIELD_ACTIVITY).asActivity();
- </pre>
-</em>
-          
-    
-
-        </div>
-  
-  </td></tr>
-
-
-	 
-    <tr class="alt-color api apilevel-" >
-        <td class="jd-typecol"><nobr>
-            
-            
-            
-            static
-            
-            void</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/fitness/FitnessActivities.html#setValue(com.google.android.gms.fitness.data.DataPoint, java.lang.String)">setValue</a></span>(<a href="/reference/com/google/android/gms/fitness/data/DataPoint.html">DataPoint</a> dataPoint, String activity)</nobr>
-        
-        <div class="jd-descrdiv">
-          <em>
-      This method is deprecated.
-    Use <code><a href="/reference/com/google/android/gms/fitness/data/Value.html#setActivity(java.lang.String)">setActivity(String)</a></code> instead.  This method will be removed in
- an upcoming release.  New usage:
- <pre>
-     dataPoint.getValue(FIELD_ACTIVITY).setActivity(activity);
- </pre>
-</em>
           
     
 
@@ -5760,6 +5751,166 @@ From class
 
 
 
+<A NAME="SLEEP_AWAKE"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+        static
+        final
+        String
+      </span>
+        SLEEP_AWAKE
+    </h4>
+      <div class="api-level">
+
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+
+
+
+  <div class="jd-tagdata jd-tagdescr"><p>The user is in an awake period in the middle of sleep. </p></div>
+
+
+        <div class="jd-tagdata">
+        <span class="jd-tagtitle">Constant Value: </span>
+        <span>
+
+                "sleep.awake"
+
+        </span>
+        </div>
+
+    </div>
+</div>
+
+
+
+<A NAME="SLEEP_DEEP"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+        static
+        final
+        String
+      </span>
+        SLEEP_DEEP
+    </h4>
+      <div class="api-level">
+
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+
+
+
+  <div class="jd-tagdata jd-tagdescr"><p>The user is in a deep sleep cycle. </p></div>
+
+
+        <div class="jd-tagdata">
+        <span class="jd-tagtitle">Constant Value: </span>
+        <span>
+
+                "sleep.deep"
+
+        </span>
+        </div>
+
+    </div>
+</div>
+
+
+
+<A NAME="SLEEP_LIGHT"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+        static
+        final
+        String
+      </span>
+        SLEEP_LIGHT
+    </h4>
+      <div class="api-level">
+
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+
+
+
+  <div class="jd-tagdata jd-tagdescr"><p>The user is in a light sleep cycle. </p></div>
+
+
+        <div class="jd-tagdata">
+        <span class="jd-tagtitle">Constant Value: </span>
+        <span>
+
+                "sleep.light"
+
+        </span>
+        </div>
+
+    </div>
+</div>
+
+
+
+<A NAME="SLEEP_REM"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+        static
+        final
+        String
+      </span>
+        SLEEP_REM
+    </h4>
+      <div class="api-level">
+
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+
+
+
+  <div class="jd-tagdata jd-tagdescr"><p>The user is in a REM sleep cycle. </p></div>
+
+
+        <div class="jd-tagdata">
+        <span class="jd-tagtitle">Constant Value: </span>
+        <span>
+
+                "sleep.rem"
+
+        </span>
+        </div>
+
+    </div>
+</div>
+
+
+
 <A NAME="SNOWBOARDING"></A>
 
 <div class="jd-details api apilevel-"> 
@@ -6588,8 +6739,8 @@ From class
     
 
       
-  <div class="jd-tagdata jd-tagdescr"><p>The current activity is not known.  In this case, the activity could be any of the 
- activities described in this class, or a completely different one. 
+  <div class="jd-tagdata jd-tagdescr"><p>The current activity is not known.  In this case, the activity could be any of the
+ activities described in this class, or a completely different one.
 </p></div>
 
     
@@ -7214,8 +7365,8 @@ From class
 
       
   <div class="jd-tagdata jd-tagdescr"><p>Returns the MIME type for a particular activity.  The MIME type is used in intents for
- <code><a href="/reference/com/google/android/gms/fitness/SessionsApi.ViewIntentBuilder.html">viewing a session</a></code> and
- <code><a href="/reference/com/google/android/gms/fitness/Fitness.html#ACTION_TRACK">tracking an activity</a></code>.</p></div>
+ <a href="/reference/com/google/android/gms/fitness/SessionsApi.ViewIntentBuilder.html">viewing a session</a></a> and
+ <a href="/reference/com/google/android/gms/fitness/Fitness.html#ACTION_TRACK">tracking an activity</a></a>.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
       <table class="jd-tagtable">
@@ -7226,88 +7377,6 @@ From class
         </tr>
       </table>
   </div>
-
-    </div>
-</div>
-
-
-<A NAME="getValue(com.google.android.gms.fitness.data.DataPoint)"></A>
-
-<div class="jd-details api apilevel-"> 
-    <h4 class="jd-details-title">
-      <span class="normal">
-        public 
-        static 
-         
-         
-         
-        String
-      </span>
-      <span class="sympad">getValue</span>
-      <span class="normal">(<a href="/reference/com/google/android/gms/fitness/data/DataPoint.html">DataPoint</a> dataPoint)</span>
-    </h4>
-      <div class="api-level">
-        <div></div>
-        
-  
-
-      </div>
-    <div class="jd-details-descr">
-      
-    
-
-      <p>
-  <p class="caution"><strong>
-      This method is deprecated.</strong><br/>
-    Use <code><a href="/reference/com/google/android/gms/fitness/data/Value.html#asActivity()">asActivity()</a></code> instead.  This method will be removed in
- an upcoming release.  New usage:
- <pre>
-     dataPoint.getValue(FIELD_ACTIVITY).asActivity();
- </pre>
-
-  </p>
-  <div class="jd-tagdata jd-tagdescr"><p></p></div>
-
-    </div>
-</div>
-
-
-<A NAME="setValue(com.google.android.gms.fitness.data.DataPoint, java.lang.String)"></A>
-
-<div class="jd-details api apilevel-"> 
-    <h4 class="jd-details-title">
-      <span class="normal">
-        public 
-        static 
-         
-         
-         
-        void
-      </span>
-      <span class="sympad">setValue</span>
-      <span class="normal">(<a href="/reference/com/google/android/gms/fitness/data/DataPoint.html">DataPoint</a> dataPoint, String activity)</span>
-    </h4>
-      <div class="api-level">
-        <div></div>
-        
-  
-
-      </div>
-    <div class="jd-details-descr">
-      
-    
-
-      <p>
-  <p class="caution"><strong>
-      This method is deprecated.</strong><br/>
-    Use <code><a href="/reference/com/google/android/gms/fitness/data/Value.html#setActivity(java.lang.String)">setActivity(String)</a></code> instead.  This method will be removed in
- an upcoming release.  New usage:
- <pre>
-     dataPoint.getValue(FIELD_ACTIVITY).setActivity(activity);
- </pre>
-
-  </p>
-  <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
     </div>
 </div>
