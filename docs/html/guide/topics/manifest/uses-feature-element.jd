@@ -143,12 +143,12 @@ features</a> tables, below. Descriptor string values are case-sensitive.</dd>
   the feature specified in <code>android:name</code>.
 
 <ul>
-<li>When you declare <code>"android:required="true"</code> for a feature,
+<li>When you declare <code>android:required="true"</code> for a feature,
 you are specifying that the application <em>cannot function, or is not
 designed to function</em>, when the specified feature is not present on the
 device. </li>
 
-<li>When you declare <code>"android:required="false"</code> for a feature, it
+<li>When you declare <code>android:required="false"</code> for a feature, it
 means that the application <em>prefers to use the feature</em> if present on
 the device, but that it <em>is designed to function without the specified
 feature</em>, if necessary. </li>
