@@ -96,8 +96,6 @@
 
 
 
-
-
 <html>
 <head>
 
@@ -113,7 +111,7 @@
 href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Roboto:light,regular,medium,thin,italic,mediumitalic,bold"
   title="roboto">
-<link href="/assets/css/default.css?v=5" rel="stylesheet" type="text/css">
+<link href="/assets/css/default.css?v=4" rel="stylesheet" type="text/css">
 
 
 
@@ -414,7 +412,6 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
                 <li><a href="/distribute/users/index.html">Get Users</a></li>
                 <li><a href="/distribute/engage/index.html">Engage &amp; Retain</a></li>
                 <li><a href="/distribute/monetize/index.html">Monetize</a></li>
-                <li><a href="/distribute/analyze/index.html">Analyze</a></li>
                 <li><a href="/distribute/tools/index.html">Tools &amp; Reference</a></li>
                 <li><a href="/distribute/stories/index.html">Developer Stories</a></li>
               </ul>
@@ -596,14 +593,14 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
 
   <li class="nav-section">
-    <div class="nav-section-header"><a href="/google/play/billing/index.html" zh-cn-lang="应用内结算">
+    <div class="nav-section-header"><a href="/google/play/billing/index.html">
       <span class="en">Google Play In-app Billing</span></a>
     </div>
     <ul>
-      <li><a href="/google/play/billing/billing_overview.html" zh-cn-lang="应用内结算概述">
+      <li><a href="/google/play/billing/billing_overview.html">
               <span class="en">Overview</span></a>
       </li>
-      <li class="nav-section"><div class="nav-section-header"><a href="/google/play/billing/api.html" zh-cn-lang="应用内结算 API">
+      <li class="nav-section"><div class="nav-section-header"><a href="/google/play/billing/api.html">
               <span class="en">Version 3 API</span></a></div>
               <ul>
               <li><a href="/google/play/billing/billing_integrate.html">
@@ -626,13 +623,13 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       <li><a href="/google/play/billing/billing_subscriptions.html">
               <span class="en">Subscriptions</span></a>
       </li>
-      <li><a href="/google/play/billing/billing_best_practices.html" zh-cn-lang="安全性和设计">
+      <li><a href="/google/play/billing/billing_best_practices.html">
               <span class="en">Security and Design</span></a>
       </li>
-      <li><a href="/google/play/billing/billing_testing.html" zh-cn-lang="测试应用内结算">
+      <li><a href="/google/play/billing/billing_testing.html">
               <span class="en">Testing In-app Billing</span></a>
       </li>
-      <li><a href="/google/play/billing/billing_admin.html" zh-cn-lang="管理应用内结算">
+      <li><a href="/google/play/billing/billing_admin.html">
               <span class="en">Administering In-app Billing</span></a>
       </li>
       <li><a href="/google/play/billing/versions.html">
@@ -666,14 +663,21 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
               <span class="en">HTTP</span></a></li>
               </ul>
         </li>
-        <li><a href="/google/gcm/server-ref.html">
-            <span class="en">Server Reference</span></a>
-        </li>
         <li><a href="/google/gcm/notifications.html">
               <span class="en">User Notifications</span></a>
         </li>
+        <li><a href="/google/gcm/adv.html">
+            <span class="en">Advanced Topics</span></a>
+        </li>
         <li><a href="/google/gcm/c2dm.html">
             <span class="en">Migration</span></a>
+        </li>
+        <li id="gcm-tree-list" class="nav-section">
+          <div class="nav-section-header">
+            <a href="/reference/gcm-packages.html">
+              <span class="en">Reference</span>
+            </a>
+          <div>
         </li>
       </ul>
   </li>
@@ -802,13 +806,6 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   
 
 
-
-
-
-
-
-
-
 <div class="sum-details-links">
 
 Summary:
@@ -859,7 +856,7 @@ Summary:
   
 
   
-    extends <a href="/reference/com/google/android/gms/common/data/AbstractDataBuffer.html">AbstractDataBuffer</a>&lt;<a href="/reference/com/google/android/gms/games/Game.html">Game</a>&gt;<br/>
+    extends <a href="/reference/com/google/android/gms/common/data/DataBuffer.html">DataBuffer</a>&lt;T&gt;<br/>
   
   
   
@@ -890,7 +887,7 @@ Summary:
         
             <td class="jd-inheritance-space">&nbsp;&nbsp;&nbsp;&#x21b3;</td>
          	
-        <td colspan="2" class="jd-inheritance-class-cell"><a href="/reference/com/google/android/gms/common/data/AbstractDataBuffer.html">com.google.android.gms.common.data.AbstractDataBuffer</a>&lt;<a href="/reference/com/google/android/gms/games/Game.html">com.google.android.gms.games.Game</a>&gt;</td>
+        <td colspan="2" class="jd-inheritance-class-cell"><a href="/reference/com/google/android/gms/common/data/DataBuffer.html">com.google.android.gms.common.data.DataBuffer</a>&lt;T&gt;</td>
     </tr>
     
 
@@ -1016,19 +1013,19 @@ Summary:
 
 <tr class="api apilevel-" >
 <td colspan="12">
-  <a href="#" onclick="return toggleInherited(this, null)" id="inherited-methods-com.google.android.gms.common.data.AbstractDataBuffer" class="jd-expando-trigger closed"
-          ><img id="inherited-methods-com.google.android.gms.common.data.AbstractDataBuffer-trigger"
+  <a href="#" onclick="return toggleInherited(this, null)" id="inherited-methods-com.google.android.gms.common.data.DataBuffer" class="jd-expando-trigger closed"
+          ><img id="inherited-methods-com.google.android.gms.common.data.DataBuffer-trigger"
           src="/assets/images/triangle-closed.png"
           class="jd-expando-trigger-img" /></a>
 From class
 
-  <a href="/reference/com/google/android/gms/common/data/AbstractDataBuffer.html">com.google.android.gms.common.data.AbstractDataBuffer</a>
+  <a href="/reference/com/google/android/gms/common/data/DataBuffer.html">com.google.android.gms.common.data.DataBuffer</a>
 
-<div id="inherited-methods-com.google.android.gms.common.data.AbstractDataBuffer">
-  <div id="inherited-methods-com.google.android.gms.common.data.AbstractDataBuffer-list"
+<div id="inherited-methods-com.google.android.gms.common.data.DataBuffer">
+  <div id="inherited-methods-com.google.android.gms.common.data.DataBuffer-list"
         class="jd-inheritedlinks">
   </div>
-  <div id="inherited-methods-com.google.android.gms.common.data.AbstractDataBuffer-summary" style="display: none;">
+  <div id="inherited-methods-com.google.android.gms.common.data.DataBuffer-summary" style="display: none;">
     <table class="jd-sumtable-expando">
     
 
@@ -1044,12 +1041,12 @@ From class
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/common/data/AbstractDataBuffer.html#close()">close</a></span>()</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/common/data/DataBuffer.html#close()">close</a></span>()</nobr>
         
         <div class="jd-descrdiv">
           <em>
       This method is deprecated.
-    use <code><a href="/reference/com/google/android/gms/common/data/AbstractDataBuffer.html#release()">release()</a></code> instead
+    use <code><a href="/reference/com/google/android/gms/common/data/DataBuffer.html#release()">release()</a></code> instead
 </em>
           
     
@@ -1062,15 +1059,31 @@ From class
 	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
+            
+            
+            
+            
+            
+            int</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/common/data/DataBuffer.html#describeContents()">describeContents</a></span>()</nobr>
+        
+  </td></tr>
+
+
+	 
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
             abstract
             
             
             
             
-            <a href="/reference/com/google/android/gms/games/Game.html">Game</a></nobr>
+            T</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/common/data/AbstractDataBuffer.html#get(int)">get</a></span>(int position)</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/common/data/DataBuffer.html#get(int)">get</a></span>(int position)</nobr>
         
         <div class="jd-descrdiv">
           Get the item at the specified position.
@@ -1083,7 +1096,7 @@ From class
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -1093,13 +1106,13 @@ From class
             int</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/common/data/AbstractDataBuffer.html#getCount()">getCount</a></span>()</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/common/data/DataBuffer.html#getCount()">getCount</a></span>()</nobr>
         
   </td></tr>
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -1109,12 +1122,12 @@ From class
             boolean</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/common/data/AbstractDataBuffer.html#isClosed()">isClosed</a></span>()</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/common/data/DataBuffer.html#isClosed()">isClosed</a></span>()</nobr>
         
         <div class="jd-descrdiv">
           <em>
       This method is deprecated.
-    <code><a href="/reference/com/google/android/gms/common/data/AbstractDataBuffer.html#release()">release()</a></code> is idempotent, and so is safe to call multiple times
+    <code><a href="/reference/com/google/android/gms/common/data/DataBuffer.html#release()">release()</a></code> is idempotent, and so is safe to call multiple times
 </em>
           
     
@@ -1125,23 +1138,23 @@ From class
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
             
             
             
-            Iterator&lt;<a href="/reference/com/google/android/gms/games/Game.html">Game</a>&gt;</nobr>
+            Iterator&lt;T&gt;</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/common/data/AbstractDataBuffer.html#iterator()">iterator</a></span>()</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/common/data/DataBuffer.html#iterator()">iterator</a></span>()</nobr>
         
   </td></tr>
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -1151,7 +1164,7 @@ From class
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/common/data/AbstractDataBuffer.html#release()">release</a></span>()</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/common/data/DataBuffer.html#release()">release</a></span>()</nobr>
         
         <div class="jd-descrdiv">
           Releases resources used by the buffer.
@@ -1164,17 +1177,17 @@ From class
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
             
             
             
-            Iterator&lt;<a href="/reference/com/google/android/gms/games/Game.html">Game</a>&gt;</nobr>
+            Iterator&lt;T&gt;</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/common/data/AbstractDataBuffer.html#singleRefIterator()">singleRefIterator</a></span>()</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/common/data/DataBuffer.html#singleRefIterator()">singleRefIterator</a></span>()</nobr>
         
         <div class="jd-descrdiv">
           In order to use this one should correctly override setDataRow(int)
@@ -1398,19 +1411,19 @@ From class
 
 <tr class="api apilevel-" >
 <td colspan="12">
-  <a href="#" onclick="return toggleInherited(this, null)" id="inherited-methods-com.google.android.gms.common.data.DataBuffer" class="jd-expando-trigger closed"
-          ><img id="inherited-methods-com.google.android.gms.common.data.DataBuffer-trigger"
+  <a href="#" onclick="return toggleInherited(this, null)" id="inherited-methods-com.google.android.gms.common.api.Releasable" class="jd-expando-trigger closed"
+          ><img id="inherited-methods-com.google.android.gms.common.api.Releasable-trigger"
           src="/assets/images/triangle-closed.png"
           class="jd-expando-trigger-img" /></a>
 From interface
 
-  <a href="/reference/com/google/android/gms/common/data/DataBuffer.html">com.google.android.gms.common.data.DataBuffer</a>
+  <a href="/reference/com/google/android/gms/common/api/Releasable.html">com.google.android.gms.common.api.Releasable</a>
 
-<div id="inherited-methods-com.google.android.gms.common.data.DataBuffer">
-  <div id="inherited-methods-com.google.android.gms.common.data.DataBuffer-list"
+<div id="inherited-methods-com.google.android.gms.common.api.Releasable">
+  <div id="inherited-methods-com.google.android.gms.common.api.Releasable-list"
         class="jd-inheritedlinks">
   </div>
-  <div id="inherited-methods-com.google.android.gms.common.data.DataBuffer-summary" style="display: none;">
+  <div id="inherited-methods-com.google.android.gms.common.api.Releasable-summary" style="display: none;">
     <table class="jd-sumtable-expando">
     
 
@@ -1426,145 +1439,8 @@ From interface
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/common/data/DataBuffer.html#close()">close</a></span>()</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/common/api/Releasable.html#release()">release</a></span>()</nobr>
         
-        <div class="jd-descrdiv">
-          <em>
-      This method is deprecated.
-    use <code><a href="/reference/com/google/android/gms/common/data/DataBuffer.html#release()">release()</a></code> instead
-</em>
-
-
-
-        </div>
-
-  </td></tr>
-
-
-
-    <tr class=" api apilevel-" >
-        <td class="jd-typecol"><nobr>
-            abstract
-
-
-
-
-            <a href="/reference/com/google/android/gms/games/Game.html">Game</a></nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/common/data/DataBuffer.html#get(int)">get</a></span>(int position)</nobr>
-
-        <div class="jd-descrdiv">
-          Returns an element on specified position.
-
-
-
-        </div>
-
-  </td></tr>
-
-
-
-    <tr class="alt-color api apilevel-" >
-        <td class="jd-typecol"><nobr>
-            abstract
-
-
-
-
-            int</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/common/data/DataBuffer.html#getCount()">getCount</a></span>()</nobr>
-
-  </td></tr>
-
-
-
-    <tr class=" api apilevel-" >
-        <td class="jd-typecol"><nobr>
-            abstract
-
-
-
-
-            boolean</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/common/data/DataBuffer.html#isClosed()">isClosed</a></span>()</nobr>
-
-        <div class="jd-descrdiv">
-          <em>
-      This method is deprecated.
-    <code><a href="/reference/com/google/android/gms/common/data/DataBuffer.html#release()">release()</a></code> is idempotent, and so is safe to call multiple times
-</em>
-
-
-
-        </div>
-
-  </td></tr>
-
-
-
-    <tr class="alt-color api apilevel-" >
-        <td class="jd-typecol"><nobr>
-            abstract
-
-
-
-
-            Iterator&lt;<a href="/reference/com/google/android/gms/games/Game.html">Game</a>&gt;</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/common/data/DataBuffer.html#iterator()">iterator</a></span>()</nobr>
-
-  </td></tr>
-
-
-
-    <tr class=" api apilevel-" >
-        <td class="jd-typecol"><nobr>
-            abstract
-
-
-
-
-            void</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/common/data/DataBuffer.html#release()">release</a></span>()</nobr>
-
-        <div class="jd-descrdiv">
-          Releases resources used by the buffer.
-
-
-
-        </div>
-
-  </td></tr>
-
-
-
-    <tr class="alt-color api apilevel-" >
-        <td class="jd-typecol"><nobr>
-            abstract
-
-
-
-
-            Iterator&lt;<a href="/reference/com/google/android/gms/games/Game.html">Game</a>&gt;</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/common/data/DataBuffer.html#singleRefIterator()">singleRefIterator</a></span>()</nobr>
-
-        <div class="jd-descrdiv">
-          In order to use this iterator it should be supported by particular <code>DataBuffer</code>.
-
-
-
-        </div>
-
   </td></tr>
 
 
@@ -1602,53 +1478,11 @@ From interface
             
             
             
-            Iterator&lt;<a href="/reference/com/google/android/gms/games/Game.html">Game</a>&gt;</nobr>
+            Iterator&lt;T&gt;</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">iterator</span>()</nobr>
         
-  </td></tr>
-
-
-</table>
-  </div>
-</div>
-</td></tr>
-
-
-
-<tr class="api apilevel-" >
-<td colspan="12">
-  <a href="#" onclick="return toggleInherited(this, null)" id="inherited-methods-com.google.android.gms.common.api.Releasable" class="jd-expando-trigger closed"
-          ><img id="inherited-methods-com.google.android.gms.common.api.Releasable-trigger"
-          src="/assets/images/triangle-closed.png"
-          class="jd-expando-trigger-img" /></a>
-From interface
-
-  <a href="/reference/com/google/android/gms/common/api/Releasable.html">com.google.android.gms.common.api.Releasable</a>
-
-<div id="inherited-methods-com.google.android.gms.common.api.Releasable">
-  <div id="inherited-methods-com.google.android.gms.common.api.Releasable-list"
-        class="jd-inheritedlinks">
-  </div>
-  <div id="inherited-methods-com.google.android.gms.common.api.Releasable-summary" style="display: none;">
-    <table class="jd-sumtable-expando">
-
-
-
-
-    <tr class="alt-color api apilevel-" >
-        <td class="jd-typecol"><nobr>
-            abstract
-
-
-
-
-            void</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/common/api/Releasable.html#release()">release</a></span>()</nobr>
-
   </td></tr>
 
 

@@ -96,8 +96,6 @@
 
 
 
-
-
 <html>
 <head>
 
@@ -113,7 +111,7 @@
 href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Roboto:light,regular,medium,thin,italic,mediumitalic,bold"
   title="roboto">
-<link href="/assets/css/default.css?v=5" rel="stylesheet" type="text/css">
+<link href="/assets/css/default.css?v=4" rel="stylesheet" type="text/css">
 
 
 
@@ -414,7 +412,6 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
                 <li><a href="/distribute/users/index.html">Get Users</a></li>
                 <li><a href="/distribute/engage/index.html">Engage &amp; Retain</a></li>
                 <li><a href="/distribute/monetize/index.html">Monetize</a></li>
-                <li><a href="/distribute/analyze/index.html">Analyze</a></li>
                 <li><a href="/distribute/tools/index.html">Tools &amp; Reference</a></li>
                 <li><a href="/distribute/stories/index.html">Developer Stories</a></li>
               </ul>
@@ -596,14 +593,14 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
 
   <li class="nav-section">
-    <div class="nav-section-header"><a href="/google/play/billing/index.html" zh-cn-lang="应用内结算">
+    <div class="nav-section-header"><a href="/google/play/billing/index.html">
       <span class="en">Google Play In-app Billing</span></a>
     </div>
     <ul>
-      <li><a href="/google/play/billing/billing_overview.html" zh-cn-lang="应用内结算概述">
+      <li><a href="/google/play/billing/billing_overview.html">
               <span class="en">Overview</span></a>
       </li>
-      <li class="nav-section"><div class="nav-section-header"><a href="/google/play/billing/api.html" zh-cn-lang="应用内结算 API">
+      <li class="nav-section"><div class="nav-section-header"><a href="/google/play/billing/api.html">
               <span class="en">Version 3 API</span></a></div>
               <ul>
               <li><a href="/google/play/billing/billing_integrate.html">
@@ -626,13 +623,13 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       <li><a href="/google/play/billing/billing_subscriptions.html">
               <span class="en">Subscriptions</span></a>
       </li>
-      <li><a href="/google/play/billing/billing_best_practices.html" zh-cn-lang="安全性和设计">
+      <li><a href="/google/play/billing/billing_best_practices.html">
               <span class="en">Security and Design</span></a>
       </li>
-      <li><a href="/google/play/billing/billing_testing.html" zh-cn-lang="测试应用内结算">
+      <li><a href="/google/play/billing/billing_testing.html">
               <span class="en">Testing In-app Billing</span></a>
       </li>
-      <li><a href="/google/play/billing/billing_admin.html" zh-cn-lang="管理应用内结算">
+      <li><a href="/google/play/billing/billing_admin.html">
               <span class="en">Administering In-app Billing</span></a>
       </li>
       <li><a href="/google/play/billing/versions.html">
@@ -666,14 +663,21 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
               <span class="en">HTTP</span></a></li>
               </ul>
         </li>
-        <li><a href="/google/gcm/server-ref.html">
-            <span class="en">Server Reference</span></a>
-        </li>
         <li><a href="/google/gcm/notifications.html">
               <span class="en">User Notifications</span></a>
         </li>
+        <li><a href="/google/gcm/adv.html">
+            <span class="en">Advanced Topics</span></a>
+        </li>
         <li><a href="/google/gcm/c2dm.html">
             <span class="en">Migration</span></a>
+        </li>
+        <li id="gcm-tree-list" class="nav-section">
+          <div class="nav-section-header">
+            <a href="/reference/gcm-packages.html">
+              <span class="en">Reference</span>
+            </a>
+          <div>
         </li>
       </ul>
   </li>
@@ -777,6 +781,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
    
   
   
+   
+  
   
   
 
@@ -784,8 +790,6 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
    
   
   
-
-
   
   
 
@@ -845,9 +849,9 @@ Summary:
   
       implements 
       
-        <a href="/reference/com/google/android/gms/common/data/Freezable.html">Freezable</a>&lt;<a href="/reference/com/google/android/gms/games/snapshot/SnapshotMetadata.html">SnapshotMetadata</a>&gt;
+        Parcelable 
       
-        Parcelable
+        <a href="/reference/com/google/android/gms/common/data/Freezable.html">Freezable</a>&lt;T&gt; 
       
   
   
@@ -981,18 +985,6 @@ Summary:
     </tr>
     
     
-    <tr class=" api apilevel-" >
-        <td class="jd-typecol">long</td>
-        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/snapshot/SnapshotMetadata.html#PROGRESS_VALUE_UNKNOWN">PROGRESS_VALUE_UNKNOWN</a></td>
-        <td class="jd-descrcol" width="100%">
-          Constant indicating that the progress value of a snapshot is unknown.
-
-
-
-        </td>
-    </tr>
-
-
 
 </table>
 
@@ -1004,8 +996,6 @@ Summary:
 <table id="inhconstants" class="jd-sumtable"><tr><th>
   <a href="#" class="toggle-all" onclick="return toggleAllInherited(this, null)">[Expand]</a>
   <div style="clear:left;">Inherited Constants</div></th></tr>
-
-
 
 
 <tr class="api apilevel-" >
@@ -1053,6 +1043,8 @@ android.os.Parcelable
   </div>
 </div>
 </td></tr>
+
+
 
 
 </table>
@@ -1266,29 +1258,6 @@ android.os.Parcelable
             
             
             
-            long</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/games/snapshot/SnapshotMetadata.html#getProgressValue()">getProgressValue</a></span>()</nobr>
-
-        <div class="jd-descrdiv">
-          Retrieves the progress value for this snapshot.
-
-
-
-        </div>
-
-  </td></tr>
-
-
-
-    <tr class=" api apilevel-" >
-        <td class="jd-typecol"><nobr>
-            abstract
-
-
-
-
             String</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
@@ -1305,7 +1274,7 @@ android.os.Parcelable
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -1341,78 +1310,6 @@ android.os.Parcelable
 <table id="inhmethods" class="jd-sumtable"><tr><th>
   <a href="#" class="toggle-all" onclick="return toggleAllInherited(this, null)">[Expand]</a>
   <div style="clear:left;">Inherited Methods</div></th></tr>
-
-
-<tr class="api apilevel-" >
-<td colspan="12">
-  <a href="#" onclick="return toggleInherited(this, null)" id="inherited-methods-com.google.android.gms.common.data.Freezable" class="jd-expando-trigger closed"
-          ><img id="inherited-methods-com.google.android.gms.common.data.Freezable-trigger"
-          src="/assets/images/triangle-closed.png"
-          class="jd-expando-trigger-img" /></a>
-From interface
-
-  <a href="/reference/com/google/android/gms/common/data/Freezable.html">com.google.android.gms.common.data.Freezable</a>
-
-<div id="inherited-methods-com.google.android.gms.common.data.Freezable">
-  <div id="inherited-methods-com.google.android.gms.common.data.Freezable-list"
-        class="jd-inheritedlinks">
-  </div>
-  <div id="inherited-methods-com.google.android.gms.common.data.Freezable-summary" style="display: none;">
-    <table class="jd-sumtable-expando">
-    
-
-
-	 
-    <tr class="alt-color api apilevel-" >
-        <td class="jd-typecol"><nobr>
-            abstract
-            
-            
-            
-            
-            <a href="/reference/com/google/android/gms/games/snapshot/SnapshotMetadata.html">SnapshotMetadata</a></nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/common/data/Freezable.html#freeze()">freeze</a></span>()</nobr>
-        
-        <div class="jd-descrdiv">
-          Freeze a volatile representation into an immutable representation.
-
-
-
-        </div>
-
-  </td></tr>
-
-
-	 
-    <tr class=" api apilevel-" >
-        <td class="jd-typecol"><nobr>
-            abstract
-            
-            
-            
-            
-            boolean</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/common/data/Freezable.html#isDataValid()">isDataValid</a></span>()</nobr>
-        
-        <div class="jd-descrdiv">
-          Check to see if this object is valid for use.
-
-
-
-        </div>
-
-  </td></tr>
-
-
-</table>
-  </div>
-</div>
-</td></tr>
-
 
 
 <tr class="api apilevel-" >
@@ -1463,6 +1360,78 @@ From interface
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">writeToParcel</span>(Parcel arg0, int arg1)</nobr>
         
+  </td></tr>
+
+
+</table>
+  </div>
+</div>
+</td></tr>
+
+
+
+<tr class="api apilevel-" >
+<td colspan="12">
+  <a href="#" onclick="return toggleInherited(this, null)" id="inherited-methods-com.google.android.gms.common.data.Freezable" class="jd-expando-trigger closed"
+          ><img id="inherited-methods-com.google.android.gms.common.data.Freezable-trigger"
+          src="/assets/images/triangle-closed.png"
+          class="jd-expando-trigger-img" /></a>
+From interface
+
+  <a href="/reference/com/google/android/gms/common/data/Freezable.html">com.google.android.gms.common.data.Freezable</a>
+
+<div id="inherited-methods-com.google.android.gms.common.data.Freezable">
+  <div id="inherited-methods-com.google.android.gms.common.data.Freezable-list"
+        class="jd-inheritedlinks">
+  </div>
+  <div id="inherited-methods-com.google.android.gms.common.data.Freezable-summary" style="display: none;">
+    <table class="jd-sumtable-expando">
+    
+
+
+	 
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            abstract
+            
+            
+            
+            
+            T</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/common/data/Freezable.html#freeze()">freeze</a></span>()</nobr>
+        
+        <div class="jd-descrdiv">
+          Freeze a volatile representation into an immutable representation.
+          
+    
+
+        </div>
+  
+  </td></tr>
+
+
+	 
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            abstract
+            
+            
+            
+            
+            boolean</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/common/data/Freezable.html#isDataValid()">isDataValid</a></span>()</nobr>
+        
+        <div class="jd-descrdiv">
+          Check to see if this object is valid for use.
+          
+    
+
+        </div>
+  
   </td></tr>
 
 
@@ -1538,48 +1507,6 @@ From interface
         </span>
         </div>
     
-    </div>
-</div>
-
-
-
-<A NAME="PROGRESS_VALUE_UNKNOWN"></A>
-
-<div class="jd-details api apilevel-">
-    <h4 class="jd-details-title">
-      <span class="normal">
-        public
-        static
-        final
-        long
-      </span>
-        PROGRESS_VALUE_UNKNOWN
-    </h4>
-      <div class="api-level">
-
-
-
-
-      </div>
-    <div class="jd-details-descr">
-
-
-
-
-  <div class="jd-tagdata jd-tagdescr"><p>Constant indicating that the progress value of a snapshot is unknown.
-</p></div>
-
-
-        <div class="jd-tagdata">
-        <span class="jd-tagtitle">Constant Value: </span>
-        <span>
-
-                -1
-                (0xffffffffffffffff)
-
-        </span>
-        </div>
-
     </div>
 </div>
 
@@ -1901,50 +1828,11 @@ From interface
 
       
   <div class="jd-tagdata jd-tagdescr"><p>Retrieves the played time of this snapshot in milliseconds. This value is specified during
- the update operation. If not known, returns <code><a href="/reference/com/google/android/gms/games/snapshot/SnapshotMetadata.html#PLAYED_TIME_UNKNOWN">PLAYED_TIME_UNKNOWN</a></code>.</p></div>
+ the update operation. If not known, returns <code><a href="/reference/com/google/android/gms/games/snapshot/SnapshotMetadata.html#PLAYED_TIME_UNKNOWN">PLAYED_TIME_UNKNOWN</a></code></p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
       <ul class="nolist"><li>The played time of this snapshot in milliseconds, or <code><a href="/reference/com/google/android/gms/games/snapshot/SnapshotMetadata.html#PLAYED_TIME_UNKNOWN">PLAYED_TIME_UNKNOWN</a></code> if
          not known.
-</li></ul>
-  </div>
-
-    </div>
-</div>
-
-
-<A NAME="getProgressValue()"></A>
-
-<div class="jd-details api apilevel-">
-    <h4 class="jd-details-title">
-      <span class="normal">
-        public
-
-
-        abstract
-
-        long
-      </span>
-      <span class="sympad">getProgressValue</span>
-      <span class="normal">()</span>
-    </h4>
-      <div class="api-level">
-        <div></div>
-
-
-
-      </div>
-    <div class="jd-details-descr">
-
-
-
-
-  <div class="jd-tagdata jd-tagdescr"><p>Retrieves the progress value for this snapshot. Can be used to provide automatic conflict
- resolution (see <code><a href="/reference/com/google/android/gms/games/snapshot/Snapshots.html#RESOLUTION_POLICY_HIGHEST_PROGRESS">RESOLUTION_POLICY_HIGHEST_PROGRESS</a></code>). If not known, returns
- <code><a href="/reference/com/google/android/gms/games/snapshot/SnapshotMetadata.html#PROGRESS_VALUE_UNKNOWN">PROGRESS_VALUE_UNKNOWN</a></code>.</p></div>
-  <div class="jd-tagdata">
-      <h5 class="jd-tagtitle">Returns</h5>
-      <ul class="nolist"><li>Progress value for this snapshot, or <code><a href="/reference/com/google/android/gms/games/snapshot/SnapshotMetadata.html#PROGRESS_VALUE_UNKNOWN">PROGRESS_VALUE_UNKNOWN</a></code> if not known.
 </li></ul>
   </div>
 
