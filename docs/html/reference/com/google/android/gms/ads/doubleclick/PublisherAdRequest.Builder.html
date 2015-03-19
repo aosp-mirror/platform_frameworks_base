@@ -96,6 +96,8 @@
 
 
 
+
+
 <html>
 <head>
 
@@ -111,7 +113,7 @@
 href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Roboto:light,regular,medium,thin,italic,mediumitalic,bold"
   title="roboto">
-<link href="/assets/css/default.css?v=4" rel="stylesheet" type="text/css">
+<link href="/assets/css/default.css?v=5" rel="stylesheet" type="text/css">
 
 
 
@@ -412,6 +414,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
                 <li><a href="/distribute/users/index.html">Get Users</a></li>
                 <li><a href="/distribute/engage/index.html">Engage &amp; Retain</a></li>
                 <li><a href="/distribute/monetize/index.html">Monetize</a></li>
+                <li><a href="/distribute/analyze/index.html">Analyze</a></li>
                 <li><a href="/distribute/tools/index.html">Tools &amp; Reference</a></li>
                 <li><a href="/distribute/stories/index.html">Developer Stories</a></li>
               </ul>
@@ -593,14 +596,14 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
 
   <li class="nav-section">
-    <div class="nav-section-header"><a href="/google/play/billing/index.html">
+    <div class="nav-section-header"><a href="/google/play/billing/index.html" zh-cn-lang="应用内结算">
       <span class="en">Google Play In-app Billing</span></a>
     </div>
     <ul>
-      <li><a href="/google/play/billing/billing_overview.html">
+      <li><a href="/google/play/billing/billing_overview.html" zh-cn-lang="应用内结算概述">
               <span class="en">Overview</span></a>
       </li>
-      <li class="nav-section"><div class="nav-section-header"><a href="/google/play/billing/api.html">
+      <li class="nav-section"><div class="nav-section-header"><a href="/google/play/billing/api.html" zh-cn-lang="应用内结算 API">
               <span class="en">Version 3 API</span></a></div>
               <ul>
               <li><a href="/google/play/billing/billing_integrate.html">
@@ -623,13 +626,13 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       <li><a href="/google/play/billing/billing_subscriptions.html">
               <span class="en">Subscriptions</span></a>
       </li>
-      <li><a href="/google/play/billing/billing_best_practices.html">
+      <li><a href="/google/play/billing/billing_best_practices.html" zh-cn-lang="安全性和设计">
               <span class="en">Security and Design</span></a>
       </li>
-      <li><a href="/google/play/billing/billing_testing.html">
+      <li><a href="/google/play/billing/billing_testing.html" zh-cn-lang="测试应用内结算">
               <span class="en">Testing In-app Billing</span></a>
       </li>
-      <li><a href="/google/play/billing/billing_admin.html">
+      <li><a href="/google/play/billing/billing_admin.html" zh-cn-lang="管理应用内结算">
               <span class="en">Administering In-app Billing</span></a>
       </li>
       <li><a href="/google/play/billing/versions.html">
@@ -663,21 +666,14 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
               <span class="en">HTTP</span></a></li>
               </ul>
         </li>
+        <li><a href="/google/gcm/server-ref.html">
+            <span class="en">Server Reference</span></a>
+        </li>
         <li><a href="/google/gcm/notifications.html">
               <span class="en">User Notifications</span></a>
         </li>
-        <li><a href="/google/gcm/adv.html">
-            <span class="en">Advanced Topics</span></a>
-        </li>
         <li><a href="/google/gcm/c2dm.html">
             <span class="en">Migration</span></a>
-        </li>
-        <li id="gcm-tree-list" class="nav-section">
-          <div class="nav-section-header">
-            <a href="/reference/gcm-packages.html">
-              <span class="en">Reference</span>
-            </a>
-          <div>
         </li>
       </ul>
   </li>
@@ -977,6 +973,29 @@ Summary:
             <a href="/reference/com/google/android/gms/ads/doubleclick/PublisherAdRequest.Builder.html">PublisherAdRequest.Builder</a></nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/ads/doubleclick/PublisherAdRequest.Builder.html#addCategoryExclusion(java.lang.String)">addCategoryExclusion</a></span>(String categoryExclusion)</nobr>
+
+        <div class="jd-descrdiv">
+          Sets a slot-level ad category exclusion label.
+
+
+
+        </div>
+
+  </td></tr>
+
+
+
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            <a href="/reference/com/google/android/gms/ads/doubleclick/PublisherAdRequest.Builder.html">PublisherAdRequest.Builder</a></nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/ads/doubleclick/PublisherAdRequest.Builder.html#addCustomEventExtrasBundle(java.lang.Class<? extends com.google.android.gms.ads.mediation.customevent.CustomEvent>, android.os.Bundle)">addCustomEventExtrasBundle</a></span>(Class&lt;?&nbsp;extends&nbsp;<a href="/reference/com/google/android/gms/ads/mediation/customevent/CustomEvent.html">CustomEvent</a>&gt; adapterClass, Bundle customEventExtras)</nobr>
         
         <div class="jd-descrdiv">
@@ -990,6 +1009,29 @@ Summary:
 
 
 	 
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            <a href="/reference/com/google/android/gms/ads/doubleclick/PublisherAdRequest.Builder.html">PublisherAdRequest.Builder</a></nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/ads/doubleclick/PublisherAdRequest.Builder.html#addCustomTargeting(java.lang.String, java.lang.String)">addCustomTargeting</a></span>(String key, String value)</nobr>
+
+        <div class="jd-descrdiv">
+          Adds a custom targeting parameter.
+
+
+
+        </div>
+
+  </td></tr>
+
+
+
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             
@@ -997,6 +1039,29 @@ Summary:
             
             
             
+            <a href="/reference/com/google/android/gms/ads/doubleclick/PublisherAdRequest.Builder.html">PublisherAdRequest.Builder</a></nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/ads/doubleclick/PublisherAdRequest.Builder.html#addCustomTargeting(java.lang.String, java.util.List<java.lang.String>)">addCustomTargeting</a></span>(String key, List&lt;String&gt; values)</nobr>
+
+        <div class="jd-descrdiv">
+          Adds a custom targeting parameter.
+
+
+
+        </div>
+
+  </td></tr>
+
+
+
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
             <a href="/reference/com/google/android/gms/ads/doubleclick/PublisherAdRequest.Builder.html">PublisherAdRequest.Builder</a></nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
@@ -1013,7 +1078,7 @@ Summary:
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -1036,7 +1101,7 @@ Summary:
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -1059,7 +1124,7 @@ Summary:
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -1082,7 +1147,7 @@ Summary:
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -1105,7 +1170,7 @@ Summary:
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -1128,7 +1193,7 @@ Summary:
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -1151,7 +1216,7 @@ Summary:
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -1174,7 +1239,7 @@ Summary:
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -1197,7 +1262,7 @@ Summary:
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -1220,7 +1285,7 @@ Summary:
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -1244,6 +1309,29 @@ Summary:
 
 
 	 
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            <a href="/reference/com/google/android/gms/ads/doubleclick/PublisherAdRequest.Builder.html">PublisherAdRequest.Builder</a></nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/ads/doubleclick/PublisherAdRequest.Builder.html#setRequestAgent(java.lang.String)">setRequestAgent</a></span>(String requestAgent)</nobr>
+
+        <div class="jd-descrdiv">
+          Sets the request agent string to identify the ad request's origin.
+
+
+
+        </div>
+
+  </td></tr>
+
+
+
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             
@@ -1566,6 +1654,39 @@ From class
 
 
 
+<A NAME="addCategoryExclusion(java.lang.String)"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+
+
+
+
+        <a href="/reference/com/google/android/gms/ads/doubleclick/PublisherAdRequest.Builder.html">PublisherAdRequest.Builder</a>
+      </span>
+      <span class="sympad">addCategoryExclusion</span>
+      <span class="normal">(String categoryExclusion)</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+
+
+
+  <div class="jd-tagdata jd-tagdescr"><p>Sets a slot-level ad category exclusion label.
+</p></div>
+
+    </div>
+</div>
+
+
 <A NAME="addCustomEventExtrasBundle(java.lang.Class<? extends com.google.android.gms.ads.mediation.customevent.CustomEvent>, android.os.Bundle)"></A>
 
 <div class="jd-details api apilevel-"> 
@@ -1609,6 +1730,74 @@ From class
         </tr>
       </table>
   </div>
+
+    </div>
+</div>
+
+
+<A NAME="addCustomTargeting(java.lang.String, java.lang.String)"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+
+
+
+
+        <a href="/reference/com/google/android/gms/ads/doubleclick/PublisherAdRequest.Builder.html">PublisherAdRequest.Builder</a>
+      </span>
+      <span class="sympad">addCustomTargeting</span>
+      <span class="normal">(String key, String value)</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+
+
+
+  <div class="jd-tagdata jd-tagdescr"><p>Adds a custom targeting parameter. Calling this multiple times for the
+ same key will overwrite old values.
+</p></div>
+
+    </div>
+</div>
+
+
+<A NAME="addCustomTargeting(java.lang.String, java.util.List<java.lang.String>)"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+
+
+
+
+        <a href="/reference/com/google/android/gms/ads/doubleclick/PublisherAdRequest.Builder.html">PublisherAdRequest.Builder</a>
+      </span>
+      <span class="sympad">addCustomTargeting</span>
+      <span class="normal">(String key, List&lt;String&gt; values)</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+
+
+
+  <div class="jd-tagdata jd-tagdescr"><p>Adds a custom targeting parameter. Calling this multiple times for the
+ same key will overwrite old values.
+</p></div>
 
     </div>
 </div>
@@ -2006,6 +2195,43 @@ From class
       
   <div class="jd-tagdata jd-tagdescr"><p>Sets an identifier for use in frequency capping, audience segmentation and targeting,
  sequential ad rotation, and other audience-based ad delivery controls across devices.
+</p></div>
+
+    </div>
+</div>
+
+
+<A NAME="setRequestAgent(java.lang.String)"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+
+
+
+
+        <a href="/reference/com/google/android/gms/ads/doubleclick/PublisherAdRequest.Builder.html">PublisherAdRequest.Builder</a>
+      </span>
+      <span class="sympad">setRequestAgent</span>
+      <span class="normal">(String requestAgent)</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+
+
+
+  <div class="jd-tagdata jd-tagdescr"><p>Sets the request agent string to identify the ad request's origin. Third party libraries
+ that reference the Mobile Ads SDK should call this method to denote the platform from
+ which the ad request originated. For example, if a third party ad network called
+ "CoolAds network" mediates requests to the Mobile Ads SDK, it should call this method
+ with "CoolAds".
 </p></div>
 
     </div>

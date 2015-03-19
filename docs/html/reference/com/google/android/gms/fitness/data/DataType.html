@@ -96,6 +96,8 @@
 
 
 
+
+
 <html>
 <head>
 
@@ -111,7 +113,7 @@
 href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Roboto:light,regular,medium,thin,italic,mediumitalic,bold"
   title="roboto">
-<link href="/assets/css/default.css?v=4" rel="stylesheet" type="text/css">
+<link href="/assets/css/default.css?v=5" rel="stylesheet" type="text/css">
 
 
 
@@ -412,6 +414,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
                 <li><a href="/distribute/users/index.html">Get Users</a></li>
                 <li><a href="/distribute/engage/index.html">Engage &amp; Retain</a></li>
                 <li><a href="/distribute/monetize/index.html">Monetize</a></li>
+                <li><a href="/distribute/analyze/index.html">Analyze</a></li>
                 <li><a href="/distribute/tools/index.html">Tools &amp; Reference</a></li>
                 <li><a href="/distribute/stories/index.html">Developer Stories</a></li>
               </ul>
@@ -593,14 +596,14 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
 
   <li class="nav-section">
-    <div class="nav-section-header"><a href="/google/play/billing/index.html">
+    <div class="nav-section-header"><a href="/google/play/billing/index.html" zh-cn-lang="应用内结算">
       <span class="en">Google Play In-app Billing</span></a>
     </div>
     <ul>
-      <li><a href="/google/play/billing/billing_overview.html">
+      <li><a href="/google/play/billing/billing_overview.html" zh-cn-lang="应用内结算概述">
               <span class="en">Overview</span></a>
       </li>
-      <li class="nav-section"><div class="nav-section-header"><a href="/google/play/billing/api.html">
+      <li class="nav-section"><div class="nav-section-header"><a href="/google/play/billing/api.html" zh-cn-lang="应用内结算 API">
               <span class="en">Version 3 API</span></a></div>
               <ul>
               <li><a href="/google/play/billing/billing_integrate.html">
@@ -623,13 +626,13 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       <li><a href="/google/play/billing/billing_subscriptions.html">
               <span class="en">Subscriptions</span></a>
       </li>
-      <li><a href="/google/play/billing/billing_best_practices.html">
+      <li><a href="/google/play/billing/billing_best_practices.html" zh-cn-lang="安全性和设计">
               <span class="en">Security and Design</span></a>
       </li>
-      <li><a href="/google/play/billing/billing_testing.html">
+      <li><a href="/google/play/billing/billing_testing.html" zh-cn-lang="测试应用内结算">
               <span class="en">Testing In-app Billing</span></a>
       </li>
-      <li><a href="/google/play/billing/billing_admin.html">
+      <li><a href="/google/play/billing/billing_admin.html" zh-cn-lang="管理应用内结算">
               <span class="en">Administering In-app Billing</span></a>
       </li>
       <li><a href="/google/play/billing/versions.html">
@@ -663,21 +666,14 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
               <span class="en">HTTP</span></a></li>
               </ul>
         </li>
+        <li><a href="/google/gcm/server-ref.html">
+            <span class="en">Server Reference</span></a>
+        </li>
         <li><a href="/google/gcm/notifications.html">
               <span class="en">User Notifications</span></a>
         </li>
-        <li><a href="/google/gcm/adv.html">
-            <span class="en">Advanced Topics</span></a>
-        </li>
         <li><a href="/google/gcm/c2dm.html">
             <span class="en">Migration</span></a>
-        </li>
-        <li id="gcm-tree-list" class="nav-section">
-          <div class="nav-section-header">
-            <a href="/reference/gcm-packages.html">
-              <span class="en">Reference</span>
-            </a>
-          <div>
         </li>
       </ul>
   </li>
@@ -913,10 +909,10 @@ Summary:
  start of the count.  The platform has built-in support for converting between compatible data
  types.
  <p>
- A data type contains one or more fields.  In case of multi-dimensional data (such as an
- accelerometer with x, y, and z axes) each field represents one dimension.  Each data type field
- has a unique name which identifies it.  The field also defines the format of the data (int,
- float, etc.).
+ A data type contains one or more fields.  In case of multi-dimensional data (such as location
+ with latitude, longitude, and accuracy) each field represents one dimension.  Each data
+ type field has a unique name which identifies it.  The field also defines the format of the
+ data (int, float, etc.).
  <p>
  The data types in the <code>com.google</code> namespace are shared with any app with the user
  consent.  These are fixed and can only be updated in new releases of the platform.
@@ -978,7 +974,7 @@ Summary:
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/data/DataType.html#MIME_TYPE_PREFIX">MIME_TYPE_PREFIX</a></td>
         <td class="jd-descrcol" width="100%">
-          The common prefix for <code><a href="/reference/com/google/android/gms/fitness/data/DataType.html">data type</a></code> MIME types, for use in intents.
+          The common prefix for <a href="/reference/com/google/android/gms/fitness/data/DataType.html">data type</a></a> MIME types, for use in intents.
           
     
 
@@ -1075,6 +1071,73 @@ android.os.Parcelable
       </tr>
       
     
+      <tr class=" api apilevel-" >
+          <td class="jd-typecol"><nobr>
+          public
+          static
+          final
+          <a href="/reference/com/google/android/gms/fitness/data/DataType.html">DataType</a></nobr></td>
+          <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/data/DataType.html#AGGREGATE_BASAL_METABOLIC_RATE_SUMMARY">AGGREGATE_BASAL_METABOLIC_RATE_SUMMARY</a></td>
+          <td class="jd-descrcol" width="100%">
+            In the <code>com.google.bmr.summary</code> data type, each data point represents the
+ average, maximum and minimum basal metabolic rate, in kcal per day, over the time interval of
+ the data point.
+
+
+
+          </td>
+      </tr>
+
+
+      <tr class="alt-color api apilevel-" >
+          <td class="jd-typecol"><nobr>
+          public
+          static
+          final
+          <a href="/reference/com/google/android/gms/fitness/data/DataType.html">DataType</a></nobr></td>
+          <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/data/DataType.html#AGGREGATE_BODY_FAT_PERCENTAGE_SUMMARY">AGGREGATE_BODY_FAT_PERCENTAGE_SUMMARY</a></td>
+          <td class="jd-descrcol" width="100%">
+            In the <code>com.google.body.fat_percentage.summary</code> data type, each data point represents
+ the average, maximum and minimum percentage over the time interval of the data point.
+
+
+
+          </td>
+      </tr>
+
+
+      <tr class=" api apilevel-" >
+          <td class="jd-typecol"><nobr>
+          public
+          static
+          final
+          <a href="/reference/com/google/android/gms/fitness/data/DataType.html">DataType</a></nobr></td>
+          <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/data/DataType.html#AGGREGATE_CALORIES_CONSUMED">AGGREGATE_CALORIES_CONSUMED</a></td>
+          <td class="jd-descrcol" width="100%">
+            Aggregate calories consumed,in kcal, during a time interval.
+
+
+
+          </td>
+      </tr>
+
+
+      <tr class="alt-color api apilevel-" >
+          <td class="jd-typecol"><nobr>
+          public
+          static
+          final
+          <a href="/reference/com/google/android/gms/fitness/data/DataType.html">DataType</a></nobr></td>
+          <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/data/DataType.html#AGGREGATE_CALORIES_EXPENDED">AGGREGATE_CALORIES_EXPENDED</a></td>
+          <td class="jd-descrcol" width="100%">
+            Aggregate calories expended,in kcal, during a time interval.
+
+
+
+          </td>
+      </tr>
+
+
       <tr class=" api apilevel-" >
           <td class="jd-typecol"><nobr>
           public
@@ -1266,6 +1329,41 @@ android.os.Parcelable
           static
           final
           <a href="/reference/com/google/android/gms/fitness/data/DataType.html">DataType</a></nobr></td>
+          <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/data/DataType.html#TYPE_BASAL_METABOLIC_RATE">TYPE_BASAL_METABOLIC_RATE</a></td>
+          <td class="jd-descrcol" width="100%">
+            In the <code>com.google.calories.bmr</code> data type, each data point represents the basal
+ metabolic rate of energy expenditure at rest of the user at the time of the reading, in kcal
+ per day.
+
+
+
+          </td>
+      </tr>
+
+
+      <tr class=" api apilevel-" >
+          <td class="jd-typecol"><nobr>
+          public
+          static
+          final
+          <a href="/reference/com/google/android/gms/fitness/data/DataType.html">DataType</a></nobr></td>
+          <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/data/DataType.html#TYPE_BODY_FAT_PERCENTAGE">TYPE_BODY_FAT_PERCENTAGE</a></td>
+          <td class="jd-descrcol" width="100%">
+            In the <code>com.google.body.fat.percentage</code> data type, each data point represents a
+ measurement of the total fat mass in a person's body as a percentage of the total body mass.
+
+
+
+          </td>
+      </tr>
+
+
+      <tr class="alt-color api apilevel-" >
+          <td class="jd-typecol"><nobr>
+          public
+          static
+          final
+          <a href="/reference/com/google/android/gms/fitness/data/DataType.html">DataType</a></nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/data/DataType.html#TYPE_CALORIES_CONSUMED">TYPE_CALORIES_CONSUMED</a></td>
           <td class="jd-descrcol" width="100%">
             In the <code>com.google.calories.consumed</code> data type, each data point represents the number
@@ -1436,6 +1534,23 @@ android.os.Parcelable
           static
           final
           <a href="/reference/com/google/android/gms/fitness/data/DataType.html">DataType</a></nobr></td>
+          <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/data/DataType.html#TYPE_LOCATION_TRACK">TYPE_LOCATION_TRACK</a></td>
+          <td class="jd-descrcol" width="100%">
+            The <code>com.google.location.track</code> data type represents a location point that is part of a
+ track and which may have inexact timestamps.
+
+
+
+          </td>
+      </tr>
+
+
+      <tr class=" api apilevel-" >
+          <td class="jd-typecol"><nobr>
+          public
+          static
+          final
+          <a href="/reference/com/google/android/gms/fitness/data/DataType.html">DataType</a></nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/data/DataType.html#TYPE_POWER_SAMPLE">TYPE_POWER_SAMPLE</a></td>
           <td class="jd-descrcol" width="100%">
             In the <code>com.google.power.sample</code> data type, each data point represents an
@@ -1447,7 +1562,7 @@ android.os.Parcelable
       </tr>
       
     
-      <tr class=" api apilevel-" >
+      <tr class="alt-color api apilevel-" >
           <td class="jd-typecol"><nobr>
           public
           static
@@ -1464,7 +1579,7 @@ android.os.Parcelable
       </tr>
       
     
-      <tr class="alt-color api apilevel-" >
+      <tr class=" api apilevel-" >
           <td class="jd-typecol"><nobr>
           public
           static
@@ -1481,7 +1596,7 @@ android.os.Parcelable
       </tr>
       
     
-      <tr class=" api apilevel-" >
+      <tr class="alt-color api apilevel-" >
           <td class="jd-typecol"><nobr>
           public
           static
@@ -1498,7 +1613,7 @@ android.os.Parcelable
       </tr>
       
     
-      <tr class="alt-color api apilevel-" >
+      <tr class=" api apilevel-" >
           <td class="jd-typecol"><nobr>
           public
           static
@@ -2055,7 +2170,7 @@ From interface
     
 
       
-  <div class="jd-tagdata jd-tagdescr"><p>The common prefix for <code><a href="/reference/com/google/android/gms/fitness/data/DataType.html">data type</a></code> MIME types, for use in intents.  The
+  <div class="jd-tagdata jd-tagdescr"><p>The common prefix for <a href="/reference/com/google/android/gms/fitness/data/DataType.html">data type</a></a> MIME types, for use in intents.  The
  MIME type for a particular data type will be this prefix followed by the data type name.
  Examples:
  <pre>
@@ -2131,6 +2246,145 @@ From interface
 </p></div>
 
     
+    </div>
+</div>
+
+
+
+<A NAME="AGGREGATE_BASAL_METABOLIC_RATE_SUMMARY"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+        static
+        final
+        <a href="/reference/com/google/android/gms/fitness/data/DataType.html">DataType</a>
+      </span>
+        AGGREGATE_BASAL_METABOLIC_RATE_SUMMARY
+    </h4>
+      <div class="api-level">
+
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+
+
+
+  <div class="jd-tagdata jd-tagdescr"><p>In the <code>com.google.bmr.summary</code> data type, each data point represents the
+ average, maximum and minimum basal metabolic rate, in kcal per day, over the time interval of
+ the data point.
+ <p>
+ Because this is an aggregate data type, the start and end times should be set.
+</p></div>
+
+
+    </div>
+</div>
+
+
+
+<A NAME="AGGREGATE_BODY_FAT_PERCENTAGE_SUMMARY"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+        static
+        final
+        <a href="/reference/com/google/android/gms/fitness/data/DataType.html">DataType</a>
+      </span>
+        AGGREGATE_BODY_FAT_PERCENTAGE_SUMMARY
+    </h4>
+      <div class="api-level">
+
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+
+
+
+  <div class="jd-tagdata jd-tagdescr"><p>In the <code>com.google.body.fat_percentage.summary</code> data type, each data point represents
+ the average, maximum and minimum percentage over the time interval of the data point.
+ <p>
+ Because this is an aggregate data type, the start and end times should be set.
+</p></div>
+
+
+    </div>
+</div>
+
+
+
+<A NAME="AGGREGATE_CALORIES_CONSUMED"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+        static
+        final
+        <a href="/reference/com/google/android/gms/fitness/data/DataType.html">DataType</a>
+      </span>
+        AGGREGATE_CALORIES_CONSUMED
+    </h4>
+      <div class="api-level">
+
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+
+
+
+  <div class="jd-tagdata jd-tagdescr"><p>Aggregate calories consumed,in kcal, during a time interval. This data type is equivalent
+ to the one used for non-aggregated data. The full definition can be found at
+ <code><a href="/reference/com/google/android/gms/fitness/data/DataType.html#TYPE_CALORIES_CONSUMED">TYPE_CALORIES_CONSUMED</a></code>.
+</p></div>
+
+
+    </div>
+</div>
+
+
+
+<A NAME="AGGREGATE_CALORIES_EXPENDED"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+        static
+        final
+        <a href="/reference/com/google/android/gms/fitness/data/DataType.html">DataType</a>
+      </span>
+        AGGREGATE_CALORIES_EXPENDED
+    </h4>
+      <div class="api-level">
+
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+
+
+
+  <div class="jd-tagdata jd-tagdescr"><p>Aggregate calories expended,in kcal, during a time interval. This data type is equivalent
+ to the one used for non-aggregated data. The full definition can be found at
+ <code><a href="/reference/com/google/android/gms/fitness/data/DataType.html#TYPE_CALORIES_EXPENDED">TYPE_CALORIES_EXPENDED</a></code>.
+</p></div>
+
+
     </div>
 </div>
 
@@ -2231,13 +2485,16 @@ From interface
   <div class="jd-tagdata jd-tagdescr"><p>List of data types that are supported as <b>input</b> data types for aggregation.  These
  include:
  <ul>
-     <li/><code><a href="/reference/com/google/android/gms/fitness/data/DataType.html#TYPE_STEP_COUNT_DELTA">step_count.delta</a></code>
-     <li/><code><a href="/reference/com/google/android/gms/fitness/data/DataType.html#TYPE_DISTANCE_DELTA">distance.delta</a></code>
      <li/><code><a href="/reference/com/google/android/gms/fitness/data/DataType.html#TYPE_ACTIVITY_SEGMENT">activity.segment</a></code>
-     <li/><code><a href="/reference/com/google/android/gms/fitness/data/DataType.html#TYPE_SPEED">speed</a></code>
+     <li/><code><a href="/reference/com/google/android/gms/fitness/data/DataType.html#TYPE_BODY_FAT_PERCENTAGE">body.fat.percentage</a></code>
+     <li/><code><a href="/reference/com/google/android/gms/fitness/data/DataType.html#TYPE_CALORIES_CONSUMED">calories.consumed</a></code>
+     <li/><code><a href="/reference/com/google/android/gms/fitness/data/DataType.html#TYPE_CALORIES_EXPENDED">calories.expended</a></code>
+     <li/><code><a href="/reference/com/google/android/gms/fitness/data/DataType.html#TYPE_DISTANCE_DELTA">distance.delta</a></code>
      <li/><code><a href="/reference/com/google/android/gms/fitness/data/DataType.html#TYPE_HEART_RATE_BPM">heart_rate.bpm</a></code>
-     <li/><code><a href="/reference/com/google/android/gms/fitness/data/DataType.html#TYPE_WEIGHT">weight</a></code>
      <li/><code><a href="/reference/com/google/android/gms/fitness/data/DataType.html#TYPE_LOCATION_SAMPLE">location.sample</a></code>
+     <li/><code><a href="/reference/com/google/android/gms/fitness/data/DataType.html#TYPE_SPEED">speed</a></code>
+     <li/><code><a href="/reference/com/google/android/gms/fitness/data/DataType.html#TYPE_STEP_COUNT_DELTA">step_count.delta</a></code>
+     <li/><code><a href="/reference/com/google/android/gms/fitness/data/DataType.html#TYPE_WEIGHT">weight</a></code>
  </ul>
  Currently, data types outside of the <code>com.google</code> namespace cannot be aggregated by
  the platform.
@@ -2543,6 +2800,77 @@ From interface
 </p></div>
 
     
+    </div>
+</div>
+
+
+
+<A NAME="TYPE_BASAL_METABOLIC_RATE"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+        static
+        final
+        <a href="/reference/com/google/android/gms/fitness/data/DataType.html">DataType</a>
+      </span>
+        TYPE_BASAL_METABOLIC_RATE
+    </h4>
+      <div class="api-level">
+
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+
+
+
+  <div class="jd-tagdata jd-tagdescr"><p>In the <code>com.google.calories.bmr</code> data type, each data point represents the basal
+ metabolic rate of energy expenditure at rest of the user at the time of the reading, in kcal
+ per day.
+ <p>
+ Because the recorded BMR is instantaneous, the start time should not be set.
+</p></div>
+
+
+    </div>
+</div>
+
+
+
+<A NAME="TYPE_BODY_FAT_PERCENTAGE"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+        static
+        final
+        <a href="/reference/com/google/android/gms/fitness/data/DataType.html">DataType</a>
+      </span>
+        TYPE_BODY_FAT_PERCENTAGE
+    </h4>
+      <div class="api-level">
+
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+
+
+
+  <div class="jd-tagdata jd-tagdescr"><p>In the <code>com.google.body.fat.percentage</code> data type, each data point represents a
+ measurement of the total fat mass in a person's body as a percentage of the total body mass.
+ <p>
+ Since this is an instantaneous measurement, start time should not be set.
+</p></div>
+
+
     </div>
 </div>
 
@@ -2939,6 +3267,49 @@ From interface
 
 
 
+<A NAME="TYPE_LOCATION_TRACK"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+        static
+        final
+        <a href="/reference/com/google/android/gms/fitness/data/DataType.html">DataType</a>
+      </span>
+        TYPE_LOCATION_TRACK
+    </h4>
+      <div class="api-level">
+
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+
+
+
+  <div class="jd-tagdata jd-tagdescr"><p>The <code>com.google.location.track</code> data type represents a location point that is part of a
+ track and which may have inexact timestamps.
+ <p>
+ Its fields are the same as <a href="/reference/com/google/android/gms/fitness/data/DataType.html#TYPE_LOCATION_SAMPLE">location.sample</a></a>.  The
+ difference between the two data types is that, while <code>location.sample</code> data points
+ have an exact timestamp, <code>location.track</code> data points have an inexact time interval.
+ The start time will represent the earliest time where the user may been at the
+ location, and the end time will represent the latest time.  Start time should always be
+ set, even if it's the same as end time.
+ <p>
+ One use case of <code>location.track</code> is capturing the path of a user during an activity
+ when the track for the path is known, but the exact time at each coordinate isn't.
+</p></div>
+
+
+    </div>
+</div>
+
+
+
 <A NAME="TYPE_POWER_SAMPLE"></A>
 
 <div class="jd-details api apilevel-"> 
@@ -3303,7 +3674,7 @@ From interface
 
       
   <div class="jd-tagdata jd-tagdescr"><p>Returns the MIME type for a particular <code><a href="/reference/com/google/android/gms/fitness/data/DataType.html">DataType</a></code>.  The MIME type is used in intents
- such as the <code><a href="/reference/com/google/android/gms/fitness/HistoryApi.ViewIntentBuilder.html">data view</a></code> intent.
+ such as the <a href="/reference/com/google/android/gms/fitness/HistoryApi.ViewIntentBuilder.html">data view</a></a> intent.
 </p></div>
 
     </div>
