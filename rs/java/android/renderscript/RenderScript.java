@@ -28,6 +28,7 @@ import android.util.Log;
 import android.view.Surface;
 import android.os.SystemProperties;
 import android.os.Trace;
+import java.util.ArrayList;
 
 /**
  * This class provides access to a RenderScript context, which controls RenderScript
@@ -47,6 +48,12 @@ public class RenderScript {
     static final boolean DEBUG  = false;
     @SuppressWarnings({"UnusedDeclaration", "deprecation"})
     static final boolean LOG_ENABLED = false;
+
+    static private ArrayList<RenderScript> mProcessContextList = new ArrayList<RenderScript>();
+    private boolean mIsProcessContext = false;
+    private int mContextFlags = 0;
+    private int mContextSdkVersion = 0;
+
 
     private Context mApplicationContext;
 
@@ -1312,20 +1319,13 @@ public class RenderScript {
     }
 
     /**
-     * @hide
-     */
-    public static RenderScript create(Context ctx, int sdkVersion) {
-        return create(ctx, sdkVersion, ContextType.NORMAL, CREATE_FLAG_NONE);
-    }
-
-    /**
      * Create a RenderScript context.
      *
      * @hide
      * @param ctx The context.
      * @return RenderScript
      */
-    public static RenderScript create(Context ctx, int sdkVersion, ContextType ct, int flags) {
+    private static RenderScript internalCreate(Context ctx, int sdkVersion, ContextType ct, int flags) {
         if (!sInitialized) {
             Log.e(LOG_TAG, "RenderScript.create() called when disabled; someone is likely to crash");
             return null;
@@ -1340,6 +1340,8 @@ public class RenderScript {
         rs.mDev = rs.nDeviceCreate();
         rs.mContext = rs.nContextCreate(rs.mDev, flags, sdkVersion, ct.mID);
         rs.mContextType = ct;
+        rs.mContextFlags = flags;
+        rs.mContextSdkVersion = sdkVersion;
         if (rs.mContext == 0) {
             throw new RSDriverException("Failed to create RS context.");
         }
@@ -1349,7 +1351,9 @@ public class RenderScript {
     }
 
     /**
-     * Create a RenderScript context.
+     * calls create(cts, ContextType.NORMAL, CREATE_FLAG_NONE)
+     *
+     * See documentation for @create for details
      *
      * @param ctx The context.
      * @return RenderScript
@@ -1359,21 +1363,32 @@ public class RenderScript {
     }
 
     /**
-     * Create a RenderScript context.
+     * calls create(cts, ct, CREATE_FLAG_NONE)
      *
+     * See documentation for @create for details
      *
      * @param ctx The context.
      * @param ct The type of context to be created.
      * @return RenderScript
      */
     public static RenderScript create(Context ctx, ContextType ct) {
-        int v = ctx.getApplicationInfo().targetSdkVersion;
-        return create(ctx, v, ct, CREATE_FLAG_NONE);
+        return create(ctx, ct, CREATE_FLAG_NONE);
     }
 
      /**
-     * Create a RenderScript context.
+     * Gets or creates a RenderScript context of the specified type.
      *
+     * The returned context will be cached for future reuse within
+     * the process. When an application is finished using
+     * RenderScript it should call releaseAllContexts()
+     *
+     * A process context is a context designed for easy creation and
+     * lifecycle management.  Multiple calls to this function will
+     * return the same object provided they are called with the same
+     * options.  This allows it to be used any time a RenderScript
+     * context is needed.
+     *
+     * Prior to API 23 this always created a new context.
      *
      * @param ctx The context.
      * @param ct The type of context to be created.
@@ -1382,8 +1397,74 @@ public class RenderScript {
      */
     public static RenderScript create(Context ctx, ContextType ct, int flags) {
         int v = ctx.getApplicationInfo().targetSdkVersion;
-        return create(ctx, v, ct, flags);
+        if (v < 23) {
+            return internalCreate(ctx, v, ct, flags);
+        }
+
+        synchronized (mProcessContextList) {
+            for (RenderScript prs : mProcessContextList) {
+                if ((prs.mContextType == ct) &&
+                    (prs.mContextFlags == flags) &&
+                    (prs.mContextSdkVersion == v)) {
+
+                    return prs;
+                }
+            }
+
+            RenderScript prs = internalCreate(ctx, v, ct, flags);
+            prs.mIsProcessContext = true;
+            mProcessContextList.add(prs);
+            return prs;
+        }
     }
+
+    /**
+     * @hide
+     *
+     * Releases all the process contexts.  This is the same as
+     * calling .destroy() on each unique context retreived with
+     * create(...). If no contexts have been created this
+     * function does nothing.
+     *
+     * Typically you call this when your application is losing focus
+     * and will not be using a context for some time.
+     *
+     * This has no effect on a context created with
+     * createMultiContext()
+     */
+    public static void releaseAllContexts() {
+        ArrayList<RenderScript> oldList;
+        synchronized (mProcessContextList) {
+            oldList = mProcessContextList;
+            mProcessContextList = new ArrayList<RenderScript>();
+        }
+
+        for (RenderScript prs : oldList) {
+            prs.mIsProcessContext = false;
+            prs.destroy();
+        }
+        oldList.clear();
+    }
+
+
+
+    /**
+     * Create a RenderScript context.
+     *
+     * This is an advanced function intended for applications which
+     * need to create more than one RenderScript context to be used
+     * at the same time.
+     *
+     * If you need a single context please use create()
+     *
+     * @hide
+     * @param ctx The context.
+     * @return RenderScript
+     */
+    public static RenderScript createMultiContext(Context ctx, ContextType ct, int flags, int API_number) {
+        return internalCreate(ctx, API_number, ct, flags);
+    }
+
 
     /**
      * Print the currently available debugging information about the state of
@@ -1441,8 +1522,16 @@ public class RenderScript {
      * using this context or any objects belonging to this context is
      * illegal.
      *
+     * API 23+, this function is a NOP if the context was created
+     * with create().  Please use releaseAllContexts() to clean up
+     * contexts created with the create function.
+     *
      */
     public void destroy() {
+        if (mIsProcessContext) {
+            // users cannot destroy a process context
+            return;
+        }
         validate();
         helpDestroy();
     }
