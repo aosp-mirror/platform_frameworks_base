@@ -96,8 +96,6 @@
 
 
 
-
-
 <html>
 <head>
 
@@ -113,7 +111,7 @@
 href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Roboto:light,regular,medium,thin,italic,mediumitalic,bold"
   title="roboto">
-<link href="/assets/css/default.css?v=5" rel="stylesheet" type="text/css">
+<link href="/assets/css/default.css?v=4" rel="stylesheet" type="text/css">
 
 
 
@@ -414,7 +412,6 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
                 <li><a href="/distribute/users/index.html">Get Users</a></li>
                 <li><a href="/distribute/engage/index.html">Engage &amp; Retain</a></li>
                 <li><a href="/distribute/monetize/index.html">Monetize</a></li>
-                <li><a href="/distribute/analyze/index.html">Analyze</a></li>
                 <li><a href="/distribute/tools/index.html">Tools &amp; Reference</a></li>
                 <li><a href="/distribute/stories/index.html">Developer Stories</a></li>
               </ul>
@@ -596,14 +593,14 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
 
   <li class="nav-section">
-    <div class="nav-section-header"><a href="/google/play/billing/index.html" zh-cn-lang="应用内结算">
+    <div class="nav-section-header"><a href="/google/play/billing/index.html">
       <span class="en">Google Play In-app Billing</span></a>
     </div>
     <ul>
-      <li><a href="/google/play/billing/billing_overview.html" zh-cn-lang="应用内结算概述">
+      <li><a href="/google/play/billing/billing_overview.html">
               <span class="en">Overview</span></a>
       </li>
-      <li class="nav-section"><div class="nav-section-header"><a href="/google/play/billing/api.html" zh-cn-lang="应用内结算 API">
+      <li class="nav-section"><div class="nav-section-header"><a href="/google/play/billing/api.html">
               <span class="en">Version 3 API</span></a></div>
               <ul>
               <li><a href="/google/play/billing/billing_integrate.html">
@@ -626,13 +623,13 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       <li><a href="/google/play/billing/billing_subscriptions.html">
               <span class="en">Subscriptions</span></a>
       </li>
-      <li><a href="/google/play/billing/billing_best_practices.html" zh-cn-lang="安全性和设计">
+      <li><a href="/google/play/billing/billing_best_practices.html">
               <span class="en">Security and Design</span></a>
       </li>
-      <li><a href="/google/play/billing/billing_testing.html" zh-cn-lang="测试应用内结算">
+      <li><a href="/google/play/billing/billing_testing.html">
               <span class="en">Testing In-app Billing</span></a>
       </li>
-      <li><a href="/google/play/billing/billing_admin.html" zh-cn-lang="管理应用内结算">
+      <li><a href="/google/play/billing/billing_admin.html">
               <span class="en">Administering In-app Billing</span></a>
       </li>
       <li><a href="/google/play/billing/versions.html">
@@ -666,14 +663,21 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
               <span class="en">HTTP</span></a></li>
               </ul>
         </li>
-        <li><a href="/google/gcm/server-ref.html">
-            <span class="en">Server Reference</span></a>
-        </li>
         <li><a href="/google/gcm/notifications.html">
               <span class="en">User Notifications</span></a>
         </li>
+        <li><a href="/google/gcm/adv.html">
+            <span class="en">Advanced Topics</span></a>
+        </li>
         <li><a href="/google/gcm/c2dm.html">
             <span class="en">Migration</span></a>
+        </li>
+        <li id="gcm-tree-list" class="nav-section">
+          <div class="nav-section-header">
+            <a href="/reference/gcm-packages.html">
+              <span class="en">Reference</span>
+            </a>
+          <div>
         </li>
       </ul>
   </li>
@@ -910,7 +914,7 @@ Summary:
  <code><a href="/reference/com/google/android/gms/common/ConnectionResult.html#startResolutionForResult(android.app.Activity, int)">startResolutionForResult(Activity, int)</a></code> to get the necessary OAuth
  permissions.
  <p>
- The first connection to Fit API may require a network connection to verify the account and scopes
+ First connection to Fitness API requires network connection to verify the account and scopes
  associated with it. In case no network connection is available, Google Fit will send back a
  result with status code set to <code><a href="/reference/com/google/android/gms/common/api/CommonStatusCodes.html#NETWORK_ERROR">NETWORK_ERROR</a></code>.
  <p>
@@ -927,8 +931,7 @@ Summary:
 
             // Create a Google Fit Client instance with default user account.
             mGoogleApiClient = new GoogleApiClient.Builder(this)
-                    .addApi(Fitness.SENSORS_API)  // Required for SensorsApi calls
-                    // Optional: specify more APIs used with additional calls to addApi
+                    .addApi(Fitness.API)
                     .useDefaultAccount()
                     .addScope(new Scope(Scopes.FITNESS))
                     .addOnConnectionsCallbacks(this)
@@ -1053,7 +1056,7 @@ Summary:
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/Fitness.html#ACTION_VIEW">ACTION_VIEW</a></td>
         <td class="jd-descrcol" width="100%">
           Broadcast action: the user has requested that an application show the value of a
- particular fitness <a href="/reference/com/google/android/gms/fitness/data/DataType.html">data type</a></a>.
+ particular fitness <code><a href="/reference/com/google/android/gms/fitness/data/DataType.html">data type</a></code>.
           
     
 
@@ -1116,13 +1119,10 @@ Summary:
           public
           static
           final
-          Void</nobr></td>
+          <a href="/reference/com/google/android/gms/common/api/Api.html">Api</a>&lt;<a href="/reference/com/google/android/gms/common/api/Api.ApiOptions.NoOptions.html">Api.ApiOptions.NoOptions</a>&gt;</nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/Fitness.html#API">API</a></td>
           <td class="jd-descrcol" width="100%">
-            <em>
-      This field is deprecated.
-    in favor of granular API tokens.
-</em>
+            Token to pass to <code><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.Builder.html#addApi(com.google.android.gms.common.api.Api<? extends com.google.android.gms.common.api.Api.ApiOptions.NotRequiredOptions>)">addApi(Api<? extends Api.ApiOptions.NotRequiredOptions>)</a></code> to enable Google Fit services.
             
     
 
@@ -1131,22 +1131,6 @@ Summary:
       
     
       <tr class=" api apilevel-" >
-          <td class="jd-typecol"><nobr>
-          public
-          static
-          final
-          <a href="/reference/com/google/android/gms/common/api/Api.html">Api</a>&lt;<a href="/reference/com/google/android/gms/common/api/Api.ApiOptions.NoOptions.html">Api.ApiOptions.NoOptions</a>&gt;</nobr></td>
-          <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/Fitness.html#BLE_API">BLE_API</a></td>
-          <td class="jd-descrcol" width="100%">
-            Token to pass to <code><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.Builder.html#addApi(com.google.android.gms.common.api.Api<? extends com.google.android.gms.common.api.Api.ApiOptions.NotRequiredOptions>)">addApi(Api<? extends Api.ApiOptions.NotRequiredOptions>)</a></code> to enable <code><a href="/reference/com/google/android/gms/fitness/BleApi.html">BleApi</a></code>.
-
-
-
-          </td>
-      </tr>
-
-
-      <tr class="alt-color api apilevel-" >
           <td class="jd-typecol"><nobr>
           public
           static
@@ -1162,22 +1146,6 @@ Summary:
       </tr>
       
     
-      <tr class=" api apilevel-" >
-          <td class="jd-typecol"><nobr>
-          public
-          static
-          final
-          <a href="/reference/com/google/android/gms/common/api/Api.html">Api</a>&lt;<a href="/reference/com/google/android/gms/common/api/Api.ApiOptions.NoOptions.html">Api.ApiOptions.NoOptions</a>&gt;</nobr></td>
-          <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/Fitness.html#CONFIG_API">CONFIG_API</a></td>
-          <td class="jd-descrcol" width="100%">
-            Token to pass to <code><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.Builder.html#addApi(com.google.android.gms.common.api.Api<? extends com.google.android.gms.common.api.Api.ApiOptions.NotRequiredOptions>)">addApi(Api<? extends Api.ApiOptions.NotRequiredOptions>)</a></code> to enable <code><a href="/reference/com/google/android/gms/fitness/ConfigApi.html">ConfigApi</a></code>.
-
-
-
-          </td>
-      </tr>
-
-
       <tr class="alt-color api apilevel-" >
           <td class="jd-typecol"><nobr>
           public
@@ -1199,22 +1167,6 @@ Summary:
           public
           static
           final
-          <a href="/reference/com/google/android/gms/common/api/Api.html">Api</a>&lt;<a href="/reference/com/google/android/gms/common/api/Api.ApiOptions.NoOptions.html">Api.ApiOptions.NoOptions</a>&gt;</nobr></td>
-          <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/Fitness.html#HISTORY_API">HISTORY_API</a></td>
-          <td class="jd-descrcol" width="100%">
-            Token to pass to <code><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.Builder.html#addApi(com.google.android.gms.common.api.Api<? extends com.google.android.gms.common.api.Api.ApiOptions.NotRequiredOptions>)">addApi(Api<? extends Api.ApiOptions.NotRequiredOptions>)</a></code> to enable <code><a href="/reference/com/google/android/gms/fitness/HistoryApi.html">HistoryApi</a></code>.
-
-
-
-          </td>
-      </tr>
-
-
-      <tr class="alt-color api apilevel-" >
-          <td class="jd-typecol"><nobr>
-          public
-          static
-          final
           <a href="/reference/com/google/android/gms/fitness/HistoryApi.html">HistoryApi</a></nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/Fitness.html#HistoryApi">HistoryApi</a></td>
           <td class="jd-descrcol" width="100%">
@@ -1226,22 +1178,6 @@ Summary:
       </tr>
       
     
-      <tr class=" api apilevel-" >
-          <td class="jd-typecol"><nobr>
-          public
-          static
-          final
-          <a href="/reference/com/google/android/gms/common/api/Api.html">Api</a>&lt;<a href="/reference/com/google/android/gms/common/api/Api.ApiOptions.NoOptions.html">Api.ApiOptions.NoOptions</a>&gt;</nobr></td>
-          <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/Fitness.html#RECORDING_API">RECORDING_API</a></td>
-          <td class="jd-descrcol" width="100%">
-            Token to pass to <code><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.Builder.html#addApi(com.google.android.gms.common.api.Api<? extends com.google.android.gms.common.api.Api.ApiOptions.NotRequiredOptions>)">addApi(Api<? extends Api.ApiOptions.NotRequiredOptions>)</a></code> to enable <code><a href="/reference/com/google/android/gms/fitness/RecordingApi.html">RecordingApi</a></code>.
-
-
-
-          </td>
-      </tr>
-
-
       <tr class="alt-color api apilevel-" >
           <td class="jd-typecol"><nobr>
           public
@@ -1328,7 +1264,6 @@ Summary:
           <td class="jd-descrcol" width="100%">
             Scope for read access to the biometric data types in Google Fit, which include:
  <ul>
-     <li><code><a href="/reference/com/google/android/gms/fitness/data/DataType.html#TYPE_BODY_FAT_PERCENTAGE">body.fat.percentage</a></code>
      <li><code><a href="/reference/com/google/android/gms/fitness/data/DataType.html#TYPE_HEART_RATE_BPM">heart_rate.bpm</a></code>
      <li><code><a href="/reference/com/google/android/gms/fitness/data/DataType.html#TYPE_HEIGHT">height</a></code>
      <li><code><a href="/reference/com/google/android/gms/fitness/data/DataType.html#TYPE_WEIGHT">weight</a></code>
@@ -1351,7 +1286,6 @@ Summary:
           <td class="jd-descrcol" width="100%">
             Scope for read/write access to biometric data types in Google Fit, which include:
  <ul>
-     <li><code><a href="/reference/com/google/android/gms/fitness/data/DataType.html#TYPE_BODY_FAT_PERCENTAGE">body.fat.percentage</a></code>
      <li><code><a href="/reference/com/google/android/gms/fitness/data/DataType.html#TYPE_HEART_RATE_BPM">heart_rate.bpm</a></code>
      <li><code><a href="/reference/com/google/android/gms/fitness/data/DataType.html#TYPE_HEIGHT">height</a></code>
      <li><code><a href="/reference/com/google/android/gms/fitness/data/DataType.html#TYPE_WEIGHT">weight</a></code>
@@ -1408,38 +1342,6 @@ Summary:
       </tr>
       
     
-      <tr class=" api apilevel-" >
-          <td class="jd-typecol"><nobr>
-          public
-          static
-          final
-          <a href="/reference/com/google/android/gms/common/api/Api.html">Api</a>&lt;<a href="/reference/com/google/android/gms/common/api/Api.ApiOptions.NoOptions.html">Api.ApiOptions.NoOptions</a>&gt;</nobr></td>
-          <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/Fitness.html#SENSORS_API">SENSORS_API</a></td>
-          <td class="jd-descrcol" width="100%">
-            Token to pass to <code><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.Builder.html#addApi(com.google.android.gms.common.api.Api<? extends com.google.android.gms.common.api.Api.ApiOptions.NotRequiredOptions>)">addApi(Api<? extends Api.ApiOptions.NotRequiredOptions>)</a></code> to enable <code><a href="/reference/com/google/android/gms/fitness/SensorsApi.html">SensorsApi</a></code>.
-
-
-
-          </td>
-      </tr>
-
-
-      <tr class="alt-color api apilevel-" >
-          <td class="jd-typecol"><nobr>
-          public
-          static
-          final
-          <a href="/reference/com/google/android/gms/common/api/Api.html">Api</a>&lt;<a href="/reference/com/google/android/gms/common/api/Api.ApiOptions.NoOptions.html">Api.ApiOptions.NoOptions</a>&gt;</nobr></td>
-          <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/Fitness.html#SESSIONS_API">SESSIONS_API</a></td>
-          <td class="jd-descrcol" width="100%">
-            Token to pass to <code><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.Builder.html#addApi(com.google.android.gms.common.api.Api<? extends com.google.android.gms.common.api.Api.ApiOptions.NotRequiredOptions>)">addApi(Api<? extends Api.ApiOptions.NotRequiredOptions>)</a></code> to enable <code><a href="/reference/com/google/android/gms/fitness/SessionsApi.html">SessionsApi</a></code>.
-
-
-
-          </td>
-      </tr>
-
-
       <tr class=" api apilevel-" >
           <td class="jd-typecol"><nobr>
           public
@@ -1856,7 +1758,7 @@ From class
 
       
   <div class="jd-tagdata jd-tagdescr"><p>Broadcast action: the user has requested that an application show the value of a
- particular fitness <a href="/reference/com/google/android/gms/fitness/data/DataType.html">data type</a></a>.  This could be an intent to visualize
+ particular fitness <code><a href="/reference/com/google/android/gms/fitness/data/DataType.html">data type</a></code>.  This could be an intent to visualize
  the current value of a data type (such as the current heart rate),
  or the value of a data type over a period of time.  The extras will determine what the
  particular intent is.
@@ -2038,7 +1940,7 @@ From class
         public 
         static 
         final 
-        Void
+        <a href="/reference/com/google/android/gms/common/api/Api.html">Api</a>&lt;<a href="/reference/com/google/android/gms/common/api/Api.ApiOptions.NoOptions.html">Api.ApiOptions.NoOptions</a>&gt;
       </span>
         API
     </h4>
@@ -2052,63 +1954,8 @@ From class
       
     
 
-      <p>
-  <p class="caution"><strong>
-      This field is deprecated.</strong><br/>
-    in favor of granular API tokens.
-
-  </p>
-  <div class="jd-tagdata jd-tagdescr"><p>Instead of API, you now need to use the specific API for the calls you're making, .e.g.
- <pre>
- // Create a Google Fit Client instance with default user account.
- mGoogleApiClient = new GoogleApiClient.Builder(this)
-         .addApi(Fitness.SENSORS_API)    // Required only if you're making SensorsApi calls
-         .addApi(Fitness.RECORDING_API)  // Required only if you're making RecordingApi calls
-         .addApi(Fitness.HISTORY_API)    // Required only if you're making HistoryApi calls
-         .addApi(Fitness.SESSIONS_API)   // Required only if you're making SessionsApi calls
-         // Optional: request more APIs with additional calls to addApi
-         .useDefaultAccount()
-         .addScope(new Scope(Scopes.FITNESS))
-         .addOnConnectionsCallbacks(this)
-         .addOnConnectionFailedListener(this)
-         .build();
- </pre></p></div>
-  <div class="jd-tagdata">
-      <h5 class="jd-tagtitle">See Also</h5>
-      <ul class="nolist"><li><code><a href="/reference/com/google/android/gms/fitness/Fitness.html#SENSORS_API">SENSORS_API</a></code></li><li><code><a href="/reference/com/google/android/gms/fitness/Fitness.html#RECORDING_API">RECORDING_API</a></code></li><li><code><a href="/reference/com/google/android/gms/fitness/Fitness.html#SESSIONS_API">SESSIONS_API</a></code></li><li><code><a href="/reference/com/google/android/gms/fitness/Fitness.html#HISTORY_API">HISTORY_API</a></code></li><li><code><a href="/reference/com/google/android/gms/fitness/Fitness.html#BLE_API">BLE_API</a></code></li><li><code><a href="/reference/com/google/android/gms/fitness/Fitness.html#CONFIG_API">CONFIG_API</a></code></li>
-      </ul>
-  </div>
-
-
-    </div>
-</div>
-
-
-
-<A NAME="BLE_API"></A>
-
-<div class="jd-details api apilevel-">
-    <h4 class="jd-details-title">
-      <span class="normal">
-        public
-        static
-        final
-        <a href="/reference/com/google/android/gms/common/api/Api.html">Api</a>&lt;<a href="/reference/com/google/android/gms/common/api/Api.ApiOptions.NoOptions.html">Api.ApiOptions.NoOptions</a>&gt;
-      </span>
-        BLE_API
-    </h4>
-      <div class="api-level">
-
-
-
-
-      </div>
-    <div class="jd-details-descr">
-
-
-
       
-  <div class="jd-tagdata jd-tagdescr"><p>Token to pass to <code><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.Builder.html#addApi(com.google.android.gms.common.api.Api<? extends com.google.android.gms.common.api.Api.ApiOptions.NotRequiredOptions>)">addApi(Api<? extends Api.ApiOptions.NotRequiredOptions>)</a></code> to enable <code><a href="/reference/com/google/android/gms/fitness/BleApi.html">BleApi</a></code>.
+  <div class="jd-tagdata jd-tagdescr"><p>Token to pass to <code><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.Builder.html#addApi(com.google.android.gms.common.api.Api<? extends com.google.android.gms.common.api.Api.ApiOptions.NotRequiredOptions>)">addApi(Api<? extends Api.ApiOptions.NotRequiredOptions>)</a></code> to enable Google Fit services.
 </p></div>
 
     
@@ -2149,38 +1996,6 @@ From class
 
 
 
-<A NAME="CONFIG_API"></A>
-
-<div class="jd-details api apilevel-">
-    <h4 class="jd-details-title">
-      <span class="normal">
-        public
-        static
-        final
-        <a href="/reference/com/google/android/gms/common/api/Api.html">Api</a>&lt;<a href="/reference/com/google/android/gms/common/api/Api.ApiOptions.NoOptions.html">Api.ApiOptions.NoOptions</a>&gt;
-      </span>
-        CONFIG_API
-    </h4>
-      <div class="api-level">
-
-
-
-
-      </div>
-    <div class="jd-details-descr">
-
-
-
-
-  <div class="jd-tagdata jd-tagdescr"><p>Token to pass to <code><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.Builder.html#addApi(com.google.android.gms.common.api.Api<? extends com.google.android.gms.common.api.Api.ApiOptions.NotRequiredOptions>)">addApi(Api<? extends Api.ApiOptions.NotRequiredOptions>)</a></code> to enable <code><a href="/reference/com/google/android/gms/fitness/ConfigApi.html">ConfigApi</a></code>.
-</p></div>
-
-
-    </div>
-</div>
-
-
-
 <A NAME="ConfigApi"></A>
 
 <div class="jd-details api apilevel-"> 
@@ -2213,38 +2028,6 @@ From class
 
 
 
-<A NAME="HISTORY_API"></A>
-
-<div class="jd-details api apilevel-">
-    <h4 class="jd-details-title">
-      <span class="normal">
-        public
-        static
-        final
-        <a href="/reference/com/google/android/gms/common/api/Api.html">Api</a>&lt;<a href="/reference/com/google/android/gms/common/api/Api.ApiOptions.NoOptions.html">Api.ApiOptions.NoOptions</a>&gt;
-      </span>
-        HISTORY_API
-    </h4>
-      <div class="api-level">
-
-
-
-
-      </div>
-    <div class="jd-details-descr">
-
-
-
-
-  <div class="jd-tagdata jd-tagdescr"><p>Token to pass to <code><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.Builder.html#addApi(com.google.android.gms.common.api.Api<? extends com.google.android.gms.common.api.Api.ApiOptions.NotRequiredOptions>)">addApi(Api<? extends Api.ApiOptions.NotRequiredOptions>)</a></code> to enable <code><a href="/reference/com/google/android/gms/fitness/HistoryApi.html">HistoryApi</a></code>.
-</p></div>
-
-
-    </div>
-</div>
-
-
-
 <A NAME="HistoryApi"></A>
 
 <div class="jd-details api apilevel-"> 
@@ -2272,38 +2055,6 @@ From class
 </p></div>
 
     
-    </div>
-</div>
-
-
-
-<A NAME="RECORDING_API"></A>
-
-<div class="jd-details api apilevel-">
-    <h4 class="jd-details-title">
-      <span class="normal">
-        public
-        static
-        final
-        <a href="/reference/com/google/android/gms/common/api/Api.html">Api</a>&lt;<a href="/reference/com/google/android/gms/common/api/Api.ApiOptions.NoOptions.html">Api.ApiOptions.NoOptions</a>&gt;
-      </span>
-        RECORDING_API
-    </h4>
-      <div class="api-level">
-
-
-
-
-      </div>
-    <div class="jd-details-descr">
-
-
-
-
-  <div class="jd-tagdata jd-tagdescr"><p>Token to pass to <code><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.Builder.html#addApi(com.google.android.gms.common.api.Api<? extends com.google.android.gms.common.api.Api.ApiOptions.NotRequiredOptions>)">addApi(Api<? extends Api.ApiOptions.NotRequiredOptions>)</a></code> to enable <code><a href="/reference/com/google/android/gms/fitness/RecordingApi.html">RecordingApi</a></code>.
-</p></div>
-
-
     </div>
 </div>
 
@@ -2456,7 +2207,6 @@ From class
       
   <div class="jd-tagdata jd-tagdescr"><p>Scope for read access to the biometric data types in Google Fit, which include:
  <ul>
-     <li><code><a href="/reference/com/google/android/gms/fitness/data/DataType.html#TYPE_BODY_FAT_PERCENTAGE">body.fat.percentage</a></code>
      <li><code><a href="/reference/com/google/android/gms/fitness/data/DataType.html#TYPE_HEART_RATE_BPM">heart_rate.bpm</a></code>
      <li><code><a href="/reference/com/google/android/gms/fitness/data/DataType.html#TYPE_HEIGHT">height</a></code>
      <li><code><a href="/reference/com/google/android/gms/fitness/data/DataType.html#TYPE_WEIGHT">weight</a></code>
@@ -2494,7 +2244,6 @@ From class
       
   <div class="jd-tagdata jd-tagdescr"><p>Scope for read/write access to biometric data types in Google Fit, which include:
  <ul>
-     <li><code><a href="/reference/com/google/android/gms/fitness/data/DataType.html#TYPE_BODY_FAT_PERCENTAGE">body.fat.percentage</a></code>
      <li><code><a href="/reference/com/google/android/gms/fitness/data/DataType.html#TYPE_HEART_RATE_BPM">heart_rate.bpm</a></code>
      <li><code><a href="/reference/com/google/android/gms/fitness/data/DataType.html#TYPE_HEIGHT">height</a></code>
      <li><code><a href="/reference/com/google/android/gms/fitness/data/DataType.html#TYPE_WEIGHT">weight</a></code>
@@ -2576,70 +2325,6 @@ From class
 </p></div>
 
     
-    </div>
-</div>
-
-
-
-<A NAME="SENSORS_API"></A>
-
-<div class="jd-details api apilevel-">
-    <h4 class="jd-details-title">
-      <span class="normal">
-        public
-        static
-        final
-        <a href="/reference/com/google/android/gms/common/api/Api.html">Api</a>&lt;<a href="/reference/com/google/android/gms/common/api/Api.ApiOptions.NoOptions.html">Api.ApiOptions.NoOptions</a>&gt;
-      </span>
-        SENSORS_API
-    </h4>
-      <div class="api-level">
-
-
-
-
-      </div>
-    <div class="jd-details-descr">
-
-
-
-
-  <div class="jd-tagdata jd-tagdescr"><p>Token to pass to <code><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.Builder.html#addApi(com.google.android.gms.common.api.Api<? extends com.google.android.gms.common.api.Api.ApiOptions.NotRequiredOptions>)">addApi(Api<? extends Api.ApiOptions.NotRequiredOptions>)</a></code> to enable <code><a href="/reference/com/google/android/gms/fitness/SensorsApi.html">SensorsApi</a></code>.
-</p></div>
-
-
-    </div>
-</div>
-
-
-
-<A NAME="SESSIONS_API"></A>
-
-<div class="jd-details api apilevel-">
-    <h4 class="jd-details-title">
-      <span class="normal">
-        public
-        static
-        final
-        <a href="/reference/com/google/android/gms/common/api/Api.html">Api</a>&lt;<a href="/reference/com/google/android/gms/common/api/Api.ApiOptions.NoOptions.html">Api.ApiOptions.NoOptions</a>&gt;
-      </span>
-        SESSIONS_API
-    </h4>
-      <div class="api-level">
-
-
-
-
-      </div>
-    <div class="jd-details-descr">
-
-
-
-
-  <div class="jd-tagdata jd-tagdescr"><p>Token to pass to <code><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.Builder.html#addApi(com.google.android.gms.common.api.Api<? extends com.google.android.gms.common.api.Api.ApiOptions.NotRequiredOptions>)">addApi(Api<? extends Api.ApiOptions.NotRequiredOptions>)</a></code> to enable <code><a href="/reference/com/google/android/gms/fitness/SessionsApi.html">SessionsApi</a></code>.
-</p></div>
-
-
     </div>
 </div>
 
