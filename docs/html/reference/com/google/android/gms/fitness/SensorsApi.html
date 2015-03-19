@@ -96,8 +96,6 @@
 
 
 
-
-
 <html>
 <head>
 
@@ -113,7 +111,7 @@
 href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Roboto:light,regular,medium,thin,italic,mediumitalic,bold"
   title="roboto">
-<link href="/assets/css/default.css?v=5" rel="stylesheet" type="text/css">
+<link href="/assets/css/default.css?v=4" rel="stylesheet" type="text/css">
 
 
 
@@ -414,7 +412,6 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
                 <li><a href="/distribute/users/index.html">Get Users</a></li>
                 <li><a href="/distribute/engage/index.html">Engage &amp; Retain</a></li>
                 <li><a href="/distribute/monetize/index.html">Monetize</a></li>
-                <li><a href="/distribute/analyze/index.html">Analyze</a></li>
                 <li><a href="/distribute/tools/index.html">Tools &amp; Reference</a></li>
                 <li><a href="/distribute/stories/index.html">Developer Stories</a></li>
               </ul>
@@ -596,14 +593,14 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
 
   <li class="nav-section">
-    <div class="nav-section-header"><a href="/google/play/billing/index.html" zh-cn-lang="应用内结算">
+    <div class="nav-section-header"><a href="/google/play/billing/index.html">
       <span class="en">Google Play In-app Billing</span></a>
     </div>
     <ul>
-      <li><a href="/google/play/billing/billing_overview.html" zh-cn-lang="应用内结算概述">
+      <li><a href="/google/play/billing/billing_overview.html">
               <span class="en">Overview</span></a>
       </li>
-      <li class="nav-section"><div class="nav-section-header"><a href="/google/play/billing/api.html" zh-cn-lang="应用内结算 API">
+      <li class="nav-section"><div class="nav-section-header"><a href="/google/play/billing/api.html">
               <span class="en">Version 3 API</span></a></div>
               <ul>
               <li><a href="/google/play/billing/billing_integrate.html">
@@ -626,13 +623,13 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       <li><a href="/google/play/billing/billing_subscriptions.html">
               <span class="en">Subscriptions</span></a>
       </li>
-      <li><a href="/google/play/billing/billing_best_practices.html" zh-cn-lang="安全性和设计">
+      <li><a href="/google/play/billing/billing_best_practices.html">
               <span class="en">Security and Design</span></a>
       </li>
-      <li><a href="/google/play/billing/billing_testing.html" zh-cn-lang="测试应用内结算">
+      <li><a href="/google/play/billing/billing_testing.html">
               <span class="en">Testing In-app Billing</span></a>
       </li>
-      <li><a href="/google/play/billing/billing_admin.html" zh-cn-lang="管理应用内结算">
+      <li><a href="/google/play/billing/billing_admin.html">
               <span class="en">Administering In-app Billing</span></a>
       </li>
       <li><a href="/google/play/billing/versions.html">
@@ -666,14 +663,21 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
               <span class="en">HTTP</span></a></li>
               </ul>
         </li>
-        <li><a href="/google/gcm/server-ref.html">
-            <span class="en">Server Reference</span></a>
-        </li>
         <li><a href="/google/gcm/notifications.html">
               <span class="en">User Notifications</span></a>
         </li>
+        <li><a href="/google/gcm/adv.html">
+            <span class="en">Advanced Topics</span></a>
+        </li>
         <li><a href="/google/gcm/c2dm.html">
             <span class="en">Migration</span></a>
+        </li>
+        <li id="gcm-tree-list" class="nav-section">
+          <div class="nav-section-header">
+            <a href="/reference/gcm-packages.html">
+              <span class="en">Reference</span>
+            </a>
+          <div>
         </li>
       </ul>
   </li>
@@ -850,7 +854,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
  The Sensors API should be accessed from the <code><a href="/reference/com/google/android/gms/fitness/Fitness.html">Fitness</a></code> entry point.  Example:
  <pre>
      GoogleApiClient client = new GoogleApiClient.Builder(context)
-         .addApi(Fitness.SENSORS_API)
+         .addApi(Fitness.API)
          ...
          .build();
      client.connect();
@@ -962,7 +966,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         <span class="sympad"><a href="/reference/com/google/android/gms/fitness/SensorsApi.html#add(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.fitness.request.SensorRequest, com.google.android.gms.fitness.request.OnDataPointListener)">add</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> client, <a href="/reference/com/google/android/gms/fitness/request/SensorRequest.html">SensorRequest</a> request, <a href="/reference/com/google/android/gms/fitness/request/OnDataPointListener.html">OnDataPointListener</a> listener)</nobr>
         
         <div class="jd-descrdiv">
-          Adds a data point <a href="/reference/com/google/android/gms/fitness/request/OnDataPointListener.html">listener</a></a> to a sensor data source.
+          Adds a data point <code><a href="/reference/com/google/android/gms/fitness/request/OnDataPointListener.html">listener</a></code> to a sensor data source.
           
     
 
@@ -1186,7 +1190,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
     
 
       
-  <div class="jd-tagdata jd-tagdescr"><p>Adds a data point <a href="/reference/com/google/android/gms/fitness/request/OnDataPointListener.html">listener</a></a> to a sensor data source.  This
+  <div class="jd-tagdata jd-tagdescr"><p>Adds a data point <code><a href="/reference/com/google/android/gms/fitness/request/OnDataPointListener.html">listener</a></code> to a sensor data source.  This
  method can be called to listen on live updates from a particular data source, or data type
  (in which case a default data source is used).
  <p>

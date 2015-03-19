@@ -96,8 +96,6 @@
 
 
 
-
-
 <html>
 <head>
 
@@ -113,7 +111,7 @@
 href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Roboto:light,regular,medium,thin,italic,mediumitalic,bold"
   title="roboto">
-<link href="/assets/css/default.css?v=5" rel="stylesheet" type="text/css">
+<link href="/assets/css/default.css?v=4" rel="stylesheet" type="text/css">
 
 
 
@@ -414,7 +412,6 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
                 <li><a href="/distribute/users/index.html">Get Users</a></li>
                 <li><a href="/distribute/engage/index.html">Engage &amp; Retain</a></li>
                 <li><a href="/distribute/monetize/index.html">Monetize</a></li>
-                <li><a href="/distribute/analyze/index.html">Analyze</a></li>
                 <li><a href="/distribute/tools/index.html">Tools &amp; Reference</a></li>
                 <li><a href="/distribute/stories/index.html">Developer Stories</a></li>
               </ul>
@@ -596,14 +593,14 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
 
   <li class="nav-section">
-    <div class="nav-section-header"><a href="/google/play/billing/index.html" zh-cn-lang="应用内结算">
+    <div class="nav-section-header"><a href="/google/play/billing/index.html">
       <span class="en">Google Play In-app Billing</span></a>
     </div>
     <ul>
-      <li><a href="/google/play/billing/billing_overview.html" zh-cn-lang="应用内结算概述">
+      <li><a href="/google/play/billing/billing_overview.html">
               <span class="en">Overview</span></a>
       </li>
-      <li class="nav-section"><div class="nav-section-header"><a href="/google/play/billing/api.html" zh-cn-lang="应用内结算 API">
+      <li class="nav-section"><div class="nav-section-header"><a href="/google/play/billing/api.html">
               <span class="en">Version 3 API</span></a></div>
               <ul>
               <li><a href="/google/play/billing/billing_integrate.html">
@@ -626,13 +623,13 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       <li><a href="/google/play/billing/billing_subscriptions.html">
               <span class="en">Subscriptions</span></a>
       </li>
-      <li><a href="/google/play/billing/billing_best_practices.html" zh-cn-lang="安全性和设计">
+      <li><a href="/google/play/billing/billing_best_practices.html">
               <span class="en">Security and Design</span></a>
       </li>
-      <li><a href="/google/play/billing/billing_testing.html" zh-cn-lang="测试应用内结算">
+      <li><a href="/google/play/billing/billing_testing.html">
               <span class="en">Testing In-app Billing</span></a>
       </li>
-      <li><a href="/google/play/billing/billing_admin.html" zh-cn-lang="管理应用内结算">
+      <li><a href="/google/play/billing/billing_admin.html">
               <span class="en">Administering In-app Billing</span></a>
       </li>
       <li><a href="/google/play/billing/versions.html">
@@ -666,14 +663,21 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
               <span class="en">HTTP</span></a></li>
               </ul>
         </li>
-        <li><a href="/google/gcm/server-ref.html">
-            <span class="en">Server Reference</span></a>
-        </li>
         <li><a href="/google/gcm/notifications.html">
               <span class="en">User Notifications</span></a>
         </li>
+        <li><a href="/google/gcm/adv.html">
+            <span class="en">Advanced Topics</span></a>
+        </li>
         <li><a href="/google/gcm/c2dm.html">
             <span class="en">Migration</span></a>
+        </li>
+        <li id="gcm-tree-list" class="nav-section">
+          <div class="nav-section-header">
+            <a href="/reference/gcm-packages.html">
+              <span class="en">Reference</span>
+            </a>
+          <div>
         </li>
       </ul>
   </li>
@@ -781,15 +785,6 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   
 
 
-
-
-
-
-
-
-
-
-
 <div class="sum-details-links">
 
 Summary:
@@ -801,12 +796,6 @@ Summary:
   <a href="#constants">Constants</a>
   
 
-
-  &#124; <a href="#inhconstants">Inherited Constants</a>
-
-
-
-  &#124; <a href="#lfields">Fields</a>
 
 
 
@@ -855,11 +844,6 @@ Summary:
 
   
   
-      implements
-
-        Parcelable
-
-
   
 
 
@@ -1122,18 +1106,6 @@ Summary:
     
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
-        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/common/ConnectionResult.html#SIGN_IN_FAILED">SIGN_IN_FAILED</a></td>
-        <td class="jd-descrcol" width="100%">
-          The client attempted to connect to the service but the user is not signed in.
-
-
-
-        </td>
-    </tr>
-
-
-    <tr class=" api apilevel-" >
-        <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/common/ConnectionResult.html#SIGN_IN_REQUIRED">SIGN_IN_REQUIRED</a></td>
         <td class="jd-descrcol" width="100%">
           The client attempted to connect to the service but the user is not
@@ -1145,7 +1117,7 @@ Summary:
     </tr>
     
     
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/common/ConnectionResult.html#SUCCESS">SUCCESS</a></td>
         <td class="jd-descrcol" width="100%">
@@ -1157,7 +1129,7 @@ Summary:
     </tr>
     
     
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/common/ConnectionResult.html#TIMEOUT">TIMEOUT</a></td>
         <td class="jd-descrcol" width="100%">
@@ -1176,89 +1148,6 @@ Summary:
 
 
 
-<!-- =========== ENUM CONSTANT SUMMARY =========== -->
-<table id="inhconstants" class="jd-sumtable"><tr><th>
-  <a href="#" class="toggle-all" onclick="return toggleAllInherited(this, null)">[Expand]</a>
-  <div style="clear:left;">Inherited Constants</div></th></tr>
-
-
-
-
-<tr class="api apilevel-" >
-<td colspan="12">
-
-  <a href="#" onclick="return toggleInherited(this, null)" id="inherited-constants-android.os.Parcelable" class="jd-expando-trigger closed"
-          ><img id="inherited-constants-android.os.Parcelable-trigger"
-          src="/assets/images/triangle-closed.png"
-          class="jd-expando-trigger-img" /></a>From interface
-android.os.Parcelable
-<div id="inherited-constants-android.os.Parcelable">
-  <div id="inherited-constants-android.os.Parcelable-list"
-        class="jd-inheritedlinks">
-  </div>
-  <div id="inherited-constants-android.os.Parcelable-summary" style="display: none;">
-    <table class="jd-sumtable-expando">
-
-
-
-    <tr class="alt-color api apilevel-" >
-        <td class="jd-typecol">int</td>
-        <td class="jd-linkcol">CONTENTS_FILE_DESCRIPTOR</td>
-        <td class="jd-descrcol" width="100%">
-
-
-
-
-        </td>
-    </tr>
-
-
-    <tr class=" api apilevel-" >
-        <td class="jd-typecol">int</td>
-        <td class="jd-linkcol">PARCELABLE_WRITE_RETURN_VALUE</td>
-        <td class="jd-descrcol" width="100%">
-
-
-
-
-        </td>
-    </tr>
-
-
-</table>
-  </div>
-</div>
-</td></tr>
-
-
-</table>
-
-
-
-
-<!-- =========== FIELD SUMMARY =========== -->
-<table id="lfields" class="jd-sumtable"><tr><th colspan="12">Fields</th></tr>
-
-
-
-      <tr class="alt-color api apilevel-" >
-          <td class="jd-typecol"><nobr>
-          public
-          static
-          final
-          ConnectionResultCreator</nobr></td>
-          <td class="jd-linkcol"><a href="/reference/com/google/android/gms/common/ConnectionResult.html#CREATOR">CREATOR</a></td>
-          <td class="jd-descrcol" width="100%">
-
-
-
-
-          </td>
-      </tr>
-
-
-
-</table>
 
 
 
@@ -1315,38 +1204,6 @@ android.os.Parcelable
             
             
             
-            int</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/common/ConnectionResult.html#describeContents()">describeContents</a></span>()</nobr>
-
-  </td></tr>
-
-
-
-    <tr class=" api apilevel-" >
-        <td class="jd-typecol"><nobr>
-
-
-
-
-
-            boolean</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/common/ConnectionResult.html#equals(java.lang.Object)">equals</a></span>(Object o)</nobr>
-
-  </td></tr>
-
-
-
-    <tr class="alt-color api apilevel-" >
-        <td class="jd-typecol"><nobr>
-
-
-
-
-
             int</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
@@ -1417,22 +1274,6 @@ android.os.Parcelable
             
             
             
-            int</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/common/ConnectionResult.html#hashCode()">hashCode</a></span>()</nobr>
-
-  </td></tr>
-
-
-
-    <tr class="alt-color api apilevel-" >
-        <td class="jd-typecol"><nobr>
-
-
-
-
-
             boolean</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
@@ -1449,7 +1290,7 @@ android.os.Parcelable
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -1473,7 +1314,7 @@ android.os.Parcelable
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -1485,22 +1326,6 @@ android.os.Parcelable
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/common/ConnectionResult.html#toString()">toString</a></span>()</nobr>
         
-  </td></tr>
-
-
-
-    <tr class=" api apilevel-" >
-        <td class="jd-typecol"><nobr>
-
-
-
-
-
-            void</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/common/ConnectionResult.html#writeToParcel(android.os.Parcel, int)">writeToParcel</a></span>(Parcel out, int flags)</nobr>
-
   </td></tr>
 
 
@@ -1711,64 +1536,6 @@ From class
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">wait</span>(long arg0)</nobr>
         
-  </td></tr>
-
-
-</table>
-  </div>
-</div>
-</td></tr>
-
-
-
-<tr class="api apilevel-" >
-<td colspan="12">
-  <a href="#" onclick="return toggleInherited(this, null)" id="inherited-methods-android.os.Parcelable" class="jd-expando-trigger closed"
-          ><img id="inherited-methods-android.os.Parcelable-trigger"
-          src="/assets/images/triangle-closed.png"
-          class="jd-expando-trigger-img" /></a>
-From interface
-
-  android.os.Parcelable
-
-<div id="inherited-methods-android.os.Parcelable">
-  <div id="inherited-methods-android.os.Parcelable-list"
-        class="jd-inheritedlinks">
-  </div>
-  <div id="inherited-methods-android.os.Parcelable-summary" style="display: none;">
-    <table class="jd-sumtable-expando">
-
-
-
-
-    <tr class="alt-color api apilevel-" >
-        <td class="jd-typecol"><nobr>
-            abstract
-
-
-
-
-            int</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">describeContents</span>()</nobr>
-
-  </td></tr>
-
-
-
-    <tr class=" api apilevel-" >
-        <td class="jd-typecol"><nobr>
-            abstract
-
-
-
-
-            void</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">writeToParcel</span>(Parcel arg0, int arg1)</nobr>
-
   </td></tr>
 
 
@@ -2426,53 +2193,6 @@ From interface
 
 
 
-<A NAME="SIGN_IN_FAILED"></A>
-
-<div class="jd-details api apilevel-">
-    <h4 class="jd-details-title">
-      <span class="normal">
-        public
-        static
-        final
-        int
-      </span>
-        SIGN_IN_FAILED
-    </h4>
-      <div class="api-level">
-
-
-
-
-      </div>
-    <div class="jd-details-descr">
-
-
-
-
-  <div class="jd-tagdata jd-tagdescr"><p>The client attempted to connect to the service but the user is not signed in. Either an error
- occurred when signing in the user and the error can not be recovered with any user
- interaction; or the service may have been part of an optional API and it may be the case
- that no mandatory APIs required authentication, so authentication will not occur.
- <p>
- When seeing this error code,there is no resolution for the sign-in failure.
-</p></div>
-
-
-        <div class="jd-tagdata">
-        <span class="jd-tagtitle">Constant Value: </span>
-        <span>
-
-                17
-                (0x00000011)
-
-        </span>
-        </div>
-
-    </div>
-</div>
-
-
-
 <A NAME="SIGN_IN_REQUIRED"></A>
 
 <div class="jd-details api apilevel-"> 
@@ -2609,44 +2329,6 @@ From interface
 <!-- Fields -->
 
 
-<!-- ========= FIELD DETAIL ======== -->
-<h2>Fields</h2>
-
-
-
-
-<A NAME="CREATOR"></A>
-
-<div class="jd-details api apilevel-">
-    <h4 class="jd-details-title">
-      <span class="normal">
-        public
-        static
-        final
-        ConnectionResultCreator
-      </span>
-        CREATOR
-    </h4>
-      <div class="api-level">
-
-
-
-
-      </div>
-    <div class="jd-details-descr">
-
-
-
-
-  <div class="jd-tagdata jd-tagdescr"><p></p></div>
-
-
-    </div>
-</div>
-
-
-
-
 <!-- Public ctors -->
 
 
@@ -2714,70 +2396,6 @@ From interface
 
 <h2>Public Methods</h2>
 
-
-
-<A NAME="describeContents()"></A>
-
-<div class="jd-details api apilevel-">
-    <h4 class="jd-details-title">
-      <span class="normal">
-        public
-
-
-
-
-        int
-      </span>
-      <span class="sympad">describeContents</span>
-      <span class="normal">()</span>
-    </h4>
-      <div class="api-level">
-        <div></div>
-
-
-
-      </div>
-    <div class="jd-details-descr">
-
-
-
-
-  <div class="jd-tagdata jd-tagdescr"><p></p></div>
-
-    </div>
-</div>
-
-
-<A NAME="equals(java.lang.Object)"></A>
-
-<div class="jd-details api apilevel-">
-    <h4 class="jd-details-title">
-      <span class="normal">
-        public
-
-
-
-
-        boolean
-      </span>
-      <span class="sympad">equals</span>
-      <span class="normal">(Object o)</span>
-    </h4>
-      <div class="api-level">
-        <div></div>
-
-
-
-      </div>
-    <div class="jd-details-descr">
-
-
-
-
-  <div class="jd-tagdata jd-tagdescr"><p></p></div>
-
-    </div>
-</div>
 
 
 <A NAME="getErrorCode()"></A>
@@ -2889,38 +2507,6 @@ From interface
       <ul class="nolist"><li>true if there is a resolution that can be started.
 </li></ul>
   </div>
-
-    </div>
-</div>
-
-
-<A NAME="hashCode()"></A>
-
-<div class="jd-details api apilevel-">
-    <h4 class="jd-details-title">
-      <span class="normal">
-        public
-
-
-
-
-        int
-      </span>
-      <span class="sympad">hashCode</span>
-      <span class="normal">()</span>
-    </h4>
-      <div class="api-level">
-        <div></div>
-
-
-
-      </div>
-    <div class="jd-details-descr">
-
-
-
-
-  <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
     </div>
 </div>
@@ -3050,38 +2636,6 @@ From interface
     
 
       
-  <div class="jd-tagdata jd-tagdescr"><p></p></div>
-
-    </div>
-</div>
-
-
-<A NAME="writeToParcel(android.os.Parcel, int)"></A>
-
-<div class="jd-details api apilevel-">
-    <h4 class="jd-details-title">
-      <span class="normal">
-        public
-
-
-
-
-        void
-      </span>
-      <span class="sympad">writeToParcel</span>
-      <span class="normal">(Parcel out, int flags)</span>
-    </h4>
-      <div class="api-level">
-        <div></div>
-
-
-
-      </div>
-    <div class="jd-details-descr">
-
-
-
-
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
     </div>
