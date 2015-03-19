@@ -96,6 +96,8 @@
 
 
 
+
+
 <html>
 <head>
 
@@ -111,7 +113,7 @@
 href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Roboto:light,regular,medium,thin,italic,mediumitalic,bold"
   title="roboto">
-<link href="/assets/css/default.css?v=4" rel="stylesheet" type="text/css">
+<link href="/assets/css/default.css?v=5" rel="stylesheet" type="text/css">
 
 
 
@@ -412,6 +414,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
                 <li><a href="/distribute/users/index.html">Get Users</a></li>
                 <li><a href="/distribute/engage/index.html">Engage &amp; Retain</a></li>
                 <li><a href="/distribute/monetize/index.html">Monetize</a></li>
+                <li><a href="/distribute/analyze/index.html">Analyze</a></li>
                 <li><a href="/distribute/tools/index.html">Tools &amp; Reference</a></li>
                 <li><a href="/distribute/stories/index.html">Developer Stories</a></li>
               </ul>
@@ -593,14 +596,14 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
 
   <li class="nav-section">
-    <div class="nav-section-header"><a href="/google/play/billing/index.html">
+    <div class="nav-section-header"><a href="/google/play/billing/index.html" zh-cn-lang="应用内结算">
       <span class="en">Google Play In-app Billing</span></a>
     </div>
     <ul>
-      <li><a href="/google/play/billing/billing_overview.html">
+      <li><a href="/google/play/billing/billing_overview.html" zh-cn-lang="应用内结算概述">
               <span class="en">Overview</span></a>
       </li>
-      <li class="nav-section"><div class="nav-section-header"><a href="/google/play/billing/api.html">
+      <li class="nav-section"><div class="nav-section-header"><a href="/google/play/billing/api.html" zh-cn-lang="应用内结算 API">
               <span class="en">Version 3 API</span></a></div>
               <ul>
               <li><a href="/google/play/billing/billing_integrate.html">
@@ -623,13 +626,13 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       <li><a href="/google/play/billing/billing_subscriptions.html">
               <span class="en">Subscriptions</span></a>
       </li>
-      <li><a href="/google/play/billing/billing_best_practices.html">
+      <li><a href="/google/play/billing/billing_best_practices.html" zh-cn-lang="安全性和设计">
               <span class="en">Security and Design</span></a>
       </li>
-      <li><a href="/google/play/billing/billing_testing.html">
+      <li><a href="/google/play/billing/billing_testing.html" zh-cn-lang="测试应用内结算">
               <span class="en">Testing In-app Billing</span></a>
       </li>
-      <li><a href="/google/play/billing/billing_admin.html">
+      <li><a href="/google/play/billing/billing_admin.html" zh-cn-lang="管理应用内结算">
               <span class="en">Administering In-app Billing</span></a>
       </li>
       <li><a href="/google/play/billing/versions.html">
@@ -663,21 +666,14 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
               <span class="en">HTTP</span></a></li>
               </ul>
         </li>
+        <li><a href="/google/gcm/server-ref.html">
+            <span class="en">Server Reference</span></a>
+        </li>
         <li><a href="/google/gcm/notifications.html">
               <span class="en">User Notifications</span></a>
         </li>
-        <li><a href="/google/gcm/adv.html">
-            <span class="en">Advanced Topics</span></a>
-        </li>
         <li><a href="/google/gcm/c2dm.html">
             <span class="en">Migration</span></a>
-        </li>
-        <li id="gcm-tree-list" class="nav-section">
-          <div class="nav-section-header">
-            <a href="/reference/gcm-packages.html">
-              <span class="en">Reference</span>
-            </a>
-          <div>
         </li>
       </ul>
   </li>
@@ -967,6 +963,30 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
             
             
             
+            Intent</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/games/Players.html#getCompareProfileIntent(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.games.Player)">getCompareProfileIntent</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient, <a href="/reference/com/google/android/gms/games/Player.html">Player</a> player)</nobr>
+
+        <div class="jd-descrdiv">
+          Returns an intent that will display a screen where the user can compare themselves against
+ another player's profile.
+
+
+
+        </div>
+
+  </td></tr>
+
+
+
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            abstract
+
+
+
+
             <a href="/reference/com/google/android/gms/games/Player.html">Player</a></nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
@@ -983,7 +1003,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -1006,7 +1026,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -1029,7 +1049,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -1053,7 +1073,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -1077,7 +1097,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -1100,7 +1120,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -1124,7 +1144,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -1147,7 +1167,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -1170,7 +1190,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -1292,6 +1312,58 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
 <h2>Public Methods</h2>
 
+
+
+<A NAME="getCompareProfileIntent(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.games.Player)"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+
+
+        abstract
+
+        Intent
+      </span>
+      <span class="sympad">getCompareProfileIntent</span>
+      <span class="normal">(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient, <a href="/reference/com/google/android/gms/games/Player.html">Player</a> player)</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+
+
+
+  <div class="jd-tagdata jd-tagdescr"><p>Returns an intent that will display a screen where the user can compare themselves against
+ another player's profile.
+ Note that this must be invoked with <code><a href="/reference/android/app/Activity.html#startActivityForResult(android.content.Intent, int)">startActivityForResult(Intent, int)</a></code>, so
+ that the identity of the calling package can be established.
+ <p>
+ Required API: <code><a href="/reference/com/google/android/gms/games/Games.html#API">API</a></code><br>
+ Required Scopes: <code><a href="/reference/com/google/android/gms/games/Games.html#SCOPE_GAMES">SCOPE_GAMES</a></code></p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>apiClient</td>
+          <td>The <code><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a></code> to service the call.</td>
+        </tr>
+      </table>
+  </div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li>An <code><a href="/reference/android/content/Intent.html">Intent</a></code> that can be started to display the player profile.
+</li></ul>
+  </div>
+
+    </div>
+</div>
 
 
 <A NAME="getCurrentPlayer(com.google.android.gms.common.api.GoogleApiClient)"></A>

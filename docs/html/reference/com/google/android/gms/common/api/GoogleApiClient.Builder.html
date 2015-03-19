@@ -96,6 +96,8 @@
 
 
 
+
+
 <html>
 <head>
 
@@ -111,7 +113,7 @@
 href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Roboto:light,regular,medium,thin,italic,mediumitalic,bold"
   title="roboto">
-<link href="/assets/css/default.css?v=4" rel="stylesheet" type="text/css">
+<link href="/assets/css/default.css?v=5" rel="stylesheet" type="text/css">
 
 
 
@@ -412,6 +414,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
                 <li><a href="/distribute/users/index.html">Get Users</a></li>
                 <li><a href="/distribute/engage/index.html">Engage &amp; Retain</a></li>
                 <li><a href="/distribute/monetize/index.html">Monetize</a></li>
+                <li><a href="/distribute/analyze/index.html">Analyze</a></li>
                 <li><a href="/distribute/tools/index.html">Tools &amp; Reference</a></li>
                 <li><a href="/distribute/stories/index.html">Developer Stories</a></li>
               </ul>
@@ -593,14 +596,14 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
 
   <li class="nav-section">
-    <div class="nav-section-header"><a href="/google/play/billing/index.html">
+    <div class="nav-section-header"><a href="/google/play/billing/index.html" zh-cn-lang="应用内结算">
       <span class="en">Google Play In-app Billing</span></a>
     </div>
     <ul>
-      <li><a href="/google/play/billing/billing_overview.html">
+      <li><a href="/google/play/billing/billing_overview.html" zh-cn-lang="应用内结算概述">
               <span class="en">Overview</span></a>
       </li>
-      <li class="nav-section"><div class="nav-section-header"><a href="/google/play/billing/api.html">
+      <li class="nav-section"><div class="nav-section-header"><a href="/google/play/billing/api.html" zh-cn-lang="应用内结算 API">
               <span class="en">Version 3 API</span></a></div>
               <ul>
               <li><a href="/google/play/billing/billing_integrate.html">
@@ -623,13 +626,13 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       <li><a href="/google/play/billing/billing_subscriptions.html">
               <span class="en">Subscriptions</span></a>
       </li>
-      <li><a href="/google/play/billing/billing_best_practices.html">
+      <li><a href="/google/play/billing/billing_best_practices.html" zh-cn-lang="安全性和设计">
               <span class="en">Security and Design</span></a>
       </li>
-      <li><a href="/google/play/billing/billing_testing.html">
+      <li><a href="/google/play/billing/billing_testing.html" zh-cn-lang="测试应用内结算">
               <span class="en">Testing In-app Billing</span></a>
       </li>
-      <li><a href="/google/play/billing/billing_admin.html">
+      <li><a href="/google/play/billing/billing_admin.html" zh-cn-lang="管理应用内结算">
               <span class="en">Administering In-app Billing</span></a>
       </li>
       <li><a href="/google/play/billing/versions.html">
@@ -663,21 +666,14 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
               <span class="en">HTTP</span></a></li>
               </ul>
         </li>
+        <li><a href="/google/gcm/server-ref.html">
+            <span class="en">Server Reference</span></a>
+        </li>
         <li><a href="/google/gcm/notifications.html">
               <span class="en">User Notifications</span></a>
         </li>
-        <li><a href="/google/gcm/adv.html">
-            <span class="en">Advanced Topics</span></a>
-        </li>
         <li><a href="/google/gcm/c2dm.html">
             <span class="en">Migration</span></a>
-        </li>
-        <li id="gcm-tree-list" class="nav-section">
-          <div class="nav-section-header">
-            <a href="/reference/gcm-packages.html">
-              <span class="en">Reference</span>
-            </a>
-          <div>
         </li>
       </ul>
   </li>
@@ -1181,6 +1177,30 @@ Summary:
             <a href="/reference/com/google/android/gms/common/api/GoogleApiClient.Builder.html">GoogleApiClient.Builder</a></nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.Builder.html#requestServerAuthCode(java.lang.String, com.google.android.gms.common.api.GoogleApiClient.ServerAuthCodeCallbacks)">requestServerAuthCode</a></span>(String serverClientId, <a href="/reference/com/google/android/gms/common/api/GoogleApiClient.ServerAuthCodeCallbacks.html">GoogleApiClient.ServerAuthCodeCallbacks</a> callbacks)</nobr>
+
+        <div class="jd-descrdiv">
+          Specifies requesting of a server auth code for third party web server as part of
+ client connect() flow.
+
+
+
+        </div>
+
+  </td></tr>
+
+
+
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            <a href="/reference/com/google/android/gms/common/api/GoogleApiClient.Builder.html">GoogleApiClient.Builder</a></nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.Builder.html#setAccountName(java.lang.String)">setAccountName</a></span>(String accountName)</nobr>
         
         <div class="jd-descrdiv">
@@ -1194,7 +1214,7 @@ Summary:
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -1218,7 +1238,7 @@ Summary:
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -1241,7 +1261,7 @@ Summary:
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -1264,7 +1284,7 @@ Summary:
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -1997,6 +2017,58 @@ From class
         <tr>
             <th>IllegalStateException</td>
             <td>if clientId is already being auto-managed.
+</td>
+        </tr>
+      </table>
+  </div>
+
+    </div>
+</div>
+
+
+<A NAME="requestServerAuthCode(java.lang.String, com.google.android.gms.common.api.GoogleApiClient.ServerAuthCodeCallbacks)"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+
+
+
+
+        <a href="/reference/com/google/android/gms/common/api/GoogleApiClient.Builder.html">GoogleApiClient.Builder</a>
+      </span>
+      <span class="sympad">requestServerAuthCode</span>
+      <span class="normal">(String serverClientId, <a href="/reference/com/google/android/gms/common/api/GoogleApiClient.ServerAuthCodeCallbacks.html">GoogleApiClient.ServerAuthCodeCallbacks</a> callbacks)</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+
+
+
+  <div class="jd-tagdata jd-tagdescr"><p>Specifies requesting of a server auth code for third party web server as part of
+ client connect() flow. This is useful for applications which have a web server component
+ that need to access a Google API after the user has left the (Android) application.
+ <p>
+ If server auth code is requested, you will be given the server auth code in
+ <code><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.ServerAuthCodeCallbacks.html#onUploadServerAuthCode(java.lang.String, java.lang.String)">onUploadServerAuthCode(String, String)</a></code> callback.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>serverClientId</td>
+          <td>the 3rd party server client ID for offline access.</td>
+        </tr>
+        <tr>
+          <th>callbacks</td>
+          <td>the <code><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.ServerAuthCodeCallbacks.html">GoogleApiClient.ServerAuthCodeCallbacks</a></code> delegate which will be called back
+                  when communicating back to 3rd party web server is needed.
 </td>
         </tr>
       </table>
