@@ -31430,6 +31430,7 @@ package android.telecom {
 
   public class Voicemail implements android.os.Parcelable {
     method public static android.telecom.Voicemail.Builder createForInsertion(long, java.lang.String);
+    method public static android.telecom.Voicemail.Builder createForUpdate(long, java.lang.String);
     method public int describeContents();
     method public long getDuration();
     method public long getId();

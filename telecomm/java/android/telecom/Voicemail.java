@@ -57,6 +57,16 @@ public class Voicemail implements Parcelable {
     }
 
     /**
+     * Create a {@link Builder} for a {@link Voicemail} to be updated (or deleted).
+     * <p>
+     * The id and source data fields are mandatory for update - id is necessary for updating the
+     * database and source data is necessary for updating the server.
+     */
+    public static Builder createForUpdate(long id, String sourceData) {
+        return new Builder().setId(id).setSourceData(sourceData);
+    }
+
+    /**
      * Builder pattern for creating a {@link Voicemail}. The builder must be created with the
      * {@link #createForInsertion(long, String)} method.
      * <p>
