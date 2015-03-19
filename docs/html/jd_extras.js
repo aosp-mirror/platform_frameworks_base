@@ -1648,7 +1648,7 @@ DISTRIBUTE_RESOURCES = DISTRIBUTE_RESOURCES.concat([
     "title": "Android Auto Audio Apps UI Guidelines",
     "summary": "Guidelines for designing audio apps that work with Auto. ",
     "keywords": ["design", "Auto", "Automotive"],
-    "type": "PDF DOWNLOAD (1.1MB)",
+    "type": "Design",
     "titleFriendly": ""
   },
   {
@@ -1661,7 +1661,7 @@ DISTRIBUTE_RESOURCES = DISTRIBUTE_RESOURCES.concat([
     "title": "Android Auto Messaging Apps UI Guidelines",
     "summary": "Guidelines for designing messaging apps that work with Auto. ",
     "keywords": ["design", "Auto", "Automotive"],
-    "type": "PDF DOWNLOAD (628KB)",
+    "type": "Design",
     "titleFriendly": ""
   },
   {
@@ -1670,11 +1670,11 @@ DISTRIBUTE_RESOURCES = DISTRIBUTE_RESOURCES.concat([
     "tags": [],
     "url": "shareables/auto/AndroidAuto-custom-colors.pdf",
     "timestamp": null,
-    "image": "auto/images/assets/icons/auto_app_in_simulator.png",
+    "image": "auto/images/ui/gearhead_generic_UI.png",
     "title": "Android Auto Color Customization UI Guidelines",
     "summary": "Guidelines for color-customizing apps that work with Auto. ",
     "keywords": ["design", "Auto", "Automotive"],
-    "type": "PDF DOWNLOAD (779KB)",
+    "type": "Design",
     "titleFriendly": ""
   },
   {

@@ -2,6 +2,9 @@ page.title=Providing Messaging for Auto
 page.tags="auto", "car", "automotive", "messaging"
 page.article=true
 
+page.metaDescription=Learn how to extend your messaging app for use in Android Auto devices.
+page.image=auto/images/assets/icons/messaging_app_notifications.png
+
 @jd:body
 
 <div id="tb-wrapper">
