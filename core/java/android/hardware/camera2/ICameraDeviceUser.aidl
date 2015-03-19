@@ -16,11 +16,11 @@
 
 package android.hardware.camera2;
 
-import android.hardware.camera2.params.OutputConfiguration;
-import android.hardware.camera2.impl.CameraMetadataNative;
 import android.hardware.camera2.CaptureRequest;
-
+import android.hardware.camera2.impl.CameraMetadataNative;
+import android.hardware.camera2.params.OutputConfiguration;
 import android.hardware.camera2.utils.LongParcelable;
+import android.view.Surface;
 
 /** @hide */
 interface ICameraDeviceUser
@@ -67,6 +67,29 @@ interface ICameraDeviceUser
 
     // non-negative value is the stream ID. negative value is status_t
     int createStream(in OutputConfiguration outputConfiguration);
+
+    /**
+     * Create an input stream
+     *
+     * <p>Create an input stream of width, height, and format</p>
+     *
+     * @param width Width of the input buffers
+     * @param height Height of the input buffers
+     * @param format Format of the input buffers. One of HAL_PIXEL_FORMAT_*.
+     *
+     * @return stream ID if it's a non-negative value. status_t if it's a negative value.
+     */
+    int createInputStream(int width, int height, int format);
+
+    /**
+     * Get the surface of the input stream.
+     *
+     * <p>It's valid to call this method only after a stream configuration is completed
+     * successfully and the stream configuration includes a input stream.</p>
+     *
+     * @param surface An output argument for the surface of the input stream buffer queue.
+     */
+    int getInputSurface(out Surface surface);
 
     int createDefaultRequest(int templateId, out CameraMetadataNative request);
 

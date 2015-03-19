@@ -44,6 +44,8 @@ public class CameraCaptureSessionImpl extends CameraCaptureSession {
     private final int mId;
     private final String mIdString;
 
+    /** Input surface configured by native camera framework based on user-specified configuration */
+    private final Surface mInput;
     /** User-specified set of surfaces used as the configuration outputs */
     private final List<Surface> mOutputs;
     /**
@@ -85,7 +87,7 @@ public class CameraCaptureSessionImpl extends CameraCaptureSession {
      * There must be no pending actions
      * (e.g. no pending captures, no repeating requests, no flush).</p>
      */
-    CameraCaptureSessionImpl(int id, List<Surface> outputs,
+    CameraCaptureSessionImpl(int id, Surface input, List<Surface> outputs,
             CameraCaptureSession.StateCallback callback, Handler stateHandler,
             android.hardware.camera2.impl.CameraDeviceImpl deviceImpl,
             Handler deviceStateHandler, boolean configureSuccess) {
@@ -100,6 +102,7 @@ public class CameraCaptureSessionImpl extends CameraCaptureSession {
 
         // TODO: extra verification of outputs
         mOutputs = outputs;
+        mInput = input;
         mStateHandler = checkHandler(stateHandler);
         mStateCallback = createUserStateCallbackProxy(mStateHandler, callback);
 
@@ -145,7 +148,11 @@ public class CameraCaptureSessionImpl extends CameraCaptureSession {
             Handler handler) throws CameraAccessException {
         if (request == null) {
             throw new IllegalArgumentException("request must not be null");
+        } else if (request.isReprocess() && !isReprocessible()) {
+            throw new IllegalArgumentException("this capture session cannot handle reprocess " +
+                    "requests");
         }
+
 
         checkNotClosed();
 
@@ -169,6 +176,19 @@ public class CameraCaptureSessionImpl extends CameraCaptureSession {
             throw new IllegalArgumentException("requests must have at least one element");
         }
 
+        boolean reprocess = requests.get(0).isReprocess();
+        if (reprocess && !isReprocessible()) {
+            throw new IllegalArgumentException("this capture session cannot handle reprocess " +
+                    "requests");
+        }
+
+        for (int i = 1; i < requests.size(); i++) {
+            if (requests.get(i).isReprocess() != reprocess) {
+                throw new IllegalArgumentException("cannot mix regular and reprocess capture " +
+                        " requests");
+            }
+        }
+
         checkNotClosed();
 
         handler = checkHandler(handler, callback);
@@ -188,7 +208,10 @@ public class CameraCaptureSessionImpl extends CameraCaptureSession {
             Handler handler) throws CameraAccessException {
         if (request == null) {
             throw new IllegalArgumentException("request must not be null");
+        } else if (request.isReprocess()) {
+            throw new IllegalArgumentException("repeating reprocess requests are not supported");
         }
+
 
         checkNotClosed();
 
@@ -210,6 +233,13 @@ public class CameraCaptureSessionImpl extends CameraCaptureSession {
             throw new IllegalArgumentException("requests must not be null");
         } else if (requests.isEmpty()) {
             throw new IllegalArgumentException("requests must have at least one element");
+        }
+
+        for (CaptureRequest r : requests) {
+            if (r.isReprocess()) {
+                throw new IllegalArgumentException("repeating reprocess burst requests are not " +
+                        "supported");
+            }
         }
 
         checkNotClosed();
@@ -255,6 +285,16 @@ public class CameraCaptureSessionImpl extends CameraCaptureSession {
 
         mDeviceImpl.flush();
         // The next BUSY -> IDLE set of transitions will mark the end of the abort.
+    }
+
+    @Override
+    public boolean isReprocessible() {
+        return mInput != null;
+    }
+
+    @Override
+    public Surface getInputSurface() {
+        return mInput;
     }
 
     /**
@@ -658,8 +698,8 @@ public class CameraCaptureSessionImpl extends CameraCaptureSession {
                     mUnconfigureDrainer.taskStarted();
 
                     try {
-                        mDeviceImpl
-                                .configureOutputsChecked(null); // begin transition to unconfigured
+                        // begin transition to unconfigured
+                        mDeviceImpl.configureStreamsChecked(null, null);
                     } catch (CameraAccessException e) {
                         // OK: do not throw checked exceptions.
                         Log.e(TAG, mIdString + "Exception while configuring outputs: ", e);

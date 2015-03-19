@@ -17,21 +17,31 @@
 package android.hardware.camera2;
 
 import android.os.Handler;
+import android.view.Surface;
 import java.util.List;
 
+
 /**
- * A configured capture session for a {@link CameraDevice}, used for capturing
- * images from the camera.
+ * A configured capture session for a {@link CameraDevice}, used for capturing images from the
+ * camera or reprocessing images captured from the camera in the same session previously.
  *
  * <p>A CameraCaptureSession is created by providing a set of target output surfaces to
- * {@link CameraDevice#createCaptureSession createCaptureSession}. Once created, the session is
- * active until a new session is created by the camera device, or the camera device is closed.</p>
+ * {@link CameraDevice#createCaptureSession createCaptureSession}, or by providing an
+ * {@link android.hardware.camera2.params.InputConfiguration} and a set of target output surfaces to
+ * {@link CameraDevice#createReprocessibleCaptureSession createReprocessibleCaptureSession} for a
+ * reprocessible capture session. Once created, the session is active until a new session is
+ * created by the camera device, or the camera device is closed.</p>
+ *
+ * <p>All capture sessions can be used for capturing images from the camera but only reprocessible
+ * capture sessions can reprocess images captured from the camera in the same session previously.
+ * </p>
  *
  * <p>Creating a session is an expensive operation and can take several hundred milliseconds, since
  * it requires configuring the camera device's internal pipelines and allocating memory buffers for
  * sending images to the desired targets. Therefore the setup is done asynchronously, and
- * {@link CameraDevice#createCaptureSession createCaptureSession} will send the ready-to-use
- * CameraCaptureSession to the provided listener's
+ * {@link CameraDevice#createCaptureSession createCaptureSession} and
+ * {@link CameraDevice#createReprocessibleCaptureSession createReprocessibleCaptureSession} will
+ * send the ready-to-use CameraCaptureSession to the provided listener's
  * {@link CameraCaptureSession.StateCallback#onConfigured onConfigured} callback. If configuration
  * cannot be completed, then the
  * {@link CameraCaptureSession.StateCallback#onConfigureFailed onConfigureFailed} is called, and the
@@ -77,6 +87,12 @@ public abstract class CameraCaptureSession implements AutoCloseable {
      * {@link #setRepeatingBurst}, and will be processed as soon as the current
      * repeat/repeatBurst processing completes.</p>
      *
+     * <p>All capture sessions can be used for capturing images from the camera but only capture
+     * sessions created by
+     * {@link CameraDevice#createReprocessibleCaptureSession createReprocessibleCaptureSession}
+     * can submit reprocess capture requests. Submitting a reprocess request to a regular capture
+     * session will result in an {@link IllegalArgumentException}.</p>
+     *
      * @param request the settings for this capture
      * @param listener The callback object to notify once this request has been
      * processed. If null, no metadata will be produced for this capture,
@@ -94,7 +110,9 @@ public abstract class CameraCaptureSession implements AutoCloseable {
      *                               was explicitly closed, a new session has been created
      *                               or the camera device has been closed.
      * @throws IllegalArgumentException if the request targets no Surfaces or Surfaces that are not
-     *                                  configured as outputs for this session. Or if the handler is
+     *                                  configured as outputs for this session. Or if a reprocess
+     *                                  capture request is submitted in a non-reprocessible capture
+     *                                  session. Or if the handler is
      *                                  null, the listener is not null, and the calling thread has
      *                                  no looper.
      *
@@ -102,6 +120,7 @@ public abstract class CameraCaptureSession implements AutoCloseable {
      * @see #setRepeatingRequest
      * @see #setRepeatingBurst
      * @see #abortCaptures
+     * @see CameraDevice#createReprocessibleCaptureSession
      */
     public abstract int capture(CaptureRequest request, CaptureCallback listener, Handler handler)
             throws CameraAccessException;
@@ -121,6 +140,13 @@ public abstract class CameraCaptureSession implements AutoCloseable {
      * {@link #capture} repeatedly is that this method guarantees that no
      * other requests will be interspersed with the burst.</p>
      *
+     * <p>All capture sessions can be used for capturing images from the camera but only capture
+     * sessions created by
+     * {@link CameraDevice#createReprocessibleCaptureSession createReprocessibleCaptureSession}
+     * can submit reprocess capture requests. The list of requests must all be capturing images from
+     * the camera or all be reprocess capture requests. Submitting a reprocess request to a regular
+     * capture session will result in an {@link IllegalArgumentException}.</p>
+     *
      * @param requests the list of settings for this burst capture
      * @param listener The callback object to notify each time one of the
      * requests in the burst has been processed. If null, no metadata will be
@@ -138,9 +164,13 @@ public abstract class CameraCaptureSession implements AutoCloseable {
      * @throws IllegalStateException if this session is no longer active, either because the session
      *                               was explicitly closed, a new session has been created
      *                               or the camera device has been closed.
-     * @throws IllegalArgumentException If the requests target no Surfaces or Surfaces not currently
-     *                                  configured as outputs. Or if the handler is null, the
-     *                                  listener is not null, and the calling thread has no looper.
+     * @throws IllegalArgumentException If the requests target no Surfaces, or target Surfaces not
+     *                                  currently configured as outputs. Or if a reprocess
+     *                                  capture request is submitted in a non-reprocessible capture
+     *                                  session. Or if the list of requests contains both requests
+     *                                  to capture images from the camera and reprocess capture
+     *                                  requests. Or if the handler is null, the listener is not
+     *                                  null, and the calling thread has no looper.
      *
      * @see #capture
      * @see #setRepeatingRequest
@@ -175,6 +205,14 @@ public abstract class CameraCaptureSession implements AutoCloseable {
      * in-progress burst will be completed before the new repeat request will be
      * used.</p>
      *
+     * <p>This method does not support reprocess capture requests because each reprocess
+     * {@link CaptureRequest} must be created from the {@link TotalCaptureResult} that matches
+     * the input image to be reprocessed. This is either the {@link TotalCaptureResult} of capture
+     * that is sent for reprocessing, or one of the {@link TotalCaptureResult TotalCaptureResults}
+     * of a set of captures, when data from the whole set is combined by the application into a
+     * single reprocess input image. The request must be capturing images from the camera. If a
+     * reprocess capture request is submitted, this method will throw IllegalArgumentException.</p>
+     *
      * @param request the request to repeat indefinitely
      * @param listener The callback object to notify every time the
      * request finishes processing. If null, no metadata will be
@@ -193,9 +231,10 @@ public abstract class CameraCaptureSession implements AutoCloseable {
      *                               was explicitly closed, a new session has been created
      *                               or the camera device has been closed.
      * @throws IllegalArgumentException If the requests reference no Surfaces or Surfaces that are
-     *                                  not currently configured as outputs. Or if the handler is
-     *                                  null, the listener is not null, and the calling thread has
-     *                                  no looper. Or if no requests were passed in.
+     *                                  not currently configured as outputs. Or if the request is
+     *                                  a reprocess capture request. Or if the handler is null, the
+     *                                  listener is not null, and the calling thread has no looper.
+     *                                  Or if no requests were passed in.
      *
      * @see #capture
      * @see #captureBurst
@@ -235,6 +274,14 @@ public abstract class CameraCaptureSession implements AutoCloseable {
      * in-progress burst will be completed before the new repeat burst will be
      * used.</p>
      *
+     * <p>This method does not support reprocess capture requests because each reprocess
+     * {@link CaptureRequest} must be created from the {@link TotalCaptureResult} that matches
+     * the input image to be reprocessed. This is either the {@link TotalCaptureResult} of capture
+     * that is sent for reprocessing, or one of the {@link TotalCaptureResult TotalCaptureResults}
+     * of a set of captures, when data from the whole set is combined by the application into a
+     * single reprocess input image. The request must be capturing images from the camera. If a
+     * reprocess capture request is submitted, this method will throw IllegalArgumentException.</p>
+     *
      * @param requests the list of requests to cycle through indefinitely
      * @param listener The callback object to notify each time one of the
      * requests in the repeating bursts has finished processing. If null, no
@@ -253,7 +300,8 @@ public abstract class CameraCaptureSession implements AutoCloseable {
      *                               was explicitly closed, a new session has been created
      *                               or the camera device has been closed.
      * @throws IllegalArgumentException If the requests reference no Surfaces or Surfaces not
-     *                                  currently configured as outputs. Or if the handler is null,
+     *                                  currently configured as outputs. Or if one of the requests
+     *                                  is a reprocess capture request. Or if the handler is null,
      *                                  the listener is not null, and the calling thread has no
      *                                  looper. Or if no requests were passed in.
      *
@@ -298,9 +346,10 @@ public abstract class CameraCaptureSession implements AutoCloseable {
      * request or a repeating burst is set, it will be cleared.</p>
      *
      * <p>This method is the fastest way to switch the camera device to a new session with
-     * {@link CameraDevice#createCaptureSession}, at the cost of discarding in-progress work. It
-     * must be called before the new session is created. Once all pending requests are either
-     * completed or thrown away, the {@link StateCallback#onReady} callback will be called,
+     * {@link CameraDevice#createCaptureSession} or
+     * {@link CameraDevice#createReprocessibleCaptureSession}, at the cost of discarding in-progress
+     * work. It must be called before the new session is created. Once all pending requests are
+     * either completed or thrown away, the {@link StateCallback#onReady} callback will be called,
      * if the session has not been closed. Otherwise, the {@link StateCallback#onClosed}
      * callback will be fired when a new session is created by the camera device.</p>
      *
@@ -321,8 +370,37 @@ public abstract class CameraCaptureSession implements AutoCloseable {
      * @see #setRepeatingRequest
      * @see #setRepeatingBurst
      * @see CameraDevice#createCaptureSession
+     * @see CameraDevice#createReprocessibleCaptureSession
      */
     public abstract void abortCaptures() throws CameraAccessException;
+
+    /**
+     * Return if the application can submit reprocess capture requests with this camera capture
+     * session.
+     *
+     * @return {@code true} if the application can submit reprocess capture requests with this
+     *         camera capture session. {@code false} otherwise.
+     *
+     * @see CameraDevice#createReprocessibleCaptureSession
+     */
+    public abstract boolean isReprocessible();
+
+    /**
+     * Get the input Surface associated with a reprocessible capture session.
+     *
+     * <p>Each reprocessible capture session has an input {@link Surface} where the reprocess
+     * capture requests get the input images from, rather than the camera device. The application
+     * can create a {@link android.media.ImageWriter} with this input {@link Surface} and use it to
+     * provide input images for reprocess capture requests.</p>
+     *
+     * @return The {@link Surface} where reprocessing capture requests get the input images from. If
+     *         this is not a reprocess capture session, {@code null} will be returned.
+     *
+     * @see CameraDevice#createReprocessibleCaptureSession
+     * @see android.media.ImageWriter
+     * @see android.media.ImageReader
+     */
+    public abstract Surface getInputSurface();
 
     /**
      * Close this capture session asynchronously.

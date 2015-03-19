@@ -295,11 +295,18 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * <p>Whenever a request has been processed, regardless of failure or success,
      * it gets a unique frame number assigned to its future result/failure.</p>
      *
-     * <p>This value monotonically increments, starting with 0,
-     * for every new result or failure; and the scope is the lifetime of the
-     * {@link CameraDevice}.</p>
+     * <p>For the same type of request (capturing from the camera device or reprocessing), this
+     * value monotonically increments, starting with 0, for every new result or failure and the
+     * scope is the lifetime of the {@link CameraDevice}. Between different types of requests,
+     * the frame number may not monotonically increment. For example, the frame number of a newer
+     * reprocess result may be smaller than the frame number of an older result of capturing new
+     * images from the camera device, but the frame number of a newer reprocess result will never be
+     * smaller than the frame number of an older reprocess result.</p>
      *
      * @return The frame number
+     *
+     * @see CameraDevice#createCaptureRequest
+     * @see CameraDevice#createReprocessCaptureRequest
      */
     public long getFrameNumber() {
         return mFrameNumber;
