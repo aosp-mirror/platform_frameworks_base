@@ -83,6 +83,7 @@ import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
+import android.os.TransactionTooLargeException;
 import android.os.UserHandle;
 import android.os.WorkSource;
 import android.provider.Settings;
@@ -3961,7 +3962,8 @@ public final class ActivityStackSupervisor implements DisplayListener {
         }
 
         @Override
-        public final int startActivityIntentSender(IIntentSender intentSender) {
+        public final int startActivityIntentSender(IIntentSender intentSender)
+                throws TransactionTooLargeException {
             mService.enforceNotIsolatedCaller("ActivityContainer.startActivityIntentSender");
 
             if (!(intentSender instanceof PendingIntentRecord)) {

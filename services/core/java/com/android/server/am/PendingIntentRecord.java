@@ -29,6 +29,7 @@ import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.os.TransactionTooLargeException;
 import android.os.UserHandle;
 import android.util.Slog;
 
@@ -166,7 +167,7 @@ final class PendingIntentRecord extends IIntentSender.Stub {
         public int hashCode() {
             return hashCode;
         }
-        
+
         public String toString() {
             return "Key{" + typeName() + " pkg=" + packageName
                 + " intent="
@@ -174,7 +175,7 @@ final class PendingIntentRecord extends IIntentSender.Stub {
                         ? requestIntent.toShortString(false, true, false, false) : "<null>")
                 + " flags=0x" + Integer.toHexString(flags) + " u=" + userId + "}";
         }
-        
+
         String typeName() {
             switch (type) {
                 case ActivityManager.INTENT_SENDER_ACTIVITY:
@@ -189,7 +190,7 @@ final class PendingIntentRecord extends IIntentSender.Stub {
             return Integer.toString(type);
         }
     }
-    
+
     PendingIntentRecord(ActivityManagerService _owner, Key _k, int _u) {
         owner = _owner;
         key = _k;
@@ -197,16 +198,16 @@ final class PendingIntentRecord extends IIntentSender.Stub {
         ref = new WeakReference<PendingIntentRecord>(this);
     }
 
-    public int send(int code, Intent intent, String resolvedType,
-            IIntentReceiver finishedReceiver, String requiredPermission) {
+    public int send(int code, Intent intent, String resolvedType, IIntentReceiver finishedReceiver,
+            String requiredPermission) throws TransactionTooLargeException {
         return sendInner(code, intent, resolvedType, finishedReceiver,
                 requiredPermission, null, null, 0, 0, 0, null, null);
     }
-    
-    int sendInner(int code, Intent intent, String resolvedType,
-            IIntentReceiver finishedReceiver, String requiredPermission,
-            IBinder resultTo, String resultWho, int requestCode,
-            int flagsMask, int flagsValues, Bundle options, IActivityContainer container) {
+
+    int sendInner(int code, Intent intent, String resolvedType, IIntentReceiver finishedReceiver,
+            String requiredPermission, IBinder resultTo, String resultWho, int requestCode,
+            int flagsMask, int flagsValues, Bundle options, IActivityContainer container)
+            throws TransactionTooLargeException {
         synchronized(owner) {
             final ActivityContainer activityContainer = (ActivityContainer)container;
             if (activityContainer != null && activityContainer.mParentActivity != null &&
@@ -234,9 +235,9 @@ final class PendingIntentRecord extends IIntentSender.Stub {
                 flagsMask &= ~Intent.IMMUTABLE_FLAGS;
                 flagsValues &= flagsMask;
                 finalIntent.setFlags((finalIntent.getFlags()&~flagsMask) | flagsValues);
-                
+
                 final long origId = Binder.clearCallingIdentity();
-                
+
                 boolean sendFinish = finishedReceiver != null;
                 int userId = key.userId;
                 if (userId == UserHandle.USER_CURRENT) {
@@ -297,8 +298,7 @@ final class PendingIntentRecord extends IIntentSender.Stub {
                         break;
                     case ActivityManager.INTENT_SENDER_SERVICE:
                         try {
-                            owner.startServiceInPackage(uid,
-                                    finalIntent, resolvedType, userId);
+                            owner.startServiceInPackage(uid, finalIntent, resolvedType, userId);
                         } catch (RuntimeException e) {
                             Slog.w(TAG, "Unable to send startService intent", e);
                         }
