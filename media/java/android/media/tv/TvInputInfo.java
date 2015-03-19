@@ -116,12 +116,13 @@ public final class TvInputInfo implements Parcelable {
     private final ResolveInfo mService;
     private final String mId;
     private final String mParentId;
+    private final int mType;
+    private final boolean mIsHardwareInput;
 
     // Attributes from XML meta data.
     private String mSetupActivity;
     private String mSettingsActivity;
 
-    private int mType = TYPE_TUNER;
     private HdmiDeviceInfo mHdmiDeviceInfo;
     private String mLabel;
     private Uri mIconUri;
@@ -153,7 +154,7 @@ public final class TvInputInfo implements Parcelable {
             throws XmlPullParserException, IOException {
         return createTvInputInfo(context, service, generateInputIdForComponentName(
                 new ComponentName(service.serviceInfo.packageName, service.serviceInfo.name)),
-                null, TYPE_TUNER, null, null, false);
+                null, TYPE_TUNER, false, null, null, false);
     }
 
     /**
@@ -177,7 +178,7 @@ public final class TvInputInfo implements Parcelable {
         boolean isConnectedToHdmiSwitch = (hdmiDeviceInfo.getPhysicalAddress() & 0x0FFF) != 0;
         TvInputInfo input = createTvInputInfo(context, service, generateInputIdForHdmiDevice(
                 new ComponentName(service.serviceInfo.packageName, service.serviceInfo.name),
-                hdmiDeviceInfo), parentId, TYPE_HDMI, label, iconUri, isConnectedToHdmiSwitch);
+                hdmiDeviceInfo), parentId, TYPE_HDMI, true, label, iconUri, isConnectedToHdmiSwitch);
         input.mHdmiDeviceInfo = hdmiDeviceInfo;
         return input;
     }
@@ -202,12 +203,12 @@ public final class TvInputInfo implements Parcelable {
         int inputType = sHardwareTypeToTvInputType.get(hardwareInfo.getType(), TYPE_TUNER);
         return createTvInputInfo(context, service, generateInputIdForHardware(
                 new ComponentName(service.serviceInfo.packageName, service.serviceInfo.name),
-                hardwareInfo), null, inputType, label, iconUri, false);
+                hardwareInfo), null, inputType, true, label, iconUri, false);
     }
 
     private static TvInputInfo createTvInputInfo(Context context, ResolveInfo service,
-            String id, String parentId, int inputType, String label, Uri iconUri,
-            boolean isConnectedToHdmiSwitch)
+            String id, String parentId, int inputType, boolean isHardwareInput, String label,
+            Uri iconUri, boolean isConnectedToHdmiSwitch)
                     throws XmlPullParserException, IOException {
         ServiceInfo si = service.serviceInfo;
         PackageManager pm = context.getPackageManager();
@@ -233,7 +234,7 @@ public final class TvInputInfo implements Parcelable {
                         "Meta-data does not start with tv-input-service tag in " + si.name);
             }
 
-            TvInputInfo input = new TvInputInfo(service, id, parentId, inputType);
+            TvInputInfo input = new TvInputInfo(service, id, parentId, inputType, isHardwareInput);
             TypedArray sa = res.obtainAttributes(attrs,
                     com.android.internal.R.styleable.TvInputService);
             input.mSetupActivity = sa.getString(
@@ -272,12 +273,16 @@ public final class TvInputInfo implements Parcelable {
      * @param id ID of this TV input. Should be generated via generateInputId*().
      * @param parentId ID of this TV input's parent input. {@code null} if none exists.
      * @param type The type of this TV input service.
+     * @param isHardwareInput {@code true} if this TV input represents a hardware device.
+     *         {@code false} otherwise.
      */
-    private TvInputInfo(ResolveInfo service, String id, String parentId, int type) {
+    private TvInputInfo(ResolveInfo service, String id, String parentId, int type,
+            boolean isHardwareInput) {
         mService = service;
         mId = id;
         mParentId = parentId;
         mType = type;
+        mIsHardwareInput = isHardwareInput;
     }
 
     /**
@@ -378,6 +383,16 @@ public final class TvInputInfo implements Parcelable {
      */
     public boolean isPassthroughInput() {
         return mType != TYPE_TUNER;
+    }
+
+    /**
+     * Returns {@code true} if this TV input represents a hardware device. (e.g. built-in tuner,
+     * HDMI1) {@code false} otherwise.
+     * @hide
+     */
+    @SystemApi
+    public boolean isHardwareInput() {
+        return mIsHardwareInput;
     }
 
     /**
@@ -499,6 +514,7 @@ public final class TvInputInfo implements Parcelable {
         dest.writeString(mSetupActivity);
         dest.writeString(mSettingsActivity);
         dest.writeInt(mType);
+        dest.writeByte(mIsHardwareInput ? (byte) 1 : 0);
         dest.writeParcelable(mHdmiDeviceInfo, flags);
         dest.writeParcelable(mIconUri, flags);
         dest.writeString(mLabel);
@@ -572,6 +588,7 @@ public final class TvInputInfo implements Parcelable {
         mSetupActivity = in.readString();
         mSettingsActivity = in.readString();
         mType = in.readInt();
+        mIsHardwareInput = in.readByte() == 1 ? true : false;
         mHdmiDeviceInfo = in.readParcelable(null);
         mIconUri = in.readParcelable(null);
         mLabel = in.readString();
