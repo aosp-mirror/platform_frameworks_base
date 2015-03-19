@@ -96,8 +96,6 @@
 
 
 
-
-
 <html>
 <head>
 
@@ -113,7 +111,7 @@
 href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Roboto:light,regular,medium,thin,italic,mediumitalic,bold"
   title="roboto">
-<link href="/assets/css/default.css?v=5" rel="stylesheet" type="text/css">
+<link href="/assets/css/default.css?v=4" rel="stylesheet" type="text/css">
 
 
 
@@ -414,7 +412,6 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
                 <li><a href="/distribute/users/index.html">Get Users</a></li>
                 <li><a href="/distribute/engage/index.html">Engage &amp; Retain</a></li>
                 <li><a href="/distribute/monetize/index.html">Monetize</a></li>
-                <li><a href="/distribute/analyze/index.html">Analyze</a></li>
                 <li><a href="/distribute/tools/index.html">Tools &amp; Reference</a></li>
                 <li><a href="/distribute/stories/index.html">Developer Stories</a></li>
               </ul>
@@ -596,14 +593,14 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
 
   <li class="nav-section">
-    <div class="nav-section-header"><a href="/google/play/billing/index.html" zh-cn-lang="应用内结算">
+    <div class="nav-section-header"><a href="/google/play/billing/index.html">
       <span class="en">Google Play In-app Billing</span></a>
     </div>
     <ul>
-      <li><a href="/google/play/billing/billing_overview.html" zh-cn-lang="应用内结算概述">
+      <li><a href="/google/play/billing/billing_overview.html">
               <span class="en">Overview</span></a>
       </li>
-      <li class="nav-section"><div class="nav-section-header"><a href="/google/play/billing/api.html" zh-cn-lang="应用内结算 API">
+      <li class="nav-section"><div class="nav-section-header"><a href="/google/play/billing/api.html">
               <span class="en">Version 3 API</span></a></div>
               <ul>
               <li><a href="/google/play/billing/billing_integrate.html">
@@ -626,13 +623,13 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       <li><a href="/google/play/billing/billing_subscriptions.html">
               <span class="en">Subscriptions</span></a>
       </li>
-      <li><a href="/google/play/billing/billing_best_practices.html" zh-cn-lang="安全性和设计">
+      <li><a href="/google/play/billing/billing_best_practices.html">
               <span class="en">Security and Design</span></a>
       </li>
-      <li><a href="/google/play/billing/billing_testing.html" zh-cn-lang="测试应用内结算">
+      <li><a href="/google/play/billing/billing_testing.html">
               <span class="en">Testing In-app Billing</span></a>
       </li>
-      <li><a href="/google/play/billing/billing_admin.html" zh-cn-lang="管理应用内结算">
+      <li><a href="/google/play/billing/billing_admin.html">
               <span class="en">Administering In-app Billing</span></a>
       </li>
       <li><a href="/google/play/billing/versions.html">
@@ -666,14 +663,21 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
               <span class="en">HTTP</span></a></li>
               </ul>
         </li>
-        <li><a href="/google/gcm/server-ref.html">
-            <span class="en">Server Reference</span></a>
-        </li>
         <li><a href="/google/gcm/notifications.html">
               <span class="en">User Notifications</span></a>
         </li>
+        <li><a href="/google/gcm/adv.html">
+            <span class="en">Advanced Topics</span></a>
+        </li>
         <li><a href="/google/gcm/c2dm.html">
             <span class="en">Migration</span></a>
+        </li>
+        <li id="gcm-tree-list" class="nav-section">
+          <div class="nav-section-header">
+            <a href="/reference/gcm-packages.html">
+              <span class="en">Reference</span>
+            </a>
+          <div>
         </li>
       </ul>
   </li>
@@ -1108,19 +1112,6 @@ Summary:
     
     <tr class=" api apilevel-" >
         <td class="jd-typecol">String</td>
-        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/wallet/WalletConstants.html#EXTRA_IS_NEW_USER">EXTRA_IS_NEW_USER</a></td>
-        <td class="jd-descrcol" width="100%">
-          Extra for retrieving a boolean indicating if the user has used Instant Buy with your app
- before or not.
-
-
-
-        </td>
-    </tr>
-
-
-    <tr class="alt-color api apilevel-" >
-        <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/wallet/WalletConstants.html#EXTRA_IS_USER_PREAUTHORIZED">EXTRA_IS_USER_PREAUTHORIZED</a></td>
         <td class="jd-descrcol" width="100%">
           Extra for retrieving a boolean indicating if the user has pre-authorized your app or not
@@ -1132,7 +1123,7 @@ Summary:
     </tr>
     
     
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/wallet/WalletConstants.html#EXTRA_MASKED_WALLET">EXTRA_MASKED_WALLET</a></td>
         <td class="jd-descrcol" width="100%">
@@ -1145,7 +1136,7 @@ Summary:
     </tr>
     
     
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/wallet/WalletConstants.html#EXTRA_MASKED_WALLET_REQUEST">EXTRA_MASKED_WALLET_REQUEST</a></td>
         <td class="jd-descrcol" width="100%">
@@ -1159,7 +1150,7 @@ Summary:
     </tr>
     
     
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/wallet/WalletConstants.html#RESULT_ERROR">RESULT_ERROR</a></td>
         <td class="jd-descrcol" width="100%">
@@ -1171,37 +1162,7 @@ Summary:
     </tr>
     
     
-    <tr class="alt-color api apilevel-" >
-        <td class="jd-typecol">int</td>
-        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/wallet/WalletConstants.html#STYLE_NO_TRANSITION">STYLE_NO_TRANSITION</a></td>
-        <td class="jd-descrcol" width="100%">
-          Constant passed to
- setWindowTransitionsStyle(int)
- to set the style of window transition to have no animations and simply appear and disappear
- when starting and finishing.
-
-
-
-        </td>
-    </tr>
-
-
     <tr class=" api apilevel-" >
-        <td class="jd-typecol">int</td>
-        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/wallet/WalletConstants.html#STYLE_SLIDE_TRANSITION">STYLE_SLIDE_TRANSITION</a></td>
-        <td class="jd-descrcol" width="100%">
-          Constant passed to
- setWindowTransitionsStyle(int)
- to set the style of window transitions to slide them up when starting and down when
- when finishing.
-
-
-
-        </td>
-    </tr>
-
-
-    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/wallet/WalletConstants.html#THEME_DARK">THEME_DARK</a></td>
         <td class="jd-descrcol" width="100%">
@@ -1215,7 +1176,7 @@ Summary:
     </tr>
     
     
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/wallet/WalletConstants.html#THEME_HOLO_DARK">THEME_HOLO_DARK</a></td>
         <td class="jd-descrcol" width="100%">
@@ -1230,7 +1191,7 @@ Summary:
     </tr>
     
     
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/wallet/WalletConstants.html#THEME_HOLO_LIGHT">THEME_HOLO_LIGHT</a></td>
         <td class="jd-descrcol" width="100%">
@@ -1245,7 +1206,7 @@ Summary:
     </tr>
     
     
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/wallet/WalletConstants.html#THEME_LIGHT">THEME_LIGHT</a></td>
         <td class="jd-descrcol" width="100%">
@@ -2195,48 +2156,6 @@ From class
 
 
 
-<A NAME="EXTRA_IS_NEW_USER"></A>
-
-<div class="jd-details api apilevel-">
-    <h4 class="jd-details-title">
-      <span class="normal">
-        public
-        static
-        final
-        String
-      </span>
-        EXTRA_IS_NEW_USER
-    </h4>
-      <div class="api-level">
-
-
-
-
-      </div>
-    <div class="jd-details-descr">
-
-
-
-
-  <div class="jd-tagdata jd-tagdescr"><p>Extra for retrieving a boolean indicating if the user has used Instant Buy with your app
- before or not.
-</p></div>
-
-
-        <div class="jd-tagdata">
-        <span class="jd-tagtitle">Constant Value: </span>
-        <span>
-
-                "com.google.android.gms.wallet.EXTRA_IS_NEW_USER"
-
-        </span>
-        </div>
-
-    </div>
-</div>
-
-
-
 <A NAME="EXTRA_IS_USER_PREAUTHORIZED"></A>
 
 <div class="jd-details api apilevel-"> 
@@ -2403,96 +2322,6 @@ From class
         </span>
         </div>
     
-    </div>
-</div>
-
-
-
-<A NAME="STYLE_NO_TRANSITION"></A>
-
-<div class="jd-details api apilevel-">
-    <h4 class="jd-details-title">
-      <span class="normal">
-        public
-        static
-        final
-        int
-      </span>
-        STYLE_NO_TRANSITION
-    </h4>
-      <div class="api-level">
-
-
-
-
-      </div>
-    <div class="jd-details-descr">
-
-
-
-
-  <div class="jd-tagdata jd-tagdescr"><p>Constant passed to
- setWindowTransitionsStyle(int)
- to set the style of window transition to have no animations and simply appear and disappear
- when starting and finishing.
-</p></div>
-
-
-        <div class="jd-tagdata">
-        <span class="jd-tagtitle">Constant Value: </span>
-        <span>
-
-                2
-                (0x00000002)
-
-        </span>
-        </div>
-
-    </div>
-</div>
-
-
-
-<A NAME="STYLE_SLIDE_TRANSITION"></A>
-
-<div class="jd-details api apilevel-">
-    <h4 class="jd-details-title">
-      <span class="normal">
-        public
-        static
-        final
-        int
-      </span>
-        STYLE_SLIDE_TRANSITION
-    </h4>
-      <div class="api-level">
-
-
-
-
-      </div>
-    <div class="jd-details-descr">
-
-
-
-
-  <div class="jd-tagdata jd-tagdescr"><p>Constant passed to
- setWindowTransitionsStyle(int)
- to set the style of window transitions to slide them up when starting and down when
- when finishing. It is the default style.
-</p></div>
-
-
-        <div class="jd-tagdata">
-        <span class="jd-tagtitle">Constant Value: </span>
-        <span>
-
-                1
-                (0x00000001)
-
-        </span>
-        </div>
-
     </div>
 </div>
 
