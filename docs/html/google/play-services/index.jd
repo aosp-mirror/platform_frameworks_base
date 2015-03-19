@@ -52,8 +52,11 @@ your app with the most recent version of Google Play services without worrying
 about your users' Android version.</p>
 
   </div>
+
+
    <p>To start integrating Google Play services into your app,
    follow the <a href="/google/play-services/setup.html">Setup</a> guide.</p>
+
 </div>
 
 <h2 style="margin-top:0" id="newfeatures">New Features</h2>
@@ -62,125 +65,6 @@ about your users' Android version.</p>
   <p><a href="#" onclick="return toggleContent(this)">
     <img src="{@docRoot}assets/images/triangle-opened.png"
     class="toggle-content-img"
-      alt=""/>Google Play services, Version 7.0</a> <em>(March 2015)</em>
-  </p>
-
-  <div class="toggle-content-toggleme">
-<dl>
-<dt>Highlights in Version 7.0</dt>
-<dd>
-<p>For a summary of the feature highlights in Google Play services 7.0, see the
-announcement
-<a href="http://android-developers.blogspot.com/2015/03/google-play-services-70-places-everyone.html"
-class="external-link">blog post</a>.</p>
-<ul>
-  <li><strong>Places</strong> - Using the Google Places API for Android, you can build
-    location-aware apps that respond contextually to the local businesses and other places near
-    the device. Use the built-in place picker UI widget and API methods to find the device’s
-    current place, autocomplete users’ queries, and more.
-    <ul>
-      <li><a href="https://developers.google.com/places/documentation/android/"
-        class="external-link">Places API developer guide</a></li>
-      <li><a href="{@docRoot}reference/com/google/android/gms/location/places/package-summary.html">
-        Places API reference</a></li>
-    </ul>
-  </li>
-  <li><strong>Location settings</strong> - While the
-    <a href="{@docRoot}reference/com/google/android/gms/location/FusedLocationProviderApi.html">
-      {@code FusedLocationProviderApi}</a>
-    combines multiple sensors to give you the optimal location, the accuracy of the location your
-    app receives still depends greatly on the settings enabled on the device (GPS, wifi, airplane
-    mode, and others). Using the new
-    <a href="{@docRoot}reference/com/google/android/gms/location/SettingsApi.html">
-    {@code SettingsApi}</a>
-    class, you can bring up a Location Settings dialog which displays a one-touch control for users
-    to change their settings without leaving your app.
-  </li>
-  <li><strong>Fit</strong> - The Google Fit API is now more efficient with modular calls to specific
-    functionality within the API. You can now also access distance and granular sleep data.
-    <ul>
-      <li><a href="https://developers.google.com/fit/android/get-started.html#step_5_connect_to_the_fitness_service"
-        class="external-link">Fit API developer guide</a></li>
-      <li><a href="{@docRoot}reference/com/google/android/gms/fitness/package-summary.html">
-        Fit API reference</a></li>
-    </ul>
-  </li>
-  <li><strong>Google Mobile Ads</strong> - This release introduces the
-    <a href="{@docRoot}reference/com/google/android/gms/ads/doubleclick/PublisherAdRequest.Builder.html#addCustomTargeting(java.lang.String,%20java.lang.String)">
-      {@code addCustomTargeting()}</a>
-    and <a href="{@docRoot}reference/com/google/android/gms/ads/doubleclick/PublisherAdRequest.Builder.html#addCategoryExclusion(java.lang.String)">
-    {@code addCategoryExclusion()}</a>
-    methods to the <a href="{@docRoot}reference/com/google/android/gms/ads/doubleclick/PublisherAdRequest.Builder.html">
-    {@code PublisherAdRequest.Builder} </a>
-    class, enabling DoubleClick for Publishers (DFP) developers to
-    <a href="https://support.google.com/dfp_sb/answer/112648" class="external-link">target custom
-      criteria</a>
-    and <a href="https://support.google.com/dfp_premium/answer/2627086" class="external-link">use
-    ad exclusions to block ads</a>.
-    <ul>
-      <li><a href="https://developers.google.com/mobile-ads-sdk/docs/dfp/android/banner"
-        class="external-link">DFP targeting developer guide</a></li>
-    </ul>
-  </li>
-  <li><strong>Play Game services</strong> - The Nearby Connections API allows users to connect to
-      each other and exchange messages over a local network. This API supports local multiplayer
-      and second screen gaming.
-    <ul>
-      <li><a href="https://developers.google.com/games/services/android/nearby.html"
-        class="external-link">Nearby Connections developer guide</a></li>
-      <li><a href="{@docRoot}reference/com/google/android/gms/nearby/connection/package-summary.html">
-        Nearby Connection API reference</a></li>
-    </ul>
-  </li>
-  <li><strong>Google API client</strong> - This release introduces the
-  <a href="{@docRoot}reference/com/google/android/gms/common/api/GoogleApiClient.Builder.html#requestServerAuthCode(java.lang.String,%20com.google.android.gms.common.api.GoogleApiClient.ServerAuthCodeCallbacks)">{@code GoogleApiClient.Builder.requestServerAuthCode()}</a> method. This API makes it significantly easier
-    to enable servers to be able to make Google API calls on behalf of users. This method reduces
-    the lines of boilerplate code that you previously had to implement.
-    <ul>
-      <li><a href="https://developers.google.com/identity/sign-in/android/sign-in.html#enable_server-side_api_access_for_your_app"
-        class="external-link">Server-side API access developer guide</a></li>
-    </ul>
-  </li>
-  <li>
-    <strong>Drive</strong> - This release adds
-    <a href="{@docRoot}reference/com/google/android/gms/drive/DriveResource.html#trash(com.google.android.gms.common.api.GoogleApiClient))">
-      {@code trash()}</a> and
-    <a href="{@docRoot}reference/com/google/android/gms/drive/DriveResource.html#untrash(com.google.android.gms.common.api.GoogleApiClient)">
-      {@code untrash()}</a> methods to the
-      <a href="{@docRoot}reference/com/google/android/gms/drive/DriveResource.html">
-        {@code DriveResource}</a>
-      class. These methods enable you to move user-visible files and folders to the trash or
-      restore them from the trash. Trashing a folder recursively trashes its children. The
-      <a href="{@docRoot}reference/com/google/android/gms/drive/Metadata.html#isExplicitlyTrashed()">
-      {@code isExplicitlyTrashed()}</a> method indicates whether a resource was trashed directly,
-      or as the result of a trashed parent.
-      <ul>
-        <li><a href="https://developers.google.com/drive/android/trash.html"
-          class="external-link">Trashing and untrashing developer guide</a></li>
-      </ul>
-  </li>
-  <li><strong>SafetyNet API</strong> - The API lets you check if your app is running on a device
-    that matches a device model that has passed Android compatibility testing. The API evaluates
-    both software and hardware characteristics of a device to determine whether it matches a
-    known-good configuration that has been previously determined to be compatible. You can use the
-    SafetyNet API in conjunction with other tools to determine whether the device appears capable
-    of handling specific features in your app.
-    <ul>
-      <li><a href="{@docRoot}reference/com/google/android/gms/safetynet/package-summary.html">
-        SafetyNet API reference</a></li>
-      <li><a href="{@docRoot}google/play/safetynet/index.html">
-        SafetyNet developer guide</a></li>
-    </ul>
-  </li>
-</ul>
-</dd>
-</dl>
-  </div>
-</div>
-
-<div class="toggle-content closed">
-  <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
       alt=""/>Google Play services, Version 6.5</a> <em>(December 2014)</em>
   </p>
 
@@ -270,8 +154,6 @@ enables you to get a ready-to-use Street View panorama.
 </ul>
 </dd>
 </dl>
-  </div>
-</div>
 
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
