@@ -950,8 +950,7 @@ public class WifiConfiguration implements Parcelable {
      * Identify if this configuration represents a passpoint network
      */
     public boolean isPasspoint() {
-        return TextUtils.isEmpty(SSID)
-                && !TextUtils.isEmpty(FQDN)
+        return !TextUtils.isEmpty(FQDN)
                 && !TextUtils.isEmpty(providerFriendlyName)
                 && enterpriseConfig != null
                 && enterpriseConfig.getEapMethod() != WifiEnterpriseConfig.Eap.NONE;
