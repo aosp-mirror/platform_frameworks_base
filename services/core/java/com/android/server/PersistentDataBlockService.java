@@ -110,8 +110,7 @@ public class PersistentDataBlockService extends SystemService {
     private void formatIfOemUnlockEnabled() {
         if (doGetOemUnlockEnabled()) {
             synchronized (mLock) {
-                formatPartitionLocked();
-                doSetOemUnlockEnabledLocked(true);
+                formatPartitionLocked(true);
             }
         }
     }
@@ -165,7 +164,7 @@ public class PersistentDataBlockService extends SystemService {
             byte[] digest = computeDigestLocked(storedDigest);
             if (digest == null || !Arrays.equals(storedDigest, digest)) {
                 Slog.i(TAG, "Formatting FRP partition...");
-                formatPartitionLocked();
+                formatPartitionLocked(false);
                 return false;
             }
         }
@@ -242,7 +241,7 @@ public class PersistentDataBlockService extends SystemService {
         return md.digest();
     }
 
-    private void formatPartitionLocked() {
+    private void formatPartitionLocked(boolean setOemUnlockEnabled) {
         DataOutputStream outputStream;
         try {
             outputStream = new DataOutputStream(new FileOutputStream(new File(mDataBlockFile)));
@@ -264,7 +263,7 @@ public class PersistentDataBlockService extends SystemService {
             IoUtils.closeQuietly(outputStream);
         }
 
-        doSetOemUnlockEnabledLocked(false);
+        doSetOemUnlockEnabledLocked(setOemUnlockEnabled);
         computeAndWriteDigestLocked();
     }
 
