@@ -2,6 +2,9 @@ page.title=Providing Audio Playback for Auto
 page.tags="auto", "car", "automotive", "audio"
 page.article=true
 
+page.metaDescription=Learn how to extend your audio apps for use in Android Auto devices.
+page.image=auto/images/assets/icons/media_app_playback.png
+
 @jd:body
 
 <div id="tb-wrapper">
