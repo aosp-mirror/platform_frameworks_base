@@ -51,9 +51,9 @@ public class MainActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         Resources res = getResources();
-        defaultColor = res.getColor(R.color.none_received);
-        startJobColor = res.getColor(R.color.start_received);
-        stopJobColor = res.getColor(R.color.stop_received);
+        defaultColor = getColor(R.color.none_received);
+        startJobColor = getColor(R.color.start_received);
+        stopJobColor = getColor(R.color.stop_received);
 
         // Set up UI.
         mShowStartView = (TextView) findViewById(R.id.onstart_textview);

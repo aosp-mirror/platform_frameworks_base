@@ -154,15 +154,15 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
         mAppearAnimationFilter = new PorterDuffColorFilter(0, PorterDuff.Mode.SRC_ATOP);
         mRoundedRectCornerRadius = getResources().getDimensionPixelSize(
                 R.dimen.notification_material_rounded_rect_radius);
-        mLegacyColor = getResources().getColor(R.color.notification_legacy_background_color);
-        mNormalColor = getResources().getColor(R.color.notification_material_background_color);
-        mLowPriorityColor = getResources().getColor(
+        mLegacyColor = context.getColor(R.color.notification_legacy_background_color);
+        mNormalColor = context.getColor(R.color.notification_material_background_color);
+        mLowPriorityColor = context.getColor(
                 R.color.notification_material_background_low_priority_color);
-        mTintedRippleColor = context.getResources().getColor(
+        mTintedRippleColor = context.getColor(
                 R.color.notification_ripple_tinted_color);
-        mLowPriorityRippleColor = context.getResources().getColor(
+        mLowPriorityRippleColor = context.getColor(
                 R.color.notification_ripple_color_low_priority);
-        mNormalRippleColor = context.getResources().getColor(
+        mNormalRippleColor = context.getColor(
                 R.color.notification_ripple_untinted_color);
     }
 

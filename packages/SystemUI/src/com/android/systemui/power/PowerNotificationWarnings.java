@@ -159,7 +159,7 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
                 .setContentText(mContext.getString(R.string.invalid_charger_text))
                 .setPriority(Notification.PRIORITY_MAX)
                 .setVisibility(Notification.VISIBILITY_PUBLIC)
-                .setColor(mContext.getResources().getColor(
+                .setColor(mContext.getColor(
                         com.android.internal.R.color.system_notification_accent_color));
         final Notification n = nb.build();
         if (n.headsUpContentView != null) {
@@ -183,7 +183,7 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
                 .setDeleteIntent(pendingBroadcast(ACTION_DISMISSED_WARNING))
                 .setPriority(Notification.PRIORITY_MAX)
                 .setVisibility(Notification.VISIBILITY_PUBLIC)
-                .setColor(mContext.getResources().getColor(
+                .setColor(mContext.getColor(
                         com.android.internal.R.color.battery_saver_mode_color));
         if (hasBatterySettings()) {
             nb.setContentIntent(pendingBroadcast(ACTION_SHOW_BATTERY_SETTINGS));
@@ -214,7 +214,7 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
                 .setOngoing(true)
                 .setShowWhen(false)
                 .setVisibility(Notification.VISIBILITY_PUBLIC)
-                .setColor(mContext.getResources().getColor(
+                .setColor(mContext.getColor(
                         com.android.internal.R.color.battery_saver_mode_color));
         addStopSaverAction(nb);
         if (hasSaverSettings()) {

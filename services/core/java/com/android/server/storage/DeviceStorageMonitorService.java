@@ -471,7 +471,7 @@ public class DeviceStorageMonitorService extends SystemService {
         Notification notification = new Notification.Builder(context)
                 .setSmallIcon(com.android.internal.R.drawable.stat_notify_disk_full)
                 .setTicker(title)
-                .setColor(context.getResources().getColor(
+                .setColor(context.getColor(
                     com.android.internal.R.color.system_notification_accent_color))
                 .setContentTitle(title)
                 .setContentText(details)

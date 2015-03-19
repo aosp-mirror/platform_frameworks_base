@@ -248,14 +248,11 @@ public class RecentsConfiguration {
         taskViewThumbnailAlpha = res.getFloat(R.dimen.recents_task_view_thumbnail_alpha);
 
         // Task bar colors
-        taskBarViewDefaultBackgroundColor =
-                res.getColor(R.color.recents_task_bar_default_background_color, null);
-        taskBarViewLightTextColor =
-                res.getColor(R.color.recents_task_bar_light_text_color, null);
-        taskBarViewDarkTextColor =
-                res.getColor(R.color.recents_task_bar_dark_text_color, null);
-        taskBarViewHighlightColor =
-                res.getColor(R.color.recents_task_bar_highlight_color, null);
+        taskBarViewDefaultBackgroundColor = context.getColor(
+                R.color.recents_task_bar_default_background_color);
+        taskBarViewLightTextColor = context.getColor(R.color.recents_task_bar_light_text_color);
+        taskBarViewDarkTextColor = context.getColor(R.color.recents_task_bar_dark_text_color);
+        taskBarViewHighlightColor = context.getColor(R.color.recents_task_bar_highlight_color);
         taskBarViewAffiliationColorMinAlpha = res.getFloat(
                 R.dimen.recents_task_affiliation_color_min_alpha_percentage);
 

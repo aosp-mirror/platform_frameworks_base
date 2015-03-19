@@ -193,7 +193,7 @@ public class BatteryMeterView extends View implements DemoMode,
         TypedArray atts = context.obtainStyledAttributes(attrs, R.styleable.BatteryMeterView,
                 defStyle, 0);
         final int frameColor = atts.getColor(R.styleable.BatteryMeterView_frameColor,
-                res.getColor(R.color.batterymeter_frame_color));
+                context.getColor(R.color.batterymeter_frame_color));
         TypedArray levels = res.obtainTypedArray(R.array.batterymeter_color_levels);
         TypedArray colors = res.obtainTypedArray(R.array.batterymeter_color_values);
 
@@ -240,10 +240,10 @@ public class BatteryMeterView extends View implements DemoMode,
         mWarningTextPaint.setTypeface(font);
         mWarningTextPaint.setTextAlign(Paint.Align.CENTER);
 
-        mChargeColor = getResources().getColor(R.color.batterymeter_charge_color);
+        mChargeColor = context.getColor(R.color.batterymeter_charge_color);
 
         mBoltPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        mBoltPaint.setColor(res.getColor(R.color.batterymeter_bolt_color));
+        mBoltPaint.setColor(context.getColor(R.color.batterymeter_bolt_color));
         mBoltPoints = loadBoltPoints(res);
     }
 

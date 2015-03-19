@@ -60,7 +60,7 @@ public class SegmentedButtons extends LinearLayout {
             final Object tag = c.getTag();
             final boolean selected = Objects.equals(mSelectedValue, tag);
             c.setSelected(selected);
-            c.getCompoundDrawables()[1].setTint(mContext.getResources().getColor(selected
+            c.getCompoundDrawables()[1].setTint(mContext.getColor(selected
                     ? R.color.segmented_button_selected : R.color.segmented_button_unselected));
         }
         fireOnSelected();

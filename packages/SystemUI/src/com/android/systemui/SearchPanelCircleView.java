@@ -132,8 +132,8 @@ public class SearchPanelCircleView extends FrameLayout {
         mDisappearInterpolator = AnimationUtils.loadInterpolator(mContext,
                 android.R.interpolator.fast_out_linear_in);
         mBackgroundPaint.setAntiAlias(true);
-        mBackgroundPaint.setColor(getResources().getColor(R.color.search_panel_circle_color));
-        mRipplePaint.setColor(getResources().getColor(R.color.search_panel_ripple_color));
+        mBackgroundPaint.setColor(context.getColor(R.color.search_panel_circle_color));
+        mRipplePaint.setColor(context.getColor(R.color.search_panel_ripple_color));
         mRipplePaint.setAntiAlias(true);
     }
 

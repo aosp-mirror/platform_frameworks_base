@@ -144,7 +144,7 @@ public class ScreenPinningRequest implements View.OnClickListener {
             boolean isLandscape = isLandscapePhone(mContext);
 
             inflateView(isLandscape);
-            int bgColor = mContext.getResources().getColor(
+            int bgColor = mContext.getColor(
                     R.color.screen_pinning_request_window_bg);
             if (ActivityManager.isHighEndGfx()) {
                 mLayout.setAlpha(0f);

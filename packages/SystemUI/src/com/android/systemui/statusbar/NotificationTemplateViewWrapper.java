@@ -60,7 +60,7 @@ public class NotificationTemplateViewWrapper extends NotificationViewWrapper {
         super(view);
         mIconDarkAlpha = ctx.getResources().getInteger(R.integer.doze_small_icon_alpha);
         mIconBackgroundDarkColor =
-                ctx.getResources().getColor(R.color.doze_small_icon_background_color);
+                ctx.getColor(R.color.doze_small_icon_background_color);
         mLinearOutSlowInInterpolator = AnimationUtils.loadInterpolator(ctx,
                 android.R.interpolator.linear_out_slow_in);
         resolveViews();

@@ -724,7 +724,7 @@ class GlobalScreenshot {
             .setVisibility(Notification.VISIBILITY_PUBLIC) // ok to show outside lockscreen
             .setCategory(Notification.CATEGORY_ERROR)
             .setAutoCancel(true)
-            .setColor(context.getResources().getColor(
+            .setColor(context.getColor(
                         com.android.internal.R.color.system_notification_accent_color));
         Notification n =
             new Notification.BigTextStyle(b)

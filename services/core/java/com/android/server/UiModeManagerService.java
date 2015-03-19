@@ -596,7 +596,7 @@ final class UiModeManagerService extends SystemService {
                 n.defaults = Notification.DEFAULT_LIGHTS;
                 n.flags = Notification.FLAG_ONGOING_EVENT;
                 n.when = 0;
-                n.color = context.getResources().getColor(
+                n.color = context.getColor(
                         com.android.internal.R.color.system_notification_accent_color);
                 n.setLatestEventInfo(
                         context,

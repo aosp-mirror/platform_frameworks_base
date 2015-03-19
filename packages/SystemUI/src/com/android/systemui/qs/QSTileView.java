@@ -88,7 +88,7 @@ public class QSTileView extends ViewGroup {
         addView(mIcon);
 
         mDivider = new View(mContext);
-        mDivider.setBackgroundColor(res.getColor(R.color.qs_tile_divider));
+        mDivider.setBackgroundColor(context.getColor(R.color.qs_tile_divider));
         final int dh = res.getDimensionPixelSize(R.dimen.qs_tile_divider_height);
         mDivider.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, dh));
         addView(mDivider);
@@ -138,8 +138,8 @@ public class QSTileView extends ViewGroup {
             mDualLabel = new QSDualTileLabel(mContext);
             mDualLabel.setId(android.R.id.title);
             mDualLabel.setBackgroundResource(R.drawable.btn_borderless_rect);
-            mDualLabel.setFirstLineCaret(res.getDrawable(R.drawable.qs_dual_tile_caret));
-            mDualLabel.setTextColor(res.getColor(R.color.qs_tile_text));
+            mDualLabel.setFirstLineCaret(mContext.getDrawable(R.drawable.qs_dual_tile_caret));
+            mDualLabel.setTextColor(mContext.getColor(R.color.qs_tile_text));
             mDualLabel.setPadding(0, mDualTileVerticalPaddingPx, 0, mDualTileVerticalPaddingPx);
             mDualLabel.setTypeface(CONDENSED);
             mDualLabel.setTextSize(TypedValue.COMPLEX_UNIT_PX,
@@ -157,7 +157,7 @@ public class QSTileView extends ViewGroup {
         } else {
             mLabel = new TextView(mContext);
             mLabel.setId(android.R.id.title);
-            mLabel.setTextColor(res.getColor(R.color.qs_tile_text));
+            mLabel.setTextColor(mContext.getColor(R.color.qs_tile_text));
             mLabel.setGravity(Gravity.CENTER_HORIZONTAL);
             mLabel.setMinLines(2);
             mLabel.setPadding(0, 0, 0, 0);

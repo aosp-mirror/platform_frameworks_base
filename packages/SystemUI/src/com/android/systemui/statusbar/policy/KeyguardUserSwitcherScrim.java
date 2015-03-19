@@ -47,7 +47,7 @@ public class KeyguardUserSwitcherScrim extends Drawable
 
     public KeyguardUserSwitcherScrim(View host) {
         host.addOnLayoutChangeListener(this);
-        mDarkColor = host.getResources().getColor(
+        mDarkColor = host.getContext().getColor(
                 R.color.keyguard_user_switcher_background_gradient_color);
     }
 

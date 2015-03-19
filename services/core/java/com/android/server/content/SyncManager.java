@@ -3119,7 +3119,7 @@ public class SyncManager {
                 new Notification(R.drawable.stat_notify_sync_error,
                         mContext.getString(R.string.contentServiceSync),
                         System.currentTimeMillis());
-            notification.color = contextForUser.getResources().getColor(
+            notification.color = contextForUser.getColor(
                     com.android.internal.R.color.system_notification_accent_color);
             notification.setLatestEventInfo(contextForUser,
                     contextForUser.getString(R.string.contentServiceSyncNotificationTitle),

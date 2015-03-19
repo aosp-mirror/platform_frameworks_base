@@ -1763,7 +1763,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 .setContentIntent(notifyIntent)
                 .setPriority(Notification.PRIORITY_HIGH)
                 .setShowWhen(false)
-                .setColor(mContext.getResources().getColor(
+                .setColor(mContext.getColor(
                         com.android.internal.R.color.system_notification_accent_color))
                 .build();
 

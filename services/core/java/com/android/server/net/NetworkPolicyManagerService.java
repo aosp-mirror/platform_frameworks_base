@@ -789,7 +789,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         final Notification.Builder builder = new Notification.Builder(mContext);
         builder.setOnlyAlertOnce(true);
         builder.setWhen(0L);
-        builder.setColor(mContext.getResources().getColor(
+        builder.setColor(mContext.getColor(
                 com.android.internal.R.color.system_notification_accent_color));
 
         final Resources res = mContext.getResources();
@@ -916,7 +916,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         builder.setTicker(title);
         builder.setContentTitle(title);
         builder.setContentText(body);
-        builder.setColor(mContext.getResources().getColor(
+        builder.setColor(mContext.getColor(
                 com.android.internal.R.color.system_notification_accent_color));
 
         final Intent intent = buildAllowBackgroundDataIntent();

@@ -927,6 +927,7 @@ public class Resources {
      * @deprecated Use {@link #getColor(int, Theme)} instead.
      */
     @ColorInt
+    @Deprecated
     public int getColor(@ColorRes int id) throws NotFoundException {
         return getColor(id, null);
     }
@@ -996,6 +997,7 @@ public class Resources {
      * @deprecated Use {@link #getColorStateList(int, Theme)} instead.
      */
     @Nullable
+    @Deprecated
     public ColorStateList getColorStateList(@ColorRes int id) throws NotFoundException {
         final ColorStateList csl = getColorStateList(id, null);
         if (csl != null && csl.canApplyTheme()) {
@@ -1048,8 +1050,6 @@ public class Resources {
 
         return res;
     }
-
-
 
     /**
      * Return a boolean associated with a particular resource ID.  This can be

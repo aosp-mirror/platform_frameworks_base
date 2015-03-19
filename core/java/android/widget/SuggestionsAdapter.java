@@ -378,7 +378,7 @@ class SuggestionsAdapter extends ResourceCursorAdapter implements OnClickListene
             // Lazily get the URL color from the current theme.
             TypedValue colorValue = new TypedValue();
             context.getTheme().resolveAttribute(R.attr.textColorSearchUrl, colorValue, true);
-            mUrlColor = context.getResources().getColorStateList(colorValue.resourceId);
+            mUrlColor = context.getColorStateList(colorValue.resourceId);
         }
 
         SpannableString text = new SpannableString(url);

@@ -341,7 +341,7 @@ public class LockdownVpnTracker {
                 .setOngoing(true)
                 .addAction(R.drawable.ic_menu_refresh, mContext.getString(R.string.reset),
                         mResetIntent)
-                .setColor(mContext.getResources().getColor(
+                .setColor(mContext.getColor(
                         com.android.internal.R.color.system_notification_accent_color));
 
         NotificationManager.from(mContext).notify(TAG, 0, builder.build());
