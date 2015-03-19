@@ -243,9 +243,11 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
 
     final Object mRulesLock = new Object();
 
+    volatile boolean mSystemReady;
     volatile boolean mScreenOn;
     volatile boolean mRestrictBackground;
     volatile boolean mRestrictPower;
+    volatile boolean mDeviceIdleMode;
 
     private final boolean mSuppressDefaultPolicy;
 
@@ -367,11 +369,12 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 }
             });
             mRestrictPower = mPowerManagerInternal.getLowPowerModeEnabled();
+            mSystemReady = true;
 
             // read policy from disk
             readPolicyLocked();
 
-            if (mRestrictBackground || mRestrictPower) {
+            if (mRestrictBackground || mRestrictPower || mDeviceIdleMode) {
                 updateRulesForGlobalChangeLocked(true);
                 updateNotificationsLocked();
             }
@@ -1031,7 +1034,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         // will not have a bandwidth limit.  Also only do this if restrict
         // background data use is *not* enabled, since that takes precendence
         // use over those networks can have a cost associated with it).
-        final boolean powerSave = mRestrictPower && !mRestrictBackground;
+        final boolean powerSave = (mRestrictPower || mDeviceIdleMode) && !mRestrictBackground;
 
         // First, generate identities of all connected networks so we can
         // quickly compare them against all defined policies below.
@@ -1696,6 +1699,20 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         }
     }
 
+    @Override
+    public void setDeviceIdleMode(boolean enabled) {
+        mContext.enforceCallingOrSelfPermission(MANAGE_NETWORK_POLICY, TAG);
+
+        synchronized (mRulesLock) {
+            if (mDeviceIdleMode != enabled) {
+                mDeviceIdleMode = enabled;
+                if (mSystemReady) {
+                    updateRulesForGlobalChangeLocked(true);
+                }
+            }
+        }
+    }
+
     private NetworkPolicy findPolicyForNetworkLocked(NetworkIdentity ident) {
         for (int i = mNetworkPolicy.size()-1; i >= 0; i--) {
             NetworkPolicy policy = mNetworkPolicy.valueAt(i);
@@ -1801,8 +1818,10 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 return;
             }
 
+            fout.print("System ready: "); fout.println(mSystemReady);
             fout.print("Restrict background: "); fout.println(mRestrictBackground);
             fout.print("Restrict power: "); fout.println(mRestrictPower);
+            fout.print("Device idle: "); fout.println(mDeviceIdleMode);
             fout.print("Current foreground state: "); fout.println(mCurForegroundState);
             fout.println("Network policies:");
             fout.increaseIndent();
@@ -1952,8 +1971,8 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     }
 
     /**
-     * Update rules that might be changed by {@link #mRestrictBackground}
-     * or {@link #mRestrictPower} value.
+     * Update rules that might be changed by {@link #mRestrictBackground},
+     * {@link #mRestrictPower}, or {@link #mDeviceIdleMode} value.
      */
     void updateRulesForGlobalChangeLocked(boolean restrictedNetworksChanged) {
         final PackageManager pm = mContext.getPackageManager();
@@ -1962,7 +1981,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         // If we are in restrict power mode, we allow all important apps
         // to have data access.  Otherwise, we restrict data access to only
         // the top apps.
-        mCurForegroundState = (!mRestrictBackground && mRestrictPower)
+        mCurForegroundState = (!mRestrictBackground && (mRestrictPower || mDeviceIdleMode))
                 ? ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND
                 : ActivityManager.PROCESS_STATE_TOP;
 
@@ -2015,7 +2034,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 // uid in background, and global background disabled
                 uidRules = RULE_REJECT_METERED;
             }
-        } else if (mRestrictPower) {
+        } else if (mRestrictPower || mDeviceIdleMode) {
             final boolean whitelisted = mPowerSaveWhitelistAppIds.get(UserHandle.getAppId(uid));
             if (!whitelisted && !uidForeground
                     && (uidPolicy & POLICY_ALLOW_BACKGROUND_BATTERY_SAVE) == 0) {

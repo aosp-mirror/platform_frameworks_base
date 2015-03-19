@@ -960,6 +960,7 @@ public final class SystemServer {
 
         if (!disableNonCoreServices) {
             mSystemServiceManager.startService(MediaProjectionManagerService.class);
+            mSystemServiceManager.startService(DeviceIdleController.class);
         }
 
         // Before things start rolling, be sure we have decided whether

@@ -15807,6 +15807,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                                         if (userId == UserHandle.USER_OWNER) {
                                             mTaskPersister.removeFromPackageCache(ssp);
                                         }
+                                        mBatteryStatsService.notePackageUninstalled(ssp);
                                     }
                                 } else {
                                     removeTasksByRemovedPackageComponentsLocked(ssp, userId);
@@ -15832,6 +15833,13 @@ public final class ActivityManagerService extends ActivityManagerNative
                         }
                         if (userId == UserHandle.USER_OWNER) {
                             mTaskPersister.addOtherDeviceTasksToRecentsLocked(ssp);
+                        }
+                        try {
+                            ApplicationInfo ai = AppGlobals.getPackageManager().
+                                    getApplicationInfo(ssp, 0, 0);
+                            mBatteryStatsService.notePackageInstalled(ssp,
+                                    ai != null ? ai.versionCode : 0);
+                        } catch (RemoteException e) {
                         }
                     }
                     break;

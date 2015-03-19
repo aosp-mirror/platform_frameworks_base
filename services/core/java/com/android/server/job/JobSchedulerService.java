@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import android.app.ActivityManager;
 import android.app.AppGlobals;
 import android.app.job.JobInfo;
 import android.app.job.JobScheduler;
@@ -72,7 +73,8 @@ public class JobSchedulerService extends com.android.server.SystemService
         implements StateChangedListener, JobCompletedListener {
     static final boolean DEBUG = false;
     /** The number of concurrent jobs we run at one time. */
-    private static final int MAX_JOB_CONTEXTS_COUNT = 3;
+    private static final int MAX_JOB_CONTEXTS_COUNT
+            = ActivityManager.isLowRamDeviceStatic() ? 1 : 3;
     static final String TAG = "JobSchedulerService";
     /** Master list of jobs. */
     final JobStore mJobs;

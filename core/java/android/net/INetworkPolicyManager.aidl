@@ -54,7 +54,8 @@ interface INetworkPolicyManager {
     void setRestrictBackground(boolean restrictBackground);
     boolean getRestrictBackground();
 
+    void setDeviceIdleMode(boolean enabled);
+
     NetworkQuotaInfo getNetworkQuotaInfo(in NetworkState state);
     boolean isNetworkMetered(in NetworkState state);
-
 }
