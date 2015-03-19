@@ -669,6 +669,14 @@ void JMediaCodec::handleCallback(const sp<AMessage> &msg) {
             break;
         }
 
+        case MediaCodec::CB_CODEC_RELEASED:
+        {
+            if (!msg->findInt32("reason", &arg2)) {
+                arg2 = MediaCodec::REASON_UNKNOWN;
+            }
+            break;
+        }
+
         default:
             TRESPASS();
     }
