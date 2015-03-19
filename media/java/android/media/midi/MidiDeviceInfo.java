@@ -43,6 +43,11 @@ public final class MidiDeviceInfo implements Parcelable {
     public static final int TYPE_VIRTUAL = 2;
 
     /**
+     * Constant representing Bluetooth MIDI devices for {@link #getType}
+     */
+    public static final int TYPE_BLUETOOTH = 3;
+
+    /**
      * Bundle key for the device's user visible name property.
      * Used with the {@link android.os.Bundle} returned by {@link #getProperties}.
      * For USB devices, this is a concatenation of the manufacturer and product names.
@@ -76,6 +81,13 @@ public final class MidiDeviceInfo implements Parcelable {
      * Used with the {@link android.os.Bundle} returned by {@link #getProperties}
      */
     public static final String PROPERTY_USB_DEVICE = "usb_device";
+
+    /**
+     * Bundle key for the device's {@link android.bluetooth.BluetoothDevice}.
+     * Only set for Bluetooth MIDI devices.
+     * Used with the {@link android.os.Bundle} returned by {@link #getProperties}
+     */
+    public static final String PROPERTY_BLUETOOTH_DEVICE = "bluetooth_device";
 
     /**
      * Bundle key for the device's ALSA card number.
