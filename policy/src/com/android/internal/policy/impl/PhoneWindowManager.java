@@ -5944,7 +5944,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             intent = mHomeIntent;
         }
 
-        startActivityAsUser(mHomeIntent, UserHandle.CURRENT);
+        startActivityAsUser(intent, UserHandle.CURRENT);
     }
 
     /**
