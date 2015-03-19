@@ -723,6 +723,12 @@ public class TextureView extends View {
             mSurface.release();
         }
         mSurface = surfaceTexture;
+
+        // If the view is visible, update the listener in the new surface to use
+        // the existing listener in the view.
+        if (((mViewFlags & VISIBILITY_MASK) == VISIBLE)) {
+            mSurface.setOnFrameAvailableListener(mUpdateListener, mAttachInfo.mHandler);
+        }
         mUpdateSurface = true;
         invalidateParentIfNeeded();
     }
