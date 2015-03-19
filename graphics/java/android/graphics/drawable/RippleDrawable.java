@@ -212,19 +212,12 @@ public class RippleDrawable extends LayerDrawable {
         }
 
         cancelExitingRipples();
-        invalidateSelf();
     }
 
-    private boolean cancelExitingRipples() {
-        boolean needsDraw = false;
-
+    private void cancelExitingRipples() {
         final int count = mExitingRipplesCount;
         final RippleForeground[] ripples = mExitingRipples;
         for (int i = 0; i < count; i++) {
-            // If the ripple is animating on the hardware thread, we'll need to
-            // draw an additional frame after canceling to restore the software
-            // drawing path.
-            needsDraw |= ripples[i].isHardwareAnimating();
             ripples[i].end();
         }
 
@@ -233,21 +226,8 @@ public class RippleDrawable extends LayerDrawable {
         }
         mExitingRipplesCount = 0;
 
-        return needsDraw;
-    }
-
-    @Override
-    public void setAlpha(int alpha) {
-        super.setAlpha(alpha);
-
-        // TODO: Should we support this?
-    }
-
-    @Override
-    public void setColorFilter(ColorFilter colorFilter) {
-        super.setColorFilter(colorFilter);
-
-        // TODO: Should we support this?
+        // Always draw an additional "clean" frame after canceling animations.
+        invalidateSelf();
     }
 
     @Override
@@ -606,7 +586,6 @@ public class RippleDrawable extends LayerDrawable {
         }
 
         cancelExitingRipples();
-        invalidateSelf();
     }
 
     @Override

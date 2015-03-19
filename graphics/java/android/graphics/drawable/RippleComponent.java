@@ -193,6 +193,7 @@ abstract class RippleComponent {
     private void cancelSoftwareAnimations() {
         if (mSoftwareAnimator != null) {
             mSoftwareAnimator.cancel();
+            mSoftwareAnimator = null;
         }
     }
 
@@ -203,6 +204,7 @@ abstract class RippleComponent {
     private void endSoftwareAnimations() {
         if (mSoftwareAnimator != null) {
             mSoftwareAnimator.end();
+            mSoftwareAnimator = null;
         }
     }
 
