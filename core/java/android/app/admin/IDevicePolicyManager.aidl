@@ -189,6 +189,7 @@ interface IDevicePolicyManager {
     void setCrossProfileCallerIdDisabled(in ComponentName who, boolean disabled);
     boolean getCrossProfileCallerIdDisabled(in ComponentName who);
     boolean getCrossProfileCallerIdDisabledForUser(int userId);
+    void startManagedQuickContact(String lookupKey, long contactId, in Intent originalIntent);
 
     void setTrustAgentConfiguration(in ComponentName admin, in ComponentName agent,
             in PersistableBundle args);
