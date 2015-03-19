@@ -334,6 +334,18 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
     public static final int FLAG_FULL_BACKUP_ONLY = 1<<26;
 
     /**
+     * Value for {@link #flags}: {@code true} if the application may use cleartext network traffic
+     * (e.g., HTTP rather than HTTPS; WebSockets rather than WebSockets Secure; XMPP, IMAP, STMP
+     * without STARTTLS or TLS). If {@code false}, the app declares that it does not intend to use
+     * cleartext network traffic, in which case platform components (e.g., HTTP stacks,
+     * {@code WebView}, {@code MediaPlayer}) will refuse app's requests to use cleartext traffic.
+     * Third-party libraries are encouraged to honor this flag as well.
+     *
+     * @hide
+     */
+    public static final int FLAG_USES_CLEARTEXT_TRAFFIC = 1<<27;
+
+    /**
      * Value for {@link #flags}: true if code from this application will need to be
      * loaded into other applications' processes. On devices that support multiple
      * instruction sets, this implies the code might be loaded into a process that's
