@@ -20,8 +20,6 @@ import android.hardware.CameraInfo;
 import android.hardware.ICamera;
 import android.hardware.ICameraClient;
 import android.hardware.ICameraServiceListener;
-import android.hardware.IProCameraCallbacks;
-import android.hardware.IProCameraUser;
 import android.hardware.camera2.ICameraDeviceCallbacks;
 import android.hardware.camera2.ICameraDeviceUser;
 import android.hardware.camera2.impl.CameraMetadataNative;
@@ -173,30 +171,6 @@ public class CameraBinderTest extends AndroidTestCase {
                     .connect(dummyCallbacks, cameraId, clientPackageName,
                     CameraBinderTestUtils.USE_CALLING_UID, holder);
             ICamera cameraUser = ICamera.Stub.asInterface(holder.getBinder());
-            assertNotNull(String.format("Camera %s was null", cameraId), cameraUser);
-
-            Log.v(TAG, String.format("Camera %s connected", cameraId));
-
-            cameraUser.disconnect();
-        }
-    }
-
-    static class DummyProCameraCallbacks extends DummyBase implements IProCameraCallbacks {
-    }
-
-    @SmallTest
-    public void testConnectPro() throws Exception {
-        for (int cameraId = 0; cameraId < mUtils.getGuessedNumCameras(); ++cameraId) {
-
-            IProCameraCallbacks dummyCallbacks = new DummyProCameraCallbacks();
-
-            String clientPackageName = getContext().getPackageName();
-
-            BinderHolder holder = new BinderHolder();
-            CameraBinderDecorator.newInstance(mUtils.getCameraService())
-                    .connectPro(dummyCallbacks, cameraId,
-                    clientPackageName, CameraBinderTestUtils.USE_CALLING_UID, holder);
-            IProCameraUser cameraUser = IProCameraUser.Stub.asInterface(holder.getBinder());
             assertNotNull(String.format("Camera %s was null", cameraId), cameraUser);
 
             Log.v(TAG, String.format("Camera %s connected", cameraId));
