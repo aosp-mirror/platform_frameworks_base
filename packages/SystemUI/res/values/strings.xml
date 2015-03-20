@@ -216,6 +216,10 @@
     <string name="phone_label">open phone</string>
     <!-- Click action label for accessibility for the phone button. [CHAR LIMIT=NONE] -->
     <string name="camera_label">open camera</string>
+    <!-- Caption for "Recents resize" developer debug feature. [CHAR LIMIT=NONE] -->
+    <string name="recents_caption_resize">Select new task layout</string>
+    <!-- Button name for "Cancel". [CHAR LIMIT=NONE] -->
+    <string name="cancel">Cancel</string>
 
     <!-- Content description of the compatibility zoom button for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_compatibility_zoom_button">Compatibility zoom button.</string>

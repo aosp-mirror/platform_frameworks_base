@@ -259,7 +259,7 @@ public class SystemServicesProxy {
     public Rect getTaskBounds(int stackId) {
         ActivityManager.StackInfo info = getAllStackInfos().get(stackId);
         if (info != null)
-          return getAllStackInfos().get(stackId).bounds;
+          return info.bounds;
         return new Rect();
     }
 
