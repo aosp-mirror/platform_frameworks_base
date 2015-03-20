@@ -7361,7 +7361,9 @@ public final class BatteryStatsImpl extends BatteryStats {
         updateNetworkActivityLocked(NET_UPDATE_ALL, SystemClock.elapsedRealtime());
         // TODO(adamlesinski): enable when bluedroid stops deadlocking. b/19248786
         // updateBluetoothControllerActivityLocked();
-        updateWifiControllerActivityLocked();
+        // TODO(adamlesinski): disabled to avoid deadlock. Need to change how external
+        // data is pulled/accessed from BatteryStats. b/19729960
+        // updateWifiControllerActivityLocked();
         if (mOnBatteryInternal) {
             final boolean screenOn = mScreenState == Display.STATE_ON;
             updateDischargeScreenLevelsLocked(screenOn, screenOn);
