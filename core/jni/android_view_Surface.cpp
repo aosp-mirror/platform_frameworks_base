@@ -192,6 +192,9 @@ PublicFormat android_view_Surface_mapHalFormatDataspaceToPublicFormat(
         case HAL_PIXEL_FORMAT_YCbCr_422_I:
             // Name differs, though the value is the same
             return PublicFormat::YUY2;
+        case HAL_PIXEL_FORMAT_IMPLEMENTATION_DEFINED:
+            // Name differs, though the value is the same
+            return PublicFormat::PRIVATE;
         case HAL_PIXEL_FORMAT_Y16:
             // Dataspace-dependent
             switch (dataSpace) {
@@ -216,7 +219,6 @@ PublicFormat android_view_Surface_mapHalFormatDataspaceToPublicFormat(
             break;
         case HAL_PIXEL_FORMAT_BGRA_8888:
         case HAL_PIXEL_FORMAT_RAW_OPAQUE:
-        case HAL_PIXEL_FORMAT_IMPLEMENTATION_DEFINED:
             // Not defined in public API
             return PublicFormat::UNKNOWN;
 
