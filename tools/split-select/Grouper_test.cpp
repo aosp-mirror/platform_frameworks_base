@@ -37,6 +37,8 @@ protected:
         addSplit(splits, "en-rUS-sw300dp-xhdpi");
         addSplit(splits, "large");
         addSplit(splits, "pl-rPL");
+        addSplit(splits, "fr-rCA");
+        addSplit(splits, "fr");
         addSplit(splits, "xlarge");
         addSplit(splits, "en-rUS-sw600dp-xhdpi");
         addSplit(splits, "en-rUS-sw300dp-hdpi");
@@ -64,7 +66,7 @@ protected:
 };
 
 TEST_F(GrouperTest, shouldHaveCorrectNumberOfGroups) {
-    EXPECT_EQ(12u, mGroups.size());
+    EXPECT_EQ(15u, mGroups.size());
 }
 
 TEST_F(GrouperTest, shouldGroupDensities) {
@@ -79,7 +81,10 @@ TEST_F(GrouperTest, shouldGroupAbi) {
 }
 
 TEST_F(GrouperTest, shouldGroupLocale) {
-    expectHasGroupWithSplits("pl-rPL", "de-rDE");
+    expectHasGroupWithSplits("pl-rPL");
+    expectHasGroupWithSplits("de-rDE");
+    expectHasGroupWithSplits("fr");
+    expectHasGroupWithSplits("fr-rCA");
 }
 
 TEST_F(GrouperTest, shouldGroupEachSplitIntoItsOwnGroup) {
