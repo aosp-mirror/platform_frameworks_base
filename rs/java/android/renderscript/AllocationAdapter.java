@@ -136,7 +136,7 @@ public class AllocationAdapter extends Allocation {
 
 
     /**
-     * @hide
+     *
      * Set the active X.  The x value must be within the range for
      * the allocation being adapted.
      *
@@ -208,7 +208,7 @@ public class AllocationAdapter extends Allocation {
     }
 
     /**
-     * @hide
+     *
      */
     public void setArray(int arrayNum, int arrayVal) {
         if (mAdaptedAllocation.getType().getArray(arrayNum) == 0) {
@@ -242,7 +242,7 @@ public class AllocationAdapter extends Allocation {
     }
 
     /**
-     * @hide
+     *
      *
      * Create an arbitrary window into the base allocation
      * The type describes the shape of the window.

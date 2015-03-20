@@ -28524,8 +28524,11 @@ package android.renderscript {
   public class AllocationAdapter extends android.renderscript.Allocation {
     method public static android.renderscript.AllocationAdapter create1D(android.renderscript.RenderScript, android.renderscript.Allocation);
     method public static android.renderscript.AllocationAdapter create2D(android.renderscript.RenderScript, android.renderscript.Allocation);
+    method public static android.renderscript.AllocationAdapter createTyped(android.renderscript.RenderScript, android.renderscript.Allocation, android.renderscript.Type);
+    method public void setArray(int, int);
     method public void setFace(android.renderscript.Type.CubemapFace);
     method public void setLOD(int);
+    method public void setX(int);
     method public void setY(int);
     method public void setZ(int);
   }
