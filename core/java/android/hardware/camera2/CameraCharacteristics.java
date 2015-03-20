@@ -991,7 +991,8 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * <ul>
      * <li>Processed (but stalling): any non-RAW format with a stallDurations &gt; 0.
      * Typically JPEG format (ImageFormat#JPEG).</li>
-     * <li>Raw formats: ImageFormat#RAW_SENSOR, ImageFormat#RAW10 and ImageFormat#RAW_OPAQUE.</li>
+     * <li>Raw formats: ImageFormat#RAW_SENSOR, ImageFormat#RAW10, ImageFormat#RAW12,
+     * and ImageFormat#RAW_OPAQUE.</li>
      * <li>Processed (but not-stalling): any non-RAW format without a stall duration.
      * Typically ImageFormat#YUV_420_888, ImageFormat#NV21, ImageFormat#YV12.</li>
      * </ul>
@@ -1023,6 +1024,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * <ul>
      * <li>ImageFormat#RAW_SENSOR</li>
      * <li>ImageFormat#RAW10</li>
+     * <li>ImageFormat#RAW12</li>
      * <li>Opaque <code>RAW</code></li>
      * </ul>
      * <p>LEGACY mode devices ({@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL android.info.supportedHardwareLevel} <code>==</code> LEGACY)

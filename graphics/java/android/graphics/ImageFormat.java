@@ -356,6 +356,108 @@ public class ImageFormat {
     public static final int RAW10 = 0x25;
 
     /**
+     * <p>
+     * Android 12-bit raw format
+     * </p>
+     * <p>
+     * This is a single-plane, 12-bit per pixel, densely packed (in each row),
+     * unprocessed format, usually representing raw Bayer-pattern images coming
+     * from an image sensor.
+     * </p>
+     * <p>
+     * In an image buffer with this format, starting from the first pixel of each
+     * row, each two consecutive pixels are packed into 3 bytes (24 bits). The first
+     * and second byte contains the top 8 bits of first and second pixel. The third
+     * byte contains the 4 least significant bits of the two pixels, the exact layout
+     * data for each two consecutive pixels is illustrated below (Pi[j] stands for
+     * the jth bit of the ith pixel):
+     * </p>
+     * <table>
+     * <thead>
+     * <tr>
+     * <th align="center"></th>
+     * <th align="center">bit 7</th>
+     * <th align="center">bit 6</th>
+     * <th align="center">bit 5</th>
+     * <th align="center">bit 4</th>
+     * <th align="center">bit 3</th>
+     * <th align="center">bit 2</th>
+     * <th align="center">bit 1</th>
+     * <th align="center">bit 0</th>
+     * </tr>
+     * </thead> <tbody>
+     * <tr>
+     * <td align="center">Byte 0:</td>
+     * <td align="center">P0[11]</td>
+     * <td align="center">P0[10]</td>
+     * <td align="center">P0[ 9]</td>
+     * <td align="center">P0[ 8]</td>
+     * <td align="center">P0[ 7]</td>
+     * <td align="center">P0[ 6]</td>
+     * <td align="center">P0[ 5]</td>
+     * <td align="center">P0[ 4]</td>
+     * </tr>
+     * <tr>
+     * <td align="center">Byte 1:</td>
+     * <td align="center">P1[11]</td>
+     * <td align="center">P1[10]</td>
+     * <td align="center">P1[ 9]</td>
+     * <td align="center">P1[ 8]</td>
+     * <td align="center">P1[ 7]</td>
+     * <td align="center">P1[ 6]</td>
+     * <td align="center">P1[ 5]</td>
+     * <td align="center">P1[ 4]</td>
+     * </tr>
+     * <tr>
+     * <td align="center">Byte 2:</td>
+     * <td align="center">P1[ 3]</td>
+     * <td align="center">P1[ 2]</td>
+     * <td align="center">P1[ 1]</td>
+     * <td align="center">P1[ 0]</td>
+     * <td align="center">P0[ 3]</td>
+     * <td align="center">P0[ 2]</td>
+     * <td align="center">P0[ 1]</td>
+     * <td align="center">P0[ 0]</td>
+     * </tr>
+     * </tbody>
+     * </table>
+     * <p>
+     * This format assumes
+     * <ul>
+     * <li>a width multiple of 4 pixels</li>
+     * <li>an even height</li>
+     * </ul>
+     * </p>
+     *
+     * <pre>size = row stride * height</pre> where the row stride is in <em>bytes</em>,
+     * not pixels.
+     *
+     * <p>
+     * Since this is a densely packed format, the pixel stride is always 0. The
+     * application must use the pixel data layout defined in above table to
+     * access each row data. When row stride is equal to {@code width * (12 / 8)}, there
+     * will be no padding bytes at the end of each row, the entire image data is
+     * densely packed. When stride is larger than {@code width * (12 / 8)}, padding
+     * bytes will be present at the end of each row.
+     * </p>
+     * <p>
+     * For example, the {@link android.media.Image} object can provide data in
+     * this format from a {@link android.hardware.camera2.CameraDevice} (if
+     * supported) through a {@link android.media.ImageReader} object. The
+     * {@link android.media.Image#getPlanes() Image#getPlanes()} will return a
+     * single plane containing the pixel data. The pixel stride is always 0 in
+     * {@link android.media.Image.Plane#getPixelStride()}, and the
+     * {@link android.media.Image.Plane#getRowStride()} describes the vertical
+     * neighboring pixel distance (in bytes) between adjacent rows.
+     * </p>
+     *
+     * @see android.media.Image
+     * @see android.media.ImageReader
+     * @see android.hardware.camera2.CameraDevice
+     */
+    public static final int RAW12 = 0x26;
+
+    /**
      * Android dense depth image format.
      *
      * Each pixel is 16 bits, representing a depth ranging measurement from
@@ -418,6 +520,8 @@ public class ImageFormat {
                 return 16;
             case RAW10:
                 return 10;
+            case RAW12:
+                return 12;
         }
         return -1;
     }
@@ -445,6 +549,7 @@ public class ImageFormat {
             case YUV_420_888:
             case RAW_SENSOR:
             case RAW10:
+            case RAW12:
             case DEPTH16:
             case DEPTH_POINT_CLOUD:
                 return true;
