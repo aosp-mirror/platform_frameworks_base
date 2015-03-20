@@ -71,7 +71,7 @@ page.tags=video,audio,mpeg,mp4,m4a,mp3,3gp,3gpp,flac,wave,wav
 </tr>
 
 <tr>
-<td rowspan="11">Audio</td>
+<td rowspan="12">Audio</td>
 <td>AAC LC</td>
 <td style="text-align: center;"><big>&bull;</big></td>
 <td style="text-align: center;"><big>&bull;</big></td>
@@ -180,6 +180,15 @@ rates for raw PCM recordings at 8000, 16000 and 44100 Hz.</td>
 </tr>
 
 <tr>
+<td>Opus</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"><big>&bull;</big><br><small>(Android 5.0+)</small></td>
+<td></td>
+<td>
+  Matroska (.mkv)</td>
+</tr>
+
+<tr>
 <td rowspan="5">Image</td>
 <td>JPEG</td>
 <td style="text-align: center;"><big>&bull;</big></td>
@@ -235,7 +244,7 @@ rates for raw PCM recordings at 8000, 16000 and 44100 Hz.</td>
 
 
 <tr>
-<td rowspan="4">Video</td>
+<td rowspan="6">Video</td>
 <td>H.263</td>
 <td style="text-align: center;"><big>&bull;</big></td>
 <td style="text-align: center;"><big>&bull;</big></td>
@@ -257,6 +266,15 @@ rates for raw PCM recordings at 8000, 16000 and 44100 Hz.</td>
 </tr>
 
 <tr>
+<td>H.265 HEVC</td>
+<td style="text-align: center;" nowrap></td>
+<td style="text-align: center;" nowrap><big>&bull;</big><br><small>(Android 5.0+)</small></td>
+<td>Main Profile Level 3 for mobile devices and Main Profile Level 4.1 for Android TV</td>
+<td>
+  &bull; MPEG-4 (.mp4)<br>
+</tr>
+
+<tr>
 <td>MPEG-4 SP</td>
 <td>&nbsp;</td>
 <td style="text-align: center;"><big>&bull;</big></td>
@@ -270,6 +288,16 @@ rates for raw PCM recordings at 8000, 16000 and 44100 Hz.</td>
 <td style="text-align: center;" nowrap><big>&bull;</big><br><small>(Android 4.3+)</small></td>
 <td style="text-align: center;" nowrap><big>&bull;</big><br><small>(Android 2.3.3+)</small></td>
 <td>Streamable only in Android 4.0 and above</td>
+<td>
+  &bull; <a href="http://www.webmproject.org/">WebM</a> (.webm)<br>
+  &bull; Matroska (.mkv, Android 4.0+)</td>
+</tr>
+
+<tr>
+<td>VP9</td>
+<td style="text-align: center;" nowrap></td>
+<td style="text-align: center;" nowrap><big>&bull;</big><br><small>(Android 4.4+)</small></td>
+<td></td>
 <td>
   &bull; <a href="http://www.webmproject.org/">WebM</a> (.webm)<br>
   &bull; Matroska (.mkv, Android 4.0+)</td>
