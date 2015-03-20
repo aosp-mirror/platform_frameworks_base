@@ -90,7 +90,7 @@ int register_android_view_InputDevice(JNIEnv* env)
     gInputDeviceClassInfo.clazz = MakeGlobalRefOrDie(env, gInputDeviceClassInfo.clazz);
 
     gInputDeviceClassInfo.ctor = GetMethodIDOrDie(env, gInputDeviceClassInfo.clazz, "<init>",
-            "(IIILjava/lang/String;IILjava/lang/String;ZIILandroid/view/KeyCharacterMap;ZZ)V");
+            "(IIILjava/lang/String;IILjava/lang/String;Ljava/lang/String;ZIILandroid/view/KeyCharacterMap;ZZ)V");
 
     gInputDeviceClassInfo.addMotionRange = GetMethodIDOrDie(env, gInputDeviceClassInfo.clazz,
             "addMotionRange", "(IIFFFFF)V");
