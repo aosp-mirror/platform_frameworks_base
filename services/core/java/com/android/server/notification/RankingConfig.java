@@ -20,6 +20,10 @@ public interface RankingConfig {
 
     void setPackagePriority(String packageName, int uid, int priority);
 
+    boolean getPackagePeekable(String packageName, int uid);
+
+    void setPackagePeekable(String packageName, int uid, boolean peekable);
+
     int getPackageVisibilityOverride(String packageName, int uid);
 
     void setPackageVisibilityOverride(String packageName, int uid, int visibility);

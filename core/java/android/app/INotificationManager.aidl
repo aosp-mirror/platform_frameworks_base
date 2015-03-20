@@ -48,6 +48,9 @@ interface INotificationManager
     void setPackagePriority(String pkg, int uid, int priority);
     int getPackagePriority(String pkg, int uid);
 
+    void setPackagePeekable(String pkg, int uid, boolean peekable);
+    boolean getPackagePeekable(String pkg, int uid);
+
     void setPackageVisibilityOverride(String pkg, int uid, int visibility);
     int getPackageVisibilityOverride(String pkg, int uid);
 
