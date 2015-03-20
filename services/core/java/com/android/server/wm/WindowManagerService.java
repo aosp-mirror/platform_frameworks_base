@@ -7383,7 +7383,7 @@ public class WindowManagerService extends IWindowManager.Stub
                         outSurface.copyFrom(surface);
                         final IBinder winBinder = window.asBinder();
                         token = new Binder();
-                        mDragState = new DragState(this, token, surface, /*flags*/ 0, winBinder);
+                        mDragState = new DragState(this, token, surface, flags, winBinder);
                         token = mDragState.mToken = new Binder();
 
                         // 5 second timeout for this window to actually begin the drag

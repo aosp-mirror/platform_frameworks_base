@@ -1001,7 +1001,8 @@ public class Editor {
                 CharSequence selectedText = mTextView.getTransformedText(start, end);
                 ClipData data = ClipData.newPlainText(null, selectedText);
                 DragLocalState localState = new DragLocalState(mTextView, start, end);
-                mTextView.startDrag(data, getTextThumbnailBuilder(selectedText), localState, 0);
+                mTextView.startDrag(data, getTextThumbnailBuilder(selectedText), localState,
+                        View.DRAG_FLAG_GLOBAL);
                 stopSelectionActionMode();
             } else {
                 stopSelectionActionMode();
