@@ -1519,6 +1519,10 @@ public class Intent implements Parcelable, Cloneable {
      * </p><p>
      * See {@link android.os.PowerManager#isInteractive} for details.
      * </p>
+     * You <em>cannot</em> receive this through components declared in
+     * manifests, only by explicitly registering for it with
+     * {@link Context#registerReceiver(BroadcastReceiver, IntentFilter)
+     * Context.registerReceiver()}.
      *
      * <p class="note">This is a protected intent that can only be sent
      * by the system.
@@ -1539,6 +1543,10 @@ public class Intent implements Parcelable, Cloneable {
      * </p><p>
      * See {@link android.os.PowerManager#isInteractive} for details.
      * </p>
+     * You <em>cannot</em> receive this through components declared in
+     * manifests, only by explicitly registering for it with
+     * {@link Context#registerReceiver(BroadcastReceiver, IntentFilter)
+     * Context.registerReceiver()}.
      *
      * <p class="note">This is a protected intent that can only be sent
      * by the system.
@@ -1576,7 +1584,7 @@ public class Intent implements Parcelable, Cloneable {
 
     /**
      * Broadcast Action: The current time has changed.  Sent every
-     * minute.  You can <em>not</em> receive this through components declared
+     * minute.  You <em>cannot</em> receive this through components declared
      * in manifests, only by explicitly registering for it with
      * {@link Context#registerReceiver(BroadcastReceiver, IntentFilter)
      * Context.registerReceiver()}.
@@ -1922,7 +1930,7 @@ public class Intent implements Parcelable, Cloneable {
      * appropriately.
      *
      * <p class="note">
-     * You can <em>not</em> receive this through components declared
+     * You <em>cannot</em> receive this through components declared
      * in manifests, only by explicitly registering for it with
      * {@link Context#registerReceiver(BroadcastReceiver, IntentFilter)
      * Context.registerReceiver()}.
@@ -1949,7 +1957,7 @@ public class Intent implements Parcelable, Cloneable {
      * contents of the Intent.
      *
      * <p class="note">
-     * You can <em>not</em> receive this through components declared
+     * You <em>cannot</em> receive this through components declared
      * in manifests, only by explicitly registering for it with
      * {@link Context#registerReceiver(BroadcastReceiver, IntentFilter)
      * Context.registerReceiver()}.  See {@link #ACTION_BATTERY_LOW},
