@@ -23,10 +23,18 @@
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     >
-    <ImageView
+    <com.android.systemui.statusbar.AlphaOptimizedImageView
+        android:theme="@style/DualToneLightTheme"
         android:id="@+id/mobile_signal"
         android:layout_height="wrap_content"
         android:layout_width="wrap_content"
+        />
+    <com.android.systemui.statusbar.AlphaOptimizedImageView
+        android:theme="@style/DualToneDarkTheme"
+        android:id="@+id/mobile_signal_dark"
+        android:layout_height="wrap_content"
+        android:layout_width="wrap_content"
+        android:alpha="0.0"
         />
     <ImageView
         android:id="@+id/mobile_type"

@@ -59,9 +59,10 @@ public class SignalClusterView
     private String mWifiDescription;
     private ArrayList<PhoneState> mPhoneStates = new ArrayList<PhoneState>();
     private int mIconTint = Color.WHITE;
+    private float mDarkIntensity;
 
     ViewGroup mWifiGroup;
-    ImageView mVpn, mWifi, mAirplane, mNoSims;
+    ImageView mVpn, mWifi, mAirplane, mNoSims, mWifiDark, mNoSimsDark;
     View mWifiAirplaneSpacer;
     View mWifiSignalSpacer;
     LinearLayout mMobileSignalGroup;
@@ -115,8 +116,10 @@ public class SignalClusterView
         mVpn            = (ImageView) findViewById(R.id.vpn);
         mWifiGroup      = (ViewGroup) findViewById(R.id.wifi_combo);
         mWifi           = (ImageView) findViewById(R.id.wifi_signal);
+        mWifiDark       = (ImageView) findViewById(R.id.wifi_signal_dark);
         mAirplane       = (ImageView) findViewById(R.id.airplane);
         mNoSims         = (ImageView) findViewById(R.id.no_sims);
+        mNoSimsDark     = (ImageView) findViewById(R.id.no_sims_dark);
         mWifiAirplaneSpacer =         findViewById(R.id.wifi_airplane_spacer);
         mWifiSignalSpacer =           findViewById(R.id.wifi_signal_spacer);
         mMobileSignalGroup = (LinearLayout) findViewById(R.id.mobile_signal_group);
@@ -273,6 +276,7 @@ public class SignalClusterView
         if (DEBUG) Log.d(TAG, String.format("vpn: %s", mVpnVisible ? "VISIBLE" : "GONE"));
         if (mWifiVisible) {
             mWifi.setImageResource(mWifiStrengthId);
+            mWifiDark.setImageResource(mWifiStrengthId);
             mWifiGroup.setContentDescription(mWifiDescription);
             mWifiGroup.setVisibility(View.VISIBLE);
         } else {
@@ -317,15 +321,17 @@ public class SignalClusterView
         }
 
         mNoSims.setVisibility(mNoSimsVisible ? View.VISIBLE : View.GONE);
+        mNoSimsDark.setVisibility(mNoSimsVisible ? View.VISIBLE : View.GONE);
 
         boolean anythingVisible = mNoSimsVisible || mWifiVisible || mIsAirplaneMode
                 || anyMobileVisible || mVpnVisible;
         setPaddingRelative(0, 0, anythingVisible ? mEndPadding : mEndPaddingNothingVisible, 0);
     }
 
-    public void setIconTint(int tint) {
-        boolean changed = tint != mIconTint;
+    public void setIconTint(int tint, float darkIntensity) {
+        boolean changed = tint != mIconTint || darkIntensity != mDarkIntensity;
         mIconTint = tint;
+        mDarkIntensity = darkIntensity;
         if (changed && isAttachedToWindow()) {
             applyIconTint();
         }
@@ -333,12 +339,17 @@ public class SignalClusterView
 
     private void applyIconTint() {
         setTint(mVpn, mIconTint);
-        setTint(mWifi, mIconTint);
-        setTint(mNoSims, mIconTint);
         setTint(mAirplane, mIconTint);
+        applyDarkIntensity(mDarkIntensity, mNoSims, mNoSimsDark);
+        applyDarkIntensity(mDarkIntensity, mWifi, mWifiDark);
         for (int i = 0; i < mPhoneStates.size(); i++) {
-            mPhoneStates.get(i).setIconTint(mIconTint);
+            mPhoneStates.get(i).setIconTint(mIconTint, mDarkIntensity);
         }
+    }
+
+    private void applyDarkIntensity(float darkIntensity, View lightIcon, View darkIcon) {
+        lightIcon.setAlpha(1 - darkIntensity);
+        darkIcon.setAlpha(darkIntensity);
     }
 
     private void setTint(ImageView v, int tint) {
@@ -354,7 +365,7 @@ public class SignalClusterView
         private String mMobileDescription, mMobileTypeDescription;
 
         private ViewGroup mMobileGroup;
-        private ImageView mMobile, mMobileType;
+        private ImageView mMobile, mMobileDark, mMobileType;
 
         public PhoneState(int subId, Context context) {
             ViewGroup root = (ViewGroup) LayoutInflater.from(context)
@@ -366,12 +377,14 @@ public class SignalClusterView
         public void setViews(ViewGroup root) {
             mMobileGroup    = root;
             mMobile         = (ImageView) root.findViewById(R.id.mobile_signal);
+            mMobileDark     = (ImageView) root.findViewById(R.id.mobile_signal_dark);
             mMobileType     = (ImageView) root.findViewById(R.id.mobile_type);
         }
 
         public boolean apply(boolean isSecondaryIcon) {
             if (mMobileVisible && !mIsAirplaneMode) {
                 mMobile.setImageResource(mMobileStrengthId);
+                mMobileDark.setImageResource(mMobileStrengthId);
                 mMobileType.setImageResource(mMobileTypeId);
                 mMobileGroup.setContentDescription(mMobileTypeDescription
                         + " " + mMobileDescription);
@@ -384,6 +397,8 @@ public class SignalClusterView
             mMobileGroup.setPaddingRelative(isSecondaryIcon ? mSecondaryTelephonyPadding : 0,
                     0, 0, 0);
             mMobile.setPaddingRelative(mIsMobileTypeIconWide ? mWideTypeIconStartPadding : 0,
+                    0, 0, 0);
+            mMobileDark.setPaddingRelative(mIsMobileTypeIconWide ? mWideTypeIconStartPadding : 0,
                     0, 0, 0);
 
             if (DEBUG) Log.d(TAG, String.format("mobile: %s sig=%d typ=%d",
@@ -401,8 +416,8 @@ public class SignalClusterView
             }
         }
 
-        public void setIconTint(int tint) {
-            setTint(mMobile, tint);
+        public void setIconTint(int tint, float darkIntensity) {
+            applyDarkIntensity(darkIntensity, mMobile, mMobileDark);
             setTint(mMobileType, tint);
         }
     }

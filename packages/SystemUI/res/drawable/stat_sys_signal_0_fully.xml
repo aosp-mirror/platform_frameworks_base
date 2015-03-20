@@ -20,6 +20,6 @@ Copyright (C) 2014 The Android Open Source Project
         android:viewportWidth="24.0"
         android:viewportHeight="24.0">
     <path
-        android:fillColor="#4DFFFFFF"
+        android:fillColor="?attr/backgroundColor"
         android:pathData="M2.000000,22.000000l20.000000,0.000000 0.000000,-20.000000z"/>
 </vector>

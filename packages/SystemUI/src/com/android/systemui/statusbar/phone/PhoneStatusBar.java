@@ -49,7 +49,6 @@ import android.content.res.Resources;
 import android.database.ContentObserver;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.ColorFilter;
 import android.graphics.PixelFormat;
 import android.graphics.Point;
@@ -224,8 +223,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
 
     /** Allow some time inbetween the long press for back and recents. */
     private static final int LOCK_TO_APP_GESTURE_TOLERENCE = 200;
-
-    private int mLightModeIconColor;
 
     PhoneStatusBarPolicy mIconPolicy;
 
@@ -535,7 +532,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         updateDisplaySize();
         mScrimSrcModeEnabled = mContext.getResources().getBoolean(
                 R.bool.config_status_bar_scrim_behind_use_src);
-        mLightModeIconColor = mContext.getColor(R.color.light_mode_icon_color);
 
         super.start(); // calls createAndAddWindows()
 
@@ -2324,9 +2320,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                 boolean allowLight = isTransparentBar && !mBatteryController.isPowerSave();
                 boolean light = (vis & View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR) != 0;
 
-                mIconController.setIconTint(
-                        (allowLight && light) ? mLightModeIconColor : Color.WHITE);
-
+                mIconController.setIconsDark(allowLight && light);
             }
             // restore the recents bit
             if (wasRecentsVisible) {
