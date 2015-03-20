@@ -203,7 +203,20 @@ public class MediaMetadataRetriever
     }
 
     /**
-     * Call this method after setDataSource(). This method retrieves the 
+     * Sets the data source (MediaDataSource) to use.
+     *
+     * @param dataSource the MediaDataSource for the media you want to play
+     */
+    public void setDataSource(MediaDataSource dataSource)
+            throws IllegalArgumentException {
+        _setDataSource(dataSource);
+    }
+
+    private native void _setDataSource(MediaDataSource dataSource)
+          throws IllegalArgumentException;
+
+    /**
+     * Call this method after setDataSource(). This method retrieves the
      * meta data value associated with the keyCode.
      * 
      * The keyCode currently supported is listed below as METADATA_XXX

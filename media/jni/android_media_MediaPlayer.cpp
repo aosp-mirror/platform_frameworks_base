@@ -36,6 +36,7 @@
 #include "utils/Errors.h"  // for status_t
 #include "utils/KeyedVector.h"
 #include "utils/String8.h"
+#include "android_media_MediaDataSource.h"
 #include "android_media_Utils.h"
 
 #include "android_os_Parcel.h"
@@ -249,6 +250,23 @@ android_media_MediaPlayer_setDataSourceFD(JNIEnv *env, jobject thiz, jobject fil
     int fd = jniGetFDFromFileDescriptor(env, fileDescriptor);
     ALOGV("setDataSourceFD: fd %d", fd);
     process_media_player_call( env, thiz, mp->setDataSource(fd, offset, length), "java/io/IOException", "setDataSourceFD failed." );
+}
+
+static void
+android_media_MediaPlayer_setDataSourceCallback(JNIEnv *env, jobject thiz, jobject dataSource)
+{
+    sp<MediaPlayer> mp = getMediaPlayer(env, thiz);
+    if (mp == NULL ) {
+        jniThrowException(env, "java/lang/IllegalStateException", NULL);
+        return;
+    }
+
+    if (dataSource == NULL) {
+        jniThrowException(env, "java/lang/IllegalArgumentException", NULL);
+        return;
+    }
+    sp<IDataSource> callbackDataSource = new JMediaDataSource(env, dataSource);
+    process_media_player_call(env, thiz, mp->setDataSource(callbackDataSource), "java/lang/RuntimeException", "setDataSourceCallback failed." );
 }
 
 static sp<IGraphicBufferProducer>
@@ -871,7 +889,8 @@ static JNINativeMethod gMethods[] = {
         (void *)android_media_MediaPlayer_setDataSourceAndHeaders
     },
 
-    {"_setDataSource",       "(Ljava/io/FileDescriptor;JJ)V",    (void *)android_media_MediaPlayer_setDataSourceFD},
+    {"_setDataSource",      "(Ljava/io/FileDescriptor;JJ)V",    (void *)android_media_MediaPlayer_setDataSourceFD},
+    {"_setDataSource",      "(Landroid/media/MediaDataSource;)V",(void *)android_media_MediaPlayer_setDataSourceCallback },
     {"_setVideoSurface",    "(Landroid/view/Surface;)V",        (void *)android_media_MediaPlayer_setVideoSurface},
     {"_prepare",            "()V",                              (void *)android_media_MediaPlayer_prepare},
     {"prepareAsync",        "()V",                              (void *)android_media_MediaPlayer_prepareAsync},

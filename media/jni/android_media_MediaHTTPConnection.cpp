@@ -134,7 +134,6 @@ static jobject android_media_MediaHTTPConnection_native_getIMemory(
 static jint android_media_MediaHTTPConnection_native_readAt(
         JNIEnv *env, jobject thiz, jlong offset, jint size) {
     sp<JMediaHTTPConnection> conn = getObject(env, thiz);
-
     if (size > JMediaHTTPConnection::kBufferSize) {
         size = JMediaHTTPConnection::kBufferSize;
     }

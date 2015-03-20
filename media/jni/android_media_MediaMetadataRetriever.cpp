@@ -30,6 +30,7 @@
 #include "jni.h"
 #include "JNIHelp.h"
 #include "android_runtime/AndroidRuntime.h"
+#include "android_media_MediaDataSource.h"
 #include "android_media_Utils.h"
 #include "android_util_Binder.h"
 
@@ -169,6 +170,23 @@ static void android_media_MediaMetadataRetriever_setDataSourceFD(JNIEnv *env, jo
         return;
     }
     process_media_retriever_call(env, retriever->setDataSource(fd, offset, length), "java/lang/RuntimeException", "setDataSource failed");
+}
+
+static void android_media_MediaMetadataRetriever_setDataSourceCallback(JNIEnv *env, jobject thiz, jobject dataSource)
+{
+    ALOGV("setDataSourceCallback");
+    MediaMetadataRetriever* retriever = getRetriever(env, thiz);
+    if (retriever == 0) {
+        jniThrowException(env, "java/lang/IllegalStateException", "No retriever available");
+        return;
+    }
+    if (dataSource == NULL) {
+        jniThrowException(env, "java/lang/IllegalArgumentException", NULL);
+        return;
+    }
+
+    sp<IDataSource> callbackDataSource = new JMediaDataSource(env, dataSource);
+    process_media_retriever_call(env, retriever->setDataSource(callbackDataSource), "java/lang/RuntimeException", "setDataSourceCallback failed");
 }
 
 template<typename T>
@@ -457,6 +475,7 @@ static JNINativeMethod nativeMethods[] = {
         },
 
         {"setDataSource",   "(Ljava/io/FileDescriptor;JJ)V", (void *)android_media_MediaMetadataRetriever_setDataSourceFD},
+        {"_setDataSource",   "(Landroid/media/MediaDataSource;)V", (void *)android_media_MediaMetadataRetriever_setDataSourceCallback},
         {"_getFrameAtTime", "(JI)Landroid/graphics/Bitmap;", (void *)android_media_MediaMetadataRetriever_getFrameAtTime},
         {"extractMetadata", "(I)Ljava/lang/String;", (void *)android_media_MediaMetadataRetriever_extractMetadata},
         {"getEmbeddedPicture", "(I)[B", (void *)android_media_MediaMetadataRetriever_getEmbeddedPicture},
