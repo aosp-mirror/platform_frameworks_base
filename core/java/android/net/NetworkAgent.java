@@ -49,6 +49,8 @@ public abstract class NetworkAgent extends Handler {
     private static final boolean VDBG = false;
     private final Context mContext;
     private final ArrayList<Message>mPreConnectedQueue = new ArrayList<Message>();
+    private volatile long mLastBwRefreshTime = 0;
+    private static final long BW_REFRESH_MIN_WIN_MS = 500;
 
     private static final int BASE = Protocol.BASE_NETWORK_AGENT;
 
@@ -138,6 +140,11 @@ public abstract class NetworkAgent extends Handler {
      */
     public static final int CMD_SAVE_ACCEPT_UNVALIDATED = BASE + 9;
 
+    /** Sent by ConnectivityService to the NetworkAgent to inform the agent to pull
+     * the underlying network connection for updated bandwidth information.
+     */
+    public static final int CMD_REQUEST_BANDWIDTH_UPDATE = BASE + 10;
+
     public NetworkAgent(Looper looper, Context context, String logTag, NetworkInfo ni,
             NetworkCapabilities nc, LinkProperties lp, int score) {
         this(looper, context, logTag, ni, nc, lp, score, null);
@@ -199,6 +206,15 @@ public abstract class NetworkAgent extends Handler {
                 log("Unhandled Message " + msg);
                 break;
             }
+            case CMD_REQUEST_BANDWIDTH_UPDATE: {
+                if (VDBG) {
+                    log("CMD_REQUEST_BANDWIDTH_UPDATE request received.");
+                }
+                if (System.currentTimeMillis() > (mLastBwRefreshTime + BW_REFRESH_MIN_WIN_MS)) {
+                    pollLceData();
+                }
+                break;
+            }
             case CMD_REPORT_NETWORK_STATUS: {
                 if (VDBG) {
                     log("CMD_REPORT_NETWORK_STATUS(" +
@@ -244,6 +260,7 @@ public abstract class NetworkAgent extends Handler {
      * Called by the bearer code when it has new NetworkCapabilities data.
      */
     public void sendNetworkCapabilities(NetworkCapabilities networkCapabilities) {
+        mLastBwRefreshTime = System.currentTimeMillis();
         queueOrSendMessage(EVENT_NETWORK_CAPABILITIES_CHANGED,
                 new NetworkCapabilities(networkCapabilities));
     }
@@ -296,6 +313,13 @@ public abstract class NetworkAgent extends Handler {
      * network won't be immediately requested again.
      */
     abstract protected void unwanted();
+
+    /**
+     * Called when ConnectivityService request a bandwidth update. The parent factory
+     * shall try to overwrite this method and produce a bandwidth update if capable.
+     */
+    protected void pollLceData() {
+    }
 
     /**
      * Called when the system determines the usefulness of this network.

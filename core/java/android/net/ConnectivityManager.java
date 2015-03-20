@@ -2452,6 +2452,23 @@ public class ConnectivityManager {
     }
 
     /**
+     * Request connectivityservice to refresh network capabilities for the given
+     * {@link network}. This method returns true if the network is still active, false
+     * otherwise. Notice the method call assumes the caller has registered for
+     * listening NetworkCapabilities updates.
+     *
+     * @param network{@link Network} specifying which network you're interested.
+     * @hide
+     */
+    public boolean requestBwUpdate(Network network) {
+        try {
+            return mService.requestBwUpdate(network);
+        } catch (RemoteException e) {
+            return false;
+        }
+    }
+
+    /**
      * Unregisters callbacks about and possibly releases networks originating from
      * {@link #requestNetwork} and {@link #registerNetworkCallback} calls.  If the
      * given {@code NetworkCallback} had previously been used with {@code #requestNetwork},
