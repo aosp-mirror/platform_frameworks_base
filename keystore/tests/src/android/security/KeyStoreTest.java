@@ -36,6 +36,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
+import java.security.spec.RSAKeyGenParameterSpec;
 
 import android.util.Log;
 import android.util.Base64;
@@ -713,6 +714,8 @@ public class KeyStoreTest extends ActivityUnitTestCase<Activity> {
         args.addInt(KeymasterDefs.KM_TAG_KEY_SIZE, 2048);
         args.addBlob(KeymasterDefs.KM_TAG_APPLICATION_ID, null);
         args.addBlob(KeymasterDefs.KM_TAG_APPLICATION_DATA, null);
+        args.addBlob(KeymasterDefs.KM_TAG_RSA_PUBLIC_EXPONENT,
+                RSAKeyGenParameterSpec.F4.toByteArray());
 
         KeyCharacteristics outCharacteristics = new KeyCharacteristics();
         int result = mKeyStore.generateKey(name, args, 0, outCharacteristics);
@@ -750,6 +753,8 @@ public class KeyStoreTest extends ActivityUnitTestCase<Activity> {
         args.addInt(KeymasterDefs.KM_TAG_BLOCK_MODE, KeymasterDefs.KM_MODE_ECB);
         args.addBlob(KeymasterDefs.KM_TAG_APPLICATION_ID, new byte[] {0x01, 0x02, 0x03});
         args.addBlob(KeymasterDefs.KM_TAG_APPLICATION_DATA, null);
+        args.addBlob(KeymasterDefs.KM_TAG_RSA_PUBLIC_EXPONENT,
+                RSAKeyGenParameterSpec.F4.toByteArray());
 
         KeyCharacteristics outCharacteristics = new KeyCharacteristics();
         int result = mKeyStore.generateKey(name, args, 0, outCharacteristics);
