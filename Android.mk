@@ -45,6 +45,7 @@ LOCAL_SRC_FILES += \
        core/java/android/content/EventLogTags.logtags \
        core/java/android/speech/tts/EventLogTags.logtags \
        core/java/android/webkit/EventLogTags.logtags \
+       core/java/com/android/internal/logging/EventLogTags.logtags \
 
 ## READ ME: ########################################################
 ##
