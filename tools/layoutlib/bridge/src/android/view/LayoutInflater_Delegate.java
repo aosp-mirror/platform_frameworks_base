@@ -21,9 +21,11 @@ import com.android.tools.layoutlib.annotations.LayoutlibDelegate;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
+import android.content.Context;
 import android.content.res.TypedArray;
 import android.content.res.XmlResourceParser;
 import android.util.AttributeSet;
+import android.util.TypedValue;
 import android.util.Xml;
 
 import java.io.IOException;
@@ -36,8 +38,12 @@ import java.io.IOException;
  *
  */
 public class LayoutInflater_Delegate {
-
     private static final String TAG_MERGE = "merge";
+
+    private static final String ATTR_LAYOUT = "layout";
+
+    private static final int[] ATTRS_THEME = new int[] {
+            com.android.internal.R.attr.theme };
 
     public static boolean sIsInInclude = false;
 
@@ -49,7 +55,7 @@ public class LayoutInflater_Delegate {
      */
     @LayoutlibDelegate
     /* package */ static void rInflate(LayoutInflater thisInflater, XmlPullParser parser,
-            View parent, final AttributeSet attrs, boolean finishInflate, boolean inheritContext)
+            View parent, Context context, AttributeSet attrs, boolean finishInflate)
             throws XmlPullParserException, IOException {
 
         if (finishInflate == false) {
@@ -61,7 +67,7 @@ public class LayoutInflater_Delegate {
 
         // ---- START DEFAULT IMPLEMENTATION.
 
-        thisInflater.rInflate_Original(parser, parent, attrs, finishInflate, inheritContext);
+        thisInflater.rInflate_Original(parser, parent, context, attrs, finishInflate);
 
         // ---- END DEFAULT IMPLEMENTATION.
 
@@ -74,15 +80,50 @@ public class LayoutInflater_Delegate {
     }
 
     @LayoutlibDelegate
-    public static void parseInclude(LayoutInflater thisInflater, XmlPullParser parser, View parent,
-            AttributeSet attrs, boolean inheritContext) throws XmlPullParserException, IOException {
-
+    public static void parseInclude(LayoutInflater thisInflater, XmlPullParser parser,
+            Context context, View parent, AttributeSet attrs)
+            throws XmlPullParserException, IOException {
         int type;
 
         if (parent instanceof ViewGroup) {
-            final int layout = attrs.getAttributeResourceValue(null, "layout", 0);
+            // Apply a theme wrapper, if requested. This is sort of a weird
+            // edge case, since developers think the <include> overwrites
+            // values in the AttributeSet of the included View. So, if the
+            // included View has a theme attribute, we'll need to ignore it.
+            final TypedArray ta = context.obtainStyledAttributes(attrs, ATTRS_THEME);
+            final int themeResId = ta.getResourceId(0, 0);
+            final boolean hasThemeOverride = themeResId != 0;
+            if (hasThemeOverride) {
+                context = new ContextThemeWrapper(context, themeResId);
+            }
+            ta.recycle();
+
+            // If the layout is pointing to a theme attribute, we have to
+            // massage the value to get a resource identifier out of it.
+            int layout = attrs.getAttributeResourceValue(null, ATTR_LAYOUT, 0);
             if (layout == 0) {
-                final String value = attrs.getAttributeValue(null, "layout");
+                final String value = attrs.getAttributeValue(null, ATTR_LAYOUT);
+                if (value == null || value.length() <= 0) {
+                    throw new InflateException("You must specify a layout in the"
+                            + " include tag: <include layout=\"@layout/layoutID\" />");
+                }
+
+                // Attempt to resolve the "?attr/name" string to an identifier.
+                layout = context.getResources().getIdentifier(value.substring(1), null, null);
+            }
+
+            // The layout might be referencing a theme attribute.
+            // ---- START CHANGES
+            if (layout != 0) {
+                final TypedValue tempValue = new TypedValue();
+                if (context.getTheme().resolveAttribute(layout, tempValue, true)) {
+                    layout = tempValue.resourceId;
+                }
+            }
+            // ---- END CHANGES
+
+            if (layout == 0) {
+                final String value = attrs.getAttributeValue(null, ATTR_LAYOUT);
                 if (value == null) {
                     throw new InflateException("You must specifiy a layout in the"
                             + " include tag: <include layout=\"@layout/layoutID\" />");
@@ -111,12 +152,23 @@ public class LayoutInflater_Delegate {
 
                     if (TAG_MERGE.equals(childName)) {
                         // Inflate all children.
-                        thisInflater.rInflate(childParser, parent, childAttrs, false,
-                                inheritContext);
+                        thisInflater.rInflate(childParser, parent, context, childAttrs, false);
                     } else {
                         final View view = thisInflater.createViewFromTag(parent, childName,
-                                childAttrs, inheritContext);
+                                context, childAttrs, hasThemeOverride);
                         final ViewGroup group = (ViewGroup) parent;
+
+                        final TypedArray a = context.obtainStyledAttributes(
+                                attrs, com.android.internal.R.styleable.Include);
+                        final int id = a.getResourceId(
+                                com.android.internal.R.styleable.Include_id, View.NO_ID);
+                        final int visibility = a.getInt(
+                                com.android.internal.R.styleable.Include_visibility, -1);
+                        final boolean hasWidth = a.hasValue(
+                                com.android.internal.R.styleable.Include_layout_width);
+                        final boolean hasHeight = a.hasValue(
+                                com.android.internal.R.styleable.Include_layout_height);
+                        a.recycle();
 
                         // We try to load the layout params set in the <include /> tag. If
                         // they don't exist, we will rely on the layout params set in the
@@ -127,40 +179,27 @@ public class LayoutInflater_Delegate {
                         // successfully loaded layout params from the <include /> tag,
                         // false means we need to rely on the included layout params.
                         ViewGroup.LayoutParams params = null;
-                        try {
-                            // ---- START CHANGES
-                            sIsInInclude = true;
-                            // ---- END CHANGES
+                        if (hasWidth && hasHeight) {
+                            try {
+                                // ---- START CHANGES
+                                sIsInInclude = true;
+                                // ---- END CHANGES
 
-                            params = group.generateLayoutParams(attrs);
+                                params = group.generateLayoutParams(attrs);
 
-                        } catch (RuntimeException e) {
-                            // ---- START CHANGES
-                            sIsInInclude = false;
-                            // ---- END CHANGES
-
-                            params = group.generateLayoutParams(childAttrs);
-                        } finally {
-                            // ---- START CHANGES
-                            sIsInInclude = false;
-                            // ---- END CHANGES
-
-                            if (params != null) {
-                                view.setLayoutParams(params);
+                            } finally {
+                                // ---- START CHANGES
+                                sIsInInclude = false;
+                                // ---- END CHANGES
                             }
                         }
+                        if (params == null) {
+                            params = group.generateLayoutParams(childAttrs);
+                        }
+                        view.setLayoutParams(params);
 
                         // Inflate all children.
-                        thisInflater.rInflate(childParser, view, childAttrs, true, true);
-
-                        // Attempt to override the included layout's android:id with the
-                        // one set on the <include /> tag itself.
-                        TypedArray a = thisInflater.mContext.obtainStyledAttributes(attrs,
-                            com.android.internal.R.styleable.View, 0, 0);
-                        int id = a.getResourceId(com.android.internal.R.styleable.View_id, View.NO_ID);
-                        // While we're at it, let's try to override android:visibility.
-                        int visibility = a.getInt(com.android.internal.R.styleable.View_visibility, -1);
-                        a.recycle();
+                        thisInflater.rInflateChildren(childParser, view, childAttrs, true);
 
                         if (id != View.NO_ID) {
                             view.setId(id);
@@ -188,12 +227,6 @@ public class LayoutInflater_Delegate {
             throw new InflateException("<include /> can only be used inside of a ViewGroup");
         }
 
-        final int currentDepth = parser.getDepth();
-        while (((type = parser.next()) != XmlPullParser.END_TAG ||
-                parser.getDepth() > currentDepth) && type != XmlPullParser.END_DOCUMENT) {
-            // Empty
-        }
+        LayoutInflater.consumeChildElements(parser);
     }
-
-
 }
