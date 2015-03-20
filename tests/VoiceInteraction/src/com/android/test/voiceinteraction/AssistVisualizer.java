@@ -47,12 +47,12 @@ public class AssistVisualizer extends View {
     public void setAssistStructure(AssistStructure as) {
         mAssistStructure = as;
         mTextRects.clear();
-        final int N = as.getWindowCount();
+        final int N = as.getWindowNodeCount();
         if (N > 0) {
-            AssistStructure.ViewNode window = new AssistStructure.ViewNode();
             for (int i=0; i<N; i++) {
-                as.getWindowAt(i, window);
-                buildTextRects(window, 0, 0);
+                AssistStructure.WindowNode windowNode = as.getWindowNodeAt(i);
+                buildTextRects(windowNode.getRootViewNode(), windowNode.getLeft(),
+                        windowNode.getTop());
             }
         }
         invalidate();
@@ -79,9 +79,8 @@ public class AssistVisualizer extends View {
         if (N > 0) {
             left -= root.getScrollX();
             top -= root.getScrollY();
-            AssistStructure.ViewNode child = new AssistStructure.ViewNode();
             for (int i=0; i<N; i++) {
-                root.getChildAt(i, child);
+                AssistStructure.ViewNode child = root.getChildAt(i);
                 buildTextRects(child, left, top);
             }
         }

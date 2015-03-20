@@ -4067,22 +4067,25 @@ package android.app {
     method public int describeContents();
     method public android.content.ComponentName getActivityComponent();
     method public static android.app.AssistStructure getAssistStructure(android.os.Bundle);
-    method public void getWindowAt(int, android.app.AssistStructure.ViewNode);
-    method public int getWindowCount();
+    method public android.app.AssistStructure.WindowNode getWindowNodeAt(int);
+    method public int getWindowNodeCount();
     method public void writeToParcel(android.os.Parcel, int);
     field public static final java.lang.String ASSIST_KEY = "android:assist_structure";
     field public static final android.os.Parcelable.Creator<android.app.AssistStructure> CREATOR;
   }
 
   public static class AssistStructure.ViewNode {
-    ctor public AssistStructure.ViewNode();
-    method public void getChildAt(int, android.app.AssistStructure.ViewNode);
+    method public android.app.AssistStructure.ViewNode getChildAt(int);
     method public int getChildCount();
     method public java.lang.String getClassName();
-    method public java.lang.String getContentDescription();
+    method public java.lang.CharSequence getContentDescription();
     method public android.os.Bundle getExtras();
     method public int getHeight();
     method public java.lang.String getHint();
+    method public int getId();
+    method public java.lang.String getIdEntry();
+    method public java.lang.String getIdPackage();
+    method public java.lang.String getIdType();
     method public int getLeft();
     method public int getScrollX();
     method public int getScrollY();
@@ -4111,6 +4114,15 @@ package android.app {
     field public static final int TEXT_STYLE_ITALIC = 2; // 0x2
     field public static final int TEXT_STYLE_STRIKE_THRU = 8; // 0x8
     field public static final int TEXT_STYLE_UNDERLINE = 4; // 0x4
+  }
+
+  public static class AssistStructure.WindowNode {
+    method public int getHeight();
+    method public int getLeft();
+    method public android.app.AssistStructure.ViewNode getRootViewNode();
+    method public java.lang.CharSequence getTitle();
+    method public int getTop();
+    method public int getWidth();
   }
 
   public class DatePickerDialog extends android.app.AlertDialog implements android.widget.DatePicker.OnDateChangedListener android.content.DialogInterface.OnClickListener {
