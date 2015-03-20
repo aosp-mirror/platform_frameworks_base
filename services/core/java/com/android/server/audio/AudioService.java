@@ -4115,8 +4115,8 @@ public class AudioService extends IAudioService.Stub {
                             AudioSystem.setDeviceConnectionState(
                                                             spec.mDeviceType,
                                                             AudioSystem.DEVICE_STATE_AVAILABLE,
-                                                            (String)device.getValue(),
-                                                            "unknown-device");
+                                                            spec.mDeviceAddress,
+                                                            spec.mDeviceName);
                         }
                     }
                     // Restore call state
