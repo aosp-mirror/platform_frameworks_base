@@ -2550,6 +2550,58 @@ bool ResTable_config::match(const ResTable_config& settings) const {
     return true;
 }
 
+void ResTable_config::appendDirLocale(String8& out) const {
+    if (!language[0]) {
+        return;
+    }
+
+    if (!localeScript[0] && !localeVariant[0]) {
+        // Legacy format.
+        if (out.size() > 0) {
+            out.append("-");
+        }
+
+        char buf[4];
+        size_t len = unpackLanguage(buf);
+        out.append(buf, len);
+
+        if (country[0]) {
+            out.append("-r");
+            len = unpackRegion(buf);
+            out.append(buf, len);
+        }
+        return;
+    }
+
+    // We are writing the modified bcp47 tag.
+    // It starts with 'b+' and uses '+' as a separator.
+
+    if (out.size() > 0) {
+        out.append("-");
+    }
+    out.append("b+");
+
+    char buf[4];
+    size_t len = unpackLanguage(buf);
+    out.append(buf, len);
+
+    if (localeScript[0]) {
+        out.append("+");
+        out.append(localeScript, sizeof(localeScript));
+    }
+
+    if (country[0]) {
+        out.append("+");
+        len = unpackRegion(buf);
+        out.append(buf, len);
+    }
+
+    if (localeVariant[0]) {
+        out.append("+");
+        out.append(localeVariant, sizeof(localeVariant));
+    }
+}
+
 void ResTable_config::getBcp47Locale(char str[RESTABLE_MAX_LOCALE_LEN]) const {
     memset(str, 0, RESTABLE_MAX_LOCALE_LEN);
 
@@ -2650,12 +2702,7 @@ String8 ResTable_config::toString() const {
         res.appendFormat("mnc%d", dtohs(mnc));
     }
 
-    char localeStr[RESTABLE_MAX_LOCALE_LEN];
-    getBcp47Locale(localeStr);
-    if (strlen(localeStr) > 0) {
-        if (res.size() > 0) res.append("-");
-        res.append(localeStr);
-    }
+    appendDirLocale(res);
 
     if ((screenLayout&MASK_LAYOUTDIR) != 0) {
         if (res.size() > 0) res.append("-");

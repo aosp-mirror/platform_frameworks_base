@@ -65,7 +65,7 @@ TEST(AaptConfigTest, ParseBasicQualifiers) {
 TEST(AaptConfigTest, ParseLocales) {
     ConfigDescription config;
     EXPECT_TRUE(TestParse("en-rUS", &config));
-    EXPECT_EQ(String8("en-US"), config.toString());
+    EXPECT_EQ(String8("en-rUS"), config.toString());
 }
 
 TEST(AaptConfigTest, ParseQualifierAddedInApi13) {
