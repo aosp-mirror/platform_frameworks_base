@@ -16,7 +16,6 @@
 
 package android.net.dhcp;
 
-import java.net.InetAddress;
 import java.net.Inet4Address;
 import java.nio.ByteBuffer;
 
@@ -27,15 +26,14 @@ class DhcpOfferPacket extends DhcpPacket {
     /**
      * The IP address of the server which sent this packet.
      */
-    private final InetAddress mSrcIp;
+    private final Inet4Address mSrcIp;
 
     /**
      * Generates a OFFER packet with the specified parameters.
      */
-    DhcpOfferPacket(int transId, boolean broadcast, InetAddress serverAddress,
-                    InetAddress clientIp, byte[] clientMac) {
-        super(transId, Inet4Address.ANY, clientIp, Inet4Address.ANY,
-            Inet4Address.ANY, clientMac, broadcast);
+    DhcpOfferPacket(int transId, boolean broadcast, Inet4Address serverAddress,
+                    Inet4Address clientIp, byte[] clientMac) {
+        super(transId, INADDR_ANY, clientIp, INADDR_ANY, INADDR_ANY, clientMac, broadcast);
         mSrcIp = serverAddress;
     }
 
@@ -44,7 +42,7 @@ class DhcpOfferPacket extends DhcpPacket {
         String dnsServers = ", DNS servers: ";
 
         if (mDnsServers != null) {
-            for (InetAddress dnsServer: mDnsServers) {
+            for (Inet4Address dnsServer: mDnsServers) {
                 dnsServers += dnsServer + " ";
             }
         }
@@ -59,8 +57,8 @@ class DhcpOfferPacket extends DhcpPacket {
      */
     public ByteBuffer buildPacket(int encap, short destUdp, short srcUdp) {
         ByteBuffer result = ByteBuffer.allocate(MAX_LENGTH);
-        InetAddress destIp = mBroadcast ? Inet4Address.ALL : mYourIp;
-        InetAddress srcIp = mBroadcast ? Inet4Address.ANY : mSrcIp;
+        Inet4Address destIp = mBroadcast ? INADDR_BROADCAST : mYourIp;
+        Inet4Address srcIp = mBroadcast ? INADDR_ANY : mSrcIp;
 
         fillInPacket(encap, destIp, srcIp, destUdp, srcUdp, result,
             DHCP_BOOTREPLY, mBroadcast);
@@ -88,13 +86,5 @@ class DhcpOfferPacket extends DhcpPacket {
         addTlv(buffer, DHCP_BROADCAST_ADDRESS, mBroadcastAddress);
         addTlv(buffer, DHCP_DNS_SERVER, mDnsServers);
         addTlvEnd(buffer);
-    }
-
-    /**
-     * Notifies the state machine of the OFFER packet parameters.
-     */
-    public void doNextOp(DhcpStateMachine machine) {
-        machine.onOfferReceived(mBroadcast, mTransId, mClientMac, mYourIp,
-            mServerIdentifier);
     }
 }

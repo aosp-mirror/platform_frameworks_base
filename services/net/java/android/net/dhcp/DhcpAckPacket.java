@@ -16,7 +16,6 @@
 
 package android.net.dhcp;
 
-import java.net.InetAddress;
 import java.net.Inet4Address;
 import java.nio.ByteBuffer;
 
@@ -28,12 +27,11 @@ class DhcpAckPacket extends DhcpPacket {
     /**
      * The address of the server which sent this packet.
      */
-    private final InetAddress mSrcIp;
+    private final Inet4Address mSrcIp;
 
-    DhcpAckPacket(int transId, boolean broadcast, InetAddress serverAddress,
-                  InetAddress clientIp, byte[] clientMac) {
-        super(transId, Inet4Address.ANY, clientIp, serverAddress,
-            Inet4Address.ANY, clientMac, broadcast);
+    DhcpAckPacket(int transId, boolean broadcast, Inet4Address serverAddress,
+                  Inet4Address clientIp, byte[] clientMac) {
+        super(transId, INADDR_ANY, clientIp, serverAddress, INADDR_ANY, clientMac, broadcast);
         mBroadcast = broadcast;
         mSrcIp = serverAddress;
     }
@@ -42,7 +40,7 @@ class DhcpAckPacket extends DhcpPacket {
         String s = super.toString();
         String dnsServers = " DNS servers: ";
 
-        for (InetAddress dnsServer: mDnsServers) {
+        for (Inet4Address dnsServer: mDnsServers) {
             dnsServers += dnsServer.toString() + " ";
         }
 
@@ -57,8 +55,8 @@ class DhcpAckPacket extends DhcpPacket {
      */
     public ByteBuffer buildPacket(int encap, short destUdp, short srcUdp) {
         ByteBuffer result = ByteBuffer.allocate(MAX_LENGTH);
-        InetAddress destIp = mBroadcast ? Inet4Address.ALL : mYourIp;
-        InetAddress srcIp = mBroadcast ? Inet4Address.ANY : mSrcIp;
+        Inet4Address destIp = mBroadcast ? INADDR_BROADCAST : mYourIp;
+        Inet4Address srcIp = mBroadcast ? INADDR_ANY : mSrcIp;
 
         fillInPacket(encap, destIp, srcIp, destUdp, srcUdp, result,
             DHCP_BOOTREPLY, mBroadcast);
@@ -97,13 +95,5 @@ class DhcpAckPacket extends DhcpPacket {
         } else {
             return v.intValue();
         }
-    }
-
-    /**
-     * Notifies the specified state machine of the ACK packet parameters.
-     */
-    public void doNextOp(DhcpStateMachine machine) {
-        machine.onAckReceived(mYourIp, mSubnetMask, mGateway, mDnsServers,
-            mServerIdentifier, getInt(mLeaseTime));
     }
 }

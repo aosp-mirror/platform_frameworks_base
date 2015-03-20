@@ -16,9 +16,11 @@
 
 package android.net;
 
+import java.io.FileDescriptor;
 import java.net.InetAddress;
 import java.net.Inet4Address;
 import java.net.Inet6Address;
+import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.util.Collection;
 import java.util.Locale;
@@ -139,6 +141,11 @@ public class NetworkUtils {
     public native static String getDhcpError();
 
     /**
+     * Attaches a socket filter that accepts DHCP packets to the given socket.
+     */
+    public native static void attachDhcpFilter(FileDescriptor fd) throws SocketException;
+
+    /**
      * Binds the current process to the network designated by {@code netId}.  All sockets created
      * in the future (and not explicitly bound via a bound {@link SocketFactory} (see
      * {@link Network#getSocketFactory}) will be bound to this network.  Note that if this
@@ -169,6 +176,15 @@ public class NetworkUtils {
      * @return 0 on success or negative errno on failure.
      */
     public native static int bindSocketToNetwork(int socketfd, int netId);
+
+    /**
+     * Protect {@code fd} from VPN connections.  After protecting, data sent through
+     * this socket will go directly to the underlying network, so its traffic will not be
+     * forwarded through the VPN.
+     */
+    public static boolean protectFromVpn(FileDescriptor fd) {
+        return protectFromVpn(fd.getInt$());
+    }
 
     /**
      * Protect {@code socketfd} from VPN connections.  After protecting, data sent through
@@ -228,6 +244,25 @@ public class NetworkUtils {
     public static int netmaskIntToPrefixLength(int netmask) {
         return Integer.bitCount(netmask);
     }
+
+    /**
+     * Convert an IPv4 netmask to a prefix length, checking that the netmask is contiguous.
+     * @param netmask as a {@code Inet4Address}.
+     * @return the network prefix length
+     * @throws IllegalArgumentException the specified netmask was not contiguous.
+     * @hide
+     */
+    public static int netmaskToPrefixLength(Inet4Address netmask) {
+        // inetAddressToInt returns an int in *network* byte order.
+        int i = Integer.reverseBytes(inetAddressToInt(netmask));
+        int prefixLength = Integer.bitCount(i);
+        int trailingZeros = Integer.numberOfTrailingZeros(i);
+        if (trailingZeros != 32 - prefixLength) {
+            throw new IllegalArgumentException("Non-contiguous netmask: " + Integer.toHexString(i));
+        }
+        return prefixLength;
+    }
+
 
     /**
      * Create an InetAddress from a string where the string must be a standard
@@ -306,6 +341,22 @@ public class NetworkUtils {
             throw new RuntimeException("getNetworkPart error - " + e.toString());
         }
         return netPart;
+    }
+
+    /**
+     * Returns the implicit netmask of an IPv4 address, as was the custom before 1993.
+     */
+    public static int getImplicitNetmask(Inet4Address address) {
+        int firstByte = address.getAddress()[0] & 0xff;  // Convert to an unsigned value.
+        if (firstByte < 128) {
+            return 8;
+        } else if (firstByte < 192) {
+            return 16;
+        } else if (firstByte < 224) {
+            return 24;
+        } else {
+            return 32;  // Will likely not end well for other reasons.
+        }
     }
 
     /**

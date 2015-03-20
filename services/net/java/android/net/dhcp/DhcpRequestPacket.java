@@ -18,7 +18,6 @@ package android.net.dhcp;
 
 import android.util.Log;
 
-import java.net.InetAddress;
 import java.net.Inet4Address;
 import java.nio.ByteBuffer;
 
@@ -29,10 +28,9 @@ class DhcpRequestPacket extends DhcpPacket {
     /**
      * Generates a REQUEST packet with the specified parameters.
      */
-    DhcpRequestPacket(int transId, InetAddress clientIp, byte[] clientMac,
+    DhcpRequestPacket(int transId, Inet4Address clientIp, byte[] clientMac,
                       boolean broadcast) {
-        super(transId, clientIp, Inet4Address.ANY, Inet4Address.ANY,
-          Inet4Address.ANY, clientMac, broadcast);
+        super(transId, clientIp, INADDR_ANY, INADDR_ANY, INADDR_ANY, clientMac, broadcast);
     }
 
     public String toString() {
@@ -48,7 +46,7 @@ class DhcpRequestPacket extends DhcpPacket {
     public ByteBuffer buildPacket(int encap, short destUdp, short srcUdp) {
         ByteBuffer result = ByteBuffer.allocate(MAX_LENGTH);
 
-        fillInPacket(encap, Inet4Address.ALL, Inet4Address.ANY, destUdp, srcUdp,
+        fillInPacket(encap, INADDR_BROADCAST, INADDR_ANY, destUdp, srcUdp,
             result, DHCP_BOOTREQUEST, mBroadcast);
         result.flip();
         return result;
@@ -65,22 +63,15 @@ class DhcpRequestPacket extends DhcpPacket {
         System.arraycopy(mClientMac, 0, clientId, 1, 6);
 
         addTlv(buffer, DHCP_MESSAGE_TYPE, DHCP_MESSAGE_TYPE_REQUEST);
-        addTlv(buffer, DHCP_PARAMETER_LIST, mRequestedParams);
-        addTlv(buffer, DHCP_REQUESTED_IP, mRequestedIp);
-        addTlv(buffer, DHCP_SERVER_IDENTIFIER, mServerIdentifier);
+        if (!INADDR_ANY.equals(mRequestedIp)) {
+            addTlv(buffer, DHCP_REQUESTED_IP, mRequestedIp);
+        }
+        if (!INADDR_ANY.equals(mServerIdentifier)) {
+            addTlv(buffer, DHCP_SERVER_IDENTIFIER, mServerIdentifier);
+        }
         addTlv(buffer, DHCP_CLIENT_IDENTIFIER, clientId);
+        addCommonClientTlvs(buffer);
+        addTlv(buffer, DHCP_PARAMETER_LIST, mRequestedParams);
         addTlvEnd(buffer);
-    }
-
-    /**
-     * Notifies the specified state machine of the REQUEST packet parameters.
-     */
-    public void doNextOp(DhcpStateMachine machine) {
-        InetAddress clientRequest =
-            mRequestedIp == null ? mClientIp : mRequestedIp;
-        Log.v(TAG, "requested IP is " + mRequestedIp + " and client IP is " +
-            mClientIp);
-        machine.onRequestReceived(mBroadcast, mTransId, mClientMac,
-            clientRequest, mRequestedParams, mHostName);
     }
 }
