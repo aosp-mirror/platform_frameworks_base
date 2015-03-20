@@ -17,6 +17,7 @@
 package android.graphics.drawable;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.content.res.ColorStateList;
 import android.content.res.Resources;
 import android.content.res.Resources.Theme;
@@ -98,23 +99,28 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
     private boolean mMutated;
 
     /**
-     * Create a new layer drawable with the list of specified layers.
+     * Creates a new layer drawable with the list of specified layers.
      *
-     * @param layers A list of drawables to use as layers in this new drawable.
+     * @param layers a list of drawables to use as layers in this new drawable,
+     *               must be non-null
      */
-    public LayerDrawable(Drawable[] layers) {
+    public LayerDrawable(@NonNull Drawable[] layers) {
         this(layers, null);
     }
 
     /**
-     * Create a new layer drawable with the specified list of layers and the
+     * Creates a new layer drawable with the specified list of layers and the
      * specified constant state.
      *
      * @param layers The list of layers to add to this drawable.
      * @param state The constant drawable state.
      */
-    LayerDrawable(Drawable[] layers, LayerState state) {
+    LayerDrawable(@NonNull Drawable[] layers, @Nullable LayerState state) {
         this(state, null);
+
+        if (layers == null) {
+            throw new IllegalArgumentException("layers must be non-null");
+        }
 
         final int length = layers.length;
         final ChildDrawable[] r = new ChildDrawable[length];
@@ -134,14 +140,14 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
         this((LayerState) null, null);
     }
 
-    LayerDrawable(LayerState state, Resources res) {
+    LayerDrawable(@Nullable LayerState state, @Nullable Resources res) {
         mLayerState = createConstantState(state, res);
         if (mLayerState.mNum > 0) {
             ensurePadding();
         }
     }
 
-    LayerState createConstantState(LayerState state, Resources res) {
+    LayerState createConstantState(@Nullable LayerState state, @Nullable Resources res) {
         return new LayerState(state, this, res);
     }
 
@@ -393,6 +399,7 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
     public int addLayer(Drawable dr) {
         final ChildDrawable layer = createLayer(dr);
         final int index = addLayer(layer);
+        ensurePadding();
         return index;
     }
 
@@ -1107,7 +1114,6 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
 
     @Override
     protected boolean onStateChange(int[] state) {
-        boolean paddingChanged = false;
         boolean changed = false;
 
         final ChildDrawable[] array = mLayerState.mChildren;
@@ -1115,15 +1121,12 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
         for (int i = 0; i < N; i++) {
             final ChildDrawable r = array[i];
             if (r.mDrawable.isStateful() && r.mDrawable.setState(state)) {
+                refreshChildPadding(i, r);
                 changed = true;
-            }
-
-            if (refreshChildPadding(i, r)) {
-                paddingChanged = true;
             }
         }
 
-        if (paddingChanged) {
+        if (changed) {
             updateLayerBounds(getBounds());
         }
 
@@ -1132,7 +1135,6 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
 
     @Override
     protected boolean onLevelChange(int level) {
-        boolean paddingChanged = false;
         boolean changed = false;
 
         final ChildDrawable[] array = mLayerState.mChildren;
@@ -1140,15 +1142,12 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
         for (int i = 0; i < N; i++) {
             final ChildDrawable r = array[i];
             if (r.mDrawable.setLevel(level)) {
+                refreshChildPadding(i, r);
                 changed = true;
-            }
-
-            if (refreshChildPadding(i, r)) {
-                paddingChanged = true;
             }
         }
 
-        if (paddingChanged) {
+        if (changed) {
             updateLayerBounds(getBounds());
         }
 
