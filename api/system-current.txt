@@ -35600,6 +35600,7 @@ package android.view {
     method public java.lang.String getName();
     method public int getProductId();
     method public int getSources();
+    method public java.lang.String getUniqueId();
     method public int getVendorId();
     method public android.os.Vibrator getVibrator();
     method public boolean[] hasKeys(int...);

@@ -48,6 +48,11 @@ jobject android_view_InputDevice_create(JNIEnv* env, const InputDeviceInfo& devi
         return NULL;
     }
 
+    ScopedLocalRef<jstring> uniqueIdObj(env, env->NewStringUTF(deviceInfo.getIdentifier().uniqueId));
+    if (!uniqueIdObj.get()) {
+        return NULL;
+    }
+
     ScopedLocalRef<jobject> kcmObj(env,
             android_view_KeyCharacterMap_create(env, deviceInfo.getId(),
             deviceInfo.getKeyCharacterMap()));
@@ -61,9 +66,9 @@ jobject android_view_InputDevice_create(JNIEnv* env, const InputDeviceInfo& devi
                 gInputDeviceClassInfo.ctor, deviceInfo.getId(), deviceInfo.getGeneration(),
                 deviceInfo.getControllerNumber(), nameObj.get(),
                 static_cast<int32_t>(ident.vendor), static_cast<int32_t>(ident.product),
-                descriptorObj.get(), deviceInfo.isExternal(), deviceInfo.getSources(),
-                deviceInfo.getKeyboardType(), kcmObj.get(), deviceInfo.hasVibrator(),
-                deviceInfo.hasButtonUnderPad()));
+                uniqueIdObj.get(), descriptorObj.get(), deviceInfo.isExternal(),
+                deviceInfo.getSources(), deviceInfo.getKeyboardType(), kcmObj.get(),
+                deviceInfo.hasVibrator(), deviceInfo.hasButtonUnderPad()));
 
     const Vector<InputDeviceInfo::MotionRange>& ranges = deviceInfo.getMotionRanges();
     for (size_t i = 0; i < ranges.size(); i++) {
