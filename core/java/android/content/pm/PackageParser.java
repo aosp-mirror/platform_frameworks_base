@@ -3110,8 +3110,7 @@ public class PackageParser {
             }
 
             a.info.resizeable = sa.getBoolean(
-                    R.styleable.AndroidManifestActivity_resizeableActivity,
-                    owner.applicationInfo.targetSdkVersion >= Build.VERSION_CODES.MNC);
+                    R.styleable.AndroidManifestActivity_resizeableActivity, false);
             if (a.info.resizeable) {
                 // Fixed screen orientation isn't supported with resizeable activities.
                 a.info.screenOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
