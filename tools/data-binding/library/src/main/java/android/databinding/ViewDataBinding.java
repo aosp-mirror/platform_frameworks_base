@@ -16,10 +16,13 @@
 
 package android.databinding;
 
+import android.annotation.TargetApi;
 import android.os.Build.VERSION;
 import android.os.Build.VERSION_CODES;
+import android.util.Log;
 import android.util.SparseIntArray;
 import android.view.View;
+import android.view.View.OnAttachStateChangeListener;
 import android.view.ViewGroup;
 
 import java.lang.ref.WeakReference;
@@ -71,6 +74,29 @@ public abstract class ViewDataBinding {
         }
     };
 
+    private static final OnAttachStateChangeListener ROOT_REATTACHED_LISTENER;
+
+    static {
+        if (VERSION.SDK_INT < VERSION_CODES.KITKAT) {
+            ROOT_REATTACHED_LISTENER = null;
+        } else {
+            ROOT_REATTACHED_LISTENER = new OnAttachStateChangeListener() {
+                @TargetApi(VERSION_CODES.KITKAT)
+                @Override
+                public void onViewAttachedToWindow(View v) {
+                    // execute the pending bindings.
+                    ViewDataBinding binding = (ViewDataBinding) v.getTag();
+                    v.post(binding.mRebindRunnable);
+                    v.removeOnAttachStateChangeListener(this);
+                }
+
+                @Override
+                public void onViewDetachedFromWindow(View v) {
+                }
+            };
+        }
+    }
+
     /**
      * Runnable executed on animation heartbeat to rebind the dirty Views.
      */
@@ -78,8 +104,19 @@ public abstract class ViewDataBinding {
         @Override
         public void run() {
             if (mPendingRebind) {
-                mPendingRebind = false;
-                executePendingBindings();
+                boolean rebind = true;
+                if (VERSION.SDK_INT >= VERSION_CODES.KITKAT) {
+                    rebind = mRoot.isAttachedToWindow();
+                    if (!rebind) {
+                        // Don't execute the pending bindings until the View
+                        // is attached again.
+                        mRoot.addOnAttachStateChangeListener(ROOT_REATTACHED_LISTENER);
+                    }
+                }
+                if (rebind) {
+                    mPendingRebind = false;
+                    executePendingBindings();
+                }
             }
         }
     };
