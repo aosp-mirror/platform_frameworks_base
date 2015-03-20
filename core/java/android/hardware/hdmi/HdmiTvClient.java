@@ -211,6 +211,19 @@ public final class HdmiTvClient extends HdmiClient {
         }
     }
 
+    /**
+     * Sends a &lt;Standby&gt; command to other device.
+     *
+     * @param deviceId device id to send the command to
+     */
+    public void sendStandby(int deviceId) {
+        try {
+            mService.sendStandby(getDeviceType(), deviceId);
+        } catch (RemoteException e) {
+            Log.e(TAG, "sendStandby threw exception ", e);
+        }
+    }
+
     private static IHdmiRecordListener getListenerWrapper(final HdmiRecordListener callback) {
         return new IHdmiRecordListener.Stub() {
             @Override

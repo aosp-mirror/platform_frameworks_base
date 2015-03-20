@@ -254,6 +254,16 @@ final class HdmiCecLocalDevicePlayback extends HdmiCecLocalDevice {
 
     @Override
     @ServiceThreadOnly
+    protected void sendStandby(int deviceId) {
+        assertRunOnServiceThread();
+
+        // Playback device can send <Standby> to TV only. Ignore the parameter.
+        int targetAddress = Constants.ADDR_TV;
+        mService.sendCecCommand(HdmiCecMessageBuilder.buildStandby(mAddress, targetAddress));
+    }
+
+    @Override
+    @ServiceThreadOnly
     protected void disableDevice(boolean initiatedByCec, PendingActionClearedCallback callback) {
         super.disableDevice(initiatedByCec, callback);
 
