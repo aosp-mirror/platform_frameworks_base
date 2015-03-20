@@ -2492,9 +2492,9 @@ public class MediaPlayer extends PlayerBase
             throw new IllegalArgumentException("Illegal mimeType for timed text source: " + mime);
         }
 
-        FileDescriptor fd2;
+        final FileDescriptor dupedFd;
         try {
-            fd2 = Libcore.os.dup(fd);
+            dupedFd = Libcore.os.dup(fd);
         } catch (ErrnoException ex) {
             Log.e(TAG, ex.getMessage(), ex);
             throw new RuntimeException(ex);
@@ -2521,7 +2521,6 @@ public class MediaPlayer extends PlayerBase
 
         getMediaTimeProvider();
 
-        final FileDescriptor fd3 = fd2;
         final long offset2 = offset;
         final long length2 = length;
         final HandlerThread thread = new HandlerThread(
@@ -2531,14 +2530,13 @@ public class MediaPlayer extends PlayerBase
         Handler handler = new Handler(thread.getLooper());
         handler.post(new Runnable() {
             private int addTrack() {
-                InputStream is = null;
                 final ByteArrayOutputStream bos = new ByteArrayOutputStream();
                 try {
-                    Libcore.os.lseek(fd3, offset2, OsConstants.SEEK_SET);
+                    Libcore.os.lseek(dupedFd, offset2, OsConstants.SEEK_SET);
                     byte[] buffer = new byte[4096];
                     for (long total = 0; total < length2;) {
                         int bytesToRead = (int) Math.min(buffer.length, length2 - total);
-                        int bytes = IoBridge.read(fd3, buffer, 0, bytesToRead);
+                        int bytes = IoBridge.read(dupedFd, buffer, 0, bytesToRead);
                         if (bytes < 0) {
                             break;
                         } else {
@@ -2557,12 +2555,10 @@ public class MediaPlayer extends PlayerBase
                     Log.e(TAG, e.getMessage(), e);
                     return MEDIA_INFO_TIMED_TEXT_ERROR;
                 } finally {
-                    if (is != null) {
-                        try {
-                            is.close();
-                        } catch (IOException e) {
-                            Log.e(TAG, e.getMessage(), e);
-                        }
+                    try {
+                        Libcore.os.close(dupedFd);
+                    } catch (ErrnoException e) {
+                        Log.e(TAG, e.getMessage(), e);
                     }
                 }
             }
