@@ -1,4 +1,4 @@
-page.title=Get Started with TV Apps
+page.title=Getting Started with TV Apps
 page.tags="leanback","recyclerview","launcher"
 
 trainingnavtop=true
@@ -10,6 +10,7 @@ startpage=true
 <div id="tb">
   <h2>This lesson teaches you how to</h2>
   <ol>
+    <li><a href="#media">Determine Media Format Support</a></li>
     <li><a href="#dev-project">Setup a TV Project</a></li>
     <li><a href="#tv-libraries">Add TV Support Libraries</a></li>
     <li><a href="#build-it">Build TV Apps</a></li>
@@ -42,6 +43,18 @@ startpage=true
   minimum required changes to enable an app to run on TV devices.
 </p>
 
+<h2 id="media">Determine Media Format Support</h2>
+
+<p>See the following documentation for information about the codecs, protocols, and formats
+supported by Android TV.</p>
+
+<ul>
+  <li><a href="{@docRoot}guide/appendix/media-formats.html">Supported Media Formats</a></li>
+  <li><a class="external-link" href="https://source.android.com/devices/drm.html">DRM</a></li>
+  <li><code><a href="{@docRoot}reference/android/drm/package-summary.html">android.drm</a></code></li>
+  <li><a href="{@docRoot}guide/topics/media/exoplayer.html">ExoPlayer</a></li>
+  <li>{@link android.media.MediaPlayer android.media.MediaPlayer}</li>
+</ul>
 
 <h2 id="dev-project">Set up a TV Project</h2>
 
@@ -284,9 +297,15 @@ startpage=true
     TV devices.
   </li>
   <li>
-    <a href="{@docRoot}training/tv/games/index.html">Games for TV</a> - TV devices are a great
+    <a href="{@docRoot}training/tv/games/index.html">Building TV Games</a> - TV devices are a great
     platform for games. See this topic for information on building great game experiences for TV.
   </li>
+    <li>
+    <a href="{@docRoot}training/tv/tif/index.html">Building Live TV Apps</a> - Present your video
+    content in a linear, "broadcast TV" style with channels and programs that your users can access
+    through a program guide as well as the channel up/down buttons.
+  </li>
+
 </ul>
 
 
