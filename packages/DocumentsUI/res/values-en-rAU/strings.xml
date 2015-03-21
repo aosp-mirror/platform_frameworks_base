@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--  Copyright (C) 2013 The Android Open Source Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+ -->
+
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="app_label" msgid="2783841764617238354">"Documents"</string>
+    <string name="title_open" msgid="4353228937663917801">"Open from"</string>
+    <string name="title_save" msgid="2433679664882857999">"Save to"</string>
+    <string name="menu_create_dir" msgid="5947289605844398389">"Create folder"</string>
+    <string name="menu_grid" msgid="6878021334497835259">"Grid view"</string>
+    <string name="menu_list" msgid="7279285939892417279">"List view"</string>
+    <string name="menu_sort" msgid="7677740407158414452">"Sort by"</string>
+    <string name="menu_search" msgid="3816712084502856974">"Search"</string>
+    <string name="menu_settings" msgid="6008033148948428823">"Settings"</string>
+    <string name="menu_open" msgid="432922957274920903">"Open"</string>
+    <string name="menu_save" msgid="2394743337684426338">"Save"</string>
+    <string name="menu_share" msgid="3075149983979628146">"Share"</string>
+    <string name="menu_delete" msgid="8138799623850614177">"Delete"</string>
+    <string name="menu_select" msgid="8711270657353563424">"Select \"<xliff:g id="DIRECTORY">^1</xliff:g>\""</string>
+    <string name="menu_advanced_show" product="nosdcard" msgid="4693652895715631401">"Show internal storage"</string>
+    <string name="menu_advanced_show" product="default" msgid="5792182900084144261">"Show SD card"</string>
+    <string name="menu_advanced_hide" product="nosdcard" msgid="4218809952721972589">"Hide internal storage"</string>
+    <string name="menu_advanced_hide" product="default" msgid="4845869969015718848">"Hide SD card"</string>
+    <string name="menu_file_size_show" msgid="3240323619260823076">"Show file size"</string>
+    <string name="menu_file_size_hide" msgid="8881975928502581042">"Hide file size"</string>
+    <string name="mode_selected_count" msgid="459111894725594625">"<xliff:g id="COUNT">%1$d</xliff:g> selected"</string>
+    <string name="sort_name" msgid="9183560467917256779">"By name"</string>
+    <string name="sort_date" msgid="586080032956151448">"By date modified"</string>
+    <string name="sort_size" msgid="3350681319735474741">"By size"</string>
+    <string name="drawer_open" msgid="4545466532430226949">"Show roots"</string>
+    <string name="drawer_close" msgid="7602734368552123318">"Hide roots"</string>
+    <string name="save_error" msgid="6167009778003223664">"Failed to save document"</string>
+    <string name="create_error" msgid="3735649141335444215">"Failed to create folder"</string>
+    <string name="query_error" msgid="1222448261663503501">"Failed to query documents"</string>
+    <string name="root_recent" msgid="4470053704320518133">"Recent"</string>
+    <string name="root_available_bytes" msgid="8568452858617033281">"<xliff:g id="SIZE">%1$s</xliff:g> free"</string>
+    <string name="root_type_service" msgid="2178854894416775409">"Storage services"</string>
+    <string name="root_type_shortcut" msgid="3318760609471618093">"Shortcuts"</string>
+    <string name="root_type_device" msgid="7121342474653483538">"Devices"</string>
+    <string name="root_type_apps" msgid="8838065367985945189">"More apps"</string>
+    <string name="empty" msgid="7858882803708117596">"No items"</string>
+    <string name="toast_no_application" msgid="1339885974067891667">"Cannot open file"</string>
+    <string name="toast_failed_delete" msgid="2180678019407244069">"Unable to delete some documents"</string>
+    <string name="share_via" msgid="8966594246261344259">"Share via"</string>
+</resources>
