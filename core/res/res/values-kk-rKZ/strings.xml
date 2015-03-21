@@ -123,8 +123,7 @@
     <string name="roamingText11" msgid="4154476854426920970">"Роуминг баннері қосулы"</string>
     <string name="roamingText12" msgid="1189071119992726320">"Роуминг баннері өшірулі"</string>
     <string name="roamingTextSearching" msgid="8360141885972279963">"Қызметті іздеу"</string>
-    <!-- no translation found for wfcRegErrorTitle (2301376280632110664) -->
-    <skip />
+    <string name="wfcRegErrorTitle" msgid="2301376280632110664">"Wi-Fi қоңыраулары"</string>
   <string-array name="wfcOperatorErrorMessages">
   </string-array>
     <string name="cfTemplateNotForwarded" msgid="1683685883841272560">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: Басқа нөмірге бағытталмады"</string>
@@ -204,6 +203,7 @@
     <string name="global_actions_airplane_mode_on_status" msgid="2719557982608919750">"Ұшақ режимі ҚОСУЛЫ"</string>
     <string name="global_actions_airplane_mode_off_status" msgid="5075070442854490296">"Ұшақ режимі ӨШІРУЛІ"</string>
     <string name="global_action_settings" msgid="1756531602592545966">"Параметрлер"</string>
+    <string name="global_action_assist" msgid="3892832961594295030">"Көмек"</string>
     <string name="global_action_voice_assist" msgid="7751191495200504480">"Дауыс көмекшісі"</string>
     <string name="global_action_lockdown" msgid="8751542514724332873">"Қазір бекіту"</string>
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
@@ -1301,10 +1301,8 @@
       <item quantity="other">Ашық Wi-Fi желілері қол жетімді</item>
       <item quantity="one">Ашық Wi-Fi желісі қол жетімді</item>
     </plurals>
-    <!-- no translation found for wifi_available_sign_in (9157196203958866662) -->
-    <skip />
-    <!-- no translation found for network_available_sign_in (1848877297365446605) -->
-    <skip />
+    <string name="wifi_available_sign_in" msgid="9157196203958866662">"Wi-Fi желісіне кіру"</string>
+    <string name="network_available_sign_in" msgid="1848877297365446605">"Желіге кіру"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
     <skip />
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"Wi-Fi желісіне қосыла алмады"</string>

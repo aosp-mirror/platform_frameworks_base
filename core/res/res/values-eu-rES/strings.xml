@@ -123,8 +123,7 @@
     <string name="roamingText11" msgid="4154476854426920970">"Ibiltaritzari buruzko jakinarazpena aktibatuta"</string>
     <string name="roamingText12" msgid="1189071119992726320">"Ibiltaritzari buruzko jakinarazpena desaktibatuta"</string>
     <string name="roamingTextSearching" msgid="8360141885972279963">"Zerbitzu bila"</string>
-    <!-- no translation found for wfcRegErrorTitle (2301376280632110664) -->
-    <skip />
+    <string name="wfcRegErrorTitle" msgid="2301376280632110664">"Wi-Fi bidezko deiak"</string>
   <string-array name="wfcOperatorErrorMessages">
   </string-array>
     <string name="cfTemplateNotForwarded" msgid="1683685883841272560">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: ez da desbideratu"</string>
@@ -204,6 +203,7 @@
     <string name="global_actions_airplane_mode_on_status" msgid="2719557982608919750">"Hegaldi modua AKTIBATUTA dago"</string>
     <string name="global_actions_airplane_mode_off_status" msgid="5075070442854490296">"Hegaldi modua DESAKTIBATUTA dago"</string>
     <string name="global_action_settings" msgid="1756531602592545966">"Ezarpenak"</string>
+    <string name="global_action_assist" msgid="3892832961594295030">"Lagundu"</string>
     <string name="global_action_voice_assist" msgid="7751191495200504480">"Ahots-laguntza"</string>
     <string name="global_action_lockdown" msgid="8751542514724332873">"Blokeatu"</string>
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
@@ -1301,10 +1301,8 @@
       <item quantity="other">Wi-Fi sare irekiak erabilgarri</item>
       <item quantity="one">Wi-Fi sare irekia erabilgarri</item>
     </plurals>
-    <!-- no translation found for wifi_available_sign_in (9157196203958866662) -->
-    <skip />
-    <!-- no translation found for network_available_sign_in (1848877297365446605) -->
-    <skip />
+    <string name="wifi_available_sign_in" msgid="9157196203958866662">"Hasi saioa Wi-Fi sarean"</string>
+    <string name="network_available_sign_in" msgid="1848877297365446605">"Hasi saioa sarean"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
     <skip />
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"Ezin izan da Wi-Fi sarera konektatu"</string>
