@@ -123,8 +123,7 @@
     <string name="roamingText11" msgid="4154476854426920970">"Банерот со роаминг е вклучен"</string>
     <string name="roamingText12" msgid="1189071119992726320">"Банерот со роаминг е исклучен"</string>
     <string name="roamingTextSearching" msgid="8360141885972279963">"Пребарување за услуга"</string>
-    <!-- no translation found for wfcRegErrorTitle (2301376280632110664) -->
-    <skip />
+    <string name="wfcRegErrorTitle" msgid="2301376280632110664">"Повикување преку Wi-Fi"</string>
   <string-array name="wfcOperatorErrorMessages">
   </string-array>
     <string name="cfTemplateNotForwarded" msgid="1683685883841272560">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: не е препратено"</string>
@@ -204,6 +203,7 @@
     <string name="global_actions_airplane_mode_on_status" msgid="2719557982608919750">"Режимот на работа во авион е вклучен"</string>
     <string name="global_actions_airplane_mode_off_status" msgid="5075070442854490296">"Режимот на работа во авион е исклучен"</string>
     <string name="global_action_settings" msgid="1756531602592545966">"Поставки"</string>
+    <string name="global_action_assist" msgid="3892832961594295030">"Асистенција"</string>
     <string name="global_action_voice_assist" msgid="7751191495200504480">"Гласовна помош"</string>
     <string name="global_action_lockdown" msgid="8751542514724332873">"Заклучи сега"</string>
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
@@ -1301,10 +1301,8 @@
       <item quantity="one">Отворени Wi-Fi мрежи се достапни</item>
       <item quantity="other">Отворени Wi-Fi мрежи се достапни</item>
     </plurals>
-    <!-- no translation found for wifi_available_sign_in (9157196203958866662) -->
-    <skip />
-    <!-- no translation found for network_available_sign_in (1848877297365446605) -->
-    <skip />
+    <string name="wifi_available_sign_in" msgid="9157196203958866662">"Најавете се на мрежа на Wi-Fi"</string>
+    <string name="network_available_sign_in" msgid="1848877297365446605">"Најавете се на мрежа"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
     <skip />
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"Не можеше да се поврзе со Wi-Fi"</string>

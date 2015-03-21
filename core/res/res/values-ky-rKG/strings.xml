@@ -191,8 +191,7 @@
     <skip />
     <!-- no translation found for roamingTextSearching (8360141885972279963) -->
     <skip />
-    <!-- no translation found for wfcRegErrorTitle (2301376280632110664) -->
-    <skip />
+    <string name="wfcRegErrorTitle" msgid="2301376280632110664">"Wi-Fi Чалуу"</string>
   <string-array name="wfcOperatorErrorMessages">
   </string-array>
     <!-- no translation found for cfTemplateNotForwarded (1683685883841272560) -->
@@ -309,6 +308,7 @@
     <!-- no translation found for global_actions_airplane_mode_off_status (5075070442854490296) -->
     <skip />
     <string name="global_action_settings" msgid="1756531602592545966">"Жөндөөлөр"</string>
+    <string name="global_action_assist" msgid="3892832961594295030">"Жардам"</string>
     <string name="global_action_voice_assist" msgid="7751191495200504480">"Үн жардамчысы"</string>
     <string name="global_action_lockdown" msgid="8751542514724332873">"Азыр кулпулоо"</string>
     <!-- no translation found for status_bar_notification_info_overflow (5301981741705354993) -->
@@ -1705,10 +1705,8 @@
       <item quantity="other">Ачык Wi-Fi тармагы жеткиликтүү</item>
       <item quantity="one">Ачык Wi-Fi тармагы жеткиликтүү</item>
     </plurals>
-    <!-- no translation found for wifi_available_sign_in (9157196203958866662) -->
-    <skip />
-    <!-- no translation found for network_available_sign_in (1848877297365446605) -->
-    <skip />
+    <string name="wifi_available_sign_in" msgid="9157196203958866662">"Wi-Fi түйүнүнө кирүү"</string>
+    <string name="network_available_sign_in" msgid="1848877297365446605">"Тармакка кирүү"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
     <skip />
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"Wi-Fi менен туташуу түзүлбөдү"</string>

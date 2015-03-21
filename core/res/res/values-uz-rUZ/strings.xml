@@ -123,8 +123,7 @@
     <string name="roamingText11" msgid="4154476854426920970">"Rouming banneri yoqilgan"</string>
     <string name="roamingText12" msgid="1189071119992726320">"Rouming banneri o‘chirilgan"</string>
     <string name="roamingTextSearching" msgid="8360141885972279963">"Xizmatlar qidirilmoqda"</string>
-    <!-- no translation found for wfcRegErrorTitle (2301376280632110664) -->
-    <skip />
+    <string name="wfcRegErrorTitle" msgid="2301376280632110664">"Wi-Fi qo‘ng‘iroq"</string>
   <string-array name="wfcOperatorErrorMessages">
   </string-array>
     <string name="cfTemplateNotForwarded" msgid="1683685883841272560">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: Yo‘naltirilmadi"</string>
@@ -204,6 +203,7 @@
     <string name="global_actions_airplane_mode_on_status" msgid="2719557982608919750">"Parvoz usuli yoqilgan"</string>
     <string name="global_actions_airplane_mode_off_status" msgid="5075070442854490296">"Parvoz rejimi o‘chirilgan"</string>
     <string name="global_action_settings" msgid="1756531602592545966">"Sozlamalar"</string>
+    <string name="global_action_assist" msgid="3892832961594295030">"Yordam"</string>
     <string name="global_action_voice_assist" msgid="7751191495200504480">"Ovozli yordam"</string>
     <string name="global_action_lockdown" msgid="8751542514724332873">"Qulflash"</string>
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
@@ -1301,10 +1301,8 @@
       <item quantity="other">Ochiq Wi-Fi tarmoqlari mavjud</item>
       <item quantity="one">Ochiq Wi-Fi tarmog‘i mavjud</item>
     </plurals>
-    <!-- no translation found for wifi_available_sign_in (9157196203958866662) -->
-    <skip />
-    <!-- no translation found for network_available_sign_in (1848877297365446605) -->
-    <skip />
+    <string name="wifi_available_sign_in" msgid="9157196203958866662">"Wi-Fi tarmoqqa kirish"</string>
+    <string name="network_available_sign_in" msgid="1848877297365446605">"Tarmoqqa kirish"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
     <skip />
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"Wi-Fi’ga ulana olmadi"</string>
