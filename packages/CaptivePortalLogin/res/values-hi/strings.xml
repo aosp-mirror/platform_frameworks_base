@@ -4,6 +4,5 @@
     <string name="app_name" msgid="5934709770924185752">"CaptivePortalLogin"</string>
     <string name="action_use_network" msgid="6076184727448466030">"इस नेटवर्क का उपयोग जैसा है वैसा ही करें"</string>
     <string name="action_do_not_use_network" msgid="4577366536956516683">"इस नेटवर्क का उपयोग न करें"</string>
-    <!-- no translation found for action_bar_label (917235635415966620) -->
-    <skip />
+    <string name="action_bar_label" msgid="917235635415966620">"नेटवर्क में प्रवेश करें"</string>
 </resources>
