@@ -14748,7 +14748,9 @@ package android.media {
     method public abstract android.media.Image.Plane[] getPlanes();
     method public abstract long getTimestamp();
     method public abstract int getWidth();
+    method public boolean isOpaque();
     method public void setCropRect(android.graphics.Rect);
+    method public void setTimestamp(long);
   }
 
   public static abstract class Image.Plane {
@@ -14766,12 +14768,27 @@ package android.media {
     method public int getMaxImages();
     method public android.view.Surface getSurface();
     method public int getWidth();
+    method public boolean isOpaque();
     method public static android.media.ImageReader newInstance(int, int, int, int);
+    method public static android.media.ImageReader newOpaqueInstance(int, int, int);
     method public void setOnImageAvailableListener(android.media.ImageReader.OnImageAvailableListener, android.os.Handler);
   }
 
   public static abstract interface ImageReader.OnImageAvailableListener {
     method public abstract void onImageAvailable(android.media.ImageReader);
+  }
+
+  public class ImageWriter implements java.lang.AutoCloseable {
+    method public void close();
+    method public android.media.Image dequeueInputImage();
+    method public int getMaxImages();
+    method public static android.media.ImageWriter newInstance(android.view.Surface, int);
+    method public void queueInputImage(android.media.Image);
+    method public void setImageListener(android.media.ImageWriter.ImageListener, android.os.Handler);
+  }
+
+  public static abstract interface ImageWriter.ImageListener {
+    method public abstract void onInputImageReleased(android.media.ImageWriter);
   }
 
   public class JetPlayer {

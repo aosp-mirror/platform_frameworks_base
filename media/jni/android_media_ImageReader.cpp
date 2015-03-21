@@ -860,6 +860,25 @@ static jint ImageReader_imageSetup(JNIEnv* env, jobject thiz,
     return ACQUIRE_SUCCESS;
 }
 
+static void ImageReader_detachImage(JNIEnv* env, jobject thiz, jobject image) {
+    ALOGV("%s:", __FUNCTION__);
+    JNIImageReaderContext* ctx = ImageReader_getContext(env, thiz);
+    if (ctx == NULL) {
+        jniThrowException(env, "java/lang/IllegalStateException", "ImageReader was already closed");
+        return;
+    }
+
+    // CpuConsumer* consumer = ctx->getCpuConsumer();
+    CpuConsumer::LockedBuffer* buffer = Image_getLockedBuffer(env, image);
+    if (!buffer) {
+        ALOGW("Image already released!!!");
+        return;
+    }
+
+    // TODO: need implement
+    jniThrowRuntimeException(env, "nativeDetachImage is not implemented yet!!!");
+}
+
 static jobject ImageReader_getSurface(JNIEnv* env, jobject thiz)
 {
     ALOGV("%s: ", __FUNCTION__);
@@ -961,6 +980,7 @@ static JNINativeMethod gImageReaderMethods[] = {
     {"nativeReleaseImage",     "(Landroid/media/Image;)V",   (void*)ImageReader_imageRelease },
     {"nativeImageSetup",       "(Landroid/media/Image;)I",   (void*)ImageReader_imageSetup },
     {"nativeGetSurface",       "()Landroid/view/Surface;",   (void*)ImageReader_getSurface },
+    {"nativeDetachImage",      "(Landroid/media/Image;)V",   (void*)ImageReader_detachImage },
 };
 
 static JNINativeMethod gImageMethods[] = {

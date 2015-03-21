@@ -27,6 +27,7 @@ import java.lang.ref.WeakReference;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.NioUtils;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * <p>The ImageReader class allows direct application access to image data
@@ -34,7 +35,7 @@ import java.nio.NioUtils;
  *
  * <p>Several Android media API classes accept Surface objects as targets to
  * render to, including {@link MediaPlayer}, {@link MediaCodec},
- * {@link android.hardware.camera2.CameraDevice}, and
+ * {@link android.hardware.camera2.CameraDevice}, {@link ImageWriter} and
  * {@link android.renderscript.Allocation RenderScript Allocations}. The image
  * sizes and formats that can be used with each source vary, and should be
  * checked in the documentation for the specific API.</p>
@@ -97,7 +98,57 @@ public class ImageReader implements AutoCloseable {
      * @see Image
      */
     public static ImageReader newInstance(int width, int height, int format, int maxImages) {
+        if (format == PixelFormat.OPAQUE) {
+            throw new IllegalArgumentException("To obtain an opaque ImageReader, please use"
+                    + " newOpaqueInstance rather than newInstance");
+        }
         return new ImageReader(width, height, format, maxImages);
+    }
+
+    /**
+     * <p>
+     * Create a new opaque reader for images of the desired size.
+     * </p>
+     * <p>
+     * An opaque {@link ImageReader} produces images that are not directly
+     * accessible by the application. The application can still acquire images
+     * from an opaque image reader, and send them to the
+     * {@link android.hardware.camera2.CameraDevice camera} for reprocessing via
+     * {@link ImageWriter} interface. However, the {@link Image#getPlanes()
+     * getPlanes()} will return an empty array for opaque images. The
+     * application can check if an existing reader is an opaque reader by
+     * calling {@link #isOpaque()}.
+     * </p>
+     * <p>
+     * The {@code maxImages} parameter determines the maximum number of
+     * {@link Image} objects that can be be acquired from the
+     * {@code ImageReader} simultaneously. Requesting more buffers will use up
+     * more memory, so it is important to use only the minimum number necessary.
+     * </p>
+     * <p>
+     * The valid sizes and formats depend on the source of the image data.
+     * </p>
+     * <p>
+     * Opaque ImageReaders are more efficient to use when application access to
+     * image data is not necessary, comparing to ImageReaders using a non-opaque
+     * format such as {@link ImageFormat#YUV_420_888 YUV_420_888}.
+     * </p>
+     *
+     * @param width The default width in pixels of the Images that this reader
+     *            will produce.
+     * @param height The default height in pixels of the Images that this reader
+     *            will produce.
+     * @param maxImages The maximum number of images the user will want to
+     *            access simultaneously. This should be as small as possible to
+     *            limit memory use. Once maxImages Images are obtained by the
+     *            user, one of them has to be released before a new Image will
+     *            become available for access through
+     *            {@link #acquireLatestImage()} or {@link #acquireNextImage()}.
+     *            Must be greater than 0.
+     * @see Image
+     */
+    public static ImageReader newOpaqueInstance(int width, int height, int maxImages) {
+        return new ImageReader(width, height, PixelFormat.OPAQUE, maxImages);
     }
 
     /**
@@ -194,6 +245,23 @@ public class ImageReader implements AutoCloseable {
      */
     public int getMaxImages() {
         return mMaxImages;
+    }
+
+    /**
+     * <p>
+     * Check if the {@link ImageReader} is an opaque reader.
+     * </p>
+     * <p>
+     * An opaque image reader produces opaque images, see {@link Image#isOpaque}
+     * for more details.
+     * </p>
+     *
+     * @return true if the ImageReader is opaque.
+     * @see Image#isOpaque
+     * @see ImageReader#newOpaqueInstance
+     */
+    public boolean isOpaque() {
+        return mFormat == PixelFormat.OPAQUE;
     }
 
     /**
@@ -457,6 +525,58 @@ public class ImageReader implements AutoCloseable {
     }
 
     /**
+     * <p>
+     * Remove the ownership of this image from the ImageReader.
+     * </p>
+     * <p>
+     * After this call, the ImageReader no longer owns this image, and the image
+     * ownership can be transfered to another entity like {@link ImageWriter}
+     * via {@link ImageWriter#queueInputImage}. It's up to the new owner to
+     * release the resources held by this image. For example, if the ownership
+     * of this image is transfered to an {@link ImageWriter}, the image will be
+     * freed by the ImageWriter after the image data consumption is done.
+     * </p>
+     * <p>
+     * This method can be used to achieve zero buffer copy for use cases like
+     * {@link android.hardware.camera2.CameraDevice Camera2 API} OPAQUE and YUV
+     * reprocessing, where the application can select an output image from
+     * {@link ImageReader} and transfer this image directly to
+     * {@link ImageWriter}, where this image can be consumed by camera directly.
+     * For OPAQUE reprocessing, this is the only way to send input buffers to
+     * the {@link android.hardware.camera2.CameraDevice camera} for
+     * reprocessing.
+     * </p>
+     * <p>
+     * This is a package private method that is only used internally.
+     * </p>
+     *
+     * @param image The image to be detached from this ImageReader.
+     * @throws IllegalStateException If the ImageReader or image have been
+     *             closed, or the has been detached, or has not yet been
+     *             acquired.
+     */
+     void detachImage(Image image) {
+       if (image == null) {
+           throw new IllegalArgumentException("input image must not be null");
+       }
+       if (!isImageOwnedbyMe(image)) {
+           throw new IllegalArgumentException("Trying to detach an image that is not owned by"
+                   + " this ImageReader");
+       }
+
+        SurfaceImage si = (SurfaceImage) image;
+        if (!si.isImageValid()) {
+            throw new IllegalStateException("Image is no longer valid");
+        }
+        if (si.isAttachable()) {
+            throw new IllegalStateException("Image was already detached from this ImageReader");
+        }
+
+        nativeDetachImage(image);
+        si.setDetached(true);
+   }
+
+    /**
      * Only a subset of the formats defined in
      * {@link android.graphics.ImageFormat ImageFormat} and
      * {@link android.graphics.PixelFormat PixelFormat} are supported by
@@ -487,10 +607,20 @@ public class ImageReader implements AutoCloseable {
             case ImageFormat.DEPTH16:
             case ImageFormat.DEPTH_POINT_CLOUD:
                 return 1;
+            case PixelFormat.OPAQUE:
+                return 0;
             default:
                 throw new UnsupportedOperationException(
                         String.format("Invalid format specified %d", mFormat));
         }
+    }
+
+    private boolean isImageOwnedbyMe(Image image) {
+        if (!(image instanceof SurfaceImage)) {
+            return false;
+        }
+        SurfaceImage si = (SurfaceImage) image;
+        return si.getReader() == this;
     }
 
     /**
@@ -561,7 +691,11 @@ public class ImageReader implements AutoCloseable {
         @Override
         public void close() {
             if (mIsImageValid) {
-                ImageReader.this.releaseImage(this);
+                if (!mIsDetached.get()) {
+                    // For detached images, the new owner is responsible for
+                    // releasing the resources
+                    ImageReader.this.releaseImage(this);
+                }
             }
         }
 
@@ -614,6 +748,15 @@ public class ImageReader implements AutoCloseable {
         }
 
         @Override
+        public void setTimestamp(long timestampNs) {
+            if (mIsImageValid) {
+                mTimestamp = timestampNs;
+            } else {
+                throw new IllegalStateException("Image is already released");
+            }
+        }
+
+        @Override
         public Plane[] getPlanes() {
             if (mIsImageValid) {
                 // Shallow copy is fine.
@@ -624,12 +767,31 @@ public class ImageReader implements AutoCloseable {
         }
 
         @Override
+        public boolean isOpaque() {
+            return mFormat == PixelFormat.OPAQUE;
+        }
+
+        @Override
         protected final void finalize() throws Throwable {
             try {
                 close();
             } finally {
                 super.finalize();
             }
+        }
+
+        @Override
+        boolean isAttachable() {
+            return mIsDetached.get();
+        }
+
+        @Override
+        ImageReader getOwner() {
+            return ImageReader.this;
+        }
+
+        private void setDetached(boolean detached) {
+            mIsDetached.getAndSet(detached);
         }
 
         private void setImageValid(boolean isValid) {
@@ -734,6 +896,8 @@ public class ImageReader implements AutoCloseable {
         private boolean mIsImageValid;
         private int mHeight = -1;
         private int mWidth = -1;
+        // If this image is detached from the ImageReader.
+        private AtomicBoolean mIsDetached = new AtomicBoolean(false);
 
         private synchronized native ByteBuffer nativeImageGetBuffer(int idx, int readerFormat);
         private synchronized native SurfacePlane nativeCreatePlane(int idx, int readerFormat);
@@ -746,6 +910,7 @@ public class ImageReader implements AutoCloseable {
     private synchronized native void nativeClose();
     private synchronized native void nativeReleaseImage(Image i);
     private synchronized native Surface nativeGetSurface();
+    private synchronized native void nativeDetachImage(Image i);
 
     /**
      * @return A return code {@code ACQUIRE_*}
