@@ -53,6 +53,7 @@ import com.android.server.accessibility.AccessibilityManagerService;
 import com.android.server.accounts.AccountManagerService;
 import com.android.server.am.ActivityManagerService;
 import com.android.server.audio.AudioService;
+import com.android.server.camera.CameraService;
 import com.android.server.clipboard.ClipboardService;
 import com.android.server.content.ContentService;
 import com.android.server.devicepolicy.DevicePolicyManagerService;
@@ -408,6 +409,7 @@ public final class SystemServer {
         AudioService audioService = null;
         MmsServiceBroker mmsService = null;
         EntropyMixer entropyMixer = null;
+        CameraService cameraService = null;
 
         boolean disableStorage = SystemProperties.getBoolean("config.disable_storage", false);
         boolean disableBluetooth = SystemProperties.getBoolean("config.disable_bluetooth", false);
@@ -435,6 +437,9 @@ public final class SystemServer {
             entropyMixer = new EntropyMixer(context);
 
             mContentResolver = context.getContentResolver();
+
+            Slog.i(TAG, "Camera Service");
+            mSystemServiceManager.startService(CameraService.class);
 
             // The AccountManager must come before the ContentService
             try {

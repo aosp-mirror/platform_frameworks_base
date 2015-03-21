@@ -1220,6 +1220,14 @@
         android:label="@string/permlab_cameraDisableTransmitLed"
         android:description="@string/permdesc_cameraDisableTransmitLed" />
 
+    <!-- Allows sending the camera service notifications about system-wide events.
+        @hide -->
+    <permission android:name="android.permission.CAMERA_SEND_SYSTEM_EVENTS"
+        android:permissionGroup="android.permission-group.CAMERA"
+        android:protectionLevel="signature|system"
+        android:label="@string/permdesc_cameraSendSystemEvent"
+        android:description="@string/permdesc_cameraSendSystemEvent" />
+
     <!-- =========================================== -->
     <!-- Permissions associated with telephony state -->
     <!-- =========================================== -->
