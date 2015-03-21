@@ -200,6 +200,7 @@
     <string name="global_actions_airplane_mode_on_status" msgid="2719557982608919750">"Le mode Avion est activé."</string>
     <string name="global_actions_airplane_mode_off_status" msgid="5075070442854490296">"Le mode Avion est désactivé."</string>
     <string name="global_action_settings" msgid="1756531602592545966">"Paramètres"</string>
+    <string name="global_action_assist" msgid="3892832961594295030">"Assistance"</string>
     <string name="global_action_voice_assist" msgid="7751191495200504480">"Assistance vocale"</string>
     <string name="global_action_lockdown" msgid="8751542514724332873">"Verrouiller"</string>
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"&gt;999"</string>
@@ -618,7 +619,7 @@
     <string name="permdesc_hardware_test" msgid="6597964191208016605">"Permet à l\'application de contrôler différents périphériques à des fins de test matériel."</string>
     <string name="permlab_fm" msgid="8749504526866832">"accéder aux radios FM"</string>
     <string name="permdesc_fm" msgid="4145699441237962818">"Permet à l\'application d\'accéder aux radios FM afin d\'écouter des programmes."</string>
-    <string name="permlab_callPhone" msgid="3925836347681847954">"Appeler directement les numéros de téléphone"</string>
+    <string name="permlab_callPhone" msgid="3925836347681847954">"appeler directement les numéros de téléphone"</string>
     <string name="permdesc_callPhone" msgid="3740797576113760827">"Permet à l\'application d\'appeler des numéros de téléphone sans votre intervention. Cette autorisation peut entraîner des frais ou des appels imprévus et ne permet pas à l\'application d\'appeler des numéros d\'urgence. Les applications malveillantes peuvent générer des frais en passant des appels sans votre consentement."</string>
     <string name="permlab_callPrivileged" msgid="4198349211108497879">"Appel direct de tout numéro de téléphone"</string>
     <string name="permdesc_callPrivileged" msgid="1689024901509996810">"Permet à l\'application d\'appeler n\'importe quel numéro de téléphone, y compris les numéros d\'urgence, sans votre intervention. Des applications malveillantes peuvent passer des appels inutiles et interdits aux services d\'urgence."</string>
@@ -692,7 +693,7 @@
     <string name="permdesc_createNetworkSockets" msgid="3403062187779724185">"Permet à l\'application de créer des sockets réseau et d\'utiliser des protocoles réseau personnalisés. Le navigateur et d\'autres applications permettent d\'envoyer des données sur Internet. Cette autorisation n\'est donc pas nécessaire pour envoyer des données sur Internet."</string>
     <string name="permlab_writeApnSettings" msgid="505660159675751896">"changer/intercepter les paramètres et le trafic du réseau"</string>
     <string name="permdesc_writeApnSettings" msgid="5333798886412714193">"Permet à l\'application de modifier les paramètres réseau, ainsi que d\'intercepter et de surveiller tout le trafic réseau ayant pour but de modifier le proxy et le port d\'un APN, par exemple. Des applications malveillantes peuvent exploiter cette fonctionnalité pour surveiller, rediriger ou modifier les paquets réseau à votre insu."</string>
-    <string name="permlab_changeNetworkState" msgid="958884291454327309">"Modification de la connectivité du réseau"</string>
+    <string name="permlab_changeNetworkState" msgid="958884291454327309">"modifier la connectivité réseau"</string>
     <string name="permdesc_changeNetworkState" msgid="6789123912476416214">"Permet à l\'application de modifier l\'état de la connectivité du réseau."</string>
     <string name="permlab_changeTetherState" msgid="5952584964373017960">"changer la connectivité du partage de connexion"</string>
     <string name="permdesc_changeTetherState" msgid="1524441344412319780">"Permet à l\'application de modifier l\'état de la connectivité du partage de connexion."</string>

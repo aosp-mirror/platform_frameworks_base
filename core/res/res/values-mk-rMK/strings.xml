@@ -200,6 +200,7 @@
     <string name="global_actions_airplane_mode_on_status" msgid="2719557982608919750">"Режимот на работа во авион е вклучен"</string>
     <string name="global_actions_airplane_mode_off_status" msgid="5075070442854490296">"Режимот на работа во авион е исклучен"</string>
     <string name="global_action_settings" msgid="1756531602592545966">"Поставки"</string>
+    <string name="global_action_assist" msgid="3892832961594295030">"Асистенција"</string>
     <string name="global_action_voice_assist" msgid="7751191495200504480">"Гласовна помош"</string>
     <string name="global_action_lockdown" msgid="8751542514724332873">"Заклучи сега"</string>
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
@@ -1004,7 +1005,7 @@
     <string name="lockscreen_forgot_pattern_button_text" msgid="2626999449610695930">"Ја заборавивте шемата?"</string>
     <string name="lockscreen_glogin_forgot_pattern" msgid="2588521501166032747">"Отклучи сметка"</string>
     <string name="lockscreen_glogin_too_many_attempts" msgid="2751368605287288808">"Премногу обиди со шема"</string>
-    <string name="lockscreen_glogin_instructions" msgid="3931816256100707784">"За да го отклучите, пријавете се со вашата сметка на Google."</string>
+    <string name="lockscreen_glogin_instructions" msgid="3931816256100707784">"За да го отклучите, најавете се со вашата сметка на Google."</string>
     <string name="lockscreen_glogin_username_hint" msgid="8846881424106484447">"Корисничко име (e-пошта)"</string>
     <string name="lockscreen_glogin_password_hint" msgid="5958028383954738528">"Лозинка"</string>
     <string name="lockscreen_glogin_submit_button" msgid="7130893694795786300">"Најави се"</string>
@@ -1338,8 +1339,8 @@
     <item quantity="one" msgid="1634101450343277345">"Отворена Wi-Fi мрежа е достапна"</item>
     <item quantity="other" msgid="7915895323644292768">"Отворени Wi-Fi мрежи се достапни"</item>
   </plurals>
-    <string name="wifi_available_sign_in" msgid="4029489716605255386">"Пријави се на Wi-Fi мрежа"</string>
-    <string name="network_available_sign_in" msgid="8495155593358054676">"Пријави се на мрежа"</string>
+    <string name="wifi_available_sign_in" msgid="4029489716605255386">"Најави се на Wi-Fi мрежа"</string>
+    <string name="network_available_sign_in" msgid="8495155593358054676">"Најави се на мрежа"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
     <skip />
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"Не можеше да се поврзе со Wi-Fi"</string>
@@ -1686,10 +1687,10 @@
     <string name="kg_invalid_puk" msgid="3638289409676051243">"Повторно внесете го точниот ПУК код. Повторните обиди трајно ќе ја оневозможат СИМ картичката."</string>
     <string name="kg_invalid_confirm_pin_hint" product="default" msgid="7003469261464593516">"ПИН кодовите не се совпаѓаат"</string>
     <string name="kg_login_too_many_attempts" msgid="6486842094005698475">"Премногу обиди со шема"</string>
-    <string name="kg_login_instructions" msgid="1100551261265506448">"За да го отклучите, пријавете се со вашата сметка на Google."</string>
+    <string name="kg_login_instructions" msgid="1100551261265506448">"За да го отклучите, најавете се со вашата сметка на Google."</string>
     <string name="kg_login_username_hint" msgid="5718534272070920364">"Корисничко име (е-пошта)"</string>
     <string name="kg_login_password_hint" msgid="9057289103827298549">"Лозинка"</string>
-    <string name="kg_login_submit_button" msgid="5355904582674054702">"Пријави се"</string>
+    <string name="kg_login_submit_button" msgid="5355904582674054702">"Најави се"</string>
     <string name="kg_login_invalid_input" msgid="5754664119319872197">"Неважечко корисничко име или лозинка."</string>
     <string name="kg_login_account_recovery_hint" msgid="5690709132841752974">"Го заборави своето корисничко име или лозинката?\nПосети"<b>"google.com/accounts/recovery"</b>"."</string>
     <string name="kg_login_checking_password" msgid="1052685197710252395">"Сметката се проверува..."</string>

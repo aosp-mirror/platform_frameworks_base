@@ -200,6 +200,7 @@
     <string name="global_actions_airplane_mode_on_status" msgid="2719557982608919750">"Режим рада у авиону је УКЉУЧЕН"</string>
     <string name="global_actions_airplane_mode_off_status" msgid="5075070442854490296">"Режим рада у авиону је ИСКЉУЧЕН"</string>
     <string name="global_action_settings" msgid="1756531602592545966">"Подешавања"</string>
+    <string name="global_action_assist" msgid="3892832961594295030">"Помоћ"</string>
     <string name="global_action_voice_assist" msgid="7751191495200504480">"Гласовна помоћ"</string>
     <string name="global_action_lockdown" msgid="8751542514724332873">"Закључај одмах"</string>
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
@@ -1841,8 +1842,8 @@
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"Тражи шаблон за откључавање пре откачињања"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Тражи лозинку пре откачињања"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"Да би продужила време трајања батерије, уштеда батерије смањује перформансе уређаја и ограничава вибрацију, услуге локације и већину позадинских података. Имејл, размена порука и друге апликације које се ослањају на синхронизацију можда неће да се ажурирају ако их не отворите.\n\nУштеда батерије се аутоматски искључује када се уређај пуни."</string>
-    <string name="downtime_condition_summary" msgid="8761776337475705749">"Док се прекид рада не заврши у <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
-    <string name="downtime_condition_line_one" msgid="8762708714645352010">"Док се време одмора не заврши"</string>
+    <string name="downtime_condition_summary" msgid="8761776337475705749">"Док се одмор не заврши у <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
+    <string name="downtime_condition_line_one" msgid="8762708714645352010">"Док се одмор не заврши"</string>
   <plurals name="zen_mode_duration_minutes_summary">
     <item quantity="one" msgid="3177683545388923234">"Један минут (до <xliff:g id="FORMATTEDTIME">%2$s</xliff:g>)"</item>
     <item quantity="other" msgid="2787867221129368935">"%1$d минута (до <xliff:g id="FORMATTEDTIME">%2$s</xliff:g>)"</item>

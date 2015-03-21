@@ -200,6 +200,7 @@
     <string name="global_actions_airplane_mode_on_status" msgid="2719557982608919750">"हवाई जहाज मोड चालू है"</string>
     <string name="global_actions_airplane_mode_off_status" msgid="5075070442854490296">"हवाई जहाज मोड बंद है"</string>
     <string name="global_action_settings" msgid="1756531602592545966">"सेटिंग"</string>
+    <string name="global_action_assist" msgid="3892832961594295030">"सहायता"</string>
     <string name="global_action_voice_assist" msgid="7751191495200504480">"वॉइस सहायक"</string>
     <string name="global_action_lockdown" msgid="8751542514724332873">"अभी लॉक करें"</string>
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
@@ -930,7 +931,7 @@
     <string name="relationTypeAssistant" msgid="6274334825195379076">"सहायक"</string>
     <string name="relationTypeBrother" msgid="8757913506784067713">"भाई"</string>
     <string name="relationTypeChild" msgid="1890746277276881626">"बच्चा"</string>
-    <string name="relationTypeDomesticPartner" msgid="6904807112121122133">"घरेलू सहयोगी"</string>
+    <string name="relationTypeDomesticPartner" msgid="6904807112121122133">"हमसफ़र"</string>
     <string name="relationTypeFather" msgid="5228034687082050725">"पिता"</string>
     <string name="relationTypeFriend" msgid="7313106762483391262">"मित्र"</string>
     <string name="relationTypeManager" msgid="6365677861610137895">"प्रबंधक"</string>
@@ -1256,7 +1257,7 @@
     <string name="cancel" msgid="6442560571259935130">"रहने दें"</string>
     <string name="yes" msgid="5362982303337969312">"ठीक है"</string>
     <string name="no" msgid="5141531044935541497">"रहने दें"</string>
-    <string name="dialog_alert_title" msgid="2049658708609043103">"ध्यानाकर्षण"</string>
+    <string name="dialog_alert_title" msgid="2049658708609043103">"ध्यान दें"</string>
     <string name="loading" msgid="7933681260296021180">"लोड हो रहे हैं..."</string>
     <string name="capital_on" msgid="1544682755514494298">"चालू"</string>
     <string name="capital_off" msgid="6815870386972805832">"बंद"</string>
@@ -1558,7 +1559,7 @@
     <string name="sync_really_delete" msgid="2572600103122596243">"आइटम हटाएं"</string>
     <string name="sync_undo_deletes" msgid="2941317360600338602">"हटाए गए को वापस लाएं"</string>
     <string name="sync_do_nothing" msgid="3743764740430821845">"फिलहाल कुछ न करें"</string>
-    <string name="choose_account_label" msgid="5655203089746423927">"कोई खाता चुनें"</string>
+    <string name="choose_account_label" msgid="5655203089746423927">"खाता चुनें"</string>
     <string name="add_account_label" msgid="2935267344849993553">"कोई खाता जोड़ें"</string>
     <string name="add_account_button_label" msgid="3611982894853435874">"खाता जोड़ें"</string>
     <string name="number_picker_increment_button" msgid="2412072272832284313">"बढ़ाएं"</string>

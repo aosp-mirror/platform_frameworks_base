@@ -200,6 +200,8 @@
     <string name="global_actions_airplane_mode_on_status" msgid="2719557982608919750">"已开启飞行模式"</string>
     <string name="global_actions_airplane_mode_off_status" msgid="5075070442854490296">"未开启飞行模式"</string>
     <string name="global_action_settings" msgid="1756531602592545966">"设置"</string>
+    <!-- no translation found for global_action_assist (3892832961594295030) -->
+    <skip />
     <string name="global_action_voice_assist" msgid="7751191495200504480">"语音助理"</string>
     <string name="global_action_lockdown" msgid="8751542514724332873">"立即锁定"</string>
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
@@ -783,7 +785,7 @@
     <string name="permlab_readNetworkUsageHistory" msgid="7862593283611493232">"读取网络使用情况历史记录"</string>
     <string name="permdesc_readNetworkUsageHistory" msgid="7689060749819126472">"允许应用读取特定网络和应用的网络使用情况历史记录。"</string>
     <string name="permlab_manageNetworkPolicy" msgid="2562053592339859990">"管理网络政策"</string>
-    <string name="permdesc_manageNetworkPolicy" msgid="7537586771559370668">"允许应用管理网络政策和定义专门针对应用的规则。"</string>
+    <string name="permdesc_manageNetworkPolicy" msgid="7537586771559370668">"允许应用管理网络规范和定义专门针对应用的规则。"</string>
     <string name="permlab_modifyNetworkAccounting" msgid="5088217309088729650">"修改网络使用情况记录方式"</string>
     <string name="permdesc_modifyNetworkAccounting" msgid="5443412866746198123">"允许该应用修改对于各应用的网络使用情况的统计方式。普通应用不应使用此权限。"</string>
     <string name="permlab_accessNotifications" msgid="7673416487873432268">"访问通知"</string>

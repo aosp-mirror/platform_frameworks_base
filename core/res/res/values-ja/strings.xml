@@ -200,6 +200,7 @@
     <string name="global_actions_airplane_mode_on_status" msgid="2719557982608919750">"機内モードON"</string>
     <string name="global_actions_airplane_mode_off_status" msgid="5075070442854490296">"機内モードOFF"</string>
     <string name="global_action_settings" msgid="1756531602592545966">"設定"</string>
+    <string name="global_action_assist" msgid="3892832961594295030">"サポート"</string>
     <string name="global_action_voice_assist" msgid="7751191495200504480">"音声アシスト"</string>
     <string name="global_action_lockdown" msgid="8751542514724332873">"今すぐロック"</string>
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
@@ -526,7 +527,7 @@
     <string name="permdesc_readSocialStream" product="default" msgid="4255706027172050872">"あなたや友だちのソーシャル更新情報へのアクセスと同期をアプリに許可します。情報の共有は慎重に行ってください。これを許可すると、あなたと友だちがソーシャルネットワークで行ったやり取りを、機密性に関係なくアプリから読み取ることができるようになります。注: この許可は、一部のソーシャルネットワークでは適用されない場合があります。"</string>
     <string name="permlab_writeSocialStream" product="default" msgid="3504179222493235645">"ソーシャルストリームに書く"</string>
     <string name="permdesc_writeSocialStream" product="default" msgid="3086557552204114849">"友だちのソーシャル更新情報の表示をアプリに許可します。情報の共有は慎重に行ってください。これによりアプリは、友だちから発信されたかのようなメッセージを作成できるようになります。注: この許可は、一部のソーシャルネットワークでは適用されない場合があります。"</string>
-    <string name="permlab_readCalendar" msgid="5972727560257612398">"カレンダーの予定と機密情報を読み取る"</string>
+    <string name="permlab_readCalendar" msgid="5972727560257612398">"カレンダーの予定と機密情報の読み取り"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="4216462049057658723">"タブレットに保存されているカレンダーの予定（友だちや同僚の予定も含めすべて）を読み取ることをアプリに許可します。これにより、アプリがカレンダーのデータを機密性に関係なく共有または保存できるようになる可能性があります。"</string>
     <string name="permdesc_readCalendar" product="tv" msgid="3191352452242394196">"テレビに保存されているカレンダーの予定（友だちや同僚の予定も含めすべて）を読み取ることをアプリに許可します。これにより、アプリがカレンダーのデータを機密性に関係なく共有または保存できるようになる可能性があります。"</string>
     <string name="permdesc_readCalendar" product="default" msgid="7434548682470851583">"携帯端末に保存されているカレンダーの予定（友だちや同僚の予定も含めすべて）を読み取ることをアプリに許可します。これにより、アプリがカレンダーのデータを機密性に関係なく共有または保存できるようになる可能性があります。"</string>

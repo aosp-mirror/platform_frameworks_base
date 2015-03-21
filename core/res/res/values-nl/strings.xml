@@ -196,10 +196,11 @@
     <string name="global_action_toggle_silent_mode" msgid="8219525344246810925">"Stille modus"</string>
     <string name="global_action_silent_mode_on_status" msgid="3289841937003758806">"Geluid is UIT"</string>
     <string name="global_action_silent_mode_off_status" msgid="1506046579177066419">"Geluid is AAN"</string>
-    <string name="global_actions_toggle_airplane_mode" msgid="5884330306926307456">"Vliegmodus"</string>
-    <string name="global_actions_airplane_mode_on_status" msgid="2719557982608919750">"Vliegmodus is AAN"</string>
-    <string name="global_actions_airplane_mode_off_status" msgid="5075070442854490296">"Vliegmodus is UIT"</string>
+    <string name="global_actions_toggle_airplane_mode" msgid="5884330306926307456">"Vliegtuigmodus"</string>
+    <string name="global_actions_airplane_mode_on_status" msgid="2719557982608919750">"Vliegtuigmodus is AAN"</string>
+    <string name="global_actions_airplane_mode_off_status" msgid="5075070442854490296">"Vliegtuigmodus is UIT"</string>
     <string name="global_action_settings" msgid="1756531602592545966">"Instellingen"</string>
+    <string name="global_action_assist" msgid="3892832961594295030">"Helpen"</string>
     <string name="global_action_voice_assist" msgid="7751191495200504480">"Spraakassistent"</string>
     <string name="global_action_lockdown" msgid="8751542514724332873">"Nu vergrendelen"</string>
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999 +"</string>
