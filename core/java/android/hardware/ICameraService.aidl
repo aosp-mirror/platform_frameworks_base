@@ -18,8 +18,6 @@ package android.hardware;
 
 import android.hardware.ICamera;
 import android.hardware.ICameraClient;
-import android.hardware.IProCameraUser;
-import android.hardware.IProCameraCallbacks;
 import android.hardware.camera2.ICameraDeviceUser;
 import android.hardware.camera2.ICameraDeviceCallbacks;
 import android.hardware.camera2.impl.CameraMetadataNative;
@@ -44,12 +42,6 @@ interface ICameraService
                     int clientUid,
                     // Container for an ICamera object
                     out BinderHolder device);
-
-    int connectPro(IProCameraCallbacks callbacks, int cameraId,
-                              String clientPackageName,
-                              int clientUid,
-                              // Container for an IProCameraUser object
-                              out BinderHolder device);
 
     int connectDevice(ICameraDeviceCallbacks callbacks, int cameraId,
                               String clientPackageName,
