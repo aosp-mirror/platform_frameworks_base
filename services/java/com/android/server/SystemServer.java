@@ -39,6 +39,7 @@ import android.os.StrictMode;
 import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.UserHandle;
+import android.os.storage.IMountService;
 import android.util.DisplayMetrics;
 import android.util.EventLog;
 import android.util.Slog;
@@ -131,6 +132,8 @@ public final class SystemServer {
             "com.android.server.ethernet.EthernetService";
     private static final String JOB_SCHEDULER_SERVICE_CLASS =
             "com.android.server.job.JobSchedulerService";
+    private static final String MOUNT_SERVICE_CLASS =
+            "com.android.server.MountService$Lifecycle";
     private static final String PERSISTENT_DATA_BLOCK_PROP = "ro.frp.pst";
 
     private final int mFactoryTestMode;
@@ -384,7 +387,7 @@ public final class SystemServer {
         ContentService contentService = null;
         VibratorService vibrator = null;
         IAlarmManager alarm = null;
-        MountService mountService = null;
+        IMountService mountService = null;
         NetworkManagementService networkManagement = null;
         NetworkStatsService networkStats = null;
         NetworkPolicyManagerService networkPolicy = null;
@@ -552,9 +555,9 @@ public final class SystemServer {
                      * NotificationManagerService is dependant on MountService,
                      * (for media / usb notifications) so we must start MountService first.
                      */
-                    Slog.i(TAG, "Mount Service");
-                    mountService = new MountService(context);
-                    ServiceManager.addService("mount", mountService);
+                    mSystemServiceManager.startService(MOUNT_SERVICE_CLASS);
+                    mountService = IMountService.Stub.asInterface(
+                            ServiceManager.getService("mount"));
                 } catch (Throwable e) {
                     reportWtf("starting Mount Service", e);
                 }
@@ -711,7 +714,10 @@ public final class SystemServer {
              * first before continuing.
              */
             if (mountService != null && !mOnlyCore) {
-                mountService.waitForAsecScan();
+                try {
+                    mountService.waitForAsecScan();
+                } catch (RemoteException ignored) {
+                }
             }
 
             try {
@@ -1039,7 +1045,6 @@ public final class SystemServer {
         }
 
         // These are needed to propagate to the runnable below.
-        final MountService mountServiceF = mountService;
         final NetworkManagementService networkManagementF = networkManagement;
         final NetworkStatsService networkStatsF = networkStats;
         final NetworkPolicyManagerService networkPolicyF = networkPolicy;
@@ -1085,11 +1090,6 @@ public final class SystemServer {
                     startSystemUi(context);
                 } catch (Throwable e) {
                     reportWtf("starting System UI", e);
-                }
-                try {
-                    if (mountServiceF != null) mountServiceF.systemReady();
-                } catch (Throwable e) {
-                    reportWtf("making Mount Service ready", e);
                 }
                 try {
                     if (networkScoreF != null) networkScoreF.systemReady();

@@ -888,6 +888,21 @@ public interface IMountService extends IInterface {
                 }
                 return;
             }
+
+            @Override
+            public void waitForAsecScan() throws RemoteException {
+                Parcel _data = Parcel.obtain();
+                Parcel _reply = Parcel.obtain();
+                try {
+                    _data.writeInterfaceToken(DESCRIPTOR);
+                    mRemote.transact(Stub.TRANSACTION_waitForAsecScan, _data, _reply, 0);
+                    _reply.readException();
+                } finally {
+                    _reply.recycle();
+                    _data.recycle();
+                }
+                return;
+            }
         }
 
         private static final String DESCRIPTOR = "IMountService";
@@ -977,6 +992,8 @@ public interface IMountService extends IInterface {
         static final int TRANSACTION_lastMaintenance = IBinder.FIRST_CALL_TRANSACTION + 41;
 
         static final int TRANSACTION_runMaintenance = IBinder.FIRST_CALL_TRANSACTION + 42;
+
+        static final int TRANSACTION_waitForAsecScan = IBinder.FIRST_CALL_TRANSACTION + 43;
 
         /**
          * Cast an IBinder object into an IMountService interface, generating a
@@ -1396,6 +1413,12 @@ public interface IMountService extends IInterface {
                     reply.writeNoException();
                     return true;
                 }
+                case TRANSACTION_waitForAsecScan: {
+                    data.enforceInterface(DESCRIPTOR);
+                    waitForAsecScan();
+                    reply.writeNoException();
+                    return true;
+                }
             }
             return super.onTransact(code, data, reply, flags);
         }
@@ -1680,4 +1703,6 @@ public interface IMountService extends IInterface {
      * @throws RemoteException
      */
     public void runMaintenance() throws RemoteException;
+
+    public void waitForAsecScan() throws RemoteException;
 }

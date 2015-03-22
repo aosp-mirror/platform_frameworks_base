@@ -123,6 +123,27 @@ class MountService extends IMountService.Stub
 
     // TODO: listen for user creation/deletion
 
+    public static class Lifecycle extends SystemService {
+        private MountService mMountService;
+
+        public Lifecycle(Context context) {
+            super(context);
+        }
+
+        @Override
+        public void onStart() {
+            mMountService = new MountService(getContext());
+            publishBinderService("mount", mMountService);
+        }
+
+        @Override
+        public void onBootPhase(int phase) {
+            if (phase == SystemService.PHASE_ACTIVITY_MANAGER_READY) {
+                mMountService.systemReady();
+            }
+        }
+    }
+
     private static final boolean LOCAL_LOGD = false;
     private static final boolean DEBUG_UNMOUNT = false;
     private static final boolean DEBUG_EVENTS = false;
@@ -574,7 +595,8 @@ class MountService extends IMountService.Stub
 
     private final Handler mHandler;
 
-    void waitForAsecScan() {
+    @Override
+    public void waitForAsecScan() {
         waitForLatch(mAsecsScanned);
     }
 
@@ -1538,7 +1560,7 @@ class MountService extends IMountService.Stub
         }
     }
 
-    public void systemReady() {
+    private void systemReady() {
         mSystemReady = true;
         mHandler.obtainMessage(H_SYSTEM_READY).sendToTarget();
     }
