@@ -25,6 +25,7 @@ import static android.view.WindowManager.LayoutParams.*;
 import android.app.SearchManager;
 import android.os.UserHandle;
 import com.android.internal.R;
+import com.android.internal.util.ScreenShapeHelper;
 import com.android.internal.view.RootViewSurfaceTaker;
 import com.android.internal.view.StandaloneActionMode;
 import com.android.internal.view.menu.ContextMenuBuilder;
@@ -61,6 +62,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.SystemProperties;
 import android.transition.Scene;
 import android.transition.Transition;
 import android.transition.TransitionInflater;
@@ -145,7 +147,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
     TypedValue mFixedWidthMinor;
     TypedValue mFixedHeightMajor;
     TypedValue mFixedHeightMinor;
-    TypedValue mOutsetBottom;
+    int mOutsetBottomPx;
 
     // This is the top-level view of the window, containing the window decor.
     private DecorView mDecor;
@@ -2379,12 +2381,10 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
 
         @Override
         public WindowInsets dispatchApplyWindowInsets(WindowInsets insets) {
-            if (mOutsetBottom != null) {
-                final DisplayMetrics metrics = getContext().getResources().getDisplayMetrics();
-                int bottom = (int) mOutsetBottom.getDimension(metrics);
+            if (mOutsetBottomPx != 0) {
                 WindowInsets newInsets = insets.replaceSystemWindowInsets(
                         insets.getSystemWindowInsetLeft(), insets.getSystemWindowInsetTop(),
-                        insets.getSystemWindowInsetRight(), bottom);
+                        insets.getSystemWindowInsetRight(), mOutsetBottomPx);
                 return super.dispatchApplyWindowInsets(newInsets);
             } else {
                 return super.dispatchApplyWindowInsets(insets);
@@ -2603,12 +2603,11 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                 }
             }
 
-            if (mOutsetBottom != null) {
+            if (mOutsetBottomPx != 0) {
                 int mode = MeasureSpec.getMode(heightMeasureSpec);
                 if (mode != MeasureSpec.UNSPECIFIED) {
-                    int outset = (int) mOutsetBottom.getDimension(metrics);
                     int height = MeasureSpec.getSize(heightMeasureSpec);
-                    heightMeasureSpec = MeasureSpec.makeMeasureSpec(height + outset, mode);
+                    heightMeasureSpec = MeasureSpec.makeMeasureSpec(height + mOutsetBottomPx, mode);
                 }
             }
 
@@ -3441,10 +3440,9 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             final boolean shouldUseBottomOutset =
                     display.getDisplayId() == Display.DEFAULT_DISPLAY
                             || (getForcedWindowFlags() & FLAG_FULLSCREEN) != 0;
-            if (shouldUseBottomOutset && a.hasValue(R.styleable.Window_windowOutsetBottom)) {
-                if (mOutsetBottom == null) mOutsetBottom = new TypedValue();
-                a.getValue(R.styleable.Window_windowOutsetBottom,
-                        mOutsetBottom);
+            if (shouldUseBottomOutset) {
+                mOutsetBottomPx = ScreenShapeHelper.getWindowOutsetBottomPx(
+                        getContext().getResources().getDisplayMetrics(), a);
             }
         }
 

@@ -40,14 +40,12 @@ import android.hardware.display.DisplayManager;
 import android.hardware.display.DisplayManager.DisplayListener;
 import android.media.AudioManager;
 import android.os.Binder;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Debug;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.os.ParcelFileDescriptor;
-import android.os.PowerManager;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.SystemClock;
@@ -78,6 +76,7 @@ import android.widget.Scroller;
 import com.android.internal.R;
 import com.android.internal.os.SomeArgs;
 import com.android.internal.policy.PolicyManager;
+import com.android.internal.util.ScreenShapeHelper;
 import com.android.internal.view.BaseSurfaceHolder;
 import com.android.internal.view.RootViewSurfaceTaker;
 
@@ -121,8 +120,10 @@ public final class ViewRootImpl implements ViewParent,
     private static final String PROPERTY_PROFILE_RENDERING = "viewroot.profile_rendering";
     private static final String PROPERTY_MEDIA_DISABLED = "config.disable_media";
 
-    // property used by emulator to determine display shape
+    // properties used by emulator to determine display shape
     public static final String PROPERTY_EMULATOR_CIRCULAR = "ro.emulator.circular";
+    public static final String PROPERTY_EMULATOR_WIN_OUTSET_BOTTOM_PX =
+            "ro.emu.win_outset_bottom_px";
 
     /**
      * Maximum time we allow the user to roll the trackball enough to generate
@@ -333,8 +334,6 @@ public final class ViewRootImpl implements ViewParent,
     /** Set to true once doDie() has been called. */
     private boolean mRemoved;
 
-    private boolean mIsEmulator;
-    private boolean mIsCircularEmulator;
     private final boolean mWindowIsRound;
 
     /**
@@ -391,8 +390,7 @@ public final class ViewRootImpl implements ViewParent,
         mChoreographer = Choreographer.getInstance();
         mDisplayManager = (DisplayManager)context.getSystemService(Context.DISPLAY_SERVICE);
         loadSystemProperties();
-        mWindowIsRound = context.getResources().getBoolean(
-                com.android.internal.R.bool.config_windowIsRound);
+        mWindowIsRound = ScreenShapeHelper.getWindowIsRound(context.getResources());
     }
 
     public static void addFirstDrawHandler(Runnable callback) {
@@ -1224,10 +1222,9 @@ public final class ViewRootImpl implements ViewParent,
     void dispatchApplyInsets(View host) {
         mDispatchContentInsets.set(mAttachInfo.mContentInsets);
         mDispatchStableInsets.set(mAttachInfo.mStableInsets);
-        final boolean isRound = (mIsEmulator && mIsCircularEmulator) || mWindowIsRound;
         host.dispatchApplyWindowInsets(new WindowInsets(
                 mDispatchContentInsets, null /* windowDecorInsets */,
-                mDispatchStableInsets, isRound));
+                mDispatchStableInsets, mWindowIsRound));
     }
 
     private void performTraversals() {
@@ -5571,11 +5568,6 @@ public final class ViewRootImpl implements ViewParent,
                         mHandler.sendEmptyMessageDelayed(MSG_INVALIDATE_WORLD, 200);
                     }
                 }
-
-                // detect emulator
-                mIsEmulator = Build.HARDWARE.contains("goldfish");
-                mIsCircularEmulator =
-                        SystemProperties.getBoolean(PROPERTY_EMULATOR_CIRCULAR, false);
             }
         });
     }
