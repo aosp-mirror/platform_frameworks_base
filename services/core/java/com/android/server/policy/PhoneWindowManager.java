@@ -4025,7 +4025,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
 
     private void offsetInputMethodWindowLw(WindowState win) {
-        int top = win.getDisplayFrameLw().top;
+        int top = Math.max(win.getDisplayFrameLw().top, win.getContentFrameLw().top);
         top += win.getGivenContentInsetsLw().top;
         if (mContentBottom > top) {
             mContentBottom = top;
@@ -4044,7 +4044,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
 
     private void offsetVoiceInputWindowLw(WindowState win) {
-        int top = win.getDisplayFrameLw().top;
+        int top = Math.max(win.getDisplayFrameLw().top, win.getContentFrameLw().top);
         top += win.getGivenContentInsetsLw().top;
         if (mVoiceContentBottom > top) {
             mVoiceContentBottom = top;
