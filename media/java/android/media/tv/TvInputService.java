@@ -1223,6 +1223,8 @@ public abstract class TvInputService extends Service {
                     args.arg2 = mProxySession;
                     args.arg3 = mProxySessionCallback;
                     args.arg4 = session.getToken();
+                    session.tune(TvContract.buildChannelUriForPassthroughInput(
+                            getHardwareInputId()));
                 } else {
                     args.arg1 = null;
                     args.arg2 = null;
@@ -1232,7 +1234,6 @@ public abstract class TvInputService extends Service {
                 }
                 mServiceHandler.obtainMessage(ServiceHandler.DO_NOTIFY_SESSION_CREATED, args)
                         .sendToTarget();
-                session.tune(TvContract.buildChannelUriForPassthroughInput(getHardwareInputId()));
             }
 
             @Override
