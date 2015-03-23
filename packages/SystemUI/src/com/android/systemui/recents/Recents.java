@@ -385,7 +385,7 @@ public class Recents extends SystemUI
         }
 
         // Return early if there are no tasks in the focused stack
-        if (focusedStack.getTaskCount() == 0) return;
+        if (focusedStack == null || focusedStack.getTaskCount() == 0) return;
 
         ActivityManager.RunningTaskInfo runningTask = mSystemServicesProxy.getTopMostTask();
         // Return early if there is no running task (can't determine affiliated tasks in this case)
