@@ -292,7 +292,7 @@ public class RecentsConfiguration {
                 Settings.Global.DEVELOPMENT_SETTINGS_ENABLED) != 0;
         lockToAppEnabled = ssp.getSystemSetting(context,
                 Settings.System.LOCK_TO_APP_ENABLED) != 0;
-        multiStackEnabled = "1".equals(ssp.getSystemProperty("overview.enableMultiStack"));
+        multiStackEnabled = "true".equals(ssp.getSystemProperty("persist.sys.debug.multi_window"));
     }
 
     /** Called when the configuration has changed, and we want to reset any configuration specific
