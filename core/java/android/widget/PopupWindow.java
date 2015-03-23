@@ -46,6 +46,7 @@ import android.view.ViewTreeObserver;
 import android.view.ViewTreeObserver.OnGlobalLayoutListener;
 import android.view.ViewTreeObserver.OnScrollChangedListener;
 import android.view.WindowManager;
+import android.view.WindowManager.LayoutParams;
 
 import java.lang.ref.WeakReference;
 
@@ -126,10 +127,10 @@ public class PopupWindow {
     private OnTouchListener mTouchInterceptor;
 
     private int mWidthMode;
-    private int mWidth;
+    private int mWidth = LayoutParams.WRAP_CONTENT;
     private int mLastWidth;
     private int mHeightMode;
-    private int mHeight;
+    private int mHeight = LayoutParams.WRAP_CONTENT;
     private int mLastHeight;
 
     private int mPopupWidth;
@@ -907,17 +908,19 @@ public class PopupWindow {
      * {@link ViewGroup.LayoutParams#WRAP_CONTENT},
      * {@link ViewGroup.LayoutParams#MATCH_PARENT}, or 0 to use the absolute
      * height.
+     *
+     * @deprecated Use {@link #setWidth(int)} and {@link #setHeight(int)}.
      */
+    @Deprecated
     public void setWindowLayoutMode(int widthSpec, int heightSpec) {
         mWidthMode = widthSpec;
         mHeightMode = heightSpec;
     }
 
     /**
-     * <p>Return this popup's height MeasureSpec</p>
+     * Returns the popup's height MeasureSpec.
      *
      * @return the height MeasureSpec of the popup
-     *
      * @see #setHeight(int)
      */
     public int getHeight() {
@@ -925,13 +928,12 @@ public class PopupWindow {
     }
 
     /**
-     * <p>Change the popup's height MeasureSpec</p>
-     *
-     * <p>If the popup is showing, calling this method will take effect only
-     * the next time the popup is shown.</p>
+     * Sets the popup's height MeasureSpec.
+     * <p>
+     * If the popup is showing, calling this method will take effect the next
+     * time the popup is shown.
      *
      * @param height the height MeasureSpec of the popup
-     *
      * @see #getHeight()
      * @see #isShowing()
      */
@@ -940,10 +942,9 @@ public class PopupWindow {
     }
 
     /**
-     * <p>Return this popup's width MeasureSpec</p>
+     * Returns the popup's width MeasureSpec.
      *
      * @return the width MeasureSpec of the popup
-     *
      * @see #setWidth(int)
      */
     public int getWidth() {
@@ -951,13 +952,12 @@ public class PopupWindow {
     }
 
     /**
-     * <p>Change the popup's width MeasureSpec</p>
-     *
-     * <p>If the popup is showing, calling this method will take effect only
-     * the next time the popup is shown.</p>
+     * Sets the popup's width MeasureSpec.
+     * <p>
+     * If the popup is showing, calling this method will take effect the next
+     * time the popup is shown.
      *
      * @param width the width MeasureSpec of the popup
-     *
      * @see #getWidth()
      * @see #isShowing()
      */
@@ -1658,10 +1658,17 @@ public class PopupWindow {
 
     /**
      * Updates the state of the popup window, if it is currently being displayed,
-     * from the currently set state.  This includes:
-     * {@link #setClippingEnabled(boolean)}, {@link #setFocusable(boolean)},
-     * {@link #setIgnoreCheekPress()}, {@link #setInputMethodMode(int)},
-     * {@link #setTouchable(boolean)}, and {@link #setAnimationStyle(int)}.
+     * from the currently set state.
+     * <p>
+     * This includes:
+     * <ul>
+     *     <li>{@link #setClippingEnabled(boolean)}</li>
+     *     <li>{@link #setFocusable(boolean)}</li>
+     *     <li>{@link #setIgnoreCheekPress()}</li>
+     *     <li>{@link #setInputMethodMode(int)}</li>
+     *     <li>{@link #setTouchable(boolean)}</li>
+     *     <li>{@link #setAnimationStyle(int)}</li>
+     * </ul>
      */
     public void update() {
         if (!isShowing() || mContentView == null) {
@@ -1692,12 +1699,13 @@ public class PopupWindow {
     }
 
     /**
-     * <p>Updates the dimension of the popup window. Calling this function
-     * also updates the window with the current popup state as described
-     * for {@link #update()}.</p>
+     * Updates the dimension of the popup window.
+     * <p>
+     * Calling this function also updates the window with the current popup
+     * state as described for {@link #update()}.
      *
-     * @param width the new width
-     * @param height the new height
+     * @param width the new width, must be >= 0 or -1 to ignore
+     * @param height the new height, must be >= 0 or -1 to ignore
      */
     public void update(int width, int height) {
         final WindowManager.LayoutParams p =
@@ -1706,40 +1714,43 @@ public class PopupWindow {
     }
 
     /**
-     * <p>Updates the position and the dimension of the popup window. Width and
-     * height can be set to -1 to update location only.  Calling this function
-     * also updates the window with the current popup state as
-     * described for {@link #update()}.</p>
+     * Updates the position and the dimension of the popup window.
+     * <p>
+     * Width and height can be set to -1 to update location only. Calling this
+     * function also updates the window with the current popup state as
+     * described for {@link #update()}.
      *
      * @param x the new x location
      * @param y the new y location
-     * @param width the new width, can be -1 to ignore
-     * @param height the new height, can be -1 to ignore
+     * @param width the new width, must be >= 0 or -1 to ignore
+     * @param height the new height, must be >= 0 or -1 to ignore
      */
     public void update(int x, int y, int width, int height) {
         update(x, y, width, height, false);
     }
 
     /**
-     * <p>Updates the position and the dimension of the popup window. Width and
-     * height can be set to -1 to update location only.  Calling this function
-     * also updates the window with the current popup state as
-     * described for {@link #update()}.</p>
+     * Updates the position and the dimension of the popup window.
+     * <p>
+     * Width and height can be set to -1 to update location only. Calling this
+     * function also updates the window with the current popup state as
+     * described for {@link #update()}.
      *
      * @param x the new x location
      * @param y the new y location
-     * @param width the new width, can be -1 to ignore
-     * @param height the new height, can be -1 to ignore
-     * @param force reposition the window even if the specified position
-     *              already seems to correspond to the LayoutParams
+     * @param width the new width, must be >= 0 or -1 to ignore
+     * @param height the new height, must be >= 0 or -1 to ignore
+     * @param force {@code true} to reposition the window even if the specified
+     *              position already seems to correspond to the LayoutParams,
+     *              {@code false} to only reposition if needed
      */
     public void update(int x, int y, int width, int height, boolean force) {
-        if (width != -1) {
+        if (width >= 0) {
             mLastWidth = width;
             setWidth(width);
         }
 
-        if (height != -1) {
+        if (height >= 0) {
             mLastHeight = height;
             setHeight(height);
         }
@@ -1794,32 +1805,34 @@ public class PopupWindow {
     }
 
     /**
-     * <p>Updates the position and the dimension of the popup window. Calling this
-     * function also updates the window with the current popup state as described
-     * for {@link #update()}.</p>
+     * Updates the position and the dimension of the popup window.
+     * <p>
+     * Calling this function also updates the window with the current popup
+     * state as described for {@link #update()}.
      *
      * @param anchor the popup's anchor view
-     * @param width the new width, can be -1 to ignore
-     * @param height the new height, can be -1 to ignore
+     * @param width the new width, must be >= 0 or -1 to ignore
+     * @param height the new height, must be >= 0 or -1 to ignore
      */
     public void update(View anchor, int width, int height) {
         update(anchor, false, 0, 0, true, width, height);
     }
 
     /**
-     * <p>Updates the position and the dimension of the popup window. Width and
-     * height can be set to -1 to update location only.  Calling this function
-     * also updates the window with the current popup state as
-     * described for {@link #update()}.</p>
-     *
-     * <p>If the view later scrolls to move <code>anchor</code> to a different
-     * location, the popup will be moved correspondingly.</p>
+     * Updates the position and the dimension of the popup window.
+     * <p>
+     * Width and height can be set to -1 to update location only. Calling this
+     * function also updates the window with the current popup state as
+     * described for {@link #update()}.
+     * <p>
+     * If the view later scrolls to move {@code anchor} to a different
+     * location, the popup will be moved correspondingly.
      *
      * @param anchor the popup's anchor view
      * @param xoff x offset from the view's left edge
      * @param yoff y offset from the view's bottom edge
-     * @param width the new width, can be -1 to ignore
-     * @param height the new height, can be -1 to ignore
+     * @param width the new width, must be >= 0 or -1 to ignore
+     * @param height the new height, must be >= 0 or -1 to ignore
      */
     public void update(View anchor, int xoff, int yoff, int width, int height) {
         update(anchor, true, xoff, yoff, true, width, height);

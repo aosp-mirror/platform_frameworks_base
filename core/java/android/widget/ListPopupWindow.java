@@ -567,13 +567,11 @@ public class ListPopupWindow {
     public void show() {
         int height = buildDropDown();
 
-        int widthSpec = 0;
-        int heightSpec = 0;
-
         boolean noInputMethod = isInputMethodNotNeeded();
         mPopup.setAllowScrollingAnchorParent(!noInputMethod);
 
         if (mPopup.isShowing()) {
+            final int widthSpec;
             if (mDropDownWidth == ViewGroup.LayoutParams.MATCH_PARENT) {
                 // The call to PopupWindow's update method below can accept -1 for any
                 // value you do not want to update.
@@ -584,19 +582,19 @@ public class ListPopupWindow {
                 widthSpec = mDropDownWidth;
             }
 
+            final int heightSpec;
             if (mDropDownHeight == ViewGroup.LayoutParams.MATCH_PARENT) {
                 // The call to PopupWindow's update method below can accept -1 for any
                 // value you do not want to update.
                 heightSpec = noInputMethod ? height : ViewGroup.LayoutParams.MATCH_PARENT;
                 if (noInputMethod) {
-                    mPopup.setWindowLayoutMode(
-                            mDropDownWidth == ViewGroup.LayoutParams.MATCH_PARENT ?
-                                    ViewGroup.LayoutParams.MATCH_PARENT : 0, 0);
+                    mPopup.setWidth(mDropDownWidth == ViewGroup.LayoutParams.MATCH_PARENT ?
+                            ViewGroup.LayoutParams.MATCH_PARENT : 0);
+                    mPopup.setHeight(0);
                 } else {
-                    mPopup.setWindowLayoutMode(
-                            mDropDownWidth == ViewGroup.LayoutParams.MATCH_PARENT ?
-                                    ViewGroup.LayoutParams.MATCH_PARENT : 0,
-                            ViewGroup.LayoutParams.MATCH_PARENT);
+                    mPopup.setWidth(mDropDownWidth == ViewGroup.LayoutParams.MATCH_PARENT ?
+                                    ViewGroup.LayoutParams.MATCH_PARENT : 0);
+                    mPopup.setHeight(ViewGroup.LayoutParams.MATCH_PARENT);
                 }
             } else if (mDropDownHeight == ViewGroup.LayoutParams.WRAP_CONTENT) {
                 heightSpec = height;
@@ -604,32 +602,37 @@ public class ListPopupWindow {
                 heightSpec = mDropDownHeight;
             }
 
+            mPopup.setWidth(widthSpec);
+            mPopup.setHeight(heightSpec);
             mPopup.setOutsideTouchable(!mForceIgnoreOutsideTouch && !mDropDownAlwaysVisible);
 
             mPopup.update(getAnchorView(), mDropDownHorizontalOffset,
-                    mDropDownVerticalOffset, widthSpec, heightSpec);
+                            mDropDownVerticalOffset, -1, -1);
         } else {
+            final int widthSpec;
             if (mDropDownWidth == ViewGroup.LayoutParams.MATCH_PARENT) {
                 widthSpec = ViewGroup.LayoutParams.MATCH_PARENT;
             } else {
                 if (mDropDownWidth == ViewGroup.LayoutParams.WRAP_CONTENT) {
-                    mPopup.setWidth(getAnchorView().getWidth());
+                    widthSpec = getAnchorView().getWidth();
                 } else {
-                    mPopup.setWidth(mDropDownWidth);
+                    widthSpec = mDropDownWidth;
                 }
             }
 
+            final int heightSpec;
             if (mDropDownHeight == ViewGroup.LayoutParams.MATCH_PARENT) {
                 heightSpec = ViewGroup.LayoutParams.MATCH_PARENT;
             } else {
                 if (mDropDownHeight == ViewGroup.LayoutParams.WRAP_CONTENT) {
-                    mPopup.setHeight(height);
+                    heightSpec = height;
                 } else {
-                    mPopup.setHeight(mDropDownHeight);
+                    heightSpec = mDropDownHeight;
                 }
             }
 
-            mPopup.setWindowLayoutMode(widthSpec, heightSpec);
+            mPopup.setWidth(widthSpec);
+            mPopup.setHeight(heightSpec);
             mPopup.setClipToScreenEnabled(true);
             
             // use outside touchable to dismiss drop down when touching outside of it, so

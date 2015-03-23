@@ -41772,7 +41772,7 @@ package android.widget {
     method public void setTouchInterceptor(android.view.View.OnTouchListener);
     method public void setTouchable(boolean);
     method public void setWidth(int);
-    method public void setWindowLayoutMode(int, int);
+    method public deprecated void setWindowLayoutMode(int, int);
     method public void showAsDropDown(android.view.View);
     method public void showAsDropDown(android.view.View, int, int);
     method public void showAsDropDown(android.view.View, int, int, int);
