@@ -662,11 +662,11 @@ please see styles_device_defaults.xml.
         <item name="internalLayout">@layout/time_picker_material</item>
         <item name="headerTimeTextAppearance">@style/TextAppearance.Material.TimePicker.TimeLabel</item>
         <item name="headerAmPmTextAppearance">@style/TextAppearance.Material.TimePicker.AmPmLabel</item>
-        <item name="headerBackground">@drawable/time_picker_header_material</item>
+        <item name="headerBackground">?attr/colorAccent</item>
         <item name="numbersTextColor">?attr/textColorPrimaryActivated</item>
         <item name="numbersInnerTextColor">?attr/textColorSecondaryActivated</item>
-        <item name="numbersBackgroundColor">#08ffffff</item>
         <item name="numbersSelectorColor">?attr/colorControlActivated</item>
+        <item name="numbersBackgroundColor">#ff555555</item>
         <item name="amPmTextColor">?attr/textColorSecondary</item>
     </style>
 
@@ -676,9 +676,9 @@ please see styles_device_defaults.xml.
         <item name="calendarViewShown">true</item>
         <!-- Attributes for new-style DatePicker. -->
         <item name="internalLayout">@layout/date_picker_material</item>
-        <item name="headerBackground">?attr/colorAccent</item>
         <item name="yearListItemTextAppearance">@style/TextAppearance.Material.DatePicker.List.YearLabel</item>
         <item name="yearListItemActivatedTextAppearance">@style/TextAppearance.Material.DatePicker.List.YearLabel.Activated</item>
+        <item name="headerBackground">#</item>
     </style>
 
     <style name="Widget.Material.ActivityChooserView" parent="Widget.ActivityChooserView">
@@ -1033,10 +1033,14 @@ please see styles_device_defaults.xml.
     <style name="Widget.Material.Light.NumberPicker" parent="Widget.Material.NumberPicker"/>
 
     <style name="Widget.Material.Light.TimePicker" parent="Widget.Material.TimePicker">
-        <item name="numbersBackgroundColor">#10000000</item>
+        <item name="headerBackground">?attr/colorAccent</item>
+        <item name="numbersBackgroundColor">#ffeeeeee</item>
     </style>
 
-    <style name="Widget.Material.Light.DatePicker" parent="Widget.Material.DatePicker" />
+    <style name="Widget.Material.Light.DatePicker" parent="Widget.Material.DatePicker">
+        <item name="headerBackground">?attr/colorAccent</item>
+    </style>
+
     <style name="Widget.Material.Light.ActivityChooserView" parent="Widget.Material.ActivityChooserView" />
     <style name="Widget.Material.Light.ImageWell" parent="Widget.Material.ImageWell"/>
     <style name="Widget.Material.Light.ListView" parent="Widget.Material.ListView"/>
