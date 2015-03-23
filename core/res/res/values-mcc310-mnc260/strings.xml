@@ -25,9 +25,13 @@
     <string-array name="wfcOperatorErrorCodes" translatable="false">
         <item>REG09</item>
     </string-array>
-    <!-- WFC Operator Error Messages -->
-    <string-array name="wfcOperatorErrorMessages">
-        <item>Wi-Fi Calling isn\&apos;t available. Contact your carrier to enable Wi-Fi Calling.</item>
+    <!-- WFC Operator Error Messages showed as alerts -->
+    <string-array name="wfcOperatorErrorAlertMessages">
+        <item>To make calls and send messages over Wi-Fi, first ask your carrier to set up this service. Then turn on Wi-Fi calling again from Settings.</item>
+    </string-array>
+    <!-- WFC Operator Error Messages showed as notifications -->
+    <string-array name="wfcOperatorErrorNotificationMessages">
+        <item>Register with your carrier</item>
     </string-array>
     <!-- Template for showing cellular network operator name while WFC is active -->
     <string name="wfcSpnFormat">%s Wi-Fi Calling</string>
