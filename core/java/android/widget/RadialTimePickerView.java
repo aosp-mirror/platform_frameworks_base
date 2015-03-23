@@ -641,7 +641,7 @@ public class RadialTimePickerView extends View {
         mCircleRadius = Math.min(mXCenter, mYCenter);
 
         mMinHypotenuseForInnerNumber = mCircleRadius - mTextInset[HOURS_INNER] - mSelectorRadius;
-        mMaxHypotenuseForOuterNumber = mCircleRadius - mTextInset[HOURS] - mSelectorRadius;
+        mMaxHypotenuseForOuterNumber = mCircleRadius - mTextInset[HOURS] + mSelectorRadius;
         mHalfwayHypotenusePoint = mCircleRadius - (mTextInset[HOURS] + mTextInset[HOURS_INNER]) / 2;
 
         calculatePositionsHours();
@@ -1144,30 +1144,31 @@ public class RadialTimePickerView extends View {
 
         private void adjustPicker(int step) {
             final int stepSize;
-            final int initialValue;
+            final int initialStep;
             final int maxValue;
             final int minValue;
             if (mShowHours) {
-                stepSize = DEGREES_FOR_ONE_HOUR;
-                initialValue = getCurrentHour() % 12;
+                stepSize = 1;
 
+                final int currentHour24 = getCurrentHour();
                 if (mIs24HourMode) {
-                    maxValue = 23;
+                    initialStep = currentHour24;
                     minValue = 0;
+                    maxValue = 23;
                 } else {
-                    maxValue = 12;
+                    initialStep = hour24To12(currentHour24);
                     minValue = 1;
+                    maxValue = 12;
                 }
             } else {
-                stepSize = DEGREES_FOR_ONE_MINUTE;
-                initialValue = getCurrentMinute();
-
-                maxValue = 55;
+                stepSize = 5;
+                initialStep = getCurrentMinute() / stepSize;
                 minValue = 0;
+                maxValue = 55;
             }
 
-            final int steppedValue = snapOnly30s(initialValue * stepSize, step) / stepSize;
-            final int clampedValue = MathUtils.constrain(steppedValue, minValue, maxValue);
+            final int nextValue = (initialStep + step) * stepSize;
+            final int clampedValue = MathUtils.constrain(nextValue, minValue, maxValue);
             if (mShowHours) {
                 setCurrentHour(clampedValue);
             } else {
