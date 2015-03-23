@@ -348,9 +348,13 @@ public class DatePicker extends FrameLayout {
     }
 
     /**
-     * Gets whether the {@link CalendarView} is shown.
+     * Returns whether the {@link CalendarView} is shown.
+     * <p>
+     * <strong>Note:</strong> This method returns {@code false} when the
+     * {@link android.R.styleable#DatePicker_datePickerMode} attribute is set
+     * to {@code calendar}.
      *
-     * @return True if the calendar view is shown.
+     * @return {@code true} if the calendar view is shown
      * @see #getCalendarView()
      */
     public boolean getCalendarViewShown() {
@@ -358,13 +362,13 @@ public class DatePicker extends FrameLayout {
     }
 
     /**
-     * Gets the {@link CalendarView}.
+     * Returns the {@link CalendarView} used by this picker.
      * <p>
-     * This method returns {@code null} when the
+     * <strong>Note:</strong> This method returns {@code null} when the
      * {@link android.R.styleable#DatePicker_datePickerMode} attribute is set
      * to {@code calendar}.
      *
-     * @return The calendar view.
+     * @return the calendar view
      * @see #getCalendarViewShown()
      */
     public CalendarView getCalendarView() {
@@ -374,20 +378,25 @@ public class DatePicker extends FrameLayout {
     /**
      * Sets whether the {@link CalendarView} is shown.
      * <p>
-     * Calling this method has no effect when the
+     * <strong>Note:</strong> Calling this method has no effect when the
      * {@link android.R.styleable#DatePicker_datePickerMode} attribute is set
      * to {@code calendar}.
      *
-     * @param shown True if the calendar view is to be shown.
+     * @param shown {@code true} to show the calendar view, {@code false} to
+     *              hide it
      */
     public void setCalendarViewShown(boolean shown) {
         mDelegate.setCalendarViewShown(shown);
     }
 
     /**
-     * Gets whether the spinners are shown.
+     * Returns whether the spinners are shown.
+     * <p>
+     * T<strong>Note:</strong> his method returns {@code false} when the
+     * {@link android.R.styleable#DatePicker_datePickerMode} attribute is set
+     * to {@code calendar}.
      *
-     * @return True if the spinners are shown.
+     * @return {@code true} if the spinners are shown
      */
     public boolean getSpinnersShown() {
         return mDelegate.getSpinnersShown();
@@ -395,8 +404,13 @@ public class DatePicker extends FrameLayout {
 
     /**
      * Sets whether the spinners are shown.
+     * <p>
+     * Calling this method has no effect when the
+     * {@link android.R.styleable#DatePicker_datePickerMode} attribute is set
+     * to {@code calendar}.
      *
-     * @param shown True if the spinners are to be shown.
+     * @param shown {@code true} to show the spinners, {@code false} to hide
+     *              them
      */
     public void setSpinnersShown(boolean shown) {
         mDelegate.setSpinnersShown(shown);
