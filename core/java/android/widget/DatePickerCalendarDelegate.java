@@ -61,10 +61,6 @@ class DatePickerCalendarDelegate extends DatePicker.AbstractDatePickerDelegate {
 
     private static final int ANIMATION_DURATION = 300;
 
-    private static final int MONTH_INDEX = 0;
-    private static final int DAY_INDEX = 1;
-    private static final int YEAR_INDEX = 2;
-
     public static final int[] ATTRS_TEXT_COLOR = new int[]{com.android.internal.R.attr.textColor};
 
     public static final int[] ATTRS_DISABLED_ALPHA = new int[]{
@@ -93,10 +89,10 @@ class DatePickerCalendarDelegate extends DatePicker.AbstractDatePickerDelegate {
 
     private int mCurrentView = UNINITIALIZED;
 
-    private Calendar mCurrentDate;
-    private Calendar mTempDate;
-    private Calendar mMinDate;
-    private Calendar mMaxDate;
+    private final Calendar mCurrentDate;
+    private final Calendar mTempDate;
+    private final Calendar mMinDate;
+    private final Calendar mMaxDate;
 
     private int mFirstDayOfWeek = USE_LOCALE;
 
@@ -105,10 +101,10 @@ class DatePickerCalendarDelegate extends DatePicker.AbstractDatePickerDelegate {
         super(delegator, context);
 
         final Locale locale = mCurrentLocale;
-        mMinDate = getCalendarForLocale(mMinDate, locale);
-        mMaxDate = getCalendarForLocale(mMaxDate, locale);
-        mTempDate = getCalendarForLocale(mMaxDate, locale);
-        mCurrentDate = getCalendarForLocale(mCurrentDate, locale);
+        mCurrentDate = Calendar.getInstance(locale);
+        mTempDate = Calendar.getInstance(locale);
+        mMinDate = Calendar.getInstance(locale);
+        mMaxDate = Calendar.getInstance(locale);
 
         mMinDate.set(DEFAULT_START_YEAR, Calendar.JANUARY, 1);
         mMaxDate.set(DEFAULT_END_YEAR, Calendar.DECEMBER, 31);
@@ -314,61 +310,6 @@ class DatePickerCalendarDelegate extends DatePicker.AbstractDatePickerDelegate {
             }
         }
     };
-
-    /**
-     * Gets a calendar for locale bootstrapped with the value of a given calendar.
-     *
-     * @param oldCalendar The old calendar.
-     * @param locale The locale.
-     */
-    private Calendar getCalendarForLocale(Calendar oldCalendar, Locale locale) {
-        if (oldCalendar == null) {
-            return Calendar.getInstance(locale);
-        } else {
-            final long currentTimeMillis = oldCalendar.getTimeInMillis();
-            Calendar newCalendar = Calendar.getInstance(locale);
-            newCalendar.setTimeInMillis(currentTimeMillis);
-            return newCalendar;
-        }
-    }
-
-    /**
-     * Compute the array representing the order of Month / Day / Year views in their layout.
-     * Will be used for I18N purpose as the order of them depends on the Locale.
-     */
-    private int[] getMonthDayYearIndexes(String pattern) {
-        int[] result = new int[3];
-
-        final String filteredPattern = pattern.replaceAll("'.*?'", "");
-
-        final int dayIndex = filteredPattern.indexOf('d');
-        final int monthMIndex = filteredPattern.indexOf("M");
-        final int monthIndex = (monthMIndex != -1) ? monthMIndex : filteredPattern.indexOf("L");
-        final int yearIndex = filteredPattern.indexOf("y");
-
-        if (yearIndex < monthIndex) {
-            result[YEAR_INDEX] = 0;
-
-            if (monthIndex < dayIndex) {
-                result[MONTH_INDEX] = 1;
-                result[DAY_INDEX] = 2;
-            } else {
-                result[MONTH_INDEX] = 2;
-                result[DAY_INDEX] = 1;
-            }
-        } else {
-            result[YEAR_INDEX] = 2;
-
-            if (monthIndex < dayIndex) {
-                result[MONTH_INDEX] = 0;
-                result[DAY_INDEX] = 1;
-            } else {
-                result[MONTH_INDEX] = 1;
-                result[DAY_INDEX] = 0;
-            }
-        }
-        return result;
-    }
 
     @Override
     protected void onLocaleChanged(Locale locale) {
