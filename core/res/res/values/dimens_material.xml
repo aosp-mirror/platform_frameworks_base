@@ -143,9 +143,7 @@
     <dimen name="timepicker_text_size_inner">12sp</dimen>
 
     <!-- Material date picker dimensions. -->
-    <dimen name="datepicker_year_picker_padding_top">8dp</dimen>
     <dimen name="datepicker_year_label_height">64dp</dimen>
-    <dimen name="datepicker_year_label_text_size">22dp</dimen>
     <dimen name="datepicker_component_width">260dp</dimen>
     <dimen name="datepicker_dialog_width">520dp</dimen>
     <dimen name="datepicker_selected_date_day_size">88dp</dimen>
@@ -154,10 +152,24 @@
     <dimen name="datepicker_header_height">30dp</dimen>
     <dimen name="datepicker_header_text_size">14dp</dimen>
 
+    <dimen name="datepicker_list_year_label_size">16sp</dimen>
+    <dimen name="datepicker_list_year_activated_label_size">26sp</dimen>
+
+    <dimen name="date_picker_year_label_size">16sp</dimen>
+    <dimen name="date_picker_date_label_size">34dp</dimen>
+
     <!-- Used by Material-style SimpleMonthView -->
-    <dimen name="datepicker_day_number_size">12sp</dimen>
-    <dimen name="datepicker_month_label_size">14sp</dimen>
-    <dimen name="datepicker_month_day_label_text_size">12sp</dimen>
-    <dimen name="datepicker_month_list_item_header_height">48dp</dimen>
+    <dimen name="date_picker_month_text_size">14sp</dimen>
+    <dimen name="date_picker_day_of_week_text_size">12sp</dimen>
+    <dimen name="date_picker_day_text_size">12sp</dimen>
+    <dimen name="date_picker_month_height">56dp</dimen>
+    <dimen name="date_picker_day_of_week_height">36dp</dimen>
+    <dimen name="date_picker_day_height">40dp</dimen>
+    <dimen name="date_picker_day_width">44dp</dimen>
+    <dimen name="date_picker_day_selector_radius">20dp</dimen>
+    <dimen name="day_picker_padding_horizontal">20dp</dimen>
+    <dimen name="day_picker_padding_top">6dp</dimen>
+    <dimen name="day_picker_button_margin_top">0dp</dimen>
+
     <dimen name="datepicker_view_animator_height">226dp</dimen>
 </resources>

@@ -5042,18 +5042,6 @@
     <!-- Accessibility announcement for minute circular picker [CHAR LIMIT=NONE] -->
     <string name="select_minutes">Select minutes</string>
 
-    <!--
-        Content description for the month and day selector in the date picker, which displays
-        a selectable grid of days laid out by month.
-        [CHAR LIMIT=50]
-     -->
-    <string name="day_picker_description">Month grid of days</string>
-    <!--
-        Content description for the year selector in the date picker, which displays
-        a scrolling, vertical list of years.
-        [CHAR LIMIT=50]
-     -->
-    <string name="year_picker_description">Year list</string>
     <!-- Accessibility announcement for the day picker [CHAR LIMIT=NONE] -->
     <string name="select_day">Select month and day</string>
     <!-- Accessibility announcement for the year picker [CHAR LIMIT=NONE] -->
@@ -5079,7 +5067,11 @@
     <string name="sans_serif">sans-serif</string>
 
     <!-- DO NOT TRANSLATE -->
-    <string name="day_of_week_label_typeface">sans-serif</string>
+    <string name="date_picker_month_typeface">sans-serif-medium</string>
+    <!-- DO NOT TRANSLATE -->
+    <string name="date_picker_day_of_week_typeface">sans-serif-medium</string>
+    <!-- DO NOT TRANSLATE -->
+    <string name="date_picker_day_typeface">sans-serif-medium</string>
 
     <!-- Notify use that they are in Lock-to-app -->
     <string name="lock_to_app_toast">To unpin this screen, touch and hold Back and Overview at the same time.</string>

@@ -464,6 +464,33 @@ public class ColorStateList implements Parcelable {
         return mColors;
     }
 
+    /**
+     * Returns whether the specified state is referenced in any of the state
+     * specs contained within this ColorStateList.
+     * <p>
+     * Any reference, either positive or negative {ex. ~R.attr.state_enabled},
+     * will cause this method to return {@code true}. Wildcards are not counted
+     * as references.
+     *
+     * @param state the state to search for
+     * @return {@code true} if the state if referenced, {@code false} otherwise
+     * @hide Use only as directed. For internal use only.
+     */
+    public boolean hasState(int state) {
+        final int[][] stateSpecs = mStateSpecs;
+        final int specCount = stateSpecs.length;
+        for (int specIndex = 0; specIndex < specCount; specIndex++) {
+            final int[] states = stateSpecs[specIndex];
+            final int stateCount = states.length;
+            for (int stateIndex = 0; stateIndex < stateCount; stateIndex++) {
+                if (states[stateIndex] == state || states[stateIndex] == ~state) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
     @Override
     public String toString() {
         return "ColorStateList{" +

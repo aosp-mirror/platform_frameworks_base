@@ -464,8 +464,8 @@ package android {
     field public static final int datePickerMode = 16843955; // 0x10104b3
     field public static final int datePickerStyle = 16843612; // 0x101035c
     field public static final int dateTextAppearance = 16843593; // 0x1010349
-    field public static final int dayOfWeekBackground = 16843924; // 0x1010494
-    field public static final int dayOfWeekTextAppearance = 16843925; // 0x1010495
+    field public static final deprecated int dayOfWeekBackground = 16843924; // 0x1010494
+    field public static final deprecated int dayOfWeekTextAppearance = 16843925; // 0x1010495
     field public static final int debuggable = 16842767; // 0x101000f
     field public static final int defaultValue = 16843245; // 0x10101ed
     field public static final int delay = 16843212; // 0x10101cc
@@ -587,7 +587,7 @@ package android {
     field public static final int flipInterval = 16843129; // 0x1010179
     field public static final int focusable = 16842970; // 0x10100da
     field public static final int focusableInTouchMode = 16842971; // 0x10100db
-    field public static final int focusedMonthDateColor = 16843587; // 0x1010343
+    field public static final deprecated int focusedMonthDateColor = 16843587; // 0x1010343
     field public static final int fontFamily = 16843692; // 0x10103ac
     field public static final int fontFeatureSettings = 16843959; // 0x10104b7
     field public static final int footerDividersEnabled = 16843311; // 0x101022f
@@ -651,9 +651,9 @@ package android {
     field public static final int hasCode = 16842764; // 0x101000c
     field public static final int headerAmPmTextAppearance = 16843936; // 0x10104a0
     field public static final int headerBackground = 16843055; // 0x101012f
-    field public static final int headerDayOfMonthTextAppearance = 16843927; // 0x1010497
+    field public static final deprecated int headerDayOfMonthTextAppearance = 16843927; // 0x1010497
     field public static final int headerDividersEnabled = 16843310; // 0x101022e
-    field public static final int headerMonthTextAppearance = 16843926; // 0x1010496
+    field public static final deprecated int headerMonthTextAppearance = 16843926; // 0x1010496
     field public static final int headerTimeTextAppearance = 16843935; // 0x101049f
     field public static final int headerYearTextAppearance = 16843928; // 0x1010498
     field public static final int height = 16843093; // 0x1010155
@@ -1094,8 +1094,8 @@ package android {
     field public static final int selectable = 16843238; // 0x10101e6
     field public static final int selectableItemBackground = 16843534; // 0x101030e
     field public static final int selectableItemBackgroundBorderless = 16843868; // 0x101045c
-    field public static final int selectedDateVerticalBar = 16843591; // 0x1010347
-    field public static final int selectedWeekBackgroundColor = 16843586; // 0x1010342
+    field public static final deprecated int selectedDateVerticalBar = 16843591; // 0x1010347
+    field public static final deprecated int selectedWeekBackgroundColor = 16843586; // 0x1010342
     field public static final int sessionService = 16843837; // 0x101043d
     field public static final int settingsActivity = 16843301; // 0x1010225
     field public static final int setupActivity = 16843766; // 0x10103f6
@@ -1114,8 +1114,8 @@ package android {
     field public static final int showOnLockScreen = 16843721; // 0x10103c9
     field public static final int showSilent = 16843259; // 0x10101fb
     field public static final int showText = 16843949; // 0x10104ad
-    field public static final int showWeekNumber = 16843582; // 0x101033e
-    field public static final int shownWeekCount = 16843585; // 0x1010341
+    field public static final deprecated int showWeekNumber = 16843582; // 0x101033e
+    field public static final deprecated int shownWeekCount = 16843585; // 0x1010341
     field public static final int shrinkColumns = 16843082; // 0x101014a
     field public static final deprecated int singleLine = 16843101; // 0x101015d
     field public static final int singleUser = 16843711; // 0x10103bf
@@ -1352,7 +1352,7 @@ package android {
     field public static final int typeface = 16842902; // 0x1010096
     field public static final int uiOptions = 16843672; // 0x1010398
     field public static final int uncertainGestureColor = 16843382; // 0x1010276
-    field public static final int unfocusedMonthDateColor = 16843588; // 0x1010344
+    field public static final deprecated int unfocusedMonthDateColor = 16843588; // 0x1010344
     field public static final int unselectedAlpha = 16843278; // 0x101020e
     field public static final int updatePeriodMillis = 16843344; // 0x1010250
     field public static final int useDefaultMargins = 16843641; // 0x1010379
@@ -1394,8 +1394,8 @@ package android {
     field public static final int webTextViewStyle = 16843449; // 0x10102b9
     field public static final int webViewStyle = 16842885; // 0x1010085
     field public static final int weekDayTextAppearance = 16843592; // 0x1010348
-    field public static final int weekNumberColor = 16843589; // 0x1010345
-    field public static final int weekSeparatorLineColor = 16843590; // 0x1010346
+    field public static final deprecated int weekNumberColor = 16843589; // 0x1010345
+    field public static final deprecated int weekSeparatorLineColor = 16843590; // 0x1010346
     field public static final int weightSum = 16843048; // 0x1010128
     field public static final int widgetCategory = 16843716; // 0x10103c4
     field public static final int widgetLayout = 16843243; // 0x10101eb
@@ -1454,7 +1454,7 @@ package android {
     field public static final int xlargeScreens = 16843455; // 0x10102bf
     field public static final int y = 16842925; // 0x10100ad
     field public static final int yearListItemTextAppearance = 16843929; // 0x1010499
-    field public static final int yearListSelectorColor = 16843930; // 0x101049a
+    field public static final deprecated int yearListSelectorColor = 16843930; // 0x101049a
     field public static final int yesNoPreferenceStyle = 16842896; // 0x1010090
     field public static final int zAdjustment = 16843201; // 0x10101c1
   }
@@ -38152,34 +38152,34 @@ package android.widget {
     method public long getDate();
     method public int getDateTextAppearance();
     method public int getFirstDayOfWeek();
-    method public int getFocusedMonthDateColor();
+    method public deprecated int getFocusedMonthDateColor();
     method public long getMaxDate();
     method public long getMinDate();
-    method public android.graphics.drawable.Drawable getSelectedDateVerticalBar();
-    method public int getSelectedWeekBackgroundColor();
+    method public deprecated android.graphics.drawable.Drawable getSelectedDateVerticalBar();
+    method public deprecated int getSelectedWeekBackgroundColor();
     method public boolean getShowWeekNumber();
-    method public int getShownWeekCount();
-    method public int getUnfocusedMonthDateColor();
+    method public deprecated int getShownWeekCount();
+    method public deprecated int getUnfocusedMonthDateColor();
     method public int getWeekDayTextAppearance();
-    method public int getWeekNumberColor();
-    method public int getWeekSeparatorLineColor();
+    method public deprecated int getWeekNumberColor();
+    method public deprecated int getWeekSeparatorLineColor();
     method public void setDate(long);
     method public void setDate(long, boolean, boolean);
     method public void setDateTextAppearance(int);
     method public void setFirstDayOfWeek(int);
-    method public void setFocusedMonthDateColor(int);
+    method public deprecated void setFocusedMonthDateColor(int);
     method public void setMaxDate(long);
     method public void setMinDate(long);
     method public void setOnDateChangeListener(android.widget.CalendarView.OnDateChangeListener);
-    method public void setSelectedDateVerticalBar(int);
-    method public void setSelectedDateVerticalBar(android.graphics.drawable.Drawable);
-    method public void setSelectedWeekBackgroundColor(int);
+    method public deprecated void setSelectedDateVerticalBar(int);
+    method public deprecated void setSelectedDateVerticalBar(android.graphics.drawable.Drawable);
+    method public deprecated void setSelectedWeekBackgroundColor(int);
     method public void setShowWeekNumber(boolean);
-    method public void setShownWeekCount(int);
-    method public void setUnfocusedMonthDateColor(int);
+    method public deprecated void setShownWeekCount(int);
+    method public deprecated void setUnfocusedMonthDateColor(int);
     method public void setWeekDayTextAppearance(int);
-    method public void setWeekNumberColor(int);
-    method public void setWeekSeparatorLineColor(int);
+    method public deprecated void setWeekNumberColor(int);
+    method public deprecated void setWeekSeparatorLineColor(int);
   }
 
   public static abstract interface CalendarView.OnDateChangeListener {

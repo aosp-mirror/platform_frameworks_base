@@ -1036,7 +1036,7 @@
         <attr name="colorSwitchThumbNormal" format="color" />
 
         <!-- @hide The background used by framework controls. -->
-        <attr name="controlBackground" format="color" />
+        <attr name="controlBackground" format="reference" />
 
         <!-- The color applied to the edge effect on scrolling containers. -->
         <attr name="colorEdgeEffect" format="color" />
@@ -4443,46 +4443,42 @@
     </declare-styleable>
 
     <declare-styleable name="DatePicker">
-        <!-- The first year (inclusive), for example "1940".
-             {@deprecated Use minDate instead.} -->
+        <!-- The first year (inclusive), for example "1940". {@deprecated Use minDate instead.} -->
         <attr name="startYear" format="integer" />
-        <!-- The last year (inclusive), for example "2010".
-             {@deprecated Use maxDate instead.} -->
+        <!-- The last year (inclusive), for example "2010". {@deprecated Use maxDate instead.} -->
         <attr name="endYear" format="integer" />
-        <!-- Whether the spinners are shown. -->
-        <attr name="spinnersShown" format="boolean" />
-        <!-- Whether the calendar view is shown. -->
-        <attr name="calendarViewShown" format="boolean" />
+
+        <!-- The first day of week according to {@link java.util.Calendar}. -->
+        <attr name="firstDayOfWeek" />
         <!-- The minimal date shown by this calendar view in mm/dd/yyyy format. -->
         <attr name="minDate" format="string" />
         <!-- The maximal date shown by this calendar view in mm/dd/yyyy format. -->
         <attr name="maxDate" format="string" />
-        <!-- The first day of week according to {@link java.util.Calendar}. -->
-        <attr name="firstDayOfWeek" />
+
+        <!-- Whether the spinners are shown. Only valid for "spinner" mode. -->
+        <attr name="spinnersShown" format="boolean" />
+        <!-- Whether the calendar view is shown. Only valid for "spinner" mode. -->
+        <attr name="calendarViewShown" format="boolean" />
+
         <!-- @hide The layout of the date picker. -->
         <attr name="internalLayout" format="reference"  />
         <!-- @hide The layout of the legacy DatePicker. -->
         <attr name="legacyLayout" />
-        <!-- The background color for the date selector 's day of week. -->
-        <attr name="dayOfWeekBackground" format="color|reference" />
-        <!-- The text color for the date selector's day of week. -->
-        <attr name="dayOfWeekTextAppearance" format="reference" />
-        <!-- The month's text appearance in the date selector. -->
-        <attr name="headerMonthTextAppearance" format="reference" />
-        <!-- The day of month's text appearance in the date selector. -->
-        <attr name="headerDayOfMonthTextAppearance" format="reference" />
-        <!-- The year's text appearance in the date selector. -->
-        <attr name="headerYearTextAppearance" format="reference" />
-        <!-- The background for the date selector. -->
+
+        <!-- The text color for the selected date header text, ex. "2014" or
+             "Tue, Mar 18". This should be a color state list where the
+             activated state will be used when the year picker or day picker is
+             active.-->
+        <attr name="headerTextColor" format="color" />
+        <!-- The background for the selected date header. -->
         <attr name="headerBackground" />
+
         <!-- The list year's text appearance in the list. -->
         <attr name="yearListItemTextAppearance" format="reference" />
-        <!-- The list year's selected circle color in the list. -->
-        <attr name="yearListSelectorColor" format="color" />
+        <!-- @hide The list year's text appearance in the list when activated. -->
+        <attr name="yearListItemActivatedTextAppearance" format="reference" />
         <!-- The text color list of the calendar. -->
         <attr name="calendarTextColor" format="color" />
-        <!-- @hide The activated background color for the calendar. -->
-        <attr name="calendarDayBackgroundColor" format="color" />
         <!-- Defines the look of the widget. Prior to the L release, the only choice was
              spinner. As of L, with the Material theme selected, the default layout is calendar,
              but this attribute can be used to force spinner to be used instead. -->
@@ -4492,6 +4488,19 @@
             <!-- Date picker with calendar to select the date. -->
             <enum name="calendar" value="2" />
         </attr>
+
+        <!-- @deprecated The text appearance for the month (ex. May) in the selected date header. -->
+        <attr name="headerMonthTextAppearance" format="reference" />
+        <!-- @deprecated The text appearance for the day of month (ex. 28) in the selected date header. -->
+        <attr name="headerDayOfMonthTextAppearance" format="reference" />
+        <!-- The text appearance for the year (ex. 2014) in the selected date header. -->
+        <attr name="headerYearTextAppearance" format="reference" />
+        <!-- @deprecated The background color for the header's day of week. -->
+        <attr name="dayOfWeekBackground" format="color" />
+        <!-- @deprecated The text color for the header's day of week. -->
+        <attr name="dayOfWeekTextAppearance" format="reference" />
+        <!-- @deprecated The list year's selected circle color in the list. -->
+        <attr name="yearListSelectorColor" format="color" />
     </declare-styleable>
 
     <declare-styleable name="TwoLineListItem">
@@ -4709,35 +4718,42 @@
     <declare-styleable name="CalendarView">
         <!-- The first day of week according to {@link java.util.Calendar}. -->
         <attr name="firstDayOfWeek" format="integer" />
-        <!-- Whether do show week numbers. -->
-        <attr name="showWeekNumber" format="boolean" />
         <!-- The minimal date shown by this calendar view in mm/dd/yyyy format. -->
         <attr name="minDate" />
         <!-- The minimal date shown by this calendar view in mm/dd/yyyy format. -->
         <attr name="maxDate" />
-        <!-- The number of weeks to be shown. -->
-        <attr name="shownWeekCount" format="integer"/>
-        <!-- The background color for the selected week. -->
-        <attr name="selectedWeekBackgroundColor" format="color|reference" />
-        <!-- The color for the dates of the focused month. -->
-        <attr name="focusedMonthDateColor" format="color|reference" />
-        <!-- The color for the dates of an unfocused month. -->
-        <attr name="unfocusedMonthDateColor" format="color|reference" />
-        <!-- The color for the week numbers. -->
-        <attr name="weekNumberColor" format="color|reference" />
-        <!-- The color for the separator line between weeks. -->
-        <attr name="weekSeparatorLineColor" format="color|reference" />
-        <!-- Drawable for the vertical bar shown at the beginning and at the end of the selected date. -->
-        <attr name="selectedDateVerticalBar" format="reference" />
-        <!-- The text appearance for the week day abbreviation of the calendar header. -->
+        <!-- The text appearance for the month and year in the calendar header. -->
+        <attr name="monthTextAppearance" format="reference" />
+        <!-- The text appearance for the week day abbreviation in the calendar header. -->
         <attr name="weekDayTextAppearance" format="reference" />
-        <!-- The text appearance for the calendar dates. -->
+        <!-- The text appearance for the day numbers in the calendar grid. -->
         <attr name="dateTextAppearance" format="reference" />
-        <!-- The number of weeks to be shown. -->
+        <!-- @hide The background color used for the day selection indicator. -->
+        <attr name="daySelectorColor" format="color" />
+        <!-- @hide The background color used for the day highlight indicator. -->
+        <attr name="dayHighlightColor" format="color" />
+        <!-- @hide Which style of calendar delegate to use. -->
         <attr name="calendarViewMode">
             <enum name="holo" value="0" />
             <enum name="material" value="1" />
         </attr>
+
+        <!-- @deprecated Whether do show week numbers. -->
+        <attr name="showWeekNumber" format="boolean" />
+        <!-- @deprecated The number of weeks to be shown. -->
+        <attr name="shownWeekCount" format="integer"/>
+        <!-- @deprecated The background color for the selected week. -->
+        <attr name="selectedWeekBackgroundColor" format="color|reference" />
+        <!-- @deprecated The color for the dates of the focused month. -->
+        <attr name="focusedMonthDateColor" format="color|reference" />
+        <!-- @deprecated The color for the dates of an unfocused month. -->
+        <attr name="unfocusedMonthDateColor" format="color|reference" />
+        <!-- @deprecated The color for the week numbers. -->
+        <attr name="weekNumberColor" format="color|reference" />
+        <!-- @deprecated The color for the separator line between weeks. -->
+        <attr name="weekSeparatorLineColor" format="color|reference" />
+        <!-- @deprecated Drawable for the vertical bar shown at the beginning and at the end of the selected date. -->
+        <attr name="selectedDateVerticalBar" format="reference" />
     </declare-styleable>
 
     <declare-styleable name="NumberPicker">
