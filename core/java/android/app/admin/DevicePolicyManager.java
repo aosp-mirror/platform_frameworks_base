@@ -577,11 +577,10 @@ public class DevicePolicyManager {
     /**
      * @hide
      * Activity action: ask the user to add a new device administrator as the profile owner
-     * for this user. Only system privileged apps that have MANAGE_USERS and MANAGE_DEVICE_ADMINS
-     * permission can call this API.
+     * for this user. Only system apps can launch this intent.
      *
-     * <p>The ComponentName of the profile owner admin is pass in {@link #EXTRA_DEVICE_ADMIN} extra
-     * field. This will invoke a UI to bring the user through adding the profile owner admin
+     * <p>The ComponentName of the profile owner admin is passed in the {@link #EXTRA_DEVICE_ADMIN}
+     * extra field. This will invoke a UI to bring the user through adding the profile owner admin
      * to remotely control restrictions on the user.
      *
      * <p>The intent must be invoked via {@link Activity#startActivityForResult()} to receive the
@@ -593,8 +592,8 @@ public class DevicePolicyManager {
      * field to provide the user with additional explanation (in addition
      * to your component's description) about what is being added.
      *
-     * <p>If there is already a profile owner active or the caller doesn't have the required
-     * permissions, the operation will return a failure result.
+     * <p>If there is already a profile owner active or the caller is not a system app, the
+     * operation will return a failure result.
      */
     @SystemApi
     public static final String ACTION_SET_PROFILE_OWNER
