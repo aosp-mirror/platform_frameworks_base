@@ -4,10 +4,15 @@ import com.android.annotations.NonNull;
 import com.android.layoutlib.bridge.impl.DelegateManager;
 import com.android.tools.layoutlib.annotations.LayoutlibDelegate;
 
+import android.graphics.BidiRenderer;
+import android.graphics.Paint;
+import android.graphics.Paint_Delegate;
+import android.graphics.RectF;
 import android.text.StaticLayout.LineBreaks;
 import android.text.Primitive.PrimitiveType;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import com.ibm.icu.text.BreakIterator;
@@ -33,7 +38,7 @@ public class StaticLayout_Delegate {
         new DelegateManager<Builder>(Builder.class);
 
     @LayoutlibDelegate
-    /*package*/ static int nComputeLineBreaks(long nativeBuilder, char[] inputText, float[] widths,
+    /*package*/ static int nComputeLineBreaks(long nativeBuilder,
             int length, float firstWidth, int firstWidthLineCount, float restWidth,
             int[] variableTabStops, int defaultTabStop, boolean optimize, LineBreaks recycle,
             int[] recycleBreaks, float[] recycleWidths, boolean[] recycleFlags, int recycleLength) {
@@ -41,7 +46,7 @@ public class StaticLayout_Delegate {
         Builder builder = sBuilderManager.getDelegate(nativeBuilder);
         // compute all possible breakpoints.
         BreakIterator it = BreakIterator.getLineInstance(new ULocale(builder.mLocale));
-        it.setText(new Segment(inputText, 0, length));
+        it.setText(new Segment(builder.mText, 0, length));
         // average word length in english is 5. So, initialize the possible breaks with a guess.
         List<Integer> breaks = new ArrayList<Integer>((int) Math.ceil(length / 5d));
         int loc;
@@ -52,7 +57,7 @@ public class StaticLayout_Delegate {
 
         LineWidth lineWidth = new LineWidth(firstWidth, firstWidthLineCount, restWidth);
         TabStops tabStopCalculator = new TabStops(variableTabStops, defaultTabStop);
-        List<Primitive> primitives = computePrimitives(inputText, widths, length, breaks);
+        List<Primitive> primitives = computePrimitives(builder.mText, builder.mWidths, length, breaks);
         LineBreaker lineBreaker;
         if (optimize) {
             lineBreaker = new OptimizingLineBreaker(primitives, lineWidth, tabStopCalculator);
@@ -119,16 +124,62 @@ public class StaticLayout_Delegate {
     }
 
     @LayoutlibDelegate
-    /*package*/ static void nBuilderSetLocale(long nativeBuilder, String locale) {
+    /*package*/ static void nSetLocale(long nativeBuilder, String locale) {
         Builder builder = sBuilderManager.getDelegate(nativeBuilder);
         builder.mLocale = locale;
     }
 
+    @LayoutlibDelegate
+    /*package*/ static void nSetText(long nativeBuilder, char[] text, int length) {
+        Builder builder = sBuilderManager.getDelegate(nativeBuilder);
+        builder.mText = text;
+        builder.mWidths = new float[length];
+    }
+
+
+    @LayoutlibDelegate
+    /*package*/ static float nAddStyleRun(long nativeBuilder, long nativePaint, long nativeTypeface,
+            int start, int end, boolean isRtl) {
+        Builder builder = sBuilderManager.getDelegate(nativeBuilder);
+
+        int bidiFlags = isRtl ? Paint.BIDI_FORCE_RTL : Paint.BIDI_FORCE_LTR;
+        return measureText(nativePaint, builder.mText, start, end - start, builder.mWidths, bidiFlags);
+    }
+
+
+    @LayoutlibDelegate
+    /*package*/ static void nAddMeasuredRun(long nativeBuilder, int start, int end, float[] widths) {
+        Builder builder = sBuilderManager.getDelegate(nativeBuilder);
+        System.arraycopy(widths, start, builder.mWidths, start, end - start);
+    }
+
+    @LayoutlibDelegate
+    /*package*/ static void nAddReplacementRun(long nativeBuilder, int start, int end, float width) {
+        Builder builder = sBuilderManager.getDelegate(nativeBuilder);
+        builder.mWidths[start] = width;
+        Arrays.fill(builder.mWidths, start + 1, end, 0.0f);
+    }
+
+    @LayoutlibDelegate
+    /*package*/ static void nGetWidths(long nativeBuilder, float[] floatsArray) {
+        Builder builder = sBuilderManager.getDelegate(nativeBuilder);
+        System.arraycopy(builder.mWidths, 0, floatsArray, 0, builder.mWidths.length);
+    }
+
+    private static float measureText(long nativePaint, char []text, int index, int count,
+            float[] widths, int bidiFlags) {
+        Paint_Delegate paint = Paint_Delegate.getDelegate(nativePaint);
+        RectF bounds = new BidiRenderer(null, paint, text)
+            .renderText(index, index + count, bidiFlags, widths, 0, false);
+        return bounds.right - bounds.left;
+    }
+
     /**
-     * Java representation of the native Builder class. It currently only stores the locale
-     * set by nBuilderSetLocale.
+     * Java representation of the native Builder class.
      */
     static class Builder {
         String mLocale;
+        char[] mText;
+        float[] mWidths;
     }
 }
