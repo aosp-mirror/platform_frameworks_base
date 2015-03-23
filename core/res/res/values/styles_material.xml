@@ -662,7 +662,7 @@ please see styles_device_defaults.xml.
         <item name="internalLayout">@layout/time_picker_material</item>
         <item name="headerTimeTextAppearance">@style/TextAppearance.Material.TimePicker.TimeLabel</item>
         <item name="headerAmPmTextAppearance">@style/TextAppearance.Material.TimePicker.AmPmLabel</item>
-        <item name="headerBackground">?attr/colorAccent</item>
+        <item name="headerBackground">#ff555555</item>
         <item name="numbersTextColor">?attr/textColorPrimaryActivated</item>
         <item name="numbersInnerTextColor">?attr/textColorSecondaryActivated</item>
         <item name="numbersSelectorColor">?attr/colorControlActivated</item>
@@ -678,7 +678,7 @@ please see styles_device_defaults.xml.
         <item name="internalLayout">@layout/date_picker_material</item>
         <item name="yearListItemTextAppearance">@style/TextAppearance.Material.DatePicker.List.YearLabel</item>
         <item name="yearListItemActivatedTextAppearance">@style/TextAppearance.Material.DatePicker.List.YearLabel.Activated</item>
-        <item name="headerBackground">#</item>
+        <item name="headerBackground">#ff555555</item>
     </style>
 
     <style name="Widget.Material.ActivityChooserView" parent="Widget.ActivityChooserView">
