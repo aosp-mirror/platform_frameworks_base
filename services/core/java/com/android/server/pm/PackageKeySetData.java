@@ -27,11 +27,7 @@ public class PackageKeySetData {
     /* KeySet containing all signing keys - superset of the others */
     private long mProperSigningKeySet;
 
-    private long[] mSigningKeySets;
-
     private long[] mUpgradeKeySets;
-
-    private long[] mDefinedKeySets;
 
     private final ArrayMap<String, Long> mKeySetAliases = new ArrayMap<String, Long>();
 
@@ -41,23 +37,12 @@ public class PackageKeySetData {
 
     PackageKeySetData(PackageKeySetData original) {
         mProperSigningKeySet = original.mProperSigningKeySet;
-        mSigningKeySets = ArrayUtils.cloneOrNull(original.mSigningKeySets);
         mUpgradeKeySets = ArrayUtils.cloneOrNull(original.mUpgradeKeySets);
-        mDefinedKeySets = ArrayUtils.cloneOrNull(original.mDefinedKeySets);
         mKeySetAliases.putAll(original.mKeySetAliases);
     }
 
     protected void setProperSigningKeySet(long ks) {
-        if (ks == mProperSigningKeySet) {
-
-            /* nothing to change */
-            return;
-        }
-
-        /* otherwise, our current signing keysets are likely invalid */
-        removeAllSigningKeySets();
         mProperSigningKeySet = ks;
-        addSigningKeySet(ks);
         return;
     }
 
@@ -65,15 +50,10 @@ public class PackageKeySetData {
         return mProperSigningKeySet;
     }
 
-    protected void addSigningKeySet(long ks) {
-        mSigningKeySets = ArrayUtils.appendLong(mSigningKeySets, ks);
-    }
-
-    protected void removeSigningKeySet(long ks) {
-        mSigningKeySets = ArrayUtils.removeLong(mSigningKeySets, ks);
-    }
-
     protected void addUpgradeKeySet(String alias) {
+        if (alias == null) {
+            return;
+        }
 
         /* must have previously been defined */
         Long ks = mKeySetAliases.get(alias);
@@ -89,19 +69,9 @@ public class PackageKeySetData {
      * Used only when restoring keyset data from persistent storage.  Must
      * correspond to a defined-keyset.
      */
+
     protected void addUpgradeKeySetById(long ks) {
-        mSigningKeySets = ArrayUtils.appendLong(mSigningKeySets, ks);
-    }
-
-    protected void addDefinedKeySet(long ks, String alias) {
-        mDefinedKeySets = ArrayUtils.appendLong(mDefinedKeySets, ks);
-        mKeySetAliases.put(alias, ks);
-    }
-
-    protected void removeAllSigningKeySets() {
-        mProperSigningKeySet = KEYSET_UNASSIGNED;
-        mSigningKeySets = null;
-        return;
+        mUpgradeKeySets = ArrayUtils.appendLong(mUpgradeKeySets, ks);
     }
 
     protected void removeAllUpgradeKeySets() {
@@ -109,36 +79,44 @@ public class PackageKeySetData {
         return;
     }
 
-    protected void removeAllDefinedKeySets() {
-        mDefinedKeySets = null;
-        mKeySetAliases.clear();
-        return;
-    }
-
-    protected boolean packageIsSignedBy(long ks) {
-        return ArrayUtils.contains(mSigningKeySets, ks);
-    }
-
-    protected long[] getSigningKeySets() {
-        return mSigningKeySets;
-    }
-
     protected long[] getUpgradeKeySets() {
         return mUpgradeKeySets;
-    }
-
-    protected long[] getDefinedKeySets() {
-        return mDefinedKeySets;
     }
 
     protected ArrayMap<String, Long> getAliases() {
         return mKeySetAliases;
     }
 
+    /*
+     * Replace defined keysets with new ones.
+     */
+    protected void setAliases(ArrayMap<String, Long> newAliases) {
+
+        /* remove old aliases */
+        removeAllDefinedKeySets();
+
+        /* add new ones */
+        final int newAliasSize = newAliases.size();
+        for (int i = 0; i < newAliasSize; i++) {
+            mKeySetAliases.put(newAliases.keyAt(i), newAliases.valueAt(i));;
+        }
+    }
+
+    protected void addDefinedKeySet(long ks, String alias) {
+        mKeySetAliases.put(alias, ks);
+    }
+
+    protected void removeAllDefinedKeySets() {
+        final int aliasSize = mKeySetAliases.size();
+        for (int i = 0; i < aliasSize; i++) {
+            mKeySetAliases.removeAt(i);
+        }
+    }
+
     protected boolean isUsingDefinedKeySets() {
 
-        /* should never be the case that mDefinedKeySets.length == 0 */
-        return (mDefinedKeySets != null && mDefinedKeySets.length > 0);
+        /* should never be the case that mUpgradeKeySets.length == 0 */
+        return (mKeySetAliases.size() > 0);
     }
 
     protected boolean isUsingUpgradeKeySets() {
