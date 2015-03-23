@@ -2204,7 +2204,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         mTrackingAssociations = "1".equals(SystemProperties.get("debug.track-associations"));
 
         mConfiguration.setToDefaults();
-        mConfiguration.locale = Locale.getDefault();
+        mConfiguration.setLocale(Locale.getDefault());
 
         mConfigurationSeq = mConfiguration.seq = 1;
         mProcessCpuTracker.init();
