@@ -31,10 +31,15 @@ public abstract class StateController {
     protected static final boolean DEBUG = false;
     protected Context mContext;
     protected StateChangedListener mStateChangedListener;
+    protected boolean mDeviceIdleMode;
 
     public StateController(StateChangedListener stateChangedListener, Context context) {
         mStateChangedListener = stateChangedListener;
         mContext = context;
+    }
+
+    public void deviceIdleModeChanged(boolean enabled) {
+        mDeviceIdleMode = enabled;
     }
 
     /**
@@ -50,5 +55,4 @@ public abstract class StateController {
     public abstract void maybeStopTrackingJob(JobStatus jobStatus);
 
     public abstract void dumpControllerState(PrintWriter pw);
-
 }

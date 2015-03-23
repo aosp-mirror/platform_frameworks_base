@@ -856,6 +856,23 @@ public final class PowerManager {
     }
 
     /**
+     * Returns true if the device is currently in idle mode.  This happens when a device
+     * has been sitting unused and unmoving for a sufficiently long period of time, so that
+     * it decides to go into a lower power-use state.  This may involve things like turning
+     * off network access to apps.  You can monitor for changes to this state with
+     * {@link #ACTION_DEVICE_IDLE_MODE_CHANGED}.
+     *
+     * @return Returns true if currently in low power mode, else false.
+     */
+    public boolean isDeviceIdleMode() {
+        try {
+            return mService.isDeviceIdleMode();
+        } catch (RemoteException e) {
+            return false;
+        }
+    }
+
+    /**
      * Turn off the device.
      *
      * @param confirm If true, shows a shutdown confirmation dialog.
@@ -877,6 +894,14 @@ public final class PowerManager {
     @SdkConstant(SdkConstant.SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_POWER_SAVE_MODE_CHANGED
             = "android.os.action.POWER_SAVE_MODE_CHANGED";
+
+    /**
+     * Intent that is broadcast when the state of {@link #isDeviceIdleMode()} changes.
+     * This broadcast is only sent to registered receivers.
+     */
+    @SdkConstant(SdkConstant.SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_DEVICE_IDLE_MODE_CHANGED
+            = "android.os.action.DEVICE_IDLE_MODE_CHANGED";
 
     /**
      * Intent that is broadcast when the state of {@link #isPowerSaveMode()} is about to change.

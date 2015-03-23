@@ -22884,6 +22884,7 @@ package android.os {
   }
 
   public final class PowerManager {
+    method public boolean isDeviceIdleMode();
     method public boolean isInteractive();
     method public boolean isPowerSaveMode();
     method public deprecated boolean isScreenOn();
@@ -22891,6 +22892,7 @@ package android.os {
     method public android.os.PowerManager.WakeLock newWakeLock(int, java.lang.String);
     method public void reboot(java.lang.String);
     field public static final int ACQUIRE_CAUSES_WAKEUP = 268435456; // 0x10000000
+    field public static final java.lang.String ACTION_DEVICE_IDLE_MODE_CHANGED = "android.os.action.DEVICE_IDLE_MODE_CHANGED";
     field public static final java.lang.String ACTION_POWER_SAVE_MODE_CHANGED = "android.os.action.POWER_SAVE_MODE_CHANGED";
     field public static final deprecated int FULL_WAKE_LOCK = 26; // 0x1a
     field public static final int ON_AFTER_RELEASE = 536870912; // 0x20000000
