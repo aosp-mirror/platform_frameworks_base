@@ -257,8 +257,7 @@
     <string name="quick_settings_wifi_no_network" msgid="2221993077220856376">"ජාලයක් නැත"</string>
     <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"Wi-Fi අක්‍රියයි"</string>
     <string name="quick_settings_wifi_detail_empty_text" msgid="2831702993995222755">"තිබෙන ජාල සුරැකුවේ නැත"</string>
-    <!-- no translation found for quick_settings_cast_title (7709016546426454729) -->
-    <skip />
+    <string name="quick_settings_cast_title" msgid="7709016546426454729">"Cast"</string>
     <string name="quick_settings_casting" msgid="6601710681033353316">"කාස්ට් කිරීම"</string>
     <string name="quick_settings_cast_device_default_name" msgid="5367253104742382945">"නම් නොකළ උපාංගය"</string>
     <string name="quick_settings_cast_device_default_description" msgid="2484573682378634413">"කාස්ට් කිරීමට සුදානම්"</string>
