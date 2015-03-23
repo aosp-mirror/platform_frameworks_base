@@ -48,4 +48,14 @@
     <dimen name="timepicker_text_inset_inner">46dp</dimen>
     <dimen name="timepicker_text_size_normal">14sp</dimen>
     <dimen name="timepicker_text_size_inner">12sp</dimen>
+
+    <!-- Used by Material-style SimpleMonthView -->
+    <dimen name="date_picker_month_height">40dp</dimen>
+    <dimen name="date_picker_day_of_week_height">14dp</dimen>
+    <dimen name="date_picker_day_height">32dp</dimen>
+    <dimen name="date_picker_day_width">46dp</dimen>
+    <dimen name="date_picker_day_selector_radius">16dp</dimen>
+    <dimen name="day_picker_padding_horizontal">18dp</dimen>
+    <dimen name="day_picker_padding_top">0dp</dimen>
+    <dimen name="day_picker_button_margin_top">-8dp</dimen>
 </resources>

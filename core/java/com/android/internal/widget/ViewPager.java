@@ -137,7 +137,7 @@ public class ViewPager extends ViewGroup {
     private int mRestoredCurItem = -1;
     private Parcelable mRestoredAdapterState = null;
     private ClassLoader mRestoredClassLoader = null;
-    private Scroller mScroller;
+    private final Scroller mScroller;
     private PagerObserver mObserver;
 
     private int mPageMargin;
@@ -162,9 +162,9 @@ public class ViewPager extends ViewGroup {
 
     private boolean mIsBeingDragged;
     private boolean mIsUnableToDrag;
-    private int mDefaultGutterSize;
+    private final int mDefaultGutterSize;
     private int mGutterSize;
-    private int mTouchSlop;
+    private final int mTouchSlop;
     /**
      * Position of the last motion event.
      */
@@ -187,10 +187,10 @@ public class ViewPager extends ViewGroup {
      * Determines speed during touch scrolling
      */
     private VelocityTracker mVelocityTracker;
-    private int mMinimumVelocity;
-    private int mMaximumVelocity;
-    private int mFlingDistance;
-    private int mCloseEnough;
+    private final int mMinimumVelocity;
+    private final int mMaximumVelocity;
+    private final int mFlingDistance;
+    private final int mCloseEnough;
 
     // If the pager is at least this close to its final position, complete the scroll
     // on touch down and let the user interact with the content inside instead of
@@ -200,8 +200,8 @@ public class ViewPager extends ViewGroup {
     private boolean mFakeDragging;
     private long mFakeDragBeginTime;
 
-    private EdgeEffect mLeftEdge;
-    private EdgeEffect mRightEdge;
+    private final EdgeEffect mLeftEdge;
+    private final EdgeEffect mRightEdge;
 
     private boolean mFirstLayout = true;
     private boolean mNeedCalculatePageOffsets = false;
@@ -339,20 +339,24 @@ public class ViewPager extends ViewGroup {
     interface Decor {}
 
     public ViewPager(Context context) {
-        super(context);
-        initViewPager();
+        this(context, null);
     }
 
     public ViewPager(Context context, AttributeSet attrs) {
-        super(context, attrs);
-        initViewPager();
+        this(context, attrs, 0);
     }
 
-    void initViewPager() {
+    public ViewPager(Context context, AttributeSet attrs, int defStyleAttr) {
+        this(context, attrs, defStyleAttr, 0);
+    }
+
+    public ViewPager(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+        super(context, attrs, defStyleAttr, defStyleRes);
+
         setWillNotDraw(false);
         setDescendantFocusability(FOCUS_AFTER_DESCENDANTS);
         setFocusable(true);
-        final Context context = getContext();
+
         mScroller = new Scroller(context, sInterpolator);
         final ViewConfiguration configuration = ViewConfiguration.get(context);
         final float density = context.getResources().getDisplayMetrics().density;

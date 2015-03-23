@@ -27,7 +27,6 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
-import android.text.TextUtils;
 import android.text.format.DateUtils;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
@@ -267,12 +266,12 @@ class CalendarViewLegacyDelegate extends CalendarView.AbstractCalendarViewDelega
         mFirstDayOfWeek = a.getInt(R.styleable.CalendarView_firstDayOfWeek,
                 LocaleData.get(Locale.getDefault()).firstDayOfWeek);
         final String minDate = a.getString(R.styleable.CalendarView_minDate);
-        if (TextUtils.isEmpty(minDate) || !parseDate(minDate, mMinDate)) {
-            parseDate(DEFAULT_MIN_DATE, mMinDate);
+        if (!CalendarView.parseDate(minDate, mMinDate)) {
+            CalendarView.parseDate(DEFAULT_MIN_DATE, mMinDate);
         }
         final String maxDate = a.getString(R.styleable.CalendarView_maxDate);
-        if (TextUtils.isEmpty(maxDate) || !parseDate(maxDate, mMaxDate)) {
-            parseDate(DEFAULT_MAX_DATE, mMaxDate);
+        if (!CalendarView.parseDate(maxDate, mMaxDate)) {
+            CalendarView.parseDate(DEFAULT_MAX_DATE, mMaxDate);
         }
         if (mMaxDate.before(mMinDate)) {
             throw new IllegalArgumentException("Max date cannot be before min date.");

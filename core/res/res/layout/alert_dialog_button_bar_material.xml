@@ -18,16 +18,16 @@
 <com.android.internal.widget.ButtonBarLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/buttonPanel"
-    style="?attr/buttonBarStyle"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layoutDirection="locale"
     android:orientation="horizontal"
     android:paddingStart="12dp"
     android:paddingEnd="12dp"
-    android:paddingTop="8dp"
-    android:paddingBottom="8dp"
-    android:gravity="bottom">
+    android:paddingTop="4dp"
+    android:paddingBottom="4dp"
+    android:gravity="bottom"
+    style="?attr/buttonBarStyle">
 
     <Button
         android:id="@+id/button3"

@@ -372,10 +372,12 @@ please see styles_device_defaults.xml.
     <style name="TextAppearance.Material.WindowTitle" parent="TextAppearance.Material.Title" />
     <style name="TextAppearance.Material.DialogWindowTitle" parent="TextAppearance.Material.Title" />
 
-    <style name="TextAppearance.Material.CalendarViewWeekDayView" parent="TextAppearance.Material.Small">
-        <item name="textStyle">bold</item>
-        <item name="textColor">#505050</item>
+    <style name="TextAppearance.Material.Widget.Calendar.Day" parent="TextAppearance.Material.Caption">
+        <item name="textColor">?attr/textColorPrimaryActivated</item>
     </style>
+
+    <style name="TextAppearance.Material.Widget.Calendar.DayOfWeek" parent="TextAppearance.Material.Caption" />
+    <style name="TextAppearance.Material.Widget.Calendar.Month" parent="TextAppearance.Material.Body2" />
 
     <style name="TextAppearance.Material.TimePicker.TimeLabel" parent="TextAppearance.Material">
         <item name="textSize">@dimen/timepicker_time_label_size</item>
@@ -406,14 +408,27 @@ please see styles_device_defaults.xml.
     </style>
 
     <style name="TextAppearance.Material.DatePicker.YearLabel" parent="TextAppearance.Material">
-        <item name="includeFontPadding">false</item>
         <item name="textColor">@color/date_picker_header_text_material</item>
-        <item name="textSize">@dimen/datepicker_selected_date_year_size</item>
+        <item name="textSize">@dimen/date_picker_year_label_size</item>
+        <item name="fontFamily">sans-serif-medium</item>
+    </style>
+
+    <style name="TextAppearance.Material.DatePicker.DateLabel" parent="TextAppearance.Material">
+        <item name="textColor">@color/date_picker_header_text_material</item>
+        <item name="textSize">@dimen/date_picker_date_label_size</item>
+        <item name="fontFamily">sans-serif-medium</item>
     </style>
 
     <style name="TextAppearance.Material.DatePicker.List.YearLabel" parent="TextAppearance.Material">
-        <item name="textColor">?attr/textColorSecondaryActivated</item>
-        <item name="textSize">@dimen/datepicker_year_label_text_size</item>
+        <item name="textColor">?attr/textColorPrimary</item>
+        <item name="textSize">@dimen/datepicker_list_year_label_size</item>
+        <item name="fontFamily">sans-serif</item>
+    </style>
+
+    <style name="TextAppearance.Material.DatePicker.List.YearLabel.Activated">
+        <item name="textColor">?attr/colorControlActivated</item>
+        <item name="textSize">@dimen/datepicker_list_year_activated_label_size</item>
+        <item name="fontFamily">sans-serif-medium</item>
     </style>
 
     <style name="TextAppearance.Material.Notification">
@@ -487,7 +502,8 @@ please see styles_device_defaults.xml.
     <!-- Alert dialog button bar button -->
     <style name="Widget.Material.Button.ButtonBar.AlertDialog" parent="Widget.Material.Button.Borderless.Colored">
         <item name="minWidth">64dp</item>
-        <item name="maxLines">2</item>
+        <item name="singleLine">true</item>
+        <item name="ellipsize">none</item>
         <item name="minHeight">@dimen/alert_dialog_button_bar_height</item>
     </style>
 
@@ -615,14 +631,13 @@ please see styles_device_defaults.xml.
     </style>
 
     <style name="Widget.Material.CalendarView" parent="Widget.CalendarView">
-        <item name="selectedWeekBackgroundColor">#330099FF</item>
-        <item name="focusedMonthDateColor">#FFFFFFFF</item>
-        <item name="unfocusedMonthDateColor">#66FFFFFF</item>
-        <item name="weekNumberColor">#33FFFFFF</item>
-        <item name="weekSeparatorLineColor">#19FFFFFF</item>
-        <item name="selectedDateVerticalBar">@drawable/day_picker_week_view_dayline_holo</item>
-        <item name="weekDayTextAppearance">@style/TextAppearance.Material.CalendarViewWeekDayView</item>
         <item name="calendarViewMode">material</item>
+
+        <item name="monthTextAppearance">@style/TextAppearance.Material.Widget.Calendar.Month</item>
+        <item name="weekDayTextAppearance">@style/TextAppearance.Material.Widget.Calendar.DayOfWeek</item>
+        <item name="dateTextAppearance">@style/TextAppearance.Material.Widget.Calendar.Day</item>
+        <item name="daySelectorColor">?attr/colorControlActivated</item>
+        <item name="dayHighlightColor">?attr/colorControlHighlight</item>
     </style>
 
     <style name="Widget.Material.ImageButton" parent="Widget.ImageButton">
@@ -650,7 +665,7 @@ please see styles_device_defaults.xml.
         <item name="headerBackground">@drawable/time_picker_header_material</item>
         <item name="numbersTextColor">?attr/textColorPrimaryActivated</item>
         <item name="numbersInnerTextColor">?attr/textColorSecondaryActivated</item>
-        <item name="numbersBackgroundColor">#10ffffff</item>
+        <item name="numbersBackgroundColor">#08ffffff</item>
         <item name="numbersSelectorColor">?attr/colorControlActivated</item>
         <item name="amPmTextColor">?attr/textColorSecondary</item>
     </style>
@@ -660,17 +675,10 @@ please see styles_device_defaults.xml.
         <item name="legacyLayout">@layout/date_picker_legacy_holo</item>
         <item name="calendarViewShown">true</item>
         <!-- Attributes for new-style DatePicker. -->
-        <item name="internalLayout">@layout/date_picker_holo</item>
-        <item name="dayOfWeekBackground">#10000000</item>
-        <item name="dayOfWeekTextAppearance">@style/TextAppearance.Material.DatePicker.DayOfWeekLabel</item>
-        <item name="headerMonthTextAppearance">@style/TextAppearance.Material.DatePicker.MonthLabel</item>
-        <item name="headerDayOfMonthTextAppearance">@style/TextAppearance.Material.DatePicker.DayOfMonthLabel</item>
-        <item name="headerYearTextAppearance">@style/TextAppearance.Material.DatePicker.YearLabel</item>
+        <item name="internalLayout">@layout/date_picker_material</item>
         <item name="headerBackground">?attr/colorAccent</item>
         <item name="yearListItemTextAppearance">@style/TextAppearance.Material.DatePicker.List.YearLabel</item>
-        <item name="yearListSelectorColor">?attr/colorControlActivated</item>
-        <item name="calendarTextColor">?attr/textColorSecondaryActivated</item>
-        <item name="calendarDayBackgroundColor">?attr/colorControlActivated</item>
+        <item name="yearListItemActivatedTextAppearance">@style/TextAppearance.Material.DatePicker.List.YearLabel.Activated</item>
     </style>
 
     <style name="Widget.Material.ActivityChooserView" parent="Widget.ActivityChooserView">
@@ -1021,17 +1029,7 @@ please see styles_device_defaults.xml.
     <style name="Widget.Material.Light.GestureOverlayView" parent="Widget.Material.GestureOverlayView"/>
     <style name="Widget.Material.Light.GridView" parent="Widget.Material.GridView"/>
     <style name="Widget.Material.Light.ImageButton" parent="Widget.Material.ImageButton"/>
-
-    <style name="Widget.Material.Light.CalendarView" parent="Widget.CalendarView">
-        <item name="selectedWeekBackgroundColor">#330066ff</item>
-        <item name="focusedMonthDateColor">#FF000000</item>
-        <item name="unfocusedMonthDateColor">#7F08002B</item>
-        <item name="weekNumberColor">#7F080021</item>
-        <item name="weekSeparatorLineColor">#7F08002A</item>
-        <item name="weekDayTextAppearance">@style/TextAppearance.Material.CalendarViewWeekDayView</item>
-        <item name="calendarViewMode">material</item>
-    </style>
-
+    <style name="Widget.Material.Light.CalendarView" parent="Widget.Material.CalendarView" />
     <style name="Widget.Material.Light.NumberPicker" parent="Widget.Material.NumberPicker"/>
 
     <style name="Widget.Material.Light.TimePicker" parent="Widget.Material.TimePicker">

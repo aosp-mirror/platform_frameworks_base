@@ -18,6 +18,7 @@ package android.widget;
 
 import android.annotation.ColorInt;
 import android.annotation.DrawableRes;
+import android.annotation.StyleRes;
 import android.annotation.Widget;
 import android.content.Context;
 import android.content.res.Configuration;
@@ -31,6 +32,7 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.Locale;
 import java.util.TimeZone;
 
@@ -118,7 +120,9 @@ public class CalendarView extends FrameLayout {
      * @param count The shown week count.
      *
      * @attr ref android.R.styleable#CalendarView_shownWeekCount
+     * @deprecated No longer used by Material-style CalendarView.
      */
+    @Deprecated
     public void setShownWeekCount(int count) {
         mDelegate.setShownWeekCount(count);
     }
@@ -129,7 +133,9 @@ public class CalendarView extends FrameLayout {
      * @return The shown week count.
      *
      * @attr ref android.R.styleable#CalendarView_shownWeekCount
+     * @deprecated No longer used by Material-style CalendarView.
      */
+    @Deprecated
     public int getShownWeekCount() {
         return mDelegate.getShownWeekCount();
     }
@@ -140,7 +146,9 @@ public class CalendarView extends FrameLayout {
      * @param color The week background color.
      *
      * @attr ref android.R.styleable#CalendarView_selectedWeekBackgroundColor
+     * @deprecated No longer used by Material-style CalendarView.
      */
+    @Deprecated
     public void setSelectedWeekBackgroundColor(@ColorInt int color) {
         mDelegate.setSelectedWeekBackgroundColor(color);
     }
@@ -151,8 +159,10 @@ public class CalendarView extends FrameLayout {
      * @return The week background color.
      *
      * @attr ref android.R.styleable#CalendarView_selectedWeekBackgroundColor
+     * @deprecated No longer used by Material-style CalendarView.
      */
     @ColorInt
+    @Deprecated
     public int getSelectedWeekBackgroundColor() {
         return mDelegate.getSelectedWeekBackgroundColor();
     }
@@ -163,7 +173,9 @@ public class CalendarView extends FrameLayout {
      * @param color The focused month date color.
      *
      * @attr ref android.R.styleable#CalendarView_focusedMonthDateColor
+     * @deprecated No longer used by Material-style CalendarView.
      */
+    @Deprecated
     public void setFocusedMonthDateColor(@ColorInt int color) {
         mDelegate.setFocusedMonthDateColor(color);
     }
@@ -174,8 +186,10 @@ public class CalendarView extends FrameLayout {
      * @return The focused month date color.
      *
      * @attr ref android.R.styleable#CalendarView_focusedMonthDateColor
+     * @deprecated No longer used by Material-style CalendarView.
      */
     @ColorInt
+    @Deprecated
     public int getFocusedMonthDateColor() {
         return mDelegate.getFocusedMonthDateColor();
     }
@@ -186,7 +200,9 @@ public class CalendarView extends FrameLayout {
      * @param color A not focused month date color.
      *
      * @attr ref android.R.styleable#CalendarView_unfocusedMonthDateColor
+     * @deprecated No longer used by Material-style CalendarView.
      */
+    @Deprecated
     public void setUnfocusedMonthDateColor(@ColorInt int color) {
         mDelegate.setUnfocusedMonthDateColor(color);
     }
@@ -197,8 +213,10 @@ public class CalendarView extends FrameLayout {
      * @return A not focused month date color.
      *
      * @attr ref android.R.styleable#CalendarView_unfocusedMonthDateColor
+     * @deprecated No longer used by Material-style CalendarView.
      */
     @ColorInt
+    @Deprecated
     public int getUnfocusedMonthDateColor() {
         return mDelegate.getUnfocusedMonthDateColor();
     }
@@ -209,7 +227,9 @@ public class CalendarView extends FrameLayout {
      * @param color The week number color.
      *
      * @attr ref android.R.styleable#CalendarView_weekNumberColor
+     * @deprecated No longer used by Material-style CalendarView.
      */
+    @Deprecated
     public void setWeekNumberColor(@ColorInt int color) {
         mDelegate.setWeekNumberColor(color);
     }
@@ -220,8 +240,10 @@ public class CalendarView extends FrameLayout {
      * @return The week number color.
      *
      * @attr ref android.R.styleable#CalendarView_weekNumberColor
+     * @deprecated No longer used by Material-style CalendarView.
      */
     @ColorInt
+    @Deprecated
     public int getWeekNumberColor() {
         return mDelegate.getWeekNumberColor();
     }
@@ -232,7 +254,9 @@ public class CalendarView extends FrameLayout {
      * @param color The week separator color.
      *
      * @attr ref android.R.styleable#CalendarView_weekSeparatorLineColor
+     * @deprecated No longer used by Material-style CalendarView.
      */
+    @Deprecated
     public void setWeekSeparatorLineColor(@ColorInt int color) {
         mDelegate.setWeekSeparatorLineColor(color);
     }
@@ -243,8 +267,10 @@ public class CalendarView extends FrameLayout {
      * @return The week separator color.
      *
      * @attr ref android.R.styleable#CalendarView_weekSeparatorLineColor
+     * @deprecated No longer used by Material-style CalendarView.
      */
     @ColorInt
+    @Deprecated
     public int getWeekSeparatorLineColor() {
         return mDelegate.getWeekSeparatorLineColor();
     }
@@ -256,7 +282,9 @@ public class CalendarView extends FrameLayout {
      * @param resourceId The vertical bar drawable resource id.
      *
      * @attr ref android.R.styleable#CalendarView_selectedDateVerticalBar
+     * @deprecated No longer used by Material-style CalendarView.
      */
+    @Deprecated
     public void setSelectedDateVerticalBar(@DrawableRes int resourceId) {
         mDelegate.setSelectedDateVerticalBar(resourceId);
     }
@@ -268,7 +296,9 @@ public class CalendarView extends FrameLayout {
      * @param drawable The vertical bar drawable.
      *
      * @attr ref android.R.styleable#CalendarView_selectedDateVerticalBar
+     * @deprecated No longer used by Material-style CalendarView.
      */
+    @Deprecated
     public void setSelectedDateVerticalBar(Drawable drawable) {
         mDelegate.setSelectedDateVerticalBar(drawable);
     }
@@ -278,7 +308,9 @@ public class CalendarView extends FrameLayout {
      * the end of the selected date.
      *
      * @return The vertical bar drawable.
+     * @deprecated No longer used by Material-style CalendarView.
      */
+    @Deprecated
     public Drawable getSelectedDateVerticalBar() {
         return mDelegate.getSelectedDateVerticalBar();
     }
@@ -519,29 +551,36 @@ public class CalendarView extends FrameLayout {
         void setShownWeekCount(int count);
         int getShownWeekCount();
 
-        void setSelectedWeekBackgroundColor(int color);
+        void setSelectedWeekBackgroundColor(@ColorInt int color);
+        @ColorInt
         int getSelectedWeekBackgroundColor();
 
-        void setFocusedMonthDateColor(int color);
+        void setFocusedMonthDateColor(@ColorInt int color);
+        @ColorInt
         int getFocusedMonthDateColor();
 
-        void setUnfocusedMonthDateColor(int color);
+        void setUnfocusedMonthDateColor(@ColorInt int color);
+        @ColorInt
         int getUnfocusedMonthDateColor();
 
-        void setWeekNumberColor(int color);
+        void setWeekNumberColor(@ColorInt int color);
+        @ColorInt
         int getWeekNumberColor();
 
-        void setWeekSeparatorLineColor(int color);
+        void setWeekSeparatorLineColor(@ColorInt int color);
+        @ColorInt
         int getWeekSeparatorLineColor();
 
-        void setSelectedDateVerticalBar(int resourceId);
+        void setSelectedDateVerticalBar(@DrawableRes int resourceId);
         void setSelectedDateVerticalBar(Drawable drawable);
         Drawable getSelectedDateVerticalBar();
 
-        void setWeekDayTextAppearance(int resourceId);
+        void setWeekDayTextAppearance(@StyleRes int resourceId);
+        @StyleRes
         int getWeekDayTextAppearance();
 
-        void setDateTextAppearance(int resourceId);
+        void setDateTextAppearance(@StyleRes int resourceId);
+        @StyleRes
         int getDateTextAppearance();
 
         void setMinDate(long minDate);
@@ -569,17 +608,11 @@ public class CalendarView extends FrameLayout {
      * An abstract class which can be used as a start for CalendarView implementations
      */
     abstract static class AbstractCalendarViewDelegate implements CalendarViewDelegate {
-        /** String for parsing dates. */
-        private static final String DATE_FORMAT = "MM/dd/yyyy";
-
         /** The default minimal date. */
         protected static final String DEFAULT_MIN_DATE = "01/01/1900";
 
         /** The default maximal date. */
         protected static final String DEFAULT_MAX_DATE = "01/01/2100";
-
-        /** Date format for parsing dates. */
-        protected static final DateFormat DATE_FORMATTER = new SimpleDateFormat(DATE_FORMAT);
 
         protected CalendarView mDelegator;
         protected Context mContext;
@@ -600,21 +633,131 @@ public class CalendarView extends FrameLayout {
             mCurrentLocale = locale;
         }
 
-        /**
-         * Parses the given <code>date</code> and in case of success sets
-         * the result to the <code>outDate</code>.
-         *
-         * @return True if the date was parsed.
-         */
-        protected boolean parseDate(String date, Calendar outDate) {
-            try {
-                outDate.setTime(DATE_FORMATTER.parse(date));
-                return true;
-            } catch (ParseException e) {
-                Log.w(LOG_TAG, "Date: " + date + " not in format: " + DATE_FORMAT);
-                return false;
-            }
+        @Override
+        public void setShownWeekCount(int count) {
+            // Deprecated.
+        }
+
+        @Override
+        public int getShownWeekCount() {
+            // Deprecated.
+            return 0;
+        }
+
+        @Override
+        public void setSelectedWeekBackgroundColor(@ColorInt int color) {
+            // Deprecated.
+        }
+
+        @ColorInt
+        @Override
+        public int getSelectedWeekBackgroundColor() {
+            return 0;
+        }
+
+        @Override
+        public void setFocusedMonthDateColor(@ColorInt int color) {
+            // Deprecated.
+        }
+
+        @ColorInt
+        @Override
+        public int getFocusedMonthDateColor() {
+            return 0;
+        }
+
+        @Override
+        public void setUnfocusedMonthDateColor(@ColorInt int color) {
+            // Deprecated.
+        }
+
+        @ColorInt
+        @Override
+        public int getUnfocusedMonthDateColor() {
+            return 0;
+        }
+
+        @Override
+        public void setWeekNumberColor(@ColorInt int color) {
+            // Deprecated.
+        }
+
+        @ColorInt
+        @Override
+        public int getWeekNumberColor() {
+            // Deprecated.
+            return 0;
+        }
+
+        @Override
+        public void setWeekSeparatorLineColor(@ColorInt int color) {
+            // Deprecated.
+        }
+
+        @ColorInt
+        @Override
+        public int getWeekSeparatorLineColor() {
+            // Deprecated.
+            return 0;
+        }
+
+        @Override
+        public void setSelectedDateVerticalBar(@DrawableRes int resId) {
+            // Deprecated.
+        }
+
+        @Override
+        public void setSelectedDateVerticalBar(Drawable drawable) {
+            // Deprecated.
+        }
+
+        @Override
+        public Drawable getSelectedDateVerticalBar() {
+            // Deprecated.
+            return null;
+        }
+
+        @Override
+        public void setShowWeekNumber(boolean showWeekNumber) {
+            // Deprecated.
+        }
+
+        @Override
+        public boolean getShowWeekNumber() {
+            // Deprecated.
+            return false;
+        }
+
+        @Override
+        public void onConfigurationChanged(Configuration newConfig) {
+            // Nothing to do here, configuration changes are already propagated
+            // by ViewGroup.
         }
     }
 
+    /** String for parsing dates. */
+    private static final String DATE_FORMAT = "MM/dd/yyyy";
+
+    /** Date format for parsing dates. */
+    private static final DateFormat DATE_FORMATTER = new SimpleDateFormat(DATE_FORMAT);
+
+    /**
+     * Utility method for the date format used by CalendarView's min/max date.
+     *
+     * @hide Use only as directed. For internal use only.
+     */
+    public static boolean parseDate(String date, Calendar outDate) {
+        if (date == null || date.isEmpty()) {
+            return false;
+        }
+
+        try {
+            final Date parsedDate = DATE_FORMATTER.parse(date);
+            outDate.setTime(parsedDate);
+            return true;
+        } catch (ParseException e) {
+            Log.w(LOG_TAG, "Date: " + date + " not in format: " + DATE_FORMAT);
+            return false;
+        }
+    }
 }
