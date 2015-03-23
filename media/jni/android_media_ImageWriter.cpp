@@ -435,7 +435,7 @@ static void ImageWriter_queueImage(JNIEnv* env, jobject thiz, jlong nativeCtx, j
     Image_unlockIfLocked(env, image);
 
     // Set timestamp
-    ALOGV("timestamp to be queued: %lld", timestampNs);
+    ALOGV("timestamp to be queued: %" PRId64, timestampNs);
     res = native_window_set_buffers_timestamp(anw.get(), timestampNs);
     if (res != OK) {
         jniThrowRuntimeException(env, "Set timestamp failed");
