@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-package com.android.databinding.multimoduletestapp;
+package android.databinding.multimoduletestapp;
 
-import com.android.databinding.testlibrary.ObservableInLibrary;
+import android.databinding.testlibrary.ObservableInLibrary;
 
 import android.app.Application;
 import android.binding.Observable;

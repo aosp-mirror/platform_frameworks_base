@@ -1,6 +1,6 @@
 package com.android.example.bindingdemo.vo;
 
-import android.binding.OnPropertyChangedListener;
+import android.databinding.OnPropertyChangedListener;
 
 import com.android.example.bindingdemo.R;
 

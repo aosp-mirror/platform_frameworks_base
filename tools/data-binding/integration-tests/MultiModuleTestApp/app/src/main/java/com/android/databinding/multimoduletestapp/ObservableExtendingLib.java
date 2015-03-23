@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-package com.android.databinding.multimoduletestapp;
+package android.databinding.multimoduletestapp;
 
-import com.android.databinding.testlibrary.ObservableInLibrary;
+import android.databinding.testlibrary.ObservableInLibrary;
 
 import android.binding.Bindable;
-import com.android.databinding.multimoduletestapp.BR;
+import android.databinding.multimoduletestapp.BR;
 
 public class ObservableExtendingLib extends ObservableInLibrary {
     @Bindable

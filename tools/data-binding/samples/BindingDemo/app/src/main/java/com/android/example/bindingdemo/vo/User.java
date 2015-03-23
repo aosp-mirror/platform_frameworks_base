@@ -1,9 +1,9 @@
 package com.android.example.bindingdemo.vo;
 
-import android.binding.Bindable;
+import android.databinding.Bindable;
 import android.graphics.Color;
 
-import com.android.databinding.library.BaseObservable;
+import android.databinding.BaseObservable;
 import com.android.example.bindingdemo.BR;
 
 import java.util.Objects;

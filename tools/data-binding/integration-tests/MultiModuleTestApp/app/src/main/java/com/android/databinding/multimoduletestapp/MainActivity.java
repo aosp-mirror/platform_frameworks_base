@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-package com.android.databinding.multimoduletestapp;
+package android.databinding.multimoduletestapp;
 
-import com.android.databinding.multimoduletestapp.generated.ActivityMainBinding;
+import android.databinding.multimoduletestapp.generated.ActivityMainBinding;
 import android.app.Activity;
 import android.os.Bundle;
 import android.view.Menu;

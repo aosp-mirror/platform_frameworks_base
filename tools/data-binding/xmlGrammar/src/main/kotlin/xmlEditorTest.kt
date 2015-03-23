@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.android.databinding
+package android.databinding.parser
 
 import java.io.File
 import org.antlr.v4.runtime.ANTLRInputStream

@@ -17,7 +17,7 @@
               android:orientation="vertical"
               android:layout_width="match_parent"
               android:layout_height="match_parent">
-    <variable name="objectInLand" type="com.android.databinding.testapp.vo.NotBindableVo"/>
+    <variable name="objectInLand" type="android.databinding.testapp.vo.NotBindableVo"/>
     <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
               android:id="@+id/objectInLandTextView"
               android:text="@{objectInLand.stringValue}"/>

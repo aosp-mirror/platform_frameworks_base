@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-package com.android.databinding.multimoduletestapp;
+package android.databinding.multimoduletestapp;
 
-import com.android.databinding.testlibrary.ObservableInLibrary;
+import android.databinding.testlibrary.ObservableInLibrary;
 
 import android.binding.Observable;
 import android.binding.OnPropertyChangedListener;
@@ -26,7 +26,7 @@ import android.test.AndroidTestCase;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.android.databinding.multimoduletestapp.BR;
+import android.databinding.multimoduletestapp.BR;
 
 public class EventIdsTest extends AndroidTestCase {
     public void testLibraryObservable() {

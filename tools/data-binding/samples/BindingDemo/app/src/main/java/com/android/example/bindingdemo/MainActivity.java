@@ -1,9 +1,8 @@
 package com.android.example.bindingdemo;
 
-import android.binding.Bindable;
-import android.binding.BinderBundle;
-import android.binding.Observable;
-import android.binding.OnPropertyChangedListener;
+import android.databinding.Bindable;
+import android.databinding.Observable;
+import android.databinding.OnPropertyChangedListener;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
@@ -13,8 +12,8 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.android.databinding.library.DataBindingUtil;
-import com.android.databinding.library.PropertyChangeRegistry;
+import android.databinding.DataBindingUtil;
+import android.databinding.PropertyChangeRegistry;
 import com.android.example.bindingdemo.generated.ListItemBinding;
 import com.android.example.bindingdemo.generated.MainActivityBinding;
 import com.android.example.bindingdemo.vo.User;

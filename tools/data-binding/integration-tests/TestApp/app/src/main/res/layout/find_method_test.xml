@@ -3,11 +3,11 @@
               android:orientation="vertical"
               android:layout_width="match_parent"
               android:layout_height="match_parent">
-    <variable name="obj" type="com.android.databinding.testapp.vo.FindMethodBindingObject"/>
-    <import type="com.android.databinding.testapp.vo.FindMethodBindingObject.Bar"/>
+    <variable name="obj" type="android.databinding.testapp.vo.FindMethodBindingObject"/>
+    <import type="android.databinding.testapp.vo.FindMethodBindingObject.Bar"/>
     <variable name="obj2" type="Bar&lt;String&gt;"/>
-    <import type="com.android.databinding.testapp.vo.FindMethodBindingObject"/>
-    <import type="com.android.databinding.testapp.vo.FindMethodBindingObject" alias="FMBO"/>
+    <import type="android.databinding.testapp.vo.FindMethodBindingObject"/>
+    <import type="android.databinding.testapp.vo.FindMethodBindingObject" alias="FMBO"/>
     <TextView
             android:id="@+id/textView0"
             android:layout_width="wrap_content" android:layout_height="wrap_content"
@@ -39,11 +39,11 @@
     <TextView
             android:id="@+id/textView7"
             android:layout_width="wrap_content" android:layout_height="wrap_content"
-            android:text="@{com.android.databinding.testapp.vo.FindMethodBindingObject.staticMethod()}"/>
+            android:text="@{android.databinding.testapp.vo.FindMethodBindingObject.staticMethod()}"/>
     <TextView
             android:id="@+id/textView8"
             android:layout_width="wrap_content" android:layout_height="wrap_content"
-            android:text="@{com.android.databinding.testapp.vo.FindMethodBindingObject.foo.bar}"/>
+            android:text="@{android.databinding.testapp.vo.FindMethodBindingObject.foo.bar}"/>
     <TextView
             android:id="@+id/textView9"
             android:layout_width="wrap_content" android:layout_height="wrap_content"

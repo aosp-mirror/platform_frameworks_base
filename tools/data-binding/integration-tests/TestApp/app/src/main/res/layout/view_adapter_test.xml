@@ -4,7 +4,7 @@
               android:layout_width="match_parent"
               android:layout_height="match_parent"
         >
-        <variable name="obj" type="com.android.databinding.testapp.vo.ViewBindingObject"/>
+        <variable name="obj" type="android.databinding.testapp.vo.ViewBindingObject"/>
     <View
             android:id="@+id/padding"
             android:layout_width="10dp"

@@ -24,7 +24,7 @@ targetCompatibility = config.javaSourceCompatibility
 mainClassName = "org.antlr.v4.Tool"
 
 run {
-    args "BindingExpression.g4", "-visitor", "-o", "src/main/java-gen/com/android/databinding", "-package", "com.android.databinding"
+    args "BindingExpression.g4", "-visitor", "-o", "src/main/java-gen/android/databinding/parser", "-package", "android.databinding.parser"
 }
 
 sourceSets {

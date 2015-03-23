@@ -3,8 +3,8 @@ package com.android.example.bindingdemo;
 import android.support.v7.widget.RecyclerView;
 import android.view.ViewGroup;
 
-import com.android.databinding.library.DataBindingUtil;
-import com.android.databinding.library.ViewDataBinding;
+import android.databinding.DataBindingUtil;
+import android.databinding.ViewDataBinding;
 
 abstract public class DataBoundAdapter<T extends ViewDataBinding>
         extends RecyclerView.Adapter<DataBoundAdapter.DataBoundViewHolder<T>> {

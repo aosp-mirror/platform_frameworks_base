@@ -17,8 +17,8 @@
               android:orientation="vertical"
               android:layout_width="match_parent"
               android:layout_height="match_parent">
-    <variable name="obj1" type="com.android.databinding.testapp.vo.NotBindableVo"/>
-    <variable name="obj2" type="com.android.databinding.testapp.vo.NotBindableVo"/>
+    <variable name="obj1" type="android.databinding.testapp.vo.NotBindableVo"/>
+    <variable name="obj2" type="android.databinding.testapp.vo.NotBindableVo"/>
     <TextView
             android:id="@+id/textView1"
             android:text="@{obj1.stringValue}"

@@ -13,13 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.android.databinding
+package android.databinding.tool
 
 import org.gradle.api.DefaultTask
 import org.gradle.api.tasks.TaskAction
-import com.android.databinding.LayoutXmlProcessor
 import kotlin.properties.Delegates
-import com.android.databinding.util.Log
+import android.databinding.tool.util.Log
 import java.io.File
 
 open class DataBindingProcessLayoutsTask : DefaultTask() {

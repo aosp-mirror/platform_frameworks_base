@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-package com.android.databinding.multimoduletestapp;
+package android.databinding.multimoduletestapp;
 
 import android.binding.Bindable;
 
-import com.android.databinding.library.BaseObservable;
-import com.android.databinding.multimoduletestapp.BR;
+import android.databinding.library.BaseObservable;
+import android.databinding.multimoduletestapp.BR;
 
 public class ObservableInMainApp extends BaseObservable {
     @Bindable

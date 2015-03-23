@@ -4,9 +4,9 @@
               android:orientation="vertical"
               android:layout_width="match_parent"
               android:layout_height="match_parent">
-    <variable name="obj1" type="com.android.databinding.testapp.vo.NotBindableVo"/>
-    <variable name="obj2" type="com.android.databinding.testapp.vo.NotBindableVo"/>
-    <variable name="obj3" type="com.android.databinding.testapp.vo.NotBindableVo"/>
+    <variable name="obj1" type="android.databinding.testapp.vo.NotBindableVo"/>
+    <variable name="obj2" type="android.databinding.testapp.vo.NotBindableVo"/>
+    <variable name="obj3" type="android.databinding.testapp.vo.NotBindableVo"/>
     <variable name="cond1" type="boolean"/>
     <variable name="cond2" type="boolean"/>
     <TextView

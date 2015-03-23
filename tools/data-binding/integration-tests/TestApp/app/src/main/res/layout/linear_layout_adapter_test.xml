@@ -3,7 +3,7 @@
               android:orientation="vertical"
               android:layout_width="match_parent"
               android:layout_height="match_parent">
-    <variable name="obj" type="com.android.databinding.testapp.vo.LinearLayoutBindingObject"/>
+    <variable name="obj" type="android.databinding.testapp.vo.LinearLayoutBindingObject"/>
     <LinearLayout
             android:layout_width="match_parent" android:layout_height="match_parent"
             android:id="@+id/view"

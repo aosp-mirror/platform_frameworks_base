@@ -18,7 +18,7 @@
               android:orientation="vertical"
               android:layout_width="match_parent"
               android:layout_height="match_parent">
-    <variable name="foo" type="com.android.databinding.test.independentlibrary.vo.MyBindableObject"/>
+    <variable name="foo" type="android.databinding.test.independentlibrary.vo.MyBindableObject"/>
     <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
         android:id="@+id/fooTextView"
             android:text='@{foo.field +  " " + foo.field}'/>

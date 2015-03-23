@@ -17,7 +17,7 @@
               android:orientation="vertical"
               android:layout_width="match_parent"
               android:layout_height="match_parent">
-    <variable name="innerObject" type="com.android.databinding.testapp.vo.NotBindableVo"/>
+    <variable name="innerObject" type="android.databinding.testapp.vo.NotBindableVo"/>
     <variable name="innerValue" type="java.lang.String"/>
     <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
               android:id="@+id/innerTextView"

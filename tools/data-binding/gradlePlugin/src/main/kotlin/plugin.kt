@@ -14,53 +14,23 @@
  * limitations under the License.
  */
 
-package com.android.databinding
+package android.databinding.tool
 
 import org.gradle.api.Plugin
 import org.gradle.api.Project
-import groovy.lang.Closure
-import org.codehaus.groovy.runtime.MethodClosure
-import org.gradle.api.Task
 import com.android.build.gradle.AppExtension
 import com.android.build.gradle.internal.api.ApplicationVariantImpl
 import com.android.build.gradle.internal.variant.ApplicationVariantData
-import kotlin.properties.Delegates
-import java.net.URLClassLoader
-import groovy.lang.MetaClass
 import java.io.File
-import java.util.ArrayList
-import org.gradle.api.internal.tasks.compile.DefaultJavaCompileSpec
-import org.gradle.api.tasks.WorkResult
 import org.gradle.api.file.FileCollection
-import org.gradle.api.internal.file.DefaultSourceDirectorySet
-import org.gradle.api.tasks.compile.CompileOptions
-import org.gradle.internal.Factory
-import org.gradle.api.AntBuilder
-import org.gradle.api.internal.project.ProjectInternal
-import org.gradle.api.internal.tasks.compile.daemon.CompilerDaemonManager
-import org.gradle.api.internal.tasks.compile.DefaultJavaCompilerFactory
-import javax.tools.JavaCompiler
-import javax.tools.ToolProvider
-import java.util.Arrays
-import org.apache.commons.io.FileUtils
-import com.android.databinding.reflection.ModelAnalyzer
-import com.android.databinding.writer.JavaFileWriter
-import java.io.FileInputStream
-import java.io.FileOutputStream
-import org.apache.commons.io.IOUtils
-import java.io.FileWriter
-import java.io.ByteArrayOutputStream
-import org.apache.commons.codec.binary.Base64
-import com.android.builder.model.ApiVersion
-import com.android.databinding.util.Log
+import android.databinding.tool.writer.JavaFileWriter
+import android.databinding.tool.util.Log
 import org.gradle.api.Action
 import com.android.build.gradle.BaseExtension
 import com.android.build.gradle.LibraryExtension
 import com.android.build.gradle.api.LibraryVariant
 import com.android.build.gradle.api.ApplicationVariant
-import com.android.build.gradle.api.BaseVariant
 import com.android.build.gradle.internal.variant.BaseVariantData
-import com.android.build.gradle.internal.variant.ApkVariantData
 import com.android.build.gradle.internal.variant.LibraryVariantData
 import com.android.build.gradle.internal.api.LibraryVariantImpl
 import com.android.build.gradle.api.TestVariant
@@ -213,7 +183,7 @@ class DataBinderPlugin : Plugin<Project> {
             if (packageTask !is org.gradle.api.tasks.bundling.Jar) {
                 throw RuntimeException("cannot find package task in $project $variantData project $packageJarTaskName")
             }
-            val excludePattern = "com/android/databinding/layouts/*.*"
+            val excludePattern = "android/databinding/layouts/*.*"
             val appPkgAsClass = packageName.replace('.', '/')
             packageTask.exclude(excludePattern)
             packageTask.exclude("$appPkgAsClass/generated/*")

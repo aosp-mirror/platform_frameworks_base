@@ -7,5 +7,5 @@
           android:scrollingCache="@{obj.scrollingCache}"
           android:smoothScrollbar="@{obj.smoothScrollbar}"
         >
-    <variable name="obj" type="com.android.databinding.testapp.vo.AbsListViewBindingObject"/>
+    <variable name="obj" type="android.databinding.testapp.vo.AbsListViewBindingObject"/>
 </ListView>
