@@ -53,8 +53,6 @@ import com.android.internal.R;
  * only if {@link #setMeasureAllChildren(boolean) setConsiderGoneChildrenWhenMeasuring()}
  * is set to true.
  *
- * @attr ref android.R.styleable#FrameLayout_foreground
- * @attr ref android.R.styleable#FrameLayout_foregroundGravity
  * @attr ref android.R.styleable#FrameLayout_measureAllChildren
  */
 @RemoteView
@@ -63,13 +61,6 @@ public class FrameLayout extends ViewGroup {
 
     @ViewDebug.ExportedProperty(category = "measurement")
     boolean mMeasureAllChildren = false;
-
-    @ViewDebug.ExportedProperty(category = "drawing")
-    private Drawable mForeground;
-    private ColorStateList mForegroundTintList = null;
-    private PorterDuff.Mode mForegroundTintMode = null;
-    private boolean mHasForegroundTint = false;
-    private boolean mHasForegroundTintMode = false;
 
     @ViewDebug.ExportedProperty(category = "padding")
     private int mForegroundPaddingLeft = 0;
@@ -85,15 +76,6 @@ public class FrameLayout extends ViewGroup {
 
     private final Rect mSelfBounds = new Rect();
     private final Rect mOverlayBounds = new Rect();
-
-    @ViewDebug.ExportedProperty(category = "drawing")
-    private int mForegroundGravity = Gravity.FILL;
-
-    /** {@hide} */
-    @ViewDebug.ExportedProperty(category = "drawing")
-    protected boolean mForegroundInPadding = true;
-
-    boolean mForegroundBoundsChanged = false;
     
     private final ArrayList<View> mMatchParentChildren = new ArrayList<View>(1);
     
@@ -115,48 +97,12 @@ public class FrameLayout extends ViewGroup {
 
         final TypedArray a = context.obtainStyledAttributes(
                 attrs, com.android.internal.R.styleable.FrameLayout, defStyleAttr, defStyleRes);
-
-        mForegroundGravity = a.getInt(
-                com.android.internal.R.styleable.FrameLayout_foregroundGravity, mForegroundGravity);
-
-        final Drawable d = a.getDrawable(com.android.internal.R.styleable.FrameLayout_foreground);
-        if (d != null) {
-            setForeground(d);
-        }
         
         if (a.getBoolean(com.android.internal.R.styleable.FrameLayout_measureAllChildren, false)) {
             setMeasureAllChildren(true);
         }
 
-        if (a.hasValue(R.styleable.FrameLayout_foregroundTintMode)) {
-            mForegroundTintMode = Drawable.parseTintMode(a.getInt(
-                    R.styleable.FrameLayout_foregroundTintMode, -1), mForegroundTintMode);
-            mHasForegroundTintMode = true;
-        }
-
-        if (a.hasValue(R.styleable.FrameLayout_foregroundTint)) {
-            mForegroundTintList = a.getColorStateList(R.styleable.FrameLayout_foregroundTint);
-            mHasForegroundTint = true;
-        }
-
-        mForegroundInPadding = a.getBoolean(R.styleable.FrameLayout_foregroundInsidePadding, true);
-
         a.recycle();
-
-        applyForegroundTint();
-    }
-
-    /**
-     * Describes how the foreground is positioned.
-     *
-     * @return foreground gravity.
-     *
-     * @see #setForegroundGravity(int)
-     *
-     * @attr ref android.R.styleable#FrameLayout_foregroundGravity
-     */
-    public int getForegroundGravity() {
-        return mForegroundGravity;
     }
 
     /**
@@ -166,25 +112,18 @@ public class FrameLayout extends ViewGroup {
      *
      * @see #getForegroundGravity()
      *
-     * @attr ref android.R.styleable#FrameLayout_foregroundGravity
+     * @attr ref android.R.styleable#View_foregroundGravity
      */
     @android.view.RemotableViewMethod
     public void setForegroundGravity(int foregroundGravity) {
-        if (mForegroundGravity != foregroundGravity) {
-            if ((foregroundGravity & Gravity.RELATIVE_HORIZONTAL_GRAVITY_MASK) == 0) {
-                foregroundGravity |= Gravity.START;
-            }
+        if (getForegroundGravity() != foregroundGravity) {
+            super.setForegroundGravity(foregroundGravity);
 
-            if ((foregroundGravity & Gravity.VERTICAL_GRAVITY_MASK) == 0) {
-                foregroundGravity |= Gravity.TOP;
-            }
-
-            mForegroundGravity = foregroundGravity;
-
-
-            if (mForegroundGravity == Gravity.FILL && mForeground != null) {
+            // calling get* again here because the set above may apply default constraints
+            final Drawable foreground = getForeground();
+            if (getForegroundGravity() == Gravity.FILL && foreground != null) {
                 Rect padding = new Rect();
-                if (mForeground.getPadding(padding)) {
+                if (foreground.getPadding(padding)) {
                     mForegroundPaddingLeft = padding.left;
                     mForegroundPaddingTop = padding.top;
                     mForegroundPaddingRight = padding.right;
@@ -201,53 +140,6 @@ public class FrameLayout extends ViewGroup {
         }
     }
 
-    @Override
-    protected void onVisibilityChanged(@NonNull View changedView, @Visibility int visibility) {
-        super.onVisibilityChanged(changedView, visibility);
-
-        final Drawable dr = mForeground;
-        if (dr != null) {
-            final boolean visible = visibility == VISIBLE && getVisibility() == VISIBLE;
-            if (visible != dr.isVisible()) {
-                dr.setVisible(visible, false);
-            }
-        }
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected boolean verifyDrawable(Drawable who) {
-        return super.verifyDrawable(who) || (who == mForeground);
-    }
-
-    @Override
-    public void jumpDrawablesToCurrentState() {
-        super.jumpDrawablesToCurrentState();
-        if (mForeground != null) mForeground.jumpToCurrentState();
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void drawableStateChanged() {
-        super.drawableStateChanged();
-        if (mForeground != null && mForeground.isStateful()) {
-            mForeground.setState(getDrawableState());
-        }
-    }
-
-    @Override
-    public void drawableHotspotChanged(float x, float y) {
-        super.drawableHotspotChanged(x, y);
-
-        if (mForeground != null) {
-            mForeground.setHotspot(x, y);
-        }
-    }
-
     /**
      * Returns a set of layout parameters with a width of
      * {@link android.view.ViewGroup.LayoutParams#MATCH_PARENT},
@@ -258,161 +150,23 @@ public class FrameLayout extends ViewGroup {
         return new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
     }
 
-    /**
-     * Supply a Drawable that is to be rendered on top of all of the child
-     * views in the frame layout.  Any padding in the Drawable will be taken
-     * into account by ensuring that the children are inset to be placed
-     * inside of the padding area.
-     * 
-     * @param d The Drawable to be drawn on top of the children.
-     * 
-     * @attr ref android.R.styleable#FrameLayout_foreground
-     */
-    public void setForeground(Drawable d) {
-        if (mForeground != d) {
-            if (mForeground != null) {
-                mForeground.setCallback(null);
-                unscheduleDrawable(mForeground);
-            }
-
-            mForeground = d;
-            mForegroundPaddingLeft = 0;
-            mForegroundPaddingTop = 0;
-            mForegroundPaddingRight = 0;
-            mForegroundPaddingBottom = 0;
-
-            if (d != null) {
-                setWillNotDraw(false);
-                d.setCallback(this);
-                d.setLayoutDirection(getLayoutDirection());
-                if (d.isStateful()) {
-                    d.setState(getDrawableState());
-                }
-                applyForegroundTint();
-                if (mForegroundGravity == Gravity.FILL) {
-                    Rect padding = new Rect();
-                    if (d.getPadding(padding)) {
-                        mForegroundPaddingLeft = padding.left;
-                        mForegroundPaddingTop = padding.top;
-                        mForegroundPaddingRight = padding.right;
-                        mForegroundPaddingBottom = padding.bottom;
-                    }
-                }
-            }  else {
-                setWillNotDraw(true);
-            }
-            requestLayout();
-            invalidate();
-        }
-    }
-
-    /**
-     * Returns the drawable used as the foreground of this FrameLayout. The
-     * foreground drawable, if non-null, is always drawn on top of the children.
-     *
-     * @return A Drawable or null if no foreground was set.
-     */
-    public Drawable getForeground() {
-        return mForeground;
-    }
-
-    /**
-     * Applies a tint to the foreground drawable. Does not modify the current
-     * tint mode, which is {@link PorterDuff.Mode#SRC_IN} by default.
-     * <p>
-     * Subsequent calls to {@link #setForeground(Drawable)} will automatically
-     * mutate the drawable and apply the specified tint and tint mode using
-     * {@link Drawable#setTintList(ColorStateList)}.
-     *
-     * @param tint the tint to apply, may be {@code null} to clear tint
-     *
-     * @attr ref android.R.styleable#FrameLayout_foregroundTint
-     * @see #getForegroundTintList()
-     * @see Drawable#setTintList(ColorStateList)
-     */
-    public void setForegroundTintList(@Nullable ColorStateList tint) {
-        mForegroundTintList = tint;
-        mHasForegroundTint = true;
-
-        applyForegroundTint();
-    }
-
-    /**
-     * @return the tint applied to the foreground drawable
-     * @attr ref android.R.styleable#FrameLayout_foregroundTint
-     * @see #setForegroundTintList(ColorStateList)
-     */
-    @Nullable
-    public ColorStateList getForegroundTintList() {
-        return mForegroundTintList;
-    }
-
-    /**
-     * Specifies the blending mode used to apply the tint specified by
-     * {@link #setForegroundTintList(ColorStateList)}} to the foreground drawable.
-     * The default mode is {@link PorterDuff.Mode#SRC_IN}.
-     *
-     * @param tintMode the blending mode used to apply the tint, may be
-     *                 {@code null} to clear tint
-     * @attr ref android.R.styleable#FrameLayout_foregroundTintMode
-     * @see #getForegroundTintMode()
-     * @see Drawable#setTintMode(PorterDuff.Mode)
-     */
-    public void setForegroundTintMode(@Nullable PorterDuff.Mode tintMode) {
-        mForegroundTintMode = tintMode;
-        mHasForegroundTintMode = true;
-
-        applyForegroundTint();
-    }
-
-    /**
-     * @return the blending mode used to apply the tint to the foreground
-     *         drawable
-     * @attr ref android.R.styleable#FrameLayout_foregroundTintMode
-     * @see #setForegroundTintMode(PorterDuff.Mode)
-     */
-    @Nullable
-    public PorterDuff.Mode getForegroundTintMode() {
-        return mForegroundTintMode;
-    }
-
-    private void applyForegroundTint() {
-        if (mForeground != null && (mHasForegroundTint || mHasForegroundTintMode)) {
-            mForeground = mForeground.mutate();
-
-            if (mHasForegroundTint) {
-                mForeground.setTintList(mForegroundTintList);
-            }
-
-            if (mHasForegroundTintMode) {
-                mForeground.setTintMode(mForegroundTintMode);
-            }
-
-            // The drawable (or one of its children) may not have been
-            // stateful before applying the tint, so let's try again.
-            if (mForeground.isStateful()) {
-                mForeground.setState(getDrawableState());
-            }
-        }
-    }
-
     int getPaddingLeftWithForeground() {
-        return mForegroundInPadding ? Math.max(mPaddingLeft, mForegroundPaddingLeft) :
+        return isForegroundInsidePadding() ? Math.max(mPaddingLeft, mForegroundPaddingLeft) :
             mPaddingLeft + mForegroundPaddingLeft;
     }
 
     int getPaddingRightWithForeground() {
-        return mForegroundInPadding ? Math.max(mPaddingRight, mForegroundPaddingRight) :
+        return isForegroundInsidePadding() ? Math.max(mPaddingRight, mForegroundPaddingRight) :
             mPaddingRight + mForegroundPaddingRight;
     }
 
     private int getPaddingTopWithForeground() {
-        return mForegroundInPadding ? Math.max(mPaddingTop, mForegroundPaddingTop) :
+        return isForegroundInsidePadding() ? Math.max(mPaddingTop, mForegroundPaddingTop) :
             mPaddingTop + mForegroundPaddingTop;
     }
 
     private int getPaddingBottomWithForeground() {
-        return mForegroundInPadding ? Math.max(mPaddingBottom, mForegroundPaddingBottom) :
+        return isForegroundInsidePadding() ? Math.max(mPaddingBottom, mForegroundPaddingBottom) :
             mPaddingBottom + mForegroundPaddingBottom;
     }
 
@@ -527,8 +281,6 @@ public class FrameLayout extends ViewGroup {
         final int parentTop = getPaddingTopWithForeground();
         final int parentBottom = bottom - top - getPaddingBottomWithForeground();
 
-        mForegroundBoundsChanged = true;
-        
         for (int i = 0; i < count; i++) {
             final View child = getChildAt(i);
             if (child.getVisibility() != GONE) {
@@ -582,62 +334,6 @@ public class FrameLayout extends ViewGroup {
                 child.layout(childLeft, childTop, childLeft + width, childTop + height);
             }
         }
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void onSizeChanged(int w, int h, int oldw, int oldh) {
-        super.onSizeChanged(w, h, oldw, oldh);
-        mForegroundBoundsChanged = true;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void draw(Canvas canvas) {
-        super.draw(canvas);
-
-        if (mForeground != null) {
-            final Drawable foreground = mForeground;
-
-            if (mForegroundBoundsChanged) {
-                mForegroundBoundsChanged = false;
-                final Rect selfBounds = mSelfBounds;
-                final Rect overlayBounds = mOverlayBounds;
-
-                final int w = mRight-mLeft;
-                final int h = mBottom-mTop;
-
-                if (mForegroundInPadding) {
-                    selfBounds.set(0, 0, w, h);
-                } else {
-                    selfBounds.set(mPaddingLeft, mPaddingTop, w - mPaddingRight, h - mPaddingBottom);
-                }
-
-                final int layoutDirection = getLayoutDirection();
-                Gravity.apply(mForegroundGravity, foreground.getIntrinsicWidth(),
-                        foreground.getIntrinsicHeight(), selfBounds, overlayBounds,
-                        layoutDirection);
-                foreground.setBounds(overlayBounds);
-            }
-            
-            foreground.draw(canvas);
-        }
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public boolean gatherTransparentRegion(Region region) {
-        boolean opaque = super.gatherTransparentRegion(region);
-        if (region != null && mForeground != null) {
-            applyDrawableToTransparentRegion(mForeground, region);
-        }
-        return opaque;
     }
 
     /**
