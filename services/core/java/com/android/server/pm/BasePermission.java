@@ -18,6 +18,9 @@ package com.android.server.pm;
 
 import android.content.pm.PackageParser;
 import android.content.pm.PermissionInfo;
+import android.os.UserHandle;
+
+import com.android.internal.util.ArrayUtils;
 
 final class BasePermission {
     final static int TYPE_NORMAL = 0;
@@ -40,9 +43,17 @@ final class BasePermission {
 
     PermissionInfo pendingInfo;
 
+    /** UID that owns the definition of this permission */
     int uid;
 
-    int[] gids;
+    /** Additional GIDs given to apps granted this permission */
+    private int[] gids;
+
+    /**
+     * Flag indicating that {@link #gids} should be adjusted based on the
+     * {@link UserHandle} the granted app is running as.
+     */
+    private boolean perUser;
 
     BasePermission(String _name, String _sourcePackage, int _type) {
         name = _name;
@@ -52,9 +63,31 @@ final class BasePermission {
         protectionLevel = PermissionInfo.PROTECTION_SIGNATURE;
     }
 
+    @Override
     public String toString() {
         return "BasePermission{" + Integer.toHexString(System.identityHashCode(this)) + " " + name
                 + "}";
+    }
+
+    public void setGids(int[] gids, boolean perUser) {
+        this.gids = gids;
+        this.perUser = perUser;
+    }
+
+    public boolean hasGids() {
+        return ArrayUtils.isEmpty(gids);
+    }
+
+    public int[] computeGids(int userId) {
+        if (perUser) {
+            final int[] userGids = new int[gids.length];
+            for (int i = 0; i < gids.length; i++) {
+                userGids[i] = UserHandle.getUid(userId, gids[i]);
+            }
+            return userGids;
+        } else {
+            return gids;
+        }
     }
 
     public boolean isRuntime() {

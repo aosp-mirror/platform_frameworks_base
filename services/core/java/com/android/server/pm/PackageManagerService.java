@@ -1429,7 +1429,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                     mSettings.mPermissions.put(perm.name, bp);
                 }
                 if (perm.gids != null) {
-                    bp.gids = appendInts(bp.gids, perm.gids);
+                    bp.setGids(perm.gids, perm.perUser);
                 }
             }
 

@@ -485,7 +485,7 @@ final class Settings {
                         bp.pendingInfo.packageName = newPkg;
                     }
                     bp.uid = 0;
-                    bp.gids = null;
+                    bp.setGids(null, false);
                 }
             }
         }
@@ -3700,7 +3700,8 @@ final class Settings {
                     pw.println("):");
             pw.print("    sourcePackage="); pw.println(p.sourcePackage);
             pw.print("    uid="); pw.print(p.uid);
-                    pw.print(" gids="); pw.print(PackageManagerService.arrayToString(p.gids));
+                    pw.print(" gids="); pw.print(Arrays.toString(
+                            p.computeGids(UserHandle.USER_OWNER)));
                     pw.print(" type="); pw.print(p.type);
                     pw.print(" prot=");
                     pw.println(PermissionInfo.protectionToString(p.protectionLevel));
