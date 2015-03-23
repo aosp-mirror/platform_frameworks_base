@@ -157,7 +157,6 @@ final class UiModeManagerService extends SystemService {
     @Override
     public void onStart() {
         final Context context = getContext();
-        mTwilightManager = getLocalService(TwilightManager.class);
 
         final PowerManager powerManager =
                 (PowerManager) context.getSystemService(Context.POWER_SERVICE);
@@ -188,7 +187,11 @@ final class UiModeManagerService extends SystemService {
         mNightMode = Settings.Secure.getInt(context.getContentResolver(),
                 Settings.Secure.UI_NIGHT_MODE, defaultNightMode);
 
-        mTwilightManager.registerListener(mTwilightListener, mHandler);
+        // Update the initial, static configurations.
+        synchronized (this) {
+            updateConfigurationLocked();
+            sendConfigurationLocked();
+        }
 
         publishBinderService(Context.UI_MODE_SERVICE, mService);
     }
@@ -297,8 +300,11 @@ final class UiModeManagerService extends SystemService {
                     pw.print(" mSetUiMode=0x"); pw.println(Integer.toHexString(mSetUiMode));
             pw.print("  mHoldingConfiguration="); pw.print(mHoldingConfiguration);
                     pw.print(" mSystemReady="); pw.println(mSystemReady);
-            pw.print("  mTwilightService.getCurrentState()=");
-                    pw.println(mTwilightManager.getCurrentState());
+            if (mTwilightManager != null) {
+                // We may not have a TwilightManager.
+                pw.print("  mTwilightService.getCurrentState()=");
+                pw.println(mTwilightManager.getCurrentState());
+            }
         }
     }
 
@@ -306,6 +312,10 @@ final class UiModeManagerService extends SystemService {
     public void onBootPhase(int phase) {
         if (phase == SystemService.PHASE_SYSTEM_SERVICES_READY) {
             synchronized (mLock) {
+                mTwilightManager = getLocalService(TwilightManager.class);
+                if (mTwilightManager != null) {
+                    mTwilightManager.registerListener(mTwilightListener, mHandler);
+                }
                 mSystemReady = true;
                 mCarModeEnabled = mDockState == Intent.EXTRA_DOCK_STATE_CAR;
                 updateComputedNightModeLocked();
@@ -623,9 +633,11 @@ final class UiModeManagerService extends SystemService {
     }
 
     private void updateComputedNightModeLocked() {
-        TwilightState state = mTwilightManager.getCurrentState();
-        if (state != null) {
-            mComputedNightMode = state.isNight();
+        if (mTwilightManager != null) {
+            TwilightState state = mTwilightManager.getCurrentState();
+            if (state != null) {
+                mComputedNightMode = state.isNight();
+            }
         }
     }
 
