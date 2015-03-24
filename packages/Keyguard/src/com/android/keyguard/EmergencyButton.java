@@ -36,7 +36,10 @@ import com.android.internal.widget.LockPatternUtils;
  * allows the user to return to the call.
  */
 public class EmergencyButton extends Button {
-    private static final String ACTION_EMERGENCY_DIAL = "com.android.phone.EmergencyDialer.DIAL";
+    private static final Intent INTENT_EMERGENCY_DIAL = new Intent()
+            .setAction("com.android.phone.EmergencyDialer.DIAL")
+            .setPackage("com.android.phone")
+            .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
 
     KeyguardUpdateMonitorCallback mInfoCallback = new KeyguardUpdateMonitorCallback() {
 
@@ -112,12 +115,9 @@ public class EmergencyButton extends Button {
                 mEmergencyButtonCallback.onEmergencyButtonClickedWhenInCall();
             }
         } else {
-            final boolean bypassHandler = true;
-            KeyguardUpdateMonitor.getInstance(mContext).reportEmergencyCallAction(bypassHandler);
-            Intent intent = new Intent(ACTION_EMERGENCY_DIAL);
-            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
-                    | Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
-            getContext().startActivityAsUser(intent,
+            KeyguardUpdateMonitor.getInstance(mContext).reportEmergencyCallAction(
+                    true /* bypassHandler */);
+            getContext().startActivityAsUser(INTENT_EMERGENCY_DIAL,
                     new UserHandle(mLockPatternUtils.getCurrentUser()));
         }
     }
