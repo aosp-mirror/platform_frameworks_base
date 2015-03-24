@@ -118,7 +118,6 @@ public final class ViewRootImpl implements ViewParent,
      * at 60 Hz. This can be used to measure the potential framerate.
      */
     private static final String PROPERTY_PROFILE_RENDERING = "viewroot.profile_rendering";
-    private static final String PROPERTY_MEDIA_DISABLED = "config.disable_media";
 
     // properties used by emulator to determine display shape
     public static final String PROPERTY_EMULATOR_CIRCULAR = "ro.emulator.circular";
@@ -300,8 +299,6 @@ public final class ViewRootImpl implements ViewParent,
     private boolean mProfileRendering;
     private Choreographer.FrameCallback mRenderProfiler;
     private boolean mRenderProfilingEnabled;
-
-    private boolean mMediaDisabled;
 
     // Variables to track frames per second, enabled via DEBUG_FPS flag
     private long mFpsStartTime = -1;
@@ -5360,10 +5357,6 @@ public final class ViewRootImpl implements ViewParent,
     public void playSoundEffect(int effectId) {
         checkThread();
 
-        if (mMediaDisabled) {
-            return;
-        }
-
         try {
             final AudioManager audioManager = getAudioManager();
 
@@ -5569,9 +5562,6 @@ public final class ViewRootImpl implements ViewParent,
                 // Profiling
                 mProfileRendering = SystemProperties.getBoolean(PROPERTY_PROFILE_RENDERING, false);
                 profileRendering(mAttachInfo.mHasWindowFocus);
-
-                // Media (used by sound effects)
-                mMediaDisabled = SystemProperties.getBoolean(PROPERTY_MEDIA_DISABLED, false);
 
                 // Hardware rendering
                 if (mAttachInfo.mHardwareRenderer != null) {
