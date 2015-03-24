@@ -19,6 +19,7 @@ package com.android.server.pm;
 import android.os.UserHandle;
 import android.util.ArrayMap;
 import android.util.ArraySet;
+
 import com.android.internal.util.ArrayUtils;
 
 import java.util.Arrays;
@@ -214,7 +215,7 @@ public final class PermissionsState {
         int result = PERMISSION_OPERATION_SUCCESS;
 
         PermissionData permissionData = mPermissions.get(permission.name);
-        if (permissionData.getGids() != NO_GIDS) {
+        if (permissionData.hasGids()) {
             for (int userId : permissionData.getUserIds()) {
                 if (revokePermission(permission, userId)
                         == PERMISSION_OPERATION_SUCCESS_GIDS_CHANGED) {
@@ -226,7 +227,7 @@ public final class PermissionsState {
 
         mPermissions.remove(permission.name);
 
-        return  result;
+        return result;
     }
 
     /**
@@ -333,7 +334,7 @@ public final class PermissionsState {
                     continue;
                 }
                 PermissionData permissionData = mPermissions.valueAt(i);
-                final int[] permGids = permissionData.getGids();
+                final int[] permGids = permissionData.computeGids(userId);
                 if (permGids != NO_GIDS) {
                     gids = appendInts(gids, permGids);
                 }
@@ -373,7 +374,7 @@ public final class PermissionsState {
             return PERMISSION_OPERATION_FAILURE;
         }
 
-        final boolean hasGids = permission.gids != NO_GIDS;
+        final boolean hasGids = permission.hasGids();
         final int[] oldGids = hasGids ? computeGids(userId) : NO_GIDS;
 
         if (mPermissions == null) {
@@ -382,7 +383,7 @@ public final class PermissionsState {
 
         PermissionData permissionData = mPermissions.get(permission.name);
         if (permissionData == null) {
-            permissionData = new PermissionData(permission.gids);
+            permissionData = new PermissionData(permission);
             mPermissions.put(permission.name, permissionData);
         }
 
@@ -405,7 +406,7 @@ public final class PermissionsState {
             return PERMISSION_OPERATION_FAILURE;
         }
 
-        final boolean hasGids = permission.gids != NO_GIDS;
+        final boolean hasGids = permission.hasGids();
         final int[] oldGids = hasGids ? computeGids(userId) : NO_GIDS;
 
         PermissionData permissionData = mPermissions.get(permission.name);
@@ -448,17 +449,15 @@ public final class PermissionsState {
     }
 
     private static final class PermissionData {
-        private final int[] mGids;
+        private final BasePermission mPerm;
         private int[] mUserIds = USERS_NONE;
 
-        public PermissionData(int[] gids) {
-            mGids = !ArrayUtils.isEmpty(gids)
-                    ? Arrays.copyOf(gids, gids.length)
-                    : NO_GIDS;
+        public PermissionData(BasePermission perm) {
+            mPerm = perm;
         }
 
         public PermissionData(PermissionData other) {
-            this(other.mGids);
+            this(other.mPerm);
 
             if (other.mUserIds == USERS_ALL || other.mUserIds == USERS_NONE) {
                 mUserIds = other.mUserIds;
@@ -467,8 +466,12 @@ public final class PermissionsState {
             }
         }
 
-        public int[] getGids() {
-            return mGids;
+        public boolean hasGids() {
+            return mPerm.hasGids();
+        }
+
+        public int[] computeGids(int userId) {
+            return mPerm.computeGids(userId);
         }
 
         public int[] getUserIds() {

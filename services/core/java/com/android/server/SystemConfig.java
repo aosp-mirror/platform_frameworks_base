@@ -71,9 +71,11 @@ public class SystemConfig {
     public static final class PermissionEntry {
         public final String name;
         public int[] gids;
+        public boolean perUser;
 
-        PermissionEntry(String _name) {
-            name = _name;
+        PermissionEntry(String name, boolean perUser) {
+            this.name = name;
+            this.perUser = perUser;
         }
     }
 
@@ -363,14 +365,14 @@ public class SystemConfig {
 
     void readPermission(XmlPullParser parser, String name)
             throws IOException, XmlPullParserException {
-
-        name = name.intern();
-
-        PermissionEntry perm = mPermissions.get(name);
-        if (perm == null) {
-            perm = new PermissionEntry(name);
-            mPermissions.put(name, perm);
+        if (mPermissions.containsKey(name)) {
+            throw new IllegalStateException("Duplicate permission definition for " + name);
         }
+
+        final boolean perUser = XmlUtils.readBooleanAttribute(parser, "perUser", false);
+        final PermissionEntry perm = new PermissionEntry(name, perUser);
+        mPermissions.put(name, perm);
+
         int outerDepth = parser.getDepth();
         int type;
         while ((type=parser.next()) != XmlPullParser.END_DOCUMENT
