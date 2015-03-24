@@ -24,6 +24,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.graphics.Rect;
 import android.os.Bundle;
+import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
@@ -33,6 +34,8 @@ import com.android.systemui.recents.model.RecentsTaskLoader;
 import com.android.systemui.recents.model.Task;
 import com.android.systemui.recents.RecentsActivity;
 import com.android.systemui.recents.views.RecentsView;
+
+import java.util.ArrayList;
 
 /**
  * A helper for the dialogs that show when task debugging is on.
@@ -46,16 +49,32 @@ public class RecentsResizeTaskDialog extends DialogFragment {
     private static final int PLACE_RIGHT = 2;
     private static final int PLACE_TOP = 3;
     private static final int PLACE_BOTTOM = 4;
-    private static final int PLACE_FULL = 5;
+    private static final int PLACE_TOP_LEFT = 5;
+    private static final int PLACE_TOP_RIGHT = 6;
+    private static final int PLACE_BOTTOM_LEFT = 7;
+    private static final int PLACE_BOTTOM_RIGHT = 8;
+    private static final int PLACE_FULL = 9;
+
+    // The button resource ID combined with the arrangement command.
+    private static final int[][] BUTTON_DEFINITIONS =
+           {{R.id.place_left, PLACE_LEFT},
+            {R.id.place_right, PLACE_RIGHT},
+            {R.id.place_top, PLACE_TOP},
+            {R.id.place_bottom, PLACE_BOTTOM},
+            {R.id.place_top_left, PLACE_TOP_LEFT},
+            {R.id.place_top_right, PLACE_TOP_RIGHT},
+            {R.id.place_bottom_left, PLACE_BOTTOM_LEFT},
+            {R.id.place_bottom_right, PLACE_BOTTOM_RIGHT},
+            {R.id.place_full, PLACE_FULL}};
 
     // The task we want to resize.
-    private Task mTaskToResize;
-    private Task mNextTaskToResize;
     private FragmentManager mFragmentManager;
     private View mResizeTaskDialogContent;
     private RecentsActivity mRecentsActivity;
     private RecentsView mRecentsView;
     private SystemServicesProxy mSsp;
+    private Rect[] mBounds = {new Rect(), new Rect(), new Rect(), new Rect()};
+    private Task[] mTasks = {null, null, null, null};
 
     public RecentsResizeTaskDialog(FragmentManager mgr, RecentsActivity activity) {
         mFragmentManager = mgr;
@@ -65,9 +84,8 @@ public class RecentsResizeTaskDialog extends DialogFragment {
 
     /** Shows the resize-task dialog. */
     void showResizeTaskDialog(Task mainTask, RecentsView rv) {
-        mTaskToResize = mainTask;
+        mTasks[0] = mainTask;
         mRecentsView = rv;
-        mNextTaskToResize = mRecentsView.getNextTaskOrTopTask(mainTask);
 
         show(mFragmentManager, TAG);
     }
@@ -79,36 +97,18 @@ public class RecentsResizeTaskDialog extends DialogFragment {
         mResizeTaskDialogContent =
                 inflater.inflate(R.layout.recents_task_resize_dialog, null, false);
 
-        ((Button)mResizeTaskDialogContent.findViewById(R.id.place_left)).setOnClickListener(
-                new View.OnClickListener() {
-            public void onClick(View v) {
-                placeTasks(PLACE_LEFT);
+        for (int i = 0; i < BUTTON_DEFINITIONS.length; i++) {
+            Button b = (Button)mResizeTaskDialogContent.findViewById(BUTTON_DEFINITIONS[i][0]);
+            if (b != null) {
+                final int action = BUTTON_DEFINITIONS[i][1];
+                b.setOnClickListener(
+                        new View.OnClickListener() {
+                            public void onClick(View v) {
+                                placeTasks(action);
+                            }
+                        });
             }
-        });
-        ((Button)mResizeTaskDialogContent.findViewById(R.id.place_right)).setOnClickListener(
-                new View.OnClickListener() {
-            public void onClick(View v) {
-                placeTasks(PLACE_RIGHT);
-            }
-        });
-        ((Button)mResizeTaskDialogContent.findViewById(R.id.place_top)).setOnClickListener(
-                new View.OnClickListener() {
-            public void onClick(View v) {
-                placeTasks(PLACE_TOP);
-            }
-        });
-        ((Button)mResizeTaskDialogContent.findViewById(R.id.place_bottom)).setOnClickListener(
-                new View.OnClickListener() {
-            public void onClick(View v) {
-                placeTasks(PLACE_BOTTOM);
-            }
-        });
-        ((Button)mResizeTaskDialogContent.findViewById(R.id.place_full)).setOnClickListener(
-                new View.OnClickListener() {
-            public void onClick(View v) {
-                placeTasks(PLACE_FULL);
-            }
-        });
+        }
 
         builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
             @Override
@@ -122,48 +122,111 @@ public class RecentsResizeTaskDialog extends DialogFragment {
 
     /** Helper function to place window(s) on the display according to an arrangement request. */
     private void placeTasks(int arrangement) {
-        Rect focusedBounds = mSsp.getWindowRect();
-        Rect otherBounds = new Rect(focusedBounds);
-
+        Rect rect = mSsp.getWindowRect();
+        for (int i = 0; i < mBounds.length; ++i) {
+            mBounds[i].set(rect);
+            if (i != 0) {
+                mTasks[i] = null;
+            }
+        }
+        int additionalTasks = 0;
         switch (arrangement) {
             case PLACE_LEFT:
-                focusedBounds.right = focusedBounds.centerX();
-                otherBounds.left = focusedBounds.right;
+                mBounds[0].right = mBounds[0].centerX();
+                mBounds[1].left = mBounds[0].right;
+                additionalTasks = 1;
                 break;
             case PLACE_RIGHT:
-                otherBounds.right = otherBounds.centerX();
-                focusedBounds.left = otherBounds.right;
+                mBounds[1].right = mBounds[1].centerX();
+                mBounds[0].left = mBounds[1].right;
+                additionalTasks = 1;
                 break;
             case PLACE_TOP:
-                focusedBounds.bottom = focusedBounds.centerY();
-                otherBounds.top = focusedBounds.bottom;
+                mBounds[0].bottom = mBounds[0].centerY();
+                mBounds[1].top = mBounds[0].bottom;
+                additionalTasks = 1;
                 break;
             case PLACE_BOTTOM:
-                otherBounds.bottom = otherBounds.centerY();
-                focusedBounds.top = otherBounds.bottom;
+                mBounds[1].bottom = mBounds[1].centerY();
+                mBounds[0].top = mBounds[1].bottom;
+                additionalTasks = 1;
+                break;
+            case PLACE_TOP_LEFT:  // TL, TR, BL, BR
+                mBounds[0].right = mBounds[0].centerX();
+                mBounds[0].bottom = mBounds[0].centerY();
+                mBounds[1].left = mBounds[0].right;
+                mBounds[1].bottom = mBounds[0].bottom;
+                mBounds[2].right = mBounds[0].right;
+                mBounds[2].top = mBounds[0].bottom;
+                mBounds[3].left = mBounds[0].right;
+                mBounds[3].top = mBounds[0].bottom;
+                additionalTasks = 3;
+                break;
+            case PLACE_TOP_RIGHT:  // TR, TL, BR, BL
+                mBounds[0].left = mBounds[0].centerX();
+                mBounds[0].bottom = mBounds[0].centerY();
+                mBounds[1].right = mBounds[0].left;
+                mBounds[1].bottom = mBounds[0].bottom;
+                mBounds[2].left = mBounds[0].left;
+                mBounds[2].top = mBounds[0].bottom;
+                mBounds[3].right = mBounds[0].left;
+                mBounds[3].top = mBounds[0].bottom;
+                additionalTasks = 3;
+                break;
+            case PLACE_BOTTOM_LEFT:  // BL, BR, TL, TR
+                mBounds[0].right = mBounds[0].centerX();
+                mBounds[0].top = mBounds[0].centerY();
+                mBounds[1].left = mBounds[0].right;
+                mBounds[1].top = mBounds[0].top;
+                mBounds[2].right = mBounds[0].right;
+                mBounds[2].bottom = mBounds[0].top;
+                mBounds[3].left = mBounds[0].right;
+                mBounds[3].bottom = mBounds[0].top;
+                additionalTasks = 3;
+                break;
+            case PLACE_BOTTOM_RIGHT:  // BR, BL, TR, TL
+                mBounds[0].left = mBounds[0].centerX();
+                mBounds[0].top = mBounds[0].centerY();
+                mBounds[1].right = mBounds[0].left;
+                mBounds[1].top = mBounds[0].top;
+                mBounds[2].left = mBounds[0].left;
+                mBounds[2].bottom = mBounds[0].top;
+                mBounds[3].right = mBounds[0].left;
+                mBounds[3].bottom = mBounds[0].top;
+                additionalTasks = 3;
                 break;
             case PLACE_FULL:
-                // Null the rectangle to avoid the other task to show up.
-                otherBounds = new Rect();
+                // Nothing to change.
                 break;
         }
 
-        // Resize all other tasks to go to the other side.
-        if (mNextTaskToResize != null && !otherBounds.isEmpty()) {
-            mSsp.resizeTask(mNextTaskToResize.key.id, otherBounds);
+        // Get the other tasks.
+        for (int i = 1; i <= additionalTasks && mTasks[i - 1] != null; ++i) {
+            mTasks[i] = mRecentsView.getNextTaskOrTopTask(mTasks[i - 1]);
+            // Do stop if we circled back to the first item.
+            if (mTasks[i] == mTasks[0]) {
+                mTasks[i] = null;
+            }
         }
-        mSsp.resizeTask(mTaskToResize.key.id, focusedBounds);
+
+        // Resize all tasks beginning from the "oldest" one.
+        for (int i = additionalTasks; i >= 0; --i) {
+            if (mTasks[i] != null) {
+               mSsp.resizeTask(mTasks[i].key.id, mBounds[i]);
+            }
+        }
 
         // Get rid of the dialog.
         dismiss();
         mRecentsActivity.dismissRecentsToHomeRaw(false);
 
-        // Show tasks - beginning with the other first so that the focus ends on the selected one.
+        // Show tasks - beginning with the oldest so that the focus ends on the selected one.
         // TODO: Remove this once issue b/19893373 is resolved.
-        if (mNextTaskToResize != null && !otherBounds.isEmpty()) {
-            mRecentsView.launchTask(mNextTaskToResize);
+        for (int i = additionalTasks; i >= 0; --i) {
+            if (mTasks[i] != null) {
+                mRecentsView.launchTask(mTasks[i]);
+            }
         }
-        mRecentsView.launchTask(mTaskToResize);
     }
 
     @Override
