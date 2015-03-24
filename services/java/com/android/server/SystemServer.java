@@ -406,12 +406,9 @@ public final class SystemServer {
         AudioService audioService = null;
         MmsServiceBroker mmsService = null;
         EntropyMixer entropyMixer = null;
-        MidiService midiService = null;
 
         boolean disableStorage = SystemProperties.getBoolean("config.disable_storage", false);
-        boolean disableMedia = SystemProperties.getBoolean("config.disable_media", false);
         boolean disableBluetooth = SystemProperties.getBoolean("config.disable_bluetooth", false);
-        boolean disableTelephony = SystemProperties.getBoolean("config.disable_telephony", false);
         boolean disableLocation = SystemProperties.getBoolean("config.disable_location", false);
         boolean disableSystemUI = SystemProperties.getBoolean("config.disable_systemui", false);
         boolean disableNonCoreServices = SystemProperties.getBoolean("config.disable_noncore", false);
@@ -520,7 +517,6 @@ public final class SystemServer {
         LockSettingsService lockSettings = null;
         AssetAtlasService atlas = null;
         MediaRouterService mediaRouter = null;
-        MidiService midi = null;
 
         // Bring up services needed for UI.
         if (mFactoryTestMode != FactoryTest.FACTORY_TEST_LOW_LEVEL) {
@@ -792,29 +788,25 @@ public final class SystemServer {
                 }
             }
 
-            if (!disableMedia && !"0".equals(SystemProperties.get("system_init.startaudioservice"))) {
-                try {
-                    Slog.i(TAG, "Audio Service");
-                    audioService = new AudioService(context);
-                    ServiceManager.addService(Context.AUDIO_SERVICE, audioService);
-                } catch (Throwable e) {
-                    reportWtf("starting Audio Service", e);
-                }
+            try {
+                Slog.i(TAG, "Audio Service");
+                audioService = new AudioService(context);
+                ServiceManager.addService(Context.AUDIO_SERVICE, audioService);
+            } catch (Throwable e) {
+                reportWtf("starting Audio Service", e);
             }
 
             if (!disableNonCoreServices) {
                 mSystemServiceManager.startService(DockObserver.class);
             }
 
-            if (!disableMedia) {
-                try {
-                    Slog.i(TAG, "Wired Accessory Manager");
-                    // Listen for wired headset changes
-                    inputManager.setWiredAccessoryCallbacks(
-                            new WiredAccessoryManager(context, inputManager));
-                } catch (Throwable e) {
-                    reportWtf("starting WiredAccessoryManager", e);
-                }
+            try {
+                Slog.i(TAG, "Wired Accessory Manager");
+                // Listen for wired headset changes
+                inputManager.setWiredAccessoryCallbacks(
+                        new WiredAccessoryManager(context, inputManager));
+            } catch (Throwable e) {
+                reportWtf("starting WiredAccessoryManager", e);
             }
 
             if (!disableNonCoreServices) {
@@ -891,14 +883,12 @@ public final class SystemServer {
                 }
             }
 
-            if (!disableMedia) {
-                try {
-                    Slog.i(TAG, "CommonTimeManagementService");
-                    commonTimeMgmtService = new CommonTimeManagementService(context);
-                    ServiceManager.addService("commontime_management", commonTimeMgmtService);
-                } catch (Throwable e) {
-                    reportWtf("starting CommonTimeManagementService service", e);
-                }
+            try {
+                Slog.i(TAG, "CommonTimeManagementService");
+                commonTimeMgmtService = new CommonTimeManagementService(context);
+                ServiceManager.addService("commontime_management", commonTimeMgmtService);
+            } catch (Throwable e) {
+                reportWtf("starting CommonTimeManagementService service", e);
             }
 
             if (!disableNetwork) {

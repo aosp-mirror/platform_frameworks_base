@@ -32,7 +32,6 @@ import android.os.ParcelFileDescriptor;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
-import android.os.SystemProperties;
 import android.util.AndroidRuntimeException;
 import android.util.Log;
 
@@ -112,7 +111,24 @@ import com.android.internal.app.IAppOpsService;
  * resumes.</p>
  */
 public class SoundPool {
-    private final SoundPoolDelegate mImpl;
+    static { System.loadLibrary("soundpool"); }
+
+    // SoundPool messages
+    //
+    // must match SoundPool.h
+    private static final int SAMPLE_LOADED = 1;
+
+    private final static String TAG = "SoundPool";
+    private final static boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
+
+    private long mNativeContext; // accessed by native methods
+
+    private EventHandler mEventHandler;
+    private SoundPool.OnLoadCompleteListener mOnLoadCompleteListener;
+
+    private final Object mLock;
+    private final AudioAttributes mAttributes;
+    private final IAppOpsService mAppOps;
 
     /**
      * Constructor. Constructs a SoundPool object with the following
@@ -135,10 +151,374 @@ public class SoundPool {
     }
 
     private SoundPool(int maxStreams, AudioAttributes attributes) {
-        if (SystemProperties.getBoolean("config.disable_media", false)) {
-            mImpl = new SoundPoolStub();
+        // do native setup
+        if (native_setup(new WeakReference<SoundPool>(this), maxStreams, attributes) != 0) {
+            throw new RuntimeException("Native setup failed");
+        }
+        mLock = new Object();
+        mAttributes = attributes;
+        IBinder b = ServiceManager.getService(Context.APP_OPS_SERVICE);
+        mAppOps = IAppOpsService.Stub.asInterface(b);
+    }
+
+    /**
+     * Release the SoundPool resources.
+     *
+     * Release all memory and native resources used by the SoundPool
+     * object. The SoundPool can no longer be used and the reference
+     * should be set to null.
+     */
+    public native final void release();
+
+    protected void finalize() { release(); }
+
+    /**
+     * Load the sound from the specified path.
+     *
+     * @param path the path to the audio file
+     * @param priority the priority of the sound. Currently has no effect. Use
+     *                 a value of 1 for future compatibility.
+     * @return a sound ID. This value can be used to play or unload the sound.
+     */
+    public int load(String path, int priority) {
+        int id = 0;
+        try {
+            File f = new File(path);
+            ParcelFileDescriptor fd = ParcelFileDescriptor.open(f,
+                    ParcelFileDescriptor.MODE_READ_ONLY);
+            if (fd != null) {
+                id = _load(fd.getFileDescriptor(), 0, f.length(), priority);
+                fd.close();
+            }
+        } catch (java.io.IOException e) {
+            Log.e(TAG, "error loading " + path);
+        }
+        return id;
+    }
+
+    /**
+     * Load the sound from the specified APK resource.
+     *
+     * Note that the extension is dropped. For example, if you want to load
+     * a sound from the raw resource file "explosion.mp3", you would specify
+     * "R.raw.explosion" as the resource ID. Note that this means you cannot
+     * have both an "explosion.wav" and an "explosion.mp3" in the res/raw
+     * directory.
+     * 
+     * @param context the application context
+     * @param resId the resource ID
+     * @param priority the priority of the sound. Currently has no effect. Use
+     *                 a value of 1 for future compatibility.
+     * @return a sound ID. This value can be used to play or unload the sound.
+     */
+    public int load(Context context, int resId, int priority) {
+        AssetFileDescriptor afd = context.getResources().openRawResourceFd(resId);
+        int id = 0;
+        if (afd != null) {
+            id = _load(afd.getFileDescriptor(), afd.getStartOffset(), afd.getLength(), priority);
+            try {
+                afd.close();
+            } catch (java.io.IOException ex) {
+                //Log.d(TAG, "close failed:", ex);
+            }
+        }
+        return id;
+    }
+
+    /**
+     * Load the sound from an asset file descriptor.
+     *
+     * @param afd an asset file descriptor
+     * @param priority the priority of the sound. Currently has no effect. Use
+     *                 a value of 1 for future compatibility.
+     * @return a sound ID. This value can be used to play or unload the sound.
+     */
+    public int load(AssetFileDescriptor afd, int priority) {
+        if (afd != null) {
+            long len = afd.getLength();
+            if (len < 0) {
+                throw new AndroidRuntimeException("no length for fd");
+            }
+            return _load(afd.getFileDescriptor(), afd.getStartOffset(), len, priority);
         } else {
-            mImpl = new SoundPoolImpl(this, maxStreams, attributes);
+            return 0;
+        }
+    }
+
+    /**
+     * Load the sound from a FileDescriptor.
+     *
+     * This version is useful if you store multiple sounds in a single
+     * binary. The offset specifies the offset from the start of the file
+     * and the length specifies the length of the sound within the file.
+     *
+     * @param fd a FileDescriptor object
+     * @param offset offset to the start of the sound
+     * @param length length of the sound
+     * @param priority the priority of the sound. Currently has no effect. Use
+     *                 a value of 1 for future compatibility.
+     * @return a sound ID. This value can be used to play or unload the sound.
+     */
+    public int load(FileDescriptor fd, long offset, long length, int priority) {
+        return _load(fd, offset, length, priority);
+    }
+
+    /**
+     * Unload a sound from a sound ID.
+     *
+     * Unloads the sound specified by the soundID. This is the value
+     * returned by the load() function. Returns true if the sound is
+     * successfully unloaded, false if the sound was already unloaded.
+     *
+     * @param soundID a soundID returned by the load() function
+     * @return true if just unloaded, false if previously unloaded
+     */
+    public native final boolean unload(int soundID);
+
+    /**
+     * Play a sound from a sound ID.
+     *
+     * Play the sound specified by the soundID. This is the value 
+     * returned by the load() function. Returns a non-zero streamID
+     * if successful, zero if it fails. The streamID can be used to
+     * further control playback. Note that calling play() may cause
+     * another sound to stop playing if the maximum number of active
+     * streams is exceeded. A loop value of -1 means loop forever,
+     * a value of 0 means don't loop, other values indicate the
+     * number of repeats, e.g. a value of 1 plays the audio twice.
+     * The playback rate allows the application to vary the playback
+     * rate (pitch) of the sound. A value of 1.0 means play back at
+     * the original frequency. A value of 2.0 means play back twice
+     * as fast, and a value of 0.5 means playback at half speed.
+     *
+     * @param soundID a soundID returned by the load() function
+     * @param leftVolume left volume value (range = 0.0 to 1.0)
+     * @param rightVolume right volume value (range = 0.0 to 1.0)
+     * @param priority stream priority (0 = lowest priority)
+     * @param loop loop mode (0 = no loop, -1 = loop forever)
+     * @param rate playback rate (1.0 = normal playback, range 0.5 to 2.0)
+     * @return non-zero streamID if successful, zero if failed
+     */
+    public final int play(int soundID, float leftVolume, float rightVolume,
+            int priority, int loop, float rate) {
+        if (isRestricted()) {
+            leftVolume = rightVolume = 0;
+        }
+        return _play(soundID, leftVolume, rightVolume, priority, loop, rate);
+    }
+
+    /**
+     * Pause a playback stream.
+     *
+     * Pause the stream specified by the streamID. This is the
+     * value returned by the play() function. If the stream is
+     * playing, it will be paused. If the stream is not playing
+     * (e.g. is stopped or was previously paused), calling this
+     * function will have no effect.
+     *
+     * @param streamID a streamID returned by the play() function
+     */
+    public native final void pause(int streamID);
+
+    /**
+     * Resume a playback stream.
+     *
+     * Resume the stream specified by the streamID. This
+     * is the value returned by the play() function. If the stream
+     * is paused, this will resume playback. If the stream was not
+     * previously paused, calling this function will have no effect.
+     *
+     * @param streamID a streamID returned by the play() function
+     */
+    public native final void resume(int streamID);
+
+    /**
+     * Pause all active streams.
+     *
+     * Pause all streams that are currently playing. This function
+     * iterates through all the active streams and pauses any that
+     * are playing. It also sets a flag so that any streams that
+     * are playing can be resumed by calling autoResume().
+     */
+    public native final void autoPause();
+
+    /**
+     * Resume all previously active streams.
+     *
+     * Automatically resumes all streams that were paused in previous
+     * calls to autoPause().
+     */
+    public native final void autoResume();
+
+    /**
+     * Stop a playback stream.
+     *
+     * Stop the stream specified by the streamID. This
+     * is the value returned by the play() function. If the stream
+     * is playing, it will be stopped. It also releases any native
+     * resources associated with this stream. If the stream is not
+     * playing, it will have no effect.
+     *
+     * @param streamID a streamID returned by the play() function
+     */
+    public native final void stop(int streamID);
+
+    /**
+     * Set stream volume.
+     *
+     * Sets the volume on the stream specified by the streamID.
+     * This is the value returned by the play() function. The
+     * value must be in the range of 0.0 to 1.0. If the stream does
+     * not exist, it will have no effect.
+     *
+     * @param streamID a streamID returned by the play() function
+     * @param leftVolume left volume value (range = 0.0 to 1.0)
+     * @param rightVolume right volume value (range = 0.0 to 1.0)
+     */
+    public final void setVolume(int streamID, float leftVolume, float rightVolume) {
+        if (isRestricted()) {
+            return;
+        }
+        _setVolume(streamID, leftVolume, rightVolume);
+    }
+
+    /**
+     * Similar, except set volume of all channels to same value.
+     * @hide
+     */
+    public void setVolume(int streamID, float volume) {
+        setVolume(streamID, volume, volume);
+    }
+
+    /**
+     * Change stream priority.
+     *
+     * Change the priority of the stream specified by the streamID.
+     * This is the value returned by the play() function. Affects the
+     * order in which streams are re-used to play new sounds. If the
+     * stream does not exist, it will have no effect.
+     *
+     * @param streamID a streamID returned by the play() function
+     */
+    public native final void setPriority(int streamID, int priority);
+
+    /**
+     * Set loop mode.
+     *
+     * Change the loop mode. A loop value of -1 means loop forever,
+     * a value of 0 means don't loop, other values indicate the
+     * number of repeats, e.g. a value of 1 plays the audio twice.
+     * If the stream does not exist, it will have no effect.
+     *
+     * @param streamID a streamID returned by the play() function
+     * @param loop loop mode (0 = no loop, -1 = loop forever)
+     */
+    public native final void setLoop(int streamID, int loop);
+
+    /**
+     * Change playback rate.
+     *
+     * The playback rate allows the application to vary the playback
+     * rate (pitch) of the sound. A value of 1.0 means playback at
+     * the original frequency. A value of 2.0 means playback twice
+     * as fast, and a value of 0.5 means playback at half speed.
+     * If the stream does not exist, it will have no effect.
+     *
+     * @param streamID a streamID returned by the play() function
+     * @param rate playback rate (1.0 = normal playback, range 0.5 to 2.0)
+     */
+    public native final void setRate(int streamID, float rate);
+
+    public interface OnLoadCompleteListener {
+        /**
+         * Called when a sound has completed loading.
+         *
+         * @param soundPool SoundPool object from the load() method
+         * @param sampleId the sample ID of the sound loaded.
+         * @param status the status of the load operation (0 = success)
+         */
+        public void onLoadComplete(SoundPool soundPool, int sampleId, int status);
+    }
+
+    /**
+     * Sets the callback hook for the OnLoadCompleteListener.
+     */
+    public void setOnLoadCompleteListener(OnLoadCompleteListener listener) {
+        synchronized(mLock) {
+            if (listener != null) {
+                // setup message handler
+                Looper looper;
+                if ((looper = Looper.myLooper()) != null) {
+                    mEventHandler = new EventHandler(looper);
+                } else if ((looper = Looper.getMainLooper()) != null) {
+                    mEventHandler = new EventHandler(looper);
+                } else {
+                    mEventHandler = null;
+                }
+            } else {
+                mEventHandler = null;
+            }
+            mOnLoadCompleteListener = listener;
+        }
+    }
+
+    private boolean isRestricted() {
+        if ((mAttributes.getFlags() & AudioAttributes.FLAG_BYPASS_INTERRUPTION_POLICY) != 0) {
+            return false;
+        }
+        try {
+            final int mode = mAppOps.checkAudioOperation(AppOpsManager.OP_PLAY_AUDIO,
+                    mAttributes.getUsage(),
+                    Process.myUid(), ActivityThread.currentPackageName());
+            return mode != AppOpsManager.MODE_ALLOWED;
+        } catch (RemoteException e) {
+            return false;
+        }
+    }
+
+    private native final int _load(FileDescriptor fd, long offset, long length, int priority); 
+
+    private native final int native_setup(Object weakRef, int maxStreams,
+            Object/*AudioAttributes*/ attributes);
+
+    private native final int _play(int soundID, float leftVolume, float rightVolume,
+            int priority, int loop, float rate);
+
+    private native final void _setVolume(int streamID, float leftVolume, float rightVolume);
+
+    // post event from native code to message handler
+    @SuppressWarnings("unchecked")
+    private static void postEventFromNative(Object ref, int msg, int arg1, int arg2, Object obj) {
+        SoundPool soundPool = ((WeakReference<SoundPool>) ref).get();
+        if (soundPool == null)
+            return;
+
+        if (soundPool.mEventHandler != null) {
+            Message m = soundPool.mEventHandler.obtainMessage(msg, arg1, arg2, obj);
+            soundPool.mEventHandler.sendMessage(m);
+        }
+    }
+
+    private final class EventHandler extends Handler {
+        public EventHandler(Looper looper) {
+            super(looper);
+        }
+
+        @Override
+        public void handleMessage(Message msg) {
+            switch(msg.what) {
+            case SAMPLE_LOADED:
+                if (DEBUG) Log.d(TAG, "Sample " + msg.arg1 + " loaded");
+                synchronized(mLock) {
+                    if (mOnLoadCompleteListener != null) {
+                        mOnLoadCompleteListener.onLoadComplete(SoundPool.this, msg.arg1, msg.arg2);
+                    }
+                }
+                break;
+            default:
+                Log.e(TAG, "Unknown message type " + msg.what);
+                return;
+            }
         }
     }
 
@@ -196,614 +576,5 @@ public class SoundPool {
             }
             return new SoundPool(mMaxStreams, mAudioAttributes);
         }
-    }
-
-    /**
-     * Load the sound from the specified path.
-     *
-     * @param path the path to the audio file
-     * @param priority the priority of the sound. Currently has no effect. Use
-     *                 a value of 1 for future compatibility.
-     * @return a sound ID. This value can be used to play or unload the sound.
-     */
-    public int load(String path, int priority) {
-        return mImpl.load(path, priority);
-    }
-
-    /**
-     * Load the sound from the specified APK resource.
-     *
-     * Note that the extension is dropped. For example, if you want to load
-     * a sound from the raw resource file "explosion.mp3", you would specify
-     * "R.raw.explosion" as the resource ID. Note that this means you cannot
-     * have both an "explosion.wav" and an "explosion.mp3" in the res/raw
-     * directory.
-     * 
-     * @param context the application context
-     * @param resId the resource ID
-     * @param priority the priority of the sound. Currently has no effect. Use
-     *                 a value of 1 for future compatibility.
-     * @return a sound ID. This value can be used to play or unload the sound.
-     */
-    public int load(Context context, int resId, int priority) {
-        return mImpl.load(context, resId, priority);
-    }
-
-    /**
-     * Load the sound from an asset file descriptor.
-     *
-     * @param afd an asset file descriptor
-     * @param priority the priority of the sound. Currently has no effect. Use
-     *                 a value of 1 for future compatibility.
-     * @return a sound ID. This value can be used to play or unload the sound.
-     */
-    public int load(AssetFileDescriptor afd, int priority) {
-        return mImpl.load(afd, priority);
-    }
-
-    /**
-     * Load the sound from a FileDescriptor.
-     *
-     * This version is useful if you store multiple sounds in a single
-     * binary. The offset specifies the offset from the start of the file
-     * and the length specifies the length of the sound within the file.
-     *
-     * @param fd a FileDescriptor object
-     * @param offset offset to the start of the sound
-     * @param length length of the sound
-     * @param priority the priority of the sound. Currently has no effect. Use
-     *                 a value of 1 for future compatibility.
-     * @return a sound ID. This value can be used to play or unload the sound.
-     */
-    public int load(FileDescriptor fd, long offset, long length, int priority) {
-        return mImpl.load(fd, offset, length, priority);
-    }
-
-    /**
-     * Unload a sound from a sound ID.
-     *
-     * Unloads the sound specified by the soundID. This is the value
-     * returned by the load() function. Returns true if the sound is
-     * successfully unloaded, false if the sound was already unloaded.
-     *
-     * @param soundID a soundID returned by the load() function
-     * @return true if just unloaded, false if previously unloaded
-     */
-    public final boolean unload(int soundID) {
-        return mImpl.unload(soundID);
-    }
-
-    /**
-     * Play a sound from a sound ID.
-     *
-     * Play the sound specified by the soundID. This is the value 
-     * returned by the load() function. Returns a non-zero streamID
-     * if successful, zero if it fails. The streamID can be used to
-     * further control playback. Note that calling play() may cause
-     * another sound to stop playing if the maximum number of active
-     * streams is exceeded. A loop value of -1 means loop forever,
-     * a value of 0 means don't loop, other values indicate the
-     * number of repeats, e.g. a value of 1 plays the audio twice.
-     * The playback rate allows the application to vary the playback
-     * rate (pitch) of the sound. A value of 1.0 means play back at
-     * the original frequency. A value of 2.0 means play back twice
-     * as fast, and a value of 0.5 means playback at half speed.
-     *
-     * @param soundID a soundID returned by the load() function
-     * @param leftVolume left volume value (range = 0.0 to 1.0)
-     * @param rightVolume right volume value (range = 0.0 to 1.0)
-     * @param priority stream priority (0 = lowest priority)
-     * @param loop loop mode (0 = no loop, -1 = loop forever)
-     * @param rate playback rate (1.0 = normal playback, range 0.5 to 2.0)
-     * @return non-zero streamID if successful, zero if failed
-     */
-    public final int play(int soundID, float leftVolume, float rightVolume,
-            int priority, int loop, float rate) {
-        return mImpl.play(
-            soundID, leftVolume, rightVolume, priority, loop, rate);
-    }
-
-    /**
-     * Pause a playback stream.
-     *
-     * Pause the stream specified by the streamID. This is the
-     * value returned by the play() function. If the stream is
-     * playing, it will be paused. If the stream is not playing
-     * (e.g. is stopped or was previously paused), calling this
-     * function will have no effect.
-     *
-     * @param streamID a streamID returned by the play() function
-     */
-    public final void pause(int streamID) {
-        mImpl.pause(streamID);
-    }
-
-    /**
-     * Resume a playback stream.
-     *
-     * Resume the stream specified by the streamID. This
-     * is the value returned by the play() function. If the stream
-     * is paused, this will resume playback. If the stream was not
-     * previously paused, calling this function will have no effect.
-     *
-     * @param streamID a streamID returned by the play() function
-     */
-    public final void resume(int streamID) {
-        mImpl.resume(streamID);
-    }
-
-    /**
-     * Pause all active streams.
-     *
-     * Pause all streams that are currently playing. This function
-     * iterates through all the active streams and pauses any that
-     * are playing. It also sets a flag so that any streams that
-     * are playing can be resumed by calling autoResume().
-     */
-    public final void autoPause() {
-        mImpl.autoPause();
-    }
-
-    /**
-     * Resume all previously active streams.
-     *
-     * Automatically resumes all streams that were paused in previous
-     * calls to autoPause().
-     */
-    public final void autoResume() {
-        mImpl.autoResume();
-    }
-
-    /**
-     * Stop a playback stream.
-     *
-     * Stop the stream specified by the streamID. This
-     * is the value returned by the play() function. If the stream
-     * is playing, it will be stopped. It also releases any native
-     * resources associated with this stream. If the stream is not
-     * playing, it will have no effect.
-     *
-     * @param streamID a streamID returned by the play() function
-     */
-    public final void stop(int streamID) {
-        mImpl.stop(streamID);
-    }
-
-    /**
-     * Set stream volume.
-     *
-     * Sets the volume on the stream specified by the streamID.
-     * This is the value returned by the play() function. The
-     * value must be in the range of 0.0 to 1.0. If the stream does
-     * not exist, it will have no effect.
-     *
-     * @param streamID a streamID returned by the play() function
-     * @param leftVolume left volume value (range = 0.0 to 1.0)
-     * @param rightVolume right volume value (range = 0.0 to 1.0)
-     */
-    public final void setVolume(int streamID,
-            float leftVolume, float rightVolume) {
-        mImpl.setVolume(streamID, leftVolume, rightVolume);
-    }
-
-    /**
-     * Similar, except set volume of all channels to same value.
-     * @hide
-     */
-    public void setVolume(int streamID, float volume) {
-        setVolume(streamID, volume, volume);
-    }
-
-    /**
-     * Change stream priority.
-     *
-     * Change the priority of the stream specified by the streamID.
-     * This is the value returned by the play() function. Affects the
-     * order in which streams are re-used to play new sounds. If the
-     * stream does not exist, it will have no effect.
-     *
-     * @param streamID a streamID returned by the play() function
-     */
-    public final void setPriority(int streamID, int priority) {
-        mImpl.setPriority(streamID, priority);
-    }
-
-    /**
-     * Set loop mode.
-     *
-     * Change the loop mode. A loop value of -1 means loop forever,
-     * a value of 0 means don't loop, other values indicate the
-     * number of repeats, e.g. a value of 1 plays the audio twice.
-     * If the stream does not exist, it will have no effect.
-     *
-     * @param streamID a streamID returned by the play() function
-     * @param loop loop mode (0 = no loop, -1 = loop forever)
-     */
-    public final void setLoop(int streamID, int loop) {
-        mImpl.setLoop(streamID, loop);
-    }
-
-    /**
-     * Change playback rate.
-     *
-     * The playback rate allows the application to vary the playback
-     * rate (pitch) of the sound. A value of 1.0 means playback at
-     * the original frequency. A value of 2.0 means playback twice
-     * as fast, and a value of 0.5 means playback at half speed.
-     * If the stream does not exist, it will have no effect.
-     *
-     * @param streamID a streamID returned by the play() function
-     * @param rate playback rate (1.0 = normal playback, range 0.5 to 2.0)
-     */
-    public final void setRate(int streamID, float rate) {
-        mImpl.setRate(streamID, rate);
-    }
-
-    public interface OnLoadCompleteListener {
-        /**
-         * Called when a sound has completed loading.
-         *
-         * @param soundPool SoundPool object from the load() method
-         * @param sampleId the sample ID of the sound loaded.
-         * @param status the status of the load operation (0 = success)
-         */
-        public void onLoadComplete(SoundPool soundPool, int sampleId, int status);
-    }
-
-    /**
-     * Sets the callback hook for the OnLoadCompleteListener.
-     */
-    public void setOnLoadCompleteListener(OnLoadCompleteListener listener) {
-        mImpl.setOnLoadCompleteListener(listener);
-    }
-
-    /**
-     * Release the SoundPool resources.
-     *
-     * Release all memory and native resources used by the SoundPool
-     * object. The SoundPool can no longer be used and the reference
-     * should be set to null.
-     */
-    public final void release() {
-        mImpl.release();
-    }
-
-    /**
-     * Interface for SoundPool implementations.
-     * SoundPool is statically referenced and unconditionally called from all
-     * over the framework, so we can't simply omit the class or make it throw
-     * runtime exceptions, as doing so would break the framework. Instead we
-     * now select either a real or no-op impl object based on whether media is
-     * enabled.
-     *
-     * @hide
-     */
-    /* package */ interface SoundPoolDelegate {
-        public int load(String path, int priority);
-        public int load(Context context, int resId, int priority);
-        public int load(AssetFileDescriptor afd, int priority);
-        public int load(
-                FileDescriptor fd, long offset, long length, int priority);
-        public boolean unload(int soundID);
-        public int play(
-                int soundID, float leftVolume, float rightVolume,
-                int priority, int loop, float rate);
-        public void pause(int streamID);
-        public void resume(int streamID);
-        public void autoPause();
-        public void autoResume();
-        public void stop(int streamID);
-        public void setVolume(int streamID, float leftVolume, float rightVolume);
-        public void setVolume(int streamID, float volume);
-        public void setPriority(int streamID, int priority);
-        public void setLoop(int streamID, int loop);
-        public void setRate(int streamID, float rate);
-        public void setOnLoadCompleteListener(OnLoadCompleteListener listener);
-        public void release();
-    }
-
-
-    /**
-     * Real implementation of the delegate interface. This was formerly the
-     * body of SoundPool itself.
-     */
-    /* package */ static class SoundPoolImpl implements SoundPoolDelegate {
-        static { System.loadLibrary("soundpool"); }
-
-        private final static String TAG = "SoundPool";
-        private final static boolean DEBUG = false;
-
-        private long mNativeContext; // accessed by native methods
-
-        private EventHandler mEventHandler;
-        private SoundPool.OnLoadCompleteListener mOnLoadCompleteListener;
-        private SoundPool mProxy;
-
-        private final Object mLock;
-        private final AudioAttributes mAttributes;
-        private final IAppOpsService mAppOps;
-
-        // SoundPool messages
-        //
-        // must match SoundPool.h
-        private static final int SAMPLE_LOADED = 1;
-
-        public SoundPoolImpl(SoundPool proxy, int maxStreams, AudioAttributes attr) {
-
-            // do native setup
-            if (native_setup(new WeakReference(this), maxStreams, attr) != 0) {
-                throw new RuntimeException("Native setup failed");
-            }
-            mLock = new Object();
-            mProxy = proxy;
-            mAttributes = attr;
-            IBinder b = ServiceManager.getService(Context.APP_OPS_SERVICE);
-            mAppOps = IAppOpsService.Stub.asInterface(b);
-        }
-
-        public int load(String path, int priority)
-        {
-            int id = 0;
-            try {
-                File f = new File(path);
-                ParcelFileDescriptor fd = ParcelFileDescriptor.open(f, ParcelFileDescriptor.MODE_READ_ONLY);
-                if (fd != null) {
-                    id = _load(fd.getFileDescriptor(), 0, f.length(), priority);
-                    fd.close();
-                }
-            } catch (java.io.IOException e) {
-                Log.e(TAG, "error loading " + path);
-            }
-            return id;
-        }
-
-        @Override
-        public int load(Context context, int resId, int priority) {
-            AssetFileDescriptor afd = context.getResources().openRawResourceFd(resId);
-            int id = 0;
-            if (afd != null) {
-                id = _load(afd.getFileDescriptor(), afd.getStartOffset(), afd.getLength(), priority);
-                try {
-                    afd.close();
-                } catch (java.io.IOException ex) {
-                    //Log.d(TAG, "close failed:", ex);
-                }
-            }
-            return id;
-        }
-
-        @Override
-        public int load(AssetFileDescriptor afd, int priority) {
-            if (afd != null) {
-                long len = afd.getLength();
-                if (len < 0) {
-                    throw new AndroidRuntimeException("no length for fd");
-                }
-                return _load(afd.getFileDescriptor(), afd.getStartOffset(), len, priority);
-            } else {
-                return 0;
-            }
-        }
-
-        @Override
-        public int load(FileDescriptor fd, long offset, long length, int priority) {
-            return _load(fd, offset, length, priority);
-        }
-
-        private native final int _load(FileDescriptor fd, long offset, long length, int priority);
-
-        @Override
-        public native final boolean unload(int soundID);
-
-        @Override
-        public final int play(int soundID, float leftVolume, float rightVolume,
-                int priority, int loop, float rate) {
-            if (isRestricted()) {
-                leftVolume = rightVolume = 0;
-            }
-            return _play(soundID, leftVolume, rightVolume, priority, loop, rate);
-        }
-
-        public native final int _play(int soundID, float leftVolume, float rightVolume,
-                int priority, int loop, float rate);
-
-        private boolean isRestricted() {
-            if ((mAttributes.getFlags() & AudioAttributes.FLAG_BYPASS_INTERRUPTION_POLICY) != 0) {
-                return false;
-            }
-            try {
-                final int mode = mAppOps.checkAudioOperation(AppOpsManager.OP_PLAY_AUDIO,
-                        mAttributes.getUsage(),
-                        Process.myUid(), ActivityThread.currentPackageName());
-                return mode != AppOpsManager.MODE_ALLOWED;
-            } catch (RemoteException e) {
-                return false;
-            }
-        }
-
-        @Override
-        public native final void pause(int streamID);
-
-        @Override
-        public native final void resume(int streamID);
-
-        @Override
-        public native final void autoPause();
-
-        @Override
-        public native final void autoResume();
-
-        @Override
-        public native final void stop(int streamID);
-
-        @Override
-        public final void setVolume(int streamID, float leftVolume, float rightVolume) {
-            if (isRestricted()) {
-                return;
-            }
-            _setVolume(streamID, leftVolume, rightVolume);
-        }
-
-        private native final void _setVolume(int streamID, float leftVolume, float rightVolume);
-
-        @Override
-        public void setVolume(int streamID, float volume) {
-            setVolume(streamID, volume, volume);
-        }
-
-        @Override
-        public native final void setPriority(int streamID, int priority);
-
-        @Override
-        public native final void setLoop(int streamID, int loop);
-
-        @Override
-        public native final void setRate(int streamID, float rate);
-
-        @Override
-        public void setOnLoadCompleteListener(SoundPool.OnLoadCompleteListener listener)
-        {
-            synchronized(mLock) {
-                if (listener != null) {
-                    // setup message handler
-                    Looper looper;
-                    if ((looper = Looper.myLooper()) != null) {
-                        mEventHandler = new EventHandler(mProxy, looper);
-                    } else if ((looper = Looper.getMainLooper()) != null) {
-                        mEventHandler = new EventHandler(mProxy, looper);
-                    } else {
-                        mEventHandler = null;
-                    }
-                } else {
-                    mEventHandler = null;
-                }
-                mOnLoadCompleteListener = listener;
-            }
-        }
-
-        private class EventHandler extends Handler
-        {
-            private SoundPool mSoundPool;
-
-            public EventHandler(SoundPool soundPool, Looper looper) {
-                super(looper);
-                mSoundPool = soundPool;
-            }
-
-            @Override
-            public void handleMessage(Message msg) {
-                switch(msg.what) {
-                case SAMPLE_LOADED:
-                    if (DEBUG) Log.d(TAG, "Sample " + msg.arg1 + " loaded");
-                    synchronized(mLock) {
-                        if (mOnLoadCompleteListener != null) {
-                            mOnLoadCompleteListener.onLoadComplete(mSoundPool, msg.arg1, msg.arg2);
-                        }
-                    }
-                    break;
-                default:
-                    Log.e(TAG, "Unknown message type " + msg.what);
-                    return;
-                }
-            }
-        }
-
-        // post event from native code to message handler
-        private static void postEventFromNative(Object weakRef, int msg, int arg1, int arg2, Object obj)
-        {
-            SoundPoolImpl soundPoolImpl = (SoundPoolImpl)((WeakReference)weakRef).get();
-            if (soundPoolImpl == null)
-                return;
-
-            if (soundPoolImpl.mEventHandler != null) {
-                Message m = soundPoolImpl.mEventHandler.obtainMessage(msg, arg1, arg2, obj);
-                soundPoolImpl.mEventHandler.sendMessage(m);
-            }
-        }
-
-        public native final void release();
-
-        private native final int native_setup(Object weakRef, int maxStreams,
-                Object/*AudioAttributes*/ attributes);
-
-        protected void finalize() { release(); }
-    }
-
-    /**
-     * No-op implementation of SoundPool.
-     * Used when media is disabled by the system.
-     * @hide
-     */
-    /* package */ static class SoundPoolStub implements SoundPoolDelegate {
-        public SoundPoolStub() { }
-
-        public int load(String path, int priority) {
-            return 0;
-        }
-
-        @Override
-        public int load(Context context, int resId, int priority) {
-            return 0;
-        }
-
-        @Override
-        public int load(AssetFileDescriptor afd, int priority) {
-            return 0;
-        }
-
-        @Override
-        public int load(FileDescriptor fd, long offset, long length, int priority) {
-            return 0;
-        }
-
-        @Override
-        public final boolean unload(int soundID) {
-            return true;
-        }
-
-        @Override
-        public final int play(int soundID, float leftVolume, float rightVolume,
-                int priority, int loop, float rate) {
-            return 0;
-        }
-
-        @Override
-        public final void pause(int streamID) { }
-
-        @Override
-        public final void resume(int streamID) { }
-
-        @Override
-        public final void autoPause() { }
-
-        @Override
-        public final void autoResume() { }
-
-        @Override
-        public final void stop(int streamID) { }
-
-        @Override
-        public final void setVolume(int streamID,
-                float leftVolume, float rightVolume) { }
-
-        @Override
-        public void setVolume(int streamID, float volume) {
-        }
-
-        @Override
-        public final void setPriority(int streamID, int priority) { }
-
-        @Override
-        public final void setLoop(int streamID, int loop) { }
-
-        @Override
-        public final void setRate(int streamID, float rate) { }
-
-        @Override
-        public void setOnLoadCompleteListener(SoundPool.OnLoadCompleteListener listener) {
-        }
-
-        @Override
-        public final void release() { }
     }
 }

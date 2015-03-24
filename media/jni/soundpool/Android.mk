@@ -2,7 +2,7 @@ LOCAL_PATH:= $(call my-dir)
 include $(CLEAR_VARS)
 
 LOCAL_SRC_FILES:= \
-    android_media_SoundPool_SoundPoolImpl.cpp \
+    android_media_SoundPool.cpp \
     SoundPool.cpp \
     SoundPoolThread.cpp
 
