@@ -178,7 +178,7 @@ public class WindowManagerService extends IWindowManager.Stub
     static final boolean DEBUG_ORIENTATION = false;
     static final boolean DEBUG_APP_ORIENTATION = false;
     static final boolean DEBUG_CONFIGURATION = false;
-    static final boolean DEBUG_APP_TRANSITIONS = false;
+    static final boolean DEBUG_APP_TRANSITIONS = true;
     static final boolean DEBUG_STARTING_WINDOW = false;
     static final boolean DEBUG_WALLPAPER = false;
     static final boolean DEBUG_WALLPAPER_LIGHT = false || DEBUG_WALLPAPER;
@@ -189,7 +189,7 @@ public class WindowManagerService extends IWindowManager.Stub
     static final boolean DEBUG_LAYOUT_REPEATS = true;
     static final boolean DEBUG_SURFACE_TRACE = false;
     static final boolean DEBUG_WINDOW_TRACE = false;
-    static final boolean DEBUG_TASK_MOVEMENT = false;
+    static final boolean DEBUG_TASK_MOVEMENT = true;
     static final boolean DEBUG_STACK = false;
     static final boolean DEBUG_DISPLAY = false;
     static final boolean DEBUG_POWER = false;
@@ -3720,10 +3720,8 @@ public class WindowManagerService extends IWindowManager.Stub
         } else {
             // TODO(multidisplay): Change to the correct display.
             final WindowList windows = getDefaultWindowListLocked();
-            int pos = windows.size() - 1;
-            while (pos >= 0) {
+            for (int pos = windows.size() - 1; pos >= 0; --pos) {
                 WindowState win = windows.get(pos);
-                pos--;
                 if (win.mAppToken != null) {
                     // We hit an application window. so the orientation will be determined by the
                     // app window. No point in continuing further.
