@@ -30,8 +30,10 @@ public:
     ~Signal() { }
 
     void signal() {
-        Mutex::Autolock l(mLock);
-        mSignaled = true;
+        {
+            Mutex::Autolock l(mLock);
+            mSignaled = true;
+        }
         mCondition.signal(mType);
     }
 
