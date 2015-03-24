@@ -22,6 +22,8 @@ import android.os.Parcelable;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.android.internal.telecom.IVideoProvider;
+
 /**
  * A parcelable representation of a conference connection.
  * @hide
@@ -33,17 +35,23 @@ public final class ParcelableConference implements Parcelable {
     private int mConnectionCapabilities;
     private List<String> mConnectionIds;
     private long mConnectTimeMillis;
+    private final IVideoProvider mVideoProvider;
+    private final int mVideoState;
 
     public ParcelableConference(
             PhoneAccountHandle phoneAccount,
             int state,
             int connectionCapabilities,
-            List<String> connectionIds) {
+            List<String> connectionIds,
+            IVideoProvider videoProvider,
+            int videoState) {
         mPhoneAccount = phoneAccount;
         mState = state;
         mConnectionCapabilities = connectionCapabilities;
         mConnectionIds = connectionIds;
         mConnectTimeMillis = Conference.CONNECT_TIME_NOT_SPECIFIED;
+        mVideoProvider = videoProvider;
+        mVideoState = videoState;
     }
 
     public ParcelableConference(
@@ -51,8 +59,10 @@ public final class ParcelableConference implements Parcelable {
             int state,
             int connectionCapabilities,
             List<String> connectionIds,
+            IVideoProvider videoProvider,
+            int videoState,
             long connectTimeMillis) {
-        this(phoneAccount, state, connectionCapabilities, connectionIds);
+        this(phoneAccount, state, connectionCapabilities, connectionIds, videoProvider, videoState);
         mConnectTimeMillis = connectTimeMillis;
     }
 
@@ -69,6 +79,10 @@ public final class ParcelableConference implements Parcelable {
                 .append(mConnectTimeMillis)
                 .append(", children: ")
                 .append(mConnectionIds)
+                .append(", VideoState: ")
+                .append(mVideoState)
+                .append(", VideoProvider: ")
+                .append(mVideoProvider)
                 .toString();
     }
 
@@ -91,6 +105,13 @@ public final class ParcelableConference implements Parcelable {
     public long getConnectTimeMillis() {
         return mConnectTimeMillis;
     }
+    public IVideoProvider getVideoProvider() {
+        return mVideoProvider;
+    }
+
+    public int getVideoState() {
+        return mVideoState;
+    }
 
     public static final Parcelable.Creator<ParcelableConference> CREATOR =
             new Parcelable.Creator<ParcelableConference> () {
@@ -104,8 +125,12 @@ public final class ParcelableConference implements Parcelable {
             source.readList(connectionIds, classLoader);
             long connectTimeMillis = source.readLong();
 
+            IVideoProvider videoCallProvider =
+                    IVideoProvider.Stub.asInterface(source.readStrongBinder());
+            int videoState = source.readInt();
+
             return new ParcelableConference(phoneAccount, state, capabilities, connectionIds,
-                    connectTimeMillis);
+                    videoCallProvider, videoState);
         }
 
         @Override
@@ -128,5 +153,8 @@ public final class ParcelableConference implements Parcelable {
         destination.writeInt(mConnectionCapabilities);
         destination.writeList(mConnectionIds);
         destination.writeLong(mConnectTimeMillis);
+        destination.writeStrongBinder(
+                mVideoProvider != null ? mVideoProvider.asBinder() : null);
+        destination.writeInt(mVideoState);
     }
 }

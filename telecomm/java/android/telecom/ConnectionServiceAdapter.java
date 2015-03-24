@@ -369,4 +369,26 @@ final class ConnectionServiceAdapter implements DeathRecipient {
             }
         }
     }
+
+    /**
+     * Set the call substate for the connection.
+     * Valid values: {@link Connection#CALL_SUBSTATE_NONE},
+     * {@link Connection#CALL_SUBSTATE_AUDIO_CONNECTED_SUSPENDED},
+     * {@link Connection#CALL_SUBSTATE_VIDEO_CONNECTED_SUSPENDED},
+     * {@link Connection#CALL_SUBSTATE_AVP_RETRY},
+     * {@link Connection#CALL_SUBSTATE_MEDIA_PAUSED}.
+     *
+     * @param callId The unique ID of the call to set the substate for.
+     * @param callSubstate The new call substate.
+     * @hide
+     */
+    public final void setCallSubstate(String callId, int callSubstate) {
+        Log.v(this, "setCallSubstate: %d", callSubstate);
+        for (IConnectionServiceAdapter adapter : mAdapters) {
+            try {
+                adapter.setCallSubstate(callId, callSubstate);
+            } catch (RemoteException ignored) {
+            }
+        }
+    }
 }

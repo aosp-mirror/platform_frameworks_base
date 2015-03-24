@@ -209,4 +209,12 @@ public interface TelephonyProperties
      * Set to the sim count.
      */
     static final String PROPERTY_SIM_COUNT = "ro.telephony.sim.count";
+
+    /**
+     * Controls audio route for video calls.
+     * 0 - Use the default audio routing strategy.
+     * 1 - Disable the speaker. Route the audio to Headset or Bluetooth
+     *     or Earpiece, based on the default audio routing strategy.
+     */
+    static final String PROPERTY_VIDEOCALL_AUDIO_OUTPUT = "persist.radio.call.audio.output";
 }

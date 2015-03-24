@@ -270,7 +270,6 @@ public class ImsCallProfile implements Parcelable {
         return "{ serviceType=" + mServiceType +
                 ", callType=" + mCallType +
                 ", restrictCause=" + mRestrictCause +
-                //", callExtras=" + mCallExtras.toString() +
                 ", mediaProfile=" + mMediaProfile.toString() + " }";
     }
 
@@ -313,22 +312,31 @@ public class ImsCallProfile implements Parcelable {
      * @param callType The call type.
      * @return The video state.
      */
-    public static int getVideoStateFromCallType(int callType) {
-        switch (callType) {
-            case CALL_TYPE_VT_NODIR:
-                return VideoProfile.VideoState.PAUSED |
-                        VideoProfile.VideoState.BIDIRECTIONAL;
+    public static int getVideoStateFromImsCallProfile(ImsCallProfile callProfile) {
+        int videostate = VideoProfile.VideoState.AUDIO_ONLY;
+        switch (callProfile.mCallType) {
             case CALL_TYPE_VT_TX:
-                return VideoProfile.VideoState.TX_ENABLED;
+                videostate = VideoProfile.VideoState.TX_ENABLED;
+                break;
             case CALL_TYPE_VT_RX:
-                return VideoProfile.VideoState.RX_ENABLED;
+                videostate = VideoProfile.VideoState.RX_ENABLED;
+                break;
             case CALL_TYPE_VT:
-                return VideoProfile.VideoState.BIDIRECTIONAL;
+                videostate = VideoProfile.VideoState.BIDIRECTIONAL;
+                break;
             case CALL_TYPE_VOICE:
-                return VideoProfile.VideoState.AUDIO_ONLY;
+                videostate = VideoProfile.VideoState.AUDIO_ONLY;
+                break;
             default:
-                return VideoProfile.VideoState.AUDIO_ONLY;
+                videostate = VideoProfile.VideoState.AUDIO_ONLY;
+                break;
         }
+        if (callProfile.isVideoPaused() && videostate != VideoProfile.VideoState.AUDIO_ONLY) {
+            videostate |= VideoProfile.VideoState.PAUSED;
+        } else {
+            videostate &= ~VideoProfile.VideoState.PAUSED;
+        }
+        return videostate;
     }
 
     /**
@@ -384,6 +392,14 @@ public class ImsCallProfile implements Parcelable {
             default:
                 return PhoneConstants.PRESENTATION_UNKNOWN;
         }
+    }
+
+    /**
+     * Checks if video call is paused
+     * @return true if call is video paused
+     */
+    public boolean isVideoPaused() {
+        return mMediaProfile.mVideoDirection == ImsStreamMediaProfile.DIRECTION_INACTIVE;
     }
 
     /**

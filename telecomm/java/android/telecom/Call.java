@@ -208,10 +208,6 @@ public final class Call {
          */
         public static final int CAPABILITY_WIFI = 0x00010000;
 
-        //******************************************************************************************
-        // Next CAPABILITY value: 0x00020000
-        //******************************************************************************************
-
         /**
          * Indicates that the current device callback number should be shown.
          *
@@ -225,8 +221,14 @@ public final class Call {
          */
         public static final int CAPABILITY_SPEED_UP_MT_AUDIO = 0x00040000;
 
+         /**
+         * Call type can be modified for IMS call
+         * @hide
+         */
+        public static final int CAPABILITY_CAN_UPGRADE_TO_VIDEO = 0x00080000;
+
         //******************************************************************************************
-        // Next CAPABILITY value: 0x00080000
+        // Next CAPABILITY value: 0x00100000
         //******************************************************************************************
 
         private final Uri mHandle;
@@ -242,6 +244,7 @@ public final class Call {
         private final int mVideoState;
         private final StatusHints mStatusHints;
         private final Bundle mExtras;
+        private final int mCallSubstate;
 
         /**
          * Whether the supplied capabilities  supports the specified capability.
@@ -328,6 +331,9 @@ public final class Call {
             }
             if (can(capabilities, CAPABILITY_SPEED_UP_MT_AUDIO)) {
                 builder.append(" CAPABILITY_SPEED_UP_MT_AUDIO");
+            }
+            if (can(capabilities, CAPABILITY_CAN_UPGRADE_TO_VIDEO)) {
+                builder.append(" CAPABILITY_CAN_UPGRADE_TO_VIDEO");
             }
             builder.append("]");
             return builder.toString();
@@ -434,6 +440,14 @@ public final class Call {
             return mExtras;
         }
 
+        /**
+         * @return The substate of the {@code Call}.
+         * @hide
+         */
+        public int getCallSubstate() {
+            return mCallSubstate;
+        }
+
         @Override
         public boolean equals(Object o) {
             if (o instanceof Details) {
@@ -452,7 +466,8 @@ public final class Call {
                         Objects.equals(mGatewayInfo, d.mGatewayInfo) &&
                         Objects.equals(mVideoState, d.mVideoState) &&
                         Objects.equals(mStatusHints, d.mStatusHints) &&
-                        Objects.equals(mExtras, d.mExtras);
+                        Objects.equals(mExtras, d.mExtras) &&
+                        Objects.equals(mCallSubstate, d.mCallSubstate);
             }
             return false;
         }
@@ -472,7 +487,8 @@ public final class Call {
                     Objects.hashCode(mGatewayInfo) +
                     Objects.hashCode(mVideoState) +
                     Objects.hashCode(mStatusHints) +
-                    Objects.hashCode(mExtras);
+                    Objects.hashCode(mExtras) +
+                    Objects.hashCode(mCallSubstate);
         }
 
         /** {@hide} */
@@ -489,7 +505,8 @@ public final class Call {
                 GatewayInfo gatewayInfo,
                 int videoState,
                 StatusHints statusHints,
-                Bundle extras) {
+                Bundle extras,
+                int callSubstate) {
             mHandle = handle;
             mHandlePresentation = handlePresentation;
             mCallerDisplayName = callerDisplayName;
@@ -503,6 +520,7 @@ public final class Call {
             mVideoState = videoState;
             mStatusHints = statusHints;
             mExtras = extras;
+            mCallSubstate = callSubstate;
         }
     }
 
@@ -883,7 +901,8 @@ public final class Call {
                 parcelableCall.getGatewayInfo(),
                 parcelableCall.getVideoState(),
                 parcelableCall.getStatusHints(),
-                parcelableCall.getExtras());
+                parcelableCall.getExtras(),
+                parcelableCall.getCallSubstate());
         boolean detailsChanged = !Objects.equals(mDetails, details);
         if (detailsChanged) {
             mDetails = details;

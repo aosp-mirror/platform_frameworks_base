@@ -48,4 +48,26 @@ oneway interface ImsConfigListener {
      * @return void.
      */
     void onSetFeatureResponse(int feature, int network, int value, int status);
+
+    /**
+     * Notifies client the value of the get operation result on the video quality item.
+     *
+     * @param status. as defined in com.android.ims.ImsConfig#OperationStatusConstants.
+     * @param quality. as defined in com.android.ims.ImsConfig#OperationValuesConstants.
+     * @return void
+     *
+     * @throws ImsException if calling the IMS service results in an error.
+     */
+     void onGetVideoQuality(int status, int quality);
+
+    /**
+     * Notifies client the set value operation result for video quality item.
+     * Used by clients that need to be notified the set operation result.
+     *
+     * @param status. as defined in com.android.ims.ImsConfig#OperationStatusConstants.
+     * @return void
+     *
+     * @throws ImsException if calling the IMS service results in an error.
+     */
+     void onSetVideoQuality(int status);
 }
