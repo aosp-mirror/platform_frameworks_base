@@ -1951,15 +1951,14 @@ public class PackageManagerService extends IPackageManager.Stub {
             return null;
         }
 
-        PermissionsState permissionsState = ps.getPermissionsState();
+        final PermissionsState permissionsState = ps.getPermissionsState();
 
         final int[] gids = permissionsState.computeGids(userId);
-        Set<String> permissions = permissionsState.getPermissions(userId);
-
+        final Set<String> permissions = permissionsState.getPermissions(userId);
         final PackageUserState state = ps.readUserState(userId);
+
         return PackageParser.generatePackageInfo(p, gids, flags,
-                ps.firstInstallTime, ps.lastUpdateTime, permissions,
-                state, userId);
+                ps.firstInstallTime, ps.lastUpdateTime, permissions, state, userId);
     }
 
     @Override

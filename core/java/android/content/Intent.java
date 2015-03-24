@@ -1502,6 +1502,66 @@ public class Intent implements Parcelable, Cloneable {
      */
     public static final String METADATA_SETUP_VERSION = "android.SETUP_VERSION";
 
+    /**
+     * Activity action: Launch UI to manage the permissions of an app.
+     * <p>
+     * Input: {@link #EXTRA_PACKAGE_NAME} specifies the package whose permissions
+     * will be managed by the launched UI.
+     * </p>
+     * <p>
+     * Output: Nothing.
+     * </p>
+     *
+     * @see #EXTRA_PACKAGE_NAME
+     *
+     * @hide
+     */
+    @SystemApi
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_MANAGE_APP_PERMISSIONS =
+            "android.intent.action.MANAGE_APP_PERMISSIONS";
+
+    /**
+     * Intent extra: An app package name.
+     * <p>
+     * Type: String
+     * </p>S
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final String EXTRA_PACKAGE_NAME = "android.intent.extra.PACKAGE_NAME";
+
+    /**
+     * Activity action: Launch UI to manage which apps have a given permission.
+     * <p>
+     * Input: {@link #EXTRA_PERMISSION_NAME} specifies the permission access
+     * to which will be managed by the launched UI.
+     * </p>
+     * <p>
+     * Output: Nothing.
+     * </p>
+     *
+     * @see #EXTRA_PERMISSION_NAME
+     *
+     * @hide
+     */
+    @SystemApi
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_MANAGE_PERMISSION_APPS =
+            "android.intent.action.MANAGE_PERMISSION_APPS";
+
+    /**
+     * Intent extra: The name of a permission.
+     * <p>
+     * Type: String
+     * </p>
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final String EXTRA_PERMISSION_NAME = "android.intent.extra.PERMISSION_NAME";
+
     // ---------------------------------------------------------------------
     // ---------------------------------------------------------------------
     // Standard intent broadcast actions (see action variable).
