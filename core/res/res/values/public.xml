@@ -2651,4 +2651,5 @@
 
   <public type="attr" name="colorBackgroundFloating" />
 
+  <public type="attr" name="extractNativeLibs" />
 </resources>
