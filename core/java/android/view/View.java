@@ -4813,10 +4813,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @hide
      */
     protected boolean performButtonActionOnTouchDown(MotionEvent event) {
-        if ((event.getButtonState() & MotionEvent.BUTTON_SECONDARY) != 0) {
-            if (showContextMenu(event.getX(), event.getY(), event.getMetaState())) {
-                return true;
-            }
+        if (event.getToolType(0) == MotionEvent.TOOL_TYPE_MOUSE &&
+            (event.getButtonState() & MotionEvent.BUTTON_SECONDARY) != 0) {
+            showContextMenu(event.getX(), event.getY(), event.getMetaState());
+            mPrivateFlags |= PFLAG_CANCEL_NEXT_UP_EVENT;
+            return true;
         }
         return false;
     }
