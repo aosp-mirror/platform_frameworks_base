@@ -16,6 +16,8 @@ package android.graphics.drawable;
 
 import android.animation.Animator;
 import android.animation.AnimatorInflater;
+import android.animation.AnimatorSet;
+import android.animation.Animator.AnimatorListener;
 import android.annotation.NonNull;
 import android.content.res.ColorStateList;
 import android.content.res.Resources;
@@ -37,6 +39,7 @@ import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * This class uses {@link android.animation.ObjectAnimator} and
@@ -312,6 +315,15 @@ public class AnimatedVectorDrawable extends Drawable implements Animatable {
 
             eventType = parser.next();
         }
+        setupAnimatorSet();
+    }
+
+    private void setupAnimatorSet() {
+        if (mAnimatedVectorState.mTempAnimators != null) {
+            mAnimatedVectorState.mAnimatorSet.playTogether(mAnimatedVectorState.mTempAnimators);
+            mAnimatedVectorState.mTempAnimators.clear();
+            mAnimatedVectorState.mTempAnimators = null;
+        }
     }
 
     @Override
@@ -330,10 +342,44 @@ public class AnimatedVectorDrawable extends Drawable implements Animatable {
         }
     }
 
+    /**
+     * Adds a listener to the set of listeners that are sent events through the life of an
+     * animation.
+     *
+     * @param listener the listener to be added to the current set of listeners for this animation.
+     */
+    public void addListener(AnimatorListener listener) {
+        mAnimatedVectorState.mAnimatorSet.addListener(listener);
+    }
+
+    /**
+     * Removes a listener from the set listening to this animation.
+     *
+     * @param listener the listener to be removed from the current set of listeners for this
+     *                 animation.
+     */
+    public void removeListener(AnimatorListener listener) {
+        mAnimatedVectorState.mAnimatorSet.removeListener(listener);
+    }
+
+    /**
+     * Gets the set of {@link android.animation.Animator.AnimatorListener} objects that are currently
+     * listening for events on this <code>AnimatedVectorDrawable</code> object.
+     *
+     * @return List<AnimatorListener> The set of listeners.
+     */
+    public List<AnimatorListener> getListeners() {
+        return mAnimatedVectorState.mAnimatorSet.getListeners();
+    }
+
     private static class AnimatedVectorDrawableState extends ConstantState {
         int mChangingConfigurations;
         VectorDrawable mVectorDrawable;
-        ArrayList<Animator> mAnimators;
+        // Always have a valid animatorSet to handle all the listeners call.
+        AnimatorSet mAnimatorSet = new AnimatorSet();
+        // When parsing the XML, we build individual animator and store in this array. At the end,
+        // we add this array into the mAnimatorSet.
+        private ArrayList<Animator> mTempAnimators;
         ArrayMap<Animator, String> mTargetNameMap;
 
         public AnimatedVectorDrawableState(AnimatedVectorDrawableState copy,
@@ -353,18 +399,23 @@ public class AnimatedVectorDrawable extends Drawable implements Animatable {
                     mVectorDrawable.setBounds(copy.mVectorDrawable.getBounds());
                     mVectorDrawable.setAllowCaching(false);
                 }
-                if (copy.mAnimators != null) {
-                    final int numAnimators = copy.mAnimators.size();
-                    mAnimators = new ArrayList<Animator>(numAnimators);
+                if (copy.mAnimatorSet != null) {
+                    final int numAnimators = copy.mTargetNameMap.size();
+                    // Deep copy a animator set, and then setup the target map again.
+                    mAnimatorSet = copy.mAnimatorSet.clone();
                     mTargetNameMap = new ArrayMap<Animator, String>(numAnimators);
+                    // Since the new AnimatorSet is cloned from the old one, the order must be the
+                    // same inside the array.
+                    ArrayList<Animator> oldAnim = copy.mAnimatorSet.getChildAnimations();
+                    ArrayList<Animator> newAnim = mAnimatorSet.getChildAnimations();
+
                     for (int i = 0; i < numAnimators; ++i) {
-                        Animator anim = copy.mAnimators.get(i);
-                        Animator animClone = anim.clone();
-                        String targetName = copy.mTargetNameMap.get(anim);
-                        Object targetObject = mVectorDrawable.getTargetByName(targetName);
-                        animClone.setTarget(targetObject);
-                        mAnimators.add(animClone);
-                        mTargetNameMap.put(animClone, targetName);
+                        // Target name must be the same for new and old
+                        String targetName = copy.mTargetNameMap.get(oldAnim.get(i));
+
+                        Object newTargetObject = mVectorDrawable.getTargetByName(targetName);
+                        newAnim.get(i).setTarget(newTargetObject);
+                        mTargetNameMap.put(newAnim.get(i), targetName);
                     }
                 }
             } else {
@@ -397,11 +448,11 @@ public class AnimatedVectorDrawable extends Drawable implements Animatable {
     private void setupAnimatorsForTarget(String name, Animator animator) {
         Object target = mAnimatedVectorState.mVectorDrawable.getTargetByName(name);
         animator.setTarget(target);
-        if (mAnimatedVectorState.mAnimators == null) {
-            mAnimatedVectorState.mAnimators = new ArrayList<Animator>();
+        if (mAnimatedVectorState.mTempAnimators == null) {
+            mAnimatedVectorState.mTempAnimators = new ArrayList<Animator>();
             mAnimatedVectorState.mTargetNameMap = new ArrayMap<Animator, String>();
         }
-        mAnimatedVectorState.mAnimators.add(animator);
+        mAnimatedVectorState.mTempAnimators.add(animator);
         mAnimatedVectorState.mTargetNameMap.put(animator, name);
         if (DBG_ANIMATION_VECTOR_DRAWABLE) {
             Log.v(LOGTAG, "add animator  for target " + name + " " + animator);
@@ -410,27 +461,11 @@ public class AnimatedVectorDrawable extends Drawable implements Animatable {
 
     @Override
     public boolean isRunning() {
-        final ArrayList<Animator> animators = mAnimatedVectorState.mAnimators;
-        final int size = animators.size();
-        for (int i = 0; i < size; i++) {
-            final Animator animator = animators.get(i);
-            if (animator.isRunning()) {
-                return true;
-            }
-        }
-        return false;
+        return mAnimatedVectorState.mAnimatorSet.isRunning();
     }
 
     private boolean isStarted() {
-        final ArrayList<Animator> animators = mAnimatedVectorState.mAnimators;
-        final int size = animators.size();
-        for (int i = 0; i < size; i++) {
-            final Animator animator = animators.get(i);
-            if (animator.isStarted()) {
-                return true;
-            }
-        }
-        return false;
+        return mAnimatedVectorState.mAnimatorSet.isStarted();
     }
 
     @Override
@@ -439,24 +474,13 @@ public class AnimatedVectorDrawable extends Drawable implements Animatable {
         if (isStarted()) {
             return;
         }
-        // Otherwise, kick off every animator.
-        final ArrayList<Animator> animators = mAnimatedVectorState.mAnimators;
-        final int size = animators.size();
-        for (int i = 0; i < size; i++) {
-            final Animator animator = animators.get(i);
-            animator.start();
-        }
+        mAnimatedVectorState.mAnimatorSet.start();
         invalidateSelf();
     }
 
     @Override
     public void stop() {
-        final ArrayList<Animator> animators = mAnimatedVectorState.mAnimators;
-        final int size = animators.size();
-        for (int i = 0; i < size; i++) {
-            final Animator animator = animators.get(i);
-            animator.end();
-        }
+        mAnimatedVectorState.mAnimatorSet.end();
     }
 
     /**
@@ -473,27 +497,14 @@ public class AnimatedVectorDrawable extends Drawable implements Animatable {
             Log.w(LOGTAG, "AnimatedVectorDrawable can't reverse()");
             return;
         }
-        final ArrayList<Animator> animators = mAnimatedVectorState.mAnimators;
-        final int size = animators.size();
-        for (int i = 0; i < size; i++) {
-            final Animator animator = animators.get(i);
-            animator.reverse();
-        }
+        mAnimatedVectorState.mAnimatorSet.reverse();
     }
 
     /**
      * @hide
      */
     public boolean canReverse() {
-        final ArrayList<Animator> animators = mAnimatedVectorState.mAnimators;
-        final int size = animators.size();
-        for (int i = 0; i < size; i++) {
-            final Animator animator = animators.get(i);
-            if (!animator.canReverse()) {
-                return false;
-            }
-        }
-        return true;
+        return mAnimatedVectorState.mAnimatorSet.canReverse();
     }
 
     private final Callback mCallback = new Callback() {

@@ -11896,9 +11896,12 @@ package android.graphics.drawable {
 
   public class AnimatedVectorDrawable extends android.graphics.drawable.Drawable implements android.graphics.drawable.Animatable {
     ctor public AnimatedVectorDrawable();
+    method public void addListener(android.animation.Animator.AnimatorListener);
     method public void draw(android.graphics.Canvas);
+    method public java.util.List<android.animation.Animator.AnimatorListener> getListeners();
     method public int getOpacity();
     method public boolean isRunning();
+    method public void removeListener(android.animation.Animator.AnimatorListener);
     method public void setAlpha(int);
     method public void setColorFilter(android.graphics.ColorFilter);
     method public void start();
