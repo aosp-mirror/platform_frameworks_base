@@ -358,7 +358,7 @@ public class JobSchedulerService extends com.android.server.SystemService
                 for (int i=0; i<jobs.size(); i++) {
                     JobStatus job = jobs.valueAt(i);
                     for (int controller=0; controller<mControllers.size(); controller++) {
-                        mControllers.get(i).deviceIdleModeChanged(mDeviceIdleMode);
+                        mControllers.get(controller).deviceIdleModeChanged(mDeviceIdleMode);
                         mControllers.get(controller).maybeStartTrackingJob(job);
                     }
                 }
