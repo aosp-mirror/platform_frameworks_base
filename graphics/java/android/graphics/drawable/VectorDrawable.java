@@ -791,7 +791,6 @@ public class VectorDrawable extends Drawable {
         // is no need for deep copying.
         private final Path mPath;
         private final Path mRenderPath;
-        private static final Matrix IDENTITY_MATRIX = new Matrix();
         private final Matrix mFinalPathMatrix = new Matrix();
 
         private Paint mStrokePaint;
@@ -932,7 +931,7 @@ public class VectorDrawable extends Drawable {
 
         public void draw(Canvas canvas, int w, int h, ColorFilter filter) {
             // Travese the tree in pre-order to draw.
-            drawGroupTree(mRootGroup, IDENTITY_MATRIX, canvas, w, h, filter);
+            drawGroupTree(mRootGroup, Matrix.IDENTITY_MATRIX, canvas, w, h, filter);
         }
 
         private void drawPath(VGroup vGroup, VPath vPath, Canvas canvas, int w, int h,
