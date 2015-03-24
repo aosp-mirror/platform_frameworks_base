@@ -457,6 +457,50 @@ public class DevicePolicyManager {
         = "android.app.extra.PROVISIONING_DEVICE_INITIALIZER_PACKAGE_CHECKSUM";
 
     /**
+     * A String extra holding the MAC address of the Bluetooth device to connect to with status
+     * updates during provisioning.
+     *
+     * <p>Use in an NFC record with {@link #MIME_TYPE_PROVISIONING_NFC} that starts device owner
+     * provisioning via an NFC bump.
+     */
+    public static final String EXTRA_PROVISIONING_BT_MAC_ADDRESS
+            = "android.app.extra.PROVISIONING_BT_MAC_ADDRESS";
+
+    /**
+     * A String extra holding the Bluetooth service UUID on the device to connect to with status
+     * updates during provisioning.
+     *
+     * <p>This value must be specified when {@code #EXTRA_PROVISIONING_BT_MAC_ADDRESS} is present.
+     *
+     * <p>Use in an NFC record with {@link #MIME_TYPE_PROVISIONING_NFC} that starts device owner
+     * provisioning via an NFC bump.
+     */
+    public static final String EXTRA_PROVISIONING_BT_UUID
+            = "android.app.extra.PROVISIONING_BT_UUID";
+
+    /**
+     * A String extra holding a unique identifier used to identify the device connecting over
+     * Bluetooth. This identifier will be part of every status message sent to the remote device.
+     *
+     * <p>This value must be specified when {@code #EXTRA_PROVISIONING_BT_MAC_ADDRESS} is present.
+     *
+     * <p>Use in an NFC record with {@link #MIME_TYPE_PROVISIONING_NFC} that starts device owner
+     * provisioning via an NFC bump.
+     */
+    public static final String EXTRA_PROVISIONING_BT_DEVICE_ID
+            = "android.app.extra.PROVISIONING_BT_DEVICE_ID";
+
+    /**
+     * A Boolean extra that that will cause a provisioned device to temporarily proxy network
+     * traffic over Bluetooth. When a Wi-Fi network is available, the network proxy will stop.
+     *
+     * <p>Use in an NFC record with {@link #MIME_TYPE_PROVISIONING_NFC} that starts device owner
+     * provisioning via an NFC bump.
+     */
+    public static final String EXTRA_PROVISIONING_BT_USE_PROXY
+            = "android.app.extra.PROVISIONING_BT_USE_PROXY";
+
+    /**
      * This MIME type is used for starting the Device Owner provisioning.
      *
      * <p>During device owner provisioning a device admin app is set as the owner of the device.
