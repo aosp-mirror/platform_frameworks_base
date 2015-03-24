@@ -168,24 +168,17 @@ public class DimLayer {
         mLastBounds.set(mBounds);
     }
 
-    /**
-     * @param bounds The new bounds to set
-     * @param inTransaction Whether the call is made within a surface transaction.
-     */
-    void setBounds(Rect bounds, boolean inTransaction) {
+    /** @param bounds The new bounds to set */
+    void setBounds(Rect bounds) {
         mBounds.set(bounds);
         if (isDimming() && !mLastBounds.equals(bounds)) {
             try {
-                if (!inTransaction) {
-                    SurfaceControl.openTransaction();
-                }
+                SurfaceControl.openTransaction();
                 adjustBounds();
             } catch (RuntimeException e) {
                 Slog.w(TAG, "Failure setting size", e);
             } finally {
-                if (!inTransaction) {
-                    SurfaceControl.closeTransaction();
-                }
+                SurfaceControl.closeTransaction();
             }
         }
     }
