@@ -16,22 +16,26 @@
 
 package com.android.layoutlib.bridge.bars;
 
+import com.android.layoutlib.bridge.android.BridgeContext;
 import com.android.resources.Density;
 
 import org.xmlpull.v1.XmlPullParserException;
 
-import android.content.Context;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
 public class NavigationBar extends CustomBar {
 
-    public NavigationBar(Context context, Density density, int orientation, boolean isRtl,
+    /** Navigation bar background color attribute name. */
+    private static final String ATTR_COLOR = "navigationBarColor";
+
+    public NavigationBar(BridgeContext context, Density density, int orientation, boolean isRtl,
             boolean rtlEnabled, int simulatedPlatformVersion) throws XmlPullParserException {
         super(context, orientation, "/bars/navigation_bar.xml", "navigation_bar.xml",
                 simulatedPlatformVersion);
 
-        setBackgroundColor(0xFF000000);
+        int color = getThemeAttrColor(ATTR_COLOR, true);
+        setBackgroundColor(color == 0 ? 0xFF000000 : color);
 
         // Cannot access the inside items through id because no R.id values have been
         // created for them.
