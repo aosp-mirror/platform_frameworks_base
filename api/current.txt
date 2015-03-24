@@ -16821,9 +16821,15 @@ package android.media.midi {
 
   public final class MidiManager {
     method public android.media.midi.MidiDeviceInfo[] getDeviceList();
+    method public void openBluetoothDevice(android.bluetooth.BluetoothDevice, android.media.midi.MidiManager.BluetoothOpenCallback, android.os.Handler);
     method public void openDevice(android.media.midi.MidiDeviceInfo, android.media.midi.MidiManager.DeviceOpenCallback, android.os.Handler);
     method public void registerDeviceCallback(android.media.midi.MidiManager.DeviceCallback, android.os.Handler);
     method public void unregisterDeviceCallback(android.media.midi.MidiManager.DeviceCallback);
+  }
+
+  public static abstract class MidiManager.BluetoothOpenCallback {
+    ctor public MidiManager.BluetoothOpenCallback();
+    method public abstract void onDeviceOpened(android.bluetooth.BluetoothDevice, android.media.midi.MidiDevice);
   }
 
   public static class MidiManager.DeviceCallback {

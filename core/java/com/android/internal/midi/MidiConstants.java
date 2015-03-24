@@ -19,7 +19,7 @@ package com.android.internal.midi;
 /**
  * MIDI related constants and static methods.
  */
-public class MidiConstants {
+public final class MidiConstants {
     public static final byte STATUS_COMMAND_MASK = (byte) 0xF0;
     public static final byte STATUS_CHANNEL_MASK = (byte) 0x0F;
 
@@ -84,5 +84,17 @@ public class MidiConstants {
             }
         }
         return (goodBytes == 0);
+    }
+
+    // Returns true if this command can be used for running status
+    public static boolean allowRunningStatus(int command) {
+        // only Channel Voice and Channel Mode commands can use running status
+        return (command >= STATUS_NOTE_OFF && command < STATUS_SYSTEM_EXCLUSIVE);
+    }
+
+    // Returns true if this command cancels running status
+    public static boolean cancelsRunningStatus(int command) {
+        // System Common messages cancel running status
+        return (command >= STATUS_SYSTEM_EXCLUSIVE && command <= STATUS_END_SYSEX);
     }
 }
