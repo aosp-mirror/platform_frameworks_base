@@ -157,8 +157,8 @@ public class TaskStack {
             return false;
         }
 
-        mDimLayer.setBounds(bounds, false);
-        mAnimationBackgroundSurface.setBounds(bounds, false);
+        mDimLayer.setBounds(bounds);
+        mAnimationBackgroundSurface.setBounds(bounds);
         mBounds.set(bounds);
         mRotation = rotation;
         updateOverrideConfiguration();
