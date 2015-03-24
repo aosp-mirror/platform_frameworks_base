@@ -71,7 +71,9 @@ import static com.android.server.net.NetworkStatsService.ACTION_NETWORK_STATS_UP
 import static org.xmlpull.v1.XmlPullParser.END_DOCUMENT;
 import static org.xmlpull.v1.XmlPullParser.START_TAG;
 
+import android.Manifest;
 import android.app.ActivityManager;
+import android.app.AppGlobals;
 import android.app.IActivityManager;
 import android.app.INotificationManager;
 import android.app.IProcessObserver;
@@ -83,6 +85,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
 import android.content.pm.UserInfo;
 import android.content.res.Resources;
@@ -2020,6 +2023,17 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
 
     void updateRulesForUidLocked(int uid) {
         if (!isUidValidForRules(uid)) return;
+
+        // quick check: if this uid doesn't have INTERNET permission, it doesn't have
+        // network access anyway, so it is a waste to mess with it here.
+        final IPackageManager ipm = AppGlobals.getPackageManager();
+        try {
+            if (ipm.checkUidPermission(Manifest.permission.INTERNET, uid)
+                    != PackageManager.PERMISSION_GRANTED) {
+                return;
+            }
+        } catch (RemoteException e) {
+        }
 
         final int uidPolicy = mUidPolicy.get(uid, POLICY_NONE);
         final boolean uidForeground = isUidForegroundLocked(uid);

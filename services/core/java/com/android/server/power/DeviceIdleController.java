@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.server;
+package com.android.server.power;
 
 import android.app.AlarmManager;
 import android.app.PendingIntent;
@@ -30,12 +30,16 @@ import android.hardware.TriggerEventListener;
 import android.hardware.display.DisplayManager;
 import android.net.INetworkPolicyManager;
 import android.os.Binder;
+import android.os.PowerManager;
+import android.os.PowerManagerInternal;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
+import android.os.UserHandle;
 import android.util.TimeUtils;
 import android.view.Display;
 import com.android.internal.app.IBatteryStats;
+import com.android.server.SystemService;
 import com.android.server.am.BatteryStatsService;
 
 import java.io.FileDescriptor;
@@ -59,6 +63,11 @@ public class DeviceIdleController extends SystemService {
      * the significant motion sensor whenever the screen is off.
      */
     private static final long DEFAULT_INACTIVE_TIMEOUT = 30*60*1000L;
+    /**
+     * This is the time, after seeing motion, that we wait after becoming inactive from
+     * that until we start looking for motion again.
+     */
+    private static final long DEFAULT_MOTION_INACTIVE_TIMEOUT = 10*60*1000L;
     /**
      * This is the time, after the inactive timeout elapses, that we will wait looking
      * for significant motion until we truly consider the device to be idle.
@@ -94,11 +103,13 @@ public class DeviceIdleController extends SystemService {
 
     private AlarmManager mAlarmManager;
     private IBatteryStats mBatteryStats;
+    private PowerManagerInternal mLocalPowerManager;
     private INetworkPolicyManager mNetworkPolicyManager;
     private DisplayManager mDisplayManager;
     private SensorManager mSensorManager;
     private Sensor mSigMotionSensor;
     private PendingIntent mAlarmIntent;
+    private Intent mIdleIntent;
     private Display mCurDisplay;
     private boolean mScreenOn;
     private boolean mCharging;
@@ -124,6 +135,7 @@ public class DeviceIdleController extends SystemService {
 
     private int mState;
 
+    private long mInactiveTimeout;
     private long mNextAlarmTime;
     private long mNextIdlePendingDelay;
     private long mNextIdleDelay;
@@ -181,6 +193,7 @@ public class DeviceIdleController extends SystemService {
         synchronized (this) {
             mAlarmManager = (AlarmManager) getContext().getSystemService(Context.ALARM_SERVICE);
             mBatteryStats = BatteryStatsService.getService();
+            mLocalPowerManager = getLocalService(PowerManagerInternal.class);
             mNetworkPolicyManager = INetworkPolicyManager.Stub.asInterface(
                                 ServiceManager.getService(Context.NETWORK_POLICY_SERVICE));
             mDisplayManager = (DisplayManager) getContext().getSystemService(
@@ -192,6 +205,9 @@ public class DeviceIdleController extends SystemService {
                     .setPackage("android")
                     .setFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
             mAlarmIntent = PendingIntent.getBroadcast(getContext(), 0, intent, 0);
+
+            mIdleIntent = new Intent(PowerManager.ACTION_DEVICE_IDLE_MODE_CHANGED);
+            mIdleIntent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
 
             IntentFilter filter = new IntentFilter();
             filter.addAction(Intent.ACTION_BATTERY_CHANGED);
@@ -205,6 +221,7 @@ public class DeviceIdleController extends SystemService {
             // a battery update the next time the level drops.
             mCharging = true;
             mState = STATE_ACTIVE;
+            mInactiveTimeout = DEFAULT_INACTIVE_TIMEOUT;
             updateDisplayLocked();
         }
 
@@ -238,12 +255,17 @@ public class DeviceIdleController extends SystemService {
 
     void becomeActiveLocked() {
         if (mState != STATE_ACTIVE) {
+            mLocalPowerManager.setDeviceIdleMode(false);
             try {
                 mNetworkPolicyManager.setDeviceIdleMode(false);
                 mBatteryStats.noteDeviceIdleMode(false, true, false);
             } catch (RemoteException e) {
             }
+            if (mState == STATE_IDLE) {
+                getContext().sendBroadcastAsUser(mIdleIntent, UserHandle.ALL);
+            }
             mState = STATE_ACTIVE;
+            mInactiveTimeout = DEFAULT_INACTIVE_TIMEOUT;
             mNextIdlePendingDelay = 0;
             mNextIdleDelay = 0;
             cancelAlarmLocked();
@@ -256,7 +278,9 @@ public class DeviceIdleController extends SystemService {
             // Screen has turned off; we are now going to become inactive and start
             // waiting to see if we will ultimately go idle.
             mState = STATE_INACTIVE;
-            scheduleAlarmLocked(DEFAULT_INACTIVE_TIMEOUT, false);
+            mNextIdlePendingDelay = 0;
+            mNextIdleDelay = 0;
+            scheduleAlarmLocked(mInactiveTimeout, false);
         }
     }
 
@@ -283,11 +307,13 @@ public class DeviceIdleController extends SystemService {
                     mNextIdleDelay = DEFAULT_MAX_IDLE_TIMEOUT;
                 }
                 mState = STATE_IDLE;
+                mLocalPowerManager.setDeviceIdleMode(true);
                 try {
                     mNetworkPolicyManager.setDeviceIdleMode(true);
                     mBatteryStats.noteDeviceIdleMode(true, false, false);
                 } catch (RemoteException e) {
                 }
+                getContext().sendBroadcastAsUser(mIdleIntent, UserHandle.ALL);
                 break;
             case STATE_IDLE:
                 // We have been idling long enough, now it is time to do some work.
@@ -297,11 +323,13 @@ public class DeviceIdleController extends SystemService {
                     mNextIdlePendingDelay = DEFAULT_MAX_IDLE_PENDING_TIMEOUT;
                 }
                 mState = STATE_IDLE_PENDING;
+                mLocalPowerManager.setDeviceIdleMode(false);
                 try {
                     mNetworkPolicyManager.setDeviceIdleMode(false);
                     mBatteryStats.noteDeviceIdleMode(false, false, false);
                 } catch (RemoteException e) {
                 }
+                getContext().sendBroadcastAsUser(mIdleIntent, UserHandle.ALL);
                 break;
         }
     }
@@ -313,13 +341,18 @@ public class DeviceIdleController extends SystemService {
         // state to wait again for no motion.  Note that we only monitor for significant
         // motion after moving out of the inactive state, so no need to worry about that.
         if (mState != STATE_ACTIVE) {
-            mState = STATE_INACTIVE;
+            mLocalPowerManager.setDeviceIdleMode(false);
             try {
                 mNetworkPolicyManager.setDeviceIdleMode(false);
                 mBatteryStats.noteDeviceIdleMode(false, false, true);
             } catch (RemoteException e) {
             }
-            stepIdleStateLocked();
+            if (mState == STATE_IDLE) {
+                getContext().sendBroadcastAsUser(mIdleIntent, UserHandle.ALL);
+            }
+            mState = STATE_ACTIVE;
+            mInactiveTimeout = DEFAULT_MOTION_INACTIVE_TIMEOUT;
+            becomeInactiveIfAppropriateLocked();
         }
     }
 
@@ -399,26 +432,30 @@ public class DeviceIdleController extends SystemService {
             }
         }
 
-        pw.print("  mSigMotionSensor="); pw.println(mSigMotionSensor);
-        pw.print("  mCurDisplay="); pw.println(mCurDisplay);
-        pw.print("  mScreenOn="); pw.println(mScreenOn);
-        pw.print("  mCharging="); pw.println(mCharging);
-        pw.print("  mSigMotionActive="); pw.println(mSigMotionActive);
-        pw.print("  mState="); pw.println(stateToString(mState));
-        if (mNextAlarmTime != 0) {
-            pw.print("  mNextAlarmTime=");
-            TimeUtils.formatDuration(mNextAlarmTime, SystemClock.elapsedRealtime(), pw);
+        synchronized (this) {
+            pw.print("  mSigMotionSensor="); pw.println(mSigMotionSensor);
+            pw.print("  mCurDisplay="); pw.println(mCurDisplay);
+            pw.print("  mScreenOn="); pw.println(mScreenOn);
+            pw.print("  mCharging="); pw.println(mCharging);
+            pw.print("  mSigMotionActive="); pw.println(mSigMotionActive);
+            pw.print("  mState="); pw.println(stateToString(mState));
+            pw.print("  mInactiveTimeout="); TimeUtils.formatDuration(mInactiveTimeout, pw);
             pw.println();
-        }
-        if (mNextIdlePendingDelay != 0) {
-            pw.print("  mNextIdlePendingDelay=");
-            TimeUtils.formatDuration(mNextIdlePendingDelay, pw);
-            pw.println();
-        }
-        if (mNextIdleDelay != 0) {
-            pw.print("  mNextIdleDelay=");
-            TimeUtils.formatDuration(mNextIdleDelay, pw);
-            pw.println();
+            if (mNextAlarmTime != 0) {
+                pw.print("  mNextAlarmTime=");
+                TimeUtils.formatDuration(mNextAlarmTime, SystemClock.elapsedRealtime(), pw);
+                pw.println();
+            }
+            if (mNextIdlePendingDelay != 0) {
+                pw.print("  mNextIdlePendingDelay=");
+                TimeUtils.formatDuration(mNextIdlePendingDelay, pw);
+                pw.println();
+            }
+            if (mNextIdleDelay != 0) {
+                pw.print("  mNextIdleDelay=");
+                TimeUtils.formatDuration(mNextIdleDelay, pw);
+                pw.println();
+            }
         }
     }
 }

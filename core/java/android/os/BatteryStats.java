@@ -613,6 +613,9 @@ public abstract class BatteryStats implements Parcelable {
             if ((initMode&STEP_LEVEL_MODE_POWER_SAVE) != 0) {
                 out.append('p');
             }
+            if ((initMode&STEP_LEVEL_MODE_DEVICE_IDLE) != 0) {
+                out.append('i');
+            }
             switch ((modMode&STEP_LEVEL_MODE_SCREEN_STATE) + 1) {
                 case Display.STATE_OFF: out.append('F'); break;
                 case Display.STATE_ON: out.append('O'); break;
@@ -621,6 +624,9 @@ public abstract class BatteryStats implements Parcelable {
             }
             if ((modMode&STEP_LEVEL_MODE_POWER_SAVE) != 0) {
                 out.append('P');
+            }
+            if ((modMode&STEP_LEVEL_MODE_DEVICE_IDLE) != 0) {
+                out.append('I');
             }
             out.append('-');
             appendHex(level, 4, out);
@@ -648,6 +654,9 @@ public abstract class BatteryStats implements Parcelable {
                     case 'p': out |= (((long)STEP_LEVEL_MODE_POWER_SAVE)
                             << STEP_LEVEL_INITIAL_MODE_SHIFT);
                         break;
+                    case 'i': out |= (((long)STEP_LEVEL_MODE_DEVICE_IDLE)
+                            << STEP_LEVEL_INITIAL_MODE_SHIFT);
+                        break;
                     case 'F': out |= (((long)Display.STATE_OFF-1)<<STEP_LEVEL_MODIFIED_MODE_SHIFT);
                         break;
                     case 'O': out |= (((long)Display.STATE_ON-1)<<STEP_LEVEL_MODIFIED_MODE_SHIFT);
@@ -658,6 +667,9 @@ public abstract class BatteryStats implements Parcelable {
                             << STEP_LEVEL_MODIFIED_MODE_SHIFT);
                         break;
                     case 'P': out |= (((long)STEP_LEVEL_MODE_POWER_SAVE)
+                            << STEP_LEVEL_MODIFIED_MODE_SHIFT);
+                        break;
+                    case 'I': out |= (((long)STEP_LEVEL_MODE_DEVICE_IDLE)
                             << STEP_LEVEL_MODIFIED_MODE_SHIFT);
                         break;
                 }
@@ -820,11 +832,18 @@ public abstract class BatteryStats implements Parcelable {
         }
     }
 
+    public static final class PackageChange {
+        public String mPackageName;
+        public boolean mUpdate;
+        public int mVersionCode;
+    }
+
     public static final class DailyItem {
         public long mStartTime;
         public long mEndTime;
         public LevelStepTracker mDischargeSteps;
         public LevelStepTracker mChargeSteps;
+        public ArrayList<PackageChange> mPackageChanges;
     }
 
     public abstract DailyItem getDailyItemLocked(int daysAgo);
@@ -1524,6 +1543,23 @@ public abstract class BatteryStats implements Parcelable {
     public abstract int getDeviceIdleModeEnabledCount(int which);
 
     /**
+     * Returns the time in microseconds that device has been in idling while on
+     * battery.  This is broader than {@link #getDeviceIdleModeEnabledTime} -- it
+     * counts all of the time that we consider the device to be idle, whether or not
+     * it is currently in the actual device idle mode.
+     *
+     * {@hide}
+     */
+    public abstract long getDeviceIdlingTime(long elapsedRealtimeUs, int which);
+
+    /**
+     * Returns the number of times that the devie has started idling.
+     *
+     * {@hide}
+     */
+    public abstract int getDeviceIdlingCount(int which);
+
+    /**
      * Returns the number of times that connectivity state changed.
      *
      * {@hide}
@@ -2069,45 +2105,44 @@ public abstract class BatteryStats implements Parcelable {
     // Step duration mode: power save is on.
     public static final int STEP_LEVEL_MODE_POWER_SAVE = 0x04;
 
+    // Step duration mode: device is currently in idle mode.
+    public static final int STEP_LEVEL_MODE_DEVICE_IDLE = 0x08;
+
     public static final int[] STEP_LEVEL_MODES_OF_INTEREST = new int[] {
             STEP_LEVEL_MODE_SCREEN_STATE|STEP_LEVEL_MODE_POWER_SAVE,
+            STEP_LEVEL_MODE_SCREEN_STATE|STEP_LEVEL_MODE_POWER_SAVE|STEP_LEVEL_MODE_DEVICE_IDLE,
+            STEP_LEVEL_MODE_SCREEN_STATE|STEP_LEVEL_MODE_DEVICE_IDLE,
             STEP_LEVEL_MODE_SCREEN_STATE|STEP_LEVEL_MODE_POWER_SAVE,
             STEP_LEVEL_MODE_SCREEN_STATE|STEP_LEVEL_MODE_POWER_SAVE,
             STEP_LEVEL_MODE_SCREEN_STATE|STEP_LEVEL_MODE_POWER_SAVE,
             STEP_LEVEL_MODE_SCREEN_STATE|STEP_LEVEL_MODE_POWER_SAVE,
             STEP_LEVEL_MODE_SCREEN_STATE|STEP_LEVEL_MODE_POWER_SAVE,
-            STEP_LEVEL_MODE_SCREEN_STATE|STEP_LEVEL_MODE_POWER_SAVE,
-            STEP_LEVEL_MODE_SCREEN_STATE|STEP_LEVEL_MODE_POWER_SAVE,
+            STEP_LEVEL_MODE_SCREEN_STATE|STEP_LEVEL_MODE_POWER_SAVE|STEP_LEVEL_MODE_DEVICE_IDLE,
+            STEP_LEVEL_MODE_SCREEN_STATE|STEP_LEVEL_MODE_DEVICE_IDLE,
     };
     public static final int[] STEP_LEVEL_MODE_VALUES = new int[] {
             (Display.STATE_OFF-1),
             (Display.STATE_OFF-1)|STEP_LEVEL_MODE_POWER_SAVE,
+            (Display.STATE_OFF-1)|STEP_LEVEL_MODE_DEVICE_IDLE,
             (Display.STATE_ON-1),
             (Display.STATE_ON-1)|STEP_LEVEL_MODE_POWER_SAVE,
             (Display.STATE_DOZE-1),
             (Display.STATE_DOZE-1)|STEP_LEVEL_MODE_POWER_SAVE,
             (Display.STATE_DOZE_SUSPEND-1),
             (Display.STATE_DOZE_SUSPEND-1)|STEP_LEVEL_MODE_POWER_SAVE,
+            (Display.STATE_DOZE_SUSPEND-1)|STEP_LEVEL_MODE_DEVICE_IDLE,
     };
     public static final String[] STEP_LEVEL_MODE_LABELS = new String[] {
             "screen off",
             "screen off power save",
+            "screen off device idle",
             "screen on",
             "screen on power save",
             "screen doze",
             "screen doze power save",
             "screen doze-suspend",
             "screen doze-suspend power save",
-    };
-    public static final String[] STEP_LEVEL_MODE_TAGS = new String[] {
-            "off",
-            "off-save",
-            "on",
-            "on-save",
-            "doze",
-            "doze-save",
-            "susp",
-            "susp-save",
+            "screen doze-suspend device idle",
     };
 
     /**
@@ -2139,6 +2174,8 @@ public abstract class BatteryStats implements Parcelable {
      * Return the array of daily charge step durations.
      */
     public abstract LevelStepTracker getDailyChargeLevelStepTracker();
+
+    public abstract ArrayList<PackageChange> getDailyPackageChanges();
 
     public abstract Map<String, ? extends Timer> getWakeupReasonStats();
 
@@ -2338,6 +2375,7 @@ public abstract class BatteryStats implements Parcelable {
         final long interactiveTime = getInteractiveTime(rawRealtime, which);
         final long powerSaveModeEnabledTime = getPowerSaveModeEnabledTime(rawRealtime, which);
         final long deviceIdleModeEnabledTime = getDeviceIdleModeEnabledTime(rawRealtime, which);
+        final long deviceIdlingTime = getDeviceIdlingTime(rawRealtime, which);
         final int connChanges = getNumConnectivityChange(which);
         final long phoneOnTime = getPhoneOnTime(rawRealtime, which);
         final long wifiOnTime = getWifiOnTime(rawRealtime, which);
@@ -2410,7 +2448,8 @@ public abstract class BatteryStats implements Parcelable {
                 0 /*legacy input event count*/, getMobileRadioActiveTime(rawRealtime, which) / 1000,
                 getMobileRadioActiveAdjustedTime(which) / 1000, interactiveTime / 1000,
                 powerSaveModeEnabledTime / 1000, connChanges, deviceIdleModeEnabledTime / 1000,
-                getDeviceIdleModeEnabledCount(which));
+                getDeviceIdleModeEnabledCount(which), deviceIdlingTime / 1000,
+                getDeviceIdlingCount(which));
         
         // Dump screen brightness stats
         Object[] args = new Object[NUM_SCREEN_BRIGHTNESS_BINS];
@@ -2879,6 +2918,7 @@ public abstract class BatteryStats implements Parcelable {
         final long interactiveTime = getInteractiveTime(rawRealtime, which);
         final long powerSaveModeEnabledTime = getPowerSaveModeEnabledTime(rawRealtime, which);
         final long deviceIdleModeEnabledTime = getDeviceIdleModeEnabledTime(rawRealtime, which);
+        final long deviceIdlingTime = getDeviceIdlingTime(rawRealtime, which);
         final long phoneOnTime = getPhoneOnTime(rawRealtime, which);
         final long wifiRunningTime = getGlobalWifiRunningTime(rawRealtime, which);
         final long wifiOnTime = getWifiOnTime(rawRealtime, which);
@@ -2923,10 +2963,21 @@ public abstract class BatteryStats implements Parcelable {
                     sb.append(")");
             pw.println(sb.toString());
         }
-        if (deviceIdleModeEnabledTime != 0) {
+        if (deviceIdlingTime != 0) {
             sb.setLength(0);
             sb.append(prefix);
                     sb.append("  Device idling: ");
+                    formatTimeMs(sb, deviceIdlingTime / 1000);
+                    sb.append("(");
+                    sb.append(formatRatioLocked(deviceIdlingTime, whichBatteryRealtime));
+                    sb.append(") "); sb.append(getDeviceIdlingCount(which));
+                    sb.append("x");
+            pw.println(sb.toString());
+        }
+        if (deviceIdleModeEnabledTime != 0) {
+            sb.setLength(0);
+            sb.append(prefix);
+                    sb.append("  Idle mode time: ");
                     formatTimeMs(sb, deviceIdleModeEnabledTime / 1000);
                     sb.append("(");
                     sb.append(formatRatioLocked(deviceIdleModeEnabledTime, whichBatteryRealtime));
@@ -4403,6 +4454,11 @@ public abstract class BatteryStats implements Parcelable {
                 } else {
                     lineArgs[3] = "";
                 }
+                if ((modMode&STEP_LEVEL_MODE_DEVICE_IDLE) == 0) {
+                    lineArgs[3] = (initMode&STEP_LEVEL_MODE_DEVICE_IDLE) != 0 ? "i+" : "i-";
+                } else {
+                    lineArgs[3] = "";
+                }
                 dumpLine(pw, 0 /* uid */, "i" /* category */, header, (Object[])lineArgs);
             } else {
                 pw.print(prefix);
@@ -4425,6 +4481,12 @@ public abstract class BatteryStats implements Parcelable {
                     pw.print(haveModes ? ", " : " (");
                     pw.print((initMode&STEP_LEVEL_MODE_POWER_SAVE) != 0
                             ? "power-save-on" : "power-save-off");
+                    haveModes = true;
+                }
+                if ((modMode&STEP_LEVEL_MODE_DEVICE_IDLE) == 0) {
+                    pw.print(haveModes ? ", " : " (");
+                    pw.print((initMode&STEP_LEVEL_MODE_DEVICE_IDLE) != 0
+                            ? "device-idle-on" : "device-idle-off");
                     haveModes = true;
                 }
                 if (haveModes) {
@@ -4554,6 +4616,23 @@ public abstract class BatteryStats implements Parcelable {
                 pw.print(tmpSb);
                 pw.print(" (from "); pw.print(tmpOutInt[0]);
                 pw.println(" steps)");
+            }
+        }
+    }
+
+    private void dumpDailyPackageChanges(PrintWriter pw, String prefix,
+            ArrayList<PackageChange> changes) {
+        if (changes == null) {
+            return;
+        }
+        pw.print(prefix); pw.println("Package changes:");
+        for (int i=0; i<changes.size(); i++) {
+            PackageChange pc = changes.get(i);
+            if (pc.mUpdate) {
+                pw.print(prefix); pw.print("  Update "); pw.print(pc.mPackageName);
+                pw.print(" vers="); pw.println(pc.mVersionCode);
+            } else {
+                pw.print(prefix); pw.print("  Uninstall "); pw.println(pc.mPackageName);
             }
         }
     }
@@ -4688,7 +4767,8 @@ public abstract class BatteryStats implements Parcelable {
             int[] outInt = new int[1];
             LevelStepTracker dsteps = getDailyDischargeLevelStepTracker();
             LevelStepTracker csteps = getDailyChargeLevelStepTracker();
-            if (dsteps.mNumStepDurations > 0 || csteps.mNumStepDurations > 0) {
+            ArrayList<PackageChange> pkgc = getDailyPackageChanges();
+            if (dsteps.mNumStepDurations > 0 || csteps.mNumStepDurations > 0 || pkgc != null) {
                 if ((flags&DUMP_DAILY_ONLY) != 0) {
                     if (dumpDurationSteps(pw, "    ", "  Current daily discharge step durations:",
                             dsteps, false)) {
@@ -4700,6 +4780,7 @@ public abstract class BatteryStats implements Parcelable {
                         dumpDailyLevelStepSummary(pw, "      ", "Charge", csteps,
                                 sb, outInt);
                     }
+                    dumpDailyPackageChanges(pw, "    ", pkgc);
                 } else {
                     pw.println("  Current daily steps:");
                     dumpDailyLevelStepSummary(pw, "    ", "Discharge", dsteps,
@@ -4731,6 +4812,7 @@ public abstract class BatteryStats implements Parcelable {
                         dumpDailyLevelStepSummary(pw, "        ", "Charge", dit.mChargeSteps,
                                 sb, outInt);
                     }
+                    dumpDailyPackageChanges(pw, "    ", dit.mPackageChanges);
                 } else {
                     dumpDailyLevelStepSummary(pw, "    ", "Discharge", dit.mDischargeSteps,
                             sb, outInt);

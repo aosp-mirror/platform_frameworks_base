@@ -109,7 +109,7 @@ public final class BatteryStatsImpl extends BatteryStats {
     private static final int MAGIC = 0xBA757475; // 'BATSTATS'
 
     // Current on-disk Parcel version
-    private static final int VERSION = 120 + (USE_OLD_HISTORY ? 1000 : 0);
+    private static final int VERSION = 121 + (USE_OLD_HISTORY ? 1000 : 0);
 
     // Maximum number of items we will record in the history.
     private static final int MAX_HISTORY_ITEMS = 2000;
@@ -310,6 +310,9 @@ public final class BatteryStatsImpl extends BatteryStats {
     boolean mPowerSaveModeEnabled;
     StopwatchTimer mPowerSaveModeEnabledTimer;
 
+    boolean mDeviceIdling;
+    StopwatchTimer mDeviceIdlingTimer;
+
     boolean mDeviceIdleModeEnabled;
     StopwatchTimer mDeviceIdleModeEnabledTimer;
 
@@ -414,6 +417,7 @@ public final class BatteryStatsImpl extends BatteryStats {
     int mMinDischargeStepLevel;
     final LevelStepTracker mDischargeStepTracker = new LevelStepTracker(MAX_LEVEL_STEPS);
     final LevelStepTracker mDailyDischargeStepTracker = new LevelStepTracker(MAX_LEVEL_STEPS*2);
+    ArrayList<PackageChange> mDailyPackageChanges;
 
     int mLastChargeStepLevel;
     int mMaxChargeStepLevel;
@@ -3417,9 +3421,26 @@ public final class BatteryStatsImpl extends BatteryStats {
     }
 
     public void noteDeviceIdleModeLocked(boolean enabled, boolean fromActive, boolean fromMotion) {
+        final long elapsedRealtime = SystemClock.elapsedRealtime();
+        final long uptime = SystemClock.uptimeMillis();
+        boolean nowIdling = enabled;
+        if (mDeviceIdling && !enabled && !fromActive && !fromMotion) {
+            // We don't go out of general idling mode until explicitly taken out of
+            // device idle through going active or significant motion.
+            nowIdling = true;
+        }
+        if (mDeviceIdling != nowIdling) {
+            mDeviceIdling = nowIdling;
+            int stepState = nowIdling ? STEP_LEVEL_MODE_DEVICE_IDLE : 0;
+            mModStepMode |= (mCurStepMode&STEP_LEVEL_MODE_DEVICE_IDLE) ^ stepState;
+            mCurStepMode = (mCurStepMode&~STEP_LEVEL_MODE_DEVICE_IDLE) | stepState;
+            if (enabled) {
+                mDeviceIdlingTimer.startRunningLocked(elapsedRealtime);
+            } else {
+                mDeviceIdlingTimer.stopRunningLocked(elapsedRealtime);
+            }
+        }
         if (mDeviceIdleModeEnabled != enabled) {
-            final long elapsedRealtime = SystemClock.elapsedRealtime();
-            final long uptime = SystemClock.uptimeMillis();
             mDeviceIdleModeEnabled = enabled;
             if (fromMotion) {
                 addHistoryEventLocked(elapsedRealtime, uptime, HistoryItem.EVENT_SIGNIFICANT_MOTION,
@@ -3449,7 +3470,11 @@ public final class BatteryStatsImpl extends BatteryStats {
         final long uptime = SystemClock.uptimeMillis();
         addHistoryEventLocked(elapsedRealtime, uptime, HistoryItem.EVENT_PACKAGE_INSTALLED,
                 pkgName, versionCode);
-        mNumConnectivityChange++;
+        PackageChange pc = new PackageChange();
+        pc.mPackageName = pkgName;
+        pc.mUpdate = true;
+        pc.mVersionCode = versionCode;
+        addPackageChange(pc);
     }
 
     public void notePackageUninstalledLocked(String pkgName) {
@@ -3457,7 +3482,17 @@ public final class BatteryStatsImpl extends BatteryStats {
         final long uptime = SystemClock.uptimeMillis();
         addHistoryEventLocked(elapsedRealtime, uptime, HistoryItem.EVENT_PACKAGE_UNINSTALLED,
                 pkgName, 0);
-        mNumConnectivityChange++;
+        PackageChange pc = new PackageChange();
+        pc.mPackageName = pkgName;
+        pc.mUpdate = true;
+        addPackageChange(pc);
+    }
+
+    private void addPackageChange(PackageChange pc) {
+        if (mDailyPackageChanges == null) {
+            mDailyPackageChanges = new ArrayList<>();
+        }
+        mDailyPackageChanges.add(pc);
     }
 
     public void notePhoneOnLocked() {
@@ -4260,6 +4295,14 @@ public final class BatteryStatsImpl extends BatteryStats {
 
     @Override public int getDeviceIdleModeEnabledCount(int which) {
         return mDeviceIdleModeEnabledTimer.getCountLocked(which);
+    }
+
+    @Override public long getDeviceIdlingTime(long elapsedRealtimeUs, int which) {
+        return mDeviceIdlingTimer.getTotalTimeLocked(elapsedRealtimeUs, which);
+    }
+
+    @Override public int getDeviceIdlingCount(int which) {
+        return mDeviceIdlingTimer.getCountLocked(which);
     }
 
     @Override public int getNumConnectivityChange(int which) {
@@ -6724,6 +6767,7 @@ public final class BatteryStatsImpl extends BatteryStats {
         mInteractiveTimer = new StopwatchTimer(null, -10, null, mOnBatteryTimeBase);
         mPowerSaveModeEnabledTimer = new StopwatchTimer(null, -2, null, mOnBatteryTimeBase);
         mDeviceIdleModeEnabledTimer = new StopwatchTimer(null, -11, null, mOnBatteryTimeBase);
+        mDeviceIdlingTimer = new StopwatchTimer(null, -12, null, mOnBatteryTimeBase);
         mPhoneOnTimer = new StopwatchTimer(null, -3, null, mOnBatteryTimeBase);
         for (int i=0; i<SignalStrength.NUM_SIGNAL_STRENGTH_BINS; i++) {
             mPhoneSignalStrengthsTimer[i] = new StopwatchTimer(null, -200-i, null,
@@ -6849,6 +6893,11 @@ public final class BatteryStatsImpl extends BatteryStats {
                     mDailyChargeStepTracker.mNumStepDurations,
                     mDailyChargeStepTracker.mStepDurations);
         }
+        if (mDailyPackageChanges != null) {
+            hasData = true;
+            item.mPackageChanges = mDailyPackageChanges;
+            mDailyPackageChanges = null;
+        }
         mDailyDischargeStepTracker.init();
         mDailyChargeStepTracker.init();
         updateDailyDeadlineLocked();
@@ -6899,6 +6948,21 @@ public final class BatteryStatsImpl extends BatteryStats {
             out.attribute(null, "end", Long.toString(dit.mEndTime));
             writeDailyLevelSteps(out, "dis", dit.mDischargeSteps, sb);
             writeDailyLevelSteps(out, "chg", dit.mChargeSteps, sb);
+            if (dit.mPackageChanges != null) {
+                for (int j=0; j<dit.mPackageChanges.size(); j++) {
+                    PackageChange pc = dit.mPackageChanges.get(j);
+                    if (pc.mUpdate) {
+                        out.startTag(null, "upd");
+                        out.attribute(null, "pkg", pc.mPackageName);
+                        out.attribute(null, "ver", Integer.toString(pc.mVersionCode));
+                        out.endTag(null, "upd");
+                    } else {
+                        out.startTag(null, "rem");
+                        out.attribute(null, "pkg", pc.mPackageName);
+                        out.endTag(null, "rem");
+                    }
+                }
+            }
             out.endTag(null, "item");
         }
         out.endTag(null, "daily-items");
@@ -7011,6 +7075,26 @@ public final class BatteryStatsImpl extends BatteryStats {
                 readDailyItemTagDetailsLocked(parser, dit, false, "dis");
             } else if (tagName.equals("chg")) {
                 readDailyItemTagDetailsLocked(parser, dit, true, "chg");
+            } else if (tagName.equals("upd")) {
+                if (dit.mPackageChanges == null) {
+                    dit.mPackageChanges = new ArrayList<>();
+                }
+                PackageChange pc = new PackageChange();
+                pc.mUpdate = true;
+                pc.mPackageName = parser.getAttributeValue(null, "pkg");
+                String verStr = parser.getAttributeValue(null, "ver");
+                pc.mVersionCode = verStr != null ? Integer.parseInt(verStr) : 0;
+                dit.mPackageChanges.add(pc);
+                XmlUtils.skipCurrentTag(parser);
+            } else if (tagName.equals("rem")) {
+                if (dit.mPackageChanges == null) {
+                    dit.mPackageChanges = new ArrayList<>();
+                }
+                PackageChange pc = new PackageChange();
+                pc.mUpdate = false;
+                pc.mPackageName = parser.getAttributeValue(null, "pkg");
+                dit.mPackageChanges.add(pc);
+                XmlUtils.skipCurrentTag(parser);
             } else {
                 Slog.w(TAG, "Unknown element under <item>: "
                         + parser.getName());
@@ -7295,6 +7379,7 @@ public final class BatteryStatsImpl extends BatteryStats {
         mInteractiveTimer.reset(false);
         mPowerSaveModeEnabledTimer.reset(false);
         mDeviceIdleModeEnabledTimer.reset(false);
+        mDeviceIdlingTimer.reset(false);
         mPhoneOnTimer.reset(false);
         mAudioOnTimer.reset(false);
         mVideoOnTimer.reset(false);
@@ -8083,6 +8168,11 @@ public final class BatteryStatsImpl extends BatteryStats {
         return mDailyChargeStepTracker;
     }
 
+    @Override
+    public ArrayList<PackageChange> getDailyPackageChanges() {
+        return mDailyPackageChanges;
+    }
+
     long getBatteryUptimeLocked() {
         return mOnBatteryTimeBase.getUptime(SystemClock.uptimeMillis() * 1000);
     }
@@ -8583,6 +8673,20 @@ public final class BatteryStatsImpl extends BatteryStats {
         mChargeStepTracker.readFromParcel(in);
         mDailyDischargeStepTracker.readFromParcel(in);
         mDailyChargeStepTracker.readFromParcel(in);
+        int NPKG = in.readInt();
+        if (NPKG > 0) {
+            mDailyPackageChanges = new ArrayList<>(NPKG);
+            while (NPKG > 0) {
+                NPKG--;
+                PackageChange pc = new PackageChange();
+                pc.mPackageName = in.readString();
+                pc.mUpdate = in.readInt() != 0;
+                pc.mVersionCode = in.readInt();
+                mDailyPackageChanges.add(pc);
+            }
+        } else {
+            mDailyPackageChanges = null;
+        }
         mDailyStartTime = in.readLong();
         mNextMinDailyDeadline = in.readLong();
         mNextMaxDailyDeadline = in.readLong();
@@ -8599,6 +8703,7 @@ public final class BatteryStatsImpl extends BatteryStats {
         mPhoneOn = false;
         mPowerSaveModeEnabledTimer.readSummaryFromParcelLocked(in);
         mDeviceIdleModeEnabledTimer.readSummaryFromParcelLocked(in);
+        mDeviceIdlingTimer.readSummaryFromParcelLocked(in);
         mPhoneOnTimer.readSummaryFromParcelLocked(in);
         for (int i=0; i<SignalStrength.NUM_SIGNAL_STRENGTH_BINS; i++) {
             mPhoneSignalStrengthsTimer[i].readSummaryFromParcelLocked(in);
@@ -8890,6 +8995,18 @@ public final class BatteryStatsImpl extends BatteryStats {
         mChargeStepTracker.writeToParcel(out);
         mDailyDischargeStepTracker.writeToParcel(out);
         mDailyChargeStepTracker.writeToParcel(out);
+        if (mDailyPackageChanges != null) {
+            final int NPKG = mDailyPackageChanges.size();
+            out.writeInt(NPKG);
+            for (int i=0; i<NPKG; i++) {
+                PackageChange pc = mDailyPackageChanges.get(i);
+                out.writeString(pc.mPackageName);
+                out.writeInt(pc.mUpdate ? 1 : 0);
+                out.writeInt(pc.mVersionCode);
+            }
+        } else {
+            out.writeInt(0);
+        }
         out.writeLong(mDailyStartTime);
         out.writeLong(mNextMinDailyDeadline);
         out.writeLong(mNextMaxDailyDeadline);
@@ -8901,6 +9018,7 @@ public final class BatteryStatsImpl extends BatteryStats {
         mInteractiveTimer.writeSummaryFromParcelLocked(out, NOWREAL_SYS);
         mPowerSaveModeEnabledTimer.writeSummaryFromParcelLocked(out, NOWREAL_SYS);
         mDeviceIdleModeEnabledTimer.writeSummaryFromParcelLocked(out, NOWREAL_SYS);
+        mDeviceIdlingTimer.writeSummaryFromParcelLocked(out, NOWREAL_SYS);
         mPhoneOnTimer.writeSummaryFromParcelLocked(out, NOWREAL_SYS);
         for (int i=0; i<SignalStrength.NUM_SIGNAL_STRENGTH_BINS; i++) {
             mPhoneSignalStrengthsTimer[i].writeSummaryFromParcelLocked(out, NOWREAL_SYS);
@@ -9201,6 +9319,7 @@ public final class BatteryStatsImpl extends BatteryStats {
         mPhoneOn = false;
         mPowerSaveModeEnabledTimer = new StopwatchTimer(null, -2, null, mOnBatteryTimeBase, in);
         mDeviceIdleModeEnabledTimer = new StopwatchTimer(null, -11, null, mOnBatteryTimeBase, in);
+        mDeviceIdlingTimer = new StopwatchTimer(null, -12, null, mOnBatteryTimeBase, in);
         mPhoneOnTimer = new StopwatchTimer(null, -3, null, mOnBatteryTimeBase, in);
         for (int i=0; i<SignalStrength.NUM_SIGNAL_STRENGTH_BINS; i++) {
             mPhoneSignalStrengthsTimer[i] = new StopwatchTimer(null, -200-i,
@@ -9367,6 +9486,7 @@ public final class BatteryStatsImpl extends BatteryStats {
         mInteractiveTimer.writeToParcel(out, uSecRealtime);
         mPowerSaveModeEnabledTimer.writeToParcel(out, uSecRealtime);
         mDeviceIdleModeEnabledTimer.writeToParcel(out, uSecRealtime);
+        mDeviceIdlingTimer.writeToParcel(out, uSecRealtime);
         mPhoneOnTimer.writeToParcel(out, uSecRealtime);
         for (int i=0; i<SignalStrength.NUM_SIGNAL_STRENGTH_BINS; i++) {
             mPhoneSignalStrengthsTimer[i].writeToParcel(out, uSecRealtime);
@@ -9507,6 +9627,8 @@ public final class BatteryStatsImpl extends BatteryStats {
             mPowerSaveModeEnabledTimer.logState(pr, "  ");
             pr.println("*** Device idle mode timer:");
             mDeviceIdleModeEnabledTimer.logState(pr, "  ");
+            pr.println("*** Device idling timer:");
+            mDeviceIdlingTimer.logState(pr, "  ");
             pr.println("*** Phone timer:");
             mPhoneOnTimer.logState(pr, "  ");
             for (int i=0; i<SignalStrength.NUM_SIGNAL_STRENGTH_BINS; i++) {

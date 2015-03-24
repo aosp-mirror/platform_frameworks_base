@@ -420,6 +420,9 @@ public final class PowerManagerService extends SystemService
     // True if the battery level is currently considered low.
     private boolean mBatteryLevelLow;
 
+    // True if we are currently in device idle mode.
+    private boolean mDeviceIdleMode;
+
     // True if theater mode is enabled
     private boolean mTheaterModeEnabled;
 
@@ -2178,6 +2181,12 @@ public final class PowerManagerService extends SystemService
         }
     }
 
+    private boolean isDeviceIdleModeInternal() {
+        synchronized (mLock) {
+            return mDeviceIdleMode;
+        }
+    }
+
     private void handleBatteryStateChangedLocked() {
         mDirty |= DIRTY_BATTERY_STATE;
         updatePowerStateLocked();
@@ -3050,6 +3059,16 @@ public final class PowerManagerService extends SystemService
             }
         }
 
+        @Override // Binder call
+        public boolean isDeviceIdleMode() {
+            final long ident = Binder.clearCallingIdentity();
+            try {
+                return isDeviceIdleModeInternal();
+            } finally {
+                Binder.restoreCallingIdentity(ident);
+            }
+        }
+
         /**
          * Reboots the device.
          *
@@ -3293,6 +3312,13 @@ public final class PowerManagerService extends SystemService
         public void registerLowPowerModeObserver(LowPowerModeListener listener) {
             synchronized (mLock) {
                 mLowPowerModeListeners.add(listener);
+            }
+        }
+
+        @Override
+        public void setDeviceIdleMode(boolean enabled) {
+            synchronized (mLock) {
+                mDeviceIdleMode = enabled;
             }
         }
     }
