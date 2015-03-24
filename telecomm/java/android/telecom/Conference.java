@@ -181,7 +181,10 @@ public abstract class Conference extends Conferenceable {
      * @hide
      */
     public void removeCapability(int capability) {
-        mConnectionCapabilities &= ~capability;
+        int newCapabilities = mConnectionCapabilities;
+        newCapabilities &= ~capability;
+
+        setConnectionCapabilities(newCapabilities);
     }
 
     /**
@@ -191,7 +194,10 @@ public abstract class Conference extends Conferenceable {
      * @hide
      */
     public void addCapability(int capability) {
-        mConnectionCapabilities |= capability;
+        int newCapabilities = mConnectionCapabilities;
+        newCapabilities |= capability;
+
+        setConnectionCapabilities(newCapabilities);
     }
 
     /**
