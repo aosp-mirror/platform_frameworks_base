@@ -3716,8 +3716,10 @@ public class WindowManagerService extends IWindowManager.Stub
         } else {
             // TODO(multidisplay): Change to the correct display.
             final WindowList windows = getDefaultWindowListLocked();
-            for (int pos = windows.size() - 1; pos >= 0; --pos) {
+            int pos = windows.size() - 1;
+            while (pos >= 0) {
                 WindowState win = windows.get(pos);
+                pos--;
                 if (win.mAppToken != null) {
                     // We hit an application window. so the orientation will be determined by the
                     // app window. No point in continuing further.
