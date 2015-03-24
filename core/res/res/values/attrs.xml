@@ -7759,6 +7759,8 @@
             <enum name="multi-select" value="4" />
             <enum name="integer" value="5" />
             <enum name="string" value="6" />
+            <enum name="bundle" value="7" />
+            <enum name="bundle_array" value="8" />
         </attr>
         <attr name="title" />
         <attr name="description" />

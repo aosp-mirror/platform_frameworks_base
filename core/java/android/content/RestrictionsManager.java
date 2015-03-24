@@ -32,12 +32,14 @@ import android.util.Log;
 import android.util.Xml;
 
 import com.android.internal.R;
+import com.android.internal.util.XmlUtils;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -71,12 +73,15 @@ import java.util.List;
  *         android:key="string"
  *         android:title="string resource"
  *         android:restrictionType=["bool" | "string" | "integer"
- *                                         | "choice" | "multi-select" | "hidden"]
+ *                                         | "choice" | "multi-select" | "hidden"
+ *                                         | "bundle" | "bundle_array"]
  *         android:description="string resource"
  *         android:entries="string-array resource"
  *         android:entryValues="string-array resource"
- *         android:defaultValue="reference"
- *         /&gt;
+ *         android:defaultValue="reference" &gt;
+ *             &lt;restriction ... /&gt;
+ *             ...
+ *     &lt;/restriction&gt;
  *     &lt;restriction ... /&gt;
  *     ...
  * &lt;/restrictions&gt;
@@ -96,6 +101,9 @@ import java.util.List;
  * <li><code>description</code> is meant to describe the restriction in more detail to the
  * administrator controlling the values, if the title is not sufficient.</li>
  * </ul>
+ * <p>
+ * Only restrictions of type {@code bundle} and {@code bundle_array} can have one or multiple nested
+ * restriction elements.
  * <p>
  * In your manifest's <code>application</code> section, add the meta-data tag to point to
  * the restrictions XML file as shown below:
@@ -537,9 +545,7 @@ public class RestrictionsManager {
 
         XmlResourceParser xml =
                 appInfo.loadXmlMetaData(mContext.getPackageManager(), META_DATA_APP_RESTRICTIONS);
-        List<RestrictionEntry> restrictions = loadManifestRestrictions(packageName, xml);
-
-        return restrictions;
+        return loadManifestRestrictions(packageName, xml);
     }
 
     private List<RestrictionEntry> loadManifestRestrictions(String packageName,
@@ -550,23 +556,16 @@ public class RestrictionsManager {
         } catch (NameNotFoundException nnfe) {
             return null;
         }
-        ArrayList<RestrictionEntry> restrictions = new ArrayList<RestrictionEntry>();
+        ArrayList<RestrictionEntry> restrictions = new ArrayList<>();
         RestrictionEntry restriction;
 
         try {
             int tagType = xml.next();
             while (tagType != XmlPullParser.END_DOCUMENT) {
                 if (tagType == XmlPullParser.START_TAG) {
-                    if (xml.getName().equals(TAG_RESTRICTION)) {
-                        AttributeSet attrSet = Xml.asAttributeSet(xml);
-                        if (attrSet != null) {
-                            TypedArray a = appContext.obtainStyledAttributes(attrSet,
-                                    com.android.internal.R.styleable.RestrictionEntry);
-                            restriction = loadRestriction(appContext, a);
-                            if (restriction != null) {
-                                restrictions.add(restriction);
-                            }
-                        }
+                    restriction = loadRestrictionElement(appContext, xml);
+                    if (restriction != null) {
+                        restrictions.add(restriction);
                     }
                 }
                 tagType = xml.next();
@@ -582,7 +581,21 @@ public class RestrictionsManager {
         return restrictions;
     }
 
-    private RestrictionEntry loadRestriction(Context appContext, TypedArray a) {
+    private RestrictionEntry loadRestrictionElement(Context appContext, XmlResourceParser xml)
+            throws IOException, XmlPullParserException {
+        if (xml.getName().equals(TAG_RESTRICTION)) {
+            AttributeSet attrSet = Xml.asAttributeSet(xml);
+            if (attrSet != null) {
+                TypedArray a = appContext.obtainStyledAttributes(attrSet,
+                        com.android.internal.R.styleable.RestrictionEntry);
+                return loadRestriction(appContext, a, xml);
+            }
+        }
+        return null;
+    }
+
+    private RestrictionEntry loadRestriction(Context appContext, TypedArray a, XmlResourceParser xml)
+            throws IOException, XmlPullParserException {
         String key = a.getString(R.styleable.RestrictionEntry_key);
         int restrictionType = a.getInt(
                 R.styleable.RestrictionEntry_restrictionType, -1);
@@ -633,9 +646,90 @@ public class RestrictionsManager {
                 restriction.setSelectedState(
                         a.getBoolean(R.styleable.RestrictionEntry_defaultValue, false));
                 break;
+            case RestrictionEntry.TYPE_BUNDLE:
+            case RestrictionEntry.TYPE_BUNDLE_ARRAY:
+                final int outerDepth = xml.getDepth();
+                List<RestrictionEntry> restrictionEntries = new ArrayList<>();
+                while (XmlUtils.nextElementWithin(xml, outerDepth)) {
+                    RestrictionEntry childEntry = loadRestrictionElement(appContext, xml);
+                    if (childEntry == null) {
+                        Log.w(TAG, "Child entry cannot be loaded for bundle restriction " + key);
+                    } else {
+                        restrictionEntries.add(childEntry);
+                        if (restrictionType == RestrictionEntry.TYPE_BUNDLE_ARRAY
+                                && childEntry.getType() != RestrictionEntry.TYPE_BUNDLE) {
+                            Log.w(TAG, "bundle_array " + key
+                                    + " can only contain entries of type bundle");
+                        }
+                    }
+                }
+                restriction.setRestrictions(restrictionEntries.toArray(new RestrictionEntry[
+                        restrictionEntries.size()]));
+                break;
             default:
                 Log.w(TAG, "Unknown restriction type " + restrictionType);
         }
         return restriction;
     }
+
+    /**
+     * Converts a list of restrictions to the corresponding bundle, using the following mapping:
+     * <table>
+     *     <tr><th>RestrictionEntry</th><th>Bundle</th></tr>
+     *     <tr><td>{@link RestrictionEntry#TYPE_BOOLEAN}</td><td>{@link Bundle#putBoolean}</td></tr>
+     *     <tr><td>{@link RestrictionEntry#TYPE_CHOICE}, {@link RestrictionEntry#TYPE_CHOICE}</td>
+     *     <td>{@link Bundle#putStringArray}</td></tr>
+     *     <tr><td>{@link RestrictionEntry#TYPE_INTEGER}</td><td>{@link Bundle#putInt}</td></tr>
+     *     <tr><td>{@link RestrictionEntry#TYPE_STRING}</td><td>{@link Bundle#putString}</td></tr>
+     *     <tr><td>{@link RestrictionEntry#TYPE_BUNDLE}</td><td>{@link Bundle#putBundle}</td></tr>
+     *     <tr><td>{@link RestrictionEntry#TYPE_BUNDLE_ARRAY}</td>
+     *     <td>{@link Bundle#putParcelableArray}</td></tr>
+     * </table>
+     * @param entries list of restrictions
+     */
+    public static Bundle convertRestrictionsToBundle(List<RestrictionEntry> entries) {
+        final Bundle bundle = new Bundle();
+        for (RestrictionEntry entry : entries) {
+            addRestrictionToBundle(bundle, entry);
+        }
+        return bundle;
+    }
+
+    private static Bundle addRestrictionToBundle(Bundle bundle, RestrictionEntry entry) {
+        switch (entry.getType()) {
+            case RestrictionEntry.TYPE_BOOLEAN:
+                bundle.putBoolean(entry.getKey(), entry.getSelectedState());
+                break;
+            case RestrictionEntry.TYPE_CHOICE:
+            case RestrictionEntry.TYPE_CHOICE_LEVEL:
+            case RestrictionEntry.TYPE_MULTI_SELECT:
+                bundle.putStringArray(entry.getKey(), entry.getAllSelectedStrings());
+                break;
+            case RestrictionEntry.TYPE_INTEGER:
+                bundle.putInt(entry.getKey(), entry.getIntValue());
+                break;
+            case RestrictionEntry.TYPE_STRING:
+            case RestrictionEntry.TYPE_NULL:
+                bundle.putString(entry.getKey(), entry.getSelectedString());
+                break;
+            case RestrictionEntry.TYPE_BUNDLE:
+                RestrictionEntry[] restrictions = entry.getRestrictions();
+                Bundle childBundle = convertRestrictionsToBundle(Arrays.asList(restrictions));
+                bundle.putBundle(entry.getKey(), childBundle);
+                break;
+            case RestrictionEntry.TYPE_BUNDLE_ARRAY:
+                restrictions = entry.getRestrictions();
+                Bundle[] bundleArray = new Bundle[restrictions.length];
+                for (int i = 0; i < restrictions.length; i++) {
+                    bundleArray[i] = addRestrictionToBundle(new Bundle(), restrictions[i]);
+                }
+                bundle.putParcelableArray(entry.getKey(), bundleArray);
+                break;
+            default:
+                throw new IllegalArgumentException(
+                        "Unsupported restrictionEntry type: " + entry.getType());
+        }
+        return bundle;
+    }
+
 }

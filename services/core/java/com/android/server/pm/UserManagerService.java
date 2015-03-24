@@ -36,6 +36,7 @@ import android.os.Handler;
 import android.os.IUserManager;
 import android.os.Message;
 import android.os.ParcelFileDescriptor;
+import android.os.Parcelable;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -49,9 +50,11 @@ import android.util.SparseBooleanArray;
 import android.util.TimeUtils;
 import android.util.Xml;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.IAppOpsService;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.FastXmlSerializer;
+import com.android.internal.util.XmlUtils;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -70,6 +73,8 @@ import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.List;
+
+import libcore.io.IoUtils;
 
 public class UserManagerService extends IUserManager.Stub {
 
@@ -107,6 +112,8 @@ public class UserManagerService extends IUserManager.Stub {
     private static final String ATTR_TYPE_STRING = "s";
     private static final String ATTR_TYPE_BOOLEAN = "b";
     private static final String ATTR_TYPE_INTEGER = "i";
+    private static final String ATTR_TYPE_BUNDLE = "B";
+    private static final String ATTR_TYPE_BUNDLE_ARRAY = "BA";
 
     private static final String USER_INFO_DIR = "system" + File.separator + "users";
     private static final String USER_LIST_FILENAME = "userlist.xml";
@@ -1672,124 +1679,168 @@ public class UserManagerService extends IUserManager.Stub {
 
     private Bundle readApplicationRestrictionsLocked(String packageName,
             int userId) {
+        AtomicFile restrictionsFile =
+                new AtomicFile(new File(Environment.getUserSystemDirectory(userId),
+                        packageToRestrictionsFileName(packageName)));
+        return readApplicationRestrictionsLocked(restrictionsFile);
+    }
+
+    @VisibleForTesting
+    static Bundle readApplicationRestrictionsLocked(AtomicFile restrictionsFile) {
         final Bundle restrictions = new Bundle();
-        final ArrayList<String> values = new ArrayList<String>();
+        final ArrayList<String> values = new ArrayList<>();
 
         FileInputStream fis = null;
         try {
-            AtomicFile restrictionsFile =
-                    new AtomicFile(new File(Environment.getUserSystemDirectory(userId),
-                            packageToRestrictionsFileName(packageName)));
             fis = restrictionsFile.openRead();
             XmlPullParser parser = Xml.newPullParser();
             parser.setInput(fis, null);
-            int type;
-            while ((type = parser.next()) != XmlPullParser.START_TAG
-                    && type != XmlPullParser.END_DOCUMENT) {
-                ;
-            }
-
-            if (type != XmlPullParser.START_TAG) {
+            XmlUtils.nextElement(parser);
+            if (parser.getEventType() != XmlPullParser.START_TAG) {
                 Slog.e(LOG_TAG, "Unable to read restrictions file "
                         + restrictionsFile.getBaseFile());
                 return restrictions;
             }
-
-            while ((type = parser.next()) != XmlPullParser.END_DOCUMENT) {
-                if (type == XmlPullParser.START_TAG && parser.getName().equals(TAG_ENTRY)) {
-                    String key = parser.getAttributeValue(null, ATTR_KEY);
-                    String valType = parser.getAttributeValue(null, ATTR_VALUE_TYPE);
-                    String multiple = parser.getAttributeValue(null, ATTR_MULTIPLE);
-                    if (multiple != null) {
-                        values.clear();
-                        int count = Integer.parseInt(multiple);
-                        while (count > 0 && (type = parser.next()) != XmlPullParser.END_DOCUMENT) {
-                            if (type == XmlPullParser.START_TAG
-                                    && parser.getName().equals(TAG_VALUE)) {
-                                values.add(parser.nextText().trim());
-                                count--;
-                            }
-                        }
-                        String [] valueStrings = new String[values.size()];
-                        values.toArray(valueStrings);
-                        restrictions.putStringArray(key, valueStrings);
-                    } else {
-                        String value = parser.nextText().trim();
-                        if (ATTR_TYPE_BOOLEAN.equals(valType)) {
-                            restrictions.putBoolean(key, Boolean.parseBoolean(value));
-                        } else if (ATTR_TYPE_INTEGER.equals(valType)) {
-                            restrictions.putInt(key, Integer.parseInt(value));
-                        } else {
-                            restrictions.putString(key, value);
-                        }
-                    }
-                }
+            while (parser.next() != XmlPullParser.END_DOCUMENT) {
+                readEntry(restrictions, values, parser);
             }
-        } catch (IOException ioe) {
-        } catch (XmlPullParserException pe) {
+        } catch (IOException|XmlPullParserException e) {
+            Log.w(LOG_TAG, "Error parsing " + restrictionsFile.getBaseFile(), e);
         } finally {
-            if (fis != null) {
-                try {
-                    fis.close();
-                } catch (IOException e) {
-                }
-            }
+            IoUtils.closeQuietly(fis);
         }
         return restrictions;
     }
 
+    private static void readEntry(Bundle restrictions, ArrayList<String> values,
+            XmlPullParser parser) throws XmlPullParserException, IOException {
+        int type = parser.getEventType();
+        if (type == XmlPullParser.START_TAG && parser.getName().equals(TAG_ENTRY)) {
+            String key = parser.getAttributeValue(null, ATTR_KEY);
+            String valType = parser.getAttributeValue(null, ATTR_VALUE_TYPE);
+            String multiple = parser.getAttributeValue(null, ATTR_MULTIPLE);
+            if (multiple != null) {
+                values.clear();
+                int count = Integer.parseInt(multiple);
+                while (count > 0 && (type = parser.next()) != XmlPullParser.END_DOCUMENT) {
+                    if (type == XmlPullParser.START_TAG
+                            && parser.getName().equals(TAG_VALUE)) {
+                        values.add(parser.nextText().trim());
+                        count--;
+                    }
+                }
+                String [] valueStrings = new String[values.size()];
+                values.toArray(valueStrings);
+                restrictions.putStringArray(key, valueStrings);
+            } else if (ATTR_TYPE_BUNDLE.equals(valType)) {
+                restrictions.putBundle(key, readBundleEntry(parser, values));
+            } else if (ATTR_TYPE_BUNDLE_ARRAY.equals(valType)) {
+                final int outerDepth = parser.getDepth();
+                ArrayList<Bundle> bundleList = new ArrayList<>();
+                while (XmlUtils.nextElementWithin(parser, outerDepth)) {
+                    Bundle childBundle = readBundleEntry(parser, values);
+                    bundleList.add(childBundle);
+                }
+                restrictions.putParcelableArray(key,
+                        bundleList.toArray(new Bundle[bundleList.size()]));
+            } else {
+                String value = parser.nextText().trim();
+                if (ATTR_TYPE_BOOLEAN.equals(valType)) {
+                    restrictions.putBoolean(key, Boolean.parseBoolean(value));
+                } else if (ATTR_TYPE_INTEGER.equals(valType)) {
+                    restrictions.putInt(key, Integer.parseInt(value));
+                } else {
+                    restrictions.putString(key, value);
+                }
+            }
+        }
+    }
+
+    private static Bundle readBundleEntry(XmlPullParser parser, ArrayList<String> values)
+            throws IOException, XmlPullParserException {
+        Bundle childBundle = new Bundle();
+        final int outerDepth = parser.getDepth();
+        while (XmlUtils.nextElementWithin(parser, outerDepth)) {
+            readEntry(childBundle, values, parser);
+        }
+        return childBundle;
+    }
+
     private void writeApplicationRestrictionsLocked(String packageName,
             Bundle restrictions, int userId) {
-        FileOutputStream fos = null;
         AtomicFile restrictionsFile = new AtomicFile(
                 new File(Environment.getUserSystemDirectory(userId),
                         packageToRestrictionsFileName(packageName)));
+        writeApplicationRestrictionsLocked(restrictions, restrictionsFile);
+    }
+
+    @VisibleForTesting
+    static void writeApplicationRestrictionsLocked(Bundle restrictions,
+            AtomicFile restrictionsFile) {
+        FileOutputStream fos = null;
         try {
             fos = restrictionsFile.startWrite();
             final BufferedOutputStream bos = new BufferedOutputStream(fos);
 
-            // XmlSerializer serializer = XmlUtils.serializerInstance();
             final XmlSerializer serializer = new FastXmlSerializer();
             serializer.setOutput(bos, "utf-8");
             serializer.startDocument(null, true);
             serializer.setFeature("http://xmlpull.org/v1/doc/features.html#indent-output", true);
 
             serializer.startTag(null, TAG_RESTRICTIONS);
-
-            for (String key : restrictions.keySet()) {
-                Object value = restrictions.get(key);
-                serializer.startTag(null, TAG_ENTRY);
-                serializer.attribute(null, ATTR_KEY, key);
-
-                if (value instanceof Boolean) {
-                    serializer.attribute(null, ATTR_VALUE_TYPE, ATTR_TYPE_BOOLEAN);
-                    serializer.text(value.toString());
-                } else if (value instanceof Integer) {
-                    serializer.attribute(null, ATTR_VALUE_TYPE, ATTR_TYPE_INTEGER);
-                    serializer.text(value.toString());
-                } else if (value == null || value instanceof String) {
-                    serializer.attribute(null, ATTR_VALUE_TYPE, ATTR_TYPE_STRING);
-                    serializer.text(value != null ? (String) value : "");
-                } else {
-                    serializer.attribute(null, ATTR_VALUE_TYPE, ATTR_TYPE_STRING_ARRAY);
-                    String[] values = (String[]) value;
-                    serializer.attribute(null, ATTR_MULTIPLE, Integer.toString(values.length));
-                    for (String choice : values) {
-                        serializer.startTag(null, TAG_VALUE);
-                        serializer.text(choice != null ? choice : "");
-                        serializer.endTag(null, TAG_VALUE);
-                    }
-                }
-                serializer.endTag(null, TAG_ENTRY);
-            }
-
+            writeBundle(restrictions, serializer);
             serializer.endTag(null, TAG_RESTRICTIONS);
 
             serializer.endDocument();
             restrictionsFile.finishWrite(fos);
         } catch (Exception e) {
             restrictionsFile.failWrite(fos);
-            Slog.e(LOG_TAG, "Error writing application restrictions list");
+            Slog.e(LOG_TAG, "Error writing application restrictions list", e);
+        }
+    }
+
+    private static void writeBundle(Bundle restrictions, XmlSerializer serializer)
+            throws IOException {
+        for (String key : restrictions.keySet()) {
+            Object value = restrictions.get(key);
+            serializer.startTag(null, TAG_ENTRY);
+            serializer.attribute(null, ATTR_KEY, key);
+
+            if (value instanceof Boolean) {
+                serializer.attribute(null, ATTR_VALUE_TYPE, ATTR_TYPE_BOOLEAN);
+                serializer.text(value.toString());
+            } else if (value instanceof Integer) {
+                serializer.attribute(null, ATTR_VALUE_TYPE, ATTR_TYPE_INTEGER);
+                serializer.text(value.toString());
+            } else if (value == null || value instanceof String) {
+                serializer.attribute(null, ATTR_VALUE_TYPE, ATTR_TYPE_STRING);
+                serializer.text(value != null ? (String) value : "");
+            } else if (value instanceof Bundle) {
+                serializer.attribute(null, ATTR_VALUE_TYPE, ATTR_TYPE_BUNDLE);
+                writeBundle((Bundle) value, serializer);
+            } else if (value instanceof Parcelable[]) {
+                serializer.attribute(null, ATTR_VALUE_TYPE, ATTR_TYPE_BUNDLE_ARRAY);
+                Parcelable[] array = (Parcelable[]) value;
+                for (Parcelable parcelable : array) {
+                    if (!(parcelable instanceof Bundle)) {
+                        throw new IllegalArgumentException("bundle-array can only hold Bundles");
+                    }
+                    serializer.startTag(null, TAG_ENTRY);
+                    serializer.attribute(null, ATTR_VALUE_TYPE, ATTR_TYPE_BUNDLE);
+                    writeBundle((Bundle) parcelable, serializer);
+                    serializer.endTag(null, TAG_ENTRY);
+                }
+            } else {
+                serializer.attribute(null, ATTR_VALUE_TYPE, ATTR_TYPE_STRING_ARRAY);
+                String[] values = (String[]) value;
+                serializer.attribute(null, ATTR_MULTIPLE, Integer.toString(values.length));
+                for (String choice : values) {
+                    serializer.startTag(null, TAG_VALUE);
+                    serializer.text(choice != null ? choice : "");
+                    serializer.endTag(null, TAG_VALUE);
+                }
+            }
+            serializer.endTag(null, TAG_ENTRY);
         }
     }
 

@@ -8377,6 +8377,7 @@ package android.content {
     ctor public RestrictionEntry(java.lang.String, boolean);
     ctor public RestrictionEntry(java.lang.String, java.lang.String[]);
     ctor public RestrictionEntry(java.lang.String, int);
+    ctor public RestrictionEntry(java.lang.String, android.content.RestrictionEntry[], boolean);
     ctor public RestrictionEntry(android.os.Parcel);
     method public int describeContents();
     method public java.lang.String[] getAllSelectedStrings();
@@ -8385,6 +8386,7 @@ package android.content {
     method public java.lang.String getDescription();
     method public int getIntValue();
     method public java.lang.String getKey();
+    method public android.content.RestrictionEntry[] getRestrictions();
     method public boolean getSelectedState();
     method public java.lang.String getSelectedString();
     method public java.lang.String getTitle();
@@ -8396,6 +8398,7 @@ package android.content {
     method public void setChoiceValues(android.content.Context, int);
     method public void setDescription(java.lang.String);
     method public void setIntValue(int);
+    method public void setRestrictions(android.content.RestrictionEntry[]);
     method public void setSelectedState(boolean);
     method public void setSelectedString(java.lang.String);
     method public void setTitle(java.lang.String);
@@ -8403,6 +8406,8 @@ package android.content {
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator<android.content.RestrictionEntry> CREATOR;
     field public static final int TYPE_BOOLEAN = 1; // 0x1
+    field public static final int TYPE_BUNDLE = 7; // 0x7
+    field public static final int TYPE_BUNDLE_ARRAY = 8; // 0x8
     field public static final int TYPE_CHOICE = 2; // 0x2
     field public static final int TYPE_INTEGER = 5; // 0x5
     field public static final int TYPE_MULTI_SELECT = 4; // 0x4
@@ -8411,6 +8416,7 @@ package android.content {
   }
 
   public class RestrictionsManager {
+    method public static android.os.Bundle convertRestrictionsToBundle(java.util.List<android.content.RestrictionEntry>);
     method public android.content.Intent createLocalApprovalIntent();
     method public android.os.Bundle getApplicationRestrictions();
     method public java.util.List<android.content.RestrictionEntry> getManifestRestrictions(java.lang.String);
