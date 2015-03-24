@@ -47,6 +47,7 @@ import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 
 public class MidiService extends IMidiManager.Stub {
@@ -269,7 +270,9 @@ public class MidiService extends IMidiManager.Stub {
 
         public void binderDied() {
             synchronized (mDevicesByInfo) {
-                removeDeviceLocked(this);
+                if (mDevicesByInfo.remove(mDeviceInfo) != null) {
+                    removeDeviceLocked(this);
+                }
             }
         }
 
@@ -368,6 +371,7 @@ public class MidiService extends IMidiManager.Stub {
         synchronized (mDevicesByInfo) {
             Device device = mDevicesByServer.get(server.asBinder());
             if (device != null) {
+                mDevicesByInfo.remove(device.getDeviceInfo());
                 removeDeviceLocked(device);
             }
         }
@@ -454,16 +458,14 @@ public class MidiService extends IMidiManager.Stub {
 
     // synchronize on mDevicesByInfo
     private void removeDeviceLocked(Device device) {
-        if (mDevicesByInfo.remove(device.getDeviceInfo()) != null) {
-            IMidiDeviceServer server = device.getDeviceServer();
-            if (server != null) {
-                mDevicesByServer.remove(server);
-            }
+        IMidiDeviceServer server = device.getDeviceServer();
+        if (server != null) {
+            mDevicesByServer.remove(server);
+        }
 
-            synchronized (mClients) {
-                for (Client c : mClients.values()) {
-                    c.deviceRemoved(device);
-                }
+        synchronized (mClients) {
+            for (Client c : mClients.values()) {
+                c.deviceRemoved(device);
             }
         }
     }
@@ -616,8 +618,11 @@ public class MidiService extends IMidiManager.Stub {
 
     private void removePackageDeviceServers(String packageName) {
         synchronized (mDevicesByInfo) {
-            for (Device device : mDevicesByInfo.values()) {
+            Iterator<Device> iterator = mDevicesByInfo.values().iterator();
+            while (iterator.hasNext()) {
+                Device device = iterator.next();
                 if (packageName.equals(device.getPackageName())) {
+                    iterator.remove();
                     removeDeviceLocked(device);
                 }
             }
@@ -634,15 +639,19 @@ public class MidiService extends IMidiManager.Stub {
 
         pw.println("Devices:");
         pw.increaseIndent();
-        for (Device device : mDevicesByInfo.values()) {
-            pw.println(device.toString());
+        synchronized (mDevicesByInfo) {
+            for (Device device : mDevicesByInfo.values()) {
+                pw.println(device.toString());
+            }
         }
         pw.decreaseIndent();
 
         pw.println("Clients:");
         pw.increaseIndent();
-        for (Client client : mClients.values()) {
-            pw.println(client.toString());
+        synchronized (mClients) {
+            for (Client client : mClients.values()) {
+                pw.println(client.toString());
+            }
         }
         pw.decreaseIndent();
     }
