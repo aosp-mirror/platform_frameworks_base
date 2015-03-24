@@ -3168,6 +3168,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     private Drawable mBackground;
     private TintInfo mBackgroundTint;
 
+    @ViewDebug.ExportedProperty(deepExport = true, prefix = "fg_")
+    private ForegroundInfo mForegroundInfo;
+
     /**
      * RenderNode used for backgrounds.
      * <p>
@@ -3182,11 +3185,21 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
     private String mTransitionName;
 
-    private static class TintInfo {
+    static class TintInfo {
         ColorStateList mTintList;
         PorterDuff.Mode mTintMode;
         boolean mHasTintMode;
         boolean mHasTintList;
+    }
+
+    private static class ForegroundInfo {
+        private Drawable mDrawable;
+        private TintInfo mTintInfo;
+        private int mGravity = Gravity.START | Gravity.TOP;
+        private boolean mInsidePadding = true;
+        private boolean mBoundsChanged;
+        private final Rect mSelfBounds = new Rect();
+        private final Rect mOverlayBounds = new Rect();
     }
 
     static class ListenerInfo {
@@ -4055,6 +4068,25 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 case R.styleable.View_outlineProvider:
                     setOutlineProviderFromAttribute(a.getInt(R.styleable.View_outlineProvider,
                             PROVIDER_BACKGROUND));
+                    break;
+                case R.styleable.View_foreground:
+                    setForeground(a.getDrawable(attr));
+                    break;
+                case R.styleable.View_foregroundGravity:
+                    setForegroundGravity(a.getInt(attr, Gravity.NO_GRAVITY));
+                    break;
+                case R.styleable.View_foregroundTintMode:
+                    setForegroundTintMode(Drawable.parseTintMode(a.getInt(attr, -1), null));
+                    break;
+                case R.styleable.View_foregroundTint:
+                    setForegroundTintList(a.getColorStateList(attr));
+                    break;
+                case R.styleable.View_foregroundInsidePadding:
+                    if (mForegroundInfo == null) {
+                        mForegroundInfo = new ForegroundInfo();
+                    }
+                    mForegroundInfo.mInsidePadding = a.getBoolean(attr,
+                            mForegroundInfo.mInsidePadding);
                     break;
             }
         }
@@ -8801,6 +8833,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         if (dr != null && visible != dr.isVisible()) {
             dr.setVisible(visible, false);
         }
+        final Drawable fg = mForegroundInfo != null ? mForegroundInfo.mDrawable : null;
+        if (fg != null && visible != fg.isVisible()) {
+            fg.setVisible(visible, false);
+        }
     }
 
     /**
@@ -9917,6 +9953,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         }
 
         mBackgroundSizeChanged = true;
+        if (mForegroundInfo != null) {
+            mForegroundInfo.mBoundsChanged = true;
+        }
 
         final AttachInfo ai = mAttachInfo;
         if (ai != null) {
@@ -10755,6 +10794,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 invalidate(true);
             }
             mBackgroundSizeChanged = true;
+            if (mForegroundInfo != null) {
+                mForegroundInfo.mBoundsChanged = true;
+            }
             invalidateParentIfNeeded();
             if ((mPrivateFlags2 & PFLAG2_VIEW_QUICK_REJECTED) == PFLAG2_VIEW_QUICK_REJECTED) {
                 // View was rejected last time it was drawn by its parent; this may have changed
@@ -10820,6 +10862,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 invalidate(true);
             }
             mBackgroundSizeChanged = true;
+            if (mForegroundInfo != null) {
+                mForegroundInfo.mBoundsChanged = true;
+            }
             invalidateParentIfNeeded();
             if ((mPrivateFlags2 & PFLAG2_VIEW_QUICK_REJECTED) == PFLAG2_VIEW_QUICK_REJECTED) {
                 // View was rejected last time it was drawn by its parent; this may have changed
@@ -10879,6 +10924,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 invalidate(true);
             }
             mBackgroundSizeChanged = true;
+            if (mForegroundInfo != null) {
+                mForegroundInfo.mBoundsChanged = true;
+            }
             invalidateParentIfNeeded();
             if ((mPrivateFlags2 & PFLAG2_VIEW_QUICK_REJECTED) == PFLAG2_VIEW_QUICK_REJECTED) {
                 // View was rejected last time it was drawn by its parent; this may have changed
@@ -10935,6 +10983,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 invalidate(true);
             }
             mBackgroundSizeChanged = true;
+            if (mForegroundInfo != null) {
+                mForegroundInfo.mBoundsChanged = true;
+            }
             invalidateParentIfNeeded();
             if ((mPrivateFlags2 & PFLAG2_VIEW_QUICK_REJECTED) == PFLAG2_VIEW_QUICK_REJECTED) {
                 // View was rejected last time it was drawn by its parent; this may have changed
@@ -15313,12 +15364,13 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             // Step 4, draw the children
             dispatchDraw(canvas);
 
-            // Step 6, draw decorations (scrollbars)
-            onDrawScrollBars(canvas);
-
+            // Overlay is part of the content and draws beneath Foreground
             if (mOverlay != null && !mOverlay.isEmpty()) {
                 mOverlay.getOverlayView().dispatchDraw(canvas);
             }
+
+            // Step 6, draw decorations (foreground, scrollbars)
+            onDrawForeground(canvas);
 
             // we're done...
             return;
@@ -15461,12 +15513,13 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
         canvas.restoreToCount(saveCount);
 
-        // Step 6, draw decorations (scrollbars)
-        onDrawScrollBars(canvas);
-
+        // Overlay is part of the content and draws beneath Foreground
         if (mOverlay != null && !mOverlay.isEmpty()) {
             mOverlay.getOverlayView().dispatchDraw(canvas);
         }
+
+        // Step 6, draw decorations (foreground, scrollbars)
+        onDrawForeground(canvas);
     }
 
     /**
@@ -15849,6 +15902,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             mPrivateFlags |= drawn;
 
             mBackgroundSizeChanged = true;
+            if (mForegroundInfo != null) {
+                mForegroundInfo.mBoundsChanged = true;
+            }
 
             notifySubtreeAccessibilityStateChangedIfNeeded();
         }
@@ -15992,6 +16048,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         if (mBackground != null) {
             mBackground.setLayoutDirection(layoutDirection);
         }
+        if (mForegroundInfo != null && mForegroundInfo.mDrawable != null) {
+            mForegroundInfo.mDrawable.setLayoutDirection(layoutDirection);
+        }
         mPrivateFlags2 |= PFLAG2_DRAWABLE_RESOLVED;
         onResolveDrawables(layoutDirection);
     }
@@ -16047,7 +16106,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     @CallSuper
     protected boolean verifyDrawable(Drawable who) {
-        return who == mBackground || (mScrollCache != null && mScrollCache.scrollBar == who);
+        return who == mBackground || (mScrollCache != null && mScrollCache.scrollBar == who)
+                || (mForegroundInfo != null && mForegroundInfo.mDrawable == who);
     }
 
     /**
@@ -16065,9 +16125,14 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     protected void drawableStateChanged() {
         final int[] state = getDrawableState();
 
-        final Drawable d = mBackground;
-        if (d != null && d.isStateful()) {
-            d.setState(state);
+        final Drawable bg = mBackground;
+        if (bg != null && bg.isStateful()) {
+            bg.setState(state);
+        }
+
+        final Drawable fg = mForegroundInfo != null ? mForegroundInfo.mDrawable : null;
+        if (fg != null && fg.isStateful()) {
+            fg.setState(state);
         }
 
         if (mScrollCache != null) {
@@ -16098,6 +16163,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     public void drawableHotspotChanged(float x, float y) {
         if (mBackground != null) {
             mBackground.setHotspot(x, y);
+        }
+        if (mForegroundInfo != null && mForegroundInfo.mDrawable != null) {
+            mForegroundInfo.mDrawable.setHotspot(x, y);
         }
 
         dispatchDrawableHotspotChanged(x, y);
@@ -16269,6 +16337,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         }
         if (mStateListAnimator != null) {
             mStateListAnimator.jumpToCurrentState();
+        }
+        if (mForegroundInfo != null && mForegroundInfo.mDrawable != null) {
+            mForegroundInfo.mDrawable.jumpToCurrentState();
         }
     }
 
@@ -16550,6 +16621,248 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                     mBackground.setState(getDrawableState());
                 }
             }
+        }
+    }
+
+    /**
+     * Returns the drawable used as the foreground of this View. The
+     * foreground drawable, if non-null, is always drawn on top of the view's content.
+     *
+     * @return a Drawable or null if no foreground was set
+     *
+     * @see #onDrawForeground(Canvas)
+     */
+    public Drawable getForeground() {
+        return mForegroundInfo != null ? mForegroundInfo.mDrawable : null;
+    }
+
+    /**
+     * Supply a Drawable that is to be rendered on top of all of the content in the view.
+     *
+     * @param foreground the Drawable to be drawn on top of the children
+     *
+     * @attr ref android.R.styleable#View_foreground
+     */
+    public void setForeground(Drawable foreground) {
+        if (mForegroundInfo == null) {
+            if (foreground == null) {
+                // Nothing to do.
+                return;
+            }
+            mForegroundInfo = new ForegroundInfo();
+        }
+
+        if (foreground == mForegroundInfo.mDrawable) {
+            // Nothing to do
+            return;
+        }
+
+        if (mForegroundInfo.mDrawable != null) {
+            mForegroundInfo.mDrawable.setCallback(null);
+            unscheduleDrawable(mForegroundInfo.mDrawable);
+        }
+
+        mForegroundInfo.mDrawable = foreground;
+        if (foreground != null) {
+            setWillNotDraw(false);
+            foreground.setCallback(this);
+            foreground.setLayoutDirection(getLayoutDirection());
+            if (foreground.isStateful()) {
+                foreground.setState(getDrawableState());
+            }
+            applyForegroundTint();
+        }
+        requestLayout();
+        invalidate();
+    }
+
+    /**
+     * Magic bit used to support features of framework-internal window decor implementation details.
+     * This used to live exclusively in FrameLayout.
+     *
+     * @return true if the foreground should draw inside the padding region or false
+     *         if it should draw inset by the view's padding
+     * @hide internal use only; only used by FrameLayout and internal screen layouts.
+     */
+    public boolean isForegroundInsidePadding() {
+        return mForegroundInfo != null ? mForegroundInfo.mInsidePadding : true;
+    }
+
+    /**
+     * Describes how the foreground is positioned.
+     *
+     * @return foreground gravity.
+     *
+     * @see #setForegroundGravity(int)
+     *
+     * @attr ref android.R.styleable#View_foregroundGravity
+     */
+    public int getForegroundGravity() {
+        return mForegroundInfo != null ? mForegroundInfo.mGravity
+                : Gravity.START | Gravity.TOP;
+    }
+
+    /**
+     * Describes how the foreground is positioned. Defaults to START and TOP.
+     *
+     * @param gravity see {@link android.view.Gravity}
+     *
+     * @see #getForegroundGravity()
+     *
+     * @attr ref android.R.styleable#View_foregroundGravity
+     */
+    public void setForegroundGravity(int gravity) {
+        if (mForegroundInfo == null) {
+            mForegroundInfo = new ForegroundInfo();
+        }
+
+        if (mForegroundInfo.mGravity != gravity) {
+            if ((gravity & Gravity.RELATIVE_HORIZONTAL_GRAVITY_MASK) == 0) {
+                gravity |= Gravity.START;
+            }
+
+            if ((gravity & Gravity.VERTICAL_GRAVITY_MASK) == 0) {
+                gravity |= Gravity.TOP;
+            }
+
+            mForegroundInfo.mGravity = gravity;
+            requestLayout();
+        }
+    }
+
+    /**
+     * Applies a tint to the foreground drawable. Does not modify the current tint
+     * mode, which is {@link PorterDuff.Mode#SRC_IN} by default.
+     * <p>
+     * Subsequent calls to {@link #setForeground(Drawable)} will automatically
+     * mutate the drawable and apply the specified tint and tint mode using
+     * {@link Drawable#setTintList(ColorStateList)}.
+     *
+     * @param tint the tint to apply, may be {@code null} to clear tint
+     *
+     * @attr ref android.R.styleable#View_foregroundTint
+     * @see #getForegroundTintList()
+     * @see Drawable#setTintList(ColorStateList)
+     */
+    public void setForegroundTintList(@Nullable ColorStateList tint) {
+        if (mForegroundInfo == null) {
+            mForegroundInfo = new ForegroundInfo();
+        }
+        if (mForegroundInfo.mTintInfo == null) {
+            mForegroundInfo.mTintInfo = new TintInfo();
+        }
+        mForegroundInfo.mTintInfo.mTintList = tint;
+        mForegroundInfo.mTintInfo.mHasTintList = true;
+
+        applyForegroundTint();
+    }
+
+    /**
+     * Return the tint applied to the foreground drawable, if specified.
+     *
+     * @return the tint applied to the foreground drawable
+     * @attr ref android.R.styleable#View_foregroundTint
+     * @see #setForegroundTintList(ColorStateList)
+     */
+    @Nullable
+    public ColorStateList getForegroundTintList() {
+        return mForegroundInfo != null && mForegroundInfo.mTintInfo != null
+                ? mBackgroundTint.mTintList : null;
+    }
+
+    /**
+     * Specifies the blending mode used to apply the tint specified by
+     * {@link #setForegroundTintList(ColorStateList)}} to the background
+     * drawable. The default mode is {@link PorterDuff.Mode#SRC_IN}.
+     *
+     * @param tintMode the blending mode used to apply the tint, may be
+     *                 {@code null} to clear tint
+     * @attr ref android.R.styleable#View_foregroundTintMode
+     * @see #getForegroundTintMode()
+     * @see Drawable#setTintMode(PorterDuff.Mode)
+     */
+    public void setForegroundTintMode(@Nullable PorterDuff.Mode tintMode) {
+        if (mBackgroundTint == null) {
+            mBackgroundTint = new TintInfo();
+        }
+        mBackgroundTint.mTintMode = tintMode;
+        mBackgroundTint.mHasTintMode = true;
+
+        applyBackgroundTint();
+    }
+
+    /**
+     * Return the blending mode used to apply the tint to the foreground
+     * drawable, if specified.
+     *
+     * @return the blending mode used to apply the tint to the foreground
+     *         drawable
+     * @attr ref android.R.styleable#View_foregroundTintMode
+     * @see #setBackgroundTintMode(PorterDuff.Mode)
+     */
+    @Nullable
+    public PorterDuff.Mode getForegroundTintMode() {
+        return mForegroundInfo != null && mForegroundInfo.mTintInfo != null
+                ? mForegroundInfo.mTintInfo.mTintMode : null;
+    }
+
+    private void applyForegroundTint() {
+        if (mForegroundInfo != null && mForegroundInfo.mDrawable != null
+                && mForegroundInfo.mTintInfo != null) {
+            final TintInfo tintInfo = mForegroundInfo.mTintInfo;
+            if (tintInfo.mHasTintList || tintInfo.mHasTintMode) {
+                mForegroundInfo.mDrawable = mForegroundInfo.mDrawable.mutate();
+
+                if (tintInfo.mHasTintList) {
+                    mForegroundInfo.mDrawable.setTintList(tintInfo.mTintList);
+                }
+
+                if (tintInfo.mHasTintMode) {
+                    mForegroundInfo.mDrawable.setTintMode(tintInfo.mTintMode);
+                }
+
+                // The drawable (or one of its children) may not have been
+                // stateful before applying the tint, so let's try again.
+                if (mForegroundInfo.mDrawable.isStateful()) {
+                    mForegroundInfo.mDrawable.setState(getDrawableState());
+                }
+            }
+        }
+    }
+
+    /**
+     * Draw any foreground content for this view.
+     *
+     * <p>Foreground content may consist of scroll bars, a {@link #setForeground foreground}
+     * drawable or other view-specific decorations. The foreground is drawn on top of the
+     * primary view content.</p>
+     *
+     * @param canvas canvas to draw into
+     */
+    public void onDrawForeground(Canvas canvas) {
+        onDrawScrollBars(canvas);
+
+        final Drawable foreground = mForegroundInfo != null ? mForegroundInfo.mDrawable : null;
+        if (foreground != null) {
+            if (mForegroundInfo.mBoundsChanged) {
+                mForegroundInfo.mBoundsChanged = false;
+                final Rect selfBounds = mForegroundInfo.mSelfBounds;
+                final Rect overlayBounds = mForegroundInfo.mOverlayBounds;
+
+                if (mForegroundInfo.mInsidePadding) {
+                    selfBounds.set(0, 0, getWidth(), getHeight());
+                } else {
+                    selfBounds.set(getPaddingLeft(), getPaddingTop(),
+                            getWidth() - getPaddingRight(), getHeight() - getPaddingBottom());
+                }
+
+                final int ld = getLayoutDirection();
+                Gravity.apply(mForegroundInfo.mGravity, foreground.getIntrinsicWidth(),
+                        foreground.getIntrinsicHeight(), selfBounds, overlayBounds, ld);
+                foreground.setBounds(overlayBounds);
+            }
+
+            foreground.draw(canvas);
         }
     }
 
@@ -18089,6 +18402,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 // exists, so we remove the background drawable's non-transparent
                 // parts from this transparent region.
                 applyDrawableToTransparentRegion(mBackground, region);
+            }
+            final Drawable foreground = mForegroundInfo != null ? mForegroundInfo.mDrawable : null;
+            if (foreground != null) {
+                applyDrawableToTransparentRegion(mForegroundInfo.mDrawable, region);
             }
         }
         return true;

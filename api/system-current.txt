@@ -36811,6 +36811,10 @@ package android.view {
     method public boolean getFitsSystemWindows();
     method public java.util.ArrayList<android.view.View> getFocusables(int);
     method public void getFocusedRect(android.graphics.Rect);
+    method public android.graphics.drawable.Drawable getForeground();
+    method public int getForegroundGravity();
+    method public android.content.res.ColorStateList getForegroundTintList();
+    method public android.graphics.PorterDuff.Mode getForegroundTintMode();
     method public boolean getGlobalVisibleRect(android.graphics.Rect, android.graphics.Point);
     method public final boolean getGlobalVisibleRect(android.graphics.Rect);
     method public android.os.Handler getHandler();
@@ -36982,6 +36986,7 @@ package android.view {
     method protected void onDisplayHint(int);
     method public boolean onDragEvent(android.view.DragEvent);
     method protected void onDraw(android.graphics.Canvas);
+    method public void onDrawForeground(android.graphics.Canvas);
     method protected final void onDrawScrollBars(android.graphics.Canvas);
     method public boolean onFilterTouchEventForSecurity(android.view.MotionEvent);
     method protected void onFinishInflate();
@@ -37087,6 +37092,10 @@ package android.view {
     method public void setFitsSystemWindows(boolean);
     method public void setFocusable(boolean);
     method public void setFocusableInTouchMode(boolean);
+    method public void setForeground(android.graphics.drawable.Drawable);
+    method public void setForegroundGravity(int);
+    method public void setForegroundTintList(android.content.res.ColorStateList);
+    method public void setForegroundTintMode(android.graphics.PorterDuff.Mode);
     method public void setHapticFeedbackEnabled(boolean);
     method public void setHasTransientState(boolean);
     method public void setHorizontalFadingEdgeEnabled(boolean);
@@ -41216,16 +41225,8 @@ package android.widget {
     ctor public FrameLayout(android.content.Context, android.util.AttributeSet, int);
     ctor public FrameLayout(android.content.Context, android.util.AttributeSet, int, int);
     method public deprecated boolean getConsiderGoneChildrenWhenMeasuring();
-    method public android.graphics.drawable.Drawable getForeground();
-    method public int getForegroundGravity();
-    method public android.content.res.ColorStateList getForegroundTintList();
-    method public android.graphics.PorterDuff.Mode getForegroundTintMode();
     method public boolean getMeasureAllChildren();
     method protected void onLayout(boolean, int, int, int, int);
-    method public void setForeground(android.graphics.drawable.Drawable);
-    method public void setForegroundGravity(int);
-    method public void setForegroundTintList(android.content.res.ColorStateList);
-    method public void setForegroundTintMode(android.graphics.PorterDuff.Mode);
     method public void setMeasureAllChildren(boolean);
   }
 
