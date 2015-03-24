@@ -223,7 +223,7 @@ public final class Call {
 
         //**********************************************************************************************
         // Next CAPABILITY value: 0x00080000
-        //**********************************************************************************************
+        //******************************************************************************************
 
         private final Uri mHandle;
         private final int mHandlePresentation;
@@ -323,7 +323,7 @@ public final class Call {
                 builder.append(" CAPABILITY_SHOW_CALLBACK_NUMBER");
             }
             if (can(capabilities, CAPABILITY_SPEED_UP_MT_AUDIO)) {
-                builder.append(" CAPABILITY_SPEED_UP_IMS_MT_AUDIO");
+                builder.append(" CAPABILITY_SPEED_UP_MT_AUDIO");
             }
             builder.append("]");
             return builder.toString();

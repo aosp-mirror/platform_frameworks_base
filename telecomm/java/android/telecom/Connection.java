@@ -171,7 +171,7 @@ public abstract class Connection implements IConferenceable {
      * Connection is using WIFI.
      * @hide
      */
-    public static final int CAPABILITY_WIFI = 0x000010000;
+    public static final int CAPABILITY_WIFI = 0x00010000;
 
     /**
      * Indicates that the current device callback number should be shown.
@@ -292,7 +292,7 @@ public abstract class Connection implements IConferenceable {
             builder.append(" CAPABILITY_SHOW_CALLBACK_NUMBER");
         }
         if (can(capabilities, CAPABILITY_SPEED_UP_MT_AUDIO)) {
-            builder.append(" CAPABILITY_SPEED_UP_IMS_MT_AUDIO");
+            builder.append(" CAPABILITY_SPEED_UP_MT_AUDIO");
         }
         builder.append("]");
         return builder.toString();

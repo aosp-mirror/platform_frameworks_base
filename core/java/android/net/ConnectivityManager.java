@@ -2337,7 +2337,7 @@ public class ConnectivityManager {
      * successfully finding a network for the applications request.  Retrieve it with
      * {@link android.content.Intent#getParcelableExtra(String)}.
      * <p>
-     * Note that if you intend to invoke (@link #setProcessDefaultNetwork(Network)) or
+     * Note that if you intend to invoke {@link #setProcessDefaultNetwork} or
      * {@link Network#openConnection(java.net.URL)} then you must get a
      * ConnectivityManager instance before doing so.
      */

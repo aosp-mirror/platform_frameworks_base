@@ -251,6 +251,8 @@
     <string-array name="wfcOperatorErrorCodes" translatable="false" />
     <!-- WFC Operator Error Messages -->
     <string-array name="wfcOperatorErrorMessages" />
+    <!-- Template for showing cellular network operator name while WFC is active -->
+    <string name="wfcSpnFormat">%s</string>
 
     <!--
         {0} is one of "bearerServiceCode*"

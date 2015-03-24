@@ -6950,6 +6950,7 @@ package android.bluetooth.le {
     field public static final int SCAN_MODE_BALANCED = 1; // 0x1
     field public static final int SCAN_MODE_LOW_LATENCY = 2; // 0x2
     field public static final int SCAN_MODE_LOW_POWER = 0; // 0x0
+    field public static final int SCAN_MODE_OPPORTUNISTIC = -1; // 0xffffffff
   }
 
   public static final class ScanSettings.Builder {
@@ -18576,7 +18577,10 @@ package android.net.wifi {
     field public int frequency;
     field public boolean is80211McRTTResponder;
     field public int level;
+    field public java.lang.String operatorFriendlyName;
+    field public boolean passpointNetwork;
     field public long timestamp;
+    field public java.lang.String venueName;
   }
 
   public final class SupplicantState extends java.lang.Enum implements android.os.Parcelable {
@@ -18603,6 +18607,7 @@ package android.net.wifi {
   public class WifiConfiguration implements android.os.Parcelable {
     ctor public WifiConfiguration();
     method public int describeContents();
+    method public boolean isPasspoint();
     method public void writeToParcel(android.os.Parcel, int);
     field public java.lang.String BSSID;
     field public java.lang.String FQDN;
