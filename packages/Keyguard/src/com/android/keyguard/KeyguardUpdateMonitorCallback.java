@@ -19,6 +19,7 @@ import android.app.admin.DevicePolicyManager;
 import android.graphics.Bitmap;
 import android.media.AudioManager;
 import android.os.SystemClock;
+import android.service.fingerprint.FingerprintManager;
 import android.telephony.TelephonyManager;
 import android.view.WindowManagerPolicy;
 
@@ -176,14 +177,24 @@ public class KeyguardUpdateMonitorCallback {
 
     /**
      * Called when a fingerprint is recognized.
-     * @param userId
+     * @param userId the user id for which the fingerprint was authenticated
      */
-    public void onFingerprintRecognized(int userId) { }
+    public void onFingerprintAuthenticated(int userId) { }
 
     /**
-     * Called when fingerprint is acquired but not yet recognized
+     * Called when fingerprint provides help string (e.g. "Try again")
+     * @param msgId
+     * @param helpString
      */
-    public void onFingerprintAcquired(int info) { }
+    public void onFingerprintHelp(int msgId, String helpString) { }
+
+    /**
+     * Called when fingerprint provides an semi-permanent error message
+     * (e.g. "Hardware not available").
+     * @param msgId one of the error messages listed in {@link FingerprintManager}
+     * @param errString
+     */
+    public void onFingerprintError(int msgId, String errString) { }
 
     /**
      * Called when the state of face unlock changed.

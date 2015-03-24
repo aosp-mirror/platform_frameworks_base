@@ -2059,6 +2059,19 @@
   <!-- From KeyguardServiceDelegate -->
   <java-symbol type="string" name="config_keyguardComponent" />
 
+  <!-- Fingerprint messages -->
+  <java-symbol type="string" name="fingerprint_error_unable_to_process" />
+  <java-symbol type="string" name="fingerprint_error_hw_not_available" />
+  <java-symbol type="string" name="fingerprint_error_no_space" />
+  <java-symbol type="string" name="fingerprint_error_timeout" />
+  <java-symbol type="array" name="fingerprint_error_vendor" />
+  <java-symbol type="string" name="fingerprint_acquired_partial" />
+  <java-symbol type="string" name="fingerprint_acquired_insufficient" />
+  <java-symbol type="string" name="fingerprint_acquired_imager_dirty" />
+  <java-symbol type="string" name="fingerprint_acquired_too_slow" />
+  <java-symbol type="string" name="fingerprint_acquired_too_fast" />
+  <java-symbol type="array" name="fingerprint_acquired_vendor" />
+
   <!-- From various Material changes -->
   <java-symbol type="attr" name="titleTextAppearance" />
   <java-symbol type="attr" name="subtitleTextAppearance" />

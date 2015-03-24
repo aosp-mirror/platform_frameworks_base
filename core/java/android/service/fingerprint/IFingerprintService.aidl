@@ -17,31 +17,42 @@ package android.service.fingerprint;
 
 import android.os.Bundle;
 import android.service.fingerprint.IFingerprintServiceReceiver;
+import android.service.fingerprint.Fingerprint;
+import java.util.List;
 
 /**
  * Communication channel from client to the fingerprint service.
  * @hide
  */
 interface IFingerprintService {
-    // Any errors resulting from this call will be returned to the listener
-    void enroll(IBinder token, long timeout, int userId);
+    // Authenticate the given sessionId with a fingerprint
+    void authenticate(IBinder token, long sessionId, int groupId, int flags);
+
+    // Start fingerprint enrollment
+    void enroll(IBinder token, int groupId, int flags);
 
     // Any errors resulting from this call will be returned to the listener
-    void enrollCancel(IBinder token, int userId);
+    void remove(IBinder token, int fingerId, int groupId);
 
-    // Any errors resulting from this call will be returned to the listener
-    void remove(IBinder token, int fingerprintId, int userId);
+    // Rename the fingerprint specified by fingerId and groupId to the given name
+    void rename(int fingerId, int groupId, String name);
 
-    // Start listening for fingerprint events.  This has the side effect of starting
-    // the hardware if not already started.
-    void startListening(IBinder token, IFingerprintServiceReceiver receiver, int userId);
+    // Get a list of enrolled fingerprints in the given group.
+    List<Fingerprint> getEnrolledFingerprints(int groupId);
 
-    // Stops listening for fingerprints
-    void stopListening(IBinder token, int userId);
+    // Register listener for an instance of FingerprintManager
+    void addListener(IBinder token, IFingerprintServiceReceiver receiver, int userId);
+
+    // Unregister listener for an instance of FingerprintManager
+    void removeListener(IBinder token, IFingerprintServiceReceiver receiver);
 
     // Determine if HAL is loaded and ready
-    boolean isHardwareDetected();
+    boolean isHardwareDetected(long deviceId);
 
-    // Rename the given fingerprint id
-    void rename(int fpId, String name);
+    // Gets the number of hardware devices
+    // int getHardwareDeviceCount();
+
+    // Gets the unique device id for hardware enumerated at i
+    // long getHardwareDevice(int i);
+
 }

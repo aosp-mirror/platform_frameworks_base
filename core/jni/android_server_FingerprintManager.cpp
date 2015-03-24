@@ -47,14 +47,15 @@ static jobject gCallback;
 
 class CallbackHandler : public MessageHandler {
     int type;
-    int arg1, arg2;
+    int arg1, arg2, arg3;
 public:
-    CallbackHandler(int type, int arg1, int arg2) : type(type), arg1(arg1), arg2(arg2) { }
+    CallbackHandler(int type, int arg1, int arg2, int arg3)
+        : type(type), arg1(arg1), arg2(arg2), arg3(arg3) { }
 
     virtual void handleMessage(const Message& message) {
         //ALOG(LOG_VERBOSE, LOG_TAG, "hal_notify(msg=%d, arg1=%d, arg2=%d)\n", msg.type, arg1, arg2);
         JNIEnv* env = AndroidRuntime::getJNIEnv();
-        env->CallVoidMethod(gCallback, gFingerprintServiceClassInfo.notify, type, arg1, arg2);
+        env->CallVoidMethod(gCallback, gFingerprintServiceClassInfo.notify, type, arg1, arg2, arg3);
     }
 };
 
@@ -62,6 +63,7 @@ public:
 static void hal_notify_callback(fingerprint_msg_t msg) {
     uint32_t arg1 = 0;
     uint32_t arg2 = 0;
+    uint32_t arg3 = 0;
     switch (msg.type) {
         case FINGERPRINT_ERROR:
             arg1 = msg.data.error;
@@ -71,13 +73,16 @@ static void hal_notify_callback(fingerprint_msg_t msg) {
             break;
         case FINGERPRINT_PROCESSED:
             arg1 = msg.data.processed.finger.fid;
+            arg2 = msg.data.processed.finger.gid;
             break;
         case FINGERPRINT_TEMPLATE_ENROLLING:
             arg1 = msg.data.enroll.finger.fid;
-            arg2 = msg.data.enroll.samples_remaining;
+            arg2 = msg.data.enroll.finger.gid;
+            arg3 = msg.data.enroll.samples_remaining;
             break;
         case FINGERPRINT_TEMPLATE_REMOVED:
             arg1 = msg.data.removed.finger.fid;
+            arg2 = msg.data.removed.finger.gid;
             break;
         default:
             ALOGE("fingerprint: invalid msg: %d", msg.type);
@@ -86,7 +91,7 @@ static void hal_notify_callback(fingerprint_msg_t msg) {
     // This call potentially comes in on a thread not owned by us. Hand it off to our
     // looper so it runs on our thread when calling back to FingerprintService.
     // CallbackHandler object is reference-counted, so no cleanup necessary.
-    gLooper->sendMessage(new CallbackHandler(msg.type, arg1, arg2), Message());
+    gLooper->sendMessage(new CallbackHandler(msg.type, arg1, arg2, arg3), Message());
 }
 
 static void nativeInit(JNIEnv *env, jobject clazz, jobject mQueue, jobject callbackObj) {
@@ -95,9 +100,15 @@ static void nativeInit(JNIEnv *env, jobject clazz, jobject mQueue, jobject callb
     gLooper = android_os_MessageQueue_getMessageQueue(env, mQueue)->getLooper();
 }
 
-static jint nativeEnroll(JNIEnv* env, jobject clazz, jint timeout) {
-    ALOG(LOG_VERBOSE, LOG_TAG, "nativeEnroll()\n");
-    int ret = gContext.device->enroll(gContext.device, 0, timeout);
+static jint nativeEnroll(JNIEnv* env, jobject clazz, jint timeout, jint groupId) {
+    ALOG(LOG_VERBOSE, LOG_TAG, "nativeEnroll(gid=%d, timeout=%d)\n", groupId, timeout);
+    int ret = gContext.device->enroll(gContext.device, groupId, timeout);
+    return reinterpret_cast<jint>(ret);
+}
+
+static jint nativeAuthenticate(JNIEnv* env, jobject clazz, jlong sessionId, jint groupId) {
+    ALOG(LOG_VERBOSE, LOG_TAG, "nativeAuthenticate(sid=%ld, gid=%d)\n", sessionId, groupId);
+    int ret = gContext.device->authenticate(gContext.device, sessionId, groupId);
     return reinterpret_cast<jint>(ret);
 }
 
@@ -107,11 +118,11 @@ static jint nativeEnrollCancel(JNIEnv* env, jobject clazz) {
     return reinterpret_cast<jint>(ret);
 }
 
-static jint nativeRemove(JNIEnv* env, jobject clazz, jint fingerprintId) {
-    ALOG(LOG_VERBOSE, LOG_TAG, "nativeRemove(%d)\n", fingerprintId);
+static jint nativeRemove(JNIEnv* env, jobject clazz, jint fingerId, jint groupId) {
+    ALOG(LOG_VERBOSE, LOG_TAG, "nativeRemove(fid=%d, gid=%d)\n", fingerId, groupId);
     fingerprint_finger_id_t finger;
-    finger.gid = 0;
-    finger.fid = fingerprintId;
+    finger.fid = fingerId;
+    finger.gid = groupId;
     int ret = gContext.device->remove(gContext.device, finger);
     return reinterpret_cast<jint>(ret);
 }
@@ -172,9 +183,10 @@ static jint nativeCloseHal(JNIEnv* env, jobject clazz) {
 
 // TODO: clean up void methods
 static const JNINativeMethod g_methods[] = {
-    { "nativeEnroll", "(I)I", (void*)nativeEnroll },
+    { "nativeAuthenticate", "(JI)I", (void*)nativeAuthenticate },
+    { "nativeEnroll", "(II)I", (void*)nativeEnroll },
     { "nativeEnrollCancel", "()I", (void*)nativeEnrollCancel },
-    { "nativeRemove", "(I)I", (void*)nativeRemove },
+    { "nativeRemove", "(II)I", (void*)nativeRemove },
     { "nativeOpenHal", "()I", (void*)nativeOpenHal },
     { "nativeCloseHal", "()I", (void*)nativeCloseHal },
     { "nativeInit","(Landroid/os/MessageQueue;"
@@ -185,7 +197,7 @@ int register_android_server_fingerprint_FingerprintService(JNIEnv* env) {
     jclass clazz = FindClassOrDie(env, FINGERPRINT_SERVICE);
     gFingerprintServiceClassInfo.clazz = MakeGlobalRefOrDie(env, clazz);
     gFingerprintServiceClassInfo.notify =
-            GetMethodIDOrDie(env, gFingerprintServiceClassInfo.clazz,"notify", "(III)V");
+            GetMethodIDOrDie(env, gFingerprintServiceClassInfo.clazz,"notify", "(IIII)V");
     int result = RegisterMethodsOrDie(env, FINGERPRINT_SERVICE, g_methods, NELEM(g_methods));
     ALOG(LOG_VERBOSE, LOG_TAG, "FingerprintManager JNI ready.\n");
     return result;

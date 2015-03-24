@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 The Android Open Source Project
+ * Copyright (C) 2015 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,17 +15,5 @@
  */
 package android.service.fingerprint;
 
-import android.os.Bundle;
-import android.os.UserHandle;
-
-/**
- * Communication channel from the FingerprintService back to FingerprintManager.
- * @hide
- */
-oneway interface IFingerprintServiceReceiver {
-    void onEnrollResult(long deviceId, int fingerId, int groupId, int remaining);
-    void onAcquired(long deviceId, int acquiredInfo);
-    void onProcessed(long deviceId, int fingerId, int groupId);
-    void onError(long deviceId, int error);
-    void onRemoved(long deviceId, int fingerId, int groupId);
-}
+// @hide
+parcelable Fingerprint;
