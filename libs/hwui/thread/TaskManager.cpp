@@ -109,8 +109,11 @@ bool TaskManager::WorkerThread::addTask(TaskWrapper task) {
         return false;
     }
 
-    Mutex::Autolock l(mLock);
-    ssize_t index = mTasks.add(task);
+    ssize_t index;
+    {
+        Mutex::Autolock l(mLock);
+        index = mTasks.add(task);
+    }
     mSignal.signal();
 
     return index >= 0;
