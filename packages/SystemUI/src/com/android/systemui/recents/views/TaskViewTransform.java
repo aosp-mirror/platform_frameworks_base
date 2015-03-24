@@ -132,6 +132,8 @@ public class TaskViewTransform {
 
     /** Reset the transform on a view. */
     public static void reset(View v) {
+        // Cancel any running animations
+        v.animate().cancel();
         v.setTranslationX(0f);
         v.setTranslationY(0f);
         v.setTranslationZ(0f);
