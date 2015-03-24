@@ -26,14 +26,15 @@ import android.content.Context;
 import android.content.res.ColorStateList;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.drawable.Drawable;
+import android.graphics.drawable.GradientDrawable;
+import android.graphics.drawable.RippleDrawable;
 import android.graphics.Outline;
 import android.graphics.Paint;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
 import android.graphics.PorterDuffXfermode;
-import android.graphics.drawable.Drawable;
-import android.graphics.drawable.GradientDrawable;
-import android.graphics.drawable.RippleDrawable;
+import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.view.View;
 import android.view.ViewOutlineProvider;
@@ -43,7 +44,9 @@ import android.widget.TextView;
 import com.android.systemui.R;
 import com.android.systemui.recents.Constants;
 import com.android.systemui.recents.RecentsConfiguration;
+import com.android.systemui.recents.misc.SystemServicesProxy;
 import com.android.systemui.recents.misc.Utilities;
+import com.android.systemui.recents.model.RecentsTaskLoader;
 import com.android.systemui.recents.model.Task;
 
 
@@ -51,6 +54,7 @@ import com.android.systemui.recents.model.Task;
 public class TaskViewHeader extends FrameLayout {
 
     RecentsConfiguration mConfig;
+    private SystemServicesProxy mSsp;
 
     // Header views
     ImageView mMoveTaskButton;
@@ -91,6 +95,7 @@ public class TaskViewHeader extends FrameLayout {
     public TaskViewHeader(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
         mConfig = RecentsConfiguration.getInstance();
+        mSsp = RecentsTaskLoader.getInstance().getSystemServicesProxy();
         setWillNotDraw(false);
         setClipToOutline(true);
         setOutlineProvider(new ViewOutlineProvider() {
@@ -207,6 +212,31 @@ public class TaskViewHeader extends FrameLayout {
         mDismissButton.setContentDescription(String.format(mDismissContentDescription,
                 t.activityLabel));
         mMoveTaskButton.setVisibility((mConfig.multiStackEnabled) ? View.VISIBLE : View.INVISIBLE);
+    }
+
+    /** Updates the resize task bar button. */
+    void updateResizeTaskBarIcon(Task t) {
+        Rect display = mSsp.getWindowRect();
+        Rect taskRect = mSsp.getTaskBounds(t.key.stackId);
+        int resId = R.drawable.star;
+        if (display.equals(taskRect)) {
+            resId = R.drawable.vector_drawable_place_fullscreen;
+        } else {
+            boolean top = display.top == taskRect.top;
+            boolean bottom = display.bottom == taskRect.bottom;
+            boolean left = display.left == taskRect.left;
+            boolean right = display.right == taskRect.right;
+            if (top && bottom && left) {
+                resId = R.drawable.vector_drawable_place_left;
+            } else if (top && bottom && right) {
+                resId = R.drawable.vector_drawable_place_right;
+            } else if (top && left && right) {
+                resId = R.drawable.vector_drawable_place_top;
+            } else if (bottom && left && right) {
+                resId = R.drawable.vector_drawable_place_bottom;
+            }
+        }
+        mMoveTaskButton.setImageResource(resId);
     }
 
     /** Unbinds the bar view from the task */

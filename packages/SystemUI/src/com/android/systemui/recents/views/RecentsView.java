@@ -149,6 +149,31 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
         return mTaskStackViews;
     }
 
+    /** Gets the next task in the stack - or if the last - the top task */
+    public Task getNextTaskOrTopTask(Task taskToSearch) {
+        Task returnTask = null; 
+        boolean found = false;
+        List<TaskStackView> stackViews = getTaskStackViews();
+        int stackCount = stackViews.size();
+        for (int i = stackCount - 1; i >= 0; --i) {
+            TaskStack stack = stackViews.get(i).getStack();
+            ArrayList<Task> taskList = stack.getTasks();
+            // Iterate the stack views and try and find the focused task
+            for (int j = taskList.size() - 1; j >= 0; --j) {
+                Task task = taskList.get(j);
+                // Return the next task in the line.
+                if (found)
+                    return task;
+                // Remember the first possible task as the top task.
+                if (returnTask == null)
+                    returnTask = task;
+                if (task == taskToSearch)
+                    found = true;
+            }
+        }
+        return returnTask;
+    }
+
     /** Launches the focused task from the first stack if possible */
     public boolean launchFocusedTask() {
         // Get the first stack view
@@ -164,6 +189,28 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
                 TaskView tv = taskViews.get(j);
                 Task task = tv.getTask();
                 if (tv.isFocusedTask()) {
+                    onTaskViewClicked(stackView, tv, stack, task, false);
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    /** Launches a given task. */
+    public boolean launchTask(Task task) {
+        // Get the first stack view
+        List<TaskStackView> stackViews = getTaskStackViews();
+        int stackCount = stackViews.size();
+        for (int i = 0; i < stackCount; i++) {
+            TaskStackView stackView = stackViews.get(i);
+            TaskStack stack = stackView.getStack();
+            // Iterate the stack views and try and find the given task.
+            List<TaskView> taskViews = stackView.getTaskViews();
+            int taskViewCount = taskViews.size();
+            for (int j = 0; j < taskViewCount; j++) {
+                TaskView tv = taskViews.get(j);
+                if (tv.getTask() == task) {
                     onTaskViewClicked(stackView, tv, stack, task, false);
                     return true;
                 }

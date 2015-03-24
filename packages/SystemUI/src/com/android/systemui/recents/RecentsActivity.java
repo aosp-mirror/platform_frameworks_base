@@ -592,14 +592,14 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
 
     private RecentsResizeTaskDialog getResizeTaskDebugDialog() {
         if (mResizeTaskDebugDialog == null) {
-            mResizeTaskDebugDialog = new RecentsResizeTaskDialog(getFragmentManager());
+            mResizeTaskDebugDialog = new RecentsResizeTaskDialog(getFragmentManager(), this);
         }
         return mResizeTaskDebugDialog;
     }
 
     @Override
     public void onTaskResize(Task t) {
-        getResizeTaskDebugDialog().showResizeTaskDialog(t);
+        getResizeTaskDebugDialog().showResizeTaskDialog(t, mRecentsView);
     }
 
     /**** RecentsView.RecentsViewCallbacks Implementation ****/
