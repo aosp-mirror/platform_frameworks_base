@@ -3066,97 +3066,6 @@ public class Editor {
         showSuggestions();
     }
 
-    private class ActionPopupWindow extends PinnedPopupWindow implements OnClickListener {
-        private static final int POPUP_TEXT_LAYOUT =
-                com.android.internal.R.layout.text_edit_action_popup_text;
-        private TextView mPasteTextView;
-        private TextView mReplaceTextView;
-
-        @Override
-        protected void createPopupWindow() {
-            mPopupWindow = new PopupWindow(mTextView.getContext(), null,
-                    com.android.internal.R.attr.textSelectHandleWindowStyle);
-            mPopupWindow.setClippingEnabled(true);
-        }
-
-        @Override
-        protected void initContentView() {
-            LinearLayout linearLayout = new LinearLayout(mTextView.getContext());
-            linearLayout.setOrientation(LinearLayout.HORIZONTAL);
-            mContentView = linearLayout;
-            mContentView.setBackgroundResource(
-                    com.android.internal.R.drawable.text_edit_paste_window);
-
-            LayoutInflater inflater = (LayoutInflater) mTextView.getContext().
-                    getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-
-            LayoutParams wrapContent = new LayoutParams(
-                    ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-
-            mPasteTextView = (TextView) inflater.inflate(POPUP_TEXT_LAYOUT, null);
-            mPasteTextView.setLayoutParams(wrapContent);
-            mContentView.addView(mPasteTextView);
-            mPasteTextView.setText(com.android.internal.R.string.paste);
-            mPasteTextView.setOnClickListener(this);
-
-            mReplaceTextView = (TextView) inflater.inflate(POPUP_TEXT_LAYOUT, null);
-            mReplaceTextView.setLayoutParams(wrapContent);
-            mContentView.addView(mReplaceTextView);
-            mReplaceTextView.setText(com.android.internal.R.string.replace);
-            mReplaceTextView.setOnClickListener(this);
-        }
-
-        @Override
-        public void show() {
-            boolean canPaste = mTextView.canPaste();
-            boolean canSuggest = mTextView.isSuggestionsEnabled() && isCursorInsideSuggestionSpan();
-            mPasteTextView.setVisibility(canPaste ? View.VISIBLE : View.GONE);
-            mReplaceTextView.setVisibility(canSuggest ? View.VISIBLE : View.GONE);
-
-            if (!canPaste && !canSuggest) return;
-
-            super.show();
-        }
-
-        @Override
-        public void onClick(View view) {
-            if (view == mPasteTextView && mTextView.canPaste()) {
-                mTextView.onTextContextMenuItem(TextView.ID_PASTE);
-                hide();
-            } else if (view == mReplaceTextView) {
-                onReplace();
-            }
-        }
-
-        @Override
-        protected int getTextOffset() {
-            return (mTextView.getSelectionStart() + mTextView.getSelectionEnd()) / 2;
-        }
-
-        @Override
-        protected int getVerticalLocalPosition(int line) {
-            return mTextView.getLayout().getLineTop(line) - mContentView.getMeasuredHeight();
-        }
-
-        @Override
-        protected int clipVertically(int positionY) {
-            if (positionY < 0) {
-                final int offset = getTextOffset();
-                final Layout layout = mTextView.getLayout();
-                final int line = layout.getLineForOffset(offset);
-                positionY += layout.getLineBottom(line) - layout.getLineTop(line);
-                positionY += mContentView.getMeasuredHeight();
-
-                // Assumes insertion and selection handles share the same height
-                final Drawable handle = mTextView.getContext().getDrawable(
-                        mTextView.mTextSelectHandleRes);
-                positionY += handle.getIntrinsicHeight();
-            }
-
-            return positionY;
-        }
-    }
-
     /**
      * A listener to call {@link InputMethodManager#updateCursorAnchorInfo(View, CursorAnchorInfo)}
      * while the input method is requesting the cursor/anchor position. Does nothing as long as
@@ -4065,7 +3974,6 @@ public class Editor {
     }
 
     class SelectionModifierCursorController implements CursorController {
-        private static final int DELAY_BEFORE_REPLACE_ACTION = 200; // milliseconds
         // The cursor controller handles, lazily created when shown.
         private SelectionStartHandleView mStartHandle;
         private SelectionEndHandleView mEndHandle;
