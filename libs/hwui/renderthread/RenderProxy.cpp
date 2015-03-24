@@ -395,6 +395,7 @@ CREATE_BRIDGE1(outputLogBuffer, int fd) {
 }
 
 void RenderProxy::outputLogBuffer(int fd) {
+    if (!RenderThread::hasInstance()) return;
     SETUP_TASK(outputLogBuffer);
     args->fd = fd;
     staticPostAndWait(task);
