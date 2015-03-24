@@ -1,3 +1,11 @@
+package android.content.pm {
+
+  public class PackageInfo implements android.os.Parcelable {
+    field public static final int REQUESTED_PERMISSION_REQUIRED = 1; // 0x1
+  }
+
+}
+
 package android.media {
 
   public class AudioFormat {

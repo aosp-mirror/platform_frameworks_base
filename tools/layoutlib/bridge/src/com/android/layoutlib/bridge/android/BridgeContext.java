@@ -1010,6 +1010,12 @@ public final class BridgeContext extends Context {
     }
 
     @Override
+    public int checkSelfPermission(String arg0) {
+        // pass
+        return 0;
+    }
+
+    @Override
     public int checkPermission(String arg0, int arg1, int arg2, IBinder arg3) {
         // pass
         return 0;

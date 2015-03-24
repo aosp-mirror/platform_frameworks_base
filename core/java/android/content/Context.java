@@ -3109,6 +3109,20 @@ public abstract class Context {
     public abstract int checkCallingOrSelfPermission(@NonNull String permission);
 
     /**
+     * Determine whether <em>you</em> have been granted a particular permission.
+     *
+     * @param permission The name of the permission being checked.
+     *
+     * @return {@link PackageManager#PERMISSION_GRANTED} if you have the
+     * permission, or {@link PackageManager#PERMISSION_DENIED} if not.
+     *
+     * @see PackageManager#checkPermission(String, String)
+     * @see #checkCallingPermission(String)
+     */
+    @PackageManager.PermissionResult
+    public abstract int checkSelfPermission(@NonNull String permission);
+
+    /**
      * If the given permission is not allowed for a particular process
      * and user ID running in the system, throw a {@link SecurityException}.
      *

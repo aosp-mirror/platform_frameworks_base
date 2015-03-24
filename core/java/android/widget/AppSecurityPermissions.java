@@ -16,6 +16,7 @@
 */
 package android.widget;
 
+import android.os.UserHandle;
 import com.android.internal.R;
 
 import android.app.AlertDialog;
@@ -243,7 +244,8 @@ public class AppSecurityPermissions {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
                     PackageManager pm = getContext().getPackageManager();
-                    pm.revokePermission(mPackageName, mPerm.name);
+                    pm.revokePermission(mPackageName, mPerm.name,
+                            new UserHandle(mContext.getUserId()));
                     PermissionItemView.this.setVisibility(View.GONE);
                 }
             };
@@ -298,7 +300,7 @@ public class AppSecurityPermissions {
             }
             extractPerms(info, permSet, installedPkgInfo);
         }
-        // Get permissions related to  shared user if any
+        // Get permissions related to shared user if any
         if (info.sharedUserId != null) {
             int sharedUid;
             try {
@@ -358,7 +360,7 @@ public class AppSecurityPermissions {
             String permName = strList[i];
             // If we are only looking at an existing app, then we only
             // care about permissions that have actually been granted to it.
-            if (installedPkgInfo != null && info == installedPkgInfo) {
+            if (installedPkgInfo != null && info != installedPkgInfo) {
                 if ((flagsList[i]&PackageInfo.REQUESTED_PERMISSION_GRANTED) == 0) {
                     continue;
                 }

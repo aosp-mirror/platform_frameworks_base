@@ -3431,6 +3431,7 @@ package android.app {
     method public boolean onPreparePanel(int, android.view.View, android.view.Menu);
     method public void onProvideAssistContent(android.app.AssistContent);
     method public void onProvideAssistData(android.os.Bundle);
+    method public void onRequestPermissionsResult(int, java.lang.String[], int[]);
     method protected void onRestart();
     method protected void onRestoreInstanceState(android.os.Bundle);
     method public void onRestoreInstanceState(android.os.Bundle, android.os.PersistableBundle);
@@ -3461,6 +3462,7 @@ package android.app {
     method public boolean releaseInstance();
     method public final deprecated void removeDialog(int);
     method public void reportFullyDrawn();
+    method public final void requestPermissions(java.lang.String[], int);
     method public boolean requestVisibleBehind(boolean);
     method public final boolean requestWindowFeature(int);
     method public final void runOnUiThread(java.lang.Runnable);
@@ -4315,6 +4317,7 @@ package android.app {
     method public void onOptionsMenuClosed(android.view.Menu);
     method public void onPause();
     method public void onPrepareOptionsMenu(android.view.Menu);
+    method public void onRequestPermissionsResult(int, java.lang.String[], int[]);
     method public void onResume();
     method public void onSaveInstanceState(android.os.Bundle);
     method public void onStart();
@@ -4323,6 +4326,7 @@ package android.app {
     method public void onViewCreated(android.view.View, android.os.Bundle);
     method public void onViewStateRestored(android.os.Bundle);
     method public void registerForContextMenu(android.view.View);
+    method public final void requestPermissions(java.lang.String[], int);
     method public void setAllowEnterTransitionOverlap(boolean);
     method public void setAllowReturnTransitionOverlap(boolean);
     method public void setArguments(android.os.Bundle);
@@ -7409,6 +7413,7 @@ package android.content {
     method public abstract int checkCallingPermission(java.lang.String);
     method public abstract int checkCallingUriPermission(android.net.Uri, int);
     method public abstract int checkPermission(java.lang.String, int, int);
+    method public abstract int checkSelfPermission(java.lang.String);
     method public abstract int checkUriPermission(android.net.Uri, int, int, int);
     method public abstract int checkUriPermission(android.net.Uri, java.lang.String, java.lang.String, int, int, int);
     method public abstract deprecated void clearWallpaper() throws java.io.IOException;
@@ -7586,6 +7591,7 @@ package android.content {
     method public int checkCallingPermission(java.lang.String);
     method public int checkCallingUriPermission(android.net.Uri, int);
     method public int checkPermission(java.lang.String, int, int);
+    method public int checkSelfPermission(java.lang.String);
     method public int checkUriPermission(android.net.Uri, int, int, int);
     method public int checkUriPermission(android.net.Uri, java.lang.String, java.lang.String, int, int, int);
     method public deprecated void clearWallpaper() throws java.io.IOException;
@@ -8838,7 +8844,6 @@ package android.content.pm {
     field public static final int INSTALL_LOCATION_INTERNAL_ONLY = 1; // 0x1
     field public static final int INSTALL_LOCATION_PREFER_EXTERNAL = 2; // 0x2
     field public static final int REQUESTED_PERMISSION_GRANTED = 2; // 0x2
-    field public static final int REQUESTED_PERMISSION_REQUIRED = 1; // 0x1
     field public android.content.pm.ActivityInfo[] activities;
     field public android.content.pm.ApplicationInfo applicationInfo;
     field public int baseRevisionCode;
@@ -30192,6 +30197,7 @@ package android.test.mock {
     method public int checkCallingPermission(java.lang.String);
     method public int checkCallingUriPermission(android.net.Uri, int);
     method public int checkPermission(java.lang.String, int, int);
+    method public int checkSelfPermission(java.lang.String);
     method public int checkUriPermission(android.net.Uri, int, int, int);
     method public int checkUriPermission(android.net.Uri, java.lang.String, java.lang.String, int, int, int);
     method public void clearWallpaper();

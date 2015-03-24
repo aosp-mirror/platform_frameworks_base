@@ -46,32 +46,34 @@ import android.content.pm.UserInfo;
 import android.content.pm.VerificationParams;
 import android.content.pm.VerifierDeviceIdentity;
 import android.net.Uri;
+import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
 import android.content.IntentSender;
+import com.android.internal.os.IResultReceiver;
 
 /**
  *  See {@link PackageManager} for documentation on most of the APIs
  *  here.
- * 
+ *
  *  {@hide}
  */
 interface IPackageManager {
     boolean isPackageAvailable(String packageName, int userId);
     PackageInfo getPackageInfo(String packageName, int flags, int userId);
     int getPackageUid(String packageName, int userId);
-    int[] getPackageGids(String packageName);
-    
+    int[] getPackageGids(String packageName, int userId);
+
     String[] currentToCanonicalPackageNames(in String[] names);
     String[] canonicalToCurrentPackageNames(in String[] names);
 
     PermissionInfo getPermissionInfo(String name, int flags);
-    
+
     List<PermissionInfo> queryPermissionsByGroup(String group, int flags);
-    
+
     PermissionGroupInfo getPermissionGroupInfo(String name, int flags);
-    
+
     List<PermissionGroupInfo> getAllPermissionGroups(int flags);
-    
+
     ApplicationInfo getApplicationInfo(String packageName, int flags ,int userId);
 
     ActivityInfo getActivityInfo(in ComponentName className, int flags, int userId);
@@ -85,28 +87,28 @@ interface IPackageManager {
 
     ProviderInfo getProviderInfo(in ComponentName className, int flags, int userId);
 
-    int checkPermission(String permName, String pkgName);
-    
+    int checkPermission(String permName, String pkgName, int userId);
+
     int checkUidPermission(String permName, int uid);
-    
+
     boolean addPermission(in PermissionInfo info);
-    
+
     void removePermission(String name);
 
-    void grantPermission(String packageName, String permissionName);
+    boolean grantPermission(String packageName, String permissionName, int userId);
 
-    void revokePermission(String packageName, String permissionName);
+    boolean revokePermission(String packageName, String permissionName, int userId);
 
     boolean isProtectedBroadcast(String actionName);
-    
+
     int checkSignatures(String pkg1, String pkg2);
-    
+
     int checkUidSignatures(int uid1, int uid2);
-    
+
     String[] getPackagesForUid(int uid);
-    
+
     String getNameForUid(int uid);
-    
+
     int getUidForSharedUser(String sharedUserName);
 
     int getFlagsForUid(int uid);
@@ -121,7 +123,7 @@ interface IPackageManager {
 
     boolean canForwardTo(in Intent intent, String resolvedType, int sourceUserId, int targetUserId);
 
-    List<ResolveInfo> queryIntentActivities(in Intent intent, 
+    List<ResolveInfo> queryIntentActivities(in Intent intent,
             String resolvedType, int flags, int userId);
 
     List<ResolveInfo> queryIntentActivityOptions(
@@ -168,7 +170,7 @@ interface IPackageManager {
 
     /**
      * Retrieve all applications that are marked as persistent.
-     * 
+     *
      * @return A List&lt;applicationInfo> containing one entry for each persistent
      *         application.
      */
@@ -178,7 +180,7 @@ interface IPackageManager {
 
     /**
      * Retrieve sync information for all content providers.
-     * 
+     *
      * @param outNames Filled in with a list of the root names of the content
      *                 providers that can sync.
      * @param outInfo Filled in with a list of the ProviderInfo for each

@@ -1517,6 +1517,15 @@ public final class Pm {
     }
 
     private int runGrantRevokePermission(boolean grant) {
+        int userId = UserHandle.USER_CURRENT;
+
+        String opt = null;
+        while ((opt = nextOption()) != null) {
+            if (opt.equals("--user")) {
+                userId = Integer.parseInt(nextArg());
+            }
+        }
+
         String pkg = nextArg();
         if (pkg == null) {
             System.err.println("Error: no package specified");
@@ -1529,11 +1538,12 @@ public final class Pm {
             showUsage();
             return 1;
         }
+
         try {
             if (grant) {
-                mPm.grantPermission(pkg, perm);
+                mPm.grantPermission(pkg, perm, userId);
             } else {
-                mPm.revokePermission(pkg, perm);
+                mPm.revokePermission(pkg, perm, userId);
             }
             return 0;
         } catch (RemoteException e) {
@@ -1815,8 +1825,8 @@ public final class Pm {
         System.err.println("       pm disable-until-used [--user USER_ID] PACKAGE_OR_COMPONENT");
         System.err.println("       pm hide [--user USER_ID] PACKAGE_OR_COMPONENT");
         System.err.println("       pm unhide [--user USER_ID] PACKAGE_OR_COMPONENT");
-        System.err.println("       pm grant PACKAGE PERMISSION");
-        System.err.println("       pm revoke PACKAGE PERMISSION");
+        System.err.println("       pm grant [--user USER_ID] PACKAGE PERMISSION");
+        System.err.println("       pm revoke [--user USER_ID] PACKAGE PERMISSION");
         System.err.println("       pm set-install-location [0/auto] [1/internal] [2/external]");
         System.err.println("       pm get-install-location");
         System.err.println("       pm set-permission-enforced PERMISSION [true|false]");
@@ -1889,8 +1899,9 @@ public final class Pm {
         System.err.println("  as \"package/class\").");
         System.err.println("");
         System.err.println("pm grant, revoke: these commands either grant or revoke permissions");
-        System.err.println("  to applications.  Only optional permissions the application has");
-        System.err.println("  declared can be granted or revoked.");
+        System.err.println("    to apps. The permissions must be declared as used in the app's");
+        System.err.println("    manifest, be runtime permissions (protection level dangerous),");
+        System.err.println("    and the app targeting SDK greater than Lollipop MR1.");
         System.err.println("");
         System.err.println("pm get-install-location: returns the current install location.");
         System.err.println("    0 [auto]: Let system decide the best location");

@@ -167,8 +167,7 @@ public class PackageInfo implements Parcelable {
      * or null if there were none.  This is only filled in if the flag
      * {@link PackageManager#GET_PERMISSIONS} was set.  Each value matches
      * the corresponding entry in {@link #requestedPermissions}, and will have
-     * the flags {@link #REQUESTED_PERMISSION_REQUIRED} and
-     * {@link #REQUESTED_PERMISSION_GRANTED} set as appropriate.
+     * the flag {@link #REQUESTED_PERMISSION_GRANTED} set as appropriate.
      */
     public int[] requestedPermissionsFlags;
 
@@ -176,6 +175,8 @@ public class PackageInfo implements Parcelable {
      * Flag for {@link #requestedPermissionsFlags}: the requested permission
      * is required for the application to run; the user can not optionally
      * disable it.  Currently all permissions are required.
+     *
+     * @removed We do not support required permissions.
      */
     public static final int REQUESTED_PERMISSION_REQUIRED = 1<<0;
 

@@ -57,8 +57,10 @@ final class PackageSetting extends PackageSettingBase {
             + " " + name + "/" + appId + "}";
     }
 
-    public int[] getGids() {
-        return sharedUser != null ? sharedUser.gids : gids;
+    public PermissionsState getPermissionsState() {
+        return (sharedUser != null)
+                ? sharedUser.getPermissionsState()
+                : super.getPermissionsState();
     }
 
     public boolean isPrivileged() {

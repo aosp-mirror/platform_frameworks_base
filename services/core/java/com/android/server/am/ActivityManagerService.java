@@ -76,6 +76,7 @@ import com.android.internal.os.IResultReceiver;
 import com.android.internal.os.ProcessCpuTracker;
 import com.android.internal.os.TransferPipe;
 import com.android.internal.os.Zygote;
+import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.FastPrintWriter;
 import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.MemInfoReader;
@@ -3066,7 +3067,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                  * Add shared application and profile GIDs so applications can share some
                  * resources like shared libraries and access user-wide resources
                  */
-                if (permGids == null) {
+                if (ArrayUtils.isEmpty(permGids)) {
                     gids = new int[2];
                 } else {
                     gids = new int[permGids.length + 2];
@@ -6530,7 +6531,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         if (permission == null) {
             return PackageManager.PERMISSION_DENIED;
         }
-        return checkComponentPermission(permission, pid, UserHandle.getAppId(uid), -1, true);
+        return checkComponentPermission(permission, pid, uid, -1, true);
     }
 
     @Override
@@ -6550,7 +6551,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             pid = tlsIdentity.pid;
         }
 
-        return checkComponentPermission(permission, pid, UserHandle.getAppId(uid), -1, true);
+        return checkComponentPermission(permission, pid, uid, -1, true);
     }
 
     /**

@@ -410,7 +410,7 @@ public class PackageParser {
 
     public static PackageInfo generatePackageInfo(PackageParser.Package p,
             int gids[], int flags, long firstInstallTime, long lastUpdateTime,
-            ArraySet<String> grantedPermissions, PackageUserState state, int userId) {
+            Set<String> grantedPermissions, PackageUserState state, int userId) {
 
         if (!checkUseInstalledOrHidden(flags, state)) {
             return null;
@@ -569,9 +569,8 @@ public class PackageParser {
                 for (int i=0; i<N; i++) {
                     final String perm = p.requestedPermissions.get(i);
                     pi.requestedPermissions[i] = perm;
-                    if (p.requestedPermissionsRequired.get(i)) {
-                        pi.requestedPermissionsFlags[i] |= PackageInfo.REQUESTED_PERMISSION_REQUIRED;
-                    }
+                    // The notion of requried permissions is deprecated but for compatibility.
+                    pi.requestedPermissionsFlags[i] |= PackageInfo.REQUESTED_PERMISSION_REQUIRED;
                     if (grantedPermissions != null && grantedPermissions.contains(perm)) {
                         pi.requestedPermissionsFlags[i] |= PackageInfo.REQUESTED_PERMISSION_GRANTED;
                     }
@@ -1812,7 +1811,6 @@ public class PackageParser {
                 }
                 implicitPerms.append(npi.name);
                 pkg.requestedPermissions.add(npi.name);
-                pkg.requestedPermissionsRequired.add(Boolean.TRUE);
             }
         }
         if (implicitPerms != null) {
@@ -1831,7 +1829,6 @@ public class PackageParser {
                 final String perm = spi.newPerms[in];
                 if (!pkg.requestedPermissions.contains(perm)) {
                     pkg.requestedPermissions.add(perm);
-                    pkg.requestedPermissionsRequired.add(Boolean.TRUE);
                 }
             }
         }
@@ -1863,17 +1860,6 @@ public class PackageParser {
                 && pkg.applicationInfo.targetSdkVersion
                         >= android.os.Build.VERSION_CODES.DONUT)) {
             pkg.applicationInfo.flags |= ApplicationInfo.FLAG_SUPPORTS_SCREEN_DENSITIES;
-        }
-
-        /*
-         * b/8528162: Ignore the <uses-permission android:required> attribute if
-         * targetSdkVersion < JELLY_BEAN_MR2. There are lots of apps in the wild
-         * which are improperly using this attribute, even though it never worked.
-         */
-        if (pkg.applicationInfo.targetSdkVersion < Build.VERSION_CODES.JELLY_BEAN_MR2) {
-            for (int i = 0; i < pkg.requestedPermissionsRequired.size(); i++) {
-                pkg.requestedPermissionsRequired.set(i, Boolean.TRUE);
-            }
         }
 
         return pkg;
@@ -1911,11 +1897,6 @@ public class PackageParser {
         // that may change.
         String name = sa.getNonResourceString(
                 com.android.internal.R.styleable.AndroidManifestUsesPermission_name);
-/*
-        boolean required = sa.getBoolean(
-                com.android.internal.R.styleable.AndroidManifestUsesPermission_required, true);
-*/
-        boolean required = true; // Optional <uses-permission> not supported
 
         int maxSdkVersion = 0;
         TypedValue val = sa.peekValue(
@@ -1933,13 +1914,9 @@ public class PackageParser {
                 int index = pkg.requestedPermissions.indexOf(name);
                 if (index == -1) {
                     pkg.requestedPermissions.add(name.intern());
-                    pkg.requestedPermissionsRequired.add(required ? Boolean.TRUE : Boolean.FALSE);
                 } else {
-                    if (pkg.requestedPermissionsRequired.get(index) != required) {
-                        outError[0] = "conflicting <uses-permission> entries";
-                        mParseError = PackageManager.INSTALL_PARSE_FAILED_MANIFEST_MALFORMED;
-                        return false;
-                    }
+                    Slog.w(TAG, "Ignoring duplicate uses-permission: " + name + " in package: "
+                            + pkg.packageName + " at: " + parser.getPositionDescription());
                 }
             }
         }
@@ -4217,7 +4194,6 @@ public class PackageParser {
         public final ArrayList<Instrumentation> instrumentation = new ArrayList<Instrumentation>(0);
 
         public final ArrayList<String> requestedPermissions = new ArrayList<String>();
-        public final ArrayList<Boolean> requestedPermissionsRequired = new ArrayList<Boolean>();
 
         public ArrayList<String> protectedBroadcasts;
 

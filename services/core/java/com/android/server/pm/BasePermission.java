@@ -56,4 +56,9 @@ final class BasePermission {
         return "BasePermission{" + Integer.toHexString(System.identityHashCode(this)) + " " + name
                 + "}";
     }
+
+    public boolean isRuntime() {
+        return (protectionLevel & PermissionInfo.PROTECTION_MASK_BASE)
+                == PermissionInfo.PROTECTION_DANGEROUS;
+    }
 }

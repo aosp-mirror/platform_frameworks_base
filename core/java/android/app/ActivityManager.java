@@ -2493,7 +2493,8 @@ public class ActivityManager {
     public static int checkComponentPermission(String permission, int uid,
             int owningUid, boolean exported) {
         // Root, system server get to do everything.
-        if (uid == 0 || uid == Process.SYSTEM_UID) {
+        final int appId = UserHandle.getAppId(uid);
+        if (appId == Process.ROOT_UID || appId == Process.SYSTEM_UID) {
             return PackageManager.PERMISSION_GRANTED;
         }
         // Isolated processes don't get any permissions.

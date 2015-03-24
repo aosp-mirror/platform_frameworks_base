@@ -32,7 +32,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 
 public class PackageManagerSettingsTests extends AndroidTestCase {
-
     private static final String PACKAGE_NAME_2 = "com.google.app2";
     private static final String PACKAGE_NAME_3 = "com.android.app3";
     private static final String PACKAGE_NAME_1 = "com.google.app1";
@@ -56,7 +55,7 @@ public class PackageManagerSettingsTests extends AndroidTestCase {
         writeFile(new File(getContext().getFilesDir(), "system/packages.xml"),
                 ("<?xml version='1.0' encoding='utf-8' standalone='yes' ?>"
                 + "<packages>"
-                + "<last-platform-version internal=\"15\" external=\"0\" />"
+                + "<last-platform-version internal=\"15\" external=\"0\" fingerprint=\"foo\" />"
                 + "<permission-trees>"
                 + "<item name=\"com.google.android.permtree\" package=\"com.google.android.permpackage\" />"
                 + "</permission-trees>"
@@ -110,28 +109,32 @@ public class PackageManagerSettingsTests extends AndroidTestCase {
                 .getBytes());
     }
 
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
+    private void deleteSystemFolder() {
+        File systemFolder = new File(getContext().getFilesDir(), "system");
+        deleteFolder(systemFolder);
+    }
+
+    private static void deleteFolder(File folder) {
+        File[] files = folder.listFiles();
+        if (files != null) {
+            for (File file : files) {
+                deleteFolder(file);
+            }
+        }
+        folder.delete();
     }
 
     private void writeOldFiles() {
+        deleteSystemFolder();
         writePackagesXml();
         writeStoppedPackagesXml();
         writePackagesList();
     }
 
-    @Override
-    protected void tearDown() throws Exception {
-        super.tearDown();
-    }
-
     public void testSettingsReadOld() {
-        // Debug.waitForDebugger();
-
         // Write the package files and make sure they're parsed properly the first time
         writeOldFiles();
-        Settings settings = new Settings(getContext(), getContext().getFilesDir());
+        Settings settings = new Settings(getContext(), getContext().getFilesDir(), new Object());
         assertEquals(true, settings.readLPw(null, null, 0, false));
         assertNotNull(settings.peekPackageLPr(PACKAGE_NAME_3));
         assertNotNull(settings.peekPackageLPr(PACKAGE_NAME_1));
@@ -149,11 +152,12 @@ public class PackageManagerSettingsTests extends AndroidTestCase {
     public void testNewPackageRestrictionsFile() {
         // Write the package files and make sure they're parsed properly the first time
         writeOldFiles();
-        Settings settings = new Settings(getContext(), getContext().getFilesDir());
+        Settings settings = new Settings(getContext(), getContext().getFilesDir(), new Object());
         assertEquals(true, settings.readLPw(null, null, 0, false));
+        settings.writeLPr();
 
         // Create Settings again to make it read from the new files
-        settings = new Settings(getContext(), getContext().getFilesDir());
+        settings = new Settings(getContext(), getContext().getFilesDir(), new Object());
         assertEquals(true, settings.readLPw(null, null, 0, false));
 
         PackageSetting ps = settings.peekPackageLPr(PACKAGE_NAME_2);
@@ -164,7 +168,7 @@ public class PackageManagerSettingsTests extends AndroidTestCase {
     public void testEnableDisable() {
         // Write the package files and make sure they're parsed properly the first time
         writeOldFiles();
-        Settings settings = new Settings(getContext(), getContext().getFilesDir());
+        Settings settings = new Settings(getContext(), getContext().getFilesDir(), new Object());
         assertEquals(true, settings.readLPw(null, null, 0, false));
 
         // Enable/Disable a package
