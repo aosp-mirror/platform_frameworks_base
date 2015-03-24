@@ -22,6 +22,7 @@ import android.app.AppGlobals;
 import android.app.IActivityManager;
 import android.app.IApplicationThread;
 import android.app.IBackupAgent;
+import android.app.PackageInstallObserver;
 import android.app.PendingIntent;
 import android.app.backup.BackupAgent;
 import android.app.backup.BackupDataInput;
@@ -45,7 +46,6 @@ import android.content.ServiceConnection;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageDataObserver;
 import android.content.pm.IPackageDeleteObserver;
-import android.content.pm.IPackageInstallObserver;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
@@ -200,7 +200,6 @@ public class BackupManagerService {
 
     private static final String RUN_BACKUP_ACTION = "android.app.backup.intent.RUN";
     private static final String RUN_INITIALIZE_ACTION = "android.app.backup.intent.INIT";
-    private static final String RUN_CLEAR_ACTION = "android.app.backup.intent.CLEAR";
     private static final int MSG_RUN_BACKUP = 1;
     private static final int MSG_RUN_ADB_BACKUP = 2;
     private static final int MSG_RUN_RESTORE = 3;
@@ -1198,11 +1197,13 @@ public class BackupManagerService {
                 temp = new RandomAccessFile(tempProcessedFile, "rws");
                 in = new RandomAccessFile(mEverStored, "r");
 
+                // Loop until we hit EOF
                 while (true) {
-                    PackageInfo info;
                     String pkg = in.readUTF();
                     try {
-                        info = mPackageManager.getPackageInfo(pkg, 0);
+                        // is this package still present?
+                        mPackageManager.getPackageInfo(pkg, 0);
+                        // if we get here then yes it is; remember it
                         mEverStoredApps.add(pkg);
                         temp.writeUTF(pkg);
                         if (MORE_DEBUG) Slog.v(TAG, "   + " + pkg);
@@ -4100,7 +4101,6 @@ public class BackupManagerService {
 
             SinglePackageBackupRunner(ParcelFileDescriptor output, PackageInfo target,
                     AtomicBoolean latch) throws IOException {
-                int oldfd = output.getFd();
                 mOutput = ParcelFileDescriptor.dup(output.getFileDescriptor());
                 mTarget = target;
                 mLatch = latch;
@@ -4812,7 +4812,7 @@ public class BackupManagerService {
             }
         }
 
-        class RestoreInstallObserver extends IPackageInstallObserver.Stub {
+        class RestoreInstallObserver extends PackageInstallObserver {
             final AtomicBoolean mDone = new AtomicBoolean();
             String mPackageName;
             int mResult;
@@ -4838,8 +4838,8 @@ public class BackupManagerService {
             }
 
             @Override
-            public void packageInstalled(String packageName, int returnCode)
-                    throws RemoteException {
+            public void onPackageInstalled(String packageName, int returnCode,
+                    String msg, Bundle extras) {
                 synchronized (mDone) {
                     mResult = returnCode;
                     mPackageName = packageName;
@@ -5095,7 +5095,9 @@ public class BackupManagerService {
                         offset = extractLine(buffer, offset, str);
                         version = Integer.parseInt(str[0]);  // app version
                         offset = extractLine(buffer, offset, str);
-                        int platformVersion = Integer.parseInt(str[0]);
+                        // This is the platform version, which we don't use, but we parse it
+                        // as a safety against corruption in the manifest.
+                        Integer.parseInt(str[0]);
                         offset = extractLine(buffer, offset, str);
                         info.installerPackageName = (str[0].length() > 0) ? str[0] : null;
                         offset = extractLine(buffer, offset, str);
@@ -6156,7 +6158,7 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
             }
         }
 
-        class RestoreInstallObserver extends IPackageInstallObserver.Stub {
+        class RestoreInstallObserver extends PackageInstallObserver {
             final AtomicBoolean mDone = new AtomicBoolean();
             String mPackageName;
             int mResult;
@@ -6182,8 +6184,8 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
             }
 
             @Override
-            public void packageInstalled(String packageName, int returnCode)
-                    throws RemoteException {
+            public void onPackageInstalled(String packageName, int returnCode,
+                    String msg, Bundle extras) {
                 synchronized (mDone) {
                     mResult = returnCode;
                     mPackageName = packageName;
@@ -6432,7 +6434,9 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
                         offset = extractLine(buffer, offset, str);
                         version = Integer.parseInt(str[0]);  // app version
                         offset = extractLine(buffer, offset, str);
-                        int platformVersion = Integer.parseInt(str[0]);
+                        // This is the platform version, which we don't use, but we parse it
+                        // as a safety against corruption in the manifest.
+                        Integer.parseInt(str[0]);
                         offset = extractLine(buffer, offset, str);
                         info.installerPackageName = (str[0].length() > 0) ? str[0] : null;
                         offset = extractLine(buffer, offset, str);
@@ -8357,7 +8361,9 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
             }
 
             // make sure the screen is lit for the user interaction
-            mPowerManager.userActivity(SystemClock.uptimeMillis(), false);
+            mPowerManager.userActivity(SystemClock.uptimeMillis(),
+                    PowerManager.USER_ACTIVITY_EVENT_OTHER,
+                    0);
 
             // start the confirmation countdown
             startConfirmationTimeout(token, params);
@@ -8440,7 +8446,9 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
             }
 
             // make sure the screen is lit for the user interaction
-            mPowerManager.userActivity(SystemClock.uptimeMillis(), false);
+            mPowerManager.userActivity(SystemClock.uptimeMillis(),
+                    PowerManager.USER_ACTIVITY_EVENT_OTHER,
+                    0);
 
             // start the confirmation countdown
             startConfirmationTimeout(token, params);
