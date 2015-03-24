@@ -59,6 +59,7 @@ namespace android {
 struct RequestFields {
     jfieldID data;
     jfieldID defaultUrl;
+    jfieldID requestType;
 };
 
 struct ArrayListFields {
@@ -100,6 +101,12 @@ struct KeyTypes {
     jint kKeyTypeOffline;
     jint kKeyTypeRelease;
 } gKeyTypes;
+
+struct KeyRequestTypes {
+    jint kKeyRequestTypeInitial;
+    jint kKeyRequestTypeRenewal;
+    jint kKeyRequestTypeRelease;
+} gKeyRequestTypes;
 
 struct CertificateTypes {
     jint kCertificateTypeNone;
@@ -182,7 +189,7 @@ void JNIDrmListener::notify(DrmPlugin::EventType eventType, int extra,
     jint jeventType;
 
     // translate DrmPlugin event types into their java equivalents
-    switch(eventType) {
+    switch (eventType) {
         case DrmPlugin::kDrmPluginEventProvisionRequired:
             jeventType = gEventTypes.kEventProvisionRequired;
             break;
@@ -236,7 +243,7 @@ static bool throwExceptionAsNecessary(
 
     const char *drmMessage = NULL;
 
-    switch(err) {
+    switch (err) {
     case ERROR_DRM_UNKNOWN:
         drmMessage = "General DRM error";
         break;
@@ -587,6 +594,13 @@ static void android_media_MediaDrm_native_init(JNIEnv *env) {
     GET_STATIC_FIELD_ID(field, clazz, "KEY_TYPE_RELEASE", "I");
     gKeyTypes.kKeyTypeRelease = env->GetStaticIntField(clazz, field);
 
+    GET_STATIC_FIELD_ID(field, clazz, "REQUEST_TYPE_INITIAL", "I");
+    gKeyRequestTypes.kKeyRequestTypeInitial = env->GetStaticIntField(clazz, field);
+    GET_STATIC_FIELD_ID(field, clazz, "REQUEST_TYPE_RENEWAL", "I");
+    gKeyRequestTypes.kKeyRequestTypeRenewal = env->GetStaticIntField(clazz, field);
+    GET_STATIC_FIELD_ID(field, clazz, "REQUEST_TYPE_RELEASE", "I");
+    gKeyRequestTypes.kKeyRequestTypeRelease = env->GetStaticIntField(clazz, field);
+
     GET_STATIC_FIELD_ID(field, clazz, "CERTIFICATE_TYPE_NONE", "I");
     gCertificateTypes.kCertificateTypeNone = env->GetStaticIntField(clazz, field);
     GET_STATIC_FIELD_ID(field, clazz, "CERTIFICATE_TYPE_X509", "I");
@@ -595,6 +609,7 @@ static void android_media_MediaDrm_native_init(JNIEnv *env) {
     FIND_CLASS(clazz, "android/media/MediaDrm$KeyRequest");
     GET_FIELD_ID(gFields.keyRequest.data, clazz, "mData", "[B");
     GET_FIELD_ID(gFields.keyRequest.defaultUrl, clazz, "mDefaultUrl", "Ljava/lang/String;");
+    GET_FIELD_ID(gFields.keyRequest.requestType, clazz, "mRequestType", "I");
 
     FIND_CLASS(clazz, "android/media/MediaDrm$ProvisionRequest");
     GET_FIELD_ID(gFields.provisionRequest.data, clazz, "mData", "[B");
@@ -786,9 +801,10 @@ static jobject android_media_MediaDrm_getKeyRequest(
 
     Vector<uint8_t> request;
     String8 defaultUrl;
+    DrmPlugin::KeyRequestType keyRequestType;
 
     status_t err = drm->getKeyRequest(sessionId, initData, mimeType,
-                                          keyType, optParams, request, defaultUrl);
+            keyType, optParams, request, defaultUrl, &keyRequestType);
 
     if (throwExceptionAsNecessary(env, err, "Failed to get key request")) {
         return NULL;
@@ -807,6 +823,25 @@ static jobject android_media_MediaDrm_getKeyRequest(
 
         jstring jdefaultUrl = env->NewStringUTF(defaultUrl.string());
         env->SetObjectField(keyObj, gFields.keyRequest.defaultUrl, jdefaultUrl);
+
+        switch (keyRequestType) {
+            case DrmPlugin::kKeyRequestType_Initial:
+                env->SetIntField(keyObj, gFields.keyRequest.requestType,
+                        gKeyRequestTypes.kKeyRequestTypeInitial);
+                break;
+            case DrmPlugin::kKeyRequestType_Renewal:
+                env->SetIntField(keyObj, gFields.keyRequest.requestType,
+                        gKeyRequestTypes.kKeyRequestTypeRenewal);
+                break;
+            case DrmPlugin::kKeyRequestType_Release:
+                env->SetIntField(keyObj, gFields.keyRequest.requestType,
+                        gKeyRequestTypes.kKeyRequestTypeRelease);
+                break;
+            case DrmPlugin::kKeyRequestType_Unknown:
+                throwStateException(env, "DRM plugin failure: unknown key request type",
+                        ERROR_DRM_UNKNOWN);
+                break;
+        }
     }
 
     return keyObj;
