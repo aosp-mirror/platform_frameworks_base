@@ -418,6 +418,7 @@ CREATE_BRIDGE2(dumpGraphicsMemory, int fd, RenderThread* thread) {
 }
 
 void RenderProxy::dumpGraphicsMemory(int fd) {
+    if (!RenderThread::hasInstance()) return;
     SETUP_TASK(dumpGraphicsMemory);
     args->fd = fd;
     args->thread = &RenderThread::getInstance();
