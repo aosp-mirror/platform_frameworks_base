@@ -7075,7 +7075,6 @@ public class PackageManagerService extends IPackageManager.Stub {
                     case GRANT_RUNTIME: {
                         // Grant previously granted runtime permissions.
                         for (int userId : UserManagerService.getInstance().getUserIds()) {
-                            // Make sure runtime permissions are loaded.
                             if (origPermissions.hasRuntimePermission(bp.name, userId)) {
                                 if (permissionsState.grantRuntimePermission(bp, userId) !=
                                         PermissionsState.PERMISSION_OPERATION_FAILURE) {
@@ -7089,7 +7088,6 @@ public class PackageManagerService extends IPackageManager.Stub {
                         // Grant runtime permissions for a previously held install permission.
                         permissionsState.revokeInstallPermission(bp);
                         for (int userId : UserManagerService.getInstance().getUserIds()) {
-                            // Make sure runtime permissions are loaded.
                             if (permissionsState.grantRuntimePermission(bp, userId) !=
                                     PermissionsState.PERMISSION_OPERATION_FAILURE) {
                                 changedPermission = true;
