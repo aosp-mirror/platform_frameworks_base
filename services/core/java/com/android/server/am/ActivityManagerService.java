@@ -3046,12 +3046,12 @@ public final class ActivityManagerService extends ActivityManagerNative
                 int[] permGids = null;
                 try {
                     checkTime(startTime, "startProcess: getting gids from package manager");
-                    final PackageManager pm = mContext.getPackageManager();
-                    permGids = pm.getPackageGids(app.info.packageName);
+                    permGids = AppGlobals.getPackageManager().getPackageGids(app.info.packageName,
+                            app.userId);
 
                     if (Environment.isExternalStorageEmulated()) {
                         checkTime(startTime, "startProcess: checking external storage perm");
-                        if (pm.checkPermission(
+                        if (mContext.getPackageManager().checkPermission(
                                 android.Manifest.permission.ACCESS_ALL_EXTERNAL_STORAGE,
                                 app.info.packageName) == PERMISSION_GRANTED) {
                             mountExternal = Zygote.MOUNT_EXTERNAL_MULTIUSER_ALL;
@@ -3059,7 +3059,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                             mountExternal = Zygote.MOUNT_EXTERNAL_MULTIUSER;
                         }
                     }
-                } catch (PackageManager.NameNotFoundException e) {
+                } catch (RemoteException e) {
                     Slog.w(TAG, "Unable to retrieve gids", e);
                 }
 
