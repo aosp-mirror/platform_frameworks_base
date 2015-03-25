@@ -349,6 +349,10 @@
   <java-symbol type="integer" name="config_burnInProtectionMinVerticalOffset" />
   <java-symbol type="integer" name="config_burnInProtectionMaxVerticalOffset" />
   <java-symbol type="integer" name="config_burnInProtectionMaxRadius" />
+  <java-symbol type="integer" name="config_bluetooth_idle_cur_ma" />
+  <java-symbol type="integer" name="config_bluetooth_rx_cur_ma" />
+  <java-symbol type="integer" name="config_bluetooth_tx_cur_ma" />
+  <java-symbol type="integer" name="config_bluetooth_operating_voltage_mv" />
   <java-symbol type="integer" name="config_cursorWindowSize" />
   <java-symbol type="integer" name="config_drawLockTimeoutMillis" />
   <java-symbol type="integer" name="config_doublePressOnPowerBehavior" />
@@ -756,6 +760,7 @@
   <java-symbol type="string" name="wfcRegErrorTitle" />
   <java-symbol type="array" name="wfcOperatorErrorCodes" />
   <java-symbol type="array" name="wfcOperatorErrorMessages" />
+  <java-symbol type="string" name="wfcSpnFormat" />
   <java-symbol type="string" name="policydesc_disableCamera" />
   <java-symbol type="string" name="policydesc_encryptedStorage" />
   <java-symbol type="string" name="policydesc_expirePassword" />

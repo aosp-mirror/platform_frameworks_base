@@ -52,6 +52,7 @@ public class Protocol {
     public static final int BASE_WIFI_RTT_SERVICE                                   = 0x00027300;
     public static final int BASE_WIFI_PASSPOINT_MANAGER                             = 0x00028000;
     public static final int BASE_WIFI_PASSPOINT_SERVICE                             = 0x00028100;
+    public static final int BASE_WIFI_LOGGER                                        = 0x00028300;
     public static final int BASE_DHCP                                               = 0x00030000;
     public static final int BASE_DATA_CONNECTION                                    = 0x00040000;
     public static final int BASE_DATA_CONNECTION_AC                                 = 0x00041000;
