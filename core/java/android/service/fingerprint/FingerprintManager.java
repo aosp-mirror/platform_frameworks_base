@@ -202,7 +202,7 @@ public class FingerprintManager {
         /**
          * Called when the given fingerprint can't be removed.
          * @param fp the fingerprint that the call attempted to remove.
-         * @parame errMsgId an associated error message id.
+         * @param errMsgId an associated error message id.
          * @param errString an error message indicating why the fingerprint id can't be removed.
          */
         public abstract void onRemovalError(Fingerprint fp, int errMsgId, CharSequence errString);
