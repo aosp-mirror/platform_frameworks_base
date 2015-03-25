@@ -51,6 +51,7 @@ interface IPowerManager
 
     void setStayOnSetting(int val);
     void boostScreenBrightness(long time);
+    boolean isScreenBrightnessBoosted();
 
     // temporarily overrides the screen brightness settings to allow the user to
     // see the effect of a settings change without applying it immediately
