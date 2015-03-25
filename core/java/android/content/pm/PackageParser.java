@@ -376,16 +376,6 @@ public class PackageParser {
         return path.endsWith(".apk");
     }
 
-    /*
-    public static PackageInfo generatePackageInfo(PackageParser.Package p,
-            int gids[], int flags, long firstInstallTime, long lastUpdateTime,
-            HashSet<String> grantedPermissions) {
-        PackageUserState state = new PackageUserState();
-        return generatePackageInfo(p, gids, flags, firstInstallTime, lastUpdateTime,
-                grantedPermissions, state, UserHandle.getCallingUserId());
-    }
-    */
-
     /**
      * Generate and return the {@link PackageInfo} for a parsed package.
      *
@@ -394,7 +384,7 @@ public class PackageParser {
      */
     public static PackageInfo generatePackageInfo(PackageParser.Package p,
             int gids[], int flags, long firstInstallTime, long lastUpdateTime,
-            ArraySet<String> grantedPermissions, PackageUserState state) {
+            Set<String> grantedPermissions, PackageUserState state) {
 
         return generatePackageInfo(p, gids, flags, firstInstallTime, lastUpdateTime,
                 grantedPermissions, state, UserHandle.getCallingUserId());
@@ -574,7 +564,7 @@ public class PackageParser {
                 for (int i=0; i<N; i++) {
                     final String perm = p.requestedPermissions.get(i);
                     pi.requestedPermissions[i] = perm;
-                    // The notion of requried permissions is deprecated but for compatibility.
+                    // The notion of required permissions is deprecated but for compatibility.
                     pi.requestedPermissionsFlags[i] |= PackageInfo.REQUESTED_PERMISSION_REQUIRED;
                     if (grantedPermissions != null && grantedPermissions.contains(perm)) {
                         pi.requestedPermissionsFlags[i] |= PackageInfo.REQUESTED_PERMISSION_GRANTED;
