@@ -126,6 +126,8 @@ public class UsbDeviceManager {
     private boolean mAdbEnabled;
     private boolean mAudioSourceEnabled;
     private boolean mMidiEnabled;
+    private int mMidiCard;
+    private int mMidiDevice;
     private Map<String, List<Pair<String, String>>> mOemModeMap;
     private String[] mAccessoryStrings;
     private UsbDebuggingManager mDebuggingManager;
@@ -623,26 +625,24 @@ public class UsbDeviceManager {
         private void updateMidiFunction() {
             boolean enabled = containsFunction(mCurrentFunctions, UsbManager.USB_FUNCTION_MIDI);
             if (enabled != mMidiEnabled) {
-                int card = -1;
-                int device = -1;
-
                 if (enabled) {
                     Scanner scanner = null;
                     try {
                         scanner = new Scanner(new File(MIDI_ALSA_PATH));
-                        card = scanner.nextInt();
-                        device = scanner.nextInt();
+                        mMidiCard = scanner.nextInt();
+                        mMidiDevice = scanner.nextInt();
                     } catch (FileNotFoundException e) {
                         Slog.e(TAG, "could not open MIDI PCM file", e);
+                        enabled = false;
                     } finally {
                         if (scanner != null) {
                             scanner.close();
                         }
                     }
                 }
-                mUsbAlsaManager.setPeripheralMidiState(enabled, card, device);
                 mMidiEnabled = enabled;
             }
+            mUsbAlsaManager.setPeripheralMidiState(mMidiEnabled && mConfigured, mMidiCard, mMidiDevice);
         }
 
         @Override

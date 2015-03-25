@@ -47,6 +47,8 @@ public final class UsbMidiDevice implements Closeable {
 
     private static final int BUFFER_SIZE = 512;
 
+    private final FileDescriptor[] mFileDescriptors;
+
     // for polling multiple FileDescriptors for MIDI events
     private final StructPollfd[] mPollFDs;
     // streams for reading from ALSA driver
@@ -69,7 +71,7 @@ public final class UsbMidiDevice implements Closeable {
             return null;
         }
 
-        UsbMidiDevice midiDevice = new UsbMidiDevice(fileDescriptors, fileDescriptors);
+        UsbMidiDevice midiDevice = new UsbMidiDevice(fileDescriptors);
         if (!midiDevice.register(context, properties)) {
             IoUtils.closeQuietly(midiDevice);
             Log.e(TAG, "createDeviceServer failed");
@@ -78,14 +80,15 @@ public final class UsbMidiDevice implements Closeable {
         return midiDevice;
     }
 
-    private UsbMidiDevice(FileDescriptor[] inputFiles, FileDescriptor[] outputFiles) {
-        int inputCount = inputFiles.length;
-        int outputCount = outputFiles.length;
+    private UsbMidiDevice(FileDescriptor[] fileDescriptors) {
+        mFileDescriptors = fileDescriptors;
+        int inputCount = fileDescriptors.length;
+        int outputCount = fileDescriptors.length;
 
         mPollFDs = new StructPollfd[inputCount];
         mInputStreams = new FileInputStream[inputCount];
         for (int i = 0; i < inputCount; i++) {
-            FileDescriptor fd = inputFiles[i];
+            FileDescriptor fd = fileDescriptors[i];
             StructPollfd pollfd = new StructPollfd();
             pollfd.fd = fd;
             pollfd.events = (short)OsConstants.POLLIN;
@@ -95,7 +98,7 @@ public final class UsbMidiDevice implements Closeable {
 
         mOutputStreams = new FileOutputStream[outputCount];
         for (int i = 0; i < outputCount; i++) {
-            mOutputStreams[i] = new FileOutputStream(outputFiles[i]);
+            mOutputStreams[i] = new FileOutputStream(fileDescriptors[i]);
         }
 
         mInputPortReceivers = new MidiReceiver[inputCount];
@@ -176,8 +179,10 @@ public final class UsbMidiDevice implements Closeable {
         for (int i = 0; i < mOutputStreams.length; i++) {
             mOutputStreams[i].close();
         }
+        nativeClose(mFileDescriptors);
     }
 
     private static native int nativeGetSubdeviceCount(int card, int device);
     private static native FileDescriptor[] nativeOpen(int card, int device, int subdeviceCount);
+    private static native void nativeClose(FileDescriptor[] fileDescriptors);
 }
