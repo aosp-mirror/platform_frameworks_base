@@ -363,10 +363,10 @@ public class DevicePolicyManager {
         = "android.app.extra.PROVISIONING_DEVICE_ADMIN_PACKAGE_DOWNLOAD_COOKIE_HEADER";
 
     /**
-     * A String extra holding the SHA-1 checksum of the file at download location specified in
-     * {@link #EXTRA_PROVISIONING_DEVICE_ADMIN_PACKAGE_DOWNLOAD_LOCATION}. If this doesn't match
-     * the file at the download location an error will be shown to the user and the user will be
-     * asked to factory reset the device.
+     * A String extra holding the URL-safe base64 encoded SHA-1 checksum of the file at download
+     * location specified in {@link #EXTRA_PROVISIONING_DEVICE_ADMIN_PACKAGE_DOWNLOAD_LOCATION}. If
+     * this doesn't match the file at the download location an error will be shown to the user and
+     * the user will be asked to factory reset the device.
      *
      * <p>Use in an NFC record with {@link #MIME_TYPE_PROVISIONING_NFC} that starts device owner
      * provisioning via an NFC bump.
@@ -445,7 +445,8 @@ public class DevicePolicyManager {
         = "android.app.extra.PROVISIONING_DEVICE_INITIALIZER_PACKAGE_DOWNLOAD_COOKIE_HEADER";
 
     /**
-     * A String extra holding the SHA-1 checksum of the file at download location specified in
+     * A String extra holding the URL-safe base64 encoded SHA-1 checksum of the file at download
+     * location specified in
      * {@link #EXTRA_PROVISIONING_DEVICE_INITIALIZER_PACKAGE_DOWNLOAD_LOCATION}. If this doesn't
      * match the file at the download location an error will be shown to the user and the user will
      * be asked to factory reset the device.
