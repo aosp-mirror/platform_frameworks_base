@@ -60,4 +60,13 @@ public abstract class DevicePolicyManagerInternal {
      */
     public abstract void addOnCrossProfileWidgetProvidersChangeListener(
             OnCrossProfileWidgetProvidersChangeListener listener);
+
+    /**
+     * Checks if an app with given uid is an active device admin of its user and has the policy
+     * specified.
+     * @param uid App uid.
+     * @param reqPolicy Required policy, for policies see {@link DevicePolicyManager}.
+     * @return true if the uid is an active admin with the given policy.
+     */
+    public abstract boolean isActiveAdminWithPolicy(int uid, int reqPolicy);
 }
