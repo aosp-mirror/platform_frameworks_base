@@ -16,6 +16,7 @@
 
 package com.android.layoutlib.bridge.bars;
 
+import com.android.annotations.NonNull;
 import com.android.ide.common.rendering.api.RenderResources;
 import com.android.ide.common.rendering.api.ResourceValue;
 import com.android.ide.common.rendering.api.StyleResourceValue;
@@ -26,6 +27,7 @@ import com.android.layoutlib.bridge.impl.ParserFactory;
 import com.android.layoutlib.bridge.impl.ResourceHelper;
 import com.android.resources.Density;
 import com.android.resources.LayoutDirection;
+import com.android.resources.ResourceType;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -47,6 +49,8 @@ import android.widget.TextView;
 import java.io.IOException;
 import java.io.InputStream;
 
+import static android.os.Build.VERSION_CODES.LOLLIPOP;
+
 /**
  * Base "bar" class for the window decor around the the edited layout.
  * This is basically an horizontal layout that loads a given layout on creation (it is read
@@ -63,7 +67,7 @@ abstract class CustomBar extends LinearLayout {
 
     protected abstract TextView getStyleableTextView();
 
-    protected CustomBar(Context context, int orientation, String layoutPath,
+    protected CustomBar(BridgeContext context, int orientation, String layoutPath,
             String name, int simulatedPlatformVersion) throws XmlPullParserException {
         super(context);
         mSimulatedPlatformVersion = simulatedPlatformVersion;
@@ -197,7 +201,7 @@ abstract class CustomBar extends LinearLayout {
 
 
                 ResourceValue textColor = res.findItemInStyle(textStyle, "textColor",
-                        true /*isFrameworkAttr*/);
+                        true);
                 textColor = res.resolveResValue(textColor);
                 if (textColor != null) {
                     ColorStateList stateList = ResourceHelper.getColorStateList(
@@ -210,12 +214,39 @@ abstract class CustomBar extends LinearLayout {
         }
     }
 
+    /**
+     * Given a theme attribute name, get the color referenced by it. The theme attribute may be
+     * used in a layout like "?attr/foo".
+     * <p/>
+     * Returns 0 if not found.
+     *
+     * @throws NumberFormatException if color resolved to an invalid string.
+     */
+    protected int getThemeAttrColor(@NonNull String attrName, boolean isFramework) {
+        if (!Config.isGreaterOrEqual(mSimulatedPlatformVersion, LOLLIPOP)) {
+            return 0;
+        }
+        assert mContext instanceof BridgeContext;
+        BridgeContext context = ((BridgeContext) mContext);
+        RenderResources renderResources = context.getRenderResources();
+        // From ?attr/foo to @color/bar. This is most likely an ItemResourceValue.
+        ResourceValue resource = renderResources.findItemInTheme(attrName, isFramework);
+        if (resource != null) {
+            // Form @color/bar to the #AARRGGBB
+            resource = renderResources.resolveResValue(resource);
+        }
+        if (resource != null && ResourceType.COLOR.equals(resource.getResourceType())) {
+            return ResourceHelper.getColor(resource.getValue());
+        }
+        return 0;
+    }
+
     private ResourceValue getResourceValue(String reference) {
         BridgeContext bridgeContext = (BridgeContext) mContext;
         RenderResources res = bridgeContext.getRenderResources();
 
         // find the resource
-        ResourceValue value = res.findResValue(reference, false /*isFramework*/);
+        ResourceValue value = res.findResValue(reference, false);
 
         // resolve it if needed
         return res.resolveResValue(value);
