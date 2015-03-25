@@ -15,6 +15,8 @@
   ~ limitations under the License
   -->
 
+<!-- This layout is duplicated in land/time_picker_material.xml, so any
+     changes made here need to be manually copied over. -->
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
                 xmlns:tools="http://schemas.android.com/tools"
                 android:id="@+id/time_header"
@@ -32,6 +34,7 @@
         android:layout_height="wrap_content"
         android:layout_toLeftOf="@+id/separator"
         android:layout_alignBaseline="@+id/separator"
+        android:textAppearance="@style/TextAppearance.Material.TimePicker.TimeLabel"
         android:singleLine="true"
         android:ellipsize="none"
         android:gravity="right"
@@ -46,6 +49,7 @@
         android:layout_marginLeft="@dimen/timepicker_separator_padding"
         android:layout_marginRight="@dimen/timepicker_separator_padding"
         android:layout_centerInParent="true"
+        android:textAppearance="@style/TextAppearance.Material.TimePicker.TimeLabel"
         android:importantForAccessibility="no"
         tools:text=":"
         tools:textSize="@dimen/timepicker_time_label_size"
@@ -59,6 +63,7 @@
         android:layout_height="wrap_content"
         android:layout_toRightOf="@+id/separator"
         android:layout_alignBaseline="@+id/separator"
+        android:textAppearance="@style/TextAppearance.Material.TimePicker.TimeLabel"
         android:singleLine="true"
         android:ellipsize="none"
         android:gravity="left"
@@ -83,6 +88,7 @@
             android:paddingStart="@dimen/timepicker_ampm_horizontal_padding"
             android:paddingEnd="@dimen/timepicker_ampm_horizontal_padding"
             android:paddingTop="@dimen/timepicker_am_top_padding"
+            android:textAppearance="@style/TextAppearance.Material.TimePicker.AmPmLabel"
             android:lines="1"
             android:ellipsize="none"
             tools:text="AM"
@@ -95,6 +101,7 @@
             android:paddingStart="@dimen/timepicker_ampm_horizontal_padding"
             android:paddingEnd="@dimen/timepicker_ampm_horizontal_padding"
             android:paddingTop="@dimen/timepicker_pm_top_padding"
+            android:textAppearance="@style/TextAppearance.Material.TimePicker.AmPmLabel"
             android:lines="1"
             android:ellipsize="none"
             tools:text="PM"

@@ -303,8 +303,8 @@ package android {
     field public static final int alphabeticShortcut = 16843235; // 0x10101e3
     field public static final int alwaysDrawnWithCache = 16842991; // 0x10100ef
     field public static final int alwaysRetainTaskState = 16843267; // 0x1010203
-    field public static final int amPmBackgroundColor = 16843941; // 0x10104a5
-    field public static final int amPmTextColor = 16843940; // 0x10104a4
+    field public static final deprecated int amPmBackgroundColor = 16843941; // 0x10104a5
+    field public static final deprecated int amPmTextColor = 16843940; // 0x10104a4
     field public static final int ambientShadowAlpha = 16843966; // 0x10104be
     field public static final int angle = 16843168; // 0x10101a0
     field public static final int animateFirstView = 16843477; // 0x10102d5
@@ -650,12 +650,12 @@ package android {
     field public static final int hapticFeedbackEnabled = 16843358; // 0x101025e
     field public static final int hardwareAccelerated = 16843475; // 0x10102d3
     field public static final int hasCode = 16842764; // 0x101000c
-    field public static final int headerAmPmTextAppearance = 16843936; // 0x10104a0
+    field public static final deprecated int headerAmPmTextAppearance = 16843936; // 0x10104a0
     field public static final int headerBackground = 16843055; // 0x101012f
     field public static final deprecated int headerDayOfMonthTextAppearance = 16843927; // 0x1010497
     field public static final int headerDividersEnabled = 16843310; // 0x101022e
     field public static final deprecated int headerMonthTextAppearance = 16843926; // 0x1010496
-    field public static final int headerTimeTextAppearance = 16843935; // 0x101049f
+    field public static final deprecated int headerTimeTextAppearance = 16843935; // 0x101049f
     field public static final int headerYearTextAppearance = 16843928; // 0x1010498
     field public static final int height = 16843093; // 0x1010155
     field public static final int hideOnContentScroll = 16843843; // 0x1010443
