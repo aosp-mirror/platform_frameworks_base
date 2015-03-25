@@ -69,7 +69,7 @@
       <item quantity="one"><xliff:g id="PRINT_JOB_NAME_1">%1$d</xliff:g> प्रिंट कार्य</item>
       <item quantity="other"><xliff:g id="PRINT_JOB_NAME_1">%1$d</xliff:g> प्रिंट कार्य</item>
     </plurals>
-    <string name="cancel" msgid="4373674107267141885">"रहने दें"</string>
+    <string name="cancel" msgid="4373674107267141885">"अभी नहीं"</string>
     <string name="restart" msgid="2472034227037808749">"पुन: आरंभ करें"</string>
     <string name="no_connection_to_printer" msgid="2159246915977282728">"प्रिंटर के लिए कोई कनेक्शन नहीं"</string>
     <string name="reason_unknown" msgid="5507940196503246139">"अज्ञात"</string>
