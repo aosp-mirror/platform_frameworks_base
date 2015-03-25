@@ -244,13 +244,18 @@ public class Html {
                 next++;
             }
 
-            withinParagraph(out, text, i, next - nl, nl, next == end);
+            if (withinParagraph(out, text, i, next - nl, nl, next == end)) {
+                /* Paragraph should be closed */
+                out.append("</p>\n");
+                out.append(getOpenParaTagWithDirection(text, next, end));
+            }
         }
 
         out.append("</p>\n");
     }
 
-    private static void withinParagraph(StringBuilder out, Spanned text,
+    /* Returns true if the caller should close and reopen the paragraph. */
+    private static boolean withinParagraph(StringBuilder out, Spanned text,
                                         int start, int end, int nl,
                                         boolean last) {
         int next;
@@ -363,17 +368,14 @@ public class Html {
             }
         }
 
-        String p = last ? "" : "</p>\n" + getOpenParaTagWithDirection(text, start, end);
-
         if (nl == 1) {
             out.append("<br>\n");
-        } else if (nl == 2) {
-            out.append(p);
+            return false;
         } else {
             for (int i = 2; i < nl; i++) {
                 out.append("<br>");
             }
-            out.append(p);
+            return !last;
         }
     }
 
