@@ -16,10 +16,11 @@
 
 package android.databinding.testlibrary;
 
-import android.binding.Bindable;
+import android.databinding.Bindable;
 
-import android.databinding.library.BaseObservable;
 import android.databinding.testlibrary.BR;
+
+import android.databinding.BaseObservable;
 
 public class ObservableInLibrary extends BaseObservable {
 

@@ -45,6 +45,7 @@ android {
 println "combined ${config.testGroup}.independent-library:${config.snapshotVersion}"
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
+    compile "com.android.databinding:library:${config.snapshotVersion}"
     compile project(':testlibrary')
     compile "com.android.support:support-v4:+"
     provided "com.android.databinding:annotationprocessor:${config.snapshotVersion}"

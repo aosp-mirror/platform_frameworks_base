@@ -16,9 +16,9 @@
 
 package android.databinding.multimoduletestapp;
 
-import android.binding.Bindable;
+import android.databinding.Bindable;
 
-import android.databinding.library.BaseObservable;
+import android.databinding.BaseObservable;
 import android.databinding.multimoduletestapp.BR;
 
 public class ObservableInMainApp extends BaseObservable {

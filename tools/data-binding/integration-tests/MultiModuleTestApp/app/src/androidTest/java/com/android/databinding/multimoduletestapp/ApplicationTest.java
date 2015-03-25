@@ -19,8 +19,8 @@ package android.databinding.multimoduletestapp;
 import android.databinding.testlibrary.ObservableInLibrary;
 
 import android.app.Application;
-import android.binding.Observable;
-import android.binding.OnPropertyChangedListener;
+import android.databinding.Observable;
+import android.databinding.OnPropertyChangedListener;
 import android.test.ApplicationTestCase;
 
 import java.beans.PropertyChangeEvent;

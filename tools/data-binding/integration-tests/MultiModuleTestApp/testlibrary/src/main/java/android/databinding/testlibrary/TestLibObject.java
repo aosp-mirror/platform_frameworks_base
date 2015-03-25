@@ -16,7 +16,7 @@
 
 package android.databinding.testlibrary;
 
-import android.binding.Bindable;
+import android.databinding.Bindable;
 
 public class TestLibObject {
     @Bindable

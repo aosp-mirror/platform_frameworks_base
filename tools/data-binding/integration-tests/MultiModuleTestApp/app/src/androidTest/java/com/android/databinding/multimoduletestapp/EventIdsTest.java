@@ -18,8 +18,8 @@ package android.databinding.multimoduletestapp;
 
 import android.databinding.testlibrary.ObservableInLibrary;
 
-import android.binding.Observable;
-import android.binding.OnPropertyChangedListener;
+import android.databinding.Observable;
+import android.databinding.OnPropertyChangedListener;
 import android.os.Debug;
 import android.test.AndroidTestCase;
 

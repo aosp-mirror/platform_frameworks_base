@@ -64,7 +64,7 @@ allprojects {
 
 subprojects.uploadArchives.each { it.shouldRunAfter deleteRepo  }
 buildExtensionsTask.shouldRunAfter deleteRepo
-tasks['runTestsOfMultiModuleTestApp'].shouldRunAfter tasks['runTestsOfIndependentLibrary']
+tasks['runTestsOfMultiModuleTestApp'].dependsOn tasks['runTestsOfIndependentLibrary']
 
 
 task rebuildRepo() {
