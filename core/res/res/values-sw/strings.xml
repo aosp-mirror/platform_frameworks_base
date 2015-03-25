@@ -1794,8 +1794,6 @@
     <string name="minute_picker_description" msgid="8606010966873791190">"Kitelezi cha mviringo wa dakika"</string>
     <string name="select_hours" msgid="6043079511766008245">"Chagua saa"</string>
     <string name="select_minutes" msgid="3974345615920336087">"Chagua dakika"</string>
-    <string name="day_picker_description" msgid="8990847925961297968">"Gridi ya mwezi ya siku"</string>
-    <string name="year_picker_description" msgid="5524331207436052403">"Orodha ya miaka"</string>
     <string name="select_day" msgid="7774759604701773332">"Chagua mwezi na siku"</string>
     <string name="select_year" msgid="7952052866994196170">"Chagua mwaka"</string>
     <string name="item_is_selected" msgid="949687401682476608">"<xliff:g id="ITEM">%1$s</xliff:g> kimechaguliwa"</string>
