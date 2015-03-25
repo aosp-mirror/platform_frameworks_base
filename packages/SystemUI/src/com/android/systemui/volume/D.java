@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 The Android Open Source Project
+ * Copyright (C) 2015 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,18 +16,8 @@
 
 package com.android.systemui.volume;
 
-import android.content.res.Configuration;
+import android.util.Log;
 
-import com.android.systemui.DemoMode;
-import com.android.systemui.statusbar.policy.ZenModeController;
-
-import java.io.FileDescriptor;
-import java.io.PrintWriter;
-
-public interface VolumeComponent extends DemoMode {
-    ZenModeController getZenController();
-    void dismissNow();
-    void onConfigurationChanged(Configuration newConfig);
-    void dump(FileDescriptor fd, PrintWriter pw, String[] args);
-    void register();
+class D {
+    public static boolean BUG = Log.isLoggable("volume", Log.DEBUG);
 }

@@ -1,0 +1,87 @@
+<!--
+     Copyright (C) 2015 The Android Open Source Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+-->
+<resources xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item name="volume_expand_animation_duration" type="integer">300</item>
+
+    <color name="volume_icon_color">#ffffffff</color>
+    <color name="volume_settings_icon_color">#7fffffff</color>
+
+    <dimen name="volume_slider_interspacing">2dp</dimen>
+    <dimen name="volume_offset_top">0dp</dimen>
+    <dimen name="volume_button_size">48dp</dimen>
+
+    <item name="volume_secondary_alpha" format="float" type="dimen">0.3</item>
+
+    <style name="VolumeDialogAnimations">
+        <item name="android:windowEnterAnimation">@android:anim/fade_in</item>
+        <item name="android:windowExitAnimation">@android:anim/fade_out</item>
+    </style>
+
+    <style name="VolumeButtons" parent="@android:style/Widget.Material.Button.Borderless">
+        <item name="android:background">@drawable/btn_borderless_rect</item>
+    </style>
+
+    <style name="TextAppearance" />
+
+    <style name="TextAppearance.Volume">
+        <item name="android:textStyle">normal</item>
+        <item name="android:textColor">#ffffffff</item>
+        <item name="android:fontFamily">sans-serif</item>
+    </style>
+
+    <style name="TextAppearance.Volume.ZenSwitch">
+        <item name="android:textSize">16sp</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+    </style>
+
+    <style name="TextAppearance.Volume.ZenSwitchSummary">
+        <item name="android:textSize">14sp</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+    </style>
+
+    <style name="TextAppearance.Volume.ZenSwitchDetail">
+        <item name="android:textSize">14sp</item>
+        <item name="android:fontFamily">sans-serif</item>
+        <item name="android:textColor">#ffb0b3c5</item>
+    </style>
+
+    <string-array name="volume_stream_titles" translatable="false">
+        <item>Voice calls</item> <!-- STREAM_VOICE_CALL -->
+        <item>System</item> <!-- STREAM_SYSTEM -->
+        <item>Notifications</item> <!-- STREAM_RING -->
+        <item>Media</item> <!-- STREAM_MUSIC -->
+        <item>Alarms</item> <!-- STREAM_ALARM -->
+        <item></item> <!-- STREAM_NOTIFICATION -->
+        <item>Bluetooth calls</item> <!-- STREAM_BLUETOOTH_SCO -->
+        <item></item> <!-- STREAM_SYSTEM_ENFORCED -->
+        <item></item> <!-- STREAM_DTMF -->
+        <item></item> <!-- STREAM_TTS -->
+    </string-array>
+
+    <string name="volume_dnd_is_on" translatable="false">Do not disturb is on</string>
+    <string name="volume_turn_off" translatable="false">Turn off</string>
+    <string name="volume_stream_muted" translatable="false">%s silent</string>
+    <string name="volume_stream_vibrate" translatable="false">%s vibrate</string>
+    <string name="volume_stream_suppressed" translatable="false">%1$s silent — %2$s</string>
+    <string name="volume_stream_muted_dnd" translatable="false">%s silent — No interruptions</string>
+    <string name="volume_stream_limited_dnd" translatable="false">%s — Priority only</string>
+    <string name="volume_stream_vibrate_dnd" translatable="false">%s vibrate — Priority only</string>
+    <string name="volume_dnd_ends_in" translatable="false">Do not disturb ends in %s</string>
+    <string name="volume_dnd_ends_at" translatable="false">Do not disturb ends at %s</string>
+    <string name="volume_end_now" translatable="false">End now</string>
+
+</resources>

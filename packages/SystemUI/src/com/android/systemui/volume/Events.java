@@ -1,0 +1,189 @@
+/*
+ * Copyright (C) 2015 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package com.android.systemui.volume;
+
+import android.media.AudioManager;
+import android.media.AudioSystem;
+import android.provider.Settings.Global;
+import android.util.Log;
+
+import com.android.systemui.volume.VolumeDialogController.State;
+
+import java.util.Arrays;
+
+/**
+ *  Interesting events related to the volume.
+ */
+public class Events {
+    private static final String TAG = Util.logTag(Events.class);
+
+    public static final int EVENT_SHOW_DIALOG = 0;  // (reason|int) (keyguard|bool)
+    public static final int EVENT_DISMISS_DIALOG = 1; // (reason|int)
+    public static final int EVENT_ACTIVE_STREAM_CHANGED = 2; // (stream|int)
+    public static final int EVENT_EXPAND = 3; // (expand|bool)
+    public static final int EVENT_KEY = 4;
+    public static final int EVENT_COLLECTION_STARTED = 5;
+    public static final int EVENT_COLLECTION_STOPPED = 6;
+    public static final int EVENT_ICON_CLICK = 7; // (stream|int) (icon_state|int)
+    public static final int EVENT_SETTINGS_CLICK = 8;
+    public static final int EVENT_TOUCH_LEVEL_CHANGED = 9; // (stream|int) (level|int)
+    public static final int EVENT_LEVEL_CHANGED = 10; // (stream|int) (level|int)
+    public static final int EVENT_INTERNAL_RINGER_MODE_CHANGED = 11; // (mode|int)
+    public static final int EVENT_EXTERNAL_RINGER_MODE_CHANGED = 12; // (mode|int)
+    public static final int EVENT_ZEN_MODE_CHANGED = 13; // (mode|int)
+    public static final int EVENT_SUPPRESSOR_CHANGED = 14;  // (component|string) (name|string)
+    public static final int EVENT_MUTE_CHANGED = 15;  // (stream|int) (muted|bool)
+
+    private static final String[] EVENT_TAGS = {
+        "show_dialog",
+        "dismiss_dialog",
+        "active_stream_changed",
+        "expand",
+        "key",
+        "collection_started",
+        "collection_stopped",
+        "icon_click",
+        "settings_click",
+        "touch_level_changed",
+        "level_changed",
+        "internal_ringer_mode_changed",
+        "external_ringer_mode_changed",
+        "zen_mode_changed",
+        "suppressor_changed",
+        "mute_changed",
+    };
+
+    public static final int DISMISS_REASON_UNKNOWN = 0;
+    public static final int DISMISS_REASON_TOUCH_OUTSIDE = 1;
+    public static final int DISMISS_REASON_VOLUME_CONTROLLER = 2;
+    public static final int DISMISS_REASON_TIMEOUT = 3;
+    public static final int DISMISS_REASON_SCREEN_OFF = 4;
+    public static final int DISMISS_REASON_SETTINGS_CLICKED = 5;
+    public static final int DISMISS_REASON_DONE_CLICKED = 6;
+    public static final String[] DISMISS_REASONS = {
+        "unknown",
+        "touch_outside",
+        "volume_controller",
+        "timeout",
+        "screen_off",
+        "settings_clicked",
+        "done_clicked",
+    };
+
+    public static final int SHOW_REASON_UNKNOWN = 0;
+    public static final int SHOW_REASON_VOLUME_CHANGED = 1;
+    public static final int SHOW_REASON_REMOTE_VOLUME_CHANGED = 2;
+    public static final String[] SHOW_REASONS = {
+        "unknown",
+        "volume_changed",
+        "remote_volume_changed"
+    };
+
+    public static final int ICON_STATE_UNKNOWN = 0;
+    public static final int ICON_STATE_UNMUTE = 1;
+    public static final int ICON_STATE_MUTE = 2;
+    public static final int ICON_STATE_VIBRATE = 3;
+
+    public static Callback sCallback;
+
+    public static void writeEvent(int tag, Object... list) {
+        final long time = System.currentTimeMillis();
+        final StringBuilder sb = new StringBuilder("writeEvent ").append(EVENT_TAGS[tag]);
+        if (list != null && list.length > 0) {
+            sb.append(" ");
+            switch (tag) {
+                case EVENT_SHOW_DIALOG:
+                    sb.append(SHOW_REASONS[(Integer) list[0]]).append(" keyguard=").append(list[1]);
+                    break;
+                case EVENT_EXPAND:
+                    sb.append(list[0]);
+                    break;
+                case EVENT_DISMISS_DIALOG:
+                    sb.append(DISMISS_REASONS[(Integer) list[0]]);
+                    break;
+                case EVENT_ACTIVE_STREAM_CHANGED:
+                    sb.append(AudioSystem.streamToString((Integer) list[0]));
+                    break;
+                case EVENT_ICON_CLICK:
+                    sb.append(AudioSystem.streamToString((Integer) list[0])).append(' ')
+                            .append(iconStateToString((Integer) list[1]));
+                    break;
+                case EVENT_TOUCH_LEVEL_CHANGED:
+                case EVENT_LEVEL_CHANGED:
+                case EVENT_MUTE_CHANGED:
+                    sb.append(AudioSystem.streamToString((Integer) list[0])).append(' ')
+                            .append(list[1]);
+                    break;
+                case EVENT_INTERNAL_RINGER_MODE_CHANGED:
+                case EVENT_EXTERNAL_RINGER_MODE_CHANGED:
+                    sb.append(ringerModeToString((Integer) list[0]));
+                    break;
+                case EVENT_ZEN_MODE_CHANGED:
+                    sb.append(zenModeToString((Integer) list[0]));
+                    break;
+                case EVENT_SUPPRESSOR_CHANGED:
+                    sb.append(list[0]).append(' ').append(list[1]);
+                    break;
+                default:
+                    sb.append(Arrays.asList(list));
+                    break;
+            }
+        }
+        Log.i(TAG, sb.toString());
+        if (sCallback != null) {
+            sCallback.writeEvent(time, tag, list);
+        }
+    }
+
+    public static void writeState(long time, State state) {
+        if (sCallback != null) {
+            sCallback.writeState(time, state);
+        }
+    }
+
+    private static String iconStateToString(int iconState) {
+        switch (iconState) {
+            case ICON_STATE_UNMUTE: return "unmute";
+            case ICON_STATE_MUTE: return "mute";
+            case ICON_STATE_VIBRATE: return "vibrate";
+            default: return "unknown_state_" + iconState;
+        }
+    }
+
+    private static String ringerModeToString(int ringerMode) {
+        switch (ringerMode) {
+            case AudioManager.RINGER_MODE_SILENT: return "silent";
+            case AudioManager.RINGER_MODE_VIBRATE: return "vibrate";
+            case AudioManager.RINGER_MODE_NORMAL: return "normal";
+            default: return "unknown";
+        }
+    }
+
+    private static String zenModeToString(int zenMode) {
+        switch (zenMode) {
+            case Global.ZEN_MODE_OFF: return "off";
+            case Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS: return "important_interruptions";
+            case Global.ZEN_MODE_NO_INTERRUPTIONS: return "no_interruptions";
+            default: return "unknown";
+        }
+    }
+
+    public interface Callback {
+        void writeEvent(long time, int tag, Object[] list);
+        void writeState(long time, State state);
+    }
+}

@@ -13,14 +13,17 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
-<vector xmlns:android="http://schemas.android.com/apk/res/android"
-    android:height="24.0dp"
-    android:viewportHeight="48.0"
-    android:viewportWidth="48.0"
-    android:width="24.0dp" >
+<animated-vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:drawable="@drawable/ic_volume_expand" >
 
-    <path
-        android:fillColor="#FFFFFFFF"
-        android:pathData="M38.0,26.0L26.0,26.0l0.0,12.0l-4.0,0.0L22.0,26.0L10.0,26.0l0.0,-4.0l12.0,0.0L22.0,10.0l4.0,0.0l0.0,12.0l12.0,0.0l0.0,4.0z" />
+    <target
+        android:name="chevron_01"
+        android:animation="@anim/ic_volume_expand_chevron_01_animation" />
+    <target
+        android:name="rectangle_3"
+        android:animation="@anim/ic_volume_expand_rectangle_3_animation" />
+    <target
+        android:name="rectangle_4"
+        android:animation="@anim/ic_volume_expand_rectangle_4_animation" />
 
-</vector>
+</animated-vector>
