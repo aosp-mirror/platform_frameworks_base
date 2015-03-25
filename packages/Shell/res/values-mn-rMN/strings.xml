@@ -22,4 +22,6 @@
     <string name="bugreport_finished_text" product="default" msgid="3559904746859400732">"Та алдааны мэдэгдлийг хуваалцах бол хүрнэ үү"</string>
     <string name="bugreport_confirm" msgid="5130698467795669780">"Алдааны репорт нь хувийн болон нууц мэдээлэл зэргийг агуулсан системийн төрөл бүрийн лог файлын датаг агуулна. Алдааны репортыг зөвхөн итгэлтэй апп болон хүмүүст хуваалцана уу."</string>
     <string name="bugreport_confirm_repeat" msgid="4926842460688645058">"Энэ мессежийг дараагийн удаа харуулах"</string>
+    <!-- no translation found for bugreport_storage_title (5332488144740527109) -->
+    <skip />
 </resources>

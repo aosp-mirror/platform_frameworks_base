@@ -22,4 +22,6 @@
     <string name="bugreport_finished_text" product="default" msgid="3559904746859400732">"Pieskarieties, lai kopīgotu kļūdu pārskatu."</string>
     <string name="bugreport_confirm" msgid="5130698467795669780">"Kļūdu pārskatā ir iekļauti dati no dažādiem sistēmas žurnālfailiem, tostarp personas dati un privāta informācija. Kļūdu pārskatus ieteicams kopīgot tikai ar uzticamām lietotnēm un lietotājiem."</string>
     <string name="bugreport_confirm_repeat" msgid="4926842460688645058">"Rādīt šo ziņojumu nākamajā reizē"</string>
+    <!-- no translation found for bugreport_storage_title (5332488144740527109) -->
+    <skip />
 </resources>

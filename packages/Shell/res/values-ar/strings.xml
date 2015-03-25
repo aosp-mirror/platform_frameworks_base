@@ -22,4 +22,6 @@
     <string name="bugreport_finished_text" product="default" msgid="3559904746859400732">"المس لمشاركة تقرير الأخطاء"</string>
     <string name="bugreport_confirm" msgid="5130698467795669780">"تحتوي تقارير الأخطاء على بيانات من ملفات سجلات النظام المتنوعة، بما في ذلك معلومات شخصية وخاصة. لا تشارك تقارير الأخطاء إلا مع التطبيقات والأشخاص الموثوق بهم."</string>
     <string name="bugreport_confirm_repeat" msgid="4926842460688645058">"إظهار هذه الرسالة في المرة القادمة"</string>
+    <!-- no translation found for bugreport_storage_title (5332488144740527109) -->
+    <skip />
 </resources>

@@ -22,4 +22,6 @@
     <string name="bugreport_finished_text" product="default" msgid="3559904746859400732">"Հպեք` ձեր վրիպակի մասին զեկույցը տարածելու համար"</string>
     <string name="bugreport_confirm" msgid="5130698467795669780">"Վրիպակի զեկույցները պարունակում են տվյալներ համակարգի տարբեր մուտքի ֆայլերից, այդ թվում նաև անհատական ​​և գաղտնի տեղեկություններ: Վրիպակի զեկույցները կիսեք միայն այն հավելվածների և մարդկանց հետ, որոնց վստահում եք:"</string>
     <string name="bugreport_confirm_repeat" msgid="4926842460688645058">"Այս հաղորդագրությունը ցույց տալ հաջորդ անգամ"</string>
+    <!-- no translation found for bugreport_storage_title (5332488144740527109) -->
+    <skip />
 </resources>

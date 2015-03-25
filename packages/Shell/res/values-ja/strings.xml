@@ -22,4 +22,6 @@
     <string name="bugreport_finished_text" product="default" msgid="3559904746859400732">"バグレポートを共有するにはタップします"</string>
     <string name="bugreport_confirm" msgid="5130698467795669780">"バグレポートには、個人の非公開情報など、システムのさまざまなログファイルのデータが含まれます。共有する場合は信頼するアプリとユーザーのみを選択してください。"</string>
     <string name="bugreport_confirm_repeat" msgid="4926842460688645058">"このメッセージを次回も表示する"</string>
+    <!-- no translation found for bugreport_storage_title (5332488144740527109) -->
+    <skip />
 </resources>

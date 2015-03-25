@@ -22,4 +22,6 @@
     <string name="bugreport_finished_text" product="default" msgid="3559904746859400732">"Érintse meg a programhiba-jelentés megosztásához"</string>
     <string name="bugreport_confirm" msgid="5130698467795669780">"A programhiba-jelentések a rendszer különféle naplófájljaiból származó adatokat tartalmaznak, köztük személyes és magánjellegű információkat is. Csak olyan alkalmazásokkal és személyekkel osszon meg programhiba-jelentéseket, amelyekben vagy akikben megbízik."</string>
     <string name="bugreport_confirm_repeat" msgid="4926842460688645058">"Üzenet mutatása legközelebb"</string>
+    <!-- no translation found for bugreport_storage_title (5332488144740527109) -->
+    <skip />
 </resources>

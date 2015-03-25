@@ -22,4 +22,6 @@
     <string name="bugreport_finished_text" product="default" msgid="3559904746859400732">"Toca aquí per compartir el teu informe d\'error."</string>
     <string name="bugreport_confirm" msgid="5130698467795669780">"Els informes d\'error contenen dades dels diferents fitxers de registre del sistema, inclosa informació privada i personal. Comparteix els informes d\'error només amb les aplicacions i amb les persones en qui confies."</string>
     <string name="bugreport_confirm_repeat" msgid="4926842460688645058">"Mostra aquest missatge la propera vegada"</string>
+    <!-- no translation found for bugreport_storage_title (5332488144740527109) -->
+    <skip />
 </resources>

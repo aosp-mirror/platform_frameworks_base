@@ -22,4 +22,6 @@
     <string name="bugreport_finished_text" product="default" msgid="3559904746859400732">"ඔබගේ දෝෂ වාර්තාව බෙදා ගැනීමට ස්පර්ශ කරන්න"</string>
     <string name="bugreport_confirm" msgid="5130698467795669780">"පුද්ගලික සහ පෞද්ගලික තොරතුරු ඇතුළත්ව පද්ධතියේ විවිධ ලොග් ගොනු වල දත්ත දෝෂ වාර්තාවේ අඩංගු වේ. ඔබට විශ්වාසවන්ත යෙදුම් සහ පුද්ගලයින් සමඟ පමණක් දෝෂ වාර්තා බෙදා ගන්න."</string>
     <string name="bugreport_confirm_repeat" msgid="4926842460688645058">"ඊළඟ වෙලාවේ මෙම පණිවිඩය පෙන්වන්න"</string>
+    <!-- no translation found for bugreport_storage_title (5332488144740527109) -->
+    <skip />
 </resources>
