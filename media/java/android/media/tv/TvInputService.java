@@ -1077,12 +1077,19 @@ public abstract class TvInputService extends Service {
         int dispatchInputEvent(InputEvent event, InputEventReceiver receiver) {
             if (DEBUG) Log.d(TAG, "dispatchInputEvent(" + event + ")");
             boolean isNavigationKey = false;
+            boolean skipDispatchToOverlayView = false;
             if (event instanceof KeyEvent) {
                 KeyEvent keyEvent = (KeyEvent) event;
-                isNavigationKey = isNavigationKey(keyEvent.getKeyCode());
                 if (keyEvent.dispatch(this, mDispatcherState, this)) {
                     return TvInputManager.Session.DISPATCH_HANDLED;
                 }
+                isNavigationKey = isNavigationKey(keyEvent.getKeyCode());
+                // When media keys and KEYCODE_MEDIA_AUDIO_TRACK are dispatched to ViewRootImpl,
+                // ViewRootImpl always consumes the keys. In this case, an application loses
+                // a chance to handle media keys. Therefore, media keys are not dispatched to
+                // ViewRootImpl.
+                skipDispatchToOverlayView = KeyEvent.isMediaKey(keyEvent.getKeyCode())
+                        || keyEvent.getKeyCode() == KeyEvent.KEYCODE_MEDIA_AUDIO_TRACK;
             } else if (event instanceof MotionEvent) {
                 MotionEvent motionEvent = (MotionEvent) event;
                 final int source = motionEvent.getSource();
@@ -1100,7 +1107,8 @@ public abstract class TvInputService extends Service {
                     }
                 }
             }
-            if (mOverlayViewContainer == null || !mOverlayViewContainer.isAttachedToWindow()) {
+            if (mOverlayViewContainer == null || !mOverlayViewContainer.isAttachedToWindow()
+                    || skipDispatchToOverlayView) {
                 return TvInputManager.Session.DISPATCH_NOT_HANDLED;
             }
             if (!mOverlayViewContainer.hasWindowFocus()) {
