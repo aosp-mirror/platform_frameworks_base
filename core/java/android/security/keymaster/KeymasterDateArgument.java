@@ -27,6 +27,12 @@ class KeymasterDateArgument extends KeymasterArgument {
 
     public KeymasterDateArgument(int tag, Date date) {
         super(tag);
+        switch (KeymasterDefs.getTagType(tag)) {
+            case KeymasterDefs.KM_DATE:
+                break; // OK.
+            default:
+                throw new IllegalArgumentException("Bad date tag " + tag);
+        }
         this.date = date;
     }
 
