@@ -88,6 +88,9 @@
     <string name="unlock_label" msgid="8779712358041029439">"ontsluit"</string>
     <string name="phone_label" msgid="2320074140205331708">"maak foon oop"</string>
     <string name="camera_label" msgid="7261107956054836961">"maak kamera oop"</string>
+    <!-- no translation found for recents_caption_resize (3517056471774958200) -->
+    <skip />
+    <string name="cancel" msgid="6442560571259935130">"Kanselleer"</string>
     <string name="accessibility_compatibility_zoom_button" msgid="8461115318742350699">"Versoenbaarheid-zoem se knoppie."</string>
     <string name="accessibility_compatibility_zoom_example" msgid="4220687294564945780">"Zoem kleiner na groter skerm."</string>
     <string name="accessibility_bluetooth_connected" msgid="2707027633242983370">"Bluetooth gekoppel."</string>

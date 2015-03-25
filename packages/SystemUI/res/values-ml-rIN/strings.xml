@@ -88,6 +88,9 @@
     <string name="unlock_label" msgid="8779712358041029439">"അൺലോക്കുചെയ്യുക"</string>
     <string name="phone_label" msgid="2320074140205331708">"ഫോൺ തുറക്കുക"</string>
     <string name="camera_label" msgid="7261107956054836961">"ക്യാമറ തുറക്കുക"</string>
+    <!-- no translation found for recents_caption_resize (3517056471774958200) -->
+    <skip />
+    <string name="cancel" msgid="6442560571259935130">"റദ്ദാക്കുക"</string>
     <string name="accessibility_compatibility_zoom_button" msgid="8461115318742350699">"അനുയോജ്യതാ സൂം ബട്ടൺ."</string>
     <string name="accessibility_compatibility_zoom_example" msgid="4220687294564945780">"ചെറുതിൽ നിന്ന് വലിയ സ്‌ക്രീനിലേക്ക് സൂം ചെയ്യുക."</string>
     <string name="accessibility_bluetooth_connected" msgid="2707027633242983370">"ബ്ലൂടൂത്ത് കണക്‌റ്റുചെയ്തു."</string>
@@ -257,8 +260,7 @@
     <string name="quick_settings_wifi_no_network" msgid="2221993077220856376">"നെറ്റ്‌വർക്ക് ഒന്നുമില്ല"</string>
     <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"Wi-Fi ഓഫുചെയ്യുക"</string>
     <string name="quick_settings_wifi_detail_empty_text" msgid="2831702993995222755">"സംരംക്ഷിച്ച നെറ്റ്‌വർക്കുകളൊന്നും ലഭ്യമല്ല"</string>
-    <!-- no translation found for quick_settings_cast_title (7709016546426454729) -->
-    <skip />
+    <string name="quick_settings_cast_title" msgid="7709016546426454729">"കാസ്‌റ്റുചെയ്യുക"</string>
     <string name="quick_settings_casting" msgid="6601710681033353316">"കാസ്റ്റുചെയ്യുന്നു"</string>
     <string name="quick_settings_cast_device_default_name" msgid="5367253104742382945">"പേരിടാത്ത ഉപകരണം"</string>
     <string name="quick_settings_cast_device_default_description" msgid="2484573682378634413">"കാസ്‌റ്റ് ചെയ്യാൻ തയ്യാറാണ്"</string>

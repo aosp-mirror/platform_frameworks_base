@@ -88,6 +88,9 @@
     <string name="unlock_label" msgid="8779712358041029439">"desbloquear"</string>
     <string name="phone_label" msgid="2320074140205331708">"abrir teléfono"</string>
     <string name="camera_label" msgid="7261107956054836961">"abrir cámara"</string>
+    <!-- no translation found for recents_caption_resize (3517056471774958200) -->
+    <skip />
+    <string name="cancel" msgid="6442560571259935130">"Cancelar"</string>
     <string name="accessibility_compatibility_zoom_button" msgid="8461115318742350699">"Botón de zoom de compatibilidade"</string>
     <string name="accessibility_compatibility_zoom_example" msgid="4220687294564945780">"Zoom de compatibilidade co tamaño da pantalla."</string>
     <string name="accessibility_bluetooth_connected" msgid="2707027633242983370">"Bluetooth conectado"</string>
@@ -259,8 +262,7 @@
     <string name="quick_settings_wifi_no_network" msgid="2221993077220856376">"Non hai rede"</string>
     <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"Wifi desactivada"</string>
     <string name="quick_settings_wifi_detail_empty_text" msgid="2831702993995222755">"Non hai redes gardadas dispoñibles"</string>
-    <!-- no translation found for quick_settings_cast_title (7709016546426454729) -->
-    <skip />
+    <string name="quick_settings_cast_title" msgid="7709016546426454729">"Emisión"</string>
     <string name="quick_settings_casting" msgid="6601710681033353316">"Emitindo"</string>
     <string name="quick_settings_cast_device_default_name" msgid="5367253104742382945">"Dispositivo sen nome"</string>
     <string name="quick_settings_cast_device_default_description" msgid="2484573682378634413">"Listo para emitir"</string>
