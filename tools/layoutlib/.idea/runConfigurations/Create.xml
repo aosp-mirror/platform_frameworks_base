@@ -5,8 +5,8 @@
     <option name="VM_PARAMETERS" value="" />
     <option name="PROGRAM_PARAMETERS" value="out/host/common/obj/JAVA_LIBRARIES/temp_layoutlib_intermediates/javalib.jar out/target/common/obj/JAVA_LIBRARIES/core-libart_intermediates/classes.jar out/target/common/obj/JAVA_LIBRARIES/framework_intermediates/classes.jar out/target/common/obj/JAVA_LIBRARIES/ext_intermediates/classes.jar out/target/common/obj/JAVA_LIBRARIES/ext_intermediates/javalib.jar" />
     <option name="WORKING_DIRECTORY" value="file://$PROJECT_DIR$/../../../../" />
-    <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="true" />
-    <option name="ALTERNATIVE_JRE_PATH" value="1.6" />
+    <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
+    <option name="ALTERNATIVE_JRE_PATH" value="" />
     <option name="ENABLE_SWING_INSPECTOR" value="false" />
     <option name="ENV_VARIABLES" />
     <option name="PASS_PARENT_ENVS" value="true" />

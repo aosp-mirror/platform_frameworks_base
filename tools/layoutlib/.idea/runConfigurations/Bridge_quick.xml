@@ -1,13 +1,13 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="All in bridge" type="JUnit" factoryName="JUnit" singleton="true">
+  <configuration default="false" name="Bridge quick" type="JUnit" factoryName="JUnit">
     <extension name="coverage" enabled="false" merge="false" sample_coverage="true" runner="idea" />
     <module name="bridge" />
-    <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="true" />
-    <option name="ALTERNATIVE_JRE_PATH" value="1.7" />
-    <option name="PACKAGE_NAME" value="" />
+    <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
+    <option name="ALTERNATIVE_JRE_PATH" value="" />
+    <option name="PACKAGE_NAME" />
     <option name="MAIN_CLASS_NAME" value="" />
     <option name="METHOD_NAME" value="" />
-    <option name="TEST_OBJECT" value="package" />
+    <option name="TEST_OBJECT" value="pattern" />
     <option name="VM_PARAMETERS" value="-ea" />
     <option name="PARAMETERS" value="" />
     <option name="WORKING_DIRECTORY" value="file://$PROJECT_DIR$" />
@@ -17,7 +17,11 @@
       <value defaultName="singleModule" />
     </option>
     <envs />
-    <patterns />
+    <patterns>
+      <pattern testClass="com.android.layoutlib.bridge.TestDelegates" />
+      <pattern testClass="android.graphics.Matrix_DelegateTest" />
+      <pattern testClass="com.android.layoutlib.bridge.android.BridgeXmlBlockParserTest" />
+    </patterns>
     <RunnerSettings RunnerId="Run" />
     <ConfigurationWrapper RunnerId="Run" />
     <method />
