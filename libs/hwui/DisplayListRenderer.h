@@ -296,8 +296,9 @@ private:
         // so that we don't need to modify the paint every time we access it.
         SkTLazy<SkPaint> filteredPaint;
         if (mDrawFilter.get()) {
-            paint = filteredPaint.init();
+            filteredPaint.set(*paint);
             mDrawFilter->filter(filteredPaint.get(), SkDrawFilter::kPaint_Type);
+            paint = filteredPaint.get();
         }
 
         // compute the hash key for the paint and check the cache.

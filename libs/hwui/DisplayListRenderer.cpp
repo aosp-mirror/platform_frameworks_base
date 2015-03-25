@@ -484,7 +484,7 @@ void DisplayListRenderer::drawRects(const float* rects, int count, const SkPaint
 }
 
 void DisplayListRenderer::setDrawFilter(SkDrawFilter* filter) {
-    mDrawFilter.reset(filter);
+    mDrawFilter.reset(SkSafeRef(filter));
 }
 
 void DisplayListRenderer::insertReorderBarrier(bool enableReorder) {
