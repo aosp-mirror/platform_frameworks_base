@@ -249,8 +249,8 @@ public class VectorDrawable extends Drawable {
     @Override
     public void draw(Canvas canvas) {
         final Rect bounds = getBounds();
-        if (bounds.width() == 0 || bounds.height() == 0) {
-            // too small to draw
+        if (bounds.width() <= 0 || bounds.height() <= 0) {
+            // Nothing to draw
             return;
         }
 
