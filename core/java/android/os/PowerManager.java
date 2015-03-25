@@ -712,6 +712,22 @@ public final class PowerManager {
     }
 
     /**
+     * Returns whether the screen brightness is currently boosted to maximum, caused by a call
+     * to {@link #boostScreenBrightness(long)}.
+     * @return {@code True} if the screen brightness is currently boosted. {@code False} otherwise.
+     *
+     * @hide
+     */
+    @SystemApi
+    public boolean isScreenBrightnessBoosted() {
+        try {
+            return mService.isScreenBrightnessBoosted();
+        } catch (RemoteException e) {
+            return false;
+        }
+    }
+
+    /**
      * Sets the brightness of the backlights (screen, keyboard, button).
      * <p>
      * Requires the {@link android.Manifest.permission#DEVICE_POWER} permission.
@@ -890,6 +906,16 @@ public final class PowerManager {
 
     /** @hide */
     public static final String EXTRA_POWER_SAVE_MODE = "mode";
+
+    /**
+     * Intent that is broadcast when the state of {@link #isScreenBrightnessBoosted()} has changed.
+     * This broadcast is only sent to registered receivers.
+     *
+     * @hide
+     **/
+    @SystemApi
+    public static final String ACTION_SCREEN_BRIGHTNESS_BOOST_CHANGED
+            = "android.os.action.SCREEN_BRIGHTNESS_BOOST_CHANGED";
 
     /**
      * A wake lock is a mechanism to indicate that your application needs

@@ -23738,6 +23738,7 @@ package android.os {
   public final class PowerManager {
     method public boolean isInteractive();
     method public boolean isPowerSaveMode();
+    method public boolean isScreenBrightnessBoosted();
     method public deprecated boolean isScreenOn();
     method public boolean isWakeLockLevelSupported(int);
     method public android.os.PowerManager.WakeLock newWakeLock(int, java.lang.String);
@@ -23745,6 +23746,7 @@ package android.os {
     method public void userActivity(long, int, int);
     field public static final int ACQUIRE_CAUSES_WAKEUP = 268435456; // 0x10000000
     field public static final java.lang.String ACTION_POWER_SAVE_MODE_CHANGED = "android.os.action.POWER_SAVE_MODE_CHANGED";
+    field public static final java.lang.String ACTION_SCREEN_BRIGHTNESS_BOOST_CHANGED = "android.os.action.SCREEN_BRIGHTNESS_BOOST_CHANGED";
     field public static final deprecated int FULL_WAKE_LOCK = 26; // 0x1a
     field public static final int ON_AFTER_RELEASE = 536870912; // 0x20000000
     field public static final int PARTIAL_WAKE_LOCK = 1; // 0x1
