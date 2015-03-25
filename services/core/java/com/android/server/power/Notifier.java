@@ -78,6 +78,7 @@ final class Notifier {
     private static final int MSG_USER_ACTIVITY = 1;
     private static final int MSG_BROADCAST = 2;
     private static final int MSG_WIRELESS_CHARGING_STARTED = 3;
+    private static final int MSG_SCREEN_BRIGHTNESS_BOOST_CHANGED = 4;
 
     private final Object mLock = new Object();
 
@@ -92,6 +93,7 @@ final class Notifier {
     private final NotifierHandler mHandler;
     private final Intent mScreenOnIntent;
     private final Intent mScreenOffIntent;
+    private final Intent mScreenBrightnessBoostIntent;
 
     // The current interactive state.
     private int mActualInteractiveState;
@@ -127,6 +129,10 @@ final class Notifier {
                 Intent.FLAG_RECEIVER_REGISTERED_ONLY | Intent.FLAG_RECEIVER_FOREGROUND);
         mScreenOffIntent = new Intent(Intent.ACTION_SCREEN_OFF);
         mScreenOffIntent.addFlags(
+                Intent.FLAG_RECEIVER_REGISTERED_ONLY | Intent.FLAG_RECEIVER_FOREGROUND);
+        mScreenBrightnessBoostIntent =
+                new Intent(PowerManager.ACTION_SCREEN_BRIGHTNESS_BOOST_CHANGED);
+        mScreenBrightnessBoostIntent.addFlags(
                 Intent.FLAG_RECEIVER_REGISTERED_ONLY | Intent.FLAG_RECEIVER_FOREGROUND);
 
         // Initialize interactive state for battery stats.
@@ -349,6 +355,19 @@ final class Notifier {
     }
 
     /**
+     * Called when screen brightness boost begins or ends.
+     */
+    public void onScreenBrightnessBoostChanged() {
+        if (DEBUG) {
+            Slog.d(TAG, "onScreenBrightnessBoostChanged");
+        }
+
+        mSuspendBlocker.acquire();
+        Message msg = mHandler.obtainMessage(MSG_SCREEN_BRIGHTNESS_BOOST_CHANGED);
+        msg.setAsynchronous(true);
+        mHandler.sendMessage(msg);
+    }
+    /**
      * Called when there has been user activity.
      */
     public void onUserActivity(int event, int uid) {
@@ -457,6 +476,22 @@ final class Notifier {
         }
     }
 
+    private void sendBrightnessBoostChangedBroadcast() {
+        if (DEBUG) {
+            Slog.d(TAG, "Sending brightness boost changed broadcast.");
+        }
+
+        mContext.sendOrderedBroadcastAsUser(mScreenBrightnessBoostIntent, UserHandle.ALL, null,
+                mScreeBrightnessBoostChangedDone, mHandler, 0, null, null);
+    }
+
+    private final BroadcastReceiver mScreeBrightnessBoostChangedDone = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            mSuspendBlocker.release();
+        }
+    };
+
     private void sendWakeUpBroadcast() {
         if (DEBUG) {
             Slog.d(TAG, "Sending wake up broadcast.");
@@ -538,6 +573,9 @@ final class Notifier {
 
                 case MSG_WIRELESS_CHARGING_STARTED:
                     playWirelessChargingStartedSound();
+                    break;
+                case MSG_SCREEN_BRIGHTNESS_BOOST_CHANGED:
+                    sendBrightnessBoostChangedBroadcast();
                     break;
             }
         }
