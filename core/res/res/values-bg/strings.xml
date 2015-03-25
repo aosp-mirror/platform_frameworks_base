@@ -1794,8 +1794,6 @@
     <string name="minute_picker_description" msgid="8606010966873791190">"Кръгов плъзгач за минутите"</string>
     <string name="select_hours" msgid="6043079511766008245">"Избиране на часове"</string>
     <string name="select_minutes" msgid="3974345615920336087">"Избиране на минути"</string>
-    <string name="day_picker_description" msgid="8990847925961297968">"Месечна таблица на дните"</string>
-    <string name="year_picker_description" msgid="5524331207436052403">"Списък с години"</string>
     <string name="select_day" msgid="7774759604701773332">"Избиране на месец и ден"</string>
     <string name="select_year" msgid="7952052866994196170">"Избиране на година"</string>
     <string name="item_is_selected" msgid="949687401682476608">"Избрахте <xliff:g id="ITEM">%1$s</xliff:g>"</string>

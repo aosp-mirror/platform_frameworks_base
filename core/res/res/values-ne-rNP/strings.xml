@@ -1800,8 +1800,6 @@
     <string name="minute_picker_description" msgid="8606010966873791190">"मिनेट गोलाकार स्लाइडर"</string>
     <string name="select_hours" msgid="6043079511766008245">"घण्टा चयन गर्नुहोस्"</string>
     <string name="select_minutes" msgid="3974345615920336087">"मिनेट चयन गर्नुहोस्"</string>
-    <string name="day_picker_description" msgid="8990847925961297968">"दिनहरुको महिना ग्रिड"</string>
-    <string name="year_picker_description" msgid="5524331207436052403">"वर्ष सूची"</string>
     <string name="select_day" msgid="7774759604701773332">"महिना र दिन चयन गर्नुहोस्"</string>
     <string name="select_year" msgid="7952052866994196170">"वर्ष चयन गर्नुहोस्"</string>
     <string name="item_is_selected" msgid="949687401682476608">"<xliff:g id="ITEM">%1$s</xliff:g> चयन गरियो"</string>

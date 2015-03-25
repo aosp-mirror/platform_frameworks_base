@@ -1794,8 +1794,6 @@
     <string name="minute_picker_description" msgid="8606010966873791190">"円形スライダー（分）"</string>
     <string name="select_hours" msgid="6043079511766008245">"時間を選択"</string>
     <string name="select_minutes" msgid="3974345615920336087">"分を選択"</string>
-    <string name="day_picker_description" msgid="8990847925961297968">"日グリッド（月別）"</string>
-    <string name="year_picker_description" msgid="5524331207436052403">"年リスト"</string>
     <string name="select_day" msgid="7774759604701773332">"月と日を選択"</string>
     <string name="select_year" msgid="7952052866994196170">"年を選択"</string>
     <string name="item_is_selected" msgid="949687401682476608">"<xliff:g id="ITEM">%1$s</xliff:g>を選択しました"</string>

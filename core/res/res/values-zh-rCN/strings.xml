@@ -1794,8 +1794,6 @@
     <string name="minute_picker_description" msgid="8606010966873791190">"分钟转盘"</string>
     <string name="select_hours" msgid="6043079511766008245">"选择小时"</string>
     <string name="select_minutes" msgid="3974345615920336087">"选择分钟"</string>
-    <string name="day_picker_description" msgid="8990847925961297968">"按月份划分的日期网格"</string>
-    <string name="year_picker_description" msgid="5524331207436052403">"年份列表"</string>
     <string name="select_day" msgid="7774759604701773332">"选择月份和日期"</string>
     <string name="select_year" msgid="7952052866994196170">"选择年份"</string>
     <string name="item_is_selected" msgid="949687401682476608">"已选择<xliff:g id="ITEM">%1$s</xliff:g>"</string>

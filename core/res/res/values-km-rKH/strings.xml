@@ -1796,8 +1796,6 @@
     <string name="minute_picker_description" msgid="8606010966873791190">"គ្រាប់​រំកិល​រង្វង់​នាទី"</string>
     <string name="select_hours" msgid="6043079511766008245">"ជ្រើស​ម៉ោង"</string>
     <string name="select_minutes" msgid="3974345615920336087">"ជ្រើស​នាទី"</string>
-    <string name="day_picker_description" msgid="8990847925961297968">"ក្រឡា​​​ខែ​នៃ​ថ្ងៃ"</string>
-    <string name="year_picker_description" msgid="5524331207436052403">"បញ្ជី​ឆ្នាំ"</string>
     <string name="select_day" msgid="7774759604701773332">"ជ្រើស​ខែ និង​ថ្ងៃ"</string>
     <string name="select_year" msgid="7952052866994196170">"ជ្រើស​ឆ្នាំ"</string>
     <string name="item_is_selected" msgid="949687401682476608">"បាន​ជ្រើស <xliff:g id="ITEM">%1$s</xliff:g>"</string>

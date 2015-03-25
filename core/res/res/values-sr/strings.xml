@@ -1803,8 +1803,6 @@
     <string name="minute_picker_description" msgid="8606010966873791190">"Кружни клизач за минуте"</string>
     <string name="select_hours" msgid="6043079511766008245">"Изаберите сате"</string>
     <string name="select_minutes" msgid="3974345615920336087">"Изаберите минуте"</string>
-    <string name="day_picker_description" msgid="8990847925961297968">"Приказ дана у месецу у виду мреже"</string>
-    <string name="year_picker_description" msgid="5524331207436052403">"Листа година"</string>
     <string name="select_day" msgid="7774759604701773332">"Изаберите месец и дан"</string>
     <string name="select_year" msgid="7952052866994196170">"Изаберите годину"</string>
     <string name="item_is_selected" msgid="949687401682476608">"Изабрали сте <xliff:g id="ITEM">%1$s</xliff:g>"</string>

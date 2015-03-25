@@ -1211,9 +1211,9 @@
     <string name="app_running_notification_title" msgid="8718335121060787914">"<xliff:g id="APP_NAME">%1$s</xliff:g> चल रहा है"</string>
     <string name="app_running_notification_text" msgid="4653586947747330058">"अधिक जानकारी के लिए या ऐप्स  रोकने के लिए स्पर्श करें."</string>
     <string name="ok" msgid="5970060430562524910">"ठीक है"</string>
-    <string name="cancel" msgid="6442560571259935130">"रहने दें"</string>
+    <string name="cancel" msgid="6442560571259935130">"अभी नहीं"</string>
     <string name="yes" msgid="5362982303337969312">"ठीक है"</string>
-    <string name="no" msgid="5141531044935541497">"रहने दें"</string>
+    <string name="no" msgid="5141531044935541497">"अभी नहीं"</string>
     <string name="dialog_alert_title" msgid="2049658708609043103">"ध्यान दें"</string>
     <string name="loading" msgid="7933681260296021180">"लोड हो रहे हैं..."</string>
     <string name="capital_on" msgid="1544682755514494298">"चालू"</string>
@@ -1335,7 +1335,7 @@
     <string name="sms_short_code_details" msgid="5873295990846059400">"इससे आपके मोबाइल खाते पर "<b>"शुल्क लग सकता है"</b>"."</string>
     <string name="sms_premium_short_code_details" msgid="7869234868023975"><b>"इससे आपके मोबाइल खाते पर शुल्क लगेगा."</b></string>
     <string name="sms_short_code_confirm_allow" msgid="4458878637111023413">"भेजें"</string>
-    <string name="sms_short_code_confirm_deny" msgid="2927389840209170706">"रहने दें"</string>
+    <string name="sms_short_code_confirm_deny" msgid="2927389840209170706">"अभी नहीं"</string>
     <string name="sms_short_code_remember_choice" msgid="5289538592272218136">"मेरी पसंद को याद रखें"</string>
     <string name="sms_short_code_remember_undo_instruction" msgid="4960944133052287484">"आप इसे बाद में सेटिंग &gt; ऐप्स  में बदल सकते हैं"</string>
     <string name="sms_short_code_confirm_always_allow" msgid="3241181154869493368">"हमेशा अनुमति दें"</string>
@@ -1545,7 +1545,7 @@
     <string name="date_picker_increment_year_button" msgid="6318697384310808899">"वर्ष बढ़ाएं"</string>
     <string name="date_picker_decrement_year_button" msgid="4482021813491121717">"वर्ष कम करें"</string>
     <string name="keyboardview_keycode_alt" msgid="4856868820040051939">"Alt"</string>
-    <string name="keyboardview_keycode_cancel" msgid="1203984017245783244">"रहने दें"</string>
+    <string name="keyboardview_keycode_cancel" msgid="1203984017245783244">"अभी नहीं"</string>
     <string name="keyboardview_keycode_delete" msgid="3337914833206635744">"हटाएं"</string>
     <string name="keyboardview_keycode_done" msgid="1992571118466679775">"पूर्ण"</string>
     <string name="keyboardview_keycode_mode_change" msgid="4547387741906537519">"Mode change"</string>
@@ -1794,8 +1794,6 @@
     <string name="minute_picker_description" msgid="8606010966873791190">"मिनटों का चक्राकार स्लाइडर"</string>
     <string name="select_hours" msgid="6043079511766008245">"घंटे चुनें"</string>
     <string name="select_minutes" msgid="3974345615920336087">"मिनट चुनें"</string>
-    <string name="day_picker_description" msgid="8990847925961297968">"दिनों की माह ग्रिड"</string>
-    <string name="year_picker_description" msgid="5524331207436052403">"वर्ष की सूची"</string>
     <string name="select_day" msgid="7774759604701773332">"माह और दिन चुनें"</string>
     <string name="select_year" msgid="7952052866994196170">"वर्ष चुनें"</string>
     <string name="item_is_selected" msgid="949687401682476608">"<xliff:g id="ITEM">%1$s</xliff:g> चयनित"</string>

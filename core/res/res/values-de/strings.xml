@@ -203,7 +203,7 @@
     <string name="global_actions_airplane_mode_on_status" msgid="2719557982608919750">"Flugmodus ist AN."</string>
     <string name="global_actions_airplane_mode_off_status" msgid="5075070442854490296">"Flugmodus ist AUS."</string>
     <string name="global_action_settings" msgid="1756531602592545966">"Einstellungen"</string>
-    <string name="global_action_assist" msgid="3892832961594295030">"Geräteassistent"</string>
+    <string name="global_action_assist" msgid="3892832961594295030">"Assistent"</string>
     <string name="global_action_voice_assist" msgid="7751191495200504480">"Sprachassistent"</string>
     <string name="global_action_lockdown" msgid="8751542514724332873">"Jetzt sperren"</string>
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
@@ -1794,8 +1794,6 @@
     <string name="minute_picker_description" msgid="8606010966873791190">"Kreisförmiger Schieberegler für Minuten"</string>
     <string name="select_hours" msgid="6043079511766008245">"Stunden auswählen"</string>
     <string name="select_minutes" msgid="3974345615920336087">"Minuten auswählen"</string>
-    <string name="day_picker_description" msgid="8990847925961297968">"Monatsraster mit einzelnen Tagen"</string>
-    <string name="year_picker_description" msgid="5524331207436052403">"Jahresliste"</string>
     <string name="select_day" msgid="7774759604701773332">"Monat und Tag auswählen"</string>
     <string name="select_year" msgid="7952052866994196170">"Jahr auswählen"</string>
     <string name="item_is_selected" msgid="949687401682476608">"<xliff:g id="ITEM">%1$s</xliff:g> ausgewählt"</string>
