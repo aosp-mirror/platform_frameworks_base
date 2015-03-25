@@ -17,11 +17,11 @@
 package com.android.documentsui;
 
 import static com.android.documentsui.DocumentsActivity.TAG;
-import static com.android.documentsui.DocumentsActivity.State.MODE_UNKNOWN;
-import static com.android.documentsui.DocumentsActivity.State.SORT_ORDER_DISPLAY_NAME;
-import static com.android.documentsui.DocumentsActivity.State.SORT_ORDER_LAST_MODIFIED;
-import static com.android.documentsui.DocumentsActivity.State.SORT_ORDER_SIZE;
-import static com.android.documentsui.DocumentsActivity.State.SORT_ORDER_UNKNOWN;
+import static com.android.documentsui.BaseActivity.State.MODE_UNKNOWN;
+import static com.android.documentsui.BaseActivity.State.SORT_ORDER_DISPLAY_NAME;
+import static com.android.documentsui.BaseActivity.State.SORT_ORDER_LAST_MODIFIED;
+import static com.android.documentsui.BaseActivity.State.SORT_ORDER_SIZE;
+import static com.android.documentsui.BaseActivity.State.SORT_ORDER_UNKNOWN;
 import static com.android.documentsui.model.DocumentInfo.getCursorInt;
 
 import android.content.AsyncTaskLoader;
@@ -36,7 +36,7 @@ import android.provider.DocumentsContract;
 import android.provider.DocumentsContract.Document;
 import android.util.Log;
 
-import com.android.documentsui.DocumentsActivity.State;
+import com.android.documentsui.BaseActivity.State;
 import com.android.documentsui.RecentsProvider.StateColumns;
 import com.android.documentsui.model.DocumentInfo;
 import com.android.documentsui.model.RootInfo;

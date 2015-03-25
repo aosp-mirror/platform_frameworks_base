@@ -17,7 +17,7 @@
 package com.android.documentsui;
 
 import static com.android.documentsui.DocumentsActivity.TAG;
-import static com.android.documentsui.DocumentsActivity.State.SORT_ORDER_LAST_MODIFIED;
+import static com.android.documentsui.BaseActivity.State.SORT_ORDER_LAST_MODIFIED;
 
 import android.app.ActivityManager;
 import android.content.AsyncTaskLoader;
@@ -34,7 +34,7 @@ import android.provider.DocumentsContract.Root;
 import android.text.format.DateUtils;
 import android.util.Log;
 
-import com.android.documentsui.DocumentsActivity.State;
+import com.android.documentsui.BaseActivity.State;
 import com.android.documentsui.model.RootInfo;
 import com.google.android.collect.Maps;
 import com.google.common.collect.Lists;

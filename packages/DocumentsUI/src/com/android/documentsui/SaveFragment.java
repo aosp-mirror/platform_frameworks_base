@@ -113,7 +113,7 @@ public class SaveFragment extends Fragment {
     private View.OnClickListener mSaveListener = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
-            final DocumentsActivity activity = DocumentsActivity.get(SaveFragment.this);
+            final BaseActivity activity = BaseActivity.get(SaveFragment.this);
             if (mReplaceTarget != null) {
                 activity.onSaveRequested(mReplaceTarget);
             } else {

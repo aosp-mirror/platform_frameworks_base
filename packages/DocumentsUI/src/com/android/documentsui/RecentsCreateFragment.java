@@ -45,7 +45,7 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import com.android.documentsui.DocumentsActivity.State;
+import com.android.documentsui.BaseActivity.State;
 import com.android.documentsui.RecentsProvider.RecentColumns;
 import com.android.documentsui.model.DocumentStack;
 import com.android.documentsui.model.DurableUtils;
@@ -95,7 +95,7 @@ public class RecentsCreateFragment extends Fragment {
         mListView.setAdapter(mAdapter);
 
         final RootsCache roots = DocumentsApplication.getRootsCache(context);
-        final State state = ((DocumentsActivity) getActivity()).getDisplayState();
+        final State state = ((BaseActivity) getActivity()).getDisplayState();
 
         mCallbacks = new LoaderCallbacks<List<DocumentStack>>() {
             @Override
@@ -110,7 +110,7 @@ public class RecentsCreateFragment extends Fragment {
 
                 // When launched into empty recents, show drawer
                 if (mAdapter.isEmpty() && !state.stackTouched) {
-                    ((DocumentsActivity) context).setRootsDrawerOpen(true);
+                    ((BaseActivity) context).setRootsDrawerOpen(true);
                 }
             }
 
@@ -139,7 +139,7 @@ public class RecentsCreateFragment extends Fragment {
         @Override
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
             final DocumentStack stack = mAdapter.getItem(position);
-            ((DocumentsActivity) getActivity()).onStackPicked(stack);
+            ((BaseActivity) getActivity()).onStackPicked(stack);
         }
     };
 

@@ -36,7 +36,7 @@ import android.provider.DocumentsContract;
 import android.provider.DocumentsContract.Root;
 import android.util.Log;
 
-import com.android.documentsui.DocumentsActivity.State;
+import com.android.documentsui.BaseActivity.State;
 import com.android.documentsui.model.RootInfo;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
