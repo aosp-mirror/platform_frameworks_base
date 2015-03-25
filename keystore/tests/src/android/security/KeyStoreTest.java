@@ -25,6 +25,7 @@ import android.security.KeyStore;
 import android.security.keymaster.ExportResult;
 import android.security.keymaster.KeyCharacteristics;
 import android.security.keymaster.KeymasterArguments;
+import android.security.keymaster.KeymasterBlob;
 import android.security.keymaster.KeymasterDefs;
 import android.security.keymaster.OperationResult;
 import android.test.ActivityUnitTestCase;
@@ -712,8 +713,6 @@ public class KeyStoreTest extends ActivityUnitTestCase<Activity> {
         args.addInt(KeymasterDefs.KM_TAG_ALGORITHM, KeymasterDefs.KM_ALGORITHM_RSA);
         args.addInt(KeymasterDefs.KM_TAG_PADDING, KeymasterDefs.KM_PAD_NONE);
         args.addInt(KeymasterDefs.KM_TAG_KEY_SIZE, 2048);
-        args.addBlob(KeymasterDefs.KM_TAG_APPLICATION_ID, null);
-        args.addBlob(KeymasterDefs.KM_TAG_APPLICATION_DATA, null);
         args.addBlob(KeymasterDefs.KM_TAG_RSA_PUBLIC_EXPONENT,
                 RSAKeyGenParameterSpec.F4.toByteArray());
 
@@ -744,6 +743,7 @@ public class KeyStoreTest extends ActivityUnitTestCase<Activity> {
 
     public void testAppId() throws Exception {
         String name = "test";
+        byte[] id = new byte[] {0x01, 0x02, 0x03};
         KeymasterArguments args = new KeymasterArguments();
         args.addInt(KeymasterDefs.KM_TAG_PURPOSE, KeymasterDefs.KM_PURPOSE_ENCRYPT);
         args.addInt(KeymasterDefs.KM_TAG_PURPOSE, KeymasterDefs.KM_PURPOSE_DECRYPT);
@@ -751,8 +751,7 @@ public class KeyStoreTest extends ActivityUnitTestCase<Activity> {
         args.addInt(KeymasterDefs.KM_TAG_PADDING, KeymasterDefs.KM_PAD_NONE);
         args.addInt(KeymasterDefs.KM_TAG_KEY_SIZE, 2048);
         args.addInt(KeymasterDefs.KM_TAG_BLOCK_MODE, KeymasterDefs.KM_MODE_ECB);
-        args.addBlob(KeymasterDefs.KM_TAG_APPLICATION_ID, new byte[] {0x01, 0x02, 0x03});
-        args.addBlob(KeymasterDefs.KM_TAG_APPLICATION_DATA, null);
+        args.addBlob(KeymasterDefs.KM_TAG_APPLICATION_ID, id);
         args.addBlob(KeymasterDefs.KM_TAG_RSA_PUBLIC_EXPONENT,
                 RSAKeyGenParameterSpec.F4.toByteArray());
 
@@ -764,7 +763,7 @@ public class KeyStoreTest extends ActivityUnitTestCase<Activity> {
                 mKeyStore.getKeyCharacteristics(name, null, null, outCharacteristics));
         assertEquals("getKeyCharacteristics should succeed with application ID",
                 KeyStore.NO_ERROR,
-                mKeyStore.getKeyCharacteristics(name, new byte[] {0x01, 0x02, 0x03}, null,
+                mKeyStore.getKeyCharacteristics(name, new KeymasterBlob(id), null,
                     outCharacteristics));
     }
 
@@ -789,8 +788,6 @@ public class KeyStoreTest extends ActivityUnitTestCase<Activity> {
         args.addInt(KeymasterDefs.KM_TAG_BLOCK_MODE, KeymasterDefs.KM_MODE_OCB);
         args.addInt(KeymasterDefs.KM_TAG_CHUNK_LENGTH, 4096);
         args.addInt(KeymasterDefs.KM_TAG_MAC_LENGTH, 16);
-        args.addBlob(KeymasterDefs.KM_TAG_APPLICATION_ID, null);
-        args.addBlob(KeymasterDefs.KM_TAG_APPLICATION_DATA, null);
 
         KeyCharacteristics outCharacteristics = new KeyCharacteristics();
         int rc = mKeyStore.generateKey(name, args, 0, outCharacteristics);
@@ -798,8 +795,6 @@ public class KeyStoreTest extends ActivityUnitTestCase<Activity> {
 
         KeymasterArguments out = new KeymasterArguments();
         args = new KeymasterArguments();
-        args.addBlob(KeymasterDefs.KM_TAG_APPLICATION_ID, null);
-        args.addBlob(KeymasterDefs.KM_TAG_APPLICATION_DATA, null);
         OperationResult result = mKeyStore.begin(name, KeymasterDefs.KM_PURPOSE_ENCRYPT,
                 true, args, out);
         IBinder token = result.token;
@@ -888,8 +883,6 @@ public class KeyStoreTest extends ActivityUnitTestCase<Activity> {
         args.addInt(KeymasterDefs.KM_TAG_BLOCK_MODE, KeymasterDefs.KM_MODE_OCB);
         args.addInt(KeymasterDefs.KM_TAG_CHUNK_LENGTH, 4096);
         args.addInt(KeymasterDefs.KM_TAG_MAC_LENGTH, 16);
-        args.addBlob(KeymasterDefs.KM_TAG_APPLICATION_ID, null);
-        args.addBlob(KeymasterDefs.KM_TAG_APPLICATION_DATA, null);
 
         KeyCharacteristics outCharacteristics = new KeyCharacteristics();
         int rc = mKeyStore.generateKey(name, args, 0, outCharacteristics);
@@ -897,8 +890,6 @@ public class KeyStoreTest extends ActivityUnitTestCase<Activity> {
 
         KeymasterArguments out = new KeymasterArguments();
         args = new KeymasterArguments();
-        args.addBlob(KeymasterDefs.KM_TAG_APPLICATION_ID, null);
-        args.addBlob(KeymasterDefs.KM_TAG_APPLICATION_DATA, null);
         OperationResult result = mKeyStore.begin(name, KeymasterDefs.KM_PURPOSE_ENCRYPT,
                 true, args, out);
         assertEquals("Begin should succeed", KeyStore.NO_ERROR, result.resultCode);
