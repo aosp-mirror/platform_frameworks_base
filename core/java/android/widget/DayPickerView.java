@@ -88,7 +88,8 @@ class DayPickerView extends ViewPager {
         a.recycle();
 
         // Set up adapter.
-        mAdapter = new DayPickerAdapter(context);
+        mAdapter = new DayPickerAdapter(context,
+                R.layout.date_picker_month_item_material, R.id.month_view);
         mAdapter.setMonthTextAppearance(monthTextAppearanceResId);
         mAdapter.setDayOfWeekTextAppearance(dayOfWeekTextAppearanceResId);
         mAdapter.setDayTextAppearance(dayTextAppearanceResId);
@@ -127,6 +128,14 @@ class DayPickerView extends ViewPager {
                 if (mOnDaySelectedListener != null) {
                     mOnDaySelectedListener.onDaySelected(DayPickerView.this, day);
                 }
+            }
+
+            @Override
+            public void onNavigationClick(DayPickerAdapter view, int direction, boolean animate) {
+                // ViewPager clamps input values, so we don't need to worry
+                // about passing invalid indices.
+                final int nextItem = getCurrentItem() + direction;
+                setCurrentItem(nextItem, animate);
             }
         });
     }

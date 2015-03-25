@@ -389,32 +389,14 @@ please see styles_device_defaults.xml.
         <item name="textColor">@color/primary_text_secondary_when_activated_material_inverse</item>
     </style>
 
-    <style name="TextAppearance.Material.DatePicker.DayOfWeekLabel" parent="TextAppearance.Material">
-        <item name="includeFontPadding">false</item>
-        <item name="textColor">?attr/textColorPrimaryInverse</item>
-        <item name="textSize">@dimen/datepicker_header_text_size</item>
-    </style>
-
-    <style name="TextAppearance.Material.DatePicker.MonthLabel" parent="TextAppearance.Material">
-        <item name="includeFontPadding">false</item>
-        <item name="textColor">@color/date_picker_header_text_material</item>
-        <item name="textSize">@dimen/datepicker_selected_date_month_size</item>
-    </style>
-
-    <style name="TextAppearance.Material.DatePicker.DayOfMonthLabel" parent="TextAppearance.Material">
-        <item name="includeFontPadding">false</item>
-        <item name="textColor">@color/date_picker_header_text_material</item>
-        <item name="textSize">@dimen/datepicker_selected_date_day_size</item>
-    </style>
-
     <style name="TextAppearance.Material.DatePicker.YearLabel" parent="TextAppearance.Material">
-        <item name="textColor">@color/date_picker_header_text_material</item>
+        <item name="textColor">@color/primary_text_secondary_when_activated_material_inverse</item>
         <item name="textSize">@dimen/date_picker_year_label_size</item>
         <item name="fontFamily">sans-serif-medium</item>
     </style>
 
     <style name="TextAppearance.Material.DatePicker.DateLabel" parent="TextAppearance.Material">
-        <item name="textColor">@color/date_picker_header_text_material</item>
+        <item name="textColor">@color/primary_text_secondary_when_activated_material_inverse</item>
         <item name="textSize">@dimen/date_picker_date_label_size</item>
         <item name="fontFamily">sans-serif-medium</item>
     </style>
@@ -675,8 +657,7 @@ please see styles_device_defaults.xml.
         <item name="calendarViewShown">true</item>
         <!-- Attributes for new-style DatePicker. -->
         <item name="internalLayout">@layout/date_picker_material</item>
-        <item name="yearListItemTextAppearance">@style/TextAppearance.Material.DatePicker.List.YearLabel</item>
-        <item name="yearListItemActivatedTextAppearance">@style/TextAppearance.Material.DatePicker.List.YearLabel.Activated</item>
+        <item name="headerTextColor">@color/primary_text_secondary_when_activated_material</item>
         <item name="headerBackground">#ff555555</item>
     </style>
 
@@ -1038,6 +1019,7 @@ please see styles_device_defaults.xml.
     </style>
 
     <style name="Widget.Material.Light.DatePicker" parent="Widget.Material.DatePicker">
+        <item name="headerTextColor">@color/primary_text_secondary_when_activated_material_inverse</item>
         <item name="headerBackground">?attr/colorAccent</item>
     </style>
 

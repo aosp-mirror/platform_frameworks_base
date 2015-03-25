@@ -15,23 +15,10 @@
      limitations under the License.
 -->
 
-<ViewAnimator xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/animator"
+<android.widget.SimpleMonthView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/month_view"
     android:layout_width="match_parent"
-    android:layout_height="0dp"
-    android:layout_weight="1"
-    android:gravity="center">
-
-    <android.widget.DayPickerView
-        android:id="@+id/date_picker_day_picker"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:inAnimation="@anim/fade_in"
-        android:outAnimation="@anim/fade_out" />
-
-    <android.widget.YearPickerView
-        android:id="@+id/date_picker_year_picker"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent" />
-
-</ViewAnimator>
+    android:layout_height="wrap_content"
+    android:paddingStart="@dimen/day_picker_padding_horizontal"
+    android:paddingEnd="@dimen/day_picker_padding_horizontal"
+    android:paddingTop="@dimen/day_picker_padding_top" />

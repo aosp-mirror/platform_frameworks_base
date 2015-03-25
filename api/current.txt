@@ -657,7 +657,7 @@ package android {
     field public static final int headerDividersEnabled = 16843310; // 0x101022e
     field public static final deprecated int headerMonthTextAppearance = 16843926; // 0x1010496
     field public static final deprecated int headerTimeTextAppearance = 16843935; // 0x101049f
-    field public static final int headerYearTextAppearance = 16843928; // 0x1010498
+    field public static final deprecated int headerYearTextAppearance = 16843928; // 0x1010498
     field public static final int height = 16843093; // 0x1010155
     field public static final int hideOnContentScroll = 16843843; // 0x1010443
     field public static final int hint = 16843088; // 0x1010150
@@ -1456,7 +1456,7 @@ package android {
     field public static final int x = 16842924; // 0x10100ac
     field public static final int xlargeScreens = 16843455; // 0x10102bf
     field public static final int y = 16842925; // 0x10100ad
-    field public static final int yearListItemTextAppearance = 16843929; // 0x1010499
+    field public static final deprecated int yearListItemTextAppearance = 16843929; // 0x1010499
     field public static final deprecated int yearListSelectorColor = 16843930; // 0x101049a
     field public static final int yesNoPreferenceStyle = 16842896; // 0x1010090
     field public static final int zAdjustment = 16843201; // 0x10101c1

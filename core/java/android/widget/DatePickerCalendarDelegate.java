@@ -49,7 +49,6 @@ import java.util.Locale;
  * A delegate for picking up a date (day / month / year).
  */
 class DatePickerCalendarDelegate extends DatePicker.AbstractDatePickerDelegate {
-
     private static final int USE_LOCALE = 0;
 
     private static final int UNINITIALIZED = -1;
@@ -61,9 +60,9 @@ class DatePickerCalendarDelegate extends DatePicker.AbstractDatePickerDelegate {
 
     private static final int ANIMATION_DURATION = 300;
 
-    public static final int[] ATTRS_TEXT_COLOR = new int[]{com.android.internal.R.attr.textColor};
-
-    public static final int[] ATTRS_DISABLED_ALPHA = new int[]{
+    private static final int[] ATTRS_TEXT_COLOR = new int[] {
+            com.android.internal.R.attr.textColor};
+    private static final int[] ATTRS_DISABLED_ALPHA = new int[] {
             com.android.internal.R.attr.disabledAlpha};
 
     private SimpleDateFormat mYearFormat;
@@ -157,6 +156,8 @@ class DatePickerCalendarDelegate extends DatePicker.AbstractDatePickerDelegate {
             header.setBackground(a.getDrawable(R.styleable.DatePicker_headerBackground));
         }
 
+        a.recycle();
+
         // Set up picker container.
         mAnimator = (ViewAnimator) mContainer.findViewById(R.id.animator);
 
@@ -174,31 +175,9 @@ class DatePickerCalendarDelegate extends DatePicker.AbstractDatePickerDelegate {
         mYearPickerView.setDate(mCurrentDate.getTimeInMillis());
         mYearPickerView.setOnYearSelectedListener(mOnYearSelectedListener);
 
-        final int yearTextAppearanceResId = a.getResourceId(
-                R.styleable.DatePicker_yearListItemTextAppearance, 0);
-        if (yearTextAppearanceResId != 0) {
-            mYearPickerView.setYearTextAppearance(yearTextAppearanceResId);
-        }
-
-        final int yearActivatedTextAppearanceResId = a.getResourceId(
-                R.styleable.DatePicker_yearListItemActivatedTextAppearance, 0);
-        if (yearActivatedTextAppearanceResId != 0) {
-            mYearPickerView.setYearActivatedTextAppearance(yearActivatedTextAppearanceResId);
-        }
-
-        a.recycle();
-
         // Set up content descriptions.
         mSelectDay = res.getString(R.string.select_day);
         mSelectYear = res.getString(R.string.select_year);
-
-        final Animation inAnim = new AlphaAnimation(0, 1);
-        inAnim.setDuration(ANIMATION_DURATION);
-        mAnimator.setInAnimation(inAnim);
-
-        final Animation outAnim = new AlphaAnimation(1, 0);
-        outAnim.setDuration(ANIMATION_DURATION);
-        mAnimator.setOutAnimation(outAnim);
 
         // Initialize for current locale. This also initializes the date, so no
         // need to call onDateChanged.

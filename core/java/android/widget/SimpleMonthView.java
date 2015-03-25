@@ -26,6 +26,7 @@ import android.graphics.Paint.Align;
 import android.graphics.Paint.Style;
 import android.graphics.Rect;
 import android.graphics.Typeface;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.text.TextPaint;
 import android.text.format.DateFormat;
@@ -59,6 +60,12 @@ class SimpleMonthView extends View {
     private static final String DEFAULT_TITLE_FORMAT = "MMMMy";
     private static final String DAY_OF_WEEK_FORMAT = "EEEEE";
 
+    /** Virtual view ID for previous button. */
+    private static final int ITEM_ID_PREV = 0x101;
+
+    /** Virtual view ID for next button. */
+    private static final int ITEM_ID_NEXT = 0x100;
+
     private final TextPaint mMonthPaint = new TextPaint();
     private final TextPaint mDayOfWeekPaint = new TextPaint();
     private final TextPaint mDayPaint = new TextPaint();
@@ -66,12 +73,26 @@ class SimpleMonthView extends View {
     private final Paint mDayHighlightPaint = new Paint();
 
     private final Calendar mCalendar = Calendar.getInstance();
-    private final Calendar mDayLabelCalendar = Calendar.getInstance();
+    private final Calendar mDayOfWeekLabelCalendar = Calendar.getInstance();
 
     private final MonthViewTouchHelper mTouchHelper;
 
     private final SimpleDateFormat mTitleFormatter;
     private final SimpleDateFormat mDayOfWeekFormatter;
+
+    private final int mMonthHeight;
+    private final int mDayOfWeekHeight;
+    private final int mDayHeight;
+    private final int mCellWidth;
+    private final int mDaySelectorRadius;
+
+    // Next/previous drawables.
+    private final Drawable mPrevDrawable;
+    private final Drawable mNextDrawable;
+    private final Rect mPrevHitArea;
+    private final Rect mNextHitArea;
+    private final CharSequence mPrevContentDesc;
+    private final CharSequence mNextContentDesc;
 
     private CharSequence mTitle;
 
@@ -80,12 +101,6 @@ class SimpleMonthView extends View {
 
     private int mPaddedWidth;
     private int mPaddedHeight;
-
-    private final int mMonthHeight;
-    private final int mDayOfWeekHeight;
-    private final int mDayHeight;
-    private final int mCellWidth;
-    private final int mDaySelectorRadius;
 
     /** The day of month for the selected day, or -1 if no day is selected. */
     private int mActivatedDay = -1;
@@ -122,7 +137,10 @@ class SimpleMonthView extends View {
 
     private ColorStateList mDayTextColor;
 
-    private int mTouchedDay = -1;
+    private int mTouchedItem = -1;
+
+    private boolean mPrevEnabled;
+    private boolean mNextEnabled;
 
     public SimpleMonthView(Context context) {
         this(context, null);
@@ -146,6 +164,13 @@ class SimpleMonthView extends View {
         mCellWidth = res.getDimensionPixelSize(R.dimen.date_picker_day_width);
         mDaySelectorRadius = res.getDimensionPixelSize(R.dimen.date_picker_day_selector_radius);
 
+        mPrevDrawable = context.getDrawable(R.drawable.ic_chevron_left);
+        mNextDrawable = context.getDrawable(R.drawable.ic_chevron_right);
+        mPrevHitArea = mPrevDrawable != null ? new Rect() : null;
+        mNextHitArea = mNextDrawable != null ? new Rect() : null;
+        mPrevContentDesc = res.getText(R.string.date_picker_prev_month_button);
+        mNextContentDesc = res.getText(R.string.date_picker_next_month_button);
+
         // Set up accessibility components.
         mTouchHelper = new MonthViewTouchHelper(this);
         setAccessibilityDelegate(mTouchHelper);
@@ -158,6 +183,18 @@ class SimpleMonthView extends View {
 
         setClickable(true);
         initPaints(res);
+    }
+
+    public void setNextEnabled(boolean enabled) {
+        mNextEnabled = enabled;
+        mTouchHelper.invalidateRoot();
+        invalidate();
+    }
+
+    public void setPrevEnabled(boolean enabled) {
+        mPrevEnabled = enabled;
+        mTouchHelper.invalidateRoot();
+        invalidate();
     }
 
     /**
@@ -192,7 +229,16 @@ class SimpleMonthView extends View {
     }
 
     public void setMonthTextAppearance(int resId) {
-        applyTextAppearance(mMonthPaint, resId);
+        final ColorStateList monthColor = applyTextAppearance(mMonthPaint, resId);
+        if (monthColor != null) {
+            if (mPrevDrawable != null) {
+                mPrevDrawable.setTintList(monthColor);
+            }
+            if (mNextDrawable != null) {
+                mNextDrawable.setTintList(monthColor);
+            }
+        }
+
         invalidate();
     }
 
@@ -300,23 +346,26 @@ class SimpleMonthView extends View {
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
+        final int x = (int) (event.getX() + 0.5f);
+        final int y = (int) (event.getY() + 0.5f);
+
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
             case MotionEvent.ACTION_MOVE:
-                final int touchedDay = getDayAtLocation(event.getX(), event.getY());
-                if (mTouchedDay != touchedDay) {
-                    mTouchedDay = touchedDay;
+                final int touchedItem = getItemAtLocation(x, y);
+                if (mTouchedItem != touchedItem) {
+                    mTouchedItem = touchedItem;
                     invalidate();
                 }
                 break;
 
             case MotionEvent.ACTION_UP:
-                final int clickedDay = getDayAtLocation(event.getX(), event.getY());
-                onDayClicked(clickedDay);
+                final int clickedItem = getItemAtLocation(x, y);
+                onItemClicked(clickedItem, true);
                 // Fall through.
             case MotionEvent.ACTION_CANCEL:
                 // Reset touched day on stream end.
-                mTouchedDay = -1;
+                mTouchedItem = -1;
                 invalidate();
                 break;
         }
@@ -332,6 +381,7 @@ class SimpleMonthView extends View {
         drawMonth(canvas);
         drawDaysOfWeek(canvas);
         drawDays(canvas);
+        drawButtons(canvas);
 
         canvas.translate(-paddingLeft, -paddingTop);
     }
@@ -347,34 +397,43 @@ class SimpleMonthView extends View {
     }
 
     private void drawDaysOfWeek(Canvas canvas) {
-        final float cellWidthHalf = mPaddedWidth / (DAYS_IN_WEEK * 2);
+        final TextPaint p = mDayOfWeekPaint;
+        final int headerHeight = mMonthHeight;
+        final int rowHeight = mDayOfWeekHeight;
+        final int colWidth = mPaddedWidth / DAYS_IN_WEEK;
 
-        // Vertically centered within the cell height.
-        final float lineHeight = mDayOfWeekPaint.ascent() + mDayOfWeekPaint.descent();
-        final float y = mMonthHeight + (mDayOfWeekHeight - lineHeight) / 2f;
+        // Text is vertically centered within the day of week height.
+        final float halfLineHeight = (p.ascent() + p.descent()) / 2f;
+        final int rowCenter = headerHeight + rowHeight / 2;
 
-        for (int i = 0; i < DAYS_IN_WEEK; i++) {
-            final int calendarDay = (i + mWeekStart) % DAYS_IN_WEEK;
-            mDayLabelCalendar.set(Calendar.DAY_OF_WEEK, calendarDay);
-
-            final String dayLabel = mDayOfWeekFormatter.format(mDayLabelCalendar.getTime());
-            final float x = (2 * i + 1) * cellWidthHalf;
-            canvas.drawText(dayLabel, x, y, mDayOfWeekPaint);
+        for (int col = 0; col < DAYS_IN_WEEK; col++) {
+            final int colCenter = colWidth * col + colWidth / 2;
+            final int dayOfWeek = (col + mWeekStart) % DAYS_IN_WEEK;
+            final String label = getDayOfWeekLabel(dayOfWeek);
+            canvas.drawText(label, colCenter, rowCenter - halfLineHeight, p);
         }
+    }
+
+    private String getDayOfWeekLabel(int dayOfWeek) {
+        mDayOfWeekLabelCalendar.set(Calendar.DAY_OF_WEEK, dayOfWeek);
+        return mDayOfWeekFormatter.format(mDayOfWeekLabelCalendar.getTime());
     }
 
     /**
      * Draws the month days.
      */
     private void drawDays(Canvas canvas) {
-        final int cellWidthHalf = mPaddedWidth / (DAYS_IN_WEEK * 2);
+        final TextPaint p = mDayPaint;
+        final int headerHeight = mMonthHeight + mDayOfWeekHeight;
+        final int rowHeight = mDayHeight;
+        final int colWidth = mPaddedWidth / DAYS_IN_WEEK;
 
-        // Vertically centered within the cell height.
-        final float halfLineHeight = (mDayPaint.ascent() + mDayPaint.descent()) / 2;
-        float centerY = mMonthHeight + mDayOfWeekHeight + mDayHeight / 2f;
+        // Text is vertically centered within the row height.
+        final float halfLineHeight = (p.ascent() + p.descent()) / 2f;
+        int rowCenter = headerHeight + rowHeight / 2;
 
-        for (int day = 1, j = findDayOffset(); day <= mDaysInMonth; day++) {
-            final int x = (2 * j + 1) * cellWidthHalf;
+        for (int day = 1, col = findDayOffset(); day <= mDaysInMonth; day++) {
+            final int colCenter = colWidth * col + colWidth / 2;
             int stateMask = 0;
 
             if (day >= mEnabledDayStart && day <= mEnabledDayEnd) {
@@ -386,12 +445,12 @@ class SimpleMonthView extends View {
                 stateMask |= StateSet.VIEW_STATE_ACTIVATED;
 
                 // Adjust the circle to be centered on the row.
-                canvas.drawCircle(x, centerY, mDaySelectorRadius, mDaySelectorPaint);
-            } else if (mTouchedDay == day) {
+                canvas.drawCircle(colCenter, rowCenter, mDaySelectorRadius, mDaySelectorPaint);
+            } else if (mTouchedItem == day) {
                 stateMask |= StateSet.VIEW_STATE_PRESSED;
 
                 // Adjust the circle to be centered on the row.
-                canvas.drawCircle(x, centerY, mDaySelectorRadius, mDayHighlightPaint);
+                canvas.drawCircle(colCenter, rowCenter, mDaySelectorRadius, mDayHighlightPaint);
             }
 
             final boolean isDayToday = mToday == day;
@@ -402,16 +461,26 @@ class SimpleMonthView extends View {
                 final int[] stateSet = StateSet.get(stateMask);
                 dayTextColor = mDayTextColor.getColorForState(stateSet, 0);
             }
-            mDayPaint.setColor(dayTextColor);
+            p.setColor(dayTextColor);
 
-            canvas.drawText("" + day, x, centerY - halfLineHeight, mDayPaint);
+            canvas.drawText(Integer.toString(day), colCenter, rowCenter - halfLineHeight, p);
 
-            j++;
+            col++;
 
-            if (j == DAYS_IN_WEEK) {
-                j = 0;
-                centerY += mDayHeight;
+            if (col == DAYS_IN_WEEK) {
+                col = 0;
+                rowCenter += rowHeight;
             }
+        }
+    }
+
+    private void drawButtons(Canvas canvas) {
+        if (mPrevEnabled && mPrevDrawable != null) {
+            mPrevDrawable.draw(canvas);
+        }
+
+        if (mNextEnabled && mNextDrawable != null) {
+            mNextDrawable.draw(canvas);
         }
     }
 
@@ -569,8 +638,42 @@ class SimpleMonthView extends View {
 
     @Override
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
-        mPaddedWidth = w - getPaddingLeft() - getPaddingRight();
-        mPaddedHeight = w - getPaddingTop() - getPaddingBottom();
+        final int paddedLeft = getPaddingLeft();
+        final int paddedTop = getPaddingTop();
+        final int paddedRight = w - getPaddingRight();
+        final int paddedBottom = h - getPaddingBottom();
+        mPaddedWidth = paddedRight - paddedLeft;
+        mPaddedHeight = paddedBottom - paddedTop;
+
+        final int monthHeight = mMonthHeight;
+        final int cellWidth = mPaddedWidth / DAYS_IN_WEEK;
+
+        // Vertically center the previous/next drawables within the month
+        // header, horizontally center within the day cell, then expand the
+        // hit area to ensure it's at least 48x48dp.
+        final Drawable prevDrawable = mPrevDrawable;
+        if (prevDrawable != null) {
+            final int dW = prevDrawable.getIntrinsicWidth();
+            final int dH = prevDrawable.getIntrinsicHeight();
+            final int iconTop = (monthHeight - dH) / 2;
+            final int iconLeft = (cellWidth - dW) / 2;
+
+            // Button bounds don't include padding, but hit area does.
+            prevDrawable.setBounds(iconLeft, iconTop, iconLeft + dW, iconTop + dH);
+            mPrevHitArea.set(0, 0, paddedLeft + cellWidth, paddedTop + monthHeight);
+        }
+
+        final Drawable nextDrawable = mNextDrawable;
+        if (nextDrawable != null) {
+            final int dW = nextDrawable.getIntrinsicWidth();
+            final int dH = nextDrawable.getIntrinsicHeight();
+            final int iconTop = (monthHeight - dH) / 2;
+            final int iconRight = mPaddedWidth - (cellWidth - dW) / 2;
+
+            // Button bounds don't include padding, but hit area does.
+            nextDrawable.setBounds(iconRight - dW, iconTop, iconRight, iconTop + dH);
+            mNextHitArea.set(paddedRight - cellWidth, 0, w, paddedTop + monthHeight);
+        }
 
         // Invalidate cached accessibility information.
         mTouchHelper.invalidateRoot();
@@ -585,22 +688,29 @@ class SimpleMonthView extends View {
     }
 
     /**
-     * Calculates the day of the month at the specified touch position. Returns
-     * the day of the month or -1 if the position wasn't in a valid day.
+     * Calculates the day of the month or item identifier at the specified
+     * touch position. Returns the day of the month or -1 if the position
+     * wasn't in a valid day.
      *
      * @param x the x position of the touch event
      * @param y the y position of the touch event
-     * @return the day of the month at (x, y) or -1 if the position wasn't in a
-     *         valid day
+     * @return the day of the month at (x, y), an item identifier, or -1 if the
+     *         position wasn't in a valid day or item
      */
-    private int getDayAtLocation(float x, float y) {
-        final int paddedX = (int) (x - getPaddingLeft() + 0.5f);
+    private int getItemAtLocation(int x, int y) {
+        if (mNextEnabled && mNextDrawable != null && mNextHitArea.contains(x, y)) {
+            return ITEM_ID_NEXT;
+        } else if (mPrevEnabled && mPrevDrawable != null && mPrevHitArea.contains(x, y)) {
+            return ITEM_ID_PREV;
+        }
+
+        final int paddedX = x - getPaddingLeft();
         if (paddedX < 0 || paddedX >= mPaddedWidth) {
             return -1;
         }
 
         final int headerHeight = mMonthHeight + mDayOfWeekHeight;
-        final int paddedY = (int) (y - getPaddingTop() + 0.5f);
+        final int paddedY = y - getPaddingTop();
         if (paddedY < headerHeight || paddedY >= mPaddedHeight) {
             return -1;
         }
@@ -619,30 +729,50 @@ class SimpleMonthView extends View {
     /**
      * Calculates the bounds of the specified day.
      *
-     * @param day the day of the month
+     * @param id the day of the month, or an item identifier
      * @param outBounds the rect to populate with bounds
      */
-    private boolean getBoundsForDay(int day, Rect outBounds) {
-        if (day < 1 || day > mDaysInMonth) {
+    private boolean getBoundsForItem(int id, Rect outBounds) {
+        if (mNextEnabled && id == ITEM_ID_NEXT) {
+            if (mNextDrawable != null) {
+                outBounds.set(mNextHitArea);
+                return true;
+            }
+        } else if (mPrevEnabled && id == ITEM_ID_PREV) {
+            if (mPrevDrawable != null) {
+                outBounds.set(mPrevHitArea);
+                return true;
+            }
+        }
+
+        if (id < 1 || id > mDaysInMonth) {
             return false;
         }
 
-        final int index = day - 1 + findDayOffset();
-        final int row = index / DAYS_IN_WEEK;
+        final int index = id - 1 + findDayOffset();
+
+        // Compute left edge.
         final int col = index % DAYS_IN_WEEK;
+        final int colWidth = mPaddedWidth / DAYS_IN_WEEK;
+        final int left = getPaddingLeft() + col * colWidth;
 
+        // Compute top edge.
+        final int row = index / DAYS_IN_WEEK;
+        final int rowHeight = mDayHeight;
         final int headerHeight = mMonthHeight + mDayOfWeekHeight;
-        final int paddedY = row * mDayHeight + headerHeight;
-        final int paddedX = col * mPaddedWidth;
+        final int top = getPaddingTop() + headerHeight + row * rowHeight;
 
-        final int y = paddedY + getPaddingTop();
-        final int x = paddedX + getPaddingLeft();
-
-        final int cellHeight = mDayHeight;
-        final int cellWidth = mPaddedWidth / DAYS_IN_WEEK;
-        outBounds.set(x, y, (x + cellWidth), (y + cellHeight));
-
+        outBounds.set(left, top, left + colWidth, top + rowHeight);
         return true;
+    }
+
+    /**
+     * Called when an item is clicked.
+     *
+     * @param id the day number or item identifier
+     */
+    private boolean onItemClicked(int id, boolean animate) {
+        return onNavigationClicked(id, animate) || onDayClicked(id);
     }
 
     /**
@@ -651,15 +781,45 @@ class SimpleMonthView extends View {
      *
      * @param day the day that was clicked
      */
-    private void onDayClicked(int day) {
+    private boolean onDayClicked(int day) {
+        if (day < 0 || day > mDaysInMonth) {
+            return false;
+        }
+
         if (mOnDayClickListener != null) {
-            Calendar date = Calendar.getInstance();
+            final Calendar date = Calendar.getInstance();
             date.set(mYear, mMonth, day);
             mOnDayClickListener.onDayClick(this, date);
         }
 
         // This is a no-op if accessibility is turned off.
         mTouchHelper.sendEventForVirtualView(day, AccessibilityEvent.TYPE_VIEW_CLICKED);
+        return true;
+    }
+
+    /**
+     * Called when the user clicks on a navigation button. Handles callbacks to
+     * the {@link OnDayClickListener} if one is set.
+     *
+     * @param id the item identifier
+     */
+    private boolean onNavigationClicked(int id, boolean animate) {
+        final int direction;
+        if (id == ITEM_ID_NEXT) {
+            direction = 1;
+        } else if (id == ITEM_ID_PREV) {
+            direction = -1;
+        } else {
+            return false;
+        }
+
+        if (mOnDayClickListener != null) {
+            mOnDayClickListener.onNavigationClick(this, direction, animate);
+        }
+
+        // This is a no-op if accessibility is turned off.
+        mTouchHelper.sendEventForVirtualView(id, AccessibilityEvent.TYPE_VIEW_CLICKED);
+        return true;
     }
 
     /**
@@ -678,7 +838,7 @@ class SimpleMonthView extends View {
 
         @Override
         protected int getVirtualViewAt(float x, float y) {
-            final int day = getDayAtLocation(x, y);
+            final int day = getItemAtLocation((int) (x + 0.5f), (int) (y + 0.5f));
             if (day >= 0) {
                 return day;
             }
@@ -687,6 +847,14 @@ class SimpleMonthView extends View {
 
         @Override
         protected void getVisibleVirtualViews(IntArray virtualViewIds) {
+            if (mNextEnabled && mNextDrawable != null) {
+                virtualViewIds.add(ITEM_ID_PREV);
+            }
+
+            if (mPrevEnabled && mPrevDrawable != null) {
+                virtualViewIds.add(ITEM_ID_NEXT);
+            }
+
             for (int day = 1; day <= mDaysInMonth; day++) {
                 virtualViewIds.add(day);
             }
@@ -699,7 +867,7 @@ class SimpleMonthView extends View {
 
         @Override
         protected void onPopulateNodeForVirtualView(int virtualViewId, AccessibilityNodeInfo node) {
-            final boolean hasBounds = getBoundsForDay(virtualViewId, mTempRect);
+            final boolean hasBounds = getBoundsForItem(virtualViewId, mTempRect);
 
             if (!hasBounds) {
                 // The day is invalid, kill the node.
@@ -710,12 +878,14 @@ class SimpleMonthView extends View {
                 return;
             }
 
+            node.setText(getItemText(virtualViewId));
             node.setContentDescription(getItemDescription(virtualViewId));
             node.setBoundsInParent(mTempRect);
             node.addAction(AccessibilityAction.ACTION_CLICK);
 
             if (virtualViewId == mActivatedDay) {
-                node.setSelected(true);
+                // TODO: This should use activated once that's supported.
+                node.setChecked(true);
             }
 
         }
@@ -725,31 +895,45 @@ class SimpleMonthView extends View {
                 Bundle arguments) {
             switch (action) {
                 case AccessibilityNodeInfo.ACTION_CLICK:
-                    onDayClicked(virtualViewId);
-                    return true;
+                    return onItemClicked(virtualViewId, false);
             }
 
             return false;
         }
 
         /**
-         * Generates a description for a given time object. Since this
-         * description will be spoken, the components are ordered by descending
-         * specificity as DAY MONTH YEAR.
+         * Generates a description for a given virtual view.
          *
-         * @param day The day to generate a description for
-         * @return A description of the time object
+         * @param id the day or item identifier to generate a description for
+         * @return a description of the virtual view
          */
-        private CharSequence getItemDescription(int day) {
-            mTempCalendar.set(mYear, mMonth, day);
-            final CharSequence date = DateFormat.format(DATE_FORMAT,
-                    mTempCalendar.getTimeInMillis());
-
-            if (day == mActivatedDay) {
-                return getContext().getString(R.string.item_is_selected, date);
+        private CharSequence getItemDescription(int id) {
+            if (id == ITEM_ID_NEXT) {
+                return mNextContentDesc;
+            } else if (id == ITEM_ID_PREV) {
+                return mPrevContentDesc;
+            } else if (id >= 1 && id <= mDaysInMonth) {
+                mTempCalendar.set(mYear, mMonth, id);
+                return DateFormat.format(DATE_FORMAT, mTempCalendar.getTimeInMillis());
             }
 
-            return date;
+            return "";
+        }
+
+        /**
+         * Generates displayed text for a given virtual view.
+         *
+         * @param id the day or item identifier to generate text for
+         * @return the visible text of the virtual view
+         */
+        private CharSequence getItemText(int id) {
+            if (id == ITEM_ID_NEXT || id == ITEM_ID_PREV) {
+                return null;
+            } else if (id >= 1 && id <= mDaysInMonth) {
+                return Integer.toString(id);
+            }
+
+            return null;
         }
     }
 
@@ -758,5 +942,6 @@ class SimpleMonthView extends View {
      */
     public interface OnDayClickListener {
         public void onDayClick(SimpleMonthView view, Calendar day);
+        public void onNavigationClick(SimpleMonthView view, int direction, boolean animate);
     }
 }

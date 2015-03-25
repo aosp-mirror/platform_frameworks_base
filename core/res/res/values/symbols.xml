@@ -2040,7 +2040,6 @@
   <java-symbol type="integer" name="config_downtime_condition_lookahead_threshold_hrs" />
   <java-symbol type="string" name="muted_by" />
 
-  <java-symbol type="string" name="item_is_selected" />
   <java-symbol type="string" name="select_day" />
   <java-symbol type="string" name="select_year" />
 
@@ -2190,6 +2189,8 @@
   <java-symbol type="style" name="TextAppearance.Material.Widget.Calendar.Month" />
   <java-symbol type="style" name="TextAppearance.Material.Widget.Calendar.DayOfWeek" />
   <java-symbol type="style" name="TextAppearance.Material.Widget.Calendar.Day" />
+  <java-symbol type="style" name="TextAppearance.Material.DatePicker.List.YearLabel" />
+  <java-symbol type="style" name="TextAppearance.Material.DatePicker.List.YearLabel.Activated" />
   <java-symbol type="dimen" name="day_picker_padding_top"/>
   <java-symbol type="dimen" name="date_picker_day_of_week_height"/>
 
@@ -2205,4 +2206,11 @@
   <java-symbol type="dimen" name="floating_toolbar_menu_button_minimum_width" />
   <java-symbol type="dimen" name="floating_toolbar_default_width" />
   <java-symbol type="dimen" name="floating_toolbar_minimum_overflow_height" />
+
+  <java-symbol type="drawable" name="ic_chevron_left" />
+  <java-symbol type="drawable" name="ic_chevron_right" />
+  <java-symbol type="string" name="date_picker_prev_month_button" />
+  <java-symbol type="string" name="date_picker_next_month_button" />
+  <java-symbol type="layout" name="date_picker_month_item_material" />
+  <java-symbol type="id" name="month_view" />
 </resources>

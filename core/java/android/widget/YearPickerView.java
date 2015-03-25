@@ -111,25 +111,18 @@ class YearPickerView extends ListView {
         mAdapter.setRange(min, max);
     }
 
-    public void setYearTextAppearance(int resId) {
-        mAdapter.setItemTextAppearance(resId);
-    }
-
-    public void setYearActivatedTextAppearance(int resId) {
-        mAdapter.setItemActivatedTextAppearance(resId);
-    }
-
     private static class YearAdapter extends BaseAdapter {
         private static final int ITEM_LAYOUT = R.layout.year_label_text_view;
+        private static final int ITEM_TEXT_APPEARANCE =
+                R.style.TextAppearance_Material_DatePicker_List_YearLabel;
+        private static final int ITEM_TEXT_ACTIVATED_APPEARANCE =
+                R.style.TextAppearance_Material_DatePicker_List_YearLabel_Activated;
 
         private final LayoutInflater mInflater;
 
         private int mActivatedYear;
         private int mMinYear;
         private int mCount;
-
-        private int mItemTextAppearanceResId;
-        private int mItemActivatedTextAppearanceResId;
 
         public YearAdapter(Context context) {
             mInflater = LayoutInflater.from(context);
@@ -153,16 +146,6 @@ class YearPickerView extends ListView {
                 return true;
             }
             return false;
-        }
-
-        public void setItemTextAppearance(int resId) {
-            mItemTextAppearanceResId = resId;
-            notifyDataSetChanged();
-        }
-
-        public void setItemActivatedTextAppearance(int resId) {
-            mItemActivatedTextAppearanceResId = resId;
-            notifyDataSetChanged();
         }
 
         @Override
@@ -203,10 +186,10 @@ class YearPickerView extends ListView {
             final boolean activated = mActivatedYear == year;
 
             final int textAppearanceResId;
-            if (activated && mItemActivatedTextAppearanceResId != 0) {
-                textAppearanceResId = mItemActivatedTextAppearanceResId;
+            if (activated && ITEM_TEXT_ACTIVATED_APPEARANCE != 0) {
+                textAppearanceResId = ITEM_TEXT_ACTIVATED_APPEARANCE;
             } else {
-                textAppearanceResId = mItemTextAppearanceResId;
+                textAppearanceResId = ITEM_TEXT_APPEARANCE;
             }
 
             final TextView v = (TextView) convertView;

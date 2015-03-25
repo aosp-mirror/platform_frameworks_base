@@ -364,27 +364,26 @@
 
     <dimen name="resolver_max_width">480dp</dimen>
 
-     <!-- Size of the offset applied to the position of the circular mask. This is only
-     used on circular displays. In the case where there is no "chin", this will default
-     to 0 -->
-     <dimen name="circular_display_mask_offset">0px</dimen>
+    <!-- Size of the offset applied to the position of the circular mask. This
+         is only used on circular displays. In the case where there is no
+         "chin", this will default to 0 -->
+    <dimen name="circular_display_mask_offset">0px</dimen>
+    <!-- Amount to reduce the size of the circular mask by (to compensate for
+         aliasing effects). This is only used on circular displays. -->
+    <dimen name="circular_display_mask_thickness">1px</dimen>
 
-     <!-- Amount to reduce the size of the circular mask by (to compensate for aliasing
-     effects). This is only used on circular displays. -->
-     <dimen name="circular_display_mask_thickness">1px</dimen>
+    <dimen name="lock_pattern_dot_line_width">3dp</dimen>
+    <dimen name="lock_pattern_dot_size">12dp</dimen>
+    <dimen name="lock_pattern_dot_size_activated">28dp</dimen>
 
-     <dimen name="lock_pattern_dot_line_width">3dp</dimen>
-     <dimen name="lock_pattern_dot_size">12dp</dimen>
-     <dimen name="lock_pattern_dot_size_activated">28dp</dimen>
+    <dimen name="text_handle_min_size">40dp</dimen>
 
-     <dimen name="text_handle_min_size">40dp</dimen>
-
-     <!-- Lighting and shadow properties -->
-     <dimen name="light_y">-200dp</dimen>
-     <dimen name="light_z">800dp</dimen>
-     <dimen name="light_radius">600dp</dimen>
-     <item type="dimen" format="float" name="ambient_shadow_alpha">0.075</item>
-     <item type="dimen" format="float" name="spot_shadow_alpha">0.15</item>
+    <!-- Lighting and shadow properties -->
+    <dimen name="light_y">-200dp</dimen>
+    <dimen name="light_z">800dp</dimen>
+    <dimen name="light_radius">600dp</dimen>
+    <item type="dimen" format="float" name="ambient_shadow_alpha">0.075</item>
+    <item type="dimen" format="float" name="spot_shadow_alpha">0.15</item>
 
      <!-- Floating toolbar dimensions -->
      <dimen name="floating_toolbar_height">48dp</dimen>

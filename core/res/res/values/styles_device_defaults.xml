@@ -240,10 +240,6 @@ easier.
     <!-- @deprecated Action bars are now themed using the inheritable android:theme attribute. -->
     <style name="TextAppearance.DeviceDefault.Widget.ActionMode.Subtitle.Inverse" parent="TextAppearance.Material.Widget.ActionMode.Subtitle.Inverse"/>
     <style name="TextAppearance.DeviceDefault.Widget.ActionBar.Menu" parent="TextAppearance.Material.Widget.ActionBar.Menu"/>
-    <style name="TextAppearance.DeviceDefault.DatePicker.DayOfWeekLabel" parent="TextAppearance.Material.DatePicker.DayOfWeekLabel"/>
-    <style name="TextAppearance.DeviceDefault.DatePicker.MonthLabel" parent="TextAppearance.Material.DatePicker.MonthLabel"/>
-    <style name="TextAppearance.DeviceDefault.DatePicker.DayOfMonthLabel" parent="TextAppearance.Material.DatePicker.DayOfMonthLabel"/>
-    <style name="TextAppearance.DeviceDefault.DatePicker.YearLabel" parent="TextAppearance.Material.DatePicker.YearLabel"/>
 
     <!-- Preference Styles -->
     <style name="Preference.DeviceDefault" parent="Preference.Material"/>

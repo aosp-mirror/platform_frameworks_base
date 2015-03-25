@@ -4444,11 +4444,6 @@
     </declare-styleable>
 
     <declare-styleable name="DatePicker">
-        <!-- The first year (inclusive), for example "1940". {@deprecated Use minDate instead.} -->
-        <attr name="startYear" format="integer" />
-        <!-- The last year (inclusive), for example "2010". {@deprecated Use maxDate instead.} -->
-        <attr name="endYear" format="integer" />
-
         <!-- The first day of week according to {@link java.util.Calendar}. -->
         <attr name="firstDayOfWeek" />
         <!-- The minimal date shown by this calendar view in mm/dd/yyyy format. -->
@@ -4474,12 +4469,14 @@
         <!-- The background for the selected date header. -->
         <attr name="headerBackground" />
 
-        <!-- The list year's text appearance in the list. -->
+        <!-- The list year's text appearance in the list.
+             {@deprecated Use yearListTextColor. }-->
         <attr name="yearListItemTextAppearance" format="reference" />
         <!-- @hide The list year's text appearance in the list when activated. -->
         <attr name="yearListItemActivatedTextAppearance" format="reference" />
         <!-- The text color list of the calendar. -->
         <attr name="calendarTextColor" format="color" />
+
         <!-- Defines the look of the widget. Prior to the L release, the only choice was
              spinner. As of L, with the Material theme selected, the default layout is calendar,
              but this attribute can be used to force spinner to be used instead. -->
@@ -4490,17 +4487,29 @@
             <enum name="calendar" value="2" />
         </attr>
 
-        <!-- @deprecated The text appearance for the month (ex. May) in the selected date header. -->
+        <!-- The first year (inclusive), for example "1940".
+             {@deprecated Use minDate instead.} -->
+        <attr name="startYear" format="integer" />
+        <!-- The last year (inclusive), for example "2010".
+             {@deprecated Use maxDate instead.} -->
+        <attr name="endYear" format="integer" />
+        <!-- The text appearance for the month (ex. May) in the selected date header.
+             {@deprecated Use headerTextColor instead.} -->
         <attr name="headerMonthTextAppearance" format="reference" />
-        <!-- @deprecated The text appearance for the day of month (ex. 28) in the selected date header. -->
+        <!-- The text appearance for the day of month (ex. 28) in the selected date header.
+             {@deprecated Use headerTextColor instead.} -->
         <attr name="headerDayOfMonthTextAppearance" format="reference" />
-        <!-- The text appearance for the year (ex. 2014) in the selected date header. -->
+        <!-- The text appearance for the year (ex. 2014) in the selected date header.
+             {@deprecated Use headerTextColor instead.} -->
         <attr name="headerYearTextAppearance" format="reference" />
-        <!-- @deprecated The background color for the header's day of week. -->
+        <!-- The background color for the header's day of week.
+             {@deprecated No longer displayed.} -->
         <attr name="dayOfWeekBackground" format="color" />
-        <!-- @deprecated The text color for the header's day of week. -->
+        <!-- The text color for the header's day of week.
+             {@deprecated No longer displayed.} -->
         <attr name="dayOfWeekTextAppearance" format="reference" />
-        <!-- @deprecated The list year's selected circle color in the list. -->
+        <!-- The list year's selected circle color in the list.
+             {@deprecated No longer displayed.} -->
         <attr name="yearListSelectorColor" format="color" />
     </declare-styleable>
 

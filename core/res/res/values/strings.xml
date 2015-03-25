@@ -4415,6 +4415,10 @@
     <string name="date_picker_increment_year_button">Increase year</string>
     <!-- Description of the button to decrease the DatePicker's year value. [CHAR LIMIT=NONE] -->
     <string name="date_picker_decrement_year_button">Decrease year</string>
+    <!-- Description of the button to move to the previous month. [CHAR LIMIT=NONE] -->
+    <string name="date_picker_prev_month_button">Previous month</string>
+    <!-- Description of the button to move to the next month. [CHAR LIMIT=NONE] -->
+    <string name="date_picker_next_month_button">Next month</string>
 
     <!-- KeyboardView - accessibility support -->
     <!-- Description of the Alt button in a KeyboardView. [CHAR LIMIT=NONE] -->
@@ -5078,8 +5082,6 @@
     <string name="select_day">Select month and day</string>
     <!-- Accessibility announcement for the year picker [CHAR LIMIT=NONE] -->
     <string name="select_year">Select year</string>
-    <!-- Accessibility description for the item that is currently selected. -->
-    <string name="item_is_selected"><xliff:g id="item" example="2013">%1$s</xliff:g> selected</string>
     <!-- Accessibility announcement when a number that had been typed in is deleted [CHAR_LIMIT=NONE] -->
     <string name="deleted_key"><xliff:g id="key" example="4">%1$s</xliff:g> deleted</string>
 
