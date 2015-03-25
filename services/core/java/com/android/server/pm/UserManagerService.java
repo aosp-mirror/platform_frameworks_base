@@ -1219,6 +1219,7 @@ public class UserManagerService extends IUserManager.Stub {
                     updateUserIdsLocked();
                     Bundle restrictions = new Bundle();
                     mUserRestrictions.append(userId, restrictions);
+                    mPm.newUserCreatedLILPw(userId);
                 }
             }
             if (userInfo != null) {

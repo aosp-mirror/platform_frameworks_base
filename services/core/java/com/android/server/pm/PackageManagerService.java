@@ -339,7 +339,7 @@ public class PackageManagerService extends IPackageManager.Stub {
     /** Permission grant: grant the permission as an install permission. */
     private static final int GRANT_INSTALL = 2;
 
-    /** Permission grant: grant the permission as a runtime permission. */
+    /** Permission grant: grant the permission as a runtime one. */
     private static final int GRANT_RUNTIME = 3;
 
     /** Permission grant: grant as runtime a permission that was granted as an install time one. */
@@ -7022,8 +7022,8 @@ public class PackageManagerService extends IPackageManager.Stub {
                         // For legacy apps dangerous permissions are install time ones.
                         grant = GRANT_INSTALL;
                     } else if ((pkg.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0) {
-                        // For modern system apps dangerous permissions are install time ones.
-                        grant = GRANT_INSTALL;
+                        // For modern system apps dangerous permissions are runtime ones.
+                        grant = GRANT_UPGRADE;
                     } else {
                         if (origPermissions.hasInstallPermission(bp.name)) {
                             // For legacy apps that became modern, install becomes runtime.
@@ -13356,6 +13356,11 @@ public class PackageManagerService extends IPackageManager.Stub {
             mInstaller.createUserConfig(userHandle);
             mSettings.createNewUserLILPw(this, mInstaller, userHandle, path);
         }
+    }
+
+    void newUserCreatedLILPw(int userHandle) {
+        // Adding a user requires updating runtime permissions for system apps.
+        updatePermissionsLPw(null, null, UPDATE_PERMISSIONS_ALL);
     }
 
     @Override
