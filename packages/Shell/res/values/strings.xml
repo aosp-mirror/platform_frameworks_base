@@ -30,4 +30,7 @@
     <string name="bugreport_confirm">Bug reports contain data from the system\'s various log files, including personal and private information.  Only share bug reports with apps and people you trust.</string>
     <!-- Checkbox that indicates this dialog should be shown again when the next bugreport is taken. [CHAR LIMIT=50] -->
     <string name="bugreport_confirm_repeat">Show this message next time</string>
+
+    <!-- Title for documents backend that offers bugreports. -->
+    <string name="bugreport_storage_title">Bug reports</string>
 </resources>
