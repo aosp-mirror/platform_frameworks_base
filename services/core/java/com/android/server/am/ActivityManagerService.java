@@ -6326,27 +6326,34 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
         try {
             PendingIntentRecord res = (PendingIntentRecord)pendingResult;
-            Intent intent = res.key.requestIntent;
-            if (intent != null) {
-                if (res.lastTag != null && res.lastTagPrefix == prefix && (res.lastTagPrefix == null
-                        || res.lastTagPrefix.equals(prefix))) {
-                    return res.lastTag;
-                }
-                res.lastTagPrefix = prefix;
-                StringBuilder sb = new StringBuilder(128);
-                if (prefix != null) {
-                    sb.append(prefix);
-                }
-                if (intent.getAction() != null) {
-                    sb.append(intent.getAction());
-                } else if (intent.getComponent() != null) {
-                    intent.getComponent().appendShortString(sb);
-                } else {
-                    sb.append("?");
-                }
-                return res.lastTag = sb.toString();
+            synchronized (this) {
+                return getTagForIntentSenderLocked(res, prefix);
             }
         } catch (ClassCastException e) {
+        }
+        return null;
+    }
+
+    String getTagForIntentSenderLocked(PendingIntentRecord res, String prefix) {
+        final Intent intent = res.key.requestIntent;
+        if (intent != null) {
+            if (res.lastTag != null && res.lastTagPrefix == prefix && (res.lastTagPrefix == null
+                    || res.lastTagPrefix.equals(prefix))) {
+                return res.lastTag;
+            }
+            res.lastTagPrefix = prefix;
+            final StringBuilder sb = new StringBuilder(128);
+            if (prefix != null) {
+                sb.append(prefix);
+            }
+            if (intent.getAction() != null) {
+                sb.append(intent.getAction());
+            } else if (intent.getComponent() != null) {
+                intent.getComponent().appendShortString(sb);
+            } else {
+                sb.append("?");
+            }
+            return res.lastTag = sb.toString();
         }
         return null;
     }
@@ -10479,17 +10486,21 @@ public final class ActivityManagerService extends ActivityManagerNative
         if (!(sender instanceof PendingIntentRecord)) {
             return;
         }
-        BatteryStatsImpl stats = mBatteryStatsService.getActiveStatistics();
+        final PendingIntentRecord rec = (PendingIntentRecord)sender;
+        final String tag;
+        synchronized (this) {
+            tag = getTagForIntentSenderLocked(rec, "*walarm*:");
+        }
+        final BatteryStatsImpl stats = mBatteryStatsService.getActiveStatistics();
         synchronized (stats) {
             if (mBatteryStatsService.isOnBattery()) {
                 mBatteryStatsService.enforceCallingPermission();
-                PendingIntentRecord rec = (PendingIntentRecord)sender;
                 int MY_UID = Binder.getCallingUid();
                 int uid = rec.uid == MY_UID ? Process.SYSTEM_UID : rec.uid;
                 BatteryStatsImpl.Uid.Pkg pkg =
                     stats.getPackageStatsLocked(sourceUid >= 0 ? sourceUid : uid,
                             sourcePkg != null ? sourcePkg : rec.key.packageName);
-                pkg.incWakeupsLocked();
+                pkg.noteWakeupAlarmLocked(tag);
             }
         }
     }

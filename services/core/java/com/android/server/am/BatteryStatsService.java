@@ -772,12 +772,11 @@ public final class BatteryStatsService extends IBatteryStats.Stub
 
     private void dumpHelp(PrintWriter pw) {
         pw.println("Battery stats (batterystats) dump options:");
-        pw.println("  [--checkin] [--history] [--history-start] [--unplugged] [--charged] [-c]");
+        pw.println("  [--checkin] [--history] [--history-start] [--charged] [-c]");
         pw.println("  [--daily] [--reset] [--write] [--new-daily] [--read-daily] [-h] [<package.name>]");
         pw.println("  --checkin: format output for a checkin report.");
         pw.println("  --history: show only history data.");
         pw.println("  --history-start <num>: show only history data starting at given time offset.");
-        pw.println("  --unplugged: only output data since last unplugged.");
         pw.println("  --charged: only output data since last charged.");
         pw.println("  --daily: only output full daily data.");
         pw.println("  --reset: reset the stats, clearing all current data.");
@@ -856,8 +855,6 @@ public final class BatteryStatsService extends IBatteryStats.Stub
                 } else if ("-c".equals(arg)) {
                     useCheckinFormat = true;
                     flags |= BatteryStats.DUMP_INCLUDE_HISTORY;
-                } else if ("--unplugged".equals(arg)) {
-                    flags |= BatteryStats.DUMP_UNPLUGGED_ONLY;
                 } else if ("--charged".equals(arg)) {
                     flags |= BatteryStats.DUMP_CHARGED_ONLY;
                 } else if ("--daily".equals(arg)) {
@@ -931,8 +928,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         if (reqUid >= 0) {
             // By default, if the caller is only interested in a specific package, then
             // we only dump the aggregated data since charged.
-            if ((flags&(BatteryStats.DUMP_HISTORY_ONLY|BatteryStats.DUMP_UNPLUGGED_ONLY
-                    |BatteryStats.DUMP_CHARGED_ONLY)) == 0) {
+            if ((flags&(BatteryStats.DUMP_HISTORY_ONLY|BatteryStats.DUMP_CHARGED_ONLY)) == 0) {
                 flags |= BatteryStats.DUMP_CHARGED_ONLY;
                 // Also if they are doing -c, we don't want history.
                 flags &= ~BatteryStats.DUMP_INCLUDE_HISTORY;

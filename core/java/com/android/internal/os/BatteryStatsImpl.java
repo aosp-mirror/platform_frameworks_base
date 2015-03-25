@@ -109,7 +109,7 @@ public final class BatteryStatsImpl extends BatteryStats {
     private static final int MAGIC = 0xBA757475; // 'BATSTATS'
 
     // Current on-disk Parcel version
-    private static final int VERSION = 121 + (USE_OLD_HISTORY ? 1000 : 0);
+    private static final int VERSION = 122 + (USE_OLD_HISTORY ? 1000 : 0);
 
     // Maximum number of items we will record in the history.
     private static final int MAX_HISTORY_ITEMS = 2000;
@@ -494,8 +494,7 @@ public final class BatteryStatsImpl extends BatteryStats {
      * Used as a buffer for reading in data from /proc/wakelocks before it is processed and added
      * to mKernelWakelockStats.
      */
-    private final Map<String, KernelWakelockStats> mProcWakelockFileStats =
-            new HashMap<String, KernelWakelockStats>();
+    private final Map<String, KernelWakelockStats> mProcWakelockFileStats = new HashMap<>();
 
     private final NetworkStatsFactory mNetworkStatsFactory = new NetworkStatsFactory();
     private NetworkStats mCurMobileSnapshot = new NetworkStats(SystemClock.elapsedRealtime(), 50);
@@ -4607,17 +4606,17 @@ public final class BatteryStatsImpl extends BatteryStats {
         }
 
         @Override
-        public Map<String, ? extends BatteryStats.Uid.Wakelock> getWakelockStats() {
+        public ArrayMap<String, ? extends BatteryStats.Uid.Wakelock> getWakelockStats() {
             return mWakelockStats.getMap();
         }
 
         @Override
-        public Map<String, ? extends BatteryStats.Timer> getSyncStats() {
+        public ArrayMap<String, ? extends BatteryStats.Timer> getSyncStats() {
             return mSyncStats.getMap();
         }
 
         @Override
-        public Map<String, ? extends BatteryStats.Timer> getJobStats() {
+        public ArrayMap<String, ? extends BatteryStats.Timer> getJobStats() {
             return mJobStats.getMap();
         }
 
@@ -4627,12 +4626,12 @@ public final class BatteryStatsImpl extends BatteryStats {
         }
 
         @Override
-        public Map<String, ? extends BatteryStats.Uid.Proc> getProcessStats() {
+        public ArrayMap<String, ? extends BatteryStats.Uid.Proc> getProcessStats() {
             return mProcessStats;
         }
 
         @Override
-        public Map<String, ? extends BatteryStats.Uid.Pkg> getPackageStats() {
+        public ArrayMap<String, ? extends BatteryStats.Uid.Pkg> getPackageStats() {
             return mPackageStats;
         }
 
@@ -6153,40 +6152,20 @@ public final class BatteryStatsImpl extends BatteryStats {
          */
         public final class Pkg extends BatteryStats.Uid.Pkg implements TimeBaseObs {
             /**
-             * Number of times this package has done something that could wake up the
-             * device from sleep.
+             * Number of times wakeup alarms have occurred for this app.
              */
-            int mWakeups;
-
-            /**
-             * Number of things that could wake up the device loaded from a
-             * previous save.
-             */
-            int mLoadedWakeups;
-
-            /**
-             * Number of things that could wake up the device as of the
-             * last run.
-             */
-            int mLastWakeups;
-
-            /**
-             * Number of things that could wake up the device as of the
-             * last run.
-             */
-            int mUnpluggedWakeups;
+            ArrayMap<String, Counter> mWakeupAlarms = new ArrayMap<>();
 
             /**
              * The statics we have collected for this package's services.
              */
-            final HashMap<String, Serv> mServiceStats = new HashMap<String, Serv>();
+            final ArrayMap<String, Serv> mServiceStats = new ArrayMap<>();
 
             Pkg() {
                 mOnBatteryScreenOffTimeBase.add(this);
             }
 
             public void onTimeStarted(long elapsedRealtime, long baseUptime, long baseRealtime) {
-                mUnpluggedWakeups = mWakeups;
             }
 
             public void onTimeStopped(long elapsedRealtime, long baseUptime, long baseRealtime) {
@@ -6197,10 +6176,12 @@ public final class BatteryStatsImpl extends BatteryStats {
             }
 
             void readFromParcelLocked(Parcel in) {
-                mWakeups = in.readInt();
-                mLoadedWakeups = in.readInt();
-                mLastWakeups = 0;
-                mUnpluggedWakeups = in.readInt();
+                int numWA = in.readInt();
+                mWakeupAlarms.clear();
+                for (int i=0; i<numWA; i++) {
+                    String tag = in.readString();
+                    mWakeupAlarms.put(tag, new Counter(mOnBatteryTimeBase, in));
+                }
 
                 int numServs = in.readInt();
                 mServiceStats.clear();
@@ -6214,34 +6195,39 @@ public final class BatteryStatsImpl extends BatteryStats {
             }
 
             void writeToParcelLocked(Parcel out) {
-                out.writeInt(mWakeups);
-                out.writeInt(mLoadedWakeups);
-                out.writeInt(mUnpluggedWakeups);
+                int numWA = mWakeupAlarms.size();
+                out.writeInt(numWA);
+                for (int i=0; i<numWA; i++) {
+                    out.writeString(mWakeupAlarms.keyAt(i));
+                    mWakeupAlarms.valueAt(i).writeToParcel(out);
+                }
 
-                out.writeInt(mServiceStats.size());
-                for (Map.Entry<String, Uid.Pkg.Serv> servEntry : mServiceStats.entrySet()) {
-                    out.writeString(servEntry.getKey());
-                    Uid.Pkg.Serv serv = servEntry.getValue();
-
+                final int NS = mServiceStats.size();
+                out.writeInt(NS);
+                for (int i=0; i<NS; i++) {
+                    out.writeString(mServiceStats.keyAt(i));
+                    Uid.Pkg.Serv serv = mServiceStats.valueAt(i);
                     serv.writeToParcelLocked(out);
                 }
             }
 
             @Override
-            public Map<String, ? extends BatteryStats.Uid.Pkg.Serv> getServiceStats() {
-                return mServiceStats;
+            public ArrayMap<String, ? extends BatteryStats.Counter> getWakeupAlarmStats() {
+                return mWakeupAlarms;
+            }
+
+            public void noteWakeupAlarmLocked(String tag) {
+                Counter c = mWakeupAlarms.get(tag);
+                if (c == null) {
+                    c = new Counter(mOnBatteryTimeBase);
+                    mWakeupAlarms.put(tag, c);
+                }
+                c.stepAtomic();
             }
 
             @Override
-            public int getWakeups(int which) {
-                int val = mWakeups;
-                if (which == STATS_CURRENT) {
-                    val -= mLoadedWakeups;
-                } else if (which == STATS_SINCE_UNPLUGGED) {
-                    val -= mUnpluggedWakeups;
-                }
-
-                return val;
+            public ArrayMap<String, ? extends BatteryStats.Uid.Pkg.Serv> getServiceStats() {
+                return mServiceStats;
             }
 
             /**
@@ -6481,14 +6467,6 @@ public final class BatteryStatsImpl extends BatteryStats {
 
                     return val;
                 }
-            }
-
-            public BatteryStatsImpl getBatteryStats() {
-                return BatteryStatsImpl.this;
-            }
-
-            public void incWakeupsLocked() {
-                mWakeups++;
             }
 
             final Serv newServiceStatsLocked() {
@@ -8938,7 +8916,18 @@ public final class BatteryStatsImpl extends BatteryStats {
             for (int ip = 0; ip < NP; ip++) {
                 String pkgName = in.readString();
                 Uid.Pkg p = u.getPackageStatsLocked(pkgName);
-                p.mWakeups = p.mLoadedWakeups = in.readInt();
+                final int NWA = in.readInt();
+                if (NWA > 1000) {
+                    Slog.w(TAG, "File corrupt: too many wakeup alarms " + NWA);
+                    return;
+                }
+                p.mWakeupAlarms.clear();
+                for (int iwa=0; iwa<NWA; iwa++) {
+                    String tag = in.readString();
+                    Counter c = new Counter(mOnBatteryTimeBase);
+                    c.readSummaryFromParcelLocked(in);
+                    p.mWakeupAlarms.put(tag, c);
+                }
                 NS = in.readInt();
                 if (NS > 1000) {
                     Slog.w(TAG, "File corrupt: too many services " + NS);
@@ -9263,20 +9252,22 @@ public final class BatteryStatsImpl extends BatteryStats {
                     : u.mPackageStats.entrySet()) {
                     out.writeString(ent.getKey());
                     Uid.Pkg ps = ent.getValue();
-                    out.writeInt(ps.mWakeups);
+                    final int NWA = ps.mWakeupAlarms.size();
+                    out.writeInt(NWA);
+                    for (int iwa=0; iwa<NWA; iwa++) {
+                        out.writeString(ps.mWakeupAlarms.keyAt(iwa));
+                        ps.mWakeupAlarms.valueAt(iwa).writeSummaryFromParcelLocked(out);
+                    }
                     NS = ps.mServiceStats.size();
                     out.writeInt(NS);
-                    if (NS > 0) {
-                        for (Map.Entry<String, BatteryStatsImpl.Uid.Pkg.Serv> sent
-                                : ps.mServiceStats.entrySet()) {
-                            out.writeString(sent.getKey());
-                            BatteryStatsImpl.Uid.Pkg.Serv ss = sent.getValue();
-                            long time = ss.getStartTimeToNowLocked(
-                                    mOnBatteryTimeBase.getUptime(NOW_SYS));
-                            out.writeLong(time);
-                            out.writeInt(ss.mStarts);
-                            out.writeInt(ss.mLaunches);
-                        }
+                    for (int is=0; is<NS; is++) {
+                        out.writeString(ps.mServiceStats.keyAt(is));
+                        BatteryStatsImpl.Uid.Pkg.Serv ss = ps.mServiceStats.valueAt(is);
+                        long time = ss.getStartTimeToNowLocked(
+                                mOnBatteryTimeBase.getUptime(NOW_SYS));
+                        out.writeLong(time);
+                        out.writeInt(ss.mStarts);
+                        out.writeInt(ss.mLaunches);
                     }
                 }
             }
