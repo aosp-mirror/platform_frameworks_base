@@ -29,6 +29,8 @@ import android.util.LongArray;
 import android.util.Pools.SynchronizedPool;
 import android.view.View;
 
+import com.android.internal.R;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -3402,6 +3404,15 @@ public class AccessibilityNodeInfo implements Parcelable {
                 new AccessibilityAction(
                         AccessibilityNodeInfo.ACTION_SET_TEXT, null);
 
+        /**
+         * Action that requests the node make its bounding rectangle visible
+         * on the screen, scrolling if necessary just enough.
+         *
+         * @see View#requestRectangleOnScreen(Rect)
+         */
+        public static final AccessibilityAction ACTION_SHOW_ON_SCREEN =
+                new AccessibilityAction(R.id.accessibility_action_show_on_screen, null);
+
         private static final ArraySet<AccessibilityAction> sStandardActions = new ArraySet<AccessibilityAction>();
         static {
             sStandardActions.add(ACTION_FOCUS);
@@ -3426,6 +3437,7 @@ public class AccessibilityNodeInfo implements Parcelable {
             sStandardActions.add(ACTION_COLLAPSE);
             sStandardActions.add(ACTION_DISMISS);
             sStandardActions.add(ACTION_SET_TEXT);
+            sStandardActions.add(ACTION_SHOW_ON_SCREEN);
         }
 
         private final int mActionId;

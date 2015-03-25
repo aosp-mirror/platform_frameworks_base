@@ -2192,4 +2192,6 @@
   <java-symbol type="style" name="TextAppearance.Material.Widget.Calendar.Day" />
   <java-symbol type="dimen" name="day_picker_padding_top"/>
   <java-symbol type="dimen" name="date_picker_day_of_week_height"/>
+
+  <java-symbol type="id" name="accessibility_action_show_on_screen" />
 </resources>
