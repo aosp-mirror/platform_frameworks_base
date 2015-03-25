@@ -251,7 +251,9 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
         }
         int targetAddress = targetDevice.getLogicalAddress();
         ActiveSource active = getActiveSource();
-        if (active.isValid() && targetAddress == active.logicalAddress) {
+        if (targetDevice.getDevicePowerStatus() == HdmiControlManager.POWER_STATUS_ON
+                && active.isValid()
+                && targetAddress == active.logicalAddress) {
             invokeCallback(callback, HdmiControlManager.RESULT_SUCCESS);
             return;
         }
