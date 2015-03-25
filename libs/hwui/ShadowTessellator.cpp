@@ -197,6 +197,7 @@ bool ShadowTessellator::isClockwisePath(const SkPath& path) {
             case SkPath::kLine_Verb:
                 arrayForDirection.add((Vector2){pts[1].x(), pts[1].y()});
                 break;
+            case SkPath::kConic_Verb:
             case SkPath::kQuad_Verb:
                 arrayForDirection.add((Vector2){pts[1].x(), pts[1].y()});
                 arrayForDirection.add((Vector2){pts[2].x(), pts[2].y()});
