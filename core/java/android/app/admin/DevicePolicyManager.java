@@ -20,7 +20,6 @@ import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.annotation.SystemApi;
 import android.app.Activity;
-import android.app.admin.IDevicePolicyManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -176,7 +175,7 @@ public class DevicePolicyManager {
      *
      * <p>This component is set as device owner and active admin when device owner provisioning is
      * started by an NFC message containing an NFC record with MIME type
-     * {@link #MIME_TYPE_PROVISIONING_NFC}.
+     * {@link #MIME_TYPE_PROVISIONING_NFC_V2}.
      *
      * @see DeviceAdminReceiver
      */
@@ -346,7 +345,7 @@ public class DevicePolicyManager {
      * {@link #EXTRA_PROVISIONING_DEVICE_ADMIN_PACKAGE_DOWNLOAD_LOCATION} if the version of the
      * installed package is less than this version code.
      *
-     * <p>Use in an NFC record with {@link #MIME_TYPE_PROVISIONING_NFC} that starts device owner
+     * <p>Use in an NFC record with {@link #MIME_TYPE_PROVISIONING_NFC_V2} that starts device owner
      * provisioning via an NFC bump.
      */
     public static final String EXTRA_PROVISIONING_DEVICE_ADMIN_MINIMUM_VERSION_CODE
@@ -392,7 +391,7 @@ public class DevicePolicyManager {
      * A boolean extra indicating whether device encryption is required as part of Device Owner
      * provisioning.
      *
-     * <p>Use in an NFC record with {@link #MIME_TYPE_PROVISIONING_NFC} that starts device owner
+     * <p>Use in an NFC record with {@link #MIME_TYPE_PROVISIONING_NFC_V2} that starts device owner
      * provisioning via an NFC bump.
      */
     public static final String EXTRA_PROVISIONING_SKIP_ENCRYPTION =
@@ -404,7 +403,7 @@ public class DevicePolicyManager {
      * privileges during device initialization and profile owner privileges during secondary user
      * initialization.
      *
-     * <p>Use in an NFC record with {@link #MIME_TYPE_PROVISIONING_NFC} that starts device owner
+     * <p>Use in an NFC record with {@link #MIME_TYPE_PROVISIONING_NFC_V2} that starts device owner
      * provisioning via an NFC bump.
      * @see ComponentName#unflattenFromString()
      */
@@ -416,7 +415,7 @@ public class DevicePolicyManager {
      * initializer package. When not provided it is assumed that the device initializer package is
      * already installed.
      *
-     * <p>Use in an NFC record with {@link #MIME_TYPE_PROVISIONING_NFC} that starts device owner
+     * <p>Use in an NFC record with {@link #MIME_TYPE_PROVISIONING_NFC_V2} that starts device owner
      * provisioning via an NFC bump.
      */
     public static final String EXTRA_PROVISIONING_DEVICE_INITIALIZER_PACKAGE_DOWNLOAD_LOCATION
@@ -428,7 +427,7 @@ public class DevicePolicyManager {
      * {@link #EXTRA_PROVISIONING_DEVICE_INITIALIZER_PACKAGE_DOWNLOAD_LOCATION} if the version of
      * the installed package is less than this version code.
      *
-     * <p>Use in an NFC record with {@link #MIME_TYPE_PROVISIONING_NFC} that starts device owner
+     * <p>Use in an NFC record with {@link #MIME_TYPE_PROVISIONING_NFC_V2} that starts device owner
      * provisioning via an NFC bump.
      */
     public static final String EXTRA_PROVISIONING_DEVICE_INITIALIZER_MINIMUM_VERSION_CODE
@@ -438,7 +437,7 @@ public class DevicePolicyManager {
      * A String extra holding a http cookie header which should be used in the http request to the
      * url specified in {@link #EXTRA_PROVISIONING_DEVICE_INITIALIZER_PACKAGE_DOWNLOAD_LOCATION}.
      *
-     * <p>Use in an NFC record with {@link #MIME_TYPE_PROVISIONING_NFC} that starts device owner
+     * <p>Use in an NFC record with {@link #MIME_TYPE_PROVISIONING_NFC_V2} that starts device owner
      * provisioning via an NFC bump.
      */
     public static final String EXTRA_PROVISIONING_DEVICE_INITIALIZER_PACKAGE_DOWNLOAD_COOKIE_HEADER
@@ -451,7 +450,7 @@ public class DevicePolicyManager {
      * match the file at the download location an error will be shown to the user and the user will
      * be asked to factory reset the device.
      *
-     * <p>Use in an NFC record with {@link #MIME_TYPE_PROVISIONING_NFC} that starts device owner
+     * <p>Use in an NFC record with {@link #MIME_TYPE_PROVISIONING_NFC_V2} that starts device owner
      * provisioning via an NFC bump.
      */
     public static final String EXTRA_PROVISIONING_DEVICE_INITIALIZER_PACKAGE_CHECKSUM
@@ -461,7 +460,7 @@ public class DevicePolicyManager {
      * A String extra holding the MAC address of the Bluetooth device to connect to with status
      * updates during provisioning.
      *
-     * <p>Use in an NFC record with {@link #MIME_TYPE_PROVISIONING_NFC} that starts device owner
+     * <p>Use in an NFC record with {@link #MIME_TYPE_PROVISIONING_NFC_V2} that starts device owner
      * provisioning via an NFC bump.
      */
     public static final String EXTRA_PROVISIONING_BT_MAC_ADDRESS
@@ -473,7 +472,7 @@ public class DevicePolicyManager {
      *
      * <p>This value must be specified when {@code #EXTRA_PROVISIONING_BT_MAC_ADDRESS} is present.
      *
-     * <p>Use in an NFC record with {@link #MIME_TYPE_PROVISIONING_NFC} that starts device owner
+     * <p>Use in an NFC record with {@link #MIME_TYPE_PROVISIONING_NFC_V2} that starts device owner
      * provisioning via an NFC bump.
      */
     public static final String EXTRA_PROVISIONING_BT_UUID
@@ -485,7 +484,7 @@ public class DevicePolicyManager {
      *
      * <p>This value must be specified when {@code #EXTRA_PROVISIONING_BT_MAC_ADDRESS} is present.
      *
-     * <p>Use in an NFC record with {@link #MIME_TYPE_PROVISIONING_NFC} that starts device owner
+     * <p>Use in an NFC record with {@link #MIME_TYPE_PROVISIONING_NFC_V2} that starts device owner
      * provisioning via an NFC bump.
      */
     public static final String EXTRA_PROVISIONING_BT_DEVICE_ID
@@ -495,31 +494,26 @@ public class DevicePolicyManager {
      * A Boolean extra that that will cause a provisioned device to temporarily proxy network
      * traffic over Bluetooth. When a Wi-Fi network is available, the network proxy will stop.
      *
-     * <p>Use in an NFC record with {@link #MIME_TYPE_PROVISIONING_NFC} that starts device owner
+     * <p>Use in an NFC record with {@link #MIME_TYPE_PROVISIONING_NFC_V2} that starts device owner
      * provisioning via an NFC bump.
      */
     public static final String EXTRA_PROVISIONING_BT_USE_PROXY
             = "android.app.extra.PROVISIONING_BT_USE_PROXY";
-
     /**
-     * This MIME type is used for starting the Device Owner provisioning.
+     * This MIME type is used for starting the Device Owner provisioning that does not require
+     * provisioning features introduced in Android API level
+     * {@link android.os.Build.VERSION_CODES#MNC} or later levels.
      *
-     * <p>During device owner provisioning a device admin app is set as the owner of the device.
-     * A device owner has full control over the device. The device owner can not be modified by the
-     * user and the only way of resetting the device is if the device owner app calls a factory
-     * reset.
-     *
-     * <p> A typical use case would be a device that is owned by a company, but used by either an
-     * employee or client.
-     *
-     * <p> The NFC message should be send to an unprovisioned device.
+     * <p>For more information about the provisioning process see
+     * {@link #MIME_TYPE_PROVISIONING_NFC_V2}.
      *
      * <p>The NFC record must contain a serialized {@link java.util.Properties} object which
      * contains the following properties:
      * <ul>
-     * <li>{@link #EXTRA_PROVISIONING_DEVICE_ADMIN_PACKAGE_DOWNLOAD_LOCATION}</li>
+     * <li>{@link #EXTRA_PROVISIONING_DEVICE_ADMIN_PACKAGE_NAME}</li>
+     * <li>{@link #EXTRA_PROVISIONING_DEVICE_ADMIN_PACKAGE_DOWNLOAD_LOCATION}, optional</li>
      * <li>{@link #EXTRA_PROVISIONING_DEVICE_ADMIN_PACKAGE_DOWNLOAD_COOKIE_HEADER}, optional</li>
-     * <li>{@link #EXTRA_PROVISIONING_DEVICE_ADMIN_PACKAGE_CHECKSUM}</li>
+     * <li>{@link #EXTRA_PROVISIONING_DEVICE_ADMIN_PACKAGE_CHECKSUM}, optional</li>
      * <li>{@link #EXTRA_PROVISIONING_LOCAL_TIME} (convert to String), optional</li>
      * <li>{@link #EXTRA_PROVISIONING_TIME_ZONE}, optional</li>
      * <li>{@link #EXTRA_PROVISIONING_LOCALE}, optional</li>
@@ -530,17 +524,56 @@ public class DevicePolicyManager {
      * <li>{@link #EXTRA_PROVISIONING_WIFI_PROXY_HOST}, optional</li>
      * <li>{@link #EXTRA_PROVISIONING_WIFI_PROXY_PORT} (convert to String), optional</li>
      * <li>{@link #EXTRA_PROVISIONING_WIFI_PROXY_BYPASS}, optional</li>
-     * <li>{@link #EXTRA_PROVISIONING_WIFI_PAC_URL}, optional</li>
-     * <li>{@link #EXTRA_PROVISIONING_SKIP_ENCRYPTION}, optional</li></ul>
+     * <li>{@link #EXTRA_PROVISIONING_WIFI_PAC_URL}, optional</li></ul>
      *
      * <p>
-     * In version {@link android.os.Build.VERSION_CODES#LOLLIPOP}, it should also contain
-     * {@link #EXTRA_PROVISIONING_DEVICE_ADMIN_PACKAGE_NAME}.
-     * As of {@link android.os.Build.VERSION_CODES#MNC}, it should contain
-     * {@link #EXTRA_PROVISIONING_DEVICE_ADMIN_COMPONENT_NAME} instead, (although
-     * specifying only {@link #EXTRA_PROVISIONING_DEVICE_ADMIN_PACKAGE_NAME} is still supported).
-     * This componentName must have been converted to a String via
-     * {@link android.content.ComponentName#flattenToString()}
+     * As of {@link android.os.Build.VERSION_CODES#MNC}, the properties should contain
+     * {@link #EXTRA_PROVISIONING_DEVICE_ADMIN_COMPONENT_NAME} instead of
+     * {@link #EXTRA_PROVISIONING_DEVICE_ADMIN_PACKAGE_NAME}, (although specifying only
+     * {@link #EXTRA_PROVISIONING_DEVICE_ADMIN_PACKAGE_NAME} is still supported).
+     *
+     * @see #MIME_TYPE_PROVISIONING_NFC_V2
+     *
+     */
+    public static final String MIME_TYPE_PROVISIONING_NFC
+        = "application/com.android.managedprovisioning";
+
+
+    /**
+     * This MIME type is used for starting the Device Owner provisioning that requires
+     * new provisioning features introduced in API version
+     * {@link android.os.Build.VERSION_CODES#MNC} in addition to those supported in earlier
+     * versions.
+     *
+     * <p>During device owner provisioning a device admin app is set as the owner of the device.
+     * A device owner has full control over the device. The device owner can not be modified by the
+     * user and the only way of resetting the device is if the device owner app calls a factory
+     * reset.
+     *
+     * <p> A typical use case would be a device that is owned by a company, but used by either an
+     * employee or client.
+     *
+     * <p> The NFC message should be sent to an unprovisioned device.
+     *
+     * <p>The NFC record must contain a serialized {@link java.util.Properties} object which
+     * contains the following properties in addition to properties listed at
+     * {@link #MIME_TYPE_PROVISIONING_NFC}:
+     * <ul>
+     * <li>{@link #EXTRA_PROVISIONING_SKIP_ENCRYPTION}, optional</li>
+     * <li>{@link #EXTRA_PROVISIONING_DEVICE_INITIALIZER_COMPONENT_NAME}, optional</li>
+     * <li>{@link #EXTRA_PROVISIONING_DEVICE_INITIALIZER_PACKAGE_DOWNLOAD_LOCATION}, optional</li>
+     * <li>{@link #EXTRA_PROVISIONING_DEVICE_INITIALIZER_PACKAGE_DOWNLOAD_COOKIE_HEADER}, optional</li>
+     * <li>{@link #EXTRA_PROVISIONING_DEVICE_INITIALIZER_PACKAGE_CHECKSUM}, optional</li>
+     * <li>{@link #EXTRA_PROVISIONING_DEVICE_INITIALIZER_MINIMUM_VERSION_CODE}, optional</li>
+     * <li>{@link #EXTRA_PROVISIONING_DEVICE_ADMIN_COMPONENT_NAME}.
+     * Replaces {@link #EXTRA_PROVISIONING_DEVICE_ADMIN_PACKAGE_NAME}. The value of the property
+     * should be converted to a String via
+     * {@link android.content.ComponentName#flattenToString()}</li>
+     * <li>{@link #EXTRA_PROVISIONING_DEVICE_ADMIN_MINIMUM_VERSION_CODE}, optional</li>
+     * <li>{@link #EXTRA_PROVISIONING_BT_MAC_ADDRESS}, optional</li>
+     * <li>{@link #EXTRA_PROVISIONING_BT_UUID}, optional</li>
+     * <li>{@link #EXTRA_PROVISIONING_BT_DEVICE_ID}, optional</li>
+     * <li>{@link #EXTRA_PROVISIONING_BT_USE_PROXY}, optional</li></ul>
      *
      * <p> When device owner provisioning has completed, an intent of the type
      * {@link DeviceAdminReceiver#ACTION_PROFILE_PROVISIONING_COMPLETE} is broadcasted to the
@@ -552,8 +585,8 @@ public class DevicePolicyManager {
      * <p>Input: Nothing.</p>
      * <p>Output: Nothing</p>
      */
-    public static final String MIME_TYPE_PROVISIONING_NFC
-        = "application/com.android.managedprovisioning";
+    public static final String MIME_TYPE_PROVISIONING_NFC_V2
+            = "application/com.android.managedprovisioning.v2";
 
     /**
      * Activity action: ask the user to add a new device administrator to the system.
