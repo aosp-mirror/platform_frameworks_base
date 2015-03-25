@@ -19271,21 +19271,25 @@ package android.net.wifi {
     field public static final int RTT_BW_40_SUPPORT = 8; // 0x8
     field public static final int RTT_BW_5_SUPPORT = 1; // 0x1
     field public static final int RTT_BW_80_SUPPORT = 16; // 0x10
-    field public static final int RTT_CHANNEL_WIDTH_10 = 6; // 0x6
-    field public static final int RTT_CHANNEL_WIDTH_160 = 3; // 0x3
-    field public static final int RTT_CHANNEL_WIDTH_20 = 0; // 0x0
-    field public static final int RTT_CHANNEL_WIDTH_40 = 1; // 0x1
-    field public static final int RTT_CHANNEL_WIDTH_5 = 5; // 0x5
-    field public static final int RTT_CHANNEL_WIDTH_80 = 2; // 0x2
-    field public static final int RTT_CHANNEL_WIDTH_80P80 = 4; // 0x4
+    field public static final deprecated int RTT_CHANNEL_WIDTH_10 = 6; // 0x6
+    field public static final deprecated int RTT_CHANNEL_WIDTH_160 = 3; // 0x3
+    field public static final deprecated int RTT_CHANNEL_WIDTH_20 = 0; // 0x0
+    field public static final deprecated int RTT_CHANNEL_WIDTH_40 = 1; // 0x1
+    field public static final deprecated int RTT_CHANNEL_WIDTH_5 = 5; // 0x5
+    field public static final deprecated int RTT_CHANNEL_WIDTH_80 = 2; // 0x2
+    field public static final deprecated int RTT_CHANNEL_WIDTH_80P80 = 4; // 0x4
     field public static final deprecated int RTT_CHANNEL_WIDTH_UNSPECIFIED = -1; // 0xffffffff
+    field public static final int RTT_PEER_NAN = 5; // 0x5
+    field public static final int RTT_PEER_P2P_CLIENT = 4; // 0x4
+    field public static final int RTT_PEER_P2P_GO = 3; // 0x3
     field public static final int RTT_PEER_TYPE_AP = 1; // 0x1
     field public static final int RTT_PEER_TYPE_STA = 2; // 0x2
-    field public static final int RTT_PEER_TYPE_UNSPECIFIED = 0; // 0x0
+    field public static final deprecated int RTT_PEER_TYPE_UNSPECIFIED = 0; // 0x0
     field public static final int RTT_STATUS_ABORTED = 8; // 0x8
     field public static final int RTT_STATUS_FAILURE = 1; // 0x1
     field public static final int RTT_STATUS_FAIL_AP_ON_DIFF_CHANNEL = 6; // 0x6
     field public static final int RTT_STATUS_FAIL_BUSY_TRY_LATER = 12; // 0xc
+    field public static final int RTT_STATUS_FAIL_FTM_PARAM_OVERRIDE = 15; // 0xf
     field public static final int RTT_STATUS_FAIL_INVALID_TS = 9; // 0x9
     field public static final int RTT_STATUS_FAIL_NOT_SCHEDULED_YET = 4; // 0x4
     field public static final int RTT_STATUS_FAIL_NO_CAPABILITY = 7; // 0x7
@@ -19294,11 +19298,13 @@ package android.net.wifi {
     field public static final int RTT_STATUS_FAIL_REJECTED = 3; // 0x3
     field public static final int RTT_STATUS_FAIL_SCHEDULE = 11; // 0xb
     field public static final int RTT_STATUS_FAIL_TM_TIMEOUT = 5; // 0x5
+    field public static final int RTT_STATUS_INVALID_REQ = 13; // 0xd
+    field public static final int RTT_STATUS_NO_WIFI = 14; // 0xe
     field public static final int RTT_STATUS_SUCCESS = 0; // 0x0
     field public static final deprecated int RTT_TYPE_11_MC = 4; // 0x4
     field public static final deprecated int RTT_TYPE_11_V = 2; // 0x2
     field public static final int RTT_TYPE_ONE_SIDED = 1; // 0x1
-    field public static final int RTT_TYPE_TWO_SIDED = 4; // 0x4
+    field public static final int RTT_TYPE_TWO_SIDED = 2; // 0x2
     field public static final deprecated int RTT_TYPE_UNSPECIFIED = 0; // 0x0
   }
 
@@ -19366,6 +19372,8 @@ package android.net.wifi {
 
   public static class RttManager.RttResult {
     ctor public RttManager.RttResult();
+    field public android.net.wifi.RttManager.WifiInformationElement LCI;
+    field public android.net.wifi.RttManager.WifiInformationElement LCR;
     field public java.lang.String bssid;
     field public int burstDuration;
     field public int burstNumber;
@@ -19378,6 +19386,7 @@ package android.net.wifi {
     field public int frameNumberPerBurstPeer;
     field public int measurementFrameNumber;
     field public int measurementType;
+    field public int negotiatedBurstNum;
     field public deprecated int requestType;
     field public int retryAfterDuration;
     field public int rssi;
@@ -19397,10 +19406,10 @@ package android.net.wifi {
     field public deprecated int tx_rate;
   }
 
-  public class RttManager.wifiInformationElement {
-    ctor public RttManager.wifiInformationElement();
-    field public java.lang.String data;
-    field public int id;
+  public static class RttManager.WifiInformationElement {
+    ctor public RttManager.WifiInformationElement();
+    field public byte[] data;
+    field public byte id;
   }
 
   public class ScanResult implements android.os.Parcelable {
