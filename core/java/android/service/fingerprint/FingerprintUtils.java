@@ -67,7 +67,7 @@ class FingerprintUtils {
         return toIntArray(tmp);
     }
 
-    public static void addFingerprintIdForUser(int fingerId, ContentResolver res, int userId) {
+    public static void addFingerprintIdForUser(ContentResolver res, int fingerId, int userId) {
         // FingerId 0 has special meaning.
         if (fingerId == 0) {
             Log.w(TAG, "Tried to add fingerId 0");

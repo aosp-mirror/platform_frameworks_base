@@ -125,7 +125,7 @@ public class UnlockMethodCache {
         }
 
         @Override
-        public void onFingerprintRecognized(int userId) {
+        public void onFingerprintAuthenticated(int userId) {
             update(false /* updateAlways */);
         }
 

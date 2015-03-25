@@ -2226,6 +2226,36 @@
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_useFingerprint">Allows the app to use fingerprint hardware for authentication</string>
 
+    <!-- Message shown during fingerprint acquisision when the fingerprint cannot be recognized -->
+    <string name="fingerprint_acquired_partial">Partial fingerprint detected. Please try again.</string>
+    <!-- Message shown during fingerprint acquisision when the fingerprint cannot be recognized -->
+    <string name="fingerprint_acquired_insufficient">Couldn\'t process fingerprint. Please try again.</string>
+    <!-- Message shown during fingerprint acquisision when the fingerprint sensor needs cleaning -->
+    <string name="fingerprint_acquired_imager_dirty">Fingerprint sensor is dirty. Please clean and try again.</string>
+    <!-- Message shown during fingerprint acquisision when the user removes their finger from the sensor too quickly -->
+    <string name="fingerprint_acquired_too_fast">Finger moved to fast. Please try again.</string>
+    <!-- Message shown during fingerprint acquisision when the user moves their finger too slowly -->
+    <string name="fingerprint_acquired_too_slow">Finger moved to slow. Please try again.</string>
+    <!-- Array containing custom messages shown during fingerprint acquisision from vendor.  Vendor is expected to add and translate these strings -->
+    <string-array name="fingerprint_acquired_vendor">
+        <item>Vendor-specific acquisition error message 0</item>
+    </string-array>
+
+    <!-- Generic error message shown when the fingerprint hardware can't recognize the fingerprint -->
+    <string name="fingerprint_error_unable_to_process">Unable to process. Try again.</string>
+    <!-- Error message shown when the fingerprint hardware can't be accessed -->
+    <string name="fingerprint_error_hw_not_available">Hardware not available.</string>
+    <!-- Error message shown when the fingerprint hardware has run out of room for storing fingerprints -->
+    <string name="fingerprint_error_no_space">Fingerprint can\'t be stored. Please remove an existing fingerprint.</string>
+    <!-- Error message shown when the fingerprint hardware timer has expired and the user needs to restart the operation. -->
+    <string name="fingerprint_error_timeout">Fingerprint time out reached. Try again.</string>
+    <!-- Error message shown when the fingerprint hardware timer has expired and the user needs to restart the operation. -->
+    <string name="fingerprint_error_vendor">Fingerprint time out reached. Try again.</string>
+    <!-- Array containing custom error messages from vendor.  Vendor is expected to add and translate these strings -->
+    <string-array name="fingerprint_error_vendor">
+        <item>Vendor-specifc error message.</item>
+    </string-array>
+
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_readSyncSettings">read sync settings</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
