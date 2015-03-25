@@ -42,6 +42,7 @@ import android.view.ViewGroup;
 import android.view.ViewParent;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
+import android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction;
 import android.view.accessibility.AccessibilityRecord;
 import android.view.animation.Interpolator;
 import android.widget.EdgeEffect;
@@ -370,8 +371,6 @@ public class ViewPager extends ViewGroup {
         mFlingDistance = (int) (MIN_DISTANCE_FOR_FLING * density);
         mCloseEnough = (int) (CLOSE_ENOUGH * density);
         mDefaultGutterSize = (int) (DEFAULT_GUTTER_SIZE * density);
-
-        setAccessibilityDelegate(new MyAccessibilityDelegate());
 
         if (getImportantForAccessibility() == IMPORTANT_FOR_ACCESSIBILITY_AUTO) {
             setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_YES);
@@ -2695,29 +2694,6 @@ public class ViewPager extends ViewGroup {
     }
 
     @Override
-    public boolean dispatchPopulateAccessibilityEvent(AccessibilityEvent event) {
-        // Dispatch scroll events from this ViewPager.
-        if (event.getEventType() == AccessibilityEvent.TYPE_VIEW_SCROLLED) {
-            return super.dispatchPopulateAccessibilityEvent(event);
-        }
-
-        // Dispatch all other accessibility events from the current page.
-        final int childCount = getChildCount();
-        for (int i = 0; i < childCount; i++) {
-            final View child = getChildAt(i);
-            if (child.getVisibility() == VISIBLE) {
-                final ItemInfo ii = infoForChild(child);
-                if (ii != null && ii.position == mCurItem &&
-                        child.dispatchPopulateAccessibilityEvent(event)) {
-                    return true;
-                }
-            }
-        }
-
-        return false;
-    }
-
-    @Override
     protected ViewGroup.LayoutParams generateDefaultLayoutParams() {
         return new LayoutParams();
     }
@@ -2737,60 +2713,63 @@ public class ViewPager extends ViewGroup {
         return new LayoutParams(getContext(), attrs);
     }
 
-    class MyAccessibilityDelegate extends AccessibilityDelegate {
 
-        @Override
-        public void onInitializeAccessibilityEvent(View host, AccessibilityEvent event) {
-            super.onInitializeAccessibilityEvent(host, event);
-            event.setClassName(ViewPager.class.getName());
-            final AccessibilityRecord record = AccessibilityRecord.obtain();
-            record.setScrollable(canScroll());
-            if (event.getEventType() == AccessibilityEvent.TYPE_VIEW_SCROLLED
-                    && mAdapter != null) {
-                record.setItemCount(mAdapter.getCount());
-                record.setFromIndex(mCurItem);
-                record.setToIndex(mCurItem);
-            }
+    @Override
+    public void onInitializeAccessibilityEvent(AccessibilityEvent event) {
+        super.onInitializeAccessibilityEvent(event);
+
+        event.setClassName(ViewPager.class.getName());
+        event.setScrollable(canScroll());
+
+        if (event.getEventType() == AccessibilityEvent.TYPE_VIEW_SCROLLED && mAdapter != null) {
+            event.setItemCount(mAdapter.getCount());
+            event.setFromIndex(mCurItem);
+            event.setToIndex(mCurItem);
+        }
+    }
+
+    @Override
+    public void onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo info) {
+        super.onInitializeAccessibilityNodeInfo(info);
+
+        info.setClassName(ViewPager.class.getName());
+        info.setScrollable(canScroll());
+
+        if (canScrollHorizontally(1)) {
+            info.addAction(AccessibilityAction.ACTION_SCROLL_FORWARD);
         }
 
-        @Override
-        public void onInitializeAccessibilityNodeInfo(View host, AccessibilityNodeInfo info) {
-            super.onInitializeAccessibilityNodeInfo(host, info);
-            info.setClassName(ViewPager.class.getName());
-            info.setScrollable(canScroll());
-            if (canScrollHorizontally(1)) {
-                info.addAction(AccessibilityNodeInfo.ACTION_SCROLL_FORWARD);
-            }
-            if (canScrollHorizontally(-1)) {
-                info.addAction(AccessibilityNodeInfo.ACTION_SCROLL_BACKWARD);
-            }
+        if (canScrollHorizontally(-1)) {
+            info.addAction(AccessibilityAction.ACTION_SCROLL_BACKWARD);
+        }
+    }
+
+    @Override
+    public boolean performAccessibilityAction(int action, Bundle args) {
+        if (super.performAccessibilityAction(action, args)) {
+            return true;
         }
 
-        @Override
-        public boolean performAccessibilityAction(View host, int action, Bundle args) {
-            if (super.performAccessibilityAction(host, action, args)) {
-                return true;
-            }
-            switch (action) {
-                case AccessibilityNodeInfo.ACTION_SCROLL_FORWARD: {
-                    if (canScrollHorizontally(1)) {
-                        setCurrentItem(mCurItem + 1);
-                        return true;
-                    }
-                } return false;
-                case AccessibilityNodeInfo.ACTION_SCROLL_BACKWARD: {
-                    if (canScrollHorizontally(-1)) {
-                        setCurrentItem(mCurItem - 1);
-                        return true;
-                    }
-                } return false;
-            }
-            return false;
+        switch (action) {
+            case AccessibilityNodeInfo.ACTION_SCROLL_FORWARD:
+                if (canScrollHorizontally(1)) {
+                    setCurrentItem(mCurItem + 1);
+                    return true;
+                }
+                return false;
+            case AccessibilityNodeInfo.ACTION_SCROLL_BACKWARD:
+                if (canScrollHorizontally(-1)) {
+                    setCurrentItem(mCurItem - 1);
+                    return true;
+                }
+                return false;
         }
 
-        private boolean canScroll() {
-            return (mAdapter != null) && (mAdapter.getCount() > 1);
-        }
+        return false;
+    }
+
+    private boolean canScroll() {
+        return mAdapter != null && mAdapter.getCount() > 1;
     }
 
     private class PagerObserver extends DataSetObserver {
