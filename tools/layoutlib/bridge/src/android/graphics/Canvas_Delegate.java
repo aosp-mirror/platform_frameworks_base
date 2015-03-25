@@ -675,7 +675,7 @@ public final class Canvas_Delegate {
                             graphics.fillRoundRect(
                                     (int)left, (int)top,
                                     (int)(right - left), (int)(bottom - top),
-                                    (int)rx, (int)ry);
+                                    2 * (int)rx, 2 * (int)ry);
                         }
 
                         if (style == Paint.Style.STROKE.nativeInt ||
@@ -683,7 +683,7 @@ public final class Canvas_Delegate {
                             graphics.drawRoundRect(
                                     (int)left, (int)top,
                                     (int)(right - left), (int)(bottom - top),
-                                    (int)rx, (int)ry);
+                                    2 * (int)rx, 2 * (int)ry);
                         }
                     }
         });
