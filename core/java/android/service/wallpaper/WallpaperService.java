@@ -155,7 +155,6 @@ public abstract class WallpaperService extends Service {
                 WindowManager.LayoutParams.PRIVATE_FLAG_WANTS_OFFSET_NOTIFICATIONS;
         int mCurWindowFlags = mWindowFlags;
         int mCurWindowPrivateFlags = mWindowPrivateFlags;
-        int mOutsetBottomPx;
         final Rect mVisibleInsets = new Rect();
         final Rect mWinFrame = new Rect();
         final Rect mOverscanInsets = new Rect();
@@ -624,18 +623,9 @@ public abstract class WallpaperService extends Service {
                     mLayout.token = mWindowToken;
 
                     if (!mCreated) {
-                        // Retrieve watch round and outset info
-                        final WindowManager windowService = (WindowManager)getSystemService(
-                                Context.WINDOW_SERVICE);
+                        // Retrieve watch round info
                         TypedArray windowStyle = obtainStyledAttributes(
                                 com.android.internal.R.styleable.Window);
-                        final Display display = windowService.getDefaultDisplay();
-                        final boolean shouldUseBottomOutset =
-                                display.getDisplayId() == Display.DEFAULT_DISPLAY;
-                        if (shouldUseBottomOutset) {
-                            mOutsetBottomPx = ScreenShapeHelper.getWindowOutsetBottomPx(
-                                    getResources().getDisplayMetrics(), windowStyle);
-                        }
                         mWindowIsRound = ScreenShapeHelper.getWindowIsRound(getResources());
                         windowStyle.recycle();
 
@@ -770,10 +760,7 @@ public abstract class WallpaperService extends Service {
                             mDispatchedStableInsets.set(mStableInsets);
                             mFinalSystemInsets.set(mDispatchedOverscanInsets);
                             mFinalStableInsets.set(mDispatchedStableInsets);
-                            if (mOutsetBottomPx != 0) {
-                                mFinalSystemInsets.bottom =
-                                        mIWallpaperEngine.mDisplayPadding.bottom + mOutsetBottomPx;
-                            }
+                            mFinalSystemInsets.bottom = mIWallpaperEngine.mDisplayPadding.bottom;
                             WindowInsets insets = new WindowInsets(mFinalSystemInsets,
                                     null, mFinalStableInsets, mWindowIsRound);
                             onApplyWindowInsets(insets);
