@@ -31,8 +31,6 @@ public class NetworkSecurityPolicy {
 
     private static final NetworkSecurityPolicy INSTANCE = new NetworkSecurityPolicy();
 
-    private volatile boolean mCleartextTrafficPermitted = true;
-
     private NetworkSecurityPolicy() {}
 
     /**
@@ -62,7 +60,7 @@ public class NetworkSecurityPolicy {
      * honor this aspect of the policy.
      */
     public boolean isCleartextTrafficPermitted() {
-        return mCleartextTrafficPermitted;
+        return libcore.net.NetworkSecurityPolicy.isCleartextTrafficPermitted();
     }
 
     /**
@@ -74,6 +72,6 @@ public class NetworkSecurityPolicy {
      * @hide
      */
     public void setCleartextTrafficPermitted(boolean permitted) {
-        mCleartextTrafficPermitted = permitted;
+        libcore.net.NetworkSecurityPolicy.setCleartextTrafficPermitted(permitted);
     }
 }
