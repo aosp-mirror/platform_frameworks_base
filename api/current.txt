@@ -15231,6 +15231,7 @@ package android.media {
     method public android.graphics.Bitmap getIconBitmap();
     method public android.net.Uri getIconUri();
     method public java.lang.String getMediaId();
+    method public android.net.Uri getMediaUri();
     method public java.lang.CharSequence getSubtitle();
     method public java.lang.CharSequence getTitle();
     method public void writeToParcel(android.os.Parcel, int);
@@ -15245,6 +15246,7 @@ package android.media {
     method public android.media.MediaDescription.Builder setIconBitmap(android.graphics.Bitmap);
     method public android.media.MediaDescription.Builder setIconUri(android.net.Uri);
     method public android.media.MediaDescription.Builder setMediaId(java.lang.String);
+    method public android.media.MediaDescription.Builder setMediaUri(android.net.Uri);
     method public android.media.MediaDescription.Builder setSubtitle(java.lang.CharSequence);
     method public android.media.MediaDescription.Builder setTitle(java.lang.CharSequence);
   }
