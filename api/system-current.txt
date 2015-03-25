@@ -5908,6 +5908,7 @@ package android.app.backup {
     ctor public BackupTransport();
     method public int abortFullRestore();
     method public void cancelFullBackup();
+    method public int checkFullBackupSize(long);
     method public int clearBackupData(android.content.pm.PackageInfo);
     method public android.content.Intent configurationIntent();
     method public java.lang.String currentDestinationString();
@@ -32771,6 +32772,7 @@ package android.test.mock {
     method public android.graphics.drawable.Drawable getUserBadgedIcon(android.graphics.drawable.Drawable, android.os.UserHandle);
     method public java.lang.CharSequence getUserBadgedLabel(java.lang.CharSequence, android.os.UserHandle);
     method public android.content.res.XmlResourceParser getXml(java.lang.String, int, android.content.pm.ApplicationInfo);
+    method public void grantPermission(java.lang.String, java.lang.String, android.os.UserHandle);
     method public boolean hasSystemFeature(java.lang.String);
     method public boolean isSafeMode();
     method public java.util.List<android.content.pm.ResolveInfo> queryBroadcastReceivers(android.content.Intent, int);
@@ -32786,6 +32788,7 @@ package android.test.mock {
     method public android.content.pm.ResolveInfo resolveActivity(android.content.Intent, int);
     method public android.content.pm.ProviderInfo resolveContentProvider(java.lang.String, int);
     method public android.content.pm.ResolveInfo resolveService(android.content.Intent, int);
+    method public void revokePermission(java.lang.String, java.lang.String, android.os.UserHandle);
     method public void setApplicationEnabledSetting(java.lang.String, int, int);
     method public void setComponentEnabledSetting(android.content.ComponentName, int, int);
     method public void setInstallerPackageName(java.lang.String, java.lang.String);

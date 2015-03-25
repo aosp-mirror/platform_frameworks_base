@@ -29,6 +29,7 @@ import android.app.backup.BackupDataInput;
 import android.app.backup.BackupDataOutput;
 import android.app.backup.BackupTransport;
 import android.app.backup.FullBackup;
+import android.app.backup.FullBackupDataOutput;
 import android.app.backup.RestoreDescription;
 import android.app.backup.RestoreSet;
 import android.app.backup.IBackupManager;
@@ -134,6 +135,7 @@ import java.util.Objects;
 import java.util.Random;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.zip.Deflater;
@@ -726,7 +728,7 @@ public class BackupManagerService {
             {
                 try {
                     BackupRestoreTask task = (BackupRestoreTask) msg.obj;
-                    task.operationComplete();
+                    task.operationComplete(msg.arg1);
                 } catch (ClassCastException e) {
                     Slog.e(TAG, "Invalid completion in flight, obj=" + msg.obj);
                 }
@@ -2224,7 +2226,7 @@ public class BackupManagerService {
         void execute();
 
         // An operation that wanted a callback has completed
-        void operationComplete();
+        void operationComplete(int result);
 
         // An operation that wanted a callback has timed out
         void handleTimeout();
@@ -2792,7 +2794,7 @@ public class BackupManagerService {
         }
 
         @Override
-        public void operationComplete() {
+        public void operationComplete(int unusedResult) {
             // The agent reported back to us!
 
             if (mBackupData == null) {
@@ -3128,8 +3130,23 @@ public class BackupManagerService {
 
     // Core logic for performing one package's full backup, gathering the tarball from the
     // application and emitting it to the designated OutputStream.
+
+    // Callout from the engine to an interested participant that might need to communicate
+    // with the agent prior to asking it to move data
+    interface FullBackupPreflight {
+        /**
+         * Perform the preflight operation necessary for the given package.
+         * @param pkg The name of the package being proposed for full-data backup
+         * @param agent Live BackupAgent binding to the target app's agent
+         * @return BackupTransport.TRANSPORT_OK to proceed with the backup operation,
+         *         or one of the other BackupTransport.* error codes as appropriate
+         */
+        int preflightFullBackup(PackageInfo pkg, IBackupAgent agent);
+    };
+
     class FullBackupEngine {
         OutputStream mOutput;
+        FullBackupPreflight mPreflightHook;
         IFullBackupRestoreObserver mObserver;
         File mFilesDir;
         File mManifestFile;
@@ -3160,8 +3177,7 @@ public class BackupManagerService {
             @Override
             public void run() {
                 try {
-                    BackupDataOutput output = new BackupDataOutput(
-                            mPipe.getFileDescriptor());
+                    FullBackupDataOutput output = new FullBackupDataOutput(mPipe);
 
                     if (mWriteManifest) {
                         final boolean writeWidgetData = mWidgetData != null;
@@ -3204,14 +3220,15 @@ public class BackupManagerService {
             }
         }
 
-        FullBackupEngine(OutputStream output, String packageName, boolean alsoApks) {
+        FullBackupEngine(OutputStream output, String packageName, FullBackupPreflight preflightHook,
+                boolean alsoApks) {
             mOutput = output;
+            mPreflightHook = preflightHook;
             mIncludeApks = alsoApks;
             mFilesDir = new File("/data/system");
             mManifestFile = new File(mFilesDir, BACKUP_MANIFEST_FILENAME);
             mMetadataFile = new File(mFilesDir, BACKUP_METADATA_FILENAME);
         }
-
 
         public int backupOnePackage(PackageInfo pkg) throws RemoteException {
             int result = BackupTransport.TRANSPORT_OK;
@@ -3222,42 +3239,52 @@ public class BackupManagerService {
             if (agent != null) {
                 ParcelFileDescriptor[] pipes = null;
                 try {
-                    pipes = ParcelFileDescriptor.createPipe();
+                    // Call the preflight hook, if any
+                    if (mPreflightHook != null) {
+                        result = mPreflightHook.preflightFullBackup(pkg, agent);
+                        if (MORE_DEBUG) {
+                            Slog.v(TAG, "preflight returned " + result);
+                        }
+                    }
 
-                    ApplicationInfo app = pkg.applicationInfo;
-                    final boolean isSharedStorage = pkg.packageName.equals(SHARED_BACKUP_AGENT_PACKAGE);
-                    final boolean sendApk = mIncludeApks
-                            && !isSharedStorage
-                            && ((app.privateFlags & ApplicationInfo.PRIVATE_FLAG_FORWARD_LOCK) == 0)
-                            && ((app.flags & ApplicationInfo.FLAG_SYSTEM) == 0 ||
+                    // If we're still good to go after preflighting, start moving data
+                    if (result == BackupTransport.TRANSPORT_OK) {
+                        pipes = ParcelFileDescriptor.createPipe();
+
+                        ApplicationInfo app = pkg.applicationInfo;
+                        final boolean isSharedStorage = pkg.packageName.equals(SHARED_BACKUP_AGENT_PACKAGE);
+                        final boolean sendApk = mIncludeApks
+                                && !isSharedStorage
+                                && ((app.privateFlags & ApplicationInfo.PRIVATE_FLAG_FORWARD_LOCK) == 0)
+                                && ((app.flags & ApplicationInfo.FLAG_SYSTEM) == 0 ||
                                 (app.flags & ApplicationInfo.FLAG_UPDATED_SYSTEM_APP) != 0);
 
-                    byte[] widgetBlob = AppWidgetBackupBridge.getWidgetState(pkg.packageName,
-                            UserHandle.USER_OWNER);
+                        byte[] widgetBlob = AppWidgetBackupBridge.getWidgetState(pkg.packageName,
+                                UserHandle.USER_OWNER);
 
-                    final int token = generateToken();
-                    FullBackupRunner runner = new FullBackupRunner(pkg, agent, pipes[1],
-                            token, sendApk, !isSharedStorage, widgetBlob);
-                    pipes[1].close();   // the runner has dup'd it
-                    pipes[1] = null;
-                    Thread t = new Thread(runner, "app-data-runner");
-                    t.start();
+                        final int token = generateToken();
+                        FullBackupRunner runner = new FullBackupRunner(pkg, agent, pipes[1],
+                                token, sendApk, !isSharedStorage, widgetBlob);
+                        pipes[1].close();   // the runner has dup'd it
+                        pipes[1] = null;
+                        Thread t = new Thread(runner, "app-data-runner");
+                        t.start();
 
-                    // Now pull data from the app and stuff it into the output
-                    try {
-                        routeSocketDataToOutput(pipes[0], mOutput);
-                    } catch (IOException e) {
-                        Slog.i(TAG, "Caught exception reading from agent", e);
-                        result = BackupTransport.AGENT_ERROR;
+                        // Now pull data from the app and stuff it into the output
+                        try {
+                            routeSocketDataToOutput(pipes[0], mOutput);
+                        } catch (IOException e) {
+                            Slog.i(TAG, "Caught exception reading from agent", e);
+                            result = BackupTransport.AGENT_ERROR;
+                        }
+
+                        if (!waitUntilOperationComplete(token)) {
+                            Slog.e(TAG, "Full backup failed on package " + pkg.packageName);
+                            result = BackupTransport.AGENT_ERROR;
+                        } else {
+                            if (DEBUG) Slog.d(TAG, "Full package backup success: " + pkg.packageName);
+                        }
                     }
-
-                    if (!waitUntilOperationComplete(token)) {
-                        Slog.e(TAG, "Full backup failed on package " + pkg.packageName);
-                        result = BackupTransport.AGENT_ERROR;
-                    } else {
-                        if (DEBUG) Slog.d(TAG, "Full package backup success: " + pkg.packageName);
-                    }
-
                 } catch (IOException e) {
                     Slog.e(TAG, "Error backing up " + pkg.packageName, e);
                     result = BackupTransport.AGENT_ERROR;
@@ -3282,7 +3309,7 @@ public class BackupManagerService {
             return result;
         }
 
-        private void writeApkToBackup(PackageInfo pkg, BackupDataOutput output) {
+        private void writeApkToBackup(PackageInfo pkg, FullBackupDataOutput output) {
             // Forward-locked apps, system-bundled .apks, etc are filtered out before we get here
             // TODO: handle backing up split APKs
             final String appSourceDir = pkg.applicationInfo.getBaseCodePath();
@@ -3781,7 +3808,7 @@ public class BackupManagerService {
                     final boolean isSharedStorage =
                             pkg.packageName.equals(SHARED_BACKUP_AGENT_PACKAGE);
 
-                    mBackupEngine = new FullBackupEngine(out, pkg.packageName, mIncludeApks);
+                    mBackupEngine = new FullBackupEngine(out, pkg.packageName, null, mIncludeApks);
                     sendOnBackupPackage(isSharedStorage ? "Shared storage" : pkg.packageName);
                     mBackupEngine.backupOnePackage(pkg);
 
@@ -3828,13 +3855,13 @@ public class BackupManagerService {
         static final String TAG = "PFTBT";
         ArrayList<PackageInfo> mPackages;
         boolean mUpdateSchedule;
-        AtomicBoolean mLatch;
+        CountDownLatch mLatch;
         AtomicBoolean mKeepRunning;     // signal from job scheduler
         FullBackupJob mJob;             // if a scheduled job needs to be finished afterwards
 
         PerformFullTransportBackupTask(IFullBackupRestoreObserver observer, 
                 String[] whichPackages, boolean updateSchedule,
-                FullBackupJob runningJob, AtomicBoolean latch) {
+                FullBackupJob runningJob, CountDownLatch latch) {
             super(observer);
             mUpdateSchedule = updateSchedule;
             mLatch = latch;
@@ -3944,10 +3971,10 @@ public class BackupManagerService {
 
                         // Now set up the backup engine / data source end of things
                         enginePipes = ParcelFileDescriptor.createPipe();
-                        AtomicBoolean runnerLatch = new AtomicBoolean(false);
+                        CountDownLatch runnerLatch = new CountDownLatch(1);
                         SinglePackageBackupRunner backupRunner =
                                 new SinglePackageBackupRunner(enginePipes[1], currentPackage,
-                                        runnerLatch);
+                                        transport, runnerLatch);
                         // The runner dup'd the pipe half, so we close it here
                         enginePipes[1].close();
                         enginePipes[1] = null;
@@ -3972,6 +3999,9 @@ public class BackupManagerService {
                                 break;
                             }
                             nRead = in.read(buffer);
+                            if (MORE_DEBUG) {
+                                Slog.v(TAG, "in.read(buffer) from app: " + nRead);
+                            }
                             if (nRead > 0) {
                                 out.write(buffer, 0, nRead);
                                 result = transport.sendBackupData(nRead);
@@ -4055,10 +4085,7 @@ public class BackupManagerService {
                     mRunningFullBackupTask = null;
                 }
 
-                synchronized (mLatch) {
-                    mLatch.set(true);
-                    mLatch.notifyAll();
-                }
+                mLatch.countDown();
 
                 // Now that we're actually done with schedule-driven work, reschedule
                 // the next pass based on the new queue state.
@@ -4094,15 +4121,79 @@ public class BackupManagerService {
         // Run the backup and pipe it back to the given socket -- expects to run on
         // a standalone thread.  The  runner owns this half of the pipe, and closes
         // it to indicate EOD to the other end.
+        class SinglePackageBackupPreflight implements BackupRestoreTask, FullBackupPreflight {
+            final AtomicInteger mResult = new AtomicInteger();
+            final CountDownLatch mLatch = new CountDownLatch(1);
+            final IBackupTransport mTransport;
+
+            public SinglePackageBackupPreflight(IBackupTransport transport) {
+                mTransport = transport;
+            }
+
+            @Override
+            public int preflightFullBackup(PackageInfo pkg, IBackupAgent agent) {
+                int result;
+                try {
+                    final int token = generateToken();
+                    prepareOperationTimeout(token, TIMEOUT_FULL_BACKUP_INTERVAL, this);
+                    addBackupTrace("preflighting");
+                    if (MORE_DEBUG) {
+                        Slog.d(TAG, "Preflighting full payload of " + pkg.packageName);
+                    }
+                    agent.doMeasureFullBackup(token, mBackupManagerBinder);
+
+                    // now wait to get our result back
+                    mLatch.await();
+                    int totalSize = mResult.get();
+                    if (MORE_DEBUG) {
+                        Slog.v(TAG, "Got preflight response; size=" + totalSize);
+                    }
+
+                    result = mTransport.checkFullBackupSize(totalSize);
+                } catch (Exception e) {
+                    Slog.w(TAG, "Exception preflighting " + pkg.packageName + ": " + e.getMessage());
+                    result = BackupTransport.AGENT_ERROR;
+                }
+                return result;
+            }
+
+            @Override
+            public void execute() {
+                // Unused in this case
+            }
+
+            @Override
+            public void operationComplete(int result) {
+                // got the callback, and our preflightFullBackup() method is waiting for the result
+                if (MORE_DEBUG) {
+                    Slog.i(TAG, "Preflight op complete, result=" + result);
+                }
+                mResult.set(result);
+                mLatch.countDown();
+            }
+
+            @Override
+            public void handleTimeout() {
+                if (MORE_DEBUG) {
+                    Slog.i(TAG, "Preflight timeout; failing");
+                }
+                mResult.set(BackupTransport.AGENT_ERROR);
+                mLatch.countDown();
+            }
+            
+        }
+
         class SinglePackageBackupRunner implements Runnable {
             final ParcelFileDescriptor mOutput;
             final PackageInfo mTarget;
-            final AtomicBoolean mLatch;
+            final FullBackupPreflight mPreflight;
+            final CountDownLatch mLatch;
 
             SinglePackageBackupRunner(ParcelFileDescriptor output, PackageInfo target,
-                    AtomicBoolean latch) throws IOException {
+                    IBackupTransport transport, CountDownLatch latch) throws IOException {
                 mOutput = ParcelFileDescriptor.dup(output.getFileDescriptor());
                 mTarget = target;
+                mPreflight = new SinglePackageBackupPreflight(transport);
                 mLatch = latch;
             }
 
@@ -4110,15 +4201,13 @@ public class BackupManagerService {
             public void run() {
                 try {
                     FileOutputStream out = new FileOutputStream(mOutput.getFileDescriptor());
-                    FullBackupEngine engine = new FullBackupEngine(out, mTarget.packageName, false);
+                    FullBackupEngine engine = new FullBackupEngine(out, mTarget.packageName,
+                            mPreflight, false);
                     engine.backupOnePackage(mTarget);
                 } catch (Exception e) {
                     Slog.e(TAG, "Exception during full package backup of " + mTarget);
                 } finally {
-                    synchronized (mLatch) {
-                        mLatch.set(true);
-                        mLatch.notifyAll();
-                    }
+                    mLatch.countDown();
                     try {
                         mOutput.close();
                     } catch (IOException e) {
@@ -4126,7 +4215,6 @@ public class BackupManagerService {
                     }
                 }
             }
-            
         }
     }
 
@@ -4258,7 +4346,7 @@ public class BackupManagerService {
 
             // Okay, the top thing is runnable now.  Pop it off and get going.
             mFullBackupQueue.remove(0);
-            AtomicBoolean latch = new AtomicBoolean(false);
+            CountDownLatch latch = new CountDownLatch(1);
             String[] pkg = new String[] {entry.packageName};
             mRunningFullBackupTask = new PerformFullTransportBackupTask(null, pkg, true,
                     scheduledJob, latch);
@@ -7895,7 +7983,7 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
         }
 
         @Override
-        public void operationComplete() {
+        public void operationComplete(int unusedResult) {
             if (MORE_DEBUG) {
                 Slog.i(TAG, "operationComplete() during restore: target="
                         + mCurrentPackage.packageName
@@ -8395,17 +8483,18 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
             Slog.d(TAG, "fullTransportBackup()");
         }
 
-        AtomicBoolean latch = new AtomicBoolean(false);
+        CountDownLatch latch = new CountDownLatch(1);
         PerformFullTransportBackupTask task =
                 new PerformFullTransportBackupTask(null, pkgNames, false, null, latch);
         (new Thread(task, "full-transport-master")).start();
-        synchronized (latch) {
+        do {
             try {
-                while (latch.get() == false) {
-                    latch.wait();
-                }
-            } catch (InterruptedException e) {}
-        }
+                latch.await();
+                break;
+            } catch (InterruptedException e) {
+                // Just go back to waiting for the latch to indicate completion
+            }
+        } while (true);
         if (DEBUG) {
             Slog.d(TAG, "Done with full transport backup.");
         }
@@ -8948,8 +9037,10 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
 
     // Note that a currently-active backup agent has notified us that it has
     // completed the given outstanding asynchronous backup/restore operation.
-    public void opComplete(int token) {
-        if (MORE_DEBUG) Slog.v(TAG, "opComplete: " + Integer.toHexString(token));
+    public void opComplete(int token, long result) {
+        if (MORE_DEBUG) {
+            Slog.v(TAG, "opComplete: " + Integer.toHexString(token) + " result=" + result);
+        }
         Operation op = null;
         synchronized (mCurrentOpLock) {
             op = mCurrentOperations.get(token);
@@ -8962,6 +9053,8 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
         // The completion callback, if any, is invoked on the handler
         if (op != null && op.callback != null) {
             Message msg = mBackupHandler.obtainMessage(MSG_OP_COMPLETE, op.callback);
+            // NB: this cannot distinguish between results > 2 gig
+            msg.arg1 = (result > Integer.MAX_VALUE) ? Integer.MAX_VALUE : (int) result;
             mBackupHandler.sendMessage(msg);
         }
     }

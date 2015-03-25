@@ -104,9 +104,9 @@ public class SystemBackupAgent extends BackupAgentHelper {
         // steps during restore; the restore will happen properly when the individual
         // files are restored piecemeal.
         FullBackup.backupToTar(getPackageName(), FullBackup.ROOT_TREE_TOKEN, null,
-                WALLPAPER_INFO_DIR, WALLPAPER_INFO, output.getData());
+                WALLPAPER_INFO_DIR, WALLPAPER_INFO, output);
         FullBackup.backupToTar(getPackageName(), FullBackup.ROOT_TREE_TOKEN, null,
-                WALLPAPER_IMAGE_DIR, WALLPAPER_IMAGE, output.getData());
+                WALLPAPER_IMAGE_DIR, WALLPAPER_IMAGE, output);
     }
 
     @Override

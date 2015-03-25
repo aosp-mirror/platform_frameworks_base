@@ -309,10 +309,10 @@ public class Trampoline extends IBackupManager.Stub {
     }
 
     @Override
-    public void opComplete(int token) throws RemoteException {
+    public void opComplete(int token, long result) throws RemoteException {
         BackupManagerService svc = mService;
         if (svc != null) {
-            svc.opComplete(token);
+            svc.opComplete(token, result);
         }
     }
 
