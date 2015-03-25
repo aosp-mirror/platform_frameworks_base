@@ -350,10 +350,15 @@ public class ActivityView extends ViewGroup {
             if (activityView != null) {
                 final ActivityViewCallback callback = activityView.mActivityViewCallback;
                 if (callback != null) {
+                    final WeakReference<ActivityViewCallback> callbackRef =
+                            new WeakReference<>(callback);
                     activityView.post(new Runnable() {
                         @Override
                         public void run() {
-                            callback.onAllActivitiesComplete(activityView);
+                            ActivityViewCallback callback = callbackRef.get();
+                            if (callback != null) {
+                                callback.onAllActivitiesComplete(activityView);
+                            }
                         }
                     });
                 }
