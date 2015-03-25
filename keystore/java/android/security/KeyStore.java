@@ -25,6 +25,7 @@ import android.os.ServiceManager;
 import android.security.keymaster.ExportResult;
 import android.security.keymaster.KeyCharacteristics;
 import android.security.keymaster.KeymasterArguments;
+import android.security.keymaster.KeymasterBlob;
 import android.security.keymaster.OperationResult;
 import android.util.Log;
 
@@ -403,7 +404,7 @@ public class KeyStore {
         return generateKey(alias, args, UID_SELF, flags, outCharacteristics);
     }
 
-    public int getKeyCharacteristics(String alias, byte[] clientId, byte[] appId,
+    public int getKeyCharacteristics(String alias, KeymasterBlob clientId, KeymasterBlob appId,
             KeyCharacteristics outCharacteristics) {
         try {
             return mBinder.getKeyCharacteristics(alias, clientId, appId, outCharacteristics);
@@ -429,7 +430,8 @@ public class KeyStore {
         return importKey(alias, args, format, keyData, UID_SELF, flags, outCharacteristics);
     }
 
-    public ExportResult exportKey(String alias, int format, byte[] clientId, byte[] appId) {
+    public ExportResult exportKey(String alias, int format, KeymasterBlob clientId,
+            KeymasterBlob appId) {
         try {
             return mBinder.exportKey(alias, format, clientId, appId);
         } catch (RemoteException e) {
