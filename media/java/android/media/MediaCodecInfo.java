@@ -124,6 +124,8 @@ public final class MediaCodecInfo {
     private static final Range<Integer> SIZE_RANGE = Range.create(1, 32768);
     private static final Range<Integer> FRAME_RATE_RANGE = Range.create(0, 960);
     private static final Range<Integer> BITRATE_RANGE = Range.create(0, 500000000);
+    private static final int DEFAULT_MAX_SUPPORTED_INSTANCES = 32;
+    private static final int MAX_SUPPORTED_INSTANCES_LIMIT = 256;
 
     // found stuff that is not supported by framework (=> this should not happen)
     private static final int ERROR_UNRECOGNIZED   = (1 << 0);
@@ -147,6 +149,7 @@ public final class MediaCodecInfo {
 
         // CLASSIFICATION
         private String mMime;
+        private int mMaxSupportedInstances;
 
         // LEGACY FIELDS
 
@@ -366,6 +369,18 @@ public final class MediaCodecInfo {
             return mMime;
         }
 
+        /**
+         * Returns the max number of the supported concurrent codec instances.
+         * <p>
+         * This is a hint for an upper bound. Applications should not expect to successfully
+         * operate more instances than the returned value, but the actual number of
+         * concurrently operable instances may be less as it depends on the available
+         * resources at time of use.
+         */
+        public int getMaxSupportedInstances() {
+            return mMaxSupportedInstances;
+        }
+
         private boolean isAudio() {
             return mAudioCaps != null;
         }
@@ -466,6 +481,15 @@ public final class MediaCodecInfo {
                 mEncoderCaps = EncoderCapabilities.create(info, this);
                 mEncoderCaps.setDefaultFormat(mDefaultFormat);
             }
+
+            final Map<String, Object> global = MediaCodecList.getGlobalSettings();
+            mMaxSupportedInstances = Utils.parseIntSafely(
+                    global.get("max-supported-instances"), DEFAULT_MAX_SUPPORTED_INSTANCES);
+
+            int maxInstances = Utils.parseIntSafely(
+                    map.get("max-supported-instances"), mMaxSupportedInstances);
+            mMaxSupportedInstances =
+                    Range.create(1, MAX_SUPPORTED_INSTANCES_LIMIT).clamp(maxInstances);
 
             for (Feature feat: getValidFeatures()) {
                 String key = MediaFormat.KEY_FEATURE_ + feat.mName;

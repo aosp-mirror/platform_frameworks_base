@@ -262,6 +262,27 @@ static jobject android_media_MediaCodecList_getCodecCapabilities(
     return caps;
 }
 
+static jobject android_media_MediaCodecList_getGlobalSettings(JNIEnv *env, jobject /* thiz */) {
+    sp<IMediaCodecList> mcl = getCodecList(env);
+    if (mcl == NULL) {
+        // Runtime exception already pending.
+        return NULL;
+    }
+
+    const sp<AMessage> settings = mcl->getGlobalSettings();
+    if (settings == NULL) {
+        jniThrowException(env, "java/lang/RuntimeException", "cannot get global settings");
+        return NULL;
+    }
+
+    jobject settingsObj = NULL;
+    if (ConvertMessageToMap(env, settings, &settingsObj)) {
+        return NULL;
+    }
+
+    return settingsObj;
+}
+
 static void android_media_MediaCodecList_native_init(JNIEnv* /* env */) {
 }
 
@@ -276,6 +297,10 @@ static JNINativeMethod gMethods[] = {
     { "getCodecCapabilities",
       "(ILjava/lang/String;)Landroid/media/MediaCodecInfo$CodecCapabilities;",
       (void *)android_media_MediaCodecList_getCodecCapabilities },
+
+    { "native_getGlobalSettings",
+      "()Ljava/util/Map;",
+      (void *)android_media_MediaCodecList_getGlobalSettings },
 
     { "findCodecByName", "(Ljava/lang/String;)I",
       (void *)android_media_MediaCodecList_findCodecByName },

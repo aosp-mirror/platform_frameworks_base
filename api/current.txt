@@ -15159,6 +15159,7 @@ package android.media {
     method public android.media.MediaCodecInfo.AudioCapabilities getAudioCapabilities();
     method public android.media.MediaFormat getDefaultFormat();
     method public android.media.MediaCodecInfo.EncoderCapabilities getEncoderCapabilities();
+    method public int getMaxSupportedInstances();
     method public java.lang.String getMimeType();
     method public android.media.MediaCodecInfo.VideoCapabilities getVideoCapabilities();
     method public final boolean isFeatureRequired(java.lang.String);
