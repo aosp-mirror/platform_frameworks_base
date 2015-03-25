@@ -713,8 +713,8 @@ public class KeyStoreTest extends ActivityUnitTestCase<Activity> {
         args.addInt(KeymasterDefs.KM_TAG_ALGORITHM, KeymasterDefs.KM_ALGORITHM_RSA);
         args.addInt(KeymasterDefs.KM_TAG_PADDING, KeymasterDefs.KM_PAD_NONE);
         args.addInt(KeymasterDefs.KM_TAG_KEY_SIZE, 2048);
-        args.addBlob(KeymasterDefs.KM_TAG_RSA_PUBLIC_EXPONENT,
-                RSAKeyGenParameterSpec.F4.toByteArray());
+        args.addLong(KeymasterDefs.KM_TAG_RSA_PUBLIC_EXPONENT,
+                RSAKeyGenParameterSpec.F4.longValue());
 
         KeyCharacteristics outCharacteristics = new KeyCharacteristics();
         int result = mKeyStore.generateKey(name, args, 0, outCharacteristics);
@@ -752,8 +752,8 @@ public class KeyStoreTest extends ActivityUnitTestCase<Activity> {
         args.addInt(KeymasterDefs.KM_TAG_KEY_SIZE, 2048);
         args.addInt(KeymasterDefs.KM_TAG_BLOCK_MODE, KeymasterDefs.KM_MODE_ECB);
         args.addBlob(KeymasterDefs.KM_TAG_APPLICATION_ID, id);
-        args.addBlob(KeymasterDefs.KM_TAG_RSA_PUBLIC_EXPONENT,
-                RSAKeyGenParameterSpec.F4.toByteArray());
+        args.addLong(KeymasterDefs.KM_TAG_RSA_PUBLIC_EXPONENT,
+                RSAKeyGenParameterSpec.F4.longValue());
 
         KeyCharacteristics outCharacteristics = new KeyCharacteristics();
         int result = mKeyStore.generateKey(name, args, 0, outCharacteristics);
