@@ -42,10 +42,21 @@
             </intent-filter>
         </activity>
 
+        <activity
+            android:name=".StandaloneActivity"
+            android:theme="@style/StandaloneTheme"
+            android:icon="@drawable/ic_doc_text"
+            android:enabled="false">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
         <provider
             android:name=".RecentsProvider"
             android:authorities="com.android.documentsui.recents"
-            android:exported="false" />
+            android:exported="false"/>
 
         <receiver android:name=".PackageReceiver">
             <intent-filter>

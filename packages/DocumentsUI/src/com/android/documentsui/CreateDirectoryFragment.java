@@ -70,7 +70,7 @@ public class CreateDirectoryFragment extends DialogFragment {
             public void onClick(DialogInterface dialog, int which) {
                 final String displayName = text1.getText().toString();
 
-                final DocumentsActivity activity = (DocumentsActivity) getActivity();
+                final BaseActivity activity = (BaseActivity) getActivity();
                 final DocumentInfo cwd = activity.getCurrentDirectory();
 
                 new CreateDirectoryTask(activity, cwd, displayName).executeOnExecutor(
@@ -83,12 +83,12 @@ public class CreateDirectoryFragment extends DialogFragment {
     }
 
     private class CreateDirectoryTask extends AsyncTask<Void, Void, DocumentInfo> {
-        private final DocumentsActivity mActivity;
+        private final BaseActivity mActivity;
         private final DocumentInfo mCwd;
         private final String mDisplayName;
 
         public CreateDirectoryTask(
-                DocumentsActivity activity, DocumentInfo cwd, String displayName) {
+                BaseActivity activity, DocumentInfo cwd, String displayName) {
             mActivity = activity;
             mCwd = cwd;
             mDisplayName = displayName;

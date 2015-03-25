@@ -16,8 +16,6 @@
 
 package com.android.documentsui;
 
-import static com.android.documentsui.DocumentsActivity.State.ACTION_GET_CONTENT;
-
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
@@ -43,7 +41,7 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import com.android.documentsui.DocumentsActivity.State;
+import com.android.documentsui.BaseActivity.State;
 import com.android.documentsui.model.DocumentInfo;
 import com.android.documentsui.model.RootInfo;
 import com.google.common.collect.Lists;
@@ -101,7 +99,7 @@ public class RootsFragment extends Fragment {
 
         final Context context = getActivity();
         final RootsCache roots = DocumentsApplication.getRootsCache(context);
-        final State state = ((DocumentsActivity) context).getDisplayState();
+        final State state = ((BaseActivity) context).getDisplayState();
 
         mCallbacks = new LoaderCallbacks<Collection<RootInfo>>() {
             @Override
@@ -138,9 +136,9 @@ public class RootsFragment extends Fragment {
 
     public void onDisplayStateChanged() {
         final Context context = getActivity();
-        final State state = ((DocumentsActivity) context).getDisplayState();
+        final State state = ((BaseActivity) context).getDisplayState();
 
-        if (state.action == ACTION_GET_CONTENT) {
+        if (state.action == State.ACTION_GET_CONTENT) {
             mList.setOnItemLongClickListener(mItemLongClickListener);
         } else {
             mList.setOnItemLongClickListener(null);
@@ -153,7 +151,7 @@ public class RootsFragment extends Fragment {
     public void onCurrentRootChanged() {
         if (mAdapter == null) return;
 
-        final RootInfo root = ((DocumentsActivity) getActivity()).getCurrentRoot();
+        final RootInfo root = ((BaseActivity) getActivity()).getCurrentRoot();
         for (int i = 0; i < mAdapter.getCount(); i++) {
             final Object item = mAdapter.getItem(i);
             if (item instanceof RootItem) {
@@ -176,7 +174,7 @@ public class RootsFragment extends Fragment {
     private OnItemClickListener mItemListener = new OnItemClickListener() {
         @Override
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-            final DocumentsActivity activity = DocumentsActivity.get(RootsFragment.this);
+            final BaseActivity activity = BaseActivity.get(RootsFragment.this);
             final Item item = mAdapter.getItem(position);
             if (item instanceof RootItem) {
                 activity.onRootPicked(((RootItem) item).root, true);

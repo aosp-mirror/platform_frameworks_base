@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013 The Android Open Source Project
+ * Copyright (C) 2015 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,17 +16,11 @@
 
 package com.android.documentsui;
 
+
 import static com.android.documentsui.DirectoryFragment.ANIM_DOWN;
 import static com.android.documentsui.DirectoryFragment.ANIM_NONE;
 import static com.android.documentsui.DirectoryFragment.ANIM_SIDE;
 import static com.android.documentsui.DirectoryFragment.ANIM_UP;
-import static com.android.documentsui.BaseActivity.State.ACTION_CREATE;
-import static com.android.documentsui.BaseActivity.State.ACTION_GET_CONTENT;
-import static com.android.documentsui.BaseActivity.State.ACTION_MANAGE;
-import static com.android.documentsui.BaseActivity.State.ACTION_OPEN;
-import static com.android.documentsui.BaseActivity.State.ACTION_OPEN_TREE;
-import static com.android.documentsui.BaseActivity.State.MODE_GRID;
-import static com.android.documentsui.BaseActivity.State.MODE_LIST;
 import android.app.Activity;
 import android.app.Fragment;
 import android.app.FragmentManager;
@@ -45,8 +39,8 @@ import android.graphics.Point;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Debug;
 import android.provider.DocumentsContract;
-import android.provider.DocumentsContract.Root;
 import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v4.widget.DrawerLayout.DrawerListener;
@@ -69,7 +63,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.Toolbar;
 
-import com.android.documentsui.RecentsProvider.RecentColumns;
 import com.android.documentsui.RecentsProvider.ResumeColumns;
 import com.android.documentsui.model.DocumentInfo;
 import com.android.documentsui.model.DocumentStack;
@@ -85,14 +78,12 @@ import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.Executor;
 
-public class DocumentsActivity extends BaseActivity {
-    public static final String TAG = "Documents";
+public class StandaloneActivity extends BaseActivity {
+    public static final String TAG = "StandaloneFileManagement";
 
     private static final String EXTRA_STATE = "state";
 
     private static final int CODE_FORWARD = 42;
-
-    private boolean mShowAsDialog;
 
     private SearchView mSearchView;
 
@@ -101,9 +92,7 @@ public class DocumentsActivity extends BaseActivity {
 
     private Toolbar mRootsToolbar;
 
-    private DrawerLayout mDrawerLayout;
     private ActionBarDrawerToggle mDrawerToggle;
-    private View mRootsDrawer;
 
     private DirectoryContainerView mDirectoryContainer;
 
@@ -118,6 +107,7 @@ public class DocumentsActivity extends BaseActivity {
 
     @Override
     public void onCreate(Bundle icicle) {
+        // Debug.waitForDebugger();
         super.onCreate(icicle);
 
         mRoots = DocumentsApplication.getRootsCache(this);
@@ -127,30 +117,15 @@ public class DocumentsActivity extends BaseActivity {
 
         final Context context = this;
         final Resources res = getResources();
-        mShowAsDialog = res.getBoolean(R.bool.show_as_dialog);
 
-        if (mShowAsDialog) {
-            // Strongly define our horizontal dimension; we leave vertical as
-            // WRAP_CONTENT so that system resizes us when IME is showing.
-            final WindowManager.LayoutParams a = getWindow().getAttributes();
+        // Strongly define our horizontal dimension; we leave vertical as
+        final WindowManager.LayoutParams a = getWindow().getAttributes();
 
-            final Point size = new Point();
-            getWindowManager().getDefaultDisplay().getSize(size);
-            a.width = (int) res.getFraction(R.dimen.dialog_width, size.x, size.x);
+        final Point size = new Point();
+        getWindowManager().getDefaultDisplay().getSize(size);
+        // a.width = (int) res.getFraction(R.dimen.dialog_width, size.x, size.x);
 
-            getWindow().setAttributes(a);
-
-        } else {
-            // Non-dialog means we have a drawer
-            mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
-
-            mDrawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout,
-                    R.drawable.ic_hamburger, R.string.drawer_open, R.string.drawer_close);
-
-            mDrawerLayout.setDrawerListener(mDrawerListener);
-
-            mRootsDrawer = findViewById(R.id.drawer_roots);
-        }
+        getWindow().setAttributes(a);
 
         mDirectoryContainer = (DirectoryContainerView) findViewById(R.id.container_directory);
 
@@ -175,40 +150,9 @@ public class DocumentsActivity extends BaseActivity {
 
         setActionBar(mToolbar);
 
-        // Hide roots when we're managing a specific root
-        if (mState.action == ACTION_MANAGE) {
-            if (mShowAsDialog) {
-                findViewById(R.id.container_roots).setVisibility(View.GONE);
-            } else {
-                mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
-            }
-        }
-
-        if (mState.action == ACTION_CREATE) {
-            final String mimeType = getIntent().getType();
-            final String title = getIntent().getStringExtra(Intent.EXTRA_TITLE);
-            SaveFragment.show(getFragmentManager(), mimeType, title);
-        } else if (mState.action == ACTION_OPEN_TREE) {
-            PickFragment.show(getFragmentManager());
-        }
-
-        if (mState.action == ACTION_GET_CONTENT) {
-            final Intent moreApps = new Intent(getIntent());
-            moreApps.setComponent(null);
-            moreApps.setPackage(null);
-            RootsFragment.show(getFragmentManager(), moreApps);
-        } else if (mState.action == ACTION_OPEN
-                || mState.action == ACTION_CREATE || mState.action == ACTION_OPEN_TREE) {
-            RootsFragment.show(getFragmentManager(), null);
-        }
-
+        RootsFragment.show(getFragmentManager(), null);
         if (!mState.restored) {
-            if (mState.action == ACTION_MANAGE) {
-                final Uri rootUri = getIntent().getData();
-                new RestoreRootTask(rootUri).executeOnExecutor(getCurrentExecutor());
-            } else {
-                new RestoreStackTask().execute();
-            }
+            new RestoreStackTask().execute();
         } else {
             onCurrentDirectoryChanged(ANIM_NONE);
         }
@@ -218,43 +162,15 @@ public class DocumentsActivity extends BaseActivity {
         mState = new State();
 
         final Intent intent = getIntent();
-        final String action = intent.getAction();
-        if (Intent.ACTION_OPEN_DOCUMENT.equals(action)) {
-            mState.action = ACTION_OPEN;
-        } else if (Intent.ACTION_CREATE_DOCUMENT.equals(action)) {
-            mState.action = ACTION_CREATE;
-        } else if (Intent.ACTION_GET_CONTENT.equals(action)) {
-            mState.action = ACTION_GET_CONTENT;
-        } else if (Intent.ACTION_OPEN_DOCUMENT_TREE.equals(action)) {
-            mState.action = ACTION_OPEN_TREE;
-        } else if (DocumentsContract.ACTION_MANAGE_ROOT.equals(action)) {
-            mState.action = ACTION_MANAGE;
-        }
-
-        if (mState.action == ACTION_OPEN || mState.action == ACTION_GET_CONTENT) {
-            mState.allowMultiple = intent.getBooleanExtra(
-                    Intent.EXTRA_ALLOW_MULTIPLE, false);
-        }
-
-        if (mState.action == ACTION_MANAGE) {
-            mState.acceptMimes = new String[] { "*/*" };
-            mState.allowMultiple = true;
-        } else if (intent.hasExtra(Intent.EXTRA_MIME_TYPES)) {
-            mState.acceptMimes = intent.getStringArrayExtra(Intent.EXTRA_MIME_TYPES);
-        } else {
-            mState.acceptMimes = new String[] { intent.getType() };
-        }
-
+        mState.action = State.ACTION_MANAGE_ALL;
+        mState.acceptMimes = new String[] { "*/*" };
+        mState.allowMultiple = true;
+        mState.acceptMimes = new String[] { intent.getType() };
         mState.localOnly = intent.getBooleanExtra(Intent.EXTRA_LOCAL_ONLY, false);
         mState.forceAdvanced = intent.getBooleanExtra(DocumentsContract.EXTRA_SHOW_ADVANCED, false);
         mState.showAdvanced = mState.forceAdvanced
                 | LocalPreferences.getDisplayAdvancedDevices(this);
-
-        if (mState.action == ACTION_MANAGE) {
-            mState.showSize = true;
-        } else {
-            mState.showSize = LocalPreferences.getDisplayFileSize(this);
-        }
+        mState.showSize = true;
     }
 
     private class RestoreRootTask extends AsyncTask<Void, Void, RootInfo> {
@@ -328,51 +244,9 @@ public class DocumentsActivity extends BaseActivity {
         protected void onPostExecute(Void result) {
             if (isDestroyed()) return;
             mState.restored = true;
-
-            // Show drawer when no stack restored, but only when requesting
-            // non-visual content. However, if we last used an external app,
-            // drawer is always shown.
-
-            boolean showDrawer = false;
-            if (!mRestoredStack) {
-                showDrawer = true;
-            }
-            if (MimePredicate.mimeMatches(MimePredicate.VISUAL_MIMES, mState.acceptMimes)) {
-                showDrawer = false;
-            }
-            if (mExternal && mState.action == ACTION_GET_CONTENT) {
-                showDrawer = true;
-            }
-
-            if (showDrawer) {
-                setRootsDrawerOpen(true);
-            }
-
             onCurrentDirectoryChanged(ANIM_NONE);
         }
     }
-
-    private DrawerListener mDrawerListener = new DrawerListener() {
-        @Override
-        public void onDrawerSlide(View drawerView, float slideOffset) {
-            mDrawerToggle.onDrawerSlide(drawerView, slideOffset);
-        }
-
-        @Override
-        public void onDrawerOpened(View drawerView) {
-            mDrawerToggle.onDrawerOpened(drawerView);
-        }
-
-        @Override
-        public void onDrawerClosed(View drawerView) {
-            mDrawerToggle.onDrawerClosed(drawerView);
-        }
-
-        @Override
-        public void onDrawerStateChanged(int newState) {
-            mDrawerToggle.onDrawerStateChanged(newState);
-        }
-    };
 
     @Override
     protected void onPostCreate(Bundle savedInstanceState) {
@@ -385,50 +259,16 @@ public class DocumentsActivity extends BaseActivity {
 
     @Override
     public void setRootsDrawerOpen(boolean open) {
-        if (!mShowAsDialog) {
-            if (open) {
-                mDrawerLayout.openDrawer(mRootsDrawer);
-            } else {
-                mDrawerLayout.closeDrawer(mRootsDrawer);
-            }
-        }
-    }
-
-    private boolean isRootsDrawerOpen() {
-        if (mShowAsDialog) {
-            return false;
-        } else {
-            return mDrawerLayout.isDrawerOpen(mRootsDrawer);
-        }
+        Log.w(TAG, "Trying to change state of roots drawer to > " + (open ? "open" : "closed"));
+      // throw new UnsupportedOperationException();
     }
 
     public void updateActionBar() {
-        if (mRootsToolbar != null) {
-            if (mState.action == ACTION_OPEN || mState.action == ACTION_GET_CONTENT
-                    || mState.action == ACTION_OPEN_TREE) {
-                mRootsToolbar.setTitle(R.string.title_open);
-            } else if (mState.action == ACTION_CREATE) {
-                mRootsToolbar.setTitle(R.string.title_save);
-            }
-        }
-
         final RootInfo root = getCurrentRoot();
-        final boolean showRootIcon = mShowAsDialog || (mState.action == ACTION_MANAGE);
-        if (showRootIcon) {
-            mToolbar.setNavigationIcon(
-                    root != null ? root.loadToolbarIcon(mToolbar.getContext()) : null);
-            mToolbar.setNavigationContentDescription(R.string.drawer_open);
-            mToolbar.setNavigationOnClickListener(null);
-        } else {
-            mToolbar.setNavigationIcon(R.drawable.ic_hamburger);
-            mToolbar.setNavigationContentDescription(R.string.drawer_open);
-            mToolbar.setNavigationOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    setRootsDrawerOpen(true);
-                }
-            });
-        }
+        mToolbar.setNavigationIcon(
+                root != null ? root.loadToolbarIcon(mToolbar.getContext()) : null);
+        mToolbar.setNavigationContentDescription(R.string.drawer_open);
+        mToolbar.setNavigationOnClickListener(null);
 
         if (mSearchExpanded) {
             mToolbar.setTitle(null);
@@ -455,17 +295,14 @@ public class DocumentsActivity extends BaseActivity {
         super.onCreateOptionsMenu(menu);
         getMenuInflater().inflate(R.menu.activity, menu);
 
-        // Most actions are visible when showing as dialog
-        if (mShowAsDialog) {
-            for (int i = 0; i < menu.size(); i++) {
-                final MenuItem item = menu.getItem(i);
-                switch (item.getItemId()) {
-                    case R.id.menu_advanced:
-                    case R.id.menu_file_size:
-                        break;
-                    default:
-                        item.setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
-                }
+        for (int i = 0; i < menu.size(); i++) {
+            final MenuItem item = menu.getItem(i);
+            switch (item.getItemId()) {
+                case R.id.menu_advanced:
+                case R.id.menu_file_size:
+                    break;
+                default:
+                    item.setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
             }
         }
 
@@ -546,8 +383,8 @@ public class DocumentsActivity extends BaseActivity {
         final MenuItem fileSize = menu.findItem(R.id.menu_file_size);
 
         sort.setVisible(cwd != null);
-        grid.setVisible(mState.derivedMode != MODE_GRID);
-        list.setVisible(mState.derivedMode != MODE_LIST);
+        grid.setVisible(mState.derivedMode != State.MODE_GRID);
+        list.setVisible(mState.derivedMode != State.MODE_LIST);
 
         if (mState.currentSearch != null) {
             // Search uses backend ranking; no sorting
@@ -570,39 +407,16 @@ public class DocumentsActivity extends BaseActivity {
         // Only sort by size when visible
         sortSize.setVisible(mState.showSize);
 
-        boolean searchVisible;
-        boolean fileSizeVisible = mState.action != ACTION_MANAGE;
-        if (mState.action == ACTION_CREATE || mState.action == ACTION_OPEN_TREE) {
-            createDir.setVisible(cwd != null && cwd.isCreateSupported());
-            searchVisible = false;
-
-            // No display options in recent directories
-            if (cwd == null) {
-                grid.setVisible(false);
-                list.setVisible(false);
-                fileSizeVisible = false;
-            }
-
-            if (mState.action == ACTION_CREATE) {
-                SaveFragment.get(fm).setSaveEnabled(cwd != null && cwd.isCreateSupported());
-            }
-        } else {
-            createDir.setVisible(false);
-
-            searchVisible = root != null
-                    && ((root.flags & Root.FLAG_SUPPORTS_SEARCH) != 0);
-        }
-
-        // TODO: close any search in-progress when hiding
-        search.setVisible(searchVisible);
+        fileSize.setVisible(true);
+        search.setVisible(true);
+        createDir.setVisible(true);
+        advanced.setVisible(true);
 
         advanced.setTitle(LocalPreferences.getDisplayAdvancedDevices(this)
                 ? R.string.menu_advanced_hide : R.string.menu_advanced_show);
         fileSize.setTitle(LocalPreferences.getDisplayFileSize(this)
                 ? R.string.menu_file_size_hide : R.string.menu_file_size_show);
 
-        advanced.setVisible(mState.action != ACTION_MANAGE);
-        fileSize.setVisible(fileSizeVisible);
 
         return true;
     }
@@ -702,9 +516,6 @@ public class DocumentsActivity extends BaseActivity {
         if (size > 1) {
             mState.stack.pop();
             onCurrentDirectoryChanged(ANIM_UP);
-        } else if (size == 1 && !isRootsDrawerOpen()) {
-            // TODO: open root drawer once we can capture back key
-            super.onBackPressed();
         } else {
             super.onBackPressed();
         }
@@ -811,7 +622,6 @@ public class DocumentsActivity extends BaseActivity {
         }
     }
 
-    @Override
     public DocumentInfo getCurrentDirectory() {
         return mState.stack.peek();
     }
@@ -843,18 +653,13 @@ public class DocumentsActivity extends BaseActivity {
         mDirectoryContainer.setDrawDisappearingFirst(anim == ANIM_DOWN);
 
         if (cwd == null) {
-            // No directory means recents
-            if (mState.action == ACTION_CREATE || mState.action == ACTION_OPEN_TREE) {
-                RecentsCreateFragment.show(fm);
-            } else {
-                DirectoryFragment.showRecentsOpen(fm, anim);
+            DirectoryFragment.showRecentsOpen(fm, anim);
 
-                // Start recents in grid when requesting visual things
-                final boolean visualMimes = MimePredicate.mimeMatches(
-                        MimePredicate.VISUAL_MIMES, mState.acceptMimes);
-                mState.userMode = visualMimes ? MODE_GRID : MODE_LIST;
-                mState.derivedMode = mState.userMode;
-            }
+            // Start recents in grid when requesting visual things
+            final boolean visualMimes = MimePredicate.mimeMatches(
+                    MimePredicate.VISUAL_MIMES, mState.acceptMimes);
+            mState.userMode = visualMimes ? State.MODE_GRID : State.MODE_LIST;
+            mState.derivedMode = mState.userMode;
         } else {
             if (mState.currentSearch != null) {
                 // Ongoing search
@@ -862,23 +667,6 @@ public class DocumentsActivity extends BaseActivity {
             } else {
                 // Normal boring directory
                 DirectoryFragment.showNormal(fm, root, cwd, anim);
-            }
-        }
-
-        // Forget any replacement target
-        if (mState.action == ACTION_CREATE) {
-            final SaveFragment save = SaveFragment.get(fm);
-            if (save != null) {
-                save.setReplaceTarget(null);
-            }
-        }
-
-        if (mState.action == ACTION_OPEN_TREE) {
-            final PickFragment pick = PickFragment.get(fm);
-            if (pick != null) {
-                final CharSequence displayName = (mState.stack.size() <= 1) ? root.title
-                        : cwd.displayName;
-                pick.setPickTarget(cwd, displayName);
             }
         }
 
@@ -918,10 +706,6 @@ public class DocumentsActivity extends BaseActivity {
             new PickRootTask(root).executeOnExecutor(getCurrentExecutor());
         } else {
             onCurrentDirectoryChanged(ANIM_SIDE);
-        }
-
-        if (closeDrawer) {
-            setRootsDrawerOpen(false);
         }
     }
 
@@ -992,45 +776,22 @@ public class DocumentsActivity extends BaseActivity {
             mState.stack.push(doc);
             mState.stackTouched = true;
             onCurrentDirectoryChanged(ANIM_DOWN);
-        } else if (mState.action == ACTION_OPEN || mState.action == ACTION_GET_CONTENT) {
-            // Explicit file picked, return
-            new ExistingFinishTask(doc.derivedUri).executeOnExecutor(getCurrentExecutor());
-        } else if (mState.action == ACTION_CREATE) {
-            // Replace selected file
-            SaveFragment.get(fm).setReplaceTarget(doc);
-        } else if (mState.action == ACTION_MANAGE) {
-            // First try managing the document; we expect manager to filter
-            // based on authority, so we don't grant.
-            final Intent manage = new Intent(DocumentsContract.ACTION_MANAGE_DOCUMENT);
-            manage.setData(doc.derivedUri);
+        } else {
+            // Fall back to viewing
+            final Intent view = new Intent(Intent.ACTION_VIEW);
+            view.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            view.setData(doc.derivedUri);
 
             try {
-                startActivity(manage);
-            } catch (ActivityNotFoundException ex) {
-                // Fall back to viewing
-                final Intent view = new Intent(Intent.ACTION_VIEW);
-                view.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-                view.setData(doc.derivedUri);
-
-                try {
-                    startActivity(view);
-                } catch (ActivityNotFoundException ex2) {
-                    Toast.makeText(this, R.string.toast_no_application, Toast.LENGTH_SHORT).show();
-                }
+                startActivity(view);
+            } catch (ActivityNotFoundException ex2) {
+                Toast.makeText(this, R.string.toast_no_application, Toast.LENGTH_SHORT).show();
             }
         }
     }
 
-    @Override
     public void onDocumentsPicked(List<DocumentInfo> docs) {
-        if (mState.action == ACTION_OPEN || mState.action == ACTION_GET_CONTENT) {
-            final int size = docs.size();
-            final Uri[] uris = new Uri[size];
-            for (int i = 0; i < size; i++) {
-                uris[i] = docs.get(i).derivedUri;
-            }
-            new ExistingFinishTask(uris).executeOnExecutor(getCurrentExecutor());
-        }
+        // TODO
     }
 
     @Override
@@ -1055,13 +816,6 @@ public class DocumentsActivity extends BaseActivity {
         final ContentValues values = new ContentValues();
 
         final byte[] rawStack = DurableUtils.writeToArrayOrNull(mState.stack);
-        if (mState.action == ACTION_CREATE || mState.action == ACTION_OPEN_TREE) {
-            // Remember stack for last create
-            values.clear();
-            values.put(RecentColumns.KEY, mState.stack.buildKey());
-            values.put(RecentColumns.STACK, rawStack);
-            resolver.insert(RecentsProvider.buildRecent(), values);
-        }
 
         // Remember location for next app launch
         final String packageName = getCallingPackageMaybeExtra();
@@ -1086,18 +840,9 @@ public class DocumentsActivity extends BaseActivity {
             intent.setClipData(clipData);
         }
 
-        if (mState.action == ACTION_GET_CONTENT) {
-            intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-        } else if (mState.action == ACTION_OPEN_TREE) {
-            intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION
-                    | Intent.FLAG_GRANT_WRITE_URI_PERMISSION
-                    | Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION
-                    | Intent.FLAG_GRANT_PREFIX_URI_PERMISSION);
-        } else {
-            intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION
-                    | Intent.FLAG_GRANT_WRITE_URI_PERMISSION
-                    | Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION);
-        }
+        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION
+                | Intent.FLAG_GRANT_WRITE_URI_PERMISSION
+                | Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION);
 
         setResult(Activity.RESULT_OK, intent);
         finish();
@@ -1147,7 +892,7 @@ public class DocumentsActivity extends BaseActivity {
             if (result != null) {
                 onFinished(result);
             } else {
-                Toast.makeText(DocumentsActivity.this, R.string.save_error, Toast.LENGTH_SHORT)
+                Toast.makeText(StandaloneActivity.this, R.string.save_error, Toast.LENGTH_SHORT)
                         .show();
             }
 
@@ -1199,5 +944,9 @@ public class DocumentsActivity extends BaseActivity {
         for (DocumentInfo doc : mState.stack) {
             Log.d(TAG, " +-- " + doc);
         }
+    }
+
+    public static BaseActivity get(Fragment fragment) {
+        return (BaseActivity) fragment.getActivity();
     }
 }

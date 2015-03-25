@@ -17,12 +17,12 @@
 package com.android.documentsui;
 
 import static com.android.documentsui.DocumentsActivity.TAG;
-import static com.android.documentsui.DocumentsActivity.State.ACTION_CREATE;
-import static com.android.documentsui.DocumentsActivity.State.ACTION_MANAGE;
-import static com.android.documentsui.DocumentsActivity.State.MODE_GRID;
-import static com.android.documentsui.DocumentsActivity.State.MODE_LIST;
-import static com.android.documentsui.DocumentsActivity.State.MODE_UNKNOWN;
-import static com.android.documentsui.DocumentsActivity.State.SORT_ORDER_UNKNOWN;
+import static com.android.documentsui.BaseActivity.State.ACTION_CREATE;
+import static com.android.documentsui.BaseActivity.State.ACTION_MANAGE;
+import static com.android.documentsui.BaseActivity.State.MODE_GRID;
+import static com.android.documentsui.BaseActivity.State.MODE_LIST;
+import static com.android.documentsui.BaseActivity.State.MODE_UNKNOWN;
+import static com.android.documentsui.BaseActivity.State.SORT_ORDER_UNKNOWN;
 import static com.android.documentsui.model.DocumentInfo.getCursorInt;
 import static com.android.documentsui.model.DocumentInfo.getCursorLong;
 import static com.android.documentsui.model.DocumentInfo.getCursorString;
@@ -76,7 +76,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.android.documentsui.DocumentsActivity.State;
+import com.android.documentsui.BaseActivity.State;
 import com.android.documentsui.ProviderExecutor.Preemptable;
 import com.android.documentsui.RecentsProvider.StateColumns;
 import com.android.documentsui.model.DocumentInfo;
@@ -301,13 +301,13 @@ public class DirectoryFragment extends Fragment {
                     state.derivedMode = result.mode;
                 }
                 state.derivedSortOrder = result.sortOrder;
-                ((DocumentsActivity) context).onStateChanged();
+                ((BaseActivity) context).onStateChanged();
 
                 updateDisplayState();
 
                 // When launched into empty recents, show drawer
                 if (mType == TYPE_RECENT_OPEN && mAdapter.isEmpty() && !state.stackTouched) {
-                    ((DocumentsActivity) context).setRootsDrawerOpen(true);
+                    ((BaseActivity) context).setRootsDrawerOpen(true);
                 }
 
                 // Restore any previous instance state
@@ -386,7 +386,7 @@ public class DirectoryFragment extends Fragment {
         // Mode change is just visual change; no need to kick loader, and
         // deliver change event immediately.
         state.derivedMode = state.userMode;
-        ((DocumentsActivity) getActivity()).onStateChanged();
+        ((BaseActivity) getActivity()).onStateChanged();
 
         updateDisplayState();
     }
@@ -441,7 +441,7 @@ public class DirectoryFragment extends Fragment {
                 final int docFlags = getCursorInt(cursor, Document.COLUMN_FLAGS);
                 if (isDocumentEnabled(docMimeType, docFlags)) {
                     final DocumentInfo doc = DocumentInfo.fromDirectoryCursor(cursor);
-                    ((DocumentsActivity) getActivity()).onDocumentPicked(doc);
+                    ((BaseActivity) getActivity()).onDocumentPicked(doc);
                 }
             }
         }
@@ -487,7 +487,7 @@ public class DirectoryFragment extends Fragment {
 
             final int id = item.getItemId();
             if (id == R.id.menu_open) {
-                DocumentsActivity.get(DirectoryFragment.this).onDocumentsPicked(docs);
+                BaseActivity.get(DirectoryFragment.this).onDocumentsPicked(docs);
                 mode.finish();
                 return true;
 
@@ -616,7 +616,7 @@ public class DirectoryFragment extends Fragment {
     }
 
     private static State getDisplayState(Fragment fragment) {
-        return ((DocumentsActivity) fragment.getActivity()).getDisplayState();
+        return ((BaseActivity) fragment.getActivity()).getDisplayState();
     }
 
     private static abstract class Footer {
