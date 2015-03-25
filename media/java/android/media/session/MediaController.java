@@ -516,8 +516,8 @@ public final class MediaController {
     }
 
     /**
-     * Callback for receiving updates on from the session. A Callback can be
-     * registered using {@link #registerCallback}
+     * Callback for receiving updates from the session. A Callback can be
+     * registered using {@link #registerCallback}.
      */
     public static abstract class Callback {
         /**

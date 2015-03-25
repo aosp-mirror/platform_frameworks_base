@@ -1314,7 +1314,8 @@ public final class Configuration implements Parcelable, Comparable<Configuration
      * {@link View#LAYOUT_DIRECTION_LTR}. If not null will set it to the layout direction
      * corresponding to the Locale.
      *
-     * @see {@link View#LAYOUT_DIRECTION_LTR} and {@link View#LAYOUT_DIRECTION_RTL}
+     * @see View#LAYOUT_DIRECTION_LTR
+     * @see View#LAYOUT_DIRECTION_RTL
      */
     public void setLayoutDirection(Locale locale) {
         // There is a "1" difference between the configuration values for

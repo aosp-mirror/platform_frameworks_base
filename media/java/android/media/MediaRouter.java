@@ -1500,18 +1500,18 @@ public class MediaRouter {
 
         /**
          * The default playback type, "local", indicating the presentation of the media is happening
-         * on the same device (e.g. a phone, a tablet) as where it is controlled from.
+         * on the same device (e&#46;g&#46; a phone, a tablet) as where it is controlled from.
          * @see #getPlaybackType()
          */
         public final static int PLAYBACK_TYPE_LOCAL = 0;
         /**
          * A playback type indicating the presentation of the media is happening on
-         * a different device (i.e. the remote device) than where it is controlled from.
+         * a different device (i&#46;e&#46; the remote device) than where it is controlled from.
          * @see #getPlaybackType()
          */
         public final static int PLAYBACK_TYPE_REMOTE = 1;
         /**
-         * Playback information indicating the playback volume is fixed, i.e. it cannot be
+         * Playback information indicating the playback volume is fixed, i&#46;e&#46; it cannot be
          * controlled from this object. An example of fixed playback volume is a remote player,
          * playing over HDMI where the user prefers to control the volume on the HDMI sink, rather
          * than attenuate at the source.
