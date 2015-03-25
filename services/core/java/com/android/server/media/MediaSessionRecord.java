@@ -40,6 +40,7 @@ import android.media.session.MediaSession;
 import android.media.session.ParcelableVolumeInfo;
 import android.media.session.PlaybackState;
 import android.media.AudioAttributes;
+import android.net.Uri;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.DeadObjectException;
@@ -887,6 +888,14 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
             }
         }
 
+        public void playFromUri(Uri uri, Bundle extras) {
+            try {
+                mCb.onPlayFromUri(uri, extras);
+            } catch (RemoteException e) {
+                Slog.e(TAG, "Remote failure in playFromUri.", e);
+            }
+        }
+
         public void skipToTrack(long id) {
             try {
                 mCb.onSkipToTrack(id);
@@ -1100,6 +1109,11 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
         @Override
         public void playFromSearch(String query, Bundle extras) throws RemoteException {
             mSessionCb.playFromSearch(query, extras);
+        }
+
+        @Override
+        public void playFromUri(Uri uri, Bundle extras) throws RemoteException {
+            mSessionCb.playFromUri(uri, extras);
         }
 
         @Override

@@ -30,6 +30,7 @@ import android.media.MediaMetadata;
 import android.media.Rating;
 import android.media.VolumeProvider;
 import android.media.routing.MediaRouter;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -541,6 +542,10 @@ public final class MediaSession {
         postToCallback(CallbackMessageHandler.MSG_PLAY_SEARCH, query, extras);
     }
 
+    private void dispatchPlayFromUri(Uri uri, Bundle extras) {
+        postToCallback(CallbackMessageHandler.MSG_PLAY_URI, uri, extras);
+    }
+
     private void dispatchSkipToItem(long id) {
         postToCallback(CallbackMessageHandler.MSG_SKIP_TO_ITEM, id);
     }
@@ -833,6 +838,12 @@ public final class MediaSession {
         }
 
         /**
+         * Override to handle requests to play a specific media item represented by a URI.
+         */
+        public void onPlayFromUri(Uri uri, Bundle extras) {
+        }
+
+        /**
          * Override to handle requests to play an item with a given id from the
          * play queue.
          */
@@ -957,6 +968,14 @@ public final class MediaSession {
             MediaSession session = mMediaSession.get();
             if (session != null) {
                 session.dispatchPlayFromSearch(query, extras);
+            }
+        }
+
+        @Override
+        public void onPlayFromUri(Uri uri, Bundle extras) {
+            MediaSession session = mMediaSession.get();
+            if (session != null) {
+                session.dispatchPlayFromUri(uri, extras);
             }
         }
 
@@ -1171,6 +1190,7 @@ public final class MediaSession {
         private static final int MSG_COMMAND = 15;
         private static final int MSG_ADJUST_VOLUME = 16;
         private static final int MSG_SET_VOLUME = 17;
+        private static final int MSG_PLAY_URI = 18;
 
         private MediaSession.Callback mCallback;
 
@@ -1209,6 +1229,9 @@ public final class MediaSession {
                     break;
                 case MSG_PLAY_SEARCH:
                     mCallback.onPlayFromSearch((String) msg.obj, msg.getData());
+                    break;
+                case MSG_PLAY_URI:
+                    mCallback.onPlayFromUri((Uri) msg.obj, msg.getData());
                     break;
                 case MSG_SKIP_TO_ITEM:
                     mCallback.onSkipToQueueItem((Long) msg.obj);

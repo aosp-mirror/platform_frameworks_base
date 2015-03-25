@@ -126,6 +126,13 @@ public final class PlaybackState implements Parcelable {
     public static final long ACTION_SKIP_TO_QUEUE_ITEM = 1 << 12;
 
     /**
+     * Indicates this session supports the play from URI command.
+     *
+     * @see Builder#setActions(long)
+     */
+    public static final long ACTION_PLAY_FROM_URI = 1 << 13;
+
+    /**
      * This is the default playback state and indicates that no media has been
      * added yet, or the performer has been reset and has no content to play.
      *
@@ -353,6 +360,11 @@ public final class PlaybackState implements Parcelable {
      * <li> {@link PlaybackState#ACTION_SKIP_TO_NEXT}</li>
      * <li> {@link PlaybackState#ACTION_SEEK_TO}</li>
      * <li> {@link PlaybackState#ACTION_SET_RATING}</li>
+     * <li> {@link PlaybackState#ACTION_PLAY_PAUSE}</li>
+     * <li> {@link PlaybackState#ACTION_PLAY_FROM_MEDIA_ID}</li>
+     * <li> {@link PlaybackState#ACTION_PLAY_FROM_SEARCH}</li>
+     * <li> {@link PlaybackState#ACTION_SKIP_TO_QUEUE_ITEM}</li>
+     * <li> {@link PlaybackState#ACTION_PLAY_FROM_URI}</li>
      * </ul>
      */
     public long getActions() {
@@ -868,6 +880,11 @@ public final class PlaybackState implements Parcelable {
          * <li> {@link PlaybackState#ACTION_SKIP_TO_NEXT}</li>
          * <li> {@link PlaybackState#ACTION_SEEK_TO}</li>
          * <li> {@link PlaybackState#ACTION_SET_RATING}</li>
+         * <li> {@link PlaybackState#ACTION_PLAY_PAUSE}</li>
+         * <li> {@link PlaybackState#ACTION_PLAY_FROM_MEDIA_ID}</li>
+         * <li> {@link PlaybackState#ACTION_PLAY_FROM_SEARCH}</li>
+         * <li> {@link PlaybackState#ACTION_SKIP_TO_QUEUE_ITEM}</li>
+         * <li> {@link PlaybackState#ACTION_PLAY_FROM_URI}</li>
          * </ul>
          *
          * @param actions The set of actions allowed.
