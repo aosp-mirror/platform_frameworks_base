@@ -22,4 +22,6 @@
     <string name="bugreport_finished_text" product="default" msgid="3559904746859400732">"Snertu til að deila villutilkynningunni"</string>
     <string name="bugreport_confirm" msgid="5130698467795669780">"Villutilkynningar innihalda gögn úr hinum ýmsu annálsskrám kerfisins, þ. á m. persónuleg gögn og trúnaðarupplýsingar. Deildu villutilkynningum eingöngu með forritum og fólki sem þú treystir."</string>
     <string name="bugreport_confirm_repeat" msgid="4926842460688645058">"Sýna þessi skilaboð næst"</string>
+    <!-- no translation found for bugreport_storage_title (5332488144740527109) -->
+    <skip />
 </resources>

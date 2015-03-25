@@ -22,4 +22,6 @@
     <string name="bugreport_finished_text" product="default" msgid="3559904746859400732">"Допри да се сподели твојот извештај за грешка"</string>
     <string name="bugreport_confirm" msgid="5130698467795669780">"Извештаите за грешка содржат податоци од разни датотеки за евиденција на системот, вклучувајќи лични и приватни информации. Извештаите за грешка споделувајте ги само со апликации и луѓе на коишто им верувате."</string>
     <string name="bugreport_confirm_repeat" msgid="4926842460688645058">"Прикажи ја поракава следниот пат"</string>
+    <!-- no translation found for bugreport_storage_title (5332488144740527109) -->
+    <skip />
 </resources>

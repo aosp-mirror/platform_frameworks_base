@@ -22,4 +22,6 @@
     <string name="bugreport_finished_text" product="default" msgid="3559904746859400732">"Jaa virheraportti koskettamalla tätä"</string>
     <string name="bugreport_confirm" msgid="5130698467795669780">"Virheraportit sisältävät järjestelmän lokitietoja, ja niihin voi sisältyä henkilökohtaisia ja yksityisiä tietoja. Jaa virheraportteja vain luotettaville sovelluksille ja käyttäjille."</string>
     <string name="bugreport_confirm_repeat" msgid="4926842460688645058">"Näytä tämä viesti seuraavalla kerralla"</string>
+    <!-- no translation found for bugreport_storage_title (5332488144740527109) -->
+    <skip />
 </resources>

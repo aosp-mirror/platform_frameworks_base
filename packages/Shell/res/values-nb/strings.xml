@@ -22,4 +22,6 @@
     <string name="bugreport_finished_text" product="default" msgid="3559904746859400732">"Trykk for å dele feilrapporten din"</string>
     <string name="bugreport_confirm" msgid="5130698467795669780">"Feilrapporter inkluderer data fra systemets forskjellige loggfiler. Dette omfatter personlig og privat informasjon. Du bør bare dele feilrapporter med apper og folk du stoler på."</string>
     <string name="bugreport_confirm_repeat" msgid="4926842460688645058">"Vis denne meldingen neste gang"</string>
+    <!-- no translation found for bugreport_storage_title (5332488144740527109) -->
+    <skip />
 </resources>

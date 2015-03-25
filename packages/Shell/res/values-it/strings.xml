@@ -22,4 +22,6 @@
     <string name="bugreport_finished_text" product="default" msgid="3559904746859400732">"Tocca per condividere la segnalazione di bug"</string>
     <string name="bugreport_confirm" msgid="5130698467795669780">"Le segnalazioni di bug contengono dati da vari file di log del sistema, incluse informazioni personali e private. Condividi le segnalazioni di bug solo con app e persone attendibili."</string>
     <string name="bugreport_confirm_repeat" msgid="4926842460688645058">"Mostra questo messaggio la prossima volta"</string>
+    <!-- no translation found for bugreport_storage_title (5332488144740527109) -->
+    <skip />
 </resources>
