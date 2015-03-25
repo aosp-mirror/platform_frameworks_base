@@ -88,6 +88,9 @@
     <string name="unlock_label" msgid="8779712358041029439">"আনলক করুন"</string>
     <string name="phone_label" msgid="2320074140205331708">"ফোন খুলুন"</string>
     <string name="camera_label" msgid="7261107956054836961">"ক্যামেরা খুলুন"</string>
+    <!-- no translation found for recents_caption_resize (3517056471774958200) -->
+    <skip />
+    <string name="cancel" msgid="6442560571259935130">"বাতিল করুন"</string>
     <string name="accessibility_compatibility_zoom_button" msgid="8461115318742350699">"সামঞ্জস্যের জুম বোতাম৷"</string>
     <string name="accessibility_compatibility_zoom_example" msgid="4220687294564945780">"ছোট থেকে বৃহৎ স্ক্রীণে জুম করুন৷"</string>
     <string name="accessibility_bluetooth_connected" msgid="2707027633242983370">"Bluetooth সংযুক্ত হয়েছে৷"</string>
@@ -257,8 +260,7 @@
     <string name="quick_settings_wifi_no_network" msgid="2221993077220856376">"কোনো নেটওয়ার্ক নেই"</string>
     <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"Wi-Fi বন্ধ"</string>
     <string name="quick_settings_wifi_detail_empty_text" msgid="2831702993995222755">"কোন সংরক্ষিত নেটওয়ার্ক উপলব্ধ নেই"</string>
-    <!-- no translation found for quick_settings_cast_title (7709016546426454729) -->
-    <skip />
+    <string name="quick_settings_cast_title" msgid="7709016546426454729">"কাস্ট করুন"</string>
     <string name="quick_settings_casting" msgid="6601710681033353316">"কাস্ট করা হচ্ছে"</string>
     <string name="quick_settings_cast_device_default_name" msgid="5367253104742382945">"নামবিহীন ডিভাইস"</string>
     <string name="quick_settings_cast_device_default_description" msgid="2484573682378634413">"কাস্ট করার জন্য প্রস্তুত"</string>
