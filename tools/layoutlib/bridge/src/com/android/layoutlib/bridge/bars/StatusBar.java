@@ -25,7 +25,6 @@ import com.android.resources.Density;
 
 import org.xmlpull.v1.XmlPullParserException;
 
-import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.view.Gravity;
 import android.view.View;
@@ -38,20 +37,21 @@ import java.io.InputStream;
 
 public class StatusBar extends CustomBar {
 
-    private final Context mContext;
     private final int mSimulatedPlatformVersion;
+    /** Status bar background color attribute name. */
+    private static final String ATTR_COLOR = "colorPrimaryDark";
 
-    public StatusBar(Context context, Density density, int direction, boolean RtlEnabled,
+    public StatusBar(BridgeContext context, Density density, int direction, boolean RtlEnabled,
             int simulatedPlatformVersion) throws XmlPullParserException {
         // FIXME: if direction is RTL but it's not enabled in application manifest, mirror this bar.
         super(context, LinearLayout.HORIZONTAL, "/bars/status_bar.xml", "status_bar.xml",
                 simulatedPlatformVersion);
-        mContext = context;
         mSimulatedPlatformVersion = simulatedPlatformVersion;
 
         // FIXME: use FILL_H?
         setGravity(Gravity.START | Gravity.TOP | Gravity.RIGHT);
-        setBackgroundColor(Config.getStatusBarColor(simulatedPlatformVersion));
+        int color = getThemeAttrColor(ATTR_COLOR, true);
+        setBackgroundColor(color == 0 ? Config.getStatusBarColor(simulatedPlatformVersion) : color);
 
         // Cannot access the inside items through id because no R.id values have been
         // created for them.
@@ -82,10 +82,8 @@ public class StatusBar extends CustomBar {
                 try {
                     BridgeXmlBlockParser parser = new BridgeXmlBlockParser(
                             ParserFactory.create(stream, null), (BridgeContext) mContext, true);
-                    Drawable drawable = Drawable.createFromXml(mContext.getResources(), parser);
-                    if (drawable != null) {
-                        imageView.setImageDrawable(drawable);
-                    }
+                    imageView.setImageDrawable(
+                            Drawable.createFromXml(mContext.getResources(), parser));
                 } catch (XmlPullParserException e) {
                     Bridge.getLog().error(LayoutLog.TAG_BROKEN, "Unable to draw wifi icon", e,
                             null);
