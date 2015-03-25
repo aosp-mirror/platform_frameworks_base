@@ -147,7 +147,7 @@ public class BridgePowerManager implements IPowerManager {
     }
 
     @Override
-    public boolean isScreenBrightnessBoosted() {
+    public boolean isScreenBrightnessBoosted() throws RemoteException {
         return false;
     }
 }
