@@ -636,7 +636,7 @@ public class KeyguardViewMediator extends SystemUI {
                 doKeyguardLocked(null);
             }
         }
-        KeyguardUpdateMonitor.getInstance(mContext).dispatchScreenTurndOff(why);
+        KeyguardUpdateMonitor.getInstance(mContext).dispatchScreenTurnedOff(why);
     }
 
     private void doKeyguardLaterLocked() {

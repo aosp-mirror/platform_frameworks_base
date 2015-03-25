@@ -1239,7 +1239,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
         mHandler.sendEmptyMessage(MSG_SCREEN_TURNED_ON);
     }
 
-    public void dispatchScreenTurndOff(int why) {
+    public void dispatchScreenTurnedOff(int why) {
         synchronized(this) {
             mScreenOn = false;
         }
