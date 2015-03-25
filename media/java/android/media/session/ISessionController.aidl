@@ -23,9 +23,9 @@ import android.media.Rating;
 import android.media.routing.IMediaRouterDelegate;
 import android.media.routing.IMediaRouterStateCallback;
 import android.media.session.ISessionControllerCallback;
+import android.media.session.MediaSession;
 import android.media.session.ParcelableVolumeInfo;
 import android.media.session.PlaybackState;
-import android.media.session.MediaSession;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.ResultReceiver;
@@ -55,8 +55,9 @@ interface ISessionController {
 
     // These commands are for the TransportControls
     void play();
-    void playFromMediaId(String uri, in Bundle extras);
+    void playFromMediaId(String mediaId, in Bundle extras);
     void playFromSearch(String string, in Bundle extras);
+    void playFromUri(in Uri uri, in Bundle extras);
     void skipToQueueItem(long id);
     void pause();
     void stop();
