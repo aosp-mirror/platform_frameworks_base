@@ -94,9 +94,20 @@ android_server_UsbMidiDevice_open(JNIEnv *env, jobject /* thiz */, jint card, ji
     return fds;
 }
 
+static void
+android_server_UsbMidiDevice_close(JNIEnv *env, jobject /* thiz */, jobjectArray fds)
+{
+    int count = env->GetArrayLength(fds);
+    for (int i = 0; i < count; i++) {
+        jobject fd = env->GetObjectArrayElement(fds, i);
+        close(jniGetFDFromFileDescriptor(env, fd));
+    }
+}
+
 static JNINativeMethod method_table[] = {
     { "nativeGetSubdeviceCount", "(II)I", (void*)android_server_UsbMidiDevice_get_subdevice_count },
     { "nativeOpen", "(III)[Ljava/io/FileDescriptor;", (void*)android_server_UsbMidiDevice_open },
+    { "nativeClose", "([Ljava/io/FileDescriptor;)V", (void*)android_server_UsbMidiDevice_close },
 };
 
 int register_android_server_UsbMidiDevice(JNIEnv *env)

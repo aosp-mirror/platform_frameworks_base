@@ -459,7 +459,7 @@ public final class UsbAlsaManager {
     }
 
    /* package */ void setPeripheralMidiState(boolean enabled, int card, int device) {
-        if (enabled) {
+        if (enabled && mPeripheralMidiDevice == null) {
             Bundle properties = new Bundle();
             Resources r = mContext.getResources();
             properties.putString(MidiDeviceInfo.PROPERTY_MANUFACTURER, r.getString(
@@ -469,7 +469,7 @@ public final class UsbAlsaManager {
             properties.putInt(MidiDeviceInfo.PROPERTY_ALSA_CARD, card);
             properties.putInt(MidiDeviceInfo.PROPERTY_ALSA_DEVICE, device);
             mPeripheralMidiDevice = UsbMidiDevice.create(mContext, properties, card, device);
-        } else if (mPeripheralMidiDevice != null) {
+        } else if (!enabled && mPeripheralMidiDevice != null) {
             IoUtils.closeQuietly(mPeripheralMidiDevice);
             mPeripheralMidiDevice = null;
         }
