@@ -23,6 +23,7 @@ import android.text.style.LineHeightSpan;
 import android.text.style.MetricAffectingSpan;
 import android.text.style.TabStopSpan;
 import android.util.Log;
+import android.util.Pools.SynchronizedPool;
 
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.GrowingArrayUtils;
@@ -56,28 +57,23 @@ public class StaticLayout extends Layout {
             mNativePtr = nNewBuilder();
         }
 
-        static Builder obtain() {
-            Builder b = null;
-            synchronized (sLock) {
-                for (int i = 0; i < sCached.length; i++) {
-                    if (sCached[i] != null) {
-                        b = sCached[i];
-                        sCached[i] = null;
-                        break;
-                    }
-                }
-            }
+        public static Builder obtain(CharSequence source, int start, int end, int width) {
+            Builder b = sPool.acquire();
             if (b == null) {
                 b = new Builder();
             }
 
             // set default initial values
-            b.mWidth = 0;
+            b.mText = source;
+            b.mStart = start;
+            b.mEnd = end;
+            b.mWidth = width;
+            b.mAlignment = Alignment.ALIGN_NORMAL;
             b.mTextDir = TextDirectionHeuristics.FIRSTSTRONG_LTR;
             b.mSpacingMult = 1.0f;
             b.mSpacingAdd = 0.0f;
             b.mIncludePad = true;
-            b.mEllipsizedWidth = 0;
+            b.mEllipsizedWidth = width;
             b.mEllipsize = null;
             b.mMaxLines = Integer.MAX_VALUE;
 
@@ -85,18 +81,11 @@ public class StaticLayout extends Layout {
             return b;
         }
 
-        static void recycle(Builder b) {
+        private static void recycle(Builder b) {
             b.mPaint = null;
             b.mText = null;
             MeasuredText.recycle(b.mMeasuredText);
-            synchronized (sLock) {
-                for (int i = 0; i < sCached.length; i++) {
-                    if (sCached[i] == null) {
-                        sCached[i] = b;
-                        break;
-                    }
-                }
-            }
+            sPool.release(b);
         }
 
         // release any expensive state
@@ -126,6 +115,11 @@ public class StaticLayout extends Layout {
             if (mEllipsize == null) {
                 mEllipsizedWidth = width;
             }
+            return this;
+        }
+
+        public Builder setAlignment(Alignment alignment) {
+            mAlignment = alignment;
             return this;
         }
 
@@ -163,6 +157,11 @@ public class StaticLayout extends Layout {
 
         public Builder setMaxLines(int maxLines) {
             mMaxLines = maxLines;
+            return this;
+        }
+
+        public Builder setBreakStrategy(@BreakStrategy int breakStrategy) {
+            mBreakStrategy = breakStrategy;
             return this;
         }
 
@@ -207,10 +206,8 @@ public class StaticLayout extends Layout {
         }
 
         public StaticLayout build() {
-            // TODO: can optimize based on whether ellipsis is needed
-            StaticLayout result = new StaticLayout(mText);
-            result.generate(this, this.mIncludePad, this.mIncludePad);
-            recycle(this);
+            StaticLayout result = new StaticLayout(this);
+            Builder.recycle(this);
             return result;
         }
 
@@ -230,6 +227,7 @@ public class StaticLayout extends Layout {
         int mEnd;
         TextPaint mPaint;
         int mWidth;
+        Alignment mAlignment;
         TextDirectionHeuristic mTextDir;
         float mSpacingMult;
         float mSpacingAdd;
@@ -237,6 +235,7 @@ public class StaticLayout extends Layout {
         int mEllipsizedWidth;
         TextUtils.TruncateAt mEllipsize;
         int mMaxLines;
+        int mBreakStrategy;
 
         Paint.FontMetricsInt mFontMetricsInt = new Paint.FontMetricsInt();
 
@@ -245,8 +244,7 @@ public class StaticLayout extends Layout {
 
         Locale mLocale;
 
-        private static final Object sLock = new Object();
-        private static final Builder[] sCached = new Builder[3];
+        private static final SynchronizedPool<Builder> sPool = new SynchronizedPool<Builder>(3);
     }
 
     public StaticLayout(CharSequence source, TextPaint paint,
@@ -316,10 +314,9 @@ public class StaticLayout extends Layout {
                     : new Ellipsizer(source),
               paint, outerwidth, align, textDir, spacingmult, spacingadd);
 
-        Builder b = Builder.obtain();
-        b.setText(source, bufstart, bufend)
+        Builder b = Builder.obtain(source, bufstart, bufend, outerwidth)
             .setPaint(paint)
-            .setWidth(outerwidth)
+            .setAlignment(align)
             .setTextDir(textDir)
             .setSpacingMult(spacingmult)
             .setSpacingAdd(spacingadd)
@@ -364,6 +361,35 @@ public class StaticLayout extends Layout {
         mColumns = COLUMNS_ELLIPSIZE;
         mLineDirections = ArrayUtils.newUnpaddedArray(Directions.class, 2 * mColumns);
         mLines = new int[mLineDirections.length];
+    }
+
+    private StaticLayout(Builder b) {
+        super((b.mEllipsize == null)
+                ? b.mText
+                : (b.mText instanceof Spanned)
+                    ? new SpannedEllipsizer(b.mText)
+                    : new Ellipsizer(b.mText),
+                b.mPaint, b.mWidth, b.mAlignment, b.mSpacingMult, b.mSpacingAdd);
+
+        if (b.mEllipsize != null) {
+            Ellipsizer e = (Ellipsizer) getText();
+
+            e.mLayout = this;
+            e.mWidth = b.mEllipsizedWidth;
+            e.mMethod = b.mEllipsize;
+            mEllipsizedWidth = b.mEllipsizedWidth;
+
+            mColumns = COLUMNS_ELLIPSIZE;
+        } else {
+            mColumns = COLUMNS_NORMAL;
+            mEllipsizedWidth = b.mWidth;
+        }
+
+        mLineDirections = ArrayUtils.newUnpaddedArray(Directions.class, 2 * mColumns);
+        mLines = new int[mLineDirections.length];
+        mMaximumVisibleLineCount = b.mMaxLines;
+
+        generate(b, b.mIncludePad, b.mIncludePad);
     }
 
     /* package */ void generate(Builder b, boolean includepad, boolean trackpad) {
@@ -477,10 +503,9 @@ public class StaticLayout extends Layout {
                 }
             }
 
-            int breakStrategy = 0;  // 0 = kBreakStrategy_Greedy
             nSetupParagraph(b.mNativePtr, chs, paraEnd - paraStart,
                     firstWidth, firstWidthLineCount, restWidth,
-                    variableTabStops, TAB_INCREMENT, breakStrategy);
+                    variableTabStops, TAB_INCREMENT, b.mBreakStrategy);
 
             // measurement has to be done before performing line breaking
             // but we don't want to recompute fontmetrics or span ranges the
