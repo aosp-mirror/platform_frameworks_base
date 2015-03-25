@@ -2819,7 +2819,7 @@ public abstract class Context {
 
     /**
      * Use with {@link #getSystemService} to retrieve a
-     * {@link android.bluetooth.BluetoothAdapter} for using Bluetooth.
+     * {@link android.bluetooth.BluetoothManager} for using Bluetooth.
      *
      * @see #getSystemService
      */
