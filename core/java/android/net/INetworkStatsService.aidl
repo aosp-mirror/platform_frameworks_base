@@ -27,6 +27,14 @@ interface INetworkStatsService {
     /** Start a statistics query session. */
     INetworkStatsSession openSession();
 
+    /** Start a statistics query session. If calling package is profile or device owner then it is
+     *  granted automatic access if apiLevel is NetworkStatsManager.API_LEVEL_DPC_ALLOWED. If
+     *  apiLevel is at least NetworkStatsManager.API_LEVEL_REQUIRES_PACKAGE_USAGE_STATS then
+     *  PACKAGE_USAGE_STATS permission is always checked. If PACKAGE_USAGE_STATS is not granted
+     *  READ_NETWORK_USAGE_STATS is checked for.
+     */
+    INetworkStatsSession openSessionForUsageStats(String callingPackage);
+
     /** Return network layer usage total for traffic that matches template. */
     long getNetworkTotalBytes(in NetworkTemplate template, long start, long end);
 

@@ -2149,7 +2149,7 @@ public abstract class Context {
             CONNECTIVITY_SERVICE,
             //@hide: UPDATE_LOCK_SERVICE,
             //@hide: NETWORKMANAGEMENT_SERVICE,
-            //@hide: NETWORK_STATS_SERVICE,
+            NETWORK_STATS_SERVICE,
             //@hide: NETWORK_POLICY_SERVICE,
             WIFI_SERVICE,
             WIFI_PASSPOINT_SERVICE,
@@ -2259,6 +2259,9 @@ public abstract class Context {
      * <dd> A {@link android.os.BatteryManager} for managing battery state
      * <dt> {@link #JOB_SCHEDULER_SERVICE} ("taskmanager")
      * <dd>  A {@link android.app.job.JobScheduler} for managing scheduled tasks
+     * <dt> {@link #NETWORK_STATS_SERVICE} ("netstats")
+     * <dd> A {@link android.app.usage.NetworkStatsManager NetworkStatsManager} for querying network
+     * usage statistics.
      * </dl>
      *
      * <p>Note:  System services obtained via this API may be closely associated with
@@ -2316,6 +2319,8 @@ public abstract class Context {
      * @see android.os.BatteryManager
      * @see #JOB_SCHEDULER_SERVICE
      * @see android.app.job.JobScheduler
+     * @see #NETWORK_STATS_SERVICE
+     * @see android.app.usage.NetworkStatsManager
      */
     public abstract Object getSystemService(@ServiceName @NonNull String name);
 
@@ -2334,7 +2339,8 @@ public abstract class Context {
      * {@link android.telephony.TelephonyManager}, {@link android.telephony.SubscriptionManager},
      * {@link android.view.inputmethod.InputMethodManager},
      * {@link android.app.UiModeManager}, {@link android.app.DownloadManager},
-     * {@link android.os.BatteryManager}, {@link android.app.job.JobScheduler}.
+     * {@link android.os.BatteryManager}, {@link android.app.job.JobScheduler},
+     * {@link android.app.usage.NetworkStatsManager}.
      * </p><p>
      * Note: System services obtained via this API may be closely associated with
      * the Context in which they are obtained from.  In general, do not share the
@@ -2563,7 +2569,13 @@ public abstract class Context {
      */
     public static final String NETWORKMANAGEMENT_SERVICE = "network_management";
 
-    /** {@hide} */
+    /**
+     * Use with {@link #getSystemService} to retrieve a {@link
+     * android.app.usage.NetworkStatsManager} for querying network usage stats.
+     *
+     * @see #getSystemService
+     * @see android.app.usage.NetworkStatsManager
+     */
     public static final String NETWORK_STATS_SERVICE = "netstats";
     /** {@hide} */
     public static final String NETWORK_POLICY_SERVICE = "netpolicy";

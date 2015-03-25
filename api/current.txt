@@ -92,6 +92,7 @@ package android {
     field public static final java.lang.String MOUNT_FORMAT_FILESYSTEMS = "android.permission.MOUNT_FORMAT_FILESYSTEMS";
     field public static final java.lang.String MOUNT_UNMOUNT_FILESYSTEMS = "android.permission.MOUNT_UNMOUNT_FILESYSTEMS";
     field public static final java.lang.String NFC = "android.permission.NFC";
+    field public static final java.lang.String PACKAGE_USAGE_STATS = "android.permission.PACKAGE_USAGE_STATS";
     field public static final deprecated java.lang.String PERSISTENT_ACTIVITY = "android.permission.PERSISTENT_ACTIVITY";
     field public static final java.lang.String PROCESS_OUTGOING_CALLS = "android.permission.PROCESS_OUTGOING_CALLS";
     field public static final java.lang.String READ_CALENDAR = "android.permission.READ_CALENDAR";
@@ -5905,6 +5906,37 @@ package android.app.usage {
     field public static final android.os.Parcelable.Creator<android.app.usage.ConfigurationStats> CREATOR;
   }
 
+  public class NetworkStatsManager {
+    method public android.app.usage.NetworkUsageStats queryDetails(int, java.lang.String, long, long) throws android.os.RemoteException, java.lang.SecurityException;
+    method public android.app.usage.NetworkUsageStats queryDetailsForUid(int, java.lang.String, long, long, int) throws android.os.RemoteException, java.lang.SecurityException;
+    method public android.app.usage.NetworkUsageStats querySummary(int, java.lang.String, long, long) throws android.os.RemoteException, java.lang.SecurityException;
+    method public android.app.usage.NetworkUsageStats.Bucket querySummaryForDevice(int, java.lang.String, long, long) throws android.os.RemoteException, java.lang.SecurityException;
+    method public android.app.usage.NetworkUsageStats.Bucket querySummaryForUser(int, java.lang.String, long, long) throws android.os.RemoteException, java.lang.SecurityException;
+  }
+
+  public final class NetworkUsageStats implements java.lang.AutoCloseable {
+    method public void close();
+    method public boolean getNextBucket(android.app.usage.NetworkUsageStats.Bucket);
+    method public boolean hasNextBucket();
+  }
+
+  public static class NetworkUsageStats.Bucket {
+    ctor public NetworkUsageStats.Bucket();
+    method public long getEndTimeStamp();
+    method public long getRxBytes();
+    method public long getRxPackets();
+    method public long getStartTimeStamp();
+    method public int getState();
+    method public long getTxBytes();
+    method public long getTxPackets();
+    method public int getUid();
+    field public static final int STATE_ALL = -1; // 0xffffffff
+    field public static final int STATE_DEFAULT = 1; // 0x1
+    field public static final int STATE_FOREGROUND = 2; // 0x2
+    field public static final int UID_REMOVED = -4; // 0xfffffffc
+    field public static final int UID_TETHERING = -5; // 0xfffffffb
+  }
+
   public final class UsageEvents implements android.os.Parcelable {
     method public int describeContents();
     method public boolean getNextEvent(android.app.usage.UsageEvents.Event);
@@ -7562,6 +7594,7 @@ package android.content {
     field public static final int MODE_PRIVATE = 0; // 0x0
     field public static final deprecated int MODE_WORLD_READABLE = 1; // 0x1
     field public static final deprecated int MODE_WORLD_WRITEABLE = 2; // 0x2
+    field public static final java.lang.String NETWORK_STATS_SERVICE = "netstats";
     field public static final java.lang.String NFC_SERVICE = "nfc";
     field public static final java.lang.String NOTIFICATION_SERVICE = "notification";
     field public static final java.lang.String NSD_SERVICE = "servicediscovery";
