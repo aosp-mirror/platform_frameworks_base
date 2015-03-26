@@ -175,7 +175,8 @@ public class DevicePolicyManager {
      *
      * <p>This component is set as device owner and active admin when device owner provisioning is
      * started by an NFC message containing an NFC record with MIME type
-     * {@link #MIME_TYPE_PROVISIONING_NFC_V2}.
+     * {@link #MIME_TYPE_PROVISIONING_NFC_V2}. For the NFC record, the component name should be
+     * flattened to a string, via {@link ComponentName#flattenToShortString()}.
      *
      * @see DeviceAdminReceiver
      */
@@ -398,14 +399,16 @@ public class DevicePolicyManager {
              "android.app.extra.PROVISIONING_SKIP_ENCRYPTION";
 
     /**
-     * On devices managed by a device owner app, a String representation of a Component name extra
-     * indicating the component of the application that is temporarily granted device owner
-     * privileges during device initialization and profile owner privileges during secondary user
-     * initialization.
+     * On devices managed by a device owner app, a {@link ComponentName} extra indicating the
+     * component of the application that is temporarily granted device owner privileges during
+     * device initialization and profile owner privileges during secondary user initialization.
      *
-     * <p>Use in an NFC record with {@link #MIME_TYPE_PROVISIONING_NFC_V2} that starts device owner
-     * provisioning via an NFC bump.
-     * @see ComponentName#unflattenFromString()
+     * <p>
+     * It can also be used in an NFC record with {@link #MIME_TYPE_PROVISIONING_NFC_v2} that starts
+     * device owner provisioning via an NFC bump. For the NFC record, it should be flattened to a
+     * string first.
+     *
+     * @see ComponentName#flattenToShortString()
      */
     public static final String EXTRA_PROVISIONING_DEVICE_INITIALIZER_COMPONENT_NAME
         = "android.app.extra.PROVISIONING_DEVICE_INITIALIZER_COMPONENT_NAME";
