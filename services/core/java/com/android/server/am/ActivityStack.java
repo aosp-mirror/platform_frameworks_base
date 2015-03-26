@@ -3896,8 +3896,7 @@ final class ActivityStack {
         return true;
     }
 
-    private boolean relaunchActivityLocked(ActivityRecord r,
-            int changes, boolean andResume) {
+    private boolean relaunchActivityLocked(ActivityRecord r, int changes, boolean andResume) {
         List<ResultInfo> results = null;
         List<ReferrerIntent> newIntents = null;
         if (andResume) {
