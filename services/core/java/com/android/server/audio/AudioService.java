@@ -234,9 +234,6 @@ public class AudioService extends IAudioService.Stub {
     private final Object mSoundEffectsLock = new Object();
     private static final int NUM_SOUNDPOOL_CHANNELS = 4;
 
-    // Maximum volume adjust steps allowed in a single batch call.
-    private static final int MAX_BATCH_VOLUME_ADJUST_STEPS = 4;
-
     /* Sound effect file names  */
     private static final String SOUND_EFFECTS_PATH = "/media/audio/ui/";
     private static final List<String> SOUND_EFFECT_FILES = new ArrayList<String>();
@@ -988,6 +985,7 @@ public class AudioService extends IAudioService.Stub {
         } else {
             streamType = getActiveStreamType(suggestedStreamType);
         }
+        ensureValidStreamType(streamType);
         final int resolvedStream = mStreamVolumeAlias[streamType];
 
         // Play sounds on STREAM_RING only.
@@ -1421,6 +1419,8 @@ public class AudioService extends IAudioService.Stub {
     private void sendVolumeUpdate(int streamType, int oldIndex, int index, int flags) {
         if (!isPlatformVoice() && (streamType == AudioSystem.STREAM_RING)) {
             streamType = AudioSystem.STREAM_NOTIFICATION;
+        } else {
+            streamType = mStreamVolumeAlias[streamType];
         }
 
         if (streamType == AudioSystem.STREAM_MUSIC) {
@@ -3128,12 +3128,6 @@ public class AudioService extends IAudioService.Stub {
                 break;
             default:
                 throw new IllegalArgumentException("Bad direction " + direction);
-        }
-    }
-
-    private void ensureValidSteps(int steps) {
-        if (Math.abs(steps) > MAX_BATCH_VOLUME_ADJUST_STEPS) {
-            throw new IllegalArgumentException("Bad volume adjust steps " + steps);
         }
     }
 
