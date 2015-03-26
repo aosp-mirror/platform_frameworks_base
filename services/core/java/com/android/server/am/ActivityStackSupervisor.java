@@ -129,7 +129,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
     static final boolean DEBUG_RELEASE = DEBUG || false;
     static final boolean DEBUG_SAVED_STATE = DEBUG || false;
     static final boolean DEBUG_SCREENSHOTS = DEBUG || false;
-    static final boolean DEBUG_STATES = DEBUG || false;
+    static final boolean DEBUG_STATES = DEBUG || true;
     static final boolean DEBUG_VISIBLE_BEHIND = DEBUG || false;
 
     public static final int HOME_STACK_ID = 0;
@@ -273,8 +273,8 @@ public final class ActivityStackSupervisor implements DisplayListener {
      * until the task exits or #stopLockTaskMode() is called. */
     TaskRecord mLockTaskModeTask;
     /** Store the current lock task mode. Possible values:
-     * {@link ActivityManager#LOCK_TASK_MODE_NONE}, {@link ActicityManager#LOCK_TASK_MODE_LOCKED},
-     * {@link ActicityManager#LOCK_TASK_MODE_PINNED}
+     * {@link ActivityManager#LOCK_TASK_MODE_NONE}, {@link ActivityManager#LOCK_TASK_MODE_LOCKED},
+     * {@link ActivityManager#LOCK_TASK_MODE_PINNED}
      */
     private int mLockTaskModeState;
     /**
@@ -1132,12 +1132,13 @@ public final class ActivityStackSupervisor implements DisplayListener {
             ProcessRecord app, boolean andResume, boolean checkConfig)
             throws RemoteException {
 
-        r.startFreezingScreenLocked(app, 0);
-        if (false) Slog.d(TAG, "realStartActivity: setting app visibility true");
-        mWindowManager.setAppVisibility(r.appToken, true);
+        if (andResume) {
+            r.startFreezingScreenLocked(app, 0);
+            mWindowManager.setAppVisibility(r.appToken, true);
 
-        // schedule launch ticks to collect information about slow apps.
-        r.startLaunchTickingLocked();
+            // schedule launch ticks to collect information about slow apps.
+            r.startLaunchTickingLocked();
+        }
 
         // Have the window manager re-evaluate the orientation of
         // the screen based on the new activity order.  Note that
@@ -1195,34 +1196,37 @@ public final class ActivityStackSupervisor implements DisplayListener {
             r.forceNewConfig = false;
             mService.showAskCompatModeDialogLocked(r);
             r.compat = mService.compatibilityInfoForPackageLocked(r.info.applicationInfo);
-            String profileFile = null;
-            ParcelFileDescriptor profileFd = null;
+            ProfilerInfo profilerInfo = null;
             if (mService.mProfileApp != null && mService.mProfileApp.equals(app.processName)) {
                 if (mService.mProfileProc == null || mService.mProfileProc == app) {
                     mService.mProfileProc = app;
-                    profileFile = mService.mProfileFile;
-                    profileFd = mService.mProfileFd;
-                }
-            }
-            app.hasShownUi = true;
-            app.pendingUiClean = true;
-            if (profileFd != null) {
-                try {
-                    profileFd = profileFd.dup();
-                } catch (IOException e) {
-                    if (profileFd != null) {
-                        try {
-                            profileFd.close();
-                        } catch (IOException o) {
+                    final String profileFile = mService.mProfileFile;
+                    if (profileFile != null) {
+                        ParcelFileDescriptor profileFd = mService.mProfileFd;
+                        if (profileFd != null) {
+                            try {
+                                profileFd = profileFd.dup();
+                            } catch (IOException e) {
+                                if (profileFd != null) {
+                                    try {
+                                        profileFd.close();
+                                    } catch (IOException o) {
+                                    }
+                                    profileFd = null;
+                                }
+                            }
                         }
-                        profileFd = null;
+
+                        profilerInfo = new ProfilerInfo(profileFile, profileFd,
+                                mService.mSamplingInterval, mService.mAutoStopProfiler);
                     }
                 }
             }
 
-            ProfilerInfo profilerInfo = profileFile != null
-                    ? new ProfilerInfo(profileFile, profileFd, mService.mSamplingInterval,
-                    mService.mAutoStopProfiler) : null;
+            if (andResume) {
+                app.hasShownUi = true;
+                app.pendingUiClean = true;
+            }
             app.forceProcessStateUpTo(ActivityManager.PROCESS_STATE_TOP);
             app.thread.scheduleLaunchActivity(new Intent(r.intent), r.appToken,
                     System.identityHashCode(r), r.info, new Configuration(mService.mConfiguration),
