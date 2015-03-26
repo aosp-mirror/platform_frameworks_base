@@ -41,7 +41,7 @@ public class TextViewBindingAdapterTest
     }
 
     public void testNumeric() throws Throwable {
-        TextView view = mBinder.getNumericText();
+        TextView view = mBinder.numericText;
         assertTrue(view.getKeyListener() instanceof DigitsKeyListener);
         DigitsKeyListener listener = (DigitsKeyListener) view.getKeyListener();
         assertEquals(getExpectedNumericType(), listener.getInputType());
@@ -66,7 +66,7 @@ public class TextViewBindingAdapterTest
 
     public void testDrawables() throws Throwable {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
-            TextView view = mBinder.getTextDrawableNormal();
+            TextView view = mBinder.textDrawableNormal;
             assertEquals(mBindingObject.getDrawableLeft(),
                     ((ColorDrawable) view.getCompoundDrawables()[0]).getColor());
             assertEquals(mBindingObject.getDrawableTop(),
@@ -91,7 +91,7 @@ public class TextViewBindingAdapterTest
 
     public void testDrawableStartEnd() throws Throwable {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
-            TextView view = mBinder.getTextDrawableStartEnd();
+            TextView view = mBinder.textDrawableStartEnd;
             assertEquals(mBindingObject.getDrawableStart(),
                     ((ColorDrawable) view.getCompoundDrawablesRelative()[0]).getColor());
             assertEquals(mBindingObject.getDrawableEnd(),
@@ -107,7 +107,7 @@ public class TextViewBindingAdapterTest
     }
 
     public void testSimpleProperties() throws Throwable {
-        TextView view = mBinder.getTextView();
+        TextView view = mBinder.textView;
 
         assertEquals(mBindingObject.getAutoLink(), view.getAutoLinkMask());
         assertEquals(mBindingObject.getDrawablePadding(), view.getCompoundDrawablePadding());
@@ -220,7 +220,7 @@ public class TextViewBindingAdapterTest
     }
 
     public void testAllCaps() throws Throwable {
-        TextView view = mBinder.getTextAllCaps();
+        TextView view = mBinder.textAllCaps;
 
         assertEquals(mBindingObject.isTextAllCaps(), view.getTransformationMethod() != null);
         if (view.getTransformationMethod() != null) {
@@ -238,7 +238,7 @@ public class TextViewBindingAdapterTest
     }
 
     public void testBufferType() throws Throwable {
-        TextView view = mBinder.getTextBufferType();
+        TextView view = mBinder.textBufferType;
 
         assertEquals(mBindingObject.getBufferType(), getBufferType(view));
         changeValues();
@@ -257,14 +257,14 @@ public class TextViewBindingAdapterTest
     }
 
     public void testInputType() throws Throwable {
-        TextView view = mBinder.getTextInputType();
+        TextView view = mBinder.textInputType;
         assertEquals(mBindingObject.getInputType(), view.getInputType());
         changeValues();
         assertEquals(mBindingObject.getInputType(), view.getInputType());
     }
 
     public void testDigits() throws Throwable {
-        TextView view = mBinder.getTextDigits();
+        TextView view = mBinder.textDigits;
         assertEquals(mBindingObject.getDigits(), getDigits(view));
         changeValues();
         assertEquals(mBindingObject.getDigits(), getDigits(view));
@@ -283,7 +283,7 @@ public class TextViewBindingAdapterTest
     }
 
     public void testPhoneNumber() throws Throwable {
-        TextView textView = mBinder.getTextPhoneNumber();
+        TextView textView = mBinder.textPhoneNumber;
         assertEquals(mBindingObject.isPhoneNumber(), isPhoneNumber(textView));
         changeValues();
         assertEquals(mBindingObject.isPhoneNumber(), isPhoneNumber(textView));
@@ -295,7 +295,7 @@ public class TextViewBindingAdapterTest
     }
 
     public void testInputMethod() throws Throwable {
-        TextView textView = mBinder.getTextInputMethod();
+        TextView textView = mBinder.textInputMethod;
         assertTrue(TextViewBindingObject.KeyListener1.class.isInstance(textView.getKeyListener()));
         changeValues();
         assertTrue(TextViewBindingObject.KeyListener2.class.isInstance(textView.getKeyListener()));

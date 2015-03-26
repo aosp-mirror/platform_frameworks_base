@@ -282,7 +282,7 @@ public abstract class ViewDataBinding {
      * @param viewsWithIds A mapping of views with IDs but without expressions to the index
      *                     into the views array.
      */
-    protected static void mapTaggedChildViews(View root, View[] views, SparseIntArray includes,
+    private static void mapTaggedChildViews(View root, View[] views, SparseIntArray includes,
             SparseIntArray viewsWithIds) {
         if (root instanceof ViewGroup) {
             ViewGroup viewGroup = (ViewGroup) root;
@@ -312,6 +312,26 @@ public abstract class ViewDataBinding {
         if (visitChildren) {
             mapTaggedChildViews(view, views, includes, viewsWithIds);
         }
+    }
+
+    /**
+     * Walks the view hierarchy under root and pulls out tagged Views, includes, and views with
+     * IDs into a View[] that is returned. This is used to walk the view hierarchy once to find
+     * all bound and ID'd views.
+     *
+     * @param root The root of the view hierarchy to walk.
+     * @param numViews The total number of ID'd views and views with expressions.
+     * @param includes Views that are considered includes and should be treated as separate
+     *                 binders.
+     * @param viewsWithIds Views that don't have tags, but have IDs.
+     * @return An array of size numViews containing all Views in the hierarchy that have IDs
+     * (with elements in viewsWithIds) or are tagged containing expressions.
+     */
+    protected static View[] mapChildViews(View root, int numViews, SparseIntArray includes,
+            SparseIntArray viewsWithIds) {
+        View[] views = new View[numViews];
+        mapTaggedChildViews(root, views, includes, viewsWithIds);
+        return views;
     }
 
     /**

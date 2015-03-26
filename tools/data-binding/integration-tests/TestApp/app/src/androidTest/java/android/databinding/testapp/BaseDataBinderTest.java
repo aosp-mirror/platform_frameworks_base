@@ -84,10 +84,14 @@ public class BaseDataBinderTest<T extends ViewDataBinding>
         assertEquals(klass, mBinder.getClass().getDeclaredField(fieldName).getType());
     }
 
+    protected void assertPublicField(Class<?> klass, String fieldName) throws NoSuchFieldException {
+        assertEquals(klass, mBinder.getClass().getField(fieldName).getType());
+    }
+
     protected void assertNoField(String fieldName) {
         Exception[] ex = new Exception[1];
         try {
-            mBinder.getClass().getDeclaredField(fieldName);
+            mBinder.getClass().getField(fieldName);
         } catch (NoSuchFieldException e) {
             ex[0] = e;
         }

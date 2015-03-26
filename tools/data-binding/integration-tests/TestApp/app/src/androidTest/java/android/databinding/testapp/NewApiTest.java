@@ -34,15 +34,15 @@ public class NewApiTest extends BaseDataBinderTest<NewApiLayoutBinding> {
         mBinder.setName("foo");
         mBinder.setChildren(new ArrayList<View>());
         mBinder.executePendingBindings();
-        assertEquals("foo", mBinder.getTextView().getText().toString());
-        assertEquals(3f, mBinder.getTextView().getElevation());
+        assertEquals("foo", mBinder.textView.getText().toString());
+        assertEquals(3f, mBinder.textView.getElevation());
     }
 
     @UiThreadTest
     public void testSetElevationOlderAPI() {
         DataBinderTrojan.setBuildSdkInt(1);
         try {
-            TextView textView = mBinder.getTextView();
+            TextView textView = mBinder.textView;
             float originalElevation = textView.getElevation();
             mBinder.setElevation(3);
             mBinder.setName("foo2");
@@ -60,7 +60,7 @@ public class NewApiTest extends BaseDataBinderTest<NewApiLayoutBinding> {
         mBinder.setChildren(views);
         mBinder.executePendingBindings();
         assertEquals(1, views.size());
-        assertSame(mBinder.getTextView(), views.get(0));
+        assertSame(mBinder.textView, views.get(0));
     }
 
     @UiThreadTest

@@ -35,27 +35,17 @@ public class LandscapeConfigTest extends BaseLandDataBinderTest<MultiResLayoutBi
     public void testSharedViewIdAndVariableInheritance()
             throws InterruptedException, NoSuchMethodException, NoSuchFieldException {
         assertEquals("MultiResLayoutBindingLandImpl", mBinder.getClass().getSimpleName());
-        assertMethod(TextView.class, "getObjectInLandTextView");
-        assertMethod(TextView.class, "getObjectInDefaultTextView");
-        assertMethod(View.class, "getObjectInDefaultTextView2");
-
-        assertField(TextView.class, "mObjectInLandTextView");
-        assertField(TextView.class, "mObjectInDefaultTextView");
-        assertField(TextView.class, "mObjectInDefaultTextView2");
+        assertPublicField(TextView.class, "objectInLandTextView");
+        assertPublicField(TextView.class, "objectInDefaultTextView");
+        assertPublicField(View.class, "objectInDefaultTextView2");
 
         assertField(NotBindableVo.class, "mObjectInLand");
         assertField(NotBindableVo.class, "mObjectInDefault");
 
         // includes
-        assertMethod(ViewDataBinding.class, "getIncludedLayoutConflict");
-        assertMethod(BasicBindingBinding.class, "getIncludedLayoutShared");
-        assertMethod(ConditionalBindingBinding.class, "getIncludedLayoutPort");
-        assertMethod(ConditionalBindingBinding.class, "getIncludedLayoutLand");
-
-        assertField(IncludedLayoutBinding.class, "mIncludedLayoutConflict");
-        assertField(BasicBindingBinding.class, "mIncludedLayoutShared");
-        assertField(ConditionalBindingBinding.class, "mIncludedLayoutLand");
-
-        assertNoField("mIncludedLayoutPort");
+        assertPublicField(ViewDataBinding.class, "includedLayoutConflict");
+        assertPublicField(BasicBindingBinding.class, "includedLayoutShared");
+        assertPublicField(ConditionalBindingBinding.class, "includedLayoutPort");
+        assertPublicField(ConditionalBindingBinding.class, "includedLayoutLand");
     }
 }

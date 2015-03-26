@@ -29,67 +29,67 @@ public class FindMethodTest
     }
 
     public void testNoArg() throws Throwable {
-        TextView textView = mBinder.getTextView6();
+        TextView textView = mBinder.textView6;
         assertEquals("no arg", textView.getText().toString());
     }
 
     public void testIntArg() throws Throwable {
-        TextView textView = mBinder.getTextView0();
+        TextView textView = mBinder.textView0;
         assertEquals("1", textView.getText().toString());
     }
 
     public void testFloatArg() throws Throwable {
-        TextView textView = mBinder.getTextView1();
+        TextView textView = mBinder.textView1;
         assertEquals("1.25", textView.getText().toString());
     }
 
     public void testStringArg() throws Throwable {
-        TextView textView = mBinder.getTextView2();
+        TextView textView = mBinder.textView2;
         assertEquals("hello", textView.getText().toString());
     }
 
     public void testBoxedArg() throws Throwable {
-        TextView textView = mBinder.getTextView3();
+        TextView textView = mBinder.textView3;
         assertEquals("1", textView.getText().toString());
     }
 
     public void testInheritedMethod() throws Throwable {
-        TextView textView = mBinder.getTextView4();
+        TextView textView = mBinder.textView4;
         assertEquals("base", textView.getText().toString());
     }
 
     public void testInheritedMethodInt() throws Throwable {
-        TextView textView = mBinder.getTextView5();
+        TextView textView = mBinder.textView5;
         assertEquals("base 2", textView.getText().toString());
     }
 
     public void testStaticMethod() throws Throwable {
-        TextView textView = mBinder.getTextView7();
+        TextView textView = mBinder.textView7;
         assertEquals("world", textView.getText().toString());
     }
 
     public void testStaticField() throws Throwable {
-        TextView textView = mBinder.getTextView8();
+        TextView textView = mBinder.textView8;
         assertEquals("hello world", textView.getText().toString());
     }
 
     public void testImportStaticMethod() throws Throwable {
-        TextView textView = mBinder.getTextView9();
+        TextView textView = mBinder.textView9;
         assertEquals("world", textView.getText().toString());
     }
 
     public void testImportStaticField() throws Throwable {
-        TextView textView = mBinder.getTextView10();
+        TextView textView = mBinder.textView10;
         assertEquals("hello world", textView.getText().toString());
     }
 
     public void testAliasStaticMethod() throws Throwable {
-        TextView textView = mBinder.getTextView11();
+        TextView textView = mBinder.textView11;
         assertEquals("world", textView.getText().toString());
     }
 
     public void testAliasStaticField() throws Throwable {
-        TextView textView = mBinder.getTextView12();
+        TextView textView = mBinder.textView12;
         assertEquals("hello world", textView.getText().toString());
     }
 
@@ -97,17 +97,17 @@ public class FindMethodTest
     public void testImports() throws Throwable {
         mBinder.setObj2(new FindMethodBindingObject.Bar<String>());
         mBinder.executePendingBindings();
-        TextView textView = mBinder.getTextView15();
+        TextView textView = mBinder.textView15;
         assertEquals("hello", textView.getText().toString());
     }
 
     @UiThreadTest
     public void testConfusingMethods() throws Throwable {
-        assertEquals("1", mBinder.getTextView16().getText().toString());
-        assertEquals("1", mBinder.getTextView17().getText().toString());
-        assertEquals("hello", mBinder.getTextView18().getText().toString());
-        assertEquals("yay", mBinder.getTextView19().getText().toString());
-        assertEquals("hello", mBinder.getTextView20().getText().toString());
-        assertEquals("hello", mBinder.getTextView21().getText().toString());
+        assertEquals("1", mBinder.textView16.getText().toString());
+        assertEquals("1", mBinder.textView17.getText().toString());
+        assertEquals("hello", mBinder.textView18.getText().toString());
+        assertEquals("yay", mBinder.textView19.getText().toString());
+        assertEquals("hello", mBinder.textView20.getText().toString());
+        assertEquals("hello", mBinder.textView21.getText().toString());
     }
 }

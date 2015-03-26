@@ -70,6 +70,6 @@ public class BasicBindingTest extends BaseDataBinderTest<BasicBindingBinding> {
 
     private void rebindAndAssert(String text) {
         mBinder.executePendingBindings();
-        assertEquals(text, mBinder.getTextView().getText().toString());
+        assertEquals(text, mBinder.textView.getText().toString());
     }
 }

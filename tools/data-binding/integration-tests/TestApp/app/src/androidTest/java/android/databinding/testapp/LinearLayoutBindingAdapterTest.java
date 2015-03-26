@@ -34,7 +34,7 @@ public class LinearLayoutBindingAdapterTest
     @Override
     protected void setUp() throws Exception {
         super.setUp();
-        mView = mBinder.getView();
+        mView = mBinder.view;
     }
 
     public void testMeasureWithLargestChild() throws Throwable {

@@ -48,7 +48,7 @@ public class ResourceTest extends BaseDataBinderTest<ResourceTestBinding> {
 
     @UiThreadTest
     public void testStringFormat() throws Throwable {
-        TextView view = mBinder.getTextView0();
+        TextView view = mBinder.textView0;
         assertEquals("Mrs. Doubtfire", view.getText().toString());
 
         mBinder.setTitle("Mr.");
@@ -58,7 +58,7 @@ public class ResourceTest extends BaseDataBinderTest<ResourceTestBinding> {
 
     @UiThreadTest
     public void testQuantityString() throws Throwable {
-        TextView view = mBinder.getTextView1();
+        TextView view = mBinder.textView1;
         assertEquals("oranges", view.getText().toString());
 
         mBinder.setCount(1);
@@ -68,19 +68,19 @@ public class ResourceTest extends BaseDataBinderTest<ResourceTestBinding> {
 
     @UiThreadTest
     public void testFractionNoParameters() throws Throwable {
-        TextView view = mBinder.getFractionNoParameters();
+        TextView view = mBinder.fractionNoParameters;
         assertEquals("1.5", view.getText().toString());
     }
 
     @UiThreadTest
     public void testFractionOneParameter() throws Throwable {
-        TextView view = mBinder.getFractionOneParameter();
+        TextView view = mBinder.fractionOneParameter;
         assertEquals("3.0", view.getText().toString());
     }
 
     @UiThreadTest
     public void testFractionTwoParameters() throws Throwable {
-        TextView view = mBinder.getFractionTwoParameters();
+        TextView view = mBinder.fractionTwoParameters;
         assertEquals("9.0", view.getText().toString());
     }
 }

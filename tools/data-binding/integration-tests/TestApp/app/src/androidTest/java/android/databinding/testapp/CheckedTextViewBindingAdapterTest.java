@@ -35,7 +35,7 @@ public class CheckedTextViewBindingAdapterTest extends
     @Override
     protected void setUp() throws Exception {
         super.setUp();
-        mView = mBinder.getView();
+        mView = mBinder.view;
     }
 
     public void testView() throws Throwable {

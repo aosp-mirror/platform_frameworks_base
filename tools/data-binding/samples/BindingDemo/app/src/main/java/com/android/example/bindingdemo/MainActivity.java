@@ -48,12 +48,12 @@ public class MainActivity extends ActionBarActivity implements Observable {
         super.onCreate(savedInstanceState);
         dataBinder =  MainActivityBinding.inflate(this);
         setContentView(dataBinder.getRoot());
-        dataBinder.getRobotList().setHasFixedSize(true);
-        dataBinder.getToolkittyList().setHasFixedSize(true);
+        dataBinder.robotList.setHasFixedSize(true);
+        dataBinder.toolkittyList.setHasFixedSize(true);
         tkAdapter = new UserAdapter(Users.toolkities);
         robotAdapter = new UserAdapter(Users.robots);
-        dataBinder.getToolkittyList().setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
-        dataBinder.getRobotList().setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
+        dataBinder.toolkittyList.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
+        dataBinder.robotList.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
         dataBinder.setActivity(this);
         dataBinder.executePendingBindings();
     }
@@ -85,8 +85,8 @@ public class MainActivity extends ActionBarActivity implements Observable {
             if (selected == null) {
                 return;
             }
-            selected.setName(dataBinder.getSelectedName().getText().toString());
-            selected.setLastName(dataBinder.getSelectedLastname().getText().toString());
+            selected.setName(dataBinder.selectedName.getText().toString());
+            selected.setLastName(dataBinder.selectedLastname.getText().toString());
         }
     };
 
@@ -110,10 +110,10 @@ public class MainActivity extends ActionBarActivity implements Observable {
                 tkAdapter.remove(selected);
                 selected.setGroup(User.ROBOT);
                 robotAdapter.add(selected);
-                dataBinder.getRobotList().smoothScrollToPosition(robotAdapter.getItemCount() - 1);
+                dataBinder.robotList.smoothScrollToPosition(robotAdapter.getItemCount() - 1);
             } else {
                 tkAdapter.add(selected);
-                dataBinder.getToolkittyList().smoothScrollToPosition(tkAdapter.getItemCount() - 1);
+                dataBinder.toolkittyList.smoothScrollToPosition(tkAdapter.getItemCount() - 1);
                 selected.setGroup(User.TOOLKITTY);
                 robotAdapter.remove(selected);
             }

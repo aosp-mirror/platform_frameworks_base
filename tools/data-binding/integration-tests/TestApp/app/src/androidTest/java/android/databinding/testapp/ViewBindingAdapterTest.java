@@ -35,7 +35,7 @@ public class ViewBindingAdapterTest extends BindingAdapterTestBase<ViewAdapterTe
     }
 
     public void testPadding() throws Throwable {
-        View view = mBinder.getPadding();
+        View view = mBinder.padding;
         assertEquals(mBindingObject.getPadding(), view.getPaddingBottom());
         assertEquals(mBindingObject.getPadding(), view.getPaddingTop());
         assertEquals(mBindingObject.getPadding(), view.getPaddingRight());
@@ -50,7 +50,7 @@ public class ViewBindingAdapterTest extends BindingAdapterTestBase<ViewAdapterTe
     }
 
     public void testPaddingLeftRight() throws Throwable {
-        View view = mBinder.getPaddingLeftRight();
+        View view = mBinder.paddingLeftRight;
         assertEquals(mBindingObject.getPaddingLeft(), view.getPaddingLeft());
         assertEquals(mBindingObject.getPaddingRight(), view.getPaddingRight());
 
@@ -62,7 +62,7 @@ public class ViewBindingAdapterTest extends BindingAdapterTestBase<ViewAdapterTe
 
     public void testPaddingStartEnd() throws Throwable {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
-            View view = mBinder.getPaddingStartEnd();
+            View view = mBinder.paddingStartEnd;
             assertEquals(mBindingObject.getPaddingStart(), view.getPaddingStart());
             assertEquals(mBindingObject.getPaddingEnd(), view.getPaddingEnd());
 
@@ -74,7 +74,7 @@ public class ViewBindingAdapterTest extends BindingAdapterTestBase<ViewAdapterTe
     }
 
     public void testPaddingTopBottom() throws Throwable {
-        View view = mBinder.getPaddingTopBottom();
+        View view = mBinder.paddingTopBottom;
         assertEquals(mBindingObject.getPaddingTop(), view.getPaddingTop());
         assertEquals(mBindingObject.getPaddingBottom(), view.getPaddingBottom());
 
@@ -86,7 +86,7 @@ public class ViewBindingAdapterTest extends BindingAdapterTestBase<ViewAdapterTe
 
     public void testBackgroundTint() throws Throwable {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            View view = mBinder.getBackgroundTint();
+            View view = mBinder.backgroundTint;
             assertNotNull(view.getBackgroundTintList());
             ColorStateList colorStateList = view.getBackgroundTintList();
             assertEquals(mBindingObject.getBackgroundTint(), colorStateList.getDefaultColor());
@@ -100,7 +100,7 @@ public class ViewBindingAdapterTest extends BindingAdapterTestBase<ViewAdapterTe
     }
 
     public void testFadeScrollbars() throws Throwable {
-        View view = mBinder.getFadeScrollbars();
+        View view = mBinder.fadeScrollbars;
         assertEquals(mBindingObject.getFadeScrollbars(), view.isScrollbarFadingEnabled());
 
         changeValues();
@@ -109,7 +109,7 @@ public class ViewBindingAdapterTest extends BindingAdapterTestBase<ViewAdapterTe
     }
 
     public void testNextFocus() throws Throwable {
-        View view = mBinder.getNextFocus();
+        View view = mBinder.nextFocus;
 
         assertEquals(mBindingObject.getNextFocusDown(), view.getNextFocusDownId());
         assertEquals(mBindingObject.getNextFocusUp(), view.getNextFocusUpId());
@@ -131,7 +131,7 @@ public class ViewBindingAdapterTest extends BindingAdapterTestBase<ViewAdapterTe
     }
 
     public void testRequiresFadingEdge() throws Throwable {
-        View view = mBinder.getRequiresFadingEdge();
+        View view = mBinder.requiresFadingEdge;
 
         assertTrue(view.isVerticalFadingEdgeEnabled());
         assertFalse(view.isHorizontalFadingEdgeEnabled());
@@ -143,7 +143,7 @@ public class ViewBindingAdapterTest extends BindingAdapterTestBase<ViewAdapterTe
     }
 
     public void testScrollbar() throws Throwable {
-        View view = mBinder.getScrollbar();
+        View view = mBinder.scrollbar;
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
             assertEquals(mBindingObject.getScrollbarDefaultDelayBeforeFade(),
@@ -166,7 +166,7 @@ public class ViewBindingAdapterTest extends BindingAdapterTestBase<ViewAdapterTe
 
     public void testTransformPivot() throws Throwable {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
-            View view = mBinder.getTransformPivot();
+            View view = mBinder.transformPivot;
 
             assertEquals(mBindingObject.getTransformPivotX(), view.getPivotX());
             assertEquals(mBindingObject.getTransformPivotY(), view.getPivotY());

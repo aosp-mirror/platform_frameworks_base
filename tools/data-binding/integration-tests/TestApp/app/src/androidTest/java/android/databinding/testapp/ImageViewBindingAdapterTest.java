@@ -33,7 +33,7 @@ public class ImageViewBindingAdapterTest
     @Override
     protected void setUp() throws Exception {
         super.setUp();
-        mView = mBinder.getView();
+        mView = mBinder.view;
     }
 
     public void testImageView() throws Throwable {

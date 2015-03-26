@@ -135,6 +135,7 @@ public class ResourceBundle implements Serializable {
             Set<String> includeBindingIds = new HashSet<String>();
             Set<String> viewBindingIds = new HashSet<String>();
             Map<String, String> viewTypes = new HashMap<String, String>();
+            Map<String, String> includes = new HashMap<String, String>();
             L.d("validating ids for %s", bundles.getKey());
             for (LayoutFileBundle bundle : bundles.getValue()) {
                 for (BindingTargetBundle target : bundle.mBindingTargetBundles) {
@@ -154,11 +155,15 @@ public class ResourceBundle implements Serializable {
                     if (existingType == null) {
                         L.d("assigning %s as %s", target.getId(), target.mFullClassName);
                         viewTypes.put(target.mId, target.mFullClassName);
+                        if (target.isBinder()) {
+                            includes.put(target.mId, target.getIncludedLayout());
+                        }
                     } else if (!existingType.equals(target.mFullClassName)) {
                         if (target.isBinder()) {
                             L.d("overriding %s as base binder", target.getId());
                             viewTypes.put(target.mId,
                                     "android.databinding.ViewDataBinding");
+                            includes.put(target.mId, target.getIncludedLayout());
                         } else {
                             L.d("overriding %s as base view", target.getId());
                             viewTypes.put(target.mId, "android.view.View");
@@ -172,7 +177,7 @@ public class ResourceBundle implements Serializable {
                     BindingTargetBundle target = bundle.getBindingTargetById(viewType.getKey());
                     if (target == null) {
                         bundle.createBindingTarget(viewType.getKey(), viewType.getValue(), false,
-                                null, null);
+                                null, null).setIncludedLayout(includes.get(viewType.getKey()));
                     } else {
                         L.d("setting interface type on %s (%s) as %s", target.mId, target.mFullClassName, viewType.getValue());
                         target.setInterfaceType(viewType.getValue());

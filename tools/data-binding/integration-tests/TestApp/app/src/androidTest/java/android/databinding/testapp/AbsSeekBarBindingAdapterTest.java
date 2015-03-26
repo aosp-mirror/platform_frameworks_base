@@ -34,7 +34,7 @@ public class AbsSeekBarBindingAdapterTest
     @Override
     protected void setUp() throws Exception {
         super.setUp();
-        mView = mBinder.getView();
+        mView = mBinder.view;
     }
 
     public void testThumbTint() throws Throwable {

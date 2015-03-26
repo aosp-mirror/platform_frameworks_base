@@ -86,7 +86,7 @@ public class LeakTest extends ActivityInstrumentationTestCase2<TestActivity> {
         runTestOnUiThread(new Runnable() {
             @Override
             public void run() {
-                assertEquals("hello world", binding.getTextView().getText().toString());
+                assertEquals("hello world", binding.textView.getText().toString());
                 getActivity().setContentView(binding.getRoot());
                 binding.getRoot().postOnAnimation(watcher);
             }
@@ -97,7 +97,7 @@ public class LeakTest extends ActivityInstrumentationTestCase2<TestActivity> {
         runTestOnUiThread(new Runnable() {
             @Override
             public void run() {
-                assertEquals("goodbye world", binding.getTextView().getText().toString());
+                assertEquals("goodbye world", binding.textView.getText().toString());
             }
         });
     }

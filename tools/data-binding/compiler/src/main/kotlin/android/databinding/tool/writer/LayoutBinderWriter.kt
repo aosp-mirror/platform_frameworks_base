@@ -39,6 +39,7 @@ import android.databinding.tool.expr.BracketExpr
 import android.databinding.tool.reflection.Callable
 import android.databinding.tool.expr.CastExpr
 import android.databinding.tool.reflection.ModelAnalyzer
+import java.util.HashMap
 
 fun String.stripNonJava() = this.split("[^a-zA-Z0-9]").map{ it.trim() }.joinToCamelCaseAsVar()
 
@@ -84,7 +85,15 @@ val BindingTarget.readableUniqueName by Delegates.lazy {(target: BindingTarget) 
 }
 
 val BindingTarget.fieldName by Delegates.lazy { (target : BindingTarget) ->
-    "m${target.readableUniqueName.capitalize()}"
+    if (target.getFieldName() == null) {
+        if (target.getId() == null) {
+            target.setFieldName("m${target.readableUniqueName.capitalize()}")
+        } else {
+            target.androidId.stripNonJava();
+            target.setFieldName(target.readableUniqueName);
+        }
+    }
+    target.getFieldName();
 }
 
 val BindingTarget.getterName by Delegates.lazy { (target : BindingTarget) ->
@@ -299,6 +308,7 @@ fun <T> FlagSet.mapOr(other : FlagSet, cb : (suffix : String, index : Int) -> T)
 
 class LayoutBinderWriter(val layoutBinder : LayoutBinder) {
     val model = layoutBinder.getModel()
+    val indices = HashMap<BindingTarget, kotlin.Int>()
     val mDirtyFlags by Delegates.lazy {
         val fs = FlagSet(BitSet(), model.getFlagBucketCount());
         Arrays.fill(fs.buckets, -1)
@@ -330,6 +340,7 @@ class LayoutBinderWriter(val layoutBinder : LayoutBinder) {
 
     public fun write() : String  {
         layoutBinder.resolveWhichExpressionsAreUsed()
+        calculateIndices();
         return kcode("package ${layoutBinder.getPackage()};") {
             nl("import ${layoutBinder.getModulePackage()}.R;")
             nl("import ${layoutBinder.getModulePackage()}.BR;")
@@ -343,7 +354,6 @@ class LayoutBinderWriter(val layoutBinder : LayoutBinder) {
                 tab(declareLog())
                 tab(declareSetVariable())
                 tab(variableSettersAndGetters())
-                tab(viewGetters())
                 tab(onFieldChange())
 
                 tab(executePendingBindings())
@@ -355,6 +365,16 @@ class LayoutBinderWriter(val layoutBinder : LayoutBinder) {
             tab("//end")
         }.generate()
     }
+    fun calculateIndices() : Unit {
+        val numTaggedViews = layoutBinder.getBindingTargets().
+                filter{it.isUsed() && !it.isBinder()}.count()
+        layoutBinder.getBindingTargets().filter{ it.isUsed() && it.getTag() != null }.forEach {
+            indices.put(it, Integer.parseInt(it.getTag()));
+        }
+        layoutBinder.getBindingTargets().filter{ it.isUsed() && it.isBinder()}.withIndex().forEach {
+            indices.put(it.value, it.index + numTaggedViews);
+        }
+    }
     fun declareIncludeViews() = kcode("") {
         nl("private static final android.util.SparseIntArray sIncludes;")
         nl("private static final android.util.SparseIntArray sViewsWithIds;")
@@ -364,11 +384,8 @@ class LayoutBinderWriter(val layoutBinder : LayoutBinder) {
                 tab("sIncludes = null;")
             } else {
                 tab("sIncludes = new android.util.SparseIntArray();")
-                val numTaggedViews = layoutBinder.getBindingTargets().
-                        filter{it.isUsed() && !it.isBinder()}.count()
-                layoutBinder.getBindingTargets().filter{ it.isUsed() && it.isBinder()}.withIndex()
-                        .forEach {
-                    tab("sIncludes.put(${it.value.androidId}, ${it.index + numTaggedViews});")
+                layoutBinder.getBindingTargets().filter{ it.isUsed() && it.isBinder()}.forEach {
+                    tab("sIncludes.put(${it.androidId}, ${indices.get(it)});")
                 }
             }
             val hasViewsWithIds = layoutBinder.getBindingTargets().firstOrNull{ it.isUsed() && !it.supportsTag()} != null
@@ -378,24 +395,39 @@ class LayoutBinderWriter(val layoutBinder : LayoutBinder) {
                 tab("sViewsWithIds = new android.util.SparseIntArray();")
                 layoutBinder.getBindingTargets().filter{ it.isUsed() && !it.supportsTag() }.
                         forEach {
-                    tab("sViewsWithIds.put(${it.androidId}, ${it.getTag()});")
+                    tab("sViewsWithIds.put(${it.androidId}, ${indices.get(it)});")
                 }
             }
         }
         nl("}")
     }
     fun declareConstructor() = kcode("") {
-        nl("public ${className}(View root) {") {
-            tab("super(root, ${model.getObservables().size()});")
-            val viewCount = layoutBinder.getBindingTargets().filter{it.isUsed()}.count()
-            tab("View[] views = new View[${viewCount}];")
-            tab("mapTaggedChildViews(root, views, sIncludes, sViewsWithIds);");
+        nl("private ${className}(View root, View[] views) {") {
+            tab("super(root, ${model.getObservables().size()}") {
+                layoutBinder.getBindingTargets().filter{it.getId() != null}.forEach {
+                    val index = indices.get(it)
+                    if (!it.isUsed()) {
+                        tab(", null")
+                    } else if (index == null) {
+                        tab(", (${it.getInterfaceType()}) root")
+                    } else if (it.isBinder()) {
+                        tab(", ${it.getViewClass()}.bind(views[${index}])")
+                    } else {
+                        tab(", (${it.getInterfaceType()}) views[${index}]")
+                    }
+                }
+                tab(");")
+            }
             val taggedViews = layoutBinder.getBindingTargets().filter{it.isUsed() && !it.isBinder()}
             taggedViews.forEach {
                 if (it.getTag() == null) {
-                    tab("this.${it.fieldName} = (${it.getViewClass()}) root;")
+                    if (it.getId() == null) {
+                        tab("this.${it.fieldName} = (${it.getViewClass()}) root;")
+                    }
                 } else {
-                    tab("this.${it.fieldName} = (${it.getViewClass()}) views[${it.getTag()}];")
+                    if (it.getId() == null) {
+                        tab("this.${it.fieldName} = (${it.getViewClass()}) views[${it.getTag()}];")
+                    }
                     if (it.supportsTag()) {
                         val originalTag = it.getOriginalTag();
                         var tagValue = "null"
@@ -415,12 +447,13 @@ class LayoutBinderWriter(val layoutBinder : LayoutBinder) {
                     }
                 }
             }
-            val taggedCount = taggedViews.count()
-            layoutBinder.getBindingTargets().filter{it.isUsed() && it.isBinder()}.withIndex()
-                    .forEach {
-                tab("this.${it.value.fieldName} = ${it.value.getViewClass()}.bind(views[${it.index + taggedCount}]);")
-            }
             tab("invalidateAll();");
+            nl("}")
+        }
+        nl("")
+        nl("public ${className}(View root) {") {
+            val viewCount = layoutBinder.getBindingTargets().filter{it.isUsed()}.count()
+            tab("this(root, mapChildViews(root, ${viewCount}, sIncludes, sViewsWithIds));")
         }
         nl("}")
     }
@@ -501,8 +534,8 @@ class LayoutBinderWriter(val layoutBinder : LayoutBinder) {
     }
 
     fun onFieldChange() = kcode("") {
-        tab("@Override")
-        tab("protected boolean onFieldChange(int localFieldId, Object object, int fieldId) {") {
+        nl("@Override")
+        nl("protected boolean onFieldChange(int localFieldId, Object object, int fieldId) {") {
             tab("switch (localFieldId) {") {
                 model.getObservables().forEach {
                     tab("case ${it.getId()} :") {
@@ -513,10 +546,11 @@ class LayoutBinderWriter(val layoutBinder : LayoutBinder) {
             tab("}")
             tab("return false;")
         }
-        tab("}")
+        nl("}")
+        nl("")
 
         model.getObservables().forEach {
-            tab("private boolean ${it.onChangeName}(${it.getResolvedType().toJavaCode()} ${it.readableUniqueName}, int fieldId) {") {
+            nl("private boolean ${it.onChangeName}(${it.getResolvedType().toJavaCode()} ${it.readableUniqueName}, int fieldId) {") {
                 tab("switch (fieldId) {", {
                     val accessedFields: List<FieldAccessExpr> = it.getParents().filterIsInstance(javaClass<FieldAccessExpr>())
                     accessedFields.filter { it.canBeInvalidated() }
@@ -543,28 +577,14 @@ class LayoutBinderWriter(val layoutBinder : LayoutBinder) {
                 tab("}")
                 tab("return false;")
             }
-            tab("}")
+            nl("}")
+            nl("")
         }
     }
 
     fun declareViews() = kcode("// views") {
-        layoutBinder.getBindingTargets().filter{it.isUsed()}.forEach {
-            nl("private final ${it.getViewClass()} ${it.fieldName};")
-        }
-    }
-
-    fun viewGetters() = kcode("// view getters") {
-        layoutBinder.getBindingTargets().filter{it.getId() != null}.forEach {
-            nl("@Override")
-            nl("public ${it.getInterfaceType()} ${it.getterName}() {") {
-                if (it.isUsed()) {
-                    tab("return ${it.fieldName};")
-                } else {
-                    tab("return null;")
-                }
-
-            }
-            nl("}")
+        layoutBinder.getBindingTargets().filter {it.isUsed() && (it.getId() == null)}.forEach {
+            nl("private final ${it.getInterfaceType()} ${it.fieldName};")
         }
     }
 
@@ -638,7 +658,14 @@ class LayoutBinderWriter(val layoutBinder : LayoutBinder) {
                         }) {") {
                             it.value.forEach { binding ->
                                 tab("// api target ${binding.getMinApi()}")
-                                val bindingCode = binding.toJavaCode(binding.getTarget().fieldName, binding.getExpr().toCode().generate())
+                                val fieldName : String
+                                if (binding.getTarget().getViewClass().
+                                        equals(binding.getTarget().getInterfaceType())) {
+                                    fieldName = "this.${binding.getTarget().fieldName}"
+                                } else {
+                                    fieldName = "((${binding.getTarget().getViewClass()}) this.${binding.getTarget().fieldName})"
+                                }
+                                val bindingCode = binding.toJavaCode(fieldName, binding.getExpr().toCode().generate())
                                 if (binding.getMinApi() > 1) {
                                     tab("if(getBuildSdkInt() >= ${binding.getMinApi()}) {") {
                                         tab("$bindingCode;")
@@ -732,8 +759,20 @@ class LayoutBinderWriter(val layoutBinder : LayoutBinder) {
             nl("import android.databinding.DataBindingUtil;")
             nl("import android.databinding.ViewDataBinding;")
             nl("public abstract class ${baseClassName} extends ViewDataBinding {")
-            tab("protected ${baseClassName}(android.view.View root, int localFieldCount) {") {
-                tab("super(root, localFieldCount);")
+            layoutBinder.getBindingTargets().filter{it.getId() != null}.forEach {
+                tab("public final ${it.getInterfaceType()} ${it.fieldName};")
+            }
+            nl("")
+            tab("protected ${baseClassName}(android.view.View root_, int localFieldCount") {
+                layoutBinder.getBindingTargets().filter{it.getId() != null}.forEach {
+                    tab(", ${it.getInterfaceType()} ${it.readableUniqueName}")
+                }
+            }
+            tab(") {") {
+                tab("super(root_, localFieldCount);")
+                layoutBinder.getBindingTargets().filter{it.getId() != null}.forEach {
+                    tab("this.${it.fieldName} = ${it.readableUniqueName};")
+                }
             }
             tab("}")
             nl("")
@@ -745,10 +784,6 @@ class LayoutBinderWriter(val layoutBinder : LayoutBinder) {
                     tab("public abstract void ${it.setterName}(${type} ${it.readableUniqueName});")
                 }
             }
-            layoutBinder.getBindingTargets().filter{ it.getId() != null }.forEach {
-                tab("public abstract ${it.getInterfaceType()} ${it.getterName}();")
-            }
-            nl("")
             tab("public static ${baseClassName} inflate(android.view.ViewGroup root) {") {
                 tab("return DataBindingUtil.<${baseClassName}>inflate(root.getContext(), ${layoutBinder.getModulePackage()}.R.layout.${layoutBinder.getLayoutname()}, root, true);")
             }

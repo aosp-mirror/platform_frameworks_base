@@ -45,7 +45,7 @@ public class ObservableFieldTest extends BaseDataBinderTest<ObservableFieldTestB
 
     @UiThreadTest
     public void testBoolean() {
-        TextView view = mBinder.getBField();
+        TextView view = mBinder.bField;
         assertEquals("false", view.getText());
 
         mObj.bField.set(true);
@@ -56,7 +56,7 @@ public class ObservableFieldTest extends BaseDataBinderTest<ObservableFieldTestB
 
     @UiThreadTest
     public void testByte() {
-        TextView view = mBinder.getTField();
+        TextView view = mBinder.tField;
         assertEquals("0", view.getText());
 
         mObj.tField.set((byte) 1);
@@ -67,7 +67,7 @@ public class ObservableFieldTest extends BaseDataBinderTest<ObservableFieldTestB
 
     @UiThreadTest
     public void testShort() {
-        TextView view = mBinder.getSField();
+        TextView view = mBinder.sField;
         assertEquals("0", view.getText());
 
         mObj.sField.set((short) 1);
@@ -78,7 +78,7 @@ public class ObservableFieldTest extends BaseDataBinderTest<ObservableFieldTestB
 
     @UiThreadTest
     public void testChar() {
-        TextView view = mBinder.getCField();
+        TextView view = mBinder.cField;
         assertEquals("\u0000", view.getText());
 
         mObj.cField.set('A');
@@ -89,7 +89,7 @@ public class ObservableFieldTest extends BaseDataBinderTest<ObservableFieldTestB
 
     @UiThreadTest
     public void testInt() {
-        TextView view = mBinder.getIField();
+        TextView view = mBinder.iField;
         assertEquals("0", view.getText());
 
         mObj.iField.set(1);
@@ -100,7 +100,7 @@ public class ObservableFieldTest extends BaseDataBinderTest<ObservableFieldTestB
 
     @UiThreadTest
     public void testLong() {
-        TextView view = mBinder.getLField();
+        TextView view = mBinder.lField;
         assertEquals("0", view.getText());
 
         mObj.lField.set(1);
@@ -111,7 +111,7 @@ public class ObservableFieldTest extends BaseDataBinderTest<ObservableFieldTestB
 
     @UiThreadTest
     public void testFloat() {
-        TextView view = mBinder.getFField();
+        TextView view = mBinder.fField;
         assertEquals("0.0", view.getText());
 
         mObj.fField.set(1);
@@ -122,7 +122,7 @@ public class ObservableFieldTest extends BaseDataBinderTest<ObservableFieldTestB
 
     @UiThreadTest
     public void testDouble() {
-        TextView view = mBinder.getDField();
+        TextView view = mBinder.dField;
         assertEquals("0.0", view.getText());
 
         mObj.dField.set(1);
@@ -133,7 +133,7 @@ public class ObservableFieldTest extends BaseDataBinderTest<ObservableFieldTestB
 
     @UiThreadTest
     public void testObject() {
-        TextView view = mBinder.getOField();
+        TextView view = mBinder.oField;
         assertEquals("Hello", view.getText());
 
         mObj.oField.set("World");

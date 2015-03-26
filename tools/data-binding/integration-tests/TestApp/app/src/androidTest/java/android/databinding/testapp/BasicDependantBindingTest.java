@@ -71,10 +71,10 @@ public class BasicDependantBindingTest extends BaseDataBinderTest<BasicDependant
 
     private void assertValues(String textView1, String textView2,
             String mergedView1, String mergedView2, String rawMerge) {
-        assertEquals(textView1, mBinder.getTextView1().getText().toString());
-        assertEquals(textView2, mBinder.getTextView2().getText().toString());
-        assertEquals(mergedView1, mBinder.getMergedTextView1().getText().toString());
-        assertEquals(mergedView2, mBinder.getMergedTextView2().getText().toString());
-        assertEquals(rawMerge, mBinder.getRawStringMerge().getText().toString());
+        assertEquals(textView1, mBinder.textView1.getText().toString());
+        assertEquals(textView2, mBinder.textView2.getText().toString());
+        assertEquals(mergedView1, mBinder.mergedTextView1.getText().toString());
+        assertEquals(mergedView2, mBinder.mergedTextView2.getText().toString());
+        assertEquals(rawMerge, mBinder.rawStringMerge.getText().toString());
     }
 }

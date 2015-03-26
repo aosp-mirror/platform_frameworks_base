@@ -32,9 +32,9 @@ public class ObservableWithNotBindableFieldObjectTest extends BaseDataBinderTest
         ObservableWithNotBindableFieldObject obj = new ObservableWithNotBindableFieldObject();
         mBinder.setObj(obj);
         mBinder.executePendingBindings();
-        assertEquals("", mBinder.getTextView().getText().toString());
+        assertEquals("", mBinder.textView.getText().toString());
         obj.update("100");
         mBinder.executePendingBindings();
-        assertEquals("100", mBinder.getTextView().getText().toString());
+        assertEquals("100", mBinder.textView.getText().toString());
     }
 }

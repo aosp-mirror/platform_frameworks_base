@@ -66,11 +66,11 @@ public class BracketTest extends BaseDataBinderTest<BracketTestBinding> {
 
     @UiThreadTest
     public void testBrackets() {
-        assertEquals("Hello World", mBinder.getArrayText().getText().toString());
-        assertEquals("Hello", mBinder.getSparseArrayText().getText().toString());
-        assertEquals("World", mBinder.getLongSparseArrayText().getText().toString());
-        assertEquals("100", mBinder.getSparseIntArrayText().getText().toString());
-        assertEquals("true", mBinder.getSparseBooleanArrayText().getText().toString());
-        assertEquals("5", mBinder.getSparseLongArrayText().getText().toString());
+        assertEquals("Hello World", mBinder.arrayText.getText().toString());
+        assertEquals("Hello", mBinder.sparseArrayText.getText().toString());
+        assertEquals("World", mBinder.longSparseArrayText.getText().toString());
+        assertEquals("100", mBinder.sparseIntArrayText.getText().toString());
+        assertEquals("true", mBinder.sparseBooleanArrayText.getText().toString());
+        assertEquals("5", mBinder.sparseLongArrayText.getText().toString());
     }
 }

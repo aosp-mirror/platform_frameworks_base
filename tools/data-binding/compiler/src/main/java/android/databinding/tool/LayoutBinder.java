@@ -23,10 +23,14 @@ import android.databinding.tool.expr.Expr;
 import android.databinding.tool.expr.ExprModel;
 import android.databinding.tool.expr.IdentifierExpr;
 import android.databinding.tool.store.ResourceBundle;
+import android.databinding.tool.store.ResourceBundle.BindingTargetBundle;
 import android.databinding.tool.util.ParserHelper;
 import android.databinding.tool.writer.LayoutBinderWriter;
+import android.databinding.tool.writer.WriterPackage;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -35,6 +39,14 @@ import java.util.Map;
  * Keeps all information about the bindings per layout file
  */
 public class LayoutBinder {
+    private static final Comparator<BindingTarget> COMPARE_FIELD_NAME = new Comparator<BindingTarget>() {
+        @Override
+        public int compare(BindingTarget first, BindingTarget second) {
+            final String fieldName1 = WriterPackage.getFieldName(first);
+            final String fieldName2 = WriterPackage.getFieldName(second);
+            return fieldName1.compareTo(fieldName2);
+        }
+    };
 
     /*
     * val pkg: String, val projectPackage: String, val baseClassName: String,
@@ -69,13 +81,14 @@ public class LayoutBinder {
         for (Map.Entry<String, String> userImport : mBundle.getImports().entrySet()) {
             mExprModel.addImport(userImport.getKey(), userImport.getValue());
         }
-        for (ResourceBundle.BindingTargetBundle targetBundle : mBundle.getBindingTargetBundles()) {
+        for (BindingTargetBundle targetBundle : mBundle.getBindingTargetBundles()) {
             final BindingTarget bindingTarget = createBindingTarget(targetBundle);
             for (ResourceBundle.BindingTargetBundle.BindingBundle bindingBundle : targetBundle
                     .getBindingBundleList()) {
                 bindingTarget.addBinding(bindingBundle.getName(), parse(bindingBundle.getExpr()));
             }
         }
+        Collections.sort(mBindingTargets, COMPARE_FIELD_NAME);
     }
 
     public void resolveWhichExpressionsAreUsed() {

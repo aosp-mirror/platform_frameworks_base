@@ -26,7 +26,7 @@ public class ConditionalBindingTest extends BaseDataBinderTest<ConditionalBindin
         mBinder.setCond1(cond1);
         mBinder.setCond2(cond2);
         mBinder.executePendingBindings();
-        final String text = mBinder.getTextView().getText().toString();
+        final String text = mBinder.textView.getText().toString();
         assertEquals(cond1 && cond2, "a".equals(text));
         assertEquals(cond1 && !cond2, "b".equals(text));
         assertEquals(!cond1, "c".equals(text));

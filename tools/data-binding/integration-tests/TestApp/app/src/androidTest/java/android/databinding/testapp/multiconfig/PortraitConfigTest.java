@@ -34,29 +34,16 @@ public class PortraitConfigTest extends BaseDataBinderTest<MultiResLayoutBinding
     public void testSharedViewIdAndVariableInheritance()
             throws InterruptedException, NoSuchMethodException, NoSuchFieldException {
         assertEquals("MultiResLayoutBindingImpl", mBinder.getClass().getSimpleName());
-        assertEquals("MultiResLayoutBindingImpl", mBinder.getClass().getSimpleName());
-        assertMethod(TextView.class, "getObjectInLandTextView");
-        assertMethod(TextView.class, "getObjectInDefaultTextView");
-        assertMethod(View.class, "getObjectInDefaultTextView2");
+        assertPublicField(TextView.class, "objectInLandTextView");
+        assertPublicField(TextView.class, "objectInDefaultTextView");
+        assertPublicField(View.class, "objectInDefaultTextView2");
 
-        assertNoField("mObjectInLandTextView");
-        assertField(TextView.class, "mObjectInDefaultTextView");
-        assertField(EditText.class, "mObjectInDefaultTextView2");
-
-        assertNoField("mObjectInLand");
         assertField(NotBindableVo.class, "mObjectInDefault");
 
-
         // includes
-        assertMethod(ViewDataBinding.class, "getIncludedLayoutConflict");
-        assertMethod(BasicBindingBinding.class, "getIncludedLayoutShared");
-        assertMethod(ConditionalBindingBinding.class, "getIncludedLayoutPort");
-        assertMethod(ConditionalBindingBinding.class, "getIncludedLayoutLand");
-
-        assertField(BasicBindingBinding.class, "mIncludedLayoutConflict");
-        assertField(BasicBindingBinding.class, "mIncludedLayoutShared");
-        assertField(ConditionalBindingBinding.class, "mIncludedLayoutPort");
-
-        assertNoField("mIncludedLayoutLand");
+        assertPublicField(ViewDataBinding.class, "includedLayoutConflict");
+        assertPublicField(BasicBindingBinding.class, "includedLayoutShared");
+        assertPublicField(ConditionalBindingBinding.class, "includedLayoutPort");
+        assertPublicField(ConditionalBindingBinding.class, "includedLayoutLand");
     }
 }

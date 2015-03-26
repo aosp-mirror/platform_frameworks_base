@@ -56,7 +56,7 @@ public class CastTest extends BaseDataBinderTest<CastTestBinding> {
 
     @UiThreadTest
     public void testCast() throws Throwable {
-        assertEquals("hello", mBinder.getTextView0().getText().toString());
-        assertEquals("world", mBinder.getTextView1().getText().toString());
+        assertEquals("hello", mBinder.textView0.getText().toString());
+        assertEquals("world", mBinder.textView1.getText().toString());
     }
 }
