@@ -15808,6 +15808,16 @@ package android.media {
     field public static final int SUCCESS = 0; // 0x0
   }
 
+  public static class AudioRecord.Builder {
+    ctor public AudioRecord.Builder();
+    method public android.media.AudioRecord build() throws java.lang.UnsupportedOperationException;
+    method public android.media.AudioRecord.Builder setAudioAttributes(android.media.AudioAttributes) throws java.lang.IllegalArgumentException;
+    method public android.media.AudioRecord.Builder setAudioFormat(android.media.AudioFormat) throws java.lang.IllegalArgumentException;
+    method public android.media.AudioRecord.Builder setBufferSizeInBytes(int) throws java.lang.IllegalArgumentException;
+    method public android.media.AudioRecord.Builder setCapturePreset(int) throws java.lang.IllegalArgumentException;
+    method public android.media.AudioRecord.Builder setSessionId(int) throws java.lang.IllegalArgumentException;
+  }
+
   public static abstract interface AudioRecord.OnRecordPositionUpdateListener {
     method public abstract void onMarkerReached(android.media.AudioRecord);
     method public abstract void onPeriodicNotification(android.media.AudioRecord);

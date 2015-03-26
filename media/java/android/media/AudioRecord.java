@@ -20,6 +20,7 @@ import java.lang.ref.WeakReference;
 import java.nio.ByteBuffer;
 import java.util.Iterator;
 
+import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.os.Binder;
 import android.os.Handler;
@@ -313,8 +314,14 @@ public class AudioRecord
 
         audioParamCheck(attributes.getCapturePreset(), rate, encoding);
 
-        mChannelCount = AudioFormat.channelCountFromInChannelMask(format.getChannelMask());
-        mChannelMask = getChannelMaskFromLegacyConfig(format.getChannelMask(), false);
+        int channelMask = AudioFormat.CHANNEL_IN_DEFAULT;
+        if ((format.getPropertySetMask()
+                & AudioFormat.AUDIO_FORMAT_HAS_PROPERTY_CHANNEL_MASK) != 0)
+        {
+            channelMask = format.getChannelMask();
+        }
+        mChannelCount = AudioFormat.channelCountFromInChannelMask(channelMask);
+        mChannelMask = getChannelMaskFromLegacyConfig(channelMask, false);
 
         audioBuffSizeCheck(bufferSizeInBytes);
 
@@ -333,6 +340,161 @@ public class AudioRecord
         mSessionId = session[0];
 
         mState = STATE_INITIALIZED;
+    }
+
+    /**
+     * Builder class for {@link AudioRecord} objects.
+     * Use this class to configure and create an <code>AudioRecord</code> instance. By setting the
+     * recording preset (a.k.a. recording source) and audio format parameters, you indicate which of
+     *  those vary from the default behavior on the device.
+     * <p> Here is an example where <code>Builder</code> is used to specify all {@link AudioFormat}
+     * parameters, to be used by a new <code>AudioRecord</code> instance:
+     *
+     * <pre class="prettyprint">
+     * AudioRecord recorder = new AudioRecord.Builder()
+     *         .setCapturePreset(MediaRecorder.AudioSource.VOICE_COMMUNICATION)
+     *         .setAudioFormat(new AudioFormat.Builder()
+     *                 .setEncoding(AudioFormat.ENCODING_PCM_16BIT)
+     *                 .setSampleRate(32000)
+     *                 .setChannelMask(AudioFormat.CHANNEL_IN_MONO)
+     *                 .build())
+     *         .setBufferSize(2*minBuffSize)
+     *         .build();
+     * </pre>
+     * <p>
+     * If the capture preset is not set with {@link #setCapturePreset(int)},
+     * {@link MediaRecorder.AudioSource#DEFAULT} is used.
+     * <br>If the audio format is not specified or is incomplete, its sample rate will be the
+     * default output sample rate of the device (see
+     * {@link AudioManager#PROPERTY_OUTPUT_SAMPLE_RATE}), its channel configuration will be
+     * {@link AudioFormat#CHANNEL_IN_DEFAULT}.
+     * <br>Failing to set an adequate buffer size with {@link #setBufferSizeInBytes(int)} will
+     * prevent the successful creation of an <code>AudioRecord</code> instance.
+     */
+    public static class Builder {
+        private AudioAttributes mAttributes;
+        private AudioFormat mFormat;
+        private int mBufferSizeInBytes;
+        private int mSessionId = AudioManager.AUDIO_SESSION_ID_GENERATE;
+
+        /**
+         * Constructs a new Builder with the default values as described above.
+         */
+        public Builder() {
+        }
+
+        /**
+         * @param preset the capture preset (also referred to as the recording source).
+         * See {@link MediaRecorder.AudioSource} for the supported capture preset definitions.
+         * @return the same Builder instance.
+         * @throws IllegalArgumentException
+         */
+        public Builder setCapturePreset(int preset) throws IllegalArgumentException {
+            if ( (preset < MediaRecorder.AudioSource.DEFAULT) ||
+                    (preset > MediaRecorder.getAudioSourceMax()) ) {
+                throw new IllegalArgumentException("Invalid audio source " + preset);
+            }
+            mAttributes = new AudioAttributes.Builder()
+                    .setInternalCapturePreset(preset)
+                    .build();
+            return this;
+        }
+
+        /**
+         * @hide
+         * To be only used by system components. Allows specifying non-public capture presets
+         * @param attributes a non-null {@link AudioAttributes} instance that contains the capture
+         *     preset to be used.
+         * @return the same Builder instance.
+         * @throws IllegalArgumentException
+         */
+        @SystemApi
+        public Builder setAudioAttributes(@NonNull AudioAttributes attributes)
+                throws IllegalArgumentException {
+            if (attributes == null) {
+                throw new IllegalArgumentException("Illegal null AudioAttributes argument");
+            }
+            if (attributes.getCapturePreset() == MediaRecorder.AudioSource.AUDIO_SOURCE_INVALID) {
+                throw new IllegalArgumentException(
+                        "No valid capture preset in AudioAttributes argument");
+            }
+            // keep reference, we only copy the data when building
+            mAttributes = attributes;
+            return this;
+        }
+
+        /**
+         * Sets the format of the audio data to be captured.
+         * @param format a non-null {@link AudioFormat} instance
+         * @return the same Builder instance.
+         * @throws IllegalArgumentException
+         */
+        public Builder setAudioFormat(@NonNull AudioFormat format) throws IllegalArgumentException {
+            if (format == null) {
+                throw new IllegalArgumentException("Illegal null AudioFormat argument");
+            }
+            // keep reference, we only copy the data when building
+            mFormat = format;
+            return this;
+        }
+
+        /**
+         * Sets the total size (in bytes) of the buffer where audio data is written
+         * during the recording. New audio data can be read from this buffer in smaller chunks
+         * than this size. See {@link #getMinBufferSize(int, int, int)} to determine the minimum
+         * required buffer size for the successful creation of an AudioRecord instance.
+         * Using values smaller than getMinBufferSize() will result in an initialization failure.
+         * @param bufferSizeInBytes a value strictly greater than 0
+         * @return the same Builder instance.
+         * @throws IllegalArgumentException
+         */
+        public Builder setBufferSizeInBytes(int bufferSizeInBytes) throws IllegalArgumentException {
+            if (bufferSizeInBytes <= 0) {
+                throw new IllegalArgumentException("Invalid buffer size " + bufferSizeInBytes);
+            }
+            mBufferSizeInBytes = bufferSizeInBytes;
+            return this;
+        }
+
+        /**
+         * @hide
+         * To be only used by system components.
+         * @param sessionId ID of audio session the AudioRecord must be attached to, or
+         *     {@link AudioManager#AUDIO_SESSION_ID_GENERATE} if the session isn't known at
+         *     construction time.
+         * @return the same Builder instance.
+         * @throws IllegalArgumentException
+         */
+        @SystemApi
+        public Builder setSessionId(int sessionId) throws IllegalArgumentException {
+            if (sessionId < 0) {
+                throw new IllegalArgumentException("Invalid session ID " + sessionId);
+            }
+            mSessionId = sessionId;
+            return this;
+        }
+
+        /**
+         * @return a new {@link AudioRecord} instance initialized with all the parameters set
+         *     on this <code>Builder</code>
+         * @throws UnsupportedOperationException if the parameters set on the <code>Builder</code>
+         *     were incompatible, or if they are not supported by the device.
+         */
+        public AudioRecord build() throws UnsupportedOperationException {
+            if (mFormat == null) {
+                mFormat = new AudioFormat.Builder().build();
+            }
+            if (mAttributes == null) {
+                mAttributes = new AudioAttributes.Builder()
+                        .setInternalCapturePreset(MediaRecorder.AudioSource.DEFAULT)
+                        .build();
+            }
+            try {
+                return new AudioRecord(mAttributes, mFormat, mBufferSizeInBytes, mSessionId);
+            } catch (IllegalArgumentException e) {
+                throw new UnsupportedOperationException(e.getMessage());
+            }
+        }
     }
 
     // Convenience method for the constructor's parameter checks.
