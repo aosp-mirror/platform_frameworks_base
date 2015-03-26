@@ -258,9 +258,17 @@ public class TelephonyManager {
      * <p>
      * Output: nothing.
      */
-    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    @SdkConstant(SdkConstantType.SERVICE_ACTION)
     public static final String ACTION_RESPOND_VIA_MESSAGE =
             "android.intent.action.RESPOND_VIA_MESSAGE";
+
+    /**
+     * The emergency dialer may choose to present activities with intent filters for this
+     * action as emergency assistance buttons that launch the activity when clicked.
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_EMERGENCY_ASSISTANCE =
+            "android.telephony.action.EMERGENCY_ASSISTANCE";
 
     /**
      * The lookup key used with the {@link #ACTION_PHONE_STATE_CHANGED} broadcast
