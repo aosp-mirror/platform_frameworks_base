@@ -2253,6 +2253,17 @@ final class Settings {
         mReadMessages.append("Read completed successfully: " + mPackages.size() + " packages, "
                 + mSharedUsers.size() + " shared uids\n");
 
+        // The persisted state we just read was generated after a permissions
+        // update for all users, update each package and shared user setting
+        // with the device users ids to start from were we left off.
+        final int[] userIds = UserManagerService.getInstance().getUserIds();
+        for (PackageSetting ps : mPackages.values()) {
+            ps.setPermissionsUpdatedForUserIds(userIds);
+        }
+        for (SharedUserSetting sus : mSharedUsers.values()) {
+            sus.setPermissionsUpdatedForUserIds(userIds);
+        }
+
         return true;
     }
 
@@ -3010,8 +3021,6 @@ final class Settings {
                     XmlUtils.skipCurrentTag(parser);
                 }
             }
-
-
         } else {
             XmlUtils.skipCurrentTag(parser);
         }

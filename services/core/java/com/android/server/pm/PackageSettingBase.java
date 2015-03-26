@@ -198,6 +198,7 @@ abstract class PackageSettingBase extends SettingBase {
      * Make a shallow copy of this package settings.
      */
     public void copyFrom(PackageSettingBase base) {
+        setPermissionsUpdatedForUserIds(base.getPermissionsUpdatedForUserIds());
         getPermissionsState().copyFrom(base.getPermissionsState());
         primaryCpuAbiString = base.primaryCpuAbiString;
         secondaryCpuAbiString = base.secondaryCpuAbiString;

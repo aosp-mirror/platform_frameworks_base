@@ -6967,6 +6967,10 @@ public class PackageManagerService extends IPackageManager.Stub {
         PermissionsState permissionsState = ps.getPermissionsState();
         PermissionsState origPermissions = permissionsState;
 
+        final int[] currentUserIds = UserManagerService.getInstance().getUserIds();
+
+        int[] upgradeUserIds = PermissionsState.USERS_NONE;
+
         boolean changedPermission = false;
 
         if (replace) {
@@ -7022,16 +7026,32 @@ public class PackageManagerService extends IPackageManager.Stub {
                         // For legacy apps dangerous permissions are install time ones.
                         grant = GRANT_INSTALL;
                     } else if ((pkg.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0) {
-                        // For modern system apps dangerous permissions are runtime ones.
-                        grant = GRANT_UPGRADE;
-                    } else {
+                        final int[] updatedUserIds = ps.getPermissionsUpdatedForUserIds();
                         if (origPermissions.hasInstallPermission(bp.name)) {
-                            // For legacy apps that became modern, install becomes runtime.
+                            // If a system app had an install permission, then the app was
+                            // upgraded and we grant the permissions as runtime to all users.
                             grant = GRANT_UPGRADE;
-                        } else if (replace) {
-                            // For upgraded modern apps keep runtime permissions unchanged.
+                            upgradeUserIds = currentUserIds;
+                        } else if (!Arrays.equals(updatedUserIds, currentUserIds)) {
+                            // If users changed since the last permissions update for a
+                            // system app, we grant the permission as runtime to the new users.
+                            grant = GRANT_UPGRADE;
+                            upgradeUserIds = currentUserIds;
+                            for (int userId : updatedUserIds) {
+                                upgradeUserIds = ArrayUtils.removeInt(upgradeUserIds, userId);
+                            }
+                        } else {
+                            // Otherwise, we grant the permission as runtime if the app
+                            // already had it, i.e. we preserve runtime permissions.
                             grant = GRANT_RUNTIME;
                         }
+                    } else if (origPermissions.hasInstallPermission(bp.name)) {
+                        // For legacy apps that became modern, install becomes runtime.
+                        grant = GRANT_UPGRADE;
+                        upgradeUserIds = currentUserIds;
+                    } else if (replace) {
+                        // For upgraded modern apps keep runtime permissions unchanged.
+                        grant = GRANT_RUNTIME;
                     }
                 } break;
 
@@ -7086,7 +7106,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                     case GRANT_UPGRADE: {
                         // Grant runtime permissions for a previously held install permission.
                         permissionsState.revokeInstallPermission(bp);
-                        for (int userId : UserManagerService.getInstance().getUserIds()) {
+                        for (int userId : upgradeUserIds) {
                             if (permissionsState.grantRuntimePermission(bp, userId) !=
                                     PermissionsState.PERMISSION_OPERATION_FAILURE) {
                                 changedPermission = true;
@@ -7133,6 +7153,8 @@ public class PackageManagerService extends IPackageManager.Stub {
             // changed.
             ps.permissionsFixed = true;
         }
+
+        ps.setPermissionsUpdatedForUserIds(currentUserIds);
     }
 
     private boolean isNewPlatformPermissionForPackage(String perm, PackageParser.Package pkg) {

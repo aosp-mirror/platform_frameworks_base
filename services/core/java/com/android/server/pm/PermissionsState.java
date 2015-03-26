@@ -55,9 +55,9 @@ public final class PermissionsState {
     /** The permission operation failed. */
     public static final int PERMISSION_OPERATION_FAILURE = 3;
 
-    private static final int[] USERS_ALL = {UserHandle.USER_ALL};
+    public static final int[] USERS_ALL = {UserHandle.USER_ALL};
 
-    private static final int[] USERS_NONE = {};
+    public static final int[] USERS_NONE = {};
 
     private static final int[] NO_GIDS = {};
 
@@ -149,6 +149,9 @@ public final class PermissionsState {
      *     #PERMISSION_OPERATION_FAILURE}.
      */
     public int grantRuntimePermission(BasePermission permission, int userId) {
+        if (userId == UserHandle.USER_ALL) {
+            return PERMISSION_OPERATION_FAILURE;
+        }
         return grantPermission(permission, userId);
     }
 
@@ -162,6 +165,9 @@ public final class PermissionsState {
      *     #PERMISSION_OPERATION_FAILURE}.
      */
     public int revokeRuntimePermission(BasePermission permission, int userId) {
+        if (userId == UserHandle.USER_ALL) {
+            return PERMISSION_OPERATION_FAILURE;
+        }
         return revokePermission(permission, userId);
     }
 

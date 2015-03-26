@@ -17,13 +17,15 @@
 package com.android.server.pm;
 
 import android.content.pm.ApplicationInfo;
-import android.util.ArraySet;
+
+import java.util.Arrays;
 
 abstract class SettingBase {
     int pkgFlags;
     int pkgPrivateFlags;
 
     private final PermissionsState mPermissionsState;
+    private int[] mPermissionsUpdatedForUserIds = PermissionsState.USERS_NONE;
 
     SettingBase(int pkgFlags, int pkgPrivateFlags) {
         setFlags(pkgFlags);
@@ -35,10 +37,27 @@ abstract class SettingBase {
         pkgFlags = base.pkgFlags;
         pkgPrivateFlags = base.pkgPrivateFlags;
         mPermissionsState = new PermissionsState(base.mPermissionsState);
+        setPermissionsUpdatedForUserIds(base.mPermissionsUpdatedForUserIds);
     }
 
     public PermissionsState getPermissionsState() {
         return mPermissionsState;
+    }
+
+    public int[] getPermissionsUpdatedForUserIds() {
+        return mPermissionsUpdatedForUserIds;
+    }
+
+    public void setPermissionsUpdatedForUserIds(int[] userIds) {
+        if (Arrays.equals(mPermissionsUpdatedForUserIds, userIds)) {
+            return;
+        }
+
+        if (userIds == PermissionsState.USERS_NONE || userIds == PermissionsState.USERS_ALL) {
+            mPermissionsUpdatedForUserIds = userIds;
+        } else {
+            mPermissionsUpdatedForUserIds = Arrays.copyOf(userIds, userIds.length);
+        }
     }
 
     void setFlags(int pkgFlags) {
