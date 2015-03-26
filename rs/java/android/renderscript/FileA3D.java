@@ -145,6 +145,9 @@ public class FileA3D extends BaseObj {
             case MESH:
                 entry.mLoadedObj = new Mesh(objectID, rs);
                 break;
+
+            default:
+                throw new RSRuntimeException("Unrecognized object type in file.");
             }
 
             entry.mLoadedObj.updateFromNative();
