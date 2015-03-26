@@ -112,7 +112,7 @@ public class Am extends BaseCommand {
                 "       am instrument [-r] [-e <NAME> <VALUE>] [-p <FILE>] [-w]\n" +
                 "               [--user <USER_ID> | current]\n" +
                 "               [--no-window-animation] [--abi <ABI>] <COMPONENT>\n" +
-                "       am profile start [--user <USER_ID> current] <PROCESS> <FILE>\n" +
+                "       am profile start [--user <USER_ID> current] [--sampling INTERVAL] <PROCESS> <FILE>\n" +
                 "       am profile stop [--user <USER_ID> current] [<PROCESS>]\n" +
                 "       am dumpheap [--user <USER_ID> current] [-n] <PROCESS> <FILE>\n" +
                 "       am set-debug-app [-w] [--persistent] <PACKAGE>\n" +
@@ -1031,6 +1031,7 @@ public class Am extends BaseCommand {
         boolean wall = false;
         int userId = UserHandle.USER_CURRENT;
         int profileType = 0;
+        mSamplingInterval = 0;
 
         String process = null;
 
@@ -1044,6 +1045,8 @@ public class Am extends BaseCommand {
                     userId = parseUserArg(nextArgRequired());
                 } else if (opt.equals("--wall")) {
                     wall = true;
+                } else if (opt.equals("--sampling")) {
+                    mSamplingInterval = Integer.parseInt(nextArgRequired());
                 } else {
                     System.err.println("Error: Unknown option: " + opt);
                     return;
@@ -1093,7 +1096,7 @@ public class Am extends BaseCommand {
                 System.err.println("Consider using a file under /data/local/tmp/");
                 return;
             }
-            profilerInfo = new ProfilerInfo(profileFile, fd, 0, false);
+            profilerInfo = new ProfilerInfo(profileFile, fd, mSamplingInterval, false);
         }
 
         try {
