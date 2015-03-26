@@ -54,11 +54,13 @@ public class SystemSensorManager extends SensorManager {
     // Looper associated with the context in which this instance was created.
     private final Looper mMainLooper;
     private final int mTargetSdkLevel;
+    private final String mPackageName;
 
     /** {@hide} */
     public SystemSensorManager(Context context, Looper mainLooper) {
         mMainLooper = mainLooper;
         mTargetSdkLevel = context.getApplicationInfo().targetSdkVersion;
+        mPackageName = context.getPackageName();
         synchronized(sSensorModuleLock) {
             if (!sSensorModuleInitialized) {
                 sSensorModuleInitialized = true;
@@ -117,14 +119,14 @@ public class SystemSensorManager extends SensorManager {
             if (queue == null) {
                 Looper looper = (handler != null) ? handler.getLooper() : mMainLooper;
                 queue = new SensorEventQueue(listener, looper, this);
-                if (!queue.addSensor(sensor, delayUs, maxBatchReportLatencyUs, reservedFlags)) {
+                if (!queue.addSensor(sensor, delayUs, maxBatchReportLatencyUs)) {
                     queue.dispose();
                     return false;
                 }
                 mSensorListeners.put(listener, queue);
                 return true;
             } else {
-                return queue.addSensor(sensor, delayUs, maxBatchReportLatencyUs, reservedFlags);
+                return queue.addSensor(sensor, delayUs, maxBatchReportLatencyUs);
             }
         }
     }
@@ -165,14 +167,14 @@ public class SystemSensorManager extends SensorManager {
             TriggerEventQueue queue = mTriggerListeners.get(listener);
             if (queue == null) {
                 queue = new TriggerEventQueue(listener, mMainLooper, this);
-                if (!queue.addSensor(sensor, 0, 0, 0)) {
+                if (!queue.addSensor(sensor, 0, 0)) {
                     queue.dispose();
                     return false;
                 }
                 mTriggerListeners.put(listener, queue);
                 return true;
             } else {
-                return queue.addSensor(sensor, 0, 0, 0);
+                return queue.addSensor(sensor, 0, 0);
             }
         }
     }
@@ -223,9 +225,9 @@ public class SystemSensorManager extends SensorManager {
      */
     private static abstract class BaseEventQueue {
         private native long nativeInitBaseEventQueue(BaseEventQueue eventQ, MessageQueue msgQ,
-                float[] scratch);
+                float[] scratch, String packageName);
         private static native int nativeEnableSensor(long eventQ, int handle, int rateUs,
-                int maxBatchReportLatencyUs, int reservedFlags);
+                int maxBatchReportLatencyUs);
         private static native int nativeDisableSensor(long eventQ, int handle);
         private static native void nativeDestroySensorEventQueue(long eventQ);
         private static native int nativeFlushSensor(long eventQ);
@@ -238,7 +240,8 @@ public class SystemSensorManager extends SensorManager {
         protected final SystemSensorManager mManager;
 
         BaseEventQueue(Looper looper, SystemSensorManager manager) {
-            nSensorEventQueue = nativeInitBaseEventQueue(this, looper.getQueue(), mScratch);
+            nSensorEventQueue = nativeInitBaseEventQueue(this, looper.getQueue(), mScratch,
+                    manager.mPackageName);
             mCloseGuard.open("dispose");
             mManager = manager;
         }
@@ -248,7 +251,7 @@ public class SystemSensorManager extends SensorManager {
         }
 
         public boolean addSensor(
-                Sensor sensor, int delayUs, int maxBatchReportLatencyUs, int reservedFlags) {
+                Sensor sensor, int delayUs, int maxBatchReportLatencyUs) {
             // Check if already present.
             int handle = sensor.getHandle();
             if (mActiveSensors.get(handle)) return false;
@@ -256,10 +259,10 @@ public class SystemSensorManager extends SensorManager {
             // Get ready to receive events before calling enable.
             mActiveSensors.put(handle, true);
             addSensorEvent(sensor);
-            if (enableSensor(sensor, delayUs, maxBatchReportLatencyUs, reservedFlags) != 0) {
+            if (enableSensor(sensor, delayUs, maxBatchReportLatencyUs) != 0) {
                 // Try continuous mode if batching fails.
                 if (maxBatchReportLatencyUs == 0 ||
-                    maxBatchReportLatencyUs > 0 && enableSensor(sensor, delayUs, 0, 0) != 0) {
+                    maxBatchReportLatencyUs > 0 && enableSensor(sensor, delayUs, 0) != 0) {
                   removeSensor(sensor, false);
                   return false;
                 }
@@ -328,11 +331,11 @@ public class SystemSensorManager extends SensorManager {
         }
 
         private int enableSensor(
-                Sensor sensor, int rateUs, int maxBatchReportLatencyUs, int reservedFlags) {
+                Sensor sensor, int rateUs, int maxBatchReportLatencyUs) {
             if (nSensorEventQueue == 0) throw new NullPointerException();
             if (sensor == null) throw new NullPointerException();
             return nativeEnableSensor(nSensorEventQueue, sensor.getHandle(), rateUs,
-                    maxBatchReportLatencyUs, reservedFlags);
+                    maxBatchReportLatencyUs);
         }
 
         private int disableSensor(Sensor sensor) {
