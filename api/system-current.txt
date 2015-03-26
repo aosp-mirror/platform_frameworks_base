@@ -14172,6 +14172,7 @@ package android.hardware.hdmi {
     method public void setHdmiMhlVendorCommandListener(android.hardware.hdmi.HdmiTvClient.HdmiMhlVendorCommandListener);
     method public void setInputChangeListener(android.hardware.hdmi.HdmiTvClient.InputChangeListener);
     method public void setRecordListener(android.hardware.hdmi.HdmiRecordListener);
+    method public void setSystemAudioMode(boolean, android.hardware.hdmi.HdmiTvClient.SelectCallback);
     method public void setSystemAudioMute(boolean);
     method public void setSystemAudioVolume(int, int, int);
     method public void startOneTouchRecord(int, android.hardware.hdmi.HdmiRecordSources.RecordSource);
