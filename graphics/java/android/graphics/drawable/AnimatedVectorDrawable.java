@@ -50,8 +50,8 @@ import java.util.List;
  * </p>
  * <p>
  * First is the XML file for {@link android.graphics.drawable.VectorDrawable}.
- * Note that we allow the animation happen on the group's attributes and path's
- * attributes, which requires they are uniquely named in this xml file. Groups
+ * Note that we allow the animation to happen on the group's attributes and path's
+ * attributes, which requires they are uniquely named in this XML file. Groups
  * and paths without animations do not need names.
  * </p>
  * <li>Here is a simple VectorDrawable in this vectordrawable.xml file.
@@ -74,7 +74,7 @@ import java.util.List;
  * &lt;/vector&gt;
  * </pre></li>
  * <p>
- * Second is the AnimatedVectorDrawable's xml file, which defines the target
+ * Second is the AnimatedVectorDrawable's XML file, which defines the target
  * VectorDrawable, the target paths and groups to animate, the properties of the
  * path and group to animate and the animations defined as the ObjectAnimators
  * or AnimatorSets.
@@ -93,7 +93,7 @@ import java.util.List;
  * &lt;/animated-vector&gt;
  * </pre></li>
  * <p>
- * Last is the Animator xml file, which is the same as a normal ObjectAnimator
+ * Last is the Animator XML file, which is the same as a normal ObjectAnimator
  * or AnimatorSet.
  * To complete this example, here are the 2 animator files used in avd.xml:
  * rotation.xml and path_morph.xml.
@@ -110,7 +110,7 @@ import java.util.List;
  * the other. Note that the paths must be compatible for morphing.
  * In more details, the paths should have exact same length of commands , and
  * exact same length of parameters for each commands.
- * Note that the path string are better stored in strings.xml for reusing.
+ * Note that the path strings are better stored in strings.xml for reusing.
  * <pre>
  * &lt;set xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;&gt;
  *     &lt;objectAnimator
