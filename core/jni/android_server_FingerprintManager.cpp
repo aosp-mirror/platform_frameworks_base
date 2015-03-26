@@ -17,6 +17,7 @@
 #define LOG_TAG "Fingerprint-JNI"
 
 #include "JNIHelp.h"
+#include <inttypes.h>
 
 #include <android_runtime/AndroidRuntime.h>
 #include <android_runtime/Log.h>
@@ -107,7 +108,7 @@ static jint nativeEnroll(JNIEnv* env, jobject clazz, jint timeout, jint groupId)
 }
 
 static jint nativeAuthenticate(JNIEnv* env, jobject clazz, jlong sessionId, jint groupId) {
-    ALOG(LOG_VERBOSE, LOG_TAG, "nativeAuthenticate(sid=%ld, gid=%d)\n", sessionId, groupId);
+    ALOG(LOG_VERBOSE, LOG_TAG, "nativeAuthenticate(sid=%" PRId64 ", gid=%d)\n", sessionId, groupId);
     int ret = gContext.device->authenticate(gContext.device, sessionId, groupId);
     return reinterpret_cast<jint>(ret);
 }
