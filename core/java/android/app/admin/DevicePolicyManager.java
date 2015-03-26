@@ -404,7 +404,7 @@ public class DevicePolicyManager {
      * device initialization and profile owner privileges during secondary user initialization.
      *
      * <p>
-     * It can also be used in an NFC record with {@link #MIME_TYPE_PROVISIONING_NFC_v2} that starts
+     * It can also be used in an NFC record with {@link #MIME_TYPE_PROVISIONING_NFC_V2} that starts
      * device owner provisioning via an NFC bump. For the NFC record, it should be flattened to a
      * string first.
      *
