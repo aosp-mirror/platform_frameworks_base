@@ -52,6 +52,7 @@ final class SetArcTransmissionStateAction extends HdmiCecFeatureAction {
 
     @Override
     boolean start() {
+        // Seq #37.
         if (mEnabled) {
             // Enable ARC status immediately after sending <Report Arc Initiated>.
             // If AVR responds with <Feature Abort>, disable ARC status again.
