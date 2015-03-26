@@ -2652,4 +2652,5 @@
   <public type="attr" name="colorBackgroundFloating" />
 
   <public type="attr" name="extractNativeLibs" />
+  <public type="attr" name="usesCleartextTraffic" />
 </resources>
