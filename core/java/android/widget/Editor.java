@@ -4664,8 +4664,8 @@ public class Editor {
 
                 // Otherwise the user inserted the composition.
                 String newText = TextUtils.substring(source, start, end);
-                EditOperation edit = new EditOperation(mEditor, false, "", dstart, newText);
-                recordEdit(edit);
+                EditOperation edit = new EditOperation(mEditor, "", dstart, newText);
+                recordEdit(edit, false /* forceMerge */);
                 return true;
             }
 
@@ -4684,11 +4684,15 @@ public class Editor {
             // Build a new operation with all the information from this edit.
             String newText = TextUtils.substring(source, start, end);
             String oldText = TextUtils.substring(dest, dstart, dend);
-            EditOperation edit = new EditOperation(mEditor, forceMerge, oldText, dstart, newText);
-            recordEdit(edit);
+            EditOperation edit = new EditOperation(mEditor, oldText, dstart, newText);
+            recordEdit(edit, forceMerge);
         }
 
-        private void recordEdit(EditOperation edit) {
+        /**
+         * Fetches the last undo operation and checks to see if a new edit should be merged into it.
+         * If forceMerge is true then the new edit is always merged.
+         */
+        private void recordEdit(EditOperation edit, boolean forceMerge) {
             // Fetch the last edit operation and attempt to merge in the new edit.
             final UndoManager um = mEditor.mUndoManager;
             um.beginUpdate("Edit text");
@@ -4698,6 +4702,11 @@ public class Editor {
                 // Add this as the first edit.
                 if (DEBUG_UNDO) Log.d(TAG, "filter: adding first op " + edit);
                 um.addOperation(edit, UndoManager.MERGE_MODE_NONE);
+            } else if (forceMerge) {
+                // Forced merges take priority because they could be the result of a non-user-edit
+                // change and this case should not create a new undo operation.
+                if (DEBUG_UNDO) Log.d(TAG, "filter: force merge " + edit);
+                lastEdit.forceMergeWith(edit);
             } else if (!mIsUserEdit) {
                 // An application directly modified the Editable outside of a text edit. Treat this
                 // as a new change and don't attempt to merge.
@@ -4773,7 +4782,6 @@ public class Editor {
         private static final int TYPE_REPLACE = 2;
 
         private int mType;
-        private boolean mForceMerge;
         private String mOldText;
         private int mOldTextStart;
         private String mNewText;
@@ -4784,13 +4792,10 @@ public class Editor {
 
         /**
          * Constructs an edit operation from a text input operation on editor that replaces the
-         * oldText starting at dstart with newText. If forceMerge is true then always forcibly
-         * merge this operation with any previous one.
+         * oldText starting at dstart with newText.
          */
-        public EditOperation(Editor editor, boolean forceMerge, String oldText, int dstart,
-                String newText) {
+        public EditOperation(Editor editor, String oldText, int dstart, String newText) {
             super(editor.mUndoOwner);
-            mForceMerge = forceMerge;
             mOldText = oldText;
             mNewText = newText;
 
@@ -4817,7 +4822,6 @@ public class Editor {
         public EditOperation(Parcel src, ClassLoader loader) {
             super(src, loader);
             mType = src.readInt();
-            mForceMerge = src.readInt() != 0;
             mOldText = src.readString();
             mOldTextStart = src.readInt();
             mNewText = src.readString();
@@ -4829,7 +4833,6 @@ public class Editor {
         @Override
         public void writeToParcel(Parcel dest, int flags) {
             dest.writeInt(mType);
-            dest.writeInt(mForceMerge ? 1 : 0);
             dest.writeString(mOldText);
             dest.writeInt(mOldTextStart);
             dest.writeString(mNewText);
@@ -4880,10 +4883,6 @@ public class Editor {
             if (DEBUG_UNDO) {
                 Log.d(TAG, "mergeWith old " + this);
                 Log.d(TAG, "mergeWith new " + edit);
-            }
-            if (edit.mForceMerge) {
-                forceMergeWith(edit);
-                return true;
             }
             switch (mType) {
                 case TYPE_INSERT:
@@ -4942,7 +4941,7 @@ public class Editor {
          * Forcibly creates a single merged edit operation by simulating the entire text
          * contents being replaced.
          */
-        private void forceMergeWith(EditOperation edit) {
+        public void forceMergeWith(EditOperation edit) {
             if (DEBUG_UNDO) Log.d(TAG, "forceMerge");
             Editor editor = getOwnerData();
 
