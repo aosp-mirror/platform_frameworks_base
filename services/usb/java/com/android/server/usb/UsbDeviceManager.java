@@ -365,18 +365,6 @@ public class UsbDeviceManager {
                 updateState(state);
                 mAdbEnabled = containsFunction(mCurrentFunctions, UsbManager.USB_FUNCTION_ADB);
 
-                // Upgrade step for previous versions that used persist.service.adb.enable
-                String value = SystemProperties.get("persist.service.adb.enable", "");
-                if (value.length() > 0) {
-                    char enable = value.charAt(0);
-                    if (enable == '1') {
-                        setAdbEnabled(true);
-                    } else if (enable == '0') {
-                        setAdbEnabled(false);
-                    }
-                    SystemProperties.set("persist.service.adb.enable", "");
-                }
-
                 // register observer to listen for settings changes
                 mContentResolver.registerContentObserver(
                         Settings.Global.getUriFor(Settings.Global.ADB_ENABLED),
