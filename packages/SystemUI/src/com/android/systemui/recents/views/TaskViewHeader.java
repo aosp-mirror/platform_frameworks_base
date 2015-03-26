@@ -191,10 +191,7 @@ public class TaskViewHeader extends FrameLayout {
             mApplicationIcon.setImageDrawable(t.applicationIcon);
         }
         mApplicationIcon.setContentDescription(t.activityLabel);
-        // Always update when multi stack debugging is enabled as the stack id can change
-        if (mConfig.multiStackEnabled) {
-            mActivityDescription.setText("[" + t.key.stackId + "] " + t.activityLabel);
-        } else if (!mActivityDescription.getText().toString().equals(t.activityLabel)) {
+        if (!mActivityDescription.getText().toString().equals(t.activityLabel)) {
             mActivityDescription.setText(t.activityLabel);
         }
         // Try and apply the system ui tint
@@ -212,6 +209,9 @@ public class TaskViewHeader extends FrameLayout {
         mDismissButton.setContentDescription(String.format(mDismissContentDescription,
                 t.activityLabel));
         mMoveTaskButton.setVisibility((mConfig.multiStackEnabled) ? View.VISIBLE : View.INVISIBLE);
+        if (mConfig.multiStackEnabled) {
+            updateResizeTaskBarIcon(t);
+        }
     }
 
     /** Updates the resize task bar button. */
@@ -234,6 +234,14 @@ public class TaskViewHeader extends FrameLayout {
                 resId = R.drawable.vector_drawable_place_top;
             } else if (bottom && left && right) {
                 resId = R.drawable.vector_drawable_place_bottom;
+            } else if (top && right) {
+                resId = R.drawable.vector_drawable_place_top_right;
+            } else if (top && left) {
+                resId = R.drawable.vector_drawable_place_top_left;
+            } else if (bottom && right) {
+                resId = R.drawable.vector_drawable_place_bottom_right;
+            } else if (bottom && left) {
+                resId = R.drawable.vector_drawable_place_bottom_left;
             }
         }
         mMoveTaskButton.setImageResource(resId);
