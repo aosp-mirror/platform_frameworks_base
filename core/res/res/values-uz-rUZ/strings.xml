@@ -126,6 +126,7 @@
     <string name="wfcRegErrorTitle" msgid="2301376280632110664">"Wi-Fi qo‘ng‘iroq"</string>
   <string-array name="wfcOperatorErrorMessages">
   </string-array>
+    <string name="wfcSpnFormat" msgid="8211621332478306568">"%s"</string>
     <string name="cfTemplateNotForwarded" msgid="1683685883841272560">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: Yo‘naltirilmadi"</string>
     <string name="cfTemplateForwarded" msgid="1302922117498590521">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
     <string name="cfTemplateForwardedTime" msgid="9206251736527085256">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>  <xliff:g id="TIME_DELAY">{2}</xliff:g> soniyadan so‘ng"</string>
@@ -746,6 +747,22 @@
     <string name="permdesc_manageFingerprint" msgid="178208705828055464">"Ilova foydalanish uchun barmoq izi namunalarini qo‘shish va o‘chirish usullarini qo‘llashi mumkin."</string>
     <string name="permlab_useFingerprint" msgid="3150478619915124905">"barmoq izi sensoridan foydalanish"</string>
     <string name="permdesc_useFingerprint" msgid="9165097460730684114">"Ilova haqiqiylikni tekshirish uchun barmoq izi sensoridan foydalanishi mumkin"</string>
+    <string name="fingerprint_acquired_partial" msgid="735082772341716043">"Barmoq izi qisman aniqlandi. Qayta urinib ko‘ring."</string>
+    <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"Barmoq izi aniqlanmadi. Qayta urinib ko‘ring."</string>
+    <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"Barmoq izi sensori kirlangan. Uni tozalab, keyin qayta urinib ko‘ring."</string>
+    <string name="fingerprint_acquired_too_fast" msgid="5303368850245663580">"Barmoq juda tez harakatlandi. Qayta urinib ko‘ring."</string>
+    <string name="fingerprint_acquired_too_slow" msgid="7381891107120721078">"Barmoq juda sekin harakatlandi. Qayta urinib ko‘ring."</string>
+  <string-array name="fingerprint_acquired_vendor">
+    <item msgid="2892952818207766996">"Sotuvchidan barmoq izini olishda sodir bo‘ladigan xatolik xabari 0"</item>
+  </string-array>
+    <string name="fingerprint_error_unable_to_process" msgid="4232401562838100026">"Barmoq izini aniqlab bo‘lmadi. Qayta urinib ko‘ring."</string>
+    <string name="fingerprint_error_hw_not_available" msgid="6162709753784993771">"Barmoq izi sensoridan foydalanib bo‘lmaydi."</string>
+    <string name="fingerprint_error_no_space" msgid="1055819001126053318">"Barmoq izini saqlab bo‘lmadi. Mavjud barmoq izlaridan birini o‘chirib tashlang."</string>
+    <string name="fingerprint_error_timeout" msgid="3927186043737732875">"Barmoq izini aniqlash vaqti tugab qoldi. Qayta urinib ko‘ring."</string>
+    <string name="fingerprint_error_vendor" msgid="3175724710791609491">"Barmoq izini aniqlash vaqti tugab qoldi. Qayta urinib ko‘ring."</string>
+  <string-array name="fingerprint_error_vendor">
+    <item msgid="5804600450373644614">"Xizmat bilan bog‘liq xatolik xabari."</item>
+  </string-array>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"sinx-sh sozlamalarini o‘qish"</string>
     <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"Ilovaga hisobning sinxronlash sozlamalarini o‘qish uchun ruxsat beradi. Masalan, bu \"Odamlar\" ilovasi hisob bilan sinxronlangan yoki aksini aniqlay oladi."</string>
     <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"sinx.ni yoqish/o‘chirish"</string>

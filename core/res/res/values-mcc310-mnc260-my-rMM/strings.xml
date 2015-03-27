@@ -25,4 +25,5 @@
   <string-array name="wfcOperatorErrorMessages">
     <item msgid="931634632269046788">"ဝိုင်ဖိုင်ခေါ်ဆိုမှု မရပါ။ ဝိုင်ဖိုင် ခေါ်နိုင်ရန် သင်၏ ဖုန်းဝန်ဆောင်မှုပေးသူအား ဆက်သွယ်ပါ။"</item>
   </string-array>
+    <string name="wfcSpnFormat" msgid="4982938551498609442">"%s ဝိုင်ဖိုင် ခေါ်ဆိုမှု"</string>
 </resources>

@@ -25,4 +25,5 @@
   <string-array name="wfcOperatorErrorMessages">
     <item msgid="931634632269046788">"Wi-Fi zvani nav pieejami. Lai iespējotu Wi-Fi zvanus, sazinieties ar savu mobilo sakaru operatoru."</item>
   </string-array>
+    <string name="wfcSpnFormat" msgid="4982938551498609442">"%s Wi-Fi zvani"</string>
 </resources>

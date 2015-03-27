@@ -128,6 +128,7 @@
     <string name="wfcRegErrorTitle" msgid="2301376280632110664">"‏שיחות ב-Wi-Fi"</string>
   <string-array name="wfcOperatorErrorMessages">
   </string-array>
+    <string name="wfcSpnFormat" msgid="8211621332478306568">"%s"</string>
     <string name="cfTemplateNotForwarded" msgid="1683685883841272560">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: ללא העברה"</string>
     <string name="cfTemplateForwarded" msgid="1302922117498590521">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
     <string name="cfTemplateForwardedTime" msgid="9206251736527085256">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g> כעבור <xliff:g id="TIME_DELAY">{2}</xliff:g> שניות"</string>
@@ -748,6 +749,22 @@
     <string name="permdesc_manageFingerprint" msgid="178208705828055464">"מאפשר לאפליקציה להפעיל שיטות להוספה ומחיקה של תבניות טביעות אצבעות שבהן ייעשה שימוש."</string>
     <string name="permlab_useFingerprint" msgid="3150478619915124905">"שימוש בחומרה של טביעות אצבעות"</string>
     <string name="permdesc_useFingerprint" msgid="9165097460730684114">"מאפשר לאפליקציה להשתמש בחומרה של טביעות אצבעות לצורך אימות"</string>
+    <string name="fingerprint_acquired_partial" msgid="735082772341716043">"זוהתה טביעת אצבע חלקית. נסה שוב."</string>
+    <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"לא ניתן היה לעבד את טביעת האצבע. נסה שוב."</string>
+    <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"החיישן של טביעות האצבעות מלוכלך. נקה אותו ונסה שוב."</string>
+    <string name="fingerprint_acquired_too_fast" msgid="5303368850245663580">"האצבע זזה מהר מדי, נסה שוב."</string>
+    <string name="fingerprint_acquired_too_slow" msgid="7381891107120721078">"האצבע זזה לאט מדי, נסה שוב."</string>
+  <string-array name="fingerprint_acquired_vendor">
+    <item msgid="2892952818207766996">"הודעת שגיאה 0 של רכישה ספציפית לספק"</item>
+  </string-array>
+    <string name="fingerprint_error_unable_to_process" msgid="4232401562838100026">"אין אפשרות לעבד. נסה שוב."</string>
+    <string name="fingerprint_error_hw_not_available" msgid="6162709753784993771">"החומרה לא זמינה."</string>
+    <string name="fingerprint_error_no_space" msgid="1055819001126053318">"לא ניתן לאחסן טביעת אצבע. הסר טביעת אצבע קיימת."</string>
+    <string name="fingerprint_error_timeout" msgid="3927186043737732875">"חלף זמן קצוב לתפוגה של טביעת אצבע. נסה שוב."</string>
+    <string name="fingerprint_error_vendor" msgid="3175724710791609491">"חלף זמן קצוב לתפוגה של טביעת אצבע. נסה שוב."</string>
+  <string-array name="fingerprint_error_vendor">
+    <item msgid="5804600450373644614">"הודעת שגיאה ספציפית לספק."</item>
+  </string-array>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"קרא את הגדרות הסינכרון"</string>
     <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"מאפשר לאפליקציה לקרוא את הגדרות הסנכרון של חשבון. לדוגמה, ניתן לגלות כך האם האפליקציה \'אנשים\' מסונכרן עם חשבון כלשהו."</string>
     <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"הפעלת וכיבוי סנכרון"</string>

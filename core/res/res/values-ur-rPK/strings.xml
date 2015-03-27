@@ -126,6 +126,7 @@
     <string name="wfcRegErrorTitle" msgid="2301376280632110664">"‏Wi-Fi کالنگ"</string>
   <string-array name="wfcOperatorErrorMessages">
   </string-array>
+    <string name="wfcSpnFormat" msgid="8211621332478306568">"‎%s"</string>
     <string name="cfTemplateNotForwarded" msgid="1683685883841272560">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g> : فارورڈ نہیں کی گئی"</string>
     <string name="cfTemplateForwarded" msgid="1302922117498590521">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
     <string name="cfTemplateForwardedTime" msgid="9206251736527085256">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g> بعد از <xliff:g id="TIME_DELAY">{2}</xliff:g> سیکنڈ"</string>
@@ -746,6 +747,22 @@
     <string name="permdesc_manageFingerprint" msgid="178208705828055464">"ایپ کو استعمال کیلئے فنگر پرنٹ کی تمثیلات شامل کرنے اور حذف کرنے کیلئے طریقوں کو کالعدم قرار دینے کی اجازت دیتا ہے۔"</string>
     <string name="permlab_useFingerprint" msgid="3150478619915124905">"فنگر پرنٹ ہارڈ ویئر استعمال کریں"</string>
     <string name="permdesc_useFingerprint" msgid="9165097460730684114">"ایپ کو توثیق کیلئے فنگر پرنٹ ہارڈ ویئر استعمال کرنے کی اجازت دیتا ہے"</string>
+    <string name="fingerprint_acquired_partial" msgid="735082772341716043">"جزوی فنگر پرنٹ کی شناخت ہوئی۔ براہ کرم دوبارہ کوشش کریں۔"</string>
+    <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"فنگر پرنٹ پر کارروائی نہیں کی جا سکی۔ براہ کرم دوبارہ کوشش کریں۔"</string>
+    <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"فنگر پرنٹ سینسر گندا ہے۔ براہ کرم صاف کریں اور دوبارہ کوشش کریں۔"</string>
+    <string name="fingerprint_acquired_too_fast" msgid="5303368850245663580">"انگلی کو کافی تیزی سے ہٹا لیا گیا۔ براہ کرم دوبارہ کوشش کریں۔"</string>
+    <string name="fingerprint_acquired_too_slow" msgid="7381891107120721078">"انگلی کو بہت آہستہ ہٹا لیا گیا۔ براہ کرم دوبارہ کوشش کریں۔"</string>
+  <string-array name="fingerprint_acquired_vendor">
+    <item msgid="2892952818207766996">"وینڈر کیلئے مخصوص حصول کی خرابی کا پیغام 0"</item>
+  </string-array>
+    <string name="fingerprint_error_unable_to_process" msgid="4232401562838100026">"کارروائی کرنے سے قاصر ہے۔ دوبارہ کوشش کریں۔"</string>
+    <string name="fingerprint_error_hw_not_available" msgid="6162709753784993771">"ہارڈ ویئر دستیاب نہیں ہے۔"</string>
+    <string name="fingerprint_error_no_space" msgid="1055819001126053318">"فنگر پرنٹ اسٹور نہیں کیا جا سکتا ہے۔ براہ کرم ایک موجودہ فنگر پرنٹ ہٹائیں۔"</string>
+    <string name="fingerprint_error_timeout" msgid="3927186043737732875">"فنگر پرنٹ کی میعاد ختم ہوگئی۔ دوبارہ کوشش کریں۔"</string>
+    <string name="fingerprint_error_vendor" msgid="3175724710791609491">"فنگر پرنٹ کی میعاد ختم ہوگئی۔ دوبارہ کوشش کریں۔"</string>
+  <string-array name="fingerprint_error_vendor">
+    <item msgid="5804600450373644614">"وینڈر کیلئے مخصوص خرابی کا پیغام۔"</item>
+  </string-array>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"مطابقت پذیری کی ترتیبات پڑھیں"</string>
     <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"‏ایپ کو کسی اکاؤنٹ کیلئے مطابقت پذیری کی ترتیبات پڑھنے کی اجازت دیتا ہے۔ مثلا، یہ تعین کرسکتا ہے کہ آیا People ایپ کسی اکاؤنٹ کے ساتھ مطابقت پذیر ہے۔"</string>
     <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"مطابقت پذیری آن اور آف ٹوگل کریں"</string>

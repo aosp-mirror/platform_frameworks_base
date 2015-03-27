@@ -126,6 +126,7 @@
     <string name="wfcRegErrorTitle" msgid="2301376280632110664">"Wi-Fi 通話"</string>
   <string-array name="wfcOperatorErrorMessages">
   </string-array>
+    <string name="wfcSpnFormat" msgid="8211621332478306568">"%s"</string>
     <string name="cfTemplateNotForwarded" msgid="1683685883841272560">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>：未轉接"</string>
     <string name="cfTemplateForwarded" msgid="1302922117498590521">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
     <string name="cfTemplateForwardedTime" msgid="9206251736527085256">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>：<xliff:g id="TIME_DELAY">{2}</xliff:g> 秒後 <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
@@ -746,6 +747,22 @@
     <string name="permdesc_manageFingerprint" msgid="178208705828055464">"允許應用程式呼叫方法來新增及移除可用的指紋範本"</string>
     <string name="permlab_useFingerprint" msgid="3150478619915124905">"使用指紋硬體"</string>
     <string name="permdesc_useFingerprint" msgid="9165097460730684114">"允許應用程式使用指紋硬體進行驗證"</string>
+    <string name="fingerprint_acquired_partial" msgid="735082772341716043">"僅偵測到部分指紋，請再試一次。"</string>
+    <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"無法處理指紋，請再試一次。"</string>
+    <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"指紋感應器有髒汙。請清潔感應器，然後再試一次。"</string>
+    <string name="fingerprint_acquired_too_fast" msgid="5303368850245663580">"手指移動速度過快，請再試一次。"</string>
+    <string name="fingerprint_acquired_too_slow" msgid="7381891107120721078">"手指移動速度過慢，請再試一次。"</string>
+  <string-array name="fingerprint_acquired_vendor">
+    <item msgid="2892952818207766996">"供應商專用的指紋擷取錯誤訊息 0"</item>
+  </string-array>
+    <string name="fingerprint_error_unable_to_process" msgid="4232401562838100026">"無法辨識指紋，請再試一次。"</string>
+    <string name="fingerprint_error_hw_not_available" msgid="6162709753784993771">"硬體無法使用。"</string>
+    <string name="fingerprint_error_no_space" msgid="1055819001126053318">"無法儲存指紋，請先移除現有指紋。"</string>
+    <string name="fingerprint_error_timeout" msgid="3927186043737732875">"指紋處理作業逾時，請再試一次。"</string>
+    <string name="fingerprint_error_vendor" msgid="3175724710791609491">"指紋處理作業逾時，請再試一次。"</string>
+  <string-array name="fingerprint_error_vendor">
+    <item msgid="5804600450373644614">"供應商專用的錯誤訊息。"</item>
+  </string-array>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"讀取同步處理設定"</string>
     <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"允許應用程式讀取帳戶的同步處理設定，例如判斷「使用者」應用程式是否和某個帳戶進行同步處理。"</string>
     <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"開啟及關閉同步功能"</string>

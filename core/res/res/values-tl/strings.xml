@@ -126,6 +126,7 @@
     <string name="wfcRegErrorTitle" msgid="2301376280632110664">"Pagtawag sa pamamagitan ng Wi-Fi"</string>
   <string-array name="wfcOperatorErrorMessages">
   </string-array>
+    <string name="wfcSpnFormat" msgid="8211621332478306568">"%s"</string>
     <string name="cfTemplateNotForwarded" msgid="1683685883841272560">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: Hindi naipasa"</string>
     <string name="cfTemplateForwarded" msgid="1302922117498590521">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
     <string name="cfTemplateForwardedTime" msgid="9206251736527085256">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g> pagkatapos ng <xliff:g id="TIME_DELAY">{2}</xliff:g> (na) segundo"</string>
@@ -746,6 +747,22 @@
     <string name="permdesc_manageFingerprint" msgid="178208705828055464">"Pinapayagan ang app na mag-invoke ng mga paraan upang magdagdag at mag-delete ng mga template ng fingerprint na magagamit."</string>
     <string name="permlab_useFingerprint" msgid="3150478619915124905">"gamitina ng hardware ng fingerprint"</string>
     <string name="permdesc_useFingerprint" msgid="9165097460730684114">"Pinapayagan ang app na gumamit ng hardware ng fingerprint para sa pagpapatotoo"</string>
+    <string name="fingerprint_acquired_partial" msgid="735082772341716043">"Hindi buo ang natukoy na fingerprint. Pakisubukang muli."</string>
+    <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"Hindi maproseso ang fingerprint. Pakisubukang muli."</string>
+    <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"Marumi ang sensor ng fingerprint. Pakilinis at subukang muli."</string>
+    <string name="fingerprint_acquired_too_fast" msgid="5303368850245663580">"Masyadong mabilis ang paggalaw ng daliri. Pakisubukang muli."</string>
+    <string name="fingerprint_acquired_too_slow" msgid="7381891107120721078">"Masyadong mabagal ang paggalaw ng daliri. Pakisubukang muli."</string>
+  <string-array name="fingerprint_acquired_vendor">
+    <item msgid="2892952818207766996">"Mensahe ng error sa pagkuha na partikular sa vendor 0"</item>
+  </string-array>
+    <string name="fingerprint_error_unable_to_process" msgid="4232401562838100026">"Hindi maproseso. Subukang muli."</string>
+    <string name="fingerprint_error_hw_not_available" msgid="6162709753784993771">"Hindi available ang hardware."</string>
+    <string name="fingerprint_error_no_space" msgid="1055819001126053318">"Hindi maiimbak ang fingerprint. Mangyaring mag-alis ng umiiral nang fingerprint."</string>
+    <string name="fingerprint_error_timeout" msgid="3927186043737732875">"Nag-time out ang fingerprint. Subukang muli."</string>
+    <string name="fingerprint_error_vendor" msgid="3175724710791609491">"Nag-time out ang fingerprint. Subukang muli."</string>
+  <string-array name="fingerprint_error_vendor">
+    <item msgid="5804600450373644614">"Mensahe ng error na partikular sa vendor."</item>
+  </string-array>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"basahin ang mga setting ng sync"</string>
     <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"Pinapayagan ang app na basahin ang mga setting ng pag-sync para sa isang account. Halimbawa, matutukoy nito kung naka-sync ang app na Mga Tao sa isang account."</string>
     <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"I-toggle on at off ang pag-sync"</string>

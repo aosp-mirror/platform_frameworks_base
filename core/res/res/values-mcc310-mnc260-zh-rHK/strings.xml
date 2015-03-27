@@ -25,4 +25,5 @@
   <string-array name="wfcOperatorErrorMessages">
     <item msgid="931634632269046788">"無法使用 Wi-Fi 通話。請聯絡您的流動網絡供應商，以啟用 Wi-Fi 通話。"</item>
   </string-array>
+    <string name="wfcSpnFormat" msgid="4982938551498609442">"%s Wi-Fi 通話"</string>
 </resources>

@@ -126,6 +126,7 @@
     <string name="wfcRegErrorTitle" msgid="2301376280632110664">"Trucades per Wi-Fi"</string>
   <string-array name="wfcOperatorErrorMessages">
   </string-array>
+    <string name="wfcSpnFormat" msgid="8211621332478306568">"%s"</string>
     <string name="cfTemplateNotForwarded" msgid="1683685883841272560">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: no s\'ha desviat"</string>
     <string name="cfTemplateForwarded" msgid="1302922117498590521">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
     <string name="cfTemplateForwardedTime" msgid="9206251736527085256">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g> després de <xliff:g id="TIME_DELAY">{2}</xliff:g> segons"</string>
@@ -746,6 +747,22 @@
     <string name="permdesc_manageFingerprint" msgid="178208705828055464">"Permet que l\'aplicació invoqui mètodes per afegir i suprimir plantilles d\'empremtes digitals que es puguin fer servir."</string>
     <string name="permlab_useFingerprint" msgid="3150478619915124905">"Utilitzar el maquinari d\'empremtes digitals"</string>
     <string name="permdesc_useFingerprint" msgid="9165097460730684114">"Permet que l\'aplicació faci servir maquinari d\'empremtes digitals per a l\'autenticació"</string>
+    <string name="fingerprint_acquired_partial" msgid="735082772341716043">"S\'ha detectat una empremta digital parcial. Torna-ho a provar."</string>
+    <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"No s\'ha pogut processar l\'empremta digital. Torna-ho a provar."</string>
+    <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"El sensor d\'empremtes digitals està brut. Neteja\'l i torna-ho a provar."</string>
+    <string name="fingerprint_acquired_too_fast" msgid="5303368850245663580">"El dit s\'ha mogut massa ràpid. Torna-ho a provar."</string>
+    <string name="fingerprint_acquired_too_slow" msgid="7381891107120721078">"El dit s\'ha mogut massa lentament. Torna-ho a provar."</string>
+  <string-array name="fingerprint_acquired_vendor">
+    <item msgid="2892952818207766996">"Missatge d\'error d\'adquisició 0 específic del proveïdor"</item>
+  </string-array>
+    <string name="fingerprint_error_unable_to_process" msgid="4232401562838100026">"No es pot processar. Torna-ho a provar."</string>
+    <string name="fingerprint_error_hw_not_available" msgid="6162709753784993771">"No hi ha maquinari disponible."</string>
+    <string name="fingerprint_error_no_space" msgid="1055819001126053318">"L\'empremta digital no es pot desar. Suprimeix-ne una."</string>
+    <string name="fingerprint_error_timeout" msgid="3927186043737732875">"S\'ha esgotat el temps d\'espera per a l\'empremta digital. Torna-ho a provar."</string>
+    <string name="fingerprint_error_vendor" msgid="3175724710791609491">"S\'ha esgotat el temps d\'espera per a l\'empremta digital. Torna-ho a provar."</string>
+  <string-array name="fingerprint_error_vendor">
+    <item msgid="5804600450373644614">"Missatge d\'error específic del proveïdor."</item>
+  </string-array>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"llegir la configuració de sincronització"</string>
     <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"Permet que l\'aplicació llegeixi la configuració de sincronització d\'un compte. Per exemple, això pot determinar que l\'aplicació Persones estigui sincronitzada amb un compte."</string>
     <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"activar o desactivar la sincronització"</string>

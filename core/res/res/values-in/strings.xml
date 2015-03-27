@@ -126,6 +126,7 @@
     <string name="wfcRegErrorTitle" msgid="2301376280632110664">"Panggilan Wi-Fi"</string>
   <string-array name="wfcOperatorErrorMessages">
   </string-array>
+    <string name="wfcSpnFormat" msgid="8211621332478306568">"%s"</string>
     <string name="cfTemplateNotForwarded" msgid="1683685883841272560">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: Tidak diteruskan"</string>
     <string name="cfTemplateForwarded" msgid="1302922117498590521">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
     <string name="cfTemplateForwardedTime" msgid="9206251736527085256">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g> setelah <xliff:g id="TIME_DELAY">{2}</xliff:g> detik"</string>
@@ -746,6 +747,22 @@
     <string name="permdesc_manageFingerprint" msgid="178208705828055464">"Mengizinkan aplikasi memanggil metode untuk menambahkan dan menghapus template sidik jari untuk digunakan."</string>
     <string name="permlab_useFingerprint" msgid="3150478619915124905">"gunakan perangkat keras sidik jari"</string>
     <string name="permdesc_useFingerprint" msgid="9165097460730684114">"Mengizinkan aplikasi untuk menggunakan perangkat keras sidik jari untuk otentikasi"</string>
+    <string name="fingerprint_acquired_partial" msgid="735082772341716043">"Sebagian sidik jari terdeteksi. Coba lagi."</string>
+    <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"Tidak dapat memproses sidik jari. Coba lagi."</string>
+    <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"Sensor sidik jari kotor. Bersihkan dan coba lagi."</string>
+    <string name="fingerprint_acquired_too_fast" msgid="5303368850245663580">"Jari digerakkan terlalu cepat. Coba lagi."</string>
+    <string name="fingerprint_acquired_too_slow" msgid="7381891107120721078">"Jari digerakkan terlalu lambat. Coba lagi."</string>
+  <string-array name="fingerprint_acquired_vendor">
+    <item msgid="2892952818207766996">"Pesan kesalahan akuisisi khusus vendor 0"</item>
+  </string-array>
+    <string name="fingerprint_error_unable_to_process" msgid="4232401562838100026">"Tidak dapat memproses. Coba lagi."</string>
+    <string name="fingerprint_error_hw_not_available" msgid="6162709753784993771">"Perangkat keras tidak tersedia."</string>
+    <string name="fingerprint_error_no_space" msgid="1055819001126053318">"Sidik jari tidak dapat disimpan. Hapus sidik jari yang ada."</string>
+    <string name="fingerprint_error_timeout" msgid="3927186043737732875">"Waktu sidik jari habis. Coba lagi."</string>
+    <string name="fingerprint_error_vendor" msgid="3175724710791609491">"Waktu sidik jari habis. Coba lagi."</string>
+  <string-array name="fingerprint_error_vendor">
+    <item msgid="5804600450373644614">"Pesan kesalahan khusus vendor"</item>
+  </string-array>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"baca setelan sinkron"</string>
     <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"Memungkinkan aplikasi membaca setelan sinkronisasi untuk sebuah akun. Misalnya, izin ini dapat menentukan apakah aplikasi Orang disinkronkan dengan sebuah akun."</string>
     <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"nyalakan dan matikan sinkronisasi"</string>

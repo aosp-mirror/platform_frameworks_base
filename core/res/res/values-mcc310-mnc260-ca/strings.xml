@@ -25,4 +25,5 @@
   <string-array name="wfcOperatorErrorMessages">
     <item msgid="931634632269046788">"Les trucades per Wi-Fi no estan disponibles. Contacta amb l\'operador de telefonia mòbil per activar-les."</item>
   </string-array>
+    <string name="wfcSpnFormat" msgid="4982938551498609442">"Trucada de Wi-Fi de: %s"</string>
 </resources>

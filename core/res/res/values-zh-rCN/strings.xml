@@ -126,6 +126,8 @@
     <string name="wfcRegErrorTitle" msgid="2301376280632110664">"WLAN 通话"</string>
   <string-array name="wfcOperatorErrorMessages">
   </string-array>
+    <!-- no translation found for wfcSpnFormat (8211621332478306568) -->
+    <skip />
     <string name="cfTemplateNotForwarded" msgid="1683685883841272560">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>：无法转接"</string>
     <string name="cfTemplateForwarded" msgid="1302922117498590521">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>：<xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
     <string name="cfTemplateForwardedTime" msgid="9206251736527085256">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>：<xliff:g id="TIME_DELAY">{2}</xliff:g>秒后<xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
@@ -746,6 +748,28 @@
     <string name="permdesc_manageFingerprint" msgid="178208705828055464">"允许该应用调用方法来添加和删除可用的指纹模板。"</string>
     <string name="permlab_useFingerprint" msgid="3150478619915124905">"使用指纹硬件"</string>
     <string name="permdesc_useFingerprint" msgid="9165097460730684114">"允许该应用使用指纹硬件进行身份验证"</string>
+    <!-- no translation found for fingerprint_acquired_partial (735082772341716043) -->
+    <skip />
+    <!-- no translation found for fingerprint_acquired_insufficient (4596546021310923214) -->
+    <skip />
+    <!-- no translation found for fingerprint_acquired_imager_dirty (1087209702421076105) -->
+    <skip />
+    <!-- no translation found for fingerprint_acquired_too_fast (5303368850245663580) -->
+    <skip />
+    <!-- no translation found for fingerprint_acquired_too_slow (7381891107120721078) -->
+    <skip />
+    <!-- no translation found for fingerprint_acquired_vendor:0 (2892952818207766996) -->
+    <!-- no translation found for fingerprint_error_unable_to_process (4232401562838100026) -->
+    <skip />
+    <!-- no translation found for fingerprint_error_hw_not_available (6162709753784993771) -->
+    <skip />
+    <!-- no translation found for fingerprint_error_no_space (1055819001126053318) -->
+    <skip />
+    <!-- no translation found for fingerprint_error_timeout (3927186043737732875) -->
+    <skip />
+    <!-- no translation found for fingerprint_error_vendor (3175724710791609491) -->
+    <skip />
+    <!-- no translation found for fingerprint_error_vendor:0 (5804600450373644614) -->
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"读取同步设置"</string>
     <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"允许该应用读取某个帐户的同步设置。例如，此权限可确定“联系人”应用是否与某个帐户同步。"</string>
     <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"启用和停用同步"</string>

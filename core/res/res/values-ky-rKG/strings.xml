@@ -194,6 +194,7 @@
     <string name="wfcRegErrorTitle" msgid="2301376280632110664">"Wi-Fi Чалуу"</string>
   <string-array name="wfcOperatorErrorMessages">
   </string-array>
+    <string name="wfcSpnFormat" msgid="8211621332478306568">"%s"</string>
     <!-- no translation found for cfTemplateNotForwarded (1683685883841272560) -->
     <skip />
     <!-- no translation found for cfTemplateForwarded (1302922117498590521) -->
@@ -948,6 +949,22 @@
     <string name="permdesc_manageFingerprint" msgid="178208705828055464">"Колдонмого пайдалануу үчүн манжа изинин үлгүлөрүн кошуу жана жок кылуу мүмкүндүгүн берет."</string>
     <string name="permlab_useFingerprint" msgid="3150478619915124905">"манжа изинин аппараттык камсыздоосун колдонуу"</string>
     <string name="permdesc_useFingerprint" msgid="9165097460730684114">"Колдонмого аныктыгын текшерүү үчүн манжа изинин аппараттык камсыздоосун пайдалануу мүмкүндүгүн берет"</string>
+    <string name="fingerprint_acquired_partial" msgid="735082772341716043">"Манжа изи жарым-жартылай аныкталды. Кайра аракет кылыңыз."</string>
+    <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"Манжа изи иштелбей койду. Кайра аракет кылыңыз."</string>
+    <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"Манжа изинин сенсору кирдеп калган. Тазалап, кайра аракет кылыңыз."</string>
+    <string name="fingerprint_acquired_too_fast" msgid="5303368850245663580">"Манжа өтө тез жылдырылды. Кайра аракет кылыңыз."</string>
+    <string name="fingerprint_acquired_too_slow" msgid="7381891107120721078">"Манжа өтө жай жылдырылды. Кайра аракет кылыңыз."</string>
+  <string-array name="fingerprint_acquired_vendor">
+    <item msgid="2892952818207766996">"Жеткирүүчүгө тиешелүү ээ болуу катасы жөнүндө билдирүү 0"</item>
+  </string-array>
+    <string name="fingerprint_error_unable_to_process" msgid="4232401562838100026">"Иштетилбей жатат. Кайра аракет кылыңыз."</string>
+    <string name="fingerprint_error_hw_not_available" msgid="6162709753784993771">"Аппараттык камсыздоо жеткиликтүү эмес."</string>
+    <string name="fingerprint_error_no_space" msgid="1055819001126053318">"Манжа изин сактоо мүмкүн эмес. Учурдагы манжа изин алып салыңыз."</string>
+    <string name="fingerprint_error_timeout" msgid="3927186043737732875">"Манжа изин күтүү мөөнөтү бүттү. Кайра аракет кылыңыз."</string>
+    <string name="fingerprint_error_vendor" msgid="3175724710791609491">"Манжа изин күтүү мөөнөтү бүттү. Кайра аракет кылыңыз."</string>
+  <string-array name="fingerprint_error_vendor">
+    <item msgid="5804600450373644614">"Жеткирүүчүгө тиешелүү ката жөнүндө билдирүү."</item>
+  </string-array>
     <!-- no translation found for permlab_readSyncSettings (6201810008230503052) -->
     <skip />
     <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"Колдонмого эсеп менен синхрондошуу тууралоолорун окуганга уруксат берет. Мисалы, Кишилер колдонмосу эсеп менен синхрондошкондугун аныктай алат."</string>

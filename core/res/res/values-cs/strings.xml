@@ -128,6 +128,7 @@
     <string name="wfcRegErrorTitle" msgid="2301376280632110664">"Volání přes Wi-Fi"</string>
   <string-array name="wfcOperatorErrorMessages">
   </string-array>
+    <string name="wfcSpnFormat" msgid="8211621332478306568">"%s"</string>
     <string name="cfTemplateNotForwarded" msgid="1683685883841272560">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: Nepřesměrováno"</string>
     <string name="cfTemplateForwarded" msgid="1302922117498590521">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
     <string name="cfTemplateForwardedTime" msgid="9206251736527085256">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g> po <xliff:g id="TIME_DELAY">{2}</xliff:g> sek."</string>
@@ -748,6 +749,22 @@
     <string name="permdesc_manageFingerprint" msgid="178208705828055464">"Umožňuje aplikaci volat metody k přidání a smazání šablon otisků prstů, které budou použity."</string>
     <string name="permlab_useFingerprint" msgid="3150478619915124905">"použití hardwaru na čtení otisků prstů"</string>
     <string name="permdesc_useFingerprint" msgid="9165097460730684114">"Umožňuje aplikaci použít k ověření hardware na čtení otisků prstů"</string>
+    <string name="fingerprint_acquired_partial" msgid="735082772341716043">"Byla zjištěna jen část otisku prstu. Zkuste to znovu."</string>
+    <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"Zpracování otisku prstu se nezdařilo. Zkuste to znovu."</string>
+    <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"Senzor otisků prstů je znečištěn. Vyčistěte jej a zkuste to znovu."</string>
+    <string name="fingerprint_acquired_too_fast" msgid="5303368850245663580">"Pohyb prstem byl příliš rychlý. Zkuste to znovu."</string>
+    <string name="fingerprint_acquired_too_slow" msgid="7381891107120721078">"Pohyb prstem byl příliš pomalý. Zkuste to znovu."</string>
+  <string-array name="fingerprint_acquired_vendor">
+    <item msgid="2892952818207766996">"Chybová zpráva 0 dodavatele ohledně načtení otisků"</item>
+  </string-array>
+    <string name="fingerprint_error_unable_to_process" msgid="4232401562838100026">"Otisk prstu nelze zpracovat. Zkuste to znovu."</string>
+    <string name="fingerprint_error_hw_not_available" msgid="6162709753784993771">"Hardware není dostupný."</string>
+    <string name="fingerprint_error_no_space" msgid="1055819001126053318">"Otisk prstu nelze uložit. Odstraňte existující otisk prstu."</string>
+    <string name="fingerprint_error_timeout" msgid="3927186043737732875">"Časový limit sejmutí otisku prstu vypršel. Zkuste to znovu."</string>
+    <string name="fingerprint_error_vendor" msgid="3175724710791609491">"Časový limit sejmutí otisku prstu vypršel. Zkuste to znovu."</string>
+  <string-array name="fingerprint_error_vendor">
+    <item msgid="5804600450373644614">"Chybová zpráva dodavatele"</item>
+  </string-array>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"čtení nastavení synchronizace"</string>
     <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"Umožňuje aplikaci číst nastavení synchronizace v účtu. Může například určit, zda je s účtem synchronizována aplikace Lidé."</string>
     <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"vypnutí nebo zapnutí synchronizace"</string>

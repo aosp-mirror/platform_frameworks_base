@@ -126,6 +126,7 @@
     <string name="wfcRegErrorTitle" msgid="2301376280632110664">"การโทรผ่าน Wi-Fi"</string>
   <string-array name="wfcOperatorErrorMessages">
   </string-array>
+    <string name="wfcSpnFormat" msgid="8211621332478306568">"%s"</string>
     <string name="cfTemplateNotForwarded" msgid="1683685883841272560">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: ไม่ได้โอนสาย"</string>
     <string name="cfTemplateForwarded" msgid="1302922117498590521">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
     <string name="cfTemplateForwardedTime" msgid="9206251736527085256">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g> หลังผ่านไป <xliff:g id="TIME_DELAY">{2}</xliff:g> วินาที"</string>
@@ -746,6 +747,22 @@
     <string name="permdesc_manageFingerprint" msgid="178208705828055464">"อนุญาตให้แอปเรียกใช้วิธีการเพื่อเพิ่มและลบเทมเพลตลายนิ้วมือสำหรับการใช้งาน"</string>
     <string name="permlab_useFingerprint" msgid="3150478619915124905">"ใช้ฮาร์ดแวร์ลายนิ้วมือ"</string>
     <string name="permdesc_useFingerprint" msgid="9165097460730684114">"อนุญาตให้แอปใช้ฮาร์ดแวร์ลายนิ้วมือเพื่อตรวจสอบสิทธิ์"</string>
+    <string name="fingerprint_acquired_partial" msgid="735082772341716043">"ตรวจพบลายนิ้วมือเพียงบางส่วน โปรดลองอีกครั้ง"</string>
+    <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"ไม่สามารถประมวลผลลายนิ้วมือได้ โปรดลองอีกครั้ง"</string>
+    <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"เซ็นเซอร์ลายนิ้วมือไม่สะอาด โปรดทำความสะอาดและลองอีกครั้ง"</string>
+    <string name="fingerprint_acquired_too_fast" msgid="5303368850245663580">"เคลื่อนนิ้วเร็วเกินไป โปรดลองอีกครั้ง"</string>
+    <string name="fingerprint_acquired_too_slow" msgid="7381891107120721078">"เคลื่อนนิ้วช้าเกินไป โปรดลองอีกครั้ง"</string>
+  <string-array name="fingerprint_acquired_vendor">
+    <item msgid="2892952818207766996">"ข้อความแสดงข้อผิดพลาดการกระทำเฉพาะผู้ขาย 0"</item>
+  </string-array>
+    <string name="fingerprint_error_unable_to_process" msgid="4232401562838100026">"ไม่สามารถดำเนินการได้ โปรดลองอีกครั้ง"</string>
+    <string name="fingerprint_error_hw_not_available" msgid="6162709753784993771">"ฮาร์ดแวร์ไม่พร้อมใช้งาน"</string>
+    <string name="fingerprint_error_no_space" msgid="1055819001126053318">"ไม่สามารถเก็บลายนิ้วมือได้ โปรดนำลายนิ้วมือที่มีอยู่ออก"</string>
+    <string name="fingerprint_error_timeout" msgid="3927186043737732875">"หมดเวลาใช้ลายนิ้วมือแล้ว โปรดลองอีกครั้ง"</string>
+    <string name="fingerprint_error_vendor" msgid="3175724710791609491">"หมดเวลาใช้ลายนิ้วมือแล้ว โปรดลองอีกครั้ง"</string>
+  <string-array name="fingerprint_error_vendor">
+    <item msgid="5804600450373644614">"ข้อความแสดงข้อผิดพลาดเฉพาะผู้ขาย"</item>
+  </string-array>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"อ่านการตั้งค่าการซิงค์แล้ว"</string>
     <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"อนุญาตให้แอปพลิเคชันอ่านการตั้งค่าการซิงค์ของบัญชี ตัวอย่างเช่น การอนุญาตนี้สามารถระบุได้ว่าแอปพลิเคชัน People ซิงค์กับบัญชีหรือไม่"</string>
     <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"สลับระหว่างเปิดและปิดการซิงค์"</string>

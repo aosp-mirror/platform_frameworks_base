@@ -126,6 +126,7 @@
     <string name="wfcRegErrorTitle" msgid="2301376280632110664">"Llamada por Wi-Fi"</string>
   <string-array name="wfcOperatorErrorMessages">
   </string-array>
+    <string name="wfcSpnFormat" msgid="8211621332478306568">"%s"</string>
     <string name="cfTemplateNotForwarded" msgid="1683685883841272560">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: no se ha remitido"</string>
     <string name="cfTemplateForwarded" msgid="1302922117498590521">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
     <string name="cfTemplateForwardedTime" msgid="9206251736527085256">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g> después de <xliff:g id="TIME_DELAY">{2}</xliff:g> segundos"</string>
@@ -746,6 +747,22 @@
     <string name="permdesc_manageFingerprint" msgid="178208705828055464">"Permite que la aplicación emplee métodos para agregar y eliminar plantillas de huellas digitales para su uso."</string>
     <string name="permlab_useFingerprint" msgid="3150478619915124905">"Utilizar hardware de huellas digitales"</string>
     <string name="permdesc_useFingerprint" msgid="9165097460730684114">"Permite que la aplicación utilice el hardware de huellas digitales para realizar la autenticación."</string>
+    <string name="fingerprint_acquired_partial" msgid="735082772341716043">"La huella digital se detectó parcialmente. Vuelve a intentarlo."</string>
+    <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"No se pudo procesar la huella digital. Vuelve a intentarlo."</string>
+    <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"El sensor de huellas digitales está sucio. Limpia el sensor y vuelve a intentarlo."</string>
+    <string name="fingerprint_acquired_too_fast" msgid="5303368850245663580">"Moviste el dedo muy rápido. Vuelve a intentarlo."</string>
+    <string name="fingerprint_acquired_too_slow" msgid="7381891107120721078">"Moviste el dedo muy despacio. Vuelve a intentarlo."</string>
+  <string-array name="fingerprint_acquired_vendor">
+    <item msgid="2892952818207766996">"Mensaje de error de adquisición específico del proveedor 0"</item>
+  </string-array>
+    <string name="fingerprint_error_unable_to_process" msgid="4232401562838100026">"No se puede procesar. Vuelve a intentarlo."</string>
+    <string name="fingerprint_error_hw_not_available" msgid="6162709753784993771">"El hardware no está disponible."</string>
+    <string name="fingerprint_error_no_space" msgid="1055819001126053318">"No se puede almacenar la huella digital. Elimina una de las existentes."</string>
+    <string name="fingerprint_error_timeout" msgid="3927186043737732875">"Finalizó el tiempo de espera para la huella digital. Vuelve a intentarlo."</string>
+    <string name="fingerprint_error_vendor" msgid="3175724710791609491">"Finalizó el tiempo de espera para la huella digital. Vuelve a intentarlo."</string>
+  <string-array name="fingerprint_error_vendor">
+    <item msgid="5804600450373644614">"Mensaje de error específico del proveedor"</item>
+  </string-array>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"leer la configuración de sincronización"</string>
     <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"Este permiso permite que la aplicación consulte la configuración de sincronización de una cuenta. Esto permite, por ejemplo, determinar si la aplicación Personas está sincronizada con una cuenta."</string>
     <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"activar y desactivar la sincronización"</string>

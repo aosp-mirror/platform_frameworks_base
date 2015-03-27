@@ -25,4 +25,5 @@
   <string-array name="wfcOperatorErrorMessages">
     <item msgid="931634632269046788">"‏Wi-Fi کالنگ دستیاب نہیں ہے۔ Wi-Fi کالنگ فعال کرنے کیلئے اپنے کیریئر سے رابطہ کریں۔"</item>
   </string-array>
+    <string name="wfcSpnFormat" msgid="4982938551498609442">"‏‎%s Wi-Fi کالنگ"</string>
 </resources>

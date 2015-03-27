@@ -126,6 +126,7 @@
     <string name="wfcRegErrorTitle" msgid="2301376280632110664">"Chamadas por wifi"</string>
   <string-array name="wfcOperatorErrorMessages">
   </string-array>
+    <string name="wfcSpnFormat" msgid="8211621332478306568">"%s"</string>
     <string name="cfTemplateNotForwarded" msgid="1683685883841272560">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: non desviada"</string>
     <string name="cfTemplateForwarded" msgid="1302922117498590521">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
     <string name="cfTemplateForwardedTime" msgid="9206251736527085256">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g> tras <xliff:g id="TIME_DELAY">{2}</xliff:g> segundos"</string>
@@ -746,6 +747,22 @@
     <string name="permdesc_manageFingerprint" msgid="178208705828055464">"Permite que a aplicación invoque métodos para engadir e eliminar modelos de uso de identificación dixital."</string>
     <string name="permlab_useFingerprint" msgid="3150478619915124905">"usar hardware de identificación dixital"</string>
     <string name="permdesc_useFingerprint" msgid="9165097460730684114">"Permite que a aplicación utilice hardware de identificación dixital para a autenticación"</string>
+    <string name="fingerprint_acquired_partial" msgid="735082772341716043">"Detectouse unha identificación dixital parcial. Téntao de novo."</string>
+    <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"Non se puido procesar a impresión dixital. Téntao de novo."</string>
+    <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"O sensor de identificación dixital está sucio. Límpao e téntao de novo."</string>
+    <string name="fingerprint_acquired_too_fast" msgid="5303368850245663580">"O dedo moveuse demasiado rápido. Téntao de novo."</string>
+    <string name="fingerprint_acquired_too_slow" msgid="7381891107120721078">"O dedo moveuse demasiado lento. Téntao de novo."</string>
+  <string-array name="fingerprint_acquired_vendor">
+    <item msgid="2892952818207766996">"Mensaxe de erro de adquisición específico do vendedor 0"</item>
+  </string-array>
+    <string name="fingerprint_error_unable_to_process" msgid="4232401562838100026">"Non se pode procesar. Téntao de novo."</string>
+    <string name="fingerprint_error_hw_not_available" msgid="6162709753784993771">"Hardware non dispoñible."</string>
+    <string name="fingerprint_error_no_space" msgid="1055819001126053318">"Non se pode almacenar a identificación dixital. Elimina unha identificación dixital existente."</string>
+    <string name="fingerprint_error_timeout" msgid="3927186043737732875">"Esgotouse o tempo de espera da identificación dixital. Téntao de novo."</string>
+    <string name="fingerprint_error_vendor" msgid="3175724710791609491">"Esgotouse o tempo de espera da identificación dixital. Téntao de novo."</string>
+  <string-array name="fingerprint_error_vendor">
+    <item msgid="5804600450373644614">"Mensaxe de erro específico do vendedor"</item>
+  </string-array>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"ler a configuración de sincronización"</string>
     <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"Permite á aplicación ler a configuración de sincronización dunha conta. Por exemplo, esta acción pode determinar se a aplicación Contactos se sincroniza cunha conta."</string>
     <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"activar e desactivar a sincronización"</string>

@@ -126,6 +126,7 @@
     <string name="wfcRegErrorTitle" msgid="2301376280632110664">"Wi-Fi कलिङ"</string>
   <string-array name="wfcOperatorErrorMessages">
   </string-array>
+    <string name="wfcSpnFormat" msgid="8211621332478306568">"%s"</string>
     <string name="cfTemplateNotForwarded" msgid="1683685883841272560">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: अगाडि पठाइएको छैन"</string>
     <string name="cfTemplateForwarded" msgid="1302922117498590521">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
     <string name="cfTemplateForwardedTime" msgid="9206251736527085256">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g> पछि <xliff:g id="TIME_DELAY">{2}</xliff:g> सेकेन्ड"</string>
@@ -746,6 +747,22 @@
     <string name="permdesc_manageFingerprint" msgid="178208705828055464">"अनुप्रयोगलाई प्रयोगको लागि औठाछाप टेम्प्लेट थप्न र मेटाउने तरिका आह्वान गर्न अनुमति दिन्छ।"</string>
     <string name="permlab_useFingerprint" msgid="3150478619915124905">"औठाछाप हार्डवेयर प्रयोग गर्नुहोस्"</string>
     <string name="permdesc_useFingerprint" msgid="9165097460730684114">"अनुप्रयोगलाई प्रमाणीकरणको लागि औठाछाप हार्डवेयर प्रयोग गर्न अनुमति दिन्छ"</string>
+    <string name="fingerprint_acquired_partial" msgid="735082772341716043">"आंशिक औठाछाप पत्ता लाग्यो। कृपया फेरि प्रयास गर्नुहोस्।"</string>
+    <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"औठाछाप प्रशोधन गर्न सकिएन। कृपया फेरि प्रयास गर्नुहोस्।"</string>
+    <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"औँठाछाप सेन्सर फोहोर छ। कृपया सफा गरेर फेरि प्रयास गर्नुहोस्।"</string>
+    <string name="fingerprint_acquired_too_fast" msgid="5303368850245663580">"औंला निकै छिटो सारियो। कृपया फेरि प्रयास गर्नुहोस्।"</string>
+    <string name="fingerprint_acquired_too_slow" msgid="7381891107120721078">"औंला निकै ढिला सारियो। कृपया फेरि प्रयास गर्नुहोस्।"</string>
+  <string-array name="fingerprint_acquired_vendor">
+    <item msgid="2892952818207766996">"उत्पादक-निर्दिष्ट अधिग्रहण त्रुटि सन्देश 0"</item>
+  </string-array>
+    <string name="fingerprint_error_unable_to_process" msgid="4232401562838100026">"प्रसोधन गर्न असमर्थ। फेरि प्रयास गर्नुहोस्।"</string>
+    <string name="fingerprint_error_hw_not_available" msgid="6162709753784993771">"हार्डवेयर उपलब्ध छैन।"</string>
+    <string name="fingerprint_error_no_space" msgid="1055819001126053318">"औँठाछाप भण्डारण गर्न सकिँदैन। कृपया अवस्थित औठाछाप हटाउनुहोस्।"</string>
+    <string name="fingerprint_error_timeout" msgid="3927186043737732875">"औँठाछापको समय सकिएको छ। फेरि प्रयास गर्नुहोस्।"</string>
+    <string name="fingerprint_error_vendor" msgid="3175724710791609491">"औँठाछापको समय सकिएको छ। फेरि प्रयास गर्नुहोस्।"</string>
+  <string-array name="fingerprint_error_vendor">
+    <item msgid="5804600450373644614">"उत्पादक-निर्दिष्ट त्रुटि सन्देश।"</item>
+  </string-array>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"समीकरण सेटिङहरू पढ्नुहोस्"</string>
     <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"अनुप्रयोगलाई खाताको लागि सिङ्क सेटिङहरू पढ्न अनुमति दिन्छ। उदाहरणको लागि यसले व्यक्तिहरको अनुप्रयोग खातासँग सिङ्क भएको नभएको निर्धारण गर्न सक्दछ।"</string>
     <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"टगल सिङ्क खुला र बन्द"</string>

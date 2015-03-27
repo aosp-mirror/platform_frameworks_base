@@ -126,6 +126,7 @@
     <string name="wfcRegErrorTitle" msgid="2301376280632110664">"Wi-Fi-puhelut"</string>
   <string-array name="wfcOperatorErrorMessages">
   </string-array>
+    <string name="wfcSpnFormat" msgid="8211621332478306568">"%s"</string>
     <string name="cfTemplateNotForwarded" msgid="1683685883841272560">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: ei siirretty"</string>
     <string name="cfTemplateForwarded" msgid="1302922117498590521">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
     <string name="cfTemplateForwardedTime" msgid="9206251736527085256">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g> <xliff:g id="TIME_DELAY">{2}</xliff:g> sekunnin päästä"</string>
@@ -746,6 +747,22 @@
     <string name="permdesc_manageFingerprint" msgid="178208705828055464">"Sallii sovelluksen käyttää menetelmiä, joilla voidaan lisätä tai poistaa sormenjälkimalleja."</string>
     <string name="permlab_useFingerprint" msgid="3150478619915124905">"sormenjälkilaitteiston käyttö"</string>
     <string name="permdesc_useFingerprint" msgid="9165097460730684114">"Sallii sovelluksen käyttää sormenjälkilaitteistoa todennukseen."</string>
+    <string name="fingerprint_acquired_partial" msgid="735082772341716043">"Sormenjälki havaittiin vain osittain. Yritä uudelleen."</string>
+    <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"Sormenjäljen käsittely epäonnistui. Yritä uudelleen."</string>
+    <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"Sormenjälkitunnistin on likainen. Puhdista tunnistin ja yritä uudelleen."</string>
+    <string name="fingerprint_acquired_too_fast" msgid="5303368850245663580">"Liikutit sormea liian nopeasti. Yritä uudelleen."</string>
+    <string name="fingerprint_acquired_too_slow" msgid="7381891107120721078">"Liikutit sormea liian hitaasti. Yritä uudelleen."</string>
+  <string-array name="fingerprint_acquired_vendor">
+    <item msgid="2892952818207766996">"Toimittajakohtainen ​​hankintavirheilmoitus 0"</item>
+  </string-array>
+    <string name="fingerprint_error_unable_to_process" msgid="4232401562838100026">"Käsittely ei onnistu. Yritä uudelleen."</string>
+    <string name="fingerprint_error_hw_not_available" msgid="6162709753784993771">"Laitteisto ei ole käytettävissä."</string>
+    <string name="fingerprint_error_no_space" msgid="1055819001126053318">"Sormenjälkeä ei voida tallentaa. Poista aiemmin lisätty sormenjälki."</string>
+    <string name="fingerprint_error_timeout" msgid="3927186043737732875">"Sormenjälkitunnistimen toiminta aikakatkaistiin. Yritä uudelleen."</string>
+    <string name="fingerprint_error_vendor" msgid="3175724710791609491">"Sormenjälkitunnistimen toiminta aikakatkaistiin. Yritä uudelleen."</string>
+  <string-array name="fingerprint_error_vendor">
+    <item msgid="5804600450373644614">"Toimittajakohtainen ​​virheilmoitus."</item>
+  </string-array>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"lue synkronointiasetuksia"</string>
     <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"Antaa sovelluksen lukea tilien synkronointiasetuksia. Sovellus voi esimerkiksi määrittää, onko Henkilöt-sovellus synkronoitu tilin kanssa."</string>
     <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"ota synkronointi käyttöön tai poista se käytöstä"</string>
