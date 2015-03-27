@@ -22,6 +22,5 @@
     <string name="bugreport_finished_text" product="default" msgid="3559904746859400732">"Tryck om du vill dela felrapporten"</string>
     <string name="bugreport_confirm" msgid="5130698467795669780">"Felrapporter innehåller data från systemets olika loggfiler, inklusive personliga och privata uppgifter. Dela bara felrapporter med personer du litar på."</string>
     <string name="bugreport_confirm_repeat" msgid="4926842460688645058">"Visa det här meddelandet nästa gång"</string>
-    <!-- no translation found for bugreport_storage_title (5332488144740527109) -->
-    <skip />
+    <string name="bugreport_storage_title" msgid="5332488144740527109">"Felrapporter"</string>
 </resources>

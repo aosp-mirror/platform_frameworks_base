@@ -22,6 +22,5 @@
     <string name="bugreport_finished_text" product="default" msgid="3559904746859400732">"Бөліс үшін, вирус туралы баянатты түртіңіз."</string>
     <string name="bugreport_confirm" msgid="5130698467795669780">"Вирус туралы баянатта жүйеде тіркелген әртүрлі файлдар туралы деректер болады, оған жеке және құпия ақпарат та кіреді. Вирус баянаттарын сенімді қолданбалар және сенімді адамдармен ғана бөлісіңіз."</string>
     <string name="bugreport_confirm_repeat" msgid="4926842460688645058">"Бұл хабарды келесі жолы көрсетіңіз"</string>
-    <!-- no translation found for bugreport_storage_title (5332488144740527109) -->
-    <skip />
+    <string name="bugreport_storage_title" msgid="5332488144740527109">"Қате туралы баяндамалар"</string>
 </resources>
