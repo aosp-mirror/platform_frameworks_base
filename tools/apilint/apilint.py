@@ -26,14 +26,17 @@ $ git blame api/current.txt -t -e > /tmp/currentblame.txt
 $ apilint.py /tmp/currentblame.txt previous.txt --no-color
 """
 
-import re, sys, collections, traceback
+import re, sys, collections, traceback, argparse
 
 
 BLACK, RED, GREEN, YELLOW, BLUE, MAGENTA, CYAN, WHITE = range(8)
 
+ALLOW_GOOGLE = False
+USE_COLOR = True
+
 def format(fg=None, bg=None, bright=False, bold=False, dim=False, reset=False):
     # manually derived from http://en.wikipedia.org/wiki/ANSI_escape_code#Codes
-    if "--no-color" in sys.argv: return ""
+    if not USE_COLOR: return ""
     codes = []
     if reset: codes.append("0")
     else:
@@ -976,7 +979,7 @@ def examine_clazz(clazz):
     verify_collections(clazz)
     verify_flags(clazz)
     verify_exception(clazz)
-    verify_google(clazz)
+    if not ALLOW_GOOGLE: verify_google(clazz)
     verify_bitset(clazz)
     verify_manager(clazz)
     verify_boxed(clazz)
@@ -1061,11 +1064,30 @@ def verify_compat(cur, prev):
 
 
 if __name__ == "__main__":
-    with open(sys.argv[1]) as f:
-        cur_fail = examine_stream(f)
+    parser = argparse.ArgumentParser(description="Enforces common Android public API design \
+            patterns. It ignores lint messages from a previous API level, if provided.")
+    parser.add_argument("current.txt", type=argparse.FileType('r'), help="current.txt")
+    parser.add_argument("previous.txt", nargs='?', type=argparse.FileType('r'), default=None,
+            help="previous.txt")
+    parser.add_argument("--no-color", action='store_const', const=True,
+            help="Disable terminal colors")
+    parser.add_argument("--allow-google", action='store_const', const=True,
+            help="Allow references to Google")
+    args = vars(parser.parse_args())
 
-    if len(sys.argv) > 2:
-        with open(sys.argv[2]) as f:
+    if args['no_color']:
+        USE_COLOR = False
+
+    if args['allow_google']:
+        ALLOW_GOOGLE = True
+
+    current_file = args['current.txt']
+    previous_file = args['previous.txt']
+
+    with current_file as f:
+        cur_fail = examine_stream(f)
+    if not previous_file is None:
+        with previous_file as f:
             prev_fail = examine_stream(f)
 
         # ignore errors from previous API level
