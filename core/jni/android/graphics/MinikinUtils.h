@@ -31,22 +31,14 @@
 
 namespace android {
 
-// TODO: these should be defined in Minikin's Layout.h
-enum {
-    kBidi_LTR = 0,
-    kBidi_RTL = 1,
-    kBidi_Default_LTR = 2,
-    kBidi_Default_RTL = 3,
-    kBidi_Force_LTR = 4,
-    kBidi_Force_RTL = 5,
-
-    kBidi_Mask = 0x7
-};
-
 class MinikinUtils {
 public:
-    static void doLayout(Layout* layout, const Paint* paint, int bidiFlags, TypefaceImpl* typeface,
-            const uint16_t* buf, size_t start, size_t count, size_t bufSize);
+    static FontStyle prepareMinikinPaint(MinikinPaint* minikinPaint, FontCollection** pFont,
+            const Paint* paint, TypefaceImpl* typeface);
+
+    static void doLayout(Layout* layout, const Paint* paint, int bidiFlags,
+            TypefaceImpl* typeface, const uint16_t* buf, size_t start, size_t count,
+            size_t bufSize);
 
     static float xOffsetForTextAlign(Paint* paint, const Layout& layout);
 

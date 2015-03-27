@@ -1153,7 +1153,10 @@ public abstract class Layout {
                 return end - 1;
             }
 
-            if (ch != ' ' && ch != '\t') {
+            // Note: keep this in sync with Minikin LineBreaker::isLineEndSpace()
+            if (!(ch == ' ' || ch == '\t' || ch == 0x1680 ||
+                    (0x2000 <= ch && ch <= 0x200A && ch != 0x2007) ||
+                    ch == 0x205F || ch == 0x3000)) {
                 break;
             }
 

@@ -170,8 +170,9 @@ public class StaticLayout extends Layout {
          * Measurement and break iteration is done in native code. The protocol for using
          * the native code is as follows.
          *
-         * For each paragraph, do a nSetText of the paragraph text. Then, for each run within the
-         * paragraph:
+         * For each paragraph, do a nSetText of the paragraph text. Also do nSetLineWidth.
+         *
+         * Then, for each run within the paragraph:
          *  - setLocale (this must be done at least for the first run, optional afterwards)
          *  - one of the following, depending on the type of run:
          *    + addStyleRun (a text run, to be measured in native code)
@@ -459,7 +460,26 @@ public class StaticLayout extends Layout {
             byte[] chdirs = measured.mLevels;
             int dir = measured.mDir;
             boolean easy = measured.mEasy;
-            nSetText(b.mNativePtr, chs, paraEnd - paraStart);
+
+            // tab stop locations
+            int[] variableTabStops = null;
+            if (spanned != null) {
+                TabStopSpan[] spans = getParagraphSpans(spanned, paraStart,
+                        paraEnd, TabStopSpan.class);
+                if (spans.length > 0) {
+                    int[] stops = new int[spans.length];
+                    for (int i = 0; i < spans.length; i++) {
+                        stops[i] = spans[i].getTabStop();
+                    }
+                    Arrays.sort(stops, 0, stops.length);
+                    variableTabStops = stops;
+                }
+            }
+
+            int breakStrategy = 0;  // 0 = kBreakStrategy_Greedy
+            nSetupParagraph(b.mNativePtr, chs, paraEnd - paraStart,
+                    firstWidth, firstWidthLineCount, restWidth,
+                    variableTabStops, TAB_INCREMENT, breakStrategy);
 
             // measurement has to be done before performing line breaking
             // but we don't want to recompute fontmetrics or span ranges the
@@ -505,25 +525,9 @@ public class StaticLayout extends Layout {
                 spanEndCacheCount++;
             }
 
-            // tab stop locations
-            int[] variableTabStops = null;
-            if (spanned != null) {
-                TabStopSpan[] spans = getParagraphSpans(spanned, paraStart,
-                        paraEnd, TabStopSpan.class);
-                if (spans.length > 0) {
-                    int[] stops = new int[spans.length];
-                    for (int i = 0; i < spans.length; i++) {
-                        stops[i] = spans[i].getTabStop();
-                    }
-                    Arrays.sort(stops, 0, stops.length);
-                    variableTabStops = stops;
-                }
-            }
-
             nGetWidths(b.mNativePtr, widths);
-            int breakCount = nComputeLineBreaks(b.mNativePtr, paraEnd - paraStart, firstWidth,
-                    firstWidthLineCount, restWidth, variableTabStops, TAB_INCREMENT, false, lineBreaks,
-                    lineBreaks.breaks, lineBreaks.widths, lineBreaks.flags, lineBreaks.breaks.length);
+            int breakCount = nComputeLineBreaks(b.mNativePtr, lineBreaks, lineBreaks.breaks,
+                    lineBreaks.widths, lineBreaks.flags, lineBreaks.breaks.length);
 
             int[] breaks = lineBreaks.breaks;
             float[] lineWidths = lineBreaks.widths;
@@ -966,7 +970,10 @@ public class StaticLayout extends Layout {
     private static native void nFinishBuilder(long nativePtr);
     private static native void nSetLocale(long nativePtr, String locale);
 
-    private static native void nSetText(long nativePtr, char[] text, int length);
+    // Set up paragraph text and settings; done as one big method to minimize jni crossings
+    private static native void nSetupParagraph(long nativePtr, char[] text, int length,
+            float firstWidth, int firstWidthLineCount, float restWidth,
+            int[] variableTabStops, int defaultTabStop, int breakStrategy);
 
     private static native float nAddStyleRun(long nativePtr, long nativePaint,
             long nativeTypeface, int start, int end, boolean isRtl);
@@ -983,9 +990,7 @@ public class StaticLayout extends Layout {
     // the arrays inside the LineBreaks objects are passed in as well
     // to reduce the number of JNI calls in the common case where the
     // arrays do not have to be resized
-    private static native int nComputeLineBreaks(long nativePtr,
-            int length, float firstWidth, int firstWidthLineCount, float restWidth,
-            int[] variableTabStops, int defaultTabStop, boolean optimize, LineBreaks recycle,
+    private static native int nComputeLineBreaks(long nativePtr, LineBreaks recycle,
             int[] recycleBreaks, float[] recycleWidths, boolean[] recycleFlags, int recycleLength);
 
     private int mLineCount;
