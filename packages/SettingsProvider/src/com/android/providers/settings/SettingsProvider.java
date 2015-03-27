@@ -1859,40 +1859,43 @@ public class SettingsProvider extends ContentProvider {
                 return getSettingsLocked(SETTINGS_TYPE_SYSTEM, userId);
             }
 
+            /**
+             * You must perform all necessary mutations to bring the settings
+             * for this user from the old to the new version. When you add a new
+             * upgrade step you *must* update SETTINGS_VERSION.
+             *
+             * This is an example of moving a setting from secure to global.
+             *
+             * // v119: Example settings changes.
+             * if (currentVersion == 118) {
+             *     if (userId == UserHandle.USER_OWNER) {
+             *         // Remove from the secure settings.
+             *         SettingsState secureSettings = getSecureSettingsLocked(userId);
+             *         String name = "example_setting_to_move";
+             *         String value = secureSettings.getSetting(name);
+             *         secureSettings.deleteSetting(name);
+             *
+             *         // Add to the global settings.
+             *         SettingsState globalSettings = getGlobalSettingsLocked();
+             *         globalSettings.insertSetting(name, value, SettingsState.SYSTEM_PACKAGE_NAME);
+             *     }
+             *
+             *     // Update the current version.
+             *     currentVersion = 119;
+             * }
+             */
             private int onUpgradeLocked(int userId, int oldVersion, int newVersion) {
                 if (DEBUG) {
                     Slog.w(LOG_TAG, "Upgrading settings for user: " + userId + " from version: "
                             + oldVersion + " to version: " + newVersion);
                 }
 
-                // You must perform all necessary mutations to bring the settings
-                // for this user from the old to the new version. When you add a new
-                // upgrade step you *must* update SETTINGS_VERSION.
+                int currentVersion = oldVersion;
 
-                /**
-                 * This is an example of moving a setting from secure to global.
-                 *
-                 * int currentVersion = oldVersion;
-                 * if (currentVersion == 118) {
-                 *     // Remove from the secure settings.
-                 *     SettingsState secureSettings = getSecureSettingsLocked(userId);
-                 *     String name = "example_setting_to_move";
-                 *     String value = secureSettings.getSetting(name);
-                 *     secureSettings.deleteSetting(name);
-                 *
-                 *     // Add to the global settings.
-                 *     SettingsState globalSettings = getGlobalSettingsLocked();
-                 *     globalSettings.insertSetting(name, value, SettingsState.SYSTEM_PACKAGE_NAME);
-                 *
-                 *     // Update the current version.
-                 *     currentVersion = 119;
-                 * }
-                 *
-                 * // Return the current version.
-                 * return currentVersion;
-                 */
+                // vXXX: Add new settings above this point.
 
-                return SettingsState.VERSION_UNDEFINED;
+                // Return the current version.
+                return currentVersion;
             }
         }
     }
