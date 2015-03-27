@@ -16,6 +16,9 @@
 
 package android.security.keymaster;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * Class tracking all the keymaster enum values needed for the binder API to keystore.
  * This must be kept in sync with hardware/libhardware/include/hardware/keymaster_defs.h
@@ -224,7 +227,53 @@ public final class KeymasterDefs {
     public static final int KM_ERROR_VERSION_MISMATCH = -101;
     public static final int KM_ERROR_UNKNOWN_ERROR = -1000;
 
+    public static final Map<Integer, String> sErrorCodeToString = new HashMap<Integer, String>();
+    static {
+        sErrorCodeToString.put(KM_ERROR_OK, "OK");
+        sErrorCodeToString.put(KM_ERROR_UNSUPPORTED_PURPOSE, "Unsupported purpose");
+        sErrorCodeToString.put(KM_ERROR_INCOMPATIBLE_PURPOSE, "Incompatible purpose");
+        sErrorCodeToString.put(KM_ERROR_UNSUPPORTED_ALGORITHM, "Unsupported algorithm");
+        sErrorCodeToString.put(KM_ERROR_INCOMPATIBLE_ALGORITHM, "Incompatible algorithm");
+        sErrorCodeToString.put(KM_ERROR_UNSUPPORTED_KEY_SIZE, "Unsupported key size");
+        sErrorCodeToString.put(KM_ERROR_UNSUPPORTED_BLOCK_MODE, "Unsupported block mode");
+        sErrorCodeToString.put(KM_ERROR_INCOMPATIBLE_BLOCK_MODE, "Incompatible block mode");
+        sErrorCodeToString.put(KM_ERROR_UNSUPPORTED_TAG_LENGTH,
+                "Unsupported authentication tag length");
+        sErrorCodeToString.put(KM_ERROR_UNSUPPORTED_PADDING_MODE, "Unsupported padding mode");
+        sErrorCodeToString.put(KM_ERROR_INCOMPATIBLE_PADDING_MODE, "Incompatible padding mode");
+        sErrorCodeToString.put(KM_ERROR_UNSUPPORTED_DIGEST, "Unsupported digest");
+        sErrorCodeToString.put(KM_ERROR_INCOMPATIBLE_DIGEST, "Incompatible digest");
+        sErrorCodeToString.put(KM_ERROR_INVALID_EXPIRATION_TIME, "Invalid expiration time");
+        sErrorCodeToString.put(KM_ERROR_INVALID_USER_ID, "Invalid user ID");
+        sErrorCodeToString.put(KM_ERROR_INVALID_AUTHORIZATION_TIMEOUT,
+                "Invalid user authorization timeout");
+        sErrorCodeToString.put(KM_ERROR_UNSUPPORTED_KEY_FORMAT, "Unsupported key format");
+        sErrorCodeToString.put(KM_ERROR_INCOMPATIBLE_KEY_FORMAT, "Incompatible key format");
+        sErrorCodeToString.put(KM_ERROR_INVALID_INPUT_LENGTH, "Invalid input length");
+        sErrorCodeToString.put(KM_ERROR_KEY_NOT_YET_VALID, "Key not yet valid");
+        sErrorCodeToString.put(KM_ERROR_KEY_EXPIRED, "Key expired");
+        sErrorCodeToString.put(KM_ERROR_KEY_USER_NOT_AUTHENTICATED, "Key user not authenticated");
+        sErrorCodeToString.put(KM_ERROR_INVALID_OPERATION_HANDLE, "Invalid operation handle");
+        sErrorCodeToString.put(KM_ERROR_VERIFICATION_FAILED, "Signature/MAC verification failed");
+        sErrorCodeToString.put(KM_ERROR_TOO_MANY_OPERATIONS, "Too many operations");
+        sErrorCodeToString.put(KM_ERROR_INVALID_KEY_BLOB, "Invalid key blob");
+        sErrorCodeToString.put(KM_ERROR_INVALID_ARGUMENT, "Invalid argument");
+        sErrorCodeToString.put(KM_ERROR_UNSUPPORTED_TAG, "Unsupported tag");
+        sErrorCodeToString.put(KM_ERROR_INVALID_TAG, "Invalid tag");
+        sErrorCodeToString.put(KM_ERROR_MEMORY_ALLOCATION_FAILED, "Memory allocation failed");
+        sErrorCodeToString.put(KM_ERROR_UNIMPLEMENTED, "Not implemented");
+        sErrorCodeToString.put(KM_ERROR_UNKNOWN_ERROR, "Unknown error");
+    }
+
     public static int getTagType(int tag) {
         return tag & (0xF << 28);
+    }
+
+    public static String getErrorMessage(int errorCode) {
+        String result = sErrorCodeToString.get(errorCode);
+        if (result != null) {
+            return result;
+        }
+        return String.valueOf(errorCode);
     }
 }
