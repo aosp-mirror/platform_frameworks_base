@@ -35,5 +35,9 @@ public class AndroidKeyStoreProvider extends Provider {
         // java.security.KeyPairGenerator
         put("KeyPairGenerator.EC", AndroidKeyPairGenerator.EC.class.getName());
         put("KeyPairGenerator.RSA", AndroidKeyPairGenerator.RSA.class.getName());
+
+        // javax.crypto.KeyGenerator
+        put("KeyGenerator.AES", KeyStoreKeyGeneratorSpi.AES.class.getName());
+        put("KeyGenerator.HmacSHA256", KeyStoreKeyGeneratorSpi.HmacSHA256.class.getName());
     }
 }
