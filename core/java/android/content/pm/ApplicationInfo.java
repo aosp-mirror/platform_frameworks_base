@@ -655,7 +655,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         }
         pw.println(prefix + "dataDir=" + dataDir);
         if (sharedLibraryFiles != null) {
-            pw.println(prefix + "sharedLibraryFiles=" + sharedLibraryFiles);
+            pw.println(prefix + "sharedLibraryFiles=" + Arrays.toString(sharedLibraryFiles));
         }
         pw.println(prefix + "enabled=" + enabled + " targetSdkVersion=" + targetSdkVersion
                 + " versionCode=" + versionCode);
