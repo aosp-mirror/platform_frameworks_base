@@ -386,4 +386,11 @@
      <item type="dimen" format="float" name="ambient_shadow_alpha">0.075</item>
      <item type="dimen" format="float" name="spot_shadow_alpha">0.15</item>
 
+     <!-- Floating toolbar dimensions -->
+     <dimen name="floating_toolbar_height">48dp</dimen>
+     <dimen name="floating_toolbar_menu_button_side_padding">8dp</dimen>
+     <dimen name="floating_toolbar_text_size">14sp</dimen>
+     <dimen name="floating_toolbar_menu_button_minimum_width">48dp</dimen>
+     <dimen name="floating_toolbar_default_width">250dp</dimen>
+     <dimen name="floating_toolbar_minimum_overflow_height">192dp</dimen>
 </resources>
