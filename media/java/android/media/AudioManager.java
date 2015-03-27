@@ -134,6 +134,22 @@ public class AudioManager {
     public static final String VOLUME_CHANGED_ACTION = "android.media.VOLUME_CHANGED_ACTION";
 
     /**
+     * @hide Broadcast intent when the devices for a particular stream type changes.
+     * Includes the stream, the new devices and previous devices.
+     * Notes:
+     *  - for internal platform use only, do not make public,
+     *  - never used for "remote" volume changes
+     *
+     * @see #EXTRA_VOLUME_STREAM_TYPE
+     * @see #EXTRA_VOLUME_STREAM_DEVICES
+     * @see #EXTRA_PREV_VOLUME_STREAM_DEVICES
+     * @see #getDevicesForStream
+     */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String STREAM_DEVICES_CHANGED_ACTION =
+        "android.media.STREAM_DEVICES_CHANGED_ACTION";
+
+    /**
      * @hide Broadcast intent when a stream mute state changes.
      * Includes the stream that changed and the new mute state
      *
@@ -194,6 +210,18 @@ public class AudioManager {
      */
     public static final String EXTRA_PREV_VOLUME_STREAM_VALUE =
         "android.media.EXTRA_PREV_VOLUME_STREAM_VALUE";
+
+    /**
+     * @hide The devices associated with the stream for the stream devices changed intent.
+     */
+    public static final String EXTRA_VOLUME_STREAM_DEVICES =
+        "android.media.EXTRA_VOLUME_STREAM_DEVICES";
+
+    /**
+     * @hide The previous devices associated with the stream for the stream devices changed intent.
+     */
+    public static final String EXTRA_PREV_VOLUME_STREAM_DEVICES =
+        "android.media.EXTRA_PREV_VOLUME_STREAM_DEVICES";
 
     /**
      * @hide The new master volume mute state for the master mute changed intent.

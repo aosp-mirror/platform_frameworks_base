@@ -3299,7 +3299,7 @@ public class AudioService extends IAudioService.Stub {
     }
 
     private int getDeviceForStream(int stream) {
-        int device = AudioSystem.getDevicesForStream(stream);
+        int device = getDevicesForStream(stream);
         if ((device & (device - 1)) != 0) {
             // Multiple device selection is either:
             //  - speaker + one other device: give priority to speaker in this case.
@@ -3320,6 +3320,27 @@ public class AudioService extends IAudioService.Stub {
             }
         }
         return device;
+    }
+
+    private int getDevicesForStream(int stream) {
+        return getDevicesForStream(stream, true /*checkOthers*/);
+    }
+
+    private int getDevicesForStream(int stream, boolean checkOthers) {
+        ensureValidStreamType(stream);
+        synchronized (VolumeStreamState.class) {
+            return mStreamStates[stream].observeDevicesForStream_syncVSS(checkOthers);
+        }
+    }
+
+    private void observeDevicesForStreams(int skipStream) {
+        synchronized (VolumeStreamState.class) {
+            for (int stream = 0; stream < mStreamStates.length; stream++) {
+                if (stream != skipStream) {
+                    mStreamStates[stream].observeDevicesForStream_syncVSS(false /*checkOthers*/);
+                }
+            }
+        }
     }
 
     /*
@@ -3400,9 +3421,11 @@ public class AudioService extends IAudioService.Stub {
 
         private boolean mIsMuted;
         private String mVolumeIndexSettingName;
+        private int mObservedDevices;
 
         private final SparseIntArray mIndexMap = new SparseIntArray(8);
         private final Intent mVolumeChanged;
+        private final Intent mStreamDevicesChanged;
 
         private VolumeStreamState(String settingName, int streamType) {
 
@@ -3416,6 +3439,29 @@ public class AudioService extends IAudioService.Stub {
             readSettings();
             mVolumeChanged = new Intent(AudioManager.VOLUME_CHANGED_ACTION);
             mVolumeChanged.putExtra(AudioManager.EXTRA_VOLUME_STREAM_TYPE, mStreamType);
+            mStreamDevicesChanged = new Intent(AudioManager.STREAM_DEVICES_CHANGED_ACTION);
+            mStreamDevicesChanged.putExtra(AudioManager.EXTRA_VOLUME_STREAM_TYPE, mStreamType);
+        }
+
+        public int observeDevicesForStream_syncVSS(boolean checkOthers) {
+            final int devices = AudioSystem.getDevicesForStream(mStreamType);
+            if (devices == mObservedDevices) {
+                return devices;
+            }
+            final int prevDevices = mObservedDevices;
+            mObservedDevices = devices;
+            if (checkOthers) {
+                // one stream's devices have changed, check the others
+                observeDevicesForStreams(mStreamType);
+            }
+            // log base stream changes to the event log
+            if (mStreamVolumeAlias[mStreamType] == mStreamType) {
+                EventLogTags.writeStreamDevicesChanged(mStreamType, prevDevices, devices);
+            }
+            sendBroadcastToAll(mStreamDevicesChanged
+                    .putExtra(AudioManager.EXTRA_PREV_VOLUME_STREAM_DEVICES, prevDevices)
+                    .putExtra(AudioManager.EXTRA_VOLUME_STREAM_DEVICES, devices));
+            return devices;
         }
 
         public String getSettingNameForDevice(int device) {
@@ -3710,7 +3756,7 @@ public class AudioService extends IAudioService.Stub {
             }
             pw.println();
             pw.print("   Devices: ");
-            final int devices = AudioSystem.getDevicesForStream(mStreamType);
+            final int devices = getDevicesForStream(mStreamType);
             int device, i = 0, n = 0;
             // iterate all devices from 1 to DEVICE_OUT_DEFAULT exclusive
             // (the default device is not returned by getDevicesForStream)
@@ -4244,6 +4290,7 @@ public class AudioService extends IAudioService.Stub {
                         }
                     }
                     mRoutesObservers.finishBroadcast();
+                    observeDevicesForStreams(-1);
                     break;
                 }
 
@@ -5342,7 +5389,7 @@ public class AudioService extends IAudioService.Stub {
                                 on ? AudioSystem.FORCE_HDMI_SYSTEM_AUDIO_ENFORCED :
                                      AudioSystem.FORCE_NONE);
                     }
-                    device = AudioSystem.getDevicesForStream(AudioSystem.STREAM_MUSIC);
+                    device = getDevicesForStream(AudioSystem.STREAM_MUSIC);
                 }
             }
         }
