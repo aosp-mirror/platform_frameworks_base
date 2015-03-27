@@ -4,4 +4,4 @@ option java_package com.android.internal.logging;
 
 # interaction logs
 524287 sysui_view_visibility (category|1|5),(visible|1|6)
-524288 sysui_action (category|1|5),(type|1|6)
+524288 sysui_action (category|1|5)
