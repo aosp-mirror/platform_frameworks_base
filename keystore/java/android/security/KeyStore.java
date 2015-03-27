@@ -389,19 +389,19 @@ public class KeyStore {
         }
     }
 
-    public int generateKey(String alias, KeymasterArguments args, int uid, int flags,
-            KeyCharacteristics outCharacteristics) {
+    public int generateKey(String alias, KeymasterArguments args, byte[] entropy, int uid,
+            int flags, KeyCharacteristics outCharacteristics) {
         try {
-            return mBinder.generateKey(alias, args, uid, flags, outCharacteristics);
+            return mBinder.generateKey(alias, args, entropy, uid, flags, outCharacteristics);
         } catch (RemoteException e) {
             Log.w(TAG, "Cannot connect to keystore", e);
             return SYSTEM_ERROR;
         }
     }
 
-    public int generateKey(String alias, KeymasterArguments args, int flags,
+    public int generateKey(String alias, KeymasterArguments args, byte[] entropy, int flags,
             KeyCharacteristics outCharacteristics) {
-        return generateKey(alias, args, UID_SELF, flags, outCharacteristics);
+        return generateKey(alias, args, entropy, UID_SELF, flags, outCharacteristics);
     }
 
     public int getKeyCharacteristics(String alias, KeymasterBlob clientId, KeymasterBlob appId,
@@ -441,9 +441,9 @@ public class KeyStore {
     }
 
     public OperationResult begin(String alias, int purpose, boolean pruneable,
-            KeymasterArguments args, KeymasterArguments outArgs) {
+            KeymasterArguments args, byte[] entropy, KeymasterArguments outArgs) {
         try {
-            return mBinder.begin(getToken(), alias, purpose, pruneable, args, outArgs);
+            return mBinder.begin(getToken(), alias, purpose, pruneable, args, entropy, outArgs);
         } catch (RemoteException e) {
             Log.w(TAG, "Cannot connect to keystore", e);
             return null;

@@ -60,8 +60,8 @@ interface IKeystoreService {
 
     // Keymaster 0.4 methods
     int addRngEntropy(in byte[] data);
-    int generateKey(String alias, in KeymasterArguments arguments, int uid, int flags,
-        out KeyCharacteristics characteristics);
+    int generateKey(String alias, in KeymasterArguments arguments, in byte[] entropy, int uid,
+        int flags, out KeyCharacteristics characteristics);
     int getKeyCharacteristics(String alias, in KeymasterBlob clientId, in KeymasterBlob appId,
         out KeyCharacteristics characteristics);
     int importKey(String alias, in KeymasterArguments arguments, int format,
@@ -69,7 +69,7 @@ interface IKeystoreService {
     ExportResult exportKey(String alias, int format, in KeymasterBlob clientId,
         in KeymasterBlob appId);
     OperationResult begin(IBinder appToken, String alias, int purpose, boolean pruneable,
-        in KeymasterArguments params, out KeymasterArguments operationParams);
+        in KeymasterArguments params, in byte[] entropy, out KeymasterArguments operationParams);
     OperationResult update(IBinder token, in KeymasterArguments params, in byte[] input);
     OperationResult finish(IBinder token, in KeymasterArguments params, in byte[] signature);
     int abort(IBinder handle);
