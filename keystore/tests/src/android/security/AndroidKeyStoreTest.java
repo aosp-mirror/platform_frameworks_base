@@ -2127,7 +2127,7 @@ public class AndroidKeyStoreTest extends AndroidTestCase {
         assertEquals("The keystore size should match expected", 2, mKeyStore.size());
         assertAliases(new String[] { TEST_ALIAS_2, TEST_ALIAS_3 });
 
-        assertTrue(mAndroidKeyStore.delKey(Credentials.USER_PRIVATE_KEY + TEST_ALIAS_3));
+        assertTrue(mAndroidKeyStore.delete(Credentials.USER_PRIVATE_KEY + TEST_ALIAS_3));
 
         assertEquals("The keystore size should match expected", 1, mKeyStore.size());
         assertAliases(new String[] { TEST_ALIAS_2 });
