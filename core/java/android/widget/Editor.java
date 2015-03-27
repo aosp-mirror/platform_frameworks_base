@@ -27,6 +27,7 @@ import android.content.UndoManager;
 import android.content.UndoOperation;
 import android.content.UndoOwner;
 import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -109,6 +110,7 @@ import java.text.BreakIterator;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.List;
 
 /**
  * Helper class used by TextView to handle editable text views.
@@ -2980,6 +2982,8 @@ public class Editor {
                 }
             }
 
+            addIntentMenuItemsForTextProcessing(menu);
+
             if (menu.hasVisibleItems() || mode.getCustomView() != null) {
                 mTextView.setHasTransientState(true);
                 return true;
@@ -3036,6 +3040,32 @@ public class Editor {
             styledAttributes.recycle();
         }
 
+        private void addIntentMenuItemsForTextProcessing(Menu menu) {
+            if (mTextView.canProcessText()) {
+                PackageManager packageManager = mTextView.getContext().getPackageManager();
+                List<ResolveInfo> supportedActivities =
+                        packageManager.queryIntentActivities(createProcessTextIntent(), 0);
+                for (ResolveInfo info : supportedActivities) {
+                    menu.add(info.loadLabel(packageManager))
+                        .setIntent(createProcessTextIntentForResolveInfo(info))
+                        .setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM
+                                | MenuItem.SHOW_AS_ACTION_WITH_TEXT);
+                }
+            }
+        }
+
+        private Intent createProcessTextIntent() {
+            return new Intent()
+                .setAction(Intent.ACTION_PROCESS_TEXT)
+                .setType("text/plain");
+        }
+
+        private Intent createProcessTextIntentForResolveInfo(ResolveInfo info) {
+            return createProcessTextIntent()
+                    .putExtra(Intent.EXTRA_PROCESS_TEXT_READONLY, !mTextView.isTextEditable())
+                    .setClassName(info.activityInfo.packageName, info.activityInfo.name);
+        }
+
         @Override
         public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
             updateReplaceItem(menu);
@@ -3060,6 +3090,13 @@ public class Editor {
 
         @Override
         public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
+            if (item.getIntent() != null
+                    && item.getIntent().getAction().equals(Intent.ACTION_PROCESS_TEXT)) {
+                item.getIntent().putExtra(Intent.EXTRA_PROCESS_TEXT, mTextView.getSelectedText());
+                mTextView.startActivityForResult(
+                        item.getIntent(), TextView.PROCESS_TEXT_REQUEST_CODE);
+                return true;
+            }
             if (mCustomSelectionActionModeCallback != null &&
                  mCustomSelectionActionModeCallback.onActionItemClicked(mode, item)) {
                 return true;

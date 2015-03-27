@@ -1568,7 +1568,7 @@ public class Instrumentation {
 
     /**
      * Like {@link #execStartActivity(android.content.Context, android.os.IBinder,
-     * android.os.IBinder, Fragment, android.content.Intent, int, android.os.Bundle)},
+     * android.os.IBinder, String, android.content.Intent, int, android.os.Bundle)},
      * but for calls from a {#link Fragment}.
      * 
      * @param who The Context from which the activity is being started.
@@ -1576,7 +1576,7 @@ public class Instrumentation {
      *                      is being started.
      * @param token Internal token identifying to the system who is starting 
      *              the activity; may be null.
-     * @param target Which fragment is performing the start (and thus receiving 
+     * @param target Which element is performing the start (and thus receiving 
      *               any result).
      * @param intent The actual Intent to start.
      * @param requestCode Identifier for this request's result; less than zero 
@@ -1595,7 +1595,7 @@ public class Instrumentation {
      * {@hide}
      */
     public ActivityResult execStartActivity(
-        Context who, IBinder contextThread, IBinder token, Fragment target,
+        Context who, IBinder contextThread, IBinder token, String target,
         Intent intent, int requestCode, Bundle options) {
         IApplicationThread whoThread = (IApplicationThread) contextThread;
         if (mActivityMonitors != null) {
@@ -1619,8 +1619,7 @@ public class Instrumentation {
             int result = ActivityManagerNative.getDefault()
                 .startActivity(whoThread, who.getBasePackageName(), intent,
                         intent.resolveTypeIfNeeded(who.getContentResolver()),
-                        token, target != null ? target.mWho : null,
-                        requestCode, 0, null, options);
+                        token, target, requestCode, 0, null, options);
             checkStartActivityResult(result, intent);
         } catch (RemoteException e) {
         }

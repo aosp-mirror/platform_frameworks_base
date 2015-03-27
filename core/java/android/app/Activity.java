@@ -94,6 +94,7 @@ import android.view.View.OnCreateContextMenuListener;
 import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
 import android.view.ViewManager;
+import android.view.ViewRootImpl;
 import android.view.Window;
 import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
@@ -4467,18 +4468,35 @@ public class Activity extends ContextThemeWrapper
      */
     public void startActivityFromFragment(@NonNull Fragment fragment, Intent intent,
             int requestCode, @Nullable Bundle options) {
+        startActivityForResult(fragment.mWho, intent, requestCode, options);
+    }
+
+    /**
+     * @hide
+     */
+    @Override
+    public void startActivityForResult(
+            String who, Intent intent, int requestCode, @Nullable Bundle options) {
         if (options != null) {
             mActivityTransitionState.startExitOutTransition(this, options);
         }
         Instrumentation.ActivityResult ar =
             mInstrumentation.execStartActivity(
-                this, mMainThread.getApplicationThread(), mToken, fragment,
+                this, mMainThread.getApplicationThread(), mToken, who,
                 intent, requestCode, options);
         if (ar != null) {
             mMainThread.sendActivityResult(
-                mToken, fragment.mWho, requestCode,
+                mToken, who, requestCode,
                 ar.getResultCode(), ar.getResultData());
         }
+    }
+
+    /**
+     * @hide
+     */
+    @Override
+    public boolean canStartActivityForResult() {
+        return true;
     }
 
     /**
@@ -6364,12 +6382,24 @@ public class Activity extends ContextThemeWrapper
                 onActivityResult(requestCode, resultCode, data);
             }
         } else {
-            Fragment frag = mFragments.findFragmentByWho(who);
-            if (frag != null) {
-                if (isRequestPermissionResult(data)) {
-                    dispatchRequestPermissionsResultToFragment(requestCode, data, frag);
-                } else {
-                    frag.onActivityResult(requestCode, resultCode, data);
+            if (who.startsWith("@android:view:")) {
+                ArrayList<ViewRootImpl> views = WindowManagerGlobal.getInstance().getRootViews(
+                        getActivityToken());
+                for (ViewRootImpl viewRoot : views) {
+                    if (viewRoot.getView() != null
+                            && viewRoot.getView().dispatchActivityResult(
+                                    who, requestCode, resultCode, data)) {
+                        return;
+                    }
+                }
+            } else {
+                Fragment frag = mFragments.findFragmentByWho(who);
+                if (frag != null) {
+                    if (isRequestPermissionResult(data)) {
+                        dispatchRequestPermissionsResultToFragment(requestCode, data, frag);
+                    } else {
+                        frag.onActivityResult(requestCode, resultCode, data);
+                    }
                 }
             }
         }

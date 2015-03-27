@@ -336,6 +336,17 @@ public class ContextWrapper extends Context {
         mBase.startActivityAsUser(intent, user);
     }
 
+    /** @hide **/
+    public void startActivityForResult(
+            String who, Intent intent, int requestCode, Bundle options) {
+        mBase.startActivityForResult(who, intent, requestCode, options);
+    }
+
+    /** @hide **/
+    public boolean canStartActivityForResult() {
+        return mBase.canStartActivityForResult();
+    }
+
     @Override
     public void startActivity(Intent intent, Bundle options) {
         mBase.startActivity(intent, options);
