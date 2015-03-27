@@ -1541,7 +1541,8 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
      * to the camera, that the JPEG picture needs to be rotated by, to be viewed
      * upright.</p>
      * <p>Camera devices may either encode this value into the JPEG EXIF header, or
-     * rotate the image data to match this orientation.</p>
+     * rotate the image data to match this orientation. When the image data is rotated,
+     * the thumbnail data will also be rotated.</p>
      * <p>Note that this orientation is relative to the orientation of the camera sensor, given
      * by {@link CameraCharacteristics#SENSOR_ORIENTATION android.sensor.orientation}.</p>
      * <p>To translate from the device orientation given by the Android sensor APIs, the following
