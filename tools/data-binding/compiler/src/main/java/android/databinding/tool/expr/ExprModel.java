@@ -26,6 +26,7 @@ import android.databinding.tool.util.L;
 import android.databinding.tool.writer.FlagSet;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.BitSet;
 import java.util.HashMap;
 import java.util.List;
@@ -437,12 +438,12 @@ public class ExprModel {
         return elevated;
     }
 
-    public Iterable<Expr> filterShouldRead(Iterable<Expr> exprs) {
-        return Iterables.filter(exprs, sShouldReadPred);
+    public static Iterable<Expr> filterShouldRead(Iterable<Expr> exprs) {
+        return toCollection(Iterables.filter(exprs, sShouldReadPred));
     }
 
-    public Iterable<Expr> filterCanBeReadNow(Iterable<Expr> exprs) {
-        return Iterables.filter(exprs, sReadNowPred);
+    public static List<Expr> toCollection(Iterable<Expr> iterable) {
+        return Arrays.asList(Iterables.toArray(iterable, Expr.class));
     }
 
     private static final Predicate<Expr> sShouldReadPred = new Predicate<Expr>() {

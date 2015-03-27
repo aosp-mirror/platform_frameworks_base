@@ -679,7 +679,7 @@ class LayoutBinderWriter(val layoutBinder : LayoutBinder) {
             }
 
             do {
-                val batch = model.filterShouldRead(model.getPendingExpressions()).toArrayList()
+                val batch = ExprModel.filterShouldRead(model.getPendingExpressions()).toArrayList()
                 val mJustRead = arrayListOf<Expr>()
                 while (!batch.none()) {
                     val readNow = batch.filter { it.shouldReadNow(mJustRead) }
@@ -758,8 +758,7 @@ class LayoutBinderWriter(val layoutBinder : LayoutBinder) {
                 // create an if case for all dependencies that might be null
                 val nullables = expr.getDependencies().filter {
                     it.isMandatory() && it.getOther().getResolvedType().isNullable()
-                }
-                        .map { it.getOther() }
+                }.map { it.getOther() }
                 if (!expr.isEqualityCheck() && nullables.isNotEmpty()) {
                     tab ("if ( ${nullables.map { "${it.localName} != null" }.joinToString(" && ")}) {") {
                         tab("${expr.localName}").app(" = ", expr.toCode(true)).app(";")

@@ -400,17 +400,12 @@ abstract public class Expr {
         return mRead;
     }
 
-    public boolean considerElevatingConditionals(Expr cond) {
+    public boolean considerElevatingConditionals(Expr justRead) {
         boolean elevated = false;
         for (Dependency dependency : mDependencies) {
-            if (dependency.isConditional() && dependency.getCondition() == cond) {
+            if (dependency.isConditional() && dependency.getCondition() == justRead) {
                 dependency.elevate();
-                // silent elevate because it is not necessary anymore (already calculated)
-                // but need to mark dependencies elevated so that we can decide to calculate
-                // this expression when all dependencies are elevated
-                if (!dependency.getOther().isRead()) {
-                    elevated = true;
-                }
+                elevated = true;
             }
         }
         return elevated;
@@ -433,7 +428,7 @@ abstract public class Expr {
     Predicate<Dependency> hasNestedCannotRead = new Predicate<Dependency>() {
         @Override
         public boolean apply(Dependency input) {
-            return input.getOther().hasNestedCannotRead();
+            return input.isConditional() || input.getOther().hasNestedCannotRead();
         }
     };
 
@@ -469,6 +464,9 @@ abstract public class Expr {
                 mRead = invalidFlags.isEmpty() || clone.isEmpty();
             }
 
+        }
+        if (mRead) {
+            mShouldReadFlags = null; // if we've been marked as read, clear should read flags
         }
         return mRead;
     }

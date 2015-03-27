@@ -93,7 +93,7 @@ public class ExpressionVisitor extends BindingExpressionBaseVisitor<Expr> {
     public Expr visitQuestionQuestionOp(@NotNull BindingExpressionParser.QuestionQuestionOpContext ctx) {
         final Expr left = ctx.left.accept(this);
         return mModel.ternary(mModel.comparison("==", left, mModel.symbol("null", Object.class)),
-                left, ctx.right.accept(this));
+                ctx.right.accept(this), left);
     }
 
     @Override

@@ -34,6 +34,8 @@ import android.databinding.tool.reflection.ModelClass;
 import android.databinding.tool.reflection.java.JavaAnalyzer;
 import android.databinding.tool.util.L;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.BitSet;
 import java.util.List;
 
@@ -45,8 +47,11 @@ import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 
 public class ExprModelTest {
+
     private static class DummyExpr extends Expr {
+
         String mKey;
+
         public DummyExpr(String key, DummyExpr... children) {
             super(children);
             mKey = key;
@@ -76,7 +81,7 @@ public class ExprModelTest {
         protected void failed(Throwable e, Description description) {
             if (mExprModel != null && mExprModel.getFlagMapping() != null) {
                 final String[] mapping = mExprModel.getFlagMapping();
-                for (int i = 0; i < mapping.length; i ++) {
+                for (int i = 0; i < mapping.length; i++) {
                     L.d("flag %d: %s", i, mapping[i]);
                 }
             }
@@ -96,6 +101,7 @@ public class ExprModelTest {
         assertSame(d, mExprModel.register(d));
         assertEquals(1, mExprModel.mExprMap.size());
     }
+
     @Test
     public void testAddDupe1() {
         final DummyExpr d = new DummyExpr("a");
@@ -131,8 +137,8 @@ public class ExprModelTest {
         IdentifierExpr a = lb.addVariable("a", "java.lang.String");
         IdentifierExpr b = lb.addVariable("b", "java.lang.String");
         IdentifierExpr c = lb.addVariable("c", "java.lang.String");
-        final Expr ternary = lb.parse("a == null ? b : c");
-        final Expr equality = mExprModel.comparison("==", a, mExprModel.symbol("null", Object.class));
+        lb.parse("a == null ? b : c");
+        mExprModel.comparison("==", a, mExprModel.symbol("null", Object.class));
         lb.getModel().seal();
         Iterable<Expr> shouldRead = getShouldRead();
         // a and a == null
@@ -144,6 +150,59 @@ public class ExprModelTest {
         // now , assume we've read this
         final BitSet shouldReadFlags = first.getShouldReadFlags();
         assertNotNull(shouldReadFlags);
+    }
+
+    @Test
+    public void testTernaryWithPlus() {
+        LayoutBinder lb = new MockLayoutBinder();
+        mExprModel = lb.getModel();
+        IdentifierExpr user = lb
+                .addVariable("user", "android.databinding.tool.expr.ExprModelTest.User");
+        MathExpr parsed = parse(lb, "user.name + \" \" + (user.lastName ?? \"\")", MathExpr.class);
+        mExprModel.seal();
+        Iterable<Expr> toRead = getShouldRead();
+        Iterable<Expr> readNow = getReadFirst(toRead);
+        assertEquals(1, Iterables.size(readNow));
+        assertSame(user, Iterables.getFirst(readNow, null));
+        List<Expr> justRead = new ArrayList<Expr>();
+        justRead.add(user);
+        readNow = filterOut(getReadFirst(toRead, justRead), justRead);
+        assertEquals(2, Iterables.size(readNow)); //user.name && user.lastName
+        Iterables.addAll(justRead, readNow);
+        // user.lastname (T, F), user.name + " "
+        readNow = filterOut(getReadFirst(toRead, justRead), justRead);
+        assertEquals(2, Iterables.size(readNow)); //user.name && user.lastName
+        Iterables.addAll(justRead, readNow);
+        readNow = filterOut(getReadFirst(toRead, justRead), justRead);
+        assertEquals(0, Iterables.size(readNow));
+        mExprModel.markBitsRead();
+
+        toRead = getShouldRead();
+        assertEquals(2, Iterables.size(toRead));
+        justRead.clear();
+        readNow = filterOut(getReadFirst(toRead, justRead), justRead);
+        assertEquals(1, Iterables.size(readNow));
+        assertSame(parsed.getRight(), Iterables.getFirst(readNow, null));
+        Iterables.addAll(justRead, readNow);
+
+        readNow = filterOut(getReadFirst(toRead, justRead), justRead);
+        assertEquals(1, Iterables.size(readNow));
+        assertSame(parsed, Iterables.getFirst(readNow, null));
+        Iterables.addAll(justRead, readNow);
+
+        readNow = filterOut(getReadFirst(toRead, justRead), justRead);
+        assertEquals(0, Iterables.size(readNow));
+        mExprModel.markBitsRead();
+        assertEquals(0, Iterables.size(getShouldRead()));
+    }
+
+    private List<Expr> filterOut(Iterable itr, final Iterable exclude) {
+        return Arrays.asList(Iterables.toArray(Iterables.filter(itr, new Predicate() {
+            @Override
+            public boolean apply(Object input) {
+                return !Iterables.contains(exclude, input);
+            }
+        }), Expr.class));
     }
 
     @Test
@@ -202,10 +261,12 @@ public class ExprModelTest {
         IdentifierExpr e = lb.addVariable("e", "java.lang.String");
         final Expr aTernary = lb.parse("a == null ? b == null ? c : d : e");
         assertTrue(aTernary instanceof TernaryExpr);
-        final Expr bTernary = ((TernaryExpr)aTernary).getIfTrue();
+        final Expr bTernary = ((TernaryExpr) aTernary).getIfTrue();
         assertTrue(bTernary instanceof TernaryExpr);
-        final Expr aIsNull = mExprModel.comparison("==", a, mExprModel.symbol("null", Object.class));
-        final Expr bIsNull = mExprModel.comparison("==", b, mExprModel.symbol("null", Object.class));
+        final Expr aIsNull = mExprModel
+                .comparison("==", a, mExprModel.symbol("null", Object.class));
+        final Expr bIsNull = mExprModel
+                .comparison("==", b, mExprModel.symbol("null", Object.class));
         lb.getModel().seal();
         Iterable<Expr> shouldRead = getShouldRead();
         // a and a == null
@@ -216,7 +277,6 @@ public class ExprModelTest {
         assertTrue(c.getShouldReadFlags().isEmpty());
         assertTrue(d.getShouldReadFlags().isEmpty());
         assertTrue(e.getShouldReadFlags().isEmpty());
-
 
         Iterable<Expr> readFirst = getReadFirst(shouldRead, null);
         assertEquals(1, Iterables.size(readFirst));
@@ -267,7 +327,6 @@ public class ExprModelTest {
         LayoutBinder lb = new MockLayoutBinder();
         mExprModel = lb.getModel();
 
-
         IdentifierExpr u1 = lb.addVariable("u1", User.class.getCanonicalName());
         IdentifierExpr u2 = lb.addVariable("u2", User.class.getCanonicalName());
         IdentifierExpr a = lb.addVariable("a", int.class.getCanonicalName());
@@ -276,7 +335,8 @@ public class ExprModelTest {
         IdentifierExpr d = lb.addVariable("d", int.class.getCanonicalName());
         IdentifierExpr e = lb.addVariable("e", int.class.getCanonicalName());
         TernaryExpr abTernary = parse(lb, "a > b ? u1.name : u2.name", TernaryExpr.class);
-        TernaryExpr bcTernary = parse(lb, "b > c ? u1.getCond(d) ? u1.lastName : u2.lastName : `xx` + u2.getCond(e) ", TernaryExpr.class);
+        TernaryExpr bcTernary = parse(lb, "b > c ? u1.getCond(d) ? u1.lastName : u2.lastName : `xx`"
+                + " + u2.getCond(e) ", TernaryExpr.class);
         Expr abCmp = abTernary.getPred();
         Expr bcCmp = bcTernary.getPred();
         Expr u1GetCondD = ((TernaryExpr) bcTernary.getIfTrue()).getPred();
@@ -286,7 +346,6 @@ public class ExprModelTest {
         Expr u2Name = abTernary.getIfFalse();
         Expr u1LastName = ((TernaryExpr) bcTernary.getIfTrue()).getIfTrue();
         Expr u2LastName = ((TernaryExpr) bcTernary.getIfTrue()).getIfFalse();
-
 
         mExprModel.seal();
         Iterable<Expr> shouldRead = getShouldRead();
@@ -314,8 +373,10 @@ public class ExprModelTest {
 
         assertFlags(d, bcTernary.getRequirementFlagIndex(true));
         assertFlags(e, bcTernary.getRequirementFlagIndex(false));
-        assertFlags(u1, bcTernary.getRequirementFlagIndex(true), abTernary.getRequirementFlagIndex(true));
-        assertFlags(u2, bcTernary.getRequirementFlagIndex(false), abTernary.getRequirementFlagIndex(false));
+        assertFlags(u1, bcTernary.getRequirementFlagIndex(true),
+                abTernary.getRequirementFlagIndex(true));
+        assertFlags(u2, bcTernary.getRequirementFlagIndex(false),
+                abTernary.getRequirementFlagIndex(false));
 
         assertFlags(u1GetCondD, bcTernary.getRequirementFlagIndex(true));
         assertFlags(u2GetCondE, bcTernary.getRequirementFlagIndex(false));
@@ -341,8 +402,6 @@ public class ExprModelTest {
         assertFlags(bcTernary.getIfTrue(), bcTernary.getRequirementFlagIndex(true));
         assertFlags(bcTernary, b, c, u1, u2, d, u1LastName, u2LastName, e);
     }
-
-
 
     @Test
     public void testCircularDependency() {
@@ -442,11 +501,13 @@ public class ExprModelTest {
         int i = 0;
         log("list", iterable);
         for (Expr expr : exprs) {
-            assertTrue((i++) + ":must contain " + expr.getUniqueKey(), Iterables.contains(iterable, expr));
+            assertTrue((i++) + ":must contain " + expr.getUniqueKey(),
+                    Iterables.contains(iterable, expr));
         }
         i = 0;
         for (Expr expr : iterable) {
-            assertTrue((i++) + ":must be expected " + expr.getUniqueKey(), ArrayUtils.contains(exprs, expr));
+            assertTrue((i++) + ":must be expected " + expr.getUniqueKey(),
+                    ArrayUtils.contains(exprs, expr));
         }
     }
 
@@ -459,18 +520,16 @@ public class ExprModelTest {
     private void log(String s, Iterable<Expr> iterable) {
         L.d(s);
         for (Expr e : iterable) {
-            L.d(": %s : %s allFlags: %s readSoFar: %s", e.getUniqueKey(), e.getShouldReadFlags(), e.getShouldReadFlagsWithConditionals(), e.getReadSoFar());
+            L.d(": %s : %s allFlags: %s readSoFar: %s", e.getUniqueKey(), e.getShouldReadFlags(),
+                    e.getShouldReadFlagsWithConditionals(), e.getReadSoFar());
         }
         L.d("end of %s", s);
     }
 
-//    private Iterable<Expr> getReadFirst(Iterable<Expr> shouldRead) {
-//        return mExprModel.filterCanBeReadNow(shouldRead);
-//    }
-
     private Iterable<Expr> getReadFirst(Iterable<Expr> shouldRead) {
         return getReadFirst(shouldRead, null);
     }
+
     private Iterable<Expr> getReadFirst(Iterable<Expr> shouldRead, final Iterable<Expr> justRead) {
         return Iterables.filter(shouldRead, new Predicate<Expr>() {
             @Override
@@ -485,7 +544,9 @@ public class ExprModelTest {
     }
 
     public static class User {
+
         String name;
+
         String lastName;
 
         public String getName() {
