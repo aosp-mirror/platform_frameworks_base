@@ -340,8 +340,6 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
      * cleartext network traffic, in which case platform components (e.g., HTTP stacks,
      * {@code WebView}, {@code MediaPlayer}) will refuse app's requests to use cleartext traffic.
      * Third-party libraries are encouraged to honor this flag as well.
-     *
-     * @hide
      */
     public static final int FLAG_USES_CLEARTEXT_TRAFFIC = 1<<27;
 
@@ -379,7 +377,8 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
      * {@link #FLAG_LARGE_HEAP}, {@link #FLAG_STOPPED},
      * {@link #FLAG_SUPPORTS_RTL}, {@link #FLAG_INSTALLED},
      * {@link #FLAG_IS_DATA_ONLY}, {@link #FLAG_IS_GAME},
-     * {@link #FLAG_FULL_BACKUP_ONLY}, {@link #FLAG_MULTIARCH}.
+     * {@link #FLAG_FULL_BACKUP_ONLY}, {@link #FLAG_USES_CLEARTEXT_TRAFFIC},
+     * {@link #FLAG_MULTIARCH}.
      */
     public int flags = 0;
 

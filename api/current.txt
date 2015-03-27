@@ -1361,6 +1361,7 @@ package android {
     field public static final int useIntrinsicSizeAsMinimum = 16843536; // 0x1010310
     field public static final int useLevel = 16843167; // 0x101019f
     field public static final int userVisible = 16843409; // 0x1010291
+    field public static final int usesCleartextTraffic = 16844009; // 0x10104e9
     field public static final int value = 16842788; // 0x1010024
     field public static final int valueFrom = 16843486; // 0x10102de
     field public static final int valueTo = 16843487; // 0x10102df
@@ -8728,6 +8729,7 @@ package android.content.pm {
     field public static final int FLAG_SYSTEM = 1; // 0x1
     field public static final int FLAG_TEST_ONLY = 256; // 0x100
     field public static final int FLAG_UPDATED_SYSTEM_APP = 128; // 0x80
+    field public static final int FLAG_USES_CLEARTEXT_TRAFFIC = 134217728; // 0x8000000
     field public static final int FLAG_VM_SAFE_MODE = 16384; // 0x4000
     field public java.lang.String backupAgentName;
     field public java.lang.String className;
@@ -27768,6 +27770,11 @@ package android.security {
     ctor public KeyStoreParameter.Builder(android.content.Context);
     method public android.security.KeyStoreParameter build();
     method public android.security.KeyStoreParameter.Builder setEncryptionRequired(boolean);
+  }
+
+  public class NetworkSecurityPolicy {
+    method public static android.security.NetworkSecurityPolicy getInstance();
+    method public boolean isCleartextTrafficPermitted();
   }
 
 }

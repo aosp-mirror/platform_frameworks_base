@@ -389,13 +389,12 @@
          with the same {@link android.R.attr#taskAffinity} as it has. -->
     <attr name="allowTaskReparenting" format="boolean" />
 
-    <!-- Declare that this application may use cleartext traffic (e.g., HTTP rather than HTTPS;
-         WebSockets rather than WebSockets Secure; XMPP, IMAP, STMP without STARTTLS or TLS).
-         Defaults to true. If set to false {@code false}, the app declares that it does not
-         intend to use cleartext network traffic, in which case platform components (e.g.,
-         HTTP stacks, {@code WebView}, {@code MediaPlayer}) will refuse app's requests to use
-         cleartext traffic. Third-party libraries are encouraged to honor this flag as well.
-         @hide -->
+    <!-- Declare that this application may use cleartext traffic, such as HTTP rather than HTTPS;
+         WebSockets rather than WebSockets Secure; XMPP, IMAP, STMP without STARTTLS or TLS.
+         Defaults to true. If set to false {@code false}, the application declares that it does not
+         intend to use cleartext network traffic, in which case platform components (e.g. HTTP
+         stacks, {@code WebView}, {@code MediaPlayer}) will refuse applications's requests to use
+         cleartext traffic. Third-party libraries are encouraged to honor this flag as well. -->
     <attr name="usesCleartextTraffic" format="boolean" />
 
     <!-- Declare that code from this application will need to be loaded into other
@@ -1164,13 +1163,13 @@
              "com.google". -->
         <attr name="requiredAccountType" format="string"/>
         <attr name="isGame" />
-        <!-- Declare that this application may use cleartext traffic (e.g., HTTP rather than HTTPS;
-             WebSockets rather than WebSockets Secure; XMPP, IMAP, STMP without STARTTLS or TLS).
-             Defaults to true. If set to false {@code false}, the app declares that it does not
-             intend to use cleartext network traffic, in which case platform components (e.g.,
-             HTTP stacks, {@code WebView}, {@code MediaPlayer}) will refuse app's requests to use
-             cleartext traffic. Third-party libraries are encouraged to honor this flag as well.
-             @hide -->
+        <!-- Declare that this application may use cleartext traffic, such as HTTP rather than
+             HTTPS; WebSockets rather than WebSockets Secure; XMPP, IMAP, STMP without STARTTLS or
+             TLS). Defaults to true. If set to false {@code false}, the application declares that it
+             does not intend to use cleartext network traffic, in which case platform components
+             (e.g. HTTP stacks, {@code WebView}, {@code MediaPlayer}) will refuse applications's
+             requests to use cleartext traffic. Third-party libraries are encouraged to honor this
+             flag as well. -->
         <attr name="usesCleartextTraffic" />
         <attr name="multiArch" />
         <attr name="extractNativeLibs" />
