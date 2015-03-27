@@ -16,12 +16,9 @@
 
 package android.view;
 
-import com.android.annotations.NonNull;
-import com.android.layoutlib.bridge.android.BridgeContext;
 import com.android.resources.Density;
 import com.android.tools.layoutlib.annotations.LayoutlibDelegate;
 
-import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap_Delegate;
 import android.graphics.Canvas;
@@ -29,8 +26,6 @@ import android.graphics.Outline;
 import android.graphics.Path_Delegate;
 import android.graphics.Rect;
 import android.graphics.Region.Op;
-import android.util.DisplayMetrics;
-import android.util.TypedValue;
 import android.view.animation.Transformation;
 
 import java.awt.Graphics2D;
@@ -50,33 +45,36 @@ public class ViewGroup_Delegate {
     @LayoutlibDelegate
     /*package*/ static boolean drawChild(ViewGroup thisVG, Canvas canvas, View child,
             long drawingTime) {
-        boolean retVal = thisVG.drawChild_Original(canvas, child, drawingTime);
         if (child.getZ() > thisVG.getZ()) {
             ViewOutlineProvider outlineProvider = child.getOutlineProvider();
             Outline outline = new Outline();
             outlineProvider.getOutline(child, outline);
-
+            if (outline.mPath == null && outline.mRect == null) {
+                // Sometimes, the bounds of the background drawable are not set until View.draw()
+                // is called. So, we set the bounds manually and try to get the outline again.
+                child.getBackground().setBounds(0, 0, child.mRight - child.mLeft,
+                        child.mBottom - child.mTop);
+                outlineProvider.getOutline(child, outline);
+            }
             if (outline.mPath != null || (outline.mRect != null && !outline.mRect.isEmpty())) {
                 int restoreTo = transformCanvas(thisVG, canvas, child);
                 drawShadow(thisVG, canvas, child, outline);
                 canvas.restoreToCount(restoreTo);
             }
         }
-        return retVal;
+        return thisVG.drawChild_Original(canvas, child, drawingTime);
     }
 
     private static void drawShadow(ViewGroup parent, Canvas canvas, View child,
             Outline outline) {
+        float elevation = getElevation(child, parent);
+        if(outline.mRect != null) {
+            RectShadowPainter.paintShadow(outline, elevation, canvas);
+            return;
+        }
         BufferedImage shadow = null;
-        int x = 0;
-        if (outline.mRect != null) {
-            Shadow s = getRectShadow(parent, canvas, child, outline);
-            if (s != null) {
-              shadow = s.mShadow;
-              x = -s.mShadowWidth;
-            }
-        } else if (outline.mPath != null) {
-            shadow = getPathShadow(child, outline, canvas);
+        if (outline.mPath != null) {
+            shadow = getPathShadow(outline, canvas, elevation);
         }
         if (shadow == null) {
             return;
@@ -85,52 +83,17 @@ public class ViewGroup_Delegate {
                 Density.getEnum(canvas.getDensity()));
         Rect clipBounds = canvas.getClipBounds();
         Rect newBounds = new Rect(clipBounds);
-        newBounds.left = newBounds.left + x;
+        newBounds.inset((int)-elevation, (int)-elevation);
         canvas.clipRect(newBounds, Op.REPLACE);
-        canvas.drawBitmap(bitmap, x, 0, null);
+        canvas.drawBitmap(bitmap, 0, 0, null);
         canvas.clipRect(clipBounds, Op.REPLACE);
     }
 
-    private static Shadow getRectShadow(ViewGroup parent, Canvas canvas, View child,
-            Outline outline) {
-        BufferedImage shadow;
-        Rect clipBounds = canvas.getClipBounds();
-        if (clipBounds.isEmpty()) {
-            return null;
-        }
-        float height = child.getZ() - parent.getZ();
-        // Draw large shadow if difference in z index is more than 10dp
-        float largeShadowThreshold = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 10f,
-                getMetrics(child));
-        boolean largeShadow = height > largeShadowThreshold;
-        int shadowSize = largeShadow ? ShadowPainter.SHADOW_SIZE : ShadowPainter.SMALL_SHADOW_SIZE;
-        shadow = new BufferedImage(clipBounds.width() + shadowSize, clipBounds.height(),
-                BufferedImage.TYPE_INT_ARGB);
-        Graphics2D graphics = shadow.createGraphics();
-        Rect rect = outline.mRect;
-        if (largeShadow) {
-            ShadowPainter.drawRectangleShadow(graphics,
-                    rect.left + shadowSize, rect.top, rect.width(), rect.height());
-        } else {
-            ShadowPainter.drawSmallRectangleShadow(graphics,
-                    rect.left + shadowSize, rect.top, rect.width(), rect.height());
-        }
-        graphics.dispose();
-        return new Shadow(shadow, shadowSize);
+    private static float getElevation(View child, ViewGroup parent) {
+        return child.getZ() - parent.getZ();
     }
 
-    @NonNull
-    private static DisplayMetrics getMetrics(View view) {
-        Context context = view.getContext();
-        context = BridgeContext.getBaseContext(context);
-        if (context instanceof BridgeContext) {
-            return ((BridgeContext) context).getMetrics();
-        }
-        throw new RuntimeException("View " + view.getClass().getName() + " not created with the " +
-                "right context");
-    }
-
-    private static BufferedImage getPathShadow(View child, Outline outline, Canvas canvas) {
+    private static BufferedImage getPathShadow(Outline outline, Canvas canvas, float elevation) {
         Rect clipBounds = canvas.getClipBounds();
         if (clipBounds.isEmpty()) {
           return null;
@@ -140,7 +103,7 @@ public class ViewGroup_Delegate {
         Graphics2D graphics = image.createGraphics();
         graphics.draw(Path_Delegate.getDelegate(outline.mPath.mNativePath).getJavaShape());
         graphics.dispose();
-        return ShadowPainter.createDropShadow(image, ((int) child.getZ()));
+        return ShadowPainter.createDropShadow(image, (int) elevation);
     }
 
     // Copied from android.view.View#draw(Canvas, ViewGroup, long) and removed code paths
@@ -193,16 +156,5 @@ public class ViewGroup_Delegate {
             }
         }
         return restoreTo;
-    }
-
-    private static class Shadow {
-        public BufferedImage mShadow;
-        public int mShadowWidth;
-
-        public Shadow(BufferedImage shadow, int shadowWidth) {
-            mShadow = shadow;
-            mShadowWidth = shadowWidth;
-        }
-
     }
 }
