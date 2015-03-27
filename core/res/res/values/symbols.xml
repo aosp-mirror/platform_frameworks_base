@@ -2194,4 +2194,15 @@
   <java-symbol type="dimen" name="date_picker_day_of_week_height"/>
 
   <java-symbol type="id" name="accessibility_action_show_on_screen" />
+
+  <!-- Floating toolbar -->
+  <java-symbol type="layout" name="floating_popup_container" />
+  <java-symbol type="layout" name="floating_popup_menu_button" />
+  <java-symbol type="layout" name="floating_popup_open_overflow_button" />
+  <java-symbol type="dimen" name="floating_toolbar_height" />
+  <java-symbol type="dimen" name="floating_toolbar_menu_button_side_padding" />
+  <java-symbol type="dimen" name="floating_toolbar_text_size" />
+  <java-symbol type="dimen" name="floating_toolbar_menu_button_minimum_width" />
+  <java-symbol type="dimen" name="floating_toolbar_default_width" />
+  <java-symbol type="dimen" name="floating_toolbar_minimum_overflow_height" />
 </resources>
