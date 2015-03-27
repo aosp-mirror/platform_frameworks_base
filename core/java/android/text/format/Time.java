@@ -47,6 +47,7 @@ import libcore.util.ZoneInfoDB;
  *     before 1st Jan 1970 UTC).</li>
  *     <li>Much of the formatting / parsing assumes ASCII text and is therefore not suitable for
  *     use with non-ASCII scripts.</li>
+ *     <li>No support for pseudo-zones like "GMT-07:00".</li>
  * </ul>
  *
  * @deprecated Use {@link java.util.GregorianCalendar} instead.
