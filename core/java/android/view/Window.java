@@ -1856,14 +1856,14 @@ public abstract class Window {
     public abstract int getStatusBarColor();
 
     /**
-     * Sets the color of the status bar to {@param color}.
+     * Sets the color of the status bar to {@code color}.
      *
      * For this to take effect,
      * the window must be drawing the system bar backgrounds with
      * {@link android.view.WindowManager.LayoutParams#FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS} and
      * {@link android.view.WindowManager.LayoutParams#FLAG_TRANSLUCENT_STATUS} must not be set.
      *
-     * If {@param color} is not opaque, consider setting
+     * If {@code color} is not opaque, consider setting
      * {@link android.view.View#SYSTEM_UI_FLAG_LAYOUT_STABLE} and
      * {@link android.view.View#SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN}.
      * <p>

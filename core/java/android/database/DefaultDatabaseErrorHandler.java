@@ -24,7 +24,7 @@ import android.util.Log;
 import android.util.Pair;
 
 /**
- * Default class used to define the actions to take when the database corruption is reported
+ * Default class used to define the action to take when database corruption is reported
  * by sqlite.
  * <p>
  * An application can specify an implementation of {@link DatabaseErrorHandler} on the
@@ -38,7 +38,7 @@ import android.util.Pair;
  * The specified {@link DatabaseErrorHandler} is used to handle database corruption errors, if they
  * occur.
  * <p>
- * If null is specified for DatabaeErrorHandler param in the above calls, then this class is used
+ * If null is specified for the DatabaseErrorHandler param in the above calls, this class is used
  * as the default {@link DatabaseErrorHandler}.
  */
 public final class DefaultDatabaseErrorHandler implements DatabaseErrorHandler {
