@@ -1,11 +1,11 @@
 <component name="libraryTable">
   <library name="guava">
     <CLASSES>
-      <root url="jar://$PROJECT_DIR$/../../../../out/host/common/obj/JAVA_LIBRARIES/guavalib_intermediates/javalib.jar!/" />
+      <root url="jar://$PROJECT_DIR$/../../../../prebuilts/tools/common/m2/repository/com/google/guava/guava/15.0/guava-15.0.jar!/" />
     </CLASSES>
     <JAVADOC />
     <SOURCES>
-      <root url="file://$PROJECT_DIR$/../../../../external/guava/guava/src" />
+      <root url="jar://$PROJECT_DIR$/../../../../prebuilts/tools/common/m2/repository/com/google/guava/guava/15.0/guava-15.0-sources.jar!/" />
     </SOURCES>
   </library>
 </component>
