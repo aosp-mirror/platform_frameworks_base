@@ -18,14 +18,18 @@ package com.android.server;
 
 import android.Manifest;
 import android.app.ActivityManager;
+import android.app.PendingIntent;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Binder;
+import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.service.persistentdata.IPersistentDataBlockService;
+import android.service.persistentdata.PersistentDataBlockManager;
 import android.util.Slog;
 
 import com.android.internal.R;
@@ -428,6 +432,29 @@ public class PersistentDataBlockService extends SystemService {
         }
 
         @Override
+        public void wipeIfAllowed(Bundle bundle, PendingIntent pi) {
+            // Should only be called by owner
+            if (UserHandle.getCallingUserId() != UserHandle.USER_OWNER) {
+                throw new SecurityException("Only the Owner is allowed to wipe");
+            }
+            // Caller must be able to query the the state of the PersistentDataBlock
+            enforcePersistentDataBlockAccess();
+            String allowedPackage = mContext.getResources()
+                    .getString(R.string.config_persistentDataPackageName);
+            Intent intent = new Intent();
+            intent.setPackage(allowedPackage);
+            intent.setAction(PersistentDataBlockManager.ACTION_WIPE_IF_ALLOWED);
+            intent.putExtras(bundle);
+            intent.putExtra(PersistentDataBlockManager.EXTRA_WIPE_IF_ALLOWED_CALLBACK, pi);
+            long id = Binder.clearCallingIdentity();
+            try {
+                mContext.sendBroadcastAsUser(intent, UserHandle.OWNER);
+            } finally {
+                restoreCallingIdentity(id);
+            }
+        }
+
+        @Override
         public void setOemUnlockEnabled(boolean enabled) {
             // do not allow monkey to flip the flag
             if (ActivityManager.isUserAMonkey()) {
@@ -450,10 +477,7 @@ public class PersistentDataBlockService extends SystemService {
 
         @Override
         public int getDataBlockSize() {
-            if (mContext.checkCallingPermission(Manifest.permission.ACCESS_PDB_STATE)
-                    != PackageManager.PERMISSION_GRANTED) {
-                enforceUid(Binder.getCallingUid());
-            }
+            enforcePersistentDataBlockAccess();
 
             DataInputStream inputStream;
             try {
@@ -472,6 +496,13 @@ public class PersistentDataBlockService extends SystemService {
                 return 0;
             } finally {
                 IoUtils.closeQuietly(inputStream);
+            }
+        }
+
+        private void enforcePersistentDataBlockAccess() {
+            if (mContext.checkCallingPermission(Manifest.permission.ACCESS_PDB_STATE)
+                    != PackageManager.PERMISSION_GRANTED) {
+                enforceUid(Binder.getCallingUid());
             }
         }
 
