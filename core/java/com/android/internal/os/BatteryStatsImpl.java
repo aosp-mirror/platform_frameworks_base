@@ -16,18 +16,14 @@
 
 package com.android.internal.os;
 
-import static android.net.NetworkStats.UID_ALL;
-import static com.android.server.NetworkManagementSocketTagger.PROP_QTAGUID_ENABLED;
-
+import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.bluetooth.BluetoothActivityEnergyInfo;
-import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothHeadset;
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkStats;
-import android.net.wifi.IWifiManager;
 import android.net.wifi.WifiActivityEnergyInfo;
 import android.net.wifi.WifiManager;
 import android.os.BadParcelableException;
@@ -42,8 +38,6 @@ import android.os.Parcel;
 import android.os.ParcelFormatException;
 import android.os.Parcelable;
 import android.os.Process;
-import android.os.RemoteException;
-import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.WorkSource;
@@ -65,13 +59,14 @@ import android.util.TimeUtils;
 import android.util.Xml;
 import android.view.Display;
 
-import com.android.internal.annotations.GuardedBy;
 import com.android.internal.net.NetworkStatsFactory;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.FastPrintWriter;
 import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.JournaledFile;
 import com.android.internal.util.XmlUtils;
+import com.android.server.NetworkManagementSocketTagger;
+import libcore.util.EmptyArray;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlSerializer;
@@ -132,6 +127,9 @@ public final class BatteryStatsImpl extends BatteryStats {
     static final int MSG_REPORT_POWER_CHANGE = 2;
     static final long DELAY_UPDATE_WAKELOCKS = 5*1000;
 
+    private final KernelWakelockReader mKernelWakelockReader = new KernelWakelockReader();
+    private final KernelWakelockStats mTmpWakelockStats = new KernelWakelockStats();
+
     public interface BatteryCallback {
         public void batteryNeedsCpuUpdate();
         public void batteryPowerChanged(boolean onBattery);
@@ -160,7 +158,12 @@ public final class BatteryStatsImpl extends BatteryStats {
         }
     }
 
+    public interface ExternalStatsSync {
+        void scheduleSync();
+    }
+
     public final MyHandler mHandler;
+    private final ExternalStatsSync mExternalSync;
 
     private BatteryCallback mCallback;
 
@@ -330,7 +333,7 @@ public final class BatteryStatsImpl extends BatteryStats {
 
     int mPhoneSignalStrengthBin = -1;
     int mPhoneSignalStrengthBinRaw = -1;
-    final StopwatchTimer[] mPhoneSignalStrengthsTimer = 
+    final StopwatchTimer[] mPhoneSignalStrengthsTimer =
             new StopwatchTimer[SignalStrength.NUM_SIGNAL_STRENGTH_BINS];
 
     StopwatchTimer mPhoneSignalScanningTimer;
@@ -445,17 +448,16 @@ public final class BatteryStatsImpl extends BatteryStats {
     private int mLoadedNumConnectivityChange;
     private int mUnpluggedNumConnectivityChange;
 
+    private final NetworkStats.Entry mTmpNetworkStatsEntry = new NetworkStats.Entry();
+
     /*
      * Holds a SamplingTimer associated with each kernel wakelock name being tracked.
      */
-    private final HashMap<String, SamplingTimer> mKernelWakelockStats =
-            new HashMap<String, SamplingTimer>();
+    private final HashMap<String, SamplingTimer> mKernelWakelockStats = new HashMap<>();
 
     public Map<String, ? extends Timer> getKernelWakelockStats() {
         return mKernelWakelockStats;
     }
-
-    private static int sKernelWakelockUpdateVersion = 0;
 
     String mLastWakeupReason = null;
     long mLastWakeupUptimeMs = 0;
@@ -465,55 +467,12 @@ public final class BatteryStatsImpl extends BatteryStats {
         return mWakeupReasonStats;
     }
 
-    private static final int[] PROC_WAKELOCKS_FORMAT = new int[] {
-        Process.PROC_TAB_TERM|Process.PROC_OUT_STRING|                // 0: name
-                              Process.PROC_QUOTES,
-        Process.PROC_TAB_TERM|Process.PROC_OUT_LONG,                  // 1: count
-        Process.PROC_TAB_TERM,
-        Process.PROC_TAB_TERM,
-        Process.PROC_TAB_TERM,
-        Process.PROC_TAB_TERM|Process.PROC_OUT_LONG,                  // 5: totalTime
-    };
-
-    private static final int[] WAKEUP_SOURCES_FORMAT = new int[] {
-        Process.PROC_TAB_TERM|Process.PROC_OUT_STRING,                // 0: name
-        Process.PROC_TAB_TERM|Process.PROC_COMBINE|
-                              Process.PROC_OUT_LONG,                  // 1: count
-        Process.PROC_TAB_TERM|Process.PROC_COMBINE,
-        Process.PROC_TAB_TERM|Process.PROC_COMBINE,
-        Process.PROC_TAB_TERM|Process.PROC_COMBINE,
-        Process.PROC_TAB_TERM|Process.PROC_COMBINE,
-        Process.PROC_TAB_TERM|Process.PROC_COMBINE
-                             |Process.PROC_OUT_LONG,                  // 6: totalTime
-    };
-
-    private final String[] mProcWakelocksName = new String[3];
-    private final long[] mProcWakelocksData = new long[3];
-
-    /*
-     * Used as a buffer for reading in data from /proc/wakelocks before it is processed and added
-     * to mKernelWakelockStats.
-     */
-    private final Map<String, KernelWakelockStats> mProcWakelockFileStats = new HashMap<>();
-
-    private final NetworkStatsFactory mNetworkStatsFactory = new NetworkStatsFactory();
-    private NetworkStats mCurMobileSnapshot = new NetworkStats(SystemClock.elapsedRealtime(), 50);
-    private NetworkStats mLastMobileSnapshot = new NetworkStats(SystemClock.elapsedRealtime(), 50);
-    private NetworkStats mCurWifiSnapshot = new NetworkStats(SystemClock.elapsedRealtime(), 50);
-    private NetworkStats mLastWifiSnapshot = new NetworkStats(SystemClock.elapsedRealtime(), 50);
-    private NetworkStats mTmpNetworkStats;
-    private final NetworkStats.Entry mTmpNetworkStatsEntry = new NetworkStats.Entry();
-
-    @GuardedBy("this")
-    private String[] mMobileIfaces = new String[0];
-    @GuardedBy("this")
-    private String[] mWifiIfaces = new String[0];
-
     public BatteryStatsImpl() {
         mFile = null;
         mCheckinFile = null;
         mDailyFile = null;
         mHandler = null;
+        mExternalSync = null;
         clearHistoryLocked();
     }
 
@@ -523,7 +482,7 @@ public final class BatteryStatsImpl extends BatteryStats {
     }
 
     static class TimeBase {
-        private final ArrayList<TimeBaseObs> mObservers = new ArrayList<TimeBaseObs>();
+        private final ArrayList<TimeBaseObs> mObservers = new ArrayList<>();
 
         private long mUptime;
         private long mRealtime;
@@ -1776,147 +1735,6 @@ public final class BatteryStatsImpl extends BatteryStats {
             mWakeupReasonStats.put(name, timer);
         }
         return timer;
-    }
-
-    private final Map<String, KernelWakelockStats> readKernelWakelockStats() {
-
-        FileInputStream is;
-        byte[] buffer = new byte[32*1024];
-        int len;
-        boolean wakeup_sources;
-
-        try {
-            try {
-                is = new FileInputStream("/d/wakeup_sources");
-                wakeup_sources = true;
-            } catch (java.io.FileNotFoundException e) {
-                try {
-                    is = new FileInputStream("/proc/wakelocks");
-                    wakeup_sources = false;
-                } catch (java.io.FileNotFoundException e2) {
-                    return null;
-                }
-            }
-
-            len = is.read(buffer);
-            is.close();
-        } catch (java.io.IOException e) {
-            return null;
-        }
-
-        if (len > 0) {
-            if (len >= buffer.length) {
-                Slog.wtf(TAG, "Kernel wake locks exceeded buffer size " + buffer.length);
-            }
-            int i;
-            for (i=0; i<len; i++) {
-                if (buffer[i] == '\0') {
-                    len = i;
-                    break;
-                }
-            }
-        }
-
-        return parseProcWakelocks(buffer, len, wakeup_sources);
-    }
-
-    private final Map<String, KernelWakelockStats> parseProcWakelocks(
-            byte[] wlBuffer, int len, boolean wakeup_sources) {
-        String name;
-        int count;
-        long totalTime;
-        int startIndex;
-        int endIndex;
-        int numUpdatedWlNames = 0;
-
-        // Advance past the first line.
-        int i;
-        for (i = 0; i < len && wlBuffer[i] != '\n' && wlBuffer[i] != '\0'; i++);
-        startIndex = endIndex = i + 1;
-
-        synchronized(this) {
-            Map<String, KernelWakelockStats> m = mProcWakelockFileStats;
-
-            sKernelWakelockUpdateVersion++;
-            while (endIndex < len) {
-                for (endIndex=startIndex;
-                        endIndex < len && wlBuffer[endIndex] != '\n' && wlBuffer[endIndex] != '\0';
-                        endIndex++);
-                endIndex++; // endIndex is an exclusive upper bound.
-                // Don't go over the end of the buffer, Process.parseProcLine might
-                // write to wlBuffer[endIndex]
-                if (endIndex >= (len - 1) ) {
-                    return m;
-                }
-
-                String[] nameStringArray = mProcWakelocksName;
-                long[] wlData = mProcWakelocksData;
-                // Stomp out any bad characters since this is from a circular buffer
-                // A corruption is seen sometimes that results in the vm crashing
-                // This should prevent crashes and the line will probably fail to parse
-                for (int j = startIndex; j < endIndex; j++) {
-                    if ((wlBuffer[j] & 0x80) != 0) wlBuffer[j] = (byte) '?';
-                }
-                boolean parsed = Process.parseProcLine(wlBuffer, startIndex, endIndex,
-                        wakeup_sources ? WAKEUP_SOURCES_FORMAT :
-                                         PROC_WAKELOCKS_FORMAT,
-                        nameStringArray, wlData, null);
-
-                name = nameStringArray[0];
-                count = (int) wlData[1];
-
-                if (wakeup_sources) {
-                        // convert milliseconds to microseconds
-                        totalTime = wlData[2] * 1000;
-                } else {
-                        // convert nanoseconds to microseconds with rounding.
-                        totalTime = (wlData[2] + 500) / 1000;
-                }
-
-                if (parsed && name.length() > 0) {
-                    if (!m.containsKey(name)) {
-                        m.put(name, new KernelWakelockStats(count, totalTime,
-                                sKernelWakelockUpdateVersion));
-                        numUpdatedWlNames++;
-                    } else {
-                        KernelWakelockStats kwlStats = m.get(name);
-                        if (kwlStats.mVersion == sKernelWakelockUpdateVersion) {
-                            kwlStats.mCount += count;
-                            kwlStats.mTotalTime += totalTime;
-                        } else {
-                            kwlStats.mCount = count;
-                            kwlStats.mTotalTime = totalTime;
-                            kwlStats.mVersion = sKernelWakelockUpdateVersion;
-                            numUpdatedWlNames++;
-                        }
-                    }
-                }
-                startIndex = endIndex;
-            }
-
-            if (m.size() != numUpdatedWlNames) {
-                // Don't report old data.
-                Iterator<KernelWakelockStats> itr = m.values().iterator();
-                while (itr.hasNext()) {
-                    if (itr.next().mVersion != sKernelWakelockUpdateVersion) {
-                        itr.remove();
-                    }
-                }
-            }
-            return m;
-        }
-    }
-
-    private class KernelWakelockStats {
-        public int mCount;
-        public long mTotalTime;
-        public int mVersion;
-
-        KernelWakelockStats(int count, long totalTime, int version) {
-            mCount = count;
-            mTotalTime = totalTime;
-            mVersion = version;
-        }
     }
 
     /*
@@ -3390,7 +3208,7 @@ public final class BatteryStatsImpl extends BatteryStats {
                 mMobileRadioActivePerAppTimer.startRunningLocked(elapsedRealtime);
             } else {
                 mMobileRadioActiveTimer.stopRunningLocked(realElapsedRealtimeMs);
-                updateNetworkActivityLocked(NET_UPDATE_MOBILE, realElapsedRealtimeMs);
+                updateMobileRadioStateLocked(realElapsedRealtimeMs);
                 mMobileRadioActivePerAppTimer.stopRunningLocked(realElapsedRealtimeMs);
             }
         }
@@ -3728,6 +3546,7 @@ public final class BatteryStatsImpl extends BatteryStats {
             addHistoryRecordLocked(elapsedRealtime, uptime);
             mWifiOn = true;
             mWifiOnTimer.startRunningLocked(elapsedRealtime);
+            scheduleSyncExternalStatsLocked();
         }
     }
 
@@ -3741,6 +3560,7 @@ public final class BatteryStatsImpl extends BatteryStats {
             addHistoryRecordLocked(elapsedRealtime, uptime);
             mWifiOn = false;
             mWifiOnTimer.stopRunningLocked(elapsedRealtime);
+            scheduleSyncExternalStatsLocked();
         }
     }
 
@@ -3903,6 +3723,7 @@ public final class BatteryStatsImpl extends BatteryStats {
                 int uid = mapUid(ws.get(i));
                 getUidStatsLocked(uid).noteWifiRunningLocked(elapsedRealtime);
             }
+            scheduleSyncExternalStatsLocked();
         } else {
             Log.w(TAG, "noteWifiRunningLocked -- called while WIFI running");
         }
@@ -3941,6 +3762,7 @@ public final class BatteryStatsImpl extends BatteryStats {
                 int uid = mapUid(ws.get(i));
                 getUidStatsLocked(uid).noteWifiStoppedLocked(elapsedRealtime);
             }
+            scheduleSyncExternalStatsLocked();
         } else {
             Log.w(TAG, "noteWifiStoppedLocked -- called while WIFI not running");
         }
@@ -3955,6 +3777,7 @@ public final class BatteryStatsImpl extends BatteryStats {
             }
             mWifiState = wifiState;
             mWifiStateTimer[wifiState].startRunningLocked(elapsedRealtime);
+            scheduleSyncExternalStatsLocked();
         }
     }
 
@@ -4026,6 +3849,7 @@ public final class BatteryStatsImpl extends BatteryStats {
             addHistoryRecordLocked(elapsedRealtime, uptime);
             mBluetoothOn = true;
             mBluetoothOnTimer.startRunningLocked(elapsedRealtime);
+            scheduleSyncExternalStatsLocked();
         }
     }
 
@@ -4039,6 +3863,7 @@ public final class BatteryStatsImpl extends BatteryStats {
             addHistoryRecordLocked(elapsedRealtime, uptime);
             mBluetoothOn = false;
             mBluetoothOnTimer.stopRunningLocked(elapsedRealtime);
+            scheduleSyncExternalStatsLocked();
         }
     }
 
@@ -4065,6 +3890,7 @@ public final class BatteryStatsImpl extends BatteryStats {
             if (DEBUG_HISTORY) Slog.v(TAG, "WIFI full lock on to: "
                     + Integer.toHexString(mHistoryCur.states));
             addHistoryRecordLocked(elapsedRealtime, uptime);
+            scheduleSyncExternalStatsLocked();
         }
         mWifiFullLockNesting++;
         getUidStatsLocked(uid).noteFullWifiLockAcquiredLocked(elapsedRealtime);
@@ -4080,6 +3906,7 @@ public final class BatteryStatsImpl extends BatteryStats {
             if (DEBUG_HISTORY) Slog.v(TAG, "WIFI full lock off to: "
                     + Integer.toHexString(mHistoryCur.states));
             addHistoryRecordLocked(elapsedRealtime, uptime);
+            scheduleSyncExternalStatsLocked();
         }
         getUidStatsLocked(uid).noteFullWifiLockReleasedLocked(elapsedRealtime);
     }
@@ -4137,6 +3964,7 @@ public final class BatteryStatsImpl extends BatteryStats {
             if (DEBUG_HISTORY) Slog.v(TAG, "WIFI multicast on to: "
                     + Integer.toHexString(mHistoryCur.states));
             addHistoryRecordLocked(elapsedRealtime, uptime);
+            scheduleSyncExternalStatsLocked();
         }
         mWifiMulticastNesting++;
         getUidStatsLocked(uid).noteWifiMulticastEnabledLocked(elapsedRealtime);
@@ -4152,6 +3980,7 @@ public final class BatteryStatsImpl extends BatteryStats {
             if (DEBUG_HISTORY) Slog.v(TAG, "WIFI multicast off to: "
                     + Integer.toHexString(mHistoryCur.states));
             addHistoryRecordLocked(elapsedRealtime, uptime);
+            scheduleSyncExternalStatsLocked();
         }
         getUidStatsLocked(uid).noteWifiMulticastDisabledLocked(elapsedRealtime);
     }
@@ -4259,7 +4088,8 @@ public final class BatteryStatsImpl extends BatteryStats {
         // During device boot, qtaguid isn't enabled until after the inital
         // loading of battery stats. Now that they're enabled, take our initial
         // snapshot for future delta calculation.
-        updateNetworkActivityLocked(NET_UPDATE_ALL, SystemClock.elapsedRealtime());
+        updateMobileRadioStateLocked(SystemClock.elapsedRealtime());
+        updateWifiStateLocked(null);
     }
 
     @Override public long getScreenOnTime(long elapsedRealtimeUs, int which) {
@@ -5949,7 +5779,7 @@ public final class BatteryStatsImpl extends BatteryStats {
                     Slog.w(TAG, "File corrupt: too many excessive power entries " + N);
                     return false;
                 }
-                
+
                 mExcessivePower = new ArrayList<ExcessivePower>();
                 for (int i=0; i<N; i++) {
                     ExcessivePower ew = new ExcessivePower();
@@ -6727,7 +6557,7 @@ public final class BatteryStatsImpl extends BatteryStats {
         }
     }
 
-    public BatteryStatsImpl(File systemDir, Handler handler) {
+    public BatteryStatsImpl(File systemDir, Handler handler, ExternalStatsSync externalSync) {
         if (systemDir != null) {
             mFile = new JournaledFile(new File(systemDir, "batterystats.bin"),
                     new File(systemDir, "batterystats.bin.tmp"));
@@ -6736,6 +6566,7 @@ public final class BatteryStatsImpl extends BatteryStats {
         }
         mCheckinFile = new AtomicFile(new File(systemDir, "batterystats-checkin.bin"));
         mDailyFile = new AtomicFile(new File(systemDir, "batterystats-daily.xml"));
+        mExternalSync = externalSync;
         mHandler = new MyHandler(handler.getLooper());
         mStartCount++;
         mScreenOnTimer = new StopwatchTimer(null, -1, null, mOnBatteryTimeBase);
@@ -6808,6 +6639,7 @@ public final class BatteryStatsImpl extends BatteryStats {
         mCheckinFile = null;
         mDailyFile = null;
         mHandler = null;
+        mExternalSync = null;
         clearHistoryLocked();
         readFromParcel(p);
     }
@@ -7479,18 +7311,230 @@ public final class BatteryStatsImpl extends BatteryStats {
             mDischargeScreenOffUnplugLevel = mDischargeCurrentLevel;
         }
     }
-    
+
     public void pullPendingStateUpdatesLocked() {
-        updateKernelWakelocksLocked();
-        updateNetworkActivityLocked(NET_UPDATE_ALL, SystemClock.elapsedRealtime());
-        // TODO(adamlesinski): enable when bluedroid stops deadlocking. b/19248786
-        // updateBluetoothControllerActivityLocked();
-        // TODO(adamlesinski): disabled to avoid deadlock. Need to change how external
-        // data is pulled/accessed from BatteryStats. b/19729960
-        // updateWifiControllerActivityLocked();
         if (mOnBatteryInternal) {
             final boolean screenOn = mScreenState == Display.STATE_ON;
             updateDischargeScreenLevelsLocked(screenOn, screenOn);
+        }
+    }
+
+    private String[] mMobileIfaces = EmptyArray.STRING;
+    private String[] mWifiIfaces = EmptyArray.STRING;
+
+    private final NetworkStatsFactory mNetworkStatsFactory = new NetworkStatsFactory();
+
+    private static final int NETWORK_STATS_LAST = 0;
+    private static final int NETWORK_STATS_NEXT = 1;
+    private static final int NETWORK_STATS_DELTA = 2;
+
+    private final NetworkStats[] mMobileNetworkStats = new NetworkStats[] {
+            new NetworkStats(SystemClock.elapsedRealtime(), 50),
+            new NetworkStats(SystemClock.elapsedRealtime(), 50),
+            new NetworkStats(SystemClock.elapsedRealtime(), 50)
+    };
+
+    private final NetworkStats[] mWifiNetworkStats = new NetworkStats[] {
+            new NetworkStats(SystemClock.elapsedRealtime(), 50),
+            new NetworkStats(SystemClock.elapsedRealtime(), 50),
+            new NetworkStats(SystemClock.elapsedRealtime(), 50)
+    };
+
+    /**
+     * Retrieves the delta of network stats for the given network ifaces. Uses networkStatsBuffer
+     * as a buffer of NetworkStats objects to cycle through when computing deltas.
+     */
+    private NetworkStats getNetworkStatsDeltaLocked(String[] ifaces,
+                                                    NetworkStats[] networkStatsBuffer)
+            throws IOException {
+        if (!SystemProperties.getBoolean(NetworkManagementSocketTagger.PROP_QTAGUID_ENABLED,
+                false)) {
+            return null;
+        }
+
+        final NetworkStats stats = mNetworkStatsFactory.readNetworkStatsDetail(NetworkStats.UID_ALL,
+                ifaces, NetworkStats.TAG_NONE, networkStatsBuffer[NETWORK_STATS_NEXT]);
+        networkStatsBuffer[NETWORK_STATS_DELTA] = NetworkStats.subtract(stats,
+                networkStatsBuffer[NETWORK_STATS_LAST], null, null,
+                networkStatsBuffer[NETWORK_STATS_DELTA]);
+        networkStatsBuffer[NETWORK_STATS_NEXT] = networkStatsBuffer[NETWORK_STATS_LAST];
+        networkStatsBuffer[NETWORK_STATS_LAST] = stats;
+        return networkStatsBuffer[NETWORK_STATS_DELTA];
+    }
+
+    /**
+     * Distribute WiFi energy info and network traffic to apps.
+     * @param info The energy information from the WiFi controller.
+     */
+    public void updateWifiStateLocked(@Nullable final WifiActivityEnergyInfo info) {
+        final NetworkStats delta;
+        try {
+            delta = getNetworkStatsDeltaLocked(mWifiIfaces, mWifiNetworkStats);
+        } catch (IOException e) {
+            Slog.wtf(TAG, "Failed to get wifi network stats", e);
+            return;
+        }
+
+        if (!mOnBatteryInternal) {
+            return;
+        }
+
+        if (delta != null) {
+            final int size = delta.size();
+            for (int i = 0; i < size; i++) {
+                final NetworkStats.Entry entry = delta.getValues(i, mTmpNetworkStatsEntry);
+
+                if (DEBUG) {
+                    Slog.d(TAG, "Wifi uid " + entry.uid + ": delta rx=" + entry.rxBytes
+                            + " tx=" + entry.txBytes);
+                }
+
+                if (entry.rxBytes == 0 || entry.txBytes == 0) {
+                    continue;
+                }
+
+                final Uid u = getUidStatsLocked(mapUid(entry.uid));
+                u.noteNetworkActivityLocked(NETWORK_WIFI_RX_DATA, entry.rxBytes,
+                        entry.rxPackets);
+                u.noteNetworkActivityLocked(NETWORK_WIFI_TX_DATA, entry.txBytes,
+                        entry.txPackets);
+
+                mNetworkByteActivityCounters[NETWORK_WIFI_RX_DATA].addCountLocked(
+                        entry.rxBytes);
+                mNetworkByteActivityCounters[NETWORK_WIFI_TX_DATA].addCountLocked(
+                        entry.txBytes);
+                mNetworkPacketActivityCounters[NETWORK_WIFI_RX_DATA].addCountLocked(
+                        entry.rxPackets);
+                mNetworkPacketActivityCounters[NETWORK_WIFI_TX_DATA].addCountLocked(
+                        entry.txPackets);
+            }
+        }
+
+        if (info != null) {
+            // Update WiFi controller stats.
+            mWifiActivityCounters[CONTROLLER_RX_TIME].addCountLocked(
+                    info.getControllerRxTimeMillis());
+            mWifiActivityCounters[CONTROLLER_TX_TIME].addCountLocked(
+                    info.getControllerTxTimeMillis());
+            mWifiActivityCounters[CONTROLLER_IDLE_TIME].addCountLocked(
+                    info.getControllerIdleTimeMillis());
+            mWifiActivityCounters[CONTROLLER_ENERGY].addCountLocked(
+                    info.getControllerEnergyUsed());
+        }
+    }
+
+    /**
+     * Distribute Cell radio energy info and network traffic to apps.
+     */
+    public void updateMobileRadioStateLocked(long elapsedRealtimeMs) {
+        final NetworkStats delta;
+
+        try {
+            delta = getNetworkStatsDeltaLocked(mMobileIfaces, mMobileNetworkStats);
+        } catch (IOException e) {
+            Slog.wtf(TAG, "Failed to get mobile network stats", e);
+            return;
+        }
+
+        if (delta == null || !mOnBatteryInternal) {
+            return;
+        }
+
+        long radioTime = mMobileRadioActivePerAppTimer.checkpointRunningLocked(elapsedRealtimeMs);
+        long totalPackets = delta.getTotalPackets();
+
+        final int size = delta.size();
+        for (int i = 0; i < size; i++) {
+            final NetworkStats.Entry entry = delta.getValues(i, mTmpNetworkStatsEntry);
+
+            if (entry.rxBytes == 0 || entry.txBytes == 0) continue;
+
+            final Uid u = getUidStatsLocked(mapUid(entry.uid));
+            u.noteNetworkActivityLocked(NETWORK_MOBILE_RX_DATA, entry.rxBytes,
+                    entry.rxPackets);
+            u.noteNetworkActivityLocked(NETWORK_MOBILE_TX_DATA, entry.txBytes,
+                    entry.txPackets);
+
+            if (radioTime > 0) {
+                // Distribute total radio active time in to this app.
+                long appPackets = entry.rxPackets + entry.txPackets;
+                long appRadioTime = (radioTime*appPackets)/totalPackets;
+                u.noteMobileRadioActiveTimeLocked(appRadioTime);
+                // Remove this app from the totals, so that we don't lose any time
+                // due to rounding.
+                radioTime -= appRadioTime;
+                totalPackets -= appPackets;
+            }
+
+            mNetworkByteActivityCounters[NETWORK_MOBILE_RX_DATA].addCountLocked(
+                    entry.rxBytes);
+            mNetworkByteActivityCounters[NETWORK_MOBILE_TX_DATA].addCountLocked(
+                    entry.txBytes);
+            mNetworkPacketActivityCounters[NETWORK_MOBILE_RX_DATA].addCountLocked(
+                    entry.rxPackets);
+            mNetworkPacketActivityCounters[NETWORK_MOBILE_TX_DATA].addCountLocked(
+                    entry.txPackets);
+        }
+
+        if (radioTime > 0) {
+            // Whoops, there is some radio time we can't blame on an app!
+            mMobileRadioActiveUnknownTime.addCountLocked(radioTime);
+            mMobileRadioActiveUnknownCount.addCountLocked(1);
+        }
+    }
+
+    /**
+     * Distribute Bluetooth energy info and network traffic to apps.
+     * @param info The energy information from the bluetooth controller.
+     */
+    public void updateBluetoothStateLocked(@Nullable final BluetoothActivityEnergyInfo info) {
+        if (info != null && mOnBatteryInternal) {
+            mBluetoothActivityCounters[CONTROLLER_RX_TIME].addCountLocked(
+                    info.getControllerRxTimeMillis());
+            mBluetoothActivityCounters[CONTROLLER_TX_TIME].addCountLocked(
+                    info.getControllerTxTimeMillis());
+            mBluetoothActivityCounters[CONTROLLER_IDLE_TIME].addCountLocked(
+                    info.getControllerIdleTimeMillis());
+            mBluetoothActivityCounters[CONTROLLER_ENERGY].addCountLocked(
+                    info.getControllerEnergyUsed());
+        }
+    }
+
+    /**
+     * Read and distribute kernel wake lock use across apps.
+     */
+    public void updateKernelWakelocksLocked() {
+        final KernelWakelockStats wakelockStats = mKernelWakelockReader.readKernelWakelockStats(
+                mTmpWakelockStats);
+        if (wakelockStats == null) {
+            // Not crashing might make board bringup easier.
+            Slog.w(TAG, "Couldn't get kernel wake lock stats");
+            return;
+        }
+
+        for (Map.Entry<String, KernelWakelockStats.Entry> ent : wakelockStats.entrySet()) {
+            String name = ent.getKey();
+            KernelWakelockStats.Entry kws = ent.getValue();
+
+            SamplingTimer kwlt = mKernelWakelockStats.get(name);
+            if (kwlt == null) {
+                kwlt = new SamplingTimer(mOnBatteryScreenOffTimeBase,
+                        true /* track reported val */);
+                mKernelWakelockStats.put(name, kwlt);
+            }
+            kwlt.updateCurrentReportedCount(kws.mCount);
+            kwlt.updateCurrentReportedTotalTime(kws.mTotalTime);
+            kwlt.setUpdateVersion(kws.mVersion);
+        }
+
+        if (wakelockStats.size() != mKernelWakelockStats.size()) {
+            // Set timers to stale if they didn't appear in /proc/wakelocks this time.
+            for (Map.Entry<String, SamplingTimer> ent : mKernelWakelockStats.entrySet()) {
+                SamplingTimer st = ent.getValue();
+                if (st.getUpdateVersion() != wakelockStats.kernelWakelockVersion) {
+                    st.setStale();
+                }
+            }
         }
     }
 
@@ -7647,340 +7691,132 @@ public final class BatteryStatsImpl extends BatteryStats {
         }
     }
 
+    private void scheduleSyncExternalStatsLocked() {
+        if (mExternalSync != null) {
+            mExternalSync.scheduleSync();
+        }
+    }
+
     // This should probably be exposed in the API, though it's not critical
-    private static final int BATTERY_PLUGGED_NONE = 0;
+    public static final int BATTERY_PLUGGED_NONE = 0;
 
-    public void setBatteryState(int status, int health, int plugType, int level,
+    public void setBatteryStateLocked(int status, int health, int plugType, int level,
             int temp, int volt) {
-        synchronized(this) {
-            final boolean onBattery = plugType == BATTERY_PLUGGED_NONE;
-            final long uptime = SystemClock.uptimeMillis();
-            final long elapsedRealtime = SystemClock.elapsedRealtime();
-            if (!mHaveBatteryLevel) {
-                mHaveBatteryLevel = true;
-                // We start out assuming that the device is plugged in (not
-                // on battery).  If our first report is now that we are indeed
-                // plugged in, then twiddle our state to correctly reflect that
-                // since we won't be going through the full setOnBattery().
-                if (onBattery == mOnBattery) {
-                    if (onBattery) {
-                        mHistoryCur.states &= ~HistoryItem.STATE_BATTERY_PLUGGED_FLAG;
-                    } else {
-                        mHistoryCur.states |= HistoryItem.STATE_BATTERY_PLUGGED_FLAG;
-                    }
-                }
-                mHistoryCur.batteryStatus = (byte)status;
-                mHistoryCur.batteryLevel = (byte)level;
-                mMaxChargeStepLevel = mMinDischargeStepLevel =
-                        mLastChargeStepLevel = mLastDischargeStepLevel = level;
-            } else if (mCurrentBatteryLevel != level || mOnBattery != onBattery) {
-                recordDailyStatsIfNeededLocked(level >= 100 && onBattery);
-            }
-            int oldStatus = mHistoryCur.batteryStatus;
-            if (onBattery) {
-                mDischargeCurrentLevel = level;
-                if (!mRecordingHistory) {
-                    mRecordingHistory = true;
-                    startRecordingHistory(elapsedRealtime, uptime, true);
-                }
-            } else if (level < 96) {
-                if (!mRecordingHistory) {
-                    mRecordingHistory = true;
-                    startRecordingHistory(elapsedRealtime, uptime, true);
-                }
-            }
-            mCurrentBatteryLevel = level;
-            if (mDischargePlugLevel < 0) {
-                mDischargePlugLevel = level;
-            }
-            if (onBattery != mOnBattery) {
-                mHistoryCur.batteryLevel = (byte)level;
-                mHistoryCur.batteryStatus = (byte)status;
-                mHistoryCur.batteryHealth = (byte)health;
-                mHistoryCur.batteryPlugType = (byte)plugType;
-                mHistoryCur.batteryTemperature = (short)temp;
-                mHistoryCur.batteryVoltage = (char)volt;
-                setOnBatteryLocked(elapsedRealtime, uptime, onBattery, oldStatus, level);
-            } else {
-                boolean changed = false;
-                if (mHistoryCur.batteryLevel != level) {
-                    mHistoryCur.batteryLevel = (byte)level;
-                    changed = true;
-                }
-                if (mHistoryCur.batteryStatus != status) {
-                    mHistoryCur.batteryStatus = (byte)status;
-                    changed = true;
-                }
-                if (mHistoryCur.batteryHealth != health) {
-                    mHistoryCur.batteryHealth = (byte)health;
-                    changed = true;
-                }
-                if (mHistoryCur.batteryPlugType != plugType) {
-                    mHistoryCur.batteryPlugType = (byte)plugType;
-                    changed = true;
-                }
-                if (temp >= (mHistoryCur.batteryTemperature+10)
-                        || temp <= (mHistoryCur.batteryTemperature-10)) {
-                    mHistoryCur.batteryTemperature = (short)temp;
-                    changed = true;
-                }
-                if (volt > (mHistoryCur.batteryVoltage+20)
-                        || volt < (mHistoryCur.batteryVoltage-20)) {
-                    mHistoryCur.batteryVoltage = (char)volt;
-                    changed = true;
-                }
-                if (changed) {
-                    addHistoryRecordLocked(elapsedRealtime, uptime);
-                }
-                long modeBits = (((long)mInitStepMode) << STEP_LEVEL_INITIAL_MODE_SHIFT)
-                        | (((long)mModStepMode) << STEP_LEVEL_MODIFIED_MODE_SHIFT)
-                        | (((long)(level&0xff)) << STEP_LEVEL_LEVEL_SHIFT);
+        final boolean onBattery = plugType == BATTERY_PLUGGED_NONE;
+        final long uptime = SystemClock.uptimeMillis();
+        final long elapsedRealtime = SystemClock.elapsedRealtime();
+        if (!mHaveBatteryLevel) {
+            mHaveBatteryLevel = true;
+            // We start out assuming that the device is plugged in (not
+            // on battery).  If our first report is now that we are indeed
+            // plugged in, then twiddle our state to correctly reflect that
+            // since we won't be going through the full setOnBattery().
+            if (onBattery == mOnBattery) {
                 if (onBattery) {
-                    if (mLastDischargeStepLevel != level && mMinDischargeStepLevel > level) {
-                        mDischargeStepTracker.addLevelSteps(mLastDischargeStepLevel - level,
-                                modeBits, elapsedRealtime);
-                        mDailyDischargeStepTracker.addLevelSteps(mLastDischargeStepLevel - level,
-                                modeBits, elapsedRealtime);
-                        mLastDischargeStepLevel = level;
-                        mMinDischargeStepLevel = level;
-                        mInitStepMode = mCurStepMode;
-                        mModStepMode = 0;
-                    }
+                    mHistoryCur.states &= ~HistoryItem.STATE_BATTERY_PLUGGED_FLAG;
                 } else {
-                    if (mLastChargeStepLevel != level && mMaxChargeStepLevel < level) {
-                        mChargeStepTracker.addLevelSteps(level - mLastChargeStepLevel,
-                                modeBits, elapsedRealtime);
-                        mDailyChargeStepTracker.addLevelSteps(level - mLastChargeStepLevel,
-                                modeBits, elapsedRealtime);
-                        mLastChargeStepLevel = level;
-                        mMaxChargeStepLevel = level;
-                        mInitStepMode = mCurStepMode;
-                        mModStepMode = 0;
-                    }
+                    mHistoryCur.states |= HistoryItem.STATE_BATTERY_PLUGGED_FLAG;
                 }
             }
-            if (!onBattery && status == BatteryManager.BATTERY_STATUS_FULL) {
-                // We don't record history while we are plugged in and fully charged.
-                // The next time we are unplugged, history will be cleared.
-                mRecordingHistory = DEBUG;
+            mHistoryCur.batteryStatus = (byte)status;
+            mHistoryCur.batteryLevel = (byte)level;
+            mMaxChargeStepLevel = mMinDischargeStepLevel =
+                    mLastChargeStepLevel = mLastDischargeStepLevel = level;
+        } else if (mCurrentBatteryLevel != level || mOnBattery != onBattery) {
+            recordDailyStatsIfNeededLocked(level >= 100 && onBattery);
+        }
+        int oldStatus = mHistoryCur.batteryStatus;
+        if (onBattery) {
+            mDischargeCurrentLevel = level;
+            if (!mRecordingHistory) {
+                mRecordingHistory = true;
+                startRecordingHistory(elapsedRealtime, uptime, true);
+            }
+        } else if (level < 96) {
+            if (!mRecordingHistory) {
+                mRecordingHistory = true;
+                startRecordingHistory(elapsedRealtime, uptime, true);
             }
         }
-    }
-
-    public void updateKernelWakelocksLocked() {
-        Map<String, KernelWakelockStats> m = readKernelWakelockStats();
-
-        if (m == null) {
-            // Not crashing might make board bringup easier.
-            Slog.w(TAG, "Couldn't get kernel wake lock stats");
-            return;
+        mCurrentBatteryLevel = level;
+        if (mDischargePlugLevel < 0) {
+            mDischargePlugLevel = level;
         }
+        if (onBattery != mOnBattery) {
+            mHistoryCur.batteryLevel = (byte)level;
+            mHistoryCur.batteryStatus = (byte)status;
+            mHistoryCur.batteryHealth = (byte)health;
+            mHistoryCur.batteryPlugType = (byte)plugType;
+            mHistoryCur.batteryTemperature = (short)temp;
+            mHistoryCur.batteryVoltage = (char)volt;
+            setOnBatteryLocked(elapsedRealtime, uptime, onBattery, oldStatus, level);
+        } else {
+            boolean changed = false;
+            if (mHistoryCur.batteryLevel != level) {
+                mHistoryCur.batteryLevel = (byte)level;
+                changed = true;
 
-        for (Map.Entry<String, KernelWakelockStats> ent : m.entrySet()) {
-            String name = ent.getKey();
-            KernelWakelockStats kws = ent.getValue();
-
-            SamplingTimer kwlt = mKernelWakelockStats.get(name);
-            if (kwlt == null) {
-                kwlt = new SamplingTimer(mOnBatteryScreenOffTimeBase,
-                        true /* track reported val */);
-                mKernelWakelockStats.put(name, kwlt);
+                // TODO(adamlesinski): Schedule the creation of a HistoryStepDetails record
+                // which will pull external stats.
+                scheduleSyncExternalStatsLocked();
             }
-            kwlt.updateCurrentReportedCount(kws.mCount);
-            kwlt.updateCurrentReportedTotalTime(kws.mTotalTime);
-            kwlt.setUpdateVersion(sKernelWakelockUpdateVersion);
-        }
-
-        if (m.size() != mKernelWakelockStats.size()) {
-            // Set timers to stale if they didn't appear in /proc/wakelocks this time.
-            for (Map.Entry<String, SamplingTimer> ent : mKernelWakelockStats.entrySet()) {
-                SamplingTimer st = ent.getValue();
-                if (st.getUpdateVersion() != sKernelWakelockUpdateVersion) {
-                    st.setStale();
+            if (mHistoryCur.batteryStatus != status) {
+                mHistoryCur.batteryStatus = (byte)status;
+                changed = true;
+            }
+            if (mHistoryCur.batteryHealth != health) {
+                mHistoryCur.batteryHealth = (byte)health;
+                changed = true;
+            }
+            if (mHistoryCur.batteryPlugType != plugType) {
+                mHistoryCur.batteryPlugType = (byte)plugType;
+                changed = true;
+            }
+            if (temp >= (mHistoryCur.batteryTemperature+10)
+                    || temp <= (mHistoryCur.batteryTemperature-10)) {
+                mHistoryCur.batteryTemperature = (short)temp;
+                changed = true;
+            }
+            if (volt > (mHistoryCur.batteryVoltage+20)
+                    || volt < (mHistoryCur.batteryVoltage-20)) {
+                mHistoryCur.batteryVoltage = (char)volt;
+                changed = true;
+            }
+            if (changed) {
+                addHistoryRecordLocked(elapsedRealtime, uptime);
+            }
+            long modeBits = (((long)mInitStepMode) << STEP_LEVEL_INITIAL_MODE_SHIFT)
+                    | (((long)mModStepMode) << STEP_LEVEL_MODIFIED_MODE_SHIFT)
+                    | (((long)(level&0xff)) << STEP_LEVEL_LEVEL_SHIFT);
+            if (onBattery) {
+                if (mLastDischargeStepLevel != level && mMinDischargeStepLevel > level) {
+                    mDischargeStepTracker.addLevelSteps(mLastDischargeStepLevel - level,
+                            modeBits, elapsedRealtime);
+                    mDailyDischargeStepTracker.addLevelSteps(mLastDischargeStepLevel - level,
+                            modeBits, elapsedRealtime);
+                    mLastDischargeStepLevel = level;
+                    mMinDischargeStepLevel = level;
+                    mInitStepMode = mCurStepMode;
+                    mModStepMode = 0;
                 }
-            }
-        }
-    }
-
-    static final int NET_UPDATE_MOBILE = 1<<0;
-    static final int NET_UPDATE_WIFI = 1<<1;
-    static final int NET_UPDATE_ALL = 0xffff;
-
-    private void updateNetworkActivityLocked(int which, long elapsedRealtimeMs) {
-        if (!SystemProperties.getBoolean(PROP_QTAGUID_ENABLED, false)) return;
-
-        if ((which&NET_UPDATE_MOBILE) != 0 && mMobileIfaces.length > 0) {
-            final NetworkStats snapshot;
-            final NetworkStats last = mCurMobileSnapshot;
-            try {
-                snapshot = mNetworkStatsFactory.readNetworkStatsDetail(UID_ALL,
-                        mMobileIfaces, NetworkStats.TAG_NONE, mLastMobileSnapshot);
-            } catch (IOException e) {
-                Log.wtf(TAG, "Failed to read mobile network stats", e);
-                return;
-            }
-
-            mCurMobileSnapshot = snapshot;
-            mLastMobileSnapshot = last;
-
-            if (mOnBatteryInternal) {
-                final NetworkStats delta = NetworkStats.subtract(snapshot, last,
-                        null, null, mTmpNetworkStats);
-                mTmpNetworkStats = delta;
-
-                long radioTime = mMobileRadioActivePerAppTimer.checkpointRunningLocked(
-                        elapsedRealtimeMs);
-                long totalPackets = delta.getTotalPackets();
-
-                final int size = delta.size();
-                for (int i = 0; i < size; i++) {
-                    final NetworkStats.Entry entry = delta.getValues(i, mTmpNetworkStatsEntry);
-
-                    if (entry.rxBytes == 0 || entry.txBytes == 0) continue;
-
-                    final Uid u = getUidStatsLocked(mapUid(entry.uid));
-                    u.noteNetworkActivityLocked(NETWORK_MOBILE_RX_DATA, entry.rxBytes,
-                            entry.rxPackets);
-                    u.noteNetworkActivityLocked(NETWORK_MOBILE_TX_DATA, entry.txBytes,
-                            entry.txPackets);
-
-                    if (radioTime > 0) {
-                        // Distribute total radio active time in to this app.
-                        long appPackets = entry.rxPackets + entry.txPackets;
-                        long appRadioTime = (radioTime*appPackets)/totalPackets;
-                        u.noteMobileRadioActiveTimeLocked(appRadioTime);
-                        // Remove this app from the totals, so that we don't lose any time
-                        // due to rounding.
-                        radioTime -= appRadioTime;
-                        totalPackets -= appPackets;
-                    }
-
-                    mNetworkByteActivityCounters[NETWORK_MOBILE_RX_DATA].addCountLocked(
-                            entry.rxBytes);
-                    mNetworkByteActivityCounters[NETWORK_MOBILE_TX_DATA].addCountLocked(
-                            entry.txBytes);
-                    mNetworkPacketActivityCounters[NETWORK_MOBILE_RX_DATA].addCountLocked(
-                            entry.rxPackets);
-                    mNetworkPacketActivityCounters[NETWORK_MOBILE_TX_DATA].addCountLocked(
-                            entry.txPackets);
-                }
-
-                if (radioTime > 0) {
-                    // Whoops, there is some radio time we can't blame on an app!
-                    mMobileRadioActiveUnknownTime.addCountLocked(radioTime);
-                    mMobileRadioActiveUnknownCount.addCountLocked(1);
+            } else {
+                if (mLastChargeStepLevel != level && mMaxChargeStepLevel < level) {
+                    mChargeStepTracker.addLevelSteps(level - mLastChargeStepLevel,
+                            modeBits, elapsedRealtime);
+                    mDailyChargeStepTracker.addLevelSteps(level - mLastChargeStepLevel,
+                            modeBits, elapsedRealtime);
+                    mLastChargeStepLevel = level;
+                    mMaxChargeStepLevel = level;
+                    mInitStepMode = mCurStepMode;
+                    mModStepMode = 0;
                 }
             }
         }
-
-        if ((which&NET_UPDATE_WIFI) != 0 && mWifiIfaces.length > 0) {
-            final NetworkStats snapshot;
-            final NetworkStats last = mCurWifiSnapshot;
-            try {
-                snapshot = mNetworkStatsFactory.readNetworkStatsDetail(UID_ALL,
-                        mWifiIfaces, NetworkStats.TAG_NONE, mLastWifiSnapshot);
-            } catch (IOException e) {
-                Log.wtf(TAG, "Failed to read wifi network stats", e);
-                return;
-            }
-
-            mCurWifiSnapshot = snapshot;
-            mLastWifiSnapshot = last;
-
-            if (mOnBatteryInternal) {
-                final NetworkStats delta = NetworkStats.subtract(snapshot, last,
-                        null, null, mTmpNetworkStats);
-                mTmpNetworkStats = delta;
-
-                final int size = delta.size();
-                for (int i = 0; i < size; i++) {
-                    final NetworkStats.Entry entry = delta.getValues(i, mTmpNetworkStatsEntry);
-
-                    if (DEBUG) {
-                        final NetworkStats.Entry cur = snapshot.getValues(i, null);
-                        Slog.d(TAG, "Wifi uid " + entry.uid + ": delta rx=" + entry.rxBytes
-                                + " tx=" + entry.txBytes + ", cur rx=" + cur.rxBytes
-                                + " tx=" + cur.txBytes);
-                    }
-
-                    if (entry.rxBytes == 0 || entry.txBytes == 0) continue;
-
-                    final Uid u = getUidStatsLocked(mapUid(entry.uid));
-                    u.noteNetworkActivityLocked(NETWORK_WIFI_RX_DATA, entry.rxBytes,
-                            entry.rxPackets);
-                    u.noteNetworkActivityLocked(NETWORK_WIFI_TX_DATA, entry.txBytes,
-                            entry.txPackets);
-
-                    mNetworkByteActivityCounters[NETWORK_WIFI_RX_DATA].addCountLocked(
-                            entry.rxBytes);
-                    mNetworkByteActivityCounters[NETWORK_WIFI_TX_DATA].addCountLocked(
-                            entry.txBytes);
-                    mNetworkPacketActivityCounters[NETWORK_WIFI_RX_DATA].addCountLocked(
-                            entry.rxPackets);
-                    mNetworkPacketActivityCounters[NETWORK_WIFI_TX_DATA].addCountLocked(
-                            entry.txPackets);
-                }
-            }
+        if (!onBattery && status == BatteryManager.BATTERY_STATUS_FULL) {
+            // We don't record history while we are plugged in and fully charged.
+            // The next time we are unplugged, history will be cleared.
+            mRecordingHistory = DEBUG;
         }
-    }
-
-    private void updateBluetoothControllerActivityLocked() {
-        BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
-        if (adapter == null) {
-            return;
-        }
-
-        // We read the data even if we are not on battery. Each read clears
-        // the previous data, so we must always read to make sure the
-        // data is for the current interval.
-        BluetoothActivityEnergyInfo info = adapter.getControllerActivityEnergyInfo(
-                BluetoothAdapter.ACTIVITY_ENERGY_INFO_REFRESHED);
-        if (info == null || !info.isValid() || !mOnBatteryInternal) {
-            // Bad info or we are not on battery.
-            return;
-        }
-
-        mBluetoothActivityCounters[CONTROLLER_RX_TIME].addCountLocked(
-                info.getControllerRxTimeMillis());
-        mBluetoothActivityCounters[CONTROLLER_TX_TIME].addCountLocked(
-                info.getControllerTxTimeMillis());
-        mBluetoothActivityCounters[CONTROLLER_IDLE_TIME].addCountLocked(
-                info.getControllerIdleTimeMillis());
-        mBluetoothActivityCounters[CONTROLLER_ENERGY].addCountLocked(
-                info.getControllerEnergyUsed());
-    }
-
-    private void updateWifiControllerActivityLocked() {
-        IWifiManager wifiManager = IWifiManager.Stub.asInterface(
-                ServiceManager.getService(Context.WIFI_SERVICE));
-        if (wifiManager == null) {
-            return;
-        }
-
-        WifiActivityEnergyInfo info;
-        try {
-            // We read the data even if we are not on battery. Each read clears
-            // the previous data, so we must always read to make sure the
-            // data is for the current interval.
-            info = wifiManager.reportActivityInfo();
-        } catch (RemoteException e) {
-            // Nothing to report, WiFi is dead.
-            return;
-        }
-
-        if (info == null || !info.isValid() || !mOnBatteryInternal) {
-            // Bad info or we are not on battery.
-            return;
-        }
-
-        mWifiActivityCounters[CONTROLLER_RX_TIME].addCountLocked(
-                info.getControllerRxTimeMillis());
-        mWifiActivityCounters[CONTROLLER_TX_TIME].addCountLocked(
-                info.getControllerTxTimeMillis());
-        mWifiActivityCounters[CONTROLLER_IDLE_TIME].addCountLocked(
-                info.getControllerIdleTimeMillis());
-        mWifiActivityCounters[CONTROLLER_ENERGY].addCountLocked(
-                info.getControllerEnergyUsed());
     }
 
     public long getAwakeTimeBattery() {

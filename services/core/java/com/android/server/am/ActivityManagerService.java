@@ -2188,7 +2188,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         systemDir.mkdirs();
         mBatteryStatsService = new BatteryStatsService(systemDir, mHandler);
         mBatteryStatsService.getActiveStatistics().readLocked();
-        mBatteryStatsService.getActiveStatistics().writeAsyncLocked();
+        mBatteryStatsService.scheduleWriteToDisk();
         mOnBattery = DEBUG_POWER ? true
                 : mBatteryStatsService.getActiveStatistics().getIsOnBattery();
         mBatteryStatsService.getActiveStatistics().setCallback(this);
@@ -2432,7 +2432,7 @@ public final class ActivityManagerService extends ActivityManagerNative
 
                 if (mLastWriteTime < (now-BATTERY_STATS_TIME)) {
                     mLastWriteTime = now;
-                    mBatteryStatsService.getActiveStatistics().writeAsyncLocked();
+                    mBatteryStatsService.scheduleWriteToDisk();
                 }
             }
         }
