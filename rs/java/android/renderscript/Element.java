@@ -114,7 +114,8 @@ public class Element extends BaseObj {
      * MATRIX the three matrix types contain FLOAT_32 elements and are treated
      * as 32 bits for alignment purposes.
      *
-     * RS_* objects.  32 bit opaque handles.
+     * RS_* objects:  opaque handles with implementation dependent
+     * sizes.
      */
     public enum DataType {
         NONE (0, 0),
