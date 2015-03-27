@@ -248,7 +248,7 @@ public class PackageManagerService extends IPackageManager.Stub {
     private static final boolean DEBUG_DEXOPT = false;
     private static final boolean DEBUG_ABI_SELECTION = false;
 
-    private static final boolean RUNTIME_PERMISSIONS_ENABLED =
+    static final boolean RUNTIME_PERMISSIONS_ENABLED =
             SystemProperties.getInt("ro.runtime.permissions.enabled", 0) == 1;
 
     private static final int RADIO_UID = Process.PHONE_UID;
@@ -1811,7 +1811,26 @@ public class PackageManagerService extends IPackageManager.Stub {
                     + mSettings.mInternalSdkPlatform + " to " + mSdkVersion
                     + "; regranting permissions for internal storage");
             mSettings.mInternalSdkPlatform = mSdkVersion;
-            
+
+
+            // We keep track for which users we granted permissions to be able
+            // to grant runtime permissions to system apps for newly appeared
+            // users. If we supported runtime permissions during the previous
+            // boot, then we already granted permissions for all device users.
+            // In such a case we set the users for which we granted permissions
+            // to avoid clobbering of runtime permissions we granted to system
+            // apps but the user revoked later.
+            if (PackageManagerService.RUNTIME_PERMISSIONS_ENABLED &&
+                    mSettings.mRuntimePermissionEnabled) {
+                final int[] userIds = UserManagerService.getInstance().getUserIds();
+                for (PackageSetting ps : mSettings.mPackages.values()) {
+                    ps.setPermissionsUpdatedForUserIds(userIds);
+                }
+                for (SharedUserSetting sus : mSettings.mSharedUsers.values()) {
+                    sus.setPermissionsUpdatedForUserIds(userIds);
+                }
+            }
+
             updatePermissionsLPw(null, null, UPDATE_PERMISSIONS_ALL
                     | (regrantPermissions
                             ? (UPDATE_PERMISSIONS_REPLACE_PKG|UPDATE_PERMISSIONS_REPLACE_ALL)
@@ -1842,7 +1861,6 @@ public class PackageManagerService extends IPackageManager.Stub {
 
             EventLog.writeEvent(EventLogTags.BOOT_PROGRESS_PMS_READY,
                     SystemClock.uptimeMillis());
-
 
             mRequiredVerifierPackage = getRequiredVerifierLPr();
         } // synchronized (mPackages)
@@ -6993,11 +7011,12 @@ public class PackageManagerService extends IPackageManager.Stub {
         final int[] currentUserIds = UserManagerService.getInstance().getUserIds();
 
         int[] upgradeUserIds = PermissionsState.USERS_NONE;
+        int[] changedRuntimePermissionUserIds = PermissionsState.USERS_NONE;
 
-        boolean changedPermission = false;
+        boolean changedInstallPermission = false;
 
         if (replace) {
-            ps.permissionsFixed = false;
+            ps.installPermissionsFixed = false;
             origPermissions = new PermissionsState(permissionsState);
             permissionsState.reset();
         }
@@ -7092,7 +7111,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             }
 
             if (grant != GRANT_DENIED) {
-                if (!isSystemApp(ps) && ps.permissionsFixed) {
+                if (!isSystemApp(ps) && ps.installPermissionsFixed) {
                     // If this is an existing, non-system package, then
                     // we can't add any new permissions to it.
                     if (!allowedSig && !origPermissions.hasInstallPermission(perm)) {
@@ -7110,7 +7129,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                         // Grant an install permission.
                         if (permissionsState.grantInstallPermission(bp) !=
                                 PermissionsState.PERMISSION_OPERATION_FAILURE) {
-                            changedPermission = true;
+                            changedInstallPermission = true;
                         }
                     } break;
 
@@ -7118,9 +7137,11 @@ public class PackageManagerService extends IPackageManager.Stub {
                         // Grant previously granted runtime permissions.
                         for (int userId : UserManagerService.getInstance().getUserIds()) {
                             if (origPermissions.hasRuntimePermission(bp.name, userId)) {
-                                if (permissionsState.grantRuntimePermission(bp, userId) !=
+                                if (permissionsState.grantRuntimePermission(bp, userId) ==
                                         PermissionsState.PERMISSION_OPERATION_FAILURE) {
-                                    changedPermission = true;
+                                    // If we cannot put the permission as it was, we have to write.
+                                    changedRuntimePermissionUserIds = ArrayUtils.appendInt(
+                                            changedRuntimePermissionUserIds, userId);
                                 }
                             }
                         }
@@ -7132,7 +7153,9 @@ public class PackageManagerService extends IPackageManager.Stub {
                         for (int userId : upgradeUserIds) {
                             if (permissionsState.grantRuntimePermission(bp, userId) !=
                                     PermissionsState.PERMISSION_OPERATION_FAILURE) {
-                                changedPermission = true;
+                                // If we granted the permission, we have to write.
+                                changedRuntimePermissionUserIds = ArrayUtils.appendInt(
+                                        changedRuntimePermissionUserIds, userId);
                             }
                         }
                     } break;
@@ -7149,7 +7172,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             } else {
                 if (permissionsState.revokeInstallPermission(bp) !=
                         PermissionsState.PERMISSION_OPERATION_FAILURE) {
-                    changedPermission = true;
+                    changedInstallPermission = true;
                     Slog.i(TAG, "Un-granting permission " + perm
                             + " from package " + pkg.packageName
                             + " (protectionLevel=" + bp.protectionLevel
@@ -7169,15 +7192,20 @@ public class PackageManagerService extends IPackageManager.Stub {
             }
         }
 
-        if ((changedPermission || replace) && !ps.permissionsFixed &&
+        if ((changedInstallPermission || replace) && !ps.installPermissionsFixed &&
                 !isSystemApp(ps) || isUpdatedSystemApp(ps)){
             // This is the first that we have heard about this package, so the
             // permissions we have now selected are fixed until explicitly
             // changed.
-            ps.permissionsFixed = true;
+            ps.installPermissionsFixed = true;
         }
 
-        ps.setPermissionsUpdatedForUserIds(currentUserIds);
+        ps.setPermissionsUpdatedForUserIds(changedRuntimePermissionUserIds);
+
+        // Persist the runtime permissions state for users with changes.
+        for (int userId : changedRuntimePermissionUserIds) {
+           mSettings.writeRuntimePermissionsForUserLPr(userId, true);
+        }
     }
 
     private boolean isNewPlatformPermissionForPackage(String perm, PackageParser.Package pkg) {

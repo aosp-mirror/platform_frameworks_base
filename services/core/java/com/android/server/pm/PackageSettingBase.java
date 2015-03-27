@@ -92,7 +92,7 @@ abstract class PackageSettingBase extends SettingBase {
 
     PackageSignatures signatures = new PackageSignatures();
 
-    boolean permissionsFixed;
+    boolean installPermissionsFixed;
 
     PackageKeySetData keySetData = new PackageKeySetData();
 
@@ -145,7 +145,7 @@ abstract class PackageSettingBase extends SettingBase {
 
         signatures = new PackageSignatures(base.signatures);
 
-        permissionsFixed = base.permissionsFixed;
+        installPermissionsFixed = base.installPermissionsFixed;
         userState.clear();
         for (int i=0; i<base.userState.size(); i++) {
             userState.put(base.userState.keyAt(i),
@@ -207,7 +207,7 @@ abstract class PackageSettingBase extends SettingBase {
         firstInstallTime = base.firstInstallTime;
         lastUpdateTime = base.lastUpdateTime;
         signatures = base.signatures;
-        permissionsFixed = base.permissionsFixed;
+        installPermissionsFixed = base.installPermissionsFixed;
         userState.clear();
         for (int i=0; i<base.userState.size(); i++) {
             userState.put(base.userState.keyAt(i), base.userState.valueAt(i));
