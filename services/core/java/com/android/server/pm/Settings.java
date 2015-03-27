@@ -175,6 +175,7 @@ final class Settings {
     private static final String ATTR_HIDDEN = "hidden";
     private static final String ATTR_INSTALLED = "inst";
     private static final String ATTR_BLOCK_UNINSTALL = "blockUninstall";
+    private static final String ATTR_RUNTIME_PERMSISSIONS_ENABLED = "runtime-permissions-enabled";
 
     private final Object mLock;
     private final Context mContext;
@@ -200,6 +201,10 @@ final class Settings {
     // used to grant newer permissions one time during a system upgrade.
     int mInternalSdkPlatform;
     int mExternalSdkPlatform;
+
+
+    // Whether runtime permissions are enabled.
+    boolean mRuntimePermissionEnabled;
 
     /**
      * The current database version for apps on internal storage. This is
@@ -1645,6 +1650,8 @@ final class Settings {
             serializer.attribute(null, "internal", Integer.toString(mInternalSdkPlatform));
             serializer.attribute(null, "external", Integer.toString(mExternalSdkPlatform));
             serializer.attribute(null, "fingerprint", mFingerprint);
+            serializer.attribute(null, ATTR_RUNTIME_PERMSISSIONS_ENABLED,
+                    String.valueOf(PackageManagerService.RUNTIME_PERMISSIONS_ENABLED));
             serializer.endTag(null, "last-platform-version");
 
             serializer.startTag(null, "database-version");
@@ -2141,6 +2148,8 @@ final class Settings {
                     } catch (NumberFormatException e) {
                     }
                     mFingerprint = parser.getAttributeValue(null, "fingerprint");
+                    mRuntimePermissionEnabled = XmlUtils.readBooleanAttribute(parser,
+                            ATTR_RUNTIME_PERMSISSIONS_ENABLED);
                 } else if (tagName.equals("database-version")) {
                     mInternalDatabaseVersion = mExternalDatabaseVersion = 0;
                     try {
@@ -2252,17 +2261,6 @@ final class Settings {
 
         mReadMessages.append("Read completed successfully: " + mPackages.size() + " packages, "
                 + mSharedUsers.size() + " shared uids\n");
-
-        // The persisted state we just read was generated after a permissions
-        // update for all users, update each package and shared user setting
-        // with the device users ids to start from were we left off.
-        final int[] userIds = UserManagerService.getInstance().getUserIds();
-        for (PackageSetting ps : mPackages.values()) {
-            ps.setPermissionsUpdatedForUserIds(userIds);
-        }
-        for (SharedUserSetting sus : mSharedUsers.values()) {
-            sus.setPermissionsUpdatedForUserIds(userIds);
-        }
 
         return true;
     }
@@ -3001,7 +2999,7 @@ final class Settings {
                 } else if (tagName.equals(TAG_PERMISSIONS)) {
                     readInstallPermissionsLPr(parser,
                             packageSetting.getPermissionsState());
-                    packageSetting.permissionsFixed = true;
+                    packageSetting.installPermissionsFixed = true;
                 } else if (tagName.equals("proper-signing-keyset")) {
                     long id = Long.parseLong(parser.getAttributeValue(null, "identifier"));
                     packageSetting.keySetData.setProperSigningKeySet(id);
@@ -3574,7 +3572,8 @@ final class Settings {
                     pw.println(ps.installerPackageName);
         }
         pw.print(prefix); pw.print("  signatures="); pw.println(ps.signatures);
-        pw.print(prefix); pw.print("  permissionsFixed="); pw.print(ps.permissionsFixed);
+        pw.print(prefix); pw.print("  installPermissionsFixed=");
+                pw.print(ps.installPermissionsFixed);
                 pw.print(" installStatus="); pw.println(ps.installStatus);
         pw.print(prefix); pw.print("  pkgFlags="); printFlags(pw, ps.pkgFlags, FLAG_DUMP_SPEC);
                 pw.println();
