@@ -286,11 +286,14 @@ interface IBackupManager {
      * Notify the backup manager that a BackupAgent has completed the operation
      * corresponding to the given token.
      *
-     * @param token The transaction token passed to a BackupAgent's doBackup() or
-     *        doRestore() method.
+     * @param token The transaction token passed to the BackupAgent method being
+     *        invoked.
+     * @param result In the case of a full backup measure operation, the estimated
+     *        total file size that would result from the operation. Unused in all other
+     *        cases.
      * {@hide}
      */
-    void opComplete(int token);
+    void opComplete(int token, long result);
 
     /**
      * Make the device's backup and restore machinery (in)active.  When it is inactive,

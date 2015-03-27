@@ -238,6 +238,7 @@ interface IBackupTransport {
 
     long requestFullBackupTime();
     int performFullBackup(in PackageInfo targetPackage, in ParcelFileDescriptor socket);
+    int checkFullBackupSize(long size);
     int sendBackupData(int numBytes);
     void cancelFullBackup();
 

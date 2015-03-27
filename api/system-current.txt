@@ -5910,6 +5910,7 @@ package android.app.backup {
     ctor public BackupTransport();
     method public int abortFullRestore();
     method public void cancelFullBackup();
+    method public int checkFullBackupSize(long);
     method public int clearBackupData(android.content.pm.PackageInfo);
     method public android.content.Intent configurationIntent();
     method public java.lang.String currentDestinationString();

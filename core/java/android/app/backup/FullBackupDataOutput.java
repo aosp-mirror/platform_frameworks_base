@@ -9,7 +9,14 @@ import android.os.ParcelFileDescriptor;
  */
 public class FullBackupDataOutput {
     // Currently a name-scoping shim around BackupDataOutput
-    private BackupDataOutput mData;
+    private final BackupDataOutput mData;
+    private long mSize;
+
+    /** @hide - used only in measure operation */
+    public FullBackupDataOutput() {
+        mData = null;
+        mSize = 0;
+    }
 
     /** @hide */
     public FullBackupDataOutput(ParcelFileDescriptor fd) {
@@ -18,4 +25,14 @@ public class FullBackupDataOutput {
 
     /** @hide */
     public BackupDataOutput getData() { return mData; }
+
+    /** @hide - used for measurement pass */
+    public void addSize(long size) {
+        if (size > 0) {
+            mSize += size;
+        }
+    }
+
+    /** @hide - used for measurement pass */
+    public long getSize() { return mSize; }
 }

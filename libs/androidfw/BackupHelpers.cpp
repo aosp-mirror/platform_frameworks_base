@@ -478,7 +478,8 @@ void send_tarfile_chunk(BackupDataWriter* writer, const char* buffer, size_t siz
 }
 
 int write_tarfile(const String8& packageName, const String8& domain,
-        const String8& rootpath, const String8& filepath, BackupDataWriter* writer)
+        const String8& rootpath, const String8& filepath, off_t* outSize,
+        BackupDataWriter* writer)
 {
     // In the output stream everything is stored relative to the root
     const char* relstart = filepath.string() + rootpath.length();
@@ -488,6 +489,7 @@ int write_tarfile(const String8& packageName, const String8& domain,
     // If relpath is empty, it means this is the top of one of the standard named
     // domain directories, so we should just skip it
     if (relpath.length() == 0) {
+        *outSize = 0;
         return 0;
     }
 
@@ -517,11 +519,24 @@ int write_tarfile(const String8& packageName, const String8& domain,
         return err;
     }
 
+    // very large files need a pax extended size header
+    if (s.st_size > 077777777777LL) {
+        needExtended = true;
+    }
+
     String8 fullname;   // for pax later on
     String8 prefix;
 
     const int isdir = S_ISDIR(s.st_mode);
     if (isdir) s.st_size = 0;   // directories get no actual data in the tar stream
+
+    // Report the size, including a rough tar overhead estimation: 512 bytes for the
+    // overall tar file-block header, plus 2 blocks if using the pax extended format,
+    // plus the raw content size rounded up to a multiple of 512.
+    *outSize = 512 + (needExtended ? 1024 : 0) + 512*((s.st_size + 511)/512);
+
+    // Measure case: we've returned the size; now return without moving data
+    if (!writer) return 0;
 
     // !!! TODO: use mmap when possible to avoid churning the buffer cache
     // !!! TODO: this will break with symlinks; need to use readlink(2)
@@ -560,10 +575,6 @@ int write_tarfile(const String8& packageName, const String8& domain,
     snprintf(buf + 116, 8, "0%lo", (unsigned long)s.st_gid);
 
     // [ 124 :  12 ] file size in bytes
-    if (s.st_size > 077777777777LL) {
-        // very large files need a pax extended size header
-        needExtended = true;
-    }
     snprintf(buf + 124, 12, "%011llo", (isdir) ? 0LL : s.st_size);
 
     // [ 136 :  12 ] last mod time as a UTC time_t

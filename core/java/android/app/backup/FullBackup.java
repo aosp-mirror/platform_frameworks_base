@@ -58,7 +58,7 @@ public class FullBackup {
      * @hide
      */
     static public native int backupToTar(String packageName, String domain,
-            String linkdomain, String rootpath, String path, BackupDataOutput output);
+            String linkdomain, String rootpath, String path, FullBackupDataOutput output);
 
     /**
      * Copy data from a socket to the given File location on permanent storage.  The

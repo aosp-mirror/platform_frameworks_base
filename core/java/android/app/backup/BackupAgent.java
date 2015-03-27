@@ -424,10 +424,12 @@ public abstract class BackupAgent extends ContextWrapper {
         }
 
         // And now that we know where it lives, semantically, back it up appropriately
-        Log.i(TAG, "backupFile() of " + filePath + " => domain=" + domain
+        // In the measurement case, backupToTar() updates the size in output and returns
+        // without transmitting any file data.
+        if (DEBUG) Log.i(TAG, "backupFile() of " + filePath + " => domain=" + domain
                 + " rootpath=" + rootpath);
-        FullBackup.backupToTar(getPackageName(), domain, null, rootpath, filePath,
-                output.getData());
+        
+        FullBackup.backupToTar(getPackageName(), domain, null, rootpath, filePath, output);
     }
 
     /**
@@ -477,9 +479,8 @@ public abstract class BackupAgent extends ContextWrapper {
                     continue;
                 }
 
-                // Finally, back this file up before proceeding
-                FullBackup.backupToTar(packageName, domain, null, rootPath, filePath,
-                        output.getData());
+                // Finally, back this file up (or measure it) before proceeding
+                FullBackup.backupToTar(packageName, domain, null, rootPath, filePath, output);
             }
         }
     }
@@ -640,7 +641,7 @@ public abstract class BackupAgent extends ContextWrapper {
 
                 Binder.restoreCallingIdentity(ident);
                 try {
-                    callbackBinder.opComplete(token);
+                    callbackBinder.opComplete(token, 0);
                 } catch (RemoteException e) {
                     // we'll time out anyway, so we're safe
                 }
@@ -670,7 +671,7 @@ public abstract class BackupAgent extends ContextWrapper {
 
                 Binder.restoreCallingIdentity(ident);
                 try {
-                    callbackBinder.opComplete(token);
+                    callbackBinder.opComplete(token, 0);
                 } catch (RemoteException e) {
                     // we'll time out anyway, so we're safe
                 }
@@ -692,10 +693,10 @@ public abstract class BackupAgent extends ContextWrapper {
             try {
                 BackupAgent.this.onFullBackup(new FullBackupDataOutput(data));
             } catch (IOException ex) {
-                Log.d(TAG, "onBackup (" + BackupAgent.this.getClass().getName() + ") threw", ex);
+                Log.d(TAG, "onFullBackup (" + BackupAgent.this.getClass().getName() + ") threw", ex);
                 throw new RuntimeException(ex);
             } catch (RuntimeException ex) {
-                Log.d(TAG, "onBackup (" + BackupAgent.this.getClass().getName() + ") threw", ex);
+                Log.d(TAG, "onFullBackup (" + BackupAgent.this.getClass().getName() + ") threw", ex);
                 throw ex;
             } finally {
                 // ... and then again after, as in the doBackup() case
@@ -713,9 +714,33 @@ public abstract class BackupAgent extends ContextWrapper {
 
                 Binder.restoreCallingIdentity(ident);
                 try {
-                    callbackBinder.opComplete(token);
+                    callbackBinder.opComplete(token, 0);
                 } catch (RemoteException e) {
                     // we'll time out anyway, so we're safe
+                }
+            }
+        }
+
+        public void doMeasureFullBackup(int token, IBackupManager callbackBinder) {
+            // Ensure that we're running with the app's normal permission level
+            final long ident = Binder.clearCallingIdentity();
+            FullBackupDataOutput measureOutput = new FullBackupDataOutput();
+
+            waitForSharedPrefs();
+            try {
+                BackupAgent.this.onFullBackup(measureOutput);
+            } catch (IOException ex) {
+                Log.d(TAG, "onFullBackup[M] (" + BackupAgent.this.getClass().getName() + ") threw", ex);
+                throw new RuntimeException(ex);
+            } catch (RuntimeException ex) {
+                Log.d(TAG, "onFullBackup[M] (" + BackupAgent.this.getClass().getName() + ") threw", ex);
+                throw ex;
+            } finally {
+                Binder.restoreCallingIdentity(ident);
+                try {
+                    callbackBinder.opComplete(token, measureOutput.getSize());
+                } catch (RemoteException e) {
+                    // timeout, so we're safe
                 }
             }
         }
@@ -728,6 +753,7 @@ public abstract class BackupAgent extends ContextWrapper {
             try {
                 BackupAgent.this.onRestoreFile(data, size, type, domain, path, mode, mtime);
             } catch (IOException e) {
+                Log.d(TAG, "onRestoreFile (" + BackupAgent.this.getClass().getName() + ") threw", e);
                 throw new RuntimeException(e);
             } finally {
                 // Ensure that any side-effect SharedPreferences writes have landed
@@ -735,7 +761,7 @@ public abstract class BackupAgent extends ContextWrapper {
 
                 Binder.restoreCallingIdentity(ident);
                 try {
-                    callbackBinder.opComplete(token);
+                    callbackBinder.opComplete(token, 0);
                 } catch (RemoteException e) {
                     // we'll time out anyway, so we're safe
                 }
@@ -747,13 +773,16 @@ public abstract class BackupAgent extends ContextWrapper {
             long ident = Binder.clearCallingIdentity();
             try {
                 BackupAgent.this.onRestoreFinished();
+            } catch (Exception e) {
+                Log.d(TAG, "onRestoreFinished (" + BackupAgent.this.getClass().getName() + ") threw", e);
+                throw e;
             } finally {
                 // Ensure that any side-effect SharedPreferences writes have landed
                 waitForSharedPrefs();
 
                 Binder.restoreCallingIdentity(ident);
                 try {
-                    callbackBinder.opComplete(token);
+                    callbackBinder.opComplete(token, 0);
                 } catch (RemoteException e) {
                     // we'll time out anyway, so we're safe
                 }

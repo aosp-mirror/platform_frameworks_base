@@ -393,6 +393,26 @@ public class BackupTransport {
     }
 
     /**
+     * Called after {@link #performFullBackup} to make sure that the transport is willing to
+     * handle a full-data backup operation of the specified size on the current package.
+     * If the transport returns anything other than TRANSPORT_OK, the package's backup
+     * operation will be skipped (and {@link #finishBackup() invoked} with no data for that
+     * package being passed to {@link #sendBackupData}.
+     *
+     * Added in MNC (API 23).
+     *
+     * @param size The estimated size of the full-data payload for this app.  This includes
+     *         manifest and archive format overhead, but is not guaranteed to be precise.
+     * @return TRANSPORT_OK if the platform is to proceed with the full-data backup,
+     *         TRANSPORT_PACKAGE_REJECTED if the proposed payload size is too large for
+     *         the transport to handle, or TRANSPORT_ERROR to indicate a fatal error
+     *         condition that means the platform cannot perform a backup at this time.
+     */
+    public int checkFullBackupSize(long size) {
+        return BackupTransport.TRANSPORT_OK;
+    }
+
+    /**
      * Tells the transport to read {@code numBytes} bytes of data from the socket file
      * descriptor provided in the {@link #performFullBackup(PackageInfo, ParcelFileDescriptor)}
      * call, and deliver those bytes to the datastore.
@@ -585,6 +605,11 @@ public class BackupTransport {
         @Override
         public int performFullBackup(PackageInfo targetPackage, ParcelFileDescriptor socket) throws RemoteException {
             return BackupTransport.this.performFullBackup(targetPackage, socket);
+        }
+
+        @Override
+        public int checkFullBackupSize(long size) {
+            return BackupTransport.this.checkFullBackupSize(size);
         }
 
         @Override

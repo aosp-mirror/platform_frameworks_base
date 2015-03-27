@@ -100,6 +100,11 @@ oneway interface IBackupAgent {
     void doFullBackup(in ParcelFileDescriptor data, int token, IBackupManager callbackBinder);
 
     /**
+     * Estimate how much data a full backup will deliver
+     */
+    void doMeasureFullBackup(int token, IBackupManager callbackBinder);
+
+    /**
      * Restore a single "file" to the application.  The file was typically obtained from
      * a full-backup dataset.  The agent reads 'size' bytes of file content
      * from the provided file descriptor.

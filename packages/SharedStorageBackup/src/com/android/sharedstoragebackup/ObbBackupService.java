@@ -17,8 +17,8 @@
 package com.android.sharedstoragebackup;
 
 import android.app.Service;
-import android.app.backup.BackupDataOutput;
 import android.app.backup.FullBackup;
+import android.app.backup.FullBackupDataOutput;
 import android.app.backup.IBackupManager;
 import android.content.Intent;
 import android.os.Environment;
@@ -67,7 +67,7 @@ public class ObbBackupService extends Service {
                                 Log.i(TAG, obbList.size() + " files to back up");
                             }
                             final String rootPath = obbDir.getCanonicalPath();
-                            final BackupDataOutput out = new BackupDataOutput(outFd);
+                            final FullBackupDataOutput out = new FullBackupDataOutput(data);
                             for (File f : obbList) {
                                 final String filePath = f.getCanonicalPath();
                                 if (DEBUG) {
@@ -92,7 +92,7 @@ public class ObbBackupService extends Service {
                 }
 
                 try {
-                    callbackBinder.opComplete(token);
+                    callbackBinder.opComplete(token, 0);
                 } catch (RemoteException e) {
                 }
             }
@@ -119,7 +119,7 @@ public class ObbBackupService extends Service {
                 Log.i(TAG, "Exception restoring OBB " + path, e);
             } finally {
                 try {
-                    callbackBinder.opComplete(token);
+                    callbackBinder.opComplete(token, 0);
                 } catch (RemoteException e) {
                 }
             }

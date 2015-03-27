@@ -17,6 +17,8 @@
 #ifndef _UTILS_BACKUP_HELPERS_H
 #define _UTILS_BACKUP_HELPERS_H
 
+#include <sys/stat.h>
+
 #include <utils/Errors.h>
 #include <utils/String8.h>
 #include <utils/KeyedVector.h>
@@ -135,7 +137,8 @@ int back_up_files(int oldSnapshotFD, BackupDataWriter* dataStream, int newSnapsh
         char const* const* files, char const* const *keys, int fileCount);
 
 int write_tarfile(const String8& packageName, const String8& domain,
-        const String8& rootPath, const String8& filePath, BackupDataWriter* outputStream);
+        const String8& rootPath, const String8& filePath, off_t* outSize,
+        BackupDataWriter* outputStream);
 
 class RestoreHelperBase
 {
