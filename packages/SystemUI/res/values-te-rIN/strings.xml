@@ -88,8 +88,7 @@
     <string name="unlock_label" msgid="8779712358041029439">"అన్‌లాక్ చేయి"</string>
     <string name="phone_label" msgid="2320074140205331708">"ఫోన్‌ను తెరువు"</string>
     <string name="camera_label" msgid="7261107956054836961">"కెమెరాను తెరువు"</string>
-    <!-- no translation found for recents_caption_resize (3517056471774958200) -->
-    <skip />
+    <string name="recents_caption_resize" msgid="3517056471774958200">"కొత్త విధి లేఅవుట్‌ను ఎంచుకోండి"</string>
     <string name="cancel" msgid="6442560571259935130">"రద్దు చేయండి"</string>
     <string name="accessibility_compatibility_zoom_button" msgid="8461115318742350699">"అనుకూలత జూమ్ బటన్."</string>
     <string name="accessibility_compatibility_zoom_example" msgid="4220687294564945780">"చిన్న స్క్రీన్ నుండి పెద్దదానికి జూమ్ చేయండి."</string>

@@ -88,8 +88,7 @@
     <string name="unlock_label" msgid="8779712358041029439">"Entsperren"</string>
     <string name="phone_label" msgid="2320074140205331708">"Telefon öffnen"</string>
     <string name="camera_label" msgid="7261107956054836961">"Kamera öffnen"</string>
-    <!-- no translation found for recents_caption_resize (3517056471774958200) -->
-    <skip />
+    <string name="recents_caption_resize" msgid="3517056471774958200">"Neues Aufgabenlayout auswählen"</string>
     <string name="cancel" msgid="6442560571259935130">"Abbrechen"</string>
     <string name="accessibility_compatibility_zoom_button" msgid="8461115318742350699">"Schaltfläche für Kompatibilitätszoom"</string>
     <string name="accessibility_compatibility_zoom_example" msgid="4220687294564945780">"Zoom auf einen größeren Bildschirm"</string>

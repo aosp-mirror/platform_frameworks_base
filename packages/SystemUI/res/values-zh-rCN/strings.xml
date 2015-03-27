@@ -88,8 +88,7 @@
     <string name="unlock_label" msgid="8779712358041029439">"解锁"</string>
     <string name="phone_label" msgid="2320074140205331708">"打开电话"</string>
     <string name="camera_label" msgid="7261107956054836961">"打开相机"</string>
-    <!-- no translation found for recents_caption_resize (3517056471774958200) -->
-    <skip />
+    <string name="recents_caption_resize" msgid="3517056471774958200">"选择新的任务布局"</string>
     <string name="cancel" msgid="6442560571259935130">"取消"</string>
     <string name="accessibility_compatibility_zoom_button" msgid="8461115318742350699">"兼容性缩放按钮。"</string>
     <string name="accessibility_compatibility_zoom_example" msgid="4220687294564945780">"将小屏幕的图片放大在较大屏幕上显示。"</string>
