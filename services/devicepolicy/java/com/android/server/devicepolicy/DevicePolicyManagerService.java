@@ -3031,7 +3031,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     }
                     PersistentDataBlockManager manager = (PersistentDataBlockManager)
                             mContext.getSystemService(Context.PERSISTENT_DATA_BLOCK_SERVICE);
-                    manager.wipe();
+                    if (manager != null) {
+                        manager.wipe();
+                    }
                 }
                 boolean wipeExtRequested = (flags & WIPE_EXTERNAL_STORAGE) != 0;
                 wipeDeviceOrUserLocked(wipeExtRequested, userHandle,
