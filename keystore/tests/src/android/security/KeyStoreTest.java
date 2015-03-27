@@ -717,7 +717,7 @@ public class KeyStoreTest extends ActivityUnitTestCase<Activity> {
                 RSAKeyGenParameterSpec.F4.longValue());
 
         KeyCharacteristics outCharacteristics = new KeyCharacteristics();
-        int result = mKeyStore.generateKey(name, args, 0, outCharacteristics);
+        int result = mKeyStore.generateKey(name, args, null, 0, outCharacteristics);
         assertEquals("generateRsaKey should succeed", KeyStore.NO_ERROR, result);
         return outCharacteristics;
     }
@@ -726,6 +726,24 @@ public class KeyStoreTest extends ActivityUnitTestCase<Activity> {
         generateRsaKey("test");
         mKeyStore.delete("test");
     }
+
+    public void testGenerateRsaWithEntropy() throws Exception {
+        byte[] entropy = new byte[] {1,2,3,4,5};
+        String name = "test";
+        KeymasterArguments args = new KeymasterArguments();
+        args.addInt(KeymasterDefs.KM_TAG_PURPOSE, KeymasterDefs.KM_PURPOSE_ENCRYPT);
+        args.addInt(KeymasterDefs.KM_TAG_PURPOSE, KeymasterDefs.KM_PURPOSE_DECRYPT);
+        args.addInt(KeymasterDefs.KM_TAG_ALGORITHM, KeymasterDefs.KM_ALGORITHM_RSA);
+        args.addInt(KeymasterDefs.KM_TAG_PADDING, KeymasterDefs.KM_PAD_NONE);
+        args.addInt(KeymasterDefs.KM_TAG_KEY_SIZE, 2048);
+        args.addLong(KeymasterDefs.KM_TAG_RSA_PUBLIC_EXPONENT,
+                RSAKeyGenParameterSpec.F4.longValue());
+
+        KeyCharacteristics outCharacteristics = new KeyCharacteristics();
+        int result = mKeyStore.generateKey(name, args, entropy, 0, outCharacteristics);
+        assertEquals("generateKey should succeed", KeyStore.NO_ERROR, result);
+    }
+
     public void testGenerateAndDelete() throws Exception {
         generateRsaKey("test");
         assertTrue("delete should succeed", mKeyStore.delete("test"));
@@ -756,7 +774,7 @@ public class KeyStoreTest extends ActivityUnitTestCase<Activity> {
                 RSAKeyGenParameterSpec.F4.longValue());
 
         KeyCharacteristics outCharacteristics = new KeyCharacteristics();
-        int result = mKeyStore.generateKey(name, args, 0, outCharacteristics);
+        int result = mKeyStore.generateKey(name, args, null, 0, outCharacteristics);
         assertEquals("generateRsaKey should succeed", KeyStore.NO_ERROR, result);
         assertEquals("getKeyCharacteristics should fail without application ID",
                 KeymasterDefs.KM_ERROR_INVALID_KEY_BLOB,
@@ -790,13 +808,13 @@ public class KeyStoreTest extends ActivityUnitTestCase<Activity> {
         args.addInt(KeymasterDefs.KM_TAG_MAC_LENGTH, 16);
 
         KeyCharacteristics outCharacteristics = new KeyCharacteristics();
-        int rc = mKeyStore.generateKey(name, args, 0, outCharacteristics);
+        int rc = mKeyStore.generateKey(name, args, null, 0, outCharacteristics);
         assertEquals("Generate should succeed", KeyStore.NO_ERROR, rc);
 
         KeymasterArguments out = new KeymasterArguments();
         args = new KeymasterArguments();
         OperationResult result = mKeyStore.begin(name, KeymasterDefs.KM_PURPOSE_ENCRYPT,
-                true, args, out);
+                true, args, null, out);
         IBinder token = result.token;
         assertEquals("Begin should succeed", KeyStore.NO_ERROR, result.resultCode);
         result = mKeyStore.update(token, null, new byte[] {0x01, 0x02, 0x03, 0x04});
@@ -826,7 +844,7 @@ public class KeyStoreTest extends ActivityUnitTestCase<Activity> {
     private byte[] doOperation(String name, int purpose, byte[] in, KeymasterArguments beginArgs) {
         KeymasterArguments out = new KeymasterArguments();
         OperationResult result = mKeyStore.begin(name, purpose,
-                true, beginArgs, out);
+                true, beginArgs, null, out);
         assertEquals("Begin should succeed", KeyStore.NO_ERROR, result.resultCode);
         IBinder token = result.token;
         result = mKeyStore.update(token, null, in);
@@ -885,18 +903,19 @@ public class KeyStoreTest extends ActivityUnitTestCase<Activity> {
         args.addInt(KeymasterDefs.KM_TAG_MAC_LENGTH, 16);
 
         KeyCharacteristics outCharacteristics = new KeyCharacteristics();
-        int rc = mKeyStore.generateKey(name, args, 0, outCharacteristics);
+        int rc = mKeyStore.generateKey(name, args, null, 0, outCharacteristics);
         assertEquals("Generate should succeed", KeyStore.NO_ERROR, rc);
 
         KeymasterArguments out = new KeymasterArguments();
         args = new KeymasterArguments();
         OperationResult result = mKeyStore.begin(name, KeymasterDefs.KM_PURPOSE_ENCRYPT,
-                true, args, out);
+                true, args, null, out);
         assertEquals("Begin should succeed", KeyStore.NO_ERROR, result.resultCode);
         IBinder first = result.token;
         // Implementation detail: softkeymaster supports 16 concurrent operations
         for (int i = 0; i < 16; i++) {
-            result = mKeyStore.begin(name, KeymasterDefs.KM_PURPOSE_ENCRYPT, true, args, out);
+            result = mKeyStore.begin(name, KeymasterDefs.KM_PURPOSE_ENCRYPT, true, args, null,
+                    out);
             assertEquals("Begin should succeed", KeyStore.NO_ERROR, result.resultCode);
         }
         // At this point the first operation should be pruned.
