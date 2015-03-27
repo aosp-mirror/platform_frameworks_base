@@ -272,13 +272,14 @@ public class TrustAgentWrapper {
         alarmFilter.addDataScheme(mAlarmIntent.getScheme());
         final String pathUri = mAlarmIntent.toUri(Intent.URI_INTENT_SCHEME);
         alarmFilter.addDataPath(pathUri, PatternMatcher.PATTERN_LITERAL);
-        mContext.registerReceiver(mBroadcastReceiver, alarmFilter, PERMISSION, null);
 
         // Schedules a restart for when connecting times out. If the connection succeeds,
         // the restart is canceled in mCallback's onConnected.
         scheduleRestart();
         mBound = context.bindServiceAsUser(intent, mConnection, Context.BIND_AUTO_CREATE, user);
-        if (!mBound) {
+        if (mBound) {
+            mContext.registerReceiver(mBroadcastReceiver, alarmFilter, PERMISSION, null);
+        } else {
             Log.e(TAG, "Can't bind to TrustAgent " + mName.flattenToShortString());
         }
     }
@@ -398,7 +399,6 @@ public class TrustAgentWrapper {
     }
 
     public void destroy() {
-        mContext.unregisterReceiver(mBroadcastReceiver);
         mHandler.removeMessages(MSG_RESTART_TIMEOUT);
 
         if (!mBound) {
@@ -408,6 +408,7 @@ public class TrustAgentWrapper {
         mTrustManagerService.mArchive.logAgentStopped(mUserId, mName);
         mContext.unbindService(mConnection);
         mBound = false;
+        mContext.unregisterReceiver(mBroadcastReceiver);
         mTrustAgentService = null;
         mSetTrustAgentFeaturesToken = null;
         mHandler.sendEmptyMessage(MSG_REVOKE_TRUST);
