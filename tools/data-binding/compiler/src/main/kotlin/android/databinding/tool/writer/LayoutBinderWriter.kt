@@ -66,7 +66,7 @@ class ExprModelExt {
     }
 }
 
-val ExprModel.ext by Delegates.lazy { (target : ExprModel) ->
+val ExprModel.ext by Delegates.lazy { target : ExprModel ->
     ExprModelExt()
 }
 
@@ -74,7 +74,7 @@ fun ExprModel.getUniqueFieldName(base : String) : String = ext.getUniqueFieldNam
 
 fun ExprModel.localizeFlag(set : FlagSet, base : String) : FlagSet = ext.localizeFlag(set, base)
 
-val BindingTarget.readableUniqueName by Delegates.lazy {(target: BindingTarget) ->
+val BindingTarget.readableUniqueName by Delegates.lazy { target: BindingTarget ->
     val variableName : String
     if (target.getId() == null) {
         variableName = "boundView" + target.getTag()
@@ -84,7 +84,17 @@ val BindingTarget.readableUniqueName by Delegates.lazy {(target: BindingTarget) 
     target.getModel().ext.getUniqueFieldName(variableName)
 }
 
-val BindingTarget.fieldName by Delegates.lazy { (target : BindingTarget) ->
+fun BindingTarget.superConversion(variable : String) : String {
+    if (isBinder()) {
+        return "${getViewClass()}.bind(${variable})"
+    } else if (getResolvedType() != null && getResolvedType().extendsViewStub()) {
+        return "new android.databinding.ViewStubProxy((android.view.ViewStub) ${variable})"
+    } else {
+        return "(${interfaceType}) ${variable}"
+    }
+}
+
+val BindingTarget.fieldName by Delegates.lazy { target : BindingTarget ->
     if (target.getFieldName() == null) {
         if (target.getId() == null) {
             target.setFieldName("m${target.readableUniqueName.capitalize()}")
@@ -96,61 +106,70 @@ val BindingTarget.fieldName by Delegates.lazy { (target : BindingTarget) ->
     target.getFieldName();
 }
 
-val BindingTarget.getterName by Delegates.lazy { (target : BindingTarget) ->
+val BindingTarget.getterName by Delegates.lazy { target : BindingTarget ->
     "get${target.readableUniqueName.capitalize()}"
 }
 
-val BindingTarget.androidId by Delegates.lazy { (target : BindingTarget) ->
+val BindingTarget.androidId by Delegates.lazy { target : BindingTarget ->
     "R.id.${target.getId().androidId()}"
 }
 
-val Expr.readableUniqueName by Delegates.lazy { (expr : Expr) ->
+val BindingTarget.interfaceType by Delegates.lazy { target : BindingTarget ->
+    if (target.getResolvedType() != null && target.getResolvedType().extendsViewStub()) {
+        "android.databinding.ViewStubProxy"
+    } else {
+        target.getInterfaceType()
+    }
+}
+
+val Expr.readableUniqueName by Delegates.lazy { expr : Expr ->
     Log.d { "readableUniqueName for ${expr.getUniqueKey()}" }
     val stripped = "${expr.getUniqueKey().stripNonJava()}"
     expr.getModel().ext.getUniqueFieldName(stripped)
 }
 
-val Expr.fieldName by Delegates.lazy { (expr : Expr) ->
-    "m${expr.readableUniqueName.capitalize()}"
+val Expr.readableName by Delegates.lazy { expr : Expr ->
+    Log.d { "readableUniqueName for ${expr.getUniqueKey()}" }
+    "${expr.getUniqueKey().stripNonJava()}"
 }
 
-val Expr.hasFlag by Delegates.lazy { (expr : Expr) ->
+val Expr.fieldName by Delegates.lazy { expr : Expr ->
+    "m${expr.readableName.capitalize()}"
+}
+
+val Expr.hasFlag by Delegates.lazy { expr : Expr ->
     expr.getId() < expr.getModel().getInvalidateableFieldLimit()
 }
 
-val Expr.localName by Delegates.lazy { (expr : Expr) ->
+val Expr.localName by Delegates.lazy { expr : Expr ->
     if(expr.isVariable()) expr.fieldName else "${expr.readableUniqueName}"
 }
 
-val Expr.setterName by Delegates.lazy { (expr : Expr) ->
-    "set${expr.readableUniqueName.capitalize()}"
+val Expr.setterName by Delegates.lazy { expr : Expr ->
+    "set${expr.readableName.capitalize()}"
 }
 
-val Expr.onChangeName by Delegates.lazy { (expr : Expr) ->
+val Expr.onChangeName by Delegates.lazy { expr : Expr ->
     "onChange${expr.readableUniqueName.capitalize()}"
 }
 
-val Expr.getterName by Delegates.lazy { (expr : Expr) ->
-    "get${expr.readableUniqueName.capitalize()}"
+val Expr.getterName by Delegates.lazy { expr : Expr ->
+    "get${expr.readableName.capitalize()}"
 }
 
-val Expr.staticFieldName by Delegates.lazy { (expr : Expr) ->
-    "s${expr.readableUniqueName.capitalize()}"
-}
-
-val Expr.dirtyFlagName by Delegates.lazy { (expr : Expr) ->
+val Expr.dirtyFlagName by Delegates.lazy { expr : Expr ->
     "sFlag${expr.readableUniqueName.capitalize()}"
 }
 
-val Expr.shouldReadFlagName by Delegates.lazy { (expr : Expr) ->
+val Expr.shouldReadFlagName by Delegates.lazy { expr : Expr ->
     "sFlagRead${expr.readableUniqueName.capitalize()}"
 }
 
-val Expr.invalidateFlagName by Delegates.lazy { (expr : Expr) ->
+val Expr.invalidateFlagName by Delegates.lazy { expr : Expr ->
     "sFlag${expr.readableUniqueName.capitalize()}Invalid"
 }
 
-val Expr.conditionalFlagPrefix by Delegates.lazy { (expr : Expr) ->
+val Expr.conditionalFlagPrefix by Delegates.lazy { expr : Expr ->
     "sFlag${expr.readableUniqueName.capitalize()}Is"
 }
 
@@ -238,22 +257,22 @@ fun Expr.isVariable() = this is IdentifierExpr && this.isDynamic()
 fun Expr.conditionalFlagName(output : Boolean, suffix : String) = "${dirtyFlagName}_${output}$suffix"
 
 
-val Expr.dirtyFlagSet by Delegates.lazy { (expr : Expr) ->
+val Expr.dirtyFlagSet by Delegates.lazy { expr : Expr ->
     val fs = FlagSet(expr.getInvalidFlags(), expr.getModel().getFlagBucketCount())
     expr.getModel().localizeFlag(fs, expr.dirtyFlagName)
 }
 
-val Expr.invalidateFlagSet by Delegates.lazy { (expr : Expr) ->
+val Expr.invalidateFlagSet by Delegates.lazy { expr : Expr ->
     val fs = FlagSet(expr.getId())
     expr.getModel().localizeFlag(fs, expr.invalidateFlagName)
 }
 
-val Expr.shouldReadFlagSet by Delegates.lazy { (expr : Expr) ->
+val Expr.shouldReadFlagSet by Delegates.lazy { expr : Expr ->
     val fs = FlagSet(expr.getShouldReadFlags(), expr.getModel().getFlagBucketCount())
     expr.getModel().localizeFlag(fs, expr.shouldReadFlagName)
 }
 
-val Expr.conditionalFlags by Delegates.lazy { (expr : Expr) ->
+val Expr.conditionalFlags by Delegates.lazy { expr : Expr ->
     val model = expr.getModel()
     arrayListOf(model.localizeFlag(FlagSet(expr.getRequirementFlagIndex(false)),
             "${expr.conditionalFlagPrefix}False"),
@@ -408,18 +427,23 @@ class LayoutBinderWriter(val layoutBinder : LayoutBinder) {
                     val index = indices.get(it)
                     if (!it.isUsed()) {
                         tab(", null")
-                    } else if (index == null) {
-                        tab(", (${it.getInterfaceType()}) root")
-                    } else if (it.isBinder()) {
-                        tab(", ${it.getViewClass()}.bind(views[${index}])")
-                    } else {
-                        tab(", (${it.getInterfaceType()}) views[${index}]")
+                    } else{
+                        val variableName : String
+                        if (index == null) {
+                            variableName = "root";
+                        } else {
+                            variableName = "views[${index}]"
+                        }
+                        tab(", ${it.superConversion(variableName)}")
                     }
                 }
                 tab(");")
             }
             val taggedViews = layoutBinder.getBindingTargets().filter{it.isUsed() && !it.isBinder()}
             taggedViews.forEach {
+                if (it.getResolvedType() != null && it.getResolvedType().extendsViewStub()) {
+                    tab("this.${it.fieldName}.setContainingBinding(this);")
+                }
                 if (it.getTag() == null) {
                     if (it.getId() == null) {
                         tab("this.${it.fieldName} = (${it.getViewClass()}) root;")
@@ -584,7 +608,7 @@ class LayoutBinderWriter(val layoutBinder : LayoutBinder) {
 
     fun declareViews() = kcode("// views") {
         layoutBinder.getBindingTargets().filter {it.isUsed() && (it.getId() == null)}.forEach {
-            nl("private final ${it.getInterfaceType()} ${it.fieldName};")
+            nl("private final ${it.interfaceType} ${it.fieldName};")
         }
     }
 
@@ -596,7 +620,7 @@ class LayoutBinderWriter(val layoutBinder : LayoutBinder) {
 
     fun declareDirtyFlags() = kcode("// dirty flag") {
         model.ext.localizedFlags.forEach { flag ->
-            flag.notEmpty { (suffix, value) ->
+            flag.notEmpty { suffix, value ->
                 nl("private")
                 app(" ", if(flag.isDynamic()) null else "static final");
                 app(" ", " ${flag.type} ${flag.getLocalName()}$suffix = $value;")
@@ -682,6 +706,14 @@ class LayoutBinderWriter(val layoutBinder : LayoutBinder) {
             includedBinders.filter{it.isUsed()}.forEach { binder ->
                 tab("${binder.fieldName}.executePendingBindings();")
             }
+            layoutBinder.getBindingTargets().filter{
+                it.isUsed() && it.getResolvedType() != null && it.getResolvedType().extendsViewStub()
+            }.forEach {
+                tab("if (${it.fieldName}.getBinding() != null) {") {
+                    tab("${it.fieldName}.getBinding().executePendingBindings();")
+                }
+                tab("}")
+            }
         }
         nl("}")
     }
@@ -760,12 +792,12 @@ class LayoutBinderWriter(val layoutBinder : LayoutBinder) {
             nl("import android.databinding.ViewDataBinding;")
             nl("public abstract class ${baseClassName} extends ViewDataBinding {")
             layoutBinder.getBindingTargets().filter{it.getId() != null}.forEach {
-                tab("public final ${it.getInterfaceType()} ${it.fieldName};")
+                tab("public final ${it.interfaceType} ${it.fieldName};")
             }
             nl("")
             tab("protected ${baseClassName}(android.view.View root_, int localFieldCount") {
                 layoutBinder.getBindingTargets().filter{it.getId() != null}.forEach {
-                    tab(", ${it.getInterfaceType()} ${it.readableUniqueName}")
+                    tab(", ${it.interfaceType} ${it.readableUniqueName}")
                 }
             }
             tab(") {") {

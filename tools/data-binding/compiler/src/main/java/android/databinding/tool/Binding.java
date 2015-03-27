@@ -20,6 +20,7 @@ import android.databinding.tool.expr.Expr;
 import android.databinding.tool.reflection.ModelAnalyzer;
 import android.databinding.tool.reflection.ModelClass;
 import android.databinding.tool.store.SetterStore;
+import android.databinding.tool.store.SetterStore.SetterCall;
 
 public class Binding {
 
@@ -37,8 +38,16 @@ public class Binding {
     private SetterStore.SetterCall getSetterCall() {
         if (mSetterCall == null) {
             ModelClass viewType = mTarget.getResolvedType();
-            mSetterCall = SetterStore.get(ModelAnalyzer.getInstance()).getSetterCall(mName,
-                    viewType, mExpr.getResolvedType(), mExpr.getModel().getImports());
+            if (viewType != null && viewType.extendsViewStub()) {
+                if (isViewStubAttribute()) {
+                    mSetterCall = new ViewStubDirectCall(mName, viewType, mExpr);
+                } else {
+                    mSetterCall = new ViewStubSetterCall(mName);
+                }
+            } else {
+                mSetterCall = SetterStore.get(ModelAnalyzer.getInstance()).getSetterCall(mName,
+                        viewType, mExpr.getResolvedType(), mExpr.getModel().getImports());
+            }
         }
         return mSetterCall;
     }
@@ -76,5 +85,56 @@ public class Binding {
 
     public Expr getExpr() {
         return mExpr;
+    }
+
+    private boolean isViewStubAttribute() {
+        if ("android:inflatedId".equals(mName)) {
+            return true;
+        } else if ("android:layout".equals(mName)) {
+            return true;
+        } else if ("android:visibility".equals(mName)) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    private static class ViewStubSetterCall extends SetterCall {
+        private final String mName;
+
+        public ViewStubSetterCall(String name) {
+            mName = name.substring(name.lastIndexOf(':') + 1);
+        }
+
+        @Override
+        protected String toJavaInternal(String viewExpression, String converted) {
+            return "if (" + viewExpression + ".isInflated()) " + viewExpression +
+                    ".getBinding().setVariable(BR." + mName + ", " + converted + ")";
+        }
+
+        @Override
+        public int getMinApi() {
+            return 0;
+        }
+    }
+
+    private static class ViewStubDirectCall extends SetterCall {
+        private final SetterCall mWrappedCall;
+
+        public ViewStubDirectCall(String name, ModelClass viewType, Expr expr) {
+            mWrappedCall = SetterStore.get(ModelAnalyzer.getInstance()).getSetterCall(name,
+                    viewType, expr.getResolvedType(), expr.getModel().getImports());
+        }
+
+        @Override
+        protected String toJavaInternal(String viewExpression, String converted) {
+            return "if (!" + viewExpression + ".isInflated()) " +
+                    mWrappedCall.toJava(viewExpression + ".getViewStub()", converted);
+        }
+
+        @Override
+        public int getMinApi() {
+            return 0;
+        }
     }
 }

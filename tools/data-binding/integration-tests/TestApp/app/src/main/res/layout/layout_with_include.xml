@@ -26,4 +26,5 @@
              bind:innerObject="@{outerObject}"
              bind:innerValue="@{`modified ` + outerObject.intValue}"
             />
+    <include layout="@layout/plain_layout" android:id="@+id/plainLayout"/>
 </LinearLayout>

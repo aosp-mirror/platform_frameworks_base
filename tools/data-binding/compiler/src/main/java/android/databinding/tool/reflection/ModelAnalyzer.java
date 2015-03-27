@@ -68,6 +68,8 @@ public abstract class ModelAnalyzer {
     public static final String VIEW_DATA_BINDING =
             "android.databinding.ViewDataBinding";
 
+    public static final String VIEW_STUB_CLASS_NAME = "android.view.ViewStub";
+
     private ModelClass[] mListTypes;
     private ModelClass mMapType;
     private ModelClass mStringType;
@@ -77,6 +79,7 @@ public abstract class ModelAnalyzer {
     private ModelClass mObservableMapType;
     private ModelClass[] mObservableFieldTypes;
     private ModelClass mViewBindingType;
+    private ModelClass mViewStubType;
 
     private static ModelAnalyzer sAnalyzer;
 
@@ -280,6 +283,13 @@ public abstract class ModelAnalyzer {
             }
         }
         return mObservableFieldTypes;
+    }
+
+    ModelClass getViewStubType() {
+        if (mViewStubType == null) {
+            mViewStubType = findClass(VIEW_STUB_CLASS_NAME, null);
+        }
+        return mViewStubType;
     }
 
     private ModelClass loadClassErasure(String className) {

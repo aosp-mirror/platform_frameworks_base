@@ -33,7 +33,7 @@ public class ViewStubBindingAdapterTest
     @Override
     protected void setUp() throws Exception {
         super.setUp();
-        mView = mBinder.view;
+        mView = mBinder.view.getViewStub();
     }
 
     public void testLayout() throws Throwable {

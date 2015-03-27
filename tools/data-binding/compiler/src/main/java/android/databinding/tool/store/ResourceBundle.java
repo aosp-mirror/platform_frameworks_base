@@ -17,6 +17,8 @@ import com.google.common.base.Preconditions;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
 
+import android.databinding.tool.reflection.ModelAnalyzer;
+import android.databinding.tool.reflection.ModelClass;
 import android.databinding.tool.util.L;
 import android.databinding.tool.util.ParserHelper;
 

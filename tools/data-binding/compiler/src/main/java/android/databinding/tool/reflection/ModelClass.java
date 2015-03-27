@@ -129,6 +129,13 @@ public abstract class ModelClass {
     }
 
     /**
+     * @return whether or not this ModelClass type extends ViewStub.
+     */
+    public boolean extendsViewStub() {
+        return ModelAnalyzer.getInstance().getViewStubType().isAssignableFrom(this);
+    }
+
+    /**
      * @return whether or not this is an Observable type such as ObservableMap, ObservableList,
      * or Observable.
      */
