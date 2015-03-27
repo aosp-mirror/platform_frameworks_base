@@ -306,6 +306,6 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
     }
 
    protected void assertNetworkNameEquals(String expected) {
-       assertEquals("Network name", expected, mNetworkController.getMobileNetworkName());
+       assertEquals("Network name", expected, mNetworkController.getMobileDataNetworkName());
    }
 }
