@@ -290,6 +290,22 @@ public abstract class KeyStoreKeyConstraints {
                     throw new IllegalArgumentException("Unknown padding: " + padding);
             }
         }
+
+        /**
+         * @hide
+         */
+        public static String toString(@PaddingEnum int padding) {
+            switch (padding) {
+                case NONE:
+                    return "NONE";
+                case ZERO:
+                    return "ZERO";
+                case PKCS7:
+                    return "PKCS#7";
+                default:
+                    throw new IllegalArgumentException("Unknown padding: " + padding);
+            }
+        }
     }
 
     @Retention(RetentionPolicy.SOURCE)
@@ -421,6 +437,18 @@ public abstract class KeyStoreKeyConstraints {
             switch (mode) {
                 case KeymasterDefs.KM_MODE_ECB:
                     return ECB;
+                default:
+                    throw new IllegalArgumentException("Unknown block mode: " + mode);
+            }
+        }
+
+        /**
+         * @hide
+         */
+        public static String toString(@BlockModeEnum int mode) {
+            switch (mode) {
+                case ECB:
+                    return "ECB";
                 default:
                     throw new IllegalArgumentException("Unknown block mode: " + mode);
             }
