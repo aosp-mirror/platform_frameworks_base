@@ -9394,6 +9394,7 @@ package android.content.pm {
     field public static final java.lang.String FEATURE_LOCATION_NETWORK = "android.hardware.location.network";
     field public static final java.lang.String FEATURE_MANAGED_USERS = "android.software.managed_users";
     field public static final java.lang.String FEATURE_MICROPHONE = "android.hardware.microphone";
+    field public static final java.lang.String FEATURE_MIDI = "android.software.midi";
     field public static final java.lang.String FEATURE_NFC = "android.hardware.nfc";
     field public static final java.lang.String FEATURE_NFC_HOST_CARD_EMULATION = "android.hardware.nfc.hce";
     field public static final java.lang.String FEATURE_OPENGLES_EXTENSION_PACK = "android.hardware.opengles.aep";

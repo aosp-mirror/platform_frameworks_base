@@ -17,6 +17,7 @@
 package com.android.server.usb;
 
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.hardware.usb.UsbConstants;
 import android.hardware.usb.UsbDevice;
@@ -55,6 +56,7 @@ public final class UsbAlsaManager {
 
     private final Context mContext;
     private IAudioService mAudioService;
+    private final boolean mHasMidiFeature;
 
     private final AlsaCardsParser mCardsParser = new AlsaCardsParser();
     private final AlsaDevicesParser mDevicesParser = new AlsaDevicesParser();
@@ -126,6 +128,7 @@ public final class UsbAlsaManager {
 
     /* package */ UsbAlsaManager(Context context) {
         mContext = context;
+        mHasMidiFeature = context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_MIDI);
 
         // initial scan
         mCardsParser.scan();
@@ -389,7 +392,7 @@ public final class UsbAlsaManager {
             // mDevicesParser.scan()
 
             boolean hasMidi = mDevicesParser.hasMIDIDevices(addedCard);
-            if (hasMidi) {
+            if (hasMidi && mHasMidiFeature) {
                 int device = mDevicesParser.getDefaultDeviceNum(addedCard);
                 AlsaDevice alsaDevice = waitForAlsaDevice(addedCard, device, AlsaDevice.TYPE_MIDI);
                 if (alsaDevice != null) {
@@ -459,6 +462,10 @@ public final class UsbAlsaManager {
     }
 
    /* package */ void setPeripheralMidiState(boolean enabled, int card, int device) {
+        if (!mHasMidiFeature) {
+            return;
+        }
+
         if (enabled && mPeripheralMidiDevice == null) {
             Bundle properties = new Bundle();
             Resources r = mContext.getResources();

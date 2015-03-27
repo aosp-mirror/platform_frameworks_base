@@ -1600,6 +1600,12 @@ public abstract class PackageManager {
     @SdkConstant(SdkConstantType.FEATURE)
     public static final String FEATURE_GAMEPAD = "android.hardware.gamepad";
 
+    /**
+     * Feature for {@link #getSystemAvailableFeatures} and {@link #hasSystemFeature}:
+     * The device has a full implementation of the android.media.midi.* APIs.
+     */
+    @SdkConstant(SdkConstantType.FEATURE)
+    public static final String FEATURE_MIDI = "android.software.midi";
 
     /**
      * Action to external storage service to clean out removed apps.
