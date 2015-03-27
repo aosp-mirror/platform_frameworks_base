@@ -61,7 +61,11 @@ public class LeakTest extends ActivityInstrumentationTestCase2<TestActivity> {
                 getActivity().setContentView(new FrameLayout(getActivity()));
             }
         });
-        System.gc();
+        WeakReference<Object> canary = new WeakReference<Object>(new Object());
+        while (canary.get() != null) {
+            byte[] b = new byte[1024 * 1024];
+            System.gc();
+        }
         assertNull(mWeakReference.get());
     }
 
