@@ -416,78 +416,42 @@ final class SettingsState {
 
     private void parseStateLocked(XmlPullParser parser)
             throws IOException, XmlPullParserException {
-        parser.next();
-        skipEmptyTextTags(parser);
-        expect(parser, XmlPullParser.START_TAG, TAG_SETTINGS);
-
-        mVersion = Integer.parseInt(parser.getAttributeValue(null, ATTR_VERSION));
-
-        parser.next();
-
-        while (parseSettingLocked(parser)) {
-            parser.next();
-        }
-
-        skipEmptyTextTags(parser);
-        expect(parser, XmlPullParser.END_TAG, TAG_SETTINGS);
-    }
-
-    private boolean parseSettingLocked(XmlPullParser parser)
-            throws IOException, XmlPullParserException {
-        skipEmptyTextTags(parser);
-        if (!accept(parser, XmlPullParser.START_TAG, TAG_SETTING)) {
-            return false;
-        }
-
-        String id = parser.getAttributeValue(null, ATTR_ID);
-        String name = parser.getAttributeValue(null, ATTR_NAME);
-        String value = parser.getAttributeValue(null, ATTR_VALUE);
-        String packageName = parser.getAttributeValue(null, ATTR_PACKAGE);
-        mSettings.put(name, new Setting(name, unpackValue(value),
-                unpackValue(packageName), id));
-
-        if (DEBUG_PERSISTENCE) {
-            Slog.i(LOG_TAG, "[RESTORED] " + name + "=" + value);
-        }
-
-        parser.next();
-
-        skipEmptyTextTags(parser);
-        expect(parser, XmlPullParser.END_TAG, TAG_SETTING);
-
-        return true;
-    }
-
-    private void expect(XmlPullParser parser, int type, String tag)
-            throws IOException, XmlPullParserException {
-        if (!accept(parser, type, tag)) {
-            throw new XmlPullParserException("Expected event: " + type
-                    + " and tag: " + tag + " but got event: " + parser.getEventType()
-                    + " and tag:" + parser.getName());
-        }
-    }
-
-    private void skipEmptyTextTags(XmlPullParser parser)
-            throws IOException, XmlPullParserException {
-        while (accept(parser, XmlPullParser.TEXT, null)
-                && parser.isWhitespace()) {
-            parser.next();
-        }
-    }
-
-    private boolean accept(XmlPullParser parser, int type, String tag)
-            throws IOException, XmlPullParserException {
-        if (parser.getEventType() != type) {
-            return false;
-        }
-        if (tag != null) {
-            if (!tag.equals(parser.getName())) {
-                return false;
+        final int outerDepth = parser.getDepth();
+        int type;
+        while ((type = parser.next()) != XmlPullParser.END_DOCUMENT
+                && (type != XmlPullParser.END_TAG || parser.getDepth() > outerDepth)) {
+            if (type == XmlPullParser.END_TAG || type == XmlPullParser.TEXT) {
+                continue;
             }
-        } else if (parser.getName() != null) {
-            return false;
+
+            String tagName = parser.getName();
+            if (tagName.equals(TAG_SETTINGS)) {
+                parseSettingsLocked(parser);
+            }
         }
-        return true;
+    }
+
+    private void parseSettingsLocked(XmlPullParser parser)
+            throws IOException, XmlPullParserException {
+        final int outerDepth = parser.getDepth();
+        int type;
+        while ((type = parser.next()) != XmlPullParser.END_DOCUMENT
+                && (type != XmlPullParser.END_TAG || parser.getDepth() > outerDepth)) {
+            if (type == XmlPullParser.END_TAG || type == XmlPullParser.TEXT) {
+                continue;
+            }
+
+            String id = parser.getAttributeValue(null, ATTR_ID);
+            String name = parser.getAttributeValue(null, ATTR_NAME);
+            String value = parser.getAttributeValue(null, ATTR_VALUE);
+            String packageName = parser.getAttributeValue(null, ATTR_PACKAGE);
+            mSettings.put(name, new Setting(name, unpackValue(value),
+                    unpackValue(packageName), id));
+
+            if (DEBUG_PERSISTENCE) {
+                Slog.i(LOG_TAG, "[RESTORED] " + name + "=" + value);
+            }
+        }
     }
 
     private final class MyHandler extends Handler {
