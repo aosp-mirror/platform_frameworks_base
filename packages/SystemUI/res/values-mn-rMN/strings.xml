@@ -86,8 +86,7 @@
     <string name="unlock_label" msgid="8779712358041029439">"тайлах"</string>
     <string name="phone_label" msgid="2320074140205331708">"утас нээх"</string>
     <string name="camera_label" msgid="7261107956054836961">"камер нээх"</string>
-    <!-- no translation found for recents_caption_resize (3517056471774958200) -->
-    <skip />
+    <string name="recents_caption_resize" msgid="3517056471774958200">"Шинэ ажиллах талбарыг сонгоно уу"</string>
     <string name="cancel" msgid="6442560571259935130">"Цуцлах"</string>
     <string name="accessibility_compatibility_zoom_button" msgid="8461115318742350699">"Тохиромжтой өсгөх товч."</string>
     <string name="accessibility_compatibility_zoom_example" msgid="4220687294564945780">"Жижгээс том дэлгэцрүү өсгөх."</string>

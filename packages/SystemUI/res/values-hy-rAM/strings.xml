@@ -88,8 +88,7 @@
     <string name="unlock_label" msgid="8779712358041029439">"ապակողպել"</string>
     <string name="phone_label" msgid="2320074140205331708">"բացել հեռախոսը"</string>
     <string name="camera_label" msgid="7261107956054836961">"բացել ֆոտոխցիկը"</string>
-    <!-- no translation found for recents_caption_resize (3517056471774958200) -->
-    <skip />
+    <string name="recents_caption_resize" msgid="3517056471774958200">"Ընտրել առաջադրանքի նոր դասավորություն"</string>
     <string name="cancel" msgid="6442560571259935130">"Չեղարկել"</string>
     <string name="accessibility_compatibility_zoom_button" msgid="8461115318742350699">"Համատեղելիության խոշորացման կոճակը:"</string>
     <string name="accessibility_compatibility_zoom_example" msgid="4220687294564945780">"Դիտափոխել փոքրից ավելի մեծ էկրան:"</string>

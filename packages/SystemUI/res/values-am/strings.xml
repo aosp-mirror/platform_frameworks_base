@@ -88,8 +88,7 @@
     <string name="unlock_label" msgid="8779712358041029439">"ክፈት"</string>
     <string name="phone_label" msgid="2320074140205331708">"ስልክ ክፈት"</string>
     <string name="camera_label" msgid="7261107956054836961">"ካሜራ ክፈት"</string>
-    <!-- no translation found for recents_caption_resize (3517056471774958200) -->
-    <skip />
+    <string name="recents_caption_resize" msgid="3517056471774958200">"የአዲስ ተግባር አቀማመጥን ይምረጡ"</string>
     <string name="cancel" msgid="6442560571259935130">"ይቅር"</string>
     <string name="accessibility_compatibility_zoom_button" msgid="8461115318742350699">"የተኳኋኝአጉላ አዝራር።"</string>
     <string name="accessibility_compatibility_zoom_example" msgid="4220687294564945780">"አነስተኛውን ማያ ወደ ትልቅ አጉላ።"</string>

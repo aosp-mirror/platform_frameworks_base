@@ -88,8 +88,7 @@
     <string name="unlock_label" msgid="8779712358041029439">"잠금 해제"</string>
     <string name="phone_label" msgid="2320074140205331708">"휴대전화 열기"</string>
     <string name="camera_label" msgid="7261107956054836961">"카메라 열기"</string>
-    <!-- no translation found for recents_caption_resize (3517056471774958200) -->
-    <skip />
+    <string name="recents_caption_resize" msgid="3517056471774958200">"새 작업 레이아웃 선택"</string>
     <string name="cancel" msgid="6442560571259935130">"취소"</string>
     <string name="accessibility_compatibility_zoom_button" msgid="8461115318742350699">"호환성 확대/축소 버튼입니다."</string>
     <string name="accessibility_compatibility_zoom_example" msgid="4220687294564945780">"작은 화면을 큰 화면으로 확대합니다."</string>
