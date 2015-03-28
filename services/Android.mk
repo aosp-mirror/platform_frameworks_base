@@ -24,6 +24,7 @@ services := \
     appwidget \
     backup \
     devicepolicy \
+    midi \
     net \
     print \
     restrictions \

@@ -124,6 +124,8 @@ public final class SystemServer {
             "com.android.server.print.PrintManagerService";
     private static final String USB_SERVICE_CLASS =
             "com.android.server.usb.UsbService$Lifecycle";
+    private static final String MIDI_SERVICE_CLASS =
+            "com.android.server.midi.MidiService$Lifecycle";
     private static final String WIFI_SERVICE_CLASS =
             "com.android.server.wifi.WifiService";
     private static final String WIFI_P2P_SERVICE_CLASS =
@@ -810,6 +812,11 @@ public final class SystemServer {
             }
 
             if (!disableNonCoreServices) {
+                if (mPackageManager.hasSystemFeature(PackageManager.FEATURE_MIDI)) {
+                    // Start MIDI Manager service
+                    mSystemServiceManager.startService(MIDI_SERVICE_CLASS);
+                }
+
                 if (mPackageManager.hasSystemFeature(PackageManager.FEATURE_USB_HOST)
                         || mPackageManager.hasSystemFeature(
                                 PackageManager.FEATURE_USB_ACCESSORY)) {
@@ -824,16 +831,6 @@ public final class SystemServer {
                     ServiceManager.addService(Context.SERIAL_SERVICE, serial);
                 } catch (Throwable e) {
                     Slog.e(TAG, "Failure starting SerialService", e);
-                }
-            }
-
-            if (!disableNonCoreServices) {
-                try {
-                    Slog.i(TAG, "MIDI Service");
-                    ServiceManager.addService(Context.MIDI_SERVICE,
-                            new MidiService(context));
-                } catch (Throwable e) {
-                    reportWtf("starting MIDI Service", e);
                 }
             }
 

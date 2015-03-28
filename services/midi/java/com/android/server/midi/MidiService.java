@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.server;
+package com.android.server.midi;
 
 import android.content.Context;
 import android.content.Intent;
@@ -40,6 +40,7 @@ import android.util.Log;
 import com.android.internal.content.PackageMonitor;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.XmlUtils;
+import com.android.server.SystemService;
 
 import org.xmlpull.v1.XmlPullParser;
 
@@ -51,6 +52,21 @@ import java.util.Iterator;
 import java.util.List;
 
 public class MidiService extends IMidiManager.Stub {
+
+    public static class Lifecycle extends SystemService {
+        private MidiService mMidiService;
+
+        public Lifecycle(Context context) {
+            super(context);
+        }
+
+        @Override
+        public void onStart() {
+            mMidiService = new MidiService(getContext());
+            publishBinderService(Context.MIDI_SERVICE, mMidiService);
+        }
+    }
+
     private static final String TAG = "MidiService";
 
     private final Context mContext;
