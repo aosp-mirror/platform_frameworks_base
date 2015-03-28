@@ -25,4 +25,5 @@
   <string-array name="wfcOperatorErrorMessages">
     <item msgid="931634632269046788">"Wi-Fi qo‘ng‘iroq mavjud emas. Wi-Fi qo‘ng‘iroqni yoqish uchun tarmoq operatori bilan bog‘laning."</item>
   </string-array>
+    <string name="wfcSpnFormat" msgid="4982938551498609442">"%s Wi-Fi qo‘ng‘iroqlar"</string>
 </resources>

@@ -25,4 +25,5 @@
   <string-array name="wfcOperatorErrorMessages">
     <item msgid="931634632269046788">"Panggilan Wi-Fi tidak tersedia. Hubungi operator untuk mengaktifkan Panggilan Wi-Fi."</item>
   </string-array>
+    <string name="wfcSpnFormat" msgid="4982938551498609442">"%s Panggilan Wi-Fi"</string>
 </resources>

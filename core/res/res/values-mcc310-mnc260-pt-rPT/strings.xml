@@ -25,4 +25,5 @@
   <string-array name="wfcOperatorErrorMessages">
     <item msgid="931634632269046788">"As chamadas Wi-Fi não estão disponíveis. Contacte o seu operador para as ativar."</item>
   </string-array>
+    <string name="wfcSpnFormat" msgid="4982938551498609442">"Chamadas por Wi-Fi da %s"</string>
 </resources>

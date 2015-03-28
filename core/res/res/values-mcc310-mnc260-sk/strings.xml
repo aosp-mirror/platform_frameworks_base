@@ -25,4 +25,5 @@
   <string-array name="wfcOperatorErrorMessages">
     <item msgid="931634632269046788">"Volanie cez Wi-Fi nie je k dispozícii. Kontaktujte svojho operátora a požiadajte ho o povolenie volania cez Wi-Fi."</item>
   </string-array>
+    <string name="wfcSpnFormat" msgid="4982938551498609442">"Volanie siete Wi-Fi %s"</string>
 </resources>

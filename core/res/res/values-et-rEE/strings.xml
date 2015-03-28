@@ -126,6 +126,7 @@
     <string name="wfcRegErrorTitle" msgid="2301376280632110664">"WiFi-kõned"</string>
   <string-array name="wfcOperatorErrorMessages">
   </string-array>
+    <string name="wfcSpnFormat" msgid="8211621332478306568">"%s"</string>
     <string name="cfTemplateNotForwarded" msgid="1683685883841272560">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: pole suunatud"</string>
     <string name="cfTemplateForwarded" msgid="1302922117498590521">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
     <string name="cfTemplateForwardedTime" msgid="9206251736527085256">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g> <xliff:g id="TIME_DELAY">{2}</xliff:g> sekundi pärast"</string>
@@ -746,6 +747,22 @@
     <string name="permdesc_manageFingerprint" msgid="178208705828055464">"Võimaldab rakendusel tühistada meetodid kasutatavate sõrmejäljemallide lisamiseks ja kustutamiseks."</string>
     <string name="permlab_useFingerprint" msgid="3150478619915124905">"sõrmejälje riistvara kasutamine"</string>
     <string name="permdesc_useFingerprint" msgid="9165097460730684114">"Võimaldab rakendusel autentimiseks kasutada sõrmejälje riistvara"</string>
+    <string name="fingerprint_acquired_partial" msgid="735082772341716043">"Tuvastati osaline sõrmejälg. Proovige uuesti."</string>
+    <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"Sõrmejälge ei õnnestunud töödelda. Proovige uuesti."</string>
+    <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"Sõrmejäljeandur on must. Puhastage see ja proovige uuesti."</string>
+    <string name="fingerprint_acquired_too_fast" msgid="5303368850245663580">"Sõrm liikus liiga kiiresti. Proovige uuesti."</string>
+    <string name="fingerprint_acquired_too_slow" msgid="7381891107120721078">"Sõrm liikus liiga aeglaselt. Proovige uuesti."</string>
+  <string-array name="fingerprint_acquired_vendor">
+    <item msgid="2892952818207766996">"Teenusepakkujapõhise värbamise veateade 0"</item>
+  </string-array>
+    <string name="fingerprint_error_unable_to_process" msgid="4232401562838100026">"Töötlemine ei õnnestu. Proovige uuesti."</string>
+    <string name="fingerprint_error_hw_not_available" msgid="6162709753784993771">"Riistvara pole saadaval."</string>
+    <string name="fingerprint_error_no_space" msgid="1055819001126053318">"Sõrmejälge ei saa salvestada. Eemaldage olemasolev sõrmejälg."</string>
+    <string name="fingerprint_error_timeout" msgid="3927186043737732875">"Sõrmejälje riistvara taimeri ajalõpp. Proovige uuesti."</string>
+    <string name="fingerprint_error_vendor" msgid="3175724710791609491">"Sõrmejälje riistvara taimeri ajalõpp. Proovige uuesti."</string>
+  <string-array name="fingerprint_error_vendor">
+    <item msgid="5804600450373644614">"Teenusepakkujapõhine veateade."</item>
+  </string-array>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"loe sünkroonimisseadeid"</string>
     <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"Võimaldab rakendusel lugeda konto sünkroonimisseadeid. Näiteks võib see määrata, kas rakendus Inimesed on kontoga sünkroonitud."</string>
     <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"lülitage sünkroonimine sisse ja välja"</string>

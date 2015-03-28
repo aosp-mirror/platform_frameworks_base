@@ -126,6 +126,7 @@
     <string name="wfcRegErrorTitle" msgid="2301376280632110664">"Chamadas por Wi-Fi"</string>
   <string-array name="wfcOperatorErrorMessages">
   </string-array>
+    <string name="wfcSpnFormat" msgid="8211621332478306568">"%s"</string>
     <string name="cfTemplateNotForwarded" msgid="1683685883841272560">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: Não encaminhado"</string>
     <string name="cfTemplateForwarded" msgid="1302922117498590521">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
     <string name="cfTemplateForwardedTime" msgid="9206251736527085256">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g> após <xliff:g id="TIME_DELAY">{2}</xliff:g> segundos"</string>
@@ -746,6 +747,22 @@
     <string name="permdesc_manageFingerprint" msgid="178208705828055464">"Permite que o app execute métodos para adicionar e excluir modelos de impressão digital para uso."</string>
     <string name="permlab_useFingerprint" msgid="3150478619915124905">"usar hardware de impressão digital"</string>
     <string name="permdesc_useFingerprint" msgid="9165097460730684114">"Permite que o app use hardware de impressão digital para autenticação."</string>
+    <string name="fingerprint_acquired_partial" msgid="735082772341716043">"Impressão digital parcial detectada. Tente novamente."</string>
+    <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"Não foi possível processar a impressão digital. Tente novamente."</string>
+    <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"O sensor de impressão digital está sujo. Limpe-o e tente novamente."</string>
+    <string name="fingerprint_acquired_too_fast" msgid="5303368850245663580">"O dedo foi retirado rápido demais. Tente novamente."</string>
+    <string name="fingerprint_acquired_too_slow" msgid="7381891107120721078">"O movimento do dedo está muito lento. Tente novamente."</string>
+  <string-array name="fingerprint_acquired_vendor">
+    <item msgid="2892952818207766996">"Mensagem de erro de aquisição específica de fornecedor 0"</item>
+  </string-array>
+    <string name="fingerprint_error_unable_to_process" msgid="4232401562838100026">"Não foi possível concluir o processo. Tente novamente."</string>
+    <string name="fingerprint_error_hw_not_available" msgid="6162709753784993771">"Hardware indisponível."</string>
+    <string name="fingerprint_error_no_space" msgid="1055819001126053318">"Não foi possível armazenar a impressão digital. Remova uma impressão digital já existente."</string>
+    <string name="fingerprint_error_timeout" msgid="3927186043737732875">"Tempo máximo para captura da impressão digital atingido. Tente novamente."</string>
+    <string name="fingerprint_error_vendor" msgid="3175724710791609491">"Tempo máximo para captura da impressão digital atingido. Tente novamente."</string>
+  <string-array name="fingerprint_error_vendor">
+    <item msgid="5804600450373644614">"Mensagem de erro específica de fornecedor."</item>
+  </string-array>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"ler as configurações de sincronização"</string>
     <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"Permite que o app leia as configurações de sincronização de uma conta. Por exemplo, pode determinar se o app People está sincronizado com uma conta."</string>
     <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"ativar e desativar sincronização"</string>

@@ -25,4 +25,5 @@
   <string-array name="wfcOperatorErrorMessages">
     <item msgid="931634632269046788">"Hindi available ang Pagtawag sa pamamagitan ng Wi-Fi. Makipag-ugnayan sa iyong carrier upang i-enable ang Pagtawag sa pamamagitan ng Wi-Fi."</item>
   </string-array>
+    <string name="wfcSpnFormat" msgid="4982938551498609442">"Pagtawag sa Pamamagitan ng Wi-Fi ng %s"</string>
 </resources>

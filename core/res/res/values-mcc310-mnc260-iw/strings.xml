@@ -25,4 +25,5 @@
   <string-array name="wfcOperatorErrorMessages">
     <item msgid="931634632269046788">"‏שיחות ב-Wi-Fi אינן זמינות. צור קשר עם הספק שלך כדי להפעיל שיחות ב-Wi-Fi."</item>
   </string-array>
+    <string name="wfcSpnFormat" msgid="4982938551498609442">"‏שיחות Wi-Fi של %s"</string>
 </resources>

@@ -25,4 +25,5 @@
   <string-array name="wfcOperatorErrorMessages">
     <item msgid="931634632269046788">"ការហៅតាម Wi-Fi មិនមាននោះទេ។ សូមទាក់ទងទៅអ្នកផ្តល់សេវាកម្មទូរស័ព្ទរបស់អ្នកដើម្បីបើកដំណើរការហៅតាម Wi-Fi។"</item>
   </string-array>
+    <string name="wfcSpnFormat" msgid="4982938551498609442">"ការហៅតាមរយៈ Wi-Fi %s"</string>
 </resources>

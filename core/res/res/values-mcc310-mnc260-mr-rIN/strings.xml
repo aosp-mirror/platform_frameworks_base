@@ -25,4 +25,5 @@
   <string-array name="wfcOperatorErrorMessages">
     <item msgid="931634632269046788">"वाय-फाय कॉलिंग उपलब्‍ध नाही. वाय-फाय कॉलिंग सक्षम करण्‍यासाठी आपल्‍या वाहकाशी संपर्क साधा."</item>
   </string-array>
+    <string name="wfcSpnFormat" msgid="4982938551498609442">"%s वाय-फाय कॉलिंग"</string>
 </resources>

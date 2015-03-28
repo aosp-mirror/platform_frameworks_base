@@ -25,4 +25,5 @@
   <string-array name="wfcOperatorErrorMessages">
     <item msgid="931634632269046788">"Klicanje prek Wi-Fi-ja ni na voljo. Obrnite se na operaterja, da vam omogoči klicanje prek Wi-Fi-ja."</item>
   </string-array>
+    <string name="wfcSpnFormat" msgid="4982938551498609442">"Klicanje prek Wi-Fi-ja (%s)"</string>
 </resources>

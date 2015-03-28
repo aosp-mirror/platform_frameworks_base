@@ -25,4 +25,5 @@
   <string-array name="wfcOperatorErrorMessages">
     <item msgid="931634632269046788">"Wi-Fi ጥሪ ማድረጊያ አይገኝም። የ Wi-Fi ጥሪ ማድረጊያን ለማንቃት የእርስዎን አገልግሎት አቅራቢ ያነጋግሩ።"</item>
   </string-array>
+    <string name="wfcSpnFormat" msgid="4982938551498609442">"የ%s Wi-Fi ጥሪ"</string>
 </resources>

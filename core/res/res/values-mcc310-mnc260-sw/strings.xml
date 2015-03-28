@@ -25,4 +25,5 @@
   <string-array name="wfcOperatorErrorMessages">
     <item msgid="931634632269046788">"Huduma ya Upigaji simu kwa Wi-Fi haipatikani. Wasiliana na mtoa huduma wako ili awashe Upigaji simu kwa Wi-Fi."</item>
   </string-array>
+    <string name="wfcSpnFormat" msgid="4982938551498609442">"%s Upigaji Simu kwa Wi-Fi"</string>
 </resources>

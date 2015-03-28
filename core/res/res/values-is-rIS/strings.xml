@@ -126,6 +126,7 @@
     <string name="wfcRegErrorTitle" msgid="2301376280632110664">"Wi-Fi símtöl"</string>
   <string-array name="wfcOperatorErrorMessages">
   </string-array>
+    <string name="wfcSpnFormat" msgid="8211621332478306568">"%s"</string>
     <string name="cfTemplateNotForwarded" msgid="1683685883841272560">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: Ekki áframsent"</string>
     <string name="cfTemplateForwarded" msgid="1302922117498590521">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
     <string name="cfTemplateForwardedTime" msgid="9206251736527085256">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g> eftir <xliff:g id="TIME_DELAY">{2}</xliff:g> sekúndur"</string>
@@ -746,6 +747,22 @@
     <string name="permdesc_manageFingerprint" msgid="178208705828055464">"Gerir forritinu kleift að beita aðferðum til að bæta við og eyða fingrafarasniðmátum til notkunar."</string>
     <string name="permlab_useFingerprint" msgid="3150478619915124905">"nota fingrafarabúnað"</string>
     <string name="permdesc_useFingerprint" msgid="9165097460730684114">"Leyfir forritinu að nota fingrafarabúnað til auðkenningar"</string>
+    <string name="fingerprint_acquired_partial" msgid="735082772341716043">"Hluti fingrafars greindist. Reyndu aftur."</string>
+    <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"Ekki var hægt að vinna úr fingrafarinu. Reyndu aftur."</string>
+    <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"Fingrafaraskynjarinn er óhreinn. Hreinsaðu hann og reyndu aftur."</string>
+    <string name="fingerprint_acquired_too_fast" msgid="5303368850245663580">"Fingurinn hreyfðist of hratt. Reyndu aftur."</string>
+    <string name="fingerprint_acquired_too_slow" msgid="7381891107120721078">"Fingurinn hreyfðist of hægt. Reyndu aftur."</string>
+  <string-array name="fingerprint_acquired_vendor">
+    <item msgid="2892952818207766996">"Skráningarvilluboð 0 frá framleiðanda"</item>
+  </string-array>
+    <string name="fingerprint_error_unable_to_process" msgid="4232401562838100026">"Ekki var hægt að vinna úr þessu. Reyndu aftur."</string>
+    <string name="fingerprint_error_hw_not_available" msgid="6162709753784993771">"Vélbúnaður er ekki tiltækur."</string>
+    <string name="fingerprint_error_no_space" msgid="1055819001126053318">"Ekki er hægt að vista fingrafarið. Fjarlægðu eitthvert af fingraförunum sem fyrir eru."</string>
+    <string name="fingerprint_error_timeout" msgid="3927186043737732875">"Tímamörk runnu út fyrir fingrafar. Reyndu aftur."</string>
+    <string name="fingerprint_error_vendor" msgid="3175724710791609491">"Tímamörk runnu út fyrir fingrafar. Reyndu aftur."</string>
+  <string-array name="fingerprint_error_vendor">
+    <item msgid="5804600450373644614">"Villuboð frá framleiðanda."</item>
+  </string-array>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"lesa samstillingar"</string>
     <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"Leyfir forriti að lesa kosti samstillingar fyrir reikning. Þetta er til dæmis hægt að nota til að komast að því hvort forritið Fólk er samstillt við reikning."</string>
     <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"kveikja og slökkva á samstillingu"</string>

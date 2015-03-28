@@ -25,4 +25,5 @@
   <string-array name="wfcOperatorErrorMessages">
     <item msgid="931634632269046788">"Opkald via Wi-Fi er ikke muligt. Kontakt dit mobilselskab for at aktivere Opkald via Wi-Fi."</item>
   </string-array>
+    <string name="wfcSpnFormat" msgid="4982938551498609442">"%s Wi-Fi-opkald"</string>
 </resources>

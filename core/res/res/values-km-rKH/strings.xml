@@ -126,6 +126,7 @@
     <string name="wfcRegErrorTitle" msgid="2301376280632110664">"ការហៅតាម Wi-Fi"</string>
   <string-array name="wfcOperatorErrorMessages">
   </string-array>
+    <string name="wfcSpnFormat" msgid="8211621332478306568">"%s"</string>
     <string name="cfTemplateNotForwarded" msgid="1683685883841272560">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g> ៖ មិន​បាន​បញ្ជូន​បន្ត"</string>
     <string name="cfTemplateForwarded" msgid="1302922117498590521">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
     <string name="cfTemplateForwardedTime" msgid="9206251736527085256">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g> បន្ទាប់​ពី <xliff:g id="TIME_DELAY">{2}</xliff:g> វិនាទី"</string>
@@ -746,6 +747,22 @@
     <string name="permdesc_manageFingerprint" msgid="178208705828055464">"អនុញ្ញាតឲ្យកម្មវិធីប្រើវិធីសាស្ត្របន្ថែម និងលុបពុម្ពម្រាមដៃសម្រាប់ប្រើប្រាស់។"</string>
     <string name="permlab_useFingerprint" msgid="3150478619915124905">"ប្រើផ្នែករឹងស្នាមម្រាមដៃ"</string>
     <string name="permdesc_useFingerprint" msgid="9165097460730684114">"អនុញ្ញាតឲ្យកម្មវិធីប្រើផ្នែករឹងស្នាមម្រាមដៃសម្រាប់ការផ្ទៀងផ្ទាត់"</string>
+    <string name="fingerprint_acquired_partial" msgid="735082772341716043">"បានផ្តិតយកស្នាមម្រាមដៃមិនពេញលក្ខណៈ។ សូមព្យាយាមម្តងទៀត។"</string>
+    <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"មិនអាចដំណើរការស្នាមម្រាមដៃបានទេ។ សូមព្យាយាមម្តងទៀត។"</string>
+    <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"ឧបករណ៍ផ្តិតម្រាមដៃប្រលាក់ហើយ។ សូមសម្អាត ហើយព្យាយាមម្តងទៀត។"</string>
+    <string name="fingerprint_acquired_too_fast" msgid="5303368850245663580">"ម្រាមដៃមានចលនារហ័សពេក។ សូមព្យាយាមម្តងទៀត។"</string>
+    <string name="fingerprint_acquired_too_slow" msgid="7381891107120721078">"ម្រាមដៃមានចលនាយឺតពេក។ សូមព្យាយាមម្តងទៀត។"</string>
+  <string-array name="fingerprint_acquired_vendor">
+    <item msgid="2892952818207766996">"សារកំហុសនៃការទិញពីអ្នកលក់ជាក់លាក់ 0"</item>
+  </string-array>
+    <string name="fingerprint_error_unable_to_process" msgid="4232401562838100026">"មិនអាចដំណើរការបានទេ។ សូមព្យាយាមម្តងទៀត។"</string>
+    <string name="fingerprint_error_hw_not_available" msgid="6162709753784993771">"មិនមានផ្នែករឹងទេ។"</string>
+    <string name="fingerprint_error_no_space" msgid="1055819001126053318">"មិនអាចផ្ទុកស្នាមម្រាមដៃទេ។ សូមយកស្នាមម្រាមដៃដែលមានស្រាប់ចេញ។"</string>
+    <string name="fingerprint_error_timeout" msgid="3927186043737732875">"ការផ្តិតម្រាមដៃបានអស់ពេល។ សូមព្យាយាមម្តងទៀត។"</string>
+    <string name="fingerprint_error_vendor" msgid="3175724710791609491">"ការផ្តិតម្រាមដៃបានអស់ពេល។ សូមព្យាយាមម្តងទៀត។"</string>
+  <string-array name="fingerprint_error_vendor">
+    <item msgid="5804600450373644614">"សារកំហុសពីអ្នកលក់ជាក់លាក់។"</item>
+  </string-array>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"អាន​ការ​កំណត់​ធ្វើ​សម​កាល​កម្ម"</string>
     <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"ឲ្យ​កម្មវិធី​អាន​ការ​កំណត់​ធ្វើ​សម​កាល​កម្ម​សម្រាប់​គណនី។ ឧទាហរណ៍ វា​អាច​កំណត់​ថា​តើ​​​កម្មវិធី​ត្រូវ​បាន​បើក​ជា​មួយ​គណនី​ដែរ​ឬទេ។"</string>
     <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"បិទ/បើក​ការ​ធ្វើ​សម​កាល​កម្ម"</string>

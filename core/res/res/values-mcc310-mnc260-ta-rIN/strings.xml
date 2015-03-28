@@ -25,4 +25,5 @@
   <string-array name="wfcOperatorErrorMessages">
     <item msgid="931634632269046788">"வைஃபை அழைப்பு கிடைக்கவில்லை. வைஃபை அழைப்பை இயக்க, மொபைல் நிறுவனத்தைத் தொடர்புகொள்ளவும்."</item>
   </string-array>
+    <string name="wfcSpnFormat" msgid="4982938551498609442">"%s வைஃபை அழைப்பு"</string>
 </resources>

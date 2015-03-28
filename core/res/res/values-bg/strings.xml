@@ -126,6 +126,7 @@
     <string name="wfcRegErrorTitle" msgid="2301376280632110664">"Обаждания през Wi-Fi"</string>
   <string-array name="wfcOperatorErrorMessages">
   </string-array>
+    <string name="wfcSpnFormat" msgid="8211621332478306568">"%s"</string>
     <string name="cfTemplateNotForwarded" msgid="1683685883841272560">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: Не е пренасочено"</string>
     <string name="cfTemplateForwarded" msgid="1302922117498590521">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
     <string name="cfTemplateForwardedTime" msgid="9206251736527085256">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g> след <xliff:g id="TIME_DELAY">{2}</xliff:g> секунди"</string>
@@ -746,6 +747,22 @@
     <string name="permdesc_manageFingerprint" msgid="178208705828055464">"Разрешава на приложението да извиква начини за добавяне и изтриване на шаблони за отпечатъци, които да се използват."</string>
     <string name="permlab_useFingerprint" msgid="3150478619915124905">"използване на хардуера за отпечатъци"</string>
     <string name="permdesc_useFingerprint" msgid="9165097460730684114">"Разрешава на приложението да използва хардуера за отпечатъци с цел удостоверяване"</string>
+    <string name="fingerprint_acquired_partial" msgid="735082772341716043">"Открит е частичен отпечатък. Моля, опитайте отново."</string>
+    <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"Отпечатъкът не можа да се обработи. Моля, опитайте отново."</string>
+    <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"Сензорът за отпечатъци е мръсен. Моля, почистете го и опитайте отново."</string>
+    <string name="fingerprint_acquired_too_fast" msgid="5303368850245663580">"Преместихте пръста си твърде бързо. Моля, опитайте отново."</string>
+    <string name="fingerprint_acquired_too_slow" msgid="7381891107120721078">"Преместихте пръста си твърде бавно. Моля, опитайте отново."</string>
+  <string-array name="fingerprint_acquired_vendor">
+    <item msgid="2892952818207766996">"Съобщение за грешка 0 при придобиване от конкретен доставчик"</item>
+  </string-array>
+    <string name="fingerprint_error_unable_to_process" msgid="4232401562838100026">"Не може да се обработи. Опитайте отново."</string>
+    <string name="fingerprint_error_hw_not_available" msgid="6162709753784993771">"Няма достъп до хардуера."</string>
+    <string name="fingerprint_error_no_space" msgid="1055819001126053318">"Отпечатъкът не може да бъде съхранен. Моля, премахнете съществуващ."</string>
+    <string name="fingerprint_error_timeout" msgid="3927186043737732875">"Времето за изчакване за отпечатък изтече. Опитайте отново."</string>
+    <string name="fingerprint_error_vendor" msgid="3175724710791609491">"Времето за изчакване за отпечатък изтече. Опитайте отново."</string>
+  <string-array name="fingerprint_error_vendor">
+    <item msgid="5804600450373644614">"Съобщение за грешка от конкретен доставчик."</item>
+  </string-array>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"четене на настройките за синхронизиране"</string>
     <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"Разрешава на приложението да чете настройките за синхронизиране на профил. Например това може да определи дали приложението Хора е синхронизирано с даден профил."</string>
     <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"включване и изключване на синхронизирането"</string>

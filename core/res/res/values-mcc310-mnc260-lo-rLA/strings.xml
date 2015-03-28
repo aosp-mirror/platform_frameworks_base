@@ -25,4 +25,5 @@
   <string-array name="wfcOperatorErrorMessages">
     <item msgid="931634632269046788">"ການໂທ Wi-Fi ບໍ່ພ້ອມໃຊ້ງານ. ໃຫ້ຕິດຕໍ່ຫາຜູ້ໃຫ້ບໍລິການຂອງທ່ານເພື່ອເປີດໃຊ້ການໂທ Wi-Fi."</item>
   </string-array>
+    <string name="wfcSpnFormat" msgid="4982938551498609442">"ການ​ໂທ %s Wi-Fi"</string>
 </resources>
