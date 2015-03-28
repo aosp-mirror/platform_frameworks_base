@@ -433,6 +433,9 @@ final class SettingsState {
 
     private void parseSettingsLocked(XmlPullParser parser)
             throws IOException, XmlPullParserException {
+
+        mVersion = Integer.parseInt(parser.getAttributeValue(null, ATTR_VERSION));
+
         final int outerDepth = parser.getDepth();
         int type;
         while ((type = parser.next()) != XmlPullParser.END_DOCUMENT
@@ -441,15 +444,18 @@ final class SettingsState {
                 continue;
             }
 
-            String id = parser.getAttributeValue(null, ATTR_ID);
-            String name = parser.getAttributeValue(null, ATTR_NAME);
-            String value = parser.getAttributeValue(null, ATTR_VALUE);
-            String packageName = parser.getAttributeValue(null, ATTR_PACKAGE);
-            mSettings.put(name, new Setting(name, unpackValue(value),
-                    unpackValue(packageName), id));
+            String tagName = parser.getName();
+            if (tagName.equals(TAG_SETTING)) {
+                String id = parser.getAttributeValue(null, ATTR_ID);
+                String name = parser.getAttributeValue(null, ATTR_NAME);
+                String value = parser.getAttributeValue(null, ATTR_VALUE);
+                String packageName = parser.getAttributeValue(null, ATTR_PACKAGE);
+                mSettings.put(name, new Setting(name, unpackValue(value),
+                        unpackValue(packageName), id));
 
-            if (DEBUG_PERSISTENCE) {
-                Slog.i(LOG_TAG, "[RESTORED] " + name + "=" + value);
+                if (DEBUG_PERSISTENCE) {
+                    Slog.i(LOG_TAG, "[RESTORED] " + name + "=" + value);
+                }
             }
         }
     }
