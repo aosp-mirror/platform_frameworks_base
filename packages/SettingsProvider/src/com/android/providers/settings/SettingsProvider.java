@@ -1806,7 +1806,7 @@ public class SettingsProvider extends ContentProvider {
                 final int oldVersion = secureSettings.getVersionLocked();
                 final int newVersion = SETTINGS_VERSION;
 
-                // If up do data - done.
+                // If up do date - done.
                 if (oldVersion == newVersion) {
                     return;
                 }
