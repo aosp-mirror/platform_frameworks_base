@@ -371,7 +371,7 @@ public class BackupManagerService {
                     // we're now good to go, so start the backup alarms
                     if (MORE_DEBUG) Slog.d(TAG, "Now provisioned, so starting backups");
                     KeyValueBackupJob.schedule(mContext);
-                    scheduleNextFullBackupJob();
+                    scheduleNextFullBackupJob(0);
                 }
             }
         }
@@ -1786,7 +1786,7 @@ public class BackupManagerService {
                         PackageInfo app = mPackageManager.getPackageInfo(packageName, 0);
                         if (appGetsFullBackup(app) && appIsEligibleForBackup(app.applicationInfo)) {
                             enqueueFullBackup(packageName, now);
-                            scheduleNextFullBackupJob();
+                            scheduleNextFullBackupJob(0);
                         }
 
                         // Transport maintenance: rebind to known existing transports that have
@@ -3919,6 +3919,7 @@ public class BackupManagerService {
             ParcelFileDescriptor[] transportPipes = null;
 
             PackageInfo currentPackage;
+            long backoff = 0;
 
             try {
                 if (!mEnabled || !mProvisioned) {
@@ -4033,6 +4034,14 @@ public class BackupManagerService {
                             Slog.e(TAG, "Error " + result
                                     + " backing up " + currentPackage.packageName);
                         }
+
+                        // Also ask the transport how long it wants us to wait before
+                        // moving on to the next package, if any.
+                        backoff = transport.requestFullBackupTime();
+                        if (DEBUG_SCHEDULING) {
+                            Slog.i(TAG, "Transport suggested backoff=" + backoff);
+                        }
+
                     }
 
                     // Roll this package to the end of the backup queue if we're
@@ -4090,7 +4099,7 @@ public class BackupManagerService {
                 // Now that we're actually done with schedule-driven work, reschedule
                 // the next pass based on the new queue state.
                 if (mUpdateSchedule) {
-                    scheduleNextFullBackupJob();
+                    scheduleNextFullBackupJob(backoff);
                 }
             }
         }
@@ -4223,16 +4232,17 @@ public class BackupManagerService {
     /**
      * Schedule a job to tell us when it's a good time to run a full backup
      */
-    void scheduleNextFullBackupJob() {
+    void scheduleNextFullBackupJob(long transportMinLatency) {
         synchronized (mQueueLock) {
             if (mFullBackupQueue.size() > 0) {
                 // schedule the next job at the point in the future when the least-recently
                 // backed up app comes due for backup again; or immediately if it's already
                 // due.
-                long upcomingLastBackup = mFullBackupQueue.get(0).lastBackup;
-                long timeSinceLast = System.currentTimeMillis() - upcomingLastBackup;
-                final long latency = (timeSinceLast < MIN_FULL_BACKUP_INTERVAL)
+                final long upcomingLastBackup = mFullBackupQueue.get(0).lastBackup;
+                final long timeSinceLast = System.currentTimeMillis() - upcomingLastBackup;
+                final long appLatency = (timeSinceLast < MIN_FULL_BACKUP_INTERVAL)
                         ? (MIN_FULL_BACKUP_INTERVAL - timeSinceLast) : 0;
+                final long latency = Math.min(transportMinLatency, appLatency);
                 Runnable r = new Runnable() {
                     @Override public void run() {
                         FullBackupJob.schedule(mContext, latency);
@@ -8495,6 +8505,13 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
                 // Just go back to waiting for the latch to indicate completion
             }
         } while (true);
+
+        // We just ran a backup on these packages, so kick them to the end of the queue
+        final long now = System.currentTimeMillis();
+        for (String pkg : pkgNames) {
+            enqueueFullBackup(pkg, now);
+        }
+
         if (DEBUG) {
             Slog.d(TAG, "Done with full transport backup.");
         }
@@ -8664,7 +8681,7 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
                 if (enable && !wasEnabled && mProvisioned) {
                     // if we've just been enabled, start scheduling backup passes
                     KeyValueBackupJob.schedule(mContext);
-                    scheduleNextFullBackupJob();
+                    scheduleNextFullBackupJob(0);
                 } else if (!enable) {
                     // No longer enabled, so stop running backups
                     if (DEBUG) Slog.i(TAG, "Opting out of backup");
