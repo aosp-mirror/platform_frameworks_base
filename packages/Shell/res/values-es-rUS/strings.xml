@@ -22,6 +22,5 @@
     <string name="bugreport_finished_text" product="default" msgid="3559904746859400732">"Toca para compartir tu informe de errores."</string>
     <string name="bugreport_confirm" msgid="5130698467795669780">"Los informes de errores contienen datos de los distintos archivos de registro del sistema, incluida la información personal y privada. Comparte los informes de errores únicamente con aplicaciones y personas en las que confíes."</string>
     <string name="bugreport_confirm_repeat" msgid="4926842460688645058">"Mostrar este mensaje la próxima vez"</string>
-    <!-- no translation found for bugreport_storage_title (5332488144740527109) -->
-    <skip />
+    <string name="bugreport_storage_title" msgid="5332488144740527109">"Informes de errores"</string>
 </resources>

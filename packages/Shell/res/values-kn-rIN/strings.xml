@@ -22,6 +22,5 @@
     <string name="bugreport_finished_text" product="default" msgid="3559904746859400732">"ನಿಮ್ಮ ದೋಷದ ವರದಿಯನ್ನು ಹಂಚಿಕೊಳ್ಳಲು ಸ್ಪರ್ಶಿಸಿ"</string>
     <string name="bugreport_confirm" msgid="5130698467795669780">"ವೈಯಕ್ತಿಕ ಮತ್ತು ಖಾಸಗಿ ಮಾಹಿತಿಯು ಸೇರಿದಂತೆ, ಸಿಸ್ಟಂನ ಹಲವಾರು ಲಾಗ್ ಫೈಲ್‌ಗಳಿಂದ ಡೇಟಾವನ್ನು ದೋಷದ ವರದಿಗಳು ಒಳಗೊಂಡಿವೆ. ನೀವು ನಂಬುವಂತಹ ಅಪ್ಲಿಕೇಶನ್‌ಗಳು ಮತ್ತು ಜನರೊಂದಿಗೆ ಮಾತ್ರ ದೋಷದ ವರದಿಗಳನ್ನು ಹಂಚಿಕೊಳ್ಳಿ."</string>
     <string name="bugreport_confirm_repeat" msgid="4926842460688645058">"ಈ ಸಂದೇಶವನ್ನು ಮುಂದಿನ ಬಾರಿ ತೋರಿಸಿ"</string>
-    <!-- no translation found for bugreport_storage_title (5332488144740527109) -->
-    <skip />
+    <string name="bugreport_storage_title" msgid="5332488144740527109">"ದೋಷ ವರದಿಗಳು"</string>
 </resources>

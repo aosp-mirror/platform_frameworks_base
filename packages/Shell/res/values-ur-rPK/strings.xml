@@ -22,6 +22,5 @@
     <string name="bugreport_finished_text" product="default" msgid="3559904746859400732">"اپنی بَگ رپورٹ کا اشتراک کرنے کیلئے ٹچ کریں"</string>
     <string name="bugreport_confirm" msgid="5130698467795669780">"بَگ رپورٹس میں سسٹم کی مختلف لاگ فائلوں سے ڈیٹا شامل ہوتا ہے، بشمول ذاتی اور نجی معلومات۔ بَگ رپورٹس کا اشتراک صرف اپنے بھروسے مند ایپس اور لوگوں کے ساتھ کریں۔"</string>
     <string name="bugreport_confirm_repeat" msgid="4926842460688645058">"یہ پیغام اگلی بار دکھائیں"</string>
-    <!-- no translation found for bugreport_storage_title (5332488144740527109) -->
-    <skip />
+    <string name="bugreport_storage_title" msgid="5332488144740527109">"بگ رپورٹس"</string>
 </resources>
