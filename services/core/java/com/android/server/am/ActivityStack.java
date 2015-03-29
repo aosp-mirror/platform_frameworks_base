@@ -3915,9 +3915,8 @@ final class ActivityStack {
         mStackSupervisor.removeChildActivityContainers(r);
 
         try {
-            if (DEBUG_SWITCH || DEBUG_STATES) Slog.i(TAG,
-                    (andResume ? "Relaunching to RESUMED " : "Relaunching to PAUSED ")
-                    + r);
+            if (DEBUG_SWITCH || DEBUG_STATES) Slog.i(TAG, "Moving to " +
+                    (andResume ? "RESUMED" : "PAUSED") + " Relaunching " + r);
             r.forceNewConfig = false;
             r.app.thread.scheduleRelaunchActivity(r.appToken, results, newIntents, changes,
                     !andResume, new Configuration(mService.mConfiguration),

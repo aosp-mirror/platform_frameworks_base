@@ -4604,8 +4604,7 @@ public class WindowManagerService extends IWindowManager.Stub
             if (DEBUG_APP_TRANSITIONS || DEBUG_ORIENTATION) Slog.v(TAG, "setAppVisibility(" +
                     token + ", visible=" + visible + "): " + mAppTransition +
                     " hidden=" + wtoken.hidden + " hiddenRequested=" +
-                    wtoken.hiddenRequested, HIDE_STACK_CRAWLS ?
-                            null : new RuntimeException("here").fillInStackTrace());
+                    wtoken.hiddenRequested + " Callers=" + Debug.getCallers(6));
 
             // If we are preparing an app transition, then delay changing
             // the visibility of this token until we execute that transition.
