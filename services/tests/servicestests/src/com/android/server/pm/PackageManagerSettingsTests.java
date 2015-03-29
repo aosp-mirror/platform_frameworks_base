@@ -157,7 +157,7 @@ public class PackageManagerSettingsTests extends AndroidTestCase {
         settings.writeLPr();
 
         // Create Settings again to make it read from the new files
-        settings = new Settings(getContext(), getContext().getFilesDir(), new Object());
+        settings = new Settings(getContext().getFilesDir(), new Object());
         assertEquals(true, settings.readLPw(null, null, 0, false));
 
         PackageSetting ps = settings.peekPackageLPr(PACKAGE_NAME_2);
@@ -168,7 +168,7 @@ public class PackageManagerSettingsTests extends AndroidTestCase {
     public void testEnableDisable() {
         // Write the package files and make sure they're parsed properly the first time
         writeOldFiles();
-        Settings settings = new Settings(getContext(), getContext().getFilesDir(), new Object());
+        Settings settings = new Settings(getContext().getFilesDir(), new Object());
         assertEquals(true, settings.readLPw(null, null, 0, false));
 
         // Enable/Disable a package
