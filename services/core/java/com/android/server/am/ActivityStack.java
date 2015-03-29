@@ -1018,6 +1018,10 @@ final class ActivityStack {
                 if (DEBUG_PAUSE) Slog.v(TAG, "App died during pause, not stopping: " + prev);
                 prev = null;
             }
+            // It is possible the activity was freezing the screen before it was paused.
+            // In that case go ahead and remove the freeze this activity has on the screen
+            // since it is no longer visible.
+            prev.stopFreezingScreenLocked(true /*force*/);
             mPausingActivity = null;
         }
 
