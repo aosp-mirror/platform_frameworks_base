@@ -74,8 +74,8 @@ public:
     // has returned a buffer and it is ready for ImageWriter to dequeue.
     virtual void onBufferReleased();
 
-    void setProducer(const sp<ANativeWindow>& producer) { mProducer = producer; }
-    ANativeWindow* getProducer() { return mProducer.get(); }
+    void setProducer(const sp<Surface>& producer) { mProducer = producer; }
+    Surface* getProducer() { return mProducer.get(); }
 
     void setBufferFormat(int format) { mFormat = format; }
     int getBufferFormat() { return mFormat; }
@@ -90,7 +90,7 @@ private:
     static JNIEnv* getJNIEnv(bool* needsDetach);
     static void detachJNI();
 
-    sp<ANativeWindow> mProducer;
+    sp<Surface> mProducer;
     jobject mWeakThiz;
     jclass mClazz;
     int mFormat;
@@ -155,10 +155,21 @@ void JNIImageWriterContext::onBufferReleased() {
     bool needsDetach = false;
     JNIEnv* env = getJNIEnv(&needsDetach);
     if (env != NULL) {
+        // Detach the buffer every time when a buffer consumption is done,
+        // need let this callback give a BufferItem, then only detach if it was attached to this
+        // Writer. Do the detach unconditionally for opaque format now. see b/19977520
+        if (mFormat == HAL_PIXEL_FORMAT_IMPLEMENTATION_DEFINED) {
+            sp<Fence> fence;
+            ANativeWindowBuffer* buffer;
+            ALOGV("%s: One buffer is detached", __FUNCTION__);
+            mProducer->detachNextBuffer(&buffer, &fence);
+        }
+
         env->CallStaticVoidMethod(mClazz, gImageWriterClassInfo.postEventFromNative, mWeakThiz);
     } else {
         ALOGW("onBufferReleased event will not posted");
     }
+
     if (needsDetach) {
         detachJNI();
     }
@@ -170,13 +181,13 @@ extern "C" {
 
 // -------------------------------Private method declarations--------------
 
-static bool isWritable(int format);
 static bool isPossiblyYUV(PixelFormat format);
 static void Image_setNativeContext(JNIEnv* env, jobject thiz,
         sp<GraphicBuffer> buffer, int fenceFd);
 static void Image_getNativeContext(JNIEnv* env, jobject thiz,
         GraphicBuffer** buffer, int* fenceFd);
 static void Image_unlockIfLocked(JNIEnv* env, jobject thiz);
+static bool isFormatOpaque(int format);
 
 // --------------------------ImageWriter methods---------------------------------------
 
@@ -278,7 +289,7 @@ static jlong ImageWriter_init(JNIEnv* env, jobject thiz, jobject weakThiz, jobje
     env->SetIntField(thiz, gImageWriterClassInfo.mWriterFormat, reinterpret_cast<jint>(format));
 
 
-    if (isWritable(format)) {
+    if (!isFormatOpaque(format)) {
         res = native_window_set_usage(anw.get(), GRALLOC_USAGE_SW_WRITE_OFTEN);
         if (res != OK) {
             ALOGE("%s: Configure usage %08x for format %08x failed: %s (%d)",
@@ -461,31 +472,87 @@ static void ImageWriter_queueImage(JNIEnv* env, jobject thiz, jlong nativeCtx, j
         return;
     }
 
+    // Clear the image native context: end of this image's lifecycle in public API.
     Image_setNativeContext(env, image, NULL, -1);
 }
 
-static void ImageWriter_attachImage(JNIEnv* env, jobject thiz, jlong nativeCtx, jobject image) {
+static jint ImageWriter_attachAndQueueImage(JNIEnv* env, jobject thiz, jlong nativeCtx,
+        jlong nativeBuffer, jint imageFormat, jlong timestampNs, jint left, jint top,
+        jint right, jint bottom) {
     ALOGV("%s", __FUNCTION__);
     JNIImageWriterContext* const ctx = reinterpret_cast<JNIImageWriterContext *>(nativeCtx);
     if (ctx == NULL || thiz == NULL) {
         jniThrowException(env, "java/lang/IllegalStateException",
                 "ImageWriterContext is not initialized");
-        return;
+        return -1;
     }
 
-    sp<ANativeWindow> anw = ctx->getProducer();
+    sp<Surface> surface = ctx->getProducer();
+    status_t res = OK;
+    if (!isFormatOpaque(imageFormat)) {
+        // TODO: need implement, see b/19962027
+        jniThrowRuntimeException(env,
+                "nativeAttachImage for non-opaque image is not implement yet!!!");
+        return -1;
+    }
 
-    GraphicBuffer *buffer = NULL;
-    int fenceFd = -1;
-    Image_getNativeContext(env, image, &buffer, &fenceFd);
-    if (buffer == NULL) {
+    if (!isFormatOpaque(ctx->getBufferFormat())) {
         jniThrowException(env, "java/lang/IllegalStateException",
-                "Image is not initialized");
-        return;
+                "Trying to attach an opaque image into a non-opaque ImageWriter");
+        return -1;
     }
 
-    // TODO: need implement
-    jniThrowRuntimeException(env, "nativeAttachImage is not implement yet!!!");
+    // Image is guaranteed to be from ImageReader at this point, so it is safe to
+    // cast to BufferItem pointer.
+    BufferItem* opaqueBuffer = reinterpret_cast<BufferItem*>(nativeBuffer);
+    if (opaqueBuffer == NULL) {
+        jniThrowException(env, "java/lang/IllegalStateException",
+                "Image is not initialized or already closed");
+        return -1;
+    }
+
+    // Step 1. Attach Image
+    res = surface->attachBuffer(opaqueBuffer->mGraphicBuffer.get());
+    if (res != OK) {
+        // TODO: handle different error case separately.
+        ALOGE("Attach image failed: %s (%d)", strerror(-res), res);
+        jniThrowRuntimeException(env, "nativeAttachImage failed!!!");
+        return res;
+    }
+    sp < ANativeWindow > anw = surface;
+
+    // Step 2. Set timestamp and crop. Note that we do not need unlock the image because
+    // it was not locked.
+    ALOGV("timestamp to be queued: %" PRId64, timestampNs);
+    res = native_window_set_buffers_timestamp(anw.get(), timestampNs);
+    if (res != OK) {
+        jniThrowRuntimeException(env, "Set timestamp failed");
+        return res;
+    }
+
+    android_native_rect_t cropRect;
+    cropRect.left = left;
+    cropRect.top = top;
+    cropRect.right = right;
+    cropRect.bottom = bottom;
+    res = native_window_set_crop(anw.get(), &cropRect);
+    if (res != OK) {
+        jniThrowRuntimeException(env, "Set crop rect failed");
+        return res;
+    }
+
+    // Step 3. Queue Image.
+    res = anw->queueBuffer(anw.get(), opaqueBuffer->mGraphicBuffer.get(), /*fenceFd*/
+            -1);
+    if (res != OK) {
+        jniThrowRuntimeException(env, "Queue input buffer failed");
+        return res;
+    }
+
+    // Do not set the image native context. Since it would overwrite the existing native context
+    // of the image that is from ImageReader, the subsequent image close will run into issues.
+
+    return res;
 }
 
 // --------------------------Image methods---------------------------------------
@@ -534,10 +601,13 @@ static void Image_unlockIfLocked(JNIEnv* env, jobject thiz) {
 
     // Is locked?
     bool isLocked = false;
-    jobject planes = env->GetObjectField(thiz, gSurfaceImageClassInfo.mPlanes);
+    jobject planes = NULL;
+    if (!isFormatOpaque(buffer->getPixelFormat())) {
+        planes = env->GetObjectField(thiz, gSurfaceImageClassInfo.mPlanes);
+    }
     isLocked = (planes != NULL);
     if (isLocked) {
-        // no need to use fence here, as we it will be consumed by either concel or queue buffer.
+        // no need to use fence here, as we it will be consumed by either cancel or queue buffer.
         status_t res = buffer->unlock();
         if (res != OK) {
             jniThrowRuntimeException(env, "unlock buffer failed");
@@ -900,7 +970,7 @@ static jobjectArray Image_createSurfacePlanes(JNIEnv* env, jobject thiz,
     jobject byteBuffer;
 
     int format = Image_getFormat(env, thiz);
-    if (!isWritable(format) && numPlanes > 0) {
+    if (isFormatOpaque(format) && numPlanes > 0) {
         String8 msg;
         msg.appendFormat("Format 0x%x is opaque, thus not writable, the number of planes (%d)"
                 " must be 0", format, numPlanes);
@@ -914,6 +984,9 @@ static jobjectArray Image_createSurfacePlanes(JNIEnv* env, jobject thiz,
         jniThrowRuntimeException(env, "Failed to create SurfacePlane arrays,"
                 " probably out of memory");
         return NULL;
+    }
+    if (isFormatOpaque(format)) {
+        return surfacePlanes;
     }
 
     // Buildup buffer info: rowStride, pixelStride and byteBuffers.
@@ -943,13 +1016,9 @@ static jobjectArray Image_createSurfacePlanes(JNIEnv* env, jobject thiz,
 
 // -------------------------------Private convenience methods--------------------
 
-// Check if buffer with this format is writable. Generally speaking, the opaque formats
-// like IMPLEMENTATION_DEFINED is not writable, as the actual buffer formats and layouts
-// are unknown to frameworks.
-static bool isWritable(int format) {
-    // Assume all other formats are writable.
-    return !(format == HAL_PIXEL_FORMAT_IMPLEMENTATION_DEFINED ||
-            format == HAL_PIXEL_FORMAT_RAW_OPAQUE);
+static bool isFormatOpaque(int format) {
+    // Only treat IMPLEMENTATION_DEFINED as an opaque format for now.
+    return format == HAL_PIXEL_FORMAT_IMPLEMENTATION_DEFINED;
 }
 
 static bool isPossiblyYUV(PixelFormat format) {
@@ -986,8 +1055,8 @@ static JNINativeMethod gImageWriterMethods[] = {
     {"nativeClassInit",         "()V",                        (void*)ImageWriter_classInit },
     {"nativeInit",              "(Ljava/lang/Object;Landroid/view/Surface;I)J",
                                                               (void*)ImageWriter_init },
-    {"nativeClose",              "(J)V",                       (void*)ImageWriter_close },
-    {"nativeAttachImage",       "(JLandroid/media/Image;)V",  (void*)ImageWriter_attachImage },
+    {"nativeClose",              "(J)V",                      (void*)ImageWriter_close },
+    {"nativeAttachAndQueueImage", "(JJIJIIII)I",          (void*)ImageWriter_attachAndQueueImage },
     {"nativeDequeueInputImage", "(JLandroid/media/Image;)V",  (void*)ImageWriter_dequeueImage },
     {"nativeQueueInputImage",   "(JLandroid/media/Image;JIIII)V",  (void*)ImageWriter_queueImage },
     {"cancelImage",             "(JLandroid/media/Image;)V",   (void*)ImageWriter_cancelImage },

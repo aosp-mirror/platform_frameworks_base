@@ -98,7 +98,7 @@ public class ImageReader implements AutoCloseable {
      * @see Image
      */
     public static ImageReader newInstance(int width, int height, int format, int maxImages) {
-        if (format == PixelFormat.OPAQUE) {
+        if (format == ImageFormat.PRIVATE) {
             throw new IllegalArgumentException("To obtain an opaque ImageReader, please use"
                     + " newOpaqueInstance rather than newInstance");
         }
@@ -148,7 +148,7 @@ public class ImageReader implements AutoCloseable {
      * @see Image
      */
     public static ImageReader newOpaqueInstance(int width, int height, int maxImages) {
-        return new ImageReader(width, height, PixelFormat.OPAQUE, maxImages);
+        return new ImageReader(width, height, ImageFormat.PRIVATE, maxImages);
     }
 
     /**
@@ -261,7 +261,7 @@ public class ImageReader implements AutoCloseable {
      * @see ImageReader#newOpaqueInstance
      */
     public boolean isOpaque() {
-        return mFormat == PixelFormat.OPAQUE;
+        return mFormat == ImageFormat.PRIVATE;
     }
 
     /**
@@ -343,7 +343,7 @@ public class ImageReader implements AutoCloseable {
      * @hide
      */
     public Image acquireNextImageNoThrowISE() {
-        SurfaceImage si = new SurfaceImage();
+        SurfaceImage si = new SurfaceImage(mFormat);
         return acquireNextSurfaceImage(si) == ACQUIRE_SUCCESS ? si : null;
     }
 
@@ -408,7 +408,9 @@ public class ImageReader implements AutoCloseable {
      * @see #acquireLatestImage
      */
     public Image acquireNextImage() {
-        SurfaceImage si = new SurfaceImage();
+        // Initialize with reader format, but can be overwritten by native if the image
+        // format is different from the reader format.
+        SurfaceImage si = new SurfaceImage(mFormat);
         int status = acquireNextSurfaceImage(si);
 
         switch (status) {
@@ -565,9 +567,8 @@ public class ImageReader implements AutoCloseable {
        }
 
         SurfaceImage si = (SurfaceImage) image;
-        if (!si.isImageValid()) {
-            throw new IllegalStateException("Image is no longer valid");
-        }
+        si.throwISEIfImageIsInvalid();
+
         if (si.isAttachable()) {
             throw new IllegalStateException("Image was already detached from this ImageReader");
         }
@@ -607,7 +608,7 @@ public class ImageReader implements AutoCloseable {
             case ImageFormat.DEPTH16:
             case ImageFormat.DEPTH_POINT_CLOUD:
                 return 1;
-            case PixelFormat.OPAQUE:
+            case ImageFormat.PRIVATE:
                 return 0;
             default:
                 throw new UnsupportedOperationException(
@@ -684,18 +685,15 @@ public class ImageReader implements AutoCloseable {
     }
 
     private class SurfaceImage extends android.media.Image {
-        public SurfaceImage() {
+        public SurfaceImage(int format) {
             mIsImageValid = false;
+            mFormat = format;
         }
 
         @Override
         public void close() {
             if (mIsImageValid) {
-                if (!mIsDetached.get()) {
-                    // For detached images, the new owner is responsible for
-                    // releasing the resources
-                    ImageReader.this.releaseImage(this);
-                }
+                ImageReader.this.releaseImage(this);
             }
         }
 
@@ -705,70 +703,53 @@ public class ImageReader implements AutoCloseable {
 
         @Override
         public int getFormat() {
-            if (mIsImageValid) {
-                return ImageReader.this.mFormat;
-            } else {
-                throw new IllegalStateException("Image is already released");
-            }
+            throwISEIfImageIsInvalid();
+            return mFormat;
         }
 
         @Override
         public int getWidth() {
-            if (mIsImageValid) {
-                if (mWidth == -1) {
-                    mWidth = (getFormat() == ImageFormat.JPEG) ? ImageReader.this.getWidth() :
-                            nativeGetWidth();
-                }
-                return mWidth;
-            } else {
-                throw new IllegalStateException("Image is already released");
+            throwISEIfImageIsInvalid();
+            if (mWidth == -1) {
+                mWidth = (getFormat() == ImageFormat.JPEG) ? ImageReader.this.getWidth() :
+                        nativeGetWidth(mFormat);
             }
+            return mWidth;
         }
 
         @Override
         public int getHeight() {
-            if (mIsImageValid) {
-                if (mHeight == -1) {
-                    mHeight = (getFormat() == ImageFormat.JPEG) ? ImageReader.this.getHeight() :
-                            nativeGetHeight();
-                }
-                return mHeight;
-            } else {
-                throw new IllegalStateException("Image is already released");
+            throwISEIfImageIsInvalid();
+            if (mHeight == -1) {
+                mHeight = (getFormat() == ImageFormat.JPEG) ? ImageReader.this.getHeight() :
+                        nativeGetHeight(mFormat);
             }
+            return mHeight;
         }
 
         @Override
         public long getTimestamp() {
-            if (mIsImageValid) {
-                return mTimestamp;
-            } else {
-                throw new IllegalStateException("Image is already released");
-            }
+            throwISEIfImageIsInvalid();
+            return mTimestamp;
         }
 
         @Override
         public void setTimestamp(long timestampNs) {
-            if (mIsImageValid) {
-                mTimestamp = timestampNs;
-            } else {
-                throw new IllegalStateException("Image is already released");
-            }
+            throwISEIfImageIsInvalid();
+            mTimestamp = timestampNs;
         }
 
         @Override
         public Plane[] getPlanes() {
-            if (mIsImageValid) {
-                // Shallow copy is fine.
-                return mPlanes.clone();
-            } else {
-                throw new IllegalStateException("Image is already released");
-            }
+            throwISEIfImageIsInvalid();
+            // Shallow copy is fine.
+            return mPlanes.clone();
         }
 
         @Override
         public boolean isOpaque() {
-            return mFormat == PixelFormat.OPAQUE;
+            throwISEIfImageIsInvalid();
+            return mFormat == ImageFormat.PRIVATE;
         }
 
         @Override
@@ -782,15 +763,24 @@ public class ImageReader implements AutoCloseable {
 
         @Override
         boolean isAttachable() {
+            throwISEIfImageIsInvalid();
             return mIsDetached.get();
         }
 
         @Override
         ImageReader getOwner() {
+            throwISEIfImageIsInvalid();
             return ImageReader.this;
         }
 
+        @Override
+        long getNativeContext() {
+            throwISEIfImageIsInvalid();
+            return mNativeBuffer;
+        }
+
         private void setDetached(boolean detached) {
+            throwISEIfImageIsInvalid();
             mIsDetached.getAndSet(detached);
         }
 
@@ -798,8 +788,10 @@ public class ImageReader implements AutoCloseable {
             mIsImageValid = isValid;
         }
 
-        private boolean isImageValid() {
-            return mIsImageValid;
+        private void throwISEIfImageIsInvalid() {
+            if (!mIsImageValid) {
+                throw new IllegalStateException("Image is already closed");
+            }
         }
 
         private void clearSurfacePlanes() {
@@ -829,9 +821,7 @@ public class ImageReader implements AutoCloseable {
 
             @Override
             public ByteBuffer getBuffer() {
-                if (SurfaceImage.this.isImageValid() == false) {
-                    throw new IllegalStateException("Image is already released");
-                }
+                SurfaceImage.this.throwISEIfImageIsInvalid();
                 if (mBuffer != null) {
                     return mBuffer;
                 } else {
@@ -845,20 +835,14 @@ public class ImageReader implements AutoCloseable {
 
             @Override
             public int getPixelStride() {
-                if (SurfaceImage.this.isImageValid()) {
-                    return mPixelStride;
-                } else {
-                    throw new IllegalStateException("Image is already released");
-                }
+                SurfaceImage.this.throwISEIfImageIsInvalid();
+                return mPixelStride;
             }
 
             @Override
             public int getRowStride() {
-                if (SurfaceImage.this.isImageValid()) {
-                    return mRowStride;
-                } else {
-                    throw new IllegalStateException("Image is already released");
-                }
+                SurfaceImage.this.throwISEIfImageIsInvalid();
+                return mRowStride;
             }
 
             private void clearBuffer() {
@@ -885,7 +869,7 @@ public class ImageReader implements AutoCloseable {
          * This field is used to keep track of native object and used by native code only.
          * Don't modify.
          */
-        private long mLockedBuffer;
+        private long mNativeBuffer;
 
         /**
          * This field is set by native code during nativeImageSetup().
@@ -896,13 +880,14 @@ public class ImageReader implements AutoCloseable {
         private boolean mIsImageValid;
         private int mHeight = -1;
         private int mWidth = -1;
+        private int mFormat = ImageFormat.UNKNOWN;
         // If this image is detached from the ImageReader.
         private AtomicBoolean mIsDetached = new AtomicBoolean(false);
 
         private synchronized native ByteBuffer nativeImageGetBuffer(int idx, int readerFormat);
         private synchronized native SurfacePlane nativeCreatePlane(int idx, int readerFormat);
-        private synchronized native int nativeGetWidth();
-        private synchronized native int nativeGetHeight();
+        private synchronized native int nativeGetWidth(int format);
+        private synchronized native int nativeGetHeight(int format);
     }
 
     private synchronized native void nativeInit(Object weakSelf, int w, int h,
@@ -910,7 +895,7 @@ public class ImageReader implements AutoCloseable {
     private synchronized native void nativeClose();
     private synchronized native void nativeReleaseImage(Image i);
     private synchronized native Surface nativeGetSurface();
-    private synchronized native void nativeDetachImage(Image i);
+    private synchronized native int nativeDetachImage(Image i);
 
     /**
      * @return A return code {@code ACQUIRE_*}
