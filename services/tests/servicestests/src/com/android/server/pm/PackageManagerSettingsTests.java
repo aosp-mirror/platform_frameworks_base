@@ -134,7 +134,7 @@ public class PackageManagerSettingsTests extends AndroidTestCase {
     public void testSettingsReadOld() {
         // Write the package files and make sure they're parsed properly the first time
         writeOldFiles();
-        Settings settings = new Settings(getContext(), getContext().getFilesDir(), new Object());
+        Settings settings = new Settings(getContext().getFilesDir(), new Object());
         assertEquals(true, settings.readLPw(null, null, 0, false));
         assertNotNull(settings.peekPackageLPr(PACKAGE_NAME_3));
         assertNotNull(settings.peekPackageLPr(PACKAGE_NAME_1));
@@ -152,7 +152,7 @@ public class PackageManagerSettingsTests extends AndroidTestCase {
     public void testNewPackageRestrictionsFile() {
         // Write the package files and make sure they're parsed properly the first time
         writeOldFiles();
-        Settings settings = new Settings(getContext(), getContext().getFilesDir(), new Object());
+        Settings settings = new Settings(getContext().getFilesDir(), new Object());
         assertEquals(true, settings.readLPw(null, null, 0, false));
         settings.writeLPr();
 

@@ -1349,7 +1349,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         mOnlyCore = onlyCore;
         mLazyDexOpt = "eng".equals(SystemProperties.get("ro.build.type"));
         mMetrics = new DisplayMetrics();
-        mSettings = new Settings(mContext, mPackages);
+        mSettings = new Settings(mPackages);
         mSettings.addSharedUserLPw("android.uid.system", Process.SYSTEM_UID,
                 ApplicationInfo.FLAG_SYSTEM, ApplicationInfo.PRIVATE_FLAG_PRIVILEGED);
         mSettings.addSharedUserLPw("android.uid.phone", RADIO_UID,
@@ -1812,23 +1812,11 @@ public class PackageManagerService extends IPackageManager.Stub {
                     + "; regranting permissions for internal storage");
             mSettings.mInternalSdkPlatform = mSdkVersion;
 
-
-            // We keep track for which users we granted permissions to be able
-            // to grant runtime permissions to system apps for newly appeared
-            // users. If we supported runtime permissions during the previous
-            // boot, then we already granted permissions for all device users.
-            // In such a case we set the users for which we granted permissions
-            // to avoid clobbering of runtime permissions we granted to system
-            // apps but the user revoked later.
-            if (PackageManagerService.RUNTIME_PERMISSIONS_ENABLED &&
-                    mSettings.mRuntimePermissionEnabled) {
-                final int[] userIds = UserManagerService.getInstance().getUserIds();
-                for (PackageSetting ps : mSettings.mPackages.values()) {
-                    ps.setPermissionsUpdatedForUserIds(userIds);
-                }
-                for (SharedUserSetting sus : mSettings.mSharedUsers.values()) {
-                    sus.setPermissionsUpdatedForUserIds(userIds);
-                }
+            // For now runtime permissions are toggled via a system property.
+            if (!RUNTIME_PERMISSIONS_ENABLED) {
+                // Remove the runtime permissions state if the feature
+                // was disabled by flipping the system property.
+                mSettings.deleteRuntimePermissionsFiles();
             }
 
             updatePermissionsLPw(null, null, UPDATE_PERMISSIONS_ALL
@@ -2714,6 +2702,10 @@ public class PackageManagerService extends IPackageManager.Stub {
 
     @Override
     public boolean grantPermission(String packageName, String name, int userId) {
+        if (!RUNTIME_PERMISSIONS_ENABLED) {
+            return false;
+        }
+
         if (!sUserManager.exists(userId)) {
             return false;
         }
@@ -2724,6 +2716,9 @@ public class PackageManagerService extends IPackageManager.Stub {
 
         enforceCrossUserPermission(Binder.getCallingUid(), userId, true, false,
                 "grantPermission");
+
+        boolean gidsChanged = false;
+        final SettingBase sb;
 
         synchronized (mPackages) {
             final PackageParser.Package pkg = mPackages.get(packageName);
@@ -2738,7 +2733,7 @@ public class PackageManagerService extends IPackageManager.Stub {
 
             enforceDeclaredAsUsedAndRuntimePermission(pkg, bp);
 
-            final SettingBase sb = (SettingBase) pkg.mExtras;
+            sb = (SettingBase) pkg.mExtras;
             if (sb == null) {
                 throw new IllegalArgumentException("Unknown package: " + packageName);
             }
@@ -2752,19 +2747,27 @@ public class PackageManagerService extends IPackageManager.Stub {
                 }
 
                 case PermissionsState.PERMISSION_OPERATION_SUCCESS_GIDS_CHANGED: {
-                    killSettingPackagesForUser(sb, userId, KILL_APP_REASON_GIDS_CHANGED);
+                    gidsChanged = true;
                 } break;
             }
 
             // Not critical if that is lost - app has to request again.
             mSettings.writeRuntimePermissionsForUserLPr(userId, false);
-
-            return true;
         }
+
+        if (gidsChanged) {
+            killSettingPackagesForUser(sb, userId, KILL_APP_REASON_GIDS_CHANGED);
+        }
+
+        return true;
     }
 
     @Override
     public boolean revokePermission(String packageName, String name, int userId) {
+        if (!RUNTIME_PERMISSIONS_ENABLED) {
+            return false;
+        }
+
         if (!sUserManager.exists(userId)) {
             return false;
         }
@@ -2775,6 +2778,8 @@ public class PackageManagerService extends IPackageManager.Stub {
 
         enforceCrossUserPermission(Binder.getCallingUid(), userId, true, false,
                 "revokePermission");
+
+        final SettingBase sb;
 
         synchronized (mPackages) {
             final PackageParser.Package pkg = mPackages.get(packageName);
@@ -2789,7 +2794,7 @@ public class PackageManagerService extends IPackageManager.Stub {
 
             enforceDeclaredAsUsedAndRuntimePermission(pkg, bp);
 
-            final SettingBase sb = (SettingBase) pkg.mExtras;
+            sb = (SettingBase) pkg.mExtras;
             if (sb == null) {
                 throw new IllegalArgumentException("Unknown package: " + packageName);
             }
@@ -2801,13 +2806,13 @@ public class PackageManagerService extends IPackageManager.Stub {
                 return false;
             }
 
-            killSettingPackagesForUser(sb, userId, KILL_APP_REASON_PERMISSIONS_REVOKED);
-
             // Critical, after this call all should never have the permission.
             mSettings.writeRuntimePermissionsForUserLPr(userId, true);
-
-            return true;
         }
+
+        killSettingPackagesForUser(sb, userId, KILL_APP_REASON_PERMISSIONS_REVOKED);
+
+        return true;
     }
 
     @Override
@@ -7067,7 +7072,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                                     <= Build.VERSION_CODES.LOLLIPOP_MR1) {
                         // For legacy apps dangerous permissions are install time ones.
                         grant = GRANT_INSTALL;
-                    } else if ((pkg.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0) {
+                    } else if (ps.isSystem()) {
                         final int[] updatedUserIds = ps.getPermissionsUpdatedForUserIds();
                         if (origPermissions.hasInstallPermission(bp.name)) {
                             // If a system app had an install permission, then the app was
@@ -7200,11 +7205,13 @@ public class PackageManagerService extends IPackageManager.Stub {
             ps.installPermissionsFixed = true;
         }
 
-        ps.setPermissionsUpdatedForUserIds(changedRuntimePermissionUserIds);
+        ps.setPermissionsUpdatedForUserIds(currentUserIds);
 
         // Persist the runtime permissions state for users with changes.
-        for (int userId : changedRuntimePermissionUserIds) {
-           mSettings.writeRuntimePermissionsForUserLPr(userId, true);
+        if (RUNTIME_PERMISSIONS_ENABLED) {
+            for (int userId : changedRuntimePermissionUserIds) {
+                mSettings.writeRuntimePermissionsForUserLPr(userId, true);
+            }
         }
     }
 
@@ -11043,15 +11050,18 @@ public class PackageManagerService extends IPackageManager.Stub {
                         for (int userId : UserManagerService.getInstance().getUserIds()) {
                             final int userIdToKill = mSettings.updateSharedUserPermsLPw(deletedPs,
                                     userId);
-                            if (userIdToKill == userId) {
+                            if (userIdToKill == UserHandle.USER_ALL
+                                    || userIdToKill >= UserHandle.USER_OWNER) {
                                 // If gids changed for this user, kill all affected packages.
-                                killSettingPackagesForUser(deletedPs, userIdToKill,
-                                        KILL_APP_REASON_GIDS_CHANGED);
-                            } else if (userIdToKill == UserHandle.USER_ALL) {
-                                // If gids changed for all users, kill them all - done.
-                                killSettingPackagesForUser(deletedPs, userIdToKill,
-                                        KILL_APP_REASON_GIDS_CHANGED);
-                                break;
+                                mHandler.post(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        // This has to happen with no lock held.
+                                        killSettingPackagesForUser(deletedPs, userIdToKill,
+                                                KILL_APP_REASON_GIDS_CHANGED);
+                                    }
+                                });
+                            break;
                             }
                         }
                     }

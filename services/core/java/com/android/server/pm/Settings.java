@@ -25,7 +25,6 @@ import static android.Manifest.permission.READ_EXTERNAL_STORAGE;
 import static android.os.Process.SYSTEM_UID;
 import static android.os.Process.PACKAGE_INFO_GID;
 
-import android.content.Context;
 import android.content.IntentFilter;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ResolveInfo;
@@ -175,10 +174,8 @@ final class Settings {
     private static final String ATTR_HIDDEN = "hidden";
     private static final String ATTR_INSTALLED = "inst";
     private static final String ATTR_BLOCK_UNINSTALL = "blockUninstall";
-    private static final String ATTR_RUNTIME_PERMSISSIONS_ENABLED = "runtime-permissions-enabled";
 
     private final Object mLock;
-    private final Context mContext;
 
     private final RuntimePermissionPersistence mRuntimePermissionsPersistence;
 
@@ -201,10 +198,6 @@ final class Settings {
     // used to grant newer permissions one time during a system upgrade.
     int mInternalSdkPlatform;
     int mExternalSdkPlatform;
-
-
-    // Whether runtime permissions are enabled.
-    boolean mRuntimePermissionEnabled;
 
     /**
      * The current database version for apps on internal storage. This is
@@ -282,12 +275,11 @@ final class Settings {
 
     public final KeySetManagerService mKeySetManagerService = new KeySetManagerService(mPackages);
 
-    Settings(Context context, Object lock) {
-        this(context, Environment.getDataDirectory(), lock);
+    Settings(Object lock) {
+        this(Environment.getDataDirectory(), lock);
     }
 
-    Settings(Context context, File dataDir, Object lock) {
-        mContext = context;
+    Settings(File dataDir, Object lock) {
         mLock = lock;
 
         mRuntimePermissionsPersistence = new RuntimePermissionPersistence(mLock);
@@ -951,6 +943,17 @@ final class Settings {
         // This instead of Environment.getUserSystemDirectory(userId) to support testing.
         File userDir = new File(new File(mSystemDir, "users"), Integer.toString(userId));
         return new File(userDir, RUNTIME_PERMISSIONS_FILE_NAME);
+    }
+
+    boolean isFirstRuntimePermissionsBoot() {
+        return !getUserRuntimePermissionsFile(UserHandle.USER_OWNER).exists();
+    }
+
+    void deleteRuntimePermissionsFiles() {
+        for (int userId : UserManagerService.getInstance().getUserIds()) {
+            File file = getUserRuntimePermissionsFile(userId);
+            file.delete();
+        }
     }
 
     private File getUserPackagesStateBackupFile(int userId) {
@@ -1650,8 +1653,6 @@ final class Settings {
             serializer.attribute(null, "internal", Integer.toString(mInternalSdkPlatform));
             serializer.attribute(null, "external", Integer.toString(mExternalSdkPlatform));
             serializer.attribute(null, "fingerprint", mFingerprint);
-            serializer.attribute(null, ATTR_RUNTIME_PERMSISSIONS_ENABLED,
-                    String.valueOf(PackageManagerService.RUNTIME_PERMISSIONS_ENABLED));
             serializer.endTag(null, "last-platform-version");
 
             serializer.startTag(null, "database-version");
@@ -2148,8 +2149,6 @@ final class Settings {
                     } catch (NumberFormatException e) {
                     }
                     mFingerprint = parser.getAttributeValue(null, "fingerprint");
-                    mRuntimePermissionEnabled = XmlUtils.readBooleanAttribute(parser,
-                            ATTR_RUNTIME_PERMSISSIONS_ENABLED);
                 } else if (tagName.equals("database-version")) {
                     mInternalDatabaseVersion = mExternalDatabaseVersion = 0;
                     try {
@@ -2739,6 +2738,18 @@ final class Settings {
             }
         }
 
+        // We keep track for which users we granted permissions to be able
+        // to grant runtime permissions to system apps for newly appeared
+        // users or newly appeared system apps. If we supported runtime
+        // permissions during the previous boot, then we already granted
+        // permissions for all device users. In such a case we set the users
+        // for which we granted permissions to avoid clobbering of runtime
+        // permissions we granted to system apps but the user revoked later.
+        if (!isFirstRuntimePermissionsBoot()) {
+            final int[] userIds = UserManagerService.getInstance().getUserIds();
+            ps.setPermissionsUpdatedForUserIds(userIds);
+        }
+
         mDisabledSysPackages.put(name, ps);
     }
 
@@ -3019,6 +3030,18 @@ final class Settings {
                     XmlUtils.skipCurrentTag(parser);
                 }
             }
+
+            // We keep track for which users we granted permissions to be able
+            // to grant runtime permissions to system apps for newly appeared
+            // users or newly appeared system apps. If we supported runtime
+            // permissions during the previous boot, then we already granted
+            // permissions for all device users. In such a case we set the users
+            // for which we granted permissions to avoid clobbering of runtime
+            // permissions we granted to system apps but the user revoked later.
+            if (!isFirstRuntimePermissionsBoot()) {
+                final int[] userIds = UserManagerService.getInstance().getUserIds();
+                packageSetting.setPermissionsUpdatedForUserIds(userIds);
+            }
         } else {
             XmlUtils.skipCurrentTag(parser);
         }
@@ -3135,6 +3158,18 @@ final class Settings {
                             "Unknown element under <shared-user>: " + parser.getName());
                     XmlUtils.skipCurrentTag(parser);
                 }
+            }
+
+            // We keep track for which users we granted permissions to be able
+            // to grant runtime permissions to system apps for newly appeared
+            // users or newly appeared system apps. If we supported runtime
+            // permissions during the previous boot, then we already granted
+            // permissions for all device users. In such a case we set the users
+            // for which we granted permissions to avoid clobbering of runtime
+            // permissions we granted to system apps but the user revoked later.
+            if (!isFirstRuntimePermissionsBoot()) {
+                final int[] userIds = UserManagerService.getInstance().getUserIds();
+                su.setPermissionsUpdatedForUserIds(userIds);
             }
         } else {
             XmlUtils.skipCurrentTag(parser);
@@ -3850,11 +3885,19 @@ final class Settings {
         }
 
         public void writePermissionsForUserSyncLPr(int userId) {
+            if (!PackageManagerService.RUNTIME_PERMISSIONS_ENABLED) {
+                return;
+            }
+
             mHandler.removeMessages(userId);
             writePermissionsSync(userId);
         }
 
         public void writePermissionsForUserAsyncLPr(int userId) {
+            if (!PackageManagerService.RUNTIME_PERMISSIONS_ENABLED) {
+                return;
+            }
+
             final long currentTimeMillis = SystemClock.uptimeMillis();
 
             if (mWriteScheduled.get(userId)) {
@@ -4014,128 +4057,67 @@ final class Settings {
 
         private void parseRuntimePermissionsLPr(XmlPullParser parser, int userId)
                 throws IOException, XmlPullParserException {
-            parser.next();
-            skipEmptyTextTags(parser);
-            if (!accept(parser, XmlPullParser.START_TAG, TAG_RUNTIME_PERMISSIONS)) {
-                return;
-            }
+            final int outerDepth = parser.getDepth();
+            int type;
+            while ((type = parser.next()) != XmlPullParser.END_DOCUMENT
+                    && (type != XmlPullParser.END_TAG || parser.getDepth() > outerDepth)) {
+                if (type == XmlPullParser.END_TAG || type == XmlPullParser.TEXT) {
+                    continue;
+                }
 
-            parser.next();
+                switch (parser.getName()) {
+                    case TAG_PACKAGE: {
+                        String name = parser.getAttributeValue(null, ATTR_NAME);
+                        PackageSetting ps = mPackages.get(name);
+                        if (ps == null) {
+                            Slog.w(PackageManagerService.TAG, "Unknown package:" + name);
+                            XmlUtils.skipCurrentTag(parser);
+                            continue;
+                        }
+                        parsePermissionsLPr(parser, ps.getPermissionsState(), userId);
+                    } break;
 
-            while (parsePackageLPr(parser, userId)
-                    || parseSharedUserLPr(parser, userId)) {
-                parser.next();
-            }
-
-            skipEmptyTextTags(parser);
-            expect(parser, XmlPullParser.END_TAG, TAG_RUNTIME_PERMISSIONS);
-        }
-
-        private boolean parsePackageLPr(XmlPullParser parser, int userId)
-                throws IOException, XmlPullParserException {
-            skipEmptyTextTags(parser);
-            if (!accept(parser, XmlPullParser.START_TAG, TAG_PACKAGE)) {
-                return false;
-            }
-
-            String name = parser.getAttributeValue(null, ATTR_NAME);
-
-            parser.next();
-
-            PackageSetting ps = mPackages.get(name);
-            if (ps != null) {
-                while (parsePermissionLPr(parser, ps.getPermissionsState(), userId)) {
-                    parser.next();
+                    case TAG_SHARED_USER: {
+                        String name = parser.getAttributeValue(null, ATTR_NAME);
+                        SharedUserSetting sus = mSharedUsers.get(name);
+                        if (sus == null) {
+                            Slog.w(PackageManagerService.TAG, "Unknown shared user:" + name);
+                            XmlUtils.skipCurrentTag(parser);
+                            continue;
+                        }
+                        parsePermissionsLPr(parser, sus.getPermissionsState(), userId);
+                    } break;
                 }
             }
-
-            skipEmptyTextTags(parser);
-            expect(parser, XmlPullParser.END_TAG, TAG_PACKAGE);
-
-            return true;
         }
 
-        private boolean parseSharedUserLPr(XmlPullParser parser, int userId)
-                throws IOException, XmlPullParserException {
-            skipEmptyTextTags(parser);
-            if (!accept(parser, XmlPullParser.START_TAG, TAG_SHARED_USER)) {
-                return false;
-            }
-
-            String name = parser.getAttributeValue(null, ATTR_NAME);
-
-            parser.next();
-
-            SharedUserSetting sus = mSharedUsers.get(name);
-            if (sus != null) {
-                while (parsePermissionLPr(parser, sus.getPermissionsState(), userId)) {
-                    parser.next();
-                }
-            }
-
-            skipEmptyTextTags(parser);
-            expect(parser, XmlPullParser.END_TAG, TAG_SHARED_USER);
-
-            return true;
-        }
-
-        private boolean parsePermissionLPr(XmlPullParser parser, PermissionsState permissionsState,
+        private void parsePermissionsLPr(XmlPullParser parser, PermissionsState permissionsState,
                 int userId) throws IOException, XmlPullParserException {
-            skipEmptyTextTags(parser);
-            if (!accept(parser, XmlPullParser.START_TAG, TAG_ITEM)) {
-                return false;
-            }
-
-            String name = parser.getAttributeValue(null, ATTR_NAME);
-
-            parser.next();
-
-            BasePermission bp = mPermissions.get(name);
-            if (bp != null) {
-                if (permissionsState.grantRuntimePermission(bp, userId) ==
-                        PermissionsState.PERMISSION_OPERATION_FAILURE) {
-                    Slog.w(PackageManagerService.TAG, "Duplicate permission:" + name);
+            final int outerDepth = parser.getDepth();
+            int type;
+            while ((type = parser.next()) != XmlPullParser.END_DOCUMENT
+                    && (type != XmlPullParser.END_TAG || parser.getDepth() > outerDepth)) {
+                if (type == XmlPullParser.END_TAG || type == XmlPullParser.TEXT) {
+                    continue;
                 }
-            } else {
-                Slog.w(PackageManagerService.TAG, "Unknown permission:" + name);
-            }
 
-            skipEmptyTextTags(parser);
-            expect(parser, XmlPullParser.END_TAG, TAG_ITEM);
+                switch (parser.getName()) {
+                    case TAG_ITEM: {
+                        String name = parser.getAttributeValue(null, ATTR_NAME);
+                        BasePermission bp = mPermissions.get(name);
+                        if (bp == null) {
+                            Slog.w(PackageManagerService.TAG, "Unknown permission:" + name);
+                            XmlUtils.skipCurrentTag(parser);
+                            continue;
+                        }
 
-            return true;
-        }
-
-        private void expect(XmlPullParser parser, int type, String tag)
-                throws IOException, XmlPullParserException {
-            if (!accept(parser, type, tag)) {
-                throw new XmlPullParserException("Expected event: " + type
-                        + " and tag: " + tag + " but got event: " + parser.getEventType()
-                        + " and tag:" + parser.getName());
-            }
-        }
-
-        private void skipEmptyTextTags(XmlPullParser parser)
-                throws IOException, XmlPullParserException {
-            while (accept(parser, XmlPullParser.TEXT, null)
-                    && parser.isWhitespace()) {
-                parser.next();
-            }
-        }
-
-        private boolean accept(XmlPullParser parser, int type, String tag)
-                throws IOException, XmlPullParserException {
-            if (parser.getEventType() != type) {
-                return false;
-            }
-            if (tag != null) {
-                if (!tag.equals(parser.getName())) {
-                    return false;
+                        if (permissionsState.grantRuntimePermission(bp, userId) ==
+                                PermissionsState.PERMISSION_OPERATION_FAILURE) {
+                            Slog.w(PackageManagerService.TAG, "Duplicate permission:" + name);
+                        }
+                    } break;
                 }
-            } else if (parser.getName() != null) {
-                return false;
             }
-            return true;
         }
 
         private void writePermissions(XmlSerializer serializer, Set<String> permissions)
