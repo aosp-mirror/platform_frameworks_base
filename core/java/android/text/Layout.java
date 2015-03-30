@@ -225,17 +225,17 @@ public abstract class Layout {
 
         // Draw the lines, one at a time.
         // The baseline is the top of the following line minus the current line's descent.
-        for (int i = firstLine; i <= lastLine; i++) {
+        for (int lineNum = firstLine; lineNum <= lastLine; lineNum++) {
             int start = previousLineEnd;
-            previousLineEnd = getLineStart(i + 1);
-            int end = getLineVisibleEnd(i, start, previousLineEnd);
+            previousLineEnd = getLineStart(lineNum + 1);
+            int end = getLineVisibleEnd(lineNum, start, previousLineEnd);
 
             int ltop = previousLineBottom;
-            int lbottom = getLineTop(i+1);
+            int lbottom = getLineTop(lineNum + 1);
             previousLineBottom = lbottom;
-            int lbaseline = lbottom - getLineDescent(i);
+            int lbaseline = lbottom - getLineDescent(lineNum);
 
-            int dir = getParagraphDirection(i);
+            int dir = getParagraphDirection(lineNum);
             int left = 0;
             int right = mWidth;
 
@@ -254,7 +254,7 @@ public abstract class Layout {
                 // just collect the ones present at the start of the paragraph.
                 // If spanEnd is before the end of the paragraph, that's not
                 // our problem.
-                if (start >= spanEnd && (i == firstLine || isFirstParaLine)) {
+                if (start >= spanEnd && (lineNum == firstLine || isFirstParaLine)) {
                     spanEnd = sp.nextSpanTransition(start, textLength,
                                                     ParagraphStyle.class);
                     spans = getParagraphSpans(sp, start, spanEnd, ParagraphStyle.class);
@@ -280,7 +280,7 @@ public abstract class Layout {
                         int startLine = getLineForOffset(sp.getSpanStart(spans[n]));
                         // if there is more than one LeadingMarginSpan2, use
                         // the count that is greatest
-                        if (i < startLine + count) {
+                        if (lineNum < startLine + count) {
                             useFirstLineMargin = true;
                             break;
                         }
@@ -304,7 +304,7 @@ public abstract class Layout {
                 }
             }
 
-            boolean hasTabOrEmoji = getLineContainsTab(i);
+            boolean hasTabOrEmoji = getLineContainsTab(lineNum);
             // Can't tell if we have tabs for sure, currently
             if (hasTabOrEmoji && !tabStopsIsInitialized) {
                 if (tabStops == null) {
@@ -333,7 +333,7 @@ public abstract class Layout {
                     x = right;
                 }
             } else {
-                int max = (int)getLineExtent(i, tabStops, false);
+                int max = (int)getLineExtent(lineNum, tabStops, false);
                 if (align == Alignment.ALIGN_OPPOSITE) {
                     if (dir == DIR_LEFT_TO_RIGHT) {
                         x = right - max;
@@ -346,7 +346,8 @@ public abstract class Layout {
                 }
             }
 
-            Directions directions = getLineDirections(i);
+            paint.setHyphenEdit(getHyphen(lineNum));
+            Directions directions = getLineDirections(lineNum);
             if (directions == DIRS_ALL_LEFT_TO_RIGHT && !mSpannedText && !hasTabOrEmoji) {
                 // XXX: assumes there's nothing additional to be done
                 canvas.drawText(buf, start, end, x, lbaseline, paint);
@@ -676,6 +677,15 @@ public abstract class Layout {
      * bottom line of the Layout.
      */
     public abstract int getBottomPadding();
+
+    /**
+     * Returns the hyphen edit for a line.
+     *
+     * @hide
+     */
+    public int getHyphen(int line) {
+        return 0;
+    }
 
 
     /**
