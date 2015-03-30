@@ -381,12 +381,12 @@ please see styles_device_defaults.xml.
 
     <style name="TextAppearance.Material.TimePicker.TimeLabel" parent="TextAppearance.Material">
         <item name="textSize">@dimen/timepicker_time_label_size</item>
-        <item name="textColor">@color/time_picker_header_text_material</item>
+        <item name="textColor">@color/primary_text_secondary_when_activated_material_inverse</item>
     </style>
 
     <style name="TextAppearance.Material.TimePicker.AmPmLabel" parent="TextAppearance.Material.Button">
         <item name="textSize">@dimen/timepicker_ampm_label_size</item>
-        <item name="textColor">@color/time_picker_header_text_material</item>
+        <item name="textColor">@color/primary_text_secondary_when_activated_material_inverse</item>
     </style>
 
     <style name="TextAppearance.Material.DatePicker.DayOfWeekLabel" parent="TextAppearance.Material">
@@ -660,8 +660,7 @@ please see styles_device_defaults.xml.
         <item name="legacyLayout">@layout/time_picker_legacy_material</item>
         <!-- Attributes for new-style TimePicker. -->
         <item name="internalLayout">@layout/time_picker_material</item>
-        <item name="headerTimeTextAppearance">@style/TextAppearance.Material.TimePicker.TimeLabel</item>
-        <item name="headerAmPmTextAppearance">@style/TextAppearance.Material.TimePicker.AmPmLabel</item>
+        <item name="headerTextColor">@color/primary_text_secondary_when_activated_material</item>
         <item name="headerBackground">#ff555555</item>
         <item name="numbersTextColor">?attr/textColorPrimaryActivated</item>
         <item name="numbersInnerTextColor">?attr/textColorSecondaryActivated</item>
@@ -1033,6 +1032,7 @@ please see styles_device_defaults.xml.
     <style name="Widget.Material.Light.NumberPicker" parent="Widget.Material.NumberPicker"/>
 
     <style name="Widget.Material.Light.TimePicker" parent="Widget.Material.TimePicker">
+        <item name="headerTextColor">@color/primary_text_secondary_when_activated_material_inverse</item>
         <item name="headerBackground">?attr/colorAccent</item>
         <item name="numbersBackgroundColor">#ffeeeeee</item>
     </style>
