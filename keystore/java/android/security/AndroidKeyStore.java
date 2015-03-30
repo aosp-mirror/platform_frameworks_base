@@ -494,6 +494,19 @@ public class AndroidKeyStore extends KeyStoreSpi {
             args.addInt(KeymasterDefs.KM_TAG_DIGEST,
                     KeyStoreKeyConstraints.Digest.toKeymaster(digest));
         }
+        if (keyAlgorithm == KeyStoreKeyConstraints.Algorithm.HMAC) {
+            if (digest == null) {
+                throw new IllegalStateException("Digest algorithm must be specified for key"
+                        + " algorithm " + keyAlgorithmString);
+            }
+            Integer digestOutputSizeBytes =
+                    KeyStoreKeyConstraints.Digest.getOutputSizeBytes(digest);
+            if (digestOutputSizeBytes != null) {
+                // TODO: Remove MAC length constraint once Keymaster API no longer requires it.
+                // TODO: Switch to bits instead of bytes, once this is fixed in Keymaster
+                args.addInt(KeymasterDefs.KM_TAG_MAC_LENGTH, digestOutputSizeBytes);
+            }
+        }
 
         @KeyStoreKeyConstraints.PurposeEnum int purposes = (params.getPurposes() != null)
                 ? params.getPurposes()

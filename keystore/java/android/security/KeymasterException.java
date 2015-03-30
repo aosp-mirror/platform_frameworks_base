@@ -7,7 +7,14 @@ package android.security;
  */
 public class KeymasterException extends Exception {
 
-    public KeymasterException(String message) {
+    private final int mErrorCode;
+
+    public KeymasterException(int errorCode, String message) {
         super(message);
+        mErrorCode = errorCode;
+    }
+
+    public int getErrorCode() {
+        return mErrorCode;
     }
 }
