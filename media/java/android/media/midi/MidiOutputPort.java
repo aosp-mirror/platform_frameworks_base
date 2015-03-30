@@ -21,6 +21,8 @@ import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.util.Log;
 
+import com.android.internal.midi.MidiDispatcher;
+
 import dalvik.system.CloseGuard;
 
 import libcore.io.IoUtils;
