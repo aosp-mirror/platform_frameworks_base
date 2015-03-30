@@ -139,7 +139,8 @@ public class RenderScript {
      * Returns an identifier that can be used to identify a particular
      * minor version of RS.
      *
-     * @hide
+     * @return The minor RenderScript version number
+     *
      */
     public static long getMinorID() {
         return sMinorID;
@@ -1321,7 +1322,6 @@ public class RenderScript {
     /**
      * Create a RenderScript context.
      *
-     * @hide
      * @param ctx The context.
      * @return RenderScript
      */
@@ -1418,14 +1418,13 @@ public class RenderScript {
      /**
      * Gets or creates a RenderScript context of the specified type.
      *
-     * @hide
      * @param ctx The context.
      * @param ct The type of context to be created.
      * @param sdkVersion The target SDK Version.
      * @param flags The OR of the CREATE_FLAG_* options desired
      * @return RenderScript
      */
-    public static RenderScript create(Context ctx, int sdkVersion, ContextType ct, int flags) {
+    private static RenderScript create(Context ctx, int sdkVersion, ContextType ct, int flags) {
         if (sdkVersion < 23) {
             return internalCreate(ctx, sdkVersion, ct, flags);
         }
@@ -1448,8 +1447,6 @@ public class RenderScript {
     }
 
     /**
-     * @hide
-     *
      * Releases all the process contexts.  This is the same as
      * calling .destroy() on each unique context retreived with
      * create(...). If no contexts have been created this
@@ -1486,7 +1483,6 @@ public class RenderScript {
      *
      * If you need a single context please use create()
      *
-     * @hide
      * @param ctx The context.
      * @return RenderScript
      */

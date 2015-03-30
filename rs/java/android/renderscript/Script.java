@@ -66,7 +66,6 @@ public class Script extends BaseObj {
     }
 
     /**
-     * @hide Pending API review
      * InvokeID is an identifier for an invoke function. It is used
      * as an identifier for ScriptGroup creation.
      *
@@ -86,7 +85,6 @@ public class Script extends BaseObj {
 
     private final SparseArray<InvokeID> mIIDs = new SparseArray<InvokeID>();
     /**
-     * @hide Pending API review
      * Only to be used by generated reflected classes.
      */
     protected InvokeID createInvokeID(int slot) {
@@ -222,22 +220,21 @@ public class Script extends BaseObj {
 
     /**
      * Only intended for use by generated reflected code.
-     *
-     * @hide
      */
     protected void forEach(int slot, Allocation[] ains, Allocation aout,
                            FieldPacker v) {
+
+        // FieldPacker is kept here to support regular params in the future.
         forEach(slot, ains, aout, v, null);
     }
 
     /**
      * Only intended for use by generated reflected code.
-     *
-     * @hide
      */
     protected void forEach(int slot, Allocation[] ains, Allocation aout,
                            FieldPacker v, LaunchOptions sc) {
         // TODO: Is this necessary if nScriptForEach calls validate as well?
+        // FieldPacker is kept here to support regular params in the future.
         mRS.validate();
         if (ains != null) {
             for (Allocation ain : ains) {
