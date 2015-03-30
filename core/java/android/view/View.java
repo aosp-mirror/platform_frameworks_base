@@ -9959,6 +9959,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @param oldt Previous vertical scroll origin.
      */
     protected void onScrollChanged(int l, int t, int oldl, int oldt) {
+        notifySubtreeAccessibilityStateChangedIfNeeded();
+
         if (AccessibilityManager.getInstance(mContext).isEnabled()) {
             postSendViewScrolledAccessibilityEventCallback();
         }

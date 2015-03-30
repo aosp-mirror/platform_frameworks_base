@@ -6268,39 +6268,77 @@ public final class ViewRootImpl implements ViewParent,
 
 
             case AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED: {
-                if (mAccessibilityFocusedHost != null && mAccessibilityFocusedVirtualView != null) {
-                    // We care only for changes rooted in the focused host.
-                    final long eventSourceId = event.getSourceNodeId();
-                    final int hostViewId = AccessibilityNodeInfo.getAccessibilityViewId(
-                            eventSourceId);
-                    if (hostViewId != mAccessibilityFocusedHost.getAccessibilityViewId()) {
-                        break;
-                    }
-
-                    // We only care about changes that may change the virtual focused view bounds.
-                    final int changes = event.getContentChangeTypes();
-                    if ((changes & AccessibilityEvent.CONTENT_CHANGE_TYPE_SUBTREE) != 0
-                            || changes == AccessibilityEvent.CONTENT_CHANGE_TYPE_UNDEFINED) {
-                        AccessibilityNodeProvider provider = mAccessibilityFocusedHost
-                                .getAccessibilityNodeProvider();
-                        if (provider != null) {
-                            final int virtualChildId = AccessibilityNodeInfo.getVirtualDescendantId(
-                                    mAccessibilityFocusedVirtualView.getSourceNodeId());
-                            if (virtualChildId == AccessibilityNodeInfo.UNDEFINED_ITEM_ID) {
-                                mAccessibilityFocusedVirtualView = provider
-                                        .createAccessibilityNodeInfo(
-                                                AccessibilityNodeProvider.HOST_VIEW_ID);
-                            } else {
-                                mAccessibilityFocusedVirtualView = provider
-                                        .createAccessibilityNodeInfo(virtualChildId);
-                            }
-                        }
-                    }
-                }
+                handleWindowContentChangedEvent(event);
             } break;
         }
         mAccessibilityManager.sendAccessibilityEvent(event);
         return true;
+    }
+
+    /**
+     * Updates the focused virtual view, when necessary, in response to a
+     * content changed event.
+     * <p>
+     * This is necessary to get updated bounds after a position change.
+     *
+     * @param event an accessibility event of type
+     *              {@link AccessibilityEvent#TYPE_WINDOW_CONTENT_CHANGED}
+     */
+    private void handleWindowContentChangedEvent(AccessibilityEvent event) {
+        // No virtual view focused, nothing to do here.
+        if (mAccessibilityFocusedHost == null || mAccessibilityFocusedVirtualView == null) {
+            return;
+        }
+
+        // If we have a node but no provider, abort.
+        final AccessibilityNodeProvider provider =
+                mAccessibilityFocusedHost.getAccessibilityNodeProvider();
+        if (provider == null) {
+            // TODO: Should we clear the focused virtual view?
+            return;
+        }
+
+        // We only care about change types that may affect the bounds of the
+        // focused virtual view.
+        final int changes = event.getContentChangeTypes();
+        if ((changes & AccessibilityEvent.CONTENT_CHANGE_TYPE_SUBTREE) == 0
+                && changes != AccessibilityEvent.CONTENT_CHANGE_TYPE_UNDEFINED) {
+            return;
+        }
+
+        final long eventSourceNodeId = event.getSourceNodeId();
+        final int changedViewId = AccessibilityNodeInfo.getAccessibilityViewId(eventSourceNodeId);
+
+        // Search up the tree for subtree containment.
+        boolean hostInSubtree = false;
+        View root = mAccessibilityFocusedHost;
+        while (root != null && !hostInSubtree) {
+            if (changedViewId == root.getAccessibilityViewId()) {
+                hostInSubtree = true;
+            } else {
+                final ViewParent parent = root.getParent();
+                if (parent instanceof View) {
+                    root = (View) parent;
+                } else {
+                    root = null;
+                }
+            }
+        }
+
+        // We care only about changes in subtrees containing the host view.
+        if (!hostInSubtree) {
+            return;
+        }
+
+        final long focusedSourceNodeId = mAccessibilityFocusedVirtualView.getSourceNodeId();
+        int focusedChildId = AccessibilityNodeInfo.getVirtualDescendantId(focusedSourceNodeId);
+        if (focusedChildId == AccessibilityNodeInfo.UNDEFINED_ITEM_ID) {
+            // TODO: Should we clear the focused virtual view?
+            focusedChildId = AccessibilityNodeProvider.HOST_VIEW_ID;
+        }
+
+        // Refresh the node for the focused virtual view.
+        mAccessibilityFocusedVirtualView = provider.createAccessibilityNodeInfo(focusedChildId);
     }
 
     @Override
