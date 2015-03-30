@@ -58,14 +58,16 @@ abstract class RequestArcAction extends HdmiCecFeatureAction {
             // received without <Request ARC Initiation> or <Request ARC Termination>.
             case Constants.MESSAGE_FEATURE_ABORT:
                 int originalOpcode = cmd.getParams()[0] & 0xFF;
-                if (originalOpcode == Constants.MESSAGE_REQUEST_ARC_INITIATION
-                        || originalOpcode == Constants.MESSAGE_REQUEST_ARC_TERMINATION) {
+                if (originalOpcode == Constants.MESSAGE_REQUEST_ARC_TERMINATION) {
                     disableArcTransmission();
                     finish();
                     return true;
-                } else {
-                    return false;
+                } else if (originalOpcode == Constants.MESSAGE_REQUEST_ARC_INITIATION) {
+                    tv().setArcStatus(false);
+                    finish();
+                    return true;
                 }
+                return false;
         }
         return false;
     }
@@ -82,7 +84,7 @@ abstract class RequestArcAction extends HdmiCecFeatureAction {
         if (mState != state || state != STATE_WATING_FOR_REQUEST_ARC_REQUEST_RESPONSE) {
             return;
         }
-        HdmiLogger.debug("[T]RequestArcAction.");
+        HdmiLogger.debug("[T] RequestArcAction.");
         disableArcTransmission();
         finish();
     }
