@@ -36653,8 +36653,10 @@ package android.view {
     method public long getTimeDelta();
     method public boolean isInProgress();
     method public boolean isQuickScaleEnabled();
+    method public boolean isSecondaryButtonScaleEnabled();
     method public boolean onTouchEvent(android.view.MotionEvent);
     method public void setQuickScaleEnabled(boolean);
+    method public void setSecondaryButtonScaleEnabled(boolean);
   }
 
   public static abstract interface ScaleGestureDetector.OnScaleGestureListener {
