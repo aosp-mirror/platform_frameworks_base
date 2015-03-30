@@ -401,6 +401,20 @@ public abstract class KeyStoreKeyConstraints {
                     throw new IllegalArgumentException("Unknown digest: " + digest);
             }
         }
+
+        /**
+         * @hide
+         */
+        public static Integer getOutputSizeBytes(@DigestEnum int digest) {
+            switch (digest) {
+                case NONE:
+                    return null;
+                case SHA256:
+                    return 256 / 8;
+                default:
+                    throw new IllegalArgumentException("Unknown digest: " + digest);
+            }
+        }
     }
 
     @Retention(RetentionPolicy.SOURCE)
