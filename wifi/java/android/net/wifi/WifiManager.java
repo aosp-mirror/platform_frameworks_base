@@ -2621,4 +2621,25 @@ public class WifiManager {
         }
         return false;
     }
+
+    /**
+     * Resets all wifi manager settings back to factory defaults.
+     *
+     * @hide
+     */
+    public void factoryReset() {
+        // Enable wifi
+        setWifiEnabled(true);
+        // Delete all Wifi SSIDs
+        List<WifiConfiguration> networks = getConfiguredNetworks();
+        if (networks != null) {
+            for (WifiConfiguration config : networks) {
+                removeNetwork(config.networkId);
+            }
+            saveConfiguration();
+        }
+
+        // Turn mobile hotspot off
+        setWifiApEnabled(null, false);
+    }
 }

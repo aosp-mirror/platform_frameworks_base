@@ -653,9 +653,10 @@ interface ITelephony {
      * Get the preferred network type.
      * Used for device configuration by some CDMA operators.
      *
+     * @param subId the id of the subscription to query.
      * @return the preferred network type, defined in RILConstants.java.
      */
-    int getPreferredNetworkType();
+    int getPreferredNetworkType(int subId);
 
     /**
      * Check TETHER_DUN_REQUIRED and TETHER_DUN_APN settings, net.tethering.noprovisioning
@@ -667,13 +668,21 @@ interface ITelephony {
     int getTetherApnRequired();
 
     /**
+     * Set the network selection mode to automatic.
+     *
+     * @param subId the id of the subscription to update.
+     */
+    void setNetworkSelectionModeAutomatic(int subId);
+
+    /**
      * Set the preferred network type.
      * Used for device configuration by some CDMA operators.
      *
+     * @param subId the id of the subscription to update.
      * @param networkType the preferred network type, defined in RILConstants.java.
      * @return true on success; false on any failure.
      */
-    boolean setPreferredNetworkType(int networkType);
+    boolean setPreferredNetworkType(int subId, int networkType);
 
     /**
      * User enable/disable Mobile Data.

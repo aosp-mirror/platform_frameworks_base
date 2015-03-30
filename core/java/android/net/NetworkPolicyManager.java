@@ -180,6 +180,33 @@ public class NetworkPolicyManager {
     }
 
     /**
+     * Resets network policy settings back to factory defaults.
+     *
+     * @hide
+     */
+    public void factoryReset(String subscriber) {
+        // Turn mobile data limit off
+        NetworkPolicy[] policies = getNetworkPolicies();
+        NetworkTemplate template = NetworkTemplate.buildTemplateMobileAll(subscriber);
+        for (NetworkPolicy policy : policies) {
+            if (policy.template.equals(template)) {
+                policy.limitBytes = NetworkPolicy.LIMIT_DISABLED;
+                policy.inferred = false;
+                policy.clearSnooze();
+            }
+        }
+        setNetworkPolicies(policies);
+
+        // Turn restrict background data off
+        setRestrictBackground(false);
+
+        // Remove app's "restrict background data" flag
+        for (int uid : getUidsWithPolicy(POLICY_REJECT_METERED_BACKGROUND)) {
+            setUidPolicy(uid, NetworkPolicyManager.POLICY_NONE);
+        }
+    }
+
+    /**
      * Compute the last cycle boundary for the given {@link NetworkPolicy}. For
      * example, if cycle day is 20th, and today is June 15th, it will return May
      * 20th. When cycle day doesn't exist in current month, it snaps to the 1st
