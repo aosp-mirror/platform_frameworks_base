@@ -24,6 +24,8 @@ import android.os.RemoteException;
 import android.system.OsConstants;
 import android.util.Log;
 
+import com.android.internal.midi.MidiDispatcher;
+
 import dalvik.system.CloseGuard;
 
 import libcore.io.IoUtils;

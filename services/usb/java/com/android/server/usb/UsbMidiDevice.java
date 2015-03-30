@@ -19,7 +19,6 @@ package com.android.server.usb;
 import android.content.Context;
 import android.media.midi.MidiDeviceInfo;
 import android.media.midi.MidiDeviceServer;
-import android.media.midi.MidiDispatcher;
 import android.media.midi.MidiManager;
 import android.media.midi.MidiReceiver;
 import android.media.midi.MidiSender;

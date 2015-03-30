@@ -14,19 +14,20 @@
  * limitations under the License.
  */
 
-package android.media.midi;
+package com.android.internal.midi;
+
+import android.media.midi.MidiReceiver;
+import android.media.midi.MidiSender;
 
 import java.io.IOException;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
- * Utility class for dispatching MIDI data to a list of {@link MidiReceiver}s.
- * This class subclasses {@link MidiReceiver} and dispatches any data it receives
+ * Utility class for dispatching MIDI data to a list of {@link android.media.midi.MidiReceiver}s.
+ * This class subclasses {@link android.media.midi.MidiReceiver} and dispatches any data it receives
  * to its receiver list. Any receivers that throw an exception upon receiving data will
  * be automatically removed from the receiver list, but no IOException will be returned
- * from the dispatcher's {@link #onReceive} in that case.
- *
- * @hide
+ * from the dispatcher's {@link android.media.midi.MidiReceiver#onReceive} in that case.
  */
 public final class MidiDispatcher extends MidiReceiver {
 
@@ -35,7 +36,7 @@ public final class MidiDispatcher extends MidiReceiver {
 
     private final MidiSender mSender = new MidiSender() {
         /**
-         * Called to connect a {@link MidiReceiver} to the sender
+         * Called to connect a {@link android.media.midi.MidiReceiver} to the sender
          *
          * @param receiver the receiver to connect
          */
@@ -44,7 +45,7 @@ public final class MidiDispatcher extends MidiReceiver {
         }
 
         /**
-         * Called to disconnect a {@link MidiReceiver} from the sender
+         * Called to disconnect a {@link android.media.midi.MidiReceiver} from the sender
          *
          * @param receiver the receiver to disconnect
          */
@@ -54,7 +55,7 @@ public final class MidiDispatcher extends MidiReceiver {
     };
 
     /**
-     * Returns the number of {@link MidiReceiver}s this dispatcher contains.
+     * Returns the number of {@link android.media.midi.MidiReceiver}s this dispatcher contains.
      * @return the number of receivers
      */
     public int getReceiverCount() {
@@ -62,7 +63,8 @@ public final class MidiDispatcher extends MidiReceiver {
     }
 
     /**
-     * Returns a {@link MidiSender} which is used to add and remove {@link MidiReceiver}s
+     * Returns a {@link android.media.midi.MidiSender} which is used to add and remove
+     * {@link android.media.midi.MidiReceiver}s
      * to the dispatcher's receiver list.
      * @return the dispatcher's MidiSender
      */
