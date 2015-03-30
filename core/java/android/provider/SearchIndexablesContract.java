@@ -16,6 +16,7 @@
 
 package android.provider;
 
+import android.annotation.SystemApi;
 import android.content.ContentResolver;
 
 /**
@@ -23,6 +24,7 @@ import android.content.ContentResolver;
  *
  * @hide
  */
+@SystemApi
 public class SearchIndexablesContract {
 
     /**

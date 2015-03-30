@@ -27888,6 +27888,126 @@ package android.provider {
     field public static final java.lang.String SIZE = "_size";
   }
 
+  public abstract class SearchIndexableData {
+    ctor public SearchIndexableData();
+    ctor public SearchIndexableData(android.content.Context);
+    field public java.lang.String className;
+    field public android.content.Context context;
+    field public boolean enabled;
+    field public int iconResId;
+    field public java.lang.String intentAction;
+    field public java.lang.String intentTargetClass;
+    field public java.lang.String intentTargetPackage;
+    field public java.lang.String key;
+    field public java.util.Locale locale;
+    field public java.lang.String packageName;
+    field public int rank;
+    field public int userId;
+  }
+
+  public class SearchIndexableResource extends android.provider.SearchIndexableData {
+    ctor public SearchIndexableResource(int, int, java.lang.String, int);
+    ctor public SearchIndexableResource(android.content.Context);
+    field public int xmlResId;
+  }
+
+  public class SearchIndexablesContract {
+    ctor public SearchIndexablesContract();
+    field public static final int COLUMN_INDEX_NON_INDEXABLE_KEYS_KEY_VALUE = 0; // 0x0
+    field public static final int COLUMN_INDEX_RAW_CLASS_NAME = 7; // 0x7
+    field public static final int COLUMN_INDEX_RAW_ENTRIES = 4; // 0x4
+    field public static final int COLUMN_INDEX_RAW_ICON_RESID = 8; // 0x8
+    field public static final int COLUMN_INDEX_RAW_INTENT_ACTION = 9; // 0x9
+    field public static final int COLUMN_INDEX_RAW_INTENT_TARGET_CLASS = 11; // 0xb
+    field public static final int COLUMN_INDEX_RAW_INTENT_TARGET_PACKAGE = 10; // 0xa
+    field public static final int COLUMN_INDEX_RAW_KEY = 12; // 0xc
+    field public static final int COLUMN_INDEX_RAW_KEYWORDS = 5; // 0x5
+    field public static final int COLUMN_INDEX_RAW_RANK = 0; // 0x0
+    field public static final int COLUMN_INDEX_RAW_SCREEN_TITLE = 6; // 0x6
+    field public static final int COLUMN_INDEX_RAW_SUMMARY_OFF = 3; // 0x3
+    field public static final int COLUMN_INDEX_RAW_SUMMARY_ON = 2; // 0x2
+    field public static final int COLUMN_INDEX_RAW_TITLE = 1; // 0x1
+    field public static final int COLUMN_INDEX_RAW_USER_ID = 13; // 0xd
+    field public static final int COLUMN_INDEX_XML_RES_CLASS_NAME = 2; // 0x2
+    field public static final int COLUMN_INDEX_XML_RES_ICON_RESID = 3; // 0x3
+    field public static final int COLUMN_INDEX_XML_RES_INTENT_ACTION = 4; // 0x4
+    field public static final int COLUMN_INDEX_XML_RES_INTENT_TARGET_CLASS = 6; // 0x6
+    field public static final int COLUMN_INDEX_XML_RES_INTENT_TARGET_PACKAGE = 5; // 0x5
+    field public static final int COLUMN_INDEX_XML_RES_RANK = 0; // 0x0
+    field public static final int COLUMN_INDEX_XML_RES_RESID = 1; // 0x1
+    field public static final java.lang.String INDEXABLES_RAW = "indexables_raw";
+    field public static final java.lang.String[] INDEXABLES_RAW_COLUMNS;
+    field public static final java.lang.String INDEXABLES_RAW_PATH = "settings/indexables_raw";
+    field public static final java.lang.String INDEXABLES_XML_RES = "indexables_xml_res";
+    field public static final java.lang.String[] INDEXABLES_XML_RES_COLUMNS;
+    field public static final java.lang.String INDEXABLES_XML_RES_PATH = "settings/indexables_xml_res";
+    field public static final java.lang.String NON_INDEXABLES_KEYS = "non_indexables_key";
+    field public static final java.lang.String[] NON_INDEXABLES_KEYS_COLUMNS;
+    field public static final java.lang.String NON_INDEXABLES_KEYS_PATH = "settings/non_indexables_key";
+    field public static final java.lang.String PROVIDER_INTERFACE = "android.content.action.SEARCH_INDEXABLES_PROVIDER";
+  }
+
+  private static class SearchIndexablesContract.BaseColumns {
+    field public static final java.lang.String COLUMN_CLASS_NAME = "className";
+    field public static final java.lang.String COLUMN_ICON_RESID = "iconResId";
+    field public static final java.lang.String COLUMN_INTENT_ACTION = "intentAction";
+    field public static final java.lang.String COLUMN_INTENT_TARGET_CLASS = "intentTargetClass";
+    field public static final java.lang.String COLUMN_INTENT_TARGET_PACKAGE = "intentTargetPackage";
+    field public static final java.lang.String COLUMN_RANK = "rank";
+  }
+
+  public static final class SearchIndexablesContract.NonIndexableKey extends android.provider.SearchIndexablesContract.BaseColumns {
+    field public static final java.lang.String COLUMN_CLASS_NAME = "className";
+    field public static final java.lang.String COLUMN_ICON_RESID = "iconResId";
+    field public static final java.lang.String COLUMN_INTENT_ACTION = "intentAction";
+    field public static final java.lang.String COLUMN_INTENT_TARGET_CLASS = "intentTargetClass";
+    field public static final java.lang.String COLUMN_INTENT_TARGET_PACKAGE = "intentTargetPackage";
+    field public static final java.lang.String COLUMN_KEY_VALUE = "key";
+    field public static final java.lang.String COLUMN_RANK = "rank";
+    field public static final java.lang.String MIME_TYPE = "vnd.android.cursor.dir/non_indexables_key";
+  }
+
+  public static final class SearchIndexablesContract.RawData extends android.provider.SearchIndexablesContract.BaseColumns {
+    field public static final java.lang.String COLUMN_CLASS_NAME = "className";
+    field public static final java.lang.String COLUMN_ENTRIES = "entries";
+    field public static final java.lang.String COLUMN_ICON_RESID = "iconResId";
+    field public static final java.lang.String COLUMN_INTENT_ACTION = "intentAction";
+    field public static final java.lang.String COLUMN_INTENT_TARGET_CLASS = "intentTargetClass";
+    field public static final java.lang.String COLUMN_INTENT_TARGET_PACKAGE = "intentTargetPackage";
+    field public static final java.lang.String COLUMN_KEY = "key";
+    field public static final java.lang.String COLUMN_KEYWORDS = "keywords";
+    field public static final java.lang.String COLUMN_RANK = "rank";
+    field public static final java.lang.String COLUMN_SCREEN_TITLE = "screenTitle";
+    field public static final java.lang.String COLUMN_SUMMARY_OFF = "summaryOff";
+    field public static final java.lang.String COLUMN_SUMMARY_ON = "summaryOn";
+    field public static final java.lang.String COLUMN_TITLE = "title";
+    field public static final java.lang.String COLUMN_USER_ID = "user_id";
+    field public static final java.lang.String MIME_TYPE = "vnd.android.cursor.dir/indexables_raw";
+  }
+
+  public static final class SearchIndexablesContract.XmlResource extends android.provider.SearchIndexablesContract.BaseColumns {
+    field public static final java.lang.String COLUMN_CLASS_NAME = "className";
+    field public static final java.lang.String COLUMN_ICON_RESID = "iconResId";
+    field public static final java.lang.String COLUMN_INTENT_ACTION = "intentAction";
+    field public static final java.lang.String COLUMN_INTENT_TARGET_CLASS = "intentTargetClass";
+    field public static final java.lang.String COLUMN_INTENT_TARGET_PACKAGE = "intentTargetPackage";
+    field public static final java.lang.String COLUMN_RANK = "rank";
+    field public static final java.lang.String COLUMN_XML_RESID = "xmlResId";
+    field public static final java.lang.String MIME_TYPE = "vnd.android.cursor.dir/indexables_xml_res";
+  }
+
+  public abstract class SearchIndexablesProvider extends android.content.ContentProvider {
+    ctor public SearchIndexablesProvider();
+    method public final int delete(android.net.Uri, java.lang.String, java.lang.String[]);
+    method public java.lang.String getType(android.net.Uri);
+    method public final android.net.Uri insert(android.net.Uri, android.content.ContentValues);
+    method public android.database.Cursor query(android.net.Uri, java.lang.String[], java.lang.String, java.lang.String[], java.lang.String);
+    method public abstract android.database.Cursor queryNonIndexableKeys(java.lang.String[]);
+    method public abstract android.database.Cursor queryRawData(java.lang.String[]);
+    method public abstract android.database.Cursor queryXmlResources(java.lang.String[]);
+    method public final int update(android.net.Uri, android.content.ContentValues, java.lang.String, java.lang.String[]);
+  }
+
   public class SearchRecentSuggestions {
     ctor public SearchRecentSuggestions(android.content.Context, java.lang.String, int);
     method public void clearHistory();
