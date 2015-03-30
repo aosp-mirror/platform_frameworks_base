@@ -16,18 +16,6 @@
 
 package android.widget;
 
-import android.content.UndoManager;
-import android.content.UndoOperation;
-import android.content.UndoOwner;
-import android.os.Build;
-import android.os.Parcel;
-import android.os.Parcelable;
-import android.text.InputFilter;
-import com.android.internal.util.ArrayUtils;
-import com.android.internal.util.GrowingArrayUtils;
-import com.android.internal.view.menu.MenuBuilder;
-import com.android.internal.widget.EditableInputConnection;
-
 import android.R;
 import android.app.PendingIntent;
 import android.app.PendingIntent.CanceledException;
@@ -35,6 +23,9 @@ import android.content.ClipData;
 import android.content.ClipData.Item;
 import android.content.Context;
 import android.content.Intent;
+import android.content.UndoManager;
+import android.content.UndoOperation;
+import android.content.UndoOwner;
 import android.content.pm.PackageManager;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
@@ -46,13 +37,17 @@ import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.drawable.Drawable;
 import android.inputmethodservice.ExtractEditText;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.os.ParcelableParcel;
 import android.os.SystemClock;
 import android.provider.Settings;
 import android.text.DynamicLayout;
 import android.text.Editable;
+import android.text.InputFilter;
 import android.text.InputType;
 import android.text.Layout;
 import android.text.ParcelableSpan;
@@ -104,6 +99,11 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.TextView.Drawables;
 import android.widget.TextView.OnEditorActionListener;
+
+import com.android.internal.util.ArrayUtils;
+import com.android.internal.util.GrowingArrayUtils;
+import com.android.internal.view.menu.MenuBuilder;
+import com.android.internal.widget.EditableInputConnection;
 
 import java.text.BreakIterator;
 import java.util.Arrays;

@@ -26,6 +26,8 @@ import java.util.List;
 // frameworks/base/core/jni/android_text_StaticLayout.cpp revision b808260
 public abstract class LineBreaker {
 
+    protected static final int TAB_MASK   = 0x20000000;  // keep in sync with StaticLayout
+
     protected final @NonNull List<Primitive> mPrimitives;
     protected final @NonNull LineWidth mLineWidth;
     protected final @NonNull TabStops mTabStops;
