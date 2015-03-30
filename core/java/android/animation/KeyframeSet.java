@@ -201,7 +201,6 @@ class KeyframeSet implements Keyframes {
      * @return The animated value.
      */
     public Object getValue(float fraction) {
-
         // Special-case optimization for the common case of only two keyframes
         if (mNumKeyframes == 2) {
             if (mInterpolator != null) {
@@ -238,12 +237,13 @@ class KeyframeSet implements Keyframes {
             Keyframe nextKeyframe = mKeyframes.get(i);
             if (fraction < nextKeyframe.getFraction()) {
                 final TimeInterpolator interpolator = nextKeyframe.getInterpolator();
-                if (interpolator != null) {
-                    fraction = interpolator.getInterpolation(fraction);
-                }
                 final float prevFraction = prevKeyframe.getFraction();
                 float intervalFraction = (fraction - prevFraction) /
                     (nextKeyframe.getFraction() - prevFraction);
+                // Apply interpolator on the proportional duration.
+                if (interpolator != null) {
+                    intervalFraction = interpolator.getInterpolation(intervalFraction);
+                }
                 return mEvaluator.evaluate(intervalFraction, prevKeyframe.getValue(),
                         nextKeyframe.getValue());
             }
