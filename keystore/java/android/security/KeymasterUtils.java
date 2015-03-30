@@ -13,9 +13,11 @@ public abstract class KeymasterUtils {
             case KeymasterDefs.KM_ERROR_INVALID_AUTHORIZATION_TIMEOUT:
                 // The name of this parameter significantly differs between Keymaster and framework
                 // APIs. Use the framework wording to make life easier for developers.
-                return new KeymasterException("Invalid user authentication validity duration");
+                return new KeymasterException(keymasterErrorCode,
+                        "Invalid user authentication validity duration");
             default:
-                return new KeymasterException(KeymasterDefs.getErrorMessage(keymasterErrorCode));
+                return new KeymasterException(keymasterErrorCode,
+                        KeymasterDefs.getErrorMessage(keymasterErrorCode));
         }
     }
 }

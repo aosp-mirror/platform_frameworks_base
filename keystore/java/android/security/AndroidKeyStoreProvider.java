@@ -39,5 +39,9 @@ public class AndroidKeyStoreProvider extends Provider {
         // javax.crypto.KeyGenerator
         put("KeyGenerator.AES", KeyStoreKeyGeneratorSpi.AES.class.getName());
         put("KeyGenerator.HmacSHA256", KeyStoreKeyGeneratorSpi.HmacSHA256.class.getName());
+
+        // javax.crypto.Mac
+        put("Mac.HmacSHA256", KeyStoreHmacSpi.HmacSHA256.class.getName());
+        put("Mac.HmacSHA256 SupportedKeyClasses", KeyStoreSecretKey.class.getName());
     }
 }
