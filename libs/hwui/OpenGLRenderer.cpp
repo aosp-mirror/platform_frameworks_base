@@ -858,6 +858,8 @@ void OpenGLRenderer::drawTextureLayer(Layer* layer, const Rect& rect) {
                 .setModelViewMapUnitToRectOptionalSnap(snap, rect)
                 .setRoundRectClipState(currentSnapshot()->roundRectClipState)
                 .build();
+        renderGlop(glop);
+        return;
     }
 
     float alpha = getLayerAlpha(layer);
