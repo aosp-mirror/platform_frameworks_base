@@ -16,6 +16,7 @@
 
 package android.widget;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.Widget;
 import android.content.Context;
@@ -29,18 +30,13 @@ import com.android.internal.R;
 import java.util.Locale;
 
 /**
- * A view for selecting the time of day, in either 24 hour or AM/PM mode. The
- * hour, each minute digit, and AM/PM (if applicable) can be conrolled by
- * vertical spinners. The hour can be entered by keyboard input. Entering in two
- * digit hours can be accomplished by hitting two digits within a timeout of
- * about a second (e.g. '1' then '2' to select 12). The minutes can be entered
- * by entering single digits. Under AM/PM mode, the user can hit 'a', 'A", 'p'
- * or 'P' to pick. For a dialog using this view, see
- * {@link android.app.TimePickerDialog}.
+ * A widget for selecting the time of day, in either 24-hour or AM/PM mode.
  * <p>
- * See the <a href="{@docRoot}guide/topics/ui/controls/pickers.html">Pickers</a>
- * guide.
- * </p>
+ * For a dialog using this view, see {@link android.app.TimePickerDialog}. See
+ * the <a href="{@docRoot}guide/topics/ui/controls/pickers.html">Pickers</a>
+ * guide for more information.
+ *
+ * @attr ref android.R.styleable#TimePicker_timePickerMode
  */
 @Widget
 public class TimePicker extends FrameLayout {
@@ -96,44 +92,105 @@ public class TimePicker extends FrameLayout {
     }
 
     /**
-     * Set the current hour.
+     * Sets the currently selected hour using 24-hour time.
+     *
+     * @param hour the hour to set, in the range (0-23)
+     * @see #getHour()
      */
-    public void setCurrentHour(Integer currentHour) {
-        mDelegate.setCurrentHour(currentHour);
+    public void setHour(int hour) {
+        mDelegate.setCurrentHour(hour);
     }
 
     /**
-     * @return The current hour in the range (0-23).
+     * Returns the currently selected hour using 24-hour time.
+     *
+     * @return the currently selected hour, in the range (0-23)
+     * @see #setHour(int)
      */
+    public int getHour() {
+        return mDelegate.getCurrentHour();
+    }
+
+    /**
+     * Sets the currently selected minute..
+     *
+     * @param minute the minute to set, in the range (0-59)
+     * @see #getMinute()
+     */
+    public void setMinute(int minute) {
+        mDelegate.setCurrentMinute(minute);
+    }
+
+    /**
+     * Returns the currently selected minute.
+     *
+     * @return the currently selected minute, in the range (0-59)
+     * @see #setMinute(int)
+     */
+    public int getMinute() {
+        return mDelegate.getCurrentMinute();
+    }
+
+    /**
+     * Sets the current hour.
+     *
+     * @deprecated Use {@link #setHour(int)}
+     */
+    @Deprecated
+    public void setCurrentHour(@NonNull Integer currentHour) {
+        setHour(currentHour);
+    }
+
+    /**
+     * @return the current hour in the range (0-23)
+     * @deprecated Use {@link #getHour()}
+     */
+    @NonNull
+    @Deprecated
     public Integer getCurrentHour() {
         return mDelegate.getCurrentHour();
     }
 
     /**
      * Set the current minute (0-59).
+     *
+     * @deprecated Use {@link #setMinute(int)}
      */
-    public void setCurrentMinute(Integer currentMinute) {
+    @Deprecated
+    public void setCurrentMinute(@NonNull Integer currentMinute) {
         mDelegate.setCurrentMinute(currentMinute);
     }
 
     /**
-     * @return The current minute.
+     * @return the current minute
+     * @deprecated Use {@link #getMinute()}
      */
+    @NonNull
+    @Deprecated
     public Integer getCurrentMinute() {
         return mDelegate.getCurrentMinute();
     }
 
     /**
-     * Set whether in 24 hour or AM/PM mode.
+     * Sets whether this widget displays time in 24-hour mode or 12-hour mode
+     * with an AM/PM picker.
      *
-     * @param is24HourView True = 24 hour mode. False = AM/PM.
+     * @param is24HourView {@code true} to display in 24-hour mode,
+     *                     {@code false} for 12-hour mode with AM/PM
+     * @see #is24HourView()
      */
-    public void setIs24HourView(Boolean is24HourView) {
+    public void setIs24HourView(@NonNull Boolean is24HourView) {
+        if (is24HourView == null) {
+            return;
+        }
+
         mDelegate.setIs24HourView(is24HourView);
     }
 
     /**
-     * @return true if this is in 24 hour view else false.
+     * @return {@code true} if this widget displays time in 24-hour mode,
+     *         {@code false} otherwise}
+     * @see #setIs24HourView(Boolean)
      */
     public boolean is24HourView() {
         return mDelegate.is24HourView();
@@ -210,13 +267,13 @@ public class TimePicker extends FrameLayout {
      * for the real behavior.
      */
     interface TimePickerDelegate {
-        void setCurrentHour(Integer currentHour);
-        Integer getCurrentHour();
+        void setCurrentHour(int currentHour);
+        int getCurrentHour();
 
-        void setCurrentMinute(Integer currentMinute);
-        Integer getCurrentMinute();
+        void setCurrentMinute(int currentMinute);
+        int getCurrentMinute();
 
-        void setIs24HourView(Boolean is24HourView);
+        void setIs24HourView(boolean is24HourView);
         boolean is24HourView();
 
         void setOnTimeChangedListener(OnTimeChangedListener onTimeChangedListener);

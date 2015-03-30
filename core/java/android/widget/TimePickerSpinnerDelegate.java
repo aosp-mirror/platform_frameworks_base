@@ -279,13 +279,13 @@ class TimePickerSpinnerDelegate extends TimePicker.AbstractTimePickerDelegate {
     }
 
     @Override
-    public void setCurrentHour(Integer currentHour) {
+    public void setCurrentHour(int currentHour) {
         setCurrentHour(currentHour, true);
     }
 
-    private void setCurrentHour(Integer currentHour, boolean notifyTimeChanged) {
+    private void setCurrentHour(int currentHour, boolean notifyTimeChanged) {
         // why was Integer used in the first place?
-        if (currentHour == null || currentHour == getCurrentHour()) {
+        if (currentHour == getCurrentHour()) {
             return;
         }
         if (!is24HourView()) {
@@ -310,7 +310,7 @@ class TimePickerSpinnerDelegate extends TimePicker.AbstractTimePickerDelegate {
     }
 
     @Override
-    public Integer getCurrentHour() {
+    public int getCurrentHour() {
         int currentHour = mHourSpinner.getValue();
         if (is24HourView()) {
             return currentHour;
@@ -322,7 +322,7 @@ class TimePickerSpinnerDelegate extends TimePicker.AbstractTimePickerDelegate {
     }
 
     @Override
-    public void setCurrentMinute(Integer currentMinute) {
+    public void setCurrentMinute(int currentMinute) {
         if (currentMinute == getCurrentMinute()) {
             return;
         }
@@ -331,12 +331,12 @@ class TimePickerSpinnerDelegate extends TimePicker.AbstractTimePickerDelegate {
     }
 
     @Override
-    public Integer getCurrentMinute() {
+    public int getCurrentMinute() {
         return mMinuteSpinner.getValue();
     }
 
     @Override
-    public void setIs24HourView(Boolean is24HourView) {
+    public void setIs24HourView(boolean is24HourView) {
         if (mIs24HourView == is24HourView) {
             return;
         }

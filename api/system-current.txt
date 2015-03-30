@@ -40877,7 +40877,7 @@ package android.widget {
     field protected android.database.Cursor mDataCursor;
   }
 
-  public class AnalogClock extends android.view.View {
+  public deprecated class AnalogClock extends android.view.View {
     ctor public AnalogClock(android.content.Context);
     ctor public AnalogClock(android.content.Context, android.util.AttributeSet);
     ctor public AnalogClock(android.content.Context, android.util.AttributeSet, int);
@@ -42938,12 +42938,16 @@ package android.widget {
     ctor public TimePicker(android.content.Context, android.util.AttributeSet);
     ctor public TimePicker(android.content.Context, android.util.AttributeSet, int);
     ctor public TimePicker(android.content.Context, android.util.AttributeSet, int, int);
-    method public java.lang.Integer getCurrentHour();
-    method public java.lang.Integer getCurrentMinute();
+    method public deprecated java.lang.Integer getCurrentHour();
+    method public deprecated java.lang.Integer getCurrentMinute();
+    method public int getHour();
+    method public int getMinute();
     method public boolean is24HourView();
-    method public void setCurrentHour(java.lang.Integer);
-    method public void setCurrentMinute(java.lang.Integer);
+    method public deprecated void setCurrentHour(java.lang.Integer);
+    method public deprecated void setCurrentMinute(java.lang.Integer);
+    method public void setHour(int);
     method public void setIs24HourView(java.lang.Boolean);
+    method public void setMinute(int);
     method public void setOnTimeChangedListener(android.widget.TimePicker.OnTimeChangedListener);
   }
 
