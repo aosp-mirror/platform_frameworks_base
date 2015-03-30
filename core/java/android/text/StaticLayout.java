@@ -170,8 +170,7 @@ public class StaticLayout extends Layout {
          * Measurement and break iteration is done in native code. The protocol for using
          * the native code is as follows.
          *
-         * For each paragraph, do a nSetupParagraph, which sets paragraph text, line width, tab
-         * stops, break strategy (and possibly other parameters in the future).
+         * For each paragraph, do a nSetText of the paragraph text. Also do nSetLineWidth.
          *
          * Then, for each run within the paragraph:
          *  - setLocale (this must be done at least for the first run, optional afterwards)
@@ -188,7 +187,7 @@ public class StaticLayout extends Layout {
 
         private void setLocale(Locale locale) {
             if (!locale.equals(mLocale)) {
-                nSetLocale(mNativePtr, locale.toLanguageTag(), Hyphenator.get(locale));
+                nSetLocale(mNativePtr, locale.toLanguageTag());
                 mLocale = locale;
             }
         }
@@ -532,7 +531,7 @@ public class StaticLayout extends Layout {
 
             int[] breaks = lineBreaks.breaks;
             float[] lineWidths = lineBreaks.widths;
-            int[] flags = lineBreaks.flags;
+            boolean[] flags = lineBreaks.flags;
 
             // here is the offset of the starting character of the line we are currently measuring
             int here = paraStart;
@@ -618,7 +617,7 @@ public class StaticLayout extends Layout {
                     fm.top, fm.bottom,
                     v,
                     spacingmult, spacingadd, null,
-                    null, fm, 0,
+                    null, fm, false,
                     needMultiply, measured.mLevels, measured.mDir, measured.mEasy, bufEnd,
                     includepad, trackpad, null,
                     null, bufStart, ellipsize,
@@ -630,7 +629,7 @@ public class StaticLayout extends Layout {
                       int above, int below, int top, int bottom, int v,
                       float spacingmult, float spacingadd,
                       LineHeightSpan[] chooseHt, int[] chooseHtv,
-                      Paint.FontMetricsInt fm, int flags,
+                      Paint.FontMetricsInt fm, boolean hasTabOrEmoji,
                       boolean needMultiply, byte[] chdirs, int dir,
                       boolean easy, int bufEnd, boolean includePad,
                       boolean trackPad, char[] chs,
@@ -723,10 +722,8 @@ public class StaticLayout extends Layout {
         lines[off + mColumns + START] = end;
         lines[off + mColumns + TOP] = v;
 
-        // TODO: could move TAB to share same column as HYPHEN, simplifying this code and gaining
-        // one bit for start field
-        lines[off + TAB] |= flags & TAB_MASK;
-        lines[off + HYPHEN] = flags;
+        if (hasTabOrEmoji)
+            lines[off + TAB] |= TAB_MASK;
 
         lines[off + DIR] |= dir << DIR_SHIFT;
         Directions linedirs = DIRS_ALL_LEFT_TO_RIGHT;
@@ -946,11 +943,6 @@ public class StaticLayout extends Layout {
     }
 
     @Override
-    public int getHyphen(int line) {
-        return mLines[mColumns * line + HYPHEN] & 0xff;
-    }
-
-    @Override
     public int getEllipsisCount(int line) {
         if (mColumns < COLUMNS_ELLIPSIZE) {
             return 0;
@@ -976,10 +968,7 @@ public class StaticLayout extends Layout {
     private static native long nNewBuilder();
     private static native void nFreeBuilder(long nativePtr);
     private static native void nFinishBuilder(long nativePtr);
-
-    /* package */ static native long nLoadHyphenator(String patternData);
-
-    private static native void nSetLocale(long nativePtr, String locale, long nativeHyphenator);
+    private static native void nSetLocale(long nativePtr, String locale);
 
     // Set up paragraph text and settings; done as one big method to minimize jni crossings
     private static native void nSetupParagraph(long nativePtr, char[] text, int length,
@@ -1002,23 +991,22 @@ public class StaticLayout extends Layout {
     // to reduce the number of JNI calls in the common case where the
     // arrays do not have to be resized
     private static native int nComputeLineBreaks(long nativePtr, LineBreaks recycle,
-            int[] recycleBreaks, float[] recycleWidths, int[] recycleFlags, int recycleLength);
+            int[] recycleBreaks, float[] recycleWidths, boolean[] recycleFlags, int recycleLength);
 
     private int mLineCount;
     private int mTopPadding, mBottomPadding;
     private int mColumns;
     private int mEllipsizedWidth;
 
-    private static final int COLUMNS_NORMAL = 4;
-    private static final int COLUMNS_ELLIPSIZE = 6;
+    private static final int COLUMNS_NORMAL = 3;
+    private static final int COLUMNS_ELLIPSIZE = 5;
     private static final int START = 0;
     private static final int DIR = START;
     private static final int TAB = START;
     private static final int TOP = 1;
     private static final int DESCENT = 2;
-    private static final int HYPHEN = 3;
-    private static final int ELLIPSIS_START = 4;
-    private static final int ELLIPSIS_COUNT = 5;
+    private static final int ELLIPSIS_START = 3;
+    private static final int ELLIPSIS_COUNT = 4;
 
     private int[] mLines;
     private Directions[] mLineDirections;
@@ -1040,7 +1028,7 @@ public class StaticLayout extends Layout {
         private static final int INITIAL_SIZE = 16;
         public int[] breaks = new int[INITIAL_SIZE];
         public float[] widths = new float[INITIAL_SIZE];
-        public int[] flags = new int[INITIAL_SIZE]; // hasTabOrEmoji
+        public boolean[] flags = new boolean[INITIAL_SIZE]; // hasTabOrEmoji
         // breaks, widths, and flags should all have the same length
     }
 
