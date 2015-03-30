@@ -356,8 +356,6 @@ public class DynamicLayout extends Layout
             ints[DESCENT] = desc;
             objects[0] = reflowed.getLineDirections(i);
 
-            ints[HYPHEN] = reflowed.getHyphen(i);
-
             if (mEllipsize) {
                 ints[ELLIPSIS_START] = reflowed.getEllipsisStart(i);
                 ints[ELLIPSIS_COUNT] = reflowed.getEllipsisCount(i);
@@ -634,11 +632,6 @@ public class DynamicLayout extends Layout
     }
 
     @Override
-    public int getHyphen(int line) {
-        return mInts.getValue(line, HYPHEN);
-    }
-
-    @Override
     public int getEllipsizedWidth() {
         return mEllipsizedWidth;
     }
@@ -746,12 +739,11 @@ public class DynamicLayout extends Layout
     private static final int TAB = START;
     private static final int TOP = 1;
     private static final int DESCENT = 2;
-    private static final int HYPHEN = 3;
-    private static final int COLUMNS_NORMAL = 4;
+    private static final int COLUMNS_NORMAL = 3;
 
-    private static final int ELLIPSIS_START = 4;
-    private static final int ELLIPSIS_COUNT = 5;
-    private static final int COLUMNS_ELLIPSIZE = 6;
+    private static final int ELLIPSIS_START = 3;
+    private static final int ELLIPSIS_COUNT = 4;
+    private static final int COLUMNS_ELLIPSIZE = 5;
 
     private static final int START_MASK = 0x1FFFFFFF;
     private static final int DIR_SHIFT  = 30;

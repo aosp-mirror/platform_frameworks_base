@@ -21,7 +21,6 @@
 #include "unicode/brkiter.h"
 #include "utils/misc.h"
 #include "utils/Log.h"
-#include "ScopedStringChars.h"
 #include "ScopedPrimitiveArray.h"
 #include "JNIHelp.h"
 #include "core_jni_helpers.h"
@@ -72,14 +71,14 @@ static void nSetupParagraph(JNIEnv* env, jclass, jlong nativePtr, jcharArray tex
 }
 
 static void recycleCopy(JNIEnv* env, jobject recycle, jintArray recycleBreaks,
-                        jfloatArray recycleWidths, jintArray recycleFlags,
+                        jfloatArray recycleWidths, jbooleanArray recycleFlags,
                         jint recycleLength, size_t nBreaks, const jint* breaks,
-                        const jfloat* widths, const jint* flags) {
+                        const jfloat* widths, const jboolean* flags) {
     if ((size_t)recycleLength < nBreaks) {
         // have to reallocate buffers
         recycleBreaks = env->NewIntArray(nBreaks);
         recycleWidths = env->NewFloatArray(nBreaks);
-        recycleFlags = env->NewIntArray(nBreaks);
+        recycleFlags = env->NewBooleanArray(nBreaks);
 
         env->SetObjectField(recycle, gLineBreaks_fieldID.breaks, recycleBreaks);
         env->SetObjectField(recycle, gLineBreaks_fieldID.widths, recycleWidths);
@@ -88,12 +87,12 @@ static void recycleCopy(JNIEnv* env, jobject recycle, jintArray recycleBreaks,
     // copy data
     env->SetIntArrayRegion(recycleBreaks, 0, nBreaks, breaks);
     env->SetFloatArrayRegion(recycleWidths, 0, nBreaks, widths);
-    env->SetIntArrayRegion(recycleFlags, 0, nBreaks, flags);
+    env->SetBooleanArrayRegion(recycleFlags, 0, nBreaks, flags);
 }
 
 static jint nComputeLineBreaks(JNIEnv* env, jclass, jlong nativePtr,
                                jobject recycle, jintArray recycleBreaks,
-                               jfloatArray recycleWidths, jintArray recycleFlags,
+                               jfloatArray recycleWidths, jbooleanArray recycleFlags,
                                jint recycleLength) {
     LineBreaker* b = reinterpret_cast<LineBreaker*>(nativePtr);
 
@@ -120,20 +119,12 @@ static void nFinishBuilder(JNIEnv*, jclass, jlong nativePtr) {
     b->finish();
 }
 
-static jlong nLoadHyphenator(JNIEnv* env, jclass, jstring patternData) {
-    ScopedStringChars str(env, patternData);
-    Hyphenator* hyphenator = Hyphenator::load(str.get(), str.size());
-    return reinterpret_cast<jlong>(hyphenator);
-}
-
-static void nSetLocale(JNIEnv* env, jclass, jlong nativePtr, jstring javaLocaleName,
-        jlong nativeHyphenator) {
+static void nSetLocale(JNIEnv* env, jclass, jlong nativePtr, jstring javaLocaleName) {
     ScopedIcuLocale icuLocale(env, javaLocaleName);
     LineBreaker* b = reinterpret_cast<LineBreaker*>(nativePtr);
-    Hyphenator* hyphenator = reinterpret_cast<Hyphenator*>(nativeHyphenator);
 
     if (icuLocale.valid()) {
-        b->setLocale(icuLocale.locale(), hyphenator);
+        b->setLocale(icuLocale.locale());
     }
 }
 
@@ -173,14 +164,13 @@ static JNINativeMethod gMethods[] = {
     {"nNewBuilder", "()J", (void*) nNewBuilder},
     {"nFreeBuilder", "(J)V", (void*) nFreeBuilder},
     {"nFinishBuilder", "(J)V", (void*) nFinishBuilder},
-    {"nLoadHyphenator", "(Ljava/lang/String;)J", (void*) nLoadHyphenator},
-    {"nSetLocale", "(JLjava/lang/String;J)V", (void*) nSetLocale},
+    {"nSetLocale", "(JLjava/lang/String;)V", (void*) nSetLocale},
     {"nSetupParagraph", "(J[CIFIF[III)V", (void*) nSetupParagraph},
     {"nAddStyleRun", "(JJJIIZ)F", (void*) nAddStyleRun},
     {"nAddMeasuredRun", "(JII[F)V", (void*) nAddMeasuredRun},
     {"nAddReplacementRun", "(JIIF)V", (void*) nAddReplacementRun},
     {"nGetWidths", "(J[F)V", (void*) nGetWidths},
-    {"nComputeLineBreaks", "(JLandroid/text/StaticLayout$LineBreaks;[I[F[II)I",
+    {"nComputeLineBreaks", "(JLandroid/text/StaticLayout$LineBreaks;[I[F[ZI)I",
         (void*) nComputeLineBreaks}
 };
 
@@ -191,7 +181,7 @@ int register_android_text_StaticLayout(JNIEnv* env)
 
     gLineBreaks_fieldID.breaks = GetFieldIDOrDie(env, gLineBreaks_class, "breaks", "[I");
     gLineBreaks_fieldID.widths = GetFieldIDOrDie(env, gLineBreaks_class, "widths", "[F");
-    gLineBreaks_fieldID.flags = GetFieldIDOrDie(env, gLineBreaks_class, "flags", "[I");
+    gLineBreaks_fieldID.flags = GetFieldIDOrDie(env, gLineBreaks_class, "flags", "[Z");
 
     return RegisterMethodsOrDie(env, "android/text/StaticLayout", gMethods, NELEM(gMethods));
 }
