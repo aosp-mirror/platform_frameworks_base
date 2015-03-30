@@ -75,6 +75,7 @@ public class SystemGesturesPointerEventListener implements PointerEventListener 
                 mDebugFireable = true;
                 mDownPointers = 0;
                 captureDown(event, 0);
+                mCallbacks.onDown();
                 break;
             case MotionEvent.ACTION_POINTER_DOWN:
                 captureDown(event, event.getActionIndex());
@@ -106,6 +107,7 @@ public class SystemGesturesPointerEventListener implements PointerEventListener 
             case MotionEvent.ACTION_CANCEL:
                 mSwipeFireable = false;
                 mDebugFireable = false;
+                mCallbacks.onUpOrCancel();
                 break;
             default:
                 if (DEBUG) Slog.d(TAG, "Ignoring " + event);
@@ -192,6 +194,8 @@ public class SystemGesturesPointerEventListener implements PointerEventListener 
         void onSwipeFromTop();
         void onSwipeFromBottom();
         void onSwipeFromRight();
+        void onDown();
+        void onUpOrCancel();
         void onDebug();
     }
 }
