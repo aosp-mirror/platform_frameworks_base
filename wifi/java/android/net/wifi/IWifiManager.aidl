@@ -115,6 +115,8 @@ interface IWifiManager
 
     WifiConfiguration getWifiApConfiguration();
 
+    WifiConfiguration buildWifiConfig(String uriString, String mimeType, in byte[] data);
+
     void setWifiApConfiguration(in WifiConfiguration wifiConfig);
 
     void startWifi();
