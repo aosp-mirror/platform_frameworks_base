@@ -74,14 +74,14 @@ public class CompilerChef {
         ensureDataBinder();
         for (LayoutBinder layoutBinder : mDataBinder.mLayoutBinders) {
             for (String variableName : layoutBinder.getUserDefinedVariables().keySet()) {
-                bindables.addVariable(variableName, layoutBinder.getInterfaceName());
+                bindables.addVariable(variableName, layoutBinder.getClassName());
             }
         }
     }
     
-    public void writeViewBinderInterfaces() {
+    public void writeViewBinderInterfaces(boolean isLibrary) {
         ensureDataBinder();
-        mDataBinder.writerBinderInterfaces();
+        mDataBinder.writerBaseClasses(isLibrary);
     }
 
     public void writeViewBinders() {
