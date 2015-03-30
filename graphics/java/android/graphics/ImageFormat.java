@@ -388,6 +388,33 @@ public class ImageFormat {
     public static final int DEPTH_POINT_CLOUD = 0x101;
 
     /**
+     * Android private opaque image format.
+     * <p>
+     * The choices of the actual format and pixel data layout are entirely up to
+     * the device-specific and framework internal implementations, and may vary
+     * depending on use cases even for the same device. The buffers of this
+     * format can be produced by components like
+     * {@link android.media.ImageWriter ImageWriter} , and interpreted correctly
+     * by consumers like {@link android.hardware.camera2.CameraDevice
+     * CameraDevice} based on the device/framework private information. However,
+     * these buffers are not directly accessible to the application.
+     * </p>
+     * <p>
+     * When an {@link android.media.Image Image} of this format is obtained from
+     * an {@link android.media.ImageReader ImageReader} or
+     * {@link android.media.ImageWriter ImageWriter}, the
+     * {@link android.media.Image#getPlanes() getPlanes()} method will return an
+     * empty {@link android.media.Image.Plane Plane} array.
+     * </p>
+     * <p>
+     * If a buffer of this format is to be used as an OpenGL ES texture, the
+     * framework will assume that sampling the texture will always return an
+     * alpha value of 1.0 (i.e. the buffer contains only opaque pixel values).
+     * </p>
+     */
+    public static final int PRIVATE = 0x22;
+
+    /**
      * Use this function to retrieve the number of bits per pixel of an
      * ImageFormat.
      *
@@ -447,6 +474,7 @@ public class ImageFormat {
             case RAW10:
             case DEPTH16:
             case DEPTH_POINT_CLOUD:
+            case PRIVATE:
                 return true;
         }
 
