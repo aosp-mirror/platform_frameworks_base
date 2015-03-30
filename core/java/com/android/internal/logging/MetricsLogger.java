@@ -31,6 +31,13 @@ public class MetricsLogger implements MetricsConstants {
     public static final int MANAGE_APPLICATIONS_ALL = 134;
     public static final int MANAGE_APPLICATIONS_NOTIFICATIONS = 135;
 
+    public static final int ACTION_WIFI_ADD_NETWORK = 136;
+    public static final int ACTION_WIFI_CONNECT = 137;
+    public static final int ACTION_WIFI_FORCE_SCAN = 138;
+    public static final int ACTION_WIFI_FORGET = 139;
+    public static final int ACTION_WIFI_OFF = 140;
+    public static final int ACTION_WIFI_ON = 141;
+
     public static void visible(Context context, int category) throws IllegalArgumentException {
         if (Build.IS_DEBUGGABLE && category == VIEW_UNKNOWN) {
             throw new IllegalArgumentException("Must define metric category");
@@ -43,5 +50,12 @@ public class MetricsLogger implements MetricsConstants {
             throw new IllegalArgumentException("Must define metric category");
         }
         EventLogTags.writeSysuiViewVisibility(category, 0);
+    }
+
+    public static void action(Context context, int category) {
+        if (Build.IS_DEBUGGABLE && category == VIEW_UNKNOWN) {
+            throw new IllegalArgumentException("Must define metric category");
+        }
+        EventLogTags.writeSysuiAction(category);
     }
 }
