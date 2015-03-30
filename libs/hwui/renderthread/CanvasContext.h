@@ -127,23 +127,24 @@ private:
     RenderThread& mRenderThread;
     EglManager& mEglManager;
     sp<ANativeWindow> mNativeWindow;
-    EGLSurface mEglSurface;
-    bool mBufferPreserved;
-    SwapBehavior mSwapBehavior;
+    EGLSurface mEglSurface = EGL_NO_SURFACE;
+    bool mBufferPreserved = false;
+    SwapBehavior mSwapBehavior = kSwap_default;
 
     bool mOpaque;
-    OpenGLRenderer* mCanvas;
-    bool mHaveNewSurface;
+    OpenGLRenderer* mCanvas = nullptr;
+    bool mHaveNewSurface = false;
     DamageAccumulator mDamageAccumulator;
     std::unique_ptr<AnimationContext> mAnimationContext;
 
     const sp<RenderNode> mRootRenderNode;
 
     DrawProfiler mProfiler;
-    FrameInfo* mCurrentFrameInfo;
+    FrameInfo* mCurrentFrameInfo = nullptr;
     // Ring buffer large enough for 1 second worth of frames
     RingBuffer<FrameInfo, 60> mFrames;
     std::string mName;
+    JankTracker mJankTracker;
 
     std::set<RenderNode*> mPrefetechedLayers;
 };

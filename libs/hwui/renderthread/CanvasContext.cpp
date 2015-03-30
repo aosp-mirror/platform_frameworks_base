@@ -41,15 +41,10 @@ CanvasContext::CanvasContext(RenderThread& thread, bool translucent,
         RenderNode* rootRenderNode, IContextFactory* contextFactory)
         : mRenderThread(thread)
         , mEglManager(thread.eglManager())
-        , mEglSurface(EGL_NO_SURFACE)
-        , mBufferPreserved(false)
-        , mSwapBehavior(kSwap_default)
         , mOpaque(!translucent)
-        , mCanvas(nullptr)
-        , mHaveNewSurface(false)
         , mAnimationContext(contextFactory->createAnimationContext(mRenderThread.timeLord()))
         , mRootRenderNode(rootRenderNode)
-        , mCurrentFrameInfo(nullptr) {
+        , mJankTracker(thread.timeLord().frameIntervalNanos()) {
     mRenderThread.renderState().registerCanvasContext(this);
     mProfiler.setDensity(mRenderThread.mainDisplayInfo().density);
 }
@@ -258,6 +253,7 @@ void CanvasContext::draw() {
 
     // TODO: Use a fence for real completion?
     mCurrentFrameInfo->markFrameCompleted();
+    mJankTracker.addFrame(*mCurrentFrameInfo);
     mRenderThread.jankTracker().addFrame(*mCurrentFrameInfo);
     profiler().finishFrame();
 }
