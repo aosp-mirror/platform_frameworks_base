@@ -2602,15 +2602,21 @@ public class MediaPlayer implements SubtitleController.Listener
                 return;
 
             case MEDIA_STOPPED:
-                if (mTimeProvider != null) {
-                    mTimeProvider.onStopped();
+                {
+                    TimeProvider timeProvider = mTimeProvider;
+                    if (timeProvider != null) {
+                        timeProvider.onStopped();
+                    }
                 }
                 break;
 
             case MEDIA_STARTED:
             case MEDIA_PAUSED:
-                if (mTimeProvider != null) {
-                    mTimeProvider.onPaused(msg.what == MEDIA_PAUSED);
+                {
+                    TimeProvider timeProvider = mTimeProvider;
+                    if (timeProvider != null) {
+                        timeProvider.onPaused(msg.what == MEDIA_PAUSED);
+                    }
                 }
                 break;
 
@@ -2620,21 +2626,26 @@ public class MediaPlayer implements SubtitleController.Listener
                 return;
 
             case MEDIA_SEEK_COMPLETE:
-              if (mOnSeekCompleteListener != null) {
-                  mOnSeekCompleteListener.onSeekComplete(mMediaPlayer);
-              }
-              // fall through
+                if (mOnSeekCompleteListener != null) {
+                    mOnSeekCompleteListener.onSeekComplete(mMediaPlayer);
+                }
+                // fall through
 
             case MEDIA_SKIPPED:
-              if (mTimeProvider != null) {
-                  mTimeProvider.onSeekComplete(mMediaPlayer);
-              }
-              return;
+                {
+                    TimeProvider timeProvider = mTimeProvider;
+                    if (timeProvider != null) {
+                        timeProvider.onSeekComplete(mMediaPlayer);
+                    }
+                }
+                return;
 
             case MEDIA_SET_VIDEO_SIZE:
-              if (mOnVideoSizeChangedListener != null)
-                  mOnVideoSizeChangedListener.onVideoSizeChanged(mMediaPlayer, msg.arg1, msg.arg2);
-              return;
+                if (mOnVideoSizeChangedListener != null) {
+                    mOnVideoSizeChangedListener.onVideoSizeChanged(
+                        mMediaPlayer, msg.arg1, msg.arg2);
+                }
+                return;
 
             case MEDIA_ERROR:
                 Log.e(TAG, "Error (" + msg.arg1 + "," + msg.arg2 + ")");
