@@ -18,6 +18,7 @@ package android.provider;
 
 import android.accounts.Account;
 import android.app.Activity;
+import android.app.admin.DevicePolicyManager;
 import android.content.ActivityNotFoundException;
 import android.content.ContentProviderClient;
 import android.content.ContentProviderOperation;
@@ -1628,7 +1629,6 @@ public final class ContactsContract {
          */
         public static final String CONTENT_VCARD_TYPE = "text/x-vcard";
 
-
         /**
          * Mimimal ID for corp contacts returned from
          * {@link PhoneLookup#ENTERPRISE_CONTENT_FILTER_URI}.
@@ -1636,6 +1636,14 @@ public final class ContactsContract {
          * @hide
          */
         public static long ENTERPRISE_CONTACT_ID_BASE = 1000000000; // slightly smaller than 2 ** 30
+
+        /**
+         * Prefix for corp contacts returned from
+         * {@link PhoneLookup#ENTERPRISE_CONTENT_FILTER_URI}.
+         *
+         * @hide
+         */
+        public static String ENTERPRISE_CONTACT_LOOKUP_PREFIX = "c-";
 
         /**
          * Return TRUE if a contact ID is from the contacts provider on the enterprise profile.
@@ -5032,9 +5040,17 @@ public final class ContactsContract {
          *     is from the corp profile, use
          *     {@link ContactsContract.Contacts#isEnterpriseContactId(long)}.
          *     </li>
+         *     <li>
+         *     Corp contacts will get artificial {@link #LOOKUP_KEY}s too.
+         *     </li>
          * </ul>
          * <p>
-         * This URI does NOT support selection nor order-by.
+         * A contact lookup URL built by
+         * {@link ContactsContract.Contacts#getLookupUri(long, String)}
+         * with an {@link #_ID} and a {@link #LOOKUP_KEY} returned by this API can be passed to
+         * {@link ContactsContract.QuickContact#showQuickContact} even if a contact is from the
+         * corp profile.
+         * </p>
          *
          * <pre>
          * Uri lookupUri = Uri.withAppendedPath(PhoneLookup.ENTERPRISE_CONTENT_FILTER_URI,
@@ -6025,10 +6041,18 @@ public final class ContactsContract {
             *     a contact
             *     is from the corp profile, use
             *     {@link ContactsContract.Contacts#isEnterpriseContactId(long)}.
-            *     </li>
-            * </ul>
-            * <p>
-            * This URI does NOT support selection nor order-by.
+             *     </li>
+             *     <li>
+             *     Corp contacts will get artificial {@link #LOOKUP_KEY}s too.
+             *     </li>
+             * </ul>
+             * <p>
+             * A contact lookup URL built by
+             * {@link ContactsContract.Contacts#getLookupUri(long, String)}
+             * with an {@link #_ID} and a {@link #LOOKUP_KEY} returned by this API can be passed to
+             * {@link ContactsContract.QuickContact#showQuickContact} even if a contact is from the
+             * corp profile.
+             * </p>
             *
             * <pre>
             * Uri lookupUri = Uri.withAppendedPath(Email.ENTERPRISE_CONTENT_LOOKUP_URI,
@@ -8182,6 +8206,9 @@ public final class ContactsContract {
          */
         public static final int MODE_LARGE = 3;
 
+        /** @hide */
+        public static final int MODE_DEFAULT = MODE_LARGE;
+
         /**
          * Constructs the QuickContacts intent with a view's rect.
          * @hide
@@ -8224,12 +8251,37 @@ public final class ContactsContract {
             // Launch pivot dialog through intent for now
             final Intent intent = new Intent(ACTION_QUICK_CONTACT).addFlags(intentFlags);
 
+            // NOTE: This logic and rebuildManagedQuickContactsIntent() must be in sync.
             intent.setData(lookupUri);
             intent.setSourceBounds(target);
             intent.putExtra(EXTRA_MODE, mode);
             intent.putExtra(EXTRA_EXCLUDE_MIMES, excludeMimes);
             return intent;
         }
+
+        /**
+         * Constructs a QuickContacts intent based on an incoming intent for DevicePolicyManager
+         * to strip off anything not necessary.
+         * 
+         * @hide
+         */
+        public static Intent rebuildManagedQuickContactsIntent(String lookupKey, long contactId,
+                Intent originalIntent) {
+            final Intent intent = new Intent(ACTION_QUICK_CONTACT);
+            // Rebuild the URI from a lookup key and a contact ID.
+            intent.setData(Contacts.getLookupUri(contactId, lookupKey));
+
+            // Copy flags and always set NEW_TASK because it won't have a parent activity.
+            intent.setFlags(originalIntent.getFlags() | Intent.FLAG_ACTIVITY_NEW_TASK);
+
+            // Copy extras.
+            intent.setSourceBounds(originalIntent.getSourceBounds());
+            intent.putExtra(EXTRA_MODE, originalIntent.getIntExtra(EXTRA_MODE, MODE_DEFAULT));
+            intent.putExtra(EXTRA_EXCLUDE_MIMES,
+                    originalIntent.getStringArrayExtra(EXTRA_EXCLUDE_MIMES));
+            return intent;
+        }
+
 
         /**
          * Trigger a dialog that lists the various methods of interacting with
@@ -8259,7 +8311,7 @@ public final class ContactsContract {
             // Trigger with obtained rectangle
             Intent intent = composeQuickContactsIntent(context, target, lookupUri, mode,
                     excludeMimes);
-            startActivityWithErrorToast(context, intent);
+            ContactsInternal.startQuickContactWithErrorToast(context, intent);
         }
 
         /**
@@ -8292,7 +8344,7 @@ public final class ContactsContract {
                 String[] excludeMimes) {
             Intent intent = composeQuickContactsIntent(context, target, lookupUri, mode,
                     excludeMimes);
-            startActivityWithErrorToast(context, intent);
+            ContactsInternal.startQuickContactWithErrorToast(context, intent);
         }
 
         /**
@@ -8325,10 +8377,10 @@ public final class ContactsContract {
             // Use MODE_LARGE instead of accepting mode as a parameter. The different mode
             // values defined in ContactsContract only affect very old implementations
             // of QuickContacts.
-            Intent intent = composeQuickContactsIntent(context, target, lookupUri, MODE_LARGE,
+            Intent intent = composeQuickContactsIntent(context, target, lookupUri, MODE_DEFAULT,
                     excludeMimes);
             intent.putExtra(EXTRA_PRIORITIZED_MIMETYPE, prioritizedMimeType);
-            startActivityWithErrorToast(context, intent);
+            ContactsInternal.startQuickContactWithErrorToast(context, intent);
         }
 
         /**
@@ -8363,19 +8415,10 @@ public final class ContactsContract {
             // Use MODE_LARGE instead of accepting mode as a parameter. The different mode
             // values defined in ContactsContract only affect very old implementations
             // of QuickContacts.
-            Intent intent = composeQuickContactsIntent(context, target, lookupUri, MODE_LARGE,
+            Intent intent = composeQuickContactsIntent(context, target, lookupUri, MODE_DEFAULT,
                     excludeMimes);
             intent.putExtra(EXTRA_PRIORITIZED_MIMETYPE, prioritizedMimeType);
-            startActivityWithErrorToast(context, intent);
-        }
-
-        private static void startActivityWithErrorToast(Context context, Intent intent) {
-            try {
-              context.startActivity(intent);
-            } catch (ActivityNotFoundException e) {
-                Toast.makeText(context, com.android.internal.R.string.quick_contacts_not_available,
-                                Toast.LENGTH_SHORT).show();
-            }
+            ContactsInternal.startQuickContactWithErrorToast(context, intent);
         }
     }
 
