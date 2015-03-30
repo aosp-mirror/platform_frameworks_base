@@ -89,7 +89,7 @@ static jint saveLayerAlpha(JNIEnv* env, jobject, jlong canvasHandle, jfloat l, j
 static void restore(JNIEnv* env, jobject, jlong canvasHandle) {
     Canvas* canvas = get_canvas(canvasHandle);
     if (canvas->getSaveCount() <= 1) {  // cannot restore anymore
-        // fail silently on underflow, so as not to break existing apps that miscount
+        doThrowISE(env, "Underflow in restore - more restores than saves");
         return;
     }
     canvas->restore();
@@ -98,7 +98,7 @@ static void restore(JNIEnv* env, jobject, jlong canvasHandle) {
 static void restoreToCount(JNIEnv* env, jobject, jlong canvasHandle, jint restoreCount) {
     Canvas* canvas = get_canvas(canvasHandle);
     if (restoreCount < 1 || restoreCount > canvas->getSaveCount()) {
-        // fail silently on underflow, so as not to break existing apps that miscount
+        doThrowIAE(env, "Underflow in restoreToCount - more restores than saves");
         return;
     }
     canvas->restoreToCount(restoreCount);
