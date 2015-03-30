@@ -18,8 +18,7 @@ package com.android.server.am;
 
 import static android.content.Intent.FLAG_ACTIVITY_NEW_DOCUMENT;
 import static android.content.Intent.FLAG_ACTIVITY_RETAIN_IN_RECENTS;
-import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
-import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NAME;
+import static com.android.server.am.ActivityManagerDebugConfig.*;
 import static com.android.server.am.ActivityRecord.HOME_ACTIVITY_TYPE;
 import static com.android.server.am.ActivityRecord.APPLICATION_ACTIVITY_TYPE;
 import static com.android.server.am.ActivityRecord.RECENTS_ACTIVITY_TYPE;
@@ -58,6 +57,8 @@ import java.util.ArrayList;
 
 final class TaskRecord {
     private static final String TAG = TAG_WITH_CLASS_NAME ? "TaskRecord" : TAG_AM;
+    private static final String TAG_RECENTS = TAG + POSTFIX_RECENTS;
+    private static final String TAG_TASKS = TAG + POSTFIX_TASKS;
 
     static final String ATTR_TASKID = "task_id";
     private static final String TAG_INTENT = "intent";
@@ -312,8 +313,7 @@ final class TaskRecord {
                     _intent.setSourceBounds(null);
                 }
             }
-            if (ActivityManagerService.DEBUG_TASKS) Slog.v(TAG,
-                    "Setting Intent of " + this + " to " + _intent);
+            if (DEBUG_TASKS) Slog.v(TAG_TASKS, "Setting Intent of " + this + " to " + _intent);
             intent = _intent;
             realActivity = _intent != null ? _intent.getComponent() : null;
             origActivity = null;
@@ -325,7 +325,7 @@ final class TaskRecord {
                 targetIntent.setComponent(targetComponent);
                 targetIntent.setSelector(null);
                 targetIntent.setSourceBounds(null);
-                if (ActivityManagerService.DEBUG_TASKS) Slog.v(TAG,
+                if (DEBUG_TASKS) Slog.v(TAG_TASKS,
                         "Setting Intent of " + this + " to target " + targetIntent);
                 intent = targetIntent;
                 realActivity = targetComponent;
@@ -821,7 +821,7 @@ final class TaskRecord {
     }
 
     void saveToXml(XmlSerializer out) throws IOException, XmlPullParserException {
-        if (ActivityManagerService.DEBUG_RECENTS) Slog.i(TAG, "Saving task=" + this);
+        if (DEBUG_RECENTS) Slog.i(TAG_RECENTS, "Saving task=" + this);
 
         out.attribute(null, ATTR_TASKID, String.valueOf(taskId));
         if (realActivity != null) {
@@ -1048,7 +1048,7 @@ final class TaskRecord {
             activities.get(activityNdx).task = task;
         }
 
-        if (ActivityManagerService.DEBUG_RECENTS) Slog.d(TAG, "Restored task=" + task);
+        if (DEBUG_RECENTS) Slog.d(TAG_RECENTS, "Restored task=" + task);
         return task;
     }
 

@@ -72,7 +72,7 @@ class ActivityManagerDebugConfig {
     static final boolean DEBUG_TRANSITION = DEBUG_ALL || false;
     static final boolean DEBUG_URI_PERMISSION = DEBUG_ALL || false;
     static final boolean DEBUG_USER_LEAVING = DEBUG_ALL || false;
-    static final boolean DEBUG_VISBILITY = DEBUG_ALL || false;
+    static final boolean DEBUG_VISIBILITY = DEBUG_ALL || false;
 
     static final String POSTFIX_BACKUP = (APPEND_CATEGORY_NAME) ? "_Backup" : "";
     static final String POSTFIX_BROADCAST = (APPEND_CATEGORY_NAME) ? "_Broadcast" : "";
@@ -80,11 +80,29 @@ class ActivityManagerDebugConfig {
     static final String POSTFIX_CONFIGURATION = (APPEND_CATEGORY_NAME) ? "_Configuration" : "";
     static final String POSTFIX_FOCUS = (APPEND_CATEGORY_NAME) ? "_Focus" : "";
     static final String POSTFIX_IMMERSIVE = (APPEND_CATEGORY_NAME) ? "_Immersive" : "";
+    static final String POSTFIX_LOCKSCREEN = (APPEND_CATEGORY_NAME) ? "_LOCKSCREEN" : "";
     static final String POSTFIX_LRU = (APPEND_CATEGORY_NAME) ? "_LRU" : "";
     static final String POSTFIX_MU = "_MU";
     static final String POSTFIX_OOM_ADJ = (APPEND_CATEGORY_NAME) ? "_OomAdj" : "";
+    static final String POSTFIX_PAUSE = (APPEND_CATEGORY_NAME) ? "_Pause" : "";
+    static final String POSTFIX_POWER = (APPEND_CATEGORY_NAME) ? "_Power" : "";
+    static final String POSTFIX_PROCESS_OBSERVERS = (APPEND_CATEGORY_NAME)
+            ? "_ProcessObservers" : "";
+    static final String POSTFIX_PROCESSES = (APPEND_CATEGORY_NAME) ? "_Processes" : "";
+    static final String POSTFIX_PROVIDER = (APPEND_CATEGORY_NAME) ? "_Provider" : "";
+    static final String POSTFIX_PSS = (APPEND_CATEGORY_NAME) ? "_Pss" : "";
+    static final String POSTFIX_RESULTS = (APPEND_CATEGORY_NAME) ? "_Results" : "";
+    static final String POSTFIX_RECENTS = (APPEND_CATEGORY_NAME) ? "_Recents" : "";
     static final String POSTFIX_SERVICE = (APPEND_CATEGORY_NAME) ? "_Service" : "";
     static final String POSTFIX_SERVICE_EXECUTING =
             (APPEND_CATEGORY_NAME) ? "_ServiceExecuting" : "";
+    static final String POSTFIX_STACK = (APPEND_CATEGORY_NAME) ? "_Stack" : "";
+    static final String POSTFIX_SWITCH = (APPEND_CATEGORY_NAME) ? "_Switch" : "";
+    static final String POSTFIX_TASKS = (APPEND_CATEGORY_NAME) ? "_Tasks" : "";
+    static final String POSTFIX_THUMBNAILS = (APPEND_CATEGORY_NAME) ? "_Thumbnails" : "";
+    static final String POSTFIX_TRANSITION = (APPEND_CATEGORY_NAME) ? "_Transition" : "";
+    static final String POSTFIX_URI_PERMISSION = (APPEND_CATEGORY_NAME) ? "_UriPermission" : "";
+    static final String POSTFIX_USER_LEAVING = (APPEND_CATEGORY_NAME) ? "_UserLeaving" : "";
+    static final String POSTFIX_VISIBILITY = (APPEND_CATEGORY_NAME) ? "_Visibility" : "";
 
 }

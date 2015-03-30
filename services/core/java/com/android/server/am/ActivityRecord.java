@@ -17,8 +17,6 @@
 package com.android.server.am;
 
 import static com.android.server.am.ActivityManagerDebugConfig.*;
-import static com.android.server.am.ActivityManagerService.DEBUG_SWITCH;
-import static com.android.server.am.ActivityManagerService.DEBUG_THUMBNAILS;
 import static com.android.server.am.TaskPersister.DEBUG_PERSISTER;
 import static com.android.server.am.TaskPersister.DEBUG_RESTORER;
 import static com.android.server.am.TaskRecord.INVALID_TASK_ID;
@@ -75,6 +73,8 @@ import java.util.Objects;
  */
 final class ActivityRecord {
     private static final String TAG = TAG_WITH_CLASS_NAME ? "ActivityRecord" : TAG_AM;
+    private static final String TAG_SWITCH = TAG + POSTFIX_SWITCH;
+    private static final String TAG_THUMBNAILS = TAG + POSTFIX_THUMBNAILS;
 
     private static final boolean SHOW_ACTIVITY_START_TIME = true;
     static final boolean DEBUG_SAVED_STATE = ActivityStackSupervisor.DEBUG_SAVED_STATE;
@@ -354,7 +354,7 @@ final class ActivityRecord {
             synchronized (mService) {
                 ActivityRecord r = tokenToActivityRecordLocked(this);
                 if (r != null) {
-                    if (DEBUG_SWITCH) Log.v(TAG, "windowsGone(): " + r);
+                    if (DEBUG_SWITCH) Log.v(TAG_SWITCH, "windowsGone(): " + r);
                     r.nowVisible = false;
                     return;
                 }
@@ -863,7 +863,7 @@ final class ActivityRecord {
 
     void updateThumbnailLocked(Bitmap newThumbnail, CharSequence description) {
         if (newThumbnail != null) {
-            if (DEBUG_THUMBNAILS) Slog.i(TAG,
+            if (DEBUG_THUMBNAILS) Slog.i(TAG_THUMBNAILS,
                     "Setting thumbnail of " + this + " to " + newThumbnail);
             boolean thumbnailUpdated = task.setLastThumbnail(newThumbnail);
             if (thumbnailUpdated && isPersistable()) {
@@ -1014,7 +1014,7 @@ final class ActivityRecord {
 
     void windowsVisibleLocked() {
         mStackSupervisor.reportActivityVisibleLocked(this);
-        if (DEBUG_SWITCH) Log.v(TAG, "windowsVisibleLocked(): " + this);
+        if (DEBUG_SWITCH) Log.v(TAG_SWITCH, "windowsVisibleLocked(): " + this);
         if (!nowVisible) {
             nowVisible = true;
             lastVisibleTime = SystemClock.uptimeMillis();
@@ -1030,7 +1030,7 @@ final class ActivityRecord {
                 if (size > 0) {
                     for (int i = 0; i < size; i++) {
                         ActivityRecord r = mStackSupervisor.mWaitingVisibleActivities.get(i);
-                        if (DEBUG_SWITCH) Log.v(TAG, "Was waiting for visible: " + r);
+                        if (DEBUG_SWITCH) Log.v(TAG_SWITCH, "Was waiting for visible: " + r);
                     }
                     mStackSupervisor.mWaitingVisibleActivities.clear();
                     mStackSupervisor.scheduleIdleLocked();

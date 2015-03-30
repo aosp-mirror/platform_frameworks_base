@@ -16,10 +16,7 @@
 
 package com.android.server.am;
 
-import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
-import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NAME;
-import static com.android.server.am.ActivityManagerService.DEBUG_RECENTS;
-import static com.android.server.am.ActivityManagerService.DEBUG_TASKS;
+import static com.android.server.am.ActivityManagerDebugConfig.*;
 import static com.android.server.am.TaskRecord.INVALID_TASK_ID;
 
 import android.app.ActivityManager;
@@ -44,6 +41,8 @@ import java.util.HashMap;
  */
 class RecentTasks extends ArrayList<TaskRecord> {
     private static final String TAG = TAG_WITH_CLASS_NAME ? "RecentTasks" : TAG_AM;
+    private static final String TAG_RECENTS = TAG + POSTFIX_RECENTS;
+    private static final String TAG_TASKS = TAG + POSTFIX_TASKS;
 
     // Maximum number recent bitmaps to keep in memory.
     private static final int MAX_RECENT_BITMAPS = 3;
@@ -83,8 +82,8 @@ class RecentTasks extends ArrayList<TaskRecord> {
         for (int i = size() - 1; i >= 0; --i) {
             TaskRecord tr = get(i);
             if (tr.userId == userId) {
-                if(DEBUG_TASKS) Slog.i(TAG, "remove RecentTask " + tr
-                        + " when finishing user" + userId);
+                if(DEBUG_TASKS) Slog.i(TAG_TASKS,
+                        "remove RecentTask " + tr + " when finishing user" + userId);
                 remove(i);
                 tr.removedFromRecents();
             }
@@ -170,21 +169,21 @@ class RecentTasks extends ArrayList<TaskRecord> {
                             continue;
                         } else {
                             // Otherwise just not available for now.
-                            if (DEBUG_RECENTS && task.isAvailable) Slog.d(TAG,
+                            if (DEBUG_RECENTS && task.isAvailable) Slog.d(TAG_RECENTS,
                                     "Making recent unavailable: " + task);
                             task.isAvailable = false;
                         }
                     } else {
                         if (!ai.enabled || !ai.applicationInfo.enabled
                                 || (ai.applicationInfo.flags&ApplicationInfo.FLAG_INSTALLED) == 0) {
-                            if (DEBUG_RECENTS && task.isAvailable) Slog.d(TAG,
+                            if (DEBUG_RECENTS && task.isAvailable) Slog.d(TAG_RECENTS,
                                     "Making recent unavailable: " + task
                                     + " (enabled=" + ai.enabled + "/" + ai.applicationInfo.enabled
                                     + " flags=" + Integer.toHexString(ai.applicationInfo.flags)
                                     + ")");
                             task.isAvailable = false;
                         } else {
-                            if (DEBUG_RECENTS && !task.isAvailable) Slog.d(TAG,
+                            if (DEBUG_RECENTS && !task.isAvailable) Slog.d(TAG_RECENTS,
                                     "Making recent available: " + task);
                             task.isAvailable = true;
                         }
@@ -210,7 +209,7 @@ class RecentTasks extends ArrayList<TaskRecord> {
             top = top.mNextAffiliate;
             topIndex--;
         }
-        if (DEBUG_RECENTS) Slog.d(TAG, "addRecent: adding affilliates starting at "
+        if (DEBUG_RECENTS) Slog.d(TAG_RECENTS, "addRecent: adding affilliates starting at "
                 + topIndex + " from intial " + taskIndex);
         // Find the end of the chain, doing a sanity check along the way.
         boolean sane = top.mAffiliatedTaskId == task.mAffiliatedTaskId;
@@ -218,7 +217,7 @@ class RecentTasks extends ArrayList<TaskRecord> {
         TaskRecord prev = top;
         while (endIndex < recentsCount) {
             TaskRecord cur = get(endIndex);
-            if (DEBUG_RECENTS) Slog.d(TAG, "addRecent: looking at next chain @"
+            if (DEBUG_RECENTS) Slog.d(TAG_RECENTS, "addRecent: looking at next chain @"
                     + endIndex + " " + cur);
             if (cur == top) {
                 // Verify start of the chain.
@@ -249,7 +248,7 @@ class RecentTasks extends ArrayList<TaskRecord> {
                             + cur.mPrevAffiliate);
                     sane = false;
                 }
-                if (DEBUG_RECENTS) Slog.d(TAG, "addRecent: end of chain @" + endIndex);
+                if (DEBUG_RECENTS) Slog.d(TAG_RECENTS, "addRecent: end of chain @" + endIndex);
                 break;
             } else {
                 // Verify middle of the chain's prev points to a valid item.
@@ -290,12 +289,12 @@ class RecentTasks extends ArrayList<TaskRecord> {
             // All looks good, we can just move all of the affiliated tasks
             // to the top.
             for (int i=topIndex; i<=endIndex; i++) {
-                if (DEBUG_RECENTS) Slog.d(TAG, "addRecent: moving affiliated " + task
+                if (DEBUG_RECENTS) Slog.d(TAG_RECENTS, "addRecent: moving affiliated " + task
                         + " from " + i + " to " + (i-topIndex));
                 TaskRecord cur = remove(i);
                 add(i - topIndex, cur);
             }
-            if (DEBUG_RECENTS) Slog.d(TAG, "addRecent: done moving tasks  " +  topIndex
+            if (DEBUG_RECENTS) Slog.d(TAG_RECENTS, "addRecent: done moving tasks  " +  topIndex
                     + " to " + endIndex);
             return true;
         }
@@ -312,19 +311,20 @@ class RecentTasks extends ArrayList<TaskRecord> {
         int recentsCount = size();
         // Quick case: never add voice sessions.
         if (task.voiceSession != null) {
-            if (DEBUG_RECENTS) Slog.d(TAG, "addRecent: not adding voice interaction " + task);
+            if (DEBUG_RECENTS) Slog.d(TAG_RECENTS,
+                    "addRecent: not adding voice interaction " + task);
             return;
         }
         // Another quick case: check if the top-most recent task is the same.
         if (!isAffiliated && recentsCount > 0 && get(0) == task) {
-            if (DEBUG_RECENTS) Slog.d(TAG, "addRecent: already at top: " + task);
+            if (DEBUG_RECENTS) Slog.d(TAG_RECENTS, "addRecent: already at top: " + task);
             return;
         }
         // Another quick case: check if this is part of a set of affiliated
         // tasks that are at the top.
         if (isAffiliated && recentsCount > 0 && task.inRecents
                 && task.mAffiliatedTaskId == get(0).mAffiliatedTaskId) {
-            if (DEBUG_RECENTS) Slog.d(TAG, "addRecent: affiliated " + get(0)
+            if (DEBUG_RECENTS) Slog.d(TAG_RECENTS, "addRecent: affiliated " + get(0)
                     + " at top when adding " + task);
             return;
         }
@@ -341,7 +341,7 @@ class RecentTasks extends ArrayList<TaskRecord> {
                     remove(taskIndex);
                     add(0, task);
                     mService.notifyTaskPersisterLocked(task, false);
-                    if (DEBUG_RECENTS) Slog.d(TAG, "addRecent: moving to top " + task
+                    if (DEBUG_RECENTS) Slog.d(TAG_RECENTS, "addRecent: moving to top " + task
                             + " from " + taskIndex);
                     return;
                 } else {
@@ -361,7 +361,7 @@ class RecentTasks extends ArrayList<TaskRecord> {
             }
         }
 
-        if (DEBUG_RECENTS) Slog.d(TAG, "addRecent: trimming tasks for " + task);
+        if (DEBUG_RECENTS) Slog.d(TAG_RECENTS, "addRecent: trimming tasks for " + task);
         trimForTaskLocked(task, true);
 
         recentsCount = size();
@@ -376,7 +376,7 @@ class RecentTasks extends ArrayList<TaskRecord> {
             // If this is a simple non-affiliated task, or we had some failure trying to
             // handle it as part of an affilated task, then just place it at the top.
             add(0, task);
-            if (DEBUG_RECENTS) Slog.d(TAG, "addRecent: adding " + task);
+            if (DEBUG_RECENTS) Slog.d(TAG_RECENTS, "addRecent: adding " + task);
         } else if (isAffiliated) {
             // If this is a new affiliated task, then move all of the affiliated tasks
             // to the front and insert this new one.
@@ -398,8 +398,8 @@ class RecentTasks extends ArrayList<TaskRecord> {
                         // after us in the list, so add at their position.
                         taskIndex = otherIndex;
                     }
-                    if (DEBUG_RECENTS) Slog.d(TAG, "addRecent: new affiliated task added at "
-                            + taskIndex + ": " + task);
+                    if (DEBUG_RECENTS) Slog.d(TAG_RECENTS,
+                            "addRecent: new affiliated task added at " + taskIndex + ": " + task);
                     add(taskIndex, task);
 
                     // Now move everything to the front.
@@ -412,19 +412,19 @@ class RecentTasks extends ArrayList<TaskRecord> {
                     // everything and then go through our general path of adding a new task.
                     needAffiliationFix = true;
                 } else {
-                    if (DEBUG_RECENTS) Slog.d(TAG, "addRecent: couldn't find other affiliation "
-                            + other);
+                    if (DEBUG_RECENTS) Slog.d(TAG_RECENTS,
+                            "addRecent: couldn't find other affiliation " + other);
                     needAffiliationFix = true;
                 }
             } else {
-                if (DEBUG_RECENTS) Slog.d(TAG,
+                if (DEBUG_RECENTS) Slog.d(TAG_RECENTS,
                         "addRecent: adding affiliated task without next/prev:" + task);
                 needAffiliationFix = true;
             }
         }
 
         if (needAffiliationFix) {
-            if (DEBUG_RECENTS) Slog.d(TAG, "addRecent: regrouping affiliations");
+            if (DEBUG_RECENTS) Slog.d(TAG_RECENTS, "addRecent: regrouping affiliations");
             cleanupLocked(task.userId);
         }
     }
