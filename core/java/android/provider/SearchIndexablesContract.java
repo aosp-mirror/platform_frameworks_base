@@ -236,7 +236,7 @@ public class SearchIndexablesContract {
     /**
      * The base columns.
      */
-    private static class BaseColumns {
+    public static class BaseColumns {
         private BaseColumns() {
         }
 

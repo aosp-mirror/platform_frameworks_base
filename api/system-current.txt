@@ -27947,7 +27947,7 @@ package android.provider {
     field public static final java.lang.String PROVIDER_INTERFACE = "android.content.action.SEARCH_INDEXABLES_PROVIDER";
   }
 
-  private static class SearchIndexablesContract.BaseColumns {
+  public static class SearchIndexablesContract.BaseColumns {
     field public static final java.lang.String COLUMN_CLASS_NAME = "className";
     field public static final java.lang.String COLUMN_ICON_RESID = "iconResId";
     field public static final java.lang.String COLUMN_INTENT_ACTION = "intentAction";
@@ -27957,26 +27957,14 @@ package android.provider {
   }
 
   public static final class SearchIndexablesContract.NonIndexableKey extends android.provider.SearchIndexablesContract.BaseColumns {
-    field public static final java.lang.String COLUMN_CLASS_NAME = "className";
-    field public static final java.lang.String COLUMN_ICON_RESID = "iconResId";
-    field public static final java.lang.String COLUMN_INTENT_ACTION = "intentAction";
-    field public static final java.lang.String COLUMN_INTENT_TARGET_CLASS = "intentTargetClass";
-    field public static final java.lang.String COLUMN_INTENT_TARGET_PACKAGE = "intentTargetPackage";
     field public static final java.lang.String COLUMN_KEY_VALUE = "key";
-    field public static final java.lang.String COLUMN_RANK = "rank";
     field public static final java.lang.String MIME_TYPE = "vnd.android.cursor.dir/non_indexables_key";
   }
 
   public static final class SearchIndexablesContract.RawData extends android.provider.SearchIndexablesContract.BaseColumns {
-    field public static final java.lang.String COLUMN_CLASS_NAME = "className";
     field public static final java.lang.String COLUMN_ENTRIES = "entries";
-    field public static final java.lang.String COLUMN_ICON_RESID = "iconResId";
-    field public static final java.lang.String COLUMN_INTENT_ACTION = "intentAction";
-    field public static final java.lang.String COLUMN_INTENT_TARGET_CLASS = "intentTargetClass";
-    field public static final java.lang.String COLUMN_INTENT_TARGET_PACKAGE = "intentTargetPackage";
     field public static final java.lang.String COLUMN_KEY = "key";
     field public static final java.lang.String COLUMN_KEYWORDS = "keywords";
-    field public static final java.lang.String COLUMN_RANK = "rank";
     field public static final java.lang.String COLUMN_SCREEN_TITLE = "screenTitle";
     field public static final java.lang.String COLUMN_SUMMARY_OFF = "summaryOff";
     field public static final java.lang.String COLUMN_SUMMARY_ON = "summaryOn";
@@ -27986,12 +27974,6 @@ package android.provider {
   }
 
   public static final class SearchIndexablesContract.XmlResource extends android.provider.SearchIndexablesContract.BaseColumns {
-    field public static final java.lang.String COLUMN_CLASS_NAME = "className";
-    field public static final java.lang.String COLUMN_ICON_RESID = "iconResId";
-    field public static final java.lang.String COLUMN_INTENT_ACTION = "intentAction";
-    field public static final java.lang.String COLUMN_INTENT_TARGET_CLASS = "intentTargetClass";
-    field public static final java.lang.String COLUMN_INTENT_TARGET_PACKAGE = "intentTargetPackage";
-    field public static final java.lang.String COLUMN_RANK = "rank";
     field public static final java.lang.String COLUMN_XML_RESID = "xmlResId";
     field public static final java.lang.String MIME_TYPE = "vnd.android.cursor.dir/indexables_xml_res";
   }
