@@ -810,7 +810,6 @@ class LayoutBinderWriter(val layoutBinder : LayoutBinder) {
             nl("")
             variables.forEach {
                 if (it.getUserDefinedType() != null) {
-                    tab("@Bindable")
                     //it.getExpandedUserDefinedType(ModelAnalyzer.getInstance());
                     val type = ModelAnalyzer.getInstance().applyImports(it.getUserDefinedType(), model.getImports())
                     tab("public abstract void ${it.setterName}(${type} ${it.readableUniqueName});")

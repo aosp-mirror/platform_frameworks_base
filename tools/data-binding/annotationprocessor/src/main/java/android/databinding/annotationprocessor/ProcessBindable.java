@@ -20,6 +20,7 @@ import com.google.common.base.Preconditions;
 
 import android.databinding.Bindable;
 import android.databinding.BindingBuildInfo;
+import android.databinding.tool.CompilerChef.BindableHolder;
 import android.databinding.tool.util.GenerationalClassUtil;
 import android.databinding.tool.util.L;
 
@@ -45,43 +46,58 @@ import javax.lang.model.type.TypeKind;
 
 // binding app info and library info are necessary to trigger this.
 @SupportedSourceVersion(SourceVersion.RELEASE_7)
-public class ProcessBindable extends ProcessDataBinding.ProcessingStep {
+public class ProcessBindable extends ProcessDataBinding.ProcessingStep implements BindableHolder {
     private static final String INTERMEDIATE_FILE_EXT = "-br.bin";
     Intermediate mProperties;
+    HashMap<String, HashSet<String>> mLayoutVariables = new HashMap<>();
 
     @Override
     public boolean onHandleStep(RoundEnvironment roundEnv, ProcessingEnvironment processingEnv,
             BindingBuildInfo buildInfo) {
         if (mProperties == null) {
             mProperties = new IntermediateV1(buildInfo.modulePackage());
-        }
-        for (Element element : AnnotationUtil.getElementsAnnotatedWith(roundEnv, Bindable.class)) {
-            Element enclosingElement = element.getEnclosingElement();
-            ElementKind kind = enclosingElement.getKind();
-            if (kind != ElementKind.CLASS && kind != ElementKind.INTERFACE) {
-                L.e("Bindable must be on a member field or method. The enclosing type is %s",
-                        enclosingElement.getKind());
+            mergeLayoutVariables();
+            mLayoutVariables.clear();
+            for (Element element : AnnotationUtil
+                    .getElementsAnnotatedWith(roundEnv, Bindable.class)) {
+                Element enclosingElement = element.getEnclosingElement();
+                ElementKind kind = enclosingElement.getKind();
+                if (kind != ElementKind.CLASS && kind != ElementKind.INTERFACE) {
+                    L.e("Bindable must be on a member field or method. The enclosing type is %s",
+                            enclosingElement.getKind());
+                }
+                TypeElement enclosing = (TypeElement) enclosingElement;
+                String name = getPropertyName(element);
+                if (name != null) {
+                    Preconditions
+                            .checkNotNull(mProperties, "Must receive app / library info before "
+                                    + "Bindable fields.");
+                    mProperties.addProperty(enclosing.getQualifiedName().toString(), name);
+                }
             }
-            TypeElement enclosing = (TypeElement) enclosingElement;
-            String name = getPropertyName(element);
-            if (name != null) {
-                Preconditions.checkNotNull(mProperties, "Must receive app / library info before "
-                        + "Bindable fields.");
-                mProperties.addProperty(enclosing.getQualifiedName().toString(), name);
+            if (mProperties.hasValues()) {
+                GenerationalClassUtil.writeIntermediateFile(processingEnv,
+                        mProperties.getPackage(),
+                        createIntermediateFileName(mProperties.getPackage()), mProperties);
+                generateBRClasses(!buildInfo.isLibrary(), mProperties.getPackage());
             }
         }
         return false;
     }
 
     @Override
+    public void addVariable(String variableName, String containingClassName) {
+        HashSet<String> variableNames = mLayoutVariables.get(containingClassName);
+        if (variableNames == null) {
+            variableNames = new HashSet<>();
+            mLayoutVariables.put(containingClassName, variableNames);
+        }
+        variableNames.add(variableName);
+    }
+
+    @Override
     public void onProcessingOver(RoundEnvironment roundEnvironment,
             ProcessingEnvironment processingEnvironment, BindingBuildInfo buildInfo) {
-        if (mProperties != null) {
-            GenerationalClassUtil.writeIntermediateFile(processingEnvironment,
-                    mProperties.getPackage(),
-                    createIntermediateFileName(mProperties.getPackage()), mProperties);
-            generateBRClasses(!buildInfo.isLibrary(), mProperties.getPackage());
-        }
     }
 
     private String createIntermediateFileName(String appPkg) {
@@ -183,6 +199,14 @@ public class ProcessBindable extends ProcessDataBinding.ProcessingStep {
                 propertyName.subSequence(1, propertyName.length());
     }
 
+    private void mergeLayoutVariables() {
+        for (String containingClass : mLayoutVariables.keySet()) {
+            for (String variable : mLayoutVariables.get(containingClass)) {
+                mProperties.addProperty(containingClass, variable);
+            }
+        }
+    }
+
     private static boolean prefixes(CharSequence sequence, String prefix) {
         boolean prefixes = false;
         if (sequence.length() > prefix.length()) {
@@ -234,6 +258,8 @@ public class ProcessBindable extends ProcessDataBinding.ProcessingStep {
 
         void addProperty(String className, String propertyName);
 
+        boolean hasValues();
+
         String getPackage();
     }
 
@@ -263,6 +289,11 @@ public class ProcessBindable extends ProcessDataBinding.ProcessingStep {
                 mProperties.put(className, properties);
             }
             properties.add(propertyName);
+        }
+
+        @Override
+        public boolean hasValues() {
+            return !mProperties.isEmpty();
         }
 
         @Override

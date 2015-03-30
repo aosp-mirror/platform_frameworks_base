@@ -45,6 +45,13 @@ public class ProcessExpressions extends ProcessDataBinding.ProcessingStep {
 
     private static final String LAYOUT_INFO_FILE_SUFFIX = "-layoutinfo.bin";
 
+    private final ProcessBindable mProcessBindable;
+
+    public ProcessExpressions(ProcessBindable processBindable) {
+        mProcessBindable = processBindable;
+    }
+
+
     @Override
     public boolean onHandleStep(RoundEnvironment roundEnvironment,
             ProcessingEnvironment processingEnvironment, BindingBuildInfo buildInfo) {
@@ -79,7 +86,6 @@ public class ProcessExpressions extends ProcessDataBinding.ProcessingStep {
     @Override
     public void onProcessingOver(RoundEnvironment roundEnvironment,
             ProcessingEnvironment processingEnvironment, BindingBuildInfo buildInfo) {
-
     }
 
     private void generateBinders(ResourceBundle resourceBundle, BindingBuildInfo buildInfo,
@@ -117,6 +123,7 @@ public class ProcessExpressions extends ProcessDataBinding.ProcessingStep {
             throws JAXBException {
         CompilerChef compilerChef = CompilerChef.createChef(resourceBundle, getWriter());
         if (compilerChef.hasAnythingToGenerate()) {
+            compilerChef.addBRVariables(mProcessBindable);
             compilerChef.writeViewBinderInterfaces();
             if (!forLibraryModule) {
                 compilerChef.writeDbrFile();

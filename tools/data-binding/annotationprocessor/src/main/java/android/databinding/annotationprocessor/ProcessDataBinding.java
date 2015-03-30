@@ -69,10 +69,11 @@ public class ProcessDataBinding extends AbstractProcessor {
     }
 
     private void initProcessingSteps() {
+        ProcessBindable processBindable = new ProcessBindable();
         mProcessingSteps = Arrays.asList(
                 new ProcessMethodAdapters(),
-                new ProcessExpressions(),
-                new ProcessBindable()
+                new ProcessExpressions(processBindable),
+                processBindable
         );
         AnnotationJavaFileWriter javaFileWriter = new AnnotationJavaFileWriter(processingEnv);
         for (ProcessingStep step : mProcessingSteps) {

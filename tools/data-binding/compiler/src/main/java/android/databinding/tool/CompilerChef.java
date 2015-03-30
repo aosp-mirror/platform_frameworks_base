@@ -66,6 +66,18 @@ public class CompilerChef {
             mFileWriter.writeToFile(pkg + "." + dbr.getClassName(), dbr.write());
         }
     }
+
+    /**
+     * Adds variables to list of Bindables.
+     */
+    public void addBRVariables(BindableHolder bindables) {
+        ensureDataBinder();
+        for (LayoutBinder layoutBinder : mDataBinder.mLayoutBinders) {
+            for (String variableName : layoutBinder.getUserDefinedVariables().keySet()) {
+                bindables.addVariable(variableName, layoutBinder.getInterfaceName());
+            }
+        }
+    }
     
     public void writeViewBinderInterfaces() {
         ensureDataBinder();
@@ -75,5 +87,9 @@ public class CompilerChef {
     public void writeViewBinders() {
         ensureDataBinder();
         mDataBinder.writeBinders();
+    }
+
+    public interface BindableHolder {
+        void addVariable(String variableName, String containingClassName);
     }
 }
