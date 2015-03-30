@@ -78,8 +78,6 @@ import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.UserManager;
-import android.provider.ContactsContract.QuickContact;
-import android.provider.ContactsInternal;
 import android.provider.Settings;
 import android.security.Credentials;
 import android.security.IKeyChainAliasCallback;
@@ -147,8 +145,6 @@ import java.util.Set;
 public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
     private static final String LOG_TAG = "DevicePolicyManagerService";
-
-    private static final boolean VERBOSE_LOG = false; // DO NOT SUBMIT WITH TRUE
 
     private static final String DEVICE_POLICIES_XML = "device_policies.xml";
 
@@ -5437,59 +5433,6 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             ActiveAdmin admin = getProfileOwnerAdmin(userId);
             return (admin != null) ? admin.disableCallerId : false;
         }
-    }
-
-    @Override
-    public void startManagedQuickContact(String actualLookupKey, long actualContactId,
-            Intent originalIntent) {
-        final Intent intent = QuickContact.rebuildManagedQuickContactsIntent(
-                actualLookupKey, actualContactId, originalIntent);
-        final int callingUserId = UserHandle.getCallingUserId();
-
-        final long ident = Binder.clearCallingIdentity();
-        try {
-            synchronized (this) {
-                final int managedUserId = getManagedUserId(callingUserId);
-                if (managedUserId < 0) {
-                    return;
-                }
-                if (getCrossProfileCallerIdDisabledForUser(managedUserId)) {
-                    if (VERBOSE_LOG) {
-                        Log.v(LOG_TAG,
-                                "Cross-profile contacts access disabled for user " + managedUserId);
-                    }
-                    return;
-                }
-                ContactsInternal.startQuickContactWithErrorToastForUser(
-                        mContext, intent, new UserHandle(managedUserId));
-            }
-        } finally {
-            Binder.restoreCallingIdentity(ident);
-        }
-    }
-
-    /**
-     * @return the user ID of the managed user that is linked to the current user, if any.
-     * Otherwise -1.
-     */
-    public int getManagedUserId(int callingUserId) {
-        if (VERBOSE_LOG) {
-            Log.v(LOG_TAG, "getManagedUserId: callingUserId=" + callingUserId);
-        }
-
-        for (UserInfo ui : mUserManager.getProfiles(callingUserId)) {
-            if (ui.id == callingUserId || !ui.isManagedProfile()) {
-                continue; // Caller user self, or not a managed profile.  Skip.
-            }
-            if (VERBOSE_LOG) {
-                Log.v(LOG_TAG, "Managed user=" + ui.id);
-            }
-            return ui.id;
-        }
-        if (VERBOSE_LOG) {
-            Log.v(LOG_TAG, "Managed user not found.");
-        }
-        return -1;
     }
 
     /**
