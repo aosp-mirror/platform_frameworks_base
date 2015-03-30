@@ -3165,22 +3165,6 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Start Quick Contact on the managed profile for the current user, if the policy allows.
-     * @hide
-     */
-    public void startManagedQuickContact(String actualLookupKey, long actualContactId,
-            Intent originalIntent) {
-        if (mService != null) {
-            try {
-                mService.startManagedQuickContact(
-                        actualLookupKey, actualContactId, originalIntent);
-            } catch (RemoteException e) {
-                Log.w(TAG, "Failed talking with device policy service", e);
-            }
-        }
-    }
-
-    /**
      * Called by the profile owner of a managed profile so that some intents sent in the managed
      * profile can also be resolved in the parent, or vice versa.
      * Only activity intents are supported.
