@@ -38,6 +38,8 @@ public class MetricsLogger implements MetricsConstants {
     public static final int ACTION_WIFI_OFF = 140;
     public static final int ACTION_WIFI_ON = 141;
 
+    public static final int MANAGE_PERMISSIONS = 142;
+
     public static void visible(Context context, int category) throws IllegalArgumentException {
         if (Build.IS_DEBUGGABLE && category == VIEW_UNKNOWN) {
             throw new IllegalArgumentException("Must define metric category");
