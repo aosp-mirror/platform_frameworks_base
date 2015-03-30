@@ -166,7 +166,7 @@ public class GreedyLineBreaker extends LineBreaker {
             if (lineBreaks.breaks.length != mBreaksList.size()) {
                 lineBreaks.breaks = new int[mBreaksList.size()];
                 lineBreaks.widths = new float[mWidthsList.size()];
-                lineBreaks.flags = new boolean[mFlagsList.size()];
+                lineBreaks.flags = new int[mFlagsList.size()];
             }
 
             int i = 0;
@@ -181,7 +181,7 @@ public class GreedyLineBreaker extends LineBreaker {
             }
             i = 0;
             for (boolean b : mFlagsList) {
-                lineBreaks.flags[i] = b;
+                lineBreaks.flags[i] = b ? TAB_MASK : 0;
                 i++;
             }
 

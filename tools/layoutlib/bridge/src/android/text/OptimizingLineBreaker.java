@@ -51,7 +51,7 @@ public class OptimizingLineBreaker extends LineBreaker {
             assert p.type == PrimitiveType.PENALTY;
             breakInfo.breaks = new int[]{0};
             breakInfo.widths = new float[]{p.width};
-            breakInfo.flags = new boolean[]{false};
+            breakInfo.flags = new int[]{0};
             return;
         }
         Node[] opt = new Node[numBreaks];
@@ -129,7 +129,7 @@ public class OptimizingLineBreaker extends LineBreaker {
 
             breakInfo.breaks[count] = mPrimitives.get(idx).location;
             breakInfo.widths[count] = opt[idx].mWidth;
-            breakInfo.flags [count] = opt[idx].mHasTabs;
+            breakInfo.flags [count] = opt[idx].mHasTabs ? TAB_MASK : 0;
             idx = opt[idx].mPrev;
         }
     }
@@ -140,7 +140,7 @@ public class OptimizingLineBreaker extends LineBreaker {
         }
         int[] breaks = new int[size];
         float[] widths = new float[size];
-        boolean[] flags = new boolean[size];
+        int[] flags = new int[size];
 
         int toCopy = Math.min(size, lineBreaks.breaks.length);
         System.arraycopy(lineBreaks.breaks, 0, breaks, 0, toCopy);

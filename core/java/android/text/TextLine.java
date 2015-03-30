@@ -955,6 +955,10 @@ class TextLine {
                     span.updateDrawState(wp);
                 }
 
+                // Only draw hyphen on last run in line
+                if (jnext < mLen) {
+                    wp.setHyphenEdit(0);
+                }
                 x += handleText(wp, j, jnext, i, inext, runIsRtl, c, x,
                         top, y, bottom, fmi, needWidth || jnext < measureLimit);
             }
