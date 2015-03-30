@@ -815,7 +815,9 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         }
 
         // Start dozing
-        mUIDozeTrigger.startDozing();
+        if (!mConfig.multiStackEnabled) {
+            mUIDozeTrigger.startDozing();
+        }
     }
 
     /** Requests this task stacks to start it's enter-recents animation */
@@ -1219,7 +1221,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         RecentsTaskLoader.getInstance().loadTaskData(task);
 
         // If the doze trigger has already fired, then update the state for this task view
-        if (mUIDozeTrigger.hasTriggered()) {
+        if (mConfig.multiStackEnabled || mUIDozeTrigger.hasTriggered()) {
             tv.setNoUserInteractionState();
         }
 
