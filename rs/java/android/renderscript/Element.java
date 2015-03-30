@@ -119,9 +119,6 @@ public class Element extends BaseObj {
      */
     public enum DataType {
         NONE (0, 0),
-        /**
-         *     @hide
-         */
         FLOAT_16 (1, 2),
         FLOAT_32 (2, 4),
         FLOAT_64 (3, 8),
@@ -390,9 +387,6 @@ public class Element extends BaseObj {
         return rs.mElement_I64;
     }
 
-    /**
-     *     @hide
-     */
     public static Element F16(RenderScript rs) {
         if(rs.mElement_F16 == null) {
             rs.mElement_F16 = createUser(rs, DataType.FLOAT_16);
@@ -534,9 +528,6 @@ public class Element extends BaseObj {
         return rs.mElement_RGBA_8888;
     }
 
-    /**
-     *     @hide
-     */
     public static Element F16_2(RenderScript rs) {
         if(rs.mElement_HALF_2 == null) {
             rs.mElement_HALF_2 = createVector(rs, DataType.FLOAT_16, 2);
@@ -544,9 +535,6 @@ public class Element extends BaseObj {
         return rs.mElement_HALF_2;
     }
 
-    /**
-     *     @hide
-     */
     public static Element F16_3(RenderScript rs) {
         if(rs.mElement_FLOAT_3 == null) {
             rs.mElement_FLOAT_3 = createVector(rs, DataType.FLOAT_16, 3);
@@ -554,9 +542,6 @@ public class Element extends BaseObj {
         return rs.mElement_HALF_3;
     }
 
-    /**
-     *     @hide
-     */
     public static Element F16_4(RenderScript rs) {
         if(rs.mElement_HALF_4 == null) {
             rs.mElement_HALF_4 = createVector(rs, DataType.FLOAT_16, 4);

@@ -150,24 +150,29 @@ public class Type extends BaseObj {
     }
 
     /**
-     * @hide
-     */
-    public int getArray(int dim) {
-        if ((dim < 0) || (dim >= mMaxArrays)) {
+      * Return the dimension of the specified array.
+      *
+      * @param arrayNum  The array dimension to query
+      * @return int
+      */
+    public int getArray(int arrayNum) {
+        if ((arrayNum < 0) || (arrayNum >= mMaxArrays)) {
             throw new RSIllegalArgumentException("Array dimension out of range.");
         }
 
-        if (mArrays == null || dim >= mArrays.length) {
+        if (mArrays == null || arrayNum >= mArrays.length) {
             // Dimension in range but no array for that dimension allocated
             return 0;
         }
 
-        return mArrays[dim];
+        return mArrays[arrayNum];
     }
 
     /**
-     * @hide
-     */
+      * Return the number of array dimensions.
+      *
+      * @return int
+      */
     public int getArrayCount() {
         if (mArrays != null) return mArrays.length;
         return 0;
@@ -377,7 +382,7 @@ public class Type extends BaseObj {
         }
 
         /**
-         * @hide
+         * Adds an array dimension to the builder
          *
          * @param dim
          * @param value

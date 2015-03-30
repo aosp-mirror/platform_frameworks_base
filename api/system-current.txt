@@ -28798,6 +28798,10 @@ package android.renderscript {
     method public static android.renderscript.Element A_8(android.renderscript.RenderScript);
     method public static android.renderscript.Element BOOLEAN(android.renderscript.RenderScript);
     method public static android.renderscript.Element ELEMENT(android.renderscript.RenderScript);
+    method public static android.renderscript.Element F16(android.renderscript.RenderScript);
+    method public static android.renderscript.Element F16_2(android.renderscript.RenderScript);
+    method public static android.renderscript.Element F16_3(android.renderscript.RenderScript);
+    method public static android.renderscript.Element F16_4(android.renderscript.RenderScript);
     method public static android.renderscript.Element F32(android.renderscript.RenderScript);
     method public static android.renderscript.Element F32_2(android.renderscript.RenderScript);
     method public static android.renderscript.Element F32_3(android.renderscript.RenderScript);
@@ -28896,6 +28900,7 @@ package android.renderscript {
     method public static android.renderscript.Element.DataType valueOf(java.lang.String);
     method public static final android.renderscript.Element.DataType[] values();
     enum_constant public static final android.renderscript.Element.DataType BOOLEAN;
+    enum_constant public static final android.renderscript.Element.DataType FLOAT_16;
     enum_constant public static final android.renderscript.Element.DataType FLOAT_32;
     enum_constant public static final android.renderscript.Element.DataType FLOAT_64;
     enum_constant public static final android.renderscript.Element.DataType MATRIX_2X2;
@@ -29169,11 +29174,14 @@ package android.renderscript {
     method public static android.renderscript.RenderScript create(android.content.Context);
     method public static android.renderscript.RenderScript create(android.content.Context, android.renderscript.RenderScript.ContextType);
     method public static android.renderscript.RenderScript create(android.content.Context, android.renderscript.RenderScript.ContextType, int);
+    method public static android.renderscript.RenderScript createMultiContext(android.content.Context, android.renderscript.RenderScript.ContextType, int, int);
     method public void destroy();
     method public void finish();
     method public final android.content.Context getApplicationContext();
     method public android.renderscript.RenderScript.RSErrorHandler getErrorHandler();
     method public android.renderscript.RenderScript.RSMessageHandler getMessageHandler();
+    method public static long getMinorID();
+    method public static void releaseAllContexts();
     method public void sendMessage(int, int[]);
     method public void setErrorHandler(android.renderscript.RenderScript.RSErrorHandler);
     method public void setMessageHandler(android.renderscript.RenderScript.RSMessageHandler);
@@ -29255,9 +29263,12 @@ package android.renderscript {
   public class Script extends android.renderscript.BaseObj {
     method public void bindAllocation(android.renderscript.Allocation, int);
     method protected android.renderscript.Script.FieldID createFieldID(int, android.renderscript.Element);
+    method protected android.renderscript.Script.InvokeID createInvokeID(int);
     method protected android.renderscript.Script.KernelID createKernelID(int, int, android.renderscript.Element, android.renderscript.Element);
     method protected void forEach(int, android.renderscript.Allocation, android.renderscript.Allocation, android.renderscript.FieldPacker);
     method protected void forEach(int, android.renderscript.Allocation, android.renderscript.Allocation, android.renderscript.FieldPacker, android.renderscript.Script.LaunchOptions);
+    method protected void forEach(int, android.renderscript.Allocation[], android.renderscript.Allocation, android.renderscript.FieldPacker);
+    method protected void forEach(int, android.renderscript.Allocation[], android.renderscript.Allocation, android.renderscript.FieldPacker, android.renderscript.Script.LaunchOptions);
     method public boolean getVarB(int);
     method public double getVarD(int);
     method public float getVarF(int);
@@ -29293,6 +29304,9 @@ package android.renderscript {
   }
 
   public static final class Script.FieldID extends android.renderscript.BaseObj {
+  }
+
+  public static final class Script.InvokeID extends android.renderscript.BaseObj {
   }
 
   public static final class Script.KernelID extends android.renderscript.BaseObj {
@@ -29505,6 +29519,8 @@ package android.renderscript {
     method public static android.renderscript.Type createX(android.renderscript.RenderScript, android.renderscript.Element, int);
     method public static android.renderscript.Type createXY(android.renderscript.RenderScript, android.renderscript.Element, int, int);
     method public static android.renderscript.Type createXYZ(android.renderscript.RenderScript, android.renderscript.Element, int, int, int);
+    method public int getArray(int);
+    method public int getArrayCount();
     method public int getCount();
     method public android.renderscript.Element getElement();
     method public int getX();
@@ -29518,6 +29534,7 @@ package android.renderscript {
   public static class Type.Builder {
     ctor public Type.Builder(android.renderscript.RenderScript, android.renderscript.Element);
     method public android.renderscript.Type create();
+    method public android.renderscript.Type.Builder setArray(int, int);
     method public android.renderscript.Type.Builder setFaces(boolean);
     method public android.renderscript.Type.Builder setMipmaps(boolean);
     method public android.renderscript.Type.Builder setX(int);
