@@ -27,10 +27,11 @@ import java.util.TreeMap;
 public class EventScheduler {
     private static final long NANOS_PER_MILLI = 1000000;
 
-    private final Object lock = new Object();
+    private final Object mLock = new Object();
     private SortedMap<Long, FastEventQueue> mEventBuffer;
     private FastEventQueue mEventPool = null;
     private int mMaxPoolSize = 200;
+    private boolean mClosed;
 
     public EventScheduler() {
         mEventBuffer = new TreeMap<Long, FastEventQueue>();
@@ -146,7 +147,7 @@ public class EventScheduler {
      * @param event
      */
     public void add(SchedulableEvent event) {
-        synchronized (lock) {
+        synchronized (mLock) {
             FastEventQueue list = mEventBuffer.get(event.getTimestamp());
             if (list == null) {
                 long lowestTime = mEventBuffer.isEmpty() ? Long.MAX_VALUE
@@ -156,7 +157,7 @@ public class EventScheduler {
                 // If the event we added is earlier than the previous earliest
                 // event then notify any threads waiting for the next event.
                 if (event.getTimestamp() < lowestTime) {
-                    lock.notify();
+                    mLock.notify();
                 }
             } else {
                 list.add(event);
@@ -183,7 +184,7 @@ public class EventScheduler {
      */
     public SchedulableEvent getNextEvent(long time) {
         SchedulableEvent event = null;
-        synchronized (lock) {
+        synchronized (mLock) {
             if (!mEventBuffer.isEmpty()) {
                 long lowestTime = mEventBuffer.firstKey();
                 // Is it time for this list to be processed?
@@ -206,9 +207,9 @@ public class EventScheduler {
      */
     public SchedulableEvent waitNextEvent() throws InterruptedException {
         SchedulableEvent event = null;
-        while (true) {
-            long millisToWait = Integer.MAX_VALUE;
-            synchronized (lock) {
+        synchronized (mLock) {
+            while (!mClosed) {
+                long millisToWait = Integer.MAX_VALUE;
                 if (!mEventBuffer.isEmpty()) {
                     long now = System.nanoTime();
                     long lowestTime = mEventBuffer.firstKey();
@@ -228,9 +229,16 @@ public class EventScheduler {
                         }
                     }
                 }
-                lock.wait((int) millisToWait);
+                mLock.wait((int) millisToWait);
             }
         }
         return event;
+    }
+
+    public void close() {
+        synchronized (mLock) {
+            mClosed = true;
+            mLock.notify();
+        }
     }
 }
