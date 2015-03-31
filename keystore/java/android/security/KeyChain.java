@@ -379,7 +379,7 @@ public final class KeyChain {
      */
     public static boolean isKeyAlgorithmSupported(String algorithm) {
         final String algUpper = algorithm.toUpperCase(Locale.US);
-        return "EC".equals(algUpper) || "RSA".equals(algUpper);
+        return "DSA".equals(algUpper) || "EC".equals(algUpper) || "RSA".equals(algUpper);
     }
 
     /**

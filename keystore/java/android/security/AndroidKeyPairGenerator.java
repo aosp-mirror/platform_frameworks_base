@@ -17,6 +17,7 @@
 package android.security;
 
 import com.android.org.bouncycastle.x509.X509V3CertificateGenerator;
+
 import com.android.org.conscrypt.NativeCrypto;
 import com.android.org.conscrypt.OpenSSLEngine;
 
@@ -33,6 +34,7 @@ import java.security.SecureRandom;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
 import java.security.spec.AlgorithmParameterSpec;
+import java.security.spec.DSAParameterSpec;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.RSAKeyGenParameterSpec;
 import java.security.spec.X509EncodedKeySpec;
@@ -154,6 +156,8 @@ public class AndroidKeyPairGenerator extends KeyPairGeneratorSpi {
     private static String getDefaultSignatureAlgorithmForKeyType(String keyType) {
         if ("RSA".equalsIgnoreCase(keyType)) {
             return "sha256WithRSA";
+        } else if ("DSA".equalsIgnoreCase(keyType)) {
+            return "sha1WithDSA";
         } else if ("EC".equalsIgnoreCase(keyType)) {
             return "sha256WithECDSA";
         } else {
@@ -167,6 +171,13 @@ public class AndroidKeyPairGenerator extends KeyPairGeneratorSpi {
                 if (spec instanceof RSAKeyGenParameterSpec) {
                     RSAKeyGenParameterSpec rsaSpec = (RSAKeyGenParameterSpec) spec;
                     return new byte[][] { rsaSpec.getPublicExponent().toByteArray() };
+                }
+                break;
+            case NativeCrypto.EVP_PKEY_DSA:
+                if (spec instanceof DSAParameterSpec) {
+                    DSAParameterSpec dsaSpec = (DSAParameterSpec) spec;
+                    return new byte[][] { dsaSpec.getG().toByteArray(),
+                            dsaSpec.getP().toByteArray(), dsaSpec.getQ().toByteArray() };
                 }
                 break;
         }
