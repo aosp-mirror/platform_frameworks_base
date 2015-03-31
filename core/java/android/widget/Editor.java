@@ -2954,8 +2954,11 @@ public class Editor {
             }
             mSelectionHandleHeight = Math.max(
                     mSelectHandleLeft.getMinimumHeight(), mSelectHandleRight.getMinimumHeight());
-            getInsertionController().getHandle();
-            mInsertionHandleHeight = mSelectHandleCenter.getMinimumHeight();
+            InsertionPointCursorController insertionController = getInsertionController();
+            if (insertionController != null) {
+                insertionController.getHandle();
+                mInsertionHandleHeight = mSelectHandleCenter.getMinimumHeight();
+            }
         }
 
         @Override
