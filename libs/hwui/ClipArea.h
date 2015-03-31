@@ -144,7 +144,7 @@ private:
             float bottom, const mat4* transform, SkRegion::Op op);
 
     void ensureClipRegion();
-    void setClipRectToRegionBounds();
+    void onClipRegionUpdated();
     bool clipRegionOp(float left, float top, float right, float bottom,
             SkRegion::Op op);
 

@@ -234,7 +234,7 @@ bool ClipArea::clipRectWithTransform(const Rect& r, const mat4* transform,
 bool ClipArea::clipRegion(const SkRegion& region, SkRegion::Op op) {
     enterRegionMode();
     mClipRegion.op(region, op);
-    setClipRectToRegionBounds();
+    onClipRegionUpdated();
     return true;
 }
 
@@ -262,6 +262,9 @@ void ClipArea::enterRectangleMode() {
 
 bool ClipArea::rectangleModeClipRectWithTransform(const Rect& r,
         const mat4* transform, SkRegion::Op op) {
+
+    // TODO: we should be able to handle kReplace_Op efficiently without
+    // going through RegionMode and later falling back into RectangleMode.
 
     if (op != SkRegion::kIntersect_Op) {
         enterRegionMode();
@@ -324,15 +327,16 @@ bool ClipArea::rectangleListModeClipRectWithTransform(float left, float top,
  */
 
 void ClipArea::enterRegionMode() {
-    if (mMode != kModeRegion) {
-        if (mMode == kModeRectangle) {
+    Mode oldMode = mMode;
+    mMode = kModeRegion;
+    if (oldMode != kModeRegion) {
+        if (oldMode == kModeRectangle) {
             mClipRegion.setRect(mClipRect.left, mClipRect.top,
                     mClipRect.right, mClipRect.bottom);
         } else {
             mClipRegion = mRectangleList.convertToRegion(createViewportRegion());
-            setClipRectToRegionBounds();
+            onClipRegionUpdated();
         }
-        mMode = kModeRegion;
     }
 }
 
@@ -342,7 +346,7 @@ bool ClipArea::regionModeClipRectWithTransform(const Rect& r,
     SkRegion transformedRectRegion;
     regionFromPath(transformedRect, transformedRectRegion);
     mClipRegion.op(transformedRectRegion, op);
-    setClipRectToRegionBounds();
+    onClipRegionUpdated();
     return true;
 }
 
@@ -352,12 +356,13 @@ bool ClipArea::regionModeClipRectWithTransform(float left, float top,
             transform, op);
 }
 
-void ClipArea::setClipRectToRegionBounds() {
+void ClipArea::onClipRegionUpdated() {
     if (!mClipRegion.isEmpty()) {
         mClipRect.set(mClipRegion.getBounds());
 
         if (mClipRegion.isRect()) {
             mClipRegion.setEmpty();
+            enterRectangleMode();
         }
     } else {
         mClipRect.setEmpty();
