@@ -41,7 +41,7 @@ public class KeyValueBackupJob extends JobService {
     // Once someone asks for a backup, this is how long we hold off, batching
     // up additional requests, before running the actual backup pass.  Privileged
     // callers can always trigger an immediate pass via BackupManager.backupNow().
-    private static final long BATCH_INTERVAL = 4 * AlarmManager.INTERVAL_HOUR;
+    static final long BATCH_INTERVAL = 4 * AlarmManager.INTERVAL_HOUR;
 
     // Random variation in next-backup scheduling time to avoid server load spikes
     private static final int FUZZ_MILLIS = 10 * 60 * 1000;
