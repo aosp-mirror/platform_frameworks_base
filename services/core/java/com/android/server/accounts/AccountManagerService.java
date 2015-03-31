@@ -109,7 +109,7 @@ public class AccountManagerService
 
     private static final int TIMEOUT_DELAY_MS = 1000 * 60;
     private static final String DATABASE_NAME = "accounts.db";
-    private static final int DATABASE_VERSION = 6;
+    private static final int DATABASE_VERSION = 7;
 
     private final Context mContext;
 
@@ -131,6 +131,8 @@ public class AccountManagerService
     private static final String ACCOUNTS_TYPE_COUNT = "count(type)";
     private static final String ACCOUNTS_PASSWORD = "password";
     private static final String ACCOUNTS_PREVIOUS_NAME = "previous_name";
+    private static final String ACCOUNTS_LAST_AUTHENTICATE_TIME_EPOCH_MILLIS =
+            "last_password_entry_time_millis_epoch";
 
     private static final String TABLE_AUTHTOKENS = "authtokens";
     private static final String AUTHTOKENS_ID = "_id";
@@ -697,7 +699,8 @@ public class AccountManagerService
         long identityToken = clearCallingIdentity();
         try {
             new Session(fromAccounts, response, account.type, false,
-                    false /* stripAuthTokenFromResult */) {
+                    false /* stripAuthTokenFromResult */, account.name,
+                    false /* authDetailsRequired */) {
                 @Override
                 protected String toDebugString(long now) {
                     return super.toDebugString(now) + ", getAccountCredentialsForClone"
@@ -725,12 +728,43 @@ public class AccountManagerService
         }
     }
 
+    @Override
+    public boolean accountAuthenticated(final Account account) {
+        if (account == null) {
+            throw new IllegalArgumentException("account is null");
+        }
+        checkAuthenticateAccountsPermission(account);
+
+        final UserAccounts accounts = getUserAccountsForCaller();
+        int userId = Binder.getCallingUserHandle().getIdentifier();
+        if (!canUserModifyAccounts(userId) || !canUserModifyAccountsForType(userId, account.type)) {
+            return false;
+        }
+        synchronized (accounts.cacheLock) {
+            final ContentValues values = new ContentValues();
+            values.put(ACCOUNTS_LAST_AUTHENTICATE_TIME_EPOCH_MILLIS, System.currentTimeMillis());
+            final SQLiteDatabase db = accounts.openHelper.getWritableDatabase();
+            int i = db.update(
+                    TABLE_ACCOUNTS,
+                    values,
+                    ACCOUNTS_NAME + "=? AND " + ACCOUNTS_TYPE + "=?",
+                    new String[] {
+                            account.name, account.type
+                    });
+            if (i > 0) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     private void completeCloningAccount(IAccountManagerResponse response,
             final Bundle accountCredentials, final Account account, final UserAccounts targetUser) {
         long id = clearCallingIdentity();
         try {
             new Session(targetUser, response, account.type, false,
-                    false /* stripAuthTokenFromResult */) {
+                    false /* stripAuthTokenFromResult */, account.name,
+                    false /* authDetailsRequired */) {
                 @Override
                 protected String toDebugString(long now) {
                     return super.toDebugString(now) + ", getAccountCredentialsForClone"
@@ -795,6 +829,7 @@ public class AccountManagerService
                 values.put(ACCOUNTS_NAME, account.name);
                 values.put(ACCOUNTS_TYPE, account.type);
                 values.put(ACCOUNTS_PASSWORD, password);
+                values.put(ACCOUNTS_LAST_AUTHENTICATE_TIME_EPOCH_MILLIS, System.currentTimeMillis());
                 long accountId = db.insert(TABLE_ACCOUNTS, ACCOUNTS_NAME, values);
                 if (accountId < 0) {
                     Log.w(TAG, "insertAccountIntoDatabase: " + account
@@ -885,7 +920,8 @@ public class AccountManagerService
         public TestFeaturesSession(UserAccounts accounts, IAccountManagerResponse response,
                 Account account, String[] features) {
             super(accounts, response, account.type, false /* expectActivityLaunch */,
-                    true /* stripAuthTokenFromResult */);
+                    true /* stripAuthTokenFromResult */, account.name,
+                    false /* authDetailsRequired */);
             mFeatures = features;
             mAccount = account;
         }
@@ -1184,7 +1220,8 @@ public class AccountManagerService
         public RemoveAccountSession(UserAccounts accounts, IAccountManagerResponse response,
                 Account account, boolean expectActivityLaunch) {
             super(accounts, response, account.type, expectActivityLaunch,
-                    true /* stripAuthTokenFromResult */);
+                    true /* stripAuthTokenFromResult */, account.name,
+                    false /* authDetailsRequired */);
             mAccount = account;
         }
 
@@ -1419,6 +1456,13 @@ public class AccountManagerService
             try {
                 final ContentValues values = new ContentValues();
                 values.put(ACCOUNTS_PASSWORD, password);
+                long time = 0;
+                // Only set current time, if it is a valid password. For clear password case, it
+                // should not be set.
+                if (password != null) {
+                    time = System.currentTimeMillis();
+                }
+                values.put(ACCOUNTS_LAST_AUTHENTICATE_TIME_EPOCH_MILLIS, time);
                 final long accountId = getAccountIdLocked(db, account);
                 if (accountId >= 0) {
                     final String[] argsAccountId = {String.valueOf(accountId)};
@@ -1547,8 +1591,9 @@ public class AccountManagerService
         UserAccounts accounts = getUserAccounts(UserHandle.getUserId(callingUid));
         long identityToken = clearCallingIdentity();
         try {
-            new Session(accounts, response, accountType, false,
-                    false /* stripAuthTokenFromResult */) {
+            new Session(accounts, response, accountType, false /* expectActivityLaunch */,
+                    false /* stripAuthTokenFromResult */,  null /* accountName */,
+                    false /* authDetailsRequired */) {
                 @Override
                 protected String toDebugString(long now) {
                     return super.toDebugString(now) + ", getAuthTokenLabel"
@@ -1648,7 +1693,8 @@ public class AccountManagerService
             }
 
             new Session(accounts, response, account.type, expectActivityLaunch,
-                    false /* stripAuthTokenFromResult */) {
+                    false /* stripAuthTokenFromResult */, account.name,
+                    false /* authDetailsRequired */) {
                 @Override
                 protected String toDebugString(long now) {
                     if (loginOptions != null) loginOptions.keySet();
@@ -1842,7 +1888,8 @@ public class AccountManagerService
         long identityToken = clearCallingIdentity();
         try {
             new Session(accounts, response, accountType, expectActivityLaunch,
-                    true /* stripAuthTokenFromResult */) {
+                    true /* stripAuthTokenFromResult */, null /* accountName */,
+                    false /* authDetailsRequired */) {
                 @Override
                 public void run() throws RemoteException {
                     mAuthenticator.addAccount(this, mAccountType, authTokenType, requiredFeatures,
@@ -1917,7 +1964,8 @@ public class AccountManagerService
         long identityToken = clearCallingIdentity();
         try {
             new Session(accounts, response, accountType, expectActivityLaunch,
-                    true /* stripAuthTokenFromResult */) {
+                    true /* stripAuthTokenFromResult */, null /* accountName */,
+                    false /* authDetailsRequired */) {
                 @Override
                 public void run() throws RemoteException {
                     mAuthenticator.addAccount(this, mAccountType, authTokenType, requiredFeatures,
@@ -1973,7 +2021,8 @@ public class AccountManagerService
         long identityToken = clearCallingIdentity();
         try {
             new Session(accounts, response, account.type, expectActivityLaunch,
-                    true /* stripAuthTokenFromResult */) {
+                    true /* stripAuthTokenFromResult */, account.name,
+                    true /* authDetailsRequired */) {
                 @Override
                 public void run() throws RemoteException {
                     mAuthenticator.confirmCredentials(this, account, options);
@@ -2009,7 +2058,8 @@ public class AccountManagerService
         long identityToken = clearCallingIdentity();
         try {
             new Session(accounts, response, account.type, expectActivityLaunch,
-                    true /* stripAuthTokenFromResult */) {
+                    true /* stripAuthTokenFromResult */, account.name,
+                    false /* authDetailsRequired */) {
                 @Override
                 public void run() throws RemoteException {
                     mAuthenticator.updateCredentials(this, account, authTokenType, loginOptions);
@@ -2045,7 +2095,8 @@ public class AccountManagerService
         long identityToken = clearCallingIdentity();
         try {
             new Session(accounts, response, accountType, expectActivityLaunch,
-                    true /* stripAuthTokenFromResult */) {
+                    true /* stripAuthTokenFromResult */, null /* accountName */,
+                    false /* authDetailsRequired */) {
                 @Override
                 public void run() throws RemoteException {
                     mAuthenticator.editProperties(this, mAccountType);
@@ -2071,7 +2122,8 @@ public class AccountManagerService
         public GetAccountsByTypeAndFeatureSession(UserAccounts accounts,
                 IAccountManagerResponse response, String type, String[] features, int callingUid) {
             super(accounts, response, type, false /* expectActivityLaunch */,
-                    true /* stripAuthTokenFromResult */);
+                    true /* stripAuthTokenFromResult */, null /* accountName */,
+                    false /* authDetailsRequired */);
             mCallingUid = callingUid;
             mFeatures = features;
         }
@@ -2437,6 +2489,9 @@ public class AccountManagerService
         final String mAccountType;
         final boolean mExpectActivityLaunch;
         final long mCreationTime;
+        final String mAccountName;
+        // Indicates if we need to add auth details(like last credential time)
+        final boolean mAuthDetailsRequired;
 
         public int mNumResults = 0;
         private int mNumRequestContinued = 0;
@@ -2448,7 +2503,8 @@ public class AccountManagerService
         protected final UserAccounts mAccounts;
 
         public Session(UserAccounts accounts, IAccountManagerResponse response, String accountType,
-                boolean expectActivityLaunch, boolean stripAuthTokenFromResult) {
+                boolean expectActivityLaunch, boolean stripAuthTokenFromResult, String accountName,
+                boolean authDetailsRequired) {
             super();
             //if (response == null) throw new IllegalArgumentException("response is null");
             if (accountType == null) throw new IllegalArgumentException("accountType is null");
@@ -2458,6 +2514,9 @@ public class AccountManagerService
             mAccountType = accountType;
             mExpectActivityLaunch = expectActivityLaunch;
             mCreationTime = SystemClock.elapsedRealtime();
+            mAccountName = accountName;
+            mAuthDetailsRequired = authDetailsRequired;
+
             synchronized (mSessions) {
                 mSessions.put(toString(), this);
             }
@@ -2592,6 +2651,16 @@ public class AccountManagerService
         public void onResult(Bundle result) {
             mNumResults++;
             Intent intent = null;
+            if (result != null && mAuthDetailsRequired) {
+                long lastAuthenticatedTime = DatabaseUtils.longForQuery(
+                        mAccounts.openHelper.getReadableDatabase(),
+                        "select " + ACCOUNTS_LAST_AUTHENTICATE_TIME_EPOCH_MILLIS + " from " +
+                                TABLE_ACCOUNTS + " WHERE " + ACCOUNTS_NAME + "=? AND "
+                                + ACCOUNTS_TYPE + "=?",
+                        new String[]{mAccountName, mAccountType});
+                result.putLong(AccountManager.KEY_LAST_AUTHENTICATE_TIME_MILLIS_EPOCH,
+                        lastAuthenticatedTime);
+            }
             if (result != null
                     && (intent = result.getParcelable(AccountManager.KEY_INTENT)) != null) {
                 /*
@@ -2798,6 +2867,7 @@ public class AccountManagerService
                     + ACCOUNTS_TYPE + " TEXT NOT NULL, "
                     + ACCOUNTS_PASSWORD + " TEXT, "
                     + ACCOUNTS_PREVIOUS_NAME + " TEXT, "
+                    + ACCOUNTS_LAST_AUTHENTICATE_TIME_EPOCH_MILLIS + " INTEGER DEFAULT 0, "
                     + "UNIQUE(" + ACCOUNTS_NAME + "," + ACCOUNTS_TYPE + "))");
 
             db.execSQL("CREATE TABLE " + TABLE_AUTHTOKENS + " (  "
@@ -2831,6 +2901,11 @@ public class AccountManagerService
                     + ACCOUNTS_NAME + " TEXT NOT NULL, "
                     + ACCOUNTS_TYPE + " TEXT NOT NULL, "
                     + "UNIQUE(" + ACCOUNTS_NAME + "," + ACCOUNTS_TYPE + "))");
+        }
+
+        private void addLastSuccessfullAuthenticatedTimeColumn(SQLiteDatabase db) {
+            db.execSQL("ALTER TABLE " + TABLE_ACCOUNTS + " ADD COLUMN "
+                    + ACCOUNTS_LAST_AUTHENTICATE_TIME_EPOCH_MILLIS + " DEFAULT 0");
         }
 
         private void addOldAccountNameColumn(SQLiteDatabase db) {
@@ -2889,6 +2964,11 @@ public class AccountManagerService
 
             if (oldVersion == 5) {
                 addOldAccountNameColumn(db);
+                oldVersion++;
+            }
+
+            if (oldVersion == 6) {
+                addLastSuccessfullAuthenticatedTimeColumn(db);
                 oldVersion++;
             }
 

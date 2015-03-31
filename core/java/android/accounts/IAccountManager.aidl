@@ -67,6 +67,7 @@ interface IAccountManager {
         boolean expectActivityLaunch);
     void confirmCredentialsAsUser(in IAccountManagerResponse response, in Account account,
         in Bundle options, boolean expectActivityLaunch, int userId);
+    boolean accountAuthenticated(in Account account);
     void getAuthTokenLabel(in IAccountManagerResponse response, String accountType,
         String authTokenType);
 
