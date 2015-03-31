@@ -558,6 +558,8 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv)
     char dex2oatXmxFlagsBuf[sizeof("-Xmx")-1 + PROPERTY_VALUE_MAX];
     char dex2oatCompilerFilterBuf[sizeof("--compiler-filter=")-1 + PROPERTY_VALUE_MAX];
     char dex2oatImageCompilerFilterBuf[sizeof("--compiler-filter=")-1 + PROPERTY_VALUE_MAX];
+    char dex2oatThreadsBuf[sizeof("-j")-1 + PROPERTY_VALUE_MAX];
+    char dex2oatThreadsImageBuf[sizeof("-j")-1 + PROPERTY_VALUE_MAX];
     char dex2oatFlagsBuf[PROPERTY_VALUE_MAX];
     char dex2oatImageFlagsBuf[PROPERTY_VALUE_MAX];
     char extraOptsBuf[PROPERTY_VALUE_MAX];
@@ -733,6 +735,9 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv)
         parseCompilerOption("dalvik.vm.dex2oat-filter", dex2oatCompilerFilterBuf,
                             "--compiler-filter=", "-Xcompiler-option");
     }
+    parseCompilerOption("dalvik.vm.dex2oat-threads", dex2oatThreadsBuf, "-j", "-Xcompiler-option");
+    parseCompilerOption("dalvik.vm.image-dex2oat-threads", dex2oatThreadsImageBuf, "-j",
+                        "-Ximage-compiler-option");
     property_get("dalvik.vm.dex2oat-flags", dex2oatFlagsBuf, "");
     parseExtraOpts(dex2oatFlagsBuf, "-Xcompiler-option");
 
