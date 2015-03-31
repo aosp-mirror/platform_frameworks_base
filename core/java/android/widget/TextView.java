@@ -9037,6 +9037,12 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     boolean selectAllText() {
+        // Need to hide insert point cursor controller before settings selection, otherwise insert
+        // point cursor controller obtains cursor update event and update cursor with cancelling
+        // selection.
+        if (mEditor != null) {
+            mEditor.hideInsertionPointCursorController();
+        }
         final int length = mText.length();
         Selection.setSelection((Spannable) mText, 0, length);
         return length > 0;
