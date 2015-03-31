@@ -47,6 +47,7 @@ public abstract class IntentResolver<F extends IntentFilter, R extends Object> {
     final private static String TAG = "IntentResolver";
     final private static boolean DEBUG = false;
     final private static boolean localLOGV = DEBUG || false;
+    final private static boolean localVerificationLOGV = DEBUG || false;
 
     public void addFilter(F f) {
         if (localLOGV) {
@@ -478,11 +479,27 @@ public abstract class IntentResolver<F extends IntentFilter, R extends Object> {
 
     /**
      * Returns whether the object associated with the given filter is
-     * "stopped," that is whether it should not be included in the result
+     * "stopped", that is whether it should not be included in the result
      * if the intent requests to excluded stopped objects.
      */
     protected boolean isFilterStopped(F filter, int userId) {
         return false;
+    }
+
+    /**
+     * Returns whether the given filter is "verified" that is whether it has been verified against
+     * its data URIs.
+     *
+     * The verification would happen only and only if the Intent action is
+     * {@link android.content.Intent#ACTION_VIEW} and the Intent category is
+     * {@link android.content.Intent#CATEGORY_BROWSABLE} and the Intent data scheme
+     * is "http" or "https".
+     *
+     * @see android.content.IntentFilter#setAutoVerify(boolean)
+     * @see android.content.IntentFilter#getAutoVerify()
+     */
+    protected boolean isFilterVerified(F filter) {
+        return filter.isVerified();
     }
 
     /**
@@ -708,6 +725,13 @@ public abstract class IntentResolver<F extends IntentFilter, R extends Object> {
                     Slog.v(TAG, "  Filter is not from package " + packageName + "; skipping");
                 }
                 continue;
+            }
+
+            // Are we verified ?
+            if (filter.getAutoVerify()) {
+                if (localVerificationLOGV || debug) {
+                    Slog.v(TAG, "  Filter verified: " + isFilterVerified(filter));
+                }
             }
 
             // Do we already have this one?

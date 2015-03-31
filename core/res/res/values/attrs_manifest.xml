@@ -1042,6 +1042,18 @@
          libraries in the apk must be stored and page-aligned.  -->
     <attr name="extractNativeLibs" format="boolean"/>
 
+    <!-- Specify whether an activity intent filter will need to be verified thru its set
+         of data URIs. This will only be used when the Intent's action is set to
+         {@link android.content.Intent#ACTION_VIEW Intent.ACTION_VIEW} and the Intent's category is
+         set to {@link android.content.Intent#CATEGORY_BROWSABLE Intent.CATEGORY_BROWSABLE} and the
+         intern filter data scheme is set to "http" or "https". When set to true, the intent filter
+         will need to use its data tag for getting the URIs to verify with.
+
+         For each URI, an HTTPS network request will be done to <code>/.well-known/associations.json</code>
+         host to verify that the web site is okay with the app intercepting the URI.
+         -->
+    <attr name="autoVerify" format="boolean" />
+
     <!-- The <code>manifest</code> tag is the root of an
          <code>AndroidManifest.xml</code> file,
          describing the contents of an Android package (.apk) file.  One
@@ -1840,6 +1852,7 @@
         <attr name="banner" />
         <attr name="logo" />
         <attr name="priority" />
+        <attr name="autoVerify" />
     </declare-styleable>
     
     <!-- Attributes that can be supplied in an AndroidManifest.xml

@@ -31,6 +31,7 @@ import android.content.pm.IPackageInstallObserver;
 import android.content.pm.IPackageMoveObserver;
 import android.content.pm.IPackageStatsObserver;
 import android.content.pm.InstrumentationInfo;
+import android.content.pm.IntentFilterVerificationInfo;
 import android.content.pm.KeySet;
 import android.content.pm.ManifestDigest;
 import android.content.pm.PackageInfo;
@@ -718,6 +719,38 @@ public class MockPackageManager extends PackageManager {
     @Override
     public void extendVerificationTimeout(int id, int verificationCodeAtTimeout,
             long millisecondsToDelay) {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
+     * @hide
+     */
+    @Override
+    public void verifyIntentFilter(int id, int verificationCode, List<String> outFailedDomains) {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
+     * @hide
+     */
+    @Override
+    public int getIntentVerificationStatus(String packageName, int userId) {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
+     * @hide
+     */
+    @Override
+    public boolean updateIntentVerificationStatus(String packageName, int status, int userId) {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
+     * @hide
+     */
+    @Override
+    public List<IntentFilterVerificationInfo> getIntentFilterVerifications(String packageName) {
         throw new UnsupportedOperationException();
     }
 

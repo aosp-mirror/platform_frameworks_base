@@ -36,6 +36,7 @@ import android.content.pm.IPackageManager;
 import android.content.pm.IPackageMoveObserver;
 import android.content.pm.IPackageStatsObserver;
 import android.content.pm.InstrumentationInfo;
+import android.content.pm.IntentFilterVerificationInfo;
 import android.content.pm.KeySet;
 import android.content.pm.ManifestDigest;
 import android.content.pm.PackageInfo;
@@ -1305,6 +1306,45 @@ final class ApplicationPackageManager extends PackageManager {
             mPM.extendVerificationTimeout(id, verificationCodeAtTimeout, millisecondsToDelay);
         } catch (RemoteException e) {
             // Should never happen!
+        }
+    }
+
+    @Override
+    public void verifyIntentFilter(int id, int verificationCode, List<String> outFailedDomains) {
+        try {
+            mPM.verifyIntentFilter(id, verificationCode, outFailedDomains);
+        } catch (RemoteException e) {
+            // Should never happen!
+        }
+    }
+
+    @Override
+    public int getIntentVerificationStatus(String packageName, int userId) {
+        try {
+            return mPM.getIntentVerificationStatus(packageName, userId);
+        } catch (RemoteException e) {
+            // Should never happen!
+            return PackageManager.INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_UNDEFINED;
+        }
+    }
+
+    @Override
+    public boolean updateIntentVerificationStatus(String packageName, int status, int userId) {
+        try {
+            return mPM.updateIntentVerificationStatus(packageName, status, userId);
+        } catch (RemoteException e) {
+            // Should never happen!
+            return false;
+        }
+    }
+
+    @Override
+    public List<IntentFilterVerificationInfo> getIntentFilterVerifications(String packageName) {
+        try {
+            return mPM.getIntentFilterVerifications(packageName);
+        } catch (RemoteException e) {
+            // Should never happen!
+            return null;
         }
     }
 

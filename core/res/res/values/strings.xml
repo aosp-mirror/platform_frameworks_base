@@ -3367,6 +3367,22 @@
     <string name="permdesc_bindPackageVerifier">Allows the holder to make requests of
         package verifiers. Should never be needed for normal apps.</string>
 
+    <!-- Title of an application permission which allows the application to verify whether
+         a different intent filter is able to be verified by some internal logic. [CHAR LIMIT=40] -->
+    <string name="permlab_intentFilterVerificationAgent">verify intent filter</string>
+    <!-- Description of an application permission which allows the application to verify whether
+         a different intent filter is able to be verified by some internal heuristic. [CHAR LIMIT=NONE] -->
+    <string name="permdesc_intentFilterVerificationAgent">Allows the app to check if an intent filter
+        is verified or not.</string>
+
+    <!-- Title of an application permission which allows the application to verify whether
+         a different intent filter is able to be verified by some internal logic. [CHAR LIMIT=40] -->
+    <string name="permlab_bindIntentFilterVerifier">bind to an intent filter verifier</string>
+    <!-- Description of an application permission which allows the application to verify whether
+         a different intent filter is able to be verified by some internal logic. [CHAR LIMIT=NONE] -->
+    <string name="permdesc_bindIntentFilterVerifier">Allows the holder to make requests of
+        intent filter verifiers. Should never be needed for normal apps.</string>
+
     <!-- Title of an application permission which allows the application to access serial ports via the SerialManager. [CHAR LIMIT=40] -->
     <string name="permlab_serialPort">access serial ports</string>
     <!-- Description of an application permission which allows the application access serial ports via the SerialManager. [CHAR LIMIT=NONE] -->

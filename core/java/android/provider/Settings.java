@@ -6097,7 +6097,7 @@ public final class Settings {
        public static final String PACKAGE_VERIFIER_SETTING_VISIBLE = "verifier_setting_visible";
 
        /**
-        * Run package verificaiton on apps installed through ADB/ADT/USB
+        * Run package verification on apps installed through ADB/ADT/USB
         * 1 = perform package verification on ADB installs (default)
         * 0 = bypass package verification on ADB installs
         * @hide

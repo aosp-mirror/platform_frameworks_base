@@ -1911,6 +1911,19 @@ public class Intent implements Parcelable, Cloneable {
     public static final String ACTION_PACKAGE_VERIFIED = "android.intent.action.PACKAGE_VERIFIED";
 
     /**
+     * Broadcast Action: Sent to the system intent filter verifier when an intent filter
+     * needs to be verified. The data contains the filter data hosts to be verified against.
+     * <p class="note">
+     * This is a protected intent that can only be sent by the system.
+     * </p>
+     *
+     * @hide
+     */
+    @SystemApi
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_INTENT_FILTER_NEEDS_VERIFICATION = "android.intent.action.INTENT_FILTER_NEEDS_VERIFICATION";
+
+    /**
      * Broadcast Action: Resources for a set of packages (which were
      * previously unavailable) are currently
      * available since the media on which they exist is available.

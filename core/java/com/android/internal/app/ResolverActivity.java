@@ -604,9 +604,10 @@ public class ResolverActivity extends Activity implements AdapterView.OnItemClic
         if ((mAlwaysUseOption || mAdapter.hasFilteredItem()) && mAdapter.mOrigResolveList != null) {
             // Build a reasonable intent filter, based on what matched.
             IntentFilter filter = new IntentFilter();
+            String action = intent.getAction();
 
-            if (intent.getAction() != null) {
-                filter.addAction(intent.getAction());
+            if (action != null) {
+                filter.addAction(action);
             }
             Set<String> categories = intent.getCategories();
             if (categories != null) {
@@ -688,8 +689,30 @@ public class ResolverActivity extends Activity implements AdapterView.OnItemClic
                     if (r.match > bestMatch) bestMatch = r.match;
                 }
                 if (alwaysCheck) {
-                    getPackageManager().addPreferredActivity(filter, bestMatch, set,
-                            intent.getComponent());
+                    PackageManager pm = getPackageManager();
+
+                    // Set the preferred Activity
+                    pm.addPreferredActivity(filter, bestMatch, set, intent.getComponent());
+
+                    // Update Domain Verification status
+                    int userId = getUserId();
+                    ComponentName cn = intent.getComponent();
+                    String packageName = cn.getPackageName();
+                    String dataScheme = (data != null) ? data.getScheme() : null;
+
+                    boolean isHttpOrHttps = (dataScheme != null) &&
+                            (dataScheme.equals(IntentFilter.SCHEME_HTTP) ||
+                            dataScheme.equals(IntentFilter.SCHEME_HTTPS));
+
+                    boolean isViewAction = (action != null) && action.equals(Intent.ACTION_VIEW);
+                    boolean hasCategoryBrowsable = (categories != null) &&
+                            categories.contains(Intent.CATEGORY_BROWSABLE);
+
+                    if (isHttpOrHttps && isViewAction && hasCategoryBrowsable) {
+                        pm.updateIntentVerificationStatus(packageName,
+                                PackageManager.INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ALWAYS,
+                                userId);
+                    }
                 } else {
                     try {
                         AppGlobals.getPackageManager().setLastChosenActivity(intent,

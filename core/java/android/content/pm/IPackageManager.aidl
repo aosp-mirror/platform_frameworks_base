@@ -31,6 +31,7 @@ import android.content.pm.IPackageDeleteObserver2;
 import android.content.pm.IPackageDataObserver;
 import android.content.pm.IPackageMoveObserver;
 import android.content.pm.IPackageStatsObserver;
+import android.content.pm.IntentFilterVerificationInfo;
 import android.content.pm.InstrumentationInfo;
 import android.content.pm.KeySet;
 import android.content.pm.PackageInfo;
@@ -435,6 +436,11 @@ interface IPackageManager {
 
     void verifyPendingInstall(int id, int verificationCode);
     void extendVerificationTimeout(int id, int verificationCodeAtTimeout, long millisecondsToDelay);
+
+    void verifyIntentFilter(int id, int verificationCode, in List<String> outFailedDomains);
+    int getIntentVerificationStatus(String packageName, int userId);
+    boolean updateIntentVerificationStatus(String packageName, int status, int userId);
+    List<IntentFilterVerificationInfo> getIntentFilterVerifications(String packageName);
 
     VerifierDeviceIdentity getVerifierDeviceIdentity();
 
