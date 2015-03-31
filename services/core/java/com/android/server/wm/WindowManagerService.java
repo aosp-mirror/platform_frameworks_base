@@ -4626,19 +4626,19 @@ public class WindowManagerService extends IWindowManager.Stub
                     wtoken.hiddenRequested, HIDE_STACK_CRAWLS ?
                             null : new RuntimeException("here").fillInStackTrace());
 
+            mOpeningApps.remove(wtoken);
+            mClosingApps.remove(wtoken);
+            wtoken.waitingToShow = wtoken.waitingToHide = false;
+            wtoken.hiddenRequested = !visible;
+
             // If we are preparing an app transition, then delay changing
             // the visibility of this token until we execute that transition.
             if (okToDisplay() && mAppTransition.isTransitionSet()) {
-                wtoken.hiddenRequested = !visible;
-
                 if (!wtoken.startingDisplayed) {
                     if (DEBUG_APP_TRANSITIONS) Slog.v(
                             TAG, "Setting dummy animation on: " + wtoken);
                     wtoken.mAppAnimator.setDummyAnimation();
                 }
-                mOpeningApps.remove(wtoken);
-                mClosingApps.remove(wtoken);
-                wtoken.waitingToShow = wtoken.waitingToHide = false;
                 wtoken.inPendingTransaction = true;
                 if (visible) {
                     mOpeningApps.add(wtoken);
