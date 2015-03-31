@@ -611,10 +611,22 @@ abstract class DhcpPacket {
     /**
      * Reads a string of specified length from the buffer.
      */
-    private static String readAsciiString(ByteBuffer buf, int byteCount) {
+    private static String readAsciiString(ByteBuffer buf, int byteCount, boolean nullOk) {
         byte[] bytes = new byte[byteCount];
         buf.get(bytes);
-        return new String(bytes, 0, bytes.length, StandardCharsets.US_ASCII);
+        int length = bytes.length;
+        if (!nullOk) {
+            // Stop at the first null byte. This is because some DHCP options (e.g., the domain
+            // name) are passed to netd via FrameworkListener, which refuses arguments containing
+            // null bytes. We don't do this by default because vendorInfo is an opaque string which
+            // could in theory contain null bytes.
+            for (length = 0; length < bytes.length; length++) {
+                if (bytes[length] == 0) {
+                    break;
+                }
+            }
+        }
+        return new String(bytes, 0, length, StandardCharsets.US_ASCII);
     }
 
     /**
@@ -797,7 +809,7 @@ abstract class DhcpPacket {
                             break;
                         case DHCP_HOST_NAME:
                             expectedLen = optionLen;
-                            hostName = readAsciiString(packet, optionLen);
+                            hostName = readAsciiString(packet, optionLen, false);
                             break;
                         case DHCP_MTU:
                             expectedLen = 2;
@@ -805,7 +817,7 @@ abstract class DhcpPacket {
                             break;
                         case DHCP_DOMAIN_NAME:
                             expectedLen = optionLen;
-                            domainName = readAsciiString(packet, optionLen);
+                            domainName = readAsciiString(packet, optionLen, false);
                             break;
                         case DHCP_BROADCAST_ADDRESS:
                             bcAddr = readIpAddress(packet);
@@ -834,7 +846,7 @@ abstract class DhcpPacket {
                             break;
                         case DHCP_MESSAGE:
                             expectedLen = optionLen;
-                            message = readAsciiString(packet, optionLen);
+                            message = readAsciiString(packet, optionLen, false);
                             break;
                         case DHCP_MAX_MESSAGE_SIZE:
                             expectedLen = 2;
@@ -850,7 +862,7 @@ abstract class DhcpPacket {
                             break;
                         case DHCP_VENDOR_CLASS_ID:
                             expectedLen = optionLen;
-                            vendorId = readAsciiString(packet, optionLen);
+                            vendorId = readAsciiString(packet, optionLen, true);
                             break;
                         case DHCP_CLIENT_IDENTIFIER: { // Client identifier
                             byte[] id = new byte[optionLen];
