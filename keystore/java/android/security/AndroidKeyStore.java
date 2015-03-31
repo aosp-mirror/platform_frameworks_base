@@ -457,7 +457,7 @@ public class AndroidKeyStore extends KeyStoreSpi {
 
         String keyAlgorithmString = key.getAlgorithm();
         @KeyStoreKeyConstraints.AlgorithmEnum int keyAlgorithm;
-        @KeyStoreKeyConstraints.AlgorithmEnum Integer digest;
+        @KeyStoreKeyConstraints.DigestEnum Integer digest;
         try {
             keyAlgorithm =
                     KeyStoreKeyConstraints.Algorithm.fromJCASecretKeyAlgorithm(keyAlgorithmString);
@@ -493,18 +493,18 @@ public class AndroidKeyStore extends KeyStoreSpi {
         if (digest != null) {
             args.addInt(KeymasterDefs.KM_TAG_DIGEST,
                     KeyStoreKeyConstraints.Digest.toKeymaster(digest));
-        }
-        if (keyAlgorithm == KeyStoreKeyConstraints.Algorithm.HMAC) {
-            if (digest == null) {
-                throw new IllegalStateException("Digest algorithm must be specified for key"
-                        + " algorithm " + keyAlgorithmString);
-            }
             Integer digestOutputSizeBytes =
                     KeyStoreKeyConstraints.Digest.getOutputSizeBytes(digest);
             if (digestOutputSizeBytes != null) {
                 // TODO: Remove MAC length constraint once Keymaster API no longer requires it.
                 // TODO: Switch to bits instead of bytes, once this is fixed in Keymaster
                 args.addInt(KeymasterDefs.KM_TAG_MAC_LENGTH, digestOutputSizeBytes);
+            }
+        }
+        if (keyAlgorithm == KeyStoreKeyConstraints.Algorithm.HMAC) {
+            if (digest == null) {
+                throw new IllegalStateException("Digest algorithm must be specified for key"
+                        + " algorithm " + keyAlgorithmString);
             }
         }
 
@@ -559,6 +559,12 @@ public class AndroidKeyStore extends KeyStoreSpi {
 
         // TODO: Remove this once keymaster does not require us to specify the size of imported key.
         args.addInt(KeymasterDefs.KM_TAG_KEY_SIZE, keyMaterial.length * 8);
+
+        if (((purposes & KeyStoreKeyConstraints.Purpose.ENCRYPT) != 0)
+                || ((purposes & KeyStoreKeyConstraints.Purpose.DECRYPT) != 0)) {
+            // Permit caller-specified IV. This is needed for the Cipher abstraction.
+            args.addBoolean(KeymasterDefs.KM_TAG_CALLER_NONCE);
+        }
 
         Credentials.deleteAllTypesForAlias(mKeyStore, entryAlias);
         String keyAliasInKeystore = Credentials.USER_SECRET_KEY + entryAlias;
