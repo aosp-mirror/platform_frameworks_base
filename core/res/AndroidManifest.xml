@@ -3098,9 +3098,9 @@
             </intent-filter>
         </receiver>
 
-        <receiver android:name="com.android.server.updates.TZInfoInstallReceiver" >
+        <receiver android:name="com.android.server.updates.TzDataInstallReceiver" >
             <intent-filter>
-                <action android:name="android.intent.action.UPDATE_TZINFO" />
+                <action android:name="android.intent.action.UPDATE_TZDATA" />
                 <data android:scheme="content" android:host="*" android:mimeType="*/*" />
             </intent-filter>
         </receiver>
