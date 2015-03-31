@@ -3938,16 +3938,6 @@ public class BackupManagerService {
                     return;
                 }
 
-                // Don't proceed unless we have already established package metadata
-                // for the current dataset via a key/value backup pass.
-                File stateDir = new File(mBaseStateDir, transport.transportDirName());
-                File pmState = new File(stateDir, PACKAGE_MANAGER_SENTINEL);
-                if (pmState.length() <= 0) {
-                    Slog.i(TAG, "Full backup requested but dataset not yet initialized "
-                            + "via k/v backup pass; ignoring");
-                    return;
-                }
-
                 // Set up to send data to the transport
                 final int N = mPackages.size();
                 for (int i = 0; i < N; i++) {
@@ -4296,6 +4286,31 @@ public class BackupManagerService {
         writeFullBackupScheduleAsync();
     }
 
+    private boolean fullBackupAllowable(IBackupTransport transport) {
+        if (transport == null) {
+            Slog.w(TAG, "Transport not present; full data backup not performed");
+            return false;
+        }
+
+        // Don't proceed unless we have already established package metadata
+        // for the current dataset via a key/value backup pass.
+        try {
+            File stateDir = new File(mBaseStateDir, transport.transportDirName());
+            File pmState = new File(stateDir, PACKAGE_MANAGER_SENTINEL);
+            if (pmState.length() <= 0) {
+                if (DEBUG) {
+                    Slog.i(TAG, "Full backup requested but dataset not yet initialized");
+                }
+                return false;
+            }
+        } catch (Exception e) {
+            Slog.w(TAG, "Unable to contact transport");
+            return false;
+        }
+
+        return true;
+    }
+
     /**
      * Conditions are right for a full backup operation, so run one.  The model we use is
      * to perform one app backup per scheduled job execution, and to reschedule the job
@@ -4307,6 +4322,7 @@ public class BackupManagerService {
     boolean beginFullBackup(FullBackupJob scheduledJob) {
         long now = System.currentTimeMillis();
         FullBackupEntry entry = null;
+        long latency = MIN_FULL_BACKUP_INTERVAL;
 
         if (!mEnabled || !mProvisioned) {
             // Backups are globally disabled, so don't proceed.  We also don't reschedule
@@ -4338,17 +4354,41 @@ public class BackupManagerService {
                 return false;
             }
 
-            entry = mFullBackupQueue.get(0);
-            long timeSinceRun = now - entry.lastBackup;
-            if (timeSinceRun < MIN_FULL_BACKUP_INTERVAL) {
-                // It's too early to back up the next thing in the queue, so bow out
+            // At this point we know that we have work to do, just not right now.  Any
+            // exit without actually running backups will also require that we
+            // reschedule the job.
+            boolean runBackup = true;
+
+            if (!fullBackupAllowable(getTransport(mCurrentTransport))) {
                 if (MORE_DEBUG) {
-                    Slog.i(TAG, "Device ready but too early to back up next app");
+                    Slog.i(TAG, "Preconditions not met; not running full backup");
                 }
-                final long latency = MIN_FULL_BACKUP_INTERVAL - timeSinceRun;
+                runBackup = false;
+                // Typically this means we haven't run a key/value backup yet.  Back off
+                // full-backup operations by the key/value job's run interval so that
+                // next time we run, we are likely to be able to make progress.
+                latency = KeyValueBackupJob.BATCH_INTERVAL;
+            }
+
+            if (runBackup) {
+                entry = mFullBackupQueue.get(0);
+                long timeSinceRun = now - entry.lastBackup;
+                runBackup = (timeSinceRun >= MIN_FULL_BACKUP_INTERVAL);
+                if (!runBackup) {
+                    // It's too early to back up the next thing in the queue, so bow out
+                    if (MORE_DEBUG) {
+                        Slog.i(TAG, "Device ready but too early to back up next app");
+                    }
+                    // Wait until the next app in the queue falls due for a full data backup
+                    latency = MIN_FULL_BACKUP_INTERVAL - timeSinceRun;
+                }
+            }
+
+            if (!runBackup) {
+                final long deferTime = latency;     // pin for the closure
                 mBackupHandler.post(new Runnable() {
                     @Override public void run() {
-                        FullBackupJob.schedule(mContext, latency);
+                        FullBackupJob.schedule(mContext, deferTime);
                     }
                 });
                 return false;
@@ -8489,27 +8529,31 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
             throw new IllegalStateException("Restore supported only for the device owner");
         }
 
-        if (DEBUG) {
-            Slog.d(TAG, "fullTransportBackup()");
-        }
-
-        CountDownLatch latch = new CountDownLatch(1);
-        PerformFullTransportBackupTask task =
-                new PerformFullTransportBackupTask(null, pkgNames, false, null, latch);
-        (new Thread(task, "full-transport-master")).start();
-        do {
-            try {
-                latch.await();
-                break;
-            } catch (InterruptedException e) {
-                // Just go back to waiting for the latch to indicate completion
+        if (!fullBackupAllowable(getTransport(mCurrentTransport))) {
+            Slog.i(TAG, "Full backup not currently possible -- key/value backup not yet run?");
+        } else {
+            if (DEBUG) {
+                Slog.d(TAG, "fullTransportBackup()");
             }
-        } while (true);
 
-        // We just ran a backup on these packages, so kick them to the end of the queue
-        final long now = System.currentTimeMillis();
-        for (String pkg : pkgNames) {
-            enqueueFullBackup(pkg, now);
+            CountDownLatch latch = new CountDownLatch(1);
+            PerformFullTransportBackupTask task =
+                    new PerformFullTransportBackupTask(null, pkgNames, false, null, latch);
+            (new Thread(task, "full-transport-master")).start();
+            do {
+                try {
+                    latch.await();
+                    break;
+                } catch (InterruptedException e) {
+                    // Just go back to waiting for the latch to indicate completion
+                }
+            } while (true);
+
+            // We just ran a backup on these packages, so kick them to the end of the queue
+            final long now = System.currentTimeMillis();
+            for (String pkg : pkgNames) {
+                enqueueFullBackup(pkg, now);
+            }
         }
 
         if (DEBUG) {
