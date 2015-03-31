@@ -130,6 +130,7 @@ public class ScaleGestureDetector {
     private float mFocusY;
 
     private boolean mQuickScaleEnabled;
+    private boolean mButtonScaleEnabled;
 
     private float mCurrSpan;
     private float mPrevSpan;
@@ -151,14 +152,17 @@ public class ScaleGestureDetector {
     private int mTouchHistoryDirection;
     private long mTouchHistoryLastAcceptedTime;
     private int mTouchMinMajor;
-    private MotionEvent mDoubleTapEvent;
-    private int mDoubleTapMode = DOUBLE_TAP_MODE_NONE;
     private final Handler mHandler;
 
+    private float mAnchoredScaleStartX;
+    private float mAnchoredScaleStartY;
+    private int mAnchoredScaleMode = ANCHORED_SCALE_MODE_NONE;
+
     private static final long TOUCH_STABILIZE_TIME = 128; // ms
-    private static final int DOUBLE_TAP_MODE_NONE = 0;
-    private static final int DOUBLE_TAP_MODE_IN_PROGRESS = 1;
     private static final float SCALE_FACTOR = .5f;
+    private static final int ANCHORED_SCALE_MODE_NONE = 0;
+    private static final int ANCHORED_SCALE_MODE_DOUBLE_TAP = 1;
+    private static final int ANCHORED_SCALE_MODE_BUTTON = 2;
 
 
     /**
@@ -310,8 +314,17 @@ public class ScaleGestureDetector {
             mGestureDetector.onTouchEvent(event);
         }
 
+        final int count = event.getPointerCount();
+        final int toolType = event.getToolType(0);
+        final boolean isButtonTool = toolType == MotionEvent.TOOL_TYPE_STYLUS
+                || toolType == MotionEvent.TOOL_TYPE_MOUSE;
+        final boolean isAnchoredScaleButtonDown = isButtonTool && (count == 1)
+                && (event.getButtonState() & MotionEvent.BUTTON_SECONDARY) != 0;
+
+        final boolean anchoredScaleCancelled =
+                mAnchoredScaleMode == ANCHORED_SCALE_MODE_BUTTON && !isAnchoredScaleButtonDown;
         final boolean streamComplete = action == MotionEvent.ACTION_UP ||
-                action == MotionEvent.ACTION_CANCEL;
+                action == MotionEvent.ACTION_CANCEL || anchoredScaleCancelled;
 
         if (action == MotionEvent.ACTION_DOWN || streamComplete) {
             // Reset any scale in progress with the listener.
@@ -321,11 +334,11 @@ public class ScaleGestureDetector {
                 mListener.onScaleEnd(this);
                 mInProgress = false;
                 mInitialSpan = 0;
-                mDoubleTapMode = DOUBLE_TAP_MODE_NONE;
-            } else if (mDoubleTapMode == DOUBLE_TAP_MODE_IN_PROGRESS && streamComplete) {
+                mAnchoredScaleMode = ANCHORED_SCALE_MODE_NONE;
+            } else if (inAnchoredScaleMode() && streamComplete) {
                 mInProgress = false;
                 mInitialSpan = 0;
-                mDoubleTapMode = DOUBLE_TAP_MODE_NONE;
+                mAnchoredScaleMode = ANCHORED_SCALE_MODE_NONE;
             }
 
             if (streamComplete) {
@@ -334,25 +347,32 @@ public class ScaleGestureDetector {
             }
         }
 
+        if (!mInProgress && mButtonScaleEnabled && !inAnchoredScaleMode()
+                && !streamComplete && isAnchoredScaleButtonDown) {
+            // Start of a button scale gesture
+            mAnchoredScaleStartX = event.getX();
+            mAnchoredScaleStartY = event.getY();
+            mAnchoredScaleMode = ANCHORED_SCALE_MODE_BUTTON;
+            mInitialSpan = 0;
+        }
+
         final boolean configChanged = action == MotionEvent.ACTION_DOWN ||
                 action == MotionEvent.ACTION_POINTER_UP ||
-                action == MotionEvent.ACTION_POINTER_DOWN;
-
+                action == MotionEvent.ACTION_POINTER_DOWN || anchoredScaleCancelled;
 
         final boolean pointerUp = action == MotionEvent.ACTION_POINTER_UP;
         final int skipIndex = pointerUp ? event.getActionIndex() : -1;
 
         // Determine focal point
         float sumX = 0, sumY = 0;
-        final int count = event.getPointerCount();
         final int div = pointerUp ? count - 1 : count;
         final float focusX;
         final float focusY;
-        if (mDoubleTapMode == DOUBLE_TAP_MODE_IN_PROGRESS) {
-            // In double tap mode, the focal pt is always where the double tap
-            // gesture started
-            focusX = mDoubleTapEvent.getX();
-            focusY = mDoubleTapEvent.getY();
+        if (inAnchoredScaleMode()) {
+            // In anchored scale mode, the focal pt is always where the double tap
+            // or button down gesture started
+            focusX = mAnchoredScaleStartX;
+            focusY = mAnchoredScaleStartY;
             if (event.getY() < focusY) {
                 mEventBeforeOrAboveStartingGestureEvent = true;
             } else {
@@ -390,7 +410,7 @@ public class ScaleGestureDetector {
         final float spanX = devX * 2;
         final float spanY = devY * 2;
         final float span;
-        if (inDoubleTapMode()) {
+        if (inAnchoredScaleMode()) {
             span = spanY;
         } else {
             span = (float) Math.hypot(spanX, spanY);
@@ -402,11 +422,10 @@ public class ScaleGestureDetector {
         final boolean wasInProgress = mInProgress;
         mFocusX = focusX;
         mFocusY = focusY;
-        if (!inDoubleTapMode() && mInProgress && (span < mMinSpan || configChanged)) {
+        if (!inAnchoredScaleMode() && mInProgress && (span < mMinSpan || configChanged)) {
             mListener.onScaleEnd(this);
             mInProgress = false;
             mInitialSpan = span;
-            mDoubleTapMode = DOUBLE_TAP_MODE_NONE;
         }
         if (configChanged) {
             mPrevSpanX = mCurrSpanX = spanX;
@@ -414,7 +433,7 @@ public class ScaleGestureDetector {
             mInitialSpan = mPrevSpan = mCurrSpan = span;
         }
 
-        final int minSpan = inDoubleTapMode() ? mSpanSlop : mMinSpan;
+        final int minSpan = inAnchoredScaleMode() ? mSpanSlop : mMinSpan;
         if (!mInProgress && span >=  minSpan &&
                 (wasInProgress || Math.abs(span - mInitialSpan) > mSpanSlop)) {
             mPrevSpanX = mCurrSpanX = spanX;
@@ -447,9 +466,8 @@ public class ScaleGestureDetector {
         return true;
     }
 
-
-    private boolean inDoubleTapMode() {
-        return mDoubleTapMode == DOUBLE_TAP_MODE_IN_PROGRESS;
+    private boolean inAnchoredScaleMode() {
+        return mAnchoredScaleMode != ANCHORED_SCALE_MODE_NONE;
     }
 
     /**
@@ -466,8 +484,9 @@ public class ScaleGestureDetector {
                         @Override
                         public boolean onDoubleTap(MotionEvent e) {
                             // Double tap: start watching for a swipe
-                            mDoubleTapEvent = e;
-                            mDoubleTapMode = DOUBLE_TAP_MODE_IN_PROGRESS;
+                            mAnchoredScaleStartX = e.getX();
+                            mAnchoredScaleStartY = e.getY();
+                            mAnchoredScaleMode = ANCHORED_SCALE_MODE_DOUBLE_TAP;
                             return true;
                         }
                     };
@@ -481,6 +500,27 @@ public class ScaleGestureDetector {
    */
     public boolean isQuickScaleEnabled() {
         return mQuickScaleEnabled;
+    }
+
+    /**
+     * Sets whether the associates {@link OnScaleGestureListener} should receive onScale callbacks
+     * when the user presses a {@value MotionEvent#BUTTON_SECONDARY} (right mouse button, stylus
+     * first button) and drags the pointer on the screen. Note that this is enabled by default if
+     * the app targets API 23 and newer.
+     *
+     * @param scales true to enable stylus or mouse scaling, false to disable.
+     */
+    public void setSecondaryButtonScaleEnabled(boolean scales) {
+        mButtonScaleEnabled = scales;
+    }
+
+    /**
+     * Return whether the button scale gesture, in which the user presses a
+     * {@value MotionEvent#BUTTON_SECONDARY} (right mouse button, stylus first button) and drags the
+     * pointer on the screen, should perform scaling. {@see #setButtonScaleEnabled(boolean)}.
+     */
+    public boolean isSecondaryButtonScaleEnabled() {
+        return mButtonScaleEnabled;
     }
 
     /**
@@ -586,7 +626,7 @@ public class ScaleGestureDetector {
      * @return The current scaling factor.
      */
     public float getScaleFactor() {
-        if (inDoubleTapMode()) {
+        if (inAnchoredScaleMode()) {
             // Drag is moving up; the further away from the gesture
             // start, the smaller the span should be, the closer,
             // the larger the span, and therefore the larger the scale
