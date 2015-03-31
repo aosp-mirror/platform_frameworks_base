@@ -117,13 +117,14 @@ class IntKeyframeSet extends KeyframeSet implements Keyframes.IntKeyframes {
             IntKeyframe nextKeyframe = (IntKeyframe) mKeyframes.get(i);
             if (fraction < nextKeyframe.getFraction()) {
                 final TimeInterpolator interpolator = nextKeyframe.getInterpolator();
-                if (interpolator != null) {
-                    fraction = interpolator.getInterpolation(fraction);
-                }
                 float intervalFraction = (fraction - prevKeyframe.getFraction()) /
                     (nextKeyframe.getFraction() - prevKeyframe.getFraction());
                 int prevValue = prevKeyframe.getIntValue();
                 int nextValue = nextKeyframe.getIntValue();
+                // Apply interpolator on the proportional duration.
+                if (interpolator != null) {
+                    intervalFraction = interpolator.getInterpolation(intervalFraction);
+                }
                 return mEvaluator == null ?
                         prevValue + (int)(intervalFraction * (nextValue - prevValue)) :
                         ((Number)mEvaluator.evaluate(intervalFraction, prevValue, nextValue)).

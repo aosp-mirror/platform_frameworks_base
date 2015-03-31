@@ -118,13 +118,14 @@ class FloatKeyframeSet extends KeyframeSet implements Keyframes.FloatKeyframes {
             FloatKeyframe nextKeyframe = (FloatKeyframe) mKeyframes.get(i);
             if (fraction < nextKeyframe.getFraction()) {
                 final TimeInterpolator interpolator = nextKeyframe.getInterpolator();
-                if (interpolator != null) {
-                    fraction = interpolator.getInterpolation(fraction);
-                }
                 float intervalFraction = (fraction - prevKeyframe.getFraction()) /
                     (nextKeyframe.getFraction() - prevKeyframe.getFraction());
                 float prevValue = prevKeyframe.getFloatValue();
                 float nextValue = nextKeyframe.getFloatValue();
+                // Apply interpolator on the proportional duration.
+                if (interpolator != null) {
+                    intervalFraction = interpolator.getInterpolation(intervalFraction);
+                }
                 return mEvaluator == null ?
                         prevValue + intervalFraction * (nextValue - prevValue) :
                         ((Number)mEvaluator.evaluate(intervalFraction, prevValue, nextValue)).
