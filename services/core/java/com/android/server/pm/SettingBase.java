@@ -24,7 +24,7 @@ abstract class SettingBase {
     int pkgFlags;
     int pkgPrivateFlags;
 
-    private final PermissionsState mPermissionsState;
+    protected final PermissionsState mPermissionsState;
     private int[] mPermissionsUpdatedForUserIds = PermissionsState.USERS_NONE;
 
     SettingBase(int pkgFlags, int pkgPrivateFlags) {

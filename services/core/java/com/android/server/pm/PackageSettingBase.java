@@ -204,7 +204,7 @@ abstract class PackageSettingBase extends SettingBase {
      */
     public void copyFrom(PackageSettingBase base) {
         setPermissionsUpdatedForUserIds(base.getPermissionsUpdatedForUserIds());
-        getPermissionsState().copyFrom(base.getPermissionsState());
+        mPermissionsState.copyFrom(base.mPermissionsState);
         primaryCpuAbiString = base.primaryCpuAbiString;
         secondaryCpuAbiString = base.secondaryCpuAbiString;
         cpuAbiOverrideString = base.cpuAbiOverrideString;
