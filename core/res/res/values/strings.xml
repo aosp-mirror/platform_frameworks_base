@@ -1758,6 +1758,8 @@
     <string name="permlab_cameraDisableTransmitLed">disable transmit indicator LED when camera is in use</string>
     <!-- Description of a camera app permission, listed so the user can choose whether or not they want to allow it to disable the may-transmit light indicator. -->
     <string name="permdesc_cameraDisableTransmitLed">Allows a pre-installed system application to disable the camera use indicator LED.</string>
+    <!-- Description of a camera app permission, listed so that the user can send the camera service notifications about system-wide events. -->
+    <string name="permdesc_cameraSendSystemEvent">Allows a pre-installed system application to send the camera service system events.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_brick" product="tablet">permanently disable tablet</string>

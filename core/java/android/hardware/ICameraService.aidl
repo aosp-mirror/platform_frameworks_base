@@ -75,4 +75,11 @@ interface ICameraService
                     out BinderHolder device);
 
     int setTorchMode(String CameraId, boolean enabled, IBinder clientBinder);
+
+    /**
+     * Notify the camera service of a system event.  Should only be called from system_server.
+     *
+     * Callers require the android.permission.CAMERA_SEND_SYSTEM_EVENTS permission.
+     */
+    oneway void notifySystemEvent(int eventId, int arg0);
 }
