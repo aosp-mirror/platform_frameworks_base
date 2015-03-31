@@ -33,7 +33,8 @@ import java.util.regex.Pattern;
 public class WifiKey implements Parcelable {
 
     // Patterns used for validation.
-    private static final Pattern SSID_PATTERN = Pattern.compile("(\".*\")|(0x[\\p{XDigit}]+)");
+    private static final Pattern SSID_PATTERN = Pattern.compile("(\".*\")|(0x[\\p{XDigit}]+)",
+            Pattern.DOTALL);
     private static final Pattern BSSID_PATTERN =
             Pattern.compile("([\\p{XDigit}]{2}:){5}[\\p{XDigit}]{2}");
 
