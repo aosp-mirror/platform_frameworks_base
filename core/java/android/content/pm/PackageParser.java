@@ -3113,6 +3113,9 @@ public class PackageParser {
                         R.styleable.AndroidManifestActivity_screenOrientation,
                         ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
             }
+
+            a.info.lockTaskOnLaunch =
+                    sa.getBoolean(R.styleable.AndroidManifestActivity_lockTaskOnLaunch, false);
         } else {
             a.info.launchMode = ActivityInfo.LAUNCH_MULTIPLE;
             a.info.configChanges = 0;
