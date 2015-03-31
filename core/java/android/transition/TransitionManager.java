@@ -430,7 +430,6 @@ public class TransitionManager {
      * Ends all pending and ongoing transitions on the specified scene root.
      *
      * @param sceneRoot The root of the View hierarchy to end transitions on.
-     * @hide
      */
     public static void endTransitions(final ViewGroup sceneRoot) {
         sPendingTransitions.remove(sceneRoot);
