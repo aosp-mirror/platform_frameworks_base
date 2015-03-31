@@ -17,9 +17,10 @@
 package android.media;
 
 import java.lang.ref.WeakReference;
-import java.util.UUID;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.UUID;
 import android.annotation.SystemApi;
 import android.os.Handler;
 import android.os.Looper;
@@ -98,12 +99,14 @@ import android.util.Log;
  */
 public final class MediaDrm {
 
-    private final static String TAG = "MediaDrm";
+    private static final String TAG = "MediaDrm";
 
     private static final String PERMISSION = android.Manifest.permission.ACCESS_DRM_CERTIFICATES;
 
     private EventHandler mEventHandler;
     private OnEventListener mOnEventListener;
+    private OnKeysChangeListener mOnKeysChangeListener;
+    private OnExpirationUpdateListener mOnExpirationUpdateListener;
 
     private long mNativeContext;
 
@@ -227,6 +230,148 @@ public final class MediaDrm {
     }
 
     /**
+     * Register a callback to be invoked when a session expiration update
+     * occurs.  The app's OnExpirationUpdateListener will be notified
+     * when the expiration time of the keys in the session have changed.
+     * @param listener the callback that will be run
+     * @param handler the handler on which the listener should be invoked, or
+     *     null if the listener should be invoked on the calling thread's looper.
+     */
+    public void setOnExpirationUpdateListener(OnExpirationUpdateListener listener,
+            Handler handler)
+    {
+        if (listener != null) {
+            Looper looper = handler != null ? handler.getLooper() : Looper.myLooper();
+            if (looper != null) {
+                if (mEventHandler == null || mEventHandler.getLooper() != looper) {
+                    mEventHandler = new EventHandler(this, looper);
+                }
+            }
+        }
+        mOnExpirationUpdateListener = listener;
+    }
+
+    /**
+     * Interface definition for a callback to be invoked when a drm session
+     * expiration update occurs
+     */
+    public interface OnExpirationUpdateListener
+    {
+        /**
+         * Called when a session expiration update occurs, to inform the app
+         * about the change in expiration time
+         *
+         * @param md the MediaDrm object on which the event occurred
+         * @param sessionId the DRM session ID on which the event occurred
+         * @param expirationTime the new expiration time for the keys in the session.
+         *     The time is in milliseconds, relative to the Unix epoch.
+         */
+        void onExpirationUpdate(MediaDrm md, byte[] sessionId, long expirationTime);
+    }
+
+    /**
+     * Register a callback to be invoked when the state of keys in a session
+     * change, e.g. when a license update occurs or when a license expires.
+     *
+     * @param listener the callback that will be run when key status changes
+     * @param handler the handler on which the listener should be invoked, or
+     *     null if the listener should be invoked on the calling thread's looper.
+     */
+    public void setOnKeysChangeListener(OnKeysChangeListener listener,
+            Handler handler)
+    {
+        if (listener != null) {
+            Looper looper = handler != null ? handler.getLooper() : Looper.myLooper();
+            if (looper != null) {
+                if (mEventHandler == null || mEventHandler.getLooper() != looper) {
+                    mEventHandler = new EventHandler(this, looper);
+                }
+            }
+        }
+        mOnKeysChangeListener = listener;
+    }
+
+    /**
+     * Interface definition for a callback to be invoked when the keys in a drm
+     * session change states.
+     */
+    public interface OnKeysChangeListener
+    {
+        /**
+         * Called when the keys in a session change status, such as when the license
+         * is renewed or expires.
+         *
+         * @param md the MediaDrm object on which the event occurred
+         * @param sessionId the DRM session ID on which the event occurred
+         * @param keyInformation a list of {@link MediaDrm.KeyStatus}
+         *     instances indicating the status for each key in the session
+         * @param hasNewUsableKey indicates if a key has been added that is usable,
+         *     which may trigger an attempt to resume playback on the media stream
+         *     if it is currently blocked waiting for a key.
+         */
+        void onKeysChange(MediaDrm md, byte[] sessionId, List<KeyStatus> keyInformation,
+                boolean hasNewUsableKey);
+    }
+
+    /**
+     * The key is currently usable to decrypt media data
+     */
+    public static final int KEY_STATUS_USABLE = 0;
+
+    /**
+     * The key is no longer usable to decrypt media data because its
+     * expiration time has passed.
+     */
+    public static final int KEY_STATUS_EXPIRED = 1;
+
+    /**
+     * The key is not currently usable to decrypt media data because its
+     * output requirements cannot currently be met.
+     */
+    public static final int KEY_STATUS_OUTPUT_NOT_ALLOWED = 2;
+
+    /**
+     * The status of the key is not yet known and is being determined.
+     * The status will be updated with the actual status when it has
+     * been determined.
+     */
+    public static final int KEY_STATUS_PENDING = 3;
+
+    /**
+     * The key is not currently usable to decrypt media data because of an
+     * internal error in processing unrelated to input parameters.  This error
+     * is not actionable by an app.
+     */
+    public static final int KEY_STATUS_INTERNAL_ERROR = 4;
+
+
+    /**
+     * Defines the status of a key.
+     * A KeyStatus for each key in a session is provided to the
+     * {@link OnKeysChangeListener#onKeysChange}
+     * listener.
+     */
+    public static final class KeyStatus {
+        private final byte[] mKeyId;
+        private final int mStatusCode;
+
+        KeyStatus(byte[] keyId, int statusCode) {
+            mKeyId = keyId;
+            mStatusCode = statusCode;
+        }
+
+        /**
+         * Returns the status code for the key
+         */
+        public int getStatusCode() { return mStatusCode; }
+
+        /**
+         * Returns the id for the key
+         */
+        public byte[] getKeyId() { return mKeyId; }
+    }
+
+    /**
      * Register a callback to be invoked when an event occurs
      *
      * @param listener the callback that will be run
@@ -289,6 +434,8 @@ public final class MediaDrm {
     public static final int EVENT_SESSION_RECLAIMED = 5;
 
     private static final int DRM_EVENT = 200;
+    private static final int EXPIRATION_UPDATE = 201;
+    private static final int KEYS_CHANGE = 202;
 
     private class EventHandler extends Handler
     {
@@ -308,8 +455,6 @@ public final class MediaDrm {
             switch(msg.what) {
 
             case DRM_EVENT:
-                Log.i(TAG, "Drm event (" + msg.arg1 + "," + msg.arg2 + ")");
-
                 if (mOnEventListener != null) {
                     if (msg.obj != null && msg.obj instanceof Parcel) {
                         Parcel parcel = (Parcel)msg.obj;
@@ -321,7 +466,42 @@ public final class MediaDrm {
                         if (data.length == 0) {
                             data = null;
                         }
+
+                        Log.i(TAG, "Drm event (" + msg.arg1 + "," + msg.arg2 + ")");
                         mOnEventListener.onEvent(mMediaDrm, sessionId, msg.arg1, msg.arg2, data);
+                    }
+                }
+                return;
+
+            case KEYS_CHANGE:
+                if (mOnKeysChangeListener != null) {
+                    if (msg.obj != null && msg.obj instanceof Parcel) {
+                        Parcel parcel = (Parcel)msg.obj;
+                        byte[] sessionId = parcel.createByteArray();
+                        if (sessionId.length > 0) {
+                            List<KeyStatus> keyStatusList = keyStatusListFromParcel(parcel);
+                            boolean hasNewUsableKey = (parcel.readInt() != 0);
+
+                            Log.i(TAG, "Drm keys change");
+                            mOnKeysChangeListener.onKeysChange(mMediaDrm, sessionId, keyStatusList,
+                                    hasNewUsableKey);
+                        }
+                    }
+                }
+                return;
+
+            case EXPIRATION_UPDATE:
+                if (mOnExpirationUpdateListener != null) {
+                    if (msg.obj != null && msg.obj instanceof Parcel) {
+                        Parcel parcel = (Parcel)msg.obj;
+                        byte[] sessionId = parcel.createByteArray();
+                        if (sessionId.length > 0) {
+                            long expirationTime = parcel.readLong();
+
+                            Log.i(TAG, "Drm key expiration update: " + expirationTime);
+                            mOnExpirationUpdateListener.onExpirationUpdate(mMediaDrm, sessionId,
+                                    expirationTime);
+                        }
                     }
                 }
                 return;
@@ -333,7 +513,21 @@ public final class MediaDrm {
         }
     }
 
-    /*
+    /**
+     * Parse a list of KeyStatus objects from an event parcel
+     */
+    private List<KeyStatus> keyStatusListFromParcel(Parcel parcel) {
+        int nelems = parcel.readInt();
+        List<KeyStatus> keyStatusList = new ArrayList(nelems);
+        while (nelems-- > 0) {
+            byte[] keyId = parcel.createByteArray();
+            int keyStatusCode = parcel.readInt();
+            keyStatusList.add(new KeyStatus(keyId, keyStatusCode));
+        }
+        return keyStatusList;
+    }
+
+    /**
      * This method is called from native code when an event occurs.  This method
      * just uses the EventHandler system to post the event back to the main app thread.
      * We use a weak reference to the original MediaPlayer object so that the native
@@ -341,14 +535,14 @@ public final class MediaDrm {
      * the cookie passed to native_setup().)
      */
     private static void postEventFromNative(Object mediadrm_ref,
-            int eventType, int extra, Object obj)
+            int what, int eventType, int extra, Object obj)
     {
-        MediaDrm md = (MediaDrm)((WeakReference)mediadrm_ref).get();
+        MediaDrm md = (MediaDrm)((WeakReference<MediaDrm>)mediadrm_ref).get();
         if (md == null) {
             return;
         }
         if (md.mEventHandler != null) {
-            Message m = md.mEventHandler.obtainMessage(DRM_EVENT, eventType, extra, obj);
+            Message m = md.mEventHandler.obtainMessage(what, eventType, extra, obj);
             md.mEventHandler.sendMessage(m);
         }
     }
@@ -404,7 +598,7 @@ public final class MediaDrm {
     /**
      * Contains the opaque data an app uses to request keys from a license server
      */
-    public final static class KeyRequest {
+    public static final class KeyRequest {
         private byte[] mData;
         private String mDefaultUrl;
         private int mRequestType;
@@ -521,7 +715,7 @@ public final class MediaDrm {
      * Contains the opaque data an app uses to request a certificate from a provisioning
      * server
      */
-    public final static class ProvisionRequest {
+    public static final class ProvisionRequest {
         ProvisionRequest() {}
 
         /**
@@ -812,7 +1006,7 @@ public final class MediaDrm {
      *
      * @hide - not part of the public API at this time
      */
-    public final static class CertificateRequest {
+    public static final class CertificateRequest {
         private byte[] mData;
         private String mDefaultUrl;
 
@@ -860,7 +1054,7 @@ public final class MediaDrm {
      *
      * @hide - not part of the public API at this time
      */
-    public final static class Certificate {
+    public static final class Certificate {
         Certificate() {}
 
         /**

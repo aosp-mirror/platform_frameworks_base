@@ -96,6 +96,12 @@ struct EventTypes {
     jint kEventSessionReclaimed;
 } gEventTypes;
 
+struct EventWhat {
+    jint kWhatDrmEvent;
+    jint kWhatExpirationUpdate;
+    jint kWhatKeysChange;
+} gEventWhat;
+
 struct KeyTypes {
     jint kKeyTypeStreaming;
     jint kKeyTypeOffline;
@@ -186,24 +192,36 @@ JNIDrmListener::~JNIDrmListener()
 void JNIDrmListener::notify(DrmPlugin::EventType eventType, int extra,
                             const Parcel *obj)
 {
-    jint jeventType;
+    jint jwhat;
+    jint jeventType = 0;
 
     // translate DrmPlugin event types into their java equivalents
     switch (eventType) {
         case DrmPlugin::kDrmPluginEventProvisionRequired:
+            jwhat = gEventWhat.kWhatDrmEvent;
             jeventType = gEventTypes.kEventProvisionRequired;
             break;
         case DrmPlugin::kDrmPluginEventKeyNeeded:
+            jwhat = gEventWhat.kWhatDrmEvent;
             jeventType = gEventTypes.kEventKeyRequired;
             break;
         case DrmPlugin::kDrmPluginEventKeyExpired:
+            jwhat = gEventWhat.kWhatDrmEvent;
             jeventType = gEventTypes.kEventKeyExpired;
             break;
         case DrmPlugin::kDrmPluginEventVendorDefined:
+            jwhat = gEventWhat.kWhatDrmEvent;
             jeventType = gEventTypes.kEventVendorDefined;
             break;
         case DrmPlugin::kDrmPluginEventSessionReclaimed:
+            jwhat = gEventWhat.kWhatDrmEvent;
             jeventType = gEventTypes.kEventSessionReclaimed;
+            break;
+        case DrmPlugin::kDrmPluginEventExpirationUpdate:
+            jwhat = gEventWhat.kWhatExpirationUpdate;
+            break;
+         case DrmPlugin::kDrmPluginEventKeysChange:
+            jwhat = gEventWhat.kWhatKeysChange;
             break;
         default:
             ALOGE("Invalid event DrmPlugin::EventType %d, ignored", (int)eventType);
@@ -217,7 +235,7 @@ void JNIDrmListener::notify(DrmPlugin::EventType eventType, int extra,
             Parcel* nativeParcel = parcelForJavaObject(env, jParcel);
             nativeParcel->setData(obj->data(), obj->dataSize());
             env->CallStaticVoidMethod(mClass, gFields.post_event, mObject,
-                    jeventType, extra, jParcel);
+                    jwhat, jeventType, extra, jParcel);
             env->DeleteLocalRef(jParcel);
         }
     }
@@ -573,7 +591,7 @@ static void android_media_MediaDrm_native_init(JNIEnv *env) {
     FIND_CLASS(clazz, "android/media/MediaDrm");
     GET_FIELD_ID(gFields.context, clazz, "mNativeContext", "J");
     GET_STATIC_METHOD_ID(gFields.post_event, clazz, "postEventFromNative",
-                         "(Ljava/lang/Object;IILjava/lang/Object;)V");
+                         "(Ljava/lang/Object;IIILjava/lang/Object;)V");
 
     jfieldID field;
     GET_STATIC_FIELD_ID(field, clazz, "EVENT_PROVISION_REQUIRED", "I");
@@ -586,6 +604,13 @@ static void android_media_MediaDrm_native_init(JNIEnv *env) {
     gEventTypes.kEventVendorDefined = env->GetStaticIntField(clazz, field);
     GET_STATIC_FIELD_ID(field, clazz, "EVENT_SESSION_RECLAIMED", "I");
     gEventTypes.kEventSessionReclaimed = env->GetStaticIntField(clazz, field);
+
+    GET_STATIC_FIELD_ID(field, clazz, "DRM_EVENT", "I");
+    gEventWhat.kWhatDrmEvent = env->GetStaticIntField(clazz, field);
+    GET_STATIC_FIELD_ID(field, clazz, "EXPIRATION_UPDATE", "I");
+    gEventWhat.kWhatExpirationUpdate = env->GetStaticIntField(clazz, field);
+    GET_STATIC_FIELD_ID(field, clazz, "KEYS_CHANGE", "I");
+    gEventWhat.kWhatKeysChange = env->GetStaticIntField(clazz, field);
 
     GET_STATIC_FIELD_ID(field, clazz, "KEY_TYPE_STREAMING", "I");
     gKeyTypes.kKeyTypeStreaming = env->GetStaticIntField(clazz, field);
@@ -837,7 +862,7 @@ static jobject android_media_MediaDrm_getKeyRequest(
                 env->SetIntField(keyObj, gFields.keyRequest.requestType,
                         gKeyRequestTypes.kKeyRequestTypeRelease);
                 break;
-            case DrmPlugin::kKeyRequestType_Unknown:
+            default:
                 throwStateException(env, "DRM plugin failure: unknown key request type",
                         ERROR_DRM_UNKNOWN);
                 break;
