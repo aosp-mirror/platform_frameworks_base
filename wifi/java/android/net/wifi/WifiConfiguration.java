@@ -401,13 +401,6 @@ public class WifiConfiguration implements Parcelable {
      */
     public String autoJoinBSSID;
 
-    /**
-     * @hide
-     * BSSID list on which this configuration was seen.
-     * TODO: prevent this list to grow infinitely, age-out the results
-     */
-    public HashMap<String, ScanResult> scanResultCache;
-
     /** The Below RSSI thresholds are used to configure AutoJoin
      *  - GOOD/LOW/BAD thresholds are used so as to calculate link score
      *  - UNWANTED_SOFT are used by the blacklisting logic so as to handle
@@ -497,7 +490,7 @@ public class WifiConfiguration implements Parcelable {
      * A summary of the RSSI and Band status for that configuration
      * This is used as a temporary value by the auto-join controller
      */
-    public final class Visibility {
+    public static final class Visibility {
         public int rssi5;   // strongest 5GHz RSSI
         public int rssi24;  // strongest 2.4GHz RSSI
         public int num5;    // number of BSSIDs on 5GHz
@@ -573,47 +566,8 @@ public class WifiConfiguration implements Parcelable {
      * age in milliseconds: we will consider only ScanResults that are more recent,
      * i.e. younger.
      ***/
-    public Visibility setVisibility(long age) {
-        if (scanResultCache == null) {
-            visibility = null;
-            return null;
-        }
-
-        Visibility status = new Visibility();
-
-        long now_ms = System.currentTimeMillis();
-        for(ScanResult result : scanResultCache.values()) {
-            if (result.seen == 0)
-                continue;
-
-            if (result.is5GHz()) {
-                //strictly speaking: [4915, 5825]
-                //number of known BSSID on 5GHz band
-                status.num5 = status.num5 + 1;
-            } else if (result.is24GHz()) {
-                //strictly speaking: [2412, 2482]
-                //number of known BSSID on 2.4Ghz band
-                status.num24 = status.num24 + 1;
-            }
-
-            if ((now_ms - result.seen) > age) continue;
-
-            if (result.is5GHz()) {
-                if (result.level > status.rssi5) {
-                    status.rssi5 = result.level;
-                    status.age5 = result.seen;
-                    status.BSSID5 = result.BSSID;
-                }
-            } else if (result.is24GHz()) {
-                if (result.level > status.rssi24) {
-                    status.rssi24 = result.level;
-                    status.age24 = result.seen;
-                    status.BSSID24 = result.BSSID;
-                }
-            }
-        }
+    public void setVisibility(Visibility status) {
         visibility = status;
-        return status;
     }
 
     /** @hide */
@@ -970,31 +924,6 @@ public class WifiConfiguration implements Parcelable {
         return  false;
     }
 
-    /**
-     * most recent time we have seen this configuration
-     * @return most recent scanResult
-     * @hide
-     */
-    public ScanResult lastSeen() {
-        ScanResult mostRecent = null;
-
-        if (scanResultCache == null) {
-            return null;
-        }
-
-        for (ScanResult result : scanResultCache.values()) {
-            if (mostRecent == null) {
-                if (result.seen != 0)
-                   mostRecent = result;
-            } else {
-                if (result.seen > mostRecent.seen) {
-                   mostRecent = result;
-                }
-            }
-        }
-        return mostRecent;
-    }
-
     /** @hide **/
     public void setAutoJoinStatus(int status) {
         if (status < 0) status = 0;
@@ -1007,75 +936,6 @@ public class WifiConfiguration implements Parcelable {
             autoJoinStatus = status;
             dirty = true;
         }
-    }
-
-    /** @hide
-     *  trim the scan Result Cache
-     * @param: number of entries to keep in the cache
-     */
-    public void trimScanResultsCache(int num) {
-        if (this.scanResultCache == null) {
-            return;
-        }
-        int currenSize = this.scanResultCache.size();
-        if (currenSize <= num) {
-            return; // Nothing to trim
-        }
-        ArrayList<ScanResult> list = new ArrayList<ScanResult>(this.scanResultCache.values());
-        if (list.size() != 0) {
-            // Sort by descending timestamp
-            Collections.sort(list, new Comparator() {
-                public int compare(Object o1, Object o2) {
-                    ScanResult a = (ScanResult)o1;
-                    ScanResult b = (ScanResult)o2;
-                    if (a.seen > b.seen) {
-                        return 1;
-                    }
-                    if (a.seen < b.seen) {
-                        return -1;
-                    }
-                    return a.BSSID.compareTo(b.BSSID);
-                }
-            });
-        }
-        for (int i = 0; i < currenSize - num ; i++) {
-            // Remove oldest results from scan cache
-            ScanResult result = list.get(i);
-            this.scanResultCache.remove(result.BSSID);
-        }
-    }
-
-    /* @hide */
-    private ArrayList<ScanResult> sortScanResults() {
-        ArrayList<ScanResult> list = new ArrayList<ScanResult>(this.scanResultCache.values());
-        if (list.size() != 0) {
-            Collections.sort(list, new Comparator() {
-                public int compare(Object o1, Object o2) {
-                    ScanResult a = (ScanResult)o1;
-                    ScanResult b = (ScanResult)o2;
-                    if (a.numIpConfigFailures > b.numIpConfigFailures) {
-                        return 1;
-                    }
-                    if (a.numIpConfigFailures < b.numIpConfigFailures) {
-                        return -1;
-                    }
-                    if (a.seen > b.seen) {
-                        return -1;
-                    }
-                    if (a.seen < b.seen) {
-                        return 1;
-                    }
-                    if (a.level > b.level) {
-                        return -1;
-                    }
-                    if (a.level < b.level) {
-                        return 1;
-                    }
-                    return a.BSSID.compareTo(b.BSSID);
-                }
-            });
-        }
-        return list;
     }
 
     @Override
@@ -1246,42 +1106,6 @@ public class WifiConfiguration implements Parcelable {
                     sbuf.append(" = ").append(choice);
                     sbuf.append('\n');
                 }
-            }
-        }
-        if (this.scanResultCache != null) {
-            sbuf.append("Scan Cache:  ").append('\n');
-            ArrayList<ScanResult> list = sortScanResults();
-            if (list.size() > 0) {
-                for (ScanResult result : list) {
-                    long milli = now_ms - result.seen;
-                    long ageSec = 0;
-                    long ageMin = 0;
-                    long ageHour = 0;
-                    long ageMilli = 0;
-                    long ageDay = 0;
-                    if (now_ms > result.seen && result.seen > 0) {
-                        ageMilli = milli % 1000;
-                        ageSec   = (milli / 1000) % 60;
-                        ageMin   = (milli / (60*1000)) % 60;
-                        ageHour  = (milli / (60*60*1000)) % 24;
-                        ageDay   = (milli / (24*60*60*1000));
-                    }
-                    sbuf.append("{").append(result.BSSID).append(",").append(result.frequency);
-                    sbuf.append(",").append(String.format("%3d", result.level));
-                    if (result.autoJoinStatus > 0) {
-                        sbuf.append(",st=").append(result.autoJoinStatus);
-                    }
-                    if (ageSec > 0 || ageMilli > 0) {
-                        sbuf.append(String.format(",%4d.%02d.%02d.%02d.%03dms", ageDay,
-                                ageHour, ageMin, ageSec, ageMilli));
-                    }
-                    if (result.numIpConfigFailures > 0) {
-                        sbuf.append(",ipfail=");
-                        sbuf.append(result.numIpConfigFailures);
-                    }
-                    sbuf.append("} ");
-                }
-                sbuf.append('\n');
             }
         }
         sbuf.append("triggeredLow: ").append(this.numUserTriggeredWifiDisableLowRSSI);
@@ -1576,11 +1400,6 @@ public class WifiConfiguration implements Parcelable {
             defaultGwMacAddress = source.defaultGwMacAddress;
 
             mIpConfiguration = new IpConfiguration(source.mIpConfiguration);
-
-            if ((source.scanResultCache != null) && (source.scanResultCache.size() > 0)) {
-                scanResultCache = new HashMap<String, ScanResult>();
-                scanResultCache.putAll(source.scanResultCache);
-            }
 
             if ((source.connectChoices != null) && (source.connectChoices.size() > 0)) {
                 connectChoices = new HashMap<String, Integer>();
