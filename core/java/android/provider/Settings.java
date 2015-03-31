@@ -5517,6 +5517,12 @@ public final class Settings {
         public static final String APP_IDLE_DURATION = "app_idle_duration";
 
         /**
+         * Controls whether double tap to wake is enabled.
+         * @hide
+         */
+        public static final String DOUBLE_TAP_TO_WAKE = "double_tap_to_wake";
+
+        /**
          * This are the settings to be backed up.
          *
          * NOTE: Settings are backed up and restored in the order they appear
@@ -5571,7 +5577,8 @@ public final class Settings {
             MOUNT_UMS_PROMPT,
             MOUNT_UMS_NOTIFY_ENABLED,
             UI_NIGHT_MODE,
-            SLEEP_TIMEOUT
+            SLEEP_TIMEOUT,
+            DOUBLE_TAP_TO_WAKE,
         };
 
         /**
