@@ -93,7 +93,8 @@ public abstract class KeyStoreHmacSpi extends MacSpi {
             throw new CryptoOperationException("Keystore returned null operation token");
         }
         mChunkedStreamer = new KeyStoreCryptoOperationChunkedStreamer(
-                new KeyStoreStreamingConsumer(mKeyStore, mOperationToken));
+                new KeyStoreCryptoOperationChunkedStreamer.MainDataStream(
+                        mKeyStore, mOperationToken));
     }
 
     @Override
@@ -145,30 +146,6 @@ public abstract class KeyStoreHmacSpi extends MacSpi {
             }
         } finally {
             super.finalize();
-        }
-    }
-
-    /**
-     * KeyStore-backed consumer of {@code MacSpi}'s chunked stream.
-     */
-    private static class KeyStoreStreamingConsumer
-            implements KeyStoreCryptoOperationChunkedStreamer.KeyStoreOperation {
-        private final KeyStore mKeyStore;
-        private final IBinder mOperationToken;
-
-        private KeyStoreStreamingConsumer(KeyStore keyStore, IBinder operationToken) {
-            mKeyStore = keyStore;
-            mOperationToken = operationToken;
-        }
-
-        @Override
-        public OperationResult update(byte[] input) {
-            return mKeyStore.update(mOperationToken, null, input);
-        }
-
-        @Override
-        public OperationResult finish(byte[] input) {
-            return mKeyStore.finish(mOperationToken, null, input);
         }
     }
 }
