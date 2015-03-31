@@ -170,12 +170,15 @@ adb pull /sdcard/calc.trace /tmp
 
   <h2 id="runningtraceview">Viewing Trace Files in Traceview</h2>
 
-  <p>To run Traceview and view the trace files, enter <code>traceview
-  &lt;trace-base-name&gt;</code>. For example, to run Traceview on the example files copied in the
-  previous section, use:</p>
-  <pre>
-traceview /tmp/calc
-</pre>
+  <p>To run Traceview and view the trace files:</p>
+  <ul>
+    <li>start the
+    <a href="{@docRoot}tools/help/monitor.html">Android Device Monitor</a>. </li>
+    <li>In the Android Device Monitor tool bar, click <strong>DDMS</strong> and select a process. </li>
+    <li>Click the <strong>Start Method Profiling</strong> icon to start method profiling. </li>
+    <li>After the profiling is complete, click the <strong>Stop Method Profiling</strong> icon to
+    display the traceview. </li>
+   </ul> 
 
   <p class="note"><strong>Note:</strong> If you are trying to view the trace logs of an application 
   that is built with ProGuard enabled (release mode build), some method and member names might be obfuscated.

@@ -22,28 +22,23 @@ parent.link=index.html
                 <li><a href="#logcat">Using LogCat</a></li>
                 <li><a href="#ops-location">Emulating phone operations and location</a></li>
             </ol>
-        
+
         </li>
       </ol>
     </div>
   </div>
 
-  <p>Android ships with a debugging tool called the Dalvik Debug Monitor Server (DDMS), which
+  <p>Android Studio includes a debugging tool called the Dalvik Debug Monitor Server (DDMS), which
   provides port-forwarding services, screen capture on the device, thread and heap information on
   the device, logcat, process, and radio state information, incoming call and SMS spoofing,
   location data spoofing, and more. This page provides a modest discussion of DDMS features; it is
   not an exhaustive exploration of all the features and capabilities.</p>
-  
+
   <h2 id="running">Running DDMS</h2>
-  <p>DDMS is integrated into Eclipse and is also shipped in the <code>tools/</code> directory of the
-  SDK. DDMS works with both the emulator and a connected device. If both are connected and running simultaneously, 
-  DDMS defaults to the emulator.</p>
-  
-  <ul>
-    <li>From Eclipse: Click <strong>Window > Open Perspective > Other... > DDMS</strong>.</li>
-    <li>From the command line: Type <code>ddms</code> (or <code>./ddms</code> on Mac/Linux) from the <code>tools/</code>
-    directory. </li>
-  </ul>
+  <p>DDMS is integrated into Android Studio. To use it, launch the
+  <a href="{@docRoot}tools/help/monitor.html">Android Device Monitor</a>, and click the
+  <strong>DDMS</strong> menu button. DDMS works with both the emulator and a
+  connected device. If both are connected and running simultaneously, DDMS defaults to the emulator.</p>
 
 
   <h2 id="how-ddms-works">How DDMS Interacts with a Debugger</h2>
@@ -70,7 +65,7 @@ parent.link=index.html
   all the VMs on a device. The traffic that is forwarded is determined by the currently selected process
   in the DDMS Devices view.</p>
 
-  <p>The following screenshot shows a typical DDMS screen in Eclipse. If you are starting DDMS from
+  <p>The following screenshot shows a typical DDMS screen. If you are starting DDMS from
   the command line, the screen is slightly different, but much of the functionality is identical.
   Notice that the highlighted process, <code>com.android.email</code>, that is running in the emulator
   has the debugging port 8700 assigned to it as well as 8606. This signifies that DDMS is currently
@@ -78,10 +73,10 @@ parent.link=index.html
 
   <img src="{@docRoot}images/debug-ddms.png"
        width="1024" />
-  <p class="img-caption"><strong>Figure 1.</strong> 
-  Screenshot of DDMS</p> 
+  <p class="img-caption"><strong>Figure 1.</strong>
+  Screenshot of DDMS</p>
 
-  <p>If you are not using Eclipse and ADT, read <a href=
+  <p>If you are using the command line, read <a href=
   "{@docRoot}tools/debugging/debugging-projects-cmdline.html#debuggingPort">Configuring
   your IDE to attach to the debugging port</a>, for more information on attaching your
   debugger.</p>
@@ -97,11 +92,11 @@ parent.link=index.html
 
   <h2 id="using-ddms">Using DDMS</h2>
   The following sections describe how to use DDMS and the various tabs and panes that are part of the
-  DDMS GUI. The Eclipse version and the command line version have minor UI differences, but the 
-  same functionality. For information on running DDMS, see the previous section in this document,
+  DDMS GUI. The Android Studio version and the command line version have minor UI differences, but
+  the same functionality. For information on running DDMS, see the previous section in this document,
   <a href="#running">Running DDMS</a>.
-  
-  
+
+
   <h3 id="heap">Viewing heap usage for a process</h3>
 
   <p>DDMS allows you to view how much heap memory a process is using. This information is useful in
@@ -129,7 +124,7 @@ parent.link=index.html
   objects are being allocated when you perform certain actions in your application. This
   information is valuable for assessing memory usage that can affect application performance.
   </p>
-  
+
   <p>To track memory allocation of objects:</p>
   <ol>
     <li>In the Devices tab, select the process that you want to enable allocation tracking
@@ -155,7 +150,7 @@ parent.link=index.html
   <p>DDMS provides a File Explorer tab that allows you to view, copy, and delete files on the
   device. This feature is useful in examining files that are created by your application or if you
   want to transfer files to and from the device.</p>
-  
+
   <p>To work with an emulator or device's file system:</p>
   <ol>
     <li>In the Devices tab, select the emulator that you want to view the file system for.</li>
@@ -166,7 +161,7 @@ parent.link=index.html
     <li>To copy a file to the device, click the <strong>Push file</strong> button on the File
     Explorer tab.</li>
   </ol>
-  
+
   <!-- Need to elaborate more on where things are stored in the file system,
    databases, apks, user info, files that are important to look at -->
 
@@ -189,7 +184,7 @@ parent.link=index.html
   where profiling data is collected, use the {@link android.os.Debug#startMethodTracing()} and 
   {@link android.os.Debug#stopMethodTracing()} methods. For more information about generating trace logs, see 
   <a href="debugging-tracing.html">Profiling and Debugging UIs</a>.</p>
-  
+
   <p>Before you start method profiling in DDMS, be aware of the following restrictions:</p>
     <ul>
       <li>Android 2.1 and earlier devices must
@@ -197,7 +192,7 @@ parent.link=index.html
       <li>Android 2.2 and later devices do not need an SD card. The trace log files are 
       streamed directly to your development machine.</li>
     </ul>
-  
+
   <p>To start method profiling:</p>
   <ol>
     <li>On the Devices tab, select the process that you want to enable method profiling for.</li>
@@ -214,7 +209,7 @@ parent.link=index.html
   </ol>
 
    <h3 id="network">Using the Network Traffic tool</h3>
-   
+
    <p>In Android 4.0, the DDMS (Dalvik Debug Monitor Server) includes a Detailed
 Network Usage tab that makes it possible to track when your application is
 making network requests. Using this tool, you can monitor how and when your app
@@ -273,7 +268,7 @@ to clear the tag.</p>
 
 <p>Socket tagging is supported in Android 4.0, but real-time stats will only be
 displayed on devices running Android 4.0.3 or higher.</p>
-   
+
   <h3 id="logcat">Using LogCat</h3>
 
   <p>LogCat is integrated into DDMS, and outputs the messages that you print out using the {@link android.util.Log}
@@ -295,7 +290,7 @@ displayed on devices running Android 4.0.3 or higher.</p>
 
     <li>Error</li>
   </ul>
-  
+
   <p>You can also setup your own custom filter to specify more details such as filtering messages
   with the log tags or with the process id that generated the log message. The add filter,
   edit filter, and delete filter buttons let you manage your custom filters.</p>
@@ -350,7 +345,7 @@ displayed on devices running Android 4.0.3 or higher.</p>
 
     <li>KML - Keyhole Markup Language file</li>
   </ul>
-  
+
   For more information about providing mock location data, see 
   <a href="{@docRoot}guide/topics/location/strategies.html#MockData">Location Strategies</a>.
   

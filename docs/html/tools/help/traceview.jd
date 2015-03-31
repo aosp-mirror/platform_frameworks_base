@@ -3,14 +3,26 @@ parent.title=Tools
 parent.link=index.html
 @jd:body
 
-<p>Traceview is a graphical viewer for execution logs saved by your application. 
+<p>Traceview is a graphical viewer for execution logs saved by your application.
 Traceview can help you debug your application and profile its performance.</p>
 
-<p>To start Traceview, enter the following command from the SDK <code>tools/</code> directory:</p>
-  <pre>traceview</pre>
-</ol>
+<p>To start the Traceview tool:</p>
 
-<p>For more information on how to use Traceview, see 
-<a href="{@docRoot}tools/debugging/debugging-tracing.html">Profiling with Traceview and dmtracedump</a>
+<ul>
+ <li>Start the <a href="{@docRoot}tools/help/monitor.html">Android Device Monitor</a>. </li>
+ <li>In the Android Device Monitor tool bar, click <strong>DDMS</strong> and select a process. </li>
+ <li>Click the <strong>Start Method Profiling</strong> icon to start method profiling. </li>
+ <li>After the profiling is complete, click the <strong>Stop Method Profiling</strong> icon to
+   display the traceview. </li>
+</ul>
+
+
+<p>For more information on how to use Traceview, see
+<a href="{@docRoot}tools/debugging/debugging-tracing.html">Profiling with Traceview and
+dmtracedump</a>.
 </p>
+
+<p class="note"><strong>Note:</strong> Running <code>traceview</code> from the command line
+has been deprecated. </p>
+
 
