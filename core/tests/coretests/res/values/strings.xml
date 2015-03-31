@@ -135,4 +135,8 @@
     <string name="first">Four score and seven years ago our fathers brought forth on this continent, a new nation, conceived in Liberty, and dedicated to the proposition that all men are created equal.</string>
     <string name="actor">Abe Lincoln</string>
     <string name="caption">Lincoln adressing the crowd at Gettysburgh</string>
+
+    <!-- RestrictionsManagerTest -->
+    <string name="restrictionManager_title">Title</string>
+    <string name="restrictionManager_desc">Description</string>
 </resources>

@@ -113,6 +113,9 @@
     <application android:theme="@style/Theme">
         <uses-library android:name="android.test.runner" />
         <uses-library android:name="org.apache.http.legacy" android:required="false" />
+        <meta-data
+            android:name="android.content.APP_RESTRICTIONS"
+            android:resource="@xml/app_restrictions" />
         <activity android:name="android.view.ViewAttachTestActivity" android:label="View Attach Test">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
