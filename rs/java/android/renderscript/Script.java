@@ -473,7 +473,23 @@ public class Script extends BaseObj {
 
 
     /**
-     * Class used to specify clipping for a kernel launch.
+     * Class for specifying the specifics about how a kernel will be
+     * launched
+     *
+     * This class can specify a potential range of cells on which to
+     * run a kernel.  If no set is called for a dimension then this
+     * class will have no impact on that dimension when the kernel
+     * is executed.
+     *
+     * The forEach launch will operate over the intersection of the
+     * dimensions.
+     *
+     * Example:
+     * LaunchOptions with setX(5, 15)
+     * Allocation with dimension X=10, Y=10
+     * The resulting forEach run would execute over x = 5 to 10 and
+     * y = 0 to 10.
+     *
      *
      */
     public static final class LaunchOptions {
