@@ -40,6 +40,7 @@ import android.telephony.SubscriptionManager;
 import android.util.ArrayMap;
 import android.util.Log;
 
+import com.android.internal.net.VpnConfig;
 import com.android.internal.telephony.ITelephony;
 import com.android.internal.telephony.PhoneConstants;
 import com.android.internal.util.Protocol;
@@ -2444,6 +2445,38 @@ public class ConnectivityManager {
         try {
             mService.releaseNetworkRequest(networkCallback.networkRequest);
         } catch (RemoteException e) {}
+    }
+
+    /**
+     * Resets all connectivity manager settings back to factory defaults.
+     * @hide
+     */
+    public void factoryReset() {
+        // Turn airplane mode off
+        setAirplaneMode(false);
+
+        // Untether
+        for (String tether : getTetheredIfaces()) {
+            untether(tether);
+        }
+
+        // Turn VPN off
+        try {
+            VpnConfig vpnConfig = mService.getVpnConfig();
+            if (vpnConfig != null) {
+                if (vpnConfig.legacy) {
+                    mService.prepareVpn(VpnConfig.LEGACY_VPN, VpnConfig.LEGACY_VPN);
+                } else {
+                    // Prevent this app from initiating VPN connections in the future without
+                    // user intervention.
+                    mService.setVpnPackageAuthorization(false);
+
+                    mService.prepareVpn(vpnConfig.user, VpnConfig.LEGACY_VPN);
+                }
+            }
+        } catch (RemoteException e) {
+            // Well, we tried
+        }
     }
 
     /**

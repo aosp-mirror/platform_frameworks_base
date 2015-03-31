@@ -3316,17 +3316,38 @@ public class TelephonyManager {
      * @return the preferred network type, defined in RILConstants.java.
      * @hide
      */
-    public int getPreferredNetworkType() {
+    public int getPreferredNetworkType(int subId) {
         try {
             ITelephony telephony = getITelephony();
             if (telephony != null)
-                return telephony.getPreferredNetworkType();
+                return telephony.getPreferredNetworkType(subId);
         } catch (RemoteException ex) {
             Rlog.e(TAG, "getPreferredNetworkType RemoteException", ex);
         } catch (NullPointerException ex) {
             Rlog.e(TAG, "getPreferredNetworkType NPE", ex);
         }
         return -1;
+    }
+
+    /**
+     * Sets the network selection mode to automatic.
+     * <p>
+     * Requires Permission:
+     *   {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE}
+     * Or the calling app has carrier privileges. @see #hasCarrierPrivileges
+     *
+     * @hide
+     */
+    public void setNetworkSelectionModeAutomatic(int subId) {
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony != null)
+                telephony.setNetworkSelectionModeAutomatic(subId);
+        } catch (RemoteException ex) {
+            Rlog.e(TAG, "setNetworkSelectionModeAutomatic RemoteException", ex);
+        } catch (NullPointerException ex) {
+            Rlog.e(TAG, "setNetworkSelectionModeAutomatic NPE", ex);
+        }
     }
 
     /**
@@ -3337,15 +3358,16 @@ public class TelephonyManager {
      *   {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE}
      * Or the calling app has carrier privileges. @see #hasCarrierPrivileges
      *
+     * @param subId the id of the subscription to set the preferred network type for.
      * @param networkType the preferred network type, defined in RILConstants.java.
      * @return true on success; false on any failure.
      * @hide
      */
-    public boolean setPreferredNetworkType(int networkType) {
+    public boolean setPreferredNetworkType(int subId, int networkType) {
         try {
             ITelephony telephony = getITelephony();
             if (telephony != null)
-                return telephony.setPreferredNetworkType(networkType);
+                return telephony.setPreferredNetworkType(subId, networkType);
         } catch (RemoteException ex) {
             Rlog.e(TAG, "setPreferredNetworkType RemoteException", ex);
         } catch (NullPointerException ex) {
@@ -3364,7 +3386,8 @@ public class TelephonyManager {
      * @return true on success; false on any failure.
      */
     public boolean setPreferredNetworkTypeToGlobal() {
-        return setPreferredNetworkType(RILConstants.NETWORK_MODE_LTE_CDMA_EVDO_GSM_WCDMA);
+        return setPreferredNetworkType(getDefaultSubscription(),
+                RILConstants.NETWORK_MODE_LTE_CDMA_EVDO_GSM_WCDMA);
     }
 
     /**
@@ -4447,5 +4470,23 @@ public class TelephonyManager {
         }
 
         return retval;
+    }
+
+    /**
+     * Resets telephony manager settings back to factory defaults.
+     *
+     * @hide
+     */
+    public void factoryReset(int subId) {
+        if (SubscriptionManager.isUsableSubIdValue(subId)) {
+            // Enable data
+            setDataEnabled(subId, true);
+            // Set network selection mode to automatic
+            setNetworkSelectionModeAutomatic(subId);
+            // Set preferred mobile network type to the best available
+            setPreferredNetworkType(subId, RILConstants.PREFERRED_NETWORK_MODE);
+            // Turn off roaming
+            SubscriptionManager.from(mContext).setDataRoaming(0, subId);
+        }
     }
 }
