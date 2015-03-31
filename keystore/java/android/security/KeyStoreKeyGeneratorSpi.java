@@ -35,7 +35,7 @@ public abstract class KeyStoreKeyGeneratorSpi extends KeyGeneratorSpi {
 
     private final KeyStore mKeyStore = KeyStore.getInstance();
     private final @KeyStoreKeyConstraints.AlgorithmEnum int mAlgorithm;
-    private final @KeyStoreKeyConstraints.AlgorithmEnum Integer mDigest;
+    private final @KeyStoreKeyConstraints.DigestEnum Integer mDigest;
     private final int mDefaultKeySizeBits;
 
     private KeyGeneratorSpec mSpec;
@@ -76,18 +76,18 @@ public abstract class KeyStoreKeyGeneratorSpi extends KeyGeneratorSpi {
         if (mDigest != null) {
             args.addInt(KeymasterDefs.KM_TAG_DIGEST,
                     KeyStoreKeyConstraints.Digest.toKeymaster(mDigest));
-        }
-        if (mAlgorithm == KeyStoreKeyConstraints.Algorithm.HMAC) {
-            if (mDigest == null) {
-                throw new IllegalStateException("Digest algorithm must be specified for key"
-                        + " algorithm " + KeyStoreKeyConstraints.Algorithm.toString(mAlgorithm));
-            }
             Integer digestOutputSizeBytes =
                     KeyStoreKeyConstraints.Digest.getOutputSizeBytes(mDigest);
             if (digestOutputSizeBytes != null) {
                 // TODO: Remove MAC length constraint once Keymaster API no longer requires it.
                 // TODO: Switch to bits instead of bytes, once this is fixed in Keymaster
                 args.addInt(KeymasterDefs.KM_TAG_MAC_LENGTH, digestOutputSizeBytes);
+            }
+        }
+        if (mAlgorithm == KeyStoreKeyConstraints.Algorithm.HMAC) {
+            if (mDigest == null) {
+                throw new IllegalStateException("Digest algorithm must be specified for key"
+                        + " algorithm " + KeyStoreKeyConstraints.Algorithm.toString(mAlgorithm));
             }
         }
         int keySizeBits = (spec.getKeySize() != null) ? spec.getKeySize() : mDefaultKeySizeBits;
