@@ -138,7 +138,7 @@ void JankTracker::switchStorageToAshmem(int ashmemfd) {
     int regionSize = ashmem_get_size_region(ashmemfd);
     if (regionSize < static_cast<int>(sizeof(ProfileData))) {
         ALOGW("Ashmem region is too small! Received %d, required %u",
-                regionSize, sizeof(ProfileData));
+                regionSize, static_cast<unsigned int>(sizeof(ProfileData)));
         return;
     }
     ProfileData* newData = reinterpret_cast<ProfileData*>(
