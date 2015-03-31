@@ -222,16 +222,6 @@ public abstract class KeyStoreKeyConstraints {
                     throw new IllegalArgumentException("Unsupported key algorithm: " + algorithm);
             }
         }
-
-        /**
-         * @hide
-         */
-        public static String toJCAKeyPairAlgorithm(@AlgorithmEnum int algorithm) {
-            switch (algorithm) {
-                default:
-                    throw new IllegalArgumentException("Unsupported key alorithm: " + algorithm);
-            }
-        }
     }
 
     @Retention(RetentionPolicy.SOURCE)
@@ -304,6 +294,20 @@ public abstract class KeyStoreKeyConstraints {
                     return "PKCS#7";
                 default:
                     throw new IllegalArgumentException("Unknown padding: " + padding);
+            }
+        }
+
+        /**
+         * @hide
+         */
+        public static @PaddingEnum int fromJCAPadding(String padding) {
+            String paddingLower = padding.toLowerCase(Locale.US);
+            if ("nopadding".equals(paddingLower)) {
+                return NONE;
+            } else if ("pkcs7padding".equals(paddingLower)) {
+                return PKCS7;
+            } else {
+                throw new IllegalArgumentException("Unknown padding: " + padding);
             }
         }
     }
@@ -418,7 +422,7 @@ public abstract class KeyStoreKeyConstraints {
     }
 
     @Retention(RetentionPolicy.SOURCE)
-    @IntDef({BlockMode.ECB})
+    @IntDef({BlockMode.ECB, BlockMode.CBC, BlockMode.CTR})
     public @interface BlockModeEnum {}
 
     /**
@@ -427,10 +431,14 @@ public abstract class KeyStoreKeyConstraints {
     public static abstract class BlockMode {
         private BlockMode() {}
 
-        /**
-         * Electronic Codebook (ECB) block mode.
-         */
+        /** Electronic Codebook (ECB) block mode. */
         public static final int ECB = 0;
+
+        /** Cipher Block Chaining (CBC) block mode. */
+        public static final int CBC = 1;
+
+        /** Counter (CTR) block mode. */
+        public static final int CTR = 2;
 
         /**
          * @hide
@@ -439,6 +447,10 @@ public abstract class KeyStoreKeyConstraints {
             switch (mode) {
                 case ECB:
                     return KeymasterDefs.KM_MODE_ECB;
+                case CBC:
+                    return KeymasterDefs.KM_MODE_CBC;
+                case CTR:
+                    return KeymasterDefs.KM_MODE_CTR;
                 default:
                     throw new IllegalArgumentException("Unknown block mode: " + mode);
             }
@@ -451,6 +463,10 @@ public abstract class KeyStoreKeyConstraints {
             switch (mode) {
                 case KeymasterDefs.KM_MODE_ECB:
                     return ECB;
+                case KeymasterDefs.KM_MODE_CBC:
+                    return CBC;
+                case KeymasterDefs.KM_MODE_CTR:
+                    return CTR;
                 default:
                     throw new IllegalArgumentException("Unknown block mode: " + mode);
             }
@@ -463,8 +479,28 @@ public abstract class KeyStoreKeyConstraints {
             switch (mode) {
                 case ECB:
                     return "ECB";
+                case CBC:
+                    return "CBC";
+                case CTR:
+                    return "CTR";
                 default:
                     throw new IllegalArgumentException("Unknown block mode: " + mode);
+            }
+        }
+
+        /**
+         * @hide
+         */
+        public static @BlockModeEnum int fromJCAMode(String mode) {
+            String modeLower = mode.toLowerCase(Locale.US);
+            if ("ecb".equals(modeLower)) {
+                return ECB;
+            } else if ("cbc".equals(modeLower)) {
+                return CBC;
+            } else if ("ctr".equals(modeLower)) {
+                return CTR;
+            } else {
+                throw new IllegalArgumentException("Unknown block mode: " + mode);
             }
         }
     }

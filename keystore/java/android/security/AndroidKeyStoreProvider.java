@@ -41,7 +41,30 @@ public class AndroidKeyStoreProvider extends Provider {
         put("KeyGenerator.HmacSHA256", KeyStoreKeyGeneratorSpi.HmacSHA256.class.getName());
 
         // javax.crypto.Mac
-        put("Mac.HmacSHA256", KeyStoreHmacSpi.HmacSHA256.class.getName());
-        put("Mac.HmacSHA256 SupportedKeyClasses", KeyStoreSecretKey.class.getName());
+        putMacImpl("HmacSHA256", KeyStoreHmacSpi.HmacSHA256.class.getName());
+
+        // javax.crypto.Cipher
+        putSymmetricCipherImpl("AES/ECB/NoPadding",
+                KeyStoreCipherSpi.AES.ECB.NoPadding.class.getName());
+        putSymmetricCipherImpl("AES/ECB/PKCS7Padding",
+                KeyStoreCipherSpi.AES.ECB.PKCS7Padding.class.getName());
+
+        putSymmetricCipherImpl("AES/CBC/NoPadding",
+                KeyStoreCipherSpi.AES.CBC.NoPadding.class.getName());
+        putSymmetricCipherImpl("AES/CBC/PKCS7Padding",
+                KeyStoreCipherSpi.AES.CBC.PKCS7Padding.class.getName());
+
+        putSymmetricCipherImpl("AES/CTR/NoPadding",
+                KeyStoreCipherSpi.AES.CTR.NoPadding.class.getName());
+    }
+
+    private void putMacImpl(String algorithm, String implClass) {
+        put("Mac." + algorithm, implClass);
+        put("Mac." + algorithm + " SupportedKeyClasses", KeyStoreSecretKey.class.getName());
+    }
+
+    private void putSymmetricCipherImpl(String transformation, String implClass) {
+        put("Cipher." + transformation, implClass);
+        put("Cipher." + transformation + " SupportedKeyClasses", KeyStoreSecretKey.class.getName());
     }
 }
