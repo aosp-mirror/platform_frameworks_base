@@ -29,6 +29,9 @@ import android.system.OsConstants;
 import android.system.StructPollfd;
 import android.util.Log;
 
+import com.android.internal.midi.MidiEventScheduler;
+import com.android.internal.midi.MidiEventScheduler.MidiEvent;
+
 import libcore.io.IoUtils;
 
 import java.io.Closeable;
@@ -42,7 +45,7 @@ public final class UsbMidiDevice implements Closeable {
 
     private MidiDeviceServer mServer;
 
-    private final MidiReceiver[] mInputPortReceivers;
+    private final MidiEventScheduler mEventScheduler;
 
     private static final int BUFFER_SIZE = 512;
 
@@ -99,19 +102,7 @@ public final class UsbMidiDevice implements Closeable {
         for (int i = 0; i < outputCount; i++) {
             mOutputStreams[i] = new FileOutputStream(fileDescriptors[i]);
         }
-
-        mInputPortReceivers = new MidiReceiver[inputCount];
-        for (int port = 0; port < inputCount; port++) {
-            final int portF = port;
-            mInputPortReceivers[port] = new MidiReceiver() {
-                @Override
-                public void onReceive(byte[] data, int offset, int count, long timestamp)
-                        throws IOException {
-                    // FIXME - timestamps are ignored, future posting not supported yet.
-                    mOutputStreams[portF].write(data, offset, count);
-                }
-            };
-        }
+        mEventScheduler = new MidiEventScheduler(inputCount);
     }
 
     private boolean register(Context context, Bundle properties) {
@@ -121,16 +112,22 @@ public final class UsbMidiDevice implements Closeable {
             return false;
         }
 
+        int inputCount = mInputStreams.length;
         int outputCount = mOutputStreams.length;
-        mServer = midiManager.createDeviceServer(mInputPortReceivers, outputCount,
+        MidiReceiver[] inputPortReceivers = new MidiReceiver[inputCount];
+        for (int port = 0; port < inputCount; port++) {
+            inputPortReceivers[port] = mEventScheduler.getReceiver(port);
+        }
+
+        mServer = midiManager.createDeviceServer(inputPortReceivers, outputCount,
                 null, null, properties, MidiDeviceInfo.TYPE_USB, null);
         if (mServer == null) {
             return false;
         }
         final MidiReceiver[] outputReceivers = mServer.getOutputPortReceivers();
 
-        // FIXME can we only run this when we have a dispatcher that has listeners?
-        new Thread() {
+        // Create input thread
+        new Thread("UsbMidiDevice input thread") {
             @Override
             public void run() {
                 byte[] buffer = new byte[BUFFER_SIZE];
@@ -160,6 +157,33 @@ public final class UsbMidiDevice implements Closeable {
                 } catch (ErrnoException e) {
                     Log.d(TAG, "reader thread exiting");
                 }
+                Log.d(TAG, "input thread exit");
+            }
+        }.start();
+
+        // Create output thread
+        new Thread("UsbMidiDevice output thread") {
+            @Override
+            public void run() {
+                while (true) {
+                    MidiEvent event;
+                    try {
+                        event = (MidiEvent)mEventScheduler.waitNextEvent();
+                    } catch (InterruptedException e) {
+                        // try again
+                        continue;
+                    }
+                    if (event == null) {
+                        break;
+                    }
+                    try {
+                        mOutputStreams[event.portNumber].write(event.data, 0, event.count);
+                    } catch (IOException e) {
+                        Log.e(TAG, "write failed for port " + event.portNumber);
+                    }
+                    mEventScheduler.addEventToPool(event);
+                }
+                Log.d(TAG, "output thread exit");
             }
         }.start();
 
@@ -168,6 +192,8 @@ public final class UsbMidiDevice implements Closeable {
 
     @Override
     public void close() throws IOException {
+        mEventScheduler.close();
+
         if (mServer != null) {
             mServer.close();
         }
