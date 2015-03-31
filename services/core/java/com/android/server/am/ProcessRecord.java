@@ -16,6 +16,8 @@
 
 package com.android.server.am;
 
+import static android.app.ActivityManager.PROCESS_STATE_NONEXISTENT;
+
 import android.util.ArraySet;
 import android.util.EventLog;
 import android.util.Slog;
@@ -83,10 +85,10 @@ final class ProcessRecord {
     int curSchedGroup;          // Currently desired scheduling class
     int setSchedGroup;          // Last set to background scheduling class
     int trimMemoryLevel;        // Last selected memory trimming level
-    int curProcState = -1;      // Currently computed process state: ActivityManager.PROCESS_STATE_*
-    int repProcState = -1;      // Last reported process state
-    int setProcState = -1;      // Last set process state in process tracker
-    int pssProcState = -1;      // The proc state we are currently requesting pss for
+    int curProcState = PROCESS_STATE_NONEXISTENT; // Currently computed process state
+    int repProcState = PROCESS_STATE_NONEXISTENT; // Last reported process state
+    int setProcState = PROCESS_STATE_NONEXISTENT; // Last set process state in process tracker
+    int pssProcState = PROCESS_STATE_NONEXISTENT; // Currently requesting pss for
     boolean serviceb;           // Process currently is on the service B list
     boolean serviceHighRam;     // We are forcing to service B list due to its RAM use
     boolean setIsForeground;    // Running foreground UI when last set?
