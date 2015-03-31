@@ -49,9 +49,10 @@ import javax.xml.xpath.XPathFactory;
  */
 public class LayoutFileParser {
     private static final String XPATH_VARIABLE_DEFINITIONS = "//variable";
-    private static final String XPATH_BINDING_2_EXPR = "//@*[starts-with(., '@{') and substring(., string-length(.)) = '}']";
-    private static final String XPATH_BINDING_ELEMENTS = XPATH_BINDING_2_EXPR + "/..";
+    private static final String XPATH_BINDING_ELEMENTS = "//*[@*[starts-with(., '@{') and substring(., string-length(.)) = '}']]";
+    private static final String XPATH_ID_ELEMENTS = "//*[@*[local-name()='id']]";
     private static final String XPATH_IMPORT_DEFINITIONS = "//import";
+    private static final String XPATH_MERGE_TAG = "/merge";
     final String LAYOUT_PREFIX = "@layout/";
 
     public ResourceBundle.LayoutFileBundle parseXml(File xml, String pkg, int layoutId)
@@ -130,7 +131,7 @@ public class LayoutFileParser {
                         ParserHelper.INSTANCE$.toClassName(layoutName) + "Binding";
                 includedLayoutName = layoutName;
             } else {
-                className = getFullViewClassName(nodeName);
+                className = getFullViewClassName(parent);
             }
             final Node originalTag = attributes.getNamedItem("android:tag");
             final String tag;
@@ -156,7 +157,26 @@ public class LayoutFileParser {
             }
         }
 
+        if (!bindingNodes.isEmpty() || !imports.isEmpty() || !variableNodes.isEmpty()) {
+            if (isMergeLayout(doc, xPath)) {
+                L.e("<merge> is not allowed with data binding.");
+                throw new RuntimeException("<merge> is not allowed with data binding.");
+            }
+            final List<Node> idNodes = getNakedIds(doc, xPath);
+            for (Node node : idNodes) {
+                if (!bindingNodes.contains(node) && !"include".equals(node.getNodeName())) {
+                    final Node id = node.getAttributes().getNamedItem("android:id");
+                    final String className = getFullViewClassName(node);
+                    bundle.createBindingTarget(id.getNodeValue(), className, true, null, null);
+                }
+            }
+        }
+
         return bundle;
+    }
+
+    private boolean isMergeLayout(Document doc, XPath xPath) throws XPathExpressionException {
+        return !get(doc, xPath, XPATH_MERGE_TAG).isEmpty();
     }
 
     private List<Node> getBindingNodes(Document doc, XPath xPath) throws XPathExpressionException {
@@ -169,6 +189,10 @@ public class LayoutFileParser {
 
     private List<Node> getImportNodes(Document doc, XPath xPath) throws XPathExpressionException {
         return get(doc, xPath, XPATH_IMPORT_DEFINITIONS);
+    }
+
+    private List<Node> getNakedIds(Document doc, XPath xPath) throws XPathExpressionException {
+        return get(doc, xPath, XPATH_ID_ELEMENTS);
     }
 
     private List<Node> get(Document doc, XPath xPath, String pattern)
@@ -185,7 +209,16 @@ public class LayoutFileParser {
         return result;
     }
 
-    private String getFullViewClassName(String viewName) {
+    private String getFullViewClassName(Node viewNode) {
+        String viewName = viewNode.getNodeName();
+        if ("view".equals(viewName)) {
+            Node classNode = viewNode.getAttributes().getNamedItem("class");
+            if (classNode == null) {
+                L.e("No class attribute for 'view' node");
+            } else {
+                viewName = classNode.getNodeValue();
+            }
+        }
         if (viewName.indexOf('.') == -1) {
             if (ObjectUtils.equals(viewName, "View") || ObjectUtils.equals(viewName, "ViewGroup") ||
                     ObjectUtils.equals(viewName, "ViewStub")) {

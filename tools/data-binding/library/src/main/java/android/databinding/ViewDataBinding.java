@@ -19,7 +19,6 @@ package android.databinding;
 import android.annotation.TargetApi;
 import android.os.Build.VERSION;
 import android.os.Build.VERSION_CODES;
-import android.util.Log;
 import android.util.SparseIntArray;
 import android.view.View;
 import android.view.View.OnAttachStateChangeListener;
@@ -296,18 +295,11 @@ public abstract class ViewDataBinding {
             SparseIntArray viewsWithIds) {
         boolean visitChildren = true;
         String tag = (String) view.getTag();
-        int id;
         if (tag != null && tag.startsWith(BINDING_TAG_PREFIX)) {
             int tagIndex = parseTagInt(tag);
             views[tagIndex] = view;
-        } else if ((id = view.getId()) > 0) {
-            int index;
-            if (viewsWithIds != null && (index = viewsWithIds.get(id, -1)) >= 0) {
-                views[index] = view;
-            } else if (includes != null && (index = includes.get(id, -1)) >= 0) {
-                views[index] = view;
-                visitChildren = false;
-            }
+        } else {
+            visitChildren = addViewWithId(view, views, includes, viewsWithIds);
         }
         if (visitChildren) {
             mapTaggedChildViews(view, views, includes, viewsWithIds);
@@ -330,8 +322,27 @@ public abstract class ViewDataBinding {
     protected static View[] mapChildViews(View root, int numViews, SparseIntArray includes,
             SparseIntArray viewsWithIds) {
         View[] views = new View[numViews];
-        mapTaggedChildViews(root, views, includes, viewsWithIds);
+        boolean visitChildren = addViewWithId(root, views, includes, viewsWithIds);
+        if (visitChildren) {
+            mapTaggedChildViews(root, views, includes, viewsWithIds);
+        }
         return views;
+    }
+
+    private static boolean addViewWithId(View view, View[] views, SparseIntArray includes,
+            SparseIntArray viewsWithIds) {
+        final int id = view.getId();
+        boolean visitChildren = true;
+        if (id > 0) {
+            int index;
+            if (viewsWithIds != null && (index = viewsWithIds.get(id, -1)) >= 0) {
+                views[index] = view;
+            } else if (includes != null && (index = includes.get(id, -1)) >= 0) {
+                views[index] = view;
+                visitChildren = false;
+            }
+        }
+        return visitChildren;
     }
 
     /**

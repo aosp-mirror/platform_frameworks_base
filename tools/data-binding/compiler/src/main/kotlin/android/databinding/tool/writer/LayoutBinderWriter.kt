@@ -395,11 +395,11 @@ class LayoutBinderWriter(val layoutBinder : LayoutBinder) {
     }
     fun calculateIndices() : Unit {
         val numTaggedViews = layoutBinder.getBindingTargets().
-                filter{it.isUsed() && !it.isBinder()}.count()
+                filter{it.isUsed() && it.getTag() != null}.count()
         layoutBinder.getBindingTargets().filter{ it.isUsed() && it.getTag() != null }.forEach {
             indices.put(it, Integer.parseInt(it.getTag()));
         }
-        layoutBinder.getBindingTargets().filter{ it.isUsed() && it.isBinder()}.withIndex().forEach {
+        layoutBinder.getBindingTargets().filter{ it.isUsed() && it.getTag() == null && it.getId() != null }.withIndex().forEach {
             indices.put(it.value, it.index + numTaggedViews);
         }
     }
@@ -416,13 +416,16 @@ class LayoutBinderWriter(val layoutBinder : LayoutBinder) {
                     tab("sIncludes.put(${it.androidId}, ${indices.get(it)});")
                 }
             }
-            val hasViewsWithIds = layoutBinder.getBindingTargets().firstOrNull{ it.isUsed() && !it.supportsTag()} != null
+            val hasViewsWithIds = layoutBinder.getBindingTargets().firstOrNull{
+                it.isUsed() && (!it.supportsTag() || (it.getId() != null && it.getTag() == null))
+            } != null
             if (!hasViewsWithIds) {
                 tab("sViewsWithIds = null;")
             } else {
                 tab("sViewsWithIds = new android.util.SparseIntArray();")
-                layoutBinder.getBindingTargets().filter{ it.isUsed() && !it.supportsTag() }.
-                        forEach {
+                layoutBinder.getBindingTargets().filter{
+                    it.isUsed() && (!it.supportsTag() || (it.getId() != null && it.getTag() == null))
+                }.forEach {
                     tab("sViewsWithIds.put(${it.androidId}, ${indices.get(it)});")
                 }
             }

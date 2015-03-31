@@ -83,4 +83,9 @@ public class NoIdTest extends BaseDataBinderTest<NoIdTestBinding> {
         String expectedValue = view.getResources().getString(android.R.string.ok);
         assertEquals(expectedValue, view.getTag());
     }
+
+    @UiThreadTest
+    public void testIdOnly() {
+        assertEquals("hello", mBinder.textView.getText().toString());
+    }
 }

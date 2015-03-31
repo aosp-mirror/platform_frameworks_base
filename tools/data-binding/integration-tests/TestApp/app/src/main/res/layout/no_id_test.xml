@@ -14,4 +14,8 @@
               android:text="@{name}" android:tag="@string/app_name"/>
     <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
               android:text="@{name}" android:tag="@android:string/ok"/>
+    <TextView android:id="@+id/textView"
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:text="hello"/>
 </LinearLayout>
