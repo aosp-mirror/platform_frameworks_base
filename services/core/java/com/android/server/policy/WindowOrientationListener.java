@@ -136,7 +136,9 @@ public abstract class WindowOrientationListener {
 
     public void onTouchStart() {
         synchronized (mLock) {
-            mSensorEventListener.onTouchStartLocked();
+            if (mSensorEventListener != null) {
+                mSensorEventListener.onTouchStartLocked();
+            }
         }
     }
 
@@ -144,7 +146,9 @@ public abstract class WindowOrientationListener {
         long whenElapsedNanos = SystemClock.elapsedRealtimeNanos();
 
         synchronized (mLock) {
-            mSensorEventListener.onTouchEndLocked(whenElapsedNanos);
+            if (mSensorEventListener != null) {
+                mSensorEventListener.onTouchEndLocked(whenElapsedNanos);
+            }
         }
     }
 
