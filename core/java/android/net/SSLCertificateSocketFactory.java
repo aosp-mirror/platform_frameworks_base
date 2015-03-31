@@ -208,7 +208,7 @@ public class SSLCertificateSocketFactory extends SSLSocketFactory {
     private SSLSocketFactory makeSocketFactory(
             KeyManager[] keyManagers, TrustManager[] trustManagers) {
         try {
-            OpenSSLContextImpl sslContext = OpenSSLContextImpl.getPreferred();
+            OpenSSLContextImpl sslContext = new OpenSSLContextImpl();
             sslContext.engineInit(keyManagers, trustManagers, null);
             sslContext.engineGetClientSessionContext().setPersistentCache(mSessionCache);
             return sslContext.engineGetSocketFactory();
