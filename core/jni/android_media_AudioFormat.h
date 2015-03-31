@@ -25,6 +25,8 @@
 #define ENCODING_PCM_FLOAT  4
 #define ENCODING_AC3        5
 #define ENCODING_E_AC3      6
+#define ENCODING_DTS        7
+#define ENCODING_DTS_HD     8
 #define ENCODING_INVALID    0
 #define ENCODING_DEFAULT    1
 
@@ -46,6 +48,10 @@ static inline audio_format_t audioFormatToNative(int audioFormat)
         return AUDIO_FORMAT_AC3;
     case ENCODING_E_AC3:
         return AUDIO_FORMAT_E_AC3;
+    case ENCODING_DTS:
+        return AUDIO_FORMAT_DTS;
+    case ENCODING_DTS_HD:
+        return AUDIO_FORMAT_DTS_HD;
     case ENCODING_DEFAULT:
         return AUDIO_FORMAT_DEFAULT;
     default:
@@ -66,6 +72,10 @@ static inline int audioFormatFromNative(audio_format_t nativeFormat)
         return ENCODING_AC3;
     case AUDIO_FORMAT_E_AC3:
         return ENCODING_E_AC3;
+    case AUDIO_FORMAT_DTS:
+        return ENCODING_DTS;
+    case AUDIO_FORMAT_DTS_HD:
+        return ENCODING_DTS_HD;
     case AUDIO_FORMAT_DEFAULT:
         return ENCODING_DEFAULT;
     default:

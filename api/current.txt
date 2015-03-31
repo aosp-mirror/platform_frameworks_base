@@ -14420,6 +14420,8 @@ package android.media {
     field public static final int CHANNEL_OUT_SURROUND = 1052; // 0x41c
     field public static final int ENCODING_AC3 = 5; // 0x5
     field public static final int ENCODING_DEFAULT = 1; // 0x1
+    field public static final int ENCODING_DTS = 7; // 0x7
+    field public static final int ENCODING_DTS_HD = 8; // 0x8
     field public static final int ENCODING_E_AC3 = 6; // 0x6
     field public static final int ENCODING_INVALID = 0; // 0x0
     field public static final int ENCODING_PCM_16BIT = 2; // 0x2
