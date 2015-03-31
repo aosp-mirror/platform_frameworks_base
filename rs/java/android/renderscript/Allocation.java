@@ -273,8 +273,8 @@ public class Allocation extends BaseObj {
     }
 
     /**
-     * @hide
      * Enable/Disable AutoPadding for Vec3 elements.
+     * By default: Diabled.
      *
      * @param useAutoPadding True: enable AutoPadding; flase: disable AutoPadding
      *

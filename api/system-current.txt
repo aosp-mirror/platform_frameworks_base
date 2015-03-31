@@ -28832,6 +28832,7 @@ package android.renderscript {
     method public void ioReceive();
     method public void ioSend();
     method public deprecated synchronized void resize(int);
+    method public void setAutoPadding(boolean);
     method public void setFromFieldPacker(int, android.renderscript.FieldPacker);
     method public void setFromFieldPacker(int, int, android.renderscript.FieldPacker);
     method public void setFromFieldPacker(int, int, int, int, android.renderscript.FieldPacker);
