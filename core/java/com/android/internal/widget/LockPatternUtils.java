@@ -425,8 +425,8 @@ public class LockPatternUtils {
         setLong(PASSWORD_TYPE_KEY, DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED, userHandle);
 
         try {
-            getLockSettings().setLockPassword(null, userHandle);
-            getLockSettings().setLockPattern(null, userHandle);
+            getLockSettings().setLockPassword(null, null, userHandle);
+            getLockSettings().setLockPattern(null, null, userHandle);
         } catch (RemoteException e) {
             // well, we tried...
         }
@@ -477,24 +477,30 @@ public class LockPatternUtils {
     /**
      * Save a lock pattern.
      * @param pattern The new pattern to save.
+     * @param savedPattern The previously saved pattern, or null if none
      */
-    public void saveLockPattern(List<LockPatternView.Cell> pattern) {
-        this.saveLockPattern(pattern, getCurrentOrCallingUserId());
+    public void saveLockPattern(List<LockPatternView.Cell> pattern,
+            String savedPattern) {
+        this.saveLockPattern(pattern, savedPattern, getCurrentOrCallingUserId());
     }
 
+    public void saveLockPattern(List<LockPatternView.Cell> pattern, int userId) {
+        this.saveLockPattern(pattern, null, userId);
+    }
     /**
      * Save a lock pattern.
      * @param pattern The new pattern to save.
+     * @param savedPattern The previously saved pattern, converted to String format
      * @param userId the user whose pattern is to be saved.
      */
-    public void saveLockPattern(List<LockPatternView.Cell> pattern, int userId) {
+    public void saveLockPattern(List<LockPatternView.Cell> pattern, String savedPattern, int userId) {
         try {
             if (pattern == null || pattern.size() < MIN_LOCK_PATTERN_SIZE) {
                 throw new IllegalArgumentException("pattern must not be null and at least "
                         + MIN_LOCK_PATTERN_SIZE + " dots long.");
             }
 
-            getLockSettings().setLockPattern(patternToString(pattern), userId);
+            getLockSettings().setLockPattern(patternToString(pattern), savedPattern, userId);
             DevicePolicyManager dpm = getDevicePolicyManager();
 
             // Update the device encryption password.
@@ -685,10 +691,11 @@ public class LockPatternUtils {
      * as the requested mode, but will adjust the mode to be as good as the
      * pattern.
      * @param password The password to save
+     * @param savedPassword The previously saved lock password, or null if none
      * @param quality {@see DevicePolicyManager#getPasswordQuality(android.content.ComponentName)}
      */
-    public void saveLockPassword(String password, int quality) {
-        saveLockPassword(password, quality, getCurrentOrCallingUserId());
+    public void saveLockPassword(String password, String savedPassword, int quality) {
+        saveLockPassword(password, savedPassword, quality, getCurrentOrCallingUserId());
     }
 
     /**
@@ -699,7 +706,8 @@ public class LockPatternUtils {
      * @param quality {@see DevicePolicyManager#getPasswordQuality(android.content.ComponentName)}
      * @param userHandle The userId of the user to change the password for
      */
-    public void saveLockPassword(String password, int quality, int userHandle) {
+    public void saveLockPassword(String password, String savedPassword, int quality,
+            int userHandle) {
         try {
             DevicePolicyManager dpm = getDevicePolicyManager();
             if (password == null || password.length() < MIN_LOCK_PASSWORD_SIZE) {
@@ -707,7 +715,7 @@ public class LockPatternUtils {
                         + "of length " + MIN_LOCK_PASSWORD_SIZE);
             }
 
-            getLockSettings().setLockPassword(password, userHandle);
+            getLockSettings().setLockPassword(password, savedPassword, userHandle);
             int computedQuality = computePasswordQuality(password);
 
             // Update the device encryption password.

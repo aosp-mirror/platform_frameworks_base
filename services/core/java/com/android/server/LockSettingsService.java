@@ -44,12 +44,14 @@ import android.provider.Settings;
 import android.provider.Settings.Secure;
 import android.provider.Settings.SettingNotFoundException;
 import android.security.KeyStore;
+import android.service.gatekeeper.IGateKeeperService;
 import android.text.TextUtils;
 import android.util.Slog;
 
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.widget.ILockSettings;
 import com.android.internal.widget.LockPatternUtils;
+import com.android.server.LockSettingsStorage.CredentialHash;
 
 import java.util.Arrays;
 import java.util.List;
@@ -72,6 +74,7 @@ public class LockSettingsService extends ILockSettings.Stub {
 
     private LockPatternUtils mLockPatternUtils;
     private boolean mFirstCallToVold;
+    private IGateKeeperService mGateKeeperService;
 
     public LockSettingsService(Context context) {
         mContext = context;
@@ -131,6 +134,7 @@ public class LockSettingsService extends ILockSettings.Stub {
 
     public void systemReady() {
         migrateOldData();
+        getGateKeeperService();
         mStorage.prefetchUser(UserHandle.USER_OWNER);
     }
 
@@ -277,7 +281,6 @@ public class LockSettingsService extends ILockSettings.Stub {
     @Override
     public boolean getBoolean(String key, boolean defaultValue, int userId) throws RemoteException {
         checkReadPermission(key, userId);
-
         String value = getStringUnchecked(key, null, userId);
         return TextUtils.isEmpty(value) ?
                 defaultValue : (value.equals("1") || value.equals("true"));
@@ -345,40 +348,133 @@ public class LockSettingsService extends ILockSettings.Stub {
         }
     }
 
-    @Override
-    public void setLockPattern(String pattern, int userId) throws RemoteException {
-        checkWritePermission(userId);
 
-        maybeUpdateKeystore(pattern, userId);
+    private byte[] getCurrentHandle(int userId) {
+        CredentialHash credential;
+        byte[] currentHandle;
 
-        final byte[] hash = LockPatternUtils.patternToHash(
-                LockPatternUtils.stringToPattern(pattern));
-        mStorage.writePatternHash(hash, userId);
+        int currentHandleType = mStorage.getStoredCredentialType(userId);
+        switch (currentHandleType) {
+            case CredentialHash.TYPE_PATTERN:
+                credential = mStorage.readPatternHash(userId);
+                currentHandle = credential != null
+                        ? credential.hash
+                        : null;
+                break;
+            case CredentialHash.TYPE_PASSWORD:
+                credential = mStorage.readPasswordHash(userId);
+                currentHandle = credential != null
+                        ? credential.hash
+                        : null;
+                break;
+            case CredentialHash.TYPE_NONE:
+            default:
+                currentHandle = null;
+                break;
+        }
+
+        // sanity check
+        if (currentHandleType != CredentialHash.TYPE_NONE && currentHandle == null) {
+            Slog.e(TAG, "Stored handle type [" + currentHandleType + "] but no handle available");
+        }
+
+        return currentHandle;
     }
 
+
     @Override
-    public void setLockPassword(String password, int userId) throws RemoteException {
+    public void setLockPattern(String pattern, String savedCredential, int userId)
+            throws RemoteException {
+        byte[] currentHandle = getCurrentHandle(userId);
+
+        if (currentHandle == null) {
+            if (savedCredential != null) {
+                Slog.w(TAG, "Saved credential provided, but none stored");
+            }
+            savedCredential = null;
+        }
+
+        byte[] enrolledHandle = enrollCredential(currentHandle, savedCredential, pattern, userId);
+        if (enrolledHandle != null) {
+            mStorage.writePatternHash(enrolledHandle, userId);
+        } else {
+            Slog.e(TAG, "Failed to enroll pattern");
+        }
+    }
+
+
+    @Override
+    public void setLockPassword(String password, String savedCredential, int userId)
+            throws RemoteException {
+
+        byte[] currentHandle = getCurrentHandle(userId);
+
+        if (currentHandle == null) {
+            if (savedCredential != null) {
+                Slog.w(TAG, "Saved credential provided, but none stored");
+            }
+            savedCredential = null;
+        }
+
+        byte[] enrolledHandle = enrollCredential(currentHandle, savedCredential, password, userId);
+        if (enrolledHandle != null) {
+            mStorage.writePasswordHash(enrolledHandle, userId);
+        } else {
+            Slog.e(TAG, "Failed to enroll password");
+        }
+    }
+
+    private byte[] enrollCredential(byte[] enrolledHandle,
+            String enrolledCredential, String toEnroll, int userId)
+            throws RemoteException {
         checkWritePermission(userId);
+        byte[] enrolledCredentialBytes = enrolledCredential == null
+                ? null
+                : enrolledCredential.getBytes();
+        byte[] toEnrollBytes = toEnroll == null
+                ? null
+                : toEnroll.getBytes();
+        byte[] hash = getGateKeeperService().enroll(userId, enrolledHandle, enrolledCredentialBytes,
+                toEnrollBytes);
 
-        maybeUpdateKeystore(password, userId);
+        if (hash != null) {
+            maybeUpdateKeystore(toEnroll, userId);
+        }
 
-        mStorage.writePasswordHash(mLockPatternUtils.passwordToHash(password, userId), userId);
+        return hash;
     }
 
     @Override
     public boolean checkPattern(String pattern, int userId) throws RemoteException {
         checkPasswordReadPermission(userId);
-        byte[] hash = LockPatternUtils.patternToHash(LockPatternUtils.stringToPattern(pattern));
-        byte[] storedHash = mStorage.readPatternHash(userId);
+
+        CredentialHash storedHash = mStorage.readPatternHash(userId);
 
         if (storedHash == null) {
             return true;
         }
 
-        boolean matched = Arrays.equals(hash, storedHash);
+        if (storedHash.version == CredentialHash.VERSION_LEGACY) {
+            // Try the old backend and upgrade if a match is found
+            byte[] hash = LockPatternUtils.patternToHash(
+                    LockPatternUtils.stringToPattern(pattern));
+            boolean matched = Arrays.equals(hash, storedHash.hash);
+            if (matched && !TextUtils.isEmpty(pattern)) {
+                maybeUpdateKeystore(pattern, userId);
+                // migrate pattern to GateKeeper
+                setLockPattern(pattern, null, userId);
+            }
+
+            return matched;
+        }
+
+        boolean matched = getGateKeeperService()
+                .verify(userId, storedHash.hash, pattern.getBytes());
         if (matched && !TextUtils.isEmpty(pattern)) {
             maybeUpdateKeystore(pattern, userId);
+            return true;
         }
+
         return matched;
     }
 
@@ -386,17 +482,31 @@ public class LockSettingsService extends ILockSettings.Stub {
     public boolean checkPassword(String password, int userId) throws RemoteException {
         checkPasswordReadPermission(userId);
 
-        byte[] hash = mLockPatternUtils.passwordToHash(password, userId);
-        byte[] storedHash = mStorage.readPasswordHash(userId);
+       CredentialHash storedHash = mStorage.readPasswordHash(userId);
 
         if (storedHash == null) {
             return true;
         }
 
-        boolean matched = Arrays.equals(hash, storedHash);
-        if (matched && !TextUtils.isEmpty(password)) {
+        if (storedHash.version == CredentialHash.VERSION_LEGACY) {
+            byte[] hash = mLockPatternUtils.passwordToHash(password, userId);
+            boolean matched = Arrays.equals(hash, storedHash.hash);
+            if (matched && !TextUtils.isEmpty(password)) {
+                maybeUpdateKeystore(password, userId);
+                // migrate password to GateKeeper
+                setLockPassword(password, null, userId);
+            }
+            return matched;
+        }
+
+
+
+        boolean matched = getGateKeeperService()
+                .verify(userId, storedHash.hash, password.getBytes());
+        if (!TextUtils.isEmpty(password) && matched) {
             maybeUpdateKeystore(password, userId);
         }
+
         return matched;
     }
 
@@ -497,4 +607,21 @@ public class LockSettingsService extends ILockSettings.Stub {
         }
         return null;
     }
+
+    private synchronized IGateKeeperService getGateKeeperService() {
+        if (mGateKeeperService != null) {
+            return mGateKeeperService;
+        }
+
+        final IBinder service =
+            ServiceManager.getService("android.service.gatekeeper.IGateKeeperService");
+        if (service != null) {
+            mGateKeeperService = IGateKeeperService.Stub.asInterface(service);
+            return mGateKeeperService;
+        }
+
+        Slog.e(TAG, "Unable to acquire GateKeeperService");
+        return null;
+    }
+
 }
