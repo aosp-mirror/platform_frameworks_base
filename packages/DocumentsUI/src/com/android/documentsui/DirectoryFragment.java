@@ -501,6 +501,14 @@ public class DirectoryFragment extends Fragment {
                 mode.finish();
                 return true;
 
+            } else if (id == R.id.menu_select_all) {
+                int count = mCurrentView.getCount();
+                for (int i = 0; i < count; i++) {
+                    mCurrentView.setItemChecked(i, true);
+                }
+                updateDisplayState();
+                return true;
+
             } else {
                 return false;
             }
