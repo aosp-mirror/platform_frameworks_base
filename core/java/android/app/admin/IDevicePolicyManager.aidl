@@ -191,6 +191,10 @@ interface IDevicePolicyManager {
     boolean getCrossProfileCallerIdDisabledForUser(int userId);
     void startManagedQuickContact(String lookupKey, long contactId, in Intent originalIntent);
 
+    void setBluetoothContactSharingDisabled(in ComponentName who, boolean disabled);
+    boolean getBluetoothContactSharingDisabled(in ComponentName who);
+    boolean getBluetoothContactSharingDisabledForUser(int userId);
+
     void setTrustAgentConfiguration(in ComponentName admin, in ComponentName agent,
             in PersistableBundle args);
     List<PersistableBundle> getTrustAgentConfiguration(in ComponentName admin,

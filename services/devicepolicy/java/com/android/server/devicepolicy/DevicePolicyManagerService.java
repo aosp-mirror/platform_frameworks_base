@@ -347,6 +347,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         private static final String TAG_DISABLE_KEYGUARD_FEATURES = "disable-keyguard-features";
         private static final String TAG_DISABLE_CAMERA = "disable-camera";
         private static final String TAG_DISABLE_CALLER_ID = "disable-caller-id";
+        private static final String TAG_DISABLE_BLUETOOTH_CONTACT_SHARING
+                = "disable-bt-contacts-sharing";
         private static final String TAG_DISABLE_SCREEN_CAPTURE = "disable-screen-capture";
         private static final String TAG_DISABLE_ACCOUNT_MANAGEMENT = "disable-account-management";
         private static final String TAG_REQUIRE_AUTO_TIME = "require_auto_time";
@@ -428,6 +430,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         boolean encryptionRequested = false;
         boolean disableCamera = false;
         boolean disableCallerId = false;
+        boolean disableBluetoothContactSharing = true;
         boolean disableScreenCapture = false; // Can only be set by a device/profile owner.
         boolean requireAutoTime = false; // Can only be set by a device owner.
 
@@ -568,6 +571,12 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 out.startTag(null, TAG_DISABLE_CALLER_ID);
                 out.attribute(null, ATTR_VALUE, Boolean.toString(disableCallerId));
                 out.endTag(null, TAG_DISABLE_CALLER_ID);
+            }
+            if (disableBluetoothContactSharing) {
+                out.startTag(null, TAG_DISABLE_BLUETOOTH_CONTACT_SHARING);
+                out.attribute(null, ATTR_VALUE,
+                        Boolean.toString(disableBluetoothContactSharing));
+                out.endTag(null, TAG_DISABLE_BLUETOOTH_CONTACT_SHARING);
             }
             if (disableScreenCapture) {
                 out.startTag(null, TAG_DISABLE_SCREEN_CAPTURE);
@@ -714,6 +723,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 } else if (TAG_DISABLE_CALLER_ID.equals(tag)) {
                     disableCallerId = Boolean.parseBoolean(
                             parser.getAttributeValue(null, ATTR_VALUE));
+                } else if (TAG_DISABLE_BLUETOOTH_CONTACT_SHARING.equals(tag)) {
+                    disableBluetoothContactSharing = Boolean.parseBoolean(parser
+                            .getAttributeValue(null, ATTR_VALUE));
                 } else if (TAG_DISABLE_SCREEN_CAPTURE.equals(tag)) {
                     disableScreenCapture = Boolean.parseBoolean(
                             parser.getAttributeValue(null, ATTR_VALUE));
@@ -904,6 +916,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     pw.println(disableCamera);
             pw.print(prefix); pw.print("disableCallerId=");
                     pw.println(disableCallerId);
+            pw.print(prefix); pw.print("disableBluetoothContactSharing=");
+                    pw.println(disableBluetoothContactSharing);
             pw.print(prefix); pw.print("disableScreenCapture=");
                     pw.println(disableScreenCapture);
             pw.print(prefix); pw.print("requireAutoTime=");
@@ -5515,6 +5529,46 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             Log.v(LOG_TAG, "Managed user not found.");
         }
         return -1;
+    }
+
+    @Override
+    public void setBluetoothContactSharingDisabled(ComponentName who, boolean disabled) {
+        if (!mHasFeature) {
+            return;
+        }
+        Preconditions.checkNotNull(who, "ComponentName is null");
+        synchronized (this) {
+            ActiveAdmin admin = getActiveAdminForCallerLocked(who,
+                    DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
+            if (admin.disableBluetoothContactSharing != disabled) {
+                admin.disableBluetoothContactSharing = disabled;
+                saveSettingsLocked(UserHandle.getCallingUserId());
+            }
+        }
+    }
+
+    @Override
+    public boolean getBluetoothContactSharingDisabled(ComponentName who) {
+        if (!mHasFeature) {
+            return false;
+        }
+        Preconditions.checkNotNull(who, "ComponentName is null");
+        synchronized (this) {
+            ActiveAdmin admin = getActiveAdminForCallerLocked(who,
+                    DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
+            return admin.disableBluetoothContactSharing;
+        }
+    }
+
+    @Override
+    public boolean getBluetoothContactSharingDisabledForUser(int userId) {
+        // TODO: Should there be a check to make sure this relationship is
+        // within a profile group?
+        // enforceSystemProcess("getCrossProfileCallerIdDisabled can only be called by system");
+        synchronized (this) {
+            ActiveAdmin admin = getProfileOwnerAdmin(userId);
+            return (admin != null) ? admin.disableBluetoothContactSharing : false;
+        }
     }
 
     /**
