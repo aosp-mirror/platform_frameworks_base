@@ -16,6 +16,8 @@
 
 package com.android.server.am;
 
+import static android.content.Intent.FLAG_ACTIVITY_NEW_DOCUMENT;
+import static android.content.Intent.FLAG_ACTIVITY_RETAIN_IN_RECENTS;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.am.ActivityRecord.HOME_ACTIVITY_TYPE;
@@ -346,8 +348,8 @@ final class TaskRecord {
         if ((info.flags & ActivityInfo.FLAG_AUTO_REMOVE_FROM_RECENTS) != 0) {
             // If the activity itself has requested auto-remove, then just always do it.
             autoRemoveRecents = true;
-        } else if ((intentFlags & (Intent.FLAG_ACTIVITY_NEW_DOCUMENT
-                | Intent.FLAG_ACTIVITY_RETAIN_IN_RECENTS)) == Intent.FLAG_ACTIVITY_NEW_DOCUMENT) {
+        } else if ((intentFlags & (FLAG_ACTIVITY_NEW_DOCUMENT | FLAG_ACTIVITY_RETAIN_IN_RECENTS))
+                == FLAG_ACTIVITY_NEW_DOCUMENT) {
             // If the caller has not asked for the document to be retained, then we may
             // want to turn on auto-remove, depending on whether the target has set its
             // own document launch mode.
@@ -879,7 +881,8 @@ final class TaskRecord {
         for (int activityNdx = 0; activityNdx < numActivities; ++activityNdx) {
             final ActivityRecord r = activities.get(activityNdx);
             if (r.info.persistableMode == ActivityInfo.PERSIST_ROOT_ONLY || !r.isPersistable() ||
-                    ((r.intent.getFlags() & Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET) != 0) &&
+                    ((r.intent.getFlags() & FLAG_ACTIVITY_NEW_DOCUMENT
+                            | FLAG_ACTIVITY_RETAIN_IN_RECENTS) == FLAG_ACTIVITY_NEW_DOCUMENT) &&
                             activityNdx > 0) {
                 // Stop at first non-persistable or first break in task (CLEAR_WHEN_TASK_RESET).
                 break;
