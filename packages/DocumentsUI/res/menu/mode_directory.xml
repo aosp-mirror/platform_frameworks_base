@@ -33,4 +33,8 @@
         android:id="@+id/menu_select_all"
         android:title="@string/menu_select_all"
         android:showAsAction="never" />
+    <item
+        android:id="@+id/menu_copy"
+        android:title="@string/menu_copy"
+        android:showAsAction="never" />
 </menu>
