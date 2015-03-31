@@ -48,11 +48,6 @@ struct JLineBreaksID {
 static jclass gLineBreaks_class;
 static JLineBreaksID gLineBreaks_fieldID;
 
-static const int CHAR_SPACE = 0x20;
-static const int CHAR_TAB = 0x09;
-static const int CHAR_NEWLINE = 0x0a;
-static const int CHAR_ZWSP = 0x200b;
-
 // set text and set a number of parameters for creating a layout (width, tabstops, strategy)
 static void nSetupParagraph(JNIEnv* env, jclass, jlong nativePtr, jcharArray text, jint length,
         jfloat firstWidth, jint firstWidthLineLimit, jfloat restWidth,
