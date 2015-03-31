@@ -17494,8 +17494,12 @@ public final class ActivityManagerService extends ActivityManagerNative
         mFullPssPending = true;
         mPendingPssProcesses.ensureCapacity(mLruProcesses.size());
         mPendingPssProcesses.clear();
-        for (int i=mLruProcesses.size()-1; i>=0; i--) {
+        for (int i = mLruProcesses.size() - 1; i >= 0; i--) {
             ProcessRecord app = mLruProcesses.get(i);
+            if (app.thread == null
+                    || app.curProcState == ActivityManager.PROCESS_STATE_NONEXISTENT) {
+                continue;
+            }
             if (memLowered || now > (app.lastStateTime+ProcessList.PSS_ALL_INTERVAL)) {
                 app.pssProcState = app.setProcState;
                 app.nextPssTime = ProcessList.computeNextPssTime(app.curProcState, true,
@@ -17811,8 +17815,8 @@ public final class ActivityManagerService extends ActivityManagerNative
                 }
             }
         }
-        if (app.setProcState < 0 || ProcessList.procStatesDifferForMem(app.curProcState,
-                app.setProcState)) {
+        if (app.setProcState == ActivityManager.PROCESS_STATE_NONEXISTENT
+                || ProcessList.procStatesDifferForMem(app.curProcState, app.setProcState)) {
             if (false && mTestPssMode && app.setProcState >= 0 && app.lastStateTime <= (now-200)) {
                 // Experimental code to more aggressively collect pss while
                 // running test...  the problem is that this tends to collect
