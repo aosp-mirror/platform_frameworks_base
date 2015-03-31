@@ -24398,6 +24398,7 @@ package android.os {
     field public static java.lang.String DIRECTORY_RINGTONES;
     field public static final java.lang.String MEDIA_BAD_REMOVAL = "bad_removal";
     field public static final java.lang.String MEDIA_CHECKING = "checking";
+    field public static final java.lang.String MEDIA_EJECTING = "ejecting";
     field public static final java.lang.String MEDIA_MOUNTED = "mounted";
     field public static final java.lang.String MEDIA_MOUNTED_READ_ONLY = "mounted_ro";
     field public static final java.lang.String MEDIA_NOFS = "nofs";

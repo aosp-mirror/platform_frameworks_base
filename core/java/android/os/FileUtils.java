@@ -369,6 +369,23 @@ public class FileUtils {
      * {@link File#getCanonicalFile()} to avoid symlink or path traversal
      * attacks.
      */
+    public static boolean contains(File[] dirs, File file) {
+        for (File dir : dirs) {
+            if (contains(dir, file)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Test if a file lives under the given directory, either as a direct child
+     * or a distant grandchild.
+     * <p>
+     * Both files <em>must</em> have been resolved using
+     * {@link File#getCanonicalFile()} to avoid symlink or path traversal
+     * attacks.
+     */
     public static boolean contains(File dir, File file) {
         if (file == null) return false;
 

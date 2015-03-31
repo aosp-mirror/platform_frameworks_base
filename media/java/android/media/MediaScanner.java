@@ -553,15 +553,8 @@ public class MediaScanner
                         boolean isimage = MediaFile.isImageFileType(mFileType);
 
                         if (isaudio || isvideo || isimage) {
-                            if (mExternalIsEmulated && path.startsWith(mExternalStoragePath)) {
-                                // try to rewrite the path to bypass the sd card fuse layer
-                                String directPath = Environment.getMediaStorageDirectory() +
-                                        path.substring(mExternalStoragePath.length());
-                                File f = new File(directPath);
-                                if (f.exists()) {
-                                    path = directPath;
-                                }
-                            }
+                            path = Environment.maybeTranslateEmulatedPathToInternal(new File(path))
+                                    .getAbsolutePath();
                         }
 
                         // we only extract metadata for audio and video files

@@ -59,7 +59,7 @@ public class MtpStorage {
      *
      * @return the storage ID
      */
-    public static int getStorageId(int index) {
+    public static int getStorageIdForIndex(int index) {
         // storage ID is 0x00010001 for primary storage,
         // then 0x00020001, 0x00030001, etc. for secondary storages
         return ((index + 1) << 16) + 1;

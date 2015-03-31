@@ -402,13 +402,7 @@ final class SystemServiceRegistry {
                 new CachedServiceFetcher<StorageManager>() {
             @Override
             public StorageManager createService(ContextImpl ctx) {
-                try {
-                    return new StorageManager(
-                            ctx.getContentResolver(), ctx.mMainThread.getHandler().getLooper());
-                } catch (RemoteException rex) {
-                    Log.e(TAG, "Failed to create StorageManager", rex);
-                    return null;
-                }
+                return new StorageManager(ctx, ctx.mMainThread.getHandler().getLooper());
             }});
 
         registerService(Context.TELEPHONY_SERVICE, TelephonyManager.class,

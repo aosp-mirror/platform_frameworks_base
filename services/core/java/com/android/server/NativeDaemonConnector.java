@@ -48,8 +48,6 @@ import java.util.LinkedList;
  * {@code libsysutils} FrameworkListener protocol.
  */
 final class NativeDaemonConnector implements Runnable, Handler.Callback, Watchdog.Monitor {
-    private static final boolean LOGD = false;
-
     private final static boolean VDBG = false;
 
     private final String TAG;
@@ -57,6 +55,8 @@ final class NativeDaemonConnector implements Runnable, Handler.Callback, Watchdo
     private String mSocket;
     private OutputStream mOutputStream;
     private LocalLog mLocalLog;
+
+    private volatile boolean mDebug = false;
 
     private final ResponseQueue mResponseQueue;
 
@@ -97,6 +97,14 @@ final class NativeDaemonConnector implements Runnable, Handler.Callback, Watchdo
         mSequenceNumber = new AtomicInteger(0);
         TAG = logTag != null ? logTag : "NativeDaemonConnector";
         mLocalLog = new LocalLog(maxLogSize);
+    }
+
+    /**
+     * Enable Set debugging mode, which causes messages to also be written to both
+     * {@link Slog} in addition to internal log.
+     */
+    public void setDebug(boolean debug) {
+        mDebug = debug;
     }
 
     @Override
@@ -513,7 +521,7 @@ final class NativeDaemonConnector implements Runnable, Handler.Callback, Watchdo
     }
 
     private void log(String logstring) {
-        if (LOGD) Slog.d(TAG, logstring);
+        if (mDebug) Slog.d(TAG, logstring);
         mLocalLog.log(logstring);
     }
 

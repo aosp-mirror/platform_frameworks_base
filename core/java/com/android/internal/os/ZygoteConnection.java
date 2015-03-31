@@ -514,10 +514,8 @@ class ZygoteConnection {
                                 "Duplicate arg specified");
                     }
                     niceName = arg.substring(arg.indexOf('=') + 1);
-                } else if (arg.equals("--mount-external-multiuser")) {
-                    mountExternal = Zygote.MOUNT_EXTERNAL_MULTIUSER;
-                } else if (arg.equals("--mount-external-multiuser-all")) {
-                    mountExternal = Zygote.MOUNT_EXTERNAL_MULTIUSER_ALL;
+                } else if (arg.equals("--mount-external-default")) {
+                    mountExternal = Zygote.MOUNT_EXTERNAL_DEFAULT;
                 } else if (arg.equals("--query-abi-list")) {
                     abiListQuery = true;
                 } else if (arg.startsWith("--instruction-set=")) {

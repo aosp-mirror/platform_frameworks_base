@@ -41,15 +41,10 @@ public final class Zygote {
     /** enable the JIT compiler */
     public static final int DEBUG_ENABLE_JIT         = 1 << 5;
 
-
     /** No external storage should be mounted. */
     public static final int MOUNT_EXTERNAL_NONE = 0;
-    /** Single-user external storage should be mounted. */
-    public static final int MOUNT_EXTERNAL_SINGLEUSER = 1;
-    /** Multi-user external storage should be mounted. */
-    public static final int MOUNT_EXTERNAL_MULTIUSER = 2;
-    /** All multi-user external storage should be mounted. */
-    public static final int MOUNT_EXTERNAL_MULTIUSER_ALL = 3;
+    /** Default user-specific external storage should be mounted. */
+    public static final int MOUNT_EXTERNAL_DEFAULT = 1;
 
     private static final ZygoteHooks VM_HOOKS = new ZygoteHooks();
 
