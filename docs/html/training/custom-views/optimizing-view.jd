@@ -12,33 +12,21 @@ previous.link=making-interactive.html
     <div id="tb">
 
         <h2>This lesson teaches you to</h2>
-        <ol>
-            <li><a href="#less">Do Less, Less Frequently</a></li>
-            <li><a href="#accelerate">Use Hardware Acceleration</a></li>
-        </ol>
-
-        <h2>You should also read</h2>
         <ul>
-            <li><a href="{@docRoot}guide/topics/graphics/hardware-accel.html">
-                Hardware Acceleration
-            </a>
-        </li>
-    </ul>
-<h2>Try it out</h2>
-<div class="download-box">
-<a href="{@docRoot}shareables/training/CustomView.zip"
-class="button">Download the sample</a>
-<p class="filename">CustomView.zip</p>
-</div>
-</div>
+            <li><a href="#less">Do Less, Less Frequently</a></li>
+        </ul>
+        <h2>Try it out</h2>
+        <div class="download-box">
+            <a href="{@docRoot}shareables/training/CustomView.zip"
+                class="button">Download the sample</a>
+            <p class="filename">CustomView.zip</p>
         </div>
-
+    </div>
+</div>
 
 <p>Now that you have a well-designed view that responds to gestures and transitions between states,
-you need to ensure
-that the view runs fast. To avoid a UI that feels sluggish or stutters during playback, you must
-ensure that your
-animations consistently run at 60 frames per second.</p>
+ensure that the view runs fast. To avoid a UI that feels sluggish or stutters during playback,
+ensure that animations consistently run at 60 frames per second.</p>
 
 <h2 id="less">Do Less, Less Frequently</h2>
 
@@ -52,19 +40,13 @@ would cause a stutter. Allocate objects during initialization, or between animat
 allocation while an
 animation is running.</p>
 
-<p>In addition to making {@link android.view.View#onDraw onDraw()} leaner, you should also make sure
+<p>In addition to making {@link android.view.View#onDraw onDraw()} leaner, also make sure
 it's called as
 infrequently as possible. Most calls to {@link android.view.View#onDraw onDraw()} are the result of
 a call to {@link
 android.view.View#invalidate() invalidate()}, so eliminate unnecessary calls to {@link
 android.view.View#invalidate()
-invalidate()}. When possible, call the four-parameter variant of {@link
-android.view.View#invalidate() invalidate()}
-rather than the version that takes no parameters. The no-parameter variant invalidates the entire
-view, while the
-four-parameter variant invalidates only a specified portion of the view. This approach allows draw calls to
-be more efficient and
-can eliminate unnecessary invalidation of views that fall outside the invalid rectangle.</p>
+invalidate()}.</p>
 
 <p>Another very expensive operation is traversing layouts. Any time a view calls {@link
 android.view.View#requestLayout()
@@ -78,7 +60,7 @@ behave properly. These deep view hierarchies cause performance problems. Make yo
 as shallow as
 possible.</p>
 
-<p>If you have a complex UI, you should consider writing a custom {@link android.view.ViewGroup
+<p>If you have a complex UI, consider writing a custom {@link android.view.ViewGroup
 ViewGroup} to perform
 its layout. Unlike the built-in views, your custom view can make application-specific assumptions
 about the size and
@@ -88,89 +70,3 @@ to extend {@link android.view.ViewGroup ViewGroup} as part of a custom view. Pie
 views, but it never
 measures them. Instead, it sets their sizes directly according to its own custom layout
 algorithm.</p>
-
-<h2 id="accelerate">Use Hardware Acceleration</h2>
-
-<p>As of Android 3.0, the Android 2D graphics system can be accelerated by the GPU (Graphics
-Processing Unit) hardware
-found in most newer Android devices. GPU hardware acceleration can result in a tremendous
-performance increase for many
-applications, but it isn't the right choice for every application. The Android framework
-gives you the ability to finely control which parts of your application are or are not
-hardware accelerated.</p>
-
-<p>See <a href="{@docRoot}guide/topics/graphics/hardware-accel.html">Hardware Acceleration</a>
-        in the Android Developers Guide for directions on how to enable acceleration at the
-        application, activity, or window level. Notice  that in addition to the directions in
-        the developer guide, you must also set your application's target API to 11 or higher by
-        specifying {@code &lt;uses-sdk
-        android:targetSdkVersion="11"/&gt;} in your {@code AndroidManifest.xml} file.</p>
-
-<p>Once you've enabled hardware acceleration, you may or may not see a performance increase.
-Mobile GPUs are very good at certain tasks, such as scaling, rotating, and translating
-bitmapped images. They are not particularly good at other tasks, such as drawing lines or curves. To
-get the most out of GPU acceleration, you should maximize the number of operations that the GPU is
-good at, and minimize the number of operations that the GPU isn't good at.</p>
-
-<p>In the PieChart example, for instance, drawing the pie is relatively expensive. Redrawing the pie
-each time it's
-rotated causes the UI to feel sluggish. The solution is to place the pie chart into a child
-{@link android.view.View} and set that
-{@link android.view.View}'s
-<a href="{@docRoot}reference/android/view/View.html#setLayerType(int, android.graphics.Paint)">
-    layer type</a> to {@link android.view.View#LAYER_TYPE_HARDWARE}, so that the GPU can cache it as
-a static
-image. The sample
-defines the child view as an inner class of {@code PieChart}, which minimizes the amount of code
-changes that are needed
-to implement this solution.</p>
-
-<pre>
-   private class PieView extends View {
-
-       public PieView(Context context) {
-           super(context);
-           if (!isInEditMode()) {
-               setLayerType(View.LAYER_TYPE_HARDWARE, null);
-           }
-       }
-       
-       &#64;Override
-       protected void onDraw(Canvas canvas) {
-           super.onDraw(canvas);
-
-           for (Item it : mData) {
-               mPiePaint.setShader(it.mShader);
-               canvas.drawArc(mBounds,
-                       360 - it.mEndAngle,
-                       it.mEndAngle - it.mStartAngle,
-                       true, mPiePaint);
-           }
-       }
-
-       &#64;Override
-       protected void onSizeChanged(int w, int h, int oldw, int oldh) {
-           mBounds = new RectF(0, 0, w, h);
-       }
-
-       RectF mBounds;
-   }
-</pre>
-
-<p>After this code change, {@code PieChart.PieView.onDraw()} is called only when the view is first
-shown. During the rest
-of the application's lifetime, the pie chart is cached as an image, and redrawn at different
-rotation angles by the GPU.
-GPU hardware is particularly good at this sort of thing, and the performance difference is
-immediately noticeable.</p>
-
-<p>There is a tradeoff, though. Caching images as hardware layers consumes video memory, which is a
-limited resource.
-For this reason, the final version of {@code PieChart.PieView} only sets its layer type to
-{@link android.view.View#LAYER_TYPE_HARDWARE}
-while the user is actively scrolling. At all other times, it sets its layer type to
-{@link android.view.View#LAYER_TYPE_NONE}, which
-allows the GPU to stop caching the image.</p>
-
-<p>Finally, don't forget to profile your code. Techniques that improve performance on one view
-might negatively affect performance on another.</p>
