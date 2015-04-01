@@ -87,4 +87,7 @@
 
   <!-- Doze invert -->
   <java-symbol type="bool" name="config_invert_colors_on_doze" />
+
+  <!-- Automatic brightness enhancements -->
+  <java-symbol type="integer" name="config_autoBrightnessBrighteningLightFastDebounce"/>
 </resources>
