@@ -131,6 +131,17 @@ named <code>MyNoteActivity</code>:
   </tr>
 
   <tr>
+    <td>Start stopwatch</td>
+    <td>"Ok Google, start stopwatch"</td>
+    <td>
+      <dl>
+        <dt>Action</dt>
+        <dd><code>com.google.android.wearable.action.STOPWATCH</code></dd>
+      </dl>
+   </td>
+  </tr>
+
+  <tr>
     <td>Start/Stop a bike ride</td>
     <td>"OK Google, start cycling"<br/><br/>"OK Google, start my bike ride"<br/><br/>"OK Google, stop cycling"</td>
     <td>
