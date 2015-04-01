@@ -384,6 +384,11 @@ public abstract class Uri implements Parcelable, Comparable<Uri> {
                     }
                 }
                 return builder.toString();
+            } else if (scheme.equalsIgnoreCase("http") || scheme.equalsIgnoreCase("https")
+                    || scheme.equalsIgnoreCase("ftp")) {
+                ssp = "//" + ((getHost() != null) ? getHost() : "")
+                        + ((getPort() != -1) ? (":" + getPort()) : "")
+                        + "/...";
             }
         }
         // Not a sensitive scheme, but let's still be conservative about
