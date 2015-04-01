@@ -471,22 +471,23 @@
     <dimen name="go_to_full_shade_appearing_translation">200dp</dimen>
 
     <!-- The diameter of the search panel circle. -->
-    <dimen name="search_panel_circle_size">88dp</dimen>
+    <dimen name="assist_orb_size">144dp</dimen>
 
-    <!-- The margin to the edge of the screen from where the circle starts to appear -->
-    <dimen name="search_panel_circle_base_margin">80dp</dimen>
+    <!-- The margin to the edge of the screen from where the orb starts to appear -->
+    <dimen name="assist_orb_base_margin">22dp</dimen>
 
-    <!-- The amount the circle translates when appearing -->
-    <dimen name="search_panel_circle_travel_distance">80dp</dimen>
+    <!-- The amount the orb translates when appearing -->
+    <dimen name="assist_orb_travel_distance">26dp</dimen>
 
-    <!-- The elevation of the search panel circle -->
-    <dimen name="search_panel_circle_elevation">12dp</dimen>
+    <!-- The elevation of the orb -->
+    <dimen name="assist_orb_elevation">12dp</dimen>
 
-    <!-- The height of the scrim behind the search panel circle. -->
-    <dimen name="search_panel_scrim_height">250dp</dimen>
+    <!-- The height of the scrim behind the orb. -->
+    <dimen name="assist_orb_scrim_height">250dp</dimen>
 
-    <!-- How far the user needs to drag up to invoke search. -->
-    <dimen name="search_panel_threshold">100dp</dimen>
+    <!-- The height of the scrim behind the search panel circle. Should be navigation_bar_height
+         + 8dp. -->
+    <dimen name="assist_orb_navbar_scrim_height">56dp</dimen>
 
     <!-- The width/height of the phone/camera/unlock icon view on keyguard. -->
     <dimen name="keyguard_affordance_height">56dp</dimen>
