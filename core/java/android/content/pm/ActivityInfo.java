@@ -648,12 +648,6 @@ public class ActivityInfo extends ComponentInfo
      */
     public boolean resizeable;
 
-    /**
-     * Value indicating if the activity is to be locked at startup.
-     * @hide
-     */
-    public boolean lockTaskOnLaunch;
-
     public ActivityInfo() {
     }
 
@@ -671,15 +665,13 @@ public class ActivityInfo extends ComponentInfo
         uiOptions = orig.uiOptions;
         parentActivityName = orig.parentActivityName;
         maxRecents = orig.maxRecents;
-        resizeable = orig.resizeable;
-        lockTaskOnLaunch = orig.lockTaskOnLaunch;
     }
-
+    
     /**
      * Return the theme resource identifier to use for this activity.  If
      * the activity defines a theme, that is used; else, the application
      * theme is used.
-     *
+     * 
      * @return The theme associated with this activity.
      */
     public final int getThemeResource() {
@@ -717,7 +709,7 @@ public class ActivityInfo extends ComponentInfo
         if (uiOptions != 0) {
             pw.println(prefix + " uiOptions=0x" + Integer.toHexString(uiOptions));
         }
-        pw.println(prefix + "resizeable=" + resizeable + " lockTaskOnLaunch=" + lockTaskOnLaunch);
+        pw.println(prefix + "resizeable=" + resizeable);
         super.dumpBack(pw, prefix);
     }
     
@@ -747,7 +739,6 @@ public class ActivityInfo extends ComponentInfo
         dest.writeInt(persistableMode);
         dest.writeInt(maxRecents);
         dest.writeInt(resizeable ? 1 : 0);
-        dest.writeInt(lockTaskOnLaunch ? 1 : 0);
     }
 
     public static final Parcelable.Creator<ActivityInfo> CREATOR
@@ -776,6 +767,5 @@ public class ActivityInfo extends ComponentInfo
         persistableMode = source.readInt();
         maxRecents = source.readInt();
         resizeable = (source.readInt() == 1);
-        lockTaskOnLaunch = (source.readInt() == 1);
     }
 }

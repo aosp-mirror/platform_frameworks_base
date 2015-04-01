@@ -1038,13 +1038,6 @@
          activity. -->
     <attr name="resizeableActivity" format="boolean" />
 
-    <!-- Tasks rooted at this activity will start up in lock-task mode. That means that they
-         cannot be navigated away from until they finish or explicitly release lock-task mode.
-         This only works for system privileged activities. An exception will be thrown for
-         non-privileged activities that use this attribute.
-         @hide -->
-    <attr name="lockTaskOnLaunch" format="boolean" />
-
     <!-- When set installer will extract native libraries. If set to false
          libraries in the apk must be stored and page-aligned.  -->
     <attr name="extractNativeLibs" format="boolean"/>
@@ -1198,7 +1191,7 @@
          features in your package (or other packages).  See the
          <a href="{@docRoot}guide/topics/security/security.html">Security and Permissions</a>
          document for more information on permissions.
-
+         
          <p>This appears as a child tag of the root
          {@link #AndroidManifest manifest} tag. -->
     <declare-styleable name="AndroidManifestPermission" parent="AndroidManifest">
@@ -1217,15 +1210,15 @@
         <attr name="protectionLevel" />
         <attr name="permissionFlags" />
     </declare-styleable>
-
+    
     <!-- The <code>permission-group</code> tag declares a logical grouping of
          related permissions.
-
+         
          <p>Note that this tag does not declare a permission itself, only
          a namespace in which further permissions can be placed.  See
          the {@link #AndroidManifestPermission &lt;permission&gt;} tag for
          more information.
-
+         
          <p>This appears as a child tag of the root
          {@link #AndroidManifest manifest} tag. -->
     <declare-styleable name="AndroidManifestPermissionGroup" parent="AndroidManifest">
@@ -1243,7 +1236,7 @@
         <attr name="permissionGroupFlags" />
         <attr name="priority" />
     </declare-styleable>
-
+    
     <!-- The <code>permission-tree</code> tag declares the base of a tree of
          permission values: it declares that this package has ownership of
          the given permission name, as well as all names underneath it
@@ -1756,7 +1749,6 @@
         <attr name="relinquishTaskIdentity" />
         <attr name="resumeWhilePausing" />
         <attr name="resizeableActivity" />
-        <attr name="lockTaskOnLaunch" />
     </declare-styleable>
     
     <!-- The <code>activity-alias</code> tag declares a new
