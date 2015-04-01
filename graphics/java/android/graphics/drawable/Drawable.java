@@ -816,9 +816,12 @@ public abstract class Drawable {
      * returned.  You can use the method {@link #resolveOpacity} to perform a
      * standard reduction of two opacities to the appropriate single output.
      *
-     * <p>Note that the returned value does <em>not</em> take into account a
+     * <p>Note that the returned value does not necessarily take into account a
      * custom alpha or color filter that has been applied by the client through
-     * the {@link #setAlpha} or {@link #setColorFilter} methods.
+     * the {@link #setAlpha} or {@link #setColorFilter} methods. Some subclasses,
+     * such as {@link BitmapDrawable}, {@link ColorDrawable}, and {@link GradientDrawable},
+     * do account for the value of {@link #setAlpha}, but the general behavior is dependent
+     * upon the implementation of the subclass.
      *
      * @return int The opacity class of the Drawable.
      *
