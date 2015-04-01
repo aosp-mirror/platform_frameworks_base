@@ -3911,9 +3911,9 @@ public final class ActivityManagerService extends ActivityManagerNative
             }
             // Do not allow task to finish in Lock Task mode.
             if (tr == mStackSupervisor.mLockTaskModeTask) {
-                if (rootR == r && tr.getTopActivity() == r) {
+                if (rootR == r) {
                     Slog.i(TAG, "Not finishing task in lock task mode");
-                    mStackSupervisor.showLockTaskToastLocked();
+                    mStackSupervisor.showLockTaskToast();
                     return false;
                 }
             }
@@ -4074,7 +4074,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 // Do not allow task to finish in Lock Task mode.
                 if (r.task == mStackSupervisor.mLockTaskModeTask) {
                     if (rootR == r) {
-                        mStackSupervisor.showLockTaskToastLocked();
+                        mStackSupervisor.showLockTaskToast();
                         return false;
                     }
                 }
@@ -8238,7 +8238,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 return;
             }
             if (mStackSupervisor.isLockTaskModeViolation(task)) {
-                mStackSupervisor.showLockTaskToastLocked();
+                mStackSupervisor.showLockTaskToast();
                 Slog.e(TAG, "moveTaskToFront: Attempt to violate Lock Task Mode");
                 return;
             }
@@ -8272,7 +8272,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 if (taskId >= 0) {
                     if ((mStackSupervisor.mLockTaskModeTask != null)
                             && (mStackSupervisor.mLockTaskModeTask.taskId == taskId)) {
-                        mStackSupervisor.showLockTaskToastLocked();
+                        mStackSupervisor.showLockTaskToast();
                         return false;
                     }
                     return ActivityRecord.getStackLocked(token).moveTaskToBackLocked(taskId);
