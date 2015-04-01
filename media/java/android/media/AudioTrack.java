@@ -21,7 +21,10 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.ref.WeakReference;
 import java.nio.ByteBuffer;
 import java.nio.NioUtils;
+
 import android.annotation.IntDef;
+import android.annotation.NonNull;
+import android.annotation.SystemApi;
 import android.app.ActivityThread;
 import android.app.AppOpsManager;
 import android.content.Context;
@@ -112,6 +115,14 @@ public class AudioTrack
      * as the audio is playing.
      */
     public static final int MODE_STREAM = 1;
+
+    /** @hide */
+    @IntDef({
+        MODE_STATIC,
+        MODE_STREAM
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface TransferMode {}
 
     /**
      * State of an AudioTrack that was not successfully initialized upon creation.
@@ -454,6 +465,179 @@ public class AudioTrack
             mState = STATE_NO_STATIC_DATA;
         } else {
             mState = STATE_INITIALIZED;
+        }
+    }
+
+    /**
+     * Builder class for {@link AudioTrack} objects.
+     * Use this class to configure and create an <code>AudioTrack</code> instance. By setting audio
+     * attributes and audio format parameters, you indicate which of those vary from the default
+     * behavior on the device.
+     * <p> Here is an example where <code>Builder</code> is used to specify all {@link AudioFormat}
+     * parameters, to be used by a new <code>AudioTrack</code> instance:
+     *
+     * <pre class="prettyprint">
+     * AudioTrack player = new AudioTrack.Builder()
+     *         .setAudioAttributes(new AudioAttributes.Builder()
+     *                  .setUsage(AudioAttributes.USAGE_ALARM)
+     *                  .setContentType(CONTENT_TYPE_MUSIC)
+     *                  .build())
+     *         .setAudioFormat(new AudioFormat.Builder()
+     *                 .setEncoding(AudioFormat.ENCODING_PCM_16BIT)
+     *                 .setSampleRate(441000)
+     *                 .setChannelMask(AudioFormat.CHANNEL_OUT_STEREO)
+     *                 .build())
+     *         .setBufferSize(minBuffSize)
+     *         .build();
+     * </pre>
+     * <p>
+     * If the audio attributes are not set with {@link #setAudioAttributes(AudioAttributes)},
+     * attributes comprising {@link AudioAttributes#USAGE_MEDIA} will be used.
+     * <br>If the audio format is not specified or is incomplete, its sample rate will be the
+     * default output sample rate of the device (see
+     * {@link AudioManager#PROPERTY_OUTPUT_SAMPLE_RATE}), its channel configuration will be
+     * {@link AudioFormat#CHANNEL_OUT_STEREO} and the encoding will be
+     * {@link AudioFormat#ENCODING_PCM_16BIT}.
+     * <br>If the transfer mode is not specified with {@link #setTransferMode(int)},
+     * {@link AudioTrack#MODE_STREAM} will be used.
+     * <br>If the session ID is not specified with {@link #setSessionId(int)}, a new one will
+     * be generated.
+     */
+    public static class Builder {
+        private AudioAttributes mAttributes;
+        private AudioFormat mFormat;
+        private int mBufferSizeInBytes;
+        private int mSessionId = AudioManager.AUDIO_SESSION_ID_GENERATE;
+        private int mMode = MODE_STREAM;
+
+        /**
+         * Constructs a new Builder with the default values as described above.
+         */
+        public Builder() {
+        }
+
+        /**
+         * Sets the {@link AudioAttributes}.
+         * @param attributes a non-null {@link AudioAttributes} instance that describes the audio
+         *     data to be played.
+         * @return the same Builder instance.
+         * @throws IllegalArgumentException
+         */
+        public @NonNull Builder setAudioAttributes(@NonNull AudioAttributes attributes)
+                throws IllegalArgumentException {
+            if (attributes == null) {
+                throw new IllegalArgumentException("Illegal null AudioAttributes argument");
+            }
+            // keep reference, we only copy the data when building
+            mAttributes = attributes;
+            return this;
+        }
+
+        /**
+         * Sets the format of the audio data to be played by the {@link AudioTrack}.
+         * See {@link AudioFormat.Builder} for configuring the audio format parameters such
+         * as encoding, channel mask and sample rate.
+         * @param format a non-null {@link AudioFormat} instance.
+         * @return the same Builder instance.
+         * @throws IllegalArgumentException
+         */
+        public @NonNull Builder setAudioFormat(@NonNull AudioFormat format)
+                throws IllegalArgumentException {
+            if (format == null) {
+                throw new IllegalArgumentException("Illegal null AudioFormat argument");
+            }
+            // keep reference, we only copy the data when building
+            mFormat = format;
+            return this;
+        }
+
+        /**
+         * Sets the total size (in bytes) of the buffer where audio data is read from for playback.
+         * If using the {@link AudioTrack} in streaming mode
+         * (see {@link AudioTrack#MODE_STREAM}, you can write data into this buffer in smaller
+         * chunks than this size. See {@link #getMinBufferSize(int, int, int)} to determine
+         * the minimum required buffer size for the successful creation of an AudioTrack instance
+         * in streaming mode. Using values smaller than <code>getMinBufferSize()</code> will result
+         * in an exception when trying to build the <code>AudioTrack</code>.
+         * <br>If using the <code>AudioTrack</code> in static mode (see
+         * {@link AudioTrack#MODE_STATIC}), this is the maximum size of the sound that will be
+         * played by this instance.
+         * @param bufferSizeInBytes
+         * @return the same Builder instance.
+         * @throws IllegalArgumentException
+         */
+        public @NonNull Builder setBufferSizeInBytes(int bufferSizeInBytes)
+                throws IllegalArgumentException {
+            if (bufferSizeInBytes <= 0) {
+                throw new IllegalArgumentException("Invalid buffer size " + bufferSizeInBytes);
+            }
+            mBufferSizeInBytes = bufferSizeInBytes;
+            return this;
+        }
+
+        /**
+         * Sets the mode under which buffers of audio data are transferred from the
+         * {@link AudioTrack} to the framework.
+         * @param mode one of {@link AudioTrack#MODE_STREAM}, {@link AudioTrack#MODE_STATIC}.
+         * @return the same Builder instance.
+         * @throws IllegalArgumentException
+         */
+        public @NonNull Builder setTransferMode(@TransferMode int mode)
+                throws IllegalArgumentException {
+            switch(mode) {
+                case MODE_STREAM:
+                case MODE_STATIC:
+                    mMode = mode;
+                    break;
+                default:
+                    throw new IllegalArgumentException("Invalid transfer mode " + mode);
+            }
+            return this;
+        }
+
+        /**
+         * Sets the session ID the {@link AudioTrack} will be attached to.
+         * @param sessionId a strictly positive ID number retrieved from another
+         *     <code>AudioTrack</code> via {@link AudioTrack#getAudioSessionId()} or allocated by
+         *     {@link AudioManager} via {@link AudioManager#generateAudioSessionId()}, or
+         *     {@link AudioManager#AUDIO_SESSION_ID_GENERATE}.
+         * @return the same Builder instance.
+         * @throws IllegalArgumentException
+         */
+        public @NonNull Builder setSessionId(int sessionId)
+                throws IllegalArgumentException {
+            if ((sessionId != AudioManager.AUDIO_SESSION_ID_GENERATE) && (sessionId < 1)) {
+                throw new IllegalArgumentException("Invalid audio session ID " + sessionId);
+            }
+            mSessionId = sessionId;
+            return this;
+        }
+
+        /**
+         * Builds an {@link AudioTrack} instance initialized with all the parameters set
+         * on this <code>Builder</code>.
+         * @return a new {@link AudioTrack} instance.
+         * @throws UnsupportedOperationException if the parameters set on the <code>Builder</code>
+         *     were incompatible, or if they are not supported by the device.
+         */
+        public @NonNull AudioTrack build() throws UnsupportedOperationException {
+            if (mAttributes == null) {
+                mAttributes = new AudioAttributes.Builder()
+                        .setUsage(AudioAttributes.USAGE_MEDIA)
+                        .build();
+            }
+            if (mFormat == null) {
+                mFormat = new AudioFormat.Builder()
+                        .setChannelMask(AudioFormat.CHANNEL_OUT_STEREO)
+                        .setSampleRate(AudioSystem.getPrimaryOutputSamplingRate())
+                        .setEncoding(AudioFormat.ENCODING_DEFAULT)
+                        .build();
+            }
+            try {
+                return new AudioTrack(mAttributes, mFormat, mBufferSizeInBytes, mMode, mSessionId);
+            } catch (IllegalArgumentException e) {
+                throw new UnsupportedOperationException(e.getMessage());
+            }
         }
     }
 
@@ -1749,5 +1933,4 @@ public class AudioTrack
     private static void loge(String msg) {
         Log.e(TAG, msg);
     }
-
 }
