@@ -403,13 +403,13 @@ public class AssetAtlasService extends IAssetAtlas.Stub {
         if (cpuCount == 1) {
             new ComputeWorker(MIN_SIZE, MAX_SIZE, STEP, bitmaps, pixelCount, results, null).run();
         } else {
-            int start = MIN_SIZE;
-            int end = MAX_SIZE - (cpuCount - 1) * STEP;
+            int start = MIN_SIZE + (cpuCount - 1) * STEP;
+            int end = MAX_SIZE;
             int step = STEP * cpuCount;
 
             final CountDownLatch signal = new CountDownLatch(cpuCount);
 
-            for (int i = 0; i < cpuCount; i++, start += STEP, end += STEP) {
+            for (int i = 0; i < cpuCount; i++, start -= STEP, end -= STEP) {
                 ComputeWorker worker = new ComputeWorker(start, end, step,
                         bitmaps, pixelCount, results, signal);
                 new Thread(worker, "Atlas Worker #" + (i + 1)).start();
@@ -435,7 +435,8 @@ public class AssetAtlasService extends IAssetAtlas.Stub {
 
         if (DEBUG_ATLAS) {
             float delay = (System.nanoTime() - begin) / 1000.0f / 1000.0f / 1000.0f;
-            Log.d(LOG_TAG, String.format("Found best atlas configuration in %.2fs", delay));
+            Log.d(LOG_TAG, String.format("Found best atlas configuration (out of %d) in %.2fs",
+                    results.size(), delay));
         }
 
         WorkerResult result = results.get(0);
@@ -696,8 +697,8 @@ public class AssetAtlasService extends IAssetAtlas.Stub {
 
             Atlas.Entry entry = new Atlas.Entry();
             for (Atlas.Type type : Atlas.Type.values()) {
-                for (int width = mStart; width < mEnd; width += mStep) {
-                    for (int height = MIN_SIZE; height < MAX_SIZE; height += STEP) {
+                for (int width = mEnd; width > mStart; width -= mStep) {
+                    for (int height = MAX_SIZE; height > MIN_SIZE; height -= STEP) {
                         // If the atlas is not big enough, skip it
                         if (width * height <= mThreshold) continue;
 
