@@ -657,7 +657,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
                 final ActivityStack stack = stacks.get(stackNdx);
                 final ActivityRecord r = stack.mResumedActivity;
                 if (r != null) {
-                    if (!r.nowVisible || r.waitingVisible) {
+                    if (!r.nowVisible || mWaitingVisibleActivities.contains(r)) {
                         return false;
                     }
                     foundResumed = true;
