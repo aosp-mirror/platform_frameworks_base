@@ -2657,4 +2657,5 @@
   <!--IntentFilter auto verification -->
   <public type="attr" name="autoVerify" />
 
+  <public type="attr" name="lockTaskOnLaunch" />
 </resources>

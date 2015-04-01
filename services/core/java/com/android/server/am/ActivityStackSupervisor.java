@@ -154,9 +154,10 @@ public final class ActivityStackSupervisor implements DisplayListener {
     static final int CONTAINER_CALLBACK_VISIBILITY = FIRST_SUPERVISOR_STACK_MSG + 8;
     static final int LOCK_TASK_START_MSG = FIRST_SUPERVISOR_STACK_MSG + 9;
     static final int LOCK_TASK_END_MSG = FIRST_SUPERVISOR_STACK_MSG + 10;
-    static final int CONTAINER_CALLBACK_TASK_LIST_EMPTY = FIRST_SUPERVISOR_STACK_MSG + 11;
-    static final int CONTAINER_TASK_LIST_EMPTY_TIMEOUT = FIRST_SUPERVISOR_STACK_MSG + 12;
-    static final int LAUNCH_TASK_BEHIND_COMPLETE = FIRST_SUPERVISOR_STACK_MSG + 13;
+    static final int LOCK_TASK_SHOW_TOAST_MSG = FIRST_SUPERVISOR_STACK_MSG + 11;
+    static final int CONTAINER_CALLBACK_TASK_LIST_EMPTY = FIRST_SUPERVISOR_STACK_MSG + 12;
+    static final int CONTAINER_TASK_LIST_EMPTY_TIMEOUT = FIRST_SUPERVISOR_STACK_MSG + 13;
+    static final int LAUNCH_TASK_BEHIND_COMPLETE = FIRST_SUPERVISOR_STACK_MSG + 14;
 
     private final static String VIRTUAL_DISPLAY_BASE_NAME = "ActivityViewVirtualDisplay";
 
@@ -1884,7 +1885,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
                         findTaskLocked(r) : findActivityLocked(intent, r.info);
                 if (intentActivity != null) {
                     if (isLockTaskModeViolation(intentActivity.task)) {
-                        showLockTaskToast();
+                        showLockTaskToastLocked();
                         Slog.e(TAG, "startActivityUnchecked: Attempt to violate Lock Task Mode");
                         return ActivityManager.START_RETURN_LOCK_TASK_MODE_VIOLATION;
                     }
@@ -2143,6 +2144,20 @@ public final class ActivityStackSupervisor implements DisplayListener {
                         r.task);
             } else {
                 r.setTask(reuseTask, taskToAffiliate);
+            }
+            if (r.info.lockTaskOnLaunch) {
+                try {
+                    if (!AppGlobals.getPackageManager().isUidPrivileged(callingUid)) {
+                        Slog.e(TAG, "Non-privileged activity " + r +
+                                " using lockTaskOnLaunch attribute");
+                        throw new RuntimeException(
+                                "Non-privileged activity using lockTaskOnLaunch attribute.");
+                    }
+                } catch (RemoteException e) {
+                    // Unreachable. The package manager is in this process.
+                }
+                setLockTaskModeLocked(r.task, ActivityManager.LOCK_TASK_MODE_LOCKED,
+                        "lockTaskOnLaunch attribute");
             }
             if (!movedHome) {
                 if ((launchFlags &
@@ -3596,8 +3611,8 @@ public final class ActivityStackSupervisor implements DisplayListener {
         return list;
     }
 
-    void showLockTaskToast() {
-        mLockTaskNotify.showToast(mLockTaskModeState);
+    void showLockTaskToastLocked() {
+        mHandler.sendEmptyMessage(LOCK_TASK_SHOW_TOAST_MSG);
     }
 
     void setLockTaskModeLocked(TaskRecord task, int lockTaskModeState, String reason) {
@@ -3796,6 +3811,13 @@ public final class ActivityStackSupervisor implements DisplayListener {
                         mLockTaskModeState = ActivityManager.LOCK_TASK_MODE_NONE;
                     }
                 } break;
+                case LOCK_TASK_SHOW_TOAST_MSG: {
+                    if (mLockTaskNotify == null) {
+                        mLockTaskNotify = new LockTaskNotify(mService.mContext);
+                    }
+                    mLockTaskNotify.showToast(mLockTaskModeState);
+                    break;
+                }
                 case CONTAINER_CALLBACK_TASK_LIST_EMPTY: {
                     final ActivityContainer container = (ActivityContainer) msg.obj;
                     final IActivityContainerCallback callback = container.mCallback;
