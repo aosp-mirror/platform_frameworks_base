@@ -1044,7 +1044,6 @@ final class ActivityRecord {
         // First find the real culprit...  if this activity is waiting for
         // another activity to start or has stopped, then the key dispatching
         // timeout should not be caused by this.
-        ActivityRecord r = this;
         if (mStackSupervisor.mWaitingVisibleActivities.contains(this) || stopped) {
             final ActivityStack stack = mStackSupervisor.getFocusedStack();
             // Try to use the one which is closest to top.
