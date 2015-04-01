@@ -26031,8 +26031,16 @@ package android.provider {
     field public static final java.lang.String ACTION_SET_ALARM = "android.intent.action.SET_ALARM";
     field public static final java.lang.String ACTION_SET_TIMER = "android.intent.action.SET_TIMER";
     field public static final java.lang.String ACTION_SHOW_ALARMS = "android.intent.action.SHOW_ALARMS";
+    field public static final java.lang.String ACTION_VOICE_CANCEL_ALARM = "android.intent.action.VOICE_CANCEL_ALARM";
+    field public static final java.lang.String ACTION_VOICE_DELETE_ALARM = "android.intent.action.VOICE_DELETE_ALARM";
+    field public static final java.lang.String ALARM_SEARCH_MODE_ALL = "all";
+    field public static final java.lang.String ALARM_SEARCH_MODE_NEXT = "next";
+    field public static final java.lang.String ALARM_SEARCH_MODE_NONE = "none";
+    field public static final java.lang.String ALARM_SEARCH_MODE_TIME = "time";
+    field public static final java.lang.String EXTRA_ALARM_SEARCH_MODE = "android.intent.extra.alarm.ALARM_SEARCH_MODE";
     field public static final java.lang.String EXTRA_DAYS = "android.intent.extra.alarm.DAYS";
     field public static final java.lang.String EXTRA_HOUR = "android.intent.extra.alarm.HOUR";
+    field public static final java.lang.String EXTRA_IS_PM = "android.intent.extra.alarm.IS_PM";
     field public static final java.lang.String EXTRA_LENGTH = "android.intent.extra.alarm.LENGTH";
     field public static final java.lang.String EXTRA_MESSAGE = "android.intent.extra.alarm.MESSAGE";
     field public static final java.lang.String EXTRA_MINUTES = "android.intent.extra.alarm.MINUTES";
