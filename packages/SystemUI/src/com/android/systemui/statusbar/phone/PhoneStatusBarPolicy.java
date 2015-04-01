@@ -16,16 +16,22 @@
 
 package com.android.systemui.statusbar.phone;
 
+import android.app.ActivityManagerNative;
 import android.app.AlarmManager;
+import android.app.IUserSwitchObserver;
 import android.app.StatusBarManager;
 import android.bluetooth.BluetoothAdapter;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.UserInfo;
 import android.media.AudioManager;
 import android.os.Handler;
+import android.os.IRemoteCallback;
+import android.os.RemoteException;
 import android.os.UserHandle;
+import android.os.UserManager;
 import android.provider.Settings.Global;
 import android.telecom.TelecomManager;
 import android.util.Log;
@@ -54,6 +60,7 @@ public class PhoneStatusBarPolicy {
     private static final String SLOT_ZEN = "zen";
     private static final String SLOT_VOLUME = "volume";
     private static final String SLOT_ALARM_CLOCK = "alarm_clock";
+    private static final String SLOT_MANAGED_PROFILE = "managed_profile";
 
     private final Context mContext;
     private final StatusBarManager mService;
@@ -72,6 +79,10 @@ public class PhoneStatusBarPolicy {
 
     private boolean mBluetoothEnabled = false;
 
+    private boolean mManagedProfileFocused = false;
+    private boolean mManagedProfileIconVisible = true;
+
+    private boolean mKeyguardVisible = true;
 
     private BroadcastReceiver mIntentReceiver = new BroadcastReceiver() {
         @Override
@@ -94,9 +105,6 @@ public class PhoneStatusBarPolicy {
             else if (action.equals(TelecomManager.ACTION_CURRENT_TTY_MODE_CHANGED)) {
                 updateTTY(intent);
             }
-            else if (action.equals(Intent.ACTION_USER_SWITCHED)) {
-                updateAlarm();
-            }
         }
     };
 
@@ -115,8 +123,14 @@ public class PhoneStatusBarPolicy {
         filter.addAction(BluetoothAdapter.ACTION_CONNECTION_STATE_CHANGED);
         filter.addAction(TelephonyIntents.ACTION_SIM_STATE_CHANGED);
         filter.addAction(TelecomManager.ACTION_CURRENT_TTY_MODE_CHANGED);
-        filter.addAction(Intent.ACTION_USER_SWITCHED);
         mContext.registerReceiver(mIntentReceiver, filter, null, mHandler);
+
+        // listen for user / profile change.
+        try {
+            ActivityManagerNative.getDefault().registerUserSwitchObserver(mUserSwitchListener);
+        } catch (RemoteException e) {
+            // Ignore
+        }
 
         // TTY status
         mService.setIcon(SLOT_TTY,  R.drawable.stat_sys_tty_mode, 0, null);
@@ -147,6 +161,10 @@ public class PhoneStatusBarPolicy {
         mService.setIcon(SLOT_HOTSPOT, R.drawable.stat_sys_hotspot, 0, null);
         mService.setIconVisibility(SLOT_HOTSPOT, mHotspot.isHotspotEnabled());
         mHotspot.addCallback(mHotspotCallback);
+
+        // managed profile
+        mService.setIcon(SLOT_MANAGED_PROFILE, R.drawable.stat_sys_managed_profile_status, 0, null);
+        mService.setIconVisibility(SLOT_MANAGED_PROFILE, false);
     }
 
     public void setZenMode(int zen) {
@@ -298,6 +316,53 @@ public class PhoneStatusBarPolicy {
         mService.setIconVisibility(SLOT_CAST, isCasting);
     }
 
+    private void profileChanged(int userId) {
+        UserManager userManager = (UserManager) mContext.getSystemService(Context.USER_SERVICE);
+        UserInfo user = null;
+        if (userId == UserHandle.USER_CURRENT) {
+            try {
+                user = ActivityManagerNative.getDefault().getCurrentUser();
+            } catch (RemoteException e) {
+                // Ignore
+            }
+        } else {
+            user = userManager.getUserInfo(userId);
+        }
+
+        mManagedProfileFocused = user != null && user.isManagedProfile();
+        if (DEBUG) Log.v(TAG, "profileChanged: mManagedProfileFocused: " + mManagedProfileFocused);
+        // Actually update the icon later when transition starts.
+    }
+
+    private void updateManagedProfile() {
+        if (DEBUG) Log.v(TAG, "updateManagedProfile: mManagedProfileFocused: "
+                + mManagedProfileFocused
+                + " mKeyguardVisible: " + mKeyguardVisible);
+        boolean showIcon = mManagedProfileFocused && !mKeyguardVisible;
+        if (mManagedProfileIconVisible != showIcon) {
+            mService.setIconVisibility(SLOT_MANAGED_PROFILE, showIcon);
+            mManagedProfileIconVisible = showIcon;
+        }
+    }
+
+    private final IUserSwitchObserver.Stub mUserSwitchListener =
+            new IUserSwitchObserver.Stub() {
+                @Override
+                public void onUserSwitching(int newUserId, IRemoteCallback reply) {
+                }
+
+                @Override
+                public void onUserSwitchComplete(int newUserId) throws RemoteException {
+                    updateAlarm();
+                    profileChanged(newUserId);
+                }
+
+                @Override
+                public void onForegroundProfileSwitch(int newProfileId) {
+                    profileChanged(newProfileId);
+                }
+            };
+
     private final HotspotController.Callback mHotspotCallback = new HotspotController.Callback() {
         @Override
         public void onHotspotChanged(boolean enabled) {
@@ -311,4 +376,13 @@ public class PhoneStatusBarPolicy {
             updateCast();
         }
     };
+
+    public void appTransitionStarting(long startTime, long duration) {
+        updateManagedProfile();
+    }
+
+    public void setKeyguardShowing(boolean visible) {
+        mKeyguardVisible = visible;
+        updateManagedProfile();
+    }
 }

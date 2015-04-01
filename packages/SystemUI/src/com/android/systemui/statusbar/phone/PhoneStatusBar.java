@@ -3288,8 +3288,10 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         }
         if (mState == StatusBarState.KEYGUARD || mState == StatusBarState.SHADE_LOCKED) {
             mScrimController.setKeyguardShowing(true);
+            mIconPolicy.setKeyguardShowing(true);
         } else {
             mScrimController.setKeyguardShowing(false);
+            mIconPolicy.setKeyguardShowing(false);
         }
         mNotificationPanel.setBarState(mState, mKeyguardFadingAway, goingToFullShade);
         updateDozingState();
@@ -3723,6 +3725,9 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         // setKeyguardFadingAway
         if (!mKeyguardFadingAway) {
             mIconController.appTransitionStarting(startTime, duration);
+        }
+        if (mIconPolicy != null) {
+            mIconPolicy.appTransitionStarting(startTime, duration);
         }
     }
 
