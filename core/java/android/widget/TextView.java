@@ -8576,8 +8576,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     @Override
-    public void onProvideAssistStructure(ViewAssistStructure structure, Bundle extras) {
-        super.onProvideAssistStructure(structure, extras);
+    public void onProvideAssistStructure(ViewAssistStructure structure) {
+        super.onProvideAssistStructure(structure);
         final boolean isPassword = hasPasswordTransformationMethod();
         if (!isPassword) {
             structure.setText(getText(), getSelectionStart(), getSelectionEnd());

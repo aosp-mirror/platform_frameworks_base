@@ -91,6 +91,7 @@ import android.view.animation.Transformation;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputConnection;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.Checkable;
 import android.widget.ScrollBarDrawable;
 
 import static android.os.Build.VERSION_CODES.*;
@@ -5676,10 +5677,143 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     /**
      * Called when assist structure is being retrieved from a view as part of
      * {@link android.app.Activity#onProvideAssistData Activity.onProvideAssistData}.
-     * @param structure Additional standard structured view structure to supply.
-     * @param extras Non-standard extensions.
+     * @param structure Fill in with structured view data.  The default implementation
+     * fills in all data that can be inferred from the view itself.
      */
-    public void onProvideAssistStructure(ViewAssistStructure structure, Bundle extras) {
+    public void onProvideAssistStructure(ViewAssistStructure structure) {
+        final int id = mID;
+        if (id > 0 && (id&0xff000000) != 0 && (id&0x00ff0000) != 0
+                && (id&0x0000ffff) != 0) {
+            String pkg, type, entry;
+            try {
+                final Resources res = getResources();
+                entry = res.getResourceEntryName(id);
+                type = res.getResourceTypeName(id);
+                pkg = res.getResourcePackageName(id);
+            } catch (Resources.NotFoundException e) {
+                entry = type = pkg = null;
+            }
+            structure.setId(id, pkg, type, entry);
+        } else {
+            structure.setId(id, null, null, null);
+        }
+        structure.setDimens(mLeft, mTop, mScrollX, mScrollY, mRight-mLeft, mBottom-mTop);
+        structure.setVisibility(getVisibility());
+        structure.setEnabled(isEnabled());
+        if (isClickable()) {
+            structure.setClickable(true);
+        }
+        if (isFocusable()) {
+            structure.setFocusable(true);
+        }
+        if (isFocused()) {
+            structure.setFocused(true);
+        }
+        if (isAccessibilityFocused()) {
+            structure.setAccessibilityFocused(true);
+        }
+        if (isSelected()) {
+            structure.setSelected(true);
+        }
+        if (isActivated()) {
+            structure.setActivated(true);
+        }
+        if (isLongClickable()) {
+            structure.setLongClickable(true);
+        }
+        if (this instanceof Checkable) {
+            structure.setCheckable(true);
+            if (((Checkable)this).isChecked()) {
+                structure.setChecked(true);
+            }
+        }
+        structure.setClassName(getAccessibilityClassName().toString());
+        structure.setContentDescription(getContentDescription());
+    }
+
+    /**
+     * Called when assist structure is being retrieved from a view as part of
+     * {@link android.app.Activity#onProvideAssistData Activity.onProvideAssistData} to
+     * generate additional virtual structure under this view.  The defaullt implementation
+     * uses {@link #getAccessibilityNodeProvider()} to try to generate this from the
+     * view's virtual accessibility nodes, if any.  You can override this for a more
+     * optimal implementation providing this data.
+     */
+    public void onProvideVirtualAssistStructure(ViewAssistStructure structure) {
+        AccessibilityNodeProvider provider = getAccessibilityNodeProvider();
+        if (provider != null) {
+            AccessibilityNodeInfo info = createAccessibilityNodeInfo();
+            Log.i("View", "Provider of " + this + ": children=" + info.getChildCount());
+            structure.setChildCount(1);
+            ViewAssistStructure root = structure.newChild(0);
+            populateVirtualAssistStructure(root, provider, info);
+            info.recycle();
+        }
+    }
+
+    private void populateVirtualAssistStructure(ViewAssistStructure structure,
+            AccessibilityNodeProvider provider, AccessibilityNodeInfo info) {
+        structure.setId(AccessibilityNodeInfo.getVirtualDescendantId(info.getSourceNodeId()),
+                null, null, null);
+        Rect rect = structure.getTempRect();
+        info.getBoundsInParent(rect);
+        structure.setDimens(rect.left, rect.top, 0, 0, rect.width(), rect.height());
+        structure.setVisibility(VISIBLE);
+        structure.setEnabled(info.isEnabled());
+        if (info.isClickable()) {
+            structure.setClickable(true);
+        }
+        if (info.isFocusable()) {
+            structure.setFocusable(true);
+        }
+        if (info.isFocused()) {
+            structure.setFocused(true);
+        }
+        if (info.isAccessibilityFocused()) {
+            structure.setAccessibilityFocused(true);
+        }
+        if (info.isSelected()) {
+            structure.setSelected(true);
+        }
+        if (info.isLongClickable()) {
+            structure.setLongClickable(true);
+        }
+        if (info.isCheckable()) {
+            structure.setCheckable(true);
+            if (info.isChecked()) {
+                structure.setChecked(true);
+            }
+        }
+        CharSequence cname = info.getClassName();
+        structure.setClassName(cname != null ? cname.toString() : null);
+        structure.setContentDescription(info.getContentDescription());
+        Log.i("View", "vassist " + cname + " @ " + rect.toShortString()
+                + " text=" + info.getText() + " cd=" + info.getContentDescription());
+        if (info.getText() != null || info.getError() != null) {
+            structure.setText(info.getText(), info.getTextSelectionStart(),
+                    info.getTextSelectionEnd());
+        }
+        final int NCHILDREN = info.getChildCount();
+        if (NCHILDREN > 0) {
+            structure.setChildCount(NCHILDREN);
+            for (int i=0; i<NCHILDREN; i++) {
+                AccessibilityNodeInfo cinfo = provider.createAccessibilityNodeInfo(
+                        AccessibilityNodeInfo.getVirtualDescendantId(info.getChildId(i)));
+                ViewAssistStructure child = structure.newChild(i);
+                populateVirtualAssistStructure(child, provider, cinfo);
+                cinfo.recycle();
+            }
+        }
+    }
+
+    /**
+     * Dispatch creation of {@link ViewAssistStructure} down the hierarchy.  The default
+     * implementation calls {@link #onProvideAssistStructure} and
+     * {@link #onProvideVirtualAssistStructure}.
+     */
+    public void dispatchProvideAssistStructure(ViewAssistStructure structure) {
+        onProvideAssistStructure(structure);
+        onProvideVirtualAssistStructure(structure);
     }
 
     /**

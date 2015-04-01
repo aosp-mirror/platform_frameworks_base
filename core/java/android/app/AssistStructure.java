@@ -17,7 +17,6 @@
 package android.app;
 
 import android.content.ComponentName;
-import android.content.res.Resources;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.Typeface;
@@ -31,10 +30,8 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewAssistStructure;
-import android.view.ViewGroup;
 import android.view.ViewRootImpl;
 import android.view.WindowManagerGlobal;
-import android.widget.Checkable;
 
 import java.util.ArrayList;
 
@@ -56,107 +53,22 @@ final public class AssistStructure implements Parcelable {
 
     final ArrayList<WindowNode> mWindowNodes = new ArrayList<>();
 
-    ViewAssistStructureImpl mTmpViewAssistStructureImpl = new ViewAssistStructureImpl();
-    Bundle mTmpExtras = new Bundle();
+    Rect mTmpRect = new Rect();
 
-    final static class ViewAssistStructureImpl extends ViewAssistStructure {
+    final static class ViewNodeText {
         CharSequence mText;
-        int mTextSelectionStart = -1;
-        int mTextSelectionEnd = -1;
-        int mTextColor = ViewNode.TEXT_COLOR_UNDEFINED;
-        int mTextBackgroundColor = ViewNode.TEXT_COLOR_UNDEFINED;
-        float mTextSize = 0;
-        int mTextStyle = 0;
-        CharSequence mHint;
-
-        @Override
-        public void setText(CharSequence text) {
-            mText = text;
-            mTextSelectionStart = mTextSelectionEnd = -1;
-        }
-
-        @Override
-        public void setText(CharSequence text, int selectionStart, int selectionEnd) {
-            mText = text;
-            mTextSelectionStart = selectionStart;
-            mTextSelectionEnd = selectionEnd;
-        }
-
-        @Override
-        public void setTextPaint(TextPaint paint) {
-            mTextColor = paint.getColor();
-            mTextBackgroundColor = paint.bgColor;
-            mTextSize = paint.getTextSize();
-            mTextStyle = 0;
-            Typeface tf = paint.getTypeface();
-            if (tf != null) {
-                if (tf.isBold()) {
-                    mTextStyle |= ViewNode.TEXT_STYLE_BOLD;
-                }
-                if (tf.isItalic()) {
-                    mTextStyle |= ViewNode.TEXT_STYLE_ITALIC;
-                }
-            }
-            int pflags = paint.getFlags();
-            if ((pflags& Paint.FAKE_BOLD_TEXT_FLAG) != 0) {
-                mTextStyle |= ViewNode.TEXT_STYLE_BOLD;
-            }
-            if ((pflags& Paint.UNDERLINE_TEXT_FLAG) != 0) {
-                mTextStyle |= ViewNode.TEXT_STYLE_UNDERLINE;
-            }
-            if ((pflags& Paint.STRIKE_THRU_TEXT_FLAG) != 0) {
-                mTextStyle |= ViewNode.TEXT_STYLE_STRIKE_THRU;
-            }
-        }
-
-        @Override
-        public void setHint(CharSequence hint) {
-            mHint = hint;
-        }
-
-        @Override
-        public CharSequence getText() {
-            return mText;
-        }
-
-        @Override
-        public int getTextSelectionStart() {
-            return mTextSelectionStart;
-        }
-
-        @Override
-        public int getTextSelectionEnd() {
-            return mTextSelectionEnd;
-        }
-
-        @Override
-        public CharSequence getHint() {
-            return mHint;
-        }
-    }
-
-    final static class ViewNodeTextImpl {
-        final CharSequence mText;
-        final int mTextSelectionStart;
-        final int mTextSelectionEnd;
+        int mTextSelectionStart;
+        int mTextSelectionEnd;
         int mTextColor;
         int mTextBackgroundColor;
         float mTextSize;
         int mTextStyle;
-        final String mHint;
+        String mHint;
 
-        ViewNodeTextImpl(ViewAssistStructureImpl data) {
-            mText = data.mText;
-            mTextSelectionStart = data.mTextSelectionStart;
-            mTextSelectionEnd = data.mTextSelectionEnd;
-            mTextColor = data.mTextColor;
-            mTextBackgroundColor = data.mTextBackgroundColor;
-            mTextSize = data.mTextSize;
-            mTextStyle = data.mTextStyle;
-            mHint = data.mHint != null ? data.mHint.toString() : null;
+        ViewNodeText() {
         }
 
-        ViewNodeTextImpl(Parcel in) {
+        ViewNodeText(Parcel in) {
             mText = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(in);
             mTextSelectionStart = in.readInt();
             mTextSelectionEnd = in.readInt();
@@ -199,7 +111,9 @@ final public class AssistStructure implements Parcelable {
             mWidth = rect.width();
             mHeight = rect.height();
             mTitle = root.getTitle();
-            mRoot = new ViewNode(assist, view);
+            mRoot = new ViewNode();
+            ViewNodeBuilder builder = new ViewNodeBuilder(assist, mRoot);
+            view.dispatchProvideAssistStructure(builder);
         }
 
         WindowNode(Parcel in, PooledStringReader preader) {
@@ -260,16 +174,16 @@ final public class AssistStructure implements Parcelable {
         public static final int TEXT_STYLE_UNDERLINE = 1<<2;
         public static final int TEXT_STYLE_STRIKE_THRU = 1<<3;
 
-        final int mId;
-        final String mIdPackage;
-        final String mIdType;
-        final String mIdEntry;
-        final int mX;
-        final int mY;
-        final int mScrollX;
-        final int mScrollY;
-        final int mWidth;
-        final int mHeight;
+        int mId;
+        String mIdPackage;
+        String mIdType;
+        String mIdEntry;
+        int mX;
+        int mY;
+        int mScrollX;
+        int mScrollY;
+        int mWidth;
+        int mHeight;
 
         static final int FLAGS_DISABLED = 0x00000001;
         static final int FLAGS_VISIBILITY_MASK = View.VISIBLE|View.INVISIBLE|View.GONE;
@@ -283,104 +197,17 @@ final public class AssistStructure implements Parcelable {
         static final int FLAGS_CLICKABLE = 0x00004000;
         static final int FLAGS_LONG_CLICKABLE = 0x00200000;
 
-        final int mFlags;
+        int mFlags;
 
-        final String mClassName;
-        final CharSequence mContentDescription;
+        String mClassName;
+        CharSequence mContentDescription;
 
-        final ViewNodeTextImpl mText;
-        final Bundle mExtras;
+        ViewNodeText mText;
+        Bundle mExtras;
 
-        final ViewNode[] mChildren;
+        ViewNode[] mChildren;
 
-        ViewNode(AssistStructure assistStructure, View view) {
-            mId = view.getId();
-            if (mId > 0 && (mId&0xff000000) != 0 && (mId&0x00ff0000) != 0
-                    && (mId&0x0000ffff) != 0) {
-                String pkg, type, entry;
-                try {
-                    Resources res = view.getResources();
-                    entry = res.getResourceEntryName(mId);
-                    type = res.getResourceTypeName(mId);
-                    pkg = res.getResourcePackageName(mId);
-                } catch (Resources.NotFoundException e) {
-                    entry = type = pkg = null;
-                }
-                mIdPackage = pkg;
-                mIdType = type;
-                mIdEntry = entry;
-            } else {
-                mIdPackage = mIdType = mIdEntry = null;
-            }
-            mX = view.getLeft();
-            mY = view.getTop();
-            mScrollX = view.getScrollX();
-            mScrollY = view.getScrollY();
-            mWidth = view.getWidth();
-            mHeight = view.getHeight();
-            int flags = view.getVisibility();
-            if (!view.isEnabled()) {
-                flags |= FLAGS_DISABLED;
-            }
-            if (!view.isClickable()) {
-                flags |= FLAGS_CLICKABLE;
-            }
-            if (!view.isFocusable()) {
-                flags |= FLAGS_FOCUSABLE;
-            }
-            if (!view.isFocused()) {
-                flags |= FLAGS_FOCUSED;
-            }
-            if (!view.isAccessibilityFocused()) {
-                flags |= FLAGS_ACCESSIBILITY_FOCUSED;
-            }
-            if (!view.isSelected()) {
-                flags |= FLAGS_SELECTED;
-            }
-            if (!view.isActivated()) {
-                flags |= FLAGS_ACTIVATED;
-            }
-            if (!view.isLongClickable()) {
-                flags |= FLAGS_LONG_CLICKABLE;
-            }
-            if (view instanceof Checkable) {
-                flags |= FLAGS_CHECKABLE;
-                if (((Checkable)view).isChecked()) {
-                    flags |= FLAGS_CHECKED;
-                }
-            }
-            mFlags = flags;
-            mClassName = view.getAccessibilityClassName().toString();
-            mContentDescription = view.getContentDescription();
-            final ViewAssistStructureImpl viewData = assistStructure.mTmpViewAssistStructureImpl;
-            final Bundle extras = assistStructure.mTmpExtras;
-            view.onProvideAssistStructure(viewData, extras);
-            if (viewData.mText != null || viewData.mHint != null) {
-                mText = new ViewNodeTextImpl(viewData);
-                assistStructure.mTmpViewAssistStructureImpl = new ViewAssistStructureImpl();
-            } else {
-                mText = null;
-            }
-            if (!extras.isEmpty()) {
-                mExtras = extras;
-                assistStructure.mTmpExtras = new Bundle();
-            } else {
-                mExtras = null;
-            }
-            if (view instanceof ViewGroup) {
-                ViewGroup vg = (ViewGroup)view;
-                final int NCHILDREN = vg.getChildCount();
-                if (NCHILDREN > 0) {
-                    mChildren = new ViewNode[NCHILDREN];
-                    for (int i=0; i<NCHILDREN; i++) {
-                        mChildren[i] = new ViewNode(assistStructure, vg.getChildAt(i));
-                    }
-                } else {
-                    mChildren = null;
-                }
-            } else {
-                mChildren = null;
-            }
+        ViewNode() {
         }
 
         ViewNode(Parcel in, PooledStringReader preader) {
@@ -406,7 +233,7 @@ final public class AssistStructure implements Parcelable {
             mClassName = preader.readString();
             mContentDescription = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(in);
             if (in.readInt() != 0) {
-                mText = new ViewNodeTextImpl(in);
+                mText = new ViewNodeText(in);
             } else {
                 mText = null;
             }
@@ -592,6 +419,221 @@ final public class AssistStructure implements Parcelable {
 
         public ViewNode getChildAt(int index) {
             return mChildren[index];
+        }
+    }
+
+    static class ViewNodeBuilder extends ViewAssistStructure {
+        final AssistStructure mAssist;
+        final ViewNode mNode;
+
+        ViewNodeBuilder(AssistStructure assist, ViewNode node) {
+            mAssist = assist;
+            mNode = node;
+        }
+
+        @Override
+        public void setId(int id, String packageName, String typeName, String entryName) {
+            mNode.mId = id;
+            mNode.mIdPackage = packageName;
+            mNode.mIdType = typeName;
+            mNode.mIdEntry = entryName;
+        }
+
+        @Override
+        public void setDimens(int left, int top, int scrollX, int scrollY, int width, int height) {
+            mNode.mX = left;
+            mNode.mY = top;
+            mNode.mScrollX = scrollX;
+            mNode.mScrollY = scrollY;
+            mNode.mWidth = width;
+            mNode.mHeight = height;
+        }
+
+        @Override
+        public void setVisibility(int visibility) {
+            mNode.mFlags = (mNode.mFlags&~ViewNode.FLAGS_VISIBILITY_MASK) | visibility;
+        }
+
+        @Override
+        public void setEnabled(boolean state) {
+            mNode.mFlags = (mNode.mFlags&~ViewNode.FLAGS_DISABLED)
+                    | (state ? 0 : ViewNode.FLAGS_DISABLED);
+        }
+
+        @Override
+        public void setClickable(boolean state) {
+            mNode.mFlags = (mNode.mFlags&~ViewNode.FLAGS_CLICKABLE)
+                    | (state ? ViewNode.FLAGS_CLICKABLE : 0);
+        }
+
+        @Override
+        public void setLongClickable(boolean state) {
+            mNode.mFlags = (mNode.mFlags&~ViewNode.FLAGS_LONG_CLICKABLE)
+                    | (state ? ViewNode.FLAGS_LONG_CLICKABLE : 0);
+        }
+
+        @Override
+        public void setFocusable(boolean state) {
+            mNode.mFlags = (mNode.mFlags&~ViewNode.FLAGS_FOCUSABLE)
+                    | (state ? ViewNode.FLAGS_FOCUSABLE : 0);
+        }
+
+        @Override
+        public void setFocused(boolean state) {
+            mNode.mFlags = (mNode.mFlags&~ViewNode.FLAGS_FOCUSED)
+                    | (state ? ViewNode.FLAGS_FOCUSED : 0);
+        }
+
+        @Override
+        public void setAccessibilityFocused(boolean state) {
+            mNode.mFlags = (mNode.mFlags&~ViewNode.FLAGS_ACCESSIBILITY_FOCUSED)
+                    | (state ? ViewNode.FLAGS_ACCESSIBILITY_FOCUSED : 0);
+        }
+
+        @Override
+        public void setCheckable(boolean state) {
+            mNode.mFlags = (mNode.mFlags&~ViewNode.FLAGS_CHECKABLE)
+                    | (state ? ViewNode.FLAGS_CHECKABLE : 0);
+        }
+
+        @Override
+        public void setChecked(boolean state) {
+            mNode.mFlags = (mNode.mFlags&~ViewNode.FLAGS_CHECKED)
+                    | (state ? ViewNode.FLAGS_CHECKED : 0);
+        }
+
+        @Override
+        public void setSelected(boolean state) {
+            mNode.mFlags = (mNode.mFlags&~ViewNode.FLAGS_SELECTED)
+                    | (state ? ViewNode.FLAGS_SELECTED : 0);
+        }
+
+        @Override
+        public void setActivated(boolean state) {
+            mNode.mFlags = (mNode.mFlags&~ViewNode.FLAGS_ACTIVATED)
+                    | (state ? ViewNode.FLAGS_ACTIVATED : 0);
+        }
+
+        @Override
+        public void setClassName(String className) {
+            mNode.mClassName = className;
+        }
+
+        @Override
+        public void setContentDescription(CharSequence contentDescription) {
+            mNode.mContentDescription = contentDescription;
+        }
+
+        private final ViewNodeText getNodeText() {
+            if (mNode.mText != null) {
+                return mNode.mText;
+            }
+            mNode.mText = new ViewNodeText();
+            return mNode.mText;
+        }
+
+        @Override
+        public void setText(CharSequence text) {
+            ViewNodeText t = getNodeText();
+            t.mText = text;
+            t.mTextSelectionStart = t.mTextSelectionEnd = -1;
+        }
+
+        @Override
+        public void setText(CharSequence text, int selectionStart, int selectionEnd) {
+            ViewNodeText t = getNodeText();
+            t.mText = text;
+            t.mTextSelectionStart = selectionStart;
+            t.mTextSelectionEnd = selectionEnd;
+        }
+
+        @Override
+        public void setTextPaint(TextPaint paint) {
+            ViewNodeText t = getNodeText();
+            t.mTextColor = paint.getColor();
+            t.mTextBackgroundColor = paint.bgColor;
+            t.mTextSize = paint.getTextSize();
+            t.mTextStyle = 0;
+            Typeface tf = paint.getTypeface();
+            if (tf != null) {
+                if (tf.isBold()) {
+                    t.mTextStyle |= ViewNode.TEXT_STYLE_BOLD;
+                }
+                if (tf.isItalic()) {
+                    t.mTextStyle |= ViewNode.TEXT_STYLE_ITALIC;
+                }
+            }
+            int pflags = paint.getFlags();
+            if ((pflags& Paint.FAKE_BOLD_TEXT_FLAG) != 0) {
+                t.mTextStyle |= ViewNode.TEXT_STYLE_BOLD;
+            }
+            if ((pflags& Paint.UNDERLINE_TEXT_FLAG) != 0) {
+                t.mTextStyle |= ViewNode.TEXT_STYLE_UNDERLINE;
+            }
+            if ((pflags& Paint.STRIKE_THRU_TEXT_FLAG) != 0) {
+                t.mTextStyle |= ViewNode.TEXT_STYLE_STRIKE_THRU;
+            }
+        }
+
+        @Override
+        public void setHint(CharSequence hint) {
+            getNodeText().mHint = hint != null ? hint.toString() : null;
+        }
+
+        @Override
+        public CharSequence getText() {
+            return mNode.mText != null ? mNode.mText.mText : null;
+        }
+
+        @Override
+        public int getTextSelectionStart() {
+            return mNode.mText != null ? mNode.mText.mTextSelectionStart : -1;
+        }
+
+        @Override
+        public int getTextSelectionEnd() {
+            return mNode.mText != null ? mNode.mText.mTextSelectionEnd : -1;
+        }
+
+        @Override
+        public CharSequence getHint() {
+            return mNode.mText != null ? mNode.mText.mHint : null;
+        }
+
+        @Override
+        public Bundle editExtras() {
+            if (mNode.mExtras != null) {
+                return mNode.mExtras;
+            }
+            mNode.mExtras = new Bundle();
+            return mNode.mExtras;
+        }
+
+        @Override
+        public void clearExtras() {
+            mNode.mExtras = null;
+        }
+
+        @Override
+        public void setChildCount(int num) {
+            mNode.mChildren = new ViewNode[num];
+        }
+
+        @Override
+        public int getChildCount() {
+            return mNode.mChildren != null ? mNode.mChildren.length : 0;
+        }
+
+        @Override
+        public ViewAssistStructure newChild(int index) {
+            ViewNode node = new ViewNode();
+            mNode.mChildren[index] = node;
+            return new ViewNodeBuilder(mAssist, node);
+        }
+
+        @Override
+        public Rect getTempRect() {
+            return mAssist.mTmpRect;
         }
     }
 

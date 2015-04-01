@@ -45,6 +45,7 @@ public class AssistVisualizer extends View {
     }
 
     public void setAssistStructure(AssistStructure as) {
+        mAssistStructure.dump();
         mAssistStructure = as;
         mTextRects.clear();
         final int N = as.getWindowNodeCount();
@@ -55,6 +56,7 @@ public class AssistVisualizer extends View {
                         windowNode.getTop());
             }
         }
+        Log.d(TAG, "Building text rects in " + this + ": found " + mTextRects.size());
         invalidate();
     }
 
@@ -69,10 +71,11 @@ public class AssistVisualizer extends View {
         }
         int left = parentLeft+root.getLeft();
         int top = parentTop+root.getTop();
-        Log.d(TAG, "View " + root.getClassName() + ": " + left + ", " + top);
-        if (root.getText() != null) {
+        if (root.getText() != null || root.getContentDescription() != null) {
             Rect r = new Rect(left, top, left+root.getWidth(), top+root.getHeight());
-            Log.d(TAG, "Text Rect " + r.toShortString() + ": " + root.getText());
+            Log.d(TAG, "View " + root.getClassName() + " " + left + "," + top + " tr "
+                    + r.toShortString() + ": "
+                    + (root.getText() != null ? root.getText() : root.getContentDescription()));
             mTextRects.add(r);
         }
         final int N = root.getChildCount();
@@ -91,6 +94,7 @@ public class AssistVisualizer extends View {
         super.onDraw(canvas);
         getLocationOnScreen(mTmpLocation);
         final int N = mTextRects.size();
+        Log.d(TAG, "Drawing text rects in " + this + ": found " + mTextRects.size());
         for (int i=0; i<N; i++) {
             Rect r = mTextRects.get(i);
             canvas.drawRect(r.left-mTmpLocation[0], r.top-mTmpLocation[1],

@@ -37053,6 +37053,7 @@ package android.view {
     method public boolean dispatchNestedPreScroll(int, int, int[], int[]);
     method public boolean dispatchNestedScroll(int, int, int, int, int[]);
     method public boolean dispatchPopulateAccessibilityEvent(android.view.accessibility.AccessibilityEvent);
+    method public void dispatchProvideAssistStructure(android.view.ViewAssistStructure);
     method protected void dispatchRestoreInstanceState(android.util.SparseArray<android.os.Parcelable>);
     method protected void dispatchSaveInstanceState(android.util.SparseArray<android.os.Parcelable>);
     method protected void dispatchSetActivated(boolean);
@@ -37309,7 +37310,8 @@ package android.view {
     method protected void onMeasure(int, int);
     method protected void onOverScrolled(int, int, boolean, boolean);
     method public void onPopulateAccessibilityEvent(android.view.accessibility.AccessibilityEvent);
-    method public void onProvideAssistStructure(android.view.ViewAssistStructure, android.os.Bundle);
+    method public void onProvideAssistStructure(android.view.ViewAssistStructure);
+    method public void onProvideVirtualAssistStructure(android.view.ViewAssistStructure);
     method protected void onRestoreInstanceState(android.os.Parcelable);
     method public void onRtlPropertiesChanged(int);
     method protected android.os.Parcelable onSaveInstanceState();
@@ -37719,14 +37721,34 @@ package android.view {
 
   public abstract class ViewAssistStructure {
     ctor public ViewAssistStructure();
+    method public abstract void clearExtras();
+    method public abstract android.os.Bundle editExtras();
+    method public abstract int getChildCount();
     method public abstract java.lang.CharSequence getHint();
     method public abstract java.lang.CharSequence getText();
     method public abstract int getTextSelectionEnd();
     method public abstract int getTextSelectionStart();
+    method public abstract android.view.ViewAssistStructure newChild(int);
+    method public abstract void setAccessibilityFocused(boolean);
+    method public abstract void setActivated(boolean);
+    method public abstract void setCheckable(boolean);
+    method public abstract void setChecked(boolean);
+    method public abstract void setChildCount(int);
+    method public abstract void setClassName(java.lang.String);
+    method public abstract void setClickable(boolean);
+    method public abstract void setContentDescription(java.lang.CharSequence);
+    method public abstract void setDimens(int, int, int, int, int, int);
+    method public abstract void setEnabled(boolean);
+    method public abstract void setFocusable(boolean);
+    method public abstract void setFocused(boolean);
     method public abstract void setHint(java.lang.CharSequence);
+    method public abstract void setId(int, java.lang.String, java.lang.String, java.lang.String);
+    method public abstract void setLongClickable(boolean);
+    method public abstract void setSelected(boolean);
     method public abstract void setText(java.lang.CharSequence);
     method public abstract void setText(java.lang.CharSequence, int, int);
     method public abstract void setTextPaint(android.text.TextPaint);
+    method public abstract void setVisibility(int);
   }
 
   public class ViewConfiguration {
