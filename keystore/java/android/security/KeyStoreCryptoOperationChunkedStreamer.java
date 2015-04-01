@@ -120,7 +120,7 @@ public class KeyStoreCryptoOperationChunkedStreamer {
             if (opResult == null) {
                 throw new KeyStoreConnectException();
             } else if (opResult.resultCode != KeyStore.NO_ERROR) {
-                throw KeymasterUtils.getExceptionForKeymasterError(opResult.resultCode);
+                throw KeymasterUtils.getKeymasterException(opResult.resultCode);
             }
 
             if (opResult.inputConsumed == chunk.length) {
@@ -203,7 +203,7 @@ public class KeyStoreCryptoOperationChunkedStreamer {
         if (opResult == null) {
             throw new KeyStoreConnectException();
         } else if (opResult.resultCode != KeyStore.NO_ERROR) {
-            throw KeymasterUtils.getExceptionForKeymasterError(opResult.resultCode);
+            throw KeymasterUtils.getKeymasterException(opResult.resultCode);
         }
 
         return concat(output, opResult.output);
@@ -227,7 +227,7 @@ public class KeyStoreCryptoOperationChunkedStreamer {
         if (opResult == null) {
             throw new KeyStoreConnectException();
         } else if (opResult.resultCode != KeyStore.NO_ERROR) {
-            throw KeymasterUtils.getExceptionForKeymasterError(opResult.resultCode);
+            throw KeymasterUtils.getKeymasterException(opResult.resultCode);
         }
 
         if (opResult.inputConsumed < chunk.length) {

@@ -136,10 +136,9 @@ public abstract class KeyStoreKeyGeneratorSpi extends KeyGeneratorSpi {
         if (spec.getUserAuthenticators().isEmpty()) {
             args.addBoolean(KeymasterDefs.KM_TAG_NO_AUTH_REQUIRED);
         } else {
-        // TODO: Pass-in user authenticator IDs once the Keymaster API has stabilized
-//            for (int userAuthenticatorId : spec.getUserAuthenticators()) {
-//                args.addInt(KeymasterDefs.KM_TAG_USER_AUTH_ID, userAuthenticatorId);
-//            }
+            args.addInt(KeymasterDefs.KM_TAG_USER_AUTH_TYPE,
+                    KeyStoreKeyConstraints.UserAuthenticator.allToKeymaster(
+                            spec.getUserAuthenticators()));
         }
         if (spec.getUserAuthenticationValidityDurationSeconds() != null) {
             args.addInt(KeymasterDefs.KM_TAG_AUTH_TIMEOUT,
@@ -175,8 +174,7 @@ public abstract class KeyStoreKeyGeneratorSpi extends KeyGeneratorSpi {
         int errorCode = mKeyStore.generateKey(
                 keyAliasInKeystore, args, additionalEntropy, flags, new KeyCharacteristics());
         if (errorCode != KeyStore.NO_ERROR) {
-            throw new CryptoOperationException("Failed to generate key",
-                    KeymasterUtils.getExceptionForKeymasterError(errorCode));
+            throw KeymasterUtils.getCryptoOperationException(errorCode);
         }
         String keyAlgorithmJCA =
                 KeyStoreKeyConstraints.Algorithm.toJCASecretKeyAlgorithm(mAlgorithm, mDigest);
