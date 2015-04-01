@@ -337,13 +337,13 @@ class LayoutBinderWriter(val layoutBinder : LayoutBinder) {
     }
 
     val dynamics by Delegates.lazy { model.getExprMap().values().filter { it.isDynamic() } }
-    val className = layoutBinder.getClassName()
+    val className = layoutBinder.getImplementationName()
 
     val identifiers by Delegates.lazy {
         dynamics.filter { it is IdentifierExpr }
     }
 
-    val baseClassName = "${layoutBinder.getInterfaceName()}"
+    val baseClassName = "${layoutBinder.getClassName()}"
 
     val includedBinders by Delegates.lazy {
         layoutBinder.getBindingTargets().filter { it.isBinder() }
@@ -364,7 +364,13 @@ class LayoutBinderWriter(val layoutBinder : LayoutBinder) {
             nl("import ${layoutBinder.getModulePackage()}.R;")
             nl("import ${layoutBinder.getModulePackage()}.BR;")
             nl("import android.view.View;")
-            nl("public class ${className} extends ${baseClassName} {") {
+            val classDeclaration : String
+            if (layoutBinder.hasVariations()) {
+                classDeclaration = "${className} extends ${baseClassName}"
+            } else {
+                classDeclaration = "${className} extends android.databinding.ViewDataBinding"
+            }
+            nl("public class ${classDeclaration} {") {
                 tab(declareIncludeViews())
                 tab(declareViews())
                 tab(declareVariables())
@@ -378,6 +384,9 @@ class LayoutBinderWriter(val layoutBinder : LayoutBinder) {
                 tab(executePendingBindings())
 
                 tab(declareDirtyFlags())
+                if (!layoutBinder.hasVariations()) {
+                    tab(declareFactories())
+                }
             }
             nl("}")
             tab(flagMapping())
@@ -421,65 +430,72 @@ class LayoutBinderWriter(val layoutBinder : LayoutBinder) {
         nl("}")
     }
     fun declareConstructor() = kcode("") {
-        nl("private ${className}(View root, View[] views) {") {
-            tab("super(root, ${model.getObservables().size()}") {
-                layoutBinder.getBindingTargets().filter{it.getId() != null}.forEach {
-                    val index = indices.get(it)
-                    if (!it.isUsed()) {
-                        tab(", null")
-                    } else{
-                        val variableName : String
-                        if (index == null) {
-                            variableName = "root";
-                        } else {
-                            variableName = "views[${index}]"
-                        }
-                        tab(", ${it.superConversion(variableName)}")
-                    }
-                }
-                tab(");")
+        val viewCount = layoutBinder.getBindingTargets().filter{it.isUsed()}.count()
+        if (layoutBinder.hasVariations()) {
+            nl("")
+            nl("public ${className}(View root) {") {
+                tab("this(root, mapChildViews(root, ${viewCount}, sIncludes, sViewsWithIds));")
             }
-            val taggedViews = layoutBinder.getBindingTargets().filter{it.isUsed() && !it.isBinder()}
-            taggedViews.forEach {
+            nl("}")
+            nl("private ${className}(View root, View[] views) {") {
+                tab("super(root, ${model.getObservables().size()}") {
+                    layoutBinder.getBindingTargets().filter { it.getId() != null }.forEach {
+                        tab(", ${fieldConversion(it)}")
+                    }
+                    tab(");")
+                }
+            }
+        } else {
+            nl("${baseClassName}(View root) {") {
+                tab("super(root, ${model.getObservables().size()});")
+                tab("final View[] views = mapChildViews(root, ${viewCount}, sIncludes, sViewsWithIds);")
+            }
+        }
+        val taggedViews = layoutBinder.getBindingTargets().filter{it.isUsed()}
+        taggedViews.forEach {
+            if (!layoutBinder.hasVariations() || it.getId() == null) {
+                tab("this.${it.fieldName} = ${fieldConversion(it)};")
+            }
+            if (!it.isBinder()) {
                 if (it.getResolvedType() != null && it.getResolvedType().extendsViewStub()) {
                     tab("this.${it.fieldName}.setContainingBinding(this);")
                 }
-                if (it.getTag() == null) {
-                    if (it.getId() == null) {
-                        tab("this.${it.fieldName} = (${it.getViewClass()}) root;")
-                    }
-                } else {
-                    if (it.getId() == null) {
-                        tab("this.${it.fieldName} = (${it.getViewClass()}) views[${it.getTag()}];")
-                    }
-                    if (it.supportsTag()) {
-                        val originalTag = it.getOriginalTag();
-                        var tagValue = "null"
-                        if (originalTag != null) {
-                            tagValue = "\"${originalTag}\""
-                            if (originalTag.startsWith("@")) {
-                                var packageName = layoutBinder.getModulePackage()
-                                if (originalTag.startsWith("@android:")) {
-                                    packageName = "android"
-                                }
-                                val slashIndex = originalTag.indexOf('/')
-                                val resourceId = originalTag.substring(slashIndex + 1)
-                                tagValue = "root.getResources().getString(${packageName}.R.string.${resourceId})"
+                if (it.supportsTag() && it.getTag() != null) {
+                    val originalTag = it.getOriginalTag();
+                    var tagValue = "null"
+                    if (originalTag != null) {
+                        tagValue = "\"${originalTag}\""
+                        if (originalTag.startsWith("@")) {
+                            var packageName = layoutBinder.getModulePackage()
+                            if (originalTag.startsWith("@android:")) {
+                                packageName = "android"
                             }
+                            val slashIndex = originalTag.indexOf('/')
+                            val resourceId = originalTag.substring(slashIndex + 1)
+                            tagValue = "root.getResources().getString(${packageName}.R.string.${resourceId})"
                         }
-                        tab("this.${it.fieldName}.setTag(${tagValue});")
                     }
+                    tab("this.${it.fieldName}.setTag(${tagValue});")
                 }
             }
-            tab("invalidateAll();");
-            nl("}")
         }
-        nl("")
-        nl("public ${className}(View root) {") {
-            val viewCount = layoutBinder.getBindingTargets().filter{it.isUsed()}.count()
-            tab("this(root, mapChildViews(root, ${viewCount}, sIncludes, sViewsWithIds));")
-        }
+        tab("invalidateAll();");
         nl("}")
+    }
+
+    fun fieldConversion(target : BindingTarget) : String {
+        val index = indices.get(target)
+        if (!target.isUsed()) {
+            return "null"
+        } else {
+            val variableName: String
+            if (index == null) {
+                variableName = "root";
+            } else {
+                variableName = "views[${index}]"
+            }
+            return target.superConversion(variableName)
+        }
     }
 
     fun declareInvalidateAll() = kcode("") {
@@ -607,8 +623,15 @@ class LayoutBinderWriter(val layoutBinder : LayoutBinder) {
     }
 
     fun declareViews() = kcode("// views") {
-        layoutBinder.getBindingTargets().filter {it.isUsed() && (it.getId() == null)}.forEach {
-            nl("private final ${it.interfaceType} ${it.fieldName};")
+        val oneLayout = !layoutBinder.hasVariations();
+        layoutBinder.getBindingTargets().filter {it.isUsed() && (oneLayout || it.getId() == null)}.forEach {
+            val access : String
+            if (oneLayout && it.getId() != null) {
+                access = "public"
+            } else {
+                access = "private"
+            }
+            nl("${access} final ${it.interfaceType} ${it.fieldName};")
         }
     }
 
@@ -783,6 +806,25 @@ class LayoutBinderWriter(val layoutBinder : LayoutBinder) {
             }
         }
         tab("}")
+    }
+
+    fun declareFactories() = kcode("") {
+        nl("public static ${baseClassName} inflate(android.view.ViewGroup root) {") {
+            tab("return bind(android.view.LayoutInflater.from(root.getContext()).inflate(${layoutBinder.getModulePackage()}.R.layout.${layoutBinder.getLayoutname()}, root, true));")
+        }
+        nl("}")
+        nl("public static ${baseClassName} inflate(android.content.Context context) {") {
+            tab("return bind(android.view.LayoutInflater.from(context).inflate(${layoutBinder.getModulePackage()}.R.layout.${layoutBinder.getLayoutname()}, null, false));")
+        }
+        nl("}")
+        nl("public static ${baseClassName} bind(android.view.View view) {") {
+            tab("if (!\"${layoutBinder.getId()}\".equals(view.getTag())) {") {
+                tab("throw new RuntimeException(\"view tag doesn't isn't correct on view\");")
+            }
+            tab("}")
+            tab("return new ${baseClassName}(view);")
+        }
+        nl("}")
     }
 
     public fun writeBaseClass() : String =

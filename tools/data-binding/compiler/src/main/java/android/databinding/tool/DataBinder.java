@@ -47,23 +47,26 @@ public class DataBinder {
         return mLayoutBinders;
     }
     
-    public void writerBinderInterfaces() {
+    public void writerBaseClasses(boolean isLibrary) {
         Set<String> writtenFiles = new HashSet<String>();
         for (LayoutBinder layoutBinder : mLayoutBinders) {
-            String interfaceName = layoutBinder.getInterfaceName();
-            if (writtenFiles.contains(interfaceName)) {
-                continue;
+            if (isLibrary || layoutBinder.hasVariations()) {
+                String className = layoutBinder.getClassName();
+                if (writtenFiles.contains(className)) {
+                    continue;
+                }
+                mFileWriter.writeToFile(layoutBinder.getPackage() + "." + className,
+                        layoutBinder.writeViewBinderBaseClass());
+                writtenFiles.add(className);
             }
-            mFileWriter.writeToFile(layoutBinder.getPackage() + "." + interfaceName,
-                    layoutBinder.writeViewBinderInterface());
-            writtenFiles.add(interfaceName);
         }
     }
     
     public void writeBinders() {
         for (LayoutBinder layoutBinder : mLayoutBinders) {
-            L.d("writing data binder %s", layoutBinder.getClassName());
-            mFileWriter.writeToFile(layoutBinder.getPackage() + "." + layoutBinder.getClassName(),
+            String className = layoutBinder.getImplementationName();
+            L.d("writing data binder %s", className);
+            mFileWriter.writeToFile(layoutBinder.getPackage() + "." + className,
                     layoutBinder.writeViewBinder());
         }
     }

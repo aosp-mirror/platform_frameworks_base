@@ -124,7 +124,7 @@ public class ProcessExpressions extends ProcessDataBinding.ProcessingStep {
         CompilerChef compilerChef = CompilerChef.createChef(resourceBundle, getWriter());
         if (compilerChef.hasAnythingToGenerate()) {
             compilerChef.addBRVariables(mProcessBindable);
-            compilerChef.writeViewBinderInterfaces();
+            compilerChef.writeViewBinderInterfaces(forLibraryModule);
             if (!forLibraryModule) {
                 compilerChef.writeDbrFile();
                 compilerChef.writeViewBinders();

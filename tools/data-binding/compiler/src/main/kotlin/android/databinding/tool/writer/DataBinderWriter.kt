@@ -27,7 +27,7 @@ class DataBinderWriter(val pkg: String, val projectPackage: String, val classNam
                             layoutBinders.groupBy{it.getLayoutname()}.forEach {
                                 tab("case ${it.value.first!!.getModulePackage()}.R.layout.${it.value.first!!.getLayoutname()}:") {
                                     if (it.value.size() == 1) {
-                                        tab("return new ${it.value.first!!.getPackage()}.${it.value.first!!.getClassName()}(view);")
+                                        tab("return ${it.value.first!!.getPackage()}.${it.value.first!!.getImplementationName()}.bind(view);")
                                     } else {
                                         // we should check the tag to decide which layout we need to inflate
                                         tab("{") {
@@ -36,7 +36,7 @@ class DataBinderWriter(val pkg: String, val projectPackage: String, val classNam
                                             it.value.forEach {
                                                 // TODO don't use strings. not necessary
                                                 tab("if (tag.equals(String.valueOf(${it.getId()}))) {") {
-                                                    tab("return new ${it.getPackage()}.${it.getClassName()}(view);")
+                                                    tab("return new ${it.getPackage()}.${it.getImplementationName()}(view);")
                                                 } tab("}")
                                             }
                                         }tab("}")

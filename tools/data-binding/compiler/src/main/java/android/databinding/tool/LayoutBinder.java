@@ -155,7 +155,7 @@ public class LayoutBinder {
         }
     }
 
-    public String writeViewBinderInterface() {
+    public String writeViewBinderBaseClass() {
         ensureWriter();
         return mWriter.writeBaseClass();
     }
@@ -190,18 +190,21 @@ public class LayoutBinder {
         return mBundle.getFileName();
     }
 
-    public String getClassName() {
-        final String suffix;
+    public String getImplementationName() {
         if (hasVariations()) {
-            suffix = mBundle.getConfigName();
+            final String suffix;
+            if (hasVariations()) {
+                suffix = mBundle.getConfigName();
+            } else {
+                suffix = "";
+            }
+            return mBaseClassName + suffix + "Impl";
         } else {
-            suffix = "";
+            return mBaseClassName;
         }
-        return mBaseClassName + suffix + "Impl";
-
     }
     
-    public String getInterfaceName() {
+    public String getClassName() {
         return mBaseClassName;
     }
 
