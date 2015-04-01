@@ -101,8 +101,7 @@ public abstract class KeyStoreHmacSpi extends MacSpi {
         if (opResult == null) {
             throw new KeyStoreConnectException();
         } else if (opResult.resultCode != KeyStore.NO_ERROR) {
-            throw new CryptoOperationException("Failed to start keystore operation",
-                    KeymasterUtils.getExceptionForKeymasterError(opResult.resultCode));
+            throw KeymasterUtils.getCryptoOperationException(opResult.resultCode);
         }
         mOperationToken = opResult.token;
         if (mOperationToken == null) {
@@ -128,7 +127,7 @@ public abstract class KeyStoreHmacSpi extends MacSpi {
         try {
             output = mChunkedStreamer.update(input, offset, len);
         } catch (KeymasterException e) {
-            throw new CryptoOperationException("Keystore operation failed", e);
+            throw KeymasterUtils.getCryptoOperationException(e);
         }
         if ((output != null) && (output.length != 0)) {
             throw new CryptoOperationException("Update operation unexpectedly produced output");
@@ -145,7 +144,7 @@ public abstract class KeyStoreHmacSpi extends MacSpi {
         try {
             result = mChunkedStreamer.doFinal(null, 0, 0);
         } catch (KeymasterException e) {
-            throw new CryptoOperationException("Keystore operation failed", e);
+            throw KeymasterUtils.getCryptoOperationException(e);
         }
 
         engineReset();

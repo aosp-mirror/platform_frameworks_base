@@ -23,7 +23,10 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.Locale;
+import java.util.Set;
 
 /**
  * Constraints for {@code AndroidKeyStore} keys.
@@ -517,6 +520,89 @@ public abstract class KeyStoreKeyConstraints {
                 return CTR;
             } else {
                 throw new IllegalArgumentException("Unknown block mode: " + mode);
+            }
+        }
+    }
+
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef({UserAuthenticator.LOCK_SCREEN})
+    public @interface UserAuthenticatorEnum {}
+
+    /**
+     * User authenticators which can be used to restrict/protect access to keys.
+     */
+    public static abstract class UserAuthenticator {
+        private UserAuthenticator() {}
+
+        /** Lock screen. */
+        public static final int LOCK_SCREEN = 1;
+
+        /**
+         * @hide
+         */
+        public static int toKeymaster(@UserAuthenticatorEnum int userAuthenticator) {
+            switch (userAuthenticator) {
+                case LOCK_SCREEN:
+                    return LOCK_SCREEN;
+                default:
+                    throw new IllegalArgumentException(
+                            "Unknown user authenticator: " + userAuthenticator);
+            }
+        }
+
+        /**
+         * @hide
+         */
+        public static @UserAuthenticatorEnum int fromKeymaster(int userAuthenticator) {
+            switch (userAuthenticator) {
+                case LOCK_SCREEN:
+                    return LOCK_SCREEN;
+                default:
+                    throw new IllegalArgumentException(
+                            "Unknown user authenticator: " + userAuthenticator);
+            }
+        }
+
+        /**
+         * @hide
+         */
+        public static int allToKeymaster(Set<Integer> userAuthenticators) {
+            int result = 0;
+            for (@UserAuthenticatorEnum int userAuthenticator : userAuthenticators) {
+                result |= toKeymaster(userAuthenticator);
+            }
+            return result;
+        }
+
+        /**
+         * @hide
+         */
+        public static Set<Integer> allFromKeymaster(int userAuthenticators) {
+            int userAuthenticator = 1;
+            Set<Integer> result = null;
+            while (userAuthenticators != 0) {
+                if ((userAuthenticators & 1) != 0) {
+                    if (result == null) {
+                        result = new HashSet<Integer>();
+                    }
+                    result.add(fromKeymaster(userAuthenticator));
+                }
+                userAuthenticators >>>= 1;
+                userAuthenticator <<= 1;
+            }
+            return (result != null) ? result : Collections.<Integer>emptySet();
+        }
+
+        /**
+         * @hide
+         */
+        public static String toString(@UserAuthenticatorEnum int userAuthenticator) {
+            switch (userAuthenticator) {
+                case LOCK_SCREEN:
+                    return "LOCK_SCREEN";
+                default:
+                    throw new IllegalArgumentException(
+                            "Unknown user authenticator: " + userAuthenticator);
             }
         }
     }

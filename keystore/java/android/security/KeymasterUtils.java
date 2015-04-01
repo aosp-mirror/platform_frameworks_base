@@ -29,7 +29,7 @@ import java.util.List;
 public abstract class KeymasterUtils {
     private KeymasterUtils() {}
 
-    public static KeymasterException getExceptionForKeymasterError(int keymasterErrorCode) {
+    public static KeymasterException getKeymasterException(int keymasterErrorCode) {
         switch (keymasterErrorCode) {
             case KeymasterDefs.KM_ERROR_INVALID_AUTHORIZATION_TIMEOUT:
                 // The name of this parameter significantly differs between Keymaster and framework
@@ -40,6 +40,19 @@ public abstract class KeymasterUtils {
                 return new KeymasterException(keymasterErrorCode,
                         KeymasterDefs.getErrorMessage(keymasterErrorCode));
         }
+    }
+
+    public static CryptoOperationException getCryptoOperationException(KeymasterException e) {
+        switch (e.getErrorCode()) {
+            case KeymasterDefs.KM_ERROR_KEY_USER_NOT_AUTHENTICATED:
+                return new UserNotAuthenticatedException();
+            default:
+                return new CryptoOperationException("Crypto operation failed", e);
+        }
+    }
+
+    public static CryptoOperationException getCryptoOperationException(int keymasterErrorCode) {
+        return getCryptoOperationException(getKeymasterException(keymasterErrorCode));
     }
 
     public static Integer getInt(KeyCharacteristics keyCharacteristics, int tag) {

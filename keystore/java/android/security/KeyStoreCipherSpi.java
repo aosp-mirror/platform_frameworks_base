@@ -222,8 +222,7 @@ public abstract class KeyStoreCipherSpi extends CipherSpi {
         if (opResult == null) {
             throw new KeyStoreConnectException();
         } else if (opResult.resultCode != KeyStore.NO_ERROR) {
-            throw new CryptoOperationException("Failed to start keystore operation",
-                    KeymasterUtils.getExceptionForKeymasterError(opResult.resultCode));
+            throw KeymasterUtils.getCryptoOperationException(opResult.resultCode);
         }
 
         if (opResult.token == null) {
@@ -249,7 +248,7 @@ public abstract class KeyStoreCipherSpi extends CipherSpi {
         try {
             output = mMainDataStreamer.update(input, inputOffset, inputLen);
         } catch (KeymasterException e) {
-            throw new CryptoOperationException("Keystore operation failed", e);
+            throw KeymasterUtils.getCryptoOperationException(e);
         }
 
         if (output.length == 0) {
@@ -294,7 +293,7 @@ public abstract class KeyStoreCipherSpi extends CipherSpi {
                 case KeymasterDefs.KM_ERROR_VERIFICATION_FAILED:
                     throw new AEADBadTagException();
                 default:
-                    throw new CryptoOperationException("Keystore operation failed", e);
+                    throw KeymasterUtils.getCryptoOperationException(e);
             }
         }
 
