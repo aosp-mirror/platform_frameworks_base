@@ -22,6 +22,7 @@ import android.security.keymaster.KeymasterDefs;
 import java.security.InvalidKeyException;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.KeySpec;
+import java.util.Date;
 import java.util.Set;
 
 import javax.crypto.SecretKey;
@@ -112,6 +113,24 @@ public class KeyStoreSecretKeyFactorySpi extends SecretKeyFactorySpi {
             throw new InvalidKeySpecException("Unsupported key characteristic", e);
         }
 
+        Date keyValidityStart =
+                KeymasterUtils.getDate(keyCharacteristics, KeymasterDefs.KM_TAG_ACTIVE_DATETIME);
+        if ((keyValidityStart != null) && (keyValidityStart.getTime() <= 0)) {
+            keyValidityStart = null;
+        }
+        Date keyValidityForOriginationEnd = KeymasterUtils.getDate(keyCharacteristics,
+                KeymasterDefs.KM_TAG_ORIGINATION_EXPIRE_DATETIME);
+        if ((keyValidityForOriginationEnd != null)
+                && (keyValidityForOriginationEnd.getTime() == Long.MAX_VALUE)) {
+            keyValidityForOriginationEnd = null;
+        }
+        Date keyValidityForConsumptionEnd = KeymasterUtils.getDate(keyCharacteristics,
+                KeymasterDefs.KM_TAG_USAGE_EXPIRE_DATETIME);
+        if ((keyValidityForConsumptionEnd != null)
+                && (keyValidityForConsumptionEnd.getTime() == Long.MAX_VALUE)) {
+            keyValidityForConsumptionEnd = null;
+        }
+
         int swEnforcedUserAuthenticatorIds =
                 keyCharacteristics.swEnforced.getInt(KeymasterDefs.KM_TAG_USER_AUTH_TYPE, 0);
         int hwEnforcedUserAuthenticatorIds =
@@ -126,11 +145,9 @@ public class KeyStoreSecretKeyFactorySpi extends SecretKeyFactorySpi {
         return new KeyStoreKeySpec(entryAlias,
                 origin,
                 keySize,
-                KeymasterUtils.getDate(keyCharacteristics, KeymasterDefs.KM_TAG_ACTIVE_DATETIME),
-                KeymasterUtils.getDate(keyCharacteristics,
-                        KeymasterDefs.KM_TAG_ORIGINATION_EXPIRE_DATETIME),
-                KeymasterUtils.getDate(keyCharacteristics,
-                        KeymasterDefs.KM_TAG_USAGE_EXPIRE_DATETIME),
+                keyValidityStart,
+                keyValidityForOriginationEnd,
+                keyValidityForConsumptionEnd,
                 purposes,
                 algorithm,
                 padding,
