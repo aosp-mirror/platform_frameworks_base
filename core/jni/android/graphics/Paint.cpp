@@ -23,6 +23,7 @@
 #include "GraphicsJNI.h"
 #include "core_jni_helpers.h"
 #include <ScopedUtfChars.h>
+#include <ScopedStringChars.h>
 
 #include "SkBlurDrawLooper.h"
 #include "SkColorFilter.h"
@@ -40,6 +41,8 @@
 #include "MinikinUtils.h"
 #include "Paint.h"
 #include "TypefaceImpl.h"
+
+#include <vector>
 
 // temporary for debugging
 #include <Caches.h>
@@ -972,6 +975,68 @@ public:
                                       JNI_ABORT);
     }
 
+    static jboolean layoutContainsNotdef(const Layout& layout) {
+        for (size_t i = 0; i < layout.nGlyphs(); i++) {
+            if (layout.getGlyphId(i) == 0) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    static jboolean hasGlyphVariation(const Paint* paint, TypefaceImpl* typeface, jint bidiFlags,
+            const jchar* chars, size_t size) {
+        // TODO: query font for whether character has variation selector; requires a corresponding
+        // function in Minikin.
+        return false;
+    }
+
+    static jboolean hasGlyph(JNIEnv *env, jclass, jlong paintHandle, jlong typefaceHandle,
+            jint bidiFlags, jstring string) {
+        const Paint* paint = reinterpret_cast<Paint*>(paintHandle);
+        TypefaceImpl* typeface = reinterpret_cast<TypefaceImpl*>(typefaceHandle);
+        ScopedStringChars str(env, string);
+
+        /* start by rejecting variation selectors (not supported yet) */
+        size_t nChars = 0;
+        for (size_t i = 0; i < str.size(); i++) {
+            jchar c = str[i];
+            if (0xDC00 <= c && c <= 0xDFFF) {
+                // invalid UTF-16, unpaired trailing surrogate
+                return false;
+            } else if (0xD800 <= c && c <= 0xDBFF) {
+                if (i + 1 == str.size()) {
+                    // invalid UTF-16, unpaired leading surrogate at end of string
+                    return false;
+                }
+                i++;
+                jchar c2 = str[i];
+                if (!(0xDC00 <= c2 && c2 <= 0xDFFF)) {
+                    // invalid UTF-16, unpaired leading surrogate
+                    return false;
+                }
+                // UTF-16 encoding of range U+E0100..U+E01EF is DB40 DD00 .. DB40 DDEF
+                if (c == 0xDB40 && 0xDD00 <= c2 && c2 <= 0xDDEF) {
+                    return hasGlyphVariation(paint, typeface, bidiFlags, str.get(), str.size());
+                }
+            } else if (0xFE00 <= c && c <= 0xFE0F) {
+                return hasGlyphVariation(paint, typeface, bidiFlags, str.get(), str.size());
+            }
+            nChars++;
+        }
+        Layout layout;
+        MinikinUtils::doLayout(&layout, paint, bidiFlags, typeface, str.get(), 0, str.size(),
+                str.size());
+        size_t nGlyphs = layout.nGlyphs();
+        if (nGlyphs != 1 && nChars > 1) {
+            // multiple-character input, and was not a ligature
+            // TODO: handle ZWJ/ZWNJ characters specially so we can detect certain ligatures
+            // in joining scripts, such as Arabic and Mongolian.
+            return false;
+        }
+        return nGlyphs > 0 && !layoutContainsNotdef(layout);
+    }
+
 };
 
 static JNINativeMethod methods[] = {
@@ -1057,6 +1122,7 @@ static JNINativeMethod methods[] = {
                                         (void*) PaintGlue::getStringBounds },
     {"nativeGetCharArrayBounds", "(JJ[CIIILandroid/graphics/Rect;)V",
                                     (void*) PaintGlue::getCharArrayBounds },
+    {"native_hasGlyph",           "(JJILjava/lang/String;)Z", (void*) PaintGlue::hasGlyph },
 
     {"native_setShadowLayer", "!(JFFFI)V", (void*)PaintGlue::setShadowLayer},
     {"native_hasShadowLayer", "!(J)Z", (void*)PaintGlue::hasShadowLayer}

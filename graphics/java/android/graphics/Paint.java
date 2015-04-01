@@ -2249,6 +2249,26 @@ public class Paint {
             bounds);
     }
 
+    /**
+     * Determine whether the typeface set on the paint has a glyph supporting the string. The
+     * simplest case is when the string contains a single character, in which this method
+     * determines whether the font has the character. In the case of multiple characters, the
+     * method returns true if there is a single glyph representing the ligature. For example, if
+     * the input is a pair of regional indicator symbols, determine whether there is an emoji flag
+     * for the pair.
+     *
+     * Finally, if the string contains a variation selector, the method only returns true if
+     * the fonts contains a glyph specific to that variation.
+     *
+     * Checking is done on the entire fallback chain, not just the immediate font referenced.
+     *
+     * @param string the string to test whether there is glyph support
+     * @return true if the typeface has a glyph for the string
+     */
+    public boolean hasGlyph(String string) {
+        return native_hasGlyph(mNativePaint, mNativeTypeface, mBidiFlags, string);
+    }
+
     @Override
     protected void finalize() throws Throwable {
         try {
@@ -2334,4 +2354,6 @@ public class Paint {
                                                              String settings);
     private static native int native_getHyphenEdit(long native_object);
     private static native void native_setHyphenEdit(long native_object, int hyphen);
+    private static native boolean native_hasGlyph(long native_object, long native_typeface,
+            int bidiFlags, String string);
 }
