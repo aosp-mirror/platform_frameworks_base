@@ -716,7 +716,15 @@ void SoundChannel::play(const sp<Sample>& sample, int nextChannelID, float leftV
         }
 #endif
 
-        if (!mAudioTrack.get() || mPrevSampleID != sample->sampleID()) {
+        // check if the existing track has the same sample id.
+        if (mAudioTrack != 0 && mPrevSampleID == sample->sampleID()) {
+            // the sample rate may fail to change if the audio track is a fast track.
+            if (mAudioTrack->setSampleRate(sampleRate) == NO_ERROR) {
+                newTrack = mAudioTrack;
+                ALOGV("reusing track %p for sample %d", mAudioTrack.get(), sample->sampleID());
+            }
+        }
+        if (newTrack == 0) {
             // mToggle toggles each time a track is started on a given channel.
             // The toggle is concatenated with the SoundChannel address and passed to AudioTrack
             // as callback user data. This enables the detection of callbacks received from the old
@@ -746,10 +754,6 @@ void SoundChannel::play(const sp<Sample>& sample, int nextChannelID, float leftV
             mToggle = toggle;
             mAudioTrack = newTrack;
             ALOGV("using new track %p for sample %d", newTrack.get(), sample->sampleID());
-        } else {
-            newTrack = mAudioTrack;
-            newTrack->setSampleRate(sampleRate);
-            ALOGV("reusing track %p for sample %d", mAudioTrack.get(), sample->sampleID());
         }
         newTrack->setVolume(leftVolume, rightVolume);
         newTrack->setLoop(0, frameCount, loop);
