@@ -53,6 +53,7 @@ android {
         exclude 'META-INF/services/javax.annotation.processing.Processor'
         exclude 'META-INF/LICENSE.txt'
         exclude 'META-INF/NOTICE.txt'
+        exclude 'android/databinding/DataBinderMapper.class'
     }
 }
 dependencies {
@@ -85,6 +86,11 @@ uploadArchives {
             pom.artifactId = 'library'
         }
     }
+}
+
+afterEvaluate {
+    tasks['packageReleaseJar'].exclude('android/databinding/DataBinderMapper.*')
+    tasks['packageDebugJar'].exclude('android/databinding/DataBinderMapper.*')
 }
 
 uploadJarArchives {

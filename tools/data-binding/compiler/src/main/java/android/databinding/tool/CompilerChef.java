@@ -61,7 +61,7 @@ public class CompilerChef {
         ensureDataBinder();
         final String pkg = "android.databinding";
         DataBinderWriter dbr = new DataBinderWriter(pkg, mResourceBundle.getAppPackage(),
-                "GeneratedDataBinderRenderer", mDataBinder.getLayoutBinders());
+                "DataBinderMapper", mDataBinder.getLayoutBinders());
         if (dbr.getLayoutBinders().size() > 0) {
             mFileWriter.writeToFile(pkg + "." + dbr.getClassName(), dbr.write());
         }

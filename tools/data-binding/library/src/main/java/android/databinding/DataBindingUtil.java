@@ -25,22 +25,7 @@ import android.view.ViewGroup;
  * Utility class to create {@link ViewDataBinding} from layouts.
  */
 public class DataBindingUtil {
-    private static DataBinderMapper sMapper;
-
-    private static DataBinderMapper getMapper() {
-        if (sMapper != null) {
-            return sMapper;
-        }
-        try {
-            sMapper = (DataBinderMapper) ViewDataBinding.class.getClassLoader()
-                    .loadClass("android.databinding.GeneratedDataBinderRenderer")
-                    .newInstance();
-        } catch (Throwable t) {
-            throw new RuntimeException(t);
-        }
-        return sMapper;
-    }
-
+    private static DataBinderMapper sMapper = new DataBinderMapper();
 
     public static <T extends ViewDataBinding> T inflate(Context context, int layoutId,
             ViewGroup parent, boolean attachToParent) {
@@ -51,6 +36,6 @@ public class DataBindingUtil {
 
     @SuppressWarnings("unchecked")
     public static <T extends ViewDataBinding> T bindTo(View root, int layoutId) {
-        return (T) getMapper().getDataBinder(root, layoutId);
+        return (T) sMapper.getDataBinder(root, layoutId);
     }
 }

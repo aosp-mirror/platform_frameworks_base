@@ -20,8 +20,7 @@ class DataBinderWriter(val pkg: String, val projectPackage: String, val classNam
             kcode("") {
                 nl("package $pkg;")
                 nl("import $projectPackage.BR;")
-                nl("class $className implements android.databinding.DataBinderMapper {") {
-                    tab("@Override")
+                nl("class $className {") {
                     tab("public android.databinding.ViewDataBinding getDataBinder(android.view.View view, int layoutId) {") {
                         tab("switch(layoutId) {") {
                             layoutBinders.groupBy{it.getLayoutname()}.forEach {

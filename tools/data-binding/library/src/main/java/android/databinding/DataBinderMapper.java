@@ -18,7 +18,16 @@ package android.databinding;
 
 import android.view.View;
 
-public interface DataBinderMapper {
-    public ViewDataBinding getDataBinder(View view, int layoutId);
-    public int getId(String key);
+/**
+ * This class will be stripped from the jar and then replaced by the annotation processor
+ * as part of the code generation step. This class's existence is just to ensure that
+ * compile works and no reflection is needed to access the generated class.
+ */
+public class DataBinderMapper {
+    public ViewDataBinding getDataBinder(View view, int layoutId) {
+        return null;
+    }
+    public int getId(String key) {
+        return 0;
+    }
 }
