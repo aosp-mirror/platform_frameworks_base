@@ -421,6 +421,14 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
     public static final int PRIVATE_FLAG_PRIVILEGED = 1<<3;
 
     /**
+     * Value for {@link #flags}: {@code true} if the application has any IntentFiler with some
+     * data URI using HTTP or HTTPS with an associated VIEW action.
+     *
+     * {@hide}
+     */
+    public static final int PRIVATE_FLAG_HAS_DOMAIN_URLS = 1<<4;
+
+    /**
      * Private/hidden flags. See {@code PRIVATE_FLAG_...} constants.
      * {@hide}
      */

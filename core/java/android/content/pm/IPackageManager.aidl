@@ -437,7 +437,7 @@ interface IPackageManager {
     void verifyPendingInstall(int id, int verificationCode);
     void extendVerificationTimeout(int id, int verificationCodeAtTimeout, long millisecondsToDelay);
 
-    void verifyIntentFilter(int id, int verificationCode, in List<String> outFailedDomains);
+    void verifyIntentFilter(int id, int verificationCode, in List<String> failedDomains);
     int getIntentVerificationStatus(String packageName, int userId);
     boolean updateIntentVerificationStatus(String packageName, int status, int userId);
     List<IntentFilterVerificationInfo> getIntentFilterVerifications(String packageName);
