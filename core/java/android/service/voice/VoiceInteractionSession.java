@@ -43,6 +43,7 @@ import android.view.ViewTreeObserver;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
 import com.android.internal.app.IVoiceInteractionManagerService;
+import com.android.internal.app.IVoiceInteractionSessionShowCallback;
 import com.android.internal.app.IVoiceInteractor;
 import com.android.internal.app.IVoiceInteractorCallback;
 import com.android.internal.app.IVoiceInteractorRequest;
@@ -163,9 +164,10 @@ public abstract class VoiceInteractionSession implements KeyEvent.Callback {
 
     final IVoiceInteractionSession mSession = new IVoiceInteractionSession.Stub() {
         @Override
-        public void show(Bundle sessionArgs, int flags) {
-            mHandlerCaller.sendMessage(mHandlerCaller.obtainMessageIO(MSG_SHOW,
-                    flags, sessionArgs));
+        public void show(Bundle sessionArgs, int flags,
+                IVoiceInteractionSessionShowCallback showCallback) {
+            mHandlerCaller.sendMessage(mHandlerCaller.obtainMessageIOO(MSG_SHOW,
+                    flags, sessionArgs, showCallback));
         }
 
         @Override
@@ -412,9 +414,12 @@ public abstract class VoiceInteractionSession implements KeyEvent.Callback {
                     onHandleScreenshot((Bitmap) msg.obj);
                     break;
                 case MSG_SHOW:
-                    if (DEBUG) Log.d(TAG, "doShow: args=" + msg.obj
-                            + " flags=" + msg.arg1);
-                    doShow((Bundle) msg.obj, msg.arg1);
+                    args = (SomeArgs)msg.obj;
+                    if (DEBUG) Log.d(TAG, "doShow: args=" + args.arg1
+                            + " flags=" + msg.arg1
+                            + " showCallback=" + args.arg2);
+                    doShow((Bundle) args.arg1, msg.arg1,
+                            (IVoiceInteractionSessionShowCallback) args.arg2);
                     break;
                 case MSG_HIDE:
                     if (DEBUG) Log.d(TAG, "doHide");
@@ -523,7 +528,7 @@ public abstract class VoiceInteractionSession implements KeyEvent.Callback {
         onCreate(args, startFlags);
     }
 
-    void doShow(Bundle args, int flags) {
+    void doShow(Bundle args, int flags, final IVoiceInteractionSessionShowCallback showCallback) {
         if (DEBUG) Log.v(TAG, "Showing window: mWindowAdded=" + mWindowAdded
                 + " mWindowVisible=" + mWindowVisible);
 
@@ -547,6 +552,22 @@ public abstract class VoiceInteractionSession implements KeyEvent.Callback {
             if (!mWindowVisible) {
                 mWindowVisible = true;
                 mWindow.show();
+            }
+            if (showCallback != null) {
+                mRootView.invalidate();
+                mRootView.getViewTreeObserver().addOnPreDrawListener(
+                        new ViewTreeObserver.OnPreDrawListener() {
+                            @Override
+                            public boolean onPreDraw() {
+                                mRootView.getViewTreeObserver().removeOnPreDrawListener(this);
+                                try {
+                                    showCallback.onShown();
+                                } catch (RemoteException e) {
+                                    Log.w(TAG, "Error calling onShown", e);
+                                }
+                                return true;
+                            }
+                        });
             }
         } finally {
             mWindowWasVisible = true;
@@ -582,7 +603,8 @@ public abstract class VoiceInteractionSession implements KeyEvent.Callback {
         mRootView = mInflater.inflate(
                 com.android.internal.R.layout.voice_interaction_session, null);
         mRootView.setSystemUiVisibility(
-                View.SYSTEM_UI_FLAG_LAYOUT_STABLE | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION);
+                View.SYSTEM_UI_FLAG_LAYOUT_STABLE | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
         mWindow.setContentView(mRootView);
         mRootView.getViewTreeObserver().addOnComputeInternalInsetsListener(mInsetsComputer);
 
@@ -716,7 +738,9 @@ public abstract class VoiceInteractionSession implements KeyEvent.Callback {
         mWindow = new SoftInputWindow(mContext, "VoiceInteractionSession", mTheme,
                 mCallbacks, this, mDispatcherState,
                 WindowManager.LayoutParams.TYPE_VOICE_INTERACTION, Gravity.BOTTOM, true);
-        mWindow.getWindow().addFlags(WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED);
+        mWindow.getWindow().addFlags(
+                WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED |
+                WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN);
         initViews();
         mWindow.getWindow().setLayout(MATCH_PARENT, MATCH_PARENT);
         mWindow.setToken(mToken);

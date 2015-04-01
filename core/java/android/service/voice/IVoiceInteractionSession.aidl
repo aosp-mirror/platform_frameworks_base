@@ -20,11 +20,13 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 
+import com.android.internal.app.IVoiceInteractionSessionShowCallback;
+
 /**
  * @hide
  */
 oneway interface IVoiceInteractionSession {
-    void show(in Bundle sessionArgs, int flags);
+    void show(in Bundle sessionArgs, int flags, IVoiceInteractionSessionShowCallback showCallback);
     void hide();
     void handleAssist(in Bundle assistData);
     void handleScreenshot(in Bitmap screenshot);

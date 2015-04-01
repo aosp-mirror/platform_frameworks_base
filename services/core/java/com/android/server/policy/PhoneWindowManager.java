@@ -1922,6 +1922,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         case TYPE_PHONE:
             return 3;
         case TYPE_SEARCH_BAR:
+        case TYPE_VOICE_INTERACTION_STARTING:
             return 4;
         case TYPE_VOICE_INTERACTION:
             // voice interaction layer is almost immediately above apps.
@@ -2270,16 +2271,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 if (DEBUG_LAYOUT) Slog.i(TAG, "NAVIGATION BAR: " + mNavigationBar);
                 break;
             case TYPE_NAVIGATION_BAR_PANEL:
-                mContext.enforceCallingOrSelfPermission(
-                        android.Manifest.permission.STATUS_BAR_SERVICE,
-                        "PhoneWindowManager");
-                break;
             case TYPE_STATUS_BAR_PANEL:
-                mContext.enforceCallingOrSelfPermission(
-                        android.Manifest.permission.STATUS_BAR_SERVICE,
-                        "PhoneWindowManager");
-                break;
             case TYPE_STATUS_BAR_SUB_PANEL:
+            case TYPE_VOICE_INTERACTION_STARTING:
                 mContext.enforceCallingOrSelfPermission(
                         android.Manifest.permission.STATUS_BAR_SERVICE,
                         "PhoneWindowManager");
@@ -3657,7 +3651,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 pf.bottom = df.bottom = of.bottom = cf.bottom
                         = mOverscanScreenTop + mOverscanScreenHeight;
             }
-        } else  if (attrs.type == TYPE_INPUT_METHOD || attrs.type == TYPE_VOICE_INTERACTION) {
+        } else if (attrs.type == TYPE_INPUT_METHOD) {
             pf.left = df.left = of.left = cf.left = vf.left = mDockLeft;
             pf.top = df.top = of.top = cf.top = vf.top = mDockTop;
             pf.right = df.right = of.right = cf.right = vf.right = mDockRight;
@@ -3668,6 +3662,15 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             // IM dock windows always go to the bottom of the screen.
             attrs.gravity = Gravity.BOTTOM;
             mDockLayer = win.getSurfaceLayer();
+        } else if (attrs.type == TYPE_VOICE_INTERACTION) {
+            pf.left = df.left = of.left = cf.left = vf.left = mUnrestrictedScreenLeft;
+            pf.top = df.top = of.top = mUnrestrictedScreenTop;
+            pf.right = df.right = of.right = cf.right = vf.right = mUnrestrictedScreenLeft
+                    + mUnrestrictedScreenWidth;
+            pf.bottom = df.bottom = of.bottom = cf.bottom = mUnrestrictedScreenTop
+                    + mUnrestrictedScreenHeight;
+            cf.bottom = vf.bottom = mStableBottom;
+            cf.top = vf.top = mStableTop;
         } else if (win == mStatusBar && (attrs.privateFlags & PRIVATE_FLAG_KEYGUARD) != 0) {
             pf.left = df.left = of.left = mUnrestrictedScreenLeft;
             pf.top = df.top = of.top = mUnrestrictedScreenTop;

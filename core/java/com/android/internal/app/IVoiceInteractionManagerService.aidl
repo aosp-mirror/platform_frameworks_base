@@ -16,9 +16,11 @@
 
 package com.android.internal.app;
 
+import android.content.ComponentName;
 import android.content.Intent;
 import android.os.Bundle;
 
+import com.android.internal.app.IVoiceInteractionSessionShowCallback;
 import com.android.internal.app.IVoiceInteractor;
 import android.hardware.soundtrigger.IRecognitionStatusCallback;
 import android.hardware.soundtrigger.SoundTrigger;
@@ -87,10 +89,17 @@ interface IVoiceInteractionManagerService {
     boolean isServiceActive();
 
     /**
+     * @return the component name for the currently active voice interaction service
+     */
+    ComponentName getActiveServiceComponentName();
+
+    /**
      * Shows the session for the currently active service. Used to start a new session from system
      * affordances.
+     *
+     * @param showCallback callback to be notified when the session was shown
      */
-    void showSessionForActiveService();
+    void showSessionForActiveService(IVoiceInteractionSessionShowCallback showCallback);
 
     /**
      * Indicates whether there is a voice session running (but not necessarily showing).

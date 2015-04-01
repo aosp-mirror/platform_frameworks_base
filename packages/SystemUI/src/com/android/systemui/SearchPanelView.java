@@ -122,7 +122,8 @@ public class SearchPanelView extends FrameLayout implements StatusBarPanel {
 
     private void startVoiceInteractor() {
         try {
-            mVoiceInteractionManagerService.showSessionForActiveService();
+            // TODO: Pass show callback
+            mVoiceInteractionManagerService.showSessionForActiveService(null /* showCallback */);
         } catch (RemoteException e) {
             Log.w(TAG, "Failed to call showSessionForActiveService", e);
         }
@@ -134,6 +135,15 @@ public class SearchPanelView extends FrameLayout implements StatusBarPanel {
         } catch (RemoteException e) {
             Log.w(TAG, "Failed to call isServiceActive", e);
             return false;
+        }
+    }
+
+    private ComponentName getVoiceInteractorComponentName() {
+        try {
+            return mVoiceInteractionManagerService.getActiveServiceComponentName();
+        } catch (RemoteException e) {
+            Log.w(TAG, "Failed to call getActiveServiceComponentName", e);
+            return null;
         }
     }
 
@@ -152,25 +162,38 @@ public class SearchPanelView extends FrameLayout implements StatusBarPanel {
     private void maybeSwapSearchIcon() {
         Intent intent = ((SearchManager) mContext.getSystemService(Context.SEARCH_SERVICE))
                 .getAssistIntent(mContext, false, UserHandle.USER_CURRENT);
-        if (intent != null) {
-            ComponentName component = intent.getComponent();
-            replaceDrawable(mLogo, component, ASSIST_ICON_METADATA_NAME);
+        ComponentName component = null;
+        boolean isService = false;
+        if (isVoiceInteractorActive()) {
+            component = getVoiceInteractorComponentName();
+            isService = true;
+        } else if (intent != null) {
+            component = intent.getComponent();
+        }
+        if (component != null) {
+            replaceDrawable(mLogo, component, ASSIST_ICON_METADATA_NAME,
+                    isService);
         } else {
             mLogo.setImageDrawable(null);
         }
     }
 
-    public void replaceDrawable(ImageView v, ComponentName component, String name) {
+    public void replaceDrawable(ImageView v, ComponentName component, String name,
+            boolean isService) {
         if (component != null) {
             try {
                 PackageManager packageManager = mContext.getPackageManager();
                 // Look for the search icon specified in the activity meta-data
-                Bundle metaData = packageManager.getActivityInfo(
-                        component, PackageManager.GET_META_DATA).metaData;
+                Bundle metaData = isService
+                        ? packageManager.getServiceInfo(
+                        component, PackageManager.GET_META_DATA).metaData
+                        : packageManager.getActivityInfo(
+                                component, PackageManager.GET_META_DATA).metaData;
                 if (metaData != null) {
                     int iconResId = metaData.getInt(name);
                     if (iconResId != 0) {
-                        Resources res = packageManager.getResourcesForActivity(component);
+                        Resources res = packageManager.getResourcesForApplication(
+                                component.getPackageName());
                         v.setImageDrawable(res.getDrawable(iconResId));
                         return;
                     }

@@ -26,6 +26,7 @@ import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageParser;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
 import android.database.ContentObserver;
@@ -50,6 +51,7 @@ import android.text.TextUtils;
 import android.util.Slog;
 
 import com.android.internal.app.IVoiceInteractionManagerService;
+import com.android.internal.app.IVoiceInteractionSessionShowCallback;
 import com.android.internal.app.IVoiceInteractor;
 import com.android.internal.content.PackageMonitor;
 import com.android.internal.os.BackgroundThread;
@@ -396,7 +398,8 @@ public class VoiceInteractionManagerService extends SystemService {
                 final int callingUid = Binder.getCallingUid();
                 final long caller = Binder.clearCallingIdentity();
                 try {
-                    mImpl.showSessionLocked(callingPid, callingUid, args, flags);
+                    mImpl.showSessionLocked(callingPid, callingUid, args, flags,
+                            null /* showCallback */);
                 } finally {
                     Binder.restoreCallingIdentity(caller);
                 }
@@ -434,7 +437,8 @@ public class VoiceInteractionManagerService extends SystemService {
                 final int callingUid = Binder.getCallingUid();
                 final long caller = Binder.clearCallingIdentity();
                 try {
-                    return mImpl.showSessionLocked(callingPid, callingUid, sessionArgs, flags);
+                    return mImpl.showSessionLocked(callingPid, callingUid, sessionArgs, flags,
+                            null /* showCallback */);
                 } finally {
                     Binder.restoreCallingIdentity(caller);
                 }
@@ -720,7 +724,20 @@ public class VoiceInteractionManagerService extends SystemService {
         }
 
         @Override
-        public void showSessionForActiveService() {
+        public ComponentName getActiveServiceComponentName() {
+            synchronized (this) {
+                if (mContext.checkCallingPermission(
+                        Manifest.permission.ACCESS_VOICE_INTERACTION_SERVICE)
+                        != PackageManager.PERMISSION_GRANTED) {
+                    throw new SecurityException("Caller does not hold the permission "
+                            + Manifest.permission.ACCESS_VOICE_INTERACTION_SERVICE);
+                }
+                return mImpl != null ? mImpl.mComponent : null;
+            }
+        }
+
+        @Override
+        public void showSessionForActiveService(IVoiceInteractionSessionShowCallback showCallback) {
             synchronized (this) {
                 if (mContext.checkCallingPermission(
                         Manifest.permission.ACCESS_VOICE_INTERACTION_SERVICE)
@@ -740,7 +757,8 @@ public class VoiceInteractionManagerService extends SystemService {
                     mImpl.showSessionLocked(callingPid, callingUid, new Bundle() /* sessionArgs */,
                             VoiceInteractionService.START_SOURCE_SYSTEM
                                     | VoiceInteractionService.START_WITH_ASSIST
-                                    | VoiceInteractionService.START_WITH_SCREENSHOT);
+                                    | VoiceInteractionService.START_WITH_SCREENSHOT,
+                            showCallback);
                 } finally {
                     Binder.restoreCallingIdentity(caller);
                 }

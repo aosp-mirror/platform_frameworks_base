@@ -39,6 +39,7 @@ import android.service.voice.VoiceInteractionServiceInfo;
 import android.util.Slog;
 import android.view.IWindowManager;
 
+import com.android.internal.app.IVoiceInteractionSessionShowCallback;
 import com.android.internal.app.IVoiceInteractor;
 
 import java.io.FileDescriptor;
@@ -134,12 +135,13 @@ class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConne
         mContext.registerReceiver(mBroadcastReceiver, filter, null, handler);
     }
 
-    public boolean showSessionLocked(int callingPid, int callingUid, Bundle args, int flags) {
+    public boolean showSessionLocked(int callingPid, int callingUid, Bundle args, int flags,
+            IVoiceInteractionSessionShowCallback showCallback) {
         if (mActiveSession == null) {
             mActiveSession = new VoiceInteractionSessionConnection(mLock, mSessionComponentName,
                     mUser, mContext, this, callingPid, callingUid);
         }
-        return mActiveSession.showLocked(args, flags);
+        return mActiveSession.showLocked(args, flags, showCallback);
     }
 
     public boolean hideSessionLocked(int callingPid, int callingUid) {
