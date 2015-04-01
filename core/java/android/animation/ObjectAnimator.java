@@ -50,9 +50,11 @@ import java.lang.ref.WeakReference;
  * value. Alternatively, you can leave the fractions off and the keyframes will be equally
  * distributed within the total duration. Also, a keyframe with no value will derive its value
  * from the target object when the animator starts, just like animators with only one
- * value specified.</p>
+ * value specified. In addition, an optional interpolator can be specified. The interpolator will
+ * be applied on the interval between the keyframe that the interpolator is set on and the previous
+ * keyframe. When no interpolator is supplied, the default linear interpolator will be used. </p>
  *
- * {@sample development/samples/ApiDemos/res/anim/object_animator_pvh_kf.xml KeyframeResources}
+ * {@sample development/samples/ApiDemos/res/anim/object_animator_pvh_kf_interpolated.xml KeyframeResources}
  *
  * <div class="special reference">
  * <h3>Developer Guides</h3>

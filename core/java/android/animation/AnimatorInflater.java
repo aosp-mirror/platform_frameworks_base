@@ -947,6 +947,11 @@ public class AnimatorInflater {
                     Keyframe.ofInt(fraction);
         }
 
+        final int resID = a.getResourceId(R.styleable.Keyframe_interpolator, 0);
+        if (resID > 0) {
+            final Interpolator interpolator = AnimationUtils.loadInterpolator(res, theme, resID);
+            keyframe.setInterpolator(interpolator);
+        }
         a.recycle();
 
         return keyframe;

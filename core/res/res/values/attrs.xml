@@ -5961,6 +5961,9 @@
         <attr name="valueType" />
         <attr name="value" />
         <attr name="fraction" format="float" />
+        <!-- Defines a per-interval interpolator for this keyframe. This interpolator will be used
+             to interpolate between this keyframe and the previous keyframe.-->
+        <attr name="interpolator" />
     </declare-styleable>
 
     <!-- ========================== -->
