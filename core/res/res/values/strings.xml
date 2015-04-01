@@ -249,10 +249,20 @@
     <string name="wfcRegErrorTitle">Wi-Fi Calling</string>
     <!-- WFC Operator Error Codes -->
     <string-array name="wfcOperatorErrorCodes" translatable="false" />
-    <!-- WFC Operator Error Messages -->
-    <string-array name="wfcOperatorErrorMessages" />
+    <!-- WFC Operator Error Messages showed as alerts -->
+    <string-array name="wfcOperatorErrorAlertMessages" />
+    <!-- WFC Operator Error Messages showed as notifications -->
+    <string-array name="wfcOperatorErrorNotificationMessages" />
     <!-- Template for showing cellular network operator name while WFC is active -->
     <string name="wfcSpnFormat">%s</string>
+    <!-- WFC, summary for Disabled -->
+    <string name="wifi_calling_off_summary">Off</string>
+    <!-- WFC, summary for Wi-Fi Preferred -->
+    <string name="wfc_mode_wifi_preferred_summary">Wi-Fi preferred</string>
+    <!-- WFC, summary for Cellular Preferred -->
+    <string name="wfc_mode_cellular_preferred_summary">Cellular preferred</string>
+    <!-- WFC, summary for Wi-Fi Only -->
+    <string name="wfc_mode_wifi_only_summary">Wi-Fi only</string>
 
     <!--
         {0} is one of "bearerServiceCode*"
