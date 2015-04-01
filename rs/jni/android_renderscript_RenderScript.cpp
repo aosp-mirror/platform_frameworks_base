@@ -372,7 +372,7 @@ nClosureCreate(JNIEnv *_env, jobject _this, jlong con, jlong kernelID,
   return (jlong)(uintptr_t)rsClosureCreate(
       (RsContext)con, (RsScriptKernelID)kernelID, (RsAllocation)returnValue,
       fieldIDs, (size_t)fieldIDs_length, values, (size_t)values_length,
-      (size_t*)sizes, (size_t)sizes_length,
+      (int*)sizes, (size_t)sizes_length,
       depClosures, (size_t)depClosures_length,
       depFieldIDs, (size_t)depFieldIDs_length);
 }
@@ -405,7 +405,7 @@ nInvokeClosureCreate(JNIEnv *_env, jobject _this, jlong con, jlong invokeID,
   return (jlong)(uintptr_t)rsInvokeClosureCreate(
       (RsContext)con, (RsScriptInvokeID)invokeID, jParams, jParamLength,
       fieldIDs, (size_t)fieldIDs_length, values, (size_t)values_length,
-      (size_t*)sizes, (size_t)sizes_length);
+      (int*)sizes, (size_t)sizes_length);
 }
 
 static void
