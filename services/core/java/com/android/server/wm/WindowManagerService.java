@@ -4615,6 +4615,11 @@ public class WindowManagerService extends IWindowManager.Stub
             wtoken.waitingToShow = wtoken.waitingToHide = false;
             wtoken.hiddenRequested = !visible;
 
+            mOpeningApps.remove(wtoken);
+            mClosingApps.remove(wtoken);
+            wtoken.waitingToShow = wtoken.waitingToHide = false;
+            wtoken.hiddenRequested = !visible;
+
             // If we are preparing an app transition, then delay changing
             // the visibility of this token until we execute that transition.
             if (okToDisplay() && mAppTransition.isTransitionSet()) {
