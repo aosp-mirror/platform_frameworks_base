@@ -18768,6 +18768,7 @@ package android.net.wifi {
 
   public static final class WifiEnterpriseConfig.Eap {
     field public static final int AKA = 5; // 0x5
+    field public static final int AKA_PRIME = 6; // 0x6
     field public static final int NONE = -1; // 0xffffffff
     field public static final int PEAP = 0; // 0x0
     field public static final int PWD = 3; // 0x3

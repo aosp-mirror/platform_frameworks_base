@@ -6375,6 +6375,14 @@ public final class Settings {
                 "wifi_scan_always_enabled";
 
        /**
+        * Settings to allow BLE scans to be enabled even when Bluetooth is turned off for
+        * connectivity.
+        * @hide
+        */
+       public static final String BLE_SCAN_ALWAYS_AVAILABLE =
+               "ble_scan_always_enabled";
+
+       /**
         * Used to save the Wifi_ON state prior to tethering.
         * This state will be checked to restore Wifi after
         * the user turns off tethering.
