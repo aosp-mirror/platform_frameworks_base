@@ -59,6 +59,7 @@ public class KeyGeneratorSpec implements AlgorithmParameterSpec {
     private final Integer mMaxUsesPerBoot;
     private final Set<Integer> mUserAuthenticators;
     private final Integer mUserAuthenticationValidityDurationSeconds;
+    private final boolean mInvalidatedOnNewFingerprintEnrolled;
 
     private KeyGeneratorSpec(
             Context context,
@@ -74,7 +75,8 @@ public class KeyGeneratorSpec implements AlgorithmParameterSpec {
             Integer minSecondsBetweenOperations,
             Integer maxUsesPerBoot,
             Set<Integer> userAuthenticators,
-            Integer userAuthenticationValidityDurationSeconds) {
+            Integer userAuthenticationValidityDurationSeconds,
+            boolean invalidatedOnNewFingerprintEnrolled) {
         if (context == null) {
             throw new IllegalArgumentException("context == null");
         } else if (TextUtils.isEmpty(keyStoreAlias)) {
@@ -101,6 +103,7 @@ public class KeyGeneratorSpec implements AlgorithmParameterSpec {
                 ? new HashSet<Integer>(userAuthenticators)
                 : Collections.<Integer>emptySet();
         mUserAuthenticationValidityDurationSeconds = userAuthenticationValidityDurationSeconds;
+        mInvalidatedOnNewFingerprintEnrolled = invalidatedOnNewFingerprintEnrolled;
     }
 
     /**
@@ -239,6 +242,19 @@ public class KeyGeneratorSpec implements AlgorithmParameterSpec {
     }
 
     /**
+     * Returns {@code true} if this key must be permanently invalidated once a new fingerprint is
+     * enrolled. This constraint only has effect if fingerprint reader is one of the user
+     * authenticators protecting access to this key.
+     *
+     * @see #getUserAuthenticators()
+     *
+     * @hide
+     */
+    public boolean isInvalidatedOnNewFingerprintEnrolled() {
+        return mInvalidatedOnNewFingerprintEnrolled;
+    }
+
+    /**
      * Returns {@code true} if the key must be encrypted in the {@link java.security.KeyStore}.
      */
     public boolean isEncryptionRequired() {
@@ -260,6 +276,7 @@ public class KeyGeneratorSpec implements AlgorithmParameterSpec {
         private Integer mMaxUsesPerBoot;
         private Set<Integer> mUserAuthenticators;
         private Integer mUserAuthenticationValidityDurationSeconds;
+        private boolean mInvalidatedOnNewFingerprintEnrolled;
 
         /**
          * Creates a new instance of the {@code Builder} with the given {@code context}. The
@@ -473,6 +490,22 @@ public class KeyGeneratorSpec implements AlgorithmParameterSpec {
         }
 
         /**
+         * Sets whether this key must be invalidated (permanently) once a new fingerprint is
+         * enrolled. This only has effect if fingerprint reader is one of the user authenticators
+         * protecting access to the key.
+         *
+         * <p>By default, enrolling a new fingerprint does not invalidate the key.
+         *
+         * @see #setUserAuthenticators(Set)
+         *
+         * @hide
+         */
+        public Builder setInvalidatedOnNewFingerprintEnrolled(boolean invalidated) {
+            mInvalidatedOnNewFingerprintEnrolled = invalidated;
+            return this;
+        }
+
+        /**
          * Builds a new instance instance of {@code KeyGeneratorSpec}.
          *
          * @throws IllegalArgumentException if a required field is missing or violates a constraint.
@@ -481,7 +514,8 @@ public class KeyGeneratorSpec implements AlgorithmParameterSpec {
             return new KeyGeneratorSpec(mContext, mKeystoreAlias, mFlags, mKeySize,
                     mKeyValidityStart, mKeyValidityForOriginationEnd, mKeyValidityForConsumptionEnd,
                     mPurposes, mPadding, mBlockMode, mMinSecondsBetweenOperations, mMaxUsesPerBoot,
-                    mUserAuthenticators, mUserAuthenticationValidityDurationSeconds);
+                    mUserAuthenticators, mUserAuthenticationValidityDurationSeconds,
+                    mInvalidatedOnNewFingerprintEnrolled);
         }
     }
 }

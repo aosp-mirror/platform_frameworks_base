@@ -540,6 +540,10 @@ public class AndroidKeyStore extends KeyStoreSpi {
                     KeyStoreKeyConstraints.UserAuthenticator.allToKeymaster(
                             params.getUserAuthenticators()));
         }
+        if (params.isInvalidatedOnNewFingerprintEnrolled()) {
+            // TODO: Add the invalidate on fingerprint enrolled constraint once Keymaster supports
+            // that.
+        }
         if (params.getUserAuthenticationValidityDurationSeconds() != null) {
             args.addInt(KeymasterDefs.KM_TAG_AUTH_TIMEOUT,
                     params.getUserAuthenticationValidityDurationSeconds());

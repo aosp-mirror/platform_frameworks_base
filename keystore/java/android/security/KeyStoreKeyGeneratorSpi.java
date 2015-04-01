@@ -141,6 +141,10 @@ public abstract class KeyStoreKeyGeneratorSpi extends KeyGeneratorSpi {
                     KeyStoreKeyConstraints.UserAuthenticator.allToKeymaster(
                             spec.getUserAuthenticators()));
         }
+        if (spec.isInvalidatedOnNewFingerprintEnrolled()) {
+            // TODO: Add the invalidate on fingerprint enrolled constraint once Keymaster supports
+            // that.
+        }
         if (spec.getUserAuthenticationValidityDurationSeconds() != null) {
             args.addInt(KeymasterDefs.KM_TAG_AUTH_TIMEOUT,
                     spec.getUserAuthenticationValidityDurationSeconds());

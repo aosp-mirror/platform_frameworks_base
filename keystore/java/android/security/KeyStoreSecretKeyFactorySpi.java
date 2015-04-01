@@ -142,6 +142,9 @@ public class KeyStoreSecretKeyFactorySpi extends SecretKeyFactorySpi {
                 KeyStoreKeyConstraints.UserAuthenticator.allFromKeymaster(
                         hwEnforcedUserAuthenticatorIds);
 
+        // TODO: Populate the value below from key characteristics once Keymaster is ready.
+        boolean invalidatedOnNewFingerprintEnrolled = false;
+
         return new KeyStoreKeySpec(entryAlias,
                 origin,
                 keySize,
@@ -158,7 +161,8 @@ public class KeyStoreSecretKeyFactorySpi extends SecretKeyFactorySpi {
                 KeymasterUtils.getInt(keyCharacteristics, KeymasterDefs.KM_TAG_MAX_USES_PER_BOOT),
                 userAuthenticators,
                 teeBackedUserAuthenticators,
-                KeymasterUtils.getInt(keyCharacteristics, KeymasterDefs.KM_TAG_AUTH_TIMEOUT));
+                KeymasterUtils.getInt(keyCharacteristics, KeymasterDefs.KM_TAG_AUTH_TIMEOUT),
+                invalidatedOnNewFingerprintEnrolled);
     }
 
     @Override

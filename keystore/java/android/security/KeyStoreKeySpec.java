@@ -45,6 +45,7 @@ public class KeyStoreKeySpec implements KeySpec {
     private final Set<Integer> mUserAuthenticators;
     private final Set<Integer> mTeeBackedUserAuthenticators;
     private final Integer mUserAuthenticationValidityDurationSeconds;
+    private final boolean mInvalidatedOnNewFingerprintEnrolled;
 
 
     /**
@@ -63,7 +64,8 @@ public class KeyStoreKeySpec implements KeySpec {
             Integer maxUsesPerBoot,
             Set<Integer> userAuthenticators,
             Set<Integer> teeBackedUserAuthenticators,
-            Integer userAuthenticationValidityDurationSeconds) {
+            Integer userAuthenticationValidityDurationSeconds,
+            boolean invalidatedOnNewFingerprintEnrolled) {
         mKeystoreAlias = keystoreKeyAlias;
         mOrigin = origin;
         mKeySize = keySize;
@@ -84,6 +86,7 @@ public class KeyStoreKeySpec implements KeySpec {
                 ? new HashSet<Integer>(teeBackedUserAuthenticators)
                 : Collections.<Integer>emptySet();
         mUserAuthenticationValidityDurationSeconds = userAuthenticationValidityDurationSeconds;
+        mInvalidatedOnNewFingerprintEnrolled = invalidatedOnNewFingerprintEnrolled;
     }
 
     /**
@@ -222,5 +225,16 @@ public class KeyStoreKeySpec implements KeySpec {
      */
     public Integer getUserAuthenticationValidityDurationSeconds() {
         return mUserAuthenticationValidityDurationSeconds;
+    }
+
+    /**
+     * Returns {@code true} if this key will be permanently invalidated once a new fingerprint is
+     * enrolled. This constraint only has effect if fingerprint reader is one of the user
+     * authenticators protecting access to this key.
+     *
+     * @see #getUserAuthenticators()
+     */
+    public boolean isInvalidatedOnNewFingerprintEnrolled() {
+        return mInvalidatedOnNewFingerprintEnrolled;
     }
 }

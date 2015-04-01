@@ -59,6 +59,7 @@ public final class KeyStoreParameter implements ProtectionParameter {
     private final Integer mMaxUsesPerBoot;
     private final Set<Integer> mUserAuthenticators;
     private final Integer mUserAuthenticationValidityDurationSeconds;
+    private final boolean mInvalidatedOnNewFingerprintEnrolled;
 
     private KeyStoreParameter(int flags, Date keyValidityStart,
             Date keyValidityForOriginationEnd, Date keyValidityForConsumptionEnd,
@@ -70,7 +71,8 @@ public final class KeyStoreParameter implements ProtectionParameter {
             Integer minSecondsBetweenOperations,
             Integer maxUsesPerBoot,
             Set<Integer> userAuthenticators,
-            Integer userAuthenticationValidityDurationSeconds) {
+            Integer userAuthenticationValidityDurationSeconds,
+            boolean invalidatedOnNewFingerprintEnrolled) {
         if ((userAuthenticationValidityDurationSeconds != null)
                 && (userAuthenticationValidityDurationSeconds < 0)) {
             throw new IllegalArgumentException(
@@ -92,6 +94,7 @@ public final class KeyStoreParameter implements ProtectionParameter {
                 ? new HashSet<Integer>(userAuthenticators)
                 : Collections.<Integer>emptySet();
         mUserAuthenticationValidityDurationSeconds = userAuthenticationValidityDurationSeconds;
+        mInvalidatedOnNewFingerprintEnrolled = invalidatedOnNewFingerprintEnrolled;
     }
 
     /**
@@ -245,6 +248,19 @@ public final class KeyStoreParameter implements ProtectionParameter {
     }
 
     /**
+     * Returns {@code true} if this key must be permanently invalidated once a new fingerprint is
+     * enrolled. This constraint only has effect if fingerprint reader is one of the user
+     * authenticators protecting access to this key.
+     *
+     * @see #getUserAuthenticators()
+     *
+     * @hide
+     */
+    public boolean isInvalidatedOnNewFingerprintEnrolled() {
+        return mInvalidatedOnNewFingerprintEnrolled;
+    }
+
+    /**
      * Builder class for {@link KeyStoreParameter} objects.
      * <p>
      * This will build protection parameters for use with the
@@ -275,6 +291,7 @@ public final class KeyStoreParameter implements ProtectionParameter {
         private Integer mMaxUsesPerBoot;
         private Set<Integer> mUserAuthenticators;
         private Integer mUserAuthenticationValidityDurationSeconds;
+        private boolean mInvalidatedOnNewFingerprintEnrolled;
 
         /**
          * Creates a new instance of the {@code Builder} with the given
@@ -496,6 +513,22 @@ public final class KeyStoreParameter implements ProtectionParameter {
         }
 
         /**
+         * Sets whether this key must be invalidated (permanently) whenever a new fingerprint is
+         * enrolled. This only has effect if fingerprint reader is one of the user authenticators
+         * protecting access to the key.
+         *
+         * <p>By default, enrolling a new fingerprint does not invalidate the key.
+         *
+         * @see #setUserAuthenticators(Set)
+         *
+         * @hide
+         */
+        public Builder setInvalidatedOnNewFingerprintEnrolled(boolean invalidated) {
+            mInvalidatedOnNewFingerprintEnrolled = invalidated;
+            return this;
+        }
+
+        /**
          * Builds the instance of the {@code KeyStoreParameter}.
          *
          * @throws IllegalArgumentException if a required field is missing
@@ -506,7 +539,8 @@ public final class KeyStoreParameter implements ProtectionParameter {
                     mKeyValidityForOriginationEnd, mKeyValidityForConsumptionEnd, mPurposes,
                     mAlgorithm, mPadding, mDigest, mBlockMode, mMinSecondsBetweenOperations,
                     mMaxUsesPerBoot, mUserAuthenticators,
-                    mUserAuthenticationValidityDurationSeconds);
+                    mUserAuthenticationValidityDurationSeconds,
+                    mInvalidatedOnNewFingerprintEnrolled);
         }
     }
 }

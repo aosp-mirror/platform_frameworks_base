@@ -537,6 +537,9 @@ public abstract class KeyStoreKeyConstraints {
         /** Lock screen. */
         public static final int LOCK_SCREEN = 1;
 
+        /** Fingerprint reader/sensor. */
+        public static final int FINGERPRINT_READER = 1 << 1;
+
         /**
          * @hide
          */
@@ -544,6 +547,8 @@ public abstract class KeyStoreKeyConstraints {
             switch (userAuthenticator) {
                 case LOCK_SCREEN:
                     return LOCK_SCREEN;
+                case FINGERPRINT_READER:
+                    return FINGERPRINT_READER;
                 default:
                     throw new IllegalArgumentException(
                             "Unknown user authenticator: " + userAuthenticator);
@@ -557,6 +562,8 @@ public abstract class KeyStoreKeyConstraints {
             switch (userAuthenticator) {
                 case LOCK_SCREEN:
                     return LOCK_SCREEN;
+                case FINGERPRINT_READER:
+                    return FINGERPRINT_READER;
                 default:
                     throw new IllegalArgumentException(
                             "Unknown user authenticator: " + userAuthenticator);
@@ -600,6 +607,8 @@ public abstract class KeyStoreKeyConstraints {
             switch (userAuthenticator) {
                 case LOCK_SCREEN:
                     return "LOCK_SCREEN";
+                case FINGERPRINT_READER:
+                    return "FINGERPRINT_READER";
                 default:
                     throw new IllegalArgumentException(
                             "Unknown user authenticator: " + userAuthenticator);

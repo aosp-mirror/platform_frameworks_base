@@ -46,6 +46,9 @@ public abstract class KeymasterUtils {
         switch (e.getErrorCode()) {
             case KeymasterDefs.KM_ERROR_KEY_USER_NOT_AUTHENTICATED:
                 return new UserNotAuthenticatedException();
+            // TODO: Handle TBD Keymaster error code "invalid key: new fingerprint enrolled"
+            // case KeymasterDefs.KM_ERROR_TBD
+            //     return new NewFingerprintEnrolledException();
             default:
                 return new CryptoOperationException("Crypto operation failed", e);
         }
