@@ -585,6 +585,8 @@
     <string name="permdesc_camera" msgid="8497216524735535009">"Permite que o app tire fotos e filme vídeos com a câmera. Esta permissão autoriza o app a usar a câmera a qualquer momento sem sua confirmação."</string>
     <string name="permlab_cameraDisableTransmitLed" msgid="2651072630501126222">"desativar a transmissão do LED indicador quando a câmera estiver em uso"</string>
     <string name="permdesc_cameraDisableTransmitLed" msgid="4764585465480295341">"Permite que um app do sistema pré-instalado desative o LED indicador de uso da câmera."</string>
+    <!-- no translation found for permdesc_cameraSendSystemEvent (8642231538552298107) -->
+    <skip />
     <string name="permlab_brick" product="tablet" msgid="2961292205764488304">"desativar permanentemente o tablet"</string>
     <string name="permlab_brick" product="tv" msgid="4912674222121249410">"desativar TV permanentemente"</string>
     <string name="permlab_brick" product="default" msgid="8337817093326370537">"desativar permanentemente o telefone"</string>
@@ -1136,6 +1138,10 @@
     <string name="permdesc_packageVerificationAgent" msgid="8437590190990843381">"Permite que o app verifique se um pacote pode ser instalado."</string>
     <string name="permlab_bindPackageVerifier" msgid="4187786793360326654">"vincular a um verificador de pacote"</string>
     <string name="permdesc_bindPackageVerifier" msgid="3180741773233862126">"Permite que o titular solicite verificadores de pacote. Nunca deve ser necessário para apps normais."</string>
+    <string name="permlab_intentFilterVerificationAgent" msgid="1135788294400437497">"verificar filtro de intenção"</string>
+    <string name="permdesc_intentFilterVerificationAgent" msgid="5853902808424716312">"Permite que o app verifique se um filtro de intenção foi confirmado ou não."</string>
+    <string name="permlab_bindIntentFilterVerifier" msgid="8567268159430779210">"usar verificador de filtro de intenção"</string>
+    <string name="permdesc_bindIntentFilterVerifier" msgid="681128728719578778">"Permite que o titular solicite verificadores de filtro de intenção. Nunca é necessário para apps normais."</string>
     <string name="permlab_serialPort" msgid="546083327654631076">"acessar portas seriais"</string>
     <string name="permdesc_serialPort" msgid="2991639985224598193">"Permite que o detentor tenha acesso a portas seriais usando a API SerialManager."</string>
     <string name="permlab_accessContentProvidersExternally" msgid="5077774297943409285">"acessar fornec. de conteúdo externamente"</string>
@@ -1561,6 +1567,8 @@
     <string name="date_picker_decrement_day_button" msgid="4131881521818750031">"Diminuir dia"</string>
     <string name="date_picker_increment_year_button" msgid="6318697384310808899">"Aumentar ano"</string>
     <string name="date_picker_decrement_year_button" msgid="4482021813491121717">"Diminuir ano"</string>
+    <string name="date_picker_prev_month_button" msgid="2858244643992056505">"Mês passado"</string>
+    <string name="date_picker_next_month_button" msgid="5559507736887605055">"Próximo mês"</string>
     <string name="keyboardview_keycode_alt" msgid="4856868820040051939">"Alt"</string>
     <string name="keyboardview_keycode_cancel" msgid="1203984017245783244">"Cancelar"</string>
     <string name="keyboardview_keycode_delete" msgid="3337914833206635744">"Excluir"</string>
@@ -1813,7 +1821,6 @@
     <string name="select_minutes" msgid="3974345615920336087">"Selecione os minutos"</string>
     <string name="select_day" msgid="7774759604701773332">"Selecione o mês e o dia"</string>
     <string name="select_year" msgid="7952052866994196170">"Selecione o ano"</string>
-    <string name="item_is_selected" msgid="949687401682476608">"<xliff:g id="ITEM">%1$s</xliff:g> selecionado"</string>
     <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> excluído"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"Trabalho: <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="lock_to_app_toast" msgid="7570091317001980053">"Para liberar esta tela, toque e mantenha pressionados \"Voltar\" e \"Visão geral\" ao mesmo tempo."</string>

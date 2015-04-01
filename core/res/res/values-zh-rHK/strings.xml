@@ -585,6 +585,8 @@
     <string name="permdesc_camera" msgid="8497216524735535009">"允許應用程式使用相機拍照和錄影。這項權限允許應用程式隨時使用相機，而不需經您確認。"</string>
     <string name="permlab_cameraDisableTransmitLed" msgid="2651072630501126222">"使用相機時停用傳輸指示燈"</string>
     <string name="permdesc_cameraDisableTransmitLed" msgid="4764585465480295341">"允許預先安裝的系統應用程式停用相機指示燈。"</string>
+    <!-- no translation found for permdesc_cameraSendSystemEvent (8642231538552298107) -->
+    <skip />
     <string name="permlab_brick" product="tablet" msgid="2961292205764488304">"永久停用平板電腦"</string>
     <string name="permlab_brick" product="tv" msgid="4912674222121249410">"永遠停用電視"</string>
     <string name="permlab_brick" product="default" msgid="8337817093326370537">"永久停用手機"</string>
@@ -1136,6 +1138,14 @@
     <string name="permdesc_packageVerificationAgent" msgid="8437590190990843381">"允許應用程式驗證套件是否可安裝。"</string>
     <string name="permlab_bindPackageVerifier" msgid="4187786793360326654">"繫結至套件驗證程序"</string>
     <string name="permdesc_bindPackageVerifier" msgid="3180741773233862126">"允許應用程式要求驗證套件 (不建議一般應用程式使用)。"</string>
+    <!-- no translation found for permlab_intentFilterVerificationAgent (1135788294400437497) -->
+    <skip />
+    <!-- no translation found for permdesc_intentFilterVerificationAgent (5853902808424716312) -->
+    <skip />
+    <!-- no translation found for permlab_bindIntentFilterVerifier (8567268159430779210) -->
+    <skip />
+    <!-- no translation found for permdesc_bindIntentFilterVerifier (681128728719578778) -->
+    <skip />
     <string name="permlab_serialPort" msgid="546083327654631076">"接入串列通訊埠"</string>
     <string name="permdesc_serialPort" msgid="2991639985224598193">"允許應用程式使用 SerialManager API 接入串列通訊埠。"</string>
     <string name="permlab_accessContentProvidersExternally" msgid="5077774297943409285">"從外部存取內容供應商"</string>
@@ -1561,6 +1571,10 @@
     <string name="date_picker_decrement_day_button" msgid="4131881521818750031">"減少日數"</string>
     <string name="date_picker_increment_year_button" msgid="6318697384310808899">"增加年數"</string>
     <string name="date_picker_decrement_year_button" msgid="4482021813491121717">"減少年數"</string>
+    <!-- no translation found for date_picker_prev_month_button (2858244643992056505) -->
+    <skip />
+    <!-- no translation found for date_picker_next_month_button (5559507736887605055) -->
+    <skip />
     <string name="keyboardview_keycode_alt" msgid="4856868820040051939">"Alt"</string>
     <string name="keyboardview_keycode_cancel" msgid="1203984017245783244">"取消"</string>
     <string name="keyboardview_keycode_delete" msgid="3337914833206635744">"刪除"</string>
@@ -1813,7 +1827,6 @@
     <string name="select_minutes" msgid="3974345615920336087">"選取分鐘"</string>
     <string name="select_day" msgid="7774759604701773332">"選取月份和日期"</string>
     <string name="select_year" msgid="7952052866994196170">"選取年份"</string>
-    <string name="item_is_selected" msgid="949687401682476608">"已選取<xliff:g id="ITEM">%1$s</xliff:g>"</string>
     <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> 已刪除"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"公司<xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="lock_to_app_toast" msgid="7570091317001980053">"如要取消固定這個畫面，請同時輕觸並按住 [返回] 和 [概覽]。"</string>

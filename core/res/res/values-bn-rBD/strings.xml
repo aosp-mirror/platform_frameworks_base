@@ -585,6 +585,8 @@
     <string name="permdesc_camera" msgid="8497216524735535009">"ক্যামেরার সাহায্যে ছবি তুলতে ও ভিডিও তৈরি করতে অ্যাপ্লিকেশানটিকে মঞ্জুর করে৷ এই অনুমতিটি অ্যাপ্লিকেশানটিকে আপনার নিশ্চয়তা ছাড়াই যেকোনো সময় ক্যামেরা ব্যবহার করতে মঞ্জুর করে৷"</string>
     <string name="permlab_cameraDisableTransmitLed" msgid="2651072630501126222">"যখন ক্যামেরা ব্যবহারে থাকে তখন ট্রান্সমিট সূচক LED অক্ষম করে"</string>
     <string name="permdesc_cameraDisableTransmitLed" msgid="4764585465480295341">"আগে থেকে ইনস্টল থাকা একটি সিস্টেম অ্যাপ্লিকেশানকে ক্যামেরা ব্যবহারের সূচক LEDটিকে অক্ষম করার অনুমতি দেয়৷"</string>
+    <!-- no translation found for permdesc_cameraSendSystemEvent (8642231538552298107) -->
+    <skip />
     <string name="permlab_brick" product="tablet" msgid="2961292205764488304">"ট্যাবলেটকে স্থায়ীভাবে অক্ষম করে"</string>
     <string name="permlab_brick" product="tv" msgid="4912674222121249410">"টিভি স্থায়ীভাবে অক্ষম করে"</string>
     <string name="permlab_brick" product="default" msgid="8337817093326370537">"ফোনকে স্থায়ীভাবে অক্ষম করে"</string>
@@ -1136,6 +1138,10 @@
     <string name="permdesc_packageVerificationAgent" msgid="8437590190990843381">"অ্যাপ্লিকেশানকে ইনস্টলযোগ্য প্যাকেজ যাচাই করার অনুমতি দেয়৷"</string>
     <string name="permlab_bindPackageVerifier" msgid="4187786793360326654">"একটি প্যাকেজ যাচাইকারীতে সংলগ্ন করে"</string>
     <string name="permdesc_bindPackageVerifier" msgid="3180741773233862126">"ধারককে, প্যাকেজ যাচাইকারীতে অনুরোধগুলি পাঠাতে দেয়৷ সাধারণ অ্যাপ্লিকেশানগুলির জন্য কখনোই প্রয়োজনীয় নয়৷"</string>
+    <string name="permlab_intentFilterVerificationAgent" msgid="1135788294400437497">"অভিপ্রায় ফিল্টার যাচাই করুন"</string>
+    <string name="permdesc_intentFilterVerificationAgent" msgid="5853902808424716312">"কোনো অভিপ্রায় ফিল্টার যাচাই করা হয়েছে কি না অ্যাপ্লিকেশানটিকে তা পরীক্ষা করার মঞ্জুরি দেয়৷"</string>
+    <string name="permlab_bindIntentFilterVerifier" msgid="8567268159430779210">"একটি অভিপ্রায় ফিল্টার যাচাইকারী আবদ্ধ করুন"</string>
+    <string name="permdesc_bindIntentFilterVerifier" msgid="681128728719578778">"ধারককে,অভিপ্রায় ফিল্টার যাচাইকারীতে অনুরোধগুলি পাঠাতে দেয়৷ সাধারণ অ্যাপ্লিকেশানগুলির জন্য কখনোই প্রয়োজনীয় নয়৷"</string>
     <string name="permlab_serialPort" msgid="546083327654631076">"সিরিয়াল পোর্টগুলি অ্যাক্সেস করে"</string>
     <string name="permdesc_serialPort" msgid="2991639985224598193">"সিরিয়াল ম্যানেজার API ব্যবহার করে ধারককে সিরিয়াল পোর্টগুলি অ্যাক্সেস করতে অনুমতি দেয়৷"</string>
     <string name="permlab_accessContentProvidersExternally" msgid="5077774297943409285">"বাহ্যিকভাবে সামগ্রীর পরিষেবা প্রদানকারীদের অ্যাক্সেস করুন"</string>
@@ -1561,6 +1567,8 @@
     <string name="date_picker_decrement_day_button" msgid="4131881521818750031">"দিন কম করুন"</string>
     <string name="date_picker_increment_year_button" msgid="6318697384310808899">"বছর বাড়ান"</string>
     <string name="date_picker_decrement_year_button" msgid="4482021813491121717">"বছর কম করুন"</string>
+    <string name="date_picker_prev_month_button" msgid="2858244643992056505">"পূর্ববর্তী মাস"</string>
+    <string name="date_picker_next_month_button" msgid="5559507736887605055">"পরের মাস"</string>
     <string name="keyboardview_keycode_alt" msgid="4856868820040051939">"Alt"</string>
     <string name="keyboardview_keycode_cancel" msgid="1203984017245783244">"বাতিল করুন"</string>
     <string name="keyboardview_keycode_delete" msgid="3337914833206635744">"মুছুন"</string>
@@ -1813,7 +1821,6 @@
     <string name="select_minutes" msgid="3974345615920336087">"মিনিট নির্বাচন করুন"</string>
     <string name="select_day" msgid="7774759604701773332">"মাস এবং দিন নির্বাচন করুন"</string>
     <string name="select_year" msgid="7952052866994196170">"বছর নির্বাচন করুন"</string>
-    <string name="item_is_selected" msgid="949687401682476608">"<xliff:g id="ITEM">%1$s</xliff:g> নির্বাচন করা হয়েছে"</string>
     <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> মুছে ফেলা হয়েছে"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"কর্মক্ষেত্র <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="lock_to_app_toast" msgid="7570091317001980053">"এই স্ক্রীনটিকে আনপিন করতে, \'ফিরুন\' এবং \'এক নজরে\' একসাথে স্পর্শ করুন এবং ধরে রাখুন৷"</string>

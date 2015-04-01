@@ -585,6 +585,8 @@
     <string name="permdesc_camera" msgid="8497216524735535009">"Permet que l\'aplicació faci fotos i vídeos amb la càmera. Aquest permís permet que l\'aplicació utilitzi la càmera en qualsevol moment sense la teva confirmació."</string>
     <string name="permlab_cameraDisableTransmitLed" msgid="2651072630501126222">"desactiva la transmissió del LED indicador en fer servir la càmera"</string>
     <string name="permdesc_cameraDisableTransmitLed" msgid="4764585465480295341">"Permet que una aplicació dels sistema preinstal·lada desactivi el LED indicador d\'ús de la càmera."</string>
+    <!-- no translation found for permdesc_cameraSendSystemEvent (8642231538552298107) -->
+    <skip />
     <string name="permlab_brick" product="tablet" msgid="2961292205764488304">"desactiva la tauleta de manera permanent"</string>
     <string name="permlab_brick" product="tv" msgid="4912674222121249410">"desactivar el televisor de manera permanent"</string>
     <string name="permlab_brick" product="default" msgid="8337817093326370537">"desactivar definitivament el telèfon"</string>
@@ -1136,6 +1138,14 @@
     <string name="permdesc_packageVerificationAgent" msgid="8437590190990843381">"Permet que l\'aplicació verifiqui si un paquet es pot instal·lar."</string>
     <string name="permlab_bindPackageVerifier" msgid="4187786793360326654">"vincula a un verificador de paquets"</string>
     <string name="permdesc_bindPackageVerifier" msgid="3180741773233862126">"Permet que el titular sol·liciti verificadors de paquets. No s\'hauria de necessitar mai per a les aplicacions normals."</string>
+    <!-- no translation found for permlab_intentFilterVerificationAgent (1135788294400437497) -->
+    <skip />
+    <!-- no translation found for permdesc_intentFilterVerificationAgent (5853902808424716312) -->
+    <skip />
+    <!-- no translation found for permlab_bindIntentFilterVerifier (8567268159430779210) -->
+    <skip />
+    <!-- no translation found for permdesc_bindIntentFilterVerifier (681128728719578778) -->
+    <skip />
     <string name="permlab_serialPort" msgid="546083327654631076">"accedeix a ports sèrie"</string>
     <string name="permdesc_serialPort" msgid="2991639985224598193">"Permet que el titular accedeixi a ports sèrie amb l\'API SerialManager."</string>
     <string name="permlab_accessContentProvidersExternally" msgid="5077774297943409285">"accedeix als proveïdors de contingut externament"</string>
@@ -1561,6 +1571,10 @@
     <string name="date_picker_decrement_day_button" msgid="4131881521818750031">"Fes disminuir el dia"</string>
     <string name="date_picker_increment_year_button" msgid="6318697384310808899">"Fes augmentar l\'any"</string>
     <string name="date_picker_decrement_year_button" msgid="4482021813491121717">"Fes disminuir l\'any"</string>
+    <!-- no translation found for date_picker_prev_month_button (2858244643992056505) -->
+    <skip />
+    <!-- no translation found for date_picker_next_month_button (5559507736887605055) -->
+    <skip />
     <string name="keyboardview_keycode_alt" msgid="4856868820040051939">"Alt"</string>
     <string name="keyboardview_keycode_cancel" msgid="1203984017245783244">"Cancel·la"</string>
     <string name="keyboardview_keycode_delete" msgid="3337914833206635744">"Suprimeix"</string>
@@ -1813,7 +1827,6 @@
     <string name="select_minutes" msgid="3974345615920336087">"Selecciona els minuts"</string>
     <string name="select_day" msgid="7774759604701773332">"Selecciona un mes i un dia"</string>
     <string name="select_year" msgid="7952052866994196170">"Selecciona un any"</string>
-    <string name="item_is_selected" msgid="949687401682476608">"<xliff:g id="ITEM">%1$s</xliff:g> seleccionat"</string>
     <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> suprimit"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"<xliff:g id="LABEL">%1$s</xliff:g> de la feina"</string>
     <string name="lock_to_app_toast" msgid="7570091317001980053">"Per anul·lar la fixació d\'aquesta pantalla, mantén premudes les opcions Enrere i Visió general alhora."</string>

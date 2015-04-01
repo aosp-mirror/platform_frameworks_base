@@ -585,6 +585,8 @@
     <string name="permdesc_camera" msgid="8497216524735535009">"கேமரா மூலமாகப் படங்களையும், வீடியோக்களையும் எடுக்க பயன்பாட்டை அனுமதிக்கிறது. உங்கள் உறுதிப்படுத்தல் இன்றி கேமராவை எந்நேரத்திலும் பயன்படுத்தப் பயன்பாட்டை இது அனுமதிக்கிறது."</string>
     <string name="permlab_cameraDisableTransmitLed" msgid="2651072630501126222">"கேமரா பயன்பாட்டில் இருக்கும்போது டிரான்ஸ்மிட் இன்டிகேட்டர் LED ஐ முடக்குதல்"</string>
     <string name="permdesc_cameraDisableTransmitLed" msgid="4764585465480295341">"இன்டிகேட்டர் LED ஐ கேமரா பயன்படுத்துவதை முடக்க, முன்நிறுவப்பட்ட அமைப்பு பயன்பாட்டை அனுமதிக்கிறது."</string>
+    <!-- no translation found for permdesc_cameraSendSystemEvent (8642231538552298107) -->
+    <skip />
     <string name="permlab_brick" product="tablet" msgid="2961292205764488304">"டேப்லெட்டை நிரந்தரமாக முடக்குதல்"</string>
     <string name="permlab_brick" product="tv" msgid="4912674222121249410">"டிவியை நிரந்தரமாக முடக்குதல்"</string>
     <string name="permlab_brick" product="default" msgid="8337817093326370537">"தொலைபேசியை நிரந்தரமாக முடக்குதல்"</string>
@@ -1136,6 +1138,10 @@
     <string name="permdesc_packageVerificationAgent" msgid="8437590190990843381">"பேக்கேஜ் நிறுவுவதற்கு ஏற்றதா என்பதைச் சரிபார்க்க, பயன்பாட்டை அனுமதிக்கிறது."</string>
     <string name="permlab_bindPackageVerifier" msgid="4187786793360326654">"தொகுப்பு சரிபார்ப்பானுடன் இணைத்தல்"</string>
     <string name="permdesc_bindPackageVerifier" msgid="3180741773233862126">"தொகுப்பைச் சரிபார்ப்பிற்கான கோரிக்கைகளை உருவாக்க, ஹோல்டரை அனுமதிக்கிறது. சாதாரண பயன்பாடுகளுக்கு எப்போதுமே தேவைப்படாது."</string>
+    <string name="permlab_intentFilterVerificationAgent" msgid="1135788294400437497">"இன்டென்ட் வடிப்பானைச் சரிபார்த்தல்"</string>
+    <string name="permdesc_intentFilterVerificationAgent" msgid="5853902808424716312">"இன்டென்ட் வடிப்பான் சரிபார்க்கப்பட்டதா அல்லது இல்லையா என்பதைச் சோதிக்க, பயன்பாட்டை அனுமதிக்கும்."</string>
+    <string name="permlab_bindIntentFilterVerifier" msgid="8567268159430779210">"இன்டென்ட் வடிப்பான் சரிபார்ப்பியுடன் இணைத்தல்"</string>
+    <string name="permdesc_bindIntentFilterVerifier" msgid="681128728719578778">"இன்டென்ட் வடிப்பான் சரிபார்ப்பிகளின் கோரிக்கைகளை உருவாக்க ஹோல்டரை அனுமதிக்கும். சாதாரணப் பயன்பாடுகளுக்கு எப்போதுமே தேவைப்படாது."</string>
     <string name="permlab_serialPort" msgid="546083327654631076">"தொடர் போர்ட்களின் அணுகல்"</string>
     <string name="permdesc_serialPort" msgid="2991639985224598193">"SerialManager API ஐப் பயன்படுத்தி தொடர் போர்ட்களை அணுக ஹோல்டரை அனுமதிக்கிறது."</string>
     <string name="permlab_accessContentProvidersExternally" msgid="5077774297943409285">"வெளிப்புறமாக வழங்கப்படும் உள்ளடக்கத்திற்கான அணுகல்"</string>
@@ -1561,6 +1567,8 @@
     <string name="date_picker_decrement_day_button" msgid="4131881521818750031">"நாளினைக் குறை"</string>
     <string name="date_picker_increment_year_button" msgid="6318697384310808899">"வருடத்தை அதிகரி"</string>
     <string name="date_picker_decrement_year_button" msgid="4482021813491121717">"வருடத்தைக் குறை"</string>
+    <string name="date_picker_prev_month_button" msgid="2858244643992056505">"முந்தைய மாதம்"</string>
+    <string name="date_picker_next_month_button" msgid="5559507736887605055">"அடுத்த மாதம்"</string>
     <string name="keyboardview_keycode_alt" msgid="4856868820040051939">"Alt"</string>
     <string name="keyboardview_keycode_cancel" msgid="1203984017245783244">"ரத்துசெய்"</string>
     <string name="keyboardview_keycode_delete" msgid="3337914833206635744">"நீக்கு"</string>
@@ -1813,7 +1821,6 @@
     <string name="select_minutes" msgid="3974345615920336087">"நிமிடத்தைத் தேர்ந்தெடுக்கவும்"</string>
     <string name="select_day" msgid="7774759604701773332">"மாதம் மற்றும் தேதியைத் தேர்ந்தெடுக்கவும்"</string>
     <string name="select_year" msgid="7952052866994196170">"ஆண்டைத் தேர்ந்தெடுக்கவும்"</string>
-    <string name="item_is_selected" msgid="949687401682476608">"<xliff:g id="ITEM">%1$s</xliff:g> தேர்ந்தெடுக்கப்பட்டது"</string>
     <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> நீக்கப்பட்டது"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"பணியிடம் <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="lock_to_app_toast" msgid="7570091317001980053">"இந்தத் திரையை விலக்க, பின் மற்றும் மேலோட்டப் பார்வையை ஒரே நேரத்தில் தொட்டுப் பிடித்திருக்கவும்."</string>
