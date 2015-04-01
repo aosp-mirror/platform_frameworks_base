@@ -7,6 +7,12 @@
 
 #define LOG_TAG "appproc"
 
+#include <stdio.h>
+#include <stdlib.h>
+#include <sys/prctl.h>
+#include <sys/stat.h>
+#include <unistd.h>
+
 #include <binder/IPCThreadState.h>
 #include <binder/ProcessState.h>
 #include <utils/Log.h>
@@ -16,11 +22,6 @@
 #include <cutils/trace.h>
 #include <android_runtime/AndroidRuntime.h>
 #include <private/android_filesystem_config.h>  // for AID_SYSTEM
-
-#include <stdlib.h>
-#include <stdio.h>
-#include <unistd.h>
-#include <sys/prctl.h>
 
 namespace android {
 
