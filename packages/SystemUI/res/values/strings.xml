@@ -982,4 +982,7 @@
 
     <!-- Volume dialog zen toggle switch title -->
     <string name="volume_zen_switch_text">@*android:string/zen_mode_feature_name</string>
+
+    <!-- Toast shown when user unlocks screen and managed profile activity is in the foreground -->
+    <string name="managed_profile_foreground_toast">You are in the Work profile</string>
 </resources>
