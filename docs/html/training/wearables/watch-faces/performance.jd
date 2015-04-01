@@ -99,7 +99,9 @@ enabled (right).</p>
 setFilterBitmap()} method. <a href="#fig2">Figure 2</a> shows a magnified view of a clock hand with
 and without bitmap filtering.</p>
 
-
+<p class="note"><strong>Note:</strong> In low-bit ambient mode, the system does not reliably
+render the colors in the image for bitmap filtering to process successfully. When ambient mode is
+active, disable bitmap filtering.</p>
 
 <h2 id="OutDrawing">Move Expensive Operations Outside the Drawing Method</h2>
 
