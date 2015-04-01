@@ -1562,7 +1562,7 @@ public class AccessibilityNodeInfo implements Parcelable {
     }
 
     /**
-     * Sets whether this node is visible to the user.
+     * Gets whether this node is visible to the user.
      *
      * @return Whether the node is visible to the user.
      */
