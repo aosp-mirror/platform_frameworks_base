@@ -571,7 +571,7 @@ public class NetworkStatsCollection implements FileRotator.Reader {
     }
 
     private static boolean isAccessibleToUser(int uid, int callerUid) {
-        return callerUid == android.os.Process.SYSTEM_UID ||
+        return UserHandle.getAppId(callerUid) == android.os.Process.SYSTEM_UID ||
                 uid == android.os.Process.SYSTEM_UID || uid == UID_REMOVED || uid == UID_TETHERING
                 || UserHandle.getUserId(uid) == UserHandle.getUserId(callerUid);
     }
