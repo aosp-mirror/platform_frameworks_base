@@ -192,13 +192,7 @@ public class LayoutBinder {
 
     public String getImplementationName() {
         if (hasVariations()) {
-            final String suffix;
-            if (hasVariations()) {
-                suffix = mBundle.getConfigName();
-            } else {
-                suffix = "";
-            }
-            return mBaseClassName + suffix + "Impl";
+            return mBaseClassName + mBundle.getConfigName() + "Impl";
         } else {
             return mBaseClassName;
         }
