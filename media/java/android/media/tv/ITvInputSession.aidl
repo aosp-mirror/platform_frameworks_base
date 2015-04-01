@@ -46,4 +46,10 @@ oneway interface ITvInputSession {
     void removeOverlayView();
 
     void requestUnblockContent(in String unblockedRating);
+
+    void timeShiftPause();
+    void timeShiftResume();
+    void timeShiftSeekTo(long timeMs);
+    void timeShiftSetPlaybackRate(float rate, int audioMode);
+    void timeShiftTrackCurrentPosition(boolean enabled);
 }

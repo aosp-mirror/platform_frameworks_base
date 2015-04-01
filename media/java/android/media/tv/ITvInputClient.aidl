@@ -40,4 +40,7 @@ oneway interface ITvInputClient {
     void onContentAllowed(int seq);
     void onContentBlocked(in String rating, int seq);
     void onLayoutSurface(int left, int top, int right, int bottom, int seq);
+    void onTimeShiftStatusChanged(int status, int seq);
+    void onTimeShiftStartPositionChanged(long timeMs, int seq);
+    void onTimeShiftCurrentPositionChanged(long timeMs, int seq);
 }
