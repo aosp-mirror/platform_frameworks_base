@@ -15,7 +15,8 @@ package android.databinding.tool.writer
 
 import android.databinding.tool.LayoutBinder
 
-class DataBinderWriter(val pkg: String, val projectPackage: String, val className: String, val layoutBinders : List<LayoutBinder> ) {
+class DataBinderWriter(val pkg: String, val projectPackage: String, val className: String,
+        val layoutBinders : List<LayoutBinder>, val minSdk : kotlin.Int) {
     fun write() =
             kcode("") {
                 nl("package $pkg;")
@@ -52,6 +53,8 @@ class DataBinderWriter(val pkg: String, val projectPackage: String, val classNam
                     tab("public int getId(String key) {") {
                         tab("return BR.getId(key);")
                     } tab("}")
+
+                    tab("final static int TARGET_MIN_SDK = ${minSdk};")
                 }
                 nl("}")
             }.generate()

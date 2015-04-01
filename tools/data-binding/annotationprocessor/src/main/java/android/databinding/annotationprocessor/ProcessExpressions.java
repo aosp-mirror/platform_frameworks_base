@@ -94,7 +94,7 @@ public class ProcessExpressions extends ProcessDataBinding.ProcessingStep {
         for (Intermediate intermediate : intermediates) {
             intermediate.appendTo(resourceBundle);
         }
-        writeResourceBundle(resourceBundle, buildInfo.isLibrary());
+        writeResourceBundle(resourceBundle, buildInfo.isLibrary(), buildInfo.minSdk());
     }
 
     private IntermediateV1 createIntermediateFromLayouts(String layoutInfoFolderPath) {
@@ -119,14 +119,15 @@ public class ProcessExpressions extends ProcessDataBinding.ProcessingStep {
         return result;
     }
 
-    private void writeResourceBundle(ResourceBundle resourceBundle, boolean forLibraryModule)
+    private void writeResourceBundle(ResourceBundle resourceBundle, boolean forLibraryModule,
+            int minSdk)
             throws JAXBException {
         CompilerChef compilerChef = CompilerChef.createChef(resourceBundle, getWriter());
         if (compilerChef.hasAnythingToGenerate()) {
             compilerChef.addBRVariables(mProcessBindable);
             compilerChef.writeViewBinderInterfaces(forLibraryModule);
             if (!forLibraryModule) {
-                compilerChef.writeDbrFile();
+                compilerChef.writeDbrFile(minSdk);
                 compilerChef.writeViewBinders();
             }
         }

@@ -23,11 +23,12 @@ import android.view.View;
  * as part of the code generation step. This class's existence is just to ensure that
  * compile works and no reflection is needed to access the generated class.
  */
-public class DataBinderMapper {
+class DataBinderMapper {
     public ViewDataBinding getDataBinder(View view, int layoutId) {
         return null;
     }
     public int getId(String key) {
         return 0;
     }
+    public static int TARGET_MIN_SDK = 0;
 }

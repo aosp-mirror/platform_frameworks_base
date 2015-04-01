@@ -16,9 +16,13 @@
 
 package android.databinding;
 
+import com.android.databinding.library.R;
+
 import android.annotation.TargetApi;
+import android.os.Build;
 import android.os.Build.VERSION;
 import android.os.Build.VERSION_CODES;
+import android.util.Log;
 import android.util.SparseIntArray;
 import android.view.View;
 import android.view.View.OnAttachStateChangeListener;
@@ -42,6 +46,9 @@ public abstract class ViewDataBinding {
 
     // The length of BINDING_TAG_PREFIX prevents calling length repeatedly.
     private static final int BINDING_NUMBER_START = BINDING_TAG_PREFIX.length();
+
+    // ICS (v 14) fixes a leak when using setTag(int, Object)
+    private static final boolean USE_TAG_ID = DataBinderMapper.TARGET_MIN_SDK >= 14;
 
     /**
      * Method object extracted out to attach a listener to a bound Observable object.
@@ -84,7 +91,12 @@ public abstract class ViewDataBinding {
                 @Override
                 public void onViewAttachedToWindow(View v) {
                     // execute the pending bindings.
-                    ViewDataBinding binding = (ViewDataBinding) v.getTag();
+                    final ViewDataBinding binding;
+                    if (USE_TAG_ID) {
+                        binding = (ViewDataBinding) v.getTag(R.id.dataBinding);
+                    } else {
+                        binding = (ViewDataBinding) v.getTag();
+                    }
                     v.post(binding.mRebindRunnable);
                     v.removeOnAttachStateChangeListener(this);
                 }
@@ -138,8 +150,11 @@ public abstract class ViewDataBinding {
     protected ViewDataBinding(View root, int localFieldCount) {
         mLocalFieldObservers = new WeakListener[localFieldCount];
         this.mRoot = root;
-        // TODO: When targeting ICS and above, use setTag(id, this) instead
-        this.mRoot.setTag(this);
+        if (USE_TAG_ID) {
+            this.mRoot.setTag(R.id.dataBinding, this);
+        } else {
+            this.mRoot.setTag(this);
+        }
     }
 
     public static int getBuildSdkInt() {
