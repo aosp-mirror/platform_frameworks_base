@@ -242,26 +242,12 @@ public class InsetDrawable extends DrawableWrapper {
     }
 
     @Override
-    public ConstantState getConstantState() {
-        if (mState.canConstantState()) {
-            mState.mChangingConfigurations = getChangingConfigurations();
-            return mState;
-        }
-        return null;
-    }
-
-    @Override
     DrawableWrapperState mutateConstantState() {
         mState = new InsetState(mState);
         return mState;
     }
 
     static final class InsetState extends DrawableWrapper.DrawableWrapperState {
-        int[] mThemeAttrs;
-        int mChangingConfigurations;
-
-        ConstantState mDrawableState;
-
         int mInsetLeft = 0;
         int mInsetTop = 0;
         int mInsetRight = 0;

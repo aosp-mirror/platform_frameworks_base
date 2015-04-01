@@ -89,9 +89,6 @@ public class RotateDrawable extends DrawableWrapper {
 
         final RotateState state = mState;
 
-        // Account for any configuration changes.
-        state.mChangingConfigurations |= a.getChangingConfigurations();
-
         // Extract the theme attributes, if any.
         state.mThemeAttrs = a.extractThemeAttrs();
 

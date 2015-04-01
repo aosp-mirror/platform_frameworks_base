@@ -41,7 +41,6 @@ import android.annotation.RawRes;
 import android.annotation.StringRes;
 import android.annotation.XmlRes;
 import android.content.pm.ActivityInfo;
-import android.content.res.ColorStateList.ColorStateListFactory;
 import android.graphics.Movie;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
@@ -112,8 +111,8 @@ public class Resources {
     private static final LongSparseArray<ConstantState>[] sPreloadedDrawables;
     private static final LongSparseArray<ConstantState> sPreloadedColorDrawables
             = new LongSparseArray<>();
-    private static final LongSparseArray<ColorStateListFactory> sPreloadedColorStateLists
-            = new LongSparseArray<>();
+    private static final LongSparseArray<android.content.res.ConstantState<ColorStateList>>
+            sPreloadedColorStateLists = new LongSparseArray<>();
 
     // Pool of TypedArrays targeted to this Resources object.
     final SynchronizedPool<TypedArray> mTypedArrayPool = new SynchronizedPool<>(5);
@@ -2667,7 +2666,8 @@ public class Resources {
         // Handle inline color definitions.
         if (value.type >= TypedValue.TYPE_FIRST_COLOR_INT
                 && value.type <= TypedValue.TYPE_LAST_COLOR_INT) {
-            final ColorStateListFactory factory = sPreloadedColorStateLists.get(key);
+            final android.content.res.ConstantState<ColorStateList> factory =
+                    sPreloadedColorStateLists.get(key);
             if (factory != null) {
                 return factory.newInstance();
             }
@@ -2677,7 +2677,7 @@ public class Resources {
             if (mPreloading) {
                 if (verifyPreloadConfig(value.changingConfigurations, 0, value.resourceId,
                         "color")) {
-                    sPreloadedColorStateLists.put(key, csl.getFactory());
+                    sPreloadedColorStateLists.put(key, csl.getConstantState());
                 }
             }
 
@@ -2691,7 +2691,8 @@ public class Resources {
             return csl;
         }
 
-        final ColorStateListFactory factory = sPreloadedColorStateLists.get(key);
+        final android.content.res.ConstantState<ColorStateList> factory =
+                sPreloadedColorStateLists.get(key);
         if (factory != null) {
             csl = factory.newInstance(this, theme);
         }
@@ -2704,10 +2705,10 @@ public class Resources {
             if (mPreloading) {
                 if (verifyPreloadConfig(value.changingConfigurations, 0, value.resourceId,
                         "color")) {
-                    sPreloadedColorStateLists.put(key, csl.getFactory());
+                    sPreloadedColorStateLists.put(key, csl.getConstantState());
                 }
             } else {
-                cache.put(key, theme, csl.getFactory());
+                cache.put(key, theme, csl.getConstantState());
             }
         }
 

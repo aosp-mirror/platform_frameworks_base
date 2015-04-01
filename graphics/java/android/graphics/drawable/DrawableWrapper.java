@@ -180,8 +180,7 @@ public abstract class DrawableWrapper extends Drawable implements Drawable.Callb
     @Override
     public int getChangingConfigurations() {
         return super.getChangingConfigurations()
-                | (mState != null ? mState.mChangingConfigurations : 0)
-                | mDrawable.getChangingConfigurations();
+                | (mState != null ? mState.getChangingConfigurations() : 0);
     }
 
     @Override
@@ -433,7 +432,7 @@ public abstract class DrawableWrapper extends Drawable implements Drawable.Callb
 
         @Override
         public int getChangingConfigurations() {
-            return mChangingConfigurations;
+            return mChangingConfigurations | mDrawableState.getChangingConfigurations();
         }
 
         public boolean canConstantState() {

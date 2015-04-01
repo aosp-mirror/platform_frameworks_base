@@ -71,10 +71,15 @@ import java.util.Arrays;
  */
 public class ColorStateList implements Parcelable {
     private static final String TAG = "ColorStateList";
+
     private static final int DEFAULT_COLOR = Color.RED;
     private static final int[][] EMPTY = new int[][] { new int[0] };
-    private static final SparseArray<WeakReference<ColorStateList>> sCache =
-                            new SparseArray<WeakReference<ColorStateList>>();
+
+    /** Thread-safe cache of single-color ColorStateLists. */
+    private static final SparseArray<WeakReference<ColorStateList>> sCache = new SparseArray<>();
+
+    /** Lazily-created factory for this color state list. */
+    private ColorStateListFactory mFactory;
 
     private int[][] mThemeAttrs;
     private int mChangingConfigurations;
@@ -125,7 +130,7 @@ public class ColorStateList implements Parcelable {
             }
 
             final ColorStateList csl = new ColorStateList(EMPTY, new int[] { color });
-            sCache.put(color, new WeakReference<ColorStateList>(csl));
+            sCache.put(color, new WeakReference<>(csl));
             return csl;
         }
     }
@@ -141,11 +146,13 @@ public class ColorStateList implements Parcelable {
      */
     private ColorStateList(ColorStateList orig) {
         if (orig != null) {
+            mChangingConfigurations = orig.mChangingConfigurations;
             mStateSpecs = orig.mStateSpecs;
             mDefaultColor = orig.mDefaultColor;
             mIsOpaque = orig.mIsOpaque;
 
-            // Deep copy, this may change due to theming.
+            // Deep copy, these may change due to applyTheme().
+            mThemeAttrs = orig.mThemeAttrs.clone();
             mColors = orig.mColors.clone();
         }
     }
@@ -329,6 +336,7 @@ public class ColorStateList implements Parcelable {
      * attributes.
      *
      * @return whether a theme can be applied to this color state list
+     * @hide only for resource preloading
      */
     public boolean canApplyTheme() {
         return mThemeAttrs != null;
@@ -336,10 +344,15 @@ public class ColorStateList implements Parcelable {
 
     /**
      * Applies a theme to this color state list.
+     * <p>
+     * <strong>Note:</strong> Applying a theme may affect the changing
+     * configuration parameters of this color state list. After calling this
+     * method, any dependent configurations must be updated by obtaining the
+     * new configuration mask from {@link #getChangingConfigurations()}.
      *
      * @param t the theme to apply
      */
-    public void applyTheme(Theme t) {
+    private void applyTheme(Theme t) {
         if (mThemeAttrs == null) {
             return;
         }
@@ -376,6 +389,38 @@ public class ColorStateList implements Parcelable {
         onColorsChanged();
     }
 
+    /**
+     * Returns an appropriately themed color state list.
+     *
+     * @param t the theme to apply
+     * @return a copy of the color state list with the theme applied, or the
+     *         color state list itself if there were no unresolved theme
+     *         attributes
+     * @hide only for resource preloading
+     */
+    public ColorStateList obtainForTheme(Theme t) {
+        if (t == null || !canApplyTheme()) {
+            return this;
+        }
+
+        final ColorStateList clone = new ColorStateList(this);
+        clone.applyTheme(t);
+        return clone;
+    }
+
+    /**
+     * Returns a mask of the configuration parameters for which this color
+     * state list may change, requiring that it be re-created.
+     *
+     * @return a mask of the changing configuration parameters, as defined by
+     *         {@link android.content.pm.ActivityInfo}
+     *
+     * @see android.content.pm.ActivityInfo
+     */
+    public int getChangingConfigurations() {
+        return mChangingConfigurations;
+    }
+
     private int modulateColorAlpha(int baseColor, float alphaMod) {
         if (alphaMod == 1.0f) {
             return baseColor;
@@ -383,8 +428,7 @@ public class ColorStateList implements Parcelable {
 
         final int baseAlpha = Color.alpha(baseColor);
         final int alpha = MathUtils.constrain((int) (baseAlpha * alphaMod + 0.5f), 0, 255);
-        final int color = (baseColor & 0xFFFFFF) | (alpha << 24);
-        return color;
+        return (baseColor & 0xFFFFFF) | (alpha << 24);
     }
 
     /**
@@ -534,14 +578,18 @@ public class ColorStateList implements Parcelable {
     }
 
     /**
-     * @return A factory that can create new instances of this ColorStateList.
+     * @return a factory that can create new instances of this ColorStateList
+     * @hide only for resource preloading
      */
-    ColorStateListFactory getFactory() {
-        return new ColorStateListFactory(this);
+    public ConstantState<ColorStateList> getConstantState() {
+        if (mFactory != null) {
+            mFactory = new ColorStateListFactory(this);
+        }
+        return mFactory;
     }
 
-    static class ColorStateListFactory extends ConstantState<ColorStateList> {
-        final ColorStateList mSrc;
+    private static class ColorStateListFactory extends ConstantState<ColorStateList> {
+        private final ColorStateList mSrc;
 
         public ColorStateListFactory(ColorStateList src) {
             mSrc = src;
@@ -559,13 +607,7 @@ public class ColorStateList implements Parcelable {
 
         @Override
         public ColorStateList newInstance(Resources res, Theme theme) {
-            if (theme == null || !mSrc.canApplyTheme()) {
-                return mSrc;
-            }
-
-            final ColorStateList clone = new ColorStateList(mSrc);
-            clone.applyTheme(theme);
-            return clone;
+            return mSrc.obtainForTheme(theme);
         }
     }
 

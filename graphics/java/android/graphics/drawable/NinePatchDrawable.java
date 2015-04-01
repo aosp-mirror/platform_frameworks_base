@@ -266,7 +266,7 @@ public class NinePatchDrawable extends Drawable {
 
     @Override
     public int getChangingConfigurations() {
-        return super.getChangingConfigurations() | mNinePatchState.mChangingConfigurations;
+        return super.getChangingConfigurations() | mNinePatchState.getChangingConfigurations();
     }
 
     @Override
@@ -498,7 +498,7 @@ public class NinePatchDrawable extends Drawable {
         }
 
         if (state.mTint != null && state.mTint.canApplyTheme()) {
-            state.mTint.applyTheme(t);
+            state.mTint = state.mTint.obtainForTheme(t);
         }
 
         updateLocalState(t.getResources());
@@ -680,7 +680,8 @@ public class NinePatchDrawable extends Drawable {
 
         @Override
         public int getChangingConfigurations() {
-            return mChangingConfigurations;
+            return mChangingConfigurations
+                    | (mTint != null ? mTint.getChangingConfigurations() : 0);
         }
     }
 

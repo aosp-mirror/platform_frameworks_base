@@ -87,8 +87,7 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
     @Override
     public int getChangingConfigurations() {
         return super.getChangingConfigurations()
-                | mDrawableContainerState.mChangingConfigurations
-                | mDrawableContainerState.mChildrenChangingConfigurations;
+                | mDrawableContainerState.getChangingConfigurations();
     }
 
     private boolean needsMirroring() {
@@ -865,6 +864,9 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
                 for (int i = 0; i < N; i++) {
                     if (drawables[i] != null && drawables[i].canApplyTheme()) {
                         drawables[i].applyTheme(theme);
+
+                        // Update cached mask of child changing configurations.
+                        mChildrenChangingConfigurations |= drawables[i].getChangingConfigurations();
                     }
                 }
             }
