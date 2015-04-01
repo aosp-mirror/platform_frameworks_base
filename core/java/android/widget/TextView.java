@@ -543,6 +543,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     private float mSpacingMult = 1.0f;
     private float mSpacingAdd = 0.0f;
 
+    private int mBreakStrategy;
+
     private int mMaximum = Integer.MAX_VALUE;
     private int mMaxMode = LINES;
     private int mMinimum = 0;
@@ -680,6 +682,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         boolean elegant = false;
         float letterSpacing = 0;
         String fontFeatureSettings = null;
+        mBreakStrategy = Layout.BREAK_STRATEGY_SIMPLE;
 
         final Resources.Theme theme = context.getTheme();
 
@@ -1133,6 +1136,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             case com.android.internal.R.styleable.TextView_fontFeatureSettings:
                 fontFeatureSettings = a.getString(attr);
                 break;
+
+            case com.android.internal.R.styleable.TextView_breakStrategy:
+                mBreakStrategy = a.getInt(attr, Layout.BREAK_STRATEGY_SIMPLE);
             }
         }
         a.recycle();
@@ -2957,6 +2963,35 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     @Nullable
     public String getFontFeatureSettings() {
         return mTextPaint.getFontFeatureSettings();
+    }
+
+    /**
+     * Sets the break strategy for breaking paragraphs into lines. The default value for
+     * TextView is {@link Layout#BREAK_STRATEGY_HIGH_QUALITY}, and the default value for
+     * EditText is {@link Layout#BREAK_STRATEGY_SIMPLE}, the latter to avoid the
+     * text "dancing" when being edited.
+     *
+     * @attr ref android.R.styleable#TextView_breakStrategy
+     * @see #getBreakStrategy()
+     */
+    public void setBreakStrategy(@Layout.BreakStrategy int breakStrategy) {
+        mBreakStrategy = breakStrategy;
+        if (mLayout != null) {
+            nullLayouts();
+            requestLayout();
+            invalidate();
+        }
+    }
+
+    /**
+     * @return the currently set break strategy.
+     *
+     * @attr ref android.R.styleable#TextView_breakStrategy
+     * @see #setBreakStrategy(int)
+     */
+    @Layout.BreakStrategy
+    public int getBreakStrategy() {
+        return mBreakStrategy;
     }
 
     /**
@@ -6492,27 +6527,25 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                                 hintBoring, mIncludePad, mEllipsize,
                                 ellipsisWidth);
                     }
-                } else if (shouldEllipsize) {
-                    mHintLayout = new StaticLayout(mHint,
-                                0, mHint.length(),
-                                mTextPaint, hintWidth, alignment, mTextDir, mSpacingMult,
-                                mSpacingAdd, mIncludePad, mEllipsize,
-                                ellipsisWidth, mMaxMode == LINES ? mMaximum : Integer.MAX_VALUE);
-                } else {
-                    mHintLayout = new StaticLayout(mHint, mTextPaint,
-                            hintWidth, alignment, mTextDir, mSpacingMult, mSpacingAdd,
-                            mIncludePad);
                 }
-            } else if (shouldEllipsize) {
-                mHintLayout = new StaticLayout(mHint,
-                            0, mHint.length(),
-                            mTextPaint, hintWidth, alignment, mTextDir, mSpacingMult,
-                            mSpacingAdd, mIncludePad, mEllipsize,
-                            ellipsisWidth, mMaxMode == LINES ? mMaximum : Integer.MAX_VALUE);
-            } else {
-                mHintLayout = new StaticLayout(mHint, mTextPaint,
-                        hintWidth, alignment, mTextDir, mSpacingMult, mSpacingAdd,
-                        mIncludePad);
+            }
+            // TODO: code duplication with makeSingleLayout()
+            if (mHintLayout == null) {
+                StaticLayout.Builder builder = StaticLayout.Builder.obtain(mHint, 0,
+                        mHint.length(), hintWidth)
+                        .setPaint(mTextPaint)
+                        .setAlignment(alignment)
+                        .setTextDir(mTextDir)
+                        .setSpacingMult(mSpacingMult)
+                        .setSpacingAdd(mSpacingAdd)
+                        .setIncludePad(mIncludePad)
+                        .setBreakStrategy(mBreakStrategy);
+                if (shouldEllipsize) {
+                    builder.setEllipsize(mEllipsize)
+                            .setEllipsizedWidth(ellipsisWidth)
+                            .setMaxLines(mMaxMode == LINES ? mMaximum : Integer.MAX_VALUE);
+                }
+                mHintLayout = builder.build();
             }
         }
 
@@ -6544,9 +6577,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         Layout result = null;
         if (mText instanceof Spannable) {
             result = new DynamicLayout(mText, mTransformed, mTextPaint, wantWidth,
-                    alignment, mTextDir, mSpacingMult,
-                    mSpacingAdd, mIncludePad, getKeyListener() == null ? effectiveEllipsize : null,
-                            ellipsisWidth);
+                    alignment, mTextDir, mSpacingMult, mSpacingAdd, mIncludePad, mBreakStrategy,
+                    getKeyListener() == null ? effectiveEllipsize : null, ellipsisWidth);
         } else {
             if (boring == UNKNOWN_BORING) {
                 boring = BoringLayout.isBoring(mTransformed, mTextPaint, mTextDir, mBoring);
@@ -6583,28 +6615,26 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                                 boring, mIncludePad, effectiveEllipsize,
                                 ellipsisWidth);
                     }
-                } else if (shouldEllipsize) {
-                    result = new StaticLayout(mTransformed,
-                            0, mTransformed.length(),
-                            mTextPaint, wantWidth, alignment, mTextDir, mSpacingMult,
-                            mSpacingAdd, mIncludePad, effectiveEllipsize,
-                            ellipsisWidth, mMaxMode == LINES ? mMaximum : Integer.MAX_VALUE);
-                } else {
-                    result = new StaticLayout(mTransformed, mTextPaint,
-                            wantWidth, alignment, mTextDir, mSpacingMult, mSpacingAdd,
-                            mIncludePad);
                 }
-            } else if (shouldEllipsize) {
-                result = new StaticLayout(mTransformed,
-                        0, mTransformed.length(),
-                        mTextPaint, wantWidth, alignment, mTextDir, mSpacingMult,
-                        mSpacingAdd, mIncludePad, effectiveEllipsize,
-                        ellipsisWidth, mMaxMode == LINES ? mMaximum : Integer.MAX_VALUE);
-            } else {
-                result = new StaticLayout(mTransformed, mTextPaint,
-                        wantWidth, alignment, mTextDir, mSpacingMult, mSpacingAdd,
-                        mIncludePad);
             }
+        }
+        if (result == null) {
+            StaticLayout.Builder builder = StaticLayout.Builder.obtain(mTransformed,
+                    0, mTransformed.length(), wantWidth)
+                    .setPaint(mTextPaint)
+                    .setAlignment(alignment)
+                    .setTextDir(mTextDir)
+                    .setSpacingMult(mSpacingMult)
+                    .setSpacingAdd(mSpacingAdd)
+                    .setIncludePad(mIncludePad)
+                    .setBreakStrategy(mBreakStrategy);
+            if (shouldEllipsize) {
+                builder.setEllipsize(effectiveEllipsize)
+                        .setEllipsizedWidth(ellipsisWidth)
+                        .setMaxLines(mMaxMode == LINES ? mMaximum : Integer.MAX_VALUE);
+            }
+            // TODO: explore always setting maxLines
+            result = builder.build();
         }
         return result;
     }

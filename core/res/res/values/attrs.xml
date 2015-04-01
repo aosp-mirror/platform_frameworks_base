@@ -4283,6 +4283,15 @@
         <attr name="letterSpacing" />
         <!-- Font feature settings. -->
         <attr name="fontFeatureSettings" />
+        <!-- Break strategy (control over paragraph layout). -->
+        <attr name="breakStrategy">
+            <!-- Line breaking uses simple strategy. -->
+            <enum name="simple" value="0" />
+            <!-- Line breaking uses high-quality strategy, including hyphenation. -->
+            <enum name="high_quality" value="1" />
+            <!-- Line breaking stratgegy balances line lengths. -->
+            <enum name="balanced" value="2" />
+        </attr>
     </declare-styleable>
     <declare-styleable name="TextViewAppearance">
         <!-- Base text color, typeface, size, and style. -->

@@ -497,6 +497,7 @@ please see styles_device_defaults.xml.
         <item name="textEditSideNoPasteWindowLayout">?attr/textEditSideNoPasteWindowLayout</item>
         <item name="textEditSuggestionItemLayout">?attr/textEditSuggestionItemLayout</item>
         <item name="textCursorDrawable">?attr/textCursorDrawable</item>
+        <item name="breakStrategy">high_quality</item>
     </style>
 
     <style name="Widget.CheckedTextView">
@@ -527,6 +528,7 @@ please see styles_device_defaults.xml.
         <item name="textAppearance">?attr/textAppearanceMediumInverse</item>
         <item name="textColor">?attr/editTextColor</item>
         <item name="gravity">center_vertical</item>
+        <item name="breakStrategy">simple</item>
     </style>
 
     <style name="Widget.ExpandableListView" parent="Widget.ListView">

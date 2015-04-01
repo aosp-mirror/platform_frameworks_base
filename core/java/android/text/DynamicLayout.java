@@ -79,7 +79,8 @@ public class DynamicLayout extends Layout
                          boolean includepad,
                          TextUtils.TruncateAt ellipsize, int ellipsizedWidth) {
         this(base, display, paint, width, align, TextDirectionHeuristics.FIRSTSTRONG_LTR,
-                spacingmult, spacingadd, includepad, ellipsize, ellipsizedWidth);
+                spacingmult, spacingadd, includepad, StaticLayout.BREAK_STRATEGY_SIMPLE,
+                ellipsize, ellipsizedWidth);
     }
 
     /**
@@ -95,7 +96,7 @@ public class DynamicLayout extends Layout
                          TextPaint paint,
                          int width, Alignment align, TextDirectionHeuristic textDir,
                          float spacingmult, float spacingadd,
-                         boolean includepad,
+                         boolean includepad, int breakStrategy,
                          TextUtils.TruncateAt ellipsize, int ellipsizedWidth) {
         super((ellipsize == null)
                 ? display
@@ -120,6 +121,7 @@ public class DynamicLayout extends Layout
         mObjects = new PackedObjectVector<Directions>(1);
 
         mIncludePad = includepad;
+        mBreakStrategy = breakStrategy;
 
         /*
          * This is annoying, but we can't refer to the layout until
@@ -279,10 +281,9 @@ public class DynamicLayout extends Layout
             sBuilder = null;
         }
 
-        // TODO: make sure reflowed is properly initialized
         if (reflowed == null) {
             reflowed = new StaticLayout(null);
-            b = StaticLayout.Builder.obtain();
+            b = StaticLayout.Builder.obtain(text, where, where + after, getWidth());
         }
 
         b.setText(text, where, where + after)
@@ -292,7 +293,8 @@ public class DynamicLayout extends Layout
                 .setSpacingMult(getSpacingMultiplier())
                 .setSpacingAdd(getSpacingAdd())
                 .setEllipsizedWidth(mEllipsizedWidth)
-                .setEllipsize(mEllipsizeAt);
+                .setEllipsize(mEllipsizeAt)
+                .setBreakStrategy(mBreakStrategy);
         reflowed.generate(b, false, true);
         int n = reflowed.getLineCount();
 
@@ -717,6 +719,7 @@ public class DynamicLayout extends Layout
     private boolean mEllipsize;
     private int mEllipsizedWidth;
     private TextUtils.TruncateAt mEllipsizeAt;
+    private int mBreakStrategy;
 
     private PackedIntVector mInts;
     private PackedObjectVector<Directions> mObjects;

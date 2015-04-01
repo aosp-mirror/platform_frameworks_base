@@ -426,6 +426,7 @@ package android {
     field public static final int bottomRightRadius = 16843180; // 0x10101ac
     field public static final int breadCrumbShortTitle = 16843524; // 0x1010304
     field public static final int breadCrumbTitle = 16843523; // 0x1010303
+    field public static final int breakStrategy = 16844011; // 0x10104eb
     field public static final int bufferType = 16843086; // 0x101014e
     field public static final int button = 16843015; // 0x1010107
     field public static final int buttonBarButtonStyle = 16843567; // 0x101032f
@@ -33462,6 +33463,9 @@ package android.text {
     method public final void increaseWidthTo(int);
     method public boolean isRtlCharAt(int);
     method protected final boolean isSpanned();
+    field public static final int BREAK_STRATEGY_BALANCED = 2; // 0x2
+    field public static final int BREAK_STRATEGY_HIGH_QUALITY = 1; // 0x1
+    field public static final int BREAK_STRATEGY_SIMPLE = 0; // 0x0
     field public static final int DIR_LEFT_TO_RIGHT = 1; // 0x1
     field public static final int DIR_RIGHT_TO_LEFT = -1; // 0xffffffff
   }
@@ -42925,6 +42929,7 @@ package android.widget {
     method public void endBatchEdit();
     method public boolean extractText(android.view.inputmethod.ExtractedTextRequest, android.view.inputmethod.ExtractedText);
     method public final int getAutoLinkMask();
+    method public int getBreakStrategy();
     method public int getCompoundDrawablePadding();
     method public android.content.res.ColorStateList getCompoundDrawableTintList();
     method public android.graphics.PorterDuff.Mode getCompoundDrawableTintMode();
@@ -43026,6 +43031,7 @@ package android.widget {
     method public void removeTextChangedListener(android.text.TextWatcher);
     method public void setAllCaps(boolean);
     method public final void setAutoLinkMask(int);
+    method public void setBreakStrategy(int);
     method public void setCompoundDrawablePadding(int);
     method public void setCompoundDrawableTintList(android.content.res.ColorStateList);
     method public void setCompoundDrawableTintMode(android.graphics.PorterDuff.Mode);

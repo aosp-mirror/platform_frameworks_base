@@ -16,6 +16,7 @@
 
 package android.text;
 
+import android.annotation.IntDef;
 import android.emoji.EmojiFactory;
 import android.graphics.Canvas;
 import android.graphics.Paint;
@@ -33,6 +34,8 @@ import android.text.style.TabStopSpan;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.GrowingArrayUtils;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.Arrays;
 
 /**
@@ -43,6 +46,31 @@ import java.util.Arrays;
  * For text that will not change, use a {@link StaticLayout}.
  */
 public abstract class Layout {
+    /** @hide */
+    @IntDef({BREAK_STRATEGY_SIMPLE, BREAK_STRATEGY_HIGH_QUALITY, BREAK_STRATEGY_BALANCED})
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface BreakStrategy {}
+
+    /**
+     * Value for break strategy indicating simple line breaking. Automatic hyphens are not added
+     * (though soft hyphens are respected), and modifying text generally doesn't affect the layout
+     * before it (which yields a more consistent user experience when editing), but layout may not
+     * be the highest quality.
+     */
+    public static final int BREAK_STRATEGY_SIMPLE = 0;
+
+    /**
+     * Value for break strategy indicating high quality line breaking, including automatic
+     * hyphenation and doing whole-paragraph optimization of line breaks.
+     */
+    public static final int BREAK_STRATEGY_HIGH_QUALITY = 1;
+
+    /**
+     * Value for break strategy indicating balanced line breaking. The breaks are chosen to
+     * make all lines as close to the same length as possible, including automatic hyphenation.
+     */
+    public static final int BREAK_STRATEGY_BALANCED = 2;
+
     private static final ParagraphStyle[] NO_PARA_SPANS =
         ArrayUtils.emptyArray(ParagraphStyle.class);
 
