@@ -181,7 +181,7 @@ public final class KeymasterDefs {
     public static final int KM_ERROR_UNSUPPORTED_KEY_SIZE = -6;
     public static final int KM_ERROR_UNSUPPORTED_BLOCK_MODE = -7;
     public static final int KM_ERROR_INCOMPATIBLE_BLOCK_MODE = -8;
-    public static final int KM_ERROR_UNSUPPORTED_TAG_LENGTH = -9;
+    public static final int KM_ERROR_UNSUPPORTED_MAC_LENGTH = -9;
     public static final int KM_ERROR_UNSUPPORTED_PADDING_MODE = -10;
     public static final int KM_ERROR_INCOMPATIBLE_PADDING_MODE = -11;
     public static final int KM_ERROR_UNSUPPORTED_DIGEST = -12;
@@ -237,8 +237,8 @@ public final class KeymasterDefs {
         sErrorCodeToString.put(KM_ERROR_UNSUPPORTED_KEY_SIZE, "Unsupported key size");
         sErrorCodeToString.put(KM_ERROR_UNSUPPORTED_BLOCK_MODE, "Unsupported block mode");
         sErrorCodeToString.put(KM_ERROR_INCOMPATIBLE_BLOCK_MODE, "Incompatible block mode");
-        sErrorCodeToString.put(KM_ERROR_UNSUPPORTED_TAG_LENGTH,
-                "Unsupported authentication tag length");
+        sErrorCodeToString.put(KM_ERROR_UNSUPPORTED_MAC_LENGTH,
+                "Unsupported MAC or authentication tag length");
         sErrorCodeToString.put(KM_ERROR_UNSUPPORTED_PADDING_MODE, "Unsupported padding mode");
         sErrorCodeToString.put(KM_ERROR_INCOMPATIBLE_PADDING_MODE, "Incompatible padding mode");
         sErrorCodeToString.put(KM_ERROR_UNSUPPORTED_DIGEST, "Unsupported digest");
@@ -261,6 +261,7 @@ public final class KeymasterDefs {
         sErrorCodeToString.put(KM_ERROR_UNSUPPORTED_TAG, "Unsupported tag");
         sErrorCodeToString.put(KM_ERROR_INVALID_TAG, "Invalid tag");
         sErrorCodeToString.put(KM_ERROR_MEMORY_ALLOCATION_FAILED, "Memory allocation failed");
+        sErrorCodeToString.put(KM_ERROR_UNSUPPORTED_EC_FIELD, "Unsupported EC field");
         sErrorCodeToString.put(KM_ERROR_UNIMPLEMENTED, "Not implemented");
         sErrorCodeToString.put(KM_ERROR_UNKNOWN_ERROR, "Unknown error");
     }
