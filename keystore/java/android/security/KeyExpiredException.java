@@ -17,33 +17,31 @@
 package android.security;
 
 /**
- * Indicates that a cryptographic operation could not be performed because the user has not been
- * authenticated recently enough.
+ * Indicates that a cryptographic operation failed because the employed key's validity end date
+ * is in the past.
  *
  * @hide
  */
-public class UserNotAuthenticatedException extends CryptoOperationException {
+public class KeyExpiredException extends CryptoOperationException {
 
     /**
-     * Constructs a new {@code UserNotAuthenticatedException} without detail message and cause.
+     * Constructs a new {@code KeyExpiredException} without detail message and cause.
      */
-    public UserNotAuthenticatedException() {
-        super("User not authenticated");
+    public KeyExpiredException() {
+        super("Key expired");
     }
 
     /**
-     * Constructs a new {@code UserNotAuthenticatedException} with the provided detail message and
-     * no cause.
+     * Constructs a new {@code KeyExpiredException} with the provided detail message and no cause.
      */
-    public UserNotAuthenticatedException(String message) {
+    public KeyExpiredException(String message) {
         super(message);
     }
 
     /**
-     * Constructs a new {@code UserNotAuthenticatedException} with the provided detail message and
-     * cause.
+     * Constructs a new {@code KeyExpiredException} with the provided detail message and cause.
      */
-    public UserNotAuthenticatedException(String message, Throwable cause) {
+    public KeyExpiredException(String message, Throwable cause) {
         super(message, cause);
     }
 }

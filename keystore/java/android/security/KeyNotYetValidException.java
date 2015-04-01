@@ -17,33 +17,32 @@
 package android.security;
 
 /**
- * Indicates that a cryptographic operation could not be performed because the user has not been
- * authenticated recently enough.
+ * Indicates that a cryptographic operation failed because the employed key's validity start date
+ * is in the future.
  *
  * @hide
  */
-public class UserNotAuthenticatedException extends CryptoOperationException {
+public class KeyNotYetValidException extends CryptoOperationException {
 
     /**
-     * Constructs a new {@code UserNotAuthenticatedException} without detail message and cause.
+     * Constructs a new {@code KeyNotYetValidException} without detail message and cause.
      */
-    public UserNotAuthenticatedException() {
-        super("User not authenticated");
+    public KeyNotYetValidException() {
+        super("Key not yet valid");
     }
 
     /**
-     * Constructs a new {@code UserNotAuthenticatedException} with the provided detail message and
-     * no cause.
+     * Constructs a new {@code KeyNotYetValidException} with the provided detail message and no
+     * cause.
      */
-    public UserNotAuthenticatedException(String message) {
+    public KeyNotYetValidException(String message) {
         super(message);
     }
 
     /**
-     * Constructs a new {@code UserNotAuthenticatedException} with the provided detail message and
-     * cause.
+     * Constructs a new {@code KeyNotYetValidException} with the provided detail message and cause.
      */
-    public UserNotAuthenticatedException(String message, Throwable cause) {
+    public KeyNotYetValidException(String message, Throwable cause) {
         super(message, cause);
     }
 }
