@@ -608,17 +608,21 @@ public final class ActivityStackSupervisor implements DisplayListener {
     }
 
     boolean allResumedActivitiesVisible() {
+        boolean foundResumed = false;
         for (int displayNdx = mActivityDisplays.size() - 1; displayNdx >= 0; --displayNdx) {
             ArrayList<ActivityStack> stacks = mActivityDisplays.valueAt(displayNdx).mStacks;
             for (int stackNdx = stacks.size() - 1; stackNdx >= 0; --stackNdx) {
                 final ActivityStack stack = stacks.get(stackNdx);
                 final ActivityRecord r = stack.mResumedActivity;
-                if (r != null && (!r.nowVisible || r.waitingVisible)) {
-                    return false;
+                if (r != null) {
+                    if (!r.nowVisible || r.waitingVisible) {
+                        return false;
+                    }
+                    foundResumed = true;
                 }
             }
         }
-        return true;
+        return foundResumed;
     }
 
     /**
