@@ -3509,7 +3509,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
         mHandler.sendMessage(mHandler.obtainMessage(HANDLE_DISPLAY_CHANGED, displayId, 0));
     }
 
-    public void handleDisplayAddedLocked(int displayId) {
+    private void handleDisplayAdded(int displayId) {
         boolean newDisplay;
         synchronized (mService) {
             newDisplay = mActivityDisplays.get(displayId) == null;
@@ -3527,7 +3527,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
         }
     }
 
-    public void handleDisplayRemovedLocked(int displayId) {
+    private void handleDisplayRemoved(int displayId) {
         synchronized (mService) {
             ActivityDisplay activityDisplay = mActivityDisplays.get(displayId);
             if (activityDisplay != null) {
@@ -3541,7 +3541,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
         mWindowManager.onDisplayRemoved(displayId);
     }
 
-    public void handleDisplayChangedLocked(int displayId) {
+    private void handleDisplayChanged(int displayId) {
         synchronized (mService) {
             ActivityDisplay activityDisplay = mActivityDisplays.get(displayId);
             if (activityDisplay != null) {
@@ -3551,7 +3551,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
         mWindowManager.onDisplayChanged(displayId);
     }
 
-    StackInfo getStackInfo(ActivityStack stack) {
+    private StackInfo getStackInfoLocked(ActivityStack stack) {
         StackInfo info = new StackInfo();
         mWindowManager.getStackBounds(stack.mStackId, info.bounds);
         info.displayId = Display.DEFAULT_DISPLAY;
@@ -3577,7 +3577,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
     StackInfo getStackInfoLocked(int stackId) {
         ActivityStack stack = getStack(stackId);
         if (stack != null) {
-            return getStackInfo(stack);
+            return getStackInfoLocked(stack);
         }
         return null;
     }
@@ -3587,7 +3587,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
         for (int displayNdx = 0; displayNdx < mActivityDisplays.size(); ++displayNdx) {
             ArrayList<ActivityStack> stacks = mActivityDisplays.valueAt(displayNdx).mStacks;
             for (int ndx = stacks.size() - 1; ndx >= 0; --ndx) {
-                list.add(getStackInfo(stacks.get(ndx)));
+                list.add(getStackInfoLocked(stacks.get(ndx)));
             }
         }
         return list;
@@ -3707,13 +3707,13 @@ public final class ActivityStackSupervisor implements DisplayListener {
                     }
                 } break;
                 case HANDLE_DISPLAY_ADDED: {
-                    handleDisplayAddedLocked(msg.arg1);
+                    handleDisplayAdded(msg.arg1);
                 } break;
                 case HANDLE_DISPLAY_CHANGED: {
-                    handleDisplayChangedLocked(msg.arg1);
+                    handleDisplayChanged(msg.arg1);
                 } break;
                 case HANDLE_DISPLAY_REMOVED: {
-                    handleDisplayRemovedLocked(msg.arg1);
+                    handleDisplayRemoved(msg.arg1);
                 } break;
                 case CONTAINER_CALLBACK_VISIBILITY: {
                     final ActivityContainer container = (ActivityContainer) msg.obj;

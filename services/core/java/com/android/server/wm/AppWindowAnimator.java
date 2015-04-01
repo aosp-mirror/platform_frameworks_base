@@ -242,7 +242,7 @@ public class AppWindowAnimator {
     }
 
     // This must be called while inside a transaction.
-    boolean stepAnimationLocked(long currentTime) {
+    boolean stepAnimationLocked(long currentTime, final int displayId) {
         if (mService.okToDisplay()) {
             // We will run animations as long as the display isn't frozen.
 
@@ -292,7 +292,7 @@ public class AppWindowAnimator {
         }
 
         mAnimator.setAppLayoutChanges(this, WindowManagerPolicy.FINISH_LAYOUT_REDO_ANIM,
-                "AppWindowToken");
+                "AppWindowToken", displayId);
 
         clearAnimation();
         animating = false;
