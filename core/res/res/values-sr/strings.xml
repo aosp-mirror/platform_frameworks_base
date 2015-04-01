@@ -586,6 +586,8 @@
     <string name="permdesc_camera" msgid="8497216524735535009">"Дозвољава апликацији да снима слике и видео снимке камером. Ова дозвола омогућава апликацији да у било ком тренутку користи камеру без ваше потврде."</string>
     <string name="permlab_cameraDisableTransmitLed" msgid="2651072630501126222">"онемогући пренос LED осветљења индикатора док се камера користи"</string>
     <string name="permdesc_cameraDisableTransmitLed" msgid="4764585465480295341">"Дозвољава унапред инсталираној системској апликацији да онемогући LED осветљење индикатора за коришћење камере."</string>
+    <!-- no translation found for permdesc_cameraSendSystemEvent (8642231538552298107) -->
+    <skip />
     <string name="permlab_brick" product="tablet" msgid="2961292205764488304">"трајно онемогућавање таблета"</string>
     <string name="permlab_brick" product="tv" msgid="4912674222121249410">"трајно онемогућавање ТВ-а"</string>
     <string name="permlab_brick" product="default" msgid="8337817093326370537">"трајно онемогућавање телефона"</string>
@@ -1137,6 +1139,10 @@
     <string name="permdesc_packageVerificationAgent" msgid="8437590190990843381">"Дозвољава апликацији да верификује да ли је пакет могуће инсталирати."</string>
     <string name="permlab_bindPackageVerifier" msgid="4187786793360326654">"обавезивање на верификатор пакета"</string>
     <string name="permdesc_bindPackageVerifier" msgid="3180741773233862126">"Омогућава да власник упућује захтеве верификаторима пакета. Уобичајене апликације никада не би требало да је користе."</string>
+    <string name="permlab_intentFilterVerificationAgent" msgid="1135788294400437497">"верификација intent филтера"</string>
+    <string name="permdesc_intentFilterVerificationAgent" msgid="5853902808424716312">"Дозвољава апликацији са провери да ли је intent филтер верификован."</string>
+    <string name="permlab_bindIntentFilterVerifier" msgid="8567268159430779210">"повезив. са верификатором intent филтера"</string>
+    <string name="permdesc_bindIntentFilterVerifier" msgid="681128728719578778">"Дозвољава власнику да упућује захтеве верификаторима intent филтера. Уобичајене апликације никада не би требало да је користе."</string>
     <string name="permlab_serialPort" msgid="546083327654631076">"приступ серијским портовима"</string>
     <string name="permdesc_serialPort" msgid="2991639985224598193">"Омогућава власнику да приступи серијским портовима помоћу SerialManager API-ја."</string>
     <string name="permlab_accessContentProvidersExternally" msgid="5077774297943409285">"приступ добављачима садржаја споља"</string>
@@ -1569,6 +1575,8 @@
     <string name="date_picker_decrement_day_button" msgid="4131881521818750031">"Смањивање дана"</string>
     <string name="date_picker_increment_year_button" msgid="6318697384310808899">"Повећавање године"</string>
     <string name="date_picker_decrement_year_button" msgid="4482021813491121717">"Смањивање године"</string>
+    <string name="date_picker_prev_month_button" msgid="2858244643992056505">"Претходни месец"</string>
+    <string name="date_picker_next_month_button" msgid="5559507736887605055">"Следећи месец"</string>
     <string name="keyboardview_keycode_alt" msgid="4856868820040051939">"Alt"</string>
     <string name="keyboardview_keycode_cancel" msgid="1203984017245783244">"Откажи"</string>
     <string name="keyboardview_keycode_delete" msgid="3337914833206635744">"Избриши"</string>
@@ -1822,7 +1830,6 @@
     <string name="select_minutes" msgid="3974345615920336087">"Изаберите минуте"</string>
     <string name="select_day" msgid="7774759604701773332">"Изаберите месец и дан"</string>
     <string name="select_year" msgid="7952052866994196170">"Изаберите годину"</string>
-    <string name="item_is_selected" msgid="949687401682476608">"Изабрали сте <xliff:g id="ITEM">%1$s</xliff:g>"</string>
     <string name="deleted_key" msgid="7659477886625566590">"Избрисали сте <xliff:g id="KEY">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"<xliff:g id="LABEL">%1$s</xliff:g> на послу"</string>
     <string name="lock_to_app_toast" msgid="7570091317001980053">"Да бисте откачили овај екран, истовремено додирните и задржите Назад и Преглед."</string>

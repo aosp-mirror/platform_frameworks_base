@@ -585,6 +585,8 @@
     <string name="permdesc_camera" msgid="8497216524735535009">"Επιτρέπει στην εφαρμογή τη λήψη φωτογραφιών και βίντεο με τη φωτογραφική μηχανή. Αυτή η άδεια δίνει τη δυνατότητα στην εφαρμογή να χρησιμοποιεί τη φωτογραφική μηχανή ανά πάσα στιγμή χωρίς την έγκρισή σας."</string>
     <string name="permlab_cameraDisableTransmitLed" msgid="2651072630501126222">"απενεργοποίηση ένδειξης LED μετάδοσης όταν χρησιμοποιείται η φωτογραφική μηχανή"</string>
     <string name="permdesc_cameraDisableTransmitLed" msgid="4764585465480295341">"Επιτρέπει σε μια προεγκατεστημένη εφαρμογή συστήματος να απενεργοποιήσει την ένδειξη LED χρήσης της φωτογραφικής μηχανής."</string>
+    <!-- no translation found for permdesc_cameraSendSystemEvent (8642231538552298107) -->
+    <skip />
     <string name="permlab_brick" product="tablet" msgid="2961292205764488304">"μόνιμη απενεργοποίηση του tablet"</string>
     <string name="permlab_brick" product="tv" msgid="4912674222121249410">"μόνιμη απενεργοποίηση της τηλεόρασης"</string>
     <string name="permlab_brick" product="default" msgid="8337817093326370537">"μόνιμη απενεργοποίηση τηλεφώνου"</string>
@@ -1136,6 +1138,10 @@
     <string name="permdesc_packageVerificationAgent" msgid="8437590190990843381">"Επιτρέπει στην εφαρμογή να επαληθεύσει τη δυνατότητα εγκατάστασης ενός πακέτου."</string>
     <string name="permlab_bindPackageVerifier" msgid="4187786793360326654">"δέσμευση με επαλήθευση πακέτου"</string>
     <string name="permdesc_bindPackageVerifier" msgid="3180741773233862126">"Επιτρέπει στον κάτοχο να υποβάλλει ερωτήματα σε προγράμματα επαλήθευσης πακέτου. Δεν απαιτείται για συνήθεις εφαρμογές."</string>
+    <string name="permlab_intentFilterVerificationAgent" msgid="1135788294400437497">"επαλήθευση φίλτρου πρόθεσης"</string>
+    <string name="permdesc_intentFilterVerificationAgent" msgid="5853902808424716312">"Επιτρέπει στην εφαρμογή να ελέγχει εάν ένα φίλτρο πρόθεσης είναι επαληθευμένο ή όχι."</string>
+    <string name="permlab_bindIntentFilterVerifier" msgid="8567268159430779210">"σύνδεση σε προγρ.επαλήθ.φίλτρου πρόθεσης"</string>
+    <string name="permdesc_bindIntentFilterVerifier" msgid="681128728719578778">"Επιτρέπει στον κάτοχο να υποβάλλει ερωτήματα σε προγράμματα επαλήθευσης φίλτρων πρόθεσης. Δεν απαιτείται για συνήθεις εφαρμογές."</string>
     <string name="permlab_serialPort" msgid="546083327654631076">"πρόσβαση στις σειριακές θύρες"</string>
     <string name="permdesc_serialPort" msgid="2991639985224598193">"Επιτρέπει στον κάτοχο την πρόσβαση στις σειριακές θύρες με τη χρήση του SerialManager API."</string>
     <string name="permlab_accessContentProvidersExternally" msgid="5077774297943409285">"εξωτερική πρόσβαση σε παρόχους περιεχ."</string>
@@ -1561,6 +1567,8 @@
     <string name="date_picker_decrement_day_button" msgid="4131881521818750031">"Μείωση ημέρας"</string>
     <string name="date_picker_increment_year_button" msgid="6318697384310808899">"Αύξηση έτους"</string>
     <string name="date_picker_decrement_year_button" msgid="4482021813491121717">"Μείωση έτους"</string>
+    <string name="date_picker_prev_month_button" msgid="2858244643992056505">"Προηγούμενος μήνας"</string>
+    <string name="date_picker_next_month_button" msgid="5559507736887605055">"Επόμενος μήνας"</string>
     <string name="keyboardview_keycode_alt" msgid="4856868820040051939">"Alt"</string>
     <string name="keyboardview_keycode_cancel" msgid="1203984017245783244">"Ακύρωση"</string>
     <string name="keyboardview_keycode_delete" msgid="3337914833206635744">"Διαγραφή"</string>
@@ -1813,7 +1821,6 @@
     <string name="select_minutes" msgid="3974345615920336087">"Επιλογή λεπτών"</string>
     <string name="select_day" msgid="7774759604701773332">"Επιλογή μήνα και ημέρας"</string>
     <string name="select_year" msgid="7952052866994196170">"Επιλογή έτους"</string>
-    <string name="item_is_selected" msgid="949687401682476608">"Επιλέχτηκε το στοιχείο <xliff:g id="ITEM">%1$s</xliff:g>"</string>
     <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> διαγράφηκε"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"Εργασία <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="lock_to_app_toast" msgid="7570091317001980053">"Για να ξεκαρφιτσώσετε αυτήν την οθόνη, πατήστε παρατεταμένα \"Επιστροφή\" και \"Επισκόπηση\" ταυτόχρονα."</string>

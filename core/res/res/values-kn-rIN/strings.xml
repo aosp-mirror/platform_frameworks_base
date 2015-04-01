@@ -585,6 +585,8 @@
     <string name="permdesc_camera" msgid="8497216524735535009">"ಕ್ಯಾಮರಾ ಮೂಲಕ ಚಿತ್ರಗಳು ಮತ್ತು ವೀಡಿಯೊಗಳನ್ನು ಸೆರೆಹಿಡಿಯಲು ಅಪ್ಲಿಕೇಶನ್‍‍ಗೆ ಅವಕಾಶ ಮಾಡಿಕೊಡುತ್ತದೆ. ಈ ಅನುಮತಿಯು ನಿಮ್ಮ ಖಾತರಿ ಇಲ್ಲದೆಯೇ ಯಾವುದೇ ಸಮಯದಲ್ಲಿ ಕ್ಯಾಮರಾವನ್ನು ಬಳಸಲು ಅಪ್ಲಿಕೇಶನ್‍‍ಗೆ ಅನುಮತಿಸುತ್ತದೆ."</string>
     <string name="permlab_cameraDisableTransmitLed" msgid="2651072630501126222">"ಕ್ಯಾಮರಾ ಬಳಕೆಯಲ್ಲಿರುವಾಗ ಪ್ರಸಾರ ಸೂಚಕ LED ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಿ"</string>
     <string name="permdesc_cameraDisableTransmitLed" msgid="4764585465480295341">"ಕ್ಯಾಮರಾ ಬಳಕೆ ಸೂಚಕ LED ಅನ್ನು ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಲು ಪೂರ್ವ-ಸ್ಥಾಪಿತ ಸಿಸ್ಟಂ ಅಪ್ಲಿಕೇಶನ್‌ಗೆ ಅವಕಾಶ ಮಾಡಿಕೊಡುತ್ತದೆ."</string>
+    <!-- no translation found for permdesc_cameraSendSystemEvent (8642231538552298107) -->
+    <skip />
     <string name="permlab_brick" product="tablet" msgid="2961292205764488304">"ಶಾಶ್ವತವಾಗಿ ಟ್ಯಾಬ್ಲೆಟ್ ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಿ"</string>
     <string name="permlab_brick" product="tv" msgid="4912674222121249410">"ಟಿವಿಯನ್ನು ಶಾಶ್ವತವಾಗಿ ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಿ"</string>
     <string name="permlab_brick" product="default" msgid="8337817093326370537">"ಶಾಶ್ವತವಾಗಿ ಫೋನ್ ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಿ"</string>
@@ -1136,6 +1138,10 @@
     <string name="permdesc_packageVerificationAgent" msgid="8437590190990843381">"ಪ್ಯಾಕೇಜ್‌‌‌ ಅನ್ನು ಸ್ಥಾಪಿಸಬಹುದಾದ ಪರಿಶೀಲನೆಯನ್ನು ಅಪ್ಲಿಕೇಶನ್‌‌ ಅನುಮತಿಸುತ್ತದೆ."</string>
     <string name="permlab_bindPackageVerifier" msgid="4187786793360326654">"ಪ್ಯಾಕೇಜ್ ಪರಿಶೀಲಕಕ್ಕೆ ಪ್ರತಿಬಂಧಿಸಿ"</string>
     <string name="permdesc_bindPackageVerifier" msgid="3180741773233862126">"ಪ್ಯಾಕೇಜ್‌ ಪರಿಶೀಲನಾಗಾರರ ವಿನಂತಿಗಳನ್ನು ಮಾಡಲು ಹೊಂದಿರುವವರಿಗೆ ಅವಕಾಶ ಮಾಡಿಕೊಡುತ್ತದೆ. ಸಾಮಾನ್ಯ ಅಪ್ಲಿಕೇಶನ್‌ಗಳಿಗೆ ಎಂದಿಗೂ ಅಗತ್ಯವಿರುವುದಿಲ್ಲ."</string>
+    <string name="permlab_intentFilterVerificationAgent" msgid="1135788294400437497">"ಉದ್ದೇಶಿತ ಫಿಲ್ಟರ್ ಪರಿಶೀಲಿಸಿ"</string>
+    <string name="permdesc_intentFilterVerificationAgent" msgid="5853902808424716312">"ಇಂಟರ್ನೆಟ್ ಫಿಲ್ಟರ್ ಅನ್ನು ಪರಿಶೀಲಿಸಲಾಗಿದೆಯೇ ಅಥವಾ ಇಲ್ಲವೆ ಎಂಬುದನ್ನು ಪರೀಕ್ಷಿಸಲು ಅಪ್ಲಿಕೇಶನ್‌ಗೆ ಅನುಮತಿಸುತ್ತದೆ."</string>
+    <string name="permlab_bindIntentFilterVerifier" msgid="8567268159430779210">"ಉದ್ದೇಶಿತ ಫಿಲ್ಟರ್ ಪರಿಶೀಲಕವನ್ನು ಪ್ರತಿಬಂಧಿಸಿ"</string>
+    <string name="permdesc_bindIntentFilterVerifier" msgid="681128728719578778">"ಉದ್ದೇಶಿತ ಫಿಲ್ಟರ್ ಪರಿಶೀಲನಾಗಾರರ ವಿನಂತಿಗಳನ್ನು ಮಾಡಲು ಹೊಂದಿರುವವರಿಗೆ ಅವಕಾಶ ಮಾಡಿಕೊಡುತ್ತದೆ. ಸಾಮಾನ್ಯ ಅಪ್ಲಿಕೇಶನ್‌ಗಳಿಗೆ ಎಂದಿಗೂ ಅಗತ್ಯವಿರುವುದಿಲ್ಲ."</string>
     <string name="permlab_serialPort" msgid="546083327654631076">"ಸರಣಿ ಪೋರ್ಟ್‌ಗಳನ್ನು ಪ್ರವೇಶಿಸಿ"</string>
     <string name="permdesc_serialPort" msgid="2991639985224598193">"SerialManager API ಬಳಸಿಕೊಂಡು ಸರಣಿ ಪೋರ್ಟ್‌ಗಳಿಗೆ ಪ್ರವೇಶ ಪಡೆಯಲು ಹೊಂದಿರುವವರಿಗೆ ಅನುಮತಿಸುತ್ತದೆ."</string>
     <string name="permlab_accessContentProvidersExternally" msgid="5077774297943409285">"ವಿಷಯ ಪೂರೈಕೆದಾರರನ್ನು ಬಾಹ್ಯ ರೀತಿಯಲ್ಲಿ ಪ್ರವೇಶಿಸಿ"</string>
@@ -1561,6 +1567,8 @@
     <string name="date_picker_decrement_day_button" msgid="4131881521818750031">"ದಿನವನ್ನು ಕಡಿಮೆಮಾಡಿ"</string>
     <string name="date_picker_increment_year_button" msgid="6318697384310808899">"ವರ್ಷವನ್ನು ಹೆಚ್ಚಿಸಿ"</string>
     <string name="date_picker_decrement_year_button" msgid="4482021813491121717">"ವರ್ಷವನ್ನು ಕಡಿಮೆಮಾಡಿ"</string>
+    <string name="date_picker_prev_month_button" msgid="2858244643992056505">"ಹಿಂದಿನ ತಿಂಗಳು"</string>
+    <string name="date_picker_next_month_button" msgid="5559507736887605055">"ಮುಂದಿನ ತಿಂಗಳು"</string>
     <string name="keyboardview_keycode_alt" msgid="4856868820040051939">"Alt"</string>
     <string name="keyboardview_keycode_cancel" msgid="1203984017245783244">"ರದ್ದುಮಾಡು"</string>
     <string name="keyboardview_keycode_delete" msgid="3337914833206635744">"ಅಳಿಸು"</string>
@@ -1813,7 +1821,6 @@
     <string name="select_minutes" msgid="3974345615920336087">"ನಿಮಿಷಗಳನ್ನು ಆಯ್ಕೆಮಾಡಿ"</string>
     <string name="select_day" msgid="7774759604701773332">"ತಿಂಗಳು ಮತ್ತು ದಿನವನ್ನು ಆಯ್ಕೆಮಾಡಿ"</string>
     <string name="select_year" msgid="7952052866994196170">"ವರ್ಷವನ್ನು ಆಯ್ಕೆಮಾಡಿ"</string>
-    <string name="item_is_selected" msgid="949687401682476608">"<xliff:g id="ITEM">%1$s</xliff:g> ಆಯ್ಕೆ ಮಾಡಲಾಗಿದೆ"</string>
     <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> ಅಳಿಸಲಾಗಿದೆ"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"ಕೆಲಸ <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="lock_to_app_toast" msgid="7570091317001980053">"ಈ ಪರದೆಯನ್ನು ಅನ್‌ಪಿನ್ ಮಾಡಲು, ‘ಹಿಂದೆ’ ಮತ್ತು ‘ಸಮಗ್ರ ನೋಟ’ವನ್ನು ಏಕಕಾಲದಲ್ಲಿ ಸ್ಪರ್ಶಿಸಿ ಮತ್ತು ಒತ್ತಿ ಹಿಡಿದುಕೊಳ್ಳಿ."</string>

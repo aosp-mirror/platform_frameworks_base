@@ -585,6 +585,8 @@
     <string name="permdesc_camera" msgid="8497216524735535009">"Pinapayagan ang app na kumuha ng mga larawan at video gamit ang camera. Pinapayagan ng pahintulot na ito ang app na gamitin ang camera anumang oras nang wala ng iyong kumpirmasyon."</string>
     <string name="permlab_cameraDisableTransmitLed" msgid="2651072630501126222">"i-disable ang LED na tagapagpahiwatig kapag ginagamit ang camera"</string>
     <string name="permdesc_cameraDisableTransmitLed" msgid="4764585465480295341">"Pinapayagan ang isang paunang na-install na application ng system na i-disable ang LED na tagapagpahiwatig ng paggamit sa camera."</string>
+    <!-- no translation found for permdesc_cameraSendSystemEvent (8642231538552298107) -->
+    <skip />
     <string name="permlab_brick" product="tablet" msgid="2961292205764488304">"permanenteng huwag paganahin ang tablet"</string>
     <string name="permlab_brick" product="tv" msgid="4912674222121249410">"permanenteng i-disable ang TV"</string>
     <string name="permlab_brick" product="default" msgid="8337817093326370537">"permanenteng huwag paganahin ang telepono"</string>
@@ -1136,6 +1138,10 @@
     <string name="permdesc_packageVerificationAgent" msgid="8437590190990843381">"Pinapayagan ang app na i-verify kung ang isang package ay nai-install."</string>
     <string name="permlab_bindPackageVerifier" msgid="4187786793360326654">"sumailalim sa taga-verify ng package"</string>
     <string name="permdesc_bindPackageVerifier" msgid="3180741773233862126">"Pinapayagan ang may-ari na gumawa ng mga kahilingan ng mga taga-verify ng package. Hindi kailanman dapat na kailanganin para sa normal na apps."</string>
+    <string name="permlab_intentFilterVerificationAgent" msgid="1135788294400437497">"i-verify ang intent filter"</string>
+    <string name="permdesc_intentFilterVerificationAgent" msgid="5853902808424716312">"Nagbibigay-daan sa app na suriin kung na-verify o hindi ang isang intent filter."</string>
+    <string name="permlab_bindIntentFilterVerifier" msgid="8567268159430779210">"isailalim sa verifier ng intent filter"</string>
+    <string name="permdesc_bindIntentFilterVerifier" msgid="681128728719578778">"Nagbibigay-daan sa may-ari na gumawa ng mga kahilingan ng mga verifier ng intent filter. Hindi kailanman dapat kailanganin para sa mga normal na app."</string>
     <string name="permlab_serialPort" msgid="546083327654631076">"mag-access sa mga serial port"</string>
     <string name="permdesc_serialPort" msgid="2991639985224598193">"Binibigyang-daan ang may-ari na mag-access ng mga serial port gamit ang SerialManager API."</string>
     <string name="permlab_accessContentProvidersExternally" msgid="5077774297943409285">"panlabas na mag-access ng mga provider ng nilalaman"</string>
@@ -1561,6 +1567,8 @@
     <string name="date_picker_decrement_day_button" msgid="4131881521818750031">"Bawasan ang araw"</string>
     <string name="date_picker_increment_year_button" msgid="6318697384310808899">"Dagdagdan ang taon"</string>
     <string name="date_picker_decrement_year_button" msgid="4482021813491121717">"Bawasan ang taon"</string>
+    <string name="date_picker_prev_month_button" msgid="2858244643992056505">"Nakaraang buwan"</string>
+    <string name="date_picker_next_month_button" msgid="5559507736887605055">"Susunod na buwan"</string>
     <string name="keyboardview_keycode_alt" msgid="4856868820040051939">"Alt"</string>
     <string name="keyboardview_keycode_cancel" msgid="1203984017245783244">"Kanselahin"</string>
     <string name="keyboardview_keycode_delete" msgid="3337914833206635744">"Tanggalin"</string>
@@ -1813,7 +1821,6 @@
     <string name="select_minutes" msgid="3974345615920336087">"Pumili ng mga minuto"</string>
     <string name="select_day" msgid="7774759604701773332">"Pumili ng buwan at araw"</string>
     <string name="select_year" msgid="7952052866994196170">"Pumili ng taon"</string>
-    <string name="item_is_selected" msgid="949687401682476608">"Napili ang <xliff:g id="ITEM">%1$s</xliff:g>"</string>
     <string name="deleted_key" msgid="7659477886625566590">"Tinanggal ang <xliff:g id="KEY">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"<xliff:g id="LABEL">%1$s</xliff:g> sa Trabaho"</string>
     <string name="lock_to_app_toast" msgid="7570091317001980053">"Upang i-unpin ang screen na ito, pindutin nang matagal ang Bumalik at Overview nang sabay-sabay."</string>

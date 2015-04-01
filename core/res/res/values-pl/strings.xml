@@ -587,6 +587,8 @@
     <string name="permdesc_camera" msgid="8497216524735535009">"Pozwala aplikacji na robienie zdjęć i nagrywanie filmów przy użyciu aparatu. Aplikacja z tym uprawnieniem może użyć aparatu w dowolnym momencie bez Twojego potwierdzenia."</string>
     <string name="permlab_cameraDisableTransmitLed" msgid="2651072630501126222">"wyłącz wskaźnik LED transmisji, gdy aparat jest w użyciu"</string>
     <string name="permdesc_cameraDisableTransmitLed" msgid="4764585465480295341">"Zezwala wstępnie zainstalowanej aplikacji systemowej na wyłączenie wskaźnika LED użycia kamery."</string>
+    <!-- no translation found for permdesc_cameraSendSystemEvent (8642231538552298107) -->
+    <skip />
     <string name="permlab_brick" product="tablet" msgid="2961292205764488304">"trwałe wyłączenie tabletu"</string>
     <string name="permlab_brick" product="tv" msgid="4912674222121249410">"trwałe wyłączenie telewizora"</string>
     <string name="permlab_brick" product="default" msgid="8337817093326370537">"wyłączenie telefonu na stałe"</string>
@@ -1138,6 +1140,10 @@
     <string name="permdesc_packageVerificationAgent" msgid="8437590190990843381">"Pozwala aplikacji na zweryfikowanie, czy pakiet można zainstalować."</string>
     <string name="permlab_bindPackageVerifier" msgid="4187786793360326654">"powiązanie z weryfikatorem pakietów"</string>
     <string name="permdesc_bindPackageVerifier" msgid="3180741773233862126">"Pozwala na wysyłanie żądań weryfikacji pakietu. To uprawnienie nie powinno być potrzebne zwykłym aplikacjom."</string>
+    <string name="permlab_intentFilterVerificationAgent" msgid="1135788294400437497">"weryfikacja filtru intencji"</string>
+    <string name="permdesc_intentFilterVerificationAgent" msgid="5853902808424716312">"Zezwala aplikacji na sprawdzenie, czy filtr intencji został zweryfikowany."</string>
+    <string name="permlab_bindIntentFilterVerifier" msgid="8567268159430779210">"tworzenie powiązania z weryfikacją filtru intencji"</string>
+    <string name="permdesc_bindIntentFilterVerifier" msgid="681128728719578778">"Zezwala na wysyłanie żądań weryfikacji filtrów intencji. Nieprzeznaczone dla zwykłych aplikacji."</string>
     <string name="permlab_serialPort" msgid="546083327654631076">"dostęp do portów szeregowych"</string>
     <string name="permdesc_serialPort" msgid="2991639985224598193">"Umożliwia posiadaczowi dostęp do portów szeregowych przy użyciu interfejsu API narzędzia SerialManager."</string>
     <string name="permlab_accessContentProvidersExternally" msgid="5077774297943409285">"Dostęp do dostawców treści z zewnątrz"</string>
@@ -1577,6 +1583,8 @@
     <string name="date_picker_decrement_day_button" msgid="4131881521818750031">"Zmień dzień na wcześniejszy"</string>
     <string name="date_picker_increment_year_button" msgid="6318697384310808899">"Zmień rok na późniejszy"</string>
     <string name="date_picker_decrement_year_button" msgid="4482021813491121717">"Zmień rok na wcześniejszy"</string>
+    <string name="date_picker_prev_month_button" msgid="2858244643992056505">"Poprzedni miesiąc"</string>
+    <string name="date_picker_next_month_button" msgid="5559507736887605055">"Następny miesiąc"</string>
     <string name="keyboardview_keycode_alt" msgid="4856868820040051939">"Alt"</string>
     <string name="keyboardview_keycode_cancel" msgid="1203984017245783244">"Anuluj"</string>
     <string name="keyboardview_keycode_delete" msgid="3337914833206635744">"Delete"</string>
@@ -1831,7 +1839,6 @@
     <string name="select_minutes" msgid="3974345615920336087">"Wybierz minuty"</string>
     <string name="select_day" msgid="7774759604701773332">"Wybierz miesiąc i dzień"</string>
     <string name="select_year" msgid="7952052866994196170">"Wybierz rok"</string>
-    <string name="item_is_selected" msgid="949687401682476608">"Wybrałeś <xliff:g id="ITEM">%1$s</xliff:g>"</string>
     <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> usunięte"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"<xliff:g id="LABEL">%1$s</xliff:g> (praca)"</string>
     <string name="lock_to_app_toast" msgid="7570091317001980053">"Aby odpiąć ten ekran, naciśnij i przytrzymaj jednocześnie Wstecz i Przegląd."</string>

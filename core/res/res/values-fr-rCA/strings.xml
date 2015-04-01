@@ -585,6 +585,8 @@
     <string name="permdesc_camera" msgid="8497216524735535009">"Permet à l\'application de prendre des photos et de filmer des vidéos avec l\'appareil photo. Cette autorisation lui permet d\'utiliser l\'appareil photo à tout moment sans votre consentement."</string>
     <string name="permlab_cameraDisableTransmitLed" msgid="2651072630501126222">"désactiver l\'indicateur d\'émission LED lorsque la caméra est en cours d\'utilisation"</string>
     <string name="permdesc_cameraDisableTransmitLed" msgid="4764585465480295341">"Permet à une application système préinstallée de désactiver l\'indicateur LED d\'utilisation de la caméra."</string>
+    <!-- no translation found for permdesc_cameraSendSystemEvent (8642231538552298107) -->
+    <skip />
     <string name="permlab_brick" product="tablet" msgid="2961292205764488304">"désactiver définitivement la tablette"</string>
     <string name="permlab_brick" product="tv" msgid="4912674222121249410">"désactiver définitivement le téléviseur"</string>
     <string name="permlab_brick" product="default" msgid="8337817093326370537">"désactiver définitivement le téléphone"</string>
@@ -1136,6 +1138,10 @@
     <string name="permdesc_packageVerificationAgent" msgid="8437590190990843381">"Permet à l\'application de vérifier qu\'un paquet peut être installé."</string>
     <string name="permlab_bindPackageVerifier" msgid="4187786793360326654">"s\'associer à un vérificateur de paquet"</string>
     <string name="permdesc_bindPackageVerifier" msgid="3180741773233862126">"Permet à l\'application autorisée d\'effectuer des requêtes de vérificateurs de paquet. Les applications standards ne doivent jamais avoir recours à cette fonctionnalité."</string>
+    <string name="permlab_intentFilterVerificationAgent" msgid="1135788294400437497">"vérifier le filtre d\'intention"</string>
+    <string name="permdesc_intentFilterVerificationAgent" msgid="5853902808424716312">"Permet à l\'application de vérifier si un filtre d\'intention est validé ou non."</string>
+    <string name="permlab_bindIntentFilterVerifier" msgid="8567268159430779210">"s\'associer à un vérificateur de filtre d\'intention"</string>
+    <string name="permdesc_bindIntentFilterVerifier" msgid="681128728719578778">"Permet à l\'application autorisée d\'effectuer des requêtes de vérificateurs de filtres d\'intention. Les applications standards ne devraient jamais avoir recours à cette fonctionnalité."</string>
     <string name="permlab_serialPort" msgid="546083327654631076">"accéder aux ports série"</string>
     <string name="permdesc_serialPort" msgid="2991639985224598193">"Permet à l\'application autorisée d\'accéder aux ports série avec l\'API SerialManager."</string>
     <string name="permlab_accessContentProvidersExternally" msgid="5077774297943409285">"accès externe aux fournisseurs de contenu"</string>
@@ -1561,6 +1567,8 @@
     <string name="date_picker_decrement_day_button" msgid="4131881521818750031">"Jour précédent"</string>
     <string name="date_picker_increment_year_button" msgid="6318697384310808899">"Année suivante"</string>
     <string name="date_picker_decrement_year_button" msgid="4482021813491121717">"Année précédente"</string>
+    <string name="date_picker_prev_month_button" msgid="2858244643992056505">"Le mois précédent"</string>
+    <string name="date_picker_next_month_button" msgid="5559507736887605055">"Le mois prochain"</string>
     <string name="keyboardview_keycode_alt" msgid="4856868820040051939">"Alt"</string>
     <string name="keyboardview_keycode_cancel" msgid="1203984017245783244">"Annuler"</string>
     <string name="keyboardview_keycode_delete" msgid="3337914833206635744">"Supprimer"</string>
@@ -1813,7 +1821,6 @@
     <string name="select_minutes" msgid="3974345615920336087">"Sélectionnez les minutes"</string>
     <string name="select_day" msgid="7774759604701773332">"Sélectionnez un mois et un jour"</string>
     <string name="select_year" msgid="7952052866994196170">"Sélectionnez une année"</string>
-    <string name="item_is_selected" msgid="949687401682476608">"« <xliff:g id="ITEM">%1$s</xliff:g> » a été sélectionné"</string>
     <string name="deleted_key" msgid="7659477886625566590">"« <xliff:g id="KEY">%1$s</xliff:g> » a été supprimé"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"<xliff:g id="LABEL">%1$s</xliff:g> (travail)"</string>
     <string name="lock_to_app_toast" msgid="7570091317001980053">"Pour annuler l\'épinglage de cet écran, appuyez de manière prolongée sur Retour et Aperçu simultanément."</string>

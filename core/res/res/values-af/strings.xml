@@ -585,6 +585,8 @@
     <string name="permdesc_camera" msgid="8497216524735535009">"Laat die program toe om foto\'s en video\'s met die kamera te neem. Hierdie toestemming laat die program toe om die kamera te eniger tyd sonder jou bevestiging te gebruik."</string>
     <string name="permlab_cameraDisableTransmitLed" msgid="2651072630501126222">"deaktiveer LED wat oordrag aandui wanneer kamera gebruik word"</string>
     <string name="permdesc_cameraDisableTransmitLed" msgid="4764585465480295341">"Laat \'n pre-geïnstalleerde stelselprogram toe om die LED wat kamera-gebruik aandui, te deaktiveer."</string>
+    <!-- no translation found for permdesc_cameraSendSystemEvent (8642231538552298107) -->
+    <skip />
     <string name="permlab_brick" product="tablet" msgid="2961292205764488304">"deaktiveer tablet permanent"</string>
     <string name="permlab_brick" product="tv" msgid="4912674222121249410">"deaktiveer TV permanent"</string>
     <string name="permlab_brick" product="default" msgid="8337817093326370537">"deaktiveer foon permanent"</string>
@@ -757,7 +759,7 @@
   </string-array>
     <string name="fingerprint_error_unable_to_process" msgid="4232401562838100026">"Kon nie verwerk nie. Probeer weer."</string>
     <string name="fingerprint_error_hw_not_available" msgid="6162709753784993771">"Hardeware is nie beskikbaar nie."</string>
-    <string name="fingerprint_error_no_space" msgid="1055819001126053318">"Vingerafdruk kan nie geberg word nie. Verwyder asseblief \'n bestaande vingerafdruk."</string>
+    <string name="fingerprint_error_no_space" msgid="1055819001126053318">"Vingerafdruk kan nie gestoor word nie. Verwyder asseblief \'n bestaande vingerafdruk."</string>
     <string name="fingerprint_error_timeout" msgid="3927186043737732875">"Vingerafdrukuittelling is bereik. Probeer weer."</string>
     <string name="fingerprint_error_vendor" msgid="3175724710791609491">"Vingerafdrukuittelling is bereik. Probeer weer."</string>
   <string-array name="fingerprint_error_vendor">
@@ -1136,6 +1138,10 @@
     <string name="permdesc_packageVerificationAgent" msgid="8437590190990843381">"Laat die program toe om te verifieer dat \'n pakket installeerbaar is."</string>
     <string name="permlab_bindPackageVerifier" msgid="4187786793360326654">"bind aan \'n pakkieverifieerder"</string>
     <string name="permdesc_bindPackageVerifier" msgid="3180741773233862126">"Laat die houer toe om versoeke aan pakketverifieerders te rig. Dit moet nooit vir normale programme nodig wees nie."</string>
+    <string name="permlab_intentFilterVerificationAgent" msgid="1135788294400437497">"verifieer voornemefilter"</string>
+    <string name="permdesc_intentFilterVerificationAgent" msgid="5853902808424716312">"Laat die program toe om te kyk of \'n voornemefilter geverifieer is of nie."</string>
+    <string name="permlab_bindIntentFilterVerifier" msgid="8567268159430779210">"bind aan \'n voornemefilterverifieerder"</string>
+    <string name="permdesc_bindIntentFilterVerifier" msgid="681128728719578778">"Laat die houer toe om versoeke te rig aan voornemefilterverifieerders. Behoort nooit vir normale programme nodig te wees nie."</string>
     <string name="permlab_serialPort" msgid="546083327654631076">"kry toegang tot reekspoorte"</string>
     <string name="permdesc_serialPort" msgid="2991639985224598193">"Laat die houer toe om toegang te verkry tot reekspoorte wat die SerialManager API gebruik."</string>
     <string name="permlab_accessContentProvidersExternally" msgid="5077774297943409285">"verkry toegang tot inhoud ekstern"</string>
@@ -1561,6 +1567,8 @@
     <string name="date_picker_decrement_day_button" msgid="4131881521818750031">"Verminder dag"</string>
     <string name="date_picker_increment_year_button" msgid="6318697384310808899">"Vermeerder jaar"</string>
     <string name="date_picker_decrement_year_button" msgid="4482021813491121717">"Verminder jaar"</string>
+    <string name="date_picker_prev_month_button" msgid="2858244643992056505">"Vorige maand"</string>
+    <string name="date_picker_next_month_button" msgid="5559507736887605055">"Volgende maand"</string>
     <string name="keyboardview_keycode_alt" msgid="4856868820040051939">"Alt"</string>
     <string name="keyboardview_keycode_cancel" msgid="1203984017245783244">"Kanselleer"</string>
     <string name="keyboardview_keycode_delete" msgid="3337914833206635744">"Vee uit"</string>
@@ -1813,7 +1821,6 @@
     <string name="select_minutes" msgid="3974345615920336087">"Kies minute"</string>
     <string name="select_day" msgid="7774759604701773332">"Kies maand en dag"</string>
     <string name="select_year" msgid="7952052866994196170">"Kies jaar"</string>
-    <string name="item_is_selected" msgid="949687401682476608">"<xliff:g id="ITEM">%1$s</xliff:g> gekies"</string>
     <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> uitgevee"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"Werk-<xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="lock_to_app_toast" msgid="7570091317001980053">"Om hierdie skerm te ontspeld, raak en hou tegelyk Terug en Oorsig."</string>

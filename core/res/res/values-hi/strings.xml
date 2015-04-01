@@ -585,6 +585,8 @@
     <string name="permdesc_camera" msgid="8497216524735535009">"ऐप्स  को कैमरे से चित्र और वीडियो लेने देता है. यह अनुमति ऐप्स  को किसी भी समय आपकी पुष्टि के बिना कैमरे का उपयोग करने देती है."</string>
     <string name="permlab_cameraDisableTransmitLed" msgid="2651072630501126222">"कैमरा उपयोग में होने पर संचारण संकेतक LED अक्षम करें"</string>
     <string name="permdesc_cameraDisableTransmitLed" msgid="4764585465480295341">"पहले से इंस्टॉल किए गए सिस्टम ऐप्स  को कैमरे को संकेतक LED का उपयोग करने से अक्षम करती है."</string>
+    <!-- no translation found for permdesc_cameraSendSystemEvent (8642231538552298107) -->
+    <skip />
     <string name="permlab_brick" product="tablet" msgid="2961292205764488304">"स्‍थायी रूप से टेबलेट अक्षम करें"</string>
     <string name="permlab_brick" product="tv" msgid="4912674222121249410">"टीवी को स्‍थायी रूप से अक्षम करना"</string>
     <string name="permlab_brick" product="default" msgid="8337817093326370537">"फ़ोन को स्‍थायी रूप से अक्षम करें"</string>
@@ -1136,6 +1138,10 @@
     <string name="permdesc_packageVerificationAgent" msgid="8437590190990843381">"एप्‍लि‍केशन को इंस्‍टॉल करने योग्‍य पैकेज सत्‍यापि‍त करने देता है."</string>
     <string name="permlab_bindPackageVerifier" msgid="4187786793360326654">"पैकेज प्रमाणक से आबद्ध करें"</string>
     <string name="permdesc_bindPackageVerifier" msgid="3180741773233862126">"धारक को पैकेज प्रमाणक के अनुरोध की अनुमति‍ देता है. सामान्‍य ऐप्स के लिए कभी भी आवश्‍यक नहीं होना चाहिए."</string>
+    <string name="permlab_intentFilterVerificationAgent" msgid="1135788294400437497">"लक्ष्य फ़िल्टर सत्यापित करें"</string>
+    <string name="permdesc_intentFilterVerificationAgent" msgid="5853902808424716312">"ऐप को जांच करने देती है कि कोई लक्ष्य फ़िल्टर सत्यापित है या नहीं."</string>
+    <string name="permlab_bindIntentFilterVerifier" msgid="8567268159430779210">"लक्ष्य फ़िल्टर प्रमाणक से आबद्ध करें"</string>
+    <string name="permdesc_bindIntentFilterVerifier" msgid="681128728719578778">"धारक को लक्ष्य फ़िल्टर प्रमाणक के अनुरोध की अनुमति देती है. सामान्य ऐप्स के लिए कभी भी आवश्यक नहीं होना चाहिए."</string>
     <string name="permlab_serialPort" msgid="546083327654631076">"सीरियल पोर्ट पर पहुंचें"</string>
     <string name="permdesc_serialPort" msgid="2991639985224598193">"SerialManager API का उपयोग करके धारक को सीरियल पोर्ट पर पहुंच प्रदान करता है."</string>
     <string name="permlab_accessContentProvidersExternally" msgid="5077774297943409285">"बाह्य रूप से सामग्री प्रदाताओं पर पहुंच"</string>
@@ -1561,6 +1567,8 @@
     <string name="date_picker_decrement_day_button" msgid="4131881521818750031">"दिन कम करें"</string>
     <string name="date_picker_increment_year_button" msgid="6318697384310808899">"वर्ष बढ़ाएं"</string>
     <string name="date_picker_decrement_year_button" msgid="4482021813491121717">"वर्ष कम करें"</string>
+    <string name="date_picker_prev_month_button" msgid="2858244643992056505">"पिछला महीना"</string>
+    <string name="date_picker_next_month_button" msgid="5559507736887605055">"अगला महीना"</string>
     <string name="keyboardview_keycode_alt" msgid="4856868820040051939">"Alt"</string>
     <string name="keyboardview_keycode_cancel" msgid="1203984017245783244">"अभी नहीं"</string>
     <string name="keyboardview_keycode_delete" msgid="3337914833206635744">"हटाएं"</string>
@@ -1813,7 +1821,6 @@
     <string name="select_minutes" msgid="3974345615920336087">"मिनट चुनें"</string>
     <string name="select_day" msgid="7774759604701773332">"माह और दिन चुनें"</string>
     <string name="select_year" msgid="7952052866994196170">"वर्ष चुनें"</string>
-    <string name="item_is_selected" msgid="949687401682476608">"<xliff:g id="ITEM">%1$s</xliff:g> चयनित"</string>
     <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> को हटा दिया गया"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"कार्यस्थल का <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="lock_to_app_toast" msgid="7570091317001980053">"इस स्क्रीन को अनपिन करने के लिए, एक ही समय में वापस जाएं और अवलोकन को स्पर्श करके रखें."</string>

@@ -585,6 +585,8 @@
     <string name="permdesc_camera" msgid="8497216524735535009">"Permite que a aplicação tire fotografias e grave vídeos com a câmara. Esta autorização permite que a aplicação utilize a câmara sem a sua confirmação em qualquer altura."</string>
     <string name="permlab_cameraDisableTransmitLed" msgid="2651072630501126222">"desativar LED indicador de transmissão com a câmara em utilização"</string>
     <string name="permdesc_cameraDisableTransmitLed" msgid="4764585465480295341">"Permite que uma aplicação de sistema pré-instalada desative o LED indicador de utilização da câmara."</string>
+    <!-- no translation found for permdesc_cameraSendSystemEvent (8642231538552298107) -->
+    <skip />
     <string name="permlab_brick" product="tablet" msgid="2961292205764488304">"desativar tablet de forma permanente"</string>
     <string name="permlab_brick" product="tv" msgid="4912674222121249410">"desativar a TV permanentemente"</string>
     <string name="permlab_brick" product="default" msgid="8337817093326370537">"desativar telefone de forma permanente"</string>
@@ -1136,6 +1138,10 @@
     <string name="permdesc_packageVerificationAgent" msgid="8437590190990843381">"Permite que a aplicação verifique se um pacote é instalável."</string>
     <string name="permlab_bindPackageVerifier" msgid="4187786793360326654">"vincular a um verificador de pacotes"</string>
     <string name="permdesc_bindPackageVerifier" msgid="3180741773233862126">"Permite ao titular solicitar verificadores de pacotes. Nunca deverá ser necessário para aplicações normais."</string>
+    <string name="permlab_intentFilterVerificationAgent" msgid="1135788294400437497">"validar filtro de intenções"</string>
+    <string name="permdesc_intentFilterVerificationAgent" msgid="5853902808424716312">"Permite que uma aplicação verifique se um filtro de intenções está ou não validado."</string>
+    <string name="permlab_bindIntentFilterVerifier" msgid="8567268159430779210">"vincular a um verif. de filtros intenç."</string>
+    <string name="permdesc_bindIntentFilterVerifier" msgid="681128728719578778">"Permite ao titular solicitar verificadores de filtros de intenções. Nunca deve ser necessário para aplicações normais."</string>
     <string name="permlab_serialPort" msgid="546083327654631076">"aceder a portas série"</string>
     <string name="permdesc_serialPort" msgid="2991639985224598193">"Permite ao titular aceder a portas de série através da API SerialManager."</string>
     <string name="permlab_accessContentProvidersExternally" msgid="5077774297943409285">"aceder a fornecedores de conteúdos externamente"</string>
@@ -1561,6 +1567,8 @@
     <string name="date_picker_decrement_day_button" msgid="4131881521818750031">"Diminuir dia"</string>
     <string name="date_picker_increment_year_button" msgid="6318697384310808899">"Aumentar ano"</string>
     <string name="date_picker_decrement_year_button" msgid="4482021813491121717">"Diminuir ano"</string>
+    <string name="date_picker_prev_month_button" msgid="2858244643992056505">"Mês anterior"</string>
+    <string name="date_picker_next_month_button" msgid="5559507736887605055">"Mês seguinte"</string>
     <string name="keyboardview_keycode_alt" msgid="4856868820040051939">"Alt"</string>
     <string name="keyboardview_keycode_cancel" msgid="1203984017245783244">"Cancelar"</string>
     <string name="keyboardview_keycode_delete" msgid="3337914833206635744">"Delete"</string>
@@ -1813,7 +1821,6 @@
     <string name="select_minutes" msgid="3974345615920336087">"Selecionar minutos"</string>
     <string name="select_day" msgid="7774759604701773332">"Selecionar mês e dia"</string>
     <string name="select_year" msgid="7952052866994196170">"Selecionar ano"</string>
-    <string name="item_is_selected" msgid="949687401682476608">"<xliff:g id="ITEM">%1$s</xliff:g> selecionado"</string>
     <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> eliminado"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"<xliff:g id="LABEL">%1$s</xliff:g> de trabalho"</string>
     <string name="lock_to_app_toast" msgid="7570091317001980053">"Para soltar este ecrã, toque sem soltar em Retroceder e Visão geral em simultâneo."</string>

@@ -585,6 +585,8 @@
     <string name="permdesc_camera" msgid="8497216524735535009">"به برنامه اجازه می‌دهد با دوربین به عکسبرداری و فیلمبرداری بپردازد. این مجوز به برنامه اجازه می‌‌دهد از دوربین در هر زمانی بدون تأیید شما استفاده کند."</string>
     <string name="permlab_cameraDisableTransmitLed" msgid="2651072630501126222">"‏LED نشانگر انتقال داده، هنگام استفاده از دوربین غیرفعال شود"</string>
     <string name="permdesc_cameraDisableTransmitLed" msgid="4764585465480295341">"‏به یک برنامه سیستم از قبل نصب شده اجازه می‌دهد LED نشانگر استفاده از دوربین را غیرفعال کند."</string>
+    <!-- no translation found for permdesc_cameraSendSystemEvent (8642231538552298107) -->
+    <skip />
     <string name="permlab_brick" product="tablet" msgid="2961292205764488304">"غیر فعال کردن دائم رایانهٔ لوحی"</string>
     <string name="permlab_brick" product="tv" msgid="4912674222121249410">"غیرفعالسازی دائم تلویزیون"</string>
     <string name="permlab_brick" product="default" msgid="8337817093326370537">"تلفن بطور دائمی غیرفعال شود"</string>
@@ -1136,6 +1138,10 @@
     <string name="permdesc_packageVerificationAgent" msgid="8437590190990843381">"به برنامه اجازه می‌دهد قابل نصب بودن بسته را تأیید کند."</string>
     <string name="permlab_bindPackageVerifier" msgid="4187786793360326654">"اتصال به یک تأیید کننده بسته"</string>
     <string name="permdesc_bindPackageVerifier" msgid="3180741773233862126">"‏به دارنده اجازه می‎دهد تا تاییدکنندگان بسته را درخواست کند. برای برنامه‎های عادی نیاز نیست."</string>
+    <string name="permlab_intentFilterVerificationAgent" msgid="1135788294400437497">"تأیید فیلتر هدف"</string>
+    <string name="permdesc_intentFilterVerificationAgent" msgid="5853902808424716312">"به برنامه اجازه می‌دهد بررسی کند که فیلتر هدف تأیید شده یا خیر."</string>
+    <string name="permlab_bindIntentFilterVerifier" msgid="8567268159430779210">"ارتباط با یک بررسی‌کننده فیلتر هدف"</string>
+    <string name="permdesc_bindIntentFilterVerifier" msgid="681128728719578778">"به دارنده اجازه می‌دهد بررسی‌کننده فیلتر هدف را درخواست کند. هرگز نباید برای برنامه‌های عادی مورد نیاز شود."</string>
     <string name="permlab_serialPort" msgid="546083327654631076">"دسترسی به درگاه‌های سریال"</string>
     <string name="permdesc_serialPort" msgid="2991639985224598193">"‏به دارنده اجازه می‌دهد با استفاده از SerialManager API به درگاه‌های سریال دسترسی داشته باشد."</string>
     <string name="permlab_accessContentProvidersExternally" msgid="5077774297943409285">"دسترسی خارجی به ارائه‌دهندگان محتوا"</string>
@@ -1561,6 +1567,8 @@
     <string name="date_picker_decrement_day_button" msgid="4131881521818750031">"کاهش روز"</string>
     <string name="date_picker_increment_year_button" msgid="6318697384310808899">"افزایش سال"</string>
     <string name="date_picker_decrement_year_button" msgid="4482021813491121717">"کاهش سال"</string>
+    <string name="date_picker_prev_month_button" msgid="2858244643992056505">"ماه قبل"</string>
+    <string name="date_picker_next_month_button" msgid="5559507736887605055">"ماه بعد"</string>
     <string name="keyboardview_keycode_alt" msgid="4856868820040051939">"Alt"</string>
     <string name="keyboardview_keycode_cancel" msgid="1203984017245783244">"لغو"</string>
     <string name="keyboardview_keycode_delete" msgid="3337914833206635744">"Delete"</string>
@@ -1813,7 +1821,6 @@
     <string name="select_minutes" msgid="3974345615920336087">"انتخاب دقیقه"</string>
     <string name="select_day" msgid="7774759604701773332">"انتخاب ماه و روز"</string>
     <string name="select_year" msgid="7952052866994196170">"انتخاب سال"</string>
-    <string name="item_is_selected" msgid="949687401682476608">"<xliff:g id="ITEM">%1$s</xliff:g> انتخاب شد"</string>
     <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> حذف شد"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"<xliff:g id="LABEL">%1$s</xliff:g> محل کار"</string>
     <string name="lock_to_app_toast" msgid="7570091317001980053">"برای برداشتن پین این صفحه، هم‌زمان «بازگشت» و «نمای کلی» را لمس کنید و نگه دارید."</string>
