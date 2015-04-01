@@ -22,7 +22,6 @@ import android.security.keymaster.KeymasterDefs;
 import java.security.InvalidKeyException;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.KeySpec;
-import java.util.Collections;
 import java.util.Set;
 
 import javax.crypto.SecretKey;
@@ -113,13 +112,16 @@ public class KeyStoreSecretKeyFactorySpi extends SecretKeyFactorySpi {
             throw new InvalidKeySpecException("Unsupported key characteristic", e);
         }
 
-        // TODO: Read user authentication IDs once the Keymaster API has stabilized
-        Set<Integer> userAuthenticators = Collections.emptySet();
-        Set<Integer> teeBackedUserAuthenticators = Collections.emptySet();
-//        Set<Integer> userAuthenticators = new HashSet<Integer>(
-//                getInts(keyCharacteristics, KeymasterDefs.KM_TAG_USER_AUTH_ID));
-//        Set<Integer> teeBackedUserAuthenticators = new HashSet<Integer>(
-//                keyCharacteristics.hwEnforced.getInts(KeymasterDefs.KM_TAG_USER_AUTH_ID));
+        int swEnforcedUserAuthenticatorIds =
+                keyCharacteristics.swEnforced.getInt(KeymasterDefs.KM_TAG_USER_AUTH_TYPE, 0);
+        int hwEnforcedUserAuthenticatorIds =
+                keyCharacteristics.hwEnforced.getInt(KeymasterDefs.KM_TAG_USER_AUTH_TYPE, 0);
+        int userAuthenticatorIds = swEnforcedUserAuthenticatorIds | hwEnforcedUserAuthenticatorIds;
+        Set<Integer> userAuthenticators =
+                KeyStoreKeyConstraints.UserAuthenticator.allFromKeymaster(userAuthenticatorIds);
+        Set<Integer> teeBackedUserAuthenticators =
+                KeyStoreKeyConstraints.UserAuthenticator.allFromKeymaster(
+                        hwEnforcedUserAuthenticatorIds);
 
         return new KeyStoreKeySpec(entryAlias,
                 origin,

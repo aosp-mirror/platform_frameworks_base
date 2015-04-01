@@ -536,10 +536,9 @@ public class AndroidKeyStore extends KeyStoreSpi {
         if (params.getUserAuthenticators().isEmpty()) {
             args.addBoolean(KeymasterDefs.KM_TAG_NO_AUTH_REQUIRED);
         } else {
-        // TODO: Pass-in user authenticator IDs once the Keymaster API has stabilized
-//            for (int userAuthenticatorId : params.getUserAuthenticators()) {
-//                args.addInt(KeymasterDefs.KM_TAG_USER_AUTH_ID, userAuthenticatorId);
-//            }
+            args.addInt(KeymasterDefs.KM_TAG_USER_AUTH_TYPE,
+                    KeyStoreKeyConstraints.UserAuthenticator.allToKeymaster(
+                            params.getUserAuthenticators()));
         }
         if (params.getUserAuthenticationValidityDurationSeconds() != null) {
             args.addInt(KeymasterDefs.KM_TAG_AUTH_TIMEOUT,
