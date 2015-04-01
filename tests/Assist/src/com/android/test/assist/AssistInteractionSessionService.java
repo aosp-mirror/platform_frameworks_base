@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 The Android Open Source Project
+ * Copyright (C) 2015 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -11,21 +11,18 @@
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
- * limitations under the License.
+ * limitations under the License
  */
 
-package com.google.android.test.assistant;
+package com.android.test.assist;
 
-import android.app.Activity;
 import android.os.Bundle;
-import com.google.android.test.assistant.R;
+import android.service.voice.VoiceInteractionSession;
+import android.service.voice.VoiceInteractionSessionService;
 
-public class AssistActivity extends Activity {
-
+public class AssistInteractionSessionService extends VoiceInteractionSessionService {
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.assist_intent_activity);
+    public VoiceInteractionSession onNewSession(Bundle args) {
+        return new AssistInteractionSession(this);
     }
-
 }

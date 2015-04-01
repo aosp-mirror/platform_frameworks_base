@@ -3,7 +3,7 @@ include $(CLEAR_VARS)
 
 LOCAL_SRC_FILES := $(call all-subdir-java-files)
 
-LOCAL_PACKAGE_NAME := Assistant
+LOCAL_PACKAGE_NAME := LegacyAssistant
 
 LOCAL_MODULE_TAGS := tests
 LOCAL_CERTIFICATE := platform

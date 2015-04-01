@@ -15,7 +15,7 @@
 -->
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.google.android.test.assistant">
+    package="com.google.android.test.legacyassistant">
 
     <application android:label="@string/activity_title">
 
