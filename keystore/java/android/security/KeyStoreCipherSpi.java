@@ -264,8 +264,6 @@ public abstract class KeyStoreCipherSpi extends CipherSpi implements KeyStoreCry
     @Override
     protected int engineUpdate(byte[] input, int inputOffset, int inputLen, byte[] output,
             int outputOffset) throws ShortBufferException {
-        ensureKeystoreOperationInitialized();
-
         byte[] outputCopy = engineUpdate(input, inputOffset, inputLen);
         if (outputCopy == null) {
             return 0;
