@@ -3508,8 +3508,14 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     /** {@inheritDoc} */
     @Override
     public int getSystemDecorLayerLw() {
-        if (mStatusBar != null) return mStatusBar.getSurfaceLayer();
-        if (mNavigationBar != null) return mNavigationBar.getSurfaceLayer();
+        if (mStatusBar != null && mStatusBar.isVisibleLw()) {
+            return mStatusBar.getSurfaceLayer();
+        }
+
+        if (mNavigationBar != null && mNavigationBar.isVisibleLw()) {
+            return mNavigationBar.getSurfaceLayer();
+        }
+
         return 0;
     }
 
