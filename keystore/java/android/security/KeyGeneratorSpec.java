@@ -146,7 +146,7 @@ public class KeyGeneratorSpec implements AlgorithmParameterSpec {
     }
 
     /**
-     * Gets the set of purposes for which the key can be used to the provided set of purposes.
+     * Gets the set of purposes for which the key can be used.
      *
      * @return set of purposes or {@code null} if the key can be used for any purpose.
      */

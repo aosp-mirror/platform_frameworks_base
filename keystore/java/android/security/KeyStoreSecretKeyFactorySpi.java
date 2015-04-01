@@ -1,0 +1,140 @@
+package android.security;
+
+import android.security.keymaster.KeyCharacteristics;
+import android.security.keymaster.KeymasterDefs;
+
+import java.security.InvalidKeyException;
+import java.security.spec.InvalidKeySpecException;
+import java.security.spec.KeySpec;
+import java.util.Collections;
+import java.util.Set;
+
+import javax.crypto.SecretKey;
+import javax.crypto.SecretKeyFactorySpi;
+import javax.crypto.spec.SecretKeySpec;
+
+/**
+ * {@link SecretKeyFactorySpi} backed by Android KeyStore.
+ *
+ * @hide
+ */
+public class KeyStoreSecretKeyFactorySpi extends SecretKeyFactorySpi {
+
+    private final KeyStore mKeyStore = KeyStore.getInstance();
+
+    @Override
+    protected KeySpec engineGetKeySpec(SecretKey key,
+            @SuppressWarnings("rawtypes") Class keySpecClass) throws InvalidKeySpecException {
+        if (keySpecClass == null) {
+            throw new InvalidKeySpecException("keySpecClass == null");
+        }
+        if (!(key instanceof KeyStoreSecretKey)) {
+            throw new InvalidKeySpecException("Only Android KeyStore secret keys supported: " +
+                    ((key != null) ? key.getClass().getName() : "null"));
+        }
+        if (SecretKeySpec.class.isAssignableFrom(keySpecClass)) {
+            throw new InvalidKeySpecException(
+                    "Key material export of Android KeyStore keys is not supported");
+        }
+        if (!KeyStoreKeySpec.class.equals(keySpecClass)) {
+            throw new InvalidKeySpecException("Unsupported key spec: " + keySpecClass.getName());
+        }
+        String keyAliasInKeystore = ((KeyStoreSecretKey) key).getAlias();
+        String entryAlias;
+        if (keyAliasInKeystore.startsWith(Credentials.USER_SECRET_KEY)) {
+            entryAlias = keyAliasInKeystore.substring(Credentials.USER_SECRET_KEY.length());
+        } else {
+            throw new InvalidKeySpecException("Invalid key alias: " + keyAliasInKeystore);
+        }
+
+        KeyCharacteristics keyCharacteristics = new KeyCharacteristics();
+        int errorCode =
+                mKeyStore.getKeyCharacteristics(keyAliasInKeystore, null, null, keyCharacteristics);
+        if (errorCode != KeyStore.NO_ERROR) {
+            throw new InvalidKeySpecException("Failed to obtain information about key."
+                    + " Keystore error: " + errorCode);
+        }
+
+        @KeyStoreKeyCharacteristics.OriginEnum Integer origin;
+        int keySize;
+        @KeyStoreKeyConstraints.PurposeEnum int purposes;
+        @KeyStoreKeyConstraints.AlgorithmEnum int algorithm;
+        @KeyStoreKeyConstraints.PaddingEnum Integer padding;
+        @KeyStoreKeyConstraints.DigestEnum Integer digest;
+        @KeyStoreKeyConstraints.BlockModeEnum Integer blockMode;
+        try {
+            origin = KeymasterUtils.getInt(keyCharacteristics, KeymasterDefs.KM_TAG_ORIGIN);
+            if (origin == null) {
+                throw new InvalidKeySpecException("Key origin not available");
+            }
+            origin = KeyStoreKeyCharacteristics.Origin.fromKeymaster(origin);
+            Integer keySizeInteger =
+                    KeymasterUtils.getInt(keyCharacteristics, KeymasterDefs.KM_TAG_KEY_SIZE);
+            if (keySizeInteger == null) {
+                throw new InvalidKeySpecException("Key size not available");
+            }
+            keySize = keySizeInteger;
+            purposes = KeyStoreKeyConstraints.Purpose.allFromKeymaster(
+                    KeymasterUtils.getInts(keyCharacteristics, KeymasterDefs.KM_TAG_PURPOSE));
+            Integer alg = KeymasterUtils.getInt(keyCharacteristics, KeymasterDefs.KM_TAG_ALGORITHM);
+            if (alg == null) {
+                throw new InvalidKeySpecException("Key algorithm not available");
+            }
+            algorithm = KeyStoreKeyConstraints.Algorithm.fromKeymaster(alg);
+            padding = KeymasterUtils.getInt(keyCharacteristics, KeymasterDefs.KM_TAG_PADDING);
+            if (padding != null) {
+                padding = KeyStoreKeyConstraints.Padding.fromKeymaster(padding);
+            }
+            digest = KeymasterUtils.getInt(keyCharacteristics, KeymasterDefs.KM_TAG_DIGEST);
+            if (digest != null) {
+                digest = KeyStoreKeyConstraints.Digest.fromKeymaster(digest);
+            }
+            blockMode = KeymasterUtils.getInt(keyCharacteristics, KeymasterDefs.KM_TAG_BLOCK_MODE);
+            if (blockMode != null) {
+                blockMode = KeyStoreKeyConstraints.BlockMode.fromKeymaster(blockMode);
+            }
+        } catch (IllegalArgumentException e) {
+            throw new InvalidKeySpecException("Unsupported key characteristic", e);
+        }
+
+        // TODO: Read user authentication IDs once the Keymaster API has stabilized
+        Set<Integer> userAuthenticators = Collections.emptySet();
+        Set<Integer> teeBackedUserAuthenticators = Collections.emptySet();
+//        Set<Integer> userAuthenticators = new HashSet<Integer>(
+//                getInts(keyCharacteristics, KeymasterDefs.KM_TAG_USER_AUTH_ID));
+//        Set<Integer> teeBackedUserAuthenticators = new HashSet<Integer>(
+//                keyCharacteristics.hwEnforced.getInts(KeymasterDefs.KM_TAG_USER_AUTH_ID));
+
+        return new KeyStoreKeySpec(entryAlias,
+                origin,
+                keySize,
+                KeymasterUtils.getDate(keyCharacteristics, KeymasterDefs.KM_TAG_ACTIVE_DATETIME),
+                KeymasterUtils.getDate(keyCharacteristics,
+                        KeymasterDefs.KM_TAG_ORIGINATION_EXPIRE_DATETIME),
+                KeymasterUtils.getDate(keyCharacteristics,
+                        KeymasterDefs.KM_TAG_USAGE_EXPIRE_DATETIME),
+                purposes,
+                algorithm,
+                padding,
+                digest,
+                blockMode,
+                KeymasterUtils.getInt(keyCharacteristics,
+                        KeymasterDefs.KM_TAG_MIN_SECONDS_BETWEEN_OPS),
+                KeymasterUtils.getInt(keyCharacteristics, KeymasterDefs.KM_TAG_MAX_USES_PER_BOOT),
+                userAuthenticators,
+                teeBackedUserAuthenticators,
+                KeymasterUtils.getInt(keyCharacteristics, KeymasterDefs.KM_TAG_AUTH_TIMEOUT));
+    }
+
+    @Override
+    protected SecretKey engineGenerateSecret(KeySpec keySpec) throws InvalidKeySpecException {
+        throw new UnsupportedOperationException(
+                "Key import into Android KeyStore is not supported");
+    }
+
+    @Override
+    protected SecretKey engineTranslateKey(SecretKey key) throws InvalidKeyException {
+        throw new UnsupportedOperationException(
+                "Key import into Android KeyStore is not supported");
+    }
+}
