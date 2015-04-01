@@ -1041,6 +1041,18 @@ public class Intent implements Parcelable, Cloneable {
      */
     public static final String ACTION_CALL_PRIVILEGED = "android.intent.action.CALL_PRIVILEGED";
     /**
+     * Activity action: Activate the current SIM card.  If SIM cards do not require activation,
+     * sending this intent is a no-op.
+     * <p>Input: No data should be specified.  get*Extra may have an optional
+     * {@link #EXTRA_SIM_ACTIVATION_RESPONSE} field containing a PendingIntent through which to
+     * send the activation result.
+     * <p>Output: nothing.
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_SIM_ACTIVATION_REQUEST =
+            "android.intent.action.SIM_ACTIVATION_REQUEST";
+    /**
      * Activity Action: Send a message to someone specified by the data.
      * <p>Input: {@link #getData} is URI describing the target.
      * <p>Output: nothing.
@@ -3619,6 +3631,15 @@ public class Intent implements Parcelable, Cloneable {
 
     /** {@hide} */
     public static final String EXTRA_REASON = "android.intent.extra.REASON";
+
+    /**
+     * Optional {@link android.app.PendingIntent} extra used to deliver the result of the SIM
+     * activation request.
+     * TODO: Add information about the structure and response data used with the pending intent.
+     * @hide
+     */
+    public static final String EXTRA_SIM_ACTIVATION_RESPONSE =
+            "android.intent.extra.SIM_ACTIVATION_RESPONSE";
 
     // ---------------------------------------------------------------------
     // ---------------------------------------------------------------------
