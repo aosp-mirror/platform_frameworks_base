@@ -2592,6 +2592,12 @@
         android:description="@string/permdesc_performCdmaProvisioning"
         android:protectionLevel="signature|system" />
 
+    <!-- @SystemApi Allows an application to perform SIM Activation @hide -->
+    <permission android:name="android.permission.PERFORM_SIM_ACTIVATION"
+        android:label="@string/permlab_performSimActivation"
+        android:description="@string/permdesc_performSimActivation"
+        android:protectionLevel="signature|system" />
+
     <!-- @SystemApi Allows enabling/disabling location update notifications from
          the radio.
          <p>Not for use by third-party applications. -->

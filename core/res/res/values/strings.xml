@@ -1887,6 +1887,10 @@
     <string name="permdesc_performCdmaProvisioning">Allows the app to start CDMA provisioning.
         Malicious apps may unnecessarily start CDMA provisioning.</string>
 
+    <string name="permlab_performSimActivation">start SIM card setup</string>
+    <string name="permdesc_performSimActivation">Allows the app to handle SIM activation requests.
+        The app may directly perform activation or may delegate to another app.</string>
+
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_locationUpdates">control location update notifications</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
