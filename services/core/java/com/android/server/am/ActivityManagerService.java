@@ -26,10 +26,14 @@ import static com.android.internal.util.XmlUtils.readLongAttribute;
 import static com.android.internal.util.XmlUtils.writeBooleanAttribute;
 import static com.android.internal.util.XmlUtils.writeIntAttribute;
 import static com.android.internal.util.XmlUtils.writeLongAttribute;
-import static com.android.server.am.ActivityStackSupervisor.HOME_STACK_ID;
-import static com.android.server.am.ActivityManagerDebugConfig.*;
-import static com.android.server.am.TaskRecord.INVALID_TASK_ID;
 import static com.android.server.Watchdog.NATIVE_STACKS_OF_INTEREST;
+import static com.android.server.am.ActivityManagerDebugConfig.*;
+import static com.android.server.am.ActivityStackSupervisor.HOME_STACK_ID;
+import static com.android.server.am.TaskRecord.INVALID_TASK_ID;
+import static com.android.server.am.TaskRecord.LOCK_TASK_AUTH_DONT_LOCK;
+import static com.android.server.am.TaskRecord.LOCK_TASK_AUTH_LAUNCHABLE;
+import static com.android.server.am.TaskRecord.LOCK_TASK_AUTH_PINNABLE;
+import static com.android.server.am.TaskRecord.LOCK_TASK_AUTH_WHITELISTED;
 import static org.xmlpull.v1.XmlPullParser.END_DOCUMENT;
 import static org.xmlpull.v1.XmlPullParser.START_TAG;
 
@@ -3982,13 +3986,13 @@ public final class ActivityManagerService extends ActivityManagerNative
             if (rootR == null) {
                 Slog.w(TAG, "Finishing task with all activities already finished");
             }
-            // Do not allow task to finish in Lock Task mode.
-            if (tr == mStackSupervisor.mLockTaskModeTask) {
-                if (rootR == r) {
-                    Slog.i(TAG, "Not finishing task in lock task mode");
-                    mStackSupervisor.showLockTaskToast();
-                    return false;
-                }
+            // Do not allow task to finish if last task in lockTask mode. Launchable apps can
+            // finish themselves.
+            if (tr.mLockTaskAuth != LOCK_TASK_AUTH_LAUNCHABLE && rootR == r &&
+                    mStackSupervisor.isLastLockedTask(tr)) {
+                Slog.i(TAG, "Not finishing task in lock task mode");
+                mStackSupervisor.showLockTaskToast();
+                return false;
             }
             if (mController != null) {
                 // Find the first activity that is not finishing.
@@ -4142,20 +4146,18 @@ public final class ActivityManagerService extends ActivityManagerNative
             final long origId = Binder.clearCallingIdentity();
             try {
                 ActivityRecord r = ActivityRecord.isInStackLocked(token);
+                if (r == null) {
+                    return false;
+                }
 
-                ActivityRecord rootR = r.task.getRootActivity();
-                // Do not allow task to finish in Lock Task mode.
-                if (r.task == mStackSupervisor.mLockTaskModeTask) {
-                    if (rootR == r) {
-                        mStackSupervisor.showLockTaskToast();
-                        return false;
-                    }
+                // Do not allow the last non-launchable task to finish in Lock Task mode.
+                final TaskRecord task = r.task;
+                if (task.mLockTaskAuth != LOCK_TASK_AUTH_LAUNCHABLE &&
+                        mStackSupervisor.isLastLockedTask(task) && task.getRootActivity() == r) {
+                    mStackSupervisor.showLockTaskToast();
+                    return false;
                 }
-                boolean res = false;
-                if (r != null) {
-                    res = r.task.stack.finishActivityAffinityLocked(r);
-                }
-                return res;
+                return task.stack.finishActivityAffinityLocked(r);
             } finally {
                 Binder.restoreCallingIdentity(origId);
             }
@@ -8336,9 +8338,9 @@ public final class ActivityManagerService extends ActivityManagerNative
             final long origId = Binder.clearCallingIdentity();
             try {
                 int taskId = ActivityRecord.getTaskForActivityLocked(token, !nonRoot);
-                if (taskId >= 0) {
-                    if ((mStackSupervisor.mLockTaskModeTask != null)
-                            && (mStackSupervisor.mLockTaskModeTask.taskId == taskId)) {
+                final TaskRecord task = mRecentTasks.taskForIdLocked(taskId);
+                if (task != null) {
+                    if (mStackSupervisor.isLockedTask(task)) {
                         mStackSupervisor.showLockTaskToast();
                         return false;
                     }
@@ -8520,47 +8522,45 @@ public final class ActivityManagerService extends ActivityManagerNative
 
     @Override
     public void updateLockTaskPackages(int userId, String[] packages) {
-        if (Binder.getCallingUid() != Process.SYSTEM_UID) {
+        final int callingUid = Binder.getCallingUid();
+        if (callingUid != 0 && callingUid != Process.SYSTEM_UID) {
             throw new SecurityException("updateLockTaskPackage called from non-system process");
         }
         synchronized (this) {
             mLockTaskPackages.put(userId, packages);
+            mStackSupervisor.onLockTaskPackagesUpdatedLocked();
         }
     }
 
-    private boolean isLockTaskAuthorizedLocked(String pkg) {
-        String[] packages = mLockTaskPackages.get(mCurrentUserId);
-        if (packages == null) {
-            return false;
-        }
-        for (int i = packages.length - 1; i >= 0; --i) {
-            if (pkg.equals(packages[i])) {
-                return true;
-            }
-        }
-        return false;
-    }
 
     void startLockTaskModeLocked(TaskRecord task) {
-        final String pkg = task.intent.getComponent().getPackageName();
+        if (task.mLockTaskAuth == LOCK_TASK_AUTH_DONT_LOCK) {
+            return;
+        }
+
         // isSystemInitiated is used to distinguish between locked and pinned mode, as pinned mode
         // is initiated by system after the pinning request was shown and locked mode is initiated
         // by an authorized app directly
-        boolean isSystemInitiated = Binder.getCallingUid() == Process.SYSTEM_UID;
+        final int callingUid = Binder.getCallingUid();
+        boolean isSystemInitiated = callingUid == Process.SYSTEM_UID;
         long ident = Binder.clearCallingIdentity();
         try {
-            if (!isSystemInitiated && !isLockTaskAuthorizedLocked(pkg)) {
-                StatusBarManagerInternal statusBarManager =
-                        LocalServices.getService(StatusBarManagerInternal.class);
-                if (statusBarManager != null) {
-                    statusBarManager.showScreenPinningRequest();
-                }
-                return;
-            }
-
             final ActivityStack stack = mStackSupervisor.getFocusedStack();
-            if (!isSystemInitiated && (stack == null || task != stack.topTask())) {
-                throw new IllegalArgumentException("Invalid task, not in foreground");
+            if (!isSystemInitiated) {
+                task.mLockTaskUid = callingUid;
+                if (task.mLockTaskAuth == LOCK_TASK_AUTH_PINNABLE) {
+                    // startLockTask() called by app and task mode is lockTaskModeDefault.
+                    StatusBarManagerInternal statusBarManager =
+                            LocalServices.getService(StatusBarManagerInternal.class);
+                    if (statusBarManager != null) {
+                        statusBarManager.showScreenPinningRequest();
+                    }
+                    return;
+                }
+
+                if (stack == null || task != stack.topTask()) {
+                    throw new IllegalArgumentException("Invalid task, not in foreground");
+                }
             }
             mStackSupervisor.setLockTaskModeLocked(task, isSystemInitiated ?
                     ActivityManager.LOCK_TASK_MODE_PINNED :
@@ -8614,23 +8614,15 @@ public final class ActivityManagerService extends ActivityManagerNative
 
     @Override
     public void stopLockTaskMode() {
-        // Verify that the user matches the package of the intent for the TaskRecord
-        // we are locked to or systtem.  This will ensure the same caller for startLockTaskMode
-        // and stopLockTaskMode.
-        final int callingUid = Binder.getCallingUid();
-        if (callingUid != Process.SYSTEM_UID) {
-            try {
-                String pkg =
-                        mStackSupervisor.mLockTaskModeTask.intent.getComponent().getPackageName();
-                int uid = mContext.getPackageManager().getPackageUid(pkg,
-                        Binder.getCallingUserHandle().getIdentifier());
-                if (uid != callingUid) {
-                    throw new SecurityException("Invalid uid, expected " + uid);
-                }
-            } catch (NameNotFoundException e) {
-                Log.d(TAG, "stopLockTaskMode " + e);
-                return;
-            }
+        final TaskRecord lockTask = mStackSupervisor.getLockedTaskLocked();
+        if (lockTask == null) {
+            // Our work here is done.
+            return;
+        }
+        // Ensure the same caller for startLockTaskMode and stopLockTaskMode.
+        if (getLockTaskModeState() == ActivityManager.LOCK_TASK_MODE_LOCKED &&
+                Binder.getCallingUid() != lockTask.mLockTaskUid) {
+            throw new SecurityException("Invalid uid, expected " + lockTask.mLockTaskUid);
         }
         long ident = Binder.clearCallingIdentity();
         try {

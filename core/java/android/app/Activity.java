@@ -6434,18 +6434,22 @@ public class Activity extends ContextThemeWrapper
      * Request to put this Activity in a mode where the user is locked to the
      * current task.
      *
-     * This will prevent the user from launching other apps, going to settings,
-     * or reaching the home screen.
+     * This will prevent the user from launching other apps, going to settings, or reaching the
+     * home screen. This does not include those apps whose {@link android.R.attr#lockTaskMode}
+     * values permit launching while locked.
      *
-     * If {@link DevicePolicyManager#isLockTaskPermitted(String)} returns true
-     * for this component then the app will go directly into Lock Task mode.  The user
-     * will not be able to exit this mode until {@link Activity#stopLockTask()} is called.
+     * If {@link DevicePolicyManager#isLockTaskPermitted(String)} returns true or
+     * lockTaskMode=lockTaskModeAlways for this component then the app will go directly into
+     * Lock Task mode. The user will not be able to exit this mode until
+     * {@link Activity#stopLockTask()} is called.
      *
      * If {@link DevicePolicyManager#isLockTaskPermitted(String)} returns false
      * then the system will prompt the user with a dialog requesting permission to enter
      * this mode.  When entered through this method the user can exit at any time through
      * an action described by the request dialog.  Calling stopLockTask will also exit the
      * mode.
+     *
+     * @see android.R.attr#lockTaskMode
      */
     public void startLockTask() {
         try {
@@ -6462,6 +6466,14 @@ public class Activity extends ContextThemeWrapper
      * startLockTask previously.
      *
      * This will allow the user to exit this app and move onto other activities.
+     * <p>Note: This method should only be called when the activity is user-facing. That is,
+     * between onResume() and onPause().
+     * <p>Note: If there are other tasks below this one that are also locked then calling this
+     * method will immediately finish this task and resume the previous locked one, remaining in
+     * lockTask mode.
+     *
+     * @see android.R.attr#lockTaskMode
+     * @see ActivityManager#getLockTaskModeState()
      */
     public void stopLockTask() {
         try {

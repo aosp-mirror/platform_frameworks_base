@@ -18,6 +18,10 @@ package com.android.server.am;
 
 import static android.content.Intent.FLAG_ACTIVITY_NEW_DOCUMENT;
 import static android.content.Intent.FLAG_ACTIVITY_RETAIN_IN_RECENTS;
+import static android.content.pm.ActivityInfo.LOCK_TASK_LAUNCH_MODE_ALWAYS;
+import static android.content.pm.ActivityInfo.LOCK_TASK_LAUNCH_MODE_DEFAULT;
+import static android.content.pm.ActivityInfo.LOCK_TASK_LAUNCH_MODE_IF_WHITELISTED;
+import static android.content.pm.ActivityInfo.LOCK_TASK_LAUNCH_MODE_NEVER;
 import static com.android.server.am.ActivityManagerDebugConfig.*;
 import static com.android.server.am.ActivityRecord.HOME_ACTIVITY_TYPE;
 import static com.android.server.am.ActivityRecord.APPLICATION_ACTIVITY_TYPE;
@@ -121,6 +125,20 @@ final class TaskRecord {
 
     boolean mResizeable;    // Activities in the task resizeable. Based on the resizable setting of
                             // the root activity.
+    int mLockTaskMode;      // Which tasklock mode to launch this task in. One of
+                            // ActivityManager.LOCK_TASK_LAUNCH_MODE_*
+    /** Can't be put in lockTask mode. */
+    final static int LOCK_TASK_AUTH_DONT_LOCK = 0;
+    /** Can enter lockTask with user approval if not already in lockTask. */
+    final static int LOCK_TASK_AUTH_PINNABLE = 1;
+    /** Starts in LOCK_TASK_MODE_LOCKED automatically. Can start over existing lockTask task. */
+    final static int LOCK_TASK_AUTH_LAUNCHABLE = 2;
+    /** Enters LOCK_TASK_MODE_LOCKED via startLockTask(), enters LOCK_TASK_MODE_PINNED from
+     * Overview. Can start over existing lockTask task. */
+    final static int LOCK_TASK_AUTH_WHITELISTED = 3;
+    int mLockTaskAuth = LOCK_TASK_AUTH_PINNABLE;
+
+    int mLockTaskUid = -1;  // The uid of the application that called startLockTask().
 
     // This represents the last resolved activity values for this task
     // NOTE: This value needs to be persisted with each task
@@ -186,6 +204,8 @@ final class TaskRecord {
         voiceInteractor = _voiceInteractor;
         isAvailable = true;
         mActivities = new ArrayList<>();
+        mCallingUid = info.applicationInfo.uid;
+        mCallingPackage = info.packageName;
         setIntent(_intent, info);
     }
 
@@ -201,12 +221,12 @@ final class TaskRecord {
         voiceInteractor = null;
         isAvailable = true;
         mActivities = new ArrayList<>();
+        mCallingUid = info.applicationInfo.uid;
+        mCallingPackage = info.packageName;
         setIntent(_intent, info);
 
         taskType = ActivityRecord.APPLICATION_ACTIVITY_TYPE;
         isPersistable = true;
-        mCallingUid = info.applicationInfo.uid;
-        mCallingPackage = info.packageName;
         // Clamp to [1, max].
         maxRecents = Math.min(Math.max(info.maxRecents, 1),
                 ActivityManager.getMaxAppRecentsLimitStatic());
@@ -215,8 +235,6 @@ final class TaskRecord {
         mTaskToReturnTo = HOME_ACTIVITY_TYPE;
         userId = UserHandle.getUserId(info.applicationInfo.uid);
         lastTaskDescription = _taskDescription;
-        mCallingUid = info.applicationInfo.uid;
-        mCallingPackage = info.packageName;
     }
 
     private TaskRecord(ActivityManagerService service, int _taskId, Intent _intent,
@@ -278,9 +296,9 @@ final class TaskRecord {
 
     /** Sets the original intent, and the calling uid and package. */
     void setIntent(ActivityRecord r) {
-        setIntent(r.intent, r.info);
         mCallingUid = r.launchedFromUid;
         mCallingPackage = r.launchedFromPackage;
+        setIntent(r.intent, r.info);
     }
 
     /** Sets the original intent, _without_ updating the calling uid or package. */
@@ -362,6 +380,8 @@ final class TaskRecord {
             autoRemoveRecents = false;
         }
         mResizeable = info.resizeable;
+        mLockTaskMode = info.lockTaskLaunchMode;
+        setLockTaskAuth();
     }
 
     void setTaskToReturnTo(int taskToReturnTo) {
@@ -716,6 +736,53 @@ final class TaskRecord {
         performClearTaskAtIndexLocked(0);
     }
 
+    private boolean isPrivileged() {
+        final ProcessRecord proc = mService.mProcessNames.get(mCallingPackage, mCallingUid);
+        if (proc != null) {
+                return (proc.info.privateFlags & ApplicationInfo.PRIVATE_FLAG_PRIVILEGED) != 0;
+        }
+        return false;
+    }
+
+    void setLockTaskAuth() {
+        switch (mLockTaskMode) {
+            case LOCK_TASK_LAUNCH_MODE_DEFAULT:
+                mLockTaskAuth = isLockTaskWhitelistedLocked() ?
+                    LOCK_TASK_AUTH_WHITELISTED : LOCK_TASK_AUTH_PINNABLE;
+                break;
+
+            case LOCK_TASK_LAUNCH_MODE_NEVER:
+                mLockTaskAuth = isPrivileged() ?
+                        LOCK_TASK_AUTH_DONT_LOCK : LOCK_TASK_AUTH_PINNABLE;
+                break;
+
+            case LOCK_TASK_LAUNCH_MODE_ALWAYS:
+                mLockTaskAuth = isPrivileged() ?
+                        LOCK_TASK_AUTH_LAUNCHABLE: LOCK_TASK_AUTH_PINNABLE;
+                break;
+
+            case LOCK_TASK_LAUNCH_MODE_IF_WHITELISTED:
+                mLockTaskAuth = isLockTaskWhitelistedLocked() ?
+                        LOCK_TASK_AUTH_LAUNCHABLE : LOCK_TASK_AUTH_PINNABLE;
+                break;
+        }
+    }
+
+    boolean isLockTaskWhitelistedLocked() {
+        if (mCallingPackage == null) {
+            return false;
+        }
+        String[] packages = mService.mLockTaskPackages.get(userId);
+        if (packages == null) {
+            return false;
+        }
+        for (int i = packages.length - 1; i >= 0; --i) {
+            if (mCallingPackage.equals(packages[i])) {
+                return true;
+            }
+        }
+        return false;
+    }
     boolean isHomeTask() {
         return taskType == HOME_ACTIVITY_TYPE;
     }

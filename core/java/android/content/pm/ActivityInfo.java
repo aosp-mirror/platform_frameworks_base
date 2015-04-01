@@ -609,7 +609,7 @@ public class ActivityInfo extends ComponentInfo
      * attribute.
      */
     public int configChanges;
-    
+
     /**
      * The desired soft input mode for this activity's main window.
      * Set from the {@link android.R.attr#windowSoftInputMode} attribute
@@ -648,6 +648,37 @@ public class ActivityInfo extends ComponentInfo
      */
     public boolean resizeable;
 
+    /** @hide */
+    public static final int LOCK_TASK_LAUNCH_MODE_DEFAULT = 0;
+    /** @hide */
+    public static final int LOCK_TASK_LAUNCH_MODE_NEVER = 1;
+    /** @hide */
+    public static final int LOCK_TASK_LAUNCH_MODE_ALWAYS = 2;
+    /** @hide */
+    public static final int LOCK_TASK_LAUNCH_MODE_IF_WHITELISTED = 3;
+
+    /** @hide */
+    public static final String lockTaskLaunchModeToString(int lockTaskLaunchMode) {
+        switch (lockTaskLaunchMode) {
+            case LOCK_TASK_LAUNCH_MODE_DEFAULT:
+                return "LOCK_TASK_LAUNCH_MODE_DEFAULT";
+            case LOCK_TASK_LAUNCH_MODE_NEVER:
+                return "LOCK_TASK_LAUNCH_MODE_NEVER";
+            case LOCK_TASK_LAUNCH_MODE_ALWAYS:
+                return "LOCK_TASK_LAUNCH_MODE_ALWAYS";
+            case LOCK_TASK_LAUNCH_MODE_IF_WHITELISTED:
+                return "LOCK_TASK_LAUNCH_MODE_IF_WHITELISTED";
+            default:
+                return "unknown=" + lockTaskLaunchMode;
+        }
+    }
+    /**
+     * Value indicating if the activity is to be locked at startup. Takes on the values from
+     * {@link android.R.attr#lockTaskMode}.
+     * @hide
+     */
+    public int lockTaskLaunchMode;
+
     public ActivityInfo() {
     }
 
@@ -665,13 +696,15 @@ public class ActivityInfo extends ComponentInfo
         uiOptions = orig.uiOptions;
         parentActivityName = orig.parentActivityName;
         maxRecents = orig.maxRecents;
+        resizeable = orig.resizeable;
+        lockTaskLaunchMode = orig.lockTaskLaunchMode;
     }
-    
+
     /**
      * Return the theme resource identifier to use for this activity.  If
      * the activity defines a theme, that is used; else, the application
      * theme is used.
-     * 
+     *
      * @return The theme associated with this activity.
      */
     public final int getThemeResource() {
@@ -709,7 +742,8 @@ public class ActivityInfo extends ComponentInfo
         if (uiOptions != 0) {
             pw.println(prefix + " uiOptions=0x" + Integer.toHexString(uiOptions));
         }
-        pw.println(prefix + "resizeable=" + resizeable);
+        pw.println(prefix + "resizeable=" + resizeable + " lockTaskLaunchMode="
+                + lockTaskLaunchModeToString(lockTaskLaunchMode));
         super.dumpBack(pw, prefix);
     }
     
@@ -739,6 +773,7 @@ public class ActivityInfo extends ComponentInfo
         dest.writeInt(persistableMode);
         dest.writeInt(maxRecents);
         dest.writeInt(resizeable ? 1 : 0);
+        dest.writeInt(lockTaskLaunchMode);
     }
 
     public static final Parcelable.Creator<ActivityInfo> CREATOR
@@ -767,5 +802,6 @@ public class ActivityInfo extends ComponentInfo
         persistableMode = source.readInt();
         maxRecents = source.readInt();
         resizeable = (source.readInt() == 1);
+        lockTaskLaunchMode = source.readInt();
     }
 }

@@ -2875,7 +2875,7 @@ final class ActivityStack {
             }
 
             if (endTask) {
-                mStackSupervisor.endLockTaskModeIfTaskEnding(task);
+                mStackSupervisor.removeLockedTaskLocked(task);
             }
         } else if (r.state != ActivityState.PAUSING) {
             // If the activity is PAUSING, we will complete the finish once
@@ -3674,8 +3674,7 @@ final class ActivityStack {
         }
 
         Slog.i(TAG, "moveTaskToBack: " + tr);
-
-        mStackSupervisor.endLockTaskModeIfTaskEnding(tr);
+        mStackSupervisor.removeLockedTaskLocked(tr);
 
         // If we have a watcher, preflight the move before committing to it.  First check
         // for *other* available tasks, but if none are available, then try again allowing the
@@ -4240,7 +4239,7 @@ final class ActivityStack {
      */
     void removeTask(TaskRecord task, String reason, boolean notMoving) {
         if (notMoving) {
-            mStackSupervisor.endLockTaskModeIfTaskEnding(task);
+            mStackSupervisor.removeLockedTaskLocked(task);
             mWindowManager.removeTask(task.taskId);
         }
 
@@ -4344,5 +4343,11 @@ final class ActivityStack {
         // the stack is necessarily full screen.
         mFullscreen = Configuration.EMPTY.equals(mOverrideConfig);
         return !mOverrideConfig.equals(oldConfig);
+    }
+
+    void onLockTaskPackagesUpdatedLocked() {
+        for (int taskNdx = mTaskHistory.size() - 1; taskNdx >= 0; --taskNdx) {
+            mTaskHistory.get(taskNdx).setLockTaskAuth();
+        }
     }
 }
