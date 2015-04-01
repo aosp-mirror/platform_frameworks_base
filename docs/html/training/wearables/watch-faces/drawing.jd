@@ -377,7 +377,8 @@ public void onPropertiesChanged(Bundle properties) {
 
 <ul>
 <li>For devices that use low-bit ambient mode, the screen supports fewer bits for each color
-in ambient mode, so you should disable anti-aliasing.</li>
+in ambient mode, so you should disable anti-aliasing and bitmap filtering when the device switches
+to ambient mode.</li>
 <li>For devices that require burn-in protection, avoid using large blocks of white pixels in
 ambient mode and do not place content within 10 pixels of the edge of the screen, since the
 system shifts the content periodically to avoid pixel burn-in.</li>
@@ -385,7 +386,9 @@ system shifts the content periodically to avoid pixel burn-in.</li>
 
 <p>For more information about low-bit ambient mode and burn-in protection, see
 <a href="{@docRoot}design/wear/watchfaces.html#SpecialScreens">Optimize for Special
-Screens</a>.</p>
+Screens</a>. For more information on how to disable bitmap filtering, see
+<a href="{@docRoot}training/wearables/watch-faces/performance.html#BitmapFiltering">Bitmap
+Filtering</a>.</p>
 
 
 <h2 id="Modes">Respond to Changes Between Modes</h2>
