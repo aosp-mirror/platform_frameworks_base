@@ -582,6 +582,32 @@ nScriptIntrinsicBLAS_Z(JNIEnv *_env, jobject _this, jlong con, jlong id, jint fu
 
 
 static void
+nScriptIntrinsicBLAS_BNNM(JNIEnv *_env, jobject _this, jlong con, jlong id, jint M, jint N, jint K,
+                                             jlong A, jint a_offset, jlong B, jint b_offset, jlong C, jint c_offset,
+                                             jint c_mult_int) {
+    RsBlasCall call;
+    memset(&call, 0, sizeof(call));
+    call.func = RsBlas_bnnm;
+    call.M = M;
+    call.N = N;
+    call.K = K;
+    call.a_offset = a_offset;
+    call.b_offset = b_offset;
+    call.c_offset = c_offset;
+    call.c_mult_int = c_mult_int;
+
+    RsAllocation in_allocs[3];
+    in_allocs[0] = (RsAllocation)A;
+    in_allocs[1] = (RsAllocation)B;
+    in_allocs[2] = (RsAllocation)C;
+
+    rsScriptForEachMulti((RsContext)con, (RsScript)id, 0,
+                         in_allocs, sizeof(in_allocs), nullptr,
+                         &call, sizeof(call), nullptr, 0);
+}
+
+
+static void
 nAssignName(JNIEnv *_env, jobject _this, jlong con, jlong obj, jbyteArray str)
 {
     if (kLogApi) {
@@ -2424,6 +2450,8 @@ static JNINativeMethod methods[] = {
 {"rsnScriptIntrinsicBLAS_Double",    "(JJIIIIIIIIIDJJDJIIII)V",               (void*)nScriptIntrinsicBLAS_Double },
 {"rsnScriptIntrinsicBLAS_Complex",   "(JJIIIIIIIIIFFJJFFJIIII)V",             (void*)nScriptIntrinsicBLAS_Complex },
 {"rsnScriptIntrinsicBLAS_Z",         "(JJIIIIIIIIIDDJJDDJIIII)V",             (void*)nScriptIntrinsicBLAS_Z },
+
+{"rsnScriptIntrinsicBLAS_BNNM",      "(JJIIIJIJIJII)V",                       (void*)nScriptIntrinsicBLAS_BNNM },
 
 {"rsnProgramStoreCreate",            "(JZZZZZZIII)J",                         (void*)nProgramStoreCreate },
 

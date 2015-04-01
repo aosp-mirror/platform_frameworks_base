@@ -949,6 +949,17 @@ public class RenderScript {
         rsnScriptIntrinsicBLAS_Z(mContext, id, func, TransA, TransB, Side, Uplo, Diag, M, N, K, alphaX, alphaY, A, B, betaX, betaY, C, incX, incY, KL, KU);
     }
 
+    native void rsnScriptIntrinsicBLAS_BNNM(long con, long id, int M, int N, int K,
+                                             long A, int a_offset, long B, int b_offset, long C, int c_offset,
+                                             int c_mult_int);
+    synchronized void nScriptIntrinsicBLAS_BNNM(long id, int M, int N, int K,
+                                             long A, int a_offset, long B, int b_offset, long C, int c_offset,
+                                             int c_mult_int) {
+        validate();
+        rsnScriptIntrinsicBLAS_BNNM(mContext, id, M, N, K, A, a_offset, B, b_offset, C, c_offset, c_mult_int);
+    }
+
+
 
     long     mDev;
     long     mContext;

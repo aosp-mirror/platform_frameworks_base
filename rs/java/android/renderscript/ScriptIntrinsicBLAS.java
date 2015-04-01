@@ -176,6 +176,9 @@ public final class ScriptIntrinsicBLAS extends ScriptIntrinsic {
     private static final int RsBlas_zherk = 141;
     private static final int RsBlas_zher2k = 142;
 
+    // BLAS extensions start here
+    private static final int RsBlas_bnnm = 1000;
+
     /**
      */
     public static ScriptIntrinsicBLAS create(RenderScript rs) {
@@ -1485,5 +1488,23 @@ public final class ScriptIntrinsicBLAS extends ScriptIntrinsic {
     }
 
 
+    /**
+     *
+     * 8-bit GEMM-like operation for neural networks
+     *
+     * @hide
+     **/
+    public void BNNM(Allocation A, int a_offset, Allocation B, int b_offset, Allocation C, int c_offset, int c_mult) {
+        validateL3(Element.U8(mRS), NO_TRANSPOSE, TRANSPOSE, 0, A, B, C);
+
+        int M = -1, N = -1, K = -1;
+        M = A.getType().getY();
+        N = B.getType().getY();
+        K = A.getType().getX();
+
+
+        mRS.nScriptIntrinsicBLAS_BNNM(getID(mRS), M, N, K, A.getID(mRS), a_offset, B.getID(mRS), b_offset, C.getID(mRS), c_offset, c_mult);
+
+    }
 
 }
