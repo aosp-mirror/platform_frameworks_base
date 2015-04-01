@@ -45,7 +45,7 @@ import javax.crypto.spec.IvParameterSpec;
  *
  * @hide
  */
-public abstract class KeyStoreCipherSpi extends CipherSpi {
+public abstract class KeyStoreCipherSpi extends CipherSpi implements KeyStoreCryptoOperation {
 
     public abstract static class AES extends KeyStoreCipherSpi {
         protected AES(@KeyStoreKeyConstraints.BlockModeEnum int blockMode,
@@ -129,6 +129,7 @@ public abstract class KeyStoreCipherSpi extends CipherSpi {
      * error conditions in between.
      */
     private IBinder mOperationToken;
+    private Long mOperationHandle;
     private KeyStoreCryptoOperationChunkedStreamer mMainDataStreamer;
 
     protected KeyStoreCipherSpi(
@@ -192,6 +193,7 @@ public abstract class KeyStoreCipherSpi extends CipherSpi {
             mOperationToken = null;
             mKeyStore.abort(operationToken);
         }
+        mOperationHandle = null;
         mMainDataStreamer = null;
         mAdditionalEntropyForBegin = null;
     }
@@ -230,6 +232,7 @@ public abstract class KeyStoreCipherSpi extends CipherSpi {
             throw new CryptoOperationException("Keystore returned null operation token");
         }
         mOperationToken = opResult.token;
+        mOperationHandle = opResult.operationHandle;
         loadAlgorithmSpecificParametersFromBeginResult(keymasterOutputArgs);
         mFirstOperationInitiated = true;
         mMainDataStreamer = new KeyStoreCryptoOperationChunkedStreamer(
@@ -346,6 +349,23 @@ public abstract class KeyStoreCipherSpi extends CipherSpi {
         // This should never be invoked because all algorithms registered with the AndroidKeyStore
         // provide explicitly specify padding mode.
         throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void finalize() throws Throwable {
+        try {
+            IBinder operationToken = mOperationToken;
+            if (operationToken != null) {
+                mKeyStore.abort(operationToken);
+            }
+        } finally {
+            super.finalize();
+        }
+    }
+
+    @Override
+    public Long getOperationHandle() {
+        return mOperationHandle;
     }
 
     // The methods below may need to be overridden by subclasses that use algorithm-specific

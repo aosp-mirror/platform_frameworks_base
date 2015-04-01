@@ -16,7 +16,11 @@
 
 package android.security;
 
+import java.lang.reflect.Method;
 import java.security.Provider;
+
+import javax.crypto.Cipher;
+import javax.crypto.Mac;
 
 /**
  * A provider focused on providing JCA interfaces for the Android KeyStore.
@@ -70,5 +74,43 @@ public class AndroidKeyStoreProvider extends Provider {
     private void putSymmetricCipherImpl(String transformation, String implClass) {
         put("Cipher." + transformation, implClass);
         put("Cipher." + transformation + " SupportedKeyClasses", KeyStoreSecretKey.class.getName());
+    }
+
+    /**
+     * Gets the {@link KeyStore} operation handle corresponding to the provided JCA crypto
+     * primitive.
+     *
+     * <p>The following primitives are supported: {@link Cipher} and {@link Mac}.
+     *
+     * @return KeyStore operation handle or {@code null} if the provided primitive's KeyStore
+     *         operation is not in progress.
+     *
+     * @throws IllegalArgumentException if the provided primitive is not supported or is not backed
+     *         by AndroidKeyStore provider.
+     */
+    public static Long getKeyStoreOperationHandle(Object cryptoPrimitive) {
+        if (cryptoPrimitive == null) {
+            throw new NullPointerException();
+        }
+        if ((!(cryptoPrimitive instanceof Mac)) && (!(cryptoPrimitive instanceof Cipher))) {
+            throw new IllegalArgumentException("Unsupported crypto primitive: " + cryptoPrimitive);
+        }
+        Object spi;
+        // TODO: Replace this Reflection based codewith direct invocations once the libcore changes
+        // are in.
+        try {
+            Method getSpiMethod = cryptoPrimitive.getClass().getDeclaredMethod("getSpi");
+            getSpiMethod.setAccessible(true);
+            spi = getSpiMethod.invoke(cryptoPrimitive);
+        } catch (ReflectiveOperationException e) {
+            throw new IllegalArgumentException(
+                    "Unsupported crypto primitive: " + cryptoPrimitive, e);
+        }
+        if (!(spi instanceof KeyStoreCryptoOperation)) {
+            throw new IllegalArgumentException(
+                    "Crypto primitive not backed by Android KeyStore: " + cryptoPrimitive
+                    + ", spi: " + spi);
+        }
+        return ((KeyStoreCryptoOperation) spi).getOperationHandle();
     }
 }
