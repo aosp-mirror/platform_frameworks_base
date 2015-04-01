@@ -159,13 +159,13 @@ public class WindowAnimator {
                     final AppWindowAnimator appAnimator = tokens.get(tokenNdx).mAppAnimator;
                     final boolean wasAnimating = appAnimator.animation != null
                             && appAnimator.animation != AppWindowAnimator.sDummyAnimation;
-                    if (appAnimator.stepAnimationLocked(mCurrentTime)) {
+                    if (appAnimator.stepAnimationLocked(mCurrentTime, displayId)) {
                         mAnimating = mAppWindowAnimating = true;
                     } else if (wasAnimating) {
                         // stopped animating, do one more pass through the layout
                         setAppLayoutChanges(appAnimator,
                                 WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER,
-                                "appToken " + appAnimator.mAppToken + " done");
+                                "appToken " + appAnimator.mAppToken + " done", displayId);
                         if (WindowManagerService.DEBUG_ANIM) Slog.v(TAG,
                                 "updateWindowsApps...: done animating " + appAnimator.mAppToken);
                     }
@@ -178,12 +178,12 @@ public class WindowAnimator {
                 final AppWindowAnimator appAnimator = exitingAppTokens.get(i).mAppAnimator;
                 final boolean wasAnimating = appAnimator.animation != null
                         && appAnimator.animation != AppWindowAnimator.sDummyAnimation;
-                if (appAnimator.stepAnimationLocked(mCurrentTime)) {
+                if (appAnimator.stepAnimationLocked(mCurrentTime, displayId)) {
                     mAnimating = mAppWindowAnimating = true;
                 } else if (wasAnimating) {
                     // stopped animating, do one more pass through the layout
                     setAppLayoutChanges(appAnimator, WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER,
-                        "exiting appToken " + appAnimator.mAppToken + " done");
+                        "exiting appToken " + appAnimator.mAppToken + " done", displayId);
                     if (WindowManagerService.DEBUG_ANIM) Slog.v(TAG,
                             "updateWindowsApps...: done animating exiting " + appAnimator.mAppToken);
                 }
@@ -575,11 +575,11 @@ public class WindowAnimator {
                             // This will set mOrientationChangeComplete and cause a pass through layout.
                             setAppLayoutChanges(appAnimator,
                                     WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER,
-                                    "testTokenMayBeDrawnLocked: freezingScreen");
+                                    "testTokenMayBeDrawnLocked: freezingScreen", displayId);
                         } else {
                             setAppLayoutChanges(appAnimator,
                                     WindowManagerPolicy.FINISH_LAYOUT_REDO_ANIM,
-                                    "testTokenMayBeDrawnLocked");
+                                    "testTokenMayBeDrawnLocked", displayId);
 
                             // We can now show all of the drawn windows!
                             if (!mService.mOpeningApps.contains(wtoken)) {
@@ -792,28 +792,30 @@ public class WindowAnimator {
         if (displayId < 0) {
             return 0;
         }
-        return mService.getDisplayContentLocked(displayId).pendingLayoutChanges;
+        final DisplayContent displayContent = mService.getDisplayContentLocked(displayId);
+        return (displayContent != null) ? displayContent.pendingLayoutChanges : 0;
     }
 
     void setPendingLayoutChanges(final int displayId, final int changes) {
-        if (displayId >= 0) {
-            mService.getDisplayContentLocked(displayId).pendingLayoutChanges |= changes;
+        if (displayId < 0) {
+            return;
+        }
+        final DisplayContent displayContent = mService.getDisplayContentLocked(displayId);
+        if (displayContent != null) {
+            displayContent.pendingLayoutChanges |= changes;
         }
     }
 
-    void setAppLayoutChanges(final AppWindowAnimator appAnimator, final int changes, String s) {
-        // Used to track which displays layout changes have been done.
-        SparseIntArray displays = new SparseIntArray(2);
+    void setAppLayoutChanges(final AppWindowAnimator appAnimator, final int changes, String reason,
+            final int displayId) {
         WindowList windows = appAnimator.mAppToken.allAppWindows;
         for (int i = windows.size() - 1; i >= 0; i--) {
-            final int displayId = windows.get(i).getDisplayId();
-            if (displayId >= 0 && displays.indexOfKey(displayId) < 0) {
+            if (displayId == windows.get(i).getDisplayId()) {
                 setPendingLayoutChanges(displayId, changes);
                 if (WindowManagerService.DEBUG_LAYOUT_REPEATS) {
-                    mService.debugLayoutRepeats(s, getPendingLayoutChanges(displayId));
+                    mService.debugLayoutRepeats(reason, getPendingLayoutChanges(displayId));
                 }
-                // Keep from processing this display again.
-                displays.put(displayId, changes);
+                break;
             }
         }
     }
