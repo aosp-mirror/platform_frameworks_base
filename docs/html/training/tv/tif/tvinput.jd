@@ -1,0 +1,177 @@
+page.title=Developing a TV Input Service
+page.tags=tv, tif
+helpoutsWidget=true
+
+trainingnavtop=true
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+  <h2>This lesson teaches you to</h2>
+  <ol>
+    <li><a href="#manifest">Declare Your TV Input Service in the Manifest</a></li>
+    <li><a href="#tvinput">Define Your TV Input Service</a></li>
+    <li><a href="#setup">Define Setup and Settings Activities</a></li>
+  </ol>
+  <h2>You should also read</h2>
+  <ul>
+    <li><a href="{@docRoot}reference/android/media/tv/package-summary.html">
+      android.media.tv</a></li>
+    <li><a class="external-lin" href="http://source.android.com/devices/tv/index.html">
+      TV Input Framework</a></li>
+  </ul>
+  <h2>Try It Out</h2>
+  <ul>
+    <li><a class="external-link" href="https://github.com/googlesamples/androidtv-sample-inputs">
+      TV Input Service sample app</a></li>
+  </ul>
+</div>
+</div>
+
+<p>A TV input service represents a media stream source, and lets you present your media content in a
+linear, broadcast TV fashion as channels and programs. With the TV input service, you can provide
+parental controls, program guide information, and content ratings. The TV input service works
+with the Android system TV app, developed for the device and immutable by third-party apps, which
+ultimately controls and presents content on the TV. See
+<a class="external-link" href="http://source.android.com/devices/tv/index.html">
+TV Input Framework</a> for more information about the framework architecture and its components.</p>
+
+<p>To develop a TV input service, you implement the following components:</p>
+
+<ul>
+  <li>{@link android.media.tv.TvInputService} provides long-running and background availability for
+  the TV input</li>
+  <li>{@link android.media.tv.TvInputService.Session} maintains the TV input state and communicates
+  with the hosting app</li>
+  <li>{@link android.media.tv.TvContract} describes the channels and programs available to the TV
+  input</li>
+  <li>{@link android.media.tv.TvContract.Channels} represents information about a TV channel</li>
+  <li>{@link android.media.tv.TvContract.Programs} describes a TV program with data such as program
+  title and start time</li>
+  <li>{@link android.media.tv.TvTrackInfo} represents an audio, video, or subtitle track</li>
+  <li>{@link android.media.tv.TvContentRating} describes a content rating, allows for custom content
+  rating schemes</li>
+  <li>{@link android.media.tv.TvInputManager} provides an API to the system TV app and manages
+  the interaction with TV inputs and apps</li>
+</ul>
+
+<h2 id="manifest">Declare Your TV Input Service in the Manifest</h2>
+
+<p>Your app manifest must declare your {@link android.media.tv.TvInputService}. Within that
+declaration, specify the {@link android.Manifest.permission#BIND_TV_INPUT} permission to allow the
+service to connect the TV input to the system. A system service (<code>TvInputManagerService</code>)
+performs the binding and has that permission. The system TV app sends requests to TV input services
+via the {@link android.media.tv.TvInputManager} interface. The service declaration must also
+include an intent filter that specifies the {@link android.media.tv.TvInputService}
+as the action to perform with the intent. Also within the service declaration, declare the service
+meta data in a separate XML resource. The service declaration, the intent filter and the service
+meta data are described in the following example.</p>
+
+<pre>
+&lt;service android:name="com.example.sampletvinput.SampleTvInput"
+    android:label="@string/sample_tv_input_label"
+    android:permission="android.permission.BIND_TV_INPUT"&gt;
+    &lt;intent-filter&gt;
+        &lt;action android:name="android.media.tv.TvInputService" /&gt;
+    &lt;/intent-filter&gt;
+    &lt;meta-data android:name="android.media.tv.input"
+      android:resource="@xml/sample_tv_input" /&gt;
+&lt;/service&gt;
+</pre>
+
+<p>Define the service meta data in separate XML file, as shown in the following example. The service
+meta data must include a setup interface that describes the TV input's initial configuration and
+channel scan. Also, the service meta data may (optionally) describe a settings activity for users to
+modify the TV input's behavior. The service meta data file is located in the XML resources directory
+for your application and must match the name of the resource in the manifest. Using the example
+manifest entries above, you would create an XML file in the location
+<code>res/xml/sample_tv_input.xml</code>, with the following contents:</p>
+
+<pre>
+&lt;tv-input xmlns:android="http://schemas.android.com/apk/res/android"
+  &lt;!-- Required: activity for setting up the input --&gt;
+  android:setupActivity="com.example.sampletvinput.SampleTvInputSetupActivity"
+  &lt;!-- Optional: activity for controlling the settings --&gt;
+  android:settingsActivity="com.example.sampletvinput.SampleTvInputSettingsActivity" /&gt;
+</pre>
+
+<h2 id="tvinput">Define Your TV Input Service</h2>
+
+<div class="figure">
+<img id="tvinputlife" src="{@docRoot}images/tv/tvinput-life.png" alt=""/>
+<p class="img-caption"><strong>Figure 1.</strong>TvInputService lifecycle.</p>
+</div>
+
+<p>For your service, you extend the {@link android.media.tv.TvInputService} class. A
+{@link android.media.tv.TvInputService} implementation is a
+<a href="{@docRoot}guide/components/bound-services.html">bound service</a> where the system service
+(<code>TvInputManagerService</code>) is the client that binds to it. The service life cycle methods
+you need to implement are illustrated in figure 1.</p>
+
+<p>The {@link android.app.Service#onCreate()} method initializes and starts the
+{@link android.os.HandlerThread} which provides a process thread separate from the UI thread to
+handle system-driven actions. In the following example, the {@link android.app.Service#onCreate()}
+method initializes the {@link android.view.accessibility.CaptioningManager} and prepares to handle
+the {@link android.media.tv.TvInputManager#ACTION_BLOCKED_RATINGS_CHANGED}
+and {@link android.media.tv.TvInputManager#ACTION_PARENTAL_CONTROLS_ENABLED_CHANGED} actions. These
+actions describe system intents fired when the user changes the parental control settings, and when
+there is a change on the list of blocked ratings.</p>
+
+<pre>
+&#64;Override
+public void onCreate() {
+    super.onCreate();
+    mHandlerThread = new HandlerThread(getClass()
+      .getSimpleName());
+    mHandlerThread.start();
+    mDbHandler = new Handler(mHandlerThread.getLooper());
+    mHandler = new Handler();
+    mCaptioningManager = (CaptioningManager)
+      getSystemService(Context.CAPTIONING_SERVICE);
+
+    setTheme(android.R.style.Theme_Holo_Light_NoActionBar);
+
+    mSessions = new ArrayList&lt;BaseTvInputSessionImpl&gt;();
+    IntentFilter intentFilter = new IntentFilter();
+    intentFilter.addAction(TvInputManager
+      .ACTION_BLOCKED_RATINGS_CHANGED);
+    intentFilter.addAction(TvInputManager
+      .ACTION_PARENTAL_CONTROLS_ENABLED_CHANGED);
+    registerReceiver(mBroadcastReceiver, intentFilter);
+}
+</pre>
+
+<p> See <a href="{@docRoot}training/tv/tif/ui.html#control">
+Control Content</a> for more information about working with blocked content and providing
+parental control. See {@link android.media.tv.TvInputManager} for more system-driven actions that
+you may want to handle in your TV input service.</p>
+
+<p>The {@link android.media.tv.TvInputService} creates a
+{@link android.media.tv.TvInputService.Session} that implements {@link android.os.Handler.Callback}
+to handle player state changes. With {@link android.media.tv.TvInputService.Session#onSetSurface(android.view.Surface) onSetSurface()},
+the {@link android.media.tv.TvInputService.Session} sets the {@link android.view.Surface} with the
+video content. See <a href="{@docRoot}training/tv/tif/ui.html#surface">Integrate Player with Surface</a>
+for more information about working with {@link android.view.Surface} to render video.</p>
+
+<p>The {@link android.media.tv.TvInputService.Session} handles the
+{@link android.media.tv.TvInputService.Session#onTune(android.net.Uri) onTune()}
+event when the user selects a channel, and notifies the system TV app for changes in the content and
+content meta data. These <code>notify()</code>code> methods are described in
+<a href="{@docRoot}training/tv/tif/ui.html#control">
+Control Content</a> and <a href="training/tv/tif/ui.html#track">Handle Track Selection</a> further
+in this training.</p>
+
+<h2 id="setup">Define Setup and Settings Activities</h2>
+
+<p>The system TV app works with the setup and settings activities you define for your TV input. The
+setup activity is required and must provide at least one channel record for the system database. The
+system TV app will invoke the setup activity when it cannot find a channel for the TV input.
+<p>The setup activity describes to the system TV app the channels made available through the TV
+input, as demonstrated in the next lesson, <a href="{@docRoot}training/tv/tif/channel.html">Creating
+and Updating Channel Data</a>.</p>
+
+<p>The settings activity is optional. You can define a settings activity to turn on parental
+controls, enable closed captions, set the display attributes, and so forth.</p>
+
+
