@@ -33,7 +33,7 @@ import javax.crypto.MacSpi;
  *
  * @hide
  */
-public abstract class KeyStoreHmacSpi extends MacSpi {
+public abstract class KeyStoreHmacSpi extends MacSpi implements KeyStoreCryptoOperation {
 
     public static class HmacSHA256 extends KeyStoreHmacSpi {
         public HmacSHA256() {
@@ -50,6 +50,7 @@ public abstract class KeyStoreHmacSpi extends MacSpi {
     // The fields below are reset by the engineReset operation.
     private KeyStoreCryptoOperationChunkedStreamer mChunkedStreamer;
     private IBinder mOperationToken;
+    private Long mOperationHandle;
 
     protected KeyStoreHmacSpi(@KeyStoreKeyConstraints.DigestEnum int digest, int macSizeBytes) {
         mDigest = digest;
@@ -87,6 +88,7 @@ public abstract class KeyStoreHmacSpi extends MacSpi {
             mOperationToken = null;
             mKeyStore.abort(operationToken);
         }
+        mOperationHandle = null;
         mChunkedStreamer = null;
 
         KeymasterArguments keymasterArgs = new KeymasterArguments();
@@ -108,6 +110,7 @@ public abstract class KeyStoreHmacSpi extends MacSpi {
         if (mOperationToken == null) {
             throw new CryptoOperationException("Keystore returned null operation token");
         }
+        mOperationHandle = opResult.operationHandle;
         mChunkedStreamer = new KeyStoreCryptoOperationChunkedStreamer(
                 new KeyStoreCryptoOperationChunkedStreamer.MainDataStream(
                         mKeyStore, mOperationToken));
@@ -157,11 +160,15 @@ public abstract class KeyStoreHmacSpi extends MacSpi {
         try {
             IBinder operationToken = mOperationToken;
             if (operationToken != null) {
-                mOperationToken = null;
                 mKeyStore.abort(operationToken);
             }
         } finally {
             super.finalize();
         }
+    }
+
+    @Override
+    public Long getOperationHandle() {
+        return mOperationHandle;
     }
 }
