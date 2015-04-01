@@ -36,6 +36,7 @@ import android.util.ArrayMap;
 import android.util.AttributeSet;
 import android.util.LayoutDirection;
 import android.util.Log;
+import android.util.MathUtils;
 import android.util.PathParser;
 import android.util.Xml;
 
@@ -955,10 +956,16 @@ public class VectorDrawable extends Drawable {
             final float scaleX = w / mViewportWidth;
             final float scaleY = h / mViewportHeight;
             final float minScale = Math.min(scaleX, scaleY);
+            final Matrix groupStackedMatrix = vGroup.mStackedMatrix;
 
-            mFinalPathMatrix.set(vGroup.mStackedMatrix);
+            mFinalPathMatrix.set(groupStackedMatrix);
             mFinalPathMatrix.postScale(scaleX, scaleY);
 
+            final float matrixScale = getMatrixScale(groupStackedMatrix);
+            if (matrixScale == 0) {
+                // When either x or y is scaled to 0, we don't need to draw anything.
+                return;
+            }
             vPath.toPath(mPath);
             final Path path = mPath;
 
@@ -1024,10 +1031,40 @@ public class VectorDrawable extends Drawable {
                     strokePaint.setStrokeMiter(fullPath.mStrokeMiterlimit);
                     strokePaint.setColor(applyAlpha(fullPath.mStrokeColor, fullPath.mStrokeAlpha));
                     strokePaint.setColorFilter(filter);
-                    strokePaint.setStrokeWidth(fullPath.mStrokeWidth * minScale);
+                    final float finalStrokeScale = minScale * matrixScale;
+                    strokePaint.setStrokeWidth(fullPath.mStrokeWidth * finalStrokeScale);
                     canvas.drawPath(mRenderPath, strokePaint);
                 }
             }
+        }
+
+        private float getMatrixScale(Matrix groupStackedMatrix) {
+            // Given unit vectors A = (0, 1) and B = (1, 0).
+            // After matrix mapping, we got A' and B'. Let theta = the angel b/t A' and B'.
+            // Therefore, the final scale we want is min(|A'| * sin(theta), |B'| * sin(theta)),
+            // which is (|A'| * |B'| * sin(theta)) / max (|A'|, |B'|);
+            // If  max (|A'|, |B'|) = 0, that means either x or y has a scale of 0.
+            //
+            // For non-skew case, which is most of the cases, matrix scale is computing exactly the
+            // scale on x and y axis, and take the minimal of these two.
+            // For skew case, an unit square will mapped to a parallelogram. And this function will
+            // return the minimal height of the 2 bases.
+            float[] unitVectors = new float[] {0, 1, 1, 0};
+            groupStackedMatrix.mapVectors(unitVectors);
+            float scaleX = MathUtils.mag(unitVectors[0], unitVectors[1]);
+            float scaleY = MathUtils.mag(unitVectors[2], unitVectors[3]);
+            float crossProduct = MathUtils.cross(unitVectors[0], unitVectors[1],
+                    unitVectors[2], unitVectors[3]);
+            float maxScale = MathUtils.max(scaleX, scaleY);
+
+            float matrixScale = 0;
+            if (maxScale > 0) {
+                matrixScale = MathUtils.abs(crossProduct) / maxScale;
+            }
+            if (DBG_VECTOR_DRAWABLE) {
+                Log.d(LOGTAG, "Scale x " + scaleX + " y " + scaleY + " final " + matrixScale);
+            }
+            return matrixScale;
         }
     }
 

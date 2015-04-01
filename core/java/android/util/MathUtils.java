@@ -20,7 +20,7 @@ import java.util.Random;
 
 /**
  * A class that contains utility methods related to numbers.
- * 
+ *
  * @hide Pending API council approval
  */
 public final class MathUtils {
@@ -32,7 +32,7 @@ public final class MathUtils {
     }
 
     public static float abs(float v) {
-        return v > 0 ? v : -v; 
+        return v > 0 ? v : -v;
     }
 
     public static int constrain(int amount, int low, int high) {
@@ -116,6 +116,14 @@ public final class MathUtils {
         return v * v;
     }
 
+    public static float dot(float v1x, float v1y, float v2x, float v2y) {
+        return v1x * v2x + v1y * v2y;
+    }
+
+    public static float cross(float v1x, float v1y, float v2x, float v2y) {
+        return v1x * v2y - v1y * v2x;
+    }
+
     public static float radians(float degrees) {
         return degrees * DEG_TO_RAD;
     }
@@ -142,16 +150,16 @@ public final class MathUtils {
 
     public static float tan(float angle) {
         return (float) Math.tan(angle);
-    }    
+    }
 
     public static float lerp(float start, float stop, float amount) {
         return start + (stop - start) * amount;
     }
-    
+
     public static float norm(float start, float stop, float value) {
         return (value - start) / (stop - start);
     }
-    
+
     public static float map(float minStart, float minStop, float maxStart, float maxStop, float value) {
         return maxStart + (maxStart - maxStop) * ((value - minStart) / (minStop - minStart));
     }
@@ -164,7 +172,7 @@ public final class MathUtils {
         if (howsmall >= howbig) return howsmall;
         return (int) (sRandom.nextFloat() * (howbig - howsmall) + howsmall);
     }
-    
+
     public static float random(float howbig) {
         return sRandom.nextFloat() * howbig;
     }
