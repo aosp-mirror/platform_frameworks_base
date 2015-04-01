@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package android.service.fingerprint;
+package android.hardware.fingerprint;
 
 import android.content.ContentResolver;
 import android.provider.Settings;

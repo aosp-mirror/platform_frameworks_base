@@ -13,11 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package android.service.fingerprint;
+package android.hardware.fingerprint;
 
 import android.os.Bundle;
-import android.service.fingerprint.IFingerprintServiceReceiver;
-import android.service.fingerprint.Fingerprint;
+import android.hardware.fingerprint.IFingerprintServiceReceiver;
+import android.hardware.fingerprint.Fingerprint;
 import java.util.List;
 
 /**

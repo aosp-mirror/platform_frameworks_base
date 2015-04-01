@@ -151,7 +151,6 @@ LOCAL_SRC_FILES:= \
     android_util_FileObserver.cpp \
     android/opengl/poly_clip.cpp.arm \
     android/opengl/util.cpp \
-    android_server_FingerprintManager.cpp \
     android_server_NetworkManagementSocketTagger.cpp \
     android_server_Watchdog.cpp \
     android_ddm_DdmHandleNativeHeap.cpp \
