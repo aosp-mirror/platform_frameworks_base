@@ -25,7 +25,6 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.SystemClock;
 import android.os.UserHandle;
@@ -34,6 +33,8 @@ import android.view.KeyEvent;
 import android.view.View;
 import android.view.ViewStub;
 import android.widget.Toast;
+
+import com.android.systemui.Prefs;
 import com.android.systemui.R;
 import com.android.systemui.recents.misc.DebugTrigger;
 import com.android.systemui.recents.misc.ReferenceCountedTrigger;
@@ -565,10 +566,9 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
     /** Called when debug mode is triggered */
     public void onDebugModeTriggered() {
         if (mConfig.developerOptionsEnabled) {
-            SharedPreferences settings = getSharedPreferences(getPackageName(), 0);
-            if (settings.getBoolean(Constants.Values.App.Key_DebugModeEnabled, false)) {
+            if (Prefs.getBoolean(this, Prefs.Key.DEBUG_MODE_ENABLED, false /* boolean */)) {
                 // Disable the debug mode
-                settings.edit().remove(Constants.Values.App.Key_DebugModeEnabled).apply();
+                Prefs.remove(this, Prefs.Key.DEBUG_MODE_ENABLED);
                 mConfig.debugModeEnabled = false;
                 inflateDebugOverlay();
                 if (mDebugOverlay != null) {
@@ -576,7 +576,7 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
                 }
             } else {
                 // Enable the debug mode
-                settings.edit().putBoolean(Constants.Values.App.Key_DebugModeEnabled, true).apply();
+                Prefs.putBoolean(this, Prefs.Key.DEBUG_MODE_ENABLED, true);
                 mConfig.debugModeEnabled = true;
                 inflateDebugOverlay();
                 if (mDebugOverlay != null) {

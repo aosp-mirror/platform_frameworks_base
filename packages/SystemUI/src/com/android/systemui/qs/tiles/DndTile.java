@@ -29,6 +29,7 @@ import android.view.View;
 import android.view.View.OnAttachStateChangeListener;
 import android.view.ViewGroup;
 
+import com.android.systemui.Prefs;
 import com.android.systemui.R;
 import com.android.systemui.qs.QSTile;
 import com.android.systemui.statusbar.policy.ZenModeController;
@@ -40,8 +41,6 @@ public class DndTile extends QSTile<QSTile.BooleanState> {
 
     private static final String ACTION_SET_VISIBLE = "com.android.systemui.dndtile.SET_VISIBLE";
     private static final String EXTRA_VISIBLE = "visible";
-    private static final String PREF_KEY_VISIBLE = "DndTileVisible";
-    private static final String PREF_KEY_COMBINED_ICON = "DndTileCombinedIcon";
 
     private final ZenModeController mController;
     private final DndDetailAdapter mDetailAdapter;
@@ -57,19 +56,20 @@ public class DndTile extends QSTile<QSTile.BooleanState> {
     }
 
     public static void setVisible(Context context, boolean visible) {
-        getSharedPrefs(context).edit().putBoolean(PREF_KEY_VISIBLE, visible).commit();
+        Prefs.putBoolean(context, Prefs.Key.DND_TILE_VISIBLE, visible);
     }
 
     public static boolean isVisible(Context context) {
-        return getSharedPrefs(context).getBoolean(PREF_KEY_VISIBLE, false);
+        return Prefs.getBoolean(context, Prefs.Key.DND_TILE_VISIBLE, false /* defaultValue */);
     }
 
     public static void setCombinedIcon(Context context, boolean combined) {
-        getSharedPrefs(context).edit().putBoolean(PREF_KEY_COMBINED_ICON, combined).commit();
+        Prefs.putBoolean(context, Prefs.Key.DND_TILE_COMBINED_ICON, combined);
     }
 
     public static boolean isCombinedIcon(Context context) {
-        return getSharedPrefs(context).getBoolean(PREF_KEY_COMBINED_ICON, false);
+        return Prefs.getBoolean(context, Prefs.Key.DND_TILE_COMBINED_ICON,
+                false /* defaultValue */);
     }
 
     @Override
@@ -143,22 +143,20 @@ public class DndTile extends QSTile<QSTile.BooleanState> {
         mListening = listening;
         if (mListening) {
             mController.addCallback(mZenCallback);
-            getSharedPrefs(mContext).registerOnSharedPreferenceChangeListener(mPrefListener);
+            Prefs.registerListener(mContext, mPrefListener);
         } else {
             mController.removeCallback(mZenCallback);
-            getSharedPrefs(mContext).unregisterOnSharedPreferenceChangeListener(mPrefListener);
+            Prefs.unregisterListener(mContext, mPrefListener);
         }
-    }
-
-    private static SharedPreferences getSharedPrefs(Context context) {
-        return context.getSharedPreferences(context.getPackageName(), 0);
     }
 
     private final OnSharedPreferenceChangeListener mPrefListener
             = new OnSharedPreferenceChangeListener() {
         @Override
-        public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-            if (PREF_KEY_COMBINED_ICON.equals(key) || PREF_KEY_VISIBLE.equals(key)) {
+        public void onSharedPreferenceChanged(SharedPreferences sharedPreferences,
+                @Prefs.Key String key) {
+            if (Prefs.Key.DND_TILE_COMBINED_ICON.equals(key) ||
+                    Prefs.Key.DND_TILE_VISIBLE.equals(key)) {
                 refreshState();
             }
         }
