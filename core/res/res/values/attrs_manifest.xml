@@ -1038,13 +1038,6 @@
          activity. -->
     <attr name="resizeableActivity" format="boolean" />
 
-    <!-- Tasks rooted at this activity will start up in lock-task mode. That means that they
-         cannot be navigated away from until they finish or explicitly release lock-task mode.
-         This only works for system privileged activities. An exception will be thrown for
-         non-privileged activities that use this attribute.
-         @hide -->
-    <attr name="lockTaskOnLaunch" format="boolean" />
-
     <!-- When set installer will extract native libraries. If set to false
          libraries in the apk must be stored and page-aligned.  -->
     <attr name="extractNativeLibs" format="boolean"/>
@@ -1756,7 +1749,8 @@
         <attr name="relinquishTaskIdentity" />
         <attr name="resumeWhilePausing" />
         <attr name="resizeableActivity" />
-        <attr name="lockTaskOnLaunch" />
+        <!-- @hide This activity will enter lockTask mode immediately if it is privileged -->
+        <attr name="lockTaskOnLaunch" format="boolean" />
     </declare-styleable>
     
     <!-- The <code>activity-alias</code> tag declares a new
