@@ -24,6 +24,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.util.Log;
 
 import java.util.List;
 
@@ -77,8 +78,25 @@ public abstract class ChooserTargetService extends Service {
     private final String TAG = ChooserTargetService.class.getSimpleName()
             + '[' + getClass().getSimpleName() + ']';
 
+    private static final boolean DEBUG = false;
+
+    /**
+     * The Intent action that a ChooserTargetService must respond to
+     */
     @SdkConstant(SdkConstant.SdkConstantType.SERVICE_ACTION)
     public static final String SERVICE_INTERFACE = "android.service.chooser.ChooserTargetService";
+
+    /**
+     * The name of the <code>meta-data</code> element that must be present on an
+     * <code>activity</code> element in a manifest to link it to a ChooserTargetService
+     */
+    public static final String META_DATA_NAME = "android.service.chooser.chooser_target_service";
+
+    /**
+     * The permission that a ChooserTargetService must require in order to bind to it.
+     * If this permission is not enforced the system will skip that ChooserTargetService.
+     */
+    public static final String BIND_PERMISSION = "android.permission.BIND_CHOOSER_TARGET_SERVICE";
 
     private IChooserTargetServiceWrapper mWrapper = null;
 
@@ -105,7 +123,9 @@ public abstract class ChooserTargetService extends Service {
 
     @Override
     public IBinder onBind(Intent intent) {
+        if (DEBUG) Log.d(TAG, "onBind " + intent);
         if (!SERVICE_INTERFACE.equals(intent.getAction())) {
+            if (DEBUG) Log.d(TAG, "bad intent action " + intent.getAction() + "; returning null");
             return null;
         }
 
@@ -121,9 +141,14 @@ public abstract class ChooserTargetService extends Service {
                 IntentFilter matchedFilter, IChooserTargetResult result) throws RemoteException {
             List<ChooserTarget> targets = null;
             try {
+                if (DEBUG) {
+                    Log.d(TAG, "getChooserTargets calling onGetChooserTargets; "
+                            + targetComponentName + " filter: " + matchedFilter);
+                }
                 targets = onGetChooserTargets(targetComponentName, matchedFilter);
             } finally {
                 result.sendResult(targets);
+                if (DEBUG) Log.d(TAG, "Sent results");
             }
         }
     }

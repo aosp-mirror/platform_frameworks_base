@@ -93,7 +93,8 @@ public class UsbResolverActivity extends ResolverActivity {
     }
 
     @Override
-    protected void onIntentSelected(ResolveInfo ri, Intent intent, boolean alwaysCheck) {
+    protected void onTargetSelected(TargetInfo target, boolean alwaysCheck) {
+        final ResolveInfo ri = target.getResolveInfo();
         try {
             IBinder b = ServiceManager.getService(USB_SERVICE);
             IUsbManager service = IUsbManager.Stub.asInterface(b);
@@ -121,7 +122,7 @@ public class UsbResolverActivity extends ResolverActivity {
             }
 
             try {
-                startActivityAsUser(intent, new UserHandle(userId));
+                target.startAsUser(this, null, new UserHandle(userId));
             } catch (ActivityNotFoundException e) {
                 Log.e(TAG, "startActivity failed", e);
             }

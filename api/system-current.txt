@@ -8383,6 +8383,7 @@ package android.content {
     field public static final java.lang.String EXTRA_CHANGED_COMPONENT_NAME_LIST = "android.intent.extra.changed_component_name_list";
     field public static final java.lang.String EXTRA_CHANGED_PACKAGE_LIST = "android.intent.extra.changed_package_list";
     field public static final java.lang.String EXTRA_CHANGED_UID_LIST = "android.intent.extra.changed_uid_list";
+    field public static final java.lang.String EXTRA_CHOOSER_TARGETS = "android.intent.extra.CHOOSER_TARGETS";
     field public static final java.lang.String EXTRA_CHOSEN_COMPONENT = "android.intent.extra.CHOSEN_COMPONENT";
     field public static final java.lang.String EXTRA_CHOSEN_COMPONENT_INTENT_SENDER = "android.intent.extra.CHOSEN_COMPONENT_INTENT_SENDER";
     field public static final java.lang.String EXTRA_DATA_REMOVED = "android.intent.extra.DATA_REMOVED";
@@ -30382,8 +30383,10 @@ package android.service.chooser {
   public final class ChooserTarget implements android.os.Parcelable {
     ctor public ChooserTarget(java.lang.CharSequence, android.graphics.Bitmap, float, android.app.PendingIntent);
     ctor public ChooserTarget(java.lang.CharSequence, android.graphics.Bitmap, float, android.content.IntentSender);
+    ctor public ChooserTarget(java.lang.CharSequence, android.graphics.Bitmap, float, android.content.Intent);
     method public int describeContents();
     method public android.graphics.Bitmap getIcon();
+    method public android.content.Intent getIntent();
     method public android.content.IntentSender getIntentSender();
     method public float getScore();
     method public java.lang.CharSequence getTitle();
@@ -30396,6 +30399,8 @@ package android.service.chooser {
     ctor public ChooserTargetService();
     method public android.os.IBinder onBind(android.content.Intent);
     method public abstract java.util.List<android.service.chooser.ChooserTarget> onGetChooserTargets(android.content.ComponentName, android.content.IntentFilter);
+    field public static final java.lang.String BIND_PERMISSION = "android.permission.BIND_CHOOSER_TARGET_SERVICE";
+    field public static final java.lang.String META_DATA_NAME = "android.service.chooser.chooser_target_service";
     field public static final java.lang.String SERVICE_INTERFACE = "android.service.chooser.ChooserTargetService";
   }
 
