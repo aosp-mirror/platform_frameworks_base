@@ -846,6 +846,10 @@ public class ListPopupWindow {
         return mDropDownList;
     }
 
+    DropDownListView createDropDownListView(Context context, boolean hijackFocus) {
+        return new DropDownListView(context, hijackFocus);
+    }
+
     /**
      * The maximum number of list items that can be visible and still have
      * the list expand when touched.
@@ -1068,7 +1072,7 @@ public class ListPopupWindow {
                 }
             };
 
-            mDropDownList = new DropDownListView(context, !mModal);
+            mDropDownList = createDropDownListView(context, !mModal);
             if (mDropDownListHighlight != null) {
                 mDropDownList.setSelector(mDropDownListHighlight);
             }
@@ -1494,7 +1498,7 @@ public class ListPopupWindow {
      * displayed on screen within a drop down. The focus is never actually
      * passed to the drop down in this mode; the list only looks focused.</p>
      */
-    private static class DropDownListView extends ListView {
+    static class DropDownListView extends ListView {
         /** Duration in milliseconds of the drag-to-open click animation. */
         private static final long CLICK_ANIM_DURATION = 150;
 
