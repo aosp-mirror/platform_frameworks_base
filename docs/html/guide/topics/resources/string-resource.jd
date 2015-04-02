@@ -401,19 +401,35 @@ android.content.res.Resources#getQuantityString(int,int) getQuantityString}.</p>
 format and style your string resources.</p>
 
 
-<h3>Escaping apostrophes and quotes</h3>
+<h3 id="escaping_quotes">Escaping apostrophes and quotes</h3>
 
-<p>If you have an apostrophe or a quote in your string, you must either escape it or enclose the
-whole string in the other type of enclosing quotes. For example, here are some stings that
-do and don't work:</p>
+<p>
+  If you have an apostrophe (<code>'</code>) in your string, you must either
+  escape it with a backslash (<code>\'</code>) or enclose the string in
+  double-quotes (<code>""</code>). For example, here are some strings that do
+  and don't work:
+</p>
 
 <pre>
-&lt;string name="good_example">"This'll work"&lt;/string>
-&lt;string name="good_example_2">This\'ll also work&lt;/string>
+&lt;string name="good_example">This\'ll work&lt;/string>
+&lt;string name="good_example_2">"This'll also work"&lt;/string>
 &lt;string name="bad_example">This doesn't work&lt;/string>
-&lt;string name="bad_example_2">XML encodings don&amp;apos;t work&lt;/string>
+    &lt;!-- Causes a compile error -->
 </pre>
 
+<p>
+  If you have a double-quote in your string, you must escape it
+  (<code>\"</code>). Surrounding the string with single-quotes does
+  <em>not</em> work.
+</p>
+
+<pre>
+&lt;string name="good_example">This is a \"good string\".&lt;/string>
+&lt;string name="bad_example">This is a "bad string".&lt;/string>
+    &lt;!-- Quotes are stripped; displays as: This is a bad string. -->
+&lt;string name="bad_example_2">'This is another "bad string".'&lt;/string>
+    &lt;!-- Causes a compile error -->
+</pre>
 
 <h3>Formatting strings</h3>
 
