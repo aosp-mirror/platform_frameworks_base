@@ -224,7 +224,7 @@ public abstract class KeyStoreCipherSpi extends CipherSpi implements KeyStoreCry
         if (opResult == null) {
             throw new KeyStoreConnectException();
         } else if (opResult.resultCode != KeyStore.NO_ERROR) {
-            throw KeymasterUtils.getCryptoOperationException(opResult.resultCode);
+            throw KeyStore.getCryptoOperationException(opResult.resultCode);
         }
 
         if (opResult.token == null) {
@@ -250,8 +250,8 @@ public abstract class KeyStoreCipherSpi extends CipherSpi implements KeyStoreCry
         byte[] output;
         try {
             output = mMainDataStreamer.update(input, inputOffset, inputLen);
-        } catch (KeymasterException e) {
-            throw KeymasterUtils.getCryptoOperationException(e);
+        } catch (KeyStoreException e) {
+            throw KeyStore.getCryptoOperationException(e);
         }
 
         if (output.length == 0) {
@@ -285,7 +285,7 @@ public abstract class KeyStoreCipherSpi extends CipherSpi implements KeyStoreCry
         byte[] output;
         try {
             output = mMainDataStreamer.doFinal(input, inputOffset, inputLen);
-        } catch (KeymasterException e) {
+        } catch (KeyStoreException e) {
             switch (e.getErrorCode()) {
                 case KeymasterDefs.KM_ERROR_INVALID_INPUT_LENGTH:
                     throw new IllegalBlockSizeException();
@@ -294,7 +294,7 @@ public abstract class KeyStoreCipherSpi extends CipherSpi implements KeyStoreCry
                 case KeymasterDefs.KM_ERROR_VERIFICATION_FAILED:
                     throw new AEADBadTagException();
                 default:
-                    throw KeymasterUtils.getCryptoOperationException(e);
+                    throw KeyStore.getCryptoOperationException(e);
             }
         }
 
