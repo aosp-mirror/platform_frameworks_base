@@ -258,7 +258,7 @@ public class VoicemailContract {
         public static Uri insert(Context context, Voicemail voicemail) {
             ContentResolver contentResolver = context.getContentResolver();
             ContentValues contentValues = getContentValues(voicemail);
-            return contentResolver.insert(Voicemails.CONTENT_URI, contentValues);
+            return contentResolver.insert(buildSourceUri(context.getPackageName()), contentValues);
         }
 
         /**
@@ -273,7 +273,7 @@ public class VoicemailContract {
             int count = voicemails.size();
             for (int i = 0; i < count; i++) {
                 ContentValues contentValues = getContentValues(voicemails.get(i));
-                contentResolver.insert(Voicemails.CONTENT_URI, contentValues);
+                contentResolver.insert(buildSourceUri(context.getPackageName()), contentValues);
             }
             return count;
         }
