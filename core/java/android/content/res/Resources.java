@@ -16,7 +16,10 @@
 
 package android.content.res;
 
+import android.annotation.AttrRes;
 import android.annotation.ColorInt;
+import android.annotation.StyleRes;
+import android.annotation.StyleableRes;
 import com.android.internal.util.XmlUtils;
 
 import org.xmlpull.v1.XmlPullParser;
@@ -1473,7 +1476,7 @@ public class Resources {
          * @see #obtainStyledAttributes(int, int[])
          * @see #obtainStyledAttributes(AttributeSet, int[], int, int)
          */
-        public TypedArray obtainStyledAttributes(int[] attrs) {
+        public TypedArray obtainStyledAttributes(@StyleableRes int[] attrs) {
             final int len = attrs.length;
             final TypedArray array = TypedArray.obtain(Resources.this, len);
             array.mTheme = this;
@@ -1501,7 +1504,8 @@ public class Resources {
          * @see #obtainStyledAttributes(int[])
          * @see #obtainStyledAttributes(AttributeSet, int[], int, int)
          */
-        public TypedArray obtainStyledAttributes(int resid, int[] attrs) throws NotFoundException {
+        public TypedArray obtainStyledAttributes(@StyleRes int resid, @StyleableRes int[] attrs)
+                throws NotFoundException {
             final int len = attrs.length;
             final TypedArray array = TypedArray.obtain(Resources.this, len);
             array.mTheme = this;
@@ -1584,7 +1588,7 @@ public class Resources {
          * @see #obtainStyledAttributes(int, int[])
          */
         public TypedArray obtainStyledAttributes(AttributeSet set,
-                int[] attrs, int defStyleAttr, int defStyleRes) {
+                @StyleableRes int[] attrs, @AttrRes int defStyleAttr, @StyleRes int defStyleRes) {
             final int len = attrs.length;
             final TypedArray array = TypedArray.obtain(Resources.this, len);
 
