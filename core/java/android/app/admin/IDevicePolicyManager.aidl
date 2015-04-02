@@ -213,4 +213,6 @@ interface IDevicePolicyManager {
     ComponentName getDeviceInitializerComponent();
 
     void setUserIcon(in ComponentName admin, in Bitmap icon);
+
+    void sendDeviceInitializerStatus(int statusCode, String description);
 }
