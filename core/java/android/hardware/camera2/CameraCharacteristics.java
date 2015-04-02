@@ -2354,8 +2354,8 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * <p>Camera devices that support the MANUAL_POST_PROCESSING capability will always contain
      * at least one of below mode combinations:</p>
      * <ul>
-     * <li>CONTRAST_CURVE and FAST</li>
-     * <li>GAMMA_VALUE, PRESET_CURVE, and FAST</li>
+     * <li>CONTRAST_CURVE, FAST and HIGH_QUALITY</li>
+     * <li>GAMMA_VALUE, PRESET_CURVE, FAST and HIGH_QUALITY</li>
      * </ul>
      * <p>This includes all FULL level devices.</p>
      * <p><b>Range of valid values:</b><br>

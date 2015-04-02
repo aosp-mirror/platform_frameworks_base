@@ -852,8 +852,8 @@ public abstract class CameraMetadata<TKey> {
 
     /**
      * <p>Color correction processing operates at improved
-     * quality but reduced capture rate (relative to sensor raw
-     * output).</p>
+     * quality but the capture rate might be reduced (relative to sensor
+     * raw output rate)</p>
      * <p>Advanced white balance adjustments above and beyond
      * the specified white balance pipeline may be applied.</p>
      * <p>If AWB is enabled with <code>{@link CaptureRequest#CONTROL_AWB_MODE android.control.awbMode} != OFF</code>, then
@@ -883,8 +883,8 @@ public abstract class CameraMetadata<TKey> {
     public static final int COLOR_CORRECTION_ABERRATION_MODE_FAST = 1;
 
     /**
-     * <p>Aberration correction operates at improved quality but reduced
-     * capture rate (relative to sensor raw output).</p>
+     * <p>Aberration correction operates at improved quality but the capture rate might be
+     * reduced (relative to sensor raw output rate)</p>
      * @see CaptureRequest#COLOR_CORRECTION_ABERRATION_MODE
      */
     public static final int COLOR_CORRECTION_ABERRATION_MODE_HIGH_QUALITY = 2;
@@ -1797,7 +1797,7 @@ public abstract class CameraMetadata<TKey> {
     public static final int EDGE_MODE_FAST = 1;
 
     /**
-     * <p>Apply high-quality edge enhancement, at a cost of reducing output frame rate.</p>
+     * <p>Apply high-quality edge enhancement, at a cost of possibly reduced output frame rate.</p>
      * @see CaptureRequest#EDGE_MODE
      */
     public static final int EDGE_MODE_HIGH_QUALITY = 2;
@@ -1852,7 +1852,7 @@ public abstract class CameraMetadata<TKey> {
 
     /**
      * <p>High-quality hot pixel correction is applied, at a cost
-     * of reducing frame rate relative to sensor raw output.</p>
+     * of possibly reduced frame rate relative to sensor raw output.</p>
      * <p>The hotpixel map may be returned in {@link CaptureResult#STATISTICS_HOT_PIXEL_MAP android.statistics.hotPixelMap}.</p>
      *
      * @see CaptureResult#STATISTICS_HOT_PIXEL_MAP
@@ -1894,8 +1894,8 @@ public abstract class CameraMetadata<TKey> {
     public static final int NOISE_REDUCTION_MODE_FAST = 1;
 
     /**
-     * <p>High-quality noise reduction is applied, at the cost of reducing frame rate
-     * relative to sensor output.</p>
+     * <p>High-quality noise reduction is applied, at the cost of possibly reduced frame
+     * rate relative to sensor output.</p>
      * @see CaptureRequest#NOISE_REDUCTION_MODE
      */
     public static final int NOISE_REDUCTION_MODE_HIGH_QUALITY = 2;
@@ -2032,7 +2032,7 @@ public abstract class CameraMetadata<TKey> {
 
     /**
      * <p>Apply high-quality lens shading correction, at the
-     * cost of reduced frame rate.</p>
+     * cost of possibly reduced frame rate.</p>
      * @see CaptureRequest#SHADING_MODE
      */
     public static final int SHADING_MODE_HIGH_QUALITY = 2;
@@ -2105,7 +2105,7 @@ public abstract class CameraMetadata<TKey> {
 
     /**
      * <p>High-quality gamma mapping and color enhancement will be applied, at
-     * the cost of reduced frame rate compared to raw sensor output.</p>
+     * the cost of possibly reduced frame rate compared to raw sensor output.</p>
      * @see CaptureRequest#TONEMAP_MODE
      */
     public static final int TONEMAP_MODE_HIGH_QUALITY = 2;
