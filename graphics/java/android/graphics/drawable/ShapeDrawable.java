@@ -53,9 +53,9 @@ import java.io.IOException;
  * For more information about how to use ShapeDrawable, read the <a
  * href="{@docRoot}guide/topics/graphics/2d-graphics.html#shape-drawable">
  * Canvas and Drawables</a> document. For more information about defining a
- * ShapeDrawable in XML, read the <a href="{@docRoot}
- * guide/topics/resources/drawable-resource.html#Shape">Drawable Resources</a>
- * document.
+ * ShapeDrawable in XML, read the
+ * <a href="{@docRoot}guide/topics/resources/drawable-resource.html#Shape">
+ * Drawable Resources</a> document.
  * </p>
  * </div>
  *
