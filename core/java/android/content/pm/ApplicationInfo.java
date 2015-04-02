@@ -900,6 +900,20 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
     /**
      * @hide
      */
+    public boolean isSystemApp() {
+        return (flags & ApplicationInfo.FLAG_SYSTEM) != 0;
+    }
+
+    /**
+     * @hide
+     */
+    public boolean isUpdatedSystemApp() {
+        return (flags & ApplicationInfo.FLAG_UPDATED_SYSTEM_APP) != 0;
+    }
+
+    /**
+     * @hide
+     */
     @Override protected ApplicationInfo getApplicationInfo() {
         return this;
     }

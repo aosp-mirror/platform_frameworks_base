@@ -16,6 +16,7 @@
 
 package com.android.server.pm;
 
+import android.annotation.Nullable;
 import android.content.Context;
 import android.content.pm.PackageStats;
 import android.os.Build;
@@ -83,14 +84,15 @@ public final class Installer extends SystemService {
     }
 
     public int dexopt(String apkPath, int uid, boolean isPublic, String pkgName,
-            String instructionSet, boolean vmSafeMode, boolean debuggable) {
+            String instructionSet, boolean vmSafeMode, boolean debuggable,
+            @Nullable String outputPath) {
         if (!isValidInstructionSet(instructionSet)) {
             Slog.e(TAG, "Invalid instruction set: " + instructionSet);
             return -1;
         }
 
         return mInstaller.dexopt(apkPath, uid, isPublic, pkgName, instructionSet, vmSafeMode,
-                debuggable);
+                debuggable, outputPath);
     }
 
     public int idmap(String targetApkPath, String overlayApkPath, int uid) {
@@ -131,6 +133,16 @@ public final class Installer extends SystemService {
         builder.append(codePath);
         builder.append(' ');
         builder.append(instructionSet);
+        return mInstaller.execute(builder.toString());
+    }
+
+    /**
+     * Removes packageDir or its subdirectory
+     */
+    public int rmPackageDir(String packageDir) {
+        StringBuilder builder = new StringBuilder("rmpackagedir");
+        builder.append(' ');
+        builder.append(packageDir);
         return mInstaller.execute(builder.toString());
     }
 
@@ -329,6 +341,15 @@ public final class Installer extends SystemService {
         builder.append(' ');
         builder.append(uid);
         return (mInstaller.execute(builder.toString()) == 0);
+    }
+
+    public int createOatDir(String oatDir, String dexInstructionSet) {
+        StringBuilder builder = new StringBuilder("createoatdir");
+        builder.append(' ');
+        builder.append(oatDir);
+        builder.append(' ');
+        builder.append(dexInstructionSet);
+        return mInstaller.execute(builder.toString());
     }
 
     /**
