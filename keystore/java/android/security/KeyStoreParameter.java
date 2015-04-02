@@ -60,8 +60,10 @@ public final class KeyStoreParameter implements ProtectionParameter {
     private final Set<Integer> mUserAuthenticators;
     private final Integer mUserAuthenticationValidityDurationSeconds;
 
-    private KeyStoreParameter(int flags, Date keyValidityStart,
-            Date keyValidityForOriginationEnd, Date keyValidityForConsumptionEnd,
+    private KeyStoreParameter(int flags,
+            Date keyValidityStart,
+            Date keyValidityForOriginationEnd,
+            Date keyValidityForConsumptionEnd,
             @KeyStoreKeyConstraints.PurposeEnum Integer purposes,
             @KeyStoreKeyConstraints.AlgorithmEnum Integer algorithm,
             @KeyStoreKeyConstraints.PaddingEnum Integer padding,
@@ -174,8 +176,8 @@ public final class KeyStoreParameter implements ProtectionParameter {
     }
 
     /**
-     * Gets the digest to which the key is restricted when generating Message Authentication Codes
-     * (MACs).
+     * Gets the digest to which the key is restricted when generating signatures or Message
+     * Authentication Codes (MACs).
      *
      * @return digest or {@code null} if the digest is not restricted.
      *
@@ -404,12 +406,13 @@ public final class KeyStoreParameter implements ProtectionParameter {
         }
 
         /**
-         * Restricts the key to being used only with the provided digest when generating Message
-         * Authentication Codes (MACs). Attempts to use the key with any other digest will be
-         * rejected.
+         * Restricts the key to being used only with the provided digest when generating signatures
+         * or Message Authentication Codes (MACs). Attempts to use the key with any other digest
+         * will be rejected.
          *
          * <p>For MAC keys, the default is to restrict to the digest specified in the key algorithm
-         * name.
+         * name. For asymmetric signing keys this constraint must be specified because there is no
+         * default.
          *
          * @see java.security.Key#getAlgorithm()
          *
@@ -502,10 +505,18 @@ public final class KeyStoreParameter implements ProtectionParameter {
          * @return built instance of {@code KeyStoreParameter}
          */
         public KeyStoreParameter build() {
-            return new KeyStoreParameter(mFlags, mKeyValidityStart,
-                    mKeyValidityForOriginationEnd, mKeyValidityForConsumptionEnd, mPurposes,
-                    mAlgorithm, mPadding, mDigest, mBlockMode, mMinSecondsBetweenOperations,
-                    mMaxUsesPerBoot, mUserAuthenticators,
+            return new KeyStoreParameter(mFlags,
+                    mKeyValidityStart,
+                    mKeyValidityForOriginationEnd,
+                    mKeyValidityForConsumptionEnd,
+                    mPurposes,
+                    mAlgorithm,
+                    mPadding,
+                    mDigest,
+                    mBlockMode,
+                    mMinSecondsBetweenOperations,
+                    mMaxUsesPerBoot,
+                    mUserAuthenticators,
                     mUserAuthenticationValidityDurationSeconds);
         }
     }
