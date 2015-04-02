@@ -4798,6 +4798,7 @@ package android.app {
     field public static final java.lang.String CATEGORY_PROGRESS = "progress";
     field public static final java.lang.String CATEGORY_PROMO = "promo";
     field public static final java.lang.String CATEGORY_RECOMMENDATION = "recommendation";
+    field public static final java.lang.String CATEGORY_REMINDER = "reminder";
     field public static final java.lang.String CATEGORY_SERVICE = "service";
     field public static final java.lang.String CATEGORY_SOCIAL = "social";
     field public static final java.lang.String CATEGORY_STATUS = "status";

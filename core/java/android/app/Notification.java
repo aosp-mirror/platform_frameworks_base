@@ -646,6 +646,11 @@ public class Notification implements Parcelable
     public static final String CATEGORY_STATUS = "status";
 
     /**
+     * Notification category: user-scheduled reminder.
+     */
+    public static final String CATEGORY_REMINDER = "reminder";
+
+    /**
      * One of the predefined notification categories (see the <code>CATEGORY_*</code> constants)
      * that best describes this Notification.  May be used by the system for ranking and filtering.
      */
