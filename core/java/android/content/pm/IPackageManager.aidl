@@ -269,6 +269,12 @@ interface IPackageManager {
     void clearCrossProfileIntentFilters(int sourceUserId, String ownerPackage);
 
     /**
+     * Backup/restore support - only the system uid may use these.
+     */
+    byte[] getPreferredActivityBackup(int userId);
+    void restorePreferredActivities(in byte[] backup, int userId);
+
+    /**
      * Report the set of 'Home' activity candidates, plus (if any) which of them
      * is the current "always use this one" setting.
      */

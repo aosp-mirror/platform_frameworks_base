@@ -94,6 +94,7 @@ import com.android.server.AppWidgetBackupBridge;
 import com.android.server.EventLogTags;
 import com.android.server.SystemService;
 import com.android.server.backup.PackageManagerBackupAgent.Metadata;
+import com.android.server.pm.PackageManagerService;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;

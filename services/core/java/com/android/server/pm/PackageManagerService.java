@@ -87,6 +87,7 @@ import com.android.server.Watchdog;
 import com.android.server.pm.Settings.DatabaseVersion;
 import com.android.server.storage.DeviceStorageMonitorInternal;
 
+import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlSerializer;
 
 import android.app.ActivityManager;
@@ -189,11 +190,14 @@ import android.util.PrintStreamPrinter;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseBooleanArray;
+import android.util.Xml;
 import android.view.Display;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileDescriptor;
 import java.io.FileNotFoundException;
@@ -246,6 +250,7 @@ public class PackageManagerService extends IPackageManager.Stub {
     static final boolean DEBUG_SETTINGS = false;
     static final boolean DEBUG_PREFERRED = false;
     static final boolean DEBUG_UPGRADE = false;
+    private static final boolean DEBUG_BACKUP = true;
     private static final boolean DEBUG_INSTALL = false;
     private static final boolean DEBUG_REMOVE = false;
     private static final boolean DEBUG_BROADCASTS = false;
@@ -865,6 +870,9 @@ public class PackageManagerService extends IPackageManager.Stub {
     };
     final SparseArray<PostInstallData> mRunningInstalls = new SparseArray<PostInstallData>();
     int mNextInstallToken = 1;  // nonzero; will be wrapped back to 1 when ++ overflows
+
+    // backup/restore of preferred activity state
+    private static final String TAG_PREFERRED_BACKUP = "pa";
 
     private final String mRequiredVerifierPackage;
 
@@ -12521,6 +12529,83 @@ public class PackageManagerService extends IPackageManager.Stub {
 
             if (changed) {
                 scheduleWritePackageRestrictionsLocked(userId);
+            }
+        }
+    }
+
+    /**
+     * Non-Binder method, support for the backup/restore mechanism: write the
+     * full set of preferred activities in its canonical XML format.  Returns true
+     * on success; false otherwise.
+     */
+    @Override
+    public byte[] getPreferredActivityBackup(int userId) {
+        if (Binder.getCallingUid() != Process.SYSTEM_UID) {
+            throw new SecurityException("Only the system may call getPreferredActivityBackup()");
+        }
+
+        ByteArrayOutputStream dataStream = new ByteArrayOutputStream();
+        try {
+            final XmlSerializer serializer = new FastXmlSerializer();
+            serializer.setOutput(dataStream, "utf-8");
+            serializer.startDocument(null, true);
+            serializer.startTag(null, TAG_PREFERRED_BACKUP);
+
+            synchronized (mPackages) {
+                mSettings.writePreferredActivitiesLPr(serializer, userId, true);
+            }
+
+            serializer.endTag(null, TAG_PREFERRED_BACKUP);
+            serializer.endDocument();
+            serializer.flush();
+        } catch (Exception e) {
+            if (DEBUG_BACKUP) {
+                Slog.e(TAG, "Unable to write preferred activities for backup", e);
+            }
+            return null;
+        }
+
+        return dataStream.toByteArray();
+    }
+
+    @Override
+    public void restorePreferredActivities(byte[] backup, int userId) {
+        if (Binder.getCallingUid() != Process.SYSTEM_UID) {
+            throw new SecurityException("Only the system may call restorePreferredActivities()");
+        }
+
+        try {
+            final XmlPullParser parser = Xml.newPullParser();
+            parser.setInput(new ByteArrayInputStream(backup), null);
+
+            int type;
+            while ((type = parser.next()) != XmlPullParser.START_TAG
+                    && type != XmlPullParser.END_DOCUMENT) {
+            }
+            if (type != XmlPullParser.START_TAG) {
+                // oops didn't find a start tag?!
+                if (DEBUG_BACKUP) {
+                    Slog.e(TAG, "Didn't find start tag during restore");
+                }
+                return;
+            }
+
+            // this is supposed to be TAG_PREFERRED_BACKUP
+            if (!TAG_PREFERRED_BACKUP.equals(parser.getName())) {
+                if (DEBUG_BACKUP) {
+                    Slog.e(TAG, "Found unexpected tag " + parser.getName());
+                }
+                return;
+            }
+
+            // skip interfering stuff, then we're aligned with the backing implementation
+            while ((type = parser.next()) == XmlPullParser.TEXT) { }
+            synchronized (mPackages) {
+                mSettings.readPreferredActivitiesLPw(parser, userId);
+            }
+        } catch (Exception e) {
+            if (DEBUG_BACKUP) {
+                Slog.e(TAG, "Exception restoring preferred activities: " + e.getMessage());
             }
         }
     }
