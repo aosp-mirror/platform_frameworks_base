@@ -145,7 +145,7 @@ public class KeyGeneratorSpec implements AlgorithmParameterSpec {
     }
 
     /**
-     * Gets the time instant after which the key is no long valid for decryption and verification.
+     * Gets the time instant after which the key is no longer valid for decryption and verification.
      *
      * @return instant or {@code null} if not restricted.
      *
@@ -156,7 +156,7 @@ public class KeyGeneratorSpec implements AlgorithmParameterSpec {
     }
 
     /**
-     * Gets the time instant after which the key is no long valid for encryption and signing.
+     * Gets the time instant after which the key is no longer valid for encryption and signing.
      *
      * @return instant or {@code null} if not restricted.
      */
