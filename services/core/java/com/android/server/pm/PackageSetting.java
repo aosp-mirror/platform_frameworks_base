@@ -74,4 +74,8 @@ final class PackageSetting extends PackageSettingBase {
     public boolean isSystem() {
         return (pkgFlags & ApplicationInfo.FLAG_SYSTEM) != 0;
     }
+
+    public boolean isSharedUser() {
+        return sharedUser != null;
+    }
 }
