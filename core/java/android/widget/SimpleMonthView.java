@@ -80,11 +80,12 @@ class SimpleMonthView extends View {
     private final SimpleDateFormat mTitleFormatter;
     private final SimpleDateFormat mDayOfWeekFormatter;
 
-    private final int mMonthHeight;
-    private final int mDayOfWeekHeight;
-    private final int mDayHeight;
-    private final int mCellWidth;
-    private final int mDaySelectorRadius;
+    // Desired dimensions.
+    private final int mDesiredMonthHeight;
+    private final int mDesiredDayOfWeekHeight;
+    private final int mDesiredDayHeight;
+    private final int mDesiredCellWidth;
+    private final int mDesiredDaySelectorRadius;
 
     // Next/previous drawables.
     private final Drawable mPrevDrawable;
@@ -98,6 +99,13 @@ class SimpleMonthView extends View {
 
     private int mMonth;
     private int mYear;
+
+    // Dimensions as laid out.
+    private int mMonthHeight;
+    private int mDayOfWeekHeight;
+    private int mDayHeight;
+    private int mCellWidth;
+    private int mDaySelectorRadius;
 
     private int mPaddedWidth;
     private int mPaddedHeight;
@@ -158,11 +166,11 @@ class SimpleMonthView extends View {
         super(context, attrs, defStyleAttr, defStyleRes);
 
         final Resources res = context.getResources();
-        mMonthHeight = res.getDimensionPixelSize(R.dimen.date_picker_month_height);
-        mDayOfWeekHeight = res.getDimensionPixelSize(R.dimen.date_picker_day_of_week_height);
-        mDayHeight = res.getDimensionPixelSize(R.dimen.date_picker_day_height);
-        mCellWidth = res.getDimensionPixelSize(R.dimen.date_picker_day_width);
-        mDaySelectorRadius = res.getDimensionPixelSize(R.dimen.date_picker_day_selector_radius);
+        mDesiredMonthHeight = res.getDimensionPixelSize(R.dimen.date_picker_month_height);
+        mDesiredDayOfWeekHeight = res.getDimensionPixelSize(R.dimen.date_picker_day_of_week_height);
+        mDesiredDayHeight = res.getDimensionPixelSize(R.dimen.date_picker_day_height);
+        mDesiredCellWidth = res.getDimensionPixelSize(R.dimen.date_picker_day_width);
+        mDesiredDaySelectorRadius = res.getDimensionPixelSize(R.dimen.date_picker_day_selector_radius);
 
         mPrevDrawable = context.getDrawable(R.drawable.ic_chevron_left);
         mNextDrawable = context.getDrawable(R.drawable.ic_chevron_right);
@@ -400,7 +408,7 @@ class SimpleMonthView extends View {
         final TextPaint p = mDayOfWeekPaint;
         final int headerHeight = mMonthHeight;
         final int rowHeight = mDayOfWeekHeight;
-        final int colWidth = mPaddedWidth / DAYS_IN_WEEK;
+        final int colWidth = mCellWidth;
 
         // Text is vertically centered within the day of week height.
         final float halfLineHeight = (p.ascent() + p.descent()) / 2f;
@@ -426,7 +434,7 @@ class SimpleMonthView extends View {
         final TextPaint p = mDayPaint;
         final int headerHeight = mMonthHeight + mDayOfWeekHeight;
         final int rowHeight = mDayHeight;
-        final int colWidth = mPaddedWidth / DAYS_IN_WEEK;
+        final int colWidth = mCellWidth;
 
         // Text is vertically centered within the row height.
         final float halfLineHeight = (p.ascent() + p.descent()) / 2f;
@@ -627,9 +635,9 @@ class SimpleMonthView extends View {
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        final int preferredHeight = mDayHeight * mNumWeeks + mDayOfWeekHeight + mMonthHeight
-                + getPaddingTop() + getPaddingBottom();
-        final int preferredWidth = mCellWidth * DAYS_IN_WEEK
+        final int preferredHeight = mDesiredDayHeight * mNumWeeks + mDesiredDayOfWeekHeight
+                + mDesiredMonthHeight + getPaddingTop() + getPaddingBottom();
+        final int preferredWidth = mDesiredCellWidth * DAYS_IN_WEEK
                 + getPaddingStart() + getPaddingEnd();
         final int resolvedWidth = resolveSize(preferredWidth, widthMeasureSpec);
         final int resolvedHeight = resolveSize(preferredHeight, heightMeasureSpec);
@@ -637,16 +645,46 @@ class SimpleMonthView extends View {
     }
 
     @Override
-    protected void onSizeChanged(int w, int h, int oldw, int oldh) {
-        final int paddedLeft = getPaddingLeft();
-        final int paddedTop = getPaddingTop();
-        final int paddedRight = w - getPaddingRight();
-        final int paddedBottom = h - getPaddingBottom();
-        mPaddedWidth = paddedRight - paddedLeft;
-        mPaddedHeight = paddedBottom - paddedTop;
+    protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
+        if (!changed) {
+            return;
+        }
 
-        final int monthHeight = mMonthHeight;
+        // Let's initialize a completely reasonable number of variables.
+        final int w = right - left;
+        final int h = bottom - top;
+        final int paddingLeft = getPaddingLeft();
+        final int paddingTop = getPaddingTop();
+        final int paddingRight = getPaddingRight();
+        final int paddingBottom = getPaddingBottom();
+        final int paddedRight = w - paddingRight;
+        final int paddedBottom = h - paddingBottom;
+        final int paddedWidth = paddedRight - paddingLeft;
+        final int paddedHeight = paddedBottom - paddingTop;
+        if (paddedWidth == mPaddedWidth || paddedHeight == mPaddedHeight) {
+            return;
+        }
+
+        mPaddedWidth = paddedWidth;
+        mPaddedHeight = paddedHeight;
+
+        // We may have been laid out smaller than our preferred size. If so,
+        // scale all dimensions to fit.
+        final int measuredPaddedHeight = getMeasuredHeight() - paddingTop - paddingBottom;
+        final float scaleH = paddedHeight / (float) measuredPaddedHeight;
+        final int monthHeight = (int) (mDesiredMonthHeight * scaleH);
         final int cellWidth = mPaddedWidth / DAYS_IN_WEEK;
+        mMonthHeight = monthHeight;
+        mDayOfWeekHeight = (int) (mDesiredDayOfWeekHeight * scaleH);
+        mDayHeight = (int) (mDesiredDayHeight * scaleH);
+        mCellWidth = cellWidth;
+
+        // Compute the largest day selector radius that's still within the clip
+        // bounds and desired selector radius.
+        final int maxSelectorWidth = cellWidth / 2 + Math.min(paddingLeft, paddingRight);
+        final int maxSelectorHeight = mDayHeight / 2 + paddingBottom;
+        mDaySelectorRadius = Math.min(mDesiredDaySelectorRadius,
+                Math.min(maxSelectorWidth, maxSelectorHeight));
 
         // Vertically center the previous/next drawables within the month
         // header, horizontally center within the day cell, then expand the
@@ -660,7 +698,7 @@ class SimpleMonthView extends View {
 
             // Button bounds don't include padding, but hit area does.
             prevDrawable.setBounds(iconLeft, iconTop, iconLeft + dW, iconTop + dH);
-            mPrevHitArea.set(0, 0, paddedLeft + cellWidth, paddedTop + monthHeight);
+            mPrevHitArea.set(0, 0, paddingLeft + cellWidth, paddingTop + monthHeight);
         }
 
         final Drawable nextDrawable = mNextDrawable;
@@ -668,11 +706,11 @@ class SimpleMonthView extends View {
             final int dW = nextDrawable.getIntrinsicWidth();
             final int dH = nextDrawable.getIntrinsicHeight();
             final int iconTop = (monthHeight - dH) / 2;
-            final int iconRight = mPaddedWidth - (cellWidth - dW) / 2;
+            final int iconRight = paddedWidth - (cellWidth - dW) / 2;
 
             // Button bounds don't include padding, but hit area does.
             nextDrawable.setBounds(iconRight - dW, iconTop, iconRight, iconTop + dH);
-            mNextHitArea.set(paddedRight - cellWidth, 0, w, paddedTop + monthHeight);
+            mNextHitArea.set(paddedRight - cellWidth, 0, w, paddingTop + monthHeight);
         }
 
         // Invalidate cached accessibility information.
@@ -753,7 +791,7 @@ class SimpleMonthView extends View {
 
         // Compute left edge.
         final int col = index % DAYS_IN_WEEK;
-        final int colWidth = mPaddedWidth / DAYS_IN_WEEK;
+        final int colWidth = mCellWidth;
         final int left = getPaddingLeft() + col * colWidth;
 
         // Compute top edge.

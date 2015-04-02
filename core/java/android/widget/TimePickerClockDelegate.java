@@ -25,8 +25,10 @@ import android.content.res.TypedArray;
 import android.graphics.drawable.Drawable;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.text.SpannableStringBuilder;
 import android.text.format.DateFormat;
 import android.text.format.DateUtils;
+import android.text.style.TtsSpan;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.StateSet;
@@ -155,13 +157,16 @@ class TimePickerClockDelegate extends TimePicker.AbstractTimePickerDelegate impl
         mHourView.setMinWidth(computeStableWidth(mHourView, 24));
         mMinuteView.setMinWidth(computeStableWidth(mMinuteView, 60));
 
+        final SpannableStringBuilder amLabel = new SpannableStringBuilder()
+                .append(amPmStrings[0], new TtsSpan.VerbatimBuilder(amPmStrings[0]).build(), 0);
+
         // Set up AM/PM labels.
         mAmPmLayout = mainView.findViewById(R.id.ampm_layout);
         mAmLabel = (CheckedTextView) mAmPmLayout.findViewById(R.id.am_label);
-        mAmLabel.setText(amPmStrings[0]);
+        mAmLabel.setText(obtainVerbatim(amPmStrings[0]));
         mAmLabel.setOnClickListener(mClickListener);
         mPmLabel = (CheckedTextView) mAmPmLayout.findViewById(R.id.pm_label);
-        mPmLabel.setText(amPmStrings[1]);
+        mPmLabel.setText(obtainVerbatim(amPmStrings[1]));
         mPmLabel.setOnClickListener(mClickListener);
 
         // For the sake of backwards compatibility, attempt to extract the text
@@ -218,6 +223,11 @@ class TimePickerClockDelegate extends TimePicker.AbstractTimePickerDelegate impl
         final int currentHour = calendar.get(Calendar.HOUR_OF_DAY);
         final int currentMinute = calendar.get(Calendar.MINUTE);
         initialize(currentHour, currentMinute, false /* 12h */, HOUR_INDEX);
+    }
+
+    private static final CharSequence obtainVerbatim(String text) {
+        return new SpannableStringBuilder().append(text,
+                new TtsSpan.VerbatimBuilder(text).build(), 0);
     }
 
     /**
