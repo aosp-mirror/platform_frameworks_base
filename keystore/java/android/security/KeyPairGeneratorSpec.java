@@ -97,6 +97,8 @@ public final class KeyPairGeneratorSpec implements AlgorithmParameterSpec {
 
     private final Integer mUserAuthenticationValidityDurationSeconds;
 
+    private final boolean mInvalidatedOnNewFingerprintEnrolled;
+
     /**
      * Parameter specification for the "{@code AndroidKeyPairGenerator}"
      * instance of the {@link java.security.KeyPairGenerator} API. The
@@ -142,7 +144,8 @@ public final class KeyPairGeneratorSpec implements AlgorithmParameterSpec {
             Integer minSecondsBetweenOperations,
             Integer maxUsesPerBoot,
             Set<Integer> userAuthenticators,
-            Integer userAuthenticationValidityDurationSeconds) {
+            Integer userAuthenticationValidityDurationSeconds,
+            boolean invalidatedOnNewFingerprintEnrolled) {
         if (context == null) {
             throw new IllegalArgumentException("context == null");
         } else if (TextUtils.isEmpty(keyStoreAlias)) {
@@ -186,6 +189,7 @@ public final class KeyPairGeneratorSpec implements AlgorithmParameterSpec {
                 ? new HashSet<Integer>(userAuthenticators)
                 : Collections.<Integer>emptySet();
         mUserAuthenticationValidityDurationSeconds = userAuthenticationValidityDurationSeconds;
+        mInvalidatedOnNewFingerprintEnrolled = invalidatedOnNewFingerprintEnrolled;
     }
 
     /**
@@ -197,7 +201,7 @@ public final class KeyPairGeneratorSpec implements AlgorithmParameterSpec {
             Date startDate, Date endDate, int flags) {
         this(context, keyStoreAlias, keyType, keySize, spec, subjectDN, serialNumber, startDate,
                 endDate, flags, startDate, endDate, endDate, null, null, null, null, null, null,
-                null, null);
+                null, null, false);
     }
 
     /**
@@ -426,6 +430,19 @@ public final class KeyPairGeneratorSpec implements AlgorithmParameterSpec {
     }
 
     /**
+     * Returns {@code true} if this key must be permanently invalidated once a new fingerprint is
+     * enrolled. This constraint only has effect if fingerprint reader is one of the user
+     * authenticators protecting access to this key.
+     *
+     * @see #getUserAuthenticators()
+     *
+     * @hide
+     */
+    public boolean isInvalidatedOnNewFingerprintEnrolled() {
+        return mInvalidatedOnNewFingerprintEnrolled;
+    }
+
+    /**
      * Builder class for {@link KeyPairGeneratorSpec} objects.
      * <p>
      * This will build a parameter spec for use with the <a href="{@docRoot}
@@ -488,6 +505,8 @@ public final class KeyPairGeneratorSpec implements AlgorithmParameterSpec {
         private Set<Integer> mUserAuthenticators;
 
         private Integer mUserAuthenticationValidityDurationSeconds;
+
+        private boolean mInvalidatedOnNewFingerprintEnrolled;
 
         /**
          * Creates a new instance of the {@code Builder} with the given
@@ -800,6 +819,22 @@ public final class KeyPairGeneratorSpec implements AlgorithmParameterSpec {
         }
 
         /**
+         * Sets whether this key must be invalidated (permanently) once a new fingerprint is
+         * enrolled. This only has effect if fingerprint reader is one of the user authenticators
+         * protecting access to the key.
+         *
+         * <p>By default, enrolling a new fingerprint does not invalidate the key.
+         *
+         * @see #setUserAuthenticators(Set)
+         *
+         * @hide
+         */
+        public Builder setInvalidatedOnNewFingerprintEnrolled(boolean invalidated) {
+            mInvalidatedOnNewFingerprintEnrolled = invalidated;
+            return this;
+        }
+
+        /**
          * Builds the instance of the {@code KeyPairGeneratorSpec}.
          *
          * @throws IllegalArgumentException if a required field is missing
@@ -826,7 +861,8 @@ public final class KeyPairGeneratorSpec implements AlgorithmParameterSpec {
                     mMinSecondsBetweenOperations,
                     mMaxUsesPerBoot,
                     mUserAuthenticators,
-                    mUserAuthenticationValidityDurationSeconds);
+                    mUserAuthenticationValidityDurationSeconds,
+                    mInvalidatedOnNewFingerprintEnrolled);
         }
     }
 }
