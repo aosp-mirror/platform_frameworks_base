@@ -187,7 +187,6 @@ class DayPickerView extends ViewPager {
      * @param setSelected whether to set the specified day as selected
      */
     private void setDate(long timeInMillis, boolean animate, boolean setSelected) {
-        // Set the selected day
         if (setSelected) {
             mSelectedDay.setTimeInMillis(timeInMillis);
         }
@@ -196,6 +195,9 @@ class DayPickerView extends ViewPager {
         if (position != getCurrentItem()) {
             setCurrentItem(position, animate);
         }
+
+        mTempCalendar.setTimeInMillis(timeInMillis);
+        mAdapter.setSelectedDay(mTempCalendar);
     }
 
     public long getDate() {
