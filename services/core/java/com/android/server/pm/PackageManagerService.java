@@ -7397,8 +7397,10 @@ public class PackageManagerService extends IPackageManager.Stub {
 
         if (replace) {
             ps.installPermissionsFixed = false;
-            origPermissions = new PermissionsState(permissionsState);
-            permissionsState.reset();
+            if (!ps.isSharedUser()) {
+                origPermissions = new PermissionsState(permissionsState);
+                permissionsState.reset();
+            }
         }
 
         permissionsState.setGlobalGids(mGlobalGids);
