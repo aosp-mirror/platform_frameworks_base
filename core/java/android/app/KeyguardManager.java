@@ -253,6 +253,32 @@ public class KeyguardManager {
     }
 
     /**
+     * Returns whether the device is secured with a PIN, pattern or
+     * password.
+     *
+     * @return true if a PIN, pattern or password was set.
+     */
+    public boolean isDeviceSecure() {
+        return isDeviceSecure(UserHandle.getCallingUserId());
+    }
+
+    /**
+     * Returns whether the device is secured with a PIN, pattern or
+     * password.
+     *
+     * @param userId the user for which the secure state should be reported.
+     * @return true if a PIN, pattern or password was set.
+     * @hide
+     */
+    public boolean isDeviceSecure(int userId) {
+        try {
+            return mTrustManager.isDeviceSecure(userId);
+        } catch (RemoteException e) {
+            return false;
+        }
+    }
+
+    /**
      * @deprecated Use {@link android.view.WindowManager.LayoutParams#FLAG_DISMISS_KEYGUARD}
      * and/or {@link android.view.WindowManager.LayoutParams#FLAG_SHOW_WHEN_LOCKED}
      * instead; this allows you to seamlessly hide the keyguard as your application

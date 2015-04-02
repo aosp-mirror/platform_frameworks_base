@@ -4596,6 +4596,7 @@ package android.app {
     method public deprecated void exitKeyguardSecurely(android.app.KeyguardManager.OnKeyguardExitResult);
     method public boolean inKeyguardRestrictedInputMode();
     method public boolean isDeviceLocked();
+    method public boolean isDeviceSecure();
     method public boolean isKeyguardLocked();
     method public boolean isKeyguardSecure();
     method public deprecated android.app.KeyguardManager.KeyguardLock newKeyguardLock(java.lang.String);
