@@ -142,7 +142,14 @@ static struct {
 
 static const char* const kEventHandlerClassPathName =
         "android/media/AudioPortEventHandler";
-static jmethodID gPostEventFromNative;
+static struct {
+    jfieldID    mJniCallback;
+} gEventHandlerFields;
+static struct {
+    jmethodID    postEventFromNative;
+} gAudioPortEventHandlerMethods;
+
+static Mutex gLock;
 
 enum AudioError {
     kAudioStatusOk = 0,
@@ -173,14 +180,14 @@ public:
 private:
     void sendEvent(int event);
 
-    jclass      mClass;     // Reference to AudioPortEventHandlerDelegate class
-    jobject     mObject;    // Weak ref to AudioPortEventHandlerDelegate Java object to call on
+    jclass      mClass;     // Reference to AudioPortEventHandler class
+    jobject     mObject;    // Weak ref to AudioPortEventHandler Java object to call on
 };
 
 JNIAudioPortCallback::JNIAudioPortCallback(JNIEnv* env, jobject thiz, jobject weak_thiz)
 {
 
-    // Hold onto the SoundTriggerModule class for use in calling the static method
+    // Hold onto the AudioPortEventHandler class for use in calling the static method
     // that posts events to the application thread.
     jclass clazz = env->GetObjectClass(thiz);
     if (clazz == NULL) {
@@ -189,7 +196,7 @@ JNIAudioPortCallback::JNIAudioPortCallback(JNIEnv* env, jobject thiz, jobject we
     }
     mClass = (jclass)env->NewGlobalRef(clazz);
 
-    // We use a weak reference so the SoundTriggerModule object can be garbage collected.
+    // We use a weak reference so the AudioPortEventHandler object can be garbage collected.
     // The reference is only used as a proxy for callbacks.
     mObject  = env->NewGlobalRef(weak_thiz);
 }
@@ -211,7 +218,7 @@ void JNIAudioPortCallback::sendEvent(int event)
     if (env == NULL) {
         return;
     }
-    env->CallStaticVoidMethod(mClass, gPostEventFromNative, mObject,
+    env->CallStaticVoidMethod(mClass, gAudioPortEventHandlerMethods.postEventFromNative, mObject,
                               event, 0, 0, NULL);
     if (env->ExceptionCheck()) {
         ALOGW("An exception occurred while notifying an event.");
@@ -232,6 +239,23 @@ void JNIAudioPortCallback::onAudioPatchListUpdate()
 void JNIAudioPortCallback::onServiceDied()
 {
     sendEvent(AUDIOPORT_EVENT_SERVICE_DIED);
+}
+
+static sp<JNIAudioPortCallback> setJniCallback(JNIEnv* env,
+                                       jobject thiz,
+                                       const sp<JNIAudioPortCallback>& callback)
+{
+    Mutex::Autolock l(gLock);
+    sp<JNIAudioPortCallback> old =
+            (JNIAudioPortCallback*)env->GetLongField(thiz, gEventHandlerFields.mJniCallback);
+    if (callback.get()) {
+        callback->incStrong((void*)setJniCallback);
+    }
+    if (old != 0) {
+        old->decStrong((void*)setJniCallback);
+    }
+    env->SetLongField(thiz, gEventHandlerFields.mJniCallback, (jlong)callback.get());
+    return old;
 }
 
 static int check_AudioSystem_Command(status_t status)
@@ -1355,7 +1379,9 @@ android_media_AudioSystem_eventHandlerSetup(JNIEnv *env, jobject thiz, jobject w
 
     sp<JNIAudioPortCallback> callback = new JNIAudioPortCallback(env, thiz, weak_this);
 
-    AudioSystem::setAudioPortCallback(callback);
+    if (AudioSystem::addAudioPortCallback(callback) == NO_ERROR) {
+        setJniCallback(env, thiz, callback);
+    }
 }
 
 static void
@@ -1363,9 +1389,11 @@ android_media_AudioSystem_eventHandlerFinalize(JNIEnv *env, jobject thiz)
 {
     ALOGV("eventHandlerFinalize");
 
-    sp<JNIAudioPortCallback> callback;
+    sp<JNIAudioPortCallback> callback = setJniCallback(env, thiz, 0);
 
-    AudioSystem::setAudioPortCallback(callback);
+    if (callback != 0) {
+        AudioSystem::removeAudioPortCallback(callback);
+    }
 }
 
 static jint
@@ -1636,9 +1664,11 @@ int register_android_media_AudioSystem(JNIEnv *env)
                                                 "Landroid/media/AudioHandle;");
 
     jclass eventHandlerClass = FindClassOrDie(env, kEventHandlerClassPathName);
-    gPostEventFromNative = GetStaticMethodIDOrDie(env, eventHandlerClass, "postEventFromNative",
-                                                  "(Ljava/lang/Object;IIILjava/lang/Object;)V");
-
+    gAudioPortEventHandlerMethods.postEventFromNative = GetStaticMethodIDOrDie(
+                                                    env, eventHandlerClass, "postEventFromNative",
+                                                    "(Ljava/lang/Object;IIILjava/lang/Object;)V");
+    gEventHandlerFields.mJniCallback = GetFieldIDOrDie(env,
+                                                    eventHandlerClass, "mJniCallback", "J");
 
     jclass audioMixClass = FindClassOrDie(env, "android/media/audiopolicy/AudioMix");
     gAudioMixClass = MakeGlobalRefOrDie(env, audioMixClass);
