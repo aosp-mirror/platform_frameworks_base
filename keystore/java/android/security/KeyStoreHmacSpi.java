@@ -78,7 +78,11 @@ public abstract class KeyStoreHmacSpi extends MacSpi implements KeyStoreCryptoOp
         }
 
         mKeyAliasInKeyStore = ((KeyStoreSecretKey) key).getAlias();
+        if (mKeyAliasInKeyStore == null) {
+            throw new InvalidKeyException("Key's KeyStore alias not known");
+        }
         engineReset();
+        ensureKeystoreOperationInitialized();
     }
 
     @Override
@@ -90,8 +94,18 @@ public abstract class KeyStoreHmacSpi extends MacSpi implements KeyStoreCryptoOp
         }
         mOperationHandle = null;
         mChunkedStreamer = null;
+    }
+
+    private void ensureKeystoreOperationInitialized() {
+        if (mChunkedStreamer != null) {
+            return;
+        }
+        if (mKeyAliasInKeyStore == null) {
+            throw new IllegalStateException("Not initialized");
+        }
 
         KeymasterArguments keymasterArgs = new KeymasterArguments();
+        keymasterArgs.addInt(KeymasterDefs.KM_TAG_ALGORITHM, KeyStoreKeyConstraints.Algorithm.HMAC);
         keymasterArgs.addInt(KeymasterDefs.KM_TAG_DIGEST, mDigest);
 
         OperationResult opResult = mKeyStore.begin(mKeyAliasInKeyStore,
@@ -105,10 +119,10 @@ public abstract class KeyStoreHmacSpi extends MacSpi implements KeyStoreCryptoOp
         } else if (opResult.resultCode != KeyStore.NO_ERROR) {
             throw KeymasterUtils.getCryptoOperationException(opResult.resultCode);
         }
-        mOperationToken = opResult.token;
-        if (mOperationToken == null) {
+        if (opResult.token == null) {
             throw new CryptoOperationException("Keystore returned null operation token");
         }
+        mOperationToken = opResult.token;
         mOperationHandle = opResult.operationHandle;
         mChunkedStreamer = new KeyStoreCryptoOperationChunkedStreamer(
                 new KeyStoreCryptoOperationChunkedStreamer.MainDataStream(
@@ -122,9 +136,7 @@ public abstract class KeyStoreHmacSpi extends MacSpi implements KeyStoreCryptoOp
 
     @Override
     protected void engineUpdate(byte[] input, int offset, int len) {
-        if (mChunkedStreamer == null) {
-            throw new IllegalStateException("Not initialized");
-        }
+        ensureKeystoreOperationInitialized();
 
         byte[] output;
         try {
@@ -139,9 +151,7 @@ public abstract class KeyStoreHmacSpi extends MacSpi implements KeyStoreCryptoOp
 
     @Override
     protected byte[] engineDoFinal() {
-        if (mChunkedStreamer == null) {
-            throw new IllegalStateException("Not initialized");
-        }
+        ensureKeystoreOperationInitialized();
 
         byte[] result;
         try {
