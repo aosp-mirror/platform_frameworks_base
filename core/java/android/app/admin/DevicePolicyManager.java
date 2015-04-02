@@ -2156,7 +2156,8 @@ public class DevicePolicyManager {
      * Called by a device or profile owner to install a certificate and private key pair. The
      * keypair will be visible to all apps within the profile.
      *
-     * @param who Which {@link DeviceAdminReceiver} this request is associated with.
+     * @param who Which {@link DeviceAdminReceiver} this request is associated with. Use
+     * <code>null</code> if calling from a delegated certificate installer.
      * @param privKey The private key to install.
      * @param cert The certificate to install.
      * @param alias The private key alias under which to install the certificate. If a certificate
@@ -2193,9 +2194,9 @@ public class DevicePolicyManager {
 
     /**
      * Called by a profile owner or device owner to grant access to privileged certificate
-     * manipulation APIs to a third-party CA certificate installer app. Granted APIs include
+     * manipulation APIs to a third-party certificate installer app. Granted APIs include
      * {@link #getInstalledCaCerts}, {@link #hasCaCertInstalled}, {@link #installCaCert},
-     * {@link #uninstallCaCert} and {@link #uninstallAllUserCaCerts}.
+     * {@link #uninstallCaCert}, {@link #uninstallAllUserCaCerts} and {@link #installKeyPair}.
      * <p>
      * Delegated certificate installer is a per-user state. The delegated access is persistent until
      * it is later cleared by calling this method with a null value or uninstallling the certificate
