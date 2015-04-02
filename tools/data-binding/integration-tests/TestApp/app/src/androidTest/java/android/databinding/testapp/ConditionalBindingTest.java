@@ -1,6 +1,6 @@
 package android.databinding.testapp;
 
-import android.databinding.testapp.generated.ConditionalBindingBinding;
+import android.databinding.testapp.databinding.ConditionalBindingBinding;
 import android.databinding.testapp.vo.NotBindableVo;
 
 import android.test.UiThreadTest;

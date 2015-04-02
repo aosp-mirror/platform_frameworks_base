@@ -186,7 +186,7 @@ class DataBinderPlugin : Plugin<Project> {
             val excludePattern = "android/databinding/layouts/*.*"
             val appPkgAsClass = packageName.replace('.', '/')
             packageTask.exclude(excludePattern)
-            packageTask.exclude("$appPkgAsClass/generated/*")
+            packageTask.exclude("$appPkgAsClass/databinding/*")
             packageTask.exclude("$appPkgAsClass/BR.*")
             packageTask.exclude(xmlProcessor.getInfoClassFullName().replace('.', '/') + ".class")
             log("excludes ${packageTask.getExcludes()}")

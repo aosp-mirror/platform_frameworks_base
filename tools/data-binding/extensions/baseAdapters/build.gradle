@@ -70,7 +70,7 @@ android.libraryVariants.all { variant ->
     def packageName = "com.android.databinding.library.baseAdapters"
     def appPkgAsClass = packageName.replace('.', '/')
     task.exclude("android/databinding/layouts/*.*")
-    task.exclude("$appPkgAsClass/generated/*")
+    task.exclude("$appPkgAsClass/databinding/*")
     task.exclude("$appPkgAsClass/BR.*")
     artifacts.add('jarArchives', task);
 }

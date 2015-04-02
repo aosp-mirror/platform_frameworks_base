@@ -15,7 +15,7 @@
  */
 package android.databinding.testapp;
 
-import android.databinding.testapp.generated.TabWidgetAdapterTestBinding;
+import android.databinding.testapp.databinding.TabWidgetAdapterTestBinding;
 import android.databinding.testapp.vo.TabWidgetBindingObject;
 
 import android.graphics.drawable.ColorDrawable;

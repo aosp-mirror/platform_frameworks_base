@@ -16,7 +16,7 @@
 package android.databinding.testapp;
 
 import android.databinding.ObservableArrayList;
-import android.databinding.testapp.generated.BasicBindingBinding;
+import android.databinding.testapp.databinding.BasicBindingBinding;
 
 import android.databinding.ObservableList;
 import android.databinding.OnListChangedListener;

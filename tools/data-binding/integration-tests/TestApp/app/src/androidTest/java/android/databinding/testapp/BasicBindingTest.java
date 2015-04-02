@@ -13,7 +13,7 @@
 
 package android.databinding.testapp;
 
-import android.databinding.testapp.generated.BasicBindingBinding;
+import android.databinding.testapp.databinding.BasicBindingBinding;
 
 import android.test.UiThreadTest;
 

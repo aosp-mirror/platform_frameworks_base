@@ -15,8 +15,8 @@
  */
 package android.databinding.testapp;
 
-import android.databinding.testapp.generated.ViewStubBinding;
-import android.databinding.testapp.generated.ViewStubContentsBinding;
+import android.databinding.testapp.databinding.ViewStubBinding;
+import android.databinding.testapp.databinding.ViewStubContentsBinding;
 import android.databinding.ViewStubProxy;
 import android.support.v4.util.ArrayMap;
 import android.test.UiThreadTest;

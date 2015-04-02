@@ -15,7 +15,7 @@
  */
 package android.databinding.testapp;
 
-import android.databinding.testapp.generated.AutoCompleteTextViewAdapterTestBinding;
+import android.databinding.testapp.databinding.AutoCompleteTextViewAdapterTestBinding;
 import android.databinding.testapp.vo.AutoCompleteTextViewBindingObject;
 
 import android.graphics.drawable.ColorDrawable;

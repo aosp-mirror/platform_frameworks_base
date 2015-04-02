@@ -15,7 +15,7 @@
  */
 package android.databinding.testapp;
 
-import android.databinding.testapp.generated.AbsSpinnerAdapterTestBinding;
+import android.databinding.testapp.databinding.AbsSpinnerAdapterTestBinding;
 import android.databinding.testapp.vo.AbsSpinnerBindingObject;
 
 import android.os.Build;

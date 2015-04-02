@@ -15,7 +15,7 @@
  */
 package android.databinding.testapp;
 
-import android.databinding.testapp.generated.LinearLayoutAdapterTestBinding;
+import android.databinding.testapp.databinding.LinearLayoutAdapterTestBinding;
 import android.databinding.testapp.vo.LinearLayoutBindingObject;
 
 import android.os.Build;

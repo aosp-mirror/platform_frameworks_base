@@ -71,7 +71,7 @@ public class LayoutBinder {
         mBundle = layoutBundle;
         mProjectPackage = resourceBundle.getAppPackage();
         mModulePackage = layoutBundle.getModulePackage();
-        mPackage = layoutBundle.getModulePackage() + ".generated";
+        mPackage = layoutBundle.getModulePackage() + ".databinding";
         mBaseClassName = ParserHelper.INSTANCE$.toClassName(layoutBundle.getFileName()) + "Binding";
         // copy over data.
         for (Map.Entry<String, String> variable : mBundle.getVariables().entrySet()) {

@@ -15,7 +15,7 @@
  */
 package android.databinding.testapp;
 
-import android.databinding.testapp.generated.ViewGroupAdapterTestBinding;
+import android.databinding.testapp.databinding.ViewGroupAdapterTestBinding;
 import android.databinding.testapp.vo.ViewGroupBindingObject;
 
 import android.os.Build;

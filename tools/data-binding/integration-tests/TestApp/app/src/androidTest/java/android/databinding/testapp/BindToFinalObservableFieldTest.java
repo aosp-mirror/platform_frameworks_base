@@ -13,7 +13,7 @@
 
 package android.databinding.testapp;
 
-import android.databinding.testapp.generated.BindToFinalObservableBinding;
+import android.databinding.testapp.databinding.BindToFinalObservableBinding;
 import android.databinding.testapp.vo.PublicFinalWithObservableTestVo;
 
 import android.test.UiThreadTest;

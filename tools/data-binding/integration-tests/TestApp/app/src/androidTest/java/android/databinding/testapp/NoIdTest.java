@@ -13,7 +13,7 @@
 
 package android.databinding.testapp;
 
-import android.databinding.testapp.generated.NoIdTestBinding;
+import android.databinding.testapp.databinding.NoIdTestBinding;
 
 import android.test.UiThreadTest;
 import android.widget.LinearLayout;

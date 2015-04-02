@@ -15,7 +15,7 @@
  */
 package android.databinding.testapp;
 
-import android.databinding.testapp.generated.CastTestBinding;
+import android.databinding.testapp.databinding.CastTestBinding;
 
 import android.support.v4.util.ArrayMap;
 import android.test.UiThreadTest;

@@ -14,8 +14,8 @@ import android.view.ViewGroup;
 
 import android.databinding.DataBindingUtil;
 import android.databinding.PropertyChangeRegistry;
-import com.android.example.bindingdemo.generated.ListItemBinding;
-import com.android.example.bindingdemo.generated.MainActivityBinding;
+import com.android.example.bindingdemo.databinding.ListItemBinding;
+import com.android.example.bindingdemo.databinding.MainActivityBinding;
 import com.android.example.bindingdemo.vo.User;
 import com.android.example.bindingdemo.vo.Users;
 

@@ -15,7 +15,7 @@
  */
 package android.databinding.testapp;
 
-import android.databinding.testapp.generated.TextViewAdapterTestBinding;
+import android.databinding.testapp.databinding.TextViewAdapterTestBinding;
 import android.databinding.testapp.vo.TextViewBindingObject;
 
 import android.annotation.TargetApi;

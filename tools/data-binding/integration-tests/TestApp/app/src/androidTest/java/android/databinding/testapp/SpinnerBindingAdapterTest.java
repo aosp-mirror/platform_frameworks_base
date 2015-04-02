@@ -15,7 +15,7 @@
  */
 package android.databinding.testapp;
 
-import android.databinding.testapp.generated.SpinnerAdapterTestBinding;
+import android.databinding.testapp.databinding.SpinnerAdapterTestBinding;
 import android.databinding.testapp.vo.SpinnerBindingObject;
 
 import android.graphics.drawable.ColorDrawable;

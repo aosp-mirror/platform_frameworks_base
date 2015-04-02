@@ -15,7 +15,7 @@
  */
 package android.databinding.testapp;
 
-import android.databinding.testapp.generated.ProgressBarAdapterTestBinding;
+import android.databinding.testapp.databinding.ProgressBarAdapterTestBinding;
 import android.databinding.testapp.vo.ProgressBarBindingObject;
 
 import android.os.Build;

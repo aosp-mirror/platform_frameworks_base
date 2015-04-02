@@ -16,7 +16,7 @@
 package android.databinding.testapp;
 
 import android.databinding.ListChangeRegistry;
-import android.databinding.testapp.generated.BasicBindingBinding;
+import android.databinding.testapp.databinding.BasicBindingBinding;
 
 import android.databinding.OnListChangedListener;
 

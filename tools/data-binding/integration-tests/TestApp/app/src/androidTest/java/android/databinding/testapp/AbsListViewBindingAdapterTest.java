@@ -15,7 +15,7 @@
  */
 package android.databinding.testapp;
 
-import android.databinding.testapp.generated.AbsListViewAdapterTestBinding;
+import android.databinding.testapp.databinding.AbsListViewAdapterTestBinding;
 import android.databinding.testapp.vo.AbsListViewBindingObject;
 
 import android.graphics.drawable.ColorDrawable;

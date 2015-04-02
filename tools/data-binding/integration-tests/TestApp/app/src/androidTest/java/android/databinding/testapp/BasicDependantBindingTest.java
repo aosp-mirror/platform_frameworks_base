@@ -13,7 +13,7 @@
 
 package android.databinding.testapp;
 
-import android.databinding.testapp.generated.BasicDependantBindingBinding;
+import android.databinding.testapp.databinding.BasicDependantBindingBinding;
 import android.databinding.testapp.vo.NotBindableVo;
 
 import android.test.UiThreadTest;

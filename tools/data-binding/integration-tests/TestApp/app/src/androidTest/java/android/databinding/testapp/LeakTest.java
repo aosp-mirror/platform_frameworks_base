@@ -13,7 +13,7 @@
 
 package android.databinding.testapp;
 
-import android.databinding.testapp.generated.LeakTestBinding;
+import android.databinding.testapp.databinding.LeakTestBinding;
 import android.test.ActivityInstrumentationTestCase2;
 import android.util.Log;
 import android.widget.FrameLayout;

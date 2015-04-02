@@ -20,7 +20,7 @@ import android.app.Activity;
 import android.os.Bundle;
 
 import android.databinding.test.independentlibrary.vo.MyBindableObject;
-import android.databinding.test.independentlibrary.generated.LibraryLayoutBinding;
+import android.databinding.test.independentlibrary.databinding.LibraryLayoutBinding;
 public class LibraryActivity extends Activity {
     public static final String FIELD_VALUE = "BAR";
     @Override

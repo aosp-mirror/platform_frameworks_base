@@ -15,7 +15,7 @@
  */
 package android.databinding.testapp;
 
-import android.databinding.testapp.generated.ResourceTestBinding;
+import android.databinding.testapp.databinding.ResourceTestBinding;
 
 import android.test.UiThreadTest;
 import android.widget.TextView;

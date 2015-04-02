@@ -15,7 +15,7 @@
  */
 package android.databinding.testapp;
 
-import android.databinding.testapp.generated.AbsSeekBarAdapterTestBinding;
+import android.databinding.testapp.databinding.AbsSeekBarAdapterTestBinding;
 import android.databinding.testapp.vo.AbsSeekBarBindingObject;
 
 import android.os.Build;

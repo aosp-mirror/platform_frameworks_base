@@ -15,7 +15,7 @@
  */
 package android.databinding.testapp;
 
-import android.databinding.testapp.generated.FrameLayoutAdapterTestBinding;
+import android.databinding.testapp.databinding.FrameLayoutAdapterTestBinding;
 import android.databinding.testapp.vo.FrameLayoutBindingObject;
 
 import android.os.Build;

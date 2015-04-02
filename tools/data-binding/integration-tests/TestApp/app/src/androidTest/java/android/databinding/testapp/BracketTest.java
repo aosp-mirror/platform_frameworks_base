@@ -13,7 +13,7 @@
 
 package android.databinding.testapp;
 
-import android.databinding.testapp.generated.BracketTestBinding;
+import android.databinding.testapp.databinding.BracketTestBinding;
 
 import android.test.UiThreadTest;
 import android.util.LongSparseArray;

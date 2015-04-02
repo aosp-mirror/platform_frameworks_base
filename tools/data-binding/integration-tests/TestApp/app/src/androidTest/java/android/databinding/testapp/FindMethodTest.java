@@ -15,7 +15,7 @@
  */
 package android.databinding.testapp;
 
-import android.databinding.testapp.generated.FindMethodTestBinding;
+import android.databinding.testapp.databinding.FindMethodTestBinding;
 import android.databinding.testapp.vo.FindMethodBindingObject;
 
 import android.test.UiThreadTest;

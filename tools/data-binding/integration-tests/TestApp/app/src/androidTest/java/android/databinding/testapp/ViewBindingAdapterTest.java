@@ -15,7 +15,7 @@
  */
 package android.databinding.testapp;
 
-import android.databinding.testapp.generated.ViewAdapterTestBinding;
+import android.databinding.testapp.databinding.ViewAdapterTestBinding;
 import android.databinding.testapp.vo.ViewBindingObject;
 
 import android.content.res.ColorStateList;

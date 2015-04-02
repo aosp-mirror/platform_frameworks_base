@@ -15,7 +15,7 @@
  */
 package android.databinding.testapp;
 
-import android.databinding.testapp.generated.RadioGroupAdapterTestBinding;
+import android.databinding.testapp.databinding.RadioGroupAdapterTestBinding;
 import android.databinding.testapp.vo.RadioGroupBindingObject;
 
 import android.widget.RadioGroup;

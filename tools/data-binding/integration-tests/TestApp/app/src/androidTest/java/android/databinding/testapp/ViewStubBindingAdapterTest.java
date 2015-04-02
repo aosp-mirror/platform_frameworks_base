@@ -15,7 +15,7 @@
  */
 package android.databinding.testapp;
 
-import android.databinding.testapp.generated.ViewStubAdapterTestBinding;
+import android.databinding.testapp.databinding.ViewStubAdapterTestBinding;
 import android.databinding.testapp.vo.ViewStubBindingObject;
 
 import android.view.ViewStub;

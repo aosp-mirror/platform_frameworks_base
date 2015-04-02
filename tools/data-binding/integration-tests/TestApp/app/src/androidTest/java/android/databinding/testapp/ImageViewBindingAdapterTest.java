@@ -15,7 +15,7 @@
  */
 package android.databinding.testapp;
 
-import android.databinding.testapp.generated.ImageViewAdapterTestBinding;
+import android.databinding.testapp.databinding.ImageViewAdapterTestBinding;
 import android.databinding.testapp.vo.ImageViewBindingObject;
 
 import android.widget.ImageView;

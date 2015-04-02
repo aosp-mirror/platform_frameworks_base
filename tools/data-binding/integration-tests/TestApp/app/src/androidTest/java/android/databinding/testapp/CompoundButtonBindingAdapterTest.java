@@ -15,7 +15,7 @@
  */
 package android.databinding.testapp;
 
-import android.databinding.testapp.generated.CompoundButtonAdapterTestBinding;
+import android.databinding.testapp.databinding.CompoundButtonAdapterTestBinding;
 import android.databinding.testapp.vo.CompoundButtonBindingObject;
 
 import android.widget.CompoundButton;

@@ -14,7 +14,7 @@
 package android.databinding.testapp;
 
 import android.databinding.DataBinderTrojan;
-import android.databinding.testapp.generated.NewApiLayoutBinding;
+import android.databinding.testapp.databinding.NewApiLayoutBinding;
 
 import android.os.Build;
 import android.test.UiThreadTest;

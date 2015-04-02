@@ -15,7 +15,7 @@ package android.databinding.testapp;
 
 import android.databinding.testapp.BaseDataBinderTest;
 import android.databinding.testapp.R;
-import android.databinding.testapp.generated.ObservableWithNotBindableFieldBinding;
+import android.databinding.testapp.databinding.ObservableWithNotBindableFieldBinding;
 import android.databinding.testapp.vo.ObservableWithNotBindableFieldObject;
 
 import android.test.UiThreadTest;

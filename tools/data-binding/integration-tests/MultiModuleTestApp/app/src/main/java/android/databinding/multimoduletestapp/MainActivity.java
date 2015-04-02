@@ -16,7 +16,7 @@
 
 package android.databinding.multimoduletestapp;
 
-import android.databinding.multimoduletestapp.generated.ActivityMainBinding;
+import android.databinding.multimoduletestapp.databinding.ActivityMainBinding;
 import android.app.Activity;
 import android.os.Bundle;
 import android.view.Menu;

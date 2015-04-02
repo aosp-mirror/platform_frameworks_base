@@ -15,7 +15,7 @@
  */
 package android.databinding.testapp;
 
-import android.databinding.testapp.generated.SwitchAdapterTestBinding;
+import android.databinding.testapp.databinding.SwitchAdapterTestBinding;
 import android.databinding.testapp.vo.SwitchBindingObject;
 
 import android.graphics.drawable.ColorDrawable;

@@ -15,7 +15,7 @@
  */
 package android.databinding.testapp;
 
-import android.databinding.testapp.generated.TableLayoutAdapterTestBinding;
+import android.databinding.testapp.databinding.TableLayoutAdapterTestBinding;
 import android.databinding.testapp.vo.TableLayoutBindingObject;
 
 import android.graphics.drawable.ColorDrawable;

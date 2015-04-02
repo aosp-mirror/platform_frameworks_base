@@ -13,7 +13,7 @@
 
 package android.databinding.testapp;
 
-import android.databinding.testapp.generated.LayoutWithIncludeBinding;
+import android.databinding.testapp.databinding.LayoutWithIncludeBinding;
 import android.databinding.testapp.vo.NotBindableVo;
 
 import android.test.UiThreadTest;

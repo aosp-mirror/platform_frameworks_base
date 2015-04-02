@@ -21,7 +21,7 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.databinding.testlibrary.R;
-import android.databinding.testlibrary.generated.ActivityTestLibraryMainBinding;
+import android.databinding.testlibrary.databinding.ActivityTestLibraryMainBinding;
 public class TestLibraryMainActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {

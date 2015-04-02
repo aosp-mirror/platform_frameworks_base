@@ -15,7 +15,7 @@
  */
 package android.databinding.testapp;
 
-import android.databinding.testapp.generated.CheckedTextViewAdapterTestBinding;
+import android.databinding.testapp.databinding.CheckedTextViewAdapterTestBinding;
 import android.databinding.testapp.vo.CheckedTextViewBindingObject;
 
 import android.graphics.drawable.ColorDrawable;

@@ -16,10 +16,10 @@ package android.databinding.testapp.multiconfig;
 import android.databinding.ViewDataBinding;
 import android.databinding.testapp.BaseLandDataBinderTest;
 import android.databinding.testapp.R;
-import android.databinding.testapp.generated.BasicBindingBinding;
-import android.databinding.testapp.generated.ConditionalBindingBinding;
-import android.databinding.testapp.generated.IncludedLayoutBinding;
-import android.databinding.testapp.generated.MultiResLayoutBinding;
+import android.databinding.testapp.databinding.BasicBindingBinding;
+import android.databinding.testapp.databinding.ConditionalBindingBinding;
+import android.databinding.testapp.databinding.IncludedLayoutBinding;
+import android.databinding.testapp.databinding.MultiResLayoutBinding;
 import android.databinding.testapp.vo.NotBindableVo;
 
 import android.content.pm.ActivityInfo;

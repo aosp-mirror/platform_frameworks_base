@@ -127,7 +127,7 @@ public class LayoutFileParser {
                 // if user is binding something there, there MUST be a layout file to be
                 // generated.
                 String layoutName = includeValue.substring(LAYOUT_PREFIX.length());
-                className = pkg + ".generated." +
+                className = pkg + ".databinding." +
                         ParserHelper.INSTANCE$.toClassName(layoutName) + "Binding";
                 includedLayoutName = layoutName;
             } else {
