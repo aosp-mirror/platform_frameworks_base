@@ -1635,6 +1635,23 @@ public class DevicePolicyManager {
     }
 
     /**
+     * Queries whether {@link #DO_NOT_ASK_CREDENTIALS_ON_BOOT} flag is set.
+     *
+     * @return true if DO_NOT_ASK_CREDENTIALS_ON_BOOT flag is set.
+     * @hide
+     */
+    public boolean getDoNotAskCredentialsOnBoot() {
+        if (mService != null) {
+            try {
+                return mService.getDoNotAskCredentialsOnBoot();
+            } catch (RemoteException e) {
+                Log.w(TAG, "Failed to call getDoNotAskCredentialsOnBoot()", e);
+            }
+        }
+        return false;
+    }
+
+    /**
      * Setting this to a value greater than zero enables a built-in policy
      * that will perform a device wipe after too many incorrect
      * device-unlock passwords have been entered.  This built-in policy combines
@@ -1711,6 +1728,16 @@ public class DevicePolicyManager {
     public static final int RESET_PASSWORD_REQUIRE_ENTRY = 0x0001;
 
     /**
+     * Flag for {@link #resetPassword}: don't ask for user credentials on device boot.
+     * If the flag is set, the device can be booted without asking for user password.
+     * The absence of this flag does not change the current boot requirements. This flag
+     * can be set by the device owner only. If the app is not the device owner, the flag
+     * is ignored. Once the flag is set, it cannot be reverted back without resetting the
+     * device to factory defaults.
+     */
+    public static final int DO_NOT_ASK_CREDENTIALS_ON_BOOT = 0x0002;
+
+    /**
      * Force a new device unlock password (the password needed to access the
      * entire device, not for individual accounts) on the user.  This takes
      * effect immediately.
@@ -1733,7 +1760,8 @@ public class DevicePolicyManager {
      * <p>Calling this from a managed profile will throw a security exception.
      *
      * @param password The new password for the user. Null or empty clears the password.
-     * @param flags May be 0 or {@link #RESET_PASSWORD_REQUIRE_ENTRY}.
+     * @param flags May be 0 or combination of {@link #RESET_PASSWORD_REQUIRE_ENTRY} and
+     *              {@link #DO_NOT_ASK_CREDENTIALS_ON_BOOT}.
      * @return Returns true if the password was applied, or false if it is
      * not acceptable for the current constraints.
      */

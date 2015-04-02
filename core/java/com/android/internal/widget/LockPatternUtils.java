@@ -24,7 +24,6 @@ import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.pm.PackageManager;
-import android.content.pm.UserInfo;
 import android.os.AsyncTask;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -32,7 +31,6 @@ import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.UserHandle;
-import android.os.UserManager;
 import android.os.storage.IMountService;
 import android.os.storage.StorageManager;
 import android.provider.Settings;
@@ -544,8 +542,7 @@ public class LockPatternUtils {
             // Update the device encryption password.
             if (userId == UserHandle.USER_OWNER
                     && LockPatternUtils.isDeviceEncryptionEnabled()) {
-                final boolean required = isCredentialRequiredToDecrypt(true);
-                if (!required) {
+                if (!shouldEncryptWithCredentials(true)) {
                     clearEncryptionPassword();
                 } else {
                     String stringPattern = patternToString(pattern);
@@ -759,7 +756,7 @@ public class LockPatternUtils {
             // Update the device encryption password.
             if (userHandle == UserHandle.USER_OWNER
                     && LockPatternUtils.isDeviceEncryptionEnabled()) {
-                if (!isCredentialRequiredToDecrypt(true)) {
+                if (!shouldEncryptWithCredentials(true)) {
                     clearEncryptionPassword();
                 } else {
                     boolean numeric = computedQuality
@@ -1237,5 +1234,13 @@ public class LockPatternUtils {
         }
         Settings.Global.putInt(mContext.getContentResolver(),
                 Settings.Global.REQUIRE_PASSWORD_TO_DECRYPT, required ? 1 : 0);
+    }
+
+    private boolean isDoNotAskCredentialsOnBootSet() {
+        return mDevicePolicyManager.getDoNotAskCredentialsOnBoot();
+    }
+
+    private boolean shouldEncryptWithCredentials(boolean defaultValue) {
+        return isCredentialRequiredToDecrypt(defaultValue) && !isDoNotAskCredentialsOnBootSet();
     }
 }

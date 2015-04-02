@@ -2404,6 +2404,12 @@
         android:description="@string/permdesc_bindCarrierConfigService"
         android:protectionLevel="signature|system" />
 
+    <!-- Allows an application to query whether DO_NOT_ASK_CREDENTIALS_ON_BOOT
+         flag is set.
+         @hide -->
+    <permission android:name="android.permission.QUERY_DO_NOT_ASK_CREDENTIALS_ON_BOOT"
+                android:protectionLevel="signature" />
+
     <!-- The system process is explicitly the only one allowed to launch the
          confirmation UI for full backup/restore -->
     <uses-permission android:name="android.permission.CONFIRM_FULL_BACKUP"/>

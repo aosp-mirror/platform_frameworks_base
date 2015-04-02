@@ -160,6 +160,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
     private static final String ATTR_ENABLED = "enabled";
 
+    private static final String DO_NOT_ASK_CREDENTIALS_ON_BOOT_XML =
+            "do-not-ask-credentials-on-boot";
+
     private static final int REQUEST_EXPIRE_PASSWORD = 5571;
 
     private static final long MS_PER_DAY = 86400 * 1000;
@@ -306,6 +309,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         ComponentName mRestrictionsProvider;
 
         String mDelegatedCertInstallerPackage;
+
+        boolean doNotAskCredentialsOnBoot = false;
 
         public DevicePolicyData(int userHandle) {
             mUserHandle = userHandle;
@@ -1456,6 +1461,11 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 out.endTag(null, TAG_STATUS_BAR);
             }
 
+            if (policy.doNotAskCredentialsOnBoot) {
+                out.startTag(null, DO_NOT_ASK_CREDENTIALS_ON_BOOT_XML);
+                out.endTag(null, DO_NOT_ASK_CREDENTIALS_ON_BOOT_XML);
+            }
+
             out.endTag(null, "policies");
 
             out.endDocument();
@@ -1581,6 +1591,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     policy.mStatusBarEnabledState = Boolean.parseBoolean(
                             parser.getAttributeValue(null, ATTR_ENABLED));
                     XmlUtils.skipCurrentTag(parser);
+                } else if (DO_NOT_ASK_CREDENTIALS_ON_BOOT_XML.equals(tag)) {
+                    policy.doNotAskCredentialsOnBoot = true;
                 } else {
                     Slog.w(LOG_TAG, "Unknown tag: " + tag);
                     XmlUtils.skipCurrentTag(parser);
@@ -2840,6 +2852,13 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             return false;
         }
 
+        boolean callerIsDeviceOwnerAdmin = isCallerDeviceOwnerOrInitializer(callingUid);
+        boolean doNotAskCredentialsOnBoot =
+                (flags & DevicePolicyManager.DO_NOT_ASK_CREDENTIALS_ON_BOOT) != 0;
+        if (callerIsDeviceOwnerAdmin && doNotAskCredentialsOnBoot) {
+            setDoNotAskCredentialsOnBoot();
+        }
+
         // Don't do this with the lock held, because it is going to call
         // back in to the service.
         long ident = Binder.clearCallingIdentity();
@@ -2866,6 +2885,25 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
 
         return true;
+    }
+
+    private void setDoNotAskCredentialsOnBoot() {
+        synchronized (this) {
+            DevicePolicyData policyData = getUserData(UserHandle.USER_OWNER);
+            if (!policyData.doNotAskCredentialsOnBoot) {
+                policyData.doNotAskCredentialsOnBoot = true;
+                saveSettingsLocked(UserHandle.USER_OWNER);
+            }
+        }
+    }
+
+    public boolean getDoNotAskCredentialsOnBoot() {
+        mContext.enforceCallingOrSelfPermission(
+                android.Manifest.permission.QUERY_DO_NOT_ASK_CREDENTIALS_ON_BOOT, null);
+        synchronized (this) {
+            DevicePolicyData policyData = getUserData(UserHandle.USER_OWNER);
+            return policyData.doNotAskCredentialsOnBoot;
+        }
     }
 
     public void setMaximumTimeToLock(ComponentName who, long timeMs) {
@@ -6035,5 +6073,21 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         synchronized (this) {
             return mDeviceOwner.getSystemUpdatePolicy();
         }
+    }
+
+    /**
+     * Checks if the caller of the method is the device owner app or device initialization app.
+     *
+     * @param callerUid UID of the caller.
+     * @return true if the caller is the device owner app or device initializer.
+     */
+    private boolean isCallerDeviceOwnerOrInitializer(int callerUid) {
+        String[] pkgs = mContext.getPackageManager().getPackagesForUid(callerUid);
+        for (String pkg : pkgs) {
+            if (isDeviceOwner(pkg) || isDeviceInitializer(pkg)) {
+                return true;
+            }
+        }
+        return false;
     }
 }
