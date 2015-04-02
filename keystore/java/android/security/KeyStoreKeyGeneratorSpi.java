@@ -23,6 +23,7 @@ import android.security.keymaster.KeymasterDefs;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.SecureRandom;
 import java.security.spec.AlgorithmParameterSpec;
+import java.util.Date;
 
 import javax.crypto.KeyGeneratorSpi;
 import javax.crypto.SecretKey;
@@ -144,17 +145,15 @@ public abstract class KeyStoreKeyGeneratorSpi extends KeyGeneratorSpi {
             args.addInt(KeymasterDefs.KM_TAG_AUTH_TIMEOUT,
                     spec.getUserAuthenticationValidityDurationSeconds());
         }
-        if (spec.getKeyValidityStart() != null) {
-            args.addDate(KeymasterDefs.KM_TAG_ACTIVE_DATETIME, spec.getKeyValidityStart());
-        }
-        if (spec.getKeyValidityForOriginationEnd() != null) {
-            args.addDate(KeymasterDefs.KM_TAG_ORIGINATION_EXPIRE_DATETIME,
-                    spec.getKeyValidityForOriginationEnd());
-        }
-        if (spec.getKeyValidityForConsumptionEnd() != null) {
-            args.addDate(KeymasterDefs.KM_TAG_USAGE_EXPIRE_DATETIME,
-                    spec.getKeyValidityForConsumptionEnd());
-        }
+        args.addDate(KeymasterDefs.KM_TAG_ACTIVE_DATETIME,
+                (spec.getKeyValidityStart() != null)
+                ? spec.getKeyValidityStart() : new Date(0));
+        args.addDate(KeymasterDefs.KM_TAG_ORIGINATION_EXPIRE_DATETIME,
+                (spec.getKeyValidityForOriginationEnd() != null)
+                ? spec.getKeyValidityForOriginationEnd() : new Date(Long.MAX_VALUE));
+        args.addDate(KeymasterDefs.KM_TAG_USAGE_EXPIRE_DATETIME,
+                (spec.getKeyValidityForConsumptionEnd() != null)
+                ? spec.getKeyValidityForConsumptionEnd() : new Date(Long.MAX_VALUE));
 
         if (((purposes & KeyStoreKeyConstraints.Purpose.ENCRYPT) != 0)
             || ((purposes & KeyStoreKeyConstraints.Purpose.DECRYPT) != 0)) {

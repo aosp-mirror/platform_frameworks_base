@@ -544,17 +544,15 @@ public class AndroidKeyStore extends KeyStoreSpi {
             args.addInt(KeymasterDefs.KM_TAG_AUTH_TIMEOUT,
                     params.getUserAuthenticationValidityDurationSeconds());
         }
-        if (params.getKeyValidityStart() != null) {
-            args.addDate(KeymasterDefs.KM_TAG_ACTIVE_DATETIME, params.getKeyValidityStart());
-        }
-        if (params.getKeyValidityForOriginationEnd() != null) {
-            args.addDate(KeymasterDefs.KM_TAG_ORIGINATION_EXPIRE_DATETIME,
-                    params.getKeyValidityForOriginationEnd());
-        }
-        if (params.getKeyValidityForConsumptionEnd() != null) {
-            args.addDate(KeymasterDefs.KM_TAG_USAGE_EXPIRE_DATETIME,
-                    params.getKeyValidityForConsumptionEnd());
-        }
+        args.addDate(KeymasterDefs.KM_TAG_ACTIVE_DATETIME,
+                (params.getKeyValidityStart() != null)
+                        ? params.getKeyValidityStart() : new Date(0));
+        args.addDate(KeymasterDefs.KM_TAG_ORIGINATION_EXPIRE_DATETIME,
+                (params.getKeyValidityForOriginationEnd() != null)
+                        ? params.getKeyValidityForOriginationEnd() : new Date(Long.MAX_VALUE));
+        args.addDate(KeymasterDefs.KM_TAG_USAGE_EXPIRE_DATETIME,
+                (params.getKeyValidityForConsumptionEnd() != null)
+                        ? params.getKeyValidityForConsumptionEnd() : new Date(Long.MAX_VALUE));
 
         // TODO: Remove this once keymaster does not require us to specify the size of imported key.
         args.addInt(KeymasterDefs.KM_TAG_KEY_SIZE, keyMaterial.length * 8);
