@@ -4911,6 +4911,15 @@ public final class Settings {
                 BOOLEAN_VALIDATOR;
 
         /**
+         * Whether to answer the call with the volume keys, the value is boolean.
+         * 0 = 0ff, 1 = on
+         */
+        public static final String VOLUME_ANSWER_CALL = "volume_answer_call";
+
+        /** @hide */
+        public static final Validator VOLUME_ANSWER_CALL_VALIDATOR = BOOLEAN_VALIDATOR;
+
+        /**
          * IMPORTANT: If you add a new public settings you also have to add it to
          * PUBLIC_SETTINGS below. If the new setting is hidden you have to add
          * it to PRIVATE_SETTINGS below. Also add a validator that can validate
@@ -5141,6 +5150,7 @@ public final class Settings {
             PRIVATE_SETTINGS.add(VOLUME_WAKE_SCREEN);
             PRIVATE_SETTINGS.add(VOLUME_KEY_CURSOR_CONTROL);
             PRIVATE_SETTINGS.add(VOLBTN_MUSIC_CONTROLS);
+            PRIVATE_SETTINGS.add(VOLUME_ANSWER_CALL);
         }
 
         /**
@@ -5274,6 +5284,7 @@ public final class Settings {
             VALIDATORS.put(VOLUME_WAKE_SCREEN, VOLUME_WAKE_SCREEN_VALIDATOR);
             VALIDATORS.put(VOLUME_KEY_CURSOR_CONTROL, VOLUME_KEY_CURSOR_CONTROL_VALIDATOR);
             VALIDATORS.put(VOLBTN_MUSIC_CONTROLS, VOLBTN_MUSIC_CONTROLS_VALIDATOR);
+            VALIDATORS.put(VOLUME_ANSWER_CALL, VOLUME_ANSWER_CALL_VALIDATOR);
         }
 
         /**
