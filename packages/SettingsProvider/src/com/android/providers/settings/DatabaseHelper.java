@@ -61,10 +61,18 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * Database helper class for {@link SettingsProvider}.
- * Mostly just has a bit {@link #onCreate} to initialize the database.
+ * Legacy settings database helper class for {@link SettingsProvider}.
+ *
+ * IMPORTANT: Do not add any more upgrade steps here as the global,
+ * secure, and system settings are no longer stored in a database
+ * but are kept in memory and persisted to XML.
+ *
+ * See: SettingsProvider.UpgradeController#onUpgradeLocked
+ *
+ * @deprecated The implementation is frozen.  Do not add any new code to this class!
  */
-public class DatabaseHelper extends SQLiteOpenHelper {
+@Deprecated
+class DatabaseHelper extends SQLiteOpenHelper {
     private static final String TAG = "SettingsProvider";
     private static final String DATABASE_NAME = "settings.db";
 
@@ -1932,18 +1940,13 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             upgradeVersion = 118;
         }
 
-        /**
+        /*
          * IMPORTANT: Do not add any more upgrade steps here as the global,
          * secure, and system settings are no longer stored in a database
-         * but are kept in memory and persisted to XML. The correct places
-         * for adding upgrade steps are:
+         * but are kept in memory and persisted to XML.
          *
-         * Global: SettingsProvider.UpgradeController#onUpgradeGlobalSettings
-         * Secure: SettingsProvider.UpgradeController#onUpgradeSecureSettings
-         * System: SettingsProvider.UpgradeController#onUpgradeSystemSettings
+         * See: SettingsProvider.UpgradeController#onUpgradeLocked
          */
-
-        // *** Remember to update DATABASE_VERSION above!
 
         if (upgradeVersion != currentVersion) {
             recreateDatabase(db, oldVersion, upgradeVersion, currentVersion);
@@ -2386,6 +2389,14 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
             loadIntegerSetting(stmt, Settings.System.POINTER_SPEED,
                     R.integer.def_pointer_speed);
+
+            /*
+             * IMPORTANT: Do not add any more upgrade steps here as the global,
+             * secure, and system settings are no longer stored in a database
+             * but are kept in memory and persisted to XML.
+             *
+             * See: SettingsProvider.UpgradeController#onUpgradeLocked
+             */
         } finally {
             if (stmt != null) stmt.close();
         }
@@ -2517,6 +2528,14 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
             loadIntegerSetting(stmt, Settings.Secure.SLEEP_TIMEOUT,
                     R.integer.def_sleep_timeout);
+
+            /*
+             * IMPORTANT: Do not add any more upgrade steps here as the global,
+             * secure, and system settings are no longer stored in a database
+             * but are kept in memory and persisted to XML.
+             *
+             * See: SettingsProvider.UpgradeController#onUpgradeLocked
+             */
         } finally {
             if (stmt != null) stmt.close();
         }
@@ -2693,7 +2712,14 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                     R.bool.def_guest_user_enabled);
             loadSetting(stmt, Settings.Global.ENHANCED_4G_MODE_ENABLED,
                     ImsConfig.FeatureValueConstants.ON);
-            // --- New global settings start here
+
+            /*
+             * IMPORTANT: Do not add any more upgrade steps here as the global,
+             * secure, and system settings are no longer stored in a database
+             * but are kept in memory and persisted to XML.
+             *
+             * See: SettingsProvider.UpgradeController#onUpgradeLocked
+             */
         } finally {
             if (stmt != null) stmt.close();
         }
