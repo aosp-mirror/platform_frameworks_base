@@ -347,6 +347,10 @@ public abstract class CameraMetadata<TKey> {
      * <li>{@link CaptureRequest#BLACK_LEVEL_LOCK android.blackLevel.lock}</li>
      * </ul>
      * </li>
+     * <li>Auto exposure lock<ul>
+     * <li>{@link CaptureRequest#CONTROL_AE_LOCK android.control.aeLock}</li>
+     * </ul>
+     * </li>
      * </ul>
      * <p>If any of the above 3A algorithms are enabled, then the camera
      * device will accurately report the values applied by 3A in the
@@ -358,6 +362,7 @@ public abstract class CameraMetadata<TKey> {
      * zero for each supported size-format combination.</p>
      *
      * @see CaptureRequest#BLACK_LEVEL_LOCK
+     * @see CaptureRequest#CONTROL_AE_LOCK
      * @see CameraCharacteristics#SCALER_STREAM_CONFIGURATION_MAP
      * @see CaptureRequest#SENSOR_EXPOSURE_TIME
      * @see CaptureRequest#SENSOR_FRAME_DURATION
@@ -403,6 +408,10 @@ public abstract class CameraMetadata<TKey> {
      * <li>{@link CameraCharacteristics#COLOR_CORRECTION_AVAILABLE_ABERRATION_MODES android.colorCorrection.availableAberrationModes}</li>
      * </ul>
      * </li>
+     * <li>Auto white balance lock<ul>
+     * <li>{@link CaptureRequest#CONTROL_AWB_LOCK android.control.awbLock}</li>
+     * </ul>
+     * </li>
      * </ul>
      * <p>If auto white balance is enabled, then the camera device
      * will accurately report the values applied by AWB in the result.</p>
@@ -413,6 +422,7 @@ public abstract class CameraMetadata<TKey> {
      * @see CameraCharacteristics#COLOR_CORRECTION_AVAILABLE_ABERRATION_MODES
      * @see CaptureRequest#COLOR_CORRECTION_GAINS
      * @see CaptureRequest#COLOR_CORRECTION_TRANSFORM
+     * @see CaptureRequest#CONTROL_AWB_LOCK
      * @see CaptureRequest#SHADING_MODE
      * @see CaptureRequest#STATISTICS_LENS_SHADING_MAP_MODE
      * @see CaptureRequest#TONEMAP_CURVE
@@ -529,9 +539,15 @@ public abstract class CameraMetadata<TKey> {
      * YUV_420_888 format.</p>
      * </blockquote>
      * <p>In addition, the {@link CameraCharacteristics#SYNC_MAX_LATENCY android.sync.maxLatency} field is
-     * guaranted to have a value between 0 and 4, inclusive.</p>
+     * guaranted to have a value between 0 and 4, inclusive.
+     * {@link CameraCharacteristics#CONTROL_AE_LOCK_AVAILABLE android.control.aeLockAvailable} and
+     * {@link CameraCharacteristics#CONTROL_AWB_LOCK_AVAILABLE android.control.awbLockAvailable} are also guaranteed
+     * to be <code>true</code> so burst capture with these two locks ON
+     * yields consistent image output.</p>
      *
      * @see CameraCharacteristics#CONTROL_AE_AVAILABLE_TARGET_FPS_RANGES
+     * @see CameraCharacteristics#CONTROL_AE_LOCK_AVAILABLE
+     * @see CameraCharacteristics#CONTROL_AWB_LOCK_AVAILABLE
      * @see CameraCharacteristics#SCALER_STREAM_CONFIGURATION_MAP
      * @see CameraCharacteristics#SYNC_MAX_LATENCY
      * @see CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES
