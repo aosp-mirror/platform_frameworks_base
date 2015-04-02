@@ -53,10 +53,10 @@ import com.android.internal.telephony.IccCardConstants.State;
 import com.android.internal.telephony.PhoneConstants;
 import com.android.internal.telephony.TelephonyIntents;
 
-import android.service.fingerprint.FingerprintManager;
-import android.service.fingerprint.FingerprintManager.AuthenticationCallback;
-import android.service.fingerprint.FingerprintUtils;
-import android.service.fingerprint.FingerprintManager.AuthenticationResult;
+import android.hardware.fingerprint.FingerprintManager;
+import android.hardware.fingerprint.FingerprintManager.AuthenticationCallback;
+import android.hardware.fingerprint.FingerprintUtils;
+import android.hardware.fingerprint.FingerprintManager.AuthenticationResult;
 import android.telephony.SubscriptionInfo;
 import android.telephony.SubscriptionManager;
 import android.telephony.SubscriptionManager.OnSubscriptionsChangedListener;

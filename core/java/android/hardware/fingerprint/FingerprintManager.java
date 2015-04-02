@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package android.service.fingerprint;
+package android.hardware.fingerprint;
 
 import android.app.ActivityManagerNative;
 import android.content.ContentResolver;
@@ -28,7 +28,7 @@ import android.os.Parcelable;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.provider.Settings;
-import android.service.fingerprint.FingerprintManager.EnrollmentCallback;
+import android.hardware.fingerprint.FingerprintManager.EnrollmentCallback;
 import android.util.Log;
 import android.util.Slog;
 

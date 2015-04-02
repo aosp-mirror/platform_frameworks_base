@@ -23,16 +23,16 @@ import android.os.IBinder;
 import android.os.Looper;
 import android.os.MessageQueue;
 import android.os.RemoteException;
-import android.service.fingerprint.FingerprintManager;
 import android.util.ArrayMap;
 import android.util.Slog;
 
 import com.android.server.SystemService;
 
-import android.service.fingerprint.FingerprintUtils;
-import android.service.fingerprint.Fingerprint;
-import android.service.fingerprint.IFingerprintService;
-import android.service.fingerprint.IFingerprintServiceReceiver;
+import android.hardware.fingerprint.FingerprintUtils;
+import android.hardware.fingerprint.Fingerprint;
+import android.hardware.fingerprint.FingerprintManager;
+import android.hardware.fingerprint.IFingerprintService;
+import android.hardware.fingerprint.IFingerprintServiceReceiver;
 
 import static android.Manifest.permission.MANAGE_FINGERPRINT;
 import static android.Manifest.permission.USE_FINGERPRINT;
@@ -363,7 +363,7 @@ public class FingerprintService extends SystemService {
             startEnroll(token, groupId, flags);
         }
 
-        @Override 
+        @Override
         // Binder call
         public void authenticate(IBinder token, long sessionId, int groupId, int flags) {
             checkPermission(USE_FINGERPRINT);
