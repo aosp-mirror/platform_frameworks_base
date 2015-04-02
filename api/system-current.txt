@@ -1277,6 +1277,7 @@ package android {
     field public static final int summaryColumn = 16843426; // 0x10102a2
     field public static final int summaryOff = 16843248; // 0x10101f0
     field public static final int summaryOn = 16843247; // 0x10101ef
+    field public static final int supportsAssistGesture = 16844012; // 0x10104ec
     field public static final int supportsRtl = 16843695; // 0x10103af
     field public static final int supportsSwitchingToNextInputMethod = 16843755; // 0x10103eb
     field public static final int supportsUploading = 16843419; // 0x101029b
@@ -30241,7 +30242,7 @@ package android.service.voice {
     method public void showSession(android.os.Bundle, int);
     field public static final java.lang.String SERVICE_INTERFACE = "android.service.voice.VoiceInteractionService";
     field public static final java.lang.String SERVICE_META_DATA = "android.voice_interaction";
-    field public static final int START_SOURCE_SYSTEM = 4; // 0x4
+    field public static final int START_SOURCE_ASSIST_GESTURE = 4; // 0x4
     field public static final int START_WITH_ASSIST = 1; // 0x1
     field public static final int START_WITH_SCREENSHOT = 2; // 0x2
   }

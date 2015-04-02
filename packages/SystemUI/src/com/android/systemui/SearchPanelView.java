@@ -131,7 +131,7 @@ public class SearchPanelView extends FrameLayout implements StatusBarPanel {
 
     private boolean isVoiceInteractorActive() {
         try {
-            return mVoiceInteractionManagerService.isServiceActive();
+            return mVoiceInteractionManagerService.activeServiceSupportsAssistGesture();
         } catch (RemoteException e) {
             Log.w(TAG, "Failed to call isServiceActive", e);
             return false;

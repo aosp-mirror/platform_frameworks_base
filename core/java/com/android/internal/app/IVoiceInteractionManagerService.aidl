@@ -84,11 +84,6 @@ interface IVoiceInteractionManagerService {
             in IRecognitionStatusCallback callback);
 
     /**
-     * Indicates whether any voice interaction service is currently active.
-     */
-    boolean isServiceActive();
-
-    /**
      * @return the component name for the currently active voice interaction service
      */
     ComponentName getActiveServiceComponentName();
@@ -105,4 +100,10 @@ interface IVoiceInteractionManagerService {
      * Indicates whether there is a voice session running (but not necessarily showing).
      */
     boolean isSessionRunning();
+
+    /**
+     * Indicates whether the currently active voice interaction service is capable of handling the
+     * assist gesture.
+     */
+    boolean activeServiceSupportsAssistGesture();
 }

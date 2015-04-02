@@ -84,9 +84,9 @@ public class VoiceInteractionService extends Service {
 
     /**
      * Flag for use with {@link #showSession}: indicate that the session has been started from the
-     * system.
+     * system assist gesture.
      */
-    public static final int START_SOURCE_SYSTEM = 1<<2;
+    public static final int START_SOURCE_ASSIST_GESTURE = 1<<2;
 
     IVoiceInteractionService mInterface = new IVoiceInteractionService.Stub() {
         @Override public void ready() {

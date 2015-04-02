@@ -43,6 +43,7 @@ public class VoiceInteractionServiceInfo {
     private String mSessionService;
     private String mRecognitionService;
     private String mSettingsActivity;
+    private boolean mSupportsAssistGesture;
 
     public VoiceInteractionServiceInfo(PackageManager pm, ComponentName comp)
             throws PackageManager.NameNotFoundException {
@@ -94,6 +95,9 @@ public class VoiceInteractionServiceInfo {
                     com.android.internal.R.styleable.VoiceInteractionService_recognitionService);
             mSettingsActivity = array.getString(
                     com.android.internal.R.styleable.VoiceInteractionService_settingsActivity);
+            mSupportsAssistGesture = array.getBoolean(
+                    com.android.internal.R.styleable.VoiceInteractionService_supportsAssistGesture,
+                    false);
             array.recycle();
             if (mSessionService == null) {
                 mParseError = "No sessionService specified";
@@ -103,11 +107,6 @@ public class VoiceInteractionServiceInfo {
                 mParseError = "No recognitionService specified";
                 return;
             }
-            /* Not yet time
-            if (mRecognitionService == null) {
-                mParseError = "No recogitionService specified";
-                return;
-            } */
         } catch (XmlPullParserException e) {
             mParseError = "Error parsing voice interation service meta-data: " + e;
             Log.w(TAG, "error parsing voice interaction service meta-data", e);
@@ -144,5 +143,9 @@ public class VoiceInteractionServiceInfo {
 
     public String getSettingsActivity() {
         return mSettingsActivity;
+    }
+
+    public boolean getSupportsAssistGesture() {
+        return mSupportsAssistGesture;
     }
 }
