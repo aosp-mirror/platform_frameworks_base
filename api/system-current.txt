@@ -33381,7 +33381,8 @@ package android.telephony {
   public class SmsMessage {
     method public static int[] calculateLength(java.lang.CharSequence, boolean);
     method public static int[] calculateLength(java.lang.String, boolean);
-    method public static android.telephony.SmsMessage createFromPdu(byte[]);
+    method public static deprecated android.telephony.SmsMessage createFromPdu(byte[]);
+    method public static android.telephony.SmsMessage createFromPdu(byte[], java.lang.String);
     method public java.lang.String getDisplayMessageBody();
     method public java.lang.String getDisplayOriginatingAddress();
     method public java.lang.String getEmailBody();
