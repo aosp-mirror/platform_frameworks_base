@@ -384,7 +384,7 @@ public class VolumePanel extends Handler implements DemoMode {
         final Window window = mDialog.getWindow();
         window.requestFeature(Window.FEATURE_NO_TITLE);
         mDialog.setCanceledOnTouchOutside(true);
-        mDialog.setContentView(com.android.systemui.R.layout.volume_dialog);
+        mDialog.setContentView(com.android.systemui.R.layout.volume_panel_dialog);
         mDialog.setOnDismissListener(new OnDismissListener() {
             @Override
             public void onDismiss(DialogInterface dialog) {

@@ -1,6 +1,5 @@
-<?xml version="1.0" encoding="utf-8"?>
 <!--
-     Copyright (C) 2014 The Android Open Source Project
+     Copyright (C) 2015 The Android Open Source Project
 
      Licensed under the Apache License, Version 2.0 (the "License");
      you may not use this file except in compliance with the License.
@@ -14,15 +13,50 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/volume_dialog"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:layout_marginBottom="4dp"
     android:layout_marginLeft="@dimen/notification_side_padding"
     android:layout_marginRight="@dimen/notification_side_padding"
-    android:background="@drawable/qs_background_primary"
-    android:translationZ="@dimen/volume_panel_z"
-    android:layout_marginBottom="@dimen/volume_panel_z">
+    android:layout_marginTop="4dp"
+    android:background="@drawable/volume_dialog_background"
+    android:translationZ="4dp" >
 
-        <include layout="@layout/volume_panel" />
+    <com.android.keyguard.AlphaOptimizedImageButton
+        android:id="@+id/volume_expand_button"
+        style="@style/VolumeButtons"
+        android:layout_alignParentLeft="true"
+        android:layout_width="@dimen/volume_button_size"
+        android:layout_height="@dimen/volume_button_size"
+        android:clickable="true"
+        android:soundEffectsEnabled="false"
+        android:src="@drawable/ic_volume_collapse_animation" />
 
-</FrameLayout>
+    <LinearLayout
+        android:id="@+id/volume_dialog_content"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingBottom="4dp"
+        android:paddingEnd="4dp"
+        android:paddingStart="4dp"
+        android:paddingTop="6dp" >
+
+        <!-- volume rows added and removed here! :-) -->
+
+        <FrameLayout
+            android:id="@+id/volume_footer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            tools:ignore="UselessParent" >
+
+            <include layout="@layout/volume_text_footer" />
+
+            <include layout="@layout/volume_zen_footer" />
+        </FrameLayout>
+    </LinearLayout>
+
+</RelativeLayout>

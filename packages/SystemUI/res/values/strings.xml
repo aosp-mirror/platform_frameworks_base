@@ -753,10 +753,10 @@
     <string name="camera_hint">Swipe left for camera</string>
 
     <!-- Interruption level: None. [CHAR LIMIT=20] -->
-    <string name="interruption_level_none">None</string>
+    <string name="interruption_level_none">No interruptions</string>
 
     <!-- Interruption level: Priority. [CHAR LIMIT=20] -->
-    <string name="interruption_level_priority">Priority</string>
+    <string name="interruption_level_priority">Priority only</string>
 
     <!-- Interruption level: All. [CHAR LIMIT=20] -->
     <string name="interruption_level_all">All</string>
@@ -960,4 +960,7 @@
 
     <!-- VolumeUI restoration notification: text -->
     <string name="volumeui_notification_text">Touch to restore the original.</string>
+
+    <!-- Volume dialog zen toggle switch title -->
+    <string name="volume_zen_switch_text">Block interruptions</string>
 </resources>

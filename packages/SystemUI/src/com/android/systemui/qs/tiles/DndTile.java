@@ -40,6 +40,7 @@ public class DndTile extends QSTile<QSTile.BooleanState> {
     private static final String ACTION_SET_VISIBLE = "com.android.systemui.dndtile.SET_VISIBLE";
     private static final String EXTRA_VISIBLE = "visible";
     private static final String PREF_KEY_VISIBLE = "DndTileVisible";
+    private static final String PREF_KEY_COMBINED_ICON = "DndTileCombinedIcon";
 
     private final ZenModeController mController;
     private final DndDetailAdapter mDetailAdapter;
@@ -52,7 +53,7 @@ public class DndTile extends QSTile<QSTile.BooleanState> {
         super(host);
         mController = host.getZenModeController();
         mDetailAdapter = new DndDetailAdapter();
-        mVisible = getSharedPrefs(mContext).getBoolean(PREF_KEY_VISIBLE, false);
+        mVisible = isVisible(host.getContext());
         mContext.registerReceiver(mReceiver, new IntentFilter(ACTION_SET_VISIBLE));
     }
 
@@ -63,6 +64,14 @@ public class DndTile extends QSTile<QSTile.BooleanState> {
 
     public static boolean isVisible(Context context) {
         return getSharedPrefs(context).getBoolean(PREF_KEY_VISIBLE, false);
+    }
+
+    public static void setCombinedIcon(Context context, boolean combined) {
+        getSharedPrefs(context).edit().putBoolean(PREF_KEY_COMBINED_ICON, combined).commit();
+    }
+
+    public static boolean isCombinedIcon(Context context) {
+        return getSharedPrefs(context).getBoolean(PREF_KEY_COMBINED_ICON, false);
     }
 
     @Override
