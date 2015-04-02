@@ -48,7 +48,6 @@ public class DisplayListCanvas extends Canvas {
     private int mWidth;
     private int mHeight;
 
-
     static DisplayListCanvas obtain(@NonNull RenderNode node) {
         if (node == null) throw new IllegalArgumentException("node cannot be null");
         DisplayListCanvas canvas = sPool.acquire();

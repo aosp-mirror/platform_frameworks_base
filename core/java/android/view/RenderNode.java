@@ -240,12 +240,7 @@ public class RenderNode {
      * @see #start(int, int)
      * @see #isValid()
      */
-    public void end(DisplayListCanvas endCanvas) {
-        if (!(endCanvas instanceof DisplayListCanvas)) {
-            throw new IllegalArgumentException("Passed an invalid canvas to end!");
-        }
-
-        DisplayListCanvas canvas = (DisplayListCanvas) endCanvas;
+    public void end(DisplayListCanvas canvas) {
         canvas.onPostDraw();
         long renderNodeData = canvas.finishRecording();
         nSetDisplayListData(mNativeRenderNode, renderNodeData);

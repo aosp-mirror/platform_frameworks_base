@@ -45,6 +45,8 @@ import javax.microedition.khronos.opengles.GL;
  * Canvas and Drawables</a> developer guide.</p></div>
  */
 public class Canvas {
+    /** @hide */
+    public static boolean sCompatibilityRestore = false;
 
     /**
      * Should only be assigned in constructors (or setBitmap if software canvas),
@@ -557,7 +559,8 @@ public class Canvas {
      * an error to call restore() more times than save() was called.
      */
     public void restore() {
-        native_restore(mNativeCanvasWrapper);
+        boolean throwOnUnderflow = !sCompatibilityRestore || !isHardwareAccelerated();
+        native_restore(mNativeCanvasWrapper, throwOnUnderflow);
     }
 
     /**
@@ -582,7 +585,8 @@ public class Canvas {
      * @param saveCount The save level to restore to.
      */
     public void restoreToCount(int saveCount) {
-        native_restoreToCount(mNativeCanvasWrapper, saveCount);
+        boolean throwOnUnderflow = !sCompatibilityRestore || !isHardwareAccelerated();
+        native_restoreToCount(mNativeCanvasWrapper, saveCount, throwOnUnderflow);
     }
 
     /**
@@ -1988,9 +1992,10 @@ public class Canvas {
     private static native int native_saveLayerAlpha(long nativeCanvas, float l,
                                                     float t, float r, float b,
                                                     int alpha, int layerFlags);
-    private static native void native_restore(long canvasHandle);
+    private static native void native_restore(long canvasHandle, boolean tolerateUnderflow);
     private static native void native_restoreToCount(long canvasHandle,
-                                                     int saveCount);
+                                                     int saveCount,
+                                                     boolean tolerateUnderflow);
     private static native int native_getSaveCount(long canvasHandle);
 
     private static native void native_translate(long canvasHandle,
