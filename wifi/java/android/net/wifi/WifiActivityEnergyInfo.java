@@ -141,6 +141,7 @@ public final class WifiActivityEnergyInfo implements Parcelable {
         return (int)mControllerIdleTimeMs;
     }
 
+
     /**
      * product of current(mA), voltage(V) and time(ms)
      * @return energy used

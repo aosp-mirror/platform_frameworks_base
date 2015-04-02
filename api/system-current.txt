@@ -6333,6 +6333,7 @@ package android.bluetooth {
     method public android.bluetooth.BluetoothDevice getRemoteDevice(byte[]);
     method public int getScanMode();
     method public int getState();
+    method public boolean isBleScanAlwaysAvailable();
     method public boolean isDiscovering();
     method public boolean isEnabled();
     method public boolean isMultipleAdvertisementSupported();
@@ -6349,6 +6350,7 @@ package android.bluetooth {
     field public static final java.lang.String ACTION_DISCOVERY_FINISHED = "android.bluetooth.adapter.action.DISCOVERY_FINISHED";
     field public static final java.lang.String ACTION_DISCOVERY_STARTED = "android.bluetooth.adapter.action.DISCOVERY_STARTED";
     field public static final java.lang.String ACTION_LOCAL_NAME_CHANGED = "android.bluetooth.adapter.action.LOCAL_NAME_CHANGED";
+    field public static final java.lang.String ACTION_REQUEST_BLE_SCAN_ALWAYS_AVAILABLE = "android.bluetooth.adapter.action.REQUEST_BLE_SCAN_ALWAYS_AVAILABLE";
     field public static final java.lang.String ACTION_REQUEST_DISCOVERABLE = "android.bluetooth.adapter.action.REQUEST_DISCOVERABLE";
     field public static final java.lang.String ACTION_REQUEST_ENABLE = "android.bluetooth.adapter.action.REQUEST_ENABLE";
     field public static final java.lang.String ACTION_SCAN_MODE_CHANGED = "android.bluetooth.adapter.action.SCAN_MODE_CHANGED";
@@ -20499,6 +20501,7 @@ package android.net.wifi {
 
   public static final class WifiEnterpriseConfig.Eap {
     field public static final int AKA = 5; // 0x5
+    field public static final int AKA_PRIME = 6; // 0x6
     field public static final int NONE = -1; // 0xffffffff
     field public static final int PEAP = 0; // 0x0
     field public static final int PWD = 3; // 0x3

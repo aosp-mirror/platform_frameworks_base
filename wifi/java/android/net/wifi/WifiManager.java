@@ -861,6 +861,14 @@ public class WifiManager {
     public static final int WIFI_FEATURE_TDLS_OFFCHANNEL  = 0x2000;  // Support for TDLS off channel
     /** @hide */
     public static final int WIFI_FEATURE_EPR              = 0x4000;  // Enhanced power reporting
+    /** @hide */
+    public static final int WIFI_FEATURE_AP_STA            = 0x8000;  // Support for AP STA Concurrency
+    /** @hide */
+    public static final int WIFI_FEATURE_LINK_LAYER_STATS  = 0x10000; // Link layer stats collection
+    /** @hide */
+    public static final int WIFI_FEATURE_LOGGER            = 0x20000; // WiFi Logger
+    /** @hide */
+    public static final int WIFI_FEATURE_HAL_EPNO          = 0x40000; // WiFi PNO enhanced
 
     private int getSupportedFeatures() {
         try {
@@ -972,7 +980,7 @@ public class WifiManager {
      * @return true if this adapter supports advanced power/performance counters
      */
     public boolean isEnhancedPowerReportingSupported() {
-        return isFeatureSupported(WIFI_FEATURE_EPR);
+        return isFeatureSupported(WIFI_FEATURE_LINK_LAYER_STATS);
     }
 
     /**
