@@ -1689,6 +1689,9 @@ public class UserManagerService extends IUserManager.Stub {
     static Bundle readApplicationRestrictionsLocked(AtomicFile restrictionsFile) {
         final Bundle restrictions = new Bundle();
         final ArrayList<String> values = new ArrayList<>();
+        if (!restrictionsFile.getBaseFile().exists()) {
+            return null;
+        }
 
         FileInputStream fis = null;
         try {
