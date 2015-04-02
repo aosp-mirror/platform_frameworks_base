@@ -2120,9 +2120,9 @@ public class Paint {
         int contextLen = contextEnd - contextStart;
         char[] buf = TemporaryBuffer.obtain(contextLen);
         TextUtils.getChars(text, contextStart, contextEnd, buf, 0);
-        int result = getTextRunCursor(buf, 0, contextLen, dir, offset - contextStart, cursorOpt);
+        int relPos = getTextRunCursor(buf, 0, contextLen, dir, offset - contextStart, cursorOpt);
         TemporaryBuffer.recycle(buf);
-        return result;
+        return (relPos == -1) ? -1 : relPos + contextStart;
     }
 
     /**
