@@ -1363,8 +1363,8 @@ public class Switch extends CompoundButton {
     }
 
     @Override
-    public void onProvideAssistStructure(ViewAssistStructure structure, Bundle extras) {
-        super.onProvideAssistStructure(structure, extras);
+    public void onProvideAssistStructure(ViewAssistStructure structure) {
+        super.onProvideAssistStructure(structure);
         CharSequence switchText = isChecked() ? mTextOn : mTextOff;
         if (!TextUtils.isEmpty(switchText)) {
             CharSequence oldText = structure.getText();

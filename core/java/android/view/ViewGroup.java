@@ -2852,6 +2852,33 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         return false;
     }
 
+    /**
+     * Dispatch creation of {@link ViewAssistStructure} down the hierarchy.  This implementation
+     * adds in all child views of the view group, in addition to calling the default View
+     * implementation.
+     */
+    public void dispatchProvideAssistStructure(ViewAssistStructure structure) {
+        super.dispatchProvideAssistStructure(structure);
+        if (structure.getChildCount() == 0) {
+            final int childrenCount = getChildCount();
+            if (childrenCount > 0) {
+                structure.setChildCount(childrenCount);
+                final ArrayList<View> preorderedList = buildOrderedChildList();
+                final boolean customOrder = preorderedList == null
+                        && isChildrenDrawingOrderEnabled();
+                final View[] children = mChildren;
+                for (int i=0; i<childrenCount; i++) {
+                    final int childIndex = customOrder
+                            ? getChildDrawingOrder(childrenCount, i) : i;
+                    final View child = (preorderedList == null)
+                            ? children[childIndex] : preorderedList.get(childIndex);
+                    ViewAssistStructure cstructure = structure.newChild(i);
+                    child.dispatchProvideAssistStructure(cstructure);
+                }
+            }
+        }
+    }
+
     /** @hide */
     @Override
     public void onInitializeAccessibilityNodeInfoInternal(AccessibilityNodeInfo info) {

@@ -142,7 +142,6 @@ public class MainInteractionSession extends VoiceInteractionSession
             if (assistContext != null) {
                 mAssistStructure = AssistStructure.getAssistStructure(assistContext);
                 if (mAssistStructure != null) {
-                    mAssistStructure.dump();
                     if (mAssistVisualizer != null) {
                         mAssistVisualizer.setAssistStructure(mAssistStructure);
                     }
