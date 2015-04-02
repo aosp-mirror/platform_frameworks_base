@@ -35,6 +35,7 @@ import android.widget.TextView;
 import com.android.internal.telephony.IccCardConstants;
 import com.android.internal.telephony.IccCardConstants.State;
 import com.android.internal.telephony.TelephonyIntents;
+import com.android.settingslib.WirelessUtils;
 
 public class CarrierText extends TextView {
     private static final boolean DEBUG = KeyguardConstants.DEBUG;
@@ -145,6 +146,9 @@ public class CarrierText extends TextView {
                 displayText =  makeCarrierStringOnEmergencyCapable(
                         getContext().getText(R.string.keyguard_missing_sim_message_short), text);
             }
+        }
+        if (WirelessUtils.isAirplaneModeOn(mContext)) {
+            displayText = getContext().getString(R.string.airplane_mode);
         }
         setText(displayText);
     }

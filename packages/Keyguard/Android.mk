@@ -22,6 +22,8 @@ LOCAL_MODULE := Keyguard
 
 LOCAL_CERTIFICATE := platform
 
+LOCAL_JAVA_LIBRARIES := SettingsLib
+
 LOCAL_PRIVILEGED_MODULE := true
 
 LOCAL_PROGUARD_FLAG_FILES := proguard.flags
