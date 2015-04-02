@@ -80,4 +80,20 @@ interface IVoiceInteractionManagerService {
      */
     int stopRecognition(in IVoiceInteractionService service, int keyphraseId,
             in IRecognitionStatusCallback callback);
+
+    /**
+     * Indicates whether any voice interaction service is currently active.
+     */
+    boolean isServiceActive();
+
+    /**
+     * Shows the session for the currently active service. Used to start a new session from system
+     * affordances.
+     */
+    void showSessionForActiveService();
+
+    /**
+     * Indicates whether there is a voice session running (but not necessarily showing).
+     */
+    boolean isSessionRunning();
 }

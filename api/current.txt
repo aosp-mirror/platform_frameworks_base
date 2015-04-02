@@ -28170,6 +28170,7 @@ package android.service.voice {
     method public void showSession(android.os.Bundle, int);
     field public static final java.lang.String SERVICE_INTERFACE = "android.service.voice.VoiceInteractionService";
     field public static final java.lang.String SERVICE_META_DATA = "android.voice_interaction";
+    field public static final int START_SOURCE_SYSTEM = 4; // 0x4
     field public static final int START_WITH_ASSIST = 1; // 0x1
     field public static final int START_WITH_SCREENSHOT = 2; // 0x2
   }

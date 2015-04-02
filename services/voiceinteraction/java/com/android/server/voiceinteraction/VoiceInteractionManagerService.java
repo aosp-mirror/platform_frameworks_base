@@ -707,6 +707,60 @@ public class VoiceInteractionManagerService extends SystemService {
         }
 
         @Override
+        public boolean isServiceActive() {
+            synchronized (this) {
+                if (mContext.checkCallingPermission(
+                        Manifest.permission.ACCESS_VOICE_INTERACTION_SERVICE)
+                                != PackageManager.PERMISSION_GRANTED) {
+                    throw new SecurityException("Caller does not hold the permission "
+                            + Manifest.permission.ACCESS_VOICE_INTERACTION_SERVICE);
+                }
+                return mImpl != null;
+            }
+        }
+
+        @Override
+        public void showSessionForActiveService() {
+            synchronized (this) {
+                if (mContext.checkCallingPermission(
+                        Manifest.permission.ACCESS_VOICE_INTERACTION_SERVICE)
+                        != PackageManager.PERMISSION_GRANTED) {
+                    throw new SecurityException("Caller does not hold the permission "
+                            + Manifest.permission.ACCESS_VOICE_INTERACTION_SERVICE);
+                }
+                if (mImpl == null) {
+                    Slog.w(TAG, "showSessionForActiveService without running voice interaction"
+                            + "service");
+                    return;
+                }
+                final int callingPid = Binder.getCallingPid();
+                final int callingUid = Binder.getCallingUid();
+                final long caller = Binder.clearCallingIdentity();
+                try {
+                    mImpl.showSessionLocked(callingPid, callingUid, new Bundle() /* sessionArgs */,
+                            VoiceInteractionService.START_SOURCE_SYSTEM
+                                    | VoiceInteractionService.START_WITH_ASSIST
+                                    | VoiceInteractionService.START_WITH_SCREENSHOT);
+                } finally {
+                    Binder.restoreCallingIdentity(caller);
+                }
+            }
+        }
+
+        @Override
+        public boolean isSessionRunning() {
+            synchronized (this) {
+                if (mContext.checkCallingPermission(
+                        Manifest.permission.ACCESS_VOICE_INTERACTION_SERVICE)
+                        != PackageManager.PERMISSION_GRANTED) {
+                    throw new SecurityException("Caller does not hold the permission "
+                            + Manifest.permission.ACCESS_VOICE_INTERACTION_SERVICE);
+                }
+                return mImpl != null && mImpl.mActiveSession != null;
+            }
+        }
+
+        @Override
         public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
             if (mContext.checkCallingOrSelfPermission(Manifest.permission.DUMP)
                     != PackageManager.PERMISSION_GRANTED) {

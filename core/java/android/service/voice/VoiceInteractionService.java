@@ -82,6 +82,12 @@ public class VoiceInteractionService extends Service {
      */
     public static final int START_WITH_SCREENSHOT = 1<<1;
 
+    /**
+     * Flag for use with {@link #showSession}: indicate that the session has been started from the
+     * system.
+     */
+    public static final int START_SOURCE_SYSTEM = 1<<2;
+
     IVoiceInteractionService mInterface = new IVoiceInteractionService.Stub() {
         @Override public void ready() {
             mHandler.sendEmptyMessage(MSG_READY);
