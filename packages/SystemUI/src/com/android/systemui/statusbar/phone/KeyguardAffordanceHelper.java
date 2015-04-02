@@ -69,7 +69,7 @@ public class KeyguardAffordanceHelper {
         @Override
         public void onAnimationEnd(Animator animation) {
             mSwipeAnimator = null;
-            setSwipingInProgress(false);
+            mSwipingInProgress = false;
         }
     };
     private Runnable mAnimationEndRunnable = new Runnable() {
@@ -117,14 +117,17 @@ public class KeyguardAffordanceHelper {
     }
 
     public boolean onTouchEvent(MotionEvent event) {
-        if (mMotionCancelled && event.getActionMasked() != MotionEvent.ACTION_DOWN) {
+        int action = event.getActionMasked();
+        if (mMotionCancelled && action != MotionEvent.ACTION_DOWN
+                && action != MotionEvent.ACTION_UP
+                && action != MotionEvent.ACTION_CANCEL) {
             return false;
         }
         final float y = event.getY();
         final float x = event.getX();
 
         boolean isUp = false;
-        switch (event.getActionMasked()) {
+        switch (action) {
             case MotionEvent.ACTION_DOWN:
                 if (mSwipingInProgress) {
                     cancelAnimation();
@@ -152,7 +155,8 @@ public class KeyguardAffordanceHelper {
                     mInitialTouchY = y;
                     mInitialTouchX = x;
                     mTranslationOnDown = mTranslation;
-                    setSwipingInProgress(true);
+                    mSwipingInProgress = true;
+                    mCallback.onSwipingStarted(w < -mTouchSlop);
                 }
                 if (mSwipingInProgress) {
                     setTranslation(mTranslationOnDown + x - mInitialTouchX, false, false);
@@ -176,13 +180,6 @@ public class KeyguardAffordanceHelper {
         if (mVelocityTracker != null) {
             mVelocityTracker.recycle();
             mVelocityTracker = null;
-        }
-    }
-
-    private void setSwipingInProgress(boolean inProgress) {
-        mSwipingInProgress = inProgress;
-        if (inProgress) {
-            mCallback.onSwipingStarted();
         }
     }
 
@@ -323,6 +320,9 @@ public class KeyguardAffordanceHelper {
         }
         animator.start();
         mSwipeAnimator = animator;
+        if (snapBack) {
+            mCallback.onSwipingAborted();
+        }
     }
 
     private void startFinishingCircleAnimation(float velocity, Runnable mAnimationEndRunnable) {
@@ -451,7 +451,11 @@ public class KeyguardAffordanceHelper {
             mSwipeAnimator.cancel();
         }
         setTranslation(0.0f, true, animate);
-        setSwipingInProgress(false);
+        mMotionCancelled = true;
+        if (mSwipingInProgress) {
+            mCallback.onSwipingAborted();
+        }
+        mSwipingInProgress = false;
     }
 
     public interface Callback {
@@ -470,7 +474,9 @@ public class KeyguardAffordanceHelper {
 
         float getPageWidth();
 
-        void onSwipingStarted();
+        void onSwipingStarted(boolean isRightwardMotion);
+
+        void onSwipingAborted();
 
         KeyguardAffordanceView getLeftIcon();
 

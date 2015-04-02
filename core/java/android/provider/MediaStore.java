@@ -226,6 +226,35 @@ public final class MediaStore {
     public static final String INTENT_ACTION_STILL_IMAGE_CAMERA = "android.media.action.STILL_IMAGE_CAMERA";
 
     /**
+     * The name of the Intent action used to indicate that a camera launch might be imminent. This
+     * broadcast should be targeted to the package that is receiving
+     * {@link #INTENT_ACTION_STILL_IMAGE_CAMERA} or
+     * {@link #INTENT_ACTION_STILL_IMAGE_CAMERA_SECURE}, depending on the context. If such
+     * intent would launch the resolver activity, this broadcast should not be sent at all.
+     * <p>
+     * A receiver of this broadcast should do the absolute minimum amount of work to initialize the
+     * camera in order to reduce startup time in likely case that shortly after an actual camera
+     * launch intent would be sent.
+     * <p>
+     * In case the actual intent will not be fired, the target package will receive
+     * {@link #ACTION_STILL_IMAGE_CAMERA_COOLDOWN}. However, it is recommended that the receiver
+     * also implements a timeout to close the camera after receiving this intent, as there is no
+     * guarantee that {@link #ACTION_STILL_IMAGE_CAMERA_COOLDOWN} will be delivered.
+     */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_STILL_IMAGE_CAMERA_PREWARM = "android.media.action.STILL_IMAGE_CAMERA_PREWARM";
+
+    /**
+     * The name of the Intent action used to indicate that an imminent camera launch has been
+     * cancelled by the user. This broadcast should be targeted to the package that has received
+     * {@link #ACTION_STILL_IMAGE_CAMERA_PREWARM}.
+     * <p>
+     * A receiver of this broadcast should close the camera immediately.
+     */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_STILL_IMAGE_CAMERA_COOLDOWN = "android.media.action.STILL_IMAGE_CAMERA_COOLDOWN";
+
+    /**
      * The name of the Intent action used to launch a camera in still image mode
      * for use when the device is secured (e.g. with a pin, password, pattern,
      * or face unlock). Applications responding to this intent must not expose
