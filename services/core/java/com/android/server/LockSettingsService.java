@@ -482,6 +482,7 @@ public class LockSettingsService extends ILockSettings.Stub {
     private static final String[] READ_PASSWORD_PROTECTED_SETTINGS = new String[] {
             LockPatternUtils.LOCK_PASSWORD_SALT_KEY,
             LockPatternUtils.PASSWORD_HISTORY_KEY,
+            LockPatternUtils.PASSWORD_TYPE_KEY,
     };
 
     private static final String[] SETTINGS_TO_BACKUP = new String[] {
