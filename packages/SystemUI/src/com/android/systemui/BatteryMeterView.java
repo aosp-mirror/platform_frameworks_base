@@ -16,6 +16,7 @@
 
 package com.android.systemui;
 
+import android.animation.ArgbEvaluator;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -79,6 +80,12 @@ public class BatteryMeterView extends View implements DemoMode,
 
     private BatteryController mBatteryController;
     private boolean mPowerSaveEnabled;
+
+    private int mDarkModeBackgroundColor;
+    private int mDarkModeFillColor;
+
+    private int mLightModeBackgroundColor;
+    private int mLightModeFillColor;
 
     private class BatteryTracker extends BroadcastReceiver {
         public static final int UNKNOWN_LEVEL = -1;
@@ -245,6 +252,13 @@ public class BatteryMeterView extends View implements DemoMode,
         mBoltPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         mBoltPaint.setColor(context.getColor(R.color.batterymeter_bolt_color));
         mBoltPoints = loadBoltPoints(res);
+
+        mDarkModeBackgroundColor =
+                context.getColor(R.color.dark_mode_icon_color_dual_tone_background);
+        mDarkModeFillColor = context.getColor(R.color.dark_mode_icon_color_dual_tone_fill);
+        mLightModeBackgroundColor =
+                context.getColor(R.color.light_mode_icon_color_dual_tone_background);
+        mLightModeFillColor = context.getColor(R.color.light_mode_icon_color_dual_tone_fill);
     }
 
     public void setBatteryController(BatteryController batteryController) {
@@ -309,12 +323,28 @@ public class BatteryMeterView extends View implements DemoMode,
         return color;
     }
 
-    public void setIconTint(int tint) {
-        mIconTint = tint;
-        mFramePaint.setColorFilter(new PorterDuffColorFilter(tint, PorterDuff.Mode.SRC_ATOP));
-        mBoltPaint.setColor(tint);
-        mChargeColor = tint;
+    public void setDarkIntensity(float darkIntensity) {
+        int backgroundColor = getBackgroundColor(darkIntensity);
+        int fillColor = getFillColor(darkIntensity);
+        mIconTint = fillColor;
+        mFramePaint.setColor(backgroundColor);
+        mBoltPaint.setColor(backgroundColor);
+        mChargeColor = fillColor;
         invalidate();
+    }
+
+    private int getBackgroundColor(float darkIntensity) {
+        return getColorForDarkIntensity(
+                darkIntensity, mLightModeBackgroundColor, mDarkModeBackgroundColor);
+    }
+
+    private int getFillColor(float darkIntensity) {
+        return getColorForDarkIntensity(
+                darkIntensity, mLightModeFillColor, mDarkModeFillColor);
+    }
+
+    private int getColorForDarkIntensity(float darkIntensity, int lightColor, int darkColor) {
+        return (int) ArgbEvaluator.getInstance().evaluate(darkIntensity, lightColor, darkColor);
     }
 
     @Override

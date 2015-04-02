@@ -16,11 +16,11 @@
 
 package com.android.systemui.statusbar.phone;
 
+import android.animation.ArgbEvaluator;
 import android.animation.ValueAnimator;
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
-import android.graphics.PorterDuff;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.SystemClock;
@@ -74,11 +74,15 @@ public class StatusBarIconController {
     private int mIconHPadding;
 
     private int mIconTint = Color.WHITE;
+    private float mDarkIntensity;
 
     private boolean mTransitionPending;
     private boolean mTintChangePending;
-    private int mPendingIconTint;
+    private float mPendingDarkIntensity;
     private ValueAnimator mTintAnimator;
+
+    private int mDarkModeIconColorSingleTone;
+    private int mLightModeIconColorSingleTone;
 
     private final Handler mHandler;
     private boolean mTransitionDeferring;
@@ -111,6 +115,8 @@ public class StatusBarIconController {
                 android.R.interpolator.linear_out_slow_in);
         mFastOutSlowIn = AnimationUtils.loadInterpolator(mContext,
                 android.R.interpolator.fast_out_slow_in);
+        mDarkModeIconColorSingleTone = context.getColor(R.color.dark_mode_icon_color_single_tone);
+        mLightModeIconColorSingleTone = context.getColor(R.color.light_mode_icon_color_single_tone);
         mHandler = new Handler();
         updateResources();
     }
@@ -296,30 +302,31 @@ public class StatusBarIconController {
         }
     }
 
-    public void setIconTint(int tint) {
+    public void setIconsDark(boolean dark) {
         if (mTransitionPending) {
-            deferIconTintChange(tint);
+            deferIconTintChange(dark ? 1.0f : 0.0f);
         } else if (mTransitionDeferring) {
-            animateIconTint(tint,
+            animateIconTint(dark ? 1.0f : 0.0f,
                     Math.max(0, mTransitionDeferringStartTime - SystemClock.uptimeMillis()),
                     mTransitionDeferringDuration);
         } else {
-            animateIconTint(tint, 0 /* delay */, DEFAULT_TINT_ANIMATION_DURATION);
+            animateIconTint(dark ? 1.0f : 0.0f, 0 /* delay */, DEFAULT_TINT_ANIMATION_DURATION);
         }
     }
 
-    private void animateIconTint(int targetTint, long delay, long duration) {
+    private void animateIconTint(float targetDarkIntensity, long delay,
+            long duration) {
         if (mTintAnimator != null) {
             mTintAnimator.cancel();
         }
-        if (mIconTint == targetTint) {
+        if (mDarkIntensity == targetDarkIntensity) {
             return;
         }
-        mTintAnimator = ValueAnimator.ofArgb(mIconTint, targetTint);
+        mTintAnimator = ValueAnimator.ofFloat(mDarkIntensity, targetDarkIntensity);
         mTintAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
             @Override
             public void onAnimationUpdate(ValueAnimator animation) {
-                setIconTintInternal((Integer) animation.getAnimatedValue());
+                setIconTintInternal((Float) animation.getAnimatedValue());
             }
         });
         mTintAnimator.setDuration(duration);
@@ -327,17 +334,20 @@ public class StatusBarIconController {
         mTintAnimator.setInterpolator(mFastOutSlowIn);
         mTintAnimator.start();
     }
-    private void setIconTintInternal(int tint) {
-        mIconTint = tint;
+
+    private void setIconTintInternal(float darkIntensity) {
+        mDarkIntensity = darkIntensity;
+        mIconTint = (int) ArgbEvaluator.getInstance().evaluate(darkIntensity,
+                mLightModeIconColorSingleTone, mDarkModeIconColorSingleTone);
         applyIconTint();
     }
 
-    private void deferIconTintChange(int tint) {
-        if (mTintChangePending && tint == mPendingIconTint) {
+    private void deferIconTintChange(float darkIntensity) {
+        if (mTintChangePending && darkIntensity == mPendingDarkIntensity) {
             return;
         }
         mTintChangePending = true;
-        mPendingIconTint = tint;
+        mPendingDarkIntensity = darkIntensity;
     }
 
     private void applyIconTint() {
@@ -345,9 +355,9 @@ public class StatusBarIconController {
             StatusBarIconView v = (StatusBarIconView) mStatusIcons.getChildAt(i);
             v.setImageTintList(ColorStateList.valueOf(mIconTint));
         }
-        mSignalCluster.setIconTint(mIconTint);
+        mSignalCluster.setIconTint(mIconTint, mDarkIntensity);
         mMoreIcon.setImageTintList(ColorStateList.valueOf(mIconTint));
-        mBatteryMeterView.setIconTint(mIconTint);
+        mBatteryMeterView.setDarkIntensity(mDarkIntensity);
         mClock.setTextColor(mIconTint);
         applyNotificationIconsTint();
     }
@@ -358,7 +368,6 @@ public class StatusBarIconController {
             boolean isPreL = Boolean.TRUE.equals(v.getTag(R.id.icon_is_pre_L));
             boolean colorize = !isPreL || isGrayscale(v);
             if (colorize) {
-                v.setImageTintMode(PorterDuff.Mode.SRC_ATOP);
                 v.setImageTintList(ColorStateList.valueOf(mIconTint));
             }
         }
@@ -381,7 +390,7 @@ public class StatusBarIconController {
     public void appTransitionCancelled() {
         if (mTransitionPending && mTintChangePending) {
             mTintChangePending = false;
-            animateIconTint(mPendingIconTint, 0 /* delay */, DEFAULT_TINT_ANIMATION_DURATION);
+            animateIconTint(mPendingDarkIntensity, 0 /* delay */, DEFAULT_TINT_ANIMATION_DURATION);
         }
         mTransitionPending = false;
     }
@@ -389,7 +398,7 @@ public class StatusBarIconController {
     public void appTransitionStarting(long startTime, long duration) {
         if (mTransitionPending && mTintChangePending) {
             mTintChangePending = false;
-            animateIconTint(mPendingIconTint,
+            animateIconTint(mPendingDarkIntensity,
                     Math.max(0, startTime - SystemClock.uptimeMillis()),
                     duration);
 

@@ -20,12 +20,12 @@ Copyright (C) 2014 The Android Open Source Project
         android:viewportWidth="24.0"
         android:viewportHeight="24.0">
     <path
-        android:fillColor="#FFFFFFFF"
+        android:fillColor="?attr/singleToneColor"
         android:pathData="M19.700001,20.000000l2.000000,0.000000l0.000000,2.000000l-2.000000,0.000000z"/>
     <path
-        android:fillColor="#FFFFFFFF"
+        android:fillColor="?attr/singleToneColor"
         android:pathData="M19.700001,10.000000l2.000000,0.000000l0.000000,8.100000l-2.000000,0.000000z"/>
     <path
         android:pathData="M17.700001,8.000000l4.299999,0.000000 0.000000,-6.000000 -20.000000,20.000000 15.700001,0.000000z"
-        android:fillColor="#4DFFFFFF"/>
+        android:fillColor="?attr/backgroundColor"/>
 </vector>

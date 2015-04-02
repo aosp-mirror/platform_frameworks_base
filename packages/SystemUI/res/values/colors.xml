@@ -130,5 +130,12 @@
     <color name="segmented_button_selected">#FFFFFFFF</color>
     <color name="segmented_button_unselected">#B3B0BEC5</color><!-- 70% blue grey 200 -->
     <color name="volume_panel_divider">#1FFFFFFF</color><!-- 12% white -->
-    <color name="light_mode_icon_color">#FF616161</color><!-- grey 700 -->
+
+    <color name="dark_mode_icon_color_single_tone">#99000000</color>
+    <color name="dark_mode_icon_color_dual_tone_background">#3d000000</color>
+    <color name="dark_mode_icon_color_dual_tone_fill">#7a000000</color>
+
+    <color name="light_mode_icon_color_single_tone">#ffffff</color>
+    <color name="light_mode_icon_color_dual_tone_background">#4dffffff</color>
+    <color name="light_mode_icon_color_dual_tone_fill">#ffffff</color>
 </resources>
