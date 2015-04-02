@@ -261,8 +261,7 @@ public class ShapeDrawable extends Drawable {
 
     @Override
     public int getChangingConfigurations() {
-        return super.getChangingConfigurations()
-                | mShapeState.mChangingConfigurations;
+        return super.getChangingConfigurations() | mShapeState.getChangingConfigurations();
     }
 
     /**
@@ -427,7 +426,7 @@ public class ShapeDrawable extends Drawable {
 
         // Apply theme to contained color state list.
         if (state.mTint != null && state.mTint.canApplyTheme()) {
-            state.mTint.applyTheme(t);
+            state.mTint = state.mTint.obtainForTheme(t);
         }
 
         // Update local properties.
@@ -578,7 +577,8 @@ public class ShapeDrawable extends Drawable {
 
         @Override
         public int getChangingConfigurations() {
-            return mChangingConfigurations;
+            return mChangingConfigurations
+                    | (mTint != null ? mTint.getChangingConfigurations() : 0);
         }
     }
 

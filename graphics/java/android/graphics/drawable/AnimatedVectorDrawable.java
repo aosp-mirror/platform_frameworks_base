@@ -173,7 +173,7 @@ public class AnimatedVectorDrawable extends Drawable implements Animatable {
 
     @Override
     public int getChangingConfigurations() {
-        return super.getChangingConfigurations() | mAnimatedVectorState.mChangingConfigurations;
+        return super.getChangingConfigurations() | mAnimatedVectorState.getChangingConfigurations();
     }
 
     @Override

@@ -276,7 +276,7 @@ public class ColorDrawable extends Drawable {
         }
 
         if (state.mTint != null && state.mTint.canApplyTheme()) {
-            state.mTint.applyTheme(t);
+            state.mTint = state.mTint.obtainForTheme(t);
         }
 
         updateLocalState(t.getResources());
@@ -327,7 +327,8 @@ public class ColorDrawable extends Drawable {
 
         @Override
         public int getChangingConfigurations() {
-            return mChangingConfigurations;
+            return mChangingConfigurations
+                    | (mTint != null ? mTint.getChangingConfigurations() : 0);
         }
     }
 

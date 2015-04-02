@@ -454,7 +454,7 @@ public class BitmapDrawable extends Drawable {
 
     @Override
     public int getChangingConfigurations() {
-        return super.getChangingConfigurations() | mBitmapState.mChangingConfigurations;
+        return super.getChangingConfigurations() | mBitmapState.getChangingConfigurations();
     }
 
     private boolean needMirroring() {
@@ -834,7 +834,7 @@ public class BitmapDrawable extends Drawable {
 
         // Apply theme to contained color state list.
         if (state.mTint != null && state.mTint.canApplyTheme()) {
-            state.mTint.applyTheme(t);
+            state.mTint = state.mTint.obtainForTheme(t);
         }
 
         // Update local properties.
@@ -882,7 +882,7 @@ public class BitmapDrawable extends Drawable {
 
     @Override
     public final ConstantState getConstantState() {
-        mBitmapState.mChangingConfigurations = getChangingConfigurations();
+        mBitmapState.mChangingConfigurations |= getChangingConfigurations();
         return mBitmapState;
     }
 
@@ -950,7 +950,8 @@ public class BitmapDrawable extends Drawable {
 
         @Override
         public int getChangingConfigurations() {
-            return mChangingConfigurations;
+            return mChangingConfigurations
+                    | (mTint != null ? mTint.getChangingConfigurations() : 0);
         }
     }
 
