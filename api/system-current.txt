@@ -5689,6 +5689,7 @@ package android.app.admin {
     method public java.util.List<java.lang.String> getCrossProfileWidgetProviders(android.content.ComponentName);
     method public int getCurrentFailedPasswordAttempts();
     method public java.lang.String getDeviceInitializerApp();
+    method public android.content.ComponentName getDeviceInitializerComponent();
     method public java.lang.String getDeviceOwner();
     method public java.util.List<byte[]> getInstalledCaCerts(android.content.ComponentName);
     method public int getKeyguardDisabledFeatures(android.content.ComponentName);

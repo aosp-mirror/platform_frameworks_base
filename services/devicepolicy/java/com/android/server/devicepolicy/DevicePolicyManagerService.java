@@ -4007,12 +4007,12 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             if (mDeviceOwner == null) {
                 // Device owner state does not exist, create it.
                 mDeviceOwner = DeviceOwner.createWithDeviceInitializer(
-                        initializer.getPackageName(), ownerName);
+                        initializer, ownerName);
                 mDeviceOwner.writeOwnerFile();
                 return true;
             } else {
                 // Device owner already exists, update it.
-                mDeviceOwner.setDeviceInitializer(initializer.getPackageName(), ownerName);
+                mDeviceOwner.setDeviceInitializer(initializer, ownerName);
                 mDeviceOwner.writeOwnerFile();
                 return true;
             }
@@ -4052,6 +4052,19 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         synchronized (this) {
             if (mDeviceOwner != null && mDeviceOwner.hasDeviceInitializer()) {
                 return mDeviceOwner.getDeviceInitializerPackageName();
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public ComponentName getDeviceInitializerComponent() {
+        if (!mHasFeature) {
+            return null;
+        }
+        synchronized (this) {
+            if (mDeviceOwner != null && mDeviceOwner.hasDeviceInitializer()) {
+                return mDeviceOwner.getDeviceInitializerComponent();
             }
         }
         return null;

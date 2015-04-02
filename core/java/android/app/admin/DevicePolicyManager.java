@@ -2639,8 +2639,8 @@ public class DevicePolicyManager {
      *        called by the device owner.
      * @param initializer Which {@link DeviceAdminReceiver} to make device initializer.
      * @param initializerName The user-visible name of the device initializer.
-     * @return whether the package was successfully registered as the device initializer.
-     * @throws IllegalArgumentException if the package name is null or invalid
+     * @return whether the component was successfully registered as the device initializer.
+     * @throws IllegalArgumentException if the componentname is null or invalid
      * @throws IllegalStateException if the caller is not device owner or the device has
      *         already been provisioned or a device initializer already exists.
      */
@@ -2708,6 +2708,25 @@ public class DevicePolicyManager {
         }
         return null;
     }
+
+    /**
+     * @hide
+     * Gets the device initializer component of the system.
+     *
+     * @return the component name of the device initializer.
+     */
+    @SystemApi
+    public ComponentName getDeviceInitializerComponent() {
+        if (mService != null) {
+            try {
+                return mService.getDeviceInitializerComponent();
+            } catch (RemoteException re) {
+                Log.w(TAG, "Failed to get device initializer");
+            }
+        }
+        return null;
+    }
+
 
     /**
      * Sets the enabled state of the user. A user should be enabled only once it is ready to
