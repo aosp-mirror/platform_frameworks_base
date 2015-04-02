@@ -68,8 +68,12 @@ final class ActiveSourceHandler {
         }
 
         if (!tv.isProhibitMode()) {
+            ActiveSource old = ActiveSource.of(tv.getActiveSource());
             tv.updateActiveSource(newActive);
             boolean notifyInputChange = (mCallback == null);
+            if (!old.equals(newActive)) {
+                tv.setPrevPortId(tv.getActivePortId());
+            }
             tv.updateActiveInput(newActive.physicalAddress, notifyInputChange);
             invokeCallback(HdmiControlManager.RESULT_SUCCESS);
         } else {

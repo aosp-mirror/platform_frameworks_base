@@ -343,7 +343,6 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
     void updateActiveInput(int path, boolean notifyInputChange) {
         assertRunOnServiceThread();
         // Seq #15
-        setPrevPortId(getActivePortId());
         setActivePath(path);
         // TODO: Handle PAP/PIP case.
         // Show OSD port change banner
