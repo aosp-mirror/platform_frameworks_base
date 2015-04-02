@@ -3583,6 +3583,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             // of whether a layout was requested on that View.
             sIgnoreMeasureCache = targetSdkVersion < KITKAT;
 
+            Canvas.sCompatibilityRestore = targetSdkVersion < MNC;
+
             sCompatibilityDone = true;
         }
     }

@@ -86,20 +86,26 @@ static jint saveLayerAlpha(JNIEnv* env, jobject, jlong canvasHandle, jfloat l, j
     return static_cast<jint>(get_canvas(canvasHandle)->saveLayerAlpha(l, t, r, b, alpha, flags));
 }
 
-static void restore(JNIEnv* env, jobject, jlong canvasHandle) {
+static void restore(JNIEnv* env, jobject, jlong canvasHandle, jboolean throwOnUnderflow) {
     Canvas* canvas = get_canvas(canvasHandle);
     if (canvas->getSaveCount() <= 1) {  // cannot restore anymore
-        doThrowISE(env, "Underflow in restore - more restores than saves");
-        return;
+        if (throwOnUnderflow) {
+            doThrowISE(env, "Underflow in restore - more restores than saves");
+        }
+        return; // compat behavior - return without throwing
     }
     canvas->restore();
 }
 
-static void restoreToCount(JNIEnv* env, jobject, jlong canvasHandle, jint restoreCount) {
+static void restoreToCount(JNIEnv* env, jobject, jlong canvasHandle, jint restoreCount,
+        jboolean throwOnUnderflow) {
     Canvas* canvas = get_canvas(canvasHandle);
     if (restoreCount < 1 || restoreCount > canvas->getSaveCount()) {
-        doThrowIAE(env, "Underflow in restoreToCount - more restores than saves");
-        return;
+        if (throwOnUnderflow) {
+            doThrowIAE(env, "Underflow in restoreToCount - more restores than saves");
+            return;
+        }
+        restoreCount = 1; // compat behavior - restore as far as possible
     }
     canvas->restoreToCount(restoreCount);
 }
@@ -661,8 +667,8 @@ static JNINativeMethod gMethods[] = {
     {"native_saveLayer","(JFFFFJI)I", (void*) CanvasJNI::saveLayer},
     {"native_saveLayerAlpha","(JFFFFII)I", (void*) CanvasJNI::saveLayerAlpha},
     {"native_getSaveCount","(J)I", (void*) CanvasJNI::getSaveCount},
-    {"native_restore","(J)V", (void*) CanvasJNI::restore},
-    {"native_restoreToCount","(JI)V", (void*) CanvasJNI::restoreToCount},
+    {"native_restore","(JZ)V", (void*) CanvasJNI::restore},
+    {"native_restoreToCount","(JIZ)V", (void*) CanvasJNI::restoreToCount},
     {"native_getCTM", "(JJ)V", (void*)CanvasJNI::getCTM},
     {"native_setMatrix","(JJ)V", (void*) CanvasJNI::setMatrix},
     {"native_concat","(JJ)V", (void*) CanvasJNI::concat},
