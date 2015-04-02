@@ -34,6 +34,7 @@ import java.lang.annotation.Target;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.Map;
 
 import org.apache.harmony.dalvik.ddmc.Chunk;
 import org.apache.harmony.dalvik.ddmc.ChunkHandler;
@@ -1032,6 +1033,95 @@ href="{@docRoot}guide/developing/tools/traceview.html">Traceview: A Graphical Lo
      */
     public static void resetAllCounts() {
         VMDebug.resetAllocCount(VMDebug.KIND_ALL_COUNTS);
+    }
+
+    /**
+     * Returns the value of a particular runtime statistic or {@code null} if no
+     * such runtime statistic exists.
+     *
+     * <p>The following table lists the runtime statistics that the runtime supports.
+     * Note runtime statistics may be added or removed in a future API level.</p>
+     *
+     * <table>
+     *     <thead>
+     *         <tr>
+     *             <th>Runtime statistic name</th>
+     *             <th>Meaning</th>
+     *             <th>Example</th>
+     *             <th>Supported (API Levels)</th>
+     *         </tr>
+     *     </thead>
+     *     <tbody>
+     *         <tr>
+     *             <td>art.gc.gc-count</td>
+     *             <td>The number of garbage collection runs.</td>
+     *             <td>{@code 164}</td>
+     *             <td>23</td>
+     *         </tr>
+     *         <tr>
+     *             <td>art.gc.gc-time</td>
+     *             <td>The total duration of garbage collection runs in ms.</td>
+     *             <td>{@code 62364}</td>
+     *             <td>23</td>
+     *         </tr>
+     *         <tr>
+     *             <td>art.gc.bytes-allocated</td>
+     *             <td>The total number of bytes that the application allocated.</td>
+     *             <td>{@code 1463948408}</td>
+     *             <td>23</td>
+     *         </tr>
+     *         <tr>
+     *             <td>art.gc.bytes-freed</td>
+     *             <td>The total number of bytes that garbage collection reclaimed.</td>
+     *             <td>{@code 1313493084}</td>
+     *             <td>23</td>
+     *         </tr>
+     *         <tr>
+     *             <td>art.gc.blocking-gc-count</td>
+     *             <td>The number of blocking garbage collection runs.</td>
+     *             <td>{@code 2}</td>
+     *             <td>23</td>
+     *         </tr>
+     *         <tr>
+     *             <td>art.gc.blocking-gc-time</td>
+     *             <td>The total duration of blocking garbage collection runs in ms.</td>
+     *             <td>{@code 804}</td>
+     *             <td>23</td>
+     *         </tr>
+     *         <tr>
+     *             <td>art.gc.gc-count-rate-histogram</td>
+     *             <td>The histogram of the number of garbage collection runs per 10 seconds.</td>
+     *             <td>{@code 0:34503,1:45350,2:11281,3:8088,4:43,5:8}</td>
+     *             <td>23</td>
+     *         </tr>
+     *         <tr>
+     *             <td>art.gc.blocking-gc-count-rate-histogram</td>
+     *             <td>The histogram of the number of garbage collection runs per 10 seconds.</td>
+     *             <td>{@code 0:99269,1:1,2:1}</td>
+     *             <td>23</td>
+     *         </tr>
+     *     </tbody>
+     * </table>
+     *
+     * @param statName
+     *            the name of the runtime statistic to look up.
+     * @return the value of the specified runtime statistic or {@code null} if the
+     *         runtime statistic doesn't exist.
+     * @hide
+     */
+    public static String getRuntimeStat(String statName) {
+        return VMDebug.getRuntimeStat(statName);
+    }
+
+    /**
+     * Returns a map of the names/values of the runtime statistics
+     * that {@link #getRuntimeStat()} supports.
+     *
+     * @return a map of the names/values of the supported runtime statistics.
+     * @hide
+     */
+    public static Map<String, String> getRuntimeStats() {
+        return VMDebug.getRuntimeStats();
     }
 
     /**
