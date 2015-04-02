@@ -112,6 +112,12 @@ public class DndTile extends QSTile<QSTile.BooleanState> {
                 state.contentDescription = mContext.getString(
                         R.string.accessibility_quick_settings_dnd_none_on);
                 break;
+            case Global.ZEN_MODE_ALARMS:
+                state.icon = ResourceIcon.get(R.drawable.ic_qs_dnd_on);
+                state.label = mContext.getString(R.string.quick_settings_dnd_alarms_label);
+                state.contentDescription = mContext.getString(
+                        R.string.accessibility_quick_settings_dnd_alarms_on);
+                break;
             default:
                 state.icon = ResourceIcon.get(R.drawable.ic_qs_dnd_off);
                 state.label = mContext.getString(R.string.quick_settings_dnd_label);

@@ -155,7 +155,7 @@ public class ZenModePanel extends LinearLayout {
         } else {
             mZenButtonsContainer.setBackgroundResource(R.drawable.qs_background_secondary);
         }
-        mZenButtons.getChildAt(2).setVisibility(mEmbedded ? GONE : VISIBLE);
+        mZenButtons.getChildAt(3).setVisibility(mEmbedded ? GONE : VISIBLE);
         mZenEmbeddedDivider.setVisibility(mEmbedded ? VISIBLE : GONE);
         setExpanded(mEmbedded);
         updateWidgets();
@@ -166,8 +166,11 @@ public class ZenModePanel extends LinearLayout {
         super.onFinishInflate();
 
         mZenButtons = (SegmentedButtons) findViewById(R.id.zen_buttons);
-        mZenButtons.addButton(R.string.interruption_level_none, Global.ZEN_MODE_NO_INTERRUPTIONS);
-        mZenButtons.addButton(R.string.interruption_level_priority,
+        mZenButtons.addButton(R.string.interruption_level_none_twoline,
+                Global.ZEN_MODE_NO_INTERRUPTIONS);
+        mZenButtons.addButton(R.string.interruption_level_alarms_twoline,
+                Global.ZEN_MODE_ALARMS);
+        mZenButtons.addButton(R.string.interruption_level_priority_twoline,
                 Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS);
         mZenButtons.addButton(R.string.interruption_level_all, Global.ZEN_MODE_OFF);
         mZenButtons.setCallback(mZenButtonsCallback);
@@ -718,7 +721,10 @@ public class ZenModePanel extends LinearLayout {
             case Global.ZEN_MODE_NO_INTERRUPTIONS:
                 modeText = mContext.getString(R.string.zen_no_interruptions);
                 break;
-             default:
+            case Global.ZEN_MODE_ALARMS:
+                modeText = mContext.getString(R.string.zen_alarms);
+                break;
+            default:
                 return;
         }
         announceForAccessibility(mContext.getString(R.string.zen_mode_and_condition, modeText,

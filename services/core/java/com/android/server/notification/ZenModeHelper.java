@@ -128,6 +128,8 @@ public class ZenModeHelper implements AudioManagerInternal.RingerModeDelegate {
                 return NotificationListenerService.INTERRUPTION_FILTER_ALL;
             case Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS:
                 return NotificationListenerService.INTERRUPTION_FILTER_PRIORITY;
+            case Global.ZEN_MODE_ALARMS:
+                return NotificationListenerService.INTERRUPTION_FILTER_ALARMS;
             case Global.ZEN_MODE_NO_INTERRUPTIONS:
                 return NotificationListenerService.INTERRUPTION_FILTER_NONE;
             default:
@@ -142,6 +144,8 @@ public class ZenModeHelper implements AudioManagerInternal.RingerModeDelegate {
                 return Global.ZEN_MODE_OFF;
             case NotificationListenerService.INTERRUPTION_FILTER_PRIORITY:
                 return Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS;
+            case NotificationListenerService.INTERRUPTION_FILTER_ALARMS:
+                return Global.ZEN_MODE_ALARMS;
             case NotificationListenerService.INTERRUPTION_FILTER_NONE:
                 return Global.ZEN_MODE_NO_INTERRUPTIONS;
             default:
@@ -170,6 +174,13 @@ public class ZenModeHelper implements AudioManagerInternal.RingerModeDelegate {
             case Global.ZEN_MODE_NO_INTERRUPTIONS:
                 // #notevenalarms
                 ZenLog.traceIntercepted(record, "none");
+                return true;
+            case Global.ZEN_MODE_ALARMS:
+                if (isAlarm(record)) {
+                    // Alarms only
+                    return false;
+                }
+                ZenLog.traceIntercepted(record, "alarmsOnly");
                 return true;
             case Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS:
                 if (isAlarm(record)) {
@@ -314,6 +325,7 @@ public class ZenModeHelper implements AudioManagerInternal.RingerModeDelegate {
         int newRingerModeInternal = ringerModeInternal;
         switch (mZenMode) {
             case Global.ZEN_MODE_NO_INTERRUPTIONS:
+            case Global.ZEN_MODE_ALARMS:
                 if (ringerModeInternal != AudioManager.RINGER_MODE_SILENT) {
                     mPreviousRingerMode = ringerModeInternal;
                     newRingerModeInternal = AudioManager.RINGER_MODE_SILENT;
@@ -344,7 +356,8 @@ public class ZenModeHelper implements AudioManagerInternal.RingerModeDelegate {
         switch (ringerModeNew) {
             case AudioManager.RINGER_MODE_SILENT:
                 if (isChange && policy.doNotDisturbWhenSilent) {
-                    if (mZenMode != Global.ZEN_MODE_NO_INTERRUPTIONS) {
+                    if (mZenMode != Global.ZEN_MODE_NO_INTERRUPTIONS
+                            && mZenMode != Global.ZEN_MODE_ALARMS) {
                         newZen = Global.ZEN_MODE_NO_INTERRUPTIONS;
                     }
                 }
@@ -352,7 +365,8 @@ public class ZenModeHelper implements AudioManagerInternal.RingerModeDelegate {
             case AudioManager.RINGER_MODE_VIBRATE:
             case AudioManager.RINGER_MODE_NORMAL:
                 if (isChange && ringerModeOld == AudioManager.RINGER_MODE_SILENT
-                        && mZenMode == Global.ZEN_MODE_NO_INTERRUPTIONS) {
+                        && (mZenMode == Global.ZEN_MODE_NO_INTERRUPTIONS
+                                || mZenMode == Global.ZEN_MODE_ALARMS)) {
                     newZen = Global.ZEN_MODE_OFF;
                 } else if (mZenMode != Global.ZEN_MODE_OFF) {
                     ringerModeExternalOut = AudioManager.RINGER_MODE_SILENT;
@@ -470,6 +484,7 @@ public class ZenModeHelper implements AudioManagerInternal.RingerModeDelegate {
             ValidateNotificationPeople validator, int contactsTimeoutMs, float timeoutAffinity) {
         final int zen = mZenMode;
         if (zen == Global.ZEN_MODE_NO_INTERRUPTIONS) return false; // nothing gets through
+        if (zen == Global.ZEN_MODE_ALARMS) return false; // not an alarm
         if (zen == Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS) {
             if (!mConfig.allowCalls) return false; // no calls get through
             if (validator != null) {

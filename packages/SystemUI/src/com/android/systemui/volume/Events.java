@@ -177,6 +177,7 @@ public class Events {
         switch (zenMode) {
             case Global.ZEN_MODE_OFF: return "off";
             case Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS: return "important_interruptions";
+            case Global.ZEN_MODE_ALARMS: return "alarms";
             case Global.ZEN_MODE_NO_INTERRUPTIONS: return "no_interruptions";
             default: return "unknown";
         }

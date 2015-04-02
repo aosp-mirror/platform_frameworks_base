@@ -100,7 +100,7 @@
             android:layout_height="wrap_content"
             android:clickable="true"
             android:focusable="true"
-            android:minWidth="84dp"
+            android:minWidth="66dp"
             android:text="@string/quick_settings_done"
             android:textAppearance="@style/TextAppearance.QS.DetailButton" />
     </LinearLayout>

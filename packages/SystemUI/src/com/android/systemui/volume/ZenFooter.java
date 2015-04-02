@@ -139,11 +139,15 @@ public class ZenFooter extends LinearLayout {
     }
 
     public boolean isZen() {
-        return isZenPriority() || isZenNone();
+        return isZenPriority() || isZenAlarms() || isZenNone();
     }
 
     private boolean isZenPriority() {
         return mZen == Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS;
+    }
+
+    private boolean isZenAlarms() {
+        return mZen == Global.ZEN_MODE_ALARMS;
     }
 
     private boolean isZenNone() {
@@ -188,6 +192,7 @@ public class ZenFooter extends LinearLayout {
         mSwitchBarIcon.setAlpha(isZen ? 1 : mSecondaryAlpha);
         final String line1 =
                 isZenPriority() ? mContext.getString(R.string.interruption_level_priority)
+                : isZenAlarms() ? mContext.getString(R.string.interruption_level_alarms)
                 : isZenNone() ? mContext.getString(R.string.interruption_level_none)
                 : null;
         Util.setText(mSummaryLine1, line1);

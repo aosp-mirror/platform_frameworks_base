@@ -435,6 +435,8 @@
     <string name="accessibility_quick_settings_dnd_priority_on">Do not disturb on, priority only.</string>
     <!-- Content description of the do not disturb tile in quick settings when on in none (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_quick_settings_dnd_none_on">Do not disturb on, no interruptions.</string>
+    <!-- Content description of the do not disturb tile in quick settings when on in alarms only (not shown on the screen). [CHAR LIMIT=NONE] -->
+    <string name="accessibility_quick_settings_dnd_alarms_on">Do not disturb on, alarms only.</string>
      <!-- Content description of the do not disturb tile in quick settings when off (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_quick_settings_dnd_off">Do not disturb off.</string>
     <!-- Announcement made when do not disturb changes to off (not shown on the screen). [CHAR LIMIT=NONE] -->
@@ -567,6 +569,8 @@
     <string name="quick_settings_dnd_label">Do not disturb</string>
     <!-- QuickSettings: Do not disturb - Priority only [CHAR LIMIT=NONE] -->
     <string name="quick_settings_dnd_priority_label">Priority only</string>
+    <!-- QuickSettings: Do not disturb - Alarms only [CHAR LIMIT=NONE] -->
+    <string name="quick_settings_dnd_alarms_label">Alarms only</string>
     <!-- QuickSettings: Do not disturb - No interruptions [CHAR LIMIT=NONE] -->
     <string name="quick_settings_dnd_none_label">No interruptions</string>
     <!-- QuickSettings: Bluetooth [CHAR LIMIT=NONE] -->
@@ -725,6 +729,9 @@
     <!-- Zen mode: Only important interruptions. [CHAR LIMIT=40] -->
     <string name="zen_important_interruptions">Priority interruptions only</string>
 
+    <!-- Zen mode: Only alarms. [CHAR LIMIT=40] -->
+    <string name="zen_alarms">Alarms only</string>
+
     <!-- Zen mode: Next alarm information - just a time. [CHAR LIMIT=40] -->
     <string name="zen_alarm_information_time">Your next alarm is at <xliff:g id="alarm_time" example="5:00 PM">%s</xliff:g></string>
 
@@ -758,8 +765,20 @@
     <!-- Interruption level: Priority. [CHAR LIMIT=20] -->
     <string name="interruption_level_priority">Priority only</string>
 
+    <!-- Interruption level: Alarms only. [CHAR LIMIT=20] -->
+    <string name="interruption_level_alarms">Alarms only</string>
+
     <!-- Interruption level: All. [CHAR LIMIT=20] -->
     <string name="interruption_level_all">All</string>
+
+    <!-- Interruption level: None.  Optimized for narrow two-line display. [CHAR LIMIT=20] -->
+    <string name="interruption_level_none_twoline">No\ninterruptions</string>
+
+    <!-- Interruption level: Priority.  Optimized for narrow two-line display. [CHAR LIMIT=20] -->
+    <string name="interruption_level_priority_twoline">Priority\nonly</string>
+
+    <!-- Interruption level: Alarms only.  Optimized for narrow two-line display. [CHAR LIMIT=20] -->
+    <string name="interruption_level_alarms_twoline">Alarms\nonly</string>
 
     <!-- Indication on the keyguard that is shown when the device is charging. [CHAR LIMIT=40]-->
     <string name="keyguard_indication_charging_time">Charging (<xliff:g id="charging_time_left" example="4 hours and 2 minutes">%s</xliff:g> until full)</string>

@@ -18,8 +18,8 @@
     android:layout_width="match_parent"
     android:layout_height="@dimen/qs_detail_item_height"
     android:layout_marginBottom="@dimen/zen_mode_condition_detail_item_spacing"
-    android:layout_marginStart="@dimen/zen_mode_condition_detail_button_padding"
-    android:layout_marginEnd="@dimen/zen_mode_condition_detail_button_padding" >
+    android:layout_marginStart="1dp"
+    android:layout_marginEnd="0dp" >
 
     <RadioButton
         android:id="@android:id/checkbox"
