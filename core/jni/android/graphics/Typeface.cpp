@@ -18,7 +18,7 @@
 #include "core_jni_helpers.h"
 
 #include "GraphicsJNI.h"
-#include <ScopedPrimitiveArray.h>
+#include "ScopedPrimitiveArray.h"
 #include "SkTypeface.h"
 #include "TypefaceImpl.h"
 #include <android_runtime/android_util_AssetManager.h>

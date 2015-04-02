@@ -11677,6 +11677,7 @@ package android.graphics {
     method public int getTextWidths(java.lang.String, float[]);
     method public android.graphics.Typeface getTypeface();
     method public android.graphics.Xfermode getXfermode();
+    method public boolean hasGlyph(java.lang.String);
     method public final boolean isAntiAlias();
     method public final boolean isDither();
     method public boolean isElegantTextHeight();
