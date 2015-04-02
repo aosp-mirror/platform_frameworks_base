@@ -44,6 +44,10 @@ public abstract class KeymasterUtils {
 
     public static CryptoOperationException getCryptoOperationException(KeymasterException e) {
         switch (e.getErrorCode()) {
+            case KeymasterDefs.KM_ERROR_KEY_EXPIRED:
+                return new KeyExpiredException();
+            case KeymasterDefs.KM_ERROR_KEY_NOT_YET_VALID:
+                return new KeyNotYetValidException();
             case KeymasterDefs.KM_ERROR_KEY_USER_NOT_AUTHENTICATED:
                 return new UserNotAuthenticatedException();
             // TODO: Handle TBD Keymaster error code "invalid key: new fingerprint enrolled"
