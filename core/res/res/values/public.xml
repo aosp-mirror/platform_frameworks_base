@@ -2658,4 +2658,5 @@
   <public type="attr" name="autoVerify" />
   <public type="attr" name="breakStrategy" />
 
+  <public type="attr" name="supportsAssistGesture" />
 </resources>

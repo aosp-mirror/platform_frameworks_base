@@ -41,10 +41,12 @@ import android.util.Slog;
 import android.view.IWindowManager;
 import android.view.WindowManager;
 import com.android.internal.app.IAssistScreenshotReceiver;
+import com.android.internal.app.IVoiceInteractionSessionShowCallback;
 import com.android.internal.app.IVoiceInteractor;
 import com.android.internal.os.IResultReceiver;
 
 import java.io.PrintWriter;
+import java.util.ArrayList;
 
 final class VoiceInteractionSessionConnection implements ServiceConnection {
     final static String TAG = "VoiceInteractionServiceManager";
@@ -74,6 +76,26 @@ final class VoiceInteractionSessionConnection implements ServiceConnection {
     Bundle mAssistData;
     boolean mHaveScreenshot;
     Bitmap mScreenshot;
+    ArrayList<IVoiceInteractionSessionShowCallback> mPendingShowCallbacks = new ArrayList<>();
+
+    IVoiceInteractionSessionShowCallback mShowCallback =
+            new IVoiceInteractionSessionShowCallback.Stub() {
+        @Override
+        public void onFailed() throws RemoteException {
+            synchronized (mLock) {
+                notifyPendingShowCallbacksFailedLocked();
+            }
+        }
+
+        @Override
+        public void onShown() throws RemoteException {
+            synchronized (mLock) {
+                // TODO: Figure out whether this is good enough or whether we need to hook into
+                // Window manager to actually wait for the window to be drawn.
+                notifyPendingShowCallbacksShownLocked();
+            }
+        }
+    };
 
     public interface Callback {
         public void sessionConnectionGone(VoiceInteractionSessionConnection connection);
@@ -151,7 +173,8 @@ final class VoiceInteractionSessionConnection implements ServiceConnection {
         }
     }
 
-    public boolean showLocked(Bundle args, int flags) {
+    public boolean showLocked(Bundle args, int flags,
+            IVoiceInteractionSessionShowCallback showCallback) {
         if (mBound) {
             if (!mFullyBound) {
                 mFullyBound = mContext.bindServiceAsUser(mBindIntent, mFullConnection,
@@ -182,14 +205,22 @@ final class VoiceInteractionSessionConnection implements ServiceConnection {
             }
             if (mSession != null) {
                 try {
-                    mSession.show(mShowArgs, mShowFlags);
+                    mSession.show(mShowArgs, mShowFlags, showCallback);
                     mShowArgs = null;
                     mShowFlags = 0;
                 } catch (RemoteException e) {
                 }
                 deliverSessionDataLocked();
+            } else if (showCallback != null) {
+                mPendingShowCallbacks.add(showCallback);
             }
             return true;
+        }
+        if (showCallback != null) {
+            try {
+                showCallback.onFailed();
+            } catch (RemoteException e) {
+            }
         }
         return false;
     }
@@ -320,7 +351,7 @@ final class VoiceInteractionSessionConnection implements ServiceConnection {
         mInteractor = interactor;
         if (mShown) {
             try {
-                session.show(mShowArgs, mShowFlags);
+                session.show(mShowArgs, mShowFlags, mShowCallback);
                 mShowArgs = null;
                 mShowFlags = 0;
             } catch (RemoteException e) {
@@ -328,6 +359,26 @@ final class VoiceInteractionSessionConnection implements ServiceConnection {
             deliverSessionDataLocked();
         }
         return true;
+    }
+
+    private void notifyPendingShowCallbacksShownLocked() {
+        for (int i = 0; i < mPendingShowCallbacks.size(); i++) {
+            try {
+                mPendingShowCallbacks.get(i).onShown();
+            } catch (RemoteException e) {
+            }
+        }
+        mPendingShowCallbacks.clear();
+    }
+
+    private void notifyPendingShowCallbacksFailedLocked() {
+        for (int i = 0; i < mPendingShowCallbacks.size(); i++) {
+            try {
+                mPendingShowCallbacks.get(i).onFailed();
+            } catch (RemoteException e) {
+            }
+        }
+        mPendingShowCallbacks.clear();
     }
 
     @Override

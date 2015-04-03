@@ -3009,6 +3009,14 @@
         android:description="@string/permdesc_bindCarrierMessagingService"
         android:protectionLevel="signature|system" />
 
+    <!-- Allows an application to interact with the currently active
+         {@link android.service.voice.VoiceInteractionService}.
+         @hide -->
+    <permission android:name="android.permission.ACCESS_VOICE_INTERACTION_SERVICE"
+        android:protectionLevel="signature"
+        android:description="@string/permdesc_accessVoiceInteractionService"
+        android:label="@string/permlab_accessVoiceInteractionService" />
+
     <!-- The system process is explicitly the only one allowed to launch the
          confirmation UI for full backup/restore -->
     <uses-permission android:name="android.permission.CONFIRM_FULL_BACKUP"/>

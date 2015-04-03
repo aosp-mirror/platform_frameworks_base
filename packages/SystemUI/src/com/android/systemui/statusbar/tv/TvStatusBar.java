@@ -106,12 +106,6 @@ public class TvStatusBar extends BaseStatusBar {
     }
 
     @Override
-    protected WindowManager.LayoutParams getSearchLayoutParams(
-            LayoutParams layoutParams) {
-        return null;
-    }
-
-    @Override
     protected void setAreThereNotifications() {
     }
 
@@ -120,7 +114,7 @@ public class TvStatusBar extends BaseStatusBar {
     }
 
     @Override
-    protected boolean shouldDisableNavbarGestures() {
+    public boolean shouldDisableNavbarGestures() {
         return true;
     }
 

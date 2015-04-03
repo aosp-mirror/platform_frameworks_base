@@ -120,6 +120,7 @@ import com.android.systemui.keyguard.KeyguardViewMediator;
 import com.android.systemui.qs.QSPanel;
 import com.android.systemui.recents.ScreenPinningRequest;
 import com.android.systemui.statusbar.ActivatableNotificationView;
+import com.android.systemui.assist.AssistGestureManager;
 import com.android.systemui.statusbar.BackDropView;
 import com.android.systemui.statusbar.BaseStatusBar;
 import com.android.systemui.statusbar.CommandQueue;
@@ -319,6 +320,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
 
     private int mNavigationIconHints = 0;
     private HandlerThread mHandlerThread;
+
+    private AssistGestureManager mAssistGestureManager;
 
     // ensure quick settings is disabled until the current user makes it through the setup wizard
     private boolean mUserSetup = false;
@@ -638,8 +641,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                         new NavigationBarView.OnVerticalChangedListener() {
                     @Override
                     public void onVerticalChanged(boolean isVertical) {
-                        if (mSearchPanelView != null) {
-                            mSearchPanelView.setHorizontal(isVertical);
+                        if (mAssistGestureManager != null) {
+                            mAssistGestureManager.onConfigurationChanged();
                         }
                         mNotificationPanel.setQsScrimEnabled(!isVertical);
                     }
@@ -830,6 +833,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         mBroadcastReceiver.onReceive(mContext,
                 new Intent(pm.isScreenOn() ? Intent.ACTION_SCREEN_ON : Intent.ACTION_SCREEN_OFF));
 
+        mAssistGestureManager = new AssistGestureManager(this, context);
+
         // receive broadcasts
         IntentFilter filter = new IntentFilter();
         filter.addAction(Intent.ACTION_CLOSE_SYSTEM_DIALOGS);
@@ -949,60 +954,9 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         return mStatusBarWindow;
     }
 
-    @Override
-    protected WindowManager.LayoutParams getSearchLayoutParams(LayoutParams layoutParams) {
-        boolean opaque = false;
-        WindowManager.LayoutParams lp = new WindowManager.LayoutParams(
-                LayoutParams.MATCH_PARENT,
-                LayoutParams.MATCH_PARENT,
-                WindowManager.LayoutParams.TYPE_NAVIGATION_BAR_PANEL,
-                WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
-                | WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM
-                | WindowManager.LayoutParams.FLAG_SPLIT_TOUCH,
-                (opaque ? PixelFormat.OPAQUE : PixelFormat.TRANSLUCENT));
-        if (ActivityManager.isHighEndGfx()) {
-            lp.flags |= WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED;
-        }
-        lp.gravity = Gravity.BOTTOM | Gravity.START;
-        lp.setTitle("SearchPanel");
-        lp.softInputMode = WindowManager.LayoutParams.SOFT_INPUT_STATE_UNCHANGED
-        | WindowManager.LayoutParams.SOFT_INPUT_ADJUST_NOTHING;
-        return lp;
-    }
-
-    @Override
-    protected void updateSearchPanel() {
-        super.updateSearchPanel();
-        if (mNavigationBarView != null) {
-            mNavigationBarView.setDelegateView(mSearchPanelView);
-        }
-    }
-
-    @Override
-    public void showSearchPanel() {
-        super.showSearchPanel();
-        mHandler.removeCallbacks(mShowSearchPanel);
-
-        // we want to freeze the sysui state wherever it is
-        mSearchPanelView.setSystemUiVisibility(mSystemUiVisibility);
-
-        if (mNavigationBarView != null) {
-            WindowManager.LayoutParams lp =
-                (android.view.WindowManager.LayoutParams) mNavigationBarView.getLayoutParams();
-            lp.flags &= ~WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL;
-            mWindowManager.updateViewLayout(mNavigationBarView, lp);
-        }
-    }
-
-    @Override
-    public void hideSearchPanel() {
-        super.hideSearchPanel();
-        if (mNavigationBarView != null) {
-            WindowManager.LayoutParams lp =
-                (android.view.WindowManager.LayoutParams) mNavigationBarView.getLayoutParams();
-            lp.flags |= WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL;
-            mWindowManager.updateViewLayout(mNavigationBarView, lp);
-        }
+    public void invokeAssistGesture(boolean vibrate) {
+        mHandler.removeCallbacks(mInvokeAssist);
+        mAssistGestureManager.onGestureInvoked(vibrate);
     }
 
     public int getStatusBarHeight() {
@@ -1032,30 +986,33 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     };
 
     private int mShowSearchHoldoff = 0;
-    private Runnable mShowSearchPanel = new Runnable() {
+    private Runnable mInvokeAssist = new Runnable() {
         public void run() {
-            showSearchPanel();
+            invokeAssistGesture(true /* vibrate */);
             awakenDreams();
+            if (mNavigationBarView != null) {
+                mNavigationBarView.getHomeButton().abortCurrentGesture();
+            }
         }
     };
 
     View.OnTouchListener mHomeActionListener = new View.OnTouchListener() {
         public boolean onTouch(View v, MotionEvent event) {
-            switch(event.getAction()) {
+            switch (event.getAction()) {
                 case MotionEvent.ACTION_DOWN:
-                if (!shouldDisableNavbarGestures()) {
-                    mHandler.removeCallbacks(mShowSearchPanel);
-                    mHandler.postDelayed(mShowSearchPanel, mShowSearchHoldoff);
-                }
-            break;
+                    if (!shouldDisableNavbarGestures()) {
+                        mHandler.removeCallbacks(mInvokeAssist);
+                        mHandler.postDelayed(mInvokeAssist, mShowSearchHoldoff);
+                    }
+                    break;
 
-            case MotionEvent.ACTION_UP:
-            case MotionEvent.ACTION_CANCEL:
-                mHandler.removeCallbacks(mShowSearchPanel);
-                awakenDreams();
-            break;
-        }
-        return false;
+                case MotionEvent.ACTION_UP:
+                case MotionEvent.ACTION_CANCEL:
+                    mHandler.removeCallbacks(mInvokeAssist);
+                    awakenDreams();
+                    break;
+            }
+            return false;
         }
     };
 
@@ -1079,7 +1036,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         mNavigationBarView.getBackButton().setLongClickable(true);
         mNavigationBarView.getBackButton().setOnLongClickListener(mLongPressBackRecentsListener);
         mNavigationBarView.getHomeButton().setOnTouchListener(mHomeActionListener);
-        updateSearchPanel();
+        mAssistGestureManager.onConfigurationChanged();
     }
 
     // For small-screen devices (read: phones) that lack hardware navigation buttons
@@ -2056,11 +2013,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             }
         }
 
-        if ((flags & CommandQueue.FLAG_EXCLUDE_SEARCH_PANEL) == 0) {
-            mHandler.removeMessages(MSG_CLOSE_SEARCH_PANEL);
-            mHandler.sendEmptyMessage(MSG_CLOSE_SEARCH_PANEL);
-        }
-
         if (mStatusBarWindow != null) {
             // release focus immediately to kick off focus change transition
             mStatusBarWindowManager.setStatusBarFocusable(false);
@@ -2983,7 +2935,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     };
 
     @Override
-    protected boolean shouldDisableNavbarGestures() {
+    public boolean shouldDisableNavbarGestures() {
         return !isDeviceProvisioned()
                 || mExpandedVisible
                 || (mDisabled & StatusBarManager.DISABLE_SEARCH) != 0;
@@ -3052,6 +3004,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             mHandlerThread = null;
         }
         mContext.unregisterReceiver(mBroadcastReceiver);
+        mAssistGestureManager.destroy();
     }
 
     private boolean mDemoModeAllowed;

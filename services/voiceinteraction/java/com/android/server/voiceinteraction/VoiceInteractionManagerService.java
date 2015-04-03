@@ -50,6 +50,7 @@ import android.text.TextUtils;
 import android.util.Slog;
 
 import com.android.internal.app.IVoiceInteractionManagerService;
+import com.android.internal.app.IVoiceInteractionSessionShowCallback;
 import com.android.internal.app.IVoiceInteractor;
 import com.android.internal.content.PackageMonitor;
 import com.android.internal.os.BackgroundThread;
@@ -396,7 +397,8 @@ public class VoiceInteractionManagerService extends SystemService {
                 final int callingUid = Binder.getCallingUid();
                 final long caller = Binder.clearCallingIdentity();
                 try {
-                    mImpl.showSessionLocked(callingPid, callingUid, args, flags);
+                    mImpl.showSessionLocked(callingPid, callingUid, args, flags,
+                            null /* showCallback */);
                 } finally {
                     Binder.restoreCallingIdentity(caller);
                 }
@@ -434,7 +436,8 @@ public class VoiceInteractionManagerService extends SystemService {
                 final int callingUid = Binder.getCallingUid();
                 final long caller = Binder.clearCallingIdentity();
                 try {
-                    return mImpl.showSessionLocked(callingPid, callingUid, sessionArgs, flags);
+                    return mImpl.showSessionLocked(callingPid, callingUid, sessionArgs, flags,
+                            null /* showCallback */);
                 } finally {
                     Binder.restoreCallingIdentity(caller);
                 }
@@ -518,13 +521,7 @@ public class VoiceInteractionManagerService extends SystemService {
 
         @Override
         public KeyphraseSoundModel getKeyphraseSoundModel(int keyphraseId, String bcp47Locale) {
-            synchronized (this) {
-                if (mContext.checkCallingPermission(Manifest.permission.MANAGE_VOICE_KEYPHRASES)
-                        != PackageManager.PERMISSION_GRANTED) {
-                    throw new SecurityException("Caller does not hold the permission "
-                            + Manifest.permission.MANAGE_VOICE_KEYPHRASES);
-                }
-            }
+            enforceCallingPermission(Manifest.permission.MANAGE_VOICE_KEYPHRASES);
 
             if (bcp47Locale == null) {
                 throw new IllegalArgumentException("Illegal argument(s) in getKeyphraseSoundModel");
@@ -541,15 +538,9 @@ public class VoiceInteractionManagerService extends SystemService {
 
         @Override
         public int updateKeyphraseSoundModel(KeyphraseSoundModel model) {
-            synchronized (this) {
-                if (mContext.checkCallingPermission(Manifest.permission.MANAGE_VOICE_KEYPHRASES)
-                        != PackageManager.PERMISSION_GRANTED) {
-                    throw new SecurityException("Caller does not hold the permission "
-                            + Manifest.permission.MANAGE_VOICE_KEYPHRASES);
-                }
-                if (model == null) {
-                    throw new IllegalArgumentException("Model must not be null");
-                }
+            enforceCallingPermission(Manifest.permission.MANAGE_VOICE_KEYPHRASES);
+            if (model == null) {
+                throw new IllegalArgumentException("Model must not be null");
             }
 
             final long caller = Binder.clearCallingIdentity();
@@ -572,13 +563,7 @@ public class VoiceInteractionManagerService extends SystemService {
 
         @Override
         public int deleteKeyphraseSoundModel(int keyphraseId, String bcp47Locale) {
-            synchronized (this) {
-                if (mContext.checkCallingPermission(Manifest.permission.MANAGE_VOICE_KEYPHRASES)
-                        != PackageManager.PERMISSION_GRANTED) {
-                    throw new SecurityException("Caller does not hold the permission "
-                            + Manifest.permission.MANAGE_VOICE_KEYPHRASES);
-                }
-            }
+            enforceCallingPermission(Manifest.permission.MANAGE_VOICE_KEYPHRASES);
 
             if (bcp47Locale == null) {
                 throw new IllegalArgumentException(
@@ -707,6 +692,54 @@ public class VoiceInteractionManagerService extends SystemService {
         }
 
         @Override
+        public ComponentName getActiveServiceComponentName() {
+            enforceCallingPermission(Manifest.permission.ACCESS_VOICE_INTERACTION_SERVICE);
+            synchronized (this) {
+                return mImpl != null ? mImpl.mComponent : null;
+            }
+        }
+
+        @Override
+        public void showSessionForActiveService(IVoiceInteractionSessionShowCallback showCallback) {
+            enforceCallingPermission(Manifest.permission.ACCESS_VOICE_INTERACTION_SERVICE);
+            synchronized (this) {
+                if (mImpl == null) {
+                    Slog.w(TAG, "showSessionForActiveService without running voice interaction"
+                            + "service");
+                    return;
+                }
+                final int callingPid = Binder.getCallingPid();
+                final int callingUid = Binder.getCallingUid();
+                final long caller = Binder.clearCallingIdentity();
+                try {
+                    mImpl.showSessionLocked(callingPid, callingUid, new Bundle() /* sessionArgs */,
+                            VoiceInteractionService.START_SOURCE_ASSIST_GESTURE
+                                    | VoiceInteractionService.START_WITH_ASSIST
+                                    | VoiceInteractionService.START_WITH_SCREENSHOT,
+                            showCallback);
+                } finally {
+                    Binder.restoreCallingIdentity(caller);
+                }
+            }
+        }
+
+        @Override
+        public boolean isSessionRunning() {
+            enforceCallingPermission(Manifest.permission.ACCESS_VOICE_INTERACTION_SERVICE);
+            synchronized (this) {
+                return mImpl != null && mImpl.mActiveSession != null;
+            }
+        }
+
+        @Override
+        public boolean activeServiceSupportsAssistGesture() {
+            enforceCallingPermission(Manifest.permission.ACCESS_VOICE_INTERACTION_SERVICE);
+            synchronized (this) {
+                return mImpl != null && mImpl.mInfo.getSupportsAssistGesture();
+            }
+        }
+
+        @Override
         public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
             if (mContext.checkCallingOrSelfPermission(Manifest.permission.DUMP)
                     != PackageManager.PERMISSION_GRANTED) {
@@ -724,6 +757,12 @@ public class VoiceInteractionManagerService extends SystemService {
                 mImpl.dumpLocked(fd, pw, args);
             }
             mSoundTriggerHelper.dump(fd, pw, args);
+        }
+
+        private void enforceCallingPermission(String permission) {
+            if (mContext.checkCallingPermission(permission) != PackageManager.PERMISSION_GRANTED) {
+                throw new SecurityException("Caller does not hold the permission " + permission);
+            }
         }
 
         class SettingsObserver extends ContentObserver {

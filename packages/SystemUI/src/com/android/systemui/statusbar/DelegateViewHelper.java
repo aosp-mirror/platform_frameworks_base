@@ -22,11 +22,12 @@ import android.graphics.RectF;
 import android.view.MotionEvent;
 import android.view.View;
 import com.android.systemui.R;
+import com.android.systemui.statusbar.phone.PhoneStatusBar;
 
 public class DelegateViewHelper {
     private View mDelegateView;
     private View mSourceView;
-    private BaseStatusBar mBar;
+    private PhoneStatusBar mBar;
     private int[] mTempPoint = new int[2];
     private float[] mDownPoint = new float[2];
     private float mTriggerThreshhold;
@@ -45,7 +46,7 @@ public class DelegateViewHelper {
         mDelegateView = view;
     }
 
-    public void setBar(BaseStatusBar phoneStatusBar) {
+    public void setBar(PhoneStatusBar phoneStatusBar) {
         mBar = phoneStatusBar;
     }
 
@@ -79,7 +80,7 @@ public class DelegateViewHelper {
                 float y = k < historySize ? event.getHistoricalY(k) : event.getY();
                 final float distance = mSwapXY ? (mDownPoint[0] - x) : (mDownPoint[1] - y);
                 if (distance > mTriggerThreshhold) {
-                    mBar.showSearchPanel();
+                    mBar.invokeAssistGesture(false /* vibrate */);
                     mPanelShowing = true;
                     break;
                 }

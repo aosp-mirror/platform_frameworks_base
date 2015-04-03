@@ -48,6 +48,7 @@ public class KeyButtonView extends ImageView {
     private int mTouchSlop;
     private boolean mSupportsLongpress = true;
     private AudioManager mAudioManager;
+    private boolean mGestureAborted;
 
     private final Runnable mCheckLongPress = new Runnable() {
         public void run() {
@@ -126,10 +127,15 @@ public class KeyButtonView extends ImageView {
     public boolean onTouchEvent(MotionEvent ev) {
         final int action = ev.getAction();
         int x, y;
+        if (action == MotionEvent.ACTION_DOWN) {
+            mGestureAborted = false;
+        }
+        if (mGestureAborted) {
+            return false;
+        }
 
         switch (action) {
             case MotionEvent.ACTION_DOWN:
-                //Log.d("KeyButtonView", "press");
                 mDownTime = SystemClock.uptimeMillis();
                 setPressed(true);
                 if (mCode != 0) {
@@ -202,6 +208,11 @@ public class KeyButtonView extends ImageView {
                 InputDevice.SOURCE_KEYBOARD);
         InputManager.getInstance().injectInputEvent(ev,
                 InputManager.INJECT_INPUT_EVENT_MODE_ASYNC);
+    }
+
+    public void abortCurrentGesture() {
+        setPressed(false);
+        mGestureAborted = true;
     }
 }
 

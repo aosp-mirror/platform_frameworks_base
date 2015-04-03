@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2010 The Android Open Source Project
+ * Copyright (C) 2015 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-package com.android.systemui.statusbar;
+package com.android.internal.app;
 
-public interface StatusBarPanel {
-    public boolean isInContentArea(int x, int y);
+oneway interface IVoiceInteractionSessionShowCallback {
+    void onFailed();
+    void onShown();
 }
