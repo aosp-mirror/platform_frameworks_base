@@ -586,6 +586,12 @@ void GlopBuilder::build() {
     mDescription.hasColors = mOutGlop->mesh.vertices.attribFlags & VertexAttribFlags::kColor;
     mDescription.hasVertexAlpha = mOutGlop->mesh.vertices.attribFlags & VertexAttribFlags::kAlpha;
 
+    // Enable debug highlight when what we're about to draw is tested against
+    // the stencil buffer and if stencil highlight debugging is on
+    mDescription.hasDebugHighlight = !mCaches.debugOverdraw
+            && mCaches.debugStencilClip == Caches::kStencilShowHighlight
+            && mRenderState.stencil().isTestEnabled();
+
     // serialize shader info into ShaderData
     GLuint textureUnit = mOutGlop->fill.texture.texture ? 1 : 0;
     SkiaShader::store(mCaches, mShader, mOutGlop->transform.modelView,

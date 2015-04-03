@@ -87,76 +87,11 @@ struct SkiaShaderData {
 
 class SkiaShader {
 public:
-    static SkiaShaderType getType(const SkShader& shader);
-    static void describe(Caches* caches, ProgramDescription& description,
-            const Extensions& extensions, const SkShader& shader);
-    static void setupProgram(Caches* caches, const mat4& modelViewMatrix,
-            GLuint* textureUnit, const Extensions& extensions, const SkShader& shader);
-
-    // new SkiaShader interaction model - store into ShaderData, and apply to Caches/Program/GL
     static void store(Caches& caches, const SkShader* shader, const Matrix4& modelViewMatrix,
             GLuint* textureUnit, ProgramDescription* description,
             SkiaShaderData* outData);
     static void apply(Caches& caches, const SkiaShaderData& data);
 };
-
-class InvalidSkiaShader {
-public:
-    static void describe(Caches* caches, ProgramDescription& description,
-            const Extensions& extensions, const SkShader& shader) {
-        // This shader is unsupported. Skip it.
-    }
-    static void setupProgram(Caches* caches, const mat4& modelViewMatrix,
-            GLuint* textureUnit, const Extensions& extensions, const SkShader& shader) {
-        // This shader is unsupported. Skip it.
-    }
-
-};
-/**
- * A shader that draws a layer.
- */
-class SkiaLayerShader {
-public:
-    static void describe(Caches* caches, ProgramDescription& description,
-            const Extensions& extensions, const SkShader& shader);
-    static void setupProgram(Caches* caches, const mat4& modelViewMatrix,
-            GLuint* textureUnit, const Extensions& extensions, const SkShader& shader);
-}; // class SkiaLayerShader
-
-/**
- * A shader that draws a bitmap.
- */
-class SkiaBitmapShader {
-public:
-    static void describe(Caches* caches, ProgramDescription& description,
-            const Extensions& extensions, const SkShader& shader);
-    static void setupProgram(Caches* caches, const mat4& modelViewMatrix,
-            GLuint* textureUnit, const Extensions& extensions, const SkShader& shader);
-
-
-}; // class SkiaBitmapShader
-
-/**
- * A shader that draws one of three types of gradient, depending on shader param.
- */
-class SkiaGradientShader {
-public:
-    static void describe(Caches* caches, ProgramDescription& description,
-            const Extensions& extensions, const SkShader& shader);
-    static void setupProgram(Caches* caches, const mat4& modelViewMatrix,
-            GLuint* textureUnit, const Extensions& extensions, const SkShader& shader);
-};
-
-/**
- * A shader that draws two shaders, composited with an xfermode.
- */
-class SkiaComposeShader {
-public:
-    static void describe(Caches* caches, ProgramDescription& description,
-            const Extensions& extensions, const SkShader& shader);
-    static void setupProgram(Caches* caches, const mat4& modelViewMatrix,
-            GLuint* textureUnit, const Extensions& extensions, const SkShader& shader);
-}; // class SkiaComposeShader
 
 }; // namespace uirenderer
 }; // namespace android

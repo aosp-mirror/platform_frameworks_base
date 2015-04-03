@@ -46,9 +46,9 @@ namespace uirenderer {
 
 class OpenGLRenderer;
 
-class TextSetupFunctor {
+class TextDrawFunctor {
 public:
-    TextSetupFunctor(OpenGLRenderer* renderer, float x, float y, bool pureTranslate,
+    TextDrawFunctor(OpenGLRenderer* renderer, float x, float y, bool pureTranslate,
             int alpha, SkXfermode::Mode mode, const SkPaint* paint)
         : renderer(renderer)
         , x(x)
@@ -58,8 +58,6 @@ public:
         , mode(mode)
         , paint(paint) {
     }
-
-    void setup(GLenum glyphFormat);
 
     void draw(CacheTexture& texture, bool linearFiltering);
 
@@ -92,12 +90,12 @@ public:
     // bounds is an out parameter
     bool renderPosText(const SkPaint* paint, const Rect* clip, const char *text,
             uint32_t startIndex, uint32_t len, int numGlyphs, int x, int y, const float* positions,
-            Rect* bounds, TextSetupFunctor* functor, bool forceFinish = true);
+            Rect* bounds, TextDrawFunctor* functor, bool forceFinish = true);
 
     // bounds is an out parameter
     bool renderTextOnPath(const SkPaint* paint, const Rect* clip, const char *text,
             uint32_t startIndex, uint32_t len, int numGlyphs, const SkPath* path,
-            float hOffset, float vOffset, Rect* bounds, TextSetupFunctor* functor);
+            float hOffset, float vOffset, Rect* bounds, TextDrawFunctor* functor);
 
     struct DropShadow {
         uint32_t width;
@@ -135,7 +133,7 @@ private:
     void flushAllAndInvalidate();
 
     void checkInit();
-    void initRender(const Rect* clip, Rect* bounds, TextSetupFunctor* functor);
+    void initRender(const Rect* clip, Rect* bounds, TextDrawFunctor* functor);
     void finishRender();
 
     void issueDrawCommand(Vector<CacheTexture*>& cacheTextures);
@@ -176,7 +174,7 @@ private:
 
     bool mUploadTexture;
 
-    TextSetupFunctor* mFunctor;
+    TextDrawFunctor* mFunctor;
     const Rect* mClip;
     Rect* mBounds;
     bool mDrawn;
