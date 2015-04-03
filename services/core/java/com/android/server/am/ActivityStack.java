@@ -4208,14 +4208,22 @@ final class ActivityStack {
     }
 
     void removeTask(TaskRecord task, String reason) {
-        removeTask(task, reason, true);
+        removeTask(task, reason, true /* notMoving */);
     }
 
-    void removeTask(TaskRecord task, String reason, boolean removeFromWindowManager) {
-        mStackSupervisor.endLockTaskModeIfTaskEnding(task);
-        if (removeFromWindowManager) {
+    /**
+     * Removes the input task from this stack.
+     * @param task to remove.
+     * @param reason for removal.
+     * @param notMoving task to another stack. In the case we are moving we don't want to perform
+     *                  some operations on the task like removing it from window manager or recents.
+     */
+    void removeTask(TaskRecord task, String reason, boolean notMoving) {
+        if (notMoving) {
+            mStackSupervisor.endLockTaskModeIfTaskEnding(task);
             mWindowManager.removeTask(task.taskId);
         }
+
         final ActivityRecord r = mResumedActivity;
         if (r != null && r.task == task) {
             mResumedActivity = null;
@@ -4232,7 +4240,7 @@ final class ActivityStack {
         mTaskHistory.remove(task);
         updateTaskMovement(task, true);
 
-        if (task.mActivities.isEmpty()) {
+        if (notMoving && task.mActivities.isEmpty()) {
             final boolean isVoiceSession = task.voiceSession != null;
             if (isVoiceSession) {
                 try {
