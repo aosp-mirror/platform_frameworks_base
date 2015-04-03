@@ -66,6 +66,7 @@ public class ZenModeConfig implements Parcelable {
     private static final int MINUTES_MS = 60 * SECONDS_MS;
     private static final int ZERO_VALUE_MS = 10 * SECONDS_MS;
 
+    private static final boolean DEFAULT_ALLOW_REMINDERS = true;
     private static final boolean DEFAULT_ALLOW_EVENTS = true;
 
     private static final int XML_VERSION = 1;
@@ -75,6 +76,7 @@ public class ZenModeConfig implements Parcelable {
     private static final String ALLOW_ATT_CALLS = "calls";
     private static final String ALLOW_ATT_MESSAGES = "messages";
     private static final String ALLOW_ATT_FROM = "from";
+    private static final String ALLOW_ATT_REMINDERS = "reminders";
     private static final String ALLOW_ATT_EVENTS = "events";
     private static final String SLEEP_TAG = "sleep";
     private static final String SLEEP_ATT_MODE = "mode";
@@ -100,6 +102,7 @@ public class ZenModeConfig implements Parcelable {
 
     public boolean allowCalls;
     public boolean allowMessages;
+    public boolean allowReminders = DEFAULT_ALLOW_REMINDERS;
     public boolean allowEvents = DEFAULT_ALLOW_EVENTS;
     public int allowFrom = SOURCE_ANYONE;
 
@@ -119,6 +122,7 @@ public class ZenModeConfig implements Parcelable {
     public ZenModeConfig(Parcel source) {
         allowCalls = source.readInt() == 1;
         allowMessages = source.readInt() == 1;
+        allowReminders = source.readInt() == 1;
         allowEvents = source.readInt() == 1;
         if (source.readInt() == 1) {
             sleepMode = source.readString();
@@ -147,6 +151,7 @@ public class ZenModeConfig implements Parcelable {
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeInt(allowCalls ? 1 : 0);
         dest.writeInt(allowMessages ? 1 : 0);
+        dest.writeInt(allowReminders ? 1 : 0);
         dest.writeInt(allowEvents ? 1 : 0);
         if (sleepMode != null) {
             dest.writeInt(1);
@@ -182,6 +187,7 @@ public class ZenModeConfig implements Parcelable {
             .append("allowCalls=").append(allowCalls)
             .append(",allowMessages=").append(allowMessages)
             .append(",allowFrom=").append(sourceToString(allowFrom))
+            .append(",allowReminders=").append(allowReminders)
             .append(",allowEvents=").append(allowEvents)
             .append(",sleepMode=").append(sleepMode)
             .append(",sleepStart=").append(sleepStartHour).append('.').append(sleepStartMinute)
@@ -217,6 +223,7 @@ public class ZenModeConfig implements Parcelable {
         return other.allowCalls == allowCalls
                 && other.allowMessages == allowMessages
                 && other.allowFrom == allowFrom
+                && other.allowReminders == allowReminders
                 && other.allowEvents == allowEvents
                 && Objects.equals(other.sleepMode, sleepMode)
                 && other.sleepNone == sleepNone
@@ -232,9 +239,9 @@ public class ZenModeConfig implements Parcelable {
 
     @Override
     public int hashCode() {
-        return Objects.hash(allowCalls, allowMessages, allowFrom, allowEvents, sleepMode, sleepNone,
-                sleepStartHour, sleepStartMinute, sleepEndHour, sleepEndMinute,
-                Arrays.hashCode(conditionComponents), Arrays.hashCode(conditionIds),
+        return Objects.hash(allowCalls, allowMessages, allowFrom, allowReminders, allowEvents,
+                sleepMode, sleepNone, sleepStartHour, sleepStartMinute, sleepEndHour,
+                sleepEndMinute, Arrays.hashCode(conditionComponents), Arrays.hashCode(conditionIds),
                 exitCondition, exitConditionComponent);
     }
 
@@ -300,6 +307,8 @@ public class ZenModeConfig implements Parcelable {
                 if (ALLOW_TAG.equals(tag)) {
                     rt.allowCalls = safeBoolean(parser, ALLOW_ATT_CALLS, false);
                     rt.allowMessages = safeBoolean(parser, ALLOW_ATT_MESSAGES, false);
+                    rt.allowReminders = safeBoolean(parser, ALLOW_ATT_REMINDERS,
+                            DEFAULT_ALLOW_REMINDERS);
                     rt.allowEvents = safeBoolean(parser, ALLOW_ATT_EVENTS, DEFAULT_ALLOW_EVENTS);
                     rt.allowFrom = safeInt(parser, ALLOW_ATT_FROM, SOURCE_ANYONE);
                     if (rt.allowFrom < SOURCE_ANYONE || rt.allowFrom > MAX_SOURCE) {
@@ -344,6 +353,7 @@ public class ZenModeConfig implements Parcelable {
         out.startTag(null, ALLOW_TAG);
         out.attribute(null, ALLOW_ATT_CALLS, Boolean.toString(allowCalls));
         out.attribute(null, ALLOW_ATT_MESSAGES, Boolean.toString(allowMessages));
+        out.attribute(null, ALLOW_ATT_REMINDERS, Boolean.toString(allowReminders));
         out.attribute(null, ALLOW_ATT_EVENTS, Boolean.toString(allowEvents));
         out.attribute(null, ALLOW_ATT_FROM, Integer.toString(allowFrom));
         out.endTag(null, ALLOW_TAG);

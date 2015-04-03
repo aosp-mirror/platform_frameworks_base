@@ -39,6 +39,7 @@ public class MetricsLogger implements MetricsConstants {
     public static final int ACTION_WIFI_ON = 141;
 
     public static final int MANAGE_PERMISSIONS = 142;
+    public static final int NOTIFICATION_ZEN_MODE_PRIORITY = 143;
 
     public static final int MANAGE_DOMAIN_URLS = 143;
 
