@@ -52,7 +52,6 @@ import android.os.Message;
 import android.os.Vibrator;
 import android.util.Log;
 import android.util.SparseArray;
-import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -72,7 +71,6 @@ import android.widget.TextView;
 
 import com.android.internal.R;
 import com.android.systemui.DemoMode;
-import com.android.systemui.statusbar.phone.SystemUIDialog;
 import com.android.systemui.statusbar.policy.ZenModeController;
 
 import java.io.FileDescriptor;
@@ -263,80 +261,6 @@ public class VolumePanel extends Handler implements DemoMode {
 
     private static AlertDialog sSafetyWarning;
     private static Object sSafetyWarningLock = new Object();
-
-    private static class SafetyWarning extends SystemUIDialog
-            implements DialogInterface.OnDismissListener, DialogInterface.OnClickListener {
-        private final Context mContext;
-        private final VolumePanel mVolumePanel;
-        private final AudioManager mAudioManager;
-
-        private boolean mNewVolumeUp;
-
-        SafetyWarning(Context context, VolumePanel volumePanel, AudioManager audioManager) {
-            super(context);
-            mContext = context;
-            mVolumePanel = volumePanel;
-            mAudioManager = audioManager;
-
-            setMessage(mContext.getString(com.android.internal.R.string.safe_media_volume_warning));
-            setButton(DialogInterface.BUTTON_POSITIVE,
-                    mContext.getString(com.android.internal.R.string.yes), this);
-            setButton(DialogInterface.BUTTON_NEGATIVE,
-                    mContext.getString(com.android.internal.R.string.no), (OnClickListener) null);
-            setOnDismissListener(this);
-
-            IntentFilter filter = new IntentFilter(Intent.ACTION_CLOSE_SYSTEM_DIALOGS);
-            context.registerReceiver(mReceiver, filter);
-        }
-
-        @Override
-        public boolean onKeyDown(int keyCode, KeyEvent event) {
-            if (keyCode == KeyEvent.KEYCODE_VOLUME_UP && event.getRepeatCount() == 0) {
-                mNewVolumeUp = true;
-            }
-            return super.onKeyDown(keyCode, event);
-        }
-
-        @Override
-        public boolean onKeyUp(int keyCode, KeyEvent event) {
-            if (keyCode == KeyEvent.KEYCODE_VOLUME_UP && mNewVolumeUp) {
-                if (LOGD) Log.d(TAG, "Confirmed warning via VOLUME_UP");
-                mAudioManager.disableSafeMediaVolume();
-                dismiss();
-            }
-            return super.onKeyUp(keyCode, event);
-        }
-
-        @Override
-        public void onClick(DialogInterface dialog, int which) {
-            mAudioManager.disableSafeMediaVolume();
-        }
-
-        @Override
-        public void onDismiss(DialogInterface unused) {
-            mContext.unregisterReceiver(mReceiver);
-            cleanUp();
-        }
-
-        private void cleanUp() {
-            synchronized (sSafetyWarningLock) {
-                sSafetyWarning = null;
-            }
-            mVolumePanel.forceTimeout(0);
-            mVolumePanel.updateStates();
-        }
-
-        private final BroadcastReceiver mReceiver = new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                if (Intent.ACTION_CLOSE_SYSTEM_DIALOGS.equals(intent.getAction())) {
-                    if (LOGD) Log.d(TAG, "Received ACTION_CLOSE_SYSTEM_DIALOGS");
-                    cancel();
-                    cleanUp();
-                }
-            }
-        };
-    }
 
     protected LayoutParams getDialogLayoutParams(Window window, Resources res) {
         final LayoutParams lp = window.getAttributes();
@@ -1283,7 +1207,16 @@ public class VolumePanel extends Handler implements DemoMode {
                 if (sSafetyWarning != null) {
                     return;
                 }
-                sSafetyWarning = new SafetyWarning(mContext, this, mAudioManager);
+                sSafetyWarning = new SafetyWarningDialog(mContext, mAudioManager) {
+                    @Override
+                    protected void cleanUp() {
+                        synchronized (sSafetyWarningLock) {
+                            sSafetyWarning = null;
+                        }
+                        forceTimeout(0);
+                        updateStates();
+                    }
+                };
                 sSafetyWarning.show();
             }
             updateStates();

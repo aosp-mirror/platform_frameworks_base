@@ -47,6 +47,7 @@ class Util {
         AudioManager.FLAG_SHOW_VIBRATE_HINT,
         AudioManager.FLAG_SHOW_SILENT_HINT,
         AudioManager.FLAG_FROM_KEY,
+        AudioManager.FLAG_SHOW_UI_WARNINGS,
     };
 
     private static String[] AUDIO_MANAGER_FLAG_NAMES = new String[] {
@@ -58,6 +59,7 @@ class Util {
         "SHOW_VIBRATE_HINT",
         "SHOW_SILENT_HINT",
         "FROM_KEY",
+        "SHOW_UI_WARNINGS",
     };
 
     public static String logTag(Class<?> c) {

@@ -119,6 +119,10 @@ public class VolumeDialogController {
         mHasVibrator = mVibrator != null && mVibrator.hasVibrator();
     }
 
+    public AudioManager getAudioManager() {
+        return mAudio;
+    }
+
     public void dismiss() {
         mCallbacks.onDismissRequested(Events.DISMISS_REASON_VOLUME_CONTROLLER);
     }
@@ -254,6 +258,10 @@ public class VolumeDialogController {
 
     protected void onUserActivityW() {
         // hook for subclasses
+    }
+
+    private void onShowSafetyWarningW(int flags) {
+        mCallbacks.onShowSafetyWarning(flags);
     }
 
     private boolean checkRoutedToBluetoothW(int stream) {
@@ -490,7 +498,10 @@ public class VolumeDialogController {
 
         @Override
         public void displaySafeVolumeWarning(int flags) throws RemoteException {
-            // noop
+            if (D.BUG) Log.d(TAG, "displaySafeVolumeWarning "
+                    + Util.audioManagerFlagsToString(flags));
+            if (mDestroyed) return;
+            mWorker.obtainMessage(W.SHOW_SAFETY_WARNING, flags, 0).sendToTarget();
         }
 
         @Override
@@ -537,6 +548,7 @@ public class VolumeDialogController {
         private static final int SET_ACTIVE_STREAM = 11;
         private static final int NOTIFY_VISIBLE = 12;
         private static final int USER_ACTIVITY = 13;
+        private static final int SHOW_SAFETY_WARNING = 14;
 
         W(Looper looper) {
             super(looper);
@@ -556,8 +568,9 @@ public class VolumeDialogController {
                 case CONFIGURATION_CHANGED: mCallbacks.onConfigurationChanged(); break;
                 case SET_STREAM_VOLUME: onSetStreamVolumeW(msg.arg1, msg.arg2); break;
                 case SET_ACTIVE_STREAM: onSetActiveStreamW(msg.arg1); break;
-                case NOTIFY_VISIBLE: onNotifyVisibleW(msg.arg1 != 0);
-                case USER_ACTIVITY: onUserActivityW();
+                case NOTIFY_VISIBLE: onNotifyVisibleW(msg.arg1 != 0); break;
+                case USER_ACTIVITY: onUserActivityW(); break;
+                case SHOW_SAFETY_WARNING: onShowSafetyWarningW(msg.arg1); break;
             }
         }
     }
@@ -668,6 +681,18 @@ public class VolumeDialogController {
                     @Override
                     public void run() {
                         entry.getKey().onScreenOff();
+                    }
+                });
+            }
+        }
+
+        @Override
+        public void onShowSafetyWarning(final int flags) {
+            for (final Map.Entry<Callbacks, Handler> entry : mCallbackMap.entrySet()) {
+                entry.getValue().post(new Runnable() {
+                    @Override
+                    public void run() {
+                        entry.getKey().onShowSafetyWarning(flags);
                     }
                 });
             }
@@ -958,5 +983,6 @@ public class VolumeDialogController {
         void onShowVibrateHint();
         void onShowSilentHint();
         void onScreenOff();
+        void onShowSafetyWarning(int flags);
     }
 }

@@ -103,6 +103,7 @@ public class VolumeDialog {
     private final View mTextFooter;
     private final ZenFooter mZenFooter;
     private final LayoutTransition mLayoutTransition;
+    private final Object mSafetyWarningLock = new Object();
 
     private boolean mShowing;
     private boolean mExpanded;
@@ -113,8 +114,9 @@ public class VolumeDialog {
     private boolean mAutomute = Prefs.DEFAULT_ENABLE_AUTOMUTE;
     private boolean mSilentMode = Prefs.DEFAULT_ENABLE_SILENT_MODE;
     private State mState;
-    private int mExpandAnimRes;
+    private int mExpandButtonRes;
     private boolean mExpanding;
+    private SafetyWarningDialog mSafetyWarning;
 
     public VolumeDialog(Context context, VolumeDialogController controller,
             ZenModeController zenModeController) {
@@ -138,7 +140,7 @@ public class VolumeDialog {
         mDialog.setCanceledOnTouchOutside(true);
         final Resources res = mContext.getResources();
         final WindowManager.LayoutParams lp = window.getAttributes();
-        lp.type = WindowManager.LayoutParams.TYPE_SYSTEM_ERROR;
+        lp.type = WindowManager.LayoutParams.TYPE_VOLUME_OVERLAY;
         lp.format = PixelFormat.TRANSLUCENT;
         lp.setTitle(VolumeDialog.class.getSimpleName());
         lp.gravity = Gravity.TOP | Gravity.CENTER_HORIZONTAL;
@@ -450,6 +452,7 @@ public class VolumeDialog {
 
     private int computeTimeoutH() {
         if (mZenFooter != null && mZenFooter.isFooterExpanded()) return 10000;
+        if (mSafetyWarning != null) return 5000;
         if (mExpanded || mExpanding) return 5000;
         if (mActiveStream == AudioManager.STREAM_MUSIC) return 1500;
         return 3000;
@@ -464,6 +467,12 @@ public class VolumeDialog {
         Events.writeEvent(Events.EVENT_DISMISS_DIALOG, reason);
         setExpandedH(false);
         mController.notifyVisible(false);
+        synchronized (mSafetyWarningLock) {
+            if (mSafetyWarning != null) {
+                if (D.BUG) Log.d(TAG, "SafetyWarning dismissed");
+                mSafetyWarning.dismiss();
+            }
+        }
     }
 
     private void setExpandedH(boolean expanded) {
@@ -498,8 +507,8 @@ public class VolumeDialog {
         if (mExpanding && isAttached()) return;
         final int res = mExpanded ? R.drawable.ic_volume_collapse_animation
                 : R.drawable.ic_volume_expand_animation;
-        if (res == mExpandAnimRes) return;
-        mExpandAnimRes = res;
+        if (res == mExpandButtonRes) return;
+        mExpandButtonRes = res;
         mExpandButton.setImageResource(res);
     }
 
@@ -654,7 +663,6 @@ public class VolumeDialog {
                 && mState.zenMode == Global.ZEN_MODE_NO_INTERRUPTIONS;
         final boolean isLimited = isRingStream
                 && mState.zenMode == Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS;
-        final boolean isRingAndSuppressed = isRingStream && mState.effectsSuppressor != null;
 
         // update slider max
         final int max = ss.levelMax * 100;
@@ -670,10 +678,7 @@ public class VolumeDialog {
 
         // update header text
         final String text;
-        if (isRingAndSuppressed) {
-            text = mContext.getString(R.string.volume_stream_suppressed, ss.name,
-                    mState.effectsSuppressorName);
-        } else if (isNoned) {
+        if (isNoned) {
             text = mContext.getString(R.string.volume_stream_muted_dnd, ss.name);
         } else if (isRingVibrate && isLimited) {
             text = mContext.getString(R.string.volume_stream_vibrate_dnd, ss.name);
@@ -689,14 +694,14 @@ public class VolumeDialog {
         Util.setText(row.header, text);
 
         // update icon
-        final boolean iconEnabled = !isRingAndSuppressed && (mAutomute || ss.muteSupported);
+        final boolean iconEnabled = mAutomute || ss.muteSupported;
         row.icon.setEnabled(iconEnabled);
         row.icon.setAlpha(iconEnabled ? 1 : 0.5f);
         final int iconRes =
-                !isRingAndSuppressed && isRingVibrate ? R.drawable.ic_volume_ringer_vibrate
+                isRingVibrate ? R.drawable.ic_volume_ringer_vibrate
                 : ss.routedToBluetooth ?
                         (ss.muted ? R.drawable.ic_volume_bt_mute : R.drawable.ic_volume_bt)
-                : isRingAndSuppressed || (mAutomute && ss.level == 0) ? row.iconMuteRes
+                : mAutomute && ss.level == 0 ? row.iconMuteRes
                 : (ss.muted ? row.iconMuteRes : row.iconRes);
         if (iconRes != row.cachedIconRes) {
             if (row.cachedIconRes != 0 && isRingVibrate) {
@@ -714,17 +719,12 @@ public class VolumeDialog {
                 : Events.ICON_STATE_UNKNOWN;
 
         // update slider
-        updateVolumeRowSliderH(row, isRingAndSuppressed);
+        updateVolumeRowSliderH(row);
     }
 
-    private void updateVolumeRowSliderH(VolumeRow row, boolean isRingAndSuppressed) {
-        row.slider.setEnabled(!isRingAndSuppressed);
+    private void updateVolumeRowSliderH(VolumeRow row) {
         if (row.tracking) {
             return;  // don't update if user is sliding
-        }
-        if (isRingAndSuppressed) {
-            row.slider.setProgress(0);
-            return;
         }
         final int progress = row.slider.getProgress();
         final int level = getImpliedLevel(row.slider, progress);
@@ -800,6 +800,29 @@ public class VolumeDialog {
         }
     }
 
+    private void showSafetyWarningH(int flags) {
+        if ((flags & (AudioManager.FLAG_SHOW_UI | AudioManager.FLAG_SHOW_UI_WARNINGS)) != 0
+                || mShowing) {
+            synchronized (mSafetyWarningLock) {
+                if (mSafetyWarning != null) {
+                    return;
+                }
+                mSafetyWarning = new SafetyWarningDialog(mContext, mController.getAudioManager()) {
+                    @Override
+                    protected void cleanUp() {
+                        synchronized (mSafetyWarningLock) {
+                            mSafetyWarning = null;
+                        }
+                        recheckH(null);
+                    }
+                };
+                mSafetyWarning.show();
+            }
+            recheckH(null);
+        }
+        rescheduleTimeoutH();
+    }
+
     private final VolumeDialogController.Callbacks mControllerCallbackH
             = new VolumeDialogController.Callbacks() {
         @Override
@@ -812,6 +835,7 @@ public class VolumeDialog {
             dismissH(reason);
         }
 
+        @Override
         public void onScreenOff() {
             dismissH(Events.DISMISS_REASON_SCREEN_OFF);
         }
@@ -839,10 +863,16 @@ public class VolumeDialog {
             }
         }
 
+        @Override
         public void onShowSilentHint() {
             if (mSilentMode) {
                 mController.setRingerMode(AudioManager.RINGER_MODE_NORMAL, false);
             }
+        }
+
+        @Override
+        public void onShowSafetyWarning(int flags) {
+            showSafetyWarningH(flags);
         }
     };
 
