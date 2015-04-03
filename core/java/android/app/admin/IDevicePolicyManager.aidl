@@ -210,6 +210,7 @@ interface IDevicePolicyManager {
     void clearDeviceInitializer(in ComponentName who);
     boolean setDeviceInitializer(in ComponentName who, in ComponentName initializer, String initializerName);
     String getDeviceInitializer();
+    ComponentName getDeviceInitializerComponent();
 
     void setUserIcon(in ComponentName admin, in Bitmap icon);
 }
