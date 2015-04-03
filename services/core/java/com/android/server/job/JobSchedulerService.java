@@ -51,6 +51,7 @@ import android.util.Slog;
 import android.util.SparseArray;
 
 import com.android.internal.app.IBatteryStats;
+import com.android.server.job.controllers.AppIdleController;
 import com.android.server.job.controllers.BatteryController;
 import com.android.server.job.controllers.ConnectivityController;
 import com.android.server.job.controllers.IdleController;
@@ -317,6 +318,7 @@ public class JobSchedulerService extends com.android.server.SystemService
         mControllers.add(TimeController.get(this));
         mControllers.add(IdleController.get(this));
         mControllers.add(BatteryController.get(this));
+        mControllers.add(AppIdleController.get(this));
 
         mHandler = new JobHandler(context.getMainLooper());
         mJobSchedulerStub = new JobSchedulerStub();
@@ -688,7 +690,6 @@ public class JobSchedulerService extends com.android.server.SystemService
             final boolean jobPending = mPendingJobs.contains(job);
             final boolean jobActive = isCurrentlyActiveLocked(job);
             final boolean userRunning = mStartedUsers.contains(job.getUserId());
-
             if (DEBUG) {
                 Slog.v(TAG, "isReadyToBeExecutedLocked: " + job.toShortString()
                         + " ready=" + jobReady + " pending=" + jobPending
@@ -738,6 +739,10 @@ public class JobSchedulerService extends com.android.server.SystemService
                         }
                     }
                     if (availableContext != null) {
+                        if (DEBUG) {
+                            Slog.d(TAG, "About to run job "
+                                    + nextPending.getJob().getService().toString());
+                        }
                         if (!availableContext.executeRunnableJob(nextPending)) {
                             if (DEBUG) {
                                 Slog.d(TAG, "Error executing " + nextPending);

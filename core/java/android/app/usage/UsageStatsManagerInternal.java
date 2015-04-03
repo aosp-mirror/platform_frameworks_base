@@ -57,4 +57,41 @@ public abstract class UsageStatsManagerInternal {
      * Prepares the UsageStatsService for shutdown.
      */
     public abstract void prepareShutdown();
+
+    /**
+     * Returns true if the app has not been used for a certain amount of time. How much time?
+     * Could be hours, could be days, who knows?
+     *
+     * @param packageName
+     * @param userId
+     * @return
+     */
+    public abstract boolean isAppIdle(String packageName, int userId);
+
+    /**
+     * Returns the most recent time that the specified package was active for the given user.
+     * @param packageName The package to search.
+     * @param userId The user id of the user of interest.
+     * @return The timestamp of when the package was last used, or -1 if it hasn't been used.
+     */
+    public abstract long getLastPackageAccessTime(String packageName, int userId);
+
+    /**
+     * Sets up a listener for changes to packages being accessed.
+     * @param listener A listener within the system process.
+     */
+    public abstract void addAppIdleStateChangeListener(
+            AppIdleStateChangeListener listener);
+
+    /**
+     * Removes a listener that was previously added for package usage state changes.
+     * @param listener The listener within the system process to remove.
+     */
+    public abstract void removeAppIdleStateChangeListener(
+            AppIdleStateChangeListener listener);
+
+    public interface AppIdleStateChangeListener {
+        void onAppIdleStateChanged(String packageName, int userId, boolean idle);
+    }
+
 }

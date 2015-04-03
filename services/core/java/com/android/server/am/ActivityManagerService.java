@@ -43,6 +43,7 @@ import android.app.ITaskStackListener;
 import android.app.ProfilerInfo;
 import android.app.admin.DevicePolicyManager;
 import android.app.usage.UsageEvents;
+import android.app.usage.UsageStats;
 import android.app.usage.UsageStatsManagerInternal;
 import android.appwidget.AppWidgetManager;
 import android.content.res.Resources;
@@ -61,8 +62,8 @@ import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.DebugUtils;
 import android.util.SparseIntArray;
-
 import android.view.Display;
+
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.app.DumpHeapActivity;
@@ -96,7 +97,6 @@ import com.android.server.pm.UserManagerService;
 import com.android.server.statusbar.StatusBarManagerInternal;
 import com.android.server.wm.AppTransition;
 import com.android.server.wm.WindowManagerService;
-
 import com.google.android.collect.Lists;
 import com.google.android.collect.Maps;
 
@@ -17854,6 +17854,10 @@ public final class ActivityManagerService extends ActivityManagerNative
                 app.lastCpuTime = app.curCpuTime;
 
             }
+            // Inform UsageStats of important process state change
+            // Must be called before updating setProcState
+            maybeUpdateUsageStats(app);
+
             app.setProcState = app.curProcState;
             if (app.setProcState >= ActivityManager.PROCESS_STATE_HOME) {
                 app.notCachedSinceIdle = false;
@@ -17914,6 +17918,28 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
 
         return success;
+    }
+
+    private void maybeUpdateUsageStats(ProcessRecord app) {
+        if (DEBUG_USAGE_STATS) {
+            Slog.d(TAG, "Checking proc [" + Arrays.toString(app.getPackageList())
+                    + "] state changes: old = " + app.setProcState + ", new = "
+                    + app.curProcState);
+        }
+        if (mUsageStatsService == null) {
+            return;
+        }
+        if (app.curProcState <= ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND
+                && (app.setProcState > ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND
+                        || app.setProcState < 0)) {
+            String[] packages = app.getPackageList();
+            if (packages != null) {
+                for (int i = 0; i < packages.length; i++) {
+                    mUsageStatsService.reportEvent(packages[i], app.userId,
+                            UsageEvents.Event.INTERACTION);
+                }
+            }
+        }
     }
 
     private final void setProcessTrackerStateLocked(ProcessRecord proc, int memFactor, long now) {
