@@ -848,6 +848,15 @@ public final class Settings {
             = "android.settings.ZEN_MODE_PRIORITY_SETTINGS";
 
     /**
+     * Activity Action: Show Zen Mode automation configuration settings.
+     *
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_ZEN_MODE_AUTOMATION_SETTINGS
+            = "android.settings.ZEN_MODE_AUTOMATION_SETTINGS";
+
+    /**
      * Activity Action: Show the regulatory information screen for the device.
      * <p>
      * In some cases, a matching Activity may not exist, so ensure you safeguard
