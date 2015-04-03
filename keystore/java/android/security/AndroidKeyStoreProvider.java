@@ -16,7 +16,6 @@
 
 package android.security;
 
-import java.lang.reflect.Method;
 import java.security.Provider;
 
 import javax.crypto.Cipher;
@@ -92,23 +91,17 @@ public class AndroidKeyStoreProvider extends Provider {
         if (cryptoPrimitive == null) {
             throw new NullPointerException();
         }
-        if ((!(cryptoPrimitive instanceof Mac)) && (!(cryptoPrimitive instanceof Cipher))) {
-            throw new IllegalArgumentException("Unsupported crypto primitive: " + cryptoPrimitive);
-        }
         Object spi;
-        // TODO: Replace this Reflection based codewith direct invocations once the libcore changes
-        // are in.
-        try {
-            Method getSpiMethod = cryptoPrimitive.getClass().getDeclaredMethod("getSpi");
-            getSpiMethod.setAccessible(true);
-            spi = getSpiMethod.invoke(cryptoPrimitive);
-        } catch (ReflectiveOperationException e) {
-            throw new IllegalArgumentException(
-                    "Unsupported crypto primitive: " + cryptoPrimitive, e);
+        if (cryptoPrimitive instanceof Mac) {
+            spi = ((Mac) cryptoPrimitive).getSpi();
+        } else if (cryptoPrimitive instanceof Cipher) {
+            spi = ((Cipher) cryptoPrimitive).getSpi();
+        } else {
+            throw new IllegalArgumentException("Unsupported crypto primitive: " + cryptoPrimitive);
         }
         if (!(spi instanceof KeyStoreCryptoOperation)) {
             throw new IllegalArgumentException(
-                    "Crypto primitive not backed by Android KeyStore: " + cryptoPrimitive
+                    "Crypto primitive not backed by AndroidKeyStore: " + cryptoPrimitive
                     + ", spi: " + spi);
         }
         return ((KeyStoreCryptoOperation) spi).getOperationHandle();
