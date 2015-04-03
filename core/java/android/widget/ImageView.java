@@ -687,12 +687,19 @@ public class ImageView extends View {
         return mDrawMatrix;
     }
 
+    /**
+     * Adds a transformation {@link Matrix} that is applied
+     * to the view's drawable when it is drawn.  Allows custom scaling,
+     * translation, and perspective distortion.
+     * 
+     * @param matrix the transformation parameters in matrix form
+     */
     public void setImageMatrix(Matrix matrix) {
-        // collaps null and identity to just null
+        // collapse null and identity to just null
         if (matrix != null && matrix.isIdentity()) {
             matrix = null;
         }
-        
+
         // don't invalidate unless we're actually changing our matrix
         if (matrix == null && !mMatrix.isIdentity() ||
                 matrix != null && !mMatrix.equals(matrix)) {
