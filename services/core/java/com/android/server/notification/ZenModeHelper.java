@@ -213,6 +213,13 @@ public class ZenModeHelper implements AudioManagerInternal.RingerModeDelegate {
                     }
                     return false;
                 }
+                if (isReminder(record)) {
+                    if (!mConfig.allowReminders) {
+                        ZenLog.traceIntercepted(record, "!allowReminders");
+                        return true;
+                    }
+                    return false;
+                }
                 ZenLog.traceIntercepted(record, "!priority");
                 return true;
             default:
@@ -444,6 +451,10 @@ public class ZenModeHelper implements AudioManagerInternal.RingerModeDelegate {
 
     private static boolean isEvent(NotificationRecord record) {
         return record.isCategory(Notification.CATEGORY_EVENT);
+    }
+
+    private static boolean isReminder(NotificationRecord record) {
+        return record.isCategory(Notification.CATEGORY_REMINDER);
     }
 
     public boolean isCall(NotificationRecord record) {
