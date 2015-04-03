@@ -1340,14 +1340,21 @@ public class Allocation extends BaseObj {
 
     private void copyTo(Object array, Element.DataType dt, int arrayLen) {
         Trace.traceBegin(RenderScript.TRACE_TAG, "copyTo");
-        if (dt.mSize * arrayLen < mSize) {
-            throw new RSIllegalArgumentException(
-                "Size of output array cannot be smaller than size of allocation.");
-        }
         mRS.validate();
         boolean usePadding = false;
         if (mAutoPadding && (mType.getElement().getVectorSize() == 3)) {
             usePadding = true;
+        }
+        if (usePadding) {
+            if (dt.mSize * arrayLen < mSize / 4 * 3) {
+                throw new RSIllegalArgumentException(
+                    "Size of output array cannot be smaller than size of allocation.");
+            }
+        } else {
+            if (dt.mSize * arrayLen < mSize) {
+                throw new RSIllegalArgumentException(
+                    "Size of output array cannot be smaller than size of allocation.");
+            }
         }
         mRS.nAllocationRead(getID(mRS), array, dt, mType.mElement.mType.mSize, usePadding);
         Trace.traceEnd(RenderScript.TRACE_TAG);
