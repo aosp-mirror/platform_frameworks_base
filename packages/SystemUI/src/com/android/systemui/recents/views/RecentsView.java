@@ -34,6 +34,7 @@ import android.view.WindowInsets;
 import android.widget.FrameLayout;
 import com.android.systemui.R;
 import com.android.systemui.recents.Constants;
+import com.android.systemui.recents.RecentsAppWidgetHostView;
 import com.android.systemui.recents.RecentsConfiguration;
 import com.android.systemui.recents.misc.SystemServicesProxy;
 import com.android.systemui.recents.model.RecentsPackageMonitor;
@@ -69,7 +70,7 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
 
     ArrayList<TaskStack> mStacks;
     List<TaskStackView> mTaskStackViews = new ArrayList<>();
-    View mSearchBar;
+    RecentsAppWidgetHostView mSearchBar;
     RecentsViewCallbacks mCb;
 
     public RecentsView(Context context) {
@@ -278,7 +279,7 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
     }
 
     /** Adds the search bar */
-    public void setSearchBar(View searchBar) {
+    public void setSearchBar(RecentsAppWidgetHostView searchBar) {
         // Create the search bar (and hide it if we have no recent tasks)
         if (Constants.DebugFlags.App.EnableSearchLayout) {
             // Remove the previous search bar if one exists
@@ -294,8 +295,8 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
     }
 
     /** Returns whether there is currently a search bar */
-    public boolean hasSearchBar() {
-        return mSearchBar != null;
+    public boolean hasValidSearchBar() {
+        return mSearchBar != null && !mSearchBar.isReinflateRequired();
     }
 
     /** Sets the visibility of the search bar */
