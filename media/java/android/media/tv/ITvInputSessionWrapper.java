@@ -57,6 +57,11 @@ public class ITvInputSessionWrapper extends ITvInputSession.Stub implements Hand
     private static final int DO_RELAYOUT_OVERLAY_VIEW = 11;
     private static final int DO_REMOVE_OVERLAY_VIEW = 12;
     private static final int DO_REQUEST_UNBLOCK_CONTENT = 13;
+    private static final int DO_TIME_SHIFT_PAUSE = 14;
+    private static final int DO_TIME_SHIFT_RESUME = 15;
+    private static final int DO_TIME_SHIFT_SEEK_TO = 16;
+    private static final int DO_TIME_SHIFT_SET_PLAYBACK_RATE = 17;
+    private static final int DO_TIME_SHIFT_TRACK_CURRENT_POSITION = 18;
 
     private final HandlerCaller mCaller;
 
@@ -153,6 +158,26 @@ public class ITvInputSessionWrapper extends ITvInputSession.Stub implements Hand
                 mTvInputSessionImpl.unblockContent((String) msg.obj);
                 break;
             }
+            case DO_TIME_SHIFT_PAUSE: {
+                mTvInputSessionImpl.timeShiftPause();
+                break;
+            }
+            case DO_TIME_SHIFT_RESUME: {
+                mTvInputSessionImpl.timeShiftResume();
+                break;
+            }
+            case DO_TIME_SHIFT_SEEK_TO: {
+                mTvInputSessionImpl.timeShiftSeekTo((Long) msg.obj);
+                break;
+            }
+            case DO_TIME_SHIFT_SET_PLAYBACK_RATE: {
+                mTvInputSessionImpl.timeShiftSetPlaybackRate((Float) msg.obj, msg.arg1);
+                break;
+            }
+            case DO_TIME_SHIFT_TRACK_CURRENT_POSITION: {
+                mTvInputSessionImpl.timeShiftTrackCurrentPosition((Boolean) msg.obj);
+                break;
+            }
             default: {
                 Log.w(TAG, "Unhandled message code: " + msg.what);
                 break;
@@ -240,6 +265,34 @@ public class ITvInputSessionWrapper extends ITvInputSession.Stub implements Hand
     public void requestUnblockContent(String unblockedRating) {
         mCaller.executeOrSendMessage(mCaller.obtainMessageO(
                 DO_REQUEST_UNBLOCK_CONTENT, unblockedRating));
+    }
+
+    @Override
+    public void timeShiftPause() {
+        mCaller.executeOrSendMessage(mCaller.obtainMessage(DO_TIME_SHIFT_PAUSE));
+    }
+
+    @Override
+    public void timeShiftResume() {
+        mCaller.executeOrSendMessage(mCaller.obtainMessage(DO_TIME_SHIFT_RESUME));
+    }
+
+    @Override
+    public void timeShiftSeekTo(long timeMs) {
+        mCaller.executeOrSendMessage(mCaller.obtainMessageO(DO_TIME_SHIFT_SEEK_TO,
+                Long.valueOf(timeMs)));
+    }
+
+    @Override
+    public void timeShiftSetPlaybackRate(float rate, int audioMode) {
+        mCaller.executeOrSendMessage(mCaller.obtainMessageIO(DO_TIME_SHIFT_SET_PLAYBACK_RATE,
+                audioMode, Float.valueOf(rate)));
+    }
+
+    @Override
+    public void timeShiftTrackCurrentPosition(boolean enabled) {
+        mCaller.executeOrSendMessage(mCaller.obtainMessageO(DO_TIME_SHIFT_TRACK_CURRENT_POSITION,
+                Boolean.valueOf(enabled)));
     }
 
     private final class TvInputEventReceiver extends InputEventReceiver {

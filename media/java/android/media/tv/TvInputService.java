@@ -235,7 +235,9 @@ public abstract class TvInputService extends Service {
      * Base class for derived classes to implement to provide a TV input session.
      */
     public abstract static class Session implements KeyEvent.Callback {
-        private static final int DETACH_OVERLAY_VIEW_TIMEOUT = 5000;
+        private static final int DETACH_OVERLAY_VIEW_TIMEOUT_MS = 5000;
+        private static final int POSITION_UPDATE_INTERVAL_MS = 1000;
+
         private final KeyEvent.DispatcherState mDispatcherState = new KeyEvent.DispatcherState();
         private final WindowManager mWindowManager;
         final Handler mHandler;
@@ -248,6 +250,10 @@ public abstract class TvInputService extends Service {
         private boolean mOverlayViewEnabled;
         private IBinder mWindowToken;
         private Rect mOverlayFrame;
+        private long mCurrentPositionMs;
+        private final TimeShiftCurrentPositionTrackingRunnable
+                mTimeShiftCurrentPositionTrackingRunnable =
+                new TimeShiftCurrentPositionTrackingRunnable();
 
         private final Object mLock = new Object();
         // @GuardedBy("mLock")
@@ -264,6 +270,7 @@ public abstract class TvInputService extends Service {
             mContext = context;
             mWindowManager = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
             mHandler = new Handler(context.getMainLooper());
+            mCurrentPositionMs = TvInputManager.TIME_SHIFT_INVALID_TIME;
         }
 
         /**
@@ -550,6 +557,89 @@ public abstract class TvInputService extends Service {
         }
 
         /**
+         * Informs the application that the trick play status is changed.
+         * <p>
+         * The application assumes that time shift is not available by default. So, the
+         * implementation should call this method with
+         * {@link TvInputManager#TIME_SHIFT_STATUS_AVAILABLE} on tune request, if the time shift is
+         * available in the given channel.
+         * Note that sending {@link TvInputManager#TIME_SHIFT_STATUS_AVAILABLE} means the session
+         * implemented {@link #onTimeShiftPause}, {@link #onTimeShiftResume},
+         * {@link #onTimeShiftSeekTo}, {@link #onTimeShiftGetCurrentPosition}, and
+         * {@link #onTimeShiftSetPlaybackRate}, and these are working at the moment.
+         * </p>
+         *
+         * @param status The current time shift status:
+         * <ul>
+         * <li>{@link TvInputManager#TIME_SHIFT_STATUS_AVAILABLE}
+         * <li>{@link TvInputManager#TIME_SHIFT_STATUS_UNAVAILABLE}
+         * <li>{@link TvInputManager#TIME_SHIFT_STATUS_ERROR}
+         * </ul>
+         */
+        public void notifyTimeShiftStatusChanged(final int status) {
+            executeOrPostRunnable(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        if (DEBUG) Log.d(TAG, "notifyTimeShiftStatusChanged");
+                        if (mSessionCallback != null) {
+                            mSessionCallback.onTimeShiftStatusChanged(status);
+                        }
+                    } catch (RemoteException e) {
+                        Log.w(TAG, "error in notifyTimeShiftStatusChanged");
+                    }
+                }
+            });
+        }
+
+        /**
+         * Informs the application that the time shift start position is changed.
+         * <p>
+         * The application may seek to a position in the range from the start position and the
+         * current time, inclusive. So, the implementation should call this whenever the range is
+         * updated.
+         * </p>
+         *
+         * @param timeMs the start of possible time shift range, in milliseconds since the epoch.
+         */
+        public void notifyTimeShiftStartPositionChanged(final long timeMs) {
+            executeOrPostRunnable(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        if (DEBUG) Log.d(TAG, "notifyTimeShiftStartPositionChanged");
+                        if (mSessionCallback != null) {
+                            mSessionCallback.onTimeShiftStartPositionChanged(timeMs);
+                        }
+                    } catch (RemoteException e) {
+                        Log.w(TAG, "error in notifyTimeShiftStartPositionChanged");
+                    }
+                }
+            });
+        }
+
+        /**
+         * Informs the application that the current playback position is changed.
+         *
+         * @param timeMs The current position, in milliseconds since the epoch.
+         */
+        private void notifyTimeShiftCurrentPositionChanged(final long timeMs) {
+            executeOrPostRunnable(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        if (DEBUG) Log.d(TAG, "notifyTimeShiftCurrentPositionChanged");
+                        if (mSessionCallback != null) {
+                            mSessionCallback.onTimeShiftCurrentPositionChanged(timeMs);
+                        }
+                    } catch (RemoteException e) {
+                        Log.w(TAG, "error in notifyTimeShiftCurrentPositionChanged");
+                    }
+                }
+            });
+        }
+
+        /**
          * Assigns a position of the {@link Surface} passed by {@link #onSetSurface}. The position
          * is relative to an overlay view.
          *
@@ -756,6 +846,72 @@ public abstract class TvInputService extends Service {
         }
 
         /**
+         * Called when an application requests to pause the playback.
+         *
+         * @see #onTimeShiftResume()
+         * @see #onTimeShiftSeekTo(long)
+         * @see #onTimeShiftSetPlaybackRate(float, int)
+         * @see #onTimeShiftGetCurrentPosition()
+         */
+        public void onTimeShiftPause() {
+        }
+
+        /**
+         * Called when an application requests to resume the playback.
+         *
+         * @see #onTimeShiftPause()
+         * @see #onTimeShiftSeekTo(long)
+         * @see #onTimeShiftSetPlaybackRate(float, int)
+         * @see #onTimeShiftGetCurrentPosition()
+         */
+        public void onTimeShiftResume() {
+        }
+
+        /**
+         * Called when an application requests to seek to a specific position. The {@code timeMs} is
+         * expected to be in a range from the start time,
+         * {@link #notifyTimeShiftStartPositionChanged(long)}, to the current time, inclusive. If it
+         * is not, the implementation should seek to the nearest time position in the range.
+         *
+         * @param timeMs The target time, in milliseconds since the epoch
+         * @see #onTimeShiftResume()
+         * @see #onTimeShiftPause()
+         * @see #onTimeShiftSetPlaybackRate(float, int)
+         * @see #onTimeShiftGetCurrentPosition()
+         */
+        public void onTimeShiftSeekTo(long timeMs) {
+        }
+
+        /**
+         * Called when an application sets a playback rate and an audio mode.
+         *
+         * @param rate The ratio between desired playback rate and normal one.
+         * @param audioMode The audio playback mode. Must be one of the supported audio modes:
+         * <ul>
+         * <li> {@link android.media.MediaPlayer#PLAYBACK_RATE_AUDIO_MODE_RESAMPLE}
+         * </ul>
+         * @see #onTimeShiftResume()
+         * @see #onTimeShiftPause()
+         * @see #onTimeShiftSeekTo(long)
+         * @see #onTimeShiftGetCurrentPosition()
+         */
+        public void onTimeShiftSetPlaybackRate(float rate, int audioMode) {
+        }
+
+        /**
+         * Returns the current playback position in milliseconds since the epoch.
+         * {@link TvInputManager#TIME_SHIFT_INVALID_TIME} if position is unknown at this moment.
+         *
+         * @see #onTimeShiftResume()
+         * @see #onTimeShiftPause()
+         * @see #onTimeShiftSeekTo(long)
+         * @see #onTimeShiftSetPlaybackRate(float, int)
+         */
+        public long onTimeShiftGetCurrentPosition() {
+            return TvInputManager.TIME_SHIFT_INVALID_TIME;
+        }
+
+        /**
          * Default implementation of {@link android.view.KeyEvent.Callback#onKeyDown(int, KeyEvent)
          * KeyEvent.Callback.onKeyDown()}: always returns false (doesn't handle the event).
          * <p>
@@ -887,6 +1043,7 @@ public abstract class TvInputService extends Service {
             // Removes the overlay view lastly so that any hanging on the main thread can be handled
             // in {@link #scheduleOverlayViewCleanup}.
             removeOverlayView(true);
+            mHandler.removeCallbacks(mTimeShiftCurrentPositionTrackingRunnable);
         }
 
         /**
@@ -930,6 +1087,7 @@ public abstract class TvInputService extends Service {
          * Calls {@link #onTune}.
          */
         void tune(Uri channelUri, Bundle params) {
+            mCurrentPositionMs = TvInputManager.TIME_SHIFT_INVALID_TIME;
             onTune(channelUri, params);
             // TODO: Handle failure.
         }
@@ -1059,6 +1217,46 @@ public abstract class TvInputService extends Service {
         }
 
         /**
+         * Calls {@link #onTimeShiftPause}.
+         */
+        void timeShiftPause() {
+            onTimeShiftPause();
+        }
+
+        /**
+         * Calls {@link #onTimeShiftResume}.
+         */
+        void timeShiftResume() {
+            onTimeShiftResume();
+        }
+
+        /**
+         * Calls {@link #onTimeShiftSeekTo}.
+         */
+        void timeShiftSeekTo(long timeMs) {
+            onTimeShiftSeekTo(timeMs);
+        }
+
+        /**
+         * Calls {@link #onTimeShiftSetPlaybackRate}.
+         */
+        void timeShiftSetPlaybackRate(float rate, int audioMode) {
+            onTimeShiftSetPlaybackRate(rate, audioMode);
+        }
+
+        /**
+         * Turns on/off the current position tracking.
+         */
+        void timeShiftTrackCurrentPosition(boolean enabled) {
+            if (enabled) {
+                mHandler.post(mTimeShiftCurrentPositionTrackingRunnable);
+            } else {
+                mHandler.removeCallbacks(mTimeShiftCurrentPositionTrackingRunnable);
+                mCurrentPositionMs = TvInputManager.TIME_SHIFT_INVALID_TIME;
+            }
+        }
+
+        /**
          * Schedules a task which checks whether the overlay view is detached and kills the process
          * if it is not. Note that this method is expected to be called in a non-main thread.
          */
@@ -1154,12 +1352,26 @@ public abstract class TvInputService extends Service {
             }
         }
 
+        private final class TimeShiftCurrentPositionTrackingRunnable implements Runnable {
+            @Override
+            public void run() {
+                long pos = onTimeShiftGetCurrentPosition();
+                if (mCurrentPositionMs != pos) {
+                    mCurrentPositionMs = pos;
+                    notifyTimeShiftCurrentPositionChanged(pos);
+                }
+                mHandler.removeCallbacks(mTimeShiftCurrentPositionTrackingRunnable);
+                mHandler.postDelayed(mTimeShiftCurrentPositionTrackingRunnable,
+                        POSITION_UPDATE_INTERVAL_MS);
+            }
+        }
+
         private final class OverlayViewCleanUpTask extends AsyncTask<View, Void, Void> {
             @Override
             protected Void doInBackground(View... views) {
                 View overlayViewParent = views[0];
                 try {
-                    Thread.sleep(DETACH_OVERLAY_VIEW_TIMEOUT);
+                    Thread.sleep(DETACH_OVERLAY_VIEW_TIMEOUT_MS);
                 } catch (InterruptedException e) {
                     return null;
                 }

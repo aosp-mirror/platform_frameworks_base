@@ -71,6 +71,28 @@ public final class TvInputManager {
      */
     public static final int VIDEO_UNAVAILABLE_REASON_BUFFERING = VIDEO_UNAVAILABLE_REASON_END;
 
+    private static final int TIME_SHIFT_STATUS_START = 0;
+    private static final int TIME_SHIFT_STATUS_END = 2;
+
+    /**
+     * Time shifting is available. In this status, the application can pause/resume the playback,
+     * seek to a specific position, and change the playback rate.
+     */
+    public static final int TIME_SHIFT_STATUS_AVAILABLE = TIME_SHIFT_STATUS_START;
+
+    /**
+     * Time shifting is not available.
+     */
+    public static final int TIME_SHIFT_STATUS_UNAVAILABLE = 1;
+
+    /**
+     * An error occurred while handling a time shift request. To recover the status, tune to a
+     * new channel.
+     */
+    public static final int TIME_SHIFT_STATUS_ERROR = TIME_SHIFT_STATUS_END;
+
+    public static final long TIME_SHIFT_INVALID_TIME = Long.MIN_VALUE;
+
     /**
      * The TV input is in unknown state.
      * <p>
@@ -271,7 +293,7 @@ public final class TvInputManager {
         /**
          * This is called when the video is not available, so the TV input stops the playback.
          *
-         * @param session A {@link TvInputManager.Session} associated with this callback
+         * @param session A {@link TvInputManager.Session} associated with this callback.
          * @param reason The reason why the TV input stopped the playback:
          * <ul>
          * <li>{@link TvInputManager#VIDEO_UNAVAILABLE_REASON_UNKNOWN}
@@ -287,7 +309,7 @@ public final class TvInputManager {
          * This is called when the current program content turns out to be allowed to watch since
          * its content rating is not blocked by parental controls.
          *
-         * @param session A {@link TvInputManager.Session} associated with this callback
+         * @param session A {@link TvInputManager.Session} associated with this callback.
          */
         public void onContentAllowed(Session session) {
         }
@@ -296,7 +318,7 @@ public final class TvInputManager {
          * This is called when the current program content turns out to be not allowed to watch
          * since its content rating is blocked by parental controls.
          *
-         * @param session A {@link TvInputManager.Session} associated with this callback
+         * @param session A {@link TvInputManager.Session} associated with this callback.
          * @param rating The content ration of the blocked program.
          */
         public void onContentBlocked(Session session, TvContentRating rating) {
@@ -306,7 +328,7 @@ public final class TvInputManager {
          * This is called when {@link TvInputService.Session#layoutSurface} is called to change the
          * layout of surface.
          *
-         * @param session A {@link TvInputManager.Session} associated with this callback
+         * @param session A {@link TvInputManager.Session} associated with this callback.
          * @param left Left position.
          * @param top Top position.
          * @param right Right position.
@@ -327,6 +349,40 @@ public final class TvInputManager {
          */
         @SystemApi
         public void onSessionEvent(Session session, String eventType, Bundle eventArgs) {
+        }
+
+        /**
+         * This is called when the trick play status is changed.
+         *
+         * @param session A {@link TvInputManager.Session} associated with this callback.
+         * @param status The current time shift status:
+         * <ul>
+         * <li>{@link TvInputManager#TIME_SHIFT_STATUS_AVAILABLE}
+         * <li>{@link TvInputManager#TIME_SHIFT_STATUS_UNAVAILABLE}
+         * <li>{@link TvInputManager#TIME_SHIFT_STATUS_ERROR}
+         * </ul>
+         */
+        public void onTimeShiftStatusChanged(Session session, int status) {
+        }
+
+        /**
+         * This is called when the time shift start position is changed. The application may seek to
+         * a position in the range from the start position and the current time, inclusive.
+         *
+         * @param session A {@link TvInputManager.Session} associated with this callback.
+         * @param timeMs The start of the possible time shift range, in milliseconds since the
+         *         epoch.
+         */
+        public void onTimeShiftStartPositionChanged(Session session, long timeMs) {
+        }
+
+        /**
+         * This is called when the current position is changed.
+         *
+         * @param session A {@link TvInputManager.Session} associated with this callback.
+         * @param timeMs The current position, in milliseconds since the epoch.
+         */
+        public void onTimeShiftCurrentPositionChanged(Session session, long timeMs) {
         }
     }
 
@@ -447,6 +503,33 @@ public final class TvInputManager {
                 @Override
                 public void run() {
                     mSessionCallback.onSessionEvent(mSession, eventType, eventArgs);
+                }
+            });
+        }
+
+        void postTimeShiftStatusChanged(final int status) {
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    mSessionCallback.onTimeShiftStatusChanged(mSession, status);
+                }
+            });
+        }
+
+        void postTimeShiftStartPositionChanged(final long timeMs) {
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    mSessionCallback.onTimeShiftStartPositionChanged(mSession, timeMs);
+                }
+            });
+        }
+
+        void postTimeShiftCurrentPositionChanged(final long timeMs) {
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    mSessionCallback.onTimeShiftCurrentPositionChanged(mSession, timeMs);
                 }
             });
         }
@@ -716,6 +799,42 @@ public final class TvInputManager {
                         return;
                     }
                     record.postSessionEvent(eventType, eventArgs);
+                }
+            }
+
+            @Override
+            public void onTimeShiftStatusChanged(int status, int seq) {
+                synchronized (mSessionCallbackRecordMap) {
+                    SessionCallbackRecord record = mSessionCallbackRecordMap.get(seq);
+                    if (record == null) {
+                        Log.e(TAG, "Callback not found for seq " + seq);
+                        return;
+                    }
+                    record.postTimeShiftStatusChanged(status);
+                }
+            }
+
+            @Override
+            public void onTimeShiftStartPositionChanged(long timeMs, int seq) {
+                synchronized (mSessionCallbackRecordMap) {
+                    SessionCallbackRecord record = mSessionCallbackRecordMap.get(seq);
+                    if (record == null) {
+                        Log.e(TAG, "Callback not found for seq " + seq);
+                        return;
+                    }
+                    record.postTimeShiftStartPositionChanged(timeMs);
+                }
+            }
+
+            @Override
+            public void onTimeShiftCurrentPositionChanged(long timeMs, int seq) {
+                synchronized (mSessionCallbackRecordMap) {
+                    SessionCallbackRecord record = mSessionCallbackRecordMap.get(seq);
+                    if (record == null) {
+                        Log.e(TAG, "Callback not found for seq " + seq);
+                        return;
+                    }
+                    record.postTimeShiftCurrentPositionChanged(timeMs);
                 }
             }
         };
@@ -1171,22 +1290,22 @@ public final class TvInputManager {
         private TvInputEventSender mSender;
         private InputChannel mChannel;
 
-        private final Object mTrackLock = new Object();
-        // @GuardedBy("mTrackLock")
+        private final Object mMetadataLock = new Object();
+        // @GuardedBy("mMetadataLock")
         private final List<TvTrackInfo> mAudioTracks = new ArrayList<TvTrackInfo>();
-        // @GuardedBy("mTrackLock")
+        // @GuardedBy("mMetadataLock")
         private final List<TvTrackInfo> mVideoTracks = new ArrayList<TvTrackInfo>();
-        // @GuardedBy("mTrackLock")
+        // @GuardedBy("mMetadataLock")
         private final List<TvTrackInfo> mSubtitleTracks = new ArrayList<TvTrackInfo>();
-        // @GuardedBy("mTrackLock")
+        // @GuardedBy("mMetadataLock")
         private String mSelectedAudioTrackId;
-        // @GuardedBy("mTrackLock")
+        // @GuardedBy("mMetadataLock")
         private String mSelectedVideoTrackId;
-        // @GuardedBy("mTrackLock")
+        // @GuardedBy("mMetadataLock")
         private String mSelectedSubtitleTrackId;
-        // @GuardedBy("mTrackLock")
+        // @GuardedBy("mMetadataLock")
         private int mVideoWidth;
-        // @GuardedBy("mTrackLock")
+        // @GuardedBy("mMetadataLock")
         private int mVideoHeight;
 
         private Session(IBinder token, InputChannel channel, ITvInputManager service, int userId,
@@ -1322,7 +1441,7 @@ public final class TvInputManager {
                 Log.w(TAG, "The session has been already released");
                 return;
             }
-            synchronized (mTrackLock) {
+            synchronized (mMetadataLock) {
                 mAudioTracks.clear();
                 mVideoTracks.clear();
                 mSubtitleTracks.clear();
@@ -1367,7 +1486,7 @@ public final class TvInputManager {
          * @see #getTracks
          */
         public void selectTrack(int type, String trackId) {
-            synchronized (mTrackLock) {
+            synchronized (mMetadataLock) {
                 if (type == TvTrackInfo.TYPE_AUDIO) {
                     if (trackId != null && !containsTrack(mAudioTracks, trackId)) {
                         Log.w(TAG, "Invalid audio trackId: " + trackId);
@@ -1416,7 +1535,7 @@ public final class TvInputManager {
          * @return the list of tracks for the given type.
          */
         public List<TvTrackInfo> getTracks(int type) {
-            synchronized (mTrackLock) {
+            synchronized (mMetadataLock) {
                 if (type == TvTrackInfo.TYPE_AUDIO) {
                     if (mAudioTracks == null) {
                         return null;
@@ -1445,7 +1564,7 @@ public final class TvInputManager {
          * @see #selectTrack
          */
         public String getSelectedTrack(int type) {
-            synchronized (mTrackLock) {
+            synchronized (mMetadataLock) {
                 if (type == TvTrackInfo.TYPE_AUDIO) {
                     return mSelectedAudioTrackId;
                 } else if (type == TvTrackInfo.TYPE_VIDEO) {
@@ -1462,7 +1581,7 @@ public final class TvInputManager {
          * there is an update.
          */
         boolean updateTracks(List<TvTrackInfo> tracks) {
-            synchronized (mTrackLock) {
+            synchronized (mMetadataLock) {
                 mAudioTracks.clear();
                 mVideoTracks.clear();
                 mSubtitleTracks.clear();
@@ -1485,7 +1604,7 @@ public final class TvInputManager {
          * Returns true if there is an update.
          */
         boolean updateTrackSelection(int type, String trackId) {
-            synchronized (mTrackLock) {
+            synchronized (mMetadataLock) {
                 if (type == TvTrackInfo.TYPE_AUDIO && trackId != mSelectedAudioTrackId) {
                     mSelectedAudioTrackId = trackId;
                     return true;
@@ -1509,7 +1628,7 @@ public final class TvInputManager {
          * track.
          */
         TvTrackInfo getVideoTrackToNotify() {
-            synchronized (mTrackLock) {
+            synchronized (mMetadataLock) {
                 if (!mVideoTracks.isEmpty() && mSelectedVideoTrackId != null) {
                     for (TvTrackInfo track : mVideoTracks) {
                         if (track.getId().equals(mSelectedVideoTrackId)) {
@@ -1525,6 +1644,92 @@ public final class TvInputManager {
                 }
             }
             return null;
+        }
+
+        /**
+         * Pauses the playback. Call {@link #timeShiftResume()} to restart the playback.
+         */
+        void timeShiftPause() {
+            if (mToken == null) {
+                Log.w(TAG, "The session has been already released");
+                return;
+            }
+            try {
+                mService.timeShiftPause(mToken, mUserId);
+            } catch (RemoteException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        /**
+         * Resumes the playback. No-op if it is already playing the channel.
+         */
+        void timeShiftResume() {
+            if (mToken == null) {
+                Log.w(TAG, "The session has been already released");
+                return;
+            }
+            try {
+                mService.timeShiftResume(mToken, mUserId);
+            } catch (RemoteException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        /**
+         * Seeks to the specific time position. The position should be in the range from the start
+         * time from the start time,
+         * {@link TvInputCallback#onTimeShiftStartPositionChanged(String, long)}, to the current
+         * time, inclusive.
+         *
+         * @param timeMs The target time, in milliseconds since the epoch.
+         */
+        void timeShiftSeekTo(long timeMs) {
+            if (mToken == null) {
+                Log.w(TAG, "The session has been already released");
+                return;
+            }
+            try {
+                mService.timeShiftSeekTo(mToken, timeMs, mUserId);
+            } catch (RemoteException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        /**
+         * Sets a playback rate and an audio mode.
+         *
+         * @param rate The ratio between desired playback rate and normal one.
+         * @param audioMode The audio playback mode. Must be one of the supported audio modes:
+         * <ul>
+         * <li> {@link android.media.MediaPlayer#PLAYBACK_RATE_AUDIO_MODE_RESAMPLE}
+         * </ul>
+         */
+        void timeShiftSetPlaybackRate(float rate, int audioMode) {
+            if (mToken == null) {
+                Log.w(TAG, "The session has been already released");
+                return;
+            }
+            try {
+                mService.timeShiftSetPlaybackRate(mToken, rate, audioMode, mUserId);
+            } catch (RemoteException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        /**
+         * Returns the current playback position.
+         */
+        void timeShiftTrackCurrentPosition(boolean enabled) {
+            if (mToken == null) {
+                Log.w(TAG, "The session has been already released");
+                return;
+            }
+            try {
+                mService.timeShiftTrackCurrentPosition(mToken, enabled, mUserId);
+            } catch (RemoteException e) {
+                throw new RuntimeException(e);
+            }
         }
 
         /**

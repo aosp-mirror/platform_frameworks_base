@@ -74,6 +74,12 @@ interface ITvInputManager {
 
     void requestUnblockContent(in IBinder sessionToken, in String unblockedRating, int userId);
 
+    void timeShiftPause(in IBinder sessionToken, int userId);
+    void timeShiftResume(in IBinder sessionToken, int userId);
+    void timeShiftSeekTo(in IBinder sessionToken, long timeMs, int userId);
+    void timeShiftSetPlaybackRate(in IBinder sessionToken, float rate, int audioMode, int userId);
+    void timeShiftTrackCurrentPosition(in IBinder sessionToken, boolean enabled, int userId);
+
     // For TV input hardware binding
     List<TvInputHardwareInfo> getHardwareList();
     ITvInputHardware acquireTvInputHardware(int deviceId, in ITvInputHardwareCallback callback,
