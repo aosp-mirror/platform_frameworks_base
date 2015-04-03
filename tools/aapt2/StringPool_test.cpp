@@ -20,6 +20,8 @@
 #include <gtest/gtest.h>
 #include <string>
 
+using namespace android;
+
 namespace aapt {
 
 TEST(StringPoolTest, InsertOneString) {
@@ -189,28 +191,28 @@ TEST(StringPoolTest, FlattenUtf8) {
     }
 
     {
-        android::ResStringPool test;
-        ASSERT_EQ(android::NO_ERROR, test.setTo(data, buffer.size()));
+        ResStringPool test;
+        ASSERT_TRUE(test.setTo(data, buffer.size()) == NO_ERROR);
 
         EXPECT_EQ(util::getString(test, 0), u"hello");
         EXPECT_EQ(util::getString(test, 1), u"goodbye");
         EXPECT_EQ(util::getString(test, 2), sLongString);
         EXPECT_EQ(util::getString(test, 3), u"style");
 
-        const android::ResStringPool_span* span = test.styleAt(3);
+        const ResStringPool_span* span = test.styleAt(3);
         ASSERT_NE(nullptr, span);
         EXPECT_EQ(util::getString(test, span->name.index), u"b");
         EXPECT_EQ(0u, span->firstChar);
         EXPECT_EQ(1u, span->lastChar);
         span++;
 
-        ASSERT_NE(android::ResStringPool_span::END, span->name.index);
+        ASSERT_NE(ResStringPool_span::END, span->name.index);
         EXPECT_EQ(util::getString(test, span->name.index), u"i");
         EXPECT_EQ(2u, span->firstChar);
         EXPECT_EQ(3u, span->lastChar);
         span++;
 
-        EXPECT_EQ(android::ResStringPool_span::END, span->name.index);
+        EXPECT_EQ(ResStringPool_span::END, span->name.index);
     }
     delete[] data;
 }

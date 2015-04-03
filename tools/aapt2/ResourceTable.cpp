@@ -164,7 +164,7 @@ bool ResourceTable::addResource(const ResourceNameRef& name, const ResourceId re
                 << "' has invalid entry name '"
                 << name.entry
                 << "'. Invalid character '"
-                << *badCharIter
+                << StringPiece16(badCharIter, 1)
                 << "'."
                 << std::endl;
         return false;
@@ -258,7 +258,7 @@ bool ResourceTable::markPublic(const ResourceNameRef& name, const ResourceId res
                 << "' has invalid entry name '"
                 << name.entry
                 << "'. Invalid character '"
-                << *badCharIter
+                << StringPiece16(badCharIter, 1)
                 << "'."
                 << std::endl;
         return false;
@@ -314,21 +314,21 @@ bool ResourceTable::markPublic(const ResourceNameRef& name, const ResourceId res
 std::tuple<const ResourceTableType*, const ResourceEntry*>
 ResourceTable::findResource(const ResourceNameRef& name) const {
     if (name.package != mPackage) {
-        return {nullptr, nullptr};
+        return {};
     }
 
     auto iter = std::lower_bound(mTypes.begin(), mTypes.end(), name.type, lessThanType);
     if (iter == mTypes.end() || (*iter)->type != name.type) {
-        return {nullptr, nullptr};
+        return {};
     }
 
     const std::unique_ptr<ResourceTableType>& type = *iter;
     auto iter2 = std::lower_bound(type->entries.begin(), type->entries.end(), name.entry,
                                   lessThanEntry);
     if (iter2 == type->entries.end() || name.entry != (*iter2)->name) {
-        return {nullptr, nullptr};
+        return {};
     }
-    return {iter->get(), iter2->get()};
+    return std::make_tuple(iter->get(), iter2->get());
 }
 
 } // namespace aapt

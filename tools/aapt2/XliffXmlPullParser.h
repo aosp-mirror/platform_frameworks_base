@@ -19,6 +19,7 @@
 
 #include "XmlPullParser.h"
 
+#include <memory>
 #include <string>
 
 namespace aapt {

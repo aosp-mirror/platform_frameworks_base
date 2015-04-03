@@ -116,20 +116,6 @@ public:
     const_iterator findAttribute(StringPiece16 namespaceUri, StringPiece16 name) const;
 };
 
-/*
- * Automatically reads up to the end tag of the element it was initialized with
- * when being destroyed.
- */
-class AutoFinishElement {
-public:
-    AutoFinishElement(const std::shared_ptr<XmlPullParser>& parser);
-    ~AutoFinishElement();
-
-private:
-    std::shared_ptr<XmlPullParser> mParser;
-    int mDepth;
-};
-
 //
 // Implementation
 //
@@ -210,23 +196,6 @@ inline XmlPullParser::const_iterator XmlPullParser::findAttribute(StringPiece16 
         return iter;
     }
     return endIter;
-}
-
-inline AutoFinishElement::AutoFinishElement(const std::shared_ptr<XmlPullParser>& parser) :
-        mParser(parser), mDepth(parser->getDepth()) {
-}
-
-inline AutoFinishElement::~AutoFinishElement() {
-    int depth;
-    XmlPullParser::Event event;
-    while ((depth = mParser->getDepth()) >= mDepth &&
-            XmlPullParser::isGoodEvent(event = mParser->getEvent())) {
-        if (depth == mDepth && (event == XmlPullParser::Event::kEndElement ||
-                event == XmlPullParser::Event::kEndNamespace)) {
-            return;
-        }
-        mParser->next();
-    }
 }
 
 } // namespace aapt

@@ -24,6 +24,7 @@
 
 #include <androidfw/AssetManager.h>
 #include <array>
+#include <bitset>
 #include <iostream>
 #include <map>
 #include <ostream>

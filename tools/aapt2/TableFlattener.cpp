@@ -24,6 +24,7 @@
 #include "TableFlattener.h"
 #include "Util.h"
 
+#include <algorithm>
 #include <androidfw/ResourceTypes.h>
 #include <sstream>
 

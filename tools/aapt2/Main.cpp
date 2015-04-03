@@ -171,6 +171,9 @@ bool loadBinaryResourceTable(std::shared_ptr<ResourceTable> table, const Source&
 }
 
 bool loadResTable(android::ResTable* table, const Source& source) {
+    // For NO_ERROR (which on Windows is a MACRO).
+    using namespace android;
+
     std::ifstream ifs(source.path, std::ifstream::in | std::ifstream::binary);
     if (!ifs) {
         Logger::error(source) << strerror(errno) << std::endl;
@@ -187,7 +190,7 @@ bool loadResTable(android::ResTable* table, const Source& source) {
     char* buf = new char[dataSize];
     ifs.read(buf, dataSize);
 
-    bool result = table->add(buf, dataSize, -1, true) == android::NO_ERROR;
+    bool result = table->add(buf, dataSize, -1, true) == NO_ERROR;
 
     delete [] buf;
     return result;
@@ -426,6 +429,8 @@ struct AaptOptions {
 };
 
 bool compileAndroidManifest(std::shared_ptr<Resolver> resolver, const AaptOptions& options) {
+    using namespace android;
+
     Source outSource = options.output;
     appendPath(&outSource.path, "AndroidManifest.xml");
 
@@ -456,8 +461,8 @@ bool compileAndroidManifest(std::shared_ptr<Resolver> resolver, const AaptOption
         p += b.size;
     }
 
-    android::ResXMLTree tree;
-    if (tree.setTo(data.get(), outBuffer.size()) != android::NO_ERROR) {
+    ResXMLTree tree;
+    if (tree.setTo(data.get(), outBuffer.size()) != NO_ERROR) {
         return false;
     }
 

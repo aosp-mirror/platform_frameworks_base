@@ -88,7 +88,7 @@ template <typename Iterator>
 
 inline ::std::function<::std::ostream&(::std::ostream&)> formatSize(size_t size) {
     return [size](::std::ostream& out) -> ::std::ostream& {
-        constexpr size_t K = 1024;
+        constexpr size_t K = 1024u;
         constexpr size_t M = K * K;
         constexpr size_t G = M * K;
         if (size < K) {

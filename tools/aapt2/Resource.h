@@ -20,6 +20,7 @@
 #include "StringPiece.h"
 
 #include <iomanip>
+#include <limits>
 #include <string>
 #include <tuple>
 

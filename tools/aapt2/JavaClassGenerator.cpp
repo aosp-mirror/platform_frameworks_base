@@ -20,6 +20,7 @@
 #include "ResourceValues.h"
 #include "StringPiece.h"
 
+#include <algorithm>
 #include <ostream>
 #include <set>
 #include <sstream>
@@ -87,10 +88,11 @@ bool JavaClassGenerator::generateType(std::ostream& out, const ResourceTableType
         assert(id.isValid());
 
         if (!isValidSymbol(entry->name)) {
-            mError = (std::stringstream()
-                    << "invalid symbol name '"
-                    << StringPiece16(entry->name)
-                    << "'").str();
+            std::stringstream err;
+            err << "invalid symbol name '"
+                << StringPiece16(entry->name)
+                << "'";
+            mError = err.str();
             return false;
         }
 
@@ -164,10 +166,11 @@ bool JavaClassGenerator::generate(std::ostream& out) {
             for (const auto& entry : type->entries) {
                 assert(!entry->values.empty());
                 if (!isValidSymbol(entry->name)) {
-                    mError = (std::stringstream()
-                            << "invalid symbol name '"
-                            << StringPiece16(entry->name)
-                            << "'").str();
+                    std::stringstream err;
+                    err << "invalid symbol name '"
+                        << StringPiece16(entry->name)
+                        << "'";
+                    mError = err.str();
                     return false;
                 }
                 entry->values.front().value->accept(*this, GenArgs{ out, *entry });

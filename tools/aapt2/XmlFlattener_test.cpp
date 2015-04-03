@@ -27,6 +27,8 @@
 #include <sstream>
 #include <string>
 
+using namespace android;
+
 namespace aapt {
 
 constexpr const char* kXmlPreamble = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n";
@@ -40,16 +42,16 @@ public:
 
         table->addResource(ResourceName{ {}, ResourceType::kAttr, u"id" },
                            ResourceId{ 0x01010000 }, {}, {},
-                           util::make_unique<Attribute>(false, android::ResTable_map::TYPE_ANY));
+                           util::make_unique<Attribute>(false, ResTable_map::TYPE_ANY));
 
         table->addResource(ResourceName{ {}, ResourceType::kId, u"test" },
                            ResourceId{ 0x01020000 }, {}, {}, util::make_unique<Id>());
 
         mFlattener = std::make_shared<XmlFlattener>(
-                std::make_shared<Resolver>(table, std::make_shared<android::AssetManager>()));
+                std::make_shared<Resolver>(table, std::make_shared<AssetManager>()));
     }
 
-    ::testing::AssertionResult testFlatten(std::istream& in, android::ResXMLTree* outTree) {
+    ::testing::AssertionResult testFlatten(std::istream& in, ResXMLTree* outTree) {
         std::stringstream input(kXmlPreamble);
         input << in.rdbuf() << std::endl;
         std::shared_ptr<XmlPullParser> xmlParser = std::make_shared<SourceXmlPullParser>(input);
@@ -59,7 +61,7 @@ public:
         }
 
         std::unique_ptr<uint8_t[]> data = util::copy(outBuffer);
-        if (outTree->setTo(data.get(), outBuffer.size(), true) != android::NO_ERROR) {
+        if (outTree->setTo(data.get(), outBuffer.size(), true) != NO_ERROR) {
             return ::testing::AssertionFailure();
         }
         return ::testing::AssertionSuccess();
@@ -74,11 +76,11 @@ TEST_F(XmlFlattenerTest, ParseSimpleView) {
           << "      android:id=\"@id/test\">" << std::endl
           << "</View>" << std::endl;
 
-    android::ResXMLTree tree;
+    ResXMLTree tree;
     ASSERT_TRUE(testFlatten(input, &tree));
 
-    while (tree.next() != android::ResXMLTree::END_DOCUMENT) {
-        ASSERT_NE(tree.getEventType(), android::ResXMLTree::BAD_DOCUMENT);
+    while (tree.next() != ResXMLTree::END_DOCUMENT) {
+        ASSERT_NE(tree.getEventType(), ResXMLTree::BAD_DOCUMENT);
     }
 }
 
