@@ -3982,7 +3982,10 @@ public class TelephonyManager {
      */
     public boolean canChangeDtmfToneLength() {
         try {
-            return getITelephony().canChangeDtmfToneLength();
+            ITelephony telephony = getITelephony();
+            if (telephony != null) {
+                return telephony.canChangeDtmfToneLength();
+            }
         } catch (RemoteException e) {
             Log.e(TAG, "Error calling ITelephony#canChangeDtmfToneLength", e);
         }
@@ -3996,7 +3999,10 @@ public class TelephonyManager {
      */
     public boolean isWorldPhone() {
         try {
-            return getITelephony().isWorldPhone();
+            ITelephony telephony = getITelephony();
+            if (telephony != null) {
+                return telephony.isWorldPhone();
+            }
         } catch (RemoteException e) {
             Log.e(TAG, "Error calling ITelephony#isWorldPhone", e);
         }
@@ -4010,7 +4016,10 @@ public class TelephonyManager {
      */
     public boolean isTtyModeSupported() {
         try {
-            return getITelephony().isTtyModeSupported();
+            ITelephony telephony = getITelephony();
+            if (telephony != null) {
+                return telephony.isTtyModeSupported();
+            }
         } catch (RemoteException e) {
             Log.e(TAG, "Error calling ITelephony#isTtyModeSupported", e);
         }
@@ -4025,7 +4034,10 @@ public class TelephonyManager {
      */
     public boolean isHearingAidCompatibilitySupported() {
         try {
-            return getITelephony().isHearingAidCompatibilitySupported();
+            ITelephony telephony = getITelephony();
+            if (telephony != null) {
+                return telephony.isHearingAidCompatibilitySupported();
+            }
         } catch (RemoteException e) {
             Log.e(TAG, "Error calling ITelephony#isHearingAidCompatibilitySupported", e);
         }
