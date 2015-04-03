@@ -18,5 +18,46 @@ package com.android.server.pm;
 
 import android.os.Binder;
 
-public class KeySetHandle extends Binder {
+class KeySetHandle extends Binder{
+    private final long mId;
+    private int mRefCount;
+
+    protected KeySetHandle(long id) {
+        mId = id;
+        mRefCount = 1;
+    }
+
+    /*
+     * Only used when reading state from packages.xml
+     */
+    protected KeySetHandle(long id, int refCount) {
+        mId = id;
+        mRefCount = refCount;
+    }
+
+    public long getId() {
+        return mId;
+    }
+
+    protected int getRefCountLPr() {
+        return mRefCount;
+    }
+
+    /*
+     * Only used when reading state from packages.xml
+     */
+    protected void setRefCountLPw(int newCount) {
+         mRefCount = newCount;
+         return;
+    }
+
+    protected void incrRefCountLPw() {
+        mRefCount++;
+        return;
+    }
+
+    protected int decrRefCountLPw() {
+        mRefCount--;
+        return mRefCount;
+    }
 }

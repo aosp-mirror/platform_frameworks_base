@@ -6401,21 +6401,11 @@ public class PackageManagerService extends IPackageManager.Stub {
             // Add the package's KeySets to the global KeySetManagerService
             KeySetManagerService ksms = mSettings.mKeySetManagerService;
             try {
-                // Old KeySetData no longer valid.
-                ksms.removeAppKeySetDataLPw(pkg.packageName);
                 ksms.addSigningKeySetToPackageLPw(pkg.packageName, pkg.mSigningKeys);
                 if (pkg.mKeySetMapping != null) {
-                    for (Map.Entry<String, ArraySet<PublicKey>> entry :
-                            pkg.mKeySetMapping.entrySet()) {
-                        if (entry.getValue() != null) {
-                            ksms.addDefinedKeySetToPackageLPw(pkg.packageName,
-                                                          entry.getValue(), entry.getKey());
-                        }
-                    }
+                    ksms.addDefinedKeySetsToPackageLPw(pkg.packageName, pkg.mKeySetMapping);
                     if (pkg.mUpgradeKeySets != null) {
-                        for (String upgradeAlias : pkg.mUpgradeKeySets) {
-                            ksms.addUpgradeKeySetToPackageLPw(pkg.packageName, upgradeAlias);
-                        }
+                        ksms.addUpgradeKeySetsToPackageLPw(pkg.packageName, pkg.mUpgradeKeySets);
                     }
                 }
             } catch (NullPointerException e) {
