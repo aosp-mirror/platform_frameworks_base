@@ -98,13 +98,11 @@ public class LayoutXmlProcessor {
             return false;
         }
         LayoutFileParser layoutFileParser = new LayoutFileParser();
-        int layoutId = 0;
         for (File xmlFile : getLayoutFiles(mResources)) {
             final ResourceBundle.LayoutFileBundle bindingLayout = layoutFileParser
-                    .parseXml(xmlFile, mResourceBundle.getAppPackage(), layoutId);
+                    .parseXml(xmlFile, mResourceBundle.getAppPackage());
             if (bindingLayout != null && !bindingLayout.isEmpty()) {
-                mResourceBundle.addLayoutBundle(bindingLayout, layoutId);
-                layoutId++;
+                mResourceBundle.addLayoutBundle(bindingLayout);
             }
         }
         mProcessingComplete = true;

@@ -202,12 +202,11 @@ public class LayoutBinder {
         return mBaseClassName;
     }
 
-    public int getId() {
-        return mBundle.getLayoutId();
+    public String getTag() {
+        return mBundle.getDirectory() + "/" + mBundle.getFileName();
     }
 
     public boolean hasVariations() {
         return mBundle.hasVariations();
     }
-
 }

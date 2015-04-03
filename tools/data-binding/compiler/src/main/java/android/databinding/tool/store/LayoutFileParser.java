@@ -55,10 +55,12 @@ public class LayoutFileParser {
     private static final String XPATH_MERGE_TAG = "/merge";
     final String LAYOUT_PREFIX = "@layout/";
 
-    public ResourceBundle.LayoutFileBundle parseXml(File xml, String pkg, int layoutId)
+    public ResourceBundle.LayoutFileBundle parseXml(File xml, String pkg)
             throws ParserConfigurationException, IOException, SAXException,
             XPathExpressionException {
-        File original = stripFileAndGetOriginal(xml, "" + layoutId);
+        final String xmlNoExtension = ParserHelper.INSTANCE$.stripExtension(xml.getName());
+        final String newTag = xml.getParentFile().getName() + '/' + xmlNoExtension;
+        File original = stripFileAndGetOriginal(xml, newTag);
         if (original == null) {
             L.d("assuming the file is the original for %s", xml.getAbsoluteFile());
             original = xml;
@@ -66,8 +68,7 @@ public class LayoutFileParser {
         L.d("parsing file %s", xml.getAbsolutePath());
 
         ResourceBundle.LayoutFileBundle bundle = new ResourceBundle.LayoutFileBundle(
-                ParserHelper.INSTANCE$.stripExtension(xml.getName()), layoutId,
-                xml.getParentFile().getName(), pkg);
+                xmlNoExtension, xml.getParentFile().getName(), pkg);
 
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
         final DocumentBuilder builder = factory.newDocumentBuilder();

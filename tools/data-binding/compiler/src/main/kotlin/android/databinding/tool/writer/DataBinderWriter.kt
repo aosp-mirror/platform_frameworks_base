@@ -31,11 +31,10 @@ class DataBinderWriter(val pkg: String, val projectPackage: String, val classNam
                                     } else {
                                         // we should check the tag to decide which layout we need to inflate
                                         tab("{") {
-                                            tab("final String tag = (String)view.getTag();")
+                                            tab("final Object tag = view.getTag();")
                                             tab("if(tag == null) throw new java.lang.RuntimeException(\"view must have a tag\");")
                                             it.value.forEach {
-                                                // TODO don't use strings. not necessary
-                                                tab("if (tag.equals(String.valueOf(${it.getId()}))) {") {
+                                                tab("if (\"${it.getTag()}\".equals(tag)) {") {
                                                     tab("return new ${it.getPackage()}.${it.getImplementationName()}(view);")
                                                 } tab("}")
                                             }

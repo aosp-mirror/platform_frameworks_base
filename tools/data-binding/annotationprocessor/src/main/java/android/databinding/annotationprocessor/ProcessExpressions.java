@@ -164,7 +164,7 @@ public class ProcessExpressions extends ProcessDataBinding.ProcessingStep {
                 try {
                     final ResourceBundle.LayoutFileBundle bundle
                             = (ResourceBundle.LayoutFileBundle) mUnmarshaller.unmarshal(is);
-                    resourceBundle.addLayoutBundle(bundle, bundle.getLayoutId());
+                    resourceBundle.addLayoutBundle(bundle);
                     L.d("loaded layout info file %s", bundle);
                 } finally {
                     IOUtils.closeQuietly(is);

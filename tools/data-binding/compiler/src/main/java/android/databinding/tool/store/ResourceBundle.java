@@ -53,12 +53,11 @@ public class ResourceBundle implements Serializable {
         mAppPackage = appPackage;
     }
 
-    public void addLayoutBundle(LayoutFileBundle bundle, int layoutId) {
+    public void addLayoutBundle(LayoutFileBundle bundle) {
         Preconditions.checkArgument(bundle.mFileName != null, "File bundle must have a name");
         if (!mLayoutBundles.containsKey(bundle.mFileName)) {
             mLayoutBundles.put(bundle.mFileName, new ArrayList<LayoutFileBundle>());
         }
-        bundle.mLayoutId = layoutId;
         final List<LayoutFileBundle> bundles = mLayoutBundles.get(bundle.mFileName);
         for (LayoutFileBundle existing : bundles) {
             if (existing.equals(bundle)) {
@@ -211,8 +210,6 @@ public class ResourceBundle implements Serializable {
     @XmlAccessorType(XmlAccessType.NONE)
     @XmlRootElement(name="Layout")
     public static class LayoutFileBundle implements Serializable {
-        @XmlAttribute(name="layoutId", required = true)
-        public int mLayoutId;
         @XmlAttribute(name="layout", required = true)
         public String mFileName;
         @XmlAttribute(name="modulePackage", required = true)
@@ -239,10 +236,8 @@ public class ResourceBundle implements Serializable {
         public LayoutFileBundle() {
         }
 
-        public LayoutFileBundle(String fileName, int layoutId, String directory,
-                String modulePackage) {
+        public LayoutFileBundle(String fileName, String directory, String modulePackage) {
             mFileName = fileName;
-            mLayoutId = layoutId;
             mDirectory = directory;
             mModulePackage = modulePackage;
         }
@@ -274,10 +269,6 @@ public class ResourceBundle implements Serializable {
                 }
             }
             return null;
-        }
-
-        public int getLayoutId() {
-            return mLayoutId;
         }
 
         public String getFileName() {
@@ -351,7 +342,6 @@ public class ResourceBundle implements Serializable {
                     ", mConfigName='" + mConfigName + '\'' +
                     ", mModulePackage='" + mModulePackage + '\'' +
                     ", mFileName='" + mFileName + '\'' +
-                    ", mLayoutId=" + mLayoutId +
                     '}';
         }
 
