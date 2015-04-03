@@ -2752,6 +2752,12 @@ public class PackageParser {
 
         modifySharedLibrariesForBackwardCompatibility(owner);
 
+        if (hasDomainURLs(owner)) {
+            owner.applicationInfo.privateFlags |= ApplicationInfo.PRIVATE_FLAG_HAS_DOMAIN_URLS;
+        } else {
+            owner.applicationInfo.privateFlags &= ~ApplicationInfo.PRIVATE_FLAG_HAS_DOMAIN_URLS;
+        }
+
         return true;
     }
 
@@ -2765,6 +2771,30 @@ public class PackageParser {
         owner.usesLibraries = ArrayUtils.remove(owner.usesLibraries, "org.apache.http.legacy");
         owner.usesOptionalLibraries = ArrayUtils.remove(owner.usesOptionalLibraries,
                 "org.apache.http.legacy");
+    }
+
+    /**
+     * Check if one of the IntentFilter as an action VIEW and a HTTP/HTTPS data URI
+     */
+    private static boolean hasDomainURLs(Package pkg) {
+        if (pkg == null || pkg.activities == null) return false;
+        final ArrayList<Activity> activities = pkg.activities;
+        final int countActivities = activities.size();
+        for (int n=0; n<countActivities; n++) {
+            Activity activity = activities.get(n);
+            ArrayList<ActivityIntentInfo> filters = activity.intents;
+            if (filters == null) continue;
+            final int countFilters = filters.size();
+            for (int m=0; m<countFilters; m++) {
+                ActivityIntentInfo aii = filters.get(m);
+                if (!aii.hasAction(Intent.ACTION_VIEW)) continue;
+                if (aii.hasDataScheme(IntentFilter.SCHEME_HTTP) ||
+                        aii.hasDataScheme(IntentFilter.SCHEME_HTTPS)) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     /**

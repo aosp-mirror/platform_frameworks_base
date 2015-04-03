@@ -8907,7 +8907,7 @@ public class PackageManagerService extends IPackageManager.Stub {
     }
 
     @Override
-    public void verifyIntentFilter(int id, int verificationCode, List<String> outFailedDomains)
+    public void verifyIntentFilter(int id, int verificationCode, List<String> failedDomains)
             throws RemoteException {
         mContext.enforceCallingOrSelfPermission(
                 Manifest.permission.INTENT_FILTER_VERIFICATION_AGENT,
@@ -8915,7 +8915,7 @@ public class PackageManagerService extends IPackageManager.Stub {
 
         final Message msg = mHandler.obtainMessage(INTENT_FILTER_VERIFIED);
         final IntentFilterVerificationResponse response = new IntentFilterVerificationResponse(
-                Binder.getCallingUid(), verificationCode, outFailedDomains);
+                Binder.getCallingUid(), verificationCode, failedDomains);
         msg.arg1 = id;
         msg.obj = response;
         mHandler.sendMessage(msg);
