@@ -24,6 +24,11 @@ import android.os.Parcelable;
  */
 public class VideoProfile implements Parcelable {
     /**
+     * "Unknown" video quality.
+     * @hide
+     */
+    public static final int QUALITY_UNKNOWN = 0;
+    /**
      * "High" video quality.
      */
     public static final int QUALITY_HIGH = 1;
@@ -176,6 +181,17 @@ public class VideoProfile implements Parcelable {
          */
         public static boolean isAudioOnly(int videoState) {
             return !hasState(videoState, TX_ENABLED) && !hasState(videoState, RX_ENABLED);
+        }
+
+        /**
+         * Whether the video state is any of the video type
+         * @param videoState The video state.
+         * @hide
+         * @return Returns true if the video state TX or RX or Bidirectional
+         */
+        public static boolean isVideo(int videoState) {
+            return hasState(videoState, TX_ENABLED) || hasState(videoState, RX_ENABLED)
+                    || hasState(videoState, BIDIRECTIONAL);
         }
 
         /**
