@@ -1249,11 +1249,6 @@ final class ActivityStack {
                 "ensureActivitiesVisible behind " + top
                 + " configChanges=0x" + Integer.toHexString(configChanges));
 
-        if (DEBUG_STATES && starting != null && starting.task.stack == this) {
-            Slog.d(TAG, "ensureActivitiesVisibleLocked: starting=" + starting + " state="
-                    + starting.state + " fullscreen=" + starting.fullscreen + " top=" + top
-                    + " state=" + top.state + " fullscreen=" + top.fullscreen);
-        }
         if (mTranslucentActivityWaiting != top) {
             mUndrawnActivitiesBelowTopTranslucent.clear();
             if (mTranslucentActivityWaiting != null) {
