@@ -22,7 +22,7 @@
 
 // STATUST: mingw does seem to redefine UNKNOWN_ERROR from our enum value, so a cast is necessary.
 
-#if HAVE_PRINTF_ZD
+#if !defined(_WIN32)
 #  define ZD "%zd"
 #  define ZD_TYPE ssize_t
 #  define STATUST(x) x
