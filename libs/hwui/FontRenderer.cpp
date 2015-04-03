@@ -46,51 +46,11 @@ namespace uirenderer {
 // blur inputs smaller than this constant will bypass renderscript
 #define RS_MIN_INPUT_CUTOFF 10000
 
-#define USE_GLOPS true
-
 ///////////////////////////////////////////////////////////////////////////////
 // TextSetupFunctor
 ///////////////////////////////////////////////////////////////////////////////
-void TextSetupFunctor::setup(GLenum glyphFormat) {
-    renderer->setupDraw();
-    renderer->setupDrawTextGamma(paint);
-    renderer->setupDrawDirtyRegionsDisabled();
-    renderer->setupDrawWithTexture(glyphFormat == GL_ALPHA);
-    switch (glyphFormat) {
-        case GL_ALPHA: {
-            renderer->setupDrawAlpha8Color(paint->getColor(), alpha);
-            break;
-        }
-        case GL_RGBA: {
-            float floatAlpha = alpha / 255.0f;
-            renderer->setupDrawColor(floatAlpha, floatAlpha, floatAlpha, floatAlpha);
-            break;
-        }
-        default: {
-#if DEBUG_FONT_RENDERER
-            ALOGD("TextSetupFunctor: called with unknown glyph format %x", glyphFormat);
-#endif
-            break;
-        }
-    }
-    renderer->setupDrawColorFilter(paint->getColorFilter());
-    renderer->setupDrawShader(paint->getShader());
-    renderer->setupDrawBlending(paint);
-    renderer->setupDrawProgram();
-    renderer->setupDrawModelView(kModelViewMode_Translate, false,
-            0.0f, 0.0f, 0.0f, 0.0f, pureTranslate);
-    // Calling setupDrawTexture with the name 0 will enable the
-    // uv attributes and increase the texture unit count
-    // texture binding will be performed by the font renderer as
-    // needed
-    renderer->setupDrawTexture(0);
-    renderer->setupDrawPureColorUniforms();
-    renderer->setupDrawColorFilterUniforms(paint->getColorFilter());
-    renderer->setupDrawShaderUniforms(paint->getShader(), pureTranslate);
-    renderer->setupDrawTextGammaUniforms();
-}
 
-void TextSetupFunctor::draw(CacheTexture& texture, bool linearFiltering) {
+void TextDrawFunctor::draw(CacheTexture& texture, bool linearFiltering) {
     int textureFillFlags = static_cast<int>(texture.getFormat() == GL_ALPHA
             ? TextureFillFlags::kIsAlphaMaskTexture : TextureFillFlags::kNone);
     if (linearFiltering) {
@@ -508,11 +468,6 @@ void FontRenderer::checkTextureUpdate() {
 void FontRenderer::issueDrawCommand(Vector<CacheTexture*>& cacheTextures) {
     if (!mFunctor) return;
 
-#if !USE_GLOPS
-    Caches& caches = mFunctor->renderer->getCaches();
-    RenderState& renderState = mFunctor->renderer->renderState();
-#endif
-
     bool first = true;
     bool forceRebind = false;
     for (uint32_t i = 0; i < cacheTextures.size(); i++) {
@@ -520,37 +475,12 @@ void FontRenderer::issueDrawCommand(Vector<CacheTexture*>& cacheTextures) {
         if (texture->canDraw()) {
             if (first) {
                 checkTextureUpdate();
-#if !USE_GLOPS
-                mFunctor->setup(texture->getFormat());
-
-                renderState.meshState().bindQuadIndicesBuffer();
-
-                // If returns true, a VBO was bound and we must
-                // rebind our vertex attrib pointers even if
-                // they have the same values as the current pointers
-                forceRebind = renderState.meshState().unbindMeshBuffer();
-
-                caches.textureState().activateTexture(0);
-#endif
                 first = false;
                 mDrawn = true;
             }
-#if USE_GLOPS
+
             mFunctor->draw(*texture, mLinearFiltering);
-#endif
 
-#if !USE_GLOPS
-            caches.textureState().bindTexture(texture->getTextureId());
-            texture->setLinearFiltering(mLinearFiltering);
-
-            TextureVertex* mesh = texture->mesh();
-            MeshState& meshState = renderState.meshState();
-            meshState.bindPositionVertexPointer(forceRebind, &mesh[0].x);
-            meshState.bindTexCoordsVertexPointer(forceRebind, &mesh[0].u);
-
-            glDrawElements(GL_TRIANGLES, texture->meshElementCount(),
-                    GL_UNSIGNED_SHORT, texture->indices());
-#endif
             texture->resetMesh();
             forceRebind = false;
         }
@@ -689,7 +619,7 @@ FontRenderer::DropShadow FontRenderer::renderDropShadow(const SkPaint* paint, co
     return image;
 }
 
-void FontRenderer::initRender(const Rect* clip, Rect* bounds, TextSetupFunctor* functor) {
+void FontRenderer::initRender(const Rect* clip, Rect* bounds, TextDrawFunctor* functor) {
     checkInit();
 
     mDrawn = false;
@@ -717,7 +647,7 @@ void FontRenderer::endPrecaching() {
 
 bool FontRenderer::renderPosText(const SkPaint* paint, const Rect* clip, const char *text,
         uint32_t startIndex, uint32_t len, int numGlyphs, int x, int y,
-        const float* positions, Rect* bounds, TextSetupFunctor* functor, bool forceFinish) {
+        const float* positions, Rect* bounds, TextDrawFunctor* functor, bool forceFinish) {
     if (!mCurrentFont) {
         ALOGE("No font set");
         return false;
@@ -735,7 +665,7 @@ bool FontRenderer::renderPosText(const SkPaint* paint, const Rect* clip, const c
 
 bool FontRenderer::renderTextOnPath(const SkPaint* paint, const Rect* clip, const char *text,
         uint32_t startIndex, uint32_t len, int numGlyphs, const SkPath* path,
-        float hOffset, float vOffset, Rect* bounds, TextSetupFunctor* functor) {
+        float hOffset, float vOffset, Rect* bounds, TextDrawFunctor* functor) {
     if (!mCurrentFont) {
         ALOGE("No font set");
         return false;

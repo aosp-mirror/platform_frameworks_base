@@ -65,7 +65,7 @@ class DeferredDisplayState;
 struct Glop;
 class RenderState;
 class RenderNode;
-class TextSetupFunctor;
+class TextDrawFunctor;
 class VertexBuffer;
 
 struct DrawModifiers {
@@ -727,15 +727,6 @@ private:
     void drawShape(float left, float top, PathTexture* texture, const SkPaint* paint);
 
     /**
-     * Draws the specified texture as an alpha bitmap. Alpha bitmaps obey
-     * different compositing rules.
-     *
-     * @param texture The texture to draw with
-     * @param paint The paint to render with
-     */
-    void drawAlphaBitmap(Texture* texture, const SkPaint* paint);
-
-    /**
      * Renders a strip of polygons with the specified paint, used for tessellated geometry.
      *
      * @param vertexBuffer The VertexBuffer to be drawn
@@ -760,60 +751,6 @@ private:
      * @param paint The paint to render with
      */
     void drawConvexPath(const SkPath& path, const SkPaint* paint);
-
-    /**
-     * Draws a textured rectangle with the specified texture.
-     *
-     * @param texture The texture to use
-     * @param paint The paint containing the alpha, blending mode, etc.
-     */
-    void drawTextureRect(Texture* texture, const SkPaint* paint);
-
-    /**
-     * Draws a textured mesh with the specified texture. If the indices are omitted,
-     * the mesh is drawn as a simple quad. The mesh pointers become offsets when a
-     * VBO is bound.
-     *
-     * @param left The left coordinate of the rectangle
-     * @param top The top coordinate of the rectangle
-     * @param right The right coordinate of the rectangle
-     * @param bottom The bottom coordinate of the rectangle
-     * @param texture The texture name to map onto the rectangle
-     * @param paint The paint containing the alpha, blending mode, colorFilter, etc.
-     * @param blend True if the texture contains an alpha channel
-     * @param vertices The vertices that define the mesh
-     * @param texCoords The texture coordinates of each vertex
-     * @param elementsCount The number of elements in the mesh, required by indices
-     * @param swapSrcDst Whether or not the src and dst blending operations should be swapped
-     * @param ignoreTransform True if the current transform should be ignored
-     * @param vbo The VBO used to draw the mesh
-     * @param modelViewMode Defines whether the model view matrix should be scaled
-     * @param dirty True if calling this method should dirty the current layer
-     */
-    void drawTextureMesh(float left, float top, float right, float bottom, GLuint texture,
-            const SkPaint* paint, bool blend,
-            GLvoid* vertices, GLvoid* texCoords, GLenum drawMode, GLsizei elementsCount,
-            bool swapSrcDst = false, bool ignoreTransform = false, GLuint vbo = 0,
-            ModelViewMode modelViewMode = kModelViewMode_TranslateAndScale, bool dirty = true);
-
-    void drawIndexedTextureMesh(float left, float top, float right, float bottom, GLuint texture,
-            const SkPaint* paint, bool blend,
-            GLvoid* vertices, GLvoid* texCoords, GLenum drawMode, GLsizei elementsCount,
-            bool swapSrcDst = false, bool ignoreTransform = false, GLuint vbo = 0,
-            ModelViewMode modelViewMode = kModelViewMode_TranslateAndScale, bool dirty = true);
-
-    void drawAlpha8TextureMesh(float left, float top, float right, float bottom,
-            GLuint texture, const SkPaint* paint,
-            GLvoid* vertices, GLvoid* texCoords, GLenum drawMode, GLsizei elementsCount,
-            bool ignoreTransform, ModelViewMode modelViewMode = kModelViewMode_TranslateAndScale,
-            bool dirty = true);
-
-    /**
-     * Draws the specified list of vertices as quads using indexed GL_TRIANGLES.
-     * If the number of vertices to draw exceeds the number of indices we have
-     * pre-allocated, this method will generate several glDrawElements() calls.
-     */
-    void issueIndexedQuadDraw(Vertex* mesh, GLsizei quadsCount);
 
     /**
      * Draws text underline and strike-through if needed.
@@ -873,78 +810,6 @@ private:
      */
     bool canSkipText(const SkPaint* paint) const;
 
-    /**
-     * Enable or disable blending as necessary. This function sets the appropriate
-     * blend function based on the specified xfermode.
-     */
-    inline void chooseBlending(bool blend, SkXfermode::Mode mode, ProgramDescription& description,
-            bool swapSrcDst = false);
-
-    /**
-     * Invoked before any drawing operation. This sets required state.
-     */
-    void setupDraw(bool clear = true);
-
-    /**
-     * Various methods to setup OpenGL rendering.
-     */
-    void setupDrawWithTexture(bool isAlpha8 = false);
-    void setupDrawWithTextureAndColor(bool isAlpha8 = false);
-    void setupDrawWithExternalTexture();
-    void setupDrawNoTexture();
-    void setupDrawVertexAlpha(bool useShadowAlphaInterp);
-    void setupDrawColor(int color, int alpha);
-    void setupDrawColor(float r, float g, float b, float a);
-    void setupDrawAlpha8Color(int color, int alpha);
-    void setupDrawTextGamma(const SkPaint* paint);
-    void setupDrawShader(const SkShader* shader);
-    void setupDrawColorFilter(const SkColorFilter* filter);
-    void setupDrawBlending(const Layer* layer, bool swapSrcDst = false);
-    void setupDrawBlending(const SkPaint* paint, bool blend = true, bool swapSrcDst = false);
-    void setupDrawProgram();
-    void setupDrawDirtyRegionsDisabled();
-
-    /**
-     * Setup the current program matrices based upon the nature of the geometry.
-     *
-     * @param mode If kModelViewMode_Translate, the geometry must be translated by the left and top
-     * parameters. If kModelViewMode_TranslateAndScale, the geometry that exists in the (0,0, 1,1)
-     * space must be scaled up and translated to fill the quad provided in (l,t,r,b). These
-     * transformations are stored in the modelView matrix and uploaded to the shader.
-     *
-     * @param offset Set to true if the the matrix should be fudged (translated) slightly to
-     * disambiguate geometry pixel positioning. See Vertex::GeometryFudgeFactor().
-     *
-     * @param ignoreTransform Set to true if l,t,r,b coordinates already in layer space,
-     * currentTransform() will be ignored. (e.g. when drawing clip in layer coordinates to stencil,
-     * or when simple translation has been extracted)
-     */
-    void setupDrawModelView(ModelViewMode mode, bool offset,
-            float left, float top, float right, float bottom, bool ignoreTransform = false);
-    void setupDrawColorUniforms(bool hasShader);
-    void setupDrawPureColorUniforms();
-
-    /**
-     * Setup uniforms for the current shader.
-     *
-     * @param shader SkShader on the current paint.
-     *
-     * @param ignoreTransform Set to true to ignore the transform in shader.
-     */
-    void setupDrawShaderUniforms(const SkShader* shader, bool ignoreTransform = false);
-    void setupDrawColorFilterUniforms(const SkColorFilter* paint);
-    void setupDrawSimpleMesh();
-    void setupDrawTexture(GLuint texture);
-    void setupDrawExternalTexture(GLuint texture);
-    void setupDrawTextureTransform();
-    void setupDrawTextureTransformUniforms(mat4& transform);
-    void setupDrawTextGammaUniforms();
-    void setupDrawMesh(const GLvoid* vertices, const GLvoid* texCoords = nullptr, GLuint vbo = 0);
-    void setupDrawMesh(const GLvoid* vertices, const GLvoid* texCoords, const GLvoid* colors);
-    void setupDrawMeshIndices(const GLvoid* vertices, const GLvoid* texCoords, GLuint vbo = 0);
-    void setupDrawIndexedVertices(GLvoid* vertices);
-    void accountForClear(SkXfermode::Mode mode);
-
     bool updateLayer(Layer* layer, bool inFrame);
     void updateLayers();
     void flushLayers();
@@ -993,31 +858,12 @@ private:
     inline Snapshot* writableSnapshot() { return mState.writableSnapshot(); }
     inline const Snapshot* currentSnapshot() const { return mState.currentSnapshot(); }
 
-    /**
-     * Model-view matrix used to position/size objects
-     *
-     * Stores operation-local modifications to the draw matrix that aren't incorporated into the
-     * currentTransform().
-     *
-     * If generated with kModelViewMode_Translate, mModelViewMatrix will reflect an x/y offset,
-     * e.g. the offset in drawLayer(). If generated with kModelViewMode_TranslateAndScale,
-     * mModelViewMatrix will reflect a translation and scale, e.g. the translation and scale
-     * required to make VBO 0 (a rect of (0,0,1,1)) scaled to match the x,y offset, and width/height
-     * of a bitmap.
-     *
-     * Used as input to SkiaShader transformation.
-     */
-    mat4 mModelViewMatrix;
-
     // State used to define the clipping region
     Rect mTilingClip;
     // Is the target render surface opaque
     bool mOpaque;
     // Is a frame currently being rendered
     bool mFrameStarted;
-
-    // Used to draw textured quads
-    TextureVertex mMeshVertices[4];
 
     // Default UV mapper
     const UvMapper mUvMapper;
@@ -1030,21 +876,6 @@ private:
     std::vector<Rect> mLayers;
     // List of layers to update at the beginning of a frame
     Vector< sp<Layer> > mLayerUpdates;
-
-    // The following fields are used to setup drawing
-    // Used to describe the shaders to generate
-    ProgramDescription mDescription;
-    // Color description
-    bool mColorSet;
-    FloatColor mColor;
-    // Indicates that the shader should get a color
-    bool mSetShaderColor;
-    // Current texture unit
-    GLuint mTextureUnit;
-    // Track dirty regions, true by default
-    bool mTrackDirtyRegions;
-    // Indicate whether we are drawing an opaque frame
-    bool mOpaqueFrame;
 
     // See PROPERTY_DISABLE_SCISSOR_OPTIMIZATION in
     // Properties.h
@@ -1070,7 +901,7 @@ private:
     std::vector<std::unique_ptr<SkPath>> mTempPaths;
 
     friend class Layer;
-    friend class TextSetupFunctor;
+    friend class TextDrawFunctor;
     friend class DrawBitmapOp;
     friend class DrawPatchOp;
 

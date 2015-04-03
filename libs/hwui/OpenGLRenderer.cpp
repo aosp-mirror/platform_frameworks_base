@@ -57,8 +57,6 @@
     #define EVENT_LOGD(...)
 #endif
 
-#define USE_GLOPS true
-
 namespace android {
 namespace uirenderer {
 
@@ -82,8 +80,6 @@ OpenGLRenderer::OpenGLRenderer(RenderState& renderState)
     // *set* draw modifiers to be 0
     memset(&mDrawModifiers, 0, sizeof(mDrawModifiers));
     mDrawModifiers.mOverrideLayerAlpha = 1.0f;
-
-    memcpy(mMeshVertices, kUnitQuadVertices, sizeof(kUnitQuadVertices));
 }
 
 OpenGLRenderer::~OpenGLRenderer() {
@@ -846,124 +842,42 @@ void OpenGLRenderer::composeLayer(const Snapshot& removed, const Snapshot& resto
 }
 
 void OpenGLRenderer::drawTextureLayer(Layer* layer, const Rect& rect) {
-    if (USE_GLOPS) {
-        bool snap = !layer->getForceFilter()
-                && layer->getWidth() == (uint32_t) rect.getWidth()
-                && layer->getHeight() == (uint32_t) rect.getHeight();
-        Glop glop;
-        GlopBuilder(mRenderState, mCaches, &glop)
-                .setMeshTexturedUvQuad(nullptr, Rect(0, 1, 1, 0)) // TODO: simplify with VBO
-                .setFillTextureLayer(*layer, getLayerAlpha(layer))
-                .setTransform(currentSnapshot()->getOrthoMatrix(), *currentTransform(), false)
-                .setModelViewMapUnitToRectOptionalSnap(snap, rect)
-                .setRoundRectClipState(currentSnapshot()->roundRectClipState)
-                .build();
-        renderGlop(glop);
-        return;
-    }
-
-    float alpha = getLayerAlpha(layer);
-    setupDraw();
-    if (layer->getRenderTarget() == GL_TEXTURE_2D) {
-        setupDrawWithTexture();
-    } else {
-        setupDrawWithExternalTexture();
-    }
-    setupDrawTextureTransform();
-    setupDrawColor(alpha, alpha, alpha, alpha);
-    setupDrawColorFilter(layer->getColorFilter());
-    setupDrawBlending(layer);
-    setupDrawProgram();
-    setupDrawPureColorUniforms();
-    setupDrawColorFilterUniforms(layer->getColorFilter());
-    if (layer->getRenderTarget() == GL_TEXTURE_2D) {
-        setupDrawTexture(layer->getTextureId());
-    } else {
-        setupDrawExternalTexture(layer->getTextureId());
-    }
-    if (currentTransform()->isPureTranslate()
-            && !layer->getForceFilter()
+    bool snap = !layer->getForceFilter()
             && layer->getWidth() == (uint32_t) rect.getWidth()
-            && layer->getHeight() == (uint32_t) rect.getHeight()) {
-        const float x = floorf(rect.left + currentTransform()->getTranslateX() + 0.5f);
-        const float y = floorf(rect.top + currentTransform()->getTranslateY() + 0.5f);
-
-        layer->setFilter(GL_NEAREST);
-        setupDrawModelView(kModelViewMode_TranslateAndScale, false,
-                x, y, x + rect.getWidth(), y + rect.getHeight(), true);
-    } else {
-        layer->setFilter(GL_LINEAR);
-        setupDrawModelView(kModelViewMode_TranslateAndScale, false,
-                rect.left, rect.top, rect.right, rect.bottom);
-    }
-    setupDrawTextureTransformUniforms(layer->getTexTransform());
-    setupDrawMesh(&mMeshVertices[0].x, &mMeshVertices[0].u);
-
-    glDrawArrays(GL_TRIANGLE_STRIP, 0, kUnitQuadCount);
+            && layer->getHeight() == (uint32_t) rect.getHeight();
+    Glop glop;
+    GlopBuilder(mRenderState, mCaches, &glop)
+            .setMeshTexturedUvQuad(nullptr, Rect(0, 1, 1, 0)) // TODO: simplify with VBO
+            .setFillTextureLayer(*layer, getLayerAlpha(layer))
+            .setTransform(currentSnapshot()->getOrthoMatrix(), *currentTransform(), false)
+            .setModelViewMapUnitToRectOptionalSnap(snap, rect)
+            .setRoundRectClipState(currentSnapshot()->roundRectClipState)
+            .build();
+    renderGlop(glop);
 }
 
 void OpenGLRenderer::composeLayerRect(Layer* layer, const Rect& rect, bool swap) {
     if (layer->isTextureLayer()) {
         EVENT_LOGD("composeTextureLayerRect");
-        resetDrawTextureTexCoords(0.0f, 1.0f, 1.0f, 0.0f);
         drawTextureLayer(layer, rect);
-        resetDrawTextureTexCoords(0.0f, 0.0f, 1.0f, 1.0f);
     } else {
         EVENT_LOGD("composeHardwareLayerRect");
 
-        if (USE_GLOPS) {
-            Blend::ModeOrderSwap modeUsage = swap ?
-                    Blend::ModeOrderSwap::Swap : Blend::ModeOrderSwap::NoSwap;
-            const Matrix4& transform = swap ? Matrix4::identity() : *currentTransform();
-            bool snap = !swap
-                    && layer->getWidth() == static_cast<uint32_t>(rect.getWidth())
-                    && layer->getHeight() == static_cast<uint32_t>(rect.getHeight());
-            Glop glop;
-            GlopBuilder(mRenderState, mCaches, &glop)
-                    .setMeshTexturedUvQuad(nullptr, layer->texCoords)
-                    .setFillLayer(layer->getTexture(), layer->getColorFilter(), getLayerAlpha(layer), layer->getMode(), modeUsage)
-                    .setTransform(currentSnapshot()->getOrthoMatrix(), transform, false)
-                    .setModelViewMapUnitToRectOptionalSnap(snap, rect)
-                    .setRoundRectClipState(currentSnapshot()->roundRectClipState)
-                    .build();
-            renderGlop(glop);
-            return;
-        }
-
-        const Rect& texCoords = layer->texCoords;
-        resetDrawTextureTexCoords(texCoords.left, texCoords.top,
-                texCoords.right, texCoords.bottom);
-
-        float x = rect.left;
-        float y = rect.top;
-        bool simpleTransform = currentTransform()->isPureTranslate()
-                && layer->getWidth() == (uint32_t) rect.getWidth()
-                && layer->getHeight() == (uint32_t) rect.getHeight();
-
-        if (simpleTransform) {
-            // When we're swapping, the layer is already in screen coordinates
-            if (!swap) {
-                x = floorf(rect.left + currentTransform()->getTranslateX() + 0.5f);
-                y = floorf(rect.top + currentTransform()->getTranslateY() + 0.5f);
-            }
-
-            layer->setFilter(GL_NEAREST, true);
-        } else {
-            layer->setFilter(GL_LINEAR, true);
-        }
-
-        SkPaint layerPaint;
-        layerPaint.setAlpha(getLayerAlpha(layer) * 255);
-        layerPaint.setXfermodeMode(layer->getMode());
-        layerPaint.setColorFilter(layer->getColorFilter());
-
-        bool blend = layer->isBlend() || getLayerAlpha(layer) < 1.0f;
-        drawTextureMesh(x, y, x + rect.getWidth(), y + rect.getHeight(),
-                layer->getTextureId(), &layerPaint, blend,
-                &mMeshVertices[0].x, &mMeshVertices[0].u,
-                GL_TRIANGLE_STRIP, kUnitQuadCount, swap, swap || simpleTransform);
-
-        resetDrawTextureTexCoords(0.0f, 0.0f, 1.0f, 1.0f);
+        Blend::ModeOrderSwap modeUsage = swap ?
+                Blend::ModeOrderSwap::Swap : Blend::ModeOrderSwap::NoSwap;
+        const Matrix4& transform = swap ? Matrix4::identity() : *currentTransform();
+        bool snap = !swap
+                && layer->getWidth() == static_cast<uint32_t>(rect.getWidth())
+                && layer->getHeight() == static_cast<uint32_t>(rect.getHeight());
+        Glop glop;
+        GlopBuilder(mRenderState, mCaches, &glop)
+                .setMeshTexturedUvQuad(nullptr, layer->texCoords)
+                .setFillLayer(layer->getTexture(), layer->getColorFilter(), getLayerAlpha(layer), layer->getMode(), modeUsage)
+                .setTransform(currentSnapshot()->getOrthoMatrix(), transform, false)
+                .setModelViewMapUnitToRectOptionalSnap(snap, rect)
+                .setRoundRectClipState(currentSnapshot()->roundRectClipState)
+                .build();
+        renderGlop(glop);
     }
 }
 
@@ -1079,69 +993,8 @@ void OpenGLRenderer::composeLayerRegion(Layer* layer, const Rect& rect) {
     const float texY = 1.0f / float(layer->getHeight());
     const float height = rect.getHeight();
 
-    if (USE_GLOPS) {
-        TextureVertex quadVertices[count * 4];
-        //std::unique_ptr<TextureVertex[]> quadVertices(new TextureVertex[count * 4]);
-        TextureVertex* mesh = &quadVertices[0];
-        for (size_t i = 0; i < count; i++) {
-            const android::Rect* r = &rects[i];
-
-            const float u1 = r->left * texX;
-            const float v1 = (height - r->top) * texY;
-            const float u2 = r->right * texX;
-            const float v2 = (height - r->bottom) * texY;
-
-            // TODO: Reject quads outside of the clip
-            TextureVertex::set(mesh++, r->left, r->top, u1, v1);
-            TextureVertex::set(mesh++, r->right, r->top, u2, v1);
-            TextureVertex::set(mesh++, r->left, r->bottom, u1, v2);
-            TextureVertex::set(mesh++, r->right, r->bottom, u2, v2);
-        }
-        Glop glop;
-        GlopBuilder(mRenderState, mCaches, &glop)
-                .setMeshTexturedIndexedQuads(&quadVertices[0], count * 6)
-                .setFillLayer(layer->getTexture(), layer->getColorFilter(), getLayerAlpha(layer), layer->getMode(), Blend::ModeOrderSwap::NoSwap)
-                .setTransform(currentSnapshot()->getOrthoMatrix(), *currentTransform(), false)
-                .setModelViewOffsetRectSnap(0, 0, rect)
-                .setRoundRectClipState(currentSnapshot()->roundRectClipState)
-                .build();
-        DRAW_DOUBLE_STENCIL_IF(!layer->hasDrawnSinceUpdate, renderGlop(glop));
-        return;
-    }
-
-    const float alpha = getLayerAlpha(layer);
-
-    setupDraw();
-
-    // We must get (and therefore bind) the region mesh buffer
-    // after we setup drawing in case we need to mess with the
-    // stencil buffer in setupDraw()
-    TextureVertex* mesh = mCaches.getRegionMesh();
-    uint32_t numQuads = 0;
-
-    setupDrawWithTexture();
-    setupDrawColor(alpha, alpha, alpha, alpha);
-    setupDrawColorFilter(layer->getColorFilter());
-    setupDrawBlending(layer);
-    setupDrawProgram();
-    setupDrawDirtyRegionsDisabled();
-    setupDrawPureColorUniforms();
-    setupDrawColorFilterUniforms(layer->getColorFilter());
-    setupDrawTexture(layer->getTextureId());
-    if (currentTransform()->isPureTranslate()) {
-        const float x = floorf(rect.left + currentTransform()->getTranslateX() + 0.5f);
-        const float y = floorf(rect.top + currentTransform()->getTranslateY() + 0.5f);
-
-        layer->setFilter(GL_NEAREST);
-        setupDrawModelView(kModelViewMode_Translate, false,
-                x, y, x + rect.getWidth(), y + rect.getHeight(), true);
-    } else {
-        layer->setFilter(GL_LINEAR);
-        setupDrawModelView(kModelViewMode_Translate, false,
-                rect.left, rect.top, rect.right, rect.bottom);
-    }
-    setupDrawMeshIndices(&mesh[0].x, &mesh[0].u);
-
+    TextureVertex quadVertices[count * 4];
+    TextureVertex* mesh = &quadVertices[0];
     for (size_t i = 0; i < count; i++) {
         const android::Rect* r = &rects[i];
 
@@ -1155,21 +1008,16 @@ void OpenGLRenderer::composeLayerRegion(Layer* layer, const Rect& rect) {
         TextureVertex::set(mesh++, r->right, r->top, u2, v1);
         TextureVertex::set(mesh++, r->left, r->bottom, u1, v2);
         TextureVertex::set(mesh++, r->right, r->bottom, u2, v2);
-
-        numQuads++;
-
-        if (numQuads >= kMaxNumberOfQuads) {
-            DRAW_DOUBLE_STENCIL(glDrawElements(GL_TRIANGLES, numQuads * 6,
-                    GL_UNSIGNED_SHORT, nullptr));
-            numQuads = 0;
-            mesh = mCaches.getRegionMesh();
-        }
     }
-
-    if (numQuads > 0) {
-        DRAW_DOUBLE_STENCIL(glDrawElements(GL_TRIANGLES, numQuads * 6,
-                GL_UNSIGNED_SHORT, nullptr));
-    }
+    Glop glop;
+    GlopBuilder(mRenderState, mCaches, &glop)
+            .setMeshTexturedIndexedQuads(&quadVertices[0], count * 6)
+            .setFillLayer(layer->getTexture(), layer->getColorFilter(), getLayerAlpha(layer), layer->getMode(), Blend::ModeOrderSwap::NoSwap)
+            .setTransform(currentSnapshot()->getOrthoMatrix(), *currentTransform(), false)
+            .setModelViewOffsetRectSnap(0, 0, rect)
+            .setRoundRectClipState(currentSnapshot()->roundRectClipState)
+            .build();
+    DRAW_DOUBLE_STENCIL_IF(!layer->hasDrawnSinceUpdate, renderGlop(glop));
 
 #if DEBUG_LAYERS_AS_REGIONS
     drawRegionRectsDebug(layer->region);
@@ -1248,21 +1096,6 @@ void OpenGLRenderer::dirtyLayerUnchecked(Rect& bounds, Region* region) {
     }
 }
 
-void OpenGLRenderer::issueIndexedQuadDraw(Vertex* mesh, GLsizei quadsCount) {
-    GLsizei elementsCount = quadsCount * 6;
-    while (elementsCount > 0) {
-        GLsizei drawCount = MathUtils::min(elementsCount, (GLsizei) kMaxNumberOfQuads * 6);
-
-        setupDrawIndexedVertices(&mesh[0].x);
-        glDrawElements(GL_TRIANGLES, drawCount, GL_UNSIGNED_SHORT, nullptr);
-
-        elementsCount -= drawCount;
-        // Though there are 4 vertices in a quad, we use 6 indices per
-        // quad to draw with GL_TRIANGLES
-        mesh += (drawCount / 6) * 4;
-    }
-}
-
 void OpenGLRenderer::clearLayerRegions() {
     const size_t quadCount = mLayers.size();
     if (quadCount == 0) return;
@@ -1290,34 +1123,19 @@ void OpenGLRenderer::clearLayerRegions() {
             Vertex::set(vertex++, bounds.right, bounds.bottom);
         }
         // We must clear the list of dirty rects before we
-        // call setupDraw() to prevent stencil setup to do
-        // the same thing again
+        // call clearLayerRegions() in renderGlop to prevent
+        // stencil setup from doing the same thing again
         mLayers.clear();
 
-        if (USE_GLOPS) {
-            Glop glop;
-            GlopBuilder(mRenderState, mCaches, &glop)
-                    .setMeshIndexedQuads(&mesh[0], quadCount)
-                    .setFillClear()
-                    .setTransform(currentSnapshot()->getOrthoMatrix(), Matrix4::identity(), false)
-                    .setModelViewOffsetRect(0, 0, Rect(currentSnapshot()->getClipRect()))
-                    .setRoundRectClipState(currentSnapshot()->roundRectClipState)
-                    .build();
-            renderGlop(glop, false);
-        } else {
-            SkPaint clearPaint;
-            clearPaint.setXfermodeMode(SkXfermode::kClear_Mode);
-
-            setupDraw(false);
-            setupDrawColor(0.0f, 0.0f, 0.0f, 1.0f);
-            setupDrawBlending(&clearPaint, true);
-            setupDrawProgram();
-            setupDrawPureColorUniforms();
-            setupDrawModelView(kModelViewMode_Translate, false,
-                    0.0f, 0.0f, 0.0f, 0.0f, true);
-
-            issueIndexedQuadDraw(&mesh[0], quadCount);
-        }
+        Glop glop;
+        GlopBuilder(mRenderState, mCaches, &glop)
+                .setMeshIndexedQuads(&mesh[0], quadCount)
+                .setFillClear()
+                .setTransform(currentSnapshot()->getOrthoMatrix(), Matrix4::identity(), false)
+                .setModelViewOffsetRect(0, 0, Rect(currentSnapshot()->getClipRect()))
+                .setRoundRectClipState(currentSnapshot()->roundRectClipState)
+                .build();
+        renderGlop(glop, false);
 
         if (scissorChanged) mRenderState.scissor().setEnabled(true);
     } else {
@@ -1498,35 +1316,16 @@ void OpenGLRenderer::drawRectangleList(const RectangleList& rectangleList) {
     mRenderState.scissor().set(scissorBox.left, getViewportHeight() - scissorBox.bottom,
             scissorBox.getWidth(), scissorBox.getHeight());
 
-    if (USE_GLOPS) {
-        Glop glop;
-        GlopBuilder(mRenderState, mCaches, &glop)
-                .setMeshIndexedQuads(&rectangleVertices[0], rectangleVertices.size() / 4)
-                .setFillBlack()
-                .setTransform(currentSnapshot()->getOrthoMatrix(), Matrix4::identity(), false)
-                .setModelViewOffsetRect(0, 0, scissorBox)
-                .setRoundRectClipState(currentSnapshot()->roundRectClipState)
-                .build();
-        renderGlop(glop);
-        return;
-    }
-
-    const SkPaint* paint = nullptr;
-    setupDraw();
-    setupDrawNoTexture();
-    setupDrawColor(0, 0xff * currentSnapshot()->alpha);
-    setupDrawShader(getShader(paint));
-    setupDrawColorFilter(getColorFilter(paint));
-    setupDrawBlending(paint);
-    setupDrawProgram();
-    setupDrawDirtyRegionsDisabled();
-    setupDrawModelView(kModelViewMode_Translate, false,
-            0.0f, 0.0f, 0.0f, 0.0f, true);
-    setupDrawColorUniforms(getShader(paint));
-    setupDrawShaderUniforms(getShader(paint));
-    setupDrawColorFilterUniforms(getColorFilter(paint));
-
-    issueIndexedQuadDraw(&rectangleVertices[0], rectangleVertices.size() / 4);
+    Glop glop;
+    Vertex* vertices = &rectangleVertices[0];
+    GlopBuilder(mRenderState, mCaches, &glop)
+            .setMeshIndexedQuads(vertices, rectangleVertices.size() / 4)
+            .setFillBlack()
+            .setTransform(currentSnapshot()->getOrthoMatrix(), Matrix4::identity(), false)
+            .setModelViewOffsetRect(0, 0, scissorBox)
+            .setRoundRectClipState(currentSnapshot()->roundRectClipState)
+            .build();
+    renderGlop(glop);
 }
 
 void OpenGLRenderer::setStencilFromClip() {
@@ -1666,355 +1465,6 @@ void OpenGLRenderer::renderGlop(const Glop& glop, bool clearLayer) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-// Drawing commands
-///////////////////////////////////////////////////////////////////////////////
-
-void OpenGLRenderer::setupDraw(bool clearLayer) {
-    // TODO: It would be best if we could do this before quickRejectSetupScissor()
-    //       changes the scissor test state
-    if (clearLayer) clearLayerRegions();
-    // Make sure setScissor & setStencil happen at the beginning of
-    // this method
-    if (mState.getDirtyClip()) {
-        if (mRenderState.scissor().isEnabled()) {
-            setScissorFromClip();
-        }
-
-        setStencilFromClip();
-    }
-
-    mDescription.reset();
-
-    mSetShaderColor = false;
-    mColorSet = false;
-    mColor.a = mColor.r = mColor.g = mColor.b = 0.0f;
-    mTextureUnit = 0;
-    mTrackDirtyRegions = true;
-
-    // Enable debug highlight when what we're about to draw is tested against
-    // the stencil buffer and if stencil highlight debugging is on
-    mDescription.hasDebugHighlight = !mCaches.debugOverdraw
-            && mCaches.debugStencilClip == Caches::kStencilShowHighlight
-            && mRenderState.stencil().isTestEnabled();
-}
-
-void OpenGLRenderer::setupDrawWithTexture(bool isAlpha8) {
-    mDescription.hasTexture = true;
-    mDescription.hasAlpha8Texture = isAlpha8;
-}
-
-void OpenGLRenderer::setupDrawWithTextureAndColor(bool isAlpha8) {
-    mDescription.hasTexture = true;
-    mDescription.hasColors = true;
-    mDescription.hasAlpha8Texture = isAlpha8;
-}
-
-void OpenGLRenderer::setupDrawWithExternalTexture() {
-    mDescription.hasExternalTexture = true;
-}
-
-void OpenGLRenderer::setupDrawNoTexture() {
-    mRenderState.meshState().disableTexCoordsVertexArray();
-}
-
-void OpenGLRenderer::setupDrawVertexAlpha(bool useShadowAlphaInterp) {
-    mDescription.hasVertexAlpha = true;
-    mDescription.useShadowAlphaInterp = useShadowAlphaInterp;
-}
-
-void OpenGLRenderer::setupDrawColor(int color, int alpha) {
-    mColor.a = alpha / 255.0f;
-    mColor.r = mColor.a * ((color >> 16) & 0xFF) / 255.0f;
-    mColor.g = mColor.a * ((color >>  8) & 0xFF) / 255.0f;
-    mColor.b = mColor.a * ((color      ) & 0xFF) / 255.0f;
-    mColorSet = true;
-    mSetShaderColor = mDescription.setColorModulate(mColor.a);
-}
-
-void OpenGLRenderer::setupDrawAlpha8Color(int color, int alpha) {
-    mColor.a = alpha / 255.0f;
-    mColor.r = mColor.a * ((color >> 16) & 0xFF) / 255.0f;
-    mColor.g = mColor.a * ((color >>  8) & 0xFF) / 255.0f;
-    mColor.b = mColor.a * ((color      ) & 0xFF) / 255.0f;
-    mColorSet = true;
-    mSetShaderColor = mDescription.setAlpha8ColorModulate(mColor.r, mColor.g, mColor.b, mColor.a);
-}
-
-void OpenGLRenderer::setupDrawTextGamma(const SkPaint* paint) {
-    mCaches.fontRenderer->describe(mDescription, paint);
-}
-
-void OpenGLRenderer::setupDrawColor(float r, float g, float b, float a) {
-    mColor.a = a;
-    mColor.r = r;
-    mColor.g = g;
-    mColor.b = b;
-    mColorSet = true;
-    mSetShaderColor = mDescription.setColorModulate(a);
-}
-
-void OpenGLRenderer::setupDrawShader(const SkShader* shader) {
-    if (shader != nullptr) {
-        SkiaShader::describe(&mCaches, mDescription, mCaches.extensions(), *shader);
-    }
-}
-
-void OpenGLRenderer::setupDrawColorFilter(const SkColorFilter* filter) {
-    if (filter == nullptr) {
-        return;
-    }
-
-    SkXfermode::Mode mode;
-    if (filter->asColorMode(nullptr, &mode)) {
-        mDescription.colorOp = ProgramDescription::kColorBlend;
-        mDescription.colorMode = mode;
-    } else if (filter->asColorMatrix(nullptr)) {
-        mDescription.colorOp = ProgramDescription::kColorMatrix;
-    }
-}
-
-void OpenGLRenderer::accountForClear(SkXfermode::Mode mode) {
-    if (mColorSet && mode == SkXfermode::kClear_Mode) {
-        mColor.a = 1.0f;
-        mColor.r = mColor.g = mColor.b = 0.0f;
-        mSetShaderColor = mDescription.modulate = true;
-    }
-}
-
-void OpenGLRenderer::setupDrawBlending(const Layer* layer, bool swapSrcDst) {
-    SkXfermode::Mode mode = layer->getMode();
-    // When the blending mode is kClear_Mode, we need to use a modulate color
-    // argb=1,0,0,0
-    accountForClear(mode);
-    // TODO: check shader blending, once we have shader drawing support for layers.
-    bool blend = layer->isBlend()
-            || getLayerAlpha(layer) < 1.0f
-            || (mColorSet && mColor.a < 1.0f)
-            || PaintUtils::isBlendedColorFilter(layer->getColorFilter());
-    chooseBlending(blend, mode, mDescription, swapSrcDst);
-}
-
-void OpenGLRenderer::setupDrawBlending(const SkPaint* paint, bool blend, bool swapSrcDst) {
-    SkXfermode::Mode mode = getXfermodeDirect(paint);
-    // When the blending mode is kClear_Mode, we need to use a modulate color
-    // argb=1,0,0,0
-    accountForClear(mode);
-    blend |= (mColorSet && mColor.a < 1.0f)
-            || (getShader(paint) && !getShader(paint)->isOpaque())
-            || PaintUtils::isBlendedColorFilter(getColorFilter(paint));
-    chooseBlending(blend, mode, mDescription, swapSrcDst);
-}
-
-void OpenGLRenderer::setupDrawProgram() {
-    mCaches.setProgram(mDescription);
-    if (mDescription.hasRoundRectClip) {
-        // TODO: avoid doing this repeatedly, stashing state pointer in program
-        const RoundRectClipState* state = writableSnapshot()->roundRectClipState;
-        const Rect& innerRect = state->innerRect;
-        glUniform4f(mCaches.program().getUniform("roundRectInnerRectLTRB"),
-                innerRect.left, innerRect.top,
-                innerRect.right, innerRect.bottom);
-        glUniformMatrix4fv(mCaches.program().getUniform("roundRectInvTransform"),
-                1, GL_FALSE, &state->matrix.data[0]);
-
-        // add half pixel to round out integer rect space to cover pixel centers
-        float roundedOutRadius = state->radius + 0.5f;
-        glUniform1f(mCaches.program().getUniform("roundRectRadius"),
-                roundedOutRadius);
-    }
-}
-
-void OpenGLRenderer::setupDrawDirtyRegionsDisabled() {
-    mTrackDirtyRegions = false;
-}
-
-void OpenGLRenderer::setupDrawModelView(ModelViewMode mode, bool offset,
-        float left, float top, float right, float bottom, bool ignoreTransform) {
-    mModelViewMatrix.loadTranslate(left, top, 0.0f);
-    if (mode == kModelViewMode_TranslateAndScale) {
-        mModelViewMatrix.scale(right - left, bottom - top, 1.0f);
-    }
-
-    bool dirty = right - left > 0.0f && bottom - top > 0.0f;
-    const Matrix4& transformMatrix = ignoreTransform ? Matrix4::identity() : *currentTransform();
-
-    mCaches.program().set(currentSnapshot()->getOrthoMatrix(),
-            mModelViewMatrix, transformMatrix, offset);
-    if (dirty && mTrackDirtyRegions) {
-        if (!ignoreTransform) {
-            dirtyLayer(left, top, right, bottom, *currentTransform());
-        } else {
-            dirtyLayer(left, top, right, bottom);
-        }
-    }
-}
-
-void OpenGLRenderer::setupDrawColorUniforms(bool hasShader) {
-    if ((mColorSet && !hasShader) || (hasShader && mSetShaderColor)) {
-        mCaches.program().setColor(mColor);
-    }
-}
-
-void OpenGLRenderer::setupDrawPureColorUniforms() {
-    if (mSetShaderColor) {
-        mCaches.program().setColor(mColor);
-    }
-}
-
-void OpenGLRenderer::setupDrawShaderUniforms(const SkShader* shader, bool ignoreTransform) {
-    if (shader == nullptr) {
-        return;
-    }
-
-    if (ignoreTransform) {
-        // if ignoreTransform=true was passed to setupDrawModelView, undo currentTransform()
-        // because it was built into modelView / the geometry, and the description needs to
-        // compensate.
-        mat4 modelViewWithoutTransform;
-        modelViewWithoutTransform.loadInverse(*currentTransform());
-        modelViewWithoutTransform.multiply(mModelViewMatrix);
-        mModelViewMatrix.load(modelViewWithoutTransform);
-    }
-
-    SkiaShader::setupProgram(&mCaches, mModelViewMatrix, &mTextureUnit,
-            mCaches.extensions(), *shader);
-}
-
-void OpenGLRenderer::setupDrawColorFilterUniforms(const SkColorFilter* filter) {
-    if (nullptr == filter) {
-        return;
-    }
-
-    SkColor color;
-    SkXfermode::Mode mode;
-    if (filter->asColorMode(&color, &mode)) {
-        const int alpha = SkColorGetA(color);
-        const GLfloat a = alpha / 255.0f;
-        const GLfloat r = a * SkColorGetR(color) / 255.0f;
-        const GLfloat g = a * SkColorGetG(color) / 255.0f;
-        const GLfloat b = a * SkColorGetB(color) / 255.0f;
-        glUniform4f(mCaches.program().getUniform("colorBlend"), r, g, b, a);
-        return;
-    }
-
-    SkScalar srcColorMatrix[20];
-    if (filter->asColorMatrix(srcColorMatrix)) {
-
-        float colorMatrix[16];
-        memcpy(colorMatrix, srcColorMatrix, 4 * sizeof(float));
-        memcpy(&colorMatrix[4], &srcColorMatrix[5], 4 * sizeof(float));
-        memcpy(&colorMatrix[8], &srcColorMatrix[10], 4 * sizeof(float));
-        memcpy(&colorMatrix[12], &srcColorMatrix[15], 4 * sizeof(float));
-
-        // Skia uses the range [0..255] for the addition vector, but we need
-        // the [0..1] range to apply the vector in GLSL
-        float colorVector[4];
-        colorVector[0] = srcColorMatrix[4] / 255.0f;
-        colorVector[1] = srcColorMatrix[9] / 255.0f;
-        colorVector[2] = srcColorMatrix[14] / 255.0f;
-        colorVector[3] = srcColorMatrix[19] / 255.0f;
-
-        glUniformMatrix4fv(mCaches.program().getUniform("colorMatrix"), 1,
-                GL_FALSE, colorMatrix);
-        glUniform4fv(mCaches.program().getUniform("colorMatrixVector"), 1, colorVector);
-        return;
-    }
-
-    // it is an error if we ever get here
-}
-
-void OpenGLRenderer::setupDrawTextGammaUniforms() {
-    mCaches.fontRenderer->setupProgram(mDescription, mCaches.program());
-}
-
-void OpenGLRenderer::setupDrawSimpleMesh() {
-    bool force = mRenderState.meshState().bindMeshBuffer();
-    mRenderState.meshState().bindPositionVertexPointer(force, nullptr);
-    mRenderState.meshState().unbindIndicesBuffer();
-}
-
-void OpenGLRenderer::setupDrawTexture(GLuint texture) {
-    if (texture) mCaches.textureState().bindTexture(texture);
-    mTextureUnit++;
-    mRenderState.meshState().enableTexCoordsVertexArray();
-}
-
-void OpenGLRenderer::setupDrawExternalTexture(GLuint texture) {
-    mCaches.textureState().bindTexture(GL_TEXTURE_EXTERNAL_OES, texture);
-    mTextureUnit++;
-    mRenderState.meshState().enableTexCoordsVertexArray();
-}
-
-void OpenGLRenderer::setupDrawTextureTransform() {
-    mDescription.hasTextureTransform = true;
-}
-
-void OpenGLRenderer::setupDrawTextureTransformUniforms(mat4& transform) {
-    glUniformMatrix4fv(mCaches.program().getUniform("mainTextureTransform"), 1,
-            GL_FALSE, &transform.data[0]);
-}
-
-void OpenGLRenderer::setupDrawMesh(const GLvoid* vertices,
-        const GLvoid* texCoords, GLuint vbo) {
-    bool force = false;
-    if (!vertices || vbo) {
-        force = mRenderState.meshState().bindMeshBuffer(vbo);
-    } else {
-        force = mRenderState.meshState().unbindMeshBuffer();
-    }
-
-    mRenderState.meshState().bindPositionVertexPointer(force, vertices);
-    if (mCaches.program().texCoords >= 0) {
-        mRenderState.meshState().bindTexCoordsVertexPointer(force, texCoords);
-    }
-
-    mRenderState.meshState().unbindIndicesBuffer();
-}
-
-void OpenGLRenderer::setupDrawMesh(const GLvoid* vertices,
-        const GLvoid* texCoords, const GLvoid* colors) {
-    bool force = mRenderState.meshState().unbindMeshBuffer();
-    GLsizei stride = sizeof(ColorTextureVertex);
-
-    mRenderState.meshState().bindPositionVertexPointer(force, vertices, stride);
-    if (mCaches.program().texCoords >= 0) {
-        mRenderState.meshState().bindTexCoordsVertexPointer(force, texCoords, stride);
-    }
-    int slot = mCaches.program().getAttrib("colors");
-    if (slot >= 0) {
-        glEnableVertexAttribArray(slot);
-        glVertexAttribPointer(slot, 4, GL_FLOAT, GL_FALSE, stride, colors);
-    }
-
-    mRenderState.meshState().unbindIndicesBuffer();
-}
-
-void OpenGLRenderer::setupDrawMeshIndices(const GLvoid* vertices,
-        const GLvoid* texCoords, GLuint vbo) {
-    bool force = false;
-    // If vbo is != 0 we want to treat the vertices parameter as an offset inside
-    // a VBO. However, if vertices is set to NULL and vbo == 0 then we want to
-    // use the default VBO found in RenderState
-    if (!vertices || vbo) {
-        force = mRenderState.meshState().bindMeshBuffer(vbo);
-    } else {
-        force = mRenderState.meshState().unbindMeshBuffer();
-    }
-    mRenderState.meshState().bindQuadIndicesBuffer();
-
-    mRenderState.meshState().bindPositionVertexPointer(force, vertices);
-    if (mCaches.program().texCoords >= 0) {
-        mRenderState.meshState().bindTexCoordsVertexPointer(force, texCoords);
-    }
-}
-
-void OpenGLRenderer::setupDrawIndexedVertices(GLvoid* vertices) {
-    bool force = mRenderState.meshState().unbindMeshBuffer();
-    mRenderState.meshState().bindQuadIndicesBuffer();
-    mRenderState.meshState().bindPositionVertexPointer(force, vertices, kVertexStride);
-}
-
-///////////////////////////////////////////////////////////////////////////////
 // Drawing
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -2049,30 +1499,6 @@ void OpenGLRenderer::drawRenderNode(RenderNode* renderNode, Rect& dirty, int32_t
     }
 }
 
-void OpenGLRenderer::drawAlphaBitmap(Texture* texture, const SkPaint* paint) {
-    float x = 0;
-    float y = 0;
-
-    texture->setWrap(GL_CLAMP_TO_EDGE, true);
-
-    bool ignoreTransform = false;
-    if (currentTransform()->isPureTranslate()) {
-        x = floorf(currentTransform()->getTranslateX() + 0.5f);
-        y = floorf(currentTransform()->getTranslateY() + 0.5f);
-        ignoreTransform = true;
-
-        texture->setFilter(GL_NEAREST, true);
-    } else {
-        texture->setFilter(PaintUtils::getFilter(paint), true);
-    }
-
-    // No need to check for a UV mapper on the texture object, only ARGB_8888
-    // bitmaps get packed in the atlas
-    drawAlpha8TextureMesh(x, y, x + texture->width, y + texture->height, texture->id,
-            paint, (GLvoid*) nullptr, (GLvoid*) kMeshTextureOffset,
-            GL_TRIANGLE_STRIP, kUnitQuadCount, ignoreTransform);
-}
-
 /**
  * Important note: this method is intended to draw batches of bitmaps and
  * will not set the scissor enable or dirty the current layer, if any.
@@ -2086,45 +1512,22 @@ void OpenGLRenderer::drawBitmaps(const SkBitmap* bitmap, AssetAtlas::Entry* entr
 
     const AutoTexture autoCleanup(texture);
 
-    if (USE_GLOPS) {
-        // TODO: remove layer dirty in multi-draw callers
-        // TODO: snap doesn't need to touch transform, only texture filter.
-        bool snap = pureTranslate;
-        const float x = floorf(bounds.left + 0.5f);
-        const float y = floorf(bounds.top + 0.5f);
-        int textureFillFlags = static_cast<int>((bitmap->colorType() == kAlpha_8_SkColorType)
-                ? TextureFillFlags::kIsAlphaMaskTexture : TextureFillFlags::kNone);
-        Glop glop;
-        GlopBuilder(mRenderState, mCaches, &glop)
-                .setMeshTexturedMesh(vertices, bitmapCount * 6)
-                .setFillTexturePaint(*texture, textureFillFlags, paint, currentSnapshot()->alpha)
-                .setTransform(currentSnapshot()->getOrthoMatrix(), Matrix4::identity(), false)
-                .setModelViewOffsetRectOptionalSnap(snap, x, y, Rect(0, 0, bounds.getWidth(), bounds.getHeight()))
-                .setRoundRectClipState(currentSnapshot()->roundRectClipState)
-                .build();
-        renderGlop(glop);
-        return;
-    }
-
-    mCaches.textureState().activateTexture(0);
-    texture->setWrap(GL_CLAMP_TO_EDGE, true);
-    texture->setFilter(pureTranslate ? GL_NEAREST : PaintUtils::getFilter(paint), true);
-
+    // TODO: remove layer dirty in multi-draw callers
+    // TODO: snap doesn't need to touch transform, only texture filter.
+    bool snap = pureTranslate;
     const float x = floorf(bounds.left + 0.5f);
     const float y = floorf(bounds.top + 0.5f);
-    if (CC_UNLIKELY(bitmap->colorType() == kAlpha_8_SkColorType)) {
-        drawAlpha8TextureMesh(x, y, x + bounds.getWidth(), y + bounds.getHeight(),
-                texture->id, paint, &vertices[0].x, &vertices[0].u,
-                GL_TRIANGLES, bitmapCount * 6, true,
-                kModelViewMode_Translate, false);
-    } else {
-        drawTextureMesh(x, y, x + bounds.getWidth(), y + bounds.getHeight(),
-                texture->id, paint, texture->blend, &vertices[0].x, &vertices[0].u,
-                GL_TRIANGLES, bitmapCount * 6, false, true, 0,
-                kModelViewMode_Translate, false);
-    }
-
-    mDirty = true;
+    int textureFillFlags = static_cast<int>((bitmap->colorType() == kAlpha_8_SkColorType)
+            ? TextureFillFlags::kIsAlphaMaskTexture : TextureFillFlags::kNone);
+    Glop glop;
+    GlopBuilder(mRenderState, mCaches, &glop)
+            .setMeshTexturedMesh(vertices, bitmapCount * 6)
+            .setFillTexturePaint(*texture, textureFillFlags, paint, currentSnapshot()->alpha)
+            .setTransform(currentSnapshot()->getOrthoMatrix(), Matrix4::identity(), false)
+            .setModelViewOffsetRectOptionalSnap(snap, x, y, Rect(0, 0, bounds.getWidth(), bounds.getHeight()))
+            .setRoundRectClipState(currentSnapshot()->roundRectClipState)
+            .build();
+    renderGlop(glop);
 }
 
 void OpenGLRenderer::drawBitmap(const SkBitmap* bitmap, const SkPaint* paint) {
@@ -2137,28 +1540,17 @@ void OpenGLRenderer::drawBitmap(const SkBitmap* bitmap, const SkPaint* paint) {
     if (!texture) return;
     const AutoTexture autoCleanup(texture);
 
-    if (USE_GLOPS) {
-        int textureFillFlags = static_cast<int>((bitmap->colorType() == kAlpha_8_SkColorType)
-                ? TextureFillFlags::kIsAlphaMaskTexture : TextureFillFlags::kNone);
-        Glop glop;
-        GlopBuilder(mRenderState, mCaches, &glop)
-                .setMeshTexturedUnitQuad(texture->uvMapper)
-                .setFillTexturePaint(*texture, textureFillFlags, paint, currentSnapshot()->alpha)
-                .setTransform(currentSnapshot()->getOrthoMatrix(), *currentTransform(), false)
-                .setModelViewMapUnitToRectSnap(Rect(0, 0, texture->width, texture->height))
-                .setRoundRectClipState(currentSnapshot()->roundRectClipState)
-                .build();
-        renderGlop(glop);
-        return;
-    }
-
-    if (CC_UNLIKELY(bitmap->colorType() == kAlpha_8_SkColorType)) {
-        drawAlphaBitmap(texture, paint);
-    } else {
-        drawTextureRect(texture, paint);
-    }
-
-    mDirty = true;
+    int textureFillFlags = static_cast<int>((bitmap->colorType() == kAlpha_8_SkColorType)
+            ? TextureFillFlags::kIsAlphaMaskTexture : TextureFillFlags::kNone);
+    Glop glop;
+    GlopBuilder(mRenderState, mCaches, &glop)
+            .setMeshTexturedUnitQuad(texture->uvMapper)
+            .setFillTexturePaint(*texture, textureFillFlags, paint, currentSnapshot()->alpha)
+            .setTransform(currentSnapshot()->getOrthoMatrix(), *currentTransform(), false)
+            .setModelViewMapUnitToRectSnap(Rect(0, 0, texture->width, texture->height))
+            .setRoundRectClipState(currentSnapshot()->roundRectClipState)
+            .build();
+    renderGlop(glop);
 }
 
 void OpenGLRenderer::drawBitmapMesh(const SkBitmap* bitmap, int meshWidth, int meshHeight,
@@ -2235,56 +1627,19 @@ void OpenGLRenderer::drawBitmapMesh(const SkBitmap* bitmap, int meshWidth, int m
     }
     const AutoTexture autoCleanup(texture);
 
-    if (USE_GLOPS) {
-        /*
-         * TODO: handle alpha_8 textures correctly by applying paint color, but *not*
-         * shader in that case to mimic the behavior in SkiaCanvas::drawBitmapMesh.
-         */
-        Glop glop;
-        GlopBuilder(mRenderState, mCaches, &glop)
-                .setMeshColoredTexturedMesh(mesh.get(), elementCount)
-                .setFillTexturePaint(*texture, static_cast<int>(TextureFillFlags::kNone), paint, currentSnapshot()->alpha)
-                .setTransform(currentSnapshot()->getOrthoMatrix(), *currentTransform(), false)
-                .setModelViewOffsetRect(0, 0, Rect(left, top, right, bottom))
-                .setRoundRectClipState(currentSnapshot()->roundRectClipState)
-                .build();
-        renderGlop(glop);
-        return;
-    }
-
-    mCaches.textureState().activateTexture(0);
-    texture->setWrap(GL_CLAMP_TO_EDGE, true);
-    texture->setFilter(PaintUtils::getFilter(paint), true);
-
-    int alpha;
-    SkXfermode::Mode mode;
-    getAlphaAndMode(paint, &alpha, &mode);
-
-
-    dirtyLayer(left, top, right, bottom, *currentTransform());
-
-    float a = alpha / 255.0f;
-    setupDraw();
-    setupDrawWithTextureAndColor();
-    setupDrawColor(a, a, a, a);
-    setupDrawColorFilter(getColorFilter(paint));
-    setupDrawBlending(paint, true);
-    setupDrawProgram();
-    setupDrawDirtyRegionsDisabled();
-    setupDrawModelView(kModelViewMode_Translate, false, 0, 0, 0, 0);
-    setupDrawTexture(texture->id);
-    setupDrawPureColorUniforms();
-    setupDrawColorFilterUniforms(getColorFilter(paint));
-    setupDrawMesh(&mesh[0].x, &mesh[0].u, &mesh[0].r);
-
-    glDrawArrays(GL_TRIANGLES, 0, elementCount);
-
-    int slot = mCaches.program().getAttrib("colors");
-    if (slot >= 0) {
-        glDisableVertexAttribArray(slot);
-    }
-
-    mDirty = true;
+    /*
+     * TODO: handle alpha_8 textures correctly by applying paint color, but *not*
+     * shader in that case to mimic the behavior in SkiaCanvas::drawBitmapMesh.
+     */
+    Glop glop;
+    GlopBuilder(mRenderState, mCaches, &glop)
+            .setMeshColoredTexturedMesh(mesh.get(), elementCount)
+            .setFillTexturePaint(*texture, static_cast<int>(TextureFillFlags::kNone), paint, currentSnapshot()->alpha)
+            .setTransform(currentSnapshot()->getOrthoMatrix(), *currentTransform(), false)
+            .setModelViewOffsetRect(0, 0, Rect(left, top, right, bottom))
+            .setRoundRectClipState(currentSnapshot()->roundRectClipState)
+            .build();
+    renderGlop(glop);
 }
 
 void OpenGLRenderer::drawBitmap(const SkBitmap* bitmap, Rect src, Rect dst, const SkPaint* paint) {
@@ -2296,80 +1651,22 @@ void OpenGLRenderer::drawBitmap(const SkBitmap* bitmap, Rect src, Rect dst, cons
     if (!texture) return;
     const AutoTexture autoCleanup(texture);
 
-    if (USE_GLOPS) {
-        Rect uv(fmax(0.0f, src.left / texture->width),
-                fmax(0.0f, src.top / texture->height),
-                fmin(1.0f, src.right / texture->width),
-                fmin(1.0f, src.bottom / texture->height));
+    Rect uv(fmax(0.0f, src.left / texture->width),
+            fmax(0.0f, src.top / texture->height),
+            fmin(1.0f, src.right / texture->width),
+            fmin(1.0f, src.bottom / texture->height));
 
-        int textureFillFlags = static_cast<int>((bitmap->colorType() == kAlpha_8_SkColorType)
-                ? TextureFillFlags::kIsAlphaMaskTexture : TextureFillFlags::kNone);
-        Glop glop;
-        GlopBuilder(mRenderState, mCaches, &glop)
-                .setMeshTexturedUvQuad(texture->uvMapper, uv)
-                .setFillTexturePaint(*texture, textureFillFlags, paint, currentSnapshot()->alpha)
-                .setTransform(currentSnapshot()->getOrthoMatrix(), *currentTransform(), false)
-                .setModelViewMapUnitToRectSnap(dst)
-                .setRoundRectClipState(currentSnapshot()->roundRectClipState)
-                .build();
-        renderGlop(glop);
-        return;
-    }
-
-    mCaches.textureState().activateTexture(0);
-
-    const float width = texture->width;
-    const float height = texture->height;
-
-    float u1 = fmax(0.0f, src.left / width);
-    float v1 = fmax(0.0f, src.top / height);
-    float u2 = fmin(1.0f, src.right / width);
-    float v2 = fmin(1.0f, src.bottom / height);
-
-    getMapper(texture).map(u1, v1, u2, v2);
-
-    mRenderState.meshState().unbindMeshBuffer();
-    resetDrawTextureTexCoords(u1, v1, u2, v2);
-
-    texture->setWrap(GL_CLAMP_TO_EDGE, true);
-
-    float scaleX = (dst.right - dst.left) / (src.right - src.left);
-    float scaleY = (dst.bottom - dst.top) / (src.bottom - src.top);
-
-    bool scaled = scaleX != 1.0f || scaleY != 1.0f;
-    bool ignoreTransform = false;
-
-    if (CC_LIKELY(currentTransform()->isPureTranslate())) {
-        float x = floorf(dst.left + currentTransform()->getTranslateX() + 0.5f);
-        float y = floorf(dst.top + currentTransform()->getTranslateY() + 0.5f);
-
-        dst.right = x + (dst.right - dst.left);
-        dst.bottom = y + (dst.bottom - dst.top);
-
-        dst.left = x;
-        dst.top = y;
-
-        texture->setFilter(scaled ? PaintUtils::getFilter(paint) : GL_NEAREST, true);
-        ignoreTransform = true;
-    } else {
-        texture->setFilter(PaintUtils::getFilter(paint), true);
-    }
-
-    if (CC_UNLIKELY(bitmap->colorType() == kAlpha_8_SkColorType)) {
-        drawAlpha8TextureMesh(dst.left, dst.top, dst.right, dst.bottom,
-                texture->id, paint,
-                &mMeshVertices[0].x, &mMeshVertices[0].u,
-                GL_TRIANGLE_STRIP, kUnitQuadCount, ignoreTransform);
-    } else {
-        drawTextureMesh(dst.left, dst.top, dst.right, dst.bottom,
-                texture->id, paint, texture->blend,
-                &mMeshVertices[0].x, &mMeshVertices[0].u,
-                GL_TRIANGLE_STRIP, kUnitQuadCount, false, ignoreTransform);
-    }
-
-    resetDrawTextureTexCoords(0.0f, 0.0f, 1.0f, 1.0f);
-
-    mDirty = true;
+    int textureFillFlags = static_cast<int>((bitmap->colorType() == kAlpha_8_SkColorType)
+            ? TextureFillFlags::kIsAlphaMaskTexture : TextureFillFlags::kNone);
+    Glop glop;
+    GlopBuilder(mRenderState, mCaches, &glop)
+            .setMeshTexturedUvQuad(texture->uvMapper, uv)
+            .setFillTexturePaint(*texture, textureFillFlags, paint, currentSnapshot()->alpha)
+            .setTransform(currentSnapshot()->getOrthoMatrix(), *currentTransform(), false)
+            .setModelViewMapUnitToRectSnap(dst)
+            .setRoundRectClipState(currentSnapshot()->roundRectClipState)
+            .build();
+    renderGlop(glop);
 }
 
 void OpenGLRenderer::drawPatch(const SkBitmap* bitmap, const Patch* mesh,
@@ -2382,66 +1679,20 @@ void OpenGLRenderer::drawPatch(const SkBitmap* bitmap, const Patch* mesh,
     Texture* texture = entry ? entry->texture : mCaches.textureCache.get(bitmap);
     if (!texture) return;
 
-    if (USE_GLOPS) {
-        // 9 patches are built for stretching - always filter
-        int textureFillFlags = static_cast<int>(TextureFillFlags::kForceFilter);
-        if (bitmap->colorType() == kAlpha_8_SkColorType) {
-            textureFillFlags |= TextureFillFlags::kIsAlphaMaskTexture;
-        }
-        Glop glop;
-        GlopBuilder(mRenderState, mCaches, &glop)
-                .setMeshPatchQuads(*mesh)
-                .setFillTexturePaint(*texture, textureFillFlags, paint, currentSnapshot()->alpha)
-                .setTransform(currentSnapshot()->getOrthoMatrix(), *currentTransform(), false)
-                .setModelViewOffsetRectSnap(left, top, Rect(0, 0, right - left, bottom - top)) // TODO: get minimal bounds from patch
-                .setRoundRectClipState(currentSnapshot()->roundRectClipState)
-                .build();
-        renderGlop(glop);
-        return;
+    // 9 patches are built for stretching - always filter
+    int textureFillFlags = static_cast<int>(TextureFillFlags::kForceFilter);
+    if (bitmap->colorType() == kAlpha_8_SkColorType) {
+        textureFillFlags |= TextureFillFlags::kIsAlphaMaskTexture;
     }
-
-    mCaches.textureState().activateTexture(0);
-    const AutoTexture autoCleanup(texture);
-
-    texture->setWrap(GL_CLAMP_TO_EDGE, true);
-    texture->setFilter(GL_LINEAR, true);
-
-    const bool pureTranslate = currentTransform()->isPureTranslate();
-    // Mark the current layer dirty where we are going to draw the patch
-    if (hasLayer() && mesh->hasEmptyQuads) {
-        const float offsetX = left + currentTransform()->getTranslateX();
-        const float offsetY = top + currentTransform()->getTranslateY();
-        const size_t count = mesh->quads.size();
-        for (size_t i = 0; i < count; i++) {
-            const Rect& bounds = mesh->quads.itemAt(i);
-            if (CC_LIKELY(pureTranslate)) {
-                const float x = floorf(bounds.left + offsetX + 0.5f);
-                const float y = floorf(bounds.top + offsetY + 0.5f);
-                dirtyLayer(x, y, x + bounds.getWidth(), y + bounds.getHeight());
-            } else {
-                dirtyLayer(left + bounds.left, top + bounds.top,
-                        left + bounds.right, top + bounds.bottom, *currentTransform());
-            }
-        }
-    }
-
-    bool ignoreTransform = false;
-    if (CC_LIKELY(pureTranslate)) {
-        const float x = floorf(left + currentTransform()->getTranslateX() + 0.5f);
-        const float y = floorf(top + currentTransform()->getTranslateY() + 0.5f);
-
-        right = x + right - left;
-        bottom = y + bottom - top;
-        left = x;
-        top = y;
-        ignoreTransform = true;
-    }
-    drawIndexedTextureMesh(left, top, right, bottom, texture->id, paint,
-            texture->blend, (GLvoid*) mesh->positionOffset, (GLvoid*) mesh->textureOffset,
-            GL_TRIANGLES, mesh->indexCount, false, ignoreTransform,
-            mCaches.patchCache.getMeshBuffer(), kModelViewMode_Translate, !mesh->hasEmptyQuads);
-
-    mDirty = true;
+    Glop glop;
+    GlopBuilder(mRenderState, mCaches, &glop)
+            .setMeshPatchQuads(*mesh)
+            .setFillTexturePaint(*texture, textureFillFlags, paint, currentSnapshot()->alpha)
+            .setTransform(currentSnapshot()->getOrthoMatrix(), *currentTransform(), false)
+            .setModelViewOffsetRectSnap(left, top, Rect(0, 0, right - left, bottom - top)) // TODO: get minimal bounds from patch
+            .setRoundRectClipState(currentSnapshot()->roundRectClipState)
+            .build();
+    renderGlop(glop);
 }
 
 /**
@@ -2456,33 +1707,21 @@ void OpenGLRenderer::drawPatches(const SkBitmap* bitmap, AssetAtlas::Entry* entr
     if (!texture) return;
     const AutoTexture autoCleanup(texture);
 
-    if (USE_GLOPS) {
-        // TODO: get correct bounds from caller
-        // 9 patches are built for stretching - always filter
-        int textureFillFlags = static_cast<int>(TextureFillFlags::kForceFilter);
-        if (bitmap->colorType() == kAlpha_8_SkColorType) {
-            textureFillFlags |= TextureFillFlags::kIsAlphaMaskTexture;
-        }
-        Glop glop;
-        GlopBuilder(mRenderState, mCaches, &glop)
-                .setMeshTexturedIndexedQuads(vertices, elementCount)
-                .setFillTexturePaint(*texture, textureFillFlags, paint, currentSnapshot()->alpha)
-                .setTransform(currentSnapshot()->getOrthoMatrix(), Matrix4::identity(), false)
-                .setModelViewOffsetRect(0, 0, Rect(0, 0, 0, 0))
-                .setRoundRectClipState(currentSnapshot()->roundRectClipState)
-                .build();
-        renderGlop(glop);
-        return;
+    // TODO: get correct bounds from caller
+    // 9 patches are built for stretching - always filter
+    int textureFillFlags = static_cast<int>(TextureFillFlags::kForceFilter);
+    if (bitmap->colorType() == kAlpha_8_SkColorType) {
+        textureFillFlags |= TextureFillFlags::kIsAlphaMaskTexture;
     }
-
-    texture->setWrap(GL_CLAMP_TO_EDGE, true);
-    texture->setFilter(GL_LINEAR, true);
-
-    drawIndexedTextureMesh(0.0f, 0.0f, 1.0f, 1.0f, texture->id, paint,
-            texture->blend, &vertices[0].x, &vertices[0].u,
-            GL_TRIANGLES, elementCount, false, true, 0, kModelViewMode_Translate, false);
-
-    mDirty = true;
+    Glop glop;
+    GlopBuilder(mRenderState, mCaches, &glop)
+            .setMeshTexturedIndexedQuads(vertices, elementCount)
+            .setFillTexturePaint(*texture, textureFillFlags, paint, currentSnapshot()->alpha)
+            .setTransform(currentSnapshot()->getOrthoMatrix(), Matrix4::identity(), false)
+            .setModelViewOffsetRect(0, 0, Rect(0, 0, 0, 0))
+            .setRoundRectClipState(currentSnapshot()->roundRectClipState)
+            .build();
+    renderGlop(glop);
 }
 
 void OpenGLRenderer::drawVertexBuffer(float translateX, float translateY,
@@ -2493,72 +1732,17 @@ void OpenGLRenderer::drawVertexBuffer(float translateX, float translateY,
         return;
     }
 
-    if (USE_GLOPS) {
-        bool fudgeOffset = displayFlags & kVertexBuffer_Offset;
-        bool shadowInterp = displayFlags & kVertexBuffer_ShadowInterp;
-        Glop glop;
-        GlopBuilder(mRenderState, mCaches, &glop)
-                .setMeshVertexBuffer(vertexBuffer, shadowInterp)
-                .setFillPaint(*paint, currentSnapshot()->alpha)
-                .setTransform(currentSnapshot()->getOrthoMatrix(), *currentTransform(), fudgeOffset)
-                .setModelViewOffsetRect(translateX, translateY, vertexBuffer.getBounds())
-                .setRoundRectClipState(currentSnapshot()->roundRectClipState)
-                .build();
-        renderGlop(glop);
-        return;
-    }
-
-    const VertexBuffer::MeshFeatureFlags meshFeatureFlags = vertexBuffer.getMeshFeatureFlags();
-    Rect bounds(vertexBuffer.getBounds());
-    bounds.translate(translateX, translateY);
-    dirtyLayer(bounds.left, bounds.top, bounds.right, bounds.bottom, *currentTransform());
-
-    int color = paint->getColor();
-    bool isAA = meshFeatureFlags & VertexBuffer::kAlpha;
-
-    setupDraw();
-    setupDrawNoTexture();
-    if (isAA) setupDrawVertexAlpha((displayFlags & kVertexBuffer_ShadowInterp));
-    setupDrawColor(color, ((color >> 24) & 0xFF) * currentSnapshot()->alpha);
-    setupDrawColorFilter(getColorFilter(paint));
-    setupDrawShader(getShader(paint));
-    setupDrawBlending(paint, isAA);
-    setupDrawProgram();
-    setupDrawModelView(kModelViewMode_Translate, (displayFlags & kVertexBuffer_Offset),
-            translateX, translateY, 0, 0);
-    setupDrawColorUniforms(getShader(paint));
-    setupDrawColorFilterUniforms(getColorFilter(paint));
-    setupDrawShaderUniforms(getShader(paint));
-
-    const void* vertices = vertexBuffer.getBuffer();
-    mRenderState.meshState().unbindMeshBuffer();
-    mRenderState.meshState().bindPositionVertexPointer(true, vertices,
-            isAA ? kAlphaVertexStride : kVertexStride);
-    mRenderState.meshState().resetTexCoordsVertexPointer();
-
-    int alphaSlot = -1;
-    if (isAA) {
-        void* alphaCoords = ((GLbyte*) vertices) + kVertexAlphaOffset;
-        alphaSlot = mCaches.program().getAttrib("vtxAlpha");
-        // TODO: avoid enable/disable in back to back uses of the alpha attribute
-        glEnableVertexAttribArray(alphaSlot);
-        glVertexAttribPointer(alphaSlot, 1, GL_FLOAT, GL_FALSE, kAlphaVertexStride, alphaCoords);
-    }
-
-    if (meshFeatureFlags & VertexBuffer::kIndices) {
-        mRenderState.meshState().unbindIndicesBuffer();
-        glDrawElements(GL_TRIANGLE_STRIP, vertexBuffer.getIndexCount(),
-                GL_UNSIGNED_SHORT, vertexBuffer.getIndices());
-    } else {
-        mRenderState.meshState().unbindIndicesBuffer();
-        glDrawArrays(GL_TRIANGLE_STRIP, 0, vertexBuffer.getVertexCount());
-    }
-
-    if (isAA) {
-        glDisableVertexAttribArray(alphaSlot);
-    }
-
-    mDirty = true;
+    bool fudgeOffset = displayFlags & kVertexBuffer_Offset;
+    bool shadowInterp = displayFlags & kVertexBuffer_ShadowInterp;
+    Glop glop;
+    GlopBuilder(mRenderState, mCaches, &glop)
+            .setMeshVertexBuffer(vertexBuffer, shadowInterp)
+            .setFillPaint(*paint, currentSnapshot()->alpha)
+            .setTransform(currentSnapshot()->getOrthoMatrix(), *currentTransform(), fudgeOffset)
+            .setModelViewOffsetRect(translateX, translateY, vertexBuffer.getBounds())
+            .setRoundRectClipState(currentSnapshot()->roundRectClipState)
+            .build();
+    renderGlop(glop);
 }
 
 /**
@@ -2813,40 +1997,15 @@ void OpenGLRenderer::drawTextShadow(const SkPaint* paint, const char* text,
     const float sx = x - texture->left + textShadow.dx;
     const float sy = y - texture->top + textShadow.dy;
 
-    if (USE_GLOPS) {
-        Glop glop;
-        GlopBuilder(mRenderState, mCaches, &glop)
-                .setMeshTexturedUnitQuad(nullptr)
-                .setFillShadowTexturePaint(*texture, textShadow.color, *paint, currentSnapshot()->alpha)
-                .setTransform(currentSnapshot()->getOrthoMatrix(), *currentTransform(), false)
-                .setModelViewMapUnitToRect(Rect(sx, sy, sx + texture->width, sy + texture->height))
-                .setRoundRectClipState(currentSnapshot()->roundRectClipState)
-                .build();
-        renderGlop(glop);
-        return;
-    }
-
-    const int shadowAlpha = ((textShadow.color >> 24) & 0xFF) * currentSnapshot()->alpha;
-    if (getShader(paint)) {
-        textShadow.color = SK_ColorWHITE;
-    }
-
-    setupDraw();
-    setupDrawWithTexture(true);
-    setupDrawAlpha8Color(textShadow.color, shadowAlpha < 255 ? shadowAlpha : alpha);
-    setupDrawColorFilter(getColorFilter(paint));
-    setupDrawShader(getShader(paint));
-    setupDrawBlending(paint, true);
-    setupDrawProgram();
-    setupDrawModelView(kModelViewMode_TranslateAndScale, false,
-            sx, sy, sx + texture->width, sy + texture->height);
-    setupDrawTexture(texture->id);
-    setupDrawPureColorUniforms();
-    setupDrawColorFilterUniforms(getColorFilter(paint));
-    setupDrawShaderUniforms(getShader(paint));
-    setupDrawMesh(nullptr, (GLvoid*) kMeshTextureOffset);
-
-    glDrawArrays(GL_TRIANGLE_STRIP, 0, kUnitQuadCount);
+    Glop glop;
+    GlopBuilder(mRenderState, mCaches, &glop)
+            .setMeshTexturedUnitQuad(nullptr)
+            .setFillShadowTexturePaint(*texture, textShadow.color, *paint, currentSnapshot()->alpha)
+            .setTransform(currentSnapshot()->getOrthoMatrix(), *currentTransform(), false)
+            .setModelViewMapUnitToRect(Rect(sx, sy, sx + texture->width, sy + texture->height))
+            .setRoundRectClipState(currentSnapshot()->roundRectClipState)
+            .build();
+    renderGlop(glop);
 }
 
 bool OpenGLRenderer::canSkipText(const SkPaint* paint) const {
@@ -2898,7 +2057,7 @@ void OpenGLRenderer::drawPosText(const char* text, int bytesCount, int count,
     const Rect& clip(pureTranslate ? writableSnapshot()->getClipRect() : writableSnapshot()->getLocalClip());
     Rect bounds(FLT_MAX / 2.0f, FLT_MAX / 2.0f, FLT_MIN / 2.0f, FLT_MIN / 2.0f);
 
-    TextSetupFunctor functor(this, x, y, pureTranslate, alpha, mode, paint);
+    TextDrawFunctor functor(this, x, y, pureTranslate, alpha, mode, paint);
     if (fontRenderer.renderPosText(paint, &clip, text, 0, bytesCount, count, x, y,
             positions, hasLayer() ? &bounds : nullptr, &functor)) {
         dirtyLayer(bounds.left, bounds.top, bounds.right, bounds.bottom, *currentTransform());
@@ -3050,7 +2209,7 @@ void OpenGLRenderer::drawText(const char* text, int bytesCount, int count, float
     Rect layerBounds(FLT_MAX / 2.0f, FLT_MAX / 2.0f, FLT_MIN / 2.0f, FLT_MIN / 2.0f);
 
     bool status;
-    TextSetupFunctor functor(this, x, y, pureTranslate, alpha, mode, paint);
+    TextDrawFunctor functor(this, x, y, pureTranslate, alpha, mode, paint);
 
     // don't call issuedrawcommand, do it at end of batch
     bool forceFinish = (drawOpMode != DrawOpMode::kDefer);
@@ -3092,7 +2251,7 @@ void OpenGLRenderer::drawTextOnPath(const char* text, int bytesCount, int count,
     int alpha;
     SkXfermode::Mode mode;
     getAlphaAndMode(paint, &alpha, &mode);
-    TextSetupFunctor functor(this, 0.0f, 0.0f, false, alpha, mode, paint);
+    TextDrawFunctor functor(this, 0.0f, 0.0f, false, alpha, mode, paint);
 
     const Rect* clip = &writableSnapshot()->getLocalClip();
     Rect bounds(FLT_MAX / 2.0f, FLT_MAX / 2.0f, FLT_MIN / 2.0f, FLT_MIN / 2.0f);
@@ -3159,56 +2318,15 @@ void OpenGLRenderer::drawLayer(Layer* layer, float x, float y) {
             DRAW_DOUBLE_STENCIL_IF(!layer->hasDrawnSinceUpdate,
                     composeLayerRect(layer, layer->regionRect));
         } else if (layer->mesh) {
-            if (USE_GLOPS) {
-                Glop glop;
-                GlopBuilder(mRenderState, mCaches, &glop)
-                        .setMeshTexturedIndexedQuads(layer->mesh, layer->meshElementCount)
-                        .setFillLayer(layer->getTexture(), layer->getColorFilter(), getLayerAlpha(layer), layer->getMode(), Blend::ModeOrderSwap::NoSwap)
-                        .setTransform(currentSnapshot()->getOrthoMatrix(), *currentTransform(), false)
-                        .setModelViewOffsetRectSnap(x, y, Rect(0, 0, layer->layer.getWidth(), layer->layer.getHeight()))
-                        .setRoundRectClipState(currentSnapshot()->roundRectClipState)
-                        .build();
-                DRAW_DOUBLE_STENCIL_IF(!layer->hasDrawnSinceUpdate, renderGlop(glop));
-            } else {
-                const float a = getLayerAlpha(layer);
-                setupDraw();
-                setupDrawWithTexture();
-                setupDrawColor(a, a, a, a);
-                setupDrawColorFilter(layer->getColorFilter());
-                setupDrawBlending(layer);
-                setupDrawProgram();
-                setupDrawPureColorUniforms();
-                setupDrawColorFilterUniforms(layer->getColorFilter());
-                setupDrawTexture(layer->getTextureId());
-                if (CC_LIKELY(currentTransform()->isPureTranslate())) {
-                    int tx = (int) floorf(x + currentTransform()->getTranslateX() + 0.5f);
-                    int ty = (int) floorf(y + currentTransform()->getTranslateY() + 0.5f);
-
-                    layer->setFilter(GL_NEAREST);
-                    setupDrawModelView(kModelViewMode_Translate, false, tx, ty,
-                            tx + layer->layer.getWidth(), ty + layer->layer.getHeight(), true);
-                } else {
-                    layer->setFilter(GL_LINEAR);
-                    setupDrawModelView(kModelViewMode_Translate, false, x, y,
-                            x + layer->layer.getWidth(), y + layer->layer.getHeight());
-                }
-
-                TextureVertex* mesh = &layer->mesh[0];
-                GLsizei elementsCount = layer->meshElementCount;
-
-                while (elementsCount > 0) {
-                    GLsizei drawCount = MathUtils::min(elementsCount, (GLsizei) kMaxNumberOfQuads * 6);
-
-                    setupDrawMeshIndices(&mesh[0].x, &mesh[0].u);
-                    DRAW_DOUBLE_STENCIL_IF(!layer->hasDrawnSinceUpdate,
-                            glDrawElements(GL_TRIANGLES, drawCount, GL_UNSIGNED_SHORT, nullptr));
-
-                    elementsCount -= drawCount;
-                    // Though there are 4 vertices in a quad, we use 6 indices per
-                    // quad to draw with GL_TRIANGLES
-                    mesh += (drawCount / 6) * 4;
-                }
-            }
+            Glop glop;
+            GlopBuilder(mRenderState, mCaches, &glop)
+                    .setMeshTexturedIndexedQuads(layer->mesh, layer->meshElementCount)
+                    .setFillLayer(layer->getTexture(), layer->getColorFilter(), getLayerAlpha(layer), layer->getMode(), Blend::ModeOrderSwap::NoSwap)
+                    .setTransform(currentSnapshot()->getOrthoMatrix(), *currentTransform(), false)
+                    .setModelViewOffsetRectSnap(x, y, Rect(0, 0, layer->layer.getWidth(), layer->layer.getHeight()))
+                    .setRoundRectClipState(currentSnapshot()->roundRectClipState)
+                    .build();
+            DRAW_DOUBLE_STENCIL_IF(!layer->hasDrawnSinceUpdate, renderGlop(glop));
 #if DEBUG_LAYERS_AS_REGIONS
             drawRegionRectsDebug(layer->region);
 #endif
@@ -3258,40 +2376,15 @@ void OpenGLRenderer::drawPathTexture(PathTexture* texture, float x, float y,
         return;
     }
 
-    if (USE_GLOPS) {
-        Glop glop;
-        GlopBuilder(mRenderState, mCaches, &glop)
-                .setMeshTexturedUnitQuad(nullptr)
-                .setFillPathTexturePaint(*texture, *paint, currentSnapshot()->alpha)
-                .setTransform(currentSnapshot()->getOrthoMatrix(), *currentTransform(), false)
-                .setModelViewMapUnitToRect(Rect(x, y, x + texture->width, y + texture->height))
-                .setRoundRectClipState(currentSnapshot()->roundRectClipState)
-                .build();
-        renderGlop(glop);
-        return;
-    }
-
-
-    int alpha;
-    SkXfermode::Mode mode;
-    getAlphaAndMode(paint, &alpha, &mode);
-
-    setupDraw();
-    setupDrawWithTexture(true);
-    setupDrawAlpha8Color(paint->getColor(), alpha);
-    setupDrawColorFilter(getColorFilter(paint));
-    setupDrawShader(getShader(paint));
-    setupDrawBlending(paint, true);
-    setupDrawProgram();
-    setupDrawModelView(kModelViewMode_TranslateAndScale, false,
-            x, y, x + texture->width, y + texture->height);
-    setupDrawTexture(texture->id);
-    setupDrawPureColorUniforms();
-    setupDrawColorFilterUniforms(getColorFilter(paint));
-    setupDrawShaderUniforms(getShader(paint));
-    setupDrawMesh(nullptr, (GLvoid*) kMeshTextureOffset);
-
-    glDrawArrays(GL_TRIANGLE_STRIP, 0, kUnitQuadCount);
+    Glop glop;
+    GlopBuilder(mRenderState, mCaches, &glop)
+            .setMeshTexturedUnitQuad(nullptr)
+            .setFillPathTexturePaint(*texture, *paint, currentSnapshot()->alpha)
+            .setTransform(currentSnapshot()->getOrthoMatrix(), *currentTransform(), false)
+            .setModelViewMapUnitToRect(Rect(x, y, x + texture->width, y + texture->height))
+            .setRoundRectClipState(currentSnapshot()->roundRectClipState)
+            .build();
+    renderGlop(glop);
 }
 
 // Same values used by Skia
@@ -3419,249 +2512,30 @@ void OpenGLRenderer::drawColorRects(const float* rects, int count, const SkPaint
         return;
     }
 
-    if (USE_GLOPS) {
-        const Matrix4& transform = ignoreTransform ? Matrix4::identity() : *currentTransform();
-        Glop glop;
-        GlopBuilder(mRenderState, mCaches, &glop)
-                .setMeshIndexedQuads(&mesh[0], count / 4)
-                .setFillPaint(*paint, currentSnapshot()->alpha)
-                .setTransform(currentSnapshot()->getOrthoMatrix(), transform, false)
-                .setModelViewOffsetRect(0, 0, Rect(left, top, right, bottom))
-                .setRoundRectClipState(currentSnapshot()->roundRectClipState)
-                .build();
-        renderGlop(glop);
-        return;
-    }
-
-    int color = paint->getColor();
-    // If a shader is set, preserve only the alpha
-    if (getShader(paint)) {
-        color |= 0x00ffffff;
-    }
-
-    setupDraw();
-    setupDrawNoTexture();
-    setupDrawColor(color, ((color >> 24) & 0xFF) * currentSnapshot()->alpha);
-    setupDrawShader(getShader(paint));
-    setupDrawColorFilter(getColorFilter(paint));
-    setupDrawBlending(paint);
-    setupDrawProgram();
-    setupDrawDirtyRegionsDisabled();
-    setupDrawModelView(kModelViewMode_Translate, false,
-            0.0f, 0.0f, 0.0f, 0.0f, ignoreTransform);
-    setupDrawColorUniforms(getShader(paint));
-    setupDrawShaderUniforms(getShader(paint));
-    setupDrawColorFilterUniforms(getColorFilter(paint));
-
-    if (dirty && hasLayer()) {
-        dirtyLayer(left, top, right, bottom, *currentTransform());
-    }
-
-    issueIndexedQuadDraw(&mesh[0], count / 4);
-
-    mDirty = true;
+    const Matrix4& transform = ignoreTransform ? Matrix4::identity() : *currentTransform();
+    Glop glop;
+    GlopBuilder(mRenderState, mCaches, &glop)
+            .setMeshIndexedQuads(&mesh[0], count / 4)
+            .setFillPaint(*paint, currentSnapshot()->alpha)
+            .setTransform(currentSnapshot()->getOrthoMatrix(), transform, false)
+            .setModelViewOffsetRect(0, 0, Rect(left, top, right, bottom))
+            .setRoundRectClipState(currentSnapshot()->roundRectClipState)
+            .build();
+    renderGlop(glop);
 }
 
 void OpenGLRenderer::drawColorRect(float left, float top, float right, float bottom,
         const SkPaint* paint, bool ignoreTransform) {
-
-    if (USE_GLOPS) {
-        const Matrix4& transform = ignoreTransform ? Matrix4::identity() : *currentTransform();
-        Glop glop;
-        GlopBuilder(mRenderState, mCaches, &glop)
-                .setMeshUnitQuad()
-                .setFillPaint(*paint, currentSnapshot()->alpha)
-                .setTransform(currentSnapshot()->getOrthoMatrix(), transform, false)
-                .setModelViewMapUnitToRect(Rect(left, top, right, bottom))
-                .setRoundRectClipState(currentSnapshot()->roundRectClipState)
-                .build();
-        renderGlop(glop);
-        return;
-    }
-
-    int color = paint->getColor();
-    // If a shader is set, preserve only the alpha
-    if (getShader(paint)) {
-        color |= 0x00ffffff;
-    }
-
-    setupDraw();
-    setupDrawNoTexture();
-    setupDrawColor(color, ((color >> 24) & 0xFF) * currentSnapshot()->alpha);
-    setupDrawShader(getShader(paint));
-    setupDrawColorFilter(getColorFilter(paint));
-    setupDrawBlending(paint);
-    setupDrawProgram();
-    setupDrawModelView(kModelViewMode_TranslateAndScale, false,
-            left, top, right, bottom, ignoreTransform);
-    setupDrawColorUniforms(getShader(paint));
-    setupDrawShaderUniforms(getShader(paint), ignoreTransform);
-    setupDrawColorFilterUniforms(getColorFilter(paint));
-    setupDrawSimpleMesh();
-
-    glDrawArrays(GL_TRIANGLE_STRIP, 0, kUnitQuadCount);
-}
-
-void OpenGLRenderer::drawTextureRect(Texture* texture, const SkPaint* paint) {
-    texture->setWrap(GL_CLAMP_TO_EDGE, true);
-
-    GLvoid* vertices = (GLvoid*) nullptr;
-    GLvoid* texCoords = (GLvoid*) kMeshTextureOffset;
-
-    if (texture->uvMapper) {
-        vertices = &mMeshVertices[0].x;
-        texCoords = &mMeshVertices[0].u;
-
-        Rect uvs(0.0f, 0.0f, 1.0f, 1.0f);
-        texture->uvMapper->map(uvs);
-
-        resetDrawTextureTexCoords(uvs.left, uvs.top, uvs.right, uvs.bottom);
-    }
-
-    if (CC_LIKELY(currentTransform()->isPureTranslate())) {
-        const float x = floorf(currentTransform()->getTranslateX() + 0.5f);
-        const float y = floorf(currentTransform()->getTranslateY() + 0.5f);
-
-        texture->setFilter(GL_NEAREST, true);
-        drawTextureMesh(x, y, x + texture->width, y + texture->height, texture->id,
-                paint, texture->blend, vertices, texCoords,
-                GL_TRIANGLE_STRIP, kUnitQuadCount, false, true);
-    } else {
-        texture->setFilter(PaintUtils::getFilter(paint), true);
-        drawTextureMesh(0, 0, texture->width, texture->height, texture->id, paint,
-                texture->blend, vertices, texCoords, GL_TRIANGLE_STRIP, kUnitQuadCount);
-    }
-
-    if (texture->uvMapper) {
-        resetDrawTextureTexCoords(0.0f, 0.0f, 1.0f, 1.0f);
-    }
-}
-
-void OpenGLRenderer::drawTextureMesh(float left, float top, float right, float bottom,
-        GLuint texture, const SkPaint* paint, bool blend,
-        GLvoid* vertices, GLvoid* texCoords, GLenum drawMode, GLsizei elementsCount,
-        bool swapSrcDst, bool ignoreTransform, GLuint vbo,
-        ModelViewMode modelViewMode, bool dirty) {
-
-    int a;
-    SkXfermode::Mode mode;
-    getAlphaAndMode(paint, &a, &mode);
-    const float alpha = a / 255.0f;
-
-    setupDraw();
-    setupDrawWithTexture();
-    setupDrawColor(alpha, alpha, alpha, alpha);
-    setupDrawColorFilter(getColorFilter(paint));
-    setupDrawBlending(paint, blend, swapSrcDst);
-    setupDrawProgram();
-    if (!dirty) setupDrawDirtyRegionsDisabled();
-    setupDrawModelView(modelViewMode, false, left, top, right, bottom, ignoreTransform);
-    setupDrawTexture(texture);
-    setupDrawPureColorUniforms();
-    setupDrawColorFilterUniforms(getColorFilter(paint));
-    setupDrawMesh(vertices, texCoords, vbo);
-
-    glDrawArrays(drawMode, 0, elementsCount);
-}
-
-void OpenGLRenderer::drawIndexedTextureMesh(float left, float top, float right, float bottom,
-        GLuint texture, const SkPaint* paint, bool blend,
-        GLvoid* vertices, GLvoid* texCoords, GLenum drawMode, GLsizei elementsCount,
-        bool swapSrcDst, bool ignoreTransform, GLuint vbo,
-        ModelViewMode modelViewMode, bool dirty) {
-
-    int a;
-    SkXfermode::Mode mode;
-    getAlphaAndMode(paint, &a, &mode);
-    const float alpha = a / 255.0f;
-
-    setupDraw();
-    setupDrawWithTexture();
-    setupDrawColor(alpha, alpha, alpha, alpha);
-    setupDrawColorFilter(getColorFilter(paint));
-    setupDrawBlending(paint, blend, swapSrcDst);
-    setupDrawProgram();
-    if (!dirty) setupDrawDirtyRegionsDisabled();
-    setupDrawModelView(modelViewMode, false, left, top, right, bottom, ignoreTransform);
-    setupDrawTexture(texture);
-    setupDrawPureColorUniforms();
-    setupDrawColorFilterUniforms(getColorFilter(paint));
-    setupDrawMeshIndices(vertices, texCoords, vbo);
-
-    glDrawElements(drawMode, elementsCount, GL_UNSIGNED_SHORT, nullptr);
-}
-
-void OpenGLRenderer::drawAlpha8TextureMesh(float left, float top, float right, float bottom,
-        GLuint texture, const SkPaint* paint,
-        GLvoid* vertices, GLvoid* texCoords, GLenum drawMode, GLsizei elementsCount,
-        bool ignoreTransform, ModelViewMode modelViewMode, bool dirty) {
-
-    int color = paint != nullptr ? paint->getColor() : 0;
-    int alpha;
-    SkXfermode::Mode mode;
-    getAlphaAndMode(paint, &alpha, &mode);
-
-    setupDraw();
-    setupDrawWithTexture(true);
-    if (paint != nullptr) {
-        setupDrawAlpha8Color(color, alpha);
-    }
-    setupDrawColorFilter(getColorFilter(paint));
-    setupDrawShader(getShader(paint));
-    setupDrawBlending(paint, true);
-    setupDrawProgram();
-    if (!dirty) setupDrawDirtyRegionsDisabled();
-    setupDrawModelView(modelViewMode, false, left, top, right, bottom, ignoreTransform);
-    setupDrawTexture(texture);
-    setupDrawPureColorUniforms();
-    setupDrawColorFilterUniforms(getColorFilter(paint));
-    setupDrawShaderUniforms(getShader(paint), ignoreTransform);
-    setupDrawMesh(vertices, texCoords);
-
-    glDrawArrays(drawMode, 0, elementsCount);
-}
-
-void OpenGLRenderer::chooseBlending(bool blend, SkXfermode::Mode mode,
-        ProgramDescription& description, bool swapSrcDst) {
-
-    if (currentSnapshot()->roundRectClipState != nullptr /*&& !mSkipOutlineClip*/) {
-        blend = true;
-        mDescription.hasRoundRectClip = true;
-    }
-    mSkipOutlineClip = true;
-
-    blend = blend || mode != SkXfermode::kSrcOver_Mode;
-
-    if (blend) {
-        // These blend modes are not supported by OpenGL directly and have
-        // to be implemented using shaders. Since the shader will perform
-        // the blending, turn blending off here
-        // If the blend mode cannot be implemented using shaders, fall
-        // back to the default SrcOver blend mode instead
-        if (CC_UNLIKELY(mode > SkXfermode::kScreen_Mode)) {
-            if (CC_UNLIKELY(mCaches.extensions().hasFramebufferFetch())) {
-                description.framebufferMode = mode;
-                description.swapSrcDst = swapSrcDst;
-
-                mRenderState.blend().disable();
-                return;
-            } else {
-                mode = SkXfermode::kSrcOver_Mode;
-            }
-        }
-        mRenderState.blend().enable(mode,
-                swapSrcDst ? Blend::ModeOrderSwap::Swap : Blend::ModeOrderSwap::NoSwap);
-    } else {
-        mRenderState.blend().disable();
-    }
-}
-
-void OpenGLRenderer::resetDrawTextureTexCoords(float u1, float v1, float u2, float v2) {
-    TextureVertex* v = &mMeshVertices[0];
-    TextureVertex::setUV(v++, u1, v1);
-    TextureVertex::setUV(v++, u2, v1);
-    TextureVertex::setUV(v++, u1, v2);
-    TextureVertex::setUV(v++, u2, v2);
+    const Matrix4& transform = ignoreTransform ? Matrix4::identity() : *currentTransform();
+    Glop glop;
+    GlopBuilder(mRenderState, mCaches, &glop)
+            .setMeshUnitQuad()
+            .setFillPaint(*paint, currentSnapshot()->alpha)
+            .setTransform(currentSnapshot()->getOrthoMatrix(), transform, false)
+            .setModelViewMapUnitToRect(Rect(left, top, right, bottom))
+            .setRoundRectClipState(currentSnapshot()->roundRectClipState)
+            .build();
+    renderGlop(glop);
 }
 
 void OpenGLRenderer::getAlphaAndMode(const SkPaint* paint, int* alpha,
