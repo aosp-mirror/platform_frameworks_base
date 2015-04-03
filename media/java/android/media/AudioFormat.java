@@ -38,6 +38,7 @@ public class AudioFormat {
     public static final int ENCODING_DEFAULT = 1;
 
     // These values must be kept in sync with core/jni/android_media_AudioFormat.h
+    // Also sync av/services/audiopolicy/managerdefault/ConfigParsingUtils.h
     /** Audio data format: PCM 16 bit per sample. Guaranteed to be supported by devices. */
     public static final int ENCODING_PCM_16BIT = 2;
     /** Audio data format: PCM 8 bit per sample. Not guaranteed to be supported by devices. */
@@ -48,6 +49,10 @@ public class AudioFormat {
     public static final int ENCODING_AC3 = 5;
     /** Audio data format: E-AC-3 compressed */
     public static final int ENCODING_E_AC3 = 6;
+    /** Audio data format: DTS compressed */
+    public static final int ENCODING_DTS = 7;
+    /** Audio data format: DTS HD compressed */
+    public static final int ENCODING_DTS_HD = 8;
 
     /** Invalid audio channel configuration */
     /** @deprecated use CHANNEL_INVALID instead  */
@@ -235,6 +240,8 @@ public class AudioFormat {
         case ENCODING_PCM_FLOAT:
         case ENCODING_AC3:
         case ENCODING_E_AC3:
+        case ENCODING_DTS:
+        case ENCODING_DTS_HD:
             return true;
         default:
             return false;
@@ -252,6 +259,8 @@ public class AudioFormat {
             return true;
         case ENCODING_AC3:
         case ENCODING_E_AC3:
+        case ENCODING_DTS:
+        case ENCODING_DTS_HD:
             return false;
         case ENCODING_INVALID:
         default:
@@ -400,6 +409,8 @@ public class AudioFormat {
          *     {@link AudioFormat#ENCODING_PCM_FLOAT},
          *     {@link AudioFormat#ENCODING_AC3},
          *     {@link AudioFormat#ENCODING_E_AC3}.
+         *     {@link AudioFormat#ENCODING_DTS},
+         *     {@link AudioFormat#ENCODING_DTS_HD}.
          * @return the same Builder instance.
          * @throws java.lang.IllegalArgumentException
          */
@@ -413,6 +424,8 @@ public class AudioFormat {
                 case ENCODING_PCM_FLOAT:
                 case ENCODING_AC3:
                 case ENCODING_E_AC3:
+                case ENCODING_DTS:
+                case ENCODING_DTS_HD:
                     mEncoding = encoding;
                     break;
                 case ENCODING_INVALID:
@@ -478,7 +491,9 @@ public class AudioFormat {
         ENCODING_PCM_16BIT,
         ENCODING_PCM_FLOAT,
         ENCODING_AC3,
-        ENCODING_E_AC3
+        ENCODING_E_AC3,
+        ENCODING_DTS,
+        ENCODING_DTS_HD
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface Encoding {}
