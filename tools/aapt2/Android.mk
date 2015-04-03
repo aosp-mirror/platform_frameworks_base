@@ -70,8 +70,8 @@ testSources := \
 	XmlFlattener_test.cpp
 
 cIncludes :=
+hostLdLibs :=
 
-hostLdLibs := -lz
 hostStaticLibs := \
 	libandroidfw \
 	libutils \
@@ -79,6 +79,12 @@ hostStaticLibs := \
 	libcutils \
 	libexpat \
 	libziparchive-host
+
+ifneq ($(strip $(USE_MINGW)),)
+	hostStaticLibs += libz
+else
+	hostLdLibs += -lz
+endif
 
 cFlags := -Wall -Werror -Wno-unused-parameter -UNDEBUG
 cppFlags := -std=c++11 -Wno-missing-field-initializers
