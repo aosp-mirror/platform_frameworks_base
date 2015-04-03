@@ -117,7 +117,7 @@ public abstract class KeyStoreHmacSpi extends MacSpi implements KeyStoreCryptoOp
         if (opResult == null) {
             throw new KeyStoreConnectException();
         } else if (opResult.resultCode != KeyStore.NO_ERROR) {
-            throw KeymasterUtils.getCryptoOperationException(opResult.resultCode);
+            throw KeyStore.getCryptoOperationException(opResult.resultCode);
         }
         if (opResult.token == null) {
             throw new CryptoOperationException("Keystore returned null operation token");
@@ -141,8 +141,8 @@ public abstract class KeyStoreHmacSpi extends MacSpi implements KeyStoreCryptoOp
         byte[] output;
         try {
             output = mChunkedStreamer.update(input, offset, len);
-        } catch (KeymasterException e) {
-            throw KeymasterUtils.getCryptoOperationException(e);
+        } catch (KeyStoreException e) {
+            throw KeyStore.getCryptoOperationException(e);
         }
         if ((output != null) && (output.length != 0)) {
             throw new CryptoOperationException("Update operation unexpectedly produced output");
@@ -156,8 +156,8 @@ public abstract class KeyStoreHmacSpi extends MacSpi implements KeyStoreCryptoOp
         byte[] result;
         try {
             result = mChunkedStreamer.doFinal(null, 0, 0);
-        } catch (KeymasterException e) {
-            throw KeymasterUtils.getCryptoOperationException(e);
+        } catch (KeyStoreException e) {
+            throw KeyStore.getCryptoOperationException(e);
         }
 
         engineReset();
