@@ -1146,8 +1146,6 @@ android.provider.Settings$SettingNotFoundException
 android.provider.Settings$System
 android.provider.Telephony$Mms
 android.renderscript.RenderScript
-android.security.AndroidKeyPairGenerator
-android.security.AndroidKeyStore
 android.security.AndroidKeyStoreProvider
 android.speech.tts.TextToSpeechService
 android.speech.tts.TextToSpeechService$SpeechItemV1
