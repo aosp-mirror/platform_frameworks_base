@@ -574,7 +574,8 @@ public:
 
         Layout layout;
         TypefaceImpl* typeface = getNativeTypeface(env, jpaint);
-        MinikinUtils::doLayout(&layout, paint, bidiFlags, typeface, textArray, index, count, textLength);
+        MinikinUtils::doLayout(&layout, paint, bidiFlags, typeface, textArray + index, 0, count,
+                count);
         result = layout.getAdvance();
         env->ReleaseCharArrayElements(text, const_cast<jchar*>(textArray), JNI_ABORT);
         return result;
