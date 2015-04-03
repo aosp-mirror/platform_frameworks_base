@@ -80,7 +80,7 @@ public class KeyStoreCryptoOperationChunkedStreamer {
         mMaxChunkSize = maxChunkSize;
     }
 
-    public byte[] update(byte[] input, int inputOffset, int inputLength) throws KeymasterException {
+    public byte[] update(byte[] input, int inputOffset, int inputLength) throws KeyStoreException {
         if (inputLength == 0) {
             // No input provided
             return EMPTY_BYTE_ARRAY;
@@ -120,7 +120,7 @@ public class KeyStoreCryptoOperationChunkedStreamer {
             if (opResult == null) {
                 throw new KeyStoreConnectException();
             } else if (opResult.resultCode != KeyStore.NO_ERROR) {
-                throw KeymasterUtils.getKeymasterException(opResult.resultCode);
+                throw KeyStore.getKeyStoreException(opResult.resultCode);
             }
 
             if (opResult.inputConsumed == chunk.length) {
@@ -188,7 +188,7 @@ public class KeyStoreCryptoOperationChunkedStreamer {
     }
 
     public byte[] doFinal(byte[] input, int inputOffset, int inputLength)
-            throws KeymasterException {
+            throws KeyStoreException {
         if (inputLength == 0) {
             // No input provided -- simplify the rest of the code
             input = EMPTY_BYTE_ARRAY;
@@ -203,7 +203,7 @@ public class KeyStoreCryptoOperationChunkedStreamer {
         if (opResult == null) {
             throw new KeyStoreConnectException();
         } else if (opResult.resultCode != KeyStore.NO_ERROR) {
-            throw KeymasterUtils.getKeymasterException(opResult.resultCode);
+            throw KeyStore.getKeyStoreException(opResult.resultCode);
         }
 
         return concat(output, opResult.output);
@@ -213,7 +213,7 @@ public class KeyStoreCryptoOperationChunkedStreamer {
      * Passes all of buffered input into the the KeyStore operation (via the {@code update}
      * operation) and returns output.
      */
-    public byte[] flush() throws KeymasterException {
+    public byte[] flush() throws KeyStoreException {
         if (mBufferedLength <= 0) {
             return EMPTY_BYTE_ARRAY;
         }
@@ -227,7 +227,7 @@ public class KeyStoreCryptoOperationChunkedStreamer {
         if (opResult == null) {
             throw new KeyStoreConnectException();
         } else if (opResult.resultCode != KeyStore.NO_ERROR) {
-            throw KeymasterUtils.getKeymasterException(opResult.resultCode);
+            throw KeyStore.getKeyStoreException(opResult.resultCode);
         }
 
         if (opResult.inputConsumed < chunk.length) {
