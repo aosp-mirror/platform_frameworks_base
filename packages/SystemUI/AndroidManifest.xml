@@ -178,15 +178,6 @@
                 android:excludeFromRecents="true">
         </activity>
 
-        <receiver
-            android:name=".recent.RecentsPreloadReceiver"
-            android:exported="false">
-            <intent-filter>
-                <action android:name="com.android.systemui.recent.action.PRELOAD" />
-                <action android:name="com.android.systemui.recent.action.CANCEL_PRELOAD" />
-            </intent-filter>
-        </receiver>
-
         <!-- Alternate Recents -->
         <activity android:name=".recents.RecentsActivity"
                   android:label="@string/accessibility_desc_recent_apps"
@@ -195,6 +186,7 @@
                   android:excludeFromRecents="true"
                   android:stateNotNeeded="true"
                   android:resumeWhilePausing="true"
+                  android:screenOrientation="behind"
                   android:theme="@style/config_recents_activity_theme">
             <intent-filter>
                 <action android:name="com.android.systemui.recents.TOGGLE_RECENTS" />
