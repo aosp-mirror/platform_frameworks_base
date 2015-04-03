@@ -26,6 +26,7 @@ import android.security.keymaster.ExportResult;
 import android.security.keymaster.KeyCharacteristics;
 import android.security.keymaster.KeymasterArguments;
 import android.security.keymaster.KeymasterBlob;
+import android.security.keymaster.KeymasterDefs;
 import android.security.keymaster.OperationResult;
 import android.util.Log;
 
@@ -505,5 +506,58 @@ public class KeyStore {
             Log.w(TAG, "Cannot connect to keystore", e);
             return SYSTEM_ERROR;
         }
+    }
+
+    public static KeyStoreException getKeyStoreException(int errorCode) {
+        if (errorCode > 0) {
+            // KeyStore layer error
+            switch (errorCode) {
+                case NO_ERROR:
+                    return new KeyStoreException(errorCode, "OK");
+                case LOCKED:
+                    return new KeyStoreException(errorCode, "Keystore locked");
+                case UNINITIALIZED:
+                    return new KeyStoreException(errorCode, "Keystore not initialized");
+                case SYSTEM_ERROR:
+                    return new KeyStoreException(errorCode, "System error");
+                case PERMISSION_DENIED:
+                    return new KeyStoreException(errorCode, "Permission denied");
+                case KEY_NOT_FOUND:
+                    return new KeyStoreException(errorCode, "Key not found");
+                case VALUE_CORRUPTED:
+                    return new KeyStoreException(errorCode, "Key blob corrupted");
+                default:
+                    return new KeyStoreException(errorCode, String.valueOf(errorCode));
+            }
+        } else {
+            // Keymaster layer error
+            switch (errorCode) {
+                case KeymasterDefs.KM_ERROR_INVALID_AUTHORIZATION_TIMEOUT:
+                    // The name of this parameter significantly differs between Keymaster and
+                    // framework APIs. Use the framework wording to make life easier for developers.
+                    return new KeyStoreException(errorCode,
+                            "Invalid user authentication validity duration");
+                default:
+                    return new KeyStoreException(errorCode,
+                            KeymasterDefs.getErrorMessage(errorCode));
+            }
+        }
+    }
+
+    public static CryptoOperationException getCryptoOperationException(KeyStoreException e) {
+        switch (e.getErrorCode()) {
+            case KeymasterDefs.KM_ERROR_KEY_EXPIRED:
+                return new KeyExpiredException();
+            case KeymasterDefs.KM_ERROR_KEY_NOT_YET_VALID:
+                return new KeyNotYetValidException();
+            case KeymasterDefs.KM_ERROR_KEY_USER_NOT_AUTHENTICATED:
+                return new UserNotAuthenticatedException();
+            default:
+                return new CryptoOperationException("Crypto operation failed", e);
+        }
+    }
+
+    public static CryptoOperationException getCryptoOperationException(int errorCode) {
+        return getCryptoOperationException(getKeyStoreException(errorCode));
     }
 }

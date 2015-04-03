@@ -17,15 +17,16 @@
 package android.security;
 
 /**
- * Keymaster exception.
+ * KeyStore/keymaster exception with positive error codes coming from the KeyStore and negative
+ * ones from keymaster.
  *
  * @hide
  */
-public class KeymasterException extends Exception {
+public class KeyStoreException extends Exception {
 
     private final int mErrorCode;
 
-    public KeymasterException(int errorCode, String message) {
+    public KeyStoreException(int errorCode, String message) {
         super(message);
         mErrorCode = errorCode;
     }
