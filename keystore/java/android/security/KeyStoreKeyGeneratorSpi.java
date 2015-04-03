@@ -177,7 +177,7 @@ public abstract class KeyStoreKeyGeneratorSpi extends KeyGeneratorSpi {
         int errorCode = mKeyStore.generateKey(
                 keyAliasInKeystore, args, additionalEntropy, flags, new KeyCharacteristics());
         if (errorCode != KeyStore.NO_ERROR) {
-            throw KeymasterUtils.getCryptoOperationException(errorCode);
+            throw KeyStore.getCryptoOperationException(errorCode);
         }
         String keyAlgorithmJCA =
                 KeyStoreKeyConstraints.Algorithm.toJCASecretKeyAlgorithm(mAlgorithm, mDigest);

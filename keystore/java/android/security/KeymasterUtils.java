@@ -17,7 +17,6 @@
 package android.security;
 
 import android.security.keymaster.KeyCharacteristics;
-import android.security.keymaster.KeymasterDefs;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -28,39 +27,6 @@ import java.util.List;
  */
 public abstract class KeymasterUtils {
     private KeymasterUtils() {}
-
-    public static KeymasterException getKeymasterException(int keymasterErrorCode) {
-        switch (keymasterErrorCode) {
-            case KeymasterDefs.KM_ERROR_INVALID_AUTHORIZATION_TIMEOUT:
-                // The name of this parameter significantly differs between Keymaster and framework
-                // APIs. Use the framework wording to make life easier for developers.
-                return new KeymasterException(keymasterErrorCode,
-                        "Invalid user authentication validity duration");
-            default:
-                return new KeymasterException(keymasterErrorCode,
-                        KeymasterDefs.getErrorMessage(keymasterErrorCode));
-        }
-    }
-
-    public static CryptoOperationException getCryptoOperationException(KeymasterException e) {
-        switch (e.getErrorCode()) {
-            case KeymasterDefs.KM_ERROR_KEY_EXPIRED:
-                return new KeyExpiredException();
-            case KeymasterDefs.KM_ERROR_KEY_NOT_YET_VALID:
-                return new KeyNotYetValidException();
-            case KeymasterDefs.KM_ERROR_KEY_USER_NOT_AUTHENTICATED:
-                return new UserNotAuthenticatedException();
-            // TODO: Handle TBD Keymaster error code "invalid key: new fingerprint enrolled"
-            // case KeymasterDefs.KM_ERROR_TBD
-            //     return new NewFingerprintEnrolledException();
-            default:
-                return new CryptoOperationException("Crypto operation failed", e);
-        }
-    }
-
-    public static CryptoOperationException getCryptoOperationException(int keymasterErrorCode) {
-        return getCryptoOperationException(getKeymasterException(keymasterErrorCode));
-    }
 
     public static Integer getInt(KeyCharacteristics keyCharacteristics, int tag) {
         if (keyCharacteristics.hwEnforced.containsTag(tag)) {
