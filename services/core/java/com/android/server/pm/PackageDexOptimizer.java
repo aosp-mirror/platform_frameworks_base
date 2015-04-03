@@ -16,6 +16,7 @@
 
 package com.android.server.pm;
 
+import android.annotation.Nullable;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageParser;
 import android.os.UserHandle;
@@ -23,6 +24,7 @@ import android.util.ArraySet;
 import android.util.Log;
 import android.util.Slog;
 
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -38,7 +40,9 @@ import static com.android.server.pm.InstructionSets.getDexCodeInstructionSets;
  * Helper class for running dexopt command on packages.
  */
 final class PackageDexOptimizer {
-    static final String TAG = "PackageManager.DexOptimizer";
+    private static final String TAG = "PackageManager.DexOptimizer";
+    static final String OAT_DIR_NAME = "oat";
+    // TODO b/19550105 Remove error codes and use exceptions
     static final int DEX_OPT_SKIPPED = 0;
     static final int DEX_OPT_PERFORMED = 1;
     static final int DEX_OPT_DEFERRED = 2;
@@ -117,19 +121,30 @@ final class PackageDexOptimizer {
                     final byte isDexOptNeeded = DexFile.isDexOptNeededInternal(path,
                             pkg.packageName, dexCodeInstructionSet, defer);
                     if (forceDex || (!defer && isDexOptNeeded == DexFile.DEXOPT_NEEDED)) {
+                        File oatDir = createOatDirIfSupported(pkg, dexCodeInstructionSet);
                         Log.i(TAG, "Running dexopt on: " + path + " pkg="
                                 + pkg.applicationInfo.packageName + " isa=" + dexCodeInstructionSet
-                                + " vmSafeMode=" + vmSafeMode + " debuggable=" + debuggable);
+                                + " vmSafeMode=" + vmSafeMode + " debuggable=" + debuggable
+                                + " oatDir = " + oatDir);
                         final int sharedGid = UserHandle.getSharedAppGid(pkg.applicationInfo.uid);
-                        final int ret = mPackageManagerService.mInstaller.dexopt(path, sharedGid,
-                                !pkg.isForwardLocked(), pkg.packageName, dexCodeInstructionSet,
-                                vmSafeMode, debuggable);
 
-                        if (ret < 0) {
-                            // Don't bother running dexopt again if we failed, it will probably
-                            // just result in an error again. Also, don't bother dexopting for other
-                            // paths & ISAs.
-                            return DEX_OPT_FAILED;
+                        if (oatDir != null) {
+                            int ret = mPackageManagerService.mInstaller.dexopt(
+                                    path, sharedGid, !pkg.isForwardLocked(), pkg.packageName,
+                                    dexCodeInstructionSet, vmSafeMode, debuggable,
+                                    oatDir.getAbsolutePath());
+                            if (ret < 0) {
+                                return DEX_OPT_FAILED;
+                            }
+                        } else {
+                            final int ret = mPackageManagerService.mInstaller
+                                    .dexopt(path, sharedGid,
+                                            !pkg.isForwardLocked(), pkg.packageName,
+                                            dexCodeInstructionSet,
+                                            vmSafeMode, debuggable, null);
+                            if (ret < 0) {
+                                return DEX_OPT_FAILED;
+                            }
                         }
 
                         performedDexOpt = true;
@@ -186,6 +201,36 @@ final class PackageDexOptimizer {
         return performedDexOpt ? DEX_OPT_PERFORMED : DEX_OPT_SKIPPED;
     }
 
+    /**
+     * Creates oat dir for the specified package. In certain cases oat directory
+     * <strong>cannot</strong> be created:
+     * <ul>
+     *      <li>{@code pkg} is a system app, which is not updated.</li>
+     *      <li>Package location is not a directory, i.e. monolithic install.</li>
+     * </ul>
+     *
+     * @return oat directory or null, if oat directory cannot be created.
+     */
+    @Nullable
+    private File createOatDirIfSupported(PackageParser.Package pkg, String dexInstructionSet)
+            throws IOException {
+        if (pkg.isSystemApp() && !pkg.isUpdatedSystemApp()) {
+            return null;
+        }
+        File codePath = new File(pkg.codePath);
+        if (codePath.isDirectory()) {
+            File oatDir = getOatDir(codePath);
+            mPackageManagerService.mInstaller.createOatDir(oatDir.getAbsolutePath(),
+                    dexInstructionSet);
+            return oatDir;
+        }
+        return null;
+    }
+
+    static File getOatDir(File codePath) {
+        return new File(codePath, OAT_DIR_NAME);
+    }
+
     private void performDexOptLibsLI(ArrayList<String> libs, String[] instructionSets,
             boolean forceDex, boolean defer, ArraySet<String> done) {
         for (String libName : libs) {
@@ -209,7 +254,7 @@ final class PackageDexOptimizer {
 
     public void addPackageForDeferredDexopt(PackageParser.Package pkg) {
         if (mDeferredDexOpt == null) {
-            mDeferredDexOpt = new ArraySet<PackageParser.Package>();
+            mDeferredDexOpt = new ArraySet<>();
         }
         mDeferredDexOpt.add(pkg);
     }
