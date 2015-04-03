@@ -73,6 +73,9 @@ public abstract class ViewAssistStructure {
     public abstract int getChildCount();
     public abstract ViewAssistStructure newChild(int index);
 
+    public abstract ViewAssistStructure asyncNewChild(int index);
+    public abstract void asyncCommit();
+
     /** @hide */
     public abstract Rect getTempRect();
 }

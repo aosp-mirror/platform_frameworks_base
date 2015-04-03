@@ -37777,6 +37777,8 @@ package android.view {
 
   public abstract class ViewAssistStructure {
     ctor public ViewAssistStructure();
+    method public abstract void asyncCommit();
+    method public abstract android.view.ViewAssistStructure asyncNewChild(int);
     method public abstract void clearExtras();
     method public abstract android.os.Bundle editExtras();
     method public abstract int getChildCount();

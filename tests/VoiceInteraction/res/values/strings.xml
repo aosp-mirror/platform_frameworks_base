@@ -17,6 +17,7 @@
 <resources>
 
     <string name="start">Start</string>
+    <string name="asyncStructure">(Async structure goes here)</string>
     <string name="confirm">Confirm</string>
     <string name="abort">Abort</string>
     <string name="complete">Complete</string>

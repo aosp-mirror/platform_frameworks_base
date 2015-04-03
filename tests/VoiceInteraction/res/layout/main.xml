@@ -26,6 +26,14 @@
         android:text="@string/start"
         />
 
+    <com.android.test.voiceinteraction.AsyncStructure
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingTop="64dp"
+            android:paddingBottom="64dp"
+            android:text="@string/asyncStructure"
+            />
+
 </LinearLayout>
 
 

@@ -45,8 +45,8 @@ public class AssistVisualizer extends View {
     }
 
     public void setAssistStructure(AssistStructure as) {
-        mAssistStructure.dump();
         mAssistStructure = as;
+        mAssistStructure.dump();
         mTextRects.clear();
         final int N = as.getWindowNodeCount();
         if (N > 0) {

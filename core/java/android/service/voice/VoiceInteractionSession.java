@@ -16,6 +16,7 @@
 
 package android.service.voice;
 
+import android.app.AssistStructure;
 import android.app.Dialog;
 import android.app.Instrumentation;
 import android.app.VoiceInteractor;
@@ -175,6 +176,18 @@ public abstract class VoiceInteractionSession implements KeyEvent.Callback {
 
         @Override
         public void handleAssist(Bundle assistBundle) {
+            // We want to pre-warm the AssistStructure before handing it off to the main
+            // thread.  There is a strong argument to be made that it should be handed
+            // through as a separate param rather than part of the assistBundle.
+            if (assistBundle != null) {
+                Bundle assistContext = assistBundle.getBundle(Intent.EXTRA_ASSIST_CONTEXT);
+                if (assistContext != null) {
+                    AssistStructure as = AssistStructure.getAssistStructure(assistContext);
+                    if (as != null) {
+                        as.ensureData();
+                    }
+                }
+            }
             mHandlerCaller.sendMessage(mHandlerCaller.obtainMessageO(MSG_HANDLE_ASSIST,
                     assistBundle));
         }

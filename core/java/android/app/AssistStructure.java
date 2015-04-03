@@ -20,11 +20,15 @@ import android.content.ComponentName;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.Typeface;
+import android.os.Binder;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.PooledStringReader;
 import android.os.PooledStringWriter;
+import android.os.RemoteException;
+import android.os.SystemClock;
 import android.text.TextPaint;
 import android.text.TextUtils;
 import android.util.Log;
@@ -49,11 +53,34 @@ final public class AssistStructure implements Parcelable {
      */
     public static final String ASSIST_KEY = "android:assist_structure";
 
-    final ComponentName mActivityComponent;
+    boolean mHaveData;
+
+    ComponentName mActivityComponent;
 
     final ArrayList<WindowNode> mWindowNodes = new ArrayList<>();
 
+    final ArrayList<ViewNodeBuilder> mPendingAsyncChildren = new ArrayList<>();
+
+    SendChannel mSendChannel;
+    IBinder mReceiveChannel;
+
     Rect mTmpRect = new Rect();
+
+    static final int TRANSACTION_XFER = Binder.FIRST_CALL_TRANSACTION+1;
+    static final String DESCRIPTOR = "android.app.AssistStructure";
+
+    final class SendChannel extends Binder {
+        @Override protected boolean onTransact(int code, Parcel data, Parcel reply, int flags)
+                throws RemoteException {
+            if (code == TRANSACTION_XFER) {
+                data.enforceInterface(DESCRIPTOR);
+                writeContentToParcel(reply, Parcelable.PARCELABLE_WRITE_RETURN_VALUE);
+                return true;
+            } else {
+                return super.onTransact(code, data, reply, flags);
+            }
+        }
+    }
 
     final static class ViewNodeText {
         CharSequence mText;
@@ -112,7 +139,7 @@ final public class AssistStructure implements Parcelable {
             mHeight = rect.height();
             mTitle = root.getTitle();
             mRoot = new ViewNode();
-            ViewNodeBuilder builder = new ViewNodeBuilder(assist, mRoot);
+            ViewNodeBuilder builder = new ViewNodeBuilder(assist, mRoot, false);
             view.dispatchProvideAssistStructure(builder);
         }
 
@@ -425,10 +452,12 @@ final public class AssistStructure implements Parcelable {
     static class ViewNodeBuilder extends ViewAssistStructure {
         final AssistStructure mAssist;
         final ViewNode mNode;
+        final boolean mAsync;
 
-        ViewNodeBuilder(AssistStructure assist, ViewNode node) {
+        ViewNodeBuilder(AssistStructure assist, ViewNode node, boolean async) {
             mAssist = assist;
             mNode = node;
+            mAsync = async;
         }
 
         @Override
@@ -628,7 +657,32 @@ final public class AssistStructure implements Parcelable {
         public ViewAssistStructure newChild(int index) {
             ViewNode node = new ViewNode();
             mNode.mChildren[index] = node;
-            return new ViewNodeBuilder(mAssist, node);
+            return new ViewNodeBuilder(mAssist, node, false);
+        }
+
+        @Override
+        public ViewAssistStructure asyncNewChild(int index) {
+            synchronized (mAssist) {
+                ViewNode node = new ViewNode();
+                mNode.mChildren[index] = node;
+                ViewNodeBuilder builder = new ViewNodeBuilder(mAssist, node, true);
+                mAssist.mPendingAsyncChildren.add(builder);
+                return builder;
+            }
+        }
+
+        @Override
+        public void asyncCommit() {
+            synchronized (mAssist) {
+                if (!mAsync) {
+                    throw new IllegalStateException("Child " + this
+                            + " was not created with ViewAssistStructure.asyncNewChild");
+                }
+                if (!mAssist.mPendingAsyncChildren.remove(this)) {
+                    throw new IllegalStateException("Child " + this + " already committed");
+                }
+                mAssist.notifyAll();
+            }
         }
 
         @Override
@@ -638,6 +692,7 @@ final public class AssistStructure implements Parcelable {
     }
 
     AssistStructure(Activity activity) {
+        mHaveData = true;
         mActivityComponent = activity.getComponentName();
         ArrayList<ViewRootImpl> views = WindowManagerGlobal.getInstance().getRootViews(
                 activity.getActivityToken());
@@ -648,13 +703,7 @@ final public class AssistStructure implements Parcelable {
     }
 
     AssistStructure(Parcel in) {
-        PooledStringReader preader = new PooledStringReader(in);
-        mActivityComponent = ComponentName.readFromParcel(in);
-        final int N = in.readInt();
-        for (int i=0; i<N; i++) {
-            mWindowNodes.add(new WindowNode(in, preader));
-        }
-        //dump();
+        mReceiveChannel = in.readStrongBinder();
     }
 
     /** @hide */
@@ -731,6 +780,7 @@ final public class AssistStructure implements Parcelable {
     }
 
     public ComponentName getActivityComponent() {
+        ensureData();
         return mActivityComponent;
     }
 
@@ -738,6 +788,7 @@ final public class AssistStructure implements Parcelable {
      * Return the number of window contents that have been collected in this assist data.
      */
     public int getWindowNodeCount() {
+        ensureData();
         return mWindowNodes.size();
     }
 
@@ -746,6 +797,7 @@ final public class AssistStructure implements Parcelable {
      * @param index Which window to retrieve, may be 0 to {@link #getWindowNodeCount()}-1.
      */
     public WindowNode getWindowNodeAt(int index) {
+        ensureData();
         return mWindowNodes.get(index);
     }
 
@@ -753,17 +805,77 @@ final public class AssistStructure implements Parcelable {
         return 0;
     }
 
-    public void writeToParcel(Parcel out, int flags) {
+    /** @hide */
+    public void ensureData() {
+        if (mHaveData) {
+            return;
+        }
+        mHaveData = true;
+        Parcel data = Parcel.obtain();
+        Parcel reply = Parcel.obtain();
+        data.writeInterfaceToken(DESCRIPTOR);
+        try {
+            mReceiveChannel.transact(TRANSACTION_XFER, data, reply, 0);
+        } catch (RemoteException e) {
+            Log.w(TAG, "Failure reading AssistStructure data", e);
+            return;
+        }
+        readContentFromParcel(reply);
+        data.recycle();
+        reply.recycle();
+    }
+
+    void writeContentToParcel(Parcel out, int flags) {
+        // First make sure all content has been created.
+        boolean skipStructure = false;
+        synchronized (this) {
+            long endTime = SystemClock.uptimeMillis() + 5000;
+            long now;
+            while (mPendingAsyncChildren.size() > 0 && (now=SystemClock.uptimeMillis()) < endTime) {
+                try {
+                    wait(endTime-now);
+                } catch (InterruptedException e) {
+                }
+            }
+            if (mPendingAsyncChildren.size() > 0) {
+                // We waited too long, assume none of the assist structure is valid.
+                skipStructure = true;
+            }
+        }
         int start = out.dataPosition();
         PooledStringWriter pwriter = new PooledStringWriter(out);
         ComponentName.writeToParcel(mActivityComponent, out);
-        final int N = mWindowNodes.size();
+        final int N = skipStructure ? 0 : mWindowNodes.size();
         out.writeInt(N);
         for (int i=0; i<N; i++) {
             mWindowNodes.get(i).writeToParcel(out, pwriter);
         }
         pwriter.finish();
         Log.i(TAG, "Flattened assist data: " + (out.dataPosition() - start) + " bytes");
+    }
+
+    void readContentFromParcel(Parcel in) {
+        PooledStringReader preader = new PooledStringReader(in);
+        mActivityComponent = ComponentName.readFromParcel(in);
+        final int N = in.readInt();
+        for (int i=0; i<N; i++) {
+            mWindowNodes.add(new WindowNode(in, preader));
+        }
+        //dump();
+    }
+
+    public void writeToParcel(Parcel out, int flags) {
+        if (mHaveData) {
+            // This object holds its data.  We want to write a send channel that the
+            // other side can use to retrieve that data.
+            if (mSendChannel == null) {
+                mSendChannel = new SendChannel();
+            }
+            out.writeStrongBinder(mSendChannel);
+        } else {
+            // This object doesn't hold its data, so just propagate along its receive channel.
+            out.writeStrongBinder(mReceiveChannel);
+        }
     }
 
     public static final Parcelable.Creator<AssistStructure> CREATOR
