@@ -19,7 +19,6 @@ package com.android.systemui.recents;
 import android.app.Activity;
 import android.app.ActivityOptions;
 import android.app.SearchManager;
-import android.appwidget.AppWidgetHostView;
 import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetProviderInfo;
 import android.content.BroadcastReceiver;
@@ -35,7 +34,6 @@ import android.view.KeyEvent;
 import android.view.View;
 import android.view.ViewStub;
 import android.widget.Toast;
-
 import com.android.systemui.R;
 import com.android.systemui.recents.misc.DebugTrigger;
 import com.android.systemui.recents.misc.ReferenceCountedTrigger;
@@ -49,8 +47,6 @@ import com.android.systemui.recents.views.DebugOverlayView;
 import com.android.systemui.recents.views.RecentsView;
 import com.android.systemui.recents.views.SystemBarScrimViews;
 import com.android.systemui.recents.views.ViewAnimation;
-import com.android.systemui.statusbar.phone.PhoneStatusBar;
-import com.android.systemui.SystemUIApplication;
 
 import java.lang.ref.WeakReference;
 import java.lang.reflect.InvocationTargetException;
@@ -78,9 +74,9 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
     RecentsResizeTaskDialog mResizeTaskDebugDialog;
 
     // Search AppWidget
-    RecentsAppWidgetHost mAppWidgetHost;
     AppWidgetProviderInfo mSearchAppWidgetInfo;
-    AppWidgetHostView mSearchAppWidgetHostView;
+    RecentsAppWidgetHost mAppWidgetHost;
+    RecentsAppWidgetHostView mSearchAppWidgetHostView;
 
     // Runnables to finish the Recents activity
     FinishRecentsRunnable mFinishLaunchHomeRunnable;
@@ -245,7 +241,7 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
             if (mEmptyView != null) {
                 mEmptyView.setVisibility(View.GONE);
             }
-            if (mRecentsView.hasSearchBar()) {
+            if (mRecentsView.hasValidSearchBar()) {
                 mRecentsView.setSearchBarVisibility(View.VISIBLE);
             } else {
                 addSearchBarAppWidgetView();
@@ -295,8 +291,8 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
         if (Constants.DebugFlags.App.EnableSearchLayout) {
             int appWidgetId = mConfig.searchBarAppWidgetId;
             if (appWidgetId >= 0) {
-                mSearchAppWidgetHostView = mAppWidgetHost.createView(this, appWidgetId,
-                        mSearchAppWidgetInfo);
+                mSearchAppWidgetHostView = (RecentsAppWidgetHostView) mAppWidgetHost.createView(
+                        this, appWidgetId, mSearchAppWidgetInfo);
                 Bundle opts = new Bundle();
                 opts.putInt(AppWidgetManager.OPTION_APPWIDGET_HOST_CATEGORY,
                         AppWidgetProviderInfo.WIDGET_CATEGORY_SEARCHBOX);
