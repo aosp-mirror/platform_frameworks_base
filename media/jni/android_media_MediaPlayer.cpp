@@ -926,6 +926,7 @@ extern int register_android_media_MediaMetadataRetriever(JNIEnv *env);
 extern int register_android_media_MediaMuxer(JNIEnv *env);
 extern int register_android_media_MediaRecorder(JNIEnv *env);
 extern int register_android_media_MediaScanner(JNIEnv *env);
+extern int register_android_media_MediaSync(JNIEnv *env);
 extern int register_android_media_ResampleInputStream(JNIEnv *env);
 extern int register_android_media_MediaProfiles(JNIEnv *env);
 extern int register_android_media_AmrInputStream(JNIEnv *env);
@@ -1006,6 +1007,11 @@ jint JNI_OnLoad(JavaVM* vm, void* /* reserved */)
 
     if (register_android_media_MediaCodec(env) < 0) {
         ALOGE("ERROR: MediaCodec native registration failed");
+        goto bail;
+    }
+
+    if (register_android_media_MediaSync(env) < 0) {
+        ALOGE("ERROR: MediaSync native registration failed");
         goto bail;
     }
 
