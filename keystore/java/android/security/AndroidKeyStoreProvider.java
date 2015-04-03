@@ -29,50 +29,58 @@ import javax.crypto.Mac;
 public class AndroidKeyStoreProvider extends Provider {
     public static final String PROVIDER_NAME = "AndroidKeyStore";
 
+    // IMPLEMENTATION NOTE: Class names are hard-coded in this provider to avoid loading these
+    // classes when this provider is instantiated and installed early on during each app's
+    // initialization process.
+
+    private static final String PACKAGE_NAME = "android.security";
+    private static final String KEYSTORE_SECRET_KEY_CLASS_NAME =
+            PACKAGE_NAME + ".KeyStoreSecretKey";
+
     public AndroidKeyStoreProvider() {
         super(PROVIDER_NAME, 1.0, "Android KeyStore security provider");
 
         // java.security.KeyStore
-        put("KeyStore." + AndroidKeyStore.NAME, AndroidKeyStore.class.getName());
+        put("KeyStore.AndroidKeyStore", PACKAGE_NAME + ".AndroidKeyStore");
 
         // java.security.KeyPairGenerator
-        put("KeyPairGenerator.EC", AndroidKeyPairGenerator.EC.class.getName());
-        put("KeyPairGenerator.RSA", AndroidKeyPairGenerator.RSA.class.getName());
+        put("KeyPairGenerator.EC", PACKAGE_NAME + ".AndroidKeyPairGenerator$EC");
+        put("KeyPairGenerator.RSA", PACKAGE_NAME +  ".AndroidKeyPairGenerator$RSA");
 
         // javax.crypto.KeyGenerator
-        put("KeyGenerator.AES", KeyStoreKeyGeneratorSpi.AES.class.getName());
-        put("KeyGenerator.HmacSHA256", KeyStoreKeyGeneratorSpi.HmacSHA256.class.getName());
+        put("KeyGenerator.AES", PACKAGE_NAME + ".KeyStoreKeyGeneratorSpi$AES");
+        put("KeyGenerator.HmacSHA256", PACKAGE_NAME + ".KeyStoreKeyGeneratorSpi$HmacSHA256");
 
         // java.security.SecretKeyFactory
-        put("SecretKeyFactory.AES", KeyStoreSecretKeyFactorySpi.class.getName());
-        put("SecretKeyFactory.HmacSHA256", KeyStoreSecretKeyFactorySpi.class.getName());
+        put("SecretKeyFactory.AES", PACKAGE_NAME + ".KeyStoreSecretKeyFactorySpi");
+        put("SecretKeyFactory.HmacSHA256", PACKAGE_NAME + ".KeyStoreSecretKeyFactorySpi");
 
         // javax.crypto.Mac
-        putMacImpl("HmacSHA256", KeyStoreHmacSpi.HmacSHA256.class.getName());
+        putMacImpl("HmacSHA256", PACKAGE_NAME + ".KeyStoreHmacSpi$HmacSHA256");
 
         // javax.crypto.Cipher
         putSymmetricCipherImpl("AES/ECB/NoPadding",
-                KeyStoreCipherSpi.AES.ECB.NoPadding.class.getName());
+                PACKAGE_NAME + ".KeyStoreCipherSpi$AES$ECB$NoPadding");
         putSymmetricCipherImpl("AES/ECB/PKCS7Padding",
-                KeyStoreCipherSpi.AES.ECB.PKCS7Padding.class.getName());
+                PACKAGE_NAME + ".KeyStoreCipherSpi$AES$ECB$PKCS7Padding");
 
         putSymmetricCipherImpl("AES/CBC/NoPadding",
-                KeyStoreCipherSpi.AES.CBC.NoPadding.class.getName());
+                PACKAGE_NAME + ".KeyStoreCipherSpi$AES$CBC$NoPadding");
         putSymmetricCipherImpl("AES/CBC/PKCS7Padding",
-                KeyStoreCipherSpi.AES.CBC.PKCS7Padding.class.getName());
+                PACKAGE_NAME + ".KeyStoreCipherSpi$AES$CBC$PKCS7Padding");
 
         putSymmetricCipherImpl("AES/CTR/NoPadding",
-                KeyStoreCipherSpi.AES.CTR.NoPadding.class.getName());
+                PACKAGE_NAME + ".KeyStoreCipherSpi$AES$CTR$NoPadding");
     }
 
     private void putMacImpl(String algorithm, String implClass) {
         put("Mac." + algorithm, implClass);
-        put("Mac." + algorithm + " SupportedKeyClasses", KeyStoreSecretKey.class.getName());
+        put("Mac." + algorithm + " SupportedKeyClasses", KEYSTORE_SECRET_KEY_CLASS_NAME);
     }
 
     private void putSymmetricCipherImpl(String transformation, String implClass) {
         put("Cipher." + transformation, implClass);
-        put("Cipher." + transformation + " SupportedKeyClasses", KeyStoreSecretKey.class.getName());
+        put("Cipher." + transformation + " SupportedKeyClasses", KEYSTORE_SECRET_KEY_CLASS_NAME);
     }
 
     /**
