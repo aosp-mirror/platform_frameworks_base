@@ -48,6 +48,7 @@ interface ILockSettings {
             in ICheckCredentialProgressCallback progressCallback);
     VerifyCredentialResponse verifyCredential(in byte[] credential, int type, long challenge, int userId);
     VerifyCredentialResponse verifyTiedProfileChallenge(in byte[] credential, int type, long challenge, int userId);
+    byte getLockPatternSize(int userId);
     boolean checkVoldPassword(int userId);
     @UnsupportedAppUsage
     boolean havePattern(int userId);
