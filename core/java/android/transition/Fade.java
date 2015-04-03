@@ -108,7 +108,7 @@ public class Fade extends Visibility {
     /**
      * Utility method to handle creating and running the Animator.
      */
-    private Animator createAnimation(View view, float startAlpha, float endAlpha) {
+    private Animator createAnimation(final View view, float startAlpha, final float endAlpha) {
         if (startAlpha == endAlpha) {
             return null;
         }
@@ -117,9 +117,15 @@ public class Fade extends Visibility {
         if (DBG) {
             Log.d(LOG_TAG, "Created animator " + anim);
         }
-        FadeAnimatorListener listener = new FadeAnimatorListener(view);
+        final FadeAnimatorListener listener = new FadeAnimatorListener(view);
         anim.addListener(listener);
         anim.addPauseListener(listener);
+        addListener(new TransitionListenerAdapter() {
+            @Override
+            public void onTransitionEnd(Transition transition) {
+                view.setTransitionAlpha(1);
+            }
+        });
         return anim;
     }
 
@@ -143,7 +149,6 @@ public class Fade extends Visibility {
 
     private static class FadeAnimatorListener extends AnimatorListenerAdapter {
         private final View mView;
-        private boolean mCanceled = false;
         private float mPausedAlpha = -1;
         private boolean mLayerTypeChanged = false;
 
@@ -160,18 +165,8 @@ public class Fade extends Visibility {
         }
 
         @Override
-        public void onAnimationCancel(Animator animator) {
-            mCanceled = true;
-            if (mPausedAlpha >= 0) {
-                mView.setTransitionAlpha(mPausedAlpha);
-            }
-        }
-
-        @Override
         public void onAnimationEnd(Animator animator) {
-            if (!mCanceled) {
-                mView.setTransitionAlpha(1);
-            }
+            mView.setTransitionAlpha(1);
             if (mLayerTypeChanged) {
                 mView.setLayerType(View.LAYER_TYPE_NONE, null);
             }
