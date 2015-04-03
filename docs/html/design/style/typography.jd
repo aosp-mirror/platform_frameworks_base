@@ -9,7 +9,17 @@ page.metaDescription=How to use typography in your Android apps.
     <img src="{@docRoot}design/media/typography_main.png">
 
   </div>
-  <div class="layout-content-col span-5">
+
+<a class="notice-designers-material"
+  style="width: 278px;"
+  href="http://www.google.com/design/spec/style/typography.html">
+  <div>
+    <h3>Material Design</h3>
+    <p>Typography<p>
+  </div>
+</a>
+
+<div class="layout-content-col span-5">
 
 <p>
   <a class="download-button"  onClick="ga('send', 'event', 'Design', 'Download', 'Roboto ZIP');"

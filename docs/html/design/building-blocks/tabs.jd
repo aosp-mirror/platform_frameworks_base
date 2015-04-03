@@ -4,10 +4,18 @@ page.tags=tabs,actionbar,navigation,viewpager
 
 <img src="{@docRoot}design/media/tabs_overview.png">
 
+<a class="notice-designers-material"
+  href="http://www.google.com/design/spec/components/tabs.html">
+  <div>
+    <h3>Material Design</h3>
+    <p>Tabs<p>
+  </div>
+</a>
+
 <a class="notice-developers" href="{@docRoot}training/implementing-navigation/lateral.html">
   <div>
     <h3>Developer Docs</h3>
-    <p>Creating Swipe Views with Tabs</p>
+    <p>Creating Swipe Views<br>with Tabs</p>
   </div>
 </a>
 

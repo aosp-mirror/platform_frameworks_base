@@ -2,12 +2,21 @@ page.title=Selection
 page.tags=actionmode,navigation,contextual
 @jd:body
 
+<a class="notice-designers-material"
+  href="http://www.google.com/design/spec/patterns/selection.html">
+  <div>
+    <h3>Material Design</h3>
+    <p>Selection<p>
+  </div>
+</a>
+
 <a class="notice-developers" href="{@docRoot}guide/topics/ui/menus.html#context-menu">
   <div>
     <h3>Developer Docs</h3>
     <p>Menus: Creating Contextual Menus</p>
   </div>
 </a>
+
 
 <p>Android 3.0 changed the <em>long press</em> gesture&mdash;that is, a touch that's held in the same position for a moment&mdash;to be the global gesture to select data.. This affects the way you should
 handle multi-select and contextual actions in your apps.</p>

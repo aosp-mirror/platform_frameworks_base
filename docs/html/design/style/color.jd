@@ -88,6 +88,13 @@ page.title=Color
   }
 </style>
 
+<a class="notice-designers-material" href="http://www.google.com/design/spec/style/color.html">
+  <div>
+    <h3>Material Design</h3>
+    <p>Color<p>
+  </div>
+</a>
+
 <p>Use color primarily for emphasis. Choose colors that fit with your brand and provide good contrast
 between visual components. Note that red and green may be indistinguishable to color-blind users.</p>
 
@@ -129,6 +136,6 @@ shade that can be used as a complement when needed.</p>
           .css('color', color)
           .text(color.toUpperCase());
     });
-    
+
   });
 </script>
