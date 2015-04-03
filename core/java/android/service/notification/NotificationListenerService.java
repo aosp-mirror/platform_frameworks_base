@@ -77,6 +77,12 @@ public abstract class NotificationListenerService extends Service {
      */
     public static final int INTERRUPTION_FILTER_NONE = 3;
 
+    /**
+     * {@link #getCurrentInterruptionFilter() Interruption filter} constant -
+     *     Alarms only interruption filter.
+     */
+    public static final int INTERRUPTION_FILTER_ALARMS = 4;
+
     /** {@link #getCurrentInterruptionFilter() Interruption filter} constant - returned when
      * the value is unavailable for any reason.  For example, before the notification listener
      * is connected.

@@ -19,6 +19,7 @@
     android:id="@+id/zen_mode_panel"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:layout_marginStart="35dp"
     android:clipChildren="false"
     android:orientation="vertical" >
 
@@ -34,8 +35,8 @@
             android:id="@+id/zen_buttons"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="40dp"
-            android:layout_marginRight="40dp"
+            android:layout_marginLeft="8dp"
+            android:layout_marginRight="8dp"
             android:layout_marginBottom="8dp"
             android:clipChildren="false" />
     </FrameLayout>
