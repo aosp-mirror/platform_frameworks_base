@@ -27,6 +27,7 @@ import android.content.IntentFilter;
 import android.hardware.display.DisplayManager;
 import android.hardware.display.DisplayManagerInternal;
 import android.os.SystemClock;
+import android.util.Slog;
 import android.view.Display;
 import android.view.animation.LinearInterpolator;
 
@@ -44,6 +45,8 @@ public class BurnInProtectionHelper implements DisplayManager.DisplayListener,
 
     private static final long BURNIN_PROTECTION_WAKEUP_INTERVAL_MS = TimeUnit.MINUTES.toMillis(1);
     private static final long BURNIN_PROTECTION_MINIMAL_INTERVAL_MS = TimeUnit.SECONDS.toMillis(10);
+
+    private static final boolean DEBUG = false;
 
     private static final String ACTION_BURN_IN_PROTECTION =
             "android.internal.policy.action.BURN_IN_PROTECTION";
@@ -77,10 +80,13 @@ public class BurnInProtectionHelper implements DisplayManager.DisplayListener,
     private BroadcastReceiver mBurnInProtectionReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
+            if (DEBUG) {
+                Slog.d(TAG, "onReceive " + intent);
+            }
             updateBurnInProtection();
         }
     };
-    
+
     public BurnInProtectionHelper(Context context, int minHorizontalOffset,
             int maxHorizontalOffset, int minVerticalOffset, int maxVerticalOffset,
             int maxOffsetRadius) {
@@ -136,12 +142,26 @@ public class BurnInProtectionHelper implements DisplayManager.DisplayListener,
                 mDisplayManagerInternal.setDisplayOffsets(mDisplay.getDisplayId(),
                         mLastBurnInXOffset, mLastBurnInYOffset);
             }
+            // We use currentTimeMillis to compute the next wakeup time since we want to wake up at
+            // the same time as we wake up to update ambient mode to minimize power consumption.
+            // However, we use elapsedRealtime to schedule the alarm so that setting the time can't
+            // disable burn-in protection for extended periods.
+            final long nowWall = System.currentTimeMillis();
+            final long nowElapsed = SystemClock.elapsedRealtime();
             // Next adjustment at least ten seconds in the future.
-            long next = SystemClock.elapsedRealtime() + BURNIN_PROTECTION_MINIMAL_INTERVAL_MS;
+            long nextWall = nowWall + BURNIN_PROTECTION_MINIMAL_INTERVAL_MS;
             // And aligned to the minute.
-            next = next - next % BURNIN_PROTECTION_WAKEUP_INTERVAL_MS
+            nextWall = nextWall - nextWall % BURNIN_PROTECTION_WAKEUP_INTERVAL_MS
                     + BURNIN_PROTECTION_WAKEUP_INTERVAL_MS;
-            mAlarmManager.set(AlarmManager.ELAPSED_REALTIME, next, mBurnInProtectionIntent);
+            // Use elapsed real time that is adjusted to full minute on wall clock.
+            final long nextElapsed = nowElapsed + (nextWall - nowWall);
+            if (DEBUG) {
+                Slog.d(TAG, "scheduling next wake-up, now wall time " + nowWall
+                        + ", next wall: " + nextWall + ", now elapsed: " + nowElapsed
+                        + ", next elapsed: " + nextElapsed);
+            }
+            mAlarmManager.setExact(AlarmManager.ELAPSED_REALTIME, nextElapsed,
+                    mBurnInProtectionIntent);
         } else {
             mAlarmManager.cancel(mBurnInProtectionIntent);
             mCenteringAnimator.start();
