@@ -712,6 +712,7 @@ public class KeyStoreTest extends ActivityUnitTestCase<Activity> {
         args.addInt(KeymasterDefs.KM_TAG_PURPOSE, KeymasterDefs.KM_PURPOSE_DECRYPT);
         args.addInt(KeymasterDefs.KM_TAG_ALGORITHM, KeymasterDefs.KM_ALGORITHM_RSA);
         args.addInt(KeymasterDefs.KM_TAG_PADDING, KeymasterDefs.KM_PAD_NONE);
+        args.addBoolean(KeymasterDefs.KM_TAG_NO_AUTH_REQUIRED);
         args.addInt(KeymasterDefs.KM_TAG_KEY_SIZE, 2048);
         args.addLong(KeymasterDefs.KM_TAG_RSA_PUBLIC_EXPONENT,
                 RSAKeyGenParameterSpec.F4.longValue());
@@ -735,6 +736,7 @@ public class KeyStoreTest extends ActivityUnitTestCase<Activity> {
         args.addInt(KeymasterDefs.KM_TAG_PURPOSE, KeymasterDefs.KM_PURPOSE_DECRYPT);
         args.addInt(KeymasterDefs.KM_TAG_ALGORITHM, KeymasterDefs.KM_ALGORITHM_RSA);
         args.addInt(KeymasterDefs.KM_TAG_PADDING, KeymasterDefs.KM_PAD_NONE);
+        args.addBoolean(KeymasterDefs.KM_TAG_NO_AUTH_REQUIRED);
         args.addInt(KeymasterDefs.KM_TAG_KEY_SIZE, 2048);
         args.addLong(KeymasterDefs.KM_TAG_RSA_PUBLIC_EXPONENT,
                 RSAKeyGenParameterSpec.F4.longValue());
@@ -769,6 +771,7 @@ public class KeyStoreTest extends ActivityUnitTestCase<Activity> {
         args.addInt(KeymasterDefs.KM_TAG_PADDING, KeymasterDefs.KM_PAD_NONE);
         args.addInt(KeymasterDefs.KM_TAG_KEY_SIZE, 2048);
         args.addInt(KeymasterDefs.KM_TAG_BLOCK_MODE, KeymasterDefs.KM_MODE_ECB);
+        args.addBoolean(KeymasterDefs.KM_TAG_NO_AUTH_REQUIRED);
         args.addBlob(KeymasterDefs.KM_TAG_APPLICATION_ID, id);
         args.addLong(KeymasterDefs.KM_TAG_RSA_PUBLIC_EXPONENT,
                 RSAKeyGenParameterSpec.F4.longValue());
@@ -806,6 +809,7 @@ public class KeyStoreTest extends ActivityUnitTestCase<Activity> {
         args.addInt(KeymasterDefs.KM_TAG_BLOCK_MODE, KeymasterDefs.KM_MODE_OCB);
         args.addInt(KeymasterDefs.KM_TAG_CHUNK_LENGTH, 4096);
         args.addInt(KeymasterDefs.KM_TAG_MAC_LENGTH, 16);
+        args.addBoolean(KeymasterDefs.KM_TAG_NO_AUTH_REQUIRED);
 
         KeyCharacteristics outCharacteristics = new KeyCharacteristics();
         int rc = mKeyStore.generateKey(name, args, null, 0, outCharacteristics);
@@ -838,6 +842,7 @@ public class KeyStoreTest extends ActivityUnitTestCase<Activity> {
         args.addInt(KeymasterDefs.KM_TAG_PADDING, KeymasterDefs.KM_PAD_NONE);
         args.addInt(KeymasterDefs.KM_TAG_BLOCK_MODE, mode);
         args.addInt(KeymasterDefs.KM_TAG_KEY_SIZE, size);
+        args.addBoolean(KeymasterDefs.KM_TAG_NO_AUTH_REQUIRED);
         return mKeyStore.importKey(name, args, KeymasterDefs.KM_KEY_FORMAT_RAW, key, 0,
                 new KeyCharacteristics());
     }
@@ -901,6 +906,7 @@ public class KeyStoreTest extends ActivityUnitTestCase<Activity> {
         args.addInt(KeymasterDefs.KM_TAG_BLOCK_MODE, KeymasterDefs.KM_MODE_OCB);
         args.addInt(KeymasterDefs.KM_TAG_CHUNK_LENGTH, 4096);
         args.addInt(KeymasterDefs.KM_TAG_MAC_LENGTH, 16);
+        args.addBoolean(KeymasterDefs.KM_TAG_NO_AUTH_REQUIRED);
 
         KeyCharacteristics outCharacteristics = new KeyCharacteristics();
         int rc = mKeyStore.generateKey(name, args, null, 0, outCharacteristics);
@@ -921,5 +927,31 @@ public class KeyStoreTest extends ActivityUnitTestCase<Activity> {
         // At this point the first operation should be pruned.
         assertEquals("Operation should be pruned", KeymasterDefs.KM_ERROR_INVALID_OPERATION_HANDLE,
                 mKeyStore.update(first, null, new byte[] {0x01}).resultCode);
+    }
+
+    public void testAuthNeeded() throws Exception {
+        String name = "test";
+        KeymasterArguments args = new KeymasterArguments();
+        args.addInt(KeymasterDefs.KM_TAG_PURPOSE, KeymasterDefs.KM_PURPOSE_ENCRYPT);
+        args.addInt(KeymasterDefs.KM_TAG_PURPOSE, KeymasterDefs.KM_PURPOSE_DECRYPT);
+        args.addInt(KeymasterDefs.KM_TAG_ALGORITHM, KeymasterDefs.KM_ALGORITHM_AES);
+        args.addInt(KeymasterDefs.KM_TAG_PADDING, KeymasterDefs.KM_PAD_NONE);
+        args.addInt(KeymasterDefs.KM_TAG_KEY_SIZE, 256);
+        args.addInt(KeymasterDefs.KM_TAG_BLOCK_MODE, KeymasterDefs.KM_MODE_OCB);
+        args.addInt(KeymasterDefs.KM_TAG_CHUNK_LENGTH, 4096);
+        args.addInt(KeymasterDefs.KM_TAG_MAC_LENGTH, 16);
+        args.addInt(KeymasterDefs.KM_TAG_USER_AUTH_TYPE, 1);
+
+        KeyCharacteristics outCharacteristics = new KeyCharacteristics();
+        int rc = mKeyStore.generateKey(name, args, null, 0, outCharacteristics);
+        KeymasterArguments out = new KeymasterArguments();
+        assertEquals("Generate should succeed", KeyStore.NO_ERROR, rc);
+        OperationResult result = mKeyStore.begin(name, KeymasterDefs.KM_PURPOSE_ENCRYPT,
+                true, args, null, out);
+        assertEquals("Begin should succeed", KeyStore.NO_ERROR, result.resultCode);
+        IBinder token = result.token;
+        result = mKeyStore.update(token, null, new byte[] {0x01, 0x02, 0x03, 0x04});
+        assertEquals("Update should require authorization",
+                KeymasterDefs.KM_ERROR_KEY_USER_NOT_AUTHENTICATED, result.resultCode);
     }
 }
