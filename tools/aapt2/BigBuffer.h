@@ -17,6 +17,7 @@
 #ifndef AAPT_BIG_BUFFER_H
 #define AAPT_BIG_BUFFER_H
 
+#include <cassert>
 #include <cstring>
 #include <memory>
 #include <vector>

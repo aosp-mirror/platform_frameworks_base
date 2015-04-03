@@ -21,6 +21,7 @@
 #include "Source.h"
 #include "StringPiece.h"
 
+#include <cassert>
 #include <string>
 #include <vector>
 

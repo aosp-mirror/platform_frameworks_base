@@ -157,8 +157,12 @@ bool BinaryResourceParser::getSymbol(const void* data, ResourceNameRef* outSymbo
         return false;
     }
 
+    if (reinterpret_cast<uintptr_t>(data) < reinterpret_cast<uintptr_t>(mData)) {
+        return false;
+    }
+
     // We only support 32 bit offsets right now.
-    const ptrdiff_t offset = reinterpret_cast<uintptr_t>(data) -
+    const uintptr_t offset = reinterpret_cast<uintptr_t>(data) -
             reinterpret_cast<uintptr_t>(mData);
     if (offset > std::numeric_limits<uint32_t>::max()) {
         return false;
@@ -227,7 +231,7 @@ bool BinaryResourceParser::parseSymbolTable(const ResChunk_header* chunk) {
         return false;
     }
 
-    if (mSymbolPool.setTo(parser.getChunk(), parser.getChunk()->size) != android::NO_ERROR) {
+    if (mSymbolPool.setTo(parser.getChunk(), parser.getChunk()->size) != NO_ERROR) {
         Logger::error(mSource)
                 << "failed to parse symbol string pool with code: "
                 << mSymbolPool.getError()
@@ -252,9 +256,9 @@ bool BinaryResourceParser::parseTable(const ResChunk_header* chunk) {
     while (ResChunkPullParser::isGoodEvent(parser.next())) {
         switch (parser.getChunk()->type) {
         case android::RES_STRING_POOL_TYPE:
-            if (mValuePool.getError() == android::NO_INIT) {
+            if (mValuePool.getError() == NO_INIT) {
                 if (mValuePool.setTo(parser.getChunk(), parser.getChunk()->size) !=
-                        android::NO_ERROR) {
+                        NO_ERROR) {
                     Logger::error(mSource)
                             << "failed to parse value string pool with code: "
                             << mValuePool.getError()
@@ -281,7 +285,7 @@ bool BinaryResourceParser::parseTable(const ResChunk_header* chunk) {
 
         case RES_TABLE_SOURCE_POOL_TYPE: {
             if (mSourcePool.setTo(getChunkData(*parser.getChunk()),
-                        getChunkDataLen(*parser.getChunk())) != android::NO_ERROR) {
+                        getChunkDataLen(*parser.getChunk())) != NO_ERROR) {
                 Logger::error(mSource)
                         << "failed to parse source pool with code: "
                         << mSourcePool.getError()
@@ -319,7 +323,7 @@ bool BinaryResourceParser::parseTable(const ResChunk_header* chunk) {
 }
 
 bool BinaryResourceParser::parsePackage(const ResChunk_header* chunk) {
-    if (mValuePool.getError() != android::NO_ERROR) {
+    if (mValuePool.getError() != NO_ERROR) {
         Logger::error(mSource)
                 << "no value string pool for ResTable."
                 << std::endl;
@@ -356,9 +360,9 @@ bool BinaryResourceParser::parsePackage(const ResChunk_header* chunk) {
     while (ResChunkPullParser::isGoodEvent(parser.next())) {
         switch (parser.getChunk()->type) {
         case android::RES_STRING_POOL_TYPE:
-            if (mTypePool.getError() == android::NO_INIT) {
+            if (mTypePool.getError() == NO_INIT) {
                 if (mTypePool.setTo(parser.getChunk(), parser.getChunk()->size) !=
-                        android::NO_ERROR) {
+                        NO_ERROR) {
                     Logger::error(mSource)
                             << "failed to parse type string pool with code "
                             << mTypePool.getError()
@@ -366,9 +370,9 @@ bool BinaryResourceParser::parsePackage(const ResChunk_header* chunk) {
                             << std::endl;
                     return false;
                 }
-            } else if (mKeyPool.getError() == android::NO_INIT) {
+            } else if (mKeyPool.getError() == NO_INIT) {
                 if (mKeyPool.setTo(parser.getChunk(), parser.getChunk()->size) !=
-                        android::NO_ERROR) {
+                        NO_ERROR) {
                     Logger::error(mSource)
                             << "failed to parse key string pool with code "
                             << mKeyPool.getError()
@@ -429,7 +433,7 @@ bool BinaryResourceParser::parsePackage(const ResChunk_header* chunk) {
 }
 
 bool BinaryResourceParser::parseTypeSpec(const ResChunk_header* chunk) {
-    if (mTypePool.getError() != android::NO_ERROR) {
+    if (mTypePool.getError() != NO_ERROR) {
         Logger::error(mSource)
                 << "no type string pool available for ResTable_typeSpec."
                 << std::endl;
@@ -456,14 +460,14 @@ bool BinaryResourceParser::parseTypeSpec(const ResChunk_header* chunk) {
 }
 
 bool BinaryResourceParser::parseType(const ResChunk_header* chunk) {
-    if (mTypePool.getError() != android::NO_ERROR) {
+    if (mTypePool.getError() != NO_ERROR) {
         Logger::error(mSource)
                 << "no type string pool available for ResTable_typeSpec."
                 << std::endl;
         return false;
     }
 
-    if (mKeyPool.getError() != android::NO_ERROR) {
+    if (mKeyPool.getError() != NO_ERROR) {
         Logger::error(mSource)
                 << "no key string pool available for ResTable_type."
                 << std::endl;

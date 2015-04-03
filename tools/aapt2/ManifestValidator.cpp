@@ -151,7 +151,7 @@ bool ManifestValidator::validateAttributeImpl(const StringPiece16& element,
                 << "> attribute '"
                 << attributeName
                 << "' has invalid character '"
-                << *badIter
+                << StringPiece16(badIter, 1)
                 << "'."
                 << std::endl;
         return false;

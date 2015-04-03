@@ -22,6 +22,11 @@
 #include <string>
 #include <sys/stat.h>
 
+#ifdef HAVE_MS_C_RUNTIME
+// Windows includes.
+#include <direct.h>
+#endif
+
 namespace aapt {
 
 FileType getFileType(const StringPiece& path) {
@@ -43,10 +48,14 @@ FileType getFileType(const StringPiece& path) {
         return FileType::kBlockDev;
     } else if (S_ISFIFO(sb.st_mode)) {
         return FileType::kFifo;
+#if defined(S_ISLNK)
     } else if (S_ISLNK(sb.st_mode)) {
         return FileType::kSymlink;
+#endif
+#if defined(S_ISSOCK)
     } else if (S_ISSOCK(sb.st_mode)) {
         return FileType::kSocket;
+#endif
     } else {
         return FileType::kUnknown;
     }

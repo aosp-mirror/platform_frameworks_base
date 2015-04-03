@@ -973,7 +973,7 @@ std::unique_ptr<Attribute> ResourceParser::parseAttrImpl(XmlPullParser* parser,
 
     std::unique_ptr<Attribute> attr = util::make_unique<Attribute>(weak);
     attr->symbols.swap(items);
-    attr->typeMask = typeMask ? typeMask : android::ResTable_map::TYPE_ANY;
+    attr->typeMask = typeMask ? typeMask : uint32_t(android::ResTable_map::TYPE_ANY);
     return attr;
 }
 
