@@ -5063,7 +5063,10 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
             long id = Binder.clearCallingIdentity();
             try {
-                return mUserManager.getApplicationRestrictions(packageName, userHandle);
+                Bundle bundle = mUserManager.getApplicationRestrictions(packageName, userHandle);
+                // if no restrictions were saved, mUserManager.getApplicationRestrictions
+                // returns null, but DPM method should return an empty Bundle as per JavaDoc
+                return bundle != null ? bundle : Bundle.EMPTY;
             } finally {
                 restoreCallingIdentity(id);
             }
