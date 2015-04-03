@@ -48,6 +48,13 @@ public class RadioAccessFamily implements Parcelable {
     public static final int RAF_GSM = (1 << ServiceState.RIL_RADIO_TECHNOLOGY_GSM);
     public static final int RAF_TD_SCDMA = (1 << ServiceState.RIL_RADIO_TECHNOLOGY_TD_SCDMA);
 
+    // Grouping of RAFs
+    private static final int GSM = RAF_GSM | RAF_GPRS | RAF_EDGE;
+    private static final int HS = RAF_HSUPA | RAF_HSDPA | RAF_HSPA | RAF_HSPAP;
+    private static final int CDMA = RAF_IS95A | RAF_IS95B | RAF_1xRTT;
+    private static final int EVDO = RAF_EVDO_0 | RAF_EVDO_A | RAF_EVDO_B | RAF_EHRPD;
+    private static final int WCDMA = HS | RAF_UMTS;
+
     /* Phone ID of phone */
     private int mPhoneId;
 
@@ -136,12 +143,6 @@ public class RadioAccessFamily implements Parcelable {
     };
 
     public static int getRafFromNetworkType(int type) {
-        final int GSM = RAF_GSM | RAF_GPRS | RAF_EDGE;
-        final int HS = RAF_HSUPA | RAF_HSDPA | RAF_HSPA | RAF_HSPAP;
-        final int CDMA = RAF_IS95A | RAF_IS95B | RAF_1xRTT;
-        final int EVDO = RAF_EVDO_0 | RAF_EVDO_A | RAF_EVDO_B;
-        final int WCDMA = HS | RAF_UMTS;
-
         int raf;
 
         switch (type) {
@@ -158,7 +159,7 @@ public class RadioAccessFamily implements Parcelable {
                 raf = GSM | WCDMA;
                 break;
             case RILConstants.NETWORK_MODE_CDMA:
-                raf = CDMA;
+                raf = CDMA | EVDO;
                 break;
             case RILConstants.NETWORK_MODE_LTE_CDMA_EVDO:
                 raf = RAF_LTE | CDMA | EVDO;
@@ -188,6 +189,70 @@ public class RadioAccessFamily implements Parcelable {
                 raf = RAF_UNKNOWN;
                 break;
         }
+
+        return raf;
+    }
+
+    /**
+     * if the raf includes ANY bit set for a group
+     * adjust it to contain ALL the bits for that group
+     */
+    private static int getAdjustedRaf(int raf) {
+        raf = ((GSM & raf) > 0) ? (GSM | raf) : raf;
+        raf = ((WCDMA & raf) > 0) ? (WCDMA | raf) : raf;
+        raf = ((CDMA & raf) > 0) ? (CDMA | raf) : raf;
+        raf = ((EVDO & raf) > 0) ? (EVDO | raf) : raf;
+
+        return raf;
+    }
+
+    public static int getNetworkTypeFromRaf(int raf) {
+        int type;
+
+        raf = getAdjustedRaf(raf);
+
+        switch (raf) {
+            case (GSM | WCDMA):
+                type = RILConstants.NETWORK_MODE_WCDMA_PREF;
+                break;
+            case GSM:
+                type = RILConstants.NETWORK_MODE_GSM_ONLY;
+                break;
+            case WCDMA:
+                type = RILConstants.NETWORK_MODE_WCDMA_ONLY;
+                break;
+            case (CDMA | EVDO):
+                type = RILConstants.NETWORK_MODE_CDMA;
+                break;
+            case (RAF_LTE | CDMA | EVDO):
+                type = RILConstants.NETWORK_MODE_LTE_CDMA_EVDO;
+                break;
+            case (RAF_LTE | GSM | WCDMA):
+                type = RILConstants.NETWORK_MODE_LTE_GSM_WCDMA;
+                break;
+            case (RAF_LTE | CDMA | EVDO | GSM | WCDMA):
+                type = RILConstants.NETWORK_MODE_LTE_CDMA_EVDO_GSM_WCDMA;
+                break;
+            case RAF_LTE:
+                type = RILConstants.NETWORK_MODE_LTE_ONLY;
+                break;
+            case (RAF_LTE | WCDMA):
+                type = RILConstants.NETWORK_MODE_LTE_WCDMA;
+                break;
+            case CDMA:
+                type = RILConstants.NETWORK_MODE_CDMA_NO_EVDO;
+                break;
+            case EVDO:
+                type = RILConstants.NETWORK_MODE_EVDO_NO_CDMA;
+                break;
+            case (GSM | WCDMA | CDMA | EVDO):
+                type = RILConstants.NETWORK_MODE_GLOBAL;
+                break;
+            default:
+                type = RILConstants.PREFERRED_NETWORK_MODE ;
+                break;
+        }
+
         return raf;
     }
 }
