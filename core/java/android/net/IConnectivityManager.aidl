@@ -156,6 +156,8 @@ interface IConnectivityManager
 
     void releaseNetworkRequest(in NetworkRequest networkRequest);
 
+    void setAcceptUnvalidated(in Network network, boolean accept, boolean always);
+
     int getRestoreDefaultNetworkDelay(int networkType);
 
     boolean addVpnAddress(String address, int prefixLength);

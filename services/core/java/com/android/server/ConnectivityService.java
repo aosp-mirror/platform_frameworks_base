@@ -161,6 +161,10 @@ public class ConnectivityService extends IConnectivityManager.Stub
     private static final String NETWORK_RESTORE_DELAY_PROP_NAME =
             "android.telephony.apn-restore";
 
+    // How long to wait before putting up a "This network doesn't have an Internet connection,
+    // connect anyway?" dialog after the user selects a network that doesn't validate.
+    private static final int PROMPT_UNVALIDATED_DELAY_MS = 8 * 1000;
+
     // How long to delay to removal of a pending intent based request.
     // See Settings.Secure.CONNECTIVITY_RELEASE_PENDING_INTENT_DELAY_MS
     private final int mReleasePendingIntentDelayMs;
@@ -324,6 +328,19 @@ public class ConnectivityService extends IConnectivityManager.Stub
      */
     private static final int EVENT_RELEASE_NETWORK_REQUEST_WITH_INTENT = 27;
 
+    /**
+     * used to specify whether a network should be used even if unvalidated.
+     * arg1 = whether to accept the network if it's unvalidated (1 or 0)
+     * arg2 = whether to remember this choice in the future (1 or 0)
+     * obj  = network
+     */
+    private static final int EVENT_SET_ACCEPT_UNVALIDATED = 28;
+
+    /**
+     * used to ask the user to confirm a connection to an unvalidated network.
+     * obj  = network
+     */
+    private static final int EVENT_PROMPT_UNVALIDATED = 29;
 
     /** Handler used for internal events. */
     final private InternalHandler mHandler;
@@ -1843,6 +1860,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
                         loge("ERROR: created network explicitly selected.");
                     }
                     nai.networkMisc.explicitlySelected = true;
+                    nai.networkMisc.acceptUnvalidated = (boolean) msg.obj;
                     break;
                 }
                 case NetworkMonitor.EVENT_NETWORK_TESTED: {
@@ -1866,6 +1884,9 @@ public class ConnectivityService extends IConnectivityManager.Stub
                                 android.net.NetworkAgent.CMD_REPORT_NETWORK_STATUS,
                                 (valid ? NetworkAgent.VALID_NETWORK : NetworkAgent.INVALID_NETWORK),
                                 0, null);
+
+                        // TODO: trigger a NetworkCapabilities update so that the dialog can know
+                        // that the network is now validated and close itself.
                     }
                     break;
                 }
@@ -2227,6 +2248,91 @@ public class ConnectivityService extends IConnectivityManager.Stub
         }
     }
 
+    public void setAcceptUnvalidated(Network network, boolean accept, boolean always) {
+        enforceConnectivityInternalPermission();
+        mHandler.sendMessage(mHandler.obtainMessage(EVENT_SET_ACCEPT_UNVALIDATED,
+                accept ? 1 : 0, always ? 1: 0, network));
+    }
+
+    private void handleSetAcceptUnvalidated(Network network, boolean accept, boolean always) {
+        if (DBG) log("handleSetAcceptUnvalidated network=" + network +
+                " accept=" + accept + " always=" + always);
+
+        NetworkAgentInfo nai = getNetworkAgentInfoForNetwork(network);
+        if (nai == null) {
+            // Nothing to do.
+            return;
+        }
+
+        if (nai.everValidated) {
+            // The network validated while the dialog box was up. Don't make any changes. There's a
+            // TODO in the dialog code to make it go away if the network validates; once that's
+            // implemented, taking action here will be confusing.
+            return;
+        }
+
+        if (!nai.networkMisc.explicitlySelected) {
+            Slog.wtf(TAG, "BUG: setAcceptUnvalidated non non-explicitly selected network");
+        }
+
+        if (accept != nai.networkMisc.acceptUnvalidated) {
+            int oldScore = nai.getCurrentScore();
+            nai.networkMisc.acceptUnvalidated = accept;
+            rematchAllNetworksAndRequests(nai, oldScore);
+            sendUpdatedScoreToFactories(nai);
+        }
+
+        if (always) {
+            nai.asyncChannel.sendMessage(
+                    NetworkAgent.CMD_SAVE_ACCEPT_UNVALIDATED, accept ? 1 : 0);
+        }
+
+        // TODO: should we also disconnect from the network if accept is false?
+    }
+
+    private void scheduleUnvalidatedPrompt(NetworkAgentInfo nai) {
+        mHandler.sendMessageDelayed(
+                mHandler.obtainMessage(EVENT_PROMPT_UNVALIDATED, nai.network),
+                PROMPT_UNVALIDATED_DELAY_MS);
+    }
+
+    private void handlePromptUnvalidated(Network network) {
+        NetworkAgentInfo nai = getNetworkAgentInfoForNetwork(network);
+
+        // Only prompt if the network is unvalidated and was explicitly selected by the user, and if
+        // we haven't already been told to switch to it regardless of whether it validated or not.
+        if (nai == null || nai.everValidated ||
+                !nai.networkMisc.explicitlySelected || nai.networkMisc.acceptUnvalidated) {
+            return;
+        }
+
+        // TODO: What should we do if we've already switched to this network because we had no
+        // better option? There are two obvious alternatives.
+        //
+        // 1. Decide that there's no point prompting because this is our only usable network.
+        //    However, because we didn't prompt, if later on a validated network comes along, we'll
+        //    either a) silently switch to it - bad if the user wanted to connect to stay on this
+        //    unvalidated network - or b) prompt the user at that later time - bad because the user
+        //    might not understand why they are now being prompted.
+        //
+        // 2. Always prompt the user, even if we have no other network to use. The user could then
+        //    try to find an alternative network to join (remember, if we got here, then the user
+        //    selected this network manually). This is bad because the prompt isn't really very
+        //    useful.
+        //
+        // For now we do #1, but we can revisit that later.
+        if (isDefaultNetwork(nai)) {
+            return;
+        }
+
+        Intent intent = new Intent(ConnectivityManager.ACTION_PROMPT_UNVALIDATED);
+        intent.putExtra(ConnectivityManager.EXTRA_NETWORK, network);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        intent.setClassName("com.android.settings",
+                "com.android.settings.wifi.WifiNoInternetDialog");
+        mContext.startActivityAsUser(intent, UserHandle.CURRENT);
+    }
+
     private class InternalHandler extends Handler {
         public InternalHandler(Looper looper) {
             super(looper);
@@ -2295,6 +2401,14 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 }
                 case EVENT_RELEASE_NETWORK_REQUEST: {
                     handleReleaseNetworkRequest((NetworkRequest) msg.obj, msg.arg1);
+                    break;
+                }
+                case EVENT_SET_ACCEPT_UNVALIDATED: {
+                    handleSetAcceptUnvalidated((Network) msg.obj, msg.arg1 != 0, msg.arg2 != 0);
+                    break;
+                }
+                case EVENT_PROMPT_UNVALIDATED: {
+                    handlePromptUnvalidated((Network) msg.obj);
                     break;
                 }
                 case EVENT_SYSTEM_READY: {
@@ -4099,6 +4213,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
             notifyIfacesChanged();
             notifyNetworkCallbacks(networkAgent, ConnectivityManager.CALLBACK_PRECHECK);
             networkAgent.networkMonitor.sendMessage(NetworkMonitor.CMD_NETWORK_CONNECTED);
+            scheduleUnvalidatedPrompt(networkAgent);
             if (networkAgent.isVPN()) {
                 // Temporarily disable the default proxy (not global).
                 synchronized (mProxyLock) {
