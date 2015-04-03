@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="App" parent="android:Theme.Material">
+        <item name="android:colorAccent">@color/accent</item>
+        <item name="android:text">Hey</item>
+    </style>
+</resources>

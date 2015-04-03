@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/view"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+    <View xmlns:app="http://schemas.android.com/apk/res-auto"
+        android:id="@+id/me"
+        android:layout_width="1dp"
+        android:layout_height="match_parent"
+        app:layout_width="false"
+        app:flags="complex|weak"
+        android:colorAccent="#ffffff"/>
+</LinearLayout>
