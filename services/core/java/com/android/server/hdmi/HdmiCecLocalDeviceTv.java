@@ -785,6 +785,8 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
                         HdmiDeviceInfo avr = getAvrDeviceInfo();
                         if (avr != null) {
                             onNewAvrAdded(avr);
+                        } else {
+                            setSystemAudioMode(false, true);
                         }
                     }
                 });
@@ -1615,10 +1617,6 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
         removeAction(SystemAudioAutoInitiationAction.class);
         removeAction(SystemAudioStatusAction.class);
         removeAction(VolumeControlAction.class);
-
-        // Turn off the mode but do not write it the settings, so that the next time TV powers on
-        // the system audio mode setting can be restored automatically.
-        setSystemAudioMode(false, false);
     }
 
     @ServiceThreadOnly
