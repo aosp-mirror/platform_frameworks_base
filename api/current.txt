@@ -14730,6 +14730,16 @@ package android.media {
     field public static final int WRITE_NON_BLOCKING = 1; // 0x1
   }
 
+  public static class AudioTrack.Builder {
+    ctor public AudioTrack.Builder();
+    method public android.media.AudioTrack build() throws java.lang.UnsupportedOperationException;
+    method public android.media.AudioTrack.Builder setAudioAttributes(android.media.AudioAttributes) throws java.lang.IllegalArgumentException;
+    method public android.media.AudioTrack.Builder setAudioFormat(android.media.AudioFormat) throws java.lang.IllegalArgumentException;
+    method public android.media.AudioTrack.Builder setBufferSizeInBytes(int) throws java.lang.IllegalArgumentException;
+    method public android.media.AudioTrack.Builder setSessionId(int) throws java.lang.IllegalArgumentException;
+    method public android.media.AudioTrack.Builder setTransferMode(int) throws java.lang.IllegalArgumentException;
+  }
+
   public static abstract interface AudioTrack.OnPlaybackPositionUpdateListener {
     method public abstract void onMarkerReached(android.media.AudioTrack);
     method public abstract void onPeriodicNotification(android.media.AudioTrack);
