@@ -73,7 +73,7 @@ public class AudioFormat {
     public static final int CHANNEL_OUT_DEFAULT = 1;
 
     // Output channel mask definitions below are translated to the native values defined in
-    //  in /system/core/include/system/audio.h in the JNI code of AudioTrack
+    //  in /system/media/audio/include/system/audio.h in the JNI code of AudioTrack
     public static final int CHANNEL_OUT_FRONT_LEFT = 0x4;
     public static final int CHANNEL_OUT_FRONT_RIGHT = 0x8;
     public static final int CHANNEL_OUT_FRONT_CENTER = 0x10;
