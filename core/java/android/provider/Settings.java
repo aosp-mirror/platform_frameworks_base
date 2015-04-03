@@ -138,7 +138,7 @@ public final class Settings {
             "android.settings.AIRPLANE_MODE_SETTINGS";
 
     /**
-     * Activity Action: Modify Airplane mode settings using the users voice.
+     * Activity Action: Modify Airplane mode settings using a voice command.
      * <p>
      * In some cases, a matching Activity may not exist, so ensure you safeguard against this.
      * <p>
@@ -146,15 +146,13 @@ public final class Settings {
      * {@link android.service.voice.VoiceInteractionSession#startVoiceActivity
      * startVoiceActivity}.
      * <p>
-     * To tell which state airplane mode should be set to, add the
-     * {@link #EXTRA_AIRPLANE_MODE_ENABLED} extra to this Intent with the state specified.
-     * If there is no extra in this Intent, no changes will be made.
-     * <p>
-     * The activity should verify that
+     * Note: The activity implementing this intent MUST verify that
      * {@link android.app.Activity#isVoiceInteraction isVoiceInteraction} returns true before
      * modifying the setting.
      * <p>
-     * Input: Nothing.
+     * Input: To tell which state airplane mode should be set to, add the
+     * {@link #EXTRA_AIRPLANE_MODE_ENABLED} extra to this Intent with the state specified.
+     * If the extra is not included, no changes will be made.
      * <p>
      * Output: Nothing.
      */
@@ -857,6 +855,31 @@ public final class Settings {
             = "android.settings.ZEN_MODE_AUTOMATION_SETTINGS";
 
     /**
+     * Activity Action: Modify do not disturb mode settings.
+     * <p>
+     * In some cases, a matching Activity may not exist, so ensure you safeguard against this.
+     * <p>
+     * This intent MUST be started using
+     * {@link android.service.voice.VoiceInteractionSession#startVoiceActivity
+     * startVoiceActivity}.
+     * <p>
+     * Note: The Activity implementing this intent MUST verify that
+     * {@link android.app.Activity#isVoiceInteraction isVoiceInteraction}.
+     * returns true before modifying the setting.
+     * <p>
+     * Input: The optional {@link #EXTRA_DO_NOT_DISTURB_MODE_MINUTES} extra can be used to indicate
+     * how long the user wishes to avoid interruptions for. The optional
+     * {@link #EXTRA_DO_NOT_DISTURB_MODE_ENABLED} extra can be to indicate if the user is
+     * enabling or disabling do not disturb mode. If either extra is not included, the
+     * user maybe asked to provide the value.
+     * <p>
+     * Output: Nothing.
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_VOICE_CONTROL_DO_NOT_DISTURB_MODE =
+            "android.settings.VOICE_CONTROL_DO_NOT_DISTURB_MODE";
+
+    /**
      * Activity Action: Show the regulatory information screen for the device.
      * <p>
      * In some cases, a matching Activity may not exist, so ensure you safeguard
@@ -901,6 +924,29 @@ public final class Settings {
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_BATTERY_SAVER_SETTINGS
             = "android.settings.BATTERY_SAVER_SETTINGS";
+
+    /**
+     * Activity Action: Modify Battery Saver mode setting using a voice command.
+     * <p>
+     * In some cases, a matching Activity may not exist, so ensure you safeguard against this.
+     * <p>
+     * This intent MUST be started using
+     * {@link android.service.voice.VoiceInteractionSession#startVoiceActivity
+     * startVoiceActivity}.
+     * <p>
+     * Note: The activity implementing this intent MUST verify that
+     * {@link android.app.Activity#isVoiceInteraction isVoiceInteraction} returns true before
+     * modifying the setting.
+     * <p>
+     * Input: To tell which state batter saver mode should be set to, add the
+     * {@link #EXTRA_BATTERY_SAVER_MODE_ENABLED} extra to this Intent with the state specified.
+     * If the extra is not included, no changes will be made.
+     * <p>
+     * Output: Nothing.
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_VOICE_CONTROL_BATTERY_SAVER_MODE =
+            "android.settings.VOICE_CONTROL_BATTERY_SAVER_MODE";
 
     /**
      * Activity Action: Show Home selection settings. If there are multiple activities
@@ -1016,9 +1062,36 @@ public final class Settings {
      * Activity Extra: Enable or disable Airplane Mode.
      * <p>
      * This can be passed as an extra field to the {@link #ACTION_VOICE_CONTROL_AIRPLANE_MODE}
-     * intent as a boolean.
+     * intent as a boolean to indicate if it should be enabled.
      */
     public static final String EXTRA_AIRPLANE_MODE_ENABLED = "airplane_mode_enabled";
+
+    /**
+     * Activity Extra: Enable or disable Battery saver mode.
+     * <p>
+     * This can be passed as an extra field to the {@link #ACTION_VOICE_CONTROL_BATTERY_SAVER_MODE}
+     * intent as a boolean to indicate if it should be enabled.
+     */
+    public static final String EXTRA_BATTERY_SAVER_MODE_ENABLED =
+            "android.settings.extra.battery_saver_mode_enabled";
+
+    /**
+     * Activity Extra: Enable or disable Do Not Disturb mode.
+     * <p>
+     * This can be passed as an extra field to the {@link #ACTION_VOICE_CONTROL_DO_NOT_DISTURB_MODE}
+     * intent as a boolean to indicate if it should be enabled.
+     */
+    public static final String EXTRA_DO_NOT_DISTURB_MODE_ENABLED =
+            "android.settings.extra.do_not_disturb_mode_enabled";
+
+    /**
+     * Activity Extra: How many minutes to enable do not disturb mode for.
+     * <p>
+     * This can be passed as an extra field to the {@link #ACTION_VOICE_CONTROL_DO_NOT_DISTURB_MODE}
+     * intent to indicate how long do not disturb mode should be enabled for.
+     */
+    public static final String EXTRA_DO_NOT_DISTURB_MODE_MINUTES =
+            "android.settings.extra.do_not_disturb_mode_minutes";
 
     private static final String JID_RESOURCE_PREFIX = "android";
 
