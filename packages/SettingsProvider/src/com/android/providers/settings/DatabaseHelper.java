@@ -716,6 +716,9 @@ class DatabaseHelper extends SQLiteOpenHelper {
                    Secure.LOCK_PATTERN_ENABLED,
                    Secure.LOCK_PATTERN_VISIBLE,
                    Secure.LOCK_PATTERN_TACTILE_FEEDBACK_ENABLED,
+                   Secure.LOCK_PATTERN_SIZE,
+                   Secure.LOCK_DOTS_VISIBLE,
+                   Secure.LOCK_SHOW_ERROR_PATH,
                    "lock_screen_pass_to_security_view",
                    "lockscreen.password_type",
                    "lockscreen.lockoutattemptdeadline",
@@ -1992,8 +1995,9 @@ class DatabaseHelper extends SQLiteOpenHelper {
                 // Convert lock pattern
                 try {
                     LockPatternUtils lpu = new LockPatternUtils(mContext);
+                    byte size = lpu.getLockPatternSize(mUserHandle);
                     List<LockPatternView.Cell> cellPattern =
-                            LockPatternUtils.stringToPattern(lockPattern);
+                            LockPatternUtils.stringToPattern(lockPattern, size);
                     lpu.saveLockPattern(cellPattern, null, UserHandle.USER_SYSTEM);
                 } catch (IllegalArgumentException e) {
                     // Don't want corrupted lock pattern to hang the reboot process
