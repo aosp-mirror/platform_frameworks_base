@@ -34,9 +34,6 @@ import java.io.IOException;
 /**
  * This class is used for sending and receiving data to and from a MIDI device
  * Instances of this class are created by {@link MidiManager#openDevice}.
- *
- * CANDIDATE FOR PUBLIC API
- * @hide
  */
 public final class MidiDevice implements Closeable {
     private static final String TAG = "MidiDevice";
@@ -49,6 +46,11 @@ public final class MidiDevice implements Closeable {
 
     private final CloseGuard mGuard = CloseGuard.get();
 
+    /**
+     * This class represents a connection between the output port of one device
+     * and the input port of another. Created by {@link #connectPorts}.
+     * Close this object to terminate the connection.
+     */
     public class MidiConnection implements Closeable {
         private final IBinder mToken;
         private final MidiInputPort mInputPort;
@@ -134,11 +136,11 @@ public final class MidiDevice implements Closeable {
     /**
      * Connects the supplied {@link MidiInputPort} to the output port of this device
      * with the specified port number. Once the connection is made, the MidiInput port instance
-     * can no longer receive data via its {@link MidiReciever.receive} method.
-     * This method returns a {@link #MidiConnection} object, which can be used to close the connection
+     * can no longer receive data via its {@link MidiReceiver#onReceive} method.
+     * This method returns a {@link MidiDevice.MidiConnection} object, which can be used to close the connection
      * @param inputPort the inputPort to connect
      * @param outputPortNumber the port number of the output port to connect inputPort to.
-     * @return {@link #MidiConnection} object if the connection is successful, or null in case of failure
+     * @return {@link MidiDevice.MidiConnection} object if the connection is successful, or null in case of failure
      */
     public MidiConnection connectPorts(MidiInputPort inputPort, int outputPortNumber) {
         if (outputPortNumber < 0 || outputPortNumber >= mDeviceInfo.getOutputPortCount()) {
