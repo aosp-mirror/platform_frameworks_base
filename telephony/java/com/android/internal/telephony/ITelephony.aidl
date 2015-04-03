@@ -942,4 +942,6 @@ interface ITelephony {
      * Returns the subscription ID associated with the specified PhoneAccount.
      */
     int getSubIdForPhoneAccount(in PhoneAccount phoneAccount);
+
+    void factoryReset(int subId);
 }

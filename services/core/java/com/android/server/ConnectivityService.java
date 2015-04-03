@@ -4444,4 +4444,30 @@ public class ConnectivityService extends IConnectivityManager.Stub
         }
         return success;
     }
+
+    @Override
+    public void factoryReset() {
+        enforceConnectivityInternalPermission();
+        // Turn airplane mode off
+        setAirplaneMode(false);
+
+        // Untether
+        for (String tether : getTetheredIfaces()) {
+            untether(tether);
+        }
+
+        // Turn VPN off
+        VpnConfig vpnConfig = getVpnConfig();
+        if (vpnConfig != null) {
+            if (vpnConfig.legacy) {
+                prepareVpn(VpnConfig.LEGACY_VPN, VpnConfig.LEGACY_VPN);
+            } else {
+                // Prevent this app from initiating VPN connections in the future without
+                // user intervention.
+                setVpnPackageAuthorization(false);
+
+                prepareVpn(vpnConfig.user, VpnConfig.LEGACY_VPN);
+            }
+        }
+    }
 }

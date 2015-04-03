@@ -4550,15 +4550,12 @@ public class TelephonyManager {
      * @hide
      */
     public void factoryReset(int subId) {
-        if (SubscriptionManager.isUsableSubIdValue(subId)) {
-            // Enable data
-            setDataEnabled(subId, true);
-            // Set network selection mode to automatic
-            setNetworkSelectionModeAutomatic(subId);
-            // Set preferred mobile network type to the best available
-            setPreferredNetworkType(subId, RILConstants.PREFERRED_NETWORK_MODE);
-            // Turn off roaming
-            SubscriptionManager.from(mContext).setDataRoaming(0, subId);
+        try {
+            Log.d(TAG, "factoryReset: subId=" + subId);
+            ITelephony telephony = getITelephony();
+            if (telephony != null)
+                telephony.factoryReset(subId);
+        } catch (RemoteException e) {
         }
     }
 }

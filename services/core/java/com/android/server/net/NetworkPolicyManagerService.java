@@ -2301,4 +2301,29 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         }
         fout.print("]");
     }
+
+    @Override
+    public void factoryReset(String subscriber) {
+        mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
+
+        // Turn mobile data limit off
+        NetworkPolicy[] policies = getNetworkPolicies();
+        NetworkTemplate template = NetworkTemplate.buildTemplateMobileAll(subscriber);
+        for (NetworkPolicy policy : policies) {
+            if (policy.template.equals(template)) {
+                policy.limitBytes = NetworkPolicy.LIMIT_DISABLED;
+                policy.inferred = false;
+                policy.clearSnooze();
+            }
+        }
+        setNetworkPolicies(policies);
+
+        // Turn restrict background data off
+        setRestrictBackground(false);
+
+        // Remove app's "restrict background data" flag
+        for (int uid : getUidsWithPolicy(POLICY_REJECT_METERED_BACKGROUND)) {
+            setUidPolicy(uid, POLICY_NONE);
+        }
+    }
 }

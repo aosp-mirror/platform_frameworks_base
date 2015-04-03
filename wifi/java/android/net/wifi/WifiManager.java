@@ -2791,18 +2791,9 @@ public class WifiManager {
      * @hide
      */
     public void factoryReset() {
-        // Enable wifi
-        setWifiEnabled(true);
-        // Delete all Wifi SSIDs
-        List<WifiConfiguration> networks = getConfiguredNetworks();
-        if (networks != null) {
-            for (WifiConfiguration config : networks) {
-                removeNetwork(config.networkId);
-            }
-            saveConfiguration();
+        try {
+            mService.factoryReset();
+        } catch (RemoteException e) {
         }
-
-        // Turn mobile hotspot off
-        setWifiApEnabled(null, false);
     }
 }

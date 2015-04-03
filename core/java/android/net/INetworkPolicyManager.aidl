@@ -58,4 +58,6 @@ interface INetworkPolicyManager {
 
     NetworkQuotaInfo getNetworkQuotaInfo(in NetworkState state);
     boolean isNetworkMetered(in NetworkState state);
+
+    void factoryReset(String subscriber);
 }

@@ -166,5 +166,7 @@ interface IWifiManager
     WifiConnectionStatistics getConnectionStatistics();
 
     void disableEphemeralNetwork(String SSID);
+
+    void factoryReset();
 }
 
