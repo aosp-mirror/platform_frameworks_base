@@ -65,5 +65,10 @@
                 <data android:scheme="package" />
             </intent-filter>
         </receiver>
+
+        <service
+            android:name=".CopyService"
+            android:exported="false">
+        </service>
     </application>
 </manifest>

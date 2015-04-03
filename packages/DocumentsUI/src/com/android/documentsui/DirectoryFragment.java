@@ -50,6 +50,7 @@ import android.os.Bundle;
 import android.os.CancellationSignal;
 import android.os.OperationCanceledException;
 import android.os.Parcelable;
+import android.os.SystemProperties;
 import android.provider.DocumentsContract;
 import android.provider.DocumentsContract.Document;
 import android.text.format.DateUtils;
@@ -77,6 +78,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.android.documentsui.BaseActivity.State;
+import com.android.documentsui.CopyService;
 import com.android.documentsui.ProviderExecutor.Preemptable;
 import com.android.documentsui.RecentsProvider.StateColumns;
 import com.android.documentsui.model.DocumentInfo;
@@ -463,11 +465,14 @@ public class DirectoryFragment extends Fragment {
             final MenuItem open = menu.findItem(R.id.menu_open);
             final MenuItem share = menu.findItem(R.id.menu_share);
             final MenuItem delete = menu.findItem(R.id.menu_delete);
+            final MenuItem copy = menu.findItem(R.id.menu_copy);
 
             final boolean manageMode = state.action == ACTION_MANAGE;
             open.setVisible(!manageMode);
             share.setVisible(manageMode);
             delete.setVisible(manageMode);
+            // Hide the copy feature by default.
+            copy.setVisible(SystemProperties.getBoolean("debug.documentsui.enable_copy", false));
 
             return true;
         }
@@ -498,6 +503,11 @@ public class DirectoryFragment extends Fragment {
 
             } else if (id == R.id.menu_delete) {
                 onDeleteDocuments(docs);
+                mode.finish();
+                return true;
+
+            } else if (id == R.id.menu_copy) {
+                onCopyDocuments(docs);
                 mode.finish();
                 return true;
 
@@ -621,6 +631,20 @@ public class DirectoryFragment extends Fragment {
         if (hadTrouble) {
             Toast.makeText(context, R.string.toast_failed_delete, Toast.LENGTH_SHORT).show();
         }
+    }
+
+    private void onCopyDocuments(List<DocumentInfo> docs) {
+        final Context context = getActivity();
+        final Resources res = context.getResources();
+
+        Intent copyIntent = new Intent(context, CopyService.class);
+        copyIntent.putParcelableArrayListExtra(CopyService.EXTRA_SRC_LIST,
+                new ArrayList<DocumentInfo>(docs));
+
+        Toast.makeText(context,
+                res.getQuantityString(R.plurals.copy_begin, docs.size(), docs.size()),
+                Toast.LENGTH_SHORT).show();
+        context.startService(copyIntent);
     }
 
     private static State getDisplayState(Fragment fragment) {
