@@ -2836,7 +2836,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
         }
         mWindowManager.moveTaskToStack(taskId, stackId, toTop);
         if (task.stack != null) {
-            task.stack.removeTask(task, "moveTaskToStack", false);
+            task.stack.removeTask(task, "moveTaskToStack", false /* notMoving */);
         }
         stack.addTask(task, toTop, true);
         resumeTopActivitiesLocked();

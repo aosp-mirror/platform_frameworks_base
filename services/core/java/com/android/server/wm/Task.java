@@ -78,7 +78,7 @@ class Task {
         }
         if (DEBUG_STACK) Slog.i(TAG, "moveTaskToStack: removing taskId=" + mTaskId
                 + " from stack=" + mStack);
-        EventLog.writeEvent(EventLogTags.WM_TASK_REMOVED, mTaskId, "removeTask");
+        EventLog.writeEvent(EventLogTags.WM_TASK_REMOVED, mTaskId, "moveTask");
         if (mStack != null) {
             mStack.removeTask(this);
         }
@@ -88,7 +88,7 @@ class Task {
     boolean removeAppToken(AppWindowToken wtoken) {
         boolean removed = mAppTokens.remove(wtoken);
         if (mAppTokens.size() == 0) {
-            EventLog.writeEvent(com.android.server.EventLogTags.WM_TASK_REMOVED, mTaskId,
+            EventLog.writeEvent(EventLogTags.WM_TASK_REMOVED, mTaskId,
                     "removeAppToken: last token");
             if (mDeferRemoval) {
                 removeLocked();
