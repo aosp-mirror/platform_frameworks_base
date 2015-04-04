@@ -1473,6 +1473,11 @@ final class WindowState implements WindowManagerPolicy.WindowState {
             mOrientationChanging = false;
             mLastFreezeDuration = (int)(SystemClock.elapsedRealtime()
                     - mService.mDisplayFreezeTime);
+            // We are assuming the hosting process is dead or in a zombie state.
+            Slog.w(TAG, "Failed to report 'resized' to the client of " + this
+                    + ", removing this window.");
+            mService.mPendingRemove.add(this);
+            mService.requestTraversalLocked();
         }
     }
 
