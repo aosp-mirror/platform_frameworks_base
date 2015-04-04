@@ -109,4 +109,6 @@
     <string name="kg_pin_accepted" msgid="1448241673570020097">"코드 승인 완료"</string>
     <string name="keyguard_carrier_default" msgid="8700650403054042153">"서비스 불가"</string>
     <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"입력 방법 버튼을 전환합니다."</string>
+    <!-- no translation found for airplane_mode (3122107900897202805) -->
+    <skip />
 </resources>
