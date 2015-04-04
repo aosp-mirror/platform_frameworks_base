@@ -23,13 +23,17 @@ import android.os.Parcelable;
 import android.os.UserHandle;
 
 import com.android.internal.util.IndentingPrintWriter;
+import com.android.internal.util.Preconditions;
 
 import java.io.CharArrayWriter;
 import java.io.File;
 
 /**
- * Description of a storage volume and its capabilities, including the
- * filesystem path where it may be mounted.
+ * Information about a storage volume that may be mounted. This is a legacy
+ * specialization of {@link VolumeInfo} which describes the volume for a
+ * specific user.
+ * <p>
+ * This class may be deprecated in the future.
  *
  * @hide
  */
@@ -37,21 +41,16 @@ public class StorageVolume implements Parcelable {
 
     private final String mId;
     private final int mStorageId;
-
     private final File mPath;
-    private final int mDescriptionId;
+    private final String mDescription;
     private final boolean mPrimary;
     private final boolean mRemovable;
     private final boolean mEmulated;
     private final long mMtpReserveSize;
     private final boolean mAllowMassStorage;
-    /** Maximum file size for the storage, or zero for no limit */
     private final long mMaxFileSize;
-    /** When set, indicates exclusive ownership of this volume */
     private final UserHandle mOwner;
-
-    private final String mUuid;
-    private final String mUserLabel;
+    private final String mFsUuid;
     private final String mState;
 
     // StorageVolume extra for ACTION_MEDIA_REMOVED, ACTION_MEDIA_UNMOUNTED, ACTION_MEDIA_CHECKING,
@@ -59,30 +58,29 @@ public class StorageVolume implements Parcelable {
     // ACTION_MEDIA_BAD_REMOVAL, ACTION_MEDIA_UNMOUNTABLE and ACTION_MEDIA_EJECT broadcasts.
     public static final String EXTRA_STORAGE_VOLUME = "storage_volume";
 
-    public StorageVolume(String id, int storageId, File path, int descriptionId, boolean primary,
+    public StorageVolume(String id, int storageId, File path, String description, boolean primary,
             boolean removable, boolean emulated, long mtpReserveSize, boolean allowMassStorage,
-            long maxFileSize, UserHandle owner, String uuid, String userLabel, String state) {
-        mId = id;
+            long maxFileSize, UserHandle owner, String fsUuid, String state) {
+        mId = Preconditions.checkNotNull(id);
         mStorageId = storageId;
-        mPath = path;
-        mDescriptionId = descriptionId;
+        mPath = Preconditions.checkNotNull(path);
+        mDescription = Preconditions.checkNotNull(description);
         mPrimary = primary;
         mRemovable = removable;
         mEmulated = emulated;
         mMtpReserveSize = mtpReserveSize;
         mAllowMassStorage = allowMassStorage;
         mMaxFileSize = maxFileSize;
-        mOwner = owner;
-        mUuid = uuid;
-        mUserLabel = userLabel;
-        mState = state;
+        mOwner = Preconditions.checkNotNull(owner);
+        mFsUuid = fsUuid;
+        mState = Preconditions.checkNotNull(state);
     }
 
     private StorageVolume(Parcel in) {
         mId = in.readString();
         mStorageId = in.readInt();
         mPath = new File(in.readString());
-        mDescriptionId = in.readInt();
+        mDescription = in.readString();
         mPrimary = in.readInt() != 0;
         mRemovable = in.readInt() != 0;
         mEmulated = in.readInt() != 0;
@@ -90,8 +88,7 @@ public class StorageVolume implements Parcelable {
         mAllowMassStorage = in.readInt() != 0;
         mMaxFileSize = in.readLong();
         mOwner = in.readParcelable(null);
-        mUuid = in.readString();
-        mUserLabel = in.readString();
+        mFsUuid = in.readString();
         mState = in.readString();
     }
 
@@ -118,11 +115,7 @@ public class StorageVolume implements Parcelable {
      * @return the volume description
      */
     public String getDescription(Context context) {
-        return context.getResources().getString(mDescriptionId);
-    }
-
-    public int getDescriptionId() {
-        return mDescriptionId;
+        return mDescription;
     }
 
     public boolean isPrimary() {
@@ -196,7 +189,7 @@ public class StorageVolume implements Parcelable {
     }
 
     public String getUuid() {
-        return mUuid;
+        return mFsUuid;
     }
 
     /**
@@ -204,18 +197,18 @@ public class StorageVolume implements Parcelable {
      * parse or UUID is unknown.
      */
     public int getFatVolumeId() {
-        if (mUuid == null || mUuid.length() != 9) {
+        if (mFsUuid == null || mFsUuid.length() != 9) {
             return -1;
         }
         try {
-            return (int)Long.parseLong(mUuid.replace("-", ""), 16);
+            return (int) Long.parseLong(mFsUuid.replace("-", ""), 16);
         } catch (NumberFormatException e) {
             return -1;
         }
     }
 
     public String getUserLabel() {
-        return mUserLabel;
+        return mDescription;
     }
 
     public String getState() {
@@ -249,7 +242,7 @@ public class StorageVolume implements Parcelable {
         pw.printPair("mId", mId);
         pw.printPair("mStorageId", mStorageId);
         pw.printPair("mPath", mPath);
-        pw.printPair("mDescriptionId", mDescriptionId);
+        pw.printPair("mDescription", mDescription);
         pw.printPair("mPrimary", mPrimary);
         pw.printPair("mRemovable", mRemovable);
         pw.printPair("mEmulated", mEmulated);
@@ -257,8 +250,7 @@ public class StorageVolume implements Parcelable {
         pw.printPair("mAllowMassStorage", mAllowMassStorage);
         pw.printPair("mMaxFileSize", mMaxFileSize);
         pw.printPair("mOwner", mOwner);
-        pw.printPair("mUuid", mUuid);
-        pw.printPair("mUserLabel", mUserLabel);
+        pw.printPair("mFsUuid", mFsUuid);
         pw.printPair("mState", mState);
         pw.decreaseIndent();
     }
@@ -285,7 +277,7 @@ public class StorageVolume implements Parcelable {
         parcel.writeString(mId);
         parcel.writeInt(mStorageId);
         parcel.writeString(mPath.toString());
-        parcel.writeInt(mDescriptionId);
+        parcel.writeString(mDescription);
         parcel.writeInt(mPrimary ? 1 : 0);
         parcel.writeInt(mRemovable ? 1 : 0);
         parcel.writeInt(mEmulated ? 1 : 0);
@@ -293,8 +285,7 @@ public class StorageVolume implements Parcelable {
         parcel.writeInt(mAllowMassStorage ? 1 : 0);
         parcel.writeLong(mMaxFileSize);
         parcel.writeParcelable(mOwner, flags);
-        parcel.writeString(mUuid);
-        parcel.writeString(mUserLabel);
+        parcel.writeString(mFsUuid);
         parcel.writeString(mState);
     }
 }

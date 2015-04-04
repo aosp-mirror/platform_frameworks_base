@@ -33,14 +33,13 @@ import android.provider.Settings;
 import android.util.Log;
 import android.util.SparseArray;
 
-import libcore.util.EmptyArray;
-
 import com.android.internal.util.Preconditions;
 
 import java.io.File;
 import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -63,6 +62,9 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public class StorageManager {
     private static final String TAG = "StorageManager";
+
+    /** {@hide} */
+    public static final String PROP_PRIMARY_PHYSICAL = "ro.vold.primary_physical";
 
     private final Context mContext;
     private final ContentResolver mResolver;
@@ -555,6 +557,24 @@ public class StorageManager {
     }
 
     /** {@hide} */
+    public @NonNull List<DiskInfo> getDisks() {
+        try {
+            return Arrays.asList(mMountService.getDisks());
+        } catch (RemoteException e) {
+            throw e.rethrowAsRuntimeException();
+        }
+    }
+
+    /** {@hide} */
+    public @NonNull List<VolumeInfo> getVolumes() {
+        try {
+            return Arrays.asList(mMountService.getVolumes());
+        } catch (RemoteException e) {
+            throw e.rethrowAsRuntimeException();
+        }
+    }
+
+    /** {@hide} */
     public @Nullable StorageVolume getStorageVolume(File file) {
         return getStorageVolume(getVolumeList(), file);
     }
@@ -597,16 +617,9 @@ public class StorageManager {
         }
     }
 
-    /**
-     * Returns list of all mountable volumes.
-     * @hide
-     */
+    /** {@hide} */
     public @NonNull StorageVolume[] getVolumeList() {
-        try {
-            return mMountService.getVolumeList(mContext.getUserId());
-        } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
-        }
+        return getVolumeList(mContext.getUserId());
     }
 
     /** {@hide} */

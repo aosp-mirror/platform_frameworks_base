@@ -18,6 +18,7 @@ package com.android.internal.util;
 
 import java.io.PrintWriter;
 import java.io.Writer;
+import java.util.Arrays;
 
 /**
  * Lightweight wrapper around {@link PrintWriter} that automatically indents
@@ -66,6 +67,10 @@ public class IndentingPrintWriter extends PrintWriter {
 
     public void printPair(String key, Object value) {
         print(key + "=" + String.valueOf(value) + " ");
+    }
+
+    public void printPair(String key, Object[] value) {
+        print(key + "=" + Arrays.toString(value) + " ");
     }
 
     public void printHexPair(String key, int value) {

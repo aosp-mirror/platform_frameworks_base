@@ -904,6 +904,40 @@ public interface IMountService extends IInterface {
                 }
                 return;
             }
+
+            @Override
+            public DiskInfo[] getDisks() throws RemoteException {
+                Parcel _data = Parcel.obtain();
+                Parcel _reply = Parcel.obtain();
+                DiskInfo[] _result;
+                try {
+                    _data.writeInterfaceToken(DESCRIPTOR);
+                    mRemote.transact(Stub.TRANSACTION_getDisks, _data, _reply, 0);
+                    _reply.readException();
+                    _result = _reply.createTypedArray(DiskInfo.CREATOR);
+                } finally {
+                    _reply.recycle();
+                    _data.recycle();
+                }
+                return _result;
+            }
+
+            @Override
+            public VolumeInfo[] getVolumes() throws RemoteException {
+                Parcel _data = Parcel.obtain();
+                Parcel _reply = Parcel.obtain();
+                VolumeInfo[] _result;
+                try {
+                    _data.writeInterfaceToken(DESCRIPTOR);
+                    mRemote.transact(Stub.TRANSACTION_getDisks, _data, _reply, 0);
+                    _reply.readException();
+                    _result = _reply.createTypedArray(VolumeInfo.CREATOR);
+                } finally {
+                    _reply.recycle();
+                    _data.recycle();
+                }
+                return _result;
+            }
         }
 
         private static final String DESCRIPTOR = "IMountService";
@@ -995,6 +1029,10 @@ public interface IMountService extends IInterface {
         static final int TRANSACTION_runMaintenance = IBinder.FIRST_CALL_TRANSACTION + 42;
 
         static final int TRANSACTION_waitForAsecScan = IBinder.FIRST_CALL_TRANSACTION + 43;
+
+        static final int TRANSACTION_getDisks = IBinder.FIRST_CALL_TRANSACTION + 44;
+
+        static final int TRANSACTION_getVolumes = IBinder.FIRST_CALL_TRANSACTION + 45;
 
         /**
          * Cast an IBinder object into an IMountService interface, generating a
@@ -1421,6 +1459,20 @@ public interface IMountService extends IInterface {
                     reply.writeNoException();
                     return true;
                 }
+                case TRANSACTION_getDisks: {
+                    data.enforceInterface(DESCRIPTOR);
+                    DiskInfo[] disks = getDisks();
+                    reply.writeNoException();
+                    reply.writeTypedArray(disks, android.os.Parcelable.PARCELABLE_WRITE_RETURN_VALUE);
+                    return true;
+                }
+                case TRANSACTION_getVolumes: {
+                    data.enforceInterface(DESCRIPTOR);
+                    VolumeInfo[] volumes = getVolumes();
+                    reply.writeNoException();
+                    reply.writeTypedArray(volumes, android.os.Parcelable.PARCELABLE_WRITE_RETURN_VALUE);
+                    return true;
+                }
             }
             return super.onTransact(code, data, reply, flags);
         }
@@ -1707,4 +1759,7 @@ public interface IMountService extends IInterface {
     public void runMaintenance() throws RemoteException;
 
     public void waitForAsecScan() throws RemoteException;
+
+    public DiskInfo[] getDisks() throws RemoteException;
+    public VolumeInfo[] getVolumes() throws RemoteException;
 }

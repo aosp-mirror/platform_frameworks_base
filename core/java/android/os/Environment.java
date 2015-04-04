@@ -80,11 +80,11 @@ public class Environment {
 
         public File[] getExternalDirs() {
             final StorageVolume[] volumes = StorageManager.getVolumeList(mUserId);
-            final File[] dirs = new File[volumes.length];
+            final File[] files = new File[volumes.length];
             for (int i = 0; i < volumes.length; i++) {
-                dirs[i] = volumes[i].getPathFile();
+                files[i] = volumes[i].getPathFile();
             }
-            return dirs;
+            return files;
         }
 
         @Deprecated
