@@ -30,7 +30,8 @@
     <string name="menu_share" msgid="3075149983979628146">"공유"</string>
     <string name="menu_delete" msgid="8138799623850614177">"삭제"</string>
     <string name="menu_select" msgid="8711270657353563424">"\'<xliff:g id="DIRECTORY">^1</xliff:g>\' 선택"</string>
-    <!-- no translation found for menu_select_all (4320518282375109902) -->
+    <string name="menu_select_all" msgid="4320518282375109902">"모두 선택"</string>
+    <!-- no translation found for menu_copy (3612326052677229148) -->
     <skip />
     <string name="menu_advanced_show" product="nosdcard" msgid="4693652895715631401">"내부 저장소 표시"</string>
     <string name="menu_advanced_show" product="default" msgid="5792182900084144261">"SD 카드 표시"</string>
@@ -57,4 +58,10 @@
     <string name="toast_no_application" msgid="1339885974067891667">"파일을 열 수 없음"</string>
     <string name="toast_failed_delete" msgid="2180678019407244069">"일부 문서를 삭제할 수 없음"</string>
     <string name="share_via" msgid="8966594246261344259">"공유 방법"</string>
+    <string name="cancel" msgid="6442560571259935130">"취소"</string>
+    <!-- no translation found for copy_notification_title (6374299806748219777) -->
+    <skip />
+    <!-- no translation found for copy_remaining (6283790937387975095) -->
+    <skip />
+    <!-- no translation found for copy_begin (9071199452634086365) -->
 </resources>

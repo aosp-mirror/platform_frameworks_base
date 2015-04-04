@@ -30,7 +30,8 @@
     <string name="menu_share" msgid="3075149983979628146">"ভাগ করুন"</string>
     <string name="menu_delete" msgid="8138799623850614177">"মুছুন"</string>
     <string name="menu_select" msgid="8711270657353563424">"\"<xliff:g id="DIRECTORY">^1</xliff:g>\" নির্বাচন করুন"</string>
-    <!-- no translation found for menu_select_all (4320518282375109902) -->
+    <string name="menu_select_all" msgid="4320518282375109902">"সমস্ত নির্বাচন করুন"</string>
+    <!-- no translation found for menu_copy (3612326052677229148) -->
     <skip />
     <string name="menu_advanced_show" product="nosdcard" msgid="4693652895715631401">"অভ্যন্তরীণ সঞ্চয়স্থান দেখান"</string>
     <string name="menu_advanced_show" product="default" msgid="5792182900084144261">"SD কার্ড দেখান"</string>
@@ -57,4 +58,10 @@
     <string name="toast_no_application" msgid="1339885974067891667">"ফাইল খোলা যাবে না"</string>
     <string name="toast_failed_delete" msgid="2180678019407244069">"কিছু দস্তাবেজ মুছতে অসমর্থ"</string>
     <string name="share_via" msgid="8966594246261344259">"এর মাধ্যমে ভাগ করুন"</string>
+    <string name="cancel" msgid="6442560571259935130">"বাতিল করুন"</string>
+    <!-- no translation found for copy_notification_title (6374299806748219777) -->
+    <skip />
+    <!-- no translation found for copy_remaining (6283790937387975095) -->
+    <skip />
+    <!-- no translation found for copy_begin (9071199452634086365) -->
 </resources>
