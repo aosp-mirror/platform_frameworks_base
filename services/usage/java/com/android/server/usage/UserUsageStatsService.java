@@ -19,8 +19,11 @@ package com.android.server.usage;
 import android.app.usage.ConfigurationStats;
 import android.app.usage.TimeSparseArray;
 import android.app.usage.UsageEvents;
+import android.app.usage.UsageEvents.Event;
 import android.app.usage.UsageStats;
 import android.app.usage.UsageStatsManager;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.os.SystemClock;
 import android.content.Context;
@@ -60,6 +63,7 @@ class UserUsageStatsService {
     private final UnixCalendar mDailyExpiryDate;
     private final StatsUpdatedListener mListener;
     private final String mLogPrefix;
+    private final int mUserId;
 
     interface StatsUpdatedListener {
         void onStatsUpdated();
@@ -73,6 +77,7 @@ class UserUsageStatsService {
         mCurrentStats = new IntervalStats[UsageStatsManager.INTERVAL_COUNT];
         mListener = listener;
         mLogPrefix = "User[" + Integer.toString(userId) + "] ";
+        mUserId = userId;
     }
 
     void init(final long currentTimeMillis) {
@@ -128,6 +133,35 @@ class UserUsageStatsService {
 
             stat.updateConfigurationStats(null, stat.lastTimeSaved);
         }
+
+        if (mDatabase.isNewUpdate()) {
+            initializeDefaultsForApps(currentTimeMillis, mDatabase.isFirstUpdate());
+        }
+    }
+
+    /**
+     * If any of the apps don't have a last-used entry, add one now.
+     * @param currentTimeMillis the current time
+     * @param firstUpdate if it is the first update, touch all installed apps, otherwise only
+     *        touch the system apps
+     */
+    private void initializeDefaultsForApps(long currentTimeMillis, boolean firstUpdate) {
+        PackageManager pm = mContext.getPackageManager();
+        List<PackageInfo> packages = pm.getInstalledPackages(0, mUserId);
+        final int packageCount = packages.size();
+        for (int i = 0; i < packageCount; i++) {
+            final PackageInfo pi = packages.get(i);
+            String packageName = pi.packageName;
+            if (pi.applicationInfo != null && (firstUpdate || pi.applicationInfo.isSystemApp())
+                    && getLastPackageAccessTime(packageName) == -1) {
+                for (IntervalStats stats : mCurrentStats) {
+                    stats.update(packageName, currentTimeMillis, Event.INTERACTION);
+                    mStatsChanged = true;
+                }
+            }
+        }
+        // Persist the new OTA-related access stats.
+        persistActiveStats();
     }
 
     void onTimeChanged(long oldTime, long newTime) {

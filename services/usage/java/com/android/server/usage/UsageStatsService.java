@@ -92,7 +92,7 @@ public class UsageStatsService extends SystemService implements
     long mRealTimeSnapshot;
     long mSystemTimeSnapshot;
 
-    private static final long DEFAULT_APP_IDLE_THRESHOLD_MILLIS = 3L * 24 * 60 * 60 * 1000; //3 days
+    private static final long DEFAULT_APP_IDLE_THRESHOLD_MILLIS = 1L * 24 * 60 * 60 * 1000; // 1 day
     private long mAppIdleDurationMillis;
 
     private ArrayList<UsageStatsManagerInternal.AppIdleStateChangeListener>
