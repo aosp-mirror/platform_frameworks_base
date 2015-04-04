@@ -124,9 +124,19 @@
     <string name="roamingText12" msgid="1189071119992726320">"ரோமிங் பேனர் முடக்கப்பட்டது"</string>
     <string name="roamingTextSearching" msgid="8360141885972279963">"சேவையைத் தேடுகிறது"</string>
     <string name="wfcRegErrorTitle" msgid="2301376280632110664">"வைஃபை அழைப்பு"</string>
-  <string-array name="wfcOperatorErrorMessages">
+  <string-array name="wfcOperatorErrorAlertMessages">
+  </string-array>
+  <string-array name="wfcOperatorErrorNotificationMessages">
   </string-array>
     <string name="wfcSpnFormat" msgid="8211621332478306568">"%s"</string>
+    <!-- no translation found for wifi_calling_off_summary (8720659586041656098) -->
+    <skip />
+    <!-- no translation found for wfc_mode_wifi_preferred_summary (1994113411286935263) -->
+    <skip />
+    <!-- no translation found for wfc_mode_cellular_preferred_summary (5920549484600758786) -->
+    <skip />
+    <!-- no translation found for wfc_mode_wifi_only_summary (2379919155237869320) -->
+    <skip />
     <string name="cfTemplateNotForwarded" msgid="1683685883841272560">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: பகிரப்படவில்லை"</string>
     <string name="cfTemplateForwarded" msgid="1302922117498590521">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
     <string name="cfTemplateForwardedTime" msgid="9206251736527085256">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="TIME_DELAY">{2}</xliff:g> வினாடிகளுக்குப் பிறகு <xliff:g id="DIALING_NUMBER">{1}</xliff:g> ஐப் பகிர்"</string>
@@ -585,8 +595,7 @@
     <string name="permdesc_camera" msgid="8497216524735535009">"கேமரா மூலமாகப் படங்களையும், வீடியோக்களையும் எடுக்க பயன்பாட்டை அனுமதிக்கிறது. உங்கள் உறுதிப்படுத்தல் இன்றி கேமராவை எந்நேரத்திலும் பயன்படுத்தப் பயன்பாட்டை இது அனுமதிக்கிறது."</string>
     <string name="permlab_cameraDisableTransmitLed" msgid="2651072630501126222">"கேமரா பயன்பாட்டில் இருக்கும்போது டிரான்ஸ்மிட் இன்டிகேட்டர் LED ஐ முடக்குதல்"</string>
     <string name="permdesc_cameraDisableTransmitLed" msgid="4764585465480295341">"இன்டிகேட்டர் LED ஐ கேமரா பயன்படுத்துவதை முடக்க, முன்நிறுவப்பட்ட அமைப்பு பயன்பாட்டை அனுமதிக்கிறது."</string>
-    <!-- no translation found for permdesc_cameraSendSystemEvent (8642231538552298107) -->
-    <skip />
+    <string name="permdesc_cameraSendSystemEvent" msgid="8642231538552298107">"முறைமை நிகழ்வுகள் பற்றிய கேமரா சேவை அறிவிப்புகளை அனுப்ப, முன்நிறுவப்பட்ட முறைமை பயன்பாட்டை அனுமதிக்கும்."</string>
     <string name="permlab_brick" product="tablet" msgid="2961292205764488304">"டேப்லெட்டை நிரந்தரமாக முடக்குதல்"</string>
     <string name="permlab_brick" product="tv" msgid="4912674222121249410">"டிவியை நிரந்தரமாக முடக்குதல்"</string>
     <string name="permlab_brick" product="default" msgid="8337817093326370537">"தொலைபேசியை நிரந்தரமாக முடக்குதல்"</string>
@@ -635,6 +644,10 @@
     <string name="permlab_performCdmaProvisioning" product="tv" msgid="3485391974208100809">"CDMA TV அமைவிலிருந்து நேரடியாக தொடங்குதல்"</string>
     <string name="permlab_performCdmaProvisioning" product="default" msgid="5604848095315421425">"CDMA தொலைபேசி அமைவை நேரடியாகத் தொடங்குதல்"</string>
     <string name="permdesc_performCdmaProvisioning" msgid="1994193538802314186">"CDMA வழங்கலைத் தொடங்க, பயன்பாட்டை அனுமதிக்கிறது. தீங்குவிளைவிக்கும் பயன்பாடுகள் தேவையில்லாமல் CDMA வழங்கலைத் தொடங்கலாம்."</string>
+    <!-- no translation found for permlab_performSimActivation (1651116521896665009) -->
+    <skip />
+    <!-- no translation found for permdesc_performSimActivation (1778214876348917401) -->
+    <skip />
     <string name="permlab_locationUpdates" msgid="7785408253364335740">"இட புதுப்பிப்பு அறிவிப்புகளைக் கட்டுப்படுத்துதல்"</string>
     <string name="permdesc_locationUpdates" msgid="1120741557891438876">"ரேடியோவிலிருந்து இருப்பிட புதுப்பிப்பு அறிவிப்புகளை இயக்க/முடக்க பயன்பாட்டை அனுமதிக்கிறது. சாதாரண பயன்பாடுகள் பயன்படுத்தாது."</string>
     <string name="permlab_checkinProperties" msgid="7855259461268734914">"செக்இன் பண்புகளின் அணுகல்"</string>
@@ -841,6 +854,10 @@
     <string name="permdesc_removeDrmCertificates" msgid="7272999075113400993">"DRM சான்றிதழ்களை அகற்ற, பயன்பாட்டை அனுமதிக்கிறது. சாதாரண பயன்பாடுகளுக்கு எப்போதுமே தேவைப்படாது."</string>
     <string name="permlab_bindCarrierMessagingService" msgid="1490229371796969158">"மொபைல் நிறுவனச் செய்தியிடல் சேவையுடன் இணைத்தல்"</string>
     <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"மொபைல் நிறுவனச் செய்தியிடல் சேவையின் உயர்-நிலை இடைமுகத்துடன் ஹோல்டரை இணைக்க அனுமதிக்கும். இயல்பான பயன்பாடுகளுக்குத் தேவைப்படாது."</string>
+    <!-- no translation found for permlab_accessVoiceInteractionService (4183835260471435605) -->
+    <skip />
+    <!-- no translation found for permdesc_accessVoiceInteractionService (836587728238433459) -->
+    <skip />
     <string name="policylab_limitPassword" msgid="4497420728857585791">"கடவுச்சொல் விதிகளை அமைக்கவும்"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"திரைப் பூட்டின் கடவுச்சொற்கள் மற்றும் பின்களில் அனுமதிக்கப்படும் நீளத்தையும் எழுத்துக்குறிகளையும் கட்டுப்படுத்தும்."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"திரைத் திறக்க முயற்சிகளைக் கண்காணித்தல்"</string>

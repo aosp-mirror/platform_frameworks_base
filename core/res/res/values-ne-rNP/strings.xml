@@ -124,9 +124,19 @@
     <string name="roamingText12" msgid="1189071119992726320">"रोमिङ ब्यानर बन्द छ"</string>
     <string name="roamingTextSearching" msgid="8360141885972279963">"सेवाको खोजी गर्दै…"</string>
     <string name="wfcRegErrorTitle" msgid="2301376280632110664">"Wi-Fi कलिङ"</string>
-  <string-array name="wfcOperatorErrorMessages">
+  <string-array name="wfcOperatorErrorAlertMessages">
+  </string-array>
+  <string-array name="wfcOperatorErrorNotificationMessages">
   </string-array>
     <string name="wfcSpnFormat" msgid="8211621332478306568">"%s"</string>
+    <!-- no translation found for wifi_calling_off_summary (8720659586041656098) -->
+    <skip />
+    <!-- no translation found for wfc_mode_wifi_preferred_summary (1994113411286935263) -->
+    <skip />
+    <!-- no translation found for wfc_mode_cellular_preferred_summary (5920549484600758786) -->
+    <skip />
+    <!-- no translation found for wfc_mode_wifi_only_summary (2379919155237869320) -->
+    <skip />
     <string name="cfTemplateNotForwarded" msgid="1683685883841272560">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: अगाडि पठाइएको छैन"</string>
     <string name="cfTemplateForwarded" msgid="1302922117498590521">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
     <string name="cfTemplateForwardedTime" msgid="9206251736527085256">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g> पछि <xliff:g id="TIME_DELAY">{2}</xliff:g> सेकेन्ड"</string>
@@ -585,8 +595,7 @@
     <string name="permdesc_camera" msgid="8497216524735535009">"अनुप्रयोगलाई क्यामेरासँग तस्बिर र भिडियोहरू लिन अनुमति दिन्छ। यस अनुमतिले अनुप्रयोगलाई तपाईंको पुष्टिकरण बिना कुनै पनि समयमा क्यामेरा प्रयोग गर्न स्वीकृति दिन्छ।"</string>
     <string name="permlab_cameraDisableTransmitLed" msgid="2651072630501126222">"क्यामेरा प्रयोगमा हुँदा सूचक LED प्रसारण असक्षम गर्नुहोस्"</string>
     <string name="permdesc_cameraDisableTransmitLed" msgid="4764585465480295341">"पूर्व-स्थापित प्रणाली अनुप्रयोगलाई क्यामेरा उपयोग सूचक LED अक्षम गर्न अनुमति दिन्छ।"</string>
-    <!-- no translation found for permdesc_cameraSendSystemEvent (8642231538552298107) -->
-    <skip />
+    <string name="permdesc_cameraSendSystemEvent" msgid="8642231538552298107">"एउटा पूर्व-स्थापित प्रणाली अनुप्रयोगलाई क्यामेरा सेवा प्रणाली घटनाहरू पठाउन अनुमति दिन्छ।"</string>
     <string name="permlab_brick" product="tablet" msgid="2961292205764488304">"स्थायी रूपमा ट्याब्लेट असक्षम पार्नुहोस्"</string>
     <string name="permlab_brick" product="tv" msgid="4912674222121249410">"स्थायी रूपमा TV अक्षम गर्नुहोस्"</string>
     <string name="permlab_brick" product="default" msgid="8337817093326370537">"फोनलाई स्थायी रूपमा असक्षम पार्नहोस्"</string>
@@ -635,6 +644,10 @@
     <string name="permlab_performCdmaProvisioning" product="tv" msgid="3485391974208100809">"प्रत्यक्ष CDMA TV सेटअप सुरु गर्नुहोस्"</string>
     <string name="permlab_performCdmaProvisioning" product="default" msgid="5604848095315421425">"CDMA फोन सेटअप सिधै सुरु गर्नुहोस्"</string>
     <string name="permdesc_performCdmaProvisioning" msgid="1994193538802314186">"अनुप्रयोगलाई CDMA प्रावधान सुरu गर्न अनुमति दिन्छ। खराब अनुप्रयोगहरूले अनावश्यक रूपमा CDMA प्रावधान सुरु गर्न सक्छन्।"</string>
+    <!-- no translation found for permlab_performSimActivation (1651116521896665009) -->
+    <skip />
+    <!-- no translation found for permdesc_performSimActivation (1778214876348917401) -->
+    <skip />
     <string name="permlab_locationUpdates" msgid="7785408253364335740">"स्थान अपडेट सूचनाहरू नियन्त्रण गर्नुहोस्"</string>
     <string name="permdesc_locationUpdates" msgid="1120741557891438876">"रेडियोबाट स्थान अद्यावधिक सूचनाहरूलाई सक्षम/असक्षम गर्न अनुप्रयोगलाई अनुमति दिन्छ। सामान्य अनुप्रयोगहरूबाट प्रयोग नहुने।"</string>
     <string name="permlab_checkinProperties" msgid="7855259461268734914">"परीक्षण विशेषताहरू पहुँच गर्नुहोस्"</string>
@@ -841,6 +854,10 @@
     <string name="permdesc_removeDrmCertificates" msgid="7272999075113400993">"DRM प्रमाणपत्रहरू हटाउन अनुप्रयोगलाई अनुमति दिन्छ। सामान्य अनुप्रयोगहरूको लागि कहिल्यै आवश्यकता पर्दैन।"</string>
     <string name="permlab_bindCarrierMessagingService" msgid="1490229371796969158">"वाहक मेसेजिङ सेवामा आबद्ध हुनुहोस्"</string>
     <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"धारकलाई वाहक मेसेजिङ सेवाको उच्च-स्तरको इन्टरफेसमा आबद्ध हुन अनुमति दिनुहोस्। सामान्य एपहरूको लागि कहिल्यै आवश्यकता पर्दैन।"</string>
+    <!-- no translation found for permlab_accessVoiceInteractionService (4183835260471435605) -->
+    <skip />
+    <!-- no translation found for permdesc_accessVoiceInteractionService (836587728238433459) -->
+    <skip />
     <string name="policylab_limitPassword" msgid="4497420728857585791">"पासवर्ड नियमहरू मिलाउनुहोस्"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"स्क्रिन लक पासवर्ड र PIN हरूमा अनुमति दिइएको लम्बाइ र वर्णहरूको नियन्त्रण गर्नुहोस्।"</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"मोनिटर स्क्रिन-अनलक प्रयत्नहरू"</string>

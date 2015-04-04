@@ -124,9 +124,19 @@
     <string name="roamingText12" msgid="1189071119992726320">"Roaming-banneri pois käytöstä"</string>
     <string name="roamingTextSearching" msgid="8360141885972279963">"Etsitään signaalia"</string>
     <string name="wfcRegErrorTitle" msgid="2301376280632110664">"Wi-Fi-puhelut"</string>
-  <string-array name="wfcOperatorErrorMessages">
+  <string-array name="wfcOperatorErrorAlertMessages">
+  </string-array>
+  <string-array name="wfcOperatorErrorNotificationMessages">
   </string-array>
     <string name="wfcSpnFormat" msgid="8211621332478306568">"%s"</string>
+    <!-- no translation found for wifi_calling_off_summary (8720659586041656098) -->
+    <skip />
+    <!-- no translation found for wfc_mode_wifi_preferred_summary (1994113411286935263) -->
+    <skip />
+    <!-- no translation found for wfc_mode_cellular_preferred_summary (5920549484600758786) -->
+    <skip />
+    <!-- no translation found for wfc_mode_wifi_only_summary (2379919155237869320) -->
+    <skip />
     <string name="cfTemplateNotForwarded" msgid="1683685883841272560">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: ei siirretty"</string>
     <string name="cfTemplateForwarded" msgid="1302922117498590521">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
     <string name="cfTemplateForwardedTime" msgid="9206251736527085256">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g> <xliff:g id="TIME_DELAY">{2}</xliff:g> sekunnin päästä"</string>
@@ -585,8 +595,7 @@
     <string name="permdesc_camera" msgid="8497216524735535009">"Antaa sovelluksen ottaa kuvia ja kuvata videoita kameralla. Sovellus voi käyttää kameraa milloin tahansa ilman lupaasi."</string>
     <string name="permlab_cameraDisableTransmitLed" msgid="2651072630501126222">"poista lähetyksen merkkivalo käytöstä, kun kameraa käytetään"</string>
     <string name="permdesc_cameraDisableTransmitLed" msgid="4764585465480295341">"Antaa valmiiksi asennetun järjestelmäsovelluksen poistaa käytöstä kameran käytössäolon merkkivalon."</string>
-    <!-- no translation found for permdesc_cameraSendSystemEvent (8642231538552298107) -->
-    <skip />
+    <string name="permdesc_cameraSendSystemEvent" msgid="8642231538552298107">"Antaa valmiiksi asennetun järjestelmäsovelluksen lähettää kamerapalvelulle tietoja järjestelmätapahtumista."</string>
     <string name="permlab_brick" product="tablet" msgid="2961292205764488304">"poista tabletti käytöstä lopullisesti"</string>
     <string name="permlab_brick" product="tv" msgid="4912674222121249410">"Poista televisio pysyvästi käytöstä"</string>
     <string name="permlab_brick" product="default" msgid="8337817093326370537">"poista puhelin käytöstä pysyvästi"</string>
@@ -635,6 +644,10 @@
     <string name="permlab_performCdmaProvisioning" product="tv" msgid="3485391974208100809">"Käynnistä CDMA-television asetusten määrittäminen"</string>
     <string name="permlab_performCdmaProvisioning" product="default" msgid="5604848095315421425">"aloita CDMA-puhelimen asetuksien määrittäminen"</string>
     <string name="permdesc_performCdmaProvisioning" msgid="1994193538802314186">"Antaa sovelluksen aloittaa CDMA-määrityksen. Haitalliset sovellukset voivat aloittaa tarpeettoman CDMA-määrityksen."</string>
+    <!-- no translation found for permlab_performSimActivation (1651116521896665009) -->
+    <skip />
+    <!-- no translation found for permdesc_performSimActivation (1778214876348917401) -->
+    <skip />
     <string name="permlab_locationUpdates" msgid="7785408253364335740">"hallitse sijaintien päivitysilmoituksia"</string>
     <string name="permdesc_locationUpdates" msgid="1120741557891438876">"Antaa sovelluksen ottaa käyttöön / poistaa käytöstä radion sijainninpäivitysilmoitukset. Ei tavallisten sovellusten käyttöön."</string>
     <string name="permlab_checkinProperties" msgid="7855259461268734914">"käyttää checkin-asetuksia"</string>
@@ -841,6 +854,10 @@
     <string name="permdesc_removeDrmCertificates" msgid="7272999075113400993">"Antaa sovelluksen poistaa DRM-varmenteita. Ei tavallisten sovellusten käyttöön."</string>
     <string name="permlab_bindCarrierMessagingService" msgid="1490229371796969158">"Operaattorin viestipalveluun sitoutuminen"</string>
     <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"Antaa sovelluksen sitoutua operaattorin viestipalvelun ylätason liittymään. Ei tavallisten sovellusten käyttöön."</string>
+    <!-- no translation found for permlab_accessVoiceInteractionService (4183835260471435605) -->
+    <skip />
+    <!-- no translation found for permdesc_accessVoiceInteractionService (836587728238433459) -->
+    <skip />
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Aseta salasanasäännöt"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"Hallinnoi ruudun ruudun lukituksen salasanoissa ja PIN-koodeissa sallittuja merkkejä ja niiden pituutta."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Tarkkaile ruudun lukituksen poistoyrityksiä"</string>
@@ -1138,14 +1155,10 @@
     <string name="permdesc_packageVerificationAgent" msgid="8437590190990843381">"Antaa sovelluksen vahvistaa, että pakkaus on asennettavissa."</string>
     <string name="permlab_bindPackageVerifier" msgid="4187786793360326654">"sitoudu paketin vahvistajaan"</string>
     <string name="permdesc_bindPackageVerifier" msgid="3180741773233862126">"Antaa sovelluksen tehdä pakettien vahvistuspyyntöjä. Ei tavallisten sovellusten käyttöön."</string>
-    <!-- no translation found for permlab_intentFilterVerificationAgent (1135788294400437497) -->
-    <skip />
-    <!-- no translation found for permdesc_intentFilterVerificationAgent (5853902808424716312) -->
-    <skip />
-    <!-- no translation found for permlab_bindIntentFilterVerifier (8567268159430779210) -->
-    <skip />
-    <!-- no translation found for permdesc_bindIntentFilterVerifier (681128728719578778) -->
-    <skip />
+    <string name="permlab_intentFilterVerificationAgent" msgid="1135788294400437497">"vahvista aikomussuodatin"</string>
+    <string name="permdesc_intentFilterVerificationAgent" msgid="5853902808424716312">"Antaa sovelluksen tarkistaa, onko aikomussuodatin vahvistettu vai ei."</string>
+    <string name="permlab_bindIntentFilterVerifier" msgid="8567268159430779210">"sitoudu aikomussuodattimen vahvistuspalveluun"</string>
+    <string name="permdesc_bindIntentFilterVerifier" msgid="681128728719578778">"Antaa sovelluksen tehdä aikomussuodattimen vahvistuspyyntöjä. Ei tavallisten sovellusten käyttöön."</string>
     <string name="permlab_serialPort" msgid="546083327654631076">"käytä sarjaportteja"</string>
     <string name="permdesc_serialPort" msgid="2991639985224598193">"Luvan haltija voi käyttää sarjaportteja SerialManager-sovellusliittymän avulla."</string>
     <string name="permlab_accessContentProvidersExternally" msgid="5077774297943409285">"käytä ulkoisia sisällöntarjoajia"</string>
@@ -1571,10 +1584,8 @@
     <string name="date_picker_decrement_day_button" msgid="4131881521818750031">"Vähennä päivien määrää."</string>
     <string name="date_picker_increment_year_button" msgid="6318697384310808899">"Lisää vuosien määrää."</string>
     <string name="date_picker_decrement_year_button" msgid="4482021813491121717">"Vähennä vuosien määrää."</string>
-    <!-- no translation found for date_picker_prev_month_button (2858244643992056505) -->
-    <skip />
-    <!-- no translation found for date_picker_next_month_button (5559507736887605055) -->
-    <skip />
+    <string name="date_picker_prev_month_button" msgid="2858244643992056505">"Edellinen kuukausi"</string>
+    <string name="date_picker_next_month_button" msgid="5559507736887605055">"Seuraava kuukausi"</string>
     <string name="keyboardview_keycode_alt" msgid="4856868820040051939">"Alt"</string>
     <string name="keyboardview_keycode_cancel" msgid="1203984017245783244">"Peruuta"</string>
     <string name="keyboardview_keycode_delete" msgid="3337914833206635744">"Poista"</string>

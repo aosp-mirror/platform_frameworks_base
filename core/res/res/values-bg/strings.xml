@@ -124,9 +124,19 @@
     <string name="roamingText12" msgid="1189071119992726320">"Банерът за роуминг е изключен"</string>
     <string name="roamingTextSearching" msgid="8360141885972279963">"Търси се покритие"</string>
     <string name="wfcRegErrorTitle" msgid="2301376280632110664">"Обаждания през Wi-Fi"</string>
-  <string-array name="wfcOperatorErrorMessages">
+  <string-array name="wfcOperatorErrorAlertMessages">
+  </string-array>
+  <string-array name="wfcOperatorErrorNotificationMessages">
   </string-array>
     <string name="wfcSpnFormat" msgid="8211621332478306568">"%s"</string>
+    <!-- no translation found for wifi_calling_off_summary (8720659586041656098) -->
+    <skip />
+    <!-- no translation found for wfc_mode_wifi_preferred_summary (1994113411286935263) -->
+    <skip />
+    <!-- no translation found for wfc_mode_cellular_preferred_summary (5920549484600758786) -->
+    <skip />
+    <!-- no translation found for wfc_mode_wifi_only_summary (2379919155237869320) -->
+    <skip />
     <string name="cfTemplateNotForwarded" msgid="1683685883841272560">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: Не е пренасочено"</string>
     <string name="cfTemplateForwarded" msgid="1302922117498590521">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
     <string name="cfTemplateForwardedTime" msgid="9206251736527085256">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g> след <xliff:g id="TIME_DELAY">{2}</xliff:g> секунди"</string>
@@ -585,8 +595,7 @@
     <string name="permdesc_camera" msgid="8497216524735535009">"Разрешава на приложението да прави снимки и видеоклипове с камерата. Това разрешение му позволява да я използва по всяко време без потвърждение от ваша страна."</string>
     <string name="permlab_cameraDisableTransmitLed" msgid="2651072630501126222">"деактивиране на светодиодния индикатор за предаване, когато камерата се използва"</string>
     <string name="permdesc_cameraDisableTransmitLed" msgid="4764585465480295341">"Разрешава на предварително инсталирано системно приложение да деактивира светодиодния индикатор за използване на камерата."</string>
-    <!-- no translation found for permdesc_cameraSendSystemEvent (8642231538552298107) -->
-    <skip />
+    <string name="permdesc_cameraSendSystemEvent" msgid="8642231538552298107">"Разрешава на предварително инсталирано системно приложение да изпраща известия за системни събития до услугата за камера."</string>
     <string name="permlab_brick" product="tablet" msgid="2961292205764488304">"деактивиране на таблета за постоянно"</string>
     <string name="permlab_brick" product="tv" msgid="4912674222121249410">"деактивиране на телевизора за постоянно"</string>
     <string name="permlab_brick" product="default" msgid="8337817093326370537">"деактивиране на телефона за постоянно"</string>
@@ -635,6 +644,10 @@
     <string name="permlab_performCdmaProvisioning" product="tv" msgid="3485391974208100809">"директно стартиране на настройването на телевизора със CDMA"</string>
     <string name="permlab_performCdmaProvisioning" product="default" msgid="5604848095315421425">"директно стартиране на настройката на телефона през CDMA"</string>
     <string name="permdesc_performCdmaProvisioning" msgid="1994193538802314186">"Разрешава на приложението да стартира обезпечаване за CDMA. Злонамерените приложения могат ненужно да стартират този процес."</string>
+    <!-- no translation found for permlab_performSimActivation (1651116521896665009) -->
+    <skip />
+    <!-- no translation found for permdesc_performSimActivation (1778214876348917401) -->
+    <skip />
     <string name="permlab_locationUpdates" msgid="7785408253364335740">"контролиране на известията за актуализиране на местоположението"</string>
     <string name="permdesc_locationUpdates" msgid="1120741557891438876">"Разрешава на приложението да активира или деактивира известията за актуализиране на местоположението от радиомодула. Не е предназначено за нормални приложения."</string>
     <string name="permlab_checkinProperties" msgid="7855259461268734914">"достъп до свойствата на услугата за проверка"</string>
@@ -841,6 +854,10 @@
     <string name="permdesc_removeDrmCertificates" msgid="7272999075113400993">"Разрешава на приложението да премахва сертификатите за управление на цифровите права (DRM). Нормалните приложения би трябвало никога да се нуждаят от това."</string>
     <string name="permlab_bindCarrierMessagingService" msgid="1490229371796969158">"свързване с услуга за съобщения от оператор"</string>
     <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"Разрешава на притежателя да се свърже към интерфейса от най-високото ниво на услуга за съобщения от оператор. Нормалните приложения би трябвало никога да не се нуждаят от това."</string>
+    <!-- no translation found for permlab_accessVoiceInteractionService (4183835260471435605) -->
+    <skip />
+    <!-- no translation found for permdesc_accessVoiceInteractionService (836587728238433459) -->
+    <skip />
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Задаване на правила за паролата"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"Контролира дължината и разрешените знаци за паролите и ПИН кодовете за заключване на екрана."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Наблюдаване на опитите за отключване на екрана"</string>
@@ -1138,14 +1155,10 @@
     <string name="permdesc_packageVerificationAgent" msgid="8437590190990843381">"Разрешава на приложението да провери дали пакетът може да се инсталира."</string>
     <string name="permlab_bindPackageVerifier" msgid="4187786793360326654">"обвързване с верификатор на пакета"</string>
     <string name="permdesc_bindPackageVerifier" msgid="3180741773233862126">"Разрешава на притежателя да прави заявки за верификатори на пакета. Нормалните приложения би трябвало никога да не се нуждаят от това."</string>
-    <!-- no translation found for permlab_intentFilterVerificationAgent (1135788294400437497) -->
-    <skip />
-    <!-- no translation found for permdesc_intentFilterVerificationAgent (5853902808424716312) -->
-    <skip />
-    <!-- no translation found for permlab_bindIntentFilterVerifier (8567268159430779210) -->
-    <skip />
-    <!-- no translation found for permdesc_bindIntentFilterVerifier (681128728719578778) -->
-    <skip />
+    <string name="permlab_intentFilterVerificationAgent" msgid="1135788294400437497">"проверка на филтъра за намерения"</string>
+    <string name="permdesc_intentFilterVerificationAgent" msgid="5853902808424716312">"Разрешава на приложението да проверява дали даден филтър за намерения е потвърден или не."</string>
+    <string name="permlab_bindIntentFilterVerifier" msgid="8567268159430779210">"свързв. с вериф. на филтри за намерения"</string>
+    <string name="permdesc_bindIntentFilterVerifier" msgid="681128728719578778">"Разрешава на притежателя да отправя заявки за верификатори на филтрите за намерения. Нормалните приложения би трябвало никога да не се нуждаят от това."</string>
     <string name="permlab_serialPort" msgid="546083327654631076">"достъп до серийни портове"</string>
     <string name="permdesc_serialPort" msgid="2991639985224598193">"Разрешава на притежателя достъп до серийни портове посредством приложния програмен интерфейс (API) SerialManager."</string>
     <string name="permlab_accessContentProvidersExternally" msgid="5077774297943409285">"външен достъп до доставчиците на съдърж."</string>
@@ -1571,10 +1584,8 @@
     <string name="date_picker_decrement_day_button" msgid="4131881521818750031">"Намаляване на дните"</string>
     <string name="date_picker_increment_year_button" msgid="6318697384310808899">"Увеличаване на годините"</string>
     <string name="date_picker_decrement_year_button" msgid="4482021813491121717">"Намаляване на годините"</string>
-    <!-- no translation found for date_picker_prev_month_button (2858244643992056505) -->
-    <skip />
-    <!-- no translation found for date_picker_next_month_button (5559507736887605055) -->
-    <skip />
+    <string name="date_picker_prev_month_button" msgid="2858244643992056505">"Предишен месец"</string>
+    <string name="date_picker_next_month_button" msgid="5559507736887605055">"Следващ месец"</string>
     <string name="keyboardview_keycode_alt" msgid="4856868820040051939">"Alt"</string>
     <string name="keyboardview_keycode_cancel" msgid="1203984017245783244">"Отказ"</string>
     <string name="keyboardview_keycode_delete" msgid="3337914833206635744">"Изтриване"</string>

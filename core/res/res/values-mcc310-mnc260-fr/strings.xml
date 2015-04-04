@@ -22,8 +22,7 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-  <string-array name="wfcOperatorErrorMessages">
-    <item msgid="931634632269046788">"Les appels Wi-Fi ne sont pas disponibles. Contactez votre opérateur pour les activer."</item>
-  </string-array>
+    <!-- no translation found for wfcOperatorErrorAlertMessages:0 (7239039348648848288) -->
+    <!-- no translation found for wfcOperatorErrorNotificationMessages:0 (483847327467331298) -->
     <string name="wfcSpnFormat" msgid="4982938551498609442">"Appels Wi-Fi %s"</string>
 </resources>

@@ -124,9 +124,19 @@
     <string name="roamingText12" msgid="1189071119992726320">"ရုန်းမင်းစာတမ်းပိတ်ထားရန်"</string>
     <string name="roamingTextSearching" msgid="8360141885972279963">"ဆားဗစ်အားရှာဖွေနေသည်"</string>
     <string name="wfcRegErrorTitle" msgid="2301376280632110664">"ဝိုင်ဖိုင် ခေါ်ဆိုမှု"</string>
-  <string-array name="wfcOperatorErrorMessages">
+  <string-array name="wfcOperatorErrorAlertMessages">
+  </string-array>
+  <string-array name="wfcOperatorErrorNotificationMessages">
   </string-array>
     <string name="wfcSpnFormat" msgid="8211621332478306568">"%s"</string>
+    <!-- no translation found for wifi_calling_off_summary (8720659586041656098) -->
+    <skip />
+    <!-- no translation found for wfc_mode_wifi_preferred_summary (1994113411286935263) -->
+    <skip />
+    <!-- no translation found for wfc_mode_cellular_preferred_summary (5920549484600758786) -->
+    <skip />
+    <!-- no translation found for wfc_mode_wifi_only_summary (2379919155237869320) -->
+    <skip />
     <string name="cfTemplateNotForwarded" msgid="1683685883841272560">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: ထပ်ဆင့်မပို့နိုင်ပါ"</string>
     <string name="cfTemplateForwarded" msgid="1302922117498590521">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
     <string name="cfTemplateForwardedTime" msgid="9206251736527085256">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g> နောက် <xliff:g id="TIME_DELAY">{2}</xliff:g> စက္ကန့်"</string>
@@ -585,8 +595,7 @@
     <string name="permdesc_camera" msgid="8497216524735535009">"အပလီကေးရှင်းအား အလိုအလျောက် ဓာတ်ပုံရိုက်ခွင့်၊ ဗီဒီယို ရိုက်ကူးခွင့် ပြုပါ။ ဒီခွင့်ပြုချက်က အပလီကေးရှင်းကို အချိန်မရွေး ကင်မရာအား ခွင့်ပြုချက် မလိုအပ်ပဲ သုံးခွင့်ပြုပါသည်။"</string>
     <string name="permlab_cameraDisableTransmitLed" msgid="2651072630501126222">"ထုတ်လွှင့်မှုပြ အချက်ပေး မီးအား ကင်မရာ သုံးနေစဉ် ပိတ်ရန်"</string>
     <string name="permdesc_cameraDisableTransmitLed" msgid="4764585465480295341">"ကြိုတင်သွင်းထားသော စစ်စတန် စနစ်တစ်ခုကို ကင်မရာ သုံးနေသော မီးအား ထိန်းချုပ်ခွင့်ပေးခြင်း"</string>
-    <!-- no translation found for permdesc_cameraSendSystemEvent (8642231538552298107) -->
-    <skip />
+    <string name="permdesc_cameraSendSystemEvent" msgid="8642231538552298107">"ကြိုတင်ထည့်သွင်းထားသည့် စနစ်အပလီကေးရှင်းကို စနစ်ဖြစ်ရပ်ကင်မရာ ဝန်ဆောင်မှုကို ပို့ခွင့်ပြုပါသည်။"</string>
     <string name="permlab_brick" product="tablet" msgid="2961292205764488304">"တက်ပလက်ကို အမြဲတမ်း အလုပ်မလုပ်ရန်ပိတ်ခြင်း"</string>
     <string name="permlab_brick" product="tv" msgid="4912674222121249410">"တီဗွီအား အပြီးပိတ်ရန်"</string>
     <string name="permlab_brick" product="default" msgid="8337817093326370537">"ဖုန်းကို အမြဲတမ်း အလုပ်မလုပ်ရန်ပိတ်ခြင်း"</string>
@@ -635,6 +644,10 @@
     <string name="permlab_performCdmaProvisioning" product="tv" msgid="3485391974208100809">"CDMA TV ပြင်ဆင်သတ်မှတ်မှုအား တိုက်ရိုက်စတင်ရန်"</string>
     <string name="permlab_performCdmaProvisioning" product="default" msgid="5604848095315421425">"CDMAဖုန်း အစသတ်မှတ်ခြင်းကို တိုက်ရိုက်စတင်ရန်"</string>
     <string name="permdesc_performCdmaProvisioning" msgid="1994193538802314186">"appအား CDMA အတွက် စီမံလုပ်ကိုင်မှုကို စတင်ခွင့် ပြုသည်။ ကြံဖန် appများက မလိုအပ်ဘဲနှင့် CDMA အတွက် စီမံလုပ်ကိုင်မှုကို စတင်နိုင်ကြသည်။"</string>
+    <!-- no translation found for permlab_performSimActivation (1651116521896665009) -->
+    <skip />
+    <!-- no translation found for permdesc_performSimActivation (1778214876348917401) -->
+    <skip />
     <string name="permlab_locationUpdates" msgid="7785408253364335740">"တည်နေရာအဆင့်မြှင့်ခြင်းသတိပေးချက်အားထိန်းချုပ်ရန်"</string>
     <string name="permdesc_locationUpdates" msgid="1120741557891438876">"appအား ရေဒီယိုထံမှ တည်နေရာ မွမ်းမံမှု အကြောင်းကြားစာများကို ပိတ်/ဖွင့်ခွင့် ပြုသည်။ သာမန် appများ အသုံးပြုရန် မဟုတ်နိုင်ပါ။"</string>
     <string name="permlab_checkinProperties" msgid="7855259461268734914">"ချက်ခ်အင်ဂုဏ်သတ္တိများအား ဝင်ရောက်ချိတ်ဆက်ခြင်း"</string>
@@ -841,6 +854,10 @@
     <string name="permdesc_removeDrmCertificates" msgid="7272999075113400993">"အပလီကေးရှင်းအား DRM လက်မှတ်များကို ဖယ်ရှားခွင့် ပြုသည်။  သာမန် appများ အတွက် ဘယ်တော့မှ မလိုအပ်နိုင်ပါ။"</string>
     <string name="permlab_bindCarrierMessagingService" msgid="1490229371796969158">"စာပို့စာယူ ဆက်သွယ်ရေးဝန်ဆောင်မှုတစ်ခုအား ပူးပေါင်းခွင့်ပြုရန်"</string>
     <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"စာပို့စာယူဆက်သွယ်ရေးဝန်ဆောင်မှုတစ်ခု၏ ထိပ်ဆုံးရှိအင်တာဖေ့စ်ဖြင့် ပူးပေါင်းရန် ပိုင်ရှင်အားခွင့်ပြုပါ။ ပုံမှန် app များအတွက် မလိုအပ်ပါ။"</string>
+    <!-- no translation found for permlab_accessVoiceInteractionService (4183835260471435605) -->
+    <skip />
+    <!-- no translation found for permdesc_accessVoiceInteractionService (836587728238433459) -->
+    <skip />
     <string name="policylab_limitPassword" msgid="4497420728857585791">"စကားဝှက်စည်းမျဥ်းကိုသတ်မှတ်ရန်"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"မျက်နှာပြင်သော့ခတ်သည့် စကားဝှက်များနှင့် PINများရှိ ခွင့်ပြုထားသည့် စာလုံးအရေအတွက်နှင့် အက္ခရာများအား ထိန်းချုပ်ရန်။"</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"မော်နီတာမျက်နှာပြင်ဖွင့်ရန် ကြိုးစားခွင့်များ"</string>

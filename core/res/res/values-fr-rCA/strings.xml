@@ -124,9 +124,19 @@
     <string name="roamingText12" msgid="1189071119992726320">"Bannière d\'itinérance désactivée"</string>
     <string name="roamingTextSearching" msgid="8360141885972279963">"Recherche des services disponibles"</string>
     <string name="wfcRegErrorTitle" msgid="2301376280632110664">"Appels Wi-Fi"</string>
-  <string-array name="wfcOperatorErrorMessages">
+  <string-array name="wfcOperatorErrorAlertMessages">
+  </string-array>
+  <string-array name="wfcOperatorErrorNotificationMessages">
   </string-array>
     <string name="wfcSpnFormat" msgid="8211621332478306568">"%s"</string>
+    <!-- no translation found for wifi_calling_off_summary (8720659586041656098) -->
+    <skip />
+    <!-- no translation found for wfc_mode_wifi_preferred_summary (1994113411286935263) -->
+    <skip />
+    <!-- no translation found for wfc_mode_cellular_preferred_summary (5920549484600758786) -->
+    <skip />
+    <!-- no translation found for wfc_mode_wifi_only_summary (2379919155237869320) -->
+    <skip />
     <string name="cfTemplateNotForwarded" msgid="1683685883841272560">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g> : non transféré"</string>
     <string name="cfTemplateForwarded" msgid="1302922117498590521">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g> : <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
     <string name="cfTemplateForwardedTime" msgid="9206251736527085256">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g> : <xliff:g id="DIALING_NUMBER">{1}</xliff:g> au bout de <xliff:g id="TIME_DELAY">{2}</xliff:g> secondes"</string>
@@ -585,8 +595,7 @@
     <string name="permdesc_camera" msgid="8497216524735535009">"Permet à l\'application de prendre des photos et de filmer des vidéos avec l\'appareil photo. Cette autorisation lui permet d\'utiliser l\'appareil photo à tout moment sans votre consentement."</string>
     <string name="permlab_cameraDisableTransmitLed" msgid="2651072630501126222">"désactiver l\'indicateur d\'émission LED lorsque la caméra est en cours d\'utilisation"</string>
     <string name="permdesc_cameraDisableTransmitLed" msgid="4764585465480295341">"Permet à une application système préinstallée de désactiver l\'indicateur LED d\'utilisation de la caméra."</string>
-    <!-- no translation found for permdesc_cameraSendSystemEvent (8642231538552298107) -->
-    <skip />
+    <string name="permdesc_cameraSendSystemEvent" msgid="8642231538552298107">"Permet à une application système préinstallée d\'envoyer au service de l\'appareil photo des événements relatifs au système."</string>
     <string name="permlab_brick" product="tablet" msgid="2961292205764488304">"désactiver définitivement la tablette"</string>
     <string name="permlab_brick" product="tv" msgid="4912674222121249410">"désactiver définitivement le téléviseur"</string>
     <string name="permlab_brick" product="default" msgid="8337817093326370537">"désactiver définitivement le téléphone"</string>
@@ -635,6 +644,10 @@
     <string name="permlab_performCdmaProvisioning" product="tv" msgid="3485391974208100809">"lancer directement la configuration du téléviseur par CDMA"</string>
     <string name="permlab_performCdmaProvisioning" product="default" msgid="5604848095315421425">"démarrer directement la configuration du téléphone CDMA"</string>
     <string name="permdesc_performCdmaProvisioning" msgid="1994193538802314186">"Permet à l\'application de lancer le déploiement CDMA. Des applications malveillantes sont susceptibles de le lancer inutilement."</string>
+    <!-- no translation found for permlab_performSimActivation (1651116521896665009) -->
+    <skip />
+    <!-- no translation found for permdesc_performSimActivation (1778214876348917401) -->
+    <skip />
     <string name="permlab_locationUpdates" msgid="7785408253364335740">"contrôler les notifications de mise à jour de la position géographique"</string>
     <string name="permdesc_locationUpdates" msgid="1120741557891438876">"Permet à l\'application d\'activer ou de désactiver les notifications de mise à jour de la position à partir du signal radio. Les applications standards ne doivent pas utiliser cette fonctionnalité."</string>
     <string name="permlab_checkinProperties" msgid="7855259461268734914">"accéder aux propriétés d\'enregistrement"</string>
@@ -841,6 +854,10 @@
     <string name="permdesc_removeDrmCertificates" msgid="7272999075113400993">"Permet à une application de supprimer les certificats GDN. Cela ne devrait jamais être nécessaire pour des applications normales."</string>
     <string name="permlab_bindCarrierMessagingService" msgid="1490229371796969158">"s\'associer à un service de messagerie d\'un fournisseur"</string>
     <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"Permet à l\'application autorisée de s\'associer à l\'interface de plus haut niveau d\'un service de messagerie d\'un fournisseur. Les applications standards ne devraient jamais avoir recours à cette fonctionnalité."</string>
+    <!-- no translation found for permlab_accessVoiceInteractionService (4183835260471435605) -->
+    <skip />
+    <!-- no translation found for permdesc_accessVoiceInteractionService (836587728238433459) -->
+    <skip />
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Définir les règles du mot de passe"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"Gérer le nombre et le type de caractères autorisés dans les mots de passe et les NIP de verrouillage de l\'écran."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Gérer les tentatives de déverrouillage de l\'écran"</string>
@@ -1247,7 +1264,7 @@
     <string name="whichViewApplicationNamed" msgid="2286418824011249620">"Ouvrir avec %1$s"</string>
     <string name="whichEditApplication" msgid="144727838241402655">"Modifier avec"</string>
     <string name="whichEditApplicationNamed" msgid="1775815530156447790">"Modifier avec %1$s"</string>
-    <string name="whichSendApplication" msgid="6902512414057341668">"Partager avec"</string>
+    <string name="whichSendApplication" msgid="6902512414057341668">"Partager"</string>
     <string name="whichSendApplicationNamed" msgid="2799370240005424391">"Partager avec %1$s"</string>
     <string name="whichHomeApplication" msgid="4307587691506919691">"Sélectionner une application pour l\'écran d\'accueil"</string>
     <string name="whichHomeApplicationNamed" msgid="4493438593214760979">"Utiliser %1$s comme écran d\'accueil"</string>
