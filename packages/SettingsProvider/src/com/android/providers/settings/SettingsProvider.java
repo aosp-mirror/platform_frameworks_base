@@ -1502,15 +1502,15 @@ public class SettingsProvider extends ContentProvider {
         public void onPackageRemovedLocked(String packageName, int userId) {
             final int globalKey = makeKey(SETTINGS_TYPE_GLOBAL, UserHandle.USER_OWNER);
             SettingsState globalSettings = mSettingsStates.get(globalKey);
-            globalSettings.onPackageRemovedLocked(packageName);
+            if (globalSettings != null) globalSettings.onPackageRemovedLocked(packageName);
 
             final int secureKey = makeKey(SETTINGS_TYPE_SECURE, userId);
             SettingsState secureSettings = mSettingsStates.get(secureKey);
-            secureSettings.onPackageRemovedLocked(packageName);
+            if (secureSettings != null) secureSettings.onPackageRemovedLocked(packageName);
 
             final int systemKey = makeKey(SETTINGS_TYPE_SYSTEM, userId);
             SettingsState systemSettings = mSettingsStates.get(systemKey);
-            systemSettings.onPackageRemovedLocked(packageName);
+            if (systemSettings != null) systemSettings.onPackageRemovedLocked(packageName);
         }
 
         private SettingsState peekSettingsStateLocked(int key) {
