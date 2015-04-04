@@ -280,15 +280,12 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         long mLastMaximumTimeToLock = -1;
         boolean mUserSetupComplete = false;
 
-        final HashMap<ComponentName, ActiveAdmin> mAdminMap
-                = new HashMap<ComponentName, ActiveAdmin>();
-        final ArrayList<ActiveAdmin> mAdminList
-                = new ArrayList<ActiveAdmin>();
-        final ArrayList<ComponentName> mRemovingAdmins
-                = new ArrayList<ComponentName>();
+        final HashMap<ComponentName, ActiveAdmin> mAdminMap = new HashMap<>();
+        final ArrayList<ActiveAdmin> mAdminList = new ArrayList<>();
+        final ArrayList<ComponentName> mRemovingAdmins = new ArrayList<>();
 
         // This is the list of component allowed to start lock task mode.
-        final List<String> mLockTaskPackages = new ArrayList<String>();
+        final List<String> mLockTaskPackages = new ArrayList<>();
 
         ComponentName mRestrictionsProvider;
 
@@ -299,7 +296,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
     }
 
-    final SparseArray<DevicePolicyData> mUserData = new SparseArray<DevicePolicyData>();
+    final SparseArray<DevicePolicyData> mUserData = new SparseArray<>();
 
     Handler mHandler = new Handler();
 
@@ -1596,6 +1593,16 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         validatePasswordOwnerLocked(policy);
         syncDeviceCapabilitiesLocked(policy);
         updateMaximumTimeToLockLocked(policy);
+        updateLockTaskPackagesLocked(policy, userHandle);
+    }
+
+    private void updateLockTaskPackagesLocked(DevicePolicyData policy, int userId) {
+        IActivityManager am = ActivityManagerNative.getDefault();
+        try {
+            am.updateLockTaskPackages(userId, policy.mLockTaskPackages.toArray(new String[0]));
+        } catch (RemoteException e) {
+            // Not gonna happen.
+        }
     }
 
     static void validateQualityConstant(int quality) {
@@ -5515,6 +5522,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
             // Store the settings persistently.
             saveSettingsLocked(userHandle);
+            updateLockTaskPackagesLocked(policy, userHandle);
         }
     }
 

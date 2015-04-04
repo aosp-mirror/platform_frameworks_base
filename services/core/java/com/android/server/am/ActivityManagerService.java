@@ -41,7 +41,6 @@ import android.app.IActivityContainerCallback;
 import android.app.IAppTask;
 import android.app.ITaskStackListener;
 import android.app.ProfilerInfo;
-import android.app.admin.DevicePolicyManager;
 import android.app.usage.UsageEvents;
 import android.app.usage.UsageStatsManagerInternal;
 import android.appwidget.AppWidgetManager;
@@ -435,6 +434,11 @@ public final class ActivityManagerService extends ActivityManagerNative
      * For addAppTask: cached of the last ActivityInfo that was added.
      */
     ActivityInfo mLastAddedTaskActivity;
+
+    /**
+     * List of packages whitelisted by DevicePolicyManager for locktask. Indexed by userId.
+     */
+    SparseArray<String[]> mLockTaskPackages = new SparseArray<>();
 
     public class PendingAssistExtras extends Binder implements Runnable {
         public final ActivityRecord activity;
@@ -8451,52 +8455,54 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
     }
 
-    private boolean isLockTaskAuthorized(String pkg) {
-        final DevicePolicyManager dpm = (DevicePolicyManager)
-                mContext.getSystemService(Context.DEVICE_POLICY_SERVICE);
-        try {
-            int uid = mContext.getPackageManager().getPackageUid(pkg,
-                    Binder.getCallingUserHandle().getIdentifier());
-            return (uid == Binder.getCallingUid()) && dpm != null && dpm.isLockTaskPermitted(pkg);
-        } catch (NameNotFoundException e) {
-            return false;
+    @Override
+    public void updateLockTaskPackages(int userId, String[] packages) {
+        if (Binder.getCallingUid() != Process.SYSTEM_UID) {
+            throw new SecurityException("updateLockTaskPackage called from non-system process");
+        }
+        synchronized (this) {
+            mLockTaskPackages.put(userId, packages);
         }
     }
 
-    void startLockTaskMode(TaskRecord task) {
-        final String pkg;
-        synchronized (this) {
-            pkg = task.intent.getComponent().getPackageName();
+    private boolean isLockTaskAuthorizedLocked(String pkg) {
+        String[] packages = mLockTaskPackages.get(mCurrentUserId);
+        if (packages == null) {
+            return false;
         }
+        for (int i = packages.length - 1; i >= 0; --i) {
+            if (pkg.equals(packages[i])) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    void startLockTaskModeLocked(TaskRecord task) {
+        final String pkg = task.intent.getComponent().getPackageName();
         // isSystemInitiated is used to distinguish between locked and pinned mode, as pinned mode
         // is initiated by system after the pinning request was shown and locked mode is initiated
         // by an authorized app directly
         boolean isSystemInitiated = Binder.getCallingUid() == Process.SYSTEM_UID;
-        if (!isSystemInitiated && !isLockTaskAuthorized(pkg)) {
-            StatusBarManagerInternal statusBarManager = LocalServices.getService(
-                    StatusBarManagerInternal.class);
-            if (statusBarManager != null) {
-                statusBarManager.showScreenPinningRequest();
-            }
-            return;
-        }
         long ident = Binder.clearCallingIdentity();
         try {
-            synchronized (this) {
-                // Since we lost lock on task, make sure it is still there.
-                task = mStackSupervisor.anyTaskForIdLocked(task.taskId);
-                if (task != null) {
-                    if (!isSystemInitiated
-                            && ((mStackSupervisor.getFocusedStack() == null)
-                                    || (task != mStackSupervisor.getFocusedStack().topTask()))) {
-                        throw new IllegalArgumentException("Invalid task, not in foreground");
-                    }
-                    mStackSupervisor.setLockTaskModeLocked(task, isSystemInitiated ?
-                            ActivityManager.LOCK_TASK_MODE_PINNED :
-                            ActivityManager.LOCK_TASK_MODE_LOCKED,
-                            "startLockTask");
+            if (!isSystemInitiated && !isLockTaskAuthorizedLocked(pkg)) {
+                StatusBarManagerInternal statusBarManager =
+                        LocalServices.getService(StatusBarManagerInternal.class);
+                if (statusBarManager != null) {
+                    statusBarManager.showScreenPinningRequest();
                 }
+                return;
             }
+
+            final ActivityStack stack = mStackSupervisor.getFocusedStack();
+            if (!isSystemInitiated && (stack == null || task != stack.topTask())) {
+                throw new IllegalArgumentException("Invalid task, not in foreground");
+            }
+            mStackSupervisor.setLockTaskModeLocked(task, isSystemInitiated ?
+                    ActivityManager.LOCK_TASK_MODE_PINNED :
+                    ActivityManager.LOCK_TASK_MODE_LOCKED,
+                    "startLockTask");
         } finally {
             Binder.restoreCallingIdentity(ident);
         }
@@ -8504,37 +8510,25 @@ public final class ActivityManagerService extends ActivityManagerNative
 
     @Override
     public void startLockTaskMode(int taskId) {
-        final TaskRecord task;
-        long ident = Binder.clearCallingIdentity();
-        try {
-            synchronized (this) {
-                task = mStackSupervisor.anyTaskForIdLocked(taskId);
+        synchronized (this) {
+            final TaskRecord task = mStackSupervisor.anyTaskForIdLocked(taskId);
+            if (task != null) {
+                startLockTaskModeLocked(task);
             }
-        } finally {
-            Binder.restoreCallingIdentity(ident);
-        }
-        if (task != null) {
-            startLockTaskMode(task);
         }
     }
 
     @Override
     public void startLockTaskMode(IBinder token) {
-        final TaskRecord task;
-        long ident = Binder.clearCallingIdentity();
-        try {
-            synchronized (this) {
-                final ActivityRecord r = ActivityRecord.forTokenLocked(token);
-                if (r == null) {
-                    return;
-                }
-                task = r.task;
+        synchronized (this) {
+            final ActivityRecord r = ActivityRecord.forTokenLocked(token);
+            if (r == null) {
+                return;
             }
-        } finally {
-            Binder.restoreCallingIdentity(ident);
-        }
-        if (task != null) {
-            startLockTaskMode(task);
+            final TaskRecord task = r.task;
+            if (task != null) {
+                startLockTaskModeLocked(task);
+            }
         }
     }
 
@@ -8544,11 +8538,12 @@ public final class ActivityManagerService extends ActivityManagerNative
                 "startLockTaskModeOnCurrent");
         long ident = Binder.clearCallingIdentity();
         try {
-            ActivityRecord r = null;
             synchronized (this) {
-                r = mStackSupervisor.topRunningActivityLocked();
+                ActivityRecord r = mStackSupervisor.topRunningActivityLocked();
+                if (r != null) {
+                    startLockTaskModeLocked(r.task);
+                }
             }
-            startLockTaskMode(r.task);
         } finally {
             Binder.restoreCallingIdentity(ident);
         }

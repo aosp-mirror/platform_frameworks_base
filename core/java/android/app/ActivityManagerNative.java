@@ -2450,6 +2450,15 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             reply.writeNoException();
             return true;
         }
+
+        case UPDATE_LOCK_TASK_PACKAGES_TRANSACTION: {
+            data.enforceInterface(IActivityManager.descriptor);
+            int userId = data.readInt();
+            String[] packages = data.readStringArray();
+            updateLockTaskPackages(userId, packages);
+            reply.writeNoException();
+            return true;
+        }
         }
 
         return super.onTransact(code, data, reply, flags);
@@ -5677,6 +5686,19 @@ class ActivityManagerProxy implements IActivityManager
         data.writeStrongBinder(session.asBinder());
         data.writeInt(keepAwake ? 1 : 0);
         mRemote.transact(SET_VOICE_KEEP_AWAKE_TRANSACTION, data, reply, 0);
+        reply.readException();
+        data.recycle();
+        reply.recycle();
+    }
+
+    @Override
+    public void updateLockTaskPackages(int userId, String[] packages) throws RemoteException {
+        Parcel data = Parcel.obtain();
+        Parcel reply = Parcel.obtain();
+        data.writeInterfaceToken(IActivityManager.descriptor);
+        data.writeInt(userId);
+        data.writeStringArray(packages);
+        mRemote.transact(UPDATE_LOCK_TASK_PACKAGES_TRANSACTION, data, reply, IBinder.FLAG_ONEWAY);
         reply.readException();
         data.recycle();
         reply.recycle();
