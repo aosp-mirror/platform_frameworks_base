@@ -2427,8 +2427,10 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
         case SET_DUMP_HEAP_DEBUG_LIMIT_TRANSACTION: {
             data.enforceInterface(IActivityManager.descriptor);
             String procName = data.readString();
+            int uid = data.readInt();
             long maxMemSize = data.readLong();
-            setDumpHeapDebugLimit(procName, maxMemSize);
+            String reportPackage = data.readString();
+            setDumpHeapDebugLimit(procName, uid, maxMemSize, reportPackage);
             reply.writeNoException();
             return true;
         }
@@ -5644,12 +5646,15 @@ class ActivityManagerProxy implements IActivityManager
     }
 
     @Override
-    public void setDumpHeapDebugLimit(String processName, long maxMemSize) throws RemoteException {
+    public void setDumpHeapDebugLimit(String processName, int uid, long maxMemSize,
+            String reportPackage) throws RemoteException {
         Parcel data = Parcel.obtain();
         Parcel reply = Parcel.obtain();
         data.writeInterfaceToken(IActivityManager.descriptor);
         data.writeString(processName);
+        data.writeInt(uid);
         data.writeLong(maxMemSize);
+        data.writeString(reportPackage);
         mRemote.transact(SET_DUMP_HEAP_DEBUG_LIMIT_TRANSACTION, data, reply, 0);
         reply.readException();
         data.recycle();

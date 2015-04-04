@@ -208,8 +208,12 @@ public class AppOpsManager {
     public static final int OP_ACTIVATE_VPN = 47;
     /** @hide Access the WallpaperManagerAPI to write wallpapers. */
     public static final int OP_WRITE_WALLPAPER = 48;
+    /** @hide Received the assist structure from an app. */
+    public static final int OP_ASSIST_STRUCTURE = 49;
+    /** @hide Received a screenshot from assist. */
+    public static final int OP_ASSIST_SCREENSHOT = 50;
     /** @hide */
-    public static final int _NUM_OP = 49;
+    public static final int _NUM_OP = 51;
 
     /** Access to coarse location information. */
     public static final String OPSTR_COARSE_LOCATION =
@@ -288,6 +292,8 @@ public class AppOpsManager {
             OP_PROJECT_MEDIA,
             OP_ACTIVATE_VPN,
             OP_WRITE_WALLPAPER,
+            OP_ASSIST_STRUCTURE,
+            OP_ASSIST_SCREENSHOT,
     };
 
     /**
@@ -343,6 +349,8 @@ public class AppOpsManager {
             null,
             null,
             OPSTR_ACTIVATE_VPN,
+            null,
+            null,
             null,
     };
 
@@ -400,6 +408,8 @@ public class AppOpsManager {
             "PROJECT_MEDIA",
             "ACTIVATE_VPN",
             "WRITE_WALLPAPER",
+            "ASSIST_STRUCTURE",
+            "ASSIST_SCREENSHOT"
     };
 
     /**
@@ -456,6 +466,8 @@ public class AppOpsManager {
             null, // no permission for projecting media
             null, // no permission for activating vpn
             null, // no permission for supporting wallpaper
+            null, // no permission for receiving assist structure
+            null, // no permission for receiving assist screenshot
     };
 
     /**
@@ -513,6 +525,8 @@ public class AppOpsManager {
             null, //PROJECT_MEDIA
             UserManager.DISALLOW_CONFIG_VPN, // ACTIVATE_VPN
             UserManager.DISALLOW_WALLPAPER, // WRITE_WALLPAPER
+            null, // ASSIST_STRUCTURE
+            null, // ASSIST_SCREENSHOT
     };
 
     /**
@@ -569,6 +583,8 @@ public class AppOpsManager {
             false, //PROJECT_MEDIA
             false, //ACTIVATE_VPN
             false, //WALLPAPER
+            false, //ASSIST_STRUCTURE
+            false, //ASSIST_SCREENSHOT
     };
 
     /**
@@ -624,6 +640,8 @@ public class AppOpsManager {
             AppOpsManager.MODE_IGNORED, // OP_PROJECT_MEDIA
             AppOpsManager.MODE_IGNORED, // OP_ACTIVATE_VPN
             AppOpsManager.MODE_ALLOWED,
+            AppOpsManager.MODE_ALLOWED,
+            AppOpsManager.MODE_ALLOWED,
     };
 
     /**
@@ -650,6 +668,8 @@ public class AppOpsManager {
             false,
             false,
             true,      // OP_WRITE_SMS
+            false,
+            false,
             false,
             false,
             false,

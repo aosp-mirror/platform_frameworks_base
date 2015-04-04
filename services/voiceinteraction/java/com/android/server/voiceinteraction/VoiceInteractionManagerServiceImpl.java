@@ -145,7 +145,10 @@ class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConne
     }
 
     public boolean hideSessionLocked(int callingPid, int callingUid) {
-        return mActiveSession.hideLocked();
+        if (mActiveSession != null) {
+            return mActiveSession.hideLocked();
+        }
+        return false;
     }
 
     public boolean deliverNewSessionLocked(int callingPid, int callingUid, IBinder token,
@@ -163,6 +166,10 @@ class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConne
         try {
             if (mActiveSession == null || token != mActiveSession.mToken) {
                 Slog.w(TAG, "startVoiceActivity does not match active session");
+                return ActivityManager.START_CANCELED;
+            }
+            if (!mActiveSession.mShown) {
+                Slog.w(TAG, "startVoiceActivity not allowed on hidden session");
                 return ActivityManager.START_CANCELED;
             }
             intent = new Intent(intent);

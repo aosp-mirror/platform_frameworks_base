@@ -25,5 +25,6 @@
     <string name="completeVoice">Complete Voice</string>
     <string name="pickVoice">Pick Voice</string>
     <string name="cancelVoice">Cancel</string>
+    <string name="jumpOut">Jump out</string>
 
 </resources>

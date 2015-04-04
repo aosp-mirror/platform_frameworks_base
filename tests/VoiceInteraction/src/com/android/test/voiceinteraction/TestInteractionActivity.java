@@ -19,6 +19,7 @@ package com.android.test.voiceinteraction;
 import android.app.Activity;
 import android.app.VoiceInteractor;
 import android.content.ComponentName;
+import android.content.Intent;
 import android.os.Bundle;
 import android.service.voice.VoiceInteractionService;
 import android.util.Log;
@@ -37,6 +38,7 @@ public class TestInteractionActivity extends Activity implements View.OnClickLis
     Button mAbortButton;
     Button mCompleteButton;
     Button mPickButton;
+    Button mJumpOutButton;
     Button mCancelButton;
 
     @Override
@@ -64,6 +66,8 @@ public class TestInteractionActivity extends Activity implements View.OnClickLis
         mCompleteButton.setOnClickListener(this);
         mPickButton = (Button)findViewById(R.id.pick);
         mPickButton.setOnClickListener(this);
+        mJumpOutButton = (Button)findViewById(R.id.jump);
+        mJumpOutButton.setOnClickListener(this);
         mCancelButton = (Button)findViewById(R.id.cancel);
         mCancelButton.setOnClickListener(this);
 
@@ -165,6 +169,13 @@ public class TestInteractionActivity extends Activity implements View.OnClickLis
                 }
             };
             mInteractor.submitRequest(req);
+        } else if (v == mJumpOutButton) {
+            Log.i(TAG, "Jump out");
+            Intent intent = new Intent(Intent.ACTION_MAIN);
+            intent.addCategory(Intent.CATEGORY_LAUNCHER);
+            intent.setComponent(new ComponentName(this, VoiceInteractionMain.class));
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(intent);
         } else if (v == mCancelButton && mCurrentRequest != null) {
             Log.i(TAG, "Cancel request");
             mCurrentRequest.cancel();

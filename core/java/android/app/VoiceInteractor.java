@@ -103,9 +103,9 @@ public class VoiceInteractor {
                     request = pullRequest((IVoiceInteractorRequest)args.arg1, true);
                     if (DEBUG) Log.d(TAG, "onCompleteVoice: req="
                             + ((IVoiceInteractorRequest)args.arg1).asBinder() + "/" + request
-                            + " result=" + args.arg1);
+                            + " result=" + args.arg2);
                     if (request != null) {
-                        ((CompleteVoiceRequest)request).onCompleteResult((Bundle) args.arg1);
+                        ((CompleteVoiceRequest)request).onCompleteResult((Bundle) args.arg2);
                         request.clear();
                     }
                     break;
@@ -297,6 +297,7 @@ public class VoiceInteractor {
          */
         public static final class Option implements Parcelable {
             final CharSequence mLabel;
+            final int mIndex;
             ArrayList<CharSequence> mSynonyms;
             Bundle mExtras;
 
@@ -308,6 +309,21 @@ public class VoiceInteractor {
              */
             public Option(CharSequence label) {
                 mLabel = label;
+                mIndex = -1;
+            }
+
+            /**
+             * Creates an option that a user can select with their voice by matching the label
+             * or one of several synonyms.
+             * @param label The label that will both be matched against what the user speaks
+             * and displayed visually.
+             * @param index The location of this option within the overall set of options.
+             * Can be used to help identify which the option when it is returned from the
+             * voice interactor.
+             */
+            public Option(CharSequence label, int index) {
+                mLabel = label;
+                mIndex = index;
             }
 
             /**
@@ -326,6 +342,14 @@ public class VoiceInteractor {
 
             public CharSequence getLabel() {
                 return mLabel;
+            }
+
+            /**
+             * Return the index that was supplied in the constructor.
+             * If the option was constructed without an index, -1 is returned.
+             */
+            public int getIndex() {
+                return mIndex;
             }
 
             public int countSynonyms() {
@@ -356,6 +380,7 @@ public class VoiceInteractor {
 
             Option(Parcel in) {
                 mLabel = in.readCharSequence();
+                mIndex = in.readInt();
                 mSynonyms = in.readCharSequenceList();
                 mExtras = in.readBundle();
             }
@@ -368,6 +393,7 @@ public class VoiceInteractor {
             @Override
             public void writeToParcel(Parcel dest, int flags) {
                 dest.writeCharSequence(mLabel);
+                dest.writeInt(mIndex);
                 dest.writeCharSequenceList(mSynonyms);
                 dest.writeBundle(mExtras);
             }
