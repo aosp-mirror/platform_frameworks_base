@@ -44,7 +44,6 @@
     <string name="battery_saver_start_action" msgid="5576697451677486320">"Aktivér batterisparefunktion"</string>
     <string name="status_bar_settings_settings_button" msgid="3023889916699270224">"Indstillinger"</string>
     <string name="status_bar_settings_wifi_button" msgid="1733928151698311923">"Wi-Fi"</string>
-    <string name="status_bar_settings_airplane" msgid="4879879698500955300">"Flytilstand"</string>
     <string name="status_bar_settings_auto_rotation" msgid="3790482541357798421">"Automatisk skærmrotation"</string>
     <string name="status_bar_settings_mute_label" msgid="554682549917429396">"LYDLØS"</string>
     <string name="status_bar_settings_auto_brightness_label" msgid="511453614962324674">"AUTO"</string>
@@ -180,6 +179,8 @@
     <string name="accessibility_quick_settings_airplane_changed_on" msgid="8983005603505087728">"Flytilstand er slået til."</string>
     <string name="accessibility_quick_settings_dnd_priority_on" msgid="1448402297221249355">"\"Vil ikke forstyrres\" er slået til, kun prioritet."</string>
     <string name="accessibility_quick_settings_dnd_none_on" msgid="5910777408232088752">"\"Vil ikke forstyrres\" er slået til, ingen afbrydelser."</string>
+    <!-- no translation found for accessibility_quick_settings_dnd_alarms_on (9152834845587554157) -->
+    <skip />
     <string name="accessibility_quick_settings_dnd_off" msgid="2371832603753738581">"\"Vil ikke forstyrres\" er slået fra."</string>
     <string name="accessibility_quick_settings_dnd_changed_off" msgid="898107593453022935">"\"Vil ikke forstyrres\" er slået fra."</string>
     <string name="accessibility_quick_settings_dnd_changed_on" msgid="4483780856613561039">"\"Vil ikke forstyrres\" er slået til."</string>
@@ -230,9 +231,10 @@
     <string name="dessert_case" msgid="1295161776223959221">"Dessertcase"</string>
     <string name="start_dreams" msgid="7219575858348719790">"Dagdrøm"</string>
     <string name="ethernet_label" msgid="7967563676324087464">"Ethernet"</string>
-    <string name="quick_settings_airplane_mode_label" msgid="5510520633448831350">"Flytilstand"</string>
     <string name="quick_settings_dnd_label" msgid="8735855737575028208">"Vil ikke forstyrres"</string>
     <string name="quick_settings_dnd_priority_label" msgid="483232950670692036">"Kun prioritet"</string>
+    <!-- no translation found for quick_settings_dnd_alarms_label (2559229444312445858) -->
+    <skip />
     <string name="quick_settings_dnd_none_label" msgid="7309935569360609114">"Ingen afbrydelser"</string>
     <string name="quick_settings_bluetooth_label" msgid="6304190285170721401">"Bluetooth"</string>
     <string name="quick_settings_bluetooth_multiple_devices_label" msgid="3912245565613684735">"Bluetooth (<xliff:g id="NUMBER">%d</xliff:g> enheder)"</string>
@@ -303,6 +305,8 @@
     <string name="zen_no_interruptions_with_warning" msgid="4396898053735625287">"Ingen afbrydelser. Ikke engang alarmer."</string>
     <string name="zen_no_interruptions" msgid="7970973750143632592">"Ingen afbrydelser"</string>
     <string name="zen_important_interruptions" msgid="3477041776609757628">"Kun prioriterede afbrydelser"</string>
+    <!-- no translation found for zen_alarms (5055668280767657759) -->
+    <skip />
     <string name="zen_alarm_information_time" msgid="5235772206174372272">"Dit næste alarm er indstillet til kl. <xliff:g id="ALARM_TIME">%s</xliff:g>"</string>
     <string name="zen_alarm_information_day_time" msgid="8422733576255047893">"Din næste alarm er indstillet til <xliff:g id="ALARM_DAY_AND_TIME">%s</xliff:g>"</string>
     <string name="zen_alarm_warning" msgid="6873910860111498041">"Du vil ikke kunne høre din alarm kl. <xliff:g id="ALARM_TIME">%s</xliff:g>"</string>
@@ -312,9 +316,19 @@
     <string name="keyguard_unlock" msgid="8043466894212841998">"Stryg for at låse op"</string>
     <string name="phone_hint" msgid="3101468054914424646">"Stryg til højre for at bruge telefonen"</string>
     <string name="camera_hint" msgid="5241441720959174226">"Stryg til venstre for at åbne kameraet"</string>
-    <string name="interruption_level_none" msgid="3831278883136066646">"Ingen"</string>
-    <string name="interruption_level_priority" msgid="6517366750688942030">"Prioritet"</string>
+    <!-- no translation found for interruption_level_none (8284541443482072628) -->
+    <skip />
+    <!-- no translation found for interruption_level_priority (6426766465363855505) -->
+    <skip />
+    <!-- no translation found for interruption_level_alarms (5226306993448328896) -->
+    <skip />
     <string name="interruption_level_all" msgid="1330581184930945764">"Alle"</string>
+    <!-- no translation found for interruption_level_none_twoline (3942121050170227056) -->
+    <skip />
+    <!-- no translation found for interruption_level_priority_twoline (1564715335217164124) -->
+    <skip />
+    <!-- no translation found for interruption_level_alarms_twoline (3266909566410106146) -->
+    <skip />
     <string name="keyguard_indication_charging_time" msgid="1757251776872835768">"Oplader (fuldt opladet om <xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g>)"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="7305948938141024937">"Skift bruger"</string>
     <string name="accessibility_multi_user_switch_switcher_with_current" msgid="8434880595284601601">"Skift bruger. Nuværende bruger er <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
@@ -382,4 +396,6 @@
     <string name="volumeui_prompt_deny" msgid="5720663643411696731">"Afvis"</string>
     <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g> er dialogboksen for lydstyrke"</string>
     <string name="volumeui_notification_text" msgid="1826889705095768656">"Tryk for at gendanne originalen."</string>
+    <!-- no translation found for volume_zen_switch_text (6388350641576595452) -->
+    <skip />
 </resources>

@@ -46,7 +46,6 @@
     <string name="battery_saver_start_action" msgid="5576697451677486320">"Включить режим энергосбережения"</string>
     <string name="status_bar_settings_settings_button" msgid="3023889916699270224">"Настройки"</string>
     <string name="status_bar_settings_wifi_button" msgid="1733928151698311923">"Wi-Fi"</string>
-    <string name="status_bar_settings_airplane" msgid="4879879698500955300">"Режим полета"</string>
     <string name="status_bar_settings_auto_rotation" msgid="3790482541357798421">"Автоповорот экрана"</string>
     <string name="status_bar_settings_mute_label" msgid="554682549917429396">"ВЫКЛ."</string>
     <string name="status_bar_settings_auto_brightness_label" msgid="511453614962324674">"АВТО"</string>
@@ -184,6 +183,8 @@
     <string name="accessibility_quick_settings_airplane_changed_on" msgid="8983005603505087728">"Режим полета включен."</string>
     <string name="accessibility_quick_settings_dnd_priority_on" msgid="1448402297221249355">"Режим \"Не беспокоить\" включен. Будут показаны только важные оповещения."</string>
     <string name="accessibility_quick_settings_dnd_none_on" msgid="5910777408232088752">"Включен режим \"Не беспокоить\". Все оповещения отключены."</string>
+    <!-- no translation found for accessibility_quick_settings_dnd_alarms_on (9152834845587554157) -->
+    <skip />
     <string name="accessibility_quick_settings_dnd_off" msgid="2371832603753738581">"Режим \"Не беспокоить\" выключен."</string>
     <string name="accessibility_quick_settings_dnd_changed_off" msgid="898107593453022935">"Режим \"Не беспокоить\" выключен."</string>
     <string name="accessibility_quick_settings_dnd_changed_on" msgid="4483780856613561039">"Режим \"Не беспокоить\" включен."</string>
@@ -234,9 +235,10 @@
     <string name="dessert_case" msgid="1295161776223959221">"Коробка со сладостями"</string>
     <string name="start_dreams" msgid="7219575858348719790">"Заставка"</string>
     <string name="ethernet_label" msgid="7967563676324087464">"Ethernet"</string>
-    <string name="quick_settings_airplane_mode_label" msgid="5510520633448831350">"Режим полета"</string>
     <string name="quick_settings_dnd_label" msgid="8735855737575028208">"Не беспокоить"</string>
     <string name="quick_settings_dnd_priority_label" msgid="483232950670692036">"Только важные"</string>
+    <!-- no translation found for quick_settings_dnd_alarms_label (2559229444312445858) -->
+    <skip />
     <string name="quick_settings_dnd_none_label" msgid="7309935569360609114">"Без оповещений"</string>
     <string name="quick_settings_bluetooth_label" msgid="6304190285170721401">"Bluetooth"</string>
     <string name="quick_settings_bluetooth_multiple_devices_label" msgid="3912245565613684735">"Bluetooth (<xliff:g id="NUMBER">%d</xliff:g>)"</string>
@@ -307,6 +309,8 @@
     <string name="zen_no_interruptions_with_warning" msgid="4396898053735625287">"Никаких оповещений, даже от будильника."</string>
     <string name="zen_no_interruptions" msgid="7970973750143632592">"Не беспокоить"</string>
     <string name="zen_important_interruptions" msgid="3477041776609757628">"Только важные оповещения"</string>
+    <!-- no translation found for zen_alarms (5055668280767657759) -->
+    <skip />
     <string name="zen_alarm_information_time" msgid="5235772206174372272">"Следующий будильник: <xliff:g id="ALARM_TIME">%s</xliff:g>"</string>
     <string name="zen_alarm_information_day_time" msgid="8422733576255047893">"Следующий будильник: <xliff:g id="ALARM_DAY_AND_TIME">%s</xliff:g>"</string>
     <string name="zen_alarm_warning" msgid="6873910860111498041">"Следующий будильник: <xliff:g id="ALARM_TIME">%s</xliff:g>. Звук отключен."</string>
@@ -316,9 +320,19 @@
     <string name="keyguard_unlock" msgid="8043466894212841998">"Проведите вверх, чтобы разблокировать"</string>
     <string name="phone_hint" msgid="3101468054914424646">"Чтобы позвонить, пролистните вправо"</string>
     <string name="camera_hint" msgid="5241441720959174226">"Чтобы включить камеру, пролистните влево"</string>
-    <string name="interruption_level_none" msgid="3831278883136066646">"Не беспокоить"</string>
-    <string name="interruption_level_priority" msgid="6517366750688942030">"Важные"</string>
+    <!-- no translation found for interruption_level_none (8284541443482072628) -->
+    <skip />
+    <!-- no translation found for interruption_level_priority (6426766465363855505) -->
+    <skip />
+    <!-- no translation found for interruption_level_alarms (5226306993448328896) -->
+    <skip />
     <string name="interruption_level_all" msgid="1330581184930945764">"Все"</string>
+    <!-- no translation found for interruption_level_none_twoline (3942121050170227056) -->
+    <skip />
+    <!-- no translation found for interruption_level_priority_twoline (1564715335217164124) -->
+    <skip />
+    <!-- no translation found for interruption_level_alarms_twoline (3266909566410106146) -->
+    <skip />
     <string name="keyguard_indication_charging_time" msgid="1757251776872835768">"Зарядка батареи (осталось <xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g>)"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="7305948938141024937">"Сменить пользователя."</string>
     <string name="accessibility_multi_user_switch_switcher_with_current" msgid="8434880595284601601">"Сменить аккаунт. Вход выполнен под именем <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>."</string>
@@ -386,4 +400,6 @@
     <string name="volumeui_prompt_deny" msgid="5720663643411696731">"Нет"</string>
     <string name="volumeui_notification_title" msgid="4906770126345910955">"Приложение <xliff:g id="APP_NAME">%1$s</xliff:g> назначено регулятором громкости"</string>
     <string name="volumeui_notification_text" msgid="1826889705095768656">"Нажмите, чтобы восстановить приложение по умолчанию."</string>
+    <!-- no translation found for volume_zen_switch_text (6388350641576595452) -->
+    <skip />
 </resources>
