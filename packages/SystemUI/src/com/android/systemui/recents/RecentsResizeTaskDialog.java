@@ -209,6 +209,10 @@ public class RecentsResizeTaskDialog extends DialogFragment {
             }
         }
 
+        // Get rid of the dialog.
+        dismiss();
+        mRecentsActivity.dismissRecentsToHomeWithoutTransitionAnimation();
+
         // Resize all tasks beginning from the "oldest" one.
         for (int i = additionalTasks; i >= 0; --i) {
             if (mTasks[i] != null) {
@@ -216,12 +220,8 @@ public class RecentsResizeTaskDialog extends DialogFragment {
             }
         }
 
-        // Get rid of the dialog.
-        dismiss();
-        mRecentsActivity.dismissRecentsToHomeRaw(false);
-
-        // Show tasks - beginning with the oldest so that the focus ends on the selected one.
-        // TODO: Remove this once issue b/19893373 is resolved.
+        // Show tasks as they might not be currently visible - beginning with the oldest so that
+        // the focus ends on the selected one.
         for (int i = additionalTasks; i >= 0; --i) {
             if (mTasks[i] != null) {
                 mRecentsView.launchTask(mTasks[i]);
