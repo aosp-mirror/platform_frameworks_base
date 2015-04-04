@@ -1203,7 +1203,7 @@
     <string name="whichViewApplicationNamed" msgid="2286418824011249620">"Ouvrir avec %1$s"</string>
     <string name="whichEditApplication" msgid="144727838241402655">"Modifier avec"</string>
     <string name="whichEditApplicationNamed" msgid="1775815530156447790">"Modifier avec %1$s"</string>
-    <string name="whichSendApplication" msgid="6902512414057341668">"Partager avec"</string>
+    <string name="whichSendApplication" msgid="6902512414057341668">"Partager"</string>
     <string name="whichSendApplicationNamed" msgid="2799370240005424391">"Partager avec %1$s"</string>
     <string name="whichHomeApplication" msgid="4307587691506919691">"Sélectionner une application pour l\'écran d\'accueil"</string>
     <string name="whichHomeApplicationNamed" msgid="4493438593214760979">"Utiliser %1$s comme écran d\'accueil"</string>
