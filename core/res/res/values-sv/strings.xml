@@ -124,9 +124,19 @@
     <string name="roamingText12" msgid="1189071119992726320">"Roamingbanner av"</string>
     <string name="roamingTextSearching" msgid="8360141885972279963">"Söker efter tjänst"</string>
     <string name="wfcRegErrorTitle" msgid="2301376280632110664">"Wi-Fi-samtal"</string>
-  <string-array name="wfcOperatorErrorMessages">
+  <string-array name="wfcOperatorErrorAlertMessages">
+  </string-array>
+  <string-array name="wfcOperatorErrorNotificationMessages">
   </string-array>
     <string name="wfcSpnFormat" msgid="8211621332478306568">"%s"</string>
+    <!-- no translation found for wifi_calling_off_summary (8720659586041656098) -->
+    <skip />
+    <!-- no translation found for wfc_mode_wifi_preferred_summary (1994113411286935263) -->
+    <skip />
+    <!-- no translation found for wfc_mode_cellular_preferred_summary (5920549484600758786) -->
+    <skip />
+    <!-- no translation found for wfc_mode_wifi_only_summary (2379919155237869320) -->
+    <skip />
     <string name="cfTemplateNotForwarded" msgid="1683685883841272560">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: Vidarebefordras inte"</string>
     <string name="cfTemplateForwarded" msgid="1302922117498590521">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
     <string name="cfTemplateForwardedTime" msgid="9206251736527085256">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g><xliff:g id="DIALING_NUMBER">{1}</xliff:g> efter <xliff:g id="TIME_DELAY">{2}</xliff:g> sekunder"</string>
@@ -585,8 +595,7 @@
     <string name="permdesc_camera" msgid="8497216524735535009">"Tillåter att appen tar bilder och spelar in videor med kameran. Med den här behörigheten tillåts appen att använda kameran när som helst utan ditt godkännande."</string>
     <string name="permlab_cameraDisableTransmitLed" msgid="2651072630501126222">"inaktivera LED-sändningsindikator när kameran används"</string>
     <string name="permdesc_cameraDisableTransmitLed" msgid="4764585465480295341">"Tillåter att en förinstallerad systemapp inaktiverar LED-indikatorn för kameranvändning."</string>
-    <!-- no translation found for permdesc_cameraSendSystemEvent (8642231538552298107) -->
-    <skip />
+    <string name="permdesc_cameraSendSystemEvent" msgid="8642231538552298107">"Tillåter att en förinstallerad systemapp skickar systemmeddelanden till kameratjänsten."</string>
     <string name="permlab_brick" product="tablet" msgid="2961292205764488304">"inaktivera surfplattan permanent"</string>
     <string name="permlab_brick" product="tv" msgid="4912674222121249410">"inaktivera tv:n permanent"</string>
     <string name="permlab_brick" product="default" msgid="8337817093326370537">"inaktivera telefonen permanent"</string>
@@ -635,6 +644,10 @@
     <string name="permlab_performCdmaProvisioning" product="tv" msgid="3485391974208100809">"starta konfiguration av CDMA-tv direkt"</string>
     <string name="permlab_performCdmaProvisioning" product="default" msgid="5604848095315421425">"starta CDMA-telefoninställningar direkt"</string>
     <string name="permdesc_performCdmaProvisioning" msgid="1994193538802314186">"Tillåter att appen startar CDMA-anslutning. Skadliga appar kan starta CDMA-anslutningar i onödan."</string>
+    <!-- no translation found for permlab_performSimActivation (1651116521896665009) -->
+    <skip />
+    <!-- no translation found for permdesc_performSimActivation (1778214876348917401) -->
+    <skip />
     <string name="permlab_locationUpdates" msgid="7785408253364335740">"styra meddelanden för platsuppdatering"</string>
     <string name="permdesc_locationUpdates" msgid="1120741557891438876">"Tillåter att appen aktiverar/inaktiverar meddelanden om platsuppdateringar från radion. Används inte av vanliga appar."</string>
     <string name="permlab_checkinProperties" msgid="7855259461268734914">"få åtkomst till incheckningsegenskaper"</string>
@@ -841,6 +854,10 @@
     <string name="permdesc_removeDrmCertificates" msgid="7272999075113400993">"Tillåter ett program att ta bort DRM-certifikat. Behövs inte för vanliga appar."</string>
     <string name="permlab_bindCarrierMessagingService" msgid="1490229371796969158">"binda till en operatörs meddelandetjänst"</string>
     <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"Innehavaren tillåts att binda till den översta nivåns gränssnitt för en operatörs meddelandetjänst. Ska inte behövas för vanliga appar."</string>
+    <!-- no translation found for permlab_accessVoiceInteractionService (4183835260471435605) -->
+    <skip />
+    <!-- no translation found for permdesc_accessVoiceInteractionService (836587728238433459) -->
+    <skip />
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Ange lösenordsregler"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"Styr tillåten längd och tillåtna tecken i lösenord och pinkoder för skärmlåset."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Övervaka försök att låsa upp skärmen"</string>

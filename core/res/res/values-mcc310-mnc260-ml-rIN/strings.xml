@@ -22,8 +22,7 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-  <string-array name="wfcOperatorErrorMessages">
-    <item msgid="931634632269046788">"Wi-Fi കോളിംഗ് ലഭ്യമല്ല. Wi-Fi കോളിംഗ് പ്രവർത്തനക്ഷമമാക്കാൻ നിങ്ങളുടെ കാരിയറെ ബന്ധപ്പെടുക."</item>
-  </string-array>
+    <!-- no translation found for wfcOperatorErrorAlertMessages:0 (7239039348648848288) -->
+    <!-- no translation found for wfcOperatorErrorNotificationMessages:0 (483847327467331298) -->
     <string name="wfcSpnFormat" msgid="4982938551498609442">"%s Wi-Fi കോളിംഗ്"</string>
 </resources>

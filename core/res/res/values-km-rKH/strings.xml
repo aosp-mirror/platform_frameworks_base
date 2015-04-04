@@ -124,9 +124,19 @@
     <string name="roamingText12" msgid="1189071119992726320">"បិទ​បដា​រ៉ូមីង"</string>
     <string name="roamingTextSearching" msgid="8360141885972279963">"​ស្វែង​រក​សេវាកម្ម"</string>
     <string name="wfcRegErrorTitle" msgid="2301376280632110664">"ការហៅតាម Wi-Fi"</string>
-  <string-array name="wfcOperatorErrorMessages">
+  <string-array name="wfcOperatorErrorAlertMessages">
+  </string-array>
+  <string-array name="wfcOperatorErrorNotificationMessages">
   </string-array>
     <string name="wfcSpnFormat" msgid="8211621332478306568">"%s"</string>
+    <!-- no translation found for wifi_calling_off_summary (8720659586041656098) -->
+    <skip />
+    <!-- no translation found for wfc_mode_wifi_preferred_summary (1994113411286935263) -->
+    <skip />
+    <!-- no translation found for wfc_mode_cellular_preferred_summary (5920549484600758786) -->
+    <skip />
+    <!-- no translation found for wfc_mode_wifi_only_summary (2379919155237869320) -->
+    <skip />
     <string name="cfTemplateNotForwarded" msgid="1683685883841272560">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g> ៖ មិន​បាន​បញ្ជូន​បន្ត"</string>
     <string name="cfTemplateForwarded" msgid="1302922117498590521">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
     <string name="cfTemplateForwardedTime" msgid="9206251736527085256">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g> បន្ទាប់​ពី <xliff:g id="TIME_DELAY">{2}</xliff:g> វិនាទី"</string>
@@ -585,8 +595,7 @@
     <string name="permdesc_camera" msgid="8497216524735535009">"ឲ្យ​កម្មវិធី​ថត​រូប និង​វីដេអូ​ដោយ​ប្រើ​ម៉ាស៊ីន​ថត។ វា​ឲ្យ​កម្មវិធី​​ប្រើ​ម៉ាស៊ីន​ថត​នៅ​ពេល​​ណាមួយ​ដោយ​គ្មាន​ការ​បញ្ជាក់​របស់​អ្នក។"</string>
     <string name="permlab_cameraDisableTransmitLed" msgid="2651072630501126222">"បិទ​​ពន្លឺ​បង្ហាញ​ការ​បញ្ជូន​​ពេល​ម៉ាស៊ីន​ថត​កំពុង​ប្រើ"</string>
     <string name="permdesc_cameraDisableTransmitLed" msgid="4764585465480295341">"ឲ្យ​កម្មវិធី​ប្រព័ន្ធ​ដែល​បាន​ដំឡើង​រួច​បិទ​​ LED បង្ហាញ​ការ​ប្រើ​ម៉ាស៊ីន​ថត។"</string>
-    <!-- no translation found for permdesc_cameraSendSystemEvent (8642231538552298107) -->
-    <skip />
+    <string name="permdesc_cameraSendSystemEvent" msgid="8642231538552298107">"អនុញ្ញតឲ្យកម្មវិធីប្រព័ន្ធដែលបានដំឡើងជាមុនផ្ញើព្រឹត្តិការណ៍ប្រព័ន្ធសេវាកាមេរ៉ា។"</string>
     <string name="permlab_brick" product="tablet" msgid="2961292205764488304">"បិទ​កុំព្យូទ័រ​បន្ទះ​ជា​អចិន្ត្រៃយ៍"</string>
     <string name="permlab_brick" product="tv" msgid="4912674222121249410">"បិទដំណើរការទូរទស្សន៍ជាអចិន្ត្រៃយ៍"</string>
     <string name="permlab_brick" product="default" msgid="8337817093326370537">"បិទ​ទូរស័ព្ទ​ជា​អចិន្ត្រៃយ៍"</string>
@@ -635,6 +644,10 @@
     <string name="permlab_performCdmaProvisioning" product="tv" msgid="3485391974208100809">"ចាប់ផ្តើមកំណត់ទូរទស្សន៍ CDMA ដោយផ្ទាល់"</string>
     <string name="permlab_performCdmaProvisioning" product="default" msgid="5604848095315421425">"ចាប់ផ្ដើម​រៀបចំ​កុំព្យូទ័រ​បន្ទះ CDMA ដោយ​ផ្ទាល់"</string>
     <string name="permdesc_performCdmaProvisioning" msgid="1994193538802314186">"ឲ្យ​កម្មវិធី​ចាប់ផ្ដើម​ការ​ផ្ដល់ CDMA ។ កម្មវិធី​ព្យាបាទ​អាច​មិន​ចាំបាច់​ចាប់ផ្ដើម​ការ​ផ្ដល់ CDMA ។"</string>
+    <!-- no translation found for permlab_performSimActivation (1651116521896665009) -->
+    <skip />
+    <!-- no translation found for permdesc_performSimActivation (1778214876348917401) -->
+    <skip />
     <string name="permlab_locationUpdates" msgid="7785408253364335740">"ពិនិត្យ​​ការ​ជូន​ដំណឹង​បច្ចុប្បន្ន​ភាព​ទីតាំង"</string>
     <string name="permdesc_locationUpdates" msgid="1120741557891438876">"ឲ្យ​កម្មវិធី​បិទ/បើក​ការ​ជូន​ដំណឹង​បច្ចុប្បន្នភាព​ទីតាំង​ពី​វិទ្យុ។ មិន​សម្រាប់​ប្រើ​ដោយ​កម្មវិធី​ធម្មតា​ទេ។។"</string>
     <string name="permlab_checkinProperties" msgid="7855259461268734914">"ចូល​ដំណើរការ​លក្ខណៈ​សម្បត្តិ​ពិនិត្យ​មើល"</string>
@@ -841,6 +854,10 @@
     <string name="permdesc_removeDrmCertificates" msgid="7272999075113400993">"អនុញ្ញាត​ឲ្យ​​កម្មវិធី​លុប​ចេញ​វិញ្ញាបនបត្រ DRM ​។ គួរ​តែ​មិន​ត្រូវការ​សម្រាប់​កម្មវិធី​ធម្មតា​។"</string>
     <string name="permlab_bindCarrierMessagingService" msgid="1490229371796969158">"ភ្ជាប់ទៅសេវាកម្មសារអ្នកផ្តល់សេវាកម្មទូរស័ព្ទ"</string>
     <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"អនុញ្ញាតឲ្យអ្នកប្រើភ្ជាប់ទៅអ៊ីនធឺហ្វេសកម្រិតខ្ពស់នៃសេវាកម្មសារអ្នកផ្តល់សេវាកម្មទូរស័ព្ទ។ មិនគួរចាំបាច់សម្រាប់កម្មវិធីធម្មតាទេ។"</string>
+    <!-- no translation found for permlab_accessVoiceInteractionService (4183835260471435605) -->
+    <skip />
+    <!-- no translation found for permdesc_accessVoiceInteractionService (836587728238433459) -->
+    <skip />
     <string name="policylab_limitPassword" msgid="4497420728857585791">"កំណត់​ក្បួន​ពាក្យ​សម្ងាត់"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"គ្រប់គ្រងប្រវែង និងតួអក្សរដែលអនុញ្ញាតឲ្យប្រើក្នុងពាក្យសម្ងាត់ និងលេខសម្ងាត់ចាក់សោអេក្រង់។"</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"ពិនិត្យ​ការ​ព្យាយាម​ដោះ​សោ​អេក្រង់"</string>
@@ -1138,14 +1155,10 @@
     <string name="permdesc_packageVerificationAgent" msgid="8437590190990843381">"ឲ្យ​កម្មវិធី​ផ្ទៀងផ្ទាត់​កញ្ចប់​ដែល​អាច​ដំឡើង​បាន។"</string>
     <string name="permlab_bindPackageVerifier" msgid="4187786793360326654">"ចង​ទៅ​កម្មវិធី​ផ្ទៀងផ្ទាត់​កញ្ចប់"</string>
     <string name="permdesc_bindPackageVerifier" msgid="3180741773233862126">"ឲ្យ​ម្ចាស់​ស្នើ​កម្មវិធី​ផ្ទៀងផ្ទាត់​កញ្ចប់។ មិន​គួរ​ចាំបាច់​សម្រាប់​កម្មវិធី​ធម្មតា​ទេ។"</string>
-    <!-- no translation found for permlab_intentFilterVerificationAgent (1135788294400437497) -->
-    <skip />
-    <!-- no translation found for permdesc_intentFilterVerificationAgent (5853902808424716312) -->
-    <skip />
-    <!-- no translation found for permlab_bindIntentFilterVerifier (8567268159430779210) -->
-    <skip />
-    <!-- no translation found for permdesc_bindIntentFilterVerifier (681128728719578778) -->
-    <skip />
+    <string name="permlab_intentFilterVerificationAgent" msgid="1135788294400437497">"ផ្ទៀងផ្ទាត់តម្រងចេតនា"</string>
+    <string name="permdesc_intentFilterVerificationAgent" msgid="5853902808424716312">"អនុញ្ញាតឲ្យកម្មវិធីពិនិត្យមើលថាតើតម្រងចេតនាត្រូវបានផ្ទៀងផ្ទាត់ហើយឬនៅ។"</string>
+    <string name="permlab_bindIntentFilterVerifier" msgid="8567268159430779210">"ចងភ្ជាប់ទៅកម្មវិធីផ្ទៀងផ្ទាត់តម្រងចេតនា"</string>
+    <string name="permdesc_bindIntentFilterVerifier" msgid="681128728719578778">"អនុញ្ញាតឲ្យអ្នកគ្រប់គ្រងធ្វើការស្នើកម្មវិធីផ្ទៀងផ្ទាត់តម្រងចេតនា។ មិនគួរចាំបាច់សម្រាប់កម្មវិធីធម្មតានោះទេ។"</string>
     <string name="permlab_serialPort" msgid="546083327654631076">"ចូល​ដំណើរការ​ច្រក​ស៊េរី"</string>
     <string name="permdesc_serialPort" msgid="2991639985224598193">"អនុញ្ញាត​ឱ្យ​ចូល​ដំណើរ​ការ​ទៅ​កាន់​ច្រក​សៀរៀល​ដោយ​ប្រើ SerialManager API ។"</string>
     <string name="permlab_accessContentProvidersExternally" msgid="5077774297943409285">"ចូល​ដំណើរការ​ក្រុមហ៊ុន​ផ្ដល់​មាតិកា​ខាង​ក្រៅ"</string>
@@ -1573,10 +1586,8 @@
     <string name="date_picker_decrement_day_button" msgid="4131881521818750031">"បន្ថយ​ថ្ងៃ"</string>
     <string name="date_picker_increment_year_button" msgid="6318697384310808899">"បង្កើន​​ឆ្នាំ"</string>
     <string name="date_picker_decrement_year_button" msgid="4482021813491121717">"បន្ថយ​ឆ្នាំ"</string>
-    <!-- no translation found for date_picker_prev_month_button (2858244643992056505) -->
-    <skip />
-    <!-- no translation found for date_picker_next_month_button (5559507736887605055) -->
-    <skip />
+    <string name="date_picker_prev_month_button" msgid="2858244643992056505">"ខែមុន"</string>
+    <string name="date_picker_next_month_button" msgid="5559507736887605055">"ខែក្រោយ"</string>
     <string name="keyboardview_keycode_alt" msgid="4856868820040051939">"Alt"</string>
     <string name="keyboardview_keycode_cancel" msgid="1203984017245783244">"បោះ​បង់​"</string>
     <string name="keyboardview_keycode_delete" msgid="3337914833206635744">"លុប"</string>

@@ -125,9 +125,19 @@
     <string name="roamingText12" msgid="1189071119992726320">"Banner roaming dezactivat"</string>
     <string name="roamingTextSearching" msgid="8360141885972279963">"Se caută serviciul"</string>
     <string name="wfcRegErrorTitle" msgid="2301376280632110664">"Apelare prin Wi-Fi"</string>
-  <string-array name="wfcOperatorErrorMessages">
+  <string-array name="wfcOperatorErrorAlertMessages">
+  </string-array>
+  <string-array name="wfcOperatorErrorNotificationMessages">
   </string-array>
     <string name="wfcSpnFormat" msgid="8211621332478306568">"%s"</string>
+    <!-- no translation found for wifi_calling_off_summary (8720659586041656098) -->
+    <skip />
+    <!-- no translation found for wfc_mode_wifi_preferred_summary (1994113411286935263) -->
+    <skip />
+    <!-- no translation found for wfc_mode_cellular_preferred_summary (5920549484600758786) -->
+    <skip />
+    <!-- no translation found for wfc_mode_wifi_only_summary (2379919155237869320) -->
+    <skip />
     <string name="cfTemplateNotForwarded" msgid="1683685883841272560">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: neredirecţionată"</string>
     <string name="cfTemplateForwarded" msgid="1302922117498590521">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
     <string name="cfTemplateForwardedTime" msgid="9206251736527085256">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g> după <xliff:g id="TIME_DELAY">{2}</xliff:g> (de) secunde"</string>
@@ -586,8 +596,7 @@
     <string name="permdesc_camera" msgid="8497216524735535009">"Permite aplicației să realizeze fotografii și videoclipuri cu camera foto. Cu această permisiune aplicația utilizează camera foto oricând și fără confirmare."</string>
     <string name="permlab_cameraDisableTransmitLed" msgid="2651072630501126222">"dezactivează ledul care indică când este utilizată camera foto"</string>
     <string name="permdesc_cameraDisableTransmitLed" msgid="4764585465480295341">"Permite unei aplicații de sistem preinstalate să dezactiveze ledul care indică utilizarea camerei foto."</string>
-    <!-- no translation found for permdesc_cameraSendSystemEvent (8642231538552298107) -->
-    <skip />
+    <string name="permdesc_cameraSendSystemEvent" msgid="8642231538552298107">"Permite unei aplicații de sistem preinstalate să trimită evenimentele de sistem către serviciul Cameră foto."</string>
     <string name="permlab_brick" product="tablet" msgid="2961292205764488304">"dezactivarea permanentă a computerului tablet PC"</string>
     <string name="permlab_brick" product="tv" msgid="4912674222121249410">"dezactivează definitiv televizorul"</string>
     <string name="permlab_brick" product="default" msgid="8337817093326370537">"dezactivare permanentă a telefonului"</string>
@@ -636,6 +645,10 @@
     <string name="permlab_performCdmaProvisioning" product="tv" msgid="3485391974208100809">"pornește direct configurarea televizorului pentru CDMA"</string>
     <string name="permlab_performCdmaProvisioning" product="default" msgid="5604848095315421425">"pornire directă a configuraţiei CDMA a telefonului"</string>
     <string name="permdesc_performCdmaProvisioning" msgid="1994193538802314186">"Permite aplicației să pornească asigurarea accesului la CDMA. Aplicaţiile rău intenţionate pot să pornească asigurarea accesului la CDMA, fără ca aceasta să fie necesară."</string>
+    <!-- no translation found for permlab_performSimActivation (1651116521896665009) -->
+    <skip />
+    <!-- no translation found for permdesc_performSimActivation (1778214876348917401) -->
+    <skip />
     <string name="permlab_locationUpdates" msgid="7785408253364335740">"controlare notificări de actualizare a locaţiei"</string>
     <string name="permdesc_locationUpdates" msgid="1120741557891438876">"Permite aplicației să activeze/dezactiveze notificările privind actualizarea locaţiei primite de la radio. Nu se utilizează de aplicațiile obişnuite."</string>
     <string name="permlab_checkinProperties" msgid="7855259461268734914">"accesare proprietăţi checkin"</string>
@@ -842,6 +855,10 @@
     <string name="permdesc_removeDrmCertificates" msgid="7272999075113400993">"Permite unei aplicații să elimine certificatele DRM. Nu ar trebui să fie necesară pentru aplicațiile obișnuite."</string>
     <string name="permlab_bindCarrierMessagingService" msgid="1490229371796969158">"se conectează la un serviciu de mesagerie oferit de operator"</string>
     <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"Permite aplicației să se conecteze la interfața de nivel superior a unui serviciu de mesagerie oferit de operator. Nu ar trebui să fie niciodată necesară pentru aplicațiile obișnuite."</string>
+    <!-- no translation found for permlab_accessVoiceInteractionService (4183835260471435605) -->
+    <skip />
+    <!-- no translation found for permdesc_accessVoiceInteractionService (836587728238433459) -->
+    <skip />
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Setaţi reguli pentru parolă"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"Stabiliți lungimea și tipul de caractere permise pentru parolele și codurile PIN de blocare a ecranului."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Monitorizaţi încercările de deblocare a ecranului"</string>
@@ -1142,7 +1159,7 @@
     <string name="permlab_intentFilterVerificationAgent" msgid="1135788294400437497">"verifică filtrul de intenții"</string>
     <string name="permdesc_intentFilterVerificationAgent" msgid="5853902808424716312">"Permite aplicației să afle dacă filtrul de intenții este verificat sau nu."</string>
     <string name="permlab_bindIntentFilterVerifier" msgid="8567268159430779210">"se conectează la verificator de filtre de intenții"</string>
-    <string name="permdesc_bindIntentFilterVerifier" msgid="681128728719578778">"Permite aplicației să efectueze solicitări pentru verificatorii filtrelor de intenții. Nu ar trebui să fie niciodată necesară pentru aplicațiile obişnuite."</string>
+    <string name="permdesc_bindIntentFilterVerifier" msgid="681128728719578778">"Permite aplicației să facă solicitări pentru verificatorii filtrelor de intenții. Nu ar trebui să fie niciodată necesară pentru aplicațiile obișnuite."</string>
     <string name="permlab_serialPort" msgid="546083327654631076">"acces la porturi seriale"</string>
     <string name="permdesc_serialPort" msgid="2991639985224598193">"Permite posesorului accesul la porturile serial utilizând API-ul SerialManager."</string>
     <string name="permlab_accessContentProvidersExternally" msgid="5077774297943409285">"accesaţi furniz. de conţin. din exterior"</string>

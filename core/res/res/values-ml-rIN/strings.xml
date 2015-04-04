@@ -124,9 +124,19 @@
     <string name="roamingText12" msgid="1189071119992726320">"റോമിംഗ് ബാനർ ഓഫാക്കുക"</string>
     <string name="roamingTextSearching" msgid="8360141885972279963">"സേവനത്തിനായി തിരയുന്നു"</string>
     <string name="wfcRegErrorTitle" msgid="2301376280632110664">"Wi-Fi കോളിംഗ്"</string>
-  <string-array name="wfcOperatorErrorMessages">
+  <string-array name="wfcOperatorErrorAlertMessages">
+  </string-array>
+  <string-array name="wfcOperatorErrorNotificationMessages">
   </string-array>
     <string name="wfcSpnFormat" msgid="8211621332478306568">"%s"</string>
+    <!-- no translation found for wifi_calling_off_summary (8720659586041656098) -->
+    <skip />
+    <!-- no translation found for wfc_mode_wifi_preferred_summary (1994113411286935263) -->
+    <skip />
+    <!-- no translation found for wfc_mode_cellular_preferred_summary (5920549484600758786) -->
+    <skip />
+    <!-- no translation found for wfc_mode_wifi_only_summary (2379919155237869320) -->
+    <skip />
     <string name="cfTemplateNotForwarded" msgid="1683685883841272560">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: കൈമാറിയില്ല"</string>
     <string name="cfTemplateForwarded" msgid="1302922117498590521">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
     <string name="cfTemplateForwardedTime" msgid="9206251736527085256">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="TIME_DELAY">{2}</xliff:g> നിമിഷത്തിനുശേഷം <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
@@ -585,8 +595,7 @@
     <string name="permdesc_camera" msgid="8497216524735535009">"ക്യാമറ ഉപയോഗിച്ച് ചിത്രങ്ങളും വീഡിയോകളും എടുക്കാൻ അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു. നിങ്ങളുടെ സ്ഥിരീകരണമില്ലാതെ ഏതുസമയത്തും ക്യാമറ ഉപയോഗിക്കാൻ ഈ അനുമതി അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
     <string name="permlab_cameraDisableTransmitLed" msgid="2651072630501126222">"ക്യാമറ ഉപയോഗത്തിലായിരിക്കുമ്പോൾ ട്രാൻസ്‌മിറ്റ് ഇൻഡിക്കേറ്റർ LED പ്രവർത്തനരഹിതമാക്കുക"</string>
     <string name="permdesc_cameraDisableTransmitLed" msgid="4764585465480295341">"ക്യാമറയുടെ ഇൻഡിക്കേറ്റർ LED-യുടെ ഉപയോഗം പ്രവർത്തനരഹിതമാക്കാൻ മുൻകൂട്ടി ഇൻസ്റ്റാളുചെയ്‌ത സിസ്റ്റം അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
-    <!-- no translation found for permdesc_cameraSendSystemEvent (8642231538552298107) -->
-    <skip />
+    <string name="permdesc_cameraSendSystemEvent" msgid="8642231538552298107">"ക്യാമറ സേവന സിസ്റ്റം ഇവന്റുകൾ അയയ്‌ക്കാൻ മുൻകൂട്ടി ഇൻസ്റ്റാളുചെയ്‌ത ഒരു സിസ്റ്റം അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
     <string name="permlab_brick" product="tablet" msgid="2961292205764488304">"ശാശ്വതമായി ടാബ്‌ലെറ്റ് പ്രവർത്തനരഹിതമാക്കുക"</string>
     <string name="permlab_brick" product="tv" msgid="4912674222121249410">"ടിവിയെ ശാശ്വതമായി പ്രവർത്തനരഹിതമാക്കുക"</string>
     <string name="permlab_brick" product="default" msgid="8337817093326370537">"ശാശ്വതമായി ഫോൺ പ്രവർത്തനരഹിതമാക്കുക"</string>
@@ -635,6 +644,10 @@
     <string name="permlab_performCdmaProvisioning" product="tv" msgid="3485391974208100809">"CDMA സജ്ജീകരണം നേരിട്ട് ആരംഭിക്കുന്നു"</string>
     <string name="permlab_performCdmaProvisioning" product="default" msgid="5604848095315421425">"CDMA ഫോൺ സജ്ജീകരണം നേരിട്ട് ആരംഭിക്കുക"</string>
     <string name="permdesc_performCdmaProvisioning" msgid="1994193538802314186">"CDMA പ്രൊവിഷനിംഗ് ആരംഭിക്കുന്നതിന് അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു. ദോഷകരമായ അപ്ലിക്കേഷനുകൾ അനാവശ്യമായി CDMA പ്രൊവിഷനിംഗ് ആരംഭിച്ചേക്കാം."</string>
+    <!-- no translation found for permlab_performSimActivation (1651116521896665009) -->
+    <skip />
+    <!-- no translation found for permdesc_performSimActivation (1778214876348917401) -->
+    <skip />
     <string name="permlab_locationUpdates" msgid="7785408253364335740">"ലൊക്കേഷൻ അപ്‌ഡേറ്റ് അറിയിപ്പുകൾ നിയന്ത്രിക്കുക"</string>
     <string name="permdesc_locationUpdates" msgid="1120741557891438876">"റേഡിയോയിൽ നിന്ന് ലൊക്കേഷൻ അപ്ഡേറ്റ് അറിയിപ്പുകൾ പ്രവർത്തനക്ഷമമാക്കുന്നതിന്/പ്രവർത്തനരഹിതമാക്കുന്നതിന് അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു. സാധാരണ അപ്ലിക്കേഷനുകൾക്കായുഌഅ ഉപയോഗത്തിനല്ല."</string>
     <string name="permlab_checkinProperties" msgid="7855259461268734914">"ചെക്ക്ഇൻ പ്രോപ്പർട്ടികൾ ആക്‌സസ്സ് ചെയ്യുക"</string>
@@ -841,6 +854,10 @@
     <string name="permdesc_removeDrmCertificates" msgid="7272999075113400993">"DRM സർട്ടിഫിക്കറ്റുകൾ നീക്കംചെയ്യുന്നതിന് അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു. സാധാരണ അപ്ലിക്കേഷനുകൾക്ക് ഒരിക്കലും ആവശ്യമില്ല."</string>
     <string name="permlab_bindCarrierMessagingService" msgid="1490229371796969158">"കാരിയർ സന്ദേശമയയ്‌ക്കൽ സേവനത്തിലേക്ക് ബന്ധിപ്പിക്കുക"</string>
     <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"ഒരു കാരിയർ സന്ദേശമയയ്‌ക്കൽ സേവനത്തിന്റെ ഉയർന്ന നിലയിലുള്ള ഇന്റർഫേസിലേക്ക് ബന്ധിപ്പിക്കാൻ ദാതാവിനെ അനുവദിക്കുന്നു. സാധാരണ അപ്ലിക്കേഷനുകൾക്ക് ഒരിക്കലും ആവശ്യമില്ല."</string>
+    <!-- no translation found for permlab_accessVoiceInteractionService (4183835260471435605) -->
+    <skip />
+    <!-- no translation found for permdesc_accessVoiceInteractionService (836587728238433459) -->
+    <skip />
     <string name="policylab_limitPassword" msgid="4497420728857585791">"പാസ്‌വേഡ് നിയമങ്ങൾ സജ്ജീകരിക്കുക"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"സ്‌ക്രീൻ ലോക്ക് പാസ്‌വേഡുകളിലും PIN-കളിലും അനുവദിച്ചിരിക്കുന്ന ദൈർഘ്യവും പ്രതീകങ്ങളും നിയന്ത്രിക്കുക."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"സ്‌ക്രീൻ അൺലോക്ക് ശ്രമങ്ങൾ നിരീക്ഷിക്കുക"</string>
@@ -1138,10 +1155,10 @@
     <string name="permdesc_packageVerificationAgent" msgid="8437590190990843381">"ഒരു പാക്കേജ് ഇൻസ്റ്റാളുചെയ്യാനാവുന്നതാണോ എന്ന് പരിശോധിച്ചുറപ്പിക്കുന്നതിന് അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
     <string name="permlab_bindPackageVerifier" msgid="4187786793360326654">"ഒരു പാക്കേജ് വെരിഫയറുമായി ബന്ധപ്പെടുത്തുക"</string>
     <string name="permdesc_bindPackageVerifier" msgid="3180741773233862126">"പാക്കേജ് പരിശോധകരുടെ അഭ്യർത്ഥനകൾക്ക് ഹോൾഡറിനെ അനുവദിക്കുന്നു. സാധാരണ അപ്ലിക്കേഷനുകൾക്ക് ഒരിക്കലും ആവശ്യമില്ല."</string>
-    <string name="permlab_intentFilterVerificationAgent" msgid="1135788294400437497">"ഉദ്ദേശിത ഫിൽട്ടർ പരിശോധിച്ചുറപ്പിക്കുക"</string>
-    <string name="permdesc_intentFilterVerificationAgent" msgid="5853902808424716312">"ഒരു ഉദ്ദേശിത ഫിൽട്ടർ പരിശോധിച്ചുറപ്പിച്ചോ ഇല്ലയോ എന്ന് പരിശോധിക്കാൻ അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
-    <string name="permlab_bindIntentFilterVerifier" msgid="8567268159430779210">"ഒരു ഉദ്ദേശിത ഫിൽട്ടർ പരിശോധകനിലേക്ക് ബന്ധിപ്പിക്കുക"</string>
-    <string name="permdesc_bindIntentFilterVerifier" msgid="681128728719578778">"ഉദ്ദേശിത ഫിൽട്ടർ പരിശോധകരുടെ അഭ്യർത്ഥനകൾക്ക് ഉടമയെ അനുവദിക്കുന്നു. സാധാരണ അപ്ലിക്കേഷനുകൾക്ക് ഒരിക്കലും ആവശ്യമില്ല."</string>
+    <string name="permlab_intentFilterVerificationAgent" msgid="1135788294400437497">"ഉദ്ദേശിക്കുന്ന ഫിൽട്ടർ പരിശോധിച്ചുറപ്പിക്കുക"</string>
+    <string name="permdesc_intentFilterVerificationAgent" msgid="5853902808424716312">"ഒരു ഉദ്ദേശിക്കുന്ന ഫിൽട്ടർ പരിശോധിച്ചുറപ്പിച്ചോ ഇല്ലയോ എന്ന് പരിശോധിക്കാൻ അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
+    <string name="permlab_bindIntentFilterVerifier" msgid="8567268159430779210">"ഒരു ഉദ്ദേശിക്കുന്ന ഫിൽട്ടർ പരിശോധകനിലേക്ക് ബന്ധിപ്പിക്കുക"</string>
+    <string name="permdesc_bindIntentFilterVerifier" msgid="681128728719578778">"ഉദ്ദേശിക്കുന്ന ഫിൽട്ടർ പരിശോധകരുടെ അഭ്യർത്ഥനകൾക്ക് ഉടമയെ അനുവദിക്കുന്നു. സാധാരണ അപ്ലിക്കേഷനുകൾക്ക് ഒരിക്കലും ആവശ്യമില്ല."</string>
     <string name="permlab_serialPort" msgid="546083327654631076">"സീരിയൽ പോർട്ടുകൾ ആക്‌സസ്സ് ചെയ്യുക"</string>
     <string name="permdesc_serialPort" msgid="2991639985224598193">"SerialManager API ഉപയോഗിക്കുന്ന സീരിയൽ പോർട്ടുകൾ ആക്‌സസ്സ് ചെയ്യാൻ ദാതാവിനെ അനുവദിക്കുന്നു."</string>
     <string name="permlab_accessContentProvidersExternally" msgid="5077774297943409285">"ഉള്ളടക്ക ദാതാക്കളെ ബാഹ്യമായി ആക്‌സസ്സുചെയ്യുക"</string>

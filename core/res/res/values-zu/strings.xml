@@ -124,9 +124,19 @@
     <string name="roamingText12" msgid="1189071119992726320">"Ibhena yokuzulazula ivaliwe"</string>
     <string name="roamingTextSearching" msgid="8360141885972279963">"Iseshela Isevisi"</string>
     <string name="wfcRegErrorTitle" msgid="2301376280632110664">"Ukushaya kwe-Wi-Fi"</string>
-  <string-array name="wfcOperatorErrorMessages">
+  <string-array name="wfcOperatorErrorAlertMessages">
+  </string-array>
+  <string-array name="wfcOperatorErrorNotificationMessages">
   </string-array>
     <string name="wfcSpnFormat" msgid="8211621332478306568">"%s"</string>
+    <!-- no translation found for wifi_calling_off_summary (8720659586041656098) -->
+    <skip />
+    <!-- no translation found for wfc_mode_wifi_preferred_summary (1994113411286935263) -->
+    <skip />
+    <!-- no translation found for wfc_mode_cellular_preferred_summary (5920549484600758786) -->
+    <skip />
+    <!-- no translation found for wfc_mode_wifi_only_summary (2379919155237869320) -->
+    <skip />
     <string name="cfTemplateNotForwarded" msgid="1683685883841272560">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: Akudlulisiwe"</string>
     <string name="cfTemplateForwarded" msgid="1302922117498590521">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
     <string name="cfTemplateForwardedTime" msgid="9206251736527085256">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g> emuva kwamasekhondi angu-<xliff:g id="TIME_DELAY">{2}</xliff:g>"</string>
@@ -585,8 +595,7 @@
     <string name="permdesc_camera" msgid="8497216524735535009">"Ivumela uhlelo lokusebenza ukuthatha izithombe namavidiyo ngekhamera. Le mvume ivumela uhlelo lokusebenza ukusebenzisa ikhamera nganoma isiphi isikhathi ngaphandle kwemvume yakho."</string>
     <string name="permlab_cameraDisableTransmitLed" msgid="2651072630501126222">"khubaza i-LED yesikhombi sokudlulisa uma ikhamera isebenza"</string>
     <string name="permdesc_cameraDisableTransmitLed" msgid="4764585465480295341">"Ivumela isistimu efakwe ngaphambili yohlelo lokusebenza ukuze ikhubaze i-LED yesikhombi sokusetshenziswa kwekhamera."</string>
-    <!-- no translation found for permdesc_cameraSendSystemEvent (8642231538552298107) -->
-    <skip />
+    <string name="permdesc_cameraSendSystemEvent" msgid="8642231538552298107">"Ivumela uhlelo lokusebenza lesistimu olufakwe ngaphambilini ukuthumela imicimbi yesistimu yesevisi yekhamera."</string>
     <string name="permlab_brick" product="tablet" msgid="2961292205764488304">"vimbela ngokuphelele ithebhulethi"</string>
     <string name="permlab_brick" product="tv" msgid="4912674222121249410">"khubaza unaphakade i-TV"</string>
     <string name="permlab_brick" product="default" msgid="8337817093326370537">"ngokwaphakade vimbela ifoni"</string>
@@ -635,6 +644,10 @@
     <string name="permlab_performCdmaProvisioning" product="tv" msgid="3485391974208100809">"qala ngokuqondile ukusethwa kwe-CDMA TV"</string>
     <string name="permlab_performCdmaProvisioning" product="default" msgid="5604848095315421425">"ngokuqondile qalisa ukumisa ifoni nge-CDMA"</string>
     <string name="permdesc_performCdmaProvisioning" msgid="1994193538802314186">"Ivumela uhlelo lokusebenza ukuqalisa amalungiselelo e-CDMA. Izuhlelo lokusebenza ezinobungozi ingaqalisa amalungiselelo e-CDMA ngokungenasidingo."</string>
+    <!-- no translation found for permlab_performSimActivation (1651116521896665009) -->
+    <skip />
+    <!-- no translation found for permdesc_performSimActivation (1778214876348917401) -->
+    <skip />
     <string name="permlab_locationUpdates" msgid="7785408253364335740">"lawula izaziso zokubuyekeza indawo"</string>
     <string name="permdesc_locationUpdates" msgid="1120741557891438876">"Ivumela ukuthi uhlelo lokusebenza yenze izaziso zendawo zisebenze noma zingasebenzi emsakazweni. Ayenzelwe ukuthi isetshenziswe izinhlelo zokusebenza ezijwayelekile."</string>
     <string name="permlab_checkinProperties" msgid="7855259461268734914">"finyelela kwizakhiwo zokuhlola"</string>
@@ -841,6 +854,10 @@
     <string name="permdesc_removeDrmCertificates" msgid="7272999075113400993">"Ivumela uhlelo lokusebenza ukususa izitifiketi ze-DRM. Akufanele idingeke ngezinhlelo zokusebenza ezivamile."</string>
     <string name="permlab_bindCarrierMessagingService" msgid="1490229371796969158">"bophezela kusevisi yomlayezo yenkampani yenethiwekhi"</string>
     <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"Ivumela isibambi ukuhlanganisa isixhumanisi sokubona esiphezulu sesevisi yomlayezo yenkampani yenethiwekhi. Akufanele idingeke kuzinhlelo zokusebenza ezivamile."</string>
+    <!-- no translation found for permlab_accessVoiceInteractionService (4183835260471435605) -->
+    <skip />
+    <!-- no translation found for permdesc_accessVoiceInteractionService (836587728238433459) -->
+    <skip />
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Misa imithetho yephasiwedi"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"Lawula ubude nezinhlamvu ezivunyelwe kumaphasiwedi wokukhiya isikrini nama-PIN."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Gaka imizamo yokuvula isikrini"</string>
