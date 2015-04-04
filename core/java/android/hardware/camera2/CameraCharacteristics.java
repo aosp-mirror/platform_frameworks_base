@@ -1107,8 +1107,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * that can be configured and used simultaneously by a camera device.</p>
      * <p>When set to 0, it means no input stream is supported.</p>
      * <p>The image format for a input stream can be any supported
-     * format provided by
-     * android.scaler.availableInputOutputFormatsMap. When using an
+     * format returned by StreamConfigurationMap#getInputFormats. When using an
      * input stream, there must be at least one output stream
      * configured to to receive the reprocessed images.</p>
      * <p>When an input stream and some output streams are used in a reprocessing request,
@@ -1408,12 +1407,12 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * </thead>
      * <tbody>
      * <tr>
-     * <td align="left">OPAQUE</td>
+     * <td align="left">PRIVATE (ImageFormat#PRIVATE)</td>
      * <td align="left">JPEG</td>
      * <td align="left">OPAQUE_REPROCESSING</td>
      * </tr>
      * <tr>
-     * <td align="left">OPAQUE</td>
+     * <td align="left">PRIVATE</td>
      * <td align="left">YUV_420_888</td>
      * <td align="left">OPAQUE_REPROCESSING</td>
      * </tr>
@@ -1429,25 +1428,23 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * </tr>
      * </tbody>
      * </table>
-     * <p>OPAQUE refers to a device-internal format that is not directly application-visible.
-     * An OPAQUE input or output surface can be acquired by
-     * OpaqueImageRingBufferQueue#getInputSurface() or
-     * OpaqueImageRingBufferQueue#getOutputSurface().
-     * For a OPAQUE_REPROCESSING-capable camera device, using the OPAQUE format
+     * <p>PRIVATE refers to a device-internal format that is not directly application-visible.
+     * A PRIVATE input surface can be acquired by
+     * ImageReader.newOpaqueInstance(width, height, maxImages).
+     * For a OPAQUE_REPROCESSING-capable camera device, using the PRIVATE format
      * as either input or output will never hurt maximum frame rate (i.e.
-     * StreamConfigurationMap#getOutputStallDuration(klass,Size) is always 0),
-     * where klass is android.media.OpaqueImageRingBufferQueue.class.</p>
+     * StreamConfigurationMap#getOutputStallDuration(format, size) is always 0),
+     * where format is ImageFormat#PRIVATE.</p>
      * <p>Attempting to configure an input stream with output streams not
      * listed as available in this map is not valid.</p>
-     * <p>TODO: typedef to ReprocessFormatMap</p>
      * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
      *
      * @see CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES
      * @see CameraCharacteristics#REQUEST_MAX_NUM_INPUT_STREAMS
      * @hide
      */
-    public static final Key<int[]> SCALER_AVAILABLE_INPUT_OUTPUT_FORMATS_MAP =
-            new Key<int[]>("android.scaler.availableInputOutputFormatsMap", int[].class);
+    public static final Key<android.hardware.camera2.params.ReprocessFormatsMap> SCALER_AVAILABLE_INPUT_OUTPUT_FORMATS_MAP =
+            new Key<android.hardware.camera2.params.ReprocessFormatsMap>("android.scaler.availableInputOutputFormatsMap", android.hardware.camera2.params.ReprocessFormatsMap.class);
 
     /**
      * <p>The available stream configurations that this

@@ -48,6 +48,7 @@ import android.hardware.camera2.marshal.impl.MarshalQueryableString;
 import android.hardware.camera2.params.Face;
 import android.hardware.camera2.params.HighSpeedVideoConfiguration;
 import android.hardware.camera2.params.LensShadingMap;
+import android.hardware.camera2.params.ReprocessFormatsMap;
 import android.hardware.camera2.params.StreamConfiguration;
 import android.hardware.camera2.params.StreamConfigurationDuration;
 import android.hardware.camera2.params.StreamConfigurationMap;
@@ -838,11 +839,13 @@ public class CameraMetadataNative implements Parcelable {
                 CameraCharacteristics.DEPTH_AVAILABLE_DEPTH_STALL_DURATIONS);
         HighSpeedVideoConfiguration[] highSpeedVideoConfigurations = getBase(
                 CameraCharacteristics.CONTROL_AVAILABLE_HIGH_SPEED_VIDEO_CONFIGURATIONS);
+        ReprocessFormatsMap inputOutputFormatsMap = getBase(
+                CameraCharacteristics.SCALER_AVAILABLE_INPUT_OUTPUT_FORMATS_MAP);
 
         return new StreamConfigurationMap(
                 configurations, minFrameDurations, stallDurations,
                 depthConfigurations, depthMinFrameDurations, depthStallDurations,
-                highSpeedVideoConfigurations);
+                highSpeedVideoConfigurations, inputOutputFormatsMap);
     }
 
     private <T> Integer getMaxRegions(Key<T> key) {
