@@ -171,7 +171,7 @@ public class MediaRecorder
         public final static int AUDIO_SOURCE_INVALID = -1;
 
       /* Do not change these values without updating their counterparts
-       * in system/core/include/system/audio.h!
+       * in system/media/audio/include/system/audio.h!
        */
 
         /** Default audio source **/
