@@ -75,13 +75,19 @@ public interface IMountServiceListener extends IInterface {
                 }
                 case TRANSACTION_onStorageStateChanged: {
                     data.enforceInterface(DESCRIPTOR);
-                    String path;
-                    path = data.readString();
-                    String oldState;
-                    oldState = data.readString();
-                    String newState;
-                    newState = data.readString();
+                    final String path = data.readString();
+                    final String oldState = data.readString();
+                    final String newState = data.readString();
                     this.onStorageStateChanged(path, oldState, newState);
+                    reply.writeNoException();
+                    return true;
+                }
+                case TRANSACTION_onVolumeStateChanged: {
+                    data.enforceInterface(DESCRIPTOR);
+                    final VolumeInfo vol = (VolumeInfo) data.readParcelable(null);
+                    final int oldState = data.readInt();
+                    final int newState = data.readInt();
+                    onVolumeStateChanged(vol, oldState, newState);
                     reply.writeNoException();
                     return true;
                 }
@@ -116,7 +122,7 @@ public interface IMountServiceListener extends IInterface {
                     _data.writeInterfaceToken(DESCRIPTOR);
                     _data.writeInt(((connected) ? (1) : (0)));
                     mRemote.transact(Stub.TRANSACTION_onUsbMassStorageConnectionChanged, _data,
-                            _reply, 0);
+                            _reply, android.os.IBinder.FLAG_ONEWAY);
                     _reply.readException();
                 } finally {
                     _reply.recycle();
@@ -142,7 +148,27 @@ public interface IMountServiceListener extends IInterface {
                     _data.writeString(path);
                     _data.writeString(oldState);
                     _data.writeString(newState);
-                    mRemote.transact(Stub.TRANSACTION_onStorageStateChanged, _data, _reply, 0);
+                    mRemote.transact(Stub.TRANSACTION_onStorageStateChanged, _data, _reply,
+                            android.os.IBinder.FLAG_ONEWAY);
+                    _reply.readException();
+                } finally {
+                    _reply.recycle();
+                    _data.recycle();
+                }
+            }
+
+            @Override
+            public void onVolumeStateChanged(VolumeInfo vol, int oldState, int newState)
+                    throws RemoteException {
+                Parcel _data = Parcel.obtain();
+                Parcel _reply = Parcel.obtain();
+                try {
+                    _data.writeInterfaceToken(DESCRIPTOR);
+                    _data.writeParcelable(vol, 0);
+                    _data.writeInt(oldState);
+                    _data.writeInt(newState);
+                    mRemote.transact(Stub.TRANSACTION_onVolumeStateChanged, _data, _reply,
+                            android.os.IBinder.FLAG_ONEWAY);
                     _reply.readException();
                 } finally {
                     _reply.recycle();
@@ -154,6 +180,8 @@ public interface IMountServiceListener extends IInterface {
         static final int TRANSACTION_onUsbMassStorageConnectionChanged = (IBinder.FIRST_CALL_TRANSACTION + 0);
 
         static final int TRANSACTION_onStorageStateChanged = (IBinder.FIRST_CALL_TRANSACTION + 1);
+
+        static final int TRANSACTION_onVolumeStateChanged = (IBinder.FIRST_CALL_TRANSACTION + 2);
     }
 
     /**
@@ -172,5 +200,8 @@ public interface IMountServiceListener extends IInterface {
      *            values returned by Environment.getExternalStorageState()
      */
     public void onStorageStateChanged(String path, String oldState, String newState)
+            throws RemoteException;
+
+    public void onVolumeStateChanged(VolumeInfo vol, int oldState, int newState)
             throws RemoteException;
 }

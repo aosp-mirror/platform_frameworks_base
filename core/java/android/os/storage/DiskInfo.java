@@ -24,6 +24,8 @@ import android.util.DebugUtils;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.Preconditions;
 
+import java.io.CharArrayWriter;
+
 /**
  * Information about a physical disk which may contain one or more
  * {@link VolumeInfo}.
@@ -66,17 +68,12 @@ public class DiskInfo implements Parcelable {
         }
     }
 
-//    public void partitionPublic() throws NativeDaemonConnectorException {
-//        mConnector.execute("volume", "partition", id, "public");
-//    }
-//
-//    public void partitionPrivate() throws NativeDaemonConnectorException {
-//        mConnector.execute("volume", "partition", id, "private");
-//    }
-//
-//    public void partitionMixed(int frac) throws NativeDaemonConnectorException {
-//        mConnector.execute("volume", "partition", id, "mixed", frac);
-//    }
+    @Override
+    public String toString() {
+        final CharArrayWriter writer = new CharArrayWriter();
+        dump(new IndentingPrintWriter(writer, "    ", 80));
+        return writer.toString();
+    }
 
     public void dump(IndentingPrintWriter pw) {
         pw.println("DiskInfo:");
@@ -88,6 +85,18 @@ public class DiskInfo implements Parcelable {
         pw.printPair("volumes", volumes);
         pw.decreaseIndent();
         pw.println();
+    }
+
+    @Override
+    public DiskInfo clone() {
+        final Parcel temp = Parcel.obtain();
+        try {
+            writeToParcel(temp, 0);
+            temp.setDataPosition(0);
+            return CREATOR.createFromParcel(temp);
+        } finally {
+            temp.recycle();
+        }
     }
 
     public static final Creator<DiskInfo> CREATOR = new Creator<DiskInfo>() {
