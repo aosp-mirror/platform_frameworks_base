@@ -561,6 +561,10 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv)
     char dex2oatImageCompilerFilterBuf[sizeof("--compiler-filter=")-1 + PROPERTY_VALUE_MAX];
     char dex2oatThreadsBuf[sizeof("-j")-1 + PROPERTY_VALUE_MAX];
     char dex2oatThreadsImageBuf[sizeof("-j")-1 + PROPERTY_VALUE_MAX];
+    char dex2oat_isa_variant_key[PROPERTY_KEY_MAX];
+    char dex2oat_isa_variant[sizeof("--instruction-set-variant=") -1 + PROPERTY_VALUE_MAX];
+    char dex2oat_isa_features_key[PROPERTY_KEY_MAX];
+    char dex2oat_isa_features[sizeof("--instruction-set-features=") -1 + PROPERTY_VALUE_MAX];
     char dex2oatFlagsBuf[PROPERTY_VALUE_MAX];
     char dex2oatImageFlagsBuf[PROPERTY_VALUE_MAX];
     char extraOptsBuf[PROPERTY_VALUE_MAX];
@@ -739,6 +743,43 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv)
     parseCompilerOption("dalvik.vm.dex2oat-threads", dex2oatThreadsBuf, "-j", "-Xcompiler-option");
     parseCompilerOption("dalvik.vm.image-dex2oat-threads", dex2oatThreadsImageBuf, "-j",
                         "-Ximage-compiler-option");
+
+    // The runtime will compile a boot image, when necessary, not using installd. Thus, we need to
+    // pass the instruction-set-features/variant as an image-compiler-option.
+    // TODO: Find a better way for the instruction-set.
+#if defined(__arm__)
+    constexpr const char* instruction_set = "arm";
+#elif defined(__aarch64__)
+    constexpr const char* instruction_set = "arm64";
+#elif defined(__mips__) && !defined(__LP64__)
+    constexpr const char* instruction_set = "mips";
+#elif defined(__mips__) && defined(__LP64__)
+    constexpr const char* instruction_set = "mips64";
+#elif defined(__i386__)
+    constexpr const char* instruction_set = "x86";
+#elif defined(__x86_64__)
+    constexpr const char* instruction_set = "x86_64";
+#else
+    constexpr const char* instruction_set = "unknown";
+#endif
+    // Note: it is OK to reuse the buffer, as the values are exactly the same between
+    //       * compiler-option, used for runtime compilation (DexClassLoader)
+    //       * image-compiler-option, used for boot-image compilation on device
+
+    // Copy the variant.
+    sprintf(dex2oat_isa_variant_key, "dalvik.vm.isa.%s.variant", instruction_set);
+    parseCompilerOption(dex2oat_isa_variant_key, dex2oat_isa_variant,
+                        "--instruction-set-variant=", "-Ximage-compiler-option");
+    parseCompilerOption(dex2oat_isa_variant_key, dex2oat_isa_variant,
+                        "--instruction-set-variant=", "-Xcompiler-option");
+    // Copy the features.
+    sprintf(dex2oat_isa_features_key, "dalvik.vm.isa.%s.features", instruction_set);
+    parseCompilerOption(dex2oat_isa_features_key, dex2oat_isa_features,
+                        "--instruction-set-features=", "-Ximage-compiler-option");
+    parseCompilerOption(dex2oat_isa_features_key, dex2oat_isa_features,
+                        "--instruction-set-features=", "-Xcompiler-option");
+
+
     property_get("dalvik.vm.dex2oat-flags", dex2oatFlagsBuf, "");
     parseExtraOpts(dex2oatFlagsBuf, "-Xcompiler-option");
 
