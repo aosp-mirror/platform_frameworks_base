@@ -16,11 +16,14 @@
 
 package android.hardware.fingerprint;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.app.ActivityManagerNative;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.os.Binder;
 import android.os.CancellationSignal;
+import android.os.CancellationSignal.OnCancelListener;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Parcel;
@@ -29,6 +32,7 @@ import android.os.RemoteException;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.hardware.fingerprint.FingerprintManager.EnrollmentCallback;
+import android.security.AndroidKeyStoreProvider;
 import android.util.Log;
 import android.util.Slog;
 
@@ -41,7 +45,10 @@ import javax.crypto.Cipher;
 
 /**
  * A class that coordinates access to the fingerprint hardware.
- * @hide
+ * <p>
+ * Use {@link android.content.Context#getSystemService(java.lang.String)}
+ * with argument {@link android.content.Context#FINGERPRINT_SERVICE} to get
+ * an instance of this class.
  */
 
 public class FingerprintManager {
@@ -53,28 +60,103 @@ public class FingerprintManager {
     private static final int MSG_ERROR = 103;
     private static final int MSG_REMOVED = 104;
 
-    // Message types.  Must agree with HAL (fingerprint.h)
-    public static final int FINGERPRINT_ERROR = -1;
-    public static final int FINGERPRINT_ACQUIRED = 1;
-    public static final int FINGERPRINT_PROCESSED = 2;
-    public static final int FINGERPRINT_TEMPLATE_ENROLLING = 3;
-    public static final int FINGERPRINT_TEMPLATE_REMOVED = 4;
+    //
+    // Error messages from fingerprint hardware during initilization, enrollment, authentication or
+    // removal. Must agree with the list in fingerprint.h
+    //
 
-    // Error messages. Must agree with HAL (fingerprint.h)
+    /**
+     * The hardware is unavailable. Try again later.
+     */
     public static final int FINGERPRINT_ERROR_HW_UNAVAILABLE = 1;
+
+    /**
+     * Error state returned when the sensor was unable to process the current image.
+     */
     public static final int FINGERPRINT_ERROR_UNABLE_TO_PROCESS = 2;
+
+    /**
+     * Error state returned when the current request has been running too long. This is intended to
+     * prevent programs from waiting for the fingerprint sensor indefinitely. The timeout is
+     * platform and sensor-specific, but is generally on the order of 30 seconds.
+     */
     public static final int FINGERPRINT_ERROR_TIMEOUT = 3;
+
+    /**
+     * Error state returned for operations like enrollment; the operation cannot be completed
+     * because there's not enough storage remaining to complete the operation.
+     */
     public static final int FINGERPRINT_ERROR_NO_SPACE = 4;
+
+    /**
+     * The operation was canceled because the fingerprint sensor is unavailable. For example,
+     * this may happen when the user is switched, the device is locked or another pending operation
+     * prevents or disables it.
+     */
     public static final int FINGERPRINT_ERROR_CANCELED = 5;
+
+    /**
+     * The {@link FingerprintManager#remove(Fingerprint, RemovalCallback)} call failed. Typically
+     * this will happen when the provided fingerprint id was incorrect.
+     *
+     * @hide
+     */
+    public static final int FINGERPRINT_ERROR_UNABLE_TO_REMOVE = 6;
+
+    /**
+     * Hardware vendors may extend this list if there are conditions that do not fall under one of
+     * the above categories. Vendors are responsible for providing error strings for these errors.
+     */
     public static final int FINGERPRINT_ERROR_VENDOR_BASE = 1000;
 
-    // Image acquisition messages.  Must agree with HAL (fingerprint.h)
+    //
+    // Image acquisition messages. Must agree with those in fingerprint.h
+    //
+
+    /**
+     * The image acquired was good.
+     */
     public static final int FINGERPRINT_ACQUIRED_GOOD = 0;
+
+    /**
+     * Only a partial fingerprint image was detected. During enrollment, the user should be
+     * informed on what needs to happen to resolve this problem, e.g. "press firmly on sensor."
+     */
     public static final int FINGERPRINT_ACQUIRED_PARTIAL = 1;
+
+    /**
+     * The fingerprint image was too noisy to process due to a detected condition (i.e. dry skin) or
+     * a possibly dirty sensor (See {@link #FINGERPRINT_ACQUIRED_IMAGER_DIRTY}).
+     */
     public static final int FINGERPRINT_ACQUIRED_INSUFFICIENT = 2;
+
+    /**
+     * The fingerprint image was too noisy due to suspected or detected dirt on the sensor.
+     * For example, it's reasonable return this after multiple
+     * {@link #FINGERPRINT_ACQUIRED_INSUFFICIENT} or actual detection of dirt on the sensor
+     * (stuck pixels, swaths, etc.). The user is expected to take action to clean the sensor
+     * when this is returned.
+     */
     public static final int FINGERPRINT_ACQUIRED_IMAGER_DIRTY = 3;
+
+    /**
+     * The fingerprint image was unreadable due to lack of motion. This is most appropriate for
+     * linear array sensors that require a swipe motion.
+     */
     public static final int FINGERPRINT_ACQUIRED_TOO_SLOW = 4;
+
+    /**
+     * The fingerprint image was incomplete due to quick motion. While mostly appropriate for
+     * linear array sensors,  this could also happen if the finger was moved during acquisition.
+     * The user should be asked to move the finger slower (linear) or leave the finger on the sensor
+     * longer.
+     */
     public static final int FINGERPRINT_ACQUIRED_TOO_FAST = 5;
+
+    /**
+     * Hardware vendors may extend this list if there are conditions that do not fall under one of
+     * the above categories. Vendors are responsible for providing error strings for these errors.
+     */
     public static final int FINGERPRINT_ACQUIRED_VENDOR_BASE = 1000;
 
     private IFingerprintService mService;
@@ -85,21 +167,81 @@ public class FingerprintManager {
     private RemovalCallback mRemovalCallback;
     private CryptoObject mCryptoObject;
     private Fingerprint mRemovalFingerprint;
-    private boolean mListening;
+
+    private class OnEnrollCancelListener implements OnCancelListener {
+        private long mChallenge;
+
+        public OnEnrollCancelListener(long challenge) {
+            mChallenge = challenge;
+        }
+
+        @Override
+        public void onCancel() {
+            cancelEnrollment(mChallenge);
+        }
+    }
+
+    private class OnAuthenticationCancelListener implements OnCancelListener {
+        private CryptoObject mCrypto;
+
+        public OnAuthenticationCancelListener(CryptoObject crypto) {
+            mCrypto = crypto;
+        }
+
+        @Override
+        public void onCancel() {
+            cancelAuthentication(mCrypto);
+        }
+    }
 
     /**
-     * A wrapper class for a limited number of crypto objects supported by FingerprintManager.
+     * A wrapper class for the crypto objects supported by FingerprintManager. Currently the
+     * framework supports {@link Signature} and {@link Cipher} objects.
      */
     public static class CryptoObject {
-        CryptoObject(Signature signature) { mSignature = signature; }
-        CryptoObject(Cipher cipher) { mCipher = cipher; }
-        private Signature mSignature;
-        private Cipher mCipher;
+
+        CryptoObject(Signature signature) {
+            mSignature = signature;
+            mCipher = null;
+        }
+
+        CryptoObject(Cipher cipher) {
+            mCipher = cipher;
+            mSignature = null;
+        }
+
+        /**
+         * Get {@link Signature} object.
+         * @return {@link Signature} object or null if this doesn't contain one.
+         */
+        public Signature getSignature() { return mSignature; }
+
+        /**
+         * Get {@link Cipher} object.
+         * @return {@link Cipher} object or null if this doesn't contain one.
+         */
+        public Cipher getCipher() { return mCipher; }
+
+        /**
+         * @hide
+         * @return the opId associated with this object or 0 if none
+         */
+        public long getOpId() {
+            if (mSignature != null) {
+                return AndroidKeyStoreProvider.getKeyStoreOperationHandle(mSignature);
+            } else if (mCipher != null) {
+                return AndroidKeyStoreProvider.getKeyStoreOperationHandle(mCipher);
+            }
+            return 0;
+        }
+
+        private final Signature mSignature;
+        private final Cipher mCipher;
     };
 
     /**
      * Container for callback data from {@link FingerprintManager#authenticate(CryptoObject,
-     *     AuthenticationCallback, CancellationSignal, int)}
+     *     CancellationSignal, AuthenticationCallback, int)}.
      */
     public static final class AuthenticationResult {
         private Fingerprint mFingerprint;
@@ -113,14 +255,14 @@ public class FingerprintManager {
         /**
          * Obtain the crypto object associated with this transaction
          * @return crypto object provided to {@link FingerprintManager#authenticate(CryptoObject,
-         *     AuthenticationCallback, CancellationSignal, int)}
+         *     CancellationSignal, AuthenticationCallback, int)}.
          */
         public CryptoObject getCryptoObject() { return mCryptoObject; }
 
         /**
-         * Obtain the Fingerprint associated with this operation.  Applications are discouraged
-         * from associating specific fingers with specific applications or operations.  Hence this
-         * is not public.
+         * Obtain the Fingerprint associated with this operation. Applications are strongly
+         * discouraged from associating specific fingers with specific applications or operations.
+         *
          * @hide
          */
         public Fingerprint getFingerprint() { return mFingerprint; }
@@ -128,68 +270,75 @@ public class FingerprintManager {
 
     /**
      * Callback structure provided to {@link FingerprintManager#authenticate(CryptoObject,
-     * AuthenticationCallback, CancellationSignal, int)}. Users of {@link #FingerprintManager()}
-     * must provide an implementation of this to {@link FingerprintManager#authenticate(
-     * CryptoObject, AuthenticationCallback, CancellationSignal, int) for listening to fingerprint
-     * events.
+     * CancellationSignal, AuthenticationCallback, int)}. Users of {@link
+     * FingerprintManager#authenticate(CryptoObject, CancellationSignal,
+     * AuthenticationCallback, int) } must provide an implementation of this for listening to
+     * fingerprint events.
      */
     public static abstract class AuthenticationCallback {
         /**
          * Called when an unrecoverable error has been encountered and the operation is complete.
          * No further callbacks will be made on this object.
-         * @param errMsgId an integer identifying the error message.
-         * @param errString a human-readible error string that can be shown in UI.
+         * @param errMsgId An integer identifying the error message
+         * @param errString A human-readable error string that can be shown in UI
          */
-        public abstract void onAuthenticationError(int errMsgId, CharSequence errString);
+        public void onAuthenticationError(int errMsgId, CharSequence errString) { }
 
         /**
-         * Called when a recoverable error has been encountered during authentication.  The help
+         * Called when a recoverable error has been encountered during authentication. The help
          * string is provided to give the user guidance for what went wrong, such as
          * "Sensor dirty, please clean it."
-         * @param helpMsgId an integer identifying the error message.
-         * @param helpString a human-readible string that can be shown in UI.
+         * @param helpMsgId An integer identifying the error message
+         * @param helpString A human-readable string that can be shown in UI
          */
-        public abstract void onAuthenticationHelp(int helpMsgId, CharSequence helpString);
+        public void onAuthenticationHelp(int helpMsgId, CharSequence helpString) { }
 
         /**
          * Called when a fingerprint is recognized.
-         * @param result an object containing authentication-related data.
+         * @param result An object containing authentication-related data
          */
-        public abstract void onAuthenticationSucceeded(AuthenticationResult result);
+        public void onAuthenticationSucceeded(AuthenticationResult result) { }
+
+        /**
+         * Called when a fingerprint is valid but not recognized.
+         */
+        public void onAuthenticationFailed() { }
     };
 
     /**
      * Callback structure provided to {@link FingerprintManager#enroll(long, EnrollmentCallback,
      * CancellationSignal, int). Users of {@link #FingerprintManager()}
      * must provide an implementation of this to {@link FingerprintManager#enroll(long,
-     * EnrollmentCallback, CancellationSignal, int) for listening to fingerprint events.
+     * CancellationSignal, EnrollmentCallback, int) for listening to fingerprint events.
+     *
+     * @hide
      */
     public static abstract class EnrollmentCallback {
         /**
          * Called when an unrecoverable error has been encountered and the operation is complete.
          * No further callbacks will be made on this object.
-         * @param errMsgId an integer identifying the error message.
-         * @param errString a human-readible error string that can be shown in UI.
+         * @param errMsgId An integer identifying the error message
+         * @param errString A human-readable error string that can be shown in UI
          */
-        public abstract void onEnrollmentError(int errMsgId, CharSequence errString);
+        public void onEnrollmentError(int errMsgId, CharSequence errString) { }
 
         /**
-         * Called when a recoverable error has been encountered during enrollment.  The help
+         * Called when a recoverable error has been encountered during enrollment. The help
          * string is provided to give the user guidance for what went wrong, such as
          * "Sensor dirty, please clean it" or what they need to do next, such as
          * "Touch sensor again."
-         * @param helpMsgId an integer identifying the error message.
-         * @param helpString a human-readible string that can be shown in UI.
+         * @param helpMsgId An integer identifying the error message
+         * @param helpString A human-readable string that can be shown in UI
          */
-        public abstract void onEnrollmentHelp(int helpMsgId, CharSequence helpString);
+        public void onEnrollmentHelp(int helpMsgId, CharSequence helpString) { }
 
         /**
          * Called as each enrollment step progresses. Enrollment is considered complete when
-         * remaining reaches 0.  This function will not be called if enrollment fails. See
+         * remaining reaches 0. This function will not be called if enrollment fails. See
          * {@link EnrollmentCallback#onEnrollmentError(int, CharSequence)}
-         * @param remaining the number of remaining steps.
+         * @param remaining The number of remaining steps
          */
-        public abstract void onEnrollmentProgress(int remaining);
+        public void onEnrollmentProgress(int remaining) { }
     };
 
     /**
@@ -197,53 +346,66 @@ public class FingerprintManager {
      * {@link #FingerprintManager()} may optionally provide an implementation of this to
      * {@link FingerprintManager#remove(int, int, RemovalCallback)} for listening to
      * fingerprint template removal events.
+     *
+     * @hide
      */
     public static abstract class RemovalCallback {
         /**
          * Called when the given fingerprint can't be removed.
-         * @param fp the fingerprint that the call attempted to remove.
-         * @param errMsgId an associated error message id.
-         * @param errString an error message indicating why the fingerprint id can't be removed.
+         * @param fp The fingerprint that the call attempted to remove
+         * @param errMsgId An associated error message id
+         * @param errString An error message indicating why the fingerprint id can't be removed
          */
-        public abstract void onRemovalError(Fingerprint fp, int errMsgId, CharSequence errString);
+        public void onRemovalError(Fingerprint fp, int errMsgId, CharSequence errString) { }
 
         /**
          * Called when a given fingerprint is successfully removed.
          * @param fingerprint the fingerprint template that was removed.
          */
-        public abstract void onRemovalSucceeded(Fingerprint fingerprint);
+        public void onRemovalSucceeded(Fingerprint fingerprint) { }
     };
 
     /**
-     * Request authentication of a crypto object.  This call warms up the fingerprint hardware
-     * and starts scanning for a fingerprint.  It terminates when
+     * Request authentication of a crypto object. This call warms up the fingerprint hardware
+     * and starts scanning for a fingerprint. It terminates when
      * {@link AuthenticationCallback#onAuthenticationError(int, CharSequence)} or
      * {@link AuthenticationCallback#onAuthenticationSucceeded(AuthenticationResult) is called, at
      * which point the object is no longer valid. The operation can be canceled by using the
      * provided cancel object.
      *
      * @param crypto object associated with the call or null if none required.
-     * @param callback an object to receive authentication events
      * @param cancel an object that can be used to cancel authentication
-     * @param flags optional flags
+     * @param callback an object to receive authentication events
+     * @param flags optional flags; should be 0
      */
-    public void authenticate(CryptoObject crypto, AuthenticationCallback callback,
-            CancellationSignal cancel, int flags) {
+    public void authenticate(@Nullable CryptoObject crypto, @Nullable CancellationSignal cancel,
+            @NonNull AuthenticationCallback callback, int flags) {
         if (callback == null) {
             throw new IllegalArgumentException("Must supply an authentication callback");
         }
 
-        // TODO: handle cancel
+        if (cancel != null) {
+            if (cancel.isCanceled()) {
+                Log.w(TAG, "authentication already canceled");
+                return;
+            } else {
+                cancel.setOnCancelListener(new OnAuthenticationCancelListener(crypto));
+            }
+        }
 
         if (mService != null) try {
             mAuthenticationCallback = callback;
             mCryptoObject = crypto;
-            long sessionId = 0; // TODO: get from crypto object
-            startListening();
-            mService.authenticate(mToken, sessionId, getCurrentUserId(), flags);
+            long sessionId = crypto != null ? crypto.getOpId() : 0;
+            mService.authenticate(mToken, sessionId, getCurrentUserId(), mServiceReceiver, flags);
         } catch (RemoteException e) {
-            Log.v(TAG, "Remote exception while authenticating: ", e);
-            stopListening();
+            Log.w(TAG, "Remote exception while authenticating: ", e);
+            if (callback != null) {
+                // Though this may not be a hardware issue, it will cause apps to give up or try
+                // again later.
+                callback.onAuthenticationError(FINGERPRINT_ERROR_HW_UNAVAILABLE,
+                        getErrorString(FINGERPRINT_ERROR_HW_UNAVAILABLE));
+            }
         }
     }
 
@@ -257,44 +419,74 @@ public class FingerprintManager {
      * provided cancel object.
      * @param challenge a unique id provided by a recent verification of device credentials
      *     (e.g. pin, pattern or password).
-     * @param callback an object to receive enrollment events
      * @param cancel an object that can be used to cancel enrollment
+     * @param callback an object to receive enrollment events
      * @param flags optional flags
+     * @hide
      */
-    public void enroll(long challenge, EnrollmentCallback callback,
-            CancellationSignal cancel, int flags) {
+    public void enroll(long challenge, CancellationSignal cancel, EnrollmentCallback callback,
+            int flags) {
         if (callback == null) {
             throw new IllegalArgumentException("Must supply an enrollment callback");
         }
 
-        // TODO: handle cancel
+        if (cancel != null) {
+            if (cancel.isCanceled()) {
+                Log.w(TAG, "enrollment already canceled");
+                return;
+            } else {
+                cancel.setOnCancelListener(new OnEnrollCancelListener(challenge));
+            }
+        }
 
         if (mService != null) try {
             mEnrollmentCallback = callback;
-            startListening();
-            mService.enroll(mToken, getCurrentUserId(), flags);
+            mService.enroll(mToken, challenge, getCurrentUserId(), mServiceReceiver, flags);
         } catch (RemoteException e) {
-            Log.v(TAG, "Remote exception in enroll: ", e);
-            stopListening();
+            Log.w(TAG, "Remote exception in enroll: ", e);
+            if (callback != null) {
+                // Though this may not be a hardware issue, it will cause apps to give up or try
+                // again later.
+                callback.onEnrollmentError(FINGERPRINT_ERROR_HW_UNAVAILABLE,
+                        getErrorString(FINGERPRINT_ERROR_HW_UNAVAILABLE));
+            }
         }
+    }
+
+    /**
+     * Requests a pre-enrollment auth token to tie enrollment to the confirmation of
+     * existing device credentials (e.g. pin/pattern/password).
+     * @hide
+     */
+    public long preEnroll() {
+        long result = 0;
+        if (mService != null) try {
+            result = mService.preEnroll(mToken);
+        } catch (RemoteException e) {
+            Log.w(TAG, "Remote exception in enroll: ", e);
+        }
+        return result;
     }
 
     /**
      * Remove given fingerprint template from fingerprint hardware and/or protected storage.
      * @param fp the fingerprint item to remove
      * @param callback an optional callback to verify that fingerprint templates have been
-     * successfully removed.  May be null of no callback is required.
+     * successfully removed. May be null of no callback is required.
+     *
      * @hide
      */
     public void remove(Fingerprint fp, RemovalCallback callback) {
         if (mService != null) try {
             mRemovalCallback = callback;
             mRemovalFingerprint = fp;
-            startListening();
-            mService.remove(mToken, fp.getFingerId(), getCurrentUserId());
+            mService.remove(mToken, fp.getFingerId(), getCurrentUserId(), mServiceReceiver);
         } catch (RemoteException e) {
-            Log.v(TAG, "Remote in remove: ", e);
-            stopListening();
+            Log.w(TAG, "Remote exception in remove: ", e);
+            if (callback != null) {
+                callback.onRemovalError(fp, FINGERPRINT_ERROR_HW_UNAVAILABLE,
+                        getErrorString(FINGERPRINT_ERROR_HW_UNAVAILABLE));
+            }
         }
     }
 
@@ -302,6 +494,7 @@ public class FingerprintManager {
      * Renames the given fingerprint template
      * @param fpId the fingerprint id
      * @param newName the new name
+     *
      * @hide
      */
     public void rename(int fpId, String newName) {
@@ -320,6 +513,8 @@ public class FingerprintManager {
     /**
      * Obtain the list of enrolled fingerprints templates.
      * @return list of current fingerprint items
+     *
+     * @hide
      */
     public List<Fingerprint> getEnrolledFingerprints() {
         if (mService != null) try {
@@ -333,6 +528,7 @@ public class FingerprintManager {
     /**
      * Determine if fingerprint hardware is present and functional.
      * @return true if hardware is present and functional, false otherwise.
+     *
      * @hide
      */
     public boolean isHardwareDetected() {
@@ -403,8 +599,13 @@ public class FingerprintManager {
 
         private void sendProcessedResult(Fingerprint fp) {
             if (mAuthenticationCallback != null) {
-                AuthenticationResult result = new AuthenticationResult(mCryptoObject, fp);
-                mAuthenticationCallback.onAuthenticationSucceeded(result);
+                if (fp.getFingerId() == 0 && fp.getGroupId() == 0) {
+                    // Fingerprint template valid but doesn't match one in database
+                    mAuthenticationCallback.onAuthenticationFailed();
+                } else {
+                    final AuthenticationResult result = new AuthenticationResult(mCryptoObject, fp);
+                    mAuthenticationCallback.onAuthenticationSucceeded(result);
+                }
             }
         }
 
@@ -416,65 +617,6 @@ public class FingerprintManager {
                 mEnrollmentCallback.onEnrollmentHelp(acquireInfo, msg);
             } else if (mAuthenticationCallback != null) {
                 mAuthenticationCallback.onAuthenticationHelp(acquireInfo, msg);
-            }
-        }
-
-        private String getErrorString(int errMsg) {
-            switch (errMsg) {
-                case FINGERPRINT_ERROR_UNABLE_TO_PROCESS:
-                    return mContext.getString(
-                        com.android.internal.R.string.fingerprint_error_unable_to_process);
-                case FINGERPRINT_ERROR_HW_UNAVAILABLE:
-                    return mContext.getString(
-                        com.android.internal.R.string.fingerprint_error_hw_not_available);
-                case FINGERPRINT_ERROR_NO_SPACE:
-                    return mContext.getString(
-                        com.android.internal.R.string.fingerprint_error_no_space);
-                case FINGERPRINT_ERROR_TIMEOUT:
-                    return mContext.getString(
-                        com.android.internal.R.string.fingerprint_error_timeout);
-                default:
-                    if (errMsg >= FINGERPRINT_ERROR_VENDOR_BASE) {
-                        int msgNumber = errMsg - FINGERPRINT_ERROR_VENDOR_BASE;
-                        String[] msgArray = mContext.getResources().getStringArray(
-                                com.android.internal.R.array.fingerprint_error_vendor);
-                        if (msgNumber < msgArray.length) {
-                            return msgArray[msgNumber];
-                        }
-                    }
-                    return null;
-            }
-        }
-
-        private String getAcquiredString(int acquireInfo) {
-            switch (acquireInfo) {
-                case FINGERPRINT_ACQUIRED_GOOD:
-                    return null;
-                case FINGERPRINT_ACQUIRED_PARTIAL:
-                    return mContext.getString(
-                        com.android.internal.R.string.fingerprint_acquired_partial);
-                case FINGERPRINT_ACQUIRED_INSUFFICIENT:
-                    return mContext.getString(
-                        com.android.internal.R.string.fingerprint_acquired_insufficient);
-                case FINGERPRINT_ACQUIRED_IMAGER_DIRTY:
-                    return mContext.getString(
-                        com.android.internal.R.string.fingerprint_acquired_imager_dirty);
-                case FINGERPRINT_ACQUIRED_TOO_SLOW:
-                    return mContext.getString(
-                        com.android.internal.R.string.fingerprint_acquired_too_slow);
-                case FINGERPRINT_ACQUIRED_TOO_FAST:
-                    return mContext.getString(
-                        com.android.internal.R.string.fingerprint_acquired_too_fast);
-                default:
-                    if (acquireInfo >= FINGERPRINT_ACQUIRED_VENDOR_BASE) {
-                        int msgNumber = acquireInfo - FINGERPRINT_ACQUIRED_VENDOR_BASE;
-                        String[] msgArray = mContext.getResources().getStringArray(
-                                com.android.internal.R.array.fingerprint_acquired_vendor);
-                        if (msgNumber < msgArray.length) {
-                            return msgArray[msgNumber];
-                        }
-                    }
-                    return null;
             }
         }
     };
@@ -499,39 +641,84 @@ public class FingerprintManager {
         }
     }
 
-    /**
-     * Stops the client from listening to fingerprint events.
-     */
-    private void stopListening() {
-        if (mService != null) {
-            try {
-                if (mListening) {
-                    mService.removeListener(mToken, mServiceReceiver);
-                    mListening = false;
-                }
-            } catch (RemoteException e) {
-                Log.v(TAG, "Remote exception in stopListening(): ", e);
-            }
-        } else {
-            Log.w(TAG, "stopListening(): Service not connected!");
+    private void clearCallbacks() {
+        mAuthenticationCallback = null;
+        mEnrollmentCallback = null;
+        mRemovalCallback = null;
+    }
+
+    private void cancelEnrollment(long challenge) {
+        if (mService != null) try {
+            mService.cancelEnrollment(mToken);
+        } catch (RemoteException e) {
+            if (DEBUG) Log.w(TAG, "Remote exception while canceling enrollment");
         }
     }
 
-    /**
-     * Starts listening for fingerprint events for this client.
-     */
-    private void startListening() {
-        if (mService != null) {
-            try {
-                if (!mListening) {
-                    mService.addListener(mToken, mServiceReceiver, getCurrentUserId());
-                    mListening = true;
+    private void cancelAuthentication(CryptoObject cryptoObject) {
+        if (mService != null) try {
+            mService.cancelAuthentication(mToken);
+        } catch (RemoteException e) {
+            if (DEBUG) Log.w(TAG, "Remote exception while canceling enrollment");
+        }
+    }
+
+    private String getErrorString(int errMsg) {
+        switch (errMsg) {
+            case FINGERPRINT_ERROR_UNABLE_TO_PROCESS:
+                return mContext.getString(
+                    com.android.internal.R.string.fingerprint_error_unable_to_process);
+            case FINGERPRINT_ERROR_HW_UNAVAILABLE:
+                return mContext.getString(
+                    com.android.internal.R.string.fingerprint_error_hw_not_available);
+            case FINGERPRINT_ERROR_NO_SPACE:
+                return mContext.getString(
+                    com.android.internal.R.string.fingerprint_error_no_space);
+            case FINGERPRINT_ERROR_TIMEOUT:
+                return mContext.getString(
+                    com.android.internal.R.string.fingerprint_error_timeout);
+            default:
+                if (errMsg >= FINGERPRINT_ERROR_VENDOR_BASE) {
+                    int msgNumber = errMsg - FINGERPRINT_ERROR_VENDOR_BASE;
+                    String[] msgArray = mContext.getResources().getStringArray(
+                            com.android.internal.R.array.fingerprint_error_vendor);
+                    if (msgNumber < msgArray.length) {
+                        return msgArray[msgNumber];
+                    }
                 }
-            } catch (RemoteException e) {
-                Log.v(TAG, "Remote exception in startListening(): ", e);
-            }
-        } else {
-            Log.w(TAG, "startListening(): Service not connected!");
+                return null;
+        }
+    }
+
+    private String getAcquiredString(int acquireInfo) {
+        switch (acquireInfo) {
+            case FINGERPRINT_ACQUIRED_GOOD:
+                return null;
+            case FINGERPRINT_ACQUIRED_PARTIAL:
+                return mContext.getString(
+                    com.android.internal.R.string.fingerprint_acquired_partial);
+            case FINGERPRINT_ACQUIRED_INSUFFICIENT:
+                return mContext.getString(
+                    com.android.internal.R.string.fingerprint_acquired_insufficient);
+            case FINGERPRINT_ACQUIRED_IMAGER_DIRTY:
+                return mContext.getString(
+                    com.android.internal.R.string.fingerprint_acquired_imager_dirty);
+            case FINGERPRINT_ACQUIRED_TOO_SLOW:
+                return mContext.getString(
+                    com.android.internal.R.string.fingerprint_acquired_too_slow);
+            case FINGERPRINT_ACQUIRED_TOO_FAST:
+                return mContext.getString(
+                    com.android.internal.R.string.fingerprint_acquired_too_fast);
+            default:
+                if (acquireInfo >= FINGERPRINT_ACQUIRED_VENDOR_BASE) {
+                    int msgNumber = acquireInfo - FINGERPRINT_ACQUIRED_VENDOR_BASE;
+                    String[] msgArray = mContext.getResources().getStringArray(
+                            com.android.internal.R.array.fingerprint_acquired_vendor);
+                    if (msgNumber < msgArray.length) {
+                        return msgArray[msgNumber];
+                    }
+                }
+                return null;
         }
     }
 

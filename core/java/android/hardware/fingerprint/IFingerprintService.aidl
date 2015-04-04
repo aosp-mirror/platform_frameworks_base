@@ -26,13 +26,21 @@ import java.util.List;
  */
 interface IFingerprintService {
     // Authenticate the given sessionId with a fingerprint
-    void authenticate(IBinder token, long sessionId, int groupId, int flags);
+    void authenticate(IBinder token, long sessionId, int groupId,
+            IFingerprintServiceReceiver receiver, int flags);
+
+    // Cancel authentication for the given sessionId
+    void cancelAuthentication(IBinder token);
 
     // Start fingerprint enrollment
-    void enroll(IBinder token, int groupId, int flags);
+    void enroll(IBinder token, long challenge, int groupId, IFingerprintServiceReceiver receiver,
+            int flags);
+
+    // Cancel enrollment in progress
+    void cancelEnrollment(IBinder token);
 
     // Any errors resulting from this call will be returned to the listener
-    void remove(IBinder token, int fingerId, int groupId);
+    void remove(IBinder token, int fingerId, int groupId, IFingerprintServiceReceiver receiver);
 
     // Rename the fingerprint specified by fingerId and groupId to the given name
     void rename(int fingerId, int groupId, String name);
@@ -40,14 +48,11 @@ interface IFingerprintService {
     // Get a list of enrolled fingerprints in the given group.
     List<Fingerprint> getEnrolledFingerprints(int groupId);
 
-    // Register listener for an instance of FingerprintManager
-    void addListener(IBinder token, IFingerprintServiceReceiver receiver, int userId);
-
-    // Unregister listener for an instance of FingerprintManager
-    void removeListener(IBinder token, IFingerprintServiceReceiver receiver);
-
     // Determine if HAL is loaded and ready
     boolean isHardwareDetected(long deviceId);
+
+    // Get a pre-enrollment authentication token
+    long preEnroll(IBinder token);
 
     // Gets the number of hardware devices
     // int getHardwareDeviceCount();

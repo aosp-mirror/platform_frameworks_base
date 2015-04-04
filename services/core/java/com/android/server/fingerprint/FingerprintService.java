@@ -49,13 +49,24 @@ import java.util.List;
  * @hide
  */
 public class FingerprintService extends SystemService {
-    private final String TAG = "FingerprintService";
+    private static final String TAG = "FingerprintService";
     private static final boolean DEBUG = true;
-    private ArrayMap<IBinder, ClientData> mClients = new ArrayMap<IBinder, ClientData>();
+    private ClientData mAuthClient = null;
+    private ClientData mEnrollClient = null;
+    private ClientData mRemoveClient = null;
 
     private static final int MSG_NOTIFY = 10;
 
     private static final int ENROLLMENT_TIMEOUT_MS = 60 * 1000; // 1 minute
+
+    // Message types. Used internally to dispatch messages to the correct callback.
+    // Must agree with the list in fingerprint.h
+    private static final int FINGERPRINT_ERROR = -1;
+    private static final int FINGERPRINT_ACQUIRED = 1;
+    private static final int FINGERPRINT_PROCESSED = 2;
+    private static final int FINGERPRINT_TEMPLATE_ENROLLING = 3;
+    private static final int FINGERPRINT_TEMPLATE_REMOVED = 4;
+    private static final int FINGERPRINT_AUTHENTICATED = 5;
 
     Handler mHandler = new Handler() {
         public void handleMessage(android.os.Message msg) {
@@ -79,14 +90,33 @@ public class FingerprintService extends SystemService {
     private static final int STATE_REMOVING = 3;
     private static final long MS_PER_SEC = 1000;
 
-    private static final class ClientData {
-        public IFingerprintServiceReceiver receiver;
-        int state;
+    private class ClientData {
+        IBinder token;
+        IFingerprintServiceReceiver receiver;
         int userId;
-        public TokenWatcher tokenWatcher;
+        long opId;
+        private TokenWatcher tokenWatcher;
+        public ClientData(IBinder token, long opId, IFingerprintServiceReceiver receiver,
+                int userId) {
+            this.token = token;
+            this.opId = opId;
+            this.receiver = receiver;
+            this.userId = userId;
+            tokenWatcher = new TokenWatcher(token);
+            try {
+                token.linkToDeath(tokenWatcher, 0);
+            } catch (RemoteException e) {
+                Slog.w(TAG, "caught remote exception in linkToDeath: ", e);
+            }
+        }
 
         IBinder getToken() {
             return tokenWatcher.getToken();
+        }
+
+        public void destroy() {
+            token.unlinkToDeath(tokenWatcher, 0);
+            tokenWatcher.token = null;
         }
     }
 
@@ -102,7 +132,10 @@ public class FingerprintService extends SystemService {
         }
 
         public void binderDied() {
-            mClients.remove(token);
+            if (mAuthClient != null & mAuthClient.token == token)
+                mAuthClient = null;
+            if (mEnrollClient != null && mEnrollClient.token == token)
+                mEnrollClient = null;
             this.token = null;
         }
 
@@ -110,7 +143,14 @@ public class FingerprintService extends SystemService {
             try {
                 if (token != null) {
                     if (DEBUG) Slog.w(TAG, "removing leaked reference: " + token);
-                    mClients.remove(token);
+                    if (mAuthClient != null && mAuthClient.token == token) {
+                        mAuthClient.destroy();
+                        mAuthClient = null;
+                    }
+                    if (mEnrollClient != null && mEnrollClient.token == token) {
+                        mAuthClient.destroy();
+                        mEnrollClient = null;
+                    }
                 }
             } finally {
                 super.finalize();
@@ -125,19 +165,15 @@ public class FingerprintService extends SystemService {
     }
 
     // TODO: Move these into separate process
-    // JNI methods to communicate from FingerprintManagerService to HAL
-    static native int nativeEnroll(int timeout, int groupId);
-
+    // JNI methods to communicate from FingerprintService to HAL
+    static native int nativeEnroll(long challenge, int groupId, int timeout);
+    static native long nativePreEnroll();
+    static native int nativeStopEnrollment();
     static native int nativeAuthenticate(long sessionId, int groupId);
-
-    static native int nativeEnrollCancel();
-
+    static native int nativeStopAuthentication(long sessionId);
     static native int nativeRemove(int fingerId, int groupId);
-
     static native int nativeOpenHal();
-
     static native int nativeCloseHal();
-
     static native void nativeInit(MessageQueue queue, FingerprintService service);
 
     static final class FpHalMsg {
@@ -154,184 +190,185 @@ public class FingerprintService extends SystemService {
         }
     }
 
-    // JNI methods for communicating from HAL to clients
+    /**
+     * Called from JNI to communicate messages from fingerprint HAL.
+     */
     void notify(int type, int arg1, int arg2, int arg3) {
         mHandler.obtainMessage(MSG_NOTIFY, new FpHalMsg(type, arg1, arg2, arg3)).sendToTarget();
     }
 
     void handleNotify(int type, int arg1, int arg2, int arg3) {
-        Slog.v(TAG, "handleNotify(type=" + type + ", arg1=" + arg1 + ", arg2=" + arg2 + ")" + ", "
-                + mClients.size() + " clients");
-        for (int i = 0; i < mClients.size(); i++) {
-            if (DEBUG) Slog.v(TAG, "Client[" + i + "] binder token: " + mClients.keyAt(i));
-            ClientData clientData = mClients.valueAt(i);
-            if (clientData == null || clientData.receiver == null) {
-                if (DEBUG) Slog.v(TAG, "clientData is invalid!!");
-                continue;
+        Slog.v(TAG, "handleNotify(type=" + type + ", arg1=" + arg1 + ", arg2=" + arg2 + ")"
+                    + ", mAuthClients = " + mAuthClient + ", mEnrollClient = " + mEnrollClient);
+        if (mEnrollClient != null) {
+            try {
+                final IBinder token = mEnrollClient.token;
+                if (doNotify(mEnrollClient, type, arg1, arg2, arg3)) {
+                    stopEnrollment(token);
+                }
+            } catch (RemoteException e) {
+                Slog.e(TAG, "can't send message to mEnrollClient. Did it die?", e);
+                mEnrollClient.destroy();
+                mEnrollClient = null;
             }
-            ContentResolver contentResolver = mContext.getContentResolver();
-            switch (type) {
-                case FingerprintManager.FINGERPRINT_ERROR: {
-                    try {
-                        clientData.receiver.onError(mHalDeviceId, arg1 /* error */);
-                    } catch (RemoteException e) {
-                        Slog.e(TAG, "can't send message to client. Did it die?", e);
-                        mClients.remove(mClients.keyAt(i));
+        }
+        if (mAuthClient != null) {
+            try {
+                final IBinder token = mAuthClient.getToken();
+                if (doNotify(mAuthClient, type, arg1, arg2, arg3)) {
+                    stopAuthentication(token);
+                }
+            } catch (RemoteException e) {
+                Slog.e(TAG, "can't send message to mAuthClient. Did it die?", e);
+                mAuthClient.destroy();
+                mAuthClient = null;
+            }
+        }
+        if (mRemoveClient != null) {
+            try {
+                if (doNotify(mRemoveClient, type, arg1, arg2, arg3)) {
+                    mRemoveClient.destroy();
+                    mRemoveClient = null;
+                }
+            } catch (RemoteException e) {
+                Slog.e(TAG, "can't send message to mRemoveClient. Did it die?", e);
+                mRemoveClient.destroy();
+                mRemoveClient = null;
+            }
+        }
+    }
+
+    // Returns true if the operation is done, i.e. authentication completed
+    boolean doNotify(ClientData clientData, int type, int arg1, int arg2, int arg3)
+            throws RemoteException {
+        if (clientData.receiver == null) {
+            if (DEBUG) Slog.v(TAG, "receiver not registered!!");
+            return false;
+        }
+        ContentResolver contentResolver = mContext.getContentResolver();
+        boolean operationCompleted = false;
+        switch (type) {
+            case FINGERPRINT_ERROR:
+                clientData.receiver.onError(mHalDeviceId, arg1 /* error */);
+                if (arg1 == FingerprintManager.FINGERPRINT_ERROR_CANCELED) {
+                    if (mEnrollClient != null) {
+                        mEnrollClient.destroy();
+                        mEnrollClient = null;
+                    }
+                    if (mAuthClient != null) {
+                        mAuthClient.destroy();
+                        mAuthClient = null;
                     }
                 }
-                    break;
-                case FingerprintManager.FINGERPRINT_ACQUIRED: {
-                    try {
-                        clientData.receiver.onAcquired(mHalDeviceId, arg1 /* acquireInfo */);
-                    } catch (RemoteException e) {
-                        Slog.e(TAG, "can't send message to client. Did it die?", e);
-                        mClients.remove(mClients.keyAt(i));
-                    }
-                    break;
-                }
-                case FingerprintManager.FINGERPRINT_PROCESSED: {
-                    try {
-                        clientData.receiver
-                                .onProcessed(mHalDeviceId, arg1 /* fingerId */, arg2 /* groupId */);
-                    } catch (RemoteException e) {
-                        Slog.e(TAG, "can't send message to client. Did it die?", e);
-                        mClients.remove(mClients.keyAt(i));
-                    }
-                    break;
-                }
-                case FingerprintManager.FINGERPRINT_TEMPLATE_ENROLLING: {
-                    final int fingerId = arg1;
+                operationCompleted = true; // any error means the operation is done
+                break;
+            case FINGERPRINT_ACQUIRED:
+                clientData.receiver.onAcquired(mHalDeviceId, arg1 /* acquireInfo */);
+                break;
+            case FINGERPRINT_PROCESSED:
+                clientData.receiver.onProcessed(mHalDeviceId, arg1 /* fpId */, arg2 /* gpId */);
+                operationCompleted = true; // we either got a positive or negative match
+                break;
+            case FINGERPRINT_TEMPLATE_ENROLLING:
+                {
+                    final int fpId = arg1;
                     final int groupId = arg2;
                     final int remaining = arg3;
-                    if (clientData.state == STATE_ENROLLING) {
-                        // Only send enroll updates to clients that are actually enrolling
-                        try {
-                            clientData.receiver.onEnrollResult(mHalDeviceId, fingerId, groupId,
-                                    remaining);
-                        } catch (RemoteException e) {
-                            Slog.e(TAG, "can't send message to client. Did it die?", e);
-                            mClients.remove(mClients.keyAt(i));
-                        }
-                        // Update the database with new finger id.
-                        // TODO: move to client code (Settings)
-                        if (remaining == 0) {
-                            FingerprintUtils.addFingerprintIdForUser(contentResolver, fingerId,
-                                    clientData.userId);
-                            clientData.state = STATE_IDLE; // Nothing left to do
-                        }
-                    } else {
-                        if (DEBUG) Slog.w(TAG, "Client not enrolling");
-                        break;
+                    clientData.receiver.onEnrollResult(mHalDeviceId, fpId, groupId, remaining);
+                    if (remaining == 0) {
+                        addTemplateForUser(clientData, contentResolver, fpId);
+                        operationCompleted = true; // enroll completed
                     }
-                    break;
                 }
-                case FingerprintManager.FINGERPRINT_TEMPLATE_REMOVED: {
-                    int fingerId = arg1;
-                    int groupId = arg2;
+                break;
+            case FINGERPRINT_TEMPLATE_REMOVED:
+                {
+                    final int fingerId = arg1;
+                    final int groupId = arg2;
+                    removeTemplateForUser(clientData, contentResolver, fingerId);
                     if (fingerId == 0) {
-                        throw new IllegalStateException("Got illegal id from HAL");
+                        operationCompleted = true; // remove completed
+                    } else {
+                        clientData.receiver.onRemoved(mHalDeviceId, fingerId, groupId);
                     }
-                    FingerprintUtils.removeFingerprintIdForUser(fingerId, contentResolver,
-                            clientData.userId);
-                    if (clientData.receiver != null) {
-                        try {
-                            clientData.receiver.onRemoved(mHalDeviceId, fingerId, groupId);
-                        } catch (RemoteException e) {
-                            Slog.e(TAG, "can't send message to client. Did it die?", e);
-                            mClients.remove(mClients.keyAt(i));
-                        }
-                    }
-                    clientData.state = STATE_IDLE;
                 }
-                    break;
-            }
+                break;
+        }
+        return operationCompleted;
+    }
+
+    private void removeTemplateForUser(ClientData clientData, ContentResolver contentResolver,
+            final int fingerId) {
+        FingerprintUtils.removeFingerprintIdForUser(fingerId, contentResolver,
+                clientData.userId);
+    }
+
+    private void addTemplateForUser(ClientData clientData, ContentResolver contentResolver,
+            final int fingerId) {
+        FingerprintUtils.addFingerprintIdForUser(contentResolver, fingerId,
+                clientData.userId);
+    }
+
+    void startEnrollment(IBinder token, long opId,
+            int groupId, IFingerprintServiceReceiver receiver, int flags) {
+        stopPendingOperations();
+        mEnrollClient = new ClientData(token, opId, receiver, groupId);
+        final int timeout = (int) (ENROLLMENT_TIMEOUT_MS / MS_PER_SEC);
+        final int result = nativeEnroll(opId, groupId, timeout);
+        if (result != 0) {
+            Slog.w(TAG, "startEnroll failed, result=" + result);
         }
     }
 
-    void startEnroll(IBinder token, int groupId, int flags) {
-        ClientData clientData = mClients.get(token);
-        if (clientData != null) {
-            if (clientData.userId != groupId) {
-                throw new IllegalStateException("Bad user");
-            }
-            clientData.state = STATE_ENROLLING;
-            final int timeout = (int) (ENROLLMENT_TIMEOUT_MS / MS_PER_SEC);
-            nativeEnroll(timeout, groupId);
-        } else {
-            Slog.w(TAG, "enroll(): No listener registered");
+    public long startPreEnroll(IBinder token) {
+        return nativePreEnroll();
+    }
+
+    private void stopPendingOperations() {
+        if (mEnrollClient != null) {
+            stopEnrollment(mEnrollClient.token);
+        }
+        if (mAuthClient != null) {
+            stopAuthentication(mAuthClient.token);
+        }
+        // mRemoveClient is allowed to continue
+    }
+
+    void stopEnrollment(IBinder token) {
+        if (mEnrollClient == null || mEnrollClient.token != token) return;
+        int result = nativeStopEnrollment();
+        if (result != 0) {
+            Slog.w(TAG, "startEnrollCancel failed, result=" + result);
         }
     }
 
-    void startAuthenticate(IBinder token, long sessionId, int groupId, int flags) {
-        ClientData clientData = mClients.get(token);
-        if (clientData != null) {
-            if (clientData.userId != groupId) {
-                throw new IllegalStateException("Bad user");
-            }
-            clientData.state = STATE_AUTHENTICATING;
-            final int timeout = (int) (ENROLLMENT_TIMEOUT_MS / MS_PER_SEC);
-            nativeAuthenticate(sessionId, groupId);
-        } else {
-            Slog.w(TAG, "enroll(): No listener registered");
+    void startAuthentication(IBinder token, long opId, int groupId,
+            IFingerprintServiceReceiver receiver, int flags) {
+        stopPendingOperations();
+        mAuthClient = new ClientData(token, opId, receiver, groupId);
+        final int timeout = (int) (ENROLLMENT_TIMEOUT_MS / MS_PER_SEC);
+        final int result = nativeAuthenticate(opId, groupId);
+        if (result != 0) {
+            Slog.w(TAG, "startAuthentication failed, result=" + result);
         }
     }
 
-    void startEnrollCancel(IBinder token, int userId) {
-        ClientData clientData = mClients.get(token);
-        if (clientData != null) {
-            if (clientData.userId != userId) throw new IllegalStateException("Bad user");
-            clientData.state = STATE_IDLE;
-            nativeEnrollCancel();
-        } else {
-            Slog.w(TAG, "enrollCancel(): No listener registered");
+    void stopAuthentication(IBinder token) {
+        if (mAuthClient == null || mAuthClient.token != token) return;
+        int result = nativeStopAuthentication(mAuthClient.opId);
+        if (result != 0) {
+            Slog.w(TAG, "stopAuthentication failed, result=" + result);
         }
     }
 
-    // Remove all fingerprints for the given user.
-    void startRemove(IBinder token, int fingerId, int userId) {
-        ClientData clientData = mClients.get(token);
-        if (clientData != null) {
-            if (clientData.userId != userId) throw new IllegalStateException("Bad user");
-            clientData.state = STATE_REMOVING;
-            // The fingerprint id will be removed when we get confirmation from the HAL
-            int result = nativeRemove(fingerId, userId);
-            if (result != 0) {
-                Slog.w(TAG, "Error removing fingerprint with id = " + fingerId);
-            }
-        } else {
-            Slog.w(TAG, "remove(" + token + "): No listener registered");
+    void startRemove(IBinder token, int fingerId, int userId,
+            IFingerprintServiceReceiver receiver) {
+        mRemoveClient = new ClientData(token, 0, receiver, userId);
+        // The fingerprint template ids will be removed when we get confirmation from the HAL
+        final int result = nativeRemove(fingerId, userId);
+        if (result != 0) {
+            Slog.w(TAG, "startRemove with id = " + fingerId + " failed with result=" + result);
         }
-    }
-
-    void addListener(IBinder token, IFingerprintServiceReceiver receiver, int userId) {
-        if (DEBUG) Slog.v(TAG, "startListening(" + receiver + ")");
-        if (mClients.get(token) == null) {
-            ClientData clientData = new ClientData();
-            clientData.state = STATE_IDLE;
-            clientData.receiver = receiver;
-            clientData.userId = userId;
-            clientData.tokenWatcher = new TokenWatcher(token);
-            try {
-                token.linkToDeath(clientData.tokenWatcher, 0);
-                mClients.put(token, clientData);
-            } catch (RemoteException e) {
-                Slog.w(TAG, "caught remote exception in linkToDeath: ", e);
-            }
-        } else {
-            if (DEBUG) Slog.v(TAG, "listener already registered for " + token);
-        }
-    }
-
-    void removeListener(IBinder token, IFingerprintServiceReceiver receiver) {
-        if (DEBUG) Slog.v(TAG, "stopListening(" + token + ")");
-        ClientData clientData = mClients.get(token);
-        if (clientData != null) {
-            token.unlinkToDeath(clientData.tokenWatcher, 0);
-            mClients.remove(token);
-        } else {
-            if (DEBUG) Slog.v(TAG, "listener not registered: " + token);
-        }
-        mClients.remove(token);
     }
 
     public List<Fingerprint> getEnrolledFingerprints(int groupId) {
@@ -355,40 +392,90 @@ public class FingerprintService extends SystemService {
                 "Must have " + permission + " permission.");
     }
 
+    private static final class Message {
+        IBinder token;
+        long opId;
+        int groupId;
+        int flags;
+
+        public Message(IBinder token, long challenge, int groupId, int flags) {
+            this.token = token;
+            this.opId = challenge;
+            this.groupId = groupId;
+            this.flags = flags;
+        }
+    }
+
     private final class FingerprintServiceWrapper extends IFingerprintService.Stub {
         @Override
-        // Binder call
-        public void enroll(IBinder token, int groupId, int flags) {
+        public long preEnroll(IBinder token) {
             checkPermission(MANAGE_FINGERPRINT);
-            startEnroll(token, groupId, flags);
+            return startPreEnroll(token);
         }
 
         @Override
         // Binder call
-        public void authenticate(IBinder token, long sessionId, int groupId, int flags) {
+        public void enroll(final IBinder token, final long opid, final int groupId,
+                final IFingerprintServiceReceiver receiver, final int flags) {
+            checkPermission(MANAGE_FINGERPRINT);
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    startEnrollment(token, opid, groupId, receiver, flags);
+                }
+            });
+        }
+
+        @Override
+        // Binder call
+        public void cancelEnrollment(final IBinder token) {
+            checkPermission(MANAGE_FINGERPRINT);
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    stopEnrollment(token);
+                }
+            });
+        }
+
+        @Override
+        // Binder call
+        public void authenticate(final IBinder token, final long opId, final int groupId,
+                final IFingerprintServiceReceiver receiver, final int flags) {
             checkPermission(USE_FINGERPRINT);
-            startAuthenticate(token, sessionId, groupId, flags);
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    startAuthentication(token, opId, groupId, receiver, flags);
+                }
+            });
+        }
+
+        @Override
+
+        // Binder call
+        public void cancelAuthentication(final IBinder token) {
+            checkPermission(USE_FINGERPRINT);
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    stopAuthentication(token);
+                }
+            });
         }
 
         @Override
         // Binder call
-        public void remove(IBinder token, int fingerId, int groupId) {
+        public void remove(final IBinder token, final int fingerId, final int groupId,
+                final IFingerprintServiceReceiver receiver) {
             checkPermission(MANAGE_FINGERPRINT); // TODO: Maybe have another permission
-            startRemove(token, fingerId, groupId);
-        }
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    startRemove(token, fingerId, groupId, receiver);
+                }
+            });
 
-        @Override
-        // Binder call
-        public void addListener(IBinder token, IFingerprintServiceReceiver receiver, int userId) {
-            checkPermission(USE_FINGERPRINT);
-            FingerprintService.this.addListener(token, receiver, userId);
-        }
-
-        @Override
-        // Binder call
-        public void removeListener(IBinder token, IFingerprintServiceReceiver receiver) {
-            checkPermission(USE_FINGERPRINT);
-            FingerprintService.this.removeListener(token, receiver);
         }
 
         @Override
@@ -400,10 +487,14 @@ public class FingerprintService extends SystemService {
 
         @Override
         // Binder call
-        public void rename(int fingerId, int groupId, String name) {
+        public void rename(final int fingerId, final int groupId, final String name) {
             checkPermission(MANAGE_FINGERPRINT);
-            Slog.w(TAG, "rename id=" + fingerId + ",gid=" + groupId + ",name=" + name);
-            // TODO
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    Slog.w(TAG, "rename id=" + fingerId + ",gid=" + groupId + ",name=" + name);
+                }
+            });
         }
 
         @Override

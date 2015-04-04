@@ -101,9 +101,21 @@ static void nativeInit(JNIEnv *env, jobject clazz, jobject mQueue, jobject callb
     gLooper = android_os_MessageQueue_getMessageQueue(env, mQueue)->getLooper();
 }
 
-static jint nativeEnroll(JNIEnv* env, jobject clazz, jint timeout, jint groupId) {
+static jint nativeEnroll(JNIEnv* env, jobject clazz, jlong challenge, jint groupId, jint timeout) {
     ALOG(LOG_VERBOSE, LOG_TAG, "nativeEnroll(gid=%d, timeout=%d)\n", groupId, timeout);
     int ret = gContext.device->enroll(gContext.device, groupId, timeout);
+    return reinterpret_cast<jint>(ret);
+}
+
+static jint nativePreEnroll(JNIEnv* env, jobject clazz) {
+    uint64_t ret = gContext.device->pre_enroll(gContext.device);
+    ALOG(LOG_VERBOSE, LOG_TAG, "nativePreEnroll(), result = %" PRId64 "\n", ret);
+    return reinterpret_cast<jlong>((int64_t)ret);
+}
+
+static jint nativeStopEnrollment(JNIEnv* env, jobject clazz) {
+    ALOG(LOG_VERBOSE, LOG_TAG, "nativeStopEnrollment()\n");
+    int ret = gContext.device->cancel(gContext.device);
     return reinterpret_cast<jint>(ret);
 }
 
@@ -113,9 +125,9 @@ static jint nativeAuthenticate(JNIEnv* env, jobject clazz, jlong sessionId, jint
     return reinterpret_cast<jint>(ret);
 }
 
-static jint nativeEnrollCancel(JNIEnv* env, jobject clazz) {
-    ALOG(LOG_VERBOSE, LOG_TAG, "nativeEnrollCancel()\n");
-    int ret = gContext.device->enroll_cancel(gContext.device);
+static jint nativeStopAuthentication(JNIEnv* env, jobject clazz, jlong sessionId) {
+    ALOG(LOG_VERBOSE, LOG_TAG, "nativeStopAuthentication()\n");
+    int ret = gContext.device->cancel(gContext.device);
     return reinterpret_cast<jint>(ret);
 }
 
@@ -185,8 +197,10 @@ static jint nativeCloseHal(JNIEnv* env, jobject clazz) {
 // TODO: clean up void methods
 static const JNINativeMethod g_methods[] = {
     { "nativeAuthenticate", "(JI)I", (void*)nativeAuthenticate },
-    { "nativeEnroll", "(II)I", (void*)nativeEnroll },
-    { "nativeEnrollCancel", "()I", (void*)nativeEnrollCancel },
+    { "nativeStopAuthentication", "(J)I", (void*)nativeStopAuthentication },
+    { "nativeEnroll", "(JII)I", (void*)nativeEnroll },
+    { "nativePreEnroll", "()J", (void*)nativePreEnroll },
+    { "nativeStopEnrollment", "()I", (void*)nativeStopEnrollment },
     { "nativeRemove", "(II)I", (void*)nativeRemove },
     { "nativeOpenHal", "()I", (void*)nativeOpenHal },
     { "nativeCloseHal", "()I", (void*)nativeCloseHal },

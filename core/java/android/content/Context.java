@@ -2161,7 +2161,7 @@ public abstract class Context {
             WIFI_RTT_SERVICE,
             NSD_SERVICE,
             AUDIO_SERVICE,
-            //@hide: FINGERPRINT_SERVICE,
+            FINGERPRINT_SERVICE,
             MEDIA_ROUTER_SERVICE,
             TELEPHONY_SERVICE,
             TELEPHONY_SUBSCRIPTION_SERVICE,
@@ -2668,12 +2668,11 @@ public abstract class Context {
 
     /**
      * Use with {@link #getSystemService} to retrieve a
-     * {@link android.service.fingerprint.FingerprintManager} for handling management
+     * {@link android.hardware.fingerprint.FingerprintManager} for handling management
      * of fingerprints.
      *
      * @see #getSystemService
-     * @see android.service.fingerprint.FingerprintManager
-     * @hide
+     * @see android.hardware.fingerprint.FingerprintManager
      */
     public static final String FINGERPRINT_SERVICE = "fingerprint";
 

@@ -1247,7 +1247,6 @@
     <string name="fingerprint_acquired_too_slow">Finger moved to slow. Please try again.</string>
     <!-- Array containing custom messages shown during fingerprint acquisision from vendor.  Vendor is expected to add and translate these strings -->
     <string-array name="fingerprint_acquired_vendor">
-        <item>Vendor-specific acquisition error message 0</item>
     </string-array>
 
     <!-- Generic error message shown when the fingerprint hardware can't recognize the fingerprint -->
@@ -1262,7 +1261,6 @@
     <string name="fingerprint_error_vendor">Fingerprint time out reached. Try again.</string>
     <!-- Array containing custom error messages from vendor.  Vendor is expected to add and translate these strings -->
     <string-array name="fingerprint_error_vendor">
-        <item>Vendor-specifc error message.</item>
     </string-array>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->

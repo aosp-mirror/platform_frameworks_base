@@ -62,6 +62,7 @@ import android.telephony.SubscriptionManager;
 import android.telephony.SubscriptionManager.OnSubscriptionsChangedListener;
 import android.telephony.TelephonyManager;
 import android.util.Log;
+import android.util.Slog;
 import android.util.SparseBooleanArray;
 
 import com.google.android.collect.Lists;
@@ -115,8 +116,9 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
     private static final int MSG_FINGERPRINT_AUTHENTICATED = 323;
     private static final int MSG_FINGERPRINT_ERROR = 324;
     private static final int MSG_FINGERPRINT_HELP = 325;
-    private static final int MSG_FACE_UNLOCK_STATE_CHANGED = 326;
-    private static final int MSG_SIM_SUBSCRIPTION_INFO_CHANGED = 327;
+    private static final int MSG_FINGERPRINT_AUTH_FAILED = 326;
+    private static final int MSG_FACE_UNLOCK_STATE_CHANGED = 327;
+    private static final int MSG_SIM_SUBSCRIPTION_INFO_CHANGED = 328;
 
     private static KeyguardUpdateMonitor sInstance;
 
@@ -214,6 +216,9 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
                     break;
                 case MSG_FINGERPRINT_ERROR:
                     handleFingerprintError(msg.arg1 /* msgId */, (String) msg.obj /* errString */);
+                    break;
+                case MSG_FINGERPRINT_AUTH_FAILED:
+                    handleFingerprintAuthFailed();
                     break;
                 case MSG_FACE_UNLOCK_STATE_CHANGED:
                     handleFaceUnlockStateChanged(msg.arg1 != 0, msg.arg2);
@@ -332,13 +337,13 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
         }
     }
 
-    private void handleFingerprintAuthenticated(int fingerId, int groupId) {
-        if (fingerId == 0) {
-            // not a valid fingerprint
-            handleFingerprintHelp(-1, mContext.getString(R.string.fingerprint_not_recognized));
-            return;
-        }
+    private void handleFingerprintAuthFailed() {
+        // FingerprintManager will allow us to retry a few times before finally giving up.
+        // TODO: Figure out the proper logic to stop this call when max tries is reached.
+        handleFingerprintHelp(-1, mContext.getString(R.string.fingerprint_not_recognized));
+    }
 
+    private void handleFingerprintAuthenticated(int fingerId, int groupId) {
         try {
             final int userId;
             try {
@@ -516,6 +521,11 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
             = new AuthenticationCallback() {
 
         @Override
+        public void onAuthenticationFailed() {
+            mHandler.obtainMessage(MSG_FINGERPRINT_AUTH_FAILED).sendToTarget();
+        };
+
+        @Override
         public void onAuthenticationSucceeded(AuthenticationResult result) {
             mHandler.obtainMessage(MSG_FINGERPRINT_AUTHENTICATED,
                     result.getFingerprint().getFingerId(),
@@ -659,7 +669,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
                 cb.onScreenTurnedOn();
             }
         }
-        startListeningForFingerprint(mContext);
+        startListeningForFingerprint();
     }
 
     protected void handleScreenTurnedOff(int arg1) {
@@ -744,12 +754,14 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
                             mHandler.sendMessage(mHandler.obtainMessage(MSG_USER_SWITCHING,
                                     newUserId, 0, reply));
                             mSwitchingUser = true;
+                            stopListeningForFingerprint();
                         }
                         @Override
                         public void onUserSwitchComplete(int newUserId) throws RemoteException {
                             mHandler.sendMessage(mHandler.obtainMessage(MSG_USER_SWITCH_COMPLETE,
                                     newUserId, 0));
                             mSwitchingUser = false;
+                            startListeningForFingerprint();
                         }
                     });
         } catch (RemoteException e) {
@@ -761,25 +773,34 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
         trustManager.registerTrustListener(this);
 
         mFpm = (FingerprintManager) context.getSystemService(Context.FINGERPRINT_SERVICE);
-        startListeningForFingerprint(context);
+        startListeningForFingerprint();
     }
 
-    private void startListeningForFingerprint(Context context) {
-        if (mFpm != null && mFpm.isHardwareDetected()
+    private void startListeningForFingerprint() {
+        if (DEBUG) Log.v(TAG, "startListeningForFingerprint()");
+        final int userId;
+        try {
+            userId = ActivityManagerNative.getDefault().getCurrentUser().id;
+        } catch (RemoteException e) {
+            Log.e(TAG, "Failed to get current user id: ", e);
+            return;
+        }
+        if (mFpm != null && mFpm.isHardwareDetected() && !isFingerprintDisabled(userId)
                 && mFpm.getEnrolledFingerprints().size() > 0) {
-            if (mFingerprintCancelSignal == null) {
-                mFingerprintCancelSignal = new CancellationSignal();
-            } else {
+            if (mFingerprintCancelSignal != null) {
                 mFingerprintCancelSignal.cancel();
             }
-            mFpm.authenticate(null, mAuthenticationCallback, mFingerprintCancelSignal, 0);
+            mFingerprintCancelSignal = new CancellationSignal();
+            mFpm.authenticate(null, mFingerprintCancelSignal, mAuthenticationCallback, 0);
             setFingerprintRunningDetectionRunning(true);
         }
     }
 
-    private void stopListeningForFingerprint() {
-        if (mFingerprintCancelSignal != null) {
+    public void stopListeningForFingerprint() {
+        if (DEBUG) Log.v(TAG, "stopListeningForFingerprint()");
+        if (isFingerprintDetectionRunning()) {
             mFingerprintCancelSignal.cancel();
+            mFingerprintCancelSignal = null;
         }
         setFingerprintRunningDetectionRunning(false);
     }
