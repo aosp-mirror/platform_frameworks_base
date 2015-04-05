@@ -57,6 +57,7 @@ public class VolumeInfo implements Parcelable {
     public static final int STATE_MOUNTED = 2;
     public static final int STATE_FORMATTING = 3;
     public static final int STATE_UNMOUNTING = 4;
+    public static final int STATE_UNMOUNTABLE = 5;
 
     public static final int FLAG_PRIMARY = 1 << 0;
     public static final int FLAG_VISIBLE = 1 << 1;
@@ -70,11 +71,13 @@ public class VolumeInfo implements Parcelable {
         sStateToEnvironment.put(VolumeInfo.STATE_MOUNTED, Environment.MEDIA_MOUNTED);
         sStateToEnvironment.put(VolumeInfo.STATE_FORMATTING, Environment.MEDIA_UNMOUNTED);
         sStateToEnvironment.put(VolumeInfo.STATE_UNMOUNTING, Environment.MEDIA_EJECTING);
+        sStateToEnvironment.put(VolumeInfo.STATE_UNMOUNTABLE, Environment.MEDIA_UNMOUNTABLE);
 
         sEnvironmentToBroadcast.put(Environment.MEDIA_UNMOUNTED, Intent.ACTION_MEDIA_UNMOUNTED);
         sEnvironmentToBroadcast.put(Environment.MEDIA_CHECKING, Intent.ACTION_MEDIA_CHECKING);
         sEnvironmentToBroadcast.put(Environment.MEDIA_MOUNTED, Intent.ACTION_MEDIA_MOUNTED);
         sEnvironmentToBroadcast.put(Environment.MEDIA_EJECTING, Intent.ACTION_MEDIA_EJECT);
+        sEnvironmentToBroadcast.put(Environment.MEDIA_UNMOUNTABLE, Intent.ACTION_MEDIA_UNMOUNTABLE);
     }
 
     /** vold state */
