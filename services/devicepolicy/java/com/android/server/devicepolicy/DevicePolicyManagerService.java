@@ -3125,6 +3125,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     }
 
     private void wipeDataLocked(boolean wipeExtRequested, String reason) {
+        // TODO: wipe all public volumes on device
+
         // If the SD card is encrypted and non-removable, we have to force a wipe.
         boolean forceExtWipe = !Environment.isExternalStorageRemovable() && isExtStorageEncrypted();
 
