@@ -617,8 +617,8 @@ public class WindowManagerService extends IWindowManager.Stub
     static final long WALLPAPER_TIMEOUT_RECOVERY = 10000;
     boolean mAnimateWallpaperWithTarget;
 
-    // We give a wallpaper up to 1000ms to finish drawing before playing app transitions.
-    static final long WALLPAPER_DRAW_PENDING_TIMEOUT_DURATION = 1000;
+    // We give a wallpaper up to 500ms to finish drawing before playing app transitions.
+    static final long WALLPAPER_DRAW_PENDING_TIMEOUT_DURATION = 500;
     static final int WALLPAPER_DRAW_NORMAL = 0;
     static final int WALLPAPER_DRAW_PENDING = 1;
     static final int WALLPAPER_DRAW_TIMEOUT = 2;
@@ -9064,41 +9064,40 @@ public class WindowManagerService extends IWindowManager.Stub
                     goodToGo = false;
                 }
             }
-// Stuck in a state with mWallpaperDrawState == WALLPAPER_DRAW_PENDING without a timeout. Leave
-// commented out until that is understood.
-//            if (goodToGo && isWallpaperVisible(mWallpaperTarget)) {
-//                boolean wallpaperGoodToGo = true;
-//                for (int curTokenIndex = mWallpaperTokens.size() - 1;
-//                        curTokenIndex >= 0 && wallpaperGoodToGo; curTokenIndex--) {
-//                    WindowToken token = mWallpaperTokens.get(curTokenIndex);
-//                    for (int curWallpaperIndex = token.windows.size() - 1; curWallpaperIndex >= 0;
-//                            curWallpaperIndex--) {
-//                        WindowState wallpaper = token.windows.get(curWallpaperIndex);
-//                        if (wallpaper.mWallpaperVisible && !wallpaper.isDrawnLw()) {
-//                            // We've told this wallpaper to be visible, but it is not drawn yet
-//                            wallpaperGoodToGo = false;
-//                            if (mWallpaperDrawState != WALLPAPER_DRAW_TIMEOUT) {
-//                                // wait for this wallpaper until it is drawn or timeout
-//                                goodToGo = false;
-//                            }
-//                            if (mWallpaperDrawState == WALLPAPER_DRAW_NORMAL) {
-//                                mWallpaperDrawState = WALLPAPER_DRAW_PENDING;
-//                                mH.removeMessages(H.WALLPAPER_DRAW_PENDING_TIMEOUT);
-//                                mH.sendEmptyMessageDelayed(H.WALLPAPER_DRAW_PENDING_TIMEOUT,
-//                                        WALLPAPER_DRAW_PENDING_TIMEOUT_DURATION);
-//                            }
-//                            if (DEBUG_APP_TRANSITIONS || DEBUG_WALLPAPER) Slog.v(TAG,
-//                                    "Wallpaper should be visible but has not been drawn yet. " +
-//                                    "mWallpaperDrawState=" + mWallpaperDrawState);
-//                            break;
-//                        }
-//                    }
-//                }
-//                if (wallpaperGoodToGo) {
-//                    mWallpaperDrawState = WALLPAPER_DRAW_NORMAL;
-//                    mH.removeMessages(H.WALLPAPER_DRAW_PENDING_TIMEOUT);
-//                }
-//            }
+
+            if (goodToGo && isWallpaperVisible(mWallpaperTarget)) {
+                boolean wallpaperGoodToGo = true;
+                for (int curTokenIndex = mWallpaperTokens.size() - 1;
+                        curTokenIndex >= 0 && wallpaperGoodToGo; curTokenIndex--) {
+                    WindowToken token = mWallpaperTokens.get(curTokenIndex);
+                    for (int curWallpaperIndex = token.windows.size() - 1; curWallpaperIndex >= 0;
+                            curWallpaperIndex--) {
+                        WindowState wallpaper = token.windows.get(curWallpaperIndex);
+                        if (wallpaper.mWallpaperVisible && !wallpaper.isDrawnLw()) {
+                            // We've told this wallpaper to be visible, but it is not drawn yet
+                            wallpaperGoodToGo = false;
+                            if (mWallpaperDrawState != WALLPAPER_DRAW_TIMEOUT) {
+                                // wait for this wallpaper until it is drawn or timeout
+                                goodToGo = false;
+                            }
+                            if (mWallpaperDrawState == WALLPAPER_DRAW_NORMAL) {
+                                mWallpaperDrawState = WALLPAPER_DRAW_PENDING;
+                                mH.removeMessages(H.WALLPAPER_DRAW_PENDING_TIMEOUT);
+                                mH.sendEmptyMessageDelayed(H.WALLPAPER_DRAW_PENDING_TIMEOUT,
+                                        WALLPAPER_DRAW_PENDING_TIMEOUT_DURATION);
+                            }
+                            if (DEBUG_APP_TRANSITIONS || DEBUG_WALLPAPER) Slog.v(TAG,
+                                    "Wallpaper should be visible but has not been drawn yet. " +
+                                    "mWallpaperDrawState=" + mWallpaperDrawState);
+                            break;
+                        }
+                    }
+                }
+                if (wallpaperGoodToGo) {
+                    mWallpaperDrawState = WALLPAPER_DRAW_NORMAL;
+                    mH.removeMessages(H.WALLPAPER_DRAW_PENDING_TIMEOUT);
+                }
+            }
         }
         if (goodToGo) {
             if (DEBUG_APP_TRANSITIONS) Slog.v(TAG, "**** GOOD TO GO");
