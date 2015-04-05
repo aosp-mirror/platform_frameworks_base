@@ -32,7 +32,6 @@ public class FlagSet {
 
     public FlagSet(BitSet bitSet, int bucketCount) {
         buckets = new long[bucketCount];
-        Arrays.fill(buckets, 0L);
         for (int i = bitSet.nextSetBit(0);
                 i != -1; i = bitSet.nextSetBit(i + 1)) {
             buckets[i / sBucketSize] |= 1 << (i % sBucketSize);
@@ -42,9 +41,13 @@ public class FlagSet {
 
     public FlagSet(long[] buckets) {
         this.buckets = new long[buckets.length];
-        for (int i = 0; i < buckets.length; i ++) {
-            this.buckets[i] = buckets[i];
-        }
+        System.arraycopy(buckets, 0, this.buckets, 0, buckets.length);
+        type = "long";
+    }
+
+    public FlagSet(long[] buckets, int minBucketCount) {
+        this.buckets = new long[Math.max(buckets.length, minBucketCount)];
+        System.arraycopy(buckets, 0, this.buckets, 0, buckets.length);
         type = "long";
     }
 
@@ -83,5 +86,57 @@ public class FlagSet {
 
     public void setDynamic(boolean isDynamic) {
         mIsDynamic = isDynamic;
+    }
+
+    public FlagSet andNot(FlagSet other) {
+        FlagSet result = new FlagSet(buckets);
+        final int min = Math.min(buckets.length, other.buckets.length);
+        for (int i = 0; i < min; i ++) {
+            result.buckets[i] &= ~(other.buckets[i]);
+        }
+        return result;
+    }
+
+    public FlagSet or(FlagSet other) {
+        final FlagSet result = new FlagSet(buckets, other.buckets.length);
+        for (int i = 0; i < other.buckets.length; i ++) {
+            result.buckets[i] |= other.buckets[i];
+        }
+        return result;
+    }
+
+    public boolean isEmpty() {
+        for (int i = 0; i < buckets.length; i ++) {
+            if (buckets[i] != 0) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < buckets.length; i ++) {
+            sb.append(Long.toBinaryString(buckets[i])).append(" ");
+        }
+        return sb.toString();
+    }
+
+    private long getBucket(int bucketIndex) {
+        if (bucketIndex >= buckets.length) {
+            return 0;
+        }
+        return buckets[bucketIndex];
+    }
+
+    public boolean bitsEqual(FlagSet other) {
+        final int max = Math.max(buckets.length, other.buckets.length);
+        for (int i = 0; i < max; i ++) {
+            if (getBucket(i) != other.getBucket(i)) {
+                return false;
+            }
+        }
+        return true;
     }
 }

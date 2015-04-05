@@ -258,26 +258,20 @@ fun Expr.conditionalFlagName(output : Boolean, suffix : String) = "${dirtyFlagNa
 
 
 val Expr.dirtyFlagSet by Delegates.lazy { expr : Expr ->
-    val fs = FlagSet(expr.getInvalidFlags(), expr.getModel().getFlagBucketCount())
-    expr.getModel().localizeFlag(fs, expr.dirtyFlagName)
+    FlagSet(expr.getInvalidFlags(), expr.getModel().getFlagBucketCount())
 }
 
 val Expr.invalidateFlagSet by Delegates.lazy { expr : Expr ->
-    val fs = FlagSet(expr.getId())
-    expr.getModel().localizeFlag(fs, expr.invalidateFlagName)
+    FlagSet(expr.getId())
 }
 
 val Expr.shouldReadFlagSet by Delegates.lazy { expr : Expr ->
-    val fs = FlagSet(expr.getShouldReadFlags(), expr.getModel().getFlagBucketCount())
-    expr.getModel().localizeFlag(fs, expr.shouldReadFlagName)
+    FlagSet(expr.getShouldReadFlags(), expr.getModel().getFlagBucketCount())
 }
 
 val Expr.conditionalFlags by Delegates.lazy { expr : Expr ->
-    val model = expr.getModel()
-    arrayListOf(model.localizeFlag(FlagSet(expr.getRequirementFlagIndex(false)),
-            "${expr.conditionalFlagPrefix}False"),
-            model.localizeFlag(FlagSet(expr.getRequirementFlagIndex(true)),
-                    "${expr.conditionalFlagPrefix}True"))
+    arrayListOf(FlagSet(expr.getRequirementFlagIndex(false)),
+            FlagSet(expr.getRequirementFlagIndex(true)))
 }
 
 fun Expr.getRequirementFlagSet(expected : Boolean) : FlagSet = conditionalFlags[if(expected) 1 else 0]
@@ -300,18 +294,14 @@ fun FlagSet.getWordSuffix(wordIndex : Int) : String {
 }
 
 fun FlagSet.localValue(bucketIndex : Int) =
-        if (getLocalName() == null) buckets[bucketIndex]
+        if (getLocalName() == null) binaryCode(bucketIndex)
         else "${getLocalName()}${getWordSuffix(bucketIndex)}"
 
-fun FlagSet.or(other : FlagSet, cb : (suffix : String) -> Unit) {
-    val min = Math.min(buckets.size(), other.buckets.size())
-    for (i in 0..(min - 1)) {
-        // if these two can match by any chance, call the callback
-        if (intersect(other, i)) {
-            cb(getWordSuffix(i))
-        }
-    }
-}
+fun FlagSet.binaryCode(bucketIndex : Int) = longToBinary(buckets[bucketIndex])
+
+
+fun longToBinary(l : Long) =
+        "0b${java.lang.Long.toBinaryString(l)}L"
 
 fun <T> FlagSet.mapOr(other : FlagSet, cb : (suffix : String, index : Int) -> T) : List<T> {
     val min = Math.min(buckets.size(), other.buckets.size())
@@ -649,7 +639,7 @@ class LayoutBinderWriter(val layoutBinder : LayoutBinder) {
             flag.notEmpty { suffix, value ->
                 nl("private")
                 app(" ", if(flag.isDynamic()) null else "static final");
-                app(" ", " ${flag.type} ${flag.getLocalName()}$suffix = $value;")
+                app(" ", " ${flag.type} ${flag.getLocalName()}$suffix = ${longToBinary(value)};")
             }
         }
     }
@@ -673,7 +663,6 @@ class LayoutBinderWriter(val layoutBinder : LayoutBinder) {
                 tab("${tmpDirtyFlags.type} ${tmpDirtyFlags.localValue(i)} = ${mDirtyFlags.localValue(i)};")
                 tab("${mDirtyFlags.localValue(i)} = 0;")
             }
-            //tab("""log("dirty flags", mDirtyFlags);""")
             model.getPendingExpressions().filterNot {it.isVariable()}.forEach {
                 tab("${it.getResolvedType().toJavaCode()} ${it.localName} = ${it.getDefaultValue()};")
             }
@@ -728,7 +717,6 @@ class LayoutBinderWriter(val layoutBinder : LayoutBinder) {
                         }
                         tab("}")
                     }
-            //
             includedBinders.filter{it.isUsed()}.forEach { binder ->
                 tab("${binder.fieldName}.executePendingBindings();")
             }
@@ -744,14 +732,18 @@ class LayoutBinderWriter(val layoutBinder : LayoutBinder) {
         nl("}")
     }
 
-    fun readWithDependants(expr : Expr, mJustRead : MutableList<Expr>, batch : MutableList<Expr>, tmpDirtyFlags : FlagSet) : KCode = kcode("") {
+    fun readWithDependants(expr : Expr, mJustRead : MutableList<Expr>, batch : MutableList<Expr>,
+            tmpDirtyFlags : FlagSet, inheritedFlags : FlagSet? = null) : KCode = kcode("") {
         mJustRead.add(expr)
         Log.d { expr.getUniqueKey() }
         val flagSet = expr.shouldReadFlagSet
-        tab("if (${tmpDirtyFlags.mapOr(flagSet){ suffix, index ->
+        val needsIfWrapper = inheritedFlags == null || !flagSet.bitsEqual(inheritedFlags)
+        val ifClause = "if (${tmpDirtyFlags.mapOr(flagSet){ suffix, index ->
             "(${tmpDirtyFlags.localValue(index)} & ${flagSet.localValue(index)}) != 0"
         }.joinToString(" || ")
-        }) {") {
+        })"
+
+        val readCode = kcode("") {
             if (!expr.isVariable()) {
                 // it is not a variable read it.
                 tab("// read ${expr.getUniqueKey()}")
@@ -762,12 +754,10 @@ class LayoutBinderWriter(val layoutBinder : LayoutBinder) {
                 if (!expr.isEqualityCheck() && nullables.isNotEmpty()) {
                     tab ("if ( ${nullables.map { "${it.localName} != null" }.joinToString(" && ")}) {") {
                         tab("${expr.localName}").app(" = ", expr.toCode(true)).app(";")
-                        //tab("""log("${expr}" + ${expr.localName},0);""")
                     }
                     tab("}")
                 } else {
                     tab("${expr.localName}").app(" = ", expr.toCode(true)).app(";")
-                    //tab("""log("${expr}" + ${expr.localName},0);""")
                 }
                 if (expr.isObservable()) {
                     tab("updateRegistration(${expr.getId()}, ${expr.localName});")
@@ -799,15 +789,27 @@ class LayoutBinderWriter(val layoutBinder : LayoutBinder) {
             }
 
             val chosen = expr.getDependants().filter {
-                batch.contains(it.getDependant()) && it.getDependant().shouldReadNow(mJustRead)
+                val dependant = it.getDependant()
+                batch.contains(dependant) &&
+                        dependant.shouldReadFlagSet.andNot(flagSet).isEmpty() &&
+                        dependant.shouldReadNow(mJustRead)
             }
             if (chosen.isNotEmpty()) {
+                val nextInheritedFlags = if (needsIfWrapper) flagSet else inheritedFlags
                 chosen.forEach {
-                    nl(readWithDependants(it.getDependant(), mJustRead, batch, tmpDirtyFlags))
+                    nl(readWithDependants(it.getDependant(), mJustRead, batch, tmpDirtyFlags, nextInheritedFlags))
                 }
             }
         }
-        tab("}")
+        if (needsIfWrapper) {
+            tab(ifClause) {
+                app(" {")
+                nl(readCode)
+            }
+            tab("}")
+        } else {
+            nl(readCode)
+        }
     }
 
     fun declareFactories() = kcode("") {
@@ -821,7 +823,7 @@ class LayoutBinderWriter(val layoutBinder : LayoutBinder) {
         nl("}")
         nl("public static ${baseClassName} bind(android.view.View view) {") {
             tab("if (!\"${layoutBinder.getId()}\".equals(view.getTag())) {") {
-                tab("throw new RuntimeException(\"view tag doesn't isn't correct on view\");")
+                tab("throw new RuntimeException(\"view tag isn't correct on view\");")
             }
             tab("}")
             tab("return new ${baseClassName}(view);")
