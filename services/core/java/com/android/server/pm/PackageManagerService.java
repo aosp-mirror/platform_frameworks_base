@@ -152,7 +152,9 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.os.Environment.UserEnvironment;
 import android.os.storage.IMountService;
+import android.os.storage.StorageEventListener;
 import android.os.storage.StorageManager;
+import android.os.storage.VolumeInfo;
 import android.os.Debug;
 import android.os.FileUtils;
 import android.os.Handler;
@@ -1525,6 +1527,22 @@ public class PackageManagerService extends IPackageManager.Stub {
             }
         }
     }
+
+    private StorageEventListener mStorageListener = new StorageEventListener() {
+        @Override
+        public void onVolumeStateChanged(VolumeInfo vol, int oldState, int newState) {
+            Slog.v(TAG, vol.toString());
+
+            // TODO: when private volume shows up, look for packages there too
+            if (vol.isPrimary() && vol.type == VolumeInfo.TYPE_PUBLIC) {
+                if (vol.state == VolumeInfo.STATE_MOUNTED) {
+                    updateExternalMediaStatus(true, false);
+                } else if (vol.state == VolumeInfo.STATE_UNMOUNTING) {
+                    updateExternalMediaStatus(false, false);
+                }
+            }
+        }
+    };
 
     private void grantRequestedRuntimePermissions(PackageParser.Package pkg, int userId) {
         if (userId >= UserHandle.USER_OWNER) {
@@ -12868,6 +12886,10 @@ public class PackageManagerService extends IPackageManager.Stub {
             }
             mPostSystemReadyMessages = null;
         }
+
+        // Watch for external volumes that come and go over time
+        final StorageManager storage = mContext.getSystemService(StorageManager.class);
+        storage.registerListener(mStorageListener);
     }
 
     @Override

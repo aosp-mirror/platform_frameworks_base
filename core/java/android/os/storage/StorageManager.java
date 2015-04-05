@@ -33,6 +33,7 @@ import android.provider.Settings;
 import android.util.Log;
 import android.util.SparseArray;
 
+import com.android.internal.os.SomeArgs;
 import com.android.internal.util.Preconditions;
 
 import java.io.File;
@@ -40,6 +41,7 @@ import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -69,44 +71,64 @@ public class StorageManager {
     private final Context mContext;
     private final ContentResolver mResolver;
 
-    /*
-     * Our internal MountService binder reference
-     */
     private final IMountService mMountService;
+    private final Looper mLooper;
+    private final AtomicInteger mNextNonce = new AtomicInteger(0);
 
-    /*
-     * The looper target for callbacks
-     */
-    private final Looper mTgtLooper;
+    private final ArrayList<StorageEventListenerDelegate> mDelegates = new ArrayList<>();
 
-    /*
-     * Target listener for binder callbacks
-     */
-    private MountServiceBinderListener mBinderListener;
+    private static class StorageEventListenerDelegate extends IMountServiceListener.Stub implements
+            Handler.Callback {
+        private static final int MSG_STORAGE_STATE_CHANGED = 1;
+        private static final int MSG_VOLUME_STATE_CHANGED = 2;
 
-    /*
-     * List of our listeners
-     */
-    private List<ListenerDelegate> mListeners = new ArrayList<ListenerDelegate>();
+        final StorageEventListener mCallback;
+        final Handler mHandler;
 
-    /*
-     * Next available nonce
-     */
-    final private AtomicInteger mNextNonce = new AtomicInteger(0);
-
-    private class MountServiceBinderListener extends IMountServiceListener.Stub {
-        public void onUsbMassStorageConnectionChanged(boolean available) {
-            final int size = mListeners.size();
-            for (int i = 0; i < size; i++) {
-                mListeners.get(i).sendShareAvailabilityChanged(available);
-            }
+        public StorageEventListenerDelegate(StorageEventListener callback, Looper looper) {
+            mCallback = callback;
+            mHandler = new Handler(looper, this);
         }
 
-        public void onStorageStateChanged(String path, String oldState, String newState) {
-            final int size = mListeners.size();
-            for (int i = 0; i < size; i++) {
-                mListeners.get(i).sendStorageStateChanged(path, oldState, newState);
+        @Override
+        public boolean handleMessage(Message msg) {
+            final SomeArgs args = (SomeArgs) msg.obj;
+            switch (msg.what) {
+                case MSG_STORAGE_STATE_CHANGED:
+                    mCallback.onStorageStateChanged((String) args.arg1, (String) args.arg2,
+                            (String) args.arg3);
+                    args.recycle();
+                    return true;
+                case MSG_VOLUME_STATE_CHANGED:
+                    mCallback.onVolumeStateChanged((VolumeInfo) args.arg1, args.argi2, args.argi3);
+                    args.recycle();
+                    return true;
             }
+            args.recycle();
+            return false;
+        }
+
+        @Override
+        public void onUsbMassStorageConnectionChanged(boolean connected) throws RemoteException {
+            // Ignored
+        }
+
+        @Override
+        public void onStorageStateChanged(String path, String oldState, String newState) {
+            final SomeArgs args = SomeArgs.obtain();
+            args.arg1 = path;
+            args.arg2 = oldState;
+            args.arg3 = newState;
+            mHandler.obtainMessage(MSG_STORAGE_STATE_CHANGED, args).sendToTarget();
+        }
+
+        @Override
+        public void onVolumeStateChanged(VolumeInfo vol, int oldState, int newState) {
+            final SomeArgs args = SomeArgs.obtain();
+            args.arg1 = vol;
+            args.argi2 = oldState;
+            args.argi3 = newState;
+            mHandler.obtainMessage(MSG_VOLUME_STATE_CHANGED, args).sendToTarget();
         }
     }
 
@@ -161,7 +183,7 @@ public class StorageManager {
         ObbListenerDelegate(OnObbStateChangeListener listener) {
             nonce = getNextNonce();
             mObbEventListenerRef = new WeakReference<OnObbStateChangeListener>(listener);
-            mHandler = new Handler(mTgtLooper) {
+            mHandler = new Handler(mLooper) {
                 @Override
                 public void handleMessage(Message msg) {
                     final OnObbStateChangeListener changeListener = getListener();
@@ -169,14 +191,7 @@ public class StorageManager {
                         return;
                     }
 
-                    StorageEvent e = (StorageEvent) msg.obj;
-
-                    if (msg.what == StorageEvent.EVENT_OBB_STATE_CHANGED) {
-                        ObbStateChangedStorageEvent ev = (ObbStateChangedStorageEvent) e;
-                        changeListener.onObbStateChange(ev.path, ev.state);
-                    } else {
-                        Log.e(TAG, "Unsupported event " + msg.what);
-                    }
+                    changeListener.onObbStateChange((String) msg.obj, msg.arg1);
                 }
             };
         }
@@ -189,115 +204,7 @@ public class StorageManager {
         }
 
         void sendObbStateChanged(String path, int state) {
-            ObbStateChangedStorageEvent e = new ObbStateChangedStorageEvent(path, state);
-            mHandler.sendMessage(e.getMessage());
-        }
-    }
-
-    /**
-     * Message sent during an OBB status change event.
-     */
-    private class ObbStateChangedStorageEvent extends StorageEvent {
-        public final String path;
-
-        public final int state;
-
-        public ObbStateChangedStorageEvent(String path, int state) {
-            super(EVENT_OBB_STATE_CHANGED);
-            this.path = path;
-            this.state = state;
-        }
-    }
-
-    /**
-     * Private base class for messages sent between the callback thread
-     * and the target looper handler.
-     */
-    private class StorageEvent {
-        static final int EVENT_UMS_CONNECTION_CHANGED = 1;
-        static final int EVENT_STORAGE_STATE_CHANGED = 2;
-        static final int EVENT_OBB_STATE_CHANGED = 3;
-
-        private Message mMessage;
-
-        public StorageEvent(int what) {
-            mMessage = Message.obtain();
-            mMessage.what = what;
-            mMessage.obj = this;
-        }
-
-        public Message getMessage() {
-            return mMessage;
-        }
-    }
-
-    /**
-     * Message sent on a USB mass storage connection change.
-     */
-    private class UmsConnectionChangedStorageEvent extends StorageEvent {
-        public boolean available;
-
-        public UmsConnectionChangedStorageEvent(boolean a) {
-            super(EVENT_UMS_CONNECTION_CHANGED);
-            available = a;
-        }
-    }
-
-    /**
-     * Message sent on volume state change.
-     */
-    private class StorageStateChangedStorageEvent extends StorageEvent {
-        public String path;
-        public String oldState;
-        public String newState;
-
-        public StorageStateChangedStorageEvent(String p, String oldS, String newS) {
-            super(EVENT_STORAGE_STATE_CHANGED);
-            path = p;
-            oldState = oldS;
-            newState = newS;
-        }
-    }
-
-    /**
-     * Private class containing sender and receiver code for StorageEvents.
-     */
-    private class ListenerDelegate {
-        final StorageEventListener mStorageEventListener;
-        private final Handler mHandler;
-
-        ListenerDelegate(StorageEventListener listener) {
-            mStorageEventListener = listener;
-            mHandler = new Handler(mTgtLooper) {
-                @Override
-                public void handleMessage(Message msg) {
-                    StorageEvent e = (StorageEvent) msg.obj;
-
-                    if (msg.what == StorageEvent.EVENT_UMS_CONNECTION_CHANGED) {
-                        UmsConnectionChangedStorageEvent ev = (UmsConnectionChangedStorageEvent) e;
-                        mStorageEventListener.onUsbMassStorageConnectionChanged(ev.available);
-                    } else if (msg.what == StorageEvent.EVENT_STORAGE_STATE_CHANGED) {
-                        StorageStateChangedStorageEvent ev = (StorageStateChangedStorageEvent) e;
-                        mStorageEventListener.onStorageStateChanged(ev.path, ev.oldState, ev.newState);
-                    } else {
-                        Log.e(TAG, "Unsupported event " + msg.what);
-                    }
-                }
-            };
-        }
-
-        StorageEventListener getListener() {
-            return mStorageEventListener;
-        }
-
-        void sendShareAvailabilityChanged(boolean available) {
-            UmsConnectionChangedStorageEvent e = new UmsConnectionChangedStorageEvent(available);
-            mHandler.sendMessage(e.getMessage());
-        }
-
-        void sendStorageStateChanged(String path, String oldState, String newState) {
-            StorageStateChangedStorageEvent e = new StorageStateChangedStorageEvent(path, oldState, newState);
-            mHandler.sendMessage(e.getMessage());
+            mHandler.obtainMessage(0, state, 0, path).sendToTarget();
         }
     }
 
@@ -318,10 +225,10 @@ public class StorageManager {
      *
      * @hide
      */
-    public StorageManager(Context context, Looper tgtLooper) {
+    public StorageManager(Context context, Looper looper) {
         mContext = context;
         mResolver = context.getContentResolver();
-        mTgtLooper = tgtLooper;
+        mLooper = looper;
         mMountService = IMountService.Stub.asInterface(ServiceManager.getService("mount"));
         if (mMountService == null) {
             Log.e(TAG, "Unable to connect to mount service! - is it running yet?");
@@ -337,21 +244,15 @@ public class StorageManager {
      * @hide
      */
     public void registerListener(StorageEventListener listener) {
-        if (listener == null) {
-            return;
-        }
-
-        synchronized (mListeners) {
-            if (mBinderListener == null ) {
-                try {
-                    mBinderListener = new MountServiceBinderListener();
-                    mMountService.registerListener(mBinderListener);
-                } catch (RemoteException rex) {
-                    Log.e(TAG, "Register mBinderListener failed");
-                    return;
-                }
+        synchronized (mDelegates) {
+            final StorageEventListenerDelegate delegate = new StorageEventListenerDelegate(listener,
+                    mLooper);
+            try {
+                mMountService.registerListener(delegate);
+            } catch (RemoteException e) {
+                throw e.rethrowAsRuntimeException();
             }
-            mListeners.add(new ListenerDelegate(listener));
+            mDelegates.add(delegate);
         }
     }
 
@@ -363,28 +264,19 @@ public class StorageManager {
      * @hide
      */
     public void unregisterListener(StorageEventListener listener) {
-        if (listener == null) {
-            return;
+        synchronized (mDelegates) {
+            for (Iterator<StorageEventListenerDelegate> i = mDelegates.iterator(); i.hasNext();) {
+                final StorageEventListenerDelegate delegate = i.next();
+                if (delegate.mCallback == listener) {
+                    try {
+                        mMountService.unregisterListener(delegate);
+                    } catch (RemoteException e) {
+                        throw e.rethrowAsRuntimeException();
+                    }
+                    i.remove();
+                }
+            }
         }
-
-        synchronized (mListeners) {
-            final int size = mListeners.size();
-            for (int i=0 ; i<size ; i++) {
-                ListenerDelegate l = mListeners.get(i);
-                if (l.getListener() == listener) {
-                    mListeners.remove(i);
-                    break;
-                }
-            }
-            if (mListeners.size() == 0 && mBinderListener != null) {
-                try {
-                    mMountService.unregisterListener(mBinderListener);
-                } catch (RemoteException rex) {
-                    Log.e(TAG, "Unregister mBinderListener failed");
-                    return;
-                }
-            }
-       }
     }
 
     /**
@@ -392,12 +284,8 @@ public class StorageManager {
      *
      * @hide
      */
+    @Deprecated
     public void enableUsbMassStorage() {
-        try {
-            mMountService.setUsbMassStorageEnabled(true);
-        } catch (Exception ex) {
-            Log.e(TAG, "Failed to enable UMS", ex);
-        }
     }
 
     /**
@@ -405,12 +293,8 @@ public class StorageManager {
      *
      * @hide
      */
+    @Deprecated
     public void disableUsbMassStorage() {
-        try {
-            mMountService.setUsbMassStorageEnabled(false);
-        } catch (Exception ex) {
-            Log.e(TAG, "Failed to disable UMS", ex);
-        }
     }
 
     /**
@@ -419,12 +303,8 @@ public class StorageManager {
      *
      * @hide
      */
+    @Deprecated
     public boolean isUsbMassStorageConnected() {
-        try {
-            return mMountService.isUsbMassStorageConnected();
-        } catch (Exception ex) {
-            Log.e(TAG, "Failed to get UMS connection state", ex);
-        }
         return false;
     }
 
@@ -434,12 +314,8 @@ public class StorageManager {
      *
      * @hide
      */
+    @Deprecated
     public boolean isUsbMassStorageEnabled() {
-        try {
-            return mMountService.isUsbMassStorageEnabled();
-        } catch (RemoteException rex) {
-            Log.e(TAG, "Failed to get UMS enable state", rex);
-        }
         return false;
     }
 
@@ -569,6 +445,60 @@ public class StorageManager {
     public @NonNull List<VolumeInfo> getVolumes() {
         try {
             return Arrays.asList(mMountService.getVolumes());
+        } catch (RemoteException e) {
+            throw e.rethrowAsRuntimeException();
+        }
+    }
+
+    /** {@hide} */
+    public void mount(String volId) {
+        try {
+            mMountService.mount(volId);
+        } catch (RemoteException e) {
+            throw e.rethrowAsRuntimeException();
+        }
+    }
+
+    /** {@hide} */
+    public void unmount(String volId) {
+        try {
+            mMountService.unmount(volId);
+        } catch (RemoteException e) {
+            throw e.rethrowAsRuntimeException();
+        }
+    }
+
+    /** {@hide} */
+    public void format(String volId) {
+        try {
+            mMountService.format(volId);
+        } catch (RemoteException e) {
+            throw e.rethrowAsRuntimeException();
+        }
+    }
+
+    /** {@hide} */
+    public void partitionPublic(String diskId) {
+        try {
+            mMountService.partitionPublic(diskId);
+        } catch (RemoteException e) {
+            throw e.rethrowAsRuntimeException();
+        }
+    }
+
+    /** {@hide} */
+    public void partitionPrivate(String diskId) {
+        try {
+            mMountService.partitionPrivate(diskId);
+        } catch (RemoteException e) {
+            throw e.rethrowAsRuntimeException();
+        }
+    }
+
+    /** {@hide} */
+    public void partitionMixed(String diskId, int ratio) {
+        try {
+            mMountService.partitionMixed(diskId, ratio);
         } catch (RemoteException e) {
             throw e.rethrowAsRuntimeException();
         }

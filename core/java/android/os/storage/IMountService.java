@@ -929,7 +929,7 @@ public interface IMountService extends IInterface {
                 VolumeInfo[] _result;
                 try {
                     _data.writeInterfaceToken(DESCRIPTOR);
-                    mRemote.transact(Stub.TRANSACTION_getDisks, _data, _reply, 0);
+                    mRemote.transact(Stub.TRANSACTION_getVolumes, _data, _reply, 0);
                     _reply.readException();
                     _result = _reply.createTypedArray(VolumeInfo.CREATOR);
                 } finally {
@@ -937,6 +937,97 @@ public interface IMountService extends IInterface {
                     _data.recycle();
                 }
                 return _result;
+            }
+
+            @Override
+            public void mount(String volId) throws RemoteException {
+                Parcel _data = Parcel.obtain();
+                Parcel _reply = Parcel.obtain();
+                try {
+                    _data.writeInterfaceToken(DESCRIPTOR);
+                    _data.writeString(volId);
+                    mRemote.transact(Stub.TRANSACTION_mount, _data, _reply, 0);
+                    _reply.readException();
+                } finally {
+                    _reply.recycle();
+                    _data.recycle();
+                }
+            }
+
+            @Override
+            public void unmount(String volId) throws RemoteException {
+                Parcel _data = Parcel.obtain();
+                Parcel _reply = Parcel.obtain();
+                try {
+                    _data.writeInterfaceToken(DESCRIPTOR);
+                    _data.writeString(volId);
+                    mRemote.transact(Stub.TRANSACTION_unmount, _data, _reply, 0);
+                    _reply.readException();
+                } finally {
+                    _reply.recycle();
+                    _data.recycle();
+                }
+            }
+
+            @Override
+            public void format(String volId) throws RemoteException {
+                Parcel _data = Parcel.obtain();
+                Parcel _reply = Parcel.obtain();
+                try {
+                    _data.writeInterfaceToken(DESCRIPTOR);
+                    _data.writeString(volId);
+                    mRemote.transact(Stub.TRANSACTION_format, _data, _reply, 0);
+                    _reply.readException();
+                } finally {
+                    _reply.recycle();
+                    _data.recycle();
+                }
+            }
+
+            @Override
+            public void partitionPublic(String diskId) throws RemoteException {
+                Parcel _data = Parcel.obtain();
+                Parcel _reply = Parcel.obtain();
+                try {
+                    _data.writeInterfaceToken(DESCRIPTOR);
+                    _data.writeString(diskId);
+                    mRemote.transact(Stub.TRANSACTION_partitionPublic, _data, _reply, 0);
+                    _reply.readException();
+                } finally {
+                    _reply.recycle();
+                    _data.recycle();
+                }
+            }
+
+            @Override
+            public void partitionPrivate(String diskId) throws RemoteException {
+                Parcel _data = Parcel.obtain();
+                Parcel _reply = Parcel.obtain();
+                try {
+                    _data.writeInterfaceToken(DESCRIPTOR);
+                    _data.writeString(diskId);
+                    mRemote.transact(Stub.TRANSACTION_partitionPrivate, _data, _reply, 0);
+                    _reply.readException();
+                } finally {
+                    _reply.recycle();
+                    _data.recycle();
+                }
+            }
+
+            @Override
+            public void partitionMixed(String diskId, int ratio) throws RemoteException {
+                Parcel _data = Parcel.obtain();
+                Parcel _reply = Parcel.obtain();
+                try {
+                    _data.writeInterfaceToken(DESCRIPTOR);
+                    _data.writeString(diskId);
+                    _data.writeInt(ratio);
+                    mRemote.transact(Stub.TRANSACTION_partitionMixed, _data, _reply, 0);
+                    _reply.readException();
+                } finally {
+                    _reply.recycle();
+                    _data.recycle();
+                }
             }
         }
 
@@ -1031,8 +1122,15 @@ public interface IMountService extends IInterface {
         static final int TRANSACTION_waitForAsecScan = IBinder.FIRST_CALL_TRANSACTION + 43;
 
         static final int TRANSACTION_getDisks = IBinder.FIRST_CALL_TRANSACTION + 44;
-
         static final int TRANSACTION_getVolumes = IBinder.FIRST_CALL_TRANSACTION + 45;
+
+        static final int TRANSACTION_mount = IBinder.FIRST_CALL_TRANSACTION + 46;
+        static final int TRANSACTION_unmount = IBinder.FIRST_CALL_TRANSACTION + 47;
+        static final int TRANSACTION_format = IBinder.FIRST_CALL_TRANSACTION + 48;
+
+        static final int TRANSACTION_partitionPublic = IBinder.FIRST_CALL_TRANSACTION + 49;
+        static final int TRANSACTION_partitionPrivate = IBinder.FIRST_CALL_TRANSACTION + 50;
+        static final int TRANSACTION_partitionMixed = IBinder.FIRST_CALL_TRANSACTION + 51;
 
         /**
          * Cast an IBinder object into an IMountService interface, generating a
@@ -1473,6 +1571,49 @@ public interface IMountService extends IInterface {
                     reply.writeTypedArray(volumes, android.os.Parcelable.PARCELABLE_WRITE_RETURN_VALUE);
                     return true;
                 }
+                case TRANSACTION_mount: {
+                    data.enforceInterface(DESCRIPTOR);
+                    String volId = data.readString();
+                    mount(volId);
+                    reply.writeNoException();
+                    return true;
+                }
+                case TRANSACTION_unmount: {
+                    data.enforceInterface(DESCRIPTOR);
+                    String volId = data.readString();
+                    unmount(volId);
+                    reply.writeNoException();
+                    return true;
+                }
+                case TRANSACTION_format: {
+                    data.enforceInterface(DESCRIPTOR);
+                    String volId = data.readString();
+                    format(volId);
+                    reply.writeNoException();
+                    return true;
+                }
+                case TRANSACTION_partitionPublic: {
+                    data.enforceInterface(DESCRIPTOR);
+                    String diskId = data.readString();
+                    partitionPublic(diskId);
+                    reply.writeNoException();
+                    return true;
+                }
+                case TRANSACTION_partitionPrivate: {
+                    data.enforceInterface(DESCRIPTOR);
+                    String diskId = data.readString();
+                    partitionPrivate(diskId);
+                    reply.writeNoException();
+                    return true;
+                }
+                case TRANSACTION_partitionMixed: {
+                    data.enforceInterface(DESCRIPTOR);
+                    String diskId = data.readString();
+                    int ratio = data.readInt();
+                    partitionMixed(diskId, ratio);
+                    reply.writeNoException();
+                    return true;
+                }
             }
             return super.onTransact(code, data, reply, flags);
         }
@@ -1762,4 +1903,12 @@ public interface IMountService extends IInterface {
 
     public DiskInfo[] getDisks() throws RemoteException;
     public VolumeInfo[] getVolumes() throws RemoteException;
+
+    public void mount(String volId) throws RemoteException;
+    public void unmount(String volId) throws RemoteException;
+    public void format(String volId) throws RemoteException;
+
+    public void partitionPublic(String diskId) throws RemoteException;
+    public void partitionPrivate(String diskId) throws RemoteException;
+    public void partitionMixed(String diskId, int ratio) throws RemoteException;
 }

@@ -16,6 +16,8 @@
 
 package android.os.storage;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.content.Context;
 import android.content.Intent;
 import android.mtp.MtpStorage;
@@ -31,6 +33,7 @@ import android.util.SparseArray;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.Preconditions;
 
+import java.io.CharArrayWriter;
 import java.io.File;
 
 /**
@@ -58,8 +61,8 @@ public class VolumeInfo implements Parcelable {
     public static final int FLAG_PRIMARY = 1 << 0;
     public static final int FLAG_VISIBLE = 1 << 1;
 
-    public static SparseArray<String> sStateToEnvironment = new SparseArray<>();
-    public static ArrayMap<String, String> sEnvironmentToBroadcast = new ArrayMap<>();
+    private static SparseArray<String> sStateToEnvironment = new SparseArray<>();
+    private static ArrayMap<String, String> sEnvironmentToBroadcast = new ArrayMap<>();
 
     static {
         sStateToEnvironment.put(VolumeInfo.STATE_UNMOUNTED, Environment.MEDIA_UNMOUNTED);
@@ -111,6 +114,23 @@ public class VolumeInfo implements Parcelable {
         nickname = parcel.readString();
     }
 
+    public static @NonNull String getEnvironmentForState(int state) {
+        final String envState = sStateToEnvironment.get(state);
+        if (envState != null) {
+            return envState;
+        } else {
+            return Environment.MEDIA_UNKNOWN;
+        }
+    }
+
+    public static @Nullable String getBroadcastForEnvironment(String envState) {
+        return sEnvironmentToBroadcast.get(envState);
+    }
+
+    public static @Nullable String getBroadcastForState(int state) {
+        return getBroadcastForEnvironment(getEnvironmentForState(state));
+    }
+
     public String getDescription(Context context) {
         if (ID_EMULATED_INTERNAL.equals(id)) {
             return context.getString(com.android.internal.R.string.storage_internal);
@@ -142,7 +162,9 @@ public class VolumeInfo implements Parcelable {
     }
 
     public File getPathForUser(int userId) {
-        if (type == TYPE_PUBLIC && userId == this.userId) {
+        if (path == null) {
+            return null;
+        } else if (type == TYPE_PUBLIC && userId == this.userId) {
             return new File(path);
         } else if (type == TYPE_EMULATED) {
             return new File(path, Integer.toString(userId));
@@ -156,6 +178,7 @@ public class VolumeInfo implements Parcelable {
         final boolean emulated;
         final boolean allowMassStorage = false;
         final int mtpStorageId = MtpStorage.getStorageIdForIndex(mtpIndex);
+        final String envState = getEnvironmentForState(state);
 
         File userPath = getPathForUser(userId);
         if (userPath == null) {
@@ -165,11 +188,6 @@ public class VolumeInfo implements Parcelable {
         String description = getDescription(context);
         if (description == null) {
             description = context.getString(android.R.string.unknownName);
-        }
-
-        String envState = sStateToEnvironment.get(state);
-        if (envState == null) {
-            envState = Environment.MEDIA_UNKNOWN;
         }
 
         long mtpReserveSize = 0;
@@ -202,6 +220,13 @@ public class VolumeInfo implements Parcelable {
                 fsUuid, envState);
     }
 
+    @Override
+    public String toString() {
+        final CharArrayWriter writer = new CharArrayWriter();
+        dump(new IndentingPrintWriter(writer, "    ", 80));
+        return writer.toString();
+    }
+
     public void dump(IndentingPrintWriter pw) {
         pw.println("VolumeInfo:");
         pw.increaseIndent();
@@ -219,6 +244,18 @@ public class VolumeInfo implements Parcelable {
         pw.printPair("mtpIndex", mtpIndex);
         pw.decreaseIndent();
         pw.println();
+    }
+
+    @Override
+    public VolumeInfo clone() {
+        final Parcel temp = Parcel.obtain();
+        try {
+            writeToParcel(temp, 0);
+            temp.setDataPosition(0);
+            return CREATOR.createFromParcel(temp);
+        } finally {
+            temp.recycle();
+        }
     }
 
     public static final Creator<VolumeInfo> CREATOR = new Creator<VolumeInfo>() {
