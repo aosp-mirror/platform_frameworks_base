@@ -341,6 +341,12 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
         }
     }
 
+    /** Dismisses Recents directly to Home without transition animation. */
+    void dismissRecentsToHomeWithoutTransitionAnimation() {
+        finish();
+        overridePendingTransition(0, 0);
+    }
+
     /** Dismisses Recents directly to Home if we currently aren't transitioning. */
     boolean dismissRecentsToHome(boolean animated) {
         SystemServicesProxy ssp = RecentsTaskLoader.getInstance().getSystemServicesProxy();
