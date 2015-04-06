@@ -257,8 +257,7 @@ public class PackageManagerService extends IPackageManager.Stub {
     private static final boolean DEBUG_DEXOPT = false;
     private static final boolean DEBUG_ABI_SELECTION = false;
 
-    static final boolean RUNTIME_PERMISSIONS_ENABLED =
-            SystemProperties.getInt("ro.runtime.permissions.enabled", 0) == 1;
+    static final boolean RUNTIME_PERMISSIONS_ENABLED = true;
 
     private static final int RADIO_UID = Process.PHONE_UID;
     private static final int LOG_UID = Process.LOG_UID;
