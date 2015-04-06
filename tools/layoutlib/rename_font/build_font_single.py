@@ -193,15 +193,18 @@ def ends_in_regular(string):
 
 
 def get_version(string):
-  # The string must begin with 'Version n.nn '
-  # to extract n.nn, we return the second entry in the split strings.
   string = string.strip()
-  if not string.startswith('Version '):
-    raise InvalidFontException('mal-formed font version')
-  return sanitize(string.split()[1])
+  # The spec says that the version string should start with "Version ". But not
+  # all fonts do. So, we return the complete string if it doesn't start with
+  # the prefix, else we return the rest of the string after sanitizing it.
+  prefix = 'Version '
+  if string.startswith(prefix):
+    string = string[len(prefix):]
+  return sanitize(string)
 
 
 def sanitize(string):
+  """ Remove non-standard chars. """
   return re.sub(r'[^\w-]+', '', string)
 
 if __name__ == '__main__':
