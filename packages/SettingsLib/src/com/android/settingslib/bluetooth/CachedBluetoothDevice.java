@@ -527,7 +527,11 @@ public final class CachedBluetoothDevice implements Comparable<CachedBluetoothDe
     void onUuidChanged() {
         updateProfiles();
         ParcelUuid[] uuids = mDevice.getUuids();
+
         long timeout = MAX_UUID_DELAY_FOR_AUTO_CONNECT;
+        if (BluetoothUuid.isUuidPresent(uuids, BluetoothUuid.Hogp)) {
+            timeout = MAX_HOGP_DELAY_FOR_AUTO_CONNECT;
+        }
 
         if (DEBUG) {
             Log.d(TAG, "onUuidChanged: Time since last connect"
@@ -535,14 +539,12 @@ public final class CachedBluetoothDevice implements Comparable<CachedBluetoothDe
         }
 
         /*
-         * If a connect was attempted earlier without any UUID, we will do the
-         * connect now.
+         * If a connect was attempted earlier without any UUID, we will do the connect now.
+         * Otherwise, allow the connect on UUID change.
          */
-        if (BluetoothUuid.isUuidPresent(uuids, BluetoothUuid.Hogp)) {
-            timeout = MAX_HOGP_DELAY_FOR_AUTO_CONNECT;
-        }
         if (!mProfiles.isEmpty()
-                && (mConnectAttempted + timeout) > SystemClock.elapsedRealtime()) {
+                && ((mConnectAttempted + timeout) > SystemClock.elapsedRealtime()
+                || (mConnectAttempted == 0))) {
             connectWithoutResettingTimer(false);
         }
         dispatchAttributesChanged();
