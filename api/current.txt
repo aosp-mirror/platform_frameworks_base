@@ -27623,7 +27623,7 @@ package android.renderscript {
     method public android.renderscript.ScriptGroup2.Closure addInvoke(android.renderscript.Script.InvokeID, java.lang.Object...);
     method public android.renderscript.ScriptGroup2.Closure addKernel(android.renderscript.Script.KernelID, android.renderscript.Type, java.lang.Object[], java.util.Map<android.renderscript.Script.FieldID, java.lang.Object>);
     method public android.renderscript.ScriptGroup2.Closure addKernel(android.renderscript.Script.KernelID, android.renderscript.Type, java.lang.Object...);
-    method public android.renderscript.ScriptGroup2 create(android.renderscript.ScriptGroup2.Future...);
+    method public android.renderscript.ScriptGroup2 create(java.lang.String, android.renderscript.ScriptGroup2.Future...);
   }
 
   public static class ScriptGroup2.Closure extends android.renderscript.BaseObj {
