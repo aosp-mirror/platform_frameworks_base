@@ -966,7 +966,7 @@ public class VectorDrawable extends Drawable {
 
             if (vPath.isClipPath()) {
                 mRenderPath.addPath(path, mFinalPathMatrix);
-                canvas.clipPath(mRenderPath, Region.Op.REPLACE);
+                canvas.clipPath(mRenderPath);
             } else {
                 VFullPath fullPath = (VFullPath) vPath;
                 if (fullPath.mTrimPathStart != 0.0f || fullPath.mTrimPathEnd != 1.0f) {

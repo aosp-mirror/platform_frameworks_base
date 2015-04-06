@@ -203,8 +203,9 @@ void Snapshot::dump() const {
     ALOGD("Snapshot %p, flags %x, prev %p, height %d, ignored %d, hasComplexClip %d",
             this, flags, previous.get(), getViewportHeight(), isIgnored(), !mClipArea->isSimple());
     const Rect& clipRect(mClipArea->getClipRect());
-    ALOGD("  ClipRect %.1f %.1f %.1f %.1f",
-            clipRect.left, clipRect.top, clipRect.right, clipRect.bottom);
+    ALOGD("  ClipRect %.1f %.1f %.1f %.1f, clip simple %d",
+            clipRect.left, clipRect.top, clipRect.right, clipRect.bottom, mClipArea->isSimple());
+
     ALOGD("  Transform (at %p):", transform);
     transform->dump();
 }
