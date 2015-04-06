@@ -1617,6 +1617,14 @@
         android:protectionLevel="signature" />
     <uses-permission android:name="android.permission.BIND_JOB_SERVICE"/>
 
+    <!-- Allows an application to initiate configuration updates
+         <p>An application requesting this permission is responsible for
+         verifying the source and integrity of any update before passing
+         it off to the various individual installer components
+         @hide -->
+    <permission android:name="android.permission.UPDATE_CONFIG"
+        android:protectionLevel="signature|system" />
+
     <!-- ========================================= -->
     <!-- Permissions for special development tools -->
     <!-- ========================================= -->
@@ -2537,42 +2545,48 @@
             </intent-filter>
         </receiver>
 
-        <receiver android:name="com.android.server.updates.CertPinInstallReceiver" >
+        <receiver android:name="com.android.server.updates.CertPinInstallReceiver"
+                android:permission="android.permission.UPDATE_CONFIG">
             <intent-filter>
                 <action android:name="android.intent.action.UPDATE_PINS" />
                 <data android:scheme="content" android:host="*" android:mimeType="*/*" />
             </intent-filter>
         </receiver>
 
-        <receiver android:name="com.android.server.updates.IntentFirewallInstallReceiver" >
+        <receiver android:name="com.android.server.updates.IntentFirewallInstallReceiver"
+                android:permission="android.permission.UPDATE_CONFIG">
             <intent-filter>
                 <action android:name="android.intent.action.UPDATE_INTENT_FIREWALL" />
                 <data android:scheme="content" android:host="*" android:mimeType="*/*" />
             </intent-filter>
         </receiver>
 
-        <receiver android:name="com.android.server.updates.SmsShortCodesInstallReceiver" >
+        <receiver android:name="com.android.server.updates.SmsShortCodesInstallReceiver"
+                android:permission="android.permission.UPDATE_CONFIG">
             <intent-filter>
                 <action android:name="android.intent.action.UPDATE_SMS_SHORT_CODES" />
                 <data android:scheme="content" android:host="*" android:mimeType="*/*" />
             </intent-filter>
         </receiver>
 
-        <receiver android:name="com.android.server.updates.CarrierProvisioningUrlsInstallReceiver" >
+        <receiver android:name="com.android.server.updates.CarrierProvisioningUrlsInstallReceiver"
+                android:permission="android.permission.UPDATE_CONFIG">
             <intent-filter>
                 <action android:name="android.intent.action.UPDATE_CARRIER_PROVISIONING_URLS" />
                 <data android:scheme="content" android:host="*" android:mimeType="*/*" />
             </intent-filter>
         </receiver>
 
-        <receiver android:name="com.android.server.updates.TzDataInstallReceiver" >
+        <receiver android:name="com.android.server.updates.TzDataInstallReceiver"
+                android:permission="android.permission.UPDATE_CONFIG">
             <intent-filter>
                 <action android:name="android.intent.action.UPDATE_TZDATA" />
                 <data android:scheme="content" android:host="*" android:mimeType="*/*" />
             </intent-filter>
         </receiver>
 
-        <receiver android:name="com.android.server.updates.SELinuxPolicyInstallReceiver" >
+        <receiver android:name="com.android.server.updates.SELinuxPolicyInstallReceiver"
+                android:permission="android.permission.UPDATE_CONFIG">
             <intent-filter>
                 <action android:name="android.intent.action.UPDATE_SEPOLICY" />
                 <data android:scheme="content" android:host="*" android:mimeType="*/*" />
