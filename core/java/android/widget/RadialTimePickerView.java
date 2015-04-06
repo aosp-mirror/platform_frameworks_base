@@ -79,8 +79,10 @@ public class RadialTimePickerView extends View {
     // Transparent alpha level
     private static final int ALPHA_TRANSPARENT = 0;
 
-    private static final int DEGREES_FOR_ONE_HOUR = 30;
-    private static final int DEGREES_FOR_ONE_MINUTE = 6;
+    private static final int HOURS_IN_DAY = 24;
+    private static final int MINUTES_IN_HOUR = 60;
+    private static final int DEGREES_FOR_ONE_HOUR = 360 / HOURS_IN_DAY;
+    private static final int DEGREES_FOR_ONE_MINUTE = 360 / MINUTES_IN_HOUR;
 
     private static final int[] HOURS_NUMBERS = {12, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11};
     private static final int[] HOURS_NUMBERS_24 = {0, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23};
@@ -140,8 +142,7 @@ public class RadialTimePickerView extends View {
     private final float[] mInnerTextX = new float[12];
     private final float[] mInnerTextY = new float[12];
 
-    private final int[] mLineLength = new int[3];
-    private final int[] mSelectionDegrees = new int[3];
+    private final int[] mSelectionDegrees = new int[2];
 
     private final ArrayList<Animator> mHoursToMinutesAnims = new ArrayList<>();
     private final ArrayList<Animator> mMinuteToHoursAnims = new ArrayList<>();
@@ -168,13 +169,13 @@ public class RadialTimePickerView extends View {
     private int mYCenter;
     private int mCircleRadius;
 
-    private int mMinHypotenuseForInnerNumber;
-    private int mMaxHypotenuseForOuterNumber;
-    private int mHalfwayHypotenusePoint;
+    private int mMinDistForInnerNumber;
+    private int mMaxDistForOuterNumber;
+    private int mHalfwayDist;
 
     private String[] mOuterTextHours;
     private String[] mInnerTextHours;
-    private String[] mOuterTextMinutes;
+    private String[] mMinutesText;
     private AnimatorSet mTransition;
 
     private int mAmOrPm;
@@ -462,11 +463,10 @@ public class RadialTimePickerView extends View {
     private void setCurrentHourInternal(int hour, boolean callback, boolean autoAdvance) {
         final int degrees = (hour % 12) * DEGREES_FOR_ONE_HOUR;
         mSelectionDegrees[HOURS] = degrees;
-        mSelectionDegrees[HOURS_INNER] = degrees;
 
         // 0 is 12 AM (midnight) and 12 is 12 PM (noon).
         final int amOrPm = (hour == 0 || (hour % 24) < 12) ? AM : PM;
-        final boolean isOnInnerCircle = mIs24HourMode && hour >= 1 && hour <= 12;
+        final boolean isOnInnerCircle = getInnerCircleForHour(hour);
         if (mAmOrPm != amOrPm || mIsOnInnerCircle != isOnInnerCircle) {
             mAmOrPm = amOrPm;
             mIsOnInnerCircle = isOnInnerCircle;
@@ -488,8 +488,7 @@ public class RadialTimePickerView extends View {
      * @return the current hour between 0 and 23 (inclusive)
      */
     public int getCurrentHour() {
-        return getHourForDegrees(
-                mSelectionDegrees[mIsOnInnerCircle ? HOURS_INNER : HOURS], mIsOnInnerCircle);
+        return getHourForDegrees(mSelectionDegrees[HOURS], mIsOnInnerCircle);
     }
 
     private int getHourForDegrees(int degrees, boolean innerCircle) {
@@ -497,11 +496,11 @@ public class RadialTimePickerView extends View {
         if (mIs24HourMode) {
             // Convert the 12-hour value into 24-hour time based on where the
             // selector is positioned.
-            if (innerCircle && hour == 0) {
-                // Inner circle is 1 through 12.
+            if (!innerCircle && hour == 0) {
+                // Outer circle is 1 through 12.
                 hour = 12;
-            } else if (!innerCircle && hour != 0) {
-                // Outer circle is 13 through 23 and 0.
+            } else if (innerCircle && hour != 0) {
+                // Inner circle is 13 through 23 and 0.
                 hour += 12;
             }
         } else if (mAmOrPm == PM) {
@@ -510,6 +509,9 @@ public class RadialTimePickerView extends View {
         return hour;
     }
 
+    /**
+     * @param hour the hour in 24-hour time or 12-hour time
+     */
     private int getDegreesForHour(int hour) {
         // Convert to be 0-11.
         if (mIs24HourMode) {
@@ -522,12 +524,19 @@ public class RadialTimePickerView extends View {
         return hour * DEGREES_FOR_ONE_HOUR;
     }
 
+    /**
+     * @param hour the hour in 24-hour time or 12-hour time
+     */
+    private boolean getInnerCircleForHour(int hour) {
+        return mIs24HourMode && (hour == 0 || hour > 12);
+    }
+
     public void setCurrentMinute(int minute) {
         setCurrentMinuteInternal(minute, true);
     }
 
     private void setCurrentMinuteInternal(int minute, boolean callback) {
-        mSelectionDegrees[MINUTES] = (minute % 60) * DEGREES_FOR_ONE_MINUTE;
+        mSelectionDegrees[MINUTES] = (minute % MINUTES_IN_HOUR) * DEGREES_FOR_ONE_MINUTE;
 
         invalidate();
 
@@ -572,6 +581,7 @@ public class RadialTimePickerView extends View {
 
         initData();
         invalidate();
+        mTouchHelper.invalidateRoot();
     }
 
     public void showMinutes(boolean animate) {
@@ -587,6 +597,7 @@ public class RadialTimePickerView extends View {
 
         initData();
         invalidate();
+        mTouchHelper.invalidateRoot();
     }
 
     private void initHoursAndMinutesText() {
@@ -608,7 +619,7 @@ public class RadialTimePickerView extends View {
             mInnerTextHours = mHours12Texts;
         }
 
-        mOuterTextMinutes = mMinutesTexts;
+        mMinutesText = mMinutesTexts;
 
         final int hoursAlpha = mShowHours ? ALPHA_OPAQUE : ALPHA_TRANSPARENT;
         mAlpha[HOURS].setValue(hoursAlpha);
@@ -627,9 +638,9 @@ public class RadialTimePickerView extends View {
         mYCenter = getHeight() / 2;
         mCircleRadius = Math.min(mXCenter, mYCenter);
 
-        mMinHypotenuseForInnerNumber = mCircleRadius - mTextInset[HOURS_INNER] - mSelectorRadius;
-        mMaxHypotenuseForOuterNumber = mCircleRadius - mTextInset[HOURS] + mSelectorRadius;
-        mHalfwayHypotenusePoint = mCircleRadius - (mTextInset[HOURS] + mTextInset[HOURS_INNER]) / 2;
+        mMinDistForInnerNumber = mCircleRadius - mTextInset[HOURS_INNER] - mSelectorRadius;
+        mMaxDistForOuterNumber = mCircleRadius - mTextInset[HOURS] + mSelectorRadius;
+        mHalfwayDist = mCircleRadius - (mTextInset[HOURS] + mTextInset[HOURS_INNER]) / 2;
 
         calculatePositionsHours();
         calculatePositionsMinutes();
@@ -674,6 +685,7 @@ public class RadialTimePickerView extends View {
     private void drawMinutes(Canvas canvas, float alphaMod) {
         final int minutesAlpha = (int) (mAlpha[MINUTES].getValue() * alphaMod + 0.5f);
         if (minutesAlpha > 0) {
+            // Draw the minute selector under the elements.
             drawSelector(canvas, MINUTES, mSelectorPath, alphaMod);
 
             // Exclude the selector region, then draw minutes with no
@@ -681,7 +693,7 @@ public class RadialTimePickerView extends View {
             canvas.save(Canvas.CLIP_SAVE_FLAG);
             canvas.clipPath(mSelectorPath, Region.Op.DIFFERENCE);
             drawTextElements(canvas, mTextSize[MINUTES], mTypeface, mTextColor[MINUTES],
-                    mOuterTextMinutes, mOuterTextX[MINUTES], mOuterTextY[MINUTES], mPaint[MINUTES],
+                    mMinutesText, mOuterTextX[MINUTES], mOuterTextY[MINUTES], mPaint[MINUTES],
                     minutesAlpha, false, 0, false);
             canvas.restore();
 
@@ -690,7 +702,7 @@ public class RadialTimePickerView extends View {
             canvas.save(Canvas.CLIP_SAVE_FLAG);
             canvas.clipPath(mSelectorPath, Region.Op.INTERSECT);
             drawTextElements(canvas, mTextSize[MINUTES], mTypeface, mTextColor[MINUTES],
-                    mOuterTextMinutes, mOuterTextX[MINUTES], mOuterTextY[MINUTES], mPaint[MINUTES],
+                    mMinutesText, mOuterTextX[MINUTES], mOuterTextY[MINUTES], mPaint[MINUTES],
                     minutesAlpha, true, mSelectionDegrees[MINUTES], true);
             canvas.restore();
         }
@@ -718,7 +730,7 @@ public class RadialTimePickerView extends View {
         // Calculate the current radius at which to place the selection circle.
         final int selRadius = mSelectorRadius;
         final int selLength = mCircleRadius - mTextInset[index];
-        final double selAngleRad = Math.toRadians(mSelectionDegrees[index]);
+        final double selAngleRad = Math.toRadians(mSelectionDegrees[index % 2]);
         final float selCenterX = mXCenter + selLength * (float) Math.sin(selAngleRad);
         final float selCenterY = mYCenter - selLength * (float) Math.cos(selAngleRad);
 
@@ -734,10 +746,10 @@ public class RadialTimePickerView extends View {
         }
 
         // Draw the dot if we're between two items.
-        final boolean shouldDrawDot = mSelectionDegrees[index] % 30 != 0;
+        final boolean shouldDrawDot = mSelectionDegrees[index % 2] % 30 != 0;
         if (shouldDrawDot) {
             final Paint dotPaint = mPaintSelector[index % 2][SELECTOR_DOT];
-            dotPaint.setColor(color);
+            dotPaint.setColor(mSelectorDotColor);
             canvas.drawCircle(selCenterX, selCenterY, mSelectorDotRadius, dotPaint);
         }
 
@@ -898,56 +910,43 @@ public class RadialTimePickerView extends View {
     }
 
     private int getDegreesFromXY(float x, float y, boolean constrainOutside) {
-        final double hypotenuse = Math.sqrt(
-                (y - mYCenter) * (y - mYCenter) + (x - mXCenter) * (x - mXCenter));
+        // Ensure the point is inside the touchable area.
+        final int innerBound;
+        final int outerBound;
+        if (mIs24HourMode && mShowHours) {
+            innerBound = mMinDistForInnerNumber;
+            outerBound = mMaxDistForOuterNumber;
+        } else {
+            final int index = mShowHours ? HOURS : MINUTES;
+            final int center = mCircleRadius - mTextInset[index];
+            innerBound = center - mSelectorRadius;
+            outerBound = center + mSelectorRadius;
+        }
 
-        // Basic check if we're outside the range of the disk
-        if (constrainOutside && hypotenuse > mCircleRadius) {
+        final double dX = x - mXCenter;
+        final double dY = y - mYCenter;
+        final double distFromCenter = Math.sqrt(dX * dX + dY * dY);
+        if (distFromCenter < innerBound || constrainOutside && distFromCenter > outerBound) {
             return -1;
         }
 
-        // Check
+        // Convert to degrees.
+        final int degrees = (int) (Math.toDegrees(Math.atan2(dY, dX) + Math.PI / 2) + 0.5);
+        if (degrees < 0) {
+            return degrees + 360;
+        } else {
+            return degrees;
+        }
+    }
+
+    private boolean getInnerCircleFromXY(float x, float y) {
         if (mIs24HourMode && mShowHours) {
-            if (hypotenuse >= mMinHypotenuseForInnerNumber
-                    && hypotenuse <= mHalfwayHypotenusePoint) {
-                mIsOnInnerCircle = true;
-            } else if ((hypotenuse <= mMaxHypotenuseForOuterNumber || !constrainOutside)
-                    && hypotenuse >= mHalfwayHypotenusePoint) {
-                mIsOnInnerCircle = false;
-            } else {
-                return -1;
-            }
-        } else {
-            final int index =  (mShowHours) ? HOURS : MINUTES;
-            final float length = (mCircleRadius - mTextInset[index]);
-            final int distanceToNumber = (int) (hypotenuse - length);
-            final int maxAllowedDistance = mTextInset[index];
-            if (distanceToNumber < -maxAllowedDistance
-                    || (constrainOutside && distanceToNumber > maxAllowedDistance)) {
-                return -1;
-            }
+            final double dX = x - mXCenter;
+            final double dY = y - mYCenter;
+            final double distFromCenter = Math.sqrt(dX * dX + dY * dY);
+            return distFromCenter <= mHalfwayDist;
         }
-
-        final float opposite = Math.abs(y - mYCenter);
-        int degrees = (int) (Math.toDegrees(Math.asin(opposite / hypotenuse)) + 0.5);
-
-        // Now we have to translate to the correct quadrant.
-        final boolean rightSide = (x > mXCenter);
-        final boolean topSide = (y < mYCenter);
-        if (rightSide) {
-            if (topSide) {
-                degrees = 90 - degrees;
-            } else {
-                degrees = 90 + degrees;
-            }
-        } else {
-            if (topSide) {
-                degrees = 270 + degrees;
-            } else {
-                degrees = 270 - degrees;
-            }
-        }
-        return degrees;
+        return false;
     }
 
     boolean mChangedDuringTouch = false;
@@ -987,34 +986,28 @@ public class RadialTimePickerView extends View {
 
     private boolean handleTouchInput(
             float x, float y, boolean forceSelection, boolean autoAdvance) {
-        // Calling getDegreesFromXY has side effects, so cache
-        // whether we used to be on the inner circle.
-        final boolean wasOnInnerCircle = mIsOnInnerCircle;
+        final boolean isOnInnerCircle = getInnerCircleFromXY(x, y);
         final int degrees = getDegreesFromXY(x, y, false);
         if (degrees == -1) {
             return false;
         }
 
-        final int[] selectionDegrees = mSelectionDegrees;
         final int type;
         final int newValue;
         final boolean valueChanged;
 
         if (mShowHours) {
             final int snapDegrees = snapOnly30s(degrees, 0) % 360;
-            valueChanged = selectionDegrees[HOURS] != snapDegrees
-                    || selectionDegrees[HOURS_INNER] != snapDegrees
-                    || wasOnInnerCircle != mIsOnInnerCircle;
-
-            selectionDegrees[HOURS] = snapDegrees;
-            selectionDegrees[HOURS_INNER] = snapDegrees;
+            valueChanged = mIsOnInnerCircle != isOnInnerCircle
+                    || mSelectionDegrees[HOURS] != snapDegrees;
+            mIsOnInnerCircle = isOnInnerCircle;
+            mSelectionDegrees[HOURS] = snapDegrees;
             type = HOURS;
             newValue = getCurrentHour();
         } else {
             final int snapDegrees = snapPrefer30s(degrees) % 360;
-            valueChanged = selectionDegrees[MINUTES] != snapDegrees;
-
-            selectionDegrees[MINUTES] = snapDegrees;
+            valueChanged = mSelectionDegrees[MINUTES] != snapDegrees;
+            mSelectionDegrees[MINUTES] = snapDegrees;
             type = MINUTES;
             newValue = getCurrentMinute();
         }
@@ -1132,17 +1125,11 @@ public class RadialTimePickerView extends View {
         @Override
         protected int getVirtualViewAt(float x, float y) {
             final int id;
-
-            // Calling getDegreesXY() has side-effects, so we need to cache the
-            // current inner circle value and restore after the call.
-            final boolean wasOnInnerCircle = mIsOnInnerCircle;
             final int degrees = getDegreesFromXY(x, y, true);
-            final boolean isOnInnerCircle = mIsOnInnerCircle;
-            mIsOnInnerCircle = wasOnInnerCircle;
-
             if (degrees != -1) {
                 final int snapDegrees = snapOnly30s(degrees, 0) % 360;
                 if (mShowHours) {
+                    final boolean isOnInnerCircle = getInnerCircleFromXY(x, y);
                     final int hour24 = getHourForDegrees(snapDegrees, isOnInnerCircle);
                     final int hour = mIs24HourMode ? hour24 : hour24To12(hour24);
                     id = makeId(TYPE_HOUR, hour);
@@ -1153,8 +1140,10 @@ public class RadialTimePickerView extends View {
 
                     // If the touched minute is closer to the current minute
                     // than it is to the snapped minute, return current.
+                    final int currentOffset = getCircularDiff(current, touched, MINUTES_IN_HOUR);
+                    final int snappedOffset = getCircularDiff(snapped, touched, MINUTES_IN_HOUR);
                     final int minute;
-                    if (Math.abs(current - touched) < Math.abs(snapped - touched)) {
+                    if (currentOffset < snappedOffset) {
                         minute = current;
                     } else {
                         minute = snapped;
@@ -1168,6 +1157,20 @@ public class RadialTimePickerView extends View {
             return id;
         }
 
+        /**
+         * Returns the difference in degrees between two values along a circle.
+         *
+         * @param first value in the range [0,max]
+         * @param second value in the range [0,max]
+         * @param max the maximum value along the circle
+         * @return the difference in between the two values
+         */
+        private int getCircularDiff(int first, int second, int max) {
+            final int diff = Math.abs(first - second);
+            final int midpoint = max / 2;
+            return (diff > midpoint) ? (max - diff) : diff;
+        }
+
         @Override
         protected void getVisibleVirtualViews(IntArray virtualViewIds) {
             if (mShowHours) {
@@ -1178,7 +1181,7 @@ public class RadialTimePickerView extends View {
                 }
             } else {
                 final int current = getCurrentMinute();
-                for (int i = 0; i < 60; i += MINUTE_INCREMENT) {
+                for (int i = 0; i < MINUTES_IN_HOUR; i += MINUTE_INCREMENT) {
                     virtualViewIds.add(makeId(TYPE_MINUTE, i));
 
                     // If the current minute falls between two increments,
@@ -1236,7 +1239,7 @@ public class RadialTimePickerView extends View {
                 if (value < current && nextValue > current) {
                     // The current value is between two snap values.
                     return makeId(type, current);
-                } else if (nextValue < 60) {
+                } else if (nextValue < MINUTES_IN_HOUR) {
                     return makeId(type, nextValue);
                 }
             }
@@ -1290,7 +1293,7 @@ public class RadialTimePickerView extends View {
             final float centerRadius;
             final float degrees;
             if (type == TYPE_HOUR) {
-                final boolean innerCircle = mIs24HourMode && value > 0 && value <= 12;
+                final boolean innerCircle = getInnerCircleForHour(value);
                 if (innerCircle) {
                     centerRadius = mCircleRadius - mTextInset[HOURS_INNER];
                     radius = mSelectorRadius;
