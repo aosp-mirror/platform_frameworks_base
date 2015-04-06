@@ -485,11 +485,16 @@ public class MockPackageManager extends PackageManager {
         throw new UnsupportedOperationException();
     }
 
-    /**
-     * @hide - to match hiding in superclass
-     */
+    /** {@hide} */
     @Override
     public void movePackage(String packageName, IPackageMoveObserver observer, int flags) {
+        throw new UnsupportedOperationException();
+    }
+
+    /** {@hide} */
+    @Override
+    public void movePackageAndData(String packageName, String volumeUuid,
+            IPackageMoveObserver observer) {
         throw new UnsupportedOperationException();
     }
 

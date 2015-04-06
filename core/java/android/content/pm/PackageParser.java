@@ -604,7 +604,7 @@ public class PackageParser {
     public final static int PARSE_MUST_BE_APK = 1<<2;
     public final static int PARSE_IGNORE_PROCESSES = 1<<3;
     public final static int PARSE_FORWARD_LOCK = 1<<4;
-    public final static int PARSE_ON_SDCARD = 1<<5;
+    public final static int PARSE_EXTERNAL_STORAGE = 1<<5;
     public final static int PARSE_IS_SYSTEM_DIR = 1<<6;
     public final static int PARSE_IS_PRIVILEGED = 1<<7;
     public final static int PARSE_COLLECT_CERTIFICATES = 1<<8;
@@ -1408,7 +1408,7 @@ public class PackageParser {
         }
 
         /* Set the global "on SD card" flag */
-        if ((flags & PARSE_ON_SDCARD) != 0) {
+        if ((flags & PARSE_EXTERNAL_STORAGE) != 0) {
             pkg.applicationInfo.flags |= ApplicationInfo.FLAG_EXTERNAL_STORAGE;
         }
 

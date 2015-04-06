@@ -23,6 +23,7 @@ import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_ENABLED;
 import android.content.pm.IntentFilterVerificationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageUserState;
+import android.os.storage.VolumeInfo;
 import android.util.ArraySet;
 import android.util.SparseArray;
 
@@ -108,8 +109,10 @@ abstract class PackageSettingBase extends SettingBase {
 
     PackageSettingBase origPackage;
 
-    /* package name of the app that installed this package */
+    /** Package name of the app that installed this package */
     String installerPackageName;
+    /** UUID of {@link VolumeInfo} hosting this app */
+    String volumeUuid;
 
     IntentFilterVerificationInfo verificationInfo;
 
@@ -161,6 +164,7 @@ abstract class PackageSettingBase extends SettingBase {
         origPackage = base.origPackage;
 
         installerPackageName = base.installerPackageName;
+        volumeUuid = base.volumeUuid;
 
         keySetData = new PackageKeySetData(base.keySetData);
     }
@@ -183,8 +187,16 @@ abstract class PackageSettingBase extends SettingBase {
         installerPackageName = packageName;
     }
 
-    String getInstallerPackageName() {
+    public String getInstallerPackageName() {
         return installerPackageName;
+    }
+
+    public void setVolumeUuid(String volumeUuid) {
+        this.volumeUuid = volumeUuid;
+    }
+
+    public String getVolumeUuid() {
+        return volumeUuid;
     }
 
     public void setInstallStatus(int newStatus) {

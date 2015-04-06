@@ -25,7 +25,7 @@ import static android.system.OsConstants.O_CREAT;
 import static android.system.OsConstants.O_RDONLY;
 import static android.system.OsConstants.O_WRONLY;
 import static com.android.server.pm.PackageInstallerService.prepareExternalStageCid;
-import static com.android.server.pm.PackageInstallerService.prepareInternalStageDir;
+import static com.android.server.pm.PackageInstallerService.prepareStageDir;
 
 import android.content.Context;
 import android.content.Intent;
@@ -61,6 +61,9 @@ import android.util.ExceptionUtils;
 import android.util.MathUtils;
 import android.util.Slog;
 
+import libcore.io.IoUtils;
+import libcore.io.Libcore;
+
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.content.NativeLibraryHelper;
 import com.android.internal.content.PackageHelper;
@@ -68,9 +71,6 @@ import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.Preconditions;
 import com.android.server.pm.PackageInstallerService.PackageInstallObserverAdapter;
-
-import libcore.io.IoUtils;
-import libcore.io.Libcore;
 
 import java.io.File;
 import java.io.FileDescriptor;
@@ -892,7 +892,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         synchronized (mLock) {
             if (!mPrepared) {
                 if (stageDir != null) {
-                    prepareInternalStageDir(stageDir);
+                    prepareStageDir(stageDir);
                 } else if (stageCid != null) {
                     prepareExternalStageCid(stageCid, params.sizeBytes);
 

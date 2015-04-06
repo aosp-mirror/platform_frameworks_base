@@ -62,18 +62,18 @@ import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Process;
 import android.os.RemoteException;
+import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.util.ArrayMap;
 import android.util.Log;
 import android.view.Display;
-import android.os.SystemProperties;
+
+import dalvik.system.VMRuntime;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.Preconditions;
 import com.android.internal.util.UserIcons;
-
-import dalvik.system.VMRuntime;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
@@ -1363,7 +1363,17 @@ final class ApplicationPackageManager extends PackageManager {
         try {
             mPM.movePackage(packageName, observer, flags);
         } catch (RemoteException e) {
-            // Should never happen!
+            throw e.rethrowAsRuntimeException();
+        }
+    }
+
+    @Override
+    public void movePackageAndData(String packageName, String volumeUuid,
+            IPackageMoveObserver observer) {
+        try {
+            mPM.movePackageAndData(packageName, volumeUuid, observer);
+        } catch (RemoteException e) {
+            throw e.rethrowAsRuntimeException();
         }
     }
 

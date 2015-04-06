@@ -43,11 +43,17 @@ import static android.content.pm.PackageManager.INSTALL_FAILED_UPDATE_INCOMPATIB
 import static android.content.pm.PackageManager.INSTALL_FAILED_USER_RESTRICTED;
 import static android.content.pm.PackageManager.INSTALL_FAILED_VERSION_DOWNGRADE;
 import static android.content.pm.PackageManager.INSTALL_FORWARD_LOCK;
+import static android.content.pm.PackageManager.INSTALL_INTERNAL;
 import static android.content.pm.PackageManager.INSTALL_PARSE_FAILED_INCONSISTENT_CERTIFICATES;
+import static android.content.pm.PackageManager.INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ALWAYS;
+import static android.content.pm.PackageManager.INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ASK;
 import static android.content.pm.PackageManager.INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_NEVER;
 import static android.content.pm.PackageManager.INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_UNDEFINED;
-import static android.content.pm.PackageManager.INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ASK;
-import static android.content.pm.PackageManager.INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ALWAYS;
+import static android.content.pm.PackageManager.MOVE_EXTERNAL_MEDIA;
+import static android.content.pm.PackageManager.MOVE_FAILED_DOESNT_EXIST;
+import static android.content.pm.PackageManager.MOVE_FAILED_OPERATION_PENDING;
+import static android.content.pm.PackageManager.MOVE_FAILED_SYSTEM_PACKAGE;
+import static android.content.pm.PackageManager.MOVE_INTERNAL;
 import static android.content.pm.PackageParser.isApkFile;
 import static android.os.Process.PACKAGE_INFO_GID;
 import static android.os.Process.SYSTEM_UID;
@@ -65,31 +71,7 @@ import static com.android.server.pm.InstructionSets.getPreferredInstructionSet;
 import static com.android.server.pm.InstructionSets.getPrimaryInstructionSet;
 
 import android.Manifest;
-import android.content.pm.IntentFilterVerificationInfo;
-import android.util.ArrayMap;
-
-import com.android.internal.R;
-import com.android.internal.app.IMediaContainerService;
-import com.android.internal.app.ResolverActivity;
-import com.android.internal.content.NativeLibraryHelper;
-import com.android.internal.content.PackageHelper;
-import com.android.internal.os.IParcelFileDescriptorFactory;
-import com.android.internal.util.ArrayUtils;
-import com.android.internal.util.FastPrintWriter;
-import com.android.internal.util.FastXmlSerializer;
-import com.android.internal.util.IndentingPrintWriter;
-import com.android.server.EventLogTags;
-import com.android.server.IntentResolver;
-import com.android.server.LocalServices;
-import com.android.server.ServiceThread;
-import com.android.server.SystemConfig;
-import com.android.server.Watchdog;
-import com.android.server.pm.Settings.DatabaseVersion;
-import com.android.server.storage.DeviceStorageMonitorInternal;
-
 import org.xmlpull.v1.XmlPullParser;
-import org.xmlpull.v1.XmlSerializer;
-
 import android.app.ActivityManager;
 import android.app.ActivityManagerNative;
 import android.app.AppGlobals;
@@ -119,6 +101,7 @@ import android.content.pm.IPackageManager;
 import android.content.pm.IPackageMoveObserver;
 import android.content.pm.IPackageStatsObserver;
 import android.content.pm.InstrumentationInfo;
+import android.content.pm.IntentFilterVerificationInfo;
 import android.content.pm.KeySet;
 import android.content.pm.ManifestDigest;
 import android.content.pm.PackageCleanItem;
@@ -127,10 +110,10 @@ import android.content.pm.PackageInfoLite;
 import android.content.pm.PackageInstaller;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.LegacyPackageDeleteObserver;
+import android.content.pm.PackageParser;
 import android.content.pm.PackageParser.ActivityIntentInfo;
 import android.content.pm.PackageParser.PackageLite;
 import android.content.pm.PackageParser.PackageParserException;
-import android.content.pm.PackageParser;
 import android.content.pm.PackageStats;
 import android.content.pm.PackageUserState;
 import android.content.pm.ParceledListSlice;
@@ -150,13 +133,9 @@ import android.net.Uri;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Debug;
 import android.os.Environment;
 import android.os.Environment.UserEnvironment;
-import android.os.storage.IMountService;
-import android.os.storage.StorageEventListener;
-import android.os.storage.StorageManager;
-import android.os.storage.VolumeInfo;
-import android.os.Debug;
 import android.os.FileUtils;
 import android.os.Handler;
 import android.os.IBinder;
@@ -172,6 +151,10 @@ import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.os.storage.IMountService;
+import android.os.storage.StorageEventListener;
+import android.os.storage.StorageManager;
+import android.os.storage.VolumeInfo;
 import android.security.KeyStore;
 import android.security.SystemKeyStore;
 import android.system.ErrnoException;
@@ -179,6 +162,7 @@ import android.system.Os;
 import android.system.StructStat;
 import android.text.TextUtils;
 import android.text.format.DateUtils;
+import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.AtomicFile;
 import android.util.DisplayMetrics;
@@ -192,6 +176,33 @@ import android.util.SparseArray;
 import android.util.SparseBooleanArray;
 import android.util.Xml;
 import android.view.Display;
+
+import dalvik.system.DexFile;
+import dalvik.system.VMRuntime;
+
+import libcore.io.IoUtils;
+import libcore.util.EmptyArray;
+
+import com.android.internal.R;
+import com.android.internal.app.IMediaContainerService;
+import com.android.internal.app.ResolverActivity;
+import com.android.internal.content.NativeLibraryHelper;
+import com.android.internal.content.PackageHelper;
+import com.android.internal.os.IParcelFileDescriptorFactory;
+import com.android.internal.util.ArrayUtils;
+import com.android.internal.util.FastPrintWriter;
+import com.android.internal.util.FastXmlSerializer;
+import com.android.internal.util.IndentingPrintWriter;
+import com.android.server.EventLogTags;
+import com.android.server.IntentResolver;
+import com.android.server.LocalServices;
+import com.android.server.ServiceThread;
+import com.android.server.SystemConfig;
+import com.android.server.Watchdog;
+import com.android.server.pm.Settings.DatabaseVersion;
+import com.android.server.storage.DeviceStorageMonitorInternal;
+
+import org.xmlpull.v1.XmlSerializer;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -226,12 +237,6 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
-
-import dalvik.system.DexFile;
-import dalvik.system.VMRuntime;
-
-import libcore.io.IoUtils;
-import libcore.util.EmptyArray;
 
 /**
  * Keep track of all those .apks everywhere.
@@ -1539,9 +1544,14 @@ public class PackageManagerService extends IPackageManager.Stub {
     private StorageEventListener mStorageListener = new StorageEventListener() {
         @Override
         public void onVolumeStateChanged(VolumeInfo vol, int oldState, int newState) {
-            Slog.v(TAG, vol.toString());
+            if (vol.type == VolumeInfo.TYPE_PRIVATE) {
+                if (vol.state == VolumeInfo.STATE_MOUNTED) {
+                    loadPrivatePackages(vol);
+                } else if (vol.state == VolumeInfo.STATE_UNMOUNTING) {
+                    unloadPrivatePackages(vol);
+                }
+            }
 
-            // TODO: when private volume shows up, look for packages there too
             if (vol.isPrimary() && vol.type == VolumeInfo.TYPE_PUBLIC) {
                 if (vol.state == VolumeInfo.STATE_MOUNTED) {
                     updateExternalMediaStatus(true, false);
@@ -2160,7 +2170,7 @@ public class PackageManagerService extends IPackageManager.Stub {
 
             mRequiredVerifierPackage = getRequiredVerifierLPr();
 
-            mInstallerService = new PackageInstallerService(context, this, mAppInstallDir);
+            mInstallerService = new PackageInstallerService(context, this);
 
             mIntentFilterVerifierComponent = getIntentFilterVerifierComponentNameLPr();
             mIntentFilterVerifier = new IntentVerifierProxy(mContext,
@@ -8476,8 +8486,8 @@ public class PackageManagerService extends IPackageManager.Stub {
     public void installPackage(String originPath, IPackageInstallObserver2 observer,
             int installFlags, String installerPackageName, VerificationParams verificationParams,
             String packageAbiOverride) {
-        installPackageAsUser(originPath, observer, installFlags, installerPackageName, verificationParams,
-                packageAbiOverride, UserHandle.getCallingUserId());
+        installPackageAsUser(originPath, observer, installFlags, installerPackageName,
+                verificationParams, packageAbiOverride, UserHandle.getCallingUserId());
     }
 
     @Override
@@ -8524,7 +8534,7 @@ public class PackageManagerService extends IPackageManager.Stub {
 
         final Message msg = mHandler.obtainMessage(INIT_COPY);
         msg.obj = new InstallParams(origin, observer, installFlags,
-                installerPackageName, verificationParams, user, packageAbiOverride);
+                installerPackageName, null, verificationParams, user, packageAbiOverride);
         mHandler.sendMessage(msg);
     }
 
@@ -8543,7 +8553,7 @@ public class PackageManagerService extends IPackageManager.Stub {
 
         final Message msg = mHandler.obtainMessage(INIT_COPY);
         msg.obj = new InstallParams(origin, observer, params.installFlags,
-                installerPackageName, verifParams, user, params.abiOverride);
+                installerPackageName, params.volumeUuid, verifParams, user, params.abiOverride);
         mHandler.sendMessage(msg);
     }
 
@@ -9345,19 +9355,21 @@ public class PackageManagerService extends IPackageManager.Stub {
         final IPackageInstallObserver2 observer;
         int installFlags;
         final String installerPackageName;
+        final String volumeUuid;
         final VerificationParams verificationParams;
         private InstallArgs mArgs;
         private int mRet;
         final String packageAbiOverride;
 
         InstallParams(OriginInfo origin, IPackageInstallObserver2 observer, int installFlags,
-                String installerPackageName, VerificationParams verificationParams, UserHandle user,
-                String packageAbiOverride) {
+                String installerPackageName, String volumeUuid,
+                VerificationParams verificationParams, UserHandle user, String packageAbiOverride) {
             super(user);
             this.origin = origin;
             this.observer = observer;
             this.installFlags = installFlags;
             this.installerPackageName = installerPackageName;
+            this.volumeUuid = volumeUuid;
             this.verificationParams = verificationParams;
             this.packageAbiOverride = packageAbiOverride;
         }
@@ -9711,7 +9723,7 @@ public class PackageManagerService extends IPackageManager.Stub {
      * @param installFlags package installation flags
      * @return true if should be installed on external storage
      */
-    private static boolean installOnSd(int installFlags) {
+    private static boolean installOnExternalAsec(int installFlags) {
         if ((installFlags & PackageManager.INSTALL_INTERNAL) != 0) {
             return false;
         }
@@ -9732,7 +9744,7 @@ public class PackageManagerService extends IPackageManager.Stub {
     }
 
     private InstallArgs createInstallArgs(InstallParams params) {
-        if (installOnSd(params.installFlags) || params.isForwardLocked()) {
+        if (installOnExternalAsec(params.installFlags) || params.isForwardLocked()) {
             return new AsecInstallArgs(params);
         } else {
             return new FileInstallArgs(params);
@@ -9746,7 +9758,7 @@ public class PackageManagerService extends IPackageManager.Stub {
     private InstallArgs createInstallArgsForExisting(int installFlags, String codePath,
             String resourcePath, String nativeLibraryRoot, String[] instructionSets) {
         final boolean isInAsec;
-        if (installOnSd(installFlags)) {
+        if (installOnExternalAsec(installFlags)) {
             /* Apps on SD card are always in ASEC containers. */
             isInAsec = true;
         } else if (installForwardLocked(installFlags)
@@ -9762,7 +9774,7 @@ public class PackageManagerService extends IPackageManager.Stub {
 
         if (isInAsec) {
             return new AsecInstallArgs(codePath, instructionSets,
-                    installOnSd(installFlags), installForwardLocked(installFlags));
+                    installOnExternalAsec(installFlags), installForwardLocked(installFlags));
         } else {
             return new FileInstallArgs(codePath, resourcePath, nativeLibraryRoot,
                     instructionSets);
@@ -9777,6 +9789,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         // Always refers to PackageManager flags only
         final int installFlags;
         final String installerPackageName;
+        final String volumeUuid;
         final ManifestDigest manifestDigest;
         final UserHandle user;
         final String abiOverride;
@@ -9787,12 +9800,13 @@ public class PackageManagerService extends IPackageManager.Stub {
         /* nullable */ String[] instructionSets;
 
         InstallArgs(OriginInfo origin, IPackageInstallObserver2 observer, int installFlags,
-                String installerPackageName, ManifestDigest manifestDigest, UserHandle user,
-                String[] instructionSets, String abiOverride) {
+                String installerPackageName, String volumeUuid, ManifestDigest manifestDigest,
+                UserHandle user, String[] instructionSets, String abiOverride) {
             this.origin = origin;
             this.installFlags = installFlags;
             this.observer = observer;
             this.installerPackageName = installerPackageName;
+            this.volumeUuid = volumeUuid;
             this.manifestDigest = manifestDigest;
             this.user = user;
             this.instructionSets = instructionSets;
@@ -9844,7 +9858,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             return (installFlags & PackageManager.INSTALL_FORWARD_LOCK) != 0;
         }
 
-        protected boolean isExternal() {
+        protected boolean isExternalAsec() {
             return (installFlags & PackageManager.INSTALL_EXTERNAL) != 0;
         }
 
@@ -9891,8 +9905,8 @@ public class PackageManagerService extends IPackageManager.Stub {
         /** New install */
         FileInstallArgs(InstallParams params) {
             super(params.origin, params.observer, params.installFlags,
-                    params.installerPackageName, params.getManifestDigest(), params.getUser(),
-                    null /* instruction sets */, params.packageAbiOverride);
+                    params.installerPackageName, params.volumeUuid, params.getManifestDigest(),
+                    params.getUser(), null /* instruction sets */, params.packageAbiOverride);
             if (isFwdLocked()) {
                 throw new IllegalArgumentException("Forward locking only supported in ASEC");
             }
@@ -9901,7 +9915,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         /** Existing install */
         FileInstallArgs(String codePath, String resourcePath, String legacyNativeLibraryPath,
                 String[] instructionSets) {
-            super(OriginInfo.fromNothing(), null, 0, null, null, null, instructionSets, null);
+            super(OriginInfo.fromNothing(), null, 0, null, null, null, null, instructionSets, null);
             this.codeFile = (codePath != null) ? new File(codePath) : null;
             this.resourceFile = (resourcePath != null) ? new File(resourcePath) : null;
             this.legacyNativeLibraryPath = (legacyNativeLibraryPath != null) ?
@@ -9925,7 +9939,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             }
 
             try {
-                final File tempDir = mInstallerService.allocateInternalStageDirLegacy();
+                final File tempDir = mInstallerService.allocateStageDirLegacy(volumeUuid);
                 codeFile = tempDir;
                 resourceFile = tempDir;
             } catch (IOException e) {
@@ -9986,8 +10000,9 @@ public class PackageManagerService extends IPackageManager.Stub {
                 cleanUp();
                 return false;
             } else {
+                final File targetDir = codeFile.getParentFile();
                 final File beforeCodeFile = codeFile;
-                final File afterCodeFile = getNextCodePath(pkg.packageName);
+                final File afterCodeFile = getNextCodePath(targetDir, pkg.packageName);
 
                 Slog.d(TAG, "Renaming " + beforeCodeFile + " to " + afterCodeFile);
                 try {
@@ -10137,16 +10152,15 @@ public class PackageManagerService extends IPackageManager.Stub {
         /** New install */
         AsecInstallArgs(InstallParams params) {
             super(params.origin, params.observer, params.installFlags,
-                    params.installerPackageName, params.getManifestDigest(),
-                    params.getUser(), null /* instruction sets */,
-                    params.packageAbiOverride);
+                    params.installerPackageName, params.volumeUuid, params.getManifestDigest(),
+                    params.getUser(), null /* instruction sets */, params.packageAbiOverride);
         }
 
         /** Existing install */
         AsecInstallArgs(String fullCodePath, String[] instructionSets,
                         boolean isExternal, boolean isForwardLocked) {
             super(OriginInfo.fromNothing(), null, (isExternal ? INSTALL_EXTERNAL : 0)
-                    | (isForwardLocked ? INSTALL_FORWARD_LOCK : 0), null, null, null,
+                    | (isForwardLocked ? INSTALL_FORWARD_LOCK : 0), null, null, null, null,
                     instructionSets, null);
             // Hackily pretend we're still looking at a full code path
             if (!fullCodePath.endsWith(RES_FILE_NAME)) {
@@ -10163,7 +10177,7 @@ public class PackageManagerService extends IPackageManager.Stub {
 
         AsecInstallArgs(String cid, String[] instructionSets, boolean isForwardLocked) {
             super(OriginInfo.fromNothing(), null, (isAsecExternal(cid) ? INSTALL_EXTERNAL : 0)
-                    | (isForwardLocked ? INSTALL_FORWARD_LOCK : 0), null, null, null,
+                    | (isForwardLocked ? INSTALL_FORWARD_LOCK : 0), null, null, null, null,
                     instructionSets, null);
             this.cid = cid;
             setMountPath(PackageHelper.getSdDir(cid));
@@ -10178,7 +10192,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                     abiOverride);
 
             final File target;
-            if (isExternal()) {
+            if (isExternalAsec()) {
                 target = new UserEnvironment(UserHandle.USER_OWNER).getExternalStorageDirectory();
             } else {
                 target = Environment.getDataDirectory();
@@ -10207,7 +10221,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             }
 
             final String newMountPath = imcs.copyPackageToContainer(
-                    origin.file.getAbsolutePath(), cid, getEncryptKey(), isExternal(),
+                    origin.file.getAbsolutePath(), cid, getEncryptKey(), isExternalAsec(),
                     isFwdLocked(), deriveAbiOverride(abiOverride, null /* settings */));
 
             if (newMountPath != null) {
@@ -10488,11 +10502,11 @@ public class PackageManagerService extends IPackageManager.Stub {
         return prefix + idxStr;
     }
 
-    private File getNextCodePath(String packageName) {
+    private File getNextCodePath(File targetDir, String packageName) {
         int suffix = 1;
         File result;
         do {
-            result = new File(mAppInstallDir, packageName + "-" + suffix);
+            result = new File(targetDir, packageName + "-" + suffix);
             suffix++;
         } while (result.exists());
         return result;
@@ -10556,9 +10570,9 @@ public class PackageManagerService extends IPackageManager.Stub {
     /*
      * Install a non-existing package.
      */
-    private void installNewPackageLI(PackageParser.Package pkg,
-            int parseFlags, int scanFlags, UserHandle user,
-            String installerPackageName, PackageInstalledInfo res) {
+    private void installNewPackageLI(PackageParser.Package pkg, int parseFlags, int scanFlags,
+            UserHandle user, String installerPackageName, String volumeUuid,
+            PackageInstalledInfo res) {
         // Remember this for later, in case we need to rollback this install
         String pkgName = pkg.packageName;
 
@@ -10587,7 +10601,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             PackageParser.Package newPackage = scanPackageLI(pkg, parseFlags, scanFlags,
                     System.currentTimeMillis(), user);
 
-            updateSettingsLI(newPackage, installerPackageName, null, null, res, user);
+            updateSettingsLI(newPackage, installerPackageName, volumeUuid, null, null, res, user);
             // delete the partially installed application. the data directory will have to be
             // restored if it was already existing
             if (res.returnCode != PackageManager.INSTALL_SUCCEEDED) {
@@ -10619,9 +10633,9 @@ public class PackageManagerService extends IPackageManager.Stub {
         return false;
     }
 
-    private void replacePackageLI(PackageParser.Package pkg,
-            int parseFlags, int scanFlags, UserHandle user,
-            String installerPackageName, PackageInstalledInfo res) {
+    private void replacePackageLI(PackageParser.Package pkg, int parseFlags, int scanFlags,
+            UserHandle user, String installerPackageName, String volumeUuid,
+            PackageInstalledInfo res) {
         PackageParser.Package oldPackage;
         String pkgName = pkg.packageName;
         int[] allUsers;
@@ -10660,17 +10674,17 @@ public class PackageManagerService extends IPackageManager.Stub {
         boolean sysPkg = (isSystemApp(oldPackage));
         if (sysPkg) {
             replaceSystemPackageLI(oldPackage, pkg, parseFlags, scanFlags,
-                    user, allUsers, perUserInstalled, installerPackageName, res);
+                    user, allUsers, perUserInstalled, installerPackageName, volumeUuid, res);
         } else {
             replaceNonSystemPackageLI(oldPackage, pkg, parseFlags, scanFlags,
-                    user, allUsers, perUserInstalled, installerPackageName, res);
+                    user, allUsers, perUserInstalled, installerPackageName, volumeUuid, res);
         }
     }
 
     private void replaceNonSystemPackageLI(PackageParser.Package deletedPackage,
             PackageParser.Package pkg, int parseFlags, int scanFlags, UserHandle user,
-            int[] allUsers, boolean[] perUserInstalled,
-            String installerPackageName, PackageInstalledInfo res) {
+            int[] allUsers, boolean[] perUserInstalled, String installerPackageName,
+            String volumeUuid, PackageInstalledInfo res) {
         String pkgName = deletedPackage.packageName;
         boolean deletedPkg = true;
         boolean updatedSettings = false;
@@ -10709,8 +10723,8 @@ public class PackageManagerService extends IPackageManager.Stub {
             try {
                 final PackageParser.Package newPackage = scanPackageLI(pkg, parseFlags,
                         scanFlags | SCAN_UPDATE_TIME, System.currentTimeMillis(), user);
-                updateSettingsLI(newPackage, installerPackageName, allUsers, perUserInstalled, res,
-                        user);
+                updateSettingsLI(newPackage, installerPackageName, volumeUuid, allUsers,
+                        perUserInstalled, res, user);
                 updatedSettings = true;
             } catch (PackageManagerException e) {
                 res.setError("Package couldn't be installed in " + pkg.codePath, e);
@@ -10735,10 +10749,10 @@ public class PackageManagerService extends IPackageManager.Stub {
                 if (DEBUG_INSTALL) Slog.d(TAG, "Install failed, reinstalling: " + deletedPackage);
                 File restoreFile = new File(deletedPackage.codePath);
                 // Parse old package
-                boolean oldOnSd = isExternal(deletedPackage);
+                boolean oldExternal = isExternal(deletedPackage);
                 int oldParseFlags  = mDefParseFlags | PackageParser.PARSE_CHATTY |
                         (deletedPackage.isForwardLocked() ? PackageParser.PARSE_FORWARD_LOCK : 0) |
-                        (oldOnSd ? PackageParser.PARSE_ON_SDCARD : 0);
+                        (oldExternal ? PackageParser.PARSE_EXTERNAL_STORAGE : 0);
                 int oldScanFlags = SCAN_UPDATE_SIGNATURE | SCAN_UPDATE_TIME;
                 try {
                     scanPackageLI(restoreFile, oldParseFlags, oldScanFlags, origUpdateTime, null);
@@ -10762,8 +10776,8 @@ public class PackageManagerService extends IPackageManager.Stub {
 
     private void replaceSystemPackageLI(PackageParser.Package deletedPackage,
             PackageParser.Package pkg, int parseFlags, int scanFlags, UserHandle user,
-            int[] allUsers, boolean[] perUserInstalled,
-            String installerPackageName, PackageInstalledInfo res) {
+            int[] allUsers, boolean[] perUserInstalled, String installerPackageName,
+            String volumeUuid, PackageInstalledInfo res) {
         if (DEBUG_INSTALL) Slog.d(TAG, "replaceSystemPackageLI: new=" + pkg
                 + ", old=" + deletedPackage);
         boolean disabledSystem = false;
@@ -10840,8 +10854,8 @@ public class PackageManagerService extends IPackageManager.Stub {
             }
 
             if (res.returnCode == PackageManager.INSTALL_SUCCEEDED) {
-                updateSettingsLI(newPackage, installerPackageName, allUsers, perUserInstalled, res,
-                        user);
+                updateSettingsLI(newPackage, installerPackageName, volumeUuid, allUsers,
+                        perUserInstalled, res, user);
                 updatedSettings = true;
             }
 
@@ -10876,8 +10890,8 @@ public class PackageManagerService extends IPackageManager.Stub {
     }
 
     private void updateSettingsLI(PackageParser.Package newPackage, String installerPackageName,
-            int[] allUsers, boolean[] perUserInstalled,
-            PackageInstalledInfo res, UserHandle user) {
+            String volumeUuid, int[] allUsers, boolean[] perUserInstalled, PackageInstalledInfo res,
+            UserHandle user) {
         String pkgName = newPackage.packageName;
         synchronized (mPackages) {
             //write settings. the installStatus will be incomplete at this stage.
@@ -10935,6 +10949,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             res.pkg = newPackage;
             mSettings.setInstallStatus(pkgName, PackageSettingBase.PKG_INSTALL_COMPLETE);
             mSettings.setInstallerPackageName(pkgName, installerPackageName);
+            mSettings.setVolumeUuid(pkgName, volumeUuid);
             res.returnCode = PackageManager.INSTALL_SUCCEEDED;
             //to update install status
             mSettings.writeLPr();
@@ -10943,10 +10958,12 @@ public class PackageManagerService extends IPackageManager.Stub {
 
     private void installPackageLI(InstallArgs args, PackageInstalledInfo res) {
         final int installFlags = args.installFlags;
-        String installerPackageName = args.installerPackageName;
-        File tmpPackageFile = new File(args.getCodePath());
-        boolean forwardLocked = ((installFlags & PackageManager.INSTALL_FORWARD_LOCK) != 0);
-        boolean onSd = ((installFlags & PackageManager.INSTALL_EXTERNAL) != 0);
+        final String installerPackageName = args.installerPackageName;
+        final String volumeUuid = args.volumeUuid;
+        final File tmpPackageFile = new File(args.getCodePath());
+        final boolean forwardLocked = ((installFlags & PackageManager.INSTALL_FORWARD_LOCK) != 0);
+        final boolean onExternal = (((installFlags & PackageManager.INSTALL_EXTERNAL) != 0)
+                || (args.volumeUuid != null));
         boolean replace = false;
         final int scanFlags = SCAN_NEW_INSTALL | SCAN_FORCE_DEX | SCAN_UPDATE_SIGNATURE;
         // Result object to be returned
@@ -10956,7 +10973,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         // Retrieve PackageSettings and parse package
         final int parseFlags = mDefParseFlags | PackageParser.PARSE_CHATTY
                 | (forwardLocked ? PackageParser.PARSE_FORWARD_LOCK : 0)
-                | (onSd ? PackageParser.PARSE_ON_SDCARD : 0);
+                | (onExternal ? PackageParser.PARSE_EXTERNAL_STORAGE : 0);
         PackageParser pp = new PackageParser();
         pp.setSeparateProcesses(mSeparateProcesses);
         pp.setDisplayMetrics(mMetrics);
@@ -11108,7 +11125,7 @@ public class PackageManagerService extends IPackageManager.Stub {
 
         }
 
-        if (systemApp && onSd) {
+        if (systemApp && onExternal) {
             // Disable updates to system apps on sdcard
             res.setError(INSTALL_FAILED_INVALID_INSTALL_LOCATION,
                     "Cannot install updates to system apps on sdcard");
@@ -11134,10 +11151,10 @@ public class PackageManagerService extends IPackageManager.Stub {
         if (replace) {
             // Call replacePackageLI with SCAN_NO_DEX, since we already made dexopt
             replacePackageLI(pkg, parseFlags, scanFlags | SCAN_REPLACING | SCAN_NO_DEX, args.user,
-                    installerPackageName, res);
+                    installerPackageName, volumeUuid, res);
         } else {
             installNewPackageLI(pkg, parseFlags, scanFlags | SCAN_DELETE_DATA_ON_FAILURES,
-                    args.user, installerPackageName, res);
+                    args.user, installerPackageName, volumeUuid, res);
         }
         synchronized (mPackages) {
             final PackageSetting ps = mSettings.mPackages.get(pkgName);
@@ -11265,7 +11282,9 @@ public class PackageManagerService extends IPackageManager.Stub {
 
     private int packageFlagsToInstallFlags(PackageSetting ps) {
         int installFlags = 0;
-        if (isExternal(ps)) {
+        if (isExternal(ps) && TextUtils.isEmpty(ps.volumeUuid)) {
+            // This existing package was an external ASEC install when we have
+            // the external flag without a UUID
             installFlags |= PackageManager.INSTALL_EXTERNAL;
         }
         if (ps.isForwardLocked()) {
@@ -12975,6 +12994,8 @@ public class PackageManagerService extends IPackageManager.Stub {
         // Watch for external volumes that come and go over time
         final StorageManager storage = mContext.getSystemService(StorageManager.class);
         storage.registerListener(mStorageListener);
+
+        mInstallerService.systemReady();
     }
 
     @Override
@@ -13713,13 +13734,32 @@ public class PackageManagerService extends IPackageManager.Stub {
     }
 
     private void sendResourcesChangedBroadcast(boolean mediaStatus, boolean replacing,
+            ArrayList<ApplicationInfo> infos, IIntentReceiver finishedReceiver) {
+        final int size = infos.size();
+        final String[] packageNames = new String[size];
+        final int[] packageUids = new int[size];
+        for (int i = 0; i < size; i++) {
+            final ApplicationInfo info = infos.get(i);
+            packageNames[i] = info.packageName;
+            packageUids[i] = info.uid;
+        }
+        sendResourcesChangedBroadcast(mediaStatus, replacing, packageNames, packageUids,
+                finishedReceiver);
+    }
+
+    private void sendResourcesChangedBroadcast(boolean mediaStatus, boolean replacing,
             ArrayList<String> pkgList, int uidArr[], IIntentReceiver finishedReceiver) {
-        int size = pkgList.size();
+        sendResourcesChangedBroadcast(mediaStatus, replacing,
+                pkgList.toArray(new String[pkgList.size()]), uidArr, finishedReceiver);
+    }
+
+    private void sendResourcesChangedBroadcast(boolean mediaStatus, boolean replacing,
+            String[] pkgList, int uidArr[], IIntentReceiver finishedReceiver) {
+        int size = pkgList.length;
         if (size > 0) {
             // Send broadcasts here
             Bundle extras = new Bundle();
-            extras.putStringArray(Intent.EXTRA_CHANGED_PACKAGE_LIST, pkgList
-                    .toArray(new String[size]));
+            extras.putStringArray(Intent.EXTRA_CHANGED_PACKAGE_LIST, pkgList);
             if (uidArr != null) {
                 extras.putIntArray(Intent.EXTRA_CHANGED_UID_LIST, uidArr);
             }
@@ -13762,8 +13802,8 @@ public class PackageManagerService extends IPackageManager.Stub {
                 }
                 // Parse package
                 int parseFlags = mDefParseFlags;
-                if (args.isExternal()) {
-                    parseFlags |= PackageParser.PARSE_ON_SDCARD;
+                if (args.isExternalAsec()) {
+                    parseFlags |= PackageParser.PARSE_EXTERNAL_STORAGE;
                 }
                 if (args.isFwdLocked()) {
                     parseFlags |= PackageParser.PARSE_FORWARD_LOCK;
@@ -13910,73 +13950,130 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
     }
 
-    /** Binder call */
+    private void loadPrivatePackages(VolumeInfo vol) {
+        final ArrayList<ApplicationInfo> loaded = new ArrayList<>();
+        final int parseFlags = mDefParseFlags | PackageParser.PARSE_EXTERNAL_STORAGE;
+        synchronized (mPackages) {
+            final List<PackageSetting> packages = mSettings.getVolumePackagesLPr(vol.fsUuid);
+            for (PackageSetting ps : packages) {
+                synchronized (mInstallLock) {
+                    final PackageParser.Package pkg;
+                    try {
+                        pkg = scanPackageLI(ps.codePath, parseFlags, 0, 0, null);
+                        loaded.add(pkg.applicationInfo);
+                    } catch (PackageManagerException e) {
+                        Slog.w(TAG, "Failed to scan " + ps.codePath + ": " + e.getMessage());
+                    }
+                }
+            }
+
+            // TODO: regrant any permissions that changed based since original install
+
+            mSettings.writeLPr();
+        }
+
+        Slog.d(TAG, "Loaded packages " + loaded);
+        sendResourcesChangedBroadcast(true, false, loaded, null);
+    }
+
+    private void unloadPrivatePackages(VolumeInfo vol) {
+        final ArrayList<ApplicationInfo> unloaded = new ArrayList<>();
+        synchronized (mPackages) {
+            final List<PackageSetting> packages = mSettings.getVolumePackagesLPr(vol.fsUuid);
+            for (PackageSetting ps : packages) {
+                if (ps.pkg == null) continue;
+                synchronized (mInstallLock) {
+                    final ApplicationInfo info = ps.pkg.applicationInfo;
+                    final PackageRemovedInfo outInfo = new PackageRemovedInfo();
+                    if (deletePackageLI(ps.name, null, false, null, null,
+                            PackageManager.DELETE_KEEP_DATA, outInfo, false)) {
+                        unloaded.add(info);
+                    } else {
+                        Slog.w(TAG, "Failed to unload " + ps.codePath);
+                    }
+                }
+            }
+
+            mSettings.writeLPr();
+        }
+
+        Slog.d(TAG, "Unloaded packages " + unloaded);
+        sendResourcesChangedBroadcast(false, false, unloaded, null);
+    }
+
     @Override
     public void movePackage(final String packageName, final IPackageMoveObserver observer,
             final int flags) {
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.MOVE_PACKAGE, null);
-        UserHandle user = new UserHandle(UserHandle.getCallingUserId());
-        int returnCode = PackageManager.MOVE_SUCCEEDED;
-        int currInstallFlags = 0;
-        int newInstallFlags = 0;
+
+        final int installFlags;
+        if ((flags & MOVE_INTERNAL) != 0) {
+            installFlags = INSTALL_INTERNAL;
+        } else if ((flags & MOVE_EXTERNAL_MEDIA) != 0) {
+            installFlags = INSTALL_EXTERNAL;
+        } else {
+            throw new IllegalArgumentException("Unsupported move flags " + flags);
+        }
+
+        try {
+            movePackageInternal(packageName, null, installFlags, false, observer);
+        } catch (PackageManagerException e) {
+            Slog.d(TAG, "Failed to move " + packageName, e);
+            try {
+                observer.packageMoved(packageName, e.error);
+            } catch (RemoteException ignored) {
+            }
+        }
+    }
+
+    @Override
+    public void movePackageAndData(final String packageName, final String volumeUuid,
+            final IPackageMoveObserver observer) {
+        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.MOVE_PACKAGE, null);
+        try {
+            movePackageInternal(packageName, volumeUuid, INSTALL_INTERNAL, true, observer);
+        } catch (PackageManagerException e) {
+            Slog.d(TAG, "Failed to move " + packageName, e);
+            try {
+                observer.packageMoved(packageName, e.error);
+            } catch (RemoteException ignored) {
+            }
+        }
+    }
+
+    private void movePackageInternal(final String packageName, String volumeUuid, int installFlags,
+            boolean andData, final IPackageMoveObserver observer) throws PackageManagerException {
+        final UserHandle user = new UserHandle(UserHandle.getCallingUserId());
 
         File codeFile = null;
         String installerPackageName = null;
         String packageAbiOverride = null;
+
+        // TOOD: move app private data before installing
 
         // reader
         synchronized (mPackages) {
             final PackageParser.Package pkg = mPackages.get(packageName);
             final PackageSetting ps = mSettings.mPackages.get(packageName);
             if (pkg == null || ps == null) {
-                returnCode = PackageManager.MOVE_FAILED_DOESNT_EXIST;
-            } else {
-                // Disable moving fwd locked apps and system packages
-                if (pkg.applicationInfo != null && isSystemApp(pkg)) {
-                    Slog.w(TAG, "Cannot move system application");
-                    returnCode = PackageManager.MOVE_FAILED_SYSTEM_PACKAGE;
-                } else if (pkg.mOperationPending) {
-                    Slog.w(TAG, "Attempt to move package which has pending operations");
-                    returnCode = PackageManager.MOVE_FAILED_OPERATION_PENDING;
-                } else {
-                    // Find install location first
-                    if ((flags & PackageManager.MOVE_EXTERNAL_MEDIA) != 0
-                            && (flags & PackageManager.MOVE_INTERNAL) != 0) {
-                        Slog.w(TAG, "Ambigous flags specified for move location.");
-                        returnCode = PackageManager.MOVE_FAILED_INVALID_LOCATION;
-                    } else {
-                        newInstallFlags = (flags & PackageManager.MOVE_EXTERNAL_MEDIA) != 0
-                                ? PackageManager.INSTALL_EXTERNAL : PackageManager.INSTALL_INTERNAL;
-                        currInstallFlags = isExternal(pkg)
-                                ? PackageManager.INSTALL_EXTERNAL : PackageManager.INSTALL_INTERNAL;
-
-                        if (newInstallFlags == currInstallFlags) {
-                            Slog.w(TAG, "No move required. Trying to move to same location");
-                            returnCode = PackageManager.MOVE_FAILED_INVALID_LOCATION;
-                        } else {
-                            if (pkg.isForwardLocked()) {
-                                currInstallFlags |= PackageManager.INSTALL_FORWARD_LOCK;
-                                newInstallFlags |= PackageManager.INSTALL_FORWARD_LOCK;
-                            }
-                        }
-                    }
-                    if (returnCode == PackageManager.MOVE_SUCCEEDED) {
-                        pkg.mOperationPending = true;
-                    }
-                }
-
-                codeFile = new File(pkg.codePath);
-                installerPackageName = ps.installerPackageName;
-                packageAbiOverride = ps.cpuAbiOverrideString;
+                throw new PackageManagerException(MOVE_FAILED_DOESNT_EXIST, "Missing package");
             }
-        }
 
-        if (returnCode != PackageManager.MOVE_SUCCEEDED) {
-            try {
-                observer.packageMoved(packageName, returnCode);
-            } catch (RemoteException ignored) {
+            if (pkg.applicationInfo.isSystemApp()) {
+                throw new PackageManagerException(MOVE_FAILED_SYSTEM_PACKAGE,
+                        "Cannot move system application");
+            } else if (pkg.mOperationPending) {
+                throw new PackageManagerException(MOVE_FAILED_OPERATION_PENDING,
+                        "Attempt to move package which has pending operations");
             }
-            return;
+
+            // TODO: yell if already in desired location
+
+            pkg.mOperationPending = true;
+
+            codeFile = new File(pkg.codePath);
+            installerPackageName = ps.installerPackageName;
+            packageAbiOverride = ps.cpuAbiOverrideString;
         }
 
         final IPackageInstallObserver2 installObserver = new IPackageInstallObserver2.Stub() {
@@ -14018,12 +14115,12 @@ public class PackageManagerService extends IPackageManager.Stub {
 
         // Treat a move like reinstalling an existing app, which ensures that we
         // process everythign uniformly, like unpacking native libraries.
-        newInstallFlags |= PackageManager.INSTALL_REPLACE_EXISTING;
+        installFlags |= PackageManager.INSTALL_REPLACE_EXISTING;
 
         final Message msg = mHandler.obtainMessage(INIT_COPY);
         final OriginInfo origin = OriginInfo.fromExistingFile(codeFile);
-        msg.obj = new InstallParams(origin, installObserver, newInstallFlags,
-                installerPackageName, null, user, packageAbiOverride);
+        msg.obj = new InstallParams(origin, installObserver, installFlags,
+                installerPackageName, volumeUuid, null, user, packageAbiOverride);
         mHandler.sendMessage(msg);
     }
 

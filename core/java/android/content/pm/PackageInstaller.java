@@ -887,6 +887,8 @@ public class PackageInstaller {
         public Uri referrerUri;
         /** {@hide} */
         public String abiOverride;
+        /** {@hide} */
+        public String volumeUuid;
 
         /**
          * Construct parameters for a new package install session.
@@ -911,6 +913,7 @@ public class PackageInstaller {
             originatingUri = source.readParcelable(null);
             referrerUri = source.readParcelable(null);
             abiOverride = source.readString();
+            volumeUuid = source.readString();
         }
 
         /**
@@ -1008,6 +1011,7 @@ public class PackageInstaller {
             pw.printPair("originatingUri", originatingUri);
             pw.printPair("referrerUri", referrerUri);
             pw.printPair("abiOverride", abiOverride);
+            pw.printPair("volumeUuid", volumeUuid);
             pw.println();
         }
 
@@ -1028,6 +1032,7 @@ public class PackageInstaller {
             dest.writeParcelable(originatingUri, flags);
             dest.writeParcelable(referrerUri, flags);
             dest.writeString(abiOverride);
+            dest.writeString(volumeUuid);
         }
 
         public static final Parcelable.Creator<SessionParams>

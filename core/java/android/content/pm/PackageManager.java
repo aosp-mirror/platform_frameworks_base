@@ -43,7 +43,9 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.os.RemoteException;
 import android.os.UserHandle;
+import android.os.storage.VolumeInfo;
 import android.util.AndroidException;
+
 import com.android.internal.util.ArrayUtils;
 
 import java.io.File;
@@ -339,15 +341,17 @@ public abstract class PackageManager {
     public static final int INSTALL_ALLOW_TEST = 0x00000004;
 
     /**
-     * Flag parameter for {@link #installPackage} to indicate that this
-     * package has to be installed on the sdcard.
+     * Flag parameter for {@link #installPackage} to indicate that this package
+     * must be installed to an ASEC on a {@link VolumeInfo#TYPE_PUBLIC}.
+     *
      * @hide
      */
     public static final int INSTALL_EXTERNAL = 0x00000008;
 
     /**
      * Flag parameter for {@link #installPackage} to indicate that this package
-     * has to be installed on the sdcard.
+     * must be installed to internal storage.
+     *
      * @hide
      */
     public static final int INSTALL_INTERNAL = 0x00000010;
@@ -4099,8 +4103,12 @@ public abstract class PackageManager {
      *
      * @hide
      */
-    public abstract void movePackage(
-            String packageName, IPackageMoveObserver observer, int flags);
+    @Deprecated
+    public abstract void movePackage(String packageName, IPackageMoveObserver observer, int flags);
+
+    /** {@hide} */
+    public abstract void movePackageAndData(String packageName, String volumeUuid,
+            IPackageMoveObserver observer);
 
     /**
      * Returns the device identity that verifiers can use to associate their scheme to a particular

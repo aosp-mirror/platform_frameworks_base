@@ -459,6 +459,8 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
     public int largestWidthLimitDp = 0;
 
     /** {@hide} */
+    public String volumeUuid;
+    /** {@hide} */
     public String scanSourceDir;
     /** {@hide} */
     public String scanPublicSourceDir;
@@ -726,6 +728,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         requiresSmallestWidthDp = orig.requiresSmallestWidthDp;
         compatibleWidthLimitDp = orig.compatibleWidthLimitDp;
         largestWidthLimitDp = orig.largestWidthLimitDp;
+        volumeUuid = orig.volumeUuid;
         scanSourceDir = orig.scanSourceDir;
         scanPublicSourceDir = orig.scanPublicSourceDir;
         sourceDir = orig.sourceDir;
@@ -778,6 +781,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         dest.writeInt(requiresSmallestWidthDp);
         dest.writeInt(compatibleWidthLimitDp);
         dest.writeInt(largestWidthLimitDp);
+        dest.writeString(volumeUuid);
         dest.writeString(scanSourceDir);
         dest.writeString(scanPublicSourceDir);
         dest.writeString(sourceDir);
@@ -829,6 +833,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         requiresSmallestWidthDp = source.readInt();
         compatibleWidthLimitDp = source.readInt();
         largestWidthLimitDp = source.readInt();
+        volumeUuid = source.readString();
         scanSourceDir = source.readString();
         scanPublicSourceDir = source.readString();
         sourceDir = source.readString();
