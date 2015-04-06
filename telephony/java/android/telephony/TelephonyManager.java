@@ -575,6 +575,37 @@ public class TelephonyManager {
      */
     public static final String EXTRA_DATA_FAILURE_CAUSE = PhoneConstants.DATA_FAILURE_CAUSE_KEY;
 
+    /**
+     * Response codes for sim activation. Activation completed successfully.
+     * @hide
+     */
+    @SystemApi
+    public static final int SIM_ACTIVATION_RESULT_COMPLETE = 0;
+    /**
+     * Response codes for sim activation. Activation not supported (device has no SIM).
+     * @hide
+     */
+    @SystemApi
+    public static final int SIM_ACTIVATION_RESULT_NOT_SUPPORTED = 1;
+    /**
+     * Response codes for sim activation. Activation is in progress.
+     * @hide
+     */
+    @SystemApi
+    public static final int SIM_ACTIVATION_RESULT_IN_PROGRESS = 2;
+    /**
+     * Response codes for sim activation. Activation failed to complete.
+     * @hide
+     */
+    @SystemApi
+    public static final int SIM_ACTIVATION_RESULT_FAILED = 3;
+    /**
+     * Response codes for sim activation. Activation canceled by user.
+     * @hide
+     */
+    @SystemApi
+    public static final int SIM_ACTIVATION_RESULT_CANCELED = 4;
+
     //
     //
     // Device Info

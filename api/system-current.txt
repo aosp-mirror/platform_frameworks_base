@@ -32565,6 +32565,11 @@ package android.telephony {
     field public static final int PHONE_TYPE_GSM = 1; // 0x1
     field public static final int PHONE_TYPE_NONE = 0; // 0x0
     field public static final int PHONE_TYPE_SIP = 3; // 0x3
+    field public static final int SIM_ACTIVATION_RESULT_CANCELED = 4; // 0x4
+    field public static final int SIM_ACTIVATION_RESULT_COMPLETE = 0; // 0x0
+    field public static final int SIM_ACTIVATION_RESULT_FAILED = 3; // 0x3
+    field public static final int SIM_ACTIVATION_RESULT_IN_PROGRESS = 2; // 0x2
+    field public static final int SIM_ACTIVATION_RESULT_NOT_SUPPORTED = 1; // 0x1
     field public static final int SIM_STATE_ABSENT = 1; // 0x1
     field public static final int SIM_STATE_NETWORK_LOCKED = 4; // 0x4
     field public static final int SIM_STATE_PIN_REQUIRED = 2; // 0x2
