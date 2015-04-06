@@ -2269,6 +2269,168 @@ public class Paint {
         return native_hasGlyph(mNativePaint, mNativeTypeface, mBidiFlags, string);
     }
 
+    /**
+     * Measure cursor position within a run of text.
+     *
+     * <p>The run of text includes the characters from {@code start} to {@code end} in the text. In
+     * addition, the range {@code contextStart} to {@code contextEnd} is used as context for the
+     * purpose of complex text shaping, such as Arabic text potentially shaped differently based on
+     * the text next to it.
+     *
+     * All text outside the range {@code contextStart..contextEnd} is ignored. The text between
+     * {@code start} and {@code end} will be laid out to be measured.
+     *
+     * The returned width measurement is the advance from {@code start} to {@code offset}. It is
+     * generally a positive value, no matter the direction of the run. If {@code offset == end},
+     * the return value is simply the width of the whole run from {@code start} to {@code end}.
+     *
+     * Ligatures are formed for characters in the range {@code start..end} (but not for
+     * {@code start..contextStart} or {@code end..contextEnd}). If {@code offset} points to a
+     * character in the middle of such a formed ligature, but at a grapheme cluster boundary, the
+     * return value will also reflect an advance in the middle of the ligature. See
+     * {@link #getOffsetForAdvance} for more discussion of grapheme cluster boundaries.
+     *
+     * The direction of the run is explicitly specified by {@code isRtl}. Thus, this method is
+     * suitable only for runs of a single direction.
+     *
+     * <p>All indices are relative to the start of {@code text}. Further, {@code 0 <= contextStart
+     * <= start <= offset <= end <= contextEnd <= text.length} must hold on entry.
+     *
+     * @param text the text to measure. Cannot be null.
+     * @param start the index of the start of the range to measure
+     * @param end the index + 1 of the end of the range to measure
+     * @param contextStart the index of the start of the shaping context
+     * @param contextEnd the index + 1 of the end of the range to measure
+     * @param isRtl whether the run is in RTL direction
+     * @param offset index of caret position
+     * @return width measurement between start and offset
+     */
+    public float getRunAdvance(char[] text, int start, int end, int contextStart, int contextEnd,
+            boolean isRtl, int offset) {
+        if (text == null) {
+            throw new IllegalArgumentException("text cannot be null");
+        }
+        if ((contextStart | start | offset | end | contextEnd
+                | start - contextStart | offset - start | end - offset
+                | contextEnd - end | text.length - contextEnd) < 0) {
+            throw new IndexOutOfBoundsException();
+        }
+        if (end == start) {
+            return 0.0f;
+        }
+        // TODO: take mCompatScaling into account (or eliminate compat scaling)?
+        return native_getRunAdvance(mNativePaint, mNativeTypeface, text, start, end,
+                contextStart, contextEnd, isRtl, offset);
+    }
+
+    /**
+     * @see #getRunAdvance(char[], int, int, int, int, boolean, int)
+     *
+     * @param text the text to measure. Cannot be null.
+     * @param start the index of the start of the range to measure
+     * @param end the index + 1 of the end of the range to measure
+     * @param contextStart the index of the start of the shaping context
+     * @param contextEnd the index + 1 of the end of the range to measure
+     * @param isRtl whether the run is in RTL direction
+     * @param offset index of caret position
+     * @return width measurement between start and offset
+     */
+    public float getRunAdvance(CharSequence text, int start, int end, int contextStart,
+            int contextEnd, boolean isRtl, int offset) {
+        if (text == null) {
+            throw new IllegalArgumentException("text cannot be null");
+        }
+        if ((contextStart | start | offset | end | contextEnd
+                | start - contextStart | offset - start | end - offset
+                | contextEnd - end | text.length() - contextEnd) < 0) {
+            throw new IndexOutOfBoundsException();
+        }
+        if (end == start) {
+            return 0.0f;
+        }
+        // TODO performance: specialized alternatives to avoid buffer copy, if win is significant
+        char[] buf = TemporaryBuffer.obtain(contextEnd - contextStart);
+        TextUtils.getChars(text, contextStart, contextEnd, buf, 0);
+        float result = getRunAdvance(buf, start - contextStart, end - contextStart, 0,
+                contextEnd - contextStart, isRtl, offset - contextStart);
+        TemporaryBuffer.recycle(buf);
+        return result;
+    }
+
+    /**
+     * Get the character offset within the string whose position is closest to the specified
+     * horizontal position.
+     *
+     * <p>The returned value is generally the value of {@code offset} for which
+     * {@link #getRunAdvance} yields a result most closely approximating {@code advance},
+     * and which is also on a grapheme cluster boundary. As such, it is the preferred method
+     * for positioning a cursor in response to a touch or pointer event. The grapheme cluster
+     * boundaries are based on
+     * <a href="http://unicode.org/reports/tr29/">Unicode Standard Annex #29</a> but with some
+     * tailoring for better user experience.
+     *
+     * <p>Note that {@code advance} is a (generally positive) width measurement relative to the start
+     * of the run. Thus, for RTL runs it the distance from the point to the right edge.
+     *
+     * <p>All indices are relative to the start of {@code text}. Further, {@code 0 <= contextStart
+     * <= start <= end <= contextEnd <= text.length} must hold on entry, and {@code start <= result
+     * <= end} will hold on return.
+     *
+     * @param text the text to measure. Cannot be null.
+     * @param start the index of the start of the range to measure
+     * @param end the index + 1 of the end of the range to measure
+     * @param contextStart the index of the start of the shaping context
+     * @param contextEnd the index + 1 of the end of the range to measure
+     * @param isRtl whether the run is in RTL direction
+     * @param advance width relative to start of run
+     * @return index of offset
+     */
+    public int getOffsetForAdvance(char[] text, int start, int end, int contextStart,
+            int contextEnd, boolean isRtl, float advance) {
+        if (text == null) {
+            throw new IllegalArgumentException("text cannot be null");
+        }
+        if ((contextStart | start | end | contextEnd
+                | start - contextStart | end - start | contextEnd - end
+                | text.length - contextEnd) < 0) {
+            throw new IndexOutOfBoundsException();
+        }
+        // TODO: take mCompatScaling into account (or eliminate compat scaling)?
+        return native_getOffsetForAdvance(mNativePaint, mNativeTypeface, text, start, end,
+                contextStart, contextEnd, isRtl, advance);
+    }
+
+    /**
+     * @see #getOffsetForAdvance(char[], int, int, int, int, boolean, float)
+     *
+     * @param text the text to measure. Cannot be null.
+     * @param start the index of the start of the range to measure
+     * @param end the index + 1 of the end of the range to measure
+     * @param contextStart the index of the start of the shaping context
+     * @param contextEnd the index + 1 of the end of the range to measure
+     * @param isRtl whether the run is in RTL direction
+     * @param advance width relative to start of run
+     * @return index of offset
+     */
+    public int getOffsetForAdvance(CharSequence text, int start, int end, int contextStart,
+            int contextEnd, boolean isRtl, float advance) {
+        if (text == null) {
+            throw new IllegalArgumentException("text cannot be null");
+        }
+        if ((contextStart | start | end | contextEnd
+                | start - contextStart | end - start | contextEnd - end
+                | text.length() - contextEnd) < 0) {
+            throw new IndexOutOfBoundsException();
+        }
+        // TODO performance: specialized alternatives to avoid buffer copy, if win is significant
+        char[] buf = TemporaryBuffer.obtain(contextEnd - contextStart);
+        TextUtils.getChars(text, contextStart, contextEnd, buf, 0);
+        int result = getOffsetForAdvance(buf, start - contextStart, end - contextStart, 0,
+                contextEnd - contextStart, isRtl, advance) + contextStart;
+        TemporaryBuffer.recycle(buf);
+        return result;
+    }
+
     @Override
     protected void finalize() throws Throwable {
         try {
@@ -2356,4 +2518,10 @@ public class Paint {
     private static native void native_setHyphenEdit(long native_object, int hyphen);
     private static native boolean native_hasGlyph(long native_object, long native_typeface,
             int bidiFlags, String string);
+    private static native float native_getRunAdvance(long native_object, long native_typeface,
+            char[] text, int start, int end, int contextStart, int contextEnd, boolean isRtl,
+            int offset);
+    private static native int native_getOffsetForAdvance(long native_object,
+            long native_typeface, char[] text, int start, int end, int contextStart, int contextEnd,
+            boolean isRtl, float advance);
 }

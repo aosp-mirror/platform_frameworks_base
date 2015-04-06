@@ -22,8 +22,8 @@
 #include "jni.h"
 #include "GraphicsJNI.h"
 #include "core_jni_helpers.h"
-#include <ScopedUtfChars.h>
 #include <ScopedStringChars.h>
+#include <ScopedUtfChars.h>
 
 #include "SkBlurDrawLooper.h"
 #include "SkColorFilter.h"
@@ -37,6 +37,7 @@
 #include "utils/Blur.h"
 
 #include <minikin/GraphemeBreak.h>
+#include <minikin/Measurement.h>
 #include "MinikinSkia.h"
 #include "MinikinUtils.h"
 #include "Paint.h"
@@ -1037,6 +1038,48 @@ public:
         return nGlyphs > 0 && !layoutContainsNotdef(layout);
     }
 
+    static jfloat doRunAdvance(const Paint* paint, TypefaceImpl* typeface, const jchar buf[],
+            jint start, jint count, jint bufSize, jboolean isRtl, jint offset) {
+        Layout layout;
+        int bidiFlags = isRtl ? kBidi_Force_RTL : kBidi_Force_LTR;
+        MinikinUtils::doLayout(&layout, paint, bidiFlags, typeface, buf, start, count, bufSize);
+        return getRunAdvance(layout, buf, start, count, offset);
+    }
+
+    static jfloat getRunAdvance___CIIIIZI_F(JNIEnv *env, jclass, jlong paintHandle,
+            jlong typefaceHandle, jcharArray text, jint start, jint end, jint contextStart,
+            jint contextEnd, jboolean isRtl, jint offset) {
+        const Paint* paint = reinterpret_cast<Paint*>(paintHandle);
+        TypefaceImpl* typeface = reinterpret_cast<TypefaceImpl*>(typefaceHandle);
+        // TODO performance: optimize JNI array access
+        jchar* textArray = env->GetCharArrayElements(text, NULL);
+        jfloat result = doRunAdvance(paint, typeface, textArray + contextStart,
+                start - contextStart, end - start, contextEnd - contextStart, isRtl, offset);
+        env->ReleaseCharArrayElements(text, textArray, JNI_ABORT);
+        return result;
+    }
+
+    static jint doOffsetForAdvance(const Paint* paint, TypefaceImpl* typeface, const jchar buf[],
+            jint start, jint count, jint bufSize, jboolean isRtl, jfloat advance) {
+        Layout layout;
+        int bidiFlags = isRtl ? kBidi_Force_RTL : kBidi_Force_LTR;
+        MinikinUtils::doLayout(&layout, paint, bidiFlags, typeface, buf, start, count, bufSize);
+        return getOffsetForAdvance(layout, buf, start, count, advance);
+    }
+    static jint getOffsetForAdvance___CIIIIZF_I(JNIEnv *env, jclass, jlong paintHandle,
+            jlong typefaceHandle, jcharArray text, jint start, jint end, jint contextStart,
+            jint contextEnd, jboolean isRtl, jfloat advance) {
+        const Paint* paint = reinterpret_cast<Paint*>(paintHandle);
+        TypefaceImpl* typeface = reinterpret_cast<TypefaceImpl*>(typefaceHandle);
+        // TODO performance: optimize JNI array access
+        jchar* textArray = env->GetCharArrayElements(text, NULL);
+        jint result = doOffsetForAdvance(paint, typeface, textArray + contextStart,
+                start - contextStart, end - start, contextEnd - contextStart, isRtl, advance);
+        result += contextStart;
+        env->ReleaseCharArrayElements(text, textArray, JNI_ABORT);
+        return result;
+    }
+
 };
 
 static JNINativeMethod methods[] = {
@@ -1093,36 +1136,43 @@ static JNINativeMethod methods[] = {
     {"setTextSkewX","!(F)V", (void*) PaintGlue::setTextSkewX},
     {"native_getLetterSpacing","!(J)F", (void*) PaintGlue::getLetterSpacing},
     {"native_setLetterSpacing","!(JF)V", (void*) PaintGlue::setLetterSpacing},
-    {"native_setFontFeatureSettings","(JLjava/lang/String;)V", (void*) PaintGlue::setFontFeatureSettings},
+    {"native_setFontFeatureSettings","(JLjava/lang/String;)V",
+            (void*) PaintGlue::setFontFeatureSettings},
     {"native_getHyphenEdit", "!(J)I", (void*) PaintGlue::getHyphenEdit},
     {"native_setHyphenEdit", "!(JI)V", (void*) PaintGlue::setHyphenEdit},
     {"ascent","!()F", (void*) PaintGlue::ascent},
     {"descent","!()F", (void*) PaintGlue::descent},
 
-    {"getFontMetrics", "(Landroid/graphics/Paint$FontMetrics;)F", (void*)PaintGlue::getFontMetrics},
-    {"getFontMetricsInt", "(Landroid/graphics/Paint$FontMetricsInt;)I", (void*)PaintGlue::getFontMetricsInt},
+    {"getFontMetrics", "(Landroid/graphics/Paint$FontMetrics;)F",
+            (void*)PaintGlue::getFontMetrics},
+    {"getFontMetricsInt", "(Landroid/graphics/Paint$FontMetricsInt;)I",
+            (void*)PaintGlue::getFontMetricsInt},
     {"native_measureText","([CIII)F", (void*) PaintGlue::measureText_CIII},
     {"native_measureText","(Ljava/lang/String;I)F", (void*) PaintGlue::measureText_StringI},
     {"native_measureText","(Ljava/lang/String;III)F", (void*) PaintGlue::measureText_StringIII},
     {"native_breakText","(JJ[CIIFI[F)I", (void*) PaintGlue::breakTextC},
     {"native_breakText","(JJLjava/lang/String;ZFI[F)I", (void*) PaintGlue::breakTextS},
     {"native_getTextWidths","(JJ[CIII[F)I", (void*) PaintGlue::getTextWidths___CIII_F},
-    {"native_getTextWidths","(JJLjava/lang/String;III[F)I", (void*) PaintGlue::getTextWidths__StringIII_F},
+    {"native_getTextWidths","(JJLjava/lang/String;III[F)I",
+            (void*) PaintGlue::getTextWidths__StringIII_F},
     {"native_getTextRunAdvances","(JJ[CIIIIZ[FI)F",
-        (void*) PaintGlue::getTextRunAdvances___CIIIIZ_FI},
+            (void*) PaintGlue::getTextRunAdvances___CIIIIZ_FI},
     {"native_getTextRunAdvances","(JJLjava/lang/String;IIIIZ[FI)F",
-        (void*) PaintGlue::getTextRunAdvances__StringIIIIZ_FI},
+            (void*) PaintGlue::getTextRunAdvances__StringIIIIZ_FI},
 
     {"native_getTextRunCursor", "(J[CIIIII)I", (void*) PaintGlue::getTextRunCursor___C},
     {"native_getTextRunCursor", "(JLjava/lang/String;IIIII)I",
-        (void*) PaintGlue::getTextRunCursor__String},
-    {"native_getTextPath","(JJI[CIIFFJ)V", (void*) PaintGlue::getTextPath___C},
-    {"native_getTextPath","(JJILjava/lang/String;IIFFJ)V", (void*) PaintGlue::getTextPath__String},
+            (void*) PaintGlue::getTextRunCursor__String},
+    {"native_getTextPath", "(JJI[CIIFFJ)V", (void*) PaintGlue::getTextPath___C},
+    {"native_getTextPath", "(JJILjava/lang/String;IIFFJ)V", (void*) PaintGlue::getTextPath__String},
     {"nativeGetStringBounds", "(JJLjava/lang/String;IIILandroid/graphics/Rect;)V",
-                                        (void*) PaintGlue::getStringBounds },
+            (void*) PaintGlue::getStringBounds },
     {"nativeGetCharArrayBounds", "(JJ[CIIILandroid/graphics/Rect;)V",
-                                    (void*) PaintGlue::getCharArrayBounds },
-    {"native_hasGlyph",           "(JJILjava/lang/String;)Z", (void*) PaintGlue::hasGlyph },
+            (void*) PaintGlue::getCharArrayBounds },
+    {"native_hasGlyph", "(JJILjava/lang/String;)Z", (void*) PaintGlue::hasGlyph },
+    {"native_getRunAdvance", "(JJ[CIIIIZI)F", (void*) PaintGlue::getRunAdvance___CIIIIZI_F},
+    {"native_getOffsetForAdvance", "(JJ[CIIIIZF)I",
+            (void*) PaintGlue::getOffsetForAdvance___CIIIIZF_I},
 
     {"native_setShadowLayer", "!(JFFFI)V", (void*)PaintGlue::setShadowLayer},
     {"native_hasShadowLayer", "!(J)Z", (void*)PaintGlue::hasShadowLayer}
