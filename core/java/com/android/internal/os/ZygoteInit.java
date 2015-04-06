@@ -32,6 +32,7 @@ import android.system.ErrnoException;
 import android.system.Os;
 import android.system.OsConstants;
 import android.system.StructPollfd;
+import android.text.Hyphenator;
 import android.util.EventLog;
 import android.util.Log;
 import android.webkit.WebViewFactory;
@@ -182,6 +183,7 @@ public class ZygoteInit {
         preloadResources();
         preloadOpenGL();
         preloadSharedLibraries();
+        preloadTextResources();
         // Ask the WebViewFactory to do any initialization that must run in the zygote process,
         // for memory sharing purposes.
         WebViewFactory.prepareWebViewInZygote();
@@ -199,6 +201,10 @@ public class ZygoteInit {
         if (!SystemProperties.getBoolean(PROPERTY_DISABLE_OPENGL_PRELOADING, false)) {
             EGL14.eglGetDisplay(EGL14.EGL_DEFAULT_DISPLAY);
         }
+    }
+
+    private static void preloadTextResources() {
+        Hyphenator.init();
     }
 
     /**
