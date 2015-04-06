@@ -822,48 +822,6 @@ public class ConnectivityManager {
     }
 
     /**
-     * Tells each network type to set its radio power state as directed.
-     *
-     * @param turnOn a boolean, {@code true} to turn the radios on,
-     *        {@code false} to turn them off.
-     * @return a boolean, {@code true} indicating success.  All network types
-     *        will be tried, even if some fail.
-     *
-     * <p>This method requires the caller to hold the permission
-     * {@link android.Manifest.permission#CHANGE_NETWORK_STATE}.
-     * {@hide}
-     */
-// TODO - check for any callers and remove
-//    public boolean setRadios(boolean turnOn) {
-//        try {
-//            return mService.setRadios(turnOn);
-//        } catch (RemoteException e) {
-//            return false;
-//        }
-//    }
-
-    /**
-     * Tells a given networkType to set its radio power state as directed.
-     *
-     * @param networkType the int networkType of interest.
-     * @param turnOn a boolean, {@code true} to turn the radio on,
-     *        {@code} false to turn it off.
-     * @return a boolean, {@code true} indicating success.
-     *
-     * <p>This method requires the caller to hold the permission
-     * {@link android.Manifest.permission#CHANGE_NETWORK_STATE}.
-     * {@hide}
-     */
-// TODO - check for any callers and remove
-//    public boolean setRadio(int networkType, boolean turnOn) {
-//        try {
-//            return mService.setRadio(networkType, turnOn);
-//        } catch (RemoteException e) {
-//            return false;
-//        }
-//    }
-
-    /**
      * Tells the underlying networking system that the caller wants to
      * begin using the named feature. The interpretation of {@code feature}
      * is completely up to each networking implementation.

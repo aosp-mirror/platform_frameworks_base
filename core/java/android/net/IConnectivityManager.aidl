@@ -118,8 +118,6 @@ interface IConnectivityManager
 
     void captivePortalCheckCompleted(in NetworkInfo info, boolean isCaptivePortal);
 
-    int findConnectionTypeForIface(in String iface);
-
     int checkMobileProvisioning(int suggestedTimeOutMs);
 
     String getMobileProvisioningUrl();

@@ -721,7 +721,9 @@ public class ConnectivityService extends IConnectivityManager.Stub
                     info = new NetworkInfo(nai.networkInfo);
                     lp = new LinkProperties(nai.linkProperties);
                     nc = new NetworkCapabilities(nai.networkCapabilities);
-                    network = new Network(nai.network);
+                    // Network objects are outwardly immutable so there is no point to duplicating.
+                    // Duplicating also precludes sharing socket factories and connection pools.
+                    network = nai.network;
                     subscriberId = (nai.networkMisc != null) ? nai.networkMisc.subscriberId : null;
                 }
                 info.setType(networkType);
@@ -789,7 +791,9 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 info = new NetworkInfo(nai.networkInfo);
                 lp = new LinkProperties(nai.linkProperties);
                 nc = new NetworkCapabilities(nai.networkCapabilities);
-                network = new Network(nai.network);
+                // Network objects are outwardly immutable so there is no point to duplicating.
+                // Duplicating also precludes sharing socket factories and connection pools.
+                network = nai.network;
                 subscriberId = (nai.networkMisc != null) ? nai.networkMisc.subscriberId : null;
             }
         }
@@ -967,13 +971,13 @@ public class ConnectivityService extends IConnectivityManager.Stub
     @Override
     public Network[] getAllNetworks() {
         enforceAccessPermission();
-        final ArrayList<Network> result = new ArrayList();
         synchronized (mNetworkForNetId) {
+            final Network[] result = new Network[mNetworkForNetId.size()];
             for (int i = 0; i < mNetworkForNetId.size(); i++) {
-                result.add(new Network(mNetworkForNetId.valueAt(i).network));
+                result[i] = mNetworkForNetId.valueAt(i).network;
             }
+            return result;
         }
-        return result.toArray(new Network[result.size()]);
     }
 
     private NetworkCapabilities getNetworkCapabilitiesAndValidation(NetworkAgentInfo nai) {
@@ -2860,23 +2864,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
         }
     }
 
-    public int findConnectionTypeForIface(String iface) {
-        enforceConnectivityInternalPermission();
-
-        if (TextUtils.isEmpty(iface)) return ConnectivityManager.TYPE_NONE;
-
-        synchronized(mNetworkForNetId) {
-            for (int i = 0; i < mNetworkForNetId.size(); i++) {
-                NetworkAgentInfo nai = mNetworkForNetId.valueAt(i);
-                LinkProperties lp = nai.linkProperties;
-                if (lp != null && iface.equals(lp.getInterfaceName()) && nai.networkInfo != null) {
-                    return nai.networkInfo.getType();
-                }
-            }
-        }
-        return ConnectivityManager.TYPE_NONE;
-    }
-
     @Override
     public int checkMobileProvisioning(int suggestedTimeOutMs) {
         // TODO: Remove?  Any reason to trigger a provisioning check?
@@ -3130,7 +3117,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 loge("Starting user already has a VPN");
                 return;
             }
-            userVpn = new Vpn(mHandler.getLooper(), mContext, mNetd, this, userId);
+            userVpn = new Vpn(mHandler.getLooper(), mContext, mNetd, userId);
             mVpns.put(userId, userVpn);
         }
     }
