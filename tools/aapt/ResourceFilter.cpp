@@ -8,6 +8,10 @@
 #include "AaptUtil.h"
 #include "AaptConfig.h"
 
+#ifdef SHOW_EXTENDED_WARNINGS
+#define SHOW_DENSITY_WARNINGS
+#endif
+
 status_t
 WeakResourceFilter::parse(const String8& str)
 {
@@ -43,7 +47,9 @@ WeakResourceFilter::parse(const String8& str)
 
         // Ignore any densities. Those are best handled in --preferred-density
         if ((entry.second & ResTable_config::CONFIG_DENSITY) != 0) {
+#ifdef SHOW_DENSITY_WARNING
             fprintf(stderr, "warning: ignoring flag -c %s. Use --preferred-density instead.\n", entry.first.toString().string());
+#endif
             entry.first.density = 0;
             entry.second &= ~ResTable_config::CONFIG_DENSITY;
         }
