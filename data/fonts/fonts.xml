@@ -191,6 +191,14 @@
         <font weight="400" style="normal">NotoSansKannadaUI-Regular.ttf</font>
         <font weight="700" style="normal">NotoSansKannadaUI-Bold.ttf</font>
     </family>
+    <family variant="elegant">
+        <font weight="400" style="normal">NotoSansOriya-Regular.ttf</font>
+        <font weight="700" style="normal">NotoSansOriya-Bold.ttf</font>
+    </family>
+    <family variant="compact">
+        <font weight="400" style="normal">NotoSansOriyaUI-Regular.ttf</font>
+        <font weight="700" style="normal">NotoSansOriyaUI-Bold.ttf</font>
+    </family>
     <family>
         <font weight="400" style="normal">NotoSansSinhala-Regular.ttf</font>
         <font weight="700" style="normal">NotoSansSinhala-Bold.ttf</font>
@@ -298,9 +306,6 @@
     </family>
     <family>
         <font weight="400" style="normal">NotoSansYi-Regular.ttf</font>
-    </family>
-    <family>
-        <font weight="400" style="normal">Lohit-Odia.ttf</font>
     </family>
     <family lang="zh-Hans">
         <font weight="400" style="normal">NotoSansHans-Regular.otf</font>
