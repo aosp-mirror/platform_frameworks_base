@@ -107,6 +107,11 @@ class Task {
         }
     }
 
+    boolean showWhenLocked() {
+        final int tokensCount = mAppTokens.size();
+        return (tokensCount != 0) && mAppTokens.get(tokensCount - 1).showWhenLocked;
+    }
+
     @Override
     public String toString() {
         return "{taskId=" + mTaskId + " appTokens=" + mAppTokens + " mdr=" + mDeferRemoval + "}";
