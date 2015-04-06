@@ -16,6 +16,7 @@
 
 package android.widget;
 
+import android.os.Bundle;
 import android.os.Trace;
 import com.android.internal.R;
 import com.android.internal.util.Predicate;
@@ -42,6 +43,7 @@ import android.view.ViewGroup;
 import android.view.ViewParent;
 import android.view.ViewRootImpl;
 import android.view.accessibility.AccessibilityNodeInfo;
+import android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction;
 import android.view.accessibility.AccessibilityNodeInfo.CollectionInfo;
 import android.view.accessibility.AccessibilityNodeInfo.CollectionItemInfo;
 import android.view.accessibility.AccessibilityNodeProvider;
@@ -3893,6 +3895,33 @@ public class ListView extends AbsListView {
         final CollectionInfo collectionInfo = CollectionInfo.obtain(
                 rowsCount, 1, false, selectionMode);
         info.setCollectionInfo(collectionInfo);
+
+        if (rowsCount > 0) {
+            info.addAction(AccessibilityAction.ACTION_SCROLL_TO_POSITION);
+        }
+    }
+
+    /** @hide */
+    @Override
+    public boolean performAccessibilityActionInternal(int action, Bundle arguments) {
+        if (super.performAccessibilityActionInternal(action, arguments)) {
+            return true;
+        }
+
+        switch (action) {
+            case R.id.accessibilityActionScrollToPosition: {
+                final int row = arguments.getInt(AccessibilityNodeInfo.ACTION_ARGUMENT_ROW_INT, -1);
+                final int position = Math.min(row, getCount() - 1);
+                if (row >= 0) {
+                    // The accessibility service gets data asynchronously, so
+                    // we'll be a little lenient by clamping the last position.
+                    smoothScrollToPosition(position);
+                    return true;
+                }
+            } break;
+        }
+
+        return false;
     }
 
     @Override

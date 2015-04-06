@@ -8400,7 +8400,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                     return true;
                 }
             } break;
-            case R.id.accessibility_action_show_on_screen: {
+            case R.id.accessibilityActionShowOnScreen: {
                 if (mAttachInfo != null) {
                     final Rect r = mAttachInfo.mTmpInvalRect;
                     getDrawingRect(r);

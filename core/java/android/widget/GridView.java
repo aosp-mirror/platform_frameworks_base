@@ -21,6 +21,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.res.TypedArray;
 import android.graphics.Rect;
+import android.os.Bundle;
 import android.os.Trace;
 import android.util.AttributeSet;
 import android.util.MathUtils;
@@ -32,11 +33,14 @@ import android.view.ViewDebug;
 import android.view.ViewGroup;
 import android.view.ViewRootImpl;
 import android.view.accessibility.AccessibilityNodeInfo;
+import android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction;
 import android.view.accessibility.AccessibilityNodeProvider;
 import android.view.accessibility.AccessibilityNodeInfo.CollectionInfo;
 import android.view.accessibility.AccessibilityNodeInfo.CollectionItemInfo;
 import android.view.animation.GridLayoutAnimationController;
 import android.widget.RemoteViews.RemoteView;
+
+import com.android.internal.R;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -117,7 +121,7 @@ public class GridView extends AbsListView {
     }
 
     public GridView(Context context, AttributeSet attrs) {
-        this(context, attrs, com.android.internal.R.attr.gridViewStyle);
+        this(context, attrs, R.attr.gridViewStyle);
     }
 
     public GridView(Context context, AttributeSet attrs, int defStyleAttr) {
@@ -128,30 +132,30 @@ public class GridView extends AbsListView {
         super(context, attrs, defStyleAttr, defStyleRes);
 
         final TypedArray a = context.obtainStyledAttributes(
-                attrs, com.android.internal.R.styleable.GridView, defStyleAttr, defStyleRes);
+                attrs, R.styleable.GridView, defStyleAttr, defStyleRes);
 
         int hSpacing = a.getDimensionPixelOffset(
-                com.android.internal.R.styleable.GridView_horizontalSpacing, 0);
+                R.styleable.GridView_horizontalSpacing, 0);
         setHorizontalSpacing(hSpacing);
 
         int vSpacing = a.getDimensionPixelOffset(
-                com.android.internal.R.styleable.GridView_verticalSpacing, 0);
+                R.styleable.GridView_verticalSpacing, 0);
         setVerticalSpacing(vSpacing);
 
-        int index = a.getInt(com.android.internal.R.styleable.GridView_stretchMode, STRETCH_COLUMN_WIDTH);
+        int index = a.getInt(R.styleable.GridView_stretchMode, STRETCH_COLUMN_WIDTH);
         if (index >= 0) {
             setStretchMode(index);
         }
 
-        int columnWidth = a.getDimensionPixelOffset(com.android.internal.R.styleable.GridView_columnWidth, -1);
+        int columnWidth = a.getDimensionPixelOffset(R.styleable.GridView_columnWidth, -1);
         if (columnWidth > 0) {
             setColumnWidth(columnWidth);
         }
 
-        int numColumns = a.getInt(com.android.internal.R.styleable.GridView_numColumns, 1);
+        int numColumns = a.getInt(R.styleable.GridView_numColumns, 1);
         setNumColumns(numColumns);
 
-        index = a.getInt(com.android.internal.R.styleable.GridView_gravity, -1);
+        index = a.getInt(R.styleable.GridView_gravity, -1);
         if (index >= 0) {
             setGravity(index);
         }
@@ -2356,6 +2360,36 @@ public class GridView extends AbsListView {
         final CollectionInfo collectionInfo = CollectionInfo.obtain(
                 rowsCount, columnsCount, false, selectionMode);
         info.setCollectionInfo(collectionInfo);
+
+        if (columnsCount > 0 || rowsCount > 0) {
+            info.addAction(AccessibilityAction.ACTION_SCROLL_TO_POSITION);
+        }
+    }
+
+    /** @hide */
+    @Override
+    public boolean performAccessibilityActionInternal(int action, Bundle arguments) {
+        if (super.performAccessibilityActionInternal(action, arguments)) {
+            return true;
+        }
+
+        switch (action) {
+            case R.id.accessibilityActionScrollToPosition: {
+                // GridView only supports scrolling in one direction, so we can
+                // ignore the column argument.
+                final int numColumns = getNumColumns();
+                final int row = arguments.getInt(AccessibilityNodeInfo.ACTION_ARGUMENT_ROW_INT, -1);
+                final int position = Math.min(row * numColumns, getCount() - 1);
+                if (row >= 0) {
+                    // The accessibility service gets data asynchronously, so
+                    // we'll be a little lenient by clamping the last position.
+                    smoothScrollToPosition(position);
+                    return true;
+                }
+            } break;
+        }
+
+        return false;
     }
 
     @Override

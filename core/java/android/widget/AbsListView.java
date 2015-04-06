@@ -61,6 +61,7 @@ import android.view.ViewTreeObserver;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.AccessibilityNodeInfo;
+import android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction;
 import android.view.accessibility.AccessibilityNodeInfo.CollectionInfo;
 import android.view.animation.Interpolator;
 import android.view.animation.LinearInterpolator;
@@ -1504,11 +1505,11 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         super.onInitializeAccessibilityNodeInfoInternal(info);
         if (isEnabled()) {
             if (canScrollUp()) {
-                info.addAction(AccessibilityNodeInfo.ACTION_SCROLL_BACKWARD);
+                info.addAction(AccessibilityAction.ACTION_SCROLL_BACKWARD);
                 info.setScrollable(true);
             }
             if (canScrollDown()) {
-                info.addAction(AccessibilityNodeInfo.ACTION_SCROLL_FORWARD);
+                info.addAction(AccessibilityAction.ACTION_SCROLL_FORWARD);
                 info.setScrollable(true);
             }
         }
@@ -2502,18 +2503,18 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
 
         if (position == getSelectedItemPosition()) {
             info.setSelected(true);
-            info.addAction(AccessibilityNodeInfo.ACTION_CLEAR_SELECTION);
+            info.addAction(AccessibilityAction.ACTION_CLEAR_SELECTION);
         } else {
-            info.addAction(AccessibilityNodeInfo.ACTION_SELECT);
+            info.addAction(AccessibilityAction.ACTION_SELECT);
         }
 
         if (isClickable()) {
-            info.addAction(AccessibilityNodeInfo.ACTION_CLICK);
+            info.addAction(AccessibilityAction.ACTION_CLICK);
             info.setClickable(true);
         }
 
         if (isLongClickable()) {
-            info.addAction(AccessibilityNodeInfo.ACTION_LONG_CLICK);
+            info.addAction(AccessibilityAction.ACTION_LONG_CLICK);
             info.setLongClickable(true);
         }
     }
