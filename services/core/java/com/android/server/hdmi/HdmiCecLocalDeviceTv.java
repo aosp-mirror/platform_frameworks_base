@@ -1581,7 +1581,6 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
     @Override
     @ServiceThreadOnly
     protected void disableDevice(boolean initiatedByCec, PendingActionClearedCallback callback) {
-        super.disableDevice(initiatedByCec, callback);
         assertRunOnServiceThread();
         mService.unregisterTvInputCallback(mTvInputCallback);
         // Remove any repeated working actions.
@@ -1597,6 +1596,8 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
 
         disableSystemAudioIfExist();
         disableArcIfExist();
+
+        super.disableDevice(initiatedByCec, callback);
         clearDeviceInfoList();
         checkIfPendingActionsCleared();
     }
