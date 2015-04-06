@@ -29,12 +29,14 @@ sources := \
 	BinaryResourceParser.cpp \
 	ConfigDescription.cpp \
 	Files.cpp \
+	Flag.cpp \
 	JavaClassGenerator.cpp \
 	Linker.cpp \
 	Locale.cpp \
 	Logger.cpp \
 	ManifestParser.cpp \
 	ManifestValidator.cpp \
+	Png.cpp \
 	ResChunkPullParser.cpp \
 	Resolver.cpp \
 	Resource.cpp \
@@ -69,7 +71,10 @@ testSources := \
 	XliffXmlPullParser_test.cpp \
 	XmlFlattener_test.cpp
 
-cIncludes :=
+cIncludes := \
+	external/libpng \
+	external/libz
+
 hostLdLibs :=
 
 hostStaticLibs := \
@@ -78,7 +83,8 @@ hostStaticLibs := \
 	liblog \
 	libcutils \
 	libexpat \
-	libziparchive-host
+	libziparchive-host \
+	libpng
 
 ifneq ($(strip $(USE_MINGW)),)
 	hostStaticLibs += libz
