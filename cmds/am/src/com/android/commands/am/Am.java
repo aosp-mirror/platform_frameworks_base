@@ -1189,12 +1189,12 @@ public class Am extends BaseCommand {
     private void runSetWatchHeap() throws Exception {
         String proc = nextArgRequired();
         String limit = nextArgRequired();
-        mAm.setDumpHeapDebugLimit(proc, Long.parseLong(limit));
+        mAm.setDumpHeapDebugLimit(proc, 0, Long.parseLong(limit), null);
     }
 
     private void runClearWatchHeap() throws Exception {
         String proc = nextArgRequired();
-        mAm.setDumpHeapDebugLimit(proc, -1);
+        mAm.setDumpHeapDebugLimit(proc, 0, -1, null);
     }
 
     private void runBugReport() throws Exception {

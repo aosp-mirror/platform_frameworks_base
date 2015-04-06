@@ -17,13 +17,16 @@
 package com.android.internal.app;
 
 import android.app.Activity;
+import android.app.ActivityManager;
 import android.app.AlertDialog;
+import android.content.ActivityNotFoundException;
 import android.content.ClipData;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.DebugUtils;
+import android.util.Slog;
 
 /**
  * This activity is displayed when the system has collected a heap dump from
@@ -34,6 +37,8 @@ public class DumpHeapActivity extends Activity {
     public static final String KEY_PROCESS = "process";
     /** The size limit the process reached */
     public static final String KEY_SIZE = "size";
+    /** Optional name of package to directly launch */
+    public static final String KEY_DIRECT_LAUNCH = "direct_launch";
 
     // Broadcast action to determine when to delete the current dump heap data.
     public static final String ACTION_DELETE_DUMPHEAP = "com.android.server.am.DELETE_DUMPHEAP";
@@ -54,6 +59,28 @@ public class DumpHeapActivity extends Activity {
 
         mProcess = getIntent().getStringExtra(KEY_PROCESS);
         mSize = getIntent().getLongExtra(KEY_SIZE, 0);
+
+        String directLaunch = getIntent().getStringExtra(KEY_DIRECT_LAUNCH);
+        if (directLaunch != null) {
+            Intent intent = new Intent(ActivityManager.ACTION_REPORT_HEAP_LIMIT);
+            intent.setPackage(directLaunch);
+            ClipData clip = ClipData.newUri(getContentResolver(), "Heap Dump", JAVA_URI);
+            intent.setClipData(clip);
+            intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            intent.setType(clip.getDescription().getMimeType(0));
+            intent.putExtra(Intent.EXTRA_STREAM, JAVA_URI);
+            try {
+                startActivity(intent);
+                scheduleDelete();
+                mHandled = true;
+                finish();
+                return;
+            } catch (ActivityNotFoundException e) {
+                Slog.i("DumpHeapActivity", "Unable to direct launch to " + directLaunch
+                        + ": " + e.getMessage());
+            }
+        }
+
         AlertDialog.Builder b = new AlertDialog.Builder(this,
                 android.R.style.Theme_Material_Light_Dialog_Alert);
         b.setTitle(com.android.internal.R.string.dump_heap_title);
@@ -71,9 +98,7 @@ public class DumpHeapActivity extends Activity {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 mHandled = true;
-                Intent broadcast = new Intent(ACTION_DELETE_DUMPHEAP);
-                broadcast.putExtra(EXTRA_DELAY_DELETE, true);
-                sendBroadcast(broadcast);
+                scheduleDelete();
                 Intent intent = new Intent(Intent.ACTION_SEND);
                 ClipData clip = ClipData.newUri(getContentResolver(), "Heap Dump", JAVA_URI);
                 intent.setClipData(clip);
@@ -86,6 +111,12 @@ public class DumpHeapActivity extends Activity {
         }
         });
         mDialog = b.show();
+    }
+
+    void scheduleDelete() {
+        Intent broadcast = new Intent(ACTION_DELETE_DUMPHEAP);
+        broadcast.putExtra(EXTRA_DELAY_DELETE, true);
+        sendBroadcast(broadcast);
     }
 
     @Override

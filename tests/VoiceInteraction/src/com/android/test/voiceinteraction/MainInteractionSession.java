@@ -16,6 +16,7 @@
 
 package com.android.test.voiceinteraction;
 
+import android.app.ActivityManager;
 import android.app.AssistContent;
 import android.app.AssistStructure;
 import android.app.VoiceInteractor;
@@ -69,6 +70,8 @@ public class MainInteractionSession extends VoiceInteractionSession
     @Override
     public void onCreate(Bundle args, int startFlags) {
         super.onCreate(args);
+        ActivityManager am = getContext().getSystemService(ActivityManager.class);
+        am.setWatchHeapLimit(40*1024*1024);
     }
 
     @Override

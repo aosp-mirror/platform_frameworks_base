@@ -18,6 +18,7 @@ package com.android.server.voiceinteraction;
 
 import android.app.ActivityManager;
 import android.app.ActivityManagerNative;
+import android.app.AppOpsManager;
 import android.app.AssistContent;
 import android.app.IActivityManager;
 import android.content.ClipData;
@@ -62,6 +63,7 @@ final class VoiceInteractionSessionConnection implements ServiceConnection {
     final int mCallingUid;
     final IActivityManager mAm;
     final IWindowManager mIWindowManager;
+    final AppOpsManager mAppOps;
     final IBinder mPermissionOwner;
     boolean mShown;
     Bundle mShowArgs;
@@ -148,6 +150,7 @@ final class VoiceInteractionSessionConnection implements ServiceConnection {
         mAm = ActivityManagerNative.getDefault();
         mIWindowManager = IWindowManager.Stub.asInterface(
                 ServiceManager.getService(Context.WINDOW_SERVICE));
+        mAppOps = context.getSystemService(AppOpsManager.class);
         IBinder permOwner = null;
         try {
             permOwner = mAm.newUriPermissionOwner("voicesession:"
@@ -159,7 +162,8 @@ final class VoiceInteractionSessionConnection implements ServiceConnection {
         mBindIntent = new Intent(VoiceInteractionService.SERVICE_INTERFACE);
         mBindIntent.setComponent(mSessionComponentName);
         mBound = mContext.bindServiceAsUser(mBindIntent, this,
-                Context.BIND_AUTO_CREATE|Context.BIND_ALLOW_OOM_MANAGEMENT, new UserHandle(mUser));
+                Context.BIND_AUTO_CREATE|Context.BIND_WAIVE_PRIORITY
+                        |Context.BIND_ALLOW_OOM_MANAGEMENT, new UserHandle(mUser));
         if (mBound) {
             try {
                 mIWindowManager.addWindowToken(mToken,
@@ -186,19 +190,31 @@ final class VoiceInteractionSessionConnection implements ServiceConnection {
             mShowFlags = flags;
             mHaveAssistData = false;
             if ((flags&VoiceInteractionService.START_WITH_ASSIST) != 0) {
-                try {
-                    mAm.requestAssistContextExtras(ActivityManager.ASSIST_CONTEXT_FULL,
-                            mAssistReceiver);
-                } catch (RemoteException e) {
+                if (mAppOps.noteOpNoThrow(AppOpsManager.OP_ASSIST_STRUCTURE, mCallingUid,
+                        mSessionComponentName.getPackageName()) == AppOpsManager.MODE_ALLOWED) {
+                    try {
+                        mAm.requestAssistContextExtras(ActivityManager.ASSIST_CONTEXT_FULL,
+                                mAssistReceiver);
+                    } catch (RemoteException e) {
+                    }
+                } else {
+                    mHaveAssistData = true;
+                    mAssistData = null;
                 }
             } else {
                 mAssistData = null;
             }
             mHaveScreenshot = false;
             if ((flags&VoiceInteractionService.START_WITH_SCREENSHOT) != 0) {
-                try {
-                    mIWindowManager.requestAssistScreenshot(mScreenshotReceiver);
-                } catch (RemoteException e) {
+                if (mAppOps.noteOpNoThrow(AppOpsManager.OP_ASSIST_SCREENSHOT, mCallingUid,
+                        mSessionComponentName.getPackageName()) == AppOpsManager.MODE_ALLOWED) {
+                    try {
+                        mIWindowManager.requestAssistScreenshot(mScreenshotReceiver);
+                    } catch (RemoteException e) {
+                    }
+                } else {
+                    mHaveScreenshot = true;
+                    mScreenshot = null;
                 }
             } else {
                 mScreenshot = null;
@@ -334,6 +350,12 @@ final class VoiceInteractionSessionConnection implements ServiceConnection {
                                     | Intent.FLAG_GRANT_WRITE_URI_PERMISSION,
                             mUser);
                 } catch (RemoteException e) {
+                }
+                if (mSession != null) {
+                    try {
+                        mAm.finishVoiceTask(mSession);
+                    } catch (RemoteException e) {
+                    }
                 }
             }
             if (mFullyBound) {

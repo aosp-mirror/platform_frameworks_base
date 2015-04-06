@@ -2682,6 +2682,47 @@ public class ActivityManager {
     }
 
     /**
+     * Request that the system start watching for the calling process to exceed a pss
+     * size as given here.  Once called, the system will look for any occassions where it
+     * sees the associated process with a larger pss size and, when this happens, automatically
+     * pull a heap dump from it and allow the user to share the data.  Note that this request
+     * continues running even if the process is killed and restarted.  To remove the watch,
+     * use {@link #clearWatchHeapLimit()}.
+     *
+     * <p>This API only work if running on a debuggable (userdebug or eng) build.</p>
+     *
+     * <p>Callers can optionally implement {@link #ACTION_REPORT_HEAP_LIMIT} to directly
+     * handle heap limit reports themselves.</p>
+     *
+     * @param pssSize The size in bytes to set the limit at.
+     */
+    public void setWatchHeapLimit(long pssSize) {
+        try {
+            ActivityManagerNative.getDefault().setDumpHeapDebugLimit(null, 0, pssSize,
+                    mContext.getPackageName());
+        } catch (RemoteException e) {
+        }
+    }
+
+    /**
+     * Action an app can implement to handle reports from {@link #setWatchHeapLimit(long)}.
+     * If your package has an activity handling this action, it will be launched with the
+     * heap data provided to it the same way as {@link Intent#ACTION_SEND}.  Note that to
+     * match the activty must support this action and a MIME type of "*&#47;*".
+     */
+    public static final String ACTION_REPORT_HEAP_LIMIT = "android.app.action.REPORT_HEAP_LIMIT";
+
+    /**
+     * Clear a heap watch limit previously set by {@link #setWatchHeapLimit(long)}.
+     */
+    public void clearWatchHeapLimit() {
+        try {
+            ActivityManagerNative.getDefault().setDumpHeapDebugLimit(null, 0, 0, null);
+        } catch (RemoteException e) {
+        }
+    }
+
+    /**
      * @hide
      */
     public void startLockTaskMode(int taskId) {
