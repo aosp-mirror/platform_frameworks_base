@@ -691,6 +691,14 @@ public class WifiConfiguration implements Parcelable {
     }
 
     /**
+     * The WiFi configuration is expected not to have Internet access (e.g., a wireless printer, a
+     * Chromecast hotspot, etc.). This will be set if the user explicitly confirms a connection to
+     * this configuration and selects "don't ask again".
+     * @hide
+     */
+    public boolean noInternetAccessExpected;
+
+    /**
      * @hide
      * Last time we blacklisted the configuration
      */
@@ -1137,6 +1145,7 @@ public class WifiConfiguration implements Parcelable {
         sbuf.append(" lcuid=" + lastConnectUid);
         sbuf.append(" userApproved=" + userApprovedAsString(userApproved));
         sbuf.append(" noInternetAccessExpected=" + noInternetAccessExpected);
+        sbuf.append(" ");
 
         if (this.lastConnected != 0) {
             sbuf.append('\n');
@@ -1547,6 +1556,7 @@ public class WifiConfiguration implements Parcelable {
             dirty = source.dirty;
             userApproved = source.userApproved;
             numNoInternetAccessReports = source.numNoInternetAccessReports;
+            noInternetAccessExpected = source.noInternetAccessExpected;
         }
     }
 
@@ -1625,6 +1635,7 @@ public class WifiConfiguration implements Parcelable {
         dest.writeInt(autoJoinBailedDueToLowRssi ? 1 : 0);
         dest.writeInt(userApproved);
         dest.writeInt(numNoInternetAccessReports);
+        dest.writeInt(noInternetAccessExpected ? 1 : 0);
     }
 
     /** Implement the Parcelable interface {@hide} */
@@ -1699,6 +1710,7 @@ public class WifiConfiguration implements Parcelable {
                 config.autoJoinBailedDueToLowRssi = in.readInt() != 0;
                 config.userApproved = in.readInt();
                 config.numNoInternetAccessReports = in.readInt();
+                config.noInternetAccessExpected = in.readInt() != 0;
                 return config;
             }
 
