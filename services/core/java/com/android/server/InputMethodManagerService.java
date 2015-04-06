@@ -15,6 +15,7 @@
 
 package com.android.server;
 
+import android.annotation.NonNull;
 import com.android.internal.content.PackageMonitor;
 import com.android.internal.inputmethod.InputMethodSubtypeSwitchingController;
 import com.android.internal.inputmethod.InputMethodSubtypeSwitchingController.ImeSubtypeListItem;
@@ -1285,11 +1286,22 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         return startInputUncheckedLocked(cs, inputContext, attribute, controlFlags);
     }
 
-    InputBindResult startInputUncheckedLocked(ClientState cs,
+    InputBindResult startInputUncheckedLocked(@NonNull ClientState cs,
             IInputContext inputContext, EditorInfo attribute, int controlFlags) {
         // If no method is currently selected, do nothing.
         if (mCurMethodId == null) {
             return mNoBinding;
+        }
+
+        if (attribute != null) {
+            // We accept an empty package name as a valid data.
+            if (!TextUtils.isEmpty(attribute.packageName) &&
+                    !InputMethodUtils.checkIfPackageBelongsToUid(mAppOpsManager, cs.uid,
+                            attribute.packageName)) {
+                Slog.e(TAG, "Rejecting this client as it reported an invalid package name."
+                        + " uid=" + cs.uid + " package=" + attribute.packageName);
+                return mNoBinding;
+            }
         }
 
         if (mCurClient != cs) {
@@ -1855,16 +1867,10 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         }
 
         if (mCurClient != null && mCurAttribute != null) {
-            final int uid = mCurClient.uid;
-            final String packageName = mCurAttribute.packageName;
-            if (SystemConfig.getInstance().getFixedImeApps().contains(packageName)) {
-                if (InputMethodUtils.checkIfPackageBelongsToUid(mAppOpsManager, uid, packageName)) {
-                    return;
-                }
-                // TODO: Do we need to lock the input method when the application reported an
-                // incorrect package name?
-                Slog.e(TAG, "Ignoring FixedImeApps due to the validation failure. uid=" + uid
-                        + " package=" + packageName);
+            // We have already made sure that the package name belongs to the application's UID.
+            // No further UID check is required.
+            if (SystemConfig.getInstance().getFixedImeApps().contains(mCurAttribute.packageName)) {
+                return;
             }
         }
 
@@ -2148,7 +2154,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 // more quickly (not get stuck behind it initializing itself for the
                 // new focused input, even if its window wants to hide the IME).
                 boolean didStart = false;
-                        
+
                 switch (softInputMode&WindowManager.LayoutParams.SOFT_INPUT_MASK_STATE) {
                     case WindowManager.LayoutParams.SOFT_INPUT_STATE_UNSPECIFIED:
                         if (!isTextEditor || !doAutoShow) {
