@@ -854,10 +854,8 @@
     <string name="permdesc_removeDrmCertificates" msgid="7272999075113400993">"ອະ​ນຸ​ຍາດ​ໃຫ້​ແອັບ​ພລິ​ເຄ​ຊັນ​ລຶບ​ໃບ​ຮັບ​ຮອງ DRM. ແອັບຯ​ທົ່ວ​ໄປ​ບໍ່​ຄວນ​ຈຳ​ເປັນ​ຕ້ອງ​ໃຊ້."</string>
     <string name="permlab_bindCarrierMessagingService" msgid="1490229371796969158">"ຜູກ​ພັນ​ກັບ​ການ​ບໍ​ລິ​ການ​ສົ່ງ​ຂໍ້​ຄວາມ​ຜູ້​ໃຫ້​ບໍ​ລິ​ການ"</string>
     <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"ອະນຸຍາດໃຫ້ຜູ້ຖືຜູກ​ພັນ​ກັບຕົວ​ປະ​ສານລະດັບສູງສຸດຂອງບໍລິການສົ່ງ​ຂໍ້​ຄວາມ​ຜູ້​ໃຫ້​ບໍ​ລິ​ການ. ບໍ່ຈຳເປັນສຳລັບແອັບຯທົ່ວໄປ."</string>
-    <!-- no translation found for permlab_accessVoiceInteractionService (4183835260471435605) -->
-    <skip />
-    <!-- no translation found for permdesc_accessVoiceInteractionService (836587728238433459) -->
-    <skip />
+    <string name="permlab_accessVoiceInteractionService" msgid="4183835260471435605">"ດຳ​ເນີນ​ການ​ກັບ​ການ​ບໍ​ລິ​ການ​ດຳ​ເນີນ​ການ​ທາງ​ສຽງ"</string>
+    <string name="permdesc_accessVoiceInteractionService" msgid="836587728238433459">"ອະ​ນຸ​ຍາດ​ໃຫ້​ຜູ້​ຖື​ດຳ​ເນີນ​ການ​ກັບ​ການ​ບໍ​ລິ​ການ​ດຳ​ເນີນ​ການ​ທາງ​ສຽງ​ທີ່​ເປີດ​ຢູ່​ປະ​ຈຸ​ບັນ. ບໍ່​ຈຳ​ເປັນ​ສຳ​ລັບ​ແອັບ​ປົກ​ກະ​ຕິ."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"ຕັ້ງຄ່າກົດຂອງລະຫັດຜ່ານ"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"ຄວບຄຸມຄວາມຍາວ ແລະຕົວອັກສອນທີ່ອະ​ນຸ​ຍາດ​ໃຫ້​ຢູ່​ໃນລະ​ຫັດລັອກໜ້າຈໍ ແລະ PIN."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"ຕິດຕາມການພະຍາຍາມປົດລັອກໜ້າຈໍ"</string>

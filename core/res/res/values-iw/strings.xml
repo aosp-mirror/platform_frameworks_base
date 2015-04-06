@@ -856,10 +856,8 @@
     <string name="permdesc_removeDrmCertificates" msgid="7272999075113400993">"‏הרשאה זו מאפשרת לאפליקציה להסיר אישורי DRM. באפליקציות רגילות אף פעם לא אמור להיות בה צורך."</string>
     <string name="permlab_bindCarrierMessagingService" msgid="1490229371796969158">"איגוד לשירות העברת הודעות של ספק"</string>
     <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"מאפשרת לבעלים לאגד לממשק ברמה העליונה של שירות העברת הודעות של ספק. לעולם לא אמורה להיות נחוצה עבור אפליקציות רגילות."</string>
-    <!-- no translation found for permlab_accessVoiceInteractionService (4183835260471435605) -->
-    <skip />
-    <!-- no translation found for permdesc_accessVoiceInteractionService (836587728238433459) -->
-    <skip />
+    <string name="permlab_accessVoiceInteractionService" msgid="4183835260471435605">"אינטראקציה עם שירות אינטראקציה קולית"</string>
+    <string name="permdesc_accessVoiceInteractionService" msgid="836587728238433459">"מאפשר לבעלים לקיים אינטראקציה עם השירות הפעיל הנוכחי של אינטראקציה קולית. לא אמורה להיות נחוצה לאפליקציות רגילות."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"הגדר כללי סיסמה"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"‏קביעת האורך הנדרש והתווים המותרים בסיסמאות ובקודי PIN של מסך הנעילה."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"עקוב אחר ניסיונות לביטול נעילת מסך"</string>
