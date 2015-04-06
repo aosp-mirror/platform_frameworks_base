@@ -30,7 +30,7 @@ import java.util.Locale;
  *
  * @hide
  */
-/* package */ class Hyphenator {
+public class Hyphenator {
     // This class has deliberately simple lifetime management (no finalizer) because in
     // the common case a process will use a very small number of locales.
 
@@ -45,20 +45,14 @@ import java.util.Locale;
     }
 
     public static long get(Locale locale) {
-        synchronized (sMap) {
-            Hyphenator result = sMap.get(locale);
-            if (result == null) {
-                result = loadHyphenator(locale);
-                sMap.put(locale, result);
-            }
-            return result == null ? 0 : result.mNativePtr;
-        }
+        Hyphenator result = sMap.get(locale);
+        return result == null ? 0 : result.mNativePtr;
     }
 
     private static Hyphenator loadHyphenator(Locale locale) {
         // TODO: find pattern dictionary (from system location) that best matches locale
         if (Locale.US.equals(locale)) {
-            File f = new File("/data/local/tmp/hyph-en-us.pat.txt");
+            File f = new File(getSystemHyphenatorLocation(), "hyph-en-us.pat.txt");
             try {
                 RandomAccessFile rf = new RandomAccessFile(f, "r");
                 byte[] buf = new byte[(int)rf.length()];
@@ -68,9 +62,26 @@ import java.util.Locale;
                 long nativePtr = StaticLayout.nLoadHyphenator(patternData);
                 return new Hyphenator(nativePtr);
             } catch (IOException e) {
-                Log.e(TAG, "error loading hyphenation " + f);
+                Log.e(TAG, "error loading hyphenation " + f, e);
             }
         }
         return null;
+    }
+
+    private static File getSystemHyphenatorLocation() {
+        // TODO: move to a sensible location under system
+        return new File("/system/usr/hyphen-data");
+    }
+
+    /**
+     * Load hyphenation patterns at initialization time. We want to have patterns
+     * for all locales loaded and ready to use so we don't have to do any file IO
+     * on the UI thread when drawing text in different locales.
+     *
+     * @hide
+     */
+    public static void init() {
+        Locale l = Locale.US;
+        sMap.put(l, loadHyphenator(l));
     }
 }
