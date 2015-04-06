@@ -420,7 +420,7 @@ final class ProcessRecord {
                         tracker.getMemFactorLocked(), SystemClock.uptimeMillis(), pkgList);
                 origBase.makeInactive();
             }
-            baseProcessTracker = tracker.getProcessStateLocked(info.packageName, info.uid,
+            baseProcessTracker = tracker.getProcessStateLocked(info.packageName, uid,
                     info.versionCode, processName);
             baseProcessTracker.makeActive();
             for (int i=0; i<pkgList.size(); i++) {
@@ -428,7 +428,7 @@ final class ProcessRecord {
                 if (holder.state != null && holder.state != origBase) {
                     holder.state.makeInactive();
                 }
-                holder.state = tracker.getProcessStateLocked(pkgList.keyAt(i), info.uid,
+                holder.state = tracker.getProcessStateLocked(pkgList.keyAt(i), uid,
                         info.versionCode, processName);
                 if (holder.state != baseProcessTracker) {
                     holder.state.makeActive();
@@ -619,7 +619,7 @@ final class ProcessRecord {
                     versionCode);
             if (baseProcessTracker != null) {
                 holder.state = tracker.getProcessStateLocked(
-                        pkg, info.uid, versionCode, processName);
+                        pkg, uid, versionCode, processName);
                 pkgList.put(pkg, holder);
                 if (holder.state != baseProcessTracker) {
                     holder.state.makeActive();
@@ -666,7 +666,7 @@ final class ProcessRecord {
                 }
                 pkgList.clear();
                 ProcessStats.ProcessState ps = tracker.getProcessStateLocked(
-                        info.packageName, info.uid, info.versionCode, processName);
+                        info.packageName, uid, info.versionCode, processName);
                 ProcessStats.ProcessStateHolder holder = new ProcessStats.ProcessStateHolder(
                         info.versionCode);
                 holder.state = ps;
