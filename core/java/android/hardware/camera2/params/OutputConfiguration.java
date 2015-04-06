@@ -18,6 +18,7 @@
 package android.hardware.camera2.params;
 
 import android.hardware.camera2.CameraDevice;
+import android.hardware.camera2.utils.HashCodeHelpers;
 import android.util.Log;
 import android.view.Surface;
 import android.os.Parcel;
@@ -157,6 +158,35 @@ public final class OutputConfiguration implements Parcelable {
         }
         dest.writeInt(mRotation);
         mSurface.writeToParcel(dest, flags);
+    }
+
+    /**
+     * Check if this {@link OutputConfiguration} is equal to another {@link OutputConfiguration}.
+     *
+     * <p>Two output configurations are only equal if and only if the underlying surface and
+     * all other configuration parameters are equal. </p>
+     *
+     * @return {@code true} if the objects were equal, {@code false} otherwise
+     */
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null) {
+            return false;
+        } else if (this == obj) {
+            return true;
+        } else if (obj instanceof OutputConfiguration) {
+            final OutputConfiguration other = (OutputConfiguration) obj;
+            return (mSurface == other.mSurface && mRotation == other.mRotation);
+        }
+        return false;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public int hashCode() {
+        return HashCodeHelpers.hashCode(mSurface.hashCode(), mRotation);
     }
 
     private static final String TAG = "OutputConfiguration";
