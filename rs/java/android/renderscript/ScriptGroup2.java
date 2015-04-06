@@ -112,7 +112,7 @@ public class ScriptGroup2 extends BaseObj {
         public Closure(RenderScript rs, Script.InvokeID invokeID,
                        Object[] args, Map<Script.FieldID, Object> globals) {
             super(0, rs);
-            mFP = FieldPacker.createFieldPack(args);
+            mFP = FieldPacker.createFromArray(args);
 
             mArgs = args;
             mBindings = globals;
