@@ -119,12 +119,18 @@ final class RoutingControlAction extends HdmiCecFeatureAction {
 
     private void handleReportPowerStatus(int devicePowerStatus) {
         if (isPowerOnOrTransient(getTvPowerStatus())) {
-            tv().updateActiveInput(mCurrentRoutingPath, mNotifyInputChange);
+            updateActiveInput();
             if (isPowerOnOrTransient(devicePowerStatus)) {
                 sendSetStreamPath();
             }
         }
         finishWithCallback(HdmiControlManager.RESULT_SUCCESS);
+    }
+
+    private void updateActiveInput() {
+        HdmiCecLocalDeviceTv tv = tv();
+        tv.setPrevPortId(tv.getActivePortId());
+        tv.updateActiveInput(mCurrentRoutingPath, mNotifyInputChange);
     }
 
     private int getTvPowerStatus() {
@@ -165,13 +171,13 @@ final class RoutingControlAction extends HdmiCecFeatureAction {
                         }
                     });
                 } else {
-                    tv().updateActiveInput(mCurrentRoutingPath, mNotifyInputChange);
+                    updateActiveInput();
                     finishWithCallback(HdmiControlManager.RESULT_SUCCESS);
                 }
                 return;
             case STATE_WAIT_FOR_REPORT_POWER_STATUS:
                 if (isPowerOnOrTransient(getTvPowerStatus())) {
-                    tv().updateActiveInput(mCurrentRoutingPath, mNotifyInputChange);
+                    updateActiveInput();
                     sendSetStreamPath();
                 }
                 finishWithCallback(HdmiControlManager.RESULT_SUCCESS);
@@ -189,7 +195,7 @@ final class RoutingControlAction extends HdmiCecFeatureAction {
             mState = STATE_WAIT_FOR_REPORT_POWER_STATUS;
             addTimer(mState, TIMEOUT_REPORT_POWER_STATUS_MS);
         } else {
-            tv().updateActiveInput(mCurrentRoutingPath, mNotifyInputChange);
+            updateActiveInput();
             sendSetStreamPath();
             finishWithCallback(HdmiControlManager.RESULT_SUCCESS);
         }

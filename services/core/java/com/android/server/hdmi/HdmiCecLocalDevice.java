@@ -71,6 +71,9 @@ abstract class HdmiCecLocalDevice {
             logicalAddress = logical;
             physicalAddress = physical;
         }
+        public static ActiveSource of(ActiveSource source) {
+            return new ActiveSource(source.logicalAddress, source.physicalAddress);
+        }
         public static ActiveSource of(int logical, int physical) {
             return new ActiveSource(logical, physical);
         }
@@ -102,10 +105,10 @@ abstract class HdmiCecLocalDevice {
             StringBuffer s = new StringBuffer();
             String logicalAddressString = (logicalAddress == Constants.ADDR_INVALID)
                     ? "invalid" : String.format("0x%02x", logicalAddress);
-            s.append("logical_address: ").append(logicalAddressString);
+            s.append("(").append(logicalAddressString);
             String physicalAddressString = (physicalAddress == Constants.INVALID_PHYSICAL_ADDRESS)
                     ? "invalid" : String.format("0x%04x", physicalAddress);
-            s.append(", physical_address: ").append(physicalAddressString);
+            s.append(", ").append(physicalAddressString).append(")");
             return s.toString();
         }
     }
