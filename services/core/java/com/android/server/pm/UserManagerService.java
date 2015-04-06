@@ -1690,7 +1690,7 @@ public class UserManagerService extends IUserManager.Stub {
         final Bundle restrictions = new Bundle();
         final ArrayList<String> values = new ArrayList<>();
         if (!restrictionsFile.getBaseFile().exists()) {
-            return null;
+            return restrictions;
         }
 
         FileInputStream fis = null;
