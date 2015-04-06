@@ -42,7 +42,7 @@ public class AppIdleController extends StateController
         implements UsageStatsManagerInternal.AppIdleStateChangeListener {
 
     private static final String LOG_TAG = "AppIdleController";
-    private static final boolean DEBUG = true;
+    private static final boolean DEBUG = false;
 
     // Singleton factory
     private static Object sCreationLock = new Object();

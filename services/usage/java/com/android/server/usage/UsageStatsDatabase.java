@@ -18,6 +18,7 @@ package com.android.server.usage;
 
 import android.app.usage.TimeSparseArray;
 import android.app.usage.UsageStatsManager;
+import android.os.Build;
 import android.util.AtomicFile;
 import android.util.Slog;
 
@@ -35,7 +36,7 @@ import java.util.List;
  * Provides an interface to query for UsageStat data from an XML database.
  */
 class UsageStatsDatabase {
-    private static final int CURRENT_VERSION = 2;
+    private static final int CURRENT_VERSION = 3;
 
     private static final String TAG = "UsageStatsDatabase";
     private static final boolean DEBUG = UsageStatsService.DEBUG;
@@ -47,6 +48,8 @@ class UsageStatsDatabase {
     private final TimeSparseArray<AtomicFile>[] mSortedStatFiles;
     private final UnixCalendar mCal;
     private final File mVersionFile;
+    private boolean mFirstUpdate;
+    private boolean mNewUpdate;
 
     public UsageStatsDatabase(File dir) {
         mIntervalDirs = new File[] {
@@ -73,7 +76,7 @@ class UsageStatsDatabase {
                 }
             }
 
-            checkVersionLocked();
+            checkVersionAndBuildLocked();
             indexFilesLocked();
 
             // Delete files that are in the future.
@@ -194,10 +197,35 @@ class UsageStatsDatabase {
         }
     }
 
-    private void checkVersionLocked() {
+    /**
+     * Is this the first update to the system from L to M?
+     */
+    boolean isFirstUpdate() {
+        return mFirstUpdate;
+    }
+
+    /**
+     * Is this a system update since we started tracking build fingerprint in the version file?
+     */
+    boolean isNewUpdate() {
+        return mNewUpdate;
+    }
+
+    private void checkVersionAndBuildLocked() {
         int version;
+        String buildFingerprint;
+        String currentFingerprint = getBuildFingerprint();
+        mFirstUpdate = true;
+        mNewUpdate = true;
         try (BufferedReader reader = new BufferedReader(new FileReader(mVersionFile))) {
             version = Integer.parseInt(reader.readLine());
+            buildFingerprint = reader.readLine();
+            if (buildFingerprint != null) {
+                mFirstUpdate = false;
+            }
+            if (currentFingerprint.equals(buildFingerprint)) {
+                mNewUpdate = false;
+            }
         } catch (NumberFormatException | IOException e) {
             version = 0;
         }
@@ -205,14 +233,26 @@ class UsageStatsDatabase {
         if (version != CURRENT_VERSION) {
             Slog.i(TAG, "Upgrading from version " + version + " to " + CURRENT_VERSION);
             doUpgradeLocked(version);
+        }
 
+        if (version != CURRENT_VERSION || mNewUpdate) {
             try (BufferedWriter writer = new BufferedWriter(new FileWriter(mVersionFile))) {
                 writer.write(Integer.toString(CURRENT_VERSION));
+                writer.write("\n");
+                writer.write(currentFingerprint);
+                writer.write("\n");
+                writer.flush();
             } catch (IOException e) {
                 Slog.e(TAG, "Failed to write new version");
                 throw new RuntimeException(e);
             }
         }
+    }
+
+    private String getBuildFingerprint() {
+        return Build.VERSION.RELEASE + ";"
+                + Build.VERSION.CODENAME + ";"
+                + Build.VERSION.INCREMENTAL;
     }
 
     private void doUpgradeLocked(int thisVersion) {
