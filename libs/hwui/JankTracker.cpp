@@ -169,6 +169,10 @@ void JankTracker::switchStorageToAshmem(int ashmemfd) {
     newData->jankFrameCount += mData->jankFrameCount;
     newData->totalFrameCount >>= divider;
     newData->totalFrameCount += mData->totalFrameCount;
+    if (newData->statStartTime > mData->statStartTime
+            || newData->statStartTime == 0) {
+        newData->statStartTime = mData->statStartTime;
+    }
 
     freeData();
     mData = newData;
@@ -235,6 +239,7 @@ void JankTracker::dumpBuffer(const void* buffer, size_t bufsize, int fd) {
 }
 
 void JankTracker::dumpData(const ProfileData* data, int fd) {
+    dprintf(fd, "\nStats since: %lluns", data->statStartTime);
     dprintf(fd, "\nTotal frames rendered: %u", data->totalFrameCount);
     dprintf(fd, "\nJanky frames: %u (%.2f%%)", data->jankFrameCount,
             (float) data->jankFrameCount / (float) data->totalFrameCount * 100.0f);
@@ -252,6 +257,7 @@ void JankTracker::reset() {
     mData->frameCounts.fill(0);
     mData->totalFrameCount = 0;
     mData->jankFrameCount = 0;
+    mData->statStartTime = systemTime(CLOCK_MONOTONIC);
 }
 
 uint32_t JankTracker::findPercentile(const ProfileData* data, int percentile) {

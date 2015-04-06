@@ -44,10 +44,11 @@ enum JankType {
 struct ProfileData {
     std::array<uint32_t, NUM_BUCKETS> jankTypeCounts;
     // See comments on kBucket* constants for what this holds
-    std::array<uint32_t, 57> frameCounts;
+    std::array<uint32_t, 55> frameCounts;
 
     uint32_t totalFrameCount;
     uint32_t jankFrameCount;
+    nsecs_t statStartTime;
 };
 
 // TODO: Replace DrawProfiler with this
