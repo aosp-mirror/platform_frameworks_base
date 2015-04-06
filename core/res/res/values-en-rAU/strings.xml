@@ -129,14 +129,10 @@
   <string-array name="wfcOperatorErrorNotificationMessages">
   </string-array>
     <string name="wfcSpnFormat" msgid="8211621332478306568">"%s"</string>
-    <!-- no translation found for wifi_calling_off_summary (8720659586041656098) -->
-    <skip />
-    <!-- no translation found for wfc_mode_wifi_preferred_summary (1994113411286935263) -->
-    <skip />
-    <!-- no translation found for wfc_mode_cellular_preferred_summary (5920549484600758786) -->
-    <skip />
-    <!-- no translation found for wfc_mode_wifi_only_summary (2379919155237869320) -->
-    <skip />
+    <string name="wifi_calling_off_summary" msgid="8720659586041656098">"Off"</string>
+    <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Wi-Fi preferred"</string>
+    <string name="wfc_mode_cellular_preferred_summary" msgid="5920549484600758786">"Mobile preferred"</string>
+    <string name="wfc_mode_wifi_only_summary" msgid="2379919155237869320">"Wi-Fi only"</string>
     <string name="cfTemplateNotForwarded" msgid="1683685883841272560">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: Not forwarded"</string>
     <string name="cfTemplateForwarded" msgid="1302922117498590521">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
     <string name="cfTemplateForwardedTime" msgid="9206251736527085256">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g> after <xliff:g id="TIME_DELAY">{2}</xliff:g> seconds"</string>
@@ -644,10 +640,8 @@
     <string name="permlab_performCdmaProvisioning" product="tv" msgid="3485391974208100809">"directly start CDMA TV setup"</string>
     <string name="permlab_performCdmaProvisioning" product="default" msgid="5604848095315421425">"directly start CDMA phone setup"</string>
     <string name="permdesc_performCdmaProvisioning" msgid="1994193538802314186">"Allows the app to start CDMA provisioning. Malicious apps may unnecessarily start CDMA provisioning."</string>
-    <!-- no translation found for permlab_performSimActivation (1651116521896665009) -->
-    <skip />
-    <!-- no translation found for permdesc_performSimActivation (1778214876348917401) -->
-    <skip />
+    <string name="permlab_performSimActivation" msgid="1651116521896665009">"start SIM card setup"</string>
+    <string name="permdesc_performSimActivation" msgid="1778214876348917401">"Allows the app to handle SIM activation requests. The app may directly perform activation or may delegate to another app."</string>
     <string name="permlab_locationUpdates" msgid="7785408253364335740">"control location update notifications"</string>
     <string name="permdesc_locationUpdates" msgid="1120741557891438876">"Allows the app to enable/disable location update notifications from the radio. Not for use by normal apps."</string>
     <string name="permlab_checkinProperties" msgid="7855259461268734914">"access check-in properties"</string>
@@ -854,10 +848,8 @@
     <string name="permdesc_removeDrmCertificates" msgid="7272999075113400993">"Allows an application to remove DRM certficates. Should never be needed for normal apps."</string>
     <string name="permlab_bindCarrierMessagingService" msgid="1490229371796969158">"bind to a carrier messaging service"</string>
     <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"Allows the holder to bind to the top-level interface of a carrier messaging service. Should never be needed for normal apps."</string>
-    <!-- no translation found for permlab_accessVoiceInteractionService (4183835260471435605) -->
-    <skip />
-    <!-- no translation found for permdesc_accessVoiceInteractionService (836587728238433459) -->
-    <skip />
+    <string name="permlab_accessVoiceInteractionService" msgid="4183835260471435605">"interact with voice interaction service"</string>
+    <string name="permdesc_accessVoiceInteractionService" msgid="836587728238433459">"Allows the holder to interact with the currently active voice interaction service. Should never be needed for normal apps."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Set password rules"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"Control the length and the characters allowed in screen lock passwords and PINs."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Monitor screen-unlock attempts"</string>

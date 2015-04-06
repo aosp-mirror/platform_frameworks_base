@@ -854,10 +854,8 @@
     <string name="permdesc_removeDrmCertificates" msgid="7272999075113400993">"Huruhusu programu kuondoa vyeti vya DRM. Haipaswi kuhitajika kwa programu za kawaida kamwe."</string>
     <string name="permlab_bindCarrierMessagingService" msgid="1490229371796969158">"Shurutisha kwa huduma ya ujumbe ya mtoa huduma"</string>
     <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"Huruhusu kishikiliaji kushurutisha kwa kiolesura cha hali ya juu cha huduma ya ujumbe ya mtoa huduma. Haipaswi kuhitajika kwa programu za kawaida."</string>
-    <!-- no translation found for permlab_accessVoiceInteractionService (4183835260471435605) -->
-    <skip />
-    <!-- no translation found for permdesc_accessVoiceInteractionService (836587728238433459) -->
-    <skip />
+    <string name="permlab_accessVoiceInteractionService" msgid="4183835260471435605">"tumia huduma ya muingiliano wa sauti"</string>
+    <string name="permdesc_accessVoiceInteractionService" msgid="836587728238433459">"Humruhusu mmiliki kutumia huduma ya muingiliano wa sauti inayotumika kwa sasa. Isihitajike kamwe kwa programu za kawaida."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Kuweka kanuni za nenosiri"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"Dhibiti urefu na maandishi yanayokubalika katika nenosiri la kufunga skrini na PIN."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Kuhesabu mara ambazo skrini inajaribu kufunguliwa"</string>

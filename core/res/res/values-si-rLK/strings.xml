@@ -854,10 +854,8 @@
     <string name="permdesc_removeDrmCertificates" msgid="7272999075113400993">"යෙදුමකට DRM  සහතික ඉවත් කිරීමට ඉඩ දේ. සාමාන්‍ය යෙදුම් වලට කිසිදා අවශ්‍ය නොවේ."</string>
     <string name="permlab_bindCarrierMessagingService" msgid="1490229371796969158">"වාහක පණිවිඩ යැවීමේ සේවාවට බදින්න"</string>
     <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"වාහක සේවාව ඉහල මට්ටමේ අතුරු මුහුණතක් වෙත සම්බන්ධ කිරීමට ධාරකයාට අවසර දෙන්න. සාමාන්‍ය යෙදුම්වලට කිසි විටෙක අවශ්‍ය නොවෙයි."</string>
-    <!-- no translation found for permlab_accessVoiceInteractionService (4183835260471435605) -->
-    <skip />
-    <!-- no translation found for permdesc_accessVoiceInteractionService (836587728238433459) -->
-    <skip />
+    <string name="permlab_accessVoiceInteractionService" msgid="4183835260471435605">"හඬ අන්තර්ක්‍රියා සේවාව සමග අන්තර්ක්‍රියා කරන්න"</string>
+    <string name="permdesc_accessVoiceInteractionService" msgid="836587728238433459">"දැනට සක්‍රිය හඬ අන්තර්ක්‍රියා සේවාව සමග අන්තර්ක්‍රියා කිරීමට හිමිකරුට ඉඩ දෙයි. සාමාන්‍ය යෙදුම් සඳහා කිසිදා අවශ්‍ය නොවිය යුතුය."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"මුරපද නීති සකස් කිරීම"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"තිර අගුලු මුරපද සහ PIN තුළ ඉඩ දෙන දිග සහ අනුලකුණු පාලනය කිරීම."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"තිරය අගුළු ඇරීමේ උත්සාහයන් නිරීක්ෂණය කරන්න"</string>

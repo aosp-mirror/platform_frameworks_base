@@ -595,7 +595,7 @@
     <string name="permdesc_camera" msgid="8497216524735535009">"ایپ کو کیمرے سے تصویریں لینے اور ویڈیوز بنانے کی اجازت دیتا ہے۔ یہ اجازت ایپ کو آپ کی تصدیق کے بغیر کسی بھی وقت کیمرا استعمال کرنے کی اجازت دیتی ہے۔"</string>
     <string name="permlab_cameraDisableTransmitLed" msgid="2651072630501126222">"‏کیمرا استعمال میں ہونے پر ٹرانسمیٹ انڈیکیٹر LED کو غیر فعال کریں"</string>
     <string name="permdesc_cameraDisableTransmitLed" msgid="4764585465480295341">"‏پہلے سے انسٹال کردہ کسی سسٹم ایپلیکیشن کو کیمرا کے استعمال کے انڈیکیٹر LED کو غیر فعال کرنے کی اجازت دیتا ہے۔"</string>
-    <string name="permdesc_cameraSendSystemEvent" msgid="8642231538552298107">"پہلے سے انسٹال سسٹم ایپلیکیشن کو کیمرہ سروس سسٹم ایونٹس پر بھیجنے کی اجازت دیں۔"</string>
+    <string name="permdesc_cameraSendSystemEvent" msgid="8642231538552298107">"پہلے سے انسٹال سسٹم ایپلیکیشن کو کیمرہ سروس سسٹم ایونٹس بھیجنے کی اجازت دیتا ہے۔"</string>
     <string name="permlab_brick" product="tablet" msgid="2961292205764488304">"ٹیبلیٹ کو مستقل طور پر غیر فعال کریں"</string>
     <string name="permlab_brick" product="tv" msgid="4912674222121249410">"‏مستقل طور پر TV غیر فعال کریں"</string>
     <string name="permlab_brick" product="default" msgid="8337817093326370537">"فون کو مستقل طور پر غیر فعال کریں"</string>
