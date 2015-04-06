@@ -117,6 +117,9 @@ public class Resources {
     private static final LongSparseArray<android.content.res.ConstantState<ColorStateList>>
             sPreloadedColorStateLists = new LongSparseArray<>();
 
+    private static final String CACHE_NOT_THEMED = "";
+    private static final String CACHE_NULL_THEME = "null_theme";
+
     // Pool of TypedArrays targeted to this Resources object.
     final SynchronizedPool<TypedArray> mTypedArrayPool = new SynchronizedPool<>(5);
 
@@ -2441,8 +2444,8 @@ public class Resources {
             }
         }
 
-        // Next, check preloaded drawables. These are unthemed but may have
-        // themeable attributes.
+        // Next, check preloaded drawables. These may contain unresolved theme
+        // attributes.
         final ConstantState cs;
         if (isColorDrawable) {
             cs = sPreloadedColorDrawables.get(key);
@@ -2450,42 +2453,49 @@ public class Resources {
             cs = sPreloadedDrawables[mConfiguration.getLayoutDirection()].get(key);
         }
 
-        final Drawable dr;
+        Drawable dr;
         if (cs != null) {
-            final Drawable clonedDr = cs.newDrawable(this);
-            if (theme != null) {
-                dr = clonedDr.mutate();
-                dr.applyTheme(theme);
-                dr.clearMutated();
-            } else {
-                dr = clonedDr;
-            }
+            dr = cs.newDrawable(this);
         } else if (isColorDrawable) {
             dr = new ColorDrawable(value.data);
         } else {
-            dr = loadDrawableForCookie(value, id, theme);
+            dr = loadDrawableForCookie(value, id, null);
+        }
+
+        // Determine if the drawable has unresolved theme attributes. If it
+        // does, we'll need to apply a theme and store it in a theme-specific
+        // cache.
+        final String cacheKey;
+        if (!dr.canApplyTheme()) {
+            cacheKey = CACHE_NOT_THEMED;
+        } else if (theme == null) {
+            cacheKey = CACHE_NULL_THEME;
+        } else {
+            cacheKey = theme.getKey();
+            dr = dr.mutate();
+            dr.applyTheme(theme);
+            dr.clearMutated();
         }
 
         // If we were able to obtain a drawable, store it in the appropriate
-        // cache (either preload or themed).
+        // cache: preload, not themed, null theme, or theme-specific.
         if (dr != null) {
             dr.setChangingConfigurations(value.changingConfigurations);
-            cacheDrawable(value, theme, isColorDrawable, caches, key, dr);
+            cacheDrawable(value, isColorDrawable, caches, cacheKey, key, dr);
         }
 
         return dr;
     }
 
-    private void cacheDrawable(TypedValue value, Theme theme, boolean isColorDrawable,
+    private void cacheDrawable(TypedValue value, boolean isColorDrawable,
             ArrayMap<String, LongSparseArray<WeakReference<ConstantState>>> caches,
-            long key, Drawable dr) {
+            String cacheKey, long key, Drawable dr) {
         final ConstantState cs = dr.getConstantState();
         if (cs == null) {
             return;
         }
 
         if (mPreloading) {
-            // Preloaded drawables never have a theme, but may be themeable.
             final int changingConfigs = cs.getChangingConfigurations();
             if (isColorDrawable) {
                 if (verifyPreloadConfig(changingConfigs, 0, value.resourceId, "drawable")) {
@@ -2507,14 +2517,13 @@ public class Resources {
             }
         } else {
             synchronized (mAccessLock) {
-                final String themeKey = theme == null ? "" : theme.mKey;
-                LongSparseArray<WeakReference<ConstantState>> themedCache = caches.get(themeKey);
+                LongSparseArray<WeakReference<ConstantState>> themedCache = caches.get(cacheKey);
                 if (themedCache == null) {
                     // Clean out the caches before we add more. This shouldn't
                     // happen very often.
                     pruneCaches(caches);
                     themedCache = new LongSparseArray<>(1);
-                    caches.put(themeKey, themedCache);
+                    caches.put(cacheKey, themedCache);
                 }
                 themedCache.put(key, new WeakReference<>(cs));
             }
@@ -2612,42 +2621,43 @@ public class Resources {
             ArrayMap<String, LongSparseArray<WeakReference<ConstantState>>> caches,
             long key, Theme theme) {
         synchronized (mAccessLock) {
-            final String themeKey = theme != null ? theme.mKey : "";
-            final LongSparseArray<WeakReference<ConstantState>> themedCache = caches.get(themeKey);
-            if (themedCache != null) {
-                final Drawable themedDrawable = getCachedDrawableLocked(themedCache, key);
-                if (themedDrawable != null) {
-                    return themedDrawable;
-                }
+            // First search theme-agnostic cache.
+            final Drawable unthemedDrawable = getCachedDrawableLocked(
+                    caches, key, CACHE_NOT_THEMED);
+            if (unthemedDrawable != null) {
+                return unthemedDrawable;
             }
 
-            // No cached drawable, we'll need to create a new one.
-            return null;
+            // Next search theme-specific cache.
+            final String themeKey = theme != null ? theme.getKey() : CACHE_NULL_THEME;
+            return getCachedDrawableLocked(caches, key, themeKey);
         }
     }
 
-    private ConstantState getConstantStateLocked(
-            LongSparseArray<WeakReference<ConstantState>> drawableCache, long key) {
-        final WeakReference<ConstantState> wr = drawableCache.get(key);
-        if (wr != null) {   // we have the key
-            final ConstantState entry = wr.get();
+    private Drawable getCachedDrawableLocked(
+            ArrayMap<String, LongSparseArray<WeakReference<ConstantState>>> caches,
+            long key, String themeKey) {
+        final LongSparseArray<WeakReference<ConstantState>> cache = caches.get(themeKey);
+        if (cache != null) {
+            final ConstantState entry = getConstantStateLocked(cache, key);
             if (entry != null) {
-                //Log.i(TAG, "Returning cached drawable @ #" +
-                //        Integer.toHexString(((Integer)key).intValue())
-                //        + " in " + this + ": " + entry);
-                return entry;
-            } else {  // our entry has been purged
-                drawableCache.delete(key);
+                return entry.newDrawable(this);
             }
         }
         return null;
     }
 
-    private Drawable getCachedDrawableLocked(
+    private ConstantState getConstantStateLocked(
             LongSparseArray<WeakReference<ConstantState>> drawableCache, long key) {
-        final ConstantState entry = getConstantStateLocked(drawableCache, key);
-        if (entry != null) {
-            return entry.newDrawable(this);
+        final WeakReference<ConstantState> wr = drawableCache.get(key);
+        if (wr != null) {
+            final ConstantState entry = wr.get();
+            if (entry != null) {
+                return entry;
+            } else {
+                // Our entry has been purged.
+                drawableCache.delete(key);
+            }
         }
         return null;
     }
