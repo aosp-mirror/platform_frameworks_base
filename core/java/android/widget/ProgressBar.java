@@ -316,7 +316,7 @@ public class ProgressBar extends View {
                 mProgressTintInfo = new ProgressTintInfo();
             }
             mProgressTintInfo.mProgressTintMode = Drawable.parseTintMode(a.getInt(
-                    R.styleable.ProgressBar_progressBackgroundTintMode, -1), null);
+                    R.styleable.ProgressBar_progressTintMode, -1), null);
             mProgressTintInfo.mHasProgressTintMode = true;
         }
 
@@ -334,7 +334,7 @@ public class ProgressBar extends View {
                 mProgressTintInfo = new ProgressTintInfo();
             }
             mProgressTintInfo.mProgressBackgroundTintMode = Drawable.parseTintMode(a.getInt(
-                    R.styleable.ProgressBar_progressTintMode, -1), null);
+                    R.styleable.ProgressBar_progressBackgroundTintMode, -1), null);
             mProgressTintInfo.mHasProgressBackgroundTintMode = true;
         }
 
@@ -365,7 +365,7 @@ public class ProgressBar extends View {
             mProgressTintInfo.mHasSecondaryProgressTint = true;
         }
 
-        if (a.hasValue(R.styleable.ProgressBar_indeterminateTint)) {
+        if (a.hasValue(R.styleable.ProgressBar_indeterminateTintMode)) {
             if (mProgressTintInfo == null) {
                 mProgressTintInfo = new ProgressTintInfo();
             }
