@@ -957,6 +957,13 @@ static jint android_media_AudioTrack_attachAuxEffect(JNIEnv *env,  jobject thiz,
     return nativeToJavaStatus( lpTrack->attachAuxEffect(effectId) );
 }
 
+static jboolean android_media_AudioTrack_setOutputDevice(
+                JNIEnv *env,  jobject thiz, jint device_id) {
+
+    sp<AudioTrack> lpTrack = getAudioTrack(env, thiz);
+    return lpTrack->setOutputDevice(device_id) == NO_ERROR;
+}
+
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
 static JNINativeMethod gMethods[] = {
@@ -1002,6 +1009,8 @@ static JNINativeMethod gMethods[] = {
                              "(F)I",     (void *)android_media_AudioTrack_setAuxEffectSendLevel},
     {"native_attachAuxEffect",
                              "(I)I",     (void *)android_media_AudioTrack_attachAuxEffect},
+    {"native_setOutputDevice", "(I)Z",
+                             (void *)android_media_AudioTrack_setOutputDevice},
 };
 
 
