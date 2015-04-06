@@ -1813,7 +1813,7 @@ public final class Pm {
         System.err.println("       pm list users");
         System.err.println("       pm path PACKAGE");
         System.err.println("       pm dump PACKAGE");
-        System.err.println("       pm install [-lrtsfd] [-i PACKAGE] [PATH]");
+        System.err.println("       pm install [-lrtsfd] [-i PACKAGE] [--user USER_ID] [PATH]");
         System.err.println("       pm install-create [-lrtsfdp] [-i PACKAGE] [-S BYTES]");
         System.err.println("       pm install-write [-S BYTES] SESSION_ID SPLIT_NAME [PATH]");
         System.err.println("       pm install-commit SESSION_ID");
