@@ -38,9 +38,6 @@ import java.util.HashMap;
  *
  * {@samplecode
  * MidiManager manager = (MidiManager) getSystemService(Context.MIDI_SERVICE);}
- *
- * CANDIDATE FOR PUBLIC API
- * @hide
  */
 public final class MidiManager {
     private static final String TAG = "MidiManager";
@@ -128,7 +125,7 @@ public final class MidiManager {
         /**
          * Called to notify when the status of a MIDI device has changed
          *
-         * @param device a {@link MidiDeviceStatus} for the changed device
+         * @param status a {@link MidiDeviceStatus} for the changed device
          */
         public void onDeviceStatusChanged(MidiDeviceStatus status) {
         }
@@ -221,7 +218,7 @@ public final class MidiManager {
      * Opens a MIDI device for reading and writing.
      *
      * @param deviceInfo a {@link android.media.midi.MidiDeviceInfo} to open
-     * @param callback a {@link #DeviceOpenCallback} to be called to receive the result
+     * @param callback a {@link MidiManager.DeviceOpenCallback} to be called to receive the result
      * @param handler the {@link android.os.Handler Handler} that will be used for delivering
      *                the result. If handler is null, then the thread used for the
      *                callback is unspecified.

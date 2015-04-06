@@ -18025,6 +18025,18 @@ package android.media.effect {
 
 package android.media.midi {
 
+  public final class MidiDevice implements java.io.Closeable {
+    method public void close() throws java.io.IOException;
+    method public android.media.midi.MidiDevice.MidiConnection connectPorts(android.media.midi.MidiInputPort, int);
+    method public android.media.midi.MidiDeviceInfo getInfo();
+    method public android.media.midi.MidiInputPort openInputPort(int);
+    method public android.media.midi.MidiOutputPort openOutputPort(int);
+  }
+
+  public class MidiDevice.MidiConnection implements java.io.Closeable {
+    method public void close() throws java.io.IOException;
+  }
+
   public final class MidiDeviceInfo implements android.os.Parcelable {
     method public int describeContents();
     method public int getId();
@@ -18079,6 +18091,25 @@ package android.media.midi {
     method public void close() throws java.io.IOException;
     method public final int getPortNumber();
     method public void onReceive(byte[], int, int, long) throws java.io.IOException;
+  }
+
+  public final class MidiManager {
+    method public android.media.midi.MidiDeviceInfo[] getDeviceList();
+    method public void openDevice(android.media.midi.MidiDeviceInfo, android.media.midi.MidiManager.DeviceOpenCallback, android.os.Handler);
+    method public void registerDeviceCallback(android.media.midi.MidiManager.DeviceCallback, android.os.Handler);
+    method public void unregisterDeviceCallback(android.media.midi.MidiManager.DeviceCallback);
+  }
+
+  public static class MidiManager.DeviceCallback {
+    ctor public MidiManager.DeviceCallback();
+    method public void onDeviceAdded(android.media.midi.MidiDeviceInfo);
+    method public void onDeviceRemoved(android.media.midi.MidiDeviceInfo);
+    method public void onDeviceStatusChanged(android.media.midi.MidiDeviceStatus);
+  }
+
+  public static abstract class MidiManager.DeviceOpenCallback {
+    ctor public MidiManager.DeviceOpenCallback();
+    method public abstract void onDeviceOpened(android.media.midi.MidiDeviceInfo, android.media.midi.MidiDevice);
   }
 
   public final class MidiOutputPort extends android.media.midi.MidiSender implements java.io.Closeable {
