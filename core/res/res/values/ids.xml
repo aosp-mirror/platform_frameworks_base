@@ -93,5 +93,10 @@
   <item type="id" name="undo" />
   <item type="id" name="redo" />
   <item type="id" name="replaceText" />
-  <item type="id" name="accessibility_action_show_on_screen" />
+
+  <!-- Accessibility action identifier for {@link android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction#ACTION_SHOW_ON_SCREEN}. -->
+  <item type="id" name="accessibilityActionShowOnScreen" />
+
+  <!-- Accessibility action identifier for {@link android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction#ACTION_SCROLL_TO_POSITION}. -->
+  <item type="id" name="accessibilityActionScrollToPosition" />
 </resources>

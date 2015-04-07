@@ -2210,8 +2210,6 @@
   <java-symbol type="string" name="storage_sd_card" />
   <java-symbol type="string" name="storage_usb" />
 
-  <java-symbol type="id" name="accessibility_action_show_on_screen" />
-
   <!-- Floating toolbar -->
   <java-symbol type="layout" name="floating_popup_container" />
   <java-symbol type="layout" name="floating_popup_menu_button" />
