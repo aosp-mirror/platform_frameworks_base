@@ -40,6 +40,7 @@ import android.util.Log;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewAssistStructure;
 import android.view.ViewDebug;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
@@ -2422,6 +2423,11 @@ public class WebView extends AbsoluteLayout
 
     public CharSequence getAccessibilityClassName() {
         return WebView.class.getName();
+    }
+
+    @Override
+    public void onProvideVirtualAssistStructure(ViewAssistStructure structure) {
+        mProvider.getViewDelegate().onProvideVirtualAssistStructure(structure);
     }
 
     /** @hide */
