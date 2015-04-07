@@ -124,7 +124,7 @@ public class ScriptC extends Script {
 
         // Create the RS cache path if we haven't done so already.
         if (mCachePath == null) {
-            File f = new File(rs.mCacheDir, CACHE_PATH);
+            File f = new File(RenderScriptCacheDir.mCacheDir, CACHE_PATH);
             mCachePath = f.getAbsolutePath();
             f.mkdirs();
         }
@@ -135,7 +135,7 @@ public class ScriptC extends Script {
     private static synchronized long internalStringCreate(RenderScript rs, String resName, byte[] bitcode) {
         // Create the RS cache path if we haven't done so already.
         if (mCachePath == null) {
-            File f = new File(rs.mCacheDir, CACHE_PATH);
+            File f = new File(RenderScriptCacheDir.mCacheDir, CACHE_PATH);
             mCachePath = f.getAbsolutePath();
             f.mkdirs();
         }
