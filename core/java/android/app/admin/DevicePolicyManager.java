@@ -4187,4 +4187,27 @@ public class DevicePolicyManager {
         }
         return null;
     }
+
+    /**
+     * Called by a device owner to disable the keyguard altogether.
+     *
+     * <p>Setting the keyguard to disabled has the same effect as choosing "None" as the screen
+     * lock type. However, this call has no effect if a password, pin or pattern is currently set.
+     * If a password, pin or pattern is set after the keyguard was disabled, the keyguard stops
+     * being disabled.
+     *
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
+     * @param enabled New state of the keyguard.
+     *
+     * @return {@code false} if attempting to disable the keyguard while a lock password was in
+     * place. {@code true} otherwise."
+     */
+    public boolean setKeyguardEnabledState(ComponentName admin, boolean enabled) {
+        try {
+            return mService.setKeyguardEnabledState(admin, enabled);
+        } catch (RemoteException re) {
+            Log.w(TAG, "Failed talking with device policy service", re);
+            return false;
+        }
+    }
 }
