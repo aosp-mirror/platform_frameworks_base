@@ -109,7 +109,6 @@ interface IBatteryStats {
     void noteWifiBatchedScanStoppedFromSource(in WorkSource ws);
     void noteWifiMulticastEnabledFromSource(in WorkSource ws);
     void noteWifiMulticastDisabledFromSource(in WorkSource ws);
-    void noteWifiRadioPowerState(int powerState, long timestampNs);
     void noteNetworkInterfaceType(String iface, int type);
     void noteNetworkStatsEnabled();
     void noteDeviceIdleMode(boolean enabled, boolean fromActive, boolean fromMotion);

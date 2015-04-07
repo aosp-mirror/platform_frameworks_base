@@ -40,7 +40,6 @@ import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.os.WorkSource;
-import android.telephony.DataConnectionRealTimeInfo;
 import android.telephony.SignalStrength;
 import android.telephony.TelephonyManager;
 import android.util.Slog;
@@ -123,7 +122,6 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         mStats.setRadioScanningTimeout(mContext.getResources().getInteger(
                 com.android.internal.R.integer.config_radioScanningTimeout)
                 * 1000L);
-        mStats.setPowerProfile(new PowerProfile(context));
     }
 
     /**
@@ -541,15 +539,6 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         synchronized (mStats) {
             mStats.noteFlashlightOffLocked();
         }
-    }
-
-    @Override
-    public void noteWifiRadioPowerState(int powerState, long tsNanos) {
-        enforceCallingPermission();
-
-        // There was a change in WiFi power state.
-        // Collect data now for the past activity.
-        mHandler.scheduleSync();
     }
 
     public void noteWifiRunning(WorkSource ws) {
@@ -1106,29 +1095,13 @@ public final class BatteryStatsService extends IBatteryStats.Stub
                 result.mTimestamp = info.getTimeStamp();
                 result.mStackState = info.getStackState();
                 result.mControllerTxTimeMs =
-                        info.mControllerTxTimeMs - mLastInfo.mControllerTxTimeMs;
+                        info.getControllerTxTimeMillis()- mLastInfo.mControllerTxTimeMs;
                 result.mControllerRxTimeMs =
-                        info.mControllerRxTimeMs - mLastInfo.mControllerRxTimeMs;
-                result.mControllerEnergyUsed =
-                        info.mControllerEnergyUsed - mLastInfo.mControllerEnergyUsed;
-
-                // WiFi calculates the idle time as a difference from the on time and the various
-                // Rx + Tx times. There seems to be some missing time there because this sometimes
-                // becomes negative. Just cap it at 0 and move on.
+                        info.getControllerRxTimeMillis() - mLastInfo.mControllerRxTimeMs;
                 result.mControllerIdleTimeMs =
-                        Math.max(0, info.mControllerIdleTimeMs - mLastInfo.mControllerIdleTimeMs);
-
-                if (result.mControllerTxTimeMs < 0 ||
-                        result.mControllerRxTimeMs < 0) {
-                    // The stats were reset by the WiFi system (which is why our delta is negative).
-                    // Returns the unaltered stats.
-                    result.mControllerEnergyUsed = info.mControllerEnergyUsed;
-                    result.mControllerRxTimeMs = info.mControllerRxTimeMs;
-                    result.mControllerTxTimeMs = info.mControllerTxTimeMs;
-                    result.mControllerIdleTimeMs = info.mControllerIdleTimeMs;
-
-                    Slog.v(TAG, "WiFi energy data was reset, new WiFi energy data is " + result);
-                }
+                        info.getControllerIdleTimeMillis() - mLastInfo.mControllerIdleTimeMs;
+                result.mControllerEnergyUsed =
+                        info.getControllerEnergyUsed() - mLastInfo.mControllerEnergyUsed;
                 mLastInfo = info;
                 return result;
             }
@@ -1160,12 +1133,6 @@ public final class BatteryStatsService extends IBatteryStats.Stub
      */
     void updateExternalStats() {
         synchronized (mExternalStatsLock) {
-            if (mContext == null) {
-                // We haven't started yet (which means the BatteryStatsImpl object has
-                // no power profile. Don't consume data we can't compute yet.
-                return;
-            }
-
             final WifiActivityEnergyInfo wifiEnergyInfo = pullWifiEnergyInfoLocked();
             final BluetoothActivityEnergyInfo bluetoothEnergyInfo = pullBluetoothEnergyInfoLocked();
             synchronized (mStats) {

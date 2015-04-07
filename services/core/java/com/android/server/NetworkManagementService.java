@@ -210,7 +210,6 @@ public class NetworkManagementService extends INetworkManagementService.Stub
 
     private boolean mMobileActivityFromRadio = false;
     private int mLastPowerStateFromRadio = DataConnectionRealTimeInfo.DC_POWER_STATE_LOW;
-    private int mLastPowerStateFromWifi = DataConnectionRealTimeInfo.DC_POWER_STATE_LOW;
 
     private final RemoteCallbackList<INetworkActivityListener> mNetworkActivityListeners =
             new RemoteCallbackList<INetworkActivityListener>();
@@ -430,16 +429,6 @@ public class NetworkManagementService extends INetworkManagementService.Stub
                 mLastPowerStateFromRadio = powerState;
                 try {
                     getBatteryStats().noteMobileRadioPowerState(powerState, tsNanos);
-                } catch (RemoteException e) {
-                }
-            }
-        }
-
-        if (ConnectivityManager.isNetworkTypeWifi(type)) {
-            if (mLastPowerStateFromWifi != powerState) {
-                mLastPowerStateFromWifi = powerState;
-                try {
-                    getBatteryStats().noteWifiRadioPowerState(powerState, tsNanos);
                 } catch (RemoteException e) {
                 }
             }
