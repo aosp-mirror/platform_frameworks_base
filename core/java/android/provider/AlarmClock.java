@@ -43,8 +43,14 @@ public final class AlarmClock {
      * should remove this alarm after it has been dismissed. If an identical alarm exists matching
      * all parameters, the implementation may re-use it instead of creating a new one (in this case,
      * the alarm should not be removed after dismissal).
-     *
+     * </p><p>
      * This action always enables the alarm.
+     * </p><p>
+     * This activity could also be started in Voice Interaction mode. The activity should check
+     * {@link android.app.Activity#isVoiceInteraction}, and if true, the implementation should
+     * report a deeplink of the created/enabled alarm using
+     * {@link android.app.VoiceInteractor.CompleteVoiceRequest}. This allows follow-on voice actions
+     * such as {@link #ACTION_VOICE_CANCEL_ALARM} to cancel the alarm that was just enabled.
      * </p>
      * <h3>Request parameters</h3>
      * <ul>
@@ -61,6 +67,48 @@ public final class AlarmClock {
      */
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_SET_ALARM = "android.intent.action.SET_ALARM";
+
+    /**
+     * Voice Activity Action: Cancel an alarm.
+     * Requires: The activity must check {@link android.app.Activity#isVoiceInteraction}, i.e. be
+     * started in Voice Interaction mode.
+     * <p>
+     * Cancels the specified alarm by voice. To cancel means to disable, but not delete, the alarm.
+     * See {@link #ACTION_VOICE_DELETE_ALARM} to delete an alarm by voice.
+     * </p><p>
+     * The alarm to cancel can be specified or searched for in one of the following ways:
+     * <ol>
+     * <li>The Intent's data URI specifies a deeplink to the alarm.
+     * <li>If the Intent's data URI is unspecified, then the extra {@link #EXTRA_ALARM_SEARCH_MODE} is
+     * required to determine how to search for the alarm.
+     *
+     * @see #ACTION_VOICE_DELETE_ALARM
+     * @see #EXTRA_ALARM_SEARCH_MODE
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_VOICE_CANCEL_ALARM =
+            "android.intent.action.VOICE_CANCEL_ALARM";
+
+    /**
+     * Voice Activity Action: Delete an alarm.
+     * Requires: The activity must check {@link android.app.Activity#isVoiceInteraction}, i.e. be
+     * started in Voice Interaction mode.
+     * <p>
+     * Deletes the specified alarm by voice.
+     * See {@link #ACTION_VOICE_CANCEL_ALARM} to cancel (disable) an alarm by voice.
+     * </p><p>
+     * The alarm to delete can be specified or searched for in one of the following ways:
+     * <ol>
+     * <li>The Intent's data URI specifies a deeplink to the alarm.
+     * <li>If the Intent's data URI is unspecified, then the extra {@link #EXTRA_ALARM_SEARCH_MODE} is
+     * required to determine how to search for the alarm.
+     *
+     * @see #ACTION_VOICE_CANCEL_ALARM
+     * @see #EXTRA_ALARM_SEARCH_MODE
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_VOICE_DELETE_ALARM =
+            "android.intent.action.VOICE_DELETE_ALARM";
 
     /**
      * Activity Action: Set a timer.
@@ -97,6 +145,100 @@ public final class AlarmClock {
      */
      @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
      public static final String ACTION_SHOW_ALARMS = "android.intent.action.SHOW_ALARMS";
+
+    /**
+     * Bundle extra: Specify the type of search mode to look up an alarm.
+     * <p>
+     * Used by {@link #ACTION_VOICE_CANCEL_ALARM} and {@link #ACTION_VOICE_DELETE_ALARM} to identify
+     * the alarm(s) to cancel or delete, respectively.
+     * </p><p>
+     * This extra is only required when the alarm is not already identified by a deeplink as
+     * specified in the Intent's data URI.
+     * </p><p>
+     * The value of this extra is a {@link String}, restricted to the following set of supported
+     * search modes:
+     * <ul>
+     * <li><i>Time</i> - {@link #ALARM_SEARCH_MODE_TIME}: Selects the alarm that is most
+     * closely matched by the search parameters {@link #EXTRA_HOUR}, {@link #EXTRA_MINUTES},
+     * {@link #EXTRA_IS_PM}.
+     * <li><i>Next alarm</i> - {@link #ALARM_SEARCH_MODE_NEXT}: Selects the alarm that will
+     * ring next, or the alarm that is currently ringing, if any.
+     * <li><i>All alarms</i> - {@link #ALARM_SEARCH_MODE_ALL}: Selects all alarms.
+     * <li><i>None</i> - {@link #ALARM_SEARCH_MODE_NONE}: No search mode specified. The
+     * implementation should ask the user to select a search mode using
+     * {@link android.app.VoiceInteractor.PickOptionRequest} and proceed with a voice flow to
+     * identify the alarm.
+     * </ul>
+     * </ol>
+     *
+     * @see #ALARM_SEARCH_MODE_TIME
+     * @see #ALARM_SEARCH_MODE_NEXT
+     * @see #ALARM_SEARCH_MODE_ALL
+     * @see #ALARM_SEARCH_MODE_NONE
+     * @see #ACTION_VOICE_CANCEL_ALARM
+     * @see #ACTION_VOICE_DELETE_ALARM
+     */
+    public static final String EXTRA_ALARM_SEARCH_MODE =
+        "android.intent.extra.alarm.ALARM_SEARCH_MODE";
+
+    /**
+     * Search for the alarm that is most closely matched by the search parameters
+     * {@link #EXTRA_HOUR}, {@link #EXTRA_MINUTES}, {@link #EXTRA_IS_PM}.
+     * In this search mode, at least one of these additional extras are required.
+     * <ul>
+     * <li>{@link #EXTRA_HOUR} - The hour to search for the alarm.
+     * <li>{@link #EXTRA_MINUTES} - The minute to search for the alarm.
+     * <li>{@link #EXTRA_IS_PM} - Whether the hour is AM or PM.
+     * </ul>
+     *
+     * @see #EXTRA_ALARM_SEARCH_MODE
+     */
+    public static final String ALARM_SEARCH_MODE_TIME = "time";
+
+    /**
+     * Selects the alarm that will ring next, or the alarm that is currently ringing, if any.
+     *
+     * @see #EXTRA_ALARM_SEARCH_MODE
+     */
+    public static final String ALARM_SEARCH_MODE_NEXT = "next";
+
+    /**
+     * Selects all alarms.
+     *
+     * @see #EXTRA_ALARM_SEARCH_MODE
+     */
+    public static final String ALARM_SEARCH_MODE_ALL = "all";
+
+    /**
+     * No search mode specified. The implementation should ask the user to select a search mode
+     * using {@link android.app.VoiceInteractor.PickOptionRequest} and proceed with a voice flow to
+     * identify the alarm.
+     *
+     * @see #EXTRA_ALARM_SEARCH_MODE
+     */
+    public static final String ALARM_SEARCH_MODE_NONE = "none";
+
+    /**
+     * Bundle extra: The AM/PM of the alarm.
+     * <p>
+     * Used by {@link #ACTION_VOICE_CANCEL_ALARM} and {@link #ACTION_VOICE_DELETE_ALARM}.
+     * </p><p>
+     * This extra is optional and only used when {@link #EXTRA_ALARM_SEARCH_MODE} is set to
+     * {@link #ALARM_SEARCH_MODE_TIME}. In this search mode, the {@link #EXTRA_IS_PM} is
+     * used together with {@link #EXTRA_HOUR} and {@link #EXTRA_MINUTES}. The implementation should
+     * look up the alarm that is most closely matched by these search parameters.
+     * If {@link #EXTRA_IS_PM} is missing, then the AM/PM of the specified {@link #EXTRA_HOUR} is
+     * ambiguous and the implementation should ask for clarification from the user.
+     * </p><p>
+     * The value is a {@link Boolean}, where false=AM and true=PM.
+     * </p>
+     *
+     * @see #ACTION_VOICE_CANCEL_ALARM
+     * @see #ACTION_VOICE_DELETE_ALARM
+     * @see #EXTRA_HOUR
+     * @see #EXTRA_MINUTES
+     */
+    public static final String EXTRA_IS_PM = "android.intent.extra.alarm.IS_PM";
 
     /**
      * Bundle extra: Weekdays for repeating alarm.
