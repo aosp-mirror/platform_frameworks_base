@@ -114,7 +114,7 @@ class NavigationBarRecents extends LinearLayout {
         }
 
         // Load the activity icon on a background thread.
-        new GetActivityIconTask(button).execute(component);
+        new GetActivityIconTask(mPackageManager, button).execute(component);
 
         final Intent baseIntent = task.baseIntent;
         button.setOnClickListener(new View.OnClickListener() {
@@ -129,33 +129,6 @@ class NavigationBarRecents extends LinearLayout {
     private void hideButton(ImageView button) {
         button.setImageDrawable(null);
         button.setVisibility(View.GONE);
-    }
-
-    /**
-     * Retrieves the icon for an activity and sets it as the Drawable on an ImageView. The ImageView
-     * is hidden if the activity isn't recognized or if there is no icon.
-     */
-    private class GetActivityIconTask extends AsyncTask<ComponentName, Void, Drawable> {
-        private final ImageView mButton;  // The ImageView that will receive the icon.
-
-        public GetActivityIconTask(ImageView button) {
-            mButton = button;
-        }
-
-        @Override
-        protected Drawable doInBackground(ComponentName... params) {
-            try {
-                return mPackageManager.getActivityIcon(params[0]);
-            } catch (NameNotFoundException e) {
-                return null;
-            }
-        }
-
-        @Override
-        protected void onPostExecute(Drawable icon) {
-            mButton.setImageDrawable(icon);
-            mButton.setVisibility(icon != null ? View.VISIBLE : View.GONE);
-        }
     }
 
     /**

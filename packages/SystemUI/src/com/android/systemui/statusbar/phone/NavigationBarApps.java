@@ -17,18 +17,16 @@
 package com.android.systemui.statusbar.phone;
 
 import android.animation.LayoutTransition;
-import android.app.ActivityManager;
 import android.app.ActivityOptions;
 import android.content.ClipData;
 import android.content.ComponentName;
 import android.content.Context;
-import android.content.pm.LauncherActivityInfo;
 import android.content.pm.LauncherApps;
+import android.content.pm.PackageManager;
 import android.graphics.Canvas;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.UserHandle;
 import android.util.AttributeSet;
@@ -42,8 +40,6 @@ import android.widget.LinearLayout;
 
 import com.android.systemui.R;
 
-import java.util.List;
-
 /**
  * Container for application icons that appear in the navigation bar. Their appearance is similar
  * to the launcher hotseat. Clicking an icon launches the associated activity. A long click will
@@ -54,11 +50,9 @@ class NavigationBarApps extends LinearLayout {
     private final static boolean DEBUG = false;
     private final static String TAG = "NavigationBarApps";
 
-    // The number of apps to show for demo purposes.
-    // TODO: Remove this when the user can explicitly add and remove apps.
-    private final static int NUM_APPS = 4;
-
+    private final NavigationBarAppsModel mAppsModel;
     private final LauncherApps mLauncherApps;
+    private final PackageManager mPackageManager;
     private final LayoutInflater mLayoutInflater;
 
     // The view being dragged, or null if the user is not dragging.
@@ -66,7 +60,9 @@ class NavigationBarApps extends LinearLayout {
 
     public NavigationBarApps(Context context, AttributeSet attrs) {
         super(context, attrs);
+        mAppsModel = new NavigationBarAppsModel(context);
         mLauncherApps = (LauncherApps) context.getSystemService("launcherapps");
+        mPackageManager = context.getPackageManager();
         mLayoutInflater = LayoutInflater.from(context);
 
         // Dragging an icon removes and adds back the dragged icon. Use the layout transitions to
@@ -88,11 +84,12 @@ class NavigationBarApps extends LinearLayout {
 
     /** Creates an ImageView for each pinned app. */
     private void createAppButtons() {
-        // For demo purposes, just initialize with the first few apps from the owner profile.
-        List<LauncherActivityInfo> apps = mLauncherApps.getActivityList(null, UserHandle.OWNER);
-        int appCount = apps.size();
-        for (int i = 0; i < NUM_APPS && i < appCount; i++) {
-            ImageView button = createAppButton(apps.get(i));
+        // Load the saved icons, if any.
+        mAppsModel.initialize();
+
+        int appCount = mAppsModel.getAppCount();
+        for (int i = 0; i < appCount; i++) {
+            ImageView button = createAppButton(mAppsModel.getApp(i));
             // TODO: remove padding from leftmost button.
             addView(button);
         }
@@ -102,38 +99,16 @@ class NavigationBarApps extends LinearLayout {
      * Creates a new ImageView for a launcher activity, inflated from
      * R.layout.navigation_bar_app_item.
      */
-    private ImageView createAppButton(LauncherActivityInfo info) {
+    private ImageView createAppButton(ComponentName activityName) {
         ImageView button = (ImageView) mLayoutInflater.inflate(
                 R.layout.navigation_bar_app_item, this, false /* attachToRoot */);
-        button.setOnClickListener(new AppClickListener(info.getComponentName()));
+        button.setOnClickListener(new AppClickListener(activityName));
         // TODO: Ripple effect. Use either KeyButtonRipple or the default ripple background.
         button.setOnLongClickListener(new AppLongClickListener());
         button.setOnDragListener(new AppDragListener());
-        // Load the icon asynchronously, as it may need to create a bitmap for badging.
-        new GetBadgedIconTask(button).execute(info);
+        // Load the icon asynchronously.
+        new GetActivityIconTask(mPackageManager, button).execute(activityName);
         return button;
-    }
-
-    /** Loads a badged icon for an ImageView as a background task. */
-    private static class GetBadgedIconTask extends AsyncTask<LauncherActivityInfo, Void, Drawable> {
-        // The ImageView that will receive the icon.
-        private final ImageView mButton;
-
-        public GetBadgedIconTask(ImageView button) {
-            mButton = button;
-        }
-
-        @Override
-        protected Drawable doInBackground(LauncherActivityInfo... params) {
-            // TODO: Should this request a particular resolution and scale it down?
-            return params[0].getBadgedIcon(0 /* no particular density */);
-        }
-
-        @Override
-        protected void onPostExecute(Drawable icon) {
-            mButton.setImageDrawable(icon);
-            mButton.setVisibility(View.VISIBLE);
-        }
     }
 
     /** Starts a drag on long-click. */
@@ -195,16 +170,24 @@ class NavigationBarApps extends LinearLayout {
 
         // "Move" the dragged app by removing it and adding it back at the target location.
         int dragViewIndex = indexOfChild(mDragView);
-        removeView(mDragView);
-        // Removing the drag view above may change the index of the target view, so read it here.
         int targetIndex = indexOfChild(target);
-        if (targetIndex < dragViewIndex) {
-            // The dragged app is moving left. Add the app before the target.
-            addView(mDragView, targetIndex);
-        } else {
-            // The dragged app is moving right. Add the app after the target.
-            addView(mDragView, targetIndex + 1);
-        }
+        // This works, but is subtle:
+        // * If dragViewIndex > targetIndex then the dragged app is moving from right to left and
+        //   the dragged app will be added in front of the target.
+        // * If dragViewIndex < targetIndex then the dragged app is moving from left to right.
+        //   Removing the drag view will shift the later views one position to the left. Adding
+        //   the view at targetIndex will therefore place the app *after* the target.
+        removeView(mDragView);
+        addView(mDragView, targetIndex);
+
+        // Update the data model.
+        ComponentName app = mAppsModel.removeApp(dragViewIndex);
+        mAppsModel.addApp(targetIndex, app);
+    }
+
+    private void onDrop() {
+        // Persist the state of the reordered icons.
+        mAppsModel.savePrefs();
     }
 
     /** Drag listener for app icons. */
@@ -235,8 +218,7 @@ class NavigationBarApps extends LinearLayout {
                     return false;
                 }
                 case DragEvent.ACTION_DROP: {
-                    if (DEBUG) Log.d(TAG, "onDrop " + viewIndexInParent(v));
-                    // TODO: Persist the state of the reordered icons.
+                    onDrop();
                     return false;
                 }
                 case DragEvent.ACTION_DRAG_ENDED: {
@@ -262,10 +244,10 @@ class NavigationBarApps extends LinearLayout {
      * A click listener that launches an activity.
      */
     private class AppClickListener implements View.OnClickListener {
-        private final ComponentName mComponentName;
+        private final ComponentName mActivityName;
 
-        public AppClickListener(ComponentName componentName) {
-            mComponentName = componentName;
+        public AppClickListener(ComponentName activityName) {
+            mActivityName = activityName;
         }
 
         @Override
@@ -283,7 +265,9 @@ class NavigationBarApps extends LinearLayout {
             ActivityOptions opts =
                     ActivityOptions.makeScaleUpAnimation(v, 0, 0, v.getWidth(), v.getHeight());
             Bundle optsBundle = opts.toBundle();
-            mLauncherApps.startMainActivity(mComponentName, user, sourceBounds, optsBundle);
+
+            // Launch the activity.
+            mLauncherApps.startMainActivity(mActivityName, user, sourceBounds, optsBundle);
         }
     }
 }
