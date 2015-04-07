@@ -998,6 +998,24 @@ public final class BluetoothAdapter {
     }
 
     /**
+     * Return true if hardware has entries available for matching beacons
+     *
+     * @return true if there are hw entries available for matching beacons
+     * @hide
+     */
+    public boolean isHardwareTrackingFiltersAvailable() {
+        if (getState() != STATE_ON) return false;
+        try {
+            synchronized(mManagerCallback) {
+                if(mService != null) return (mService.numOfHwTrackFiltersAvailable() != 0);
+            }
+        } catch (RemoteException e) {
+            Log.e(TAG, "", e);
+        }
+        return false;
+    }
+
+    /**
      * Return the record of {@link BluetoothActivityEnergyInfo} object that
      * has the activity and energy info. This can be used to ascertain what
      * the controller has been up to, since the last sample.

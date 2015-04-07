@@ -128,6 +128,16 @@ public final class BluetoothLeScanner {
                         ScanCallback.SCAN_FAILED_FEATURE_UNSUPPORTED);
                 return;
             }
+            if (!isHardwareResourcesAvailableForScan(settings)) {
+                postCallbackError(callback,
+                        ScanCallback.SCAN_FAILED_OUT_OF_HARDWARE_RESOURCES);
+                return;
+            }
+            if (!isSettingsAndFilterComboAllowed(settings, filters)) {
+                postCallbackError(callback,
+                        ScanCallback.SCAN_FAILED_FEATURE_UNSUPPORTED);
+                return;
+            }
             BleScanCallbackWrapper wrapper = new BleScanCallbackWrapper(gatt, filters,
                     settings, callback, resultStorages);
             wrapper.startRegisteration();
@@ -393,5 +403,34 @@ public final class BluetoothLeScanner {
             return true;
         }
         return false;
+    }
+
+    private boolean isSettingsAndFilterComboAllowed(ScanSettings settings,
+                        List <ScanFilter> filterList) {
+        final int callbackType = settings.getCallbackType();
+        // If onlost/onfound is requested, a non-empty filter is expected
+        if ((callbackType & ScanSettings.CALLBACK_TYPE_FIRST_MATCH
+                        | ScanSettings.CALLBACK_TYPE_MATCH_LOST) != 0) {
+            if (filterList == null) {
+                return false;
+            }
+            for (ScanFilter filter : filterList) {
+                if (filter.isAllFieldsEmpty()) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    private boolean isHardwareResourcesAvailableForScan(ScanSettings settings) {
+        final int callbackType = settings.getCallbackType();
+        if ((callbackType & ScanSettings.CALLBACK_TYPE_FIRST_MATCH) != 0
+                || (callbackType & ScanSettings.CALLBACK_TYPE_MATCH_LOST) != 0) {
+            // For onlost/onfound, we required hw support be available
+            return (mBluetoothAdapter.isOffloadedFilteringSupported() &&
+                    mBluetoothAdapter.isHardwareTrackingFiltersAvailable());
+        }
+        return true;
     }
 }
