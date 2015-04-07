@@ -246,9 +246,8 @@ public class LocalePicker extends ListFragment {
             IActivityManager am = ActivityManagerNative.getDefault();
             Configuration config = am.getConfiguration();
 
-            // Will set userSetLocale to indicate this isn't some passing default - the user
-            // wants this remembered
             config.setLocale(locale);
+            config.userSetLocale = true;
 
             am.updateConfiguration(config);
             // Trigger the dirty bit for the Settings Provider.
