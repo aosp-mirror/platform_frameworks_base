@@ -19,6 +19,7 @@ package android.provider;
 import android.Manifest;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
+import android.annotation.SystemApi;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
@@ -254,7 +255,10 @@ public class VoicemailContract {
          * @param context The context of the app doing the inserting
          * @param voicemail Data to be inserted
          * @return {@link Uri} of the newly inserted {@link Voicemail}
+         *
+         * @hide
          */
+        @SystemApi
         public static Uri insert(Context context, Voicemail voicemail) {
             ContentResolver contentResolver = context.getContentResolver();
             ContentValues contentValues = getContentValues(voicemail);
@@ -267,7 +271,10 @@ public class VoicemailContract {
          * @param context The context of the app doing the inserting
          * @param voicemails Data to be inserted
          * @return the number of voicemails inserted
+         *
+         * @hide
          */
+        @SystemApi
         public static int insert(Context context, List<Voicemail> voicemails) {
             ContentResolver contentResolver = context.getContentResolver();
             int count = voicemails.size();
@@ -283,7 +290,10 @@ public class VoicemailContract {
          * package. By default, a package only has permission to delete voicemails it inserted.
          *
          * @return the number of voicemails deleted
+         *
+         * @hide
          */
+        @SystemApi
         public static int deleteAll(Context context) {
             return context.getContentResolver().delete(
                     buildSourceUri(context.getPackageName()), "", new String[0]);
@@ -439,7 +449,10 @@ public class VoicemailContract {
          * @param configurationState See {@link Status#CONFIGURATION_STATE}
          * @param dataChannelState See {@link Status#DATA_CHANNEL_STATE}
          * @param notificationChannelState See {@link Status#NOTIFICATION_CHANNEL_STATE}
+         *
+         * @hide
          */
+        @SystemApi
         public static void setStatus(Context context, PhoneAccountHandle accountHandle,
                 int configurationState, int dataChannelState, int notificationChannelState) {
             ContentResolver contentResolver = context.getContentResolver();
