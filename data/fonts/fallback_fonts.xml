@@ -181,6 +181,18 @@
     </family>
     <family>
         <fileset>
+            <file variant="elegant">NotoSansOriya-Regular.ttf</file>
+            <file variant="elegant">NotoSansOriya-Bold.ttf</file>
+        </fileset>
+    </family>
+    <family>
+        <fileset>
+            <file variant="compact">NotoSansOriyaUI-Regular.ttf</file>
+            <file variant="compact">NotoSansOriyaUI-Bold.ttf</file>
+        </fileset>
+    </family>
+    <family>
+        <fileset>
             <file>NotoSansSinhala-Regular.ttf</file>
             <file>NotoSansSinhala-Bold.ttf</file>
         </fileset>
@@ -351,11 +363,6 @@
     <family>
         <fileset>
             <file>NotoSansYi-Regular.ttf</file>
-        </fileset>
-    </family>
-    <family>
-        <fileset>
-            <file>Lohit-Odia.ttf</file>
         </fileset>
     </family>
     <family>
