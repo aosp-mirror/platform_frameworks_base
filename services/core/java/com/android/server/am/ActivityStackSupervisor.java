@@ -156,8 +156,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
     static final int LOCK_TASK_START_MSG = FIRST_SUPERVISOR_STACK_MSG + 9;
     static final int LOCK_TASK_END_MSG = FIRST_SUPERVISOR_STACK_MSG + 10;
     static final int CONTAINER_CALLBACK_TASK_LIST_EMPTY = FIRST_SUPERVISOR_STACK_MSG + 11;
-    static final int CONTAINER_TASK_LIST_EMPTY_TIMEOUT = FIRST_SUPERVISOR_STACK_MSG + 12;
-    static final int LAUNCH_TASK_BEHIND_COMPLETE = FIRST_SUPERVISOR_STACK_MSG + 13;
+    static final int LAUNCH_TASK_BEHIND_COMPLETE = FIRST_SUPERVISOR_STACK_MSG + 12;
 
     private final static String VIRTUAL_DISPLAY_BASE_NAME = "ActivityViewVirtualDisplay";
 
@@ -3803,15 +3802,6 @@ public final class ActivityStackSupervisor implements DisplayListener {
                         }
                     }
                 } break;
-                case CONTAINER_TASK_LIST_EMPTY_TIMEOUT: {
-                    synchronized (mService) {
-                        Slog.w(TAG, "Timeout waiting for all activities in task to finish. " +
-                                msg.obj);
-                        final ActivityContainer container = (ActivityContainer) msg.obj;
-                        container.mStack.finishAllActivitiesLocked(true);
-                        container.onTaskListEmptyLocked();
-                    }
-                } break;
                 case LAUNCH_TASK_BEHIND_COMPLETE: {
                     synchronized (mService) {
                         ActivityRecord r = ActivityRecord.forTokenLocked((IBinder) msg.obj);
@@ -3915,10 +3905,6 @@ public final class ActivityStackSupervisor implements DisplayListener {
                     return;
                 }
                 mContainerState = CONTAINER_STATE_FINISHING;
-
-                final Message msg =
-                        mHandler.obtainMessage(CONTAINER_TASK_LIST_EMPTY_TIMEOUT, this);
-                mHandler.sendMessageDelayed(msg, 2000);
 
                 long origId = Binder.clearCallingIdentity();
                 try {
@@ -4039,7 +4025,6 @@ public final class ActivityStackSupervisor implements DisplayListener {
         }
 
         void onTaskListEmptyLocked() {
-            mHandler.removeMessages(CONTAINER_TASK_LIST_EMPTY_TIMEOUT, this);
             detachLocked();
             deleteActivityContainer(this);
             mHandler.obtainMessage(CONTAINER_CALLBACK_TASK_LIST_EMPTY, this).sendToTarget();
