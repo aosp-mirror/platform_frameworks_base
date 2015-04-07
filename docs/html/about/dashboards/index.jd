@@ -57,7 +57,7 @@ Platform Versions</a>.</p>
 </div>
 
 
-<p style="clear:both"><em>Data collected during a 7-day period ending on March 2, 2015.
+<p style="clear:both"><em>Data collected during a 7-day period ending on April 6, 2015.
 <br/>Any versions with less than 0.1% distribution are not shown.</em>
 </p>
 
@@ -88,7 +88,7 @@ Screens</a>.</p>
 </div>
 
 
-<p style="clear:both"><em>Data collected during a 7-day period ending on March 2, 2015.
+<p style="clear:both"><em>Data collected during a 7-day period ending on April 6, 2015.
 
 <br/>Any screen configurations with less than 0.1% distribution are not shown.</em></p>
 
@@ -108,8 +108,7 @@ support for any lower version (for example, support for version 2.0 also implies
 
 
 <img alt="" style="float:right"
-src="//chart.googleapis.com/chart?chl=GL%202.0%7CGL%203.0&chf=bg%2Cs%2C00000000&chd=t%3A67.5%2C32.5&chco=c4df9b%2C6fad0c&cht=p&chs=400x250" />
-
+src="//chart.googleapis.com/chart?chl=GL%202.0%7CGL%203.0%7CGL%203.1&chf=bg%2Cs%2C00000000&chd=t%3A65.9%2C33.8%2C0.3&chco=c4df9b%2C6fad0c&cht=p&chs=400x250">
 
 <p>To declare which version of OpenGL ES your application requires, you should use the {@code
 android:glEsVersion} attribute of the <a
@@ -127,17 +126,21 @@ uses.</p>
 </tr>
 <tr>
 <td>2.0</td>
-<td>67.5%</td>
+<td>65.9%</td>
 </tr>
 <tr>
 <td>3.0</td>
-<td>32.5%</td>
+<td>33.8%</td>
+</tr>
+<tr>
+<td>3.1</td>
+<td>0.3%</td>
 </tr>
 </table>
 
 
 
-<p style="clear:both"><em>Data collected during a 7-day period ending on March 2, 2015</em></p>
+<p style="clear:both"><em>Data collected during a 7-day period ending on April 6, 2015</em></p>
 
 
 
@@ -155,7 +158,7 @@ uses.</p>
 var VERSION_DATA =
 [
   {
-    "chart": "//chart.googleapis.com/chart?chl=Froyo%7CGingerbread%7CIce%20Cream%20Sandwich%7CJelly%20Bean%7CKitKat%7CLollipop&chco=c4df9b%2C6fad0c&chd=t%3A0.4%2C6.9%2C5.9%2C42.6%2C40.9%2C3.3&chf=bg%2Cs%2C00000000&chs=500x250&cht=p",
+    "chart": "http://chart.googleapis.com/chart?chl=Froyo%7CGingerbread%7CIce%20Cream%20Sandwich%7CJelly%20Bean%7CKitKat%7CLollipop&chf=bg%2Cs%2C00000000&chd=t%3A0.4%2C6.4%2C5.7%2C40.7%2C41.4%2C5.4&chco=c4df9b%2C6fad0c&chs=500x250&cht=p",
     "data": [
       {
         "api": 8,
@@ -165,37 +168,42 @@ var VERSION_DATA =
       {
         "api": 10,
         "name": "Gingerbread",
-        "perc": "6.9"
+        "perc": "6.4"
       },
       {
         "api": 15,
         "name": "Ice Cream Sandwich",
-        "perc": "5.9"
+        "perc": "5.7"
       },
       {
         "api": 16,
         "name": "Jelly Bean",
-        "perc": "17.3"
+        "perc": "16.5"
       },
       {
         "api": 17,
         "name": "Jelly Bean",
-        "perc": "19.4"
+        "perc": "18.6"
       },
       {
         "api": 18,
         "name": "Jelly Bean",
-        "perc": "5.9"
+        "perc": "5.6"
       },
       {
         "api": 19,
         "name": "KitKat",
-        "perc": "40.9"
+        "perc": "41.4"
       },
       {
         "api": 21,
         "name": "Lollipop",
-        "perc": "3.3"
+        "perc": "5.0"
+      },
+      {
+        "api": 22,
+        "name": "Lollipop",
+        "perc": "0.4"
       }
     ]
   }
@@ -208,29 +216,29 @@ var SCREEN_DATA =
     "data": {
       "Large": {
         "hdpi": "0.6",
-        "ldpi": "0.5",
-        "mdpi": "5.1",
-        "tvdpi": "2.3",
+        "ldpi": "0.4",
+        "mdpi": "4.8",
+        "tvdpi": "2.2",
         "xhdpi": "0.6"
       },
       "Normal": {
-        "hdpi": "38.7",
-        "mdpi": "8.4",
+        "hdpi": "39.3",
+        "mdpi": "8.1",
         "tvdpi": "0.1",
-        "xhdpi": "18.9",
-        "xxhdpi": "15.8"
+        "xhdpi": "19.5",
+        "xxhdpi": "15.9"
       },
       "Small": {
-        "ldpi": "4.6"
+        "ldpi": "4.4"
       },
       "Xlarge": {
         "hdpi": "0.3",
-        "mdpi": "3.5",
+        "mdpi": "3.2",
         "xhdpi": "0.6"
       }
     },
-    "densitychart": "//chart.googleapis.com/chart?chl=ldpi%7Cmdpi%7Ctvdpi%7Chdpi%7Cxhdpi%7Cxxhdpi&chco=c4df9b%2C6fad0c&chd=t%3A5.1%2C17.0%2C2.4%2C39.6%2C20.1%2C15.8&chf=bg%2Cs%2C00000000&chs=400x250&cht=p",
-    "layoutchart": "//chart.googleapis.com/chart?chl=Xlarge%7CLarge%7CNormal%7CSmall&chco=c4df9b%2C6fad0c&chd=t%3A4.4%2C9.1%2C81.9%2C4.6&chf=bg%2Cs%2C00000000&chs=400x250&cht=p"
+    "densitychart": "//chart.googleapis.com/chart?chl=ldpi%7Cmdpi%7Ctvdpi%7Chdpi%7Cxhdpi%7Cxxhdpi&chf=bg%2Cs%2C00000000&chd=t%3A4.8%2C16.1%2C2.3%2C40.2%2C20.7%2C15.9&chco=c4df9b%2C6fad0c&chs=400x250&cht=p",
+    "layoutchart": "//chart.googleapis.com/chart?chl=Xlarge%7CLarge%7CNormal%7CSmall&chf=bg%2Cs%2C00000000&chd=t%3A4.1%2C8.6%2C82.9%2C4.4&chco=c4df9b%2C6fad0c&chs=400x250&cht=p"
   }
 ];
 
@@ -311,6 +319,11 @@ var VERSION_NAMES =
   {
     "api":21,
     "link":"<a href='/about/versions/android-5.0.html'>5.0</a>",
+    "codename":"Lollipop"
+  },
+  {
+    "api":22,
+    "link":"<a href='/about/versions/android-5.1.html'>5.1</a>",
     "codename":"Lollipop"
   }
 ];
