@@ -18,7 +18,6 @@ package com.android.internal.os;
 
 
 import android.content.Context;
-import android.content.res.Resources;
 import android.content.res.XmlResourceParser;
 
 import com.android.internal.util.XmlUtils;
@@ -76,21 +75,10 @@ public class PowerProfile {
      */
     public static final String POWER_WIFI_ACTIVE = "wifi.active";
 
-    //
-    // Updated power constants. These are not estimated, they are real world
-    // currents and voltages for the underlying bluetooth and wifi controllers.
-    //
-
-    public static final String POWER_WIFI_CONTROLLER_IDLE = "wifi.controller.idle";
-    public static final String POWER_WIFI_CONTROLLER_RX = "wifi.controller.rx";
-    public static final String POWER_WIFI_CONTROLLER_TX = "wifi.controller.tx";
-    public static final String POWER_WIFI_CONTROLLER_OPERATING_VOLTAGE = "wifi.controller.voltage";
-
-    public static final String POWER_BLUETOOTH_CONTROLLER_IDLE = "bluetooth.controller.idle";
-    public static final String POWER_BLUETOOTH_CONTROLLER_RX = "bluetooth.controller.rx";
-    public static final String POWER_BLUETOOTH_CONTROLLER_TX = "bluetooth.controller.tx";
-    public static final String POWER_BLUETOOTH_CONTROLLER_OPERATING_VOLTAGE =
-            "bluetooth.controller.voltage";
+    /**
+     * Operating voltage of the WiFi controller.
+     */
+    public static final String OPERATING_VOLTAGE_WIFI = "wifi.voltage";
 
     /**
      * Power consumption when GPS is on.
@@ -112,6 +100,10 @@ public class PowerProfile {
      */
     public static final String POWER_BLUETOOTH_AT_CMD = "bluetooth.at";
 
+    /**
+     * Operating voltage of the Bluetooth controller.
+     */
+    public static final String OPERATING_VOLTAGE_BLUETOOTH = "bluetooth.voltage";
 
     /**
      * Power consumption when screen is on, not including the backlight power.
@@ -170,7 +162,7 @@ public class PowerProfile {
      */
     public static final String POWER_BATTERY_CAPACITY = "battery.capacity";
 
-    static final HashMap<String, Object> sPowerMap = new HashMap<>();
+    static final HashMap<String, Object> sPowerMap = new HashMap<String, Object>();
 
     private static final String TAG_DEVICE = "device";
     private static final String TAG_ITEM = "item";
@@ -188,8 +180,7 @@ public class PowerProfile {
 
     private void readPowerValuesFromXml(Context context) {
         int id = com.android.internal.R.xml.power_profile;
-        final Resources resources = context.getResources();
-        XmlResourceParser parser = resources.getXml(id);
+        XmlResourceParser parser = context.getResources().getXml(id);
         boolean parsingArray = false;
         ArrayList<Double> array = new ArrayList<Double>();
         String arrayName = null;
@@ -239,36 +230,6 @@ public class PowerProfile {
             throw new RuntimeException(e);
         } finally {
             parser.close();
-        }
-
-        // Now collect other config variables.
-        int[] configResIds = new int[] {
-                com.android.internal.R.integer.config_bluetooth_idle_cur_ma,
-                com.android.internal.R.integer.config_bluetooth_rx_cur_ma,
-                com.android.internal.R.integer.config_bluetooth_tx_cur_ma,
-                com.android.internal.R.integer.config_bluetooth_operating_voltage_mv,
-                com.android.internal.R.integer.config_wifi_idle_receive_cur_ma,
-                com.android.internal.R.integer.config_wifi_active_rx_cur_ma,
-                com.android.internal.R.integer.config_wifi_tx_cur_ma,
-                com.android.internal.R.integer.config_wifi_operating_voltage_mv,
-        };
-
-        String[] configResIdKeys = new String[] {
-                POWER_BLUETOOTH_CONTROLLER_IDLE,
-                POWER_BLUETOOTH_CONTROLLER_RX,
-                POWER_BLUETOOTH_CONTROLLER_TX,
-                POWER_BLUETOOTH_CONTROLLER_OPERATING_VOLTAGE,
-                POWER_WIFI_CONTROLLER_IDLE,
-                POWER_WIFI_CONTROLLER_RX,
-                POWER_WIFI_CONTROLLER_TX,
-                POWER_WIFI_CONTROLLER_OPERATING_VOLTAGE,
-        };
-
-        for (int i = 0; i < configResIds.length; i++) {
-            int value = resources.getInteger(configResIds[i]);
-            if (value > 0) {
-                sPowerMap.put(configResIdKeys[i], (double) value);
-            }
         }
     }
 

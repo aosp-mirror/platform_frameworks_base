@@ -55,7 +55,6 @@ import android.util.Printer;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
-import android.util.SparseLongArray;
 import android.util.TimeUtils;
 import android.util.Xml;
 import android.view.Display;
@@ -96,7 +95,6 @@ import java.util.concurrent.locks.ReentrantLock;
 public final class BatteryStatsImpl extends BatteryStats {
     private static final String TAG = "BatteryStatsImpl";
     private static final boolean DEBUG = false;
-    private static final boolean DEBUG_ENERGY = false;
     private static final boolean DEBUG_HISTORY = false;
     private static final boolean USE_OLD_HISTORY = false;   // for debugging.
 
@@ -184,20 +182,22 @@ public final class BatteryStatsImpl extends BatteryStats {
     // elapsed time by the number of active timers to arrive at that timer's share of the time.
     // In order to do this, we must refresh each timer whenever the number of active timers
     // changes.
-    final ArrayList<StopwatchTimer> mPartialTimers = new ArrayList<>();
-    final ArrayList<StopwatchTimer> mFullTimers = new ArrayList<>();
-    final ArrayList<StopwatchTimer> mWindowTimers = new ArrayList<>();
-    final SparseArray<ArrayList<StopwatchTimer>> mSensorTimers = new SparseArray<>();
-    final ArrayList<StopwatchTimer> mWifiRunningTimers = new ArrayList<>();
-    final ArrayList<StopwatchTimer> mFullWifiLockTimers = new ArrayList<>();
-    final ArrayList<StopwatchTimer> mWifiMulticastTimers = new ArrayList<>();
-    final ArrayList<StopwatchTimer> mWifiScanTimers = new ArrayList<>();
-    final SparseArray<ArrayList<StopwatchTimer>> mWifiBatchedScanTimers = new SparseArray<>();
-    final ArrayList<StopwatchTimer> mAudioTurnedOnTimers = new ArrayList<>();
-    final ArrayList<StopwatchTimer> mVideoTurnedOnTimers = new ArrayList<>();
+    final ArrayList<StopwatchTimer> mPartialTimers = new ArrayList<StopwatchTimer>();
+    final ArrayList<StopwatchTimer> mFullTimers = new ArrayList<StopwatchTimer>();
+    final ArrayList<StopwatchTimer> mWindowTimers = new ArrayList<StopwatchTimer>();
+    final SparseArray<ArrayList<StopwatchTimer>> mSensorTimers
+            = new SparseArray<ArrayList<StopwatchTimer>>();
+    final ArrayList<StopwatchTimer> mWifiRunningTimers = new ArrayList<StopwatchTimer>();
+    final ArrayList<StopwatchTimer> mFullWifiLockTimers = new ArrayList<StopwatchTimer>();
+    final ArrayList<StopwatchTimer> mWifiMulticastTimers = new ArrayList<StopwatchTimer>();
+    final ArrayList<StopwatchTimer> mWifiScanTimers = new ArrayList<StopwatchTimer>();
+    final SparseArray<ArrayList<StopwatchTimer>> mWifiBatchedScanTimers =
+            new SparseArray<ArrayList<StopwatchTimer>>();
+    final ArrayList<StopwatchTimer> mAudioTurnedOnTimers = new ArrayList<StopwatchTimer>();
+    final ArrayList<StopwatchTimer> mVideoTurnedOnTimers = new ArrayList<StopwatchTimer>();
 
     // Last partial timers we use for distributing CPU usage.
-    final ArrayList<StopwatchTimer> mLastPartialTimers = new ArrayList<>();
+    final ArrayList<StopwatchTimer> mLastPartialTimers = new ArrayList<StopwatchTimer>();
 
     // These are the objects that will want to do something when the device
     // is unplugged from power.
@@ -227,7 +227,7 @@ public final class BatteryStatsImpl extends BatteryStats {
     final HistoryItem mHistoryLastLastWritten = new HistoryItem();
     final HistoryItem mHistoryReadTmp = new HistoryItem();
     final HistoryItem mHistoryAddTmp = new HistoryItem();
-    final HashMap<HistoryTag, Integer> mHistoryTagPool = new HashMap<>();
+    final HashMap<HistoryTag, Integer> mHistoryTagPool = new HashMap();
     String[] mReadHistoryStrings;
     int[] mReadHistoryUids;
     int mReadHistoryChars;
@@ -449,8 +449,6 @@ public final class BatteryStatsImpl extends BatteryStats {
     private int mUnpluggedNumConnectivityChange;
 
     private final NetworkStats.Entry mTmpNetworkStatsEntry = new NetworkStats.Entry();
-
-    private PowerProfile mPowerProfile;
 
     /*
      * Holds a SamplingTimer associated with each kernel wakelock name being tracked.
@@ -930,12 +928,6 @@ public final class BatteryStatsImpl extends BatteryStats {
         long mUnpluggedTime;
 
         /**
-         * The total time this timer has been running until the latest mark has been set.
-         * Subtract this from mTotalTime to get the time spent running since the mark was set.
-         */
-        long mTimeBeforeMark;
-
-        /**
          * Constructs from a parcel.
          * @param type
          * @param timeBase
@@ -953,7 +945,6 @@ public final class BatteryStatsImpl extends BatteryStats {
             mLoadedTime = in.readLong();
             mLastTime = 0;
             mUnpluggedTime = in.readLong();
-            mTimeBeforeMark = in.readLong();
             timeBase.add(this);
             if (DEBUG) Log.i(TAG, "**** READ TIMER #" + mType + ": mTotalTime=" + mTotalTime);
         }
@@ -973,7 +964,7 @@ public final class BatteryStatsImpl extends BatteryStats {
          * so can be completely dropped.
          */
         boolean reset(boolean detachIfReset) {
-            mTotalTime = mLoadedTime = mLastTime = mTimeBeforeMark = 0;
+            mTotalTime = mLoadedTime = mLastTime = 0;
             mCount = mLoadedCount = mLastCount = 0;
             if (detachIfReset) {
                 detach();
@@ -994,10 +985,8 @@ public final class BatteryStatsImpl extends BatteryStats {
             out.writeLong(computeRunTimeLocked(mTimeBase.getRealtime(elapsedRealtimeUs)));
             out.writeLong(mLoadedTime);
             out.writeLong(mUnpluggedTime);
-            out.writeLong(mTimeBeforeMark);
         }
 
-        @Override
         public void onTimeStarted(long elapsedRealtime, long timeBaseUptime, long baseRealtime) {
             if (DEBUG && mType < 0) {
                 Log.v(TAG, "unplug #" + mType + ": realtime=" + baseRealtime
@@ -1013,7 +1002,6 @@ public final class BatteryStatsImpl extends BatteryStats {
             }
         }
 
-        @Override
         public void onTimeStopped(long elapsedRealtime, long baseUptime, long baseRealtime) {
             if (DEBUG && mType < 0) {
                 Log.v(TAG, "plug #" + mType + ": realtime=" + baseRealtime
@@ -1067,13 +1055,6 @@ public final class BatteryStatsImpl extends BatteryStats {
             return val;
         }
 
-        @Override
-        public long getTimeSinceMarkLocked(long elapsedRealtimeUs) {
-            long val = computeRunTimeLocked(mTimeBase.getRealtime(elapsedRealtimeUs));
-            return val - mTimeBeforeMark;
-        }
-
-        @Override
         public void logState(Printer pw, String prefix) {
             pw.println(prefix + "mCount=" + mCount
                     + " mLoadedCount=" + mLoadedCount + " mLastCount=" + mLastCount
@@ -1099,9 +1080,6 @@ public final class BatteryStatsImpl extends BatteryStats {
             mCount = mLoadedCount = in.readInt();
             mLastCount = 0;
             mUnpluggedCount = mCount;
-
-            // When reading the summary, we set the mark to be the latest information.
-            mTimeBeforeMark = mTotalTime;
         }
     }
 
@@ -1497,6 +1475,21 @@ public final class BatteryStatsImpl extends BatteryStats {
             return mNesting > 0;
         }
 
+        long checkpointRunningLocked(long elapsedRealtimeMs) {
+            if (mNesting > 0) {
+                // We are running...
+                final long batteryRealtime = mTimeBase.getRealtime(elapsedRealtimeMs * 1000);
+                if (mTimerPool != null) {
+                    return refreshTimersLocked(batteryRealtime, mTimerPool, this);
+                }
+                final long heldTime = batteryRealtime - mUpdateTime;
+                mUpdateTime = batteryRealtime;
+                mTotalTime += heldTime;
+                return heldTime;
+            }
+            return 0;
+        }
+
         void stopRunningLocked(long elapsedRealtimeMs) {
             // Ignore attempt to stop a timer that isn't running
             if (mNesting == 0) {
@@ -1574,7 +1567,6 @@ public final class BatteryStatsImpl extends BatteryStats {
             return mCount;
         }
 
-        @Override
         boolean reset(boolean detachIfReset) {
             boolean canDetach = mNesting <= 0;
             super.reset(canDetach && detachIfReset);
@@ -1585,7 +1577,6 @@ public final class BatteryStatsImpl extends BatteryStats {
             return canDetach;
         }
 
-        @Override
         void detach() {
             super.detach();
             if (mTimerPool != null) {
@@ -1593,30 +1584,9 @@ public final class BatteryStatsImpl extends BatteryStats {
             }
         }
 
-        @Override
         void readSummaryFromParcelLocked(Parcel in) {
             super.readSummaryFromParcelLocked(in);
             mNesting = 0;
-        }
-
-        /**
-         * Set the mark so that we can query later for the total time the timer has
-         * accumulated since this point. The timer can be running or not.
-         *
-         * @param elapsedRealtimeMs the current elapsed realtime in milliseconds.
-         */
-        public void setMark(long elapsedRealtimeMs) {
-            final long batteryRealtime = mTimeBase.getRealtime(elapsedRealtimeMs * 1000);
-            if (mNesting > 0) {
-                // We are running.
-                if (mTimerPool != null) {
-                    refreshTimersLocked(batteryRealtime, mTimerPool, this);
-                } else {
-                    mTotalTime += batteryRealtime - mUpdateTime;
-                    mUpdateTime = batteryRealtime;
-                }
-            }
-            mTimeBeforeMark = mTotalTime;
         }
     }
 
@@ -3920,6 +3890,7 @@ public final class BatteryStatsImpl extends BatteryStats {
             if (DEBUG_HISTORY) Slog.v(TAG, "WIFI full lock on to: "
                     + Integer.toHexString(mHistoryCur.states));
             addHistoryRecordLocked(elapsedRealtime, uptime);
+            scheduleSyncExternalStatsLocked();
         }
         mWifiFullLockNesting++;
         getUidStatsLocked(uid).noteFullWifiLockAcquiredLocked(elapsedRealtime);
@@ -3935,6 +3906,7 @@ public final class BatteryStatsImpl extends BatteryStats {
             if (DEBUG_HISTORY) Slog.v(TAG, "WIFI full lock off to: "
                     + Integer.toHexString(mHistoryCur.states));
             addHistoryRecordLocked(elapsedRealtime, uptime);
+            scheduleSyncExternalStatsLocked();
         }
         getUidStatsLocked(uid).noteFullWifiLockReleasedLocked(elapsedRealtime);
     }
@@ -3992,6 +3964,7 @@ public final class BatteryStatsImpl extends BatteryStats {
             if (DEBUG_HISTORY) Slog.v(TAG, "WIFI multicast on to: "
                     + Integer.toHexString(mHistoryCur.states));
             addHistoryRecordLocked(elapsedRealtime, uptime);
+            scheduleSyncExternalStatsLocked();
         }
         mWifiMulticastNesting++;
         getUidStatsLocked(uid).noteWifiMulticastEnabledLocked(elapsedRealtime);
@@ -4007,6 +3980,7 @@ public final class BatteryStatsImpl extends BatteryStats {
             if (DEBUG_HISTORY) Slog.v(TAG, "WIFI multicast off to: "
                     + Integer.toHexString(mHistoryCur.states));
             addHistoryRecordLocked(elapsedRealtime, uptime);
+            scheduleSyncExternalStatsLocked();
         }
         getUidStatsLocked(uid).noteWifiMulticastDisabledLocked(elapsedRealtime);
     }
@@ -4114,8 +4088,7 @@ public final class BatteryStatsImpl extends BatteryStats {
         // During device boot, qtaguid isn't enabled until after the inital
         // loading of battery stats. Now that they're enabled, take our initial
         // snapshot for future delta calculation.
-        final long elapsedRealtimeMs = SystemClock.elapsedRealtime();
-        updateMobileRadioStateLocked(elapsedRealtimeMs);
+        updateMobileRadioStateLocked(SystemClock.elapsedRealtime());
         updateWifiStateLocked(null);
     }
 
@@ -4396,18 +4369,6 @@ public final class BatteryStatsImpl extends BatteryStats {
         LongSamplingCounter mMobileRadioActiveCount;
 
         /**
-         * The amount of time this uid has kept the WiFi controller in idle, tx, and rx mode.
-         */
-        LongSamplingCounter[] mWifiControllerTime =
-                new LongSamplingCounter[NUM_CONTROLLER_ACTIVITY_TYPES];
-
-        /**
-         * The amount of time this uid has kept the Bluetooth controller in idle, tx, and rx mode.
-         */
-        LongSamplingCounter[] mBluetoothControllerTime =
-                new LongSamplingCounter[NUM_CONTROLLER_ACTIVITY_TYPES];
-
-        /**
          * The CPU times we had at the last history details update.
          */
         long mLastStepUserTime;
@@ -4443,22 +4404,22 @@ public final class BatteryStatsImpl extends BatteryStats {
         /**
          * The statistics we have collected for this uid's sensor activations.
          */
-        final SparseArray<Sensor> mSensorStats = new SparseArray<>();
+        final SparseArray<Sensor> mSensorStats = new SparseArray<Sensor>();
 
         /**
          * The statistics we have collected for this uid's processes.
          */
-        final ArrayMap<String, Proc> mProcessStats = new ArrayMap<>();
+        final ArrayMap<String, Proc> mProcessStats = new ArrayMap<String, Proc>();
 
         /**
          * The statistics we have collected for this uid's processes.
          */
-        final ArrayMap<String, Pkg> mPackageStats = new ArrayMap<>();
+        final ArrayMap<String, Pkg> mPackageStats = new ArrayMap<String, Pkg>();
 
         /**
          * The transient wake stats we have collected for this uid's pids.
          */
-        final SparseArray<Pid> mPids = new SparseArray<>();
+        final SparseArray<Pid> mPids = new SparseArray<Pid>();
 
         public Uid(int uid) {
             mUid = uid;
@@ -4617,13 +4578,6 @@ public final class BatteryStatsImpl extends BatteryStats {
                 mWifiMulticastEnabled = false;
                 mWifiMulticastTimer.stopRunningLocked(elapsedRealtimeMs);
             }
-        }
-
-        public void noteWifiControllerActivityLocked(int type, long timeMs) {
-            if (mWifiControllerTime[type] == null) {
-                mWifiControllerTime[type] = new LongSamplingCounter(mOnBatteryTimeBase);
-            }
-            mWifiControllerTime[type].addCountLocked(timeMs);
         }
 
         public StopwatchTimer createAudioTurnedOnTimerLocked() {
@@ -4941,15 +4895,6 @@ public final class BatteryStatsImpl extends BatteryStats {
                     ? (int)mMobileRadioActiveCount.getCountLocked(which) : 0;
         }
 
-        @Override
-        public long getWifiControllerActivity(int type, int which) {
-            if (type >= 0 && type < NUM_CONTROLLER_ACTIVITY_TYPES &&
-                    mWifiControllerTime[type] != null) {
-                return mWifiControllerTime[type].getCountLocked(which);
-            }
-            return 0;
-        }
-
         void initNetworkActivityLocked() {
             mNetworkByteActivityCounters = new LongSamplingCounter[NUM_NETWORK_ACTIVITY_TYPES];
             mNetworkPacketActivityCounters = new LongSamplingCounter[NUM_NETWORK_ACTIVITY_TYPES];
@@ -5031,16 +4976,6 @@ public final class BatteryStatsImpl extends BatteryStats {
                 }
                 mMobileRadioActiveTime.reset(false);
                 mMobileRadioActiveCount.reset(false);
-            }
-
-            for (int i = 0; i < NUM_CONTROLLER_ACTIVITY_TYPES; i++) {
-                if (mWifiControllerTime[i] != null) {
-                    mWifiControllerTime[i].reset(false);
-                }
-
-                if (mBluetoothControllerTime[i] != null) {
-                    mBluetoothControllerTime[i].reset(false);
-                }
             }
 
             final ArrayMap<String, Wakelock> wakeStats = mWakelockStats.getMap();
@@ -5165,16 +5100,6 @@ public final class BatteryStatsImpl extends BatteryStats {
                         mNetworkPacketActivityCounters[i].detach();
                     }
                 }
-
-                for (int i = 0; i < NUM_CONTROLLER_ACTIVITY_TYPES; i++) {
-                    if (mWifiControllerTime[i] != null) {
-                        mWifiControllerTime[i].detach();
-                    }
-
-                    if (mBluetoothControllerTime[i] != null) {
-                        mBluetoothControllerTime[i].detach();
-                    }
-                }
                 mPids.clear();
             }
 
@@ -5264,7 +5189,6 @@ public final class BatteryStatsImpl extends BatteryStats {
             } else {
                 out.writeInt(0);
             }
-
             if (mAudioTurnedOnTimer != null) {
                 out.writeInt(1);
                 mAudioTurnedOnTimer.writeToParcel(out, elapsedRealtimeUs);
@@ -5315,24 +5239,6 @@ public final class BatteryStatsImpl extends BatteryStats {
                 mMobileRadioActiveCount.writeToParcel(out);
             } else {
                 out.writeInt(0);
-            }
-
-            for (int i = 0; i < NUM_CONTROLLER_ACTIVITY_TYPES; i++) {
-                if (mWifiControllerTime[i] != null) {
-                    out.writeInt(1);
-                    mWifiControllerTime[i].writeToParcel(out);
-                } else {
-                    out.writeInt(0);
-                }
-            }
-
-            for (int i = 0; i < NUM_CONTROLLER_ACTIVITY_TYPES; i++) {
-                if (mBluetoothControllerTime[i] != null) {
-                    out.writeInt(1);
-                    mBluetoothControllerTime[i].writeToParcel(out);
-                } else {
-                    out.writeInt(0);
-                }
             }
         }
 
@@ -5482,22 +5388,6 @@ public final class BatteryStatsImpl extends BatteryStats {
             } else {
                 mNetworkByteActivityCounters = null;
                 mNetworkPacketActivityCounters = null;
-            }
-
-            for (int i = 0; i < NUM_CONTROLLER_ACTIVITY_TYPES; i++) {
-                if (in.readInt() != 0) {
-                    mWifiControllerTime[i] = new LongSamplingCounter(mOnBatteryTimeBase, in);
-                } else {
-                    mWifiControllerTime[i] = null;
-                }
-            }
-
-            for (int i = 0; i < NUM_CONTROLLER_ACTIVITY_TYPES; i++) {
-                if (in.readInt() != 0) {
-                    mBluetoothControllerTime[i] = new LongSamplingCounter(mOnBatteryTimeBase, in);
-                } else {
-                    mBluetoothControllerTime[i] = null;
-                }
             }
         }
 
@@ -6754,12 +6644,6 @@ public final class BatteryStatsImpl extends BatteryStats {
         readFromParcel(p);
     }
 
-    public void setPowerProfile(PowerProfile profile) {
-        synchronized (this) {
-            mPowerProfile = profile;
-        }
-    }
-
     public void setCallback(BatteryCallback cb) {
         mCallback = cb;
     }
@@ -7483,12 +7367,9 @@ public final class BatteryStatsImpl extends BatteryStats {
      * @param info The energy information from the WiFi controller.
      */
     public void updateWifiStateLocked(@Nullable final WifiActivityEnergyInfo info) {
-        final long elapsedRealtimeMs = SystemClock.elapsedRealtime();
-        NetworkStats delta = null;
+        final NetworkStats delta;
         try {
-            if (!ArrayUtils.isEmpty(mWifiIfaces)) {
-                delta = getNetworkStatsDeltaLocked(mWifiIfaces, mWifiNetworkStats);
-            }
+            delta = getNetworkStatsDeltaLocked(mWifiIfaces, mWifiNetworkStats);
         } catch (IOException e) {
             Slog.wtf(TAG, "Failed to get wifi network stats", e);
             return;
@@ -7498,19 +7379,14 @@ public final class BatteryStatsImpl extends BatteryStats {
             return;
         }
 
-        SparseLongArray rxPackets = new SparseLongArray();
-        SparseLongArray txPackets = new SparseLongArray();
-        long totalTxPackets = 0;
-        long totalRxPackets = 0;
         if (delta != null) {
             final int size = delta.size();
             for (int i = 0; i < size; i++) {
                 final NetworkStats.Entry entry = delta.getValues(i, mTmpNetworkStatsEntry);
 
-                if (DEBUG_ENERGY) {
+                if (DEBUG) {
                     Slog.d(TAG, "Wifi uid " + entry.uid + ": delta rx=" + entry.rxBytes
-                            + " tx=" + entry.txBytes + " rxPackets=" + entry.rxPackets
-                            + " txPackets=" + entry.txPackets);
+                            + " tx=" + entry.txBytes);
                 }
 
                 if (entry.rxBytes == 0 || entry.txBytes == 0) {
@@ -7522,13 +7398,6 @@ public final class BatteryStatsImpl extends BatteryStats {
                         entry.rxPackets);
                 u.noteNetworkActivityLocked(NETWORK_WIFI_TX_DATA, entry.txBytes,
                         entry.txPackets);
-                rxPackets.put(u.getUid(), entry.rxPackets);
-                txPackets.put(u.getUid(), entry.txPackets);
-
-                // Sum the total number of packets so that the Rx Power and Tx Power can
-                // be evenly distributed amongst the apps.
-                totalRxPackets += entry.rxPackets;
-                totalTxPackets += entry.txPackets;
 
                 mNetworkByteActivityCounters[NETWORK_WIFI_RX_DATA].addCountLocked(
                         entry.rxBytes);
@@ -7542,119 +7411,6 @@ public final class BatteryStatsImpl extends BatteryStats {
         }
 
         if (info != null) {
-            // Measured in mAms
-            final long txTimeMs = info.getControllerTxTimeMillis();
-            final long rxTimeMs = info.getControllerRxTimeMillis();
-            final long idleTimeMs = info.getControllerIdleTimeMillis();
-            final long totalTimeMs = txTimeMs + rxTimeMs + idleTimeMs;
-
-            long leftOverRxTimeMs = rxTimeMs;
-
-            if (DEBUG_ENERGY) {
-                Slog.d(TAG, "------ BEGIN WiFi power blaming ------");
-                Slog.d(TAG, "  Tx Time:    " + txTimeMs + " ms");
-                Slog.d(TAG, "  Rx Time:    " + rxTimeMs + " ms");
-                Slog.d(TAG, "  Idle Time:  " + idleTimeMs + " ms");
-                Slog.d(TAG, "  Total Time: " + totalTimeMs + " ms");
-            }
-
-            long totalWifiLockTimeMs = 0;
-            long totalScanTimeMs = 0;
-
-            // On the first pass, collect some totals so that we can normalize power
-            // calculations if we need to.
-            final int uidStatsSize = mUidStats.size();
-            for (int i = 0; i < uidStatsSize; i++) {
-                final Uid uid = mUidStats.valueAt(i);
-
-                // Sum the total scan power for all apps.
-                totalScanTimeMs += uid.mWifiScanTimer.getTimeSinceMarkLocked(
-                        elapsedRealtimeMs * 1000) / 1000;
-
-                // Sum the total time holding wifi lock for all apps.
-                totalWifiLockTimeMs += uid.mFullWifiLockTimer.getTimeSinceMarkLocked(
-                        elapsedRealtimeMs * 1000) / 1000;
-            }
-
-            if (DEBUG_ENERGY && totalScanTimeMs > rxTimeMs) {
-                Slog.d(TAG, "  !Estimated scan time > Actual rx time (" + totalScanTimeMs + " ms > "
-                        + rxTimeMs + " ms). Normalizing scan time.");
-            }
-
-            // Actually assign and distribute power usage to apps.
-            for (int i = 0; i < uidStatsSize; i++) {
-                final Uid uid = mUidStats.valueAt(i);
-
-                long scanTimeSinceMarkMs = uid.mWifiScanTimer.getTimeSinceMarkLocked(
-                        elapsedRealtimeMs * 1000) / 1000;
-                if (scanTimeSinceMarkMs > 0) {
-                    // Set the new mark so that next time we get new data since this point.
-                    uid.mWifiScanTimer.setMark(elapsedRealtimeMs);
-
-                    if (totalScanTimeMs > rxTimeMs) {
-                        // Our total scan time is more than the reported Rx time.
-                        // This is possible because the cost of a scan is approximate.
-                        // Let's normalize the result so that we evenly blame each app
-                        // scanning.
-                        //
-                        // This means that we may have apps that received packets not be blamed
-                        // for this, but this is fine as scans are relatively more expensive.
-                        scanTimeSinceMarkMs = (rxTimeMs * scanTimeSinceMarkMs) / totalScanTimeMs;
-                    }
-
-                    if (DEBUG_ENERGY) {
-                        Slog.d(TAG, "  ScanTime for UID " + uid.getUid() + ": "
-                                + scanTimeSinceMarkMs + " ms)");
-                    }
-                    uid.noteWifiControllerActivityLocked(CONTROLLER_RX_TIME, scanTimeSinceMarkMs);
-                    leftOverRxTimeMs -= scanTimeSinceMarkMs;
-                }
-
-                // Distribute evenly the power consumed while Idle to each app holding a WiFi
-                // lock.
-                final long wifiLockTimeSinceMarkMs = uid.mFullWifiLockTimer.getTimeSinceMarkLocked(
-                        elapsedRealtimeMs * 1000) / 1000;
-                if (wifiLockTimeSinceMarkMs > 0) {
-                    // Set the new mark so that next time we get new data since this point.
-                    uid.mFullWifiLockTimer.setMark(elapsedRealtimeMs);
-
-                    final long myIdleTimeMs = (wifiLockTimeSinceMarkMs * idleTimeMs)
-                            / totalWifiLockTimeMs;
-                    if (DEBUG_ENERGY) {
-                        Slog.d(TAG, "  IdleTime for UID " + uid.getUid() + ": "
-                                + myIdleTimeMs + " ms");
-                    }
-                    uid.noteWifiControllerActivityLocked(CONTROLLER_IDLE_TIME, myIdleTimeMs);
-                }
-            }
-
-            if (DEBUG_ENERGY) {
-                Slog.d(TAG, "  New RxPower: " + leftOverRxTimeMs + " ms");
-            }
-
-            // Distribute the Tx power appropriately between all apps that transmitted packets.
-            for (int i = 0; i < txPackets.size(); i++) {
-                final Uid uid = getUidStatsLocked(txPackets.keyAt(i));
-                final long myTxTimeMs = (txPackets.valueAt(i) * txTimeMs) / totalTxPackets;
-                if (DEBUG_ENERGY) {
-                    Slog.d(TAG, "  TxTime for UID " + uid.getUid() + ": " + myTxTimeMs + " ms");
-                }
-                uid.noteWifiControllerActivityLocked(CONTROLLER_TX_TIME, myTxTimeMs);
-            }
-
-            // Distribute the remaining Rx power appropriately between all apps that received
-            // packets.
-            for (int i = 0; i < rxPackets.size(); i++) {
-                final Uid uid = getUidStatsLocked(rxPackets.keyAt(i));
-                final long myRxTimeMs = (rxPackets.valueAt(i) * leftOverRxTimeMs) / totalRxPackets;
-                if (DEBUG_ENERGY) {
-                    Slog.d(TAG, "  RxTime for UID " + uid.getUid() + ": " + myRxTimeMs + " ms");
-                }
-                uid.noteWifiControllerActivityLocked(CONTROLLER_RX_TIME, myRxTimeMs);
-            }
-
-            // Any left over power use will be picked up by the WiFi category in BatteryStatsHelper.
-
             // Update WiFi controller stats.
             mWifiActivityCounters[CONTROLLER_RX_TIME].addCountLocked(
                     info.getControllerRxTimeMillis());
@@ -7662,29 +7418,19 @@ public final class BatteryStatsImpl extends BatteryStats {
                     info.getControllerTxTimeMillis());
             mWifiActivityCounters[CONTROLLER_IDLE_TIME].addCountLocked(
                     info.getControllerIdleTimeMillis());
-
-            final double powerDrainMaMs;
-            if (mPowerProfile.getAveragePower(
-                    PowerProfile.POWER_WIFI_CONTROLLER_OPERATING_VOLTAGE) == 0) {
-                powerDrainMaMs = 0.0;
-            } else {
-                powerDrainMaMs = info.getControllerEnergyUsed()
-                        / mPowerProfile.getAveragePower(
-                        PowerProfile.POWER_WIFI_CONTROLLER_OPERATING_VOLTAGE);
-            }
-            mWifiActivityCounters[CONTROLLER_POWER_DRAIN].addCountLocked((long) powerDrainMaMs);
+            mWifiActivityCounters[CONTROLLER_ENERGY].addCountLocked(
+                    info.getControllerEnergyUsed());
         }
     }
 
     /**
      * Distribute Cell radio energy info and network traffic to apps.
      */
-    public void updateMobileRadioStateLocked(final long elapsedRealtimeMs) {
-        NetworkStats delta = null;
+    public void updateMobileRadioStateLocked(long elapsedRealtimeMs) {
+        final NetworkStats delta;
+
         try {
-            if (!ArrayUtils.isEmpty(mMobileIfaces)) {
-                delta = getNetworkStatsDeltaLocked(mMobileIfaces, mMobileNetworkStats);
-            }
+            delta = getNetworkStatsDeltaLocked(mMobileIfaces, mMobileNetworkStats);
         } catch (IOException e) {
             Slog.wtf(TAG, "Failed to get mobile network stats", e);
             return;
@@ -7694,24 +7440,14 @@ public final class BatteryStatsImpl extends BatteryStats {
             return;
         }
 
-        long radioTime = mMobileRadioActivePerAppTimer.getTimeSinceMarkLocked(
-                elapsedRealtimeMs * 1000);
-        mMobileRadioActivePerAppTimer.setMark(elapsedRealtimeMs);
+        long radioTime = mMobileRadioActivePerAppTimer.checkpointRunningLocked(elapsedRealtimeMs);
         long totalPackets = delta.getTotalPackets();
 
         final int size = delta.size();
         for (int i = 0; i < size; i++) {
             final NetworkStats.Entry entry = delta.getValues(i, mTmpNetworkStatsEntry);
 
-            if (entry.rxBytes == 0 || entry.txBytes == 0) {
-                continue;
-            }
-
-            if (DEBUG_ENERGY) {
-                Slog.d(TAG, "Mobile uid " + entry.uid + ": delta rx=" + entry.rxBytes
-                        + " tx=" + entry.txBytes + " rxPackets=" + entry.rxPackets
-                        + " txPackets=" + entry.txPackets);
-            }
+            if (entry.rxBytes == 0 || entry.txBytes == 0) continue;
 
             final Uid u = getUidStatsLocked(mapUid(entry.uid));
             u.noteNetworkActivityLocked(NETWORK_MOBILE_RX_DATA, entry.rxBytes,
@@ -7752,14 +7488,14 @@ public final class BatteryStatsImpl extends BatteryStats {
      * @param info The energy information from the bluetooth controller.
      */
     public void updateBluetoothStateLocked(@Nullable final BluetoothActivityEnergyInfo info) {
-        if (info != null && mOnBatteryInternal && false) {
+        if (info != null && mOnBatteryInternal) {
             mBluetoothActivityCounters[CONTROLLER_RX_TIME].addCountLocked(
                     info.getControllerRxTimeMillis());
             mBluetoothActivityCounters[CONTROLLER_TX_TIME].addCountLocked(
                     info.getControllerTxTimeMillis());
             mBluetoothActivityCounters[CONTROLLER_IDLE_TIME].addCountLocked(
                     info.getControllerIdleTimeMillis());
-            mBluetoothActivityCounters[CONTROLLER_POWER_DRAIN].addCountLocked(
+            mBluetoothActivityCounters[CONTROLLER_ENERGY].addCountLocked(
                     info.getControllerEnergyUsed());
         }
     }
