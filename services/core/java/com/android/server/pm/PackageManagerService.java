@@ -10447,13 +10447,13 @@ public class PackageManagerService extends IPackageManager.Stub {
             return;
         }
 
+        // Call with SCAN_NO_DEX, since dexopt has already been made
         if (replace) {
-            // Call replacePackageLI with SCAN_NO_DEX, since we already made dexopt
             replacePackageLI(pkg, parseFlags, scanFlags | SCAN_REPLACING | SCAN_NO_DEX, args.user,
                     installerPackageName, res);
         } else {
-            installNewPackageLI(pkg, parseFlags, scanFlags | SCAN_DELETE_DATA_ON_FAILURES,
-                    args.user, installerPackageName, res);
+            installNewPackageLI(pkg, parseFlags, scanFlags | SCAN_DELETE_DATA_ON_FAILURES
+                            | SCAN_NO_DEX, args.user, installerPackageName, res);
         }
         synchronized (mPackages) {
             final PackageSetting ps = mSettings.mPackages.get(pkgName);
