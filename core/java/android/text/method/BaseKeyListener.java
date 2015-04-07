@@ -22,6 +22,8 @@ import android.text.*;
 import android.text.method.TextKeyListener.Capitalize;
 import android.widget.TextView;
 
+import java.text.BreakIterator;
+
 /**
  * Abstract base class for key listeners.
  *
@@ -63,9 +65,9 @@ public abstract class BaseKeyListener extends MetaKeyKeyListener
 
     private boolean backspaceOrForwardDelete(View view, Editable content, int keyCode,
             KeyEvent event, boolean isForwardDelete) {
-        // Ensure the key event does not have modifiers except ALT or SHIFT.
+        // Ensure the key event does not have modifiers except ALT or SHIFT or CTRL.
         if (!KeyEvent.metaStateHasNoModifiers(event.getMetaState()
-                & ~(KeyEvent.META_SHIFT_MASK | KeyEvent.META_ALT_MASK))) {
+                & ~(KeyEvent.META_SHIFT_MASK | KeyEvent.META_ALT_MASK | KeyEvent.META_CTRL_MASK))) {
             return false;
         }
 
@@ -74,18 +76,28 @@ public abstract class BaseKeyListener extends MetaKeyKeyListener
             return true;
         }
 
-        // Alt+Backspace or Alt+ForwardDelete deletes the current line, if possible.
-        if (getMetaState(content, META_ALT_ON, event) == 1) {
-            if (deleteLine(view, content)) {
-                return true;
+        // MetaKeyKeyListener doesn't track control key state. Need to check the KeyEvent instead.
+        boolean isCtrlActive = ((event.getMetaState() & KeyEvent.META_CTRL_ON) != 0);
+        boolean isShiftActive = (getMetaState(content, META_SHIFT_ON, event) == 1);
+        boolean isAltActive = (getMetaState(content, META_ALT_ON, event) == 1);
+
+        if (isCtrlActive) {
+            if (isAltActive || isShiftActive) {
+                // Ctrl+Alt, Ctrl+Shift, Ctrl+Alt+Shift should not delete any characters.
+                return false;
             }
+            return deleteUntilWordBoundary(view, content, isForwardDelete);
+        }
+
+        // Alt+Backspace or Alt+ForwardDelete deletes the current line, if possible.
+        if (isAltActive && deleteLine(view, content)) {
+            return true;
         }
 
         // Delete a character.
         final int start = Selection.getSelectionEnd(content);
         final int end;
-        if (isForwardDelete || event.isShiftPressed()
-                || getMetaState(content, META_SHIFT_ON) == 1) {
+        if (isForwardDelete || event.isShiftPressed() || isShiftActive) {
             end = TextUtils.getOffsetAfter(content, start);
         } else {
             end = TextUtils.getOffsetBefore(content, start);
@@ -95,6 +107,54 @@ public abstract class BaseKeyListener extends MetaKeyKeyListener
             return true;
         }
         return false;
+    }
+
+    private boolean deleteUntilWordBoundary(View view, Editable content, boolean isForwardDelete) {
+        int currentCursorOffset = Selection.getSelectionStart(content);
+
+        // If there is a selection, do nothing.
+        if (currentCursorOffset != Selection.getSelectionEnd(content)) {
+            return false;
+        }
+
+        // Early exit if there is no contents to delete.
+        if ((!isForwardDelete && currentCursorOffset == 0) ||
+            (isForwardDelete && currentCursorOffset == content.length())) {
+            return false;
+        }
+
+        WordIterator wordIterator = null;
+        if (view instanceof TextView) {
+            wordIterator = ((TextView)view).getWordIterator();
+        }
+
+        if (wordIterator == null) {
+            // Default locale is used for WordIterator since the appropriate locale is not clear
+            // here.
+            // TODO: Use appropriate locale for WordIterator.
+            wordIterator = new WordIterator();
+        }
+
+        int deleteFrom;
+        int deleteTo;
+
+        if (isForwardDelete) {
+            deleteFrom = currentCursorOffset;
+            wordIterator.setCharSequence(content, deleteFrom, content.length());
+            deleteTo = wordIterator.following(currentCursorOffset);
+            if (deleteTo == BreakIterator.DONE) {
+                deleteTo = content.length();
+            }
+        } else {
+            deleteTo = currentCursorOffset;
+            wordIterator.setCharSequence(content, 0, deleteTo);
+            deleteFrom = wordIterator.preceding(currentCursorOffset);
+            if (deleteFrom == BreakIterator.DONE) {
+                deleteFrom = 0;
+            }
+        }
+        content.delete(deleteFrom, deleteTo);
+        return true;
     }
 
     private boolean deleteSelection(View view, Editable content) {
