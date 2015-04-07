@@ -16918,7 +16918,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     @Nullable
     public ColorStateList getForegroundTintList() {
         return mForegroundInfo != null && mForegroundInfo.mTintInfo != null
-                ? mBackgroundTint.mTintList : null;
+                ? mForegroundInfo.mTintInfo.mTintList : null;
     }
 
     /**
