@@ -1499,7 +1499,9 @@ public class AudioTrack
      * @param sizeInShorts the number of shorts to read in audioData after the offset.
      * @return the number of shorts that were written or {@link #ERROR_INVALID_OPERATION}
      *    if the object wasn't properly initialized, or {@link #ERROR_BAD_VALUE} if
-     *    the parameters don't resolve to valid data and indexes.
+     *    the parameters don't resolve to valid data and indexes, or
+     *    {@link AudioManager#ERROR_DEAD_OBJECT} if the AudioTrack is not valid anymore and
+     *    needs to be recreated.
      */
 
     public int write(short[] audioData, int offsetInShorts, int sizeInShorts) {
@@ -1559,7 +1561,9 @@ public class AudioTrack
      *     queuing as much audio data for playback as possible without blocking.
      * @return the number of floats that were written, or {@link #ERROR_INVALID_OPERATION}
      *    if the object wasn't properly initialized, or {@link #ERROR_BAD_VALUE} if
-     *    the parameters don't resolve to valid data and indexes.
+     *    the parameters don't resolve to valid data and indexes, or
+     *    {@link AudioManager#ERROR_DEAD_OBJECT} if the AudioTrack is not valid anymore and
+     *    needs to be recreated.
      */
     public int write(float[] audioData, int offsetInFloats, int sizeInFloats,
             @WriteMode int writeMode) {
@@ -1620,7 +1624,9 @@ public class AudioTrack
      *     <BR>With {@link #WRITE_NON_BLOCKING}, the write will return immediately after
      *     queuing as much audio data for playback as possible without blocking.
      * @return 0 or a positive number of bytes that were written, or
-     *     {@link #ERROR_BAD_VALUE}, {@link #ERROR_INVALID_OPERATION}
+     *     {@link #ERROR_BAD_VALUE}, {@link #ERROR_INVALID_OPERATION}, or
+     *     {@link AudioManager#ERROR_DEAD_OBJECT} if the AudioTrack is not valid anymore and
+     *     needs to be recreated.
      */
     public int write(ByteBuffer audioData, int sizeInBytes,
             @WriteMode int writeMode) {
