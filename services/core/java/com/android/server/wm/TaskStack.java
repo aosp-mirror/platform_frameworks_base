@@ -275,21 +275,29 @@ public class TaskStack {
         return false;
     }
 
+    void addTask(Task task, boolean toTop) {
+        addTask(task, toTop, task.showWhenLocked());
+    }
+
     /**
      * Put a Task in this stack. Used for adding and moving.
      * @param task The task to add.
      * @param toTop Whether to add it to the top or bottom.
+     * @param showWhenLocked Whether to show the task when the device is locked
+     *                       regardless of the current user.
      */
-    void addTask(Task task, boolean toTop) {
+    void addTask(Task task, boolean toTop, boolean showWhenLocked) {
         int stackNdx;
         if (!toTop) {
             stackNdx = 0;
         } else {
             stackNdx = mTasks.size();
-            if (!mService.isCurrentProfileLocked(task.mUserId)) {
+            if (!showWhenLocked && !mService.isCurrentProfileLocked(task.mUserId)) {
                 // Place the task below all current user tasks.
                 while (--stackNdx >= 0) {
-                    if (!mService.isCurrentProfileLocked(mTasks.get(stackNdx).mUserId)) {
+                    final Task tmpTask = mTasks.get(stackNdx);
+                    if (!tmpTask.showWhenLocked()
+                            || !mService.isCurrentProfileLocked(tmpTask.mUserId)) {
                         break;
                     }
                 }
@@ -490,7 +498,7 @@ public class TaskStack {
         int top = mTasks.size();
         for (int taskNdx = 0; taskNdx < top; ++taskNdx) {
             Task task = mTasks.get(taskNdx);
-            if (mService.isCurrentProfileLocked(task.mUserId)) {
+            if (mService.isCurrentProfileLocked(task.mUserId) || task.showWhenLocked()) {
                 mTasks.remove(taskNdx);
                 mTasks.add(task);
                 --top;

@@ -16,6 +16,8 @@
 
 package com.android.server.am;
 
+import static android.content.pm.ActivityInfo.FLAG_SHOW_ON_LOCK_SCREEN;
+
 import static com.android.server.am.ActivityManagerDebugConfig.*;
 
 import static com.android.server.am.ActivityRecord.HOME_ACTIVITY_TYPE;
@@ -373,8 +375,7 @@ final class ActivityStack {
     }
 
     boolean okToShowLocked(ActivityRecord r) {
-        return isCurrentProfileLocked(r.userId)
-                || (r.info.flags & ActivityInfo.FLAG_SHOW_ON_LOCK_SCREEN) != 0;
+        return isCurrentProfileLocked(r.userId) || (r.info.flags & FLAG_SHOW_ON_LOCK_SCREEN) != 0;
     }
 
     final ActivityRecord topRunningActivityLocked(ActivityRecord notTop) {
@@ -617,13 +618,15 @@ final class ActivityStack {
         final int userId = UserHandle.getUserId(info.applicationInfo.uid);
 
         for (int taskNdx = mTaskHistory.size() - 1; taskNdx >= 0; --taskNdx) {
-            TaskRecord task = mTaskHistory.get(taskNdx);
-            if (!isCurrentProfileLocked(task.userId)) {
-                return null;
-            }
+            final TaskRecord task = mTaskHistory.get(taskNdx);
+            final boolean notCurrentUserTask = !isCurrentProfileLocked(task.userId);
             final ArrayList<ActivityRecord> activities = task.mActivities;
+
             for (int activityNdx = activities.size() - 1; activityNdx >= 0; --activityNdx) {
                 ActivityRecord r = activities.get(activityNdx);
+                if (notCurrentUserTask && (r.info.flags & FLAG_SHOW_ON_LOCK_SCREEN) == 0) {
+                    return null;
+                }
                 if (!r.finishing && r.intent.getComponent().equals(cls) && r.userId == userId) {
                     //Slog.i(TAG, "Found matching class!");
                     //dump();
@@ -648,8 +651,12 @@ final class ActivityStack {
         // Move userId's tasks to the top.
         int index = mTaskHistory.size();
         for (int i = 0; i < index; ) {
-            TaskRecord task = mTaskHistory.get(i);
-            if (isCurrentProfileLocked(task.userId)) {
+            final TaskRecord task = mTaskHistory.get(i);
+
+            // NOTE: If {@link TaskRecord#topRunningActivityLocked} return is not null then it is
+            // okay to show the activity when locked.
+            if (isCurrentProfileLocked(task.userId)
+                    || task.topRunningActivityLocked(null) != null) {
                 if (DEBUG_TASKS) Slog.d(TAG_TASKS, "switchUserLocked: stack=" + getStackId() +
                         " moving " + task + " to top");
                 mTaskHistory.remove(i);
@@ -1981,7 +1988,7 @@ final class ActivityStack {
         return null;
     }
 
-    private void insertTaskAtTop(TaskRecord task) {
+    private void insertTaskAtTop(TaskRecord task, ActivityRecord newActivity) {
         // If the moving task is over home stack, transfer its return type to next task
         if (task.isOverHomeStack()) {
             final TaskRecord nextTask = getNextTask(task);
@@ -2009,10 +2016,15 @@ final class ActivityStack {
         mTaskHistory.remove(task);
         // Now put task at top.
         int taskNdx = mTaskHistory.size();
-        if (!isCurrentProfileLocked(task.userId)) {
+        final boolean notShownWhenLocked =
+                (newActivity != null && (newActivity.info.flags & FLAG_SHOW_ON_LOCK_SCREEN) == 0)
+                || (newActivity == null && task.topRunningActivityLocked(null) == null);
+        if (!isCurrentProfileLocked(task.userId) && notShownWhenLocked) {
             // Put non-current user tasks below current user tasks.
             while (--taskNdx >= 0) {
-                if (!isCurrentProfileLocked(mTaskHistory.get(taskNdx).userId)) {
+                final TaskRecord tmpTask = mTaskHistory.get(taskNdx);
+                if (!isCurrentProfileLocked(tmpTask.userId)
+                        || tmpTask.topRunningActivityLocked(null) == null) {
                     break;
                 }
             }
@@ -2031,7 +2043,7 @@ final class ActivityStack {
             // Last activity in task had been removed or ActivityManagerService is reusing task.
             // Insert or replace.
             // Might not even be in.
-            insertTaskAtTop(rTask);
+            insertTaskAtTop(rTask, r);
             mWindowManager.moveTaskToTop(taskId);
         }
         TaskRecord task = null;
@@ -3611,7 +3623,7 @@ final class ActivityStack {
 
         // Shift all activities with this task up to the top
         // of the stack, keeping them in the same internal order.
-        insertTaskAtTop(tr);
+        insertTaskAtTop(tr, null);
 
         // Set focus to the top running activity of this stack.
         ActivityRecord r = topRunningActivityLocked(null);
@@ -4288,7 +4300,7 @@ final class ActivityStack {
     void addTask(final TaskRecord task, final boolean toTop, boolean moving) {
         task.stack = this;
         if (toTop) {
-            insertTaskAtTop(task);
+            insertTaskAtTop(task, null);
         } else {
             mTaskHistory.add(0, task);
             updateTaskMovement(task, false);

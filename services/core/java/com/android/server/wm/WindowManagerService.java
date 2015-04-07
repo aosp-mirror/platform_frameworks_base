@@ -3620,7 +3620,7 @@ public class WindowManagerService extends IWindowManager.Stub
         EventLog.writeEvent(EventLogTags.WM_TASK_CREATED, taskId, stackId);
         Task task = new Task(taskId, stack, userId, this);
         mTaskIdToTask.put(taskId, task);
-        stack.addTask(task, !atoken.mLaunchTaskBehind /* toTop */);
+        stack.addTask(task, !atoken.mLaunchTaskBehind /* toTop */, atoken.showWhenLocked);
         return task;
     }
 
