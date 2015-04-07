@@ -63,8 +63,10 @@ import com.android.server.audio.PlayerRecord.RemotePlaybackState;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.Stack;
+import java.text.DateFormat;
 
 /**
  * @hide
@@ -124,6 +126,8 @@ public class MediaFocusControl implements OnFinished {
     }
 
     protected void dump(PrintWriter pw) {
+        pw.println("\nMediaFocusControl dump time: "
+                + DateFormat.getTimeInstance().format(new Date()));
         dumpFocusStack(pw);
         dumpRCStack(pw);
         dumpRCCStack(pw);
