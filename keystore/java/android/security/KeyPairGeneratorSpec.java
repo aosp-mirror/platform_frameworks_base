@@ -24,10 +24,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.cert.Certificate;
 import java.security.spec.AlgorithmParameterSpec;
-import java.util.Collections;
 import java.util.Date;
-import java.util.HashSet;
-import java.util.Set;
 
 import javax.security.auth.x500.X500Principal;
 
@@ -81,21 +78,17 @@ public final class KeyPairGeneratorSpec implements AlgorithmParameterSpec {
 
     private final Date mKeyValidityForConsumptionEnd;
 
-    private final @KeyStoreKeyConstraints.PurposeEnum Integer mPurposes;
+    private final @KeyStoreKeyConstraints.PurposeEnum int mPurposes;
 
-    private final @KeyStoreKeyConstraints.DigestEnum Integer mDigest;
+    private final @KeyStoreKeyConstraints.DigestEnum int mDigests;
 
-    private final @KeyStoreKeyConstraints.PaddingEnum Integer mPadding;
+    private final @KeyStoreKeyConstraints.PaddingEnum int mPaddings;
 
-    private final @KeyStoreKeyConstraints.BlockModeEnum Integer mBlockMode;
+    private final @KeyStoreKeyConstraints.BlockModeEnum int mBlockModes;
 
-    private final Integer mMinSecondsBetweenOperations;
+    private final @KeyStoreKeyConstraints.UserAuthenticatorEnum int mUserAuthenticators;
 
-    private final Integer mMaxUsesPerBoot;
-
-    private final Set<Integer> mUserAuthenticators;
-
-    private final Integer mUserAuthenticationValidityDurationSeconds;
+    private final int mUserAuthenticationValidityDurationSeconds;
 
     /**
      * Parameter specification for the "{@code AndroidKeyPairGenerator}"
@@ -135,14 +128,12 @@ public final class KeyPairGeneratorSpec implements AlgorithmParameterSpec {
             Date keyValidityStart,
             Date keyValidityForOriginationEnd,
             Date keyValidityForConsumptionEnd,
-            @KeyStoreKeyConstraints.PurposeEnum Integer purposes,
-            @KeyStoreKeyConstraints.DigestEnum Integer digest,
-            @KeyStoreKeyConstraints.PaddingEnum Integer padding,
-            @KeyStoreKeyConstraints.BlockModeEnum Integer blockMode,
-            Integer minSecondsBetweenOperations,
-            Integer maxUsesPerBoot,
-            Set<Integer> userAuthenticators,
-            Integer userAuthenticationValidityDurationSeconds) {
+            @KeyStoreKeyConstraints.PurposeEnum int purposes,
+            @KeyStoreKeyConstraints.DigestEnum int digests,
+            @KeyStoreKeyConstraints.PaddingEnum int paddings,
+            @KeyStoreKeyConstraints.BlockModeEnum int blockModes,
+            @KeyStoreKeyConstraints.UserAuthenticatorEnum int userAuthenticators,
+            int userAuthenticationValidityDurationSeconds) {
         if (context == null) {
             throw new IllegalArgumentException("context == null");
         } else if (TextUtils.isEmpty(keyStoreAlias)) {
@@ -157,8 +148,8 @@ public final class KeyPairGeneratorSpec implements AlgorithmParameterSpec {
             throw new IllegalArgumentException("endDate == null");
         } else if (endDate.before(startDate)) {
             throw new IllegalArgumentException("endDate < startDate");
-        } else if ((userAuthenticationValidityDurationSeconds != null)
-                && (userAuthenticationValidityDurationSeconds < 0)) {
+        } else if ((userAuthenticationValidityDurationSeconds < 0)
+                && (userAuthenticationValidityDurationSeconds != -1)) {
             throw new IllegalArgumentException(
                     "userAuthenticationValidityDurationSeconds must not be negative");
         }
@@ -177,14 +168,10 @@ public final class KeyPairGeneratorSpec implements AlgorithmParameterSpec {
         mKeyValidityForOriginationEnd = keyValidityForOriginationEnd;
         mKeyValidityForConsumptionEnd = keyValidityForConsumptionEnd;
         mPurposes = purposes;
-        mDigest = digest;
-        mPadding = padding;
-        mBlockMode = blockMode;
-        mMinSecondsBetweenOperations = minSecondsBetweenOperations;
-        mMaxUsesPerBoot = maxUsesPerBoot;
-        mUserAuthenticators = (userAuthenticators != null)
-                ? new HashSet<Integer>(userAuthenticators)
-                : Collections.<Integer>emptySet();
+        mDigests = digests;
+        mPaddings = paddings;
+        mBlockModes = blockModes;
+        mUserAuthenticators = userAuthenticators;
         mUserAuthenticationValidityDurationSeconds = userAuthenticationValidityDurationSeconds;
     }
 
@@ -196,8 +183,7 @@ public final class KeyPairGeneratorSpec implements AlgorithmParameterSpec {
             AlgorithmParameterSpec spec, X500Principal subjectDN, BigInteger serialNumber,
             Date startDate, Date endDate, int flags) {
         this(context, keyStoreAlias, keyType, keySize, spec, subjectDN, serialNumber, startDate,
-                endDate, flags, startDate, endDate, endDate, null, null, null, null, null, null,
-                null, null);
+                endDate, flags, startDate, endDate, endDate, 0, 0, 0, 0, 0, -1);
     }
 
     /**
@@ -323,90 +309,52 @@ public final class KeyPairGeneratorSpec implements AlgorithmParameterSpec {
     /**
      * Gets the set of purposes for which the key can be used.
      *
-     * @return set of purposes or {@code null} if the key can be used for any purpose.
-     *
      * @hide
      */
-    public @KeyStoreKeyConstraints.PurposeEnum Integer getPurposes() {
+    public @KeyStoreKeyConstraints.PurposeEnum int getPurposes() {
         return mPurposes;
     }
 
     /**
-     * Gets the digest to which the key is restricted.
-     *
-     * @return digest or {@code null} if the digest is not restricted.
+     * Gets the set of digests to which the key is restricted.
      *
      * @hide
      */
-    public @KeyStoreKeyConstraints.DigestEnum Integer getDigest() {
-        return mDigest;
+    public @KeyStoreKeyConstraints.DigestEnum int getDigests() {
+        return mDigests;
     }
 
     /**
-     * Gets the padding scheme to which the key is restricted.
-     *
-     * @return padding scheme or {@code null} if the padding scheme is not restricted.
+     * Gets the set of padding schemes to which the key is restricted.
      *
      * @hide
      */
-    public @KeyStoreKeyConstraints.PaddingEnum Integer getPadding() {
-        return mPadding;
+    public @KeyStoreKeyConstraints.PaddingEnum int getPaddings() {
+        return mPaddings;
     }
 
     /**
-     * Gets the block mode to which the key is restricted when used for encryption or decryption.
-     *
-     * @return block more or {@code null} if block mode is not restricted.
+     * Gets the set of block modes to which the key is restricted.
      *
      * @hide
      */
-    public @KeyStoreKeyConstraints.BlockModeEnum Integer getBlockMode() {
-        return mBlockMode;
+    public @KeyStoreKeyConstraints.BlockModeEnum int getBlockModes() {
+        return mBlockModes;
     }
 
     /**
-     * Gets the minimum number of seconds that must expire since the most recent use of the private
-     * key before it can be used again.
+     * Gets the set of user authenticators which protect access to the private key. The key can only
+     * be used iff the user has authenticated to at least one of these user authenticators.
      *
      * <p>This restriction applies only to private key operations. Public key operations are not
      * restricted.
      *
-     * @return number of seconds or {@code null} if there is no restriction on how frequently a key
-     *         can be used.
+     * @return user authenticators or {@code 0} if the key can be used without user authentication.
      *
      * @hide
      */
-    public Integer getMinSecondsBetweenOperations() {
-        return mMinSecondsBetweenOperations;
-    }
-
-    /**
-     * Gets the number of times the private key can be used without rebooting the device.
-     *
-     * <p>This restriction applies only to private key operations. Public key operations are not
-     * restricted.
-     *
-     * @return maximum number of times or {@code null} if there is no restriction.
-     *
-     * @hide
-     */
-    public Integer getMaxUsesPerBoot() {
-        return mMaxUsesPerBoot;
-    }
-
-    /**
-     * Gets the user authenticators which protect access to the private key. The key can only be
-     * used iff the user has authenticated to at least one of these user authenticators.
-     *
-     * <p>This restriction applies only to private key operations. Public key operations are not
-     * restricted.
-     *
-     * @return user authenticators or empty set if the key can be used without user authentication.
-     *
-     * @hide
-     */
-    public Set<Integer> getUserAuthenticators() {
-        return new HashSet<Integer>(mUserAuthenticators);
+    public @KeyStoreKeyConstraints.UserAuthenticatorEnum int getUserAuthenticators() {
+        return mUserAuthenticators;
     }
 
     /**
@@ -416,12 +364,12 @@ public final class KeyPairGeneratorSpec implements AlgorithmParameterSpec {
      * <p>This restriction applies only to private key operations. Public key operations are not
      * restricted.
      *
-     * @return duration in seconds or {@code null} if not restricted. {@code 0} means authentication
+     * @return duration in seconds or {@code -1} if not restricted. {@code 0} means authentication
      *         is required for every use of the key.
      *
      * @hide
      */
-    public Integer getUserAuthenticationValidityDurationSeconds() {
+    public int getUserAuthenticationValidityDurationSeconds() {
         return mUserAuthenticationValidityDurationSeconds;
     }
 
@@ -473,21 +421,17 @@ public final class KeyPairGeneratorSpec implements AlgorithmParameterSpec {
 
         private Date mKeyValidityForConsumptionEnd;
 
-        private @KeyStoreKeyConstraints.PurposeEnum Integer mPurposes;
+        private @KeyStoreKeyConstraints.PurposeEnum int mPurposes;
 
-        private @KeyStoreKeyConstraints.DigestEnum Integer mDigest;
+        private @KeyStoreKeyConstraints.DigestEnum int mDigests;
 
-        private @KeyStoreKeyConstraints.PaddingEnum Integer mPadding;
+        private @KeyStoreKeyConstraints.PaddingEnum int mPaddings;
 
-        private @KeyStoreKeyConstraints.BlockModeEnum Integer mBlockMode;
+        private @KeyStoreKeyConstraints.BlockModeEnum int mBlockModes;
 
-        private Integer mMinSecondsBetweenOperations;
+        private @KeyStoreKeyConstraints.UserAuthenticatorEnum int mUserAuthenticators;
 
-        private Integer mMaxUsesPerBoot;
-
-        private Set<Integer> mUserAuthenticators;
-
-        private Integer mUserAuthenticationValidityDurationSeconds;
+        private int mUserAuthenticationValidityDurationSeconds = -1;
 
         /**
          * Creates a new instance of the {@code Builder} with the given
@@ -675,9 +619,9 @@ public final class KeyPairGeneratorSpec implements AlgorithmParameterSpec {
         }
 
         /**
-         * Restricts the purposes for which the key can be used to the provided set of purposes.
+         * Restricts the key to being used only for the provided set of purposes.
          *
-         * <p>By default, the key can be used for encryption, decryption, signing, and verification.
+         * <p>This restriction must be specified. There is no default.
          *
          * @hide
          */
@@ -687,28 +631,28 @@ public final class KeyPairGeneratorSpec implements AlgorithmParameterSpec {
         }
 
         /**
-         * Restricts the key to being used only with the provided digest. Attempts to use the key
+         * Restricts the key to being used only with the provided digests. Attempts to use the key
          * with any other digests be rejected.
          *
          * <p>This restriction must be specified for keys which are used for signing/verification.
          *
          * @hide
          */
-        public Builder setDigest(@KeyStoreKeyConstraints.DigestEnum int digest) {
-            mDigest = digest;
+        public Builder setDigests(@KeyStoreKeyConstraints.DigestEnum int digests) {
+            mDigests = digests;
             return this;
         }
 
         /**
-         * Restricts the key to being used only with the provided padding scheme. Attempts to use
+         * Restricts the key to being used only with the provided padding schemes. Attempts to use
          * the key with any other padding will be rejected.
          *
          * <p>This restriction must be specified for keys which are used for encryption/decryption.
          *
          * @hide
          */
-        public Builder setPadding(@KeyStoreKeyConstraints.PaddingEnum int padding) {
-            mPadding = padding;
+        public Builder setPaddings(@KeyStoreKeyConstraints.PaddingEnum int paddings) {
+            mPaddings = paddings;
             return this;
         }
 
@@ -720,39 +664,8 @@ public final class KeyPairGeneratorSpec implements AlgorithmParameterSpec {
          *
          * @hide
          */
-        public Builder setBlockMode(@KeyStoreKeyConstraints.BlockModeEnum int blockMode) {
-            mBlockMode = blockMode;
-            return this;
-        }
-
-        /**
-         * Sets the minimum number of seconds that must expire since the most recent use of the key
-         * before it can be used again.
-         *
-         * <p>By default, there is no restriction on how frequently a key can be used.
-         *
-         * <p>This restriction applies only to private key operations. Public key operations are not
-         * restricted.
-         *
-         * @hide
-         */
-        public Builder setMinSecondsBetweenOperations(int seconds) {
-            mMinSecondsBetweenOperations = seconds;
-            return this;
-        }
-
-        /**
-         * Sets the maximum number of times a key can be used without rebooting the device.
-         *
-         * <p>By default, the key can be used for an unlimited number of times.
-         *
-         * <p>This restriction applies only to private key operations. Public key operations are not
-         * restricted.
-         *
-         * @hide
-         */
-        public Builder setMaxUsesPerBoot(int count) {
-            mMaxUsesPerBoot = count;
+        public Builder setBlockModes(@KeyStoreKeyConstraints.BlockModeEnum int blockModes) {
+            mBlockModes = blockModes;
             return this;
         }
 
@@ -765,16 +678,16 @@ public final class KeyPairGeneratorSpec implements AlgorithmParameterSpec {
          * <p>This restriction applies only to private key operations. Public key operations are not
          * restricted.
          *
-         * @param userAuthenticators user authenticators or empty list if this key can be accessed
+         * @param userAuthenticators user authenticators or {@code 0} if this key can be accessed
          *        without user authentication.
          *
          * @see #setUserAuthenticationValidityDurationSeconds(int)
          *
          * @hide
          */
-        public Builder setUserAuthenticators(Set<Integer> userAuthenticators) {
-            mUserAuthenticators =
-                    (userAuthenticators != null) ? new HashSet<Integer>(userAuthenticators) : null;
+        public Builder setUserAuthenticators(
+                @KeyStoreKeyConstraints.UserAuthenticatorEnum int userAuthenticators) {
+            mUserAuthenticators = userAuthenticators;
             return this;
         }
 
@@ -790,7 +703,7 @@ public final class KeyPairGeneratorSpec implements AlgorithmParameterSpec {
          * @param seconds duration in seconds or {@code 0} if the user needs to authenticate for
          *        every use of the key.
          *
-         * @see #setUserAuthenticators(Set)
+         * @see #setUserAuthenticators(int)
          *
          * @hide
          */
@@ -820,11 +733,9 @@ public final class KeyPairGeneratorSpec implements AlgorithmParameterSpec {
                     mKeyValidityForOriginationEnd,
                     mKeyValidityForConsumptionEnd,
                     mPurposes,
-                    mDigest,
-                    mPadding,
-                    mBlockMode,
-                    mMinSecondsBetweenOperations,
-                    mMaxUsesPerBoot,
+                    mDigests,
+                    mPaddings,
+                    mBlockModes,
                     mUserAuthenticators,
                     mUserAuthenticationValidityDurationSeconds);
         }

@@ -171,6 +171,9 @@ public final class KeymasterDefs {
     public static final int KM_KEY_FORMAT_PKCS12 = 2;
     public static final int KM_KEY_FORMAT_RAW = 3;
 
+    // User authenticators.
+    public static final int HW_AUTH_PASSWORD = 1 << 0;
+
     // Error codes.
     public static final int KM_ERROR_OK = 0;
     public static final int KM_ERROR_ROOT_OF_TRUST_ALREADY_SET = -1;
