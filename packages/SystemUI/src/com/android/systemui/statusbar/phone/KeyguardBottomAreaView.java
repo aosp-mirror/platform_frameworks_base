@@ -100,6 +100,7 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
     private final TrustDrawable mTrustDrawable;
     private final Interpolator mLinearOutSlowInInterpolator;
     private int mLastUnlockIconRes = 0;
+    private boolean mPrewarmSent;
 
     public KeyguardBottomAreaView(Context context) {
         this(context, null);
@@ -335,12 +336,47 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
         mLockPatternUtils.requireCredentialEntry(mLockPatternUtils.getCurrentUser());
     }
 
-    public void launchCamera() {
+    public void prewarmCamera() {
         Intent intent = getCameraIntent();
+        String targetPackage = PreviewInflater.getTargetPackage(mContext, intent,
+                mLockPatternUtils.getCurrentUser());
+        if (targetPackage != null) {
+            Intent prewarm = new Intent(MediaStore.ACTION_STILL_IMAGE_CAMERA_PREWARM);
+            prewarm.setPackage(targetPackage);
+            mPrewarmSent = true;
+            mContext.sendBroadcast(prewarm);
+        }
+    }
+
+    public void maybeCooldownCamera() {
+        if (!mPrewarmSent) {
+            return;
+        }
+        mPrewarmSent = false;
+        Intent intent = getCameraIntent();
+        String targetPackage = PreviewInflater.getTargetPackage(mContext, intent,
+                mLockPatternUtils.getCurrentUser());
+        if (targetPackage != null) {
+            Intent prewarm = new Intent(MediaStore.ACTION_STILL_IMAGE_CAMERA_COOLDOWN);
+            prewarm.setPackage(targetPackage);
+            mContext.sendBroadcast(prewarm);
+        }
+    }
+
+    public void launchCamera() {
+
+        // Reset prewarm state.
+        mPrewarmSent = false;
+        final Intent intent = getCameraIntent();
         boolean wouldLaunchResolverActivity = PreviewInflater.wouldLaunchResolverActivity(
                 mContext, intent, mLockPatternUtils.getCurrentUser());
         if (intent == SECURE_CAMERA_INTENT && !wouldLaunchResolverActivity) {
-            mContext.startActivityAsUser(intent, UserHandle.CURRENT);
+            AsyncTask.execute(new Runnable() {
+                @Override
+                public void run() {
+                    mContext.startActivityAsUser(intent, UserHandle.CURRENT);
+                }
+            });
         } else {
 
             // We need to delay starting the activity because ResolverActivity finishes itself if

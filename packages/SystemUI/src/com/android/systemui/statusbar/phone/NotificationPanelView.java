@@ -1809,11 +1809,21 @@ public class NotificationPanelView extends PanelView implements
     }
 
     @Override
-    public void onSwipingStarted() {
-        mSecureCameraLaunchManager.onSwipingStarted();
+    public void onSwipingStarted(boolean isRightwardMotion) {
+        boolean start = getLayoutDirection() == LAYOUT_DIRECTION_RTL ? isRightwardMotion
+                : !isRightwardMotion;
+        if (!start) {
+            mSecureCameraLaunchManager.onSwipingStarted();
+            mKeyguardBottomArea.prewarmCamera();
+        }
         requestDisallowInterceptTouchEvent(true);
         mOnlyAffordanceInThisMotion = true;
         mQsTracking = false;
+    }
+
+    @Override
+    public void onSwipingAborted() {
+        mKeyguardBottomArea.maybeCooldownCamera();
     }
 
     @Override
