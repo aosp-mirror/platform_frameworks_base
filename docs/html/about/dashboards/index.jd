@@ -158,7 +158,7 @@ uses.</p>
 var VERSION_DATA =
 [
   {
-    "chart": "http://chart.googleapis.com/chart?chl=Froyo%7CGingerbread%7CIce%20Cream%20Sandwich%7CJelly%20Bean%7CKitKat%7CLollipop&chf=bg%2Cs%2C00000000&chd=t%3A0.4%2C6.4%2C5.7%2C40.7%2C41.4%2C5.4&chco=c4df9b%2C6fad0c&chs=500x250&cht=p",
+    "chart": "//chart.googleapis.com/chart?chl=Froyo%7CGingerbread%7CIce%20Cream%20Sandwich%7CJelly%20Bean%7CKitKat%7CLollipop&chf=bg%2Cs%2C00000000&chd=t%3A0.4%2C6.4%2C5.7%2C40.7%2C41.4%2C5.4&chco=c4df9b%2C6fad0c&chs=500x250&cht=p",
     "data": [
       {
         "api": 8,
