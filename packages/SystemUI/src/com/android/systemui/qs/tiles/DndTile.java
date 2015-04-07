@@ -21,6 +21,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.provider.Settings;
 import android.provider.Settings.Global;
 import android.view.LayoutInflater;
@@ -46,20 +47,17 @@ public class DndTile extends QSTile<QSTile.BooleanState> {
     private final DndDetailAdapter mDetailAdapter;
 
     private boolean mListening;
-    private boolean mVisible;
     private boolean mShowingDetail;
 
     public DndTile(Host host) {
         super(host);
         mController = host.getZenModeController();
         mDetailAdapter = new DndDetailAdapter();
-        mVisible = isVisible(host.getContext());
         mContext.registerReceiver(mReceiver, new IntentFilter(ACTION_SET_VISIBLE));
     }
 
     public static void setVisible(Context context, boolean visible) {
-        context.sendBroadcast(new Intent(DndTile.ACTION_SET_VISIBLE)
-                .putExtra(DndTile.EXTRA_VISIBLE, visible));
+        getSharedPrefs(context).edit().putBoolean(PREF_KEY_VISIBLE, visible).commit();
     }
 
     public static boolean isVisible(Context context) {
@@ -98,7 +96,7 @@ public class DndTile extends QSTile<QSTile.BooleanState> {
     protected void handleUpdateState(BooleanState state, Object arg) {
         final int zen = arg instanceof Integer ? (Integer) arg : mController.getZen();
         state.value = zen != Global.ZEN_MODE_OFF;
-        state.visible = mVisible;
+        state.visible = isVisible(mContext);
         switch (zen) {
             case Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS:
                 state.icon = ResourceIcon.get(R.drawable.ic_qs_dnd_on);
@@ -145,10 +143,26 @@ public class DndTile extends QSTile<QSTile.BooleanState> {
         mListening = listening;
         if (mListening) {
             mController.addCallback(mZenCallback);
+            getSharedPrefs(mContext).registerOnSharedPreferenceChangeListener(mPrefListener);
         } else {
             mController.removeCallback(mZenCallback);
+            getSharedPrefs(mContext).unregisterOnSharedPreferenceChangeListener(mPrefListener);
         }
     }
+
+    private static SharedPreferences getSharedPrefs(Context context) {
+        return context.getSharedPreferences(context.getPackageName(), 0);
+    }
+
+    private final OnSharedPreferenceChangeListener mPrefListener
+            = new OnSharedPreferenceChangeListener() {
+        @Override
+        public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+            if (PREF_KEY_COMBINED_ICON.equals(key) || PREF_KEY_VISIBLE.equals(key)) {
+                refreshState();
+            }
+        }
+    };
 
     private final ZenModeController.Callback mZenCallback = new ZenModeController.Callback() {
         public void onZenChanged(int zen) {
@@ -156,15 +170,11 @@ public class DndTile extends QSTile<QSTile.BooleanState> {
         }
     };
 
-    private static SharedPreferences getSharedPrefs(Context context) {
-        return context.getSharedPreferences(context.getPackageName(), 0);
-    }
-
     private final BroadcastReceiver mReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            mVisible = intent.getBooleanExtra(EXTRA_VISIBLE, false);
-            getSharedPrefs(mContext).edit().putBoolean(PREF_KEY_VISIBLE, mVisible).commit();
+            final boolean visible = intent.getBooleanExtra(EXTRA_VISIBLE, false);
+            setVisible(mContext, visible);
             refreshState();
         }
     };

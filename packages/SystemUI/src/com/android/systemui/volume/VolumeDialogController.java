@@ -45,6 +45,7 @@ import android.util.Log;
 import android.util.SparseArray;
 
 import com.android.systemui.R;
+import com.android.systemui.qs.tiles.DndTile;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -489,8 +490,7 @@ public class VolumeDialogController {
 
     public void showDndTile(boolean visible) {
         if (D.BUG) Log.d(TAG, "showDndTile");
-        mContext.sendBroadcast(new Intent("com.android.systemui.dndtile.SET_VISIBLE")
-                .putExtra("visible", visible));
+        DndTile.setVisible(mContext, visible);
     }
 
     private final class VC extends IVolumeController.Stub {
