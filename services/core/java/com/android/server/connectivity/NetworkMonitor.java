@@ -220,7 +220,7 @@ public class NetworkMonitor extends StateMachine {
     // If a network is not validated, make one attempt every 10 mins to see if it starts working.
     private static final int REEVALUATE_PAUSE_MS = 10*60*1000;
     private static final int PERIODIC_ATTEMPTS = 1;
-    // When an application calls reportBadNetwork, only make one attempt.
+    // When an application calls reportNetworkConnectivity, only make one attempt.
     private static final int REEVALUATE_ATTEMPTS = 1;
     private final int mReevaluateDelayMs;
     private int mReevaluateToken = 0;
