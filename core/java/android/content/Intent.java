@@ -2908,6 +2908,24 @@ public class Intent implements Parcelable, Cloneable {
     /** {@hide} */
     public static final String EXTRA_SETTING_NEW_VALUE = "new_value";
 
+    /**
+     * Activity Action: Process a piece of text.
+     * <p>Input: {@link #EXTRA_PROCESS_TEXT} contains the text to be processed.
+     * {@link #EXTRA_PROCESS_TEXT_READONLY} states if the resulting text will be read-only.</p>
+     * <p>Output: {@link #EXTRA_PROCESS_TEXT} contains the processed text.</p>
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_PROCESS_TEXT = "android.intent.action.PROCESS_TEXT";
+    /**
+     * The name of the extra used to define the text to be processed.
+     */
+    public static final String EXTRA_PROCESS_TEXT = "android.intent.extra.PROCESS_TEXT";
+    /**
+     * The name of the extra used to define if the processed text will be used as read-only.
+     */
+    public static final String EXTRA_PROCESS_TEXT_READONLY =
+            "android.intent.extra.PROCESS_TEXT_READONLY";
+
     // ---------------------------------------------------------------------
     // ---------------------------------------------------------------------
     // Standard intent categories (see addCategory()).
