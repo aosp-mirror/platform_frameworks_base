@@ -943,9 +943,10 @@ please see styles_device_defaults.xml.
         <item name="thumbMinWidth">0dp</item>
         <item name="thumbMinHeight">0dp</item>
         <item name="textSize">45sp</item>
-        <item name="minWidth">88dp</item>
+        <item name="minWidth">104dp</item>
         <item name="minHeight">88dp</item>
         <item name="padding">0dp</item>
+        <item name="thumbPosition">inside</item>
     </style>
 
     <style name="Widget.Material.PreferenceFrameLayout">

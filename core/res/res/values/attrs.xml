@@ -3414,9 +3414,9 @@
         <attr name="position">
             <!-- Floating at the top of the content. -->
             <enum name="floating" value="0" />
-            <!-- Pinned alongside the thumb. -->
+            <!-- Pinned to the thumb, vertically centered with the middle of the thumb. -->
             <enum name="atThumb" value="1" />
-            <!-- Pinned above the thumb. -->
+            <!-- Pinned to the thumb, vertically centered with the top edge of the thumb. -->
             <enum name="aboveThumb" value="2" />
         </attr>
         <attr name="textAppearance" />
@@ -3428,6 +3428,16 @@
         <attr name="minHeight" />
         <!-- Padding for the section header preview. -->
         <attr name="padding" />
+        <!-- Position of thumb in relation to the track. -->
+        <attr name="thumbPosition">
+            <!-- The thumb's midpoint is anchored to the track. At its
+                 extremes, the thumb will extend half-way outside the
+                 track. -->
+            <enum name="midpoint" value="0" />
+            <!-- The thumb is entirely inside the track. At its extremes,
+                 the thumb will be contained entirely within the track. -->
+            <enum name="inside" value="1" />
+        </attr>
     </declare-styleable>
     <declare-styleable name="FrameLayout">
         <!-- Determines whether to measure all children or just those in

@@ -2659,4 +2659,5 @@
   <public type="attr" name="breakStrategy" />
 
   <public type="attr" name="supportsAssistGesture" />
+  <public type="attr" name="thumbPosition" />
 </resources>

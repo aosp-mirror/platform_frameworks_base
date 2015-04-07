@@ -46,6 +46,8 @@ import android.view.ViewGroupOverlay;
 import android.widget.AbsListView.OnScrollListener;
 import android.widget.ImageView.ScaleType;
 
+import com.android.internal.R;
+
 /**
  * Helper class for AbsListView to draw and control the Fast Scroll thumb
  */
@@ -82,6 +84,10 @@ class FastScroller {
     private static final int OVERLAY_AT_THUMB = 1;
     private static final int OVERLAY_ABOVE_THUMB = 2;
 
+    // Positions for thumb in relation to track.
+    private static final int THUMB_POSITION_MIDPOINT = 0;
+    private static final int THUMB_POSITION_INSIDE = 1;
+
     // Indices for mPreviewResId.
     private static final int PREVIEW_LEFT = 0;
     private static final int PREVIEW_RIGHT = 1;
@@ -100,7 +106,6 @@ class FastScroller {
     private final ImageView mThumbImage;
     private final ImageView mTrackImage;
     private final View mPreviewImage;
-
     /**
      * Preview image resource IDs for left- and right-aligned layouts. See
      * {@link #PREVIEW_LEFT} and {@link #PREVIEW_RIGHT}.
@@ -130,6 +135,11 @@ class FastScroller {
     private Drawable mThumbDrawable;
     private Drawable mTrackDrawable;
     private int mTextAppearance;
+    private int mThumbPosition;
+
+    // Used to convert between y-coordinate and thumb position within track.
+    private float mThumbOffset;
+    private float mThumbRange;
 
     /** Total width of decorations. */
     private int mWidth;
@@ -278,7 +288,6 @@ class FastScroller {
     }
 
     private void updateAppearance() {
-        final Context context = mList.getContext();
         int width = 0;
 
         // Add track to overlay if it has an image.
@@ -298,12 +307,9 @@ class FastScroller {
         // Account for minimum thumb width.
         mWidth = Math.max(width, mThumbMinWidth);
 
-        mPreviewImage.setMinimumWidth(mPreviewMinWidth);
-        mPreviewImage.setMinimumHeight(mPreviewMinHeight);
-
         if (mTextAppearance != 0) {
-            mPrimaryText.setTextAppearance(context, mTextAppearance);
-            mSecondaryText.setTextAppearance(context, mTextAppearance);
+            mPrimaryText.setTextAppearance(mTextAppearance);
+            mSecondaryText.setTextAppearance(mTextAppearance);
         }
 
         if (mTextColor != null) {
@@ -316,13 +322,11 @@ class FastScroller {
             mSecondaryText.setTextSize(TypedValue.COMPLEX_UNIT_PX, mTextSize);
         }
 
-        final int textMinSize = Math.max(0, mPreviewMinHeight);
-        mPrimaryText.setMinimumWidth(textMinSize);
-        mPrimaryText.setMinimumHeight(textMinSize);
+        final int padding = mPreviewPadding;
         mPrimaryText.setIncludeFontPadding(false);
-        mSecondaryText.setMinimumWidth(textMinSize);
-        mSecondaryText.setMinimumHeight(textMinSize);
+        mPrimaryText.setPadding(padding, padding, padding, padding);
         mSecondaryText.setIncludeFontPadding(false);
+        mSecondaryText.setPadding(padding, padding, padding, padding);
 
         refreshDrawablePressedState();
     }
@@ -330,49 +334,52 @@ class FastScroller {
     public void setStyle(@StyleRes int resId) {
         final Context context = mList.getContext();
         final TypedArray ta = context.obtainStyledAttributes(null,
-                com.android.internal.R.styleable.FastScroll, android.R.attr.fastScrollStyle, resId);
+                R.styleable.FastScroll, R.attr.fastScrollStyle, resId);
         final int N = ta.getIndexCount();
         for (int i = 0; i < N; i++) {
             final int index = ta.getIndex(i);
             switch (index) {
-                case com.android.internal.R.styleable.FastScroll_position:
+                case R.styleable.FastScroll_position:
                     mOverlayPosition = ta.getInt(index, OVERLAY_FLOATING);
                     break;
-                case com.android.internal.R.styleable.FastScroll_backgroundLeft:
+                case R.styleable.FastScroll_backgroundLeft:
                     mPreviewResId[PREVIEW_LEFT] = ta.getResourceId(index, 0);
                     break;
-                case com.android.internal.R.styleable.FastScroll_backgroundRight:
+                case R.styleable.FastScroll_backgroundRight:
                     mPreviewResId[PREVIEW_RIGHT] = ta.getResourceId(index, 0);
                     break;
-                case com.android.internal.R.styleable.FastScroll_thumbDrawable:
+                case R.styleable.FastScroll_thumbDrawable:
                     mThumbDrawable = ta.getDrawable(index);
                     break;
-                case com.android.internal.R.styleable.FastScroll_trackDrawable:
+                case R.styleable.FastScroll_trackDrawable:
                     mTrackDrawable = ta.getDrawable(index);
                     break;
-                case com.android.internal.R.styleable.FastScroll_textAppearance:
+                case R.styleable.FastScroll_textAppearance:
                     mTextAppearance = ta.getResourceId(index, 0);
                     break;
-                case com.android.internal.R.styleable.FastScroll_textColor:
+                case R.styleable.FastScroll_textColor:
                     mTextColor = ta.getColorStateList(index);
                     break;
-                case com.android.internal.R.styleable.FastScroll_textSize:
+                case R.styleable.FastScroll_textSize:
                     mTextSize = ta.getDimensionPixelSize(index, 0);
                     break;
-                case com.android.internal.R.styleable.FastScroll_minWidth:
+                case R.styleable.FastScroll_minWidth:
                     mPreviewMinWidth = ta.getDimensionPixelSize(index, 0);
                     break;
-                case com.android.internal.R.styleable.FastScroll_minHeight:
+                case R.styleable.FastScroll_minHeight:
                     mPreviewMinHeight = ta.getDimensionPixelSize(index, 0);
                     break;
-                case com.android.internal.R.styleable.FastScroll_thumbMinWidth:
+                case R.styleable.FastScroll_thumbMinWidth:
                     mThumbMinWidth = ta.getDimensionPixelSize(index, 0);
                     break;
-                case com.android.internal.R.styleable.FastScroll_thumbMinHeight:
+                case R.styleable.FastScroll_thumbMinHeight:
                     mThumbMinHeight = ta.getDimensionPixelSize(index, 0);
                     break;
-                case com.android.internal.R.styleable.FastScroll_padding:
+                case R.styleable.FastScroll_padding:
                     mPreviewPadding = ta.getDimensionPixelSize(index, 0);
+                    break;
+                case R.styleable.FastScroll_thumbPosition:
+                    mThumbPosition = ta.getInt(index, THUMB_POSITION_MIDPOINT);
                     break;
             }
         }
@@ -478,14 +485,16 @@ class FastScroller {
             final int previewResId = mPreviewResId[mLayoutFromRight ? PREVIEW_RIGHT : PREVIEW_LEFT];
             mPreviewImage.setBackgroundResource(previewResId);
 
-            // Add extra padding for text.
-            final Drawable background = mPreviewImage.getBackground();
-            if (background != null) {
-                final Rect padding = mTempBounds;
-                background.getPadding(padding);
-                padding.offset(mPreviewPadding, mPreviewPadding);
-                mPreviewImage.setPadding(padding.left, padding.top, padding.right, padding.bottom);
-            }
+            // Propagate padding to text min width/height.
+            final int textMinWidth = Math.max(0, mPreviewMinWidth - mPreviewImage.getPaddingLeft()
+                    - mPreviewImage.getPaddingRight());
+            mPrimaryText.setMinimumWidth(textMinWidth);
+            mSecondaryText.setMinimumWidth(textMinWidth);
+
+            final int textMinHeight = Math.max(0, mPreviewMinHeight - mPreviewImage.getPaddingTop()
+                    - mPreviewImage.getPaddingBottom());
+            mPrimaryText.setMinimumHeight(textMinHeight);
+            mSecondaryText.setMinimumHeight(textMinHeight);
 
             // Requires re-layout.
             updateLayout();
@@ -559,6 +568,8 @@ class FastScroller {
 
         layoutThumb();
         layoutTrack();
+
+        updateOffsetAndRange();
 
         final Rect bounds = mTempBounds;
         measurePreview(mPrimaryText, bounds);
@@ -758,13 +769,43 @@ class FastScroller {
         final int heightMeasureSpec = MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED);
         track.measure(widthMeasureSpec, heightMeasureSpec);
 
+        final int top;
+        final int bottom;
+        if (mThumbPosition == THUMB_POSITION_INSIDE) {
+            top = container.top;
+            bottom = container.bottom;
+        } else {
+            final int thumbHalfHeight = thumb.getHeight() / 2;
+            top = container.top + thumbHalfHeight;
+            bottom = container.bottom - thumbHalfHeight;
+        }
+
         final int trackWidth = track.getMeasuredWidth();
-        final int thumbHalfHeight = thumb.getHeight() / 2;
         final int left = thumb.getLeft() + (thumb.getWidth() - trackWidth) / 2;
         final int right = left + trackWidth;
-        final int top = container.top + thumbHalfHeight;
-        final int bottom = container.bottom - thumbHalfHeight;
         track.layout(left, top, right, bottom);
+    }
+
+    /**
+     * Updates the offset and range used to convert from absolute y-position to
+     * thumb position within the track.
+     */
+    private void updateOffsetAndRange() {
+        final View trackImage = mTrackImage;
+        final View thumbImage = mThumbImage;
+        final float min;
+        final float max;
+        if (mThumbPosition == THUMB_POSITION_INSIDE) {
+            final float halfThumbHeight = thumbImage.getHeight() / 2f;
+            min = trackImage.getTop() + halfThumbHeight;
+            max = trackImage.getBottom() - halfThumbHeight;
+        } else{
+            min = trackImage.getTop();
+            max = trackImage.getBottom();
+        }
+
+        mThumbOffset = min;
+        mThumbRange = max - min;
     }
 
     private void setState(int state) {
@@ -1145,18 +1186,8 @@ class FastScroller {
      *            to place the thumb.
      */
     private void setThumbPos(float position) {
-        final Rect container = mContainerRect;
-        final int top = container.top;
-        final int bottom = container.bottom;
-
-        final View trackImage = mTrackImage;
-        final View thumbImage = mThumbImage;
-        final float min = trackImage.getTop();
-        final float max = trackImage.getBottom();
-        final float offset = min;
-        final float range = max - min;
-        final float thumbMiddle = position * range + offset;
-        thumbImage.setTranslationY(thumbMiddle - thumbImage.getHeight() / 2);
+        final float thumbMiddle = position * mThumbRange + mThumbOffset;
+        mThumbImage.setTranslationY(thumbMiddle - mThumbImage.getHeight() / 2f);
 
         final View previewImage = mPreviewImage;
         final float previewHalfHeight = previewImage.getHeight() / 2f;
@@ -1175,6 +1206,9 @@ class FastScroller {
         }
 
         // Center the preview on the thumb, constrained to the list bounds.
+        final Rect container = mContainerRect;
+        final int top = container.top;
+        final int bottom = container.bottom;
         final float minP = top + previewHalfHeight;
         final float maxP = bottom - previewHalfHeight;
         final float previewMiddle = MathUtils.constrain(previewPos, minP, maxP);
@@ -1186,19 +1220,13 @@ class FastScroller {
     }
 
     private float getPosFromMotionEvent(float y) {
-        final View trackImage = mTrackImage;
-        final float min = trackImage.getTop();
-        final float max = trackImage.getBottom();
-        final float offset = min;
-        final float range = max - min;
-
         // If the list is the same height as the thumbnail or shorter,
         // effectively disable scrolling.
-        if (range <= 0) {
+        if (mThumbRange <= 0) {
             return 0f;
         }
 
-        return MathUtils.constrain((y - offset) / range, 0f, 1f);
+        return MathUtils.constrain((y - mThumbOffset) / mThumbRange, 0f, 1f);
     }
 
     /**
