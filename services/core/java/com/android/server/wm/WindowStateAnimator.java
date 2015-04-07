@@ -1403,6 +1403,9 @@ class WindowStateAnimator {
                 if (WindowManagerService.SHOW_TRANSACTIONS) WindowManagerService.logSurface(w,
                         "SIZE " + width + "x" + height, null);
                 mSurfaceControl.setSize(width, height);
+                mSurfaceControl.setMatrix(
+                        mDsDx * w.mHScale, mDtDx * w.mVScale,
+                        mDsDy * w.mHScale, mDtDy * w.mVScale);
                 mAnimator.setPendingLayoutChanges(w.getDisplayId(),
                         WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER);
                 if ((w.mAttrs.flags & LayoutParams.FLAG_DIM_BEHIND) != 0) {
