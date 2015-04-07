@@ -2228,7 +2228,7 @@ public final class ActiveServices {
                 EventLog.writeEvent(EventLogTags.AM_SERVICE_CRASHED_TOO_MUCH,
                         sr.userId, sr.crashCount, sr.shortName, app.pid);
                 bringDownServiceLocked(sr);
-            } else if (!allowRestart) {
+            } else if (!allowRestart || !mAm.isUserRunningLocked(sr.userId, false)) {
                 bringDownServiceLocked(sr);
             } else {
                 boolean canceled = scheduleServiceRestartLocked(sr, true);
