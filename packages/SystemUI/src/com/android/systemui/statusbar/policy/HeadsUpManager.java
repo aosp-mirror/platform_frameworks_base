@@ -30,16 +30,18 @@ import android.view.ViewTreeObserver;
 import android.view.accessibility.AccessibilityEvent;
 
 import com.android.systemui.R;
+import com.android.systemui.statusbar.ExpandableNotificationRow;
 import com.android.systemui.statusbar.NotificationData;
 import com.android.systemui.statusbar.phone.PhoneStatusBar;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Stack;
-import java.util.TreeMap;
+import java.util.TreeSet;
 
-public class HeadsUpManager {
+public class HeadsUpManager implements ViewTreeObserver.OnComputeInternalInsetsListener {
     private static final String TAG = "HeadsUpManager";
     private static final boolean DEBUG = false;
     private static final String SETTING_HEADS_UP_SNOOZE_LENGTH_MS = "heads_up_snooze_length_ms";
@@ -76,8 +78,8 @@ public class HeadsUpManager {
     private PhoneStatusBar mBar;
     private int mSnoozeLengthMs;
     private ContentObserver mSettingsObserver;
-
-    private TreeMap<String ,HeadsUpEntry> mHeadsUpEntries = new TreeMap<>();
+    private HashMap<String, HeadsUpEntry> mHeadsUpEntries = new HashMap<>();
+    private TreeSet<HeadsUpEntry> mSortedEntries = new TreeSet<>();
     private HashSet<String> mSwipedOutKeys = new HashSet<>();
     private int mUser;
     private Clock mClock;
@@ -86,8 +88,9 @@ public class HeadsUpManager {
     private HashSet<NotificationData.Entry> mEntriesToRemoveAfterExpand = new HashSet<>();
     private boolean mIsExpanded;
     private boolean mHasPinnedHeadsUp;
+    private int[] mTmpTwoArray = new int[2];
 
-    public HeadsUpManager(final Context context) {
+    public HeadsUpManager(final Context context, ViewTreeObserver observer) {
         Resources resources = context.getResources();
         mTouchSensitivityDelay = resources.getInteger(R.integer.heads_up_sensitivity_delay);
         if (DEBUG) Log.v(TAG, "create() " + mTouchSensitivityDelay);
@@ -95,7 +98,7 @@ public class HeadsUpManager {
         mDefaultSnoozeLengthMs = resources.getInteger(R.integer.heads_up_default_snooze_length_ms);
         mSnoozeLengthMs = mDefaultSnoozeLengthMs;
         mMinimumDisplayTime = resources.getInteger(R.integer.heads_up_notification_minimum_time);
-        mHeadsUpNotificationDecay = 2000000;
+        mHeadsUpNotificationDecay = 200000000/*resources.getInteger(R.integer.heads_up_notification_decay)*/;;
         mClock = new Clock();
         // TODO: shadow mSwipeHelper.setMaxSwipeProgress(mMaxAlpha);
 
@@ -116,12 +119,7 @@ public class HeadsUpManager {
                 Settings.Global.getUriFor(SETTING_HEADS_UP_SNOOZE_LENGTH_MS), false,
                 mSettingsObserver);
         if (DEBUG) Log.v(TAG, "mSnoozeLengthMs = " + mSnoozeLengthMs);
-
-        // TODO: investigate whether this is still needed
-//        if (!mHeadsUpEntries.isEmpty()) {
-//             whoops, we're on already!
-//             showNotification(mHeadsUpEntries);
-//        }
+        observer.addOnComputeInternalInsetsListener(this);
     }
 
     public void setBar(PhoneStatusBar bar) {
@@ -144,7 +142,6 @@ public class HeadsUpManager {
         addHeadsUpEntry(headsUp);
         updateNotification(headsUp, true);
         headsUp.setInterruption();
-        updatePinnedHeadsUpState(false);
     }
 
     /**
@@ -164,26 +161,32 @@ public class HeadsUpManager {
     }
 
     private void addHeadsUpEntry(NotificationData.Entry entry) {
-        boolean wasEmpty = mHeadsUpEntries.isEmpty();
         HeadsUpEntry headsUpEntry = mEntryPool.acquire();
+
+        // This will also add the entry to the sortedList
         headsUpEntry.setEntry(entry);
         mHeadsUpEntries.put(entry.key, headsUpEntry);
+        entry.row.setHeadsUp(true);
+        if (!entry.row.isInShade() && mIsExpanded) {
+            headsUpEntry.entry.row.setInShade(true);
+        }
+        updatePinnedHeadsUpState(false);
         for (OnHeadsUpChangedListener listener : mListeners) {
             listener.OnHeadsUpStateChanged(entry, true);
         }
         entry.row.sendAccessibilityEvent(AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED);
-        entry.row.setHeadsUp(true);
     }
 
     private void removeHeadsUpEntry(NotificationData.Entry entry) {
         HeadsUpEntry remove = mHeadsUpEntries.remove(entry.key);
+        mSortedEntries.remove(remove);
         mEntryPool.release(remove);
         entry.row.sendAccessibilityEvent(AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED);
         entry.row.setHeadsUp(false);
+        updatePinnedHeadsUpState(false);
         for (OnHeadsUpChangedListener listener : mListeners) {
             listener.OnHeadsUpStateChanged(entry, false);
         }
-        updatePinnedHeadsUpState(false);
     }
 
     private void updatePinnedHeadsUpState(boolean forceImmediate) {
@@ -238,7 +241,8 @@ public class HeadsUpManager {
      */
     public void releaseAllImmediately() {
         if (DEBUG) Log.v(TAG, "releaseAllImmediately");
-        for (String key: mHeadsUpEntries.keySet()) {
+        HashSet<String> keys = new HashSet<>(mHeadsUpEntries.keySet());
+        for (String key: keys) {
             releaseImmediately(key);
         }
     }
@@ -287,12 +291,12 @@ public class HeadsUpManager {
         return mHeadsUpEntries.get(key).entry;
     }
 
-    public TreeMap<String, HeadsUpEntry> getEntries() {
-        return mHeadsUpEntries;
+    public TreeSet<HeadsUpEntry> getSortedEntries() {
+        return mSortedEntries;
     }
 
     public HeadsUpEntry getTopEntry() {
-        return mHeadsUpEntries.isEmpty() ? null : mHeadsUpEntries.lastEntry().getValue();
+        return mSortedEntries.isEmpty() ? null : mSortedEntries.first();
     }
 
     /**
@@ -313,13 +317,25 @@ public class HeadsUpManager {
     }
 
     public void onComputeInternalInsets(ViewTreeObserver.InternalInsetsInfo info) {
-        // TODO: Look into touchable region
-//        mContentHolder.getLocationOnScreen(mTmpTwoArray);
-//
-//        info.setTouchableInsets(ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_REGION);
-//        info.touchableRegion.set(mTmpTwoArray[0], mTmpTwoArray[1],
-//                mTmpTwoArray[0] + mContentHolder.getWidth(),
-//                mTmpTwoArray[1] + mContentHolder.getHeight());
+        if (!mIsExpanded && mHasPinnedHeadsUp) {
+            int minX = Integer.MAX_VALUE;
+            int maxX = 0;
+            int minY = Integer.MAX_VALUE;
+            int maxY = 0;
+            for (HeadsUpEntry entry: mSortedEntries) {
+                ExpandableNotificationRow row = entry.entry.row;
+                if (!row.isInShade()) {
+                    row.getLocationOnScreen(mTmpTwoArray);
+                    minX = Math.min(minX, mTmpTwoArray[0]);
+                    minY = Math.min(minY, 0);
+                    maxX = Math.max(maxX, mTmpTwoArray[0] + row.getWidth());
+                    maxY = Math.max(maxY, row.getHeadsUpHeight());
+                }
+            }
+
+            info.setTouchableInsets(ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_REGION);
+            info.touchableRegion.set(minX, minY, maxX, maxY);
+        }
     }
 
     public void setUser(int user) {
@@ -332,8 +348,8 @@ public class HeadsUpManager {
         pw.print("  mSnoozeLengthMs="); pw.println(mSnoozeLengthMs);
         pw.print("  now="); pw.println(SystemClock.elapsedRealtime());
         pw.print("  mUser="); pw.println(mUser);
-        for (String key: mHeadsUpEntries.keySet()) {
-            pw.print("  HeadsUpEntry="); pw.println(mHeadsUpEntries.get(key));
+        for (HeadsUpEntry entry: mSortedEntries) {
+            pw.print("  HeadsUpEntry="); pw.println(entry.entry);
         }
         int N = mSnoozedPackages.size();
         pw.println("  snoozed packages: " + N);
@@ -363,8 +379,7 @@ public class HeadsUpManager {
 
     public float getHighestPinnedHeadsUp() {
         float max = 0;
-        for (String key: mHeadsUpEntries.keySet()) {
-            HeadsUpEntry entry = mHeadsUpEntries.get(key);
+        for (HeadsUpEntry entry: mSortedEntries) {
             if (!entry.entry.row.isInShade()) {
                 max = Math.max(max, entry.entry.row.getActualHeight());
             }
@@ -437,13 +452,14 @@ public class HeadsUpManager {
             earliestRemovaltime = currentTime + mMinimumDisplayTime;
             removeAutoCancelCallbacks();
             mHandler.postDelayed(mRemoveHeadsUpRunnable, removeDelay);
+            updateSortOrder(HeadsUpEntry.this);
         }
 
         @Override
         public int compareTo(HeadsUpEntry o) {
-            return postTime < o.postTime ? -1
+            return postTime < o.postTime ? 1
                     : postTime == o.postTime ? 0
-                            : 1;
+                            : -1;
         }
 
         public void removeAutoCancelCallbacks() {
@@ -459,6 +475,16 @@ public class HeadsUpManager {
             mHandler.postDelayed(mRemoveHeadsUpRunnable,
                     earliestRemovaltime - mClock.currentTimeMillis());
         }
+    }
+
+    /**
+     * Update the sorted heads up order.
+     *
+     * @param headsUpEntry the headsUp that changed
+     */
+    private void updateSortOrder(HeadsUpEntry headsUpEntry) {
+        mSortedEntries.remove(headsUpEntry);
+        mSortedEntries.add(headsUpEntry);
     }
 
     public static class Clock {

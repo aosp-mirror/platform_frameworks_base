@@ -172,8 +172,17 @@ public class StatusBarWindowManager {
         applyUserActivityTimeout(state);
         applyInputFeatures(state);
         applyFitsSystemWindows(state);
+        applyModalFlag(state);
         if (mLp.copyFrom(mLpChanged) != 0) {
             mWindowManager.updateViewLayout(mStatusBarView, mLp);
+        }
+    }
+
+    private void applyModalFlag(State state) {
+        if (state.headsUpShowing) {
+            mLpChanged.flags |= WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL;
+        } else {
+            mLpChanged.flags &= ~WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL;
         }
     }
 

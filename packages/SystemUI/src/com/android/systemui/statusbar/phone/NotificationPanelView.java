@@ -510,9 +510,6 @@ public class NotificationPanelView extends PanelView implements
 
     @Override
     protected void flingToHeight(float vel, boolean expand, float target) {
-        if (!expand && mHeadsUpManager.hasPinnedHeadsUp()) {
-            target = mHeadsUpManager.getHighestPinnedHeadsUp();
-        }
         mHeadsUpTouchHelper.notifyFling(!expand);
         super.flingToHeight(vel, expand, target);
     }
@@ -722,7 +719,7 @@ public class NotificationPanelView extends PanelView implements
                 || event.getActionMasked() == MotionEvent.ACTION_UP) {
             mConflictingQsExpansionGesture = false;
         }
-        if (event.getActionMasked() == MotionEvent.ACTION_DOWN && mExpandedHeight == 0
+        if (event.getActionMasked() == MotionEvent.ACTION_DOWN && isShadeCollapsed()
                 && mQsExpansionEnabled) {
             mTwoFingerQsExpandPossible = true;
         }
@@ -1774,7 +1771,7 @@ public class NotificationPanelView extends PanelView implements
     }
 
     private void updateMaxHeadsUpTranslation() {
-        mNotificationStackScroller.setMaxHeadsUpTranslation(getHeight() - mBottomBarHeight);
+        mNotificationStackScroller.setHeadsUpBoundaries(getHeight(), mBottomBarHeight);
     }
 
     @Override
@@ -2151,16 +2148,12 @@ public class NotificationPanelView extends PanelView implements
 
     @Override
     public void OnHeadsUpStateChanged(NotificationData.Entry entry, boolean isHeadsUp) {
-        // TODO: figure out the conditions when not to generate an animation
         mNotificationStackScroller.generateHeadsUpAnimation(entry.row, isHeadsUp);
-        if (isShadeCollapsed()) {
-            setExpandedHeight(mHeadsUpManager.getHighestPinnedHeadsUp());
-        }
     }
 
-    private boolean isShadeCollapsed() {
-        // TODO: handle this cleaner
-        return mHeader.getTranslationY() + mHeader.getCollapsedHeight() <= 0;
+    @Override
+    protected boolean isShadeCollapsed() {
+        return mExpandedHeight == 0 || mHeadsUpManager.hasPinnedHeadsUp();
     }
 
     @Override

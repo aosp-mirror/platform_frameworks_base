@@ -17,11 +17,13 @@
 package com.android.systemui.statusbar.stack;
 
 import android.view.View;
+
 import com.android.systemui.statusbar.ActivatableNotificationView;
+import com.android.systemui.statusbar.ExpandableNotificationRow;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
 
 import java.util.ArrayList;
-import java.util.TreeMap;
+import java.util.TreeSet;
 
 /**
  * A global state to track all input states for the algorithm.
@@ -37,7 +39,7 @@ public class AmbientState {
     private boolean mDark;
     private boolean mHideSensitive;
     private HeadsUpManager mHeadsUpManager;
-    private float mPaddingOffset;
+    private float mStackTranslation;
     private int mLayoutHeight;
     private int mTopPadding;
     private boolean mShadeExpanded;
@@ -128,16 +130,16 @@ public class AmbientState {
         mHeadsUpManager = headsUpManager;
     }
 
-    public TreeMap<String, HeadsUpManager.HeadsUpEntry> getHeadsUpEntries() {
-        return mHeadsUpManager.getEntries();
+    public TreeSet<HeadsUpManager.HeadsUpEntry> getSortedHeadsUpEntries() {
+        return mHeadsUpManager.getSortedEntries();
     }
 
-    public float getPaddingOffset() {
-        return mPaddingOffset;
+    public float getStackTranslation() {
+        return mStackTranslation;
     }
 
-    public void setPaddingOffset(float paddingOffset) {
-        mPaddingOffset = paddingOffset;
+    public void setStackTranslation(float stackTranslation) {
+        mStackTranslation = stackTranslation;
     }
 
     public int getLayoutHeight() {
@@ -148,7 +150,7 @@ public class AmbientState {
         mLayoutHeight = layoutHeight;
     }
 
-    public int getTopPadding() {
+    public float getTopPadding() {
         return mTopPadding;
     }
 
@@ -157,7 +159,13 @@ public class AmbientState {
     }
 
     public int getInnerHeight() {
-        return mLayoutHeight - mTopPadding;
+        return mLayoutHeight - mTopPadding - getTopHeadsUpPushIn();
+    }
+
+    private int getTopHeadsUpPushIn() {
+        ExpandableNotificationRow topHeadsUpEntry = getTopHeadsUpEntry();
+        return topHeadsUpEntry != null ? topHeadsUpEntry.getHeadsUpHeight()
+                - topHeadsUpEntry.getMinHeight(): 0;
     }
 
     public boolean isShadeExpanded() {
@@ -174,5 +182,10 @@ public class AmbientState {
 
     public float getMaxHeadsUpTranslation() {
         return mMaxHeadsUpTranslation;
+    }
+
+    public ExpandableNotificationRow getTopHeadsUpEntry() {
+        HeadsUpManager.HeadsUpEntry topEntry = mHeadsUpManager.getTopEntry();
+        return topEntry == null ? null : topEntry.entry.row;
     }
 }

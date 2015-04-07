@@ -659,7 +659,7 @@ public abstract class PanelView extends FrameLayout {
         // If the user isn't actively poking us, let's update the height
         if ((!mTracking || isTrackingBlocked())
                 && mHeightAnimator == null
-                && mExpandedHeight > 0
+                && !isShadeCollapsed()
                 && currentMaxPanelHeight != mExpandedHeight
                 && !mPeekPending
                 && mPeekAnimator == null
@@ -730,6 +730,7 @@ public abstract class PanelView extends FrameLayout {
     }
 
     public boolean isFullyCollapsed() {
+        // TODO: look into whether this is still correct with HUN's
         return mExpandedHeight <= 0;
     }
 
@@ -1018,6 +1019,8 @@ public abstract class PanelView extends FrameLayout {
      * @return the height of the clear all button, in pixels
      */
     protected abstract int getClearAllHeight();
+
+    protected abstract boolean isShadeCollapsed();
 
     public void setHeadsUpManager(HeadsUpManager headsUpManager) {
         mHeadsUpManager = headsUpManager;

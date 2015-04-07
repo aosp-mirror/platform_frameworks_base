@@ -160,7 +160,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.TreeMap;
+import java.util.TreeSet;
 
 import static android.app.StatusBarManager.NAVIGATION_HINT_BACK_ALT;
 import static android.app.StatusBarManager.NAVIGATION_HINT_IME_SHOWN;
@@ -615,7 +615,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                     R.color.notification_panel_solid_background)));
         }
 
-        mHeadsUpManager = new HeadsUpManager(context);
+        mHeadsUpManager = new HeadsUpManager(context, mNotificationPanel.getViewTreeObserver());
         mHeadsUpManager.setBar(this);
         mHeadsUpManager.addListener(this);
         mHeadsUpManager.addListener(mNotificationPanel);
@@ -1880,10 +1880,9 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
 
     @Override
     public void escalateHeadsUp() {
-        TreeMap<String, HeadsUpManager.HeadsUpEntry> entries = mHeadsUpManager.getEntries();
-        for (String key : entries.keySet()) {
-            Entry entry = entries.get(key).entry;
-            final StatusBarNotification sbn = entry.notification;
+        TreeSet<HeadsUpManager.HeadsUpEntry> entries = mHeadsUpManager.getSortedEntries();
+        for (HeadsUpManager.HeadsUpEntry entry : entries) {
+            final StatusBarNotification sbn = entry.entry.notification;
             final Notification notification = sbn.getNotification();
             if (notification.fullScreenIntent != null) {
                 if (DEBUG) {

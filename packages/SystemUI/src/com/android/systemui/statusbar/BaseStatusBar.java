@@ -1880,7 +1880,7 @@ public abstract class BaseStatusBar extends SystemUI implements
         }
         boolean applyInPlace = shouldApplyInPlace(entry, n);
         final boolean shouldInterrupt = shouldInterrupt(notification);
-        final boolean alertAgain = shouldInterrupt && alertAgain(entry, n);
+        final boolean alertAgain = alertAgain(entry, n);
         boolean isHeadsUp = shouldInterrupt && alertAgain;
 
         entry.notification = notification;
@@ -1947,8 +1947,12 @@ public abstract class BaseStatusBar extends SystemUI implements
         if (wasHeadsUp) {
             mHeadsUpManager.updateNotification(entry, alertAgain);
             if (!shouldInterrupt) {
+                // We don't want this to be interrupting anymore, lets remove it
                 mHeadsUpManager.removeNotification(key);
             }
+        } else if (shouldInterrupt && alertAgain) {
+            // This notification was updated to be a heads-up, show it!
+            mHeadsUpManager.showNotification(entry);
         }
     }
 
