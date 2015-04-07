@@ -82,14 +82,6 @@ see <a href="#split">Selectively compiling APIs into your executable</a>.
 <img src="{@docRoot}images/tools/sync-project.png" style="vertical-align:bottom;margin:0;height:19px" />
 in the toolbar.
   </li>
-  <li>Open your app's manifest file and add the following tag as a child of the <a
-href="{@docRoot}guide/topics/manifest/application-element.html">{@code &lt;application>}</a>
-element:
-<pre>
-&lt;meta-data android:name="com.google.android.gms.version"
-           android:value="&#64;integer/google_play_services_version" />
-</pre>
-  </li>
 </ol>
 
 <p>You can now begin developing features with the
