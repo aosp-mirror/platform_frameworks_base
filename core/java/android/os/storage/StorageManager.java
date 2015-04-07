@@ -43,6 +43,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -231,8 +232,7 @@ public class StorageManager {
         mLooper = looper;
         mMountService = IMountService.Stub.asInterface(ServiceManager.getService("mount"));
         if (mMountService == null) {
-            Log.e(TAG, "Unable to connect to mount service! - is it running yet?");
-            return;
+            throw new IllegalStateException("Failed to find running mount service");
         }
     }
 
@@ -439,6 +439,42 @@ public class StorageManager {
         } catch (RemoteException e) {
             throw e.rethrowAsRuntimeException();
         }
+    }
+
+    /** {@hide} */
+    public @Nullable DiskInfo findDiskById(String id) {
+        Preconditions.checkNotNull(id);
+        // TODO; go directly to service to make this faster
+        for (DiskInfo disk : getDisks()) {
+            if (Objects.equals(disk.id, id)) {
+                return disk;
+            }
+        }
+        return null;
+    }
+
+    /** {@hide} */
+    public @Nullable VolumeInfo findVolumeById(String id) {
+        Preconditions.checkNotNull(id);
+        // TODO; go directly to service to make this faster
+        for (VolumeInfo vol : getVolumes()) {
+            if (Objects.equals(vol.id, id)) {
+                return vol;
+            }
+        }
+        return null;
+    }
+
+    /** {@hide} */
+    public @Nullable VolumeInfo findVolumeByUuid(String fsUuid) {
+        Preconditions.checkNotNull(fsUuid);
+        // TODO; go directly to service to make this faster
+        for (VolumeInfo vol : getVolumes()) {
+            if (Objects.equals(vol.fsUuid, fsUuid)) {
+                return vol;
+            }
+        }
+        return null;
     }
 
     /** {@hide} */

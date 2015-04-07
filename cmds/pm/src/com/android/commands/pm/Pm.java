@@ -30,6 +30,7 @@ import android.content.pm.FeatureInfo;
 import android.content.pm.IPackageDataObserver;
 import android.content.pm.IPackageInstaller;
 import android.content.pm.IPackageManager;
+import android.content.pm.IPackageMoveObserver;
 import android.content.pm.InstrumentationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageInstaller;
@@ -55,11 +56,11 @@ import android.os.UserManager;
 import android.text.TextUtils;
 import android.util.Log;
 
+import libcore.io.IoUtils;
+
 import com.android.internal.content.PackageHelper;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.SizedInputStream;
-
-import libcore.io.IoUtils;
 
 import java.io.File;
 import java.io.FileDescriptor;
@@ -232,6 +233,10 @@ public final class Pm {
 
         if ("force-dex-opt".equals(op)) {
             return runForceDexOpt();
+        }
+
+        if ("move".equals(op)) {
+            return runMove();
         }
 
         try {
@@ -1278,6 +1283,51 @@ public final class Pm {
         }
     }
 
+    class LocalPackageMoveObserver extends IPackageMoveObserver.Stub {
+        boolean finished;
+        int returnCode;
+
+        @Override
+        public void packageMoved(String packageName, int returnCode) throws RemoteException {
+            synchronized (this) {
+                this.finished = true;
+                this.returnCode = returnCode;
+                notifyAll();
+            }
+        }
+    }
+
+    public int runMove() {
+        final String packageName = nextArg();
+        String volumeUuid = nextArg();
+        if ("internal".equals(volumeUuid)) {
+            volumeUuid = null;
+        }
+
+        final LocalPackageMoveObserver obs = new LocalPackageMoveObserver();
+        try {
+            mPm.movePackageAndData(packageName, volumeUuid, obs);
+
+            synchronized (obs) {
+                while (!obs.finished) {
+                    try {
+                        obs.wait();
+                    } catch (InterruptedException e) {
+                    }
+                }
+                if (obs.returnCode == PackageManager.MOVE_SUCCEEDED) {
+                    System.out.println("Success");
+                    return 0;
+                } else {
+                    System.err.println("Failure [" + obs.returnCode + "]");
+                    return 1;
+                }
+            }
+        } catch (RemoteException e) {
+            throw e.rethrowAsRuntimeException();
+        }
+    }
+
     private int runUninstall() throws RemoteException {
         int flags = 0;
         int userId = UserHandle.USER_ALL;
@@ -1820,6 +1870,7 @@ public final class Pm {
         System.err.println("       pm install-abandon SESSION_ID");
         System.err.println("       pm uninstall [-k] [--user USER_ID] PACKAGE");
         System.err.println("       pm set-installer PACKAGE INSTALLER");
+        System.err.println("       pm move PACKAGE [internal|UUID]");
         System.err.println("       pm clear [--user USER_ID] PACKAGE");
         System.err.println("       pm enable [--user USER_ID] PACKAGE_OR_COMPONENT");
         System.err.println("       pm disable [--user USER_ID] PACKAGE_OR_COMPONENT");

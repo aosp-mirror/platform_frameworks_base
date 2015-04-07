@@ -44,6 +44,7 @@ import java.io.File;
  * @hide
  */
 public class VolumeInfo implements Parcelable {
+    /** Real volume representing internal emulated storage */
     public static final String ID_EMULATED_INTERNAL = "emulated";
 
     public static final int TYPE_PUBLIC = 0;

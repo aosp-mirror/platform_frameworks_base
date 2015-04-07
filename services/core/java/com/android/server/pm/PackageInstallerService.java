@@ -63,6 +63,8 @@ import android.os.RemoteException;
 import android.os.SELinux;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.os.storage.StorageManager;
+import android.os.storage.VolumeInfo;
 import android.system.ErrnoException;
 import android.system.Os;
 import android.text.TextUtils;
@@ -75,14 +77,14 @@ import android.util.SparseArray;
 import android.util.SparseBooleanArray;
 import android.util.Xml;
 
+import libcore.io.IoUtils;
+
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.content.PackageHelper;
 import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.IoThread;
 import com.google.android.collect.Sets;
-
-import libcore.io.IoUtils;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -131,6 +133,7 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
     private static final String ATTR_ORIGINATING_URI = "originatingUri";
     private static final String ATTR_REFERRER_URI = "referrerUri";
     private static final String ATTR_ABI_OVERRIDE = "abiOverride";
+    private static final String ATTR_VOLUME_UUID = "volumeUuid";
 
     /** Automatically destroy sessions older than this */
     private static final long MAX_AGE_MILLIS = 3 * DateUtils.DAY_IN_MILLIS;
@@ -141,9 +144,10 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
 
     private final Context mContext;
     private final PackageManagerService mPm;
-    private final AppOpsManager mAppOps;
 
-    private final File mStagingDir;
+    private AppOpsManager mAppOps;
+    private StorageManager mStorage;
+
     private final HandlerThread mInstallThread;
     private final Handler mInstallHandler;
 
@@ -186,12 +190,9 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
         }
     };
 
-    public PackageInstallerService(Context context, PackageManagerService pm, File stagingDir) {
+    public PackageInstallerService(Context context, PackageManagerService pm) {
         mContext = context;
         mPm = pm;
-        mAppOps = (AppOpsManager) mContext.getSystemService(Context.APP_OPS_SERVICE);
-
-        mStagingDir = stagingDir;
 
         mInstallThread = new HandlerThread(TAG);
         mInstallThread.start();
@@ -208,8 +209,9 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
         synchronized (mSessions) {
             readSessionsLocked();
 
+            final File internalStagingDir = buildInternalStagingDir();
             final ArraySet<File> unclaimedStages = Sets.newArraySet(
-                    mStagingDir.listFiles(sStageFilter));
+                    internalStagingDir.listFiles(sStageFilter));
             final ArraySet<File> unclaimedIcons = Sets.newArraySet(
                     mSessionsDir.listFiles());
 
@@ -236,6 +238,11 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
                 icon.delete();
             }
         }
+    }
+
+    public void systemReady() {
+        mAppOps = mContext.getSystemService(AppOpsManager.class);
+        mStorage = mContext.getSystemService(StorageManager.class);
     }
 
     public void onSecureContainersAvailable() {
@@ -275,13 +282,13 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
     }
 
     @Deprecated
-    public File allocateInternalStageDirLegacy() throws IOException {
+    public File allocateStageDirLegacy(String volumeUuid) throws IOException {
         synchronized (mSessions) {
             try {
                 final int sessionId = allocateSessionIdLocked();
                 mLegacySessions.put(sessionId, true);
-                final File stageDir = buildInternalStageDir(sessionId);
-                prepareInternalStageDir(stageDir);
+                final File stageDir = buildStageDir(volumeUuid, sessionId);
+                prepareStageDir(stageDir);
                 return stageDir;
             } catch (IllegalStateException e) {
                 throw new IOException(e);
@@ -321,11 +328,6 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
                         if (age >= MAX_AGE_MILLIS) {
                             Slog.w(TAG, "Abandoning old session first created at "
                                     + session.createdMillis);
-                            valid = false;
-                        } else if (session.stageDir != null
-                                && !session.stageDir.exists()) {
-                            Slog.w(TAG, "Abandoning internal session with missing stage "
-                                    + session.stageDir);
                             valid = false;
                         } else {
                             valid = true;
@@ -378,6 +380,7 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
         params.originatingUri = readUriAttribute(in, ATTR_ORIGINATING_URI);
         params.referrerUri = readUriAttribute(in, ATTR_REFERRER_URI);
         params.abiOverride = readStringAttribute(in, ATTR_ABI_OVERRIDE);
+        params.volumeUuid = readStringAttribute(in, ATTR_VOLUME_UUID);
 
         final File appIconFile = buildAppIconFile(sessionId);
         if (appIconFile.exists()) {
@@ -448,6 +451,7 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
         writeUriAttribute(out, ATTR_ORIGINATING_URI, params.originatingUri);
         writeUriAttribute(out, ATTR_REFERRER_URI, params.referrerUri);
         writeStringAttribute(out, ATTR_ABI_OVERRIDE, params.abiOverride);
+        writeStringAttribute(out, ATTR_VOLUME_UUID, params.volumeUuid);
 
         // Persist app icon if changed since last written
         final File appIconFile = buildAppIconFile(session.sessionId);
@@ -528,28 +532,40 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
             }
         }
 
-        if (params.mode == SessionParams.MODE_FULL_INSTALL
-                || params.mode == SessionParams.MODE_INHERIT_EXISTING) {
+        switch (params.mode) {
+            case SessionParams.MODE_FULL_INSTALL:
+            case SessionParams.MODE_INHERIT_EXISTING:
+                break;
+            default:
+                throw new IllegalArgumentException("Invalid install mode: " + params.mode);
+        }
+
+        // If caller requested explicit location, sanity check it, otherwise
+        // resolve the best internal or adopted location.
+        if ((params.installFlags & PackageManager.INSTALL_INTERNAL) != 0) {
+            if (!PackageHelper.fitsOnInternal(mContext, params.sizeBytes)) {
+                throw new IOException("No suitable internal storage available");
+            }
+
+        } else if ((params.installFlags & PackageManager.INSTALL_EXTERNAL) != 0) {
+            if (!PackageHelper.fitsOnExternal(mContext, params.sizeBytes)) {
+                throw new IOException("No suitable external storage available");
+            }
+
+        } else {
+            // For now, installs to adopted media are treated as internal from
+            // an install flag point-of-view.
+            params.setInstallFlagsInternal();
+
             // Resolve best location for install, based on combination of
             // requested install flags, delta size, and manifest settings.
             final long ident = Binder.clearCallingIdentity();
             try {
-                final int resolved = PackageHelper.resolveInstallLocation(mContext,
-                        params.appPackageName, params.installLocation, params.sizeBytes,
-                        params.installFlags);
-
-                if (resolved == PackageHelper.RECOMMEND_INSTALL_INTERNAL) {
-                    params.setInstallFlagsInternal();
-                } else if (resolved == PackageHelper.RECOMMEND_INSTALL_EXTERNAL) {
-                    params.setInstallFlagsExternal();
-                } else {
-                    throw new IOException("No storage with enough free space; res=" + resolved);
-                }
+                params.volumeUuid = PackageHelper.resolveInstallVolume(mContext,
+                        params.appPackageName, params.installLocation, params.sizeBytes);
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
-        } else {
-            throw new IllegalArgumentException("Invalid install mode: " + params.mode);
         }
 
         final int sessionId;
@@ -574,7 +590,7 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
             File stageDir = null;
             String stageCid = null;
             if ((params.installFlags & PackageManager.INSTALL_INTERNAL) != 0) {
-                stageDir = buildInternalStageDir(sessionId);
+                stageDir = buildStageDir(params.volumeUuid, sessionId);
             } else {
                 stageCid = buildExternalStageCid(sessionId);
             }
@@ -673,11 +689,30 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
         throw new IllegalStateException("Failed to allocate session ID");
     }
 
-    private File buildInternalStageDir(int sessionId) {
-        return new File(mStagingDir, "vmdl" + sessionId + ".tmp");
+    private File buildInternalStagingDir() {
+        return new File(Environment.getDataDirectory(), "app");
     }
 
-    static void prepareInternalStageDir(File stageDir) throws IOException {
+    private File buildStagingDir(String volumeUuid) throws FileNotFoundException {
+        if (volumeUuid == null) {
+            return buildInternalStagingDir();
+        } else {
+            final VolumeInfo vol = mStorage.findVolumeByUuid(volumeUuid);
+            if (vol != null && vol.type == VolumeInfo.TYPE_PRIVATE
+                    && vol.state == VolumeInfo.STATE_MOUNTED) {
+                return new File(vol.path, "app");
+            } else {
+                throw new FileNotFoundException("Failed to find volume for UUID " + volumeUuid);
+            }
+        }
+    }
+
+    private File buildStageDir(String volumeUuid, int sessionId) throws FileNotFoundException {
+        final File stagingDir = buildStagingDir(volumeUuid);
+        return new File(stagingDir, "vmdl" + sessionId + ".tmp");
+    }
+
+    static void prepareStageDir(File stageDir) throws IOException {
         if (stageDir.exists()) {
             throw new IOException("Session dir already exists: " + stageDir);
         }

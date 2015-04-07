@@ -432,7 +432,8 @@ interface IPackageManager {
     PackageCleanItem nextPackageToClean(in PackageCleanItem lastPackage);
 
     void movePackage(String packageName, IPackageMoveObserver observer, int flags);
-    
+    void movePackageAndData(String packageName, String volumeUuid, IPackageMoveObserver observer);
+
     boolean addPermissionAsync(in PermissionInfo info);
 
     boolean setInstallLocation(int loc);

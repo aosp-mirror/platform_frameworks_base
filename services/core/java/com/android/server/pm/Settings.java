@@ -42,6 +42,7 @@ import android.os.Process;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.os.storage.VolumeInfo;
 import android.util.AtomicFile;
 import android.text.TextUtils;
 import android.util.LogPrinter;
@@ -53,6 +54,7 @@ import com.android.internal.os.BackgroundThread;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.JournaledFile;
+import com.android.internal.util.Preconditions;
 import com.android.internal.util.XmlUtils;
 import com.android.server.backup.PreferredActivityBackupHelper;
 import com.android.server.pm.PackageManagerService.DumpState;
@@ -333,11 +335,17 @@ final class Settings {
         }
     }
 
-    void setInstallerPackageName(String pkgName,
-            String installerPkgName) {
+    void setInstallerPackageName(String pkgName, String installerPkgName) {
         PackageSetting p = mPackages.get(pkgName);
-        if(p != null) {
+        if (p != null) {
             p.setInstallerPackageName(installerPkgName);
+        }
+    }
+
+    void setVolumeUuid(String pkgName, String volumeUuid) {
+        PackageSetting p = mPackages.get(pkgName);
+        if (p != null) {
+            p.setVolumeUuid(volumeUuid);
         }
     }
 
@@ -2066,6 +2074,9 @@ final class Settings {
         if (pkg.installerPackageName != null) {
             serializer.attribute(null, "installer", pkg.installerPackageName);
         }
+        if (pkg.volumeUuid != null) {
+            serializer.attribute(null, "volumeUuid", pkg.volumeUuid);
+        }
         pkg.signatures.writeXml(serializer, "sigs", mPastSignatures);
         if ((pkg.pkgFlags & ApplicationInfo.FLAG_SYSTEM) == 0) {
             writePermissionsLPr(serializer, pkg.getPermissionsState().getInstallPermissions());
@@ -2908,6 +2919,7 @@ final class Settings {
         String cpuAbiOverrideString = null;
         String systemStr = null;
         String installerPackageName = null;
+        String volumeUuid = null;
         String uidError = null;
         int pkgFlags = 0;
         int pkgPrivateFlags = 0;
@@ -2945,6 +2957,7 @@ final class Settings {
                 }
             }
             installerPackageName = parser.getAttributeValue(null, "installer");
+            volumeUuid = parser.getAttributeValue(null, "volumeUuid");
 
             systemStr = parser.getAttributeValue(null, "publicFlags");
             if (systemStr != null) {
@@ -3093,6 +3106,7 @@ final class Settings {
         if (packageSetting != null) {
             packageSetting.uidError = "true".equals(uidError);
             packageSetting.installerPackageName = installerPackageName;
+            packageSetting.volumeUuid = volumeUuid;
             packageSetting.legacyNativeLibraryPathString = legacyNativeLibraryPathStr;
             packageSetting.primaryCpuAbiString = primaryCpuAbiString;
             packageSetting.secondaryCpuAbiString = secondaryCpuAbiString;
@@ -3549,6 +3563,22 @@ final class Settings {
         return null;
     }
 
+    /**
+     * Return all {@link PackageSetting} that are actively installed on the
+     * given {@link VolumeInfo#fsUuid}.
+     */
+    List<PackageSetting> getVolumePackagesLPr(String volumeUuid) {
+        Preconditions.checkNotNull(volumeUuid);
+        ArrayList<PackageSetting> res = new ArrayList<>();
+        for (int i = 0; i < mPackages.size(); i++) {
+            final PackageSetting setting = mPackages.valueAt(i);
+            if (Objects.equals(volumeUuid, setting.volumeUuid)) {
+                res.add(setting);
+            }
+        }
+        return res;
+    }
+
     static void printFlags(PrintWriter pw, int val, Object[] spec) {
         pw.print("[ ");
         for (int i=0; i<spec.length; i+=2) {
@@ -3754,6 +3784,10 @@ final class Settings {
         if (ps.installerPackageName != null) {
             pw.print(prefix); pw.print("  installerPackageName=");
                     pw.println(ps.installerPackageName);
+        }
+        if (ps.volumeUuid != null) {
+            pw.print(prefix); pw.print("  volumeUuid=");
+                    pw.println(ps.volumeUuid);
         }
         pw.print(prefix); pw.print("  signatures="); pw.println(ps.signatures);
         pw.print(prefix); pw.print("  installPermissionsFixed=");

@@ -833,6 +833,9 @@ class MountService extends IMountService.Stub
             vol.userId = UserHandle.USER_OWNER;
             mHandler.obtainMessage(H_VOLUME_MOUNT, vol).sendToTarget();
 
+        } else if (vol.type == VolumeInfo.TYPE_PRIVATE) {
+            mHandler.obtainMessage(H_VOLUME_MOUNT, vol).sendToTarget();
+
         } else {
             Slog.d(TAG, "Skipping automatic mounting of " + vol);
         }
