@@ -71,7 +71,12 @@ import java.io.PrintWriter;
  */
 public final class Choreographer {
     private static final String TAG = "Choreographer";
-    private static final boolean DEBUG = false;
+
+    // Prints debug messages about jank which was detected (low volume).
+    private static final boolean DEBUG_JANK = false;
+
+    // Prints debug messages about every frame and callback registered (high volume).
+    private static final boolean DEBUG_FRAMES = false;
 
     // The default amount of time in ms between animation frames.
     // When vsync is not enabled, we want to have some idea of how long we should
@@ -139,6 +144,7 @@ public final class Choreographer {
     private boolean mCallbacksRunning;
     private long mLastFrameTimeNanos;
     private long mFrameIntervalNanos;
+    private boolean mDebugPrintNextFrameTimeDelta;
 
     /**
      * Contains information about the current frame for jank-tracking,
@@ -166,13 +172,25 @@ public final class Choreographer {
     public static final int CALLBACK_ANIMATION = 1;
 
     /**
-     * Callback type: Traversal callback.  Handles layout and draw.  Runs last
+     * Callback type: Traversal callback.  Handles layout and draw.  Runs
      * after all other asynchronous messages have been handled.
      * @hide
      */
     public static final int CALLBACK_TRAVERSAL = 2;
 
-    private static final int CALLBACK_LAST = CALLBACK_TRAVERSAL;
+    /**
+     * Callback type: Commit callback.  Handles post-draw operations for the frame.
+     * Runs after traversal completes.  The {@link #getFrameTime() frame time} reported
+     * during this callback may be updated to reflect delays that occurred while
+     * traversals were in progress in case heavy layout operations caused some frames
+     * to be skipped.  The frame time reported during this callback provides a better
+     * estimate of the start time of the frame in which animations (and other updates
+     * to the view hierarchy state) actually took effect.
+     * @hide
+     */
+    public static final int CALLBACK_COMMIT = 3;
+
+    private static final int CALLBACK_LAST = CALLBACK_COMMIT;
 
     private Choreographer(Looper looper) {
         mLooper = looper;
@@ -332,7 +350,7 @@ public final class Choreographer {
 
     private void postCallbackDelayedInternal(int callbackType,
             Object action, Object token, long delayMillis) {
-        if (DEBUG) {
+        if (DEBUG_FRAMES) {
             Log.d(TAG, "PostCallback: type=" + callbackType
                     + ", action=" + action + ", token=" + token
                     + ", delayMillis=" + delayMillis);
@@ -376,7 +394,7 @@ public final class Choreographer {
     }
 
     private void removeCallbacksInternal(int callbackType, Object action, Object token) {
-        if (DEBUG) {
+        if (DEBUG_FRAMES) {
             Log.d(TAG, "RemoveCallbacks: type=" + callbackType
                     + ", action=" + action + ", token=" + token);
         }
@@ -492,7 +510,7 @@ public final class Choreographer {
         if (!mFrameScheduled) {
             mFrameScheduled = true;
             if (USE_VSYNC) {
-                if (DEBUG) {
+                if (DEBUG_FRAMES) {
                     Log.d(TAG, "Scheduling next frame on vsync.");
                 }
 
@@ -509,7 +527,7 @@ public final class Choreographer {
             } else {
                 final long nextFrameTime = Math.max(
                         mLastFrameTimeNanos / TimeUtils.NANOS_PER_MS + sFrameDelay, now);
-                if (DEBUG) {
+                if (DEBUG_FRAMES) {
                     Log.d(TAG, "Scheduling next frame in " + (nextFrameTime - now) + " ms.");
                 }
                 Message msg = mHandler.obtainMessage(MSG_DO_FRAME);
@@ -526,6 +544,12 @@ public final class Choreographer {
                 return; // no work to do
             }
 
+            if (DEBUG_JANK && mDebugPrintNextFrameTimeDelta) {
+                mDebugPrintNextFrameTimeDelta = false;
+                Log.d(TAG, "Frame time delta: "
+                        + ((frameTimeNanos - mLastFrameTimeNanos) * 0.000001f) + " ms");
+            }
+
             long intendedFrameTimeNanos = frameTimeNanos;
             startNanos = System.nanoTime();
             final long jitterNanos = startNanos - frameTimeNanos;
@@ -536,7 +560,7 @@ public final class Choreographer {
                             + "The application may be doing too much work on its main thread.");
                 }
                 final long lastFrameOffset = jitterNanos % mFrameIntervalNanos;
-                if (DEBUG) {
+                if (DEBUG_JANK) {
                     Log.d(TAG, "Missed vsync by " + (jitterNanos * 0.000001f) + " ms "
                             + "which is more than the frame interval of "
                             + (mFrameIntervalNanos * 0.000001f) + " ms!  "
@@ -547,7 +571,7 @@ public final class Choreographer {
             }
 
             if (frameTimeNanos < mLastFrameTimeNanos) {
-                if (DEBUG) {
+                if (DEBUG_JANK) {
                     Log.d(TAG, "Frame time appears to be going backwards.  May be due to a "
                             + "previously skipped frame.  Waiting for next vsync.");
                 }
@@ -569,7 +593,9 @@ public final class Choreographer {
         mFrameInfo.markPerformTraversalsStart();
         doCallbacks(Choreographer.CALLBACK_TRAVERSAL, frameTimeNanos);
 
-        if (DEBUG) {
+        doCallbacks(Choreographer.CALLBACK_COMMIT, frameTimeNanos);
+
+        if (DEBUG_FRAMES) {
             final long endNanos = System.nanoTime();
             Log.d(TAG, "Frame " + frame + ": Finished, took "
                     + (endNanos - startNanos) * 0.000001f + " ms, latency "
@@ -583,16 +609,43 @@ public final class Choreographer {
             // We use "now" to determine when callbacks become due because it's possible
             // for earlier processing phases in a frame to post callbacks that should run
             // in a following phase, such as an input event that causes an animation to start.
-            final long now = SystemClock.uptimeMillis();
-            callbacks = mCallbackQueues[callbackType].extractDueCallbacksLocked(now);
+            final long now = System.nanoTime();
+            callbacks = mCallbackQueues[callbackType].extractDueCallbacksLocked(
+                    now / TimeUtils.NANOS_PER_MS);
             if (callbacks == null) {
                 return;
             }
             mCallbacksRunning = true;
+
+            // Update the frame time if necessary when committing the frame.
+            // We only update the frame time if we are more than 2 frames late reaching
+            // the commit phase.  This ensures that the frame time which is observed by the
+            // callbacks will always increase from one frame to the next and never repeat.
+            // We never want the next frame's starting frame time to end up being less than
+            // or equal to the previous frame's commit frame time.  Keep in mind that the
+            // next frame has most likely already been scheduled by now so we play it
+            // safe by ensuring the commit time is always at least one frame behind.
+            if (callbackType == Choreographer.CALLBACK_COMMIT) {
+                final long jitterNanos = now - frameTimeNanos;
+                if (jitterNanos >= 2 * mFrameIntervalNanos) {
+                    final long lastFrameOffset = jitterNanos % mFrameIntervalNanos
+                            + mFrameIntervalNanos;
+                    if (DEBUG_JANK) {
+                        Log.d(TAG, "Commit callback delayed by " + (jitterNanos * 0.000001f)
+                                + " ms which is more than twice the frame interval of "
+                                + (mFrameIntervalNanos * 0.000001f) + " ms!  "
+                                + "Setting frame time to " + (lastFrameOffset * 0.000001f)
+                                + " ms in the past.");
+                        mDebugPrintNextFrameTimeDelta = true;
+                    }
+                    frameTimeNanos = now - lastFrameOffset;
+                    mLastFrameTimeNanos = frameTimeNanos;
+                }
+            }
         }
         try {
             for (CallbackRecord c = callbacks; c != null; c = c.next) {
-                if (DEBUG) {
+                if (DEBUG_FRAMES) {
                     Log.d(TAG, "RunCallback: type=" + callbackType
                             + ", action=" + c.action + ", token=" + c.token
                             + ", latencyMillis=" + (SystemClock.uptimeMillis() - c.dueTime));
