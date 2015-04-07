@@ -822,7 +822,7 @@ class LayoutBinderWriter(val layoutBinder : LayoutBinder) {
         }
         nl("}")
         nl("public static ${baseClassName} bind(android.view.View view) {") {
-            tab("if (!\"${layoutBinder.getId()}\".equals(view.getTag())) {") {
+            tab("if (!\"${layoutBinder.getTag()}\".equals(view.getTag())) {") {
                 tab("throw new RuntimeException(\"view tag isn't correct on view\");")
             }
             tab("}")
