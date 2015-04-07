@@ -880,6 +880,15 @@ public final class Settings {
             "android.settings.VOICE_CONTROL_DO_NOT_DISTURB_MODE";
 
     /**
+     * Activity Action: Show Zen Mode schedule rule configuration settings.
+     *
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_ZEN_MODE_SCHEDULE_RULE_SETTINGS
+            = "android.settings.ZEN_MODE_SCHEDULE_RULE_SETTINGS";
+
+    /**
      * Activity Action: Show the regulatory information screen for the device.
      * <p>
      * In some cases, a matching Activity may not exist, so ensure you safeguard
@@ -7216,6 +7225,18 @@ public final class Settings {
             if (mode == ZEN_MODE_ALARMS) return "ZEN_MODE_ALARMS";
             if (mode == ZEN_MODE_NO_INTERRUPTIONS) return "ZEN_MODE_NO_INTERRUPTIONS";
             return "ZEN_MODE_OFF";
+        }
+
+        /** @hide */ public static boolean isValidZenMode(int value) {
+            switch (value) {
+                case Global.ZEN_MODE_OFF:
+                case Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS:
+                case Global.ZEN_MODE_ALARMS:
+                case Global.ZEN_MODE_NO_INTERRUPTIONS:
+                    return true;
+                default:
+                    return false;
+            }
         }
 
         /**

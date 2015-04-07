@@ -16,38 +16,36 @@
 
 package com.android.server.notification;
 
+import android.service.notification.ZenModeConfig.ScheduleInfo;
+import android.util.ArraySet;
+
 import java.util.Calendar;
 import java.util.Objects;
 import java.util.TimeZone;
 
-import android.service.notification.ZenModeConfig;
-import android.service.notification.ZenModeConfig.DowntimeInfo;
-import android.util.ArraySet;
-
-public class DowntimeCalendar {
-
+public class ScheduleCalendar {
     private final ArraySet<Integer> mDays = new ArraySet<Integer>();
     private final Calendar mCalendar = Calendar.getInstance();
 
-    private DowntimeInfo mInfo;
+    private ScheduleInfo mSchedule;
 
     @Override
     public String toString() {
-        return "DowntimeCalendar[mDays=" + mDays + "]";
+        return "ScheduleCalendar[mDays=" + mDays + "]";
     }
 
-    public void setDowntimeInfo(DowntimeInfo info) {
-        if (Objects.equals(mInfo, info)) return;
-        mInfo = info;
+    public void setSchedule(ScheduleInfo schedule) {
+        if (Objects.equals(mSchedule, schedule)) return;
+        mSchedule = schedule;
         updateDays();
     }
 
-    public long nextDowntimeStart(long time) {
-        if (mInfo == null || mDays.size() == 0) return Long.MAX_VALUE;
-        final long start = getTime(time, mInfo.startHour, mInfo.startMinute);
+    public long nextScheduleStart(long time) {
+        if (mSchedule == null || mDays.size() == 0) return Long.MAX_VALUE;
+        final long start = getTime(time, mSchedule.startHour, mSchedule.startMinute);
         for (int i = 0; i < Calendar.SATURDAY; i++) {
             final long t = addDays(start, i);
-            if (t > time && isInDowntime(t)) {
+            if (t > time && isInSchedule(t)) {
                 return t;
             }
         }
@@ -58,7 +56,14 @@ public class DowntimeCalendar {
         mCalendar.setTimeZone(tz);
     }
 
-    public long getNextTime(long now, int hr, int min) {
+    public long getNextChangeTime(long now) {
+        if (mSchedule == null) return 0;
+        final long nextStart = getNextTime(now, mSchedule.startHour, mSchedule.startMinute);
+        final long nextEnd = getNextTime(now, mSchedule.endHour, mSchedule.endMinute);
+        return Math.min(nextStart, nextEnd);
+    }
+
+    private long getNextTime(long now, int hr, int min) {
         final long time = getTime(now, hr, min);
         return time <= now ? addDays(time, 1) : time;
     }
@@ -72,17 +77,17 @@ public class DowntimeCalendar {
         return mCalendar.getTimeInMillis();
     }
 
-    public boolean isInDowntime(long time) {
-        if (mInfo == null || mDays.size() == 0) return false;
-        final long start = getTime(time, mInfo.startHour, mInfo.startMinute);
-        long end = getTime(time, mInfo.endHour, mInfo.endMinute);
+    public boolean isInSchedule(long time) {
+        if (mSchedule == null || mDays.size() == 0) return false;
+        final long start = getTime(time, mSchedule.startHour, mSchedule.startMinute);
+        long end = getTime(time, mSchedule.endHour, mSchedule.endMinute);
         if (end <= start) {
             end = addDays(end, 1);
         }
-        return isInDowntime(-1, time, start, end) || isInDowntime(0, time, start, end);
+        return isInSchedule(-1, time, start, end) || isInSchedule(0, time, start, end);
     }
 
-    private boolean isInDowntime(int daysOffset, long time, long start, long end) {
+    private boolean isInSchedule(int daysOffset, long time, long start, long end) {
         final int n = Calendar.SATURDAY;
         final int day = ((getDayOfWeek(time) - 1) + (daysOffset % n) + n) % n + 1;
         start = addDays(start, daysOffset);
@@ -97,10 +102,9 @@ public class DowntimeCalendar {
 
     private void updateDays() {
         mDays.clear();
-        if (mInfo != null) {
-            final int[] days = ZenModeConfig.tryParseDays(mInfo.mode);
-            for (int i = 0; days != null && i < days.length; i++) {
-                mDays.add(days[i]);
+        if (mSchedule != null && mSchedule.days != null) {
+            for (int i = 0; i < mSchedule.days.length; i++) {
+                mDays.add(mSchedule.days[i]);
             }
         }
     }

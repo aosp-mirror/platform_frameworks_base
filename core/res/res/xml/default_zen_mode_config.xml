@@ -18,7 +18,6 @@
 -->
 
 <!-- Default configuration for zen mode.  See android.service.notification.ZenModeConfig. -->
-<zen version="1">
-    <allow calls="false" messages="false" />
-    <sleep startHour="22" startMin="0" endHour="7" endMin="0" />
+<zen version="2">
+    <allow calls="true" messages="false" reminders="true" events="true" />
 </zen>

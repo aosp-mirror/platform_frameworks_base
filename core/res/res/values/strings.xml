@@ -5170,12 +5170,6 @@
     <!-- [CHAR_LIMIT=NONE] Battery saver: Feature description -->
     <string name="battery_saver_description">To help improve battery life, battery saver reduces your device’s performance and limits vibration, location services, and most background data. Email, messaging, and other apps that rely on syncing may not update unless you open them.\n\nBattery saver turns off automatically when your device is charging.</string>
 
-    <!-- [CHAR_LIMIT=NONE] Zen mode: Condition summary for built-in downtime condition, if active -->
-    <string name="downtime_condition_summary">Until your downtime ends at <xliff:g id="formattedTime" example="10:00 PM">%1$s</xliff:g></string>
-
-    <!-- [CHAR_LIMIT=NONE] Zen mode: Condition line one for built-in downtime condition, if active -->
-    <string name="downtime_condition_line_one">Until your downtime ends</string>
-
     <!-- Zen mode condition - summary: time duration in minutes. [CHAR LIMIT=NONE] -->
     <plurals name="zen_mode_duration_minutes_summary">
         <item quantity="one">For one minute (until <xliff:g id="formattedTime" example="10:00 PM">%2$s</xliff:g>)</item>
@@ -5206,14 +5200,23 @@
     <!-- Zen mode condition: no exit criteria. [CHAR LIMIT=NONE] -->
     <string name="zen_mode_forever">Until you turn this off</string>
 
+    <!-- Zen mode active automatic rule name separator. [CHAR LIMIT=NONE] -->
+    <string name="zen_mode_rule_name_combination"><xliff:g id="first" example="Weeknights">%1$s</xliff:g> / <xliff:g id="rest" example="Meetings">%2$s</xliff:g></string>
+
     <!-- Content description for the Toolbar icon used to collapse an expanded action mode. [CHAR LIMIT=NONE] -->
     <string name="toolbar_collapse_description">Collapse</string>
 
-    <!-- Zen mode condition - summary: until next alarm. [CHAR LIMIT=NONE] -->
-    <string name="zen_mode_next_alarm_summary">Until next alarm at <xliff:g id="formattedTime" example="7:30 AM">%1$s</xliff:g></string>
+    <!-- Zen mode - feature name. [CHAR LIMIT=40] -->
+    <string name="zen_mode_feature_name">Block interruptions</string>
 
-    <!-- Zen mode condition - line one: until next alarm. [CHAR LIMIT=NONE] -->
-    <string name="zen_mode_next_alarm_line_one">Until next alarm</string>
+    <!-- Zen mode - downtime legacy feature name. [CHAR LIMIT=40] -->
+    <string name="zen_mode_downtime_feature_name">Downtime</string>
+
+    <!-- Zen mode - name of default automatic schedule for weeknights. [CHAR LIMIT=40] -->
+    <string name="zen_mode_default_weeknights_name">Weeknights</string>
+
+    <!-- Zen mode - name of default automatic schedule for weekends. [CHAR LIMIT=40] -->
+    <string name="zen_mode_default_weekends_name">Weekends</string>
 
     <!-- Indication that the current volume and other effects (vibration) are being suppressed by a third party, such as a notification listener. [CHAR LIMIT=30] -->
     <string name="muted_by">Muted by <xliff:g id="third_party">%1$s</xliff:g></string>

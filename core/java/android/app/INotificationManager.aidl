@@ -76,12 +76,10 @@ interface INotificationManager
     boolean matchesCallFilter(in Bundle extras);
     boolean isSystemConditionProviderEnabled(String path);
 
+    int getZenMode();
     ZenModeConfig getZenModeConfig();
-    boolean setZenModeConfig(in ZenModeConfig config);
-    oneway void setZenMode(int mode);
+    boolean setZenModeConfig(in ZenModeConfig config, String reason);
+    oneway void setZenMode(int mode, in Uri conditionId, String reason);
     oneway void notifyConditions(String pkg, in IConditionProvider provider, in Condition[] conditions);
     oneway void requestZenModeConditions(in IConditionListener callback, int relevance);
-    oneway void setZenModeCondition(in Condition condition);
-    oneway void setAutomaticZenModeConditions(in Uri[] conditionIds);
-    Condition[] getAutomaticZenModeConditions();
 }

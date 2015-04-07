@@ -38,7 +38,6 @@ import android.os.Message;
 import android.os.SystemClock;
 import android.provider.Settings.Global;
 import android.service.notification.ZenModeConfig;
-import android.service.notification.ZenModeConfig.DowntimeInfo;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.SparseBooleanArray;
@@ -606,14 +605,6 @@ public class VolumeDialog {
                     text = mContext.getString(R.string.volume_dnd_ends_at,
                             Util.getShortTime(countdown));
                     action = mContext.getString(R.string.volume_end_now);
-                } else {
-                    final DowntimeInfo info = ZenModeConfig.tryParseDowntimeConditionId(mState.
-                            exitCondition.id);
-                    if (info != null) {
-                        text = mContext.getString(R.string.volume_dnd_ends_at,
-                                Util.getShortTime(info));
-                        action = mContext.getString(R.string.volume_end_now);
-                    }
                 }
             }
             if (text == null) {

@@ -32,6 +32,7 @@ import android.provider.Settings;
 import android.provider.Settings.Global;
 import android.service.notification.Condition;
 import android.service.notification.ZenModeConfig;
+import android.service.notification.ZenModeConfig.ZenRule;
 import android.text.TextUtils;
 import android.util.ArraySet;
 import android.util.AttributeSet;
@@ -157,7 +158,6 @@ public class ZenModePanel extends LinearLayout {
         }
         mZenButtons.getChildAt(3).setVisibility(mEmbedded ? GONE : VISIBLE);
         mZenEmbeddedDivider.setVisibility(mEmbedded ? VISIBLE : GONE);
-        setExpanded(mEmbedded);
         updateWidgets();
     }
 
@@ -278,7 +278,7 @@ public class ZenModePanel extends LinearLayout {
         if (expanded == mExpanded) return;
         if (DEBUG) Log.d(mTag, "setExpanded " + expanded);
         mExpanded = expanded;
-        if (mExpanded) {
+        if (mExpanded && isShown()) {
             ensureSelection();
         }
         updateWidgets();
@@ -299,7 +299,7 @@ public class ZenModePanel extends LinearLayout {
             });
         }
         if (mRequestingConditions) {
-            mTimeCondition = parseExistingTimeCondition(mExitCondition);
+            mTimeCondition = parseExistingTimeCondition(mContext, mExitCondition);
             if (mTimeCondition != null) {
                 mBucketIndex = -1;
             } else {
@@ -327,10 +327,9 @@ public class ZenModePanel extends LinearLayout {
         for (int i = 0; i < mMaxConditions; i++) {
             mZenConditions.addView(mInflater.inflate(R.layout.zen_mode_condition, this, false));
         }
-        setExitCondition(mController.getExitCondition());
         refreshExitConditionText();
         mSessionZen = getSelectedZen(-1);
-        handleUpdateZen(mController.getZen());
+        handleUpdateManualRule(mController.getManualRule());
         if (DEBUG) Log.d(mTag, "init mExitCondition=" + mExitCondition);
         hideAllConditions();
         mController.addCallback(mZenCallback);
@@ -352,6 +351,10 @@ public class ZenModePanel extends LinearLayout {
         return condition != null ? condition.id : null;
     }
 
+    private Uri getRealConditionId(Condition condition) {
+        return isForever(condition) ? null : getConditionId(condition);
+    }
+
     private static boolean sameConditionId(Condition lhs, Condition rhs) {
         return lhs == null ? rhs == null : rhs != null && lhs.id.equals(rhs.id);
     }
@@ -360,18 +363,18 @@ public class ZenModePanel extends LinearLayout {
         return condition == null ? null : condition.copy();
     }
 
-    public String getExitConditionText() {
-        return mExitConditionText;
+    private void refreshExitConditionText() {
+        mExitConditionText = getExitConditionText(mContext, mExitCondition);
     }
 
-    private void refreshExitConditionText() {
-        if (mExitCondition == null) {
-            mExitConditionText = foreverSummary();
-        } else if (isCountdown(mExitCondition)) {
-            final Condition condition = parseExistingTimeCondition(mExitCondition);
-            mExitConditionText = condition != null ? condition.summary : foreverSummary();
+    public static String getExitConditionText(Context context, Condition exitCondition) {
+        if (exitCondition == null) {
+            return foreverSummary(context);
+        } else if (isCountdown(exitCondition)) {
+            final Condition condition = parseExistingTimeCondition(context, exitCondition);
+            return condition != null ? condition.summary : foreverSummary(context);
         } else {
-            mExitConditionText = mExitCondition.summary;
+            return exitCondition.summary;
         }
     }
 
@@ -386,9 +389,16 @@ public class ZenModePanel extends LinearLayout {
         mIconPulser.start(noneButton);
     }
 
+    private void handleUpdateManualRule(ZenRule rule) {
+        final int zen = rule != null ? rule.zenMode : Global.ZEN_MODE_OFF;
+        handleUpdateZen(zen);
+        final Condition c = rule != null ? rule.condition : null;
+        handleExitConditionChanged(c);
+    }
+
     private void handleUpdateZen(int zen) {
         if (mSessionZen != -1 && mSessionZen != zen) {
-            setExpanded(mEmbedded || zen != Global.ZEN_MODE_OFF);
+            setExpanded(mEmbedded && isShown() || !mEmbedded && zen != Global.ZEN_MODE_OFF);
             mSessionZen = zen;
         }
         mZenButtons.setSelectedValue(zen);
@@ -398,6 +408,20 @@ public class ZenModePanel extends LinearLayout {
             final Condition selected = getSelectedCondition();
             if (!Objects.equals(mExitCondition, selected)) {
                 select(selected);
+            }
+        }
+    }
+
+    private void handleExitConditionChanged(Condition exitCondition) {
+        setExitCondition(exitCondition);
+        if (DEBUG) Log.d(mTag, "handleExitConditionChanged " + mExitCondition);
+        final int N = getVisibleConditions();
+        for (int i = 0; i < N; i++) {
+            final ConditionTag tag = getConditionTagAt(i);
+            if (tag != null) {
+                if (sameConditionId(tag.condition, mExitCondition)) {
+                    bind(exitCondition, mZenConditions.getChildAt(i));
+                }
             }
         }
     }
@@ -447,14 +471,14 @@ public class ZenModePanel extends LinearLayout {
                 ? mSubheadWarningColor : mSubheadColor);
     }
 
-    private Condition parseExistingTimeCondition(Condition condition) {
+    private static Condition parseExistingTimeCondition(Context context, Condition condition) {
         if (condition == null) return null;
         final long time = ZenModeConfig.tryParseCountdownConditionId(condition.id);
         if (time == 0) return null;
         final long now = System.currentTimeMillis();
         final long span = time - now;
         if (span <= 0 || span > MAX_BUCKET_MINUTES * MINUTES_MS) return null;
-        return ZenModeConfig.toTimeCondition(mContext,
+        return ZenModeConfig.toTimeCondition(context,
                 time, Math.round(span / (float) MINUTES_MS), now, ActivityManager.getCurrentUser());
     }
 
@@ -514,18 +538,18 @@ public class ZenModePanel extends LinearLayout {
             mZenConditions.getChildAt(i).setVisibility(GONE);
         }
         // ensure something is selected
-        if (mExpanded) {
+        if (mExpanded && isShown()) {
             ensureSelection();
         }
     }
 
     private Condition forever() {
-        return new Condition(mForeverId, foreverSummary(), "", "", 0 /*icon*/, Condition.STATE_TRUE,
-                0 /*flags*/);
+        return new Condition(mForeverId, foreverSummary(mContext), "", "", 0 /*icon*/,
+                Condition.STATE_TRUE, 0 /*flags*/);
     }
 
-    private String foreverSummary() {
-        return mContext.getString(com.android.internal.R.string.zen_mode_forever);
+    private static String foreverSummary(Context context) {
+        return context.getString(com.android.internal.R.string.zen_mode_forever);
     }
 
     private ConditionTag getConditionTagAt(int index) {
@@ -574,21 +598,7 @@ public class ZenModePanel extends LinearLayout {
         }
     }
 
-    private void handleExitConditionChanged(Condition exitCondition) {
-        setExitCondition(exitCondition);
-        if (DEBUG) Log.d(mTag, "handleExitConditionChanged " + mExitCondition);
-        final int N = getVisibleConditions();
-        for (int i = 0; i < N; i++) {
-            final ConditionTag tag = getConditionTagAt(i);
-            if (tag != null) {
-                if (sameConditionId(tag.condition, mExitCondition)) {
-                    bind(exitCondition, mZenConditions.getChildAt(i));
-                }
-            }
-        }
-    }
-
-    private boolean isCountdown(Condition c) {
+    private static boolean isCountdown(Condition c) {
         return c != null && ZenModeConfig.isValidCountdownConditionId(c.id);
     }
 
@@ -770,17 +780,21 @@ public class ZenModePanel extends LinearLayout {
 
     private void select(final Condition condition) {
         if (DEBUG) Log.d(mTag, "select " + condition);
-        final boolean isForever = isForever(condition);
+        if (mSessionZen == -1 || mSessionZen == Global.ZEN_MODE_OFF) {
+            if (DEBUG) Log.d(mTag, "Ignoring condition selection outside of manual zen");
+            return;
+        }
+        final Uri realConditionId = getRealConditionId(condition);
         if (mController != null) {
             AsyncTask.execute(new Runnable() {
                 @Override
                 public void run() {
-                    mController.setExitCondition(isForever ? null : condition);
+                    mController.setZen(mSessionZen, realConditionId, TAG + ".selectCondition");
                 }
             });
         }
         setExitCondition(condition);
-        if (isForever) {
+        if (realConditionId == null) {
             mPrefs.setMinuteIndex(-1);
         } else if (isCountdown(condition) && mBucketIndex != -1) {
             mPrefs.setMinuteIndex(mBucketIndex);
@@ -808,24 +822,19 @@ public class ZenModePanel extends LinearLayout {
 
     private final ZenModeController.Callback mZenCallback = new ZenModeController.Callback() {
         @Override
-        public void onZenChanged(int zen) {
-            mHandler.obtainMessage(H.UPDATE_ZEN, zen, 0).sendToTarget();
-        }
-        @Override
         public void onConditionsChanged(Condition[] conditions) {
             mHandler.obtainMessage(H.UPDATE_CONDITIONS, conditions).sendToTarget();
         }
 
         @Override
-        public void onExitConditionChanged(Condition exitCondition) {
-            mHandler.obtainMessage(H.EXIT_CONDITION_CHANGED, exitCondition).sendToTarget();
+        public void onManualRuleChanged(ZenRule rule) {
+            mHandler.obtainMessage(H.MANUAL_RULE_CHANGED, rule).sendToTarget();
         }
     };
 
     private final class H extends Handler {
         private static final int UPDATE_CONDITIONS = 1;
-        private static final int EXIT_CONDITION_CHANGED = 2;
-        private static final int UPDATE_ZEN = 3;
+        private static final int MANUAL_RULE_CHANGED = 2;
 
         private H() {
             super(Looper.getMainLooper());
@@ -835,10 +844,8 @@ public class ZenModePanel extends LinearLayout {
         public void handleMessage(Message msg) {
             if (msg.what == UPDATE_CONDITIONS) {
                 handleUpdateConditions((Condition[]) msg.obj);
-            } else if (msg.what == EXIT_CONDITION_CHANGED) {
-                handleExitConditionChanged((Condition) msg.obj);
-            } else if (msg.what == UPDATE_ZEN) {
-                handleUpdateZen(msg.arg1);
+            } else if (msg.what == MANUAL_RULE_CHANGED) {
+                handleUpdateManualRule((ZenRule) msg.obj);
             }
         }
     }
@@ -930,12 +937,13 @@ public class ZenModePanel extends LinearLayout {
     private final SegmentedButtons.Callback mZenButtonsCallback = new SegmentedButtons.Callback() {
         @Override
         public void onSelected(final Object value) {
-            if (value != null && mZenButtons.isShown()) {
+            if (value != null && mZenButtons.isShown() && isAttachedToWindow()) {
                 if (DEBUG) Log.d(mTag, "mZenButtonsCallback selected=" + value);
+                final Uri realConditionId = getRealConditionId(mSessionExitCondition);
                 AsyncTask.execute(new Runnable() {
                     @Override
                     public void run() {
-                        mController.setZen((Integer) value);
+                        mController.setZen((Integer) value, realConditionId, TAG + ".selectZen");
                     }
                 });
             }

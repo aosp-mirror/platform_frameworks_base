@@ -26,7 +26,9 @@ import android.os.Build;
  */
 public class MetricsLogger implements MetricsConstants {
     // These constants are temporary, they should migrate to MetricsConstants.
-    // next value is 144;
+    // next value is 145;
+
+    public static final int NOTIFICATION_ZEN_MODE_SCHEDULE_RULE = 144;
 
     public static void visible(Context context, int category) throws IllegalArgumentException {
         if (Build.IS_DEBUGGABLE && category == VIEW_UNKNOWN) {

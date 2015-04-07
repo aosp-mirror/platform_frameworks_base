@@ -85,9 +85,9 @@ public class DndTile extends QSTile<QSTile.BooleanState> {
     @Override
     public void handleClick() {
         if (mState.value) {
-            mController.setZen(Global.ZEN_MODE_OFF);
+            mController.setZen(Global.ZEN_MODE_OFF, null, TAG);
         } else {
-            mController.setZen(Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS);
+            mController.setZen(Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS, null, TAG);
             showDetail(true);
         }
     }
@@ -199,7 +199,7 @@ public class DndTile extends QSTile<QSTile.BooleanState> {
         @Override
         public void setToggleState(boolean state) {
             if (!state) {
-                mController.setZen(Global.ZEN_MODE_OFF);
+                mController.setZen(Global.ZEN_MODE_OFF, null, TAG);
                 showDetail(false);
             }
         }

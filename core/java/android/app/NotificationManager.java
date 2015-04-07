@@ -20,6 +20,7 @@ import android.annotation.SdkConstant;
 import android.app.Notification.Builder;
 import android.content.ComponentName;
 import android.content.Context;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -27,7 +28,7 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.StrictMode;
 import android.os.UserHandle;
-import android.service.notification.Condition;
+import android.provider.Settings.Global;
 import android.service.notification.IConditionListener;
 import android.service.notification.ZenModeConfig;
 import android.util.Log;
@@ -282,11 +283,23 @@ public class NotificationManager
     /**
      * @hide
      */
-    public void setZenMode(int mode) {
+    public void setZenMode(int mode, Uri conditionId, String reason) {
         INotificationManager service = getService();
         try {
-            service.setZenMode(mode);
+            service.setZenMode(mode, conditionId, reason);
         } catch (RemoteException e) {
+        }
+    }
+
+    /**
+     * @hide
+     */
+    public boolean setZenModeConfig(ZenModeConfig config, String reason) {
+        INotificationManager service = getService();
+        try {
+            return service.setZenModeConfig(config, reason);
+        } catch (RemoteException e) {
+            return false;
         }
     }
 
@@ -304,24 +317,22 @@ public class NotificationManager
     /**
      * @hide
      */
-    public void setZenModeCondition(Condition exitCondition) {
+    public int getZenMode() {
         INotificationManager service = getService();
         try {
-            service.setZenModeCondition(exitCondition);
+            return service.getZenMode();
         } catch (RemoteException e) {
         }
+        return Global.ZEN_MODE_OFF;
     }
 
     /**
      * @hide
      */
-    public Condition getZenModeCondition() {
+    public ZenModeConfig getZenModeConfig() {
         INotificationManager service = getService();
         try {
-            final ZenModeConfig config = service.getZenModeConfig();
-            if (config != null) {
-                return config.exitCondition;
-            }
+            return service.getZenModeConfig();
         } catch (RemoteException e) {
         }
         return null;

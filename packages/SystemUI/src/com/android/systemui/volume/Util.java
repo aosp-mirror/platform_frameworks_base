@@ -21,7 +21,6 @@ import android.media.MediaMetadata;
 import android.media.VolumeProvider;
 import android.media.session.MediaController.PlaybackInfo;
 import android.media.session.PlaybackState;
-import android.service.notification.ZenModeConfig.DowntimeInfo;
 import android.view.View;
 import android.widget.TextView;
 
@@ -143,10 +142,6 @@ class Util {
 
     public static String getShortTime(long millis) {
         return HMMAA.format(new Date(millis));
-    }
-
-    public static String getShortTime(DowntimeInfo info) {
-        return ((info.endHour + 1) % 12) + ":" + (info.endMinute < 10 ? " " : "") + info.endMinute;
     }
 
     public static void setText(TextView tv, CharSequence text) {

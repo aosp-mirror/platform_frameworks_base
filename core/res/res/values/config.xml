@@ -2044,15 +2044,8 @@
     <!-- Enabled built-in zen mode condition providers -->
     <string-array translatable="false" name="config_system_condition_providers">
         <item>countdown</item>
-        <item>downtime</item>
-        <item>next_alarm</item>
+        <item>schedule</item>
     </string-array>
-
-    <!-- Show the next-alarm as a zen exit condition if it occurs in the next n hours. -->
-    <integer name="config_next_alarm_condition_lookahead_threshold_hrs">12</integer>
-
-    <!-- Show downtime as a zen exit condition if it starts in the next n hours. -->
-    <integer name="config_downtime_condition_lookahead_threshold_hrs">4</integer>
 
     <!-- Flags enabling default window features. See Window.java -->
     <bool name="config_defaultWindowFeatureOptionsPanel">true</bool>
