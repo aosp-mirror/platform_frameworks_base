@@ -61,7 +61,7 @@ public class ITvInputSessionWrapper extends ITvInputSession.Stub implements Hand
     private static final int DO_TIME_SHIFT_RESUME = 15;
     private static final int DO_TIME_SHIFT_SEEK_TO = 16;
     private static final int DO_TIME_SHIFT_SET_PLAYBACK_RATE = 17;
-    private static final int DO_TIME_SHIFT_TRACK_CURRENT_POSITION = 18;
+    private static final int DO_TIME_SHIFT_ENABLE_POSITION_TRACKING = 18;
 
     private final HandlerCaller mCaller;
 
@@ -174,8 +174,8 @@ public class ITvInputSessionWrapper extends ITvInputSession.Stub implements Hand
                 mTvInputSessionImpl.timeShiftSetPlaybackRate((Float) msg.obj, msg.arg1);
                 break;
             }
-            case DO_TIME_SHIFT_TRACK_CURRENT_POSITION: {
-                mTvInputSessionImpl.timeShiftTrackCurrentPosition((Boolean) msg.obj);
+            case DO_TIME_SHIFT_ENABLE_POSITION_TRACKING: {
+                mTvInputSessionImpl.timeShiftEnablePositionTracking((Boolean) msg.obj);
                 break;
             }
             default: {
@@ -290,9 +290,9 @@ public class ITvInputSessionWrapper extends ITvInputSession.Stub implements Hand
     }
 
     @Override
-    public void timeShiftTrackCurrentPosition(boolean enabled) {
-        mCaller.executeOrSendMessage(mCaller.obtainMessageO(DO_TIME_SHIFT_TRACK_CURRENT_POSITION,
-                Boolean.valueOf(enabled)));
+    public void timeShiftEnablePositionTracking(boolean enable) {
+        mCaller.executeOrSendMessage(mCaller.obtainMessageO(
+                DO_TIME_SHIFT_ENABLE_POSITION_TRACKING, Boolean.valueOf(enable)));
     }
 
     private final class TvInputEventReceiver extends InputEventReceiver {

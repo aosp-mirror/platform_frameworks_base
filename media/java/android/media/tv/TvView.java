@@ -42,7 +42,6 @@ import android.view.ViewGroup;
 import android.view.ViewRootImpl;
 
 import java.lang.ref.WeakReference;
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -104,7 +103,7 @@ public class TvView extends ViewGroup {
     private int mSurfaceViewRight;
     private int mSurfaceViewTop;
     private int mSurfaceViewBottom;
-    private List<TimeShiftPositionCallback> mTimeShiftPositionCallbacks = new ArrayList<>();
+    private TimeShiftPositionCallback mTimeShiftPositionCallback;
 
     private final SurfaceHolder.Callback mSurfaceHolderCallback = new SurfaceHolder.Callback() {
         @Override
@@ -175,8 +174,8 @@ public class TvView extends ViewGroup {
     /**
      * Sets the callback to be invoked when an event is dispatched to this TvView.
      *
-     * @param callback The callback to receive events. A value of {@code null} removes any existing
-     *            callbacks.
+     * @param callback The callback to receive events. A value of {@code null} removes the existing
+     *            callback.
      */
     public void setCallback(TvInputCallback callback) {
         mCallback = callback;
@@ -422,7 +421,7 @@ public class TvView extends ViewGroup {
     }
 
     /**
-     * Pauses the playback. Call {@link #timeShiftResume()} to restart the playback.
+     * Pauses playback. No-op if it is already paused. Call {@link #timeShiftResume} to resume.
      */
     public void timeShiftPause() {
         if (mSession != null) {
@@ -431,7 +430,7 @@ public class TvView extends ViewGroup {
     }
 
     /**
-     * Resumes the playback. No-op if it is already playing the channel.
+     * Resumes playback. No-op if it is already resumed. Call {@link #timeShiftPause} to pause.
      */
     public void timeShiftResume() {
         if (mSession != null) {
@@ -440,11 +439,11 @@ public class TvView extends ViewGroup {
     }
 
     /**
-     * Seeks to the specific time position. The position should be in the range from the start time
-     * from the start time, {@link TimeShiftPositionCallback#onTimeShiftStartPositionChanged},
-     * to the current time, inclusive.
+     * Seeks to a specified time position. {@code timeMs} must be equal to or greater than the start
+     * position returned by {@link TimeShiftPositionCallback#onTimeShiftStartPositionChanged} and
+     * equal to or less than the current time.
      *
-     * @param timeMs The target time, in milliseconds since the epoch.
+     * @param timeMs The time position to seek to, in milliseconds since the epoch.
      */
     public void timeShiftSeekTo(long timeMs) {
         if (mSession != null) {
@@ -453,10 +452,10 @@ public class TvView extends ViewGroup {
     }
 
     /**
-     * Sets a playback rate and an audio mode.
+     * Sets playback rate and audio mode.
      *
      * @param rate The ratio between desired playback rate and normal one.
-     * @param audioMode The audio playback mode. Must be one of the supported audio modes:
+     * @param audioMode Audio playback mode. Must be one of the supported audio modes:
      * <ul>
      * <li> {@link android.media.MediaPlayer#PLAYBACK_RATE_AUDIO_MODE_RESAMPLE}
      * </ul>
@@ -468,36 +467,21 @@ public class TvView extends ViewGroup {
     }
 
     /**
-     * Registers a {@link TvView.TimeShiftPositionCallback}.
+     * Sets the callback to be invoked when the time shift position is changed.
      *
-     * @param callback A callback used to monitor the time shift range and current position.
+     * @param callback The callback to receive time shift position changes. A value of {@code null}
+     *            removes the existing callback.
      */
-    public void registerTimeShiftPositionCallback(TimeShiftPositionCallback callback) {
-        if (callback == null) {
-            throw new IllegalArgumentException("callback can not be null.");
-        }
-        mTimeShiftPositionCallbacks.add(callback);
-        ensureCurrentPositionTracking();
+    public void setTimeShiftPositionCallback(TimeShiftPositionCallback callback) {
+        mTimeShiftPositionCallback = callback;
+        ensurePositionTracking();
     }
 
-    /**
-     * Unregisters the existing {@link TvView.TimeShiftPositionCallback}.
-     *
-     * @param callback The existing callback to remove.
-     */
-    public void unregisterTimeShiftPositionCallback(TimeShiftPositionCallback callback) {
-        if (callback == null) {
-            throw new IllegalArgumentException("callback can not be null.");
-        }
-        mTimeShiftPositionCallbacks.remove(callback);
-        ensureCurrentPositionTracking();
-    }
-
-    private void ensureCurrentPositionTracking() {
+    private void ensurePositionTracking() {
         if (mSession == null) {
             return;
         }
-        mSession.timeShiftTrackCurrentPosition(!mTimeShiftPositionCallbacks.isEmpty());
+        mSession.timeShiftEnablePositionTracking(mTimeShiftPositionCallback != null);
     }
 
     /**
@@ -810,17 +794,22 @@ public class TvView extends ViewGroup {
     }
 
     /**
-     * Callback used to receive the information on the possible range for time shifting and currrent
-     * position.
+     * Callback used to receive time shift position changes.
      */
     public abstract static class TimeShiftPositionCallback {
+
         /**
-         * This is called when the time shift start position is changed. The application may seek to
-         * a position in the range from the start position and the current time, inclusive.
+         * This is called when the start playback position is changed.
+         * <p>
+         * The start playback position of the time shifted program can be adjusted by the TV input
+         * when it cannot retain the whole recorded program due to some reason (e.g. limitation on
+         * storage space). The application should not allow the user to seek to a position earlier
+         * than the start position.
+         * </p>
          *
          * @param inputId The ID of the TV input bound to this view.
-         * @param timeMs the start of the possible time shift range, in milliseconds since the
-         *         epoch.
+         * @param timeMs The start playback position of the time shifted program, in milliseconds
+         *            since the epoch.
          */
         public void onTimeShiftStartPositionChanged(String inputId, long timeMs) {
         }
@@ -829,7 +818,8 @@ public class TvView extends ViewGroup {
          * This is called when the current playback position is changed.
          *
          * @param inputId The ID of the TV input bound to this view.
-         * @param timeMs The current position, in milliseconds since the epoch.
+         * @param timeMs The current playback position of the time shifted program, in milliseconds
+         *            since the epoch.
          */
         public void onTimeShiftCurrentPositionChanged(String inputId, long timeMs) {
         }
@@ -958,11 +948,11 @@ public class TvView extends ViewGroup {
          * This is called when the time shift status is changed.
          *
          * @param inputId The ID of the TV input bound to this view.
-         * @param status The current time shift status:
+         * @param status The current time shift status. Should be one of the followings.
          * <ul>
-         * <li>{@link TvInputManager#TIME_SHIFT_STATUS_AVAILABLE}
+         * <li>{@link TvInputManager#TIME_SHIFT_STATUS_UNSUPPORTED}
          * <li>{@link TvInputManager#TIME_SHIFT_STATUS_UNAVAILABLE}
-         * <li>{@link TvInputManager#TIME_SHIFT_STATUS_ERROR}
+         * <li>{@link TvInputManager#TIME_SHIFT_STATUS_AVAILABLE}
          * </ul>
          */
         public void onTimeShiftStatusChanged(String inputId, int status) {
@@ -1040,7 +1030,7 @@ public class TvView extends ViewGroup {
                     mAppPrivateCommandAction = null;
                     mAppPrivateCommandData = null;
                 }
-                ensureCurrentPositionTracking();
+                ensurePositionTracking();
             } else {
                 mSessionCallback = null;
                 if (mCallback != null) {
@@ -1234,8 +1224,8 @@ public class TvView extends ViewGroup {
                 Log.w(TAG, "onTimeShiftStartPositionChanged - session not created");
                 return;
             }
-            for (TimeShiftPositionCallback callback : mTimeShiftPositionCallbacks) {
-                callback.onTimeShiftStartPositionChanged(mInputId, timeMs);
+            if (mTimeShiftPositionCallback != null) {
+                mTimeShiftPositionCallback.onTimeShiftStartPositionChanged(mInputId, timeMs);
             }
         }
 
@@ -1248,8 +1238,8 @@ public class TvView extends ViewGroup {
                 Log.w(TAG, "onTimeShiftCurrentPositionChanged - session not created");
                 return;
             }
-            for (TimeShiftPositionCallback callback : mTimeShiftPositionCallbacks) {
-                callback.onTimeShiftCurrentPositionChanged(mInputId, timeMs);
+            if (mTimeShiftPositionCallback != null) {
+                mTimeShiftPositionCallback.onTimeShiftCurrentPositionChanged(mInputId, timeMs);
             }
         }
     }
