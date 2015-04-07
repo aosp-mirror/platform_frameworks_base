@@ -540,6 +540,8 @@ final public class MediaCodec {
      * or the flags are not set properly
      * (e.g. missing {@link #CONFIGURE_FLAG_ENCODE} for an encoder).
      * @throws IllegalStateException if not in the Initialized state.
+     * @throws CryptoException upon DRM error.
+     * @throws CodecException upon codec error.
      */
     public void configure(
             MediaFormat format,
