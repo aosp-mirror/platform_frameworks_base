@@ -79,10 +79,10 @@ public class RadialTimePickerView extends View {
     // Transparent alpha level
     private static final int ALPHA_TRANSPARENT = 0;
 
-    private static final int HOURS_IN_DAY = 24;
-    private static final int MINUTES_IN_HOUR = 60;
-    private static final int DEGREES_FOR_ONE_HOUR = 360 / HOURS_IN_DAY;
-    private static final int DEGREES_FOR_ONE_MINUTE = 360 / MINUTES_IN_HOUR;
+    private static final int HOURS_IN_CIRCLE = 12;
+    private static final int MINUTES_IN_CIRCLE = 60;
+    private static final int DEGREES_FOR_ONE_HOUR = 360 / HOURS_IN_CIRCLE;
+    private static final int DEGREES_FOR_ONE_MINUTE = 360 / MINUTES_IN_CIRCLE;
 
     private static final int[] HOURS_NUMBERS = {12, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11};
     private static final int[] HOURS_NUMBERS_24 = {0, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23};
@@ -536,7 +536,7 @@ public class RadialTimePickerView extends View {
     }
 
     private void setCurrentMinuteInternal(int minute, boolean callback) {
-        mSelectionDegrees[MINUTES] = (minute % MINUTES_IN_HOUR) * DEGREES_FOR_ONE_MINUTE;
+        mSelectionDegrees[MINUTES] = (minute % MINUTES_IN_CIRCLE) * DEGREES_FOR_ONE_MINUTE;
 
         invalidate();
 
@@ -1140,8 +1140,8 @@ public class RadialTimePickerView extends View {
 
                     // If the touched minute is closer to the current minute
                     // than it is to the snapped minute, return current.
-                    final int currentOffset = getCircularDiff(current, touched, MINUTES_IN_HOUR);
-                    final int snappedOffset = getCircularDiff(snapped, touched, MINUTES_IN_HOUR);
+                    final int currentOffset = getCircularDiff(current, touched, MINUTES_IN_CIRCLE);
+                    final int snappedOffset = getCircularDiff(snapped, touched, MINUTES_IN_CIRCLE);
                     final int minute;
                     if (currentOffset < snappedOffset) {
                         minute = current;
@@ -1181,7 +1181,7 @@ public class RadialTimePickerView extends View {
                 }
             } else {
                 final int current = getCurrentMinute();
-                for (int i = 0; i < MINUTES_IN_HOUR; i += MINUTE_INCREMENT) {
+                for (int i = 0; i < MINUTES_IN_CIRCLE; i += MINUTE_INCREMENT) {
                     virtualViewIds.add(makeId(TYPE_MINUTE, i));
 
                     // If the current minute falls between two increments,
@@ -1239,7 +1239,7 @@ public class RadialTimePickerView extends View {
                 if (value < current && nextValue > current) {
                     // The current value is between two snap values.
                     return makeId(type, current);
-                } else if (nextValue < MINUTES_IN_HOUR) {
+                } else if (nextValue < MINUTES_IN_CIRCLE) {
                     return makeId(type, nextValue);
                 }
             }
