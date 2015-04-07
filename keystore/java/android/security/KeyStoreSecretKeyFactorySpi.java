@@ -23,7 +23,6 @@ import java.security.InvalidKeyException;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.KeySpec;
 import java.util.Date;
-import java.util.Set;
 
 import javax.crypto.SecretKey;
 import javax.crypto.SecretKeyFactorySpi;
@@ -75,9 +74,11 @@ public class KeyStoreSecretKeyFactorySpi extends SecretKeyFactorySpi {
         int keySize;
         @KeyStoreKeyConstraints.PurposeEnum int purposes;
         @KeyStoreKeyConstraints.AlgorithmEnum int algorithm;
-        @KeyStoreKeyConstraints.PaddingEnum Integer padding;
-        @KeyStoreKeyConstraints.DigestEnum Integer digest;
-        @KeyStoreKeyConstraints.BlockModeEnum Integer blockMode;
+        @KeyStoreKeyConstraints.PaddingEnum int paddings;
+        @KeyStoreKeyConstraints.DigestEnum int digests;
+        @KeyStoreKeyConstraints.BlockModeEnum int blockModes;
+        @KeyStoreKeyConstraints.UserAuthenticatorEnum int userAuthenticators;
+        @KeyStoreKeyConstraints.UserAuthenticatorEnum int teeEnforcedUserAuthenticators;
         try {
             origin = KeymasterUtils.getInt(keyCharacteristics, KeymasterDefs.KM_TAG_ORIGIN);
             if (origin == null) {
@@ -97,18 +98,27 @@ public class KeyStoreSecretKeyFactorySpi extends SecretKeyFactorySpi {
                 throw new InvalidKeySpecException("Key algorithm not available");
             }
             algorithm = KeyStoreKeyConstraints.Algorithm.fromKeymaster(alg);
-            padding = KeymasterUtils.getInt(keyCharacteristics, KeymasterDefs.KM_TAG_PADDING);
-            if (padding != null) {
-                padding = KeyStoreKeyConstraints.Padding.fromKeymaster(padding);
-            }
-            digest = KeymasterUtils.getInt(keyCharacteristics, KeymasterDefs.KM_TAG_DIGEST);
-            if (digest != null) {
-                digest = KeyStoreKeyConstraints.Digest.fromKeymaster(digest);
-            }
-            blockMode = KeymasterUtils.getInt(keyCharacteristics, KeymasterDefs.KM_TAG_BLOCK_MODE);
-            if (blockMode != null) {
-                blockMode = KeyStoreKeyConstraints.BlockMode.fromKeymaster(blockMode);
-            }
+            paddings = KeyStoreKeyConstraints.Padding.allFromKeymaster(
+                    KeymasterUtils.getInts(keyCharacteristics, KeymasterDefs.KM_TAG_PADDING));
+            digests = KeyStoreKeyConstraints.Digest.allFromKeymaster(
+                    KeymasterUtils.getInts(keyCharacteristics, KeymasterDefs.KM_TAG_DIGEST));
+            blockModes = KeyStoreKeyConstraints.BlockMode.allFromKeymaster(
+                    KeymasterUtils.getInts(keyCharacteristics, KeymasterDefs.KM_TAG_BLOCK_MODE));
+
+            @KeyStoreKeyConstraints.UserAuthenticatorEnum
+            int swEnforcedKeymasterUserAuthenticators =
+                    keyCharacteristics.swEnforced.getInt(KeymasterDefs.KM_TAG_USER_AUTH_TYPE, 0);
+            @KeyStoreKeyConstraints.UserAuthenticatorEnum
+            int hwEnforcedKeymasterUserAuthenticators =
+                    keyCharacteristics.hwEnforced.getInt(KeymasterDefs.KM_TAG_USER_AUTH_TYPE, 0);
+            @KeyStoreKeyConstraints.UserAuthenticatorEnum
+            int keymasterUserAuthenticators =
+                    swEnforcedKeymasterUserAuthenticators | hwEnforcedKeymasterUserAuthenticators;
+            userAuthenticators = KeyStoreKeyConstraints.UserAuthenticator.allFromKeymaster(
+                    keymasterUserAuthenticators);
+            teeEnforcedUserAuthenticators =
+                    KeyStoreKeyConstraints.UserAuthenticator.allFromKeymaster(
+                            hwEnforcedKeymasterUserAuthenticators);
         } catch (IllegalArgumentException e) {
             throw new InvalidKeySpecException("Unsupported key characteristic", e);
         }
@@ -130,17 +140,8 @@ public class KeyStoreSecretKeyFactorySpi extends SecretKeyFactorySpi {
                 && (keyValidityForConsumptionEnd.getTime() == Long.MAX_VALUE)) {
             keyValidityForConsumptionEnd = null;
         }
-
-        int swEnforcedUserAuthenticatorIds =
-                keyCharacteristics.swEnforced.getInt(KeymasterDefs.KM_TAG_USER_AUTH_TYPE, 0);
-        int hwEnforcedUserAuthenticatorIds =
-                keyCharacteristics.hwEnforced.getInt(KeymasterDefs.KM_TAG_USER_AUTH_TYPE, 0);
-        int userAuthenticatorIds = swEnforcedUserAuthenticatorIds | hwEnforcedUserAuthenticatorIds;
-        Set<Integer> userAuthenticators =
-                KeyStoreKeyConstraints.UserAuthenticator.allFromKeymaster(userAuthenticatorIds);
-        Set<Integer> teeBackedUserAuthenticators =
-                KeyStoreKeyConstraints.UserAuthenticator.allFromKeymaster(
-                        hwEnforcedUserAuthenticatorIds);
+        Integer userAuthenticationValidityDurationSeconds =
+                KeymasterUtils.getInt(keyCharacteristics, KeymasterDefs.KM_TAG_AUTH_TIMEOUT);
 
         return new KeyStoreKeySpec(entryAlias,
                 origin,
@@ -150,15 +151,13 @@ public class KeyStoreSecretKeyFactorySpi extends SecretKeyFactorySpi {
                 keyValidityForConsumptionEnd,
                 purposes,
                 algorithm,
-                padding,
-                digest,
-                blockMode,
-                KeymasterUtils.getInt(keyCharacteristics,
-                        KeymasterDefs.KM_TAG_MIN_SECONDS_BETWEEN_OPS),
-                KeymasterUtils.getInt(keyCharacteristics, KeymasterDefs.KM_TAG_MAX_USES_PER_BOOT),
+                paddings,
+                digests,
+                blockModes,
                 userAuthenticators,
-                teeBackedUserAuthenticators,
-                KeymasterUtils.getInt(keyCharacteristics, KeymasterDefs.KM_TAG_AUTH_TIMEOUT));
+                teeEnforcedUserAuthenticators,
+                ((userAuthenticationValidityDurationSeconds != null)
+                        ? userAuthenticationValidityDurationSeconds : -1));
     }
 
     @Override
