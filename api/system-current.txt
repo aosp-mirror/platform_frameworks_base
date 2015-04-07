@@ -617,6 +617,7 @@ package android {
     field public static final int expandableListViewWhiteStyle = 16843446; // 0x10102b6
     field public static final int exported = 16842768; // 0x1010010
     field public static final int extraTension = 16843371; // 0x101026b
+    field public static final int extractNativeLibs = 16843990; // 0x10104d6
     field public static final int factor = 16843219; // 0x10101d3
     field public static final int fadeDuration = 16843384; // 0x1010278
     field public static final int fadeEnabled = 16843390; // 0x101027e
@@ -8616,6 +8617,7 @@ package android.content.pm {
     field public static final int FLAG_ALLOW_TASK_REPARENTING = 32; // 0x20
     field public static final int FLAG_DEBUGGABLE = 2; // 0x2
     field public static final int FLAG_EXTERNAL_STORAGE = 262144; // 0x40000
+    field public static final int FLAG_EXTRACT_NATIVE_LIBS = 268435456; // 0x10000000
     field public static final int FLAG_FACTORY_TEST = 16; // 0x10
     field public static final int FLAG_FULL_BACKUP_ONLY = 67108864; // 0x4000000
     field public static final int FLAG_HAS_CODE = 4; // 0x4
@@ -18843,7 +18845,7 @@ package android.net.http {
     method public static android.net.http.HttpResponseCache getInstalled();
     method public int getNetworkCount();
     method public int getRequestCount();
-    method public static android.net.http.HttpResponseCache install(java.io.File, long) throws java.io.IOException;
+    method public static synchronized android.net.http.HttpResponseCache install(java.io.File, long) throws java.io.IOException;
     method public long maxSize();
     method public java.net.CacheRequest put(java.net.URI, java.net.URLConnection) throws java.io.IOException;
     method public long size();
@@ -44055,7 +44057,7 @@ package java.lang {
     method public static double nextUp(double);
     method public static float nextUp(float);
     method public static double pow(double, double);
-    method public static synchronized double random();
+    method public static double random();
     method public static double rint(double);
     method public static long round(double);
     method public static int round(float);

@@ -33,6 +33,7 @@ import android.content.pm.PackageParser.PackageLite;
 import android.content.pm.PackageParser.PackageParserException;
 import android.os.Build;
 import android.os.SELinux;
+import android.os.SystemProperties;
 import android.system.ErrnoException;
 import android.system.Os;
 import android.util.Slog;
@@ -74,6 +75,7 @@ public class NativeLibraryHelper {
 
         final long[] apkHandles;
         final boolean multiArch;
+        final boolean extractNativeLibs;
 
         public static Handle create(File packageFile) throws IOException {
             try {
@@ -86,14 +88,16 @@ public class NativeLibraryHelper {
 
         public static Handle create(Package pkg) throws IOException {
             return create(pkg.getAllCodePaths(),
-                    (pkg.applicationInfo.flags & ApplicationInfo.FLAG_MULTIARCH) != 0);
+                    (pkg.applicationInfo.flags & ApplicationInfo.FLAG_MULTIARCH) != 0,
+                    (pkg.applicationInfo.flags & ApplicationInfo.FLAG_EXTRACT_NATIVE_LIBS) != 0);
         }
 
         public static Handle create(PackageLite lite) throws IOException {
-            return create(lite.getAllCodePaths(), lite.multiArch);
+            return create(lite.getAllCodePaths(), lite.multiArch, lite.extractNativeLibs);
         }
 
-        private static Handle create(List<String> codePaths, boolean multiArch) throws IOException {
+        private static Handle create(List<String> codePaths, boolean multiArch,
+                boolean extractNativeLibs) throws IOException {
             final int size = codePaths.size();
             final long[] apkHandles = new long[size];
             for (int i = 0; i < size; i++) {
@@ -108,12 +112,13 @@ public class NativeLibraryHelper {
                 }
             }
 
-            return new Handle(apkHandles, multiArch);
+            return new Handle(apkHandles, multiArch, extractNativeLibs);
         }
 
-        Handle(long[] apkHandles, boolean multiArch) {
+        Handle(long[] apkHandles, boolean multiArch, boolean extractNativeLibs) {
             this.apkHandles = apkHandles;
             this.multiArch = multiArch;
+            this.extractNativeLibs = extractNativeLibs;
             mGuard.open("close");
         }
 
@@ -146,8 +151,8 @@ public class NativeLibraryHelper {
 
     private static native long nativeSumNativeBinaries(long handle, String cpuAbi);
 
-    private native static int nativeCopyNativeBinaries(long handle,
-            String sharedLibraryPath, String abiToCopy);
+    private native static int nativeCopyNativeBinaries(long handle, String sharedLibraryPath,
+            String abiToCopy, boolean extractNativeLibs, boolean hasNativeBridge);
 
     private static long sumNativeBinaries(Handle handle, String abi) {
         long sum = 0;
@@ -167,7 +172,8 @@ public class NativeLibraryHelper {
      */
     public static int copyNativeBinaries(Handle handle, File sharedLibraryDir, String abi) {
         for (long apkHandle : handle.apkHandles) {
-            int res = nativeCopyNativeBinaries(apkHandle, sharedLibraryDir.getPath(), abi);
+            int res = nativeCopyNativeBinaries(apkHandle, sharedLibraryDir.getPath(), abi,
+                    handle.extractNativeLibs, HAS_NATIVE_BRIDGE);
             if (res != INSTALL_SUCCEEDED) {
                 return res;
             }
@@ -218,7 +224,8 @@ public class NativeLibraryHelper {
     /**
      * Remove the native binaries of a given package. This deletes the files
      */
-    public static void removeNativeBinariesFromDirLI(File nativeLibraryRoot, boolean deleteRootDir) {
+    public static void removeNativeBinariesFromDirLI(File nativeLibraryRoot,
+            boolean deleteRootDir) {
         if (DEBUG_NATIVE) {
             Slog.w(TAG, "Deleting native binaries from: " + nativeLibraryRoot.getPath());
         }
@@ -247,7 +254,8 @@ public class NativeLibraryHelper {
             // asked to or this will prevent installation of future updates.
             if (deleteRootDir) {
                 if (!nativeLibraryRoot.delete()) {
-                    Slog.w(TAG, "Could not delete native binary directory: " + nativeLibraryRoot.getPath());
+                    Slog.w(TAG, "Could not delete native binary directory: " +
+                            nativeLibraryRoot.getPath());
                 }
             }
         }
@@ -415,6 +423,9 @@ public class NativeLibraryHelper {
 
     // We don't care about the other return values for now.
     private static final int BITCODE_PRESENT = 1;
+
+    private static final boolean HAS_NATIVE_BRIDGE =
+            !"0".equals(SystemProperties.get("ro.dalvik.vm.native.bridge", "0"));
 
     private static native int hasRenderscriptBitcode(long apkHandle);
 
