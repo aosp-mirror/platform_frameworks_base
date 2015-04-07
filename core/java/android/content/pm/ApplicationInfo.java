@@ -346,6 +346,11 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
     public static final int FLAG_USES_CLEARTEXT_TRAFFIC = 1<<27;
 
     /**
+     * When set installer extracts native libs from .apk files.
+     */
+    public static final int FLAG_EXTRACT_NATIVE_LIBS = 1<<28;
+
+    /**
      * Value for {@link #flags}: true if code from this application will need to be
      * loaded into other applications' processes. On devices that support multiple
      * instruction sets, this implies the code might be loaded into a process that's
