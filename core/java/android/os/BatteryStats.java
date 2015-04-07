@@ -269,6 +269,15 @@ public abstract class BatteryStats implements Parcelable {
         public abstract long getTotalTimeLocked(long elapsedRealtimeUs, int which);
 
         /**
+         * Returns the total time in microseconds associated with this Timer since the
+         * 'mark' was last set.
+         *
+         * @param elapsedRealtimeUs current elapsed realtime of system in microseconds
+         * @return a time in microseconds
+         */
+        public abstract long getTimeSinceMarkLocked(long elapsedRealtimeUs);
+
+        /**
          * Temporary for debugging.
          */
         public abstract void logState(Printer pw, String prefix);
@@ -332,7 +341,17 @@ public abstract class BatteryStats implements Parcelable {
          * @return a Map from Strings to Uid.Pkg objects.
          */
         public abstract ArrayMap<String, ? extends Pkg> getPackageStats();
-        
+
+        /**
+         * Returns the time in milliseconds that this app kept the WiFi controller in the
+         * specified state <code>type</code>.
+         * @param type one of {@link #CONTROLLER_IDLE_TIME}, {@link #CONTROLLER_RX_TIME}, or
+         *             {@link #CONTROLLER_TX_TIME}.
+         * @param which one of {@link #STATS_CURRENT}, {@link #STATS_SINCE_CHARGED}, or
+         *              {@link #STATS_SINCE_UNPLUGGED}.
+         */
+        public abstract long getWifiControllerActivity(int type, int which);
+
         /**
          * {@hide}
          */
@@ -1914,7 +1933,6 @@ public abstract class BatteryStats implements Parcelable {
     public static final int NETWORK_MOBILE_TX_DATA = 1;
     public static final int NETWORK_WIFI_RX_DATA = 2;
     public static final int NETWORK_WIFI_TX_DATA = 3;
-
     public static final int NUM_NETWORK_ACTIVITY_TYPES = NETWORK_WIFI_TX_DATA + 1;
 
     public abstract long getNetworkActivityBytes(int type, int which);
@@ -1923,10 +1941,25 @@ public abstract class BatteryStats implements Parcelable {
     public static final int CONTROLLER_IDLE_TIME = 0;
     public static final int CONTROLLER_RX_TIME = 1;
     public static final int CONTROLLER_TX_TIME = 2;
-    public static final int CONTROLLER_ENERGY = 3;
-    public static final int NUM_CONTROLLER_ACTIVITY_TYPES = CONTROLLER_ENERGY + 1;
+    public static final int CONTROLLER_POWER_DRAIN = 3;
+    public static final int NUM_CONTROLLER_ACTIVITY_TYPES = CONTROLLER_POWER_DRAIN + 1;
 
+    /**
+     * For {@link #CONTROLLER_IDLE_TIME}, {@link #CONTROLLER_RX_TIME}, and
+     * {@link #CONTROLLER_TX_TIME}, returns the time spent (in milliseconds) in the
+     * respective state.
+     * For {@link #CONTROLLER_POWER_DRAIN}, returns the power used by the controller in
+     * milli-ampere-milliseconds (mAms).
+     */
     public abstract long getBluetoothControllerActivity(int type, int which);
+
+    /**
+     * For {@link #CONTROLLER_IDLE_TIME}, {@link #CONTROLLER_RX_TIME}, and
+     * {@link #CONTROLLER_TX_TIME}, returns the time spent (in milliseconds) in the
+     * respective state.
+     * For {@link #CONTROLLER_POWER_DRAIN}, returns the power used by the controller in
+     * milli-ampere-milliseconds (mAms).
+     */
     public abstract long getWifiControllerActivity(int type, int which);
 
     /**
@@ -2618,7 +2651,7 @@ public abstract class BatteryStats implements Parcelable {
                         label = "???";
                 }
                 dumpLine(pw, uid, category, POWER_USE_ITEM_DATA, label,
-                        BatteryStatsHelper.makemAh(bs.value));
+                        BatteryStatsHelper.makemAh(bs.totalPowerMah));
             }
         }
 
@@ -3264,6 +3297,13 @@ public abstract class BatteryStats implements Parcelable {
 
         sb.setLength(0);
         sb.append(prefix);
+        sb.append("  WiFi Energy use: ").append(BatteryStatsHelper.makemAh(
+                getWifiControllerActivity(CONTROLLER_POWER_DRAIN, which) / (double)(1000*60*60)));
+        sb.append(" mAh");
+        pw.println(sb.toString());
+
+        sb.setLength(0);
+        sb.append(prefix);
                 sb.append("  Bluetooth on: "); formatTimeMs(sb, bluetoothOnTime / 1000);
                 sb.append("("); sb.append(formatRatioLocked(bluetoothOnTime, whichBatteryRealtime));
                 sb.append(")");
@@ -3376,48 +3416,48 @@ public abstract class BatteryStats implements Parcelable {
                 final BatterySipper bs = sippers.get(i);
                 switch (bs.drainType) {
                     case IDLE:
-                        pw.print(prefix); pw.print("    Idle: "); printmAh(pw, bs.value);
+                        pw.print(prefix); pw.print("    Idle: "); printmAh(pw, bs.totalPowerMah);
                         pw.println();
                         break;
                     case CELL:
-                        pw.print(prefix); pw.print("    Cell standby: "); printmAh(pw, bs.value);
+                        pw.print(prefix); pw.print("    Cell standby: "); printmAh(pw, bs.totalPowerMah);
                         pw.println();
                         break;
                     case PHONE:
-                        pw.print(prefix); pw.print("    Phone calls: "); printmAh(pw, bs.value);
+                        pw.print(prefix); pw.print("    Phone calls: "); printmAh(pw, bs.totalPowerMah);
                         pw.println();
                         break;
                     case WIFI:
-                        pw.print(prefix); pw.print("    Wifi: "); printmAh(pw, bs.value);
+                        pw.print(prefix); pw.print("    Wifi: "); printmAh(pw, bs.totalPowerMah);
                         pw.println();
                         break;
                     case BLUETOOTH:
-                        pw.print(prefix); pw.print("    Bluetooth: "); printmAh(pw, bs.value);
+                        pw.print(prefix); pw.print("    Bluetooth: "); printmAh(pw, bs.totalPowerMah);
                         pw.println();
                         break;
                     case SCREEN:
-                        pw.print(prefix); pw.print("    Screen: "); printmAh(pw, bs.value);
+                        pw.print(prefix); pw.print("    Screen: "); printmAh(pw, bs.totalPowerMah);
                         pw.println();
                         break;
                     case FLASHLIGHT:
-                        pw.print(prefix); pw.print("    Flashlight: "); printmAh(pw, bs.value);
+                        pw.print(prefix); pw.print("    Flashlight: "); printmAh(pw, bs.totalPowerMah);
                         pw.println();
                         break;
                     case APP:
                         pw.print(prefix); pw.print("    Uid ");
                         UserHandle.formatUid(pw, bs.uidObj.getUid());
-                        pw.print(": "); printmAh(pw, bs.value); pw.println();
+                        pw.print(": "); printmAh(pw, bs.totalPowerMah); pw.println();
                         break;
                     case USER:
                         pw.print(prefix); pw.print("    User "); pw.print(bs.userId);
-                        pw.print(": "); printmAh(pw, bs.value); pw.println();
+                        pw.print(": "); printmAh(pw, bs.totalPowerMah); pw.println();
                         break;
                     case UNACCOUNTED:
-                        pw.print(prefix); pw.print("    Unaccounted: "); printmAh(pw, bs.value);
+                        pw.print(prefix); pw.print("    Unaccounted: "); printmAh(pw, bs.totalPowerMah);
                         pw.println();
                         break;
                     case OVERCOUNTED:
-                        pw.print(prefix); pw.print("    Over-counted: "); printmAh(pw, bs.value);
+                        pw.print(prefix); pw.print("    Over-counted: "); printmAh(pw, bs.totalPowerMah);
                         pw.println();
                         break;
                 }
