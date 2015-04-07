@@ -27,6 +27,7 @@ import static com.android.documentsui.model.DocumentInfo.getCursorInt;
 import static com.android.documentsui.model.DocumentInfo.getCursorLong;
 import static com.android.documentsui.model.DocumentInfo.getCursorString;
 
+import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.Fragment;
 import android.app.FragmentManager;
@@ -99,6 +100,8 @@ public class DirectoryFragment extends Fragment {
 
     private AbsListView mCurrentView;
 
+    private List<DocumentInfo> mSelectedDocumentsForCopy;
+
     public static final int TYPE_NORMAL = 1;
     public static final int TYPE_SEARCH = 2;
     public static final int TYPE_RECENT_OPEN = 3;
@@ -107,6 +110,8 @@ public class DirectoryFragment extends Fragment {
     public static final int ANIM_SIDE = 2;
     public static final int ANIM_DOWN = 3;
     public static final int ANIM_UP = 4;
+
+    public static final int REQUEST_COPY_DESTINATION = 1;
 
     private int mType = TYPE_NORMAL;
     private String mStateKey;
@@ -334,6 +339,36 @@ public class DirectoryFragment extends Fragment {
         getLoaderManager().restartLoader(mLoaderId, null, mCallbacks);
 
         updateDisplayState();
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        final Context context = getActivity();
+        final Resources res = context.getResources();
+
+        // There's only one request code right now. Replace this with a switch statement or
+        // something more scalable when more codes are added.
+        if (requestCode != REQUEST_COPY_DESTINATION) {
+            return;
+        }
+        if (resultCode == Activity.RESULT_CANCELED || data == null) {
+            // User pressed the back button or otherwise cancelled the destination pick. Don't
+            // proceed with the copy.
+            return;
+        }
+
+        Uri destination = data.getData();
+
+        List<DocumentInfo> docs = mSelectedDocumentsForCopy;
+        Intent copyIntent = new Intent(context, CopyService.class);
+        copyIntent.putParcelableArrayListExtra(CopyService.EXTRA_SRC_LIST,
+                new ArrayList<DocumentInfo>(docs));
+        copyIntent.setData(destination);
+
+        Toast.makeText(context,
+                res.getQuantityString(R.plurals.copy_begin, docs.size(), docs.size()),
+                Toast.LENGTH_SHORT).show();
+        context.startService(copyIntent);
     }
 
     @Override
@@ -634,17 +669,12 @@ public class DirectoryFragment extends Fragment {
     }
 
     private void onCopyDocuments(List<DocumentInfo> docs) {
-        final Context context = getActivity();
-        final Resources res = context.getResources();
+        mSelectedDocumentsForCopy = docs;
 
-        Intent copyIntent = new Intent(context, CopyService.class);
-        copyIntent.putParcelableArrayListExtra(CopyService.EXTRA_SRC_LIST,
-                new ArrayList<DocumentInfo>(docs));
-
-        Toast.makeText(context,
-                res.getQuantityString(R.plurals.copy_begin, docs.size(), docs.size()),
-                Toast.LENGTH_SHORT).show();
-        context.startService(copyIntent);
+        // Pop up a dialog to pick a destination.  This is inadequate but works for now.
+        // TODO: Implement a picker that is to spec.
+        Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT_TREE);
+        startActivityForResult(intent, REQUEST_COPY_DESTINATION);
     }
 
     private static State getDisplayState(Fragment fragment) {
