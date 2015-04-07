@@ -20,6 +20,7 @@ import android.annotation.CallSuper;
 import android.os.Looper;
 import android.os.Trace;
 import android.util.AndroidRuntimeException;
+import android.util.Log;
 import android.view.Choreographer;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.AnimationUtils;
@@ -64,6 +65,8 @@ import java.util.HashMap;
  */
 @SuppressWarnings("unchecked")
 public class ValueAnimator extends Animator {
+    private static final String TAG = "ValueAnimator";
+    private static final boolean DEBUG = false;
 
     /**
      * Internal constants
@@ -85,10 +88,28 @@ public class ValueAnimator extends Animator {
      * to clone() to make deep copies of them.
      */
 
-    // The first time that the animation's animateFrame() method is called. This time is used to
-    // determine elapsed time (and therefore the elapsed fraction) in subsequent calls
-    // to animateFrame()
+    /**
+     * The first time that the animation's animateFrame() method is called. This time is used to
+     * determine elapsed time (and therefore the elapsed fraction) in subsequent calls
+     * to animateFrame().
+     *
+     * Whenever mStartTime is set, you must also update mStartTimeCommitted.
+     */
     long mStartTime;
+
+    /**
+     * When true, the start time has been firmly committed as a chosen reference point in
+     * time by which the progress of the animation will be evaluated.  When false, the
+     * start time may be updated when the first animation frame is committed so as
+     * to compensate for jank that may have occurred between when the start time was
+     * initialized and when the frame was actually drawn.
+     *
+     * This flag is generally set to false during the first frame of the animation
+     * when the animation playing state transitions from STOPPED to RUNNING or
+     * resumes after having been paused.  This flag is set to true when the start time
+     * is firmly committed and should not be further compensated for jank.
+     */
+    boolean mStartTimeCommitted;
 
     /**
      * Set when setCurrentPlayTime() is called. If negative, animation is not currently seeked
@@ -528,6 +549,7 @@ public class ValueAnimator extends Animator {
      * value makes it easier to compose statements together that construct and then set the
      * duration, as in <code>ValueAnimator.ofInt(0, 10).setDuration(500).start()</code>.
      */
+    @Override
     public ValueAnimator setDuration(long duration) {
         if (duration < 0) {
             throw new IllegalArgumentException("Animators cannot have negative duration: " +
@@ -547,6 +569,7 @@ public class ValueAnimator extends Animator {
      *
      * @return The length of the animation, in milliseconds.
      */
+    @Override
     public long getDuration() {
         return mUnscaledDuration;
     }
@@ -608,6 +631,7 @@ public class ValueAnimator extends Animator {
         long seekTime = (long) (mDuration * fraction);
         long currentTime = AnimationUtils.currentAnimationTimeMillis();
         mStartTime = currentTime - seekTime;
+        mStartTimeCommitted = true; // do not allow start time to be compensated for jank
         if (mPlayingState != RUNNING) {
             mSeekFraction = fraction;
             mPlayingState = SEEKED;
@@ -644,7 +668,7 @@ public class ValueAnimator extends Animator {
      * @hide
      */
     @SuppressWarnings("unchecked")
-    protected static class AnimationHandler implements Runnable {
+    protected static class AnimationHandler {
         // The per-thread list of all active animations
         /** @hide */
         protected final ArrayList<ValueAnimator> mAnimations = new ArrayList<ValueAnimator>();
@@ -667,6 +691,7 @@ public class ValueAnimator extends Animator {
 
         private final Choreographer mChoreographer;
         private boolean mAnimationScheduled;
+        private long mLastFrameTime;
 
         private AnimationHandler() {
             mChoreographer = Choreographer.getInstance();
@@ -679,7 +704,9 @@ public class ValueAnimator extends Animator {
             scheduleAnimation();
         }
 
-        private void doAnimationFrame(long frameTime) {
+        void doAnimationFrame(long frameTime) {
+            mLastFrameTime = frameTime;
+
             // mPendingAnimations holds any animations that have requested to be started
             // We're going to clear mPendingAnimations, but starting animation may
             // cause more to be added to the pending list (for example, if one animation
@@ -700,6 +727,7 @@ public class ValueAnimator extends Animator {
                     }
                 }
             }
+
             // Next, process animations currently sitting on the delayed queue, adding
             // them to the active animations if they are ready
             int numDelayedAnims = mDelayedAnims.size();
@@ -740,6 +768,9 @@ public class ValueAnimator extends Animator {
                 mEndingAnims.clear();
             }
 
+            // Schedule final commit for the frame.
+            mChoreographer.postCallback(Choreographer.CALLBACK_COMMIT, mCommit, null);
+
             // If there are still active or delayed animations, schedule a future call to
             // onAnimate to process the next frame of the animations.
             if (!mAnimations.isEmpty() || !mDelayedAnims.isEmpty()) {
@@ -747,19 +778,37 @@ public class ValueAnimator extends Animator {
             }
         }
 
-        // Called by the Choreographer.
-        @Override
-        public void run() {
-            mAnimationScheduled = false;
-            doAnimationFrame(mChoreographer.getFrameTime());
+        void commitAnimationFrame(long frameTime) {
+            final long adjustment = frameTime - mLastFrameTime;
+            final int numAnims = mAnimations.size();
+            for (int i = 0; i < numAnims; ++i) {
+                mAnimations.get(i).commitAnimationFrame(adjustment);
+            }
         }
 
         private void scheduleAnimation() {
             if (!mAnimationScheduled) {
-                mChoreographer.postCallback(Choreographer.CALLBACK_ANIMATION, this, null);
+                mChoreographer.postCallback(Choreographer.CALLBACK_ANIMATION, mAnimate, null);
                 mAnimationScheduled = true;
             }
         }
+
+        // Called by the Choreographer.
+        final Runnable mAnimate = new Runnable() {
+            @Override
+            public void run() {
+                mAnimationScheduled = false;
+                doAnimationFrame(mChoreographer.getFrameTime());
+            }
+        };
+
+        // Called by the Choreographer.
+        final Runnable mCommit = new Runnable() {
+            @Override
+            public void run() {
+                commitAnimationFrame(mChoreographer.getFrameTime());
+            }
+        };
     }
 
     /**
@@ -768,6 +817,7 @@ public class ValueAnimator extends Animator {
      *
      * @return the number of milliseconds to delay running the animation
      */
+    @Override
     public long getStartDelay() {
         return mUnscaledStartDelay;
     }
@@ -778,6 +828,7 @@ public class ValueAnimator extends Animator {
 
      * @param startDelay The amount of the delay, in milliseconds
      */
+    @Override
     public void setStartDelay(long startDelay) {
         this.mStartDelay = (long)(startDelay * sDurationScale);
         mUnscaledStartDelay = startDelay;
@@ -1148,6 +1199,7 @@ public class ValueAnimator extends Animator {
             long currentPlayTime = currentTime - mStartTime;
             long timeLeft = mDuration - currentPlayTime;
             mStartTime = currentTime - timeLeft;
+            mStartTimeCommitted = true; // do not allow start time to be compensated for jank
             mReversing = !mReversing;
         } else if (mStarted) {
             end();
@@ -1254,13 +1306,29 @@ public class ValueAnimator extends Animator {
         }
         long deltaTime = currentTime - mDelayStartTime;
         if (deltaTime > mStartDelay) {
-            // startDelay ended - start the anim and record the
-            // mStartTime appropriately
-            mStartTime = currentTime - (deltaTime - mStartDelay);
+            // startDelay ended - start the anim and record the mStartTime appropriately
+            mStartTime = mDelayStartTime + mStartDelay;
+            mStartTimeCommitted = true; // do not allow start time to be compensated for jank
             mPlayingState = RUNNING;
             return true;
         }
         return false;
+    }
+
+    /**
+     * Applies an adjustment to the animation to compensate for jank between when
+     * the animation first ran and when the frame was drawn.
+     */
+    void commitAnimationFrame(long adjustment) {
+        if (!mStartTimeCommitted) {
+            mStartTimeCommitted = true;
+            if (mPlayingState == RUNNING && adjustment > 0) {
+                mStartTime += adjustment;
+                if (DEBUG) {
+                    Log.d(TAG, "Adjusted start time by " + adjustment + " ms: " + toString());
+                }
+            }
+        }
     }
 
     /**
@@ -1303,6 +1371,8 @@ public class ValueAnimator extends Animator {
                     mCurrentIteration += (int) fraction;
                     fraction = fraction % 1f;
                     mStartTime += mDuration;
+                    // Note: We do not need to update the value of mStartTimeCommitted here
+                    // since we just added a duration offset.
                 } else {
                     done = true;
                     fraction = Math.min(fraction, 1.0f);
@@ -1334,6 +1404,7 @@ public class ValueAnimator extends Animator {
                 mStartTime = frameTime - seekTime;
                 mSeekFraction = -1;
             }
+            mStartTimeCommitted = false; // allow start time to be compensated for jank
         }
         if (mPaused) {
             if (mPauseTime < 0) {
@@ -1345,6 +1416,7 @@ public class ValueAnimator extends Animator {
             if (mPauseTime > 0) {
                 // Offset by the duration that the animation was paused
                 mStartTime += (frameTime - mPauseTime);
+                mStartTimeCommitted = false; // allow start time to be compensated for jank
             }
         }
         // The frame time might be before the start time during the first frame of
