@@ -21,12 +21,8 @@ import android.security.keymaster.KeymasterDefs;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
-import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
 import java.util.Locale;
-import java.util.Set;
 
 /**
  * Constraints for {@code AndroidKeyStore} keys.
@@ -37,7 +33,8 @@ public abstract class KeyStoreKeyConstraints {
     private KeyStoreKeyConstraints() {}
 
     @Retention(RetentionPolicy.SOURCE)
-    @IntDef(flag=true, value={Purpose.ENCRYPT, Purpose.DECRYPT, Purpose.SIGN, Purpose.VERIFY})
+    @IntDef(flag = true,
+            value = {Purpose.ENCRYPT, Purpose.DECRYPT, Purpose.SIGN, Purpose.VERIFY})
     public @interface PurposeEnum {}
 
     /**
@@ -65,11 +62,6 @@ public abstract class KeyStoreKeyConstraints {
          * Purpose: signature verification.
          */
         public static final int VERIFY = 1 << 3;
-
-        /**
-         * Number of flags defined above. Needs to be kept in sync with the flags above.
-         */
-        private static final int VALUE_COUNT = 4;
 
         /**
          * @hide
@@ -110,22 +102,12 @@ public abstract class KeyStoreKeyConstraints {
         /**
          * @hide
          */
-        public static int[] allToKeymaster(int purposes) {
-            int[] result = new int[VALUE_COUNT];
-            int resultCount = 0;
-            int purpose = 1;
-            for (int i = 0; i < 32; i++) {
-                if ((purposes & 1) != 0) {
-                    result[resultCount] = toKeymaster(purpose);
-                    resultCount++;
-                }
-                purposes >>>= 1;
-                purpose <<= 1;
-                if (purposes == 0) {
-                    break;
-                }
+        public static int[] allToKeymaster(@PurposeEnum int purposes) {
+            int[] result = getSetFlags(purposes);
+            for (int i = 0; i < result.length; i++) {
+                result[i] = toKeymaster(result[i]);
             }
-            return Arrays.copyOf(result, resultCount);
+            return result;
         }
 
         /**
@@ -244,7 +226,8 @@ public abstract class KeyStoreKeyConstraints {
     }
 
     @Retention(RetentionPolicy.SOURCE)
-    @IntDef({Padding.NONE, Padding.ZERO, Padding.PKCS7})
+    @IntDef(flag = true,
+            value = {Padding.NONE, Padding.PKCS7})
     public @interface PaddingEnum {}
 
     /**
@@ -256,17 +239,12 @@ public abstract class KeyStoreKeyConstraints {
         /**
          * No padding.
          */
-        public static final int NONE = 0;
-
-        /**
-         * Pad with zeros.
-         */
-        public static final int ZERO = 1;
+        public static final int NONE = 1 << 0;
 
         /**
          * PKCS#7 padding.
          */
-        public static final int PKCS7 = 2;
+        public static final int PKCS7 = 1 << 1;
 
         /**
          * @hide
@@ -275,8 +253,6 @@ public abstract class KeyStoreKeyConstraints {
             switch (padding) {
                 case NONE:
                     return KeymasterDefs.KM_PAD_NONE;
-                case ZERO:
-                    return KeymasterDefs.KM_PAD_ZERO;
                 case PKCS7:
                     return KeymasterDefs.KM_PAD_PKCS7;
                 default:
@@ -291,8 +267,6 @@ public abstract class KeyStoreKeyConstraints {
             switch (padding) {
                 case KeymasterDefs.KM_PAD_NONE:
                     return NONE;
-                case KeymasterDefs.KM_PAD_ZERO:
-                    return ZERO;
                 case KeymasterDefs.KM_PAD_PKCS7:
                     return PKCS7;
                 default:
@@ -307,8 +281,6 @@ public abstract class KeyStoreKeyConstraints {
             switch (padding) {
                 case NONE:
                     return "NONE";
-                case ZERO:
-                    return "ZERO";
                 case PKCS7:
                     return "PKCS#7";
                 default:
@@ -329,10 +301,33 @@ public abstract class KeyStoreKeyConstraints {
                 throw new IllegalArgumentException("Unknown padding: " + padding);
             }
         }
+
+        /**
+         * @hide
+         */
+        public static int[] allToKeymaster(@PaddingEnum int paddings) {
+            int[] result = getSetFlags(paddings);
+            for (int i = 0; i < result.length; i++) {
+                result[i] = toKeymaster(result[i]);
+            }
+            return result;
+        }
+
+        /**
+         * @hide
+         */
+        public static @PaddingEnum int allFromKeymaster(Collection<Integer> paddings) {
+            @PaddingEnum int result = 0;
+            for (int keymasterPadding : paddings) {
+                result |= fromKeymaster(keymasterPadding);
+            }
+            return result;
+        }
     }
 
     @Retention(RetentionPolicy.SOURCE)
-    @IntDef({Digest.NONE, Digest.SHA256})
+    @IntDef(flag = true,
+            value = {Digest.NONE, Digest.SHA256})
     public @interface DigestEnum {}
 
     /**
@@ -345,12 +340,12 @@ public abstract class KeyStoreKeyConstraints {
         /**
          * No digest: sign/authenticate the raw message.
          */
-        public static final int NONE = 0;
+        public static final int NONE = 1 << 0;
 
         /**
          * SHA-256 digest.
          */
-        public static final int SHA256 = 1;
+        public static final int SHA256 = 1 << 1;
 
         /**
          * @hide
@@ -364,6 +359,18 @@ public abstract class KeyStoreKeyConstraints {
                 default:
                     throw new IllegalArgumentException("Unknown digest: " + digest);
             }
+        }
+
+        /**
+         * @hide
+         */
+        public static String[] allToString(@DigestEnum int digests) {
+            int[] values = getSetFlags(digests);
+            String[] result = new String[values.length];
+            for (int i = 0; i < values.length; i++) {
+                result[i] = toString(values[i]);
+            }
+            return result;
         }
 
         /**
@@ -392,6 +399,28 @@ public abstract class KeyStoreKeyConstraints {
                 default:
                     throw new IllegalArgumentException("Unknown digest: " + digest);
             }
+        }
+
+        /**
+         * @hide
+         */
+        public static int[] allToKeymaster(@DigestEnum int digests) {
+            int[] result = getSetFlags(digests);
+            for (int i = 0; i < result.length; i++) {
+                result[i] = toKeymaster(result[i]);
+            }
+            return result;
+        }
+
+        /**
+         * @hide
+         */
+        public static @DigestEnum int allFromKeymaster(Collection<Integer> digests) {
+            @DigestEnum int result = 0;
+            for (int keymasterDigest : digests) {
+                result |= fromKeymaster(keymasterDigest);
+            }
+            return result;
         }
 
         /**
@@ -441,7 +470,8 @@ public abstract class KeyStoreKeyConstraints {
     }
 
     @Retention(RetentionPolicy.SOURCE)
-    @IntDef({BlockMode.ECB, BlockMode.CBC, BlockMode.CTR})
+    @IntDef(flag = true,
+            value = {BlockMode.ECB, BlockMode.CBC, BlockMode.CTR})
     public @interface BlockModeEnum {}
 
     /**
@@ -451,13 +481,13 @@ public abstract class KeyStoreKeyConstraints {
         private BlockMode() {}
 
         /** Electronic Codebook (ECB) block mode. */
-        public static final int ECB = 0;
+        public static final int ECB = 1 << 0;
 
         /** Cipher Block Chaining (CBC) block mode. */
-        public static final int CBC = 1;
+        public static final int CBC = 1 << 1;
 
         /** Counter (CTR) block mode. */
-        public static final int CTR = 2;
+        public static final int CTR = 1 << 2;
 
         /**
          * @hide
@@ -494,6 +524,28 @@ public abstract class KeyStoreKeyConstraints {
         /**
          * @hide
          */
+        public static int[] allToKeymaster(@BlockModeEnum int modes) {
+            int[] result = getSetFlags(modes);
+            for (int i = 0; i < result.length; i++) {
+                result[i] = toKeymaster(result[i]);
+            }
+            return result;
+        }
+
+        /**
+         * @hide
+         */
+        public static @BlockModeEnum int allFromKeymaster(Collection<Integer> modes) {
+            @BlockModeEnum int result = 0;
+            for (int keymasterMode : modes) {
+                result |= fromKeymaster(keymasterMode);
+            }
+            return result;
+        }
+
+        /**
+         * @hide
+         */
         public static String toString(@BlockModeEnum int mode) {
             switch (mode) {
                 case ECB:
@@ -525,7 +577,8 @@ public abstract class KeyStoreKeyConstraints {
     }
 
     @Retention(RetentionPolicy.SOURCE)
-    @IntDef({UserAuthenticator.LOCK_SCREEN})
+    @IntDef(flag = true,
+            value = {UserAuthenticator.LOCK_SCREEN})
     public @interface UserAuthenticatorEnum {}
 
     /**
@@ -535,7 +588,7 @@ public abstract class KeyStoreKeyConstraints {
         private UserAuthenticator() {}
 
         /** Lock screen. */
-        public static final int LOCK_SCREEN = 1;
+        public static final int LOCK_SCREEN = 1 << 0;
 
         /** Fingerprint reader/sensor. */
         public static final int FINGERPRINT_READER = 1 << 1;
@@ -546,9 +599,9 @@ public abstract class KeyStoreKeyConstraints {
         public static int toKeymaster(@UserAuthenticatorEnum int userAuthenticator) {
             switch (userAuthenticator) {
                 case LOCK_SCREEN:
-                    return LOCK_SCREEN;
+                    return KeymasterDefs.HW_AUTH_PASSWORD;
                 case FINGERPRINT_READER:
-                    return FINGERPRINT_READER;
+                    return KeymasterDefs.HW_AUTH_FINGERPRINT;
                 default:
                     throw new IllegalArgumentException(
                             "Unknown user authenticator: " + userAuthenticator);
@@ -560,7 +613,7 @@ public abstract class KeyStoreKeyConstraints {
          */
         public static @UserAuthenticatorEnum int fromKeymaster(int userAuthenticator) {
             switch (userAuthenticator) {
-                case LOCK_SCREEN:
+                case KeymasterDefs.HW_AUTH_PASSWORD:
                     return LOCK_SCREEN;
                 case FINGERPRINT_READER:
                     return FINGERPRINT_READER;
@@ -573,10 +626,15 @@ public abstract class KeyStoreKeyConstraints {
         /**
          * @hide
          */
-        public static int allToKeymaster(Set<Integer> userAuthenticators) {
+        public static int allToKeymaster(@UserAuthenticatorEnum int userAuthenticators) {
             int result = 0;
-            for (@UserAuthenticatorEnum int userAuthenticator : userAuthenticators) {
-                result |= toKeymaster(userAuthenticator);
+            int userAuthenticator = 1;
+            while (userAuthenticators != 0) {
+                if ((userAuthenticators & 1) != 0) {
+                    result |= toKeymaster(userAuthenticator);
+                }
+                userAuthenticators >>>= 1;
+                userAuthenticator <<= 1;
             }
             return result;
         }
@@ -584,20 +642,17 @@ public abstract class KeyStoreKeyConstraints {
         /**
          * @hide
          */
-        public static Set<Integer> allFromKeymaster(int userAuthenticators) {
+        public static @UserAuthenticatorEnum int allFromKeymaster(int userAuthenticators) {
+            @UserAuthenticatorEnum int result = 0;
             int userAuthenticator = 1;
-            Set<Integer> result = null;
             while (userAuthenticators != 0) {
                 if ((userAuthenticators & 1) != 0) {
-                    if (result == null) {
-                        result = new HashSet<Integer>();
-                    }
-                    result.add(fromKeymaster(userAuthenticator));
+                    result |= fromKeymaster(userAuthenticator);
                 }
                 userAuthenticators >>>= 1;
                 userAuthenticator <<= 1;
             }
-            return (result != null) ? result : Collections.<Integer>emptySet();
+            return result;
         }
 
         /**
@@ -614,5 +669,39 @@ public abstract class KeyStoreKeyConstraints {
                             "Unknown user authenticator: " + userAuthenticator);
             }
         }
+    }
+
+    private static final int[] EMPTY_INT_ARRAY = new int[0];
+
+    private static int[] getSetFlags(int flags) {
+        if (flags == 0) {
+            return EMPTY_INT_ARRAY;
+        }
+        int result[] = new int[getSetBitCount(flags)];
+        int resultOffset = 0;
+        int flag = 1;
+        while (flags != 0) {
+            if ((flags & 1) != 0) {
+                result[resultOffset] = flag;
+                resultOffset++;
+            }
+            flags >>>= 1;
+            flag <<= 1;
+        }
+        return result;
+    }
+
+    private static int getSetBitCount(int value) {
+        if (value == 0) {
+            return 0;
+        }
+        int result = 0;
+        while (value != 0) {
+            if ((value & 1) != 0) {
+                result++;
+            }
+            value >>>= 1;
+        }
+        return result;
     }
 }

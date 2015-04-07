@@ -109,32 +109,20 @@ public abstract class KeyStoreKeyGeneratorSpi extends KeyGeneratorSpi {
         }
         int keySizeBits = (spec.getKeySize() != null) ? spec.getKeySize() : mDefaultKeySizeBits;
         args.addInt(KeymasterDefs.KM_TAG_KEY_SIZE, keySizeBits);
-        @KeyStoreKeyConstraints.PurposeEnum int purposes = (spec.getPurposes() != null)
-                ? spec.getPurposes()
-                : (KeyStoreKeyConstraints.Purpose.ENCRYPT
-                        | KeyStoreKeyConstraints.Purpose.DECRYPT
-                        | KeyStoreKeyConstraints.Purpose.SIGN
-                        | KeyStoreKeyConstraints.Purpose.VERIFY);
+        int purposes = spec.getPurposes();
         for (int keymasterPurpose :
             KeyStoreKeyConstraints.Purpose.allToKeymaster(purposes)) {
             args.addInt(KeymasterDefs.KM_TAG_PURPOSE, keymasterPurpose);
         }
-        if (spec.getBlockMode() != null) {
-            args.addInt(KeymasterDefs.KM_TAG_BLOCK_MODE,
-                    KeyStoreKeyConstraints.BlockMode.toKeymaster(spec.getBlockMode()));
+        for (int keymasterBlockMode :
+            KeyStoreKeyConstraints.BlockMode.allToKeymaster(spec.getBlockModes())) {
+            args.addInt(KeymasterDefs.KM_TAG_BLOCK_MODE, keymasterBlockMode);
         }
-        if (spec.getPadding() != null) {
-            args.addInt(KeymasterDefs.KM_TAG_PADDING,
-                    KeyStoreKeyConstraints.Padding.toKeymaster(spec.getPadding()));
+        for (int keymasterPadding :
+            KeyStoreKeyConstraints.Padding.allToKeymaster(spec.getPaddings())) {
+            args.addInt(KeymasterDefs.KM_TAG_PADDING, keymasterPadding);
         }
-        if (spec.getMaxUsesPerBoot() != null) {
-            args.addInt(KeymasterDefs.KM_TAG_MAX_USES_PER_BOOT, spec.getMaxUsesPerBoot());
-        }
-        if (spec.getMinSecondsBetweenOperations() != null) {
-            args.addInt(KeymasterDefs.KM_TAG_MIN_SECONDS_BETWEEN_OPS,
-                    spec.getMinSecondsBetweenOperations());
-        }
-        if (spec.getUserAuthenticators().isEmpty()) {
+        if (spec.getUserAuthenticators() == 0) {
             args.addBoolean(KeymasterDefs.KM_TAG_NO_AUTH_REQUIRED);
         } else {
             args.addInt(KeymasterDefs.KM_TAG_USER_AUTH_TYPE,
@@ -145,7 +133,7 @@ public abstract class KeyStoreKeyGeneratorSpi extends KeyGeneratorSpi {
             // TODO: Add the invalidate on fingerprint enrolled constraint once Keymaster supports
             // that.
         }
-        if (spec.getUserAuthenticationValidityDurationSeconds() != null) {
+        if (spec.getUserAuthenticationValidityDurationSeconds() != -1) {
             args.addInt(KeymasterDefs.KM_TAG_AUTH_TIMEOUT,
                     spec.getUserAuthenticationValidityDurationSeconds());
         }

@@ -466,74 +466,65 @@ public class AndroidKeyStore extends KeyStoreSpi {
             throw new KeyStoreException("Unsupported secret key algorithm: " + keyAlgorithmString);
         }
 
-        if ((params.getAlgorithm() != null) && (params.getAlgorithm() != keyAlgorithm)) {
-            throw new KeyStoreException("Key algorithm mismatch. Key: " + keyAlgorithmString
-                    + ", parameter spec: "
-                    + KeyStoreKeyConstraints.Algorithm.toString(params.getAlgorithm()));
-        }
-
         KeymasterArguments args = new KeymasterArguments();
         args.addInt(KeymasterDefs.KM_TAG_ALGORITHM,
                 KeyStoreKeyConstraints.Algorithm.toKeymaster(keyAlgorithm));
 
-        if (digest != null) {
-            // Digest available from JCA key algorithm
-            if (params.getDigest() != null) {
-                // Digest also specified in parameters -- check that these two match
-                if (digest != params.getDigest()) {
-                    throw new KeyStoreException("Key digest mismatch. Key: " + keyAlgorithmString
+        @KeyStoreKeyConstraints.DigestEnum int digests;
+        if (params.isDigestsSpecified()) {
+            // Digest(s) specified in parameters
+            if (digest != null) {
+                // Digest also specified in the JCA key algorithm name.
+                if ((params.getDigests() & digest) != digest) {
+                    throw new KeyStoreException("Key digest mismatch"
+                            + ". Key: " + keyAlgorithmString
                             + ", parameter spec: "
-                            + KeyStoreKeyConstraints.Digest.toString(params.getDigest()));
+                            + KeyStoreKeyConstraints.Digest.allToString(params.getDigests()));
                 }
             }
+            digests = params.getDigests();
         } else {
-            // Digest not available from JCA key algorithm
-            digest = params.getDigest();
+            // No digest specified in parameters
+            if (digest != null) {
+                // Digest specified in the JCA key algorithm name.
+                digests = digest;
+            } else {
+                digests = 0;
+            }
         }
-        if (digest != null) {
-            args.addInt(KeymasterDefs.KM_TAG_DIGEST,
-                    KeyStoreKeyConstraints.Digest.toKeymaster(digest));
+        for (int keymasterDigest : KeyStoreKeyConstraints.Digest.allToKeymaster(digests)) {
+            args.addInt(KeymasterDefs.KM_TAG_DIGEST, keymasterDigest);
+        }
+        if (digests != 0) {
+            // TODO: Remove MAC length constraint once Keymaster API no longer requires it.
+            // This code will blow up if mode than one digest is specified.
             Integer digestOutputSizeBytes =
                     KeyStoreKeyConstraints.Digest.getOutputSizeBytes(digest);
             if (digestOutputSizeBytes != null) {
-                // TODO: Remove MAC length constraint once Keymaster API no longer requires it.
                 // TODO: Switch to bits instead of bytes, once this is fixed in Keymaster
                 args.addInt(KeymasterDefs.KM_TAG_MAC_LENGTH, digestOutputSizeBytes);
             }
         }
         if (keyAlgorithm == KeyStoreKeyConstraints.Algorithm.HMAC) {
-            if (digest == null) {
-                throw new IllegalStateException("Digest algorithm must be specified for key"
-                        + " algorithm " + keyAlgorithmString);
+            if (digests == 0) {
+                throw new KeyStoreException("At least one digest algorithm must be specified"
+                        + " for key algorithm " + keyAlgorithmString);
             }
         }
 
-        @KeyStoreKeyConstraints.PurposeEnum int purposes = (params.getPurposes() != null)
-                ? params.getPurposes()
-                : (KeyStoreKeyConstraints.Purpose.ENCRYPT
-                        | KeyStoreKeyConstraints.Purpose.DECRYPT
-                        | KeyStoreKeyConstraints.Purpose.SIGN
-                        | KeyStoreKeyConstraints.Purpose.VERIFY);
-        for (int keymasterPurpose :
-            KeyStoreKeyConstraints.Purpose.allToKeymaster(purposes)) {
+        int purposes = params.getPurposes();
+        for (int keymasterPurpose : KeyStoreKeyConstraints.Purpose.allToKeymaster(purposes)) {
             args.addInt(KeymasterDefs.KM_TAG_PURPOSE, keymasterPurpose);
         }
-        if (params.getBlockMode() != null) {
-            args.addInt(KeymasterDefs.KM_TAG_BLOCK_MODE,
-                    KeyStoreKeyConstraints.BlockMode.toKeymaster(params.getBlockMode()));
+        for (int keymasterBlockMode :
+            KeyStoreKeyConstraints.BlockMode.allToKeymaster(params.getBlockModes())) {
+            args.addInt(KeymasterDefs.KM_TAG_BLOCK_MODE, keymasterBlockMode);
         }
-        if (params.getPadding() != null) {
-            args.addInt(KeymasterDefs.KM_TAG_PADDING,
-                    KeyStoreKeyConstraints.Padding.toKeymaster(params.getPadding()));
+        for (int keymasterPadding :
+            KeyStoreKeyConstraints.Padding.allToKeymaster(params.getPaddings())) {
+            args.addInt(KeymasterDefs.KM_TAG_PADDING, keymasterPadding);
         }
-        if (params.getMaxUsesPerBoot() != null) {
-            args.addInt(KeymasterDefs.KM_TAG_MAX_USES_PER_BOOT, params.getMaxUsesPerBoot());
-        }
-        if (params.getMinSecondsBetweenOperations() != null) {
-            args.addInt(KeymasterDefs.KM_TAG_MIN_SECONDS_BETWEEN_OPS,
-                    params.getMinSecondsBetweenOperations());
-        }
-        if (params.getUserAuthenticators().isEmpty()) {
+        if (params.getUserAuthenticators() == 0) {
             args.addBoolean(KeymasterDefs.KM_TAG_NO_AUTH_REQUIRED);
         } else {
             args.addInt(KeymasterDefs.KM_TAG_USER_AUTH_TYPE,
@@ -544,7 +535,7 @@ public class AndroidKeyStore extends KeyStoreSpi {
             // TODO: Add the invalidate on fingerprint enrolled constraint once Keymaster supports
             // that.
         }
-        if (params.getUserAuthenticationValidityDurationSeconds() != null) {
+        if (params.getUserAuthenticationValidityDurationSeconds() != -1) {
             args.addInt(KeymasterDefs.KM_TAG_AUTH_TIMEOUT,
                     params.getUserAuthenticationValidityDurationSeconds());
         }
