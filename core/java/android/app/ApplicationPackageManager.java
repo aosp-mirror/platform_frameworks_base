@@ -1349,6 +1349,16 @@ final class ApplicationPackageManager extends PackageManager {
     }
 
     @Override
+    public List<IntentFilter> getAllIntentFilters(String packageName) {
+        try {
+            return mPM.getAllIntentFilters(packageName);
+        } catch (RemoteException e) {
+            // Should never happen!
+            return null;
+        }
+    }
+
+    @Override
     public void setInstallerPackageName(String targetPackage,
             String installerPackageName) {
         try {

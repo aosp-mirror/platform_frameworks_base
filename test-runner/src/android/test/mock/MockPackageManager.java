@@ -759,6 +759,11 @@ public class MockPackageManager extends PackageManager {
         throw new UnsupportedOperationException();
     }
 
+    @Override
+    public List<IntentFilter> getAllIntentFilters(String packageName) {
+        throw new UnsupportedOperationException();
+    }
+
     /**
      * @hide
      */

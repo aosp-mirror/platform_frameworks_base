@@ -448,6 +448,7 @@ interface IPackageManager {
     int getIntentVerificationStatus(String packageName, int userId);
     boolean updateIntentVerificationStatus(String packageName, int status, int userId);
     List<IntentFilterVerificationInfo> getIntentFilterVerifications(String packageName);
+    List<IntentFilter> getAllIntentFilters(String packageName);
 
     VerifierDeviceIdentity getVerifierDeviceIdentity();
 
