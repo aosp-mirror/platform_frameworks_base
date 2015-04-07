@@ -99,6 +99,12 @@
     <!-- Screenshot QS tile -->
     <string name="quick_settings_screenshot_label">Screenshot</string>
 
+    <!-- Sound QS Tile -->
+    <string name="quick_settings_sound_label">Sound</string>
+    <string name="quick_settings_sound_ring">Ring</string>
+    <string name="quick_settings_sound_vibrate">Vibrate</string>
+    <string name="quick_settings_sound_dnd">Do not disturb</string>
+
     <!-- Heads up snooze toast -->
     <string name="heads_up_snooze_message_one_minute">Heads-up notification from <xliff:g id="string">%s</xliff:g> are snoozing for 1 minute.</string>
     <string name="heads_up_snooze_message">Heads-up notification from <xliff:g id="string">%s</xliff:g> are snoozing for <xliff:g id="number">%d</xliff:g> minutes.</string>
