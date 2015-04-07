@@ -16,7 +16,6 @@
 
 package android.renderscript;
 
-import java.io.File;
 import java.lang.reflect.Method;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
@@ -130,8 +129,6 @@ public class RenderScript {
     native void nContextInitToClient(long con);
     native void nContextDeinitToClient(long con);
 
-    static File mCacheDir;
-
     // this should be a monotonically increasing ID
     // used in conjunction with the API version of a device
     static final long sMinorID = 1;
@@ -144,23 +141,6 @@ public class RenderScript {
      */
     public static long getMinorID() {
         return sMinorID;
-    }
-
-     /**
-     * Sets the directory to use as a persistent storage for the
-     * renderscript object file cache.
-     *
-     * @hide
-     * @param cacheDir A directory the current process can write to
-     */
-    public static void setupDiskCache(File cacheDir) {
-        if (!sInitialized) {
-            Log.e(LOG_TAG, "RenderScript.setupDiskCache() called when disabled");
-            return;
-        }
-
-        // Defer creation of cache path to nScriptCCreate().
-        mCacheDir = cacheDir;
     }
 
     /**
