@@ -415,10 +415,18 @@ public class AssetAtlasService extends IAssetAtlas.Stub {
                 new Thread(worker, "Atlas Worker #" + (i + 1)).start();
             }
 
+            boolean isAllWorkerFinished;
             try {
-                signal.await(10, TimeUnit.SECONDS);
+                isAllWorkerFinished = signal.await(10, TimeUnit.SECONDS);
             } catch (InterruptedException e) {
                 Log.w(LOG_TAG, "Could not complete configuration computation");
+                return null;
+            }
+
+            if (!isAllWorkerFinished) {
+                // We have to abort here, otherwise the async updates on "results" would crash the
+                // sort later.
+                Log.w(LOG_TAG, "Could not complete configuration computation before timeout.");
                 return null;
             }
         }
