@@ -17467,7 +17467,8 @@ public final class ActivityManagerService extends ActivityManagerNative
                                 fd = ParcelFileDescriptor.open(heapdumpFile,
                                         ParcelFileDescriptor.MODE_CREATE |
                                                 ParcelFileDescriptor.MODE_TRUNCATE |
-                                                ParcelFileDescriptor.MODE_READ_WRITE);
+                                                ParcelFileDescriptor.MODE_WRITE_ONLY |
+                                                ParcelFileDescriptor.MODE_APPEND);
                                 IApplicationThread thread = myProc.thread;
                                 if (thread != null) {
                                     try {
