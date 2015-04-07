@@ -464,7 +464,7 @@ public class BackupTransport {
      * transport level).
      *
      * <p>After this method returns zero, the system will then call
-     * {@link #getNextFullRestorePackage()} to begin the restore process for the next
+     * {@link #nextRestorePackage()} to begin the restore process for the next
      * application, and the sequence begins again.
      *
      * <p>The transport should always close this socket when returning from this method.

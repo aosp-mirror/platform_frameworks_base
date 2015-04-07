@@ -16,7 +16,6 @@
 
 package com.android.server.backup;
 
-
 import android.app.ActivityManagerNative;
 import android.app.IWallpaperManager;
 import android.app.backup.BackupDataInput;
@@ -42,6 +41,13 @@ import java.io.IOException;
  */
 public class SystemBackupAgent extends BackupAgentHelper {
     private static final String TAG = "SystemBackupAgent";
+
+    // Names of the helper tags within the dataset.  Changing one of these names will
+    // break the ability to restore from datasets that predate the change.
+    private static final String WALLPAPER_HELPER = "wallpaper";
+    private static final String RECENTS_HELPER = "recents";
+    private static final String SYNC_SETTINGS_HELPER = "account_sync_settings";
+    private static final String PREFERRED_HELPER = "preferred_activities";
 
     // These paths must match what the WallpaperManagerService uses.  The leaf *_FILENAME
     // are also used in the full-backup file format, so must not change unless steps are
@@ -84,10 +90,10 @@ public class SystemBackupAgent extends BackupAgentHelper {
                 Slog.e(TAG, "Couldn't get wallpaper name\n" + re);
             }
         }
-        addHelper("wallpaper", new WallpaperBackupHelper(SystemBackupAgent.this, files, keys));
-        addHelper("recents", new RecentsBackupHelper(SystemBackupAgent.this));
-        addHelper("account_sync_settings",
-                new AccountSyncSettingsBackupHelper(SystemBackupAgent.this));
+        addHelper(WALLPAPER_HELPER, new WallpaperBackupHelper(this, files, keys));
+        addHelper(RECENTS_HELPER, new RecentsBackupHelper(this));
+        addHelper(SYNC_SETTINGS_HELPER, new AccountSyncSettingsBackupHelper(this));
+        addHelper(PREFERRED_HELPER, new PreferredActivityBackupHelper(this));
 
         super.onBackup(oldState, data, newState);
     }
@@ -113,15 +119,15 @@ public class SystemBackupAgent extends BackupAgentHelper {
     public void onRestore(BackupDataInput data, int appVersionCode, ParcelFileDescriptor newState)
             throws IOException {
         // On restore, we also support a previous data schema "system_files"
-        addHelper("wallpaper", new WallpaperBackupHelper(SystemBackupAgent.this,
+        addHelper(WALLPAPER_HELPER, new WallpaperBackupHelper(this,
                 new String[] { WALLPAPER_IMAGE, WALLPAPER_INFO },
                 new String[] { WALLPAPER_IMAGE_KEY, WALLPAPER_INFO_KEY} ));
-        addHelper("system_files", new WallpaperBackupHelper(SystemBackupAgent.this,
+        addHelper("system_files", new WallpaperBackupHelper(this,
                 new String[] { WALLPAPER_IMAGE },
                 new String[] { WALLPAPER_IMAGE_KEY} ));
-        addHelper("recents", new RecentsBackupHelper(SystemBackupAgent.this));
-        addHelper("account_sync_settings",
-                new AccountSyncSettingsBackupHelper(SystemBackupAgent.this));
+        addHelper(RECENTS_HELPER, new RecentsBackupHelper(this));
+        addHelper(SYNC_SETTINGS_HELPER, new AccountSyncSettingsBackupHelper(this));
+        addHelper(PREFERRED_HELPER, new PreferredActivityBackupHelper(this));
 
         try {
             super.onRestore(data, appVersionCode, newState);

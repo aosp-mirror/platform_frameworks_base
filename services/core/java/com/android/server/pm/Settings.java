@@ -45,15 +45,16 @@ import android.os.UserManager;
 import android.util.AtomicFile;
 import android.text.TextUtils;
 import android.util.LogPrinter;
-
 import android.util.SparseBooleanArray;
 import android.util.SparseLongArray;
+
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.os.BackgroundThread;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.JournaledFile;
 import com.android.internal.util.XmlUtils;
+import com.android.server.backup.PreferredActivityBackupHelper;
 import com.android.server.pm.PackageManagerService.DumpState;
 
 import java.io.FileNotFoundException;
@@ -1108,7 +1109,13 @@ final class Settings {
         mExternalDatabaseVersion = CURRENT_DATABASE_VERSION;
     }
 
-    private void readPreferredActivitiesLPw(XmlPullParser parser, int userId)
+    /**
+     * Applies the preferred activity state described by the given XML.  This code
+     * also supports the restore-from-backup code path.
+     *
+     * @see PreferredActivityBackupHelper
+     */
+    void readPreferredActivitiesLPw(XmlPullParser parser, int userId)
             throws XmlPullParserException, IOException {
         int outerDepth = parser.getDepth();
         int type;
@@ -1399,6 +1406,11 @@ final class Settings {
         return components;
     }
 
+    /**
+     * Record the state of preferred activity configuration into XML.  This is used both
+     * for recording packages.xml internally and for supporting backup/restore of the
+     * preferred activity configuration.
+     */
     void writePreferredActivitiesLPr(XmlSerializer serializer, int userId, boolean full)
             throws IllegalArgumentException, IllegalStateException, IOException {
         serializer.startTag(null, "preferred-activities");
