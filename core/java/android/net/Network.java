@@ -275,7 +275,6 @@ public class Network implements Parcelable {
      * @throws IllegalArgumentException if the argument proxy is null.
      * @throws IOException if an error occurs while opening the connection.
      * @see java.net.URL#openConnection()
-     * @hide
      */
     public URLConnection openConnection(URL url, java.net.Proxy proxy) throws IOException {
         if (proxy == null) throw new IllegalArgumentException("proxy is null");

@@ -17147,6 +17147,7 @@ package android.net {
     method public java.net.InetAddress getByName(java.lang.String) throws java.net.UnknownHostException;
     method public javax.net.SocketFactory getSocketFactory();
     method public java.net.URLConnection openConnection(java.net.URL) throws java.io.IOException;
+    method public java.net.URLConnection openConnection(java.net.URL, java.net.Proxy) throws java.io.IOException;
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator<android.net.Network> CREATOR;
   }
