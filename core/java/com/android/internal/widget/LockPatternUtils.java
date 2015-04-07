@@ -449,29 +449,29 @@ public class LockPatternUtils {
      * @param disable Disables lock screen when true
      */
     public void setLockScreenDisabled(boolean disable) {
-        setBoolean(DISABLE_LOCKSCREEN_KEY, disable, getCurrentOrCallingUserId());
+        setLockScreenDisabled(disable, getCurrentOrCallingUserId());
     }
 
     /**
-     * Determine if LockScreen can be disabled. This is used, for example, to tell if we should
-     * show LockScreen or go straight to the home screen.
+     * Disable showing lock screen at all for a given user.
+     * This is only meaningful if pattern, pin or password are not set.
      *
-     * @return true if lock screen is can be disabled
+     * @param disable Disables lock screen when true
+     * @param userId User ID of the user this has effect on
+     */
+    public void setLockScreenDisabled(boolean disable, int userId) {
+        setBoolean(DISABLE_LOCKSCREEN_KEY, disable, userId);
+    }
+
+    /**
+     * Determine if LockScreen is disabled for the current user. This is used to decide whether
+     * LockScreen is shown after reboot or after screen timeout / short press on power.
+     *
+     * @return true if lock screen is disabled
      */
     public boolean isLockScreenDisabled() {
-        if (!isSecure() && getBoolean(DISABLE_LOCKSCREEN_KEY, false, getCurrentOrCallingUserId())) {
-            // Check if the number of switchable users forces the lockscreen.
-            final List<UserInfo> users = UserManager.get(mContext).getUsers(true);
-            final int userCount = users.size();
-            int switchableUsers = 0;
-            for (int i = 0; i < userCount; i++) {
-                if (users.get(i).supportsSwitchTo()) {
-                    switchableUsers++;
-                }
-            }
-            return switchableUsers < 2;
-        }
-        return false;
+        return !isSecure() &&
+                getBoolean(DISABLE_LOCKSCREEN_KEY, false, getCurrentOrCallingUserId());
     }
 
     /**
