@@ -179,8 +179,7 @@
     <string name="accessibility_quick_settings_airplane_changed_on" msgid="8983005603505087728">"Mod pesawat dihidupkan."</string>
     <string name="accessibility_quick_settings_dnd_priority_on" msgid="1448402297221249355">"Jangan ganggu dihidupkan, perkara penting sahaja."</string>
     <string name="accessibility_quick_settings_dnd_none_on" msgid="5910777408232088752">"Jangan ganggu dihidupkan, tiada gangguan."</string>
-    <!-- no translation found for accessibility_quick_settings_dnd_alarms_on (9152834845587554157) -->
-    <skip />
+    <string name="accessibility_quick_settings_dnd_alarms_on" msgid="9152834845587554157">"Jangan ganggu dihidupkan, penggera sahaja."</string>
     <string name="accessibility_quick_settings_dnd_off" msgid="2371832603753738581">"Jangan ganggu dimatikan."</string>
     <string name="accessibility_quick_settings_dnd_changed_off" msgid="898107593453022935">"Jangan ganggu dimatikan."</string>
     <string name="accessibility_quick_settings_dnd_changed_on" msgid="4483780856613561039">"Jangan ganggu dihidupkan."</string>
@@ -233,8 +232,7 @@
     <string name="ethernet_label" msgid="7967563676324087464">"Ethernet"</string>
     <string name="quick_settings_dnd_label" msgid="8735855737575028208">"Jangan ganggu"</string>
     <string name="quick_settings_dnd_priority_label" msgid="483232950670692036">"Keutamaan sahaja"</string>
-    <!-- no translation found for quick_settings_dnd_alarms_label (2559229444312445858) -->
-    <skip />
+    <string name="quick_settings_dnd_alarms_label" msgid="2559229444312445858">"Penggera sahaja"</string>
     <string name="quick_settings_dnd_none_label" msgid="7309935569360609114">"Tiada gangguan"</string>
     <string name="quick_settings_bluetooth_label" msgid="6304190285170721401">"Bluetooth"</string>
     <string name="quick_settings_bluetooth_multiple_devices_label" msgid="3912245565613684735">"Bluetooth (<xliff:g id="NUMBER">%d</xliff:g> Peranti)"</string>
@@ -305,8 +303,7 @@
     <string name="zen_no_interruptions_with_warning" msgid="4396898053735625287">"Tiada gangguan, walau penggera sekalipun."</string>
     <string name="zen_no_interruptions" msgid="7970973750143632592">"Tiada gangguan"</string>
     <string name="zen_important_interruptions" msgid="3477041776609757628">"Gangguan keutamaan sahaja"</string>
-    <!-- no translation found for zen_alarms (5055668280767657759) -->
-    <skip />
+    <string name="zen_alarms" msgid="5055668280767657759">"Penggera sahaja"</string>
     <string name="zen_alarm_information_time" msgid="5235772206174372272">"Penggera anda yang seterusnya pada <xliff:g id="ALARM_TIME">%s</xliff:g>"</string>
     <string name="zen_alarm_information_day_time" msgid="8422733576255047893">"Penggera anda yang seterusnya pada <xliff:g id="ALARM_DAY_AND_TIME">%s</xliff:g>"</string>
     <string name="zen_alarm_warning" msgid="6873910860111498041">"Anda tdk akan mdgr penggera anda pd <xliff:g id="ALARM_TIME">%s</xliff:g>"</string>
@@ -316,19 +313,13 @@
     <string name="keyguard_unlock" msgid="8043466894212841998">"Leret ke atas untuk membuka kunci"</string>
     <string name="phone_hint" msgid="3101468054914424646">"Leret ke kanan untuk telefon"</string>
     <string name="camera_hint" msgid="5241441720959174226">"Leret ke kiri untuk kamera"</string>
-    <!-- no translation found for interruption_level_none (8284541443482072628) -->
-    <skip />
-    <!-- no translation found for interruption_level_priority (6426766465363855505) -->
-    <skip />
-    <!-- no translation found for interruption_level_alarms (5226306993448328896) -->
-    <skip />
+    <string name="interruption_level_none" msgid="8284541443482072628">"Tiada gangguan"</string>
+    <string name="interruption_level_priority" msgid="6426766465363855505">"Keutamaan sahaja"</string>
+    <string name="interruption_level_alarms" msgid="5226306993448328896">"Penggera sahaja"</string>
     <string name="interruption_level_all" msgid="1330581184930945764">"Semua"</string>
-    <!-- no translation found for interruption_level_none_twoline (3942121050170227056) -->
-    <skip />
-    <!-- no translation found for interruption_level_priority_twoline (1564715335217164124) -->
-    <skip />
-    <!-- no translation found for interruption_level_alarms_twoline (3266909566410106146) -->
-    <skip />
+    <string name="interruption_level_none_twoline" msgid="3942121050170227056">"Tiada\ngangguan"</string>
+    <string name="interruption_level_priority_twoline" msgid="1564715335217164124">"Keutamaan\nsahaja"</string>
+    <string name="interruption_level_alarms_twoline" msgid="3266909566410106146">"Penggera\nsahaja"</string>
     <string name="keyguard_indication_charging_time" msgid="1757251776872835768">"Mengecas (<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> sehingga penuh)"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="7305948938141024937">"Tukar pengguna"</string>
     <string name="accessibility_multi_user_switch_switcher_with_current" msgid="8434880595284601601">"Tukar pengguna, pengguna semasa <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
@@ -396,6 +387,5 @@
     <string name="volumeui_prompt_deny" msgid="5720663643411696731">"Tolak"</string>
     <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g> ialah dialog kelantangan"</string>
     <string name="volumeui_notification_text" msgid="1826889705095768656">"Sentuh untuk memulihkan yang asal."</string>
-    <!-- no translation found for volume_zen_switch_text (6388350641576595452) -->
-    <skip />
+    <string name="volume_zen_switch_text" msgid="6388350641576595452">"Halang gangguan"</string>
 </resources>

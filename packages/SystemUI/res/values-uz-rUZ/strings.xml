@@ -313,10 +313,8 @@
     <string name="keyguard_unlock" msgid="8043466894212841998">"Qulfdan chiqarish uchun yuqoriga suring"</string>
     <string name="phone_hint" msgid="3101468054914424646">"Telefonni ochish uchun o‘ngga"</string>
     <string name="camera_hint" msgid="5241441720959174226">"Kamerani ochish uchun chapga suring"</string>
-    <!-- no translation found for interruption_level_none (8284541443482072628) -->
-    <skip />
-    <!-- no translation found for interruption_level_priority (6426766465363855505) -->
-    <skip />
+    <string name="interruption_level_none" msgid="8284541443482072628">"Bezovta qilinishlarsiz"</string>
+    <string name="interruption_level_priority" msgid="6426766465363855505">"Faqat muhimlari"</string>
     <string name="interruption_level_alarms" msgid="5226306993448328896">"Faqat signallar"</string>
     <string name="interruption_level_all" msgid="1330581184930945764">"Barchasi"</string>
     <string name="interruption_level_none_twoline" msgid="3942121050170227056">"Uzilishlar\nbo‘lmasin"</string>
@@ -389,6 +387,5 @@
     <string name="volumeui_prompt_deny" msgid="5720663643411696731">"Rad etish"</string>
     <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g> ovoz balandligini boshqaradi"</string>
     <string name="volumeui_notification_text" msgid="1826889705095768656">"Aslini tiklash uchun bosing."</string>
-    <!-- no translation found for volume_zen_switch_text (6388350641576595452) -->
-    <skip />
+    <string name="volume_zen_switch_text" msgid="6388350641576595452">"Bezovta qilinishlar"</string>
 </resources>

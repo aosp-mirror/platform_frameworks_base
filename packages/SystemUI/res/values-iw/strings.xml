@@ -315,10 +315,8 @@
     <string name="keyguard_unlock" msgid="8043466894212841998">"החלק מעלה כדי לבטל את הנעילה"</string>
     <string name="phone_hint" msgid="3101468054914424646">"כדי להפעיל את הטלפון, החלק שמאלה"</string>
     <string name="camera_hint" msgid="5241441720959174226">"החלק ימינה להפעלת המצלמה"</string>
-    <!-- no translation found for interruption_level_none (8284541443482072628) -->
-    <skip />
-    <!-- no translation found for interruption_level_priority (6426766465363855505) -->
-    <skip />
+    <string name="interruption_level_none" msgid="8284541443482072628">"ללא הפרעות"</string>
+    <string name="interruption_level_priority" msgid="6426766465363855505">"עדיפות בלבד"</string>
     <string name="interruption_level_alarms" msgid="5226306993448328896">"התראות בלבד"</string>
     <string name="interruption_level_all" msgid="1330581184930945764">"הכל"</string>
     <string name="interruption_level_none_twoline" msgid="3942121050170227056">"ללא\nהפרעות"</string>
@@ -391,6 +389,5 @@
     <string name="volumeui_prompt_deny" msgid="5720663643411696731">"דחה"</string>
     <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g> הוא תיבת הדו-שיח של עוצמת הקול"</string>
     <string name="volumeui_notification_text" msgid="1826889705095768656">"גע כדי לשחזר את עוצמת הקול המקורית."</string>
-    <!-- no translation found for volume_zen_switch_text (6388350641576595452) -->
-    <skip />
+    <string name="volume_zen_switch_text" msgid="6388350641576595452">"חסימת הפרעות"</string>
 </resources>

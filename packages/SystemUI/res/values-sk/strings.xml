@@ -381,7 +381,7 @@
     <string name="screen_pinning_title" msgid="3273740381976175811">"Obrazovka je pripnutá"</string>
     <string name="screen_pinning_description" msgid="1346522416878235405">"Obsah bude pripnutý v zobrazení, dokým ho neuvoľníte. Ak ho chcete uvoľniť, stlačte a podržte súčasne tlačidlá Späť a Prehľad."</string>
     <string name="screen_pinning_description_accessible" msgid="8518446209564202557">"Obsah bude pripnutý v zobrazení, dokým ho neuvoľníte. Uvoľníte ho stlačením a podržaním tlačidla Prehľad."</string>
-    <string name="screen_pinning_positive" msgid="3783985798366751226">"Rozumiem"</string>
+    <string name="screen_pinning_positive" msgid="3783985798366751226">"Dobre"</string>
     <string name="screen_pinning_negative" msgid="3741602308343880268">"Nie, vďaka"</string>
     <string name="quick_settings_reset_confirmation_title" msgid="748792586749897883">"Skryť <xliff:g id="TILE_LABEL">%1$s</xliff:g>?"</string>
     <string name="quick_settings_reset_confirmation_message" msgid="2235970126803317374">"Táto položka sa znova zobrazí, keď ju v nastaveniach opätovne zapnete."</string>
