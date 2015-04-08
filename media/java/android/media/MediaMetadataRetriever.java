@@ -498,5 +498,11 @@ public class MediaMetadataRetriever
      * The video rotation angle may be 0, 90, 180, or 270 degrees.
      */
     public static final int METADATA_KEY_VIDEO_ROTATION = 24;
+    /**
+     * This key retrieves the original capture framerate, if it's
+     * available. The capture framerate will be a floating point
+     * number.
+     */
+    public static final int METADATA_KEY_CAPTURE_FRAMERATE = 25;
     // Add more here...
 }

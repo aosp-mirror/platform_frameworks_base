@@ -16735,6 +16735,7 @@ package android.media {
     field public static final int METADATA_KEY_ARTIST = 2; // 0x2
     field public static final int METADATA_KEY_AUTHOR = 3; // 0x3
     field public static final int METADATA_KEY_BITRATE = 20; // 0x14
+    field public static final int METADATA_KEY_CAPTURE_FRAMERATE = 25; // 0x19
     field public static final int METADATA_KEY_CD_TRACK_NUMBER = 0; // 0x0
     field public static final int METADATA_KEY_COMPILATION = 15; // 0xf
     field public static final int METADATA_KEY_COMPOSER = 4; // 0x4
