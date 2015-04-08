@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:orientation="vertical"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent">
+    <import type="java.util.Collection"/>
+    <import type="java.util.ArrayList"/>
+    <import type="java.util.Map"/>
+    <variable name="list" type="Collection&lt;String&gt;"/>
+    <variable name="map" type="Object"/>
+
+    <TextView
+            android:id="@+id/textView0"
+            android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:text="@{((ArrayList&lt;String&gt;)list)[0]}"/>
+    <TextView
+            android:id="@+id/textView1"
+            android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:text="@{((Map&lt;String, String&gt;)map)[`hello`]}"/>
+</LinearLayout>

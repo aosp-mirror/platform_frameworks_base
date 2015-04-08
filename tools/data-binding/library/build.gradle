@@ -1,0 +1,105 @@
+/*
+ * Copyright (C) 2014 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+// Top-level build file where you can add configuration options common to all sub-projects/modules.
+
+buildscript {
+    repositories {
+        jcenter()
+    }
+    dependencies {
+        classpath "com.android.tools.build:gradle:${config.androidPluginVersion}"
+        // NOTE: Do not place your application dependencies here; they belong
+        // in the individual module build.gradle files
+    }
+}
+
+apply plugin: 'com.android.library'
+apply plugin: 'maven'
+
+android {
+    compileSdkVersion 21
+    buildToolsVersion "21.1"
+
+    defaultConfig {
+        minSdkVersion 7
+        targetSdkVersion 21
+        versionCode 1
+        versionName "1.0"
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_7
+        targetCompatibility JavaVersion.VERSION_1_7
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+        }
+    }
+    packagingOptions {
+        exclude 'META-INF/services/javax.annotation.processing.Processor'
+        exclude 'META-INF/LICENSE.txt'
+        exclude 'META-INF/NOTICE.txt'
+        exclude 'android/databinding/DataBinderMapper.class'
+    }
+}
+dependencies {
+    compile fileTree(dir: 'libs', include: ['*.jar'])
+    compile project(":baseLibrary")
+    compile 'com.android.support:support-v4:+'
+}
+
+configurations {
+    jarArchives
+}
+
+
+//create jar tasks
+android.libraryVariants.all { variant ->
+    def name = variant.buildType.name
+
+    if (name.equals(com.android.builder.core.BuilderConstants.DEBUG)) {
+        return; // Skip debug builds.
+    }
+    // @Jar version is needed to run compiler tests
+    def task = project.tasks.create "jar${name.capitalize()}", Jar
+    task.dependsOn variant.javaCompile
+    task.from variant.javaCompile.destinationDir
+    artifacts.add('jarArchives', task);
+}
+uploadArchives {
+    repositories {
+        mavenDeployer {
+            pom.artifactId = 'library'
+        }
+    }
+}
+
+afterEvaluate {
+    tasks['packageReleaseJar'].exclude('android/databinding/DataBinderMapper.*')
+    tasks['packageDebugJar'].exclude('android/databinding/DataBinderMapper.*')
+}
+
+uploadJarArchives {
+    repositories {
+        mavenDeployer {
+            repository(url: "file://${config.mavenRepoDir}")
+            pom.artifactId = "libraryJar"
+        }
+    }
+}
+
+uploadArchives.dependsOn uploadJarArchives

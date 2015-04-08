@@ -1,0 +1,141 @@
+<!--
+  Copyright (C) 2014 The Android Open Source Project
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+  -->
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:bind="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    android:id="@+id/activityRoot"
+    tools:activity=".MainActivity"
+    android:clickable="true"
+    android:onClickListener="@{activity.onUnselect}">
+    <variable name="activity" type="com.android.example.bindingdemo.MainActivity"/>
+    <!---->
+    <import
+            type="android.view.View"
+            />
+    <!---->
+    <import type="com.android.example.bindingdemo.R.string" alias="Strings"/>
+    <import type="com.android.example.bindingdemo.vo.User"/>
+    <TextView
+        android:id="@+id/title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@{activity.getString(Strings.toolkitties, activity.tkAdapter.itemCount)}">
+
+    </TextView>
+
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/toolkittyList"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/list_height"
+        bind:adapter="@{activity.tkAdapter}"
+        ></android.support.v7.widget.RecyclerView>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="10dp" />
+
+    <TextView android:text="@{activity.selected2 == activity.selected ? `same` : `different`}"
+              android:id="@+id/deleteme"
+              android:layout_width="match_parent"
+              android:layout_height="wrap_content"/>
+
+    <android.support.v7.widget.CardView
+        android:id="@+id/selected_card"
+        bind:contentPadding="@{activity.selected == null ? 5 : activity.selected.name.length()}"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        bind:visibility="@{activity.selected == null ? View.INVISIBLE : View.VISIBLE}">
+
+        <GridLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:columnCount="2"
+            android:rowCount="4">
+
+            <ImageView
+                android:id="@+id/selected_photo"
+                android:layout_width="@dimen/big_user_photo"
+                android:layout_height="@dimen/big_user_photo"
+                android:layout_column="0"
+                android:layout_row="0"
+                android:layout_rowSpan="2"
+                android:scaleType="fitCenter"
+                android:backgroundResource="@{activity.selected.photoResource}" />
+
+            <EditText
+                android:id="@+id/selected_name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_column="1"
+                android:layout_gravity="fill"
+                android:layout_row="0"
+                android:background="@android:color/holo_blue_dark"
+                android:gravity="center"
+                android:text="@{activity.selected.name}" />
+
+            <EditText
+                android:id="@+id/selected_lastname"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_column="1"
+                android:layout_gravity="fill"
+                android:layout_row="1"
+                android:background="@android:color/holo_blue_bright"
+                android:gravity="center"
+                android:text="@{activity.selected.lastName}" />
+            <Button
+                android:id="@+id/edit_button"
+                bind:onClickListener="@{activity.onSave}"
+                android:text="@{`Save changes to ` + activity.selected.name}"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_column="1"
+                android:layout_gravity="right"
+                android:layout_row="2"/>
+
+            <Button
+                android:id="@+id/delete_button"
+                bind:onClickListener="@{activity.onDelete}"
+                android:text="@{activity.getString(activity.selected.group == User.TOOLKITTY ? Strings.became_robot : Strings.became_kitten, activity.selected.name)}"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_column="1"
+                android:layout_gravity="right"
+                android:layout_row="3"/>
+
+        </GridLayout>
+    </android.support.v7.widget.CardView>
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="10dp" />
+    <TextView
+        android:id="@+id/robotsTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@{activity.robotAdapter.itemCount + &quot; Robots &quot;}" />
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/robotList"
+        android:layout_width="match_parent" bind:adapter="@{activity.robotAdapter}"  android:layout_height="@dimen/list_height"
+        ></android.support.v7.widget.RecyclerView>
+</LinearLayout>

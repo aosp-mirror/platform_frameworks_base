@@ -1,0 +1,7 @@
+include ':baseLibrary', ':app'
+include ':library'
+include ':compiler'
+include ':gradlePlugin'
+include ':grammarBuilder'
+include ':annotationprocessor'
+include ':xmlGrammar'
