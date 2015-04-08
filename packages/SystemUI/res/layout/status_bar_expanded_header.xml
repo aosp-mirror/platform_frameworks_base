@@ -128,7 +128,7 @@
         android:id="@+id/clock"
         />
 
-    <Button android:id="@+id/alarm_status"
+    <com.android.systemui.statusbar.AlphaOptimizedButton android:id="@+id/alarm_status"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
