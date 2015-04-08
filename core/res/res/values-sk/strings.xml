@@ -1840,7 +1840,7 @@
     <string name="restr_pin_try_later" msgid="973144472490532377">"Skúste to znova neskôr"</string>
     <string name="immersive_cling_title" msgid="8394201622932303336">"Zobrazenie na celú obrazovku"</string>
     <string name="immersive_cling_description" msgid="3482371193207536040">"Ukončite prejdením prstom z hornej časti nadol."</string>
-    <string name="immersive_cling_positive" msgid="5016839404568297683">"Rozumiem"</string>
+    <string name="immersive_cling_positive" msgid="5016839404568297683">"Dobre"</string>
     <string name="done_label" msgid="2093726099505892398">"Hotovo"</string>
     <string name="hour_picker_description" msgid="6698199186859736512">"Kruhový posúvač hodín"</string>
     <string name="minute_picker_description" msgid="8606010966873791190">"Kruhový posúvač minút"</string>
@@ -1858,6 +1858,10 @@
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Pred uvoľnením požiadať o číslo PIN"</string>
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"Pred uvoľnením požiadať o bezpečnostný vzor"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Pred uvoľnením požiadať o heslo"</string>
+    <!-- no translation found for package_installed_device_owner (8420696545959087545) -->
+    <skip />
+    <!-- no translation found for package_deleted_device_owner (7650577387493101353) -->
+    <skip />
     <string name="battery_saver_description" msgid="1960431123816253034">"Šetrič batérie znižuje výkonnosť vášho zariadenia a obmedzuje vibrovanie, služby určovania polohy a väčšinu údajov na pozadí, aby tak pomohol predĺžiť výdrž batérie. E-mailová aplikácia, aplikácia na odosielanie správ SMS a MMS a ďalšie aplikácie, ktoré sú založené na synchronizácii, sa pravdepodobne aktualizujú až po ich otvorení.\n\nŠetrič batérie sa automaticky vypne, keď zariadenie začnete nabíjať."</string>
     <string name="downtime_condition_summary" msgid="8761776337475705749">"Dokým o <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> neskončí výpadok"</string>
     <string name="downtime_condition_line_one" msgid="8762708714645352010">"Kým skončí vaša odstávka"</string>

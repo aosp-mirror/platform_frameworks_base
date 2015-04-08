@@ -856,10 +856,8 @@
     <string name="permdesc_removeDrmCertificates" msgid="7272999075113400993">"Povoluje aplikaci odstranit certifikáty DRM. Běžné aplikace by toto oprávnění neměly nikdy potřebovat."</string>
     <string name="permlab_bindCarrierMessagingService" msgid="1490229371796969158">"navázat se na nejvyšší úroveň rozhraní služby zasílání zpráv prostřednictvím operátora"</string>
     <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"Umožňuje držiteli navázat se na nejvyšší úroveň rozhraní služby zasílání zpráv prostřednictvím operátora. Běžné aplikace by toto oprávnění neměly nikdy potřebovat."</string>
-    <!-- no translation found for permlab_accessVoiceInteractionService (4183835260471435605) -->
-    <skip />
-    <!-- no translation found for permdesc_accessVoiceInteractionService (836587728238433459) -->
-    <skip />
+    <string name="permlab_accessVoiceInteractionService" msgid="4183835260471435605">"komunikace se službou hlasové interakce"</string>
+    <string name="permdesc_accessVoiceInteractionService" msgid="836587728238433459">"Umožňuje držiteli komunikovat s právě aktivní službou hlasové interakce. Běžné aplikace by toto oprávnění neměly nikdy potřebovat."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Nastavit pravidla pro heslo"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"Ovládání délky a znaků povolených v heslech a kódech PIN zámku obrazovky."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Sledovat pokusy o odemčení obrazovky"</string>
@@ -1866,6 +1864,10 @@
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Před uvolněním požádat o kód PIN"</string>
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"Před uvolněním požádat o bezpečnostní gesto"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Před uvolněním požádat o heslo"</string>
+    <!-- no translation found for package_installed_device_owner (8420696545959087545) -->
+    <skip />
+    <!-- no translation found for package_deleted_device_owner (7650577387493101353) -->
+    <skip />
     <string name="battery_saver_description" msgid="1960431123816253034">"Spořič baterie za účelem prodloužení výdrže baterie snižuje výkon zařízení a omezuje vibrace, služby určování polohy a většinu dat na pozadí. E-mail, aplikace pro zasílání zpráv a další aplikace, které používají synchronizaci, se nemusejí aktualizovat, dokud je neotevřete.\n\nPři nabíjení zařízení se spořič baterie automaticky vypne."</string>
     <string name="downtime_condition_summary" msgid="8761776337475705749">"Dokud v <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> neskončí pozastavení"</string>
     <string name="downtime_condition_line_one" msgid="8762708714645352010">"Dokud neskončí pozastavení"</string>

@@ -129,14 +129,10 @@
   <string-array name="wfcOperatorErrorNotificationMessages">
   </string-array>
     <string name="wfcSpnFormat" msgid="8211621332478306568">"%s"</string>
-    <!-- no translation found for wifi_calling_off_summary (8720659586041656098) -->
-    <skip />
-    <!-- no translation found for wfc_mode_wifi_preferred_summary (1994113411286935263) -->
-    <skip />
-    <!-- no translation found for wfc_mode_cellular_preferred_summary (5920549484600758786) -->
-    <skip />
-    <!-- no translation found for wfc_mode_wifi_only_summary (2379919155237869320) -->
-    <skip />
+    <string name="wifi_calling_off_summary" msgid="8720659586041656098">"خاموش"</string>
+    <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"‏Wi-Fi ترجیحی"</string>
+    <string name="wfc_mode_cellular_preferred_summary" msgid="5920549484600758786">"شبکه سلولی ترجیحی"</string>
+    <string name="wfc_mode_wifi_only_summary" msgid="2379919155237869320">"‏فقط Wi-Fi"</string>
     <string name="cfTemplateNotForwarded" msgid="1683685883841272560">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: هدایت نشده"</string>
     <string name="cfTemplateForwarded" msgid="1302922117498590521">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
     <string name="cfTemplateForwardedTime" msgid="9206251736527085256">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g> پس از <xliff:g id="TIME_DELAY">{2}</xliff:g> ثانیه"</string>
@@ -644,10 +640,8 @@
     <string name="permlab_performCdmaProvisioning" product="tv" msgid="3485391974208100809">"‏شروع مستقیم راه‌اندازی تلویزیون CDMA"</string>
     <string name="permlab_performCdmaProvisioning" product="default" msgid="5604848095315421425">"‏شروع مستقیم راه‌اندازی تلفن CDMA"</string>
     <string name="permdesc_performCdmaProvisioning" msgid="1994193538802314186">"‏به برنامه اجازه می‎دهد تا شرایط مقررات CDMA را شروع کند. برنامه‎های مخرب می‎توانند شرایط مقررات CDMA را در مواقع غیرضروری شروع کند."</string>
-    <!-- no translation found for permlab_performSimActivation (1651116521896665009) -->
-    <skip />
-    <!-- no translation found for permdesc_performSimActivation (1778214876348917401) -->
-    <skip />
+    <string name="permlab_performSimActivation" msgid="1651116521896665009">"شروع راه‌اندازی سیم‌‌کارت"</string>
+    <string name="permdesc_performSimActivation" msgid="1778214876348917401">"به برنامه امکان می‌دهد به درخواست‌های فعال‌سازی سیم‌کارت رسیدگی کند. برنامه می‌تواند به طور مستقیم فعال‌سازی را انجام دهد یا می‌تواند فعال‌سازی را به برنامه دیگری واگذار کند."</string>
     <string name="permlab_locationUpdates" msgid="7785408253364335740">"کنترل اعلان‌های به‌روزرسانی مکان"</string>
     <string name="permdesc_locationUpdates" msgid="1120741557891438876">"‏به برنامه اجازه می‎دهد اعلانهای به‎روزرسانی موقعیت مکانی را از رادیو فعال/غیرفعال کند. برای استفاده برنامه‎های عادی نیست."</string>
     <string name="permlab_checkinProperties" msgid="7855259461268734914">"دسترسی به مشخصات اعلام ورود"</string>
@@ -854,10 +848,8 @@
     <string name="permdesc_removeDrmCertificates" msgid="7272999075113400993">"‏به برنامه امکان می‌دهد گواهی‌های DRM را حذف کند. نباید برای برنامه‌های عادی هیچ‌وقت لازم باشد."</string>
     <string name="permlab_bindCarrierMessagingService" msgid="1490229371796969158">"مقید به سرویس پیام‌رسانی شرکت مخابراتی"</string>
     <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"به کنترل‌کننده اجازه می‌دهد که به سطح بالای رابط کاربر سرویس پیام‌رسانی شرکت مخابراتی مقید شود. هرگز نباید برای برنامه‌های عادی مورد نیاز شود."</string>
-    <!-- no translation found for permlab_accessVoiceInteractionService (4183835260471435605) -->
-    <skip />
-    <!-- no translation found for permdesc_accessVoiceInteractionService (836587728238433459) -->
-    <skip />
+    <string name="permlab_accessVoiceInteractionService" msgid="4183835260471435605">"تعامل با سرویس تعامل صوتی"</string>
+    <string name="permdesc_accessVoiceInteractionService" msgid="836587728238433459">"به دارنده امکان می‌دهد با سرویس تعامل صوتی در حال حاضر فعال، تعامل داشته باشد. هرگز نباید برای برنامه‌های معمولی مورد نیاز باشد."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"تنظیم قوانین رمز ورود"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"کنترل طول و نوع نویسه‌هایی که در گذرواژه و پین قفل صفحه مجاز است."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"نمایش تلاش‌های قفل گشایی صفحه"</string>
@@ -1848,6 +1840,10 @@
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"درخواست کد پین قبل از برداشتن پین"</string>
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"درخواست الگوی باز کردن قفل قبل از برداشتن پین"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"درخواست گذرواژه قبل از برداشتن پین"</string>
+    <!-- no translation found for package_installed_device_owner (8420696545959087545) -->
+    <skip />
+    <!-- no translation found for package_deleted_device_owner (7650577387493101353) -->
+    <skip />
     <string name="battery_saver_description" msgid="1960431123816253034">"برای کمک به بهبود ماندگاری باتری، ابزار صرفه‌جویی در مصرف باتری عملکرد دستگاهتان را کاهش می‌دهد و لرزش، سرویس‌های مبتنی بر مکان، و دسترسی به اکثر داده‌ها در پس‌زمینه را محدود می‌کند. ایمیل، پیام‌رسانی و برنامه‌های دیگری که به همگام‌سازی متکی هستند، تا زمانی که آن‌ها را باز نکنید نمی‌توانند به‌روز شوند.\n\nابزار صرفه‌جویی در مصرف باتری به صورت خودکار در هنگام شارژ شدن دستگاه خاموش می‌شود."</string>
     <string name="downtime_condition_summary" msgid="8761776337475705749">"تا زمانی که زمان استراحت در <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> به پایان برسد"</string>
     <string name="downtime_condition_line_one" msgid="8762708714645352010">"تا زمان اتمام فرویش"</string>

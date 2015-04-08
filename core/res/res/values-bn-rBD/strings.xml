@@ -129,14 +129,10 @@
   <string-array name="wfcOperatorErrorNotificationMessages">
   </string-array>
     <string name="wfcSpnFormat" msgid="8211621332478306568">"%s"</string>
-    <!-- no translation found for wifi_calling_off_summary (8720659586041656098) -->
-    <skip />
-    <!-- no translation found for wfc_mode_wifi_preferred_summary (1994113411286935263) -->
-    <skip />
-    <!-- no translation found for wfc_mode_cellular_preferred_summary (5920549484600758786) -->
-    <skip />
-    <!-- no translation found for wfc_mode_wifi_only_summary (2379919155237869320) -->
-    <skip />
+    <string name="wifi_calling_off_summary" msgid="8720659586041656098">"বন্ধ আছে"</string>
+    <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"পছন্দের Wi-Fi"</string>
+    <string name="wfc_mode_cellular_preferred_summary" msgid="5920549484600758786">"পছন্দের মোবাইল নেটওয়ার্ক"</string>
+    <string name="wfc_mode_wifi_only_summary" msgid="2379919155237869320">"শুধুমাত্র Wi-Fi"</string>
     <string name="cfTemplateNotForwarded" msgid="1683685883841272560">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: ফরওয়ার্ড করা হয়নি"</string>
     <string name="cfTemplateForwarded" msgid="1302922117498590521">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
     <string name="cfTemplateForwardedTime" msgid="9206251736527085256">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g> <xliff:g id="TIME_DELAY">{2}</xliff:g> সেকেন্ড পরে"</string>
@@ -644,10 +640,8 @@
     <string name="permlab_performCdmaProvisioning" product="tv" msgid="3485391974208100809">"সরাসরি CDMA TV সেটআপ শুরু করে"</string>
     <string name="permlab_performCdmaProvisioning" product="default" msgid="5604848095315421425">"CDMA ফোন সেটআপ সরাসরি শুরু করে"</string>
     <string name="permdesc_performCdmaProvisioning" msgid="1994193538802314186">"অ্যাপ্লিকেশানকে CDMA প্রস্তুতি শুরু করার অনুমতি দেয়৷ ক্ষতিকারক অ্যাপ্লিকেশান অকারণে CDMA প্রস্তুতি শুরু করতে পারে৷"</string>
-    <!-- no translation found for permlab_performSimActivation (1651116521896665009) -->
-    <skip />
-    <!-- no translation found for permdesc_performSimActivation (1778214876348917401) -->
-    <skip />
+    <string name="permlab_performSimActivation" msgid="1651116521896665009">"SIM কার্ডের সেটআপ শুরু করুন"</string>
+    <string name="permdesc_performSimActivation" msgid="1778214876348917401">"অ্যাপ্লিকেশানটিকে SIM সক্রিয়করণের অনুরোধ পরিচালনা করতে অনুমতি দিন। অ্যাপ্লিকেশানটি সরাসরি সক্রিয়করণের কার্য সম্পাদনা করতে বা অন্য অ্যাপ্লিকেশানে প্রতিনিধি নিযুক্ত করতে পারে।"</string>
     <string name="permlab_locationUpdates" msgid="7785408253364335740">"অবস্থান আপডেট বিজ্ঞপ্তিগুলিকে নিয়ন্ত্রণ করে"</string>
     <string name="permdesc_locationUpdates" msgid="1120741557891438876">"অ্যাপ্লিকেশানকে রেডিও থেকে অবস্থানের আপডেটের বিজ্ঞপ্তি সক্ষম/অক্ষম করতে দেয়৷ সাধারণ অ্যাপ্লিকেশানগুলির ব্যবহারের জন্য নয়৷"</string>
     <string name="permlab_checkinProperties" msgid="7855259461268734914">"চেক ইন বৈশিষ্ট্যাবলী অ্যাক্সেস করে"</string>
@@ -854,10 +848,8 @@
     <string name="permdesc_removeDrmCertificates" msgid="7272999075113400993">"কোনো অ্যাপ্লিকেশানকে DRM শংসাপত্রগুলি সরানোর অনুমতি দেয়। সাধারণ অ্যাপ্লিকেশানগুলির জন্য কখনো প্রয়োজন হয় না।"</string>
     <string name="permlab_bindCarrierMessagingService" msgid="1490229371796969158">"একটি ক্যারিয়ার বার্তাপ্রেরণ পরিষেবা আবদ্ধ করতে"</string>
     <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"ধারককে, একটি ক্যারিয়ার বার্তাপ্রেরণ পরিষেবার উচ্চ স্তরের ইন্টারফেসে জুড়তে অনুমতি দেয়৷ সধারণ অ্যাপ্লিকেশানগুলির জন্য কখনই প্রয়োজন হয় না৷"</string>
-    <!-- no translation found for permlab_accessVoiceInteractionService (4183835260471435605) -->
-    <skip />
-    <!-- no translation found for permdesc_accessVoiceInteractionService (836587728238433459) -->
-    <skip />
+    <string name="permlab_accessVoiceInteractionService" msgid="4183835260471435605">"ভয়েস আলাপচারিতা পরিষেবার সাথে ইন্টারঅ্যাক্ট করুন"</string>
+    <string name="permdesc_accessVoiceInteractionService" msgid="836587728238433459">"বর্তমানে সক্ষম ভয়েস আলাপচারিতা পরিষেবার সাথে ইন্টারঅ্যাক্ট করার জন্য হোল্ডারকে অনুমতি দিন৷ স্বাভাবিক অ্যাপ্লিকেশানগুলির জন্য কখনই প্রয়োজন হবে না।"</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"পাসওয়ার্ড নিয়মগুলি সেট করে"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"স্ক্রীন লক করার পাসওয়ার্ডগুলিতে অনুমতিপ্রাপ্ত অক্ষর এবং দৈর্ঘ্য নিয়ন্ত্রণ করে৷"</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"স্ক্রীণ আনলক করার প্রচেষ্টাগুলি নিরীক্ষণ করে"</string>
@@ -1848,6 +1840,10 @@
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"আনপিন করার আগে PIN চান"</string>
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"আনপিন করার আগে আনলক প্যাটার্ন চান"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"আনপিন করার আগে পাসওয়ার্ড চান"</string>
+    <!-- no translation found for package_installed_device_owner (8420696545959087545) -->
+    <skip />
+    <!-- no translation found for package_deleted_device_owner (7650577387493101353) -->
+    <skip />
     <string name="battery_saver_description" msgid="1960431123816253034">"ব্যাটরির লাইফ উন্নত করতে সহায়তা করতে, ব্যাটারি সাশ্রয়কারী আপনার ডিভাইসের কার্যসম্পাদনা হ্রাস করে এবং কম্পন, অবস্থান পরিষেবাসমূহ এবং অধিকাংশ ব্যাকগ্রাউন্ড ডেটা সীমিত করে৷ ইমেল, বার্তাপ্রেরণ এবং অন্যান্য অ্যাপ্লিকেশানগুলিকে যেগুলি সিঙ্কের উপর নির্ভর করে সেগুলিকে আপনি না খোলা পর্যন্ত নাও আপডেট হতে পারে৷\n\nআপনার ডিভাইসটিকে যখন চার্জ করা হয় তখন ব্যাটারি সাশ্রয়কারী স্বয়ংক্রিয়ভাবে বন্ধ হয়ে যায়৷"</string>
     <string name="downtime_condition_summary" msgid="8761776337475705749">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g>টার সময়ে আপনার ডাউনটাইম শেষ হওয়া পর্যন্ত"</string>
     <string name="downtime_condition_line_one" msgid="8762708714645352010">"আপনার ডাউনটাইম শেষ না হওয়া পর্যন্ত"</string>

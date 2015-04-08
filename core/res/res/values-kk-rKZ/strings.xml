@@ -854,10 +854,8 @@
     <string name="permdesc_removeDrmCertificates" msgid="7272999075113400993">"Қолданбаға DRM сертификаттарын жоюға рұқсат етеді. Қалыпты қолданбалар үшін ешқашан қажет болмайды."</string>
     <string name="permlab_bindCarrierMessagingService" msgid="1490229371796969158">"оператордың хабар алмасу қызметіне байластыру"</string>
     <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"Иесіне оператордың хабар алмасу қызметінің жоғарғы деңгейлі интерфейсіне байластыруға рұқсат етеді. Қалыпты қолданбалар үшін ешқашан қажет болмайды."</string>
-    <!-- no translation found for permlab_accessVoiceInteractionService (4183835260471435605) -->
-    <skip />
-    <!-- no translation found for permdesc_accessVoiceInteractionService (836587728238433459) -->
-    <skip />
+    <string name="permlab_accessVoiceInteractionService" msgid="4183835260471435605">"Дауыстық интерактивті қызметпен өзара әрекеттесу"</string>
+    <string name="permdesc_accessVoiceInteractionService" msgid="836587728238433459">"Ұстаушыға ағымда белсенді дауыстық интерактивті қызметпен өзара әрекеттесу мүмкіндігін береді. Қалыпты қолданбалар үшін ешқашан қажет болмауы тиіс."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Кілтсөз ережелерін тағайындау"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"Экран бекітпесінің құпия сөздерінің және PIN кодтарының ұзындығын және оларда рұқсат етілген таңбаларды басқару."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Экранды ашу әркеттерін бақылау"</string>
@@ -1848,6 +1846,10 @@
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Босату алдында PIN кодын сұрау"</string>
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"Босату алдында бекітпесін ашу өрнегін сұрау"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Босату алдында құпия сөзді сұрау"</string>
+    <!-- no translation found for package_installed_device_owner (8420696545959087545) -->
+    <skip />
+    <!-- no translation found for package_deleted_device_owner (7650577387493101353) -->
+    <skip />
     <string name="battery_saver_description" msgid="1960431123816253034">"Батареяның қызмет көрсету мерзімін жақсарту үшін батарея үнемдегіш құрылғының өнімділігін төмендетеді және дірілді, орынды анықтау қызметтерін және фондық деректердің көпшілігін шектейді. Электрондық пошта, хабар алмасу және синхрондауға негізделген басқа қолданбалар ашқанша жаңартылмауы мүмкін.\n\nБатарея үнемдегіш құрылғы зарядталып жатқанда автоматты түрде өшеді."</string>
     <string name="downtime_condition_summary" msgid="8761776337475705749">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> уақытында әрекетсіздік аяқталғанша"</string>
     <string name="downtime_condition_line_one" msgid="8762708714645352010">"Бос тұру уақыты аяқталғанша"</string>

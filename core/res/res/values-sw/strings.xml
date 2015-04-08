@@ -129,14 +129,10 @@
   <string-array name="wfcOperatorErrorNotificationMessages">
   </string-array>
     <string name="wfcSpnFormat" msgid="8211621332478306568">"%s"</string>
-    <!-- no translation found for wifi_calling_off_summary (8720659586041656098) -->
-    <skip />
-    <!-- no translation found for wfc_mode_wifi_preferred_summary (1994113411286935263) -->
-    <skip />
-    <!-- no translation found for wfc_mode_cellular_preferred_summary (5920549484600758786) -->
-    <skip />
-    <!-- no translation found for wfc_mode_wifi_only_summary (2379919155237869320) -->
-    <skip />
+    <string name="wifi_calling_off_summary" msgid="8720659586041656098">"Imezimwa"</string>
+    <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Inayopendelea Wi-Fi"</string>
+    <string name="wfc_mode_cellular_preferred_summary" msgid="5920549484600758786">"Inayopendelea mitandao ya simu za mkononi"</string>
+    <string name="wfc_mode_wifi_only_summary" msgid="2379919155237869320">"Wi-Fi pekee"</string>
     <string name="cfTemplateNotForwarded" msgid="1683685883841272560">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: Haijatumiwa mwingine"</string>
     <string name="cfTemplateForwarded" msgid="1302922117498590521">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
     <string name="cfTemplateForwardedTime" msgid="9206251736527085256">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g> baada ya sekunde <xliff:g id="TIME_DELAY">{2}</xliff:g>"</string>
@@ -644,10 +640,8 @@
     <string name="permlab_performCdmaProvisioning" product="tv" msgid="3485391974208100809">"anzisha usanidi wa runinga ya CDMA moja kwa moja"</string>
     <string name="permlab_performCdmaProvisioning" product="default" msgid="5604848095315421425">"anzisha moja kwa moja usanidi wa simu ya CDMA"</string>
     <string name="permdesc_performCdmaProvisioning" msgid="1994193538802314186">"Inaruhusu programu kuanza ugawaji wa CDMA. Programu hasidi zinaweza anza ugawaji wa CDMA usio wa lazima."</string>
-    <!-- no translation found for permlab_performSimActivation (1651116521896665009) -->
-    <skip />
-    <!-- no translation found for permdesc_performSimActivation (1778214876348917401) -->
-    <skip />
+    <string name="permlab_performSimActivation" msgid="1651116521896665009">"anzisha usanidi wa SIM kadi"</string>
+    <string name="permdesc_performSimActivation" msgid="1778214876348917401">"Inaruhusu programu kushughulikia maombi ya kuanza kutumia SIM kadi. Programu inaweza kuanzisha SIM kadi moja kwa moja au inaweza kutoa mamlaka ya kuanzisha kwa programu nyingine."</string>
     <string name="permlab_locationUpdates" msgid="7785408253364335740">"dhibiti arifa za usasishaji mahali"</string>
     <string name="permdesc_locationUpdates" msgid="1120741557891438876">"Huruhusu kuwasha au kuzima arifa za masasisho ya mahali kutoka kwa redio. Sio ya kutumiwa kwenye programu za kawaida."</string>
     <string name="permlab_checkinProperties" msgid="7855259461268734914">"fikia mipangilio ya ukaguzi"</string>
@@ -1846,6 +1840,10 @@
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Omba PIN kabla hujabandua"</string>
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"Omba mchoro wa kufungua kabla hujabandua"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Omba nenosiri kabla hujabandua"</string>
+    <!-- no translation found for package_installed_device_owner (8420696545959087545) -->
+    <skip />
+    <!-- no translation found for package_deleted_device_owner (7650577387493101353) -->
+    <skip />
     <string name="battery_saver_description" msgid="1960431123816253034">"Kusaidia kuboresha muda wa matumizi ya betri, inayookoa betri hupunguza utendaji wa kifaa chako na kupunguza mtetemo, huduma za utambuzi wa mahali, na data nyingi ya chini chini. Barua pepe, ujumbe na programu nyingine zinazotege,ea usawazishaji huenda zisisasishwe usipozifungua.\n\nInayookoa betri hujizima kiotomatiki kifaa chako kinapokuwa kinachaji."</string>
     <string name="downtime_condition_summary" msgid="8761776337475705749">"Hadi <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> wakati wa kutotenda kazi kwa kifaa chako unapoisha"</string>
     <string name="downtime_condition_line_one" msgid="8762708714645352010">"Hadi muda wako wa hali tuli utakapoisha"</string>

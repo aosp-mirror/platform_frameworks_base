@@ -855,10 +855,8 @@
     <string name="permdesc_removeDrmCertificates" msgid="7272999075113400993">"Permite unei aplicații să elimine certificatele DRM. Nu ar trebui să fie necesară pentru aplicațiile obișnuite."</string>
     <string name="permlab_bindCarrierMessagingService" msgid="1490229371796969158">"se conectează la un serviciu de mesagerie oferit de operator"</string>
     <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"Permite aplicației să se conecteze la interfața de nivel superior a unui serviciu de mesagerie oferit de operator. Nu ar trebui să fie niciodată necesară pentru aplicațiile obișnuite."</string>
-    <!-- no translation found for permlab_accessVoiceInteractionService (4183835260471435605) -->
-    <skip />
-    <!-- no translation found for permdesc_accessVoiceInteractionService (836587728238433459) -->
-    <skip />
+    <string name="permlab_accessVoiceInteractionService" msgid="4183835260471435605">"interacționează cu serviciul de interacțiune vocală"</string>
+    <string name="permdesc_accessVoiceInteractionService" msgid="836587728238433459">"Permite aplicației să interacționeze cu serviciul activ de interacțiune vocală. Nu ar trebui să fie necesară niciodată pentru aplicațiile obișnuite."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Setaţi reguli pentru parolă"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"Stabiliți lungimea și tipul de caractere permise pentru parolele și codurile PIN de blocare a ecranului."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Monitorizaţi încercările de deblocare a ecranului"</string>
@@ -1857,6 +1855,10 @@
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Solicită codul PIN înainte de a anula fixarea"</string>
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"Solicită modelul pentru deblocare înainte de a anula fixarea"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Solicită parola înainte de a anula fixarea"</string>
+    <!-- no translation found for package_installed_device_owner (8420696545959087545) -->
+    <skip />
+    <!-- no translation found for package_deleted_device_owner (7650577387493101353) -->
+    <skip />
     <string name="battery_saver_description" msgid="1960431123816253034">"Pentru a îmbunătăți autonomia bateriei, funcția de economisire a energiei reduce performanțele dispozitivului și limitează vibrațiile, serviciile de localizare și majoritatea datelor de fundal. Este posibil ca e-mailurile, mesageria și alte aplicații care depind de sincronizare să nu se actualizeze dacă nu le deschideți.\n\nFuncția de economisire a energiei se dezactivează automat când dispozitivul se încarcă."</string>
     <string name="downtime_condition_summary" msgid="8761776337475705749">"Până când inactivitatea dvs. se încheie la <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="downtime_condition_line_one" msgid="8762708714645352010">"Până la finalizarea perioadei de inactivitate"</string>

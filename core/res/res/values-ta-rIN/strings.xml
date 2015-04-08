@@ -129,14 +129,10 @@
   <string-array name="wfcOperatorErrorNotificationMessages">
   </string-array>
     <string name="wfcSpnFormat" msgid="8211621332478306568">"%s"</string>
-    <!-- no translation found for wifi_calling_off_summary (8720659586041656098) -->
-    <skip />
-    <!-- no translation found for wfc_mode_wifi_preferred_summary (1994113411286935263) -->
-    <skip />
-    <!-- no translation found for wfc_mode_cellular_preferred_summary (5920549484600758786) -->
-    <skip />
-    <!-- no translation found for wfc_mode_wifi_only_summary (2379919155237869320) -->
-    <skip />
+    <string name="wifi_calling_off_summary" msgid="8720659586041656098">"முடக்கப்பட்டுள்ளது"</string>
+    <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"வைஃபைக்கு முன்னுரிமை"</string>
+    <string name="wfc_mode_cellular_preferred_summary" msgid="5920549484600758786">"செல்லுலாருக்கு முன்னுரிமை"</string>
+    <string name="wfc_mode_wifi_only_summary" msgid="2379919155237869320">"வைஃபை மட்டும்"</string>
     <string name="cfTemplateNotForwarded" msgid="1683685883841272560">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: பகிரப்படவில்லை"</string>
     <string name="cfTemplateForwarded" msgid="1302922117498590521">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
     <string name="cfTemplateForwardedTime" msgid="9206251736527085256">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="TIME_DELAY">{2}</xliff:g> வினாடிகளுக்குப் பிறகு <xliff:g id="DIALING_NUMBER">{1}</xliff:g> ஐப் பகிர்"</string>
@@ -644,10 +640,8 @@
     <string name="permlab_performCdmaProvisioning" product="tv" msgid="3485391974208100809">"CDMA TV அமைவிலிருந்து நேரடியாக தொடங்குதல்"</string>
     <string name="permlab_performCdmaProvisioning" product="default" msgid="5604848095315421425">"CDMA தொலைபேசி அமைவை நேரடியாகத் தொடங்குதல்"</string>
     <string name="permdesc_performCdmaProvisioning" msgid="1994193538802314186">"CDMA வழங்கலைத் தொடங்க, பயன்பாட்டை அனுமதிக்கிறது. தீங்குவிளைவிக்கும் பயன்பாடுகள் தேவையில்லாமல் CDMA வழங்கலைத் தொடங்கலாம்."</string>
-    <!-- no translation found for permlab_performSimActivation (1651116521896665009) -->
-    <skip />
-    <!-- no translation found for permdesc_performSimActivation (1778214876348917401) -->
-    <skip />
+    <string name="permlab_performSimActivation" msgid="1651116521896665009">"SIM கார்டு அமைவைத் துவங்கவும்"</string>
+    <string name="permdesc_performSimActivation" msgid="1778214876348917401">"பயன்பாட்டை SIMஐச் செயல்படுத்துவதற்கான கோரிக்கைகளைக் கையாள அனுமதிக்கும். இந்தப் பயன்பாடு நேரடியாகச் செயல்படுத்தலை நடத்தலாம் அல்லது மற்றொரு பயன்பாட்டிடம் பொறுப்பை ஒப்படைக்கலாம்."</string>
     <string name="permlab_locationUpdates" msgid="7785408253364335740">"இட புதுப்பிப்பு அறிவிப்புகளைக் கட்டுப்படுத்துதல்"</string>
     <string name="permdesc_locationUpdates" msgid="1120741557891438876">"ரேடியோவிலிருந்து இருப்பிட புதுப்பிப்பு அறிவிப்புகளை இயக்க/முடக்க பயன்பாட்டை அனுமதிக்கிறது. சாதாரண பயன்பாடுகள் பயன்படுத்தாது."</string>
     <string name="permlab_checkinProperties" msgid="7855259461268734914">"செக்இன் பண்புகளின் அணுகல்"</string>
@@ -854,10 +848,8 @@
     <string name="permdesc_removeDrmCertificates" msgid="7272999075113400993">"DRM சான்றிதழ்களை அகற்ற, பயன்பாட்டை அனுமதிக்கிறது. சாதாரண பயன்பாடுகளுக்கு எப்போதுமே தேவைப்படாது."</string>
     <string name="permlab_bindCarrierMessagingService" msgid="1490229371796969158">"மொபைல் நிறுவனச் செய்தியிடல் சேவையுடன் இணைத்தல்"</string>
     <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"மொபைல் நிறுவனச் செய்தியிடல் சேவையின் உயர்-நிலை இடைமுகத்துடன் ஹோல்டரை இணைக்க அனுமதிக்கும். இயல்பான பயன்பாடுகளுக்குத் தேவைப்படாது."</string>
-    <!-- no translation found for permlab_accessVoiceInteractionService (4183835260471435605) -->
-    <skip />
-    <!-- no translation found for permdesc_accessVoiceInteractionService (836587728238433459) -->
-    <skip />
+    <string name="permlab_accessVoiceInteractionService" msgid="4183835260471435605">"குரல் மூலம் தொடர்புகொள்வதற்கான சேவையுடன் ஊடாடுதல்"</string>
+    <string name="permdesc_accessVoiceInteractionService" msgid="836587728238433459">"தற்போது செயலில் உள்ள குரல் மூலம் தொடர்புகொள்வதற்கான சேவையுடன் ஊடாட ஹோல்டரை அனுமதிக்கும். இயல்பு பயன்பாடுகளுக்கு எப்போதும் தேவைப்படாது."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"கடவுச்சொல் விதிகளை அமைக்கவும்"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"திரைப் பூட்டின் கடவுச்சொற்கள் மற்றும் பின்களில் அனுமதிக்கப்படும் நீளத்தையும் எழுத்துக்குறிகளையும் கட்டுப்படுத்தும்."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"திரைத் திறக்க முயற்சிகளைக் கண்காணித்தல்"</string>
@@ -1848,6 +1840,10 @@
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"அகற்றும் முன் PINஐக் கேள்"</string>
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"அகற்றும் முன் திறத்தல் வடிவத்தைக் கேள்"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"அகற்றும் முன் கடவுச்சொல்லைக் கேள்"</string>
+    <!-- no translation found for package_installed_device_owner (8420696545959087545) -->
+    <skip />
+    <!-- no translation found for package_deleted_device_owner (7650577387493101353) -->
+    <skip />
     <string name="battery_saver_description" msgid="1960431123816253034">"பேட்டரி ஆயுளை மேம்படுத்த, பேட்டரி சேமிப்பான் உங்கள் சாதனத்தின் செயல்திறனைக் குறைத்து, அதிர்வு, இடச் சேவைகள் மற்றும் பெரும்பாலான பின்புலத் தரவு போன்றவற்றைக் கட்டுப்படுத்துகிறது. ஒத்திசைவைச் சார்ந்துள்ள மின்னஞ்சல், செய்தியிடல் மற்றும் பிற பயன்பாடுகளானது அவற்றைத் திறக்கும்வரையில் புதுப்பிக்கப்படாமல் போகக்கூடும்.\n\nஉங்கள் ஃபோன் சார்ஜ் செய்யப்படும்போது, பேட்டரி சேமிப்பான் தானாகவே முடங்கும்."</string>
     <string name="downtime_condition_summary" msgid="8761776337475705749">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> முடியும் வரை"</string>
     <string name="downtime_condition_line_one" msgid="8762708714645352010">"செயலற்ற நேரம் முடியும் வரை"</string>

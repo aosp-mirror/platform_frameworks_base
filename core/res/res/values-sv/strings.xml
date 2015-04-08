@@ -854,10 +854,8 @@
     <string name="permdesc_removeDrmCertificates" msgid="7272999075113400993">"Tillåter ett program att ta bort DRM-certifikat. Behövs inte för vanliga appar."</string>
     <string name="permlab_bindCarrierMessagingService" msgid="1490229371796969158">"binda till en operatörs meddelandetjänst"</string>
     <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"Innehavaren tillåts att binda till den översta nivåns gränssnitt för en operatörs meddelandetjänst. Ska inte behövas för vanliga appar."</string>
-    <!-- no translation found for permlab_accessVoiceInteractionService (4183835260471435605) -->
-    <skip />
-    <!-- no translation found for permdesc_accessVoiceInteractionService (836587728238433459) -->
-    <skip />
+    <string name="permlab_accessVoiceInteractionService" msgid="4183835260471435605">"interagera med rösttjänsten"</string>
+    <string name="permdesc_accessVoiceInteractionService" msgid="836587728238433459">"Innehavaren får interagera med den för tillfället aktiva rösttjänsten. Detta ska inte behövas för vanliga appar."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Ange lösenordsregler"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"Styr tillåten längd och tillåtna tecken i lösenord och pinkoder för skärmlåset."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Övervaka försök att låsa upp skärmen"</string>
@@ -1848,6 +1846,10 @@
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Be om pinkod innan skärmen slutar fästas"</string>
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"Be om upplåsningsmönster innan skärmen slutar fästas"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Be om lösenord innan skärmen slutar fästas"</string>
+    <!-- no translation found for package_installed_device_owner (8420696545959087545) -->
+    <skip />
+    <!-- no translation found for package_deleted_device_owner (7650577387493101353) -->
+    <skip />
     <string name="battery_saver_description" msgid="1960431123816253034">"I batterisparläget reduceras enhetens prestanda så att batteriet ska räcka längre och vibration, platstjänster samt den mesta användningen av bakgrundsdata begränsas. Det kan hända att appar för e-post, sms och annat som kräver synkronisering inte uppdateras förrän du öppnar dem.\n\nBatterisparläget inaktiveras automatiskt när enheten laddas."</string>
     <string name="downtime_condition_summary" msgid="8761776337475705749">"Tills avbrottstiden är slut <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="downtime_condition_line_one" msgid="8762708714645352010">"Tills avbrottstiden är slut"</string>

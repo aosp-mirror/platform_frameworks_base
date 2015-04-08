@@ -129,14 +129,10 @@
   <string-array name="wfcOperatorErrorNotificationMessages">
   </string-array>
     <string name="wfcSpnFormat" msgid="8211621332478306568">"%s"</string>
-    <!-- no translation found for wifi_calling_off_summary (8720659586041656098) -->
-    <skip />
-    <!-- no translation found for wfc_mode_wifi_preferred_summary (1994113411286935263) -->
-    <skip />
-    <!-- no translation found for wfc_mode_cellular_preferred_summary (5920549484600758786) -->
-    <skip />
-    <!-- no translation found for wfc_mode_wifi_only_summary (2379919155237869320) -->
-    <skip />
+    <string name="wifi_calling_off_summary" msgid="8720659586041656098">"ປິດ"</string>
+    <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"ເລືອກໃຊ້ Wi​-Fi ກ່ອນ"</string>
+    <string name="wfc_mode_cellular_preferred_summary" msgid="5920549484600758786">"ເລືອກໃຊ້ເຊລລູລາກ່ອນ"</string>
+    <string name="wfc_mode_wifi_only_summary" msgid="2379919155237869320">"Wi​-Fi ເທົ່າ​ນັ້ນ"</string>
     <string name="cfTemplateNotForwarded" msgid="1683685883841272560">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: ບໍ່ຖືກສົ່ງຕໍ່"</string>
     <string name="cfTemplateForwarded" msgid="1302922117498590521">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
     <string name="cfTemplateForwardedTime" msgid="9206251736527085256">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g> ຫຼັງຈາກ <xliff:g id="TIME_DELAY">{2}</xliff:g> ວິນາທີ"</string>
@@ -644,10 +640,8 @@
     <string name="permlab_performCdmaProvisioning" product="tv" msgid="3485391974208100809">"ເລີ່ມ​ຕົ້ນ​ການ​ຕັ້ງ CDMA ໂທລະພາບໂດຍ​ກົງ"</string>
     <string name="permlab_performCdmaProvisioning" product="default" msgid="5604848095315421425">"ເລີ່ມການຕັ້ງຄ່າໂທລະສັບ CDMA ໂດຍກົງ"</string>
     <string name="permdesc_performCdmaProvisioning" msgid="1994193538802314186">"ອະນຸຍາດໃຫ້ແອັບຯເລີ່ມການເຮັດວຽກຂອງ CDMA. ແອັບຯທີ່ເປັນອັນຕະລາຍອາດເລີ່ມການເຮັດວຽກຂອງ CDMA ໂດຍບໍ່ຈຳເປັນ."</string>
-    <!-- no translation found for permlab_performSimActivation (1651116521896665009) -->
-    <skip />
-    <!-- no translation found for permdesc_performSimActivation (1778214876348917401) -->
-    <skip />
+    <string name="permlab_performSimActivation" msgid="1651116521896665009">"ເລີ່ມ​ຕົ້ນ​ການ​ຕັ້ງ​ແຜ່ນ SIM"</string>
+    <string name="permdesc_performSimActivation" msgid="1778214876348917401">"ອະ​ນຸ​ຍາດ​ໃຫ້​ແອັບ​ຈັດ​ການ​ຄຳ​ຂໍ​ການ​ເປີດ​ນຳ​ໃຊ້ SIM. ແອັບ​ອາດ​ຈະ​ເຮັດ​ການ​ເປີດ​ນຳ​ໃຊ້​ໂດຍ​ກົງ ຫຼື​ມອບ​ໃຫ້​ແອັບ​ອື່ນ​ເຮັດ."</string>
     <string name="permlab_locationUpdates" msgid="7785408253364335740">"ຄວບຄຸມການແຈ້ງເຕືອນອັບເດດສະຖານທີ່"</string>
     <string name="permdesc_locationUpdates" msgid="1120741557891438876">"ອະນຸຍາດໃຫ້ແອັບຯ ເປີດ/ປິດ ການເຮັດວຽກຂອງການແຈ້ງເຕືອນອັບເດດສະຖານທີ່ຈາກວິທະຍຸ. ແອັບຯທົ່ວໄປບໍ່ຈຳເປັນຕ້ອງໃຊ້."</string>
     <string name="permlab_checkinProperties" msgid="7855259461268734914">"ເຂົ້າເຖິງຄຸນສົມບັດການເຊັກອິນ"</string>
@@ -1846,6 +1840,10 @@
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"​ຖາມ​ຫາ PIN ກ່ອນ​ຍົກ​ເລີກ​ການປັກ​ໝຸດ"</string>
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"​ຖາມ​ຫາ​ຮູບ​ແບບ​ປົດ​ລັອກ​ກ່ອນ​ຍົກ​ເລີກ​ການ​ປັກ​ໝຸດ"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"​ຖາມ​ຫາ​ລະ​ຫັດ​ຜ່ານ​ກ່ອນ​ຍົກ​ເລີກ​ການ​ປັກ​ໝຸດ"</string>
+    <!-- no translation found for package_installed_device_owner (8420696545959087545) -->
+    <skip />
+    <!-- no translation found for package_deleted_device_owner (7650577387493101353) -->
+    <skip />
     <string name="battery_saver_description" msgid="1960431123816253034">"ເພື່ອ​ຊ່ວຍ​ເພີ່ມ​ອາ​ຍຸ​ແບັດ​ເຕີ​ຣີ, ຕົວ​ປະ​ຢັດ​ໄຟ​ແບັດ​ເຕີ​ຣີ​ຫຼຸດ​ປະ​ສິດ​ທິ​ພາບ​ການ​ເຮັດ​ວຽກ​ຂອງ​ອຸ​ປະ​ກອນ​ຂອງ​ທ່ານ​ລົງ ແລະ​ຈຳ​ກັດ​ການ​ສັ່ນ, ການ​ບໍ​ລິ​ການ​ຫາທີ່ຕັ້ງ, ແລະ​ຂໍ້​ມູນ​ພື້ນ​ຫຼັງ​ເກືອບ​ທັງ​ໝົດ. ອີ​ເມວ, ການ​ສົ່ງ​ຂໍ້​ຄວາມ, ແລະ​ແອັບອື່ນໆ​ທີ່ອາ​ໄສການ​ຊິງ​ຄ໌​ອາດ​ຈະ​ບໍ່​ອັບ​ເດດ ນອກ​ຈາກວ່າ​ທ່ານ​ເປີດ​ມັນ.\n\nຕົວ​ປະ​ຢັດ​ໄຟ​ແບັດ​ເຕີ​ຣີຈະ​ປິດ​ອັດ​ຕະ​ໂນ​ມັດ ເມື່ອ​ອຸ​ປະ​ກອນ​ຂອງ​ທ່ານ​ກຳ​ລັງ​ສາກຢູ່."</string>
     <string name="downtime_condition_summary" msgid="8761776337475705749">"ຈົນ​ກວ່າ​ດາວ​ທາມ​ຂອງ​ທ່ານ​ຈະ​ສິ້ນ​ສຸດ​ທີ່ <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="downtime_condition_line_one" msgid="8762708714645352010">"​ຈົນ​ກວ່າ​ເວ​ລາ​ປິດ​ເຮັດ​ວຽກ​ຂອງ​ທ່ານ​ສິ້ນ​ສຸດ​ລົງ"</string>

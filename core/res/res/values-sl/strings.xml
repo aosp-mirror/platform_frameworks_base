@@ -856,10 +856,8 @@
     <string name="permdesc_removeDrmCertificates" msgid="7272999075113400993">"Aplikaciji omogoča odstranjevanje potrdil za upravljanje digitalnih pravic. Tega ni treba nikoli uporabiti za navadne aplikacije."</string>
     <string name="permlab_bindCarrierMessagingService" msgid="1490229371796969158">"povezovanje z operaterjevo sporočilno storitvijo"</string>
     <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"Imetniku omogoča povezovanje z vmesnikom operaterjeve sporočilne storitve najvišje ravni. To naj ne bi bilo nikoli potrebno za navadne aplikacije."</string>
-    <!-- no translation found for permlab_accessVoiceInteractionService (4183835260471435605) -->
-    <skip />
-    <!-- no translation found for permdesc_accessVoiceInteractionService (836587728238433459) -->
-    <skip />
+    <string name="permlab_accessVoiceInteractionService" msgid="4183835260471435605">"uporaba storitve glasovne interakcije"</string>
+    <string name="permdesc_accessVoiceInteractionService" msgid="836587728238433459">"Imetniku omogoča uporabo trenutno aktivne storitve glasovne interakcije. Tega ni treba nikoli uporabiti za navadne aplikacije."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Nastavitev pravil za geslo"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"Nadzor nad dolžino in znaki, ki so dovoljeni v geslih in kodah PIN za odklepanje zaslona."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"nadzor nad poskusi odklepanja zaslona"</string>
@@ -1866,6 +1864,10 @@
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Pred odpenjanjem vprašaj za PIN"</string>
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"Pred odpenjanjem vprašaj za vzorec za odklepanje"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Pred odpenjanjem vprašaj za geslo"</string>
+    <!-- no translation found for package_installed_device_owner (8420696545959087545) -->
+    <skip />
+    <!-- no translation found for package_deleted_device_owner (7650577387493101353) -->
+    <skip />
     <string name="battery_saver_description" msgid="1960431123816253034">"Varčevanje z energijo akumulatorja podaljša čas njegovega delovanja tako, da zmanjša zmogljivost delovanja naprave in omeji vibriranje, lokacijske storitve ter prenos večine podatkov v ozadju. Aplikacije za e-pošto, sporočanje in drugo, ki uporabljajo sinhroniziranje, se morda ne posodabljajo, razen če jih odprete.\n\nVarčevanje z energijo akumulatorja se samodejno izklopi med polnjenjem akumulatorja naprave."</string>
     <string name="downtime_condition_summary" msgid="8761776337475705749">"Do konca prekinitve delovanja ob <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="downtime_condition_line_one" msgid="8762708714645352010">"Do konca časa nedelovanja"</string>

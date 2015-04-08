@@ -129,14 +129,10 @@
   <string-array name="wfcOperatorErrorNotificationMessages">
   </string-array>
     <string name="wfcSpnFormat" msgid="8211621332478306568">"%s"</string>
-    <!-- no translation found for wifi_calling_off_summary (8720659586041656098) -->
-    <skip />
-    <!-- no translation found for wfc_mode_wifi_preferred_summary (1994113411286935263) -->
-    <skip />
-    <!-- no translation found for wfc_mode_cellular_preferred_summary (5920549484600758786) -->
-    <skip />
-    <!-- no translation found for wfc_mode_wifi_only_summary (2379919155237869320) -->
-    <skip />
+    <string name="wifi_calling_off_summary" msgid="8720659586041656098">"ပိတ်ထားရသည်"</string>
+    <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"ဝိုင်ဖိုင်အား ပိုနှစ်သက်သော"</string>
+    <string name="wfc_mode_cellular_preferred_summary" msgid="5920549484600758786">"ဆယ်လူလာအား ပိုနှစ်သက်သော"</string>
+    <string name="wfc_mode_wifi_only_summary" msgid="2379919155237869320">"ကြိုးမဲ့အင်တာနက် သာလျှင်"</string>
     <string name="cfTemplateNotForwarded" msgid="1683685883841272560">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: ထပ်ဆင့်မပို့နိုင်ပါ"</string>
     <string name="cfTemplateForwarded" msgid="1302922117498590521">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
     <string name="cfTemplateForwardedTime" msgid="9206251736527085256">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g> နောက် <xliff:g id="TIME_DELAY">{2}</xliff:g> စက္ကန့်"</string>
@@ -644,10 +640,8 @@
     <string name="permlab_performCdmaProvisioning" product="tv" msgid="3485391974208100809">"CDMA TV ပြင်ဆင်သတ်မှတ်မှုအား တိုက်ရိုက်စတင်ရန်"</string>
     <string name="permlab_performCdmaProvisioning" product="default" msgid="5604848095315421425">"CDMAဖုန်း အစသတ်မှတ်ခြင်းကို တိုက်ရိုက်စတင်ရန်"</string>
     <string name="permdesc_performCdmaProvisioning" msgid="1994193538802314186">"appအား CDMA အတွက် စီမံလုပ်ကိုင်မှုကို စတင်ခွင့် ပြုသည်။ ကြံဖန် appများက မလိုအပ်ဘဲနှင့် CDMA အတွက် စီမံလုပ်ကိုင်မှုကို စတင်နိုင်ကြသည်။"</string>
-    <!-- no translation found for permlab_performSimActivation (1651116521896665009) -->
-    <skip />
-    <!-- no translation found for permdesc_performSimActivation (1778214876348917401) -->
-    <skip />
+    <string name="permlab_performSimActivation" msgid="1651116521896665009">"SIM card စင် ဖွင့်လှစ်သတ်မှတ်ရန်"</string>
+    <string name="permdesc_performSimActivation" msgid="1778214876348917401">"SIM စသုံးရန် တောင်းဆိုချက်များအား ကိုင်တွယ်ရန် app အား ခွင့်ပြုပါ။ App သည် စဖွင့်သုံးမှုအား တိုက်ရိုက် လုပ်ဆောင်မည် သို့မဟုတ် အခြား App အား ကိုယ်စားလုပ်စေမည်။"</string>
     <string name="permlab_locationUpdates" msgid="7785408253364335740">"တည်နေရာအဆင့်မြှင့်ခြင်းသတိပေးချက်အားထိန်းချုပ်ရန်"</string>
     <string name="permdesc_locationUpdates" msgid="1120741557891438876">"appအား ရေဒီယိုထံမှ တည်နေရာ မွမ်းမံမှု အကြောင်းကြားစာများကို ပိတ်/ဖွင့်ခွင့် ပြုသည်။ သာမန် appများ အသုံးပြုရန် မဟုတ်နိုင်ပါ။"</string>
     <string name="permlab_checkinProperties" msgid="7855259461268734914">"ချက်ခ်အင်ဂုဏ်သတ္တိများအား ဝင်ရောက်ချိတ်ဆက်ခြင်း"</string>
@@ -1846,6 +1840,10 @@
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"ပင်မဖြုတ်မီမှာ PIN ကို မေးကြည့်ရန်"</string>
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"ပင်မဖြုတ်မီမှာ သော့ဖွင့် ရေးဆွဲမှုပုံစံကို မေးကြည့်ရန်"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"ပင်မဖြုတ်မီမှာ စကားဝှက်ကို မေးကြည့်ရန်"</string>
+    <!-- no translation found for package_installed_device_owner (8420696545959087545) -->
+    <skip />
+    <!-- no translation found for package_deleted_device_owner (7650577387493101353) -->
+    <skip />
     <string name="battery_saver_description" msgid="1960431123816253034">"ဘက်ထရီသက်တမ်း ကြာရှည်ခံရန်၊ ဘက်ထရီအားထိန်းသည် သင့်ကိရိယာ၏ ဆောင်ရွက်ချက်ကို  လျှော့ပေးပြီး တုန်ခါမှု၊ တည်နေရာဝန်ဆောင်မှုများနှင့်၊ နောက်ခံဒေတာအများစုကို ကန့်သတ်ပေး၏။ စင့်လုပ်ပေးရလေ့ရှိသည့် အီးမေး၊ စာပို့ခြင်းနှင့်၊ အခြားအပလီကေးရှင်းများကို ၎င်းတို့အား သင် ဖွင့်မှသာ အဆင့်မြှင့်မွမ်းမံမည်ဖြစ်၏။ \n\n ကိရိယာအား အားသွင်းနေစဉ် ဘက်ထရီအားထိန်းအား အလိုအလျောက် ပိတ်ထားသည်။"</string>
     <string name="downtime_condition_summary" msgid="8761776337475705749">"သင်၏ စက်ရပ်ချိန် <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> မှာ ပြီးဆုံးသည့် အထိ။"</string>
     <string name="downtime_condition_line_one" msgid="8762708714645352010">"သင့်ကျချိန်အဆုံးအထိ"</string>

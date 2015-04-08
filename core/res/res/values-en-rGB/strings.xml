@@ -1840,6 +1840,10 @@
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Ask for PIN before unpinning"</string>
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"Ask for unlock pattern before unpinning"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Ask for password before unpinning"</string>
+    <!-- no translation found for package_installed_device_owner (8420696545959087545) -->
+    <skip />
+    <!-- no translation found for package_deleted_device_owner (7650577387493101353) -->
+    <skip />
     <string name="battery_saver_description" msgid="1960431123816253034">"To help improve battery life, battery saver reduces your device’s performance and limits vibration, location services and most background data. Email, messaging, and other apps that rely on syncing may not update unless you open them.\n\nBattery saver turns off automatically when your device is charging."</string>
     <string name="downtime_condition_summary" msgid="8761776337475705749">"Until your downtime ends at <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="downtime_condition_line_one" msgid="8762708714645352010">"Until your downtime ends"</string>

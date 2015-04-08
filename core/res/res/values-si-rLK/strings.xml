@@ -129,14 +129,10 @@
   <string-array name="wfcOperatorErrorNotificationMessages">
   </string-array>
     <string name="wfcSpnFormat" msgid="8211621332478306568">"%s"</string>
-    <!-- no translation found for wifi_calling_off_summary (8720659586041656098) -->
-    <skip />
-    <!-- no translation found for wfc_mode_wifi_preferred_summary (1994113411286935263) -->
-    <skip />
-    <!-- no translation found for wfc_mode_cellular_preferred_summary (5920549484600758786) -->
-    <skip />
-    <!-- no translation found for wfc_mode_wifi_only_summary (2379919155237869320) -->
-    <skip />
+    <string name="wifi_calling_off_summary" msgid="8720659586041656098">"ක්‍රියාවිරහිතයි"</string>
+    <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Wi-Fi වඩා කැමතියි"</string>
+    <string name="wfc_mode_cellular_preferred_summary" msgid="5920549484600758786">"සෙලියුලර් වඩා කැමතියි"</string>
+    <string name="wfc_mode_wifi_only_summary" msgid="2379919155237869320">"Wi-Fi පමණයි"</string>
     <string name="cfTemplateNotForwarded" msgid="1683685883841272560">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: ඉදිරියට නොයවන ලදි"</string>
     <string name="cfTemplateForwarded" msgid="1302922117498590521">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
     <string name="cfTemplateForwardedTime" msgid="9206251736527085256">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: තත්පර <xliff:g id="TIME_DELAY">{2}</xliff:g> ට පසුව <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
@@ -644,10 +640,8 @@
     <string name="permlab_performCdmaProvisioning" product="tv" msgid="3485391974208100809">"කෙළින්ම CDMA රුපවාහිනී ස්ථාපනය ආරම්භ කරන්න"</string>
     <string name="permlab_performCdmaProvisioning" product="default" msgid="5604848095315421425">"CDMA දුරකථන පිහිටුම සෘජුව ඇරඹීම"</string>
     <string name="permdesc_performCdmaProvisioning" msgid="1994193538802314186">"යෙදුමට CDMA ප්‍රතිපාදන ආරම්භ කිරීමට ඉඩදෙන්න. අනිෂ්ට යෙදුම් අනවශ්‍ය ලෙස CDMA ප්‍රතිපාදන ආරම්භ කළ හැක."</string>
-    <!-- no translation found for permlab_performSimActivation (1651116521896665009) -->
-    <skip />
-    <!-- no translation found for permdesc_performSimActivation (1778214876348917401) -->
-    <skip />
+    <string name="permlab_performSimActivation" msgid="1651116521896665009">"SIM කාඩ්පත පිහිටුවීම අරඹන්න"</string>
+    <string name="permdesc_performSimActivation" msgid="1778214876348917401">"යෙදුමට SIM සක්‍රිය කිරීම් ඉල්ලීම් හැසිරවීමට ඉඩ දෙයි. යෙදුම සෘජුවම සක්‍රිය කිරීම සිදු කිරීමට හෝ වෙනත් යෙදුමකට පැවරීමට හැකිය."</string>
     <string name="permlab_locationUpdates" msgid="7785408253364335740">"ස්ථාන යාවත්කාලීන දැනුම්දීම් පාලනය කරන්න"</string>
     <string name="permdesc_locationUpdates" msgid="1120741557891438876">"ස්ථානීය යාවත්කාලින දැනුම්දීම් රේඩියෝවෙන් සබල/අබල කිරීමට යෙදුමට අවසර දෙන්න. සාමාන්‍ය යෙදුම්වල භාවිතය සඳහා නොවේ."</string>
     <string name="permlab_checkinProperties" msgid="7855259461268734914">"පිරික්සුම් ගුණාංග වෙත ප්‍රවේශය"</string>
@@ -1848,6 +1842,10 @@
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"ගැලවීමට පෙර PIN විමසන්න"</string>
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"ගැලවීමට පෙර අගුළු අරින රටාව සඳහා අසන්න"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"ගැලවීමට පෙර මුරපදය විමසන්න"</string>
+    <!-- no translation found for package_installed_device_owner (8420696545959087545) -->
+    <skip />
+    <!-- no translation found for package_deleted_device_owner (7650577387493101353) -->
+    <skip />
     <string name="battery_saver_description" msgid="1960431123816253034">"බැටරි ආයු කාලය වැඩිදියුණු කිරීමට උදවු කිරීමට, බැටරි සුරැකුම ඔබේ උපාංගයේ ක්‍රියාකාරීත්වය අඩුකරන අතර කම්පනය, පිහිටීම් සේවා, සහ බොහෝමයක් පසුබිම් දත්ත සීමා කරයි. ඔබ ඒවා විවෘත නොකරන්නේ නම් මිස ඊමේල්, පණිවිඩකරණය, සහ සමමුහුර්ත කිරීම මත රඳා පවතින වෙනත් යෙදුම් යාවත්කාලීන නොවිය හැකිය.\n\nඔබේ උපාංගය ආරෝපණය වන විට බැටරි සුරැකුම ස්වයංක්‍රියව අක්‍රිය වේ."</string>
     <string name="downtime_condition_summary" msgid="8761776337475705749">"ඔබගේ බිඳවැටුම් වේලාව <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> දී අවසන්වන තුරු"</string>
     <string name="downtime_condition_line_one" msgid="8762708714645352010">"ඔබගේ බිදවැටුම් කාලය අවසන් වන තෙක්"</string>

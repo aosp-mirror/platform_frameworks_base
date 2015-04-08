@@ -129,14 +129,10 @@
   <string-array name="wfcOperatorErrorNotificationMessages">
   </string-array>
     <string name="wfcSpnFormat" msgid="8211621332478306568">"%s"</string>
-    <!-- no translation found for wifi_calling_off_summary (8720659586041656098) -->
-    <skip />
-    <!-- no translation found for wfc_mode_wifi_preferred_summary (1994113411286935263) -->
-    <skip />
-    <!-- no translation found for wfc_mode_cellular_preferred_summary (5920549484600758786) -->
-    <skip />
-    <!-- no translation found for wfc_mode_wifi_only_summary (2379919155237869320) -->
-    <skip />
+    <string name="wifi_calling_off_summary" msgid="8720659586041656098">"बन्द गर्नुहोस्"</string>
+    <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Wi-Fi मनपराइयो"</string>
+    <string name="wfc_mode_cellular_preferred_summary" msgid="5920549484600758786">"सेलुलर मनपराइयो"</string>
+    <string name="wfc_mode_wifi_only_summary" msgid="2379919155237869320">"Wi-Fi मात्र"</string>
     <string name="cfTemplateNotForwarded" msgid="1683685883841272560">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: अगाडि पठाइएको छैन"</string>
     <string name="cfTemplateForwarded" msgid="1302922117498590521">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
     <string name="cfTemplateForwardedTime" msgid="9206251736527085256">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g> पछि <xliff:g id="TIME_DELAY">{2}</xliff:g> सेकेन्ड"</string>
@@ -644,10 +640,8 @@
     <string name="permlab_performCdmaProvisioning" product="tv" msgid="3485391974208100809">"प्रत्यक्ष CDMA TV सेटअप सुरु गर्नुहोस्"</string>
     <string name="permlab_performCdmaProvisioning" product="default" msgid="5604848095315421425">"CDMA फोन सेटअप सिधै सुरु गर्नुहोस्"</string>
     <string name="permdesc_performCdmaProvisioning" msgid="1994193538802314186">"अनुप्रयोगलाई CDMA प्रावधान सुरu गर्न अनुमति दिन्छ। खराब अनुप्रयोगहरूले अनावश्यक रूपमा CDMA प्रावधान सुरु गर्न सक्छन्।"</string>
-    <!-- no translation found for permlab_performSimActivation (1651116521896665009) -->
-    <skip />
-    <!-- no translation found for permdesc_performSimActivation (1778214876348917401) -->
-    <skip />
+    <string name="permlab_performSimActivation" msgid="1651116521896665009">"SIM कार्ड सेटअप सुरु गर्नुहोस्"</string>
+    <string name="permdesc_performSimActivation" msgid="1778214876348917401">"अनुप्रयोगलाई SIM सक्रियता अनुरोध सञ्चालन गर्न अनुमति दिन्छ। अनुप्रयोगले सक्रियता सीधै सम्पादन गर्न सक्छ वा अन्य अनुप्रयोगलाई प्रत्यायोजन गर्न सक्छ।"</string>
     <string name="permlab_locationUpdates" msgid="7785408253364335740">"स्थान अपडेट सूचनाहरू नियन्त्रण गर्नुहोस्"</string>
     <string name="permdesc_locationUpdates" msgid="1120741557891438876">"रेडियोबाट स्थान अद्यावधिक सूचनाहरूलाई सक्षम/असक्षम गर्न अनुप्रयोगलाई अनुमति दिन्छ। सामान्य अनुप्रयोगहरूबाट प्रयोग नहुने।"</string>
     <string name="permlab_checkinProperties" msgid="7855259461268734914">"परीक्षण विशेषताहरू पहुँच गर्नुहोस्"</string>
@@ -854,10 +848,8 @@
     <string name="permdesc_removeDrmCertificates" msgid="7272999075113400993">"DRM प्रमाणपत्रहरू हटाउन अनुप्रयोगलाई अनुमति दिन्छ। सामान्य अनुप्रयोगहरूको लागि कहिल्यै आवश्यकता पर्दैन।"</string>
     <string name="permlab_bindCarrierMessagingService" msgid="1490229371796969158">"वाहक मेसेजिङ सेवामा आबद्ध हुनुहोस्"</string>
     <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"धारकलाई वाहक मेसेजिङ सेवाको उच्च-स्तरको इन्टरफेसमा आबद्ध हुन अनुमति दिनुहोस्। सामान्य एपहरूको लागि कहिल्यै आवश्यकता पर्दैन।"</string>
-    <!-- no translation found for permlab_accessVoiceInteractionService (4183835260471435605) -->
-    <skip />
-    <!-- no translation found for permdesc_accessVoiceInteractionService (836587728238433459) -->
-    <skip />
+    <string name="permlab_accessVoiceInteractionService" msgid="4183835260471435605">"आवाज अन्तरक्रिया सेवासँग अन्तरक्रिया गर्नुहोस्"</string>
+    <string name="permdesc_accessVoiceInteractionService" msgid="836587728238433459">"होल्डरलाई हालैको सक्रिय आवाज अन्तरक्रिया सेवासँग अन्तरक्रिया गर्न अनुमति दिन्छ। सामान्य अनुप्रयोगहरूको लागि कहिल्यै आवश्यकता पर्दैन।"</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"पासवर्ड नियमहरू मिलाउनुहोस्"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"स्क्रिन लक पासवर्ड र PIN हरूमा अनुमति दिइएको लम्बाइ र वर्णहरूको नियन्त्रण गर्नुहोस्।"</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"मोनिटर स्क्रिन-अनलक प्रयत्नहरू"</string>
@@ -1854,6 +1846,10 @@
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"पिन निकाल्नुअघि PIN सोध्नुहोस्"</string>
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"पिन निकाल्नुअघि खोल्ने रूपरेखा सोध्नुहोस्"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"पिन निकाल्नुअघि पासवर्ड सोध्नुहोस्"</string>
+    <!-- no translation found for package_installed_device_owner (8420696545959087545) -->
+    <skip />
+    <!-- no translation found for package_deleted_device_owner (7650577387493101353) -->
+    <skip />
     <string name="battery_saver_description" msgid="1960431123816253034">"ब्याट्रीको आयु सुधार्न, ब्याट्री रक्षकले तपाईँको यन्त्रको कार्यसम्पादन घटाउँछ र भाइब्रेसन, स्थान सेवा र बहुसंख्यक पृष्ठभूमि डेटा सीमित गर्दछ। इमेल, सन्देश, र अन्य अनुप्रयोगहरू जुन सिङ्कमा भर पर्छन् अद्यावधिक नहुन सक्छन् जबसम्म तपाईँ तिनीहरूलाई खोल्नुहुन्न\n\n ब्याट्री रक्षक स्वत: निस्कृय हुन्छ जब तपाईँको यन्त्र चार्ज हुँदै हुन्छ।"</string>
     <string name="downtime_condition_summary" msgid="8761776337475705749">"तपाईँको <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> डाउनटाइम समाप्त हुँदा सम्म"</string>
     <string name="downtime_condition_line_one" msgid="8762708714645352010">"तपाईँको डाउनटाइम समाप्त नभए सम्म"</string>

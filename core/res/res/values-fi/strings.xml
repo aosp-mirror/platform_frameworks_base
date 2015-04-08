@@ -854,10 +854,8 @@
     <string name="permdesc_removeDrmCertificates" msgid="7272999075113400993">"Antaa sovelluksen poistaa DRM-varmenteita. Ei tavallisten sovellusten käyttöön."</string>
     <string name="permlab_bindCarrierMessagingService" msgid="1490229371796969158">"Operaattorin viestipalveluun sitoutuminen"</string>
     <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"Antaa sovelluksen sitoutua operaattorin viestipalvelun ylätason liittymään. Ei tavallisten sovellusten käyttöön."</string>
-    <!-- no translation found for permlab_accessVoiceInteractionService (4183835260471435605) -->
-    <skip />
-    <!-- no translation found for permdesc_accessVoiceInteractionService (836587728238433459) -->
-    <skip />
+    <string name="permlab_accessVoiceInteractionService" msgid="4183835260471435605">"vuorovaikutus ääniohjauspalvelun kanssa"</string>
+    <string name="permdesc_accessVoiceInteractionService" msgid="836587728238433459">"Sallii vuorovaikutuksen aktiivisen ääniohjauspalvelun kanssa. Ei tavallisten sovellusten käyttöön."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Aseta salasanasäännöt"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"Hallinnoi ruudun ruudun lukituksen salasanoissa ja PIN-koodeissa sallittuja merkkejä ja niiden pituutta."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Tarkkaile ruudun lukituksen poistoyrityksiä"</string>
@@ -1848,6 +1846,10 @@
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Pyydä PIN-koodi ennen irrotusta"</string>
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"Pyydä lukituksenpoistokuvio ennen irrotusta"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Pyydä salasana ennen irrotusta"</string>
+    <!-- no translation found for package_installed_device_owner (8420696545959087545) -->
+    <skip />
+    <!-- no translation found for package_deleted_device_owner (7650577387493101353) -->
+    <skip />
     <string name="battery_saver_description" msgid="1960431123816253034">"Jos haluat parantaa akun kestoa, virransäästö vähentää laitteesi suorituskykyä ja rajoittaa värinää, sijaintipalveluita ja useimpia taustatietoja. Sähköposti, viestit ja muut synkronointiin perustuvat sovellukset eivät välttämättä päivity, ellet avaa niitä.\n\nVirransäästö poistuu käytöstä automaattisesti, kun laitteesi latautuu."</string>
     <string name="downtime_condition_summary" msgid="8761776337475705749">"Käyttökatkos päättyy klo <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="downtime_condition_line_one" msgid="8762708714645352010">"Vapaa-aikasi päättymiseen saakka"</string>

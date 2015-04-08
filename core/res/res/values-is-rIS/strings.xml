@@ -854,10 +854,8 @@
     <string name="permdesc_removeDrmCertificates" msgid="7272999075113400993">"Leyfir forriti að fjarlægja DRM-vottorð. Ætti aldrei að vera nauðsynlegt fyrir venjuleg forrit."</string>
     <string name="permlab_bindCarrierMessagingService" msgid="1490229371796969158">"bindast skilaboðaþjónustu símafyrirtækis"</string>
     <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"Leyfir forriti að bindast efsta viðmótslagi skilaboðaþjónustu símafyrirtækis. Ætti aldrei að vera nauðsynlegt fyrir venjuleg forrit."</string>
-    <!-- no translation found for permlab_accessVoiceInteractionService (4183835260471435605) -->
-    <skip />
-    <!-- no translation found for permdesc_accessVoiceInteractionService (836587728238433459) -->
-    <skip />
+    <string name="permlab_accessVoiceInteractionService" msgid="4183835260471435605">"nota raddsamskiptaþjónustu"</string>
+    <string name="permdesc_accessVoiceInteractionService" msgid="836587728238433459">"Leyfir handhafa að nota virka raddsamskiptaþjónustu. Ætti aldrei að vera nauðsynlegt fyrir venjuleg forrit."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Setja reglur um aðgangsorð"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"Stjórna lengd og fjölda stafa í aðgangsorðum og PIN-númerum skjáláss."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Fylgjast með tilraunum til að taka skjáinn úr lás"</string>
@@ -1848,6 +1846,10 @@
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Biðja um PIN-númer til að losa"</string>
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"Biðja um opnunarmynstur til að losa"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Biðja um aðgangsorð til að losa"</string>
+    <!-- no translation found for package_installed_device_owner (8420696545959087545) -->
+    <skip />
+    <!-- no translation found for package_deleted_device_owner (7650577387493101353) -->
+    <skip />
     <string name="battery_saver_description" msgid="1960431123816253034">"Til að auka endingu rafhlöðunnar mun orkusparnaður draga úr afköstum tækisins og takmarka titring, staðsetningarþjónustu og megnið af bakgrunnsgögnum. Ekki er víst að tölvupóstur, skilaboð og önnur forrit sem reiða sig á samstillingu uppfærist nema þú opnir þau.\n\nSjálfkrafa er slökkt á orkusparnaði þegar tækið er í hleðslu."</string>
     <string name="downtime_condition_summary" msgid="8761776337475705749">"Þangað til niðritíma lýkur, <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="downtime_condition_line_one" msgid="8762708714645352010">"Þar til niðritíma lýkur"</string>

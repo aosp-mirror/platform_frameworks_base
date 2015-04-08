@@ -854,10 +854,8 @@
     <string name="permdesc_removeDrmCertificates" msgid="7272999075113400993">"Lubab rakendusel eemaldada DRM-sertifikaate. Pole kunagi vajalik tavaliste rakenduste puhul."</string>
     <string name="permlab_bindCarrierMessagingService" msgid="1490229371796969158">"seose loomine operaatori sõnumisideteenusega"</string>
     <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"Lubab omanikul luua seose operaatori sõnumisideteenuse ülataseme liidesega. Pole kunagi vajalik tavalise rakenduse puhul."</string>
-    <!-- no translation found for permlab_accessVoiceInteractionService (4183835260471435605) -->
-    <skip />
-    <!-- no translation found for permdesc_accessVoiceInteractionService (836587728238433459) -->
-    <skip />
+    <string name="permlab_accessVoiceInteractionService" msgid="4183835260471435605">"suhtlemine häälsuhtluse teenusega"</string>
+    <string name="permdesc_accessVoiceInteractionService" msgid="836587728238433459">"Võimaldab omanikul suhelda praegu aktiivse häälsuhtluse teenusega. Seda ei peaks tavapäraste rakenduste puhul kunagi vaja olema."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Parooli reeglite määramine"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"Juhitakse ekraaniluku paroolide ja PIN-koodide pikkusi ning lubatud tähemärkide seadeid."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Ekraani avamiskatsed"</string>
@@ -1848,6 +1846,10 @@
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Enne vabastamist küsi PIN-koodi"</string>
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"Enne vabastamist küsi avamismustrit"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Enne vabastamist küsi parooli"</string>
+    <!-- no translation found for package_installed_device_owner (8420696545959087545) -->
+    <skip />
+    <!-- no translation found for package_deleted_device_owner (7650577387493101353) -->
+    <skip />
     <string name="battery_saver_description" msgid="1960431123816253034">"Aku kestuse parandamiseks vähendab akusäästja teie seadme toimivust ning piirab vibratsiooni, asukohateenuseid ja suuremat osa taustaandmetest. E-posti, sõnumsidet ja muid sünkroonimisele tuginevaid rakendusi võidakse värskendada ainult siis, kui te need avate.\n\nAkusäästja lülitatakse seadme laadimise ajal automaatselt välja."</string>
     <string name="downtime_condition_summary" msgid="8761776337475705749">"Kuni seisakuaja lõppemiseni kell <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="downtime_condition_line_one" msgid="8762708714645352010">"Kuni puhkeaja lõpuni"</string>

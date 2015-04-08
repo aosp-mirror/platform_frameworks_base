@@ -855,10 +855,8 @@
     <string name="permdesc_removeDrmCertificates" msgid="7272999075113400993">"Omogućuje aplikaciji uklanjanje DRM certifikata. Ne bi trebalo biti potrebno za uobičajene aplikacije."</string>
     <string name="permlab_bindCarrierMessagingService" msgid="1490229371796969158">"povezivanje s uslugom mobilnog operatera za slanje poruka"</string>
     <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"Omogućuje nositelju povezivanje sa sučeljem najviše razine usluge mobilnog operatera za slanje poruka. Ne bi trebalo biti potrebno za uobičajene aplikacije."</string>
-    <!-- no translation found for permlab_accessVoiceInteractionService (4183835260471435605) -->
-    <skip />
-    <!-- no translation found for permdesc_accessVoiceInteractionService (836587728238433459) -->
-    <skip />
+    <string name="permlab_accessVoiceInteractionService" msgid="4183835260471435605">"interakcija s uslugom glasovne interakcije"</string>
+    <string name="permdesc_accessVoiceInteractionService" msgid="836587728238433459">"Omogućuje korisniku interakciju s trenutačno aktivnom uslugom glasovne interakcije. Ne bi trebalo biti potrebno za uobičajene aplikacije."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Postavi pravila zaporke"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"Upravlja duljinom i znakovima koji su dopušteni u zaporkama i PIN-ovima zaključavanja zaslona."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Nadgledaj pokušaje otključavanja zaslona"</string>
@@ -1857,6 +1855,10 @@
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Traži PIN radi otkvačivanja"</string>
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"Traži uzorak za otključavanje radi otkvačivanja"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Traži zaporku radi otkvačivanja"</string>
+    <!-- no translation found for package_installed_device_owner (8420696545959087545) -->
+    <skip />
+    <!-- no translation found for package_deleted_device_owner (7650577387493101353) -->
+    <skip />
     <string name="battery_saver_description" msgid="1960431123816253034">"Da bi se produljilo trajanje baterije, ušteda baterije smanjuje rad uređaja i ograničava vibraciju, usluge lokacije i većinu pozadinskih podataka. Aplikacije za e-poštu, slanje poruka i druge aplikacije koje se oslanjaju na sinkronizaciju možda se neće ažurirati ako ih ne otvorite.\n\nUšteda baterije isključuje se automatski dok se uređaj puni."</string>
     <string name="downtime_condition_summary" msgid="8761776337475705749">"Dok razdoblje zastoja ne završi u <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="downtime_condition_line_one" msgid="8762708714645352010">"Do završetka prekida rada"</string>
