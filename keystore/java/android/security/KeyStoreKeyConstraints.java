@@ -580,7 +580,7 @@ public abstract class KeyStoreKeyConstraints {
             } else if ("ctr".equals(modeLower)) {
                 return CTR;
             } else if ("gcm".equals(modeLower)) {
-                return CTR;
+                return GCM;
             } else {
                 throw new IllegalArgumentException("Unknown block mode: " + mode);
             }
