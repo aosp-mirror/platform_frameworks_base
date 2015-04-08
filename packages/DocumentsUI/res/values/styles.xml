@@ -43,7 +43,7 @@
         <item name="android:windowSoftInputMode">stateUnspecified|adjustUnspecified</item>
     </style>
 
-    <style name="StandaloneTheme" parent="android:Theme.Light">
+    <style name="StandaloneTheme" parent="android:Theme.DeviceDefault.Light">
         <item name="android:actionBarWidgetTheme">@null</item>
         <item name="android:actionBarTheme">@*android:style/ThemeOverlay.Material.Dark.ActionBar</item>
         <item name="android:actionBarPopupTheme">@*android:style/ThemeOverlay.Material.Light</item>
