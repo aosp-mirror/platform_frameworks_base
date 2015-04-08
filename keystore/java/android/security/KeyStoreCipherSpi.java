@@ -111,7 +111,9 @@ public abstract class KeyStoreCipherSpi extends CipherSpi implements KeyStoreCry
     private final @KeyStoreKeyConstraints.BlockModeEnum int mBlockMode;
     private final @KeyStoreKeyConstraints.PaddingEnum int mPadding;
     private final int mBlockSizeBytes;
-    private final boolean mIvUsed;
+
+    /** Whether this transformation requires an IV. */
+    private final boolean mIvRequired;
 
     // Fields below are populated by Cipher.init and KeyStore.begin and should be preserved after
     // doFinal finishes.
@@ -119,10 +121,13 @@ public abstract class KeyStoreCipherSpi extends CipherSpi implements KeyStoreCry
     private KeyStoreSecretKey mKey;
     private SecureRandom mRng;
     private boolean mFirstOperationInitiated;
-    byte[] mIv;
+    private byte[] mIv;
+    /** Whether the current {@code #mIv} has been used by the underlying crypto operation. */
+    private boolean mIvHasBeenUsed;
 
-    // Fields below must be reset
+    // Fields below must be reset after doFinal
     private byte[] mAdditionalEntropyForBegin;
+
     /**
      * Token referencing this operation inside keystore service. It is initialized by
      * {@code engineInit} and is invalidated when {@code engineDoFinal} succeeds and one some
@@ -143,7 +148,7 @@ public abstract class KeyStoreCipherSpi extends CipherSpi implements KeyStoreCry
         mBlockMode = blockMode;
         mPadding = padding;
         mBlockSizeBytes = blockSizeBytes;
-        mIvUsed = ivUsed;
+        mIvRequired = ivUsed;
     }
 
     @Override
@@ -170,7 +175,7 @@ public abstract class KeyStoreCipherSpi extends CipherSpi implements KeyStoreCry
     }
 
     private void init(int opmode, Key key, SecureRandom random) throws InvalidKeyException {
-        reset();
+        resetAll();
         if (!(key instanceof KeyStoreSecretKey)) {
             throw new InvalidKeyException(
                     "Unsupported key: " + ((key != null) ? key.getClass().getName() : "null"));
@@ -187,7 +192,25 @@ public abstract class KeyStoreCipherSpi extends CipherSpi implements KeyStoreCry
         mEncrypting = opmode == Cipher.ENCRYPT_MODE;
     }
 
-    private void reset() {
+    private void resetAll() {
+        IBinder operationToken = mOperationToken;
+        if (operationToken != null) {
+            mOperationToken = null;
+            mKeyStore.abort(operationToken);
+        }
+        mEncrypting = false;
+        mKey = null;
+        mRng = null;
+        mFirstOperationInitiated = false;
+        mIv = null;
+        mIvHasBeenUsed = false;
+        mAdditionalEntropyForBegin = null;
+        mOperationToken = null;
+        mOperationHandle = null;
+        mMainDataStreamer = null;
+    }
+
+    private void resetWhilePreservingInitState() {
         IBinder operationToken = mOperationToken;
         if (operationToken != null) {
             mOperationToken = null;
@@ -204,6 +227,12 @@ public abstract class KeyStoreCipherSpi extends CipherSpi implements KeyStoreCry
         }
         if (mKey == null) {
             throw new IllegalStateException("Not initialized");
+        }
+        if ((mEncrypting) && (mIvRequired) && (mIvHasBeenUsed)) {
+            // IV is being reused for encryption: this violates security best practices.
+            throw new IllegalStateException(
+                    "IV has already been used. Reusing IV in encryption mode violates security best"
+                    + " practices.");
         }
 
         KeymasterArguments keymasterInputArgs = new KeymasterArguments();
@@ -234,6 +263,7 @@ public abstract class KeyStoreCipherSpi extends CipherSpi implements KeyStoreCry
         mOperationHandle = opResult.operationHandle;
         loadAlgorithmSpecificParametersFromBeginResult(keymasterOutputArgs);
         mFirstOperationInitiated = true;
+        mIvHasBeenUsed = true;
         mMainDataStreamer = new KeyStoreCryptoOperationChunkedStreamer(
                 new KeyStoreCryptoOperationChunkedStreamer.MainDataStream(
                         mKeyStore, opResult.token));
@@ -298,7 +328,7 @@ public abstract class KeyStoreCipherSpi extends CipherSpi implements KeyStoreCry
             }
         }
 
-        reset();
+        resetWhilePreservingInitState();
         return output;
     }
 
@@ -376,7 +406,7 @@ public abstract class KeyStoreCipherSpi extends CipherSpi implements KeyStoreCry
      */
     @Override
     protected AlgorithmParameters engineGetParameters() {
-        if (!mIvUsed) {
+        if (!mIvRequired) {
             return null;
         }
         if ((mIv != null) && (mIv.length > 0)) {
@@ -408,7 +438,7 @@ public abstract class KeyStoreCipherSpi extends CipherSpi implements KeyStoreCry
      */
     protected void initAlgorithmSpecificParameters(AlgorithmParameterSpec params)
             throws InvalidAlgorithmParameterException {
-        if (!mIvUsed) {
+        if (!mIvRequired) {
             if (params != null) {
                 throw new InvalidAlgorithmParameterException("Unsupported parameters: " + params);
             }
@@ -447,7 +477,7 @@ public abstract class KeyStoreCipherSpi extends CipherSpi implements KeyStoreCry
      */
     protected void initAlgorithmSpecificParameters(AlgorithmParameters params)
             throws InvalidAlgorithmParameterException {
-        if (!mIvUsed) {
+        if (!mIvRequired) {
             if (params != null) {
                 throw new InvalidAlgorithmParameterException("Unsupported parameters: " + params);
             }
@@ -492,7 +522,7 @@ public abstract class KeyStoreCipherSpi extends CipherSpi implements KeyStoreCry
      *         and thus {@code Cipher.init} needs to be invoked with explicitly provided parameters.
      */
     protected void initAlgorithmSpecificParameters() throws InvalidKeyException {
-        if (!mIvUsed) {
+        if (!mIvRequired) {
             return;
         }
 
@@ -515,7 +545,7 @@ public abstract class KeyStoreCipherSpi extends CipherSpi implements KeyStoreCry
         if (!mFirstOperationInitiated) {
             // First begin operation -- see if we need to provide additional entropy for IV
             // generation.
-            if (mIvUsed) {
+            if (mIvRequired) {
                 // IV is needed
                 if ((mIv == null) && (mEncrypting)) {
                     // TODO: Switch to keymaster-generated IV code below once keymaster supports
@@ -534,7 +564,7 @@ public abstract class KeyStoreCipherSpi extends CipherSpi implements KeyStoreCry
             }
         }
 
-        if ((mIvUsed) && (mIv != null)) {
+        if ((mIvRequired) && (mIv != null)) {
             keymasterArgs.addBlob(KeymasterDefs.KM_TAG_NONCE, mIv);
         }
     }
@@ -557,7 +587,7 @@ public abstract class KeyStoreCipherSpi extends CipherSpi implements KeyStoreCry
             returnedIv = null;
         }
 
-        if (mIvUsed) {
+        if (mIvRequired) {
             if (mIv == null) {
                 mIv = returnedIv;
             } else if ((returnedIv != null) && (!Arrays.equals(returnedIv, mIv))) {
