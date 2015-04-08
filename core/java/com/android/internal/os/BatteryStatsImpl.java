@@ -22,6 +22,7 @@ import android.bluetooth.BluetoothActivityEnergyInfo;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothHeadset;
 import android.content.Context;
+import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.NetworkStats;
 import android.net.wifi.WifiActivityEnergyInfo;
@@ -127,6 +128,7 @@ public final class BatteryStatsImpl extends BatteryStats {
 
     static final int MSG_UPDATE_WAKELOCKS = 1;
     static final int MSG_REPORT_POWER_CHANGE = 2;
+    static final int MSG_REPORT_CHARGING = 3;
     static final long DELAY_UPDATE_WAKELOCKS = 5*1000;
 
     private final KernelWakelockReader mKernelWakelockReader = new KernelWakelockReader();
@@ -135,6 +137,7 @@ public final class BatteryStatsImpl extends BatteryStats {
     public interface BatteryCallback {
         public void batteryNeedsCpuUpdate();
         public void batteryPowerChanged(boolean onBattery);
+        public void batterySendBroadcast(Intent intent);
     }
 
     final class MyHandler extends Handler {
@@ -154,6 +157,18 @@ public final class BatteryStatsImpl extends BatteryStats {
                 case MSG_REPORT_POWER_CHANGE:
                     if (cb != null) {
                         cb.batteryPowerChanged(msg.arg1 != 0);
+                    }
+                    break;
+                case MSG_REPORT_CHARGING:
+                    if (cb != null) {
+                        final String action;
+                        synchronized (BatteryStatsImpl.this) {
+                            action = mCharging ? BatteryManager.ACTION_CHARGING
+                                    : BatteryManager.ACTION_DISCHARGING;
+                        }
+                        Intent intent = new Intent(action);
+                        intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
+                        cb.batterySendBroadcast(intent);
                     }
                     break;
             }
@@ -392,6 +407,12 @@ public final class BatteryStatsImpl extends BatteryStats {
      */
     boolean mOnBattery;
     boolean mOnBatteryInternal;
+
+    /**
+     * External reporting of whether the device is actually charging.
+     */
+    boolean mCharging = true;
+    int mLastChargingStateLevel;
 
     /*
      * These keep track of battery levels (1-100) at the last plug event and the last unplug event.
@@ -7243,6 +7264,10 @@ public final class BatteryStatsImpl extends BatteryStats {
         return mOnBattery;
     }
 
+    public boolean isCharging() {
+        return mCharging;
+    }
+
     public boolean isScreenOn() {
         return mScreenState == Display.STATE_ON;
     }
@@ -7802,6 +7827,20 @@ public final class BatteryStatsImpl extends BatteryStats {
         }
     }
 
+    boolean setChargingLocked(boolean charging) {
+        if (mCharging != charging) {
+            mCharging = charging;
+            if (charging) {
+                mHistoryCur.states |= HistoryItem.STATE_CHARGING_FLAG;
+            } else {
+                mHistoryCur.states &= ~HistoryItem.STATE_CHARGING_FLAG;
+            }
+            mHandler.sendEmptyMessage(MSG_REPORT_CHARGING);
+            return true;
+        }
+        return false;
+    }
+
     void setOnBatteryLocked(final long mSecRealtime, final long mSecUptime, final boolean onBattery,
             final int oldStatus, final int level) {
         boolean doWrite = false;
@@ -7861,6 +7900,10 @@ public final class BatteryStatsImpl extends BatteryStats {
                 reset = true;
                 mDischargeStepTracker.init();
             }
+            if (mCharging) {
+                setChargingLocked(false);
+            }
+            mLastChargingStateLevel = level;
             mOnBattery = mOnBatteryInternal = true;
             mLastDischargeStepLevel = level;
             mMinDischargeStepLevel = level;
@@ -7890,6 +7933,7 @@ public final class BatteryStatsImpl extends BatteryStats {
             mDischargeAmountScreenOff = 0;
             updateTimeBasesLocked(true, !screenOn, uptime, realtime);
         } else {
+            mLastChargingStateLevel = level;
             mOnBattery = mOnBatteryInternal = false;
             pullPendingStateUpdatesLocked();
             mHistoryCur.batteryLevel = (byte)level;
@@ -7982,10 +8026,13 @@ public final class BatteryStatsImpl extends BatteryStats {
                     mHistoryCur.states |= HistoryItem.STATE_BATTERY_PLUGGED_FLAG;
                 }
             }
+            // Always start out assuming charging, that will be updated later.
+            mHistoryCur.states |= HistoryItem.STATE_CHARGING_FLAG;
             mHistoryCur.batteryStatus = (byte)status;
             mHistoryCur.batteryLevel = (byte)level;
             mMaxChargeStepLevel = mMinDischargeStepLevel =
                     mLastChargeStepLevel = mLastDischargeStepLevel = level;
+            mLastChargingStateLevel = level;
         } else if (mCurrentBatteryLevel != level || mOnBattery != onBattery) {
             recordDailyStatsIfNeededLocked(level >= 100 && onBattery);
         }
@@ -8046,13 +8093,11 @@ public final class BatteryStatsImpl extends BatteryStats {
                 mHistoryCur.batteryVoltage = (char)volt;
                 changed = true;
             }
-            if (changed) {
-                addHistoryRecordLocked(elapsedRealtime, uptime);
-            }
             long modeBits = (((long)mInitStepMode) << STEP_LEVEL_INITIAL_MODE_SHIFT)
                     | (((long)mModStepMode) << STEP_LEVEL_MODIFIED_MODE_SHIFT)
                     | (((long)(level&0xff)) << STEP_LEVEL_LEVEL_SHIFT);
             if (onBattery) {
+                changed |= setChargingLocked(false);
                 if (mLastDischargeStepLevel != level && mMinDischargeStepLevel > level) {
                     mDischargeStepTracker.addLevelSteps(mLastDischargeStepLevel - level,
                             modeBits, elapsedRealtime);
@@ -8064,6 +8109,28 @@ public final class BatteryStatsImpl extends BatteryStats {
                     mModStepMode = 0;
                 }
             } else {
+                if (level >= 90) {
+                    // If the battery level is at least 90%, always consider the device to be
+                    // charging even if it happens to go down a level.
+                    changed |= setChargingLocked(true);
+                    mLastChargeStepLevel = level;
+                } if (!mCharging) {
+                    if (mLastChargeStepLevel < level) {
+                        // We have not reporting that we are charging, but the level has now
+                        // gone up, so consider the state to be charging.
+                        changed |= setChargingLocked(true);
+                        mLastChargeStepLevel = level;
+                    }
+                } else {
+                    if (mLastChargeStepLevel > level) {
+                        // We had reported that the device was charging, but here we are with
+                        // power connected and the level going down.  Looks like the current
+                        // power supplied isn't enough, so consider the device to now be
+                        // discharging.
+                        changed |= setChargingLocked(false);
+                        mLastChargeStepLevel = level;
+                    }
+                }
                 if (mLastChargeStepLevel != level && mMaxChargeStepLevel < level) {
                     mChargeStepTracker.addLevelSteps(level - mLastChargeStepLevel,
                             modeBits, elapsedRealtime);
@@ -8074,6 +8141,9 @@ public final class BatteryStatsImpl extends BatteryStats {
                     mInitStepMode = mCurStepMode;
                     mModStepMode = 0;
                 }
+            }
+            if (changed) {
+                addHistoryRecordLocked(elapsedRealtime, uptime);
             }
         }
         if (!onBattery && status == BatteryManager.BATTERY_STATUS_FULL) {

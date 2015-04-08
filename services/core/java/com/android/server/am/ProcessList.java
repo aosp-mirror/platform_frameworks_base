@@ -368,6 +368,12 @@ final class ProcessList {
             case ActivityManager.PROCESS_STATE_TOP:
                 procState = "T ";
                 break;
+            case ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE:
+                procState = "FS";
+                break;
+            case ActivityManager.PROCESS_STATE_TOP_SLEEPING:
+                procState = "TS";
+                break;
             case ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND:
                 procState = "IF";
                 break;
@@ -475,6 +481,8 @@ final class ProcessList {
         PROC_MEM_PERSISTENT,            // ActivityManager.PROCESS_STATE_PERSISTENT
         PROC_MEM_PERSISTENT,            // ActivityManager.PROCESS_STATE_PERSISTENT_UI
         PROC_MEM_TOP,                   // ActivityManager.PROCESS_STATE_TOP
+        PROC_MEM_IMPORTANT,             // ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE
+        PROC_MEM_TOP,                   // ActivityManager.PROCESS_STATE_TOP_SLEEPING
         PROC_MEM_IMPORTANT,             // ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND
         PROC_MEM_IMPORTANT,             // ActivityManager.PROCESS_STATE_IMPORTANT_BACKGROUND
         PROC_MEM_IMPORTANT,             // ActivityManager.PROCESS_STATE_BACKUP
@@ -492,6 +500,8 @@ final class ProcessList {
         PSS_SHORT_INTERVAL,             // ActivityManager.PROCESS_STATE_PERSISTENT
         PSS_SHORT_INTERVAL,             // ActivityManager.PROCESS_STATE_PERSISTENT_UI
         PSS_FIRST_TOP_INTERVAL,         // ActivityManager.PROCESS_STATE_TOP
+        PSS_FIRST_BACKGROUND_INTERVAL,  // ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE
+        PSS_FIRST_BACKGROUND_INTERVAL,  // ActivityManager.PROCESS_STATE_TOP_SLEEPING
         PSS_FIRST_BACKGROUND_INTERVAL,  // ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND
         PSS_FIRST_BACKGROUND_INTERVAL,  // ActivityManager.PROCESS_STATE_IMPORTANT_BACKGROUND
         PSS_FIRST_BACKGROUND_INTERVAL,  // ActivityManager.PROCESS_STATE_BACKUP
@@ -509,6 +519,8 @@ final class ProcessList {
         PSS_SAME_IMPORTANT_INTERVAL,    // ActivityManager.PROCESS_STATE_PERSISTENT
         PSS_SAME_IMPORTANT_INTERVAL,    // ActivityManager.PROCESS_STATE_PERSISTENT_UI
         PSS_SHORT_INTERVAL,             // ActivityManager.PROCESS_STATE_TOP
+        PSS_SAME_IMPORTANT_INTERVAL,    // ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE
+        PSS_SAME_IMPORTANT_INTERVAL,    // ActivityManager.PROCESS_STATE_TOP_SLEEPING
         PSS_SAME_IMPORTANT_INTERVAL,    // ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND
         PSS_SAME_IMPORTANT_INTERVAL,    // ActivityManager.PROCESS_STATE_IMPORTANT_BACKGROUND
         PSS_SAME_IMPORTANT_INTERVAL,    // ActivityManager.PROCESS_STATE_BACKUP
@@ -526,6 +538,8 @@ final class ProcessList {
         PSS_TEST_FIRST_TOP_INTERVAL,        // ActivityManager.PROCESS_STATE_PERSISTENT
         PSS_TEST_FIRST_TOP_INTERVAL,        // ActivityManager.PROCESS_STATE_PERSISTENT_UI
         PSS_TEST_FIRST_TOP_INTERVAL,        // ActivityManager.PROCESS_STATE_TOP
+        PSS_FIRST_BACKGROUND_INTERVAL,      // ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE
+        PSS_FIRST_BACKGROUND_INTERVAL,      // ActivityManager.PROCESS_STATE_TOP_SLEEPING
         PSS_TEST_FIRST_BACKGROUND_INTERVAL, // ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND
         PSS_TEST_FIRST_BACKGROUND_INTERVAL, // ActivityManager.PROCESS_STATE_IMPORTANT_BACKGROUND
         PSS_TEST_FIRST_BACKGROUND_INTERVAL, // ActivityManager.PROCESS_STATE_BACKUP
@@ -543,6 +557,8 @@ final class ProcessList {
         PSS_TEST_SAME_BACKGROUND_INTERVAL,  // ActivityManager.PROCESS_STATE_PERSISTENT
         PSS_TEST_SAME_BACKGROUND_INTERVAL,  // ActivityManager.PROCESS_STATE_PERSISTENT_UI
         PSS_TEST_SAME_IMPORTANT_INTERVAL,   // ActivityManager.PROCESS_STATE_TOP
+        PSS_TEST_SAME_IMPORTANT_INTERVAL,   // ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE
+        PSS_TEST_SAME_IMPORTANT_INTERVAL,   // ActivityManager.PROCESS_STATE_TOP_SLEEPING
         PSS_TEST_SAME_IMPORTANT_INTERVAL,   // ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND
         PSS_TEST_SAME_IMPORTANT_INTERVAL,   // ActivityManager.PROCESS_STATE_IMPORTANT_BACKGROUND
         PSS_TEST_SAME_IMPORTANT_INTERVAL,   // ActivityManager.PROCESS_STATE_BACKUP

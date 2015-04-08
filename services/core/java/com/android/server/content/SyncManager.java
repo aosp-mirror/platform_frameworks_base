@@ -176,6 +176,7 @@ public class SyncManager {
     volatile private PowerManager.WakeLock mSyncManagerWakeLock;
     volatile private boolean mDataConnectionIsConnected = false;
     volatile private boolean mStorageIsLow = false;
+    volatile private boolean mDeviceIsIdle = false;
 
     private final NotificationManager mNotificationMgr;
     private AlarmManager mAlarmService = null;
@@ -220,6 +221,20 @@ public class SyncManager {
                     }
                 }
             };
+
+    private BroadcastReceiver mDeviceIdleReceiver = new BroadcastReceiver() {
+        @Override public void onReceive(Context context, Intent intent) {
+            boolean idle = mPowerManager.isDeviceIdleMode();
+            mDeviceIsIdle = idle;
+            if (idle) {
+                cancelActiveSync(
+                        SyncStorageEngine.EndPoint.USER_ALL_PROVIDER_ALL_ACCOUNTS_ALL,
+                        null /* any sync */);
+            } else {
+                sendCheckAlarmsMessage();
+            }
+        }
+    };
 
     private BroadcastReceiver mBootCompletedReceiver = new BroadcastReceiver() {
         @Override
@@ -424,6 +439,9 @@ public class SyncManager {
         intentFilter = new IntentFilter(Intent.ACTION_DEVICE_STORAGE_LOW);
         intentFilter.addAction(Intent.ACTION_DEVICE_STORAGE_OK);
         context.registerReceiver(mStorageIntentReceiver, intentFilter);
+
+        intentFilter = new IntentFilter(PowerManager.ACTION_DEVICE_IDLE_MODE_CHANGED);
+        context.registerReceiver(mDeviceIdleReceiver, intentFilter);
 
         intentFilter = new IntentFilter(Intent.ACTION_SHUTDOWN);
         intentFilter.setPriority(100);
@@ -1312,6 +1330,7 @@ public class SyncManager {
             pw.println();
         }
         pw.print("memory low: "); pw.println(mStorageIsLow);
+        pw.print("device idle: "); pw.println(mDeviceIsIdle);
 
         final AccountAndUser[] accounts = AccountManagerService.getSingleton().getAllAccounts();
 
@@ -2358,6 +2377,13 @@ public class SyncManager {
                 return Long.MAX_VALUE;
             }
 
+            if (mDeviceIsIdle) {
+                if (isLoggable) {
+                    Log.v(TAG, "maybeStartNextSync: device idle, skipping");
+                }
+                return Long.MAX_VALUE;
+            }
+
             // If the accounts aren't known yet then we aren't ready to run. We will be kicked
             // when the account lookup request does complete.
             if (mRunningAccounts == INITIAL_ACCOUNTS_ARRAY) {
@@ -2984,6 +3010,7 @@ public class SyncManager {
             // method to be called again
             if (!mDataConnectionIsConnected) return;
             if (mStorageIsLow) return;
+            if (mDeviceIsIdle) return;
 
             // When the status bar notification should be raised
             final long notificationTime =

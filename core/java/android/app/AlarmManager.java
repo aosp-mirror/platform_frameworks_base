@@ -115,6 +115,40 @@ public class AlarmManager
     /** @hide */
     public static final long WINDOW_HEURISTIC = -1;
 
+    /**
+     * Flag for alarms: this is to be a stand-alone alarm, that should not be batched with
+     * other alarms.
+     * @hide
+     */
+    public static final int FLAG_STANDALONE = 1<<0;
+
+    /**
+     * Flag for alarms: this alarm would like to wake the device even if it is idle.  This
+     * is, for example, an alarm for an alarm clock.
+     * @hide
+     */
+    public static final int FLAG_WAKE_FROM_IDLE = 1<<1;
+
+    /**
+     * Flag for alarms: this alarm would like to still execute even if the device is
+     * idle.  This won't bring the device out of idle, just allow this specific alarm to
+     * run.  Note that this means the actual time this alarm goes off can be inconsistent
+     * with the time of non-allow-while-idle alarms (it could go earlier than the time
+     * requested by another alarm).
+     *
+     * @hide
+     */
+    public static final int FLAG_ALLOW_WHILE_IDLE = 1<<2;
+
+    /**
+     * Flag for alarms: this alarm marks the point where we would like to come out of idle
+     * mode.  It may be moved by the alarm manager to match the first wake-from-idle alarm.
+     * Scheduling an alarm with this flag puts the alarm manager in to idle mode, where it
+     * avoids scheduling any further alarms until the marker alarm is executed.
+     * @hide
+     */
+    public static final int FLAG_IDLE_UNTIL = 1<<3;
+
     private final IAlarmManager mService;
     private final boolean mAlwaysExact;
 
@@ -204,7 +238,7 @@ public class AlarmManager
      * @see #RTC_WAKEUP
      */
     public void set(int type, long triggerAtMillis, PendingIntent operation) {
-        setImpl(type, triggerAtMillis, legacyExactLength(), 0, operation, null, null);
+        setImpl(type, triggerAtMillis, legacyExactLength(), 0, 0, operation, null, null);
     }
 
     /**
@@ -265,7 +299,8 @@ public class AlarmManager
      */
     public void setRepeating(int type, long triggerAtMillis,
             long intervalMillis, PendingIntent operation) {
-        setImpl(type, triggerAtMillis, legacyExactLength(), intervalMillis, operation, null, null);
+        setImpl(type, triggerAtMillis, legacyExactLength(), intervalMillis, 0, operation, null,
+                null);
     }
 
     /**
@@ -315,7 +350,7 @@ public class AlarmManager
      */
     public void setWindow(int type, long windowStartMillis, long windowLengthMillis,
             PendingIntent operation) {
-        setImpl(type, windowStartMillis, windowLengthMillis, 0, operation, null, null);
+        setImpl(type, windowStartMillis, windowLengthMillis, 0, 0, operation, null, null);
     }
 
     /**
@@ -353,7 +388,16 @@ public class AlarmManager
      * @see #RTC_WAKEUP
      */
     public void setExact(int type, long triggerAtMillis, PendingIntent operation) {
-        setImpl(type, triggerAtMillis, WINDOW_EXACT, 0, operation, null, null);
+        setImpl(type, triggerAtMillis, WINDOW_EXACT, 0, 0, operation, null, null);
+    }
+
+    /**
+     * Schedule an idle-until alarm, which will keep the alarm manager idle until
+     * the given time.
+     * @hide
+     */
+    public void setIdleUntil(int type, long triggerAtMillis, PendingIntent operation) {
+        setImpl(type, triggerAtMillis, WINDOW_EXACT, 0, FLAG_IDLE_UNTIL, operation, null, null);
     }
 
     /**
@@ -381,18 +425,19 @@ public class AlarmManager
      * @see android.content.Intent#filterEquals
      */
     public void setAlarmClock(AlarmClockInfo info, PendingIntent operation) {
-        setImpl(RTC_WAKEUP, info.getTriggerTime(), WINDOW_EXACT, 0, operation, null, info);
+        setImpl(RTC_WAKEUP, info.getTriggerTime(), WINDOW_EXACT, 0, 0, operation, null, info);
     }
 
     /** @hide */
     @SystemApi
     public void set(int type, long triggerAtMillis, long windowMillis, long intervalMillis,
             PendingIntent operation, WorkSource workSource) {
-        setImpl(type, triggerAtMillis, windowMillis, intervalMillis, operation, workSource, null);
+        setImpl(type, triggerAtMillis, windowMillis, intervalMillis, 0, operation, workSource,
+                null);
     }
 
     private void setImpl(int type, long triggerAtMillis, long windowMillis, long intervalMillis,
-            PendingIntent operation, WorkSource workSource, AlarmClockInfo alarmClock) {
+            int flags, PendingIntent operation, WorkSource workSource, AlarmClockInfo alarmClock) {
         if (triggerAtMillis < 0) {
             /* NOTYET
             if (mAlwaysExact) {
@@ -405,7 +450,7 @@ public class AlarmManager
         }
 
         try {
-            mService.set(type, triggerAtMillis, windowMillis, intervalMillis, operation,
+            mService.set(type, triggerAtMillis, windowMillis, intervalMillis, flags, operation,
                     workSource, alarmClock);
         } catch (RemoteException ex) {
         }
@@ -506,7 +551,7 @@ public class AlarmManager
      */
     public void setInexactRepeating(int type, long triggerAtMillis,
             long intervalMillis, PendingIntent operation) {
-        setImpl(type, triggerAtMillis, WINDOW_HEURISTIC, intervalMillis, operation, null, null);
+        setImpl(type, triggerAtMillis, WINDOW_HEURISTIC, intervalMillis, 0, operation, null, null);
     }
     
     /**

@@ -34,6 +34,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
 import android.os.PowerManager;
+import android.os.Process;
 import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.UserHandle;
@@ -61,6 +62,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Locale;
+import java.util.Random;
 import java.util.TimeZone;
 
 import static android.app.AlarmManager.RTC_WAKEUP;
@@ -128,6 +130,7 @@ class AlarmManagerService extends SystemService {
     final ResultReceiver mResultReceiver = new ResultReceiver();
     PendingIntent mTimeTickSender;
     PendingIntent mDateChangeSender;
+    Random mRandom;
     boolean mInteractive = true;
     long mNonInteractiveStartTime;
     long mNonInteractiveTime;
@@ -185,18 +188,20 @@ class AlarmManagerService extends SystemService {
     final class Batch {
         long start;     // These endpoints are always in ELAPSED
         long end;
-        boolean standalone; // certain "batches" don't participate in coalescing
+        int flags;      // Flags for alarms, such as FLAG_STANDALONE.
 
         final ArrayList<Alarm> alarms = new ArrayList<Alarm>();
 
         Batch() {
             start = 0;
             end = Long.MAX_VALUE;
+            flags = 0;
         }
 
         Batch(Alarm seed) {
             start = seed.whenElapsed;
-            end = seed.maxWhen;
+            end = seed.maxWhenElapsed;
+            flags = seed.flags;
             alarms.add(seed);
         }
 
@@ -227,9 +232,10 @@ class AlarmManagerService extends SystemService {
                 start = alarm.whenElapsed;
                 newStart = true;
             }
-            if (alarm.maxWhen < end) {
-                end = alarm.maxWhen;
+            if (alarm.maxWhenElapsed < end) {
+                end = alarm.maxWhenElapsed;
             }
+            flags |= alarm.flags;
 
             if (DEBUG_BATCH) {
                 Slog.v(TAG, "    => now " + this);
@@ -241,6 +247,7 @@ class AlarmManagerService extends SystemService {
             boolean didRemove = false;
             long newStart = 0;  // recalculate endpoints as we go
             long newEnd = Long.MAX_VALUE;
+            int newFlags = 0;
             for (int i = 0; i < alarms.size(); ) {
                 Alarm alarm = alarms.get(i);
                 if (alarm.operation.equals(operation)) {
@@ -253,9 +260,10 @@ class AlarmManagerService extends SystemService {
                     if (alarm.whenElapsed > newStart) {
                         newStart = alarm.whenElapsed;
                     }
-                    if (alarm.maxWhen < newEnd) {
-                        newEnd = alarm.maxWhen;
+                    if (alarm.maxWhenElapsed < newEnd) {
+                        newEnd = alarm.maxWhenElapsed;
                     }
+                    newFlags |= alarm.flags;
                     i++;
                 }
             }
@@ -263,6 +271,7 @@ class AlarmManagerService extends SystemService {
                 // commit the new batch bounds
                 start = newStart;
                 end = newEnd;
+                flags = newFlags;
             }
             return didRemove;
         }
@@ -271,6 +280,7 @@ class AlarmManagerService extends SystemService {
             boolean didRemove = false;
             long newStart = 0;  // recalculate endpoints as we go
             long newEnd = Long.MAX_VALUE;
+            int newFlags = 0;
             for (int i = 0; i < alarms.size(); ) {
                 Alarm alarm = alarms.get(i);
                 if (alarm.operation.getTargetPackage().equals(packageName)) {
@@ -283,9 +293,10 @@ class AlarmManagerService extends SystemService {
                     if (alarm.whenElapsed > newStart) {
                         newStart = alarm.whenElapsed;
                     }
-                    if (alarm.maxWhen < newEnd) {
-                        newEnd = alarm.maxWhen;
+                    if (alarm.maxWhenElapsed < newEnd) {
+                        newEnd = alarm.maxWhenElapsed;
                     }
+                    newFlags |= alarm.flags;
                     i++;
                 }
             }
@@ -293,6 +304,7 @@ class AlarmManagerService extends SystemService {
                 // commit the new batch bounds
                 start = newStart;
                 end = newEnd;
+                flags = newFlags;
             }
             return didRemove;
         }
@@ -313,8 +325,8 @@ class AlarmManagerService extends SystemService {
                     if (alarm.whenElapsed > newStart) {
                         newStart = alarm.whenElapsed;
                     }
-                    if (alarm.maxWhen < newEnd) {
-                        newEnd = alarm.maxWhen;
+                    if (alarm.maxWhenElapsed < newEnd) {
+                        newEnd = alarm.maxWhenElapsed;
                     }
                     i++;
                 }
@@ -357,8 +369,9 @@ class AlarmManagerService extends SystemService {
             b.append(" num="); b.append(size());
             b.append(" start="); b.append(start);
             b.append(" end="); b.append(end);
-            if (standalone) {
-                b.append(" STANDALONE");
+            if (flags != 0) {
+                b.append(" flgs=0x");
+                b.append(Integer.toHexString(flags));
             }
             b.append('}');
             return b.toString();
@@ -441,7 +454,12 @@ class AlarmManagerService extends SystemService {
     // minimum recurrence period or alarm futurity for us to be able to fuzz it
     static final long MIN_FUZZABLE_INTERVAL = 10000;
     static final BatchTimeOrder sBatchOrder = new BatchTimeOrder();
-    final ArrayList<Batch> mAlarmBatches = new ArrayList<Batch>();
+    final ArrayList<Batch> mAlarmBatches = new ArrayList<>();
+
+    // set to null if in idle mode; while in this mode, any alarms we don't want
+    // to run during this time are placed in mPendingWhileIdleAlarms
+    Alarm mPendingIdleUntil = null;
+    final ArrayList<Alarm> mPendingWhileIdleAlarms = new ArrayList<>();
 
     public AlarmManagerService(Context context) {
         super(context);
@@ -486,7 +504,7 @@ class AlarmManagerService extends SystemService {
         final int N = mAlarmBatches.size();
         for (int i = 0; i < N; i++) {
             Batch b = mAlarmBatches.get(i);
-            if (!b.standalone && b.canHold(whenElapsed, maxWhen)) {
+            if ((b.flags&AlarmManager.FLAG_STANDALONE) == 0 && b.canHold(whenElapsed, maxWhen)) {
                 return i;
             }
         }
@@ -503,31 +521,56 @@ class AlarmManagerService extends SystemService {
     void rebatchAllAlarmsLocked(boolean doValidate) {
         ArrayList<Batch> oldSet = (ArrayList<Batch>) mAlarmBatches.clone();
         mAlarmBatches.clear();
+        Alarm oldPendingIdleUntil = mPendingIdleUntil;
         final long nowElapsed = SystemClock.elapsedRealtime();
         final int oldBatches = oldSet.size();
         for (int batchNum = 0; batchNum < oldBatches; batchNum++) {
             Batch batch = oldSet.get(batchNum);
             final int N = batch.size();
             for (int i = 0; i < N; i++) {
-                Alarm a = batch.get(i);
-                long whenElapsed = convertToElapsed(a.when, a.type);
-                final long maxElapsed;
-                if (a.whenElapsed == a.maxWhen) {
-                    // Exact
-                    maxElapsed = whenElapsed;
-                } else {
-                    // Not exact.  Preserve any explicit window, otherwise recalculate
-                    // the window based on the alarm's new futurity.  Note that this
-                    // reflects a policy of preferring timely to deferred delivery.
-                    maxElapsed = (a.windowLength > 0)
-                            ? (whenElapsed + a.windowLength)
-                            : maxTriggerTime(nowElapsed, whenElapsed, a.repeatInterval);
-                }
-                setImplLocked(a.type, a.when, whenElapsed, a.windowLength, maxElapsed,
-                        a.repeatInterval, a.operation, batch.standalone, doValidate, a.workSource,
-                        a.alarmClock, a.userId);
+                reAddAlarmLocked(batch.get(i), nowElapsed, doValidate);
             }
         }
+        if (oldPendingIdleUntil != null && oldPendingIdleUntil != mPendingIdleUntil) {
+            Slog.wtf(TAG, "Rebatching: idle until changed from " + oldPendingIdleUntil
+                    + " to " + mPendingIdleUntil);
+            if (mPendingIdleUntil == null) {
+                // Somehow we lost this...  we need to restore all of the pending alarms.
+                restorePendingWhileIdleAlarmsLocked();
+            }
+        }
+        rescheduleKernelAlarmsLocked();
+        updateNextAlarmClockLocked();
+    }
+
+    void reAddAlarmLocked(Alarm a, long nowElapsed, boolean doValidate) {
+        a.when = a.origWhen;
+        long whenElapsed = convertToElapsed(a.when, a.type);
+        final long maxElapsed;
+        if (a.whenElapsed == a.maxWhenElapsed) {
+            // Exact
+            maxElapsed = whenElapsed;
+        } else {
+            // Not exact.  Preserve any explicit window, otherwise recalculate
+            // the window based on the alarm's new futurity.  Note that this
+            // reflects a policy of preferring timely to deferred delivery.
+            maxElapsed = (a.windowLength > 0)
+                    ? (whenElapsed + a.windowLength)
+                    : maxTriggerTime(nowElapsed, whenElapsed, a.repeatInterval);
+        }
+        a.whenElapsed = whenElapsed;
+        a.maxWhenElapsed = maxElapsed;
+        setImplLocked(a, true, doValidate);
+    }
+
+    void restorePendingWhileIdleAlarmsLocked() {
+        final long nowElapsed = SystemClock.elapsedRealtime();
+        for (int i=mPendingWhileIdleAlarms.size() - 1; i >= 0 && mPendingIdleUntil != null; i --) {
+            Alarm a = mPendingWhileIdleAlarms.remove(i);
+            reAddAlarmLocked(a, nowElapsed, false);
+        }
+        rescheduleKernelAlarmsLocked();
+        updateNextAlarmClockLocked();
     }
 
     static final class InFlight extends Intent {
@@ -687,7 +730,7 @@ class AlarmManagerService extends SystemService {
     }
 
     void setImpl(int type, long triggerAtTime, long windowLength, long interval,
-            PendingIntent operation, boolean isStandalone, WorkSource workSource,
+            PendingIntent operation, int flags, WorkSource workSource,
             AlarmManager.AlarmClockInfo alarmClock) {
         if (operation == null) {
             Slog.w(TAG, "set/setRepeating ignored because there is no intent");
@@ -745,25 +788,66 @@ class AlarmManagerService extends SystemService {
                 Slog.v(TAG, "set(" + operation + ") : type=" + type
                         + " triggerAtTime=" + triggerAtTime + " win=" + windowLength
                         + " tElapsed=" + triggerElapsed + " maxElapsed=" + maxElapsed
-                        + " interval=" + interval + " standalone=" + isStandalone);
+                        + " interval=" + interval + " flags=0x" + Integer.toHexString(flags));
             }
             setImplLocked(type, triggerAtTime, triggerElapsed, windowLength, maxElapsed,
-                    interval, operation, isStandalone, true, workSource, alarmClock, userId);
+                    interval, operation, flags, true, workSource, alarmClock, userId);
         }
     }
 
     private void setImplLocked(int type, long when, long whenElapsed, long windowLength,
-            long maxWhen, long interval, PendingIntent operation, boolean isStandalone,
+            long maxWhen, long interval, PendingIntent operation, int flags,
             boolean doValidate, WorkSource workSource, AlarmManager.AlarmClockInfo alarmClock,
             int userId) {
         Alarm a = new Alarm(type, when, whenElapsed, windowLength, maxWhen, interval,
-                operation, workSource, alarmClock, userId);
+                operation, workSource, flags, alarmClock, userId);
         removeLocked(operation);
+        setImplLocked(a, false, doValidate);
+    }
 
-        int whichBatch = (isStandalone) ? -1 : attemptCoalesceLocked(whenElapsed, maxWhen);
+    private void setImplLocked(Alarm a, boolean rebatching, boolean doValidate) {
+        if ((a.flags&AlarmManager.FLAG_IDLE_UNTIL) != 0) {
+            // This is a special alarm that will put the system idle until it goes off.
+            // The caller has given the time they want this to happen at, however we need
+            // to pull that earlier if there are existing alarms that have requested to
+            // bring us out of idle.
+            final int N = mAlarmBatches.size();
+            for (int i = 0; i < N; i++) {
+                Batch b = mAlarmBatches.get(i);
+                if (a.whenElapsed > b.end) {
+                    // There are no interesting things happening before our idle until,
+                    // so keep the requested time.
+                    break;
+                }
+                if ((b.flags&AlarmManager.FLAG_WAKE_FROM_IDLE) != 0) {
+                    a.when = a.whenElapsed = a.maxWhenElapsed = b.end;
+                    break;
+                }
+            }
+            // Add fuzz to make the alarm go off some time before the actual desired time.
+            final long nowElapsed = SystemClock.elapsedRealtime();
+            long fuzz = fuzzForDuration(a.whenElapsed-nowElapsed);
+            if (fuzz > 0) {
+                if (mRandom == null) {
+                    mRandom = new Random();
+                }
+                a.whenElapsed -= mRandom.nextLong() % fuzz;
+            }
+
+        } else if (mPendingIdleUntil != null) {
+            // We currently have an idle until alarm scheduled; if the new alarm has
+            // not explicitly stated it wants to run while idle, then put it on hold.
+            if ((a.flags&(AlarmManager.FLAG_ALLOW_WHILE_IDLE|AlarmManager.FLAG_WAKE_FROM_IDLE))
+                    == 0) {
+                mPendingWhileIdleAlarms.add(a);
+                return;
+            }
+        }
+
+        int whichBatch = ((a.flags&AlarmManager.FLAG_STANDALONE) != 0)
+                ? -1 : attemptCoalesceLocked(a.whenElapsed, a.maxWhenElapsed);
         if (whichBatch < 0) {
             Batch batch = new Batch(a);
-            batch.standalone = isStandalone;
             addBatchLocked(mAlarmBatches, batch);
         } else {
             Batch batch = mAlarmBatches.get(whichBatch);
@@ -775,28 +859,48 @@ class AlarmManagerService extends SystemService {
             }
         }
 
-        if (alarmClock != null) {
+        if (a.alarmClock != null) {
             mNextAlarmClockMayChange = true;
-            updateNextAlarmClockLocked();
         }
 
-        if (DEBUG_VALIDATE) {
-            if (doValidate && !validateConsistencyLocked()) {
-                Slog.v(TAG, "Tipping-point operation: type=" + type + " when=" + when
-                        + " when(hex)=" + Long.toHexString(when)
-                        + " whenElapsed=" + whenElapsed + " maxWhen=" + maxWhen
-                        + " interval=" + interval + " op=" + operation
-                        + " standalone=" + isStandalone);
+        boolean needRebatch = false;
+
+        if ((a.flags&AlarmManager.FLAG_IDLE_UNTIL) != 0) {
+            mPendingIdleUntil = a;
+            needRebatch = true;
+        } else if ((a.flags&AlarmManager.FLAG_WAKE_FROM_IDLE) != 0 && mPendingIdleUntil != null) {
+            // If we are adding an alarm that asks to wake from idle, and we are currently
+            // idling, then we need to rebatch alarms in case the idle until time needs to
+            // be updated.
+            needRebatch = true;
+        }
+
+        if (!rebatching) {
+            if (DEBUG_VALIDATE) {
+                if (doValidate && !validateConsistencyLocked()) {
+                    Slog.v(TAG, "Tipping-point operation: type=" + a.type + " when=" + a.when
+                            + " when(hex)=" + Long.toHexString(a.when)
+                            + " whenElapsed=" + a.whenElapsed
+                            + " maxWhenElapsed=" + a.maxWhenElapsed
+                            + " interval=" + a.repeatInterval + " op=" + a.operation
+                            + " flags=0x" + Integer.toHexString(a.flags));
+                    rebatchAllAlarmsLocked(false);
+                    needRebatch = false;
+                }
+            }
+
+            if (needRebatch) {
                 rebatchAllAlarmsLocked(false);
             }
-        }
 
-        rescheduleKernelAlarmsLocked();
+            rescheduleKernelAlarmsLocked();
+            updateNextAlarmClockLocked();
+        }
     }
 
     private final IBinder mService = new IAlarmManager.Stub() {
         @Override
-        public void set(int type, long triggerAtTime, long windowLength, long interval,
+        public void set(int type, long triggerAtTime, long windowLength, long interval, int flags,
                 PendingIntent operation, WorkSource workSource,
                 AlarmManager.AlarmClockInfo alarmClock) {
             if (workSource != null) {
@@ -805,8 +909,17 @@ class AlarmManagerService extends SystemService {
                         "AlarmManager.set");
             }
 
+            if (windowLength == AlarmManager.WINDOW_EXACT) {
+                flags |= AlarmManager.FLAG_STANDALONE;
+            }
+            if (alarmClock != null) {
+                flags |= AlarmManager.FLAG_WAKE_FROM_IDLE | AlarmManager.FLAG_STANDALONE;
+            }
+            if (Binder.getCallingUid() < Process.FIRST_APPLICATION_UID) {
+                flags |= AlarmManager.FLAG_ALLOW_WHILE_IDLE;
+            }
             setImpl(type, triggerAtTime, windowLength, interval, operation,
-                    windowLength == AlarmManager.WINDOW_EXACT, workSource, alarmClock);
+                    flags, workSource, alarmClock);
         }
 
         @Override
@@ -911,6 +1024,14 @@ class AlarmManagerService extends SystemService {
                     pw.print(b); pw.println(':');
                     dumpAlarmList(pw, b.alarms, "  ", nowELAPSED, nowRTC, sdf);
                 }
+            }
+            if (mPendingIdleUntil != null) {
+                pw.println();
+                pw.println("Idle mode state:");
+                pw.print("  Idling until: "); pw.println(mPendingIdleUntil);
+                mPendingIdleUntil.dump(pw, "    ", nowELAPSED, nowRTC, sdf);
+                pw.println("  Pending alarms:");
+                dumpAlarmList(pw, mPendingWhileIdleAlarms, "    ", nowELAPSED, nowRTC, sdf);
             }
 
             pw.println();
@@ -1224,6 +1345,15 @@ class AlarmManagerService extends SystemService {
     }
 
     void rescheduleKernelAlarmsLocked() {
+        if (mPendingIdleUntil != null) {
+            // If we have a pending "idle until" alarm, we will just blindly wait until
+            // it is time for that alarm to go off.  We don't want to wake up for any
+            // other reasons.
+            mNextWakeup = mNextNonWakeup = mPendingIdleUntil.whenElapsed;
+            setLocked(ELAPSED_REALTIME_WAKEUP, mNextWakeup);
+            setLocked(ELAPSED_REALTIME, mNextNonWakeup);
+            return;
+        }
         // Schedule the next upcoming wakeup alarm.  If there is a deliverable batch
         // prior to that which contains no wakeups, we schedule that as well.
         long nextNonWakeup = 0;
@@ -1260,13 +1390,26 @@ class AlarmManagerService extends SystemService {
                 mAlarmBatches.remove(i);
             }
         }
+        for (int i = mPendingWhileIdleAlarms.size() - 1; i >= 0; i--) {
+            if (mPendingWhileIdleAlarms.get(i).operation.equals(operation)) {
+                // Don't set didRemove, since this doesn't impact the scheduled alarms.
+                mPendingWhileIdleAlarms.remove(i);
+            }
+        }
 
         if (didRemove) {
             if (DEBUG_BATCH) {
                 Slog.v(TAG, "remove(operation) changed bounds; rebatching");
             }
+            boolean restorePending = false;
+            if (mPendingIdleUntil != null && mPendingIdleUntil.operation.equals(operation)) {
+                mPendingIdleUntil = null;
+                restorePending = true;
+            }
             rebatchAllAlarmsLocked(true);
-            rescheduleKernelAlarmsLocked();
+            if (restorePending) {
+                restorePendingWhileIdleAlarmsLocked();
+            }
             updateNextAlarmClockLocked();
         }
     }
@@ -1278,6 +1421,12 @@ class AlarmManagerService extends SystemService {
             didRemove |= b.remove(packageName);
             if (b.size() == 0) {
                 mAlarmBatches.remove(i);
+            }
+        }
+        for (int i = mPendingWhileIdleAlarms.size() - 1; i >= 0; i--) {
+            if (mPendingWhileIdleAlarms.get(i).operation.getTargetPackage().equals(packageName)) {
+                // Don't set didRemove, since this doesn't impact the scheduled alarms.
+                mPendingWhileIdleAlarms.remove(i);
             }
         }
 
@@ -1298,6 +1447,13 @@ class AlarmManagerService extends SystemService {
             didRemove |= b.remove(userHandle);
             if (b.size() == 0) {
                 mAlarmBatches.remove(i);
+            }
+        }
+        for (int i = mPendingWhileIdleAlarms.size() - 1; i >= 0; i--) {
+            if (UserHandle.getUserId(mPendingWhileIdleAlarms.get(i).operation.getCreatorUid())
+                    == userHandle) {
+                // Don't set didRemove, since this doesn't impact the scheduled alarms.
+                mPendingWhileIdleAlarms.remove(i);
             }
         }
 
@@ -1341,6 +1497,11 @@ class AlarmManagerService extends SystemService {
         for (int i = 0; i < mAlarmBatches.size(); i++) {
             Batch b = mAlarmBatches.get(i);
             if (b.hasPackage(packageName)) {
+                return true;
+            }
+        }
+        for (int i = 0; i < mPendingWhileIdleAlarms.size(); i++) {
+            if (mPendingWhileIdleAlarms.get(i).operation.getTargetPackage().equals(packageName)) {
                 return true;
             }
         }
@@ -1413,6 +1574,13 @@ class AlarmManagerService extends SystemService {
     boolean triggerAlarmsLocked(ArrayList<Alarm> triggerList, final long nowELAPSED,
             final long nowRTC) {
         boolean hasWakeup = false;
+        if (mPendingIdleUntil != null) {
+            // If we have a pending "idle until" alarm, don't trigger any alarms
+            // until we are past the idle period.
+            if (nowELAPSED < mPendingIdleUntil.whenElapsed) {
+                return false;
+            }
+        }
         // batches are temporally sorted, so we need only pull from the
         // start of the list until we either empty it or hit a batch
         // that is not yet deliverable
@@ -1432,6 +1600,11 @@ class AlarmManagerService extends SystemService {
                 Alarm alarm = batch.get(i);
                 alarm.count = 1;
                 triggerList.add(alarm);
+                if (mPendingIdleUntil == alarm) {
+                    mPendingIdleUntil = null;
+                    rebatchAllAlarmsLocked(false);
+                    restorePendingWhileIdleAlarmsLocked();
+                }
 
                 // Recurring alarms may have passed several alarm intervals while the
                 // phone was asleep or off, so pass a trigger count when sending them.
@@ -1445,7 +1618,7 @@ class AlarmManagerService extends SystemService {
                     final long nextElapsed = alarm.whenElapsed + delta;
                     setImplLocked(alarm.type, alarm.when + delta, nextElapsed, alarm.windowLength,
                             maxTriggerTime(nowELAPSED, nextElapsed, alarm.repeatInterval),
-                            alarm.repeatInterval, alarm.operation, batch.standalone, true,
+                            alarm.repeatInterval, alarm.operation, alarm.flags, true,
                             alarm.workSource, alarm.alarmClock, alarm.userId);
                 }
 
@@ -1494,34 +1667,38 @@ class AlarmManagerService extends SystemService {
     
     private static class Alarm {
         public final int type;
+        public final long origWhen;
         public final boolean wakeup;
         public final PendingIntent operation;
         public final String  tag;
         public final WorkSource workSource;
+        public final int flags;
         public int count;
         public long when;
         public long windowLength;
         public long whenElapsed;    // 'when' in the elapsed time base
-        public long maxWhen;        // also in the elapsed time base
+        public long maxWhenElapsed; // also in the elapsed time base
         public long repeatInterval;
         public final AlarmManager.AlarmClockInfo alarmClock;
         public final int userId;
         public PriorityClass priorityClass;
 
         public Alarm(int _type, long _when, long _whenElapsed, long _windowLength, long _maxWhen,
-                long _interval, PendingIntent _op, WorkSource _ws,
+                long _interval, PendingIntent _op, WorkSource _ws, int _flags,
                 AlarmManager.AlarmClockInfo _info, int _userId) {
             type = _type;
+            origWhen = _when;
             wakeup = _type == AlarmManager.ELAPSED_REALTIME_WAKEUP
                     || _type == AlarmManager.RTC_WAKEUP;
             when = _when;
             whenElapsed = _whenElapsed;
             windowLength = _windowLength;
-            maxWhen = _maxWhen;
+            maxWhenElapsed = _maxWhen;
             repeatInterval = _interval;
             operation = _op;
             tag = makeTag(_op, _type);
             workSource = _ws;
+            flags = _flags;
             alarmClock = _info;
             userId = _userId;
         }
@@ -1561,7 +1738,8 @@ class AlarmManagerService extends SystemService {
                     pw.println();
             pw.print(prefix); pw.print("window="); pw.print(windowLength);
                     pw.print(" repeatInterval="); pw.print(repeatInterval);
-                    pw.print(" count="); pw.println(count);
+                    pw.print(" count="); pw.print(count);
+                    pw.print(" flags=0x"); pw.println(Integer.toHexString(flags));
             pw.print(prefix); pw.print("operation="); pw.println(operation);
         }
     }
@@ -1596,6 +1774,20 @@ class AlarmManagerService extends SystemService {
         } else {
             // Otherwise, we will delay by at most an hour.
             return 60*60*1000;
+        }
+    }
+
+    static long fuzzForDuration(long duration) {
+        if (duration < 15*60*1000) {
+            // If the duration until the time is less than 15 minutes, the maximum fuzz
+            // is the duration.
+            return duration;
+        } else if (duration < 90*60*1000) {
+            // If duration is less than 1 1/2 hours, the maximum fuzz is 15 minutes,
+            return 15*60*1000;
+        } else {
+            // Otherwise, we will fuzz by at most half an hour.
+            return 30*60*1000;
         }
     }
 
@@ -1886,7 +2078,7 @@ class AlarmManagerService extends SystemService {
 
             final WorkSource workSource = null; // Let system take blame for time tick events.
             setImpl(ELAPSED_REALTIME, SystemClock.elapsedRealtime() + tickEventDelay, 0,
-                    0, mTimeTickSender, true, workSource, null);
+                    0, mTimeTickSender, AlarmManager.FLAG_STANDALONE, workSource, null);
         }
 
         public void scheduleDateChangedEvent() {
@@ -1899,8 +2091,8 @@ class AlarmManagerService extends SystemService {
             calendar.add(Calendar.DAY_OF_MONTH, 1);
 
             final WorkSource workSource = null; // Let system take blame for date change events.
-            setImpl(RTC, calendar.getTimeInMillis(), 0, 0, mDateChangeSender, true, workSource,
-                    null);
+            setImpl(RTC, calendar.getTimeInMillis(), 0, 0, mDateChangeSender,
+                    AlarmManager.FLAG_STANDALONE, workSource, null);
         }
     }
     

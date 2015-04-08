@@ -1909,7 +1909,7 @@ final class ActivityStack {
                 next.sleeping = false;
                 mService.showAskCompatModeDialogLocked(next);
                 next.app.pendingUiClean = true;
-                next.app.forceProcessStateUpTo(ActivityManager.PROCESS_STATE_TOP);
+                next.app.forceProcessStateUpTo(mService.mTopProcessState);
                 next.clearOptionsLocked();
                 next.app.thread.scheduleResumeActivity(next.appToken, next.app.repProcState,
                         mService.isNextTransitionForward(), resumeAnimOptions);

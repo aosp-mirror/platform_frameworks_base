@@ -140,6 +140,8 @@ public final class ProcessStats implements Parcelable {
             STATE_PERSISTENT,               // ActivityManager.PROCESS_STATE_PERSISTENT
             STATE_PERSISTENT,               // ActivityManager.PROCESS_STATE_PERSISTENT_UI
             STATE_TOP,                      // ActivityManager.PROCESS_STATE_TOP
+            STATE_IMPORTANT_FOREGROUND,     // ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE
+            STATE_TOP,                      // ActivityManager.PROCESS_STATE_TOP_SLEEPING
             STATE_IMPORTANT_FOREGROUND,     // ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND
             STATE_IMPORTANT_BACKGROUND,     // ActivityManager.PROCESS_STATE_IMPORTANT_BACKGROUND
             STATE_BACKUP,                   // ActivityManager.PROCESS_STATE_BACKUP

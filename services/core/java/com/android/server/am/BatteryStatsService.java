@@ -260,6 +260,12 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         }
     }
 
+    public boolean isCharging() {
+        synchronized (mStats) {
+            return mStats.isCharging();
+        }
+    }
+
     public long computeBatteryTimeRemaining() {
         synchronized (mStats) {
             long time = mStats.computeBatteryTimeRemaining(SystemClock.elapsedRealtime());
