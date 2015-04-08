@@ -383,6 +383,7 @@ public abstract class Layout {
                 tl.set(paint, buf, start, end, dir, directions, hasTabOrEmoji, tabStops);
                 tl.draw(canvas, x, ltop, lbaseline, lbottom);
             }
+            paint.setHyphenEdit(0);
         }
 
         TextLine.recycle(tl);
