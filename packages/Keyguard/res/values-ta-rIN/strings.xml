@@ -109,6 +109,5 @@
     <string name="kg_pin_accepted" msgid="1448241673570020097">"குறியீடு ஏற்கப்பட்டது!"</string>
     <string name="keyguard_carrier_default" msgid="8700650403054042153">"சேவை இல்லை."</string>
     <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"உள்ளீட்டு முறையை மாற்றும் பொத்தான்."</string>
-    <!-- no translation found for airplane_mode (3122107900897202805) -->
-    <skip />
+    <string name="airplane_mode" msgid="3122107900897202805">"விமானப் பயன்முறை"</string>
 </resources>

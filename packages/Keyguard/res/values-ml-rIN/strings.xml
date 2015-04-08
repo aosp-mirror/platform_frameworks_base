@@ -109,6 +109,5 @@
     <string name="kg_pin_accepted" msgid="1448241673570020097">"കോഡ് അംഗികരിച്ചു!"</string>
     <string name="keyguard_carrier_default" msgid="8700650403054042153">"സേവനമൊന്നുമില്ല."</string>
     <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"ടൈപ്പുചെയ്യൽ രീതി ബട്ടൺ മാറുക."</string>
-    <!-- no translation found for airplane_mode (3122107900897202805) -->
-    <skip />
+    <string name="airplane_mode" msgid="3122107900897202805">"ഫ്ലൈറ്റ് മോഡ്"</string>
 </resources>
