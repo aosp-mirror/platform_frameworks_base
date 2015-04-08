@@ -4,6 +4,17 @@
 
     <application>
         <uses-library android:name="android.test.runner" />
+        <provider
+            android:name="com.android.documentsui.StubProvider"
+            android:authorities="com.android.documentsui.stubprovider"
+            android:exported="true"
+            android:grantUriPermissions="true"
+            android:permission="android.permission.MANAGE_DOCUMENTS"
+            android:enabled="true">
+            <intent-filter>
+                <action android:name="android.content.action.DOCUMENTS_PROVIDER" />
+            </intent-filter>
+       </provider>
     </application>
 
     <instrumentation android:name="android.test.InstrumentationTestRunner"
