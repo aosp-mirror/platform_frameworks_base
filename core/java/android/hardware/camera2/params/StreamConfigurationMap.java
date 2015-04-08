@@ -92,8 +92,8 @@ public final class StreamConfigurationMap {
             StreamConfiguration[] depthConfigurations,
             StreamConfigurationDuration[] depthMinFrameDurations,
             StreamConfigurationDuration[] depthStallDurations,
-            HighSpeedVideoConfiguration[] highSpeedVideoConfigurations) {
-
+            HighSpeedVideoConfiguration[] highSpeedVideoConfigurations,
+            ReprocessFormatsMap inputOutputFormatsMap) {
         mConfigurations = checkArrayElementsNotNull(configurations, "configurations");
         mMinFrameDurations = checkArrayElementsNotNull(minFrameDurations, "minFrameDurations");
         mStallDurations = checkArrayElementsNotNull(stallDurations, "stallDurations");
@@ -167,6 +167,8 @@ public final class StreamConfigurationMap {
             }
             mHighSpeedVideoFpsRangeMap.put(fpsRange, sizeCount + 1);
         }
+
+        mInputOutputFormatsMap = inputOutputFormatsMap;
     }
 
     /**
@@ -188,6 +190,33 @@ public final class StreamConfigurationMap {
     }
 
     /**
+     * Get the image {@code format} output formats for a reprocessing input format.
+     *
+     * <p>When submitting a {@link CaptureRequest} with an input Surface of a given format,
+     * the only allowed target outputs of the {@link CaptureRequest} are the ones with a format
+     * listed in the return value of this method. Including any other output Surface as a target
+     * will throw an IllegalArgumentException. If no output format is supported given the input
+     * format, an empty int[] will be returned.</p>
+     *
+     * <p>All image formats returned by this function will be defined in either {@link ImageFormat}
+     * or in {@link PixelFormat} (and there is no possibility of collision).</p>
+     *
+     * <p>Formats listed in this array are guaranteed to return true if queried with
+     * {@link #isOutputSupportedFor(int)}.</p>
+     *
+     * @return an array of integer format
+     *
+     * @see ImageFormat
+     * @see PixelFormat
+     */
+    public final int[] getValidOutputFormatsForInput(int inputFormat) {
+        if (mInputOutputFormatsMap == null) {
+            return new int[0];
+        }
+        return mInputOutputFormatsMap.getOutputs(inputFormat);
+    }
+
+    /**
      * Get the image {@code format} input formats in this stream configuration.
      *
      * <p>All image formats returned by this function will be defined in either {@link ImageFormat}
@@ -197,8 +226,6 @@ public final class StreamConfigurationMap {
      *
      * @see ImageFormat
      * @see PixelFormat
-     *
-     * @hide
      */
     public final int[] getInputFormats() {
         return getPublicFormats(/*output*/false);
@@ -212,8 +239,6 @@ public final class StreamConfigurationMap {
      *
      * @param format a format from {@link #getInputFormats}
      * @return a non-empty array of sizes, or {@code null} if the format was not available.
-     *
-     * @hide
      */
     public Size[] getInputSizes(final int format) {
         return getPublicFormatSizes(format, /*output*/false);
@@ -390,12 +415,11 @@ public final class StreamConfigurationMap {
      * Get a list of sizes compatible with {@code klass} to use as an output.
      *
      * <p>Since some of the supported classes may support additional formats beyond
-     * an opaque/implementation-defined (under-the-hood) format; this function only returns
-     * sizes for the implementation-defined format.</p>
-     *
-     * <p>Some classes such as {@link android.media.ImageReader} may only support user-defined
-     * formats; in particular {@link #isOutputSupportedFor(Class)} will return {@code true} for
-     * that class and this method will return an empty array (but not {@code null}).</p>
+     * {@link ImageFormat#PRIVATE}; this function only returns
+     * sizes for {@link ImageFormat#PRIVATE}. For example, {@link android.media.ImageReader}
+     * supports {@link ImageFormat#YUV_420_888} and {@link ImageFormat#PRIVATE}, this method will
+     * only return the sizes for {@link ImageFormat#PRIVATE} for {@link android.media.ImageReader}
+     * class .</p>
      *
      * <p>If a well-defined format such as {@code NV21} is required, use
      * {@link #getOutputSizes(int)} instead.</p>
@@ -406,19 +430,15 @@ public final class StreamConfigurationMap {
      * @param klass
      *          a non-{@code null} {@link Class} object reference
      * @return
-     *          an array of supported sizes for implementation-defined formats,
-     *          or {@code null} iff the {@code klass} is not a supported output
+     *          an array of supported sizes for {@link ImageFormat#PRIVATE} format,
+     *          or {@code null} iff the {@code klass} is not a supported output.
+     *
      *
      * @throws NullPointerException if {@code klass} was {@code null}
      *
      * @see #isOutputSupportedFor(Class)
      */
     public <T> Size[] getOutputSizes(Class<T> klass) {
-        // Image reader is "supported", but never for implementation-defined formats; return empty
-        if (android.media.ImageReader.class.isAssignableFrom(klass)) {
-            return new Size[0];
-        }
-
         if (isOutputSupportedFor(klass) == false) {
             return null;
         }
@@ -647,7 +667,7 @@ public final class StreamConfigurationMap {
      * Get the minimum {@link CaptureRequest#SENSOR_FRAME_DURATION frame duration}
      * for the class/size combination (in nanoseconds).
      *
-     * <p>This assumes a the {@code klass} is set up to use an implementation-defined format.
+     * <p>This assumes a the {@code klass} is set up to use {@link ImageFormat#PRIVATE}.
      * For user-defined formats, use {@link #getOutputMinFrameDuration(int, Size)}.</p>
      *
      * <p>{@code klass} should be one of the ones which is supported by
@@ -791,7 +811,7 @@ public final class StreamConfigurationMap {
     /**
      * Get the stall duration for the class/size combination (in nanoseconds).
      *
-     * <p>This assumes a the {@code klass} is set up to use an implementation-defined format.
+     * <p>This assumes a the {@code klass} is set up to use {@link ImageFormat#PRIVATE}.
      * For user-defined formats, use {@link #getOutputMinFrameDuration(int, Size)}.</p>
      *
      * <p>{@code klass} should be one of the ones with a non-empty array returned by
@@ -946,11 +966,11 @@ public final class StreamConfigurationMap {
      *
      * <p>In particular these formats are converted:
      * <ul>
-     * <li>HAL_PIXEL_FORMAT_BLOB => ImageFormat.JPEG
+     * <li>HAL_PIXEL_FORMAT_BLOB => ImageFormat.JPEG</li>
      * </ul>
      * </p>
      *
-     * <p>Passing in an implementation-defined format which has no public equivalent will fail;
+     * <p>Passing in a format which has no public equivalent will fail;
      * as will passing in a public format which has a different internal format equivalent.
      * See {@link #checkArgumentFormat} for more details about a legal public format.</p>
      *
@@ -977,9 +997,6 @@ public final class StreamConfigurationMap {
             case ImageFormat.JPEG:
                 throw new IllegalArgumentException(
                         "ImageFormat.JPEG is an unknown internal format");
-            case HAL_PIXEL_FORMAT_IMPLEMENTATION_DEFINED:
-                throw new IllegalArgumentException(
-                        "IMPLEMENTATION_DEFINED must not leak to public API");
             default:
                 return format;
         }
@@ -1066,8 +1083,7 @@ public final class StreamConfigurationMap {
      * </ul>
      * </p>
      *
-     * <p>Passing in an implementation-defined format here will fail (it's not a public format);
-     * as will passing in an internal format which has a different public format equivalent.
+     * <p>Passing in an internal format which has a different public format equivalent will fail.
      * See {@link #checkArgumentFormat} for more details about a legal public format.</p>
      *
      * <p>All other formats are returned as-is, no invalid check is performed.</p>
@@ -1090,9 +1106,6 @@ public final class StreamConfigurationMap {
                 return HAL_PIXEL_FORMAT_BLOB;
             case ImageFormat.DEPTH16:
                 return HAL_PIXEL_FORMAT_Y16;
-            case HAL_PIXEL_FORMAT_IMPLEMENTATION_DEFINED:
-                throw new IllegalArgumentException(
-                        "IMPLEMENTATION_DEFINED is not allowed via public API");
             default:
                 return format;
         }
@@ -1214,8 +1227,7 @@ public final class StreamConfigurationMap {
         int i = 0;
 
         for (int format : getFormatsMap(output).keySet()) {
-            if (format != HAL_PIXEL_FORMAT_IMPLEMENTATION_DEFINED &&
-                format != HAL_PIXEL_FORMAT_RAW_OPAQUE) {
+            if (format != HAL_PIXEL_FORMAT_RAW_OPAQUE) {
                 formats[i++] = imageFormatToPublic(format);
             }
         }
@@ -1280,9 +1292,6 @@ public final class StreamConfigurationMap {
         HashMap<Integer, Integer> formatsMap = getFormatsMap(output);
 
         int size = formatsMap.size();
-        if (formatsMap.containsKey(HAL_PIXEL_FORMAT_IMPLEMENTATION_DEFINED)) {
-            size -= 1;
-        }
         if (formatsMap.containsKey(HAL_PIXEL_FORMAT_RAW_OPAQUE)) {
             size -= 1;
         }
@@ -1332,6 +1341,7 @@ public final class StreamConfigurationMap {
     private final StreamConfigurationDuration[] mDepthStallDurations;
 
     private final HighSpeedVideoConfiguration[] mHighSpeedVideoConfigurations;
+    private final ReprocessFormatsMap mInputOutputFormatsMap;
 
     /** ImageFormat -> num output sizes mapping */
     private final HashMap</*ImageFormat*/Integer, /*Count*/Integer> mOutputFormats =
@@ -1350,3 +1360,4 @@ public final class StreamConfigurationMap {
             mHighSpeedVideoFpsRangeMap = new HashMap<Range<Integer>, Integer>();
 
 }
+

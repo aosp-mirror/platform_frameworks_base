@@ -13863,6 +13863,8 @@ package android.hardware.camera2.params {
     method public android.util.Range<java.lang.Integer>[] getHighSpeedVideoFpsRangesFor(android.util.Size);
     method public android.util.Size[] getHighSpeedVideoSizes();
     method public android.util.Size[] getHighSpeedVideoSizesFor(android.util.Range<java.lang.Integer>);
+    method public final int[] getInputFormats();
+    method public android.util.Size[] getInputSizes(int);
     method public final int[] getOutputFormats();
     method public long getOutputMinFrameDuration(int, android.util.Size);
     method public long getOutputMinFrameDuration(java.lang.Class<T>, android.util.Size);
@@ -13870,6 +13872,7 @@ package android.hardware.camera2.params {
     method public android.util.Size[] getOutputSizes(int);
     method public long getOutputStallDuration(int, android.util.Size);
     method public long getOutputStallDuration(java.lang.Class<T>, android.util.Size);
+    method public final int[] getValidOutputFormatsForInput(int);
     method public boolean isOutputSupportedFor(int);
     method public static boolean isOutputSupportedFor(java.lang.Class<T>);
     method public boolean isOutputSupportedFor(android.view.Surface);
