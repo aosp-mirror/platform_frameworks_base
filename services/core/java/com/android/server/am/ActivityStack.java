@@ -899,6 +899,11 @@ final class ActivityStack {
                         r.userId, System.identityHashCode(r), r.shortComponentName,
                         mPausingActivity != null
                             ? mPausingActivity.shortComponentName : "(none)");
+                if (r.finishing && r.state == ActivityState.PAUSING) {
+                    if (DEBUG_PAUSE) Slog.v(TAG,
+                            "Executing finish of failed to pause activity: " + r);
+                    finishCurrentActivityLocked(r, FINISH_AFTER_VISIBLE, false);
+                }
             }
         }
     }
