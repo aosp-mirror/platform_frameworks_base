@@ -38,6 +38,7 @@ interface IUserManager {
     List<UserInfo> getProfiles(int userHandle, boolean enabledOnly);
     UserInfo getProfileParent(int userHandle);
     UserInfo getUserInfo(int userHandle);
+    long getUserCreationTime(int userHandle);
     boolean isRestricted();
     int getUserSerialNumber(int userHandle);
     int getUserHandle(int userSerialNumber);

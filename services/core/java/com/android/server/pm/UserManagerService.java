@@ -327,16 +327,20 @@ public class UserManagerService extends IUserManager.Stub {
     public UserInfo getProfileParent(int userHandle) {
         checkManageUsersPermission("get the profile parent");
         synchronized (mPackagesLock) {
-            UserInfo profile = getUserInfoLocked(userHandle);
-            if (profile == null) {
-                return null;
-            }
-            int parentUserId = profile.profileGroupId;
-            if (parentUserId == UserInfo.NO_PROFILE_GROUP_ID) {
-                return null;
-            } else {
-                return getUserInfoLocked(parentUserId);
-            }
+            return getProfileParentLocked(userHandle);
+        }
+    }
+
+    private UserInfo getProfileParentLocked(int userHandle) {
+        UserInfo profile = getUserInfoLocked(userHandle);
+        if (profile == null) {
+            return null;
+        }
+        int parentUserId = profile.profileGroupId;
+        if (parentUserId == UserInfo.NO_PROFILE_GROUP_ID) {
+            return null;
+        } else {
+            return getUserInfoLocked(parentUserId);
         }
     }
 
@@ -1865,6 +1869,27 @@ public class UserManagerService extends IUserManager.Stub {
             // Not found
             return -1;
         }
+    }
+
+    @Override
+    public long getUserCreationTime(int userHandle) {
+        int callingUserId = UserHandle.getCallingUserId();
+        UserInfo userInfo = null;
+        synchronized (mPackagesLock) {
+            if (callingUserId == userHandle) {
+                userInfo = getUserInfoLocked(userHandle);
+            } else {
+                UserInfo parent = getProfileParentLocked(userHandle);
+                if (parent != null && parent.id == callingUserId) {
+                    userInfo = getUserInfoLocked(userHandle);
+                }
+            }
+        }
+        if (userInfo == null) {
+            throw new SecurityException("userHandle can only be the calling user or a managed "
+                    + "profile associated with this user");
+        }
+        return userInfo.creationTime;
     }
 
     /**

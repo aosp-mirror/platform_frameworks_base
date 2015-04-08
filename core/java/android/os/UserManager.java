@@ -1320,4 +1320,19 @@ public class UserManager {
         }
         return new Bundle();
     }
+
+    /**
+     * Returns creation time of the user or of a managed profile associated with the calling user.
+     * @param userHandle user handle of the user or a managed profile associated with the
+     *                   calling user.
+     * @return creation time in milliseconds since Epoch time.
+     */
+    public long getUserCreationTime(int userHandle) {
+        try {
+            return mService.getUserCreationTime(userHandle);
+        } catch (RemoteException re) {
+            Log.w(TAG, "Could not get user creation time", re);
+            return 0;
+        }
+    }
 }
