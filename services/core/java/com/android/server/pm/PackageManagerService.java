@@ -560,7 +560,6 @@ public class PackageManagerService extends IPackageManager.Stub {
                         mIntentFilterVerificationStates.get(verificationId);
 
                 String packageName = ivs.getPackageName();
-                boolean modified = false;
 
                 ArrayList<PackageParser.ActivityIntentInfo> filters = ivs.getFilters();
                 final int filterCount = filters.size();
@@ -571,9 +570,8 @@ public class PackageManagerService extends IPackageManager.Stub {
                 }
                 ArrayList<String> domainsList = new ArrayList<>(domainsSet);
                 synchronized (mPackages) {
-                    modified = mSettings.createIntentFilterVerificationIfNeededLPw(
-                            packageName, domainsList);
-                    if (modified) {
+                    if (mSettings.createIntentFilterVerificationIfNeededLPw(
+                            packageName, domainsList) != null) {
                         scheduleWriteSettingsLocked();
                     }
                 }
@@ -698,8 +696,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                 ivs = createDomainVerificationState(verifierId, userId, verificationId,
                         packageName);
             }
-            ArrayList<String> hosts = filter.getHostsList();
-            if (!hasValidHosts(hosts)) {
+            if (!hasValidDomains(filter)) {
                 return false;
             }
             ivs.addFilter(filter);
@@ -719,17 +716,35 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
     }
 
-    private static boolean hasValidHosts(ArrayList<String> hosts) {
-        if (hosts.size() == 0) {
-            Slog.d(TAG, "IntentFilter does not contain any data hosts");
+    private static boolean hasValidDomains(ActivityIntentInfo filter) {
+        return hasValidDomains(filter, true);
+    }
+
+    private static boolean hasValidDomains(ActivityIntentInfo filter, boolean logging) {
+        boolean hasHTTPorHTTPS = filter.hasDataScheme(IntentFilter.SCHEME_HTTP) ||
+                filter.hasDataScheme(IntentFilter.SCHEME_HTTPS);
+        if (!hasHTTPorHTTPS) {
+            if (logging) {
+                Slog.d(TAG, "IntentFilter does not contain any HTTP or HTTPS data scheme");
+            }
             return false;
+        }
+        ArrayList<String> hosts = filter.getHostsList();
+        if (hosts.size() == 0) {
+            if (logging) {
+                Slog.d(TAG, "IntentFilter does not contain any data hosts");
+            }
+            // We still return true as this is the case of any Browser
+            return true;
         }
         String hostEndBase = null;
         for (String host : hosts) {
             String[] hostParts = host.split("\\.");
             // Should be at minimum a host like "example.com"
             if (hostParts.length < 2) {
-                Slog.d(TAG, "IntentFilter does not contain a valid data host name: " + host);
+                if (logging) {
+                    Slog.d(TAG, "IntentFilter does not contain a valid data host name: " + host);
+                }
                 return false;
             }
             // Verify that we have the same ending domain
@@ -739,7 +754,9 @@ public class PackageManagerService extends IPackageManager.Stub {
                 hostEndBase = hostEnd;
             }
             if (!hostEnd.equalsIgnoreCase(hostEndBase)) {
-                Slog.d(TAG, "IntentFilter does not contain the same data domains");
+                if (logging) {
+                    Slog.d(TAG, "IntentFilter does not contain the same data domains");
+                }
                 return false;
             }
         }
@@ -2176,6 +2193,8 @@ public class PackageManagerService extends IPackageManager.Stub {
             mIntentFilterVerifier = new IntentVerifierProxy(mContext,
                     mIntentFilterVerifierComponent);
 
+            primeDomainVerificationsLPw(false);
+
         } // synchronized (mPackages)
         } // synchronized (mInstallLock)
 
@@ -2270,6 +2289,50 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
 
         return verifierComponentName;
+    }
+
+    private void primeDomainVerificationsLPw(boolean logging) {
+        Slog.d(TAG, "Start priming domain verification");
+        boolean updated = false;
+        ArrayList<String> allHosts = new ArrayList<>();
+        for (PackageParser.Package pkg : mPackages.values()) {
+            final String packageName = pkg.packageName;
+            if (!hasDomainURLs(pkg)) {
+                if (logging) {
+                    Slog.d(TAG, "No priming domain verifications for " +
+                            "package with no domain URLs: " + packageName);
+                }
+                continue;
+            }
+            for (PackageParser.Activity a : pkg.activities) {
+                for (ActivityIntentInfo filter : a.intents) {
+                    if (hasValidDomains(filter, false)) {
+                        allHosts.addAll(filter.getHostsList());
+                    }
+                }
+            }
+            if (allHosts.size() > 0) {
+                allHosts.add("*");
+            }
+            IntentFilterVerificationInfo ivi =
+                    mSettings.createIntentFilterVerificationIfNeededLPw(packageName, allHosts);
+            if (ivi != null) {
+                // We will always log this
+                Slog.d(TAG, "Priming domain verifications for package: " + packageName);
+                ivi.setStatus(INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ALWAYS);
+                updated = true;
+            }
+            else {
+                if (logging) {
+                    Slog.d(TAG, "No priming domain verifications for package: " + packageName);
+                }
+            }
+            allHosts.clear();
+        }
+        if (updated) {
+            scheduleWriteSettingsLocked();
+        }
+        Slog.d(TAG, "End priming domain verification");
     }
 
     @Override
@@ -3947,6 +4010,8 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
         final int userId = UserHandle.getCallingUserId();
         ArrayList<ResolveInfo> result = new ArrayList<ResolveInfo>();
+        ArrayList<ResolveInfo> neverList = new ArrayList<ResolveInfo>();
+        ArrayList<ResolveInfo> matchAllList = new ArrayList<ResolveInfo>();
         synchronized (mPackages) {
             final int count = candidates.size();
             // First, try to use the domain prefered App
@@ -3959,12 +4024,27 @@ public class PackageManagerService extends IPackageManager.Stub {
                     int status = getDomainVerificationStatusLPr(ps, userId);
                     if (status == INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ALWAYS) {
                         result.add(info);
+                    } else if (status == INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_NEVER) {
+                        neverList.add(info);
+                    }
+                    // Add to the special match all list (Browser use case)
+                    if (info.handleAllWebDataURI) {
+                        matchAllList.add(info);
                     }
                 }
             }
-            // There is not much we can do, add all candidates
+            // If there is nothing selected, add all candidates and remove the ones that the User
+            // has explicitely put into the INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_NEVER state and
+            // also remove any .
+            // If there is still none after this pass, add all Browser Apps and let the User decide
+            // with the Disambiguation dialog if there are several ones.
             if (result.size() == 0) {
                 result.addAll(candidates);
+            }
+            result.removeAll(neverList);
+            result.removeAll(matchAllList);
+            if (result.size() == 0) {
+                result.addAll(matchAllList);
             }
         }
         if (DEBUG_PREFERRED) {
@@ -7843,7 +7923,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                 res.filter = info;
             }
             if (info != null) {
-                res.filterNeedsVerification = info.needsVerification();
+                res.handleAllWebDataURI = info.handleAllWebDataURI();
             }
             res.priority = info.getPriority();
             res.preferredOrder = activity.owner.mPreferredOrder;
@@ -11234,9 +11314,8 @@ public class PackageManagerService extends IPackageManager.Stub {
                         count++;
                     } else {
                         Slog.d(TAG, "No verification needed for IntentFilter:" + filter.toString());
-                        ArrayList<String> list = filter.getHostsList();
-                        if (hasValidHosts(list)) {
-                            allHosts.addAll(list);
+                        if (hasValidDomains(filter)) {
+                            allHosts.addAll(filter.getHostsList());
                         }
                     }
                 }
@@ -11251,7 +11330,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             Slog.d(TAG, "No need to start any IntentFilter verification!");
             if (allHosts.size() > 0 && hasDomainURLs(pkg) &&
                     mSettings.createIntentFilterVerificationIfNeededLPw(
-                            packageName, allHosts)) {
+                            packageName, allHosts) != null) {
                 scheduleWriteSettingsLocked();
             }
         }

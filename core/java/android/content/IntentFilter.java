@@ -517,6 +517,38 @@ public class IntentFilter implements Parcelable {
     }
 
     /**
+     * Return if this filter handle all HTTP or HTTPS data URI or not.
+     *
+     * @return True if the filter handle all HTTP or HTTPS data URI. False otherwise.
+     *
+     * This will check if if the Intent action is {@link android.content.Intent#ACTION_VIEW} and
+     * the Intent category is {@link android.content.Intent#CATEGORY_BROWSABLE} and the Intent
+     * data scheme is "http" or "https" and that there is no specific host defined.
+     *
+     * @hide
+     */
+    public final boolean handleAllWebDataURI() {
+        return hasWebDataURI() && (countDataAuthorities() == 0);
+    }
+
+    /**
+     * Return if this filter has any HTTP or HTTPS data URI or not.
+     *
+     * @return True if the filter has any HTTP or HTTPS data URI. False otherwise.
+     *
+     * This will check if if the Intent action is {@link android.content.Intent#ACTION_VIEW} and
+     * the Intent category is {@link android.content.Intent#CATEGORY_BROWSABLE} and the Intent
+     * data scheme is "http" or "https".
+     *
+     * @hide
+     */
+    public final boolean hasWebDataURI() {
+        return hasAction(Intent.ACTION_VIEW) &&
+                hasCategory(Intent.CATEGORY_BROWSABLE) &&
+                (hasDataScheme(SCHEME_HTTP) || hasDataScheme(SCHEME_HTTPS));
+    }
+
+    /**
      * Return if this filter needs to be automatically verified again its data URIs or not.
      *
      * @return True if the filter needs to be automatically verified. False otherwise.
@@ -530,10 +562,7 @@ public class IntentFilter implements Parcelable {
      * @hide
      */
     public final boolean needsVerification() {
-        return hasAction(Intent.ACTION_VIEW) &&
-                hasCategory(Intent.CATEGORY_BROWSABLE) &&
-                (hasDataScheme(SCHEME_HTTP) || hasDataScheme(SCHEME_HTTPS)) &&
-                getAutoVerify();
+        return hasWebDataURI() && getAutoVerify();
     }
 
     /**
