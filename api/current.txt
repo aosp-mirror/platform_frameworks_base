@@ -17527,6 +17527,7 @@ package android.media.tv {
     field public static final int TIME_SHIFT_STATUS_UNAVAILABLE = 2; // 0x2
     field public static final int TIME_SHIFT_STATUS_UNKNOWN = 0; // 0x0
     field public static final int TIME_SHIFT_STATUS_UNSUPPORTED = 1; // 0x1
+    field public static final int VIDEO_UNAVAILABLE_REASON_AUDIO_ONLY = 4; // 0x4
     field public static final int VIDEO_UNAVAILABLE_REASON_BUFFERING = 3; // 0x3
     field public static final int VIDEO_UNAVAILABLE_REASON_TUNING = 1; // 0x1
     field public static final int VIDEO_UNAVAILABLE_REASON_UNKNOWN = 0; // 0x0
