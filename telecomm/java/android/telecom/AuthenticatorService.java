@@ -19,6 +19,7 @@ import android.accounts.AbstractAccountAuthenticator;
 import android.accounts.Account;
 import android.accounts.AccountAuthenticatorResponse;
 import android.accounts.NetworkErrorException;
+import android.annotation.SystemApi;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
@@ -28,7 +29,10 @@ import android.os.IBinder;
 /**
  * A generic stub account authenticator service often used for sync adapters that do not directly
  * involve accounts.
+ *
+ * @hide
  */
+@SystemApi
 public class AuthenticatorService extends Service {
     private static Authenticator mAuthenticator;
 

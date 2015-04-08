@@ -16,13 +16,17 @@
 
 package android.telecom;
 
+import android.annotation.SystemApi;
 import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
 
 /**
  * Represents a single voicemail stored in the voicemail content provider.
+ *
+ * @hide
  */
+@SystemApi
 public class Voicemail implements Parcelable {
     private final Long mTimestamp;
     private final String mNumber;
