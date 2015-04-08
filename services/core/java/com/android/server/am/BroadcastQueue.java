@@ -50,7 +50,7 @@ import static com.android.server.am.ActivityManagerDebugConfig.*;
  * foreground priority, and one for normal (background-priority) broadcasts.
  */
 public final class BroadcastQueue {
-    private static final String TAG = TAG_WITH_CLASS_NAME ? "BroadcastQueue" : TAG_AM;
+    private static final String TAG = "BroadcastQueue";
     private static final String TAG_MU = TAG + POSTFIX_MU;
     private static final String TAG_BROADCAST = TAG + POSTFIX_BROADCAST;
 
