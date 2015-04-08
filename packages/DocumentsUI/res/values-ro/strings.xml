@@ -31,8 +31,7 @@
     <string name="menu_delete" msgid="8138799623850614177">"Ștergeți"</string>
     <string name="menu_select" msgid="8711270657353563424">"Selectați „<xliff:g id="DIRECTORY">^1</xliff:g>”"</string>
     <string name="menu_select_all" msgid="4320518282375109902">"Selectați-le pe toate"</string>
-    <!-- no translation found for menu_copy (3612326052677229148) -->
-    <skip />
+    <string name="menu_copy" msgid="3612326052677229148">"Copiați în…"</string>
     <string name="menu_advanced_show" product="nosdcard" msgid="4693652895715631401">"Afișați stocarea internă"</string>
     <string name="menu_advanced_show" product="default" msgid="5792182900084144261">"Afișați cardul SD"</string>
     <string name="menu_advanced_hide" product="nosdcard" msgid="4218809952721972589">"Ascundeți stocarea internă"</string>
@@ -59,9 +58,11 @@
     <string name="toast_failed_delete" msgid="2180678019407244069">"Unele documente nu au putut fi șterse"</string>
     <string name="share_via" msgid="8966594246261344259">"Distribuiți prin"</string>
     <string name="cancel" msgid="6442560571259935130">"Anulați"</string>
-    <!-- no translation found for copy_notification_title (6374299806748219777) -->
-    <skip />
-    <!-- no translation found for copy_remaining (6283790937387975095) -->
-    <skip />
-    <!-- no translation found for copy_begin (9071199452634086365) -->
+    <string name="copy_notification_title" msgid="6374299806748219777">"Se copiază fișierele"</string>
+    <string name="copy_remaining" msgid="6283790937387975095">"Timp rămas: <xliff:g id="DURATION">%s</xliff:g>"</string>
+    <plurals name="copy_begin" formatted="false" msgid="9071199452634086365">
+      <item quantity="few">Se copiază <xliff:g id="COUNT_1">%1$d</xliff:g> fișiere.</item>
+      <item quantity="other">Se copiază <xliff:g id="COUNT_1">%1$d</xliff:g> de fișiere.</item>
+      <item quantity="one">Se copiază <xliff:g id="COUNT_0">%1$d</xliff:g> fișier.</item>
+    </plurals>
 </resources>

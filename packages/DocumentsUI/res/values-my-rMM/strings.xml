@@ -60,5 +60,8 @@
     <string name="cancel" msgid="6442560571259935130">"ထားတော့"</string>
     <string name="copy_notification_title" msgid="6374299806748219777">"ဖိုင်များကူယူနေသည်"</string>
     <string name="copy_remaining" msgid="6283790937387975095">"<xliff:g id="DURATION">%s</xliff:g> ကျန်ရှိသည်"</string>
-    <!-- no translation found for copy_begin (9071199452634086365) -->
+    <plurals name="copy_begin" formatted="false" msgid="9071199452634086365">
+      <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> ဖိုင်များကို ကူးယူနေသည်။</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> ဖိုင် ကူးယူနေသည်။</item>
+    </plurals>
 </resources>
