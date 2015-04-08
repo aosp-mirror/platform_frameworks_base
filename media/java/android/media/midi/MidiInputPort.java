@@ -83,7 +83,18 @@ public final class MidiInputPort extends MidiReceiver implements Closeable {
             if (mOutputStream == null) {
                 throw new IOException("MidiInputPort is closed");
             }
-            int length = MidiPortImpl.packMessage(msg, offset, count, timestamp, mBuffer);
+            int length = MidiPortImpl.packData(msg, offset, count, timestamp, mBuffer);
+            mOutputStream.write(mBuffer, 0, length);
+        }
+    }
+
+    @Override
+    public void flush() throws IOException {
+        synchronized (mBuffer) {
+            if (mOutputStream == null) {
+                throw new IOException("MidiInputPort is closed");
+            }
+            int length = MidiPortImpl.packFlush(mBuffer);
             mOutputStream.write(mBuffer, 0, length);
         }
     }

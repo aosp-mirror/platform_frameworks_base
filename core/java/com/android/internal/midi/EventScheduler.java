@@ -16,6 +16,7 @@
 
 package com.android.internal.midi;
 
+import java.util.Iterator;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
@@ -28,7 +29,7 @@ public class EventScheduler {
     private static final long NANOS_PER_MILLI = 1000000;
 
     private final Object mLock = new Object();
-    private SortedMap<Long, FastEventQueue> mEventBuffer;
+    volatile private SortedMap<Long, FastEventQueue> mEventBuffer;
     private FastEventQueue mEventPool = null;
     private int mMaxPoolSize = 200;
     private boolean mClosed;
@@ -68,6 +69,7 @@ public class EventScheduler {
             mEventsRemoved++;
             SchedulableEvent event = mFirst;
             mFirst = event.mNext;
+            event.mNext = null;
             return event;
         }
 
@@ -87,7 +89,7 @@ public class EventScheduler {
      */
     public static class SchedulableEvent {
         private long mTimestamp;
-        private SchedulableEvent mNext = null;
+        volatile private SchedulableEvent mNext = null;
 
         /**
          * @param timestamp
@@ -233,6 +235,11 @@ public class EventScheduler {
             }
         }
         return event;
+    }
+
+    protected void flush() {
+        // Replace our event buffer with a fresh empty one
+        mEventBuffer = new TreeMap<Long, FastEventQueue>();
     }
 
     public void close() {

@@ -28,16 +28,9 @@ public class MidiEventScheduler extends EventScheduler {
     // Maintain a pool of scheduled events to reduce memory allocation.
     // This pool increases performance by about 14%.
     private final static int POOL_EVENT_SIZE = 16;
-
-    private final MidiReceiver[] mReceivers;
+    private MidiReceiver mReceiver = new SchedulingReceiver();
 
     private class SchedulingReceiver extends MidiReceiver {
-        private final int mPortNumber;
-
-        public SchedulingReceiver(int portNumber) {
-            mPortNumber = portNumber;
-        }
-
         /**
          * Store these bytes in the EventScheduler to be delivered at the specified
          * time.
@@ -47,14 +40,17 @@ public class MidiEventScheduler extends EventScheduler {
                 throws IOException {
             MidiEvent event = createScheduledEvent(msg, offset, count, timestamp);
             if (event != null) {
-                event.portNumber = mPortNumber;
                 add(event);
             }
+        }
+
+        @Override
+        public void flush() {
+            MidiEventScheduler.this.flush();
         }
     }
 
     public static class MidiEvent extends SchedulableEvent {
-        public int portNumber;
         public int count = 0;
         public byte[] data;
 
@@ -77,17 +73,6 @@ public class MidiEventScheduler extends EventScheduler {
                 text += data[i] + ", ";
             }
             return text;
-        }
-    }
-
-    public MidiEventScheduler() {
-        this(0);
-    }
-
-    public MidiEventScheduler(int portCount) {
-        mReceivers = new MidiReceiver[portCount];
-        for (int i = 0; i < portCount; i++) {
-            mReceivers[i] = new SchedulingReceiver(i);
         }
     }
 
@@ -132,15 +117,7 @@ public class MidiEventScheduler extends EventScheduler {
      * @return the MidiReceiver
      */
     public MidiReceiver getReceiver() {
-        return mReceivers[0];
-    }
-
-    /**
-     * This MidiReceiver will write date to the scheduling buffer.
-     * @return the MidiReceiver
-     */
-    public MidiReceiver getReceiver(int portNumber) {
-        return mReceivers[portNumber];
+        return mReceiver;
     }
 
 }
