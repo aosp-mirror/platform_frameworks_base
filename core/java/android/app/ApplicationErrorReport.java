@@ -235,10 +235,13 @@ public class ApplicationErrorReport implements Parcelable {
         dest.writeString(processName);
         dest.writeLong(time);
         dest.writeInt(systemApp ? 1 : 0);
+        dest.writeInt(crashInfo != null ? 1 : 0);
 
         switch (type) {
             case TYPE_CRASH:
-                crashInfo.writeToParcel(dest, flags);
+                if (crashInfo != null) {
+                    crashInfo.writeToParcel(dest, flags);
+                }
                 break;
             case TYPE_ANR:
                 anrInfo.writeToParcel(dest, flags);
@@ -259,10 +262,11 @@ public class ApplicationErrorReport implements Parcelable {
         processName = in.readString();
         time = in.readLong();
         systemApp = in.readInt() == 1;
+        boolean hasCrashInfo = in.readInt() == 1;
 
         switch (type) {
             case TYPE_CRASH:
-                crashInfo = new CrashInfo(in);
+                crashInfo = hasCrashInfo ? new CrashInfo(in) : null;
                 anrInfo = null;
                 batteryInfo = null;
                 runningServiceInfo = null;
