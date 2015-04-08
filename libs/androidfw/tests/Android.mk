@@ -19,6 +19,7 @@
 # targets here.
 # ==========================================================
 LOCAL_PATH:= $(call my-dir)
+
 testFiles := \
     AttributeFinder_test.cpp \
     ByteBucketArray_test.cpp \
@@ -32,26 +33,32 @@ testFiles := \
     TypeWrappers_test.cpp \
     ZipUtils_test.cpp
 
+androidfw_test_cflags := \
+    -Wall \
+    -Werror \
+    -Wunused \
+    -Wunreachable-code \
+    -Wno-missing-field-initializers \
+
+# gtest is broken.
+androidfw_test_cflags += -Wno-unnamed-type-template-args
+
 # ==========================================================
 # Build the host tests: libandroidfw_tests
 # ==========================================================
 include $(CLEAR_VARS)
 
 LOCAL_MODULE := libandroidfw_tests
-
-LOCAL_CFLAGS += -Wall -Werror -Wunused -Wunreachable-code
-# gtest is broken.
-LOCAL_CFLAGS += -Wno-unnamed-type-template-args
-
+LOCAL_CFLAGS := $(androidfw_test_cflags)
 LOCAL_SRC_FILES := $(testFiles)
 LOCAL_STATIC_LIBRARIES := \
     libandroidfw \
     libutils \
     libcutils \
-    liblog
+    liblog \
+    libz \
 
 include $(BUILD_HOST_NATIVE_TEST)
-
 
 # ==========================================================
 # Build the device tests: libandroidfw_tests
@@ -60,14 +67,11 @@ ifneq ($(SDK_ONLY),true)
 include $(CLEAR_VARS)
 
 LOCAL_MODULE := libandroidfw_tests
-
-LOCAL_CFLAGS += -Wall -Werror -Wunused -Wunreachable-code
-# gtest is broken.
-LOCAL_CFLAGS += -Wno-unnamed-type-template-args
-
+LOCAL_CFLAGS := $(androidfw_test_cflags)
 LOCAL_SRC_FILES := $(testFiles) \
     BackupData_test.cpp \
-    ObbFile_test.cpp
+    ObbFile_test.cpp \
+
 LOCAL_SHARED_LIBRARIES := \
     libandroidfw \
     libcutils \
