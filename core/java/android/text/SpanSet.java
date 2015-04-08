@@ -17,6 +17,7 @@
 package android.text;
 
 import java.lang.reflect.Array;
+import java.util.Arrays;
 
 /**
  * A cached set of spans. Caches the result of {@link Spanned#getSpans(int, int, Class)} and then
@@ -54,6 +55,7 @@ public class SpanSet<E> {
             spanFlags = new int[length];
         }
 
+        int prevNumberOfSpans = numberOfSpans;
         numberOfSpans = 0;
         for (int i = 0; i < length; i++) {
             final E span = allSpans[i];
@@ -70,6 +72,12 @@ public class SpanSet<E> {
             spanFlags[numberOfSpans] = spanFlag;
 
             numberOfSpans++;
+        }
+
+        // cleanup extra spans left over from previous init() call
+        if (numberOfSpans < prevNumberOfSpans) {
+            // prevNumberofSpans was > 0, therefore spans != null
+            Arrays.fill(spans, numberOfSpans, prevNumberOfSpans, null);
         }
     }
 
@@ -103,9 +111,8 @@ public class SpanSet<E> {
      * Removes all internal references to the spans to avoid memory leaks.
      */
     public void recycle() {
-        // The spans array is guaranteed to be not null when numberOfSpans is > 0
-        for (int i = 0; i < numberOfSpans; i++) {
-            spans[i] = null; // prevent a leak: no reference kept when TextLine is recycled
+        if (spans != null) {
+            Arrays.fill(spans, 0, numberOfSpans, null);
         }
     }
 }
