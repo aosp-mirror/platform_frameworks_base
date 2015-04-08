@@ -1519,6 +1519,7 @@ public final class ActiveServices {
         } catch (DeadObjectException e) {
             Slog.w(TAG, "Application dead when creating service " + r);
             mAm.appDiedLocked(app);
+            throw e;
         } finally {
             if (!created) {
                 // Keep the executeNesting count accurate.
