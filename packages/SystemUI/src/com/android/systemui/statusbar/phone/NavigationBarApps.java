@@ -127,7 +127,7 @@ class NavigationBarApps extends LinearLayout {
 
     /** Creates a scaled-up version of an ImageView's Drawable for dragging. */
     private static class IconDragShadowBuilder extends View.DragShadowBuilder {
-        private final static int ICON_SCALE = 3;
+        private final static int ICON_SCALE = 2;
         final Drawable mDrawable;
         final int mWidth;
         final int mHeight;
@@ -142,7 +142,9 @@ class NavigationBarApps extends LinearLayout {
         @Override
         public void onProvideShadowMetrics(Point size, Point touch) {
             size.set(mWidth, mHeight);
-            touch.set(mWidth / 2, mHeight / 2);
+            // Shift the drag shadow up slightly because the apps are at the bottom edge of the
+            // screen.
+            touch.set(mWidth / 2, mHeight * 2 / 3);
         }
 
         @Override

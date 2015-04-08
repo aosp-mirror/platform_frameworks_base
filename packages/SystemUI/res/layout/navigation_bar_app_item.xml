@@ -14,13 +14,16 @@
      limitations under the License.
 -->
 
-<!-- ImageView for an app icon in the navigation bar. Used to launch the app. -->
+<!--
+    ImageView for an app icon in the navigation bar. Used to launch the app. The ImageView size is
+    used to compute the size of the drag shadow.
+-->
 <ImageView xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="40dp"
-    android:layout_height="40dp"
-    android:layout_marginLeft="12dp"
-    android:layout_marginRight="12dp"
-    android:padding="2dp"
+    android:layout_width="48dp"
+    android:layout_height="48dp"
+    android:layout_marginLeft="8dp"
+    android:layout_marginRight="8dp"
+    android:padding="6dp"
     android:layout_gravity="center"
     android:scaleType="centerInside"
     />
