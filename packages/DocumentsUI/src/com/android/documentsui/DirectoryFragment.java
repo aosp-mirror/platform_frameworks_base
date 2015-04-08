@@ -357,7 +357,12 @@ public class DirectoryFragment extends Fragment {
             return;
         }
 
-        Uri destination = data.getData();
+        // Because the destination picker is launched using an open tree intent, the URI returned is
+        // a tree URI. Convert it to a document URI.
+        // TODO: Remove this step when the destination picker returns a document URI.
+        final Uri destinationTree = data.getData();
+        final Uri destination = DocumentsContract.buildDocumentUriUsingTree(destinationTree,
+                DocumentsContract.getTreeDocumentId(destinationTree));
 
         List<DocumentInfo> docs = mSelectedDocumentsForCopy;
         Intent copyIntent = new Intent(context, CopyService.class);
@@ -506,8 +511,10 @@ public class DirectoryFragment extends Fragment {
             open.setVisible(!manageMode);
             share.setVisible(manageMode);
             delete.setVisible(manageMode);
-            // Hide the copy feature by default.
-            copy.setVisible(SystemProperties.getBoolean("debug.documentsui.enable_copy", false));
+            // Hide the copy menu item in the recents folder. For now, also hide it by default
+            // unless the debug flag is enabled.
+            copy.setVisible((mType != TYPE_RECENT_OPEN) &&
+                    SystemProperties.getBoolean("debug.documentsui.enable_copy", false));
 
             return true;
         }
@@ -575,9 +582,7 @@ public class DirectoryFragment extends Fragment {
                 if (cursor != null) {
                     final String docMimeType = getCursorString(cursor, Document.COLUMN_MIME_TYPE);
                     final int docFlags = getCursorInt(cursor, Document.COLUMN_FLAGS);
-                    if (!Document.MIME_TYPE_DIR.equals(docMimeType)) {
-                        valid = isDocumentEnabled(docMimeType, docFlags);
-                    }
+                    valid = isDocumentEnabled(docMimeType, docFlags);
                 }
 
                 if (!valid) {
@@ -606,8 +611,17 @@ public class DirectoryFragment extends Fragment {
 
     private void onShareDocuments(List<DocumentInfo> docs) {
         Intent intent;
-        if (docs.size() == 1) {
-            final DocumentInfo doc = docs.get(0);
+
+        // Filter out directories - those can't be shared.
+        List<DocumentInfo> docsForSend = Lists.newArrayList();
+        for (DocumentInfo doc: docs) {
+            if (!Document.MIME_TYPE_DIR.equals(doc.mimeType)) {
+                docsForSend.add(doc);
+            }
+        }
+
+        if (docsForSend.size() == 1) {
+            final DocumentInfo doc = docsForSend.get(0);
 
             intent = new Intent(Intent.ACTION_SEND);
             intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
@@ -615,14 +629,14 @@ public class DirectoryFragment extends Fragment {
             intent.setType(doc.mimeType);
             intent.putExtra(Intent.EXTRA_STREAM, doc.derivedUri);
 
-        } else if (docs.size() > 1) {
+        } else if (docsForSend.size() > 1) {
             intent = new Intent(Intent.ACTION_SEND_MULTIPLE);
             intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
             intent.addCategory(Intent.CATEGORY_DEFAULT);
 
             final ArrayList<String> mimeTypes = Lists.newArrayList();
             final ArrayList<Uri> uris = Lists.newArrayList();
-            for (DocumentInfo doc : docs) {
+            for (DocumentInfo doc : docsForSend) {
                 mimeTypes.add(doc.mimeType);
                 uris.add(doc.derivedUri);
             }

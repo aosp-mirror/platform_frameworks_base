@@ -16,19 +16,24 @@
 
 package com.android.documentsui;
 
+import static com.android.documentsui.model.DocumentInfo.getCursorLong;
+import static com.android.documentsui.model.DocumentInfo.getCursorString;
+
 import android.app.IntentService;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
-import android.content.ContentResolver;
+import android.content.ContentProviderClient;
 import android.content.Context;
 import android.content.Intent;
+import android.database.Cursor;
 import android.net.Uri;
 import android.os.CancellationSignal;
-import android.os.Environment;
 import android.os.ParcelFileDescriptor;
+import android.os.RemoteException;
 import android.os.SystemClock;
 import android.provider.DocumentsContract;
+import android.provider.DocumentsContract.Document;
 import android.text.format.DateUtils;
 import android.util.Log;
 
@@ -36,12 +41,13 @@ import com.android.documentsui.model.DocumentInfo;
 
 import libcore.io.IoUtils;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.text.NumberFormat;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 
 public class CopyService extends IntentService {
     public static final String TAG = "CopyService";
@@ -56,6 +62,7 @@ public class CopyService extends IntentService {
     private volatile boolean mIsCancelled;
     // Parameters of the copy job. Requests to an IntentService are serialized so this code only
     // needs to deal with one job at a time.
+    private final List<Uri> mFailedFiles;
     private long mBatchSize;
     private long mBytesCopied;
     private long mStartTime;
@@ -65,9 +72,15 @@ public class CopyService extends IntentService {
     private long mSampleTime;
     private long mSpeed;
     private long mRemainingTime;
+    // Provider clients are acquired for the duration of each copy job. Note that there is an
+    // implicit assumption that all srcs come from the same authority.
+    private ContentProviderClient mSrcClient;
+    private ContentProviderClient mDstClient;
 
     public CopyService() {
         super("CopyService");
+
+        mFailedFiles = new ArrayList<Uri>();
     }
 
     @Override
@@ -88,27 +101,34 @@ public class CopyService extends IntentService {
         ArrayList<DocumentInfo> srcs = intent.getParcelableArrayListExtra(EXTRA_SRC_LIST);
         Uri destinationUri = intent.getData();
 
-        setupCopyJob(srcs, destinationUri);
+        try {
+            // Acquire content providers.
+            mSrcClient = DocumentsApplication.acquireUnstableProviderOrThrow(getContentResolver(),
+                    srcs.get(0).authority);
+            mDstClient = DocumentsApplication.acquireUnstableProviderOrThrow(getContentResolver(),
+                    destinationUri.getAuthority());
 
-        ArrayList<String> failedFilenames = new ArrayList<String>();
-        for (int i = 0; i < srcs.size() && !mIsCancelled; ++i) {
-            DocumentInfo src = srcs.get(i);
-            try {
-                copyFile(src, destinationUri);
-            } catch (IOException e) {
-                Log.e(TAG, "Failed to copy " + src.displayName, e);
-                failedFilenames.add(src.displayName);
+            setupCopyJob(srcs, destinationUri);
+
+            for (int i = 0; i < srcs.size() && !mIsCancelled; ++i) {
+                copy(srcs.get(i), destinationUri);
             }
+        } catch (Exception e) {
+            // Catch-all to prevent any copy errors from wedging the app.
+            Log.e(TAG, "Exceptions occurred during copying", e);
+        } finally {
+            ContentProviderClient.releaseQuietly(mSrcClient);
+            ContentProviderClient.releaseQuietly(mDstClient);
+
+            // Dismiss the ongoing copy notification when the copy is done.
+            mNotificationManager.cancel(mJobId, 0);
+
+            if (mFailedFiles.size() > 0) {
+                // TODO: Display a notification when an error has occurred.
+            }
+
+            // TODO: Display a toast if the copy was cancelled.
         }
-
-        if (failedFilenames.size() > 0) {
-            // TODO: Display a notification when an error has occurred.
-        }
-
-        // Dismiss the ongoing copy notification when the copy is done.
-        mNotificationManager.cancel(mJobId, 0);
-
-        // TODO: Display a toast if the copy was cancelled.
     }
 
     @Override
@@ -123,8 +143,10 @@ public class CopyService extends IntentService {
      *
      * @param srcs A list of src files to copy.
      * @param destinationUri The URI of the destination directory.
+     * @throws RemoteException
      */
-    private void setupCopyJob(ArrayList<DocumentInfo> srcs, Uri destinationUri) {
+    private void setupCopyJob(ArrayList<DocumentInfo> srcs, Uri destinationUri)
+            throws RemoteException {
         // Create an ID for this copy job. Use the timestamp.
         mJobId = String.valueOf(SystemClock.elapsedRealtime());
         // Reset the cancellation flag.
@@ -144,13 +166,13 @@ public class CopyService extends IntentService {
         // TODO: Add a content intent to open the destination folder.
 
         // Send an initial progress notification.
+        mProgressBuilder.setProgress(0, 0, true); // Indeterminate progress while setting up.
+        mProgressBuilder.setContentText(getString(R.string.copy_preparing));
         mNotificationManager.notify(mJobId, 0, mProgressBuilder.build());
 
         // Reset batch parameters.
-        mBatchSize = 0;
-        for (DocumentInfo doc : srcs) {
-            mBatchSize += doc.size;
-        }
+        mFailedFiles.clear();
+        mBatchSize = calculateFileSizes(srcs);
         mBytesCopied = 0;
         mStartTime = SystemClock.elapsedRealtime();
         mLastNotificationTime = 0;
@@ -165,6 +187,66 @@ public class CopyService extends IntentService {
     }
 
     /**
+     * Calculates the cumulative size of all the documents in the list. Directories are recursed
+     * into and totaled up.
+     *
+     * @param srcs
+     * @return Size in bytes.
+     * @throws RemoteException
+     */
+    private long calculateFileSizes(List<DocumentInfo> srcs) throws RemoteException {
+        long result = 0;
+        for (DocumentInfo src : srcs) {
+            if (Document.MIME_TYPE_DIR.equals(src.mimeType)) {
+                // Directories need to be recursed into.
+                result += calculateFileSizesHelper(src.derivedUri);
+            } else {
+                result += src.size;
+            }
+        }
+        return result;
+    }
+
+    /**
+     * Calculates (recursively) the cumulative size of all the files under the given directory.
+     *
+     * @throws RemoteException
+     */
+    private long calculateFileSizesHelper(Uri uri) throws RemoteException {
+        final String authority = uri.getAuthority();
+        final Uri queryUri = DocumentsContract.buildChildDocumentsUri(authority,
+                DocumentsContract.getDocumentId(uri));
+        final String queryColumns[] = new String[] {
+                Document.COLUMN_DOCUMENT_ID,
+                Document.COLUMN_MIME_TYPE,
+                Document.COLUMN_SIZE
+        };
+
+        long result = 0;
+        Cursor cursor = null;
+        try {
+            cursor = mSrcClient.query(queryUri, queryColumns, null, null, null);
+            while (cursor.moveToNext()) {
+                if (Document.MIME_TYPE_DIR.equals(
+                        getCursorString(cursor, Document.COLUMN_MIME_TYPE))) {
+                    // Recurse into directories.
+                    final Uri subdirUri = DocumentsContract.buildDocumentUri(authority,
+                            getCursorString(cursor, Document.COLUMN_DOCUMENT_ID));
+                    result += calculateFileSizesHelper(subdirUri);
+                } else {
+                    // This may return -1 if the size isn't defined. Ignore those cases.
+                    long size = getCursorLong(cursor, Document.COLUMN_SIZE);
+                    result += size > 0 ? size : 0;
+                }
+            }
+        } finally {
+            IoUtils.closeQuietly(cursor);
+        }
+
+        return result;
+    }
+
+    /**
      * Cancels the current copy job, if its ID matches the given ID.
      *
      * @param intent The cancellation intent.
@@ -173,7 +255,7 @@ public class CopyService extends IntentService {
         final String cancelledId = intent.getStringExtra(EXTRA_CANCEL);
         // Do nothing if the cancelled ID doesn't match the current job ID. This prevents racey
         // cancellation requests from affecting unrelated copy jobs.
-        if (java.util.Objects.equals(mJobId, cancelledId)) {
+        if (Objects.equals(mJobId, cancelledId)) {
             // Set the cancel flag. This causes the copy loops to exit.
             mIsCancelled = true;
             // Dismiss the progress notification here rather than in the copy loop. This preserves
@@ -237,21 +319,78 @@ public class CopyService extends IntentService {
     }
 
     /**
-     * Copies a file to a given location.
+     * Copies a the given documents to the given location.
      *
-     * @param srcInfo The source file.
-     * @param destinationUri The URI of the destination directory.
-     * @throws IOException
+     * @param srcInfo DocumentInfos for the documents to copy.
+     * @param dstDirUri The URI of the destination directory.
+     * @throws RemoteException
      */
-    private void copyFile(DocumentInfo srcInfo, Uri destinationUri) throws IOException {
-        final Context context = getApplicationContext();
-        final ContentResolver resolver = context.getContentResolver();
-
-        final Uri writableDstUri = DocumentsContract.buildDocumentUriUsingTree(destinationUri,
-                DocumentsContract.getTreeDocumentId(destinationUri));
-        final Uri dstFileUri = DocumentsContract.createDocument(resolver, writableDstUri,
+    private void copy(DocumentInfo srcInfo, Uri dstDirUri) throws RemoteException {
+        final Uri dstUri = DocumentsContract.createDocument(mDstClient, dstDirUri,
                 srcInfo.mimeType, srcInfo.displayName);
+        if (dstUri == null) {
+            // If this is a directory, the entire subdir will not be copied over.
+            Log.e(TAG, "Error while copying " + srcInfo.displayName);
+            mFailedFiles.add(srcInfo.derivedUri);
+            return;
+        }
 
+        if (Document.MIME_TYPE_DIR.equals(srcInfo.mimeType)) {
+            copyDirectoryHelper(srcInfo.derivedUri, dstUri);
+        } else {
+            copyFileHelper(srcInfo.derivedUri, dstUri);
+        }
+    }
+
+    /**
+     * Handles recursion into a directory and copying its contents. Note that in linux terms, this
+     * does the equivalent of "cp src/* dst", not "cp -r src dst".
+     *
+     * @param srcDirUri URI of the directory to copy from. The routine will copy the directory's
+     *            contents, not the directory itself.
+     * @param dstDirUri URI of the directory to copy to. Must be created beforehand.
+     * @throws RemoteException
+     */
+    private void copyDirectoryHelper(Uri srcDirUri, Uri dstDirUri) throws RemoteException {
+        // Recurse into directories. Copy children into the new subdirectory.
+        final String queryColumns[] = new String[] {
+                Document.COLUMN_DISPLAY_NAME,
+                Document.COLUMN_DOCUMENT_ID,
+                Document.COLUMN_MIME_TYPE,
+                Document.COLUMN_SIZE
+        };
+        final Uri queryUri = DocumentsContract.buildChildDocumentsUri(srcDirUri.getAuthority(),
+                DocumentsContract.getDocumentId(srcDirUri));
+        Cursor cursor = null;
+        try {
+            // Iterate over srcs in the directory; copy to the destination directory.
+            cursor = mSrcClient.query(queryUri, queryColumns, null, null, null);
+            while (cursor.moveToNext()) {
+                final String childMimeType = getCursorString(cursor, Document.COLUMN_MIME_TYPE);
+                final Uri dstUri = DocumentsContract.createDocument(mDstClient, dstDirUri,
+                        childMimeType, getCursorString(cursor, Document.COLUMN_DISPLAY_NAME));
+                final Uri childUri = DocumentsContract.buildDocumentUri(srcDirUri.getAuthority(),
+                        getCursorString(cursor, Document.COLUMN_DOCUMENT_ID));
+                if (Document.MIME_TYPE_DIR.equals(childMimeType)) {
+                    copyDirectoryHelper(childUri, dstUri);
+                } else {
+                    copyFileHelper(childUri, dstUri);
+                }
+            }
+        } finally {
+            IoUtils.closeQuietly(cursor);
+        }
+    }
+
+    /**
+     * Handles copying a single file.
+     *
+     * @param srcUri URI of the file to copy from.
+     * @param dstUri URI of the *file* to copy to. Must be created beforehand.
+     * @throws RemoteException
+     */
+    private void copyFileHelper(Uri srcUri, Uri dstUri) throws RemoteException {
+        // Copy an individual file.
         CancellationSignal canceller = new CancellationSignal();
         ParcelFileDescriptor srcFile = null;
         ParcelFileDescriptor dstFile = null;
@@ -260,8 +399,8 @@ public class CopyService extends IntentService {
 
         boolean errorOccurred = false;
         try {
-            srcFile = resolver.openFileDescriptor(srcInfo.derivedUri, "r", canceller);
-            dstFile = resolver.openFileDescriptor(dstFileUri, "w", canceller);
+            srcFile = mSrcClient.openFile(srcUri, "r", canceller);
+            dstFile = mDstClient.openFile(dstUri, "w", canceller);
             src = new ParcelFileDescriptor.AutoCloseInputStream(srcFile);
             dst = new ParcelFileDescriptor.AutoCloseOutputStream(dstFile);
 
@@ -275,7 +414,8 @@ public class CopyService extends IntentService {
             dstFile.checkError();
         } catch (IOException e) {
             errorOccurred = true;
-            Log.e(TAG, "Error while copying " + srcInfo.displayName, e);
+            Log.e(TAG, "Error while copying " + srcUri.toString(), e);
+            mFailedFiles.add(srcUri);
         } finally {
             // This also ensures the file descriptors are closed.
             IoUtils.closeQuietly(src);
@@ -285,8 +425,13 @@ public class CopyService extends IntentService {
         if (errorOccurred || mIsCancelled) {
             // Clean up half-copied files.
             canceller.cancel();
-            if (!DocumentsContract.deleteDocument(resolver, dstFileUri)) {
-                Log.w(TAG, "Failed to clean up: " + srcInfo.displayName);
+            try {
+                DocumentsContract.deleteDocument(mDstClient, dstUri);
+            } catch (RemoteException e) {
+                Log.w(TAG, "Failed to clean up: " + srcUri, e);
+                // RemoteExceptions usually signal that the connection is dead, so there's no point
+                // attempting to continue. Propagate the exception up so the copy job is cancelled.
+                throw e;
             }
         }
     }

@@ -123,5 +123,7 @@
       <item quantity="one">Copying <xliff:g id="count" example="1">%1$d</xliff:g> file.</item>
       <item quantity="other">Copying <xliff:g id="count" example="3">%1$d</xliff:g> files.</item>
     </plurals>
+    <!-- Text shown on the copy notification while DocumentsUI performs setup in preparation for copying files [CHAR LIMIT=32] -->
+    <string name="copy_preparing">Preparing for copy\u2026</string>
 
 </resources>
