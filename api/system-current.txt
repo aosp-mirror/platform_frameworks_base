@@ -5401,6 +5401,11 @@ package android.app {
     method public void onRejectSharedElements(java.util.List<android.view.View>);
     method public void onSharedElementEnd(java.util.List<java.lang.String>, java.util.List<android.view.View>, java.util.List<android.view.View>);
     method public void onSharedElementStart(java.util.List<java.lang.String>, java.util.List<android.view.View>, java.util.List<android.view.View>);
+    method public void onSharedElementsArrived(java.util.List<java.lang.String>, java.util.List<android.view.View>, android.app.SharedElementCallback.OnSharedElementsReadyListener);
+  }
+
+  public static abstract interface SharedElementCallback.OnSharedElementsReadyListener {
+    method public abstract void onSharedElementsReady();
   }
 
   public deprecated class TabActivity extends android.app.ActivityGroup {
