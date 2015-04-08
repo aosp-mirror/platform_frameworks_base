@@ -239,7 +239,7 @@ void JankTracker::dumpBuffer(const void* buffer, size_t bufsize, int fd) {
 }
 
 void JankTracker::dumpData(const ProfileData* data, int fd) {
-    dprintf(fd, "\nStats since: %lluns", data->statStartTime);
+    dprintf(fd, "\nStats since: %" PRIu64 "ns", data->statStartTime);
     dprintf(fd, "\nTotal frames rendered: %u", data->totalFrameCount);
     dprintf(fd, "\nJanky frames: %u (%.2f%%)", data->jankFrameCount,
             (float) data->jankFrameCount / (float) data->totalFrameCount * 100.0f);
