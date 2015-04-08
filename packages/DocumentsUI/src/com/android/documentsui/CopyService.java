@@ -24,7 +24,11 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.CancellationSignal;
+import android.os.Environment;
+import android.os.ParcelFileDescriptor;
 import android.os.SystemClock;
+import android.provider.DocumentsContract;
 import android.text.format.DateUtils;
 import android.util.Log;
 
@@ -82,18 +86,15 @@ public class CopyService extends IntentService {
         }
 
         ArrayList<DocumentInfo> srcs = intent.getParcelableArrayListExtra(EXTRA_SRC_LIST);
-        // Use the app local files dir as a copy destination for now. This resolves to
-        // /data/data/com.android.documentsui/files.
-        // TODO: Add actual destination picking.
-        File destinationDir = getFilesDir();
+        Uri destinationUri = intent.getData();
 
-        setupCopyJob(srcs, destinationDir);
+        setupCopyJob(srcs, destinationUri);
 
         ArrayList<String> failedFilenames = new ArrayList<String>();
         for (int i = 0; i < srcs.size() && !mIsCancelled; ++i) {
             DocumentInfo src = srcs.get(i);
             try {
-                copyFile(src, destinationDir);
+                copyFile(src, destinationUri);
             } catch (IOException e) {
                 Log.e(TAG, "Failed to copy " + src.displayName, e);
                 failedFilenames.add(src.displayName);
@@ -121,8 +122,9 @@ public class CopyService extends IntentService {
      * files.
      *
      * @param srcs A list of src files to copy.
+     * @param destinationUri The URI of the destination directory.
      */
-    private void setupCopyJob(ArrayList<DocumentInfo> srcs, File destinationDir) {
+    private void setupCopyJob(ArrayList<DocumentInfo> srcs, Uri destinationUri) {
         // Create an ID for this copy job. Use the timestamp.
         mJobId = String.valueOf(SystemClock.elapsedRealtime());
         // Reset the cancellation flag.
@@ -238,42 +240,53 @@ public class CopyService extends IntentService {
      * Copies a file to a given location.
      *
      * @param srcInfo The source file.
-     * @param destination The directory to copy into.
+     * @param destinationUri The URI of the destination directory.
      * @throws IOException
      */
-    private void copyFile(DocumentInfo srcInfo, File destinationDir)
-            throws IOException {
+    private void copyFile(DocumentInfo srcInfo, Uri destinationUri) throws IOException {
         final Context context = getApplicationContext();
         final ContentResolver resolver = context.getContentResolver();
-        final File destinationFile = new File(destinationDir, srcInfo.displayName);
-        final Uri destinationUri = Uri.fromFile(destinationFile);
 
-        InputStream source = null;
-        OutputStream destination = null;
+        final Uri writableDstUri = DocumentsContract.buildDocumentUriUsingTree(destinationUri,
+                DocumentsContract.getTreeDocumentId(destinationUri));
+        final Uri dstFileUri = DocumentsContract.createDocument(resolver, writableDstUri,
+                srcInfo.mimeType, srcInfo.displayName);
+
+        CancellationSignal canceller = new CancellationSignal();
+        ParcelFileDescriptor srcFile = null;
+        ParcelFileDescriptor dstFile = null;
+        InputStream src = null;
+        OutputStream dst = null;
 
         boolean errorOccurred = false;
         try {
-            source = resolver.openInputStream(srcInfo.derivedUri);
-            destination = resolver.openOutputStream(destinationUri);
+            srcFile = resolver.openFileDescriptor(srcInfo.derivedUri, "r", canceller);
+            dstFile = resolver.openFileDescriptor(dstFileUri, "w", canceller);
+            src = new ParcelFileDescriptor.AutoCloseInputStream(srcFile);
+            dst = new ParcelFileDescriptor.AutoCloseOutputStream(dstFile);
 
             byte[] buffer = new byte[8192];
             int len;
-            while (!mIsCancelled && ((len = source.read(buffer)) != -1)) {
-                destination.write(buffer, 0, len);
+            while (!mIsCancelled && ((len = src.read(buffer)) != -1)) {
+                dst.write(buffer, 0, len);
                 makeProgress(len);
             }
+            srcFile.checkError();
+            dstFile.checkError();
         } catch (IOException e) {
             errorOccurred = true;
             Log.e(TAG, "Error while copying " + srcInfo.displayName, e);
         } finally {
-            IoUtils.closeQuietly(source);
-            IoUtils.closeQuietly(destination);
+            // This also ensures the file descriptors are closed.
+            IoUtils.closeQuietly(src);
+            IoUtils.closeQuietly(dst);
         }
 
         if (errorOccurred || mIsCancelled) {
             // Clean up half-copied files.
-            if (!destinationFile.delete()) {
-                Log.w(TAG, "Failed to clean up partially copied file " + srcInfo.displayName);
+            canceller.cancel();
+            if (!DocumentsContract.deleteDocument(resolver, dstFileUri)) {
+                Log.w(TAG, "Failed to clean up: " + srcInfo.displayName);
             }
         }
     }
