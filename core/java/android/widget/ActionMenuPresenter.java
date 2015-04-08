@@ -381,12 +381,13 @@ public class ActionMenuPresenter extends BaseMenuPresenter
         computeMenuItemAnimationInfo(true);
         final ViewTreeObserver observer = menuViewParent.getViewTreeObserver();
         if (observer != null) {
-            observer.addOnDrawListener(new ViewTreeObserver.OnDrawListener() {
+            observer.addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
                 @Override
-                public void onDraw() {
+                public boolean onPreDraw() {
                     computeMenuItemAnimationInfo(false);
-                    observer.removeOnDrawListener(this);
+                    observer.removeOnPreDrawListener(this);
                     runItemAnimations();
+                    return true;
                 }
             });
         }
