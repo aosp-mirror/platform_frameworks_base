@@ -471,7 +471,7 @@ public abstract class KeyStoreKeyConstraints {
 
     @Retention(RetentionPolicy.SOURCE)
     @IntDef(flag = true,
-            value = {BlockMode.ECB, BlockMode.CBC, BlockMode.CTR})
+            value = {BlockMode.ECB, BlockMode.CBC, BlockMode.CTR, BlockMode.GCM})
     public @interface BlockModeEnum {}
 
     /**
@@ -489,6 +489,9 @@ public abstract class KeyStoreKeyConstraints {
         /** Counter (CTR) block mode. */
         public static final int CTR = 1 << 2;
 
+        /** Galois/Counter Mode (GCM) block mode. */
+        public static final int GCM = 1 << 3;
+
         /**
          * @hide
          */
@@ -500,6 +503,8 @@ public abstract class KeyStoreKeyConstraints {
                     return KeymasterDefs.KM_MODE_CBC;
                 case CTR:
                     return KeymasterDefs.KM_MODE_CTR;
+                case GCM:
+                    return KeymasterDefs.KM_MODE_GCM;
                 default:
                     throw new IllegalArgumentException("Unknown block mode: " + mode);
             }
@@ -516,6 +521,8 @@ public abstract class KeyStoreKeyConstraints {
                     return CBC;
                 case KeymasterDefs.KM_MODE_CTR:
                     return CTR;
+                case KeymasterDefs.KM_MODE_GCM:
+                    return GCM;
                 default:
                     throw new IllegalArgumentException("Unknown block mode: " + mode);
             }
@@ -554,6 +561,8 @@ public abstract class KeyStoreKeyConstraints {
                     return "CBC";
                 case CTR:
                     return "CTR";
+                case GCM:
+                    return "GCM";
                 default:
                     throw new IllegalArgumentException("Unknown block mode: " + mode);
             }
@@ -569,6 +578,8 @@ public abstract class KeyStoreKeyConstraints {
             } else if ("cbc".equals(modeLower)) {
                 return CBC;
             } else if ("ctr".equals(modeLower)) {
+                return CTR;
+            } else if ("gcm".equals(modeLower)) {
                 return CTR;
             } else {
                 throw new IllegalArgumentException("Unknown block mode: " + mode);
