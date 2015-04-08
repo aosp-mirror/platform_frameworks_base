@@ -27,6 +27,7 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Typeface;
 import android.hardware.Camera;
+import android.media.MediaMetadataRetriever;
 import android.media.MediaPlayer;
 import android.media.MediaRecorder;
 import android.media.EncoderCapabilities;
@@ -426,6 +427,29 @@ public class MediaRecorderTest extends ActivityInstrumentationTestCase2<MediaFra
         return validVideo;
     }
 
+    private boolean validateMetadata(String filePath, int captureRate) {
+        MediaMetadataRetriever retriever = new MediaMetadataRetriever();
+
+        retriever.setDataSource(filePath);
+
+        // verify capture rate meta key is present and correct
+        String captureFps = retriever.extractMetadata(
+                MediaMetadataRetriever.METADATA_KEY_CAPTURE_FRAMERATE);
+
+        if (captureFps == null) {
+            Log.d(TAG, "METADATA_KEY_CAPTURE_FRAMERATE is missing");
+            return false;
+        }
+
+        if (Math.abs(Float.parseFloat(captureFps) - captureRate) > 0.001) {
+            Log.d(TAG, "METADATA_KEY_CAPTURE_FRAMERATE is incorrect: "
+                    + captureFps + "vs. " + captureRate);
+            return false;
+        }
+
+        // verify other meta keys here if necessary
+        return true;
+    }
     @LargeTest
     /*
      * This test case set the camera in portrait mode.
@@ -555,13 +579,16 @@ public class MediaRecorderTest extends ActivityInstrumentationTestCase2<MediaFra
 
                 // always set videoOnly=false, MediaRecorder should disable
                 // audio automatically with time lapse/slow motion
-                success = recordVideoFromSurface(frameRate,
-                        k==0 ? MIN_VIDEO_FPS : HIGH_SPEED_FPS,
-                        352, 288, codec,
+                int captureRate = k==0 ? MIN_VIDEO_FPS : HIGH_SPEED_FPS;
+                success = recordVideoFromSurface(
+                        frameRate, captureRate, 352, 288, codec,
                         MediaRecorder.OutputFormat.THREE_GPP,
                         filename, false /* videoOnly */);
                 if (success) {
                     success = validateVideo(filename, 352, 288);
+                    if (success) {
+                        success = validateMetadata(filename, captureRate);
+                    }
                 }
                 if (!success) {
                     noOfFailure++;
@@ -569,6 +596,7 @@ public class MediaRecorderTest extends ActivityInstrumentationTestCase2<MediaFra
             }
         } catch (Exception e) {
             Log.v(TAG, e.toString());
+            noOfFailure++;
         }
         assertTrue("testSurfaceRecordingTimeLapse", noOfFailure == 0);
     }
