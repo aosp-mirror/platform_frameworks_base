@@ -854,10 +854,8 @@
     <string name="permdesc_removeDrmCertificates" msgid="7272999075113400993">"Laat \'n program toe om DRM-sertifikate te verwyder. Behoort nooit vir gewone programme nodig te wees nie."</string>
     <string name="permlab_bindCarrierMessagingService" msgid="1490229371796969158">"bind aan \'n diensverskaffer-boodskapdiens"</string>
     <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"Dit laat die houer toe om aan die top-koppelvlak van \'n diensverskaffer-boodskapdiens te bind. Behoort nooit vir gewone programme nodig te wees nie."</string>
-    <!-- no translation found for permlab_accessVoiceInteractionService (4183835260471435605) -->
-    <skip />
-    <!-- no translation found for permdesc_accessVoiceInteractionService (836587728238433459) -->
-    <skip />
+    <string name="permlab_accessVoiceInteractionService" msgid="4183835260471435605">"beleef wisselwerking met steminteraksiediens"</string>
+    <string name="permdesc_accessVoiceInteractionService" msgid="836587728238433459">"Laat die houer toe om met die huidige aktiewe steminteraksiediens wisselwerking te hê. Behoort nooit vir gewone programme nodig te wees nie."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Stel wagwoordreëls"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"Beheer die lengte en die karakters wat in skermslotwagwoorde en -PIN\'e toegelaat word."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Monitor pogings om skerm te ontsluit"</string>
@@ -1848,6 +1846,10 @@
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Vra PIN voordat jy ontspeld"</string>
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"Vra ontsluitpatroon voordat jy ontspeld"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Vra wagwoord voordat jy ontspeld"</string>
+    <!-- no translation found for package_installed_device_owner (8420696545959087545) -->
+    <skip />
+    <!-- no translation found for package_deleted_device_owner (7650577387493101353) -->
+    <skip />
     <string name="battery_saver_description" msgid="1960431123816253034">"Om batterylewe te help verbeter, verminder batterybespaarder jou toestel se werkverrigting en beperk vibrasie, liggingdienste en die meeste agtergronddata. E-pos, boodskappe en ander programme wat op sinkronisering staatmaak, sal dalk nie opdateer tensy jy hulle oopmaak nie.\n\nBatterybespaarder skakel outomaties af wanneer jou toestel besig is om te laai."</string>
     <string name="downtime_condition_summary" msgid="8761776337475705749">"Totdat jou ontspantyd om <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> eindig"</string>
     <string name="downtime_condition_line_one" msgid="8762708714645352010">"Tot jou aftyd verby is"</string>

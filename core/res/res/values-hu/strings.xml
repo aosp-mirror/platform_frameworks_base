@@ -854,10 +854,8 @@
     <string name="permdesc_removeDrmCertificates" msgid="7272999075113400993">"Lehetővé teszi, hogy az alkalmazás eltávolítsa a DRM-tanúsítványokat. A normál alkalmazásoknak erre soha nincs szükségük."</string>
     <string name="permlab_bindCarrierMessagingService" msgid="1490229371796969158">"kapcsolódás egy üzenetszolgáltatáshoz"</string>
     <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"Lehetővé teszi, hogy a tulajdonos kapcsolódjon egy üzenetszolgáltatás legfelső szintű kezelőfelületéhez. A normál alkalmazásoknak erre soha nincs szükségük."</string>
-    <!-- no translation found for permlab_accessVoiceInteractionService (4183835260471435605) -->
-    <skip />
-    <!-- no translation found for permdesc_accessVoiceInteractionService (836587728238433459) -->
-    <skip />
+    <string name="permlab_accessVoiceInteractionService" msgid="4183835260471435605">"együttműködés a hanginterakciós szolgáltatással"</string>
+    <string name="permdesc_accessVoiceInteractionService" msgid="836587728238433459">"Az engedéllyel rendelkező együttműködhet a jelenleg aktív hanginterakciós szolgáltatással. Az átlagos alkalmazásoknak erre soha nincs szükségük."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Jelszavakkal kapcsolatos szabályok beállítása"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"A képernyőzár jelszavaiban és PIN kódjaiban engedélyezett karakterek és hosszúság vezérlése."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Képernyőzár-feloldási kísérletek figyelése"</string>
@@ -1848,6 +1846,10 @@
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"PIN kód kérése a rögzítés feloldásához"</string>
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"Feloldási minta kérése a rögzítés feloldásához"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Jelszó kérése a rögzítés feloldásához"</string>
+    <!-- no translation found for package_installed_device_owner (8420696545959087545) -->
+    <skip />
+    <!-- no translation found for package_deleted_device_owner (7650577387493101353) -->
+    <skip />
     <string name="battery_saver_description" msgid="1960431123816253034">"Az akkumulátoridő növelése érdekében az energiatakarékos mód csökkenti az eszköz teljesítményét, és korlátozza a rezgést, a helyszolgáltatásokat, valamint a legtöbb háttéradatot is. Előfordulhat, hogy azok az e-mail-, üzenetküldő és egyéb alkalmazások, amelyek szinkronizálására számít, csak akkor frissítenek, ha megnyitja azokat.\n\nAz energiatakarékos mód automatikusan kikapcsol, ha eszköze töltőn van."</string>
     <string name="downtime_condition_summary" msgid="8761776337475705749">"Amíg az állásidő véget nem ér ekkor: <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="downtime_condition_line_one" msgid="8762708714645352010">"Amíg az inaktivitás véget nem ér"</string>

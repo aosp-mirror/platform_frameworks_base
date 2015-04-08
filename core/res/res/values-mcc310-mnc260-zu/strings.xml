@@ -22,7 +22,11 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <!-- no translation found for wfcOperatorErrorAlertMessages:0 (7239039348648848288) -->
-    <!-- no translation found for wfcOperatorErrorNotificationMessages:0 (483847327467331298) -->
+  <string-array name="wfcOperatorErrorAlertMessages">
+    <item msgid="7239039348648848288">"Ukuze wenze amakholi uphinde uthumele imilayezo nge-Wi-FI, qala ucele inkampani yakho yenethiwekhi ukuthi isethe le divayisi. Bese uvula ukushaya kwe-Wi-FI futhi kusukela kuzilungiselelo."</item>
+  </string-array>
+  <string-array name="wfcOperatorErrorNotificationMessages">
+    <item msgid="483847327467331298">"Bhalisa ngenkampani yakho yenethiwekhi"</item>
+  </string-array>
     <string name="wfcSpnFormat" msgid="4982938551498609442">"%s ukushaya kwe-Wi-Fi"</string>
 </resources>

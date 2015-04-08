@@ -854,10 +854,8 @@
     <string name="permdesc_removeDrmCertificates" msgid="7272999075113400993">"允許應用程式移除 DRM 憑證 (一般應用程式並不需要)。"</string>
     <string name="permlab_bindCarrierMessagingService" msgid="1490229371796969158">"與行動通訊業者簡訊服務繫結"</string>
     <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"允許應用程式與行動通訊業者簡訊服務的頂層介面繫結 (一般應用程式並不需要)。"</string>
-    <!-- no translation found for permlab_accessVoiceInteractionService (4183835260471435605) -->
-    <skip />
-    <!-- no translation found for permdesc_accessVoiceInteractionService (836587728238433459) -->
-    <skip />
+    <string name="permlab_accessVoiceInteractionService" msgid="4183835260471435605">"與語音互動服務互動"</string>
+    <string name="permdesc_accessVoiceInteractionService" msgid="836587728238433459">"允許應用程式與目前啟用的語音互動服務互動 (一般應用程式並不需要)。"</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"設定密碼規則"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"管理螢幕鎖定密碼和 PIN 碼支援的字元和長度上限。"</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"監視螢幕解鎖嘗試次數"</string>
@@ -1848,6 +1846,10 @@
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"取消固定時必須輸入 PIN"</string>
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"取消固定時必須畫出解鎖圖形"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"取消固定時必須輸入密碼"</string>
+    <!-- no translation found for package_installed_device_owner (8420696545959087545) -->
+    <skip />
+    <!-- no translation found for package_deleted_device_owner (7650577387493101353) -->
+    <skip />
     <string name="battery_saver_description" msgid="1960431123816253034">"節約耗電量模式會透過降低裝置效能、震動限制、定位服務限制和大多數背景資料運作限制等方式，延長電池續航力。此外，如果未開啟電子郵件、簡訊和其他需要使用同步功能的應用程式，系統將不會自動更新這些應用程式。\n\n當您為裝置充電時，節約耗電量模式會自動關閉。"</string>
     <string name="downtime_condition_summary" msgid="8761776337475705749">"直到 <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> 停機時間結束"</string>
     <string name="downtime_condition_line_one" msgid="8762708714645352010">"直到停機時間結束"</string>

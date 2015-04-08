@@ -854,10 +854,8 @@
     <string name="permdesc_removeDrmCertificates" msgid="7272999075113400993">"애플리케이션이 DRM 인증서를 삭제하도록 허용합니다. 일반 앱에서는 필요하지 않습니다."</string>
     <string name="permlab_bindCarrierMessagingService" msgid="1490229371796969158">"이동통신사 메시지 서비스에 고정"</string>
     <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"보유자가 이동통신사 메시지 서비스의 최상위 인터페이스에 고정할 수 있습니다. 일반 앱에는 필요하지 않습니다."</string>
-    <!-- no translation found for permlab_accessVoiceInteractionService (4183835260471435605) -->
-    <skip />
-    <!-- no translation found for permdesc_accessVoiceInteractionService (836587728238433459) -->
-    <skip />
+    <string name="permlab_accessVoiceInteractionService" msgid="4183835260471435605">"음성 상호작용 서비스와 상호작용"</string>
+    <string name="permdesc_accessVoiceInteractionService" msgid="836587728238433459">"권한을 가진 프로그램이 현재 활성화된 음성 상호작용 서비스와 상호작용하도록 허용합니다. 일반 앱에는 필요하지 않습니다."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"비밀번호 규칙 설정"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"화면 잠금 비밀번호와 PIN에 허용되는 길이와 문자 수를 제어합니다."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"화면 잠금해제 시도 모니터링"</string>
@@ -1848,6 +1846,10 @@
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"고정 해제 이전에 PIN 요청"</string>
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"고정 해제 이전에 잠금해제 패턴 요청"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"고정 해제 이전에 비밀번호 요청"</string>
+    <!-- no translation found for package_installed_device_owner (8420696545959087545) -->
+    <skip />
+    <!-- no translation found for package_deleted_device_owner (7650577387493101353) -->
+    <skip />
     <string name="battery_saver_description" msgid="1960431123816253034">"배터리 수명 개선을 위해, 배터리 세이버는 기기의 성능을 줄이고 진동, 위치 서비스 및 대부분의 백그라운드 데이터를 제한합니다. 이메일, 메시지 및 동기화에 의존하는 기타 앱은 앱을 열 때까지 업데이트되지 않을 수 있습니다.\n\n배터리 세이버는 기기를 충전 중일 때는 자동으로 사용 중지됩니다."</string>
     <string name="downtime_condition_summary" msgid="8761776337475705749">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g>에 정지가 종료될 때까지"</string>
     <string name="downtime_condition_line_one" msgid="8762708714645352010">"다운타임이 끝날 때까지"</string>

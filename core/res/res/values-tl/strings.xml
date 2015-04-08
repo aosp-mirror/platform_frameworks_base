@@ -129,14 +129,10 @@
   <string-array name="wfcOperatorErrorNotificationMessages">
   </string-array>
     <string name="wfcSpnFormat" msgid="8211621332478306568">"%s"</string>
-    <!-- no translation found for wifi_calling_off_summary (8720659586041656098) -->
-    <skip />
-    <!-- no translation found for wfc_mode_wifi_preferred_summary (1994113411286935263) -->
-    <skip />
-    <!-- no translation found for wfc_mode_cellular_preferred_summary (5920549484600758786) -->
-    <skip />
-    <!-- no translation found for wfc_mode_wifi_only_summary (2379919155237869320) -->
-    <skip />
+    <string name="wifi_calling_off_summary" msgid="8720659586041656098">"Naka-off"</string>
+    <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Mas gusto ang Wi-Fi"</string>
+    <string name="wfc_mode_cellular_preferred_summary" msgid="5920549484600758786">"Mas gusto ang cellular"</string>
+    <string name="wfc_mode_wifi_only_summary" msgid="2379919155237869320">"Wi-Fi lang"</string>
     <string name="cfTemplateNotForwarded" msgid="1683685883841272560">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: Hindi naipasa"</string>
     <string name="cfTemplateForwarded" msgid="1302922117498590521">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
     <string name="cfTemplateForwardedTime" msgid="9206251736527085256">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g> pagkatapos ng <xliff:g id="TIME_DELAY">{2}</xliff:g> (na) segundo"</string>
@@ -644,10 +640,8 @@
     <string name="permlab_performCdmaProvisioning" product="tv" msgid="3485391974208100809">"direktang simulan ang pag-setup ng CDMA TV"</string>
     <string name="permlab_performCdmaProvisioning" product="default" msgid="5604848095315421425">"direktang simulan ang pag-set up ng CDMA na telepono"</string>
     <string name="permdesc_performCdmaProvisioning" msgid="1994193538802314186">"Pinapayagan ang app na simulan ang paglalaan ng CDMA. Maaaring simulan nang hindi kinakailangan ng nakakahamak na apps ang paglalaan ng CDMA."</string>
-    <!-- no translation found for permlab_performSimActivation (1651116521896665009) -->
-    <skip />
-    <!-- no translation found for permdesc_performSimActivation (1778214876348917401) -->
-    <skip />
+    <string name="permlab_performSimActivation" msgid="1651116521896665009">"simulan ang pag-set up ng SIM card"</string>
+    <string name="permdesc_performSimActivation" msgid="1778214876348917401">"Nagbibigay-daan sa app na mangasiwa ng mga kahilingan sa pag-activate ng SIM. Maaaring direktang magsagawa ang app ng pag-activate o maaari nitong ipasa ang tungkulin sa ibang app."</string>
     <string name="permlab_locationUpdates" msgid="7785408253364335740">"kotrolin ang mga notification ng pag-update ng lokasyon"</string>
     <string name="permdesc_locationUpdates" msgid="1120741557891438876">"Pinapayagan ang app na paganahin/huwag paganahain ang mga notification ng update sa lokasyon mula sa radyo. Hindi para sa paggamit ng normal na apps."</string>
     <string name="permlab_checkinProperties" msgid="7855259461268734914">"i-access ang mga katangian ng checkin"</string>
@@ -854,10 +848,8 @@
     <string name="permdesc_removeDrmCertificates" msgid="7272999075113400993">"Nagbibigay-daan sa isang application na alisin ang mga DRM certficate. Hindi dapat kailanman kailanganin para sa karaniwang apps."</string>
     <string name="permlab_bindCarrierMessagingService" msgid="1490229371796969158">"sumailalim sa isang serbisyo ng pagmemensahe ng carrier"</string>
     <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"Binibigyang-daan ang may-ari na sumailalim sa interface sa nangungunang antas ng isang serbisyo ng pagmemensahe ng carrier. Hindi kailanman dapat kailanganin para sa mga normal na app."</string>
-    <!-- no translation found for permlab_accessVoiceInteractionService (4183835260471435605) -->
-    <skip />
-    <!-- no translation found for permdesc_accessVoiceInteractionService (836587728238433459) -->
-    <skip />
+    <string name="permlab_accessVoiceInteractionService" msgid="4183835260471435605">"makipag-ugnayan sa pamamagitan ng serbisyo sa pakikipag-ugnayan gamit ang boses"</string>
+    <string name="permdesc_accessVoiceInteractionService" msgid="836587728238433459">"Pinapayagan ang may-ari na makipag-ugnayan sa pamamagitan ng kasalukuyang aktibong serbisyo sa pakikipag-ugnayan gamit ang boses. Hindi kailanman dapat kailanganin para sa mga normal na app."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Magtakda ng mga panuntunan sa password"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"Kontrolin ang haba at ang mga character na pinapayagan sa mga password at PIN sa lock ng screen."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Subaybayan ang mga pagsubok sa pag-unlock ng screen"</string>
@@ -1848,6 +1840,10 @@
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Humingi ng PIN bago mag-unpin"</string>
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"Humingi ng pattern sa pag-unlock bago mag-unpin"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Humingi ng password bago mag-unpin"</string>
+    <!-- no translation found for package_installed_device_owner (8420696545959087545) -->
+    <skip />
+    <!-- no translation found for package_deleted_device_owner (7650577387493101353) -->
+    <skip />
     <string name="battery_saver_description" msgid="1960431123816253034">"Upang matulungang pagbutihin ang tagal ng baterya, binabawasan ng pangtipid ng baterya ang pagganap ng iyong device at nililimitahan ang pag-vibrate, mga serbisyo ng lokasyon at karamihan sa data ng background. Maaaring hindi mag-update ang email, pagmemensahe at iba pang mga app na umaasa sa pagsi-sync maliban kung buksan mo ang mga iyon.\n\nAwtomatikong nag-o-off ang pangtipid ng baterya kapag nagcha-charge ang iyong device."</string>
     <string name="downtime_condition_summary" msgid="8761776337475705749">"Hanggang sa matapos ang iyong downtime nang <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="downtime_condition_line_one" msgid="8762708714645352010">"Hanggang magtapos ang iyong downtime"</string>

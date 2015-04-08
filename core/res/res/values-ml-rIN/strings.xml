@@ -129,14 +129,10 @@
   <string-array name="wfcOperatorErrorNotificationMessages">
   </string-array>
     <string name="wfcSpnFormat" msgid="8211621332478306568">"%s"</string>
-    <!-- no translation found for wifi_calling_off_summary (8720659586041656098) -->
-    <skip />
-    <!-- no translation found for wfc_mode_wifi_preferred_summary (1994113411286935263) -->
-    <skip />
-    <!-- no translation found for wfc_mode_cellular_preferred_summary (5920549484600758786) -->
-    <skip />
-    <!-- no translation found for wfc_mode_wifi_only_summary (2379919155237869320) -->
-    <skip />
+    <string name="wifi_calling_off_summary" msgid="8720659586041656098">"ഓഫ്"</string>
+    <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Wi-Fi തിരഞ്ഞെടുത്തിരിക്കുന്നു"</string>
+    <string name="wfc_mode_cellular_preferred_summary" msgid="5920549484600758786">"സെല്ലുലാർ തിരഞ്ഞെടുത്തിരിക്കുന്നു"</string>
+    <string name="wfc_mode_wifi_only_summary" msgid="2379919155237869320">"Wi-Fi മാത്രം"</string>
     <string name="cfTemplateNotForwarded" msgid="1683685883841272560">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: കൈമാറിയില്ല"</string>
     <string name="cfTemplateForwarded" msgid="1302922117498590521">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
     <string name="cfTemplateForwardedTime" msgid="9206251736527085256">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="TIME_DELAY">{2}</xliff:g> നിമിഷത്തിനുശേഷം <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
@@ -644,10 +640,8 @@
     <string name="permlab_performCdmaProvisioning" product="tv" msgid="3485391974208100809">"CDMA സജ്ജീകരണം നേരിട്ട് ആരംഭിക്കുന്നു"</string>
     <string name="permlab_performCdmaProvisioning" product="default" msgid="5604848095315421425">"CDMA ഫോൺ സജ്ജീകരണം നേരിട്ട് ആരംഭിക്കുക"</string>
     <string name="permdesc_performCdmaProvisioning" msgid="1994193538802314186">"CDMA പ്രൊവിഷനിംഗ് ആരംഭിക്കുന്നതിന് അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു. ദോഷകരമായ അപ്ലിക്കേഷനുകൾ അനാവശ്യമായി CDMA പ്രൊവിഷനിംഗ് ആരംഭിച്ചേക്കാം."</string>
-    <!-- no translation found for permlab_performSimActivation (1651116521896665009) -->
-    <skip />
-    <!-- no translation found for permdesc_performSimActivation (1778214876348917401) -->
-    <skip />
+    <string name="permlab_performSimActivation" msgid="1651116521896665009">"SIM കാർഡ് സജ്ജമാക്കാൻ ആരംഭിക്കുക"</string>
+    <string name="permdesc_performSimActivation" msgid="1778214876348917401">"SIM സജീവമാക്കൽ അഭ്യർത്ഥനകൾ കൈകാര്യം ചെയ്യാൻ അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു. അപ്ലിക്കേഷൻ നേരിട്ട് ആക്റ്റിവേഷൻ ചെയ്യുകയോ മറ്റൊരു അപ്ലിക്കേഷൻ നിയുക്തമാക്കുകയോ ചെയ്യാം."</string>
     <string name="permlab_locationUpdates" msgid="7785408253364335740">"ലൊക്കേഷൻ അപ്‌ഡേറ്റ് അറിയിപ്പുകൾ നിയന്ത്രിക്കുക"</string>
     <string name="permdesc_locationUpdates" msgid="1120741557891438876">"റേഡിയോയിൽ നിന്ന് ലൊക്കേഷൻ അപ്ഡേറ്റ് അറിയിപ്പുകൾ പ്രവർത്തനക്ഷമമാക്കുന്നതിന്/പ്രവർത്തനരഹിതമാക്കുന്നതിന് അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു. സാധാരണ അപ്ലിക്കേഷനുകൾക്കായുഌഅ ഉപയോഗത്തിനല്ല."</string>
     <string name="permlab_checkinProperties" msgid="7855259461268734914">"ചെക്ക്ഇൻ പ്രോപ്പർട്ടികൾ ആക്‌സസ്സ് ചെയ്യുക"</string>
@@ -854,10 +848,8 @@
     <string name="permdesc_removeDrmCertificates" msgid="7272999075113400993">"DRM സർട്ടിഫിക്കറ്റുകൾ നീക്കംചെയ്യുന്നതിന് അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു. സാധാരണ അപ്ലിക്കേഷനുകൾക്ക് ഒരിക്കലും ആവശ്യമില്ല."</string>
     <string name="permlab_bindCarrierMessagingService" msgid="1490229371796969158">"കാരിയർ സന്ദേശമയയ്‌ക്കൽ സേവനത്തിലേക്ക് ബന്ധിപ്പിക്കുക"</string>
     <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"ഒരു കാരിയർ സന്ദേശമയയ്‌ക്കൽ സേവനത്തിന്റെ ഉയർന്ന നിലയിലുള്ള ഇന്റർഫേസിലേക്ക് ബന്ധിപ്പിക്കാൻ ദാതാവിനെ അനുവദിക്കുന്നു. സാധാരണ അപ്ലിക്കേഷനുകൾക്ക് ഒരിക്കലും ആവശ്യമില്ല."</string>
-    <!-- no translation found for permlab_accessVoiceInteractionService (4183835260471435605) -->
-    <skip />
-    <!-- no translation found for permdesc_accessVoiceInteractionService (836587728238433459) -->
-    <skip />
+    <string name="permlab_accessVoiceInteractionService" msgid="4183835260471435605">"വോയ്‌സ് ഇന്ററാക്ഷൻ സേവനവുമായി ഇടപെടുക"</string>
+    <string name="permdesc_accessVoiceInteractionService" msgid="836587728238433459">"നിലവിൽ സജീവമായിരിക്കുന്ന വോയ്‌സ് ഇന്ററാക്ഷൻ സേവനവുമായി ഇടപെടാൻ ഉടമയെ അനുവദിക്കുന്നു. സാധാരണ അപ്ലിക്കേഷനുകൾക്ക് ഒരിക്കലും ആവശ്യമില്ല."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"പാസ്‌വേഡ് നിയമങ്ങൾ സജ്ജീകരിക്കുക"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"സ്‌ക്രീൻ ലോക്ക് പാസ്‌വേഡുകളിലും PIN-കളിലും അനുവദിച്ചിരിക്കുന്ന ദൈർഘ്യവും പ്രതീകങ്ങളും നിയന്ത്രിക്കുക."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"സ്‌ക്രീൻ അൺലോക്ക് ശ്രമങ്ങൾ നിരീക്ഷിക്കുക"</string>
@@ -1848,6 +1840,10 @@
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"അൺപിൻ ചെയ്യുന്നതിനുമുമ്പ് പിൻ ആവശ്യപ്പെടുക"</string>
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"അൺപിൻ ചെയ്യുന്നതിനുമുമ്പ് അൺലോക്ക് പാറ്റേൺ ആവശ്യപ്പെടുക"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"അൺപിൻ ചെയ്യുന്നതിനുമുമ്പ് പാസ്‌വേഡ് ആവശ്യപ്പെടുക"</string>
+    <!-- no translation found for package_installed_device_owner (8420696545959087545) -->
+    <skip />
+    <!-- no translation found for package_deleted_device_owner (7650577387493101353) -->
+    <skip />
     <string name="battery_saver_description" msgid="1960431123816253034">"ബാറ്ററി ആയുസ്സ് മെച്ചപ്പെടുത്താൻ സഹായിക്കുന്നതിന്, ബാറ്ററി സേവർ നിങ്ങളുടെ ഉപകരണത്തിന്റെ പ്രകടനത്തെ കുറയ്‌ക്കുകയും വൈബ്രേഷനെയും മിക്ക പശ്ചാത്തല വിവരത്തെയും പരിമിതപ്പെടുത്തുകയും ചെയ്യുന്നു. ഇമെയിൽ, സന്ദേശമയയ്‌ക്കൽ, സമന്വയിപ്പിക്കലിനെ ആശ്രയിച്ചുള്ള മറ്റ് അപ്ലിക്കേഷനുകൾ എന്നിവ നിങ്ങൾ തുറക്കുന്നതുവരെ അപ്‌ഡേറ്റുചെയ്യാനിടയില്ല.\n\nനിങ്ങളുടെ ഉപകരണം ചാർജ്ജുചെയ്യുമ്പോൾ ബാറ്ററി സേവർ സ്വയം ഓഫാകും."</string>
     <string name="downtime_condition_summary" msgid="8761776337475705749">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g>-ന് നിങ്ങളുടെ കാലാവധി അവസാനിക്കുന്നതുവരെ"</string>
     <string name="downtime_condition_line_one" msgid="8762708714645352010">"പ്രവർത്തനരഹിതമായിരിക്കുന്ന സമയം അവസാനിക്കുന്നതുവരെ"</string>

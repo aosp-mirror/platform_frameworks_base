@@ -854,10 +854,8 @@
     <string name="permdesc_removeDrmCertificates" msgid="7272999075113400993">"‏ایک ایپلیکیشن کو DRM سرٹیفکیٹس کو ہٹانے کی اجازت دیتا ہے۔ عام ایپس کیلئے کبھی بھی اس کی ضرورت نہیں ہونی چاہیے۔"</string>
     <string name="permlab_bindCarrierMessagingService" msgid="1490229371796969158">"ایک کیریئر پیغام رسانی سروس کا پابند بنیں"</string>
     <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"حامل کو ایک کیریئر پیغام رسانی سروس کے اعلی سطحی انٹرفیس کا پابند ہونے کی اجازت دیتی ہے۔ عام ایپس کیلئے کبھی بھی اس کی ضرورت نہیں ہونی چاہیے۔"</string>
-    <!-- no translation found for permlab_accessVoiceInteractionService (4183835260471435605) -->
-    <skip />
-    <!-- no translation found for permdesc_accessVoiceInteractionService (836587728238433459) -->
-    <skip />
+    <string name="permlab_accessVoiceInteractionService" msgid="4183835260471435605">"صوتی تعامل کی سروس کے ساتھ تعامل کریں"</string>
+    <string name="permdesc_accessVoiceInteractionService" msgid="836587728238433459">"حامل کو موجودہ فعال صوتی تعامل کی سروس سے تعامل کی اجازت دیتا ہے۔ عام ایپس کیلئے کبھی بھی اس کی ضرورت نہيں ہونی چاہئے۔"</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"پاس ورڈ کے اصول سیٹ کریں"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"‏اسکرین لاک پاس ورڈز اور PINs میں اجازت یافتہ لمبائی اور حروف کو کنٹرول کریں۔"</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"اسکرین غیر مقفل کرنے کی کوششیں مانیٹر کریں"</string>
@@ -1848,6 +1846,10 @@
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"‏پن ہٹانے سے پہلے PIN طلب کریں"</string>
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"پن ہٹانے سے پہلے غیر مقفل کرنے کا پیٹرن طلب کریں"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"پن ہٹانے سے پہلے پاس ورڈ طلب کریں"</string>
+    <!-- no translation found for package_installed_device_owner (8420696545959087545) -->
+    <skip />
+    <!-- no translation found for package_deleted_device_owner (7650577387493101353) -->
+    <skip />
     <string name="battery_saver_description" msgid="1960431123816253034">"بیٹری کی میعاد بہتر کرنے میں مدد کرنے کیلئے، بیٹری کی بچت آپ کے آلہ کی کارکردگی کم کر دیتی ہے اور وائبریشن، مقام کی سروسز اور پس منظر کا بیشتر ڈیٹا محدود کر دیتی ہے۔ ای میل، پیغام رسانی اور مطابقت پذیری پر مبنی دیگر ایپس ممکن ہے اس وقت تک اپ ڈیٹ نہ ہوں جب تک آپ انہیں نہ کھولیں۔\n\nآپ کا آلہ چارج ہوتے وقت بیٹری کی بچت خود بخود آف ہو جاتی ہے۔"</string>
     <string name="downtime_condition_summary" msgid="8761776337475705749">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> پر آپ کا آخری وقت ختم ہونے تک"</string>
     <string name="downtime_condition_line_one" msgid="8762708714645352010">"آپ کا ڈاؤن ٹائم ختم ہونے تک"</string>

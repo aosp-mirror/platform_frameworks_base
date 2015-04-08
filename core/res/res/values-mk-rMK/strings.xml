@@ -854,10 +854,8 @@
     <string name="permdesc_removeDrmCertificates" msgid="7272999075113400993">"Дозволува апликација да отстранува ДРМ-сертификати. Не треба да се користи за стандардни апликации."</string>
     <string name="permlab_bindCarrierMessagingService" msgid="1490229371796969158">"сврзување со давателот на услугата за пораки"</string>
     <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"Дозволува сопственикот да се сврзе со интерфејсот од највисоко ниво на давателот на услугата за пораки. Не треба да се користи за стандардни апликации."</string>
-    <!-- no translation found for permlab_accessVoiceInteractionService (4183835260471435605) -->
-    <skip />
-    <!-- no translation found for permdesc_accessVoiceInteractionService (836587728238433459) -->
-    <skip />
+    <string name="permlab_accessVoiceInteractionService" msgid="4183835260471435605">"комуницирај со услуга за гласовна интеракција"</string>
+    <string name="permdesc_accessVoiceInteractionService" msgid="836587728238433459">"Дозволува интеракција на сопственикот со тековната услуга за гласовна интеракција. Не треба да се користи за стандардни апликации."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Подеси правила за лозинката"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"Контролирај ги должината и знаците што се дозволени за лозинки и ПИН-броеви за отклучување екран."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Следи ги обидите за отклучување на екранот"</string>
@@ -1850,6 +1848,10 @@
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Прашај за ПИН пред откачување"</string>
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"Прашај за шема за отклучување пред откачување"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Прашај за лозинка пред откачување"</string>
+    <!-- no translation found for package_installed_device_owner (8420696545959087545) -->
+    <skip />
+    <!-- no translation found for package_deleted_device_owner (7650577387493101353) -->
+    <skip />
     <string name="battery_saver_description" msgid="1960431123816253034">"За да ви помогне да ја подобрите трајноста на батеријата, штедачот на батеријата ја намалува изведбата на уредот и го ограничува вибрирањето, услугите за локација и повеќето податоци од заднина. Е-поштата, испраќањето пораки и другите апликации кои се потпираат на синхронизација можеби нема да се ажурираат доколку не ги отворите.\n\nШтедачот на батеријата автоматски се исклучува кога уредот се полни."</string>
     <string name="downtime_condition_summary" msgid="8761776337475705749">"Додека не заврши паузата во <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="downtime_condition_line_one" msgid="8762708714645352010">"Додека да заврши паузата"</string>

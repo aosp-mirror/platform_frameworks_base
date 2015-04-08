@@ -854,10 +854,8 @@
     <string name="permdesc_removeDrmCertificates" msgid="7272999075113400993">"允许应用移除DRM证书。普通应用绝不需要此权限。"</string>
     <string name="permlab_bindCarrierMessagingService" msgid="1490229371796969158">"绑定到运营商消息传递服务"</string>
     <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"允许应用绑定到运营商消息传递服务的顶级接口。普通应用绝不需要此权限。"</string>
-    <!-- no translation found for permlab_accessVoiceInteractionService (4183835260471435605) -->
-    <skip />
-    <!-- no translation found for permdesc_accessVoiceInteractionService (836587728238433459) -->
-    <skip />
+    <string name="permlab_accessVoiceInteractionService" msgid="4183835260471435605">"与语音互动服务进行互动"</string>
+    <string name="permdesc_accessVoiceInteractionService" msgid="836587728238433459">"允许应用与当前启用的语音互动服务进行互动。普通应用绝不需要此权限。"</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"设置密码规则"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"控制锁屏密码和 PIN 码所允许的长度和字符。"</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"监视屏幕解锁尝试次数"</string>
@@ -1848,6 +1846,10 @@
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"取消时要求输入PIN码"</string>
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"取消时要求绘制解锁图案"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"取消时要求输入密码"</string>
+    <!-- no translation found for package_installed_device_owner (8420696545959087545) -->
+    <skip />
+    <!-- no translation found for package_deleted_device_owner (7650577387493101353) -->
+    <skip />
     <string name="battery_saver_description" msgid="1960431123816253034">"为了延长电池的续航时间，节电助手会降低设备的性能，并限制振动、位置信息服务和大部分后台流量。对于电子邮件、聊天工具等依赖于同步功能的应用，可能要打开这类应用时才能收到新信息。\n\n节电助手会在设备充电时自动关闭。"</string>
     <string name="downtime_condition_summary" msgid="8761776337475705749">"直到休息时间结束（<xliff:g id="FORMATTEDTIME">%1$s</xliff:g>）"</string>
     <string name="downtime_condition_line_one" msgid="8762708714645352010">"到休息时间结束"</string>

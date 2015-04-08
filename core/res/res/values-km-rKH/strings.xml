@@ -129,14 +129,10 @@
   <string-array name="wfcOperatorErrorNotificationMessages">
   </string-array>
     <string name="wfcSpnFormat" msgid="8211621332478306568">"%s"</string>
-    <!-- no translation found for wifi_calling_off_summary (8720659586041656098) -->
-    <skip />
-    <!-- no translation found for wfc_mode_wifi_preferred_summary (1994113411286935263) -->
-    <skip />
-    <!-- no translation found for wfc_mode_cellular_preferred_summary (5920549484600758786) -->
-    <skip />
-    <!-- no translation found for wfc_mode_wifi_only_summary (2379919155237869320) -->
-    <skip />
+    <string name="wifi_calling_off_summary" msgid="8720659586041656098">"បិទ"</string>
+    <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"គួរប្រើ Wi-Fi"</string>
+    <string name="wfc_mode_cellular_preferred_summary" msgid="5920549484600758786">"គួរប្រើប្រព័ន្ធទូរស័ព្ទ"</string>
+    <string name="wfc_mode_wifi_only_summary" msgid="2379919155237869320">"Wi-Fi តែប៉ុណ្ណោះ"</string>
     <string name="cfTemplateNotForwarded" msgid="1683685883841272560">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g> ៖ មិន​បាន​បញ្ជូន​បន្ត"</string>
     <string name="cfTemplateForwarded" msgid="1302922117498590521">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
     <string name="cfTemplateForwardedTime" msgid="9206251736527085256">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g> បន្ទាប់​ពី <xliff:g id="TIME_DELAY">{2}</xliff:g> វិនាទី"</string>
@@ -644,10 +640,8 @@
     <string name="permlab_performCdmaProvisioning" product="tv" msgid="3485391974208100809">"ចាប់ផ្តើមកំណត់ទូរទស្សន៍ CDMA ដោយផ្ទាល់"</string>
     <string name="permlab_performCdmaProvisioning" product="default" msgid="5604848095315421425">"ចាប់ផ្ដើម​រៀបចំ​កុំព្យូទ័រ​បន្ទះ CDMA ដោយ​ផ្ទាល់"</string>
     <string name="permdesc_performCdmaProvisioning" msgid="1994193538802314186">"ឲ្យ​កម្មវិធី​ចាប់ផ្ដើម​ការ​ផ្ដល់ CDMA ។ កម្មវិធី​ព្យាបាទ​អាច​មិន​ចាំបាច់​ចាប់ផ្ដើម​ការ​ផ្ដល់ CDMA ។"</string>
-    <!-- no translation found for permlab_performSimActivation (1651116521896665009) -->
-    <skip />
-    <!-- no translation found for permdesc_performSimActivation (1778214876348917401) -->
-    <skip />
+    <string name="permlab_performSimActivation" msgid="1651116521896665009">"ចាប់ផ្តើមការដំឡើងស៊ីមកាត"</string>
+    <string name="permdesc_performSimActivation" msgid="1778214876348917401">"អនុញ្ញាតឲ្យកម្មវិធីគ្រប់គ្រងសំណើធ្វើឲ្យសកម្មស៊ីមកាត។ កម្មវិធីនេះអាចដំណើរការធ្វើឲ្យសកម្មដោយផ្ទាល់ ឬក៏ផ្ទេរសិទ្ធិទៅឲ្យកម្មវិធីមួយផ្សេងទៀត។"</string>
     <string name="permlab_locationUpdates" msgid="7785408253364335740">"ពិនិត្យ​​ការ​ជូន​ដំណឹង​បច្ចុប្បន្ន​ភាព​ទីតាំង"</string>
     <string name="permdesc_locationUpdates" msgid="1120741557891438876">"ឲ្យ​កម្មវិធី​បិទ/បើក​ការ​ជូន​ដំណឹង​បច្ចុប្បន្នភាព​ទីតាំង​ពី​វិទ្យុ។ មិន​សម្រាប់​ប្រើ​ដោយ​កម្មវិធី​ធម្មតា​ទេ។។"</string>
     <string name="permlab_checkinProperties" msgid="7855259461268734914">"ចូល​ដំណើរការ​លក្ខណៈ​សម្បត្តិ​ពិនិត្យ​មើល"</string>
@@ -854,10 +848,8 @@
     <string name="permdesc_removeDrmCertificates" msgid="7272999075113400993">"អនុញ្ញាត​ឲ្យ​​កម្មវិធី​លុប​ចេញ​វិញ្ញាបនបត្រ DRM ​។ គួរ​តែ​មិន​ត្រូវការ​សម្រាប់​កម្មវិធី​ធម្មតា​។"</string>
     <string name="permlab_bindCarrierMessagingService" msgid="1490229371796969158">"ភ្ជាប់ទៅសេវាកម្មសារអ្នកផ្តល់សេវាកម្មទូរស័ព្ទ"</string>
     <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"អនុញ្ញាតឲ្យអ្នកប្រើភ្ជាប់ទៅអ៊ីនធឺហ្វេសកម្រិតខ្ពស់នៃសេវាកម្មសារអ្នកផ្តល់សេវាកម្មទូរស័ព្ទ។ មិនគួរចាំបាច់សម្រាប់កម្មវិធីធម្មតាទេ។"</string>
-    <!-- no translation found for permlab_accessVoiceInteractionService (4183835260471435605) -->
-    <skip />
-    <!-- no translation found for permdesc_accessVoiceInteractionService (836587728238433459) -->
-    <skip />
+    <string name="permlab_accessVoiceInteractionService" msgid="4183835260471435605">"ធ្វើអន្តរកម្មជាមួយសេវាកម្មអន្តរកម្មសម្លេងដែលសកម្ម"</string>
+    <string name="permdesc_accessVoiceInteractionService" msgid="836587728238433459">"អនុញ្ញាតឲ្យម្ចាស់ធ្វើអន្តរកម្មជាមួយសេវាកម្មអន្តរកម្មសម្លេងដែលសកម្មថ្មីៗនេះ។ មិនគួរចាំបាច់សម្រាប់កម្មវិធីធម្មតាទេ។"</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"កំណត់​ក្បួន​ពាក្យ​សម្ងាត់"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"គ្រប់គ្រងប្រវែង និងតួអក្សរដែលអនុញ្ញាតឲ្យប្រើក្នុងពាក្យសម្ងាត់ និងលេខសម្ងាត់ចាក់សោអេក្រង់។"</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"ពិនិត្យ​ការ​ព្យាយាម​ដោះ​សោ​អេក្រង់"</string>
@@ -1850,6 +1842,10 @@
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"សួរ​រក​កូដ PIN មុន​ពេល​ផ្ដាច់"</string>
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"សួរ​រក​លំនាំ​ដោះ​សោ​មុន​ពេល​ផ្ដាច់"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"សួរ​រក​ពាក្យ​សម្ងាត់​មុន​ពេល​ផ្ដាច់"</string>
+    <!-- no translation found for package_installed_device_owner (8420696545959087545) -->
+    <skip />
+    <!-- no translation found for package_deleted_device_owner (7650577387493101353) -->
+    <skip />
     <string name="battery_saver_description" msgid="1960431123816253034">"ដើម្បីជួយឲ្យថាមពលថ្មប្រសើរឡើង កម្មវិធីសន្សំសំចៃថាមពលថ្មកាត់បន្ថយប្រតិបត្តិការឧបករណ៍របស់អ្នក និងកម្រិតភាពញ័រ សេវាកម្មទីតាំង និងទិន្នន័យផ្ទៃខាងក្រោយស្ទើរតែទាំងអស់។ ការផ្ញើសារអ៊ីម៉ែល និងកម្មវិធីផ្សេងទៀតដែលពឹងផ្អែកលើការធ្វើសមកាលកម្មអាចនឹងមិនធ្វើបច្ចុប្បន្នភាពទេ លុះត្រាតែអ្នកបើកពួកវា។\n\nកម្មវិធីសន្សំសំចៃបិទដោយស្វ័យប្រវត្តិ នៅពេលដែលឧបករណ៍របស់អ្នកកំពុងសាកថ្ម។"</string>
     <string name="downtime_condition_summary" msgid="8761776337475705749">"រហូត​ដល់ម៉ោង​សម្រាក ឬរវល់​របស់​អ្នក​បញ្ចប់​នៅ <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="downtime_condition_line_one" msgid="8762708714645352010">"រហូត​ដល់​ម៉ោង​រាប់​ថយក្រោយ​ចប់"</string>

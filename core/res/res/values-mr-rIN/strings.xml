@@ -129,14 +129,10 @@
   <string-array name="wfcOperatorErrorNotificationMessages">
   </string-array>
     <string name="wfcSpnFormat" msgid="8211621332478306568">"%s"</string>
-    <!-- no translation found for wifi_calling_off_summary (8720659586041656098) -->
-    <skip />
-    <!-- no translation found for wfc_mode_wifi_preferred_summary (1994113411286935263) -->
-    <skip />
-    <!-- no translation found for wfc_mode_cellular_preferred_summary (5920549484600758786) -->
-    <skip />
-    <!-- no translation found for wfc_mode_wifi_only_summary (2379919155237869320) -->
-    <skip />
+    <string name="wifi_calling_off_summary" msgid="8720659586041656098">"बंद"</string>
+    <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"वाय-फाय प्राधान्यकृत"</string>
+    <string name="wfc_mode_cellular_preferred_summary" msgid="5920549484600758786">"सेल्युलर प्राधान्यकृत"</string>
+    <string name="wfc_mode_wifi_only_summary" msgid="2379919155237869320">"केवळ वाय-फाय"</string>
     <string name="cfTemplateNotForwarded" msgid="1683685883841272560">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: अग्रेषित केला नाही"</string>
     <string name="cfTemplateForwarded" msgid="1302922117498590521">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
     <string name="cfTemplateForwardedTime" msgid="9206251736527085256">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="TIME_DELAY">{2}</xliff:g> सेकंदांनंतर <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
@@ -644,10 +640,8 @@
     <string name="permlab_performCdmaProvisioning" product="tv" msgid="3485391974208100809">"CDMA TV सेटअप थेट प्रारंभ करा"</string>
     <string name="permlab_performCdmaProvisioning" product="default" msgid="5604848095315421425">"CDMA फोन सेटअप थेट प्रारंभ करा"</string>
     <string name="permdesc_performCdmaProvisioning" msgid="1994193538802314186">"CDMA तरतूद प्रारंभ करण्यासाठी अॅप ला अनुमती देते. दुर्भावनापूर्ण अॅप्स CDMA तरतूद अनावश्यकपणे प्रारंभ करू शकतात."</string>
-    <!-- no translation found for permlab_performSimActivation (1651116521896665009) -->
-    <skip />
-    <!-- no translation found for permdesc_performSimActivation (1778214876348917401) -->
-    <skip />
+    <string name="permlab_performSimActivation" msgid="1651116521896665009">"सिम कार्ड सेटअप प्रारंभ करा"</string>
+    <string name="permdesc_performSimActivation" msgid="1778214876348917401">"सिम सक्रियकरण विनंत्या हाताळण्यासाठी अॅपला अनुमती देते. अॅप सक्रियकरण थेट करू शकतो किंवा दुसर्‍या अॅपला प्रतिनिधी नियुक्त करू शकतो."</string>
     <string name="permlab_locationUpdates" msgid="7785408253364335740">"नियंत्रण स्थान अद्यतन सूचना"</string>
     <string name="permdesc_locationUpdates" msgid="1120741557891438876">"रेडिओवरील स्थान अद्यतन सूचना सक्षम/अक्षम करण्यासाठी अॅप ला अनुमती देते. सामान्य अॅप्सद्वारे वापरण्यासाठी नाही."</string>
     <string name="permlab_checkinProperties" msgid="7855259461268734914">"चेकइन गुणधर्मांवर प्रवेश करा"</string>
@@ -854,10 +848,8 @@
     <string name="permdesc_removeDrmCertificates" msgid="7272999075113400993">"DRM प्रमाणपत्रे काढण्यासाठी अनुप्रयोगास अनुमती देते. सामान्य अॅप्स साठी कधीही आवश्यकता नसते."</string>
     <string name="permlab_bindCarrierMessagingService" msgid="1490229371796969158">"एका वाहक संदेशन सेवेसाठी प्रतिबद्ध"</string>
     <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"वाहक संदेशन सेवेचा शीर्ष-स्तर इंटरफेस प्रतिबद्ध करण्यासाठी होल्डरला अनुमती देते. सामान्‍य अ‍ॅप्‍सकरिता कधीही आवश्‍यक नसते."</string>
-    <!-- no translation found for permlab_accessVoiceInteractionService (4183835260471435605) -->
-    <skip />
-    <!-- no translation found for permdesc_accessVoiceInteractionService (836587728238433459) -->
-    <skip />
+    <string name="permlab_accessVoiceInteractionService" msgid="4183835260471435605">"व्हॉइस परस्परसंवाद सेवेसह परस्परसंवाद करा"</string>
+    <string name="permdesc_accessVoiceInteractionService" msgid="836587728238433459">"धारकास सध्‍या सक्रिय व्‍हॉइस परस्परसंवाद सेवेसह परस्परसंवाद करण्‍याची अनुमती देते. सामान्‍य अ‍ॅपसाठी कधीही आवश्‍यक नसते."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"संकेतशब्द नियम सेट करा"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"स्क्रीन लॉक संकेतशब्द आणि पिन मध्ये अनुमती दिलेली लांबी आणि वर्ण नियंत्रित करा."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"स्क्रीन-अनलॉक प्रयत्नांचे परीक्षण करा"</string>
@@ -1848,6 +1840,10 @@
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"अनपिन करण्‍यापूर्वी पिन साठी विचारा"</string>
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"अनपिन करण्‍यापूर्वी अनलॉक नमुन्यासाठी विचारा"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"अनपिन करण्‍यापूर्वी संकेतशब्दासाठी विचारा"</string>
+    <!-- no translation found for package_installed_device_owner (8420696545959087545) -->
+    <skip />
+    <!-- no translation found for package_deleted_device_owner (7650577387493101353) -->
+    <skip />
     <string name="battery_saver_description" msgid="1960431123816253034">"बॅटरीचे आयुष्य सुधारित करण्‍यात मदत करण्यासाठी, बॅटरी बचतकर्ता आपल्या डिव्हाइसचे कार्यप्रदर्शन कमी करतो आणि कंपन, स्थान सेवा आणि बराच पार्श्वभूमी डेटा मर्यादित करतो. संकालनावर अवलंबून असणारे ईमेल, संदेशन आणि इतर अ‍ॅप्स आपण उघडल्याशिवाय अद्यतनित होऊ शकत नाहीत.\n\nआपले डिव्हाइस चार्ज होत असते तेव्हा बॅटरी बचतकर्ता स्वयंचलितपणे बंद होतो."</string>
     <string name="downtime_condition_summary" msgid="8761776337475705749">"आपला कार्य न करण्याचा कालावधी <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> वाजता समाप्त होईपर्यंत"</string>
     <string name="downtime_condition_line_one" msgid="8762708714645352010">"आपला कार्य न करण्याचा कालावधी समाप्त होईपर्यंत"</string>

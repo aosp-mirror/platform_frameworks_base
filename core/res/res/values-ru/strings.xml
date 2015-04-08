@@ -597,7 +597,7 @@
     <string name="permdesc_camera" msgid="8497216524735535009">"Приложение сможет снимать фотографии и видеоролики с помощью камеры в любое время без вашего разрешения."</string>
     <string name="permlab_cameraDisableTransmitLed" msgid="2651072630501126222">"Отключать светодиодный индикатор во время использования камеры"</string>
     <string name="permdesc_cameraDisableTransmitLed" msgid="4764585465480295341">"Предустановленное системное приложение сможет отключать светодиодный индикатор использования камеры."</string>
-    <string name="permdesc_cameraSendSystemEvent" msgid="8642231538552298107">"Предустановленное приложение сможет отсылать информацию о системных событиях в службу поддержки камеры."</string>
+    <string name="permdesc_cameraSendSystemEvent" msgid="8642231538552298107">"Предустановленное системное приложение сможет передавать системные события службы камеры."</string>
     <string name="permlab_brick" product="tablet" msgid="2961292205764488304">"Выключение планшета"</string>
     <string name="permlab_brick" product="tv" msgid="4912674222121249410">"навсегда отключать телевизор"</string>
     <string name="permlab_brick" product="default" msgid="8337817093326370537">"Отключение телефона"</string>
@@ -856,10 +856,8 @@
     <string name="permdesc_removeDrmCertificates" msgid="7272999075113400993">"Удаление сертификатов DRM. Большинству приложений это разрешение не требуется."</string>
     <string name="permlab_bindCarrierMessagingService" msgid="1490229371796969158">"Подключение к службе обмена сообщениями"</string>
     <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"Подключение к базовому интерфейсу службы обмена сообщениями, предоставляемой оператором связи. Это разрешение обычно используется только специальными приложениями."</string>
-    <!-- no translation found for permlab_accessVoiceInteractionService (4183835260471435605) -->
-    <skip />
-    <!-- no translation found for permdesc_accessVoiceInteractionService (836587728238433459) -->
-    <skip />
+    <string name="permlab_accessVoiceInteractionService" msgid="4183835260471435605">"работа со службой голосового взаимодействия"</string>
+    <string name="permdesc_accessVoiceInteractionService" msgid="836587728238433459">"Приложение сможет работать с активной службой голосового взаимодействия. Это разрешение не используется обычными приложениями."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Правила выбора паролей"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"Контролировать длину и символы при вводе пароля и PIN-кода."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Отслеживать попытки снятия блокировки экрана"</string>
@@ -1866,6 +1864,10 @@
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Запрашивать PIN-код для отключения блокировки"</string>
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"Запрашивать графический ключ для отключения блокировки"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Запрашивать пароль для отключения блокировки"</string>
+    <!-- no translation found for package_installed_device_owner (8420696545959087545) -->
+    <skip />
+    <!-- no translation found for package_deleted_device_owner (7650577387493101353) -->
+    <skip />
     <string name="battery_saver_description" msgid="1960431123816253034">"Чтобы продлить время работы устройства от батареи, в режиме энергосбережения снижается производительность, а также ограничивается использование вибрации, геолокации и фоновой передачи данных. Данные, требующие синхронизации, могут обновляться только когда вы откроете приложение.\n\nРежим энергосбережения автоматически отключается во время зарядки устройства."</string>
     <string name="downtime_condition_summary" msgid="8761776337475705749">"До отключения режима (в <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>)"</string>
     <string name="downtime_condition_line_one" msgid="8762708714645352010">"До отключения режима"</string>

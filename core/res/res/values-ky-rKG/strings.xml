@@ -1065,10 +1065,8 @@
     <string name="permdesc_removeDrmCertificates" msgid="7272999075113400993">"Колдонмого DRM тастыктамаларын алып салуу мүмкүнчүлүгүн берет. Кадимки колдонмолорго эч качан талап кылынбайт."</string>
     <string name="permlab_bindCarrierMessagingService" msgid="1490229371796969158">"оператордун билдирүү кызматына байланышуу"</string>
     <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"Кармоочуга оператордун билдирүү кызматынын жогорку деңгээлдеги интерфейсине байланышуу мүмкүнчүлүгүн берет. Кадимки колдонмолорго эч качан талап кылынбашы мүмкүн."</string>
-    <!-- no translation found for permlab_accessVoiceInteractionService (4183835260471435605) -->
-    <skip />
-    <!-- no translation found for permdesc_accessVoiceInteractionService (836587728238433459) -->
-    <skip />
+    <string name="permlab_accessVoiceInteractionService" msgid="4183835260471435605">"үн катнаштык кызматы менен карым-катнаш кылуу"</string>
+    <string name="permdesc_accessVoiceInteractionService" msgid="836587728238433459">"Кармоочуга учурдагы жигердүү үн катнаштык кызматы менен карым-катнаш кылуу мүмкүнчүлүгүн берет. Кадимки колдонмолорго талап кылынбайт."</string>
     <!-- no translation found for policylab_limitPassword (4497420728857585791) -->
     <skip />
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"Экран кулпусунун сырсөздөрү менен PIN\'дерине уруксат берилген узундук менен белгилерди көзөмөлдөө."</string>
@@ -2363,6 +2361,10 @@
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Бошотуудан мурун PIN суралсын"</string>
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"Бошотуудан мурун кулпуну ачкан үлгү суралсын"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Бошотуудан мурун сырсөз суралсын"</string>
+    <!-- no translation found for package_installed_device_owner (8420696545959087545) -->
+    <skip />
+    <!-- no translation found for package_deleted_device_owner (7650577387493101353) -->
+    <skip />
     <string name="battery_saver_description" msgid="1960431123816253034">"Батареянын өмүрүн узартуу үчүн, батареяны үнөмдөгүч түзмөгүңүздүн ишинин майнаптуулугун азайтып, дирилдөө, жайгашкан жерди аныктоо кызматтары жана фондук дайындардын көпчүлүгүн чектеп коёт. Электрондук почта, билдирүү жазышуу жана башка шайкештештирүүгө байланыштуу колдонмолор ачылмайынча жаңыртылбай калышы мүмкүн.\n\nБатарея үнөмдөгүч түзмөгүңүз кубатталып жатканда автоматтык түрдө өчүп калат."</string>
     <string name="downtime_condition_summary" msgid="8761776337475705749">"Иштебей турган абал <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> аяктамайынча"</string>
     <string name="downtime_condition_line_one" msgid="8762708714645352010">"Аракетсиз убакытыңыз бүткүчө"</string>

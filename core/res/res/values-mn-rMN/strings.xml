@@ -129,14 +129,10 @@
   <string-array name="wfcOperatorErrorNotificationMessages">
   </string-array>
     <string name="wfcSpnFormat" msgid="8211621332478306568">"%s"</string>
-    <!-- no translation found for wifi_calling_off_summary (8720659586041656098) -->
-    <skip />
-    <!-- no translation found for wfc_mode_wifi_preferred_summary (1994113411286935263) -->
-    <skip />
-    <!-- no translation found for wfc_mode_cellular_preferred_summary (5920549484600758786) -->
-    <skip />
-    <!-- no translation found for wfc_mode_wifi_only_summary (2379919155237869320) -->
-    <skip />
+    <string name="wifi_calling_off_summary" msgid="8720659586041656098">"Идэвхгүй"</string>
+    <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Wi-Fi илүү эрхэмлэдэг"</string>
+    <string name="wfc_mode_cellular_preferred_summary" msgid="5920549484600758786">"Үүрэн сүлжээг илүү эрхэмлэдэг"</string>
+    <string name="wfc_mode_wifi_only_summary" msgid="2379919155237869320">"Зөвхөн Wi-Fi"</string>
     <string name="cfTemplateNotForwarded" msgid="1683685883841272560">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: дамжуулагдаагүй"</string>
     <string name="cfTemplateForwarded" msgid="1302922117498590521">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
     <string name="cfTemplateForwardedTime" msgid="9206251736527085256">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g> <xliff:g id="TIME_DELAY">{2}</xliff:g> секундын дараа"</string>
@@ -644,10 +640,8 @@
     <string name="permlab_performCdmaProvisioning" product="tv" msgid="3485391974208100809">"CDMA телевиз-ийн тохиргоог шууд эхлүүлэх"</string>
     <string name="permlab_performCdmaProvisioning" product="default" msgid="5604848095315421425">"CDMA утасны тохиргоог шууд эхлүүлэх"</string>
     <string name="permdesc_performCdmaProvisioning" msgid="1994193538802314186">"Апп нь CDMA провишныг эхлүүлэх боломжтой. Хортой апп нь шаардлагагүй байхад CDMA провишныг эхлүүлж болзошгүй."</string>
-    <!-- no translation found for permlab_performSimActivation (1651116521896665009) -->
-    <skip />
-    <!-- no translation found for permdesc_performSimActivation (1778214876348917401) -->
-    <skip />
+    <string name="permlab_performSimActivation" msgid="1651116521896665009">"SIM картын тохиргоог эхлүүлэх"</string>
+    <string name="permdesc_performSimActivation" msgid="1778214876348917401">"Апп-д SIM идэвхжүүлэх хүсэлтүүдийг удирдахыг зөвшөөрнө. Апп нь шууд идэвхжүүлэлт хийх эсвэл өөр апп руу дамжуулж болно."</string>
     <string name="permlab_locationUpdates" msgid="7785408253364335740">"байршил шинэчлэх мэдэгдлийг удирдах"</string>
     <string name="permdesc_locationUpdates" msgid="1120741557891438876">"Апп нь радиогоос ирсэн байршил шинэчлэх мэдэгдлийг идэвхтэй/идэвхгүй болгох боломжтой. Энгийн апп-д хэрэглэглэхгүй."</string>
     <string name="permlab_checkinProperties" msgid="7855259461268734914">"бүртгэх пропертид хандах"</string>
@@ -854,10 +848,8 @@
     <string name="permdesc_removeDrmCertificates" msgid="7272999075113400993">"Аппликешнд DRM сертификатыг устгахыг зөвшөөрнө. Энгийн апп-уудад хэзээ ч ашиглагдахгүй."</string>
     <string name="permlab_bindCarrierMessagingService" msgid="1490229371796969158">"зөөгч зурвасын үйлчилгээнд холбох"</string>
     <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"Эзэмшигчид зөөгч зурвасын үйлчилгээний түвшний интерфэйст холбогдохыг зөвшөөрдөг. Энгийн апп-д шаардлагагүй."</string>
-    <!-- no translation found for permlab_accessVoiceInteractionService (4183835260471435605) -->
-    <skip />
-    <!-- no translation found for permdesc_accessVoiceInteractionService (836587728238433459) -->
-    <skip />
+    <string name="permlab_accessVoiceInteractionService" msgid="4183835260471435605">"дуут харилцах үйлчилгээг ашиглах"</string>
+    <string name="permdesc_accessVoiceInteractionService" msgid="836587728238433459">"Эзэмшигчид одоогоор идэвхтэй байгаа дуут харилцах үйлчилгээг ашиглахыг зөвшөөр. Энэ нь энгийн апп-уудад огт шаардлагагүй."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Нууц үгний дүрмийг тохируулах"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"Дэлгэц түгжих нууц үг болон ПИН кодны урт болон нийт тэмдэгтийн уртыг хянах."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Дэлгэц тайлах оролдлогыг хянах"</string>
@@ -1848,6 +1840,10 @@
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Тогтоосныг суллахаас өмнө PIN асуух"</string>
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"Тогтоосныг суллахаас өмнө түгжээ тайлах хээ асуух"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Тогтоосныг суллахаас өмнө нууц үг асуух"</string>
+    <!-- no translation found for package_installed_device_owner (8420696545959087545) -->
+    <skip />
+    <!-- no translation found for package_deleted_device_owner (7650577387493101353) -->
+    <skip />
     <string name="battery_saver_description" msgid="1960431123816253034">"Батарей хадгалах функц нь таны төхөөрөмжийн цэнэгийг хадгалахын тулд гүйцэтгэлийг багасгаж, чичрэлтийг бууруулж, байршлын үйлчилгээнүүд болон бусад өгөгдлийн хэмжээг багасгадаг юм. И-мэйл, мессеж болон бусад синхрон хийдэг апликейшнүүд дараа дахин нээгдэх хүртлээ автоматаар шинэчлэлт хийхгүй.\n\nМөн батарей хадгалах функц нь таныг төхөөрөмжөө цэнэглэх үед автоматаар унтрах юм."</string>
     <string name="downtime_condition_summary" msgid="8761776337475705749">"Таны уйтгартай байдал <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>-д дуусах хүртэл"</string>
     <string name="downtime_condition_line_one" msgid="8762708714645352010">"Сул зогсолт дуусах хүртэл"</string>
