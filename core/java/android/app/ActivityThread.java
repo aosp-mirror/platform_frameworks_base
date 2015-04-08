@@ -5322,18 +5322,24 @@ public final class ActivityThread {
 
         private DropBoxManager dropBox;
 
-        public DropBoxReporter() {
-            dropBox = (DropBoxManager) getSystemContext().getSystemService(Context.DROPBOX_SERVICE);
-        }
+        public DropBoxReporter() {}
 
         @Override
         public void addData(String tag, byte[] data, int flags) {
+            ensureInitialized();
             dropBox.addData(tag, data, flags);
         }
 
         @Override
         public void addText(String tag, String data) {
+            ensureInitialized();
             dropBox.addText(tag, data);
+        }
+
+        private synchronized void ensureInitialized() {
+            if (dropBox == null) {
+                dropBox = (DropBoxManager) getSystemContext().getSystemService(Context.DROPBOX_SERVICE);
+            }
         }
     }
 
