@@ -181,8 +181,7 @@
     <string name="accessibility_quick_settings_airplane_changed_on" msgid="8983005603505087728">"O modo avião foi ativado."</string>
     <string name="accessibility_quick_settings_dnd_priority_on" msgid="1448402297221249355">"\"Não perturbe\" ativado, somente prioridade."</string>
     <string name="accessibility_quick_settings_dnd_none_on" msgid="5910777408232088752">"\"Não perturbe\" ativado, sem interrupções."</string>
-    <!-- no translation found for accessibility_quick_settings_dnd_alarms_on (9152834845587554157) -->
-    <skip />
+    <string name="accessibility_quick_settings_dnd_alarms_on" msgid="9152834845587554157">"\"Não perturbe\" ativado, somente alarmes."</string>
     <string name="accessibility_quick_settings_dnd_off" msgid="2371832603753738581">"\"Não perturbe\" desativado."</string>
     <string name="accessibility_quick_settings_dnd_changed_off" msgid="898107593453022935">"\"Não perturbe\" desativado."</string>
     <string name="accessibility_quick_settings_dnd_changed_on" msgid="4483780856613561039">"\"Não perturbe\" ativado."</string>
@@ -235,8 +234,7 @@
     <string name="ethernet_label" msgid="7967563676324087464">"Ethernet"</string>
     <string name="quick_settings_dnd_label" msgid="8735855737575028208">"Não perturbe"</string>
     <string name="quick_settings_dnd_priority_label" msgid="483232950670692036">"Só prioridade"</string>
-    <!-- no translation found for quick_settings_dnd_alarms_label (2559229444312445858) -->
-    <skip />
+    <string name="quick_settings_dnd_alarms_label" msgid="2559229444312445858">"Somente alarmes"</string>
     <string name="quick_settings_dnd_none_label" msgid="7309935569360609114">"Sem interrupções"</string>
     <string name="quick_settings_bluetooth_label" msgid="6304190285170721401">"Bluetooth"</string>
     <string name="quick_settings_bluetooth_multiple_devices_label" msgid="3912245565613684735">"Bluetooth (<xliff:g id="NUMBER">%d</xliff:g> dispositivos)"</string>
@@ -307,8 +305,7 @@
     <string name="zen_no_interruptions_with_warning" msgid="4396898053735625287">"Sem interrupções. Nem mesmo alarmes."</string>
     <string name="zen_no_interruptions" msgid="7970973750143632592">"Sem interrupções"</string>
     <string name="zen_important_interruptions" msgid="3477041776609757628">"Apenas interrupções prioritárias"</string>
-    <!-- no translation found for zen_alarms (5055668280767657759) -->
-    <skip />
+    <string name="zen_alarms" msgid="5055668280767657759">"Somente alarmes"</string>
     <string name="zen_alarm_information_time" msgid="5235772206174372272">"Seu próximo alarme será às <xliff:g id="ALARM_TIME">%s</xliff:g>"</string>
     <string name="zen_alarm_information_day_time" msgid="8422733576255047893">"Seu próximo alarme será em <xliff:g id="ALARM_DAY_AND_TIME">%s</xliff:g>"</string>
     <string name="zen_alarm_warning" msgid="6873910860111498041">"Você não ouvirá o alarme às <xliff:g id="ALARM_TIME">%s</xliff:g>"</string>
@@ -318,19 +315,13 @@
     <string name="keyguard_unlock" msgid="8043466894212841998">"Deslize para cima para desbloquear"</string>
     <string name="phone_hint" msgid="3101468054914424646">"Deslize à direita p/ usar o telefone"</string>
     <string name="camera_hint" msgid="5241441720959174226">"Deslize à esquerda p/ usar a câmera"</string>
-    <!-- no translation found for interruption_level_none (8284541443482072628) -->
-    <skip />
-    <!-- no translation found for interruption_level_priority (6426766465363855505) -->
-    <skip />
-    <!-- no translation found for interruption_level_alarms (5226306993448328896) -->
-    <skip />
+    <string name="interruption_level_none" msgid="8284541443482072628">"Sem interrupções"</string>
+    <string name="interruption_level_priority" msgid="6426766465363855505">"Só prioridade"</string>
+    <string name="interruption_level_alarms" msgid="5226306993448328896">"Somente alarmes"</string>
     <string name="interruption_level_all" msgid="1330581184930945764">"Tudo"</string>
-    <!-- no translation found for interruption_level_none_twoline (3942121050170227056) -->
-    <skip />
-    <!-- no translation found for interruption_level_priority_twoline (1564715335217164124) -->
-    <skip />
-    <!-- no translation found for interruption_level_alarms_twoline (3266909566410106146) -->
-    <skip />
+    <string name="interruption_level_none_twoline" msgid="3942121050170227056">"Sem\ninterrupções"</string>
+    <string name="interruption_level_priority_twoline" msgid="1564715335217164124">"Somente\nprioridade"</string>
+    <string name="interruption_level_alarms_twoline" msgid="3266909566410106146">"Somente\nalarmes"</string>
     <string name="keyguard_indication_charging_time" msgid="1757251776872835768">"Carregando (<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> até concluir)"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="7305948938141024937">"Trocar usuário"</string>
     <string name="accessibility_multi_user_switch_switcher_with_current" msgid="8434880595284601601">"Alternar usuário. Usuário atual <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
@@ -398,6 +389,5 @@
     <string name="volumeui_prompt_deny" msgid="5720663643411696731">"Negar"</string>
     <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g> é a caixa de diálogo referente ao volume"</string>
     <string name="volumeui_notification_text" msgid="1826889705095768656">"Toque para restaurar o original."</string>
-    <!-- no translation found for volume_zen_switch_text (6388350641576595452) -->
-    <skip />
+    <string name="volume_zen_switch_text" msgid="6388350641576595452">"Bloquear interrupções"</string>
 </resources>
