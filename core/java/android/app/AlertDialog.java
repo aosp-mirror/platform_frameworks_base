@@ -134,6 +134,7 @@ public class AlertDialog extends Dialog implements DialogInterface {
      * {@code context}'s theme.
      *
      * @param context the parent context
+     * @see android.R.styleable#Theme_alertDialogTheme
      */
     protected AlertDialog(Context context) {
         this(context, 0);
@@ -155,6 +156,7 @@ public class AlertDialog extends Dialog implements DialogInterface {
      * {@code context}'s theme.
      *
      * @param context the parent context
+     * @see android.R.styleable#Theme_alertDialogTheme
      */
     protected AlertDialog(Context context, boolean cancelable, OnCancelListener cancelListener) {
         this(context, 0);
@@ -187,16 +189,24 @@ public class AlertDialog extends Dialog implements DialogInterface {
      * @param themeResId the resource ID of the theme against which to inflate
      *                   this dialog, or {@code 0} to use the parent
      *                   {@code context}'s default alert dialog theme
+     * @see android.R.styleable#Theme_alertDialogTheme
      */
     protected AlertDialog(Context context, @AttrRes int themeResId) {
-        super(context, resolveDialogTheme(context, themeResId));
+        this(context, themeResId, true);
+    }
+
+    AlertDialog(Context context, @AttrRes int themeResId, boolean createContextThemeWrapper) {
+        super(context, createContextThemeWrapper ? resolveDialogTheme(context, themeResId) : 0,
+                createContextThemeWrapper);
 
         mWindow.alwaysReadCloseOnTouchAttr();
         mAlert = new AlertController(getContext(), this, getWindow());
     }
 
     static int resolveDialogTheme(Context context, int themeResId) {
-        if (themeResId == THEME_TRADITIONAL) {
+        if (themeResId == 0) {
+            return 0;
+        } else if (themeResId == THEME_TRADITIONAL) {
             return R.style.Theme_Dialog_Alert;
         } else if (themeResId == THEME_HOLO_DARK) {
             return R.style.Theme_Holo_Dialog_Alert;
@@ -428,7 +438,6 @@ public class AlertDialog extends Dialog implements DialogInterface {
 
     public static class Builder {
         private final AlertController.AlertParams P;
-        private int mThemeResId;
 
         /**
          * Creates a builder for an alert dialog that uses the default alert
@@ -473,7 +482,6 @@ public class AlertDialog extends Dialog implements DialogInterface {
         public Builder(Context context, int themeResId) {
             P = new AlertController.AlertParams(new ContextThemeWrapper(
                     context, resolveDialogTheme(context, themeResId)));
-            mThemeResId = themeResId;
         }
 
         /**
@@ -1075,7 +1083,7 @@ public class AlertDialog extends Dialog implements DialogInterface {
          * create and display the dialog.
          */
         public AlertDialog create() {
-            final AlertDialog dialog = new AlertDialog(P.mContext, mThemeResId);
+            final AlertDialog dialog = new AlertDialog(P.mContext);
             P.apply(dialog.mAlert);
             dialog.setCancelable(P.mCancelable);
             if (P.mCancelable) {

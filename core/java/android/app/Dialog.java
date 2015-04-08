@@ -21,7 +21,6 @@ import android.annotation.DrawableRes;
 import android.annotation.IdRes;
 import android.annotation.LayoutRes;
 import android.annotation.StringRes;
-import com.android.internal.app.WindowDecorActionBar;
 
 import android.annotation.Nullable;
 import android.content.ComponentName;
@@ -55,6 +54,9 @@ import android.view.ViewGroup.LayoutParams;
 import android.view.Window;
 import android.view.WindowManager;
 import android.view.accessibility.AccessibilityEvent;
+
+import com.android.internal.R;
+import com.android.internal.app.WindowDecorActionBar;
 
 import java.lang.ref.WeakReference;
 
@@ -130,27 +132,32 @@ public class Dialog implements DialogInterface, Window.Callback,
     };
 
     /**
-     * Create a Dialog window that uses the default dialog frame style.
-     * 
-     * @param context The Context the Dialog is to run it.  In particular, it
-     *                uses the window manager and theme in this context to
-     *                present its UI.
+     * Creates a dialog window that uses the default dialog theme.
+     * <p>
+     * The supplied {@code context} is used to obtain the window manager and
+     * base theme used to present the dialog.
+     *
+     * @param context the context in which the dialog should run
+     * @see android.R.styleable#Theme_dialogTheme
      */
     public Dialog(Context context) {
         this(context, 0, true);
     }
 
     /**
-     * Create a Dialog window that uses a custom dialog style.
+     * Creates a dialog window that uses a custom dialog style.
+     * <p>
+     * The supplied {@code context} is used to obtain the window manager and
+     * base theme used to present the dialog.
+     * <p>
+     * The supplied {@code theme} is applied on top of the context's theme. See
+     * <a href="{@docRoot}guide/topics/resources/available-resources.html#stylesandthemes">
+     * Style and Theme Resources</a> for more information about defining and
+     * using styles.
      *
-     * @param context The Context in which the Dialog should run. In particular, it
-     *                uses the window manager and theme from this context to
-     *                present its UI.
-     * @param theme A style resource describing the theme to use for the
-     * window. See <a href="{@docRoot}guide/topics/resources/available-resources.html#stylesandthemes">Style
-     * and Theme Resources</a> for more information about defining and using
-     * styles.  This theme is applied on top of the current theme in
-     * <var>context</var>.  If 0, the default dialog theme will be used.
+     * @param context the context in which the dialog should run
+     * @param theme a style resource describing the theme to use for the
+     *              window, or {@code 0} to use the default dialog theme
      */
     public Dialog(Context context, int theme) {
         this(context, theme, true);
@@ -159,9 +166,8 @@ public class Dialog implements DialogInterface, Window.Callback,
     Dialog(Context context, int theme, boolean createContextThemeWrapper) {
         if (createContextThemeWrapper) {
             if (theme == 0) {
-                TypedValue outValue = new TypedValue();
-                context.getTheme().resolveAttribute(com.android.internal.R.attr.dialogTheme,
-                        outValue, true);
+                final TypedValue outValue = new TypedValue();
+                context.getTheme().resolveAttribute(R.attr.dialogTheme, outValue, true);
                 theme = outValue.resourceId;
             }
             mContext = new ContextThemeWrapper(context, theme);
@@ -170,12 +176,14 @@ public class Dialog implements DialogInterface, Window.Callback,
         }
 
         mWindowManager = (WindowManager)context.getSystemService(Context.WINDOW_SERVICE);
-        Window w = new PhoneWindow(mContext);
+
+        final Window w = new PhoneWindow(mContext);
         mWindow = w;
         w.setCallback(this);
         w.setOnWindowDismissedCallback(this);
         w.setWindowManager(mWindowManager, null, null);
         w.setGravity(Gravity.CENTER);
+
         mListenersHandler = new ListenersHandler(this);
     }
 
