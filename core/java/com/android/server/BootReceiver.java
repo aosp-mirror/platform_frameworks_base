@@ -144,10 +144,6 @@ public class BootReceiver extends BroadcastReceiver {
                     -LOG_SIZE, "SYSTEM_RECOVERY_LOG");
             addFileToDropBox(db, prefs, headers, "/cache/recovery/last_kmsg",
                     -LOG_SIZE, "SYSTEM_RECOVERY_KMSG");
-            addFileToDropBox(db, prefs, headers, "/data/dontpanic/apanic_console",
-                    -LOG_SIZE, "APANIC_CONSOLE");
-            addFileToDropBox(db, prefs, headers, "/data/dontpanic/apanic_threads",
-                    -LOG_SIZE, "APANIC_THREADS");
             addAuditErrorsToDropBox(db, prefs, headers, -LOG_SIZE, "SYSTEM_AUDIT");
             addFsckErrorsToDropBox(db, prefs, headers, -LOG_SIZE, "SYSTEM_FSCK");
         } else {
