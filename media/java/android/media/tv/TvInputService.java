@@ -250,10 +250,10 @@ public abstract class TvInputService extends Service {
         private boolean mOverlayViewEnabled;
         private IBinder mWindowToken;
         private Rect mOverlayFrame;
+        private long mStartPositionMs;
         private long mCurrentPositionMs;
-        private final TimeShiftCurrentPositionTrackingRunnable
-                mTimeShiftCurrentPositionTrackingRunnable =
-                new TimeShiftCurrentPositionTrackingRunnable();
+        private final TimeShiftPositionTrackingRunnable
+                mTimeShiftPositionTrackingRunnable = new TimeShiftPositionTrackingRunnable();
 
         private final Object mLock = new Object();
         // @GuardedBy("mLock")
@@ -320,7 +320,7 @@ public abstract class TvInputService extends Service {
                             mSessionCallback.onSessionEvent(eventType, eventArgs);
                         }
                     } catch (RemoteException e) {
-                        Log.w(TAG, "error in sending event (event=" + eventType + ")");
+                        Log.w(TAG, "error in sending event (event=" + eventType + ")", e);
                     }
                 }
             });
@@ -341,7 +341,7 @@ public abstract class TvInputService extends Service {
                             mSessionCallback.onChannelRetuned(channelUri);
                         }
                     } catch (RemoteException e) {
-                        Log.w(TAG, "error in notifyChannelRetuned");
+                        Log.w(TAG, "error in notifyChannelRetuned", e);
                     }
                 }
             });
@@ -380,7 +380,7 @@ public abstract class TvInputService extends Service {
                             mSessionCallback.onTracksChanged(tracks);
                         }
                     } catch (RemoteException e) {
-                        Log.w(TAG, "error in notifyTracksChanged");
+                        Log.w(TAG, "error in notifyTracksChanged", e);
                     }
                 }
             });
@@ -410,7 +410,7 @@ public abstract class TvInputService extends Service {
                             mSessionCallback.onTrackSelected(type, trackId);
                         }
                     } catch (RemoteException e) {
-                        Log.w(TAG, "error in notifyTrackSelected");
+                        Log.w(TAG, "error in notifyTrackSelected", e);
                     }
                 }
             });
@@ -433,7 +433,7 @@ public abstract class TvInputService extends Service {
                             mSessionCallback.onVideoAvailable();
                         }
                     } catch (RemoteException e) {
-                        Log.w(TAG, "error in notifyVideoAvailable");
+                        Log.w(TAG, "error in notifyVideoAvailable", e);
                     }
                 }
             });
@@ -467,7 +467,7 @@ public abstract class TvInputService extends Service {
                             mSessionCallback.onVideoUnavailable(reason);
                         }
                     } catch (RemoteException e) {
-                        Log.w(TAG, "error in notifyVideoUnavailable");
+                        Log.w(TAG, "error in notifyVideoUnavailable", e);
                     }
                 }
             });
@@ -508,7 +508,7 @@ public abstract class TvInputService extends Service {
                             mSessionCallback.onContentAllowed();
                         }
                     } catch (RemoteException e) {
-                        Log.w(TAG, "error in notifyContentAllowed");
+                        Log.w(TAG, "error in notifyContentAllowed", e);
                     }
                 }
             });
@@ -550,30 +550,36 @@ public abstract class TvInputService extends Service {
                             mSessionCallback.onContentBlocked(rating.flattenToString());
                         }
                     } catch (RemoteException e) {
-                        Log.w(TAG, "error in notifyContentBlocked");
+                        Log.w(TAG, "error in notifyContentBlocked", e);
                     }
                 }
             });
         }
 
         /**
-         * Informs the application that the trick play status is changed.
+         * Informs the application that the time shift status is changed.
          * <p>
-         * The application assumes that time shift is not available by default. So, the
-         * implementation should call this method with
-         * {@link TvInputManager#TIME_SHIFT_STATUS_AVAILABLE} on tune request, if the time shift is
-         * available in the given channel.
-         * Note that sending {@link TvInputManager#TIME_SHIFT_STATUS_AVAILABLE} means the session
-         * implemented {@link #onTimeShiftPause}, {@link #onTimeShiftResume},
-         * {@link #onTimeShiftSeekTo}, {@link #onTimeShiftGetCurrentPosition}, and
-         * {@link #onTimeShiftSetPlaybackRate}, and these are working at the moment.
+         * Prior to calling this method, the application assumes the status
+         * {@link TvInputManager#TIME_SHIFT_STATUS_UNKNOWN}. Right after the session is created, it
+         * is important to invoke the method with the status
+         * {@link TvInputManager#TIME_SHIFT_STATUS_AVAILABLE} if the implementation does support
+         * time shifting, or {@link TvInputManager#TIME_SHIFT_STATUS_UNSUPPORTED} otherwise. Failure
+         * to notifying the current status change immediately might result in an undesirable
+         * behavior in the application such as hiding the play controls.
+         * </p><p>
+         * If the status {@link TvInputManager#TIME_SHIFT_STATUS_AVAILABLE} is reported, the
+         * application assumes it can pause/resume playback, seek to a specified time position and
+         * set playback rate and audio mode. The implementation should override
+         * {@link #onTimeShiftPause}, {@link #onTimeShiftResume}, {@link #onTimeShiftSeekTo},
+         * {@link #onTimeShiftGetStartPosition}, {@link #onTimeShiftGetCurrentPosition} and
+         * {@link #onTimeShiftSetPlaybackRate}.
          * </p>
          *
-         * @param status The current time shift status:
+         * @param status The current time shift status. Should be one of the followings.
          * <ul>
-         * <li>{@link TvInputManager#TIME_SHIFT_STATUS_AVAILABLE}
+         * <li>{@link TvInputManager#TIME_SHIFT_STATUS_UNSUPPORTED}
          * <li>{@link TvInputManager#TIME_SHIFT_STATUS_UNAVAILABLE}
-         * <li>{@link TvInputManager#TIME_SHIFT_STATUS_ERROR}
+         * <li>{@link TvInputManager#TIME_SHIFT_STATUS_AVAILABLE}
          * </ul>
          */
         public void notifyTimeShiftStatusChanged(final int status) {
@@ -586,23 +592,13 @@ public abstract class TvInputService extends Service {
                             mSessionCallback.onTimeShiftStatusChanged(status);
                         }
                     } catch (RemoteException e) {
-                        Log.w(TAG, "error in notifyTimeShiftStatusChanged");
+                        Log.w(TAG, "error in notifyTimeShiftStatusChanged", e);
                     }
                 }
             });
         }
 
-        /**
-         * Informs the application that the time shift start position is changed.
-         * <p>
-         * The application may seek to a position in the range from the start position and the
-         * current time, inclusive. So, the implementation should call this whenever the range is
-         * updated.
-         * </p>
-         *
-         * @param timeMs the start of possible time shift range, in milliseconds since the epoch.
-         */
-        public void notifyTimeShiftStartPositionChanged(final long timeMs) {
+        private void notifyTimeShiftStartPositionChanged(final long timeMs) {
             executeOrPostRunnable(new Runnable() {
                 @Override
                 public void run() {
@@ -612,17 +608,12 @@ public abstract class TvInputService extends Service {
                             mSessionCallback.onTimeShiftStartPositionChanged(timeMs);
                         }
                     } catch (RemoteException e) {
-                        Log.w(TAG, "error in notifyTimeShiftStartPositionChanged");
+                        Log.w(TAG, "error in notifyTimeShiftStartPositionChanged", e);
                     }
                 }
             });
         }
 
-        /**
-         * Informs the application that the current playback position is changed.
-         *
-         * @param timeMs The current position, in milliseconds since the epoch.
-         */
         private void notifyTimeShiftCurrentPositionChanged(final long timeMs) {
             executeOrPostRunnable(new Runnable() {
                 @Override
@@ -633,7 +624,7 @@ public abstract class TvInputService extends Service {
                             mSessionCallback.onTimeShiftCurrentPositionChanged(timeMs);
                         }
                     } catch (RemoteException e) {
-                        Log.w(TAG, "error in notifyTimeShiftCurrentPositionChanged");
+                        Log.w(TAG, "error in notifyTimeShiftCurrentPositionChanged", e);
                     }
                 }
             });
@@ -666,7 +657,7 @@ public abstract class TvInputService extends Service {
                             mSessionCallback.onLayoutSurface(left, top, right, bottom);
                         }
                     } catch (RemoteException e) {
-                        Log.w(TAG, "error in layoutSurface");
+                        Log.w(TAG, "error in layoutSurface", e);
                     }
                 }
             });
@@ -711,7 +702,7 @@ public abstract class TvInputService extends Service {
          * When {@code setSurface(null)} is called, the implementation should stop using the Surface
          * object previously given and release any references to it.
          *
-         * @param surface possibly {@code null} {@link Surface} an application passes to this TV
+         * @param surface possibly {@code null} {@link Surface} the application passes to this TV
          *            input session.
          * @return {@code true} if the surface was set, {@code false} otherwise.
          */
@@ -730,10 +721,10 @@ public abstract class TvInputService extends Service {
         }
 
         /**
-         * Called when a size of an overlay view is changed by an application. Even when the overlay
-         * view is disabled by {@link #setOverlayViewEnabled}, this is called. The size is same as
-         * the size of {@link Surface} in general. Once {@link #layoutSurface} is called, the sizes
-         * of {@link Surface} and the overlay view can be different.
+         * Called when a size of an overlay view is changed by the application. Even when the
+         * overlay view is disabled by {@link #setOverlayViewEnabled}, this is called. The size is
+         * same as the size of {@link Surface} in general. Once {@link #layoutSurface} is called,
+         * the sizes of {@link Surface} and the overlay view can be different.
          *
          * @param width The width of the overlay view.
          * @param height The height of the overlay view.
@@ -836,7 +827,7 @@ public abstract class TvInputService extends Service {
         }
 
         /**
-         * Called when an application requests to create an overlay view. Each session
+         * Called when the application requests to create an overlay view. Each session
          * implementation can override this method and return its own view.
          *
          * @return a view attached to the overlay window
@@ -846,66 +837,94 @@ public abstract class TvInputService extends Service {
         }
 
         /**
-         * Called when an application requests to pause the playback.
+         * Called when the application requests to pause playback.
          *
-         * @see #onTimeShiftResume()
-         * @see #onTimeShiftSeekTo(long)
-         * @see #onTimeShiftSetPlaybackRate(float, int)
-         * @see #onTimeShiftGetCurrentPosition()
+         * @see #onTimeShiftResume
+         * @see #onTimeShiftSeekTo
+         * @see #onTimeShiftSetPlaybackRate
+         * @see #onTimeShiftGetStartPosition
+         * @see #onTimeShiftGetCurrentPosition
          */
         public void onTimeShiftPause() {
         }
 
         /**
-         * Called when an application requests to resume the playback.
+         * Called when the application requests to resume playback.
          *
-         * @see #onTimeShiftPause()
-         * @see #onTimeShiftSeekTo(long)
-         * @see #onTimeShiftSetPlaybackRate(float, int)
-         * @see #onTimeShiftGetCurrentPosition()
+         * @see #onTimeShiftPause
+         * @see #onTimeShiftSeekTo
+         * @see #onTimeShiftSetPlaybackRate
+         * @see #onTimeShiftGetStartPosition
+         * @see #onTimeShiftGetCurrentPosition
          */
         public void onTimeShiftResume() {
         }
 
         /**
-         * Called when an application requests to seek to a specific position. The {@code timeMs} is
-         * expected to be in a range from the start time,
-         * {@link #notifyTimeShiftStartPositionChanged(long)}, to the current time, inclusive. If it
-         * is not, the implementation should seek to the nearest time position in the range.
+         * Called when the application requests to seek to a specified time position. Normally, the
+         * position is given within range between the start and the current time, inclusively. The
+         * implementation is expected to seek to the nearest time position if the given position is
+         * not in the range.
          *
-         * @param timeMs The target time, in milliseconds since the epoch
-         * @see #onTimeShiftResume()
-         * @see #onTimeShiftPause()
-         * @see #onTimeShiftSetPlaybackRate(float, int)
-         * @see #onTimeShiftGetCurrentPosition()
+         * @param timeMs The time position to seek to, in milliseconds since the epoch.
+         * @see #onTimeShiftResume
+         * @see #onTimeShiftPause
+         * @see #onTimeShiftSetPlaybackRate
+         * @see #onTimeShiftGetStartPosition
+         * @see #onTimeShiftGetCurrentPosition
          */
         public void onTimeShiftSeekTo(long timeMs) {
         }
 
         /**
-         * Called when an application sets a playback rate and an audio mode.
+         * Called when the application sets playback rate and audio mode.
          *
          * @param rate The ratio between desired playback rate and normal one.
-         * @param audioMode The audio playback mode. Must be one of the supported audio modes:
+         * @param audioMode Audio playback mode. Must be one of the supported audio modes:
          * <ul>
          * <li> {@link android.media.MediaPlayer#PLAYBACK_RATE_AUDIO_MODE_RESAMPLE}
          * </ul>
-         * @see #onTimeShiftResume()
-         * @see #onTimeShiftPause()
-         * @see #onTimeShiftSeekTo(long)
-         * @see #onTimeShiftGetCurrentPosition()
+         * @see #onTimeShiftResume
+         * @see #onTimeShiftPause
+         * @see #onTimeShiftSeekTo
+         * @see #onTimeShiftGetStartPosition
+         * @see #onTimeShiftGetCurrentPosition
          */
         public void onTimeShiftSetPlaybackRate(float rate, int audioMode) {
         }
 
         /**
-         * Returns the current playback position in milliseconds since the epoch.
-         * {@link TvInputManager#TIME_SHIFT_INVALID_TIME} if position is unknown at this moment.
+         * Returns the start playback position for time shifting, in milliseconds since the epoch.
+         * Returns {@link TvInputManager#TIME_SHIFT_INVALID_TIME} if the position is unknown at the
+         * moment.
+         * <p>
+         * The start playback position of the time shifted program should be adjusted when the
+         * implementation cannot retain the whole recorded program due to some reason (e.g.
+         * limitation on storage space). It is the earliest possible time position that the user can
+         * seek to, thus failure to notifying its change immediately might result in bad experience
+         * where the application allows the user to seek to an invalid time position.
+         * </p>
          *
-         * @see #onTimeShiftResume()
-         * @see #onTimeShiftPause()
-         * @see #onTimeShiftSeekTo(long)
-         * @see #onTimeShiftSetPlaybackRate(float, int)
+         * @see #onTimeShiftResume
+         * @see #onTimeShiftPause
+         * @see #onTimeShiftSeekTo
+         * @see #onTimeShiftSetPlaybackRate
+         * @see #onTimeShiftGetCurrentPosition
+         */
+        public long onTimeShiftGetStartPosition() {
+            return TvInputManager.TIME_SHIFT_INVALID_TIME;
+        }
+
+        /**
+         * Returns the current playback position for time shifting, in milliseconds since the epoch.
+         * Returns {@link TvInputManager#TIME_SHIFT_INVALID_TIME} if the position is unknown at the
+         * moment.
+         *
+         * @see #onTimeShiftResume
+         * @see #onTimeShiftPause
+         * @see #onTimeShiftSeekTo
+         * @see #onTimeShiftSetPlaybackRate
+         * @see #onTimeShiftGetStartPosition
          */
         public long onTimeShiftGetCurrentPosition() {
             return TvInputManager.TIME_SHIFT_INVALID_TIME;
@@ -1043,7 +1062,7 @@ public abstract class TvInputService extends Service {
             // Removes the overlay view lastly so that any hanging on the main thread can be handled
             // in {@link #scheduleOverlayViewCleanup}.
             removeOverlayView(true);
-            mHandler.removeCallbacks(mTimeShiftCurrentPositionTrackingRunnable);
+            mHandler.removeCallbacks(mTimeShiftPositionTrackingRunnable);
         }
 
         /**
@@ -1125,7 +1144,7 @@ public abstract class TvInputService extends Service {
          * Creates an overlay view. This calls {@link #onCreateOverlayView} to get a view to attach
          * to the overlay window.
          *
-         * @param windowToken A window token of an application.
+         * @param windowToken A window token of the application.
          * @param frame A position of the overlay view.
          */
         void createOverlayView(IBinder windowToken, Rect frame) {
@@ -1245,13 +1264,16 @@ public abstract class TvInputService extends Service {
         }
 
         /**
-         * Turns on/off the current position tracking.
+         * Enable/disable position tracking.
+         *
+         * @param enable {@code true} to enable tracking, {@code false} otherwise.
          */
-        void timeShiftTrackCurrentPosition(boolean enabled) {
-            if (enabled) {
-                mHandler.post(mTimeShiftCurrentPositionTrackingRunnable);
+        void timeShiftEnablePositionTracking(boolean enable) {
+            if (enable) {
+                mHandler.post(mTimeShiftPositionTrackingRunnable);
             } else {
-                mHandler.removeCallbacks(mTimeShiftCurrentPositionTrackingRunnable);
+                mHandler.removeCallbacks(mTimeShiftPositionTrackingRunnable);
+                mStartPositionMs = TvInputManager.TIME_SHIFT_INVALID_TIME;
                 mCurrentPositionMs = TvInputManager.TIME_SHIFT_INVALID_TIME;
             }
         }
@@ -1283,7 +1305,7 @@ public abstract class TvInputService extends Service {
                 }
                 isNavigationKey = isNavigationKey(keyEvent.getKeyCode());
                 // When media keys and KEYCODE_MEDIA_AUDIO_TRACK are dispatched to ViewRootImpl,
-                // ViewRootImpl always consumes the keys. In this case, an application loses
+                // ViewRootImpl always consumes the keys. In this case, the application loses
                 // a chance to handle media keys. Therefore, media keys are not dispatched to
                 // ViewRootImpl.
                 skipDispatchToOverlayView = KeyEvent.isMediaKey(keyEvent.getKeyCode())
@@ -1352,16 +1374,21 @@ public abstract class TvInputService extends Service {
             }
         }
 
-        private final class TimeShiftCurrentPositionTrackingRunnable implements Runnable {
+        private final class TimeShiftPositionTrackingRunnable implements Runnable {
             @Override
             public void run() {
-                long pos = onTimeShiftGetCurrentPosition();
-                if (mCurrentPositionMs != pos) {
-                    mCurrentPositionMs = pos;
-                    notifyTimeShiftCurrentPositionChanged(pos);
+                long startPositionMs = onTimeShiftGetStartPosition();
+                if (mStartPositionMs != startPositionMs) {
+                    mStartPositionMs = startPositionMs;
+                    notifyTimeShiftStartPositionChanged(startPositionMs);
                 }
-                mHandler.removeCallbacks(mTimeShiftCurrentPositionTrackingRunnable);
-                mHandler.postDelayed(mTimeShiftCurrentPositionTrackingRunnable,
+                long currentPositionMs = onTimeShiftGetCurrentPosition();
+                if (mCurrentPositionMs != currentPositionMs) {
+                    mCurrentPositionMs = currentPositionMs;
+                    notifyTimeShiftCurrentPositionChanged(currentPositionMs);
+                }
+                mHandler.removeCallbacks(mTimeShiftPositionTrackingRunnable);
+                mHandler.postDelayed(mTimeShiftPositionTrackingRunnable,
                         POSITION_UPDATE_INTERVAL_MS);
             }
         }
@@ -1538,7 +1565,7 @@ public abstract class TvInputService extends Service {
                 try {
                     mCallbacks.getBroadcastItem(i).addHardwareTvInput(deviceId, inputInfo);
                 } catch (RemoteException e) {
-                    Log.e(TAG, "Error while broadcasting.", e);
+                    Log.e(TAG, "error in broadcastAddHardwareTvInput", e);
                 }
             }
             mCallbacks.finishBroadcast();
@@ -1550,7 +1577,7 @@ public abstract class TvInputService extends Service {
                 try {
                     mCallbacks.getBroadcastItem(i).addHdmiTvInput(id, inputInfo);
                 } catch (RemoteException e) {
-                    Log.e(TAG, "Error while broadcasting.", e);
+                    Log.e(TAG, "error in broadcastAddHdmiTvInput", e);
                 }
             }
             mCallbacks.finishBroadcast();
@@ -1562,7 +1589,7 @@ public abstract class TvInputService extends Service {
                 try {
                     mCallbacks.getBroadcastItem(i).removeTvInput(inputId);
                 } catch (RemoteException e) {
-                    Log.e(TAG, "Error while broadcasting.", e);
+                    Log.e(TAG, "error in broadcastRemoveTvInput", e);
                 }
             }
             mCallbacks.finishBroadcast();
@@ -1583,7 +1610,7 @@ public abstract class TvInputService extends Service {
                             // Failed to create a session.
                             cb.onSessionCreated(null, null);
                         } catch (RemoteException e) {
-                            Log.e(TAG, "error in onSessionCreated");
+                            Log.e(TAG, "error in onSessionCreated", e);
                         }
                         return;
                     }
@@ -1604,7 +1631,7 @@ public abstract class TvInputService extends Service {
                             try {
                                 cb.onSessionCreated(null, null);
                             } catch (RemoteException e) {
-                                Log.e(TAG, "error in onSessionCreated");
+                                Log.e(TAG, "error in onSessionCreated", e);
                             }
                             return;
                         }
@@ -1635,7 +1662,7 @@ public abstract class TvInputService extends Service {
                     try {
                         cb.onSessionCreated(stub, hardwareSessionToken);
                     } catch (RemoteException e) {
-                        Log.e(TAG, "error in onSessionCreated");
+                        Log.e(TAG, "error in onSessionCreated", e);
                     }
                     if (sessionImpl != null) {
                         sessionImpl.initialize(cb);

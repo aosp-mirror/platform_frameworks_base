@@ -17519,9 +17519,10 @@ package android.media.tv {
     field public static final int INPUT_STATE_DISCONNECTED = 2; // 0x2
     field public static final java.lang.String META_DATA_CONTENT_RATING_SYSTEMS = "android.media.tv.metadata.CONTENT_RATING_SYSTEMS";
     field public static final long TIME_SHIFT_INVALID_TIME = -9223372036854775808L; // 0x8000000000000000L
-    field public static final int TIME_SHIFT_STATUS_AVAILABLE = 0; // 0x0
-    field public static final int TIME_SHIFT_STATUS_ERROR = 2; // 0x2
-    field public static final int TIME_SHIFT_STATUS_UNAVAILABLE = 1; // 0x1
+    field public static final int TIME_SHIFT_STATUS_AVAILABLE = 3; // 0x3
+    field public static final int TIME_SHIFT_STATUS_UNAVAILABLE = 2; // 0x2
+    field public static final int TIME_SHIFT_STATUS_UNKNOWN = 0; // 0x0
+    field public static final int TIME_SHIFT_STATUS_UNSUPPORTED = 1; // 0x1
     field public static final int VIDEO_UNAVAILABLE_REASON_BUFFERING = 3; // 0x3
     field public static final int VIDEO_UNAVAILABLE_REASON_TUNING = 1; // 0x1
     field public static final int VIDEO_UNAVAILABLE_REASON_UNKNOWN = 0; // 0x0
@@ -17556,7 +17557,6 @@ package android.media.tv {
     method public void notifyChannelRetuned(android.net.Uri);
     method public void notifyContentAllowed();
     method public void notifyContentBlocked(android.media.tv.TvContentRating);
-    method public void notifyTimeShiftStartPositionChanged(long);
     method public void notifyTimeShiftStatusChanged(int);
     method public void notifyTrackSelected(int, java.lang.String);
     method public void notifyTracksChanged(java.util.List<android.media.tv.TvTrackInfo>);
@@ -17575,6 +17575,7 @@ package android.media.tv {
     method public abstract boolean onSetSurface(android.view.Surface);
     method public void onSurfaceChanged(int, int, int);
     method public long onTimeShiftGetCurrentPosition();
+    method public long onTimeShiftGetStartPosition();
     method public void onTimeShiftPause();
     method public void onTimeShiftResume();
     method public void onTimeShiftSeekTo(long);
@@ -17627,19 +17628,18 @@ package android.media.tv {
     method public java.util.List<android.media.tv.TvTrackInfo> getTracks(int);
     method protected void onLayout(boolean, int, int, int, int);
     method public boolean onUnhandledInputEvent(android.view.InputEvent);
-    method public void registerTimeShiftPositionCallback(android.media.tv.TvView.TimeShiftPositionCallback);
     method public void reset();
     method public void selectTrack(int, java.lang.String);
     method public void setCallback(android.media.tv.TvView.TvInputCallback);
     method public void setCaptionEnabled(boolean);
     method public void setOnUnhandledInputEventListener(android.media.tv.TvView.OnUnhandledInputEventListener);
     method public void setStreamVolume(float);
+    method public void setTimeShiftPositionCallback(android.media.tv.TvView.TimeShiftPositionCallback);
     method public void timeShiftPause();
     method public void timeShiftResume();
     method public void timeShiftSeekTo(long);
     method public void timeShiftSetPlaybackRate(float, int);
     method public void tune(java.lang.String, android.net.Uri);
-    method public void unregisterTimeShiftPositionCallback(android.media.tv.TvView.TimeShiftPositionCallback);
   }
 
   public static abstract interface TvView.OnUnhandledInputEventListener {

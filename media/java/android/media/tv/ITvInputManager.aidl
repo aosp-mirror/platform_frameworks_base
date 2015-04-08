@@ -78,7 +78,7 @@ interface ITvInputManager {
     void timeShiftResume(in IBinder sessionToken, int userId);
     void timeShiftSeekTo(in IBinder sessionToken, long timeMs, int userId);
     void timeShiftSetPlaybackRate(in IBinder sessionToken, float rate, int audioMode, int userId);
-    void timeShiftTrackCurrentPosition(in IBinder sessionToken, boolean enabled, int userId);
+    void timeShiftEnablePositionTracking(in IBinder sessionToken, boolean enable, int userId);
 
     // For TV input hardware binding
     List<TvInputHardwareInfo> getHardwareList();

@@ -1422,19 +1422,19 @@ public final class TvInputManagerService extends SystemService {
         }
 
         @Override
-        public void timeShiftTrackCurrentPosition(IBinder sessionToken, boolean enabled,
+        public void timeShiftEnablePositionTracking(IBinder sessionToken, boolean enable,
                 int userId) {
             final int callingUid = Binder.getCallingUid();
             final int resolvedUserId = resolveCallingUserId(Binder.getCallingPid(), callingUid,
-                    userId, "timeShiftTrackCurrentPosition");
+                    userId, "timeShiftEnablePositionTracking");
             final long identity = Binder.clearCallingIdentity();
             try {
                 synchronized (mLock) {
                     try {
                         getSessionLocked(sessionToken, callingUid, resolvedUserId)
-                                .timeShiftTrackCurrentPosition(enabled);
+                                .timeShiftEnablePositionTracking(enable);
                     } catch (RemoteException | SessionNotFoundException e) {
-                        Slog.e(TAG, "error in timeShiftTrackCurrentPosition", e);
+                        Slog.e(TAG, "error in timeShiftEnablePositionTracking", e);
                     }
                 }
             } finally {

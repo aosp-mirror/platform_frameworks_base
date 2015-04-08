@@ -51,5 +51,5 @@ oneway interface ITvInputSession {
     void timeShiftResume();
     void timeShiftSeekTo(long timeMs);
     void timeShiftSetPlaybackRate(float rate, int audioMode);
-    void timeShiftTrackCurrentPosition(boolean enabled);
+    void timeShiftEnablePositionTracking(boolean enable);
 }

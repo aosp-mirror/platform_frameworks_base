@@ -18,6 +18,7 @@ package android.media.tv;
 
 import android.annotation.SystemApi;
 import android.graphics.Rect;
+import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -72,24 +73,29 @@ public final class TvInputManager {
     public static final int VIDEO_UNAVAILABLE_REASON_BUFFERING = VIDEO_UNAVAILABLE_REASON_END;
 
     private static final int TIME_SHIFT_STATUS_START = 0;
-    private static final int TIME_SHIFT_STATUS_END = 2;
+    private static final int TIME_SHIFT_STATUS_END = 3;
 
     /**
-     * Time shifting is available. In this status, the application can pause/resume the playback,
-     * seek to a specific position, and change the playback rate.
+     * Status prior to calling {@link TvInputService.Session#notifyTimeShiftStatusChanged}.
      */
-    public static final int TIME_SHIFT_STATUS_AVAILABLE = TIME_SHIFT_STATUS_START;
+    public static final int TIME_SHIFT_STATUS_UNKNOWN = TIME_SHIFT_STATUS_START;
 
     /**
-     * Time shifting is not available.
+     * The TV input does not support time shifting.
      */
-    public static final int TIME_SHIFT_STATUS_UNAVAILABLE = 1;
+    public static final int TIME_SHIFT_STATUS_UNSUPPORTED = 1;
 
     /**
-     * An error occurred while handling a time shift request. To recover the status, tune to a
-     * new channel.
+     * Time shifting is currently not available but might work again later.
      */
-    public static final int TIME_SHIFT_STATUS_ERROR = TIME_SHIFT_STATUS_END;
+    public static final int TIME_SHIFT_STATUS_UNAVAILABLE = 2;
+
+    /**
+     * Time shifting is currently available. In this status, the application assumes it can
+     * pause/resume playback, seek to a specified time position and set playback rate and audio
+     * mode.
+     */
+    public static final int TIME_SHIFT_STATUS_AVAILABLE = TIME_SHIFT_STATUS_END;
 
     public static final long TIME_SHIFT_INVALID_TIME = Long.MIN_VALUE;
 
@@ -352,35 +358,41 @@ public final class TvInputManager {
         }
 
         /**
-         * This is called when the trick play status is changed.
+         * This is called when the time shift status is changed.
          *
          * @param session A {@link TvInputManager.Session} associated with this callback.
-         * @param status The current time shift status:
+         * @param status The current time shift status. Should be one of the followings.
          * <ul>
-         * <li>{@link TvInputManager#TIME_SHIFT_STATUS_AVAILABLE}
+         * <li>{@link TvInputManager#TIME_SHIFT_STATUS_UNSUPPORTED}
          * <li>{@link TvInputManager#TIME_SHIFT_STATUS_UNAVAILABLE}
-         * <li>{@link TvInputManager#TIME_SHIFT_STATUS_ERROR}
+         * <li>{@link TvInputManager#TIME_SHIFT_STATUS_AVAILABLE}
          * </ul>
          */
         public void onTimeShiftStatusChanged(Session session, int status) {
         }
 
         /**
-         * This is called when the time shift start position is changed. The application may seek to
-         * a position in the range from the start position and the current time, inclusive.
+         * This is called when the start playback position is changed.
+         * <p>
+         * The start playback position of the time shifted program should be adjusted when the TV
+         * input cannot retain the whole recorded program due to some reason (e.g. limitation on
+         * storage space). This is necessary to prevent the application from allowing the user to
+         * seek to a time position that is not reachable.
+         * </p>
          *
          * @param session A {@link TvInputManager.Session} associated with this callback.
-         * @param timeMs The start of the possible time shift range, in milliseconds since the
-         *         epoch.
+         * @param timeMs The start playback position of the time shifted program, in milliseconds
+         *            since the epoch.
          */
         public void onTimeShiftStartPositionChanged(Session session, long timeMs) {
         }
 
         /**
-         * This is called when the current position is changed.
+         * This is called when the current playback position is changed.
          *
          * @param session A {@link TvInputManager.Session} associated with this callback.
-         * @param timeMs The current position, in milliseconds since the epoch.
+         * @param timeMs The current playback position of the time shifted program, in milliseconds
+         *            since the epoch.
          */
         public void onTimeShiftCurrentPositionChanged(Session session, long timeMs) {
         }
@@ -893,7 +905,7 @@ public final class TvInputManager {
                 }
             }
         } catch (RemoteException e) {
-            Log.e(TAG, "TvInputManager initialization failed: " + e);
+            Log.e(TAG, "TvInputManager initialization failed", e);
         }
     }
 
@@ -1677,12 +1689,13 @@ public final class TvInputManager {
         }
 
         /**
-         * Seeks to the specific time position. The position should be in the range from the start
-         * time from the start time,
-         * {@link TvInputCallback#onTimeShiftStartPositionChanged(String, long)}, to the current
-         * time, inclusive.
+         * Seeks to a specified time position.
+         * <p>
+         * Normally, the position is given within range between the start and the current time,
+         * inclusively.
          *
-         * @param timeMs The target time, in milliseconds since the epoch.
+         * @param timeMs The time position to seek to, in milliseconds since the epoch.
+         * @see TvView.TimeShiftPositionCallback#onTimeShiftStartPositionChanged
          */
         void timeShiftSeekTo(long timeMs) {
             if (mToken == null) {
@@ -1697,10 +1710,10 @@ public final class TvInputManager {
         }
 
         /**
-         * Sets a playback rate and an audio mode.
+         * Sets playback rate and audio mode.
          *
          * @param rate The ratio between desired playback rate and normal one.
-         * @param audioMode The audio playback mode. Must be one of the supported audio modes:
+         * @param audioMode Audio playback mode. Must be one of the supported audio modes:
          * <ul>
          * <li> {@link android.media.MediaPlayer#PLAYBACK_RATE_AUDIO_MODE_RESAMPLE}
          * </ul>
@@ -1710,6 +1723,9 @@ public final class TvInputManager {
                 Log.w(TAG, "The session has been already released");
                 return;
             }
+            if (audioMode != MediaPlayer.PLAYBACK_RATE_AUDIO_MODE_RESAMPLE) {
+                throw new IllegalArgumentException("Unknown audio playback mode " + audioMode);
+            }
             try {
                 mService.timeShiftSetPlaybackRate(mToken, rate, audioMode, mUserId);
             } catch (RemoteException e) {
@@ -1718,15 +1734,17 @@ public final class TvInputManager {
         }
 
         /**
-         * Returns the current playback position.
+         * Enable/disable position tracking.
+         *
+         * @param enable {@code true} to enable tracking, {@code false} otherwise.
          */
-        void timeShiftTrackCurrentPosition(boolean enabled) {
+        void timeShiftEnablePositionTracking(boolean enable) {
             if (mToken == null) {
                 Log.w(TAG, "The session has been already released");
                 return;
             }
             try {
-                mService.timeShiftTrackCurrentPosition(mToken, enabled, mUserId);
+                mService.timeShiftEnablePositionTracking(mToken, enable, mUserId);
             } catch (RemoteException e) {
                 throw new RuntimeException(e);
             }
