@@ -2211,8 +2211,8 @@ public final class ActivityManagerService extends ActivityManagerNative
         mGrantFile = new AtomicFile(new File(systemDir, "urigrants.xml"));
 
         // User 0 is the first and only user that runs at boot.
-        mStartedUsers.put(0, new UserStartedState(new UserHandle(0), true));
-        mUserLru.add(Integer.valueOf(0));
+        mStartedUsers.put(UserHandle.USER_OWNER, new UserStartedState(UserHandle.OWNER, true));
+        mUserLru.add(UserHandle.USER_OWNER);
         updateStartedUserArrayLocked();
 
         GL_ES_VERSION = SystemProperties.getInt("ro.opengles.version",
@@ -8641,7 +8641,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                     (ProviderInfo)providers.get(i);
                 boolean singleton = isSingleton(cpi.processName, cpi.applicationInfo,
                         cpi.name, cpi.flags);
-                if (singleton && UserHandle.getUserId(app.uid) != 0) {
+                if (singleton && UserHandle.getUserId(app.uid) != UserHandle.USER_OWNER) {
                     // This is a singleton provider, but a user besides the
                     // default user is asking to initialize a process it runs
                     // in...  well, no, it doesn't actually run in this process,
@@ -15603,7 +15603,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 }
                 List<ResolveInfo> newReceivers = AppGlobals.getPackageManager()
                         .queryIntentReceivers(intent, resolvedType, STOCK_PM_FLAGS, user);
-                if (user != 0 && newReceivers != null) {
+                if (user != UserHandle.USER_OWNER && newReceivers != null) {
                     // If this is not the primary user, we need to check for
                     // any receivers that should be filtered out.
                     for (int i=0; i<newReceivers.size(); i++) {
@@ -19302,7 +19302,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             Slog.w(TAG, msg);
             throw new SecurityException(msg);
         }
-        if (userId <= 0) {
+        if (userId < 0 || userId == UserHandle.USER_OWNER) {
             throw new IllegalArgumentException("Can't stop primary user " + userId);
         }
         enforceShellRestriction(UserManager.DISALLOW_DEBUGGING_FEATURES, userId);
@@ -19546,14 +19546,6 @@ public final class ActivityManagerService extends ActivityManagerNative
     @Override
     public void unregisterUserSwitchObserver(IUserSwitchObserver observer) {
         mUserSwitchObservers.unregister(observer);
-    }
-
-    private boolean userExists(int userId) {
-        if (userId == 0) {
-            return true;
-        }
-        UserManagerService ums = getUserManagerLocked();
-        return ums != null ? (ums.getUserInfo(userId) != null) : false;
     }
 
     int[] getUsersLocked() {
