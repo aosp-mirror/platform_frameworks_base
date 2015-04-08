@@ -24,6 +24,7 @@
 #include <cstdio>
 
 #include <gui/CpuConsumer.h>
+#include <gui/BufferItemConsumer.h>
 #include <gui/Surface.h>
 #include <camera3.h>
 
@@ -39,7 +40,7 @@
 #define ALIGN(x, mask) ( ((x) + (mask) - 1) & ~((mask) - 1) )
 
 #define ANDROID_MEDIA_IMAGEREADER_CTX_JNI_ID       "mNativeContext"
-#define ANDROID_MEDIA_SURFACEIMAGE_BUFFER_JNI_ID   "mLockedBuffer"
+#define ANDROID_MEDIA_SURFACEIMAGE_BUFFER_JNI_ID   "mNativeBuffer"
 #define ANDROID_MEDIA_SURFACEIMAGE_TS_JNI_ID       "mTimestamp"
 
 // ----------------------------------------------------------------------------
@@ -62,7 +63,7 @@ static struct {
 } gImageReaderClassInfo;
 
 static struct {
-    jfieldID mLockedBuffer;
+    jfieldID mNativeBuffer;
     jfieldID mTimestamp;
 } gSurfaceImageClassInfo;
 
@@ -73,7 +74,7 @@ static struct {
 
 // ----------------------------------------------------------------------------
 
-class JNIImageReaderContext : public CpuConsumer::FrameAvailableListener
+class JNIImageReaderContext : public ConsumerBase::FrameAvailableListener
 {
 public:
     JNIImageReaderContext(JNIEnv* env, jobject weakThiz, jclass clazz, int maxImages);
@@ -83,11 +84,18 @@ public:
     virtual void onFrameAvailable(const BufferItem& item);
 
     CpuConsumer::LockedBuffer* getLockedBuffer();
-
     void returnLockedBuffer(CpuConsumer::LockedBuffer* buffer);
+
+    BufferItem* getOpaqueBuffer();
+    void returnOpaqueBuffer(BufferItem* buffer);
 
     void setCpuConsumer(const sp<CpuConsumer>& consumer) { mConsumer = consumer; }
     CpuConsumer* getCpuConsumer() { return mConsumer.get(); }
+
+    void setOpaqueConsumer(const sp<BufferItemConsumer>& consumer) { mOpaqueConsumer = consumer; }
+    BufferItemConsumer* getOpaqueConsumer() { return mOpaqueConsumer.get(); }
+    // This is the only opaque format exposed in the ImageFormat public API.
+    bool isOpaque() { return mFormat == HAL_PIXEL_FORMAT_IMPLEMENTATION_DEFINED; }
 
     void setProducer(const sp<IGraphicBufferProducer>& producer) { mProducer = producer; }
     IGraphicBufferProducer* getProducer() { return mProducer.get(); }
@@ -109,7 +117,9 @@ private:
     static void detachJNI();
 
     List<CpuConsumer::LockedBuffer*> mBuffers;
+    List<BufferItem*> mOpaqueBuffers;
     sp<CpuConsumer> mConsumer;
+    sp<BufferItemConsumer> mOpaqueConsumer;
     sp<IGraphicBufferProducer> mProducer;
     jobject mWeakThiz;
     jclass mClazz;
@@ -125,7 +135,9 @@ JNIImageReaderContext::JNIImageReaderContext(JNIEnv* env,
     mClazz((jclass)env->NewGlobalRef(clazz)) {
     for (int i = 0; i < maxImages; i++) {
         CpuConsumer::LockedBuffer *buffer = new CpuConsumer::LockedBuffer;
+        BufferItem* opaqueBuffer = new BufferItem;
         mBuffers.push_back(buffer);
+        mOpaqueBuffers.push_back(opaqueBuffer);
     }
 }
 
@@ -169,6 +181,21 @@ void JNIImageReaderContext::returnLockedBuffer(CpuConsumer::LockedBuffer* buffer
     mBuffers.push_back(buffer);
 }
 
+BufferItem* JNIImageReaderContext::getOpaqueBuffer() {
+    if (mOpaqueBuffers.empty()) {
+        return NULL;
+    }
+    // Return an opaque buffer pointer and remove it from the list
+    List<BufferItem*>::iterator it = mOpaqueBuffers.begin();
+    BufferItem* buffer = *it;
+    mOpaqueBuffers.erase(it);
+    return buffer;
+}
+
+void JNIImageReaderContext::returnOpaqueBuffer(BufferItem* buffer) {
+    mOpaqueBuffers.push_back(buffer);
+}
+
 JNIImageReaderContext::~JNIImageReaderContext() {
     bool needsDetach = false;
     JNIEnv* env = getJNIEnv(&needsDetach);
@@ -187,8 +214,20 @@ JNIImageReaderContext::~JNIImageReaderContext() {
             it != mBuffers.end(); it++) {
         delete *it;
     }
+
+    // Delete opaque buffers
+    for (List<BufferItem *>::iterator it = mOpaqueBuffers.begin();
+            it != mOpaqueBuffers.end(); it++) {
+        delete *it;
+    }
+
     mBuffers.clear();
-    mConsumer.clear();
+    if (mConsumer != 0) {
+        mConsumer.clear();
+    }
+    if (mOpaqueConsumer != 0) {
+        mOpaqueConsumer.clear();
+    }
 }
 
 void JNIImageReaderContext::onFrameAvailable(const BufferItem& /*item*/)
@@ -210,6 +249,11 @@ void JNIImageReaderContext::onFrameAvailable(const BufferItem& /*item*/)
 
 extern "C" {
 
+static bool isFormatOpaque(int format) {
+    // Only treat IMPLEMENTATION_DEFINED as an opaque format for now.
+    return format == HAL_PIXEL_FORMAT_IMPLEMENTATION_DEFINED;
+}
+
 static JNIImageReaderContext* ImageReader_getContext(JNIEnv* env, jobject thiz)
 {
     JNIImageReaderContext *ctx;
@@ -226,6 +270,13 @@ static CpuConsumer* ImageReader_getCpuConsumer(JNIEnv* env, jobject thiz)
         jniThrowRuntimeException(env, "ImageReaderContext is not initialized");
         return NULL;
     }
+
+    if (ctx->isOpaque()) {
+        jniThrowException(env, "java/lang/IllegalStateException",
+                "Opaque ImageReader doesn't support this method");
+        return NULL;
+    }
+
     return ctx->getCpuConsumer();
 }
 
@@ -237,6 +288,7 @@ static IGraphicBufferProducer* ImageReader_getProducer(JNIEnv* env, jobject thiz
         jniThrowRuntimeException(env, "ImageReaderContext is not initialized");
         return NULL;
     }
+
     return ctx->getProducer();
 }
 
@@ -258,13 +310,19 @@ static void ImageReader_setNativeContext(JNIEnv* env,
 static CpuConsumer::LockedBuffer* Image_getLockedBuffer(JNIEnv* env, jobject image)
 {
     return reinterpret_cast<CpuConsumer::LockedBuffer*>(
-            env->GetLongField(image, gSurfaceImageClassInfo.mLockedBuffer));
+            env->GetLongField(image, gSurfaceImageClassInfo.mNativeBuffer));
 }
 
 static void Image_setBuffer(JNIEnv* env, jobject thiz,
         const CpuConsumer::LockedBuffer* buffer)
 {
-    env->SetLongField(thiz, gSurfaceImageClassInfo.mLockedBuffer, reinterpret_cast<jlong>(buffer));
+    env->SetLongField(thiz, gSurfaceImageClassInfo.mNativeBuffer, reinterpret_cast<jlong>(buffer));
+}
+
+static void Image_setOpaqueBuffer(JNIEnv* env, jobject thiz,
+        const BufferItem* buffer)
+{
+    env->SetLongField(thiz, gSurfaceImageClassInfo.mNativeBuffer, reinterpret_cast<jlong>(buffer));
 }
 
 static uint32_t Image_getJpegSize(CpuConsumer::LockedBuffer* buffer, bool usingRGBAOverride)
@@ -633,6 +691,52 @@ static int Image_getBufferHeight(CpuConsumer::LockedBuffer* buffer) {
     return buffer->height;
 }
 
+// --------------------------Methods for opaque Image and ImageReader----------
+
+static BufferItemConsumer* ImageReader_getOpaqueConsumer(JNIEnv* env, jobject thiz)
+{
+    ALOGV("%s:", __FUNCTION__);
+    JNIImageReaderContext* const ctx = ImageReader_getContext(env, thiz);
+    if (ctx == NULL) {
+        jniThrowRuntimeException(env, "ImageReaderContext is not initialized");
+        return NULL;
+    }
+
+    if (!ctx->isOpaque()) {
+        jniThrowException(env, "java/lang/IllegalStateException",
+                "Non-opaque ImageReader doesn't support this method");
+    }
+
+    return ctx->getOpaqueConsumer();
+}
+
+static BufferItem* Image_getOpaqueBuffer(JNIEnv* env, jobject image)
+{
+    return reinterpret_cast<BufferItem*>(
+            env->GetLongField(image, gSurfaceImageClassInfo.mNativeBuffer));
+}
+
+static int Image_getOpaqueBufferWidth(BufferItem* buffer) {
+    if (buffer == NULL) return -1;
+
+    if (!buffer->mCrop.isEmpty()) {
+        return buffer->mCrop.getWidth();
+    }
+    return buffer->mGraphicBuffer->getWidth();
+}
+
+static int Image_getOpaqueBufferHeight(BufferItem* buffer) {
+    if (buffer == NULL) return -1;
+
+    if (!buffer->mCrop.isEmpty()) {
+        return buffer->mCrop.getHeight();
+    }
+
+    return buffer->mGraphicBuffer->getHeight();
+}
+
+
+
 // ----------------------------------------------------------------------------
 
 static void ImageReader_classInit(JNIEnv* env, jclass clazz)
@@ -642,9 +746,9 @@ static void ImageReader_classInit(JNIEnv* env, jclass clazz)
     jclass imageClazz = env->FindClass("android/media/ImageReader$SurfaceImage");
     LOG_ALWAYS_FATAL_IF(imageClazz == NULL,
                         "can't find android/graphics/ImageReader$SurfaceImage");
-    gSurfaceImageClassInfo.mLockedBuffer = env->GetFieldID(
+    gSurfaceImageClassInfo.mNativeBuffer = env->GetFieldID(
             imageClazz, ANDROID_MEDIA_SURFACEIMAGE_BUFFER_JNI_ID, "J");
-    LOG_ALWAYS_FATAL_IF(gSurfaceImageClassInfo.mLockedBuffer == NULL,
+    LOG_ALWAYS_FATAL_IF(gSurfaceImageClassInfo.mNativeBuffer == NULL,
                         "can't find android/graphics/ImageReader.%s",
                         ANDROID_MEDIA_SURFACEIMAGE_BUFFER_JNI_ID);
 
@@ -691,24 +795,42 @@ static void ImageReader_init(JNIEnv* env, jobject thiz, jobject weakThiz,
     nativeDataspace = android_view_Surface_mapPublicFormatToHalDataspace(
         publicFormat);
 
-    sp<IGraphicBufferProducer> gbProducer;
-    sp<IGraphicBufferConsumer> gbConsumer;
-    BufferQueue::createBufferQueue(&gbProducer, &gbConsumer);
-    sp<CpuConsumer> consumer = new CpuConsumer(gbConsumer, maxImages,
-                                               /*controlledByApp*/true);
-    // TODO: throw dvm exOutOfMemoryError?
-    if (consumer == NULL) {
-        jniThrowRuntimeException(env, "Failed to allocate native CpuConsumer");
-        return;
-    }
-
     jclass clazz = env->GetObjectClass(thiz);
     if (clazz == NULL) {
         jniThrowRuntimeException(env, "Can't find android/graphics/ImageReader");
         return;
     }
     sp<JNIImageReaderContext> ctx(new JNIImageReaderContext(env, weakThiz, clazz, maxImages));
-    ctx->setCpuConsumer(consumer);
+
+    sp<IGraphicBufferProducer> gbProducer;
+    sp<IGraphicBufferConsumer> gbConsumer;
+    BufferQueue::createBufferQueue(&gbProducer, &gbConsumer);
+    sp<ConsumerBase> consumer;
+    sp<CpuConsumer> cpuConsumer;
+    sp<BufferItemConsumer> opaqueConsumer;
+    if (isFormatOpaque(nativeFormat)) {
+        // Use the SW_READ_NEVER usage to tell producer that this format is not for preview or video
+        // encoding. The only possibility will be ZSL output.
+        opaqueConsumer =
+                new BufferItemConsumer(gbConsumer, GRALLOC_USAGE_SW_READ_NEVER, maxImages,
+                        /*controlledByApp*/true);
+        if (opaqueConsumer == NULL) {
+            jniThrowRuntimeException(env, "Failed to allocate native opaque consumer");
+            return;
+        }
+        ctx->setOpaqueConsumer(opaqueConsumer);
+        consumer = opaqueConsumer;
+    } else {
+        cpuConsumer = new CpuConsumer(gbConsumer, maxImages, /*controlledByApp*/true);
+        // TODO: throw dvm exOutOfMemoryError?
+        if (cpuConsumer == NULL) {
+            jniThrowRuntimeException(env, "Failed to allocate native CpuConsumer");
+            return;
+        }
+        ctx->setCpuConsumer(cpuConsumer);
+        consumer = cpuConsumer;
+    }
+
     ctx->setProducer(gbProducer);
     consumer->setFrameAvailableListener(ctx);
     ImageReader_setNativeContext(env, thiz, ctx);
@@ -718,23 +840,42 @@ static void ImageReader_init(JNIEnv* env, jobject thiz, jobject weakThiz,
     ctx->setBufferHeight(height);
 
     // Set the width/height/format/dataspace to the CpuConsumer
-    res = consumer->setDefaultBufferSize(width, height);
-    if (res != OK) {
-        jniThrowException(env, "java/lang/IllegalStateException",
-                          "Failed to set CpuConsumer buffer size");
-        return;
+    // TODO: below code can be simplified once b/19977701 is fixed.
+    if (isFormatOpaque(nativeFormat)) {
+        res = opaqueConsumer->setDefaultBufferSize(width, height);
+        if (res != OK) {
+            jniThrowException(env, "java/lang/IllegalStateException",
+                              "Failed to set opaque consumer buffer size");
+            return;
+        }
+        res = opaqueConsumer->setDefaultBufferFormat(nativeFormat);
+        if (res != OK) {
+            jniThrowException(env, "java/lang/IllegalStateException",
+                              "Failed to set opaque consumer buffer format");
+        }
+        res = opaqueConsumer->setDefaultBufferDataSpace(nativeDataspace);
+        if (res != OK) {
+            jniThrowException(env, "java/lang/IllegalStateException",
+                              "Failed to set opaque consumer buffer dataSpace");
+        }
+    } else {
+        res = cpuConsumer->setDefaultBufferSize(width, height);
+        if (res != OK) {
+            jniThrowException(env, "java/lang/IllegalStateException",
+                              "Failed to set CpuConsumer buffer size");
+            return;
+        }
+        res = cpuConsumer->setDefaultBufferFormat(nativeFormat);
+        if (res != OK) {
+            jniThrowException(env, "java/lang/IllegalStateException",
+                              "Failed to set CpuConsumer buffer format");
+        }
+        res = cpuConsumer->setDefaultBufferDataSpace(nativeDataspace);
+        if (res != OK) {
+            jniThrowException(env, "java/lang/IllegalStateException",
+                              "Failed to set CpuConsumer buffer dataSpace");
+        }
     }
-    res = consumer->setDefaultBufferFormat(nativeFormat);
-    if (res != OK) {
-        jniThrowException(env, "java/lang/IllegalStateException",
-                          "Failed to set CpuConsumer buffer format");
-    }
-    res = consumer->setDefaultBufferDataSpace(nativeDataspace);
-    if (res != OK) {
-        jniThrowException(env, "java/lang/IllegalStateException",
-                          "Failed to set CpuConsumer buffer dataSpace");
-    }
-
 }
 
 static void ImageReader_close(JNIEnv* env, jobject thiz)
@@ -747,7 +888,13 @@ static void ImageReader_close(JNIEnv* env, jobject thiz)
         return;
     }
 
-    CpuConsumer* consumer = ImageReader_getCpuConsumer(env, thiz);
+    ConsumerBase* consumer = NULL;
+    if (ctx->isOpaque()) {
+        consumer = ImageReader_getOpaqueConsumer(env, thiz);
+    } else {
+        consumer = ImageReader_getCpuConsumer(env, thiz);
+    }
+
     if (consumer != NULL) {
         consumer->abandon();
         consumer->setFrameAvailableListener(NULL);
@@ -764,27 +911,66 @@ static void ImageReader_imageRelease(JNIEnv* env, jobject thiz, jobject image)
         return;
     }
 
-    CpuConsumer* consumer = ctx->getCpuConsumer();
-    CpuConsumer::LockedBuffer* buffer = Image_getLockedBuffer(env, image);
-    if (!buffer) {
-        ALOGW("Image already released!!!");
-        return;
+    if (ctx->isOpaque()) {
+        BufferItemConsumer* opaqueConsumer = ctx->getOpaqueConsumer();
+        BufferItem* opaqueBuffer = Image_getOpaqueBuffer(env, image);
+        opaqueConsumer->releaseBuffer(*opaqueBuffer); // Not using fence for now.
+        Image_setOpaqueBuffer(env, image, NULL);
+        ctx->returnOpaqueBuffer(opaqueBuffer);
+        ALOGV("%s: Opaque Image has been released", __FUNCTION__);
+    } else {
+        CpuConsumer* consumer = ctx->getCpuConsumer();
+        CpuConsumer::LockedBuffer* buffer = Image_getLockedBuffer(env, image);
+        if (!buffer) {
+            ALOGW("Image already released!!!");
+            return;
+        }
+        consumer->unlockBuffer(*buffer);
+        Image_setBuffer(env, image, NULL);
+        ctx->returnLockedBuffer(buffer);
+        ALOGV("%s: Image (format: 0x%x) has been released", __FUNCTION__, ctx->getBufferFormat());
     }
-    consumer->unlockBuffer(*buffer);
-    Image_setBuffer(env, image, NULL);
-    ctx->returnLockedBuffer(buffer);
 }
 
-static jint ImageReader_imageSetup(JNIEnv* env, jobject thiz,
-                                             jobject image)
-{
+static jint ImageReader_opaqueImageSetup(JNIEnv* env, JNIImageReaderContext* ctx, jobject image) {
     ALOGV("%s:", __FUNCTION__);
-    JNIImageReaderContext* ctx = ImageReader_getContext(env, thiz);
-    if (ctx == NULL) {
+    if (ctx == NULL || !ctx->isOpaque()) {
         jniThrowRuntimeException(env, "ImageReaderContext is not initialized");
         return -1;
     }
 
+    BufferItemConsumer* opaqueConsumer = ctx->getOpaqueConsumer();
+    BufferItem* buffer = ctx->getOpaqueBuffer();
+    if (buffer == NULL) {
+        ALOGW("Unable to acquire a buffer item, very likely client tried to acquire more than"
+            " maxImages buffers");
+        return ACQUIRE_MAX_IMAGES;
+    }
+
+    status_t res = opaqueConsumer->acquireBuffer(buffer, 0);
+    if (res != OK) {
+        ctx->returnOpaqueBuffer(buffer);
+        if (res == INVALID_OPERATION) {
+            // Max number of images were already acquired.
+            ALOGE("%s: Max number of buffers allowed are already acquired : %s (%d)",
+                    __FUNCTION__, strerror(-res), res);
+            return ACQUIRE_MAX_IMAGES;
+        } else {
+            ALOGE("%s: Acquire image failed with error: %s (%d)",
+                    __FUNCTION__, strerror(-res), res);
+            return ACQUIRE_NO_BUFFERS;
+        }
+    }
+
+    // Set SurfaceImage instance member variables
+    Image_setOpaqueBuffer(env, image, buffer);
+    env->SetLongField(image, gSurfaceImageClassInfo.mTimestamp,
+            static_cast<jlong>(buffer->mTimestamp));
+
+    return ACQUIRE_SUCCESS;
+}
+
+static jint ImageReader_lockedImageSetup(JNIEnv* env, JNIImageReaderContext* ctx, jobject image) {
     CpuConsumer* consumer = ctx->getCpuConsumer();
     CpuConsumer::LockedBuffer* buffer = ctx->getLockedBuffer();
     if (buffer == NULL) {
@@ -877,23 +1063,55 @@ static jint ImageReader_imageSetup(JNIEnv* env, jobject thiz,
     return ACQUIRE_SUCCESS;
 }
 
-static void ImageReader_detachImage(JNIEnv* env, jobject thiz, jobject image) {
+static jint ImageReader_imageSetup(JNIEnv* env, jobject thiz, jobject image) {
+    ALOGV("%s:", __FUNCTION__);
+    JNIImageReaderContext* ctx = ImageReader_getContext(env, thiz);
+    if (ctx == NULL) {
+        jniThrowRuntimeException(env, "ImageReaderContext is not initialized");
+        return -1;
+    }
+
+    if (ctx->isOpaque()) {
+        return ImageReader_opaqueImageSetup(env, ctx, image);
+    } else {
+        return ImageReader_lockedImageSetup(env, ctx, image);
+    }
+}
+
+static jint ImageReader_detachImage(JNIEnv* env, jobject thiz, jobject image) {
     ALOGV("%s:", __FUNCTION__);
     JNIImageReaderContext* ctx = ImageReader_getContext(env, thiz);
     if (ctx == NULL) {
         jniThrowException(env, "java/lang/IllegalStateException", "ImageReader was already closed");
-        return;
+        return -1;
     }
 
-    // CpuConsumer* consumer = ctx->getCpuConsumer();
-    CpuConsumer::LockedBuffer* buffer = Image_getLockedBuffer(env, image);
-    if (!buffer) {
-        ALOGW("Image already released!!!");
-        return;
+    status_t res = OK;
+    if (!ctx->isOpaque()) {
+        // TODO: Non-Opaque format detach is not implemented yet.
+        jniThrowRuntimeException(env,
+                "nativeDetachImage is not implemented yet for non-opaque format !!!");
+        return -1;
     }
 
-    // TODO: need implement
-    jniThrowRuntimeException(env, "nativeDetachImage is not implemented yet!!!");
+    BufferItemConsumer* opaqueConsumer = ctx->getOpaqueConsumer();
+    BufferItem* opaqueBuffer = Image_getOpaqueBuffer(env, image);
+    if (!opaqueBuffer) {
+        ALOGE(
+                "Opaque Image already released and can not be detached from ImageReader!!!");
+        jniThrowException(env, "java/lang/IllegalStateException",
+                "Opaque Image detach from ImageReader failed: buffer was already released");
+        return -1;
+    }
+
+    res = opaqueConsumer->detachBuffer(opaqueBuffer->mSlot);
+    if (res != OK) {
+        ALOGE("Opaque Image detach failed: %s (%d)!!!", strerror(-res), res);
+        jniThrowRuntimeException(env,
+                "nativeDetachImage failed for opaque image!!!");
+        return res;
+    }
+    return OK;
 }
 
 static jobject ImageReader_getSurface(JNIEnv* env, jobject thiz)
@@ -914,8 +1132,15 @@ static jobject Image_createSurfacePlane(JNIEnv* env, jobject thiz, int idx, int 
 {
     int rowStride, pixelStride;
     PublicFormat publicReaderFormat = static_cast<PublicFormat>(readerFormat);
+    int halReaderFormat = android_view_Surface_mapPublicFormatToHalFormat(
+        publicReaderFormat);
 
     ALOGV("%s: buffer index: %d", __FUNCTION__, idx);
+    if (isFormatOpaque(halReaderFormat)) {
+        jniThrowException(env, "java/lang/IllegalStateException",
+                "Opaque images from Opaque ImageReader do not have any planes");
+        return NULL;
+    }
 
     CpuConsumer::LockedBuffer* buffer = Image_getLockedBuffer(env, thiz);
 
@@ -923,9 +1148,6 @@ static jobject Image_createSurfacePlane(JNIEnv* env, jobject thiz, int idx, int 
     if (buffer == NULL) {
         jniThrowException(env, "java/lang/IllegalStateException", "Image was released");
     }
-
-    int halReaderFormat = android_view_Surface_mapPublicFormatToHalFormat(
-        publicReaderFormat);
 
     rowStride = Image_imageGetRowStride(env, buffer, idx, halReaderFormat);
     pixelStride = Image_imageGetPixelStride(env, buffer, idx, halReaderFormat);
@@ -942,17 +1164,22 @@ static jobject Image_getByteBuffer(JNIEnv* env, jobject thiz, int idx, int reade
     uint32_t size = 0;
     jobject byteBuffer;
     PublicFormat readerPublicFormat = static_cast<PublicFormat>(readerFormat);
+    int readerHalFormat = android_view_Surface_mapPublicFormatToHalFormat(
+            readerPublicFormat);
 
     ALOGV("%s: buffer index: %d", __FUNCTION__, idx);
+
+    if (isFormatOpaque(readerHalFormat)) {
+        jniThrowException(env, "java/lang/IllegalStateException",
+                "Opaque images from Opaque ImageReader do not have any plane");
+        return NULL;
+    }
 
     CpuConsumer::LockedBuffer* buffer = Image_getLockedBuffer(env, thiz);
 
     if (buffer == NULL) {
         jniThrowException(env, "java/lang/IllegalStateException", "Image was released");
     }
-
-    int readerHalFormat = android_view_Surface_mapPublicFormatToHalFormat(
-            readerPublicFormat);
 
     // Create byteBuffer from native buffer
     Image_getLockedBufferInfo(env, buffer, idx, &base, &size, readerHalFormat);
@@ -973,18 +1200,27 @@ static jobject Image_getByteBuffer(JNIEnv* env, jobject thiz, int idx, int reade
     return byteBuffer;
 }
 
-static jint Image_getWidth(JNIEnv* env, jobject thiz)
+static jint Image_getWidth(JNIEnv* env, jobject thiz, jint format)
 {
-    CpuConsumer::LockedBuffer* buffer = Image_getLockedBuffer(env, thiz);
-    return Image_getBufferWidth(buffer);
+    if (isFormatOpaque(format)) {
+        BufferItem* opaqueBuffer = Image_getOpaqueBuffer(env, thiz);
+        return Image_getOpaqueBufferWidth(opaqueBuffer);
+    } else {
+        CpuConsumer::LockedBuffer* buffer = Image_getLockedBuffer(env, thiz);
+        return Image_getBufferWidth(buffer);
+    }
 }
 
-static jint Image_getHeight(JNIEnv* env, jobject thiz)
+static jint Image_getHeight(JNIEnv* env, jobject thiz, jint format)
 {
-    CpuConsumer::LockedBuffer* buffer = Image_getLockedBuffer(env, thiz);
-    return Image_getBufferHeight(buffer);
+    if (isFormatOpaque(format)) {
+        BufferItem* opaqueBuffer = Image_getOpaqueBuffer(env, thiz);
+        return Image_getOpaqueBufferHeight(opaqueBuffer);
+    } else {
+        CpuConsumer::LockedBuffer* buffer = Image_getLockedBuffer(env, thiz);
+        return Image_getBufferHeight(buffer);
+    }
 }
-
 
 } // extern "C"
 
@@ -997,15 +1233,15 @@ static JNINativeMethod gImageReaderMethods[] = {
     {"nativeReleaseImage",     "(Landroid/media/Image;)V",   (void*)ImageReader_imageRelease },
     {"nativeImageSetup",       "(Landroid/media/Image;)I",   (void*)ImageReader_imageSetup },
     {"nativeGetSurface",       "()Landroid/view/Surface;",   (void*)ImageReader_getSurface },
-    {"nativeDetachImage",      "(Landroid/media/Image;)V",   (void*)ImageReader_detachImage },
+    {"nativeDetachImage",      "(Landroid/media/Image;)I",   (void*)ImageReader_detachImage },
 };
 
 static JNINativeMethod gImageMethods[] = {
     {"nativeImageGetBuffer",   "(II)Ljava/nio/ByteBuffer;",   (void*)Image_getByteBuffer },
     {"nativeCreatePlane",      "(II)Landroid/media/ImageReader$SurfaceImage$SurfacePlane;",
                                                               (void*)Image_createSurfacePlane },
-    {"nativeGetWidth",         "()I",                         (void*)Image_getWidth },
-    {"nativeGetHeight",        "()I",                         (void*)Image_getHeight },
+    {"nativeGetWidth",         "(I)I",                         (void*)Image_getWidth },
+    {"nativeGetHeight",        "(I)I",                         (void*)Image_getHeight },
 };
 
 int register_android_media_ImageReader(JNIEnv *env) {

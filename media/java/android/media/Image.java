@@ -249,6 +249,22 @@ public abstract class Image implements AutoCloseable {
     Object getOwner() {
         return null;
     }
+
+    /**
+     * Get native context (buffer pointer) associated with this image.
+     * <p>
+     * This is a package private method that is only used internally. It can be
+     * used to get the native buffer pointer and passed to native, which may be
+     * passed to {@link ImageWriter#attachAndQueueInputImage} to avoid a reverse
+     * JNI call.
+     * </p>
+     *
+     * @return native context associated with this Image.
+     */
+    long getNativeContext() {
+        return 0;
+    }
+
     /**
      * <p>A single color plane of image data.</p>
      *

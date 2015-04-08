@@ -16110,6 +16110,7 @@ package android.media {
   public class ImageWriter implements java.lang.AutoCloseable {
     method public void close();
     method public android.media.Image dequeueInputImage();
+    method public int getFormat();
     method public int getMaxImages();
     method public static android.media.ImageWriter newInstance(android.view.Surface, int);
     method public void queueInputImage(android.media.Image);

@@ -16,7 +16,7 @@
 
 package android.media;
 
-import android.graphics.PixelFormat;
+import android.graphics.ImageFormat;
 import android.graphics.Rect;
 import android.os.Handler;
 import android.os.Looper;
@@ -77,9 +77,7 @@ public class ImageWriter implements AutoCloseable {
     private int mWriterFormat;
 
     private final int mMaxImages;
-    // Keep track of the currently attached Image; or an attached Image that is
-    // released will be removed from this list.
-    private List<Image> mAttachedImages = new ArrayList<Image>();
+    // Keep track of the currently dequeued Image.
     private List<Image> mDequeuedImages = new ArrayList<Image>();
 
     /**
@@ -168,21 +166,38 @@ public class ImageWriter implements AutoCloseable {
      * {@link Image#close()}.
      * </p>
      * <p>
-     * This call will block if all available input images have been filled by
+     * This call will block if all available input images have been queued by
      * the application and the downstream consumer has not yet consumed any.
-     * When an Image is consumed by the downstream consumer, an
+     * When an Image is consumed by the downstream consumer and released, an
      * {@link ImageListener#onInputImageReleased} callback will be fired, which
-     * indicates that there is one input Image available. It is recommended to
-     * dequeue next Image only after this callback is fired, in the steady state.
+     * indicates that there is one input Image available. For non-opaque formats
+     * (({@link ImageWriter#getFormat()} != {@link ImageFormat#PRIVATE})), it is
+     * recommended to dequeue the next Image only after this callback is fired,
+     * in the steady state.
+     * </p>
+     * <p>
+     * If the ImageWriter is opaque ({@link ImageWriter#getFormat()} ==
+     * {@link ImageFormat#PRIVATE}), the image buffer is inaccessible to
+     * the application, and calling this method will result in an
+     * {@link IllegalStateException}. Instead, the application should acquire
+     * opaque images from some other component (e.g. an opaque
+     * {@link ImageReader}), and queue them directly to this ImageWriter via the
+     * {@link ImageWriter#queueInputImage queueInputImage()} method.
      * </p>
      *
      * @return The next available input Image from this ImageWriter.
      * @throws IllegalStateException if {@code maxImages} Images are currently
-     *             dequeued.
+     *             dequeued, or the ImageWriter is opaque.
      * @see #queueInputImage
      * @see Image#close
      */
     public Image dequeueInputImage() {
+        if (mWriterFormat == ImageFormat.PRIVATE) {
+            throw new IllegalStateException(
+                    "Opaque ImageWriter doesn't support this operation since opaque images are"
+                            + " inaccessible to the application!");
+        }
+
         if (mDequeuedImages.size() >= mMaxImages) {
             throw new IllegalStateException("Already dequeued max number of Images " + mMaxImages);
         }
@@ -214,12 +229,19 @@ public class ImageWriter implements AutoCloseable {
      * capture time.
      * </p>
      * <p>
-     * Passing in a non-opaque Image may result in a memory copy, which also
-     * requires a free input Image from this ImageWriter as the destination. In
-     * this case, this call will block, as {@link #dequeueInputImage} does, if
-     * there are no free Images available. To be safe, the application should ensure
-     * that there is at least one free Image available in this ImageWriter before calling
-     * this method.
+     * After this method is called and the downstream consumer consumes and
+     * releases the Image, an {@link ImageListener#onInputImageReleased
+     * onInputImageReleased()} callback will fire. The application can use this
+     * callback to avoid sending Images faster than the downstream consumer
+     * processing rate in steady state.
+     * </p>
+     * <p>
+     * Passing in an Image from some other component (e.g. an
+     * {@link ImageReader}) requires a free input Image from this ImageWriter as
+     * the destination. In this case, this call will block, as
+     * {@link #dequeueInputImage} does, if there are no free Images available.
+     * To avoid blocking, the application should ensure that there is at least
+     * one free Image available in this ImageWriter before calling this method.
      * </p>
      * <p>
      * After this call, the input Image is no longer valid for further access,
@@ -252,10 +274,17 @@ public class ImageWriter implements AutoCloseable {
             ImageReader prevOwner = (ImageReader) image.getOwner();
             // Only do the image attach for opaque images for now. Do the image
             // copy for other formats. TODO: use attach for other formats to
-            // improve the performance, and fall back to copy when attach/detach fails.
+            // improve the performance, and fall back to copy when attach/detach
+            // fails. Right now, detach is guaranteed to fail as the buffer is
+            // locked when ImageReader#acquireNextImage is called. See bug 19962027.
             if (image.isOpaque()) {
                 prevOwner.detachImage(image);
-                attachInputImage(image);
+                attachAndQueueInputImage(image);
+                // This clears the native reference held by the original owner.
+                // When this Image is detached later by this ImageWriter, the
+                // native memory won't be leaked.
+                image.close();
+                return;
             } else {
                 Image inputImage = dequeueInputImage();
                 inputImage.setTimestamp(image.getTimestamp());
@@ -273,22 +302,32 @@ public class ImageWriter implements AutoCloseable {
 
         /**
          * Only remove and cleanup the Images that are owned by this
-         * ImageWriter. Images detached from other owners are only
-         * temporarily owned by this ImageWriter and will be detached immediately
-         * after they are released by downstream consumers, so there is no need to
-         * keep track of them in mDequeuedImages.
+         * ImageWriter. Images detached from other owners are only temporarily
+         * owned by this ImageWriter and will be detached immediately after they
+         * are released by downstream consumers, so there is no need to keep
+         * track of them in mDequeuedImages.
          */
         if (ownedByMe) {
             mDequeuedImages.remove(image);
+            // Do not call close here, as close is essentially cancel image.
             WriterSurfaceImage wi = (WriterSurfaceImage) image;
             wi.clearSurfacePlanes();
             wi.setImageValid(false);
-        } else {
-            // This clears the native reference held by the original owner. When
-            // this Image is detached later by this ImageWriter, the native
-            // memory won't be leaked.
-            image.close();
         }
+    }
+
+    /**
+     * Get the ImageWriter format.
+     * <p>
+     * This format may be different than the Image format returned by
+     * {@link Image#getFormat()}. However, if the ImageWriter is opaque (format
+     * == {@link ImageFormat#PRIVATE}) , the images from it will also be opaque.
+     * </p>
+     *
+     * @return The ImageWriter format.
+     */
+    public int getFormat() {
+        return mWriterFormat;
     }
 
     /**
@@ -302,27 +341,33 @@ public class ImageWriter implements AutoCloseable {
          * ImageWriter after the data consumption.
          * </p>
          * <p>
-         * The client can use this callback to indicate either an input Image is
-         * available to fill data into, or the input Image is returned and freed
-         * if it was attached from other components (e.g. an
-         * {@link ImageReader}). For the latter case, the ownership of the Image
-         * will be automatically removed by ImageWriter right before this
-         * callback is fired.
+         * The client can use this callback to be notified that an input Image
+         * has been consumed and released by the downstream consumer. More
+         * specifically, this callback will be fired for below cases:
+         * <li>The application dequeues an input Image via the
+         * {@link ImageWriter#dequeueInputImage dequeueInputImage()} method,
+         * uses it, and then queues it back to this ImageWriter via the
+         * {@link ImageWriter#queueInputImage queueInputImage()} method. After
+         * the downstream consumer uses and releases this image to this
+         * ImageWriter, this callback will be fired. This image will be
+         * available to be dequeued after this callback.</li>
+         * <li>The application obtains an Image from some other component (e.g.
+         * an {@link ImageReader}), uses it, and then queues it to this
+         * ImageWriter via {@link ImageWriter#queueInputImage queueInputImage()}.
+         * After the downstream consumer uses and releases this image to this
+         * ImageWriter, this callback will be fired.</li>
          * </p>
          *
          * @param writer the ImageWriter the callback is associated with.
          * @see ImageWriter
          * @see Image
          */
-        // TODO: the semantics is confusion, does't tell which buffer is
-        // released if an application is doing queueInputImage with a mix of
-        // buffers from dequeueInputImage and from an ImageReader. see b/19872821
         void onInputImageReleased(ImageWriter writer);
     }
 
     /**
-     * Register a listener to be invoked when an input Image is returned to
-     * the ImageWriter.
+     * Register a listener to be invoked when an input Image is returned to the
+     * ImageWriter.
      *
      * @param listener The listener that will be run.
      * @param handler The handler on which the listener should be invoked, or
@@ -383,38 +428,25 @@ public class ImageWriter implements AutoCloseable {
     }
 
     /**
-     * Get the ImageWriter format.
      * <p>
-     * This format may be different than the Image format returned by
-     * {@link Image#getFormat()}
-     * </p>
-     *
-     * @return The ImageWriter format.
-     */
-    int getFormat() {
-        return mWriterFormat;
-    }
-
-
-    /**
-     * <p>
-     * Attach input Image to this ImageWriter.
+     * Attach and queue input Image to this ImageWriter.
      * </p>
      * <p>
-     * When an Image is from an opaque source (e.g. an opaque ImageReader created
-     * by {@link ImageReader#newOpaqueInstance}), or the source Image is so large
-     * that copying its data is too expensive, this method can be used to
-     * migrate the source Image into ImageWriter without a data copy. The source
-     * Image must be detached from its previous owner already, or this call will
-     * throw an {@link IllegalStateException}.
+     * When an Image is from an opaque source (e.g. an opaque ImageReader
+     * created by {@link ImageReader#newOpaqueInstance}), or the source Image is
+     * so large that copying its data is too expensive, this method can be used
+     * to migrate the source Image into ImageWriter without a data copy, and
+     * then queue it to this ImageWriter. The source Image must be detached from
+     * its previous owner already, or this call will throw an
+     * {@link IllegalStateException}.
      * </p>
      * <p>
-     * After this call, the ImageWriter takes ownership of this Image.
-     * This ownership will be automatically removed from this writer after the
+     * After this call, the ImageWriter takes ownership of this Image. This
+     * ownership will automatically be removed from this writer after the
      * consumer releases this Image, that is, after
-     * {@link ImageListener#onInputImageReleased}. The caller is
-     * responsible for closing this Image through {@link Image#close()} to free up
-     * the resources held by this Image.
+     * {@link ImageListener#onInputImageReleased}. The caller is responsible for
+     * closing this Image through {@link Image#close()} to free up the resources
+     * held by this Image.
      * </p>
      *
      * @param image The source Image to be attached and queued into this
@@ -423,7 +455,7 @@ public class ImageWriter implements AutoCloseable {
      *             previous owner, or the Image is already attached to this
      *             ImageWriter, or the source Image is invalid.
      */
-    private void attachInputImage(Image image) {
+    private void attachAndQueueInputImage(Image image) {
         if (image == null) {
             throw new IllegalArgumentException("image shouldn't be null");
         }
@@ -441,15 +473,13 @@ public class ImageWriter implements AutoCloseable {
             throw new IllegalStateException("Image was not detached from last owner, or image "
                     + " is not detachable");
         }
-        if (mAttachedImages.contains(image)) {
-            throw new IllegalStateException("Image was already attached to ImageWritter");
-        }
 
         // TODO: what if attach failed, throw RTE or detach a slot then attach?
         // need do some cleanup to make sure no orphaned
         // buffer caused leak.
-        nativeAttachImage(mNativeContext, image);
-        mAttachedImages.add(image);
+        Rect crop = image.getCropRect();
+        nativeAttachAndQueueImage(mNativeContext, image.getNativeContext(), image.getFormat(),
+                image.getTimestamp(), crop.left, crop.top, crop.right, crop.bottom);
     }
 
     /**
@@ -467,8 +497,6 @@ public class ImageWriter implements AutoCloseable {
             synchronized (mListenerLock) {
                 listener = mListener;
             }
-            // TODO: detach Image from ImageWriter and remove the Image from
-            // mAttachedImage list.
             if (listener != null) {
                 listener.onInputImageReleased(ImageWriter.this);
             }
@@ -537,7 +565,7 @@ public class ImageWriter implements AutoCloseable {
          * attached + queued successfully, and attach failed. Neither of the
          * cases need abort.
          */
-        cancelImage(mNativeContext,image);
+        cancelImage(mNativeContext, image);
         mDequeuedImages.remove(image);
         wi.clearSurfacePlanes();
         wi.setImageValid(false);
@@ -635,7 +663,7 @@ public class ImageWriter implements AutoCloseable {
                 throw new IllegalStateException("Image is already released");
             }
 
-            return getFormat() == PixelFormat.OPAQUE;
+            return getFormat() == ImageFormat.PRIVATE;
         }
 
         @Override
@@ -665,6 +693,11 @@ public class ImageWriter implements AutoCloseable {
         @Override
         ImageWriter getOwner() {
             return mOwner;
+        }
+
+        @Override
+        long getNativeContext() {
+            return mNativeBuffer;
         }
 
         @Override
@@ -776,12 +809,14 @@ public class ImageWriter implements AutoCloseable {
 
     private synchronized native void nativeClose(long nativeCtx);
 
-    private synchronized native void nativeAttachImage(long nativeCtx, Image image);
-
     private synchronized native void nativeDequeueInputImage(long nativeCtx, Image wi);
 
     private synchronized native void nativeQueueInputImage(long nativeCtx, Image image,
             long timestampNs, int left, int top, int right, int bottom);
+
+    private synchronized native int nativeAttachAndQueueImage(long nativeCtx,
+            long imageNativeBuffer, int imageFormat, long timestampNs, int left,
+            int top, int right, int bottom);
 
     private synchronized native void cancelImage(long nativeCtx, Image image);
 
