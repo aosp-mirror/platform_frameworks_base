@@ -1035,6 +1035,8 @@ public final class SystemServer {
             reportWtf("making Display Manager Service ready", e);
         }
 
+        mSystemServiceManager.setSafeMode(safeMode);
+
         // These are needed to propagate to the runnable below.
         final MountService mountServiceF = mountService;
         final NetworkManagementService networkManagementF = networkManagement;
