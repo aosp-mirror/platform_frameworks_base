@@ -52,7 +52,7 @@ public final class TvInputManager {
     private static final String TAG = "TvInputManager";
 
     static final int VIDEO_UNAVAILABLE_REASON_START = 0;
-    static final int VIDEO_UNAVAILABLE_REASON_END = 3;
+    static final int VIDEO_UNAVAILABLE_REASON_END = 4;
 
     /**
      * A generic reason. Video is not available due to an unspecified error.
@@ -70,7 +70,11 @@ public final class TvInputManager {
      * Video is not available because the TV input stopped the playback temporarily to buffer more
      * data.
      */
-    public static final int VIDEO_UNAVAILABLE_REASON_BUFFERING = VIDEO_UNAVAILABLE_REASON_END;
+    public static final int VIDEO_UNAVAILABLE_REASON_BUFFERING = 3;
+    /**
+     * Video is not available because the current program is audio-only.
+     */
+    public static final int VIDEO_UNAVAILABLE_REASON_AUDIO_ONLY = VIDEO_UNAVAILABLE_REASON_END;
 
     private static final int TIME_SHIFT_STATUS_START = 0;
     private static final int TIME_SHIFT_STATUS_END = 3;
@@ -306,6 +310,7 @@ public final class TvInputManager {
          * <li>{@link TvInputManager#VIDEO_UNAVAILABLE_REASON_TUNING}
          * <li>{@link TvInputManager#VIDEO_UNAVAILABLE_REASON_WEAK_SIGNAL}
          * <li>{@link TvInputManager#VIDEO_UNAVAILABLE_REASON_BUFFERING}
+         * <li>{@link TvInputManager#VIDEO_UNAVAILABLE_REASON_AUDIO_ONLY}
          * </ul>
          */
         public void onVideoUnavailable(Session session, int reason) {

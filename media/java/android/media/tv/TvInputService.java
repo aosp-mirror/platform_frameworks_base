@@ -450,6 +450,7 @@ public abstract class TvInputService extends Service {
          *            <li>{@link TvInputManager#VIDEO_UNAVAILABLE_REASON_TUNING}
          *            <li>{@link TvInputManager#VIDEO_UNAVAILABLE_REASON_WEAK_SIGNAL}
          *            <li>{@link TvInputManager#VIDEO_UNAVAILABLE_REASON_BUFFERING}
+         *            <li>{@link TvInputManager#VIDEO_UNAVAILABLE_REASON_AUDIO_ONLY}
          *            </ul>
          * @see #notifyVideoAvailable
          */
@@ -1525,6 +1526,7 @@ public abstract class TvInputService extends Service {
          * <li>{@link TvInputManager#VIDEO_UNAVAILABLE_REASON_TUNING}
          * <li>{@link TvInputManager#VIDEO_UNAVAILABLE_REASON_WEAK_SIGNAL}
          * <li>{@link TvInputManager#VIDEO_UNAVAILABLE_REASON_BUFFERING}
+         * <li>{@link TvInputManager#VIDEO_UNAVAILABLE_REASON_AUDIO_ONLY}
          * </ul>
          */
         public void onHardwareVideoUnavailable(int reason) { }
