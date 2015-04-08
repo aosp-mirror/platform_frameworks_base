@@ -23,6 +23,7 @@ import android.database.MatrixCursor.RowBuilder;
 import android.database.MatrixCursor;
 import android.graphics.Point;
 import android.os.CancellationSignal;
+import android.os.FileUtils;
 import android.os.ParcelFileDescriptor;
 import android.provider.DocumentsContract.Document;
 import android.provider.DocumentsContract.Root;
@@ -66,7 +67,7 @@ public class StubProvider extends DocumentsProvider {
         final MatrixCursor result = new MatrixCursor(projection != null ? projection : DEFAULT_ROOT_PROJECTION);
         final RowBuilder row = result.newRow();
         row.add(Root.COLUMN_ROOT_ID, MY_ROOT_ID);
-        row.add(Root.COLUMN_FLAGS, Root.FLAG_SUPPORTS_CREATE);
+        row.add(Root.COLUMN_FLAGS, Root.FLAG_SUPPORTS_CREATE | Root.FLAG_SUPPORTS_IS_CHILD);
         row.add(Root.COLUMN_TITLE, "Foobar SD 4GB");
         row.add(Root.COLUMN_DOCUMENT_ID, mRootDocumentId);
         row.add(Root.COLUMN_AVAILABLE_BYTES, STORAGE_SIZE - mStorageUsedBytes);
@@ -82,6 +83,17 @@ public class StubProvider extends DocumentsProvider {
         }
         includeFile(result, file);
         return result;
+    }
+
+    @Override
+    public boolean isChildDocument(String parentDocId, String docId) {
+        try {
+            final File parentFile = getFileForDocumentId(parentDocId).getCanonicalFile();
+            final File childFile = getFileForDocumentId(docId).getCanonicalFile();
+            return FileUtils.contains(parentFile, childFile);
+        } catch (IOException e) {
+            throw new IllegalArgumentException();
+        }
     }
 
     @Override
@@ -168,6 +180,10 @@ public class StubProvider extends DocumentsProvider {
 
     private String getDocumentIdForFile(File file) {
         return file.getAbsolutePath();
+    }
+
+    private File getFileForDocumentId(String documentId) {
+        return new File(documentId);
     }
 
     private void removeRecursively(File file) {
