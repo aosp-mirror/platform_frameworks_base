@@ -48,6 +48,7 @@ public class SystemBackupAgent extends BackupAgentHelper {
     private static final String RECENTS_HELPER = "recents";
     private static final String SYNC_SETTINGS_HELPER = "account_sync_settings";
     private static final String PREFERRED_HELPER = "preferred_activities";
+    private static final String NOTIFICATION_HELPER = "notifications";
 
     // These paths must match what the WallpaperManagerService uses.  The leaf *_FILENAME
     // are also used in the full-backup file format, so must not change unless steps are
@@ -94,6 +95,7 @@ public class SystemBackupAgent extends BackupAgentHelper {
         addHelper(RECENTS_HELPER, new RecentsBackupHelper(this));
         addHelper(SYNC_SETTINGS_HELPER, new AccountSyncSettingsBackupHelper(this));
         addHelper(PREFERRED_HELPER, new PreferredActivityBackupHelper(this));
+        addHelper(NOTIFICATION_HELPER, new NotificationBackupHelper(this));
 
         super.onBackup(oldState, data, newState);
     }

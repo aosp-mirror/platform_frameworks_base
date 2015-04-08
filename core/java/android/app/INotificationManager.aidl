@@ -89,4 +89,7 @@ interface INotificationManager
     boolean isNotificationPolicyTokenValid(String pkg, in NotificationManager.Policy.Token token);
     NotificationManager.Policy getNotificationPolicy(in NotificationManager.Policy.Token token);
     void setNotificationPolicy(in NotificationManager.Policy.Token token, in NotificationManager.Policy policy);
+
+    byte[] getBackupPayload(int user);
+    void applyRestore(in byte[] payload, int user);
 }

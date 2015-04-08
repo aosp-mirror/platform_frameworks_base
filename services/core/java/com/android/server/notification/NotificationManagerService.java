@@ -1610,6 +1610,18 @@ public class NotificationManagerService extends SystemService {
             return mConditionProviders.isSystemProviderEnabled(path);
         }
 
+        // Backup/restore interface
+        @Override
+        public byte[] getBackupPayload(int user) {
+            // TODO: build a payload of whatever is appropriate
+            return null;
+        }
+
+        @Override
+        public void applyRestore(byte[] payload, int user) {
+            // TODO: apply the restored payload as new current state
+        }
+
         @Override
         public Policy.Token getPolicyTokenFromListener(INotificationListener listener) {
             final long identity = Binder.clearCallingIdentity();
