@@ -23,6 +23,8 @@ import java.security.KeyPairGenerator;
 import java.security.KeyStore.ProtectionParameter;
 import java.util.Date;
 
+import javax.crypto.Cipher;
+
 /**
  * This provides the optional parameters that can be specified for
  * {@code KeyStore} entries that work with
@@ -52,6 +54,7 @@ public final class KeyStoreParameter implements ProtectionParameter {
     private final @KeyStoreKeyConstraints.PaddingEnum int mPaddings;
     private final @KeyStoreKeyConstraints.DigestEnum Integer mDigests;
     private final @KeyStoreKeyConstraints.BlockModeEnum int mBlockModes;
+    private final boolean mRandomizedEncryptionRequired;
     private final @KeyStoreKeyConstraints.UserAuthenticatorEnum int mUserAuthenticators;
     private final int mUserAuthenticationValidityDurationSeconds;
 
@@ -63,6 +66,7 @@ public final class KeyStoreParameter implements ProtectionParameter {
             @KeyStoreKeyConstraints.PaddingEnum int paddings,
             @KeyStoreKeyConstraints.DigestEnum Integer digests,
             @KeyStoreKeyConstraints.BlockModeEnum int blockModes,
+            boolean randomizedEncryptionRequired,
             @KeyStoreKeyConstraints.UserAuthenticatorEnum int userAuthenticators,
             int userAuthenticationValidityDurationSeconds) {
         if ((userAuthenticationValidityDurationSeconds < 0)
@@ -79,6 +83,7 @@ public final class KeyStoreParameter implements ProtectionParameter {
         mPaddings = paddings;
         mDigests = digests;
         mBlockModes = blockModes;
+        mRandomizedEncryptionRequired = randomizedEncryptionRequired;
         mUserAuthenticators = userAuthenticators;
         mUserAuthenticationValidityDurationSeconds = userAuthenticationValidityDurationSeconds;
     }
@@ -185,6 +190,21 @@ public final class KeyStoreParameter implements ProtectionParameter {
     }
 
     /**
+     * Returns {@code true} if encryption using this key must be sufficiently randomized to produce
+     * different ciphertexts for the same plaintext every time. The formal cryptographic property
+     * being required is <em>indistinguishability under chosen-plaintext attack ({@code
+     * IND-CPA})</em>. This property is important because it mitigates several classes of
+     * weaknesses due to which ciphertext may leak information about plaintext. For example, if a
+     * given plaintext always produces the same ciphertext, an attacker may see the repeated
+     * ciphertexts and be able to deduce something about the plaintext.
+     *
+     * @hide
+     */
+    public boolean isRandomizedEncryptionRequired() {
+        return mRandomizedEncryptionRequired;
+    }
+
+    /**
      * Gets the set of user authenticators which protect access to this key. The key can only be
      * used iff the user has authenticated to at least one of these user authenticators.
      *
@@ -235,6 +255,7 @@ public final class KeyStoreParameter implements ProtectionParameter {
         private @KeyStoreKeyConstraints.PaddingEnum int mPaddings;
         private @KeyStoreKeyConstraints.DigestEnum Integer mDigests;
         private @KeyStoreKeyConstraints.BlockModeEnum int mBlockModes;
+        private boolean mRandomizedEncryptionRequired = true;
         private @KeyStoreKeyConstraints.UserAuthenticatorEnum int mUserAuthenticators;
         private int mUserAuthenticationValidityDurationSeconds = -1;
 
@@ -381,6 +402,46 @@ public final class KeyStoreParameter implements ProtectionParameter {
         }
 
         /**
+         * Sets whether encryption using this key must be sufficiently randomized to produce
+         * different ciphertexts for the same plaintext every time. The formal cryptographic
+         * property being required is <em>indistinguishability under chosen-plaintext attack
+         * ({@code IND-CPA})</em>. This property is important because it mitigates several classes
+         * of weaknesses due to which ciphertext may leak information about plaintext. For example,
+         * if a given plaintext always produces the same ciphertext, an attacker may see the
+         * repeated ciphertexts and be able to deduce something about the plaintext.
+         *
+         * <p>By default, {@code IND-CPA} is required.
+         *
+         * <p>When {@code IND-CPA} is required:
+         * <ul>
+         * <li>transformation which do not offer {@code IND-CPA}, such as symmetric ciphers using
+         * {@code ECB} mode or RSA encryption without padding, are prohibited;</li>
+         * <li>in transformations which use an IV, such as symmetric ciphers in {@code CBC},
+         * {@code CTR}, and {@code GCM} block modes, caller-provided IVs are rejected when
+         * encrypting, to ensure that only random IVs are used.</li>
+         *
+         * <p>Before disabling this requirement, consider the following approaches instead:
+         * <ul>
+         * <li>If you are generating a random IV for encryption and then initializing a {@code}
+         * Cipher using the IV, the solution is to let the {@code Cipher} generate a random IV
+         * instead. This will occur if the {@code Cipher} is initialized for encryption without an
+         * IV. The IV can then be queried via {@link Cipher#getIV()}.</li>
+         * <li>If you are generating a non-random IV (e.g., an IV derived from something not fully
+         * random, such as the name of the file being encrypted, or transaction ID, or password,
+         * or a device identifier), consider changing your design to use a random IV which will then
+         * be provided in addition to the ciphertext to the entities which need to decrypt the
+         * ciphertext.</li>
+         * <li>If you are using RSA encryption without padding, consider switching to padding
+         * schemes which offer {@code IND-CPA}, such as PKCS#1 or OAEP.</li>
+         *
+         * </ul>
+         */
+        public Builder setRandomizedEncryptionRequired(boolean required) {
+            mRandomizedEncryptionRequired = required;
+            return this;
+        }
+
+        /**
          * Sets the user authenticators which protect access to this key. The key can only be used
          * iff the user has authenticated to at least one of these user authenticators.
          *
@@ -432,6 +493,7 @@ public final class KeyStoreParameter implements ProtectionParameter {
                     mPaddings,
                     mDigests,
                     mBlockModes,
+                    mRandomizedEncryptionRequired,
                     mUserAuthenticators,
                     mUserAuthenticationValidityDurationSeconds);
         }

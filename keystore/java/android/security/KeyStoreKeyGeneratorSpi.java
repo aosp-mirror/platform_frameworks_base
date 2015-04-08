@@ -109,13 +109,26 @@ public abstract class KeyStoreKeyGeneratorSpi extends KeyGeneratorSpi {
         }
         int keySizeBits = (spec.getKeySize() != null) ? spec.getKeySize() : mDefaultKeySizeBits;
         args.addInt(KeymasterDefs.KM_TAG_KEY_SIZE, keySizeBits);
-        int purposes = spec.getPurposes();
+        @KeyStoreKeyConstraints.PurposeEnum int purposes = spec.getPurposes();
+        @KeyStoreKeyConstraints.BlockModeEnum int blockModes = spec.getBlockModes();
+        if (((purposes & KeyStoreKeyConstraints.Purpose.ENCRYPT) != 0)
+                && (spec.isRandomizedEncryptionRequired())) {
+            @KeyStoreKeyConstraints.BlockModeEnum int incompatibleBlockModes =
+                    blockModes & ~KeyStoreKeyConstraints.BlockMode.IND_CPA_COMPATIBLE_MODES;
+            if (incompatibleBlockModes != 0) {
+                throw new IllegalStateException(
+                        "Randomized encryption (IND-CPA) required but may be violated by block"
+                        + " mode(s): "
+                        + KeyStoreKeyConstraints.BlockMode.allToString(incompatibleBlockModes)
+                        + ". See KeyGeneratorSpec documentation.");
+            }
+        }
+
         for (int keymasterPurpose :
             KeyStoreKeyConstraints.Purpose.allToKeymaster(purposes)) {
             args.addInt(KeymasterDefs.KM_TAG_PURPOSE, keymasterPurpose);
         }
-        for (int keymasterBlockMode :
-            KeyStoreKeyConstraints.BlockMode.allToKeymaster(spec.getBlockModes())) {
+        for (int keymasterBlockMode : KeyStoreKeyConstraints.BlockMode.allToKeymaster(blockModes)) {
             args.addInt(KeymasterDefs.KM_TAG_BLOCK_MODE, keymasterBlockMode);
         }
         for (int keymasterPadding :
@@ -144,8 +157,8 @@ public abstract class KeyStoreKeyGeneratorSpi extends KeyGeneratorSpi {
                 ? spec.getKeyValidityForConsumptionEnd() : new Date(Long.MAX_VALUE));
 
         if (((purposes & KeyStoreKeyConstraints.Purpose.ENCRYPT) != 0)
-            || ((purposes & KeyStoreKeyConstraints.Purpose.DECRYPT) != 0)) {
-            // Permit caller-specified IV. This is needed due to the Cipher abstraction.
+                && (!spec.isRandomizedEncryptionRequired())) {
+            // Permit caller-provided IV when encrypting with this key
             args.addBoolean(KeymasterDefs.KM_TAG_CALLER_NONCE);
         }
 
