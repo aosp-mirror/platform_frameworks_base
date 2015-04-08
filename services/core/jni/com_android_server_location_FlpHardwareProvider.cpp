@@ -297,6 +297,14 @@ static void TranslateFromObject(
       getSourcesToUse
       );
 
+  jmethodID getSmallestDisplacementMeters = env->GetMethodID(
+      batchOptionsClass,
+      "getSmallestDisplacementMeters",
+      "()F"
+      );
+  batchOptions.smallest_displacement_meters
+      = env->CallFloatMethod(batchOptionsObject, getSmallestDisplacementMeters);
+
   jmethodID getFlags = env->GetMethodID(batchOptionsClass, "getFlags", "()I");
   batchOptions.flags = env->CallIntMethod(batchOptionsObject, getFlags);
 

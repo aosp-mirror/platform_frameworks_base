@@ -30,6 +30,8 @@ public class FusedBatchOptions implements Parcelable {
 
     // the default value is set to request fixes at no cost
     private volatile double mMaxPowerAllocationInMW = 0;
+    // If non-zero can be used for power savings by throttling location when device hasn't moved.
+    private volatile float mSmallestDisplacementMeters = 0;
 
     /*
      * Getters and setters for properties needed to hold the options.
@@ -48,6 +50,14 @@ public class FusedBatchOptions implements Parcelable {
 
     public long getPeriodInNS() {
         return mPeriodInNS;
+    }
+
+    public void setSmallestDisplacementMeters(float value) {
+        mSmallestDisplacementMeters = value;
+    }
+
+    public float getSmallestDisplacementMeters() {
+        return mSmallestDisplacementMeters;
     }
 
     public void setSourceToUse(int source) {
@@ -112,6 +122,7 @@ public class FusedBatchOptions implements Parcelable {
             options.setPeriodInNS(parcel.readLong());
             options.setSourceToUse(parcel.readInt());
             options.setFlag(parcel.readInt());
+            options.setSmallestDisplacementMeters(parcel.readFloat());
             return options;
         }
 
@@ -132,5 +143,6 @@ public class FusedBatchOptions implements Parcelable {
         parcel.writeLong(mPeriodInNS);
         parcel.writeInt(mSourcesToUse);
         parcel.writeInt(mFlags);
+        parcel.writeFloat(mSmallestDisplacementMeters);
     }
 }
