@@ -726,22 +726,22 @@ please see styles_device_defaults.xml.
     </style>
 
     <style name="Widget.Material.RatingBar" parent="Widget.RatingBar">
-        <item name="progressDrawable">@drawable/ratingbar_full_material</item>
-        <item name="indeterminateDrawable">@drawable/ratingbar_full_material</item>
+        <item name="progressDrawable">@drawable/ratingbar_material</item>
+        <item name="indeterminateDrawable">@drawable/ratingbar_material</item>
     </style>
 
     <style name="Widget.Material.RatingBar.Indicator" parent="Widget.RatingBar.Indicator">
-        <item name="progressDrawable">@drawable/ratingbar_holo_dark</item>
-        <item name="indeterminateDrawable">@drawable/ratingbar_holo_dark</item>
-        <item name="minHeight">35dip</item>
-        <item name="maxHeight">35dip</item>
+        <item name="progressDrawable">@drawable/ratingbar_indicator_material</item>
+        <item name="indeterminateDrawable">@drawable/ratingbar_indicator_material</item>
+        <item name="minHeight">36dp</item>
+        <item name="maxHeight">36dp</item>
     </style>
 
     <style name="Widget.Material.RatingBar.Small" parent="Widget.RatingBar.Small">
-        <item name="progressDrawable">@drawable/ratingbar_small_holo_dark</item>
-        <item name="indeterminateDrawable">@drawable/ratingbar_small_holo_dark</item>
-        <item name="minHeight">16dip</item>
-        <item name="maxHeight">16dip</item>
+        <item name="progressDrawable">@drawable/ratingbar_small_material</item>
+        <item name="indeterminateDrawable">@drawable/ratingbar_small_material</item>
+        <item name="minHeight">16dp</item>
+        <item name="maxHeight">16dp</item>
     </style>
 
     <style name="Widget.Material.ScrollView" parent="Widget.ScrollView"/>
@@ -1038,22 +1038,9 @@ please see styles_device_defaults.xml.
     <style name="Widget.Material.Light.ProgressBar.Small.Inverse" parent="Widget.Material.ProgressBar.Small.Inverse"/>
     <style name="Widget.Material.Light.ProgressBar.Large.Inverse" parent="Widget.Material.ProgressBar.Large.Inverse"/>
     <style name="Widget.Material.Light.SeekBar" parent="Widget.Material.SeekBar"/>
-    <style name="Widget.Material.Light.RatingBar" parent="Widget.Material.RatingBar" />
-
-    <style name="Widget.Material.Light.RatingBar.Indicator" parent="Widget.RatingBar.Indicator">
-        <item name="progressDrawable">@drawable/ratingbar_holo_light</item>
-        <item name="indeterminateDrawable">@drawable/ratingbar_holo_light</item>
-        <item name="minHeight">35dip</item>
-        <item name="maxHeight">35dip</item>
-    </style>
-
-    <style name="Widget.Material.Light.RatingBar.Small" parent="Widget.RatingBar.Small">
-        <item name="progressDrawable">@drawable/ratingbar_small_holo_light</item>
-        <item name="indeterminateDrawable">@drawable/ratingbar_small_holo_light</item>
-        <item name="minHeight">16dip</item>
-        <item name="maxHeight">16dip</item>
-    </style>
-
+    <style name="Widget.Material.Light.RatingBar" parent="Widget.Material.RatingBar"/>
+    <style name="Widget.Material.Light.RatingBar.Indicator" parent="Widget.Material.RatingBar.Indicator"/>
+    <style name="Widget.Material.Light.RatingBar.Small" parent="Widget.Material.RatingBar.Small"/>
     <style name="Widget.Material.Light.ScrollView" parent="Widget.Material.ScrollView"/>
     <style name="Widget.Material.Light.HorizontalScrollView" parent="Widget.Material.HorizontalScrollView"/>
     <style name="Widget.Material.Light.Spinner" parent="Widget.Material.Spinner" />

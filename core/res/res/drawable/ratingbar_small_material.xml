@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Copyright (C) 2014 The Android Open Source Project
+<!-- Copyright (C) 2015 The Android Open Source Project
 
      Licensed under the Apache License, Version 2.0 (the "License");
      you may not use this file except in compliance with the License.
@@ -14,15 +14,22 @@
      limitations under the License.
 -->
 
-<selector xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:state_pressed="true">
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:id="@+id/background">
         <bitmap
-            android:src="@drawable/btn_rating_star_on_mtrl_alpha"
+            android:src="@drawable/ic_star_black_16dp"
+            android:tint="?attr/colorControlNormal"
+            android:alpha="?attr/disabledAlpha" />
+    </item>
+    <item android:id="@+id/secondaryProgress">
+        <bitmap
+            android:src="@drawable/ic_star_half_black_16dp"
             android:tint="?attr/colorControlActivated" />
     </item>
-    <item>
+    <item android:id="@+id/progress">
         <bitmap
-            android:src="@drawable/btn_rating_star_on_mtrl_alpha"
-            android:tint="?attr/colorControlNormal" />
+            android:src="@drawable/ic_star_black_16dp"
+            android:tint="?attr/colorControlActivated"
+            android:tileModeX="repeat" />
     </item>
-</selector>
+</layer-list>

@@ -60,7 +60,6 @@ import android.widget.RemoteViews.RemoteView;
 
 import java.util.ArrayList;
 
-
 /**
  * <p>
  * Visual indicator of progress in some operation.  Displays a bar to the user
@@ -266,9 +265,14 @@ public class ProgressBar extends View {
 
         final Drawable progressDrawable = a.getDrawable(R.styleable.ProgressBar_progressDrawable);
         if (progressDrawable != null) {
-            // Calling this method can set mMaxHeight, make sure the corresponding
-            // XML attribute for mMaxHeight is read after calling this method
-            setProgressDrawableTiled(progressDrawable);
+            // Calling setProgressDrawable can set mMaxHeight, so make sure the
+            // corresponding XML attribute for mMaxHeight is read after calling
+            // this method.
+            if (needsTileify(progressDrawable)) {
+                setProgressDrawableTiled(progressDrawable);
+            } else {
+                setProgressDrawable(progressDrawable);
+            }
         }
 
 
@@ -292,13 +296,17 @@ public class ProgressBar extends View {
 
         setProgress(a.getInt(R.styleable.ProgressBar_progress, mProgress));
 
-        setSecondaryProgress(
-                a.getInt(R.styleable.ProgressBar_secondaryProgress, mSecondaryProgress));
+        setSecondaryProgress(a.getInt(
+                R.styleable.ProgressBar_secondaryProgress, mSecondaryProgress));
 
         final Drawable indeterminateDrawable = a.getDrawable(
                 R.styleable.ProgressBar_indeterminateDrawable);
         if (indeterminateDrawable != null) {
-            setIndeterminateDrawableTiled(indeterminateDrawable);
+            if (needsTileify(indeterminateDrawable)) {
+                setIndeterminateDrawableTiled(indeterminateDrawable);
+            } else {
+                setIndeterminateDrawable(indeterminateDrawable);
+            }
         }
 
         mOnlyIndeterminate = a.getBoolean(
@@ -395,6 +403,45 @@ public class ProgressBar extends View {
     }
 
     /**
+     * Returns {@code true} if the target drawable needs to be tileified.
+     *
+     * @param dr the drawable to check
+     * @return {@code true} if the target drawable needs to be tileified,
+     *         {@code false} otherwise
+     */
+    private static boolean needsTileify(Drawable dr) {
+        if (dr instanceof LayerDrawable) {
+            final LayerDrawable orig = (LayerDrawable) dr;
+            final int N = orig.getNumberOfLayers();
+            for (int i = 0; i < N; i++) {
+                if (needsTileify(orig.getDrawable(i))) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        if (dr instanceof StateListDrawable) {
+            final StateListDrawable in = (StateListDrawable) dr;
+            final int N = in.getStateCount();
+            for (int i = 0; i < N; i++) {
+                if (needsTileify(in.getStateDrawable(i))) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        // If there's a bitmap that's not wrapped with a ClipDrawable or
+        // ScaleDrawable, we'll need to wrap it and apply tiling.
+        if (dr instanceof BitmapDrawable) {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
      * Converts a drawable to a tiled version of itself. It will recursively
      * traverse layer and state list drawables.
      */
@@ -448,18 +495,14 @@ public class ProgressBar extends View {
                 mSampleTile = tileBitmap;
             }
 
-            final ShapeDrawable shapeDrawable = new ShapeDrawable(getDrawableShape());
-            final BitmapShader bitmapShader = new BitmapShader(tileBitmap,
-                    Shader.TileMode.REPEAT, Shader.TileMode.CLAMP);
-            shapeDrawable.getPaint().setShader(bitmapShader);
+            final BitmapDrawable clone = (BitmapDrawable) bitmap.getConstantState().newDrawable();
+            clone.setTileModeXY(Shader.TileMode.REPEAT, Shader.TileMode.CLAMP);
 
-            // Ensure the tint and filter are propagated in the correct order.
-            shapeDrawable.setTintList(bitmap.getTint());
-            shapeDrawable.setTintMode(bitmap.getTintMode());
-            shapeDrawable.setColorFilter(bitmap.getColorFilter());
-
-            return clip ? new ClipDrawable(
-                    shapeDrawable, Gravity.LEFT, ClipDrawable.HORIZONTAL) : shapeDrawable;
+            if (clip) {
+                return new ClipDrawable(clone, Gravity.LEFT, ClipDrawable.HORIZONTAL);
+            } else {
+                return clone;
+            }
         }
 
         return drawable;
