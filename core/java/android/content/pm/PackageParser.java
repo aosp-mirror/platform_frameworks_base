@@ -1487,7 +1487,11 @@ public class PackageParser {
                     return null;
                 }
             } else if (tagName.equals("uses-permission")) {
-                if (!parseUsesPermission(pkg, res, parser, attrs, outError)) {
+                if (!parseUsesPermission(pkg, res, parser, attrs)) {
+                    return null;
+                }
+            } else if (tagName.equals("uses-permission-sdk-m")) {
+                if (!parseUsesPermission(pkg, res, parser, attrs)) {
                     return null;
                 }
             } else if (tagName.equals("uses-configuration")) {
@@ -1887,8 +1891,7 @@ public class PackageParser {
     }
 
     private boolean parseUsesPermission(Package pkg, Resources res, XmlResourceParser parser,
-                                        AttributeSet attrs, String[] outError)
-            throws XmlPullParserException, IOException {
+            AttributeSet attrs) throws XmlPullParserException, IOException {
         TypedArray sa = res.obtainAttributes(attrs,
                 com.android.internal.R.styleable.AndroidManifestUsesPermission);
 
@@ -1914,8 +1917,9 @@ public class PackageParser {
                 if (index == -1) {
                     pkg.requestedPermissions.add(name.intern());
                 } else {
-                    Slog.w(TAG, "Ignoring duplicate uses-permission: " + name + " in package: "
-                            + pkg.packageName + " at: " + parser.getPositionDescription());
+                    Slog.w(TAG, "Ignoring duplicate uses-permissions/uses-permissions-sdk-m: "
+                            + name + " in package: " + pkg.packageName + " at: "
+                            + parser.getPositionDescription());
                 }
             }
         }

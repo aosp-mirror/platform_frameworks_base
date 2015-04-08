@@ -1269,8 +1269,13 @@
     
     <!-- The <code>uses-permission</code> tag requests a
          {@link #AndroidManifestPermission &lt;permission&gt;} that the containing
-         package must be granted in order for it to operate correctly.
-         See the <a href="{@docRoot}guide/topics/security/security.html">Security and Permissions</a>
+         package must be granted in order for it to operate correctly. For runtime
+         permissions, i.e. ones with <code>dangerous</code> protection level, on a
+         platform that supports runtime permissions, the permission will not be
+         granted until the app explicitly requests it at runtime and the user approves
+         the grant. You cannot request at runtime permissions that are not declared
+         as used in the manifest. See the
+         <a href="{@docRoot}guide/topics/security/security.html">Security and Permissions</a>
          document for more information on permissions.  Also available is a
          {@link android.Manifest.permission list of permissions} included
          with the base platform.
@@ -1289,14 +1294,6 @@
              of Android higher than the number given here, the permission will not
              be requested.  -->
         <attr name="maxSdkVersion" format="integer" />
-        <!--  Specify whether this permission is required for the application.
-              The default is true, meaning the application requires the
-              permission, and it must always be granted when it is installed.
-              If you set this to false, then in some cases the application may
-              be installed with it being granted the permission, and it will
-              need to request the permission later if it needs it.
-        <attr name="required" format="boolean" />
-        -->
     </declare-styleable>
 
     <!-- The <code>uses-configuration</code> tag specifies
