@@ -117,6 +117,5 @@
     <string name="kg_pin_accepted" msgid="1448241673570020097">"تم قبول الرمز!"</string>
     <string name="keyguard_carrier_default" msgid="8700650403054042153">"لا تتوفر خدمة"</string>
     <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"زر تبديل طريقة الإدخال."</string>
-    <!-- no translation found for airplane_mode (3122107900897202805) -->
-    <skip />
+    <string name="airplane_mode" msgid="3122107900897202805">"وضع الطائرة"</string>
 </resources>
