@@ -3635,11 +3635,27 @@ public abstract class PackageManager {
      * @param packageName the package name. When this parameter is set to a non null value,
      *                    the results will be filtered by the package name provided.
      *                    Otherwise, there will be no filtering and it will return a list
-     *                    corresponding for all packages for the provided userId.
-     * @return a list of IntentFilterVerificationInfo for a specific package and User.
+     *                    corresponding for all packages
+     *
+     * @return a list of IntentFilterVerificationInfo for a specific package.
+     *
+     * @hide
      */
     public abstract List<IntentFilterVerificationInfo> getIntentFilterVerifications(
             String packageName);
+
+    /**
+     * Get the list of IntentFilter for a specific package.
+     *
+     * @param packageName the package name. This parameter is set to a non null value,
+     *                    the list will contain all the IntentFilter for that package.
+     *                    Otherwise, the list will be empty.
+     *
+     * @return a list of IntentFilter for a specific package.
+     *
+     * @hide
+     */
+    public abstract List<IntentFilter> getAllIntentFilters(String packageName);
 
     /**
      * Change the installer associated with a given package.  There are limitations

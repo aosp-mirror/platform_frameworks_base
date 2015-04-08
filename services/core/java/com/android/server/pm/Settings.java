@@ -22,6 +22,8 @@ import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DISABLED
 import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DISABLED_USER;
 import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_ENABLED;
 import static android.Manifest.permission.READ_EXTERNAL_STORAGE;
+import static android.content.pm.PackageManager.INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ALWAYS;
+import static android.content.pm.PackageManager.INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_NEVER;
 import static android.content.pm.PackageManager.INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_UNDEFINED;
 import static android.os.Process.SYSTEM_UID;
 import static android.os.Process.PACKAGE_INFO_GID;
@@ -964,7 +966,8 @@ final class Settings {
     }
 
     /* package protected */
-    boolean createIntentFilterVerificationIfNeededLPw(String packageName, String[] domains) {
+    boolean createIntentFilterVerificationIfNeededLPw(String packageName,
+            ArrayList<String> domains) {
         PackageSetting ps = mPackages.get(packageName);
         if (ps == null) {
             Slog.w(PackageManagerService.TAG, "No package known for name: " + packageName);
@@ -973,9 +976,9 @@ final class Settings {
         if (ps.getIntentFilterVerificationInfo() == null) {
             IntentFilterVerificationInfo ivi = new IntentFilterVerificationInfo(packageName, domains);
             ps.setIntentFilterVerificationInfo(ivi);
-            return false;
+            return true;
         }
-        return true;
+        return false;
     }
 
     int getIntentFilterVerificationStatusLPr(String packageName, int userId) {
@@ -994,17 +997,43 @@ final class Settings {
     }
 
     boolean updateIntentFilterVerificationStatusLPw(String packageName, int status, int userId) {
-        PackageSetting ps = mPackages.get(packageName);
-        if (ps == null) {
+        // Update the status for the current package
+        PackageSetting current = mPackages.get(packageName);
+        if (current == null) {
             Slog.w(PackageManagerService.TAG, "No package known for name: " + packageName);
             return false;
         }
-        ps.setDomainVerificationStatusForUser(status, userId);
+        current.setDomainVerificationStatusForUser(status, userId);
+
+        if (current.getIntentFilterVerificationInfo() == null) {
+            Slog.w(PackageManagerService.TAG,
+                    "No IntentFilterVerificationInfo known for name: " + packageName);
+            return false;
+        }
+
+        // Then, if we set a ALWAYS status, then put NEVER status for Apps whose IntentFilter
+        // domains overlap the domains of the current package
+        ArraySet<String> currentDomains = current.getIntentFilterVerificationInfo().getDomainsSet();
+        if (status == INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ALWAYS) {
+            for (PackageSetting ps : mPackages.values()) {
+                if (ps == null || ps.pkg.packageName.equals(packageName)) continue;
+                IntentFilterVerificationInfo ivi = ps.getIntentFilterVerificationInfo();
+                if (ivi == null) {
+                    continue;
+                }
+                ArraySet<String> set = ivi.getDomainsSet();
+                set.retainAll(currentDomains);
+                if (set.size() > 0) {
+                    ps.setDomainVerificationStatusForUser(
+                            INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_NEVER, userId);
+                }
+            }
+        }
         return true;
     }
 
     /**
-     * Used for dump. Should be read only.
+     * Used for Settings App and PackageManagerService dump. Should be read only.
      */
     List<IntentFilterVerificationInfo> getIntentFilterVerificationsLPr(
             String packageName) {

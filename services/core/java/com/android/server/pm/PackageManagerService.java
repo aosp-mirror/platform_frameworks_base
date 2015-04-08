@@ -564,14 +564,15 @@ public class PackageManagerService extends IPackageManager.Stub {
 
                 ArrayList<PackageParser.ActivityIntentInfo> filters = ivs.getFilters();
                 final int filterCount = filters.size();
+                ArraySet<String> domainsSet = new ArraySet<>();
                 for (int m=0; m<filterCount; m++) {
                     PackageParser.ActivityIntentInfo filter = filters.get(m);
-                    synchronized (mPackages) {
-                        modified = mSettings.createIntentFilterVerificationIfNeededLPw(
-                                packageName, filter.getHosts());
-                    }
+                    domainsSet.addAll(filter.getHostsList());
                 }
+                ArrayList<String> domainsList = new ArrayList<>(domainsSet);
                 synchronized (mPackages) {
+                    modified = mSettings.createIntentFilterVerificationIfNeededLPw(
+                            packageName, domainsList);
                     if (modified) {
                         scheduleWriteSettingsLocked();
                     }
@@ -582,7 +583,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
 
         private void sendVerificationRequest(int userId, int verificationId,
-                                             IntentFilterVerificationState ivs) {
+                IntentFilterVerificationState ivs) {
 
             Intent verificationIntent = new Intent(Intent.ACTION_INTENT_FILTER_NEEDS_VERIFICATION);
             verificationIntent.putExtra(
@@ -716,33 +717,33 @@ public class PackageManagerService extends IPackageManager.Stub {
             }
             return ivs;
         }
+    }
 
-        private boolean hasValidHosts(ArrayList<String> hosts) {
-            if (hosts.size() == 0) {
-                Slog.d(TAG, "IntentFilter does not contain any data hosts");
+    private static boolean hasValidHosts(ArrayList<String> hosts) {
+        if (hosts.size() == 0) {
+            Slog.d(TAG, "IntentFilter does not contain any data hosts");
+            return false;
+        }
+        String hostEndBase = null;
+        for (String host : hosts) {
+            String[] hostParts = host.split("\\.");
+            // Should be at minimum a host like "example.com"
+            if (hostParts.length < 2) {
+                Slog.d(TAG, "IntentFilter does not contain a valid data host name: " + host);
                 return false;
             }
-            String hostEndBase = null;
-            for (String host : hosts) {
-                String[] hostParts = host.split("\\.");
-                // Should be at minimum a host like "example.com"
-                if (hostParts.length < 2) {
-                    Slog.d(TAG, "IntentFilter does not contain a valid data host name: " + host);
-                    return false;
-                }
-                // Verify that we have the same ending domain
-                int length = hostParts.length;
-                String hostEnd = hostParts[length - 1] + hostParts[length - 2];
-                if (hostEndBase == null) {
-                    hostEndBase = hostEnd;
-                }
-                if (!hostEnd.equalsIgnoreCase(hostEndBase)) {
-                    Slog.d(TAG, "IntentFilter does not contain the same data domains");
-                    return false;
-                }
+            // Verify that we have the same ending domain
+            int length = hostParts.length;
+            String hostEnd = hostParts[length - 1] + hostParts[length - 2];
+            if (hostEndBase == null) {
+                hostEndBase = hostEnd;
             }
-            return true;
+            if (!hostEnd.equalsIgnoreCase(hostEndBase)) {
+                Slog.d(TAG, "IntentFilter does not contain the same data domains");
+                return false;
+            }
         }
+        return true;
     }
 
     private IntentFilterVerifier mIntentFilterVerifier;
@@ -3895,8 +3896,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                 resolveInfo = queryCrossProfileIntents(
                         matchingFilters, intent, resolvedType, flags, userId);
 
-                // Check for results in the current profile. Adding GET_RESOLVED_FILTER flags
-                // as we need it later
+                // Check for results in the current profile.
                 List<ResolveInfo> result = mActivities.queryIntent(
                         intent, resolvedType, flags, userId);
                 if (resolveInfo != null) {
@@ -3905,7 +3905,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                 }
                 result = filterIfNotPrimaryUser(result, userId);
                 if (result.size() > 1) {
-                    return filterCandidatesWithDomainPreferedActivitiesLPw(result);
+                    return filterCandidatesWithDomainPreferedActivitiesLPr(result);
                 }
 
                 return result;
@@ -3939,41 +3939,32 @@ public class PackageManagerService extends IPackageManager.Stub {
         return resolveInfos;
     }
 
-    private List<ResolveInfo> filterCandidatesWithDomainPreferedActivitiesLPw(
+    private List<ResolveInfo> filterCandidatesWithDomainPreferedActivitiesLPr(
             List<ResolveInfo> candidates) {
         if (DEBUG_PREFERRED) {
             Slog.v("TAG", "Filtering results with prefered activities. Candidates count: " +
                     candidates.size());
         }
         final int userId = UserHandle.getCallingUserId();
-        ArrayList<ResolveInfo> result = new ArrayList<ResolveInfo>(candidates);
+        ArrayList<ResolveInfo> result = new ArrayList<ResolveInfo>();
         synchronized (mPackages) {
-            final int count = result.size();
-            for (int n = count-1; n >= 0; n--) {
-                ResolveInfo info = result.get(n);
-                if (!info.filterNeedsVerification) {
-                    continue;
-                }
+            final int count = candidates.size();
+            // First, try to use the domain prefered App
+            for (int n=0; n<count; n++) {
+                ResolveInfo info = candidates.get(n);
                 String packageName = info.activityInfo.packageName;
                 PackageSetting ps = mSettings.mPackages.get(packageName);
                 if (ps != null) {
                     // Try to get the status from User settings first
-                    int status = ps.getDomainVerificationStatusForUser(userId);
-                    // if none available, get the master status
-                    if (status == INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_UNDEFINED) {
-                        if (ps.getIntentFilterVerificationInfo() != null) {
-                            status = ps.getIntentFilterVerificationInfo().getStatus();
-                        }
-                    }
+                    int status = getDomainVerificationStatusLPr(ps, userId);
                     if (status == INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ALWAYS) {
-                        result.clear();
                         result.add(info);
-                        // We break the for loop as we are good to go
-                        break;
-                    } else if (status == INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_NEVER) {
-                        result.remove(n);
                     }
                 }
+            }
+            // There is not much we can do, add all candidates
+            if (result.size() == 0) {
+                result.addAll(candidates);
             }
         }
         if (DEBUG_PREFERRED) {
@@ -3981,6 +3972,17 @@ public class PackageManagerService extends IPackageManager.Stub {
                     result.size());
         }
         return result;
+    }
+
+    private int getDomainVerificationStatusLPr(PackageSetting ps, int userId) {
+        int status = ps.getDomainVerificationStatusForUser(userId);
+        // if none available, get the master status
+        if (status == INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_UNDEFINED) {
+            if (ps.getIntentFilterVerificationInfo() != null) {
+                status = ps.getIntentFilterVerificationInfo().getStatus();
+            }
+        }
+        return status;
     }
 
     private ResolveInfo querySkipCurrentProfileIntents(
@@ -8980,6 +8982,28 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
     }
 
+    @Override
+    public List<IntentFilter> getAllIntentFilters(String packageName) {
+        if (TextUtils.isEmpty(packageName)) {
+            return Collections.<IntentFilter>emptyList();
+        }
+        synchronized (mPackages) {
+            PackageParser.Package pkg = mPackages.get(packageName);
+            if (pkg == null || pkg.activities == null) {
+                return Collections.<IntentFilter>emptyList();
+            }
+            final int count = pkg.activities.size();
+            ArrayList<IntentFilter> result = new ArrayList<>();
+            for (int n=0; n<count; n++) {
+                PackageParser.Activity activity = pkg.activities.get(n);
+                if (activity.intents != null || activity.intents.size() > 0) {
+                    result.addAll(activity.intents);
+                }
+            }
+            return result;
+        }
+    }
+
     /**
      * Get the "allow unknown sources" setting.
      *
@@ -11184,7 +11208,7 @@ public class PackageManagerService extends IPackageManager.Stub {
     }
 
     private void verifyIntentFiltersIfNeeded(int userId, int verifierUid,
-                                             PackageParser.Package pkg) {
+            PackageParser.Package pkg) {
         int size = pkg.activities.size();
         if (size == 0) {
             Slog.d(TAG, "No activity, so no need to verify any IntentFilter!");
@@ -11196,6 +11220,8 @@ public class PackageManagerService extends IPackageManager.Stub {
 
         final int verificationId = mIntentFilterVerificationToken++;
         int count = 0;
+        final String packageName = pkg.packageName;
+        ArrayList<String> allHosts = new ArrayList<>();
         synchronized (mPackages) {
             for (PackageParser.Activity a : pkg.activities) {
                 for (ActivityIntentInfo filter : a.intents) {
@@ -11204,10 +11230,14 @@ public class PackageManagerService extends IPackageManager.Stub {
                     if (needFilterVerification && needNetworkVerificationLPr(filter)) {
                         Slog.d(TAG, "Verification needed for IntentFilter:" + filter.toString());
                         mIntentFilterVerifier.addOneIntentFilterVerification(
-                                verifierUid, userId, verificationId, filter, pkg.packageName);
+                                verifierUid, userId, verificationId, filter, packageName);
                         count++;
                     } else {
                         Slog.d(TAG, "No verification needed for IntentFilter:" + filter.toString());
+                        ArrayList<String> list = filter.getHostsList();
+                        if (hasValidHosts(list)) {
+                            allHosts.addAll(list);
+                        }
                     }
                 }
             }
@@ -11219,6 +11249,11 @@ public class PackageManagerService extends IPackageManager.Stub {
                     + (count > 1 ? "s" : "") +  " for userId:" + userId + "!");
         } else {
             Slog.d(TAG, "No need to start any IntentFilter verification!");
+            if (allHosts.size() > 0 && hasDomainURLs(pkg) &&
+                    mSettings.createIntentFilterVerificationIfNeededLPw(
+                            packageName, allHosts)) {
+                scheduleWriteSettingsLocked();
+            }
         }
     }
 
@@ -11269,6 +11304,10 @@ public class PackageManagerService extends IPackageManager.Stub {
 
     private static boolean isPrivilegedApp(PackageParser.Package pkg) {
         return (pkg.applicationInfo.privateFlags & ApplicationInfo.PRIVATE_FLAG_PRIVILEGED) != 0;
+    }
+
+    private static boolean hasDomainURLs(PackageParser.Package pkg) {
+        return (pkg.applicationInfo.privateFlags & ApplicationInfo.PRIVATE_FLAG_HAS_DOMAIN_URLS) != 0;
     }
 
     private static boolean isSystemApp(PackageSetting ps) {

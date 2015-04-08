@@ -24,6 +24,7 @@ import static android.content.pm.PackageManager.INTENT_FILTER_DOMAIN_VERIFICATIO
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
+import android.util.ArraySet;
 import android.util.Log;
 import com.android.internal.util.XmlUtils;
 import org.xmlpull.v1.XmlPullParser;
@@ -47,17 +48,17 @@ public final class IntentFilterVerificationInfo implements Parcelable {
     private static final String ATTR_PACKAGE_NAME = "packageName";
     private static final String ATTR_STATUS = "status";
 
-    private String[] mDomains;
+    private ArrayList<String> mDomains;
     private String mPackageName;
     private int mMainStatus;
 
     public IntentFilterVerificationInfo() {
         mPackageName = null;
-        mDomains = new String[0];
+        mDomains = new ArrayList<>();
         mMainStatus = INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_UNDEFINED;
     }
 
-    public IntentFilterVerificationInfo(String packageName, String[] domains) {
+    public IntentFilterVerificationInfo(String packageName, ArrayList<String> domains) {
         mPackageName = packageName;
         mDomains = domains;
         mMainStatus = INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_UNDEFINED;
@@ -72,8 +73,12 @@ public final class IntentFilterVerificationInfo implements Parcelable {
         readFromParcel(source);
     }
 
-    public String[] getDomains() {
+    public ArrayList<String> getDomains() {
         return mDomains;
+    }
+
+    public ArraySet<String> getDomainsSet() {
+        return new ArraySet<>(mDomains);
     }
 
     public String getPackageName() {
@@ -140,7 +145,7 @@ public final class IntentFilterVerificationInfo implements Parcelable {
         }
         mMainStatus = status;
 
-        ArrayList<String> list = new ArrayList<>();
+        mDomains = new ArrayList<>();
         int outerDepth = parser.getDepth();
         int type;
         while ((type=parser.next()) != XmlPullParser.END_DOCUMENT
@@ -155,18 +160,13 @@ public final class IntentFilterVerificationInfo implements Parcelable {
             if (tagName.equals(TAG_DOMAIN)) {
                 String name = getStringFromXml(parser, ATTR_DOMAIN_NAME, null);
                 if (!TextUtils.isEmpty(name)) {
-                    if (list == null) {
-                        list = new ArrayList<>();
-                    }
-                    list.add(name);
+                    mDomains.add(name);
                 }
             } else {
                 Log.w(TAG, "Unknown tag parsing IntentFilter: " + tagName);
             }
             XmlUtils.skipCurrentTag(parser);
         }
-
-        mDomains = list.toArray(new String[list.size()]);
     }
 
     public void writeToXml(XmlSerializer serializer) throws IOException {
@@ -201,14 +201,15 @@ public final class IntentFilterVerificationInfo implements Parcelable {
     private void readFromParcel(Parcel source) {
         mPackageName = source.readString();
         mMainStatus = source.readInt();
-        mDomains = source.readStringArray();
+        mDomains = new ArrayList<>();
+        source.readStringList(mDomains);
     }
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeString(mPackageName);
         dest.writeInt(mMainStatus);
-        dest.writeStringArray(mDomains);
+        dest.writeStringList(mDomains);
     }
 
     public static final Creator<IntentFilterVerificationInfo> CREATOR =
