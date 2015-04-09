@@ -412,7 +412,6 @@ static void find_max_opacity(png_byte** rows,
                              int startX, int startY, int endX, int endY, int dX, int dY,
                              int* out_inset)
 {
-    bool opaque_within_inset = true;
     uint8_t max_opacity = 0;
     int inset = 0;
     *out_inset = 0;
