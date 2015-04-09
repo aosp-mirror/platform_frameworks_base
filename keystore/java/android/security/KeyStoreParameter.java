@@ -19,15 +19,14 @@ package android.security;
 import android.content.Context;
 
 import java.security.Key;
-import java.security.KeyPairGenerator;
 import java.security.KeyStore.ProtectionParameter;
 import java.util.Date;
 
 import javax.crypto.Cipher;
 
 /**
- * This provides the optional parameters that can be specified for
- * {@code KeyStore} entries that work with
+ * Parameters specifying how to secure and restrict the use of a key being
+ * imported into the
  * <a href="{@docRoot}training/articles/keystore.html">Android KeyStore
  * facility</a>. The Android KeyStore facility is accessed through a
  * {@link java.security.KeyStore} API using the {@code AndroidKeyStore}
@@ -38,12 +37,6 @@ import javax.crypto.Cipher;
  * there is only one logical instance of the {@code KeyStore} per application
  * UID so apps using the {@code sharedUid} facility will also share a
  * {@code KeyStore}.
- * <p>
- * Keys may be generated using the {@link KeyPairGenerator} facility with a
- * {@link KeyPairGeneratorSpec} to specify the entry's {@code alias}. A
- * self-signed X.509 certificate will be attached to generated entries, but that
- * may be replaced at a later time by a certificate signed by a real Certificate
- * Authority.
  */
 public final class KeyStoreParameter implements ProtectionParameter {
     private int mFlags;
@@ -308,7 +301,7 @@ public final class KeyStoreParameter implements ProtectionParameter {
         /**
          * Sets the time instant before which the key is not yet valid.
          *
-         * <b>By default, the key is valid at any instant.
+         * <p>By default, the key is valid at any instant.
          *
          * @see #setKeyValidityEnd(Date)
          *
@@ -322,7 +315,7 @@ public final class KeyStoreParameter implements ProtectionParameter {
         /**
          * Sets the time instant after which the key is no longer valid.
          *
-         * <b>By default, the key is valid at any instant.
+         * <p>By default, the key is valid at any instant.
          *
          * @see #setKeyValidityStart(Date)
          * @see #setKeyValidityForConsumptionEnd(Date)
@@ -339,7 +332,7 @@ public final class KeyStoreParameter implements ProtectionParameter {
         /**
          * Sets the time instant after which the key is no longer valid for encryption and signing.
          *
-         * <b>By default, the key is valid at any instant.
+         * <p>By default, the key is valid at any instant.
          *
          * @see #setKeyValidityForConsumptionEnd(Date)
          *
@@ -354,7 +347,7 @@ public final class KeyStoreParameter implements ProtectionParameter {
          * Sets the time instant after which the key is no longer valid for decryption and
          * verification.
          *
-         * <b>By default, the key is valid at any instant.
+         * <p>By default, the key is valid at any instant.
          *
          * @see #setKeyValidityForOriginationEnd(Date)
          *

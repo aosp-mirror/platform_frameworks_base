@@ -299,7 +299,7 @@ public class KeyGeneratorSpec implements AlgorithmParameterSpec {
         /**
          * Sets the time instant before which the key is not yet valid.
          *
-         * <b>By default, the key is valid at any instant.
+         * <p>By default, the key is valid at any instant.
          *
          * @see #setKeyValidityEnd(Date)
          */
@@ -311,7 +311,7 @@ public class KeyGeneratorSpec implements AlgorithmParameterSpec {
         /**
          * Sets the time instant after which the key is no longer valid.
          *
-         * <b>By default, the key is valid at any instant.
+         * <p>By default, the key is valid at any instant.
          *
          * @see #setKeyValidityStart(Date)
          * @see #setKeyValidityForConsumptionEnd(Date)
@@ -326,7 +326,7 @@ public class KeyGeneratorSpec implements AlgorithmParameterSpec {
         /**
          * Sets the time instant after which the key is no longer valid for encryption and signing.
          *
-         * <b>By default, the key is valid at any instant.
+         * <p>By default, the key is valid at any instant.
          *
          * @see #setKeyValidityForConsumptionEnd(Date)
          */
@@ -339,7 +339,7 @@ public class KeyGeneratorSpec implements AlgorithmParameterSpec {
          * Sets the time instant after which the key is no longer valid for decryption and
          * verification.
          *
-         * <b>By default, the key is valid at any instant.
+         * <p>By default, the key is valid at any instant.
          *
          * @see #setKeyValidityForOriginationEnd(Date)
          */
