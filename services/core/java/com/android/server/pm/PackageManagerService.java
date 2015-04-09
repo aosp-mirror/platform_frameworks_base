@@ -632,7 +632,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                         + verificationId + " packageName:" + packageName);
                 return;
             }
-            Slog.d(TAG, "Updating IntentFilterVerificationInfo for verificationId: "
+            Slog.d(TAG, "Updating IntentFilterVerificationInfo for verificationId:"
                     + verificationId);
 
             synchronized (mPackages) {
@@ -3955,10 +3955,9 @@ public class PackageManagerService extends IPackageManager.Stub {
                     Collections.sort(result, mResolvePrioritySorter);
                 }
                 result = filterIfNotPrimaryUser(result, userId);
-                if (result.size() > 1) {
+                if (result.size() > 1 && hasWebURI(intent)) {
                     return filterCandidatesWithDomainPreferedActivitiesLPr(result);
                 }
-
                 return result;
             }
             final PackageParser.Package pkg = mPackages.get(pkgName);
@@ -3990,16 +3989,30 @@ public class PackageManagerService extends IPackageManager.Stub {
         return resolveInfos;
     }
 
+    private static boolean hasWebURI(Intent intent) {
+        if (intent.getData() == null) {
+            return false;
+        }
+        final String scheme = intent.getScheme();
+        if (TextUtils.isEmpty(scheme)) {
+            return false;
+        }
+        return scheme.equals(IntentFilter.SCHEME_HTTP) || scheme.equals(IntentFilter.SCHEME_HTTPS);
+    }
+
     private List<ResolveInfo> filterCandidatesWithDomainPreferedActivitiesLPr(
             List<ResolveInfo> candidates) {
         if (DEBUG_PREFERRED) {
             Slog.v("TAG", "Filtering results with prefered activities. Candidates count: " +
                     candidates.size());
         }
+
         final int userId = UserHandle.getCallingUserId();
         ArrayList<ResolveInfo> result = new ArrayList<ResolveInfo>();
+        ArrayList<ResolveInfo> undefinedList = new ArrayList<ResolveInfo>();
         ArrayList<ResolveInfo> neverList = new ArrayList<ResolveInfo>();
         ArrayList<ResolveInfo> matchAllList = new ArrayList<ResolveInfo>();
+
         synchronized (mPackages) {
             final int count = candidates.size();
             // First, try to use the domain prefered App
@@ -4010,11 +4023,12 @@ public class PackageManagerService extends IPackageManager.Stub {
                 if (ps != null) {
                     // Try to get the status from User settings first
                     int status = getDomainVerificationStatusLPr(ps, userId);
-                    if (status == INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ALWAYS ||
-                            status == INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_UNDEFINED) {
+                    if (status == INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ALWAYS) {
                         result.add(info);
                     } else if (status == INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_NEVER) {
                         neverList.add(info);
+                    } else if (status == INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_UNDEFINED) {
+                        undefinedList.add(info);
                     }
                     // Add to the special match all list (Browser use case)
                     if (info.handleAllWebDataURI) {
@@ -4024,15 +4038,16 @@ public class PackageManagerService extends IPackageManager.Stub {
             }
             // If there is nothing selected, add all candidates and remove the ones that the User
             // has explicitely put into the INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_NEVER state and
-            // also remove any .
-            // If there is still none after this pass, add all Browser Apps and let the User decide
-            // with the Disambiguation dialog if there are several ones.
+            // also remove any Browser Apps ones.
+            // If there is still none after this pass, add all undefined one and Browser Apps and
+            // let the User decide with the Disambiguation dialog if there are several ones.
             if (result.size() == 0) {
                 result.addAll(candidates);
             }
             result.removeAll(neverList);
             result.removeAll(matchAllList);
             if (result.size() == 0) {
+                result.addAll(undefinedList);
                 result.addAll(matchAllList);
             }
         }
@@ -11284,6 +11299,12 @@ public class PackageManagerService extends IPackageManager.Stub {
             return;
         }
 
+        final boolean hasDomainURLs = hasDomainURLs(pkg);
+        if (!hasDomainURLs) {
+            Slog.d(TAG, "No domain URLs, so no need to verify any IntentFilter!");
+            return;
+        }
+
         Slog.d(TAG, "Checking for userId:" + userId + " if any IntentFilter from the " + size
                 + " Activities needs verification ...");
 
@@ -11291,21 +11312,25 @@ public class PackageManagerService extends IPackageManager.Stub {
         int count = 0;
         final String packageName = pkg.packageName;
         ArrayList<String> allHosts = new ArrayList<>();
+
         synchronized (mPackages) {
             for (PackageParser.Activity a : pkg.activities) {
                 for (ActivityIntentInfo filter : a.intents) {
-                    boolean needFilterVerification = filter.needsVerification() &&
-                            !filter.isVerified();
-                    if (needFilterVerification && needNetworkVerificationLPr(filter)) {
+                    boolean needsFilterVerification = filter.needsVerification();
+                    if (needsFilterVerification && needsNetworkVerificationLPr(filter)) {
                         Slog.d(TAG, "Verification needed for IntentFilter:" + filter.toString());
                         mIntentFilterVerifier.addOneIntentFilterVerification(
                                 verifierUid, userId, verificationId, filter, packageName);
                         count++;
-                    } else {
-                        Slog.d(TAG, "No verification needed for IntentFilter:" + filter.toString());
+                    } else if (!needsFilterVerification) {
+                        Slog.d(TAG, "No verification needed for IntentFilter:"
+                                + filter.toString());
                         if (hasValidDomains(filter)) {
                             allHosts.addAll(filter.getHostsList());
                         }
+                    } else {
+                        Slog.d(TAG, "Verification already done for IntentFilter:"
+                                + filter.toString());
                     }
                 }
             }
@@ -11317,15 +11342,14 @@ public class PackageManagerService extends IPackageManager.Stub {
                     + (count > 1 ? "s" : "") +  " for userId:" + userId + "!");
         } else {
             Slog.d(TAG, "No need to start any IntentFilter verification!");
-            if (allHosts.size() > 0 && hasDomainURLs(pkg) &&
-                    mSettings.createIntentFilterVerificationIfNeededLPw(
-                            packageName, allHosts) != null) {
+            if (allHosts.size() > 0 && mSettings.createIntentFilterVerificationIfNeededLPw(
+                    packageName, allHosts) != null) {
                 scheduleWriteSettingsLocked();
             }
         }
     }
 
-    private boolean needNetworkVerificationLPr(ActivityIntentInfo filter) {
+    private boolean needsNetworkVerificationLPr(ActivityIntentInfo filter) {
         final ComponentName cn  = filter.activity.getComponentName();
         final String packageName = cn.getPackageName();
 

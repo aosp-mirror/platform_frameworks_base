@@ -2778,7 +2778,7 @@ public class PackageParser {
     }
 
     /**
-     * Check if one of the IntentFilter as an action VIEW and a HTTP/HTTPS data URI
+     * Check if one of the IntentFilter as both actions DEFAULT / VIEW and a HTTP/HTTPS data URI
      */
     private static boolean hasDomainURLs(Package pkg) {
         if (pkg == null || pkg.activities == null) return false;
@@ -2792,6 +2792,7 @@ public class PackageParser {
             for (int m=0; m<countFilters; m++) {
                 ActivityIntentInfo aii = filters.get(m);
                 if (!aii.hasAction(Intent.ACTION_VIEW)) continue;
+                if (!aii.hasAction(Intent.ACTION_DEFAULT)) continue;
                 if (aii.hasDataScheme(IntentFilter.SCHEME_HTTP) ||
                         aii.hasDataScheme(IntentFilter.SCHEME_HTTPS)) {
                     Slog.d(TAG, "hasDomainURLs:true for package:" + pkg.packageName);
