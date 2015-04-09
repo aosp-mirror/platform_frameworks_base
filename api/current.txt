@@ -1301,6 +1301,7 @@ package android {
     field public static final int thicknessRatio = 16843164; // 0x101019c
     field public static final int thumb = 16843074; // 0x1010142
     field public static final int thumbOffset = 16843075; // 0x1010143
+    field public static final int thumbPosition = 16844013; // 0x10104ed
     field public static final int thumbTextPadding = 16843634; // 0x1010372
     field public static final int thumbTint = 16843889; // 0x1010471
     field public static final int thumbTintMode = 16843890; // 0x1010472
