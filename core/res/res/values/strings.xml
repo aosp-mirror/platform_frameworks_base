@@ -5237,4 +5237,10 @@
     <!-- Model name for USB MIDI Peripheral port -->
     <string name="usb_midi_peripheral_model_name">USB Peripheral Port</string>
 
+    <!-- Floating toolbar strings -->
+    <!-- Content description for the button that opens the floating toolbar overflow. [CHAR LIMIT=NONE] -->
+    <string name="floating_toolbar_open_overflow_description">More options</string>
+    <!-- Content description for the button that closes the floating toolbar overflow. [CHAR LIMIT=NONE] -->
+    <string name="floating_toolbar_close_overflow_description">Close overflow</string>
+
 </resources>
