@@ -18,6 +18,7 @@ package android.app;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
+import android.app.SharedElementCallback.OnSharedElementsReadyListener;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.Matrix;
@@ -27,6 +28,7 @@ import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.os.ResultReceiver;
 import android.transition.Transition;
 import android.transition.TransitionManager;
 import android.view.View;
@@ -408,18 +410,38 @@ class ExitTransitionCoordinator extends ActivityTransitionCoordinator {
             if (!mSharedElementNotified) {
                 mSharedElementNotified = true;
                 delayCancel();
-                mResultReceiver.send(MSG_TAKE_SHARED_ELEMENTS, mSharedElementBundle);
-            }
-            if (!mExitNotified && mExitComplete) {
-                mExitNotified = true;
-                mResultReceiver.send(MSG_EXIT_TRANSITION_COMPLETE, null);
-                mResultReceiver = null; // done talking
-                ViewGroup decorView = getDecor();
-                if (!mIsReturning && decorView != null) {
-                    decorView.suppressLayout(false);
+                if (mListener == null) {
+                    mResultReceiver.send(MSG_TAKE_SHARED_ELEMENTS, mSharedElementBundle);
+                    notifyExitComplete();
+                } else {
+                    final ResultReceiver resultReceiver = mResultReceiver;
+                    final Bundle sharedElementBundle = mSharedElementBundle;
+                    mListener.onSharedElementsArrived(mSharedElementNames, mSharedElements,
+                            new OnSharedElementsReadyListener() {
+                                @Override
+                                public void onSharedElementsReady() {
+                                    resultReceiver.send(MSG_TAKE_SHARED_ELEMENTS,
+                                            sharedElementBundle);
+                                    notifyExitComplete();
+                                }
+                            });
                 }
-                finishIfNecessary();
+            } else {
+                notifyExitComplete();
             }
+        }
+    }
+
+    private void notifyExitComplete() {
+        if (!mExitNotified && mExitComplete) {
+            mExitNotified = true;
+            mResultReceiver.send(MSG_EXIT_TRANSITION_COMPLETE, null);
+            mResultReceiver = null; // done talking
+            ViewGroup decorView = getDecor();
+            if (!mIsReturning && decorView != null) {
+                decorView.suppressLayout(false);
+            }
+            finishIfNecessary();
         }
     }
 
