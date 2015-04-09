@@ -204,6 +204,14 @@ public final class TvInputManagerService extends SystemService {
             }
 
             @Override
+            public boolean onPackageChanged(String packageName, int uid, String[] components) {
+                // The input list needs to be updated in any cases, regardless of whether
+                // it happened to the whole package or a specific component. Returning true so that
+                // the update can be handled in {@link #onSomePackagesChanged}.
+                return true;
+            }
+
+            @Override
             public void onPackageRemoved(String packageName, int uid) {
                 synchronized (mLock) {
                     UserState userState = getUserStateLocked(getChangingUserId());
