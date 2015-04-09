@@ -313,4 +313,17 @@ interface IBackupManager {
      *     is being queried.
      */
     boolean isBackupServiceActive(int whichUser);
+
+    /**
+     * Ask the framework which dataset, if any, the given package's data would be
+     * restored from if we were to install it right now.
+     *
+     * <p>Callers must hold the android.permission.BACKUP permission to use this method.
+     *
+     * @param packageName The name of the package whose most-suitable dataset we
+     *     wish to look up
+     * @return The dataset token from which a restore should be attempted, or zero if
+     *     no suitable data is available.
+     */
+    long getAvailableRestoreToken(String packageName);
 }

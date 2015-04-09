@@ -339,4 +339,30 @@ public class BackupManager {
             }
         }
     }
+
+    /**
+     * Ask the framework which dataset, if any, the given package's data would be
+     * restored from if we were to install it right now.
+     *
+     * <p>Callers must hold the android.permission.BACKUP permission to use this method.
+     *
+     * @param packageName The name of the package whose most-suitable dataset we
+     *     wish to look up
+     * @return The dataset token from which a restore should be attempted, or zero if
+     *     no suitable data is available.
+     *
+     * @hide
+     */
+    @SystemApi
+    public long getAvailableRestoreToken(String packageName) {
+        checkServiceBinder();
+        if (sService != null) {
+            try {
+                return sService.getAvailableRestoreToken(packageName);
+            } catch (RemoteException e) {
+                Log.e(TAG, "getAvailableRestoreToken() couldn't connect");
+            }
+        }
+        return 0;
+    }
 }
