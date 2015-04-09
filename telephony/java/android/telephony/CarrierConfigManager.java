@@ -78,6 +78,42 @@ public class CarrierConfigManager {
      */
     public static final String INT_VOLTE_REPLACEMENT_RAT = "int_volte_replacement_rat";
 
+    /* The following 3 fields are related to carrier visual voicemail. */
+
+    /**
+     *  The carrier number MO sms messages are sent to.
+     *
+     *  @hide
+     */
+    @SystemApi
+    public static final String STRING_VVM_DESTINATION_NUMBER = "string_vvm_destination_number";
+
+    /**
+     * The port through which the MO sms messages are sent through.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final String SHORT_VVM_PORT_NUMBER = "string_vvm_port_number";
+
+    /**
+     * The type of visual voicemail protocol the carrier adheres to (see below).
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final String STRING_VVM_TYPE = "string_vvm_type";
+
+    /* Visual voicemail protocols */
+
+    /**
+     * The OMTP protocol.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final String VVM_TYPE_OMTP = "vvm_type_omtp";
+
     private final static String TAG = "CarrierConfigManager";
 
     /** The default value for every variable. */
