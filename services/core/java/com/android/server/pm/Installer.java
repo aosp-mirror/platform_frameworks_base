@@ -55,43 +55,25 @@ public final class Installer extends SystemService {
         return mInstaller.execute(builder.toString());
     }
 
-    public int patchoat(String apkPath, int uid, boolean isPublic, String pkgName,
-            String instructionSet) {
+    public int dexopt(String apkPath, int uid, boolean isPublic,
+            String instructionSet, int dexoptNeeded) {
         if (!isValidInstructionSet(instructionSet)) {
             Slog.e(TAG, "Invalid instruction set: " + instructionSet);
             return -1;
         }
 
-        return mInstaller.patchoat(apkPath, uid, isPublic, pkgName, instructionSet);
-    }
-
-    public int patchoat(String apkPath, int uid, boolean isPublic, String instructionSet) {
-        if (!isValidInstructionSet(instructionSet)) {
-            Slog.e(TAG, "Invalid instruction set: " + instructionSet);
-            return -1;
-        }
-
-        return mInstaller.patchoat(apkPath, uid, isPublic, instructionSet);
-    }
-
-    public int dexopt(String apkPath, int uid, boolean isPublic, String instructionSet) {
-        if (!isValidInstructionSet(instructionSet)) {
-            Slog.e(TAG, "Invalid instruction set: " + instructionSet);
-            return -1;
-        }
-
-        return mInstaller.dexopt(apkPath, uid, isPublic, instructionSet);
+        return mInstaller.dexopt(apkPath, uid, isPublic, instructionSet, dexoptNeeded);
     }
 
     public int dexopt(String apkPath, int uid, boolean isPublic, String pkgName,
-            String instructionSet, boolean vmSafeMode, boolean debuggable,
-            @Nullable String outputPath) {
+            String instructionSet, int dexoptNeeded, boolean vmSafeMode,
+            boolean debuggable, @Nullable String outputPath) {
         if (!isValidInstructionSet(instructionSet)) {
             Slog.e(TAG, "Invalid instruction set: " + instructionSet);
             return -1;
         }
-
-        return mInstaller.dexopt(apkPath, uid, isPublic, pkgName, instructionSet, vmSafeMode,
+        return mInstaller.dexopt(apkPath, uid, isPublic, pkgName,
+                instructionSet, dexoptNeeded, vmSafeMode,
                 debuggable, outputPath);
     }
 
