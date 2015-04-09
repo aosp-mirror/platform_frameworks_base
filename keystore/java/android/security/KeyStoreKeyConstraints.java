@@ -592,6 +592,14 @@ public abstract class KeyStoreKeyConstraints {
         public static final int GCM = 1 << 3;
 
         /**
+         * Set of block modes compatible with IND-CPA if used correctly.
+         *
+         * @hide
+         */
+        public static final @BlockModeEnum int IND_CPA_COMPATIBLE_MODES =
+                CBC | CTR | GCM;
+
+        /**
          * @hide
          */
         public static int toKeymaster(@BlockModeEnum int mode) {
@@ -665,6 +673,24 @@ public abstract class KeyStoreKeyConstraints {
                 default:
                     throw new IllegalArgumentException("Unknown block mode: " + mode);
             }
+        }
+
+        /**
+         * @hide
+         */
+        public static String allToString(@BlockModeEnum int modes) {
+            StringBuilder result = new StringBuilder("[");
+            boolean firstValue = true;
+            for (@BlockModeEnum int mode : getSetFlags(modes)) {
+                if (firstValue) {
+                    firstValue = false;
+                } else {
+                    result.append(", ");
+                }
+                result.append(toString(mode));
+            }
+            result.append(']');
+            return result.toString();
         }
 
         /**

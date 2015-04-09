@@ -512,12 +512,23 @@ public class AndroidKeyStore extends KeyStoreSpi {
             }
         }
 
-        int purposes = params.getPurposes();
+        @KeyStoreKeyConstraints.PurposeEnum int purposes = params.getPurposes();
+        @KeyStoreKeyConstraints.BlockModeEnum int blockModes = params.getBlockModes();
+        if (((purposes & KeyStoreKeyConstraints.Purpose.ENCRYPT) != 0)
+                && (params.isRandomizedEncryptionRequired())) {
+            @KeyStoreKeyConstraints.BlockModeEnum int incompatibleBlockModes =
+                    blockModes & ~KeyStoreKeyConstraints.BlockMode.IND_CPA_COMPATIBLE_MODES;
+            if (incompatibleBlockModes != 0) {
+                throw new KeyStoreException("Randomized encryption (IND-CPA) required but may be"
+                        + " violated by block mode(s): "
+                        + KeyStoreKeyConstraints.BlockMode.allToString(incompatibleBlockModes)
+                        + ". See KeyStoreParameter documentation.");
+            }
+        }
         for (int keymasterPurpose : KeyStoreKeyConstraints.Purpose.allToKeymaster(purposes)) {
             args.addInt(KeymasterDefs.KM_TAG_PURPOSE, keymasterPurpose);
         }
-        for (int keymasterBlockMode :
-            KeyStoreKeyConstraints.BlockMode.allToKeymaster(params.getBlockModes())) {
+        for (int keymasterBlockMode : KeyStoreKeyConstraints.BlockMode.allToKeymaster(blockModes)) {
             args.addInt(KeymasterDefs.KM_TAG_BLOCK_MODE, keymasterBlockMode);
         }
         for (int keymasterPadding :
@@ -553,8 +564,8 @@ public class AndroidKeyStore extends KeyStoreSpi {
         args.addInt(KeymasterDefs.KM_TAG_KEY_SIZE, keyMaterial.length * 8);
 
         if (((purposes & KeyStoreKeyConstraints.Purpose.ENCRYPT) != 0)
-                || ((purposes & KeyStoreKeyConstraints.Purpose.DECRYPT) != 0)) {
-            // Permit caller-specified IV. This is needed for the Cipher abstraction.
+                && (!params.isRandomizedEncryptionRequired())) {
+            // Permit caller-provided IV when encrypting with this key
             args.addBoolean(KeymasterDefs.KM_TAG_CALLER_NONCE);
         }
 
