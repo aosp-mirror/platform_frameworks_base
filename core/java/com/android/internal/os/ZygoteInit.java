@@ -465,12 +465,11 @@ public class ZygoteInit {
 
         try {
             for (String classPathElement : classPathElements) {
-                final byte dexopt = DexFile.isDexOptNeededInternal(classPathElement, "*", instructionSet,
-                        false /* defer */);
-                if (dexopt == DexFile.DEXOPT_NEEDED) {
-                    installer.dexopt(classPathElement, Process.SYSTEM_UID, false, instructionSet);
-                } else if (dexopt == DexFile.PATCHOAT_NEEDED) {
-                    installer.patchoat(classPathElement, Process.SYSTEM_UID, false, instructionSet);
+                final int dexoptNeeded = DexFile.getDexOptNeeded(
+                        classPathElement, "*", instructionSet, false /* defer */);
+                if (dexoptNeeded != DexFile.NO_DEXOPT_NEEDED) {
+                    installer.dexopt(classPathElement, Process.SYSTEM_UID, false,
+                            instructionSet, dexoptNeeded);
                 }
             }
         } catch (IOException ioe) {
