@@ -1,4 +1,6 @@
 /*
+ * Copyright (C) 2015 The Android Open Source Project
+ * Copyright (c) 2015 Samsung LSI
  * Copyright (c) 2008-2009, Motorola, Inc.
  *
  * All rights reserved.
@@ -45,6 +47,7 @@ import java.io.OutputStream;
 public final class ServerSession extends ObexSession implements Runnable {
 
     private static final String TAG = "Obex ServerSession";
+    private static final boolean V = ObexHelper.VDBG;
 
     private ObexTransport mTransport;
 
@@ -91,7 +94,9 @@ public final class ServerSession extends ObexSession implements Runnable {
 
             boolean done = false;
             while (!done && !mClosed) {
+                if(V) Log.v(TAG, "Waiting for incoming request...");
                 int requestType = mInput.read();
+                if(V) Log.v(TAG, "Read request: " + requestType);
                 switch (requestType) {
                     case ObexHelper.OBEX_OPCODE_CONNECT:
                         handleConnectRequest();
@@ -140,9 +145,9 @@ public final class ServerSession extends ObexSession implements Runnable {
             }
 
         } catch (NullPointerException e) {
-            Log.d(TAG, e.toString());
+            Log.d(TAG, "Exception occured - ignoring", e);
         } catch (Exception e) {
-            Log.d(TAG, e.toString());
+            Log.d(TAG, "Exception occured - ignoring", e);
         }
         close();
     }
@@ -163,7 +168,7 @@ public final class ServerSession extends ObexSession implements Runnable {
 
         int length = mInput.read();
         length = (length << 8) + mInput.read();
-        if (length > ObexHelper.MAX_PACKET_SIZE_INT) {
+        if (length > ObexHelper.getMaxRxPacketSize(mTransport)) {
             code = ResponseCodes.OBEX_HTTP_REQ_TOO_LARGE;
         } else {
             for (int i = 3; i < length; i++) {
@@ -215,6 +220,7 @@ public final class ServerSession extends ObexSession implements Runnable {
              *internal error should not be sent because server has already replied with
              *OK response in "sendReply")
              */
+            if(V) Log.d(TAG,"Exception occured - sending OBEX_HTTP_INTERNAL_ERROR reply",e);
             if (!op.isAborted) {
                 sendResponse(ResponseCodes.OBEX_HTTP_INTERNAL_ERROR, null);
             }
@@ -243,6 +249,7 @@ public final class ServerSession extends ObexSession implements Runnable {
                 op.sendReply(response);
             }
         } catch (Exception e) {
+            if(V) Log.d(TAG,"Exception occured - sending OBEX_HTTP_INTERNAL_ERROR reply",e);
             sendResponse(ResponseCodes.OBEX_HTTP_INTERNAL_ERROR, null);
         }
     }
@@ -275,7 +282,7 @@ public final class ServerSession extends ObexSession implements Runnable {
             data[2] = (byte)totalLength;
         }
         op.write(data);
-        op.flush();
+        op.flush(); // TODO: Do we need to flush?
     }
 
     /**
@@ -304,7 +311,7 @@ public final class ServerSession extends ObexSession implements Runnable {
         flags = mInput.read();
         constants = mInput.read();
 
-        if (length > ObexHelper.MAX_PACKET_SIZE_INT) {
+        if (length > ObexHelper.getMaxRxPacketSize(mTransport)) {
             code = ResponseCodes.OBEX_HTTP_REQ_TOO_LARGE;
             totalLength = 3;
         } else {
@@ -358,6 +365,7 @@ public final class ServerSession extends ObexSession implements Runnable {
                 try {
                     code = mListener.onSetPath(request, reply, backup, create);
                 } catch (Exception e) {
+                    if(V) Log.d(TAG,"Exception occured - sending OBEX_HTTP_INTERNAL_ERROR reply",e);
                     sendResponse(ResponseCodes.OBEX_HTTP_INTERNAL_ERROR, null);
                     return;
                 }
@@ -425,7 +433,7 @@ public final class ServerSession extends ObexSession implements Runnable {
         length = mInput.read();
         length = (length << 8) + mInput.read();
 
-        if (length > ObexHelper.MAX_PACKET_SIZE_INT) {
+        if (length > ObexHelper.getMaxRxPacketSize(mTransport)) {
             code = ResponseCodes.OBEX_HTTP_REQ_TOO_LARGE;
             totalLength = 3;
         } else {
@@ -466,6 +474,7 @@ public final class ServerSession extends ObexSession implements Runnable {
                 try {
                     mListener.onDisconnect(request, reply);
                 } catch (Exception e) {
+                    if(V) Log.d(TAG,"Exception occured - sending OBEX_HTTP_INTERNAL_ERROR reply",e);
                     sendResponse(ResponseCodes.OBEX_HTTP_INTERNAL_ERROR, null);
                     return;
                 }
@@ -531,23 +540,38 @@ public final class ServerSession extends ObexSession implements Runnable {
         HeaderSet reply = new HeaderSet();
         int bytesReceived;
 
+        if(V) Log.v(TAG,"handleConnectRequest()");
+
         /*
          * Read in the length of the OBEX packet, OBEX version, flags, and max
          * packet length
          */
         packetLength = mInput.read();
         packetLength = (packetLength << 8) + mInput.read();
+        if(V) Log.v(TAG,"handleConnectRequest() - packetLength: " + packetLength);
+
         version = mInput.read();
         flags = mInput.read();
         mMaxPacketLength = mInput.read();
         mMaxPacketLength = (mMaxPacketLength << 8) + mInput.read();
+
+        if(V) Log.v(TAG,"handleConnectRequest() - version: " + version
+                + " MaxLength: " + mMaxPacketLength + " flags: " + flags);
 
         // should we check it?
         if (mMaxPacketLength > ObexHelper.MAX_PACKET_SIZE_INT) {
             mMaxPacketLength = ObexHelper.MAX_PACKET_SIZE_INT;
         }
 
-        if (packetLength > ObexHelper.MAX_PACKET_SIZE_INT) {
+        if(mMaxPacketLength > ObexHelper.getMaxTxPacketSize(mTransport)) {
+            Log.w(TAG, "Requested MaxObexPacketSize " + mMaxPacketLength
+                    + " is larger than the max size supported by the transport: "
+                    + ObexHelper.getMaxTxPacketSize(mTransport)
+                    + " Reducing to this size.");
+            mMaxPacketLength = ObexHelper.getMaxTxPacketSize(mTransport);
+        }
+
+        if (packetLength > ObexHelper.getMaxRxPacketSize(mTransport)) {
             code = ResponseCodes.OBEX_HTTP_REQ_TOO_LARGE;
             totalLength = 7;
         } else {
@@ -614,7 +638,7 @@ public final class ServerSession extends ObexSession implements Runnable {
                         code = ResponseCodes.OBEX_HTTP_INTERNAL_ERROR;
                     }
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    if(V) Log.d(TAG,"Exception occured - sending OBEX_HTTP_INTERNAL_ERROR reply",e);
                     totalLength = 7;
                     head = null;
                     code = ResponseCodes.OBEX_HTTP_INTERNAL_ERROR;
@@ -633,13 +657,14 @@ public final class ServerSession extends ObexSession implements Runnable {
          * Packet Length (Defined in MAX_PACKET_SIZE) Byte 7 to n: headers
          */
         byte[] sendData = new byte[totalLength];
+        int maxRxLength = ObexHelper.getMaxRxPacketSize(mTransport);
         sendData[0] = (byte)code;
         sendData[1] = length[2];
         sendData[2] = length[3];
         sendData[3] = (byte)0x10;
         sendData[4] = (byte)0x00;
-        sendData[5] = (byte)(ObexHelper.MAX_PACKET_SIZE_INT >> 8);
-        sendData[6] = (byte)(ObexHelper.MAX_PACKET_SIZE_INT & 0xFF);
+        sendData[5] = (byte)(maxRxLength >> 8);
+        sendData[6] = (byte)(maxRxLength & 0xFF);
 
         if (head != null) {
             System.arraycopy(head, 0, sendData, 7, head.length);
@@ -659,11 +684,16 @@ public final class ServerSession extends ObexSession implements Runnable {
             mListener.onClose();
         }
         try {
-            mInput.close();
-            mOutput.close();
-            mTransport.close();
+            /* Set state to closed before interrupting the thread by closing the streams */
             mClosed = true;
+            if(mInput != null)
+                mInput.close();
+            if(mOutput != null)
+                mOutput.close();
+            if(mTransport != null)
+                mTransport.close();
         } catch (Exception e) {
+            if(V) Log.d(TAG,"Exception occured during close() - ignore",e);
         }
         mTransport = null;
         mInput = null;
@@ -702,4 +732,7 @@ public final class ServerSession extends ObexSession implements Runnable {
         return ResponseCodes.OBEX_HTTP_INTERNAL_ERROR;
     }
 
+    public ObexTransport getTransport() {
+        return mTransport;
+    }
 }

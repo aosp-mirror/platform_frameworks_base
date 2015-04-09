@@ -1,5 +1,6 @@
 /*
- * Copyright (C) 2009-2014 The Android Open Source Project
+ * Copyright (C) 2009-2015 The Android Open Source Project
+ * Copyright (C) 2015 Samsung LSI
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -376,6 +377,18 @@ public final class BluetoothAdapter {
 
     /** @hide */
     public static final String BLUETOOTH_MANAGER_SERVICE = "bluetooth_manager";
+
+
+    /** When creating a ServerSocket using listenUsingRfcommOn() or
+     *  listenUsingL2capOn() use SOCKET_CHANNEL_AUTO_STATIC to create
+     *  a ServerSocket that auto assigns a channel number to the first
+     *  bluetooth socket.
+     *  The channel number assigned to this first Bluetooth Socket will
+     *  be stored in the ServerSocket, and reused for subsequent Bluetooth
+     *  sockets.
+     * @hide */
+    public static final int SOCKET_CHANNEL_AUTO_STATIC_NO_SDP = -2;
+
 
     private static final int ADDRESS_LENGTH = 17;
 
@@ -1144,6 +1157,9 @@ public final class BluetoothAdapter {
         BluetoothServerSocket socket = new BluetoothServerSocket(
                 BluetoothSocket.TYPE_RFCOMM, true, true, channel);
         int errno = socket.mSocket.bindListen();
+        if(channel == SOCKET_CHANNEL_AUTO_STATIC_NO_SDP) {
+            socket.setChannel(socket.mSocket.getPort());
+        }
         if (errno != 0) {
             //TODO(BT): Throw the same exception error code
             // that the previous code was using.
@@ -1278,6 +1294,9 @@ public final class BluetoothAdapter {
         BluetoothServerSocket socket = new BluetoothServerSocket(
                 BluetoothSocket.TYPE_RFCOMM, false, false, port);
         int errno = socket.mSocket.bindListen();
+        if(port == SOCKET_CHANNEL_AUTO_STATIC_NO_SDP) {
+            socket.setChannel(socket.mSocket.getPort());
+        }
         if (errno != 0) {
             //TODO(BT): Throw the same exception error code
             // that the previous code was using.
@@ -1300,6 +1319,9 @@ public final class BluetoothAdapter {
         BluetoothServerSocket socket = new BluetoothServerSocket(
                 BluetoothSocket.TYPE_RFCOMM, false, true, port);
         int errno = socket.mSocket.bindListen();
+        if(port == SOCKET_CHANNEL_AUTO_STATIC_NO_SDP) {
+            socket.setChannel(socket.mSocket.getPort());
+        }
         if (errno < 0) {
             //TODO(BT): Throw the same exception error code
             // that the previous code was using.
@@ -1325,6 +1347,30 @@ public final class BluetoothAdapter {
             //TODO(BT): Throw the same exception error code
             // that the previous code was using.
             //socket.mSocket.throwErrnoNative(errno);
+        }
+        return socket;
+    }
+
+    /**
+     * Construct an encrypted, authenticated, L2CAP server socket.
+     * Call #accept to retrieve connections to this socket.
+     * @return An L2CAP BluetoothServerSocket
+     * @throws IOException On error, for example Bluetooth not available, or
+     *                     insufficient permissions.
+     * @hide
+     */
+    public BluetoothServerSocket listenUsingL2capOn(int port) throws IOException {
+        BluetoothServerSocket socket = new BluetoothServerSocket(
+                BluetoothSocket.TYPE_L2CAP, true, true, port);
+        int errno = socket.mSocket.bindListen();
+        if(port == SOCKET_CHANNEL_AUTO_STATIC_NO_SDP) {
+            socket.setChannel(socket.mSocket.getPort());
+        }
+        if (errno != 0) {
+            //TODO(BT): Throw the same exception error code
+            // that the previous code was using.
+            //socket.mSocket.throwErrnoNative(errno);
+            throw new IOException("Error: " + errno);
         }
         return socket;
     }

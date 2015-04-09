@@ -6505,10 +6505,16 @@ package android.bluetooth {
   public final class BluetoothSocket implements java.io.Closeable {
     method public void close() throws java.io.IOException;
     method public void connect() throws java.io.IOException;
+    method public int getConnectionType();
     method public java.io.InputStream getInputStream() throws java.io.IOException;
+    method public int getMaxReceivePacketSize();
+    method public int getMaxTransmitPacketSize();
     method public java.io.OutputStream getOutputStream() throws java.io.IOException;
     method public android.bluetooth.BluetoothDevice getRemoteDevice();
     method public boolean isConnected();
+    field public static final int TYPE_L2CAP = 3; // 0x3
+    field public static final int TYPE_RFCOMM = 1; // 0x1
+    field public static final int TYPE_SCO = 2; // 0x2
   }
 
 }
