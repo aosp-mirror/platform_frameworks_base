@@ -325,6 +325,13 @@ final public class MediaCodec {
      */
     public static final int BUFFER_FLAG_END_OF_STREAM = 4;
 
+    /**
+     * This indicates that the codec is released because the media resources used by the codec
+     * have been reclaimed, for example by the resource manager.
+     * This is used by the {@link Callback#onCodecReleased} callback.
+     */
+    public static final int REASON_RECLAIMED = 1;
+
     private EventHandler mEventHandler;
     private Callback mCallback;
 
@@ -335,6 +342,7 @@ final public class MediaCodec {
     private static final int CB_OUTPUT_AVAILABLE = 2;
     private static final int CB_ERROR = 3;
     private static final int CB_OUTPUT_FORMAT_CHANGE = 4;
+    private static final int CB_CODEC_RELEASED = 5;
 
     private class EventHandler extends Handler {
         private MediaCodec mCodec;
@@ -402,6 +410,13 @@ final public class MediaCodec {
                 {
                     mCallback.onOutputFormatChanged(mCodec,
                             new MediaFormat((Map<String, Object>) msg.obj));
+                    break;
+                }
+
+                case CB_CODEC_RELEASED:
+                {
+                    int reason = msg.arg2;
+                    mCallback.onCodecReleased(mCodec, reason);
                     break;
                 }
 
@@ -720,6 +735,7 @@ final public class MediaCodec {
         }
 
         /* Must be in sync with android_media_MediaCodec.cpp */
+        private final static int ACTION_FATAL = 0;
         private final static int ACTION_TRANSIENT = 1;
         private final static int ACTION_RECOVERABLE = 2;
 
@@ -1654,6 +1670,22 @@ final public class MediaCodec {
          * @param format The new output format.
          */
         public abstract void onOutputFormatChanged(MediaCodec codec, MediaFormat format);
+
+        /**
+         * Called when the underlying codec component has been released.
+         * <p>
+         * At this point the MediaCodec must be released, as it has moved to terminal
+         * Uninitialized state.
+         *
+         * @param codec The MediaCodec object.
+         * @param reason The reason of the release.
+         */
+        public void onCodecReleased(MediaCodec codec, int reason) {
+            int errorCode = -1;
+            String detailMessage = "resources reclaimed";
+            onError(codec,
+                    new CodecException(errorCode, CodecException.ACTION_FATAL, detailMessage));
+        }
     }
 
     private void postEventFromNative(
