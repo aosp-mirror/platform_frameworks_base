@@ -19608,8 +19608,8 @@ public final class ActivityManagerService extends ActivityManagerNative
         if (info == null) return null;
         ApplicationInfo newInfo = new ApplicationInfo(info);
         newInfo.uid = applyUserId(info.uid, userId);
-        newInfo.dataDir = USER_DATA_DIR + userId + "/"
-                + info.packageName;
+        newInfo.dataDir = PackageManager.getDataDirForUser(info.volumeUuid, info.packageName,
+                userId).getAbsolutePath();
         return newInfo;
     }
 

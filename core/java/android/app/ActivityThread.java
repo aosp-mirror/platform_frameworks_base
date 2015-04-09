@@ -220,6 +220,7 @@ public final class ActivityThread {
     // which means this lock gets held while the activity and window managers
     // holds their own lock.  Thus you MUST NEVER call back into the activity manager
     // or window manager or anything that depends on them while holding this lock.
+    // These LoadedApk are only valid for the userId that we're running as.
     final ArrayMap<String, WeakReference<LoadedApk>> mPackages
             = new ArrayMap<String, WeakReference<LoadedApk>>();
     final ArrayMap<String, WeakReference<LoadedApk>> mResourcePackages
@@ -1705,13 +1706,18 @@ public final class ActivityThread {
 
     public final LoadedApk getPackageInfo(String packageName, CompatibilityInfo compatInfo,
             int flags, int userId) {
+        final boolean differentUser = (UserHandle.myUserId() != userId);
         synchronized (mResourcesManager) {
             WeakReference<LoadedApk> ref;
-            if ((flags&Context.CONTEXT_INCLUDE_CODE) != 0) {
+            if (differentUser) {
+                // Caching not supported across users
+                ref = null;
+            } else if ((flags & Context.CONTEXT_INCLUDE_CODE) != 0) {
                 ref = mPackages.get(packageName);
             } else {
                 ref = mResourcePackages.get(packageName);
             }
+
             LoadedApk packageInfo = ref != null ? ref.get() : null;
             //Slog.i(TAG, "getPackageInfo " + packageName + ": " + packageInfo);
             //if (packageInfo != null) Slog.i(TAG, "isUptoDate " + packageInfo.mResDir
@@ -1791,13 +1797,18 @@ public final class ActivityThread {
     private LoadedApk getPackageInfo(ApplicationInfo aInfo, CompatibilityInfo compatInfo,
             ClassLoader baseLoader, boolean securityViolation, boolean includeCode,
             boolean registerPackage) {
+        final boolean differentUser = (UserHandle.myUserId() != UserHandle.getUserId(aInfo.uid));
         synchronized (mResourcesManager) {
             WeakReference<LoadedApk> ref;
-            if (includeCode) {
+            if (differentUser) {
+                // Caching not supported across users
+                ref = null;
+            } else if (includeCode) {
                 ref = mPackages.get(aInfo.packageName);
             } else {
                 ref = mResourcePackages.get(aInfo.packageName);
             }
+
             LoadedApk packageInfo = ref != null ? ref.get() : null;
             if (packageInfo == null || (packageInfo.mResources != null
                     && !packageInfo.mResources.getAssets().isUpToDate())) {
@@ -1816,7 +1827,9 @@ public final class ActivityThread {
                             getSystemContext().mPackageInfo.getClassLoader());
                 }
 
-                if (includeCode) {
+                if (differentUser) {
+                    // Caching not supported across users
+                } else if (includeCode) {
                     mPackages.put(aInfo.packageName,
                             new WeakReference<LoadedApk>(packageInfo));
                 } else {

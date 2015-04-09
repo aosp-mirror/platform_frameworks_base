@@ -44,6 +44,7 @@ import android.os.Environment;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.storage.VolumeInfo;
+import android.text.TextUtils;
 import android.util.AndroidException;
 
 import com.android.internal.util.ArrayUtils;
@@ -4149,16 +4150,19 @@ public abstract class PackageManager {
     public abstract @NonNull PackageInstaller getPackageInstaller();
 
     /**
-     * Returns the data directory for a particular user and package, given the uid of the package.
-     * @param uid uid of the package, including the userId and appId
-     * @param packageName name of the package
-     * @return the user-specific data directory for the package
+     * Returns the data directory for a particular package and user.
+     *
      * @hide
      */
-    public static String getDataDirForUser(int userId, String packageName) {
+    public static File getDataDirForUser(String volumeUuid, String packageName, int userId) {
         // TODO: This should be shared with Installer's knowledge of user directory
-        return Environment.getDataDirectory().toString() + "/user/" + userId
-                + "/" + packageName;
+        final File base;
+        if (TextUtils.isEmpty(volumeUuid)) {
+            base = Environment.getDataDirectory();
+        } else {
+            base = new File("/mnt/expand/" + volumeUuid);
+        }
+        return new File(base, "user/" + userId + "/" + packageName);
     }
 
     /**
