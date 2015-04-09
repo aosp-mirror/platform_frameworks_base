@@ -144,9 +144,9 @@ public class ResolveInfo implements Parcelable {
     public boolean system;
 
     /**
-     * @hide Does the associated IntentFilter needs verification ?
+     * @hide Does the associated IntentFilter comes from a Browser ?
      */
-    public boolean filterNeedsVerification;
+    public boolean handleAllWebDataURI;
 
     private ComponentInfo getComponentInfo() {
         if (activityInfo != null) return activityInfo;
@@ -288,7 +288,7 @@ public class ResolveInfo implements Parcelable {
         resolvePackageName = orig.resolvePackageName;
         system = orig.system;
         targetUserId = orig.targetUserId;
-        filterNeedsVerification = orig.filterNeedsVerification;
+        handleAllWebDataURI = orig.handleAllWebDataURI;
     }
 
     public String toString() {
@@ -350,7 +350,7 @@ public class ResolveInfo implements Parcelable {
         dest.writeInt(targetUserId);
         dest.writeInt(system ? 1 : 0);
         dest.writeInt(noResourceId ? 1 : 0);
-        dest.writeInt(filterNeedsVerification ? 1 : 0);
+        dest.writeInt(handleAllWebDataURI ? 1 : 0);
     }
 
     public static final Creator<ResolveInfo> CREATOR
@@ -396,7 +396,7 @@ public class ResolveInfo implements Parcelable {
         targetUserId = source.readInt();
         system = source.readInt() != 0;
         noResourceId = source.readInt() != 0;
-        filterNeedsVerification = source.readInt() != 0;
+        handleAllWebDataURI = source.readInt() != 0;
     }
     
     public static class DisplayNameComparator

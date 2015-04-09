@@ -2794,6 +2794,7 @@ public class PackageParser {
                 if (!aii.hasAction(Intent.ACTION_VIEW)) continue;
                 if (aii.hasDataScheme(IntentFilter.SCHEME_HTTP) ||
                         aii.hasDataScheme(IntentFilter.SCHEME_HTTPS)) {
+                    Slog.d(TAG, "hasDomainURLs:true for package:" + pkg.packageName);
                     return true;
                 }
             }

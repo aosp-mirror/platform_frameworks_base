@@ -966,19 +966,19 @@ final class Settings {
     }
 
     /* package protected */
-    boolean createIntentFilterVerificationIfNeededLPw(String packageName,
+    IntentFilterVerificationInfo createIntentFilterVerificationIfNeededLPw(String packageName,
             ArrayList<String> domains) {
         PackageSetting ps = mPackages.get(packageName);
         if (ps == null) {
             Slog.w(PackageManagerService.TAG, "No package known for name: " + packageName);
-            return false;
+            return null;
         }
-        if (ps.getIntentFilterVerificationInfo() == null) {
-            IntentFilterVerificationInfo ivi = new IntentFilterVerificationInfo(packageName, domains);
+        IntentFilterVerificationInfo ivi = ps.getIntentFilterVerificationInfo();
+        if (ivi == null) {
+            ivi = new IntentFilterVerificationInfo(packageName, domains);
             ps.setIntentFilterVerificationInfo(ivi);
-            return true;
         }
-        return false;
+        return ivi;
     }
 
     int getIntentFilterVerificationStatusLPr(String packageName, int userId) {

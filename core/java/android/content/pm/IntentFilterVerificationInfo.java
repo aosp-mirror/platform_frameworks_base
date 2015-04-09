@@ -36,7 +36,7 @@ import java.util.ArrayList;
 
 /**
  * The {@link com.android.server.pm.PackageManagerService} maintains some
- * {@link IntentFilterVerificationInfo}s for each domain / package / class name per user.
+ * {@link IntentFilterVerificationInfo}s for each domain / package name.
  *
  * @hide
  */
