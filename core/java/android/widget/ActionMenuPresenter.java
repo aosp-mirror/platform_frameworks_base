@@ -40,7 +40,6 @@ import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.widget.ListPopupWindow.ForwardingListener;
-import com.android.internal.transition.ActionBarTransition;
 import com.android.internal.view.ActionBarPolicy;
 import com.android.internal.view.menu.ActionMenuItemView;
 import com.android.internal.view.menu.BaseMenuPresenter;
@@ -99,7 +98,30 @@ public class ActionMenuPresenter extends BaseMenuPresenter
 
     // The list of currently running animations on menu items.
     private List<ItemAnimationInfo> mRunningItemAnimations = new ArrayList<ItemAnimationInfo>();
+    private ViewTreeObserver.OnPreDrawListener mItemAnimationPreDrawListener =
+            new ViewTreeObserver.OnPreDrawListener() {
+        @Override
+        public boolean onPreDraw() {
+            computeMenuItemAnimationInfo(false);
+            ((View) mMenuView).getViewTreeObserver().removeOnPreDrawListener(this);
+            runItemAnimations();
+            return true;
+        }
+    };
+    private View.OnAttachStateChangeListener mAttachStateChangeListener =
+            new View.OnAttachStateChangeListener() {
+        @Override
+        public void onViewAttachedToWindow(View v) {
+        }
 
+        @Override
+        public void onViewDetachedFromWindow(View v) {
+            ((View) mMenuView).getViewTreeObserver().removeOnPreDrawListener(
+                    mItemAnimationPreDrawListener);
+            mPreLayoutItems.clear();
+            mPostLayoutItems.clear();
+        }
+    };
 
 
     public ActionMenuPresenter(Context context) {
@@ -177,8 +199,15 @@ public class ActionMenuPresenter extends BaseMenuPresenter
 
     @Override
     public MenuView getMenuView(ViewGroup root) {
+        MenuView oldMenuView = mMenuView;
         MenuView result = super.getMenuView(root);
-        ((ActionMenuView) result).setPresenter(this);
+        if (oldMenuView != result) {
+            ((ActionMenuView) result).setPresenter(this);
+            if (oldMenuView != null) {
+                ((View) oldMenuView).removeOnAttachStateChangeListener(mAttachStateChangeListener);
+            }
+            ((View) result).addOnAttachStateChangeListener(mAttachStateChangeListener);
+        }
         return result;
     }
 
@@ -226,11 +255,11 @@ public class ActionMenuPresenter extends BaseMenuPresenter
      * into the MenuItemLayoutInfo structure to store the appropriate position values.
      */
     private void computeMenuItemAnimationInfo(boolean preLayout) {
-        final ViewGroup menuViewParent = (ViewGroup) mMenuView;
-        final int count = menuViewParent.getChildCount();
+        final ViewGroup menuView = (ViewGroup) mMenuView;
+        final int count = menuView.getChildCount();
         SparseArray items = preLayout ? mPreLayoutItems : mPostLayoutItems;
         for (int i = 0; i < count; ++i) {
-            View child = menuViewParent.getChildAt(i);
+            View child = menuView.getChildAt(i);
             final int id = child.getId();
             if (id > 0 && child.getWidth() != 0 && child.getHeight() != 0) {
                 MenuItemLayoutInfo info = new MenuItemLayoutInfo(child, preLayout);
@@ -377,28 +406,16 @@ public class ActionMenuPresenter extends BaseMenuPresenter
      * which is then fed into runItemAnimations()
      */
     private void setupItemAnimations() {
-        final ViewGroup menuViewParent = (ViewGroup) mMenuView;
         computeMenuItemAnimationInfo(true);
-        final ViewTreeObserver observer = menuViewParent.getViewTreeObserver();
-        if (observer != null) {
-            observer.addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
-                @Override
-                public boolean onPreDraw() {
-                    computeMenuItemAnimationInfo(false);
-                    observer.removeOnPreDrawListener(this);
-                    runItemAnimations();
-                    return true;
-                }
-            });
-        }
+        ((View) mMenuView).getViewTreeObserver().
+                addOnPreDrawListener(mItemAnimationPreDrawListener);
     }
 
     @Override
     public void updateMenuView(boolean cleared) {
         final ViewGroup menuViewParent = (ViewGroup) ((View) mMenuView).getParent();
         if (menuViewParent != null) {
-//            setupItemAnimations();
-            ActionBarTransition.beginDelayedTransition(menuViewParent);
+            setupItemAnimations();
         }
         super.updateMenuView(cleared);
 
@@ -736,8 +753,14 @@ public class ActionMenuPresenter extends BaseMenuPresenter
     }
 
     public void setMenuView(ActionMenuView menuView) {
-        mMenuView = menuView;
-        menuView.initialize(mMenu);
+        if (menuView != mMenuView) {
+            if (mMenuView != null) {
+                ((View) mMenuView).removeOnAttachStateChangeListener(mAttachStateChangeListener);
+            }
+            mMenuView = menuView;
+            menuView.initialize(mMenu);
+            menuView.addOnAttachStateChangeListener(mAttachStateChangeListener);
+        }
     }
 
     public void setOverflowTintList(ColorStateList tint) {

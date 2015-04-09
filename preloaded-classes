@@ -1791,7 +1791,6 @@ com.android.internal.telephony.ITelephonyRegistry
 com.android.internal.telephony.ITelephonyRegistry$Stub
 com.android.internal.telephony.ITelephonyRegistry$Stub$Proxy
 com.android.internal.telephony.PhoneConstants$State
-com.android.internal.transition.ActionBarTransition
 com.android.internal.util.ArrayUtils
 com.android.internal.util.FastPrintWriter
 com.android.internal.util.FastPrintWriter$1
