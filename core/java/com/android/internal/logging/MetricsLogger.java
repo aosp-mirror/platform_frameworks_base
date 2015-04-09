@@ -26,23 +26,7 @@ import android.os.Build;
  */
 public class MetricsLogger implements MetricsConstants {
     // These constants are temporary, they should migrate to MetricsConstants.
-    public static final int APPLICATIONS_ADVANCED = 132;
-    public static final int LOCATION_SCANNING = 133;
-    public static final int MANAGE_APPLICATIONS_ALL = 134;
-    public static final int MANAGE_APPLICATIONS_NOTIFICATIONS = 135;
-
-    public static final int ACTION_WIFI_ADD_NETWORK = 136;
-    public static final int ACTION_WIFI_CONNECT = 137;
-    public static final int ACTION_WIFI_FORCE_SCAN = 138;
-    public static final int ACTION_WIFI_FORGET = 139;
-    public static final int ACTION_WIFI_OFF = 140;
-    public static final int ACTION_WIFI_ON = 141;
-
-    public static final int MANAGE_PERMISSIONS = 142;
-    public static final int NOTIFICATION_ZEN_MODE_PRIORITY = 143;
-    public static final int NOTIFICATION_ZEN_MODE_AUTOMATION = 144;
-
-    public static final int MANAGE_DOMAIN_URLS = 143;
+    // next value is 144;
 
     public static void visible(Context context, int category) throws IllegalArgumentException {
         if (Build.IS_DEBUGGABLE && category == VIEW_UNKNOWN) {
