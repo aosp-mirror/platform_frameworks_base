@@ -21,7 +21,6 @@ import android.app.ActivityManager;
 import android.content.ComponentCallbacks2;
 import android.content.Context;
 import android.content.res.Configuration;
-import android.os.Build;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -552,7 +551,7 @@ public final class WindowManagerGlobal {
             for (int i = 0; i < count; i++) {
                 if (token == null || mParams.get(i).token == token) {
                     ViewRootImpl root = mRoots.get(i);
-                    root.setStopped(stopped);
+                    root.setWindowStopped(stopped);
                 }
             }
         }
