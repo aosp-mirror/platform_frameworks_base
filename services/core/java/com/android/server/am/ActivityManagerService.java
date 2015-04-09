@@ -91,6 +91,7 @@ import com.google.android.collect.Lists;
 import com.google.android.collect.Maps;
 
 import libcore.io.IoUtils;
+import libcore.util.EmptyArray;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -14163,7 +14164,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             } else if ("-h".equals(opt)) {
                 pw.println("meminfo dump options: [-a] [-d] [-c] [--oom] [process]");
                 pw.println("  -a: include all available information for each process.");
-                pw.println("  -d: include dalvik details when dumping process details.");
+                pw.println("  -d: include dalvik details.");
                 pw.println("  -c: dump in a compact machine-parseable representation.");
                 pw.println("  --oom: only show processes organized by oom adj.");
                 pw.println("  --local: only collect details locally, don't call process.");
@@ -14250,6 +14251,8 @@ public final class ActivityManagerService extends ActivityManagerNative
         final SparseArray<MemItem> procMemsMap = new SparseArray<MemItem>();
         long nativePss = 0;
         long dalvikPss = 0;
+        long[] dalvikSubitemPss = dumpDalvik ? new long[Debug.MemoryInfo.NUM_DVK_STATS] :
+                EmptyArray.LONG;
         long otherPss = 0;
         long[] miscPss = new long[Debug.MemoryInfo.NUM_OTHER_STATS];
 
@@ -14327,6 +14330,9 @@ public final class ActivityManagerService extends ActivityManagerNative
 
                     nativePss += mi.nativePss;
                     dalvikPss += mi.dalvikPss;
+                    for (int j=0; j<dalvikSubitemPss.length; j++) {
+                        dalvikSubitemPss[j] += mi.getOtherPss(Debug.MemoryInfo.NUM_OTHER_STATS + j);
+                    }
                     otherPss += mi.otherPss;
                     for (int j=0; j<Debug.MemoryInfo.NUM_OTHER_STATS; j++) {
                         long mem = mi.getOtherPss(j);
@@ -14385,6 +14391,10 @@ public final class ActivityManagerService extends ActivityManagerNative
 
                         nativePss += mi.nativePss;
                         dalvikPss += mi.dalvikPss;
+                        for (int j=0; j<dalvikSubitemPss.length; j++) {
+                            dalvikSubitemPss[j] += mi.getOtherPss(
+                                    Debug.MemoryInfo.NUM_OTHER_STATS + j);
+                        }
                         otherPss += mi.otherPss;
                         for (int j=0; j<Debug.MemoryInfo.NUM_OTHER_STATS; j++) {
                             long mem = mi.getOtherPss(j);
@@ -14403,7 +14413,16 @@ public final class ActivityManagerService extends ActivityManagerNative
             ArrayList<MemItem> catMems = new ArrayList<MemItem>();
 
             catMems.add(new MemItem("Native", "Native", nativePss, -1));
-            catMems.add(new MemItem("Dalvik", "Dalvik", dalvikPss, -2));
+            final MemItem dalvikItem = new MemItem("Dalvik", "Dalvik", dalvikPss, -2);
+            if (dalvikSubitemPss.length > 0) {
+                dalvikItem.subitems = new ArrayList<MemItem>();
+                for (int j=0; j<dalvikSubitemPss.length; j++) {
+                    final String name = Debug.MemoryInfo.getOtherLabel(
+                            Debug.MemoryInfo.NUM_OTHER_STATS + j);
+                    dalvikItem.subitems.add(new MemItem(name, name, dalvikSubitemPss[j], j));
+                }
+            }
+            catMems.add(dalvikItem);
             catMems.add(new MemItem("Unknown", "Unknown", otherPss, -3));
             for (int j=0; j<Debug.MemoryInfo.NUM_OTHER_STATS; j++) {
                 String label = Debug.MemoryInfo.getOtherLabel(j);
