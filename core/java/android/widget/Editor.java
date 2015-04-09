@@ -1671,7 +1671,8 @@ public class Editor {
             return false;
         }
         ActionMode.Callback actionModeCallback = new SelectionActionModeCallback();
-        mSelectionActionMode = mTextView.startActionMode(actionModeCallback);
+        mSelectionActionMode = mTextView.startActionMode(
+                actionModeCallback, ActionMode.TYPE_FLOATING);
         return mSelectionActionMode != null;
     }
 
@@ -1704,7 +1705,8 @@ public class Editor {
         // immediately hide the newly created action bar and would be visually distracting.
         if (!willExtract) {
             ActionMode.Callback actionModeCallback = new SelectionActionModeCallback();
-            mSelectionActionMode = mTextView.startActionMode(actionModeCallback);
+            mSelectionActionMode = mTextView.startActionMode(
+                    actionModeCallback, ActionMode.TYPE_FLOATING);
         }
 
         final boolean selectionStarted = mSelectionActionMode != null || willExtract;
