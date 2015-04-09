@@ -112,7 +112,7 @@ struct __assertChar16Size {
  *
  * The PNG chunk type is "npTc".
  */
-struct Res_png_9patch
+struct alignas(uintptr_t) Res_png_9patch
 {
     Res_png_9patch() : wasDeserialized(false), xDivsOffset(0),
                        yDivsOffset(0), colorsOffset(0) { }
