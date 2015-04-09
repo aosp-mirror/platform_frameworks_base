@@ -19,7 +19,7 @@
     <application >
         <uses-library android:name="android.test.runner" />
     </application>
-
+    <uses-permission android:name="android.permission.REAL_GET_TASKS" />
     <instrumentation
         android:name=".AppCompatibilityRunner"
         android:targetPackage="com.android.compatibilitytest"
