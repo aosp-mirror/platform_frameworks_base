@@ -31,7 +31,7 @@ public abstract class KeyStoreKeyCharacteristics {
     private KeyStoreKeyCharacteristics() {}
 
     @Retention(RetentionPolicy.SOURCE)
-    @IntDef({Origin.GENERATED_INSIDE_TEE, Origin.GENERATED_OUTSIDE_OF_TEE, Origin.IMPORTED})
+    @IntDef({Origin.GENERATED, Origin.IMPORTED})
     public @interface OriginEnum {}
 
     /**
@@ -40,14 +40,11 @@ public abstract class KeyStoreKeyCharacteristics {
     public static abstract class Origin {
         private Origin() {}
 
-        /** Key was generated inside a TEE. */
-        public static final int GENERATED_INSIDE_TEE = 1;
+        /** Key was generated inside AndroidKeyStore. */
+        public static final int GENERATED = 1 << 0;
 
-        /** Key was generated outside of a TEE. */
-        public static final int GENERATED_OUTSIDE_OF_TEE = 2;
-
-        /** Key was imported. */
-        public static final int IMPORTED = 0;
+        /** Key was imported into AndroidKeyStore. */
+        public static final int IMPORTED = 1 << 1;
 
         /**
          * @hide
@@ -55,9 +52,7 @@ public abstract class KeyStoreKeyCharacteristics {
         public static @OriginEnum int fromKeymaster(int origin) {
             switch (origin) {
                 case KeymasterDefs.KM_ORIGIN_HARDWARE:
-                    return GENERATED_INSIDE_TEE;
-                case KeymasterDefs.KM_ORIGIN_SOFTWARE:
-                    return GENERATED_OUTSIDE_OF_TEE;
+                    return GENERATED;
                 case KeymasterDefs.KM_ORIGIN_IMPORTED:
                     return IMPORTED;
                 default:
