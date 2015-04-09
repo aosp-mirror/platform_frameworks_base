@@ -16,7 +16,6 @@
 
 package android.telecom;
 
-import android.annotation.SystemApi;
 import android.util.ArrayMap;
 
 import java.util.Collections;
@@ -27,10 +26,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * A unified virtual device providing a means of voice (and other) communication on a device.
- *
- * {@hide}
  */
-@SystemApi
 public final class Phone {
 
     public abstract static class Listener {

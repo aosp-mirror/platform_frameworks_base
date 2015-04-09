@@ -16,7 +16,6 @@
 
 package android.telecom;
 
-import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -25,9 +24,7 @@ import java.util.Locale;
 /**
  *  Encapsulates the telecom audio state, including the current audio routing, supported audio
  *  routing and mute.
- *  @hide
  */
-@SystemApi
 public final class AudioState implements Parcelable {
     /** Direct the audio stream through the device's earpiece. */
     public static final int ROUTE_EARPIECE      = 0x00000001;
@@ -47,11 +44,8 @@ public final class AudioState implements Parcelable {
      */
     public static final int ROUTE_WIRED_OR_EARPIECE = ROUTE_EARPIECE | ROUTE_WIRED_HEADSET;
 
-    /** Bit mask of all possible audio routes.
-     *
-     * @hide
-     */
-    public static final int ROUTE_ALL = ROUTE_EARPIECE | ROUTE_BLUETOOTH | ROUTE_WIRED_HEADSET |
+    /** Bit mask of all possible audio routes. */
+    private static final int ROUTE_ALL = ROUTE_EARPIECE | ROUTE_BLUETOOTH | ROUTE_WIRED_HEADSET |
             ROUTE_SPEAKER;
 
     private final boolean isMuted;
@@ -92,7 +86,6 @@ public final class AudioState implements Parcelable {
                 audioRouteToString(supportedRouteMask));
     }
 
-    /** @hide */
     public static String audioRouteToString(int route) {
         if (route == 0 || (route & ~ROUTE_ALL) != 0x0) {
             return "UNKNOWN";

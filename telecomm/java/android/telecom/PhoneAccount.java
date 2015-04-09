@@ -60,9 +60,7 @@ public class PhoneAccount implements Parcelable {
      * if the user has explicitly selected it to be used as the default connection manager.
      * <p>
      * See {@link #getCapabilities}
-     * @hide
      */
-    @SystemApi
     public static final int CAPABILITY_CONNECTION_MANAGER = 0x1;
 
     /**
@@ -74,9 +72,7 @@ public class PhoneAccount implements Parcelable {
      * <p>
      * See {@link #getCapabilities}
      * <p>
-     * {@hide}
      */
-    @SystemApi
     public static final int CAPABILITY_CALL_PROVIDER = 0x2;
 
     /**
@@ -203,13 +199,6 @@ public class PhoneAccount implements Parcelable {
             mSupportedUriSchemes.addAll(phoneAccount.getSupportedUriSchemes());
         }
 
-        /** @hide */
-        @SystemApi
-        public Builder setAccountHandle(PhoneAccountHandle accountHandle) {
-            mAccountHandle = accountHandle;
-            return this;
-        }
-
         /**
          * Sets the address. See {@link PhoneAccount#getAddress}.
          *
@@ -333,9 +322,7 @@ public class PhoneAccount implements Parcelable {
          *
          * @param uriScheme The URI scheme.
          * @return The builder.
-         * @hide
          */
-        @SystemApi
         public Builder addSupportedUriScheme(String uriScheme) {
             if (!TextUtils.isEmpty(uriScheme) && !mSupportedUriSchemes.contains(uriScheme)) {
                 this.mSupportedUriSchemes.add(uriScheme);
@@ -424,9 +411,7 @@ public class PhoneAccount implements Parcelable {
      * Returns a builder initialized with the current {@link PhoneAccount} instance.
      *
      * @return The builder.
-     * @hide
      */
-    @SystemApi
     public Builder toBuilder() { return new Builder(this); }
 
     /**

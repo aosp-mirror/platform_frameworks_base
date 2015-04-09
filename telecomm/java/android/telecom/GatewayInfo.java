@@ -16,7 +16,6 @@
 
 package android.telecom;
 
-import android.annotation.SystemApi;
 import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -34,17 +33,13 @@ import android.text.TextUtils;
  * <li> Call the appropriate gateway address.
  * <li> Display information about how the call is being routed to the user.
  * </ol>
- * @hide
  */
-@SystemApi
 public class GatewayInfo implements Parcelable {
 
     private final String mGatewayProviderPackageName;
     private final Uri mGatewayAddress;
     private final Uri mOriginalAddress;
 
-    /** @hide */
-    @SystemApi
     public GatewayInfo(String packageName, Uri gatewayUri, Uri originalAddress) {
         mGatewayProviderPackageName = packageName;
         mGatewayAddress = gatewayUri;

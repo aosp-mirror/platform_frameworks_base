@@ -26465,6 +26465,7 @@ package android.provider {
     field public static final java.lang.String DEBUG_APP = "debug_app";
     field public static final java.lang.String DEVELOPMENT_SETTINGS_ENABLED = "development_settings_enabled";
     field public static final java.lang.String DEVICE_PROVISIONED = "device_provisioned";
+    field public static final java.lang.String HIDE_CARRIER_NETWORK_SETTINGS = "hide_carrier_network_settings";
     field public static final java.lang.String HTTP_PROXY = "http_proxy";
     field public static final deprecated java.lang.String INSTALL_NON_MARKET_APPS = "install_non_market_apps";
     field public static final java.lang.String MODE_RINGER = "mode_ringer";
@@ -26630,6 +26631,7 @@ package android.provider {
     field public static final android.net.Uri DEFAULT_RINGTONE_URI;
     field public static final deprecated java.lang.String DEVICE_PROVISIONED = "device_provisioned";
     field public static final deprecated java.lang.String DIM_SCREEN = "dim_screen";
+    field public static final java.lang.String DTMF_TONE_TYPE_WHEN_DIALING = "dtmf_tone_type";
     field public static final java.lang.String DTMF_TONE_WHEN_DIALING = "dtmf_tone";
     field public static final java.lang.String END_BUTTON_BEHAVIOR = "end_button_behavior";
     field public static final java.lang.String FONT_SCALE = "font_scale";
@@ -26678,6 +26680,7 @@ package android.provider {
     field public static final java.lang.String USER_ROTATION = "user_rotation";
     field public static final deprecated java.lang.String USE_GOOGLE_MAIL = "use_google_mail";
     field public static final java.lang.String VIBRATE_ON = "vibrate_on";
+    field public static final java.lang.String VIBRATE_WHEN_RINGING = "vibrate_when_ringing";
     field public static final deprecated java.lang.String WAIT_FOR_DEBUGGER = "wait_for_debugger";
     field public static final deprecated java.lang.String WALLPAPER_ACTIVITY = "wallpaper_activity";
     field public static final deprecated java.lang.String WIFI_MAX_DHCP_RETRY_COUNT = "wifi_max_dhcp_retry_count";
@@ -29735,6 +29738,394 @@ package android.system {
 
 package android.telecom {
 
+  public final class AudioState implements android.os.Parcelable {
+    ctor public AudioState(boolean, int, int);
+    ctor public AudioState(android.telecom.AudioState);
+    method public static java.lang.String audioRouteToString(int);
+    method public int describeContents();
+    method public int getRoute();
+    method public int getSupportedRouteMask();
+    method public boolean isMuted();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator<android.telecom.AudioState> CREATOR;
+    field public static final int ROUTE_BLUETOOTH = 2; // 0x2
+    field public static final int ROUTE_EARPIECE = 1; // 0x1
+    field public static final int ROUTE_SPEAKER = 8; // 0x8
+    field public static final int ROUTE_WIRED_HEADSET = 4; // 0x4
+    field public static final int ROUTE_WIRED_OR_EARPIECE = 5; // 0x5
+  }
+
+  public final class Call {
+    method public void addListener(android.telecom.Call.Listener);
+    method public void answer(int);
+    method public void conference(android.telecom.Call);
+    method public void disconnect();
+    method public java.util.List<java.lang.String> getCannedTextResponses();
+    method public java.util.List<android.telecom.Call> getChildren();
+    method public java.util.List<android.telecom.Call> getConferenceableCalls();
+    method public android.telecom.Call.Details getDetails();
+    method public android.telecom.Call getParent();
+    method public java.lang.String getRemainingPostDialSequence();
+    method public int getState();
+    method public android.telecom.InCallService.VideoCall getVideoCall();
+    method public void hold();
+    method public void mergeConference();
+    method public void phoneAccountSelected(android.telecom.PhoneAccountHandle, boolean);
+    method public void playDtmfTone(char);
+    method public void postDialContinue(boolean);
+    method public void reject(boolean, java.lang.String);
+    method public void removeListener(android.telecom.Call.Listener);
+    method public void splitFromConference();
+    method public void stopDtmfTone();
+    method public void swapConference();
+    method public void unhold();
+    field public static final java.lang.String AVAILABLE_PHONE_ACCOUNTS = "selectPhoneAccountAccounts";
+    field public static final int STATE_ACTIVE = 4; // 0x4
+    field public static final int STATE_CONNECTING = 9; // 0x9
+    field public static final int STATE_DIALING = 1; // 0x1
+    field public static final int STATE_DISCONNECTED = 7; // 0x7
+    field public static final int STATE_DISCONNECTING = 10; // 0xa
+    field public static final int STATE_HOLDING = 3; // 0x3
+    field public static final int STATE_NEW = 0; // 0x0
+    field public static final int STATE_PRE_DIAL_WAIT = 8; // 0x8
+    field public static final int STATE_RINGING = 2; // 0x2
+  }
+
+  public static class Call.Details {
+    method public static boolean can(int, int);
+    method public boolean can(int);
+    method public static java.lang.String capabilitiesToString(int);
+    method public android.telecom.PhoneAccountHandle getAccountHandle();
+    method public int getCallCapabilities();
+    method public int getCallProperties();
+    method public java.lang.String getCallerDisplayName();
+    method public int getCallerDisplayNamePresentation();
+    method public final long getConnectTimeMillis();
+    method public android.telecom.DisconnectCause getDisconnectCause();
+    method public android.os.Bundle getExtras();
+    method public android.telecom.GatewayInfo getGatewayInfo();
+    method public android.net.Uri getHandle();
+    method public int getHandlePresentation();
+    method public android.telecom.StatusHints getStatusHints();
+    method public int getVideoState();
+    field public static final int CAPABILITY_DISCONNECT_FROM_CONFERENCE = 8192; // 0x2000
+    field public static final int CAPABILITY_GENERIC_CONFERENCE = 16384; // 0x4000
+    field public static final int CAPABILITY_HIGH_DEF_AUDIO = 32768; // 0x8000
+    field public static final int CAPABILITY_HOLD = 1; // 0x1
+    field public static final int CAPABILITY_MANAGE_CONFERENCE = 128; // 0x80
+    field public static final int CAPABILITY_MERGE_CONFERENCE = 4; // 0x4
+    field public static final int CAPABILITY_MUTE = 64; // 0x40
+    field public static final int CAPABILITY_RESPOND_VIA_TEXT = 32; // 0x20
+    field public static final int CAPABILITY_SEPARATE_FROM_CONFERENCE = 4096; // 0x1000
+    field public static final int CAPABILITY_SHOW_CALLBACK_NUMBER = 131072; // 0x20000
+    field public static final int CAPABILITY_SUPPORTS_VT_LOCAL_BIDIRECTIONAL = 768; // 0x300
+    field public static final int CAPABILITY_SUPPORTS_VT_LOCAL_RX = 256; // 0x100
+    field public static final int CAPABILITY_SUPPORTS_VT_LOCAL_TX = 512; // 0x200
+    field public static final int CAPABILITY_SUPPORTS_VT_REMOTE_BIDIRECTIONAL = 3072; // 0xc00
+    field public static final int CAPABILITY_SUPPORTS_VT_REMOTE_RX = 1024; // 0x400
+    field public static final int CAPABILITY_SUPPORTS_VT_REMOTE_TX = 2048; // 0x800
+    field public static final int CAPABILITY_SUPPORT_HOLD = 2; // 0x2
+    field public static final int CAPABILITY_SWAP_CONFERENCE = 8; // 0x8
+    field public static final int CAPABILITY_WIFI = 65536; // 0x10000
+  }
+
+  public static abstract class Call.Listener {
+    ctor public Call.Listener();
+    method public void onCallDestroyed(android.telecom.Call);
+    method public void onCannedTextResponsesLoaded(android.telecom.Call, java.util.List<java.lang.String>);
+    method public void onChildrenChanged(android.telecom.Call, java.util.List<android.telecom.Call>);
+    method public void onConferenceableCallsChanged(android.telecom.Call, java.util.List<android.telecom.Call>);
+    method public void onDetailsChanged(android.telecom.Call, android.telecom.Call.Details);
+    method public void onParentChanged(android.telecom.Call, android.telecom.Call);
+    method public void onPostDialWait(android.telecom.Call, java.lang.String);
+    method public void onStateChanged(android.telecom.Call, int);
+    method public void onVideoCallChanged(android.telecom.Call, android.telecom.InCallService.VideoCall);
+  }
+
+  public class CallProperties {
+    ctor public CallProperties();
+    field public static final int CONFERENCE = 1; // 0x1
+  }
+
+  public final class CallState {
+    method public static java.lang.String toString(int);
+    field public static final int ABORTED = 8; // 0x8
+    field public static final int ACTIVE = 5; // 0x5
+    field public static final int CONNECTING = 1; // 0x1
+    field public static final int DIALING = 3; // 0x3
+    field public static final int DISCONNECTED = 7; // 0x7
+    field public static final int DISCONNECTING = 9; // 0x9
+    field public static final int NEW = 0; // 0x0
+    field public static final int ON_HOLD = 6; // 0x6
+    field public static final int PRE_DIAL_WAIT = 2; // 0x2
+    field public static final int RINGING = 4; // 0x4
+  }
+
+  public final class CameraCapabilities implements android.os.Parcelable {
+    ctor public CameraCapabilities(int, int);
+    method public int describeContents();
+    method public int getHeight();
+    method public int getWidth();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator<android.telecom.CameraCapabilities> CREATOR;
+  }
+
+  public abstract class Conference implements android.telecom.IConferenceable {
+    ctor public Conference(android.telecom.PhoneAccountHandle);
+    method public final boolean addConnection(android.telecom.Connection);
+    method public final void destroy();
+    method public final android.telecom.AudioState getAudioState();
+    method public final java.util.List<android.telecom.Connection> getConferenceableConnections();
+    method public final long getConnectTimeMillis();
+    method public final int getConnectionCapabilities();
+    method public final java.util.List<android.telecom.Connection> getConnections();
+    method public final android.telecom.DisconnectCause getDisconnectCause();
+    method public final android.telecom.PhoneAccountHandle getPhoneAccountHandle();
+    method public android.telecom.Connection getPrimaryConnection();
+    method public final int getState();
+    method public void onAudioStateChanged(android.telecom.AudioState);
+    method public void onConnectionAdded(android.telecom.Connection);
+    method public void onDisconnect();
+    method public void onHold();
+    method public void onMerge(android.telecom.Connection);
+    method public void onMerge();
+    method public void onPlayDtmfTone(char);
+    method public void onSeparate(android.telecom.Connection);
+    method public void onStopDtmfTone();
+    method public void onSwap();
+    method public void onUnhold();
+    method public final void removeConnection(android.telecom.Connection);
+    method public final void setActive();
+    method public final void setConferenceableConnections(java.util.List<android.telecom.Connection>);
+    method public void setConnectTimeMillis(long);
+    method public final void setConnectionCapabilities(int);
+    method public final void setDisconnected(android.telecom.DisconnectCause);
+    method public final void setOnHold();
+    field public static final long CONNECT_TIME_NOT_SPECIFIED = 0L; // 0x0L
+  }
+
+  public abstract class Connection implements android.telecom.IConferenceable {
+    ctor public Connection();
+    method public static java.lang.String capabilitiesToString(int);
+    method public static android.telecom.Connection createCanceledConnection();
+    method public static android.telecom.Connection createFailedConnection(android.telecom.DisconnectCause);
+    method public final void destroy();
+    method public final android.net.Uri getAddress();
+    method public final int getAddressPresentation();
+    method public final boolean getAudioModeIsVoip();
+    method public final android.telecom.AudioState getAudioState();
+    method public final java.lang.String getCallerDisplayName();
+    method public final int getCallerDisplayNamePresentation();
+    method public final android.telecom.Conference getConference();
+    method public final java.util.List<android.telecom.IConferenceable> getConferenceables();
+    method public final int getConnectionCapabilities();
+    method public final android.telecom.DisconnectCause getDisconnectCause();
+    method public final int getState();
+    method public final android.telecom.StatusHints getStatusHints();
+    method public final android.telecom.Connection.VideoProvider getVideoProvider();
+    method public final boolean isRingbackRequested();
+    method public void onAbort();
+    method public void onAnswer();
+    method public void onAudioStateChanged(android.telecom.AudioState);
+    method public void onDisconnect();
+    method public void onHold();
+    method public void onPlayDtmfTone(char);
+    method public void onPostDialContinue(boolean);
+    method public void onReject();
+    method public void onSeparate();
+    method public void onStateChanged(int);
+    method public void onStopDtmfTone();
+    method public void onUnhold();
+    method public final void setActive();
+    method public final void setAddress(android.net.Uri, int);
+    method public final void setAudioModeIsVoip(boolean);
+    method public final void setCallerDisplayName(java.lang.String, int);
+    method public final void setConferenceableConnections(java.util.List<android.telecom.Connection>);
+    method public final void setConferenceables(java.util.List<android.telecom.IConferenceable>);
+    method public final void setConnectionCapabilities(int);
+    method public final void setConnectionService(android.telecom.ConnectionService);
+    method public final void setDialing();
+    method public final void setDisconnected(android.telecom.DisconnectCause);
+    method public final void setInitialized();
+    method public final void setInitializing();
+    method public final void setNextPostDialChar(char);
+    method public final void setOnHold();
+    method public final void setPostDialWait(java.lang.String);
+    method public final void setRingbackRequested(boolean);
+    method public final void setRinging();
+    method public final void setStatusHints(android.telecom.StatusHints);
+    method public static java.lang.String stateToString(int);
+    field public static final int CAPABILITY_DISCONNECT_FROM_CONFERENCE = 8192; // 0x2000
+    field public static final int CAPABILITY_HOLD = 1; // 0x1
+    field public static final int CAPABILITY_MANAGE_CONFERENCE = 128; // 0x80
+    field public static final int CAPABILITY_MERGE_CONFERENCE = 4; // 0x4
+    field public static final int CAPABILITY_MUTE = 64; // 0x40
+    field public static final int CAPABILITY_RESPOND_VIA_TEXT = 32; // 0x20
+    field public static final int CAPABILITY_SEPARATE_FROM_CONFERENCE = 4096; // 0x1000
+    field public static final int CAPABILITY_SUPPORT_HOLD = 2; // 0x2
+    field public static final int CAPABILITY_SWAP_CONFERENCE = 8; // 0x8
+    field public static final int STATE_ACTIVE = 4; // 0x4
+    field public static final int STATE_DIALING = 3; // 0x3
+    field public static final int STATE_DISCONNECTED = 6; // 0x6
+    field public static final int STATE_HOLDING = 5; // 0x5
+    field public static final int STATE_INITIALIZING = 0; // 0x0
+    field public static final int STATE_NEW = 1; // 0x1
+    field public static final int STATE_RINGING = 2; // 0x2
+  }
+
+  public static abstract class Connection.VideoProvider {
+    ctor public Connection.VideoProvider();
+    method public void changeCallDataUsage(long);
+    method public void changeCameraCapabilities(android.telecom.CameraCapabilities);
+    method public void changePeerDimensions(int, int);
+    method public void changeVideoQuality(int);
+    method public void handleCallSessionEvent(int);
+    method public abstract void onRequestCameraCapabilities();
+    method public abstract void onRequestConnectionDataUsage();
+    method public abstract void onSendSessionModifyRequest(android.telecom.VideoProfile);
+    method public abstract void onSendSessionModifyResponse(android.telecom.VideoProfile);
+    method public abstract void onSetCamera(java.lang.String);
+    method public abstract void onSetDeviceOrientation(int);
+    method public abstract void onSetDisplaySurface(android.view.Surface);
+    method public abstract void onSetPauseImage(java.lang.String);
+    method public abstract void onSetPreviewSurface(android.view.Surface);
+    method public abstract void onSetZoom(float);
+    method public void receiveSessionModifyRequest(android.telecom.VideoProfile);
+    method public void receiveSessionModifyResponse(int, android.telecom.VideoProfile, android.telecom.VideoProfile);
+    field public static final int SESSION_EVENT_CAMERA_FAILURE = 5; // 0x5
+    field public static final int SESSION_EVENT_CAMERA_READY = 6; // 0x6
+    field public static final int SESSION_EVENT_RX_PAUSE = 1; // 0x1
+    field public static final int SESSION_EVENT_RX_RESUME = 2; // 0x2
+    field public static final int SESSION_EVENT_TX_START = 3; // 0x3
+    field public static final int SESSION_EVENT_TX_STOP = 4; // 0x4
+    field public static final int SESSION_MODIFY_REQUEST_FAIL = 2; // 0x2
+    field public static final int SESSION_MODIFY_REQUEST_INVALID = 3; // 0x3
+    field public static final int SESSION_MODIFY_REQUEST_REJECTED_BY_REMOTE = 5; // 0x5
+    field public static final int SESSION_MODIFY_REQUEST_SUCCESS = 1; // 0x1
+    field public static final int SESSION_MODIFY_REQUEST_TIMED_OUT = 4; // 0x4
+  }
+
+  public final class ConnectionRequest implements android.os.Parcelable {
+    ctor public ConnectionRequest(android.telecom.PhoneAccountHandle, android.net.Uri, android.os.Bundle);
+    method public int describeContents();
+    method public android.telecom.PhoneAccountHandle getAccountHandle();
+    method public android.net.Uri getAddress();
+    method public android.os.Bundle getExtras();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator<android.telecom.ConnectionRequest> CREATOR;
+  }
+
+  public abstract class ConnectionService extends android.app.Service {
+    ctor public ConnectionService();
+    method public final void addConference(android.telecom.Conference);
+    method public final void addExistingConnection(android.telecom.PhoneAccountHandle, android.telecom.Connection);
+    method public final void conferenceRemoteConnections(android.telecom.RemoteConnection, android.telecom.RemoteConnection);
+    method public final android.telecom.RemoteConnection createRemoteIncomingConnection(android.telecom.PhoneAccountHandle, android.telecom.ConnectionRequest);
+    method public final android.telecom.RemoteConnection createRemoteOutgoingConnection(android.telecom.PhoneAccountHandle, android.telecom.ConnectionRequest);
+    method public final java.util.Collection<android.telecom.Connection> getAllConnections();
+    method public final android.os.IBinder onBind(android.content.Intent);
+    method public void onConference(android.telecom.Connection, android.telecom.Connection);
+    method public android.telecom.Connection onCreateIncomingConnection(android.telecom.PhoneAccountHandle, android.telecom.ConnectionRequest);
+    method public android.telecom.Connection onCreateOutgoingConnection(android.telecom.PhoneAccountHandle, android.telecom.ConnectionRequest);
+    method public void onRemoteConferenceAdded(android.telecom.RemoteConference);
+    method public void onRemoteExistingConnectionAdded(android.telecom.RemoteConnection);
+    field public static final java.lang.String SERVICE_INTERFACE = "android.telecom.ConnectionService";
+  }
+
+  public final class DisconnectCause implements android.os.Parcelable {
+    ctor public DisconnectCause(int);
+    ctor public DisconnectCause(int, java.lang.String);
+    ctor public DisconnectCause(int, java.lang.CharSequence, java.lang.CharSequence, java.lang.String);
+    ctor public DisconnectCause(int, java.lang.CharSequence, java.lang.CharSequence, java.lang.String, int);
+    method public int describeContents();
+    method public int getCode();
+    method public java.lang.CharSequence getDescription();
+    method public java.lang.CharSequence getLabel();
+    method public java.lang.String getReason();
+    method public int getTone();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final int BUSY = 7; // 0x7
+    field public static final int CANCELED = 4; // 0x4
+    field public static final int CONNECTION_MANAGER_NOT_SUPPORTED = 10; // 0xa
+    field public static final android.os.Parcelable.Creator<android.telecom.DisconnectCause> CREATOR;
+    field public static final int ERROR = 1; // 0x1
+    field public static final int LOCAL = 2; // 0x2
+    field public static final int MISSED = 5; // 0x5
+    field public static final int OTHER = 9; // 0x9
+    field public static final int REJECTED = 6; // 0x6
+    field public static final int REMOTE = 3; // 0x3
+    field public static final int RESTRICTED = 8; // 0x8
+    field public static final int UNKNOWN = 0; // 0x0
+  }
+
+  public class GatewayInfo implements android.os.Parcelable {
+    ctor public GatewayInfo(java.lang.String, android.net.Uri, android.net.Uri);
+    method public int describeContents();
+    method public android.net.Uri getGatewayAddress();
+    method public java.lang.String getGatewayProviderPackageName();
+    method public android.net.Uri getOriginalAddress();
+    method public boolean isEmpty();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator<android.telecom.GatewayInfo> CREATOR;
+  }
+
+  public abstract interface IConferenceable {
+  }
+
+  public abstract class InCallService extends android.app.Service {
+    ctor public InCallService();
+    method public final android.telecom.Phone getPhone();
+    method public android.os.IBinder onBind(android.content.Intent);
+    method public void onPhoneCreated(android.telecom.Phone);
+    method public void onPhoneDestroyed(android.telecom.Phone);
+    field public static final java.lang.String SERVICE_INTERFACE = "android.telecom.InCallService";
+  }
+
+  public static abstract class InCallService.VideoCall {
+    ctor public InCallService.VideoCall();
+    method public abstract void requestCallDataUsage();
+    method public abstract void requestCameraCapabilities();
+    method public abstract void sendSessionModifyRequest(android.telecom.VideoProfile);
+    method public abstract void sendSessionModifyResponse(android.telecom.VideoProfile);
+    method public abstract void setCamera(java.lang.String);
+    method public abstract void setDeviceOrientation(int);
+    method public abstract void setDisplaySurface(android.view.Surface);
+    method public abstract void setPauseImage(java.lang.String);
+    method public abstract void setPreviewSurface(android.view.Surface);
+    method public abstract void setVideoCallListener(android.telecom.InCallService.VideoCall.Listener);
+    method public abstract void setZoom(float);
+  }
+
+  public static abstract class InCallService.VideoCall.Listener {
+    ctor public InCallService.VideoCall.Listener();
+    method public abstract void onCallDataUsageChanged(long);
+    method public abstract void onCallSessionEvent(int);
+    method public abstract void onCameraCapabilitiesChanged(android.telecom.CameraCapabilities);
+    method public abstract void onPeerDimensionsChanged(int, int);
+    method public abstract void onSessionModifyRequestReceived(android.telecom.VideoProfile);
+    method public abstract void onSessionModifyResponseReceived(int, android.telecom.VideoProfile, android.telecom.VideoProfile);
+    method public abstract void onVideoQualityChanged(int);
+  }
+
+  public final class Phone {
+    method public final void addListener(android.telecom.Phone.Listener);
+    method public final boolean canAddCall();
+    method public final android.telecom.AudioState getAudioState();
+    method public final java.util.List<android.telecom.Call> getCalls();
+    method public final void removeListener(android.telecom.Phone.Listener);
+    method public final void setAudioRoute(int);
+    method public final void setMuted(boolean);
+  }
+
+  public static abstract class Phone.Listener {
+    ctor public Phone.Listener();
+    method public void onAudioStateChanged(android.telecom.Phone, android.telecom.AudioState);
+    method public void onBringToForeground(android.telecom.Phone, boolean);
+    method public void onCallAdded(android.telecom.Phone, android.telecom.Call);
+    method public void onCallRemoved(android.telecom.Phone, android.telecom.Call);
+    method public void onCanAddCallChanged(android.telecom.Phone, boolean);
+  }
+
   public class PhoneAccount implements android.os.Parcelable {
     method public static android.telecom.PhoneAccount.Builder builder(android.telecom.PhoneAccountHandle, java.lang.CharSequence);
     method public android.graphics.drawable.Drawable createIconDrawable(android.content.Context);
@@ -29753,7 +30144,10 @@ package android.telecom {
     method public java.util.List<java.lang.String> getSupportedUriSchemes();
     method public boolean hasCapabilities(int);
     method public boolean supportsUriScheme(java.lang.String);
+    method public android.telecom.PhoneAccount.Builder toBuilder();
     method public void writeToParcel(android.os.Parcel, int);
+    field public static final int CAPABILITY_CALL_PROVIDER = 2; // 0x2
+    field public static final int CAPABILITY_CONNECTION_MANAGER = 1; // 0x1
     field public static final int CAPABILITY_PLACE_EMERGENCY_CALLS = 16; // 0x10
     field public static final int CAPABILITY_SIM_SUBSCRIPTION = 4; // 0x4
     field public static final int CAPABILITY_VIDEO_CALLING = 8; // 0x8
@@ -29769,6 +30163,7 @@ package android.telecom {
   public static class PhoneAccount.Builder {
     ctor public PhoneAccount.Builder(android.telecom.PhoneAccountHandle, java.lang.CharSequence);
     ctor public PhoneAccount.Builder(android.telecom.PhoneAccount);
+    method public android.telecom.PhoneAccount.Builder addSupportedUriScheme(java.lang.String);
     method public android.telecom.PhoneAccount build();
     method public android.telecom.PhoneAccount.Builder setAddress(android.net.Uri);
     method public android.telecom.PhoneAccount.Builder setCapabilities(int);
@@ -29785,28 +30180,130 @@ package android.telecom {
 
   public class PhoneAccountHandle implements android.os.Parcelable {
     ctor public PhoneAccountHandle(android.content.ComponentName, java.lang.String);
+    ctor public PhoneAccountHandle(android.content.ComponentName, java.lang.String, android.os.UserHandle);
     method public int describeContents();
     method public android.content.ComponentName getComponentName();
     method public java.lang.String getId();
+    method public android.os.UserHandle getUserHandle();
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator<android.telecom.PhoneAccountHandle> CREATOR;
   }
 
+  public final class RemoteConference {
+    method public void disconnect();
+    method public java.util.List<android.telecom.RemoteConnection> getConferenceableConnections();
+    method public final int getConnectionCapabilities();
+    method public final java.util.List<android.telecom.RemoteConnection> getConnections();
+    method public android.telecom.DisconnectCause getDisconnectCause();
+    method public final int getState();
+    method public void hold();
+    method public void merge();
+    method public void playDtmfTone(char);
+    method public final void registerCallback(android.telecom.RemoteConference.Callback);
+    method public void separate(android.telecom.RemoteConnection);
+    method public void setAudioState(android.telecom.AudioState);
+    method public void stopDtmfTone();
+    method public void swap();
+    method public void unhold();
+    method public final void unregisterCallback(android.telecom.RemoteConference.Callback);
+  }
+
+  public static abstract class RemoteConference.Callback {
+    ctor public RemoteConference.Callback();
+    method public void onConferenceableConnectionsChanged(android.telecom.RemoteConference, java.util.List<android.telecom.RemoteConnection>);
+    method public void onConnectionAdded(android.telecom.RemoteConference, android.telecom.RemoteConnection);
+    method public void onConnectionCapabilitiesChanged(android.telecom.RemoteConference, int);
+    method public void onConnectionRemoved(android.telecom.RemoteConference, android.telecom.RemoteConnection);
+    method public void onDestroyed(android.telecom.RemoteConference);
+    method public void onDisconnected(android.telecom.RemoteConference, android.telecom.DisconnectCause);
+    method public void onStateChanged(android.telecom.RemoteConference, int, int);
+  }
+
+  public final class RemoteConnection {
+    method public void abort();
+    method public void answer();
+    method public void disconnect();
+    method public android.net.Uri getAddress();
+    method public int getAddressPresentation();
+    method public java.lang.CharSequence getCallerDisplayName();
+    method public int getCallerDisplayNamePresentation();
+    method public android.telecom.RemoteConference getConference();
+    method public java.util.List<android.telecom.RemoteConnection> getConferenceableConnections();
+    method public int getConnectionCapabilities();
+    method public android.telecom.DisconnectCause getDisconnectCause();
+    method public int getState();
+    method public android.telecom.StatusHints getStatusHints();
+    method public void hold();
+    method public boolean isRingbackRequested();
+    method public boolean isVoipAudioMode();
+    method public void playDtmfTone(char);
+    method public void postDialContinue(boolean);
+    method public void registerCallback(android.telecom.RemoteConnection.Callback);
+    method public void reject();
+    method public void setAudioState(android.telecom.AudioState);
+    method public void stopDtmfTone();
+    method public void unhold();
+    method public void unregisterCallback(android.telecom.RemoteConnection.Callback);
+  }
+
+  public static abstract class RemoteConnection.Callback {
+    ctor public RemoteConnection.Callback();
+    method public void onAddressChanged(android.telecom.RemoteConnection, android.net.Uri, int);
+    method public void onCallerDisplayNameChanged(android.telecom.RemoteConnection, java.lang.String, int);
+    method public void onConferenceChanged(android.telecom.RemoteConnection, android.telecom.RemoteConference);
+    method public void onConferenceableConnectionsChanged(android.telecom.RemoteConnection, java.util.List<android.telecom.RemoteConnection>);
+    method public void onConnectionCapabilitiesChanged(android.telecom.RemoteConnection, int);
+    method public void onDestroyed(android.telecom.RemoteConnection);
+    method public void onDisconnected(android.telecom.RemoteConnection, android.telecom.DisconnectCause);
+    method public void onPostDialChar(android.telecom.RemoteConnection, char);
+    method public void onPostDialWait(android.telecom.RemoteConnection, java.lang.String);
+    method public void onRingbackRequested(android.telecom.RemoteConnection, boolean);
+    method public void onStateChanged(android.telecom.RemoteConnection, int);
+    method public void onStatusHintsChanged(android.telecom.RemoteConnection, android.telecom.StatusHints);
+    method public void onVoipAudioChanged(android.telecom.RemoteConnection, boolean);
+  }
+
+  public final class StatusHints implements android.os.Parcelable {
+    ctor public StatusHints(android.content.ComponentName, java.lang.CharSequence, int, android.os.Bundle);
+    method public int describeContents();
+    method public android.os.Bundle getExtras();
+    method public android.graphics.drawable.Drawable getIcon(android.content.Context);
+    method public int getIconResId();
+    method public java.lang.CharSequence getLabel();
+    method public android.content.ComponentName getPackageName();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator<android.telecom.StatusHints> CREATOR;
+  }
+
   public class TelecomManager {
+    method public void addNewIncomingCall(android.telecom.PhoneAccountHandle, android.os.Bundle);
     method public void cancelMissedCallsNotification();
+    method public android.net.Uri getAdnUriForPhoneAccount(android.telecom.PhoneAccountHandle);
     method public java.util.List<android.telecom.PhoneAccountHandle> getCallCapablePhoneAccounts();
+    method public java.lang.String getLine1Number(android.telecom.PhoneAccountHandle);
     method public android.telecom.PhoneAccount getPhoneAccount(android.telecom.PhoneAccountHandle);
+    method public android.telecom.PhoneAccountHandle getSimCallManager();
+    method public android.telecom.PhoneAccountHandle getUserSelectedOutgoingPhoneAccount();
     method public boolean handleMmi(java.lang.String);
     method public boolean handleMmi(java.lang.String, android.telecom.PhoneAccountHandle);
+    method public boolean hasVoiceMailNumber(android.telecom.PhoneAccountHandle);
     method public boolean isInCall();
+    method public boolean isVoiceMailNumber(android.telecom.PhoneAccountHandle, java.lang.String);
+    method public void registerPhoneAccount(android.telecom.PhoneAccount);
     method public void showInCallScreen(boolean);
+    method public void silenceRinger();
+    method public void unregisterPhoneAccount(android.telecom.PhoneAccountHandle);
+    field public static final java.lang.String ACTION_CHANGE_PHONE_ACCOUNTS = "android.telecom.action.CHANGE_PHONE_ACCOUNTS";
+    field public static final java.lang.String ACTION_INCOMING_CALL = "android.telecom.action.INCOMING_CALL";
     field public static final java.lang.String ACTION_SHOW_CALL_ACCESSIBILITY_SETTINGS = "android.telecom.action.SHOW_CALL_ACCESSIBILITY_SETTINGS";
     field public static final java.lang.String ACTION_SHOW_CALL_SETTINGS = "android.telecom.action.SHOW_CALL_SETTINGS";
     field public static final java.lang.String ACTION_SHOW_RESPOND_VIA_SMS_SETTINGS = "android.telecom.action.SHOW_RESPOND_VIA_SMS_SETTINGS";
     field public static final char DTMF_CHARACTER_PAUSE = 44; // 0x002c ','
     field public static final char DTMF_CHARACTER_WAIT = 59; // 0x003b ';'
+    field public static final java.lang.String EXTRA_CALL_BACK_NUMBER = "android.telecom.extra.CALL_BACK_NUMBER";
     field public static final java.lang.String EXTRA_CALL_DISCONNECT_CAUSE = "android.telecom.extra.CALL_DISCONNECT_CAUSE";
     field public static final java.lang.String EXTRA_CALL_DISCONNECT_MESSAGE = "android.telecom.extra.CALL_DISCONNECT_MESSAGE";
+    field public static final java.lang.String EXTRA_INCOMING_CALL_EXTRAS = "android.telecom.extra.INCOMING_CALL_EXTRAS";
     field public static final java.lang.String EXTRA_OUTGOING_CALL_EXTRAS = "android.telecom.extra.OUTGOING_CALL_EXTRAS";
     field public static final java.lang.String EXTRA_PHONE_ACCOUNT_HANDLE = "android.telecom.extra.PHONE_ACCOUNT_HANDLE";
     field public static final java.lang.String EXTRA_START_CALL_WITH_SPEAKERPHONE = "android.telecom.extra.START_CALL_WITH_SPEAKERPHONE";
@@ -30323,6 +30820,7 @@ package android.telephony {
     method public int getDataActivity();
     method public int getDataState();
     method public java.lang.String getDeviceId();
+    method public java.lang.String getDeviceId(int);
     method public java.lang.String getDeviceSoftwareVersion();
     method public java.lang.String getGroupIdLevel1();
     method public java.lang.String getLine1Number();
@@ -30333,6 +30831,7 @@ package android.telephony {
     method public java.lang.String getNetworkOperator();
     method public java.lang.String getNetworkOperatorName();
     method public int getNetworkType();
+    method public int getPhoneCount();
     method public int getPhoneType();
     method public java.lang.String getSimCountryIso();
     method public java.lang.String getSimOperator();
@@ -57347,3 +57846,4 @@ package org.xmlpull.v1.sax2 {
   }
 
 }
+
