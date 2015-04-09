@@ -397,7 +397,7 @@ public class ActionMenuPresenter extends BaseMenuPresenter
     public void updateMenuView(boolean cleared) {
         final ViewGroup menuViewParent = (ViewGroup) ((View) mMenuView).getParent();
         if (menuViewParent != null) {
-            setupItemAnimations();
+//            setupItemAnimations();
             ActionBarTransition.beginDelayedTransition(menuViewParent);
         }
         super.updateMenuView(cleared);
