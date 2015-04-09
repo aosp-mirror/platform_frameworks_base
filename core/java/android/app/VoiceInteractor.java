@@ -318,7 +318,7 @@ public class VoiceInteractor {
              * @param label The label that will both be matched against what the user speaks
              * and displayed visually.
              * @param index The location of this option within the overall set of options.
-             * Can be used to help identify which the option when it is returned from the
+             * Can be used to help identify the option when it is returned from the
              * voice interactor.
              */
             public Option(CharSequence label, int index) {

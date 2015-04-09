@@ -1229,7 +1229,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
                 app.hasShownUi = true;
                 app.pendingUiClean = true;
             }
-            app.forceProcessStateUpTo(ActivityManager.PROCESS_STATE_TOP);
+            app.forceProcessStateUpTo(mService.mTopProcessState);
             app.thread.scheduleLaunchActivity(new Intent(r.intent), r.appToken,
                     System.identityHashCode(r), r.info, new Configuration(mService.mConfiguration),
                     new Configuration(stack.mOverrideConfig), r.compat, r.launchedFromPackage,

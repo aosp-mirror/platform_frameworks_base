@@ -1065,6 +1065,7 @@ public abstract class BatteryStats implements Parcelable {
         public static final int STATE_SCREEN_ON_FLAG = 1<<20;
         public static final int STATE_BATTERY_PLUGGED_FLAG = 1<<19;
         public static final int STATE_PHONE_IN_CALL_FLAG = 1<<18;
+        public static final int STATE_CHARGING_FLAG = 1<<17;
         public static final int STATE_BLUETOOTH_ON_FLAG = 1<<16;
 
         public static final int MOST_INTERESTING_STATES =
@@ -1751,6 +1752,7 @@ public abstract class BatteryStats implements Parcelable {
         new BitDescription(HistoryItem.STATE_SCREEN_ON_FLAG, "screen", "S"),
         new BitDescription(HistoryItem.STATE_BATTERY_PLUGGED_FLAG, "plugged", "BP"),
         new BitDescription(HistoryItem.STATE_PHONE_IN_CALL_FLAG, "phone_in_call", "Pcl"),
+        new BitDescription(HistoryItem.STATE_CHARGING_FLAG, "charging", "ch"),
         new BitDescription(HistoryItem.STATE_BLUETOOTH_ON_FLAG, "bluetooth", "b"),
         new BitDescription(HistoryItem.STATE_DATA_CONNECTION_MASK,
                 HistoryItem.STATE_DATA_CONNECTION_SHIFT, "data_conn", "Pcn",

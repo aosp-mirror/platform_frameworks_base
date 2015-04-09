@@ -162,8 +162,8 @@ final class VoiceInteractionSessionConnection implements ServiceConnection {
         mBindIntent = new Intent(VoiceInteractionService.SERVICE_INTERFACE);
         mBindIntent.setComponent(mSessionComponentName);
         mBound = mContext.bindServiceAsUser(mBindIntent, this,
-                Context.BIND_AUTO_CREATE|Context.BIND_WAIVE_PRIORITY
-                        |Context.BIND_ALLOW_OOM_MANAGEMENT, new UserHandle(mUser));
+                Context.BIND_AUTO_CREATE | Context.BIND_WAIVE_PRIORITY
+                        | Context.BIND_ALLOW_OOM_MANAGEMENT, new UserHandle(mUser));
         if (mBound) {
             try {
                 mIWindowManager.addWindowToken(mToken,

@@ -377,7 +377,7 @@ public class DeviceIdleController extends SystemService {
         }
     }
 
-    void scheduleAlarmLocked(long delay, boolean wakeup) {
+    void scheduleAlarmLocked(long delay, boolean idleUntil) {
         if (mSigMotionSensor == null) {
             // If there is no significant motion sensor on this device, then we won't schedule
             // alarms, because we can't determine if the device is not moving.  This effectively
@@ -386,8 +386,13 @@ public class DeviceIdleController extends SystemService {
             return;
         }
         mNextAlarmTime = SystemClock.elapsedRealtime() + delay;
-        mAlarmManager.set(wakeup ? AlarmManager.ELAPSED_REALTIME_WAKEUP
-                : AlarmManager.ELAPSED_REALTIME, mNextAlarmTime, mAlarmIntent);
+        if (idleUntil) {
+            mAlarmManager.setIdleUntil(AlarmManager.ELAPSED_REALTIME_WAKEUP,
+                    mNextAlarmTime, mAlarmIntent);
+        } else {
+            mAlarmManager.set(AlarmManager.ELAPSED_REALTIME_WAKEUP,
+                    mNextAlarmTime, mAlarmIntent);
+        }
     }
 
     private void dumpHelp(PrintWriter pw) {

@@ -56,6 +56,8 @@
     <protected-broadcast android:name="android.intent.action.ACTION_POWER_CONNECTED" />
     <protected-broadcast android:name="android.intent.action.ACTION_POWER_DISCONNECTED" />
     <protected-broadcast android:name="android.intent.action.ACTION_SHUTDOWN" />
+    <protected-broadcast android:name="android.intent.action.CHARGING" />
+    <protected-broadcast android:name="android.intent.action.DISCHARGING" />
     <protected-broadcast android:name="android.intent.action.DEVICE_STORAGE_LOW" />
     <protected-broadcast android:name="android.intent.action.DEVICE_STORAGE_OK" />
     <protected-broadcast android:name="android.intent.action.DEVICE_STORAGE_FULL" />

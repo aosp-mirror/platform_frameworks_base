@@ -16,10 +16,12 @@
 
 package android.os;
 
+import android.content.Context;
 import android.os.BatteryProperty;
 import android.os.IBatteryPropertiesRegistrar;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import com.android.internal.app.IBatteryStats;
 
 /**
  * The BatteryManager class contains strings and constants used for values
@@ -128,6 +130,26 @@ public class BatteryManager {
     public static final int BATTERY_PLUGGED_ANY =
             BATTERY_PLUGGED_AC | BATTERY_PLUGGED_USB | BATTERY_PLUGGED_WIRELESS;
 
+    /**
+     * Sent when the device's battery has started charging (or has reached full charge
+     * and the device is on power).  This is a good time to do work that you would like to
+     * avoid doing while on battery (that is to avoid draining the user's battery due to
+     * things they don't care enough about).
+     *
+     * This is paired with {@link #ACTION_DISCHARGING}.  The current state can always
+     * be retrieved with {@link #isCharging()}.
+     */
+    public static final String ACTION_CHARGING = "android.os.action.CHARGING";
+
+    /**
+     * Sent when the device's battery may be discharging, so apps should avoid doing
+     * extraneous work that would cause it to discharge faster.
+     *
+     * This is paired with {@link #ACTION_CHARGING}.  The current state can always
+     * be retrieved with {@link #isCharging()}.
+     */
+    public static final String ACTION_DISCHARGING = "android.os.action.DISCHARGING";
+
     /*
      * Battery property identifiers.  These must match the values in
      * frameworks/native/include/batteryservice/BatteryService.h
@@ -162,14 +184,31 @@ public class BatteryManager {
      */
     public static final int BATTERY_PROPERTY_ENERGY_COUNTER = 5;
 
+    private final IBatteryStats mBatteryStats;
     private final IBatteryPropertiesRegistrar mBatteryPropertiesRegistrar;
 
     /**
      * @removed Was previously made visible by accident.
      */
     public BatteryManager() {
+        mBatteryStats = IBatteryStats.Stub.asInterface(
+                ServiceManager.getService(BatteryStats.SERVICE_NAME));
         mBatteryPropertiesRegistrar = IBatteryPropertiesRegistrar.Stub.asInterface(
                 ServiceManager.getService("batteryproperties"));
+    }
+
+    /**
+     * Return true if the battery is currently considered to be charging.  This means that
+     * the device is plugged in and is supplying sufficient power that the battery level is
+     * going up (or the battery is fully charged).  Changes in this state are matched by
+     * broadcasts of {@link #ACTION_CHARGING} and {@link #ACTION_DISCHARGING}.
+     */
+    public boolean isCharging() {
+        try {
+            return mBatteryStats.isCharging();
+        } catch (RemoteException e) {
+            return true;
+        }
     }
 
     /**

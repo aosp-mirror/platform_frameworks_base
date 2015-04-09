@@ -40,6 +40,9 @@ interface IBatteryStats {
 
     ParcelFileDescriptor getStatisticsStream();
 
+    // Return true if we see the battery as currently charging.
+    boolean isCharging();
+
     // Return the computed amount of time remaining on battery, in milliseconds.
     // Returns -1 if nothing could be computed.
     long computeBatteryTimeRemaining();

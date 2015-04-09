@@ -986,6 +986,12 @@ public final class ActivityManagerService extends ActivityManagerNative
     private boolean mSleeping = false;
 
     /**
+     * The process state used for processes that are running the top activities.
+     * This changes between TOP and TOP_SLEEPING to following mSleeping.
+     */
+    int mTopProcessState = ActivityManager.PROCESS_STATE_TOP;
+
+    /**
      * Set while we are running a voice interaction.  This overrides
      * sleeping while it is active.
      */
@@ -2464,6 +2470,13 @@ public final class ActivityManagerService extends ActivityManagerNative
                 mOnBattery = DEBUG_POWER ? true : onBattery;
             }
         }
+    }
+
+    @Override
+    public void batterySendBroadcast(Intent intent) {
+        broadcastIntentLocked(null, null, intent, null,
+                null, 0, null, null, null, AppOpsManager.OP_NONE, false, false, -1,
+                Process.SYSTEM_UID, UserHandle.USER_ALL);
     }
 
     /**
@@ -9726,10 +9739,14 @@ public final class ActivityManagerService extends ActivityManagerNative
     void updateSleepIfNeededLocked() {
         if (mSleeping && !shouldSleepLocked()) {
             mSleeping = false;
+            mTopProcessState = ActivityManager.PROCESS_STATE_TOP;
             mStackSupervisor.comeOutOfSleepIfNeededLocked();
+            updateOomAdjLocked();
         } else if (!mSleeping && shouldSleepLocked()) {
             mSleeping = true;
+            mTopProcessState = ActivityManager.PROCESS_STATE_TOP_SLEEPING;
             mStackSupervisor.goingToSleepLocked();
+            updateOomAdjLocked();
 
             // Initialize the wake times of all processes.
             checkExcessivePowerUsageLocked(false);
@@ -10700,7 +10717,8 @@ public final class ActivityManagerService extends ActivityManagerNative
             for (int i = mLruProcesses.size() - 1 ; i >= 0 ; i--) {
                 ProcessRecord proc = mLruProcesses.get(i);
                 if (proc.notCachedSinceIdle) {
-                    if (proc.setProcState > ActivityManager.PROCESS_STATE_TOP
+                    if (proc.setProcState != ActivityManager.PROCESS_STATE_TOP
+                            && proc.setProcState >= ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND
                             && proc.setProcState <= ActivityManager.PROCESS_STATE_SERVICE) {
                         if (doKilling && proc.initialIdlePss != 0
                                 && proc.lastPss > ((proc.initialIdlePss*3)/2)) {
@@ -12893,7 +12911,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                     StringBuilder sb = new StringBuilder();
                     sb.append("    ").append(proc).append('/');
                     UserHandle.formatUid(sb, uids.keyAt(j));
-                    Pair<Long, String> val = uids.valueAt(i);
+                    Pair<Long, String> val = uids.valueAt(j);
                     sb.append(": "); DebugUtils.sizeValueToString(val.first, sb);
                     if (val.second != null) {
                         sb.append(", report to ").append(val.second);
@@ -16824,6 +16842,8 @@ public final class ActivityManagerService extends ActivityManagerNative
 
         app.systemNoUi = false;
 
+        final int PROCESS_STATE_TOP = mTopProcessState;
+
         // Determine the importance of the process, starting with most
         // important to least, and assign an appropriate OOM adjustment.
         int adj;
@@ -16837,7 +16857,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             schedGroup = Process.THREAD_GROUP_DEFAULT;
             app.adjType = "top-activity";
             foregroundActivities = true;
-            procState = ActivityManager.PROCESS_STATE_TOP;
+            procState = PROCESS_STATE_TOP;
         } else if (app.instrumentationClass != null) {
             // Don't want to kill running instrumentation.
             adj = ProcessList.FOREGROUND_APP_ADJ;
@@ -16890,8 +16910,8 @@ public final class ActivityManagerService extends ActivityManagerNative
                         adj = ProcessList.VISIBLE_APP_ADJ;
                         app.adjType = "visible";
                     }
-                    if (procState > ActivityManager.PROCESS_STATE_TOP) {
-                        procState = ActivityManager.PROCESS_STATE_TOP;
+                    if (procState > PROCESS_STATE_TOP) {
+                        procState = PROCESS_STATE_TOP;
                     }
                     schedGroup = Process.THREAD_GROUP_DEFAULT;
                     app.cached = false;
@@ -16903,8 +16923,8 @@ public final class ActivityManagerService extends ActivityManagerNative
                         adj = ProcessList.PERCEPTIBLE_APP_ADJ;
                         app.adjType = "pausing";
                     }
-                    if (procState > ActivityManager.PROCESS_STATE_TOP) {
-                        procState = ActivityManager.PROCESS_STATE_TOP;
+                    if (procState > PROCESS_STATE_TOP) {
+                        procState = PROCESS_STATE_TOP;
                     }
                     schedGroup = Process.THREAD_GROUP_DEFAULT;
                     app.cached = false;
@@ -16943,7 +16963,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             if (app.foregroundServices) {
                 // The user is aware of this app, so make it visible.
                 adj = ProcessList.PERCEPTIBLE_APP_ADJ;
-                procState = ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND;
+                procState = ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE;
                 app.cached = false;
                 app.adjType = "fg-service";
                 schedGroup = Process.THREAD_GROUP_DEFAULT;
@@ -17472,7 +17492,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                                 IApplicationThread thread = myProc.thread;
                                 if (thread != null) {
                                     try {
-                                        if (true || DEBUG_PSS) Slog.d(TAG_PSS,
+                                        if (DEBUG_PSS) Slog.d(TAG_PSS,
                                                 "Requesting dump heap from "
                                                 + myProc + " to " + heapdumpFile);
                                         thread.dumpHeap(true, heapdumpFile.toString(), fd);
@@ -18757,7 +18777,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                         + " does not match last path " + mMemWatchDumpFile);
                 return;
             }
-            if (true || DEBUG_PSS) Slog.d(TAG_PSS, "Dump heap finished for " + path);
+            if (DEBUG_PSS) Slog.d(TAG_PSS, "Dump heap finished for " + path);
             mHandler.sendEmptyMessage(POST_DUMP_HEAP_NOTIFICATION_MSG);
         }
     }

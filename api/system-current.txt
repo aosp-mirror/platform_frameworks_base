@@ -24128,6 +24128,9 @@ package android.os {
   public class BatteryManager {
     method public int getIntProperty(int);
     method public long getLongProperty(int);
+    method public boolean isCharging();
+    field public static final java.lang.String ACTION_CHARGING = "android.os.action.CHARGING";
+    field public static final java.lang.String ACTION_DISCHARGING = "android.os.action.DISCHARGING";
     field public static final int BATTERY_HEALTH_COLD = 7; // 0x7
     field public static final int BATTERY_HEALTH_DEAD = 4; // 0x4
     field public static final int BATTERY_HEALTH_GOOD = 2; // 0x2
