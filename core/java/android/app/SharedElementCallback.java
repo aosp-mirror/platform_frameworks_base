@@ -221,42 +221,4 @@ public abstract class SharedElementCallback {
         }
         return view;
     }
-
-    /**
-     * Called during an Activity Transition when the shared elements have arrived at the
-     * final location and are ready to be transferred. This method is called for both the
-     * source and destination Activities.
-     * <p>
-     * When the shared elements are ready to be transferred,
-     * {@link OnSharedElementsReadyListener#onSharedElementsReady()}
-     * must be called to trigger the transfer.
-     * <p>
-     * The default behavior is to trigger the transfer immediately.
-     *
-     * @param sharedElementNames The names of the shared elements that are being transferred..
-     * @param sharedElements The shared elements that are part of the View hierarchy.
-     * @param listener The listener to call when the shared elements are ready to be hidden
-     *                 in the source Activity or shown in the destination Activity.
-     */
-    public void onSharedElementsArrived(List<String> sharedElementNames,
-            List<View> sharedElements, OnSharedElementsReadyListener listener) {
-        listener.onSharedElementsReady();
-    }
-
-    /**
-     * Listener to be called after {@link
-     * SharedElementCallback#onSharedElementsArrived(OnSharedElementsReadyListener)}
-     * when the shared elements are ready to be hidden in the source Activity and shown in the
-     * destination Activity.
-     */
-    public interface OnSharedElementsReadyListener {
-
-        /**
-         * Call this method during or after the OnSharedElementsReadyListener has been received
-         * in {@link SharedElementCallback#onSharedElementsArrived(OnSharedElementsReadyListener)}
-         * to indicate that the shared elements are ready to be hidden in the source and shown
-         * in the destination Activity.
-         */
-        void onSharedElementsReady();
-    }
 }
