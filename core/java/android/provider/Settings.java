@@ -2395,8 +2395,6 @@ public final class Settings {
          * It was about AudioManager's setting and thus affected all the applications which
          * relied on the setting, while this is purely about the vibration setting for incoming
          * calls.
-         *
-         * @hide
          */
         public static final String VIBRATE_WHEN_RINGING = "vibrate_when_ringing";
 
@@ -2411,7 +2409,6 @@ public final class Settings {
          * DTMF tone type played by the dialer when dialing.
          *                 0 = Normal
          *                 1 = Long
-         * @hide
          */
         public static final String DTMF_TONE_TYPE_WHEN_DIALING = "dtmf_tone_type";
 
@@ -6422,7 +6419,6 @@ public final class Settings {
         /**
          * Setting to 1 will hide carrier network settings.
          * Default is 0.
-         * @hide
          */
         public static final String HIDE_CARRIER_NETWORK_SETTINGS =
                 "hide_carrier_network_settings";

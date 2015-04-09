@@ -55,8 +55,6 @@ public class TelecomManager {
      * Input: get*Extra field {@link #EXTRA_PHONE_ACCOUNT_HANDLE} contains the component name of the
      * {@link android.telecom.ConnectionService} that Telecom should bind to. Telecom will then
      * ask the connection service for more information about the call prior to showing any UI.
-     *
-     * @hide
      */
     public static final String ACTION_INCOMING_CALL = "android.telecom.action.INCOMING_CALL";
 
@@ -85,9 +83,7 @@ public class TelecomManager {
     /**
      * The {@link android.content.Intent} action used to show the settings page used to configure
      * {@link PhoneAccount} preferences.
-     * @hide
      */
-    @SystemApi
     public static final String ACTION_CHANGE_PHONE_ACCOUNTS =
             "android.telecom.action.CHANGE_PHONE_ACCOUNTS";
 
@@ -133,10 +129,7 @@ public class TelecomManager {
      * Optional extra for {@link #ACTION_INCOMING_CALL} containing a {@link Bundle} which contains
      * metadata about the call. This {@link Bundle} will be returned to the
      * {@link ConnectionService}.
-     *
-     * @hide
      */
-    @SystemApi
     public static final String EXTRA_INCOMING_CALL_EXTRAS =
             "android.telecom.extra.INCOMING_CALL_EXTRAS";
 
@@ -209,9 +202,7 @@ public class TelecomManager {
      * {@link ConnectionService}s which interact with {@link RemoteConnection}s should only populate
      * this if the {@link android.telephony.TelephonyManager#getLine1Number()} value, as that is the
      * user's expected caller ID.
-     * @hide
      */
-    @SystemApi
     public static final String EXTRA_CALL_BACK_NUMBER = "android.telecom.extra.CALL_BACK_NUMBER";
 
     /**
@@ -373,7 +364,6 @@ public class TelecomManager {
      * exists no user-chosen default {@code PhoneAccount}.
      *
      * @return The user outgoing phone account selected by the user.
-     * @hide
      */
     public PhoneAccountHandle getUserSelectedOutgoingPhoneAccount() {
         try {
@@ -405,7 +395,6 @@ public class TelecomManager {
      * {@code null}, indicating that there currently exists no user-chosen default
      * {@code PhoneAccount}.
      * @return The phone account handle of the current sim call manager.
-     * @hide
      */
     public PhoneAccountHandle getSimCallManager() {
         try {
@@ -504,8 +493,6 @@ public class TelecomManager {
      *
      * @see #EXTRA_PHONE_ACCOUNT_HANDLE
      * @return A list of {@code PhoneAccountHandle} objects.
-     *
-     * @hide
      */
     public List<PhoneAccountHandle> getCallCapablePhoneAccounts() {
         try {
@@ -621,10 +608,7 @@ public class TelecomManager {
      * {@link PhoneAccountHandle#getComponentName()} does not match the package name of the app.
      *
      * @param account The complete {@link PhoneAccount}.
-     *
-     * @hide
      */
-    @SystemApi
     public void registerPhoneAccount(PhoneAccount account) {
         try {
             if (isServiceConnected()) {
@@ -639,9 +623,7 @@ public class TelecomManager {
      * Remove a {@link PhoneAccount} registration from the system.
      *
      * @param accountHandle A {@link PhoneAccountHandle} for the {@link PhoneAccount} to unregister.
-     * @hide
      */
-    @SystemApi
     public void unregisterPhoneAccount(PhoneAccountHandle accountHandle) {
         try {
             if (isServiceConnected()) {
@@ -711,10 +693,7 @@ public class TelecomManager {
      *
      * @param accountHandle The handle for the account to check the voicemail number against
      * @param number The number to look up.
-     *
-     * @hide
      */
-    @SystemApi
     public boolean isVoiceMailNumber(PhoneAccountHandle accountHandle, String number) {
         try {
             if (isServiceConnected()) {
@@ -731,10 +710,7 @@ public class TelecomManager {
      *
      * @param accountHandle The handle for the account to check for a voicemail number.
      * @return {@code true} If the given phone account has a voicemail number.
-     *
-     * @hide
      */
-    @SystemApi
     public boolean hasVoiceMailNumber(PhoneAccountHandle accountHandle) {
         try {
             if (isServiceConnected()) {
@@ -751,10 +727,7 @@ public class TelecomManager {
      *
      * @param accountHandle The handle for the account retrieve a number for.
      * @return A string representation of the line 1 phone number.
-     *
-     * @hide
      */
-    @SystemApi
     public String getLine1Number(PhoneAccountHandle accountHandle) {
         try {
             if (isServiceConnected()) {
@@ -864,10 +837,7 @@ public class TelecomManager {
 
     /**
      * Silences the ringer if a ringing call exists.
-     *
-     * @hide
      */
-    @SystemApi
     public void silenceRinger() {
         try {
             if (isServiceConnected()) {
@@ -928,9 +898,7 @@ public class TelecomManager {
      *            {@link #registerPhoneAccount}.
      * @param extras A bundle that will be passed through to
      *            {@link ConnectionService#onCreateIncomingConnection}.
-     * @hide
      */
-    @SystemApi
     public void addNewIncomingCall(PhoneAccountHandle phoneAccount, Bundle extras) {
         try {
             if (isServiceConnected()) {
@@ -1018,9 +986,7 @@ public class TelecomManager {
      * {@code null} to return a URI which will use the default account.
      * @return The URI (with the content:// scheme) specific to the specified {@link PhoneAccount}
      * for the the content retrieve.
-     * @hide
      */
-    @SystemApi
     public Uri getAdnUriForPhoneAccount(PhoneAccountHandle accountHandle) {
         ITelecomService service = getTelecomService();
         if (service != null && accountHandle != null) {

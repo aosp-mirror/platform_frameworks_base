@@ -17,7 +17,6 @@
 package android.telecom;
 
 import android.annotation.SdkConstant;
-import android.annotation.SystemApi;
 import android.app.Service;
 import android.content.ComponentName;
 import android.content.Intent;
@@ -72,9 +71,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * receives call-commands such as answer, reject, hold and disconnect.
  * <p>
  * When there are no more live calls, telecom will unbind from the {@code ConnectionService}.
- * @hide
  */
-@SystemApi
 public abstract class ConnectionService extends Service {
     /**
      * The {@link Intent} that must be declared as handled by the service.

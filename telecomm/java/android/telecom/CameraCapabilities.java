@@ -21,7 +21,6 @@ import android.os.Parcelable;
 
 /**
  * Represents the camera capabilities important to a Video Telephony provider.
- * @hide
  */
 public final class CameraCapabilities implements Parcelable {
 
@@ -46,7 +45,7 @@ public final class CameraCapabilities implements Parcelable {
     private final float mMaxZoom;
 
     /**
-     * Create a call camera capabilities instance that doesn't support zoom.
+     * Create a call camera capabilities instance.
      *
      * @param width The width of the camera video (in pixels).
      * @param height The height of the camera video (in pixels).
@@ -56,7 +55,8 @@ public final class CameraCapabilities implements Parcelable {
     }
 
     /**
-     * Create a call camera capabilities instance.
+     * Create a call camera capabilities instance that optionally
+     * supports zoom.
      *
      * @param width The width of the camera video (in pixels).
      * @param height The height of the camera video (in pixels).

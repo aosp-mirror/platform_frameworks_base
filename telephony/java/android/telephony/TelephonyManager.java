@@ -162,7 +162,6 @@ public class TelephonyManager {
      * Returns 1 for Single standby mode (Single SIM functionality)
      * Returns 2 for Dual standby mode.(Dual SIM functionality)
      */
-    /** {@hide} */
     public int getPhoneCount() {
         int phoneCount = 1;
         switch (getMultiSimConfiguration()) {
@@ -639,7 +638,6 @@ public class TelephonyManager {
      *
      * @param slotId of which deviceID is returned
      */
-    /** {@hide} */
     public String getDeviceId(int slotId) {
         // FIXME this assumes phoneId == slotId
         try {

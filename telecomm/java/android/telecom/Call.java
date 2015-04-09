@@ -16,7 +16,6 @@
 
 package android.telecom;
 
-import android.annotation.SystemApi;
 import android.net.Uri;
 import android.os.Bundle;
 
@@ -30,10 +29,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * Represents an ongoing phone call that the in-call app should present to the user.
- *
- * {@hide}
  */
-@SystemApi
 public final class Call {
     /**
      * The state of a {@code Call} when newly created.
@@ -91,8 +87,6 @@ public final class Call {
      * The key to retrieve the optional {@code PhoneAccount}s Telecom can bundle with its Call
      * extras. Used to pass the phone accounts to display on the front end to the user in order to
      * select phone accounts to (for example) place a call.
-     *
-     * @hide
      */
     public static final String AVAILABLE_PHONE_ACCOUNTS = "selectPhoneAccountAccounts";
 
@@ -142,38 +136,32 @@ public final class Call {
 
         /**
          * Local device supports receiving video.
-         * @hide
          */
         public static final int CAPABILITY_SUPPORTS_VT_LOCAL_RX = 0x00000100;
 
         /**
          * Local device supports transmitting video.
-         * @hide
          */
         public static final int CAPABILITY_SUPPORTS_VT_LOCAL_TX = 0x00000200;
 
         /**
          * Local device supports bidirectional video calling.
-         * @hide
          */
         public static final int CAPABILITY_SUPPORTS_VT_LOCAL_BIDIRECTIONAL =
                 CAPABILITY_SUPPORTS_VT_LOCAL_RX | CAPABILITY_SUPPORTS_VT_LOCAL_TX;
 
         /**
          * Remote device supports receiving video.
-         * @hide
          */
         public static final int CAPABILITY_SUPPORTS_VT_REMOTE_RX = 0x00000400;
 
         /**
          * Remote device supports transmitting video.
-         * @hide
          */
         public static final int CAPABILITY_SUPPORTS_VT_REMOTE_TX = 0x00000800;
 
         /**
          * Remote device supports bidirectional video calling.
-         * @hide
          */
         public static final int CAPABILITY_SUPPORTS_VT_REMOTE_BIDIRECTIONAL =
                 CAPABILITY_SUPPORTS_VT_REMOTE_RX | CAPABILITY_SUPPORTS_VT_REMOTE_TX;
@@ -191,27 +179,21 @@ public final class Call {
         /**
          * Whether the call is a generic conference, where we do not know the precise state of
          * participants in the conference (eg. on CDMA).
-         *
-         * @hide
          */
         public static final int CAPABILITY_GENERIC_CONFERENCE = 0x00004000;
 
         /**
          * Call is using high definition audio.
-         * @hide
          */
         public static final int CAPABILITY_HIGH_DEF_AUDIO = 0x00008000;
 
         /**
          * Call is using WIFI.
-         * @hide
          */
         public static final int CAPABILITY_WIFI = 0x00010000;
 
         /**
          * Indicates that the current device callback number should be shown.
-         *
-         * @hide
          */
         public static final int CAPABILITY_SHOW_CALLBACK_NUMBER = 0x00020000;
 
@@ -259,7 +241,6 @@ public final class Call {
          * @param capabilities A bit field of capabilities.
          * @param capability The capability to check capabilities for.
          * @return Whether the specified capability is supported.
-         * @hide
          */
         public static boolean can(int capabilities, int capability) {
             return (capabilities & capability) != 0;
@@ -270,7 +251,6 @@ public final class Call {
          *
          * @param capability The capability to check capabilities for.
          * @return Whether the specified capability is supported.
-         * @hide
          */
         public boolean can(int capability) {
             return can(mCallCapabilities, capability);
@@ -593,7 +573,6 @@ public final class Call {
          *
          * @param call The {@code Call} invoking this method.
          * @param videoCall The {@code Call.VideoCall} associated with the {@code Call}.
-         * @hide
          */
         public void onVideoCallChanged(Call call, InCallService.VideoCall videoCall) {}
 
@@ -846,7 +825,6 @@ public final class Call {
      * Obtains an object that can be used to display video from this {@code Call}.
      *
      * @return An {@code Call.VideoCall}.
-     * @hide
      */
     public InCallService.VideoCall getVideoCall() {
         return mVideoCall;

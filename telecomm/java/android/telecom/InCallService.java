@@ -16,7 +16,6 @@
 
 package android.telecom;
 
-import android.annotation.SystemApi;
 import android.annotation.SdkConstant;
 import android.app.Service;
 import android.content.Intent;
@@ -36,10 +35,7 @@ import java.lang.String;
  * This service is implemented by any app that wishes to provide the user-interface for managing
  * phone calls. Telecom binds to this service while there exists a live (active or incoming) call,
  * and uses it to notify the in-call app of any live and and recently disconnected calls.
- *
- * {@hide}
  */
-@SystemApi
 public abstract class InCallService extends Service {
 
     /**
@@ -205,7 +201,6 @@ public abstract class InCallService extends Service {
 
     /**
      * Class to invoke functionality related to video calls.
-     * @hide
      */
     public static abstract class VideoCall {
 
@@ -302,7 +297,6 @@ public abstract class InCallService extends Service {
 
         /**
          * Listener class which invokes callbacks after video call actions occur.
-         * @hide
          */
         public static abstract class Listener {
             /**

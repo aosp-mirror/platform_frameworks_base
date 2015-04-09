@@ -16,16 +16,11 @@
 
 package android.telecom;
 
-import android.annotation.SystemApi;
-
 /**
  * Interface used to identify entities with which another entity can participate in a conference
  * call with.  The {@link ConnectionService} implementation will only recognize
  * {@link IConferenceable}s which are {@link Connection}s or {@link Conference}s.
- *
- * @hide
  */
-@SystemApi
 public interface IConferenceable {
 
 }

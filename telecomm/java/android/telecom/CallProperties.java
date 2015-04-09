@@ -18,7 +18,6 @@ package android.telecom;
 
 /**
  * Defines properties of a phone call which may be affected by changes to the call.
- * @hide
  */
 public class CallProperties {
     /** Call is currently in a conference call. */
