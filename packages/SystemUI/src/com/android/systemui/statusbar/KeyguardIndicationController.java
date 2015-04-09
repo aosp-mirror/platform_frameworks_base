@@ -26,6 +26,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.graphics.Color;
 import android.os.BatteryManager;
 import android.os.BatteryStats;
 import android.os.Handler;
@@ -53,6 +54,7 @@ public class KeyguardIndicationController {
 
     private String mRestingIndication;
     private String mTransientIndication;
+    private int mTransientTextColor;
     private boolean mVisible;
 
     private boolean mPowerPluggedIn;
@@ -105,7 +107,15 @@ public class KeyguardIndicationController {
      * Shows {@param transientIndication} until it is hidden by {@link #hideTransientIndication}.
      */
     public void showTransientIndication(String transientIndication) {
+        showTransientIndication(transientIndication, Color.WHITE);
+    }
+
+    /**
+     * Shows {@param transientIndication} until it is hidden by {@link #hideTransientIndication}.
+     */
+    public void showTransientIndication(String transientIndication, int textColor) {
         mTransientIndication = transientIndication;
+        mTransientTextColor = textColor;
         mHandler.removeMessages(MSG_HIDE_TRANSIENT);
         updateIndication();
     }
@@ -124,7 +134,15 @@ public class KeyguardIndicationController {
     private void updateIndication() {
         if (mVisible) {
             mTextView.switchIndication(computeIndication());
+            mTextView.setTextColor(computeColor());
         }
+    }
+
+    private int computeColor() {
+        if (!TextUtils.isEmpty(mTransientIndication)) {
+            return mTransientTextColor;
+        }
+        return Color.WHITE;
     }
 
     private String computeIndication() {

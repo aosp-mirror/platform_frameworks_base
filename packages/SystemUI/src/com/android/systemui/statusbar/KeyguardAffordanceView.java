@@ -34,6 +34,7 @@ import android.view.animation.AnimationUtils;
 import android.view.animation.Interpolator;
 import android.widget.ImageView;
 import com.android.systemui.R;
+import com.android.systemui.statusbar.phone.KeyguardAffordanceHelper;
 
 /**
  * An ImageView which does not have overlapping renderings commands and therefore does not need a
@@ -75,6 +76,7 @@ public class KeyguardAffordanceView extends ImageView {
     private float mCircleStartRadius;
     private float mMaxCircleSize;
     private Animator mPreviewClipper;
+    private float mRestingAlpha = KeyguardAffordanceHelper.SWIPE_RESTING_ALPHA_AMOUNT;
     private AnimatorListenerAdapter mClipEndListener = new AnimatorListenerAdapter() {
         @Override
         public void onAnimationEnd(Animator animation) {
@@ -392,6 +394,17 @@ public class KeyguardAffordanceView extends ImageView {
             animator.setDuration(duration);
             animator.start();
         }
+    }
+
+    public void setRestingAlpha(float alpha) {
+        mRestingAlpha = alpha;
+
+        // TODO: Handle the case an animation is playing.
+        setImageAlpha(alpha, false);
+    }
+
+    public float getRestingAlpha() {
+        return mRestingAlpha;
     }
 
     public void setImageAlpha(float alpha, boolean animate) {

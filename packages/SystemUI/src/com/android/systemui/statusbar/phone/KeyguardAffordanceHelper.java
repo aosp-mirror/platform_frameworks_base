@@ -83,9 +83,9 @@ public class KeyguardAffordanceHelper {
         mContext = context;
         mCallback = callback;
         initIcons();
-        updateIcon(mLeftIcon, 0.0f, SWIPE_RESTING_ALPHA_AMOUNT, false, false);
-        updateIcon(mCenterIcon, 0.0f, SWIPE_RESTING_ALPHA_AMOUNT, false, false);
-        updateIcon(mRightIcon, 0.0f, SWIPE_RESTING_ALPHA_AMOUNT, false, false);
+        updateIcon(mLeftIcon, 0.0f, mLeftIcon.getRestingAlpha(), false, false);
+        updateIcon(mCenterIcon, 0.0f, mCenterIcon.getRestingAlpha(), false, false);
+        updateIcon(mRightIcon, 0.0f, mRightIcon.getRestingAlpha(), false, false);
         initDimens();
     }
 
@@ -344,22 +344,23 @@ public class KeyguardAffordanceHelper {
             float alpha = absTranslation / getMinTranslationAmount();
 
             // We interpolate the alpha of the other icons to 0
-            float fadeOutAlpha = SWIPE_RESTING_ALPHA_AMOUNT * (1.0f - alpha);
-            fadeOutAlpha = Math.max(0.0f, fadeOutAlpha);
-
-            // We interpolate the alpha of the targetView to 1
-            alpha = fadeOutAlpha + alpha;
+            float fadeOutAlpha = 1.0f - alpha;
+            fadeOutAlpha = Math.min(1.0f, Math.max(0.0f, fadeOutAlpha));
 
             boolean animateIcons = isReset && animateReset;
             float radius = getRadiusFromTranslation(absTranslation);
             boolean slowAnimation = isReset && isBelowFalsingThreshold();
             if (!isReset) {
-                updateIcon(targetView, radius, alpha, false, false);
+                updateIcon(targetView, radius, alpha + fadeOutAlpha * targetView.getRestingAlpha(),
+                        false, false);
             } else {
-                updateIcon(targetView, 0.0f, fadeOutAlpha, animateIcons, slowAnimation);
+                updateIcon(targetView, 0.0f, fadeOutAlpha * targetView.getRestingAlpha(),
+                        animateIcons, slowAnimation);
             }
-            updateIcon(otherView, 0.0f, fadeOutAlpha, animateIcons, slowAnimation);
-            updateIcon(mCenterIcon, 0.0f, fadeOutAlpha, animateIcons, slowAnimation);
+            updateIcon(otherView, 0.0f, fadeOutAlpha * otherView.getRestingAlpha(),
+                    animateIcons, slowAnimation);
+            updateIcon(mCenterIcon, 0.0f, fadeOutAlpha * mCenterIcon.getRestingAlpha(),
+                    animateIcons, slowAnimation);
 
             mTranslation = translation;
         }
@@ -369,15 +370,14 @@ public class KeyguardAffordanceHelper {
         float alpha = newRadius / mMinBackgroundRadius;
 
         // We interpolate the alpha of the other icons to 0
-        float fadeOutAlpha = SWIPE_RESTING_ALPHA_AMOUNT * (1.0f - alpha);
+        float fadeOutAlpha =  1.0f - alpha;
         fadeOutAlpha = Math.max(0.0f, fadeOutAlpha);
 
         // We interpolate the alpha of the targetView to 1
-        alpha = fadeOutAlpha + alpha;
         KeyguardAffordanceView otherView = targetView == mRightIcon ? mLeftIcon : mRightIcon;
-        updateIconAlpha(targetView, alpha, false);
-        updateIconAlpha(otherView, fadeOutAlpha, false);
-        updateIconAlpha(mCenterIcon, fadeOutAlpha, false);
+        updateIconAlpha(targetView, alpha + fadeOutAlpha * targetView.getRestingAlpha(), false);
+        updateIconAlpha(otherView, fadeOutAlpha * otherView.getRestingAlpha(), false);
+        updateIconAlpha(mCenterIcon, fadeOutAlpha * mCenterIcon.getRestingAlpha(), false);
     }
 
     private float getTranslationFromRadius(float circleSize) {
@@ -404,14 +404,14 @@ public class KeyguardAffordanceHelper {
     }
 
     private void updateIconAlpha(KeyguardAffordanceView view, float alpha, boolean animate) {
-        float scale = getScale(alpha);
+        float scale = getScale(alpha, view);
         alpha = Math.min(1.0f, alpha);
         view.setImageAlpha(alpha, animate);
         view.setImageScale(scale, animate);
     }
 
-    private float getScale(float alpha) {
-        float scale = alpha / SWIPE_RESTING_ALPHA_AMOUNT * 0.2f +
+    private float getScale(float alpha, KeyguardAffordanceView icon) {
+        float scale = alpha / icon.getRestingAlpha() * 0.2f +
                 KeyguardAffordanceView.MIN_ICON_SCALE_AMOUNT;
         return Math.min(scale, KeyguardAffordanceView.MAX_ICON_SCALE_AMOUNT);
     }

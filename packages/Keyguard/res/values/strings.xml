@@ -303,4 +303,7 @@
     <!-- Description of airplane mode -->
     <string name="airplane_mode">Airplane mode</string>
 
+    <!-- Fingerprint hint message when finger was not recognized.-->
+    <string name="fingerprint_not_recognized">Not recognized</string>
+
 </resources>

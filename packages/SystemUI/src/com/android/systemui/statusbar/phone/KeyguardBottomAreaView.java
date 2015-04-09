@@ -25,13 +25,16 @@ import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.InsetDrawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.RemoteException;
 import android.os.UserHandle;
+import android.os.Vibrator;
 import android.provider.MediaStore;
+import android.provider.Settings;
 import android.telecom.TelecomManager;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -78,6 +81,9 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
     private static final Intent PHONE_INTENT = new Intent(Intent.ACTION_DIAL);
     private static final int DOZE_ANIMATION_STAGGER_DELAY = 48;
     private static final int DOZE_ANIMATION_ELEMENT_DURATION = 250;
+    private static final long TRANSIENT_FP_ERROR_TIMEOUT = 1300;
+    private static final long[] FP_ERROR_VIBRATE_PATTERN = new long[] {0, 30, 100, 30};
+    private static final long[] FP_SUCCESS_VIBRATE_PATTERN = new long[] {0, 30};
 
     private KeyguardAffordanceView mCameraImageView;
     private KeyguardAffordanceView mPhoneImageView;
@@ -101,6 +107,7 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
     private final Interpolator mLinearOutSlowInInterpolator;
     private int mLastUnlockIconRes = 0;
     private boolean mPrewarmSent;
+    private boolean mTransientFpError;
 
     public KeyguardBottomAreaView(Context context) {
         this(context, null);
@@ -431,27 +438,40 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
             return;
         }
         // TODO: Real icon for facelock.
-        int iconRes = mUnlockMethodCache.isFaceUnlockRunning()
-                ? com.android.internal.R.drawable.ic_account_circle
+        boolean isFingerprintIcon =
+                KeyguardUpdateMonitor.getInstance(mContext).isFingerprintDetectionRunning();
+        boolean anyFingerprintIcon = isFingerprintIcon || mTransientFpError;
+        int iconRes = mTransientFpError ? R.drawable.ic_fingerprint_error
+                : isFingerprintIcon ? R.drawable.ic_fingerprint
+                : mUnlockMethodCache.isFaceUnlockRunning()
+                        ? com.android.internal.R.drawable.ic_account_circle
                 : mUnlockMethodCache.isCurrentlyInsecure() ? R.drawable.ic_lock_open_24dp
                 : R.drawable.ic_lock_24dp;
+
         if (mLastUnlockIconRes != iconRes) {
             Drawable icon = mContext.getDrawable(iconRes);
             int iconHeight = getResources().getDimensionPixelSize(
                     R.dimen.keyguard_affordance_icon_height);
             int iconWidth = getResources().getDimensionPixelSize(
                     R.dimen.keyguard_affordance_icon_width);
-            if (icon.getIntrinsicHeight() != iconHeight || icon.getIntrinsicWidth() != iconWidth) {
+            if (!anyFingerprintIcon && (icon.getIntrinsicHeight() != iconHeight
+                    || icon.getIntrinsicWidth() != iconWidth)) {
                 icon = new IntrinsicSizeDrawable(icon, iconWidth, iconHeight);
             }
             mLockIcon.setImageDrawable(icon);
+            mLockIcon.setPaddingRelative(0, 0, 0, anyFingerprintIcon
+                    ? getResources().getDimensionPixelSize(
+                            R.dimen.fingerprint_icon_additional_padding)
+                    : 0);
+            mLockIcon.setRestingAlpha(
+                    anyFingerprintIcon ? 1f : KeyguardAffordanceHelper.SWIPE_RESTING_ALPHA_AMOUNT);
         }
-        boolean trustManaged = mUnlockMethodCache.isTrustManaged();
+
+        // Hide trust circle when fingerprint is running.
+        boolean trustManaged = mUnlockMethodCache.isTrustManaged() && !anyFingerprintIcon;
         mTrustDrawable.setTrustManaged(trustManaged);
         updateLockIconClickability();
     }
-
-
 
     public KeyguardAffordanceView getPhoneView() {
         return mPhoneImageView;
@@ -530,6 +550,14 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
                 .setDuration(DOZE_ANIMATION_ELEMENT_DURATION);
     }
 
+    private void vibrateFingerprintError() {
+        mContext.getSystemService(Vibrator.class).vibrate(FP_ERROR_VIBRATE_PATTERN, -1);
+    }
+
+    private void vibrateFingerprintSuccess() {
+        mContext.getSystemService(Vibrator.class).vibrate(FP_SUCCESS_VIBRATE_PATTERN, -1);
+    }
+
     private final BroadcastReceiver mDevicePolicyReceiver = new BroadcastReceiver() {
         public void onReceive(Context context, Intent intent) {
             post(new Runnable() {
@@ -538,6 +566,15 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
                     updateCameraVisibility();
                 }
             });
+        }
+    };
+
+    private final Runnable mTransientFpErrorClearRunnable = new Runnable() {
+        @Override
+        public void run() {
+            mTransientFpError = false;
+            mIndicationController.hideTransientIndication();
+            updateLockIcon();
         }
     };
 
@@ -562,13 +599,39 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
         public void onKeyguardVisibilityChanged(boolean showing) {
             updateLockIcon();
         }
+
+        @Override
+        public void onFingerprintAuthenticated(int userId) {
+            vibrateFingerprintSuccess();
+        }
+
+        @Override
+        public void onFingerprintRunningStateChanged(boolean running) {
+            updateLockIcon();
+        }
+
+        @Override
+        public void onFingerprintHelp(int msgId, String helpString) {
+            vibrateFingerprintError();
+            mTransientFpError = true;
+            mIndicationController.showTransientIndication(helpString,
+                    getResources().getColor(R.color.system_warning_color, null));
+            removeCallbacks(mTransientFpErrorClearRunnable);
+            postDelayed(mTransientFpErrorClearRunnable, TRANSIENT_FP_ERROR_TIMEOUT);
+            updateLockIcon();
+        }
+
+        @Override
+        public void onFingerprintError(int msgId, String errString) {
+            // TODO: Go to bouncer if this is "too many attempts" (lockout) error.
+            Log.i(TAG, "FP Error: " + errString);
+        }
     };
 
     public void setKeyguardIndicationController(
             KeyguardIndicationController keyguardIndicationController) {
         mIndicationController = keyguardIndicationController;
     }
-
 
     /**
      * A wrapper around another Drawable that overrides the intrinsic size.

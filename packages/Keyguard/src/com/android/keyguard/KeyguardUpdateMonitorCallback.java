@@ -200,4 +200,9 @@ public class KeyguardUpdateMonitorCallback {
      * Called when the state of face unlock changed.
      */
     public void onFaceUnlockStateChanged(boolean running, int userId) { }
+
+    /**
+     * Called when the fingerprint running state changed.
+     */
+    public void onFingerprintRunningStateChanged(boolean running) { }
 }

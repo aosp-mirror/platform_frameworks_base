@@ -573,4 +573,7 @@
     <!-- Screen pinning inner nav bar outer circle size -->
     <dimen name="screen_pinning_nav_highlight_outer_size">84dp</dimen>
 
+    <!-- Padding to be used on the bottom of the fingerprint icon on Keyguard so it better aligns
+         with the other icons. -->
+    <dimen name="fingerprint_icon_additional_padding">12dp</dimen>
 </resources>

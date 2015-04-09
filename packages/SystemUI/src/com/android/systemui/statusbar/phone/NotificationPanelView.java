@@ -1505,7 +1505,7 @@ public class NotificationPanelView extends PanelView implements
                 lockIcon.setImageScale(LOCK_ICON_ACTIVE_SCALE, true, 150,
                         mFastOutLinearInterpolator);
             } else if (!active && mUnlockIconActive && mTracking) {
-                lockIcon.setImageAlpha(KeyguardAffordanceHelper.SWIPE_RESTING_ALPHA_AMOUNT, true,
+                lockIcon.setImageAlpha(lockIcon.getRestingAlpha(), true /* animate */,
                         150, mFastOutLinearInterpolator, null);
                 lockIcon.setImageScale(1.0f, true, 150,
                         mFastOutLinearInterpolator);
@@ -1796,8 +1796,8 @@ public class NotificationPanelView extends PanelView implements
                 mFastOutSlowInInterpolator, new Runnable() {
                     @Override
                     public void run() {
-                        icon.setImageAlpha(KeyguardAffordanceHelper.SWIPE_RESTING_ALPHA_AMOUNT,
-                                true, KeyguardAffordanceHelper.HINT_PHASE1_DURATION,
+                        icon.setImageAlpha(icon.getRestingAlpha(),
+                                true /* animate */, KeyguardAffordanceHelper.HINT_PHASE1_DURATION,
                                 mFastOutSlowInInterpolator, null);
                     }
                 });
