@@ -54,6 +54,7 @@ import android.database.Cursor;
 import android.database.DatabaseUtils;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.database.sqlite.SQLiteStatement;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Environment;
@@ -83,9 +84,12 @@ import com.google.android.collect.Sets;
 import java.io.File;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
+import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -109,7 +113,9 @@ public class AccountManagerService
 
     private static final int TIMEOUT_DELAY_MS = 1000 * 60;
     private static final String DATABASE_NAME = "accounts.db";
-    private static final int DATABASE_VERSION = 7;
+    private static final int DATABASE_VERSION = 8;
+
+    private static final int MAX_DEBUG_DB_SIZE = 64;
 
     private final Context mContext;
 
@@ -213,6 +219,9 @@ public class AccountManagerService
          */
         private final HashMap<Account, AtomicReference<String>> previousNameCache =
                 new HashMap<Account, AtomicReference<String>>();
+
+        private int debugDbInsertionPoint = -1;
+        private SQLiteStatement statementForLogging;
 
         UserAccounts(Context context, int userId) {
             this.userId = userId;
@@ -320,6 +329,8 @@ public class AccountManagerService
         UserAccounts accounts = mUsers.get(userId);
         if (accounts == null) {
             accounts = new UserAccounts(mContext, userId);
+            initializeDebugDbSizeAndCompileSqlStatementForLogging(
+                    accounts.openHelper.getWritableDatabase(), accounts);
             mUsers.append(userId, accounts);
             purgeOldGrants(accounts);
             validateAccountsInternal(accounts, true /* invalidateAuthenticatorCache */);
@@ -407,6 +418,10 @@ public class AccountManagerService
                                 + accountType + " no longer has a registered authenticator");
                         db.delete(TABLE_ACCOUNTS, ACCOUNTS_ID + "=" + accountId, null);
                         accountDeleted = true;
+
+                        logRecord(db, DebugDbHelper.ACTION_AUTHENTICATOR_REMOVE, TABLE_ACCOUNTS,
+                                accountId, accounts);
+
                         final Account account = new Account(accountName, accountType);
                         accounts.userDataCache.remove(account);
                         accounts.authTokenCache.remove(account);
@@ -666,9 +681,10 @@ public class AccountManagerService
 
         UserAccounts accounts = getUserAccountsForCaller();
         // fails if the account already exists
+        int uid = getCallingUid();
         long identityToken = clearCallingIdentity();
         try {
-            return addAccountInternal(accounts, account, password, extras, false);
+            return addAccountInternal(accounts, account, password, extras, false, uid);
         } finally {
             restoreCallingIdentity(identityToken);
         }
@@ -811,7 +827,7 @@ public class AccountManagerService
     }
 
     private boolean addAccountInternal(UserAccounts accounts, Account account, String password,
-            Bundle extras, boolean restricted) {
+            Bundle extras, boolean restricted, int callingUid) {
         if (account == null) {
             return false;
         }
@@ -850,6 +866,10 @@ public class AccountManagerService
                     }
                 }
                 db.setTransactionSuccessful();
+
+                logRecord(db, DebugDbHelper.ACTION_ACCOUNT_ADD, TABLE_ACCOUNTS, accountId,
+                        accounts, callingUid);
+
                 insertAccountIntoCacheLocked(accounts, account);
             } finally {
                 db.endTransaction();
@@ -983,9 +1003,12 @@ public class AccountManagerService
         if (accountToRename == null) throw new IllegalArgumentException("account is null");
         checkAuthenticateAccountsPermission(accountToRename);
         UserAccounts accounts = getUserAccountsForCaller();
+
+        int callingUid = getCallingUid();
         long identityToken = clearCallingIdentity();
         try {
-            Account resultingAccount = renameAccountInternal(accounts, accountToRename, newName);
+            Account resultingAccount = renameAccountInternal(accounts, accountToRename, newName,
+                    callingUid);
             Bundle result = new Bundle();
             result.putString(AccountManager.KEY_ACCOUNT_NAME, resultingAccount.name);
             result.putString(AccountManager.KEY_ACCOUNT_TYPE, resultingAccount.type);
@@ -1000,7 +1023,7 @@ public class AccountManagerService
     }
 
     private Account renameAccountInternal(
-            UserAccounts accounts, Account accountToRename, String newName) {
+            UserAccounts accounts, Account accountToRename, String newName, int callingUid) {
         Account resultAccount = null;
         /*
          * Cancel existing notifications. Let authenticators
@@ -1038,6 +1061,8 @@ public class AccountManagerService
                     db.update(TABLE_ACCOUNTS, values, ACCOUNTS_ID + "=?", argsAccountId);
                     db.setTransactionSuccessful();
                     isSuccessful = true;
+                    logRecord(db, DebugDbHelper.ACTION_ACCOUNT_RENAME, TABLE_ACCOUNTS, accountId,
+                            accounts);
                 }
             } finally {
                 db.endTransaction();
@@ -1131,6 +1156,8 @@ public class AccountManagerService
             }
         }
 
+        logRecord(accounts, DebugDbHelper.ACTION_CALLED_ACCOUNT_REMOVE, TABLE_ACCOUNTS);
+
         try {
             new RemoveAccountSession(accounts, response, account, expectActivityLaunch).bind();
         } finally {
@@ -1188,6 +1215,8 @@ public class AccountManagerService
             }
         }
 
+        logRecord(accounts, DebugDbHelper.ACTION_CALLED_ACCOUNT_REMOVE, TABLE_ACCOUNTS);
+
         try {
             new RemoveAccountSession(accounts, response, account, expectActivityLaunch).bind();
         } finally {
@@ -1210,6 +1239,9 @@ public class AccountManagerService
         if (!canUserModifyAccounts(userId) || !canUserModifyAccountsForType(userId, account.type)) {
             return false;
         }
+
+        logRecord(accounts, DebugDbHelper.ACTION_CALLED_ACCOUNT_REMOVE, TABLE_ACCOUNTS);
+
         long identityToken = clearCallingIdentity();
         try {
             return removeAccountInternal(accounts, account);
@@ -1275,21 +1307,25 @@ public class AccountManagerService
         int deleted;
         synchronized (accounts.cacheLock) {
             final SQLiteDatabase db = accounts.openHelper.getWritableDatabase();
+            final long accountId = getAccountIdLocked(db, account);
             deleted = db.delete(TABLE_ACCOUNTS, ACCOUNTS_NAME + "=? AND " + ACCOUNTS_TYPE
                     + "=?",
                     new String[]{account.name, account.type});
             removeAccountFromCacheLocked(accounts, account);
             sendAccountsChangedBroadcast(accounts.userId);
+
+            logRecord(db, DebugDbHelper.ACTION_ACCOUNT_REMOVE, TABLE_ACCOUNTS, accountId, accounts);
         }
         if (accounts.userId == UserHandle.USER_OWNER) {
             // Owner's account was removed, remove from any users that are sharing
             // this account.
+            int callingUid = getCallingUid();
             long id = Binder.clearCallingIdentity();
             try {
                 List<UserInfo> users = mUserManager.getUsers(true);
                 for (UserInfo user : users) {
                     if (!user.isPrimary() && user.isRestricted()) {
-                        removeSharedAccountAsUser(account, user.id);
+                        removeSharedAccountAsUser(account, user.id, callingUid);
                     }
                 }
             } finally {
@@ -1441,15 +1477,17 @@ public class AccountManagerService
         if (account == null) throw new IllegalArgumentException("account is null");
         checkAuthenticateAccountsPermission(account);
         UserAccounts accounts = getUserAccountsForCaller();
+        int callingUid = getCallingUid();
         long identityToken = clearCallingIdentity();
         try {
-            setPasswordInternal(accounts, account, password);
+            setPasswordInternal(accounts, account, password, callingUid);
         } finally {
             restoreCallingIdentity(identityToken);
         }
     }
 
-    private void setPasswordInternal(UserAccounts accounts, Account account, String password) {
+    private void setPasswordInternal(UserAccounts accounts, Account account, String password,
+            int callingUid) {
         if (account == null) {
             return;
         }
@@ -1473,6 +1511,11 @@ public class AccountManagerService
                     db.delete(TABLE_AUTHTOKENS, AUTHTOKENS_ACCOUNTS_ID + "=?", argsAccountId);
                     accounts.authTokenCache.remove(account);
                     db.setTransactionSuccessful();
+
+                    String action = (password == null || password.length() == 0) ?
+                            DebugDbHelper.ACTION_CLEAR_PASSWORD
+                            : DebugDbHelper.ACTION_SET_PASSWORD;
+                    logRecord(db, action, TABLE_ACCOUNTS, accountId, accounts, callingUid);
                 }
             } finally {
                 db.endTransaction();
@@ -1497,9 +1540,11 @@ public class AccountManagerService
         if (account == null) throw new IllegalArgumentException("account is null");
         checkManageAccountsPermission();
         UserAccounts accounts = getUserAccountsForCaller();
+
+        int callingUid = getCallingUid();
         long identityToken = clearCallingIdentity();
         try {
-            setPasswordInternal(accounts, account, null);
+            setPasswordInternal(accounts, account, null, callingUid);
         } finally {
             restoreCallingIdentity(identityToken);
         }
@@ -1888,6 +1933,8 @@ public class AccountManagerService
         options.putInt(AccountManager.KEY_CALLER_UID, uid);
         options.putInt(AccountManager.KEY_CALLER_PID, pid);
 
+        logRecord(accounts, DebugDbHelper.ACTION_CALLED_ACCOUNT_ADD, TABLE_ACCOUNTS);
+
         long identityToken = clearCallingIdentity();
         try {
             new Session(accounts, response, accountType, expectActivityLaunch,
@@ -1963,6 +2010,8 @@ public class AccountManagerService
         final Bundle options = (optionsIn == null) ? new Bundle() : optionsIn;
         options.putInt(AccountManager.KEY_CALLER_UID, uid);
         options.putInt(AccountManager.KEY_CALLER_PID, pid);
+
+        logRecord(accounts, DebugDbHelper.ACTION_CALLED_ACCOUNT_ADD, TABLE_ACCOUNTS);
 
         long identityToken = clearCallingIdentity();
         try {
@@ -2320,7 +2369,8 @@ public class AccountManagerService
     @Override
     public boolean addSharedAccountAsUser(Account account, int userId) {
         userId = handleIncomingUser(userId);
-        SQLiteDatabase db = getUserAccounts(userId).openHelper.getWritableDatabase();
+        UserAccounts accounts = getUserAccounts(userId);
+        SQLiteDatabase db = accounts.openHelper.getWritableDatabase();
         ContentValues values = new ContentValues();
         values.put(ACCOUNTS_NAME, account.name);
         values.put(ACCOUNTS_TYPE, account.type);
@@ -2332,6 +2382,7 @@ public class AccountManagerService
                     + ", skipping the DB insert failed");
             return false;
         }
+        logRecord(db, DebugDbHelper.ACTION_ACCOUNT_ADD, TABLE_SHARED_ACCOUNTS, accountId, accounts);
         return true;
     }
 
@@ -2340,6 +2391,7 @@ public class AccountManagerService
         userId = handleIncomingUser(userId);
         UserAccounts accounts = getUserAccounts(userId);
         SQLiteDatabase db = accounts.openHelper.getWritableDatabase();
+        long sharedTableAccountId = getAccountIdFromSharedTable(db, account);
         final ContentValues values = new ContentValues();
         values.put(ACCOUNTS_NAME, newName);
         values.put(ACCOUNTS_PREVIOUS_NAME, account.name);
@@ -2349,20 +2401,30 @@ public class AccountManagerService
                 ACCOUNTS_NAME + "=? AND " + ACCOUNTS_TYPE+ "=?",
                 new String[] { account.name, account.type });
         if (r > 0) {
+            int callingUid = getCallingUid();
+            logRecord(db, DebugDbHelper.ACTION_ACCOUNT_RENAME, TABLE_SHARED_ACCOUNTS,
+                    sharedTableAccountId, accounts, callingUid);
             // Recursively rename the account.
-            renameAccountInternal(accounts, account, newName);
+            renameAccountInternal(accounts, account, newName, callingUid);
         }
         return r > 0;
     }
 
     @Override
     public boolean removeSharedAccountAsUser(Account account, int userId) {
+        return removeSharedAccountAsUser(account, userId, getCallingUid());
+    }
+
+    private boolean removeSharedAccountAsUser(Account account, int userId, int callingUid) {
         userId = handleIncomingUser(userId);
         UserAccounts accounts = getUserAccounts(userId);
         SQLiteDatabase db = accounts.openHelper.getWritableDatabase();
+        long sharedTableAccountId = getAccountIdFromSharedTable(db, account);
         int r = db.delete(TABLE_SHARED_ACCOUNTS, ACCOUNTS_NAME + "=? AND " + ACCOUNTS_TYPE+ "=?",
                 new String[] {account.name, account.type});
         if (r > 0) {
+            logRecord(db, DebugDbHelper.ACTION_ACCOUNT_REMOVE, TABLE_SHARED_ACCOUNTS,
+                    sharedTableAccountId, accounts, callingUid);
             removeAccountInternal(accounts, account);
         }
         return r > 0;
@@ -2456,6 +2518,19 @@ public class AccountManagerService
                     callingUid).bind();
         } finally {
             restoreCallingIdentity(identityToken);
+        }
+    }
+
+    private long getAccountIdFromSharedTable(SQLiteDatabase db, Account account) {
+        Cursor cursor = db.query(TABLE_SHARED_ACCOUNTS, new String[]{ACCOUNTS_ID},
+                "name=? AND type=?", new String[]{account.name, account.type}, null, null, null);
+        try {
+            if (cursor.moveToNext()) {
+                return cursor.getLong(0);
+            }
+            return -1;
+        } finally {
+            cursor.close();
         }
     }
 
@@ -2904,6 +2979,130 @@ public class AccountManagerService
         return databaseFile.getPath();
     }
 
+    private static class DebugDbHelper{
+        private DebugDbHelper() {
+        }
+
+        private static String TABLE_DEBUG = "debug_table";
+
+        // Columns for the table
+        private static String ACTION_TYPE = "action_type";
+        private static String TIMESTAMP = "time";
+        private static String CALLER_UID = "caller_uid";
+        private static String TABLE_NAME = "table_name";
+        private static String KEY = "primary_key";
+
+        // These actions correspond to the occurrence of real actions. Since
+        // these are called by the authenticators, the uid associated will be
+        // of the authenticator.
+        private static String ACTION_SET_PASSWORD = "action_set_password";
+        private static String ACTION_CLEAR_PASSWORD = "action_clear_password";
+        private static String ACTION_ACCOUNT_ADD = "action_account_add";
+        private static String ACTION_ACCOUNT_REMOVE = "action_account_remove";
+        private static String ACTION_AUTHENTICATOR_REMOVE = "action_authenticator_remove";
+        private static String ACTION_ACCOUNT_RENAME = "action_account_rename";
+
+        // These actions don't necessarily correspond to any action on
+        // accountDb taking place. As an example, there might be a request for
+        // addingAccount, which might not lead to addition of account on grounds
+        // of bad authentication. We will still be logging it to keep track of
+        // who called.
+        private static String ACTION_CALLED_ACCOUNT_ADD = "action_called_account_add";
+        private static String ACTION_CALLED_ACCOUNT_REMOVE = "action_called_account_remove";
+        private static String ACTION_CALLED_ACCOUNT_RENAME = "action_called_account_rename";
+
+        private static SimpleDateFormat dateFromat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+
+        private static String UPDATE_WHERE_CLAUSE = KEY + "=?";
+
+        private static void createDebugTable(SQLiteDatabase db) {
+            db.execSQL("CREATE TABLE " + TABLE_DEBUG + " ( "
+                    + ACCOUNTS_ID + " INTEGER,"
+                    + ACTION_TYPE + " TEXT NOT NULL, "
+                    + TIMESTAMP + " DATETIME,"
+                    + CALLER_UID + " INTEGER NOT NULL,"
+                    + TABLE_NAME + " TEXT NOT NULL,"
+                    + KEY + " INTEGER PRIMARY KEY)");
+            db.execSQL("CREATE INDEX timestamp_index ON " + TABLE_DEBUG + " (" + TIMESTAMP + ")");
+        }
+    }
+
+    private void logRecord(UserAccounts accounts, String action, String tableName) {
+        SQLiteDatabase db = accounts.openHelper.getWritableDatabase();
+        logRecord(db, action, tableName, -1, accounts);
+    }
+
+    /*
+     * This function receives an opened writable database.
+     */
+    private void logRecord(SQLiteDatabase db, String action, String tableName, long accountId,
+            UserAccounts userAccount) {
+        logRecord(db, action, tableName, accountId, userAccount, getCallingUid());
+    }
+
+    /*
+     * This function receives an opened writable database.
+     */
+    private void logRecord(SQLiteDatabase db, String action, String tableName, long accountId,
+            UserAccounts userAccount, int callingUid) {
+        SQLiteStatement logStatement = userAccount.statementForLogging;
+        logStatement.bindLong(1, accountId);
+        logStatement.bindString(2, action);
+        logStatement.bindString(3, DebugDbHelper.dateFromat.format(new Date()));
+        logStatement.bindLong(4, callingUid);
+        logStatement.bindString(5, tableName);
+        logStatement.bindLong(6, userAccount.debugDbInsertionPoint);
+        logStatement.execute();
+        logStatement.clearBindings();
+        userAccount.debugDbInsertionPoint = (userAccount.debugDbInsertionPoint + 1)
+                % MAX_DEBUG_DB_SIZE;
+    }
+
+    /*
+     * This should only be called once to compile the sql statement for logging
+     * and to find the insertion point.
+     */
+    private void initializeDebugDbSizeAndCompileSqlStatementForLogging(SQLiteDatabase db,
+            UserAccounts userAccount) {
+        // Initialize the count if not done earlier.
+        int size = (int) getDebugTableRowCount(db);
+        if (size >= MAX_DEBUG_DB_SIZE) {
+            // Table is full, and we need to find the point where to insert.
+            userAccount.debugDbInsertionPoint = (int) getDebugTableInsertionPoint(db);
+        } else {
+            userAccount.debugDbInsertionPoint = size;
+        }
+        compileSqlStatementForLogging(db, userAccount);
+    }
+
+    private void compileSqlStatementForLogging(SQLiteDatabase db, UserAccounts userAccount) {
+        String sql = "INSERT OR REPLACE INTO " + DebugDbHelper.TABLE_DEBUG
+                + " VALUES (?,?,?,?,?,?)";
+        userAccount.statementForLogging = db.compileStatement(sql);
+    }
+
+    private long getDebugTableRowCount(SQLiteDatabase db) {
+        String queryCountDebugDbRows = "SELECT COUNT(*) FROM " + DebugDbHelper.TABLE_DEBUG;
+        return DatabaseUtils.longForQuery(db, queryCountDebugDbRows, null);
+    }
+
+    /*
+     * Finds the row key where the next insertion should take place. This should
+     * be invoked only if the table has reached its full capacity.
+     */
+    private long getDebugTableInsertionPoint(SQLiteDatabase db) {
+        // This query finds the smallest timestamp value (and if 2 records have
+        // same timestamp, the choose the lower id).
+        String queryCountDebugDbRows = new StringBuilder()
+                .append("SELECT ").append(DebugDbHelper.KEY)
+                .append(" FROM ").append(DebugDbHelper.TABLE_DEBUG)
+                .append(" ORDER BY ")
+                .append(DebugDbHelper.TIMESTAMP).append(",").append(DebugDbHelper.KEY)
+                .append(" LIMIT 1")
+                .toString();
+        return DatabaseUtils.longForQuery(db, queryCountDebugDbRows, null);
+    }
+
     static class DatabaseHelper extends SQLiteOpenHelper {
 
         public DatabaseHelper(Context context, int userId) {
@@ -2949,6 +3148,8 @@ public class AccountManagerService
             createSharedAccountsTable(db);
 
             createAccountsDeletionTrigger(db);
+
+            DebugDbHelper.createDebugTable(db);
         }
 
         private void createSharedAccountsTable(SQLiteDatabase db) {
@@ -2966,6 +3167,10 @@ public class AccountManagerService
 
         private void addOldAccountNameColumn(SQLiteDatabase db) {
             db.execSQL("ALTER TABLE " + TABLE_ACCOUNTS + " ADD COLUMN " + ACCOUNTS_PREVIOUS_NAME);
+        }
+
+        private void addDebugTable(SQLiteDatabase db) {
+            DebugDbHelper.createDebugTable(db);
         }
 
         private void createAccountsDeletionTrigger(SQLiteDatabase db) {
@@ -3025,6 +3230,11 @@ public class AccountManagerService
 
             if (oldVersion == 6) {
                 addLastSuccessfullAuthenticatedTimeColumn(db);
+                oldVersion++;
+            }
+
+            if (oldVersion == 7) {
+                addDebugTable(db);
                 oldVersion++;
             }
 
@@ -3107,6 +3317,23 @@ public class AccountManagerService
                 fout.println("Accounts: " + accounts.length);
                 for (Account account : accounts) {
                     fout.println("  " + account);
+                }
+
+                // Add debug information.
+                fout.println();
+                Cursor cursor = db.query(DebugDbHelper.TABLE_DEBUG, null,
+                        null, null, null, null, DebugDbHelper.TIMESTAMP);
+                fout.println("AccountId, Action_Type, timestamp, UID, TableName, Key");
+                fout.println("Accounts History");
+                try {
+                    while (cursor.moveToNext()) {
+                        // print type,count
+                        fout.println(cursor.getString(0) + "," + cursor.getString(1) + "," +
+                                cursor.getString(2) + "," + cursor.getString(3) + ","
+                                + cursor.getString(4) + "," + cursor.getString(5));
+                    }
+                } finally {
+                    cursor.close();
                 }
 
                 fout.println();
