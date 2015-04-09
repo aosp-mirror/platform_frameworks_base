@@ -3167,7 +3167,7 @@ status_t ResourceTable::flatten(Bundle* bundle, const sp<const ResourceFilter>& 
                     if (!validResources[i]) {
                         sp<ConfigList> c = t->getOrderedConfigs().itemAt(i);
                         if (c != NULL) {
-                            fprintf(stderr, "%s: no entries written for %s/%s (0x%08x)\n", log_prefix,
+                            fprintf(stderr, "%s: no entries written for %s/%s (0x%08zx)\n", log_prefix,
                                     String8(typeName).string(), String8(c->getName()).string(),
                                     Res_MAKEID(p->getAssignedId() - 1, ti, i));
                         }
@@ -4526,7 +4526,6 @@ status_t ResourceTable::modifyForCompat(const Bundle* bundle) {
                     const KeyedVector<String16, Item>& bag = e->getBag();
                     const size_t bagCount = bag.size();
                     for (size_t bi = 0; bi < bagCount; bi++) {
-                        const Item& item = bag.valueAt(bi);
                         const uint32_t attrId = getResId(bag.keyAt(bi), &attr16);
                         const int sdkLevel = getPublicAttributeSdkLevel(attrId);
                         if (sdkLevel > 1 && sdkLevel > config.sdkVersion && sdkLevel > minSdk) {
