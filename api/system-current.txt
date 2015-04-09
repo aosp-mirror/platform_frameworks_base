@@ -5915,6 +5915,7 @@ package android.app.backup {
     method public android.app.backup.RestoreSession beginRestoreSession();
     method public void dataChanged();
     method public static void dataChanged(java.lang.String);
+    method public long getAvailableRestoreToken(java.lang.String);
     method public java.lang.String getCurrentTransport();
     method public boolean isBackupEnabled();
     method public java.lang.String[] listAllTransports();

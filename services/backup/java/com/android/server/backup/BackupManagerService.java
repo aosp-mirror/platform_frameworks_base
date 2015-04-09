@@ -2209,7 +2209,10 @@ public class BackupManagerService {
 
     // Get the restore-set token for the best-available restore set for this package:
     // the active set if possible, else the ancestral one.  Returns zero if none available.
-    long getAvailableRestoreToken(String packageName) {
+    public long getAvailableRestoreToken(String packageName) {
+        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.BACKUP,
+                "getAvailableRestoreToken");
+
         long token = mAncestralToken;
         synchronized (mQueueLock) {
             if (mEverStoredApps.contains(packageName)) {

@@ -317,6 +317,12 @@ public class Trampoline extends IBackupManager.Stub {
     }
 
     @Override
+    public long getAvailableRestoreToken(String packageName) {
+        BackupManagerService svc = mService;
+        return (svc != null) ? svc.getAvailableRestoreToken(packageName) : 0;
+    }
+
+    @Override
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.DUMP, TAG);
 
