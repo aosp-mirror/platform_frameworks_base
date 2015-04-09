@@ -30755,6 +30755,10 @@ package android.telephony {
     field public static final java.lang.String BOOL_CARRIER_VOLTE_TTY_SUPPORTED = "bool_carrier_volte_tty_supported";
     field public static final java.lang.String BOOL_SHOW_APN_SETTING_CDMA = "bool_show_apn_setting_cdma";
     field public static final java.lang.String INT_VOLTE_REPLACEMENT_RAT = "int_volte_replacement_rat";
+    field public static final java.lang.String SHORT_VVM_PORT_NUMBER = "string_vvm_port_number";
+    field public static final java.lang.String STRING_VVM_DESTINATION_NUMBER = "string_vvm_destination_number";
+    field public static final java.lang.String STRING_VVM_TYPE = "string_vvm_type";
+    field public static final java.lang.String VVM_TYPE_OMTP = "vvm_type_omtp";
   }
 
   public final class CellIdentityCdma implements android.os.Parcelable {
