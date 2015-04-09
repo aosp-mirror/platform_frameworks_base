@@ -64,6 +64,7 @@ public class AndroidKeyStoreProvider extends Provider {
         putSecretKeyFactoryImpl("HmacSHA512");
 
         // javax.crypto.Mac
+        putMacImpl("HmacSHA1", PACKAGE_NAME + ".KeyStoreHmacSpi$HmacSHA1");
         putMacImpl("HmacSHA224", PACKAGE_NAME + ".KeyStoreHmacSpi$HmacSHA224");
         putMacImpl("HmacSHA256", PACKAGE_NAME + ".KeyStoreHmacSpi$HmacSHA256");
         putMacImpl("HmacSHA384", PACKAGE_NAME + ".KeyStoreHmacSpi$HmacSHA384");
