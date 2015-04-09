@@ -62,12 +62,24 @@ public final class MidiOutputPort extends MidiSender implements Closeable {
                         // FIXME - inform receivers here?
                     }
 
-                    int offset = MidiPortImpl.getMessageOffset(buffer, count);
-                    int size = MidiPortImpl.getMessageSize(buffer, count);
-                    long timestamp = MidiPortImpl.getMessageTimeStamp(buffer, count);
+                    int packetType = MidiPortImpl.getPacketType(buffer, count);
+                    switch (packetType) {
+                        case MidiPortImpl.PACKET_TYPE_DATA: {
+                            int offset = MidiPortImpl.getDataOffset(buffer, count);
+                            int size = MidiPortImpl.getDataSize(buffer, count);
+                            long timestamp = MidiPortImpl.getPacketTimestamp(buffer, count);
 
-                    // dispatch to all our receivers
-                    mDispatcher.sendWithTimestamp(buffer, offset, size, timestamp);
+                            // dispatch to all our receivers
+                            mDispatcher.sendWithTimestamp(buffer, offset, size, timestamp);
+                            break;
+                        }
+                        case MidiPortImpl.PACKET_TYPE_FLUSH:
+                            mDispatcher.flush();
+                            break;
+                        default:
+                            Log.e(TAG, "Unknown packet type " + packetType);
+                            break;
+                    }
                 }
             } catch (IOException e) {
                 // FIXME report I/O failure?

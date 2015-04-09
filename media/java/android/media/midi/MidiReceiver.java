@@ -42,6 +42,13 @@ abstract public class MidiReceiver {
             throws IOException;
 
     /**
+     * Instructs the receiver to discard all pending events.
+     * @throws IOException
+     */
+    public void flush() throws IOException {
+    }
+
+    /**
      * Returns the maximum size of a message this receiver can receive.
      * Defaults to {@link java.lang.Integer#MAX_VALUE} unless overridden.
      * @return maximum message size

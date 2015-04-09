@@ -83,4 +83,11 @@ public final class MidiDispatcher extends MidiReceiver {
             }
         }
     }
+
+    @Override
+    public void flush() throws IOException {
+       for (MidiReceiver receiver : mReceivers) {
+            receiver.flush();
+       }
+    }
 }

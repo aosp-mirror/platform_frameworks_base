@@ -45,7 +45,8 @@ public final class UsbMidiDevice implements Closeable {
 
     private MidiDeviceServer mServer;
 
-    private final MidiEventScheduler mEventScheduler;
+    // event schedulers for each output port
+    private final MidiEventScheduler[] mEventSchedulers;
 
     private static final int BUFFER_SIZE = 512;
 
@@ -99,10 +100,11 @@ public final class UsbMidiDevice implements Closeable {
         }
 
         mOutputStreams = new FileOutputStream[outputCount];
+        mEventSchedulers = new MidiEventScheduler[outputCount];
         for (int i = 0; i < outputCount; i++) {
             mOutputStreams[i] = new FileOutputStream(fileDescriptors[i]);
+            mEventSchedulers[i] = new MidiEventScheduler();
         }
-        mEventScheduler = new MidiEventScheduler(inputCount);
     }
 
     private boolean register(Context context, Bundle properties) {
@@ -116,7 +118,7 @@ public final class UsbMidiDevice implements Closeable {
         int outputCount = mOutputStreams.length;
         MidiReceiver[] inputPortReceivers = new MidiReceiver[inputCount];
         for (int port = 0; port < inputCount; port++) {
-            inputPortReceivers[port] = mEventScheduler.getReceiver(port);
+            inputPortReceivers[port] = mEventSchedulers[port].getReceiver();
         }
 
         mServer = midiManager.createDeviceServer(inputPortReceivers, outputCount,
@@ -126,7 +128,7 @@ public final class UsbMidiDevice implements Closeable {
         }
         final MidiReceiver[] outputReceivers = mServer.getOutputPortReceivers();
 
-        // Create input thread
+        // Create input thread which will read from all input ports
         new Thread("UsbMidiDevice input thread") {
             @Override
             public void run() {
@@ -161,38 +163,46 @@ public final class UsbMidiDevice implements Closeable {
             }
         }.start();
 
-        // Create output thread
-        new Thread("UsbMidiDevice output thread") {
-            @Override
-            public void run() {
-                while (true) {
-                    MidiEvent event;
-                    try {
-                        event = (MidiEvent)mEventScheduler.waitNextEvent();
-                    } catch (InterruptedException e) {
-                        // try again
-                        continue;
+        // Create output thread for each output port
+        for (int port = 0; port < outputCount; port++) {
+            final MidiEventScheduler eventSchedulerF = mEventSchedulers[port];
+            final FileOutputStream outputStreamF = mOutputStreams[port];
+            final int portF = port;
+
+            new Thread("UsbMidiDevice output thread " + port) {
+                @Override
+                public void run() {
+                    while (true) {
+                        MidiEvent event;
+                        try {
+                            event = (MidiEvent)eventSchedulerF.waitNextEvent();
+                        } catch (InterruptedException e) {
+                            // try again
+                            continue;
+                        }
+                        if (event == null) {
+                            break;
+                        }
+                        try {
+                            outputStreamF.write(event.data, 0, event.count);
+                        } catch (IOException e) {
+                            Log.e(TAG, "write failed for port " + portF);
+                        }
+                        eventSchedulerF.addEventToPool(event);
                     }
-                    if (event == null) {
-                        break;
-                    }
-                    try {
-                        mOutputStreams[event.portNumber].write(event.data, 0, event.count);
-                    } catch (IOException e) {
-                        Log.e(TAG, "write failed for port " + event.portNumber);
-                    }
-                    mEventScheduler.addEventToPool(event);
+                    Log.d(TAG, "output thread exit");
                 }
-                Log.d(TAG, "output thread exit");
-            }
-        }.start();
+            }.start();
+        }
 
         return true;
     }
 
     @Override
     public void close() throws IOException {
-        mEventScheduler.close();
+        for (int i = 0; i < mEventSchedulers.length; i++) {
+            mEventSchedulers[i].close();
+        }
 
         if (mServer != null) {
             mServer.close();

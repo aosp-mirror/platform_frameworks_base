@@ -16842,6 +16842,7 @@ package android.media.midi {
 
   public abstract class MidiReceiver {
     ctor public MidiReceiver();
+    method public void flush() throws java.io.IOException;
     method public int getMaxMessageSize();
     method public abstract void onReceive(byte[], int, int, long) throws java.io.IOException;
     method public void send(byte[], int, int) throws java.io.IOException;
