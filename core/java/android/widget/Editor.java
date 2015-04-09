@@ -1668,6 +1668,7 @@ public class Editor {
         if (mSelectionActionMode != null) {
             // Selection action mode is already started
             // TODO: revisit invocations to minimize this case.
+            mSelectionActionMode.invalidate();
             return false;
         }
         ActionMode.Callback actionModeCallback = new SelectionActionModeCallback();
@@ -1681,6 +1682,7 @@ public class Editor {
     boolean startSelectionActionModeWithSelection() {
         if (mSelectionActionMode != null) {
             // Selection action mode is already started
+            mSelectionActionMode.invalidate();
             return false;
         }
 
@@ -2963,6 +2965,28 @@ public class Editor {
 
         @Override
         public boolean onCreateActionMode(ActionMode mode, Menu menu) {
+            mode.setTitle(mTextView.getContext().getString(
+                    com.android.internal.R.string.textSelectionCABTitle));
+            mode.setSubtitle(null);
+            mode.setTitleOptionalHint(true);
+            populateMenuWithItems(menu);
+
+            if (mCustomSelectionActionModeCallback != null) {
+                if (!mCustomSelectionActionModeCallback.onCreateActionMode(mode, menu)) {
+                    // The custom mode can choose to cancel the action mode
+                    return false;
+                }
+            }
+
+            if (menu.hasVisibleItems() || mode.getCustomView() != null) {
+                mTextView.setHasTransientState(true);
+                return true;
+            } else {
+                return false;
+            }
+        }
+
+        private void populateMenuWithItems(Menu menu) {
             final boolean legacy = mTextView.getContext().getApplicationInfo().targetSdkVersion <
                     Build.VERSION_CODES.LOLLIPOP;
             final Context context = !legacy && menu instanceof MenuBuilder ?
@@ -2970,11 +2994,6 @@ public class Editor {
                     mTextView.getContext();
             final TypedArray styledAttributes = context.obtainStyledAttributes(
                     com.android.internal.R.styleable.SelectionModeDrawables);
-
-            mode.setTitle(mTextView.getContext().getString(
-                    com.android.internal.R.string.textSelectionCABTitle));
-            mode.setSubtitle(null);
-            mode.setTitleOptionalHint(true);
 
             if (mTextView.canCut()) {
                 menu.add(0, TextView.ID_CUT, 0, com.android.internal.R.string.cut).
@@ -3010,35 +3029,31 @@ public class Editor {
                     setShowAsAction(
                             MenuItem.SHOW_AS_ACTION_ALWAYS | MenuItem.SHOW_AS_ACTION_WITH_TEXT);
 
-            if (mTextView.isSuggestionsEnabled() && isCursorInsideSuggestionSpan()) {
-                menu.add(0, TextView.ID_REPLACE, 0, com.android.internal.R.string.replace).
-                        setShowAsAction(
-                                MenuItem.SHOW_AS_ACTION_ALWAYS | MenuItem.SHOW_AS_ACTION_WITH_TEXT);
-            }
+            updateReplaceItem(menu);
 
             styledAttributes.recycle();
-
-            if (mCustomSelectionActionModeCallback != null) {
-                if (!mCustomSelectionActionModeCallback.onCreateActionMode(mode, menu)) {
-                    // The custom mode can choose to cancel the action mode
-                    return false;
-                }
-            }
-
-            if (menu.hasVisibleItems() || mode.getCustomView() != null) {
-                mTextView.setHasTransientState(true);
-                return true;
-            } else {
-                return false;
-            }
         }
 
         @Override
         public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
+            updateReplaceItem(menu);
+
             if (mCustomSelectionActionModeCallback != null) {
                 return mCustomSelectionActionModeCallback.onPrepareActionMode(mode, menu);
             }
             return true;
+        }
+
+        private void updateReplaceItem(Menu menu) {
+            boolean canReplace = mTextView.isSuggestionsEnabled() && isCursorInsideSuggestionSpan();
+            boolean replaceItemExists = menu.findItem(TextView.ID_REPLACE) != null;
+            if (canReplace && !replaceItemExists) {
+                menu.add(0, TextView.ID_REPLACE, 0, com.android.internal.R.string.replace).
+                setShowAsAction(
+                        MenuItem.SHOW_AS_ACTION_ALWAYS | MenuItem.SHOW_AS_ACTION_WITH_TEXT);
+            } else if (!canReplace && replaceItemExists) {
+                menu.removeItem(TextView.ID_REPLACE);
+            }
         }
 
         @Override
@@ -3796,6 +3811,9 @@ public class Editor {
             Selection.setSelection((Spannable) mTextView.getText(), offset,
                     mTextView.getSelectionEnd());
             updateDrawable();
+            if (mSelectionActionMode != null) {
+                mSelectionActionMode.invalidate();
+            }
         }
 
         @Override
@@ -3898,6 +3916,9 @@ public class Editor {
         public void updateSelection(int offset) {
             Selection.setSelection((Spannable) mTextView.getText(),
                     mTextView.getSelectionStart(), offset);
+            if (mSelectionActionMode != null) {
+                mSelectionActionMode.invalidate();
+            }
             updateDrawable();
         }
 
