@@ -45,8 +45,9 @@
 /**
  * Other constants:
  */
-// For the edge of the penumbra, the opacity is 0.
-#define OUTER_OPACITY (0.0f)
+// For the edge of the penumbra, the opacity is 0. After transform (1 - alpha),
+// it is 1.
+#define TRANSFORMED_OUTER_OPACITY (1.0f)
 
 // Once the alpha difference is greater than this threshold, we will allocate extra
 // edge vertices.
@@ -83,11 +84,13 @@ inline float getAlphaFromFactoredZ(float factoredZ) {
     return 1.0 / (1 + MathUtils::max(factoredZ, 0.0f));
 }
 
+// The shader is using gaussian function e^-(1-x)*(1-x)*4, therefore, we transform
+// the alpha value to (1 - alpha)
 inline float getTransformedAlphaFromAlpha(float alpha) {
-    return acosf(1.0f - 2.0f * alpha);
+    return 1.0f - alpha;
 }
 
-// The output is ranged from 0 to M_PI.
+// The output is ranged from 0 to 1.
 inline float getTransformedAlphaFromFactoredZ(float factoredZ) {
     return getTransformedAlphaFromAlpha(getAlphaFromFactoredZ(factoredZ));
 }
@@ -249,7 +252,7 @@ void AmbientShadow::createAmbientShadow(bool isCasterOpaque,
             indexBuffer[indexBufferIndex++] = vertexBufferIndex;
             indexBuffer[indexBufferIndex++] = currentInnerVertexIndex;
             AlphaVertex::set(&shadowVertices[vertexBufferIndex++], outerVertex.x,
-                    outerVertex.y, OUTER_OPACITY);
+                    outerVertex.y, TRANSFORMED_OUTER_OPACITY);
 
             if (j == 0) {
                 outerStart = outerVertex;
@@ -285,7 +288,7 @@ void AmbientShadow::createAmbientShadow(bool isCasterOpaque,
                     (outerLast * startWeight + outerNext * k) / extraVerticesNumber;
                 indexBuffer[indexBufferIndex++] = vertexBufferIndex;
                 AlphaVertex::set(&shadowVertices[vertexBufferIndex++], currentOuter.x,
-                        currentOuter.y, OUTER_OPACITY);
+                        currentOuter.y, TRANSFORMED_OUTER_OPACITY);
 
                 if (!isCasterOpaque) {
                     umbraVertices[umbraIndex++] = vertexBufferIndex;
