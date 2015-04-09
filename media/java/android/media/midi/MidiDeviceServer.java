@@ -252,6 +252,11 @@ public final class MidiDeviceServer implements Closeable {
                 mPortClients.put(token, client);
             }
         }
+
+        @Override
+        public MidiDeviceInfo getDeviceInfo() {
+            return mDeviceInfo;
+        }
     };
 
     /* package */ MidiDeviceServer(IMidiManager midiManager, MidiReceiver[] inputPortReceivers,
@@ -277,6 +282,10 @@ public final class MidiDeviceServer implements Closeable {
 
     /* package */ IMidiDeviceServer getBinderInterface() {
         return mServer;
+    }
+
+    public IBinder asBinder() {
+        return mServer.asBinder();
     }
 
     /* package */ void setDeviceInfo(MidiDeviceInfo deviceInfo) {

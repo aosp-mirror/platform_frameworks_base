@@ -16,6 +16,7 @@
 
 package android.media.midi;
 
+import android.bluetooth.BluetoothDevice;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -41,6 +42,24 @@ import java.util.HashMap;
  */
 public final class MidiManager {
     private static final String TAG = "MidiManager";
+
+    /**
+     * Intent for starting BluetoothMidiService
+     * @hide
+     */
+    public static final String BLUETOOTH_MIDI_SERVICE_INTENT =
+                "android.media.midi.BluetoothMidiService";
+
+    /**
+     * BluetoothMidiService package name
+     */
+    private static final String BLUETOOTH_MIDI_SERVICE_PACKAGE = "com.android.bluetoothmidiservice";
+
+    /**
+     * BluetoothMidiService class name
+     */
+    private static final String BLUETOOTH_MIDI_SERVICE_CLASS =
+                "com.android.bluetoothmidiservice.BluetoothMidiService";
 
     private final Context mContext;
     private final IMidiManager mService;
@@ -145,6 +164,19 @@ public final class MidiManager {
     }
 
     /**
+     * Callback class used for receiving the results of {@link #openBluetoothDevice}
+     */
+    abstract public static class BluetoothOpenCallback {
+        /**
+         * Called to respond to a {@link #openBluetoothDevice} request
+         *
+         * @param bluetoothDevice the {@link android.bluetooth.BluetoothDevice} to open
+         * @param device a {@link MidiDevice} for opened device, or null if opening failed
+         */
+        abstract public void onDeviceOpened(BluetoothDevice bluetoothDevice, MidiDevice device);
+    }
+
+    /**
      * @hide
      */
     public MidiManager(Context context, IMidiManager service) {
@@ -214,6 +246,19 @@ public final class MidiManager {
         }
     }
 
+    private void sendBluetoothDeviceResponse(final BluetoothDevice bluetoothDevice,
+            final MidiDevice device, final BluetoothOpenCallback callback, Handler handler) {
+        if (handler != null) {
+            handler.post(new Runnable() {
+                    @Override public void run() {
+                        callback.onDeviceOpened(bluetoothDevice, device);
+                    }
+                });
+        } else {
+            callback.onDeviceOpened(bluetoothDevice, device);
+        }
+    }
+
     /**
      * Opens a MIDI device for reading and writing.
      *
@@ -260,7 +305,7 @@ public final class MidiManager {
                         // return immediately to avoid calling sendOpenDeviceResponse below
                         return;
                     } else {
-                        Log.e(TAG, "Unable to bind  service: " + intent);
+                        Log.e(TAG, "Unable to bind service: " + intent);
                     }
                 }
             } else {
@@ -270,6 +315,51 @@ public final class MidiManager {
             Log.e(TAG, "RemoteException in openDevice");
         }
         sendOpenDeviceResponse(deviceInfo, device, callback, handler);
+    }
+
+    /**
+     * Opens a Bluetooth MIDI device for reading and writing.
+     *
+     * @param bluetoothDevice a {@link android.bluetooth.BluetoothDevice} to open as a MIDI device
+     * @param callback a {@link MidiManager.BluetoothOpenCallback} to be called to receive the
+     * result
+     * @param handler the {@link android.os.Handler Handler} that will be used for delivering
+     *                the result. If handler is null, then the thread used for the
+     *                callback is unspecified.
+     */
+    public void openBluetoothDevice(final BluetoothDevice bluetoothDevice,
+            final BluetoothOpenCallback callback, final Handler handler) {
+        Intent intent = new Intent(BLUETOOTH_MIDI_SERVICE_INTENT);
+        intent.setComponent(new ComponentName(BLUETOOTH_MIDI_SERVICE_PACKAGE,
+                BLUETOOTH_MIDI_SERVICE_CLASS));
+        intent.putExtra("device", bluetoothDevice);
+        if (!mContext.bindService(intent,
+            new ServiceConnection() {
+                @Override
+                public void onServiceConnected(ComponentName name, IBinder binder) {
+                    IMidiDeviceServer server =
+                            IMidiDeviceServer.Stub.asInterface(binder);
+                    try {
+                        // fetch MidiDeviceInfo from the server
+                        MidiDeviceInfo deviceInfo = server.getDeviceInfo();
+                        MidiDevice device = new MidiDevice(deviceInfo, server, mContext, this);
+                        sendBluetoothDeviceResponse(bluetoothDevice, device, callback, handler);
+                    } catch (RemoteException e) {
+                        Log.e(TAG, "remote exception in onServiceConnected");
+                        sendBluetoothDeviceResponse(bluetoothDevice, null, callback, handler);
+                    }
+                }
+
+                @Override
+                public void onServiceDisconnected(ComponentName name) {
+                    // FIXME - anything to do here?
+                }
+            },
+            Context.BIND_AUTO_CREATE))
+        {
+            Log.e(TAG, "Unable to bind service: " + intent);
+            sendBluetoothDeviceResponse(bluetoothDevice, null, callback, handler);
+        }
     }
 
     /** @hide */

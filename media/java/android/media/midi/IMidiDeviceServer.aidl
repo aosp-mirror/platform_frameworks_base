@@ -16,6 +16,7 @@
 
 package android.media.midi;
 
+import android.media.midi.MidiDeviceInfo;
 import android.os.ParcelFileDescriptor;
 
 /** @hide */
@@ -27,4 +28,6 @@ interface IMidiDeviceServer
 
     // connects the input port pfd to the specified output port
     void connectPorts(IBinder token, in ParcelFileDescriptor pfd, int outputPortNumber);
+
+    MidiDeviceInfo getDeviceInfo();
 }

@@ -372,8 +372,8 @@ public class MidiService extends IMidiManager.Stub {
             int numOutputPorts, String[] inputPortNames, String[] outputPortNames,
             Bundle properties, int type) {
         int uid = Binder.getCallingUid();
-        if (type != MidiDeviceInfo.TYPE_VIRTUAL && uid != Process.SYSTEM_UID) {
-            throw new SecurityException("only system can create non-virtual devices");
+        if (type == MidiDeviceInfo.TYPE_USB && uid != Process.SYSTEM_UID) {
+            throw new SecurityException("only system can create USB devices");
         }
 
         synchronized (mDevicesByInfo) {
