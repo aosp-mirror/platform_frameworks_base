@@ -24,6 +24,8 @@ LOCAL_PROGUARD_FLAG_FILES := proguard.flags
 LOCAL_PACKAGE_NAME := StatementService
 LOCAL_PRIVILEGED_MODULE := true
 
+LOCAL_JAVA_LIBRARIES += org.apache.http.legacy
+
 LOCAL_STATIC_JAVA_LIBRARIES := \
     libprotobuf-java-nano \
     volley
