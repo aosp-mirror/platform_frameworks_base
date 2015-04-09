@@ -213,8 +213,18 @@ public abstract class KeyStoreKeyConstraints {
                         throw new IllegalArgumentException("HMAC digest not specified");
                     }
                     switch (digest) {
+                        case Digest.MD5:
+                            return "HmacMD5";
+                        case Digest.SHA1:
+                            return "HmacSHA1";
+                        case Digest.SHA224:
+                            return "HmacSHA224";
                         case Digest.SHA256:
                             return "HmacSHA256";
+                        case Digest.SHA384:
+                            return "HmacSHA384";
+                        case Digest.SHA512:
+                            return "HmacSHA512";
                         default:
                             throw new IllegalArgumentException(
                                     "Unsupported HMAC digest: " + digest);
