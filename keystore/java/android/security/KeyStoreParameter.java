@@ -433,8 +433,9 @@ public final class KeyStoreParameter implements ProtectionParameter {
          * ciphertext.</li>
          * <li>If you are using RSA encryption without padding, consider switching to padding
          * schemes which offer {@code IND-CPA}, such as PKCS#1 or OAEP.</li>
-         *
          * </ul>
+         *
+         * @hide
          */
         public Builder setRandomizedEncryptionRequired(boolean required) {
             mRandomizedEncryptionRequired = required;
