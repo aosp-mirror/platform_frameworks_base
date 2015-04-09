@@ -1458,18 +1458,10 @@ public class PackageManagerService extends IPackageManager.Stub {
                         }
 
                         try {
-                            byte dexoptRequired = DexFile.isDexOptNeededInternal(lib, null,
-                                                                                 dexCodeInstructionSet,
-                                                                                 false);
-                            if (dexoptRequired != DexFile.UP_TO_DATE) {
+                            int dexoptNeeded = DexFile.getDexOptNeeded(lib, null, dexCodeInstructionSet, false);
+                            if (dexoptNeeded != DexFile.NO_DEXOPT_NEEDED) {
                                 alreadyDexOpted.add(lib);
-
-                                // The list of "shared libraries" we have at this point is
-                                if (dexoptRequired == DexFile.DEXOPT_NEEDED) {
-                                    mInstaller.dexopt(lib, Process.SYSTEM_UID, true, dexCodeInstructionSet);
-                                } else {
-                                    mInstaller.patchoat(lib, Process.SYSTEM_UID, true, dexCodeInstructionSet);
-                                }
+                                mInstaller.dexopt(lib, Process.SYSTEM_UID, true, dexCodeInstructionSet, dexoptNeeded);
                             }
                         } catch (FileNotFoundException e) {
                             Slog.w(TAG, "Library not found: " + lib);
@@ -1515,13 +1507,9 @@ public class PackageManagerService extends IPackageManager.Stub {
                             continue;
                         }
                         try {
-                            byte dexoptRequired = DexFile.isDexOptNeededInternal(path, null,
-                                                                                 dexCodeInstructionSet,
-                                                                                 false);
-                            if (dexoptRequired == DexFile.DEXOPT_NEEDED) {
-                                mInstaller.dexopt(path, Process.SYSTEM_UID, true, dexCodeInstructionSet);
-                            } else if (dexoptRequired == DexFile.PATCHOAT_NEEDED) {
-                                mInstaller.patchoat(path, Process.SYSTEM_UID, true, dexCodeInstructionSet);
+                            int dexoptNeeded = DexFile.getDexOptNeeded(path, null, dexCodeInstructionSet, false);
+                            if (dexoptNeeded != DexFile.NO_DEXOPT_NEEDED) {
+                                mInstaller.dexopt(path, Process.SYSTEM_UID, true, dexCodeInstructionSet, dexoptNeeded);
                             }
                         } catch (FileNotFoundException e) {
                             Slog.w(TAG, "Jar not found: " + path);
