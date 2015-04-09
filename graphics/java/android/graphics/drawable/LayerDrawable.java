@@ -211,7 +211,11 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
             updateLayerFromTypedArray(layer, a);
             a.recycle();
 
-            if (layer.mDrawable == null) {
+            // If the layer doesn't have a drawable or unresolved theme
+            // attribute for a drawable, attempt to parse one from the child
+            // element.
+            if (layer.mDrawable == null && (layer.mThemeAttrs == null ||
+                    layer.mThemeAttrs[R.styleable.LayerDrawableItem_drawable] == 0)) {
                 while ((type = parser.next()) == XmlPullParser.TEXT) {
                 }
                 if (type != XmlPullParser.START_TAG) {
