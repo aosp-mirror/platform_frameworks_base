@@ -49,14 +49,25 @@ public class AndroidKeyStoreProvider extends Provider {
 
         // javax.crypto.KeyGenerator
         put("KeyGenerator.AES", PACKAGE_NAME + ".KeyStoreKeyGeneratorSpi$AES");
+        put("KeyGenerator.HmacSHA1", PACKAGE_NAME + ".KeyStoreKeyGeneratorSpi$HmacSHA1");
+        put("KeyGenerator.HmacSHA224", PACKAGE_NAME + ".KeyStoreKeyGeneratorSpi$HmacSHA224");
         put("KeyGenerator.HmacSHA256", PACKAGE_NAME + ".KeyStoreKeyGeneratorSpi$HmacSHA256");
+        put("KeyGenerator.HmacSHA384", PACKAGE_NAME + ".KeyStoreKeyGeneratorSpi$HmacSHA384");
+        put("KeyGenerator.HmacSHA512", PACKAGE_NAME + ".KeyStoreKeyGeneratorSpi$HmacSHA512");
 
         // java.security.SecretKeyFactory
-        put("SecretKeyFactory.AES", PACKAGE_NAME + ".KeyStoreSecretKeyFactorySpi");
-        put("SecretKeyFactory.HmacSHA256", PACKAGE_NAME + ".KeyStoreSecretKeyFactorySpi");
+        putSecretKeyFactoryImpl("AES");
+        putSecretKeyFactoryImpl("HmacSHA1");
+        putSecretKeyFactoryImpl("HmacSHA224");
+        putSecretKeyFactoryImpl("HmacSHA256");
+        putSecretKeyFactoryImpl("HmacSHA384");
+        putSecretKeyFactoryImpl("HmacSHA512");
 
         // javax.crypto.Mac
+        putMacImpl("HmacSHA224", PACKAGE_NAME + ".KeyStoreHmacSpi$HmacSHA224");
         putMacImpl("HmacSHA256", PACKAGE_NAME + ".KeyStoreHmacSpi$HmacSHA256");
+        putMacImpl("HmacSHA384", PACKAGE_NAME + ".KeyStoreHmacSpi$HmacSHA384");
+        putMacImpl("HmacSHA512", PACKAGE_NAME + ".KeyStoreHmacSpi$HmacSHA512");
 
         // javax.crypto.Cipher
         putSymmetricCipherImpl("AES/ECB/NoPadding",
@@ -71,6 +82,10 @@ public class AndroidKeyStoreProvider extends Provider {
 
         putSymmetricCipherImpl("AES/CTR/NoPadding",
                 PACKAGE_NAME + ".KeyStoreCipherSpi$AES$CTR$NoPadding");
+    }
+
+    private void putSecretKeyFactoryImpl(String algorithm) {
+        put("SecretKeyFactory." + algorithm, PACKAGE_NAME + ".KeyStoreSecretKeyFactorySpi");
     }
 
     private void putMacImpl(String algorithm, String implClass) {
