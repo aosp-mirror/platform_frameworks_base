@@ -123,7 +123,7 @@ public abstract class KeyStoreKeyConstraints {
     }
 
     @Retention(RetentionPolicy.SOURCE)
-    @IntDef({Algorithm.AES, Algorithm.HMAC})
+    @IntDef({Algorithm.AES, Algorithm.HMAC, Algorithm.RSA, Algorithm.EC})
     public @interface AlgorithmEnum {}
 
     /**
@@ -135,12 +135,22 @@ public abstract class KeyStoreKeyConstraints {
         /**
          * Key algorithm: AES.
          */
-        public static final int AES = 0;
+        public static final int AES = 1 << 0;
 
         /**
          * Key algorithm: HMAC.
          */
-        public static final int HMAC = 1;
+        public static final int HMAC = 1 << 1;
+
+        /**
+         * Key algorithm: RSA.
+         */
+        public static final int RSA = 1 << 2;
+
+        /**
+         * Key algorithm: EC.
+         */
+        public static final int EC = 1 << 3;
 
         /**
          * @hide
@@ -151,6 +161,10 @@ public abstract class KeyStoreKeyConstraints {
                     return KeymasterDefs.KM_ALGORITHM_AES;
                 case HMAC:
                     return KeymasterDefs.KM_ALGORITHM_HMAC;
+                case RSA:
+                    return KeymasterDefs.KM_ALGORITHM_RSA;
+                case EC:
+                    return KeymasterDefs.KM_ALGORITHM_ECDSA;
                 default:
                     throw new IllegalArgumentException("Unknown algorithm: " + algorithm);
             }
@@ -165,6 +179,10 @@ public abstract class KeyStoreKeyConstraints {
                     return AES;
                 case KeymasterDefs.KM_ALGORITHM_HMAC:
                     return HMAC;
+                case KeymasterDefs.KM_ALGORITHM_RSA:
+                    return RSA;
+                case KeymasterDefs.KM_ALGORITHM_ECDSA:
+                    return EC;
                 default:
                     throw new IllegalArgumentException("Unknown algorithm: " + algorithm);
             }
@@ -179,6 +197,10 @@ public abstract class KeyStoreKeyConstraints {
                     return "AES";
                 case HMAC:
                     return "HMAC";
+                case RSA:
+                    return "RSA";
+                case EC:
+                    return "EC";
                 default:
                     throw new IllegalArgumentException("Unknown algorithm: " + algorithm);
             }
@@ -223,11 +245,32 @@ public abstract class KeyStoreKeyConstraints {
                     throw new IllegalArgumentException("Unsupported key algorithm: " + algorithm);
             }
         }
+
+        /**
+         * @hide
+         */
+        public static String toJCAKeyPairAlgorithm(@AlgorithmEnum int algorithm) {
+            switch (algorithm) {
+                case RSA:
+                    return "RSA";
+                case EC:
+                    return "EC";
+                default:
+                    throw new IllegalArgumentException("Unsupported key alorithm: " + algorithm);
+            }
+        }
     }
 
     @Retention(RetentionPolicy.SOURCE)
     @IntDef(flag = true,
-            value = {Padding.NONE, Padding.PKCS7})
+            value = {
+                Padding.NONE,
+                Padding.PKCS7,
+                Padding.RSA_PKCS1_ENCRYPTION,
+                Padding.RSA_PKCS1_SIGNATURE,
+                Padding.RSA_OAEP,
+                Padding.RSA_PSS,
+                })
     public @interface PaddingEnum {}
 
     /**
@@ -247,6 +290,26 @@ public abstract class KeyStoreKeyConstraints {
         public static final int PKCS7 = 1 << 1;
 
         /**
+         * RSA PKCS#1 v1.5 padding for encryption/decryption.
+         */
+        public static final int RSA_PKCS1_ENCRYPTION = 1 << 2;
+
+        /**
+         * RSA PKCS#1 v1.5 padding for signatures.
+         */
+        public static final int RSA_PKCS1_SIGNATURE = 1 << 3;
+
+        /**
+         * RSA Optimal Asymmetric Encryption Padding (OAEP).
+         */
+        public static final int RSA_OAEP = 1 << 4;
+
+        /**
+         * RSA PKCS#1 v2.1 Probabilistic Signature Scheme (PSS) padding.
+         */
+        public static final int RSA_PSS = 1 << 5;
+
+        /**
          * @hide
          */
         public static int toKeymaster(int padding) {
@@ -255,6 +318,14 @@ public abstract class KeyStoreKeyConstraints {
                     return KeymasterDefs.KM_PAD_NONE;
                 case PKCS7:
                     return KeymasterDefs.KM_PAD_PKCS7;
+                case RSA_PKCS1_ENCRYPTION:
+                    return KeymasterDefs.KM_PAD_RSA_PKCS1_1_5_ENCRYPT;
+                case RSA_PKCS1_SIGNATURE:
+                    return KeymasterDefs.KM_PAD_RSA_PKCS1_1_5_SIGN;
+                case RSA_OAEP:
+                    return KeymasterDefs.KM_PAD_RSA_OAEP;
+                case RSA_PSS:
+                    return KeymasterDefs.KM_PAD_RSA_PSS;
                 default:
                     throw new IllegalArgumentException("Unknown padding: " + padding);
             }
@@ -269,6 +340,14 @@ public abstract class KeyStoreKeyConstraints {
                     return NONE;
                 case KeymasterDefs.KM_PAD_PKCS7:
                     return PKCS7;
+                case KeymasterDefs.KM_PAD_RSA_PKCS1_1_5_ENCRYPT:
+                    return RSA_PKCS1_ENCRYPTION;
+                case KeymasterDefs.KM_PAD_RSA_PKCS1_1_5_SIGN:
+                    return RSA_PKCS1_SIGNATURE;
+                case KeymasterDefs.KM_PAD_RSA_OAEP:
+                    return RSA_OAEP;
+                case KeymasterDefs.KM_PAD_RSA_PSS:
+                    return RSA_PSS;
                 default:
                     throw new IllegalArgumentException("Unknown padding: " + padding);
             }
@@ -283,6 +362,14 @@ public abstract class KeyStoreKeyConstraints {
                     return "NONE";
                 case PKCS7:
                     return "PKCS#7";
+                case RSA_PKCS1_ENCRYPTION:
+                    return "RSA PKCS#1 (encryption)";
+                case RSA_PKCS1_SIGNATURE:
+                    return "RSA PKCS#1 (signature)";
+                case RSA_OAEP:
+                    return "RSA OAEP";
+                case RSA_PSS:
+                    return "RSA PSS";
                 default:
                     throw new IllegalArgumentException("Unknown padding: " + padding);
             }
@@ -291,12 +378,18 @@ public abstract class KeyStoreKeyConstraints {
         /**
          * @hide
          */
-        public static @PaddingEnum int fromJCAPadding(String padding) {
+        public static @PaddingEnum int fromJCACipherPadding(String padding) {
             String paddingLower = padding.toLowerCase(Locale.US);
             if ("nopadding".equals(paddingLower)) {
                 return NONE;
             } else if ("pkcs7padding".equals(paddingLower)) {
                 return PKCS7;
+            } else if ("pkcs1padding".equals(paddingLower)) {
+                return RSA_PKCS1_ENCRYPTION;
+            } else if (("oaeppadding".equals(paddingLower))
+                    || ((paddingLower.startsWith("oaepwith"))
+                            && (paddingLower.endsWith("padding")))) {
+                return RSA_OAEP;
             } else {
                 throw new IllegalArgumentException("Unknown padding: " + padding);
             }
