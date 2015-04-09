@@ -833,7 +833,13 @@ public final class TvContract {
         }
     }
 
-    /** Column definitions for the TV programs table. */
+    /**
+     * Column definitions for the TV programs table.
+     * <p>
+     * By default, the query results will be sorted by {@link Programs#COLUMN_START_TIME_UTC_MILLIS}
+     * in ascending order.
+     * </p>
+     */
     public static final class Programs implements BaseTvColumns {
 
         /** The content:// style URI for this table. */
@@ -1233,6 +1239,10 @@ public final class TvContract {
     /**
      * Column definitions for the TV programs that the user watched. Applications do not have access
      * to this table.
+     * <p>
+     * By default, the query results will be sorted by
+     * {@link WatchedPrograms#COLUMN_WATCH_START_TIME_UTC_MILLIS} in descending order.
+     * </p>
      * @hide
      */
     @SystemApi
