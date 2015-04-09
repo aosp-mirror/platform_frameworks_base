@@ -1,0 +1,201 @@
+//
+// Copyright (C) 2014 The Android Open Source Project
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+
+// This tool is prebuilt if we're doing an app-only build.
+// ANDROIDMK TRANSLATION ERROR: unsupported conditional
+// ifeq ($(TARGET_BUILD_APPS)$(filter true,$(TARGET_BUILD_PDK)),)
+// ==========================================================
+// Setup some common variables for the different build
+// targets here.
+// ==========================================================
+
+aaptMain = ["Main.cpp"]
+
+aaptSources = [
+    "AaptAssets.cpp",
+    "AaptConfig.cpp",
+    "AaptUtil.cpp",
+    "AaptXml.cpp",
+    "ApkBuilder.cpp",
+    "Command.cpp",
+    "CrunchCache.cpp",
+    "FileFinder.cpp",
+    "Images.cpp",
+    "Package.cpp",
+    "pseudolocalize.cpp",
+    "Resource.cpp",
+    "ResourceFilter.cpp",
+    "ResourceIdCache.cpp",
+    "ResourceTable.cpp",
+    "SourcePos.cpp",
+    "StringPool.cpp",
+    "WorkQueue.cpp",
+    "XMLNode.cpp",
+    "ZipEntry.cpp",
+    "ZipFile.cpp",
+]
+
+aaptTests = [
+    "tests/AaptConfig_test.cpp",
+    "tests/AaptGroupEntry_test.cpp",
+    "tests/ResourceFilter_test.cpp",
+]
+
+aaptCIncludes = [
+    "external/libpng",
+    "external/zlib",
+]
+
+// TODO: BUILD_NUMBER support
+//aaptCFlags = ["-DAAPT_VERSION=\\\"" + BUILD_NUMBER + "\\\""]
+aaptCFlags = [
+    "-Wall",
+    "-Werror",
+]
+
+// Statically link libz for MinGW (Win SDK under Linux),
+// and dynamically link for all others.
+// ANDROIDMK TRANSLATION ERROR: unsupported conditional
+// ifneq ($(strip $(USE_MINGW)),)
+// aaptHostStaticLibs += ["libz"]
+// ANDROIDMK TRANSLATION ERROR: else from unsupported contitional
+// else
+// aaptHostLdLibs += ["-lz"]
+// ANDROIDMK TRANSLATION ERROR: endif from unsupported contitional
+// endif
+
+// ==========================================================
+// Build the host static library: libaapt
+// ==========================================================
+cc_library_host_static {
+    name: "libaapt",
+    cflags: [
+        "-Wno-format-y2k",
+        "-DSTATIC_ANDROIDFW_FOR_TOOLS",
+    ] + aaptCFlags,
+
+    target: {
+        darwin: {
+            cflags: ["-D_DARWIN_UNLIMITED_STREAMS"],
+        },
+    },
+    shared_libs: [
+        "libexpat",
+    ],
+    include_dirs: aaptCIncludes,
+    srcs: aaptSources,
+}
+
+// ==========================================================
+// Build the executable: aapt
+// ==========================================================
+// ANDROIDMK TRANSLATION ERROR: unsupported conditional
+// ifneq ($(SDK_ONLY),true)
+cc_binary {
+    name: "aapt",
+    host_supported: true,
+    cflags: aaptCFlags,
+    srcs: aaptMain,
+    include_dirs: aaptCIncludes,
+    host_ldlibs: [
+        "-lrt",
+        "-ldl",
+        "-lpthread",
+    ],
+    target: {
+        not_windows: {
+            host_ldlibs: ["-lz"],
+        },
+        windows: {
+            static_libs: ["libz"],
+        },
+        linux: {
+            host_ldlibs: [
+                "-lrt",
+                "-ldl",
+                "-lpthread",
+            ],
+        },
+        host: {
+            static_libs: [
+                "libaapt",
+                "libandroidfw",
+                "libpng",
+                "liblog",
+                "libutils",
+                "libcutils",
+                "libexpat",
+                "libziparchive",
+            ],
+        },
+        android: {
+            srcs: aaptSources,
+            shared_libs: [
+                "libandroidfw",
+                "libutils",
+                "libcutils",
+                "libpng",
+                "liblog",
+                "libz",
+            ],
+            static_libs: ["libexpat"],
+        },
+    },
+}
+
+// ==========================================================
+// Build the host tests: libaapt_tests
+// ==========================================================
+cc_test_host {
+
+    name: "libaapt_tests",
+    cflags: aaptCFlags,
+    srcs: aaptTests,
+    local_include_dirs: ["."],
+    static_libs: [
+        "libaapt",
+        "libandroidfw",
+        "libpng",
+        "liblog",
+        "libutils",
+        "libcutils",
+        "libexpat",
+        "libziparchive",
+    ],
+    target: {
+        not_windows: {
+            host_ldlibs: ["-lz"],
+        },
+        windows: {
+            static_libs: ["libz"],
+        },
+        linux: {
+            host_ldlibs: [
+                "-lrt",
+                "-ldl",
+                "-lpthread",
+            ],
+        },
+    },
+}
+
+// ANDROIDMK TRANSLATION ERROR: endif from unsupported contitional
+// endif
+// Not SDK_ONLY
+
+// ANDROIDMK TRANSLATION ERROR: endif from unsupported contitional
+// endif
+// No TARGET_BUILD_APPS or TARGET_BUILD_PDK
