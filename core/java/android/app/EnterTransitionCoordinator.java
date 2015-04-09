@@ -18,7 +18,6 @@ package android.app;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
-import android.app.SharedElementCallback.OnSharedElementsReadyListener;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.ResultReceiver;
@@ -141,13 +140,13 @@ class EnterTransitionCoordinator extends ActivityTransitionCoordinator {
         } else {
             decor.getViewTreeObserver()
                     .addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
-                        @Override
-                        public boolean onPreDraw() {
-                            decor.getViewTreeObserver().removeOnPreDrawListener(this);
-                            viewsReady(sharedElements);
-                            return true;
-                        }
-                    });
+                @Override
+                public boolean onPreDraw() {
+                    decor.getViewTreeObserver().removeOnPreDrawListener(this);
+                    viewsReady(sharedElements);
+                    return true;
+                }
+            });
         }
     }
 
@@ -384,33 +383,23 @@ class EnterTransitionCoordinator extends ActivityTransitionCoordinator {
         }
         final Bundle sharedElementState = mSharedElementsBundle;
         mSharedElementsBundle = null;
-        OnSharedElementsReadyListener listener = new OnSharedElementsReadyListener() {
-            @Override
-            public void onSharedElementsReady() {
-                final View decorView = getDecor();
-                if (decorView != null) {
-                    decorView.getViewTreeObserver()
-                            .addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
+        final View decorView = getDecor();
+        if (decorView != null) {
+            decorView.getViewTreeObserver()
+                    .addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
+                        @Override
+                        public boolean onPreDraw() {
+                            decorView.getViewTreeObserver().removeOnPreDrawListener(this);
+                            startTransition(new Runnable() {
                                 @Override
-                                public boolean onPreDraw() {
-                                    decorView.getViewTreeObserver().removeOnPreDrawListener(this);
-                                    startTransition(new Runnable() {
-                                        @Override
-                                        public void run() {
-                                            startSharedElementTransition(sharedElementState);
-                                        }
-                                    });
-                                    return false;
+                                public void run() {
+                                    startSharedElementTransition(sharedElementState);
                                 }
                             });
-                    decorView.invalidate();
-                }
-            }
-        };
-        if (mListener == null) {
-            listener.onSharedElementsReady();
-        } else {
-            mListener.onSharedElementsArrived(mSharedElementNames, mSharedElements, listener);
+                            return false;
+                        }
+                    });
+            decorView.invalidate();
         }
     }
 
