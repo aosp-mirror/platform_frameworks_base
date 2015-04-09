@@ -35,9 +35,33 @@ import javax.crypto.MacSpi;
  */
 public abstract class KeyStoreHmacSpi extends MacSpi implements KeyStoreCryptoOperation {
 
+    public static class HmacSHA1 extends KeyStoreHmacSpi {
+        public HmacSHA1() {
+            super(KeyStoreKeyConstraints.Digest.SHA1);
+        }
+    }
+
+    public static class HmacSHA224 extends KeyStoreHmacSpi {
+        public HmacSHA224() {
+            super(KeyStoreKeyConstraints.Digest.SHA224);
+        }
+    }
+
     public static class HmacSHA256 extends KeyStoreHmacSpi {
         public HmacSHA256() {
-            super(KeyStoreKeyConstraints.Digest.SHA256, 256 / 8);
+            super(KeyStoreKeyConstraints.Digest.SHA256);
+        }
+    }
+
+    public static class HmacSHA384 extends KeyStoreHmacSpi {
+        public HmacSHA384() {
+            super(KeyStoreKeyConstraints.Digest.SHA384);
+        }
+    }
+
+    public static class HmacSHA512 extends KeyStoreHmacSpi {
+        public HmacSHA512() {
+            super(KeyStoreKeyConstraints.Digest.SHA512);
         }
     }
 
@@ -52,9 +76,9 @@ public abstract class KeyStoreHmacSpi extends MacSpi implements KeyStoreCryptoOp
     private IBinder mOperationToken;
     private Long mOperationHandle;
 
-    protected KeyStoreHmacSpi(@KeyStoreKeyConstraints.DigestEnum int digest, int macSizeBytes) {
+    protected KeyStoreHmacSpi(@KeyStoreKeyConstraints.DigestEnum int digest) {
         mDigest = digest;
-        mMacSizeBytes = macSizeBytes;
+        mMacSizeBytes = KeyStoreKeyConstraints.Digest.getOutputSizeBytes(digest);
     }
 
     @Override
