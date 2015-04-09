@@ -327,7 +327,15 @@ public abstract class KeyStoreKeyConstraints {
 
     @Retention(RetentionPolicy.SOURCE)
     @IntDef(flag = true,
-            value = {Digest.NONE, Digest.SHA256})
+            value = {
+                Digest.NONE,
+                Digest.MD5,
+                Digest.SHA1,
+                Digest.SHA224,
+                Digest.SHA256,
+                Digest.SHA384,
+                Digest.SHA512,
+                })
     public @interface DigestEnum {}
 
     /**
@@ -343,9 +351,34 @@ public abstract class KeyStoreKeyConstraints {
         public static final int NONE = 1 << 0;
 
         /**
-         * SHA-256 digest.
+         * MD5 digest.
          */
-        public static final int SHA256 = 1 << 1;
+        public static final int MD5 = 1 << 1;
+
+        /**
+         * SHA-1 digest.
+         */
+        public static final int SHA1 = 1 << 2;
+
+        /**
+         * SHA-2 224 (aka SHA-224) digest.
+         */
+        public static final int SHA224 = 1 << 3;
+
+        /**
+         * SHA-2 256 (aka SHA-256) digest.
+         */
+        public static final int SHA256 = 1 << 4;
+
+        /**
+         * SHA-2 384 (aka SHA-384) digest.
+         */
+        public static final int SHA384 = 1 << 5;
+
+        /**
+         * SHA-2 512 (aka SHA-512) digest.
+         */
+        public static final int SHA512 = 1 << 6;
 
         /**
          * @hide
@@ -354,8 +387,18 @@ public abstract class KeyStoreKeyConstraints {
             switch (digest) {
                 case NONE:
                     return "NONE";
+                case MD5:
+                    return "MD5";
+                case SHA1:
+                    return "SHA-1";
+                case SHA224:
+                    return "SHA-224";
                 case SHA256:
-                    return "SHA256";
+                    return "SHA-256";
+                case SHA384:
+                    return "SHA-384";
+                case SHA512:
+                    return "SHA-512";
                 default:
                     throw new IllegalArgumentException("Unknown digest: " + digest);
             }
@@ -364,13 +407,19 @@ public abstract class KeyStoreKeyConstraints {
         /**
          * @hide
          */
-        public static String[] allToString(@DigestEnum int digests) {
-            int[] values = getSetFlags(digests);
-            String[] result = new String[values.length];
-            for (int i = 0; i < values.length; i++) {
-                result[i] = toString(values[i]);
+        public static String allToString(@DigestEnum int digests) {
+            StringBuilder result = new StringBuilder("[");
+            boolean firstValue = true;
+            for (@DigestEnum int digest : getSetFlags(digests)) {
+                if (firstValue) {
+                    firstValue = false;
+                } else {
+                    result.append(", ");
+                }
+                result.append(toString(digest));
             }
-            return result;
+            result.append(']');
+            return result.toString();
         }
 
         /**
@@ -380,8 +429,18 @@ public abstract class KeyStoreKeyConstraints {
             switch (digest) {
                 case NONE:
                     return KeymasterDefs.KM_DIGEST_NONE;
+                case MD5:
+                    return KeymasterDefs.KM_DIGEST_MD5;
+                case SHA1:
+                    return KeymasterDefs.KM_DIGEST_SHA1;
+                case SHA224:
+                    return KeymasterDefs.KM_DIGEST_SHA_2_224;
                 case SHA256:
                     return KeymasterDefs.KM_DIGEST_SHA_2_256;
+                case SHA384:
+                    return KeymasterDefs.KM_DIGEST_SHA_2_384;
+                case SHA512:
+                    return KeymasterDefs.KM_DIGEST_SHA_2_512;
                 default:
                     throw new IllegalArgumentException("Unknown digest: " + digest);
             }
@@ -394,8 +453,18 @@ public abstract class KeyStoreKeyConstraints {
             switch (digest) {
                 case KeymasterDefs.KM_DIGEST_NONE:
                     return NONE;
+                case KeymasterDefs.KM_DIGEST_MD5:
+                    return MD5;
+                case KeymasterDefs.KM_DIGEST_SHA1:
+                    return SHA1;
+                case KeymasterDefs.KM_DIGEST_SHA_2_224:
+                    return SHA224;
                 case KeymasterDefs.KM_DIGEST_SHA_2_256:
                     return SHA256;
+                case KeymasterDefs.KM_DIGEST_SHA_2_384:
+                    return SHA384;
+                case KeymasterDefs.KM_DIGEST_SHA_2_512:
+                    return SHA512;
                 default:
                     throw new IllegalArgumentException("Unknown digest: " + digest);
             }
@@ -429,11 +498,21 @@ public abstract class KeyStoreKeyConstraints {
         public static @DigestEnum Integer fromJCASecretKeyAlgorithm(String algorithm) {
             String algorithmLower = algorithm.toLowerCase(Locale.US);
             if (algorithmLower.startsWith("hmac")) {
-                if ("hmacsha256".equals(algorithmLower)) {
+                String digestLower = algorithmLower.substring("hmac".length());
+                if ("md5".equals(digestLower)) {
+                    return MD5;
+                } else if ("sha1".equals(digestLower)) {
+                    return SHA1;
+                } else if ("sha224".equals(digestLower)) {
+                    return SHA224;
+                } else if ("sha256".equals(digestLower)) {
                     return SHA256;
+                } else if ("sha384".equals(digestLower)) {
+                    return SHA384;
+                } else if ("sha512".equals(digestLower)) {
+                    return SHA512;
                 } else {
-                    throw new IllegalArgumentException("Unsupported digest: "
-                            + algorithmLower.substring("hmac".length()));
+                    throw new IllegalArgumentException("Unsupported digest: " + digestLower);
                 }
             } else {
                 return null;
@@ -447,8 +526,18 @@ public abstract class KeyStoreKeyConstraints {
             switch (digest) {
                 case NONE:
                     return "NONE";
+                case MD5:
+                    return "MD5";
+                case SHA1:
+                    return "SHA1";
+                case SHA224:
+                    return "SHA224";
                 case SHA256:
                     return "SHA256";
+                case SHA384:
+                    return "SHA384";
+                case SHA512:
+                    return "SHA512";
                 default:
                     throw new IllegalArgumentException("Unknown digest: " + digest);
             }
@@ -461,8 +550,18 @@ public abstract class KeyStoreKeyConstraints {
             switch (digest) {
                 case NONE:
                     return null;
+                case MD5:
+                    return 128 / 8;
+                case SHA1:
+                    return 160 / 8;
+                case SHA224:
+                    return 224 / 8;
                 case SHA256:
                     return 256 / 8;
+                case SHA384:
+                    return 384 / 8;
+                case SHA512:
+                    return 512 / 8;
                 default:
                     throw new IllegalArgumentException("Unknown digest: " + digest);
             }

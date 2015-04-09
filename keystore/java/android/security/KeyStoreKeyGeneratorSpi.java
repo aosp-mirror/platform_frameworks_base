@@ -41,12 +41,41 @@ public abstract class KeyStoreKeyGeneratorSpi extends KeyGeneratorSpi {
         }
     }
 
-    public static class HmacSHA256 extends KeyStoreKeyGeneratorSpi {
-        public HmacSHA256() {
+    protected static abstract class HmacBase extends KeyStoreKeyGeneratorSpi {
+        protected HmacBase(@KeyStoreKeyConstraints.DigestEnum int digest) {
             super(KeyStoreKeyConstraints.Algorithm.HMAC,
-                    KeyStoreKeyConstraints.Digest.SHA256,
-                    KeyStoreKeyConstraints.Digest.getOutputSizeBytes(
-                            KeyStoreKeyConstraints.Digest.SHA256) * 8);
+                    digest,
+                    KeyStoreKeyConstraints.Digest.getOutputSizeBytes(digest) * 8);
+        }
+    }
+
+    public static class HmacSHA1 extends HmacBase {
+        public HmacSHA1() {
+            super(KeyStoreKeyConstraints.Digest.SHA1);
+        }
+    }
+
+    public static class HmacSHA224 extends HmacBase {
+        public HmacSHA224() {
+            super(KeyStoreKeyConstraints.Digest.SHA224);
+        }
+    }
+
+    public static class HmacSHA256 extends HmacBase {
+        public HmacSHA256() {
+            super(KeyStoreKeyConstraints.Digest.SHA256);
+        }
+    }
+
+    public static class HmacSHA384 extends HmacBase {
+        public HmacSHA384() {
+            super(KeyStoreKeyConstraints.Digest.SHA384);
+        }
+    }
+
+    public static class HmacSHA512 extends HmacBase {
+        public HmacSHA512() {
+            super(KeyStoreKeyConstraints.Digest.SHA512);
         }
     }
 
