@@ -17,6 +17,7 @@
 package com.android.documentsui;
 
 import android.content.Context;
+import android.content.pm.ProviderInfo;
 import android.content.res.AssetFileDescriptor;
 import android.database.Cursor;
 import android.database.MatrixCursor.RowBuilder;
@@ -25,6 +26,7 @@ import android.graphics.Point;
 import android.os.CancellationSignal;
 import android.os.FileUtils;
 import android.os.ParcelFileDescriptor;
+import android.provider.DocumentsContract;
 import android.provider.DocumentsContract.Document;
 import android.provider.DocumentsContract.Root;
 import android.provider.DocumentsContract.Root;
@@ -42,6 +44,7 @@ public class StubProvider extends DocumentsProvider {
     private static int STORAGE_SIZE = 1024 * 1024;  // 1 MB.
     private static final String TAG = "StubProvider";
     private static final String MY_ROOT_ID = "myRoot";
+
     private static final String[] DEFAULT_ROOT_PROJECTION = new String[] {
             Root.COLUMN_ROOT_ID, Root.COLUMN_FLAGS, Root.COLUMN_TITLE, Root.COLUMN_DOCUMENT_ID,
             Root.COLUMN_AVAILABLE_BYTES
@@ -55,6 +58,13 @@ public class StubProvider extends DocumentsProvider {
     private HashMap<String, File> mStorage = new HashMap<String, File>();
     private int mStorageUsedBytes;
     private Object mWriteLock = new Object();
+    private String mAuthority;
+
+    @Override
+    public void attachInfo(Context context, ProviderInfo info) {
+        mAuthority = info.authority;
+        super.attachInfo(context, info);
+    }
 
     @Override
     public boolean onCreate() {
@@ -125,6 +135,19 @@ public class StubProvider extends DocumentsProvider {
         final String documentId = getDocumentIdForFile(file);
         mStorage.put(documentId, file);
         return documentId;
+    }
+
+    @Override
+    public void deleteDocument(String documentId)
+            throws FileNotFoundException {
+        final File file = mStorage.get(documentId);
+        final long fileSize = file.length();
+        if (file == null || !file.delete())
+            throw new FileNotFoundException();
+        synchronized (mWriteLock) {
+            mStorageUsedBytes -= fileSize;
+        }
+        notifyStorageChanged();
     }
 
     @Override
@@ -208,6 +231,7 @@ public class StubProvider extends DocumentsProvider {
                 }
                 finally {
                     closePipeSilently(readPipe);
+                    notifyStorageChanged();
                 }
             }
         }.start();
@@ -231,6 +255,10 @@ public class StubProvider extends DocumentsProvider {
         }
     }
 
+    private void notifyStorageChanged() {
+        getContext().getContentResolver().notifyChange(DocumentsContract.buildRootsUri(mAuthority), null, false);
+    }
+
     private void includeFile(MatrixCursor result, File file) {
         final RowBuilder row = result.newRow();
         row.add(Document.COLUMN_DOCUMENT_ID, getDocumentIdForFile(file));
@@ -238,8 +266,8 @@ public class StubProvider extends DocumentsProvider {
         row.add(Document.COLUMN_SIZE, file.length());
         // TODO: Provide real mime type for files.
         row.add(Document.COLUMN_MIME_TYPE, file.isDirectory() ? Document.MIME_TYPE_DIR : "application/octet-stream");
-        int flags = 0;
-        // TODO: Add support for renaming and deleting.
+        int flags = Document.FLAG_SUPPORTS_DELETE;
+        // TODO: Add support for renaming.
         if (file.isDirectory()) {
             flags |= Document.FLAG_DIR_SUPPORTS_CREATE;
         } else {
