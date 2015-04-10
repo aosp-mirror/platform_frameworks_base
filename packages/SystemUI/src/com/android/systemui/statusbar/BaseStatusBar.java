@@ -751,8 +751,7 @@ public abstract class BaseStatusBar extends SystemUI implements
 
     protected View updateNotificationVetoButton(View row, StatusBarNotification n) {
         View vetoButton = row.findViewById(R.id.veto);
-        // TODO: make headsup non-clearable if it is in the shade
-        if (n.isClearable() || (mHeadsUpManager.isHeadsUp(n.getKey()))) {
+        if (n.isClearable()) {
             final String _pkg = n.getPackageName();
             final String _tag = n.getTag();
             final int _id = n.getId();
@@ -1225,8 +1224,7 @@ public abstract class BaseStatusBar extends SystemUI implements
     protected void workAroundBadLayerDrawableOpacity(View v) {
     }
 
-    protected boolean inflateViews(NotificationData.Entry entry, ViewGroup parent,
-            boolean isHeadsUp) {
+    protected boolean inflateViews(Entry entry, ViewGroup parent) {
         PackageManager pmUser = getPackageManagerForUser(
                 entry.notification.getUser().getIdentifier());
 
@@ -1234,12 +1232,7 @@ public abstract class BaseStatusBar extends SystemUI implements
         final StatusBarNotification sbn = entry.notification;
         RemoteViews contentView = sbn.getNotification().contentView;
         RemoteViews bigContentView = sbn.getNotification().bigContentView;
-
-        if (isHeadsUp) {
-            maxHeight =
-                    mContext.getResources().getDimensionPixelSize(R.dimen.notification_mid_height);
-            bigContentView = sbn.getNotification().headsUpContentView;
-        }
+        RemoteViews headsUpContentView = sbn.getNotification().headsUpContentView;
 
         if (contentView == null) {
             return false;
@@ -1286,10 +1279,8 @@ public abstract class BaseStatusBar extends SystemUI implements
         // NB: the large icon is now handled entirely by the template
 
         // bind the click event to the content area
-        NotificationContentView expanded =
-                (NotificationContentView) row.findViewById(R.id.expanded);
-        NotificationContentView expandedPublic =
-                (NotificationContentView) row.findViewById(R.id.expandedPublic);
+        NotificationContentView contentContainer = row.getPrivateLayout();
+        NotificationContentView contentContainerPublic = row.getPublicLayout();
 
         row.setDescendantFocusability(ViewGroup.FOCUS_BLOCK_DESCENDANTS);
         if (ENABLE_REMOTE_INPUT) {
@@ -1307,11 +1298,16 @@ public abstract class BaseStatusBar extends SystemUI implements
         // set up the adaptive layout
         View contentViewLocal = null;
         View bigContentViewLocal = null;
+        View headsUpContentViewLocal = null;
         try {
-            contentViewLocal = contentView.apply(mContext, expanded,
+            contentViewLocal = contentView.apply(mContext, contentContainer,
                     mOnClickHandler);
             if (bigContentView != null) {
-                bigContentViewLocal = bigContentView.apply(mContext, expanded,
+                bigContentViewLocal = bigContentView.apply(mContext, contentContainer,
+                        mOnClickHandler);
+            }
+            if (headsUpContentView != null) {
+                headsUpContentViewLocal = headsUpContentView.apply(mContext, contentContainer,
                         mOnClickHandler);
             }
         }
@@ -1323,23 +1319,27 @@ public abstract class BaseStatusBar extends SystemUI implements
 
         if (contentViewLocal != null) {
             contentViewLocal.setIsRootNamespace(true);
-            expanded.setContractedChild(contentViewLocal);
+            contentContainer.setContractedChild(contentViewLocal);
         }
         if (bigContentViewLocal != null) {
             bigContentViewLocal.setIsRootNamespace(true);
-            expanded.setExpandedChild(bigContentViewLocal);
+            contentContainer.setExpandedChild(bigContentViewLocal);
+        }
+        if (headsUpContentViewLocal != null) {
+            headsUpContentViewLocal.setIsRootNamespace(true);
+            contentContainer.setHeadsUpChild(headsUpContentViewLocal);
         }
 
         // now the public version
         View publicViewLocal = null;
         if (publicNotification != null) {
             try {
-                publicViewLocal = publicNotification.contentView.apply(mContext, expandedPublic,
+                publicViewLocal = publicNotification.contentView.apply(mContext, contentContainerPublic,
                         mOnClickHandler);
 
                 if (publicViewLocal != null) {
                     publicViewLocal.setIsRootNamespace(true);
-                    expandedPublic.setContractedChild(publicViewLocal);
+                    contentContainerPublic.setContractedChild(publicViewLocal);
                 }
             }
             catch (RuntimeException e) {
@@ -1361,9 +1361,9 @@ public abstract class BaseStatusBar extends SystemUI implements
             // Add a basic notification template
             publicViewLocal = LayoutInflater.from(mContext).inflate(
                     R.layout.notification_public_default,
-                    expandedPublic, false);
+                    contentContainerPublic, false);
             publicViewLocal.setIsRootNamespace(true);
-            expandedPublic.setContractedChild(publicViewLocal);
+            contentContainerPublic.setContractedChild(publicViewLocal);
 
             final TextView title = (TextView) publicViewLocal.findViewById(R.id.title);
             try {
@@ -1499,13 +1499,8 @@ public abstract class BaseStatusBar extends SystemUI implements
                 stripped.contentView = null;
                 stripped.extras.putBoolean("android.rebuild.bigView", true);
                 stripped.bigContentView = null;
-
-                // Don't create the HUN input view for now because input doesn't work there yet.
-                // TODO: Enable once HUNs can take remote input correctly.
-                if (false) {
-                    stripped.extras.putBoolean("android.rebuild.hudView", true);
-                    stripped.headsUpContentView = null;
-                }
+                stripped.extras.putBoolean("android.rebuild.hudView", true);
+                stripped.headsUpContentView = null;
 
                 Notification rebuilt = Notification.Builder.rebuild(mContext, stripped);
 
@@ -1537,16 +1532,23 @@ public abstract class BaseStatusBar extends SystemUI implements
         }
 
         // See if we have somewhere to put that remote input
-        ViewGroup actionContainer = null;
-        if (remoteInput != null && entry.expandedBig != null) {
-            View actionContainerCandidate = entry.expandedBig
-                    .findViewById(com.android.internal.R.id.actions);
-            if (actionContainerCandidate instanceof ViewGroup) {
-                actionContainer = (ViewGroup) actionContainerCandidate;
+        if (remoteInput != null) {
+            if (entry.expandedBig != null) {
+                inflateRemoteInput(entry.expandedBig, remoteInput, actions);
+            }
+            View headsUpChild = entry.row.getPrivateLayout().getHeadsUpChild();
+            if (headsUpChild != null) {
+                inflateRemoteInput(headsUpChild, remoteInput, actions);
             }
         }
 
-        if (actionContainer != null) {
+    }
+
+    private void inflateRemoteInput(View view, RemoteInput remoteInput,
+            Notification.Action[] actions) {
+        View actionContainerCandidate = view.findViewById(com.android.internal.R.id.actions);
+        if (actionContainerCandidate instanceof ViewGroup) {
+            ViewGroup actionContainer = (ViewGroup) actionContainerCandidate;
             actionContainer.removeAllViews();
             actionContainer.addView(
                     RemoteInputView.inflate(mContext, actionContainer, actions[0], remoteInput));
@@ -1719,8 +1721,7 @@ public abstract class BaseStatusBar extends SystemUI implements
         return entry.notification;
     }
 
-    protected NotificationData.Entry createNotificationViews(StatusBarNotification sbn,
-            boolean isHeadsUp) {
+    protected NotificationData.Entry createNotificationViews(StatusBarNotification sbn) {
         if (DEBUG) {
             Log.d(TAG, "createNotificationViews(notification=" + sbn);
         }
@@ -1731,7 +1732,7 @@ public abstract class BaseStatusBar extends SystemUI implements
 
         // Construct the expanded view.
         NotificationData.Entry entry = new NotificationData.Entry(sbn, iconView);
-        if (!inflateViews(entry, mStackScroller, isHeadsUp)) {
+        if (!inflateViews(entry, mStackScroller)) {
             handleNotificationError(sbn, "Couldn't expand RemoteViews for: " + sbn);
             return null;
         }
@@ -1881,7 +1882,6 @@ public abstract class BaseStatusBar extends SystemUI implements
         boolean applyInPlace = shouldApplyInPlace(entry, n);
         final boolean shouldInterrupt = shouldInterrupt(notification);
         final boolean alertAgain = alertAgain(entry, n);
-        boolean isHeadsUp = shouldInterrupt && alertAgain;
 
         entry.notification = notification;
         mGroupManager.onEntryUpdated(entry, entry.notification);
@@ -1905,7 +1905,7 @@ public abstract class BaseStatusBar extends SystemUI implements
                         return;
                     }
                 }
-                updateNotificationViews(entry, notification, isHeadsUp);
+                updateNotificationViews(entry, notification);
                 updateSuccessful = true;
             }
             catch (RuntimeException e) {
@@ -1923,7 +1923,7 @@ public abstract class BaseStatusBar extends SystemUI implements
                     n.tickerText);
             entry.icon.setNotification(n);
             entry.icon.set(ic);
-            inflateViews(entry, mStackScroller, isHeadsUp);
+            inflateViews(entry, mStackScroller);
         }
         mNotificationData.updateRanking(ranking);
         updateNotifications();
@@ -2022,12 +2022,10 @@ public abstract class BaseStatusBar extends SystemUI implements
                 && publicUnchanged;
     }
 
-    private void updateNotificationViews(NotificationData.Entry entry,
-            StatusBarNotification notification, boolean isHeadsUp) {
+    private void updateNotificationViews(Entry entry, StatusBarNotification notification) {
         final RemoteViews contentView = notification.getNotification().contentView;
-        final RemoteViews bigContentView = isHeadsUp
-                ? notification.getNotification().headsUpContentView
-                : notification.getNotification().bigContentView;
+        final RemoteViews bigContentView = notification.getNotification().bigContentView;
+        final RemoteViews headsUpContentView = notification.getNotification().headsUpContentView;
         final Notification publicVersion = notification.getNotification().publicVersion;
         final RemoteViews publicContentView = publicVersion != null ? publicVersion.contentView
                 : null;
@@ -2037,6 +2035,10 @@ public abstract class BaseStatusBar extends SystemUI implements
         if (bigContentView != null && entry.getBigContentView() != null) {
             bigContentView.reapply(mContext, entry.getBigContentView(),
                     mOnClickHandler);
+        }
+        View headsUpChild = entry.row.getPrivateLayout().getHeadsUpChild();
+        if (headsUpContentView != null && headsUpChild != null) {
+            headsUpContentView.reapply(mContext, headsUpChild, mOnClickHandler);
         }
         if (publicContentView != null && entry.getPublicContentView() != null) {
             publicContentView.reapply(mContext, entry.getPublicContentView(), mOnClickHandler);

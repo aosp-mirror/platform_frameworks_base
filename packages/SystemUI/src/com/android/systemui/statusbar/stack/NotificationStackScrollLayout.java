@@ -720,7 +720,8 @@ public class NotificationStackScrollLayout extends ViewGroup
 
     public boolean canChildBeExpanded(View v) {
         return v instanceof ExpandableNotificationRow
-                && ((ExpandableNotificationRow) v).isExpandable();
+                && ((ExpandableNotificationRow) v).isExpandable()
+                && !((ExpandableNotificationRow) v).isHeadsUp();
     }
 
     public void setUserExpandedChild(View v, boolean userExpanded) {
@@ -1766,16 +1767,17 @@ public class NotificationStackScrollLayout extends ViewGroup
     }
 
     private void updateNotificationAnimationStates() {
-        boolean running = mIsExpanded && mAnimationsEnabled;
+        boolean running = mAnimationsEnabled;
         int childCount = getChildCount();
         for (int i = 0; i < childCount; i++) {
             View child = getChildAt(i);
+            running &= mIsExpanded || isPinnedHeadsUp(child);
             updateAnimationState(running, child);
         }
     }
 
     private void updateAnimationState(View child) {
-        updateAnimationState(mAnimationsEnabled && mIsExpanded, child);
+        updateAnimationState((mAnimationsEnabled || isPinnedHeadsUp(child)) && mIsExpanded, child);
     }
 
 

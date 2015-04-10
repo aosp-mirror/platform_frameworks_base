@@ -176,7 +176,8 @@ import static com.android.systemui.statusbar.phone.BarTransitions.MODE_TRANSPARE
 import static com.android.systemui.statusbar.phone.BarTransitions.MODE_WARNING;
 
 public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
-        DragDownHelper.DragDownCallback, ActivityStarter, OnUnlockMethodChangedListener, HeadsUpManager.OnHeadsUpChangedListener {
+        DragDownHelper.DragDownCallback, ActivityStarter, OnUnlockMethodChangedListener,
+        HeadsUpManager.OnHeadsUpChangedListener {
     static final String TAG = "PhoneStatusBar";
     public static final boolean DEBUG = BaseStatusBar.DEBUG;
     public static final boolean SPEW = false;
@@ -1106,13 +1107,12 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     public void addNotification(StatusBarNotification notification, RankingMap ranking,
             Entry oldEntry) {
         if (DEBUG) Log.d(TAG, "addNotification key=" + notification.getKey());
-        boolean isHeadsUp = mUseHeadsUp && shouldInterrupt(notification);
 
-        Entry shadeEntry = createNotificationViews(notification, isHeadsUp);
+        Entry shadeEntry = createNotificationViews(notification);
         if (shadeEntry == null) {
             return;
         }
-        if (isHeadsUp) {
+        if (mUseHeadsUp && shouldInterrupt(notification)) {
             mHeadsUpManager.showNotification(shadeEntry);
         }
 

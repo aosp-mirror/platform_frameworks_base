@@ -78,13 +78,14 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
     private NotificationContentView mPublicLayout;
     private NotificationContentView mPrivateLayout;
     private int mMaxExpandHeight;
+    private int mHeadsUpHeight;
     private View mVetoButton;
     private boolean mClearable;
     private ExpansionLogger mLogger;
     private String mLoggingKey;
     private boolean mWasReset;
-    private NotificationGuts mGuts;
 
+    private NotificationGuts mGuts;
     private StatusBarNotification mStatusBarNotification;
     private boolean mIsHeadsUp;
     private View mExpandButton;
@@ -110,6 +111,14 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
     };
     private boolean mInShade;
 
+    public NotificationContentView getPrivateLayout() {
+        return mPrivateLayout;
+    }
+
+    public NotificationContentView getPublicLayout() {
+        return mPublicLayout;
+    }
+
     public void setIconAnimationRunning(boolean running) {
         setIconAnimationRunning(running, mPublicLayout);
         setIconAnimationRunning(running, mPrivateLayout);
@@ -119,8 +128,10 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
         if (layout != null) {
             View contractedChild = layout.getContractedChild();
             View expandedChild = layout.getExpandedChild();
+            View headsUpChild = layout.getHeadsUpChild();
             setIconAnimationRunningForChild(running, contractedChild);
             setIconAnimationRunningForChild(running, expandedChild);
+            setIconAnimationRunningForChild(running, headsUpChild);
         }
     }
 
@@ -171,6 +182,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
 
     public void setHeadsUp(boolean isHeadsUp) {
         mIsHeadsUp = isHeadsUp;
+        mPrivateLayout.setHeadsUp(isHeadsUp);
     }
 
     public void setGroupManager(NotificationGroupManager groupManager) {
@@ -277,8 +289,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
     }
 
     public int getHeadsUpHeight() {
-        // TODO: improve this logic
-        return getIntrinsicHeight();
+        return mHeadsUpHeight;
     }
 
     public interface ExpansionLogger {
@@ -317,6 +328,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
             resetActualHeight();
         }
         mMaxExpandHeight = 0;
+        mHeadsUpHeight = 0;
         mWasReset = true;
         onHeightReset();
         requestLayout();
@@ -554,7 +566,13 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
         }
         boolean inExpansionState = isExpanded();
         int maxContentHeight;
-        if ((!inExpansionState && !mChildrenExpanded) || mShowingPublicForIntrinsicHeight) {
+        if (mIsHeadsUp) {
+            if (inExpansionState) {
+                maxContentHeight = Math.max(mMaxExpandHeight, mHeadsUpHeight);
+            } else {
+                maxContentHeight = Math.max(mRowMinHeight, mHeadsUpHeight);
+            }
+        } else if ((!inExpansionState && !mChildrenExpanded) || mShowingPublicForIntrinsicHeight) {
             maxContentHeight = mRowMinHeight;
         } else if (mChildrenExpanded) {
             maxContentHeight = mChildrenContainer.getIntrinsicHeight();
@@ -601,7 +619,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
         super.onLayout(changed, left, top, right, bottom);
         boolean updateExpandHeight = mMaxExpandHeight == 0 && !mWasReset;
-        updateMaxExpandHeight();
+        updateMaxHeights();
         if (updateExpandHeight) {
             applyExpansionToLayout();
         }
@@ -617,9 +635,17 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
         return super.isChildInvisible(child) || isInvisibleChildContainer;
     }
 
-    private void updateMaxExpandHeight() {
+    private void updateMaxHeights() {
         int intrinsicBefore = getIntrinsicHeight();
-        mMaxExpandHeight = mPrivateLayout.getMaxHeight();
+        View expandedChild = mPrivateLayout.getExpandedChild();
+        if (expandedChild == null) {
+            expandedChild = mPrivateLayout.getContractedChild();
+        }
+        mMaxExpandHeight = expandedChild.getHeight();
+        View headsUpChild = mPrivateLayout.getHeadsUpChild();
+        if (headsUpChild != null) {
+            mHeadsUpHeight = headsUpChild.getHeight();
+        }
         if (intrinsicBefore != getIntrinsicHeight()) {
             notifyHeightChanged(false  /* needsAnimation */);
         }

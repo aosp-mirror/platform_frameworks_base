@@ -506,17 +506,19 @@ public class StackScrollAlgorithm {
             childViewState.yTranslation += ambientState.getTopPadding()
                     + ambientState.getStackTranslation();
         }
-        updateHeadsUpStates(resultState, algorithmState, ambientState);
+        updateHeadsUpStates(resultState, ambientState);
     }
 
-    private void updateHeadsUpStates(StackScrollState resultState,
-            StackScrollAlgorithmState algorithmState, AmbientState ambientState) {
+    private void updateHeadsUpStates(StackScrollState resultState, AmbientState ambientState) {
         TreeSet<HeadsUpManager.HeadsUpEntry> headsUpEntries = ambientState.getSortedHeadsUpEntries();
         for (HeadsUpManager.HeadsUpEntry entry: headsUpEntries) {
             ExpandableNotificationRow row = entry.entry.row;
             StackViewState childState = resultState.getViewStateForView(row);
             if (!row.isInShade()) {
                 childState.yTranslation = 0;
+            }
+            if (ambientState.getTopHeadsUpEntry() == row) {
+                childState.height += row.getHeadsUpHeight() - mCollapsedSize;
             }
             childState.height = Math.max(childState.height, row.getHeadsUpHeight());
 
@@ -569,7 +571,8 @@ public class StackScrollAlgorithm {
         if (child instanceof ExpandableNotificationRow) {
             ExpandableNotificationRow row = (ExpandableNotificationRow) child;
             if (ambientState != null && ambientState.getTopHeadsUpEntry() == child) {
-                return mCollapsedSize;
+                int extraSize = row.getIntrinsicHeight() - row.getHeadsUpHeight();
+                return mCollapsedSize + extraSize;
             }
             return row.getIntrinsicHeight();
         } else if (child instanceof ExpandableView) {
