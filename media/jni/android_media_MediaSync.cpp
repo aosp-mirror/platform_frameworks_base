@@ -277,7 +277,7 @@ static void android_media_MediaSync_native_init(JNIEnv *env) {
     CHECK(gFields.mediaTimestampNanoTimeID != NULL);
 
     gFields.mediaTimestampClockRateID =
-        env->GetFieldID(clazz.get(), "ClockRate", "F");
+        env->GetFieldID(clazz.get(), "clockRate", "F");
     CHECK(gFields.mediaTimestampClockRateID != NULL);
 }
 
