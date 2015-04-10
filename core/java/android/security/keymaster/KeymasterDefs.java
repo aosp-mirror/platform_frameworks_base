@@ -96,18 +96,9 @@ public final class KeymasterDefs {
     public static final int KM_MODE_FIRST_UNAUTHENTICATED = 1;
     public static final int KM_MODE_ECB = KM_MODE_FIRST_UNAUTHENTICATED;
     public static final int KM_MODE_CBC = 2;
-    public static final int KM_MODE_CBC_CTS = 3;
     public static final int KM_MODE_CTR = 4;
-    public static final int KM_MODE_OFB = 5;
-    public static final int KM_MODE_CFB = 6;
-    public static final int KM_MODE_XTS = 7;
     public static final int KM_MODE_FIRST_AUTHENTICATED = 32;
     public static final int KM_MODE_GCM = KM_MODE_FIRST_AUTHENTICATED;
-    public static final int KM_MODE_OCB = 33;
-    public static final int KM_MODE_CCM = 34;
-    public static final int KM_MODE_FIRST_MAC = 128;
-    public static final int KM_MODE_CMAC = KM_MODE_FIRST_MAC;
-    public static final int KM_MODE_POLY1305 = 129;
 
     // Padding modes.
     public static final int KM_PAD_NONE = 1;
@@ -115,11 +106,7 @@ public final class KeymasterDefs {
     public static final int KM_PAD_RSA_PSS = 3;
     public static final int KM_PAD_RSA_PKCS1_1_5_ENCRYPT = 4;
     public static final int KM_PAD_RSA_PKCS1_1_5_SIGN = 5;
-    public static final int KM_PAD_ANSI_X923 = 32;
-    public static final int KM_PAD_ISO_10126 = 33;
-    public static final int KM_PAD_ZERO = 64;
-    public static final int KM_PAD_PKCS7 = 65;
-    public static final int KM_PAD_ISO_7816_4 = 66;
+    public static final int KM_PAD_PKCS7 = 64;
 
     // Digest modes.
     public static final int KM_DIGEST_NONE = 0;
@@ -129,9 +116,6 @@ public final class KeymasterDefs {
     public static final int KM_DIGEST_SHA_2_256 = 4;
     public static final int KM_DIGEST_SHA_2_384 = 5;
     public static final int KM_DIGEST_SHA_2_512 = 6;
-    public static final int KM_DIGEST_SHA_3_256 = 7;
-    public static final int KM_DIGEST_SHA_3_384 = 8;
-    public static final int KM_DIGEST_SHA_3_512 = 9;
 
     // Key origins.
     public static final int KM_ORIGIN_HARDWARE = 0;
@@ -151,7 +135,6 @@ public final class KeymasterDefs {
     // Key formats.
     public static final int KM_KEY_FORMAT_X509 = 0;
     public static final int KM_KEY_FORMAT_PKCS8 = 1;
-    public static final int KM_KEY_FORMAT_PKCS12 = 2;
     public static final int KM_KEY_FORMAT_RAW = 3;
 
     // User authenticators.
