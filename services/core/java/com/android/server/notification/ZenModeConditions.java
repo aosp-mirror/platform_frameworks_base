@@ -20,6 +20,7 @@ import android.content.ComponentName;
 import android.net.Uri;
 import android.service.notification.Condition;
 import android.service.notification.IConditionListener;
+import android.service.notification.IConditionProvider;
 import android.service.notification.ZenModeConfig;
 import android.service.notification.ZenModeConfig.ZenRule;
 import android.util.ArrayMap;
@@ -39,6 +40,7 @@ public class ZenModeConditions implements ConditionProviders.Callback {
 
     private CountdownConditionProvider mCountdown;
     private ScheduleConditionProvider mSchedule;
+    private boolean mFirstEvaluation = true;
 
     public ZenModeConditions(ZenModeHelper helper, ConditionProviders conditionProviders) {
         mHelper = helper;
@@ -64,7 +66,8 @@ public class ZenModeConditions implements ConditionProviders.Callback {
 
     public void evaluateConfig(ZenModeConfig config) {
         if (config == null) return;
-        if (config.manualRule != null && !config.manualRule.isTrueOrUnknown()) {
+        if (config.manualRule != null && config.manualRule.condition != null
+                && !config.manualRule.isTrueOrUnknown()) {
             if (DEBUG) Log.d(TAG, "evaluateConfig: clearing manual rule");
             config.manualRule = null;
         }
@@ -72,6 +75,7 @@ public class ZenModeConditions implements ConditionProviders.Callback {
         evaluateRule(config.manualRule, current);
         for (ZenRule automaticRule : config.automaticRules.values()) {
             evaluateRule(automaticRule, current);
+            updateSnoozing(automaticRule);
         }
         final int N = mSubscriptions.size();
         for (int i = N - 1; i >= 0; i--) {
@@ -82,21 +86,7 @@ public class ZenModeConditions implements ConditionProviders.Callback {
                 mSubscriptions.removeAt(i);
             }
         }
-    }
-
-    private void evaluateRule(ZenRule rule, ArraySet<Uri> current) {
-        if (rule == null || rule.conditionId == null) return;
-        final Uri id = rule.conditionId;
-        for (SystemConditionProviderService sp : mConditionProviders.getSystemProviders()) {
-            if (sp.isValidConditionid(id)) {
-                mConditionProviders.ensureRecordExists(sp.getComponent(), id, sp.asInterface());
-                rule.component = sp.getComponent();
-            }
-        }
-        current.add(id);
-        if (mConditionProviders.subscribeIfNecessary(rule.component, rule.conditionId)) {
-            mSubscriptions.put(rule.conditionId, rule.component);
-        }
+        mFirstEvaluation = false;
     }
 
     @Override
@@ -107,6 +97,14 @@ public class ZenModeConditions implements ConditionProviders.Callback {
     @Override
     public void onUserSwitched() {
         // noop
+    }
+
+    @Override
+    public void onServiceAdded(ComponentName component) {
+        if (DEBUG) Log.d(TAG, "onServiceAdded " + component);
+        if (isAutomaticActive(component)) {
+            mHelper.setConfig(mHelper.getConfig(), "zmc.onServiceAdded");
+        }
     }
 
     @Override
@@ -125,8 +123,53 @@ public class ZenModeConditions implements ConditionProviders.Callback {
         }
     }
 
+    private void evaluateRule(ZenRule rule, ArraySet<Uri> current) {
+        if (rule == null || rule.conditionId == null) return;
+        final Uri id = rule.conditionId;
+        boolean isSystemCondition = false;
+        for (SystemConditionProviderService sp : mConditionProviders.getSystemProviders()) {
+            if (sp.isValidConditionid(id)) {
+                mConditionProviders.ensureRecordExists(sp.getComponent(), id, sp.asInterface());
+                rule.component = sp.getComponent();
+                isSystemCondition = true;
+            }
+        }
+        if (!isSystemCondition) {
+            final IConditionProvider cp = mConditionProviders.findConditionProvider(rule.component);
+            if (DEBUG) Log.d(TAG, "Ensure external rule exists: " + (cp != null) + " for " + id);
+            if (cp != null) {
+                mConditionProviders.ensureRecordExists(rule.component, id, cp);
+            }
+        }
+        if (rule.component == null) {
+            Log.w(TAG, "No component found for automatic rule: " + rule.conditionId);
+            rule.enabled = false;
+            return;
+        }
+        if (current != null) {
+            current.add(id);
+        }
+        if (mConditionProviders.subscribeIfNecessary(rule.component, rule.conditionId)) {
+            mSubscriptions.put(rule.conditionId, rule.component);
+        } else {
+            if (DEBUG) Log.d(TAG, "zmc failed to subscribe");
+        }
+    }
+
+    private boolean isAutomaticActive(ComponentName component) {
+        if (component == null) return false;
+        final ZenModeConfig config = mHelper.getConfig();
+        if (config == null) return false;
+        for (ZenRule rule : config.automaticRules.values()) {
+            if (component.equals(rule.component) && rule.isAutomaticActive()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     private boolean updateSnoozing(ZenRule rule) {
-        if (rule != null && rule.snoozing && !rule.isTrueOrUnknown()) {
+        if (rule != null && rule.snoozing && (mFirstEvaluation || !rule.isTrueOrUnknown())) {
             rule.snoozing = false;
             if (DEBUG) Log.d(TAG, "Snoozing reset for " + rule.conditionId);
             return true;
@@ -141,4 +184,5 @@ public class ZenModeConditions implements ConditionProviders.Callback {
         rule.condition = condition;
         return true;
     }
+
 }

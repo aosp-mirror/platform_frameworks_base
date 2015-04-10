@@ -654,8 +654,7 @@ public class ZenModeConfig implements Parcelable {
         }
         String summary = "";
         for (ZenRule automaticRule : config.automaticRules.values()) {
-            if (automaticRule.enabled && !automaticRule.snoozing
-                    && automaticRule.isTrueOrUnknown()) {
+            if (automaticRule.isAutomaticActive()) {
                 if (summary.isEmpty()) {
                     summary = automaticRule.name;
                 } else {
@@ -745,9 +744,13 @@ public class ZenModeConfig implements Parcelable {
                     component);
         }
 
+        public boolean isAutomaticActive() {
+            return enabled && !snoozing && component != null && isTrueOrUnknown();
+        }
+
         public boolean isTrueOrUnknown() {
-            return condition == null || condition.state == Condition.STATE_TRUE
-                    || condition.state == Condition.STATE_UNKNOWN;
+            return condition != null && (condition.state == Condition.STATE_TRUE
+                    || condition.state == Condition.STATE_UNKNOWN);
         }
 
         public static final Parcelable.Creator<ZenRule> CREATOR

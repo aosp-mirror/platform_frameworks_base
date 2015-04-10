@@ -142,6 +142,9 @@ public class ConditionProviders extends ManagedServices {
         } catch (RemoteException e) {
             // we tried
         }
+        if (mCallback != null) {
+            mCallback.onServiceAdded(info.component);
+        }
     }
 
     @Override
@@ -244,6 +247,16 @@ public class ConditionProviders extends ManagedServices {
                 }
             }
         }
+    }
+
+    public IConditionProvider findConditionProvider(ComponentName component) {
+        if (component == null) return null;
+        for (ManagedServiceInfo service : mServices) {
+            if (component.equals(service.component)) {
+                return provider(service);
+            }
+        }
+        return null;
     }
 
     public void ensureRecordExists(ComponentName component, Uri conditionId,
@@ -378,6 +391,7 @@ public class ConditionProviders extends ManagedServices {
 
     public interface Callback {
         void onBootComplete();
+        void onServiceAdded(ComponentName component);
         void onConditionChanged(Uri id, Condition condition);
         void onUserSwitched();
     }

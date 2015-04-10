@@ -889,6 +889,15 @@ public final class Settings {
             = "android.settings.ZEN_MODE_SCHEDULE_RULE_SETTINGS";
 
     /**
+     * Activity Action: Show Zen Mode external rule configuration settings.
+     *
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_ZEN_MODE_EXTERNAL_RULE_SETTINGS
+            = "android.settings.ZEN_MODE_EXTERNAL_RULE_SETTINGS";
+
+    /**
      * Activity Action: Show the regulatory information screen for the device.
      * <p>
      * In some cases, a matching Activity may not exist, so ensure you safeguard
