@@ -29,6 +29,7 @@
 #include <gui/Surface.h>
 
 #include <media/AudioTrack.h>
+#include <media/stagefright/MediaClock.h>
 #include <media/stagefright/MediaSync.h>
 #include <media/stagefright/foundation/ADebug.h>
 #include <media/stagefright/foundation/AString.h>
@@ -39,6 +40,9 @@ namespace android {
 
 struct fields_t {
     jfieldID context;
+    jfieldID mediaTimestampMediaTimeUsID;
+    jfieldID mediaTimestampNanoTimeID;
+    jfieldID mediaTimestampClockRateID;
 };
 
 static fields_t gFields;
@@ -69,6 +73,10 @@ status_t JMediaSync::createInputSurface(
 
 void JMediaSync::setPlaybackRate(float rate) {
     mSync->setPlaybackRate(rate);
+}
+
+sp<const MediaClock> JMediaSync::getMediaClock() {
+    return mSync->getMediaClock();
 }
 
 status_t JMediaSync::updateQueuedAudioData(
@@ -222,12 +230,55 @@ static void android_media_MediaSync_native_updateQueuedAudioData(
     }
 }
 
+static jboolean android_media_MediaSync_native_getTimestamp(
+        JNIEnv *env, jobject thiz, jobject timestamp) {
+    sp<JMediaSync> sync = getMediaSync(env, thiz);
+    if (sync == NULL) {
+        throwExceptionAsNecessary(env, INVALID_OPERATION);
+        return JNI_FALSE;
+    }
+
+    sp<const MediaClock> mediaClock = sync->getMediaClock();
+    if (mediaClock == NULL) {
+        return JNI_FALSE;
+    }
+
+    int64_t nowUs = ALooper::GetNowUs();
+    int64_t mediaUs = 0;
+    if (mediaClock->getMediaTime(nowUs, &mediaUs) != OK) {
+        return JNI_FALSE;
+    }
+
+    env->SetLongField(timestamp, gFields.mediaTimestampMediaTimeUsID,
+            (jlong)mediaUs);
+    env->SetLongField(timestamp, gFields.mediaTimestampNanoTimeID,
+            (jlong)(nowUs * 1000));
+    env->SetFloatField(timestamp, gFields.mediaTimestampClockRateID,
+            (jfloat)mediaClock->getPlaybackRate());
+    return JNI_TRUE;
+}
+
 static void android_media_MediaSync_native_init(JNIEnv *env) {
     ScopedLocalRef<jclass> clazz(env, env->FindClass("android/media/MediaSync"));
     CHECK(clazz.get() != NULL);
 
     gFields.context = env->GetFieldID(clazz.get(), "mNativeContext", "J");
     CHECK(gFields.context != NULL);
+
+    clazz.reset(env->FindClass("android/media/MediaTimestamp"));
+    CHECK(clazz.get() != NULL);
+
+    gFields.mediaTimestampMediaTimeUsID =
+        env->GetFieldID(clazz.get(), "mediaTimeUs", "J");
+    CHECK(gFields.mediaTimestampMediaTimeUsID != NULL);
+
+    gFields.mediaTimestampNanoTimeID =
+        env->GetFieldID(clazz.get(), "nanoTime", "J");
+    CHECK(gFields.mediaTimestampNanoTimeID != NULL);
+
+    gFields.mediaTimestampClockRateID =
+        env->GetFieldID(clazz.get(), "ClockRate", "F");
+    CHECK(gFields.mediaTimestampClockRateID != NULL);
 }
 
 static void android_media_MediaSync_native_setup(JNIEnv *env, jobject thiz) {
@@ -266,6 +317,10 @@ static JNINativeMethod gMethods[] = {
     { "native_updateQueuedAudioData",
       "(IJ)V",
       (void *)android_media_MediaSync_native_updateQueuedAudioData },
+
+    { "native_getTimestamp",
+      "(Landroid/media/MediaTimestamp;)Z",
+      (void *)android_media_MediaSync_native_getTimestamp },
 
     { "native_init", "()V", (void *)android_media_MediaSync_native_init },
 

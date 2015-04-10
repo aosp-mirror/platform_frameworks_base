@@ -17,6 +17,7 @@
 package android.media;
 
 import android.annotation.IntDef;
+import android.annotation.NonNull;
 import android.media.AudioTrack;
 import android.os.Handler;
 import android.os.Looper;
@@ -385,6 +386,37 @@ final public class MediaSync {
     private boolean isAudioPlaybackModeSupported(int mode) {
         return (mode == PLAYBACK_RATE_AUDIO_MODE_RESAMPLE);
     }
+
+   /**
+    * Get current playback position.
+    * <p>
+    * The MediaTimestamp represents a clock ticking during media playback. It's represented
+    * by an anchor frame ({@link MediaTimestamp#mediaTimeUs} and {@link MediaTimestamp#nanoTime})
+    * and clock speed ({@link MediaTimestamp#clockRate}). For continous playback with
+    * constant speed, its anchor frame doesn't change that often. Thereafter, it's recommended
+    * to not call this method often.
+    * <p>
+    * To help users to get current playback position, this method always returns the timestamp of
+    * just-rendered frame, i.e., {@link System#nanoTime} and its corresponding media time. They
+    * can be used as current playback position.
+    *
+    * @param timestamp a reference to a non-null MediaTimestamp instance allocated
+    *         and owned by caller.
+    * @return true if a timestamp is available, or false if no timestamp is available.
+    *         If a timestamp if available, the MediaTimestamp instance is filled in with
+    *         playback rate, together with the current media timestamp and the system nanoTime
+    *         corresponding to the measured media timestamp.
+    *         In the case that no timestamp is available, any supplied instance is left unaltered.
+    */
+    public boolean getTimestamp(@NonNull MediaTimestamp timestamp)
+    {
+        if (timestamp == null) {
+            throw new IllegalArgumentException();
+        }
+        return native_getTimestamp(timestamp);
+    }
+
+    private native final boolean native_getTimestamp(MediaTimestamp timestamp);
 
     /**
      * Queues the audio data asynchronously for playback (AudioTrack must be in streaming mode).
