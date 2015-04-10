@@ -70,6 +70,13 @@ public class AnimatorInflater {
     private static final int VALUE_TYPE_COLOR       = 3;
     private static final int VALUE_TYPE_UNDEFINED   = 4;
 
+    /**
+     * Enum values used in XML attributes to indicate the duration scale hint.
+     */
+    private static final int HINT_NO_SCALE                  = 0;
+    private static final int HINT_PROPORTIONAL_TO_SCREEN    = 1;
+    private static final int HINT_DEFINED_IN_DP             = 2;
+
     private static final boolean DBG_ANIMATOR_INFLATER = false;
 
     // used to calculate changing configs for resource references
@@ -691,6 +698,9 @@ public class AnimatorInflater {
                 int ordering = a.getInt(R.styleable.AnimatorSet_ordering, TOGETHER);
                 createAnimatorFromXml(res, theme, parser, attrs, (AnimatorSet) anim, ordering,
                         pixelSize);
+                final int hint = a.getInt(R.styleable.Animator_durationScaleHint,
+                        HINT_NO_SCALE);
+                anim.setDurationScaleHint(hint, res);
                 a.recycle();
             } else if (name.equals("propertyValuesHolder")) {
                 PropertyValuesHolder[] values = loadValues(res, theme, parser,
@@ -1027,6 +1037,9 @@ public class AnimatorInflater {
             anim.setInterpolator(interpolator);
         }
 
+        final int hint = arrayAnimator.getInt(R.styleable.Animator_durationScaleHint,
+                HINT_NO_SCALE);
+        anim.setDurationScaleHint(hint, res);
         arrayAnimator.recycle();
         if (arrayObjectAnimator != null) {
             arrayObjectAnimator.recycle();

@@ -17,9 +17,12 @@
 package android.animation;
 
 import android.annotation.CallSuper;
+import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.os.Looper;
 import android.os.Trace;
 import android.util.AndroidRuntimeException;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Choreographer;
 import android.view.animation.AccelerateDecelerateInterpolator;
@@ -561,7 +564,7 @@ public class ValueAnimator extends Animator {
     }
 
     private void updateScaledDuration() {
-        mDuration = (long)(mUnscaledDuration * sDurationScale);
+        mDuration = (long)(mUnscaledDuration * sDurationScale * getDistanceBasedDurationScale());
     }
 
     /**

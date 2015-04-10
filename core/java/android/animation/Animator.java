@@ -16,7 +16,12 @@
 
 package android.animation;
 
+import android.content.res.Configuration;
 import android.content.res.ConstantState;
+import android.content.res.Resources;
+import android.util.DisplayMetrics;
+import android.util.Log;
+import android.view.animation.AnimationUtils;
 
 import java.util.ArrayList;
 
@@ -25,6 +30,29 @@ import java.util.ArrayList;
  * started, ended, and have <code>AnimatorListeners</code> added to them.
  */
 public abstract class Animator implements Cloneable {
+    /**
+     * Set this hint when duration for the animation does not need to be scaled. By default, no
+     * scaling is applied to the duration.
+     */
+    public static final int HINT_NO_SCALE = 0;
+
+    /**
+     * Set this scale hint (using {@link #setDurationScaleHint(int, Resources)} when the animation's
+     * moving distance is proportional to the screen size. (e.g. a view coming in from the bottom of
+     * the screen to top/center). With this scale hint set, the animation duration will be
+     * automatically scaled based on screen size.
+     */
+    public static final int HINT_DISTANCE_PROPORTIONAL_TO_SCREEN_SIZE = 1;
+
+    /**
+     * Set this scale hint (using {@link #setDurationScaleHint(int, Resources)}) if the animation
+     * has pre-defined moving distance in dp that does not vary from device to device. This is
+     * extremely useful when the animation needs to run on both phones/tablets and TV, because TV
+     * has inflated dp and therefore will have a longer visual arc for the same animation than on
+     * the phone. This hint is used to calculate a scaling factor to compensate for different
+     * visual arcs while maintaining the same angular velocity for the animation.
+     */
+    public static final int HINT_DISTANCE_DEFINED_IN_DP = 2;
 
     /**
      * The set of listeners to be sent events through the life of an animation.
@@ -53,6 +81,24 @@ public abstract class Animator implements Cloneable {
      * ConstantState will not be garbage collected until this animator is collected
      */
     private AnimatorConstantState mConstantState;
+
+    /**
+     * Scaling factor for an animation that moves across the whole screen.
+     */
+    float mScreenSizeBasedDurationScale = 1.0f;
+
+    /**
+     * Scaling factor for an animation that is defined to move the same amount of dp across all
+     * devices.
+     */
+    float mDpBasedDurationScale = 1.0f;
+
+    /**
+     * By default, the scaling assumes the animation moves across the entire screen.
+     */
+    int mDurationScaleHint = HINT_NO_SCALE;
+
+    private final static boolean ANIM_DEBUG = false;
 
     /**
      * Starts this animation. If the animation has a nonzero startDelay, the animation will start
@@ -182,6 +228,78 @@ public abstract class Animator implements Cloneable {
      * @return The length of the animation, in milliseconds.
      */
     public abstract long getDuration();
+
+    /**
+     * Hints how duration scaling factor should be calculated. The duration will not be scaled when
+     * hint is set to {@link #HINT_NO_SCALE}. Otherwise, the duration will be automatically scaled
+     * per device to achieve the same look and feel across different devices. In order to do
+     * that, the same angular velocity of the animation will be needed on different devices in
+     * users' field of view. Therefore, the duration scale factor is determined by the ratio of the
+     * angular movement on current devices to that on the baseline device (i.e. Nexus 5).
+     *
+     * @param hint an indicator on how the animation is defined. The hint could be
+     *             {@link #HINT_NO_SCALE}, {@link #HINT_DISTANCE_PROPORTIONAL_TO_SCREEN_SIZE} or
+     *             {@link #HINT_DISTANCE_DEFINED_IN_DP}.
+     * @param res The resources {@see android.content.res.Resources} for getting display metrics
+     */
+    public void setDurationScaleHint(int hint, Resources res) {
+        if (ANIM_DEBUG) {
+            Log.d("ANIM_DEBUG", "distance based duration hint: " + hint);
+        }
+        if (hint == mDurationScaleHint) {
+            return;
+        }
+        mDurationScaleHint = hint;
+        if (hint != HINT_NO_SCALE) {
+            int uiMode = res.getConfiguration().uiMode & Configuration.UI_MODE_TYPE_MASK;
+            DisplayMetrics metrics = res.getDisplayMetrics();
+            float width = metrics.widthPixels / metrics.xdpi;
+            float height = metrics.heightPixels / metrics.ydpi;
+            float viewingDistance = AnimationUtils.getViewingDistance(width, height, uiMode);
+            if (ANIM_DEBUG) {
+                Log.d("ANIM_DEBUG", "width, height, viewing distance, uimode: "
+                        + width + ", " + height + ", " + viewingDistance + ", " + uiMode);
+            }
+            mScreenSizeBasedDurationScale = AnimationUtils
+                    .getScreenSizeBasedDurationScale(width, height, viewingDistance);
+            mDpBasedDurationScale = AnimationUtils.getDpBasedDurationScale(
+                    metrics.density, metrics.xdpi, viewingDistance);
+            if (ANIM_DEBUG) {
+                Log.d("ANIM_DEBUG", "screen based scale, dp based scale: " +
+                        mScreenSizeBasedDurationScale + ", " + mDpBasedDurationScale);
+            }
+        }
+    }
+
+    // Copies duration scale hint and scaling factors to the new animation.
+    void copyDurationScaleInfoTo(Animator anim) {
+        anim.mDurationScaleHint = mDurationScaleHint;
+        anim.mScreenSizeBasedDurationScale = mScreenSizeBasedDurationScale;
+        anim.mDpBasedDurationScale = mDpBasedDurationScale;
+    }
+
+    /**
+     * @return The scaled duration calculated based on distance of movement (as defined by the
+     * animation) and perceived velocity (derived from the duration set on the animation for
+     * baseline device)
+     */
+    public long getDistanceBasedDuration() {
+        return (long) (getDuration() * getDistanceBasedDurationScale());
+    }
+
+    /**
+     * @return scaling factor of duration based on the duration scale hint. A scaling factor of 1
+     * means no scaling will be applied to the duration.
+     */
+    float getDistanceBasedDurationScale() {
+        if (mDurationScaleHint == HINT_DISTANCE_PROPORTIONAL_TO_SCREEN_SIZE) {
+            return mScreenSizeBasedDurationScale;
+        } else if (mDurationScaleHint == HINT_DISTANCE_DEFINED_IN_DP) {
+            return mDpBasedDurationScale;
+        } else {
+            return 1f;
+        }
+    }
 
     /**
      * The time interpolator used in calculating the elapsed fraction of the
