@@ -221,13 +221,11 @@ public final class PermissionsState {
         int result = PERMISSION_OPERATION_SUCCESS;
 
         PermissionData permissionData = mPermissions.get(permission.name);
-        if (permissionData.hasGids()) {
-            for (int userId : permissionData.getUserIds()) {
-                if (revokePermission(permission, userId)
-                        == PERMISSION_OPERATION_SUCCESS_GIDS_CHANGED) {
-                    result = PERMISSION_OPERATION_SUCCESS_GIDS_CHANGED;
-                    break;
-                }
+        for (int userId : permissionData.getUserIds()) {
+            if (revokePermission(permission, userId)
+                    == PERMISSION_OPERATION_SUCCESS_GIDS_CHANGED) {
+                result = PERMISSION_OPERATION_SUCCESS_GIDS_CHANGED;
+                break;
             }
         }
 
@@ -380,7 +378,7 @@ public final class PermissionsState {
             return PERMISSION_OPERATION_FAILURE;
         }
 
-        final boolean hasGids = permission.hasGids();
+        final boolean hasGids = !ArrayUtils.isEmpty(permission.computeGids(userId));
         final int[] oldGids = hasGids ? computeGids(userId) : NO_GIDS;
 
         if (mPermissions == null) {
@@ -412,7 +410,7 @@ public final class PermissionsState {
             return PERMISSION_OPERATION_FAILURE;
         }
 
-        final boolean hasGids = permission.hasGids();
+        final boolean hasGids = !ArrayUtils.isEmpty(permission.computeGids(userId));
         final int[] oldGids = hasGids ? computeGids(userId) : NO_GIDS;
 
         PermissionData permissionData = mPermissions.get(permission.name);
@@ -470,10 +468,6 @@ public final class PermissionsState {
             } else {
                 mUserIds = Arrays.copyOf(other.mUserIds, other.mUserIds.length);
             }
-        }
-
-        public boolean hasGids() {
-            return mPerm.hasGids();
         }
 
         public int[] computeGids(int userId) {
