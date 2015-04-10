@@ -46,7 +46,7 @@ public class StackStateAnimator {
     public static final int ANIMATION_DURATION_APPEAR_DISAPPEAR = 464;
     public static final int ANIMATION_DURATION_EXPAND_CLICKED = 360;
     public static final int ANIMATION_DURATION_DIMMED_ACTIVATED = 220;
-    public static final int ANIMATION_DURATION_HEADS_UP_APPEAR = 280;
+    public static final int ANIMATION_DURATION_HEADS_UP_APPEAR = 650;
     public static final int ANIMATION_DURATION_HEADS_UP_DISAPPEAR = 230;
     public static final int ANIMATION_DELAY_PER_ELEMENT_INTERRUPTING = 80;
     public static final int ANIMATION_DELAY_PER_ELEMENT_EXPAND_CHILDREN = 54;
@@ -108,7 +108,22 @@ public class StackStateAnimator {
                         R.dimen.go_to_full_shade_appearing_translation);
         Path path = new Path();
         path.moveTo(0, 0);
-        path.cubicTo(0.8f, 0, 0.8f, 1.2f, 1f, 1f);
+        float x1 = 250f;
+        float x2 = 150f;
+        float x3 = 100f;
+        float y1 = 90f;
+        float y2 = 78f;
+        float y3 = 80f;
+        float xTot = (x1 + x2 + x3);
+        path.cubicTo(x1 * 0.9f / xTot, 0f,
+                x1 * 0.8f / xTot, y1 / y3,
+                x1 / xTot , y1 / y3);
+        path.cubicTo((x1 + x2 * 0.4f) / xTot, y1 / y3,
+                (x1 + x2 * 0.2f) / xTot, y2 / y3,
+                (x1 + x2) / xTot, y2 / y3);
+        path.cubicTo((x1 + x2 + x3 * 0.4f) / xTot, y2 / y3,
+                (x1 + x2 + x3 * 0.2f) / xTot, 1f,
+                1f, 1f);
         mHeadsUpAppearInterpolator = new PathInterpolator(path);
     }
 
