@@ -598,6 +598,7 @@ package android {
     field public static final int dropDownWidth = 16843362; // 0x1010262
     field public static final int duplicateParentState = 16842985; // 0x10100e9
     field public static final int duration = 16843160; // 0x1010198
+    field public static final int durationScaleHint = 16844014; // 0x10104ee
     field public static final int editTextBackground = 16843602; // 0x1010352
     field public static final int editTextColor = 16843601; // 0x1010351
     field public static final int editTextPreferenceStyle = 16842898; // 0x1010092
@@ -2959,6 +2960,7 @@ package android.animation {
     method public void cancel();
     method public android.animation.Animator clone();
     method public void end();
+    method public long getDistanceBasedDuration();
     method public abstract long getDuration();
     method public android.animation.TimeInterpolator getInterpolator();
     method public java.util.ArrayList<android.animation.Animator.AnimatorListener> getListeners();
@@ -2972,12 +2974,16 @@ package android.animation {
     method public void removePauseListener(android.animation.Animator.AnimatorPauseListener);
     method public void resume();
     method public abstract android.animation.Animator setDuration(long);
+    method public void setDurationScaleHint(int, android.content.res.Resources);
     method public abstract void setInterpolator(android.animation.TimeInterpolator);
     method public abstract void setStartDelay(long);
     method public void setTarget(java.lang.Object);
     method public void setupEndValues();
     method public void setupStartValues();
     method public void start();
+    field public static final int HINT_DISTANCE_DEFINED_IN_DP = 2; // 0x2
+    field public static final int HINT_DISTANCE_PROPORTIONAL_TO_SCREEN_SIZE = 1; // 0x1
+    field public static final int HINT_NO_SCALE = 0; // 0x0
   }
 
   public static abstract interface Animator.AnimatorListener {

@@ -16,6 +16,7 @@
 
 package android.view.animation;
 
+import android.content.res.Configuration;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
@@ -43,6 +44,16 @@ public class AnimationUtils {
      */
     private static final int TOGETHER = 0;
     private static final int SEQUENTIALLY = 1;
+
+    private static final float RECOMMENDED_FIELD_OF_VIEW_FOR_TV = 40f;
+    private static final float ESTIMATED_VIEWING_DISTANCE_FOR_WATCH = 11f;
+    private static final float AVERAGE_VIEWING_DISTANCE_FOR_PHONES = 14.2f;
+    private static final float N5_DIAGONAL_VIEW_ANGLE = 19.58f;
+    private static final float N5_DENSITY = 3.0f;
+    private static final float N5_DPI = 443f;
+
+    private static final float COTANGENT_OF_HALF_TV_ANGLE = (float)  (1 / Math.tan(Math.toRadians
+                (RECOMMENDED_FIELD_OF_VIEW_FOR_TV / 2)));
 
 
     /**
@@ -366,5 +377,79 @@ public class AnimationUtils {
             }
         }
         return interpolator;
+    }
+
+    /**
+     * Derives the viewing distance of a device based on the device size (in inches), and the
+     * device type.
+     * @hide
+     */
+    public static float getViewingDistance(float width, float height, int uiMode) {
+        if (uiMode == Configuration.UI_MODE_TYPE_TELEVISION) {
+            // TV
+            return (width / 2) * COTANGENT_OF_HALF_TV_ANGLE;
+        } else if (uiMode == Configuration.UI_MODE_TYPE_WATCH) {
+            // Watch
+            return ESTIMATED_VIEWING_DISTANCE_FOR_WATCH;
+        } else {
+            // Tablet, phone, etc
+            return AVERAGE_VIEWING_DISTANCE_FOR_PHONES;
+        }
+    }
+
+    /**
+     * Calculates the duration scaling factor of an animation based on the hint that the animation
+     * will move across the entire screen. A scaling factor of 1 means the duration on this given
+     * device will be the same as the duration set through
+     * {@link android.animation.Animator#setDuration(long)}. The calculation uses Nexus 5 as a
+     * baseline device. That is, the duration of the animation on a given device will scale its
+     * duration so that it has the same look and feel as the animation on Nexus 5. In order to
+     * achieve the same perceived effect of the animation across different devices, we maintain
+     * the same angular speed of the same animation in users' field of view. Therefore, the
+     * duration scale factor is determined by the ratio of the angular movement on current
+     * devices to that on the baseline device.
+     *
+     * @param width width of the screen (in inches)
+     * @param height height of the screen (in inches)
+     * @param viewingDistance the viewing distance of the device (i.e. watch, phone, TV, etc) in
+     *                        inches
+     * @return scaling factor (or multiplier) of the duration set through
+     * {@link android.animation.Animator#setDuration(long)} on current device.
+     * @hide
+     */
+    public static float getScreenSizeBasedDurationScale(float width, float height,
+            float viewingDistance) {
+        // Animation's moving distance is proportional to the screen size.
+        float diagonal = (float) Math.sqrt(width * width + height * height);
+        float diagonalViewAngle = (float) Math.toDegrees(Math.atan((diagonal / 2f)
+                / viewingDistance) * 2);
+        return diagonalViewAngle / N5_DIAGONAL_VIEW_ANGLE;
+    }
+
+    /**
+     * Calculates the duration scaling factor of an animation under the assumption that the
+     * animation is defined to move the same amount of distance (in dp) across all devices. A
+     * scaling factor of 1 means the duration on this given device will be the same as the
+     * duration set through {@link android.animation.Animator#setDuration(long)}. The calculation
+     * uses Nexus 5 as a baseline device. That is, the duration of the animation on a given
+     * device will scale its duration so that it has the same look and feel as the animation on
+     * Nexus 5. In order to achieve the same perceived effect of the animation across different
+     * devices, we maintain the same angular velocity of the same animation in users' field of
+     * view. Therefore, the duration scale factor is determined by the ratio of the angular
+     * movement on current devices to that on the baseline device.
+     *
+     * @param density logical density of the display. {@link android.util.DisplayMetrics#density}
+     * @param dpi pixels per inch
+     * @param viewingDistance viewing distance of the device (in inches)
+     * @return the scaling factor of duration
+     * @hide
+     */
+    public static float getDpBasedDurationScale(float density, float dpi,
+            float viewingDistance) {
+        // Angle in users' field of view per dp:
+        float anglePerDp = (float) Math.atan2((density / dpi) / 2, viewingDistance) * 2;
+        float baselineAnglePerDp = (float) Math.atan2((N5_DENSITY / N5_DPI) / 2,
+                AVERAGE_VIEWING_DISTANCE_FOR_PHONES) * 2;
+        return anglePerDp / baselineAnglePerDp;
     }
 }

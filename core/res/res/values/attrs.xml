@@ -5981,6 +5981,19 @@
             <!-- values are colors, which are integers starting with "#". -->
             <enum name="colorType"   value="3" />
         </attr>
+        <!-- Defines whether the animation should adjust duration in order to achieve the same
+             perceived effects on different devices. -->
+        <attr name="durationScaleHint" >
+            <!-- Default value for scale hint. When set, duration will not be scaled.-->
+            <enum name="noScale" value="0"/>
+            <!-- This should be used when the animation's moving distance is proportional to screen,
+                 as the scaling is based on screen size. -->
+            <enum name="screen" value="1"/>
+            <!-- This is for animations that have a distance defined in dp, which will be the same
+                 across different devices. In this case, scaling is based on the physical distance
+                 per dp on the current device. -->
+            <enum name="dp" value="2"/>
+        </attr>
     </declare-styleable>
 
     <declare-styleable name="PropertyValuesHolder">
