@@ -22,6 +22,7 @@ import android.annotation.ArrayRes;
 import android.annotation.AttrRes;
 import android.annotation.DrawableRes;
 import android.annotation.StringRes;
+import android.annotation.StyleRes;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.database.Cursor;
@@ -191,11 +192,11 @@ public class AlertDialog extends Dialog implements DialogInterface {
      *                   {@code context}'s default alert dialog theme
      * @see android.R.styleable#Theme_alertDialogTheme
      */
-    protected AlertDialog(Context context, @AttrRes int themeResId) {
+    protected AlertDialog(Context context, @StyleRes int themeResId) {
         this(context, themeResId, true);
     }
 
-    AlertDialog(Context context, @AttrRes int themeResId, boolean createContextThemeWrapper) {
+    AlertDialog(Context context, @StyleRes int themeResId, boolean createContextThemeWrapper) {
         super(context, createContextThemeWrapper ? resolveDialogTheme(context, themeResId) : 0,
                 createContextThemeWrapper);
 
@@ -204,9 +205,7 @@ public class AlertDialog extends Dialog implements DialogInterface {
     }
 
     static int resolveDialogTheme(Context context, int themeResId) {
-        if (themeResId == 0) {
-            return 0;
-        } else if (themeResId == THEME_TRADITIONAL) {
+        if (themeResId == THEME_TRADITIONAL) {
             return R.style.Theme_Dialog_Alert;
         } else if (themeResId == THEME_HOLO_DARK) {
             return R.style.Theme_Holo_Dialog_Alert;

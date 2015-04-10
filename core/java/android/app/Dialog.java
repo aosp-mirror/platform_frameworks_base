@@ -20,9 +20,11 @@ import android.annotation.CallSuper;
 import android.annotation.DrawableRes;
 import android.annotation.IdRes;
 import android.annotation.LayoutRes;
+import android.annotation.NonNull;
 import android.annotation.StringRes;
 
 import android.annotation.Nullable;
+import android.annotation.StyleRes;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.ContextWrapper;
@@ -140,7 +142,7 @@ public class Dialog implements DialogInterface, Window.Callback,
      * @param context the context in which the dialog should run
      * @see android.R.styleable#Theme_dialogTheme
      */
-    public Dialog(Context context) {
+    public Dialog(@NonNull Context context) {
         this(context, 0, true);
     }
 
@@ -156,26 +158,26 @@ public class Dialog implements DialogInterface, Window.Callback,
      * using styles.
      *
      * @param context the context in which the dialog should run
-     * @param theme a style resource describing the theme to use for the
+     * @param themeResId a style resource describing the theme to use for the
      *              window, or {@code 0} to use the default dialog theme
      */
-    public Dialog(Context context, int theme) {
-        this(context, theme, true);
+    public Dialog(@NonNull Context context, @StyleRes int themeResId) {
+        this(context, themeResId, true);
     }
 
-    Dialog(Context context, int theme, boolean createContextThemeWrapper) {
+    Dialog(@NonNull Context context, @StyleRes int themeResId, boolean createContextThemeWrapper) {
         if (createContextThemeWrapper) {
-            if (theme == 0) {
+            if (themeResId == 0) {
                 final TypedValue outValue = new TypedValue();
                 context.getTheme().resolveAttribute(R.attr.dialogTheme, outValue, true);
-                theme = outValue.resourceId;
+                themeResId = outValue.resourceId;
             }
-            mContext = new ContextThemeWrapper(context, theme);
+            mContext = new ContextThemeWrapper(context, themeResId);
         } else {
             mContext = context;
         }
 
-        mWindowManager = (WindowManager)context.getSystemService(Context.WINDOW_SERVICE);
+        mWindowManager = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
 
         final Window w = new PhoneWindow(mContext);
         mWindow = w;
@@ -192,14 +194,13 @@ public class Dialog implements DialogInterface, Window.Callback,
      * @hide
      */
     @Deprecated
-    protected Dialog(Context context, boolean cancelable,
-            Message cancelCallback) {
+    protected Dialog(@NonNull Context context, boolean cancelable, Message cancelCallback) {
         this(context);
         mCancelable = cancelable;
         mCancelMessage = cancelCallback;
     }
 
-    protected Dialog(Context context, boolean cancelable,
+    protected Dialog(@NonNull Context context, boolean cancelable,
             OnCancelListener cancelListener) {
         this(context);
         mCancelable = cancelable;
@@ -211,6 +212,7 @@ public class Dialog implements DialogInterface, Window.Callback,
      * 
      * @return Context The Context used by the Dialog.
      */
+    @NonNull
     public final Context getContext() {
         return mContext;
     }
