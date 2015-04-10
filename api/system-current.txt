@@ -16484,6 +16484,7 @@ package android.media {
     method public static final boolean isCryptoSchemeSupported(java.util.UUID);
     method public final void release();
     method public final boolean requiresSecureDecoderComponent(java.lang.String);
+    method public final void setMediaDrmSession(byte[]) throws android.media.MediaCryptoException;
   }
 
   public final class MediaCryptoException extends java.lang.Exception {

@@ -140,6 +140,15 @@ sp<ICrypto> JCrypto::GetCrypto(JNIEnv *env, jobject obj) {
     return jcrypto->mCrypto;
 }
 
+// JNI conversion utilities
+static Vector<uint8_t> JByteArrayToVector(JNIEnv *env, jbyteArray const &byteArray) {
+    Vector<uint8_t> vector;
+    size_t length = env->GetArrayLength(byteArray);
+    vector.insertAt((size_t)0, length);
+    env->GetByteArrayRegion(byteArray, 0, length, (jbyte *)vector.editArray());
+    return vector;
+}
+
 }  // namespace android
 
 using namespace android;
@@ -274,6 +283,37 @@ static jboolean android_media_MediaCrypto_requiresSecureDecoderComponent(
     return result ? JNI_TRUE : JNI_FALSE;
 }
 
+static void android_media_MediaCrypto_setMediaDrmSession(
+        JNIEnv *env, jobject thiz, jbyteArray jsessionId) {
+    if (jsessionId == NULL) {
+        jniThrowException(env, "java/lang/IllegalArgumentException", NULL);
+        return;
+    }
+
+    sp<ICrypto> crypto = JCrypto::GetCrypto(env, thiz);
+
+    if (crypto == NULL) {
+        jniThrowException(env, "java/lang/IllegalArgumentException", NULL);
+        return;
+    }
+
+    Vector<uint8_t> sessionId(JByteArrayToVector(env, jsessionId));
+
+    status_t err = crypto->setMediaDrmSession(sessionId);
+
+    String8 msg("setMediaDrmSession failed");
+    if (err == ERROR_DRM_SESSION_NOT_OPENED) {
+        msg += ": session not opened";
+    } else if (err == ERROR_UNSUPPORTED) {
+        msg += ": not supported by this crypto scheme";
+    } else if (err == NO_INIT) {
+        msg += ": crypto plugin not initialized";
+    } else if (err != OK) {
+        msg.appendFormat(": general failure (%d)", err);
+    }
+    jniThrowException(env, "android/media/MediaCryptoException", msg.string());
+}
+
 static JNINativeMethod gMethods[] = {
     { "release", "()V", (void *)android_media_MediaCrypto_release },
     { "native_init", "()V", (void *)android_media_MediaCrypto_native_init },
@@ -289,6 +329,9 @@ static JNINativeMethod gMethods[] = {
 
     { "requiresSecureDecoderComponent", "(Ljava/lang/String;)Z",
       (void *)android_media_MediaCrypto_requiresSecureDecoderComponent },
+
+    { "setMediaDrmSession", "([B)V",
+      (void *)android_media_MediaCrypto_setMediaDrmSession },
 };
 
 int register_android_media_Crypto(JNIEnv *env) {
