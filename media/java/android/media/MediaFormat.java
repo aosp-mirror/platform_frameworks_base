@@ -439,6 +439,22 @@ public final class MediaFormat {
     public static final String KEY_PRIORITY = "priority";
 
     /**
+     * A key describing the desired operating frame rate for video or sample rate for audio
+     * that the codec will need to operate at.
+     * <p>
+     * The associated value is an integer or a float representing frames-per-second or
+     * samples-per-second
+     * <p>
+     * This is used for cases like high-speed/slow-motion video capture, where the video encoder
+     * format contains the target playback rate (e.g. 30fps), but the component must be able to
+     * handle the high operating capture rate (e.g. 240fps).
+     * <p>
+     * This rate will be used by codec for resource planning and setting the operating points.
+     *
+     */
+    public static final String KEY_OPERATING_RATE = "operating-rate";
+
+    /**
      * A key describing the desired profile to be used by an encoder.
      * Constants are declared in {@link MediaCodecInfo.CodecProfileLevel}.
      * This key is only supported for codecs that specify a profile.
