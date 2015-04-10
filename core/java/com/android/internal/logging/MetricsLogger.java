@@ -50,4 +50,14 @@ public class MetricsLogger implements MetricsConstants {
         }
         EventLogTags.writeSysuiAction(category);
     }
+
+    /** Add an integer value to the monotonically increasing counter with the given name. */
+    public static void count(Context context, String name, int value) {
+        EventLogTags.writeSysuiCount(name, value);
+    }
+
+    /** Increment the bucket with the integer label on the histogram with the given name. */
+    public static void histogram(Context context, String name, int bucket) {
+        EventLogTags.writeSysuiHistogram(name, bucket);
+    }
 }

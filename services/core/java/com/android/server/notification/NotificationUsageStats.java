@@ -28,6 +28,7 @@ import android.os.SystemClock;
 import android.service.notification.StatusBarNotification;
 import android.util.Log;
 
+import com.android.internal.logging.MetricsLogger;
 import com.android.server.notification.NotificationManagerService.DumpFilter;
 
 import java.io.PrintWriter;
@@ -56,8 +57,10 @@ public class NotificationUsageStats {
     // Guarded by synchronized(this).
     private final Map<String, AggregatedStats> mStats = new HashMap<String, AggregatedStats>();
     private final SQLiteLog mSQLiteLog;
+    private final Context mContext;
 
     public NotificationUsageStats(Context context) {
+        mContext = context;
         mSQLiteLog = ENABLE_SQLITE_LOG ? new SQLiteLog(context) : null;
     }
 
@@ -103,6 +106,8 @@ public class NotificationUsageStats {
      * Called when the user dismissed the notification via the UI.
      */
     public synchronized void registerDismissedByUser(NotificationRecord notification) {
+        MetricsLogger.histogram(mContext, "note_dismiss_longevity",
+                (int) (System.currentTimeMillis() - notification.getRankingTimeMs()) / (60 * 1000));
         notification.stats.onDismiss();
         for (AggregatedStats stats : getAggregatedStatsLocked(notification)) {
             stats.numDismissedByUser++;
@@ -117,6 +122,8 @@ public class NotificationUsageStats {
      * Called when the user clicked the notification in the UI.
      */
     public synchronized void registerClickedByUser(NotificationRecord notification) {
+        MetricsLogger.histogram(mContext, "note_click_longevity",
+                (int) (System.currentTimeMillis() - notification.getRankingTimeMs()) / (60 * 1000));
         notification.stats.onClick();
         for (AggregatedStats stats : getAggregatedStatsLocked(notification)) {
             stats.numClickedByUser++;

@@ -34,6 +34,7 @@ import android.util.ArrayMap;
 import android.util.Log;
 import android.util.LruCache;
 import android.util.Slog;
+import com.android.internal.logging.MetricsLogger;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -244,6 +245,7 @@ public class ValidateNotificationPeople implements NotificationSignalExtractor {
 
         if (pendingLookups.isEmpty()) {
             if (INFO) Slog.i(TAG, "final affinity: " + affinity);
+            if (affinity != NONE) MetricsLogger.count(mBaseContext, "note_with_people", 1);
             return null;
         }
 
@@ -453,6 +455,8 @@ public class ValidateNotificationPeople implements NotificationSignalExtractor {
                 Slog.d(TAG, "Validation finished in " + (System.currentTimeMillis() - timeStartMs) +
                         "ms");
             }
+
+            if (mContactAffinity != NONE) MetricsLogger.count(mBaseContext, "note_with_people", 1);
         }
 
         @Override
