@@ -18,8 +18,7 @@
     <item android:state_pressed="true">
         <bitmap
             android:src="@drawable/btn_rating_star_off_mtrl_alpha"
-            android:tint="?attr/colorControlActivated"
-            android:alpha="?attr/disabledAlpha"/>
+            android:tint="?attr/colorControlActivated" />
     </item>
     <item>
         <bitmap
