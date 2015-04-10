@@ -981,5 +981,5 @@
     <string name="volumeui_notification_text">Touch to restore the original.</string>
 
     <!-- Volume dialog zen toggle switch title -->
-    <string name="volume_zen_switch_text">Block interruptions</string>
+    <string name="volume_zen_switch_text">@*android:string/zen_mode_feature_name</string>
 </resources>

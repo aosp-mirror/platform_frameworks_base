@@ -17,10 +17,11 @@ package com.android.systemui.volume;
 
 import android.animation.LayoutTransition;
 import android.animation.ValueAnimator;
+import android.app.ActivityManager;
 import android.content.Context;
 import android.content.res.Resources;
 import android.provider.Settings.Global;
-import android.service.notification.Condition;
+import android.service.notification.ZenModeConfig;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.TypedValue;
@@ -33,6 +34,8 @@ import android.widget.TextView;
 
 import com.android.systemui.R;
 import com.android.systemui.statusbar.policy.ZenModeController;
+
+import java.util.Objects;
 
 /**
  * Switch bar + zen mode panel (conditions) attached to the bottom of the volume dialog.
@@ -57,6 +60,7 @@ public class ZenFooter extends LinearLayout {
     private TextView mSummaryLine2;
     private boolean mFooterExpanded;
     private int mZen = -1;
+    private ZenModeConfig mConfig;
     private Callback mCallback;
 
     public ZenFooter(Context context, AttributeSet attrs) {
@@ -102,8 +106,8 @@ public class ZenFooter extends LinearLayout {
                 setZen(zen);
             }
             @Override
-            public void onExitConditionChanged(Condition exitCondition) {
-                update();
+            public void onConfigChanged(ZenModeConfig config) {
+                setConfig(config);
             }
         });
         mSwitchBar.setOnClickListener(new OnClickListener() {
@@ -129,12 +133,19 @@ public class ZenFooter extends LinearLayout {
             }
         });
         mZen = mController.getZen();
+        mConfig = mController.getConfig();
         update();
     }
 
     private void setZen(int zen) {
         if (mZen == zen) return;
         mZen = zen;
+        update();
+    }
+
+    private void setConfig(ZenModeConfig config) {
+        if (Objects.equals(mConfig, config)) return;
+        mConfig = config;
         update();
     }
 
@@ -196,7 +207,9 @@ public class ZenFooter extends LinearLayout {
                 : isZenNone() ? mContext.getString(R.string.interruption_level_none)
                 : null;
         Util.setText(mSummaryLine1, line1);
-        Util.setText(mSummaryLine2, mZenModePanel.getExitConditionText());
+        final String line2 = ZenModeConfig.getConditionSummary(mContext, mConfig,
+                ActivityManager.getCurrentUser());
+        Util.setText(mSummaryLine2, line2);
     }
 
     private final OnCheckedChangeListener mCheckedListener = new OnCheckedChangeListener() {
@@ -208,7 +221,7 @@ public class ZenFooter extends LinearLayout {
                         : Global.ZEN_MODE_OFF;
                 mZen = newZen;  // this one's optimistic
                 setFooterExpanded(isChecked);
-                mController.setZen(newZen);
+                mController.setZen(newZen, null, TAG);
             }
         }
     };

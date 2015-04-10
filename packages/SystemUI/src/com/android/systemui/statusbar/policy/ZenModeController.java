@@ -17,16 +17,19 @@
 package com.android.systemui.statusbar.policy;
 
 import android.content.ComponentName;
+import android.net.Uri;
 import android.service.notification.Condition;
+import android.service.notification.ZenModeConfig;
+import android.service.notification.ZenModeConfig.ZenRule;
 
 public interface ZenModeController {
     void addCallback(Callback callback);
     void removeCallback(Callback callback);
-    void setZen(int zen);
+    void setZen(int zen, Uri conditionId, String reason);
     int getZen();
     void requestConditions(boolean request);
-    void setExitCondition(Condition exitCondition);
-    Condition getExitCondition();
+    ZenRule getManualRule();
+    ZenModeConfig getConfig();
     long getNextAlarm();
     void setUserId(int userId);
     boolean isZenAvailable();
@@ -35,10 +38,11 @@ public interface ZenModeController {
 
     public static class Callback {
         public void onZenChanged(int zen) {}
-        public void onExitConditionChanged(Condition exitCondition) {}
         public void onConditionsChanged(Condition[] conditions) {}
         public void onNextAlarmChanged() {}
         public void onZenAvailableChanged(boolean available) {}
         public void onEffectsSupressorChanged() {}
+        public void onManualRuleChanged(ZenRule rule) {}
+        public void onConfigChanged(ZenModeConfig config) {}
     }
 }

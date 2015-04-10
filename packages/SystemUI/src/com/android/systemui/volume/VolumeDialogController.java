@@ -41,6 +41,7 @@ import android.os.RemoteException;
 import android.os.Vibrator;
 import android.provider.Settings;
 import android.service.notification.Condition;
+import android.service.notification.ZenModeConfig;
 import android.util.Log;
 import android.util.SparseArray;
 
@@ -393,8 +394,15 @@ public class VolumeDialogController {
         return stream == AudioManager.STREAM_RING || stream == AudioManager.STREAM_NOTIFICATION;
     }
 
+    private Condition getExitCondition() {
+        final ZenModeConfig config = mNoMan.getZenModeConfig();
+        return config == null ? null
+                : config.manualRule == null ? null
+                : config.manualRule.condition;
+    }
+
     private boolean updateExitConditionW() {
-        final Condition exitCondition = mNoMan.getZenModeCondition();
+        final Condition exitCondition = getExitCondition();
         if (Objects.equals(mState.exitCondition, exitCondition)) return false;
         mState.exitCondition = exitCondition;
         return true;
@@ -476,12 +484,12 @@ public class VolumeDialogController {
     }
 
     private void onSetExitConditionW(Condition condition) {
-        mNoMan.setZenModeCondition(condition);
+        mNoMan.setZenMode(mState.zenMode, condition != null ? condition.id : null, TAG);
     }
 
     private void onSetZenModeW(int mode) {
         if (D.BUG) Log.d(TAG, "onSetZenModeW " + mode);
-        mNoMan.setZenMode(mode);
+        mNoMan.setZenMode(mode, null, TAG);
     }
 
     private void onDismissRequestedW(int reason) {

@@ -25,7 +25,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.Uri;
 import android.service.notification.Condition;
-import android.service.notification.ConditionProviderService;
 import android.service.notification.IConditionProvider;
 import android.service.notification.ZenModeConfig;
 import android.text.format.DateUtils;
@@ -38,7 +37,7 @@ import java.io.PrintWriter;
 import java.util.Date;
 
 /** Built-in zen condition provider for simple time-based conditions */
-public class CountdownConditionProvider extends ConditionProviderService {
+public class CountdownConditionProvider extends SystemConditionProviderService {
     private static final String TAG = "CountdownConditions";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
@@ -59,6 +58,27 @@ public class CountdownConditionProvider extends ConditionProviderService {
         if (DEBUG) Slog.d(TAG, "new CountdownConditionProvider()");
     }
 
+    @Override
+    public ComponentName getComponent() {
+        return COMPONENT;
+    }
+
+    @Override
+    public boolean isValidConditionid(Uri id) {
+        return ZenModeConfig.isValidCountdownConditionId(id);
+    }
+
+    @Override
+    public void attachBase(Context base) {
+        attachBaseContext(base);
+    }
+
+    @Override
+    public IConditionProvider asInterface() {
+        return (IConditionProvider) onBind(null);
+    }
+
+    @Override
     public void dump(PrintWriter pw, DumpFilter filter) {
         pw.println("    CountdownConditionProvider:");
         pw.print("      mConnected="); pw.println(mConnected);
@@ -154,11 +174,4 @@ public class CountdownConditionProvider extends ConditionProviderService {
         return new Date(time) + " (" + time + ")";
     }
 
-    public void attachBase(Context base) {
-        attachBaseContext(base);
-    }
-
-    public IConditionProvider asInterface() {
-        return (IConditionProvider) onBind(null);
-    }
 }
