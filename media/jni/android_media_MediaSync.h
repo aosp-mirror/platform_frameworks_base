@@ -25,6 +25,7 @@ namespace android {
 
 class AudioTrack;
 struct IGraphicBufferProducer;
+struct MediaClock;
 class MediaSync;
 
 struct JMediaSync : public RefBase {
@@ -39,6 +40,8 @@ struct JMediaSync : public RefBase {
     status_t updateQueuedAudioData(int sizeInBytes, int64_t presentationTimeUs);
 
     void setPlaybackRate(float rate);
+
+    sp<const MediaClock> getMediaClock();
 
 protected:
     virtual ~JMediaSync();

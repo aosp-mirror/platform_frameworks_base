@@ -15985,6 +15985,7 @@ package android.media {
     method public void configureAudioTrack(android.media.AudioTrack, int);
     method public void configureSurface(android.view.Surface);
     method public final android.view.Surface createInputSurface();
+    method public boolean getTimestamp(android.media.MediaTimestamp);
     method public void queueAudio(java.nio.ByteBuffer, int, int, long);
     method public final void release();
     method public void setCallback(android.media.MediaSync.Callback, android.os.Handler);
@@ -16004,6 +16005,13 @@ package android.media {
     method public android.media.MediaSyncEvent setAudioSessionId(int) throws java.lang.IllegalArgumentException;
     field public static final int SYNC_EVENT_NONE = 0; // 0x0
     field public static final int SYNC_EVENT_PRESENTATION_COMPLETE = 1; // 0x1
+  }
+
+  public final class MediaTimestamp {
+    ctor public MediaTimestamp();
+    field public float clockRate;
+    field public long mediaTimeUs;
+    field public long nanoTime;
   }
 
   public final class NotProvisionedException extends android.media.MediaDrmException {
