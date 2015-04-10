@@ -32,8 +32,9 @@ import java.util.List;
 /** Test {@link UserManager} functionality. */
 public class UserManagerTest extends AndroidTestCase {
 
-    UserManager mUserManager = null;
-    Object mUserLock = new Object();
+    private UserManager mUserManager = null;
+    private final Object mUserLock = new Object();
+    private List<Integer> usersToRemove;
 
     @Override
     public void setUp() throws Exception {
@@ -49,11 +50,19 @@ public class UserManagerTest extends AndroidTestCase {
         }, filter);
 
         removeExistingUsers();
+        usersToRemove = new ArrayList<>();
+    }
+
+    @Override
+    protected void tearDown() throws Exception {
+        for (Integer userId : usersToRemove) {
+            removeUser(userId);
+        }
+        super.tearDown();
     }
 
     private void removeExistingUsers() {
         List<UserInfo> list = mUserManager.getUsers();
-        boolean found = false;
         for (UserInfo user : list) {
             if (user.id != UserHandle.USER_OWNER) {
                 removeUser(user.id);
@@ -66,7 +75,7 @@ public class UserManagerTest extends AndroidTestCase {
     }
 
     public void testAddUser() throws Exception {
-        UserInfo userInfo = mUserManager.createUser("Guest 1", UserInfo.FLAG_GUEST);
+        UserInfo userInfo = createUser("Guest 1", UserInfo.FLAG_GUEST);
         assertTrue(userInfo != null);
 
         List<UserInfo> list = mUserManager.getUsers();
@@ -83,12 +92,11 @@ public class UserManagerTest extends AndroidTestCase {
             }
         }
         assertTrue(found);
-        removeUser(userInfo.id);
     }
 
     public void testAdd2Users() throws Exception {
-        UserInfo user1 = mUserManager.createUser("Guest 1", UserInfo.FLAG_GUEST);
-        UserInfo user2 = mUserManager.createUser("User 2", UserInfo.FLAG_ADMIN);
+        UserInfo user1 = createUser("Guest 1", UserInfo.FLAG_GUEST);
+        UserInfo user2 = createUser("User 2", UserInfo.FLAG_ADMIN);
 
         assertTrue(user1 != null);
         assertTrue(user2 != null);
@@ -96,40 +104,64 @@ public class UserManagerTest extends AndroidTestCase {
         assertTrue(findUser(0));
         assertTrue(findUser(user1.id));
         assertTrue(findUser(user2.id));
-        removeUser(user1.id);
-        removeUser(user2.id);
     }
 
     public void testRemoveUser() throws Exception {
-        UserInfo userInfo = mUserManager.createUser("Guest 1", UserInfo.FLAG_GUEST);
+        UserInfo userInfo = createUser("Guest 1", UserInfo.FLAG_GUEST);
         removeUser(userInfo.id);
 
         assertFalse(findUser(userInfo.id));
     }
 
     public void testAddGuest() throws Exception {
-        UserInfo userInfo1 = mUserManager.createUser("Guest 1", UserInfo.FLAG_GUEST);
-        UserInfo userInfo2 = mUserManager.createUser("Guest 2", UserInfo.FLAG_GUEST);
+        UserInfo userInfo1 = createUser("Guest 1", UserInfo.FLAG_GUEST);
+        UserInfo userInfo2 = createUser("Guest 2", UserInfo.FLAG_GUEST);
         assertNotNull(userInfo1);
         assertNull(userInfo2);
-
-        // Cleanup
-        removeUser(userInfo1.id);
     }
 
     // Make sure only one managed profile can be created
     public void testAddManagedProfile() throws Exception {
-        UserInfo userInfo1 = mUserManager.createProfileForUser("Managed 1",
+        UserInfo userInfo1 = createProfileForUser("Managed 1",
                 UserInfo.FLAG_MANAGED_PROFILE, UserHandle.USER_OWNER);
-        UserInfo userInfo2 = mUserManager.createProfileForUser("Managed 2",
+        UserInfo userInfo2 = createProfileForUser("Managed 2",
                 UserInfo.FLAG_MANAGED_PROFILE, UserHandle.USER_OWNER);
         assertNotNull(userInfo1);
         assertNull(userInfo2);
         // Verify that current user is not a managed profile
         assertFalse(mUserManager.isManagedProfile());
-        // Cleanup
-        removeUser(userInfo1.id);
     }
+
+    public void testGetUserCreationTime() throws Exception {
+        UserInfo profile = createProfileForUser("Managed 1",
+                UserInfo.FLAG_MANAGED_PROFILE, UserHandle.USER_OWNER);
+        assertNotNull(profile);
+        assertTrue("creationTime must be set when the profile is created",
+                profile.creationTime > 0);
+        assertEquals(profile.creationTime, mUserManager.getUserCreationTime(profile.id));
+
+        long ownerCreationTime = mUserManager.getUserInfo(UserHandle.USER_OWNER).creationTime;
+        assertEquals(ownerCreationTime, mUserManager.getUserCreationTime(UserHandle.USER_OWNER));
+
+        try {
+            int noSuchUserId = 100500;
+            mUserManager.getUserCreationTime(noSuchUserId);
+            fail("SecurityException should be thrown for nonexistent user");
+        } catch (Exception e) {
+            assertTrue("SecurityException should be thrown for nonexistent user, but was: " + e,
+                    e instanceof SecurityException);
+        }
+
+        UserInfo user = createUser("User 1", 0);
+        try {
+            mUserManager.getUserCreationTime(user.id);
+            fail("SecurityException should be thrown for other user");
+        } catch (Exception e) {
+            assertTrue("SecurityException should be thrown for other user, but was: " + e,
+                    e instanceof SecurityException);
+        }
+    }
+
 
     private boolean findUser(int id) {
         List<UserInfo> list = mUserManager.getUsers();
@@ -143,40 +175,29 @@ public class UserManagerTest extends AndroidTestCase {
     }
 
     public void testSerialNumber() {
-        UserInfo user1 = mUserManager.createUser("User 1", UserInfo.FLAG_RESTRICTED);
+        UserInfo user1 = createUser("User 1", UserInfo.FLAG_RESTRICTED);
         int serialNumber1 = user1.serialNumber;
         assertEquals(serialNumber1, mUserManager.getUserSerialNumber(user1.id));
         assertEquals(user1.id, mUserManager.getUserHandle(serialNumber1));
-        removeUser(user1.id);
-        UserInfo user2 = mUserManager.createUser("User 2", UserInfo.FLAG_RESTRICTED);
+        UserInfo user2 = createUser("User 2", UserInfo.FLAG_RESTRICTED);
         int serialNumber2 = user2.serialNumber;
         assertFalse(serialNumber1 == serialNumber2);
         assertEquals(serialNumber2, mUserManager.getUserSerialNumber(user2.id));
         assertEquals(user2.id, mUserManager.getUserHandle(serialNumber2));
-        removeUser(user2.id);
     }
 
     public void testMaxUsers() {
         int N = UserManager.getMaxSupportedUsers();
         int count = mUserManager.getUsers().size();
-        List<UserInfo> created = new ArrayList<UserInfo>();
         // Create as many users as permitted and make sure creation passes
         while (count < N) {
-            UserInfo ui = mUserManager.createUser("User " + count, 0);
+            UserInfo ui = createUser("User " + count, 0);
             assertNotNull(ui);
-            created.add(ui);
             count++;
         }
         // Try to create one more user and make sure it fails
-        UserInfo extra = null;
-        assertNull(extra = mUserManager.createUser("One more", 0));
-        if (extra != null) {
-            removeUser(extra.id);
-        }
-        while (!created.isEmpty()) {
-            UserInfo user = created.remove(0);
-            removeUser(user.id);
-        }
+        UserInfo extra = createUser("One more", 0);
+        assertNull(extra);
     }
 
     public void testRestrictions() {
@@ -198,11 +219,27 @@ public class UserManagerTest extends AndroidTestCase {
             mUserManager.removeUser(userId);
             while (mUserManager.getUserInfo(userId) != null) {
                 try {
-                    mUserLock.wait(1000);
+                    mUserLock.wait(500);
                 } catch (InterruptedException ie) {
                 }
             }
         }
+    }
+
+    private UserInfo createUser(String name, int flags) {
+        UserInfo user = mUserManager.createUser(name, flags);
+        if (user != null) {
+            usersToRemove.add(user.id);
+        }
+        return user;
+    }
+
+    private UserInfo createProfileForUser(String name, int flags, int userHandle) {
+        UserInfo profile = mUserManager.createProfileForUser(name, flags, userHandle);
+        if (profile != null) {
+            usersToRemove.add(profile.id);
+        }
+        return profile;
     }
 
 }
