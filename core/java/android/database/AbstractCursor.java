@@ -404,31 +404,29 @@ public abstract class AbstractCursor implements CrossProcessCursor {
         }
     }
 
+    @Override
     public Uri getNotificationUri() {
         synchronized (mSelfObserverLock) {
             return mNotifyUri;
         }
     }
 
+    @Override
     public boolean getWantsAllOnMoveCalls() {
         return false;
     }
 
-    /**
-     * Sets a {@link Bundle} that will be returned by {@link #getExtras()}.  <code>null</code> will
-     * be converted into {@link Bundle#EMPTY}.
-     *
-     * @param extras {@link Bundle} to set.
-     * @hide
-     */
+    @Override
     public void setExtras(Bundle extras) {
         mExtras = (extras == null) ? Bundle.EMPTY : extras;
     }
 
+    @Override
     public Bundle getExtras() {
         return mExtras;
     }
 
+    @Override
     public Bundle respond(Bundle extras) {
         return Bundle.EMPTY;
     }
