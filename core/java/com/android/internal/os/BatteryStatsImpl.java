@@ -472,6 +472,8 @@ public final class BatteryStatsImpl extends BatteryStats {
     private final NetworkStats.Entry mTmpNetworkStatsEntry = new NetworkStats.Entry();
 
     private PowerProfile mPowerProfile;
+    private boolean mHasWifiEnergyReporting = false;
+    private boolean mHasBluetoothEnergyReporting = false;
 
     /*
      * Holds a SamplingTimer associated with each kernel wakelock name being tracked.
@@ -4298,11 +4300,19 @@ public final class BatteryStatsImpl extends BatteryStats {
         return mBluetoothStateTimer[bluetoothState].getCountLocked(which);
     }
 
+    @Override public boolean hasBluetoothActivityReporting() {
+        return mHasBluetoothEnergyReporting;
+    }
+
     @Override public long getBluetoothControllerActivity(int type, int which) {
         if (type >= 0 && type < mBluetoothActivityCounters.length) {
             return mBluetoothActivityCounters[type].getCountLocked(which);
         }
         return 0;
+    }
+
+    @Override public boolean hasWifiActivityReporting() {
+        return mHasWifiEnergyReporting;
     }
 
     @Override public long getWifiControllerActivity(int type, int which) {
@@ -7567,6 +7577,8 @@ public final class BatteryStatsImpl extends BatteryStats {
         }
 
         if (info != null) {
+            mHasWifiEnergyReporting = true;
+
             // Measured in mAms
             final long txTimeMs = info.getControllerTxTimeMillis();
             final long rxTimeMs = info.getControllerRxTimeMillis();
@@ -7778,6 +7790,7 @@ public final class BatteryStatsImpl extends BatteryStats {
      */
     public void updateBluetoothStateLocked(@Nullable final BluetoothActivityEnergyInfo info) {
         if (info != null && mOnBatteryInternal && false) {
+            mHasBluetoothEnergyReporting = true;
             mBluetoothActivityCounters[CONTROLLER_RX_TIME].addCountLocked(
                     info.getControllerRxTimeMillis());
             mBluetoothActivityCounters[CONTROLLER_TX_TIME].addCountLocked(
@@ -9533,6 +9546,8 @@ public final class BatteryStatsImpl extends BatteryStats {
             mWifiActivityCounters[i] = new LongSamplingCounter(mOnBatteryTimeBase, in);
         }
 
+        mHasWifiEnergyReporting = in.readInt() != 0;
+        mHasBluetoothEnergyReporting = in.readInt() != 0;
         mNumConnectivityChange = in.readInt();
         mLoadedNumConnectivityChange = in.readInt();
         mUnpluggedNumConnectivityChange = in.readInt();
@@ -9686,6 +9701,8 @@ public final class BatteryStatsImpl extends BatteryStats {
         for (int i=0; i< NUM_CONTROLLER_ACTIVITY_TYPES; i++) {
             mWifiActivityCounters[i].writeToParcel(out);
         }
+        out.writeInt(mHasWifiEnergyReporting ? 1 : 0);
+        out.writeInt(mHasBluetoothEnergyReporting ? 1 : 0);
         out.writeInt(mNumConnectivityChange);
         out.writeInt(mLoadedNumConnectivityChange);
         out.writeInt(mUnpluggedNumConnectivityChange);

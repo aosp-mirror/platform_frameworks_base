@@ -16,12 +16,15 @@
 package com.android.internal.os;
 
 import android.os.BatteryStats;
+import android.util.Log;
 
 /**
  * WiFi power calculator for when BatteryStats supports energy reporting
  * from the WiFi controller.
  */
 public class WifiPowerCalculator extends PowerCalculator {
+    private static final boolean DEBUG = BatteryStatsHelper.DEBUG;
+    private static final String TAG = "WifiPowerCalculator";
     private final double mIdleCurrentMa;
     private final double mTxCurrentMa;
     private final double mRxCurrentMa;
@@ -75,6 +78,10 @@ public class WifiPowerCalculator extends PowerCalculator {
                     + (rxTimeMs * mRxCurrentMa)) / (1000*60*60);
         }
         app.wifiPowerMah = Math.max(0, powerDrain - mTotalAppPowerDrain);
+
+        if (DEBUG) {
+            Log.d(TAG, "left over WiFi power: " + BatteryStatsHelper.makemAh(app.wifiPowerMah));
+        }
     }
 
     @Override
