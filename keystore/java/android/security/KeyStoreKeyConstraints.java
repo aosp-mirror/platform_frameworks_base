@@ -164,7 +164,7 @@ public abstract class KeyStoreKeyConstraints {
                 case RSA:
                     return KeymasterDefs.KM_ALGORITHM_RSA;
                 case EC:
-                    return KeymasterDefs.KM_ALGORITHM_ECDSA;
+                    return KeymasterDefs.KM_ALGORITHM_EC;
                 default:
                     throw new IllegalArgumentException("Unknown algorithm: " + algorithm);
             }
@@ -181,7 +181,7 @@ public abstract class KeyStoreKeyConstraints {
                     return HMAC;
                 case KeymasterDefs.KM_ALGORITHM_RSA:
                     return RSA;
-                case KeymasterDefs.KM_ALGORITHM_ECDSA:
+                case KeymasterDefs.KM_ALGORITHM_EC:
                     return EC;
                 default:
                     throw new IllegalArgumentException("Unknown algorithm: " + algorithm);
