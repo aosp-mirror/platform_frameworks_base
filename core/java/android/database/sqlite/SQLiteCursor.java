@@ -105,7 +105,6 @@ public class SQLiteCursor extends AbstractWindowedCursor {
         mQuery = query;
 
         mColumns = query.getColumnNames();
-        mRowIdColumnIndex = DatabaseUtils.findRowIdColumnIndex(mColumns);
     }
 
     /**
