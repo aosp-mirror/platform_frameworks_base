@@ -105,6 +105,17 @@ bool mkdirs(const StringPiece& path) {
     return mkdirImpl(path) == 0 || errno == EEXIST;
 }
 
+std::string getStem(const StringPiece& path) {
+    const char* start = path.begin();
+    const char* end = path.end();
+    for (const char* current = end - 1; current != start - 1; --current) {
+        if (*current == sDirSep) {
+            return std::string(start, current - start);
+        }
+    }
+    return {};
+}
+
 bool FileFilter::setPattern(const StringPiece& pattern) {
     mPatternTokens = util::splitAndLowercase(pattern, ':');
     return true;

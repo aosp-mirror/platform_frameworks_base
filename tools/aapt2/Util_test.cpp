@@ -31,7 +31,11 @@ TEST(UtilTest, TrimOnlyWhitespace) {
 }
 
 TEST(UtilTest, StringEndsWith) {
-    EXPECT_TRUE(util::stringEndsWith("hello.xml", ".xml"));
+    EXPECT_TRUE(util::stringEndsWith<char>("hello.xml", ".xml"));
+}
+
+TEST(UtilTest, StringStartsWith) {
+    EXPECT_TRUE(util::stringStartsWith<char>("hello.xml", "he"));
 }
 
 TEST(UtilTest, StringBuilderWhitespaceRemoval) {

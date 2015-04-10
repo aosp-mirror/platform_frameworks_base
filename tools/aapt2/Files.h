@@ -71,6 +71,11 @@ void appendPath(std::string* base, const StringPiece& part, const Ts&... parts);
  */
 bool mkdirs(const StringPiece& path);
 
+/**
+ * Returns all but the last part of the path.
+ */
+std::string getStem(const StringPiece& path);
+
 /*
  * Filter that determines which resource files/directories are
  * processed by AAPT. Takes a pattern string supplied by the user.

@@ -54,13 +54,6 @@ std::vector<std::string> splitAndLowercase(const StringPiece& str, char sep) {
     return splitAndTransform(str, sep, ::tolower);
 }
 
-bool stringEndsWith(const StringPiece& str, const StringPiece& suffix) {
-    if (str.size() < suffix.size()) {
-        return false;
-    }
-    return str.substr(str.size() - suffix.size(), suffix.size()) == suffix;
-}
-
 StringPiece16 trimWhitespace(const StringPiece16& str) {
     if (str.size() == 0 || str.data() == nullptr) {
         return str;

@@ -1241,7 +1241,7 @@ bool Png::process(const Source& source, std::istream& input, std::ostream& outpu
         goto bail;
     }
 
-    if (util::stringEndsWith(source.path, ".9.png")) {
+    if (util::stringEndsWith<char>(source.path, ".9.png")) {
         if (!do9Patch(&pngInfo, outError)) {
             goto bail;
         }

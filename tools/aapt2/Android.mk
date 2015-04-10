@@ -27,6 +27,7 @@ main := Main.cpp
 sources := \
 	BigBuffer.cpp \
 	BinaryResourceParser.cpp \
+	BindingXmlPullParser.cpp \
 	ConfigDescription.cpp \
 	Files.cpp \
 	Flag.cpp \
@@ -54,6 +55,7 @@ sources := \
 
 testSources := \
 	BigBuffer_test.cpp \
+	BindingXmlPullParser_test.cpp \
 	Compat_test.cpp \
 	ConfigDescription_test.cpp \
 	JavaClassGenerator_test.cpp \
