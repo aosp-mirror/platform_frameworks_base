@@ -399,6 +399,13 @@ public class BackupTransport {
      * operation will be skipped (and {@link #finishBackup() invoked} with no data for that
      * package being passed to {@link #sendBackupData}.
      *
+     * <p class="note">The platform does no size-based rejection of full backup attempts on
+     * its own: it is always the responsibility of the transport to implement its own policy.
+     * In particular, even if the preflighted payload size is zero, the platform will still call
+     * this method and will proceed to back up an archive metadata header with no file content
+     * if this method returns TRANSPORT_OK.  To avoid storing such payloads the transport
+     * must recognize this case and return TRANSPORT_PACKAGE_REJECTED.
+     *
      * Added in MNC (API 23).
      *
      * @param size The estimated size of the full-data payload for this app.  This includes

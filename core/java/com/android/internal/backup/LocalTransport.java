@@ -45,8 +45,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashSet;
-import static android.system.OsConstants.*;
+import static android.system.OsConstants.SEEK_CUR;
 
 /**
  * Backup transport for stashing stuff into a known location on disk, and
@@ -284,8 +283,10 @@ public class LocalTransport extends BackupTransport {
     private int tearDownFullBackup() {
         if (mSocket != null) {
             try {
-                mFullBackupOutputStream.flush();
-                mFullBackupOutputStream.close();
+                if (mFullBackupOutputStream != null) {
+                    mFullBackupOutputStream.flush();
+                    mFullBackupOutputStream.close();
+                }
                 mSocketInputStream = null;
                 mFullTargetPackage = null;
                 mSocket.close();
@@ -296,6 +297,7 @@ public class LocalTransport extends BackupTransport {
                 return TRANSPORT_ERROR;
             } finally {
                 mSocket = null;
+                mFullBackupOutputStream = null;
             }
         }
         return TRANSPORT_OK;
@@ -308,6 +310,18 @@ public class LocalTransport extends BackupTransport {
     @Override
     public long requestFullBackupTime() {
         return 0;
+    }
+
+    @Override
+    public int checkFullBackupSize(long size) {
+        // Decline zero-size "backups"
+        final int result = (size > 0) ? TRANSPORT_OK : TRANSPORT_PACKAGE_REJECTED;
+        if (result != TRANSPORT_OK) {
+            if (DEBUG) {
+                Log.v(TAG, "Declining backup of size " + size);
+            }
+        }
+        return result;
     }
 
     @Override
@@ -333,22 +347,14 @@ public class LocalTransport extends BackupTransport {
         }
 
         mFullTargetPackage = targetPackage.packageName;
-        FileOutputStream tarstream;
-        try {
-            File tarball = tarballFile(mFullTargetPackage);
-            tarstream = new FileOutputStream(tarball);
-        } catch (FileNotFoundException e) {
-            return TRANSPORT_ERROR;
-        }
-        mFullBackupOutputStream = new BufferedOutputStream(tarstream);
         mFullBackupBuffer = new byte[4096];
 
         return TRANSPORT_OK;
     }
 
     @Override
-    public int sendBackupData(int numBytes) {
-        if (mFullBackupBuffer == null) {
+    public int sendBackupData(final int numBytes) {
+        if (mSocket == null) {
             Log.w(TAG, "Attempted sendBackupData before performFullBackup");
             return TRANSPORT_ERROR;
         }
@@ -356,16 +362,29 @@ public class LocalTransport extends BackupTransport {
         if (numBytes > mFullBackupBuffer.length) {
             mFullBackupBuffer = new byte[numBytes];
         }
-        while (numBytes > 0) {
+
+        if (mFullBackupOutputStream == null) {
+            FileOutputStream tarstream;
             try {
-            int nRead = mSocketInputStream.read(mFullBackupBuffer, 0, numBytes);
+                File tarball = tarballFile(mFullTargetPackage);
+                tarstream = new FileOutputStream(tarball);
+            } catch (FileNotFoundException e) {
+                return TRANSPORT_ERROR;
+            }
+            mFullBackupOutputStream = new BufferedOutputStream(tarstream);
+        }
+
+        int bytesLeft = numBytes;
+        while (bytesLeft > 0) {
+            try {
+            int nRead = mSocketInputStream.read(mFullBackupBuffer, 0, bytesLeft);
             if (nRead < 0) {
                 // Something went wrong if we expect data but saw EOD
                 Log.w(TAG, "Unexpected EOD; failing backup");
                 return TRANSPORT_ERROR;
             }
             mFullBackupOutputStream.write(mFullBackupBuffer, 0, nRead);
-            numBytes -= nRead;
+            bytesLeft -= nRead;
             } catch (IOException e) {
                 Log.e(TAG, "Error handling backup data for " + mFullTargetPackage);
                 return TRANSPORT_ERROR;
