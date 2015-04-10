@@ -691,7 +691,8 @@ public class VolumeDialog {
         final int iconRes =
                 isRingVibrate ? R.drawable.ic_volume_ringer_vibrate
                 : ss.routedToBluetooth ?
-                        (ss.muted ? R.drawable.ic_volume_bt_mute : R.drawable.ic_volume_bt)
+                        (ss.muted ? R.drawable.ic_volume_media_bt_mute
+                                : R.drawable.ic_volume_media_bt)
                 : mAutomute && ss.level == 0 ? row.iconMuteRes
                 : (ss.muted ? row.iconMuteRes : row.iconRes);
         if (iconRes != row.cachedIconRes) {
@@ -703,9 +704,9 @@ public class VolumeDialog {
         }
         row.iconState =
                 iconRes == R.drawable.ic_volume_ringer_vibrate ? Events.ICON_STATE_VIBRATE
-                : (iconRes == R.drawable.ic_volume_bt_mute || iconRes == row.iconMuteRes)
+                : (iconRes == R.drawable.ic_volume_media_bt_mute || iconRes == row.iconMuteRes)
                         ? Events.ICON_STATE_MUTE
-                : (iconRes == R.drawable.ic_volume_bt || iconRes == row.iconRes)
+                : (iconRes == R.drawable.ic_volume_media_bt || iconRes == row.iconRes)
                         ? Events.ICON_STATE_UNMUTE
                 : Events.ICON_STATE_UNKNOWN;
 
