@@ -27,13 +27,18 @@ import android.provider.Settings.Global;
 import android.provider.Settings.Secure;
 import android.service.notification.ZenModeConfig;
 import android.telecom.TelecomManager;
+import android.util.ArrayMap;
 import android.util.Slog;
 
+import java.io.PrintWriter;
+import java.util.Date;
 import java.util.Objects;
 
 public class ZenModeFiltering {
     private static final String TAG = ZenModeHelper.TAG;
     private static final boolean DEBUG = ZenModeHelper.DEBUG;
+
+    static final RepeatCallers REPEAT_CALLERS = new RepeatCallers();
 
     private final Context mContext;
 
@@ -43,8 +48,25 @@ public class ZenModeFiltering {
         mContext = context;
     }
 
-    public ComponentName getDefaultPhoneApp() {
-        return mDefaultPhoneApp;
+    public void dump(PrintWriter pw, String prefix) {
+        pw.print(prefix); pw.print("mDefaultPhoneApp="); pw.println(mDefaultPhoneApp);
+        pw.print(prefix); pw.print("RepeatCallers.mThresholdMinutes=");
+        pw.println(REPEAT_CALLERS.mThresholdMinutes);
+        synchronized (REPEAT_CALLERS) {
+            if (!REPEAT_CALLERS.mCalls.isEmpty()) {
+                pw.print(prefix); pw.println("RepeatCallers.mCalls=");
+                for (int i = 0; i < REPEAT_CALLERS.mCalls.size(); i++) {
+                    pw.print(prefix); pw.print("  ");
+                    pw.print(REPEAT_CALLERS.mCalls.keyAt(i));
+                    pw.print(" at ");
+                    pw.println(ts(REPEAT_CALLERS.mCalls.valueAt(i)));
+                }
+            }
+        }
+    }
+
+    private static String ts(long time) {
+        return new Date(time) + " (" + time + ")";
     }
 
     /**
@@ -53,13 +75,14 @@ public class ZenModeFiltering {
      * @param timeoutAffinity affinity to return when the timeout specified via
      *                        <code>contactsTimeoutMs</code> is hit
      */
-    public static boolean matchesCallFilter(int zen, ZenModeConfig config, UserHandle userHandle,
-            Bundle extras, ValidateNotificationPeople validator, int contactsTimeoutMs,
-            float timeoutAffinity) {
+    public static boolean matchesCallFilter(Context context, int zen, ZenModeConfig config,
+            UserHandle userHandle, Bundle extras, ValidateNotificationPeople validator,
+            int contactsTimeoutMs, float timeoutAffinity) {
         if (zen == Global.ZEN_MODE_NO_INTERRUPTIONS) return false; // nothing gets through
         if (zen == Global.ZEN_MODE_ALARMS) return false; // not an alarm
         if (zen == Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS) {
-            if (!config.allowCalls) return false; // no calls get through
+            if (config.allowRepeatCallers && REPEAT_CALLERS.isRepeat(context, extras)) return true;
+            if (!config.allowCalls) return false; // no other calls get through
             if (validator != null) {
                 final float contactAffinity = validator.getContactAffinity(userHandle, extras,
                         contactsTimeoutMs, timeoutAffinity);
@@ -67,6 +90,11 @@ public class ZenModeFiltering {
             }
         }
         return true;
+    }
+
+    private static Bundle extras(NotificationRecord record) {
+        return record != null && record.sbn != null && record.sbn.getNotification() != null
+                ? record.sbn.getNotification().extras : null;
     }
 
     public boolean shouldIntercept(int zen, ZenModeConfig config, NotificationRecord record) {
@@ -96,6 +124,11 @@ public class ZenModeFiltering {
                     return false;
                 }
                 if (isCall(record)) {
+                    if (config.allowRepeatCallers
+                            && REPEAT_CALLERS.isRepeat(mContext, extras(record))) {
+                        ZenLog.traceNotIntercepted(record, "repeatCaller");
+                        return false;
+                    }
                     if (!config.allowCalls) {
                         ZenLog.traceIntercepted(record, "!allowCalls");
                         return true;
@@ -199,4 +232,48 @@ public class ZenModeFiltering {
                 return true;
         }
     }
+
+    private static class RepeatCallers {
+        private final ArrayMap<String, Long> mCalls = new ArrayMap<>();
+        private int mThresholdMinutes;
+
+        private synchronized boolean isRepeat(Context context, Bundle extras) {
+            if (mThresholdMinutes <= 0) {
+                mThresholdMinutes = context.getResources().getInteger(com.android.internal.R.integer
+                        .config_zen_repeat_callers_threshold);
+            }
+            if (mThresholdMinutes <= 0 || extras == null) return false;
+            final String peopleString = peopleString(extras);
+            if (peopleString == null) return false;
+            final long now = System.currentTimeMillis();
+            final int N = mCalls.size();
+            for (int i = N - 1; i >= 0; i--) {
+                final long time = mCalls.valueAt(i);
+                if (time > now || (now - time) > mThresholdMinutes * 1000 * 60) {
+                    mCalls.removeAt(i);
+                }
+            }
+            final boolean isRepeat = mCalls.containsKey(peopleString);
+            mCalls.put(peopleString, now);
+            return isRepeat;
+        }
+
+        private static String peopleString(Bundle extras) {
+            final String[] extraPeople = ValidateNotificationPeople.getExtraPeople(extras);
+            if (extraPeople == null || extraPeople.length == 0) return null;
+            final StringBuilder sb = new StringBuilder();
+            for (int i = 0; i < extraPeople.length; i++) {
+                String extraPerson = extraPeople[i];
+                if (extraPerson == null) continue;
+                extraPerson = extraPerson.trim();
+                if (extraPerson.isEmpty()) continue;
+                if (sb.length() > 0) {
+                    sb.append('|');
+                }
+                sb.append(extraPerson);
+            }
+            return sb.length() == 0 ? null : sb.toString();
+        }
+    }
+
 }

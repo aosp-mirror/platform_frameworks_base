@@ -2230,4 +2230,5 @@
   <java-symbol type="string" name="date_picker_next_month_button" />
   <java-symbol type="layout" name="date_picker_month_item_material" />
   <java-symbol type="id" name="month_view" />
+  <java-symbol type="integer" name="config_zen_repeat_callers_threshold" />
 </resources>

@@ -68,12 +68,14 @@ public class ZenModeConfig implements Parcelable {
 
     private static final boolean DEFAULT_ALLOW_REMINDERS = true;
     private static final boolean DEFAULT_ALLOW_EVENTS = true;
+    private static final boolean DEFAULT_ALLOW_REPEAT_CALLERS = false;
 
     private static final int XML_VERSION = 2;
     private static final String ZEN_TAG = "zen";
     private static final String ZEN_ATT_VERSION = "version";
     private static final String ALLOW_TAG = "allow";
     private static final String ALLOW_ATT_CALLS = "calls";
+    private static final String ALLOW_ATT_REPEAT_CALLERS = "repeatCallers";
     private static final String ALLOW_ATT_MESSAGES = "messages";
     private static final String ALLOW_ATT_FROM = "from";
     private static final String ALLOW_ATT_REMINDERS = "reminders";
@@ -101,6 +103,7 @@ public class ZenModeConfig implements Parcelable {
     private static final String RULE_ATT_CONDITION_ID = "conditionId";
 
     public boolean allowCalls;
+    public boolean allowRepeatCallers = DEFAULT_ALLOW_REPEAT_CALLERS;
     public boolean allowMessages;
     public boolean allowReminders = DEFAULT_ALLOW_REMINDERS;
     public boolean allowEvents = DEFAULT_ALLOW_EVENTS;
@@ -113,6 +116,7 @@ public class ZenModeConfig implements Parcelable {
 
     public ZenModeConfig(Parcel source) {
         allowCalls = source.readInt() == 1;
+        allowRepeatCallers = source.readInt() == 1;
         allowMessages = source.readInt() == 1;
         allowReminders = source.readInt() == 1;
         allowEvents = source.readInt() == 1;
@@ -133,6 +137,7 @@ public class ZenModeConfig implements Parcelable {
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeInt(allowCalls ? 1 : 0);
+        dest.writeInt(allowRepeatCallers ? 1 : 0);
         dest.writeInt(allowMessages ? 1 : 0);
         dest.writeInt(allowReminders ? 1 : 0);
         dest.writeInt(allowEvents ? 1 : 0);
@@ -158,6 +163,7 @@ public class ZenModeConfig implements Parcelable {
     public String toString() {
         return new StringBuilder(ZenModeConfig.class.getSimpleName()).append('[')
             .append("allowCalls=").append(allowCalls)
+            .append(",allowRepeatCallers=").append(allowRepeatCallers)
             .append(",allowMessages=").append(allowMessages)
             .append(",allowFrom=").append(sourceToString(allowFrom))
             .append(",allowReminders=").append(allowReminders)
@@ -213,6 +219,7 @@ public class ZenModeConfig implements Parcelable {
         if (o == this) return true;
         final ZenModeConfig other = (ZenModeConfig) o;
         return other.allowCalls == allowCalls
+                && other.allowRepeatCallers == allowRepeatCallers
                 && other.allowMessages == allowMessages
                 && other.allowFrom == allowFrom
                 && other.allowReminders == allowReminders
@@ -223,8 +230,8 @@ public class ZenModeConfig implements Parcelable {
 
     @Override
     public int hashCode() {
-        return Objects.hash(allowCalls, allowMessages, allowFrom, allowReminders, allowEvents,
-                automaticRules, manualRule);
+        return Objects.hash(allowCalls, allowRepeatCallers, allowMessages, allowFrom,
+                allowReminders, allowEvents, automaticRules, manualRule);
     }
 
     private static String toDayList(int[] days) {
@@ -279,6 +286,8 @@ public class ZenModeConfig implements Parcelable {
             if (type == XmlPullParser.START_TAG) {
                 if (ALLOW_TAG.equals(tag)) {
                     rt.allowCalls = safeBoolean(parser, ALLOW_ATT_CALLS, false);
+                    rt.allowRepeatCallers = safeBoolean(parser, ALLOW_ATT_REPEAT_CALLERS,
+                            DEFAULT_ALLOW_REPEAT_CALLERS);
                     rt.allowMessages = safeBoolean(parser, ALLOW_ATT_MESSAGES, false);
                     rt.allowReminders = safeBoolean(parser, ALLOW_ATT_REMINDERS,
                             DEFAULT_ALLOW_REMINDERS);
@@ -307,6 +316,7 @@ public class ZenModeConfig implements Parcelable {
 
         out.startTag(null, ALLOW_TAG);
         out.attribute(null, ALLOW_ATT_CALLS, Boolean.toString(allowCalls));
+        out.attribute(null, ALLOW_ATT_REPEAT_CALLERS, Boolean.toString(allowRepeatCallers));
         out.attribute(null, ALLOW_ATT_MESSAGES, Boolean.toString(allowMessages));
         out.attribute(null, ALLOW_ATT_REMINDERS, Boolean.toString(allowReminders));
         out.attribute(null, ALLOW_ATT_EVENTS, Boolean.toString(allowEvents));
