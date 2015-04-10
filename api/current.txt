@@ -9729,12 +9729,9 @@ package android.database {
     method public void setNotificationUri(android.content.ContentResolver, android.net.Uri);
     method public void unregisterContentObserver(android.database.ContentObserver);
     method public void unregisterDataSetObserver(android.database.DataSetObserver);
-    field protected boolean mClosed;
-    field protected android.content.ContentResolver mContentResolver;
-    field protected deprecated java.lang.Long mCurrentRowID;
-    field protected int mPos;
-    field protected deprecated int mRowIdColumnIndex;
-    field protected deprecated java.util.HashMap<java.lang.Long, java.util.Map<java.lang.String, java.lang.Object>> mUpdatedRows;
+    field protected deprecated boolean mClosed;
+    field protected deprecated android.content.ContentResolver mContentResolver;
+    field protected deprecated int mPos;
   }
 
   protected static class AbstractCursor.SelfContentObserver extends android.database.ContentObserver {
@@ -30558,7 +30555,7 @@ package android.test.mock {
     ctor public MockCursor();
     method public void close();
     method public void copyStringToBuffer(int, android.database.CharArrayBuffer);
-    method public void deactivate();
+    method public deprecated void deactivate();
     method public byte[] getBlob(int);
     method public int getColumnCount();
     method public int getColumnIndex(java.lang.String);
@@ -30591,8 +30588,9 @@ package android.test.mock {
     method public boolean moveToPrevious();
     method public void registerContentObserver(android.database.ContentObserver);
     method public void registerDataSetObserver(android.database.DataSetObserver);
-    method public boolean requery();
+    method public deprecated boolean requery();
     method public android.os.Bundle respond(android.os.Bundle);
+    method public void setExtras(android.os.Bundle);
     method public void setNotificationUri(android.content.ContentResolver, android.net.Uri);
     method public void unregisterContentObserver(android.database.ContentObserver);
     method public void unregisterDataSetObserver(android.database.DataSetObserver);

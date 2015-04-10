@@ -6,6 +6,16 @@ package android.content.pm {
 
 }
 
+package android.database {
+
+  public abstract class AbstractCursor implements android.database.CrossProcessCursor {
+    field protected java.lang.Long mCurrentRowID;
+    field protected int mRowIdColumnIndex;
+    field protected java.util.HashMap<java.lang.Long, java.util.Map<java.lang.String, java.lang.Object>> mUpdatedRows;
+  }
+
+}
+
 package android.media {
 
   public class AudioFormat {
