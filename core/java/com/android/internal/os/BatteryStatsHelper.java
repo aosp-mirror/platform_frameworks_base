@@ -21,7 +21,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.hardware.SensorManager;
 import android.net.ConnectivityManager;
-import android.net.wifi.WifiManager;
 import android.os.BatteryStats;
 import android.os.BatteryStats.Uid;
 import android.os.Bundle;
@@ -130,16 +129,11 @@ public final class BatteryStatsHelper {
         return !cm.isNetworkSupported(ConnectivityManager.TYPE_MOBILE);
     }
 
-    public static boolean checkHasWifiPowerReporting(Context context, PowerProfile profile) {
-        WifiManager manager = context.getSystemService(WifiManager.class);
-        if (manager.isEnhancedPowerReportingSupported()) {
-            if (profile.getAveragePower(PowerProfile.POWER_WIFI_CONTROLLER_IDLE) != 0 &&
-                    profile.getAveragePower(PowerProfile.POWER_WIFI_CONTROLLER_RX) != 0 &&
-                    profile.getAveragePower(PowerProfile.POWER_WIFI_CONTROLLER_TX) != 0) {
-                return true;
-            }
-        }
-        return false;
+    public static boolean checkHasWifiPowerReporting(BatteryStats stats, PowerProfile profile) {
+        return stats.hasWifiActivityReporting() &&
+                profile.getAveragePower(PowerProfile.POWER_WIFI_CONTROLLER_IDLE) != 0 &&
+                profile.getAveragePower(PowerProfile.POWER_WIFI_CONTROLLER_RX) != 0 &&
+                profile.getAveragePower(PowerProfile.POWER_WIFI_CONTROLLER_TX) != 0;
     }
 
     public BatteryStatsHelper(Context context) {
@@ -339,7 +333,7 @@ public final class BatteryStatsHelper {
         mMobileRadioPowerCalculator.reset(mStats);
 
         if (mWifiPowerCalculator == null) {
-            if (checkHasWifiPowerReporting(mContext, mPowerProfile)) {
+            if (checkHasWifiPowerReporting(mStats, mPowerProfile)) {
                 mWifiPowerCalculator = new WifiPowerCalculator(mPowerProfile);
             } else {
                 mWifiPowerCalculator = new WifiPowerEstimator(mPowerProfile);

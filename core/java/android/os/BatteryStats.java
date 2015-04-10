@@ -1947,6 +1947,13 @@ public abstract class BatteryStats implements Parcelable {
     public static final int NUM_CONTROLLER_ACTIVITY_TYPES = CONTROLLER_POWER_DRAIN + 1;
 
     /**
+     * Returns true if the BatteryStats object has detailed bluetooth power reports.
+     * When true, calling {@link #getBluetoothControllerActivity(int, int)} will yield the
+     * actual power data.
+     */
+    public abstract boolean hasBluetoothActivityReporting();
+
+    /**
      * For {@link #CONTROLLER_IDLE_TIME}, {@link #CONTROLLER_RX_TIME}, and
      * {@link #CONTROLLER_TX_TIME}, returns the time spent (in milliseconds) in the
      * respective state.
@@ -1954,6 +1961,13 @@ public abstract class BatteryStats implements Parcelable {
      * milli-ampere-milliseconds (mAms).
      */
     public abstract long getBluetoothControllerActivity(int type, int which);
+
+    /**
+     * Returns true if the BatteryStats object has detailed WiFi power reports.
+     * When true, calling {@link #getWifiControllerActivity(int, int)} will yield the
+     * actual power data.
+     */
+    public abstract boolean hasWifiActivityReporting();
 
     /**
      * For {@link #CONTROLLER_IDLE_TIME}, {@link #CONTROLLER_RX_TIME}, and
