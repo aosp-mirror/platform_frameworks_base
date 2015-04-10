@@ -171,33 +171,9 @@ public class StandaloneActivity extends BaseActivity {
         mState.showAdvanced = mState.forceAdvanced
                 | LocalPreferences.getDisplayAdvancedDevices(this);
         mState.showSize = true;
-    }
-
-    private class RestoreRootTask extends AsyncTask<Void, Void, RootInfo> {
-        private Uri mRootUri;
-
-        public RestoreRootTask(Uri rootUri) {
-            mRootUri = rootUri;
-        }
-
-        @Override
-        protected RootInfo doInBackground(Void... params) {
-            final String rootId = DocumentsContract.getRootId(mRootUri);
-            return mRoots.getRootOneshot(mRootUri.getAuthority(), rootId);
-        }
-
-        @Override
-        protected void onPostExecute(RootInfo root) {
-            if (isDestroyed()) return;
-            mState.restored = true;
-
-            if (root != null) {
-                onRootPicked(root, true);
-            } else {
-                Log.w(TAG, "Failed to find root: " + mRootUri);
-                finish();
-            }
-        }
+        final DocumentStack stack = intent.getParcelableExtra(CopyService.EXTRA_STACK);
+        if (stack != null)
+            mState.stack = stack;
     }
 
     private class RestoreStackTask extends AsyncTask<Void, Void, Void> {

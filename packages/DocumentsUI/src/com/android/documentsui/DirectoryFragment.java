@@ -358,18 +358,10 @@ public class DirectoryFragment extends Fragment {
             return;
         }
 
-        // Because the destination picker is launched using an open tree intent, the URI returned is
-        // a tree URI. Convert it to a document URI.
-        // TODO: Remove this step when the destination picker returns a document URI.
-        final Uri destinationTree = data.getData();
-        final Uri destination = DocumentsContract.buildDocumentUriUsingTree(destinationTree,
-                DocumentsContract.getTreeDocumentId(destinationTree));
-
-        List<DocumentInfo> docs = mSelectedDocumentsForCopy;
-        Intent copyIntent = new Intent(context, CopyService.class);
-        copyIntent.putParcelableArrayListExtra(CopyService.EXTRA_SRC_LIST,
-                new ArrayList<DocumentInfo>(docs));
-        copyIntent.setData(destination);
+        final List<DocumentInfo> docs = mSelectedDocumentsForCopy;
+        final Intent copyIntent = new Intent(context, CopyService.class);
+        copyIntent.putParcelableArrayListExtra(CopyService.EXTRA_SRC_LIST, new ArrayList<DocumentInfo>(docs));
+        copyIntent.putExtra(CopyService.EXTRA_STACK, data.getParcelableExtra(CopyService.EXTRA_STACK));
 
         Toast.makeText(context,
                 res.getQuantityString(R.plurals.copy_begin, docs.size(), docs.size()),

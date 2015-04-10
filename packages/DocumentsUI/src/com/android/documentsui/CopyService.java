@@ -30,6 +30,7 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.CancellationSignal;
 import android.os.ParcelFileDescriptor;
+import android.os.Parcelable;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.provider.DocumentsContract;
@@ -38,6 +39,7 @@ import android.text.format.DateUtils;
 import android.util.Log;
 
 import com.android.documentsui.model.DocumentInfo;
+import com.android.documentsui.model.DocumentStack;
 
 import libcore.io.IoUtils;
 
@@ -51,8 +53,10 @@ import java.util.Objects;
 
 public class CopyService extends IntentService {
     public static final String TAG = "CopyService";
-    public static final String EXTRA_SRC_LIST = "com.android.documentsui.SRC_LIST";
+
     private static final String EXTRA_CANCEL = "com.android.documentsui.CANCEL";
+    public static final String EXTRA_SRC_LIST = "com.android.documentsui.SRC_LIST";
+    public static final String EXTRA_STACK = "com.android.documentsui.STACK";
 
     private NotificationManager mNotificationManager;
     private Notification.Builder mProgressBuilder;
@@ -98,20 +102,20 @@ public class CopyService extends IntentService {
             return;
         }
 
-        ArrayList<DocumentInfo> srcs = intent.getParcelableArrayListExtra(EXTRA_SRC_LIST);
-        Uri destinationUri = intent.getData();
+        final ArrayList<DocumentInfo> srcs = intent.getParcelableArrayListExtra(EXTRA_SRC_LIST);
+        final DocumentStack stack = intent.getParcelableExtra(EXTRA_STACK);
 
         try {
             // Acquire content providers.
             mSrcClient = DocumentsApplication.acquireUnstableProviderOrThrow(getContentResolver(),
                     srcs.get(0).authority);
             mDstClient = DocumentsApplication.acquireUnstableProviderOrThrow(getContentResolver(),
-                    destinationUri.getAuthority());
+                    stack.peek().authority);
 
-            setupCopyJob(srcs, destinationUri);
+            setupCopyJob(srcs, stack);
 
             for (int i = 0; i < srcs.size() && !mIsCancelled; ++i) {
-                copy(srcs.get(i), destinationUri);
+                copy(srcs.get(i), stack.peek());
             }
         } catch (Exception e) {
             // Catch-all to prevent any copy errors from wedging the app.
@@ -142,28 +146,31 @@ public class CopyService extends IntentService {
      * files.
      *
      * @param srcs A list of src files to copy.
-     * @param destinationUri The URI of the destination directory.
+     * @param stack The copy destination stack.
      * @throws RemoteException
      */
-    private void setupCopyJob(ArrayList<DocumentInfo> srcs, Uri destinationUri)
+    private void setupCopyJob(ArrayList<DocumentInfo> srcs, DocumentStack stack)
             throws RemoteException {
         // Create an ID for this copy job. Use the timestamp.
         mJobId = String.valueOf(SystemClock.elapsedRealtime());
         // Reset the cancellation flag.
         mIsCancelled = false;
 
+        final Context context = getApplicationContext();
+        final Intent navigateIntent = new Intent(context, StandaloneActivity.class);
+        navigateIntent.putExtra(EXTRA_STACK, (Parcelable)stack);
+
         mProgressBuilder = new Notification.Builder(this)
                 .setContentTitle(getString(R.string.copy_notification_title))
+                .setContentIntent(PendingIntent.getActivity(context, 0, navigateIntent, 0))
                 .setCategory(Notification.CATEGORY_PROGRESS)
                 .setSmallIcon(R.drawable.ic_menu_copy).setOngoing(true);
 
-        Intent cancelIntent = new Intent(this, CopyService.class);
+        final Intent cancelIntent = new Intent(this, CopyService.class);
         cancelIntent.putExtra(EXTRA_CANCEL, mJobId);
         mProgressBuilder.addAction(R.drawable.ic_cab_cancel,
                 getString(R.string.cancel), PendingIntent.getService(this, 0,
                         cancelIntent, PendingIntent.FLAG_ONE_SHOT));
-
-        // TODO: Add a content intent to open the destination folder.
 
         // Send an initial progress notification.
         mProgressBuilder.setProgress(0, 0, true); // Indeterminate progress while setting up.
@@ -322,11 +329,11 @@ public class CopyService extends IntentService {
      * Copies a the given documents to the given location.
      *
      * @param srcInfo DocumentInfos for the documents to copy.
-     * @param dstDirUri The URI of the destination directory.
+     * @param dstDirInfo The destination directory.
      * @throws RemoteException
      */
-    private void copy(DocumentInfo srcInfo, Uri dstDirUri) throws RemoteException {
-        final Uri dstUri = DocumentsContract.createDocument(mDstClient, dstDirUri,
+    private void copy(DocumentInfo srcInfo, DocumentInfo dstDirInfo) throws RemoteException {
+        final Uri dstUri = DocumentsContract.createDocument(mDstClient, dstDirInfo.derivedUri,
                 srcInfo.mimeType, srcInfo.displayName);
         if (dstUri == null) {
             // If this is a directory, the entire subdir will not be copied over.

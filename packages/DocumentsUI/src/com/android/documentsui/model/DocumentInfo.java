@@ -24,6 +24,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.provider.DocumentsContract;
 import android.provider.DocumentsContract.Document;
+import android.provider.DocumentsContract.Root;
 import android.provider.DocumentsProvider;
 import android.text.TextUtils;
 
@@ -159,8 +160,6 @@ public class DocumentInfo implements Durable, Parcelable {
 
     public void updateFromCursor(Cursor cursor, String authority) {
         this.authority = authority;
-        this.documentId = getCursorString(cursor, Document.COLUMN_DOCUMENT_ID);
-        this.mimeType = getCursorString(cursor, Document.COLUMN_MIME_TYPE);
         this.documentId = getCursorString(cursor, Document.COLUMN_DOCUMENT_ID);
         this.mimeType = getCursorString(cursor, Document.COLUMN_MIME_TYPE);
         this.displayName = getCursorString(cursor, Document.COLUMN_DISPLAY_NAME);
