@@ -69,6 +69,7 @@ import android.os.UserHandle;
 import android.os.UserManager;
 import android.security.Credentials;
 import android.security.KeyStore;
+import android.text.TextUtils;
 import android.util.Log;
 
 import com.android.internal.annotations.GuardedBy;
@@ -114,7 +115,6 @@ public class Vpn {
     private LegacyVpnRunner mLegacyVpnRunner;
     private PendingIntent mStatusIntent;
     private volatile boolean mEnableTeardown = true;
-    private final IConnectivityManager mConnService;
     private final INetworkManagementService mNetd;
     private VpnConfig mConfig;
     private NetworkAgent mNetworkAgent;
@@ -130,10 +130,9 @@ public class Vpn {
     private final int mUserHandle;
 
     public Vpn(Looper looper, Context context, INetworkManagementService netService,
-            IConnectivityManager connService, int userHandle) {
+            int userHandle) {
         mContext = context;
         mNetd = netService;
-        mConnService = connService;
         mUserHandle = userHandle;
         mLooper = looper;
 
@@ -1086,11 +1085,15 @@ public class Vpn {
             // registering
             mOuterInterface = mConfig.interfaze;
 
-            try {
-                mOuterConnection.set(
-                        mConnService.findConnectionTypeForIface(mOuterInterface));
-            } catch (Exception e) {
-                mOuterConnection.set(ConnectivityManager.TYPE_NONE);
+            if (!TextUtils.isEmpty(mOuterInterface)) {
+                final ConnectivityManager cm = ConnectivityManager.from(mContext);
+                for (Network network : cm.getAllNetworks()) {
+                    final LinkProperties lp = cm.getLinkProperties(network);
+                    if (lp != null && mOuterInterface.equals(lp.getInterfaceName())) {
+                        final NetworkInfo networkInfo = cm.getNetworkInfo(network);
+                        if (networkInfo != null) mOuterConnection.set(networkInfo.getType());
+                    }
+                }
             }
 
             IntentFilter filter = new IntentFilter();
