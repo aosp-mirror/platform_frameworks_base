@@ -348,6 +348,10 @@ final class DisplayPowerState {
         private int mActualBacklight = INITIAL_BACKLIGHT;
         private boolean mChangeInProgress;
 
+        public PhotonicModulator() {
+            super("PhotonicModulator");
+        }
+
         public boolean setState(int state, int backlight) {
             synchronized (mLock) {
                 if (state != mPendingState || backlight != mPendingBacklight) {

@@ -106,7 +106,8 @@ public class LightsService extends SystemService {
                 mMode = mode;
                 mOnMS = onMS;
                 mOffMS = offMS;
-                Trace.traceBegin(Trace.TRACE_TAG_POWER, "setLight(" + mId + ", " + color + ")");
+                Trace.traceBegin(Trace.TRACE_TAG_POWER, "setLight(" + mId + ", 0x"
+                        + Integer.toHexString(color) + ")");
                 try {
                     setLight_native(mNativePointer, mId, color, mode, onMS, offMS, brightnessMode);
                 } finally {
