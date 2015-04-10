@@ -123,4 +123,7 @@ public class BluetoothGattCallbackWrapper extends IBluetoothGattCallback.Stub {
     public void onFoundOrLost(boolean onFound, ScanResult scanResult) throws RemoteException {
     }
 
+    @Override
+    public void onScanManagerErrorCallback(int errorCode) throws RemoteException {
+    }
 }

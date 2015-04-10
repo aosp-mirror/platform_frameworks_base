@@ -381,6 +381,18 @@ public final class BluetoothLeScanner {
                 }
             });
         }
+
+        @Override
+        public void onScanManagerErrorCallback(final int errorCode) {
+            if (VDBG) {
+                Log.d(TAG, "onScanManagerErrorCallback() - errorCode = " + errorCode);
+            }
+            synchronized (this) {
+                if (mClientIf <= 0)
+                    return;
+            }
+            postCallbackError(mScanCallback, errorCode);
+        }
     }
 
     private void postCallbackError(final ScanCallback callback, final int errorCode) {
