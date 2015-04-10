@@ -895,7 +895,7 @@ public class WifiConfiguration implements Parcelable {
         if (!TextUtils.isEmpty(FQDN)) {
             /* this is passpoint configuration; it must not have an SSID */
             if (!TextUtils.isEmpty(SSID)) {
-                return "no SSID";
+                return "SSID not expected for Passpoint: '" + SSID + "'";
             }
             /* this is passpoint configuration; it must have a providerFriendlyName */
             if (TextUtils.isEmpty(providerFriendlyName)) {
