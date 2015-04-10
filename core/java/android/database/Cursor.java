@@ -444,6 +444,13 @@ public interface Cursor extends Closeable {
     boolean getWantsAllOnMoveCalls();
 
     /**
+     * Sets a {@link Bundle} that will be returned by {@link #getExtras()}.
+     *
+     * @param extras {@link Bundle} to set, or null to set an empty bundle.
+     */
+    void setExtras(Bundle extras);
+
+    /**
      * Returns a bundle of extra values. This is an optional way for cursors to provide out-of-band
      * metadata to their users. One use of this is for reporting on the progress of network requests
      * that are required to fetch data for the cursor.

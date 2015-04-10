@@ -9726,6 +9726,7 @@ package android.database {
     method public void registerDataSetObserver(android.database.DataSetObserver);
     method public boolean requery();
     method public android.os.Bundle respond(android.os.Bundle);
+    method public void setExtras(android.os.Bundle);
     method public void setNotificationUri(android.content.ContentResolver, android.net.Uri);
     method public void unregisterContentObserver(android.database.ContentObserver);
     method public void unregisterDataSetObserver(android.database.DataSetObserver);
@@ -9831,6 +9832,7 @@ package android.database {
     method public abstract void registerDataSetObserver(android.database.DataSetObserver);
     method public abstract deprecated boolean requery();
     method public abstract android.os.Bundle respond(android.os.Bundle);
+    method public abstract void setExtras(android.os.Bundle);
     method public abstract void setNotificationUri(android.content.ContentResolver, android.net.Uri);
     method public abstract void unregisterContentObserver(android.database.ContentObserver);
     method public abstract void unregisterDataSetObserver(android.database.DataSetObserver);
@@ -9902,7 +9904,7 @@ package android.database {
     ctor public CursorWrapper(android.database.Cursor);
     method public void close();
     method public void copyStringToBuffer(int, android.database.CharArrayBuffer);
-    method public void deactivate();
+    method public deprecated void deactivate();
     method public byte[] getBlob(int);
     method public int getColumnCount();
     method public int getColumnIndex(java.lang.String);
@@ -9936,8 +9938,9 @@ package android.database {
     method public boolean moveToPrevious();
     method public void registerContentObserver(android.database.ContentObserver);
     method public void registerDataSetObserver(android.database.DataSetObserver);
-    method public boolean requery();
+    method public deprecated boolean requery();
     method public android.os.Bundle respond(android.os.Bundle);
+    method public void setExtras(android.os.Bundle);
     method public void setNotificationUri(android.content.ContentResolver, android.net.Uri);
     method public void unregisterContentObserver(android.database.ContentObserver);
     method public void unregisterDataSetObserver(android.database.DataSetObserver);
