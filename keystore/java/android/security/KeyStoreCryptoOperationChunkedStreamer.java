@@ -19,6 +19,8 @@ package android.security;
 import android.os.IBinder;
 import android.security.keymaster.OperationResult;
 
+import libcore.util.EmptyArray;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
@@ -95,7 +97,7 @@ public class KeyStoreCryptoOperationChunkedStreamer {
                 // Too much input for one chunk -- extract one max-sized chunk and feed it into the
                 // update operation.
                 inputBytesInChunk = mMaxChunkSize - mBufferedLength;
-                chunk = concat(mBuffered, mBufferedOffset, mBufferedLength,
+                chunk = ArrayUtils.concat(mBuffered, mBufferedOffset, mBufferedLength,
                         input, inputOffset, inputBytesInChunk);
             } else {
                 // All of available input fits into one chunk.
@@ -108,7 +110,7 @@ public class KeyStoreCryptoOperationChunkedStreamer {
                 } else {
                     // Need to combine buffered data with input data into one array.
                     inputBytesInChunk = inputLength;
-                    chunk = concat(mBuffered, mBufferedOffset, mBufferedLength,
+                    chunk = ArrayUtils.concat(mBuffered, mBufferedOffset, mBufferedLength,
                             input, inputOffset, inputBytesInChunk);
                 }
             }
@@ -197,7 +199,7 @@ public class KeyStoreCryptoOperationChunkedStreamer {
 
         // Flush all buffered input and provided input into keystore/keymaster.
         byte[] output = update(input, inputOffset, inputLength);
-        output = concat(output, flush());
+        output = ArrayUtils.concat(output, flush());
 
         OperationResult opResult = mKeyStoreStream.finish();
         if (opResult == null) {
@@ -206,7 +208,7 @@ public class KeyStoreCryptoOperationChunkedStreamer {
             throw KeyStore.getKeyStoreException(opResult.resultCode);
         }
 
-        return concat(output, opResult.output);
+        return ArrayUtils.concat(output, opResult.output);
     }
 
     /**
@@ -215,11 +217,11 @@ public class KeyStoreCryptoOperationChunkedStreamer {
      */
     public byte[] flush() throws KeyStoreException {
         if (mBufferedLength <= 0) {
-            return EMPTY_BYTE_ARRAY;
+            return EmptyArray.BYTE;
         }
 
-        byte[] chunk = subarray(mBuffered, mBufferedOffset, mBufferedLength);
-        mBuffered = EMPTY_BYTE_ARRAY;
+        byte[] chunk = ArrayUtils.subarray(mBuffered, mBufferedOffset, mBufferedLength);
+        mBuffered = EmptyArray.BYTE;
         mBufferedLength = 0;
         mBufferedOffset = 0;
 
@@ -238,46 +240,7 @@ public class KeyStoreCryptoOperationChunkedStreamer {
                     + " . Provided: " + chunk.length + ", consumed: " + opResult.inputConsumed);
         }
 
-        return (opResult.output != null) ? opResult.output : EMPTY_BYTE_ARRAY;
-    }
-
-    private static byte[] concat(byte[] arr1, byte[] arr2) {
-        if ((arr1 == null) || (arr1.length == 0)) {
-            return arr2;
-        } else if ((arr2 == null) || (arr2.length == 0)) {
-            return arr1;
-        } else {
-            byte[] result = new byte[arr1.length + arr2.length];
-            System.arraycopy(arr1, 0, result, 0, arr1.length);
-            System.arraycopy(arr2, 0, result, arr1.length, arr2.length);
-            return result;
-        }
-    }
-
-    private static byte[] concat(byte[] arr1, int offset1, int len1, byte[] arr2, int offset2,
-            int len2) {
-        if (len1 == 0) {
-            return subarray(arr2, offset2, len2);
-        } else if (len2 == 0) {
-            return subarray(arr1, offset1, len1);
-        } else {
-            byte[] result = new byte[len1 + len2];
-            System.arraycopy(arr1, offset1, result, 0, len1);
-            System.arraycopy(arr2, offset2, result, len1, len2);
-            return result;
-        }
-    }
-
-    private static byte[] subarray(byte[] arr, int offset, int len) {
-        if (len == 0) {
-            return EMPTY_BYTE_ARRAY;
-        }
-        if ((offset == 0) && (len == arr.length)) {
-            return arr;
-        }
-        byte[] result = new byte[len];
-        System.arraycopy(arr, offset, result, 0, len);
-        return result;
+        return (opResult.output != null) ? opResult.output : EmptyArray.BYTE;
     }
 
     /**

@@ -37,36 +37,36 @@ public abstract class KeyStoreHmacSpi extends MacSpi implements KeyStoreCryptoOp
 
     public static class HmacSHA1 extends KeyStoreHmacSpi {
         public HmacSHA1() {
-            super(KeyStoreKeyConstraints.Digest.SHA1);
+            super(KeymasterDefs.KM_DIGEST_SHA1);
         }
     }
 
     public static class HmacSHA224 extends KeyStoreHmacSpi {
         public HmacSHA224() {
-            super(KeyStoreKeyConstraints.Digest.SHA224);
+            super(KeymasterDefs.KM_DIGEST_SHA_2_224);
         }
     }
 
     public static class HmacSHA256 extends KeyStoreHmacSpi {
         public HmacSHA256() {
-            super(KeyStoreKeyConstraints.Digest.SHA256);
+            super(KeymasterDefs.KM_DIGEST_SHA_2_256);
         }
     }
 
     public static class HmacSHA384 extends KeyStoreHmacSpi {
         public HmacSHA384() {
-            super(KeyStoreKeyConstraints.Digest.SHA384);
+            super(KeymasterDefs.KM_DIGEST_SHA_2_384);
         }
     }
 
     public static class HmacSHA512 extends KeyStoreHmacSpi {
         public HmacSHA512() {
-            super(KeyStoreKeyConstraints.Digest.SHA512);
+            super(KeymasterDefs.KM_DIGEST_SHA_2_512);
         }
     }
 
     private final KeyStore mKeyStore = KeyStore.getInstance();
-    private final @KeyStoreKeyConstraints.DigestEnum int mDigest;
+    private final int mKeymasterDigest;
     private final int mMacSizeBytes;
 
     private String mKeyAliasInKeyStore;
@@ -76,9 +76,9 @@ public abstract class KeyStoreHmacSpi extends MacSpi implements KeyStoreCryptoOp
     private IBinder mOperationToken;
     private Long mOperationHandle;
 
-    protected KeyStoreHmacSpi(@KeyStoreKeyConstraints.DigestEnum int digest) {
-        mDigest = digest;
-        mMacSizeBytes = KeyStoreKeyConstraints.Digest.getOutputSizeBytes(digest);
+    protected KeyStoreHmacSpi(int keymasterDigest) {
+        mKeymasterDigest = keymasterDigest;
+        mMacSizeBytes = KeymasterUtils.getDigestOutputSizeBytes(keymasterDigest);
     }
 
     @Override
@@ -129,8 +129,8 @@ public abstract class KeyStoreHmacSpi extends MacSpi implements KeyStoreCryptoOp
         }
 
         KeymasterArguments keymasterArgs = new KeymasterArguments();
-        keymasterArgs.addInt(KeymasterDefs.KM_TAG_ALGORITHM, KeyStoreKeyConstraints.Algorithm.HMAC);
-        keymasterArgs.addInt(KeymasterDefs.KM_TAG_DIGEST, mDigest);
+        keymasterArgs.addInt(KeymasterDefs.KM_TAG_ALGORITHM, KeymasterDefs.KM_ALGORITHM_HMAC);
+        keymasterArgs.addInt(KeymasterDefs.KM_TAG_DIGEST, mKeymasterDigest);
 
         OperationResult opResult = mKeyStore.begin(mKeyAliasInKeyStore,
                 KeymasterDefs.KM_PURPOSE_SIGN,
