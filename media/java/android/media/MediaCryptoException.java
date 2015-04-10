@@ -17,8 +17,8 @@
 package android.media;
 
 /**
- * Exception thrown if MediaCrypto object could not be instantiated for
- * whatever reason.
+ * Exception thrown if MediaCrypto object could not be instantiated or
+ * if unable to perform an operation on the MediaCrypto object.
  */
 public final class MediaCryptoException extends Exception {
     public MediaCryptoException(String detailMessage) {
