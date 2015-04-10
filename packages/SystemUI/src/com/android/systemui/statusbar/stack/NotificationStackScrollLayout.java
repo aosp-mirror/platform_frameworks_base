@@ -179,7 +179,7 @@ public class NotificationStackScrollLayout extends ViewGroup
     private float mMinTopOverScrollToEscape;
     private int mIntrinsicPadding;
     private int mNotificationTopPadding;
-    private float mPaddingOffset;
+    private float mStackTranslation;
     private float mTopPaddingOverflow;
     private boolean mDontReportNextOverScroll;
     private boolean mRequestViewResizeAnimationOnLayout;
@@ -516,17 +516,17 @@ public class NotificationStackScrollLayout extends ViewGroup
             updateAlgorithmHeightAndPadding();
             requestChildrenUpdate();
         }
-        setPaddingOffset(paddingOffset);
+        setStackTranslation(paddingOffset);
     }
 
-    public float getPaddingOffset() {
-        return mPaddingOffset;
+    public float getStackTranslation() {
+        return mStackTranslation;
     }
 
-    private void setPaddingOffset(float paddingOffset) {
-        if (paddingOffset != mPaddingOffset) {
-            mPaddingOffset = paddingOffset;
-            mAmbientState.setStackTranslation(paddingOffset);
+    private void setStackTranslation(float stackTranslation) {
+        if (stackTranslation != mStackTranslation) {
+            mStackTranslation = stackTranslation;
+            mAmbientState.setStackTranslation(stackTranslation);
             requestChildrenUpdate();
         }
     }
@@ -2381,7 +2381,7 @@ public class NotificationStackScrollLayout extends ViewGroup
      * @return the y position of the first notification
      */
     public float getNotificationsTopY() {
-        return mTopPadding + getTranslationY();
+        return mTopPadding + getStackTranslation();
     }
 
     @Override
@@ -2568,7 +2568,7 @@ public class NotificationStackScrollLayout extends ViewGroup
                 max = bottom;
             }
         }
-        return max + getTranslationY();
+        return max + getStackTranslation();
     }
 
     /**
@@ -2684,6 +2684,7 @@ public class NotificationStackScrollLayout extends ViewGroup
     public void setHeadsUpManager(HeadsUpManager headsUpManager) {
         mHeadsUpManager = headsUpManager;
         mAmbientState.setHeadsUpManager(headsUpManager);
+        mStackScrollAlgorithm.setHeadsUpManager(headsUpManager);
     }
 
     public void generateHeadsUpAnimation(ExpandableNotificationRow row, boolean isHeadsUp) {

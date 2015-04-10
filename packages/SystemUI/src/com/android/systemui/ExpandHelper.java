@@ -322,6 +322,11 @@ public class ExpandHelper implements Gefingerpoken {
                         isInside(mScrollAdapter.getHostView(), x, y)
                         && mScrollAdapter.isScrolledToTop();
                 mResizedView = findView(x, y);
+                if (mResizedView != null && (isFullyExpanded(mResizedView)
+                        || !mCallback.canChildBeExpanded(mResizedView))) {
+                    mResizedView = null;
+                    mWatchingForPull = false;
+                }
                 mInitialTouchY = ev.getY();
                 break;
 

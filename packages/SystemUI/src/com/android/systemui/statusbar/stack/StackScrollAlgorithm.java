@@ -71,6 +71,7 @@ public class StackScrollAlgorithm {
     private boolean mIsSmallScreen;
     private int mMaxNotificationHeight;
     private boolean mScaleDimmed;
+    private HeadsUpManager mHeadsUpManager;
 
     public StackScrollAlgorithm(Context context) {
         initConstants(context);
@@ -570,7 +571,8 @@ public class StackScrollAlgorithm {
     private int getMaxAllowedChildHeight(View child, AmbientState ambientState) {
         if (child instanceof ExpandableNotificationRow) {
             ExpandableNotificationRow row = (ExpandableNotificationRow) child;
-            if (ambientState != null && ambientState.getTopHeadsUpEntry() == child) {
+            if (ambientState == null && row.isHeadsUp()
+                    || ambientState != null && ambientState.getTopHeadsUpEntry() == child) {
                 int extraSize = row.getIntrinsicHeight() - row.getHeadsUpHeight();
                 return mCollapsedSize + extraSize;
             }
@@ -834,6 +836,13 @@ public class StackScrollAlgorithm {
                 // current height or the end value of the animation.
                 mFirstChildMaxHeight = StackStateAnimator.getFinalActualHeight(
                         mFirstChildWhileExpanding);
+                if (mFirstChildWhileExpanding instanceof ExpandableNotificationRow) {
+                    ExpandableNotificationRow row =
+                            (ExpandableNotificationRow) mFirstChildWhileExpanding;
+                    if (row.isHeadsUp()) {
+                        mFirstChildMaxHeight += mCollapsedSize - row.getHeadsUpHeight();
+                    }
+                }
             } else {
                 updateFirstChildMaxSizeToMaxHeight();
             }
@@ -876,6 +885,9 @@ public class StackScrollAlgorithm {
     }
 
     private View findFirstVisibleChild(ViewGroup container) {
+        if (mHeadsUpManager != null && mHeadsUpManager.getTopEntry() != null) {
+            return mHeadsUpManager.getTopEntry().entry.row;
+        }
         int childCount = container.getChildCount();
         for (int i = 0; i < childCount; i++) {
             View child = container.getChildAt(i);
@@ -914,6 +926,10 @@ public class StackScrollAlgorithm {
         if (view.equals(mFirstChildWhileExpanding)) {
             updateFirstChildMaxSizeToMaxHeight();
         }
+    }
+
+    public void setHeadsUpManager(HeadsUpManager headsUpManager) {
+        mHeadsUpManager = headsUpManager;
     }
 
     class StackScrollAlgorithmState {

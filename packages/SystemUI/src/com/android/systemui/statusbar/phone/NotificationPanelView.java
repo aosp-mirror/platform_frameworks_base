@@ -185,6 +185,7 @@ public class NotificationPanelView extends PanelView implements
     private boolean mPinnedHeadsUpExist;
     private boolean mExpansionIsFromHeadsUp;
     private int mBottomBarHeight;
+    private boolean mExpandingFromHeadsUp;
     private Runnable mHeadsUpExistenceChangedRunnable = new Runnable() {
         @Override
         public void run() {
@@ -1515,16 +1516,21 @@ public class NotificationPanelView extends PanelView implements
         }
     }
     private void updateNotificationTranslucency() {
-        float alpha = (getNotificationsTopY() + mNotificationStackScroller.getItemHeight())
-                / (mQsMinExpansionHeight + mNotificationStackScroller.getBottomStackPeekSize()
-                        - mNotificationStackScroller.getCollapseSecondCardPadding());
-        alpha = Math.max(0, Math.min(alpha, 1));
-        alpha = (float) Math.pow(alpha, 0.75);
-        if (alpha != 1f && mNotificationStackScroller.getLayerType() != LAYER_TYPE_HARDWARE) {
-            mNotificationStackScroller.setLayerType(LAYER_TYPE_HARDWARE, null);
-        } else if (alpha == 1f
-                && mNotificationStackScroller.getLayerType() == LAYER_TYPE_HARDWARE) {
-            mNotificationStackScroller.setLayerType(LAYER_TYPE_NONE, null);
+        float alpha;
+        if (mExpandingFromHeadsUp || mHeadsUpManager.hasPinnedHeadsUp()) {
+            alpha = 1f;
+        } else {
+            alpha = (getNotificationsTopY() + mNotificationStackScroller.getItemHeight())
+                    / (mQsMinExpansionHeight + mNotificationStackScroller.getBottomStackPeekSize()
+                    - mNotificationStackScroller.getCollapseSecondCardPadding());
+            alpha = Math.max(0, Math.min(alpha, 1));
+            alpha = (float) Math.pow(alpha, 0.75);
+            if (alpha != 1f && mNotificationStackScroller.getLayerType() != LAYER_TYPE_HARDWARE) {
+                mNotificationStackScroller.setLayerType(LAYER_TYPE_HARDWARE, null);
+            } else if (alpha == 1f
+                    && mNotificationStackScroller.getLayerType() == LAYER_TYPE_HARDWARE) {
+                mNotificationStackScroller.setLayerType(LAYER_TYPE_NONE, null);
+            }
         }
         mNotificationStackScroller.setAlpha(alpha);
     }
@@ -1588,11 +1594,10 @@ public class NotificationPanelView extends PanelView implements
                 return mExpandedHeight / HEADER_RUBBERBAND_FACTOR - mQsMinExpansionHeight;
             }
         }
-        float paddingOffset = mNotificationStackScroller.getPaddingOffset();
-        float translation = paddingOffset / HEADER_RUBBERBAND_FACTOR;
+        float stackTranslation = mNotificationStackScroller.getStackTranslation();
+        float translation = stackTranslation / HEADER_RUBBERBAND_FACTOR;
         if (mHeadsUpManager.hasPinnedHeadsUp() || mExpansionIsFromHeadsUp) {
-            translation = mNotificationStackScroller.getTopPadding()
-                    + mNotificationStackScroller.getPaddingOffset()
+            translation = mNotificationStackScroller.getTopPadding() + stackTranslation
                     - mNotificationTopPadding - mQsMinExpansionHeight;
         }
         return Math.min(0, translation);
@@ -1669,6 +1674,7 @@ public class NotificationPanelView extends PanelView implements
         mTwoFingerQsExpandPossible = false;
         mExpansionIsFromHeadsUp = false;
         mNotificationStackScroller.setTrackingHeadsUp(mHeadsUpTouchHelper.isTrackingHeadsUp());
+        mExpandingFromHeadsUp = mHeadsUpTouchHelper.isTrackingHeadsUp();
     }
 
     private void setListening(boolean listening) {
@@ -2137,11 +2143,12 @@ public class NotificationPanelView extends PanelView implements
     public void OnPinnedHeadsUpExistChanged(final boolean exist, boolean changeImmediatly) {
         if (exist != mPinnedHeadsUpExist) {
             mPinnedHeadsUpExist = exist;
-            if (!exist) {
+            if (exist) {
+                mHeadsUpExistenceChangedRunnable.run();
+                updateNotificationTranslucency();
+            } else {
                 mNotificationStackScroller.performOnAnimationFinished(
                         mHeadsUpExistenceChangedRunnable);
-            } else {
-                mHeadsUpExistenceChangedRunnable.run();
             }
         }
     }
@@ -2166,6 +2173,7 @@ public class NotificationPanelView extends PanelView implements
         if (tracking) {
             // otherwise we update the state when the expansion is finished
             mNotificationStackScroller.setTrackingHeadsUp(true);
+            mExpandingFromHeadsUp = true;
         }
     }
 }
