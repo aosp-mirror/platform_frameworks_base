@@ -47,6 +47,8 @@ interface IWifiManager
 
     List<WifiConfiguration> getPrivilegedConfiguredNetworks();
 
+    WifiConfiguration getMatchingWifiConfig(in ScanResult scanResult);
+
     int addOrUpdateNetwork(in WifiConfiguration config);
 
     boolean removeNetwork(int netId);
@@ -112,6 +114,8 @@ interface IWifiManager
     int getWifiApEnabledState();
 
     WifiConfiguration getWifiApConfiguration();
+
+    WifiConfiguration buildWifiConfig(String uriString, String mimeType, in byte[] data);
 
     void setWifiApConfiguration(in WifiConfiguration wifiConfig);
 

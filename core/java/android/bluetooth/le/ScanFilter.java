@@ -67,6 +67,8 @@ public final class ScanFilter implements Parcelable {
     private final byte[] mManufacturerData;
     @Nullable
     private final byte[] mManufacturerDataMask;
+    private static final ScanFilter EMPTY = new ScanFilter.Builder().build() ;
+
 
     private ScanFilter(String name, String deviceAddress, ParcelUuid uuid,
             ParcelUuid uuidMask, ParcelUuid serviceDataUuid,
@@ -407,6 +409,14 @@ public final class ScanFilter implements Parcelable {
                 Objects.deepEquals(mServiceDataMask, other.mServiceDataMask) &&
                 Objects.equals(mServiceUuid, other.mServiceUuid) &&
                 Objects.equals(mServiceUuidMask, other.mServiceUuidMask);
+    }
+
+    /**
+     * Checks if the scanfilter is empty
+     * @hide
+     */
+    public boolean isAllFieldsEmpty() {
+        return EMPTY.equals(this);
     }
 
     /**

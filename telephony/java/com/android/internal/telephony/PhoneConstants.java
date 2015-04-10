@@ -186,4 +186,11 @@ public class PhoneConstants {
 
     //FIXME maybe this shouldn't be here - sprout only
     public static final int CAPABILITY_3G   = 1;
+
+    /**
+     * Values for the adb property "persist.radio.videocall.audio.output"
+     */
+    public static final int AUDIO_OUTPUT_ENABLE_SPEAKER = 0;
+    public static final int AUDIO_OUTPUT_DISABLE_SPEAKER = 1;
+    public static final int AUDIO_OUTPUT_DEFAULT = AUDIO_OUTPUT_ENABLE_SPEAKER;
 }

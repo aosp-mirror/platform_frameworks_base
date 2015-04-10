@@ -589,9 +589,9 @@ public class ConnectivityManager {
      * network.
      *
      * @return a {@link NetworkInfo} object for the current default network
-     *        or {@code null} if no network default network is currently active
+     *        or {@code null} if no default network is currently active
      *
-     * <p>This method requires the call to hold the permission
+     * <p>This method requires the caller to hold the permission
      * {@link android.Manifest.permission#ACCESS_NETWORK_STATE}.
      */
     public NetworkInfo getActiveNetworkInfo() {
@@ -738,9 +738,9 @@ public class ConnectivityManager {
      * network.
      *
      * @return a {@link NetworkInfo} object for the current default network
-     *        or {@code null} if no network default network is currently active
+     *        or {@code null} if no default network is currently active
      *
-     * <p>This method requires the call to hold the permission
+     * <p>This method requires the caller to hold the permission
      * {@link android.Manifest.permission#ACCESS_NETWORK_STATE}.
      *
      * {@hide}
@@ -760,7 +760,7 @@ public class ConnectivityManager {
      *        for the current default network, or {@code null} if there
      *        is no current default network.
      *
-     * <p>This method requires the call to hold the permission
+     * <p>This method requires the caller to hold the permission
      * {@link android.Manifest.permission#ACCESS_NETWORK_STATE}.
      * {@hide}
      */
@@ -780,7 +780,7 @@ public class ConnectivityManager {
      *        for the given networkType, or {@code null} if there is
      *        no current default network.
      *
-     * <p>This method requires the call to hold the permission
+     * <p>This method requires the caller to hold the permission
      * {@link android.Manifest.permission#ACCESS_NETWORK_STATE}.
      * {@hide}
      */
@@ -830,7 +830,7 @@ public class ConnectivityManager {
      * @return a boolean, {@code true} indicating success.  All network types
      *        will be tried, even if some fail.
      *
-     * <p>This method requires the call to hold the permission
+     * <p>This method requires the caller to hold the permission
      * {@link android.Manifest.permission#CHANGE_NETWORK_STATE}.
      * {@hide}
      */
@@ -851,7 +851,7 @@ public class ConnectivityManager {
      *        {@code} false to turn it off.
      * @return a boolean, {@code true} indicating success.
      *
-     * <p>This method requires the call to hold the permission
+     * <p>This method requires the caller to hold the permission
      * {@link android.Manifest.permission#CHANGE_NETWORK_STATE}.
      * {@hide}
      */
@@ -1202,7 +1202,7 @@ public class ConnectivityManager {
      * @return {@code true} on success, {@code false} on failure
      *
      * @deprecated Deprecated in favor of the {@link #requestNetwork},
-     *             {@link #setProcessDefaultNetwork} and {@link Network#getSocketFactory} api.
+     *             {@link #bindProcessToNetwork} and {@link Network#getSocketFactory} api.
      */
     public boolean requestRouteToHost(int networkType, int hostAddress) {
         return requestRouteToHostAddress(networkType, NetworkUtils.intToInetAddress(hostAddress));
@@ -1220,7 +1220,7 @@ public class ConnectivityManager {
      * @return {@code true} on success, {@code false} on failure
      * @hide
      * @deprecated Deprecated in favor of the {@link #requestNetwork} and
-     *             {@link #setProcessDefaultNetwork} api.
+     *             {@link #bindProcessToNetwork} api.
      */
     public boolean requestRouteToHostAddress(int networkType, InetAddress hostAddress) {
         try {
@@ -1273,7 +1273,7 @@ public class ConnectivityManager {
      * network is active. Quota status can change rapidly, so these values
      * shouldn't be cached.
      *
-     * <p>This method requires the call to hold the permission
+     * <p>This method requires the caller to hold the permission
      * {@link android.Manifest.permission#ACCESS_NETWORK_STATE}.
      *
      * @hide
@@ -1345,7 +1345,7 @@ public class ConnectivityManager {
      * listener.
      * <p>
      * If the process default network has been set with
-     * {@link ConnectivityManager#setProcessDefaultNetwork} this function will not
+     * {@link ConnectivityManager#bindProcessToNetwork} this function will not
      * reflect the process's default, but the system default.
      *
      * @param l The listener to be told when the network is active.
@@ -1430,11 +1430,20 @@ public class ConnectivityManager {
      *               situations where a Context pointer is unavailable.
      * @hide
      */
-    public static ConnectivityManager getInstance() {
-        if (sInstance == null) {
+    static ConnectivityManager getInstanceOrNull() {
+        return sInstance;
+    }
+
+    /**
+     * @deprecated - use getSystemService. This is a kludge to support static access in certain
+     *               situations where a Context pointer is unavailable.
+     * @hide
+     */
+    private static ConnectivityManager getInstance() {
+        if (getInstanceOrNull() == null) {
             throw new IllegalStateException("No ConnectivityManager yet constructed");
         }
-        return sInstance;
+        return getInstanceOrNull();
     }
 
     /**
@@ -1443,7 +1452,7 @@ public class ConnectivityManager {
      *
      * @return an array of 0 or more Strings of tetherable interface names.
      *
-     * <p>This method requires the call to hold the permission
+     * <p>This method requires the caller to hold the permission
      * {@link android.Manifest.permission#ACCESS_NETWORK_STATE}.
      * {@hide}
      */
@@ -1460,7 +1469,7 @@ public class ConnectivityManager {
      *
      * @return an array of 0 or more String of currently tethered interface names.
      *
-     * <p>This method requires the call to hold the permission
+     * <p>This method requires the caller to hold the permission
      * {@link android.Manifest.permission#ACCESS_NETWORK_STATE}.
      * {@hide}
      */
@@ -1483,7 +1492,7 @@ public class ConnectivityManager {
      * @return an array of 0 or more String indicating the interface names
      *        which failed to tether.
      *
-     * <p>This method requires the call to hold the permission
+     * <p>This method requires the caller to hold the permission
      * {@link android.Manifest.permission#ACCESS_NETWORK_STATE}.
      * {@hide}
      */
@@ -1521,7 +1530,7 @@ public class ConnectivityManager {
      * @param iface the interface name to tether.
      * @return error a {@code TETHER_ERROR} value indicating success or failure type
      *
-     * <p>This method requires the call to hold the permission
+     * <p>This method requires the caller to hold the permission
      * {@link android.Manifest.permission#CHANGE_NETWORK_STATE}.
      * {@hide}
      */
@@ -1539,7 +1548,7 @@ public class ConnectivityManager {
      * @param iface the interface name to untether.
      * @return error a {@code TETHER_ERROR} value indicating success or failure type
      *
-     * <p>This method requires the call to hold the permission
+     * <p>This method requires the caller to hold the permission
      * {@link android.Manifest.permission#CHANGE_NETWORK_STATE}.
      * {@hide}
      */
@@ -1558,7 +1567,7 @@ public class ConnectivityManager {
      *
      * @return a boolean - {@code true} indicating Tethering is supported.
      *
-     * <p>This method requires the call to hold the permission
+     * <p>This method requires the caller to hold the permission
      * {@link android.Manifest.permission#ACCESS_NETWORK_STATE}.
      * {@hide}
      */
@@ -1578,7 +1587,7 @@ public class ConnectivityManager {
      * @return an array of 0 or more regular expression Strings defining
      *        what interfaces are considered tetherable usb interfaces.
      *
-     * <p>This method requires the call to hold the permission
+     * <p>This method requires the caller to hold the permission
      * {@link android.Manifest.permission#ACCESS_NETWORK_STATE}.
      * {@hide}
      */
@@ -1598,7 +1607,7 @@ public class ConnectivityManager {
      * @return an array of 0 or more regular expression Strings defining
      *        what interfaces are considered tetherable wifi interfaces.
      *
-     * <p>This method requires the call to hold the permission
+     * <p>This method requires the caller to hold the permission
      * {@link android.Manifest.permission#ACCESS_NETWORK_STATE}.
      * {@hide}
      */
@@ -1618,7 +1627,7 @@ public class ConnectivityManager {
      * @return an array of 0 or more regular expression Strings defining
      *        what interfaces are considered tetherable bluetooth interfaces.
      *
-     * <p>This method requires the call to hold the permission
+     * <p>This method requires the caller to hold the permission
      * {@link android.Manifest.permission#ACCESS_NETWORK_STATE}.
      * {@hide}
      */
@@ -1640,7 +1649,7 @@ public class ConnectivityManager {
      * @param enable a boolean - {@code true} to enable tethering
      * @return error a {@code TETHER_ERROR} value indicating success or failure type
      *
-     * <p>This method requires the call to hold the permission
+     * <p>This method requires the caller to hold the permission
      * {@link android.Manifest.permission#CHANGE_NETWORK_STATE}.
      * {@hide}
      */
@@ -1683,7 +1692,7 @@ public class ConnectivityManager {
      * @return error The error code of the last error tethering or untethering the named
      *               interface
      *
-     * <p>This method requires the call to hold the permission
+     * <p>This method requires the caller to hold the permission
      * {@link android.Manifest.permission#ACCESS_NETWORK_STATE}.
      * {@hide}
      */
@@ -1702,7 +1711,7 @@ public class ConnectivityManager {
      * @param networkType The type of network you want to report on
      * @param percentage The quality of the connection 0 is bad, 100 is good
      *
-     * <p>This method requires the call to hold the permission
+     * <p>This method requires the caller to hold the permission
      * {@link android.Manifest.permission#STATUS_BAR}.
      * {@hide}
      */
@@ -1738,7 +1747,7 @@ public class ConnectivityManager {
      * @param p The a {@link ProxyInfo} object defining the new global
      *        HTTP proxy.  A {@code null} value will clear the global HTTP proxy.
      *
-     * <p>This method requires the call to hold the permission
+     * <p>This method requires the caller to hold the permission
      * android.Manifest.permission#CONNECTIVITY_INTERNAL.
      * @hide
      */
@@ -1755,7 +1764,7 @@ public class ConnectivityManager {
      * @return {@link ProxyInfo} for the current global HTTP proxy or {@code null}
      *        if no global HTTP proxy is set.
      *
-     * <p>This method requires the call to hold the permission
+     * <p>This method requires the caller to hold the permission
      * {@link android.Manifest.permission#ACCESS_NETWORK_STATE}.
      * @hide
      */
@@ -1770,15 +1779,14 @@ public class ConnectivityManager {
     /**
      * Get the current default HTTP proxy settings.  If a global proxy is set it will be returned,
      * otherwise if this process is bound to a {@link Network} using
-     * {@link #setProcessDefaultNetwork} then that {@code Network}'s proxy is returned, otherwise
+     * {@link #bindProcessToNetwork} then that {@code Network}'s proxy is returned, otherwise
      * the default network's proxy is returned.
      *
      * @return the {@link ProxyInfo} for the current HTTP proxy, or {@code null} if no
      *        HTTP proxy is active.
-     * @hide
      */
     public ProxyInfo getDefaultProxy() {
-        final Network network = getProcessDefaultNetwork();
+        final Network network = getBoundNetworkForProcess();
         if (network != null) {
             final ProxyInfo globalProxy = getGlobalProxy();
             if (globalProxy != null) return globalProxy;
@@ -1804,7 +1812,7 @@ public class ConnectivityManager {
      * @param networkType The network type we'd like to check
      * @return {@code true} if supported, else {@code false}
      *
-     * <p>This method requires the call to hold the permission
+     * <p>This method requires the caller to hold the permission
      * {@link android.Manifest.permission#ACCESS_NETWORK_STATE}.
      * @hide
      */
@@ -1826,7 +1834,7 @@ public class ConnectivityManager {
      * @return {@code true} if large transfers should be avoided, otherwise
      *        {@code false}.
      *
-     * <p>This method requires the call to hold the permission
+     * <p>This method requires the caller to hold the permission
      * {@link android.Manifest.permission#ACCESS_NETWORK_STATE}.
      */
     public boolean isActiveNetworkMetered() {
@@ -1862,7 +1870,7 @@ public class ConnectivityManager {
      *        in question.
      * @param isCaptivePortal true/false.
      *
-     * <p>This method requires the call to hold the permission
+     * <p>This method requires the caller to hold the permission
      * {@link android.Manifest.permission#CONNECTIVITY_INTERNAL}.
      * {@hide}
      */
@@ -1937,7 +1945,7 @@ public class ConnectivityManager {
      *
      * @param enable whether to enable airplane mode or not
      *
-     * <p>This method requires the call to hold the permission
+     * <p>This method requires the caller to hold the permission
      * {@link android.Manifest.permission#CONNECTIVITY_INTERNAL}.
      * @hide
      */
@@ -2338,9 +2346,8 @@ public class ConnectivityManager {
      * successfully finding a network for the applications request.  Retrieve it with
      * {@link android.content.Intent#getParcelableExtra(String)}.
      * <p>
-     * Note that if you intend to invoke {@link #setProcessDefaultNetwork} or
-     * {@link Network#openConnection(java.net.URL)} then you must get a
-     * ConnectivityManager instance before doing so.
+     * Note that if you intend to invoke {@link Network#openConnection(java.net.URL)}
+     * then you must get a ConnectivityManager instance before doing so.
      */
     public static final String EXTRA_NETWORK = "android.net.extra.NETWORK";
 
@@ -2491,15 +2498,42 @@ public class ConnectivityManager {
      * Sockets created by Network.getSocketFactory().createSocket() and
      * performing network-specific host name resolutions via
      * {@link Network#getAllByName Network.getAllByName} is preferred to calling
-     * {@code setProcessDefaultNetwork}.
+     * {@code bindProcessToNetwork}.
      *
      * @param network The {@link Network} to bind the current process to, or {@code null} to clear
      *                the current binding.
      * @return {@code true} on success, {@code false} if the {@link Network} is no longer valid.
      */
+    public boolean bindProcessToNetwork(Network network) {
+        // Forcing callers to call thru non-static function ensures ConnectivityManager
+        // instantiated.
+        return setProcessDefaultNetwork(network);
+    }
+
+    /**
+     * Binds the current process to {@code network}.  All Sockets created in the future
+     * (and not explicitly bound via a bound SocketFactory from
+     * {@link Network#getSocketFactory() Network.getSocketFactory()}) will be bound to
+     * {@code network}.  All host name resolutions will be limited to {@code network} as well.
+     * Note that if {@code network} ever disconnects, all Sockets created in this way will cease to
+     * work and all host name resolutions will fail.  This is by design so an application doesn't
+     * accidentally use Sockets it thinks are still bound to a particular {@link Network}.
+     * To clear binding pass {@code null} for {@code network}.  Using individually bound
+     * Sockets created by Network.getSocketFactory().createSocket() and
+     * performing network-specific host name resolutions via
+     * {@link Network#getAllByName Network.getAllByName} is preferred to calling
+     * {@code setProcessDefaultNetwork}.
+     *
+     * @param network The {@link Network} to bind the current process to, or {@code null} to clear
+     *                the current binding.
+     * @return {@code true} on success, {@code false} if the {@link Network} is no longer valid.
+     * @deprecated This function can throw {@link IllegalStateException}.  Use
+     *             {@link #bindProcessToNetwork} instead.  {@code bindProcessToNetwork}
+     *             is a direct replacement.
+     */
     public static boolean setProcessDefaultNetwork(Network network) {
         int netId = (network == null) ? NETID_UNSET : network.netId;
-        if (netId == NetworkUtils.getNetworkBoundToProcess()) {
+        if (netId == NetworkUtils.getBoundNetworkForProcess()) {
             return true;
         }
         if (NetworkUtils.bindProcessToNetwork(netId)) {
@@ -2519,19 +2553,34 @@ public class ConnectivityManager {
 
     /**
      * Returns the {@link Network} currently bound to this process via
-     * {@link #setProcessDefaultNetwork}, or {@code null} if no {@link Network} is explicitly bound.
+     * {@link #bindProcessToNetwork}, or {@code null} if no {@link Network} is explicitly bound.
      *
      * @return {@code Network} to which this process is bound, or {@code null}.
      */
+    public Network getBoundNetworkForProcess() {
+        // Forcing callers to call thru non-static function ensures ConnectivityManager
+        // instantiated.
+        return getProcessDefaultNetwork();
+    }
+
+    /**
+     * Returns the {@link Network} currently bound to this process via
+     * {@link #bindProcessToNetwork}, or {@code null} if no {@link Network} is explicitly bound.
+     *
+     * @return {@code Network} to which this process is bound, or {@code null}.
+     * @deprecated Using this function can lead to other functions throwing
+     *             {@link IllegalStateException}.  Use {@link #getBoundNetworkForProcess} instead.
+     *             {@code getBoundNetworkForProcess} is a direct replacement.
+     */
     public static Network getProcessDefaultNetwork() {
-        int netId = NetworkUtils.getNetworkBoundToProcess();
+        int netId = NetworkUtils.getBoundNetworkForProcess();
         if (netId == NETID_UNSET) return null;
         return new Network(netId);
     }
 
     /**
      * Binds host resolutions performed by this process to {@code network}.
-     * {@link #setProcessDefaultNetwork} takes precedence over this setting.
+     * {@link #bindProcessToNetwork} takes precedence over this setting.
      *
      * @param network The {@link Network} to bind host resolutions from the current process to, or
      *                {@code null} to clear the current binding.
