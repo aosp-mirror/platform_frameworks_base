@@ -543,6 +543,11 @@ static jboolean nativeIsSeekable(JNIEnv* env, jobject, jobject fileDescriptor) {
     return ::lseek64(descriptor, 0, SEEK_CUR) != -1 ? JNI_TRUE : JNI_FALSE;
 }
 
+jobject decodeBitmap(JNIEnv* env, void* data, size_t size) {
+    SkMemoryStream  stream(data, size);
+    return doDecode(env, &stream, NULL, NULL);
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 static JNINativeMethod gMethods[] = {
