@@ -16,6 +16,7 @@
 
 package android.renderscript;
 
+import java.io.File;
 import java.lang.reflect.Method;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
@@ -230,6 +231,11 @@ public class RenderScript {
     synchronized void nContextSetPriority(int p) {
         validate();
         rsnContextSetPriority(mContext, p);
+    }
+    native void rsnContextSetCacheDir(long con, String cacheDir);
+    synchronized void nContextSetCacheDir(String cacheDir) {
+        validate();
+        rsnContextSetCacheDir(mContext, cacheDir);
     }
     native void rsnContextDump(long con, int bits);
     synchronized void nContextDump(int bits) {
@@ -1325,6 +1331,14 @@ public class RenderScript {
         if (rs.mContext == 0) {
             throw new RSDriverException("Failed to create RS context.");
         }
+
+        // set up cache directory for entire context
+        final String CACHE_PATH = "com.android.renderscript.cache";
+        File f = new File(RenderScriptCacheDir.mCacheDir, CACHE_PATH);
+        String mCachePath = f.getAbsolutePath();
+        f.mkdirs();
+        rs.nContextSetCacheDir(mCachePath);
+
         rs.mMessageThread = new MessageThread(rs);
         rs.mMessageThread.start();
         return rs;
