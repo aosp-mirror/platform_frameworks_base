@@ -261,7 +261,7 @@ static jobject doDecode(JNIEnv* env, SkStreamRewindable* stream, jobject padding
     SkBitmap* outputBitmap = NULL;
     unsigned int existingBufferSize = 0;
     if (javaBitmap != NULL) {
-        outputBitmap = GraphicsJNI::getSkBitmap(env, javaBitmap);
+        outputBitmap = GraphicsJNI::getSkBitmapDeprecated(env, javaBitmap);
         if (outputBitmap->isImmutable()) {
             ALOGW("Unable to reuse an immutable bitmap as an image decoder target.");
             javaBitmap = NULL;

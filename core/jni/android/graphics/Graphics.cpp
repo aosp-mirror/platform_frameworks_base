@@ -338,7 +338,7 @@ SkColorType GraphicsJNI::legacyBitmapConfigToColorType(jint legacyConfig) {
     return static_cast<SkColorType>(gConfig2ColorType[legacyConfig]);
 }
 
-SkBitmap* GraphicsJNI::getSkBitmap(JNIEnv* env, jobject bitmap) {
+SkBitmap* GraphicsJNI::getSkBitmapDeprecated(JNIEnv* env, jobject bitmap) {
     SkASSERT(env);
     SkASSERT(bitmap);
     SkASSERT(env->IsInstanceOf(bitmap, gBitmap_class));
@@ -346,6 +346,21 @@ SkBitmap* GraphicsJNI::getSkBitmap(JNIEnv* env, jobject bitmap) {
     SkBitmap* b = reinterpret_cast<SkBitmap*>(bitmapHandle);
     SkASSERT(b);
     return b;
+}
+
+void GraphicsJNI::getSkBitmap(JNIEnv* env, jobject bitmap, SkBitmap* outBitmap) {
+    SkPixelRef* pixelRef = getSkPixelRef(env, bitmap);
+    // TODO: pixelRef->rowBytes() is only valid if the pixels are locked
+    // (which is currently always true on android), switch this to querying
+    // from the wrapper once that exists instead
+    outBitmap->setInfo(pixelRef->info(), pixelRef->rowBytes());
+    outBitmap->setPixelRef(pixelRef);
+}
+
+SkPixelRef* GraphicsJNI::getSkPixelRef(JNIEnv* env, jobject bitmap) {
+    jlong bitmapHandle = env->GetLongField(bitmap, gBitmap_skBitmapPtr);
+    SkBitmap* b = reinterpret_cast<SkBitmap*>(bitmapHandle);
+    return b->pixelRef();
 }
 
 SkColorType GraphicsJNI::getNativeBitmapColorType(JNIEnv* env, jobject jconfig) {
