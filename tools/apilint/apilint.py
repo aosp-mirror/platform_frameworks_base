@@ -518,7 +518,7 @@ def verify_intent_builder(clazz):
             if m.name.startswith("create") and m.name.endswith("Intent"):
                 pass
             else:
-                error(clazz, m, "FW1", "Methods creating an Intent must be named createFooIntent()")
+                warn(clazz, m, "FW1", "Methods creating an Intent should be named createFooIntent()")
 
 
 def verify_helper_classes(clazz):
