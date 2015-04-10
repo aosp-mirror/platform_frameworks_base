@@ -30,6 +30,7 @@ import static com.android.internal.util.XmlUtils.writeUriAttribute;
 import static org.xmlpull.v1.XmlPullParser.END_DOCUMENT;
 import static org.xmlpull.v1.XmlPullParser.START_TAG;
 
+import android.Manifest;
 import android.app.ActivityManager;
 import android.app.AppGlobals;
 import android.app.AppOpsManager;
@@ -526,6 +527,15 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
             params.installFlags &= ~PackageManager.INSTALL_FROM_ADB;
             params.installFlags &= ~PackageManager.INSTALL_ALL_USERS;
             params.installFlags |= PackageManager.INSTALL_REPLACE_EXISTING;
+        }
+
+        // Only system components can circumvent runtime permissions when installing.
+        if ((params.installFlags & PackageManager.INSTALL_GRANT_RUNTIME_PERMISSIONS) != 0
+                && mContext.checkCallingOrSelfPermission(Manifest.permission
+                .INSTALL_GRANT_RUNTIME_PERMISSIONS) == PackageManager.PERMISSION_DENIED) {
+            throw new SecurityException("You need the "
+                    + "android.permission.INSTALL_GRANT_RUNTIME_PERMISSIONS permission "
+                    + "to use the PackageManager.INSTALL_GRANT_RUNTIME_PERMISSIONS flag");
         }
 
         // Defensively resize giant app icons

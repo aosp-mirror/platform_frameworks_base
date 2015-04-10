@@ -3017,6 +3017,12 @@
         android:description="@string/permdesc_accessVoiceInteractionService"
         android:label="@string/permlab_accessVoiceInteractionService" />
 
+    <!-- Allows an app that has this permission and a permissions to install packages
+         to request all runtime permissions to be granted at installation.
+     @hide -->
+    <permission android:name="android.permission.INSTALL_GRANT_RUNTIME_PERMISSIONS"
+        android:protectionLevel="signature" />
+
     <!-- The system process is explicitly the only one allowed to launch the
          confirmation UI for full backup/restore -->
     <uses-permission android:name="android.permission.CONFIRM_FULL_BACKUP"/>
