@@ -36,7 +36,7 @@ import java.util.UUID;
 
 /**
  * This class provides methods to perform scan related operations for Bluetooth LE devices. An
- * application can scan for a particular type of Bluetotoh LE devices using {@link ScanFilter}. It
+ * application can scan for a particular type of Bluetooth LE devices using {@link ScanFilter}. It
  * can also request different types of callbacks for delivering the result.
  * <p>
  * Use {@link BluetoothAdapter#getBluetoothLeScanner()} to get an instance of
