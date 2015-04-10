@@ -294,14 +294,14 @@ public class KeyStoreTest extends ActivityUnitTestCase<Activity> {
 
     public void testSaw_ungrantedUid_Bluetooth() throws Exception {
         String[] results1 = mKeyStore.saw(TEST_KEYNAME, Process.BLUETOOTH_UID);
-        assertNull(results1);
+        assertEquals(0, results1.length);
 
         mKeyStore.password(TEST_PASSWD);
         mKeyStore.put(TEST_KEYNAME1, TEST_KEYVALUE, KeyStore.UID_SELF, KeyStore.FLAG_ENCRYPTED);
         mKeyStore.put(TEST_KEYNAME2, TEST_KEYVALUE, KeyStore.UID_SELF, KeyStore.FLAG_ENCRYPTED);
 
         String[] results2 = mKeyStore.saw(TEST_KEYNAME, Process.BLUETOOTH_UID);
-        assertNull(results2);
+        assertEquals(0, results2.length);
     }
 
     public void testSaw_grantedUid_Wifi() throws Exception {
