@@ -18,10 +18,12 @@
 #include "BigBuffer.h"
 #include "BinaryResourceParser.h"
 #include "Files.h"
+#include "Flag.h"
 #include "JavaClassGenerator.h"
 #include "Linker.h"
 #include "ManifestParser.h"
 #include "ManifestValidator.h"
+#include "Png.h"
 #include "ResourceParser.h"
 #include "ResourceTable.h"
 #include "ResourceValues.h"
@@ -41,6 +43,7 @@
 #include <iostream>
 #include <sstream>
 #include <sys/stat.h>
+#include <utils/Errors.h>
 
 using namespace aapt;
 
@@ -107,12 +110,12 @@ std::unique_ptr<FileReference> makeFileReference(StringPool& pool, const StringP
  * Collect files from 'root', filtering out any files that do not
  * match the FileFilter 'filter'.
  */
-bool walkTree(const StringPiece& root, const FileFilter& filter,
-        std::vector<Source>& outEntries) {
+bool walkTree(const Source& root, const FileFilter& filter,
+              std::vector<Source>* outEntries) {
     bool error = false;
 
-    for (const std::string& dirName : listFiles(root)) {
-        std::string dir(root.toString());
+    for (const std::string& dirName : listFiles(root.path)) {
+        std::string dir = root.path;
         appendPath(&dir, dirName);
 
         FileType ft = getFileType(dir);
@@ -134,13 +137,11 @@ bool walkTree(const StringPiece& root, const FileFilter& filter,
             }
 
             if (ft != FileType::kRegular) {
-                Logger::error(Source{ file })
-                    << "not a regular file."
-                    << std::endl;
+                Logger::error(Source{ file }) << "not a regular file." << std::endl;
                 error = true;
                 continue;
             }
-            outEntries.emplace_back(Source{ file });
+            outEntries->push_back(Source{ file });
         }
     }
     return !error;
@@ -171,9 +172,6 @@ bool loadBinaryResourceTable(std::shared_ptr<ResourceTable> table, const Source&
 }
 
 bool loadResTable(android::ResTable* table, const Source& source) {
-    // For NO_ERROR (which on Windows is a MACRO).
-    using namespace android;
-
     std::ifstream ifs(source.path, std::ifstream::in | std::ifstream::binary);
     if (!ifs) {
         Logger::error(source) << strerror(errno) << std::endl;
@@ -190,7 +188,7 @@ bool loadResTable(android::ResTable* table, const Source& source) {
     char* buf = new char[dataSize];
     ifs.read(buf, dataSize);
 
-    bool result = table->add(buf, dataSize, -1, true) == NO_ERROR;
+    bool result = table->add(buf, dataSize, -1, true) == android::NO_ERROR;
 
     delete [] buf;
     return result;
@@ -323,13 +321,6 @@ bool collectXml(std::shared_ptr<ResourceTable> table, const Source& source,
         }
     }
 
-    std::unique_ptr<FileReference> fileResource = makeFileReference(
-            table->getValueStringPool(),
-            util::utf16ToUtf8(name.entry) + ".xml",
-            name.type,
-            config);
-    table->addResource(name, config, source.line(0), std::move(fileResource));
-
     for (size_t level : sdkLevels) {
         Logger::note(source)
                 << "creating v" << level << " versioned file."
@@ -347,14 +338,15 @@ bool collectXml(std::shared_ptr<ResourceTable> table, const Source& source,
     return true;
 }
 
-struct CompileXml {
+struct CompileItem {
     Source source;
     ResourceName name;
     ConfigDescription config;
+    std::string extension;
 };
 
-bool compileXml(std::shared_ptr<Resolver> resolver, const CompileXml& item,
-                const Source& outputSource, std::queue<CompileXml>* queue) {
+bool compileXml(std::shared_ptr<Resolver> resolver, const CompileItem& item,
+                const Source& outputSource, std::queue<CompileItem>* queue) {
     std::ifstream in(item.source.path, std::ifstream::binary);
     if (!in) {
         Logger::error(item.source) << strerror(errno) << std::endl;
@@ -376,7 +368,7 @@ bool compileXml(std::shared_ptr<Resolver> resolver, const CompileXml& item,
     if (minStrippedSdk.value() > 0) {
         // Something was stripped, so let's generate a new file
         // with the version of the smallest SDK version stripped.
-        CompileXml newWork = item;
+        CompileItem newWork = item;
         newWork.config.sdkVersion = minStrippedSdk.value();
         queue->push(newWork);
     }
@@ -394,9 +386,51 @@ bool compileXml(std::shared_ptr<Resolver> resolver, const CompileXml& item,
     return true;
 }
 
+bool compilePng(const Source& source, const Source& output) {
+    std::ifstream in(source.path, std::ifstream::binary);
+    if (!in) {
+        Logger::error(source) << strerror(errno) << std::endl;
+        return false;
+    }
+
+    std::ofstream out(output.path, std::ofstream::binary);
+    if (!out) {
+        Logger::error(output) << strerror(errno) << std::endl;
+        return false;
+    }
+
+    std::string err;
+    Png png;
+    if (!png.process(source, in, out, {}, &err)) {
+        Logger::error(source) << err << std::endl;
+        return false;
+    }
+    return true;
+}
+
+bool copyFile(const Source& source, const Source& output) {
+    std::ifstream in(source.path, std::ifstream::binary);
+    if (!in) {
+        Logger::error(source) << strerror(errno) << std::endl;
+        return false;
+    }
+
+    std::ofstream out(output.path, std::ofstream::binary);
+    if (!out) {
+        Logger::error(output) << strerror(errno) << std::endl;
+        return false;
+    }
+
+    if (out << in.rdbuf()) {
+        Logger::error(output) << strerror(errno) << std::endl;
+        return true;
+    }
+    return false;
+}
+
 struct AaptOptions {
     enum class Phase {
-        LegacyFull,
+        Full,
         Collect,
         Link,
         Compile,
@@ -411,16 +445,26 @@ struct AaptOptions {
     // The location of the manifest file.
     Source manifest;
 
-    // The files to process.
-    std::vector<Source> sources;
+    // The source directories to walk and find resource files.
+    std::vector<Source> sourceDirs;
+
+    // The resource files to process and collect.
+    std::vector<Source> collectFiles;
+
+    // The binary table files to link.
+    std::vector<Source> linkFiles;
+
+    // The resource files to compile.
+    std::vector<Source> compileFiles;
 
     // The libraries these files may reference.
     std::vector<Source> libraries;
 
-    // Output directory.
+    // Output path. This can be a directory or file
+    // depending on the phase.
     Source output;
 
-    // Whether to generate a Java Class.
+    // Directory to in which to generate R.java.
     Maybe<Source> generateJavaClass;
 
     // Whether to output verbose details about
@@ -428,9 +472,8 @@ struct AaptOptions {
     bool verbose = false;
 };
 
-bool compileAndroidManifest(std::shared_ptr<Resolver> resolver, const AaptOptions& options) {
-    using namespace android;
-
+bool compileAndroidManifest(const std::shared_ptr<Resolver>& resolver,
+                            const AaptOptions& options) {
     Source outSource = options.output;
     appendPath(&outSource.path, "AndroidManifest.xml");
 
@@ -461,8 +504,8 @@ bool compileAndroidManifest(std::shared_ptr<Resolver> resolver, const AaptOption
         p += b.size;
     }
 
-    ResXMLTree tree;
-    if (tree.setTo(data.get(), outBuffer.size()) != NO_ERROR) {
+    android::ResXMLTree tree;
+    if (tree.setTo(data.get(), outBuffer.size()) != android::NO_ERROR) {
         return false;
     }
 
@@ -496,246 +539,117 @@ bool loadAppInfo(const Source& source, AppInfo* outInfo) {
     return parser.parse(source, pullParser, outInfo);
 }
 
-/**
- * Parses legacy options and walks the source directories collecting
- * files to process.
- */
-bool prepareLegacy(std::vector<StringPiece>::const_iterator argsIter,
-        const std::vector<StringPiece>::const_iterator argsEndIter,
-        AaptOptions &options) {
-    options.phase = AaptOptions::Phase::LegacyFull;
-
-    std::vector<StringPiece> sourceDirs;
-    while (argsIter != argsEndIter) {
-        if (*argsIter == "-S") {
-            ++argsIter;
-            if (argsIter == argsEndIter) {
-                Logger::error() << "-S missing argument." << std::endl;
-                return false;
-            }
-            sourceDirs.push_back(*argsIter);
-        } else if (*argsIter == "-I") {
-            ++argsIter;
-            if (argsIter == argsEndIter) {
-                Logger::error() << "-I missing argument." << std::endl;
-                return false;
-            }
-            options.libraries.push_back(Source{ argsIter->toString() });
-        } else if (*argsIter == "-M") {
-            ++argsIter;
-            if (argsIter == argsEndIter) {
-                Logger::error() << "-M missing argument." << std::endl;
-                return false;
-            }
-
-            if (!options.manifest.path.empty()) {
-                Logger::error() << "multiple -M flags are not allowed." << std::endl;
-                return false;
-            }
-            options.manifest.path = argsIter->toString();
-        } else if (*argsIter == "-o") {
-            ++argsIter;
-            if (argsIter == argsEndIter) {
-                Logger::error() << "-o missing argument." << std::endl;
-                return false;
-            }
-            options.output = Source{ argsIter->toString() };
-        } else if (*argsIter == "-J") {
-            ++argsIter;
-            if (argsIter == argsEndIter) {
-                Logger::error() << "-J missing argument." << std::endl;
-                return false;
-            }
-            options.generateJavaClass = make_value<Source>(Source{ argsIter->toString() });
-        } else if (*argsIter == "-v") {
-            options.verbose = true;
-        } else {
-            Logger::error() << "unrecognized option '" << *argsIter << "'." << std::endl;
-            return false;
-        }
-
-        ++argsIter;
+static AaptOptions prepareArgs(int argc, char** argv) {
+    if (argc < 2) {
+        std::cerr << "no command specified." << std::endl;
+        exit(1);
     }
 
-    if (options.manifest.path.empty()) {
-        Logger::error() << "must specify manifest file with -M." << std::endl;
-        return false;
-    }
+    const StringPiece command(argv[1]);
+    argc -= 2;
+    argv += 2;
 
-    // Load the App's package name, etc.
-    if (!loadAppInfo(options.manifest, &options.appInfo)) {
-        return false;
-    }
+    AaptOptions options;
 
-    /**
-     * Set up the file filter to ignore certain files.
-     */
-    const char* customIgnore = getenv("ANDROID_AAPT_IGNORE");
-    FileFilter fileFilter;
-    if (customIgnore && customIgnore[0]) {
-        fileFilter.setPattern(customIgnore);
+    StringPiece outputDescription = "place output in file";
+    if (command == "package") {
+        options.phase = AaptOptions::Phase::Full;
+        outputDescription = "place output in directory";
+    } else if (command == "collect") {
+        options.phase = AaptOptions::Phase::Collect;
+    } else if (command == "link") {
+        options.phase = AaptOptions::Phase::Link;
+    } else if (command == "compile") {
+        options.phase = AaptOptions::Phase::Compile;
+        outputDescription = "place output in directory";
     } else {
-        fileFilter.setPattern(
-                "!.svn:!.git:!.ds_store:!*.scc:.*:<dir>_*:!CVS:!thumbs.db:!picasa.ini:!*~");
+        std::cerr << "invalid command '" << command << "'." << std::endl;
+        exit(1);
     }
 
-    /*
-     * Enumerate the files in each source directory.
-     */
-    for (const StringPiece& source : sourceDirs) {
-        if (!walkTree(source, fileFilter, options.sources)) {
-            return false;
+    if (options.phase == AaptOptions::Phase::Full) {
+        flag::requiredFlag("-S", "add a directory in which to find resources",
+                [&options](const StringPiece& arg) {
+                    options.sourceDirs.push_back(Source{ arg.toString() });
+                });
+
+        flag::requiredFlag("-M", "path to AndroidManifest.xml",
+                [&options](const StringPiece& arg) {
+                    options.manifest = Source{ arg.toString() };
+                });
+
+        flag::optionalFlag("-I", "add an Android APK to link against",
+                [&options](const StringPiece& arg) {
+                    options.libraries.push_back(Source{ arg.toString() });
+                });
+
+        flag::optionalFlag("--java", "directory in which to generate R.java",
+                [&options](const StringPiece& arg) {
+                    options.generateJavaClass = Source{ arg.toString() };
+                });
+
+    } else {
+        flag::requiredFlag("--package", "Android package name",
+                [&options](const StringPiece& arg) {
+                    options.appInfo.package = util::utf8ToUtf16(arg);
+                });
+
+        if (options.phase != AaptOptions::Phase::Collect) {
+            flag::optionalFlag("-I", "add an Android APK to link against",
+                    [&options](const StringPiece& arg) {
+                        options.libraries.push_back(Source{ arg.toString() });
+                    });
+        }
+
+        if (options.phase == AaptOptions::Phase::Link) {
+            flag::optionalFlag("--java", "directory in which to generate R.java",
+                    [&options](const StringPiece& arg) {
+                        options.generateJavaClass = Source{ arg.toString() };
+                    });
         }
     }
-    return true;
-}
 
-bool prepareCollect(std::vector<StringPiece>::const_iterator argsIter,
-        const std::vector<StringPiece>::const_iterator argsEndIter,
-        AaptOptions& options) {
-    options.phase = AaptOptions::Phase::Collect;
+    // Common flags for all steps.
+    flag::requiredFlag("-o", outputDescription, [&options](const StringPiece& arg) {
+        options.output = Source{ arg.toString() };
+    });
+    flag::optionalSwitch("-v", "enables verbose logging", &options.verbose);
 
-    while (argsIter != argsEndIter) {
-        if (*argsIter == "--package") {
-            ++argsIter;
-            if (argsIter == argsEndIter) {
-                Logger::error() << "--package missing argument." << std::endl;
-                return false;
-            }
-            options.appInfo.package = util::utf8ToUtf16(*argsIter);
-        } else if (*argsIter == "-o") {
-            ++argsIter;
-            if (argsIter == argsEndIter) {
-                Logger::error() << "-o missing argument." << std::endl;
-                return false;
-            }
-            options.output = Source{ argsIter->toString() };
-        } else if (*argsIter == "-v") {
-            options.verbose = true;
-        } else if (argsIter->data()[0] != '-') {
-            options.sources.push_back(Source{ argsIter->toString() });
-        } else {
-            Logger::error()
-                    << "unknown option '"
-                    << *argsIter
-                    << "'."
-                    << std::endl;
-            return false;
+    // Build the command string for output (eg. "aapt2 compile").
+    std::string fullCommand = "aapt2";
+    fullCommand += " ";
+    fullCommand += command.toString();
+
+    // Actually read the command line flags.
+    flag::parse(argc, argv, fullCommand);
+
+    // Copy all the remaining arguments.
+    if (options.phase == AaptOptions::Phase::Collect) {
+        for (const std::string& arg : flag::getArgs()) {
+            options.collectFiles.push_back(Source{ arg });
         }
-        ++argsIter;
-    }
-    return true;
-}
-
-bool prepareLink(std::vector<StringPiece>::const_iterator argsIter,
-        const std::vector<StringPiece>::const_iterator argsEndIter,
-        AaptOptions& options) {
-    options.phase = AaptOptions::Phase::Link;
-
-    while (argsIter != argsEndIter) {
-        if (*argsIter == "--package") {
-            ++argsIter;
-            if (argsIter == argsEndIter) {
-                Logger::error() << "--package missing argument." << std::endl;
-                return false;
-            }
-            options.appInfo.package = util::utf8ToUtf16(*argsIter);
-        } else if (*argsIter == "-o") {
-            ++argsIter;
-            if (argsIter == argsEndIter) {
-                Logger::error() << "-o missing argument." << std::endl;
-                return false;
-            }
-            options.output = Source{ argsIter->toString() };
-        } else if (*argsIter == "-I") {
-            ++argsIter;
-            if (argsIter == argsEndIter) {
-                Logger::error() << "-I missing argument." << std::endl;
-                return false;
-            }
-            options.libraries.push_back(Source{ argsIter->toString() });
-        } else if (*argsIter == "--java") {
-            ++argsIter;
-            if (argsIter == argsEndIter) {
-                Logger::error() << "--java missing argument." << std::endl;
-                return false;
-            }
-            options.generateJavaClass = make_value<Source>(Source{ argsIter->toString() });
-        } else if (*argsIter == "-v") {
-            options.verbose = true;
-        } else if (argsIter->data()[0] != '-') {
-            options.sources.push_back(Source{ argsIter->toString() });
-        } else {
-            Logger::error()
-                    << "unknown option '"
-                    << *argsIter
-                    << "'."
-                    << std::endl;
-            return false;
+    } else if (options.phase == AaptOptions::Phase::Compile) {
+        for (const std::string& arg : flag::getArgs()) {
+            options.compileFiles.push_back(Source{ arg });
         }
-        ++argsIter;
-    }
-    return true;
-}
-
-bool prepareCompile(std::vector<StringPiece>::const_iterator argsIter,
-        const std::vector<StringPiece>::const_iterator argsEndIter,
-        AaptOptions& options) {
-    options.phase = AaptOptions::Phase::Compile;
-
-    while (argsIter != argsEndIter) {
-        if (*argsIter == "--package") {
-            ++argsIter;
-            if (argsIter == argsEndIter) {
-                Logger::error() << "--package missing argument." << std::endl;
-                return false;
-            }
-            options.appInfo.package = util::utf8ToUtf16(*argsIter);
-        } else if (*argsIter == "-o") {
-            ++argsIter;
-            if (argsIter == argsEndIter) {
-                Logger::error() << "-o missing argument." << std::endl;
-                return false;
-            }
-            options.output = Source{ argsIter->toString() };
-        } else if (*argsIter == "-I") {
-            ++argsIter;
-            if (argsIter == argsEndIter) {
-                Logger::error() << "-I missing argument." << std::endl;
-                return false;
-            }
-            options.libraries.push_back(Source{ argsIter->toString() });
-        } else if (*argsIter == "-v") {
-            options.verbose = true;
-        } else if (argsIter->data()[0] != '-') {
-            options.sources.push_back(Source{ argsIter->toString() });
-        } else {
-            Logger::error()
-                    << "unknown option '"
-                    << *argsIter
-                    << "'."
-                    << std::endl;
-            return false;
+    } else if (options.phase == AaptOptions::Phase::Link) {
+        for (const std::string& arg : flag::getArgs()) {
+            options.linkFiles.push_back(Source{ arg });
         }
-        ++argsIter;
     }
-    return true;
+    return options;
 }
 
-struct CollectValuesItem {
-    Source source;
-    ConfigDescription config;
-};
-
-bool collectValues(std::shared_ptr<ResourceTable> table, const CollectValuesItem& item) {
-    std::ifstream in(item.source.path, std::ifstream::binary);
+static bool collectValues(const std::shared_ptr<ResourceTable>& table, const Source& source,
+                          const ConfigDescription& config) {
+    std::ifstream in(source.path, std::ifstream::binary);
     if (!in) {
-        Logger::error(item.source) << strerror(errno) << std::endl;
+        Logger::error(source) << strerror(errno) << std::endl;
         return false;
     }
 
     std::shared_ptr<XmlPullParser> xmlParser = std::make_shared<SourceXmlPullParser>(in);
-    ResourceParser parser(table, item.source, item.config, xmlParser);
+    ResourceParser parser(table, source, config, xmlParser);
     return parser.parse();
 }
 
@@ -750,7 +664,7 @@ struct ResourcePathData {
  * Resource file paths are expected to look like:
  * [--/res/]type[-config]/name
  */
-Maybe<ResourcePathData> extractResourcePathData(const Source& source) {
+static Maybe<ResourcePathData> extractResourcePathData(const Source& source) {
     std::vector<std::string> parts = util::splitAndLowercase(source.path, '/');
     if (parts.size() < 2) {
         Logger::error(source) << "bad resource path." << std::endl;
@@ -792,326 +706,48 @@ Maybe<ResourcePathData> extractResourcePathData(const Source& source) {
     };
 }
 
-static bool doLegacy(std::shared_ptr<ResourceTable> table, std::shared_ptr<Resolver> resolver,
-                     const AaptOptions& options) {
+bool doAll(AaptOptions* options, const std::shared_ptr<ResourceTable>& table,
+           const std::shared_ptr<Resolver>& resolver) {
+    const bool versionStyles = (options->phase == AaptOptions::Phase::Full ||
+            options->phase == AaptOptions::Phase::Link);
+    const bool verifyNoMissingSymbols = (options->phase == AaptOptions::Phase::Full ||
+            options->phase == AaptOptions::Phase::Link);
+    const bool compileFiles = (options->phase == AaptOptions::Phase::Full ||
+            options->phase == AaptOptions::Phase::Compile);
+    const bool flattenTable = (options->phase == AaptOptions::Phase::Full ||
+            options->phase == AaptOptions::Phase::Collect ||
+            options->phase == AaptOptions::Phase::Link);
+    const bool useExtendedChunks = options->phase == AaptOptions::Phase::Collect;
+
+    // Build the output table path.
+    Source outputTable = options->output;
+    if (options->phase == AaptOptions::Phase::Full) {
+        appendPath(&outputTable.path, "resources.arsc");
+    }
+
     bool error = false;
-    std::queue<CompileXml> xmlCompileQueue;
+    std::queue<CompileItem> compileQueue;
 
-    //
-    // Read values XML files and XML/PNG files.
-    // Need to parse the resource type/config/filename.
-    //
-    for (const Source& source : options.sources) {
-        Maybe<ResourcePathData> maybePathData = extractResourcePathData(source);
-        if (!maybePathData) {
-            return false;
-        }
-
-        const ResourcePathData& pathData = maybePathData.value();
-        if (pathData.resourceDir == u"values") {
-            if (options.verbose) {
-                Logger::note(source) << "collecting values..." << std::endl;
-            }
-
-            error |= !collectValues(table, CollectValuesItem{ source, pathData.config });
-            continue;
-        }
-
-        const ResourceType* type = parseResourceType(pathData.resourceDir);
-        if (!type) {
-            Logger::error(source)
-                    << "invalid resource type '"
-                    << pathData.resourceDir
-                    << "'."
-                    << std::endl;
-            return false;
-        }
-
-        ResourceName resourceName = { table->getPackage(), *type, pathData.name };
-        if (pathData.extension == "xml") {
-            if (options.verbose) {
-                Logger::note(source) << "collecting XML..." << std::endl;
-            }
-
-            error |= !collectXml(table, source, resourceName, pathData.config);
-            xmlCompileQueue.push(CompileXml{
-                    source,
-                    resourceName,
-                    pathData.config
-            });
+    // If source directories were specified, walk them looking for resource files.
+    if (!options->sourceDirs.empty()) {
+        const char* customIgnore = getenv("ANDROID_AAPT_IGNORE");
+        FileFilter fileFilter;
+        if (customIgnore && customIgnore[0]) {
+            fileFilter.setPattern(customIgnore);
         } else {
-            std::unique_ptr<FileReference> fileReference = makeFileReference(
-                    table->getValueStringPool(),
-                    util::utf16ToUtf8(pathData.name) + "." + pathData.extension,
-                    *type, pathData.config);
-
-            error |= !table->addResource(resourceName, pathData.config, source.line(0),
-                                         std::move(fileReference));
+            fileFilter.setPattern(
+                    "!.svn:!.git:!.ds_store:!*.scc:.*:<dir>_*:!CVS:!thumbs.db:!picasa.ini:!*~");
         }
-    }
 
-    if (error) {
-        return false;
-    }
-
-    versionStylesForCompat(table);
-
-    //
-    // Verify all references and data types.
-    //
-    Linker linker(table, resolver);
-    if (!linker.linkAndValidate()) {
-        Logger::error()
-                << "linking failed."
-                << std::endl;
-        return false;
-    }
-
-    const auto& unresolvedRefs = linker.getUnresolvedReferences();
-    if (!unresolvedRefs.empty()) {
-        for (const auto& entry : unresolvedRefs) {
-            for (const auto& source : entry.second) {
-                Logger::error(source)
-                        << "unresolved symbol '"
-                        << entry.first
-                        << "'."
-                        << std::endl;
+        for (const Source& source : options->sourceDirs) {
+            if (!walkTree(source, fileFilter, &options->collectFiles)) {
+                return false;
             }
         }
-        return false;
     }
 
-    //
-    // Compile the XML files.
-    //
-    while (!xmlCompileQueue.empty()) {
-        const CompileXml& item = xmlCompileQueue.front();
-
-        // Create the output path from the resource name.
-        std::stringstream outputPath;
-        outputPath << item.name.type;
-        if (item.config != ConfigDescription{}) {
-            outputPath << "-" << item.config.toString();
-        }
-
-        Source outSource = options.output;
-        appendPath(&outSource.path, "res");
-        appendPath(&outSource.path, outputPath.str());
-
-        if (!mkdirs(outSource.path)) {
-            Logger::error(outSource) << strerror(errno) << std::endl;
-            return false;
-        }
-
-        appendPath(&outSource.path, util::utf16ToUtf8(item.name.entry) + ".xml");
-
-        if (options.verbose) {
-            Logger::note(outSource) << "compiling XML file." << std::endl;
-        }
-
-        error |= !compileXml(resolver, item, outSource, &xmlCompileQueue);
-        xmlCompileQueue.pop();
-    }
-
-    if (error) {
-        return false;
-    }
-
-    //
-    // Compile the AndroidManifest.xml file.
-    //
-    if (!compileAndroidManifest(resolver, options)) {
-        return false;
-    }
-
-    //
-    // Generate the Java R class.
-    //
-    if (options.generateJavaClass) {
-        Source outPath = options.generateJavaClass.value();
-        if (options.verbose) {
-            Logger::note()
-                    << "writing symbols to "
-                    << outPath
-                    << "."
-                    << std::endl;
-        }
-
-        for (std::string& part : util::split(util::utf16ToUtf8(table->getPackage()), '.')) {
-            appendPath(&outPath.path, part);
-        }
-
-        if (!mkdirs(outPath.path)) {
-            Logger::error(outPath) << strerror(errno) << std::endl;
-            return false;
-        }
-
-        appendPath(&outPath.path, "R.java");
-
-        std::ofstream fout(outPath.path);
-        if (!fout) {
-            Logger::error(outPath) << strerror(errno) << std::endl;
-            return false;
-        }
-
-        JavaClassGenerator generator(table, JavaClassGenerator::Options{});
-        if (!generator.generate(fout)) {
-            Logger::error(outPath)
-                    << generator.getError()
-                    << "."
-                    << std::endl;
-            return false;
-        }
-    }
-
-    //
-    // Flatten resource table.
-    //
-    if (table->begin() != table->end()) {
-        BigBuffer buffer(1024);
-        TableFlattener::Options tableOptions;
-        tableOptions.useExtendedChunks = false;
-        TableFlattener flattener(tableOptions);
-        if (!flattener.flatten(&buffer, *table)) {
-            Logger::error()
-                    << "failed to flatten resource table->"
-                    << std::endl;
-            return false;
-        }
-
-        if (options.verbose) {
-            Logger::note()
-                    << "Final resource table size="
-                    << util::formatSize(buffer.size())
-                    << std::endl;
-        }
-
-        std::string outTable(options.output.path);
-        appendPath(&outTable, "resources.arsc");
-
-        std::ofstream fout(outTable, std::ofstream::binary);
-        if (!fout) {
-            Logger::error(Source{outTable})
-                    << strerror(errno)
-                    << "."
-                    << std::endl;
-            return false;
-        }
-
-        if (!util::writeAll(fout, buffer)) {
-            Logger::error(Source{outTable})
-                    << strerror(errno)
-                    << "."
-                    << std::endl;
-            return false;
-        }
-        fout.flush();
-    }
-    return true;
-}
-
-static bool doCollect(std::shared_ptr<ResourceTable> table, std::shared_ptr<Resolver> resolver,
-                      const AaptOptions& options) {
-    bool error = false;
-
-    //
-    // Read values XML files and XML/PNG files.
-    // Need to parse the resource type/config/filename.
-    //
-    for (const Source& source : options.sources) {
-        Maybe<ResourcePathData> maybePathData = extractResourcePathData(source);
-        if (!maybePathData) {
-            return false;
-        }
-
-        const ResourcePathData& pathData = maybePathData.value();
-        if (pathData.resourceDir == u"values") {
-            if (options.verbose) {
-                Logger::note(source) << "collecting values..." << std::endl;
-            }
-
-            error |= !collectValues(table, CollectValuesItem{ source, pathData.config });
-            continue;
-        }
-
-        const ResourceType* type = parseResourceType(pathData.resourceDir);
-        if (!type) {
-            Logger::error(source)
-                    << "invalid resource type '"
-                    << pathData.resourceDir
-                    << "'."
-                    << std::endl;
-            return false;
-        }
-
-        ResourceName resourceName = { table->getPackage(), *type, pathData.name };
-        if (pathData.extension == "xml") {
-            if (options.verbose) {
-                Logger::note(source) << "collecting XML..." << std::endl;
-            }
-
-            error |= !collectXml(table, source, resourceName, pathData.config);
-        } else {
-            std::unique_ptr<FileReference> fileReference = makeFileReference(
-                    table->getValueStringPool(),
-                    util::utf16ToUtf8(pathData.name) + "." + pathData.extension,
-                    *type,
-                    pathData.config);
-            error |= !table->addResource(resourceName, pathData.config, source.line(0),
-                                         std::move(fileReference));
-        }
-    }
-
-    if (error) {
-        return false;
-    }
-
-    Linker linker(table, resolver);
-    if (!linker.linkAndValidate()) {
-        return false;
-    }
-
-    //
-    // Flatten resource table->
-    //
-    if (table->begin() != table->end()) {
-        BigBuffer buffer(1024);
-        TableFlattener::Options tableOptions;
-        tableOptions.useExtendedChunks = true;
-        TableFlattener flattener(tableOptions);
-        if (!flattener.flatten(&buffer, *table)) {
-            Logger::error()
-                    << "failed to flatten resource table->"
-                    << std::endl;
-            return false;
-        }
-
-        std::ofstream fout(options.output.path, std::ofstream::binary);
-        if (!fout) {
-            Logger::error(options.output)
-                    << strerror(errno)
-                    << "."
-                    << std::endl;
-            return false;
-        }
-
-        if (!util::writeAll(fout, buffer)) {
-            Logger::error(options.output)
-                    << strerror(errno)
-                    << "."
-                    << std::endl;
-            return false;
-        }
-        fout.flush();
-    }
-    return true;
-}
-
-static bool doLink(std::shared_ptr<ResourceTable> table, std::shared_ptr<Resolver> resolver,
-                   const AaptOptions& options) {
-    bool error = false;
-
-    for (const Source& source : options.sources) {
+    // Load all binary resource tables.
+    for (const Source& source : options->linkFiles) {
         error |= !loadBinaryResourceTable(table, source);
     }
 
@@ -1119,41 +755,164 @@ static bool doLink(std::shared_ptr<ResourceTable> table, std::shared_ptr<Resolve
         return false;
     }
 
-    versionStylesForCompat(table);
+    // Collect all the resource files.
+    // Need to parse the resource type/config/filename.
+    for (const Source& source : options->collectFiles) {
+        Maybe<ResourcePathData> maybePathData = extractResourcePathData(source);
+        if (!maybePathData) {
+            return false;
+        }
 
+        const ResourcePathData& pathData = maybePathData.value();
+        if (pathData.resourceDir == u"values") {
+            if (options->verbose) {
+                Logger::note(source) << "collecting values..." << std::endl;
+            }
+
+            error |= !collectValues(table, source, pathData.config);
+            continue;
+        }
+
+        const ResourceType* type = parseResourceType(pathData.resourceDir);
+        if (!type) {
+            Logger::error(source) << "invalid resource type '" << pathData.resourceDir << "'."
+                                  << std::endl;
+            return false;
+        }
+
+        ResourceName resourceName = { table->getPackage(), *type, pathData.name };
+
+        // Add the file name to the resource table.
+        std::unique_ptr<FileReference> fileReference = makeFileReference(
+                table->getValueStringPool(),
+                util::utf16ToUtf8(pathData.name) + "." + pathData.extension,
+                *type, pathData.config);
+        error |= !table->addResource(resourceName, pathData.config, source.line(0),
+                                     std::move(fileReference));
+
+        if (pathData.extension == "xml") {
+            error |= !collectXml(table, source, resourceName, pathData.config);
+        }
+
+        compileQueue.push(
+                CompileItem{ source, resourceName, pathData.config, pathData.extension });
+    }
+
+    if (error) {
+        return false;
+    }
+
+    // Version all styles referencing attributes outside of their specified SDK version.
+    if (versionStyles) {
+        versionStylesForCompat(table);
+    }
+
+    // Verify that all references are valid.
     Linker linker(table, resolver);
     if (!linker.linkAndValidate()) {
         return false;
     }
 
-    const auto& unresolvedRefs = linker.getUnresolvedReferences();
-    if (!unresolvedRefs.empty()) {
-        for (const auto& entry : unresolvedRefs) {
-            for (const auto& source : entry.second) {
-                Logger::error(source)
-                        << "unresolved symbol '"
-                        << entry.first
-                        << "'."
-                        << std::endl;
+    // Verify that all symbols exist.
+    if (verifyNoMissingSymbols) {
+        const auto& unresolvedRefs = linker.getUnresolvedReferences();
+        if (!unresolvedRefs.empty()) {
+            for (const auto& entry : unresolvedRefs) {
+                for (const auto& source : entry.second) {
+                    Logger::error(source) << "unresolved symbol '" << entry.first << "'."
+                                          << std::endl;
+                }
             }
+            return false;
         }
-        return false;
     }
 
-    //
-    // Generate the Java R class.
-    //
-    if (options.generateJavaClass) {
-        Source outPath = options.generateJavaClass.value();
-        if (options.verbose) {
-            Logger::note()
-                    << "writing symbols to "
-                    << outPath
-                    << "."
-                    << std::endl;
+    // Compile files.
+    if (compileFiles) {
+        // First process any input compile files.
+        for (const Source& source : options->compileFiles) {
+            Maybe<ResourcePathData> maybePathData = extractResourcePathData(source);
+            if (!maybePathData) {
+                return false;
+            }
+
+            const ResourcePathData& pathData = maybePathData.value();
+            const ResourceType* type = parseResourceType(pathData.resourceDir);
+            if (!type) {
+                Logger::error(source) << "invalid resource type '" << pathData.resourceDir
+                                      << "'." << std::endl;
+                return false;
+            }
+
+            ResourceName resourceName = { table->getPackage(), *type, pathData.name };
+            compileQueue.push(
+                    CompileItem{ source, resourceName, pathData.config, pathData.extension });
         }
 
-        for (std::string& part : util::split(util::utf16ToUtf8(table->getPackage()), '.')) {
+        // Now process the actual compile queue.
+        for (; !compileQueue.empty(); compileQueue.pop()) {
+            const CompileItem& item = compileQueue.front();
+
+            // Create the output directory path from the resource type and config.
+            std::stringstream outputPath;
+            outputPath << item.name.type;
+            if (item.config != ConfigDescription{}) {
+                outputPath << "-" << item.config.toString();
+            }
+
+            Source outSource = options->output;
+            appendPath(&outSource.path, "res");
+            appendPath(&outSource.path, outputPath.str());
+
+            // Make the directory.
+            if (!mkdirs(outSource.path)) {
+                Logger::error(outSource) << strerror(errno) << std::endl;
+                return false;
+            }
+
+            // Add the file name to the directory path.
+            appendPath(&outSource.path, util::utf16ToUtf8(item.name.entry) + "." + item.extension);
+
+            if (item.extension == "xml") {
+                if (options->verbose) {
+                    Logger::note(outSource) << "compiling XML file." << std::endl;
+                }
+
+                error |= !compileXml(resolver, item, outSource, &compileQueue);
+            } else if (item.extension == "png" || item.extension == "9.png") {
+                if (options->verbose) {
+                    Logger::note(outSource) << "compiling png file." << std::endl;
+                }
+
+                error |= !compilePng(item.source, outSource);
+            } else {
+                error |= !copyFile(item.source, outSource);
+            }
+        }
+
+        if (error) {
+            return false;
+        }
+    }
+
+    // Compile and validate the AndroidManifest.xml.
+    if (!options->manifest.path.empty()) {
+        if (!compileAndroidManifest(resolver, *options)) {
+            return false;
+        }
+    }
+
+    // Generate the Java class file.
+    if (options->generateJavaClass) {
+        Source outPath = options->generateJavaClass.value();
+        if (options->verbose) {
+            Logger::note() << "writing symbols to " << outPath << "." << std::endl;
+        }
+
+        // Build the output directory from the package name.
+        // Eg. com.android.app -> com/android/app
+        const std::string packageUtf8 = util::utf16ToUtf8(table->getPackage());
+        for (StringPiece part : util::tokenize<char>(packageUtf8, '.')) {
             appendPath(&outPath.path, part);
         }
 
@@ -1170,52 +929,37 @@ static bool doLink(std::shared_ptr<ResourceTable> table, std::shared_ptr<Resolve
             return false;
         }
 
-        JavaClassGenerator generator(table, JavaClassGenerator::Options{});
+        JavaClassGenerator generator(table, {});
         if (!generator.generate(fout)) {
-            Logger::error(outPath)
-                    << generator.getError()
-                    << "."
-                    << std::endl;
+            Logger::error(outPath) << generator.getError() << "." << std::endl;
             return false;
         }
     }
 
-    //
-    // Flatten resource table.
-    //
-    if (table->begin() != table->end()) {
+    // Flatten the resource table.
+    if (flattenTable && table->begin() != table->end()) {
         BigBuffer buffer(1024);
         TableFlattener::Options tableOptions;
-        tableOptions.useExtendedChunks = false;
+        tableOptions.useExtendedChunks = useExtendedChunks;
         TableFlattener flattener(tableOptions);
         if (!flattener.flatten(&buffer, *table)) {
-            Logger::error()
-                    << "failed to flatten resource table->"
-                    << std::endl;
+            Logger::error() << "failed to flatten resource table." << std::endl;
             return false;
         }
 
-        if (options.verbose) {
-            Logger::note()
-                    << "Final resource table size="
-                    << util::formatSize(buffer.size())
-                    << std::endl;
+        if (options->verbose) {
+            Logger::note() << "Final resource table size=" << util::formatSize(buffer.size())
+                           << std::endl;
         }
 
-        std::ofstream fout(options.output.path, std::ofstream::binary);
+        std::ofstream fout(outputTable.path, std::ofstream::binary);
         if (!fout) {
-            Logger::error(options.output)
-                    << strerror(errno)
-                    << "."
-                    << std::endl;
+            Logger::error(outputTable) << strerror(errno) << "." << std::endl;
             return false;
         }
 
         if (!util::writeAll(fout, buffer)) {
-            Logger::error(options.output)
-                    << strerror(errno)
-                    << "."
-                    << std::endl;
+            Logger::error(outputTable) << strerror(errno) << "." << std::endl;
             return false;
         }
         fout.flush();
@@ -1223,134 +967,24 @@ static bool doLink(std::shared_ptr<ResourceTable> table, std::shared_ptr<Resolve
     return true;
 }
 
-static bool doCompile(std::shared_ptr<ResourceTable> table, std::shared_ptr<Resolver> resolver,
-                      const AaptOptions& options) {
-    std::queue<CompileXml> xmlCompileQueue;
-
-    for (const Source& source : options.sources) {
-        Maybe<ResourcePathData> maybePathData = extractResourcePathData(source);
-        if (!maybePathData) {
-            return false;
-        }
-
-        ResourcePathData& pathData = maybePathData.value();
-        const ResourceType* type = parseResourceType(pathData.resourceDir);
-        if (!type) {
-            Logger::error(source)
-                    << "invalid resource type '"
-                    << pathData.resourceDir
-                    << "'."
-                    << std::endl;
-            return false;
-        }
-
-        ResourceName resourceName = { table->getPackage(), *type, pathData.name };
-        if (pathData.extension == "xml") {
-            xmlCompileQueue.push(CompileXml{
-                    source,
-                    resourceName,
-                    pathData.config
-            });
-        } else {
-            // TODO(adamlesinski): Handle images here.
-        }
-    }
-
-    bool error = false;
-    while (!xmlCompileQueue.empty()) {
-        const CompileXml& item = xmlCompileQueue.front();
-
-        // Create the output path from the resource name.
-        std::stringstream outputPath;
-        outputPath << item.name.type;
-        if (item.config != ConfigDescription{}) {
-            outputPath << "-" << item.config.toString();
-        }
-
-        Source outSource = options.output;
-        appendPath(&outSource.path, "res");
-        appendPath(&outSource.path, outputPath.str());
-
-        if (!mkdirs(outSource.path)) {
-            Logger::error(outSource) << strerror(errno) << std::endl;
-            return false;
-        }
-
-        appendPath(&outSource.path, util::utf16ToUtf8(item.name.entry) + ".xml");
-
-        if (options.verbose) {
-            Logger::note(outSource) << "compiling XML file." << std::endl;
-        }
-
-        error |= !compileXml(resolver, item, outSource, &xmlCompileQueue);
-        xmlCompileQueue.pop();
-    }
-    return !error;
-}
-
 int main(int argc, char** argv) {
     Logger::setLog(std::make_shared<Log>(std::cerr, std::cerr));
+    AaptOptions options = prepareArgs(argc, argv);
 
-    std::vector<StringPiece> args;
-    args.reserve(argc - 1);
-    for (int i = 1; i < argc; i++) {
-        args.emplace_back(argv[i], strlen(argv[i]));
+    // If we specified a manifest, go ahead and load the package name from the manifest.
+    if (!options.manifest.path.empty()) {
+        if (!loadAppInfo(options.manifest, &options.appInfo)) {
+            return false;
+        }
     }
 
-    if (args.empty()) {
-        Logger::error() << "no command specified." << std::endl;
-        return 1;
-    }
-
-    AaptOptions options;
-
-    // Check the command we're running.
-    const StringPiece& command = args.front();
-    if (command == "package") {
-        if (!prepareLegacy(std::begin(args) + 1, std::end(args), options)) {
-            return 1;
-        }
-    } else if (command == "collect") {
-        if (!prepareCollect(std::begin(args) + 1, std::end(args), options)) {
-            return 1;
-        }
-    } else if (command == "link") {
-        if (!prepareLink(std::begin(args) + 1, std::end(args), options)) {
-            return 1;
-        }
-    } else if (command == "compile") {
-        if (!prepareCompile(std::begin(args) + 1, std::end(args), options)) {
-            return 1;
-        }
-    } else {
-        Logger::error() << "unknown command '" << command << "'." << std::endl;
-        return 1;
-    }
-
-    //
     // Verify we have some common options set.
-    //
-
-    if (options.sources.empty()) {
-        Logger::error() << "no sources specified." << std::endl;
-        return false;
-    }
-
-    if (options.output.path.empty()) {
-        Logger::error() << "no output directory specified." << std::endl;
-        return false;
-    }
-
     if (options.appInfo.package.empty()) {
         Logger::error() << "no package name specified." << std::endl;
         return false;
     }
 
-
-    //
-    // Every phase needs a resource table and a resolver/linker.
-    //
-
+    // Every phase needs a resource table.
     std::shared_ptr<ResourceTable> table = std::make_shared<ResourceTable>();
     table->setPackage(options.appInfo.package);
     if (options.appInfo.package == u"android") {
@@ -1359,9 +993,7 @@ int main(int argc, char** argv) {
         table->setPackageId(0x7f);
     }
 
-    //
     // Load the included libraries.
-    //
     std::shared_ptr<android::AssetManager> libraries = std::make_shared<android::AssetManager>();
     for (const Source& source : options.libraries) {
         if (util::stringEndsWith(source.path, ".arsc")) {
@@ -1393,33 +1025,9 @@ int main(int argc, char** argv) {
     // Make the resolver that will cache IDs for us.
     std::shared_ptr<Resolver> resolver = std::make_shared<Resolver>(table, libraries);
 
-    //
-    // Dispatch to the real phase here.
-    //
-
-    bool result = true;
-    switch (options.phase) {
-        case AaptOptions::Phase::LegacyFull:
-            result = doLegacy(table, resolver, options);
-            break;
-
-        case AaptOptions::Phase::Collect:
-            result = doCollect(table, resolver, options);
-            break;
-
-        case AaptOptions::Phase::Link:
-            result = doLink(table, resolver, options);
-            break;
-
-        case AaptOptions::Phase::Compile:
-            result = doCompile(table, resolver, options);
-            break;
-    }
-
-    if (!result) {
-        Logger::error()
-                << "aapt exiting with failures."
-                << std::endl;
+    // Do the work.
+    if (!doAll(&options, table, resolver)) {
+        Logger::error() << "aapt exiting with failures." << std::endl;
         return 1;
     }
     return 0;
