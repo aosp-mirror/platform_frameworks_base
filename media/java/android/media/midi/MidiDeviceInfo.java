@@ -237,29 +237,23 @@ public final class MidiDeviceInfo implements Parcelable {
     }
 
     /**
-     * Returns information about an input port.
+     * Returns information about the device's ports.
+     * The ports are in unspecified order.
      *
-     * @param portNumber the number of the input port
-     * @return the input port's information object
+     * @return array of {@link PortInfo}
      */
-    public PortInfo getInputPortInfo(int portNumber) {
-        if (portNumber < 0 || portNumber >= mInputPortCount) {
-            throw new IllegalArgumentException("portNumber out of range");
-        }
-        return new PortInfo(PortInfo.TYPE_INPUT, portNumber, mInputPortNames[portNumber]);
-    }
+    public PortInfo[] getPortList() {
+        PortInfo[] portInfoList = new PortInfo[mInputPortCount + mOutputPortCount];
 
-    /**
-     * Returns information about an output port.
-     *
-     * @param portNumber the number of the output port
-     * @return the output port's information object
-     */
-    public PortInfo getOutputPortInfo(int portNumber) {
-        if (portNumber < 0 || portNumber >= mOutputPortCount) {
-            throw new IllegalArgumentException("portNumber out of range");
+        int index = 0;
+        for (int i = 0; i < mInputPortCount; i++) {
+            portInfoList[index++] = new PortInfo(PortInfo.TYPE_INPUT, i, mInputPortNames[i]);
         }
-        return new PortInfo(PortInfo.TYPE_OUTPUT, portNumber, mOutputPortNames[portNumber]);
+        for (int i = 0; i < mOutputPortCount; i++) {
+            portInfoList[index++] = new PortInfo(PortInfo.TYPE_OUTPUT, i, mOutputPortNames[i]);
+        }
+
+        return portInfoList;
     }
 
     /**
