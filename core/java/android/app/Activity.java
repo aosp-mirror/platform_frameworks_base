@@ -89,6 +89,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.PhoneWindow;
+import android.view.SearchEvent;
 import android.view.View;
 import android.view.View.OnCreateContextMenuListener;
 import android.view.ViewGroup;
@@ -786,6 +787,8 @@ public class Activity extends ContextThemeWrapper
 
     private TranslucentConversionListener mTranslucentCallback;
     private boolean mChangeCanvasToTranslucent;
+
+    private SearchEvent mSearchEvent;
 
     private boolean mTitleReady = false;
     private int mActionModeTypeStarting = ActionMode.TYPE_PRIMARY;
@@ -3547,11 +3550,22 @@ public class Activity extends ContextThemeWrapper
      * implementation changes to simply return false and you must supply your own custom
      * implementation if you want to support search.</p>
      *
+     * @param searchEvent The {@link SearchEvent} that signaled this search.
      * @return Returns {@code true} if search launched, and {@code false} if the activity does
      * not respond to search.  The default implementation always returns {@code true}, except
      * when in {@link Configuration#UI_MODE_TYPE_TELEVISION} mode where it returns false.
      *
      * @see android.app.SearchManager
+     */
+    public boolean onSearchRequested(@Nullable SearchEvent searchEvent) {
+        mSearchEvent = searchEvent;
+        boolean result = onSearchRequested();
+        mSearchEvent = null;
+        return result;
+    }
+
+    /**
+     * @see #onSearchRequested(SearchEvent)
      */
     public boolean onSearchRequested() {
         if ((getResources().getConfiguration().uiMode&Configuration.UI_MODE_TYPE_MASK)
@@ -3561,6 +3575,17 @@ public class Activity extends ContextThemeWrapper
         } else {
             return false;
         }
+    }
+
+    /**
+     * During the onSearchRequested() callbacks, this function will return the
+     * {@link SearchEvent} that triggered the callback, if it exists.
+     *
+     * @return SearchEvent The SearchEvent that triggered the {@link
+     *                    #onSearchRequested} callback.
+     */
+    public final SearchEvent getSearchEvent() {
+        return mSearchEvent;
     }
 
     /**

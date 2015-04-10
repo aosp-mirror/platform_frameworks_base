@@ -110,6 +110,11 @@ public class WindowCallback implements Window.Callback {
     }
 
     @Override
+    public boolean onSearchRequested(SearchEvent searchEvent) {
+        return onSearchRequested();
+    }
+
+    @Override
     public boolean onSearchRequested() {
         return false;
     }

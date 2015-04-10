@@ -414,6 +414,15 @@ public abstract class Window {
         public boolean onSearchRequested();
 
         /**
+         * Called when the user signals the desire to start a search.
+         *
+         * @param searchEvent A {@link SearchEvent} describing the signal to
+         *                   start a search.
+         * @return true if search launched, false if activity refuses (blocks)
+         */
+        public boolean onSearchRequested(SearchEvent searchEvent);
+
+        /**
          * Called when an action mode is being started for this window. Gives the
          * callback an opportunity to handle the action mode in its own unique and
          * beautiful way. If this method returns null the system can choose a way
