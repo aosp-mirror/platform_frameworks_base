@@ -51,7 +51,7 @@ public class AssistContent implements Parcelable {
     /**
      * Sets the Intent associated with the content, describing the current top-level context of
      * the activity.  If this contains a reference to a piece of data related to the activity,
-     * be sure to set {@link Intent#FLAG_GRANT_READ_URI_PERMISSION} so the accessibilty
+     * be sure to set {@link Intent#FLAG_GRANT_READ_URI_PERMISSION} so the accessibility
      * service can access it.
      */
     public void setIntent(Intent intent) {
