@@ -51,9 +51,23 @@ public abstract class SharedElementCallback {
     };
 
     /**
-     * Called immediately after the start state is set for the shared element.
-     * The shared element will start at the size and position of the shared element
-     * in the launching Activity or Fragment.
+     * In Activity Transitions, onSharedElementStart is called immediately before
+     * capturing the start of the shared element state on enter and reenter transitions and
+     * immediately before capturing the end of the shared element state for exit and return
+     * transitions.
+     * <p>
+     * In Fragment Transitions, onSharedElementStart is called immediately before capturing the
+     * start state of all shared element transitions.
+     * <p>
+     * This call can be used to adjust the transition start state by modifying the shared
+     * element Views. Note that no layout step will be executed between onSharedElementStart
+     * and the transition state capture.
+     * <p>
+     * For Activity Transitions, any changes made in {@link #onSharedElementEnd(List, List, List)}
+     * that are not updated during by layout should be corrected in onSharedElementStart for exit and
+     * return transitions. For example, rotation or scale will not be affected by layout and
+     * if changed in {@link #onSharedElementEnd(List, List, List)}, it will also have to be reset
+     * in onSharedElementStart again to correct the end state.
      *
      * @param sharedElementNames The names of the shared elements that were accepted into
      *                           the View hierarchy.
@@ -68,17 +82,23 @@ public abstract class SharedElementCallback {
             List<View> sharedElements, List<View> sharedElementSnapshots) {}
 
     /**
-     * Called after the end state is set for the shared element, but before the end state
-     * is captured by the shared element transition.
+     * In Activity Transitions, onSharedElementEnd is called immediately before
+     * capturing the end of the shared element state on enter and reenter transitions and
+     * immediately before capturing the start of the shared element state for exit and return
+     * transitions.
      * <p>
-     *     Any customization done in
-     *     {@link #onSharedElementStart(java.util.List, java.util.List, java.util.List)}
-     *     may need to be modified to the final state of the shared element if it is not
-     *     automatically corrected by layout. For example, rotation or scale will not
-     *     be affected by layout and if changed in {@link #onSharedElementStart(java.util.List,
-     *     java.util.List, java.util.List)}, it will also have to be set here again to correct
-     *     the end state.
-     * </p>
+     * In Fragment Transitions, onSharedElementEnd is called immediately before capturing the
+     * end state of all shared element transitions.
+     * <p>
+     * This call can be used to adjust the transition end state by modifying the shared
+     * element Views. Note that no layout step will be executed between onSharedElementEnd
+     * and the transition state capture.
+     * <p>
+     * Any changes made in {@link #onSharedElementStart(List, List, List)} that are not updated
+     * during layout should be corrected in onSharedElementEnd. For example, rotation or scale
+     * will not be affected by layout and if changed in
+     * {@link #onSharedElementStart(List, List, List)}, it will also have to be reset in
+     * onSharedElementEnd again to correct the end state.
      *
      * @param sharedElementNames The names of the shared elements that were accepted into
      *                           the View hierarchy.
