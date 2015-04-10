@@ -215,7 +215,7 @@ public class TextToSpeech {
      *     </li>
      *     <li>
      *         A list of feature strings that engines might support, e.g
-     *         {@link Engine#KEY_FEATURE_NETWORK_SYNTHESIS}). These values may be passed in to
+     *         {@link Engine#KEY_FEATURE_NETWORK_SYNTHESIS}. These values may be passed in to
      *         {@link TextToSpeech#speak} and {@link TextToSpeech#synthesizeToFile} to modify
      *         engine behaviour. The engine can be queried for the set of features it supports
      *         through {@link TextToSpeech#getFeatures(java.util.Locale)}.
@@ -576,9 +576,9 @@ public class TextToSpeech {
          * @see TextToSpeech#getFeatures(java.util.Locale)
          *
          * @deprecated Starting from API level 21, to select network synthesis, call
-         * ({@link TextToSpeech#getVoices()}, find a suitable network voice
+         * {@link TextToSpeech#getVoices()}, find a suitable network voice
          * ({@link Voice#isNetworkConnectionRequired()}) and pass it
-         * to {@link TextToSpeech#setVoice(Voice)}).
+         * to {@link TextToSpeech#setVoice(Voice)}.
          */
         @Deprecated
         public static final String KEY_FEATURE_NETWORK_SYNTHESIS = "networkTts";
