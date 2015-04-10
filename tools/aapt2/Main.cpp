@@ -17,6 +17,7 @@
 #include "AppInfo.h"
 #include "BigBuffer.h"
 #include "BinaryResourceParser.h"
+#include "BindingXmlPullParser.h"
 #include "Files.h"
 #include "Flag.h"
 #include "JavaClassGenerator.h"
@@ -285,8 +286,7 @@ void versionStylesForCompat(std::shared_ptr<ResourceTable> table) {
 }
 
 bool collectXml(std::shared_ptr<ResourceTable> table, const Source& source,
-                const ResourceName& name,
-                const ConfigDescription& config) {
+                const ResourceName& name, const ConfigDescription& config) {
     std::ifstream in(source.path, std::ifstream::binary);
     if (!in) {
         Logger::error(source) << strerror(errno) << std::endl;
@@ -295,14 +295,14 @@ bool collectXml(std::shared_ptr<ResourceTable> table, const Source& source,
 
     std::set<size_t> sdkLevels;
 
-    SourceXmlPullParser pullParser(in);
-    while (XmlPullParser::isGoodEvent(pullParser.next())) {
-        if (pullParser.getEvent() != XmlPullParser::Event::kStartElement) {
+    SourceXmlPullParser parser(in);
+    while (XmlPullParser::isGoodEvent(parser.next())) {
+        if (parser.getEvent() != XmlPullParser::Event::kStartElement) {
             continue;
         }
 
-        const auto endIter = pullParser.endAttributes();
-        for (auto iter = pullParser.beginAttributes(); iter != endIter; ++iter) {
+        const auto endIter = parser.endAttributes();
+        for (auto iter = parser.beginAttributes(); iter != endIter; ++iter) {
             if (iter->namespaceUri == u"http://schemas.android.com/apk/res/android") {
                 size_t sdkLevel = findAttributeSdkLevel(iter->name);
                 if (sdkLevel > 1) {
@@ -315,7 +315,7 @@ bool collectXml(std::shared_ptr<ResourceTable> table, const Source& source,
             bool privateRef = false;
             if (ResourceParser::tryParseReference(iter->value, &refName, &create, &privateRef) &&
                     create) {
-                table->addResource(refName, {}, source.line(pullParser.getLineNumber()),
+                table->addResource(refName, {}, source.line(parser.getLineNumber()),
                                    util::make_unique<Id>());
             }
         }
@@ -353,8 +353,14 @@ bool compileXml(std::shared_ptr<Resolver> resolver, const CompileItem& item,
         return false;
     }
 
-    BigBuffer outBuffer(1024);
+    std::shared_ptr<BindingXmlPullParser> binding;
     std::shared_ptr<XmlPullParser> xmlParser = std::make_shared<SourceXmlPullParser>(in);
+    if (item.name.type == ResourceType::kLayout) {
+        binding = std::make_shared<BindingXmlPullParser>(xmlParser);
+        xmlParser = binding;
+    }
+
+    BigBuffer outBuffer(1024);
     XmlFlattener flattener(resolver);
 
     // We strip attributes that do not belong in this version of the resource.
@@ -382,6 +388,22 @@ bool compileXml(std::shared_ptr<Resolver> resolver, const CompileItem& item,
     if (!util::writeAll(out, outBuffer)) {
         Logger::error(outputSource) << strerror(errno) << std::endl;
         return false;
+    }
+
+    if (binding) {
+        // We generated a binding xml file, write it out beside the output file.
+        Source bindingOutput = outputSource;
+        bindingOutput.path += ".bind.xml";
+        std::ofstream bout(bindingOutput.path);
+        if (!bout) {
+            Logger::error(bindingOutput) << strerror(errno) << std::endl;
+            return false;
+        }
+
+        if (!binding->writeToFile(bout)) {
+            Logger::error(bindingOutput) << strerror(errno) << std::endl;
+            return false;
+        }
     }
     return true;
 }
@@ -996,7 +1018,7 @@ int main(int argc, char** argv) {
     // Load the included libraries.
     std::shared_ptr<android::AssetManager> libraries = std::make_shared<android::AssetManager>();
     for (const Source& source : options.libraries) {
-        if (util::stringEndsWith(source.path, ".arsc")) {
+        if (util::stringEndsWith<char>(source.path, ".arsc")) {
             // We'll process these last so as to avoid a cookie issue.
             continue;
         }
@@ -1009,7 +1031,7 @@ int main(int argc, char** argv) {
     }
 
     for (const Source& source : options.libraries) {
-        if (!util::stringEndsWith(source.path, ".arsc")) {
+        if (!util::stringEndsWith<char>(source.path, ".arsc")) {
             // We've already processed this.
             continue;
         }

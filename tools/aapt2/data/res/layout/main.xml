@@ -3,9 +3,13 @@
     android:id="@+id/view"
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
+
+    <variable name="user" type="com.android.User" />
+
     <View xmlns:app="http://schemas.android.com/apk/res-auto"
         android:id="@+id/me"
         android:layout_width="1dp"
+        android:text="@{user.name}"
         android:layout_height="match_parent"
         app:layout_width="false"
         app:flags="complex|weak"

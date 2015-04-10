@@ -34,9 +34,26 @@ std::vector<std::string> split(const StringPiece& str, char sep);
 std::vector<std::string> splitAndLowercase(const StringPiece& str, char sep);
 
 /**
+ * Returns true if the string starts with prefix.
+ */
+template <typename T>
+bool stringStartsWith(const BasicStringPiece<T>& str, const BasicStringPiece<T>& prefix) {
+    if (str.size() < prefix.size()) {
+        return false;
+    }
+    return str.substr(0, prefix.size()) == prefix;
+}
+
+/**
  * Returns true if the string ends with suffix.
  */
-bool stringEndsWith(const StringPiece& str, const StringPiece& suffix);
+template <typename T>
+bool stringEndsWith(const BasicStringPiece<T>& str, const BasicStringPiece<T>& suffix) {
+    if (str.size() < suffix.size()) {
+        return false;
+    }
+    return str.substr(str.size() - suffix.size(), suffix.size()) == suffix;
+}
 
 /**
  * Creates a new StringPiece16 that points to a substring
