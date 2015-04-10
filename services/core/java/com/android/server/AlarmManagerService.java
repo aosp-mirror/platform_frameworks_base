@@ -99,6 +99,7 @@ class AlarmManagerService extends SystemService {
     static final boolean DEBUG_BATCH = localLOGV || false;
     static final boolean DEBUG_VALIDATE = localLOGV || false;
     static final boolean DEBUG_ALARM_CLOCK = localLOGV || false;
+    static final boolean RECORD_ALARMS_IN_HISTORY = true;
     static final int ALARM_EVENT = 1;
     static final String TIMEZONE_PROPERTY = "persist.sys.timezone";
 
@@ -1345,15 +1346,6 @@ class AlarmManagerService extends SystemService {
     }
 
     void rescheduleKernelAlarmsLocked() {
-        if (mPendingIdleUntil != null) {
-            // If we have a pending "idle until" alarm, we will just blindly wait until
-            // it is time for that alarm to go off.  We don't want to wake up for any
-            // other reasons.
-            mNextWakeup = mNextNonWakeup = mPendingIdleUntil.whenElapsed;
-            setLocked(ELAPSED_REALTIME_WAKEUP, mNextWakeup);
-            setLocked(ELAPSED_REALTIME, mNextNonWakeup);
-            return;
-        }
         // Schedule the next upcoming wakeup alarm.  If there is a deliverable batch
         // prior to that which contains no wakeups, we schedule that as well.
         long nextNonWakeup = 0;
@@ -1574,13 +1566,6 @@ class AlarmManagerService extends SystemService {
     boolean triggerAlarmsLocked(ArrayList<Alarm> triggerList, final long nowELAPSED,
             final long nowRTC) {
         boolean hasWakeup = false;
-        if (mPendingIdleUntil != null) {
-            // If we have a pending "idle until" alarm, don't trigger any alarms
-            // until we are past the idle period.
-            if (nowELAPSED < mPendingIdleUntil.whenElapsed) {
-                return false;
-            }
-        }
         // batches are temporally sorted, so we need only pull from the
         // start of the list until we either empty it or hit a batch
         // that is not yet deliverable
@@ -1816,6 +1801,17 @@ class AlarmManagerService extends SystemService {
                 if (localLOGV) {
                     Slog.v(TAG, "sending alarm " + alarm);
                 }
+                if (RECORD_ALARMS_IN_HISTORY) {
+                    if (alarm.workSource != null && alarm.workSource.size() > 0) {
+                        for (int wi=0; wi<alarm.workSource.size(); wi++) {
+                            ActivityManagerNative.noteAlarmStart(
+                                    alarm.operation, alarm.workSource.get(wi), alarm.tag);
+                        }
+                    } else {
+                        ActivityManagerNative.noteAlarmStart(
+                                alarm.operation, -1, alarm.tag);
+                    }
+                }
                 alarm.operation.send(getContext(), 0,
                         mBackgroundIntent.putExtra(
                                 Intent.EXTRA_ALARM_COUNT, alarm.count),
@@ -1856,11 +1852,11 @@ class AlarmManagerService extends SystemService {
                         for (int wi=0; wi<alarm.workSource.size(); wi++) {
                             ActivityManagerNative.noteWakeupAlarm(
                                     alarm.operation, alarm.workSource.get(wi),
-                                    alarm.workSource.getName(wi));
+                                    alarm.workSource.getName(wi), alarm.tag);
                         }
                     } else {
                         ActivityManagerNative.noteWakeupAlarm(
-                                alarm.operation, -1, null);
+                                alarm.operation, -1, null, alarm.tag);
                     }
                 }
             } catch (PendingIntent.CanceledException e) {
@@ -2221,6 +2217,17 @@ class AlarmManagerService extends SystemService {
                     if (fs.nesting <= 0) {
                         fs.nesting = 0;
                         fs.aggregateTime += nowELAPSED - fs.startTime;
+                    }
+                    if (RECORD_ALARMS_IN_HISTORY) {
+                        if (inflight.mWorkSource != null && inflight.mWorkSource.size() > 0) {
+                            for (int wi=0; wi<inflight.mWorkSource.size(); wi++) {
+                                ActivityManagerNative.noteAlarmFinish(
+                                        pi, inflight.mWorkSource.get(wi), inflight.mTag);
+                            }
+                        } else {
+                            ActivityManagerNative.noteAlarmFinish(
+                                    pi, -1, inflight.mTag);
+                        }
                     }
                 } else {
                     mLog.w("No in-flight alarm for " + pi + " " + intent);

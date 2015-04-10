@@ -20,8 +20,10 @@ import android.app.AssistStructure;
 import android.app.Dialog;
 import android.app.Instrumentation;
 import android.app.VoiceInteractor;
+import android.content.ComponentCallbacks2;
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.content.res.TypedArray;
 import android.graphics.Bitmap;
 import android.graphics.Rect;
@@ -65,7 +67,8 @@ import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
  * when done.  It can also initiate voice interactions with applications by calling
  * {@link #startVoiceActivity}</p>.
  */
-public abstract class VoiceInteractionSession implements KeyEvent.Callback {
+public abstract class VoiceInteractionSession implements KeyEvent.Callback,
+        ComponentCallbacks2 {
     static final String TAG = "VoiceInteractionSession";
     static final boolean DEBUG = true;
 
@@ -853,6 +856,18 @@ public abstract class VoiceInteractionSession implements KeyEvent.Callback {
      */
     public void onCloseSystemDialogs() {
         hide();
+    }
+
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+    }
+
+    @Override
+    public void onLowMemory() {
+    }
+
+    @Override
+    public void onTrimMemory(int level) {
     }
 
     /**

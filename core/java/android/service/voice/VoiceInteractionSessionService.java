@@ -19,6 +19,7 @@ package android.service.voice;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.Looper;
@@ -74,6 +75,30 @@ public abstract class VoiceInteractionSessionService extends Service {
     @Override
     public IBinder onBind(Intent intent) {
         return mInterface.asBinder();
+    }
+
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        if (mSession != null) {
+            mSession.onConfigurationChanged(newConfig);
+        }
+    }
+
+    @Override
+    public void onLowMemory() {
+        super.onLowMemory();
+        if (mSession != null) {
+            mSession.onLowMemory();
+        }
+    }
+
+    @Override
+    public void onTrimMemory(int level) {
+        super.onTrimMemory(level);
+        if (mSession != null) {
+            mSession.onTrimMemory(level);
+        }
     }
 
     void doNewSession(IBinder token, Bundle args, int startFlags) {

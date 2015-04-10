@@ -42,7 +42,6 @@ import android.app.IAppTask;
 import android.app.ITaskStackListener;
 import android.app.ProfilerInfo;
 import android.app.usage.UsageEvents;
-import android.app.usage.UsageStats;
 import android.app.usage.UsageStatsManagerInternal;
 import android.appwidget.AppWidgetManager;
 import android.content.res.Resources;
@@ -3447,6 +3446,35 @@ public final class ActivityManagerService extends ActivityManagerNative
         synchronized (this) {
             mCompatModePackages.setPackageAskCompatModeLocked(packageName, ask);
         }
+    }
+
+    @Override
+    public int getPackageProcessState(String packageName) {
+        int procState = ActivityManager.PROCESS_STATE_NONEXISTENT;
+        synchronized (this) {
+            for (int i=mLruProcesses.size()-1; i>=0; i--) {
+                final ProcessRecord proc = mLruProcesses.get(i);
+                if (procState == ActivityManager.PROCESS_STATE_NONEXISTENT
+                        || procState > proc.setProcState) {
+                    boolean found = false;
+                    for (int j=proc.pkgList.size()-1; j>=0 && !found; j--) {
+                        if (proc.pkgList.keyAt(j).equals(packageName)) {
+                            procState = proc.setProcState;
+                            found = true;
+                        }
+                    }
+                    if (proc.pkgDeps != null && !found) {
+                        for (int j=proc.pkgDeps.size()-1; j>=0; j--) {
+                            if (proc.pkgDeps.valueAt(j).equals(packageName)) {
+                                procState = proc.setProcState;
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return procState;
     }
 
     private void dispatchProcessesChanged() {
@@ -10501,15 +10529,11 @@ public final class ActivityManagerService extends ActivityManagerNative
                 Context.WINDOW_SERVICE)).addView(v, lp);
     }
 
-    public void noteWakeupAlarm(IIntentSender sender, int sourceUid, String sourcePkg) {
+    public void noteWakeupAlarm(IIntentSender sender, int sourceUid, String sourcePkg, String tag) {
         if (!(sender instanceof PendingIntentRecord)) {
             return;
         }
         final PendingIntentRecord rec = (PendingIntentRecord)sender;
-        final String tag;
-        synchronized (this) {
-            tag = getTagForIntentSenderLocked(rec, "*walarm*:");
-        }
         final BatteryStatsImpl stats = mBatteryStatsService.getActiveStatistics();
         synchronized (stats) {
             if (mBatteryStatsService.isOnBattery()) {
@@ -10521,6 +10545,34 @@ public final class ActivityManagerService extends ActivityManagerNative
                             sourcePkg != null ? sourcePkg : rec.key.packageName);
                 pkg.noteWakeupAlarmLocked(tag);
             }
+        }
+    }
+
+    public void noteAlarmStart(IIntentSender sender, int sourceUid, String tag) {
+        if (!(sender instanceof PendingIntentRecord)) {
+            return;
+        }
+        final PendingIntentRecord rec = (PendingIntentRecord)sender;
+        final BatteryStatsImpl stats = mBatteryStatsService.getActiveStatistics();
+        synchronized (stats) {
+            mBatteryStatsService.enforceCallingPermission();
+            int MY_UID = Binder.getCallingUid();
+            int uid = rec.uid == MY_UID ? Process.SYSTEM_UID : rec.uid;
+            mBatteryStatsService.noteAlarmStart(tag, sourceUid >= 0 ? sourceUid : uid);
+        }
+    }
+
+    public void noteAlarmFinish(IIntentSender sender, int sourceUid, String tag) {
+        if (!(sender instanceof PendingIntentRecord)) {
+            return;
+        }
+        final PendingIntentRecord rec = (PendingIntentRecord)sender;
+        final BatteryStatsImpl stats = mBatteryStatsService.getActiveStatistics();
+        synchronized (stats) {
+            mBatteryStatsService.enforceCallingPermission();
+            int MY_UID = Binder.getCallingUid();
+            int uid = rec.uid == MY_UID ? Process.SYSTEM_UID : rec.uid;
+            mBatteryStatsService.noteAlarmFinish(tag, sourceUid >= 0 ? sourceUid : uid);
         }
     }
 

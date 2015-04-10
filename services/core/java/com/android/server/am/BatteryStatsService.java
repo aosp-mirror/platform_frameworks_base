@@ -315,6 +315,20 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         }
     }
 
+    public void noteAlarmStart(String name, int uid) {
+        enforceCallingPermission();
+        synchronized (mStats) {
+            mStats.noteAlarmStartLocked(name, uid);
+        }
+    }
+
+    public void noteAlarmFinish(String name, int uid) {
+        enforceCallingPermission();
+        synchronized (mStats) {
+            mStats.noteAlarmFinishLocked(name, uid);
+        }
+    }
+
     public void noteStartWakelock(int uid, int pid, String name, String historyName, int type,
             boolean unimportantForLogging) {
         enforceCallingPermission();
@@ -884,7 +898,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         pw.println("    Enable or disable a running option.  Option state is not saved across boots.");
         pw.println("    Options are:");
         pw.println("      full-history: include additional detailed events in battery history:");
-        pw.println("          wake_lock_in and proc events");
+        pw.println("          wake_lock_in, alarms and proc events");
         pw.println("      no-auto-reset: don't automatically reset stats when unplugged");
     }
 

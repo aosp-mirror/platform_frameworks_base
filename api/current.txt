@@ -3555,6 +3555,7 @@ package android.app {
     method public int getMemoryClass();
     method public void getMemoryInfo(android.app.ActivityManager.MemoryInfo);
     method public static void getMyMemoryState(android.app.ActivityManager.RunningAppProcessInfo);
+    method public int getPackageImportance(java.lang.String);
     method public android.os.Debug.MemoryInfo[] getProcessMemoryInfo(int[]);
     method public java.util.List<android.app.ActivityManager.ProcessErrorStateInfo> getProcessesInErrorState();
     method public deprecated java.util.List<android.app.ActivityManager.RecentTaskInfo> getRecentTasks(int, int) throws java.lang.SecurityException;
@@ -3647,9 +3648,11 @@ package android.app {
     field public static final int IMPORTANCE_BACKGROUND = 400; // 0x190
     field public static final int IMPORTANCE_EMPTY = 500; // 0x1f4
     field public static final int IMPORTANCE_FOREGROUND = 100; // 0x64
+    field public static final int IMPORTANCE_FOREGROUND_SERVICE = 125; // 0x7d
     field public static final int IMPORTANCE_GONE = 1000; // 0x3e8
     field public static final int IMPORTANCE_PERCEPTIBLE = 130; // 0x82
     field public static final int IMPORTANCE_SERVICE = 300; // 0x12c
+    field public static final int IMPORTANCE_TOP_SLEEPING = 150; // 0x96
     field public static final int IMPORTANCE_VISIBLE = 200; // 0xc8
     field public static final int REASON_PROVIDER_IN_USE = 1; // 0x1
     field public static final int REASON_SERVICE_IN_USE = 2; // 0x2
@@ -28640,7 +28643,7 @@ package android.service.voice {
     field public static final int START_WITH_SCREENSHOT = 2; // 0x2
   }
 
-  public abstract class VoiceInteractionSession implements android.view.KeyEvent.Callback {
+  public abstract class VoiceInteractionSession implements android.content.ComponentCallbacks2 android.view.KeyEvent.Callback {
     ctor public VoiceInteractionSession(android.content.Context);
     ctor public VoiceInteractionSession(android.content.Context, android.os.Handler);
     method public void finish();
@@ -28656,6 +28659,7 @@ package android.service.voice {
     method public abstract void onCommand(android.service.voice.VoiceInteractionSession.Caller, android.service.voice.VoiceInteractionSession.Request, java.lang.String, android.os.Bundle);
     method public void onCompleteVoice(android.service.voice.VoiceInteractionSession.Caller, android.service.voice.VoiceInteractionSession.Request, java.lang.CharSequence, android.os.Bundle);
     method public void onComputeInsets(android.service.voice.VoiceInteractionSession.Insets);
+    method public void onConfigurationChanged(android.content.res.Configuration);
     method public abstract void onConfirm(android.service.voice.VoiceInteractionSession.Caller, android.service.voice.VoiceInteractionSession.Request, java.lang.CharSequence, android.os.Bundle);
     method public void onCreate(android.os.Bundle, int);
     method public android.view.View onCreateContentView();
@@ -28668,10 +28672,12 @@ package android.service.voice {
     method public boolean onKeyLongPress(int, android.view.KeyEvent);
     method public boolean onKeyMultiple(int, int, android.view.KeyEvent);
     method public boolean onKeyUp(int, android.view.KeyEvent);
+    method public void onLowMemory();
     method public abstract void onPickOption(android.service.voice.VoiceInteractionSession.Caller, android.service.voice.VoiceInteractionSession.Request, java.lang.CharSequence, android.app.VoiceInteractor.PickOptionRequest.Option[], android.os.Bundle);
     method public void onShow(android.os.Bundle, int);
     method public void onTaskFinished(android.content.Intent, int);
     method public void onTaskStarted(android.content.Intent, int);
+    method public void onTrimMemory(int);
     method public void setContentView(android.view.View);
     method public void setKeepAwake(boolean);
     method public void setTheme(int);
