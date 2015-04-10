@@ -9124,6 +9124,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
     void replaceSelectionWithText(CharSequence text) {
         ((Editable) mText).replace(getSelectionStart(), getSelectionEnd(), text);
+        mEditor.startSelectionActionModeWithSelection();
     }
 
     /**

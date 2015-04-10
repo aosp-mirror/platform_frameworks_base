@@ -1008,14 +1008,14 @@ public class Editor {
                 stopSelectionActionMode();
             } else {
                 stopSelectionActionMode();
-                startSelectionActionModeWithSelection();
+                startSelectionActionModeWithSelectionAndStartDrag();
             }
             handled = true;
         }
 
         // Start a new selection
         if (!handled) {
-            handled = startSelectionActionModeWithSelection();
+            handled = startSelectionActionModeWithSelectionAndStartDrag();
         }
 
         return handled;
@@ -1680,9 +1680,34 @@ public class Editor {
     }
 
     /**
+     * Starts a Selection Action Mode with the current selection and enters drag mode. This should
+     * be used whenever the mode is started from a touch event.
+     *
+     * @return true if the selection mode was actually started.
+     */
+    private boolean startSelectionActionModeWithSelectionAndStartDrag() {
+        boolean selectionStarted = startSelectionActionModeWithSelectionInternal();
+        if (selectionStarted) {
+            getSelectionController().enterDrag();
+        }
+        return selectionStarted;
+    }
+
+    /**
+     * Starts a Selection Action Mode with the current selection and ensures the selection handles
+     * are shown. This should be used when the mode is started from a non-touch event.
+     *
      * @return true if the selection mode was actually started.
      */
     boolean startSelectionActionModeWithSelection() {
+        boolean selectionStarted = startSelectionActionModeWithSelectionInternal();
+        if (selectionStarted) {
+            getSelectionController().show();
+        }
+        return selectionStarted;
+    }
+
+    private boolean startSelectionActionModeWithSelectionInternal() {
         if (mSelectionActionMode != null) {
             // Selection action mode is already started
             mSelectionActionMode.invalidate();
@@ -1720,10 +1745,6 @@ public class Editor {
             if (imm != null) {
                 imm.showSoftInput(mTextView, 0, null);
             }
-        }
-
-        if (selectionStarted) {
-            getSelectionController().enterDrag();
         }
         return selectionStarted;
     }
@@ -3093,6 +3114,7 @@ public class Editor {
             if (item.getIntent() != null
                     && item.getIntent().getAction().equals(Intent.ACTION_PROCESS_TEXT)) {
                 item.getIntent().putExtra(Intent.EXTRA_PROCESS_TEXT, mTextView.getSelectedText());
+                mPreserveDetachedSelection = true;
                 mTextView.startActivityForResult(
                         item.getIntent(), TextView.PROCESS_TEXT_REQUEST_CODE);
                 return true;
@@ -4239,7 +4261,7 @@ public class Editor {
                             boolean stayedInArea = distanceSquared < doubleTapSlop * doubleTapSlop;
 
                             if (stayedInArea && isPositionOnText(x, y)) {
-                                startSelectionActionModeWithSelection();
+                                startSelectionActionModeWithSelectionAndStartDrag();
                                 mDiscardNextActionUp = true;
                             }
                         }
