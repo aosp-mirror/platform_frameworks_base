@@ -3108,6 +3108,17 @@ public class Editor {
                         mTextView.getSelectionStart(), mTextView.getSelectionEnd(), mSelectionPath);
                 mSelectionPath.computeBounds(mSelectionBounds, true);
                 mSelectionBounds.bottom += mSelectionHandleHeight;
+            } else if (mCursorCount == 2) {
+                // We have a split cursor. In this case, we take the rectangle that includes both
+                // parts of the cursor to ensure we don't obscure either of them.
+                Rect firstCursorBounds = mCursorDrawable[0].getBounds();
+                Rect secondCursorBounds = mCursorDrawable[1].getBounds();
+                mSelectionBounds.set(
+                        Math.min(firstCursorBounds.left, secondCursorBounds.left),
+                        Math.min(firstCursorBounds.top, secondCursorBounds.top),
+                        Math.max(firstCursorBounds.right, secondCursorBounds.right),
+                        Math.max(firstCursorBounds.bottom, secondCursorBounds.bottom)
+                            + mInsertionHandleHeight);
             } else {
                 // We have a single cursor.
                 int line = mTextView.getLayout().getLineForOffset(mTextView.getSelectionStart());
