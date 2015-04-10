@@ -456,6 +456,7 @@ struct AaptOptions {
         Collect,
         Link,
         Compile,
+        Manifest
     };
 
     // The phase to process.
@@ -584,6 +585,9 @@ static AaptOptions prepareArgs(int argc, char** argv) {
     } else if (command == "compile") {
         options.phase = AaptOptions::Phase::Compile;
         outputDescription = "place output in directory";
+    } else if (command == "manifest") {
+        options.phase = AaptOptions::Phase::Manifest;
+        outputDescription = "place AndroidManifest.xml in directory";
     } else {
         std::cerr << "invalid command '" << command << "'." << std::endl;
         exit(1);
@@ -611,10 +615,12 @@ static AaptOptions prepareArgs(int argc, char** argv) {
                 });
 
     } else {
-        flag::requiredFlag("--package", "Android package name",
-                [&options](const StringPiece& arg) {
-                    options.appInfo.package = util::utf8ToUtf16(arg);
-                });
+        if (options.phase != AaptOptions::Phase::Manifest) {
+            flag::requiredFlag("--package", "Android package name",
+                    [&options](const StringPiece& arg) {
+                        options.appInfo.package = util::utf8ToUtf16(arg);
+                    });
+        }
 
         if (options.phase != AaptOptions::Phase::Collect) {
             flag::optionalFlag("-I", "add an Android APK to link against",
@@ -657,6 +663,10 @@ static AaptOptions prepareArgs(int argc, char** argv) {
     } else if (options.phase == AaptOptions::Phase::Link) {
         for (const std::string& arg : flag::getArgs()) {
             options.linkFiles.push_back(Source{ arg });
+        }
+    } else if (options.phase == AaptOptions::Phase::Manifest) {
+        if (!flag::getArgs().empty()) {
+            options.manifest = Source{ flag::getArgs()[0] };
         }
     }
     return options;
