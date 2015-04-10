@@ -28,6 +28,7 @@ import java.util.Date;
 public class KeyStoreKeySpec implements KeySpec {
     private final String mKeystoreAlias;
     private final int mKeySize;
+    private final boolean mTeeBacked;
     private final @KeyStoreKeyCharacteristics.OriginEnum int mOrigin;
     private final Date mKeyValidityStart;
     private final Date mKeyValidityForOriginationEnd;
@@ -46,6 +47,7 @@ public class KeyStoreKeySpec implements KeySpec {
      * @hide
      */
     KeyStoreKeySpec(String keystoreKeyAlias,
+            boolean teeBacked,
             @KeyStoreKeyCharacteristics.OriginEnum int origin,
             int keySize,
             Date keyValidityStart,
@@ -61,6 +63,7 @@ public class KeyStoreKeySpec implements KeySpec {
             int userAuthenticationValidityDurationSeconds,
             boolean invalidatedOnNewFingerprintEnrolled) {
         mKeystoreAlias = keystoreKeyAlias;
+        mTeeBacked = teeBacked;
         mOrigin = origin;
         mKeySize = keySize;
         mKeyValidityStart = keyValidityStart;
@@ -82,6 +85,14 @@ public class KeyStoreKeySpec implements KeySpec {
      */
     public String getKeystoreAlias() {
         return mKeystoreAlias;
+    }
+
+    /**
+     * Returns {@code true} if the key is TEE-backed. Key material of TEE-backed keys is available
+     * in plaintext only inside the TEE.
+     */
+    public boolean isTeeBacked() {
+        return mTeeBacked;
     }
 
     /**

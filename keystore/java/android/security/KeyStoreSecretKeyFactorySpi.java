@@ -70,7 +70,8 @@ public class KeyStoreSecretKeyFactorySpi extends SecretKeyFactorySpi {
                     + " Keystore error: " + errorCode);
         }
 
-        @KeyStoreKeyCharacteristics.OriginEnum Integer origin;
+        boolean teeBacked;
+        @KeyStoreKeyCharacteristics.OriginEnum int origin;
         int keySize;
         @KeyStoreKeyConstraints.PurposeEnum int purposes;
         @KeyStoreKeyConstraints.AlgorithmEnum int algorithm;
@@ -80,11 +81,17 @@ public class KeyStoreSecretKeyFactorySpi extends SecretKeyFactorySpi {
         @KeyStoreKeyConstraints.UserAuthenticatorEnum int userAuthenticators;
         @KeyStoreKeyConstraints.UserAuthenticatorEnum int teeEnforcedUserAuthenticators;
         try {
-            origin = KeymasterUtils.getInt(keyCharacteristics, KeymasterDefs.KM_TAG_ORIGIN);
-            if (origin == null) {
+            if (keyCharacteristics.hwEnforced.containsTag(KeymasterDefs.KM_TAG_ORIGIN)) {
+                teeBacked = true;
+                origin = KeyStoreKeyCharacteristics.Origin.fromKeymaster(
+                        keyCharacteristics.hwEnforced.getInt(KeymasterDefs.KM_TAG_ORIGIN, -1));
+            } else if (keyCharacteristics.swEnforced.containsTag(KeymasterDefs.KM_TAG_ORIGIN)) {
+                teeBacked = false;
+                origin = KeyStoreKeyCharacteristics.Origin.fromKeymaster(
+                        keyCharacteristics.swEnforced.getInt(KeymasterDefs.KM_TAG_ORIGIN, -1));
+            } else {
                 throw new InvalidKeySpecException("Key origin not available");
             }
-            origin = KeyStoreKeyCharacteristics.Origin.fromKeymaster(origin);
             Integer keySizeInteger =
                     KeymasterUtils.getInt(keyCharacteristics, KeymasterDefs.KM_TAG_KEY_SIZE);
             if (keySizeInteger == null) {
@@ -147,6 +154,7 @@ public class KeyStoreSecretKeyFactorySpi extends SecretKeyFactorySpi {
         boolean invalidatedOnNewFingerprintEnrolled = false;
 
         return new KeyStoreKeySpec(entryAlias,
+                teeBacked,
                 origin,
                 keySize,
                 keyValidityStart,
