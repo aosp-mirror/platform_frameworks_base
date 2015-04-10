@@ -23,6 +23,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 
+import com.android.systemui.Prefs;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.phone.SystemUIDialog;
 import com.android.systemui.statusbar.policy.Listenable;
@@ -32,14 +33,15 @@ public class UsageTracker implements Listenable {
 
     private final Context mContext;
     private final long mTimeToShowTile;
-    private final String mPrefKey;
+    @Prefs.Key private final String mPrefKey;
     private final String mResetAction;
 
     private boolean mRegistered;
 
-    public UsageTracker(Context context, Class<?> tile, int timeoutResource) {
+    public UsageTracker(Context context, @Prefs.Key String prefKey, Class<?> tile,
+            int timeoutResource) {
         mContext = context;
-        mPrefKey = tile.getSimpleName() + "LastUsed";
+        mPrefKey = prefKey;
         mTimeToShowTile = MILLIS_PER_DAY * mContext.getResources().getInteger(timeoutResource);
         mResetAction = "com.android.systemui.qs." + tile.getSimpleName() + ".usage_reset";
     }
@@ -56,16 +58,16 @@ public class UsageTracker implements Listenable {
     }
 
     public boolean isRecentlyUsed() {
-        long lastUsed = getSharedPrefs().getLong(mPrefKey, 0);
+        long lastUsed = Prefs.getLong(mContext, mPrefKey, 0L /* defaultValue */);
         return (System.currentTimeMillis() - lastUsed) < mTimeToShowTile;
     }
 
     public void trackUsage() {
-        getSharedPrefs().edit().putLong(mPrefKey, System.currentTimeMillis()).commit();
+        Prefs.putLong(mContext, mPrefKey, System.currentTimeMillis());
     }
 
     public void reset() {
-        getSharedPrefs().edit().remove(mPrefKey).commit();
+        Prefs.remove(mContext, mPrefKey);
     }
 
     public void showResetConfirmation(String title, final Runnable onConfirmed) {
@@ -85,10 +87,6 @@ public class UsageTracker implements Listenable {
         });
         d.setCanceledOnTouchOutside(true);
         d.show();
-    }
-
-    private SharedPreferences getSharedPrefs() {
-        return mContext.getSharedPreferences(mContext.getPackageName(), 0);
     }
 
     private BroadcastReceiver mReceiver = new BroadcastReceiver() {

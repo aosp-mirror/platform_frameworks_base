@@ -20,6 +20,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 
+import com.android.systemui.Prefs;
 import com.android.systemui.R;
 import com.android.systemui.qs.UsageTracker;
 import com.android.systemui.qs.QSTile;
@@ -105,7 +106,8 @@ public class HotspotTile extends QSTile<QSTile.BooleanState> {
     }
 
     private static UsageTracker newUsageTracker(Context context) {
-        return new UsageTracker(context, HotspotTile.class, R.integer.days_to_show_hotspot_tile);
+        return new UsageTracker(context, Prefs.Key.HOTSPOT_TILE_LAST_USED, HotspotTile.class,
+                R.integer.days_to_show_hotspot_tile);
     }
 
     private final class Callback implements HotspotController.Callback {

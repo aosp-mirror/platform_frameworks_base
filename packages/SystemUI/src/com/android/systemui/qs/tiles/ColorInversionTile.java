@@ -18,6 +18,7 @@ package com.android.systemui.qs.tiles;
 
 import android.provider.Settings.Secure;
 
+import com.android.systemui.Prefs;
 import com.android.systemui.R;
 import com.android.systemui.qs.QSTile;
 import com.android.systemui.qs.SecureSetting;
@@ -50,7 +51,8 @@ public class ColorInversionTile extends QSTile<QSTile.BooleanState> {
                 }
             }
         };
-        mUsageTracker = new UsageTracker(host.getContext(), ColorInversionTile.class,
+        mUsageTracker = new UsageTracker(host.getContext(),
+                Prefs.Key.COLOR_INVERSION_TILE_LAST_USED, ColorInversionTile.class,
                 R.integer.days_to_show_color_inversion_tile);
         if (mSetting.getValue() != 0 && !mUsageTracker.isRecentlyUsed()) {
             mUsageTracker.trackUsage();

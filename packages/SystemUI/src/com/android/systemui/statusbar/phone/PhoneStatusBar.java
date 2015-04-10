@@ -113,6 +113,7 @@ import com.android.systemui.BatteryMeterView;
 import com.android.systemui.DemoMode;
 import com.android.systemui.EventLogConstants;
 import com.android.systemui.EventLogTags;
+import com.android.systemui.Prefs;
 import com.android.systemui.R;
 import com.android.systemui.doze.DozeHost;
 import com.android.systemui.doze.DozeLog;
@@ -2573,8 +2574,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         }
 
         pw.println("SharedPreferences:");
-        for (Map.Entry<String, ?> entry : mContext.getSharedPreferences(mContext.getPackageName(),
-                Context.MODE_PRIVATE).getAll().entrySet()) {
+        for (Map.Entry<String, ?> entry : Prefs.getAll(mContext).entrySet()) {
             pw.print("  "); pw.print(entry.getKey()); pw.print("="); pw.println(entry.getValue());
         }
     }

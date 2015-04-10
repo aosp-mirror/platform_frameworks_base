@@ -18,7 +18,6 @@ package com.android.systemui.recents;
 
 import android.app.ActivityManager;
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Rect;
@@ -26,6 +25,8 @@ import android.provider.Settings;
 import android.util.DisplayMetrics;
 import android.view.animation.AnimationUtils;
 import android.view.animation.Interpolator;
+
+import com.android.systemui.Prefs;
 import com.android.systemui.R;
 import com.android.systemui.recents.misc.Console;
 import com.android.systemui.recents.misc.SystemServicesProxy;
@@ -177,12 +178,12 @@ public class RecentsConfiguration {
 
     /** Updates the state, given the specified context */
     void update(Context context) {
-        SharedPreferences settings = context.getSharedPreferences(context.getPackageName(), 0);
         Resources res = context.getResources();
         DisplayMetrics dm = res.getDisplayMetrics();
 
         // Debug mode
-        debugModeEnabled = settings.getBoolean(Constants.Values.App.Key_DebugModeEnabled, false);
+        debugModeEnabled = Prefs.getBoolean(context, Prefs.Key.DEBUG_MODE_ENABLED,
+                false /* defaultValue */);
         if (debugModeEnabled) {
             Console.Enabled = true;
         }
@@ -206,7 +207,8 @@ public class RecentsConfiguration {
 
         // Search Bar
         searchBarSpaceHeightPx = res.getDimensionPixelSize(R.dimen.recents_search_bar_space_height);
-        searchBarAppWidgetId = settings.getInt(Constants.Values.App.Key_SearchAppWidgetId, -1);
+        searchBarAppWidgetId = Prefs.getInt(context, Prefs.Key.SEARCH_APP_WIDGET_ID,
+                -1 /* defaultValue */);
 
         // Task stack
         taskStackScrollDuration =
@@ -280,9 +282,7 @@ public class RecentsConfiguration {
     /** Updates the search bar app widget */
     public void updateSearchBarAppWidgetId(Context context, int appWidgetId) {
         searchBarAppWidgetId = appWidgetId;
-        SharedPreferences settings = context.getSharedPreferences(context.getPackageName(), 0);
-        settings.edit().putInt(Constants.Values.App.Key_SearchAppWidgetId,
-                appWidgetId).apply();
+        Prefs.putInt(context, Prefs.Key.SEARCH_APP_WIDGET_ID, appWidgetId);
     }
 
     /** Updates the states that need to be re-read whenever we re-initialize. */
