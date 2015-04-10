@@ -74,10 +74,6 @@ final class BasePermission {
         this.perUser = perUser;
     }
 
-    public boolean hasGids() {
-        return ArrayUtils.isEmpty(gids);
-    }
-
     public int[] computeGids(int userId) {
         if (perUser) {
             final int[] userGids = new int[gids.length];
