@@ -5,6 +5,7 @@
 #include <utils/Log.h>
 #include <ScopedUtfChars.h>
 
+#include "BitmapFactory.h"
 #include "EmojiFactory.h"
 #include "GraphicsJNI.h"
 #include <nativehelper/JNIHelp.h>
@@ -164,14 +165,7 @@ static jobject android_emoji_EmojiFactory_getBitmapFromAndroidPua(
     return NULL;
   }
 
-  SkBitmap *bitmap = new SkBitmap;
-  if (!SkImageDecoder::DecodeMemory(bytes, size, bitmap)) {
-    ALOGE("SkImageDecoder::DecodeMemory() failed.");
-    return NULL;
-  }
-
-  return GraphicsJNI::createBitmap(env, bitmap,
-      GraphicsJNI::kBitmapCreateFlag_Premultiplied, NULL);
+  return decodeBitmap(env, (void*)bytes, size);
 }
 
 static void android_emoji_EmojiFactory_destructor(

@@ -21,4 +21,6 @@ extern jfieldID gOptions_bitmapFieldID;
 
 jstring getMimeTypeString(JNIEnv* env, SkImageDecoder::Format format);
 
+jobject decodeBitmap(JNIEnv* env, void* data, size_t size);
+
 #endif  // _ANDROID_GRAPHICS_BITMAP_FACTORY_H_
