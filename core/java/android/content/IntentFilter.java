@@ -521,14 +521,18 @@ public class IntentFilter implements Parcelable {
      *
      * @return True if the filter handle all HTTP or HTTPS data URI. False otherwise.
      *
-     * This will check if if the Intent action is {@link android.content.Intent#ACTION_VIEW} and
+     * This will check if:
+     *
+     * - either the Intent category is {@link android.content.Intent#CATEGORY_APP_BROWSER}
+     * - either the Intent action is {@link android.content.Intent#ACTION_VIEW} and
      * the Intent category is {@link android.content.Intent#CATEGORY_BROWSABLE} and the Intent
      * data scheme is "http" or "https" and that there is no specific host defined.
      *
      * @hide
      */
     public final boolean handleAllWebDataURI() {
-        return hasWebDataURI() && (countDataAuthorities() == 0);
+        return hasCategory(Intent.CATEGORY_APP_BROWSER) ||
+                (hasWebDataURI() && countDataAuthorities() == 0);
     }
 
     /**
