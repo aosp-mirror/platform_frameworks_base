@@ -18066,9 +18066,8 @@ package android.media.midi {
     method public int describeContents();
     method public int getId();
     method public int getInputPortCount();
-    method public android.media.midi.MidiDeviceInfo.PortInfo getInputPortInfo(int);
     method public int getOutputPortCount();
-    method public android.media.midi.MidiDeviceInfo.PortInfo getOutputPortInfo(int);
+    method public android.media.midi.MidiDeviceInfo.PortInfo[] getPortList();
     method public android.os.Bundle getProperties();
     method public int getType();
     method public boolean isPrivate();

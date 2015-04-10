@@ -469,10 +469,12 @@ public final class UsbAlsaManager {
         if (enabled && mPeripheralMidiDevice == null) {
             Bundle properties = new Bundle();
             Resources r = mContext.getResources();
+            properties.putString(MidiDeviceInfo.PROPERTY_NAME, r.getString(
+                    com.android.internal.R.string.usb_midi_peripheral_name));
             properties.putString(MidiDeviceInfo.PROPERTY_MANUFACTURER, r.getString(
                     com.android.internal.R.string.usb_midi_peripheral_manufacturer_name));
             properties.putString(MidiDeviceInfo.PROPERTY_PRODUCT, r.getString(
-                    com.android.internal.R.string.usb_midi_peripheral_model_name));
+                    com.android.internal.R.string.usb_midi_peripheral_product_name));
             properties.putInt(MidiDeviceInfo.PROPERTY_ALSA_CARD, card);
             properties.putInt(MidiDeviceInfo.PROPERTY_ALSA_DEVICE, device);
             mPeripheralMidiDevice = UsbMidiDevice.create(mContext, properties, card, device);

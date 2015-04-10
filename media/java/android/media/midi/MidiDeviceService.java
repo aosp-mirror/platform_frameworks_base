@@ -91,7 +91,7 @@ abstract public class MidiDeviceService extends Service {
     /**
      * Returns an array of {@link MidiReceiver} for the device's input ports.
      * Subclasses must override this to provide the receivers which will receive
-     * data sent to the device's input ports. An empty array or null should be returned if
+     * data sent to the device's input ports. An empty array should be returned if
      * the device has no input ports.
      * @return array of MidiReceivers
      */
