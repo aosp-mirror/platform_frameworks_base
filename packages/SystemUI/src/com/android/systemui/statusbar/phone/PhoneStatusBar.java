@@ -1992,10 +1992,14 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     }
 
     public void animateCollapsePanels(int flags) {
-        animateCollapsePanels(flags, false /* force */);
+        animateCollapsePanels(flags, false /* force */, false /* delayed */);
     }
 
     public void animateCollapsePanels(int flags, boolean force) {
+        animateCollapsePanels(flags, force, false /* delayed*/);
+    }
+
+    public void animateCollapsePanels(int flags, boolean force, boolean delayed) {
         if (!force &&
                 (mState == StatusBarState.KEYGUARD || mState == StatusBarState.SHADE_LOCKED)) {
             runPostCollapseRunnables();
@@ -2019,7 +2023,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             mStatusBarWindowManager.setStatusBarFocusable(false);
 
             mStatusBarWindow.cancelExpandHelper();
-            mStatusBarView.collapseAllPanels(true);
+            mStatusBarView.collapseAllPanels(true /* animate */, delayed);
         }
     }
 
@@ -2062,7 +2066,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
 
     public void animateCollapseQuickSettings() {
         if (mState == StatusBarState.SHADE) {
-            mStatusBarView.collapseAllPanels(true);
+            mStatusBarView.collapseAllPanels(true, false /* delayed */);
         }
     }
 
@@ -2075,7 +2079,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         }
 
         // Ensure the panel is fully collapsed (just in case; bug 6765842, 7260868)
-        mStatusBarView.collapseAllPanels(/*animate=*/ false);
+        mStatusBarView.collapseAllPanels(/*animate=*/ false, false /* delayed*/);
 
         // reset things to their proper state
         mStackScroller.setVisibility(View.VISIBLE);
@@ -2169,7 +2173,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             mStatusBarWindowState = state;
             if (DEBUG_WINDOW_STATE) Log.d(TAG, "Status bar " + windowStateToString(state));
             if (!showing && mState == StatusBarState.SHADE) {
-                mStatusBarView.collapseAllPanels(false);
+                mStatusBarView.collapseAllPanels(false /* animate */, false /* delayed */);
             }
         }
         if (mNavigationBarView != null
@@ -2643,8 +2647,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                     }
                 });
                 if (dismissShade) {
-                    animateCollapsePanels(
-                            CommandQueue.FLAG_EXCLUDE_RECENTS_PANEL, true /* force */);
+                    animateCollapsePanels(CommandQueue.FLAG_EXCLUDE_RECENTS_PANEL, true /* force */,
+                            true /* delayed*/);
                 }
                 return true;
             }

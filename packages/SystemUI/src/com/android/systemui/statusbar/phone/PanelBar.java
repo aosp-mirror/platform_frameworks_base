@@ -187,11 +187,11 @@ public class PanelBar extends FrameLayout {
                 (fullyOpenedPanel!=null)?" fullyOpened":"", fullyClosed?" fullyClosed":"");
     }
 
-    public void collapseAllPanels(boolean animate) {
+    public void collapseAllPanels(boolean animate, boolean delayed) {
         boolean waiting = false;
         for (PanelView pv : mPanels) {
             if (animate && !pv.isFullyCollapsed()) {
-                pv.collapse(true /* delayed */);
+                pv.collapse(delayed);
                 waiting = true;
             } else {
                 pv.resetViews();

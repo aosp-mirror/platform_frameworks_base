@@ -1628,7 +1628,7 @@ public abstract class BaseStatusBar extends SystemUI implements
 
                     // close the shade if it was open
                     animateCollapsePanels(CommandQueue.FLAG_EXCLUDE_RECENTS_PANEL,
-                            true /* force */);
+                            true /* force */, true /* delayed */);
                     visibilityChanged(false);
 
                     return mIntent != null && mIntent.isActivity();
@@ -1638,6 +1638,9 @@ public abstract class BaseStatusBar extends SystemUI implements
     }
 
     public void animateCollapsePanels(int flags, boolean force) {
+    }
+
+    public void animateCollapsePanels(int flags, boolean force, boolean delayed) {
     }
 
     public void overrideActivityPendingAppTransition(boolean keyguardShowing) {

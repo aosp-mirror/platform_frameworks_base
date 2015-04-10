@@ -149,6 +149,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
     private boolean mScreenOn;
     private SubscriptionManager mSubscriptionManager;
     private List<SubscriptionInfo> mSubscriptionInfo;
+    private boolean mFingerprintDetectionRunning;
 
     private final Handler mHandler = new Handler() {
         @Override
@@ -332,27 +333,35 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
     }
 
     private void handleFingerprintAuthenticated(int fingerId, int groupId) {
-        if (fingerId == 0) return; // not a valid fingerprint
+        if (fingerId == 0) {
+            // not a valid fingerprint
+            handleFingerprintHelp(-1, mContext.getString(R.string.fingerprint_not_recognized));
+            return;
+        }
 
-        final int userId;
         try {
-            userId = ActivityManagerNative.getDefault().getCurrentUser().id;
-        } catch (RemoteException e) {
-            Log.e(TAG, "Failed to get current user id: ", e);
-            return;
-        }
-        if (isFingerprintDisabled(userId)) {
-            Log.d(TAG, "Fingerprint disabled by DPM for userId: " + userId);
-            return;
-        }
-        final ContentResolver res = mContext.getContentResolver();
-        final int ids[] = FingerprintUtils.getFingerprintIdsForUser(res, userId);
-        for (int i = 0; i < ids.length; i++) {
-            // TODO: fix once HAL supports storing group id
-            final boolean isCorrectUser = true || (groupId == userId);
-            if (ids[i] == fingerId && isCorrectUser) {
-                onFingerprintAuthenticated(userId);
+            final int userId;
+            try {
+                userId = ActivityManagerNative.getDefault().getCurrentUser().id;
+            } catch (RemoteException e) {
+                Log.e(TAG, "Failed to get current user id: ", e);
+                return;
             }
+            if (isFingerprintDisabled(userId)) {
+                Log.d(TAG, "Fingerprint disabled by DPM for userId: " + userId);
+                return;
+            }
+            final ContentResolver res = mContext.getContentResolver();
+            final int ids[] = FingerprintUtils.getFingerprintIdsForUser(res, userId);
+            for (int i = 0; i < ids.length; i++) {
+                // TODO: fix once HAL supports storing group id
+                final boolean isCorrectUser = true || (groupId == userId);
+                if (ids[i] == fingerId && isCorrectUser) {
+                    onFingerprintAuthenticated(userId);
+                }
+            }
+        } finally {
+            setFingerprintRunningDetectionRunning(false);
         }
     }
 
@@ -366,6 +375,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
     }
 
     private void handleFingerprintError(int msgId, String errString) {
+        setFingerprintRunningDetectionRunning(false);
         for (int i = 0; i < mCallbacks.size(); i++) {
             KeyguardUpdateMonitorCallback cb = mCallbacks.get(i).get();
             if (cb != null) {
@@ -374,6 +384,21 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
         }
     }
 
+    private void setFingerprintRunningDetectionRunning(boolean running) {
+        if (running != mFingerprintDetectionRunning) {
+            mFingerprintDetectionRunning = running;
+            notifyFingerprintRunningStateChanged();
+        }
+    }
+
+    private void notifyFingerprintRunningStateChanged() {
+        for (int i = 0; i < mCallbacks.size(); i++) {
+            KeyguardUpdateMonitorCallback cb = mCallbacks.get(i).get();
+            if (cb != null) {
+                cb.onFingerprintRunningStateChanged(mFingerprintDetectionRunning);
+            }
+        }
+    }
     private void handleFaceUnlockStateChanged(boolean running, int userId) {
         mUserFaceUnlockRunning.put(userId, running);
         for (int i = 0; i < mCallbacks.size(); i++) {
@@ -386,6 +411,10 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
 
     public boolean isFaceUnlockRunning(int userId) {
         return mUserFaceUnlockRunning.get(userId);
+    }
+
+    public boolean isFingerprintDetectionRunning() {
+        return mFingerprintDetectionRunning;
     }
 
     private boolean isTrustDisabled(int userId) {
@@ -736,13 +765,15 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
     }
 
     private void startListeningForFingerprint(Context context) {
-        if (mFpm != null && mFpm.isHardwareDetected()) {
+        if (mFpm != null && mFpm.isHardwareDetected()
+                && mFpm.getEnrolledFingerprints().size() > 0) {
             if (mFingerprintCancelSignal == null) {
                 mFingerprintCancelSignal = new CancellationSignal();
             } else {
                 mFingerprintCancelSignal.cancel();
             }
             mFpm.authenticate(null, mAuthenticationCallback, mFingerprintCancelSignal, 0);
+            setFingerprintRunningDetectionRunning(true);
         }
     }
 
@@ -750,6 +781,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
         if (mFingerprintCancelSignal != null) {
             mFingerprintCancelSignal.cancel();
         }
+        setFingerprintRunningDetectionRunning(false);
     }
 
     private boolean isDeviceProvisionedInSettingsDb() {

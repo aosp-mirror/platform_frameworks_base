@@ -68,7 +68,6 @@
         android:layout_gravity="bottom|center_horizontal"
         android:src="@drawable/ic_lock_24dp"
         android:scaleType="center"
-        android:tint="#ffffffff"
         android:contentDescription="@string/accessibility_unlock_button" />
 
 </com.android.systemui.statusbar.phone.KeyguardBottomAreaView>
