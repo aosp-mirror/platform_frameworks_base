@@ -990,7 +990,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     launchHomeFromHotKey();
                     break;
                 case SHORT_PRESS_POWER_GO_HOME:
-                    launchHomeFromHotKey();
+                    launchHomeFromHotKey(true /* awakenFromDreams */, false /*respectKeyguard*/);
                     break;
             }
         }
@@ -1068,7 +1068,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                         PowerManager.GO_TO_SLEEP_REASON_SLEEP_BUTTON, 0);
                 break;
             case SHORT_PRESS_SLEEP_GO_TO_SLEEP_AND_GO_HOME:
-                launchHomeFromHotKey(false /* awakenDreams */);
+                launchHomeFromHotKey(false /* awakenDreams */, true /*respectKeyguard*/);
                 mPowerManager.goToSleep(event.getEventTime(),
                         PowerManager.GO_TO_SLEEP_REASON_SLEEP_BUTTON, 0);
                 break;
@@ -3059,50 +3059,56 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
 
     void launchHomeFromHotKey() {
-        launchHomeFromHotKey(true /* awakenFromDreams */);
+        launchHomeFromHotKey(true /* awakenFromDreams */, true /*respectKeyguard*/);
     }
 
     /**
      * A home key -> launch home action was detected.  Take the appropriate action
      * given the situation with the keyguard.
      */
-    void launchHomeFromHotKey(final boolean awakenFromDreams) {
-        if (isKeyguardShowingAndNotOccluded()) {
-            // don't launch home if keyguard showing
-        } else if (!mHideLockScreen && mKeyguardDelegate.isInputRestricted()) {
-            // when in keyguard restricted mode, must first verify unlock
-            // before launching home
-            mKeyguardDelegate.verifyUnlock(new OnKeyguardExitResult() {
-                @Override
-                public void onKeyguardExitResult(boolean success) {
-                    if (success) {
-                        try {
-                            ActivityManagerNative.getDefault().stopAppSwitches();
-                        } catch (RemoteException e) {
+    void launchHomeFromHotKey(final boolean awakenFromDreams, final boolean respectKeyguard) {
+        if (respectKeyguard) {
+            if (isKeyguardShowingAndNotOccluded()) {
+                // don't launch home if keyguard showing
+                return;
+            }
+
+            if (!mHideLockScreen && mKeyguardDelegate.isInputRestricted()) {
+                // when in keyguard restricted mode, must first verify unlock
+                // before launching home
+                mKeyguardDelegate.verifyUnlock(new OnKeyguardExitResult() {
+                    @Override
+                    public void onKeyguardExitResult(boolean success) {
+                        if (success) {
+                            try {
+                                ActivityManagerNative.getDefault().stopAppSwitches();
+                            } catch (RemoteException e) {
+                            }
+                            sendCloseSystemWindows(SYSTEM_DIALOG_REASON_HOME_KEY);
+                            startDockOrHome(true /*fromHomeKey*/, awakenFromDreams);
                         }
-                        sendCloseSystemWindows(SYSTEM_DIALOG_REASON_HOME_KEY);
-                        startDockOrHome(true /*fromHomeKey*/, awakenFromDreams);
                     }
-                }
-            });
+                });
+                return;
+            }
+        }
+
+        // no keyguard stuff to worry about, just launch home!
+        try {
+            ActivityManagerNative.getDefault().stopAppSwitches();
+        } catch (RemoteException e) {
+        }
+        if (mRecentsVisible) {
+            // Hide Recents and notify it to launch Home
+            if (awakenFromDreams) {
+                awakenDreams();
+            }
+            sendCloseSystemWindows(SYSTEM_DIALOG_REASON_HOME_KEY);
+            hideRecentApps(false, true);
         } else {
-            // no keyguard stuff to worry about, just launch home!
-            try {
-                ActivityManagerNative.getDefault().stopAppSwitches();
-            } catch (RemoteException e) {
-            }
-            if (mRecentsVisible) {
-                // Hide Recents and notify it to launch Home
-                if (awakenFromDreams) {
-                    awakenDreams();
-                }
-                sendCloseSystemWindows(SYSTEM_DIALOG_REASON_HOME_KEY);
-                hideRecentApps(false, true);
-            } else {
-                // Otherwise, just launch Home
-                sendCloseSystemWindows(SYSTEM_DIALOG_REASON_HOME_KEY);
-                startDockOrHome(true /*fromHomeKey*/, awakenFromDreams);
-            }
+            // Otherwise, just launch Home
+            sendCloseSystemWindows(SYSTEM_DIALOG_REASON_HOME_KEY);
+            startDockOrHome(true /*fromHomeKey*/, awakenFromDreams);
         }
     }
 
