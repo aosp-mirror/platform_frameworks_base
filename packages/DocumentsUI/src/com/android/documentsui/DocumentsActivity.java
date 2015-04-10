@@ -22,6 +22,7 @@ import static com.android.documentsui.BaseActivity.State.ACTION_GET_CONTENT;
 import static com.android.documentsui.BaseActivity.State.ACTION_MANAGE;
 import static com.android.documentsui.BaseActivity.State.ACTION_OPEN;
 import static com.android.documentsui.BaseActivity.State.ACTION_OPEN_TREE;
+import static com.android.documentsui.BaseActivity.State.ACTION_OPEN_COPY_DESTINATION;
 import static com.android.documentsui.BaseActivity.State.MODE_GRID;
 import static com.android.documentsui.BaseActivity.State.MODE_LIST;
 import static com.android.documentsui.DirectoryFragment.ANIM_DOWN;
@@ -190,7 +191,8 @@ public class DocumentsActivity extends BaseActivity {
             final String mimeType = getIntent().getType();
             final String title = getIntent().getStringExtra(Intent.EXTRA_TITLE);
             SaveFragment.show(getFragmentManager(), mimeType, title);
-        } else if (mState.action == ACTION_OPEN_TREE) {
+        } else if (mState.action == ACTION_OPEN_TREE ||
+                   mState.action == ACTION_OPEN_COPY_DESTINATION) {
             PickFragment.show(getFragmentManager());
         }
 
@@ -199,8 +201,10 @@ public class DocumentsActivity extends BaseActivity {
             moreApps.setComponent(null);
             moreApps.setPackage(null);
             RootsFragment.show(getFragmentManager(), moreApps);
-        } else if (mState.action == ACTION_OPEN
-                || mState.action == ACTION_CREATE || mState.action == ACTION_OPEN_TREE) {
+        } else if (mState.action == ACTION_OPEN ||
+                   mState.action == ACTION_CREATE ||
+                   mState.action == ACTION_OPEN_TREE ||
+                   mState.action == ACTION_OPEN_COPY_DESTINATION) {
             RootsFragment.show(getFragmentManager(), null);
         }
 
@@ -233,6 +237,8 @@ public class DocumentsActivity extends BaseActivity {
             mState.action = ACTION_MANAGE;
         } else if (DocumentsContract.ACTION_BROWSE_ROOT.equals(action)) {
             mState.action = ACTION_BROWSE;
+        } else if (ACTION_OPEN_COPY_DESTINATION_STRING.equals(action)) {
+            mState.action = ACTION_OPEN_COPY_DESTINATION;
         }
 
         if (mState.action == ACTION_OPEN || mState.action == ACTION_GET_CONTENT) {
@@ -408,10 +414,12 @@ public class DocumentsActivity extends BaseActivity {
 
     public void updateActionBar() {
         if (mRootsToolbar != null) {
-            if (mState.action == ACTION_OPEN || mState.action == ACTION_GET_CONTENT
-                    || mState.action == ACTION_OPEN_TREE) {
+            if (mState.action == ACTION_OPEN ||
+                mState.action == ACTION_GET_CONTENT ||
+                mState.action == ACTION_OPEN_TREE) {
                 mRootsToolbar.setTitle(R.string.title_open);
-            } else if (mState.action == ACTION_CREATE) {
+            } else if (mState.action == ACTION_CREATE ||
+                       mState.action == ACTION_OPEN_COPY_DESTINATION) {
                 mRootsToolbar.setTitle(R.string.title_save);
             }
         }
@@ -850,7 +858,9 @@ public class DocumentsActivity extends BaseActivity {
 
         if (cwd == null) {
             // No directory means recents
-            if (mState.action == ACTION_CREATE || mState.action == ACTION_OPEN_TREE) {
+            if (mState.action == ACTION_CREATE ||
+                mState.action == ACTION_OPEN_TREE ||
+                mState.action == ACTION_OPEN_COPY_DESTINATION) {
                 RecentsCreateFragment.show(fm);
             } else {
                 DirectoryFragment.showRecentsOpen(fm, anim);
@@ -879,7 +889,8 @@ public class DocumentsActivity extends BaseActivity {
             }
         }
 
-        if (mState.action == ACTION_OPEN_TREE) {
+        if (mState.action == ACTION_OPEN_TREE ||
+            mState.action == ACTION_OPEN_COPY_DESTINATION) {
             final PickFragment pick = PickFragment.get(fm);
             if (pick != null) {
                 final CharSequence displayName = (mState.stack.size() <= 1) ? root.title
@@ -1062,9 +1073,17 @@ public class DocumentsActivity extends BaseActivity {
 
     @Override
     public void onPickRequested(DocumentInfo pickTarget) {
-        final Uri viaUri = DocumentsContract.buildTreeDocumentUri(pickTarget.authority,
-                pickTarget.documentId);
-        new PickFinishTask(viaUri).executeOnExecutor(getCurrentExecutor());
+        Uri result;
+        if (mState.action == ACTION_OPEN_TREE) {
+            result = DocumentsContract.buildTreeDocumentUri(
+                    pickTarget.authority, pickTarget.documentId);
+        } else if (mState.action == ACTION_OPEN_COPY_DESTINATION) {
+            result = pickTarget.derivedUri;
+        } else {
+            // Should not be reached.
+            throw new IllegalStateException("Invalid mState.action.");
+        }
+        new PickFinishTask(result).executeOnExecutor(getCurrentExecutor());
     }
 
     private void saveStackBlocking() {
@@ -1072,7 +1091,9 @@ public class DocumentsActivity extends BaseActivity {
         final ContentValues values = new ContentValues();
 
         final byte[] rawStack = DurableUtils.writeToArrayOrNull(mState.stack);
-        if (mState.action == ACTION_CREATE || mState.action == ACTION_OPEN_TREE) {
+        if (mState.action == ACTION_CREATE ||
+            mState.action == ACTION_OPEN_TREE ||
+            mState.action == ACTION_OPEN_COPY_DESTINATION) {
             // Remember stack for last create
             values.clear();
             values.put(RecentColumns.KEY, mState.stack.buildKey());
@@ -1105,7 +1126,8 @@ public class DocumentsActivity extends BaseActivity {
 
         if (mState.action == ACTION_GET_CONTENT) {
             intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-        } else if (mState.action == ACTION_OPEN_TREE) {
+        } else if (mState.action == ACTION_OPEN_TREE ||
+                   mState.action == ACTION_OPEN_COPY_DESTINATION) {
             intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION
                     | Intent.FLAG_GRANT_WRITE_URI_PERMISSION
                     | Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION
