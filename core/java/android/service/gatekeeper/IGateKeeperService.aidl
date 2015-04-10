@@ -45,7 +45,21 @@ interface IGateKeeperService {
      * @param enrolledPasswordHandle The handle against which the provided password will be
      *                               verified.
      * @param The plaintext blob to verify against enrolledPassword.
-     * @return true if success, false if failure
+     * @return True if the authentication was successful
      */
-    boolean verify(int uid, in byte[] enrolledPasswordHandle, in byte[] providedPassword);
+    boolean verify(int uid, in byte[] enrolledPasswordHandle,
+            in byte[] providedPassword);
+    /**
+     * Verifies an enrolled handle against a provided, plaintext blob.
+     * @param uid The Android user ID associated to this enrollment
+     * @param challenge a challenge to authenticate agaisnt the device credential. If successful
+     *                  authentication occurs, this value will be written to the returned 
+     *                  authentication attestation.
+     * @param enrolledPasswordHandle The handle against which the provided password will be
+     *                               verified.
+     * @param The plaintext blob to verify against enrolledPassword.
+     * @return an opaque attestation of authentication on success, or null.
+     */
+    byte[] verifyChallenge(int uid, long challenge, in byte[] enrolledPasswordHandle, 
+            in byte[] providedPassword);
 }

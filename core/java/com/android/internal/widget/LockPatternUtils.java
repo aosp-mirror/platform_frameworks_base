@@ -280,6 +280,24 @@ public class LockPatternUtils {
     }
 
     /**
+     * Check to see if a pattern matches the saved pattern.
+     * If pattern matches, return an opaque attestation that the challenge
+     * was verified.
+     *
+     * @param pattern The pattern to check.
+     * @param challenge The challenge to verify against the pattern
+     * @return the attestation that the challenge was verified, or null.
+     */
+    public byte[] verifyPattern(List<LockPatternView.Cell> pattern, long challenge) {
+        final int userId = getCurrentOrCallingUserId();
+        try {
+            return getLockSettings().verifyPattern(patternToString(pattern), challenge, userId);
+        } catch (RemoteException re) {
+            return null;
+        }
+    }
+
+    /**
      * Check to see if a pattern matches the saved pattern.  If no pattern exists,
      * always returns true.
      * @param pattern The pattern to check.
@@ -291,6 +309,24 @@ public class LockPatternUtils {
             return getLockSettings().checkPattern(patternToString(pattern), userId);
         } catch (RemoteException re) {
             return true;
+        }
+    }
+
+    /**
+     * Check to see if a password matches the saved password.
+     * If password matches, return an opaque attestation that the challenge
+     * was verified.
+     *
+     * @param password The password to check.
+     * @param challenge The challenge to verify against the password
+     * @return the attestation that the challenge was verified, or null.
+     */
+    public byte[] verifyPassword(String password, long challenge) {
+        final int userId = getCurrentOrCallingUserId();
+        try {
+            return getLockSettings().verifyPassword(password, challenge, userId);
+        } catch (RemoteException re) {
+            return null;
         }
     }
 
