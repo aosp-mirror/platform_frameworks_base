@@ -41,7 +41,6 @@ public final class BulkCursorToCursorAdaptor extends AbstractWindowedCursor {
     public void initialize(BulkCursorDescriptor d) {
         mBulkCursor = d.cursor;
         mColumns = d.columnNames;
-        mRowIdColumnIndex = DatabaseUtils.findRowIdColumnIndex(mColumns);
         mWantsAllOnMoveCalls = d.wantsAllOnMoveCalls;
         mCount = d.count;
         if (d.window != null) {

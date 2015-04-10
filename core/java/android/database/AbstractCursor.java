@@ -35,32 +35,21 @@ public abstract class AbstractCursor implements CrossProcessCursor {
     private static final String TAG = "Cursor";
 
     /**
-     * @deprecated This is never updated by this class and should not be used
+     * @removed This field should not be used.
      */
-    @Deprecated
     protected HashMap<Long, Map<String, Object>> mUpdatedRows;
 
-    protected int mPos;
-
     /**
-     * This must be set to the index of the row ID column by any
-     * subclass that wishes to support updates.
-     *
-     * @deprecated This field should not be used.
+     * @removed This field should not be used.
      */
-    @Deprecated
     protected int mRowIdColumnIndex;
 
     /**
-     * If {@link #mRowIdColumnIndex} is not -1 this contains contains the value of
-     * the column at {@link #mRowIdColumnIndex} for the current row this cursor is
-     * pointing at.
-     *
-     * @deprecated This field should not be used.
+     * @removed This field should not be used.
      */
-    @Deprecated
     protected Long mCurrentRowID;
 
+    protected int mPos;
     protected boolean mClosed;
     protected ContentResolver mContentResolver;
     private Uri mNotifyUri;
@@ -183,9 +172,6 @@ public abstract class AbstractCursor implements CrossProcessCursor {
     /* Implementation */
     public AbstractCursor() {
         mPos = -1;
-        mRowIdColumnIndex = -1;
-        mCurrentRowID = null;
-        mUpdatedRows = new HashMap<Long, Map<String, Object>>();
     }
 
     public final int getPosition() {
@@ -216,9 +202,6 @@ public abstract class AbstractCursor implements CrossProcessCursor {
             mPos = -1;
         } else {
             mPos = position;
-            if (mRowIdColumnIndex != -1) {
-                mCurrentRowID = Long.valueOf(getLong(mRowIdColumnIndex));
-            }
         }
 
         return result;
