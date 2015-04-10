@@ -2182,8 +2182,9 @@
   <java-symbol type="bool" name="config_LTE_eri_for_network_name" />
   <java-symbol type="bool" name="config_defaultInTouchMode" />
 
+  <java-symbol type="string" name="usb_midi_peripheral_name" />
   <java-symbol type="string" name="usb_midi_peripheral_manufacturer_name" />
-  <java-symbol type="string" name="usb_midi_peripheral_model_name" />
+  <java-symbol type="string" name="usb_midi_peripheral_product_name" />
 
   <java-symbol type="bool" name="allow_stacked_button_bar" />
   <java-symbol type="id" name="spacer" />
