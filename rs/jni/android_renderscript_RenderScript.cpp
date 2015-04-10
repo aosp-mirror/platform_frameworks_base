@@ -689,6 +689,17 @@ nContextSetPriority(JNIEnv *_env, jobject _this, jlong con, jint p)
     rsContextSetPriority((RsContext)con, p);
 }
 
+static void
+nContextSetCacheDir(JNIEnv *_env, jobject _this, jlong con, jstring cacheDir)
+{
+    AutoJavaStringToUTF8 cacheDirUTF(_env, cacheDir);
+
+    if (kLogApi) {
+        ALOGD("ContextSetCacheDir, con(%p), cacheDir(%s)", (RsContext)con, cacheDirUTF.c_str());
+    }
+    rsContextSetCacheDir((RsContext)con, cacheDirUTF.c_str(), cacheDirUTF.length());
+}
+
 
 
 static void
@@ -2312,6 +2323,7 @@ static JNINativeMethod methods[] = {
 {"rsnContextCreateGL",               "(JIIIIIIIIIIIIFI)J",                    (void*)nContextCreateGL },
 {"rsnContextFinish",                 "(J)V",                                  (void*)nContextFinish },
 {"rsnContextSetPriority",            "(JI)V",                                 (void*)nContextSetPriority },
+{"rsnContextSetCacheDir",            "(JLjava/lang/String;)V",                (void*)nContextSetCacheDir },
 {"rsnContextSetSurface",             "(JIILandroid/view/Surface;)V",          (void*)nContextSetSurface },
 {"rsnContextDestroy",                "(J)V",                                  (void*)nContextDestroy },
 {"rsnContextDump",                   "(JI)V",                                 (void*)nContextDump },
