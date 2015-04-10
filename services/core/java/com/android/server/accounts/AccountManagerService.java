@@ -734,12 +734,15 @@ public class AccountManagerService
             throw new IllegalArgumentException("account is null");
         }
         checkAuthenticateAccountsPermission(account);
-
-        final UserAccounts accounts = getUserAccountsForCaller();
         int userId = Binder.getCallingUserHandle().getIdentifier();
         if (!canUserModifyAccounts(userId) || !canUserModifyAccountsForType(userId, account.type)) {
             return false;
         }
+        return updateLastAuthenticatedTime(account);
+    }
+
+    private boolean updateLastAuthenticatedTime(Account account) {
+        final UserAccounts accounts = getUserAccountsForCaller();
         synchronized (accounts.cacheLock) {
             final ContentValues values = new ContentValues();
             values.put(ACCOUNTS_LAST_AUTHENTICATE_TIME_EPOCH_MILLIS, System.currentTimeMillis());
@@ -2022,7 +2025,7 @@ public class AccountManagerService
         try {
             new Session(accounts, response, account.type, expectActivityLaunch,
                     true /* stripAuthTokenFromResult */, account.name,
-                    true /* authDetailsRequired */) {
+                    true /* authDetailsRequired */, true /* updateLastAuthenticatedTime */) {
                 @Override
                 public void run() throws RemoteException {
                     mAuthenticator.confirmCredentials(this, account, options);
@@ -2059,7 +2062,7 @@ public class AccountManagerService
         try {
             new Session(accounts, response, account.type, expectActivityLaunch,
                     true /* stripAuthTokenFromResult */, account.name,
-                    false /* authDetailsRequired */) {
+                    false /* authDetailsRequired */, true /* updateLastCredentialTime */) {
                 @Override
                 public void run() throws RemoteException {
                     mAuthenticator.updateCredentials(this, account, authTokenType, loginOptions);
@@ -2492,6 +2495,11 @@ public class AccountManagerService
         final String mAccountName;
         // Indicates if we need to add auth details(like last credential time)
         final boolean mAuthDetailsRequired;
+        // If set, we need to update the last authenticated time. This is
+        // currently
+        // used on
+        // successful confirming credentials.
+        final boolean mUpdateLastAuthenticatedTime;
 
         public int mNumResults = 0;
         private int mNumRequestContinued = 0;
@@ -2505,6 +2513,13 @@ public class AccountManagerService
         public Session(UserAccounts accounts, IAccountManagerResponse response, String accountType,
                 boolean expectActivityLaunch, boolean stripAuthTokenFromResult, String accountName,
                 boolean authDetailsRequired) {
+            this(accounts, response, accountType, expectActivityLaunch, stripAuthTokenFromResult,
+                    accountName, authDetailsRequired, false /* updateLastAuthenticatedTime */);
+        }
+
+        public Session(UserAccounts accounts, IAccountManagerResponse response, String accountType,
+                boolean expectActivityLaunch, boolean stripAuthTokenFromResult, String accountName,
+                boolean authDetailsRequired, boolean updateLastAuthenticatedTime) {
             super();
             //if (response == null) throw new IllegalArgumentException("response is null");
             if (accountType == null) throw new IllegalArgumentException("accountType is null");
@@ -2516,6 +2531,7 @@ public class AccountManagerService
             mCreationTime = SystemClock.elapsedRealtime();
             mAccountName = accountName;
             mAuthDetailsRequired = authDetailsRequired;
+            mUpdateLastAuthenticatedTime = updateLastAuthenticatedTime;
 
             synchronized (mSessions) {
                 mSessions.put(toString(), this);
@@ -2651,15 +2667,55 @@ public class AccountManagerService
         public void onResult(Bundle result) {
             mNumResults++;
             Intent intent = null;
-            if (result != null && mAuthDetailsRequired) {
-                long lastAuthenticatedTime = DatabaseUtils.longForQuery(
-                        mAccounts.openHelper.getReadableDatabase(),
-                        "select " + ACCOUNTS_LAST_AUTHENTICATE_TIME_EPOCH_MILLIS + " from " +
-                                TABLE_ACCOUNTS + " WHERE " + ACCOUNTS_NAME + "=? AND "
-                                + ACCOUNTS_TYPE + "=?",
-                        new String[]{mAccountName, mAccountType});
-                result.putLong(AccountManager.KEY_LAST_AUTHENTICATE_TIME_MILLIS_EPOCH,
-                        lastAuthenticatedTime);
+            if (result != null) {
+                boolean isSuccessfulConfirmCreds = result.getBoolean(
+                        AccountManager.KEY_BOOLEAN_RESULT, false);
+                boolean isSuccessfulUpdateCreds = 
+                        result.containsKey(AccountManager.KEY_ACCOUNT_NAME)
+                        && result.containsKey(AccountManager.KEY_ACCOUNT_TYPE);
+                // We should only update lastAuthenticated time, if 
+                // mUpdateLastAuthenticatedTime is true and the confirmRequest
+                // or updateRequest was successful
+                boolean needUpdate = mUpdateLastAuthenticatedTime 
+                        && (isSuccessfulConfirmCreds || isSuccessfulUpdateCreds);
+                if (needUpdate || mAuthDetailsRequired) {
+                    boolean accountPresent = isAccountPresentForCaller(mAccountName, mAccountType);
+                    if (needUpdate && accountPresent) {
+                        updateLastAuthenticatedTime(new Account(mAccountName, mAccountType));
+                    }
+                    if (mAuthDetailsRequired) {
+                        long lastAuthenticatedTime = -1;
+                        if (accountPresent) {
+                            lastAuthenticatedTime = DatabaseUtils.longForQuery(
+                                    mAccounts.openHelper.getReadableDatabase(),
+                                    "select " + ACCOUNTS_LAST_AUTHENTICATE_TIME_EPOCH_MILLIS
+                                            + " from " +
+                                            TABLE_ACCOUNTS + " WHERE " + ACCOUNTS_NAME + "=? AND "
+                                            + ACCOUNTS_TYPE + "=?",
+                                    new String[] {
+                                            mAccountName, mAccountType
+                                    });
+                        }
+                        result.putLong(AccountManager.KEY_LAST_AUTHENTICATE_TIME_MILLIS_EPOCH,
+                                lastAuthenticatedTime);
+                    }
+                }
+                if (mAuthDetailsRequired) {
+                    long lastAuthenticatedTime = -1;
+                    if (isAccountPresentForCaller(mAccountName, mAccountType)) {
+                        lastAuthenticatedTime = DatabaseUtils.longForQuery(
+                                mAccounts.openHelper.getReadableDatabase(),
+                                "select " + ACCOUNTS_LAST_AUTHENTICATE_TIME_EPOCH_MILLIS + " from "
+                                        +
+                                        TABLE_ACCOUNTS + " WHERE " + ACCOUNTS_NAME + "=? AND "
+                                        + ACCOUNTS_TYPE + "=?",
+                                new String[] {
+                                        mAccountName, mAccountType
+                                });
+                    }
+                    result.putLong(AccountManager.KEY_LAST_AUTHENTICATE_TIME_MILLIS_EPOCH,
+                            lastAuthenticatedTime);
+                }
             }
             if (result != null
                     && (intent = result.getParcelable(AccountManager.KEY_INTENT)) != null) {
@@ -3197,6 +3253,17 @@ public class AccountManagerService
                 return (serviceInfo.uid == callingUid) ||
                         (mPackageManager.checkSignatures(serviceInfo.uid, callingUid)
                                 == PackageManager.SIGNATURE_MATCH);
+            }
+        }
+        return false;
+    }
+
+    private boolean isAccountPresentForCaller(String accountName, String accountType) {
+        if (getUserAccountsForCaller().accountCache.containsKey(accountType)) {
+            for (Account account : getUserAccountsForCaller().accountCache.get(accountType)) {
+                if (account.name.equals(accountName)) {
+                    return true;
+                }
             }
         }
         return false;
