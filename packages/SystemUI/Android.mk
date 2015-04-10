@@ -20,6 +20,11 @@ LOCAL_RESOURCE_DIR := \
     $(LOCAL_PATH)/res
 LOCAL_AAPT_FLAGS := --auto-add-overlay --extra-packages com.android.keyguard
 
+ifneq ($(SYSTEM_UI_INCREMENTAL_BUILDS),)
+    LOCAL_PROGUARD_ENABLED := disabled
+    LOCAL_JACK_ENABLED := incremental
+endif
+
 include frameworks/base/packages/SettingsLib/common.mk
 
 include $(BUILD_PACKAGE)
