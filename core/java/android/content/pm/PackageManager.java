@@ -1318,6 +1318,15 @@ public abstract class PackageManager {
 
     /**
      * Feature for {@link #getSystemAvailableFeatures} and
+     * {@link #hasSystemFeature}: The device supports high fidelity sensor processing
+     * capabilities.
+     */
+    @SdkConstant(SdkConstantType.FEATURE)
+    public static final String FEATURE_HIFI_SENSORS =
+            "android.hardware.sensor.hifi_sensors";
+
+    /**
+     * Feature for {@link #getSystemAvailableFeatures} and
      * {@link #hasSystemFeature}: The device has a telephony radio with data
      * communication support.
      */
