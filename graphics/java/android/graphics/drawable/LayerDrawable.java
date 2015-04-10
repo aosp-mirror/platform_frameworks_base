@@ -163,7 +163,6 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
         inflateLayers(r, parser, attrs, theme);
 
         ensurePadding();
-        onStateChange(getState());
     }
 
     /**
@@ -307,7 +306,6 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
         }
 
         ensurePadding();
-        onStateChange(getState());
     }
 
     @Override
