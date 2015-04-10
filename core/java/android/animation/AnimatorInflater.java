@@ -68,6 +68,7 @@ public class AnimatorInflater {
     private static final int VALUE_TYPE_INT         = 1;
     private static final int VALUE_TYPE_PATH        = 2;
     private static final int VALUE_TYPE_COLOR       = 3;
+    private static final int VALUE_TYPE_UNDEFINED   = 4;
 
     private static final boolean DBG_ANIMATOR_INFLATER = false;
 
@@ -299,14 +300,23 @@ public class AnimatorInflater {
     private static PropertyValuesHolder getPVH(TypedArray styledAttributes, int valueType,
             int valueFromId, int valueToId, String propertyName) {
 
-        boolean getFloats = (valueType == VALUE_TYPE_FLOAT);
-
         TypedValue tvFrom = styledAttributes.peekValue(valueFromId);
         boolean hasFrom = (tvFrom != null);
         int fromType = hasFrom ? tvFrom.type : 0;
         TypedValue tvTo = styledAttributes.peekValue(valueToId);
         boolean hasTo = (tvTo != null);
         int toType = hasTo ? tvTo.type : 0;
+
+        if (valueType == VALUE_TYPE_UNDEFINED) {
+            // Check whether it's color type. If not, fall back to default type (i.e. float type)
+            if ((hasFrom && isColorType(fromType)) || (hasTo && isColorType(toType))) {
+                valueType = VALUE_TYPE_COLOR;
+            } else {
+                valueType = VALUE_TYPE_FLOAT;
+            }
+        }
+
+        boolean getFloats = (valueType == VALUE_TYPE_FLOAT);
 
         PropertyValuesHolder returnValue = null;
 
@@ -341,12 +351,8 @@ public class AnimatorInflater {
         } else {
             TypeEvaluator evaluator = null;
             // Integer and float value types are handled here.
-            if ((hasFrom && (fromType >= TypedValue.TYPE_FIRST_COLOR_INT) &&
-                    (fromType <= TypedValue.TYPE_LAST_COLOR_INT)) ||
-                    (hasTo && (toType >= TypedValue.TYPE_FIRST_COLOR_INT) &&
-                            (toType <= TypedValue.TYPE_LAST_COLOR_INT))) {
+            if (valueType == VALUE_TYPE_COLOR) {
                 // special case for colors: ignore valueType and get ints
-                getFloats = false;
                 evaluator = ArgbEvaluator.getInstance();
             }
             if (getFloats) {
@@ -383,8 +389,7 @@ public class AnimatorInflater {
                 if (hasFrom) {
                     if (fromType == TypedValue.TYPE_DIMENSION) {
                         valueFrom = (int) styledAttributes.getDimension(valueFromId, 0f);
-                    } else if ((fromType >= TypedValue.TYPE_FIRST_COLOR_INT) &&
-                            (fromType <= TypedValue.TYPE_LAST_COLOR_INT)) {
+                    } else if (isColorType(fromType)) {
                         valueFrom = styledAttributes.getColor(valueFromId, 0);
                     } else {
                         valueFrom = styledAttributes.getInt(valueFromId, 0);
@@ -392,8 +397,7 @@ public class AnimatorInflater {
                     if (hasTo) {
                         if (toType == TypedValue.TYPE_DIMENSION) {
                             valueTo = (int) styledAttributes.getDimension(valueToId, 0f);
-                        } else if ((toType >= TypedValue.TYPE_FIRST_COLOR_INT) &&
-                                (toType <= TypedValue.TYPE_LAST_COLOR_INT)) {
+                        } else if (isColorType(toType)) {
                             valueTo = styledAttributes.getColor(valueToId, 0);
                         } else {
                             valueTo = styledAttributes.getInt(valueToId, 0);
@@ -406,8 +410,7 @@ public class AnimatorInflater {
                     if (hasTo) {
                         if (toType == TypedValue.TYPE_DIMENSION) {
                             valueTo = (int) styledAttributes.getDimension(valueToId, 0f);
-                        } else if ((toType >= TypedValue.TYPE_FIRST_COLOR_INT) &&
-                                (toType <= TypedValue.TYPE_LAST_COLOR_INT)) {
+                        } else if (isColorType(toType)) {
                             valueTo = styledAttributes.getColor(valueToId, 0);
                         } else {
                             valueTo = styledAttributes.getInt(valueToId, 0);
@@ -613,8 +616,7 @@ public class AnimatorInflater {
             if (hasFrom) {
                 if (fromType == TypedValue.TYPE_DIMENSION) {
                     valueFrom = (int) arrayAnimator.getDimension(valueFromIndex, 0f);
-                } else if ((fromType >= TypedValue.TYPE_FIRST_COLOR_INT) &&
-                        (fromType <= TypedValue.TYPE_LAST_COLOR_INT)) {
+                } else if (isColorType(fromType)) {
                     valueFrom = arrayAnimator.getColor(valueFromIndex, 0);
                 } else {
                     valueFrom = arrayAnimator.getInt(valueFromIndex, 0);
@@ -622,8 +624,7 @@ public class AnimatorInflater {
                 if (hasTo) {
                     if (toType == TypedValue.TYPE_DIMENSION) {
                         valueTo = (int) arrayAnimator.getDimension(valueToIndex, 0f);
-                    } else if ((toType >= TypedValue.TYPE_FIRST_COLOR_INT) &&
-                            (toType <= TypedValue.TYPE_LAST_COLOR_INT)) {
+                    } else if (isColorType(toType)) {
                         valueTo = arrayAnimator.getColor(valueToIndex, 0);
                     } else {
                         valueTo = arrayAnimator.getInt(valueToIndex, 0);
@@ -636,8 +637,7 @@ public class AnimatorInflater {
                 if (hasTo) {
                     if (toType == TypedValue.TYPE_DIMENSION) {
                         valueTo = (int) arrayAnimator.getDimension(valueToIndex, 0f);
-                    } else if ((toType >= TypedValue.TYPE_FIRST_COLOR_INT) &&
-                            (toType <= TypedValue.TYPE_LAST_COLOR_INT)) {
+                    } else if (isColorType(toType)) {
                         valueTo = arrayAnimator.getColor(valueToIndex, 0);
                     } else {
                         valueTo = arrayAnimator.getInt(valueToIndex, 0);
@@ -749,7 +749,8 @@ public class AnimatorInflater {
                 }
                 String propertyName = a.getString(R.styleable.PropertyValuesHolder_propertyName);
                 int valueType = a.getInt(R.styleable.PropertyValuesHolder_valueType,
-                        VALUE_TYPE_FLOAT);
+                        VALUE_TYPE_UNDEFINED);
+
                 PropertyValuesHolder pvh = loadPvh(res, theme, parser, propertyName, valueType);
                 if (pvh == null) {
                     pvh = getPVH(a, valueType,
@@ -793,6 +794,7 @@ public class AnimatorInflater {
         }
     }
 
+    // Load property values holder if there are keyframes defined in it. Otherwise return null.
     private static PropertyValuesHolder loadPvh(Resources res, Theme theme, XmlPullParser parser,
             String propertyName, int valueType)
             throws XmlPullParserException, IOException {
@@ -928,7 +930,17 @@ public class AnimatorInflater {
 
         float fraction = a.getFloat(R.styleable.Keyframe_fraction, -1);
 
-        boolean hasValue = a.peekValue(R.styleable.Keyframe_value) != null;
+        TypedValue keyframeValue = a.peekValue(R.styleable.Keyframe_value);
+        boolean hasValue = (keyframeValue != null);
+        if (valueType == VALUE_TYPE_UNDEFINED) {
+            // When no value type is provided, check whether it's a color type first.
+            // If not, fall back to default value type (i.e. float type).
+            if (hasValue && isColorType(keyframeValue.type)) {
+                valueType = VALUE_TYPE_COLOR;
+            } else {
+                valueType = VALUE_TYPE_FLOAT;
+            }
+        }
 
         if (hasValue) {
             switch (valueType) {
@@ -1027,5 +1039,9 @@ public class AnimatorInflater {
             resources.getValue(id, sTmpTypedValue, true);
             return sTmpTypedValue.changingConfigurations;
         }
+    }
+
+    private static boolean isColorType(int type) {
+       return (type >= TypedValue.TYPE_FIRST_COLOR_INT) && (type <= TypedValue.TYPE_LAST_COLOR_INT);
     }
 }
