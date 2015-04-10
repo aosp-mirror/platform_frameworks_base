@@ -59,9 +59,6 @@ public final class KeymasterDefs {
     public static final int KM_TAG_BLOB_USAGE_REQUIREMENTS = KM_ENUM | 705;
 
     public static final int KM_TAG_RSA_PUBLIC_EXPONENT = KM_LONG | 200;
-    public static final int KM_TAG_DSA_GENERATOR = KM_BIGNUM | 201;
-    public static final int KM_TAG_DSA_P = KM_BIGNUM | 202;
-    public static final int KM_TAG_DSA_Q = KM_BIGNUM | 203;
     public static final int KM_TAG_ACTIVE_DATETIME = KM_DATE | 400;
     public static final int KM_TAG_ORIGINATION_EXPIRE_DATETIME = KM_DATE | 401;
     public static final int KM_TAG_USAGE_EXPIRE_DATETIME = KM_DATE | 402;
@@ -91,22 +88,8 @@ public final class KeymasterDefs {
 
     // Algorithm values.
     public static final int KM_ALGORITHM_RSA = 1;
-    public static final int KM_ALGORITHM_DSA = 2;
-    public static final int KM_ALGORITHM_ECDSA = 3;
-    public static final int KM_ALGORITHM_ECIES = 4;
+    public static final int KM_ALGORITHM_EC = 3;
     public static final int KM_ALGORITHM_AES = 32;
-    public static final int KM_ALGORITHM_3DES = 33;
-    public static final int KM_ALGORITHM_SKIPJACK = 34;
-    public static final int KM_ALGORITHM_MARS = 48;
-    public static final int KM_ALGORITHM_RC6 = 49;
-    public static final int KM_ALGORITHM_SERPENT = 50;
-    public static final int KM_ALGORITHM_TWOFISH = 51;
-    public static final int KM_ALGORITHM_IDEA = 52;
-    public static final int KM_ALGORITHM_RC5 = 53;
-    public static final int KM_ALGORITHM_CAST5 = 54;
-    public static final int KM_ALGORITHM_BLOWFISH = 55;
-    public static final int KM_ALGORITHM_RC4 = 64;
-    public static final int KM_ALGORITHM_CHACHA20 = 65;
     public static final int KM_ALGORITHM_HMAC = 128;
 
     // Block modes.
@@ -219,7 +202,6 @@ public final class KeymasterDefs {
     public static final int KM_ERROR_INVALID_TAG = -40;
     public static final int KM_ERROR_MEMORY_ALLOCATION_FAILED = -41;
     public static final int KM_ERROR_INVALID_RESCOPING = -42;
-    public static final int KM_ERROR_INVALID_DSA_PARAMS = -43;
     public static final int KM_ERROR_IMPORT_PARAMETER_MISMATCH = -44;
     public static final int KM_ERROR_SECURE_HW_ACCESS_DENIED = -45;
     public static final int KM_ERROR_OPERATION_CANCELLED = -46;
