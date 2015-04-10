@@ -1368,7 +1368,6 @@ final class BackStackRecord extends FragmentTransaction implements
                 public boolean onPreDraw() {
                     sceneRoot.getViewTreeObserver().removeOnPreDrawListener(this);
                     if (enterTransition != null) {
-                        enterTransition.removeTarget(nonExistingView);
                         removeTargets(enterTransition, enteringViews);
                     }
                     if (exitTransition != null) {
