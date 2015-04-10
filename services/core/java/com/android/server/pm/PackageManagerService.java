@@ -8612,6 +8612,15 @@ public class PackageManagerService extends IPackageManager.Stub {
             user = new UserHandle(userId);
         }
 
+        // Only system components can circumvent runtime permissions when installing.
+        if ((installFlags & PackageManager.INSTALL_GRANT_RUNTIME_PERMISSIONS) != 0
+                && mContext.checkCallingOrSelfPermission(Manifest.permission
+                .INSTALL_GRANT_RUNTIME_PERMISSIONS) == PackageManager.PERMISSION_DENIED) {
+            throw new SecurityException("You need the "
+                    + "android.permission.INSTALL_GRANT_RUNTIME_PERMISSIONS permission "
+                    + "to use the PackageManager.INSTALL_GRANT_RUNTIME_PERMISSIONS flag");
+        }
+
         verificationParams.setInstallerUid(callingUid);
 
         final File originFile = new File(originPath);
@@ -8769,7 +8778,6 @@ public class PackageManagerService extends IPackageManager.Stub {
         long callingId = Binder.clearCallingIdentity();
         try {
             boolean sendAdded = false;
-            Bundle extras = new Bundle(1);
 
             // writer
             synchronized (mPackages) {
