@@ -16,10 +16,15 @@
 
 package com.android.server.display;
 
+import com.android.server.LocalServices;
+import com.android.server.lights.Light;
+import com.android.server.lights.LightsManager;
+
 import android.content.Context;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
+import android.os.PowerManager;
 import android.os.SystemProperties;
 import android.os.Trace;
 import android.util.Slog;
@@ -40,6 +45,7 @@ import java.util.Arrays;
  */
 final class LocalDisplayAdapter extends DisplayAdapter {
     private static final String TAG = "LocalDisplayAdapter";
+    private static final boolean DEBUG = false;
 
     private static final String UNIQUE_ID_PREFIX = "local:";
 
@@ -132,13 +138,16 @@ final class LocalDisplayAdapter extends DisplayAdapter {
         private final int mBuiltInDisplayId;
         private final SurfaceControl.PhysicalDisplayInfo mPhys;
         private final int mDefaultPhysicalDisplayInfo;
+        private final Light mBacklight;
 
         private DisplayDeviceInfo mInfo;
         private boolean mHavePendingChanges;
         private int mState = Display.STATE_UNKNOWN;
+        private int mBrightness = PowerManager.BRIGHTNESS_DEFAULT;
         private float[] mSupportedRefreshRates;
         private int[] mRefreshRateConfigIndices;
         private float mLastRequestedRefreshRate;
+
 
         public LocalDisplayDevice(IBinder displayToken, int builtInDisplayId,
                 SurfaceControl.PhysicalDisplayInfo[] physicalDisplayInfos, int activeDisplayInfo) {
@@ -148,6 +157,13 @@ final class LocalDisplayAdapter extends DisplayAdapter {
                     physicalDisplayInfos[activeDisplayInfo]);
             mDefaultPhysicalDisplayInfo = activeDisplayInfo;
             updateSupportedRefreshRatesLocked(physicalDisplayInfos, mPhys);
+
+            if (mBuiltInDisplayId == SurfaceControl.BUILT_IN_DISPLAY_ID_MAIN) {
+                LightsManager lights = LocalServices.getService(LightsManager.class);
+                mBacklight = lights.getLight(LightsManager.LIGHT_ID_BACKLIGHT);
+            } else {
+                mBacklight = null;
+            }
         }
 
         public boolean updatePhysicalDisplayInfoLocked(
@@ -225,24 +241,87 @@ final class LocalDisplayAdapter extends DisplayAdapter {
         }
 
         @Override
-        public Runnable requestDisplayStateLocked(final int state) {
-            if (mState != state) {
+        public Runnable requestDisplayStateLocked(final int state, final int brightness) {
+            // Assume that the brightness is off if the display is being turned off.
+            assert state != Display.STATE_OFF || brightness == PowerManager.BRIGHTNESS_OFF;
+
+            final boolean stateChanged = (mState != state);
+            final boolean brightnessChanged = (mBrightness != brightness) && mBacklight != null;
+            if (stateChanged || brightnessChanged) {
                 final int displayId = mBuiltInDisplayId;
                 final IBinder token = getDisplayTokenLocked();
-                final int mode = getPowerModeForState(state);
-                mState = state;
-                updateDeviceInfoLocked();
+                final int oldState = mState;
 
-                // Defer actually setting the display power mode until we have exited
+                if (stateChanged) {
+                    mState = state;
+                    updateDeviceInfoLocked();
+                }
+
+                if (brightnessChanged) {
+                    mBrightness = brightness;
+                }
+
+                // Defer actually setting the display state until after we have exited
                 // the critical section since it can take hundreds of milliseconds
                 // to complete.
                 return new Runnable() {
                     @Override
                     public void run() {
-                        Trace.traceBegin(Trace.TRACE_TAG_POWER, "requestDisplayState("
-                                + Display.stateToString(state) + ", id=" + displayId + ")");
+                        // Exit a suspended state before making any changes.
+                        int currentState = oldState;
+                        if (Display.isSuspendedState(oldState)
+                                || oldState == Display.STATE_UNKNOWN) {
+                            if (!Display.isSuspendedState(state)) {
+                                setDisplayState(state);
+                                currentState = state;
+                            } else if (state == Display.STATE_DOZE_SUSPEND
+                                    || oldState == Display.STATE_DOZE_SUSPEND) {
+                                setDisplayState(Display.STATE_DOZE);
+                                currentState = Display.STATE_DOZE;
+                            } else {
+                                return; // old state and new state is off
+                            }
+                        }
+
+                        // Apply brightness changes given that we are in a non-suspended state.
+                        if (brightnessChanged) {
+                            setDisplayBrightness(brightness);
+                        }
+
+                        // Enter the final desired state, possibly suspended.
+                        if (state != currentState) {
+                            setDisplayState(state);
+                        }
+                    }
+
+                    private void setDisplayState(int state) {
+                        if (DEBUG) {
+                            Slog.d(TAG, "setDisplayState("
+                                    + "id=" + displayId
+                                    + ", state=" + Display.stateToString(state) + ")");
+                        }
+
+                        Trace.traceBegin(Trace.TRACE_TAG_POWER, "setDisplayState("
+                                + "id=" + displayId
+                                + ", state=" + Display.stateToString(state) + ")");
                         try {
+                            final int mode = getPowerModeForState(state);
                             SurfaceControl.setDisplayPowerMode(token, mode);
+                        } finally {
+                            Trace.traceEnd(Trace.TRACE_TAG_POWER);
+                        }
+                    }
+
+                    private void setDisplayBrightness(int brightness) {
+                        if (DEBUG) {
+                            Slog.d(TAG, "setDisplayBrightness("
+                                    + "id=" + displayId + ", brightness=" + brightness + ")");
+                        }
+
+                        Trace.traceBegin(Trace.TRACE_TAG_POWER, "setDisplayBrightness("
+                                + "id=" + displayId + ", brightness=" + brightness + ")");
+                        try {
+                            mBacklight.setBrightness(brightness);
                         } finally {
                             Trace.traceEnd(Trace.TRACE_TAG_POWER);
                         }
@@ -278,6 +357,8 @@ final class LocalDisplayAdapter extends DisplayAdapter {
             pw.println("mBuiltInDisplayId=" + mBuiltInDisplayId);
             pw.println("mPhys=" + mPhys);
             pw.println("mState=" + Display.stateToString(mState));
+            pw.println("mBrightness=" + mBrightness);
+            pw.println("mBacklight=" + mBacklight);
         }
 
         private void updateDeviceInfoLocked() {

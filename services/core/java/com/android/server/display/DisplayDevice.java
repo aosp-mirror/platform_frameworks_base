@@ -118,10 +118,12 @@ abstract class DisplayDevice {
     /**
      * Sets the display state, if supported.
      *
+     * @param state The new display state.
+     * @param brightness The new display brightness.
      * @return A runnable containing work to be deferred until after we have
      * exited the critical section, or null if none.
      */
-    public Runnable requestDisplayStateLocked(int state) {
+    public Runnable requestDisplayStateLocked(int state, int brightness) {
         return null;
     }
 
