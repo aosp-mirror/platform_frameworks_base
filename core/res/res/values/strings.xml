@@ -529,19 +529,14 @@
     <string name="managed_profile_label">Work</string>
 
     <!-- Title of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permgrouplab_costMoney">Services that cost you money</string>
+    <string name="permgrouplab_contacts">Contacts</string>
     <!-- Description of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permgroupdesc_costMoney">Do things that can cost you money.</string>
+    <string name="permgroupdesc_contacts">access and modify your contacts</string>
 
     <!-- Title of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permgrouplab_messages">Your messages</string>
+    <string name="permgrouplab_location">Location</string>
     <!-- Description of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permgroupdesc_messages">Read and write your SMS, email, and other messages.</string>
-
-    <!-- Title of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permgrouplab_personalInfo">Your personal information</string>
-    <!-- Description of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permgroupdesc_personalInfo">Direct access to information about you, stored in on your contact card.</string>
+    <string name="permgroupdesc_location">access your location</string>
 
     <!-- Title of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permgrouplab_socialInfo">Your social information</string>
@@ -549,141 +544,44 @@
     <string name="permgroupdesc_socialInfo">Direct access to information about your contacts and social connections.</string>
 
     <!-- Title of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permgrouplab_location">Your location</string>
-    <!-- Description of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permgroupdesc_location">Monitor your physical location.</string>
-
-    <!-- Title of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permgrouplab_network">Network communication</string>
-    <!-- Description of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permgroupdesc_network">Access various network features.</string>
-
-    <!-- Title of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permgrouplab_bluetoothNetwork">Bluetooth</string>
-    <!-- Description of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permgroupdesc_bluetoothNetwork">Access devices and networks through Bluetooth.</string>
-
-    <!-- Title of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permgrouplab_audioSettings">Audio Settings</string>
-    <!-- Description of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permgroupdesc_audioSettings">Change audio settings.</string>
-
-    <!-- Title of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permgrouplab_affectsBattery">Affects Battery</string>
-    <!-- Description of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permgroupdesc_affectsBattery">Use features that can quickly drain battery.</string>
-
-    <!-- Title of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permgrouplab_calendar">Calendar</string>
     <!-- Description of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permgroupdesc_calendar">Direct access to calendar and events.</string>
+    <string name="permgroupdesc_calendar">access and modify your calendar</string>
 
     <!-- Title of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permgrouplab_dictionary">Read User Dictionary</string>
+    <string name="permgrouplab_sms">SMS</string>
     <!-- Description of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permgroupdesc_dictionary">Read words in user dictionary.</string>
+    <string name="permgroupdesc_sms">access and modify SMS</string>
 
     <!-- Title of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permgrouplab_writeDictionary">Write User Dictionary</string>
+    <string name="permgrouplab_dictionary">User Dictionary</string>
     <!-- Description of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permgroupdesc_writeDictionary">Add words to the user dictionary.</string>
+    <string name="permgroupdesc_dictionary">Read or write words in user dictionary.</string>
 
     <!-- Title of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permgrouplab_bookmarks">Bookmarks and History</string>
     <!-- Description of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permgroupdesc_bookmarks">Direct access to bookmarks and browser history.</string>
 
-    <!-- Title of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permgrouplab_deviceAlarms">Alarm</string>
-    <!-- Description of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permgroupdesc_deviceAlarms">Set the alarm clock.</string>
-
-    <!-- Title of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permgrouplab_voicemail">Voicemail</string>
-    <!-- Description of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permgroupdesc_voicemail">Direct access to voicemail.</string>
-
-    <!-- Title of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
+    <!-- Title of a category of application permissioncds, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permgrouplab_microphone">Microphone</string>
     <!-- Description of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permgroupdesc_microphone">Direct access to the microphone to record audio.</string>
+    <string name="permgroupdesc_microphone">use device microphone</string>
 
     <!-- Title of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permgrouplab_camera">Camera</string>
     <!-- Description of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permgroupdesc_camera">Direct access to camera for image or video capture.</string>
+    <string name="permgroupdesc_camera">use device camera</string>
 
     <!-- Title of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permgrouplab_screenlock">Lock screen</string>
+    <string name="permgrouplab_phone">Phone</string>
     <!-- Description of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permgroupdesc_screenlock">Ability to affect behavior of the lock screen on your device.</string>
+    <string name="permgroupdesc_phone">use device telephony</string>
 
     <!-- Title of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permgrouplab_appInfo">Your applications information</string>
+    <string name="permgrouplab_sensors">Sensors</string>
     <!-- Description of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permgroupdesc_appInfo">Ability to affect behavior of other applications on your device.</string>
-
-    <!-- Title of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permgrouplab_wallpaper">Wallpaper</string>
-    <!-- Description of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permgroupdesc_wallpaper">Change the device wallpaper settings.</string>
-
-    <!-- Title of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permgrouplab_systemClock">Clock</string>
-    <!-- Description of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permgroupdesc_systemClock">Change the device time or timezone.</string>
-
-    <!-- Title of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permgrouplab_statusBar">Status Bar</string>
-    <!-- Description of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permgroupdesc_statusBar">Change the device status bar settings.</string>
-
-    <!-- Title of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permgrouplab_syncSettings">Sync Settings</string>
-    <!-- Description of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permgroupdesc_syncSettings">Access to the sync settings.</string>
-
-    <!-- Title of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permgrouplab_accounts">Your accounts</string>
-    <!-- Description of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permgroupdesc_accounts">Access the available accounts.</string>
-
-    <!-- Title of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permgrouplab_hardwareControls">Hardware controls</string>
-    <!-- Description of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permgroupdesc_hardwareControls">Direct access to hardware on the handset.</string>
-
-    <!-- Title of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permgrouplab_phoneCalls">Phone calls</string>
-    <!-- Description of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permgroupdesc_phoneCalls">Monitor, record, and process phone calls.</string>
-
-    <!-- Title of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permgrouplab_systemTools">System tools</string>
-    <!-- Description of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permgroupdesc_systemTools">Lower-level access and control of the system.</string>
-
-    <!-- Title of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permgrouplab_developmentTools">Development tools</string>
-    <!-- Description of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permgroupdesc_developmentTools">Features only needed for app developers.</string>
-
-    <!-- Title of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permgrouplab_display">Other Application UI</string>
-    <!-- Description of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permgroupdesc_display">Effect the UI of other applications.</string>
-
-    <!-- Title of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permgrouplab_storage">Storage</string>
-    <!-- Description of a category of application permissions, listed so the user can choose whether they want to allow the application to do this.   [CHAR LIMIT=30] -->
-    <string name="permgroupdesc_storage" product="nosdcard">Access the USB storage.</string>
-    <!-- Description of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permgroupdesc_storage" product="default">Access the SD card.</string>
-
-    <!-- Title of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permgrouplab_accessibilityFeatures">Accessibility features</string>
-    <!-- Description of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permgroupdesc_accessibilityFeatures">Features that assistive technology can request.</string>
+    <string name="permgroupdesc_sensors">access sensors and wearables</string>
 
     <!-- Title for the capability of an accessibility service to retrieve window content. -->
     <string name="capability_title_canRetrieveWindowContent">Retrieve window content</string>
@@ -764,35 +662,12 @@
       messages. This means the app could monitor or delete messages sent to your
       device without showing them to you.</string>
 
-    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_receiveEmergencyBroadcast">receive emergency broadcasts</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_receiveEmergencyBroadcast">Allows the app to receive
-      and process emergency broadcast messages. This permission is only available
-      to system apps.</string>
-
-    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_readCellBroadcasts">read cell broadcast messages</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_readCellBroadcasts">Allows the app to read
-      cell broadcast messages received by your device. Cell broadcast alerts
-      are delivered in some locations to warn you of emergency situations.
-      Malicious apps may interfere with the performance or operation of your
-      device when an emergency cell broadcast is received.</string>
-
      <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_sendSms">send SMS messages</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_sendSms">Allows the app to send SMS messages.
      This may result in unexpected charges. Malicious apps may cost you money by
      sending messages without your confirmation.</string>
-
-     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. [CHAR LIMIT=NONE] -->
-    <string name="permlab_sendRespondViaMessageRequest">send respond-via-message events</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. [CHAR LIMIT=NONE] -->
-    <string name="permdesc_sendRespondViaMessageRequest">Allows the app to send
-      requests to other messaging apps to handle respond-via-message events for incoming
-      calls.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_readSms">read your text messages (SMS or MMS)</string>
@@ -832,13 +707,6 @@
      messages sent to you without showing them to you.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_receiveBluetoothMap">receive Bluetooth messages (MAP)</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_receiveBluetoothMap">Allows the app to receive and process Bluetooth MAP
-      messages. This means the app could monitor or delete messages sent to your
-      device without showing them to you.</string>
-
-    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_getTasks">retrieve running apps</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_getTasks">Allows the app to retrieve information
@@ -846,83 +714,10 @@
        discover information about which applications are used on the device.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_startTasksFromRecents">start a task from recents</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_startTasksFromRecents">Allows the app to use an ActivityManager.RecentTaskInfo
-        object to launch a defunct task that was returned from ActivityManager.getRecentTaskList().</string>
-
-    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. [CHAR LIMIT=NONE] -->
-    <string name="permlab_interactAcrossUsers">interact across users</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. [CHAR LIMIT=NONE] -->
-    <string name="permdesc_interactAcrossUsers">Allows the app to perform actions
-        across different users on the device.  Malicious apps may use this to violate
-        the protection between users.</string>
-
-    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. [CHAR LIMIT=NONE] -->
-    <string name="permlab_interactAcrossUsersFull">full license to interact across users</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. [CHAR LIMIT=NONE] -->
-    <string name="permdesc_interactAcrossUsersFull">Allows all possible interactions across
-        users.</string>
-
-    <!--  Title of an application permission, listed so the user can choose whether they want to allow the application to create/remove/query users. [CHAR LIMIT=none] -->
-    <string name="permlab_manageUsers">manage users</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to create/remove/query users. [CHAR LIMIT=NONE] -->
-    <string name="permdesc_manageUsers">Allows apps to manage users on the device, including query, creation and deletion.</string>
-
-    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. [CHAR LIMIT=50] -->
-    <string name="permlab_getDetailedTasks">retrieve details of running apps</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. [CHAR LIMIT=NONE] -->
-    <string name="permdesc_getDetailedTasks">Allows the app to retrieve
-        detailed information about currently and recently running tasks. Malicious apps may
-        discover private information about other apps.</string>
-
-    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_reorderTasks">reorder running apps</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_reorderTasks">Allows the app to move tasks to the
       foreground and background.  The app may do this without your input.</string>
-
-    <!-- Title of an application permission, allowing an application to remove/kill tasks -->
-    <string name="permlab_removeTasks">stop running apps</string>
-    <!-- Description of an application permission, allowing an application to remove/kill tasks -->
-    <string name="permdesc_removeTasks">Allows the app to remove
-        tasks and kill their apps. Malicious apps may disrupt
-        the behavior of other apps.</string>
-
-    <!-- [CHAR LIMIT=NONE] Title of an application permission, allowing an application to create,
-         change, remove activity stacks. -->
-    <string name="permlab_manageActivityStacks">manage activity stacks</string>
-    <!-- [CHAR LIMIT=NONE] Description of an application permission, allowing an application to create,
-             change, remove activity stacks. -->
-    <string name="permdesc_manageActivityStacks">Allows the app to add, remove, and
-        modify the activity stacks in which other apps run.  Malicious apps may disrupt
-        the behavior of other apps.</string>
-
-    <!-- Title of an application permission, allowing an application to start any activity, regardless of permission protection or exported state. -->
-    <string name="permlab_startAnyActivity">start any activity</string>
-    <!-- Description of an application permission, allowing an application to start any activity, regardless of permission protection or exported state. -->
-    <string name="permdesc_startAnyActivity">Allows the app to start any activity, regardless of permission protection or exported state.</string>
-
-    <!-- Title of an application permission, allowing control of app screen compatibility mode -->
-    <string name="permlab_setScreenCompatibility">set screen compatibility</string>
-    <!-- Description of an application permission, allowing control of app screen compatibility mode -->
-    <string name="permdesc_setScreenCompatibility">Allows the app to control the
-        screen compatibility mode of other applications.  Malicious applications may
-        break the behavior of other applications.</string>
-
-    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_setDebugApp">enable app debugging</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_setDebugApp">Allows the app to turn
-        on debugging for another app. Malicious apps may use this
-        to kill other apps.</string>
-
-    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_changeConfiguration">change system display settings</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_changeConfiguration">Allows the app to
-        change the current configuration, such as the locale or overall font
-        size.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_enableCarMode">enable car mode</string>
@@ -938,353 +733,12 @@
       running.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_forceStopPackages">force stop other apps</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_forceStopPackages">Allows the app to forcibly stop other apps.</string>
-
-    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_forceBack">force app to close</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_forceBack">Allows the app to force any
-        activity that is in the foreground to close and go back.
-        Should never be needed for normal apps.</string>
-
-    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_dump">retrieve system internal state</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_dump">Allows the app to retrieve
-        internal state of the system. Malicious apps may retrieve
-        a wide variety of private and secure information that they should
-        never normally need.</string>
-
-    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_retrieve_window_content">retrieve screen content</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_retrieve_window_content">Allows the app to retrieve
-        the content of the active window. Malicious apps may retrieve
-        the entire window content and examine all its text except passwords.</string>
-
-    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_temporary_enable_accessibility">temporary enable accessibility</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_temporary_enable_accessibility">Allows an application to temporarily
-         enable accessibility on the device. Malicious apps may enable accessibility without
-         user consent.</string>
-
-    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_retrieveWindowToken">retrieve window token</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_retrieveWindowToken">Allows an application to retrieve
-        the window token. Malicious apps may perfrom unauthorized interaction with
-        the application window impersonating the system.</string>
-
-    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_frameStats">retrieve frame statistics</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_frameStats">Allows an application to collect
-        frame statistics. Malicious apps may observe the frame statistics
-        of windows from other apps.</string>
-
-    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_filter_events">filter events</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_filter_events">Allows an application to register an input filter
-            which filters the stream of all user events before they are dispatched. Malicious app
-            may control the system UI whtout user intervention.</string>
-
-    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_shutdown">partial shutdown</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_shutdown">Puts the activity manager into a shutdown
-        state.  Does not perform a complete shutdown.</string>
-
-    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_stopAppSwitches">prevent app switches</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_stopAppSwitches">Prevents the user from switching to
-        another app.</string>
-
-    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_getTopActivityInfo">get current app info</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_getTopActivityInfo">Allows the holder to retrieve private information
-        about the current application in the foreground of the screen.</string>
-
-    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_runSetActivityWatcher">monitor and control all app launching</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_runSetActivityWatcher">Allows the app to
-        monitor and control how the system launches activities.
-        Malicious apps may completely compromise the system. This
-        permission is only needed for development, never for normal
-        use.</string>
-
-    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_broadcastPackageRemoved">send package removed broadcast</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_broadcastPackageRemoved">Allows the app to
-        broadcast a notification that an app package has been removed.
-        Malicious apps may use this to kill any other running
-        app.</string>
-
-    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_broadcastSmsReceived">send SMS-received broadcast</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_broadcastSmsReceived">Allows the app to
-        broadcast a notification that an SMS message has been received.
-        Malicious apps may use this to forge incoming SMS messages.</string>
-
-    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_broadcastWapPush">send WAP-PUSH-received broadcast</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_broadcastWapPush">Allows the app to
-        broadcast a notification that a WAP PUSH message has been received.
-        Malicious apps may use this to forge MMS message receipt or to
-        silently replace the content of any webpage with malicious variants.</string>
-
-    <!-- TODO: Mark these as translatable when API is finalized. -->
-    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_broadcastNetworkPrivileged" translatable="false">send privileged network broadcasts</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_broadcastNetworkPrivileged" translatable="false">Allows the app
-        to send privileged network broadcasts.
-        Never needed for normal apps.
-    </string>
-
-    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_setProcessLimit">limit number of running processes</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_setProcessLimit">Allows the app
-        to control the maximum number of processes that will run. Never
-        needed for normal apps.</string>
-
-    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_setAlwaysFinish">force background apps to close</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_setAlwaysFinish">Allows the app
-        to control whether activities are always finished as soon as they
-        go to the background. Never needed for normal apps.</string>
-
-    <!-- [CHAR LIMIT=NONE] Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_batteryStats">read battery statistics</string>
-    <!-- [CHAR LIMIT=NONE] Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_batteryStats">Allows an application to read the current low-level
-        battery use data.  May allow the application to find out detailed information about
-        which apps you use.</string>
-
-    <!-- [CHAR LIMIT=NONE] Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_updateBatteryStats">modify battery statistics</string>
-    <!-- [CHAR LIMIT=NONE] Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_updateBatteryStats">Allows the app to modify
-        collected battery statistics. Not for use by normal apps.</string>
-
-    <!-- [CHAR LIMIT=NONE] Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_getAppOpsStats">retrieve app ops statistics</string>
-    <!-- [CHAR LIMIT=NONE] Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_getAppOpsStats">Allows the app to retrieve
-        collected application operation statistics. Not for use by normal apps.</string>
-
-    <!-- [CHAR LIMIT=NONE] Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_updateAppOpsStats">modify app ops statistics</string>
-    <!-- [CHAR LIMIT=NONE] Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_updateAppOpsStats">Allows the app to modify
-        collected application operation statistics. Not for use by normal apps.</string>
-
-    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_backup">control system backup and restore</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_backup">Allows the app to control the system\'s backup and restore mechanism.  Not for use by normal apps.</string>
-
-    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_confirm_full_backup">confirm a full backup or restore operation</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_confirm_full_backup">Allows the app to launch the full backup confirmation UI.  Not to be used by any app.</string>
-
-    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_internalSystemWindow">display unauthorized windows</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_internalSystemWindow">Allows the app to create
-        windows that are intended to be used by the internal system
-        user interface. Not for use by normal apps.</string>
-
-    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_systemAlertWindow">draw over other apps</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_systemAlertWindow">Allows the app to draw on top of other
         applications or parts of the user interface.  They may interfere with your
         use of the interface in any application, or change what you think you are
         seeing in other applications.</string>
-
-    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_setAnimationScale">modify global animation speed</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_setAnimationScale">Allows the app to change
-        the global animation speed (faster or slower animations) at any time.</string>
-
-    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_manageAppTokens">manage app tokens</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_manageAppTokens">Allows the app to
-        create and manage their own tokens, bypassing their normal
-        Z-ordering. Should never be needed for normal apps.</string>
-
-    <!-- [CHAR LIMIT=NONE] Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_freezeScreen">freeze screen</string>
-    <!-- [CHAR LIMIT=NONE] Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_freezeScreen">Allows the application to temporarily freeze
-        the screen for a full-screen transition.</string>
-
-    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_injectEvents">press keys and control buttons</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_injectEvents" product="tablet">Allows the app to deliver
-        its own input events (key presses, etc.) to other apps. Malicious
-        apps may use this to take over the tablet.</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_injectEvents" product="tv">Allows the app to deliver
-        its own input events (key presses, etc.) to other apps. Malicious
-        apps may use this to take over the TV.</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_injectEvents" product="default">Allows the app to deliver
-        its own input events (key presses, etc.) to other apps. Malicious
-        apps may use this to take over the phone.</string>
-
-    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_readInputState">record what you type and actions you take</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_readInputState">Allows the app to watch the
-        keys you press even when interacting with another app (such
-        as typing a password). Should never be needed for normal apps.</string>
-
-    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_bindInputMethod">bind to an input method</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_bindInputMethod">Allows the holder to bind to the top-level
-        interface of an input method. Should never be needed for normal apps.</string>
-
-    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_bindAccessibilityService">bind to an accessibility service</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_bindAccessibilityService">Allows the holder to bind to the top-level
-        interface of an accessibility service. Should never be needed for normal apps.</string>
-
-    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_bindPrintService">bind to a print service</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_bindPrintService">Allows the holder to bind to the top-level
-        interface of a print service. Should never be needed for normal apps.</string>
-
-    <!-- Title of an application permission, listed so the user can choose
-         whether they want to allow the application to do this. -->
-    <string name="permlab_bindPrintSpoolerService">bind to a print spooler service</string>
-    <!-- Description of an application permission, listed so the user can
-         choose whether they want to allow the application to do this. -->
-    <string name="permdesc_bindPrintSpoolerService">Allows the holder to bind to the top-level
-        interface of a print spooler service. Should never be needed for normal apps.</string>
-
-    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_bindNfcService">bind to NFC service</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_bindNfcService">Allows the holder to bind to applications
-        that are emulating NFC cards. Should never be needed for normal apps.</string>
-
-    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_bindTextService">bind to a text service</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_bindTextService">Allows the holder to bind to the top-level
-        interface of a text service(e.g. SpellCheckerService). Should never be needed for normal apps.</string>
-
-    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_bindVpnService">bind to a VPN service</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_bindVpnService">Allows the holder to bind to the top-level
-        interface of a Vpn service. Should never be needed for normal apps.</string>
-
-    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_bindWallpaper">bind to a wallpaper</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_bindWallpaper">Allows the holder to bind to the top-level
-        interface of a wallpaper. Should never be needed for normal apps.</string>
-
-    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_bindVoiceInteraction">bind to a voice interactor</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_bindVoiceInteraction">Allows the holder to bind to the top-level
-        interface of a voice interaction service. Should never be needed for normal apps.</string>
-
-    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_manageVoiceKeyphrases">manage voice keyphrases</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_manageVoiceKeyphrases">Allows the holder to manage the keyphrases for voice hotword detection.
-        Should never be needed for normal apps.</string>
-
-    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_bindRemoteDisplay">bind to a remote display</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_bindRemoteDisplay">Allows the holder to bind to the top-level
-        interface of a remote display. Should never be needed for normal apps.</string>
-
-    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_bindRemoteViews">bind to a widget service</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_bindRemoteViews">Allows the holder to bind to the top-level
-        interface of a widget service. Should never be needed for normal apps.</string>
-
-    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_bindRouteProvider">bind to a route provider service</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_bindRouteProvider">Allows the holder to bind to any registered
-        route providers. Should never be needed for normal apps.</string>
-
-    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_bindDeviceAdmin">interact with a device admin</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_bindDeviceAdmin">Allows the holder to send intents to
-        a device administrator. Should never be needed for normal apps.</string>
-
-    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_bindTvInput">bind to a TV input</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_bindTvInput">Allows the holder to bind to the top-level
-        interface of a TV input. Should never be needed for normal apps.</string>
-
-    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_modifyParentalControls">modify parental controls</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_modifyParentalControls">Allows the holder to modify the system\'s
-        parental controls data. Should never be needed for normal apps.</string>
-
-    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_manageDeviceAdmins">add or remove a device admin</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_manageDeviceAdmins">Allows the holder to add or remove active device
-        administrators. Should never be needed for normal apps.</string>
-
-    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_setOrientation">change screen orientation</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_setOrientation">Allows the app to change
-        the rotation of the screen at any time. Should never be needed for
-        normal apps.</string>
-
-    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. [CHAR LIMIT=30] -->
-    <string name="permlab_setPointerSpeed">change pointer speed</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. [CHAR LIMIT=NONE] -->
-    <string name="permdesc_setPointerSpeed">Allows the app to change
-        the mouse or trackpad pointer speed at any time. Should never be needed for
-        normal apps.</string>
-
-    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. [CHAR LIMIT=30] -->
-    <string name="permlab_setKeyboardLayout">change keyboard layout</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. [CHAR LIMIT=NONE] -->
-    <string name="permdesc_setKeyboardLayout">Allows the app to change
-        the keyboard layout. Should never be needed for normal apps.</string>
-
-    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_signalPersistentProcesses">send Linux signals to apps</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_signalPersistentProcesses">Allows the app to request that the
-        supplied signal be sent to all persistent processes.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_persistentActivity">make app always run</string>
@@ -1295,135 +749,9 @@
     <string name="permdesc_persistentActivity" product="default">Allows the app to make parts of itself persistent in memory.  This can limit memory available to other apps slowing down the phone.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_deletePackages">delete apps</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_deletePackages">Allows the app to delete
-        Android packages. Malicious apps may use this to delete important apps.</string>
-
-    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_clearAppUserData">delete other apps\' data</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_clearAppUserData">Allows the app to clear user data.</string>
-    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_deleteCacheFiles">delete other apps\' caches</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_deleteCacheFiles">Allows the app to delete
-        cache files.</string>
-
-    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_getPackageSize">measure app storage space</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_getPackageSize">Allows the app to retrieve its code, data, and cache sizes</string>
-
-    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_installPackages">directly install apps</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_installPackages">Allows the app to install new or updated
-        Android packages. Malicious apps may use this to add new apps with arbitrarily
-        powerful permissions.</string>
-
-    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_clearAppCache">delete all app cache data</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_clearAppCache" product="tablet">Allows the app to free tablet storage
-        by deleting files in the cache directories of other applications.  This may cause other
-        applications to start up more slowly as they need to re-retrieve their data.</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_clearAppCache" product="tv">Allows the app to free TV storage
-        by deleting files in the cache directories of other applications.  This may cause other
-        applications to start up more slowly as they need to re-retrieve their data.</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_clearAppCache" product="default">Allows the app to free phone storage
-        by deleting files in the cache directories of other applications.  This may cause other
-        applications to start up more slowly as they need to re-retrieve their data.</string>
-
-    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_movePackage">move app resources</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_movePackage">Allows the app to move app resources from internal to external media and vice versa.</string>
-
-    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_readLogs">read sensitive log data</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_readLogs" product="tablet">Allows the app to read from the
-        system\'s various log files.  This allows it to discover general
-        information about what you are doing with the tablet, potentially
-        including personal or private information.</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_readLogs" product="tv">Allows the app to read from the
-        system\'s various log files.  This allows it to discover general
-        information about what you are doing with the TV, potentially
-        including personal or private information.</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_readLogs" product="default">Allows the app to read from the
-        system\'s various log files.  This allows it to discover general
-        information about what you are doing with the phone, potentially
-        including personal or private information.</string>
-
-    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_anyCodecForPlayback">use any media decoder for playback</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_anyCodecForPlayback">Allows the app to use any installed
-        media decoder to decode for playback.</string>
-
-    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. This permission allows the app to install or uninstall trusted credentials, a.k.a. CA certificates. [CHAR LIMIT=NONE] -->
-    <string name="permlab_manageCaCertificates">manage trusted credentials</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. [CHAR LIMIT=NONE]-->
-    <string name="permdesc_manageCaCertificates">Allows the app to install and uninstall CA certificates as trusted credentials.</string>
-
-    <!-- Title of a permission that is never presented to the user.  This is not a
-         permission that an application must be granted by the user.  Instead, it
-         is part of a mechanism that applications use to indicate to the system
-         that they want to do scheduled background work.  -->
-    <string name="permlab_bindJobService">run the application\'s scheduled background work</string>
-    <!-- Description of an application permission, so that the user can understand
-         what is being done if they are curious. -->
-    <string name="permdesc_bindJobService">This permission allows the Android system to run the application in the background when requested.</string>
-
-    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_diagnostic">read/write to resources owned by diag</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_diagnostic">Allows the app to read and write to
-    any resource owned by the diag group; for example, files in /dev. This could
-    potentially affect system stability and security. This should be ONLY be used
-    for hardware-specific diagnostics by the manufacturer or operator.</string>
-
-    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_changeComponentState">enable or disable app components</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_changeComponentState" product="tablet">Allows the app to change whether a
-        component of another app is enabled or not. Malicious apps may use this
-        to disable important tablet capabilities. Care must be used with this permission, as it is
-        possible to get app components into an unusable, inconsistent, or unstable state.
-    </string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_changeComponentState" product="tv">Allows the app to change whether a
-        component of another app is enabled or not. Malicious apps may use this
-        to disable important TV capabilities. Care must be used with this permission, as it is
-        possible to get app components into an unusable, inconsistent, or unstable state.
-    </string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_changeComponentState" product="default">Allows the app to change whether a
-        component of another app is enabled or not. Malicious apps may use this
-        to disable important phone capabilities. Care must be used with this permission, as it is
-        possible to get app components into an unusable, inconsistent, or unstable state.
-    </string>
-
-    <!-- Title of an application permission for granting or revoking other permissions [CHAR LIMIT=NONE] -->
-    <string name="permlab_grantRevokePermissions">grant or revoke permissions</string>
-    <!-- Description of an application permission for granting or revoking other permissions [CHAR LIMIT=NONE] -->
-    <string name="permdesc_grantRevokePermissions">Allows an application to grant or revoke
-        specific permissions for it or other applications.  Malicious applications may use this
-        to access features you have not granted them.
-    </string>
-
-    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_setPreferredApplications">set preferred apps</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_setPreferredApplications">Allows the app to
-        modify your preferred apps. Malicious apps may
-        silently change the apps that are run, spoofing your
-        existing apps to collect private data from you.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_writeSettings">modify system settings</string>
@@ -1431,16 +759,6 @@
     <string name="permdesc_writeSettings">Allows the app to modify the
         system\'s settings data. Malicious apps may corrupt your system\'s
         configuration.</string>
-
-    <string name="permlab_writeSecureSettings">modify secure system settings</string>
-    <string name="permdesc_writeSecureSettings">Allows the app to modify the
-        system\'s secure settings data. Not for use by normal apps.</string>
-
-    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_writeGservices">modify the Google services map</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_writeGservices">Allows the app to modify the
-        Google services map.  Not for use by normal apps.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_receiveBootCompleted">run at startup</string>
@@ -1646,16 +964,8 @@
     <string name="permlab_accessLocationExtraCommands">access extra location provider commands</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_accessLocationExtraCommands">Allows the app to access
-      extra location provider commands.  This may allow the app to interfere
-      with the operation of the GPS or other location sources.</string>
-
-    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_installLocationProvider">permission to install a location provider</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_installLocationProvider">Create mock location sources
-      for testing or install a new location provider.  This allows the app to
-      override the location and/or status returned by other location sources
-      such as GPS or location providers.</string>
+        extra location provider commands.  This may allow the app to interfere
+        with the operation of the GPS or other location sources.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_accessFineLocation">precise location (GPS and
@@ -1679,69 +989,7 @@
       use them. Apps may use this to determine approximately where you
       are.</string>
 
-    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_accessSurfaceFlinger">access SurfaceFlinger</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_accessSurfaceFlinger">Allows the app to use SurfaceFlinger low-level features.</string>
-
-    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_readFrameBuffer">read frame buffer</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_readFrameBuffer">Allows the app to read the content of the frame buffer.</string>
-
-    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_accessInputFlinger">access InputFlinger</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_accessInputFlinger">Allows the app to use InputFlinger low-level features.</string>
-
-    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_configureWifiDisplay">configure Wifi displays</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_configureWifiDisplay">Allows the app to configure and connect to Wifi displays.</string>
-
-    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_controlWifiDisplay">control Wifi displays</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_controlWifiDisplay">Allows the app to control low-level features of Wifi displays.</string>
-
-    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_controlVpn">control Virtual Private Networks</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_controlVpn">Allows the app to control low-level features of Virtual Private Networks.</string>
-
-    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_captureAudioOutput">capture audio output</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_captureAudioOutput">Allows the app to capture and redirect audio output.</string>
-
-    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_captureAudioHotword">Hotword detection</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_captureAudioHotword">Allows the app to capture audio for Hotword detection. The capture can
-      happen in the background but does not prevent other audio capture (e.g. Camcorder).</string>
-
-    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_modifyAudioRouting">Audio Routing</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_modifyAudioRouting">Allows the app to directly control audio routing and
-      override audio policy decisions.</string>
-
-    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_captureVideoOutput">capture video output</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_captureVideoOutput">Allows the app to capture and redirect video output.</string>
-
-    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_captureSecureVideoOutput">capture secure video output</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_captureSecureVideoOutput">Allows the app to capture and redirect secure video output.</string>
-
-    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_mediaContentControl">control media playback and metadata access</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_mediaContentControl">Allows the app to control media playback and access the media information (title, author...).</string>
-
-    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+ <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_modifyAudioSettings">change your audio settings</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_modifyAudioSettings">Allows the app to modify global audio settings such as volume and which speaker is used for output.</string>
@@ -1764,82 +1012,6 @@
     <string name="permdesc_camera">Allows the app to take pictures and videos
       with the camera.  This permission allows the app to use the camera at any
       time without your confirmation.</string>
-    <!-- Title of a camera app permission, listed so the user can choose whether or not they want to allow it to disable the may-transmit light indicator. -->
-    <string name="permlab_cameraDisableTransmitLed">disable transmit indicator LED when camera is in use</string>
-    <!-- Description of a camera app permission, listed so the user can choose whether or not they want to allow it to disable the may-transmit light indicator. -->
-    <string name="permdesc_cameraDisableTransmitLed">Allows a pre-installed system application to disable the camera use indicator LED.</string>
-    <!-- Description of a camera app permission, listed so that the user can send the camera service notifications about system-wide events. -->
-    <string name="permdesc_cameraSendSystemEvent">Allows a pre-installed system application to send the camera service system events.</string>
-
-    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_brick" product="tablet">permanently disable tablet</string>
-    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_brick" product="tv">permanently disable TV</string>
-    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_brick" product="default">permanently disable phone</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_brick" product="tablet">Allows the app to
-        disable the entire tablet permanently. This is very dangerous.</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_brick" product="tv">Allows the app to
-        disable the entire TV permanently. This is very dangerous.</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_brick" product="default">Allows the app to
-        disable the entire phone permanently. This is very dangerous.</string>
-
-    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_reboot" product="tablet">force tablet reboot</string>
-    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_reboot" product="tv">force TV reboot</string>
-    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_reboot" product="default">force phone reboot</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_reboot" product="tablet">Allows the app to force the tablet to reboot.</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_reboot" product="tv">Allows the app to force the TV to reboot.</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_reboot" product="default">Allows the app to force the phone to reboot.</string>
-
-
-    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. [CHAR LIMIT=30] -->
-    <string name="permlab_mount_unmount_filesystems" product="nosdcard">access USB storage filesystem</string>
-    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_mount_unmount_filesystems" product="default">access SD Card filesystem</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_mount_unmount_filesystems">Allows the app to mount and
-        unmount filesystems for removable storage.</string>
-
-    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. [CHAR LIMIT=30] -->
-    <string name="permlab_mount_format_filesystems" product="nosdcard">erase USB storage</string>
-    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_mount_format_filesystems" product="default">erase SD Card</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_mount_format_filesystems">Allows the app to format removable storage.</string>
-
-    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_asec_access">get information on internal storage</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_asec_access">Allows the app to get information on internal storage.</string>
-
-    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_asec_create">create internal storage</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_asec_create">Allows the app to create internal storage.</string>
-
-    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_asec_destroy">destroy internal storage</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_asec_destroy">Allows the app to destroy internal storage.</string>
-
-    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_asec_mount_unmount">mount/unmount internal storage</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_asec_mount_unmount">Allows the app to mount/unmount internal storage.</string>
-
-    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_asec_rename">rename internal storage</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_asec_rename">Allows the app to rename internal storage.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_vibrate">control vibration</string>
@@ -1852,27 +1024,6 @@
     <string name="permdesc_flashlight">Allows the app to control the flashlight.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_manageUsb">manage preferences and permissions for USB devices</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_manageUsb">Allows the app to manage preferences and permissions for USB devices.</string>
-
-    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_accessMtp">implement MTP protocol</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_accessMtp">Allows access to the kernel MTP driver to implement the MTP USB protocol.</string>
-
-    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_hardware_test">test hardware</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_hardware_test">Allows the app to control
-        various peripherals for the purpose of hardware testing.</string>
-
-    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_fm">access FM radio</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_fm">Allows the app to access FM radio to listen to programs.</string>
-
-    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_callPhone">directly call phone numbers</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_callPhone">Allows the app to call phone numbers
@@ -1882,71 +1033,12 @@
       confirmation.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_callPrivileged">directly call any phone numbers</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_callPrivileged">Allows the app to call
-        any phone number, including emergency numbers, without your intervention.
-        Malicious apps may place unnecessary and illegal calls to emergency
-        services.</string>
-
-    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_performCdmaProvisioning" product="tablet">directly start CDMA tablet setup</string>
-    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_performCdmaProvisioning" product="tv">directly start CDMA TV setup</string>
-    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_performCdmaProvisioning" product="default">directly start CDMA phone setup</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_performCdmaProvisioning">Allows the app to start CDMA provisioning.
-        Malicious apps may unnecessarily start CDMA provisioning.</string>
-
-    <string name="permlab_performSimActivation">start SIM card setup</string>
-    <string name="permdesc_performSimActivation">Allows the app to handle SIM activation requests.
-        The app may directly perform activation or may delegate to another app.</string>
-
-    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_locationUpdates">control location update notifications</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_locationUpdates">Allows the app to enable/disable location
-        update notifications from the radio.  Not for use by normal apps.</string>
-
-    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_checkinProperties">access checkin properties</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_checkinProperties">Allows the app read/write access to
-        properties uploaded by the checkin service.  Not for use by normal
-        apps.</string>
-
-    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_bindGadget">choose widgets</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_bindGadget">Allows the app to tell the system
-        which widgets can be used by which app. An app with this permission
-        can give access to personal data to other apps.
-        Not for use by normal apps.</string>
-
-    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_modifyPhoneState">modify phone state</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_modifyPhoneState">Allows the app to control the
-        phone features of the device. An app with this permission can switch
-        networks, turn the phone radio on and off and the like without ever notifying
-        you.</string>
-
-    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_readPhoneState">read phone status and identity</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_readPhoneState">Allows the app to access the phone
       features of the device.  This permission allows the app to determine the
       phone number and device IDs, whether a call is active, and the remote number
       connected by a call.</string>
-
-    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_readPrecisePhoneState">read precise phone states</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_readPrecisePhoneState">Allows the app to access the precise
-      phone states.  This permission allows the app to determine the real
-      call status, whether a call is active or in the background, call fails,
-      precise data connection status and data connection fails.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_wakeLock" product="tablet">prevent tablet from sleeping</string>
@@ -1970,42 +1062,6 @@
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_transmitIr" product="default">Allows the app to use the phone\'s infrared transmitter.</string>
 
-
-    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_devicePower" product="tablet">power tablet on or off</string>
-    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_devicePower" product="tv">power TV on or off</string>
-    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_devicePower" product="default">power phone on or off</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_devicePower" product="tablet">Allows the app to turn the
-        tablet on or off.</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_devicePower" product="tv">Allows the app to turn the
-        TV on or off.</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_devicePower" product="default">Allows the app to turn the phone on or off.</string>
-
-    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_userActivity">reset display timeout</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_userActivity">Allows the app to reset the display timeout.</string>
-
-    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_factoryTest">run in factory test mode</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_factoryTest" product="tablet">Run as a low-level manufacturer test,
-        allowing complete access to the tablet hardware. Only available
-        when a tablet is running in manufacturer test mode.</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_factoryTest" product="tv">Run as a low-level manufacturer test,
-        allowing complete access to the TV hardware. Only available
-        when a TV is running in manufacturer test mode.</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_factoryTest" product="default">Run as a low-level manufacturer test,
-        allowing complete access to the phone hardware. Only available
-        when a phone is running in manufacturer test mode.</string>
-
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_setWallpaper">set wallpaper</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
@@ -2017,22 +1073,6 @@
     <string name="permdesc_setWallpaperHints">Allows the app to set the system wallpaper size hints.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_masterClear">reset system to factory defaults</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_masterClear">Allows the app to completely
-        reset the system to its factory settings, erasing all data,
-        configuration, and installed apps.</string>
-
-    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_setTime">set time</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_setTime" product="tablet">Allows the app to change the tablet\'s clock time.</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_setTime" product="tv">Allows the app to change the TV\'s clock time.</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_setTime" product="default">Allows the app to change the phone\'s clock time.</string>
-
-    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_setTimeZone">set time zone</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_setTimeZone" product="tablet">Allows the app to change the tablet\'s time zone.</string>
@@ -2040,11 +1080,6 @@
     <string name="permdesc_setTimeZone" product="tv">Allows the app to change the TV\'s time zone.</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_setTimeZone" product="default">Allows the app to change the phone\'s time zone.</string>
-
-    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_accountManagerService">act as the AccountManagerService</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_accountManagerService">Allows the app to make calls to AccountAuthenticators.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_getAccounts">find accounts on the device</string>
@@ -2060,6 +1095,7 @@
     <string name="permdesc_getAccounts" product="default">Allows the app to get
       the list of accounts known by the phone.  This may include any accounts
       created by applications you have installed.</string>
+
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_authenticateAccounts">create accounts and set passwords</string>
@@ -2096,14 +1132,7 @@
      applications provide means to send data to the internet, so this
      permission is not required to send data to the internet.</string>
 
-    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_writeApnSettings">change/intercept network settings and traffic</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_writeApnSettings">Allows the app to change network settings and to intercept and inspect all network traffic,
-      for example to change the proxy and port of any APN. Malicious apps may monitor, redirect, or modify network
-      packets without your knowledge.</string>
-
-    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+ <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_changeNetworkState">change network connectivity</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_changeNetworkState">Allows the app to change the state of network connectivity.</string>
@@ -2112,11 +1141,6 @@
     <string name="permlab_changeTetherState">change tethered connectivity</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the applicaiton to do this. -->
     <string name="permdesc_changeTetherState">Allows the app to change the state of tethered network connectivity.</string>
-
-    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_changeBackgroundDataSetting">change background data usage setting</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_changeBackgroundDataSetting">Allows the app to change the background data usage setting.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_accessWifiState">view Wi-Fi connections</string>
@@ -2146,7 +1170,7 @@
       packets sent to all devices on a Wi-Fi network using multicast addresses,
       not just your phone.  It uses more power than the non-multicast mode.</string>
 
-    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+ <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_bluetoothAdmin">access Bluetooth settings</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_bluetoothAdmin" product="tablet">Allows the app to
@@ -2159,27 +1183,6 @@
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_bluetoothAdmin" product="default">Allows the app to configure
       the local Bluetooth phone, and to discover and pair with remote devices.</string>
-
-    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_bluetoothPriv">allow Bluetooth pairing by Application</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_bluetoothPriv" product="tablet">Allows the app to
-      pair with remote devices without user interaction.</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_bluetoothPriv" product="tv">Allows the app to
-      pair with remote devices without user interaction.</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_bluetoothPriv" product="default">Allows the app to
-      pair with remote devices without user interaction.</string>
-
-    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_bluetoothMap">access Bluetooth MAP data</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_bluetoothMap" product="tablet">Allows the app to access Bluetooth MAP data.</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_bluetoothMap" product="tv">Allows the app to access Bluetooth MAP data.</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_bluetoothMap" product="default">Allows the app to access Bluetooth MAP data.</string>
 
     <string name="permlab_accessWimaxState">connect and disconnect from WiMAX</string>
     <string name="permdesc_accessWimaxState">Allows the app to determine whether
@@ -2194,19 +1197,7 @@
     <string name="permdesc_changeWimaxState" product="default">Allows the app to
       connect the phone to and disconnect the phone from WiMAX networks.</string>
 
-    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_scoreNetworks">score networks</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_scoreNetworks" product="tablet">Allows the app to
-      rank networks and influence which networks the tablet should prefer.</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_scoreNetworks" product="tv">Allows the app to
-      rank networks and influence which networks the TV should prefer.</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_scoreNetworks" product="default">Allows the app to
-        rank networks and influence which networks the phone should prefer.</string>
-
-    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+ <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_bluetooth">pair with Bluetooth devices</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_bluetooth" product="tablet">Allows the app to view the
@@ -2290,17 +1281,6 @@
     <string name="permdesc_readSyncStats">Allows an app to read the sync stats for an account, including the history of sync events and how much data is synced. </string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_subscribedFeedsRead">read subscribed feeds</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_subscribedFeedsRead">Allows the app to get details about the currently synced feeds.</string>
-
-    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_subscribedFeedsWrite">write subscribed feeds</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_subscribedFeedsWrite">Allows the app to modify
-      your currently synced feeds. Malicious apps may change your synced feeds.</string>
-
-    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_readDictionary">read terms you added to the dictionary</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_readDictionary">Allows the app to read all words,
@@ -2330,142 +1310,11 @@
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_sdcardWrite" product="default">Allows the app to write to the SD card.</string>
 
-    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. [CHAR LIMIT=30] -->
-    <string name="permlab_mediaStorageWrite" product="default">modify/delete internal media storage contents</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. [CHAR LIMIT=NONE] -->
-    <string name="permdesc_mediaStorageWrite" product="default">Allows the app to modify the contents of the internal media storage.</string>
-
-    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. [CHAR LIMIT=30] -->
-    <string name="permlab_manageDocs" product="default">manage document storage</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. [CHAR LIMIT=NONE] -->
-    <string name="permdesc_manageDocs" product="default">Allows the app to manage document storage.</string>
-
-    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. [CHAR LIMIT=30] -->
-    <string name="permlab_sdcardAccessAll">access external storage of all users</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_sdcardAccessAll">Allows the app to access external storage for all users.</string>
-
-    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_cache_filesystem">access the cache filesystem</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_cache_filesystem">Allows the app to read and write the cache filesystem.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_use_sip">make/receive SIP calls</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_use_sip">Allows the app to make and receive SIP calls.</string>
-
-    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_register_sim_subscription">register new telecom SIM connections</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_register_sim_subscription">Allows the app to register new telecom SIM connections.</string>
-
-    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_register_call_provider">register new telecom connections</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_register_call_provider">Allows the app to register new telecom connections.</string>
-
-    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_connection_manager">manage telecom connections</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_connection_manager">Allows the app to manage telecom connections.</string>
-
-    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_bind_incall_service">interact with in-call screen</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_bind_incall_service">Allows the app to control when and how the user sees the in-call screen.</string>
-
-    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_bind_connection_service">interact with telephony services</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_bind_connection_service">Allows the app to interact with telephony services to make/receive calls.</string>
-
-    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_control_incall_experience">provide an in-call user experience</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_control_incall_experience">Allows the app to provide an in-call user experience.</string>
-
-    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_readNetworkUsageHistory">read historical network usage</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_readNetworkUsageHistory">Allows the app to read historical network usage for specific networks and apps.</string>
-
-    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_manageNetworkPolicy">manage network policy</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_manageNetworkPolicy">Allows the app to manage network policies and define app-specific rules.</string>
-
-    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_modifyNetworkAccounting">modify network usage accounting</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_modifyNetworkAccounting">Allows the app to modify how network usage is accounted against apps. Not for use by normal apps.</string>
-
-    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_accessNotifications">access notifications</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_accessNotifications">Allows the app to retrieve, examine, and clear notifications, including those posted by other apps.</string>
-
-    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_bindNotificationListenerService">bind to a notification listener service</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_bindNotificationListenerService">Allows the holder to bind to the top-level interface of a notification listener service. Should never be needed for normal apps.</string>
-
-    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_bindChooserTargetService">bind to a chooser target service</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_bindChooserTargetService">Allows the holder to bind to the top-level interface of a chooser target service. Should never be needed for normal apps.</string>
-
-    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_bindConditionProviderService">bind to a condition provider service</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_bindConditionProviderService">Allows the holder to bind to the top-level interface of a condition provider service. Should never be needed for normal apps.</string>
-
-    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_bindMediaRouteService">bind to a media route service</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_bindMediaRouteService">Allows the holder to bind to the top-level interface of a media route service. Should never be needed for normal apps.</string>
-
-    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_bindDreamService">bind to a dream service</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_bindDreamService">Allows the holder to bind to the top-level interface of a dream service. Should never be needed for normal apps.</string>
-
-    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_invokeCarrierSetup">invoke the carrier-provided configuration app</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_invokeCarrierSetup">Allows the holder to invoke the carrier-provided configuration app. Should never be needed for normal apps.</string>
-
-    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_accessNetworkConditions">listen for observations on network conditions</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_accessNetworkConditions">Allows an application to listen for observations on network conditions. Should never be needed for normal apps.</string>
-
-    <string name="permlab_setInputCalibration">change input device calibration</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_setInputCalibration">Allows the app to modify the calibration parameters of the touch screen. Should never be needed for normal apps.</string>
-
-    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_accessDrmCertificates">access DRM certificates</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_accessDrmCertificates">Allows an application to provision and use DRM certficates. Should never be needed for normal apps.</string>
-
-    <string name="permlab_handoverStatus">Receive Android Beam transfer status</string>
-    <string name="permdesc_handoverStatus">Allows this application to receive information about current Android Beam transfers</string>
-
-    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_removeDrmCertificates">remove DRM certificates</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_removeDrmCertificates">Allows an application to remove DRM certficates. Should never be needed for normal apps.</string>
-
-    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_bindCarrierMessagingService">bind to a carrier messaging service</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_bindCarrierMessagingService">Allows the holder to bind to the top-level interface of a carrier messaging service. Should never be needed for normal apps.</string>
-
-    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_accessVoiceInteractionService">interact with voice interaction service</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_accessVoiceInteractionService">Allows the holder to interact with the currently active voice interaction service. Should never be needed for normal apps.</string>
 
     <!-- Policy administration -->
 
@@ -3331,22 +2180,13 @@
         applications with web browsing capabilities.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether
-        they want to allow the application to do this. -->
+    they want to allow the application to do this. -->
     <string name="permlab_setAlarm">set an alarm</string>
     <!-- Description of an application permission, listed so the user can choose whether
         they want to allow the application to do this. -->
     <string name="permdesc_setAlarm">Allows the app to set an alarm in
-      an installed alarm clock app. Some alarm clock apps may
-      not implement this feature.</string>
-
-    <!-- Title of an application permission, listed so the user can choose whether
-        they want to allow the application to modify and remove voicemails in the user's voicemail
-        inbox. [CHAR LIMIT=NONE] -->
-    <string name="permlab_writeVoicemail">write voicemails</string>
-    <!-- Description of an application permission, listed so the user can choose whether
-        they want to allow the application to modify and remove voicemails in the user's voicemail
-        inbox. [CHAR LIMIT=NONE] -->
-    <string name="permdesc_writeVoicemail">Allows the app to modify and remove messages from your voicemail inbox.</string>
+        an installed alarm clock app. Some alarm clock apps may
+        not implement this feature.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether
         they want to allow the application to do this. [CHAR LIMIT=NONE] -->
@@ -3357,13 +2197,6 @@
       to your voicemail inbox.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether
-        they want to allow the application to do this. [CHAR LIMIT=NONE] -->
-    <string name="permlab_readVoicemail">read voicemail</string>
-    <!-- Description of an application permission, listed so the user can choose whether
-        they want to allow the application to do this. [CHAR LIMIT=NONE] -->
-    <string name="permdesc_readVoicemail">Allows the app to read your voicemails.</string>
-
-    <!-- Title of an application permission, listed so the user can choose whether
         they want to allow the application to do this. -->
     <string name="permlab_writeGeolocationPermissions">modify Browser geolocation permissions</string>
     <!-- Description of an application permission, listed so the user can choose whether
@@ -3371,55 +2204,6 @@
     <string name="permdesc_writeGeolocationPermissions">Allows the app to modify the
         Browser\'s geolocation permissions. Malicious apps
         may use this to allow sending location information to arbitrary web sites.</string>
-
-    <!-- Title of an application permission which allows the application to verify whether
-         a different package is able to be installed by some internal logic. [CHAR LIMIT=40] -->
-    <string name="permlab_packageVerificationAgent">verify packages</string>
-    <!-- Description of an application permission which allows the application to verify whether
-         a different package is able to be installed by some internal heuristic. [CHAR LIMIT=NONE] -->
-    <string name="permdesc_packageVerificationAgent">Allows the app to verify a package is
-        installable.</string>
-
-    <!-- Title of an application permission which allows the application to verify whether
-         a different package is able to be installed by some internal heuristic. [CHAR LIMIT=40] -->
-    <string name="permlab_bindPackageVerifier">bind to a package verifier</string>
-    <!-- Description of an application permission which allows the application to verify whether
-         a different package is able to be installed by some internal heuristic. [CHAR LIMIT=NONE] -->
-    <string name="permdesc_bindPackageVerifier">Allows the holder to make requests of
-        package verifiers. Should never be needed for normal apps.</string>
-
-    <!-- Title of an application permission which allows the application to verify whether
-         a different intent filter is able to be verified by some internal logic. [CHAR LIMIT=40] -->
-    <string name="permlab_intentFilterVerificationAgent">verify intent filter</string>
-    <!-- Description of an application permission which allows the application to verify whether
-         a different intent filter is able to be verified by some internal heuristic. [CHAR LIMIT=NONE] -->
-    <string name="permdesc_intentFilterVerificationAgent">Allows the app to check if an intent filter
-        is verified or not.</string>
-
-    <!-- Title of an application permission which allows the application to verify whether
-         a different intent filter is able to be verified by some internal logic. [CHAR LIMIT=40] -->
-    <string name="permlab_bindIntentFilterVerifier">bind to an intent filter verifier</string>
-    <!-- Description of an application permission which allows the application to verify whether
-         a different intent filter is able to be verified by some internal logic. [CHAR LIMIT=NONE] -->
-    <string name="permdesc_bindIntentFilterVerifier">Allows the holder to make requests of
-        intent filter verifiers. Should never be needed for normal apps.</string>
-
-    <!-- Title of an application permission which allows the application to access serial ports via the SerialManager. [CHAR LIMIT=40] -->
-    <string name="permlab_serialPort">access serial ports</string>
-    <!-- Description of an application permission which allows the application access serial ports via the SerialManager. [CHAR LIMIT=NONE] -->
-    <string name="permdesc_serialPort">Allows the holder to access serial ports using the SerialManager API.</string>
-
-    <!-- Title of an application permission which allows the holder to access content
-         providers from outside an ApplicationThread. [CHAR LIMIT=40] -->
-    <string name="permlab_accessContentProvidersExternally">access content providers externally</string>
-    <!-- Description of an application permission which allows the holder to access
-         content providers from outside an ApplicationThread. [CHAR LIMIT=NONE] -->
-    <string name="permdesc_accessContentProvidersExternally">Allows the holder to access content
-     providers from the shell. Should never be needed for normal apps.</string>
-    <!-- Title of an application permission which allows the application to suggest that now is a bad time to reboot the device in order to apply an OTA.  [CHAR LIMIT=40] -->
-    <string name="permlab_updateLock">discourage automatic device updates</string>
-    <!-- Description of an application permission which allows the application to suggest that now is a bad time to reboot the device in order to apply an OTA.  [CHAR LIMIT=NONE] -->
-    <string name="permdesc_updateLock">Allows the holder to offer information to the system about when would be a good time for a noninteractive reboot to upgrade the device.</string>
 
     <!-- If the user enters a password in a form on a website, a dialog will come up asking if they want to save the password. Text in the save password dialog, asking if the browser should remember a password. -->
     <string name="save_password_message">Do you want the browser to remember this password?</string>
@@ -4139,60 +2923,10 @@
     <!-- Shown in LauncherActivity when the requested target Intent didn't return any matching Activities, leaving the list empty. -->
     <string name="activity_list_empty">No matching activities found.</string>
 
-    <!-- permission attributes related to package usage statistics -->
-    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_pkgUsageStats">update component usage statistics</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_pkgUsageStats">Allows the app to modify collected component usage statistics. Not for use by normal apps.</string>
-
-    <!-- permission attributes related to default container service -->
-    <!-- Title of an application permission that lets an application use default container service. -->
-    <string name="permlab_copyProtectedData">copy content</string>
-    <!-- Description of an application permission,  used to invoke default container service to copy content. -->
-    <string name="permdesc_copyProtectedData">Allows the app to invoke default container service to copy content. Not for use by normal apps.</string>
-
     <!-- Title of an application permission that lets an application route media output. -->
     <string name="permlab_route_media_output">Route media output</string>
     <!-- Description of an application permission that lets an application route media output. -->
     <string name="permdesc_route_media_output">Allows an application to route media output to other external devices.</string>
-
-    <!-- Title of an application permission that lets an application access keyguard secure storage. -->
-    <string name="permlab_access_keyguard_secure_storage">Access keyguard secure storage</string>
-    <!-- Description of an application permission that lets an application access keyguard secure storage. -->
-    <string name="permdesc_access_keyguard_secure_storage">Allows an application to access keguard secure storage.</string>
-
-    <!-- Title of an application permission that lets it control keyguard. -->
-    <string name="permlab_control_keyguard">Control displaying and hiding keyguard</string>
-    <!-- Description of an application permission that lets it control keyguard. -->
-    <string name="permdesc_control_keyguard">Allows an application to control keguard.</string>
-
-    <!-- Title of an application permission that lets it listen to trust state changes. -->
-    <string name="permlab_trust_listener">Listen to trust state changes.</string>
-    <!-- Description of an application permission that lets it listen to trust state changes. -->
-    <string name="permdesc_trust_listener">Allows an application to listen for changes in trust state.</string>
-
-    <!-- Title of an application permission that lets it provide a trust agent. -->
-    <string name="permlab_provide_trust_agent">Provide a trust agent.</string>
-    <!-- Description of an application permission that lets it provide a trust agent. -->
-    <string name="permdesc_provide_trust_agent">Allows an application to provide a trust agent.</string>
-    <!-- Title of an application permission that lets it launch the trust agent settings menu -->
-    <string name="permlab_launch_trust_agent_settings">Launch trust agent settings menu.</string>
-    <!-- Description of an application permission that lets it launch the trust agent settings menu -->
-    <string name="permdesc_launch_trust_agent_settings">Allows an application to launch an activity that changes the trust agent behavior.</string>
-    <!-- Title of an application permission that lets it bind to a trust agent service. -->
-    <string name="permlab_bind_trust_agent_service">Bind to a trust agent service</string>
-    <!-- Description of an application permission that lets it bind to a trust agent service. -->
-    <string name="permdesc_bind_trust_agent_service">Allows an application to bind to a trust agent service.</string>
-
-    <!-- Title of an application permission that lets it interact with recovery. -->
-    <string name="permlab_recovery">Interact with update and recovery system</string>
-    <!-- Description of an application permission that lets it control keyguard. -->
-    <string name="permdesc_recovery">Allows an application to interact with the recovery system and system updates.</string>
-
-    <!-- Title of an application permission that lets it manage media projection sessions. -->
-    <string name="permlab_manageMediaProjection">Manage media projection sessions</string>
-    <!-- Description of an application permission that lets it manage media projection sessions. -->
-    <string name="permdesc_manageMediaProjection">Allows an application to manage media projection sessions. These sessions can provide applications the ability to capture display and audio contents. Should never be needed by normal apps.</string>
 
     <!-- Title of an application permission that lets it read install sessions. -->
     <string name="permlab_readInstallSessions">Read install sessions</string>
