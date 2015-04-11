@@ -1627,9 +1627,9 @@
     <string name="issued_on" msgid="5895017404361397232">"Data de emisión:"</string>
     <string name="expires_on" msgid="3676242949915959821">"Caduca o:"</string>
     <string name="serial_number" msgid="758814067660862493">"Número de serie:"</string>
-    <string name="fingerprints" msgid="4516019619850763049">"Identificacións dixitais:"</string>
-    <string name="sha256_fingerprint" msgid="4391271286477279263">"Identificación dixital SHA-256:"</string>
-    <string name="sha1_fingerprint" msgid="7930330235269404581">"Identificación dixital SHA-1:"</string>
+    <string name="fingerprints" msgid="4516019619850763049">"Impresións dixitais:"</string>
+    <string name="sha256_fingerprint" msgid="4391271286477279263">"Impresión dixital SHA-256:"</string>
+    <string name="sha1_fingerprint" msgid="7930330235269404581">"Impresión dixital SHA-1:"</string>
     <string name="activity_chooser_view_see_all" msgid="4292569383976636200">"Ver todas"</string>
     <string name="activity_chooser_view_dialog_title_default" msgid="4710013864974040615">"Seleccionar actividade"</string>
     <string name="share_action_provider_share_with" msgid="5247684435979149216">"Compartir con"</string>

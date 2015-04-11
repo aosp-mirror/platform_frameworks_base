@@ -1260,7 +1260,7 @@
     <string name="dialog_alert_title" msgid="2049658708609043103">"Uzmanību!"</string>
     <string name="loading" msgid="7933681260296021180">"Notiek ielāde..."</string>
     <string name="capital_on" msgid="1544682755514494298">"IESLĒGT"</string>
-    <string name="capital_off" msgid="6815870386972805832">"IZSLĒGT"</string>
+    <string name="capital_off" msgid="6815870386972805832">"IZSL."</string>
     <string name="whichApplication" msgid="4533185947064773386">"Pabeigt darbību, izmantojot"</string>
     <string name="whichApplicationNamed" msgid="8260158865936942783">"Pabeigt darbību, izmantojot %1$s"</string>
     <string name="whichViewApplication" msgid="3272778576700572102">"Atvērt, izmantojot"</string>
