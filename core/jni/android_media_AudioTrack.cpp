@@ -204,9 +204,14 @@ android_media_AudioTrack_setup(JNIEnv *env, jobject thiz, jobject weak_this,
         return (jint) AUDIO_JAVA_ERROR;
     }
 
-    // Java channel masks don't map directly to the native definition, but it's a simple shift
-    // to skip the two deprecated channel configurations "default" and "mono".
-    audio_channel_mask_t nativeChannelMask = ((uint32_t)javaChannelMask) >> 2;
+    // Java channel masks don't map directly to the native definition for positional
+    // channel masks: it's a shift by 2 to skip the two deprecated channel
+    // configurations "default" and "mono".
+    // Invalid channel representations are caught by !audio_is_output_channel() below.
+    audio_channel_mask_t nativeChannelMask =
+            audio_channel_mask_get_representation(javaChannelMask)
+                == AUDIO_CHANNEL_REPRESENTATION_POSITION
+            ? javaChannelMask >> 2 : javaChannelMask;
 
     if (!audio_is_output_channel(nativeChannelMask)) {
         ALOGE("Error creating AudioTrack: invalid channel mask %#x.", javaChannelMask);
