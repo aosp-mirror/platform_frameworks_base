@@ -24,6 +24,7 @@ import android.content.pm.IntentFilterVerificationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageUserState;
 import android.os.storage.VolumeInfo;
+import android.text.TextUtils;
 import android.util.ArraySet;
 import android.util.SparseArray;
 
@@ -435,23 +436,23 @@ abstract class PackageSettingBase extends SettingBase {
         userState.delete(userId);
     }
 
-    public IntentFilterVerificationInfo getIntentFilterVerificationInfo() {
+    IntentFilterVerificationInfo getIntentFilterVerificationInfo() {
         return verificationInfo;
     }
 
-    public void setIntentFilterVerificationInfo(IntentFilterVerificationInfo info) {
+    void setIntentFilterVerificationInfo(IntentFilterVerificationInfo info) {
         verificationInfo = info;
     }
 
-    public int getDomainVerificationStatusForUser(int userId) {
+    int getDomainVerificationStatusForUser(int userId) {
         return readUserState(userId).domainVerificationStatus;
     }
 
-    public void setDomainVerificationStatusForUser(int status, int userId) {
+    void setDomainVerificationStatusForUser(int status, int userId) {
         modifyUserState(userId).domainVerificationStatus = status;
     }
 
-    public void clearDomainVerificationStatusForUser(int userId) {
+    void clearDomainVerificationStatusForUser(int userId) {
         modifyUserState(userId).domainVerificationStatus =
                 PackageManager.INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_UNDEFINED;
     }

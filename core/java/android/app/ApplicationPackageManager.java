@@ -1359,6 +1359,26 @@ final class ApplicationPackageManager extends PackageManager {
     }
 
     @Override
+    public String getDefaultBrowserPackageName(int userId) {
+        try {
+            return mPM.getDefaultBrowserPackageName(userId);
+        } catch (RemoteException e) {
+            // Should never happen!
+            return null;
+        }
+    }
+
+    @Override
+    public boolean setDefaultBrowserPackageName(String packageName, int userId) {
+        try {
+            return mPM.setDefaultBrowserPackageName(packageName, userId);
+        } catch (RemoteException e) {
+            // Should never happen!
+            return false;
+        }
+    }
+
+    @Override
     public void setInstallerPackageName(String targetPackage,
             String installerPackageName) {
         try {
