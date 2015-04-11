@@ -317,13 +317,11 @@
     <string name="keyguard_unlock" msgid="8043466894212841998">"Проведите вверх, чтобы разблокировать"</string>
     <string name="phone_hint" msgid="3101468054914424646">"Чтобы позвонить, пролистните вправо"</string>
     <string name="camera_hint" msgid="5241441720959174226">"Чтобы включить камеру, пролистните влево"</string>
-    <!-- no translation found for interruption_level_none (8284541443482072628) -->
-    <skip />
-    <!-- no translation found for interruption_level_priority (6426766465363855505) -->
-    <skip />
+    <string name="interruption_level_none" msgid="8284541443482072628">"Не беспокоить"</string>
+    <string name="interruption_level_priority" msgid="6426766465363855505">"Только важные"</string>
     <string name="interruption_level_alarms" msgid="5226306993448328896">"Только будильник"</string>
     <string name="interruption_level_all" msgid="1330581184930945764">"Все"</string>
-    <string name="interruption_level_none_twoline" msgid="3942121050170227056">"Без\nпрерываний"</string>
+    <string name="interruption_level_none_twoline" msgid="3942121050170227056">"Не\nбеспокоить"</string>
     <string name="interruption_level_priority_twoline" msgid="1564715335217164124">"Только\nважные"</string>
     <string name="interruption_level_alarms_twoline" msgid="3266909566410106146">"Только\nбудильник"</string>
     <string name="keyguard_indication_charging_time" msgid="1757251776872835768">"Зарядка батареи (осталось <xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g>)"</string>
@@ -393,6 +391,6 @@
     <string name="volumeui_prompt_deny" msgid="5720663643411696731">"Нет"</string>
     <string name="volumeui_notification_title" msgid="4906770126345910955">"Приложение <xliff:g id="APP_NAME">%1$s</xliff:g> назначено регулятором громкости"</string>
     <string name="volumeui_notification_text" msgid="1826889705095768656">"Нажмите, чтобы восстановить приложение по умолчанию."</string>
-    <!-- no translation found for volume_zen_switch_text (6388350641576595452) -->
+    <!-- no translation found for volume_zen_switch_text (8149183012610587643) -->
     <skip />
 </resources>

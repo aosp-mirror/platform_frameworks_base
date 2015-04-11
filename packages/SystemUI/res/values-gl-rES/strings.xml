@@ -61,7 +61,7 @@
     <string name="always_use_device" msgid="1450287437017315906">"Usar de forma predeterminada para dispositivo USB"</string>
     <string name="always_use_accessory" msgid="1210954576979621596">"Usar de forma predeterminada para este accesorio USB"</string>
     <string name="usb_debugging_title" msgid="4513918393387141949">"Permitir a depuración de erros de USB?"</string>
-    <string name="usb_debugging_message" msgid="2220143855912376496">"A identificación dixital da clave de RSA do ordenador é:\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
+    <string name="usb_debugging_message" msgid="2220143855912376496">"A impresión dixital da clave de RSA do ordenador é:\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="303335496705863070">"Permitir sempre desde este ordenador"</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"Ampliar ata ocupar todo"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"Estirar ata ocupar todo"</string>
@@ -389,5 +389,6 @@
     <string name="volumeui_prompt_deny" msgid="5720663643411696731">"Denegar"</string>
     <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g> é o cadro de diálogo de volume"</string>
     <string name="volumeui_notification_text" msgid="1826889705095768656">"Toca para restaurar o orixinal."</string>
-    <string name="volume_zen_switch_text" msgid="6388350641576595452">"Bloquear interrupcións"</string>
+    <!-- no translation found for volume_zen_switch_text (8149183012610587643) -->
+    <skip />
 </resources>

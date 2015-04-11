@@ -315,10 +315,8 @@
     <string name="keyguard_unlock" msgid="8043466894212841998">"Повлечете за да се отклучи"</string>
     <string name="phone_hint" msgid="3101468054914424646">"Повлечете надесно за телефон"</string>
     <string name="camera_hint" msgid="5241441720959174226">"Повлечете налево за камера"</string>
-    <!-- no translation found for interruption_level_none (8284541443482072628) -->
-    <skip />
-    <!-- no translation found for interruption_level_priority (6426766465363855505) -->
-    <skip />
+    <string name="interruption_level_none" msgid="8284541443482072628">"Без прекини"</string>
+    <string name="interruption_level_priority" msgid="6426766465363855505">"Само приоритетно"</string>
     <string name="interruption_level_alarms" msgid="5226306993448328896">"Само аларми"</string>
     <string name="interruption_level_all" msgid="1330581184930945764">"Сѐ"</string>
     <string name="interruption_level_none_twoline" msgid="3942121050170227056">"Нема\nпрекини"</string>
@@ -391,6 +389,6 @@
     <string name="volumeui_prompt_deny" msgid="5720663643411696731">"Одбиј"</string>
     <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g> е дијалог за јачина на звук"</string>
     <string name="volumeui_notification_text" msgid="1826889705095768656">"Допрете за да го вратите оригиналот."</string>
-    <!-- no translation found for volume_zen_switch_text (6388350641576595452) -->
+    <!-- no translation found for volume_zen_switch_text (8149183012610587643) -->
     <skip />
 </resources>

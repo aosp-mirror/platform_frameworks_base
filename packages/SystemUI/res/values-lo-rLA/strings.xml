@@ -387,5 +387,6 @@
     <string name="volumeui_prompt_deny" msgid="5720663643411696731">"ປະຕິເສດ"</string>
     <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g> ແມ່ນ​ໜ້າ​ຕ່າງ​ລະ​ດັບ​ສຽງ"</string>
     <string name="volumeui_notification_text" msgid="1826889705095768656">"ສໍາ​ຜັດ​ເພື່ອກູ້​ຄືນ​ຕົ້ນ​ສະ​ບັບ​."</string>
-    <string name="volume_zen_switch_text" msgid="6388350641576595452">"ບ​ລັອກ​ການ​ລົບ​ກວນ"</string>
+    <!-- no translation found for volume_zen_switch_text (8149183012610587643) -->
+    <skip />
 </resources>
