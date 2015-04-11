@@ -515,17 +515,29 @@ public class StackScrollAlgorithm {
         for (HeadsUpManager.HeadsUpEntry entry: headsUpEntries) {
             ExpandableNotificationRow row = entry.entry.row;
             StackViewState childState = resultState.getViewStateForView(row);
+            ExpandableNotificationRow topHeadsUpEntry = ambientState.getTopHeadsUpEntry();
+            boolean isTopEntry = topHeadsUpEntry == row;
             if (!row.isInShade()) {
                 childState.yTranslation = 0;
+                childState.height = row.getHeadsUpHeight();
+                if (!isTopEntry) {
+                    // Ensure that a headsUp is never below the topmost headsUp
+                    StackViewState topState = resultState.getViewStateForView(topHeadsUpEntry);
+                    childState.height = row.getHeadsUpHeight();
+                    childState.yTranslation = Math.min(childState.yTranslation,
+                            topState.yTranslation + topState.height - childState.height);
+                }
+            } else if (mIsExpanded) {
+                if (isTopEntry) {
+                    childState.height += row.getHeadsUpHeight() - mCollapsedSize;
+                }
+                childState.height = Math.max(childState.height, row.getHeadsUpHeight());
+                // Ensure that the heads up is always visible even when scrolled of from the bottom
+                float bottomPosition = ambientState.getMaxHeadsUpTranslation() - childState.height;
+                childState.yTranslation = Math.min(childState.yTranslation,
+                        bottomPosition);
             }
-            if (ambientState.getTopHeadsUpEntry() == row) {
-                childState.height += row.getHeadsUpHeight() - mCollapsedSize;
-            }
-            childState.height = Math.max(childState.height, row.getHeadsUpHeight());
 
-            // Ensure that the heads up is always visible even when scrolled of from the bottom
-            childState.yTranslation = Math.min(childState.yTranslation,
-                    ambientState.getMaxHeadsUpTranslation() - childState.height);
         }
     }
 

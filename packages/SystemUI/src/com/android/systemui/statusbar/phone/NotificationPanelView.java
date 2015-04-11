@@ -45,6 +45,7 @@ import com.android.systemui.EventLogTags;
 import com.android.systemui.R;
 import com.android.systemui.qs.QSContainer;
 import com.android.systemui.qs.QSPanel;
+import com.android.systemui.statusbar.ExpandableNotificationRow;
 import com.android.systemui.statusbar.ExpandableView;
 import com.android.systemui.statusbar.FlingAnimationUtils;
 import com.android.systemui.statusbar.GestureRecorder;
@@ -1445,7 +1446,7 @@ public class NotificationPanelView extends PanelView implements
         updateHeader();
         updateUnlockIcon();
         updateNotificationTranslucency();
-        mHeadsUpManager.setIsExpanded(!isShadeCollapsed());
+        mHeadsUpManager.setIsExpanded(expandedHeight != 0);
         mNotificationStackScroller.setShadeExpanded(!isShadeCollapsed());
         if (DEBUG) {
             invalidate();
@@ -2151,6 +2152,11 @@ public class NotificationPanelView extends PanelView implements
                         mHeadsUpExistenceChangedRunnable);
             }
         }
+    }
+
+    @Override
+    public void OnHeadsUpPinned(ExpandableNotificationRow headsUp) {
+        mNotificationStackScroller.generateHeadsUpAnimation(headsUp, true);
     }
 
     @Override

@@ -51,8 +51,8 @@ public class NotificationContentView extends FrameLayout {
 
     private NotificationViewWrapper mContractedWrapper;
 
-    private int mSmallHeight;
-    private int mHeadsUpHeight;
+    private final int mSmallHeight;
+    private final int mHeadsUpHeight;
     private int mClipTopAmount;
 
     private int mContentHeight;
@@ -77,6 +77,8 @@ public class NotificationContentView extends FrameLayout {
     public NotificationContentView(Context context, AttributeSet attrs) {
         super(context, attrs);
         mFadePaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.ADD));
+        mSmallHeight = getResources().getDimensionPixelSize(R.dimen.notification_min_height);
+        mHeadsUpHeight = getResources().getDimensionPixelSize(R.dimen.notification_mid_height);
         reset(true);
     }
 
@@ -150,8 +152,7 @@ public class NotificationContentView extends FrameLayout {
         removeAllViews();
         mContractedChild = null;
         mExpandedChild = null;
-        mSmallHeight = getResources().getDimensionPixelSize(R.dimen.notification_min_height);
-        mHeadsUpHeight = getResources().getDimensionPixelSize(R.dimen.notification_mid_height);
+        mHeadsUpChild = null;
         mVisibleView = CONTRACTED;
         if (resetActualHeight) {
             mContentHeight = mSmallHeight;
@@ -175,7 +176,6 @@ public class NotificationContentView extends FrameLayout {
             mContractedChild.animate().cancel();
             removeView(mContractedChild);
         }
-        sanitizeLayoutParams(child, mSmallHeight);
         addView(child);
         mContractedChild = child;
         mContractedWrapper = NotificationViewWrapper.wrap(getContext(), child);
@@ -259,12 +259,6 @@ public class NotificationContentView extends FrameLayout {
         setClipBounds(mClipBounds);
     }
 
-    private void sanitizeLayoutParams(View contractedChild, int height) {
-        LayoutParams lp = (LayoutParams) contractedChild.getLayoutParams();
-        lp.height = height;
-        contractedChild.setLayoutParams(lp);
-    }
-
     private void selectLayout(boolean animate, boolean force) {
         if (mContractedChild == null) {
             return;
@@ -337,8 +331,8 @@ public class NotificationContentView extends FrameLayout {
 
     private int calculateVisibleView() {
         boolean noExpandedChild = mExpandedChild == null;
-        if (mIsHeadsUp) {
-            if (mContentHeight <= mHeadsUpHeight || noExpandedChild) {
+        if (mIsHeadsUp && mHeadsUpChild != null) {
+            if (mContentHeight <= mHeadsUpChild.getHeight() || noExpandedChild) {
                 return HEADSUP;
             } else {
                 return EXPANDED;

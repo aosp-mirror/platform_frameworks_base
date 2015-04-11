@@ -1845,6 +1845,10 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     }
 
     @Override
+    public void OnHeadsUpPinned(ExpandableNotificationRow headsUp) {
+    }
+
+    @Override
     public void OnHeadsUpStateChanged(Entry entry, boolean isHeadsUp) {
         if (!isHeadsUp && mHeadsUpEntriesToRemoveOnSwitch.contains(entry)) {
             removeNotification(entry.key, mLatestRankingMap);

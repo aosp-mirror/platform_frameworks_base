@@ -621,7 +621,7 @@ public class NotificationStackScrollLayout extends ViewGroup
         requestChildrenUpdate();
     }
 
-    private boolean isPinnedHeadsUp(View v) {
+    public boolean isPinnedHeadsUp(View v) {
         if (v instanceof ExpandableNotificationRow) {
             ExpandableNotificationRow row = (ExpandableNotificationRow) v;
             return row.isHeadsUp() && !row.isInShade();
@@ -1875,7 +1875,7 @@ public class NotificationStackScrollLayout extends ViewGroup
             boolean onBottom = false;
             if (!row.isInShade() && !isHeadsUp) {
                 type = AnimationEvent.ANIMATION_TYPE_HEADS_UP_DISAPPEAR;
-            } else if (mAddedHeadsUpChildren.contains(row)) {
+            } else if (mAddedHeadsUpChildren.contains(row) || (!row.isInShade() && !mIsExpanded)) {
                 if (!row.isInShade() || shouldHunAppearFromBottom(row)) {
                     // Our custom add animation
                     type = AnimationEvent.ANIMATION_TYPE_HEADS_UP_APPEAR;

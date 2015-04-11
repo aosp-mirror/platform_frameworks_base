@@ -643,9 +643,10 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
         }
         mMaxExpandHeight = expandedChild.getHeight();
         View headsUpChild = mPrivateLayout.getHeadsUpChild();
-        if (headsUpChild != null) {
-            mHeadsUpHeight = headsUpChild.getHeight();
+        if (headsUpChild == null) {
+            headsUpChild = mPrivateLayout.getContractedChild();
         }
+        mHeadsUpHeight = headsUpChild.getHeight();
         if (intrinsicBefore != getIntrinsicHeight()) {
             notifyHeightChanged(false  /* needsAnimation */);
         }

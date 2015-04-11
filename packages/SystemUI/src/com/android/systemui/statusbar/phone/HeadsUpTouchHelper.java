@@ -89,7 +89,6 @@ public class HeadsUpTouchHelper implements Gefingerpoken {
                     mCollapseSnoozes = h < 0;
                     mInitialTouchX = x;
                     mInitialTouchY = y;
-                    mHeadsUpManager.releaseAllToShade();
                     int expandedHeight = mPickedChild.getActualHeight();
                     mPanel.startExpandMotion(x, y, true /* startTracking */, expandedHeight);
                     return true;

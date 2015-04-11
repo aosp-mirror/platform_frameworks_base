@@ -156,7 +156,7 @@ public class HeadsUpManager implements ViewTreeObserver.OnComputeInternalInsetsL
         if (alert) {
             HeadsUpEntry headsUpEntry = mHeadsUpEntries.get(headsUp.key);
             headsUpEntry.updateEntry();
-            headsUpEntry.entry.row.setInShade(mIsExpanded);
+            setEntryToShade(headsUpEntry, mIsExpanded);
         }
     }
 
@@ -168,13 +168,26 @@ public class HeadsUpManager implements ViewTreeObserver.OnComputeInternalInsetsL
         mHeadsUpEntries.put(entry.key, headsUpEntry);
         entry.row.setHeadsUp(true);
         if (!entry.row.isInShade() && mIsExpanded) {
-            headsUpEntry.entry.row.setInShade(true);
+            setEntryToShade(headsUpEntry, true);
         }
-        updatePinnedHeadsUpState(false);
+        updatePinnedHeadsUpState(false /*forceImmediate */);
         for (OnHeadsUpChangedListener listener : mListeners) {
             listener.OnHeadsUpStateChanged(entry, true);
         }
         entry.row.sendAccessibilityEvent(AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED);
+    }
+
+    private void setEntryToShade(HeadsUpEntry headsUpEntry, boolean inShade) {
+        ExpandableNotificationRow row = headsUpEntry.entry.row;
+        if (row.isInShade() != inShade) {
+            row.setInShade(inShade);
+            updatePinnedHeadsUpState(false /* forceImmediate */);
+            if (!inShade) {
+                for (OnHeadsUpChangedListener listener :mListeners) {
+                    listener.OnHeadsUpPinned(row);
+                }
+            }
+        }
     }
 
     private void removeHeadsUpEntry(NotificationData.Entry entry) {
@@ -183,7 +196,7 @@ public class HeadsUpManager implements ViewTreeObserver.OnComputeInternalInsetsL
         mEntryPool.release(remove);
         entry.row.sendAccessibilityEvent(AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED);
         entry.row.setHeadsUp(false);
-        updatePinnedHeadsUpState(false);
+        updatePinnedHeadsUpState(false /* forceImmediate */);
         for (OnHeadsUpChangedListener listener : mListeners) {
             listener.OnHeadsUpStateChanged(entry, false);
         }
@@ -392,7 +405,7 @@ public class HeadsUpManager implements ViewTreeObserver.OnComputeInternalInsetsL
             HeadsUpEntry entry = mHeadsUpEntries.get(key);
             entry.entry.row.setInShade(true);
         }
-        updatePinnedHeadsUpState(true);
+        updatePinnedHeadsUpState(true /* forceImmediate */);
     }
 
     public void onExpandingFinished() {
@@ -412,7 +425,12 @@ public class HeadsUpManager implements ViewTreeObserver.OnComputeInternalInsetsL
     }
 
     public void setIsExpanded(boolean isExpanded) {
-        mIsExpanded = isExpanded;
+        if (isExpanded != mIsExpanded) {
+            mIsExpanded = isExpanded;
+            if (isExpanded) {
+                releaseAllToShade();
+            }
+        }
     }
 
     public int getTopHeadsUpHeight() {
@@ -495,6 +513,7 @@ public class HeadsUpManager implements ViewTreeObserver.OnComputeInternalInsetsL
 
     public interface OnHeadsUpChangedListener {
         void OnPinnedHeadsUpExistChanged(boolean exist, boolean changeImmediatly);
+        void OnHeadsUpPinned(ExpandableNotificationRow headsUp);
         void OnHeadsUpStateChanged(NotificationData.Entry entry, boolean isHeadsUp);
     }
 }
