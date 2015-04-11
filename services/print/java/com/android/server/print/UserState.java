@@ -204,8 +204,8 @@ final class UserState implements PrintSpoolerCallbacks, PrintServiceCallbacks {
 
             IntentSender intentSender = PendingIntent.getActivityAsUser(
                     mContext, 0, intent, PendingIntent.FLAG_ONE_SHOT
-                    | PendingIntent.FLAG_CANCEL_CURRENT, null, new UserHandle(mUserId))
-                    .getIntentSender();
+                    | PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_IMMUTABLE,
+                    null, new UserHandle(mUserId)) .getIntentSender();
 
             Bundle result = new Bundle();
             result.putParcelable(PrintManager.EXTRA_PRINT_JOB, printJob);

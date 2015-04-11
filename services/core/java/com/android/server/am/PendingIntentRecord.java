@@ -222,19 +222,26 @@ final class PendingIntentRecord extends IIntentSender.Stub {
                     owner.cancelIntentSenderLocked(this, true);
                     canceled = true;
                 }
+
                 Intent finalIntent = key.requestIntent != null
                         ? new Intent(key.requestIntent) : new Intent();
-                if (intent != null) {
-                    int changes = finalIntent.fillIn(intent, key.flags);
-                    if ((changes&Intent.FILL_IN_DATA) == 0) {
+
+                final boolean immutable = (key.flags & PendingIntent.FLAG_IMMUTABLE) != 0;
+                if (!immutable) {
+                    if (intent != null) {
+                        int changes = finalIntent.fillIn(intent, key.flags);
+                        if ((changes & Intent.FILL_IN_DATA) == 0) {
+                            resolvedType = key.requestResolvedType;
+                        }
+                    } else {
                         resolvedType = key.requestResolvedType;
                     }
+                    flagsMask &= ~Intent.IMMUTABLE_FLAGS;
+                    flagsValues &= flagsMask;
+                    finalIntent.setFlags((finalIntent.getFlags() & ~flagsMask) | flagsValues);
                 } else {
                     resolvedType = key.requestResolvedType;
                 }
-                flagsMask &= ~Intent.IMMUTABLE_FLAGS;
-                flagsValues &= flagsMask;
-                finalIntent.setFlags((finalIntent.getFlags()&~flagsMask) | flagsValues);
 
                 final long origId = Binder.clearCallingIdentity();
 
