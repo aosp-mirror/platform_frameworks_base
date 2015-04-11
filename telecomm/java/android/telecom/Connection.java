@@ -121,7 +121,7 @@ public abstract class Connection implements IConferenceable {
      * Local device supports bidirectional video calling.
      * @hide
      */
-    public static final int CAPABILITY_SUPPORTS_VT_LOCAL =
+    public static final int CAPABILITY_SUPPORTS_VT_LOCAL_BIDIRECTIONAL =
             CAPABILITY_SUPPORTS_VT_LOCAL_RX | CAPABILITY_SUPPORTS_VT_LOCAL_TX;
 
     /**
@@ -140,7 +140,7 @@ public abstract class Connection implements IConferenceable {
      * Remote device supports bidirectional video calling.
      * @hide
      */
-    public static final int CAPABILITY_SUPPORTS_VT_REMOTE =
+    public static final int CAPABILITY_SUPPORTS_VT_REMOTE_BIDIRECTIONAL =
             CAPABILITY_SUPPORTS_VT_REMOTE_RX | CAPABILITY_SUPPORTS_VT_REMOTE_TX;
 
     /**
@@ -267,8 +267,8 @@ public abstract class Connection implements IConferenceable {
         if (can(capabilities, CAPABILITY_SUPPORTS_VT_LOCAL_TX)) {
             builder.append(" CAPABILITY_SUPPORTS_VT_LOCAL_TX");
         }
-        if (can(capabilities, CAPABILITY_SUPPORTS_VT_LOCAL)) {
-            builder.append(" CAPABILITY_SUPPORTS_VT_LOCAL");
+        if (can(capabilities, CAPABILITY_SUPPORTS_VT_LOCAL_BIDIRECTIONAL)) {
+            builder.append(" CAPABILITY_SUPPORTS_VT_LOCAL_BIDIRECTIONAL");
         }
         if (can(capabilities, CAPABILITY_SUPPORTS_VT_REMOTE_RX)) {
             builder.append(" CAPABILITY_SUPPORTS_VT_REMOTE_RX");
@@ -276,8 +276,8 @@ public abstract class Connection implements IConferenceable {
         if (can(capabilities, CAPABILITY_SUPPORTS_VT_REMOTE_TX)) {
             builder.append(" CAPABILITY_SUPPORTS_VT_REMOTE_TX");
         }
-        if (can(capabilities, CAPABILITY_SUPPORTS_VT_REMOTE)) {
-            builder.append(" CAPABILITY_SUPPORTS_VT_REMOTE");
+        if (can(capabilities, CAPABILITY_SUPPORTS_VT_REMOTE_BIDIRECTIONAL)) {
+            builder.append(" CAPABILITY_SUPPORTS_VT_REMOTE_BIDIRECTIONAL");
         }
         if (can(capabilities, CAPABILITY_HIGH_DEF_AUDIO)) {
             builder.append(" CAPABILITY_HIGH_DEF_AUDIO");
