@@ -15021,7 +15021,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * Utility function, called by draw(canvas, parent, drawingTime) to handle the less common
      * case of an active Animation being run on the view.
      */
-    private boolean drawAnimation(ViewGroup parent, long drawingTime,
+    private boolean applyLegacyAnimation(ViewGroup parent, long drawingTime,
             Animation a, boolean scalingRequired) {
         Transformation invalidationTransform;
         final int flags = parent.mGroupFlags;
@@ -15138,23 +15138,13 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         Transformation transformToApply = null;
         boolean concatMatrix = false;
 
-        boolean scalingRequired = false;
-        boolean caching;
+        boolean scalingRequired = mAttachInfo != null && mAttachInfo.mScalingRequired;
         int layerType = getLayerType();
-
         final boolean hardwareAccelerated = canvas.isHardwareAccelerated();
-        if ((flags & ViewGroup.FLAG_CHILDREN_DRAWN_WITH_CACHE) != 0 ||
-                (flags & ViewGroup.FLAG_ALWAYS_DRAWN_WITH_CACHE) != 0) {
-            caching = true;
-            // Auto-scaled apps are not hw-accelerated, no need to set scaling flag on DisplayList
-            if (mAttachInfo != null) scalingRequired = mAttachInfo.mScalingRequired;
-        } else {
-            caching = (layerType != LAYER_TYPE_NONE) || hardwareAccelerated;
-        }
 
         final Animation a = getAnimation();
         if (a != null) {
-            more = drawAnimation(parent, drawingTime, a, scalingRequired);
+            more = applyLegacyAnimation(parent, drawingTime, a, scalingRequired);
             concatMatrix = a.willChangeTransformationMatrix();
             if (concatMatrix) {
                 mPrivateFlags3 |= PFLAG3_VIEW_IS_ANIMATING_TRANSFORM;
@@ -15204,34 +15194,32 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         RenderNode renderNode = null;
         Bitmap cache = null;
         boolean hasDisplayList = false;
-        if (caching) {
-            if (!hardwareAccelerated) {
-                if (layerType != LAYER_TYPE_NONE) {
-                    layerType = LAYER_TYPE_SOFTWARE;
-                    buildDrawingCache(true);
-                }
-                cache = getDrawingCache(true);
-            } else {
-                switch (layerType) {
-                    case LAYER_TYPE_SOFTWARE:
-                        if (usingRenderNodeProperties) {
-                            hasDisplayList = canHaveDisplayList();
-                        } else {
-                            buildDrawingCache(true);
-                            cache = getDrawingCache(true);
-                        }
-                        break;
-                    case LAYER_TYPE_HARDWARE:
-                        if (usingRenderNodeProperties) {
-                            hasDisplayList = canHaveDisplayList();
-                        }
-                        break;
-                    case LAYER_TYPE_NONE:
-                        // Delay getting the display list until animation-driven alpha values are
-                        // set up and possibly passed on to the view
+        if (!hardwareAccelerated) {
+            if (layerType != LAYER_TYPE_NONE) {
+                layerType = LAYER_TYPE_SOFTWARE;
+                buildDrawingCache(true);
+            }
+            cache = getDrawingCache(true);
+        } else {
+            switch (layerType) {
+                case LAYER_TYPE_SOFTWARE:
+                    if (usingRenderNodeProperties) {
                         hasDisplayList = canHaveDisplayList();
-                        break;
-                }
+                    } else {
+                        buildDrawingCache(true);
+                        cache = getDrawingCache(true);
+                    }
+                    break;
+                case LAYER_TYPE_HARDWARE:
+                    if (usingRenderNodeProperties) {
+                        hasDisplayList = canHaveDisplayList();
+                    }
+                    break;
+                case LAYER_TYPE_NONE:
+                    // Delay getting the display list until animation-driven alpha values are
+                    // set up and possibly passed on to the view
+                    hasDisplayList = canHaveDisplayList();
+                    break;
             }
         }
         usingRenderNodeProperties &= hasDisplayList;
