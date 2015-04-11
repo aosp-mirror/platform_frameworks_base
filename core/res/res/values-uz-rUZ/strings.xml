@@ -218,69 +218,43 @@
     <string name="android_system_label" msgid="6577375335728551336">"Android tizimi"</string>
     <string name="user_owner_label" msgid="6465364741001216388">"Shaxsiy ilovalar"</string>
     <string name="managed_profile_label" msgid="6260850669674791528">"Ish"</string>
-    <string name="permgrouplab_costMoney" msgid="5429808217861460401">"Pullik xizmatlaringiz"</string>
-    <string name="permgroupdesc_costMoney" msgid="3293301903409869495">"Pulingizni sarfaydigan amallarni bajaring."</string>
-    <string name="permgrouplab_messages" msgid="7521249148445456662">"Xabarlaringiz"</string>
-    <string name="permgroupdesc_messages" msgid="7821999071003699236">"SMS, e-pochta va boshqa xabarlarni o‘qish va yozish."</string>
-    <string name="permgrouplab_personalInfo" msgid="3519163141070533474">"Shaxsiy ma’lumotlaringiz"</string>
-    <string name="permgroupdesc_personalInfo" msgid="8426453129788861338">"Aloqa kartangizda joylashgan siz haqingizdagi ma’lumotlga to‘g‘ridan to‘g‘ri kiradi."</string>
+    <!-- no translation found for permgrouplab_contacts (3657758145679177612) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_contacts (1437393511338346185) -->
+    <skip />
+    <!-- no translation found for permgrouplab_location (7275582855722310164) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_location (536889867433972794) -->
+    <skip />
     <string name="permgrouplab_socialInfo" msgid="5799096623412043791">"Ijtimoiy ma’lumotingiz"</string>
     <string name="permgroupdesc_socialInfo" msgid="7129842457611643493">"Kontaktlaringiz va ijtimoiy aloqalaringiz haqidagi ma’lumotga to‘g‘ridan to‘g‘ri o‘tadi."</string>
-    <string name="permgrouplab_location" msgid="635149742436692049">"Manzilingiz"</string>
-    <string name="permgroupdesc_location" msgid="5704679763124170100">"Jismoniy joylashuvingizni kuzatish."</string>
-    <string name="permgrouplab_network" msgid="5808983377727109831">"Tarmoq ma’lumoti"</string>
-    <string name="permgroupdesc_network" msgid="4478299413241861987">"Turli xil tarmoq xususiyatlariga ruxsat."</string>
-    <string name="permgrouplab_bluetoothNetwork" msgid="1585403544162128109">"Bluetooth"</string>
-    <string name="permgroupdesc_bluetoothNetwork" msgid="5625288577164282391">"Qurilmalar va tarmoqlarga Bluetooth orqali kirishga ruxsat."</string>
-    <string name="permgrouplab_audioSettings" msgid="8329261670151871235">"Audio sozlamalar"</string>
-    <string name="permgroupdesc_audioSettings" msgid="2641515403347568130">"Audio sozlamalarini o‘zgartirish"</string>
-    <string name="permgrouplab_affectsBattery" msgid="6209246653424798033">"Batareyaga ta’sir ko‘rsatadi"</string>
-    <string name="permgroupdesc_affectsBattery" msgid="6441275320638916947">"Batareya quvvatini tez sarflaydigan xususiyatlardan foydalaning"</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"Taqvim"</string>
-    <string name="permgroupdesc_calendar" msgid="5777534316982184416">"Taqvim va tadbirlarga to‘g‘ridan to‘g‘ri kirish."</string>
-    <string name="permgrouplab_dictionary" msgid="4148597128843641379">"Foydalanuvchi lug‘atini o‘qish"</string>
-    <string name="permgroupdesc_dictionary" msgid="7921166355964764490">"Foydalanuvchi lug‘atidan so‘zlarni o‘qish."</string>
-    <string name="permgrouplab_writeDictionary" msgid="8090237702432576788">"Foydalanuvchi lug‘atiga yozish"</string>
-    <string name="permgroupdesc_writeDictionary" msgid="2711561994497361646">"Foydalanuvchi lug‘atiga so‘zlar qo‘shish."</string>
+    <!-- no translation found for permgroupdesc_calendar (2116049656685591803) -->
+    <skip />
+    <!-- no translation found for permgrouplab_sms (228308803364967808) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_sms (3695085582674524761) -->
+    <skip />
+    <!-- no translation found for permgrouplab_dictionary (8114410334955871144) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_dictionary (7586787746354378335) -->
+    <skip />
     <string name="permgrouplab_bookmarks" msgid="1949519673103968229">"Xatcho‘plar va tarix"</string>
     <string name="permgroupdesc_bookmarks" msgid="4169771606257963028">"Xatcho‘plar va brauzer tarixiga to‘g‘ridan to‘g‘ri kirishga ruxsat."</string>
-    <string name="permgrouplab_deviceAlarms" msgid="6117704629728824101">"Uyg‘otgich"</string>
-    <string name="permgroupdesc_deviceAlarms" msgid="4769356362251641175">"Uyg‘otgichni o‘rnatish."</string>
-    <string name="permgrouplab_voicemail" msgid="4162237145027592133">"Ovozli pochta"</string>
-    <string name="permgroupdesc_voicemail" msgid="2498403969862951393">"Ovozli pochtaga tog‘ridan to‘g‘ri kirish."</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"Mikrofon"</string>
-    <string name="permgroupdesc_microphone" msgid="7106618286905738408">"Audioni yozish uchun mikrofonga to‘g‘ridan to‘g‘ri ulanadi."</string>
+    <!-- no translation found for permgroupdesc_microphone (1296196977187629181) -->
+    <skip />
     <string name="permgrouplab_camera" msgid="4820372495894586615">"Kamera"</string>
-    <string name="permgroupdesc_camera" msgid="2933667372289567714">"Rasmga yoki videoga olish uchun kameraga to‘g‘ridan to‘g‘ri kirish."</string>
-    <string name="permgrouplab_screenlock" msgid="8275500173330718168">"Ekranni qulflash"</string>
-    <string name="permgroupdesc_screenlock" msgid="7067497128925499401">"Qurilmangizning qulf ekraniga o‘zgartirish imkoniyati."</string>
-    <string name="permgrouplab_appInfo" msgid="8028789762634147725">"Ilovalaringiz haqida ma’lumot"</string>
-    <string name="permgroupdesc_appInfo" msgid="3950378538049625907">"Qurilmadagi boshqa ilovalarning ishiga ta’sir qilish qobiliyati."</string>
-    <string name="permgrouplab_wallpaper" msgid="3850280158041175998">"Orqa fon"</string>
-    <string name="permgroupdesc_wallpaper" msgid="5630417854750540154">"Qurilma orqa fon rasmlari sozlamalarini o‘zgartiradi."</string>
-    <string name="permgrouplab_systemClock" msgid="406535759236612992">"Soat"</string>
-    <string name="permgroupdesc_systemClock" msgid="3944359833624094992">"Qurilma vaqti yoki vaqt hududini o‘zgartirish."</string>
-    <string name="permgrouplab_statusBar" msgid="2095862568113945398">"Holat paneli"</string>
-    <string name="permgroupdesc_statusBar" msgid="6242593432226807171">"Qurilma holat paneli sozlamalarini o‘zgartiradi."</string>
-    <string name="permgrouplab_syncSettings" msgid="3341990986147826541">"Sinx. sozlamalari"</string>
-    <string name="permgroupdesc_syncSettings" msgid="7603195265129031797">"Sinxronlashtirish sozlamalariga ruxsat."</string>
-    <string name="permgrouplab_accounts" msgid="3359646291125325519">"Hisoblaringiz"</string>
-    <string name="permgroupdesc_accounts" msgid="4948732641827091312">"Mavjud hisoblarga kirish."</string>
-    <string name="permgrouplab_hardwareControls" msgid="7998214968791599326">"Qurilma boshqaruvlari"</string>
-    <string name="permgroupdesc_hardwareControls" msgid="4357057861225462702">"Telefondagi qurilmaga to‘g‘ridan to‘g‘ri kirish."</string>
-    <string name="permgrouplab_phoneCalls" msgid="9067173988325865923">"Telefondan qo‘ng‘iroqlar"</string>
-    <string name="permgroupdesc_phoneCalls" msgid="7489701620446183770">"Monitor, yozib olish va telefon qo‘ng‘iroqlari jarayonlari."</string>
-    <string name="permgrouplab_systemTools" msgid="4652191644082714048">"Tizim asboblari"</string>
-    <string name="permgroupdesc_systemTools" msgid="8162102602190734305">"Tizimga past darajada kirish va boshqarish."</string>
-    <string name="permgrouplab_developmentTools" msgid="3446164584710596513">"Dasturlash asboblari"</string>
-    <string name="permgroupdesc_developmentTools" msgid="7058828032358142018">"Ilova ishlab chiqaruvchilar uchun mo‘ljallangan funksiyalar"</string>
-    <string name="permgrouplab_display" msgid="4279909676036402636">"Boshqa foydalanuvchi interfeysi ilovasi"</string>
-    <string name="permgroupdesc_display" msgid="6051002031933013714">"Boshqa ilovalarda foydalanuvchi interfeysiga effekt qo‘shish"</string>
-    <string name="permgrouplab_storage" msgid="1971118770546336966">"Xotira"</string>
-    <string name="permgroupdesc_storage" product="nosdcard" msgid="7442318502446874999">"USB xotiraga ruxsat."</string>
-    <string name="permgroupdesc_storage" product="default" msgid="9203302214915355774">"SD kartaga ruxsat."</string>
-    <string name="permgrouplab_accessibilityFeatures" msgid="7919025602283593907">"Qulayliklar xususiyatlari"</string>
-    <string name="permgroupdesc_accessibilityFeatures" msgid="4205196881678144335">"Yordamchi texnologiya so‘rashi mumkin bo‘lgan xususiyatlar."</string>
+    <!-- no translation found for permgroupdesc_camera (2429930670410559293) -->
+    <skip />
+    <!-- no translation found for permgrouplab_phone (5229115638567440675) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_phone (2016641188146068700) -->
+    <skip />
+    <!-- no translation found for permgrouplab_sensors (7416703484233940260) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_sensors (2987451839455524494) -->
+    <skip />
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Oynadagi kontentni ajratib olish"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Joriy oynadagi kontent ma’lumotlarini o‘rganib chiqish."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Tegib o‘rganish xizmatini yoqish"</string>
@@ -305,14 +279,8 @@
     <string name="permdesc_receiveSms" msgid="6424387754228766939">"Ilovaga SMS xabarlarini qabul qilish va va ularni qayta ishlash uchun ruxsat beradi. Bu sizga yuborilgan xabarlarni ilova sizga ko‘rsatmasdan kuzatishi va o‘chirishi mumkinligini bildiradi."</string>
     <string name="permlab_receiveMms" msgid="1821317344668257098">"matn xabarlarini qabul qilish (MMS)"</string>
     <string name="permdesc_receiveMms" msgid="533019437263212260">"Ilovaga MMS xabarlarini qabul qilish va ularni qayta ishlash uchun ruxsat beradi. Bu sizga yuborilgan xabarlarni ilova sizga ko‘rsatmasdan kuzatishi va o‘chirishi mumkinligini bildiradi."</string>
-    <string name="permlab_receiveEmergencyBroadcast" msgid="1803477660846288089">"favqulodda radio uzatishni qabul qilish"</string>
-    <string name="permdesc_receiveEmergencyBroadcast" msgid="848524070262431974">"Ilova favqulloda tarqatma xabarlarni olishi va ularni qayta ishlashi mumkin. Ushbu ruxsatnoma faqat tizimga oid ilovalar uchun mavjud."</string>
-    <string name="permlab_readCellBroadcasts" msgid="1598328843619646166">"uyali tarmoq operatori xabarlarini o‘qish"</string>
-    <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"Ilovaga qurilmangiz tomonidan qabul qilingan uyali tarmoq operatori xabarlarini o‘qish uchun ruxsat beradi. Uyali tarmoq operatorining ogohlantiruvchi xabarlari ba’zi manzillarga favqulodda holatlar haqida ogohlantirish uchun jo‘natiladi. Zararli ilovalar uyali tarmoq orqali favqulodda xabar qabul qilinganda qurilmangizning ish faoliyati yoki amallariga xalaqit qilishi mumkin"</string>
     <string name="permlab_sendSms" msgid="5600830612147671529">"SMS xabarlarni jo‘natish"</string>
     <string name="permdesc_sendSms" msgid="7094729298204937667">"Ilovaga SMS xabarlarini jo‘natish uchun ruxsat beradi. Bu kutilmagan xarajatlarga sabab bo‘lishi mumkin. Zararli ilovalar sizdan so‘roqsiz xabarlar jo‘natish orqali pulingizni sarflashi mumkin."</string>
-    <string name="permlab_sendRespondViaMessageRequest" msgid="8713889105305943200">"xabarlashish dasturlari orqali javob jo‘natish"</string>
-    <string name="permdesc_sendRespondViaMessageRequest" msgid="7107648548468778734">"Kiruvchi qo‘ng‘iroqlarga xabar orqali javob berishda foydalanish uchun turli xabar jo‘natish dasturlari bilan bog‘lash uchun so‘rovlar jo‘natishga ruxsat beradi."</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"matn xabarlaringizni o‘qish (SMS yoki MMS)"</string>
     <string name="permdesc_readSms" product="tablet" msgid="2467981548684735522">"Ilovaga planshetingiz yoki SIM kartangizga zaxiralangan SMS xabarlarini o‘qish uchun ruxsat beradi. Bu huquq ilovaga tarkibi va maxfiyligidan qat’iy nazar har qanday SMS xabarlarni o‘qish imkonini beradi."</string>
     <string name="permdesc_readSms" product="tv" msgid="5102425513647038535">"Ilovaga televizor yoki SIM kartangizga saqlangan SMS xabarlarni o‘qish huquqini beradi. Bu ilovaga barcha SMS xabarlarni, ularning tarkibi yoki maxfiyligidan qat’i nazar, o‘qish huquqini beradi."</string>
@@ -323,188 +291,24 @@
     <string name="permdesc_writeSms" product="default" msgid="7268668709052328567">"Ilova telefon xotirasi yoki SIM kartaga saqlangan SMS xabarlarni o‘zgartirishi mumkin. Zararli dasturlar uning yordamida xabarlaringizni o‘chirib tashlashi mumkin."</string>
     <string name="permlab_receiveWapPush" msgid="5991398711936590410">"matn xabarlarini qabul qilish (WAP)"</string>
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"Ilovaga WAP xabarlarni qabul qilish va ularni qayta ishlash uchun ruxsat beradi. Ushbu huquq sizga ko‘rsatmasdan sizga yuborilgan xabarlarni kuzatish yoki o‘chirish xususiyatiga ham ega."</string>
-    <string name="permlab_receiveBluetoothMap" msgid="7593811487142360528">"Bluetooth xabarlarini (MAP) qabul qilish"</string>
-    <string name="permdesc_receiveBluetoothMap" msgid="8656755936919466345">"Bluetooth MAP xabarlarni qabul qilish va qayta ishlash. O‘qilmagan xabarlarni kuzatish va o‘chirish."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"ishlab turgan ilovalar to‘g‘risida ma’lumot olish"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"Ilovaga hozirda va so‘nggi ishga tushirilgan vazifalar haqida to‘liq ma’lumot olishiga ruxsat beradi. Bu ilovaga qurilmadagi ishlatilayotgan ilovalar haqidagi ma’lumotlarga ega bo‘lishiga ruxsat berishi mumkin."</string>
-    <string name="permlab_startTasksFromRecents" msgid="8990073877885690623">"so‘nggi foydalanilganlar ro‘yxatidagi vazifani ishga tushirish"</string>
-    <string name="permdesc_startTasksFromRecents" msgid="7382133554871222235">"Ilovaga ActivityManager.getRecentTaskList() obyektidan qaytgan so‘ndirilgan vazifalarni ishga tushirish uchun ActivityManager.RecentTaskInfo obyektidan foydalanishga ruxsat beradi."</string>
-    <string name="permlab_interactAcrossUsers" msgid="7114255281944211682">"foydalanuvchilar o‘rtasida o‘zaro aloqa"</string>
-    <string name="permdesc_interactAcrossUsers" msgid="364670963623385786">"Ilovaga qurilmadagi turli foydalanuvchilarga ta‘sir ko‘rsatadigan amallarni bajarishga ruxsat beradi. Zararli ilovalar bundan foydalanuvchilar o‘rtasidagi himoyani buzishda foydalanishi mumkin."</string>
-    <string name="permlab_interactAcrossUsersFull" msgid="2567734285545074105">"foydalanuvchilar o‘rtasidagi o‘zaro aloqa uchun to‘liq litsenziya"</string>
-    <string name="permdesc_interactAcrossUsersFull" msgid="376841368395502366">"Foydalanuvchilarning o‘zaro aloqalari uchun barcha imkoniyatga ruxsat beradi."</string>
-    <string name="permlab_manageUsers" msgid="1676150911672282428">"foydalanuvchilarni boshqarish"</string>
-    <string name="permdesc_manageUsers" msgid="8409306667645355638">"Ilovaga qurilmadagi foydalanuvchilarni, so‘rovlarni, yaratish va o‘chirish kabi amallari boshqarishga ruxsat beradi."</string>
-    <string name="permlab_getDetailedTasks" msgid="6229468674753529501">"ishga tushirilgan ilovalar ma’lumotlarini olish"</string>
-    <string name="permdesc_getDetailedTasks" msgid="153824741440717599">"Ilovaga hozirda va so‘nggi ishga tushirilgan vazifalar haqida to‘liq ma’lumot olishiga ruxsat beradi. Zararli ilovalar boshqa ilovalar haqidagi maxfiy ma’lumotlarni aniqlashi mumkin."</string>
     <string name="permlab_reorderTasks" msgid="2018575526934422779">"ishlab turgan ilovalarni qayta tartiblash"</string>
     <string name="permdesc_reorderTasks" msgid="7734217754877439351">"Ilovalarga vazifalarni old va orqa fonga o‘tkazish uchun ruxsat beradi. Ilova buni sizning yordamingizsiz bajarishi mumkin."</string>
-    <string name="permlab_removeTasks" msgid="6821513401870377403">"ishlab turgan ilovalarni to‘xtatish"</string>
-    <string name="permdesc_removeTasks" msgid="1394714352062635493">"Ilovaga vazifalarni olib tashlash va ularda ishlayotgan ilovalarini to‘xtatishga ruxsat beradi. Zarali ilovalar boshqa ilovalarning to‘g‘ri ishlashiga to‘sqinlik qilishi mumkin."</string>
-    <string name="permlab_manageActivityStacks" msgid="7391191384027303065">"faoliyat to‘plamlarni boshqarish"</string>
-    <string name="permdesc_manageActivityStacks" msgid="1615881933034084440">"Dasturga boshqa ishlayotgan dasturlarni faollashtirish, o‘zgartirish va qo‘shish imkonini beradi. Zararli dasturlar boshqa dasturlar faoliyatini ishdan chiqarishi mumkin."</string>
-    <string name="permlab_startAnyActivity" msgid="2918768238045206456">"har qanday faoliyatni boshlash"</string>
-    <string name="permdesc_startAnyActivity" msgid="997823695343584001">"Ilovaga eksport holati yoki ruxsatlar himoyasidan qat’iy nazar har qanday faoliyatni boshlashqa ruxsat beradi."</string>
-    <string name="permlab_setScreenCompatibility" msgid="6975387118861842061">"ekran mosligini o‘rnatish"</string>
-    <string name="permdesc_setScreenCompatibility" msgid="692043618693917374">"Ilovaga boshqa ilovalarning ekranga mosligi rejimini boshqarish uchun ruxsat beradi. Zararli ilovalar boshqa ilovalarning  to‘g‘ri ishlashiga to‘sqinlik qilishi mumkin."</string>
-    <string name="permlab_setDebugApp" msgid="3022107198686584052">"ilovalarni tuzatishni yoqish"</string>
-    <string name="permdesc_setDebugApp" msgid="4474512416299013256">"Ilovalarga boshqa ilovalardagi nosozliklarni tuzatish dasturini yoqishga ruxsat beradi. Zararli ilovalar bundan foydalanib boshqa ilovalarning ishini to‘xtatishi mumkin."</string>
-    <string name="permlab_changeConfiguration" msgid="4162092185124234480">"tizim ekranini o‘zgartirish sozlamalari"</string>
-    <string name="permdesc_changeConfiguration" msgid="4372223873154296076">"Ilovaga til yoki umumiy shrift o‘lchami kabi joriy sozlamalarni o‘zgartirishga ruxsat beradi."</string>
     <string name="permlab_enableCarMode" msgid="5684504058192921098">"mashina usulini yoqish"</string>
     <string name="permdesc_enableCarMode" msgid="4853187425751419467">"Ilova avtomobil rejimini yoqishi mumkin."</string>
     <string name="permlab_killBackgroundProcesses" msgid="3914026687420177202">"boshqa ilovalarni yopish"</string>
     <string name="permdesc_killBackgroundProcesses" msgid="4593353235959733119">"Ilovaga boshqa ilovalarning orqa fonda amalga oshirilayotgan jarayonlarini to‘xtatish uchun ruxsat beradi. Bu boshqa ilovalarning to‘xtatilishiga sabab bo‘lishi mumkin."</string>
-    <string name="permlab_forceStopPackages" msgid="2329627428832067700">"boshqa ilovalarni majburan to‘xtatish"</string>
-    <string name="permdesc_forceStopPackages" msgid="5253157296183940812">"Ilova boshqa ilovalarni majburan to‘xtatishi mumkib."</string>
-    <string name="permlab_forceBack" msgid="652935204072584616">"ilovani majburan yopish"</string>
-    <string name="permdesc_forceBack" msgid="3892295830419513623">"Ilova faol rejimda ishlab turgan jarayonlarni tugatishi mumkin. Oddiy ilovalar uchun talab qilinmaydi."</string>
-    <string name="permlab_dump" msgid="1681799862438954752">"tizim ichki holati haqida ma’lumot olish"</string>
-    <string name="permdesc_dump" msgid="1778299088692290329">"Ilova tizimning ichki holati to‘g‘risidagi ma’lumotlarni olishi mumkin. Zararli dasturlar uning yordamida shaxsiy va himoyalangan ma’lumotlarni qo‘lga kiritishi mumkin."</string>
-    <string name="permlab_retrieve_window_content" msgid="8022588608994589938">"ekrandagi kontentni ajratish"</string>
-    <string name="permdesc_retrieve_window_content" msgid="3193269069469700265">"Ilova faol oyna kontentini olishi mumkin. Zararli dasturlar uning yordamida shunday kontantni egallashi va parollardan tashqari har qanday matnni tahlil qilishi mumkin."</string>
-    <string name="permlab_temporary_enable_accessibility" msgid="2312612135127310254">"qulaylikni vaqtincha yoqish"</string>
-    <string name="permdesc_temporary_enable_accessibility" msgid="8079456293182975464">"Ilovaga qurilmadagi qulaylikni vaqtincha yoqish uchun ruxsat beradi. Zararli ilovalar foydalanuvchidan so‘roqsiz qulayliklarni yoqishi mumkin."</string>
-    <string name="permlab_retrieveWindowToken" msgid="7154762602367758602">"oyna tokenini olish"</string>
-    <string name="permdesc_retrieveWindowToken" msgid="668173747687795074">"Ilova token oynasini olishi mumkin. Zararli dasturlar uning yordamida ilova oynasi bilan tizim ko‘rinishida muloqot qilishi mumkin."</string>
-    <string name="permlab_frameStats" msgid="7056374987314361639">"freymlar bo‘yicha statistikani olish"</string>
-    <string name="permdesc_frameStats" msgid="4758001089491284919">"Ilova freymlar bo‘yicha statistikani to‘plashi mumkin. Zararli dasturlar uning yordamida boshqa ilovalardagi shunday statistikaga kirishlari mumkin."</string>
-    <string name="permlab_filter_events" msgid="8675535648807427389">"hodisalari filtrlash"</string>
-    <string name="permdesc_filter_events" msgid="8006236315888347680">"Ilovaga barcha foydalanuvchi hodisalarini jo‘natishdan oldin uzatishni filtrlaydigan kiruvchi filterlarni ro‘yxatdan o‘tkazishga ruxsat beradi. Zararli ilovalar tizim interfeysini foydalanuvchidan so‘ramasdan boshqarishi mumkin."</string>
-    <string name="permlab_shutdown" msgid="7185747824038909016">"qisman o‘chirish"</string>
-    <string name="permdesc_shutdown" msgid="7046500838746291775">"Faollik menejerini o‘chirish holatiga qo‘yadi. Butunlay o‘chirishni amalga oshirmaydi."</string>
-    <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"ilovalarni o‘chirish/yoqishga yo‘l qo‘ymaslik"</string>
-    <string name="permdesc_stopAppSwitches" msgid="8262195802582255021">"Foydalanuvchilarning bir ilovadan boshqasiga o‘tishini taqiqlaydi."</string>
-    <string name="permlab_getTopActivityInfo" msgid="2537922311411546016">"joriy dastur haqida ma’lumot olish"</string>
-    <string name="permdesc_getTopActivityInfo" msgid="2512448855496067131">"Foydalanuvchiga ekrandagi joriy dastur haqidagi maxfiy ma‘lumotni olish imkonini beradi."</string>
-    <string name="permlab_runSetActivityWatcher" msgid="892239094867182656">"barcha ilovalarning ishga tushirilishini kuzatib borish va boshqarish"</string>
-    <string name="permdesc_runSetActivityWatcher" msgid="6003603162578577406">"Ilova tizim jarayonlarining ishga tushishini kuzatishi va ularni boshqarishi mumkin. Zararli dasturlar uning yordamida tizim ustidan to‘liq nazoratni o‘rnatishi mumkin. Ushbu ruxsatnoma faqat dastur ishlab chiqisih uchun zarur bo‘lib, oddiy foydalanuvchilar uchun kerak emas."</string>
-    <string name="permlab_broadcastPackageRemoved" msgid="2576333434893532475">"paketlar olib tashlangan uzatishni jo‘natish"</string>
-    <string name="permdesc_broadcastPackageRemoved" msgid="6621901216207931089">"Ilova dasturlar paketini o‘chirish to‘g‘risidagi bildirishnomalarni yuborishi mumkin. Zararli dasturlar uning yordamida boshqa ilovalarning ishlashini to‘xtatib qo‘yishi mumkin."</string>
-    <string name="permlab_broadcastSmsReceived" msgid="5689095009030336593">"SMS-qabul qilingan uzatishlarni jo‘natish"</string>
-    <string name="permdesc_broadcastSmsReceived" msgid="4152037720034365492">"Ilova SMS xabar kelganligi to‘g‘risidagi bildirishnomalarni yuborishi mumkin. Zararli dasturlar uning yordamida kiruvchi SMS xabarlarni soxtalashtirishi mumkin."</string>
-    <string name="permlab_broadcastWapPush" msgid="3145347413028582371">"WAP-PUSH-qabul qilingan radiouzatishni jo‘natish"</string>
-    <string name="permdesc_broadcastWapPush" msgid="4783402525039442729">"Ilova WAP PUSH xabari kelganligi to‘g‘risida bildirishnoma yuborishi mumkin. Zararli dasturlar uning yordamida MMS xabar olinganini soxtalashtirishi yoki biror veb-sahifa tarkibini sezdirmasdan zararli ma’lumotlar bilan almashtirishi mumkin."</string>
-    <string name="permlab_setProcessLimit" msgid="2451873664363662666">"ishga tushirilgan jarayonlarning cheklangan miqdori"</string>
-    <string name="permdesc_setProcessLimit" msgid="7318061314040879542">"Ilova bir vaqtda ishga tushirish mumkin bo‘lgan eng ko‘p jarayonlar sonini boshqarishi mumkin. Oddiy ilovalar uchun talab qilinmaydi."</string>
-    <string name="permlab_setAlwaysFinish" msgid="550958507798796965">"orqa fondagi ilovalarni majburiy yopish"</string>
-    <string name="permdesc_setAlwaysFinish" msgid="7471310652868841499">"Ilova jarayonlar orqa fon rejimiga o‘tganidan so‘ng ularning tugatilishini boshqarishi mumkin. Oddiy ilovalar uchun talab qilinmaydi."</string>
-    <string name="permlab_batteryStats" msgid="2789610673514103364">"batareya holatlarini o‘qish"</string>
-    <string name="permdesc_batteryStats" msgid="5897346582882915114">"Ilovaga batareyaning joriy past darajali quvvat sarfi haqidagi ma‘lumotni o‘qishga ruxsat beradi. Ilovaga qanday ilovalardan foydalanish haqida batafsil ma‘lumotni topishga imkon berishi mumkin."</string>
-    <string name="permlab_updateBatteryStats" msgid="3719689764536379557">"batareya statistikasini o‘zgartirish"</string>
-    <string name="permdesc_updateBatteryStats" msgid="6862817857178025002">"Ilovaga yig‘ilgan batareya stitistikasini o‘zgartirish uchun ruxsat beradi. Oddiy ilovalar uchun foydalanilmaydi."</string>
-    <string name="permlab_getAppOpsStats" msgid="1508779687436585744">"ilova op-ya statistikasini yuklab olish"</string>
-    <string name="permdesc_getAppOpsStats" msgid="6243887041577912877">"Dasturga to‘plangan dastur operatsiyasi statistikasini olishga ruxsat beradi. Oddiy ilovalar uchun kerak emas."</string>
-    <string name="permlab_updateAppOpsStats" msgid="8829097373851521505">"dastur op-ya statistikasini o‘zgartirish"</string>
-    <string name="permdesc_updateAppOpsStats" msgid="50784596594403483">"Dasturga to‘plangan dastur operatsiyasi statistikasini o‘zgartirishga ruxsat beradi. Oddiy dasturlar uchun foydasi yo‘q."</string>
-    <string name="permlab_backup" msgid="470013022865453920">"tizimni zahiralash va tiklashni boshqarish"</string>
-    <string name="permdesc_backup" msgid="6912230525140589891">"Ilova tizimning zaxiralash va qayta tiklash mexanizmini boshqarishi mumkin. Oddiy ilovalar uchun talab qilinmaydi."</string>
-    <string name="permlab_confirm_full_backup" msgid="5557071325804469102">"to‘liq zahiralash yoki tiklash jarayonini tasdiqlash"</string>
-    <string name="permdesc_confirm_full_backup" msgid="1748762171637699562">"Ilova ma’lumotlarni to‘liq zaxiralashni tasdiqlash oynasini ko‘rsatishi mumkin. Ushbu ruxsatnoma hech qanday ilova tomonidan ishlatilmaydi."</string>
-    <string name="permlab_internalSystemWindow" msgid="2148563628140193231">"tasdiqdan o‘tmagan oynalarni ko‘rsatish"</string>
-    <string name="permdesc_internalSystemWindow" msgid="7458387759461466397">"Ilovaga ichki tizim foydalanuvchi interfeysi tomonidan foydalanilshi uchun mo‘ljallangan oynalarni yaratishga ruxsat beradi. Oddiy ilovalar tomonidan foydalanilmaydi."</string>
     <string name="permlab_systemAlertWindow" msgid="3543347980839518613">"boshqa ilovalar ustiga chizish"</string>
     <string name="permdesc_systemAlertWindow" msgid="8584678381972820118">"Ilovaga foydalanuvchi interfeysining qismlariga yoki boshqa ilovalarning tepasiga chizish uchun ruxsat beradi. Ular har qanday ilova interfeysidan foydalanganingizda ishingizga xalaqit qilishi mumkin yoki boshqa ilovalarda siz ko‘ryapman deb o‘ylayotgan narsalarni o‘zgartirishlari mumkin."</string>
-    <string name="permlab_setAnimationScale" msgid="2805103241153907174">"global animatsiya tezligini o‘zgartirish"</string>
-    <string name="permdesc_setAnimationScale" msgid="7690063428924343571">"Ilovalarga global animatsiya tezligi (tez yoki sekin animatsiyalar)ni har qanday vaqtda o‘zgartirish uchun ruxsat beradi."</string>
-    <string name="permlab_manageAppTokens" msgid="1286505717050121370">"ilovalarning tokenini boshqarish"</string>
-    <string name="permdesc_manageAppTokens" msgid="8043431713014395671">"Ilova oddiy Z ketma-ketlikni aylanib o‘tgan holda o‘z tokenlarini yaratishi va ularni boshqarishi mumkin. Oddiy ilovalar uchun talab qilinmaydi."</string>
-    <string name="permlab_freezeScreen" msgid="4708181184441880175">"ekranni qotirish"</string>
-    <string name="permdesc_freezeScreen" msgid="8558923789222670064">"Ilovaga ekranni butun ekran ko‘rinishiga o‘tishi uchun vaqtinchalik qotirib qo‘yishga ruxsat beradi."</string>
-    <string name="permlab_injectEvents" msgid="1378746584023586600">"bosish va boshqarish tugmalari"</string>
-    <string name="permdesc_injectEvents" product="tablet" msgid="206352565599968632">"Ilova o‘zining kiritish hodisalarini (tugmalarning bosilishi va boshqalar) boshqa dasturlarga uzatishi mumkin. Zararli dasturlar uning yordamida planshet boshqaruvini qo‘lga olishi mumkin."</string>
-    <string name="permdesc_injectEvents" product="tv" msgid="4681361983270791611">"Ilovaga o‘zi kiritgan hodisalarni (tugmalarni bosish va h.k.) boshqa ilovalarga yuborish huquqini beradi. Zararli ilovalar uning yordamida televizor boshqaruvini o‘z qo‘liga olishi mumkin."</string>
-    <string name="permdesc_injectEvents" product="default" msgid="653128057572326253">"Ilova o‘zining kiritish hodisalarini (tugmalarning bosilishi va boshqalar) boshqa dasturlarga uzatishi mumkin. Zararli dasturlar uning yordamida telefon boshqaruvini qo‘lga olishi mumkin."</string>
-    <string name="permlab_readInputState" msgid="469428900041249234">"yozgan va bajargan amallaringizni yozib olish"</string>
-    <string name="permdesc_readInputState" msgid="8387754901688728043">"Ilova foydalanuvchi tomonidan tugmachalarning bosilishini (hatto, boshqa dasturlar bilan ishlayotganda ham; m-n, parolni kiritayotganda) kuzatishi mumkin. Oddiy ilovalar uchun talab qilinmaydi."</string>
-    <string name="permlab_bindInputMethod" msgid="3360064620230515776">"yozish usuliga bog‘langan"</string>
-    <string name="permdesc_bindInputMethod" msgid="3250440322807286331">"Ilova matn kiritish tizimining yuqori darajali interfeysiga ulanishi mumkin. Oddiy ilovalar uchun talab qilinmaydi."</string>
-    <string name="permlab_bindAccessibilityService" msgid="5357733942556031593">"qulaylik xizmatiga bog‘lash"</string>
-    <string name="permdesc_bindAccessibilityService" msgid="7034615928609331368">"Foydalanuvchiga qulaylik xizmatining yo‘qori darajali interfeysiga bog‘lanish imkoni beradi. Oddiy ilovalar uchun hech qachon kerak bo‘lmaydi."</string>
-    <string name="permlab_bindPrintService" msgid="8462815179572748761">"chop etish xizmatiga bog‘lash"</string>
-    <string name="permdesc_bindPrintService" msgid="7960067623209111135">"Foydalanuvchiga chop etish xizmatining yuqori darajali interfeysini bog‘lash imkonini beradi. Oddiy dasturlar uchun hech qachon kerak bo‘lmaydi."</string>
-    <string name="permlab_bindPrintSpoolerService" msgid="6807762783744125954">"printer nazoratchisi xizmatiga bog‘lash"</string>
-    <string name="permdesc_bindPrintSpoolerService" msgid="3680552285933318372">"Foydalanuvchiga printerlar nazoratchisi xizmatining yuqori darajali interfeysini bog‘lash imkonini beradi. Oddiy ilovalar uchun hech qachon kerak bo‘lmaydi."</string>
-    <string name="permlab_bindNfcService" msgid="2752731300419410724">"NFC xizmatiga bog‘lash"</string>
-    <string name="permdesc_bindNfcService" msgid="6120647629174066862">"Foydalanuvchiga NFC kartasini emulyatsiya qilayotgan dasturlarni bog‘lash imkonini beradi. Oddiy dasturlar uchun hech qachon kerak bo‘lmaydi."</string>
-    <string name="permlab_bindTextService" msgid="7358378401915287938">"matn xizmatiga bog‘lash"</string>
-    <string name="permdesc_bindTextService" msgid="8151968910973998670">"Matnli xabarlar xizmatining (m-n, SpellCheckerService) yuqori darajali interfeysiga ulanish imkonini beradi. Oddiy ilovalar uchun talab qilinmaydi."</string>
-    <string name="permlab_bindVpnService" msgid="4708596021161473255">"VPN xizmatga bog‘lash"</string>
-    <string name="permdesc_bindVpnService" msgid="2067845564581693905">"Ilova VPN xizmatining yuqori darajali interfeysiga ulanishi mumkin. Oddiy ilovalar uchun talab qilinmaydi"</string>
-    <string name="permlab_bindWallpaper" msgid="8716400279937856462">"ekrandagi fon rasmiga bog‘lash"</string>
-    <string name="permdesc_bindWallpaper" msgid="7108428692595491668">"Ilova orqa fon rasmlari xizmatining yuqori darajali interfeysiga ulanishi mumkin. Oddiy ilovalar uchun talab qilinmaydi."</string>
-    <string name="permlab_bindVoiceInteraction" msgid="5334852580713715068">"ovozli o‘zaro ta’sir xizmatlariga ulanish"</string>
-    <string name="permdesc_bindVoiceInteraction" msgid="2345721766501778101">"Ilova ovozli o‘zaro ta’sir xizmatining yuqori darajali interfeysiga ulanishi mumkin. Oddiy ilovalar uchun talab qilinmaydi."</string>
-    <string name="permlab_manageVoiceKeyphrases" msgid="1252285102392793548">"ovozli kalit iboralarni boshqarish"</string>
-    <string name="permdesc_manageVoiceKeyphrases" msgid="8476560722907530008">"Egasiga ovozli buyruqlarni aniqlash uchun kalit iboralarni boshqarishga ruxsat beradi. Normal ilovalar uchun zarur bo‘lmaydi."</string>
-    <string name="permlab_bindRemoteDisplay" msgid="1782923938029941960">"masofadagi ekranga bog‘lash"</string>
-    <string name="permdesc_bindRemoteDisplay" msgid="1261242718727295981">"Foydalanuvchiga masofaviy ekranning yuqori darajali interfeysini bog‘lash imkonini beradi. Oddiy dasturlar uchun hech qachon kerak bo‘lmaydi."</string>
-    <string name="permlab_bindRemoteViews" msgid="5697987759897367099">"vidjet xizmatiga bog‘lash"</string>
-    <string name="permdesc_bindRemoteViews" msgid="4717987810137692572">"Ilova vidjetlar xizmatining yuqori darajali interfeysiga ulanishi mumkin. Oddiy ilovalar uchun talab qilinmaydi."</string>
-    <string name="permlab_bindRouteProvider" msgid="4869394607915096847">"yo‘nalish taqdim etuvchilarning serveriga bog‘lanish"</string>
-    <string name="permdesc_bindRouteProvider" msgid="4703804520859960329">"Ilova ro‘yxatdan o‘tgan shartlarni taqdim etuvchilarning serveriga ulanishi mumkin. Oddiy ilovalar uchun talab qilinmaydi."</string>
-    <string name="permlab_bindDeviceAdmin" msgid="8704986163711455010">"administrator bilan kelishib harakat qilish"</string>
-    <string name="permdesc_bindDeviceAdmin" msgid="569715419543907930">"Ilova qurilma administratoriga maqsadlarni yuborishi mumkin. Oddiy ilovalar uchun talab qilinmaydi."</string>
-    <string name="permlab_bindTvInput" msgid="5601264742478168987">"TV-kiritishga ulanish"</string>
-    <string name="permdesc_bindTvInput" msgid="2371008331852001924">"Ilova TV-kiritish yuqori darajali interfeysiga ulanishi mumkin. Oddiy ilovalar uchun talab qilinmaydi."</string>
-    <string name="permlab_modifyParentalControls" msgid="4611318225997592242">"ota-ona nazorati sozlamalarini o‘zgartirish"</string>
-    <string name="permdesc_modifyParentalControls" msgid="7438482894162282039">"Egasiga tizimning ota-ona nazorati ma’lumotlarini o‘zgartirish uchun ruxsat beradi. Oddiy ilovalar uchun talab qilinmaydi."</string>
-    <string name="permlab_manageDeviceAdmins" msgid="4248828900045808722">"qurilmaga administratorlarni qo‘shish yoki o‘chirish"</string>
-    <string name="permdesc_manageDeviceAdmins" msgid="5025608167709942485">"Foydalanuvchiga qurilma administratorlarini qo‘shish yoki o‘chirish imkonini beradi. Oddiy dasturlarda hech qachon kerak bo‘lmaydi."</string>
-    <string name="permlab_setOrientation" msgid="3365947717163866844">"ekran joylashishini o‘zgartirish"</string>
-    <string name="permdesc_setOrientation" msgid="3046126619316671476">"Ilova ekranni xohlagan vaqtda aylantirishi mumkin. Oddiy ilovalar uchun talab qilinmaydi."</string>
-    <string name="permlab_setPointerSpeed" msgid="9175371613322562934">"ko‘rsatgich tezligini o‘zgartirish"</string>
-    <string name="permdesc_setPointerSpeed" msgid="6866563234274104233">"Ilova sichqoncha yoki sensorli panel ko‘rsatkichining harakatlanish tezligini xohlagan vaqtda o‘zgartirishi mumkin. Oddiy ilovalar uchun talab qilinmaydi."</string>
-    <string name="permlab_setKeyboardLayout" msgid="4778731703600909340">"tugmalar tartibini o‘zgartirish"</string>
-    <string name="permdesc_setKeyboardLayout" msgid="8480016771134175879">"Ilovaga tugmalar tartibini o‘zgartirishga ruxsat beradi. Oddiy ilovalar uchun hech qachon kerak bo‘lmaydi."</string>
-    <string name="permlab_signalPersistentProcesses" msgid="4539002991947376659">"Linuks signallarini ilovalarga yuborish"</string>
-    <string name="permdesc_signalPersistentProcesses" msgid="4896992079182649141">"Ilova qabul qilingan signalni boshqa barcha doimiy jarayonlarga uzatishni so‘rashi mumkin."</string>
     <string name="permlab_persistentActivity" msgid="8841113627955563938">"ilovani doim ishlab turadigan qilish"</string>
     <string name="permdesc_persistentActivity" product="tablet" msgid="8525189272329086137">"Ilovaga o‘zining komponentlarini xotirada doimiy saqlashga ruxsat beradi. Bu mavjud xotirani cheklashi va planshetni sekin ishlashiga sabab bo‘lishi mumkin."</string>
     <string name="permdesc_persistentActivity" product="tv" msgid="5086862529499103587">"Ilovaga o‘zining muayyan qismlarining xotiraning turg‘un qismiga aylantirish huquqini beradi. Bunda, boshqa ilovalar uchun xotiradan ajratilgan joy cheklanib, televizorning ishlashi sekinlashishi mumkin."</string>
     <string name="permdesc_persistentActivity" product="default" msgid="4384760047508278272">"Ilovaga o‘zining komponentlarini xotirada doimiy saqlashga ruxsat beradi. Bu mavjud xotirani cheklashi va telefonni sekin ishlashiga sabab bo‘lishi mumkin."</string>
-    <string name="permlab_deletePackages" msgid="184385129537705938">"ilovalarni o‘chirish"</string>
-    <string name="permdesc_deletePackages" msgid="7411480275167205081">"Ilova Android dasturlari paketini o‘chirishi mumkin. Zararli dasturlar uning yordamida muhim ilovalarni o‘chirib tashlashi mumkin."</string>
-    <string name="permlab_clearAppUserData" msgid="274109191845842756">"boshqa ilovalarning ma’lumotlarini o‘chirish"</string>
-    <string name="permdesc_clearAppUserData" msgid="4625323684125459488">"Ilova foydalanuvchi ma’lumotlarini o‘chirishi mumkin."</string>
-    <string name="permlab_deleteCacheFiles" msgid="3128665571837408675">"boshqa ilovalarning keshini o‘chirish"</string>
-    <string name="permdesc_deleteCacheFiles" msgid="3812998599006730196">"Ilova kesh fayllarini o‘chirishi mumkin."</string>
     <string name="permlab_getPackageSize" msgid="7472921768357981986">"ilovalar egallagan xotira joyini hisoblash"</string>
     <string name="permdesc_getPackageSize" msgid="3921068154420738296">"Ilova o‘zining kodi, ma’lumotlari va kesh o‘lchami to‘g‘risidagi ma’lumotlarni olishi mumkin"</string>
-    <string name="permlab_installPackages" msgid="2199128482820306924">"ilovalarni bevosita o‘rnatish"</string>
-    <string name="permdesc_installPackages" msgid="5628530972548071284">"Ilova yangi yoki yangilangan Android paketlarini o‘rnatishi mumkin. Zararli dasturlar uning yordamida kuchli ruxsatnomalarga ega boshqa ilovalarni o‘rnatishi mumkin."</string>
-    <string name="permlab_clearAppCache" msgid="7487279391723526815">"barcha ilova keshi ma’lumotlarini o‘chirish"</string>
-    <string name="permdesc_clearAppCache" product="tablet" msgid="8974640871945434565">"Ilovaga turli ilovalar direktoriyalari keshidagi fayllarni o‘chirib, planshet xotirasidan bo‘sh joy hosil qilish uchun ruxsat beradi. Bu boshqa ilovalarning ma‘lumotlarini ajratib chiqarishi lozimligi sababli ushbu ilovalarning sekin yoqilishiga olib kelishi mumkin."</string>
-    <string name="permdesc_clearAppCache" product="tv" msgid="244647416303997022">"Ilovaga boshqa ilovalarning kesh jildlaridagi fayllarni o‘chirish orqali televizor xotirasini bo‘shatish huquqini beradi. Bu boshqa ilovalarning ishga tushishining sekinlashishiga sabab bo‘lishi mumkin, chunki ular o‘z ma’lumotlarini qaytadan olishi zarur bo‘ladi."</string>
-    <string name="permdesc_clearAppCache" product="default" msgid="2459441021956436779">"Ilovaga turli ilovalar direktoriyalari keshidagi fayllarni o‘chirib, telefon xotirasidan bo‘sh joy hosil qilish uchun ruxsat beradi. Bu boshqa ilovalarning ma‘lumotlarini ajratib chiqarishi lozimligi sababli ushbu ilovalarning sekin yoqilishiga olib kelishi mumkin."</string>
-    <string name="permlab_movePackage" msgid="3289890271645921411">"ilova resurslarini ko‘chirish"</string>
-    <string name="permdesc_movePackage" msgid="319562217778244524">"Ilova resurslarni ichki xotiradan tashqiga yoki aksincha ko‘chirishi mumkin."</string>
-    <string name="permlab_readLogs" msgid="6615778543198967614">"sezgir jurnal ma’lumotlarini o‘qish"</string>
-    <string name="permdesc_readLogs" product="tablet" msgid="82061313293455151">"Ilova turli tizim jurnallaridagi ma’lumotlarni o‘qishi hamda foydalanuvchining planshet bilan ishlashi to‘g‘risida ma’lumot, jumladan shaxsiy va maxfiy ma’lumotlarni olishi mumkin."</string>
-    <string name="permdesc_readLogs" product="tv" msgid="9023899974809538988">"Ilovaga tizimning turli xil jurnal fayllarini o‘qish huquqini beradi. Bu unga televizoringizdan qanday foydalanayotganingiz haqidagi umumiy ma’lumotlarni, ayniqsa, shaxsiy yoki maxfiy ma’lumotlarni aniqlash huquqini beradi."</string>
-    <string name="permdesc_readLogs" product="default" msgid="2063438140241560443">"Ilova turli tizim jurnallaridagi ma’lumotlarni o‘qishi hamda foydalanuvchining telefon bilan ishlashi to‘g‘risida ma’lumot, jumladan shaxsiy va maxfiy ma’lumotlarni olishi mumkin."</string>
-    <string name="permlab_anyCodecForPlayback" msgid="715805555823881818">"ijro etish uchun xohlagan media dekoderdan foydalaning"</string>
-    <string name="permdesc_anyCodecForPlayback" msgid="8283912488433189010">"Ilovaga ijro etishda dekodlash uchun har qanday o‘rnatilgan media dekoderdan foydalanishga ruxsat beradi."</string>
-    <string name="permlab_manageCaCertificates" msgid="1678391896786882014">"ishonchli hisob ma’lumotlarini boshqarish"</string>
-    <string name="permdesc_manageCaCertificates" msgid="4015644047196937014">"Dasturga CA sertifikatlarni ishonchli hisob ma‘lumotlari sifatida o‘rnatish yoki o‘chirishga ruxsat beradi."</string>
-    <string name="permlab_bindJobService" msgid="3637568367978271086">"ilovaning orqa fondagi vazifasini ishga tushiradi"</string>
-    <string name="permdesc_bindJobService" msgid="3473288460524119838">"Ushbu ruxsatnoma Android tizimiga ilovani so‘ralgan vaqtda orqa fonda ishlashini ta’minlashiga ruxsat beradi."</string>
-    <string name="permlab_diagnostic" msgid="8076743953908000342">"diag’ga tegishli manbalarni o‘qish yoki ularga yozish"</string>
-    <string name="permdesc_diagnostic" msgid="6608295692002452283">"Ilova tashxis tizimi ma’lumotlarini (m-n, /dev jildidagi fayllar) o‘qishi va yozishi mumkin. Bu tizimning barqarorligi va xavfsizligiga ta’sir qilishi mumkin. Ushbu ruxsatnoma apparat ta’minoti tashxisi uchun FAQAT ishlab chiqaruvchi yoki operator tomonidan ishlatilishi lozim."</string>
-    <string name="permlab_changeComponentState" msgid="6335576775711095931">"ilovaning tarkibiy qismlarini yoqish yoki o‘chirib qo‘yish"</string>
-    <string name="permdesc_changeComponentState" product="tablet" msgid="8887435740982237294">"Ilova boshqa dasturlarning tarkibiy qismlarini yoqishi va o‘chirib qo‘yishi mumkin. Zararli dasturlar uning yordamida planshetning muhim funksiyalarini o‘chirib qo‘yishi mumkin. Ilovalarning kerakli qismlari ishlamay qolishining oldini olish uchun ushbu ruxsatnomada diqqat bilan foydalaning."</string>
-    <string name="permdesc_changeComponentState" product="tv" msgid="9151634188264231389">"Ilovaga boshqa bir ilovaning biror tarkibiy qismi yoqilgan yoki yoqilmaganligini o‘zgartirish huquqini beradi. Zararli ilovalar uning yordamida televizorning muhim xususiyatlarini o‘chirib qo‘yishi mumkin. Unga ruxsat berishda ehtiyot bo‘ling, chunki u ilovaning tarkibiy qismlarini ishlatib bo‘lmaydigan, bir-biriga nomuvofiq yoki nobarqaror holatga keltirib qo‘yishi mumkin."</string>
-    <string name="permdesc_changeComponentState" product="default" msgid="1827232484416505615">"Ilova boshqa dasturlarning tarkibiy qismlarini yoqishi va o‘chirib qo‘yishi mumkin. Zararli dasturlar uning yordamida telefonning muhim funksiyalarini o‘chirib qo‘yishi mumkin. Ilovalarning kerakli qismlari ishlamay qolishining oldini olish uchun ushbu ruxsatnomada diqqat bilan foydalaning."</string>
-    <string name="permlab_grantRevokePermissions" msgid="4627315351093508795">"ruxsatlar berish yoki ularni bekor qilish"</string>
-    <string name="permdesc_grantRevokePermissions" msgid="4088642654085850662">"Ilovaga o‘zi yoki boshqa ilovalarning maxsus ruxsatlarini rad qilish yoki ularga ruxsat berishga yo‘l qo‘yadi. Zararli ilovalar sizda yo‘q bo‘lgan huquqlarga ushbu xususiyat orqali ega bo‘lishi mumkin. Zararli ilovalar bundan foydalanib, siz ruxsat bermagan xususiyatlarga kirish"</string>
-    <string name="permlab_setPreferredApplications" msgid="8463181628695396391">"afzal ko‘rilgan ilovalarni sozlash"</string>
-    <string name="permdesc_setPreferredApplications" msgid="4973986762241783712">"Ilova siz afzal ko‘rgan ilovalarni o‘zgartirishi mumkin. Zararli dasturlar uning yordamida siz ishga tushiradigan ilovalarni sezdirmasdan o‘zgartirishi va mavjud ilovalarda nomidan maxfiy ma’lumotlaringizni to‘plashi mumkin."</string>
     <string name="permlab_writeSettings" msgid="2226195290955224730">"tizim moslamalarini o‘zgartirish"</string>
     <string name="permdesc_writeSettings" msgid="7775723441558907181">"Ilova tizim sozlamalarini o‘zgartirishi mumkin. Zararli dasturlar uning yordamida tizimni ishdan chiqarishi mumkin."</string>
-    <string name="permlab_writeSecureSettings" msgid="204676251876718288">"tizim xavfsizligi sozlamalarini o‘zgartirish"</string>
-    <string name="permdesc_writeSecureSettings" msgid="8159535613020137391">"Ilova tizim xavfsizligi sozlamalarini o‘zgartirishi mumkin. Oddiy ilovalar tomonidan foydalanilmaydi."</string>
-    <string name="permlab_writeGservices" msgid="2149426664226152185">"Google xizmatlari xaritasini o‘zgartirish"</string>
-    <string name="permdesc_writeGservices" msgid="1287309437638380229">"Ilova Google xizmatlari xaritasini o‘zgartirishi mumkin. Oddiy ilovalar tomonidan foydalanilmaydi."</string>
     <string name="permlab_receiveBootCompleted" msgid="5312965565987800025">"tizim ishga tushganda bajarish"</string>
     <string name="permdesc_receiveBootCompleted" product="tablet" msgid="7390304664116880704">"Ilova tizim qayta yoqilganidan so‘ng o‘zini ishga tushirishi mumkin. Bu planshetning yonish vaqtini uzaytirishi va doimiy ishlab turivchi ilova tufayli uning tezkor ishlashini kamaytirishi mumkin."</string>
     <string name="permdesc_receiveBootCompleted" product="tv" msgid="4525890122209673621">"Ilovaga tizim ishga tushishi bilanoq o‘zi ham ishga tushadigan qilib qo‘yish huquqini beradi. Buning natijasida televizorning ishga tushishi sekinlashishi hamda ilovaning doimiy ravishda ishlab turishi oqibatida butun planshetning ishlashi sekinlashi mumkin."</string>
@@ -551,36 +355,10 @@
     <string name="permdesc_accessMockLocation" msgid="5808711039482051824">"Sinash uchun joylashuv emulyatsiyasi manbalarini yarating yoki yangi joylashuvni aniqlovchi tizimni o‘rnating. Bu ilovaga GPS yoki joylashuvni aniqlovchi tizimlar kabi boshqa joylashuv manbalari tomonidan qaytarilgan joylashuv ma‘lumotlari/yoki holatlarini o‘zgartirishga ruxsat beradi."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"qo‘shimcha manzillarga kirish buyruqlari"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"Ilovaga qo‘shimcha joylashuv xizmati buyruqlaridan foydalanishga ruxsat beradi. Uning yordamida ilova GPS yoki boshqa joylashuv ma’lumoti manbalarining ishlashiga xalaqit qilishi mumkin."</string>
-    <string name="permlab_installLocationProvider" msgid="6578101199825193873">"provayder manzilini o‘rnatishga ruxsat berish"</string>
-    <string name="permdesc_installLocationProvider" msgid="9066146120470591509">"Sinash uchun joylashuv emulyatsiyasi manbalarini yarating yoki yangi joylashuvni aniqlovchi tizimni o‘rnating. Bu ilovaga GPS yoki joylashuvni aniqlovchi tizimlar kabi boshqa joylashuv manbalari tomonidan qaytarilgan joylashuv ma‘lumotlari/yoki holatlarini o‘zgartirishga ruxsat beradi."</string>
     <string name="permlab_accessFineLocation" msgid="1191898061965273372">"aniq joylashuv (GPS va tarmoqqa asoslanib)"</string>
     <string name="permdesc_accessFineLocation" msgid="5295047563564981250">"Ilovaga global joylashuvni aniqlash tizimi (GPS) yoki Wi-Fi va uyali tarmoq antennalari kabi tarmoq joylashuv manbalaridan foydalanib, aniq joylashuvingizni topishga ruxsat beradi. Ushbu joylashuv xizmatlari yoqib qo‘yilgan bo‘lishi va qurilmangizdagi ilovaga ulardan foydalanish uchun mavjud bo‘lishi kerak. Ilovalar bundan foydalanib, sizning joylashuvingizni aniqlaydi. Bu batareya quvvatini ko‘proq sarflaydi."</string>
     <string name="permlab_accessCoarseLocation" msgid="4887895362354239628">"yaqin manzil (tarmoq)"</string>
     <string name="permdesc_accessCoarseLocation" msgid="2538200184373302295">"Ilovaga sizning taxminiy joylashuvingizni topishga ruxsat beradi. Ushbu joylashuv Wi-Fi va uyali tarmoq antennalari kabi tarmoq joylashuv manbalaridan foydlanuvchi joylashuv xizmatlari orqali aniqlanadi. Ushbu joylashuv xizmatlari yoqib qo‘yilgan bo‘lishi va qurilmangizdagi ilovaga ulardan foydalanish uchun mavjud bo‘lishi kerak. Ilovalar bundan foydalanib, sizning taxminiy joylashuvingizni aniqlaydi."</string>
-    <string name="permlab_accessSurfaceFlinger" msgid="2363969641792388947">"SurfaceFlinger’ga kirish"</string>
-    <string name="permdesc_accessSurfaceFlinger" msgid="1041619516733293551">"Ilova SurfaceFlinger’ning quyi darajadagi xususiyatlaridan foydalanishi mumkin."</string>
-    <string name="permlab_readFrameBuffer" msgid="6690504248178498136">"kadrni bugerga olishni o‘qish"</string>
-    <string name="permdesc_readFrameBuffer" msgid="4937405521809454680">"Ilova freymlar buferi tarkibini o‘qishi mumkin."</string>
-    <string name="permlab_accessInputFlinger" msgid="5348635270689553857">"InputFlinger’ga ruxsat"</string>
-    <string name="permdesc_accessInputFlinger" msgid="2104864941201226616">"Dasturga InputFlinger quyi darajali xususiyatlardan foydalanishga ruxsat beradi."</string>
-    <string name="permlab_configureWifiDisplay" msgid="5595661694746742168">"Wifi ekranlarini sozlash"</string>
-    <string name="permdesc_configureWifiDisplay" msgid="7916815158690218065">"Ilovaga Wifi ekranlarini sozlashga va ularga ulanishga ruxsat beradi."</string>
-    <string name="permlab_controlWifiDisplay" msgid="393641276723695496">"Wifi ekranlarini boshqarish"</string>
-    <string name="permdesc_controlWifiDisplay" msgid="4543912292681826986">"Ilovaga Wifi ekranlarining past darajali xususiyatlarini boshqarishga ruxsat beradi."</string>
-    <string name="permlab_controlVpn" msgid="2618442789397588200">"virtual xususiy tarmoqlarni (VPN) boshqarish"</string>
-    <string name="permdesc_controlVpn" msgid="762852603315861214">"Ilovaga virtual xususiy tarmoqlarning (VPN) quyi darajali funksiyalarini boshqarish uchun ruxsat beradi."</string>
-    <string name="permlab_captureAudioOutput" msgid="6857134498402346708">"audio chiqishni yozib olish"</string>
-    <string name="permdesc_captureAudioOutput" msgid="6210597754212208853">"Dasturga ovoz lavhasini yozib olib, qayta yo‘llashga ruxsat beradi."</string>
-    <string name="permlab_captureAudioHotword" msgid="1890553935650349808">"Hotword aniqlash"</string>
-    <string name="permdesc_captureAudioHotword" msgid="9151807958153056810">"Dasturga ovozni yozib olish jarayonida Hotword buyruq so‘zlarni tanib olish imkonini beradi. Aniqlash jarayoni, boshqa ovoz yozib olish dasturlariga halaqit qilmaydi. (masalan. Camcorder)."</string>
-    <string name="permlab_modifyAudioRouting" msgid="7738060354490807723">"Audio-yo‘naltirish"</string>
-    <string name="permdesc_modifyAudioRouting" msgid="7205731074267199735">"Ilovaga bevosita audio-yo‘naltirishni boshqarish va audiodan foydalanish qoidalarni o‘zgartirish uchun ruxsat beradi."</string>
-    <string name="permlab_captureVideoOutput" msgid="2246828773589094023">"video lavha yozib olish"</string>
-    <string name="permdesc_captureVideoOutput" msgid="359481658034149860">"Dasturga video lavhani yozib olib, qayta yo‘naltirishga ruxsat beradi."</string>
-    <string name="permlab_captureSecureVideoOutput" msgid="7815398969303382016">"xavfsiz video lavha yozib olish"</string>
-    <string name="permdesc_captureSecureVideoOutput" msgid="2779793064709350289">"Dasturga kodlangan video lavhani yozib olib, qayta yo‘naltirishga ruxsat beradi."</string>
-    <string name="permlab_mediaContentControl" msgid="8749790560720562511">"media namoyish va metadata ruxsatlarini boshqarish"</string>
-    <string name="permdesc_mediaContentControl" msgid="1637478200272062">"Dasturga media namoyish va media ma’lumot boshqaruviga ruxsat beradi (nom, muallif...)."</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"audio sozlamalaringizni o‘zgartirish"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"Ilovalarga tovush va ovoz chiqarish uchun foydalaniladigan karnay kabi global audio sozlamalarini o‘zgartirish uchun ruxsat beradi."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"audioni yozib olish"</string>
@@ -589,71 +367,14 @@
     <string name="permdesc_sim_communication" msgid="5725159654279639498">"Dasturga SIM kartaga buyruqlar jo‘natishga ruxsat beradi. Bu juda ham xavfli."</string>
     <string name="permlab_camera" msgid="3616391919559751192">"rasmga tushirish va videoga olish"</string>
     <string name="permdesc_camera" msgid="8497216524735535009">"Ilovaga kameradan foydalanib rasm va videoga olishga ruxsat beradi. Bu ruxsat ilovaga sizdan tasdiqlashni so‘ramasdan kameradan foydalanishga imkon beradi."</string>
-    <string name="permlab_cameraDisableTransmitLed" msgid="2651072630501126222">"LED ko‘rsatkichni kamera faolligida boshqarish imkoniyatini o‘chirish"</string>
-    <string name="permdesc_cameraDisableTransmitLed" msgid="4764585465480295341">"Zavodda o‘rnatilgan tizim dasturiga kamerani o‘chirish uchun LED ko‘rsatkichidan foydalanish imkonini beradi."</string>
-    <string name="permdesc_cameraSendSystemEvent" msgid="8642231538552298107">"Oldindan o‘rnatilgan tizimga oid ilovaga tizimdagi o‘zgarishlar bo‘yicha kamera xizmati bildirishnomalarini yuborish uchun ruxsat beradi."</string>
-    <string name="permlab_brick" product="tablet" msgid="2961292205764488304">"doimo planshetni o‘chirish"</string>
-    <string name="permlab_brick" product="tv" msgid="4912674222121249410">"televizorni butunlay o‘chirib qo‘yish"</string>
-    <string name="permlab_brick" product="default" msgid="8337817093326370537">"doimo telefonni o‘chirish"</string>
-    <string name="permdesc_brick" product="tablet" msgid="4334818808001699530">"Ilova planshetning barcha funksiyalarini o‘chirib qo‘yishi mumkin. Bu juda xavfli."</string>
-    <string name="permdesc_brick" product="tv" msgid="7070924544316356349">"Ilovaga televizorni butunlay o‘chirib qo‘yish huquqini beradi. Esda tuting, bu juda xavfli."</string>
-    <string name="permdesc_brick" product="default" msgid="5788903297627283099">"Ilova telefonning barcha funksiyalarini o‘chirib qo‘yishi mumkin. Bu juda xavfli."</string>
-    <string name="permlab_reboot" product="tablet" msgid="3436634972561795002">"planshetni majburiy o‘chirib-yoqish"</string>
-    <string name="permlab_reboot" product="tv" msgid="2112102119558886236">"televizorni majburan o‘chirib yoqish"</string>
-    <string name="permlab_reboot" product="default" msgid="2898560872462638242">"telefonni majburiy o‘chirib-yoqish"</string>
-    <string name="permdesc_reboot" product="tablet" msgid="8172056180063700741">"Ilova planshetni majburan o‘chirib yoqishi mumkin."</string>
-    <string name="permdesc_reboot" product="tv" msgid="7116222694344401650">"Ilovaga televizorni majburan o‘chirib yoqish huquqini beradi."</string>
-    <string name="permdesc_reboot" product="default" msgid="5326008124289989969">"Ilova telefonni majburan o‘chirib yoqishi mumkin."</string>
-    <string name="permlab_mount_unmount_filesystems" product="nosdcard" msgid="2927361537942591841">"USB xotira fayl tizimiga kirish"</string>
-    <string name="permlab_mount_unmount_filesystems" product="default" msgid="4402305049890953810">"SD xotira karta fayl tizimiga kirish"</string>
-    <string name="permdesc_mount_unmount_filesystems" msgid="1829290701658992347">"Ilova ko‘chma xotira uchun fayllar tizimini ulashi va o‘chirishi mumkin."</string>
-    <string name="permlab_mount_format_filesystems" product="nosdcard" msgid="6227819582624904972">"USB xotirani tozalash"</string>
-    <string name="permlab_mount_format_filesystems" product="default" msgid="262582698639274056">"SD xotira kartani tozalash"</string>
-    <string name="permdesc_mount_format_filesystems" msgid="8784268246779198627">"Ilova ko‘chma xotirani formatlashi mumkin."</string>
-    <string name="permlab_asec_access" msgid="3411338632002193846">"ichki xotira haqida ma’lumot olish"</string>
-    <string name="permdesc_asec_access" msgid="3094563844593878548">"Ilova ichki xotiradan ma’lumotlarni olishi mumkin."</string>
-    <string name="permlab_asec_create" msgid="6414757234789336327">"ichki xotira yaratish"</string>
-    <string name="permdesc_asec_create" msgid="4558869273585856876">"Ilova ichki xotirani yaratishi mumkin."</string>
-    <string name="permlab_asec_destroy" msgid="526928328301618022">"ichki xotirani yo‘q qilish"</string>
-    <string name="permdesc_asec_destroy" msgid="7218749286145526537">"Ilova ichki xotirani o‘chirib tashlashi mumkin."</string>
-    <string name="permlab_asec_mount_unmount" msgid="8877998101944999386">"ichki xotirani ulash/uzish"</string>
-    <string name="permdesc_asec_mount_unmount" msgid="3451360114902490929">"Ilova ichki xotirani ulashi va uzib qo‘yishi mumkin."</string>
-    <string name="permlab_asec_rename" msgid="7496633954080472417">"tashqi xotira nomini o‘zgartirish"</string>
-    <string name="permdesc_asec_rename" msgid="1794757588472127675">"Ilova ichki xotirani qayta nomlashi mumkin."</string>
     <string name="permlab_vibrate" msgid="7696427026057705834">"tebranishni boshqarish"</string>
     <string name="permdesc_vibrate" msgid="6284989245902300945">"Ilova tebranishli signallarni boshqarishi mumkin."</string>
     <string name="permlab_flashlight" msgid="2155920810121984215">"chiroq chaqnashini boshqarish"</string>
     <string name="permdesc_flashlight" msgid="6522284794568368310">"Ilova chaqnoqni boshqarishi mumkin."</string>
-    <string name="permlab_manageUsb" msgid="1113453430645402723">"USB qurilmalar uchun ruxsatlar va afzalliklarni boshqarish"</string>
-    <string name="permdesc_manageUsb" msgid="7776155430218239833">"Ilova USB qurilma sozlamalari va uning ruxsatnomalarini boshqarishi mumkin."</string>
-    <string name="permlab_accessMtp" msgid="4953468676795917042">"MTP protokolini amalga oshirish"</string>
-    <string name="permdesc_accessMtp" msgid="6532961200486791570">"MTP drayver yadrosiga MTP USB protokolini yuzaga keltirishga ruxsat beradi."</string>
-    <string name="permlab_hardware_test" msgid="4148290860400659146">"qurilmani sinab ko‘rish"</string>
-    <string name="permdesc_hardware_test" msgid="6597964191208016605">"Ilova apparat ta’minotini tekshirish uchun turli tashqi qurilmalarni boshqarishi mumkin."</string>
-    <string name="permlab_fm" msgid="8749504526866832">"FM-radioga kirish"</string>
-    <string name="permdesc_fm" msgid="4145699441237962818">"Ilova FM to‘lqinidagi radiolarga kirishi mumkin."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"telefon raqamlariga tog‘ridan to‘g‘ri qo‘ng‘iroq qilish"</string>
     <string name="permdesc_callPhone" msgid="3740797576113760827">"Ilovaga sizning yordamingizsiz telefonga qo‘ng‘iroq qilish imkonini beradi. Bu kutilmagan qo‘ng‘iroqlarni amalga oshirishi yoki ortiqcha to‘lovlarni yuzaga keltirishi mumkin. Shunga e’tibor qilinki, u favqulodda telefon raqamlariga qo‘ng‘iroqlar qilishga ruxsat bermaydi. Zararli ilovalar sizdan so‘ramasdan qo‘ng‘iroqlarni amalga oshirib, pulingizni sarflashi mumkin."</string>
-    <string name="permlab_callPrivileged" msgid="4198349211108497879">"har qanday telefon raqamlariga tog‘ridan to‘g‘ri qo‘ng‘iroq qilish"</string>
-    <string name="permdesc_callPrivileged" msgid="1689024901509996810">"Ilova sizning ishtirokingizsiz biror telefon raqamiga, jumladan favqulodda raqamlarga qo‘ng‘iroq qilishi mumkin. Zararli dasturlar uning yordamida favqulodda xizmatlarga soxta va noqonuniy qo‘ng‘iroqlarni amalga oshirishi mumkin."</string>
-    <string name="permlab_performCdmaProvisioning" product="tablet" msgid="4842576994144604821">"CDMA planshetni moslashni to‘g‘ridan to‘g‘ri boshlash"</string>
-    <string name="permlab_performCdmaProvisioning" product="tv" msgid="3485391974208100809">"bevosita CDMA televizorni sozlashni boshlash"</string>
-    <string name="permlab_performCdmaProvisioning" product="default" msgid="5604848095315421425">"CDMA telefonni moslashni to‘g‘ridan to‘g‘ri boshlash"</string>
-    <string name="permdesc_performCdmaProvisioning" msgid="1994193538802314186">"Ilova CDMA sozlamasini ishga tushirishi mumkin. Zararli dasturlar uning yordamida zarurat bo‘lmaganda ham CDMA sozlamasini ishga tushirishi mumkin."</string>
-    <string name="permlab_performSimActivation" msgid="1651116521896665009">"SIM karta sozlashuvini boshlash"</string>
-    <string name="permdesc_performSimActivation" msgid="1778214876348917401">"Ilovaga SIM kartani faollashtirishga ruxsat beradi. Ilova sim kartani to‘g‘ridan-to‘g‘ri faollashtirishi yoki bu amalni boshqa ilovaga topshirihi mumkin."</string>
-    <string name="permlab_locationUpdates" msgid="7785408253364335740">"manzilni boshqarish yangiliklari eslatmalari"</string>
-    <string name="permdesc_locationUpdates" msgid="1120741557891438876">"Ilova qabul qilish-uzatish moslamasi ma’lumotlari asosida joylashuvning yangilangani to‘g‘risidagi bildirishnomalarni yoqishi yoki o‘chirib qo‘yishi mumkin. Oddiy ilovalar tomonidan foydalanilmaydi."</string>
-    <string name="permlab_checkinProperties" msgid="7855259461268734914">"tasdiqdan o‘tib kirish xossalari"</string>
-    <string name="permdesc_checkinProperties" msgid="4024526968630194128">"Ilova ro‘yxatdan o‘tish xizmati tomonidan kiritilgan xususiyatlarni o‘qishi va ularga yozishi mumkin. Oddiy ilovalar uchun talab qilinmaydi."</string>
-    <string name="permlab_bindGadget" msgid="776905339015863471">"vidjetlarni tanlash"</string>
-    <string name="permdesc_bindGadget" msgid="8261326938599049290">"Ilova tizimda qaysi ilovalar qaysi vidjetlardan foydalanishi mumkinligini sozlashi mumkin. Bunday ruxsatnomaga ega ilova boshqa ilovalarga shaxsiy ma`lumotlarga kirish uchun ruxsat berishi mumkin. Oddiy ilovalar uchun talab qilinmaydi."</string>
-    <string name="permlab_modifyPhoneState" msgid="8423923777659292228">"telefon holatini o‘zgartirish"</string>
-    <string name="permdesc_modifyPhoneState" msgid="1029877529007686732">"Ilova qurilmadagi telefon funksiyalarini boshqarishi mumkin: tarmoqni almashtirish, radioblokni yoqish va o‘chirish hamda shunga o‘xshash boshqa amallarni sizga xabar qilmasdan bajarishi mumkin."</string>
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"telefon holati va nomini o‘qish"</string>
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"Ilovaga qurilmangizdagi telefon xususiyatlariga kirishga ruxsat beradi. Bu ruxsat ilovaga telefon raqami va qurilma nomlari, qo‘ng‘iroq faol yoki faolsizligi va masofadagi raqam qo‘ng‘rioq orqali bog‘langanligini aniqlashga imkon beradi."</string>
-    <string name="permlab_readPrecisePhoneState" msgid="5476483020282007597">"aniq davlat telefonlarini o‘qish"</string>
-    <string name="permdesc_readPrecisePhoneState" msgid="6648009074263855418">"Dasturga aniq telefon holatlarini ko‘rish uchun ruxsat beradi. Ushbu ruxsat haqiqiy qo‘ng‘iroq holatini aniqlab, \"qo‘ng‘iroqni faol yoki orqa fonda bo‘lganini, terishdagi uzilishlar, aniq internet ulanishlari va uzilishlarini aniqlashga yordam beradi."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"planshetni uyquga ketishiga yo‘l qo‘ymaslik"</string>
     <string name="permlab_wakeLock" product="tv" msgid="2601193288949154131">"televizorning uyqu rejimiga o‘tishining oldini olish"</string>
     <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"telefonni uxlashiga yo‘l qo‘ymaslik"</string>
@@ -664,34 +385,14 @@
     <string name="permdesc_transmitIr" product="tablet" msgid="5358308854306529170">"Dasturga planshetdagi infraqizil antenadan foydalanish ruxsatini beradi."</string>
     <string name="permdesc_transmitIr" product="tv" msgid="3926790828514867101">"Ilovaga televizorning infraqizil uzatkichidan foydalanish huquqini beradi."</string>
     <string name="permdesc_transmitIr" product="default" msgid="7957763745020300725">"Dasturga telefondagi infraqizil antenadan foydalanish ruxsatini beradi."</string>
-    <string name="permlab_devicePower" product="tablet" msgid="2787034722616350417">"planshetni o‘chirish/yoqish"</string>
-    <string name="permlab_devicePower" product="tv" msgid="7579718349658943416">"televizorni yoqish yoki o‘chirish"</string>
-    <string name="permlab_devicePower" product="default" msgid="4928622470980943206">"telefonni o‘chirish/yoqish"</string>
-    <string name="permdesc_devicePower" product="tablet" msgid="6689862878984631831">"Ilova planshetni yoqishi yoki o‘chirishi mumkin."</string>
-    <string name="permdesc_devicePower" product="tv" msgid="1334908641773273512">"Ilovaga televizorni yoqish yoki o‘chirish huquqini beradi."</string>
-    <string name="permdesc_devicePower" product="default" msgid="6037057348463131032">"Ilova telefonni yoqishi yoki o‘chirishi mumkin."</string>
-    <string name="permlab_userActivity" msgid="1677844893921729548">"ekranning tanaffus vaqtini o‘zgartirish"</string>
-    <string name="permdesc_userActivity" msgid="651746160252248024">"Ilovaga ekranning tanaffus vaqtini o‘zgartirish uchun ruxsat beradi."</string>
-    <string name="permlab_factoryTest" msgid="3715225492696416187">"ishlab chiqarish sinovi usulida ishga tushirish"</string>
-    <string name="permdesc_factoryTest" product="tablet" msgid="3952059318359653091">"Past darajadagi ishlab chiqarish sinovi usuli ishga tushirilganda, planshetga butunlay kirish imkonini beradi. Faqatgina planshet ishlab chiqarish sinovi usulida ishga tushirilgandagina buni amalga oshirish mumkin."</string>
-    <string name="permdesc_factoryTest" product="tv" msgid="2105643629211155695">"Quyi darajali ishlab chiqaruvchi sinovi sifatida ishlaydi hamda televizor jihoziga to‘liq kirish huquqini ta’minlaydi. U faqat televizor ishlab chiqaruvchining sinov rejimida ishlayotganda mavjud bo‘ladi."</string>
-    <string name="permdesc_factoryTest" product="default" msgid="8136644990319244802">"Past darajadagi ishlab chiqaruvchi sinovi usulida ishga tushirish. Telefon faqatgina ishlab chiqaruvchi sinovi usulida ishga tushirilgandagina mavjud bo‘ladi."</string>
     <string name="permlab_setWallpaper" msgid="6627192333373465143">"orqa fonga rasm o‘rnatish"</string>
     <string name="permdesc_setWallpaper" msgid="7373447920977624745">"Ilova tizim uchun orqa fon rasmlarini o‘rnatishi mumkin."</string>
     <string name="permlab_setWallpaperHints" msgid="3278608165977736538">"fon rasmi o‘lchamini moslash"</string>
     <string name="permdesc_setWallpaperHints" msgid="8235784384223730091">"Ilova tizimning orqa fon rasmlari uchun o‘lchamlarini ko‘rsatishi mumkin."</string>
-    <string name="permlab_masterClear" msgid="2315750423139697397">"tizimni ishlab chiqarilgan holatiga tiklash"</string>
-    <string name="permdesc_masterClear" msgid="3665380492633910226">"Ilova qurilmadagi barcha ma’lumotlar, sozlamalar va o‘rnatilgan ilovalarni o‘chirish orqali uni to‘liq zavod holatiga qaytarishi mumkin."</string>
-    <string name="permlab_setTime" msgid="2021614829591775646">"vaqtni o‘rnatish"</string>
-    <string name="permdesc_setTime" product="tablet" msgid="1896341438151152881">"Ilova planshetdagi soat vaqtini o‘zgartirishi mumkin."</string>
-    <string name="permdesc_setTime" product="tv" msgid="1826398919861882682">"Ilovaga televizordagi soat vaqtini o‘zgartirish huquqini beradi."</string>
-    <string name="permdesc_setTime" product="default" msgid="1855702730738020">"Ilova telefondagi soat vaqtini o‘zgartirishi mumkin."</string>
     <string name="permlab_setTimeZone" msgid="2945079801013077340">"vaqt hududini o‘rnatish"</string>
     <string name="permdesc_setTimeZone" product="tablet" msgid="1676983712315827645">"Iloba planshetdagi vaqt zonasini o‘zgartirishi mumkin."</string>
     <string name="permdesc_setTimeZone" product="tv" msgid="888864653946175955">"Ilovaga televizorning vaqt zonasini o‘zgartirish huquqini beradi."</string>
     <string name="permdesc_setTimeZone" product="default" msgid="4499943488436633398">"Ilova telefondagi vaqt zonasini o‘zgartirishi mumkin."</string>
-    <string name="permlab_accountManagerService" msgid="4829262349691386986">"AccountManagerService sifatida kirishish"</string>
-    <string name="permdesc_accountManagerService" msgid="1948455552333615954">"Ilovaga AccountAuthenticators’ga qo‘ng‘iroq qilish imkonini beradi."</string>
     <string name="permlab_getAccounts" msgid="1086795467760122114">"qurilmadagi hisoblarni topish"</string>
     <string name="permdesc_getAccounts" product="tablet" msgid="2741496534769660027">"Ilovaga planshetdagi hisoblar ro‘yxatini olishga ruxsat beradi. Bunga siz o‘rnatgan ilovalar tomonidan yaratilgan har qanday hisoblar kirishi mumkin."</string>
     <string name="permdesc_getAccounts" product="tv" msgid="4190633395633907543">"Ilovaga televizor tomonidan aniqlangan hisoblar ro‘yxatini olish huquqini beradi. Bunga siz o‘rnatgan ilovalar tomonidan yaratilgan har qanday hisoblar kiradi."</string>
@@ -706,14 +407,10 @@
     <string name="permdesc_accessNetworkState" msgid="8318964424675960975">"Ilovaga mavjud va ulangan tarmoqlar kabi tarmoqqa ulanishlar haqidagi ma’lumotni ko‘rish imkonini beradi."</string>
     <string name="permlab_createNetworkSockets" msgid="8018758136404323658">"butun tarmoqqa ruxsat"</string>
     <string name="permdesc_createNetworkSockets" msgid="3403062187779724185">"Ilovaga tarmoq ulagichlarini yaratish va odatdagi tarmoq protokollaridan foydalanishga ruxsat beradi. Brauzer va boshqa ilovalar internetga ma’lumot jo‘natish uchun imkoniyat yaratadi. Natijada, internetga ma’lumot jo‘natish uchun bu ruxsat talab qilinmaydi."</string>
-    <string name="permlab_writeApnSettings" msgid="505660159675751896">"tarmoq sozlamalari va tragigini ushlab qolish/o‘zgartirish"</string>
-    <string name="permdesc_writeApnSettings" msgid="5333798886412714193">"Ilova tarmoq sozlamalarini o‘zgartirishi hamda barcha tarmoq trafigini tutib olishi va tekshirishi mumkin (m-n, proksi-server yoki APN uchun portni o‘zgartirish). Zararli dasturlar uning yordamida sizning xabaringizsiz tarmoq paketlarini kuzatishi, qayta yo‘naltirishi va o‘zgartirishi mumkin."</string>
     <string name="permlab_changeNetworkState" msgid="958884291454327309">"tarmoqqa ulanishni o‘zgartirish"</string>
     <string name="permdesc_changeNetworkState" msgid="6789123912476416214">"Ilova tarmoqqa ulanish holatini o‘zgartirishi mumkin."</string>
     <string name="permlab_changeTetherState" msgid="5952584964373017960">"bog‘langan ulanishni o‘zgartirish"</string>
     <string name="permdesc_changeTetherState" msgid="1524441344412319780">"Ilova modem rejimida tarmoqqa ulanish holatini o‘zgartirishi mumkin."</string>
-    <string name="permlab_changeBackgroundDataSetting" msgid="1400666012671648741">"orqa fon ma’lumotlaridan foydalanish sozlamalarini o‘zgartirish"</string>
-    <string name="permdesc_changeBackgroundDataSetting" msgid="5347729578468744379">"Ilova internet trafigidan orqa fonda foydalanish sozlamasini o‘zgartirishi mumkin."</string>
     <string name="permlab_accessWifiState" msgid="5202012949247040011">"Wi-Fi ulanishlarini ko‘rish"</string>
     <string name="permdesc_accessWifiState" msgid="5002798077387803726">"Ilovaga ulangan Wi-Fi qurilmalari nomi va yoqilgan Wi-Fi kabi Wi-Fi tarmoqlari haqidagi ma’lumotni ko‘rish imkonini beradi."</string>
     <string name="permlab_changeWifiState" msgid="6550641188749128035">"Wi-Fi’ga ulash va uni uzish"</string>
@@ -726,24 +423,12 @@
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="6921177471748882137">"Ilova Bluetooth funksiyali mahalliy planshet sozlamalarini sozlashi hamda masofadan turib qurilmalarni aniqlash va ular bilan juftlashishni amalga oshirishi mumkin."</string>
     <string name="permdesc_bluetoothAdmin" product="tv" msgid="3373125682645601429">"Ilovaga mahalliy Bluetooth TV qurilmasini sozlash hamda masofadagi qurilmalarni aniqlash va ularga ulanish huquqini beradi."</string>
     <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"Ilova Bluetooth funksiyali mahalliy telefon sozlamalarini sozlashi hamda masofadan turib qurilmalarni aniqlash va ular bilan juftlashishni amalga oshirishi mumkin."</string>
-    <string name="permlab_bluetoothPriv" msgid="4009494246009513828">"Bluetooth’ga dastur orqali bog‘lanishi uchun ruxsat berish"</string>
-    <string name="permdesc_bluetoothPriv" product="tablet" msgid="8045735193417468857">"Dasturga foydalanuvchini aralashtirmasdan, masofaviy qurilmalarga ulanish imkonini beradi."</string>
-    <string name="permdesc_bluetoothPriv" product="tv" msgid="8045735193417468857">"Dasturga foydalanuvchini aralashtirmasdan, masofaviy qurilmalarga ulanish imkonini beradi."</string>
-    <string name="permdesc_bluetoothPriv" product="default" msgid="8045735193417468857">"Dasturga foydalanuvchini aralashtirmasdan, masofaviy qurilmalarga ulanish imkonini beradi."</string>
-    <string name="permlab_bluetoothMap" msgid="6372198338939197349">"Bluetooth MAP ma’lumotlariga kirish"</string>
-    <string name="permdesc_bluetoothMap" product="tablet" msgid="5784090105926959958">"Ilovaga Bluetooth MAP ma’lumotlariga kirish uchun ruxsat beradi."</string>
-    <string name="permdesc_bluetoothMap" product="tv" msgid="5784090105926959958">"Ilovaga Bluetooth MAP ma’lumotlariga kirish uchun ruxsat beradi."</string>
-    <string name="permdesc_bluetoothMap" product="default" msgid="5784090105926959958">"Ilovaga Bluetooth MAP ma’lumotlariga kirish uchun ruxsat beradi."</string>
     <string name="permlab_accessWimaxState" msgid="4195907010610205703">"WiMAX’ga ulanish va uzish"</string>
     <string name="permdesc_accessWimaxState" msgid="6360102877261978887">"Ilovaga har qanday ulangan WiMAX tarmoqlari haqida va yoqilgan WiMAX tarmoqlarini aniqlashga ruxsat beradi."</string>
     <string name="permlab_changeWimaxState" msgid="2405042267131496579">"WiMAX holatini o‘zgartirish"</string>
     <string name="permdesc_changeWimaxState" product="tablet" msgid="3156456504084201805">"Ilovaga planshetni WiMAX tarmoqlariga ulashga va ulardan uzishga ruxsat beradi."</string>
     <string name="permdesc_changeWimaxState" product="tv" msgid="6022307083934827718">"Ilovaga televizorni WiMAX tarmoqlariga ulash va ulardan uzish huquqini beradi."</string>
     <string name="permdesc_changeWimaxState" product="default" msgid="697025043004923798">"Ilovaga telefonni WiMAX tarmoqlariga ulashga va ulardan uzishga ruxsat beradi."</string>
-    <string name="permlab_scoreNetworks" msgid="6445777779383587181">"tarmoqlarni baholash"</string>
-    <string name="permdesc_scoreNetworks" product="tablet" msgid="1304304745850215556">"Ilova tarmoqlarga baho berishi va planshetga ulardan qaysi biriga ulanish lozimligini ko‘rsatishi mumkin."</string>
-    <string name="permdesc_scoreNetworks" product="tv" msgid="5444434643862417649">"Ilovaga tarmoqlarga baho berish va televizorga ulardan qaysi biriga ulanish lozimligini ko‘rsatish huquqini beradi."</string>
-    <string name="permdesc_scoreNetworks" product="default" msgid="1831501848178651379">"Ilova tarmoqlarga baho berishi va telefonga ulardan qaysi biriga ulanish lozimligini ko‘rsatishi mumkin."</string>
     <string name="permlab_bluetooth" msgid="6127769336339276828">"Bluetooth qurilmalar bilan bog‘lanish"</string>
     <string name="permdesc_bluetooth" product="tablet" msgid="3480722181852438628">"Ilovaga planshetdagi Bluetooth‘ning sozlamasini ko‘rishga va bog‘langan qurilmalarga ulanish va ulardan ulanish so‘rovlarini qabul qulishga imkon beradi."</string>
     <string name="permdesc_bluetooth" product="tv" msgid="3974124940101104206">"Ilovaga televizordagi Bluetooth sozlamalarini ko‘rish hamda juftlashgan qurilmalar bilan aloqa o‘rnatish va ulanishlarni qabul qilish huquqini beradi."</string>
@@ -778,10 +463,6 @@
     <string name="permdesc_writeSyncSettings" msgid="8956262591306369868">"Ilovaga hisobning sinxronlash sozlamalarini o‘zgartirish uchun ruxsat beradi. Masalan, bundan \"Odamlar\" ilovasini hisob bilan sinxronlanlash uchun foydalanish mumkin."</string>
     <string name="permlab_readSyncStats" msgid="7396577451360202448">"sinxronlash statistikasini o‘qish"</string>
     <string name="permdesc_readSyncStats" msgid="1510143761757606156">"Ilovaga hisobning sinxronlash statistikasini, shu jumladan, sinxronlangan hodisalar tarixi va qancha ma’lumot sinxronlanganligi haqidagi ma’lumotni o‘qishga ruxsat beradi."</string>
-    <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"obunalarni o‘qish"</string>
-    <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"Ilova hozirgi vaqtda sinxronlanayotgan elementlar to‘g‘risidagi ma’lumotlarni olishi mumkin."</string>
-    <string name="permlab_subscribedFeedsWrite" msgid="9015246325408209296">"obunalarga yozish"</string>
-    <string name="permdesc_subscribedFeedsWrite" msgid="6928930188826089413">"Ilova hozirgi vaqtda sinxronlanayotgan elementlarni o‘zgartirishi mumkin. Zararli dasturlar uning yordamida sinxronlangan elementlarni o‘zgartirishi mumkin"</string>
     <string name="permlab_readDictionary" msgid="4107101525746035718">"lug‘atga qo‘shgan atamalaringizni o‘qish"</string>
     <string name="permdesc_readDictionary" msgid="659614600338904243">"Ilovaga foydalanuvchi lug‘atga zaxiralagan barcha so‘zlar, nomlar va so‘z birikmalarini o‘qish uchun ruxsat beradi."</string>
     <string name="permlab_writeDictionary" msgid="2183110402314441106">"foydalanuvchi lug‘atiga so‘zlar qo‘shish"</string>
@@ -794,62 +475,8 @@
     <string name="permlab_sdcardWrite" product="default" msgid="8805693630050458763">"SD xotira kartasi tarkibidagilarni o‘zgartirish yoki o‘chirish"</string>
     <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6175406299445710888">"Ilova USB xotiraga ma’lumot yozishi mumkin."</string>
     <string name="permdesc_sdcardWrite" product="default" msgid="4337417790936632090">"Ilova SD kartaga ma’lumot yozishi mumkin."</string>
-    <string name="permlab_mediaStorageWrite" product="default" msgid="6859839199706879015">"tashqi media xotiradagilarni o‘zgartirish/o‘chirish"</string>
-    <string name="permdesc_mediaStorageWrite" product="default" msgid="8189160597698529185">"Ilova ichki multimedia xotirasidagi kontentni o‘zgartirishi mumkin."</string>
-    <string name="permlab_manageDocs" product="default" msgid="5778318598448849829">"hujjatlar xotira omborini boshqarish"</string>
-    <string name="permdesc_manageDocs" product="default" msgid="8704323176914121484">"Dasturga xotiradagi hujjatlarni boshqarish uchun ruxsat beradi."</string>
-    <string name="permlab_sdcardAccessAll" msgid="8150613823900460576">"barcha foydalanuvchilar tashqi xotirasiga ruxsat"</string>
-    <string name="permdesc_sdcardAccessAll" msgid="3215208357415891320">"Ilovalarga barcha foydalanuvchilar uchun tashqi xotiraga kirish uchun ruxsat beradi."</string>
-    <string name="permlab_cache_filesystem" msgid="5656487264819669824">"fayl tizimi keshiga kirish"</string>
-    <string name="permdesc_cache_filesystem" msgid="5578967642265550955">"Ilova kesh fayl tizimini o‘qishi va unga yozishi mumkin."</string>
     <string name="permlab_use_sip" msgid="2052499390128979920">"SIP qo‘ng‘iroqlarini amalga oshirish/qabul qilish"</string>
     <string name="permdesc_use_sip" msgid="2297804849860225257">"Ilovaga SIP qo‘ng‘iroqlarini amalga oshirish va qabul qilish uchun ruxsat beradi."</string>
-    <string name="permlab_register_sim_subscription" msgid="3166535485877549177">"yangi SIM kartali telekommunikatsiya aloqalarini ro‘yxatga olish"</string>
-    <string name="permdesc_register_sim_subscription" msgid="2138909035926222911">"Ilovaga yangi SIM kartali telekommunikatsiya aloqalarini ro‘yxatga olish uchun ruxsat beradi."</string>
-    <string name="permlab_register_call_provider" msgid="108102120289029841">"yangi telekommunikatsiya aloqalarini ro‘yxatga olish"</string>
-    <string name="permdesc_register_call_provider" msgid="7034310263521081388">"Ilovaga yangi telekommunikatsiya aloqalarini ro‘yxatga olish uchun ruxsat beradi."</string>
-    <string name="permlab_connection_manager" msgid="1116193254522105375">"telekommunikatsiya aloqalarini boshqarish"</string>
-    <string name="permdesc_connection_manager" msgid="5925480810356483565">"Ilovaga telekommunikatsiya aloqalarini boshqarish uchun ruxsat beradi."</string>
-    <string name="permlab_bind_incall_service" msgid="6773648341975287125">"suhbat vaqtida ekranni boshqarish"</string>
-    <string name="permdesc_bind_incall_service" msgid="8343471381323215005">"Ilova suhbat vaqtida ekranni boshqarishi mumkin."</string>
-    <string name="permlab_bind_connection_service" msgid="3557341439297014940">"telefoniya xizmatlarini bilan aloqa qilish"</string>
-    <string name="permdesc_bind_connection_service" msgid="4008754499822478114">"Ilovaga qo‘ng‘iroqlarni amalga oshirish/qabul qilish uchun telefoniya xizmatlari bilan aloqa qilishga ruxsat beradi."</string>
-    <string name="permlab_control_incall_experience" msgid="9061024437607777619">"suhbat vaqtida foydalanuvchi bilan aloqa qilish"</string>
-    <string name="permdesc_control_incall_experience" msgid="915159066039828124">"Ilova suhbat vaqtida foydalanuvchi bilan aloqa qilishi mumkin."</string>
-    <string name="permlab_readNetworkUsageHistory" msgid="7862593283611493232">"tarixiy tarmoq sarfi ma‘lumotlarini o‘qish"</string>
-    <string name="permdesc_readNetworkUsageHistory" msgid="7689060749819126472">"Ilova muayyan tarmoqlardan va ilovalardan foydalanish tarixini o‘qishi mumkin."</string>
-    <string name="permlab_manageNetworkPolicy" msgid="2562053592339859990">"tarmoq siyosatini boshqarish"</string>
-    <string name="permdesc_manageNetworkPolicy" msgid="7537586771559370668">"Ilova tarmoq siyosatini boshqarishi va alohida ilovalar uchun qoidalarni o‘rnatishi mumkin."</string>
-    <string name="permlab_modifyNetworkAccounting" msgid="5088217309088729650">"tarmoqdan foydalanishni hisoblashni o‘zgartirish"</string>
-    <string name="permdesc_modifyNetworkAccounting" msgid="5443412866746198123">"Ilovaga ilovalarga nisbadan hisoblanadigan tarmoqdan foydalanish ma’lumotlarini o‘zgartirishga ruxsat beradi. Oddiy ilovalar tomonidan foydalanilmaydi."</string>
-    <string name="permlab_accessNotifications" msgid="7673416487873432268">"ruxsat bildirishnomalari"</string>
-    <string name="permdesc_accessNotifications" msgid="458457742683431387">"Dasturga bildirishnomalar va boshqa dasturlar jo‘natgan xabarlarni qabul qilish, ko‘rib chiqish hamda tozalash imkonini beradi."</string>
-    <string name="permlab_bindNotificationListenerService" msgid="7057764742211656654">"bildirishnomani tinglash xizmatiga bog‘lash"</string>
-    <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"Foydalanuvchiga bildirishnomani eshituvchi xizmat yuqori darajali interfeysini bog‘lash imkonini beradi. Oddiy dasturlar uchun hech qachon kerak bo‘lmaydi."</string>
-    <string name="permlab_bindChooserTargetService" msgid="3443261076710185673">"mo‘ljaldagi xizmat bilan bog‘lanish"</string>
-    <string name="permdesc_bindChooserTargetService" msgid="1413908999583734970">"Egasiga mo‘ljaldagi xizmatning yuqori darajali interfeysiga bog‘lanish uchun ruxsat beradi. Oddiy ilovalar uchun hech qachon kerak bo‘lmaydi."</string>
-    <string name="permlab_bindConditionProviderService" msgid="1180107672332704641">"shartlarni taqdim etuvchilarning serveriga ulanish"</string>
-    <string name="permdesc_bindConditionProviderService" msgid="1680513931165058425">"Ilova shartlarni taqdim etuvchining yuqori darajali interfeysiga ulanishi mumkin. Oddiy ilovalar uchun talab qilinmaydi."</string>
-    <string name="permlab_bindMediaRouteService" msgid="6637740382272686835">"media fayllarni uzatish vositasiga bog‘lab qo‘yish"</string>
-    <string name="permdesc_bindMediaRouteService" msgid="6436655024972496687">"Media fayllarni uzatishning yuqori darajali vositasiga bog‘lab qo‘yish. Oddiy ilovalar uchun talab qilinmaydi."</string>
-    <string name="permlab_bindDreamService" msgid="4153646965978563462">"Ekran lavhalari xizmatiga ulanish"</string>
-    <string name="permdesc_bindDreamService" msgid="7325825272223347863">"Ekran lavhalari xizmatining yuqori darajali interfeysiga ulanish. Oddiy ilovalar tomonidan ishlatilmaydi."</string>
-    <string name="permlab_invokeCarrierSetup" msgid="3699600833975117478">"aloqa operatorining sozlash dasturini so‘rash"</string>
-    <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"Foydalanuvchiga aloqa operatori bergan sozlash dasturini ishga tushirish imkonini beradi. Oddiy dasturlar uchun hech qachon kerak bo‘lmaydi."</string>
-    <string name="permlab_accessNetworkConditions" msgid="8206077447838909516">"tarmoq sharoitidagi kuzatuvlarni tinglash"</string>
-    <string name="permdesc_accessNetworkConditions" msgid="6899102075825272211">"Dasturga tarmoq sharoitiga ko‘ra kuzatuvlarni eshitish imkonini beradi. Oddiy dasturlar uchun hech qachon kerak bo‘lmaydi."</string>
-    <string name="permlab_setInputCalibration" msgid="4902620118878467615">"ekran muvozanati ko‘rsatkichlarini o‘zgartirish"</string>
-    <string name="permdesc_setInputCalibration" msgid="4527511047549456929">"Ilova sensorli ekranning muvozanat ko‘rsatkichlarini o‘zgartirishi mumkin. Oddiy ilovalar uchun talab qilinmaydi."</string>
-    <string name="permlab_accessDrmCertificates" msgid="7436886640723203615">"DRM sertifikatlariga kirish"</string>
-    <string name="permdesc_accessDrmCertificates" msgid="8073288354426159089">"Ilova DRM sertifikatlarini sinxronlashi va ulardan foydalanishi mumkin. Ushbu ruxsatnoma faqat maxsus ilovalar uchun talab qilinadi."</string>
-    <string name="permlab_handoverStatus" msgid="1159132046126626731">"Android Beam uzatish holatini olish"</string>
-    <string name="permdesc_handoverStatus" msgid="4788144087245714948">"Ushbu ilovaga joriy Android Beam uzatishlari haqida ma\'lumotlarni olish ruxsati berilsin."</string>
-    <string name="permlab_removeDrmCertificates" msgid="7044888287209892751">"DRM sertifikatlarini o‘chirib tashlash"</string>
-    <string name="permdesc_removeDrmCertificates" msgid="7272999075113400993">"Ilovaga DRM sertifikatlarini o‘chirib tashlash uchun ruxsat beradi. Oddiy ilovalar uchun talab qilinmaydi."</string>
-    <string name="permlab_bindCarrierMessagingService" msgid="1490229371796969158">"aloqa operatorining xabar almashinuv xizmatiga bog‘lanish"</string>
-    <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"Egasiga aloqa operatorining xabar almashinuv xizmatining yuqori darajali interfeysiga bog‘lanish uchun ruxsat beradi. Oddiy ilovalar uchun hech qachon kerak bo‘lmaydi."</string>
-    <string name="permlab_accessVoiceInteractionService" msgid="4183835260471435605">"ovozli muloqot xizmatidan foydalanish"</string>
-    <string name="permdesc_accessVoiceInteractionService" msgid="836587728238433459">"Egasiga joriy ovozli muloqot xizmatidan foydalanishga ruxsat beradi. Oddiy ilovalarda hech qachon kerak bo‘lmaydi."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Parol qoidalarini o‘rnatish"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"Ekran qulfi paroli va PIN kodlari uchun qo‘yiladigan talablarni (belgilar soni va uzunligi) nazorat qiladi."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Ekranni qulfdan chiqarish urinishlarini nazorat qilish"</string>
@@ -1135,28 +762,10 @@
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="8497389531014185509">"Ilovaga telefoningizga zaxiralangan brauzer tarixi yoki xatcho‘plarini o‘zgartirish uchun ruxsat beradi. Bu ilovaga brauzer ma’lumotlarini o‘zgartirish yoki o‘chirishga ruxsat berishi mumkin. Diqqat qiling: ushbu ruxsat uchinchi taraf brauzerlari yoki internetni ko‘rsatish qobiliyatiga ega boshqa ilovalardan talab qilinmasligi mumkin."</string>
     <string name="permlab_setAlarm" msgid="1379294556362091814">"signal o‘rnatish"</string>
     <string name="permdesc_setAlarm" msgid="316392039157473848">"Ilova uyg‘otkichni sozlashi mumkin. Ba’zi soat ilovalari ushbu funksiyani qo‘llab-quvvatlamasligi mumkin."</string>
-    <string name="permlab_writeVoicemail" msgid="7309899891683938100">"ovozli pochta xabarlarini yozish"</string>
-    <string name="permdesc_writeVoicemail" msgid="6592572839715924830">"Ilovaga ovozli pochtangizdagi xabarlarni o‘zgartirish va o‘chirish uchun ruxsat beradi."</string>
     <string name="permlab_addVoicemail" msgid="5525660026090959044">"ovozli xat qo‘shish"</string>
     <string name="permdesc_addVoicemail" msgid="6604508651428252437">"Ilova xabarlarni ovozli pochta qutingizga qo‘shishi mumkin."</string>
-    <string name="permlab_readVoicemail" msgid="8415201752589140137">"ovozli pochta xabarlarini o‘qish"</string>
-    <string name="permdesc_readVoicemail" msgid="8926534735321616550">"Ilovaga ovozli pochta xabarlaringizni o‘qish uchun ruxsat beradi."</string>
     <string name="permlab_writeGeolocationPermissions" msgid="5962224158955273932">"brauzerdagi geolokatsiya ma’lumotlariga kirish huquqini o‘zgartirish"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="1083743234522638747">"Ilova brauzerdagi geolokatsiya ma’lumotlariga kirish sozlamalarini o‘zgartirishi mumkin. Zararli dasturlar uning yordamida joylashuv to‘g‘risidagi ma’lumotlarni boshqa istalgan veb-saytga yuborishi mumkin."</string>
-    <string name="permlab_packageVerificationAgent" msgid="5568139100645829117">"paketlarni tekshirish"</string>
-    <string name="permdesc_packageVerificationAgent" msgid="8437590190990843381">"Ilova paketlarni o‘rnatish imkoniyatini tekshirishi mumkin."</string>
-    <string name="permlab_bindPackageVerifier" msgid="4187786793360326654">"paketni tekshirgichga bog‘lash"</string>
-    <string name="permdesc_bindPackageVerifier" msgid="3180741773233862126">"Ilova paketlarni tekshirishni talab qilishi mumkin. Oddiy ilovalar uchun talab qilinmaydi."</string>
-    <string name="permlab_intentFilterVerificationAgent" msgid="1135788294400437497">"intent-filtrni tekshirish"</string>
-    <string name="permdesc_intentFilterVerificationAgent" msgid="5853902808424716312">"Ilovaga intent-filtr holatini tekshirish uchun ruxsat beradi."</string>
-    <string name="permlab_bindIntentFilterVerifier" msgid="8567268159430779210">"intent-filtrni tekshirgichga biriktirish"</string>
-    <string name="permdesc_bindIntentFilterVerifier" msgid="681128728719578778">"Egasiga intent-filtr tekshiruvi so‘rovlarini yuborish uchun ruxsat beradi. Oddiy ilovalarda hech qachon kerak bo‘lmaydi."</string>
-    <string name="permlab_serialPort" msgid="546083327654631076">"serial portlarga kirish"</string>
-    <string name="permdesc_serialPort" msgid="2991639985224598193">"Foydalanuvchiga SerialManager API’dan foydalanib, serial portlarga kirishga ruxsat beradi."</string>
-    <string name="permlab_accessContentProvidersExternally" msgid="5077774297943409285">"kontent provayderiga tashqi ruxsat"</string>
-    <string name="permdesc_accessContentProvidersExternally" msgid="4544346486697853685">"Foydalanuvchiga terminaldan kontent operatorlariga ulanishga ruxsat beradi. Oddiy ilovalar uchun hech qachon kerak bo‘lmaydi."</string>
-    <string name="permlab_updateLock" msgid="3527558366616680889">"qurilmani avtoyangilanishlardan to‘sish"</string>
-    <string name="permdesc_updateLock" msgid="1655625832166778492">"Egasiga qurilmani yangilash uchun interfaol bo‘lmagan o‘chirib-yoqishga qachon qulay vaqt bo‘lishi haqida tizimga ma’lumot berishni taklif qiladi."</string>
     <string name="save_password_message" msgid="767344687139195790">"Brauzer ushbu parolni eslab qolishini xohlaysizmi?"</string>
     <string name="save_password_notnow" msgid="6389675316706699758">"Hozir emas"</string>
     <string name="save_password_remember" msgid="6491879678996749466">"Eslab qolgich"</string>
@@ -1452,28 +1061,8 @@
     <string name="ext_media_nomedia_notification_message" product="nosdcard" msgid="6921126162580574143">"USB xotira olindi. Yangi xotira qurilmasini kiriting."</string>
     <string name="ext_media_nomedia_notification_message" product="default" msgid="3870120652983659641">"SD karta olindi. Yangisini kiriting."</string>
     <string name="activity_list_empty" msgid="1675388330786841066">"Hech qanday mos faoliyat topilmadi."</string>
-    <string name="permlab_pkgUsageStats" msgid="8787352074326748892">"komponentlardan foydalanish statistikasini yangilash"</string>
-    <string name="permdesc_pkgUsageStats" msgid="1106612424254277630">"Ilova to‘plangan tarkibiy qismlardan foydalanish statistikasini o‘zgartirishi mumkin. Oddiy ilovalar tomonidan foydalanilmaydi."</string>
-    <string name="permlab_copyProtectedData" msgid="4341036311211406692">"kontentdan nusxa olish"</string>
-    <string name="permdesc_copyProtectedData" msgid="4390697124288317831">"Ilova ma’lumotlarni nusxalash uchun saqlash xizmatlarini chaqirishi mumkin. Ushbu ruxsatnoma oddiy ilovalar tomonidan ishlatilmaydi."</string>
     <string name="permlab_route_media_output" msgid="1642024455750414694">"Media chiqishni yo‘naltirish"</string>
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"Ilovaga media chiqish ovozini boshqa tashqi qurilmalarga yo‘naltirish uchun ruxsat beradi."</string>
-    <string name="permlab_access_keyguard_secure_storage" msgid="7565552237977815047">"Klaviatura nazoratchisi xavfsiz xotirasiga ruxsat"</string>
-    <string name="permdesc_access_keyguard_secure_storage" msgid="5866245484303285762">"Dasturga klaviatura xavfsizligi xizmatining xotirasidan foydalanishga ruxsat beradi."</string>
-    <string name="permlab_control_keyguard" msgid="172195184207828387">"klaviatura nazoratchisining ko‘rsatilishini boshqarish"</string>
-    <string name="permdesc_control_keyguard" msgid="3043732290518629061">"Dasturga klaviatura nazoratchisini boshqarish uchun ruxsat beradi."</string>
-    <string name="permlab_trust_listener" msgid="1765718054003704476">"Ishonch holati o‘zgarishini kuzatish."</string>
-    <string name="permdesc_trust_listener" msgid="8233895334214716864">"Ilova ishonch holatidagi o‘zgarishlarni kuzatib borishi mumkin."</string>
-    <string name="permlab_provide_trust_agent" msgid="5465587586091358316">"Ishonchli agent bilan ta’minlash."</string>
-    <string name="permdesc_provide_trust_agent" msgid="3865702641053068148">"Ilovaga ishonchli agent bilan ta’minlash uchun ruxsat beradi."</string>
-    <string name="permlab_launch_trust_agent_settings" msgid="5859430082240410200">"Ishonchli agent sozlamalari menyusini ishga tushirish."</string>
-    <string name="permdesc_launch_trust_agent_settings" msgid="8185142708644913381">"Ilovaga ishonchli agent xatti-harakatlarini o‘zgartiruvchi amallarni ishga tushirishga ruxsat beradi."</string>
-    <string name="permlab_bind_trust_agent_service" msgid="8242093169457695334">"Ishonchli agentlar xizmatiga ulanish"</string>
-    <string name="permdesc_bind_trust_agent_service" msgid="7041930026024507515">"Ilova ishonchli agentlar xizmatiga ulanishi mumkin."</string>
-    <string name="permlab_recovery" msgid="3157024487744125846">"Tizimni yangilash va tiklashni birgalikda amalga oshirish"</string>
-    <string name="permdesc_recovery" msgid="8511774533266359571">"Dasturga tizimni tiklash va yangilash imkoniyatlari bilan ishlash uchun ruxsat beradi."</string>
-    <string name="permlab_manageMediaProjection" msgid="1120495449419929218">"Media fayllarni proyektorga uzatish seanslarini boshqarish"</string>
-    <string name="permdesc_manageMediaProjection" msgid="8053759147529492856">"Ilovaga media fayllarni proyektorga uzatish seanslarini boshqarish uchun ruxsat beradi. Ushbu seanslar yordamida ilovalar ekrandagi va audio kontentlarni yozib olishi mumkin bo‘ladi. Oddiy ilovalar uchun talab qilinmaydi."</string>
     <string name="permlab_readInstallSessions" msgid="6165432407628065939">"O‘rnatilgan seanslarni o‘qish"</string>
     <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"Ilovaga o‘rnatilgan seanslarni o‘qish uchun ruxsat beradi. Bu unga faol paket o‘rnatmalari haqidagi ma’lumotlarni ko‘rish imkonini beradi."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"Masshtabni o‘zgartirish uchun ikki marta bosing"</string>
@@ -1840,13 +1429,9 @@
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Bo‘shatishdan oldin PIN kod so‘ralsin"</string>
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"Bo‘shatishdan oldin chizmali parol so‘ralsin"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Bo‘shatishdan oldin parol so‘ralsin"</string>
-    <!-- no translation found for package_installed_device_owner (8420696545959087545) -->
-    <skip />
-    <!-- no translation found for package_deleted_device_owner (7650577387493101353) -->
-    <skip />
+    <string name="package_installed_device_owner" msgid="8420696545959087545">"Administratoringiz tomonidan o‘rnatilgan"</string>
+    <string name="package_deleted_device_owner" msgid="7650577387493101353">"Administratoringiz tomonidan o‘chirilgan"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"Batareya quvvatini uzoqroq vaqtga yetkazish uchun quvvat tejash funksiyasi qurilmangiz unumdorligini kamaytiradi hamda uning tebranishi va orqa fonda internetdan foydalanishini cheklaydi. Sinxronlanishni talab qiladigan e-pochta, xabar almashinuv va boshqa ilovalar esa qachonki ularni ishga tushirganingizda yangilanadi.\n\nQurilma quvvat olayotganda quvvat tejash funksiyasi avtomatik tarzda o‘chadi."</string>
-    <string name="downtime_condition_summary" msgid="8761776337475705749">"Tanaffus vaqti tugaguncha – <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
-    <string name="downtime_condition_line_one" msgid="8762708714645352010">"Nofoal vaqtingiz tugaguncha"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
       <item quantity="other">%1$d daqiqa (<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g> gacha)</item>
       <item quantity="one">Bir daqiqa (<xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g> gacha)</item>
@@ -1865,9 +1450,17 @@
     </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"Ushbu vaqtgacha: <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_forever" msgid="7420011936770086993">"Men o‘chirmaguncha"</string>
+    <!-- no translation found for zen_mode_rule_name_combination (191109939968076477) -->
+    <skip />
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"Yig‘ish"</string>
-    <string name="zen_mode_next_alarm_summary" msgid="5915140424683747372">"Keyingi uyg‘otkich vaqtigacha (<xliff:g id="FORMATTEDTIME">%1$s</xliff:g>)"</string>
-    <string name="zen_mode_next_alarm_line_one" msgid="5537042951553420916">"Keyingi uyg‘otkich vaqtigacha"</string>
+    <!-- no translation found for zen_mode_feature_name (289097150786114338) -->
+    <skip />
+    <!-- no translation found for zen_mode_downtime_feature_name (2626974636779860146) -->
+    <skip />
+    <!-- no translation found for zen_mode_default_weeknights_name (2069189413656431610) -->
+    <skip />
+    <!-- no translation found for zen_mode_default_weekends_name (2377398437072017011) -->
+    <skip />
     <string name="muted_by" msgid="6147073845094180001">"“<xliff:g id="THIRD_PARTY">%1$s</xliff:g>” tomonidan ovozsiz qilingan"</string>
     <string name="system_error_wipe_data" msgid="6608165524785354962">"Qurilmangiz bilan bog‘liq ichki muammo mavjud. U zavod sozlamalari tiklanmaguncha barqaror ishlamasligi mumkin."</string>
     <string name="system_error_manufacturer" msgid="8086872414744210668">"Qurilmangiz bilan bog‘liq ichki muammo mavjud. Tafsilotlar uchun qurilmangiz ishlab chiqaruvchisiga murojaat qiling."</string>
@@ -1877,6 +1470,13 @@
     <string name="stk_cc_ss_to_dial" msgid="2151304435775557162">"SS so‘rovi DIAL so‘roviga o‘zgartirildi."</string>
     <string name="stk_cc_ss_to_ussd" msgid="3951862188105305589">"SS so‘rovi USSD so‘roviga o‘zgartirildi."</string>
     <string name="stk_cc_ss_to_ss" msgid="5470768854991452695">"SS so‘rovi yangi SS so‘roviga o‘zgartirildi."</string>
+    <!-- no translation found for usb_midi_peripheral_name (7221113987741003817) -->
+    <skip />
     <string name="usb_midi_peripheral_manufacturer_name" msgid="7176526170008970168">"Android"</string>
-    <string name="usb_midi_peripheral_model_name" msgid="1959288763942653301">"Tashqi USB porti"</string>
+    <!-- no translation found for usb_midi_peripheral_product_name (4971827859165280403) -->
+    <skip />
+    <!-- no translation found for floating_toolbar_open_overflow_description (4797287862999444631) -->
+    <skip />
+    <!-- no translation found for floating_toolbar_close_overflow_description (559796923090723804) -->
+    <skip />
 </resources>

@@ -218,69 +218,43 @@
     <string name="android_system_label" msgid="6577375335728551336">"Андройд систем"</string>
     <string name="user_owner_label" msgid="6465364741001216388">"Хувийн апп-ууд"</string>
     <string name="managed_profile_label" msgid="6260850669674791528">"Ажил"</string>
-    <string name="permgrouplab_costMoney" msgid="5429808217861460401">"Танаас төлбөр авдаг үйлчилгээнүүд"</string>
-    <string name="permgroupdesc_costMoney" msgid="3293301903409869495">"Таны төлбөрт оруулах зүйлийг хийх."</string>
-    <string name="permgrouplab_messages" msgid="7521249148445456662">"Таны мессеж"</string>
-    <string name="permgroupdesc_messages" msgid="7821999071003699236">"Таны SMS, и-мэйл ба бусад мессежийг унших болон бичих."</string>
-    <string name="permgrouplab_personalInfo" msgid="3519163141070533474">"Таны хувийн мэдээлэл"</string>
-    <string name="permgroupdesc_personalInfo" msgid="8426453129788861338">"Таны харилцагчдын картанд хадгалагдсан таны мэдээлэлд шууд хандах."</string>
+    <!-- no translation found for permgrouplab_contacts (3657758145679177612) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_contacts (1437393511338346185) -->
+    <skip />
+    <!-- no translation found for permgrouplab_location (7275582855722310164) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_location (536889867433972794) -->
+    <skip />
     <string name="permgrouplab_socialInfo" msgid="5799096623412043791">"Таны нийтийн мэдээлэл"</string>
     <string name="permgroupdesc_socialInfo" msgid="7129842457611643493">"Таны харилцагчид болон нийтийн холбооны тухай мэдээлэлд шууд хандах."</string>
-    <string name="permgrouplab_location" msgid="635149742436692049">"Таны байршил"</string>
-    <string name="permgroupdesc_location" msgid="5704679763124170100">"Таны бодит байршлыг хянах."</string>
-    <string name="permgrouplab_network" msgid="5808983377727109831">"Сүлжээний холбоо"</string>
-    <string name="permgroupdesc_network" msgid="4478299413241861987">"Төрөл бүрийн сүлжээний функцүүдэд хандах"</string>
-    <string name="permgrouplab_bluetoothNetwork" msgid="1585403544162128109">"Блютүүт"</string>
-    <string name="permgroupdesc_bluetoothNetwork" msgid="5625288577164282391">"Блютүүтээр төхөөрөмж болон сүлжээнд хандах."</string>
-    <string name="permgrouplab_audioSettings" msgid="8329261670151871235">"Аудио тохиргоо"</string>
-    <string name="permgroupdesc_audioSettings" msgid="2641515403347568130">"Аудио тохиргоо солих."</string>
-    <string name="permgrouplab_affectsBattery" msgid="6209246653424798033">"Батерейд нөлөөлөх"</string>
-    <string name="permgroupdesc_affectsBattery" msgid="6441275320638916947">"Батерей хурдан дуусгах функцийг ашиглах."</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"Календарь"</string>
-    <string name="permgroupdesc_calendar" msgid="5777534316982184416">"Календар болон үйл явдалд шууд хандах."</string>
-    <string name="permgrouplab_dictionary" msgid="4148597128843641379">"Хэрэглэгчийн толиос унших"</string>
-    <string name="permgroupdesc_dictionary" msgid="7921166355964764490">"Хэрэглэгчийн толь бичгээс үг унших."</string>
-    <string name="permgrouplab_writeDictionary" msgid="8090237702432576788">"Хэрэглэгчийн тольд бичих"</string>
-    <string name="permgroupdesc_writeDictionary" msgid="2711561994497361646">"Хэрэглэгчийн толь бичигт үг нэмэх."</string>
+    <!-- no translation found for permgroupdesc_calendar (2116049656685591803) -->
+    <skip />
+    <!-- no translation found for permgrouplab_sms (228308803364967808) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_sms (3695085582674524761) -->
+    <skip />
+    <!-- no translation found for permgrouplab_dictionary (8114410334955871144) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_dictionary (7586787746354378335) -->
+    <skip />
     <string name="permgrouplab_bookmarks" msgid="1949519673103968229">"Хавчуурга болон түүх"</string>
     <string name="permgroupdesc_bookmarks" msgid="4169771606257963028">"Хавчуурга болон хөтчийн түүхрүү шууд хандах."</string>
-    <string name="permgrouplab_deviceAlarms" msgid="6117704629728824101">"Сэрүүлэг"</string>
-    <string name="permgroupdesc_deviceAlarms" msgid="4769356362251641175">"Сэрүүлэг тохируулах."</string>
-    <string name="permgrouplab_voicemail" msgid="4162237145027592133">"Дуут шуудан"</string>
-    <string name="permgroupdesc_voicemail" msgid="2498403969862951393">"Дуут шууданд шууд хандах."</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"Микрофон"</string>
-    <string name="permgroupdesc_microphone" msgid="7106618286905738408">"Аудио бичихийн тулд микрофонд шууд хандах."</string>
+    <!-- no translation found for permgroupdesc_microphone (1296196977187629181) -->
+    <skip />
     <string name="permgrouplab_camera" msgid="4820372495894586615">"Камер"</string>
-    <string name="permgroupdesc_camera" msgid="2933667372289567714">"Зураг эвсэл бичлэг хийхээр камерт шууд хандах."</string>
-    <string name="permgrouplab_screenlock" msgid="8275500173330718168">"Дэлгэц түгжих"</string>
-    <string name="permgroupdesc_screenlock" msgid="7067497128925499401">"Таны төхөөрөмжийн дэлгэцийн түгжээнд нөлөөлөх чадвар."</string>
-    <string name="permgrouplab_appInfo" msgid="8028789762634147725">"Таны аппликешны мэдээлэл"</string>
-    <string name="permgroupdesc_appInfo" msgid="3950378538049625907">"Таны төхөөрөмжийн бусад аппликешнд нөлөөлөх чадвар."</string>
-    <string name="permgrouplab_wallpaper" msgid="3850280158041175998">"Ханын зураг"</string>
-    <string name="permgroupdesc_wallpaper" msgid="5630417854750540154">"Төхөөрөмжийн ханын зургийн тохиргоог солих."</string>
-    <string name="permgrouplab_systemClock" msgid="406535759236612992">"Цаг"</string>
-    <string name="permgroupdesc_systemClock" msgid="3944359833624094992">"Төхөөрөмжийн цаг эсвэл цагийн бүсийг солих."</string>
-    <string name="permgrouplab_statusBar" msgid="2095862568113945398">"Статус самбар"</string>
-    <string name="permgroupdesc_statusBar" msgid="6242593432226807171">"Төхөөрөмжийн статус самбарын тохиргоог солих."</string>
-    <string name="permgrouplab_syncSettings" msgid="3341990986147826541">"Синк тохиргоо"</string>
-    <string name="permgroupdesc_syncSettings" msgid="7603195265129031797">"Синк тохиргоонд хандах."</string>
-    <string name="permgrouplab_accounts" msgid="3359646291125325519">"Таны акаунт"</string>
-    <string name="permgroupdesc_accounts" msgid="4948732641827091312">"Боломжит акаунтад хандах."</string>
-    <string name="permgrouplab_hardwareControls" msgid="7998214968791599326">"Хардвер контрол"</string>
-    <string name="permgroupdesc_hardwareControls" msgid="4357057861225462702">"Гар төхөөрөмжийн хардверт шууд хандах."</string>
-    <string name="permgrouplab_phoneCalls" msgid="9067173988325865923">"Утсаар ярих"</string>
-    <string name="permgroupdesc_phoneCalls" msgid="7489701620446183770">"Утасны дуудлагыг хянах, бичих болон боловсруулах."</string>
-    <string name="permgrouplab_systemTools" msgid="4652191644082714048">"Системийн багаж"</string>
-    <string name="permgroupdesc_systemTools" msgid="8162102602190734305">"Системрүү доод төвшиний хандах болон удирдах."</string>
-    <string name="permgrouplab_developmentTools" msgid="3446164584710596513">"Хөгжүүлэх багаж"</string>
-    <string name="permgroupdesc_developmentTools" msgid="7058828032358142018">"Зөвхөн аппликешн хөгжүүлэгчдэд хэрэгтэй функц."</string>
-    <string name="permgrouplab_display" msgid="4279909676036402636">"Бусад аппликешн UI"</string>
-    <string name="permgroupdesc_display" msgid="6051002031933013714">"Бусад аппликешны UI-д нөлөөлөх."</string>
-    <string name="permgrouplab_storage" msgid="1971118770546336966">"Сан"</string>
-    <string name="permgroupdesc_storage" product="nosdcard" msgid="7442318502446874999">"USB санд хандах."</string>
-    <string name="permgroupdesc_storage" product="default" msgid="9203302214915355774">"SD картад хандах."</string>
-    <string name="permgrouplab_accessibilityFeatures" msgid="7919025602283593907">"Хялбар хандах функц"</string>
-    <string name="permgroupdesc_accessibilityFeatures" msgid="4205196881678144335">"Туслах технологиос хүсэлт илгээх боломжтой функц"</string>
+    <!-- no translation found for permgroupdesc_camera (2429930670410559293) -->
+    <skip />
+    <!-- no translation found for permgrouplab_phone (5229115638567440675) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_phone (2016641188146068700) -->
+    <skip />
+    <!-- no translation found for permgrouplab_sensors (7416703484233940260) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_sensors (2987451839455524494) -->
+    <skip />
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Цонхны контентыг авах"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Таны харилцан үйлчлэх цонхны контентоос шалгах."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Хүрч танихыг асаах"</string>
@@ -305,14 +279,8 @@
     <string name="permdesc_receiveSms" msgid="6424387754228766939">"Апп нь SMS мессежийг хүлээн авах болон гүйцэтгэх боломжтой. Ингэснээр апп нь таны төхөөрөмжрүү илгээсэн мессежийг танд үзүүлэхгүйгээр хянах болон устгаж чадна."</string>
     <string name="permlab_receiveMms" msgid="1821317344668257098">"текст мессеж(МMS) хүлээж авах"</string>
     <string name="permdesc_receiveMms" msgid="533019437263212260">"Апп нь MMS мессежийг хүлээн авах болон гүйцэтгэх боломжтой. Ингэснээр апп нь таны төхөөрөмжрүү илгээсэн мессежийг танд үзүүлэхгүйгээр хянах болон устгаж чадна."</string>
-    <string name="permlab_receiveEmergencyBroadcast" msgid="1803477660846288089">"Яаралтай өргөн дамжууллыг хүлээн авах"</string>
-    <string name="permdesc_receiveEmergencyBroadcast" msgid="848524070262431974">"Апп нь яаралтай өргөн дамжууллын мессежийг хүлээн авах болон гүйцэтгэх боломжтой. Энэ зөвшөөрөл нь зөвхөн систем аппликешнд л боломжтой."</string>
-    <string name="permlab_readCellBroadcasts" msgid="1598328843619646166">"үүрэн өргөн дамжууллын мессеж унших"</string>
-    <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"Апп нь таны төхөөрөмжийн хүлээн авсан үүрэн өргөн дамжуулах мессежийг унших боломжтой. Үүрэн өргөн дамжууллын мэдэгдэл нь яаралтай нөхцөл байдлыг анхааруулах зорилгоор зарим байршлуудад хүрдэг. Хортой апп нь яаралтай үүрэн өргөн дамжууллыг хүлээн авсан үед таны төхөөрөмжийн ажиллагаа болон чадамжид нөлөөлөх боломжтой."</string>
     <string name="permlab_sendSms" msgid="5600830612147671529">"SMS мессеж илгээх"</string>
     <string name="permdesc_sendSms" msgid="7094729298204937667">"Апп нь SMS мессеж илгээх боломжтой. Энэ нь санаандгүй төлбөрт оруулж болзошгүй. Хортой апп нь таны зөвшөөрөлгүйгээр мессеж илгээн таныг төлбөрт оруулж болзошгүй."</string>
-    <string name="permlab_sendRespondViaMessageRequest" msgid="8713889105305943200">"мессежээр хариулах үйл явдалыг илгээх"</string>
-    <string name="permdesc_sendRespondViaMessageRequest" msgid="7107648548468778734">"Апп нь дуудлага ирэх үед мессежээр хариу өгөх үйл явдлыг зохицуулахын тулд бусад мессежийн апп-д хүсэлт илгээх боломжтой."</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"таны текст мессежийг унших(SMS эсвэл MMS)"</string>
     <string name="permdesc_readSms" product="tablet" msgid="2467981548684735522">"Апп нь таны утас эсвэл SIM картанд хадгалагдсан SMS мессежийг унших боломжтой. Энэ нь апп-д бүх мессежийг контент эсвэл нууц эсэхээс нь үл хамааран унших боломжийг олгоно."</string>
     <string name="permdesc_readSms" product="tv" msgid="5102425513647038535">"Апп-д таны телевиз болон Сим картийн SMS зурвасыг уншихыг зөвшөөрдөг. Энэ нь апп-д тухайн SMS зурвасуудын агуулга, нууцлалын зэргээс үл хамааран бүх зурвасуудыг уншихыг зөвшөөрдөг."</string>
@@ -323,188 +291,24 @@
     <string name="permdesc_writeSms" product="default" msgid="7268668709052328567">"Апп нь таны утас эсвэл SIM картанд хадгалагдсан SMS мессежрүү бичих боломжтой. Хортой апп нь таны мессежүүдийг устгах боломжтой."</string>
     <string name="permlab_receiveWapPush" msgid="5991398711936590410">"текст мессеж(WAP) хүлээн авах"</string>
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"Апп нь WAP мессежийг хүлээн авах болон биелүүлэх боломжтой. Энэ зөвшөөрөл нь танд илгээсэн мессежийг танд харуулалгүйгээр хянах эсвэл устгах боломжийг агуулна."</string>
-    <string name="permlab_receiveBluetoothMap" msgid="7593811487142360528">"Блютүүт зурвас (MAP) хүлээн авах"</string>
-    <string name="permdesc_receiveBluetoothMap" msgid="8656755936919466345">"Апп нь Блютүүт MAP мессежийг хүлээн авах болон гүйцэтгэх боломжтой. Ингэснээр апп нь таны төхөөрөмжрүү илгээсэн мессежийг танд үзүүлэхгүйгээр хянах болон устгаж чадна."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"ажиллаж байгаа апп-г дуудах"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"Апп нь одоо ажиллаж байгаа болон сүүлд ажилласан даалгаврын талаарх мэдээллийг авах боломжтой. Ингэснээр апп нь төхөөмж дээрх ямар аппликешнүүд ашиглагдсан талаарх мэдээлийг олох боломжтой."</string>
-    <string name="permlab_startTasksFromRecents" msgid="8990073877885690623">"саяхных дотроос ажил эхлүүлэх"</string>
-    <string name="permdesc_startTasksFromRecents" msgid="7382133554871222235">"Апп-д ActivityManager.getRecentTaskList()-с буцаж ирсэн дууссан ажлыг эхлүүлэхийн тулд ActivityManager.RecentTaskInfo объектыг ашиглах боломж олгоно."</string>
-    <string name="permlab_interactAcrossUsers" msgid="7114255281944211682">"хэрэглэгчидтэй харилцан үйлчлэлцэх"</string>
-    <string name="permdesc_interactAcrossUsers" msgid="364670963623385786">"Апп нь төхөөрөмж дээрх ялгаатай хэрэглэгчдэд үйлдэл гүйцэтгэх боломжтой. Хортой апп нь энийг ашиглан хэрэглэгч хоорондын хамгаалалтыг зөрчих боломжтой."</string>
-    <string name="permlab_interactAcrossUsersFull" msgid="2567734285545074105">"хэрэглэгчидтэй харилцан үйлчлэлцэх бүрэн зөвшөөрөл"</string>
-    <string name="permdesc_interactAcrossUsersFull" msgid="376841368395502366">"Бүх хэрэглэгчдэд боломжит бүх харилцан үйлдлийг зөвшөөрнө."</string>
-    <string name="permlab_manageUsers" msgid="1676150911672282428">"хэрэгчлэгч удирдах"</string>
-    <string name="permdesc_manageUsers" msgid="8409306667645355638">"Апп нь төхөөрөмж дээр асуулга, үүсгэлт болон устгалт зэргийг багтаасан хэрэглэгч удирдах боломжтой."</string>
-    <string name="permlab_getDetailedTasks" msgid="6229468674753529501">"ажиллаж байгаа апп-н дэлгэрэнгүйг авах"</string>
-    <string name="permdesc_getDetailedTasks" msgid="153824741440717599">"Апп нь одоо ажиллаж байгаа болон сүүлд ажилласан даалгаврын талаарх дэлгэрэнгүй мэдээллийг авах боломжтой. Хортой апп нь бусад апп-н хувийн мэдээлийг олох боломжтой."</string>
     <string name="permlab_reorderTasks" msgid="2018575526934422779">"ажиллаж байгаа апп-уудыг дахин эрэмбэлэх"</string>
     <string name="permdesc_reorderTasks" msgid="7734217754877439351">"Апп нь даалгавруудыг нүүрлүү болон арлуу зөөх боломжтой. Апп нь энийг таны оролцоогүйгээр хийж болзошгүй"</string>
-    <string name="permlab_removeTasks" msgid="6821513401870377403">"ажиллаж байгаа апп-г зогсоох"</string>
-    <string name="permdesc_removeTasks" msgid="1394714352062635493">"Апп нь даалгаврууд устгах болон тэдгээрийн апп-г зогсоох боломжтой. Хортой апп нь бусад апп-н ажиллагааг тасалдуулж болзошгүй."</string>
-    <string name="permlab_manageActivityStacks" msgid="7391191384027303065">"идэвхжилтийн стекүүдийг удирдах"</string>
-    <string name="permdesc_manageActivityStacks" msgid="1615881933034084440">"Апп-д бусад апп-уудын ажилладаг идэвхжилтийн стекүүдийг нэмэх, хасах буюу өөрчлөх боломж олгоно. Хорлонтой апп-ууд бусад апп-уудын авирт нөлөөлөх боломжтой."</string>
-    <string name="permlab_startAnyActivity" msgid="2918768238045206456">"ямарч активитиг эхлүүлэх"</string>
-    <string name="permdesc_startAnyActivity" msgid="997823695343584001">"Апп нь зөвшөөрөл хамгаалалтай эсвэл экспорт хийсэн статусаас үл хамааран ямарч активитиг эхлүүлэх боломжтой."</string>
-    <string name="permlab_setScreenCompatibility" msgid="6975387118861842061">"дэлгэцний зохицолыг тохируулах"</string>
-    <string name="permdesc_setScreenCompatibility" msgid="692043618693917374">"Апп нь бусад аппликешны дэлгэцний тохиромжит горимыг удирдах боломжтой.  Хортой аппликешн нь бусад аппликешны чадамжийг эвдэх боломжтой."</string>
-    <string name="permlab_setDebugApp" msgid="3022107198686584052">"апп дебагыг идэвхжүүлэх"</string>
-    <string name="permdesc_setDebugApp" msgid="4474512416299013256">"Апп нь бусад апп-г дебаг хийхийг асаах боломжтой. Хортой апп нь энийг ашиглан бусад апп-г зогсоох боломжтой."</string>
-    <string name="permlab_changeConfiguration" msgid="4162092185124234480">"системийн дэлгэцний тохиргоог солих"</string>
-    <string name="permdesc_changeConfiguration" msgid="4372223873154296076">"Апп нь нутагшил эсвэл фонтын хэмжээ зэрэг одоогийн тохиргоог солих боломжтой."</string>
     <string name="permlab_enableCarMode" msgid="5684504058192921098">"машины горимыг идэвхжүүлэх"</string>
     <string name="permdesc_enableCarMode" msgid="4853187425751419467">"Апп нь машины горимыг идэвхжүүлэх боломжтой."</string>
     <string name="permlab_killBackgroundProcesses" msgid="3914026687420177202">"бусад апп-г хаах"</string>
     <string name="permdesc_killBackgroundProcesses" msgid="4593353235959733119">"Апп нь бусад апп-н арын процессыг дуусгах боломжтой. Энэ бусад апп-г зогсоох боломжийг олгоно."</string>
-    <string name="permlab_forceStopPackages" msgid="2329627428832067700">"бусад апп-г хүчээр зогсоох"</string>
-    <string name="permdesc_forceStopPackages" msgid="5253157296183940812">"Апп нь бусад апп-г хүчээр зогсоох боломжтой."</string>
-    <string name="permlab_forceBack" msgid="652935204072584616">"апп-г хүчээр унтраах"</string>
-    <string name="permdesc_forceBack" msgid="3892295830419513623">"Апп нь нүүрэнд ажиллаж байгаа активитиг хүчээр зогсоох болгон арлуу явуулах боломжтой. Энгийн апп-д хэрэглэхгүй."</string>
-    <string name="permlab_dump" msgid="1681799862438954752">"системийн дотоод статусыг дуудах"</string>
-    <string name="permdesc_dump" msgid="1778299088692290329">"Апп нь системийн дотоод статусыг дуудах боломжтой. Хортой апп нь энийг ашиглах шаардлагагүй аюулгүй байдлын болон хувийн мэдээллийг дуудах боломжтой."</string>
-    <string name="permlab_retrieve_window_content" msgid="8022588608994589938">"Дэлгэцийн контентыг унших"</string>
-    <string name="permdesc_retrieve_window_content" msgid="3193269069469700265">"Апп нь идэвхтэй цонхны контентыг авах боломжтой. Хортой апп нь цонхны контентыг бүхэлд авах болон нууц үгнээс бусад бүх текстийг шалгаж болзошгүй"</string>
-    <string name="permlab_temporary_enable_accessibility" msgid="2312612135127310254">"Хялбар байдлыг түр идэвхтэй болгох"</string>
-    <string name="permdesc_temporary_enable_accessibility" msgid="8079456293182975464">"Аппликешн нь төхөөрөмжийн хялбар байдлыг түр зуур идэвхжүүлэх боломжтой. Хортой апп нь хэрэглэгчийн зөвшөөрөлгүйгээр хялбар байдлыг идэвхжүүлж болзошгүй."</string>
-    <string name="permlab_retrieveWindowToken" msgid="7154762602367758602">"цонхны токен авах"</string>
-    <string name="permdesc_retrieveWindowToken" msgid="668173747687795074">"Аппликешнд цонхны токен авах боломж олгоно. Хорлонтой апп-ууд системийн өмнөөс аппликешны цонхтой зөвшөөрөлгүйгээр харилцах боломжтой."</string>
-    <string name="permlab_frameStats" msgid="7056374987314361639">"фреймын статистик авах"</string>
-    <string name="permdesc_frameStats" msgid="4758001089491284919">"Аппликешнд фреймын статистикыг цуглуулах боломж олгоно. Хорлонтой апп-ууд виндовсын фреймын статистикыг өөр апп-с хянах боломжтой."</string>
-    <string name="permlab_filter_events" msgid="8675535648807427389">"үйл явдлыг шүүх"</string>
-    <string name="permdesc_filter_events" msgid="8006236315888347680">"Аппликешн нь хэрэглэгчийн бүх үйл явдалын илгээгдэхээс өмнөх урсгалыг шүүж байгаа оролтын шүүлтйиг бүртгэх боломжтой. Хортой апп нь хэрэглэгчийн интервэшнгүйгээр системийн UI-г удирдах боломжтой."</string>
-    <string name="permlab_shutdown" msgid="7185747824038909016">"хэсэгчилсэн унтраалт"</string>
-    <string name="permdesc_shutdown" msgid="7046500838746291775">"Активити менежерийг унтраана. Бүрэн унтраалтыг хийхгүй."</string>
-    <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"апп шилжүүлэхийг хориглох"</string>
-    <string name="permdesc_stopAppSwitches" msgid="8262195802582255021">"Хэрэглэгч бусад апп-руу сэлгэхийг хориглох."</string>
-    <string name="permlab_getTopActivityInfo" msgid="2537922311411546016">"одоогийн апп-н мэдээллийг авах"</string>
-    <string name="permdesc_getTopActivityInfo" msgid="2512448855496067131">"Эзэмшигч нь дэлгэцний нүүрэнд байгаа одоогийн аппликешны талаарх хувийн мэдээллийг унших боломжтой."</string>
-    <string name="permlab_runSetActivityWatcher" msgid="892239094867182656">"бүх апп-ын эхлэлийг хянах болон удирдах"</string>
-    <string name="permdesc_runSetActivityWatcher" msgid="6003603162578577406">"Апп нь систем активитиг яаж эхлүүлж байгааг хянах болон удирдан боломжтой. Хортой апп нь системд бүрэн нөлөөлж болзошгүй. Энэ эрх нь зөвхөн хөгжүүлэлтийн үед л хэрэгтэй ба энгийн хэрэглээнд огт хэрэггүй."</string>
-    <string name="permlab_broadcastPackageRemoved" msgid="2576333434893532475">"багц хасагдсан өргөн дамжууллыг илгээх"</string>
-    <string name="permdesc_broadcastPackageRemoved" msgid="6621901216207931089">"Апп нь апп багц устгагдсан талаарх мэдэгдлийг өргөн дамжуулах боломжтой. Хортой апп энийг ашиглан бусад ажиллаж байгаа апп-г зогсоох боломжтой."</string>
-    <string name="permlab_broadcastSmsReceived" msgid="5689095009030336593">"SMS-хүлээн авав өргөн дамжууллыг илгээх"</string>
-    <string name="permdesc_broadcastSmsReceived" msgid="4152037720034365492">"Апп нь SMS мессеж хүлээн авсан талаарх мэдэгдлийг өргөн дамжуулах боломжтой. Хортой апп энийг ашиглан ирсэн SMS мессежийг хуурамчаар хийх боломжтой."</string>
-    <string name="permlab_broadcastWapPush" msgid="3145347413028582371">"WAP-PUSH-хүлээн авав өргөн дамжууллыг илгээх"</string>
-    <string name="permdesc_broadcastWapPush" msgid="4783402525039442729">"Аппликешн нь WAP PUSH мессеж хүлээж авсан мэдэгдлийг өргөн дамжуулах боломжтой. Хортой апп нь энийг ашиглан MMS мессеж хүлээн авсан гэж хуурамчаар мэдэгдэх эсвэл хортой хувьсагч агуулсан веб хуудасны контентыг чимээгүй орлуулах боломжтой."</string>
-    <string name="permlab_setProcessLimit" msgid="2451873664363662666">"ажиллаж байгаа процессийн тоог хязгаарлах"</string>
-    <string name="permdesc_setProcessLimit" msgid="7318061314040879542">"Апп нь нэг зэрэг ажиллах процессийн тооны дээд утгыг удирдах боломжтой. Энгийн апп-д хэзээ ч ашиглагдахгүй."</string>
-    <string name="permlab_setAlwaysFinish" msgid="550958507798796965">"арын апп-г хүчээр хаах"</string>
-    <string name="permdesc_setAlwaysFinish" msgid="7471310652868841499">"Апп нь активитинүүд арын болонгуутаа дуусах эсэхийг удирдах боломжтой. Энгийн апп-д хэрэглэгдэхгүй."</string>
-    <string name="permlab_batteryStats" msgid="2789610673514103364">"батерейны статистикийг унших"</string>
-    <string name="permdesc_batteryStats" msgid="5897346582882915114">"Аппликешн нь батерей хэрэглээний доод-төвшиний одоогийн датаг унших боломжтой. Аппликешнд таны ашиглаж байгаа апп-н талаарх дэлгэрэнгүй мэдээллийг олох боломжийг олгоно."</string>
-    <string name="permlab_updateBatteryStats" msgid="3719689764536379557">"батерейн статистикийг өөрчлөх"</string>
-    <string name="permdesc_updateBatteryStats" msgid="6862817857178025002">"Апп нь батерейн цуглуулагдсан статистикийг өөрчлөх боломжтой. Энгийн апп-д шаардлагагүй."</string>
-    <string name="permlab_getAppOpsStats" msgid="1508779687436585744">"апп-н ажиллагааны статистикийг авах"</string>
-    <string name="permdesc_getAppOpsStats" msgid="6243887041577912877">"Апп нь аппликешны ажиллагааны цуглуулсан статистикийг дуудах боломжтой. Энгийн апп-д ашиглагдахгүй."</string>
-    <string name="permlab_updateAppOpsStats" msgid="8829097373851521505">"апп ажиллагааны статистикийг өөрчлөх"</string>
-    <string name="permdesc_updateAppOpsStats" msgid="50784596594403483">"Апп нь аппликешны ажиллагааны цуглуулсан статистикийг өөрчлөх боломжтой. Энгийн апп-д ашиглагдахгүй."</string>
-    <string name="permlab_backup" msgid="470013022865453920">"систем нөөшлөлт болон сэргээлтийг удирдах"</string>
-    <string name="permdesc_backup" msgid="6912230525140589891">"Апп нь системийн нөөшлөх болон сэргээх тогтолцоог удирдах боломжтой. Энгийн апп-уудад хэрэглэгдэхгүй."</string>
-    <string name="permlab_confirm_full_backup" msgid="5557071325804469102">"бүтэн нөөшлөлтийг бататгах эсвэл ажиллагааг сэргээх"</string>
-    <string name="permdesc_confirm_full_backup" msgid="1748762171637699562">"Апп нь бүрэн нөөшлөлтийг баталгаажуулах UI-г эхлүүлэх боломжтой. Энгийн апп-д ашиглагдахгүй."</string>
-    <string name="permlab_internalSystemWindow" msgid="2148563628140193231">"эрхжүүлэгдээгүй цонхыг үзүүлэх"</string>
-    <string name="permdesc_internalSystemWindow" msgid="7458387759461466397">"Апп нь дотоод системийн хэрэглэгчийн интерфейст ашиглагдах цонхыг үүсгэх боломжтой. Энгийн апп-д ашиглагдахгүй."</string>
     <string name="permlab_systemAlertWindow" msgid="3543347980839518613">"бусад апп-р зурах"</string>
     <string name="permdesc_systemAlertWindow" msgid="8584678381972820118">"Апп нь бусад аппликешн эсвэл хэрэглэгчийн интерфейсын дээд талд зурах боломжтой. Эдгээр нь бүх аппликешны интерфейсыг ашиглахад саад болох эсвэл   бусад аппликешн дээр таны харж байгааг солих боломжтой."</string>
-    <string name="permlab_setAnimationScale" msgid="2805103241153907174">"глобал энимешн хурдыг өөрчлөх"</string>
-    <string name="permdesc_setAnimationScale" msgid="7690063428924343571">"Апп нь ямар ч үед глобал энимешн хурдыг(хурдан удаан энимешн) солих боломжтой."</string>
-    <string name="permlab_manageAppTokens" msgid="1286505717050121370">"апп бүтвэрийг удирдах"</string>
-    <string name="permdesc_manageAppTokens" msgid="8043431713014395671">"Апп нь өөрийн нормал Z эрэмбийг дамжуулах замаар өөрсдийн бүтвэрийг үүсгэх болон удирдах боломжтой. Энгийн апп-д хэрэглэгдэхгүй"</string>
-    <string name="permlab_freezeScreen" msgid="4708181184441880175">"дэлгэцийг хөдөлгөөнгүй болгох"</string>
-    <string name="permdesc_freezeScreen" msgid="8558923789222670064">"Аппликешн нь бүтэн дэлгэцрүү шилжихэд дэлгэцийг хөдөлгөөнгүй болгох боломжтой."</string>
-    <string name="permlab_injectEvents" msgid="1378746584023586600">"товч болон контрол товч дарах"</string>
-    <string name="permdesc_injectEvents" product="tablet" msgid="206352565599968632">"Алл нь өөрийн оролтын үйл явдлыг(товч дарагдах г.м) бусад апп-д дамжуулах боломжтой. Хортой апп нь энийг ашиглан таблетыг удирдах боломжтой."</string>
-    <string name="permdesc_injectEvents" product="tv" msgid="4681361983270791611">"Апп-ыг бусад апликейшнүүдэд өөрийн оролтын үйлдлийг (гол даралтууд гэх мэт) илгээхийг зөвшөөрдөг. Хорлонтой аппликэйшнүүд үүнийг ашиглан телевизийг хяналтандаа авч болох юм."</string>
-    <string name="permdesc_injectEvents" product="default" msgid="653128057572326253">"Алл нь өөрийн оролтын үйл явдлыг(товч дарагдах г.м) бусад апп-д дамжуулах боломжтой. Хортой апп нь энийг ашиглан утсыг удирдах боломжтой."</string>
-    <string name="permlab_readInputState" msgid="469428900041249234">"таны хийж байгаа үйлдэл болон бичиж байгааг бичлэг хийх"</string>
-    <string name="permdesc_readInputState" msgid="8387754901688728043">"Апп нь бусад апп-тай харилцан үйлчилж(нууц үг оруулах) таны дарсан товчийг ажиглах боломжтой. Энгийн апп-д хэрэглэгдэхгүй."</string>
-    <string name="permlab_bindInputMethod" msgid="3360064620230515776">"оролтын аргатай холбох"</string>
-    <string name="permdesc_bindInputMethod" msgid="3250440322807286331">"Эзэмшигч нь оруулах аргын дээд-төвшиний интерфейстэй холбох боломжтой. Энгийн апп-д хэрэглэгдэхгүй."</string>
-    <string name="permlab_bindAccessibilityService" msgid="5357733942556031593">"хандалтын үйлчилгээнд холбогдох"</string>
-    <string name="permdesc_bindAccessibilityService" msgid="7034615928609331368">"Эзэмшигч нь хандах үйлчилгээний дээд-төвшиний интерфейстэй холбох боломжтой. Энгийн апп-д шаардлагагүй."</string>
-    <string name="permlab_bindPrintService" msgid="8462815179572748761">"хэвлэх үйлчилгээтэй холбох"</string>
-    <string name="permdesc_bindPrintService" msgid="7960067623209111135">"Эзэмшигчид хэвлэх үйлчилгээний дээд-түвшний интерфейстэй холбох боломж олгоно. Энгийн апп-уудад хэзээ ч ашиглагдахгүй."</string>
-    <string name="permlab_bindPrintSpoolerService" msgid="6807762783744125954">"хэвлэгчийн буфер үйлчилгээтэй холбох"</string>
-    <string name="permdesc_bindPrintSpoolerService" msgid="3680552285933318372">"Эзэмшигчид хэвлэх үйлчилгээний дээд-түвшний интерфейстэй холбох боломж олгоно. Энгийн апп-уудад хэзээ ч ашиглагдахгүй."</string>
-    <string name="permlab_bindNfcService" msgid="2752731300419410724">"NFC үйлчилгээтэй холбох"</string>
-    <string name="permdesc_bindNfcService" msgid="6120647629174066862">"Эзэмшигчид NFC картуудыг дуурайлгадаг аппликешнүүдийг холбох боломж олгоно. Энгийн апп-уудад хэзээ ч шаардагдахгүй."</string>
-    <string name="permlab_bindTextService" msgid="7358378401915287938">"текст үйлчилгээтэй холбох"</string>
-    <string name="permdesc_bindTextService" msgid="8151968910973998670">"Эзэмшигч нь текст үйлчилгээний(ж.нь. SpellCheckerService) дээд-төвшиний интерфейстэй холбох боломжтой. Энгийн апп-д хэрэглэгдэхгүй."</string>
-    <string name="permlab_bindVpnService" msgid="4708596021161473255">"VPN үйлчилгээтэй холбох"</string>
-    <string name="permdesc_bindVpnService" msgid="2067845564581693905">"Эзэмшигч нь VPN үйлчилгээний дээд-төвшиний интерфейстэй холбох боломжтой. Энгийн апп-д шаардлагагүй."</string>
-    <string name="permlab_bindWallpaper" msgid="8716400279937856462">"ханын зурагтай холбох"</string>
-    <string name="permdesc_bindWallpaper" msgid="7108428692595491668">"Эзэмшигч нь ханын зурагны дээд-төвшиний интерфейстэй холбох боломжтой. Энгийн апп-уудад шаардлагагүй."</string>
-    <string name="permlab_bindVoiceInteraction" msgid="5334852580713715068">"дуугаар харьцагчтай холбох"</string>
-    <string name="permdesc_bindVoiceInteraction" msgid="2345721766501778101">"Эзэмшигчид дуугаар харьцах үйлчилгээний дээд-түвшний интерфейстэй холбох боломж олгоно. Энгийн апп-уудад хэзээ ч ашиглагдахгүй."</string>
-    <string name="permlab_manageVoiceKeyphrases" msgid="1252285102392793548">"дууны гол хэллэгүүдийг удирдах"</string>
-    <string name="permdesc_manageVoiceKeyphrases" msgid="8476560722907530008">"Эзэмшигчид дууны хотворд-г таних гол хэллэгүүдийг удирдах боломж олгоно. Энгийн апп-д хэзээ ч ашиглагдахгүй."</string>
-    <string name="permlab_bindRemoteDisplay" msgid="1782923938029941960">"алсын дэлгэцтэй холбогдох"</string>
-    <string name="permdesc_bindRemoteDisplay" msgid="1261242718727295981">"Эзэмшигчид алсын дэлгэц дэх дээд давхаргын интерфэйстэй холбогдох боломж олгоно. Энгийн апп-д шаардагдахгүй."</string>
-    <string name="permlab_bindRemoteViews" msgid="5697987759897367099">"виджет үйлчилгээтэй холбох"</string>
-    <string name="permdesc_bindRemoteViews" msgid="4717987810137692572">"Эзэмшигч нь виджет үйлчилгээний дээд-төвшиний интерфейстэй холбох боломжтой. Энгийн апп-д шаардлагагүй."</string>
-    <string name="permlab_bindRouteProvider" msgid="4869394607915096847">"маршрут нийлүүлэгчийн үйлчилгээтэй холбогдох"</string>
-    <string name="permdesc_bindRouteProvider" msgid="4703804520859960329">"Эзэмшигчид бүртгэгдсэн маршрут нийлүүлэгчтэй холбогдох  боломж олгоно. Энгийн апп-уудад хэзээ ч шаардагдахгүй."</string>
-    <string name="permlab_bindDeviceAdmin" msgid="8704986163711455010">"төхөөрөмжийн админтай харилцан үйлчлэх"</string>
-    <string name="permdesc_bindDeviceAdmin" msgid="569715419543907930">"Эзэмшигч нь төхөөрөмжийн админруу интент илгээх боломжтой. Энгийн апп-д шаардлагагүй."</string>
-    <string name="permlab_bindTvInput" msgid="5601264742478168987">"ТВ оролт холбох"</string>
-    <string name="permdesc_bindTvInput" msgid="2371008331852001924">"Эзэмшигч нь ТВ оролтын дээд-төвшиний интерфейстэй холбох боломжтой. Энгийн апп-д шаардлагагүй."</string>
-    <string name="permlab_modifyParentalControls" msgid="4611318225997592242">"эцэг эхийн хяналтыг өөрчлөх"</string>
-    <string name="permdesc_modifyParentalControls" msgid="7438482894162282039">"Эзэмшигчид системийн эцэг эхийн хяналтын датаг тохируулах боломж олгоно. Энгийн апп-уудад шаардагдахгүй."</string>
-    <string name="permlab_manageDeviceAdmins" msgid="4248828900045808722">"төхөөрөмжийн админ нэмэх, хасах"</string>
-    <string name="permdesc_manageDeviceAdmins" msgid="5025608167709942485">"Эзэмшигч нь идэвхтэй төхөөрөмжийн администраторыг нэмэх, хасах боломжтой. Энгийн апп-д шаардлагагүй."</string>
-    <string name="permlab_setOrientation" msgid="3365947717163866844">"дэлгэцний чиглэлийг солих"</string>
-    <string name="permdesc_setOrientation" msgid="3046126619316671476">"Апп нь ямар ч үед дэлгэцний эргэлтийг солих боломжтой. Энгийн аппликешнд хэзээ ч ашиглахгүй."</string>
-    <string name="permlab_setPointerSpeed" msgid="9175371613322562934">"заагчийн хурдыг солих"</string>
-    <string name="permdesc_setPointerSpeed" msgid="6866563234274104233">"Апп нь хулгана эсвэл хөдлөх самбарын заагчийн хурдыг ямарч үед солих боломжтой. Энгийн апп-д хэрэглэгдэхгүй."</string>
-    <string name="permlab_setKeyboardLayout" msgid="4778731703600909340">"гарын схемийг солих"</string>
-    <string name="permdesc_setKeyboardLayout" msgid="8480016771134175879">"Апп нь гарын схемыг солих боломжтой. Энгийн апп-д хэрэглэгдэхгүй."</string>
-    <string name="permlab_signalPersistentProcesses" msgid="4539002991947376659">"аппруу Linux дохио илгээх"</string>
-    <string name="permdesc_signalPersistentProcesses" msgid="4896992079182649141">"Апп нь бүх байнгын процессруу хангамжийн дохиог илгээх хүсэлтийг хийх боломжтой."</string>
     <string name="permlab_persistentActivity" msgid="8841113627955563938">"апп-г байнга ажиллуулах"</string>
     <string name="permdesc_persistentActivity" product="tablet" msgid="8525189272329086137">"Апп нь өөрийн хэсгийн санах ойд байнга байлгах боломжтой. Энэ нь бусад апп-уудын ашиглах санах ойг хязгаарлан таблетыг удаашруулах болно."</string>
     <string name="permdesc_persistentActivity" product="tv" msgid="5086862529499103587">"Апп-д өөрийн бүрэлдэхүүн хэсгийг санах ойд хадгалахыг зөвшөөрдөг. Энэ нь бусад аппликэйшнүүдийн ашиглах санах ойн хэмжээг хязгаарлахаас гадна, телевизийг удаашруулна."</string>
     <string name="permdesc_persistentActivity" product="default" msgid="4384760047508278272">"Апп нь өөрийн хэсгийг санах ойд байнга байлгах боломжтой. Энэ нь бусад апп-уудын ашиглах санах ойг хязгаарлан утсыг удаашруулах болно."</string>
-    <string name="permlab_deletePackages" msgid="184385129537705938">"апп устгах"</string>
-    <string name="permdesc_deletePackages" msgid="7411480275167205081">"Апп нь Андройд багцийг устгах боломжтой. Хортой апп нь энийг ашиглан чухал апп-г устгах боломжтой."</string>
-    <string name="permlab_clearAppUserData" msgid="274109191845842756">"бусад апп-н датаг устгах"</string>
-    <string name="permdesc_clearAppUserData" msgid="4625323684125459488">"Апп нь хэрэглэгчийн датаг арилгах боломжтой."</string>
-    <string name="permlab_deleteCacheFiles" msgid="3128665571837408675">"бусад апп-н кешээс устгах"</string>
-    <string name="permdesc_deleteCacheFiles" msgid="3812998599006730196">"Апп нь кеш файлаас устгах боломжтой."</string>
     <string name="permlab_getPackageSize" msgid="7472921768357981986">"апп сангийн хэмжээг хэмжих"</string>
     <string name="permdesc_getPackageSize" msgid="3921068154420738296">"Апп нь өөрийн код, дата болон кеш хэмжээг унших боломжтой"</string>
-    <string name="permlab_installPackages" msgid="2199128482820306924">"апп-г шууд суулгах"</string>
-    <string name="permdesc_installPackages" msgid="5628530972548071284">"Апп нь шинэ эсвэл шинэчлэгдсэн Андройд багцийг суулгах боломжтой. Хортой апп нь энийг ашиглан дурын эрхтэй шинэ апп-г суулгах боломжтой."</string>
-    <string name="permlab_clearAppCache" msgid="7487279391723526815">"бүх апп-н кеш датаг устгах"</string>
-    <string name="permdesc_clearAppCache" product="tablet" msgid="8974640871945434565">"Апп нь бусад аппликешны кеш директороос файл устган таблетын санг чөлөөлөх боломжтой. Энэ  нь бусад аппликешнд нөлөөлж, тэдгээр нь эхлэхдээ шаардлагатай датагаа дахин дуудах тул удааширч болзошгүй."</string>
-    <string name="permdesc_clearAppCache" product="tv" msgid="244647416303997022">"Апп-д бусад апп-ны кэш лавлагаанд байгаа файлуудыг устгах хэлбэрээр телевизийн санах ойн зайг чөлөөлөхийг зөвшөөрдөг. Энэ нь бусад аппликэйшнүүдийг арай удаан эхлэхэд хүргэж болж болох юм."</string>
-    <string name="permdesc_clearAppCache" product="default" msgid="2459441021956436779">"Апп нь бусад аппликешны кеш директороос файл устган утасны санг чөлөөлөх боломжтой. Энэ нь бусад аппликешнд нөлөөлж, тэдгээр нь эхлэхдээ шаардлагатай датагаа дахин дуудах тул удааширч болзошгүй."</string>
-    <string name="permlab_movePackage" msgid="3289890271645921411">"апп нөөцийг шилжүүлэх"</string>
-    <string name="permdesc_movePackage" msgid="319562217778244524">"Апп нь апп нөөцийг дотроос гадна медиаруу болон эсрэгээр нь зөөх боломжтой."</string>
-    <string name="permlab_readLogs" msgid="6615778543198967614">"нууц лог дата унших"</string>
-    <string name="permdesc_readLogs" product="tablet" msgid="82061313293455151">"Апп нь системийн төрөл бүрийн лог файлыг унших боломжтой. Энэ нь та таблет дээрээ юу хийсэн талаарх хувийн болон нууц мэдээллийг олох боломжтой болгоно."</string>
-    <string name="permdesc_readLogs" product="tv" msgid="9023899974809538988">"Апп-д таны системийн олон төрлийн бүртгэлийн файлуудаас уншихыг зөвшөөрдөг. Энэ нь таны телевиз дээрээ хийсэн үйлдэл, хувийн мэдээлэл гэх мэт ерөнхий мэдээллийг нээхийг зөвшөөрдөг."</string>
-    <string name="permdesc_readLogs" product="default" msgid="2063438140241560443">"Апп нь системийн төрөл бүрийн лог файлыг унших боломжтой. Энэ нь та утсан дээрээ юу хийсэн талаарх хувийн болон нууц мэдээллийг олох боломжтой болгоно."</string>
-    <string name="permlab_anyCodecForPlayback" msgid="715805555823881818">"тоглуулахын тулд дурын медиа шифрлэгчийг ашиглах"</string>
-    <string name="permdesc_anyCodecForPlayback" msgid="8283912488433189010">"Апп нь тоглуулах үедээ код тайлахдаа суулгагдсан ямарч медиа код тайлагчийг ашиглах боломжтой."</string>
-    <string name="permlab_manageCaCertificates" msgid="1678391896786882014">"итгэмжлэгдсэн жуухуудыг удирдах"</string>
-    <string name="permdesc_manageCaCertificates" msgid="4015644047196937014">"Апп-д CA сертификатуудыг итгэмжлэгдсэн жуух байдлаар суулгах болон устгахыг зөвшөөрнө."</string>
-    <string name="permlab_bindJobService" msgid="3637568367978271086">"аппликешны төлөвлөгдсөн далд ажлыг эхлүүлэх"</string>
-    <string name="permdesc_bindJobService" msgid="3473288460524119838">"Энэ зөвшөөрөл нь Андройд системд төхөөрөмжийг хүсэлт гаргасан үед  аппликешныг далд ажиллуулах боломж олгоно."</string>
-    <string name="permlab_diagnostic" msgid="8076743953908000342">"оношлох грүпийн эзэмшдэг нөөцрүү унших/бичих"</string>
-    <string name="permdesc_diagnostic" msgid="6608295692002452283">"Апп нь оношлох грүпийн эзэмшдэг, жишээ нь /dev доторх файлууд, дурын  нөөцийг унших бичих боломжтой.Энэ нь системийн тогвортой байдал болон аюулгүй байдалд бодитоор нөлөөлнө. Энэ нь үйлдвэрлэгч болон операторын хардверт-зориулсан оношлогоонд ашиглагдана."</string>
-    <string name="permlab_changeComponentState" msgid="6335576775711095931">"апп компонентыг идэвхжүүлэх эсвэл идэвхгүй болгох"</string>
-    <string name="permdesc_changeComponentState" product="tablet" msgid="8887435740982237294">"Апп нь өөр апп-н компонент идэвхтэй эсэхийг солих боломжтой. Хортой апп нь энийг ашиглан таблетын чухал чадамжийг идэвхгүй болгож болзошгүй. Зөвшөөрөл нь аппликешн компонентыг тогтворгүй, ашиглаж болохгүй, тохиромжгүй төлөвт оруулах боломжтой тул ашиглахдаа болгоомжтой байх шаардлагатай."</string>
-    <string name="permdesc_changeComponentState" product="tv" msgid="9151634188264231389">"Өөр нэг апп-ны бүрдэл нь идэвхжсэн эсэхээс хамааран апп-д өөрчлөгдөхийг зөвшөөрдөг. Зарим хорлонтой аппликэйшнүүд үүнийг телевизийн чухал үзүүлэлтүүдийг идэвхгүй болгох зорилгоор ашиглаж болох юм. Апп-ны бүрдлүүдийг ашиглах боломжгүй, тогтворгүй, хэвийн биш болгох боломжтой тул энэ зөвшөөрлийг өгөхдөө анхаарал тавина уу."</string>
-    <string name="permdesc_changeComponentState" product="default" msgid="1827232484416505615">"Апп нь өөр апп-н компонент идэвхтэй эсэхийг солих боломжтой. Хортой апп нь энийг ашиглан утасны чухал чадамжийг идэвхгүй болгож болзошгүй. Зөвшөөрөл нь аппликешн компонентыг тогтворгүй, ашиглаж болохгүй, тохиромжгүй төлөвт оруулах боломжтой тул ашиглахдаа болгоомжтой байх шаардлагатай."</string>
-    <string name="permlab_grantRevokePermissions" msgid="4627315351093508795">"зөвшөөрөл олгох эсвэл цуцлах"</string>
-    <string name="permdesc_grantRevokePermissions" msgid="4088642654085850662">"Аппликешн нь өөртэй болон бусад аппликешнд тусгай зөвшөөрлийг олгох болон цуцлах боломжтой. Хортой аппликешн нь энийг ашиглан таны олгоогүй эрхэнд хандах боломжтой."</string>
-    <string name="permlab_setPreferredApplications" msgid="8463181628695396391">"үндсэн апп-г тохируулах"</string>
-    <string name="permdesc_setPreferredApplications" msgid="4973986762241783712">"Апп нь таны тусгай апп-уудыг өөрчлөх боломжтой. Хортой апп нь ажиллаж байгаа апп-г нууцаар өөрчлөн, таны хуучин апп-г таны хувийн датаг цуглуулагч болгон хуурах боломжтой."</string>
     <string name="permlab_writeSettings" msgid="2226195290955224730">"систем тохиргоог өөрчлөх"</string>
     <string name="permdesc_writeSettings" msgid="7775723441558907181">"Апп нь системийн тохиргооны датаг өөрчлөх боломжтой. Хортой апп нь таны системийн тохиргоог сүйтгэх боломжтой."</string>
-    <string name="permlab_writeSecureSettings" msgid="204676251876718288">"аюулгүй систем тохиргоог өөрчлөх"</string>
-    <string name="permdesc_writeSecureSettings" msgid="8159535613020137391">"Апп нь системийн аюулгүй байдлын тохиргооны датаг өөрчлөх боломжтой. Энгийн апп-д ашиглагдахгүй."</string>
-    <string name="permlab_writeGservices" msgid="2149426664226152185">"Google газрын зургийн үйлчилгээг өөрчлөх"</string>
-    <string name="permdesc_writeGservices" msgid="1287309437638380229">"Апп нь Google-н газрын зургийн үйлчилгээг өөрчлөх боломжтой. Энгийн апп-д ашиглагдахгүй."</string>
     <string name="permlab_receiveBootCompleted" msgid="5312965565987800025">"Эхлэхэд ажиллуулах"</string>
     <string name="permdesc_receiveBootCompleted" product="tablet" msgid="7390304664116880704">"Апп нь систем асаж дуусахад шууд өөрийгөө асаах боломжтой. Ингэснээр таблетыг асахад их хугацаа орох болон байнга ажилладаг апп нь таблетийг бүхэлд нь удаашруулах боломжтой."</string>
     <string name="permdesc_receiveBootCompleted" product="tv" msgid="4525890122209673621">"Апп-д систем эхлэхэд өөрийгөө эхлүүлэхийг зөвшөөрдөг. Энэ нь телевизийг эхлэх хугацааг удаашруулах боломжтойгоос гадна, апп-д байнга ажиллаж байх учир таблетын хурдыг ерөнхийд нь бууруулж болох юм."</string>
@@ -551,36 +355,10 @@
     <string name="permdesc_accessMockLocation" msgid="5808711039482051824">"Тестэд ашиглах хуурамч байршлын эх үүсвэрийг үүсгэх болон шинэ байршил өгөгчийг суулгах боломжтой. Ингэснээр апп нь GPS эсвэл байршил өгөгч зэрэг бусад байршлын эх үүсвэрээс ирсэн байршил болон статусыг өөрчлөх боломжтой."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"байршил нийлүүлэгчийн нэмэлт тушаалд хандах"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"Апп нь байршил нийлүүлэгчийн нэмэлт тушаалд хандах боломжтой. Энэ нь апп-д GPS эсвэл бусад байршлын үйлчилгээний ажиллагаанд нөлөөлөх боломжийг олгоно."</string>
-    <string name="permlab_installLocationProvider" msgid="6578101199825193873">"байршил нийлүүлэгчийг суулгах зөвшөөрөх"</string>
-    <string name="permdesc_installLocationProvider" msgid="9066146120470591509">"Тестэд ашиглах хуурамч байршлын эх үүсвэрийг үүсгэх болон шинэ байршил өгөгчийг суулгах боломжтой. Ингэснээр апп нь GPS эсвэл байршил өгөгч зэрэг бусад байршлын эх үүсвэрээс ирсэн байршил болон статусыг өөрчлөх боломжтой."</string>
     <string name="permlab_accessFineLocation" msgid="1191898061965273372">"Тодорхой байршил(GPS болон сүлжээнд суурилсан)"</string>
     <string name="permdesc_accessFineLocation" msgid="5295047563564981250">"Апп нь GPS эсвэл үүрэн цамхаг болон Wi-Fi зэрэг сүлжээний байршлын эх үүсвэрийг ашиглан таны тодорхой байршлыг авах боломжтой. Эдгээр байршлын үйлчилгээнүүд нь асаалттай байх шаардлагатай ба таны төхөөрөмж дээрх апп-ууд ашиглах боломжтой байх шаардлагатай. Апп-ууд энийг ашиглан таныг хаана байгааг тогтоох боломжтой ба батерей зарцуулалт нэмэгдэнэ."</string>
     <string name="permlab_accessCoarseLocation" msgid="4887895362354239628">"ойролцоох байршил(сүлжээнд суурилсан)"</string>
     <string name="permdesc_accessCoarseLocation" msgid="2538200184373302295">"Апп нь таны ойролцоох байршлыг оло боломжтой. Энэ байршил нь үүрэн цамхаг болон Wi-Fi зэрэг сүлжээний байршлын эх сурвалжийг ашигладаг байршлын үйлчилгээнээс олдоно. Эдгээр байршлын үйлчилгээнүүд нь таны төхөөрөмж дээр асаалттай байх шаардлагатай ба апп-д тэдгээрийг ашиглах боломжтой байх шаардлагатай. Апп-д тэдгээрийг ашиглан таны байршлыг ойролцоогоор олох боломжтой."</string>
-    <string name="permlab_accessSurfaceFlinger" msgid="2363969641792388947">"SurfaceFlinger-т хандах"</string>
-    <string name="permdesc_accessSurfaceFlinger" msgid="1041619516733293551">"Апп нь SurfaceFlinger доод-төвшиний функцийг ашиглах боломжтой."</string>
-    <string name="permlab_readFrameBuffer" msgid="6690504248178498136">"Фрэйм буферээс унших"</string>
-    <string name="permdesc_readFrameBuffer" msgid="4937405521809454680">"Апп нь фрэйм буферын контентыг унших боломжтой."</string>
-    <string name="permlab_accessInputFlinger" msgid="5348635270689553857">"InputFlinger-т хандалт хийх"</string>
-    <string name="permdesc_accessInputFlinger" msgid="2104864941201226616">"Апп-д SurfaceFlinger доод-түвшний функцуудыг ашиглах боломж олгоно."</string>
-    <string name="permlab_configureWifiDisplay" msgid="5595661694746742168">"Wifi дэлгэцийг тохируулах"</string>
-    <string name="permdesc_configureWifiDisplay" msgid="7916815158690218065">"Апп нь Wifi дэлгэцийг тохируулах болон холбогдох боломжтой."</string>
-    <string name="permlab_controlWifiDisplay" msgid="393641276723695496">"Wifi дэлгэцийг удирдах"</string>
-    <string name="permdesc_controlWifiDisplay" msgid="4543912292681826986">"Апп нь Wifi дэлгэцний доод-төвшиний функцийг удирдах боломжтой."</string>
-    <string name="permlab_controlVpn" msgid="2618442789397588200">"Виртуал Хувийн Сүлжээнүүдийг удирдах"</string>
-    <string name="permdesc_controlVpn" msgid="762852603315861214">"Виртуал Хувийн Сүлжээнүүдийн доод түвшний функцүүдийг тус апликейшнээр удирдахыг зөвшөөрдөг."</string>
-    <string name="permlab_captureAudioOutput" msgid="6857134498402346708">"аудио гаралтыг барих"</string>
-    <string name="permdesc_captureAudioOutput" msgid="6210597754212208853">"Апп-т аудио гаралтыг барих, дахин чиглүүлэхийг зөвшөөрнө."</string>
-    <string name="permlab_captureAudioHotword" msgid="1890553935650349808">"Хотворд таних"</string>
-    <string name="permdesc_captureAudioHotword" msgid="9151807958153056810">"Апп-д Хотворд илрүүлэхийн тулд аудиог бичихийг зөвшөөрнө. Бичилт далд хийгдэх бөгөөд бусад аудио бичилтэд (жнь. видео бичлэг) саад болохгүй."</string>
-    <string name="permlab_modifyAudioRouting" msgid="7738060354490807723">"Аудио чиглүүлэлт"</string>
-    <string name="permdesc_modifyAudioRouting" msgid="7205731074267199735">"Апп-д аудио чиглүүлэгчийг шууд удирдах, аудио бодлогын шийдвэрүүдийг давах боломж олгоно."</string>
-    <string name="permlab_captureVideoOutput" msgid="2246828773589094023">"видео гаралтыг барих"</string>
-    <string name="permdesc_captureVideoOutput" msgid="359481658034149860">"Апп-т видео гаралтыг барих, дахин чиглүүлэхийг зөвшөөрнө."</string>
-    <string name="permlab_captureSecureVideoOutput" msgid="7815398969303382016">"найдвартай видео гаралтыг барих"</string>
-    <string name="permdesc_captureSecureVideoOutput" msgid="2779793064709350289">"Апп-т найдвартай видео гаралтыг барих, дахин чиглүүлэхийг зөвшөөрнө."</string>
-    <string name="permlab_mediaContentControl" msgid="8749790560720562511">"медиа тоглуулагчийг удирдах болон метадата хандалт"</string>
-    <string name="permdesc_mediaContentControl" msgid="1637478200272062">"Апп-д медиа тоглуулах болон медианы мэдээлэлд (гарчиг, зохиогч...) хандалт хийхийг зөвшөөрнө."</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"Аудио тохиргоо солих"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"Апп нь дууны хэмжээ, спикерын гаралтад ашиглагдах глобал аудио тохиргоог өөрчлөх боломжтой."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"аудио бичих"</string>
@@ -589,71 +367,14 @@
     <string name="permdesc_sim_communication" msgid="5725159654279639498">"Апп-д SIM рүү комманд илгээхийг зөвшөөрнө. Энэ маш аюултай."</string>
     <string name="permlab_camera" msgid="3616391919559751192">"зураг авах болон видео бичих"</string>
     <string name="permdesc_camera" msgid="8497216524735535009">"Апп нь камераар зураг авах болон видео бичих боломжтой. Энэ зөвшөөрөл нь апп-д ямар ч үед таны зөвшөөрөлгүйгээр камер ашиглах боломжийг олгоно."</string>
-    <string name="permlab_cameraDisableTransmitLed" msgid="2651072630501126222">"камер ашиглаж байх үед дамжууллыг заагч LED-г идэвхгүй болгох"</string>
-    <string name="permdesc_cameraDisableTransmitLed" msgid="4764585465480295341">"Урьдчилан суусан систем аппликешн нь камер ашиглалтыг заасан LED-г идэвхгүй болгох боломжтой."</string>
-    <string name="permdesc_cameraSendSystemEvent" msgid="8642231538552298107">"Урьдчилан суулгасан системийн аппликейшнд Камерын үйлчилгээний системийн ажиллагаануудыг илгээхийг зөвшөөрнө."</string>
-    <string name="permlab_brick" product="tablet" msgid="2961292205764488304">"таблетыг бүрмөсөн идэвхгүй болгох"</string>
-    <string name="permlab_brick" product="tv" msgid="4912674222121249410">"телевиз-г бүр мөсөн идэвхгүй болгох"</string>
-    <string name="permlab_brick" product="default" msgid="8337817093326370537">"утсыг бүрмөсөн идэвхгүй болгох"</string>
-    <string name="permdesc_brick" product="tablet" msgid="4334818808001699530">"Апп нь таблетыг бүхэлд нь бүрмөсөн идэвхгүй болгох боломжтой. Энэ маш аюултайэ"</string>
-    <string name="permdesc_brick" product="tv" msgid="7070924544316356349">"Телевизийг бүхэлд нь, үүрд идэвхгүй болгохыг апп-д зөвшөөрдөг. Энэ нь маш их аюултай."</string>
-    <string name="permdesc_brick" product="default" msgid="5788903297627283099">"Апп нь утсыг бүхэлд нь бүрмөсөн идэвхгүй болгох боломжтой. Энэ маш аюултай."</string>
-    <string name="permlab_reboot" product="tablet" msgid="3436634972561795002">"таблет хүчээр дахин асаах"</string>
-    <string name="permlab_reboot" product="tv" msgid="2112102119558886236">"Телевиз дахин ачаалла"</string>
-    <string name="permlab_reboot" product="default" msgid="2898560872462638242">"утсыг хүчээр дахин асаах"</string>
-    <string name="permdesc_reboot" product="tablet" msgid="8172056180063700741">"Апп нь таблетыг хүчээр дахин асаах боломжтой."</string>
-    <string name="permdesc_reboot" product="tv" msgid="7116222694344401650">"Апп-д телевизийг албадан дахин ачаалуулахыг зөвшөөрдөг."</string>
-    <string name="permdesc_reboot" product="default" msgid="5326008124289989969">"Апп нь утсыг хүчээр дахин асаах боломжтой."</string>
-    <string name="permlab_mount_unmount_filesystems" product="nosdcard" msgid="2927361537942591841">"USB сан файл системд хандах"</string>
-    <string name="permlab_mount_unmount_filesystems" product="default" msgid="4402305049890953810">"SD карт файл системд хандах"</string>
-    <string name="permdesc_mount_unmount_filesystems" msgid="1829290701658992347">"Апп нь сугалдаг санг файл системд залгах болон салгах боломжтой."</string>
-    <string name="permlab_mount_format_filesystems" product="nosdcard" msgid="6227819582624904972">"USB санг арилгах"</string>
-    <string name="permlab_mount_format_filesystems" product="default" msgid="262582698639274056">"SD картыг арилгах"</string>
-    <string name="permdesc_mount_format_filesystems" msgid="8784268246779198627">"Апп нь зөөврийн санг форматлах боломжтой."</string>
-    <string name="permlab_asec_access" msgid="3411338632002193846">"дотоод сангийн мэдээллийг авах"</string>
-    <string name="permdesc_asec_access" msgid="3094563844593878548">"Апп нь дотоод сангаас мэдээллийг авах боломжтой"</string>
-    <string name="permlab_asec_create" msgid="6414757234789336327">"дотоод санд үүсгэх"</string>
-    <string name="permdesc_asec_create" msgid="4558869273585856876">"Апп нь дотоод сан үүсгэх боломжтой."</string>
-    <string name="permlab_asec_destroy" msgid="526928328301618022">"дотоод сангаас устгах"</string>
-    <string name="permdesc_asec_destroy" msgid="7218749286145526537">"Апп нь дотоод сангаас устгах боломжтой."</string>
-    <string name="permlab_asec_mount_unmount" msgid="8877998101944999386">"дотоод санг залгах/салгах"</string>
-    <string name="permdesc_asec_mount_unmount" msgid="3451360114902490929">"Апп нь дотоод санг залгах/салгах боломжтой."</string>
-    <string name="permlab_asec_rename" msgid="7496633954080472417">"дотоод сангийн нэрийг өөрчлөх"</string>
-    <string name="permdesc_asec_rename" msgid="1794757588472127675">"Апп нь дотоод сангийн нэрийг өөрчлөх боломжтой."</string>
     <string name="permlab_vibrate" msgid="7696427026057705834">"чичиргээг удирдах"</string>
     <string name="permdesc_vibrate" msgid="6284989245902300945">"Апп нь чичиргээг удирдах боломжтой."</string>
     <string name="permlab_flashlight" msgid="2155920810121984215">"гар чийдэн удирдах"</string>
     <string name="permdesc_flashlight" msgid="6522284794568368310">"Апп нь гар чийдэнг удирдах боломжтой."</string>
-    <string name="permlab_manageUsb" msgid="1113453430645402723">"USB төхөөрөмжийн тохиргоо болон зөвшөөрлийг удирдах"</string>
-    <string name="permdesc_manageUsb" msgid="7776155430218239833">"Апп нь USB төхөөрөмжийн зөвшөөрөл болон тохируулгыг удирдах боломжтой."</string>
-    <string name="permlab_accessMtp" msgid="4953468676795917042">"MTP протоколыг гүйцэтгэх"</string>
-    <string name="permdesc_accessMtp" msgid="6532961200486791570">"MTP USB протокол биелүүлэхээр MTP цөм драйверт хандах боломжтой."</string>
-    <string name="permlab_hardware_test" msgid="4148290860400659146">"хардвер теслэх"</string>
-    <string name="permdesc_hardware_test" msgid="6597964191208016605">"Апп нь хардверийг тестлэх зорилгоор олон төрлийн туслах төхөөрөмжийг удирдах боломжтой."</string>
-    <string name="permlab_fm" msgid="8749504526866832">"FM радиод хандах"</string>
-    <string name="permdesc_fm" msgid="4145699441237962818">"Апп-д FM радиод хандах, хөтөлбөр сонсох боломж олгоно."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"утасны дугаарт шууд дуудлага хийх"</string>
     <string name="permdesc_callPhone" msgid="3740797576113760827">"Апп нь таны оролцоогүйгээр дуудлага хийх боломжтой. Энэ нь төлөвлөгдөөгүй төлбөрт оруулах эсвэл дуудлага хийнэ. Энэ нь апп-г яаралтай дугаарт дуудлага хийхйг зөвшөөрөхгүй. Хортой апп нь таны зөвшөөрөлгүйгээр дуудлага хийж таныг төлбөрт оруулж болзошгүй"</string>
-    <string name="permlab_callPrivileged" msgid="4198349211108497879">"дурны утасны дугаарт шууд дуудлага хийх"</string>
-    <string name="permdesc_callPrivileged" msgid="1689024901509996810">"Апп нь таны оролцоогүйгээр яаралтай тусламжийн дугааруудыг оруулаад ямарч дугаарлуу дуудлага хийх боломжтой. Хортой апп нь шаардлагагүй, хууль бус дуудлагыг яаралтай тусламжийн үйлчилгээрүү хийж болзошгүй."</string>
-    <string name="permlab_performCdmaProvisioning" product="tablet" msgid="4842576994144604821">"CDMA таблет тохиргоог шууд эхлүүлэх"</string>
-    <string name="permlab_performCdmaProvisioning" product="tv" msgid="3485391974208100809">"CDMA телевиз-ийн тохиргоог шууд эхлүүлэх"</string>
-    <string name="permlab_performCdmaProvisioning" product="default" msgid="5604848095315421425">"CDMA утасны тохиргоог шууд эхлүүлэх"</string>
-    <string name="permdesc_performCdmaProvisioning" msgid="1994193538802314186">"Апп нь CDMA провишныг эхлүүлэх боломжтой. Хортой апп нь шаардлагагүй байхад CDMA провишныг эхлүүлж болзошгүй."</string>
-    <string name="permlab_performSimActivation" msgid="1651116521896665009">"SIM картын тохиргоог эхлүүлэх"</string>
-    <string name="permdesc_performSimActivation" msgid="1778214876348917401">"Апп-д SIM идэвхжүүлэх хүсэлтүүдийг удирдахыг зөвшөөрнө. Апп нь шууд идэвхжүүлэлт хийх эсвэл өөр апп руу дамжуулж болно."</string>
-    <string name="permlab_locationUpdates" msgid="7785408253364335740">"байршил шинэчлэх мэдэгдлийг удирдах"</string>
-    <string name="permdesc_locationUpdates" msgid="1120741557891438876">"Апп нь радиогоос ирсэн байршил шинэчлэх мэдэгдлийг идэвхтэй/идэвхгүй болгох боломжтой. Энгийн апп-д хэрэглэглэхгүй."</string>
-    <string name="permlab_checkinProperties" msgid="7855259461268734914">"бүртгэх пропертид хандах"</string>
-    <string name="permdesc_checkinProperties" msgid="4024526968630194128">"Апп нь бүртгэл үйлчилгээгээр байршуулагдсан пропертиг унших/бичих боломжтой. Энгийн апп-д хэрэглэгдэхгүй."</string>
-    <string name="permlab_bindGadget" msgid="776905339015863471">"виджет сонгох"</string>
-    <string name="permdesc_bindGadget" msgid="8261326938599049290">"Апп нь аль апп ямар виджетийг ашиглаж байгаа тухай системд мэдэгдэх боломжтой. Энэ зөвшөөрөлтэй апп нь бусад апп-д хувийн датад хандах эрхийг өгөх боломжтой. Энгийн апп-д ашиглагдахгүй."</string>
-    <string name="permlab_modifyPhoneState" msgid="8423923777659292228">"утасны статусыг өөрчлөх"</string>
-    <string name="permdesc_modifyPhoneState" msgid="1029877529007686732">"Апп-н төхөөрөмжийн утасны функцийг удирдах боломжтой. Энэ зөвшөөрөлтэй апп  нь танд анхааруулахгүйгээр сүлжээг сэлгэх, утасны радиог асаах, унтраах боломжтой."</string>
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"утасны статус ба таниулбарыг унших"</string>
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"Апп нь төхөөрөмжийн утасны функцд хандах боломжтой. Энэ зөвшөөрөл нь апп-д утасны дугаар болон төхөөрөмжийн ID-г, дуудлага идэвхтэй эсэх, холын дугаар дуудлагаар холбогдсон байгаа эсэхийг тогтоох боломжийг олгоно,"</string>
-    <string name="permlab_readPrecisePhoneState" msgid="5476483020282007597">"утасны байдлыг нарийн унших"</string>
-    <string name="permdesc_readPrecisePhoneState" msgid="6648009074263855418">"Апп-д утасны тодорхой байдалд хандах боломжийг олгодог. Энэ зөвшөөрөл апп-д дуудлагын бодит статус, дуудлага идэвхтэй эсхүл ар талд тавигдсан эсэх, амжилтгүй дуудлага болон дата холболтын нарийн статус болон дата холболтын алдааг тодорхойлох боломж олгоно."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"таблетыг унтуулахгүй байлгах"</string>
     <string name="permlab_wakeLock" product="tv" msgid="2601193288949154131">"Телевиз-ийн гэрэл унтрахаас сэргийл"</string>
     <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"утсыг унтуулахгүй байлгах"</string>
@@ -664,34 +385,14 @@
     <string name="permdesc_transmitIr" product="tablet" msgid="5358308854306529170">"Апп-д таблетын хэт улаан дамжуулагчийг ашиглахыг зөвшөөрнө."</string>
     <string name="permdesc_transmitIr" product="tv" msgid="3926790828514867101">"Апп-д телевизийн хэт улаан туяаны дамжуулагчийг ашиглах боломжийг олгодог."</string>
     <string name="permdesc_transmitIr" product="default" msgid="7957763745020300725">"Апп-д утасны хэт улаан дамжуулагчийг ашиглахыг зөвшөөрнө."</string>
-    <string name="permlab_devicePower" product="tablet" msgid="2787034722616350417">"таблетыг унтраах эсвэл асаах"</string>
-    <string name="permlab_devicePower" product="tv" msgid="7579718349658943416">"Телевиз-г асаах эсвэл унтраах"</string>
-    <string name="permlab_devicePower" product="default" msgid="4928622470980943206">"утсыг унтраах эсвэл асаах"</string>
-    <string name="permdesc_devicePower" product="tablet" msgid="6689862878984631831">"Апп нь таблетыг асаах, унтраах боломжтой."</string>
-    <string name="permdesc_devicePower" product="tv" msgid="1334908641773273512">"Телевизийг асаах эсвэл унтраахыг апп-д зөвшөөрдөг."</string>
-    <string name="permdesc_devicePower" product="default" msgid="6037057348463131032">"Апп нь утсыг асаах, унтраах боломжтой."</string>
-    <string name="permlab_userActivity" msgid="1677844893921729548">"дэлгэцийн амрах хугацааг тохируулах"</string>
-    <string name="permdesc_userActivity" msgid="651746160252248024">"Апп-т дэлгэцийн амрах хугацааг өөрчлөхийг зөвшөөрнө."</string>
-    <string name="permlab_factoryTest" msgid="3715225492696416187">"үйлдвэрийн тест горимд ажиллуулах"</string>
-    <string name="permdesc_factoryTest" product="tablet" msgid="3952059318359653091">"Доод төвшиний үйлдвэрийн тестийг ажиллуулан таблетын хардверт бүрэн хандах боломжтой. Таблет нь үйлдвэрийн тестийн горимд ажиллах үед л боломжтой."</string>
-    <string name="permdesc_factoryTest" product="tv" msgid="2105643629211155695">"Телевизийн техник хангамжид бүрэн нэвтрэх эрхийг олгох хэлбэрээр бага түвүшний үйлдвэрлэгчийн туршилтыг ажилуулах. Телевиз зөвхөн үйлдвэрлэгчийн туршилт горимд байгаа тохиолдолд л ажиллах боломжтой."</string>
-    <string name="permdesc_factoryTest" product="default" msgid="8136644990319244802">"Доод төвшиний үйлдвэрийн тестийг ажиллуулан утасны хардверт бүрэн хандах боломжтой. Утас үйлдвэрийн тестийн горимд ажиллах үед л боломжтой."</string>
     <string name="permlab_setWallpaper" msgid="6627192333373465143">"ханын зургийг тохируулах"</string>
     <string name="permdesc_setWallpaper" msgid="7373447920977624745">"Апп нь системийн ханын зургийг тохируулах боломжтой."</string>
     <string name="permlab_setWallpaperHints" msgid="3278608165977736538">"Таны ханын зурагны хэмжээг тохируулах"</string>
     <string name="permdesc_setWallpaperHints" msgid="8235784384223730091">"Апп нь системийн ханын зургийн хэмжээний саналыг тохируулах боломжтой"</string>
-    <string name="permlab_masterClear" msgid="2315750423139697397">"системийг үйлдвэрийн үндсэн утгаар тохируулах"</string>
-    <string name="permdesc_masterClear" msgid="3665380492633910226">"Апп нь бүх датаг арилгах болон бүх суулгасан апп-г арилган системийг бүхэлд үйлдвэрийн тохиргоогоор бүрэн тохируулах боломжтой"</string>
-    <string name="permlab_setTime" msgid="2021614829591775646">"цагийн тохиргоо"</string>
-    <string name="permdesc_setTime" product="tablet" msgid="1896341438151152881">"Апп нь таблетын цагийг солих боломжтой."</string>
-    <string name="permdesc_setTime" product="tv" msgid="1826398919861882682">"Апп-д телевизийн цагийг өөрчлөхийг зөвшөөрдөг."</string>
-    <string name="permdesc_setTime" product="default" msgid="1855702730738020">"Апп нь утасны цагийг солих боломжтой."</string>
     <string name="permlab_setTimeZone" msgid="2945079801013077340">"цагийн бүсийн тохиргоо"</string>
     <string name="permdesc_setTimeZone" product="tablet" msgid="1676983712315827645">"Апп нь таблетын цагийн бүсийг солих боломжтой."</string>
     <string name="permdesc_setTimeZone" product="tv" msgid="888864653946175955">"Апп-д телевизийн цагийн бүсийг өөрчлөхийг зөвшөөрдөг."</string>
     <string name="permdesc_setTimeZone" product="default" msgid="4499943488436633398">"Апп нь утасны цагийн бүсийг өөрчлөх боломжтой."</string>
-    <string name="permlab_accountManagerService" msgid="4829262349691386986">"AccountManagerService болж ажиллах"</string>
-    <string name="permdesc_accountManagerService" msgid="1948455552333615954">"Апп нь Акаунт гэрчлэгчрүү дуудлага хийх боломжтой."</string>
     <string name="permlab_getAccounts" msgid="1086795467760122114">"төхөөрөмж дээрх акаунтыг олох"</string>
     <string name="permdesc_getAccounts" product="tablet" msgid="2741496534769660027">"Апп нь таблетэд мэдэгдэж байгаа акаунтын жагсаалтыг авах боломжтой. Энд таны суулгасан аппликешнүүдийн үүсгэсэн бүх акаунтууд хамрагдана."</string>
     <string name="permdesc_getAccounts" product="tv" msgid="4190633395633907543">"Телевизийн жагсаалтад байгаа акаунтуудын хаягийг апп-д авахыг зөвшөөрдөг. Энэ нь таны суулгасан бусад аппликэйшнүүдийн бий болгосон акаунтуудыг оруулж болно."</string>
@@ -706,14 +407,10 @@
     <string name="permdesc_accessNetworkState" msgid="8318964424675960975">"Апп нь сүлжээ байгаа болон холбогдсон эсэх зэрэг сүлжээний холболтын талаарх мэдээллийг харах боломжтой."</string>
     <string name="permlab_createNetworkSockets" msgid="8018758136404323658">"сүлжээнд бүрэн хандах"</string>
     <string name="permdesc_createNetworkSockets" msgid="3403062187779724185">"Апп нь сүлжээний сокетыг үүсгэх болон тусгай сүлжээний протокол ашиглах боломжтой. Хөтөч болон бусад аппликешнүүд Интернетээр дата илгээх боломжтой  тул энэ зөвшөөрөл нь Интернетээр дата илгээхэд шаардлагагүй."</string>
-    <string name="permlab_writeApnSettings" msgid="505660159675751896">"сүлжээний тохиргоо болон урсгалыг солих/таслах"</string>
-    <string name="permdesc_writeApnSettings" msgid="5333798886412714193">"Апп нь сүлжээний тохиргоог солих болон сүлжээний бүх урсгалыг APN-н прокси болон портыг солих замаар таслах, хянах боломжтой. Хортой апп нь танд мэдэгдэлгүйгээр сүлжээний пакетыг хянах, дахин чиглүүлэх болон өөрчлөх боломжтой."</string>
     <string name="permlab_changeNetworkState" msgid="958884291454327309">"сүлжээний холболтыг солих"</string>
     <string name="permdesc_changeNetworkState" msgid="6789123912476416214">"Апп нь сүлжээний холболтын статусыг солих боломжтой."</string>
     <string name="permlab_changeTetherState" msgid="5952584964373017960">"модем болгосон холболтыг солих"</string>
     <string name="permdesc_changeTetherState" msgid="1524441344412319780">"Апп нь холбогдсон сүлжээний холболтын статусыг солих боломжтой."</string>
-    <string name="permlab_changeBackgroundDataSetting" msgid="1400666012671648741">"арын дата ашиглалтын тохиргоог солих"</string>
-    <string name="permdesc_changeBackgroundDataSetting" msgid="5347729578468744379">"Апп нь арын дата хэрэглээний тохиргоог солих боломжтой."</string>
     <string name="permlab_accessWifiState" msgid="5202012949247040011">"Wi-Fi холболтыг үзэх"</string>
     <string name="permdesc_accessWifiState" msgid="5002798077387803726">"Апп нь Wi-Fi идэвхтэй эсэх болон холбогдсон Wi-Fi төхөөрөмжийн нэр зэрэг Wi-Fi сүлжээний талаарх мэдээллийг харах боломжтой."</string>
     <string name="permlab_changeWifiState" msgid="6550641188749128035">"Wi-Fi -тай холбогдох болон салах"</string>
@@ -726,24 +423,12 @@
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="6921177471748882137">"Апп нь дотоод блютүүт таблетын тохиргоог харах боломжтой ба хос болох төхөөрөмжтэй холболтыг зөвшөөрөх болон хийх боломжтой"</string>
     <string name="permdesc_bluetoothAdmin" product="tv" msgid="3373125682645601429">"Телевизийн суурин Bluetooth-г тохируулах, алсын төхөөрөмжийг илрүүлэх болон холбогдохыг апп-д зөвшөөрдөг."</string>
     <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"Апп нь утасны дотоод блютүүтыг тохируулах боломжтой ба гадаад төхөөрөмжийг олох болон хос үүсгэх боломжтой."</string>
-    <string name="permlab_bluetoothPriv" msgid="4009494246009513828">"Аппликешнд bluetooth хослол хийхийг зөвшөөрнө"</string>
-    <string name="permdesc_bluetoothPriv" product="tablet" msgid="8045735193417468857">"Апп-д хэрэглэгчтэй харьцахгүйгээр зайны төхөөрөмжүүдтэй хослох боломж олгоно."</string>
-    <string name="permdesc_bluetoothPriv" product="tv" msgid="8045735193417468857">"Апп-д хэрэглэгчтэй харьцахгүйгээр зайны төхөөрөмжүүдтэй хослох боломж олгоно."</string>
-    <string name="permdesc_bluetoothPriv" product="default" msgid="8045735193417468857">"Апп-д хэрэглэгчтэй харьцахгүйгээр зайны төхөөрөмжүүдтэй хослох боломж олгоно."</string>
-    <string name="permlab_bluetoothMap" msgid="6372198338939197349">"Блютүүт MAP датаны хандалт"</string>
-    <string name="permdesc_bluetoothMap" product="tablet" msgid="5784090105926959958">"Апп-д Блютүүт MAP датад хандах боломж олгоно."</string>
-    <string name="permdesc_bluetoothMap" product="tv" msgid="5784090105926959958">"Апп-д Блютүүт MAP датад хандах боломж олгоно."</string>
-    <string name="permdesc_bluetoothMap" product="default" msgid="5784090105926959958">"Апп-д Блютүүт MAP датад хандах боломж олгоно."</string>
     <string name="permlab_accessWimaxState" msgid="4195907010610205703">"WiMAX-д холбогдох болон салах"</string>
     <string name="permdesc_accessWimaxState" msgid="6360102877261978887">"Апп нь WiMAX идэвхтэй эсэх болон холбогдсон WiMAX сүлжээний талаар мэдээллийг тодорхойлох боломжтой."</string>
     <string name="permlab_changeWimaxState" msgid="2405042267131496579">"WiMAX статусыг өөрчлөх"</string>
     <string name="permdesc_changeWimaxState" product="tablet" msgid="3156456504084201805">"Апп нь WiMAX сүлжээнд таблетыг холбох болон салгах боломжтой."</string>
     <string name="permdesc_changeWimaxState" product="tv" msgid="6022307083934827718">"Телевизийг WiMAX сүлжээнд холбох, салгахыг апп-д зөвшөөрдөг."</string>
     <string name="permdesc_changeWimaxState" product="default" msgid="697025043004923798">"Апп нь WiMAX сүлжээнд утсыг холбох болон салгах боломжтой."</string>
-    <string name="permlab_scoreNetworks" msgid="6445777779383587181">"бүртгэгдсэн сүлжээ"</string>
-    <string name="permdesc_scoreNetworks" product="tablet" msgid="1304304745850215556">"Апп-д сүлжээнүүдийг эрэмбэлж, аль сүлжээнд таблетыг холбоход нөлөөлөх боломж олгоно."</string>
-    <string name="permdesc_scoreNetworks" product="tv" msgid="5444434643862417649">"Апп-д телевизийн хэрэглэдэг сүлжээнүүд болон тэдний зэрэглэлийг жагсаахыг зөвшөөрч улмаар аль сүлжээг ашиглахыг зөвлөдөг."</string>
-    <string name="permdesc_scoreNetworks" product="default" msgid="1831501848178651379">"Апп-д сүлжээнүүдийг эрэмбэлж, аль сүлжээнд утсыг холбоход нөлөөлөх боломж олгоно."</string>
     <string name="permlab_bluetooth" msgid="6127769336339276828">"Блютүүт төхөөрөмжтэй хос үүсгэх"</string>
     <string name="permdesc_bluetooth" product="tablet" msgid="3480722181852438628">"Апп нь таблет дээрх блютүүт тохиргоог харах боломжтой ба хос болох төхөөрөмжтэй холболтыг зөвшөөрөх болон хийх боломжтой."</string>
     <string name="permdesc_bluetooth" product="tv" msgid="3974124940101104206">"Телевизийн Bluetooth тохиргоог нээж харах, бусад төхөөрөмжтэй холболт хийх болон хүлээн авахыг апп-д зөвшөөрдөг."</string>
@@ -778,10 +463,6 @@
     <string name="permdesc_writeSyncSettings" msgid="8956262591306369868">"Апп нь акаунтын синк тохиргоог өөрчлөх боломжтой. Жишээ нь энэ нь Хүмүүс апп акаунттай синк хийхийг идэвхжүүлэх боломжтой."</string>
     <string name="permlab_readSyncStats" msgid="7396577451360202448">"синк статистикийг унших"</string>
     <string name="permdesc_readSyncStats" msgid="1510143761757606156">"Апп нь синк үйлдэлийн түүх болон хэр их дата синк хийгдсэн зэрэг акаунтын синк статусыг унших боломжтой."</string>
-    <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"бүртгүүлсэн хангамжийг унших"</string>
-    <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"Апп нь одоогийн синк хийгдсэн хангамжийн талаарх мэдээллийг авах боломжтой."</string>
-    <string name="permlab_subscribedFeedsWrite" msgid="9015246325408209296">"бүртгүүлсэн хангамжруу бичих"</string>
-    <string name="permdesc_subscribedFeedsWrite" msgid="6928930188826089413">"Апп нь таны одоогийн синк хийгдсэн хангамжийг өөрчлөх боломжтой. Хортой апп нь таны синк хийгдсэн хангамжийг өөрчлөх боломжтой."</string>
     <string name="permlab_readDictionary" msgid="4107101525746035718">"таны толь бичигт нэмсэн нөхцөлийг унших"</string>
     <string name="permdesc_readDictionary" msgid="659614600338904243">"Апп нь хэрэглэгч хэрэглэгчийн толь бичигт хадгалсан бүх үгс, нэрс болон хэлцийг унших боломжтой."</string>
     <string name="permlab_writeDictionary" msgid="2183110402314441106">"хэрэглэгчийн толь бичигт үгс нэмэх"</string>
@@ -794,62 +475,8 @@
     <string name="permlab_sdcardWrite" product="default" msgid="8805693630050458763">"SD картны контентыг өөрчлөх болон устгах"</string>
     <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6175406299445710888">"Апп нь USB санруу бичих боломжтой."</string>
     <string name="permdesc_sdcardWrite" product="default" msgid="4337417790936632090">"Апп нь SD картруу бичих боломжтой."</string>
-    <string name="permlab_mediaStorageWrite" product="default" msgid="6859839199706879015">"дотоод медиа сангийн контентыг өөрчлөх/устгах"</string>
-    <string name="permdesc_mediaStorageWrite" product="default" msgid="8189160597698529185">"Апп нь дотоод медиа сангийн контентыг өөрчлөх боломжтой."</string>
-    <string name="permlab_manageDocs" product="default" msgid="5778318598448849829">"документ санг удирдах"</string>
-    <string name="permdesc_manageDocs" product="default" msgid="8704323176914121484">"Апп нь документ санг удирдах боломжтой."</string>
-    <string name="permlab_sdcardAccessAll" msgid="8150613823900460576">"бүх хэрэглэгчдийн гадаар санд хандах"</string>
-    <string name="permdesc_sdcardAccessAll" msgid="3215208357415891320">"Апп нь бүх хэрэглэгчдийн гадаад санд хандах боломжтой."</string>
-    <string name="permlab_cache_filesystem" msgid="5656487264819669824">"кеш файлсистемд хандах"</string>
-    <string name="permdesc_cache_filesystem" msgid="5578967642265550955">"Апп нь кеш файлсистемийг унших бичих боломжтой."</string>
     <string name="permlab_use_sip" msgid="2052499390128979920">"SIP дуудлага хийх/хүлээн авах"</string>
     <string name="permdesc_use_sip" msgid="2297804849860225257">"Апп-д SIP дуудлага хийх болон хүлээн авахыг зөвшөөрөх."</string>
-    <string name="permlab_register_sim_subscription" msgid="3166535485877549177">"шинэ телеком SIM холболтуудыг бүртгэх"</string>
-    <string name="permdesc_register_sim_subscription" msgid="2138909035926222911">"Апп-д шинэ телеком SIM холболтуудыг бүртгэхийг зөвшөөрнө."</string>
-    <string name="permlab_register_call_provider" msgid="108102120289029841">"шинэ телеком холболтуудыг бүртгэх"</string>
-    <string name="permdesc_register_call_provider" msgid="7034310263521081388">"Апп-д шинэ телеком холболтуудыг бүртгэхийг зөвшөөрнө."</string>
-    <string name="permlab_connection_manager" msgid="1116193254522105375">"телеком холболтуудыг удирдах."</string>
-    <string name="permdesc_connection_manager" msgid="5925480810356483565">"Апп-д телеком холболтуудыг удирдахыг зөвшөөрнө."</string>
-    <string name="permlab_bind_incall_service" msgid="6773648341975287125">"дуудлагын дэлгэцтэй харьцах"</string>
-    <string name="permdesc_bind_incall_service" msgid="8343471381323215005">"Апп-д дуудлагын дэлгэцийг хэрэглэгчид хэзээ хэрхэн харуулахыг удирдахыг зөвшөөрнө."</string>
-    <string name="permlab_bind_connection_service" msgid="3557341439297014940">"телефоны үйлчилгээтэй харилцах"</string>
-    <string name="permdesc_bind_connection_service" msgid="4008754499822478114">"Апп-д телефон үйлчилгээтэй харилцаж дуудлага хийх/авахыг зөвшөөрнө."</string>
-    <string name="permlab_control_incall_experience" msgid="9061024437607777619">"дуудлага хийж байгаа хэрэглэгчтэй харьцах"</string>
-    <string name="permdesc_control_incall_experience" msgid="915159066039828124">"Апп-д дуудлага хийж байгаа хэрэглэгчтэй харьцахыг зөвшөөрнө."</string>
-    <string name="permlab_readNetworkUsageHistory" msgid="7862593283611493232">"сүлжээний ашиглалтын түүхийг унших"</string>
-    <string name="permdesc_readNetworkUsageHistory" msgid="7689060749819126472">"Апп нь тусгай сүлжээ болон апп-н сүлжээ ашиглалтын түүхийг унших боломжтой."</string>
-    <string name="permlab_manageNetworkPolicy" msgid="2562053592339859990">"сүлжээний бодлогыг удирдах"</string>
-    <string name="permdesc_manageNetworkPolicy" msgid="7537586771559370668">"Апп нь сүлжээний бодлогыг удирдах болон апп-д зориулсан дүрмийг тогтоох боломжтой."</string>
-    <string name="permlab_modifyNetworkAccounting" msgid="5088217309088729650">"сүлжээний хэрэглээний тайланг өөрчлөх"</string>
-    <string name="permdesc_modifyNetworkAccounting" msgid="5443412866746198123">"Апп нь апп-уудын сүлжээ ашиглалтын талаарх тооцоог өөрчлөх боломжтой. Энгийн апп-д ашиглагдахгүй."</string>
-    <string name="permlab_accessNotifications" msgid="7673416487873432268">"мэдэгдэлд хандах"</string>
-    <string name="permdesc_accessNotifications" msgid="458457742683431387">"Апп нь бусад апп-уудын илгээсэн мэдэгдлүүдийг дуудах, шалгах, болон цэвэрлэх боломжтой."</string>
-    <string name="permlab_bindNotificationListenerService" msgid="7057764742211656654">"мэдэгдэл сонсогч үйлчилгээтэй холбох"</string>
-    <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"Эзэмшигч нь мэдэгдэл сонсох үйлчилгээний дээд-төвшиний интерфейстэй холбох боломжтой. Энгийн апп-д шаардлагагүй."</string>
-    <string name="permlab_bindChooserTargetService" msgid="3443261076710185673">"Сонгогчийн зорилтот үйлчилгээнд холбогдох"</string>
-    <string name="permdesc_bindChooserTargetService" msgid="1413908999583734970">"Эзэмшигчид сонгогчийн зорилтот үйлчилгээний дээд түвшний интерфэйс рүү холбогдох боломжийг олгоно. Энэ нь энгийн апп-уудад огт шаардлагагүй."</string>
-    <string name="permlab_bindConditionProviderService" msgid="1180107672332704641">"нөхцөл нийлүүлэгч үйлчилгээнд холбох"</string>
-    <string name="permdesc_bindConditionProviderService" msgid="1680513931165058425">"Эзэмшигчид нөхцөл нийлүүлэгч үйлчилгээний дээд-түвшний интерфейстэй холбох боломж олгоно. Энгийн апп-уудад хэзээ ч ашиглагдахгүй."</string>
-    <string name="permlab_bindMediaRouteService" msgid="6637740382272686835">"медиа маршрут үйлчилгээтэй холбох"</string>
-    <string name="permdesc_bindMediaRouteService" msgid="6436655024972496687">"Эзэмшигчид медиа маршрут үйлчилгээний дээр түвшний интерфэйст холбогдох боломж олгоно. Энгийн апп-д шаардагдахгүй."</string>
-    <string name="permlab_bindDreamService" msgid="4153646965978563462">"дрийм үйлчилгээнд холбох"</string>
-    <string name="permdesc_bindDreamService" msgid="7325825272223347863">"Эзэмшигч нь дрийм үйлчилгээний дээд-төвшиний интерфейстэй холбох боломжтой. Энгийн апп-д шаардлагагүй."</string>
-    <string name="permlab_invokeCarrierSetup" msgid="3699600833975117478">"үүрэн компанийн нийлүүлсэн тохируулгын апп-г өдөөх"</string>
-    <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"Эзэмшигчид үүрэн компанийн нийлүүлсэн тохируулах апп-г өдөөх боломж олгоно. Энгийн апп-уудад хэзээ ч ашиглагдахгүй."</string>
-    <string name="permlab_accessNetworkConditions" msgid="8206077447838909516">"Сүлжээний байдлын талаар ажиглалтуудыг хүлээн авах"</string>
-    <string name="permdesc_accessNetworkConditions" msgid="6899102075825272211">"Аппликешнд сүлжээний байдлын талаар ажиглалтуудыг хүлээн авахыг зөвшөөрнө. Энгийн апп-уудад хэзээ ч ашиглагдахгүй."</string>
-    <string name="permlab_setInputCalibration" msgid="4902620118878467615">"оролтын төхөөрөмжийн калибрешныг өөрчлөх"</string>
-    <string name="permdesc_setInputCalibration" msgid="4527511047549456929">"Мэдрэгчтэй дэлгэцний калибрешн параметрийг өөрчлөхийг апп-д зөвшөөрнө. Энгийн апп-д шаардлагагүй."</string>
-    <string name="permlab_accessDrmCertificates" msgid="7436886640723203615">"хандалтын DRM сертификат"</string>
-    <string name="permdesc_accessDrmCertificates" msgid="8073288354426159089">"Аппликешнд DRM сертификатыг ашиглах болон нийлүүлэхийг зөвшөөрнө. Энгийн апп-уудад хэзээ ч ашиглагдахгүй."</string>
-    <string name="permlab_handoverStatus" msgid="1159132046126626731">"Андройд Бийм дамжуулалтын статусыг хүлээн авах"</string>
-    <string name="permdesc_handoverStatus" msgid="4788144087245714948">"Одоогийн Андройд Бийм дамжуулалтын мэдээллийг хүлээн авахыг аппликешнд зөвшөөрөх"</string>
-    <string name="permlab_removeDrmCertificates" msgid="7044888287209892751">"DRM сертификатыг устгах"</string>
-    <string name="permdesc_removeDrmCertificates" msgid="7272999075113400993">"Аппликешнд DRM сертификатыг устгахыг зөвшөөрнө. Энгийн апп-уудад хэзээ ч ашиглагдахгүй."</string>
-    <string name="permlab_bindCarrierMessagingService" msgid="1490229371796969158">"зөөгч зурвасын үйлчилгээнд холбох"</string>
-    <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"Эзэмшигчид зөөгч зурвасын үйлчилгээний түвшний интерфэйст холбогдохыг зөвшөөрдөг. Энгийн апп-д шаардлагагүй."</string>
-    <string name="permlab_accessVoiceInteractionService" msgid="4183835260471435605">"дуут харилцах үйлчилгээг ашиглах"</string>
-    <string name="permdesc_accessVoiceInteractionService" msgid="836587728238433459">"Эзэмшигчид одоогоор идэвхтэй байгаа дуут харилцах үйлчилгээг ашиглахыг зөвшөөр. Энэ нь энгийн апп-уудад огт шаардлагагүй."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Нууц үгний дүрмийг тохируулах"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"Дэлгэц түгжих нууц үг болон ПИН кодны урт болон нийт тэмдэгтийн уртыг хянах."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Дэлгэц тайлах оролдлогыг хянах"</string>
@@ -1135,28 +762,10 @@
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="8497389531014185509">"Апп нь таны утсан дээр хадгалагдсан Хөтчийн түүх эсвэл хавчуургыг өөрчлөх боломжтой. Энэ нь апп-д Хөтчийн датаг арилгах эсвэл өөрчлөх боломжийг олгоно. Анхаар: Энэ зөвшөөрөл нь гуравдагч талын хөтөч эсвэл вебээр хөтөчлөх чадвартай аппликешнд ажиллахгүй байх боломжтой."</string>
     <string name="permlab_setAlarm" msgid="1379294556362091814">"сэрүүлэг тохируулах"</string>
     <string name="permdesc_setAlarm" msgid="316392039157473848">"Апп нь суулгагдсан сэрүүлэгний апп дээр сэрүүлэг тохируулах боломжтой. Зарим сэрүүлэгний апп нь энэ функцийг дэмжихгүй байж болзошгүй."</string>
-    <string name="permlab_writeVoicemail" msgid="7309899891683938100">"дуут шуудан бичих"</string>
-    <string name="permdesc_writeVoicemail" msgid="6592572839715924830">"Апп нь таны дуут шуудангийн ирсэн мэйлээс зурвас хасах боломжтой."</string>
     <string name="permlab_addVoicemail" msgid="5525660026090959044">"дуут шуудан нэмэх"</string>
     <string name="permdesc_addVoicemail" msgid="6604508651428252437">"Таны дуут шуудангийн ирсэн мэйлд зурвас нэмэхийг апп-д зөвшөөрөх."</string>
-    <string name="permlab_readVoicemail" msgid="8415201752589140137">"дуут шууданг унших"</string>
-    <string name="permdesc_readVoicemail" msgid="8926534735321616550">"Апп-д таны дуут шууданг унших боломж олгоно."</string>
     <string name="permlab_writeGeolocationPermissions" msgid="5962224158955273932">"Хөтчийн геобайршлын зөвшөөрлийг өөрчлөх"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="1083743234522638747">"Апп нь Хөтчийн гео байршлын зөвшөөрлийг өөрчлөх боломжтой. Хортой апп нь энийг ашиглан дурын веб хуудасруу байршлын мэдээллийг илгээх боломжтой."</string>
-    <string name="permlab_packageVerificationAgent" msgid="5568139100645829117">"багцийг тулгах"</string>
-    <string name="permdesc_packageVerificationAgent" msgid="8437590190990843381">"Апп нь багцыг суулгаж болох эсэхийг шалгах боломжтой."</string>
-    <string name="permlab_bindPackageVerifier" msgid="4187786793360326654">"багц тулгагчтэй холбох"</string>
-    <string name="permdesc_bindPackageVerifier" msgid="3180741773233862126">"Эзэмшигч нь багц тулгагчдад хүсэлт тавих боломжтой. Энгийн апп-д хэрэглэгдэхгүй."</string>
-    <string name="permlab_intentFilterVerificationAgent" msgid="1135788294400437497">"зориулалтын шүүлтүүрийг баталгаажуулах"</string>
-    <string name="permdesc_intentFilterVerificationAgent" msgid="5853902808424716312">"Зориулалтын шүүлтүүрийг баталгаажуулсан эсэхээс үл хамааран апп-д шалгах зөвшөөрөл өгөх"</string>
-    <string name="permlab_bindIntentFilterVerifier" msgid="8567268159430779210">"зориулалтын шүүлтүүр шалгагч руу холбох"</string>
-    <string name="permdesc_bindIntentFilterVerifier" msgid="681128728719578778">"Эзэмшигчид зориулалтын шүүлтүүрийг шалгах хүсэлт гаргахыг зөвшөөрөх. Энэ нь энгийн апп-уудад огт шаардлагагүй."</string>
-    <string name="permlab_serialPort" msgid="546083327654631076">"сериал портруу хандах"</string>
-    <string name="permdesc_serialPort" msgid="2991639985224598193">"Эзэмшигч нь SerialManager API ашиглан сериал портод хандах боломжтой."</string>
-    <string name="permlab_accessContentProvidersExternally" msgid="5077774297943409285">"контент нийлүүлэгчид гаднаас хандах"</string>
-    <string name="permdesc_accessContentProvidersExternally" msgid="4544346486697853685">"Эзэмшигч нь шелээс контент нийлүүлэгчид хандах боломжтой. Энгийн апп-с хэрэглэхгүй."</string>
-    <string name="permlab_updateLock" msgid="3527558366616680889">"төхөөрөмжийн автомат шинэчлэлтийг хориглох"</string>
-    <string name="permdesc_updateLock" msgid="1655625832166778492">"Эзэмшигч нь төхөөрөмжийг дэвшүүлэхээр хэзээ дахин асаавал тохирох тухай системд мэдээлэл санал болгох боломжтой."</string>
     <string name="save_password_message" msgid="767344687139195790">"Та хөтчид энэ нууц үгийг сануулах уу?"</string>
     <string name="save_password_notnow" msgid="6389675316706699758">"Одоо биш"</string>
     <string name="save_password_remember" msgid="6491879678996749466">"Санах"</string>
@@ -1452,28 +1061,8 @@
     <string name="ext_media_nomedia_notification_message" product="nosdcard" msgid="6921126162580574143">"USB сан сугалагдав. Шинэ медиаг хийнэ үү."</string>
     <string name="ext_media_nomedia_notification_message" product="default" msgid="3870120652983659641">"SD карт хасагдав. Шинийг хийнэ үү."</string>
     <string name="activity_list_empty" msgid="1675388330786841066">"Таарах активити олдсонгүй."</string>
-    <string name="permlab_pkgUsageStats" msgid="8787352074326748892">"компонент ашиглалтын статистикийг шинэчлэх"</string>
-    <string name="permdesc_pkgUsageStats" msgid="1106612424254277630">"Апп нь компонент хэрэглээний цуглуулагдсан статистикийг өөрчлөх боломжтой. Энгийн апп-д шаардлагагүй."</string>
-    <string name="permlab_copyProtectedData" msgid="4341036311211406692">"контент хуулах"</string>
-    <string name="permdesc_copyProtectedData" msgid="4390697124288317831">"Апп нь контентыг хуулах үндсэн контейнер үйлчилгээг дуудах боломжтой. Энгийн апп-д ашиглах боломжгүй."</string>
     <string name="permlab_route_media_output" msgid="1642024455750414694">"Медиа гаралтыг чиглүүлэх"</string>
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"Аппликешн нь медиа гаралтыг бусад гадаад төхөөрөмжрүү чиглүүлэх боломжтой."</string>
-    <string name="permlab_access_keyguard_secure_storage" msgid="7565552237977815047">"Түлхүүр хамгаалах аюулгүй санд хандах"</string>
-    <string name="permdesc_access_keyguard_secure_storage" msgid="5866245484303285762">"Аппликешн нь хамгаалалттай аюулгүй санд хандах боломжтой."</string>
-    <string name="permlab_control_keyguard" msgid="172195184207828387">"Түлхүүр хамгаалалтын харуулах болон далдлахыг удирдах"</string>
-    <string name="permdesc_control_keyguard" msgid="3043732290518629061">"Аппликешн нь түлхүүр хамгаалагчыг удирдах боломжтой."</string>
-    <string name="permlab_trust_listener" msgid="1765718054003704476">"Итгэмжлэлд орж буй өөрчлөлтийг мэдэх."</string>
-    <string name="permdesc_trust_listener" msgid="8233895334214716864">"Итгэмжлэлд орж буй өөрчлөлтийг мэдэх боломжийг аппликешнд олгоно."</string>
-    <string name="permlab_provide_trust_agent" msgid="5465587586091358316">"Итгэмжлэгдсэн төлөөлөгч нийлүүлэх"</string>
-    <string name="permdesc_provide_trust_agent" msgid="3865702641053068148">"Аппликешнд итгэмжлэгдсэн төлөөлөгч нийлүүлэх боломж олгоно."</string>
-    <string name="permlab_launch_trust_agent_settings" msgid="5859430082240410200">"Итгэмжлэгдсэн төлөөлөгчийн тохиргоо цэсийг эхлүүлэх."</string>
-    <string name="permdesc_launch_trust_agent_settings" msgid="8185142708644913381">"Аппликешнд итгэмжлэгдсэн төлөөлөгчийн авирыг өөрчлөх боломжтой үйлдлийг эхлүүлэхийг зөвшөөрнө."</string>
-    <string name="permlab_bind_trust_agent_service" msgid="8242093169457695334">"Итгэмжлэгдсэн төлөөлөгчийн үйлчилгээтэй холбогдох"</string>
-    <string name="permdesc_bind_trust_agent_service" msgid="7041930026024507515">"Аппликешнд итгэмжлэгдсэн төлөөлөгчтэй холбогдох боломж олгоно."</string>
-    <string name="permlab_recovery" msgid="3157024487744125846">"Шинэчлэлт болон сэргээх системтэй харилцах"</string>
-    <string name="permdesc_recovery" msgid="8511774533266359571">"Аппликешнд сэргээх систем болон системийн шинэчлэлтэй харилцах боломж олгоно."</string>
-    <string name="permlab_manageMediaProjection" msgid="1120495449419929218">"Медиа проекци удирдах"</string>
-    <string name="permdesc_manageMediaProjection" msgid="8053759147529492856">"Аппликешнд медиа проекци удирдахыг зөвшөөрнө. Ингэснээр аппликешнд дэлгэц болон аудио контентыг бичих боломж олгоно. Энгийн апп-д шаардагдахгүй."</string>
     <string name="permlab_readInstallSessions" msgid="6165432407628065939">"Суулгах сешн унших"</string>
     <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"Аппликешн-д суулгах сешн уншихыг зөвшөөрнө. Энэ нь идэвхтэй багцуудыг суулгалтын талаар дэлгэрэнгүй мэдээллийг үзэх боломж олгоно."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"Өсгөх контрол дээр хоёр удаа товшино уу"</string>
@@ -1840,13 +1429,9 @@
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Тогтоосныг суллахаас өмнө PIN асуух"</string>
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"Тогтоосныг суллахаас өмнө түгжээ тайлах хээ асуух"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Тогтоосныг суллахаас өмнө нууц үг асуух"</string>
-    <!-- no translation found for package_installed_device_owner (8420696545959087545) -->
-    <skip />
-    <!-- no translation found for package_deleted_device_owner (7650577387493101353) -->
-    <skip />
+    <string name="package_installed_device_owner" msgid="8420696545959087545">"Таны админ суулгасан байна"</string>
+    <string name="package_deleted_device_owner" msgid="7650577387493101353">"Таны админ устгасан байна"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"Батарей хадгалах функц нь таны төхөөрөмжийн цэнэгийг хадгалахын тулд гүйцэтгэлийг багасгаж, чичрэлтийг бууруулж, байршлын үйлчилгээнүүд болон бусад өгөгдлийн хэмжээг багасгадаг юм. И-мэйл, мессеж болон бусад синхрон хийдэг апликейшнүүд дараа дахин нээгдэх хүртлээ автоматаар шинэчлэлт хийхгүй.\n\nМөн батарей хадгалах функц нь таныг төхөөрөмжөө цэнэглэх үед автоматаар унтрах юм."</string>
-    <string name="downtime_condition_summary" msgid="8761776337475705749">"Таны уйтгартай байдал <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>-д дуусах хүртэл"</string>
-    <string name="downtime_condition_line_one" msgid="8762708714645352010">"Сул зогсолт дуусах хүртэл"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
       <item quantity="other"> %1$d минутын турш ( <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g> хүртэл)</item>
       <item quantity="one">нэг минутын турш (<xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g> хүртэл)</item>
@@ -1863,9 +1448,17 @@
     <!-- no translation found for zen_mode_duration_hours (3938821308277433854) -->
     <string name="zen_mode_until" msgid="7336308492289875088">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> хүртэл"</string>
     <string name="zen_mode_forever" msgid="7420011936770086993">"Таныг унтраах хүртэл"</string>
+    <!-- no translation found for zen_mode_rule_name_combination (191109939968076477) -->
+    <skip />
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"Хумих"</string>
-    <string name="zen_mode_next_alarm_summary" msgid="5915140424683747372">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> дахь дараагийн анхааруулга хүртэл"</string>
-    <string name="zen_mode_next_alarm_line_one" msgid="5537042951553420916">"Дараагийн анхааруулга хүртэл"</string>
+    <!-- no translation found for zen_mode_feature_name (289097150786114338) -->
+    <skip />
+    <!-- no translation found for zen_mode_downtime_feature_name (2626974636779860146) -->
+    <skip />
+    <!-- no translation found for zen_mode_default_weeknights_name (2069189413656431610) -->
+    <skip />
+    <!-- no translation found for zen_mode_default_weekends_name (2377398437072017011) -->
+    <skip />
     <string name="muted_by" msgid="6147073845094180001">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g>-с хаасан"</string>
     <string name="system_error_wipe_data" msgid="6608165524785354962">"Таны төхөөрөмжид дотоод алдаа байна.Та төхөөрөмжөө үйлдвэрээс гарсан төлөвт шилжүүлэх хүртэл таны төхөөрөмж чинь тогтворгүй байж болох юм."</string>
     <string name="system_error_manufacturer" msgid="8086872414744210668">"Таны төхөөрөмжид дотоод алдаа байна. Дэлгэрэнгүй мэдээлэл авахыг хүсвэл үйлдвэрлэгчтэйгээ холбоо барина уу."</string>
@@ -1875,6 +1468,13 @@
     <string name="stk_cc_ss_to_dial" msgid="2151304435775557162">"SS хүсэлтийг DIAL хүсэлт болгон өөрчилсөн байна"</string>
     <string name="stk_cc_ss_to_ussd" msgid="3951862188105305589">"SS хүсэлтийг USSD хүсэлт болгон өөрчилсөн байна."</string>
     <string name="stk_cc_ss_to_ss" msgid="5470768854991452695">"SS хүсэлтийг шинэ SS хүсэлт болгон өөрчилсөн байна."</string>
+    <!-- no translation found for usb_midi_peripheral_name (7221113987741003817) -->
+    <skip />
     <string name="usb_midi_peripheral_manufacturer_name" msgid="7176526170008970168">"Android"</string>
-    <string name="usb_midi_peripheral_model_name" msgid="1959288763942653301">"USB Peripheral Port"</string>
+    <!-- no translation found for usb_midi_peripheral_product_name (4971827859165280403) -->
+    <skip />
+    <!-- no translation found for floating_toolbar_open_overflow_description (4797287862999444631) -->
+    <skip />
+    <!-- no translation found for floating_toolbar_close_overflow_description (559796923090723804) -->
+    <skip />
 </resources>

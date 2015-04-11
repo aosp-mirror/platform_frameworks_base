@@ -218,69 +218,43 @@
     <string name="android_system_label" msgid="6577375335728551336">"Android సిస్టమ్"</string>
     <string name="user_owner_label" msgid="6465364741001216388">"వ్యక్తిగత అనువర్తనాలు"</string>
     <string name="managed_profile_label" msgid="6260850669674791528">"కార్యాలయం"</string>
-    <string name="permgrouplab_costMoney" msgid="5429808217861460401">"మీరు డబ్బు చెల్లించాల్సిన సేవలు"</string>
-    <string name="permgroupdesc_costMoney" msgid="3293301903409869495">"మీ డబ్బు ఖర్చు అయ్యే పనులను అమలు చేయడం."</string>
-    <string name="permgrouplab_messages" msgid="7521249148445456662">"మీ సందేశాలు"</string>
-    <string name="permgroupdesc_messages" msgid="7821999071003699236">"మీ SMS, ఇమెయిల్ మరియు ఇతర సందేశాలను చదవండి మరియు వ్రాయండి."</string>
-    <string name="permgrouplab_personalInfo" msgid="3519163141070533474">"మీ వ్యక్తిగత సమాచారం"</string>
-    <string name="permgroupdesc_personalInfo" msgid="8426453129788861338">"మీ గురించి మీ సంప్రదింపు కార్డు‌లో నిల్వ చేయబడిన సమాచారానికి ప్రత్యక్ష ప్రాప్యత."</string>
+    <!-- no translation found for permgrouplab_contacts (3657758145679177612) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_contacts (1437393511338346185) -->
+    <skip />
+    <!-- no translation found for permgrouplab_location (7275582855722310164) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_location (536889867433972794) -->
+    <skip />
     <string name="permgrouplab_socialInfo" msgid="5799096623412043791">"మీ సామాజిక సమాచారం"</string>
     <string name="permgroupdesc_socialInfo" msgid="7129842457611643493">"మీ పరిచయాలు మరియు సామాజిక బాంధవ్యాలకు సంబంధించిన సమాచారానికి ప్రత్యక్ష ప్రాప్యత."</string>
-    <string name="permgrouplab_location" msgid="635149742436692049">"మీ స్థానం"</string>
-    <string name="permgroupdesc_location" msgid="5704679763124170100">"మీ భౌతిక స్థానాన్ని పర్యవేక్షించడం."</string>
-    <string name="permgrouplab_network" msgid="5808983377727109831">"నెట్‌వర్క్ కమ్యూనికేషన్"</string>
-    <string name="permgroupdesc_network" msgid="4478299413241861987">"విభిన్న నెట్‌వర్క్ లక్షణాలను ప్రాప్యత చేయడం."</string>
-    <string name="permgrouplab_bluetoothNetwork" msgid="1585403544162128109">"బ్లూటూత్"</string>
-    <string name="permgroupdesc_bluetoothNetwork" msgid="5625288577164282391">"బ్లూటూత్ ద్వారా పరికరాలు మరియు నెట్‌వర్క్‌లను ప్రాప్యత చేయడం."</string>
-    <string name="permgrouplab_audioSettings" msgid="8329261670151871235">"ఆడియో సెట్టింగ్‌లు"</string>
-    <string name="permgroupdesc_audioSettings" msgid="2641515403347568130">"ఆడియో సెట్టింగ్‌లను మార్చడం."</string>
-    <string name="permgrouplab_affectsBattery" msgid="6209246653424798033">"బ్యాటరీని ప్రభావితం చేసేవి"</string>
-    <string name="permgroupdesc_affectsBattery" msgid="6441275320638916947">"బ్యాటరీ శక్తిని త్వరగా హరించే లక్షణాలను ఉపయోగించడం."</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"క్యాలెండర్"</string>
-    <string name="permgroupdesc_calendar" msgid="5777534316982184416">"క్యాలెండర్‌లు మరియు ఈవెంట్‌లకు ప్రత్యక్ష ప్రాప్యత."</string>
-    <string name="permgrouplab_dictionary" msgid="4148597128843641379">"వినియోగదారు నిఘంటువును చదవడం"</string>
-    <string name="permgroupdesc_dictionary" msgid="7921166355964764490">"వినియోగదారు నిఘంటువులో పదాలను చదవడం."</string>
-    <string name="permgrouplab_writeDictionary" msgid="8090237702432576788">"వినియోగదారు నిఘంటువులో వ్రాయడం"</string>
-    <string name="permgroupdesc_writeDictionary" msgid="2711561994497361646">"వినియోగదారు నిఘంటువుకు పదాలను జోడించడం."</string>
+    <!-- no translation found for permgroupdesc_calendar (2116049656685591803) -->
+    <skip />
+    <!-- no translation found for permgrouplab_sms (228308803364967808) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_sms (3695085582674524761) -->
+    <skip />
+    <!-- no translation found for permgrouplab_dictionary (8114410334955871144) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_dictionary (7586787746354378335) -->
+    <skip />
     <string name="permgrouplab_bookmarks" msgid="1949519673103968229">"బుక్‌మార్క్‌లు మరియు చరిత్ర"</string>
     <string name="permgroupdesc_bookmarks" msgid="4169771606257963028">"బుక్‌మార్క్‌లు మరియు బ్రౌజర్ చరిత్రకు ప్రత్యక్ష ప్రాప్యత."</string>
-    <string name="permgrouplab_deviceAlarms" msgid="6117704629728824101">"అలారం"</string>
-    <string name="permgroupdesc_deviceAlarms" msgid="4769356362251641175">"అలారం గడియారాన్ని సెట్ చేయడం."</string>
-    <string name="permgrouplab_voicemail" msgid="4162237145027592133">"వాయిస్‌మెయిల్"</string>
-    <string name="permgroupdesc_voicemail" msgid="2498403969862951393">"వాయిస్‌మెయిల్‌కు ప్రత్యక్ష ప్రాప్యత."</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"మైక్రోఫోన్"</string>
-    <string name="permgroupdesc_microphone" msgid="7106618286905738408">"ఆడియోని రికార్డ్ చేయడం కోసం మైక్రోఫోన్‌కు ప్రత్యక్ష ప్రాప్యత."</string>
+    <!-- no translation found for permgroupdesc_microphone (1296196977187629181) -->
+    <skip />
     <string name="permgrouplab_camera" msgid="4820372495894586615">"కెమెరా"</string>
-    <string name="permgroupdesc_camera" msgid="2933667372289567714">"చిత్రం లేదా వీడియో క్యాప్చర్ కోసం కెమెరాకు ప్రత్యక్ష ప్రాప్యత."</string>
-    <string name="permgrouplab_screenlock" msgid="8275500173330718168">"స్క్రీన్‌ను లాక్ చేయడం"</string>
-    <string name="permgroupdesc_screenlock" msgid="7067497128925499401">"మీ పరికరంలో లాక్ స్క్రీన్ యొక్క ప్రవర్తనను ప్రభావితం చేయగల సామర్థ్యం."</string>
-    <string name="permgrouplab_appInfo" msgid="8028789762634147725">"మీ అనువర్తనాల సమాచారం"</string>
-    <string name="permgroupdesc_appInfo" msgid="3950378538049625907">"మీ పరికరంలో ఇతర అనువర్తనాల ప్రవర్తనను ప్రభావితం చేయగల సామర్థ్యం."</string>
-    <string name="permgrouplab_wallpaper" msgid="3850280158041175998">"వాల్‌పేపర్"</string>
-    <string name="permgroupdesc_wallpaper" msgid="5630417854750540154">"పరికర వాల్‌పేపర్ సెట్టింగ్‌లను మార్చడం."</string>
-    <string name="permgrouplab_systemClock" msgid="406535759236612992">"గడియారం"</string>
-    <string name="permgroupdesc_systemClock" msgid="3944359833624094992">"పరికర సమయం లేదా సమయమండలిని మార్చడం."</string>
-    <string name="permgrouplab_statusBar" msgid="2095862568113945398">"స్థితి పట్టీ"</string>
-    <string name="permgroupdesc_statusBar" msgid="6242593432226807171">"పరికర స్థితి పట్టీ సెట్టింగ్‌లను మార్చడం."</string>
-    <string name="permgrouplab_syncSettings" msgid="3341990986147826541">"సమకాలీకరణ సెట్టింగ్‌లు"</string>
-    <string name="permgroupdesc_syncSettings" msgid="7603195265129031797">"సమకాలీకరణ సెట్టింగ్‌లకు ప్రాప్యత."</string>
-    <string name="permgrouplab_accounts" msgid="3359646291125325519">"మీ ఖాతాలు"</string>
-    <string name="permgroupdesc_accounts" msgid="4948732641827091312">"అందుబాటులో ఉన్న ఖాతాలను ప్రాప్యత చేయండి."</string>
-    <string name="permgrouplab_hardwareControls" msgid="7998214968791599326">"హార్డ్‌వేర్ నియంత్రణలు"</string>
-    <string name="permgroupdesc_hardwareControls" msgid="4357057861225462702">"హ్యాండ్‌సెట్‌లో హార్డ్‌వేర్‌కు ప్రత్యక్ష ప్రాప్యత."</string>
-    <string name="permgrouplab_phoneCalls" msgid="9067173988325865923">"ఫోన్ కాల్‌లు"</string>
-    <string name="permgroupdesc_phoneCalls" msgid="7489701620446183770">"ఫోన్ కాల్‌లను పర్యవేక్షించండి, రికార్డ్ చేయండి మరియు ప్రాసెస్ చేయండి."</string>
-    <string name="permgrouplab_systemTools" msgid="4652191644082714048">"సిస్టమ్ సాధనాలు"</string>
-    <string name="permgroupdesc_systemTools" msgid="8162102602190734305">"సిస్టమ్‌కు సంబంధించి తక్కువ-స్థాయి ప్రాప్యత మరియు నియంత్రణ."</string>
-    <string name="permgrouplab_developmentTools" msgid="3446164584710596513">"అభివృద్ధి సాధనాలు"</string>
-    <string name="permgroupdesc_developmentTools" msgid="7058828032358142018">"అనువర్తన డెవలపర్‌ల కోసం మాత్రమే లక్షణాలు అవసరం."</string>
-    <string name="permgrouplab_display" msgid="4279909676036402636">"ఇతర అనువర్తన UI"</string>
-    <string name="permgroupdesc_display" msgid="6051002031933013714">"ఇతర అనువర్తనాల UIని ప్రభావితం చేయడం."</string>
-    <string name="permgrouplab_storage" msgid="1971118770546336966">"నిల్వ"</string>
-    <string name="permgroupdesc_storage" product="nosdcard" msgid="7442318502446874999">"USB నిల్వను ప్రాప్యత చేయండి."</string>
-    <string name="permgroupdesc_storage" product="default" msgid="9203302214915355774">"SD కార్డు‌ను ప్రాప్యత చేయండి."</string>
-    <string name="permgrouplab_accessibilityFeatures" msgid="7919025602283593907">"ప్రాప్యత సౌలభ్య లక్షణాలు"</string>
-    <string name="permgroupdesc_accessibilityFeatures" msgid="4205196881678144335">"సహాయక సాంకేతికతను అభ్యర్థించగల లక్షణాలు."</string>
+    <!-- no translation found for permgroupdesc_camera (2429930670410559293) -->
+    <skip />
+    <!-- no translation found for permgrouplab_phone (5229115638567440675) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_phone (2016641188146068700) -->
+    <skip />
+    <!-- no translation found for permgrouplab_sensors (7416703484233940260) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_sensors (2987451839455524494) -->
+    <skip />
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"విండో కంటెంట్‍ను మరలా పొందండి"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"మీరు పరస్పర చర్య చేస్తున్న విండో కంటెంట్‌‍ను పరిశీలించండి."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"తాకడం ద్వారా విశ్లేషణను ప్రారంభించండి"</string>
@@ -305,14 +279,8 @@
     <string name="permdesc_receiveSms" msgid="6424387754228766939">"SMS సందేశాలను స్వీకరించడానికి మరియు ప్రాసెస్ చేయడానికి అనువర్తనాన్ని అనుమతిస్తుంది. అనువర్తనం మీ పరికరానికి పంపబడిన సందేశాలను మీకు చూపకుండానే పర్యవేక్షించగలదని లేదా తొలగించగలదని దీని అర్థం."</string>
     <string name="permlab_receiveMms" msgid="1821317344668257098">"వచన సందేశాలను (MMS) స్వీకరించడం"</string>
     <string name="permdesc_receiveMms" msgid="533019437263212260">"MMS సందేశాలను స్వీకరించడానికి మరియు ప్రాసెస్ చేయడానికి అనువర్తనాన్ని అనుమతిస్తుంది. అనువర్తనం మీ పరికరానికి పంపబడిన సందేశాలను మీకు చూపకుండానే పర్యవేక్షించగలదని లేదా తొలగించగలదని దీని అర్థం."</string>
-    <string name="permlab_receiveEmergencyBroadcast" msgid="1803477660846288089">"అత్యవసర ప్రసారాలను స్వీకరించడం"</string>
-    <string name="permdesc_receiveEmergencyBroadcast" msgid="848524070262431974">"అత్యవసర ప్రసార సందేశాలను స్వీకరించడానికి మరియు ప్రాసెస్ చేయడానికి అనువర్తనాన్ని అనుమతిస్తుంది. ఈ అనుమతి సిస్టమ్ అనువర్తనాలకు మాత్రమే అందుబాటులో ఉంది."</string>
-    <string name="permlab_readCellBroadcasts" msgid="1598328843619646166">"సెల్ ప్రసార సందేశాలను చదవడం"</string>
-    <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"మీ పరికరం స్వీకరించిన సెల్ ప్రసార సందేశాలను చదవడానికి అనువర్తనాన్ని అనుమతిస్తుంది. సెల్ ప్రసార హెచ్చరికలు అత్యవసర పరిస్థితుల గురించి మిమ్మల్ని హెచ్చరించడానికి కొన్ని స్థానాల్లో అందించబడతాయి. అత్యవసర సెల్ ప్రసారం స్వీకరించినప్పుడు హానికరమైన అనువర్తనాలు మీ పరికరం యొక్క పనితీరు లేదా నిర్వహణకు అంతరాయం కలిగించవచ్చు."</string>
     <string name="permlab_sendSms" msgid="5600830612147671529">"SMS సందేశాలను పంపడం"</string>
     <string name="permdesc_sendSms" msgid="7094729298204937667">"SMS సందేశాలు పంపడానికి అనువర్తనాన్ని అనుమతిస్తుంది. దీని వలన ఊహించని ఛార్జీలు విధించబడవచ్చు. హానికరమైన అనువర్తనాలు మీ నిర్ధారణ లేకుండానే సందేశాలను పంపడం ద్వారా మీకు డబ్బు ఖర్చయ్యేలా చేయవచ్చు."</string>
-    <string name="permlab_sendRespondViaMessageRequest" msgid="8713889105305943200">"సందేశం ద్వారా ప్రతిస్పందించే ఈవెంట్‌లను పంపడం"</string>
-    <string name="permdesc_sendRespondViaMessageRequest" msgid="7107648548468778734">"ఇన్‌కమింగ్ కాల్‌ల కోసం సందేశం ద్వారా ప్రతిస్పందించే ఈవెంట్‌లను నిర్వహించడానికి ఇతర సందేశ విధాన అనువర్తనాలకు అభ్యర్థనలను పంపడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"మీ వచన సందేశాలు (SMS లేదా MMS) చదవడం"</string>
     <string name="permdesc_readSms" product="tablet" msgid="2467981548684735522">"మీ టాబ్లెట్ లేదా సిమ్ కార్డు‌లో నిల్వ చేయబడిన SMS సందేశాలను చదవడానికి అనువర్తనాన్ని అనుమతిస్తుంది. ఇది కంటెంట్ లేదా గోప్యతతో సంబంధం లేకుండా అన్ని SMS సందేశాలను చదవడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
     <string name="permdesc_readSms" product="tv" msgid="5102425513647038535">"మీ టీవీ లేదా SIM కార్డ్‌లో నిల్వ చేసిన SMS సందేశాలను చదవడానికి అనువర్తనాన్ని అనుమతిస్తుంది. ఇది కంటెంట్ లేదా గోప్యతతో సంబంధం లేకుండా అన్ని SMS సందేశాలను చదవడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
@@ -323,188 +291,24 @@
     <string name="permdesc_writeSms" product="default" msgid="7268668709052328567">"మీ ఫోన్‌లో లేదా సిమ్ కార్డులో నిల్వ చేసిన SMS సందేశాలను వ్రాయడానికి అనువర్తనాన్ని అనుమతిస్తుంది. హానికరమైన అనువర్తనాలు మీ సందేశాలను తొలగించవచ్చు."</string>
     <string name="permlab_receiveWapPush" msgid="5991398711936590410">"వచన సందేశాలను (WAP) స్వీకరించడం"</string>
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"WAP సందేశాలను స్వీకరించడానికి మరియు ప్రాసెస్ చేయడానికి అనువర్తనాన్ని అనుమతిస్తుంది. ఈ అనుమతి మీకు పంపబడిన సందేశాలను మీకు చూపకుండానే పర్యవేక్షించగల లేదా తొలగించగల సామర్థ్యాన్ని కలిగి ఉంటుంది."</string>
-    <string name="permlab_receiveBluetoothMap" msgid="7593811487142360528">"బ్లూటూత్ సందేశాల స్వీకరణ (MAP)"</string>
-    <string name="permdesc_receiveBluetoothMap" msgid="8656755936919466345">"బ్లూటూత్ MAP సందేశాలను స్వీకరించడానికి మరియు ప్రాసెస్ చేయడానికి అనువర్తనాన్ని అనుమతిస్తుంది. అనువర్తనం మీ పరికరానికి పంపబడిన సందేశాలను పర్యవేక్షించగలదని లేదా మీకు చూపకుండానే తొలగించగలదని దీనర్థం."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"అమలవుతున్న అనువర్తనాలను పునరుద్ధరించడం"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"ప్రస్తుతం మరియు ఇటీవల అమలవుతున్న విధుల గురించి వివరణాత్మక సమాచారాన్ని తిరిగి పొందడానికి అనువర్తనాన్ని అనుమతిస్తుంది. ఇది పరికరంలో ఉపయోగించబడిన అనువర్తనాల గురించి సమాచారాన్ని కనుగొనడానికి అనువర్తనాన్ని అనుమతించవచ్చు."</string>
-    <string name="permlab_startTasksFromRecents" msgid="8990073877885690623">"ఇటీవలివి నుండి విధిని ప్రారంభించడం"</string>
-    <string name="permdesc_startTasksFromRecents" msgid="7382133554871222235">"ActivityManager.getRecentTaskList() నుండి అందించబడిన నిష్క్రియ విధిని ప్రారంభించడం కోసం ActivityManager.RecentTaskInfo ఆబ్జెక్ట్‌ను ఉపయోగించడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
-    <string name="permlab_interactAcrossUsers" msgid="7114255281944211682">"వినియోగదారుల మధ్య పరస్పర చర్య చేయడం"</string>
-    <string name="permdesc_interactAcrossUsers" msgid="364670963623385786">"పరికరంలోని విభిన్న వినియోగదారుల తరపున చర్యలను అమలు చేయడానికి అనువర్తనాన్ని అనుమతిస్తుంది. హానికరమైన అనువర్తనాలు వినియోగదారుల మధ్య రక్షణను ఉల్లంఘించడానికి దీన్ని ఉపయోగించవచ్చు."</string>
-    <string name="permlab_interactAcrossUsersFull" msgid="2567734285545074105">"వినియోగదారుల మధ్య పరస్పర చర్య చేయడానికి పూర్తి లైసెన్స్"</string>
-    <string name="permdesc_interactAcrossUsersFull" msgid="376841368395502366">"వినియోగదారుల మధ్య సాధ్యమయ్యే అన్ని పరస్పర చర్యలను అనుమతిస్తుంది."</string>
-    <string name="permlab_manageUsers" msgid="1676150911672282428">"వినియోగదారులను నిర్వహించడం"</string>
-    <string name="permdesc_manageUsers" msgid="8409306667645355638">"శోధించడం, సృష్టించడం మరియు తొలగించడంతో సహా పరికరంలో వినియోగదారులను నిర్వహించడానికి అనువర్తనాలను అనుమతిస్తుంది."</string>
-    <string name="permlab_getDetailedTasks" msgid="6229468674753529501">"అమలవుతున్న అనువర్తనాల వివరాలను తిరిగి పొందడం"</string>
-    <string name="permdesc_getDetailedTasks" msgid="153824741440717599">"ప్రస్తుతం మరియు ఇటీవల అమలవుతున్న విధుల గురించి వివరణాత్మక సమాచారాన్ని తిరిగి పొందడానికి అనువర్తనాన్ని అనుమతిస్తుంది. హానికరమైన అనువర్తనాలు ఇతర అనువర్తనాల గురించి ప్రైవేట్ సమాచారాన్ని కనుగొనవచ్చు."</string>
     <string name="permlab_reorderTasks" msgid="2018575526934422779">"అమలవుతున్న అనువర్తనాలను మళ్లీ క్రమం చేయడం"</string>
     <string name="permdesc_reorderTasks" msgid="7734217754877439351">"విధులను ముందుకు మరియు నేపథ్యానికి తరలించడానికి అనువర్తనాన్ని అనుమతిస్తుంది. అనువర్తనం మీ ప్రమేయం లేకుండానే దీన్ని చేయవచ్చు."</string>
-    <string name="permlab_removeTasks" msgid="6821513401870377403">"అమలవుతున్న అనువర్తనాలను ఆపివేయడం"</string>
-    <string name="permdesc_removeTasks" msgid="1394714352062635493">"విధులను తీసివేయడానికి మరియు వాటి అనువర్తనాలను నిర్బంధంగా ముగించడానికి అనువర్తనాన్ని అనుమతిస్తుంది. హానికరమైన అనువర్తనాలు ఇతర అనువర్తనాల ప్రవర్తనకు భంగం కలిగించవచ్చు."</string>
-    <string name="permlab_manageActivityStacks" msgid="7391191384027303065">"కార్యాచరణ స్టాక్‌లను నిర్వహించడం"</string>
-    <string name="permdesc_manageActivityStacks" msgid="1615881933034084440">"ఇతర అనువర్తనాలు అమలయ్యే కార్యాచరణ స్టాక్‌లను జోడించడానికి, తీసివేయడానికి మరియు సవరించడానికి అనువర్తనాన్ని అనుమతిస్తుంది. హానికరమైన అనువర్తనాలు ఇతర అనువర్తనాల ప్రవర్తనకు ఆటంకం కలిగించవచ్చు."</string>
-    <string name="permlab_startAnyActivity" msgid="2918768238045206456">"ఏదైనా కార్యాచరణను ప్రారంభించడం"</string>
-    <string name="permdesc_startAnyActivity" msgid="997823695343584001">"అనుమతి రక్షణ లేదా ఎగుమతి చేయబడి స్థితితో సంబంధం లేకుండా ఏదైనా కార్యాచరణను ప్రారంభించడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
-    <string name="permlab_setScreenCompatibility" msgid="6975387118861842061">"స్క్రీన్ అనుకూలతను సెట్ చేయడం"</string>
-    <string name="permdesc_setScreenCompatibility" msgid="692043618693917374">"ఇతర అనువర్తనాల యొక్క స్క్రీన్ అనుకూలత మోడ్‌ను నియంత్రించడానికి అనువర్తనాన్ని అనుమతిస్తుంది. హానికరమైన అనువర్తనాలు ఇతర అనువర్తనాల యొక్క ప్రవర్తనను విచ్ఛిన్నం చేయవచ్చు."</string>
-    <string name="permlab_setDebugApp" msgid="3022107198686584052">"అనువర్తన డీబగ్గింగ్‌ను ప్రారంభించడం"</string>
-    <string name="permdesc_setDebugApp" msgid="4474512416299013256">"మరొక అనువర్తనం కోసం డీబగ్గింగ్‌ను ప్రారంభించడానికి అనువర్తనాన్ని అనుమతిస్తుంది. హానికరమైన అనువర్తనాలు ఇతర అనువర్తనాలను మూసివేయడానికి దీన్ని ఉపయోగించవచ్చు."</string>
-    <string name="permlab_changeConfiguration" msgid="4162092185124234480">"సిస్టమ్ డిస్‌ప్లే సెట్టింగ్‌లను మార్చడం"</string>
-    <string name="permdesc_changeConfiguration" msgid="4372223873154296076">"లొకేల్ లేదా పూర్తి ఫాంట్ పరిమాణం వంటి ప్రస్తుత కాన్ఫిగరేషన్‌ను మార్చడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
     <string name="permlab_enableCarMode" msgid="5684504058192921098">"కారు మోడ్‌ను ప్రారంభించడం"</string>
     <string name="permdesc_enableCarMode" msgid="4853187425751419467">"కారు మోడ్‌ను ప్రారంభించడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
     <string name="permlab_killBackgroundProcesses" msgid="3914026687420177202">"ఇతర అనువర్తనాలను మూసివేయడం"</string>
     <string name="permdesc_killBackgroundProcesses" msgid="4593353235959733119">"ఇతర అనువర్తనాల నేపథ్య ప్రాసెస్‌లను ముగించడానికి అనువర్తనాన్ని అనుమతిస్తుంది. దీని వలన ఇతర అనువర్తనాలు అమలు కాకుండా ఆపివేయబడవచ్చు."</string>
-    <string name="permlab_forceStopPackages" msgid="2329627428832067700">"ఇతర అనువర్తనాలను నిర్బంధంగా ఆపివేయడం"</string>
-    <string name="permdesc_forceStopPackages" msgid="5253157296183940812">"ఇతర అనువర్తనాలను నిర్బంధంగా ఆపివేయడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
-    <string name="permlab_forceBack" msgid="652935204072584616">"అనువర్తనాన్ని నిర్బంధంగా మూసివేయడం"</string>
-    <string name="permdesc_forceBack" msgid="3892295830419513623">"ముందుభాగంలోనే మూసివేయాల్సిన మరియు వెనుకకు వెళ్లాల్సిన ఏదైనా కార్యాచరణను నిర్భందించడానికి అనువర్తనాన్ని అనుమతిస్తుంది. సాధారణ అనువర్తనాలకు ఎప్పటికీ అవసరం ఉండదు."</string>
-    <string name="permlab_dump" msgid="1681799862438954752">"సిస్టమ్ అంతర్గత స్థితిని తిరిగి పొందడం"</string>
-    <string name="permdesc_dump" msgid="1778299088692290329">"సిస్టమ్ యొక్క అంతర్గత స్థితిని తిరిగి పొందడానికి అనువర్తనాన్ని అనుమతిస్తుంది. హానికరమైన అనువర్తనాలు పలు రకాల ప్రైవేట్ మరియు సురక్షిత సమాచారాన్ని తిరిగి పొందవచ్చు, వాటికి సాధారణంగా ఎప్పటికీ అవసరం ఉండదు."</string>
-    <string name="permlab_retrieve_window_content" msgid="8022588608994589938">"స్క్రీన్ కంటెంట్‌ను మరలా పొందడం"</string>
-    <string name="permdesc_retrieve_window_content" msgid="3193269069469700265">"సక్రియ విండో యొక్క కంటెంట్‌ను తిరిగి పొందడానికి అనువర్తనాన్ని అనుమతిస్తుంది. హానికరమైన అనువర్తనాలు పూర్తి విండో యొక్క కంటెంట్‌ను తిరిగి పొందవచ్చు మరియు దాని పాస్‌వర్డ్‌లు మినహా మొత్తం వచనాన్ని పరీక్షించవచ్చు."</string>
-    <string name="permlab_temporary_enable_accessibility" msgid="2312612135127310254">"ప్రాప్యత సామర్థ్యాన్ని తాత్కాలికంగా ప్రారంభించడం"</string>
-    <string name="permdesc_temporary_enable_accessibility" msgid="8079456293182975464">"పరికరంలో ప్రాప్యత సౌలభ్యాన్ని తాత్కాలికంగా ప్రారంభించడానికి అనువర్తనాన్ని అనుమతిస్తుంది. హానికరమైన అనువర్తనాలు వినియోగదారు సమ్మతి లేకుండానే ప్రాప్యతను ప్రారంభించవచ్చు."</string>
-    <string name="permlab_retrieveWindowToken" msgid="7154762602367758602">"విండో టోకెన్‌ను పునరుద్ధరించడం"</string>
-    <string name="permdesc_retrieveWindowToken" msgid="668173747687795074">"విండో టోకెన్‌ను తిరిగి పొందడానికి అనువర్తనాన్ని అనుమతిస్తుంది. హానికరమైన అనువర్తనాలు సిస్టమ్ వలె వ్యవహరించి అనువర్తన విండోతో అనధికార పరస్పర చర్యను అమలు చేయవచ్చు."</string>
-    <string name="permlab_frameStats" msgid="7056374987314361639">"ఫ్రేమ్ గణాంకాలను పునరుద్ధరించడం"</string>
-    <string name="permdesc_frameStats" msgid="4758001089491284919">"ఫ్రేమ్ గణాంకాలను సేకరించడానికి అనువర్తనాన్ని అనుమతిస్తుంది. ఇతర అనువర్తనాల నుండి విండోల యొక్క ఫ్రేమ్ గణాంకాలను హానికరమైన అనువర్తనాలు పరిశీలించవచ్చు."</string>
-    <string name="permlab_filter_events" msgid="8675535648807427389">"ఈవెంట్‌లను ఫిల్టర్ చేయడం"</string>
-    <string name="permdesc_filter_events" msgid="8006236315888347680">"అన్ని వినియోగదారు ఈవెంట్‌ల స్ట్రీమ్‌ను పంపడానికి ముందు ఫిల్టర్ చేసే ఇన్‌పుట్ ఫిల్టర్‌ను నమోదు చేయడానికి అనువర్తనాన్ని అనుమతిస్తుంది. హానికరమైన అనువర్తనం వినియోగదారు ప్రమేయం లేకుండానే సిస్టమ్ UIని నియంత్రించవచ్చు."</string>
-    <string name="permlab_shutdown" msgid="7185747824038909016">"పాక్షిక షట్‌డౌన్"</string>
-    <string name="permdesc_shutdown" msgid="7046500838746291775">"కార్యాచరణ నిర్వాహికిని షట్‌డౌన్ స్థితిలో ఉంచుతుంది. సంపూర్ణ షట్‌డౌన్ అమలు చేయబడదు."</string>
-    <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"అనువర్తన మార్పులను నిరోధించడం"</string>
-    <string name="permdesc_stopAppSwitches" msgid="8262195802582255021">"మరో అనువర్తనానికి మార్చకుండా వినియోగదారుని నిరోధిస్తుంది."</string>
-    <string name="permlab_getTopActivityInfo" msgid="2537922311411546016">"ప్రస్తుత అనువర్తన సమాచారాన్ని పొందడం"</string>
-    <string name="permdesc_getTopActivityInfo" msgid="2512448855496067131">"స్క్రీన్ ముందు భాగంలో ప్రస్తుత అనువర్తనానికి సంబంధించిన ప్రైవేట్ సమాచారాన్ని మరలా పొందడానికి హోల్డర్‌ను అనుమతిస్తుంది."</string>
-    <string name="permlab_runSetActivityWatcher" msgid="892239094867182656">"మొత్తం అనువర్తన ప్రారంభాన్ని పర్యవేక్షించడం మరియు నియంత్రించడం"</string>
-    <string name="permdesc_runSetActivityWatcher" msgid="6003603162578577406">"సిస్టమ్ కార్యాచరణలను ఎలా ప్రారంభిస్తుందనేదాన్ని పర్యవేక్షించడానికి మరియు నియంత్రించడానికి అనువర్తనాన్ని అనుమతిస్తుంది. హానికరమైన అనువర్తనాలు సిస్టమ్‌తో పూర్తిగా రాజీ పడవచ్చు. ఈ అనుమతి అభివృద్ధి కోసం మాత్రమే అసవరం, ఎప్పటికీ సాధారణ ఉపయోగానికి కాదు."</string>
-    <string name="permlab_broadcastPackageRemoved" msgid="2576333434893532475">"ప్యాకేజీ తీసివేయబడిన ప్రసారాన్ని పంపడం"</string>
-    <string name="permdesc_broadcastPackageRemoved" msgid="6621901216207931089">"అనువర్తన ప్యాకేజీ తీసివేయబడిన నోటిఫికేషన్‌ను ప్రసారం చేయడానికి అనువర్తనాన్ని అనుమతిస్తుంది. ఏదైనా ఇతర అమలవుతున్న అనువర్తనాన్ని నాశనం చేయడానికి హానికరమైన అనువర్తనాలు దీన్ని ఉపయోగించవచ్చు."</string>
-    <string name="permlab_broadcastSmsReceived" msgid="5689095009030336593">"SMS ద్వారా స్వీకరించిన ప్రసారాన్ని పంపడం"</string>
-    <string name="permdesc_broadcastSmsReceived" msgid="4152037720034365492">"SMS సందేశం స్వీకరించబడిన నోటిఫికేషన్‌ను ప్రసారం చేయడానికి అనువర్తనాన్ని అనుమతిస్తుంది. ఇన్‌కమింగ్ SMS సందేశాలను నకిలీ చేయడానికి హానికరమైన అనువర్తనాలు దీన్ని ఉపయోగించవచ్చు."</string>
-    <string name="permlab_broadcastWapPush" msgid="3145347413028582371">"WAP-PUSH ద్వారా స్వీకరించిన ప్రసారాన్ని పంపడం"</string>
-    <string name="permdesc_broadcastWapPush" msgid="4783402525039442729">"WAP PUSH సందేశం స్వీకరించబడిన నోటిఫికేషన్‌ను ప్రసారం చేయడానికి అనువర్తనాన్ని అనుమతిస్తుంది. MMS సందేశం రసీదుని నకిలీ చేయడానికి లేదా హానికరమైన రకాలతో ఏదైనా వెబ్‌పేజీ యొక్క కంటెంట్‌ను నిశ్శబ్దంగా భర్తీ చేయడానికి హానికరమైన అనువర్తనాలు దీన్ని ఉపయోగించవచ్చు."</string>
-    <string name="permlab_setProcessLimit" msgid="2451873664363662666">"అమలవుతున్న ప్రక్రియల సంఖ్యను పరిమితం చేయడం"</string>
-    <string name="permdesc_setProcessLimit" msgid="7318061314040879542">"అమలు చేసే ప్రాసెస్‌ల యొక్క గరిష్ట సంఖ్యను నియంత్రించడానికి అనువర్తనాన్ని అనుమతిస్తుంది. సాధారణ అనువర్తనాలు ఎప్పటికీ అవసరం ఉండదు."</string>
-    <string name="permlab_setAlwaysFinish" msgid="550958507798796965">"నేపథ్య అనువర్తనాలు మూసివేయబడేలా నిర్బంధించడం"</string>
-    <string name="permdesc_setAlwaysFinish" msgid="7471310652868841499">"కార్యాచరణలు ఎల్లవేళలా నేపథ్యానికి వెళ్లిన వెంటనే ముగియాలా లేదా అనేదాన్ని నియంత్రించడానికి అనువర్తనాన్ని అనుమతిస్తుంది. సాధారణ అనువర్తనాలకు ఎప్పటికీ అవసరం ఉండదు."</string>
-    <string name="permlab_batteryStats" msgid="2789610673514103364">"బ్యాటరీ గణాంకాలను చదవడం"</string>
-    <string name="permdesc_batteryStats" msgid="5897346582882915114">"ప్రస్తుత అల్ప-స్థాయి బ్యాటరీ వినియోగ డేటాను చదవడానికి అనువర్తనాన్ని అనుమతిస్తుంది. మీరు ఎటువంటి అనువర్తనాలను ఉపయోగిస్తారనే దాని గురించి వివరణాత్మక సమాచారాన్ని కనుగొనడానికి అనువర్తనం అనుమతించబడవచ్చు."</string>
-    <string name="permlab_updateBatteryStats" msgid="3719689764536379557">"బ్యాటరీ గణాంకాలను సవరించడం"</string>
-    <string name="permdesc_updateBatteryStats" msgid="6862817857178025002">"సేకరించిన బ్యాటరీ గణాంకాలను సవరించడానికి అనువర్తనాన్ని అనుమతిస్తుంది. సాధారణ అనువర్తనాల ద్వారా ఉపయోగించడానికి ఉద్దేశించినది కాదు."</string>
-    <string name="permlab_getAppOpsStats" msgid="1508779687436585744">"అనువర్తన కార్యాచరణ గణాంకాలను మరలా పొందడం"</string>
-    <string name="permdesc_getAppOpsStats" msgid="6243887041577912877">"సేకరించిన అనువర్తన కార్యాచరణ గణాంకాలను మరలా పొందడానికి అనువర్తనాన్ని అనుమతిస్తుంది. సాధారణ అనువర్తనాల ద్వారా ఉపయోగించడానికి కాదు."</string>
-    <string name="permlab_updateAppOpsStats" msgid="8829097373851521505">"అనువర్తన కార్యాచరణ గణాంకాలను సవరించడం"</string>
-    <string name="permdesc_updateAppOpsStats" msgid="50784596594403483">"సేకరించిన అనువర్తన కార్యాచరణ గణాంకాలను సవరించడానికి అనువర్తనాన్ని అనుమతిస్తుంది. సాధారణ అనువర్తనాల ద్వారా ఉపయోగించడానికి కాదు."</string>
-    <string name="permlab_backup" msgid="470013022865453920">"సిస్టమ్ బ్యాకప్ మరియు పునరుద్ధరణను నియంత్రించడం"</string>
-    <string name="permdesc_backup" msgid="6912230525140589891">"సిస్టమ్ బ్యాకప్ మరియు పునరుద్ధరణ విధానాన్ని నియంత్రించడానికి అనువర్తనాన్ని అనుమతిస్తుంది. సాధారణ అనువర్తనాల ద్వారా ఉపయోగించడానికి ఉద్దేశించినది కాదు."</string>
-    <string name="permlab_confirm_full_backup" msgid="5557071325804469102">"పూర్తి బ్యాకప్ లేదా పునరుద్ధరణ చర్యను నిర్ధారించడం"</string>
-    <string name="permdesc_confirm_full_backup" msgid="1748762171637699562">"పూర్తి బ్యాకప్ నిర్ధారణ UIని ప్రారంభించడానికి అనువర్తనాన్ని అనుమతిస్తుంది. ఏదైనా అనువర్తనం ద్వారా ఉపయోగించకూడదు."</string>
-    <string name="permlab_internalSystemWindow" msgid="2148563628140193231">"ప్రామాణీకరించబడని విండోలను ప్రదర్శించడం"</string>
-    <string name="permdesc_internalSystemWindow" msgid="7458387759461466397">"అంతర్గత సిస్టమ్ వినియోగదారు ఇంటర్‌ఫేస్ ద్వారా ఉపయోగించడానికి ఉద్దేశించిన విండోలను సృష్టించడానికి అనువర్తనాన్ని అనుమతిస్తుంది. సాధారణ అనువర్తనాల ద్వారా ఉపయోగించడానికి ఉద్దేశించినది కాదు."</string>
     <string name="permlab_systemAlertWindow" msgid="3543347980839518613">"ఇతర అనువర్తనాలపై గీయడం"</string>
     <string name="permdesc_systemAlertWindow" msgid="8584678381972820118">"ఇతర అనువర్తనాల పైభాగాన లేదా వినియోగదారు ఇంటర్‌ఫేస్ యొక్క భాగాలపైన గీయడానికి అనువర్తనాన్ని అనుమతిస్తుంది. ఇవి ఏదైనా అనువర్తనంలో మీ ఇంటర్‌ఫేస్ వినియోగానికి అంతరాయం కలిగించవచ్చు లేదా ఇతర అనువర్తనాల్లో మీరు చూస్తున్నారని భావించేవాటిని మార్చవచ్చు."</string>
-    <string name="permlab_setAnimationScale" msgid="2805103241153907174">"గ్లోబల్ యానిమేషన్ వేగాన్ని సవరించడం"</string>
-    <string name="permdesc_setAnimationScale" msgid="7690063428924343571">"గ్లోబల్ యానిమేషన్ వేగాన్ని (వేగవంతమైన లేదా నెమ్మదైన యానిమేషన్‌లు) ఎప్పుడైనా మార్చడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
-    <string name="permlab_manageAppTokens" msgid="1286505717050121370">"అనువర్తన టోకెన్‌లను నిర్వహించడం"</string>
-    <string name="permdesc_manageAppTokens" msgid="8043431713014395671">"టోకెన్‌ల సాధారణ Z-క్రమాన్ని దాటవేస్తూ అనువర్తనం స్వంత టోకెన్‌లను సృష్టించడానికి మరియు నిర్వహించడానికి దాన్ని అనుమతిస్తుంది. సాధారణ అనువర్తనాలకు ఎప్పటికీ అవసరం ఉండదు."</string>
-    <string name="permlab_freezeScreen" msgid="4708181184441880175">"స్క్రీన్‌ను స్తంభింపజేయడం"</string>
-    <string name="permdesc_freezeScreen" msgid="8558923789222670064">"పూర్తి-స్క్రీన్ పరివర్తనం కోసం స్క్రీన్‌ను తాత్కాలికంగా స్తంభింపజేయడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
-    <string name="permlab_injectEvents" msgid="1378746584023586600">"కీలు మరియు నియంత్రణ బటన్‌లను నొక్కడం"</string>
-    <string name="permdesc_injectEvents" product="tablet" msgid="206352565599968632">"ఇతర అప్లికేషన్‌లకు అప్లికేషన్ యొక్క స్వంత ఇన్‌పుట్ ఈవెంట్‌లను (కీని నొక్కడం, మొదలైనవి) బట్వాడా చేయడానికి దాన్ని అనుమతిస్తుంది. టాబ్లెట్‌ను స్వాధీనం చేసుకోవడానికి హానికరమైన అనువర్తనాలు దీన్ని ఉపయోగించవచ్చు."</string>
-    <string name="permdesc_injectEvents" product="tv" msgid="4681361983270791611">"అనువర్తనం తన స్వంత ఇన్‌పుట్ ఈవెంట్‌లను (కీని నొక్కడాలు మొదలైనవి) ఇతర అనువర్తనాలకు బట్వాడా చేయడానికి దాన్ని అనుమతిస్తుంది. హానికరమైన అనువర్తనాలు టీవీపై నియంత్రణను పొందడానికి దీన్ని ఉపయోగించవచ్చు."</string>
-    <string name="permdesc_injectEvents" product="default" msgid="653128057572326253">"ఇతర అప్లికేషన్‌లకు అప్లికేషన్ యొక్క స్వంత ఇన్‌పుట్ ఈవెంట్‌లను (కీని నొక్కడం, మొదలైనవి) బట్వాడా చేయడానికి దాన్ని అనుమతిస్తుంది. ఫోన్‌ను స్వాధీనం చేసుకోవడానికి హానికరమైన అనువర్తనాలు దీన్ని ఉపయోగించవచ్చు."</string>
-    <string name="permlab_readInputState" msgid="469428900041249234">"మీరు టైప్ చేసేదాన్ని మరియు మీరు తీసుకునే చర్యలను రికార్డ్ చేయడం"</string>
-    <string name="permdesc_readInputState" msgid="8387754901688728043">"మరో అనువర్తనంతో పరస్పర చర్య చేస్తున్నప్పటికీ (పాస్‌వర్డ్‌ను టైప్ చేయడం వంటివి) మీరు నొక్కే కీను చూడటానికి అనువర్తనాన్ని అనుమతిస్తుంది. సాధారణ అనువర్తనాలకు ఎప్పటికీ అవసరం ఉండదు."</string>
-    <string name="permlab_bindInputMethod" msgid="3360064620230515776">"ఇన్‌పుట్ పద్ధతికి అనుబంధించడం"</string>
-    <string name="permdesc_bindInputMethod" msgid="3250440322807286331">"ఇన్‌పుట్ పద్ధతి యొక్క అగ్ర-స్థాయి ఇంటర్‌ఫేస్‌కు అనుబంధించడానికి హోల్డర్‌ను అనుమతిస్తుంది. సాధారణ అనువర్తనాలకు ఎప్పటికీ అవసరం ఉండదు."</string>
-    <string name="permlab_bindAccessibilityService" msgid="5357733942556031593">"ప్రాప్యత సామర్థ్య సేవకు అనుబంధించడం"</string>
-    <string name="permdesc_bindAccessibilityService" msgid="7034615928609331368">"ప్రాప్యత సేవ యొక్క అగ్ర-స్థాయి ఇంటర్‌ఫేస్‌కు అనుబంధించడానికి హోల్డర్‌ను అనుమతిస్తుంది. సాధారణ అనువర్తనాలకు ఎప్పటికీ అవసరం ఉండదు."</string>
-    <string name="permlab_bindPrintService" msgid="8462815179572748761">"ముద్రణ సేవకు అనుబంధించడం"</string>
-    <string name="permdesc_bindPrintService" msgid="7960067623209111135">"ముద్రణ యొక్క అగ్ర-స్థాయి ఇంటర్‌ఫేస్‌కు అనుబంధించడానికి హోల్డర్‌ను అనుమతిస్తుంది. సాధారణ అనువర్తనాల కోసం ఎప్పటికీ అవసరం ఉండకూడదు."</string>
-    <string name="permlab_bindPrintSpoolerService" msgid="6807762783744125954">"ముద్రణ స్పూలర్ సేవకు అనుబంధించడం"</string>
-    <string name="permdesc_bindPrintSpoolerService" msgid="3680552285933318372">"ముద్రణ స్పూలర్ సేవ యొక్క అగ్ర-స్థాయి ఇంటర్‌ఫేస్‌కు అనుబంధించడానికి హోల్డర్‌ను అనుమతిస్తుంది. సాధారణ అనువర్తనాల కోసం ఎప్పటికీ అవసరం ఉండకూడదు."</string>
-    <string name="permlab_bindNfcService" msgid="2752731300419410724">"NFC సేవకు అనుబంధించడం"</string>
-    <string name="permdesc_bindNfcService" msgid="6120647629174066862">"NFC కార్డ్‌లను అనుకరించే అనువర్తనాలకు అనుబంధించడానికి హోల్డర్‌ను అనుమతిస్తుంది. సాధారణ అనువర్తనాల కోసం ఎప్పటికీ అవసరం ఉండకూడదు."</string>
-    <string name="permlab_bindTextService" msgid="7358378401915287938">"వచన సేవకు అనుబంధించడం"</string>
-    <string name="permdesc_bindTextService" msgid="8151968910973998670">"వచన సేవ(ఉదా. అక్షరక్రమతనిఖీసేవ) యొక్క అగ్ర-స్థాయి ఇంటర్‌ఫేస్‌కు అనుబంధించడానికి హోల్డర్‌ను అనుమతిస్తుంది. సాధారణ అనువర్తనాలకు ఎప్పటికీ అవసరం ఉండదు."</string>
-    <string name="permlab_bindVpnService" msgid="4708596021161473255">"VPN సేవకు అనుబంధించడం"</string>
-    <string name="permdesc_bindVpnService" msgid="2067845564581693905">"Vpn సేవ యొక్క అగ్ర-స్థాయి ఇంటర్‌ఫేస్‌కు అనుబంధించడానికి హోల్డర్‌ను అనుమతిస్తుంది. సాధారణ అనువర్తనాలకు ఎప్పటికీ అవసరం ఉండదు."</string>
-    <string name="permlab_bindWallpaper" msgid="8716400279937856462">"వాల్‌పేపర్‌కు అనుబంధించడం"</string>
-    <string name="permdesc_bindWallpaper" msgid="7108428692595491668">"వాల్‌పేపర్ యొక్క అగ్ర-స్థాయి ఇంటర్‌ఫేస్‌కు అనుబంధించడానికి హోల్డర్‌ను అనుమతిస్తుంది. సాధారణ అనువర్తనాలకు ఎప్పటికీ అవసరం ఉండదు."</string>
-    <string name="permlab_bindVoiceInteraction" msgid="5334852580713715068">"వాయిస్ ఇంటరాక్టర్‌కు అనుబంధించడం"</string>
-    <string name="permdesc_bindVoiceInteraction" msgid="2345721766501778101">"వాయిస్ పారస్పరిక సేవ యొక్క అగ్ర-స్థాయి ఇంటర్‌ఫేస్‌కు అనుబంధించడానికి హోల్డర్‌ను అనుమతిస్తుంది. సాధారణ అనువర్తనాలకు ఎప్పటికీ అవసరం ఉండదు."</string>
-    <string name="permlab_manageVoiceKeyphrases" msgid="1252285102392793548">"వాయిస్ కీలక పదబంధాలను నిర్వహించండి"</string>
-    <string name="permdesc_manageVoiceKeyphrases" msgid="8476560722907530008">"వాయిస్ హాట్‌వర్డ్ గుర్తింపు కోసం కీలక పదబంధాలను నిర్వహించడానికి హోల్డర్‌ను అనుమతిస్తుంది. సాధారణ అనువర్తనాలకు ఎప్పటికీ అవసరం ఉండదు."</string>
-    <string name="permlab_bindRemoteDisplay" msgid="1782923938029941960">"రిమోట్ డిస్‌ప్లేకు అనుబంధించడం"</string>
-    <string name="permdesc_bindRemoteDisplay" msgid="1261242718727295981">"రిమోట్ డిస్‌ప్లే యొక్క అగ్ర-స్థాయి ఇంటర్‌ఫేస్‌కు అనుబంధించడానికి హోల్డర్‌ను అనుమతిస్తుంది. సాధారణ అనువర్తనాల కోసం ఎప్పటికీ అవసరం ఉండకూడదు."</string>
-    <string name="permlab_bindRemoteViews" msgid="5697987759897367099">"విడ్జెట్ సేవకు అనుబంధించడం"</string>
-    <string name="permdesc_bindRemoteViews" msgid="4717987810137692572">"విడ్జెట్ సేవ యొక్క అగ్ర-స్థాయి ఇంటర్‌ఫేస్‌కు అనుబంధించడానికి హోల్డర్‌ను అనుమతిస్తుంది. సాధారణ అనువర్తనాలకు ఎప్పటికీ అవసరం ఉండదు."</string>
-    <string name="permlab_bindRouteProvider" msgid="4869394607915096847">"మార్గ ప్రదాత సేవకు అనుబంధించడం"</string>
-    <string name="permdesc_bindRouteProvider" msgid="4703804520859960329">"నమోదిత మార్గ ప్రదాతల్లో వేటికైనా అనుబంధించడానికి హోల్డర్‌ను అనుమతిస్తుంది. సాధారణ అనువర్తనాలకు ఎప్పటికీ అవసరం ఉండదు."</string>
-    <string name="permlab_bindDeviceAdmin" msgid="8704986163711455010">"పరికర నిర్వాహికితో పరస్పర చర్య చేయడం"</string>
-    <string name="permdesc_bindDeviceAdmin" msgid="569715419543907930">"పరికర నిర్వాహకుడికి లక్ష్యాలను పంపడానికి హోల్డర్‌ను అనుమతిస్తుంది. సాధారణ అనువర్తనాలకు ఎప్పటికీ అవసరం ఉండదు."</string>
-    <string name="permlab_bindTvInput" msgid="5601264742478168987">"టీవీ ఇన్‌పుట్‌కి అనుబంధించడం"</string>
-    <string name="permdesc_bindTvInput" msgid="2371008331852001924">"టీవీ ఇన్‌పుట్ యొక్క అగ్ర-స్థాయి ఇంటర్‌ఫేస్‌కు అనుబంధించడానికి హోల్డర్‌ను అనుమతిస్తుంది. సాధారణ అనువర్తనాలకు ఎప్పటికీ అవసరం ఉండదు."</string>
-    <string name="permlab_modifyParentalControls" msgid="4611318225997592242">"తల్లిదండ్రుల నియంత్రణలను సవరించడం"</string>
-    <string name="permdesc_modifyParentalControls" msgid="7438482894162282039">"సిస్టమ్ యొక్క తల్లిదండ్రుల నియంత్రణ డేటాను సవరించడానికి హోల్డర్‌ను అనుమతిస్తుంది. సాధారణ అనువర్తనాలకు ఎప్పటికీ అవసరం ఉండదు."</string>
-    <string name="permlab_manageDeviceAdmins" msgid="4248828900045808722">"పరికర నిర్వాహకుడిని జోడించడం లేదా తీసివేయడం"</string>
-    <string name="permdesc_manageDeviceAdmins" msgid="5025608167709942485">"సక్రియ పరికర నిర్వాహకులను జోడించడానికి లేదా తీసివేయడానికి హోల్డర్‌ను అనుమతిస్తుంది. సాధారణ అనువర్తనాల కోసం ఎప్పటికీ అవసరం ఉండకూడదు."</string>
-    <string name="permlab_setOrientation" msgid="3365947717163866844">"స్క్రీన్ ధృగ్విన్యాసాన్ని మార్చడం"</string>
-    <string name="permdesc_setOrientation" msgid="3046126619316671476">"స్క్రీన్ భ్రమణాన్ని ఎప్పుడైనా మార్చడానికి అనువర్తనాన్ని అనుమతిస్తుంది. సాధారణ అనువర్తనాలకు ఎప్పటికీ అవసరం ఉండదు."</string>
-    <string name="permlab_setPointerSpeed" msgid="9175371613322562934">"పాయింటర్ వేగాన్ని మార్చడం"</string>
-    <string name="permdesc_setPointerSpeed" msgid="6866563234274104233">"మౌస్ లేదా ట్రాక్‌ప్యాడ్ పాయింటర్ వేగాన్ని ఎప్పుడైనా మార్చడానికి అనువర్తనాన్ని అనుమతిస్తుంది. సాధారణ అనువర్తనాలకు ఎప్పటికీ అవసరం ఉండదు."</string>
-    <string name="permlab_setKeyboardLayout" msgid="4778731703600909340">"కీబోర్డ్ లేఅవుట్‌ను మార్చడం"</string>
-    <string name="permdesc_setKeyboardLayout" msgid="8480016771134175879">"కీబోర్డ్ లేఅవుట్‌ను మార్చడానికి అనువర్తనాన్ని అనుమతిస్తుంది. సాధారణ అనువర్తనాలకు ఎప్పటికీ అవసరం ఉండకూడదు."</string>
-    <string name="permlab_signalPersistentProcesses" msgid="4539002991947376659">"Linux సిగ్నల్‌లను అనువర్తనాలకు పంపడం"</string>
-    <string name="permdesc_signalPersistentProcesses" msgid="4896992079182649141">"అన్ని నిరంతర ప్రాసెస్‌లకు సరఫరా సిగ్నల్‌ను పంపాలని అభ్యర్థించడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
     <string name="permlab_persistentActivity" msgid="8841113627955563938">"అనువర్తనాన్ని ఎల్లప్పుడూ అమలు చేయడం"</string>
     <string name="permdesc_persistentActivity" product="tablet" msgid="8525189272329086137">"అనువర్తనం, దాని భాగాలు మెమరీలో ఉండేలా చేయడానికి దానిని అనుమతిస్తుంది. ఇది ఇతర అనువర్తనాలకు అందుబాటులో ఉన్న మెమరీని ఆక్రమిస్తుంది, టాబ్లెట్ నెమ్మదిగా పని చేస్తుంది."</string>
     <string name="permdesc_persistentActivity" product="tv" msgid="5086862529499103587">"అనువర్తనం దానిలోని కొన్ని భాగాలను మెమరీలో ఉంచడానికి దాన్ని అనుమతిస్తుంది. ఇది టీవీ నెమ్మదిగా పని చేసేలా చేస్తూ ఇతర అనువర్తనాలకు అందుబాటులో ఉన్న మెమరీని పరిమితం చేయవచ్చు."</string>
     <string name="permdesc_persistentActivity" product="default" msgid="4384760047508278272">"అనువర్తనం, దాని భాగాలు మెమరీలో ఉండేలా చేయడానికి దానిని అనుమతిస్తుంది. ఇది ఇతర అనువర్తనాలకు అందుబాటులో ఉన్న మెమరీని ఆక్రమిస్తుంది, ఫోన్ నెమ్మదిగా పని చేస్తుంది."</string>
-    <string name="permlab_deletePackages" msgid="184385129537705938">"అనువర్తనాలను తొలగించడం"</string>
-    <string name="permdesc_deletePackages" msgid="7411480275167205081">"Android ప్యాకేజీలను తొలగించడానికి అనువర్తనాన్ని అనుమతిస్తుంది. ముఖ్యమైన అనువర్తనాలను తొలగించడానికి హానికరమైన అనువర్తనాలు దీన్ని ఉపయోగించవచ్చు."</string>
-    <string name="permlab_clearAppUserData" msgid="274109191845842756">"ఇతర అనువర్తనాల డేటాను తొలగించడం"</string>
-    <string name="permdesc_clearAppUserData" msgid="4625323684125459488">"వినియోగదారు డేటాను క్లియర్ చేయడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
-    <string name="permlab_deleteCacheFiles" msgid="3128665571837408675">"ఇతర అనువర్తనాల కాష్‌లను తొలగించడం"</string>
-    <string name="permdesc_deleteCacheFiles" msgid="3812998599006730196">"కాష్ ఫైల్‌లను తొలగించడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
     <string name="permlab_getPackageSize" msgid="7472921768357981986">"అనువర్తన నిల్వ స్థలాన్ని అంచనా వేయడం"</string>
     <string name="permdesc_getPackageSize" msgid="3921068154420738296">"అనువర్తనం కోడ్, డేటా మరియు కాష్ పరిమాణాలను తిరిగి పొందడానికి దాన్ని అనుమతిస్తుంది"</string>
-    <string name="permlab_installPackages" msgid="2199128482820306924">"అనువర్తనాలను నేరుగా ఇన్‌స్టాల్ చేయడం"</string>
-    <string name="permdesc_installPackages" msgid="5628530972548071284">"కొత్త లేదా నవీకరించిన Android ప్యాకేజీలను ఇన్‌స్టాల్ చేయడానికి అనువర్తనాన్ని అనుమతిస్తుంది. ఏకపక్ష శక్తివంతమైన అనుమతులతో కొత్త అనువర్తనాలను జోడించడానికి హానికరమైన అనువర్తనాలు దీన్ని ఉపయోగించవచ్చు."</string>
-    <string name="permlab_clearAppCache" msgid="7487279391723526815">"మొత్తం అనువర్తన కాష్ డేటాను తొలగించడం"</string>
-    <string name="permdesc_clearAppCache" product="tablet" msgid="8974640871945434565">"ఇతర అనువర్తనాల యొక్క కాష్ డైరెక్టరీల్లో ఉన్న ఫైల్‌లను తొలగించడం ద్వారా టాబ్లెట్ నిల్వను ఖాళీ చేయడానికి అనువర్తనాన్ని అనుమతిస్తుంది. దీని వలన ఇతర అనువర్తనాలు వాటి డేటాను మళ్లీ పొందాల్సి ఉంటుంది కనుక అవి చాలా నెమ్మదిగా ప్రారంభం కావచ్చు."</string>
-    <string name="permdesc_clearAppCache" product="tv" msgid="244647416303997022">"ఇతర అనువర్తనాల కాష్ డైరెక్టరీల్లో ఉన్న ఫైల్‌లను తొలగించడం ద్వారా టీవీ నిల్వను ఖాళీ చేయడానికి అనువర్తనాన్ని అనుమతిస్తుంది. దీని వలన ఇతర అనువర్తనాలు వాటి డేటాను మళ్లీ పొందాల్సి ఉంటుంది కనుక అవి చాలా నెమ్మదిగా ప్రారంభం కావచ్చు."</string>
-    <string name="permdesc_clearAppCache" product="default" msgid="2459441021956436779">"ఇతర అనువర్తనాల యొక్క కాష్ డైరెక్టరీల్లో ఉన్న ఫైల్‌లను తొలగించడం ద్వారా ఫోన్ నిల్వను ఖాళీ చేయడానికి అనువర్తనాన్ని అనుమతిస్తుంది. దీని వలన ఇతర అనువర్తనాలు వాటి డేటాను మళ్లీ పొందాల్సి ఉంటుంది కనుక అవి చాలా నెమ్మదిగా ప్రారంభం కావచ్చు."</string>
-    <string name="permlab_movePackage" msgid="3289890271645921411">"అనువర్తన వనరులను తరలించడం"</string>
-    <string name="permdesc_movePackage" msgid="319562217778244524">"అనువర్తన వనరులను అంతర్గతం నుండి బాహ్య మీడియాకు తరలించడానికి మరియు అటు నుండి ఇటు తరలించడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
-    <string name="permlab_readLogs" msgid="6615778543198967614">"ముఖ్యమైన లాగ్ డేటాను చదవడం"</string>
-    <string name="permdesc_readLogs" product="tablet" msgid="82061313293455151">"సిస్టమ్ యొక్క విభిన్న లాగ్ ఫైల్‌ల నుండి చదవడానికి అనువర్తనాన్ని అనుమతిస్తుంది. ఇది సంభావ్యంగా వ్యక్తిగత లేదా ప్రైవేట్ సమాచారంతో సహా, మీరు టాబ్లెట్‌తో ఏమి చేస్తున్నారనేదానికి సంబంధించిన సాధారణ సమాచారాన్ని కనుగొనడానికి దీన్ని అనుమతిస్తుంది."</string>
-    <string name="permdesc_readLogs" product="tv" msgid="9023899974809538988">"సిస్టమ్ యొక్క విభిన్న లాగ్ ఫైల్‌ల్లోని సమాచారం చదవడానికి అనువర్తనాన్ని అనుమతిస్తుంది. ఇది సంభావ్యంగా వ్యక్తిగత లేదా ప్రైవేట్ సమాచారంతో సహా, మీరు టీవీతో ఏమి చేస్తున్నారనేదానికి సంబంధించిన సాధారణ సమాచారాన్ని కనుగొనడానికి దీన్ని అనుమతిస్తుంది."</string>
-    <string name="permdesc_readLogs" product="default" msgid="2063438140241560443">"సిస్టమ్ యొక్క విభిన్న లాగ్ ఫైల్‌ల నుండి చదవడానికి అనువర్తనాన్ని అనుమతిస్తుంది. ఇది సంభావ్యంగా వ్యక్తిగత లేదా ప్రైవేట్ సమాచారంతో సహా, మీరు ఫోన్‌తో ఏమి చేస్తున్నారనేదానికి సంబంధించిన సాధారణ సమాచారాన్ని కనుగొనడానికి దీన్ని అనుమతిస్తుంది."</string>
-    <string name="permlab_anyCodecForPlayback" msgid="715805555823881818">"ప్లేబ్యాక్ కోసం ఏదైనా మీడియా డీకోడర్‌ను ఉపయోగించడం"</string>
-    <string name="permdesc_anyCodecForPlayback" msgid="8283912488433189010">"ప్లేబ్యాక్ కోసం డీకోడ్ చేయడానికి ఏదైనా ఇన్‌స్టాల్ చేయబడిన మీడియా డీకోడర్‌ను ఉపయోగించడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
-    <string name="permlab_manageCaCertificates" msgid="1678391896786882014">"విశ్వసనీయ ఆధారాలను నిర్వహించడం"</string>
-    <string name="permdesc_manageCaCertificates" msgid="4015644047196937014">"CA ప్రమాణపత్రాలను విశ్వసనీయ ప్రమాణపత్రాలుగా ఇన్‌స్టాల్ చేయడానికి మరియు అన్ఇన్‌స్టాల్ చేయడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
-    <string name="permlab_bindJobService" msgid="3637568367978271086">"నేపథ్యానికి షెడ్యూల్ చేసిన అనువర్తనం పనిని అమలు చేయండి"</string>
-    <string name="permdesc_bindJobService" msgid="3473288460524119838">"ఈ అనుమతి అనువర్తనాన్ని అభ్యర్థన మేరకు నేపథ్యంలో అమలు చేయడానికి Android సిస్టమ్‌ను అనుమతిస్తుంది."</string>
-    <string name="permlab_diagnostic" msgid="8076743953908000342">"విశ్లేషణ ద్వారా స్వంతమైన వనరులను చదవడం/వ్రాయడం"</string>
-    <string name="permdesc_diagnostic" msgid="6608295692002452283">"విశ్లేషణ సమూహం స్వంతంగా కలిగి ఉన్న వనరుని చదవడానికి మరియు అందులో వ్రాయడానికి అనువర్తనాన్ని అనుమతిస్తుంది; ఉదాహరణకు, /devలోని ఫైల్‌లు. దీని కారణంగా సిస్టమ్ స్థిరత్వం మరియు భద్రత సమర్థవంతంగా ప్రభావితమయ్యే అవకాశం ఉంది. ఇది హార్డ్‌వేర్-నిర్దిష్ట విశ్లేషణల కోసం తయారీదారు లేదా ఆపరేటర్ ద్వారా మాత్రమే ఉపయోగించబడాలి."</string>
-    <string name="permlab_changeComponentState" msgid="6335576775711095931">"అనువర్తన అంశాలను ప్రారంభించడం లేదా నిలిపివేయడం"</string>
-    <string name="permdesc_changeComponentState" product="tablet" msgid="8887435740982237294">"మరో అనువర్తనం యొక్క కీలక భాగాన్ని ప్రారంభించాలా లేదా అనేది మార్చడానికి అనువర్తనాన్ని అనుమతిస్తుంది. హానికరమైన అనువర్తనాలు ముఖ్యమైన టాబ్లెట్ సామర్థ్యాలను నిలిపివేయడానికి దీన్ని ఉపయోగించవచ్చు. అనువర్తనం యొక్క కీలక భాగాలు నిరుపయోగమైన, ఇమడలేని లేదా అస్థిరమైన స్థితిలోకి వెళ్లే అవకాశం ఉన్నందున తప్పనిసరిగా ఈ అనుమతితో పాటుగా కేర్‌ను ఉపయోగించాలి."</string>
-    <string name="permdesc_changeComponentState" product="tv" msgid="9151634188264231389">"మరొక అనువర్తనం అంతర్భాగాన్ని ప్రారంభించాలా లేదా అనేదాన్ని మార్చడానికి అనువర్తనాన్ని అనుమతిస్తుంది. హానికరమైన అనువర్తనాలు ముఖ్యమైన టీవీ సామర్థ్యాలను నిలిపివేయడానికి దీన్ని ఉపయోగించవచ్చు. అనువర్తనం అంతర్భాగాలు నిరుపయోగమైన, ఇమడలేని లేదా అస్థిరమైన స్థితిలోకి వెళ్లే అవకాశం ఉన్నందున ఈ అనుమతిని చాలా జాగ్రత్తగా ఉపయోగించాలి."</string>
-    <string name="permdesc_changeComponentState" product="default" msgid="1827232484416505615">"మరో అనువర్తనం యొక్క కీలక భాగాన్ని ప్రారంభించాలా లేదా అనేది మార్చడానికి అనువర్తనాన్ని అనుమతిస్తుంది. హానికరమైన అనువర్తనాలు ముఖ్యమైన ఫోన్ సామర్థ్యాలను నిలిపివేయడానికి దీన్ని ఉపయోగించవచ్చు. అనువర్తనం యొక్క కీలక భాగాలు నిరుపయోగమైన, ఇమడలేని లేదా అస్థిరమైన స్థితిలోకి వెళ్లే అవకాశం ఉన్నందున తప్పనిసరిగా ఈ అనుమతితో పాటుగా కేర్‌ను ఉపయోగించాలి."</string>
-    <string name="permlab_grantRevokePermissions" msgid="4627315351093508795">"అనుమతులను మంజూరు చేయడం లేదా ఉపసంహరించడం"</string>
-    <string name="permdesc_grantRevokePermissions" msgid="4088642654085850662">"దీని కోసం లేదా ఇతర అనువర్తనాల కోసం నిర్దిష్ట అనుమతులను మంజూరు చేయడానికి లేదా ఉపసంహరించడానికి అనువర్తనాన్ని అనుమతిస్తుంది. హానికరమైన అనువర్తనాలు మీరు ప్రాప్యత చేయడానికి అనుమతి ఇవ్వని లక్షణాలను ప్రాప్యత చేయడానికి దీన్ని ఉపయోగించవచ్చు."</string>
-    <string name="permlab_setPreferredApplications" msgid="8463181628695396391">"ప్రాధాన్య అనువర్తనాలను సెట్ చేయడం"</string>
-    <string name="permdesc_setPreferredApplications" msgid="4973986762241783712">"మీ ప్రాధాన్య అనువర్తనాలను సవరించడానికి అనువర్తనాన్ని అనుమతిస్తుంది. హానికరమైన అనువర్తనాలు అమలయ్యే అనువర్తనాలను నిశ్శబ్దంగా మార్చవచ్చు, మీ నుండి ప్రైవేట్ డేటాను సేకరించడానికి మీ ప్రస్తుత అనువర్తనాలను నకిలీ చేసి మోసగించవచ్చు."</string>
     <string name="permlab_writeSettings" msgid="2226195290955224730">"సిస్టమ్ సెట్టింగ్‌లను సవరించడం"</string>
     <string name="permdesc_writeSettings" msgid="7775723441558907181">"సిస్టమ్ యొక్క సెట్టింగ్‌ల డేటాను సవరించడానికి అనువర్తనాన్ని అనుమతిస్తుంది. హానికరమైన అనువర్తనాలు మీ సిస్టమ్ యొక్క కాన్ఫిగరేషన్‌ను నాశనం చేయవచ్చు."</string>
-    <string name="permlab_writeSecureSettings" msgid="204676251876718288">"సురక్షిత సిస్టమ్ సెట్టింగ్‌లను సవరించడం"</string>
-    <string name="permdesc_writeSecureSettings" msgid="8159535613020137391">"సిస్టమ్ యొక్క భద్రతా సెట్టింగ్‌ల డేటాను సవరించడానికి అనువర్తనాన్ని అనుమతిస్తుంది. సాధారణ అనువర్తనాల ద్వారా ఉపయోగించడానికి ఉద్దేశించినది కాదు."</string>
-    <string name="permlab_writeGservices" msgid="2149426664226152185">"Google సేవల మ్యాప్‌ను సవరించడం"</string>
-    <string name="permdesc_writeGservices" msgid="1287309437638380229">"Google సేవల మ్యాప్‌ను సవరించడానికి అనువర్తనాన్ని అనుమతిస్తుంది. సాధారణ అనువర్తనాల ద్వారా ఉపయోగించడానికి ఉద్దేశించినది కాదు."</string>
     <string name="permlab_receiveBootCompleted" msgid="5312965565987800025">"ప్రారంభంలో అమలు చేయడం"</string>
     <string name="permdesc_receiveBootCompleted" product="tablet" msgid="7390304664116880704">"సిస్టమ్ బూటింగ్‌ను పూర్తి చేసిన వెంటనే దానికదే ప్రారంభించబడటానికి అనువర్తనాన్ని అనుమతిస్తుంది. ఇది టాబ్లెట్‌ను ప్రారంభించడానికి ఎక్కువ సమయం పట్టేలా చేయవచ్చు మరియు ఎల్లప్పుడూ అమలు చేయడం ద్వారా మొత్తం టాబ్లెట్‌ను నెమ్మదిగా పని చేయడానికి అనువర్తనాన్ని అనుమతించేలా చేయవచ్చు."</string>
     <string name="permdesc_receiveBootCompleted" product="tv" msgid="4525890122209673621">"సిస్టమ్ బూటింగ్‌ను పూర్తి చేసిన వెంటనే అనువర్తనం దానికదే ప్రారంభం కావడానికి అనుమతిస్తుంది. ఇది టీవీ ప్రారంభం కావడానికి ఎక్కువ సమయం పట్టేలా చేయవచ్చు మరియు ఎల్లప్పుడూ అమలు కావడం ద్వారా మొత్తం టాబ్లెట్ పనితీరును నెమ్మది చేయడానికి అనువర్తనాన్ని అనుమతించవచ్చు."</string>
@@ -551,36 +355,10 @@
     <string name="permdesc_accessMockLocation" msgid="5808711039482051824">"పరీక్షించడం కోసం అనుకృత స్థాన మూలాలను సృష్టించండి లేదా కొత్త స్థాన ప్రదాతను ఇన్‌స్టాల్ చేయండి. ఇది GPS లేదా స్థాన ప్రదాతల వంటి ఇతర స్థాన మూలాల ద్వారా అందించబడిన స్థానం మరియు/లేదా స్థితిని భర్తీ చేయడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"అదనపు స్థాన ప్రదాత ఆదేశాలను ప్రాప్యత చేయడం"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"అదనపు స్థాన ప్రదాత ఆదేశాలను ప్రాప్యత చేయడానికి అనువర్తనాన్ని అనుమతిస్తుంది. ఇది GPS లేదా ఇతర స్థాన మూలాల నిర్వహణలో అనువర్తనం ప్రమేయం ఉండేలా అనుమతించవచ్చు."</string>
-    <string name="permlab_installLocationProvider" msgid="6578101199825193873">"స్థాన ప్రదాతను ఇన్‌స్టాల్ చేయడానికి అనుమతించడం"</string>
-    <string name="permdesc_installLocationProvider" msgid="9066146120470591509">"పరీక్షించడం కోసం అనుకృత స్థాన మూలాలను సృష్టించండి లేదా కొత్త స్థాన ప్రదాతను ఇన్‌స్టాల్ చేయండి. ఇది GPS లేదా స్థాన ప్రదాతల వంటి ఇతర స్థాన మూలాల ద్వారా అందించబడిన స్థానం మరియు/లేదా స్థితిని భర్తీ చేయడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
     <string name="permlab_accessFineLocation" msgid="1191898061965273372">"ఖచ్చితమైన స్థానం (GPS మరియు నెట్‌వర్క్-ఆధారితం)"</string>
     <string name="permdesc_accessFineLocation" msgid="5295047563564981250">"గ్లోబల్ పొజిషనింగ్ సిస్టమ్ (GPS) లేదా సెల్ టవర్‌లు మరియు Wi-Fi వంటి నెట్‌వర్క్ స్థాన మూలాలను ఉపయోగించి మీ ఖచ్చితమైన స్థానాన్ని పొందడానికి అనువర్తనాన్ని అనుమతిస్తుంది. ఈ స్థాన సేవలను అనువర్తనం ఉపయోగించడానికి తప్పనిసరిగా ప్రారంభించబడి ఉండాలి మరియు మీ పరికరానికి అందుబాటులో ఉండాలి. అనువర్తనాలు మీరు ఉన్న ప్రాంతాన్ని కనుగొనడానికి దీన్ని ఉపయోగించవచ్చు మరియు అదనపు బ్యాటరీ శక్తిని వినియోగించవచ్చు."</string>
     <string name="permlab_accessCoarseLocation" msgid="4887895362354239628">"సామీప్య స్థానం (నెట్‌వర్క్-ఆధారితం)"</string>
     <string name="permdesc_accessCoarseLocation" msgid="2538200184373302295">"మీ సామీప్య స్థానాన్ని పొందడానికి అనువర్తనాన్ని అనుమతిస్తుంది. సెల్ టవర్‌లు మరియు Wi-Fi వంటి నెట్‌వర్క్ స్థాన మూలాలను ఉపయోగించి స్థాన సేవల ద్వారా ఈ స్థానం కనుగొనబడుతుంది. ఈ స్థాన సేవలను అనువర్తనం ఉపయోగించడానికి తప్పనిసరిగా ప్రారంభించబడి ఉండాలి మరియు మీ పరికరానికి అందుబాటులో ఉండాలి. అనువర్తనాలు మీరు ఉన్న ప్రాంతాన్ని సుమారుగా గుర్తించడానికి దీన్ని ఉపయోగించవచ్చు."</string>
-    <string name="permlab_accessSurfaceFlinger" msgid="2363969641792388947">"SurfaceFlingerను ప్రాప్యత చేయడం"</string>
-    <string name="permdesc_accessSurfaceFlinger" msgid="1041619516733293551">"SurfaceFlinger తక్కువ స్థాయి లక్షణాలను ఉపయోగించడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
-    <string name="permlab_readFrameBuffer" msgid="6690504248178498136">"ఫ్రేమ్ బఫర్‌ను చదవడం"</string>
-    <string name="permdesc_readFrameBuffer" msgid="4937405521809454680">"ఫ్రేమ్ బఫర్ యొక్క కంటెంట్‌ను చదవడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
-    <string name="permlab_accessInputFlinger" msgid="5348635270689553857">"InputFlingerను ప్రాప్యత చేయడం"</string>
-    <string name="permdesc_accessInputFlinger" msgid="2104864941201226616">"InputFlinger తక్కువ స్థాయి లక్షణాలను ఉపయోగించడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
-    <string name="permlab_configureWifiDisplay" msgid="5595661694746742168">"వైఫై డిస్‌ప్లేలను కాన్ఫిగర్ చేయడం"</string>
-    <string name="permdesc_configureWifiDisplay" msgid="7916815158690218065">"వైఫై డిస్‌ప్లేలను కాన్ఫిగర్ చేయడానికి మరియు వాటికి కనెక్ట్ చేయడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
-    <string name="permlab_controlWifiDisplay" msgid="393641276723695496">"వైఫై డిస్‌ప్లేలను నియంత్రించడం"</string>
-    <string name="permdesc_controlWifiDisplay" msgid="4543912292681826986">"వైఫై డిస్‌ప్లేల యొక్క తక్కువ-స్థాయి లక్షణాలను నియంత్రించడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
-    <string name="permlab_controlVpn" msgid="2618442789397588200">"వర్చువల్ ప్రైవేట్ నెట్‌వర్క్‌లను నియంత్రించడం"</string>
-    <string name="permdesc_controlVpn" msgid="762852603315861214">"వర్చువల్ ప్రైవేట్ నెట్‌వర్క్‌ల తక్కువ-స్థాయి లక్షణాలను నియంత్రించడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
-    <string name="permlab_captureAudioOutput" msgid="6857134498402346708">"ఆడియో అవుట్‌పుట్‌ను క్యాప్చర్ చేయడం"</string>
-    <string name="permdesc_captureAudioOutput" msgid="6210597754212208853">"ఆడియో అవుట్‌పుట్‌ను క్యాప్చర్ చేసి, దారి మళ్లించడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
-    <string name="permlab_captureAudioHotword" msgid="1890553935650349808">"హాట్‌వర్డ్ గుర్తింపు"</string>
-    <string name="permdesc_captureAudioHotword" msgid="9151807958153056810">"హాట్‌వర్డ్ గుర్తింపు కోసం ఆడియోను క్యాప్చర్ చేయడానికి అనువర్తనాన్ని అనుమతిస్తుంది. క్యాప్చర్ చేయడం నేపథ్యంలో సంభవించవచ్చు కానీ దీని వలన వేరే ఆడియో క్యాప్చర్ (ఉదా. క్యామ్‌కార్డర్) నిరోధించబడదు."</string>
-    <string name="permlab_modifyAudioRouting" msgid="7738060354490807723">"ఆడియో రూటింగ్"</string>
-    <string name="permdesc_modifyAudioRouting" msgid="7205731074267199735">"ఆడియో రూటింగ్‌ను నేరుగా నియంత్రించడానికి మరియు ఆడియో విధానం నిర్ణయాలను భర్తీ చేయడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
-    <string name="permlab_captureVideoOutput" msgid="2246828773589094023">"వీడియో అవుట్‌పుట్‌ను క్యాప్చర్ చేయడం"</string>
-    <string name="permdesc_captureVideoOutput" msgid="359481658034149860">"వీడియో అవుట్‌పుట్‌ను క్యాప్చర్ చేసి, దారి మళ్లించడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
-    <string name="permlab_captureSecureVideoOutput" msgid="7815398969303382016">"సురక్షిత వీడియో అవుట్‌పుట్‌ను క్యాప్చర్ చేయడం"</string>
-    <string name="permdesc_captureSecureVideoOutput" msgid="2779793064709350289">"సురక్షిత వీడియో అవుట్‌పుట్‌ను క్యాప్చర్ చేసి, దారి మళ్లించడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
-    <string name="permlab_mediaContentControl" msgid="8749790560720562511">"మీడియా ప్లేబ్యాక్‌ను మరియు మెటాడేటా ప్రాప్యతను నియంత్రించడం"</string>
-    <string name="permdesc_mediaContentControl" msgid="1637478200272062">"మీడియా ప్లేబ్యాక్‌ను నియంత్రించడానికి మరియు మీడియా సమాచారాన్ని (శీర్షిక, రచయిత...) ప్రాప్యత చేయడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"మీ ఆడియో సెట్టింగ్‌లను మార్చడం"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"వాల్యూమ్ మరియు అవుట్‌పుట్ కోసం ఉపయోగించాల్సిన స్పీకర్ వంటి సార్వజనీన ఆడియో సెట్టింగ్‌లను సవరించడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"ఆడియోను రికార్డ్ చేయడం"</string>
@@ -589,71 +367,14 @@
     <string name="permdesc_sim_communication" msgid="5725159654279639498">"సిమ్‌కు ఆదేశాలను పంపడానికి అనువర్తనాన్ని అనుమతిస్తుంది. ఇది చాలా ప్రమాదకరం."</string>
     <string name="permlab_camera" msgid="3616391919559751192">"చిత్రాలు మరియు వీడియోలు తీయడం"</string>
     <string name="permdesc_camera" msgid="8497216524735535009">"కెమెరాతో చిత్రాలు మరియు వీడియోలను తీయడానికి అనువర్తనాన్ని అనుమతిస్తుంది. ఈ అనుమతి మీ నిర్ధారణ లేకుండానే ఎప్పుడైనా కెమెరాను ఉపయోగించడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
-    <string name="permlab_cameraDisableTransmitLed" msgid="2651072630501126222">"కెమెరా ఉపయోగంలో ఉన్నప్పుడు ప్రసరణ సూచీ LEDని నిలిపివేయడం"</string>
-    <string name="permdesc_cameraDisableTransmitLed" msgid="4764585465480295341">"కెమెరా వినియోగ సూచీ LEDని నిలిపివేయడానికి ముందే ఇన్‌స్టాల్ చేయబడిన సిస్టమ్ అనువర్తనాన్ని అనుమతిస్తుంది."</string>
-    <string name="permdesc_cameraSendSystemEvent" msgid="8642231538552298107">"కెమెరా సేవకి సిస్టమ్ ఈవెంట్‌లను పంపడానికి ముందే ఇన్‌స్టాల్ చేసిన సిస్టమ్ అనువర్తనాన్ని అనుమతిస్తుంది."</string>
-    <string name="permlab_brick" product="tablet" msgid="2961292205764488304">"టాబ్లెట్‌ను శాశ్వతంగా నిలిపివేయడం"</string>
-    <string name="permlab_brick" product="tv" msgid="4912674222121249410">"టీవీని శాశ్వతంగా నిలిపివేయడం"</string>
-    <string name="permlab_brick" product="default" msgid="8337817093326370537">"ఫోన్‌ను శాశ్వతంగా నిలిపివేయడం"</string>
-    <string name="permdesc_brick" product="tablet" msgid="4334818808001699530">"పూర్తి టాబ్లెట్‌ను శాశ్వతంగా నిలిపివేయడానికి అనువర్తనాన్ని అనుమతిస్తుంది. ఇది చాలా ప్రమాదకరం."</string>
-    <string name="permdesc_brick" product="tv" msgid="7070924544316356349">"టీవీ మొత్తం శాశ్వతంగా నిలిపివేయడానికి అనువర్తనాన్ని అనుమతిస్తుంది. ఇది చాలా ప్రమాదకరం."</string>
-    <string name="permdesc_brick" product="default" msgid="5788903297627283099">"పూర్తి ఫోన్‌ను శాశ్వతంగా నిలిపివేయడానికి అనువర్తనాన్ని అనుమతిస్తుంది. ఇది చాలా ప్రమాదకరం."</string>
-    <string name="permlab_reboot" product="tablet" msgid="3436634972561795002">"బలవంతంగా టాబ్లెట్ రీబూట్ చేయడం"</string>
-    <string name="permlab_reboot" product="tv" msgid="2112102119558886236">"నిర్బంధంగా టీవీని రీబూట్‌ చేయడం"</string>
-    <string name="permlab_reboot" product="default" msgid="2898560872462638242">"బలవంతంగా ఫోన్ రీబూట్ చేయడం"</string>
-    <string name="permdesc_reboot" product="tablet" msgid="8172056180063700741">"రీబూట్ చేయాల్సిన టాబ్లెట్‌ను నిర్బంధించడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
-    <string name="permdesc_reboot" product="tv" msgid="7116222694344401650">"రీబూట్ చేయడం కోసం టీవీని నిర్బంధించడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
-    <string name="permdesc_reboot" product="default" msgid="5326008124289989969">"రీబూట్ చేయాల్సిన ఫోన్‌ను నిర్బంధించడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
-    <string name="permlab_mount_unmount_filesystems" product="nosdcard" msgid="2927361537942591841">"USB నిల్వ ఫైల్ సిస్టమ్‌ను ప్రాప్యత చేయడం"</string>
-    <string name="permlab_mount_unmount_filesystems" product="default" msgid="4402305049890953810">"SD కార్డు ఫైల్ సిస్టమ్‌ను ప్రాప్యత చేయడం"</string>
-    <string name="permdesc_mount_unmount_filesystems" msgid="1829290701658992347">"తీసివేయగల నిల్వ కోసం ఫైల్‌సిస్టమ్‌లను మౌంట్ చేయడానికి మరియు అన్‌మౌంట్ చేయడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
-    <string name="permlab_mount_format_filesystems" product="nosdcard" msgid="6227819582624904972">"USB నిల్వను ఎరేజ్ చేయడం"</string>
-    <string name="permlab_mount_format_filesystems" product="default" msgid="262582698639274056">"SD కార్డు‌ను ఎరేజ్ చేయడం"</string>
-    <string name="permdesc_mount_format_filesystems" msgid="8784268246779198627">"తీసివేయగల నిల్వను ఫార్మాట్ చేయడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
-    <string name="permlab_asec_access" msgid="3411338632002193846">"అంతర్గత నిల్వ గురించి సమాచారాన్ని పొందడం"</string>
-    <string name="permdesc_asec_access" msgid="3094563844593878548">"అంతర్గత నిల్వపై సమాచారాన్ని పొందడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
-    <string name="permlab_asec_create" msgid="6414757234789336327">"అంతర్గత నిల్వను సృష్టించడం"</string>
-    <string name="permdesc_asec_create" msgid="4558869273585856876">"అంతర్గత నిల్వను సృష్టించడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
-    <string name="permlab_asec_destroy" msgid="526928328301618022">"అంతర్గత నిల్వను నాశనం చేయడం"</string>
-    <string name="permdesc_asec_destroy" msgid="7218749286145526537">"అంతర్గత నిల్వను నాశనం చేయడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
-    <string name="permlab_asec_mount_unmount" msgid="8877998101944999386">"అంతర్గత నిల్వను మౌంట్ చేయడం/అన్‌మౌంట్ చేయడం"</string>
-    <string name="permdesc_asec_mount_unmount" msgid="3451360114902490929">"అంతర్గత నిల్వను మౌంట్ చేయడానికి/అన్‌మౌంట్ చేయడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
-    <string name="permlab_asec_rename" msgid="7496633954080472417">"అంతర్గత నిల్వ పేరు మార్చడం"</string>
-    <string name="permdesc_asec_rename" msgid="1794757588472127675">"అంతర్గత నిల్వ పేరుని మార్చడం కోసం అనువర్తనాన్ని అనుమతిస్తుంది."</string>
     <string name="permlab_vibrate" msgid="7696427026057705834">"వైబ్రేషన్‌ను నియంత్రించడం"</string>
     <string name="permdesc_vibrate" msgid="6284989245902300945">"వైబ్రేటర్‌ను నియంత్రించడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
     <string name="permlab_flashlight" msgid="2155920810121984215">"ఫ్లాష్‌కాంతిని నియంత్రించడం"</string>
     <string name="permdesc_flashlight" msgid="6522284794568368310">"ఫ్లాష్‌లైట్‌ను నియంత్రించడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
-    <string name="permlab_manageUsb" msgid="1113453430645402723">"USB పరికరాల కోసం ప్రాధాన్యతలు మరియు అనుమతులను నిర్వహించడం"</string>
-    <string name="permdesc_manageUsb" msgid="7776155430218239833">"USB పరికరాల కోసం ప్రాధాన్యతలను మరియు అనుమతులను నిర్వహించడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
-    <string name="permlab_accessMtp" msgid="4953468676795917042">"MTP ప్రోటోకాల్ అమలు చేయడం"</string>
-    <string name="permdesc_accessMtp" msgid="6532961200486791570">"MTP USB ప్రోటోకాల్‌ను అమలు చేయడానికి కెర్నెల్ MTP డ్రైవర్‌కు ప్రాప్యతను అనుమతిస్తుంది."</string>
-    <string name="permlab_hardware_test" msgid="4148290860400659146">"హార్డ్‌వేర్‌ను పరీక్షించడం"</string>
-    <string name="permdesc_hardware_test" msgid="6597964191208016605">"హార్డ్‌వేర్ పరీక్ష ప్రయోజనం కోసం వివిధ విడిభాగాలను నియంత్రించడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
-    <string name="permlab_fm" msgid="8749504526866832">"FM రేడియోను ప్రాప్యత చేయడం"</string>
-    <string name="permdesc_fm" msgid="4145699441237962818">"ప్రోగ్రామ్‌లను వినడం కోసం FM రేడియోను ప్రాప్యత చేయడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"ఫోన్ నంబర్‌లకు నేరుగా కాల్ చేయడం"</string>
     <string name="permdesc_callPhone" msgid="3740797576113760827">"మీ ప్రమేయం లేకుండా ఫోన్ నంబర్‌లకు కాల్ చేయడానికి అనువర్తనాన్ని అనుమతిస్తుంది. దీని వలన అనుకోని ఛార్జీలు విధించబడవచ్చు లేదా కాల్‌లు రావచ్చు. ఇది అత్యవసర నంబర్‌లకు కాల్ చేయడానికి అనువర్తనాన్ని అనుమతించదని గుర్తుంచుకోండి. హానికరమైన అనువర్తనాలు మీ నిర్ధారణ లేకుండానే కాల్‌లు చేయడం ద్వారా మీకు డబ్బు ఖర్చయ్యేలా చేయవచ్చు."</string>
-    <string name="permlab_callPrivileged" msgid="4198349211108497879">"ఏ ఫోన్ నంబర్‌లకు అయినా నేరుగా కాల్ చేయడం"</string>
-    <string name="permdesc_callPrivileged" msgid="1689024901509996810">"మీ ప్రమేయం లేకుండా అత్యవసర నంబర్‌లతో సహా, ఏదైనా ఫోన్ నంబర్‌కు కాల్ చేయడానికి అనువర్తనాన్ని అనుమతిస్తుంది. హానికరమైన అనువర్తనాలు అత్యవసర సేవలకు అనవసరమైన మరియు చట్ట విరుద్ధమైన కాల్‌లు చేయవచ్చు."</string>
-    <string name="permlab_performCdmaProvisioning" product="tablet" msgid="4842576994144604821">"CDMA టాబ్లెట్ సెటప్‌ను నేరుగా ప్రారంభించడం"</string>
-    <string name="permlab_performCdmaProvisioning" product="tv" msgid="3485391974208100809">"CDMA టీవీ సెటప్‌ను నేరుగా ప్రారంభించడం"</string>
-    <string name="permlab_performCdmaProvisioning" product="default" msgid="5604848095315421425">"CDMA ఫోన్ సెటప్‌ను నేరుగా ప్రారంభించడం"</string>
-    <string name="permdesc_performCdmaProvisioning" msgid="1994193538802314186">"CDMA కేటాయింపును ప్రారంభించడానికి అనువర్తనాన్ని అనుమతిస్తుంది. హానికరమైన అనువర్తనాలు CDMA కేటాయింపును అనవసరంగా ప్రారంభించవచ్చు."</string>
-    <string name="permlab_performSimActivation" msgid="1651116521896665009">"SIM కార్డ్ సెటప్‌ను ప్రారంభించండి"</string>
-    <string name="permdesc_performSimActivation" msgid="1778214876348917401">"SIM సక్రియ అభ్యర్థనలను నిర్వహించడానికి అనువర్తనాన్ని అనుమతిస్తుంది. సక్రియ చర్యను అనువర్తనం నేరుగా నిర్వహించవచ్చు లేదా మరొక అనువర్తనానికి అప్పగించవచ్చు."</string>
-    <string name="permlab_locationUpdates" msgid="7785408253364335740">"స్థాన నవీకరణ నోటిఫికేషన్‌లను నియంత్రించడం"</string>
-    <string name="permdesc_locationUpdates" msgid="1120741557891438876">"రేడియో నుండి స్థానం నవీకరణ నోటిఫికేషన్‌లను ప్రారంభించడానికి/నిలిపివేయడానికి అనువర్తనాన్ని అనుమతిస్తుంది. సాధారణ అనువర్తనాల ద్వారా ఉపయోగించడానికి ఉద్దేశించినది కాదు."</string>
-    <string name="permlab_checkinProperties" msgid="7855259461268734914">"ప్రవేశ లక్షణాలను ప్రాప్యత చేయడం"</string>
-    <string name="permdesc_checkinProperties" msgid="4024526968630194128">"చెక్ఇన్ సేవ ద్వారా అప్‌లోడ్ చేయబడిన లక్షణాలను చదవడానికి/వ్రాయడానికి కావల్సిన ప్రాప్యతను అనువర్తనానికి అనుమతిస్తుంది. సాధారణ అనువర్తనాల ద్వారా ఉపయోగించడానికి ఉద్దేశించినది కాదు."</string>
-    <string name="permlab_bindGadget" msgid="776905339015863471">"విడ్జెట్‌లను ఎంచుకోవడం"</string>
-    <string name="permdesc_bindGadget" msgid="8261326938599049290">"ఏయే విడ్జెట్‌లను ఏయే అనువర్తనం ఉపయోగించవచ్చనే దాన్ని సిస్టమ్‌కు తెలియజేయడానికి అనువర్తనాన్ని అనుమతిస్తుంది. ఈ అనుమతిని కలిగి ఉన్న అనువర్తనం ఇతర అనువర్తనాలకు వ్యక్తిగత డేటాను ప్రాప్యత చేయగల సామర్థ్యం అందించవచ్చు. సాధారణ అనువర్తనాల ద్వారా ఉపయోగించడానికి ఉద్దేశించినది కాదు."</string>
-    <string name="permlab_modifyPhoneState" msgid="8423923777659292228">"ఫోన్ స్థితిని సవరించడం"</string>
-    <string name="permdesc_modifyPhoneState" msgid="1029877529007686732">"పరికరం యొక్క ఫోన్ లక్షణాలను నియంత్రించడానికి అనువర్తనాన్ని అనుమతిస్తుంది. అనువర్తనం ఈ అనుమతితో నెట్‌వర్క్‌లను మార్చవచ్చు, మీకు ఎప్పటికీ తెలియజేయకుండానే ఫోన్ రేడియోను ఆన్ మరియు ఆఫ్ చేయవచ్చు."</string>
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"ఫోన్ స్థితి మరియు గుర్తింపుని చదవడం"</string>
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"పరికరం యొక్క ఫోన్ లక్షణాలను ప్రాప్యత చేయడానికి అనువర్తనాన్ని అనుమతిస్తుంది. ఈ అనుమతి ఫోన్ నంబర్ మరియు పరికరం IDలను, కాల్ సక్రియంగా ఉందా లేదా అనే విషయాన్ని మరియు కాల్ ద్వారా కనెక్ట్ చేయబడిన రిమోట్ నంబర్‌ను కనుగొనడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
-    <string name="permlab_readPrecisePhoneState" msgid="5476483020282007597">"నిర్దుష్ట ఫోన్ స్థితిగతులను చదవడం"</string>
-    <string name="permdesc_readPrecisePhoneState" msgid="6648009074263855418">"ఖచ్చితమైన ఫోన్ స్థితిగతులను ప్రాప్యత చేయడానికి అనువర్తనాన్ని అనుమతిస్తుంది. ఈ అనుమతి నిజ కాల్ స్థితిని గుర్తించడానికి అనువర్తనాన్ని అనుమతిస్తుంది, కాల్ సక్రియంగా ఉందా లేదా నేపథ్యంలో ఉందా, కాల్ వైఫల్యాలు, నిర్దుష్టమైన డేటా కనెక్షన్ స్థితి మరియు డేటా కనెక్షన్ వైఫల్యాలు వంటివి."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"టాబ్లెట్‌ను నిద్రావస్థకు వెళ్లనీయకుండా నిరోధించడం"</string>
     <string name="permlab_wakeLock" product="tv" msgid="2601193288949154131">"టీవీ నిద్రావస్థకు వెళ్లకుండా నిరోధించడం"</string>
     <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"ఫోన్‌ను నిద్రావస్థకు వెళ్లనీయకుండా నిరోధించడం"</string>
@@ -664,34 +385,14 @@
     <string name="permdesc_transmitIr" product="tablet" msgid="5358308854306529170">"టాబ్లెట్ యొక్క ఇన్‌ఫ్రారెడ్ ట్రాన్స్‌మిటర్‌ను ఉపయోగించడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
     <string name="permdesc_transmitIr" product="tv" msgid="3926790828514867101">"టీవీ ఇన్‌ఫ్రారెడ్ ట్రాన్స్‌మిటర్‌‌ని ఉపయోగించడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
     <string name="permdesc_transmitIr" product="default" msgid="7957763745020300725">"ఫోన్ యొక్క ఇన్‌ఫ్రారెడ్ ట్రాన్స్‌మిటర్‌ను ఉపయోగించడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
-    <string name="permlab_devicePower" product="tablet" msgid="2787034722616350417">"పవర్ టాబ్లెట్‌ను ఆన్ లేదా ఆఫ్ చేయడం"</string>
-    <string name="permlab_devicePower" product="tv" msgid="7579718349658943416">"టీవీ పవర్ ఆన్ లేదా ఆఫ్ చేయడం"</string>
-    <string name="permlab_devicePower" product="default" msgid="4928622470980943206">"పవర్ ఫోన్‌ను ఆన్ లేదా ఆఫ్ చేయడం"</string>
-    <string name="permdesc_devicePower" product="tablet" msgid="6689862878984631831">"టాబ్లెట్‌ను ఆన్ లేదా ఆఫ్ చేయడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
-    <string name="permdesc_devicePower" product="tv" msgid="1334908641773273512">"టీవీని ఆన్ లేదా ఆఫ్ చేయడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
-    <string name="permdesc_devicePower" product="default" msgid="6037057348463131032">"ఫోన్‌ను ఆన్ లేదా ఆఫ్ చేయడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
-    <string name="permlab_userActivity" msgid="1677844893921729548">"డిస్‌ప్లే నిలుపుదల సమయాన్ని రీసెట్ చేయడం"</string>
-    <string name="permdesc_userActivity" msgid="651746160252248024">"డిస్‌ప్లే నిలుపుదల సమయాన్ని రీసెట్ చేయడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
-    <string name="permlab_factoryTest" msgid="3715225492696416187">"ఫ్యాక్టరీ పరీక్ష మోడ్‌లో అమలు చేయడం"</string>
-    <string name="permdesc_factoryTest" product="tablet" msgid="3952059318359653091">"టాబ్లెట్ హార్డ్‌వేర్‌కు పూర్తి ప్రాప్యతను అనుమతిస్తూ, తక్కువ-స్థాయి తయారీదారు పరీక్షగా అమలు చేయండి. టాబ్లెట్ తయారీదారు పరీక్ష మోడ్‌లో అమలవుతున్నప్పుడు మాత్రమే అందుబాటులో ఉంటుంది."</string>
-    <string name="permdesc_factoryTest" product="tv" msgid="2105643629211155695">"టీవీ హార్డ్‌వేర్‌కి పూర్తి ప్రాప్యతను అనుమతిస్తూ తక్కువ-స్థాయి తయారీదారు పరీక్షగా అమలు చేయండి. టీవీ తయారీదారు పరీక్ష మోడ్‌లో అమలవుతున్నప్పుడు మాత్రమే అందుబాటులో ఉంటుంది."</string>
-    <string name="permdesc_factoryTest" product="default" msgid="8136644990319244802">"ఫోన్ హార్డ్‌వేర్‌కు పూర్తి ప్రాప్యతను అనుమతిస్తూ, తక్కువ-స్థాయి తయారీదారు పరీక్షగా అమలు చేయండి. ఫోన్ తయారీదారు పరీక్ష మోడ్‌లో అమలవుతున్నప్పుడు మాత్రమే అందుబాటులో ఉంటుంది."</string>
     <string name="permlab_setWallpaper" msgid="6627192333373465143">"వాల్‌పేపర్‌ను సెట్ చేయడం"</string>
     <string name="permdesc_setWallpaper" msgid="7373447920977624745">"సిస్టమ్ వాల్‌పేపర్‌ను సెట్ చేయడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
     <string name="permlab_setWallpaperHints" msgid="3278608165977736538">"మీ వాల్‌పేపర్ పరిమాణాన్ని సర్దుబాటు చేయడం"</string>
     <string name="permdesc_setWallpaperHints" msgid="8235784384223730091">"సిస్టమ్ వాల్‌పేపర్ పరిమాణం సూచనలను సెట్ చేయడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
-    <string name="permlab_masterClear" msgid="2315750423139697397">"సిస్టమ్‌ను ఫ్యాక్టరీ డిఫాల్ట్‌లకు రీసెట్ చేయడం"</string>
-    <string name="permdesc_masterClear" msgid="3665380492633910226">"సిస్టమ్ యొక్క ఫ్యాక్టరీ సెట్టింగ్‌లు, మొత్తం డేటాను ఎరేజ్ చేయడం, కాన్ఫిగరేషన్ మరియు ఇన్‌స్టాల్ చేయబడిన అనువర్తనాల కోసం సిస్టమ్‌ను పూర్తిగా రీసెట్ చేయడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
-    <string name="permlab_setTime" msgid="2021614829591775646">"సమయాన్ని సెట్ చేయడం"</string>
-    <string name="permdesc_setTime" product="tablet" msgid="1896341438151152881">"టాబ్లెట్ యొక్క గడియారం సమయాన్ని మార్చడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
-    <string name="permdesc_setTime" product="tv" msgid="1826398919861882682">"టీవీ గడియారం సమయాన్ని మార్చడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
-    <string name="permdesc_setTime" product="default" msgid="1855702730738020">"ఫోన్ యొక్క గడియారం సమయాన్ని మార్చడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
     <string name="permlab_setTimeZone" msgid="2945079801013077340">"సమయ మండలిని సెట్ చేయడం"</string>
     <string name="permdesc_setTimeZone" product="tablet" msgid="1676983712315827645">"టాబ్లెట్ యొక్క సమయ మండలిని మార్చడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
     <string name="permdesc_setTimeZone" product="tv" msgid="888864653946175955">"టీవీ సమయ మండలిని మార్చడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
     <string name="permdesc_setTimeZone" product="default" msgid="4499943488436633398">"ఫోన్ యొక్క సమయ మండలిని మార్చడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
-    <string name="permlab_accountManagerService" msgid="4829262349691386986">"ఖాతా నిర్వాహికి సేవగా అమలు చేయడం"</string>
-    <string name="permdesc_accountManagerService" msgid="1948455552333615954">"AccountAuthenticatorsకు కాల్‌లు చేయడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
     <string name="permlab_getAccounts" msgid="1086795467760122114">"పరికరంలో ఖాతాలను కనుగొనడం"</string>
     <string name="permdesc_getAccounts" product="tablet" msgid="2741496534769660027">"టాబ్లెట్‌కు తెలిసిన ఖాతాల జాబితాను పొందడానికి అనువర్తనాన్ని అనుమతిస్తుంది. దీనిలో మీరు ఇన్‌స్టాల్ చేసిన అనువర్తనాల ద్వారా సృష్టించబడిన ఖాతాలు ఏవైనా ఉండవచ్చు."</string>
     <string name="permdesc_getAccounts" product="tv" msgid="4190633395633907543">"టీవీకి తెలిసిన ఖాతాల జాబితాను పొందడానికి అనువర్తనాన్ని అనుమతిస్తుంది. ఇందులో మీరు ఇన్‌స్టాల్ చేసిన అనువర్తనాల ద్వారా సృష్టించబడిన ఖాతాలు కూడా ఉండవచ్చు."</string>
@@ -706,14 +407,10 @@
     <string name="permdesc_accessNetworkState" msgid="8318964424675960975">"ఏ నెట్‌వర్క్‌లు ఉన్నాయి మరియు కనెక్ట్ చేయబడ్డాయి వంటి నెట్‌వర్క్ కనెక్షన్‌ల గురించి సమాచారాన్ని వీక్షించడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
     <string name="permlab_createNetworkSockets" msgid="8018758136404323658">"పూర్తి నెట్‌వర్క్ ప్రాప్యత"</string>
     <string name="permdesc_createNetworkSockets" msgid="3403062187779724185">"నెట్‌వర్క్ సాకెట్‌లను సృష్టించడానికి మరియు అనుకూల నెట్‌వర్క్ ప్రోటోకాల్‌లను ఉపయోగించడానికి అనువర్తనాన్ని అనుమతిస్తుంది. బ్రౌజర్ మరియు ఇతర అనువర్తనాలు ఇంటర్నెట్‌కు డేటా పంపడానికి మార్గాలను అందిస్తాయి, కనుక ఇంటర్నెట్‌కు డేటా పంపడానికి ఈ అనుమతి అవసరం లేదు."</string>
-    <string name="permlab_writeApnSettings" msgid="505660159675751896">"నెట్‌వర్క్ సెట్టింగ్‌లు మరియు ట్రాఫిక్‌ను మార్చడం/అడ్డగించడం"</string>
-    <string name="permdesc_writeApnSettings" msgid="5333798886412714193">"నెట్‌వర్క్ సెట్టింగ్‌లను మార్చడానికి మరియు మొత్తం నెట్‌వర్క్ ట్రాఫిక్‌ను అంతరాయం కలిగించడానికి మరియు పరిశీలించడానికి, ఉదాహరణకు ఏదైనా APN యొక్క ప్రాక్సీ మరియు పోర్ట్‌ను మార్చడానికి అనువర్తనాన్ని అనుమతిస్తుంది. హానికరమైన అనువర్తనాలు మీ ప్రమేయం లేకుండా నెట్‌వర్క్ ప్యాకెట్‌లను పర్యవేక్షించవచ్చు, దారి మళ్లించవచ్చు లేదా సవరించవచ్చు."</string>
     <string name="permlab_changeNetworkState" msgid="958884291454327309">"నెట్‌వర్క్ కనెక్టివిటీని మార్చడం"</string>
     <string name="permdesc_changeNetworkState" msgid="6789123912476416214">"నెట్‌వర్క్ కనెక్టివిటీ యొక్క స్థితిని మార్చడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
     <string name="permlab_changeTetherState" msgid="5952584964373017960">"టీథర్ చేయబడిన కనెక్టివిటీని మార్చడం"</string>
     <string name="permdesc_changeTetherState" msgid="1524441344412319780">"టీథర్ చేసిన నెట్‌వర్క్ కనెక్టివిటీ యొక్క స్థితిని మార్చడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
-    <string name="permlab_changeBackgroundDataSetting" msgid="1400666012671648741">"నేపథ్య డేటా వినియోగ సెట్టింగ్‌ను మార్చడం"</string>
-    <string name="permdesc_changeBackgroundDataSetting" msgid="5347729578468744379">"నేపథ్య డేటా వినియోగ సెట్టింగ్‌ను మార్చడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
     <string name="permlab_accessWifiState" msgid="5202012949247040011">"Wi-Fi కనెక్షన్‌లను వీక్షించడం"</string>
     <string name="permdesc_accessWifiState" msgid="5002798077387803726">"Wi-Fi ప్రారంభించబడిందా, లేదా మరియు కనెక్ట్ చేయబడిన Wi-Fi పరికరాల పేరు వంటి Wi-Fi నెట్‌వర్కింగ్ గురించి సమాచారాన్ని వీక్షించడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
     <string name="permlab_changeWifiState" msgid="6550641188749128035">"Wi-Fiకి కనెక్ట్ చేయడం మరియు దాని నుండి డిస్‌కనెక్ట్ చేయడం"</string>
@@ -726,24 +423,12 @@
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="6921177471748882137">"స్థానిక బ్లూటూత్ టాబ్లెట్‌ను కాన్ఫిగర్ చేయడానికి మరియు రిమోట్ పరికరాలతో దాన్ని కనుగొనడానికి మరియు జత చేయడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
     <string name="permdesc_bluetoothAdmin" product="tv" msgid="3373125682645601429">"స్థానిక బ్లూటూత్ టీవీని కాన్ఫిగర్ చేయడానికి మరియు రిమోట్ పరికరాలను గుర్తించి, వాటితో జత చేయడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
     <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"స్థానిక బ్లూటూత్ ఫోన్‌ను కాన్ఫిగర్ చేయడానికి మరియు రిమోట్ పరికరాలతో దాన్ని కనుగొనడానికి మరియు జత చేయడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
-    <string name="permlab_bluetoothPriv" msgid="4009494246009513828">"అనువర్తనం ద్వారా బ్లూటూత్ జత చేయడాన్ని అనుమతించడం"</string>
-    <string name="permdesc_bluetoothPriv" product="tablet" msgid="8045735193417468857">"వినియోగదారు చర్య లేకుండానే రిమోట్ పరికరాలతో జత కావడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
-    <string name="permdesc_bluetoothPriv" product="tv" msgid="8045735193417468857">"వినియోగదారు చర్య లేకుండానే రిమోట్ పరికరాలతో జత కావడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
-    <string name="permdesc_bluetoothPriv" product="default" msgid="8045735193417468857">"వినియోగదారు చర్య లేకుండానే రిమోట్ పరికరాలతో జత కావడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
-    <string name="permlab_bluetoothMap" msgid="6372198338939197349">"బ్లూటూత్ MAP డేటాను ప్రాప్యత చేయడం"</string>
-    <string name="permdesc_bluetoothMap" product="tablet" msgid="5784090105926959958">"Bluetooth MAP డేటాను ప్రాప్యత చేయడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
-    <string name="permdesc_bluetoothMap" product="tv" msgid="5784090105926959958">"Bluetooth MAP డేటాను ప్రాప్యత చేయడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
-    <string name="permdesc_bluetoothMap" product="default" msgid="5784090105926959958">"Bluetooth MAP డేటాను ప్రాప్యత చేయడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
     <string name="permlab_accessWimaxState" msgid="4195907010610205703">"WiMAXకు కనెక్ట్ చేయడం మరియు దాని నుండి డిస్‌కనెక్ట్ చేయడం"</string>
     <string name="permdesc_accessWimaxState" msgid="6360102877261978887">"Wi-Fi ప్రారంభించబడిందా, లేదా మరియు కనెక్ట్ చేయబడిన WiMAX నెట్‌వర్క్‌ల గురించి సమాచారాన్ని కనుగొనడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
     <string name="permlab_changeWimaxState" msgid="2405042267131496579">"WiMAX స్థితిని మార్చండి"</string>
     <string name="permdesc_changeWimaxState" product="tablet" msgid="3156456504084201805">"WiMAX నెట్‌వర్క్‌లకు టాబ్లెట్‌ను కనెక్ట్ చేయడానికి మరియు వాటి నుండి టాబ్లెట్‌ను డిస్‌కనెక్ట్ చేయడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
     <string name="permdesc_changeWimaxState" product="tv" msgid="6022307083934827718">"టీవీని WiMAX నెట్‌వర్క్‌లకు కనెక్ట్ చేయడానికి మరియు వాటి నుండి టీవీని డిస్‌కనెక్ట్ చేయడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
     <string name="permdesc_changeWimaxState" product="default" msgid="697025043004923798">"WiMAX నెట్‌వర్క్‌లకు ఫోన్‌ను కనెక్ట్ చేయడానికి మరియు వాటి నుండి ఫోన్‌ను డిస్‌కనెక్ట్ చేయడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
-    <string name="permlab_scoreNetworks" msgid="6445777779383587181">"స్కోర్ నెట్‌వర్క్‌లు"</string>
-    <string name="permdesc_scoreNetworks" product="tablet" msgid="1304304745850215556">"నెట్‌వర్క్‌లను ర్యాంక్ చేయడానికి మరియు టాబ్లెట్ ఏయే నెట్‌వర్క్‌లకు ప్రాధాన్యత ఇవ్వాలనేది ప్రభావితం చేయడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
-    <string name="permdesc_scoreNetworks" product="tv" msgid="5444434643862417649">"నెట్‌వర్క్‌లకు ర్యాంక్ ఇవ్వడానికి మరియు టీవీ ఏయే నెట్‌వర్క్‌లకు ప్రాధాన్యత ఇవ్వాలనేదాన్ని ప్రభావితం చేయడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
-    <string name="permdesc_scoreNetworks" product="default" msgid="1831501848178651379">"నెట్‌వర్క్‌లను ర్యాంక్ చేయడానికి మరియు ఫోన్ ఏయే నెట్‌వర్క్‌లకు ప్రాధాన్యత ఇవ్వాలనేది ప్రభావితం చేయడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
     <string name="permlab_bluetooth" msgid="6127769336339276828">"బ్లూటూత్ పరికరాలతో జత చేయడం"</string>
     <string name="permdesc_bluetooth" product="tablet" msgid="3480722181852438628">"టాబ్లెట్‌లో బ్లూటూత్ యొక్క కాన్ఫిగరేషన్‌ను వీక్షించడానికి మరియు జత చేయబడిన పరికరాలతో కనెక్షన్‌లను ఏర్పాటు చేయడానికి మరియు ఆమోదించడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
     <string name="permdesc_bluetooth" product="tv" msgid="3974124940101104206">"బ్లూటూత్ కాన్ఫిగరేషన్‌ను టీవీలో వీక్షించడానికి మరియు జత చేసిన పరికరాలతో కనెక్షన్‌లను ఏర్పాటు చేయడానికి మరియు ఆమోదించడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
@@ -778,10 +463,6 @@
     <string name="permdesc_writeSyncSettings" msgid="8956262591306369868">"ఖాతా యొక్క సమకాలీకరణ సెట్టింగ్‌లను సవరించడానికి అనువర్తనాన్ని అనుమతిస్తుంది. ఉదాహరణకు, ఇది ఒక ఖాతాతో వ్యక్తుల అనువర్తనం యొక్క సమకాలీకరణను ప్రారంభించడానికి ఉపయోగించబడవచ్చు."</string>
     <string name="permlab_readSyncStats" msgid="7396577451360202448">"సమకాలీకరణ గణాంకాలను చదవడం"</string>
     <string name="permdesc_readSyncStats" msgid="1510143761757606156">"ఖాతా యొక్క సమకాలీకరణ గణాంకాలను అలాగే సమకాలీకరణ ఈవెంట్‌ల చరిత్రను మరియు ఎంత డేటా సమకాలీకరించబడింది అనేవాటిని చదవడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
-    <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"చందా చేయబడిన ఫీడ్‌లను చదవడం"</string>
-    <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"ప్రస్తుతం సమకాలీకరించిన ఫీడ్‌ల గురించి వివరాలను పొందడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
-    <string name="permlab_subscribedFeedsWrite" msgid="9015246325408209296">"చందా చేయబడిన ఫీడ్‌లను వ్రాయడం"</string>
-    <string name="permdesc_subscribedFeedsWrite" msgid="6928930188826089413">"మీ ప్రస్తుతం సమకాలీకరించిన ఫీడ్‌లను సవరించడానికి అనువర్తనాన్ని అనుమతిస్తుంది. హానికరమైన అనువర్తనాలు మీ సమకాలీకరణ ఫీడ్‌లను మార్చవచ్చు."</string>
     <string name="permlab_readDictionary" msgid="4107101525746035718">"మీరు నిఘంటువుకు జోడించిన పదాలను చదవడం"</string>
     <string name="permdesc_readDictionary" msgid="659614600338904243">"వినియోగదారు నిఘంటువులో వినియోగదారు నిల్వ చేసిన అన్ని పదాలు, పేర్లు మరియు పదబంధాలను చదవడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
     <string name="permlab_writeDictionary" msgid="2183110402314441106">"వినియోగదారు-నిర్వచిత నిఘంటువుకు పదాలను జోడించడం"</string>
@@ -794,62 +475,8 @@
     <string name="permlab_sdcardWrite" product="default" msgid="8805693630050458763">"మీ SD కార్డు యొక్క కంటెంట్‌లను సవరించడం లేదా తొలగించడం"</string>
     <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6175406299445710888">"USB నిల్వకు వ్రాయడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
     <string name="permdesc_sdcardWrite" product="default" msgid="4337417790936632090">"SD కార్డుకి వ్రాయడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
-    <string name="permlab_mediaStorageWrite" product="default" msgid="6859839199706879015">"అంతర్గత మీడియా నిల్వ కంటెంట్‌లను సవరించడం/తొలగించడం"</string>
-    <string name="permdesc_mediaStorageWrite" product="default" msgid="8189160597698529185">"అంతర్గత మీడియో నిల్వ యొక్క కంటెంట్‌లను సవరించడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
-    <string name="permlab_manageDocs" product="default" msgid="5778318598448849829">"పత్ర నిల్వను నిర్వహించడం"</string>
-    <string name="permdesc_manageDocs" product="default" msgid="8704323176914121484">"పత్ర నిల్వను నిర్వహించడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
-    <string name="permlab_sdcardAccessAll" msgid="8150613823900460576">"అందరు వినియోగదారుల బాహ్య నిల్వను ప్రాప్యత చేయడం"</string>
-    <string name="permdesc_sdcardAccessAll" msgid="3215208357415891320">"వినియోగదారులందరి కోసం బాహ్య నిల్వను ప్రాప్యత చేయడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
-    <string name="permlab_cache_filesystem" msgid="5656487264819669824">"కాష్ ఫైల్ సిస్టమ్‌ను ప్రాప్యత చేయడం"</string>
-    <string name="permdesc_cache_filesystem" msgid="5578967642265550955">"కాష్ ఫైల్‌సిస్టమ్‌ను చదవడానికి మరియు వ్రాయడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
     <string name="permlab_use_sip" msgid="2052499390128979920">"SIP కాల్‌లను చేయడానికి/స్వీకరించడానికి"</string>
     <string name="permdesc_use_sip" msgid="2297804849860225257">"SIP కాల్‌లను చేయడానికి మరియు స్వీకరించడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
-    <string name="permlab_register_sim_subscription" msgid="3166535485877549177">"కొత్త టెలికామ్ SIM కనెక్షన్‌లను నమోదు చేయడం"</string>
-    <string name="permdesc_register_sim_subscription" msgid="2138909035926222911">"కొత్త టెలికామ్ SIM కనెక్షన్‌లను నమోదు చేయడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
-    <string name="permlab_register_call_provider" msgid="108102120289029841">"కొత్త టెలికామ్ కనెక్షన్‌లను నమోదు చేయడం"</string>
-    <string name="permdesc_register_call_provider" msgid="7034310263521081388">"కొత్త టెలికామ్ కనెక్షన్‌లను నమోదు చేయడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
-    <string name="permlab_connection_manager" msgid="1116193254522105375">"టెలికామ్ కనెక్షన్‌లను నిర్వహించడం"</string>
-    <string name="permdesc_connection_manager" msgid="5925480810356483565">"టెలికామ్ కనెక్షన్‌లను నిర్వహించడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
-    <string name="permlab_bind_incall_service" msgid="6773648341975287125">"ఇన్-కాల్ స్క్రీన్‌తో పరస్పర చర్య చేయడం"</string>
-    <string name="permdesc_bind_incall_service" msgid="8343471381323215005">"వినియోగదారునికి ఇన్-కాల్ స్క్రీన్ ఎప్పుడు, ఎలా కనిపించాలనే దాన్ని నియంత్రించడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
-    <string name="permlab_bind_connection_service" msgid="3557341439297014940">"టెలిఫోన్ సేవలతో పరస్పర చర్య చేయడం"</string>
-    <string name="permdesc_bind_connection_service" msgid="4008754499822478114">"కాల్‌లు చేయడం/స్వీకరించడం కోసం టెలిఫోన్ సేవలతో పరస్పర చర్య చేయడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
-    <string name="permlab_control_incall_experience" msgid="9061024437607777619">"ఇన్-కాల్ వినియోగదారు అనుభవాన్ని అందించడం"</string>
-    <string name="permdesc_control_incall_experience" msgid="915159066039828124">"ఇన్-కాల్ వినియోగదారుని అనుభవాన్ని అందించడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
-    <string name="permlab_readNetworkUsageHistory" msgid="7862593283611493232">"చారిత్రక నెట్‌వర్క్ వినియోగాన్ని చదవడం"</string>
-    <string name="permdesc_readNetworkUsageHistory" msgid="7689060749819126472">"నిర్దిష్ట నెట్‌వర్క్‌లు మరియు అనువర్తనాలు కోసం చారిత్రాత్మక నెట్‌వర్క్ వినియోగాన్ని చదవడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
-    <string name="permlab_manageNetworkPolicy" msgid="2562053592339859990">"నెట్‌వర్క్ విధానాన్ని నిర్వహించడం"</string>
-    <string name="permdesc_manageNetworkPolicy" msgid="7537586771559370668">"నెట్‌వర్క్ విధానాలను నిర్వహించడానికి మరియు అనువర్తన-నిర్దిష్ట నిబంధనలను నిర్వచించడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
-    <string name="permlab_modifyNetworkAccounting" msgid="5088217309088729650">"నెట్‌వర్క్ వినియోగ అకౌంటింగ్‌ను సవరించడం"</string>
-    <string name="permdesc_modifyNetworkAccounting" msgid="5443412866746198123">"అనువర్తనాల్లో నెట్‌వర్క్ వినియోగం ఎలా గణించాలనే దాన్ని సవరించడానికి అనువర్తనాన్ని అనుమతిస్తుంది. సాధారణ అనువర్తనాల ద్వారా ఉపయోగించడానికి ఉద్దేశించినది కాదు."</string>
-    <string name="permlab_accessNotifications" msgid="7673416487873432268">"నోటిఫికేషన్‌లను ప్రాప్యత చేయడం"</string>
-    <string name="permdesc_accessNotifications" msgid="458457742683431387">"నోటిఫికేషన్‌లను, ఇతర అనువర్తనాల ద్వారా పోస్ట్ చేయబడిన వాటిని తిరిగి పొందడానికి, పరిశీలించడానికి మరియు క్లియర్ చేయడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
-    <string name="permlab_bindNotificationListenerService" msgid="7057764742211656654">"నోటిఫికేషన్ పరిశీలన సేవకు అనుబంధించడం"</string>
-    <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"నోటిఫికేషన్ పరిశీలన సేవ యొక్క అగ్ర-స్థాయి ఇంటర్‌ఫేస్‌కు అనుబంధించడానికి హోల్డర్‌ను అనుమతిస్తుంది. సాధారణ అనువర్తనాల కోసం ఎప్పటికీ అవసరం ఉండకూడదు."</string>
-    <string name="permlab_bindChooserTargetService" msgid="3443261076710185673">"ఎంపిక లక్ష్యం సేవకు నిర్బంధించడం"</string>
-    <string name="permdesc_bindChooserTargetService" msgid="1413908999583734970">"ఎంపిక లక్ష్యం సేవ అగ్ర-స్థాయి ఇంటర్‌ఫేస్‌కు నిర్బంధించడానికి హోల్డర్‌ను అనుమతిస్తుంది. సాధారణ అనువర్తనాలకు ఎప్పటికీ అవసరం ఉండదు."</string>
-    <string name="permlab_bindConditionProviderService" msgid="1180107672332704641">"షరతు ప్రదాత సేవకు అనుబంధించడం"</string>
-    <string name="permdesc_bindConditionProviderService" msgid="1680513931165058425">"షరతు ప్రదాత సేవ యొక్క అగ్ర-స్థాయి ఇంటర్‌ఫేస్‌కు అనుబంధించడానికి హోల్డర్‌ను అనుమతిస్తుంది. సాధారణ అనువర్తనాలకు ఎప్పటికీ అవసరం ఉండదు."</string>
-    <string name="permlab_bindMediaRouteService" msgid="6637740382272686835">"మీడియా మార్గ సేవకు అనుబంధించడం"</string>
-    <string name="permdesc_bindMediaRouteService" msgid="6436655024972496687">"మీడియా మార్గ సేవ యొక్క అగ్ర-స్థాయి ఇంటర్‌ఫేస్‌కు అనుబంధించడానికి హోల్డర్‌ను అనుమతిస్తుంది. సాధారణ అనువర్తనాలకు ఎప్పటికీ అవసరం ఉండదు."</string>
-    <string name="permlab_bindDreamService" msgid="4153646965978563462">"డ్రీమ్ సేవ‌కి అనుబంధించడం"</string>
-    <string name="permdesc_bindDreamService" msgid="7325825272223347863">"డ్రీమ్ సేవ యొక్క అగ్ర-స్థాయి ఇంటర్‌ఫేస్‌కు అనుబంధించడానికి హోల్డర్‌ను అనుమతిస్తుంది. సాధారణ అనువర్తనాలకు ఎప్పటికీ అవసరం ఉండదు."</string>
-    <string name="permlab_invokeCarrierSetup" msgid="3699600833975117478">"క్యారియర్ అందించిన కాన్ఫిగరేషన్ అనువర్తనాన్ని అభ్యర్థించడం"</string>
-    <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"క్యారియర్ అందించిన కాన్ఫిగరేషన్ అనువర్తనాన్ని అభ్యర్థించడానికి హోల్డర్‌ను అనుమతిస్తుంది. సాధారణ అనువర్తనాల కోసం ఎప్పటికీ అవసరం ఉండకూడదు."</string>
-    <string name="permlab_accessNetworkConditions" msgid="8206077447838909516">"నెట్‌వర్క్ పరిస్థితులపై పరిశీలనల గురించి తెలుసుకోవడం"</string>
-    <string name="permdesc_accessNetworkConditions" msgid="6899102075825272211">"నెట్‌వర్క్ పరిస్థితులపై పరిశీలనల గురించి తెలుసుకోవడానికి అనువర్తనాన్ని అనుమతిస్తుంది. సాధారణ అనువర్తనాలకు ఎప్పటికీ అవసరం ఉండకూడదు."</string>
-    <string name="permlab_setInputCalibration" msgid="4902620118878467615">"ఇన్‌పుట్ పరికరం క్రమాంకనాన్ని మార్చండి"</string>
-    <string name="permdesc_setInputCalibration" msgid="4527511047549456929">"టచ్ స్క్రీన్ యొక్క క్రమాంకన పరామితులను సవరించడానికి అనువర్తనాన్ని అనుమతిస్తుంది. సాధారణ అనువర్తనాలకు ఎప్పటికీ అవసరం ఉండదు."</string>
-    <string name="permlab_accessDrmCertificates" msgid="7436886640723203615">"DRM ప్రమాణపత్రాలను ప్రాప్యత చేయడం"</string>
-    <string name="permdesc_accessDrmCertificates" msgid="8073288354426159089">"DRM ప్రమాణపత్రాలను కేటాయించడానికి మరియు ఉపయోగించడానికి అనువర్తనాన్ని అనుమతిస్తుంది. సాధారణ అనువర్తనాలకు ఎప్పటికీ అవసరం ఉండదు."</string>
-    <string name="permlab_handoverStatus" msgid="1159132046126626731">"Android Beam బదిలీ స్థితిని స్వీకరించండి"</string>
-    <string name="permdesc_handoverStatus" msgid="4788144087245714948">"ప్రస్తుత Android Beam బదిలీలకు సంబంధించిన సమాచారాన్ని స్వీకరించడానికి ఈ అనువర్తనాన్ని అనుమతిస్తుంది"</string>
-    <string name="permlab_removeDrmCertificates" msgid="7044888287209892751">"DRM ప్రమాణపత్రాలను తీసివేయడం"</string>
-    <string name="permdesc_removeDrmCertificates" msgid="7272999075113400993">"DRM ప్రమాణపత్రాలను తీసివేయడానికి అనువర్తనాన్ని అనుమతిస్తుంది. సాధారణ అనువర్తనాలకు ఎప్పటికీ అవసరం ఉండదు."</string>
-    <string name="permlab_bindCarrierMessagingService" msgid="1490229371796969158">"క్యారియర్ సందేశ సేవకు అనుబంధించడం"</string>
-    <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"క్యారియర్ సందేశ సేవ యొక్క అగ్ర-స్థాయి ఇంటర్‌ఫేస్‌కు అనుబంధించడానికి హోల్డర్‌ను అనుమతిస్తుంది. సాధారణ అనువర్తనాలకు ఎప్పటికీ అవసరం ఉండదు."</string>
-    <string name="permlab_accessVoiceInteractionService" msgid="4183835260471435605">"వాయిస్ ప్రతిస్పందక సేవతో పరస్పర చర్య చేయడం"</string>
-    <string name="permdesc_accessVoiceInteractionService" msgid="836587728238433459">"ప్రస్తుతం సక్రియంగా ఉన్న వాయిస్ ప్రతిస్పందక సేవతో పరస్పర చర్య చేయడానికి హోల్డర్‌ను అనుమతిస్తుంది. సాధారణ అనువర్తనాలకు ఎప్పటికీ అవసరం ఉండదు."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"పాస్‌వర్డ్ నియమాలను సెట్ చేయండి"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"స్క్రీన్ లాక్ పాస్‌వర్డ్‌లు మరియు PINల్లో అనుమతించబడిన పొడవు మరియు అక్షరాలను నియంత్రిస్తుంది."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"స్క్రీన్-అన్‌లాక్ ప్రయత్నాలను పర్యవేక్షించండి"</string>
@@ -1135,28 +762,10 @@
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="8497389531014185509">"మీ ఫోన్‌లో నిల్వ చేయబడిన బ్రౌజర్ చరిత్రను లేదా బుక్‌మార్క్‌లను సవరించడానికి అనువర్తనాన్ని అనుమతిస్తుంది. ఇది బ్రౌజర్ డేటాను ఎరేజ్ చేయడానికి లేదా సవరించడానికి అనువర్తనాన్ని అనుమతించవచ్చు. గమనిక: ఈ అనుమతి మూడవ పక్షం బ్రౌజర్‌లు లేదా వెబ్ బ్రౌజింగ్ సామర్థ్యాలు గల ఇతర అనువర్తనాల ద్వారా అమలు చేయబడకపోవచ్చు."</string>
     <string name="permlab_setAlarm" msgid="1379294556362091814">"అలారం సెట్ చేయడం"</string>
     <string name="permdesc_setAlarm" msgid="316392039157473848">"ఇన్‌స్టాల్ చేయబడిన అలారం గడియారం అనువర్తనంలో అలారంను సెట్ చేయడానికి అనువర్తనాన్ని అనుమతిస్తుంది. కొన్ని అలారం గల గడియారం అనువర్తనాలు ఈ లక్షణాన్ని అమలు చేయకపోవచ్చు."</string>
-    <string name="permlab_writeVoicemail" msgid="7309899891683938100">"వాయిస్ మెయిల్‌లను వ్రాయడం"</string>
-    <string name="permdesc_writeVoicemail" msgid="6592572839715924830">"మీ వాయిస్ మెయిల్ ఇన్‌బాక్స్ నుండి సందేశాలను సవరించడానికి మరియు తీసివేయడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
     <string name="permlab_addVoicemail" msgid="5525660026090959044">"వాయిస్ మెయిల్‌ను జోడించడం"</string>
     <string name="permdesc_addVoicemail" msgid="6604508651428252437">"మీ వాయిస్ మెయిల్ ఇన్‌బాక్స్‌కి సందేశాలను జోడించడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
-    <string name="permlab_readVoicemail" msgid="8415201752589140137">"వాయిస్ మెయిల్‌లను చదవడం"</string>
-    <string name="permdesc_readVoicemail" msgid="8926534735321616550">"మీ వాయిస్ మెయిల్‌లను చదవడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
     <string name="permlab_writeGeolocationPermissions" msgid="5962224158955273932">"బ్రౌజర్ భౌగోళిక స్థానం అనుమతులను సవరించడం"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="1083743234522638747">"బ్రౌజర్ యొక్క భౌగోళిక స్థానం అనుమతులను సవరించడానికి అనువర్తనాన్ని అనుమతిస్తుంది. హానికరమైన అనువర్తనాలు ఏకపక్ష వెబ్ సైట్‌లకు స్థాన సమాచారాన్ని అనుమతించడానికి దీన్ని ఉపయోగించవచ్చు."</string>
-    <string name="permlab_packageVerificationAgent" msgid="5568139100645829117">"ప్యాకేజీలను ధృవీకరించడం"</string>
-    <string name="permdesc_packageVerificationAgent" msgid="8437590190990843381">"ప్యాకేజీ ఇన్‌స్టాల్ చేయవచ్చని ధృవీకరించడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
-    <string name="permlab_bindPackageVerifier" msgid="4187786793360326654">"ప్యాకేజీ తనిఖీదారుకు అనుబంధించడం"</string>
-    <string name="permdesc_bindPackageVerifier" msgid="3180741773233862126">"ప్యాకేజీ తనిఖీదారుల యొక్క అభ్యర్థనలు చేయడానికి హోల్డర్‌ను అనుమతిస్తుంది. సాధారణ అనువర్తనాలకు ఎప్పటికీ అవసరం ఉండదు."</string>
-    <string name="permlab_intentFilterVerificationAgent" msgid="1135788294400437497">"ఉద్దేశిత ఫిల్టర్‌ను ధృవీకరించడం"</string>
-    <string name="permdesc_intentFilterVerificationAgent" msgid="5853902808424716312">"ఉద్దేశిత ఫిల్టర్ ధృవీకరించబడిందో లేదో తనిఖీ చేయడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
-    <string name="permlab_bindIntentFilterVerifier" msgid="8567268159430779210">"ఉద్దేశిత ఫిల్టర్ వెరిఫైయర్‌కి నిర్బంధించడం"</string>
-    <string name="permdesc_bindIntentFilterVerifier" msgid="681128728719578778">"ఉద్దేశిత ఫిల్టర్ వెరిఫైయర్‌ల అభ్యర్థనలు చేయడానికి హోల్డర్‌ను అనుమతిస్తుంది. సాధారణ అనువర్తనాలకు ఎప్పటికీ అవసరం ఉండదు."</string>
-    <string name="permlab_serialPort" msgid="546083327654631076">"శ్రేణి పోర్ట్‌లను ప్రాప్యత చేయడం"</string>
-    <string name="permdesc_serialPort" msgid="2991639985224598193">"శ్రేణి నిర్వాహికి APIని ఉపయోగించి శ్రేణి పోర్ట్‌లను ప్రాప్యత చేయడానికి హోల్డర్‌ను అనుమతిస్తుంది."</string>
-    <string name="permlab_accessContentProvidersExternally" msgid="5077774297943409285">"కంటెంట్ ప్రదాతలను బాహ్యంగా ప్రాప్యత చేయడం"</string>
-    <string name="permdesc_accessContentProvidersExternally" msgid="4544346486697853685">"షెల్ నుండి కంటెంట్ ప్రదాతలను ప్రాప్యత చేయడానికి హోల్డర్‌ను అనుమతిస్తుంది. సాధారణ అనువర్తనాలకు ఎప్పటికీ అవసరం ఉండకూడదు."</string>
-    <string name="permlab_updateLock" msgid="3527558366616680889">"స్వయంచాలక పరికర నవీకరణలను నిరుత్సాహపరచడం"</string>
-    <string name="permdesc_updateLock" msgid="1655625832166778492">"పరికరాన్ని అప్‌గ్రేడ్ చేయడం కోసం పరస్పర ప్రభావ రహిత రీబూట్ చేయడానికి అనుకూల సమయం ఎప్పుడు అనేదాని గురించి సిస్టమ్‌కు సమాచారాన్ని అందించడానికి హోల్డర్‌ను అనుమతిస్తుంది."</string>
     <string name="save_password_message" msgid="767344687139195790">"మీరు బ్రౌజర్ ఈ పాస్‌వర్డ్‌ను గుర్తుపెట్టుకోవాలని కోరుకుంటున్నారా?"</string>
     <string name="save_password_notnow" msgid="6389675316706699758">"ఇప్పుడు కాదు"</string>
     <string name="save_password_remember" msgid="6491879678996749466">"గుర్తుంచుకో"</string>
@@ -1452,28 +1061,8 @@
     <string name="ext_media_nomedia_notification_message" product="nosdcard" msgid="6921126162580574143">"USB నిల్వ తీసివేయబడింది. కొత్త మీడియాను చొప్పించండి."</string>
     <string name="ext_media_nomedia_notification_message" product="default" msgid="3870120652983659641">"SD కార్డు తీసివేయబడింది. కొత్తదాన్ని చొప్పించండి."</string>
     <string name="activity_list_empty" msgid="1675388330786841066">"సరిపోలే కార్యాచరణలు కనుగొనబడలేదు."</string>
-    <string name="permlab_pkgUsageStats" msgid="8787352074326748892">"ఉపభాగం వినియోగ గణాంకాలను నవీకరించడం"</string>
-    <string name="permdesc_pkgUsageStats" msgid="1106612424254277630">"సేకరించిన అంశాల వినియోగ గణాంకాలను సవరించడానికి అనువర్తనాన్ని అనుమతిస్తుంది. సాధారణ అనువర్తనాల ద్వారా ఉపయోగించడానికి ఉద్దేశించినది కాదు."</string>
-    <string name="permlab_copyProtectedData" msgid="4341036311211406692">"కంటెంట్‌ను కాపీ చేయడం"</string>
-    <string name="permdesc_copyProtectedData" msgid="4390697124288317831">"కంటెంట్‌ను కాపీ చేయడం కోసం డిఫాల్ట్ కంటైనర్ సేవను అమలు చేయడానికి అనువర్తనాన్ని అనుమతిస్తుంది. సాధారణ అనువర్తనాల ద్వారా ఉపయోగించడానికి ఉద్దేశించినది కాదు."</string>
     <string name="permlab_route_media_output" msgid="1642024455750414694">"ప్రసార మాధ్యమ అవుట్‌పుట్‌ను మళ్లించడం"</string>
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"మీడియా అవుట్‌పుట్‌ను ఇతర బాహ్య పరికరాలకు మళ్లించడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
-    <string name="permlab_access_keyguard_secure_storage" msgid="7565552237977815047">"కీగార్డ్ సురక్షిత నిల్వను ప్రాప్యత చేయడం"</string>
-    <string name="permdesc_access_keyguard_secure_storage" msgid="5866245484303285762">"కీగార్డ్ సురక్షిత నిల్వను ప్రాప్యత చేయడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
-    <string name="permlab_control_keyguard" msgid="172195184207828387">"కీగార్డ్‌ను ప్రదర్శించడాన్ని మరియు దాచిపెట్టడాన్ని నియంత్రించడం"</string>
-    <string name="permdesc_control_keyguard" msgid="3043732290518629061">"కీగార్డ్‌ను నియంత్రించడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
-    <string name="permlab_trust_listener" msgid="1765718054003704476">"విశ్వసినీయ స్థితి మార్పులను వినడం."</string>
-    <string name="permdesc_trust_listener" msgid="8233895334214716864">"విశ్వసనీయ స్థితిలో చేసిన మార్పులను వినడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
-    <string name="permlab_provide_trust_agent" msgid="5465587586091358316">"విశ్వసనీయ ఏజెంట్‌ను అందించడం."</string>
-    <string name="permdesc_provide_trust_agent" msgid="3865702641053068148">"విశ్వసనీయ ఏజెంట్‌ను అందించడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
-    <string name="permlab_launch_trust_agent_settings" msgid="5859430082240410200">"విశ్వసనీయ ఏజెంట్ సెట్టింగ్‌ల మెనుని ప్రారంభించండి."</string>
-    <string name="permdesc_launch_trust_agent_settings" msgid="8185142708644913381">"విశ్వసనీయ ఏజెంట్ ప్రవర్తనను మార్చే కార్యాచరణను ప్రారంభించడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
-    <string name="permlab_bind_trust_agent_service" msgid="8242093169457695334">"విశ్వసనీయ ఏజెంట్ సేవకు అనుబంధించడం"</string>
-    <string name="permdesc_bind_trust_agent_service" msgid="7041930026024507515">"విశ్వసనీయ ఏజెంట్ సేవకు అనుబంధించడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
-    <string name="permlab_recovery" msgid="3157024487744125846">"నవీకరణ మరియు పునరుద్ధరణ సిస్టమ్‌తో పరస్పర చర్య చేయడం"</string>
-    <string name="permdesc_recovery" msgid="8511774533266359571">"పునరుద్ధరణ సిస్టమ్ మరియు సిస్టమ్ నవీకరణలతో పరస్పర చర్య చేయడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
-    <string name="permlab_manageMediaProjection" msgid="1120495449419929218">"మీడియా ప్రొజెక్షన్ సెషన్‌లను నిర్వహించడం"</string>
-    <string name="permdesc_manageMediaProjection" msgid="8053759147529492856">"మీడియా ప్రొజెక్షన్ సెషన్‌లను నిర్వహించడానికి అనువర్తనాన్ని అనుమతిస్తుంది. ఈ సెషన్‌లు ప్రదర్శన మరియు ఆడియో కంటెంట్‌లను క్యాప్చర్ చేయగల సామర్థ్యాన్ని అనువర్తనాలకు అందించగలవు. సాధారణ అనువర్తనాలకు ఎప్పటికీ అవసరం ఉండదు."</string>
     <string name="permlab_readInstallSessions" msgid="6165432407628065939">"ఇన్‌స్టాల్ సెషన్‌లను చదవడం"</string>
     <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"ఇన్‌స్టాల్ సెషన్‌లను చదవడానికి అనువర్తనాన్ని అనుమతిస్తుంది. ఇది సక్రియ ప్యాకేజీ ఇన్‌స్టాలేషన్‌ల గురించి వివరాలను చూడటానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"జూమ్ నియంత్రణ కోసం రెండుసార్లు తాకండి"</string>
@@ -1840,13 +1429,9 @@
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"అన్‌పిన్ చేయడానికి ముందు పిన్‌ కోసం అడుగు"</string>
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"అన్‌పిన్ చేయడానికి ముందు అన్‌లాక్ నమూనా కోసం అడుగు"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"అన్‌పిన్ చేయడానికి ముందు పాస్‌వర్డ్ కోసం అడుగు"</string>
-    <!-- no translation found for package_installed_device_owner (8420696545959087545) -->
-    <skip />
-    <!-- no translation found for package_deleted_device_owner (7650577387493101353) -->
-    <skip />
+    <string name="package_installed_device_owner" msgid="8420696545959087545">"మీ నిర్వాహకులు ఇన్‌స్టాల్ చేసారు"</string>
+    <string name="package_deleted_device_owner" msgid="7650577387493101353">"మీ నిర్వాహకులు తొలగించారు"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"బ్యాటరీ జీవితకాలాన్ని మెరుగుపరచడంలో సహాయపడటానికి, బ్యాటరీ సేవర్ మీ పరికరం పనితీరును తగ్గిస్తుంది మరియు వైబ్రేషన్‌ను, స్థాన సేవలను మరియు ఎక్కువ నేపథ్య డేటాను పరిమితం చేస్తుంది. ఇమెయిల్, మెసేజింగ్ మరియు సమకాలీకరణపై ఆధారపడే ఇతర అనువర్తనాలు మీరు వాటిని తెరిస్తే మినహా నవీకరించబడవు.\n\nమీ పరికరం ఛార్జ్ అవుతున్నప్పుడు బ్యాటరీ సేవర్ స్వయంచాలకంగా ఆఫ్ అవుతుంది."</string>
-    <string name="downtime_condition_summary" msgid="8761776337475705749">"మీ వృథా సమయం <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>కి ముగిసే వరకు"</string>
-    <string name="downtime_condition_line_one" msgid="8762708714645352010">"మీ వృథా సమయం ముగిసేవరకు"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
       <item quantity="other">%1$d నిమిషాల పాటు (<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g> వరకు)</item>
       <item quantity="one">ఒక నిమిషం పాటు (<xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g> వరకు)</item>
@@ -1865,9 +1450,17 @@
     </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> వరకు"</string>
     <string name="zen_mode_forever" msgid="7420011936770086993">"మీరు దీన్ని ఆఫ్ చేసే వరకు"</string>
+    <!-- no translation found for zen_mode_rule_name_combination (191109939968076477) -->
+    <skip />
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"కుదించండి"</string>
-    <string name="zen_mode_next_alarm_summary" msgid="5915140424683747372">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g>కి సెట్ చేసిన తదుపరి అలారం వరకు"</string>
-    <string name="zen_mode_next_alarm_line_one" msgid="5537042951553420916">"తదుపరి అలారం వరకు"</string>
+    <!-- no translation found for zen_mode_feature_name (289097150786114338) -->
+    <skip />
+    <!-- no translation found for zen_mode_downtime_feature_name (2626974636779860146) -->
+    <skip />
+    <!-- no translation found for zen_mode_default_weeknights_name (2069189413656431610) -->
+    <skip />
+    <!-- no translation found for zen_mode_default_weekends_name (2377398437072017011) -->
+    <skip />
     <string name="muted_by" msgid="6147073845094180001">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> ద్వారా మ్యూట్ చేయబడింది"</string>
     <string name="system_error_wipe_data" msgid="6608165524785354962">"మీ పరికరంతో అంతర్గత సమస్య ఏర్పడింది మరియు మీరు ఫ్యాక్టరీ డేటా రీసెట్ చేసే వరకు అస్థిరంగా ఉంటుంది."</string>
     <string name="system_error_manufacturer" msgid="8086872414744210668">"మీ పరికరంతో అంతర్గత సమస్య ఏర్పడింది. వివరాల కోసం మీ తయారీదారుని సంప్రదించండి."</string>
@@ -1877,6 +1470,11 @@
     <string name="stk_cc_ss_to_dial" msgid="2151304435775557162">"SS అభ్యర్థన డయల్ అభ్యర్థనగా సవరించబడింది."</string>
     <string name="stk_cc_ss_to_ussd" msgid="3951862188105305589">"SS అభ్యర్థన USSD అభ్యర్థనగా సవరించబడింది."</string>
     <string name="stk_cc_ss_to_ss" msgid="5470768854991452695">"SS అభ్యర్థన కొత్త SS అభ్యర్థనగా సవరించబడింది."</string>
+    <!-- no translation found for usb_midi_peripheral_name (7221113987741003817) -->
+    <skip />
     <string name="usb_midi_peripheral_manufacturer_name" msgid="7176526170008970168">"Android"</string>
-    <string name="usb_midi_peripheral_model_name" msgid="1959288763942653301">"USB పెరిఫెరాల్ పోర్ట్"</string>
+    <!-- no translation found for usb_midi_peripheral_product_name (4971827859165280403) -->
+    <skip />
+    <string name="floating_toolbar_open_overflow_description" msgid="4797287862999444631">"మరిన్ని ఎంపికలు"</string>
+    <string name="floating_toolbar_close_overflow_description" msgid="559796923090723804">"అతివ్యాప్తిని మూసివేస్తుంది"</string>
 </resources>

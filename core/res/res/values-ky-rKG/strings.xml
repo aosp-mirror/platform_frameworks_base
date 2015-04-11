@@ -197,14 +197,10 @@
   <string-array name="wfcOperatorErrorNotificationMessages">
   </string-array>
     <string name="wfcSpnFormat" msgid="8211621332478306568">"%s"</string>
-    <!-- no translation found for wifi_calling_off_summary (8720659586041656098) -->
-    <skip />
-    <!-- no translation found for wfc_mode_wifi_preferred_summary (1994113411286935263) -->
-    <skip />
-    <!-- no translation found for wfc_mode_cellular_preferred_summary (5920549484600758786) -->
-    <skip />
-    <!-- no translation found for wfc_mode_wifi_only_summary (2379919155237869320) -->
-    <skip />
+    <string name="wifi_calling_off_summary" msgid="8720659586041656098">"Өчүк"</string>
+    <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Wi-Fi тандалган"</string>
+    <string name="wfc_mode_cellular_preferred_summary" msgid="5920549484600758786">"Уюлдук тармак тандалган"</string>
+    <string name="wfc_mode_wifi_only_summary" msgid="2379919155237869320">"Wi-Fi гана"</string>
     <!-- no translation found for cfTemplateNotForwarded (1683685883841272560) -->
     <skip />
     <!-- no translation found for cfTemplateForwarded (1302922117498590521) -->
@@ -330,86 +326,43 @@
     <skip />
     <string name="user_owner_label" msgid="6465364741001216388">"Жеке колдономолор"</string>
     <string name="managed_profile_label" msgid="6260850669674791528">"Жумуш"</string>
-    <!-- no translation found for permgrouplab_costMoney (5429808217861460401) -->
+    <!-- no translation found for permgrouplab_contacts (3657758145679177612) -->
     <skip />
-    <string name="permgroupdesc_costMoney" msgid="3293301903409869495">"Акчаңызды сарптоочу нерселерди кылуу."</string>
-    <!-- no translation found for permgrouplab_messages (7521249148445456662) -->
+    <!-- no translation found for permgroupdesc_contacts (1437393511338346185) -->
     <skip />
-    <string name="permgroupdesc_messages" msgid="7821999071003699236">"SMS, электрондук почта жана башка билдирүүлөрүңүздү окуңуз жана жазыңыз."</string>
-    <!-- no translation found for permgrouplab_personalInfo (3519163141070533474) -->
+    <!-- no translation found for permgrouplab_location (7275582855722310164) -->
     <skip />
-    <string name="permgroupdesc_personalInfo" msgid="8426453129788861338">"Байланыш картаңызда сакталган, сиз тууралуу маалыматтарга түз жетки алуу."</string>
+    <!-- no translation found for permgroupdesc_location (536889867433972794) -->
+    <skip />
     <string name="permgrouplab_socialInfo" msgid="5799096623412043791">"Сиздин социалдык маалыматыңыз"</string>
     <string name="permgroupdesc_socialInfo" msgid="7129842457611643493">"Сиздин байланыштарыңыз жана социалдык байланыштарыңыз тууралуу маалыматтарга түз жетки алуу."</string>
-    <!-- no translation found for permgrouplab_location (635149742436692049) -->
-    <skip />
-    <string name="permgroupdesc_location" msgid="5704679763124170100">"Жайгашкан жериңизди байкайт."</string>
-    <!-- no translation found for permgrouplab_network (5808983377727109831) -->
-    <skip />
-    <string name="permgroupdesc_network" msgid="4478299413241861987">"Ар түрдүү түйүн мүмкүнчүлүктөрүнө жетки алуу."</string>
-    <string name="permgrouplab_bluetoothNetwork" msgid="1585403544162128109">"Bluetooth"</string>
-    <string name="permgroupdesc_bluetoothNetwork" msgid="5625288577164282391">"Түзмөктөргө жана түйүндөргө Bluetooth аркылуу жетки алуу."</string>
-    <string name="permgrouplab_audioSettings" msgid="8329261670151871235">"Аудио тууралоолору"</string>
-    <string name="permgroupdesc_audioSettings" msgid="2641515403347568130">"Аудио тууралоолорун өзгөртүү."</string>
-    <string name="permgrouplab_affectsBattery" msgid="6209246653424798033">"Батарейге таасир этет"</string>
-    <string name="permgroupdesc_affectsBattery" msgid="6441275320638916947">"Батарейди тез сарптоочу мүмкүнчүлүктөрдү колдонот."</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"Күнбарак"</string>
-    <string name="permgroupdesc_calendar" msgid="5777534316982184416">"Күнбаракка жана окуяларга түз жетки алуу."</string>
-    <string name="permgrouplab_dictionary" msgid="4148597128843641379">"Колдонуучунун сөздүгүн окуу"</string>
-    <string name="permgroupdesc_dictionary" msgid="7921166355964764490">"Колдонуучунун сөздүгүндөгү сөздөрдү окуу."</string>
-    <string name="permgrouplab_writeDictionary" msgid="8090237702432576788">"Колдонуучунун сөздүгүнө жазуу"</string>
-    <string name="permgroupdesc_writeDictionary" msgid="2711561994497361646">"Колдонуучунун сөздүгүнө сөздөрдү кошуу."</string>
+    <!-- no translation found for permgroupdesc_calendar (2116049656685591803) -->
+    <skip />
+    <!-- no translation found for permgrouplab_sms (228308803364967808) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_sms (3695085582674524761) -->
+    <skip />
+    <!-- no translation found for permgrouplab_dictionary (8114410334955871144) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_dictionary (7586787746354378335) -->
+    <skip />
     <string name="permgrouplab_bookmarks" msgid="1949519673103968229">"Бүктөмөлөр жана тарых"</string>
     <string name="permgroupdesc_bookmarks" msgid="4169771606257963028">"Бүктөмөлөргө же серепчи тарыхына түз жетки алуу."</string>
-    <string name="permgrouplab_deviceAlarms" msgid="6117704629728824101">"Ойготкуч"</string>
-    <string name="permgroupdesc_deviceAlarms" msgid="4769356362251641175">"Ойготкуч сааттын убактын орнотуу."</string>
-    <string name="permgrouplab_voicemail" msgid="4162237145027592133">"Үнкат"</string>
-    <string name="permgroupdesc_voicemail" msgid="2498403969862951393">"Үнкатка түз жетки алуу."</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"Микрофон"</string>
-    <string name="permgroupdesc_microphone" msgid="7106618286905738408">"Аудио жаздыруу үчүн микрофонго түз жетки алуу."</string>
+    <!-- no translation found for permgroupdesc_microphone (1296196977187629181) -->
+    <skip />
     <string name="permgrouplab_camera" msgid="4820372495894586615">"Камера"</string>
-    <string name="permgroupdesc_camera" msgid="2933667372289567714">"Сүрөт же видео тартуу үчүн камерага түз жетки алуу."</string>
-    <string name="permgrouplab_screenlock" msgid="8275500173330718168">"Бөгөттөөчү көшөгө"</string>
-    <string name="permgroupdesc_screenlock" msgid="7067497128925499401">"Түзмөгүңүздүн бөгөттөөчү көшөгөсүнүн иштөөсүнө таасир берүү мүмкүнчүлүгү."</string>
-    <string name="permgrouplab_appInfo" msgid="8028789762634147725">"Колдонмолоруңузга тиешелүү маалыматтар"</string>
-    <string name="permgroupdesc_appInfo" msgid="3950378538049625907">"Түзмөгүңүздөгү башка колдонмолордун иштөөсүнө таасир этүү мүмкүнчүлүгү."</string>
-    <string name="permgrouplab_wallpaper" msgid="3850280158041175998">"Тушкагаз"</string>
-    <string name="permgroupdesc_wallpaper" msgid="5630417854750540154">"Түзмөктүн тушкагазынын тууралоолорун өзгөртүү."</string>
-    <string name="permgrouplab_systemClock" msgid="406535759236612992">"Саат"</string>
-    <string name="permgroupdesc_systemClock" msgid="3944359833624094992">"Түзмөктүн убактысын же саат алкагын өзгөртүү."</string>
-    <string name="permgrouplab_statusBar" msgid="2095862568113945398">"Абал тилкеси"</string>
-    <string name="permgroupdesc_statusBar" msgid="6242593432226807171">"Түзмөктүн абал тилкесинин тууралоолорун өзгөртүү."</string>
-    <string name="permgrouplab_syncSettings" msgid="3341990986147826541">"Синхрондоштуруу тууралоолору"</string>
-    <string name="permgroupdesc_syncSettings" msgid="7603195265129031797">"Синхрондоштуруу тууралоолоруна жетки алуу."</string>
-    <!-- no translation found for permgrouplab_accounts (3359646291125325519) -->
+    <!-- no translation found for permgroupdesc_camera (2429930670410559293) -->
     <skip />
-    <!-- no translation found for permgroupdesc_accounts (4948732641827091312) -->
+    <!-- no translation found for permgrouplab_phone (5229115638567440675) -->
     <skip />
-    <!-- no translation found for permgrouplab_hardwareControls (7998214968791599326) -->
+    <!-- no translation found for permgroupdesc_phone (2016641188146068700) -->
     <skip />
-    <!-- no translation found for permgroupdesc_hardwareControls (4357057861225462702) -->
+    <!-- no translation found for permgrouplab_sensors (7416703484233940260) -->
     <skip />
-    <!-- no translation found for permgrouplab_phoneCalls (9067173988325865923) -->
+    <!-- no translation found for permgroupdesc_sensors (2987451839455524494) -->
     <skip />
-    <!-- no translation found for permgroupdesc_phoneCalls (7489701620446183770) -->
-    <skip />
-    <!-- no translation found for permgrouplab_systemTools (4652191644082714048) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_systemTools (8162102602190734305) -->
-    <skip />
-    <!-- no translation found for permgrouplab_developmentTools (3446164584710596513) -->
-    <skip />
-    <string name="permgroupdesc_developmentTools" msgid="7058828032358142018">"Колдонмо өндүрүүчүлөргө гана керектүү мүмкүнчүлүктөр."</string>
-    <string name="permgrouplab_display" msgid="4279909676036402636">"Башка Колдонмонун Графиктик Интерфейси"</string>
-    <string name="permgroupdesc_display" msgid="6051002031933013714">"Башка колдонмолордун графиктик интерфейсине таасир этүү."</string>
-    <!-- no translation found for permgrouplab_storage (1971118770546336966) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_storage (7442318502446874999) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_storage (9203302214915355774) -->
-    <skip />
-    <string name="permgrouplab_accessibilityFeatures" msgid="7919025602283593907">"Жеткиликтүүлүк мүмкүнчүлүктөрү"</string>
-    <string name="permgroupdesc_accessibilityFeatures" msgid="4205196881678144335">"Көмөкчү технология талап кылуучу мүмкүнчүлүктөр."</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Терезе мазмунун алуу"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Сиз иштеп жаткан терезенин мазмунун изилдөө."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Сыйпалап изилдөөнү жандыруу"</string>
@@ -437,16 +390,9 @@
     <string name="permdesc_receiveSms" msgid="6424387754228766939">"Колдонмого SMS билдирүүлөрүн кабыл алууга жана аларды иштетип чыгууга уруксат берет. Бул, колдонмо сизге билгизбестен түзмөгүңүзгө жөнөтүлгөн билдирүүлөрдү мониторлой же жок кыла алат дегенди билдирет."</string>
     <string name="permlab_receiveMms" msgid="1821317344668257098">"билдирүүлөрдү (MMS) кабыл алуу"</string>
     <string name="permdesc_receiveMms" msgid="533019437263212260">"Колдонмого MMS билдирүүлөрүн кабыл алууга жана аларды иштетип чыгууга уруксат берет. Бул, колдонмо сизге билгизбестен түзмөгүңүзгө жөнөтүлгөн билдирүүлөрдү мониторлой же жок кыла алат дегенди билдирет."</string>
-    <!-- no translation found for permlab_receiveEmergencyBroadcast (1803477660846288089) -->
-    <skip />
-    <string name="permdesc_receiveEmergencyBroadcast" msgid="848524070262431974">"Колдонмого өзгөчө кырдаалда таркатыла турган билдирүүлөрдү алуу жана иштетүү мүмкүнчүлүгүн берет. Бул уруксат тутумдук колдонмолорго гана берилет."</string>
-    <string name="permlab_readCellBroadcasts" msgid="1598328843619646166">"уюктук берүү билдирүүлөрүн окуу"</string>
-    <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"Колдонмого түзмөгүңүз кабыл алган уюк берүүнүн билдирүүлөрүн окууга жол берет. Шашылыш эскертүү билдирүүлөрү кээ бир жерлердеги өзгөчө кырдаалдар тууралу сизди эскертүү үчүн жөнөтүлөт. Зыяндуу колдономолор шашылыш эскертүүлөр берилип жатканда, сиздин түзмөктүн иштешине жолтоо болушу мүмкүн."</string>
     <!-- no translation found for permlab_sendSms (5600830612147671529) -->
     <skip />
     <string name="permdesc_sendSms" msgid="7094729298204937667">"Колдонмого SMS билдирүүлөрүн жөнөтүү уруксатын берет. Бул сиз күтпөгөн чыгымдарга алып келиши мүмкүн. Зыяндуу колдонмолор сиздин ырастооңузсуз билдирүүлөрдү жөнөтүп, көп чыгымдарга себепкер болушу мүмкүн."</string>
-    <string name="permlab_sendRespondViaMessageRequest" msgid="8713889105305943200">"билдирүү-аркылуу-жооп-берүү окуяларын жөнөтүү"</string>
-    <string name="permdesc_sendRespondViaMessageRequest" msgid="7107648548468778734">"Колдонмого кириш чалууларды билдирүү-аркылуу-жооп-берүү окуялары менен иштетүү сурамдарын башка баарлашуу колдонмолоруна жөнөтүү мүмкүнчүлүгүн берет."</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"билдирүүлөрүңүздү (SMS же MMS) окуу"</string>
     <string name="permdesc_readSms" product="tablet" msgid="2467981548684735522">"Колдонмого планшетиңизде же SIM-картаңызда сакталган SMS билдирүүлөрүңүздү окуганга уруксат берет. Бул колдонмого SMS билдирүүлөрүңүздү, алардын мазмунуна же конфиденциалдуулугуна карабастан, окууга уруксат берет."</string>
     <string name="permdesc_readSms" product="tv" msgid="5102425513647038535">"Колдонмого сыналгыңызда же SIM картаңызда сакталган SMS билдирүүлөрүн окуу мүмкүнчүлүгүн берет. Ушуну менен колдонмо бардык SMS билдирүүлөрүн, алардын мазмунуна же купуялуулугуна карабастан окуй алат."</string>
@@ -457,214 +403,25 @@
     <string name="permdesc_writeSms" product="default" msgid="7268668709052328567">"Колдонмого телефонуңузда же SIM картаңызда сакталган SMS билдирүүлөргө жазуу мүмкүнчүлүгүн берет. Кесепеттүү колдонмолор билдирүүлөрүңүздү жок кылып салышы мүмкүн."</string>
     <string name="permlab_receiveWapPush" msgid="5991398711936590410">"билдирүүлөрдү (WAP) кабыл алуу"</string>
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"Колдонмого WAP билдирүүлөрүн кабыл алууга жана аларды иштетип чыгууга уруксат берет. Бул, колдонмо сизге билгизбестен түзмөгүңүзгө жөнөтүлгөн билдирүүлөрдү мониторлой же жок кыла алат дегенди билдирет."</string>
-    <string name="permlab_receiveBluetoothMap" msgid="7593811487142360528">"Bluetooth билдирүүлөрүн алуу (MAP)"</string>
-    <string name="permdesc_receiveBluetoothMap" msgid="8656755936919466345">"Колдонмого Bluetooth MAP билдирүүлөрүн алуу жана иштеп чыгуу мүмкүнчүлүгүн берет. Демек, колдонмо түзмөгүңүздөгү билдирүүлөрдү сизге көрсөтпөстөн тескеп же жок кыла алат."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"иштеп жаткан колдонмолорду түшүрүп алуу"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"Колдонмого учурдагы жана акыркы убакытта пайдаланылган колдонмолор тууралуу  маалымат алууга уруксат берет. Бул колдонмого түзмөктө кандай колдонмолор колдонулаарын билип алууга жол бериши мүмкүн."</string>
-    <string name="permlab_startTasksFromRecents" msgid="8990073877885690623">"тапшырманы акыркылардан баштаңыз"</string>
-    <string name="permdesc_startTasksFromRecents" msgid="7382133554871222235">"Колдонмого ActivityManager.getRecentTaskList() кайрылып келген жансыз тапшырманы ишке киргизүү үчүн ActivityManager.RecentTaskInfo объектин пайдалануу мүмкүнчүлүгүн берет."</string>
-    <string name="permlab_interactAcrossUsers" msgid="7114255281944211682">"колдонуучулар менен иштешүү"</string>
-    <string name="permdesc_interactAcrossUsers" msgid="364670963623385786">"Колдонмого түзмөктөгү ар кандай колдонуучулардын атынан кыймыл-аракеттерди жүргүзүү уруксатын берет. Зыяндуу колдонмолор, муну менен колдонуучулар аарсындагы коргонду бузуп салышы мүмкүн."</string>
-    <string name="permlab_interactAcrossUsersFull" msgid="2567734285545074105">"колдонуучулар менен иштешүү үчүн толук лицензия"</string>
-    <string name="permdesc_interactAcrossUsersFull" msgid="376841368395502366">"Колдонуучулар арасында каалаган карым-катнаш түзүү уруксаты берилет."</string>
-    <string name="permlab_manageUsers" msgid="1676150911672282428">"колдонуучуларды башкаруу"</string>
-    <string name="permdesc_manageUsers" msgid="8409306667645355638">"Колдонмого түзмөктөгү колдонуучулар менен иштөөгө уруксат берет; анын ичине тизмек жаратуу, колдонуучуларды түзүү жана жок кылуу кирет."</string>
-    <string name="permlab_getDetailedTasks" msgid="6229468674753529501">"иштеп жаткан колдонмолордун маалыматтарын алуу"</string>
-    <string name="permdesc_getDetailedTasks" msgid="153824741440717599">"Колдонмого учурдагы жана акыркы убакытта пайдаланылган колдонмолор тууралуу кеңири маалымат алууга уруксат берет. Зыяндуу колдонмолор башка колдонмолор тууралуу жабык маалыматтарды чыгарып алышы мүмкүн."</string>
     <string name="permlab_reorderTasks" msgid="2018575526934422779">"иштеп жаткан колдонмолорду иреттештирүү"</string>
     <string name="permdesc_reorderTasks" msgid="7734217754877439351">"Колдонмо процесстерди фонго же алдыңкы планга жылдыруу уруксатын алат. Колдонмо муну сиздин ырастооңузсуз кыла алат."</string>
-    <string name="permlab_removeTasks" msgid="6821513401870377403">"иштеп жаткан колдонмолорду токтотуу"</string>
-    <string name="permdesc_removeTasks" msgid="1394714352062635493">"Колдонмо процесстерди өчүрүү жана алардын колдонмолорун токтотуу уруксатын алат. Зыяндуу колдонмолор башка колдонмолордун иштөөсүнө жолтоо болушу мүмкүн."</string>
-    <string name="permlab_manageActivityStacks" msgid="7391191384027303065">"иш-чаралар стектерин башкаруу"</string>
-    <string name="permdesc_manageActivityStacks" msgid="1615881933034084440">"Колдонмого башка колдонмолордо иштеген иш-чаралардын стектерин кошуу, өчүрүү, жана өзгөртүү мүмкүнчүлүгүн берет. Зыяндуу колдонмолор башка колдонмолордун иштөөсүнө жолтоо кылышы мүмкүн."</string>
-    <string name="permlab_startAnyActivity" msgid="2918768238045206456">"аракеттерди иштетүү"</string>
-    <string name="permdesc_startAnyActivity" msgid="997823695343584001">"Колдонмого экспорттолгон абалына же уруксаттардын коргоосуна карабастан каалаган аракеттерди жүргүзүүгө жол берет."</string>
-    <string name="permlab_setScreenCompatibility" msgid="6975387118861842061">"экранды сыйыштыруу тартибин өзгөртүү"</string>
-    <string name="permdesc_setScreenCompatibility" msgid="692043618693917374">"Колдонмого башка колдонмолордун экранга сыйыштыруу тартибин өзгөртүү уруксатын берет. Зыяндуу колдонмолор башка колдонмолордун иштөөсүнө тоскоолдук кылышы мүмкүн."</string>
-    <string name="permlab_setDebugApp" msgid="3022107198686584052">"колдонмонун мүчүлүштүктөрүн оңдоону иштетүү"</string>
-    <string name="permdesc_setDebugApp" msgid="4474512416299013256">"Колдонмого башка колдонмону жөндөө же иштетүү мүмкүнчүлүгүн берет. Зыяндуу колдонмолор муну башка колдонмолорду токтотуш үчүн колдонушат."</string>
-    <string name="permlab_changeConfiguration" msgid="4162092185124234480">"системдик дисплейдин тууралоолорун өзгөртүү"</string>
-    <string name="permdesc_changeConfiguration" msgid="4372223873154296076">"Колдонмого тил же тамганын чоңдугу сыяктуу учурдагы конфигурацияларды өзгөртүүгө уруксат берет."</string>
     <!-- no translation found for permlab_enableCarMode (5684504058192921098) -->
     <skip />
     <string name="permdesc_enableCarMode" msgid="4853187425751419467">"Колдонмого унаа режимин иштетүү мүмкүнчүлүгүн берет."</string>
     <string name="permlab_killBackgroundProcesses" msgid="3914026687420177202">"башка колдонмолорду жабуу"</string>
     <string name="permdesc_killBackgroundProcesses" msgid="4593353235959733119">"Колдонмого башка колдонмолордун фондо иштеп жаткан процесстерин токтотуу уруксатын берет. Бул башка колдонмолордун иштебей калышына алып келиши мүмкүн."</string>
-    <string name="permlab_forceStopPackages" msgid="2329627428832067700">"башка колдонмолорду мажбурлап токтотуу"</string>
-    <string name="permdesc_forceStopPackages" msgid="5253157296183940812">"Колдонмого башка колдонмолорду күч менен токтотуу мүмкүнчүлүгүн берет."</string>
-    <string name="permlab_forceBack" msgid="652935204072584616">"колдонмону мажбурлап жабуу"</string>
-    <string name="permdesc_forceBack" msgid="3892295830419513623">"Колдонмого артыкчылыктуу аракетти мажбурлап жабуу жана кайтаруу мүмкүнчүлүгүн берет. Кадимки колдонмолорго эч качан талап кылынбайт."</string>
-    <!-- no translation found for permlab_dump (1681799862438954752) -->
-    <skip />
-    <string name="permdesc_dump" msgid="1778299088692290329">"Колдонмого тутумдун ички абалын түшүрүп алуу мүмкүнчүлүгүн берет. Кесепеттүү колдонмолор адатта өзүлөрүнө кереги жок купуя жана коопсуздук маалыматты түшүрүп алышы мүмкүн."</string>
-    <!-- no translation found for permlab_retrieve_window_content (8022588608994589938) -->
-    <skip />
-    <string name="permdesc_retrieve_window_content" msgid="3193269069469700265">"Колдонмого жигердүү терезенин мазмунун түшүрүп алуу мүмкүнчүлүгүн берет. Кесепеттүү колдонмолор терезенин мазмунун бүтүн бойдон түшүрүп алып, сырсөздөрдөн башка, бүтүндөй текстти изилдеп чыгышы мүмкүн."</string>
-    <string name="permlab_temporary_enable_accessibility" msgid="2312612135127310254">"атайын мүмкүнчүлүктөрдү убактылуу жандыруу"</string>
-    <string name="permdesc_temporary_enable_accessibility" msgid="8079456293182975464">"Колдонмого атайын мүмкүнчүлүктөрдү убактылуу иштетүү уруксатын берет. Зыяндуу колдонмолор, колдонуучунун ырастоосу жок эле, атайын мүмкүнчүлүктөрдү иштетиши мүмкүн."</string>
-    <string name="permlab_retrieveWindowToken" msgid="7154762602367758602">"терезе энбелгисин түшүрүп алуу"</string>
-    <string name="permdesc_retrieveWindowToken" msgid="668173747687795074">"Колдонмого терезе энбелгисин түшүрүп алуу мүмкүнчүлүгүн берет. Кесепеттүү колдонмолор тутумдун атынан колдонмонун терезесинде уруксатсыз аракеттерди аткарышы мүмкүн."</string>
-    <string name="permlab_frameStats" msgid="7056374987314361639">"алкак статистикасын түшүрүп алуу"</string>
-    <string name="permdesc_frameStats" msgid="4758001089491284919">"Колдонмого алкак статистикасын топтоо мүмкүнчүлүгүн берет. Кесепеттүү колдонмолор башка колдонмолордун терезелеринен алкак статистикасына көз салышы мүмкүн."</string>
-    <string name="permlab_filter_events" msgid="8675535648807427389">"окуяларды электөө"</string>
-    <string name="permdesc_filter_events" msgid="8006236315888347680">"Колдонмого киргизүү элегин каттап коюп, бардык колдонуучулардын окуяларын даректерине жеткизбей электөө уруксатын берет. Зыяндуу колдонмолор, колдонуучунун катышуусуз системанын колдонуучу интерфейсин башкара алышат."</string>
-    <!-- no translation found for permlab_shutdown (7185747824038909016) -->
-    <skip />
-    <!-- no translation found for permdesc_shutdown (7046500838746291775) -->
-    <skip />
-    <!-- no translation found for permlab_stopAppSwitches (4138608610717425573) -->
-    <skip />
-    <string name="permdesc_stopAppSwitches" msgid="8262195802582255021">"Колдонуучуга башка колдонмого которулууга мүмкүнчүлүк бербейт."</string>
-    <string name="permlab_getTopActivityInfo" msgid="2537922311411546016">"учурдагы колдонмо б-ча маалымат"</string>
-    <string name="permdesc_getTopActivityInfo" msgid="2512448855496067131">"Ээсине учурдагы колдонмо боюнча жеке маалыматты экрандан көрсөтүү аркылуу алуу мүмкүнчүлүгүн берет."</string>
-    <string name="permlab_runSetActivityWatcher" msgid="892239094867182656">"Ишке киргизилип жаткан колдонмону башкаруу жана көзөмөлдөө"</string>
-    <string name="permdesc_runSetActivityWatcher" msgid="6003603162578577406">"Колдонмого тутумдун иш-аракеттерди кантип ишке киргизиле тургандыгын башкарып, көзөмөлдөө мүмкүнчүлүгүн берет. Кесепеттүү колдонмолор тутумду толугу менен жарактан чыгарып салышы мүмкүн. Бул уруксат кадимки колдонуу эмес, иштеп чыгуу максаттарында гана берилет."</string>
-    <!-- no translation found for permlab_broadcastPackageRemoved (2576333434893532475) -->
-    <skip />
-    <string name="permdesc_broadcastPackageRemoved" msgid="6621901216207931089">"Колдонмого колдонмонун топтомунун жок кылынгандыгы тууралуу эскертмени таркатуу мүмкүнчүлүгүн берет. Кесепеттүү колдонмолор бул мүмкүнчүлүктөн пайдаланып, иштеп жаткан колдонмолорду \"өлтүрүп\" салышы ыктымал."</string>
-    <!-- no translation found for permlab_broadcastSmsReceived (5689095009030336593) -->
-    <skip />
-    <string name="permdesc_broadcastSmsReceived" msgid="4152037720034365492">"Колдонмого SMS билдирүүсүнүн алынгандыгы тууралуу эскертмени таркатуу мүмкүнчүлүгүн берет. Кесепеттүү колдонмолор бул мүмкүнчүлүктөн пайдаланып, алынып жаткан SMS билдирүүлөрүн бурмалап салышы ыктымал."</string>
-    <!-- no translation found for permlab_broadcastWapPush (3145347413028582371) -->
-    <skip />
-    <string name="permdesc_broadcastWapPush" msgid="4783402525039442729">"Колдонмого WAP PUSH билдирүүсүнүн алынгандыгы тууралуу эскертмени таркатуу мүмкүнчүлүгүн берет. Кесепеттүү колдонмолор бул мүмкүнчүлүктөн пайдаланып, алынып жаткан MMS билдирүүлөрүн бурмалап же веббеттин мазмунун башка кесепеттүү мазмундар менен алмаштырып салышы ыктымал."</string>
-    <!-- no translation found for permlab_setProcessLimit (2451873664363662666) -->
-    <skip />
-    <string name="permdesc_setProcessLimit" msgid="7318061314040879542">"Колдонмого иштетиле турган процесстердин басымдуу көпчүлүгүн көзөмөлдөө мүмкүнчүлүгүн берет. Кадимки колдонмолорго эч качан талап кылынбайт."</string>
-    <string name="permlab_setAlwaysFinish" msgid="550958507798796965">"фондогу колдонмолорду токтотуу"</string>
-    <string name="permdesc_setAlwaysFinish" msgid="7471310652868841499">"Колдонмого аракеттер фонго өтөөрү менен, алардын аяктаганын текшерүү мүмкүнчүлүгүн берет. Кадимки колдонмолорго эч качан талап кылынбайт."</string>
-    <string name="permlab_batteryStats" msgid="2789610673514103364">"батарей статистикасын окуу"</string>
-    <string name="permdesc_batteryStats" msgid="5897346582882915114">"Колдонмого учурдагы батарей кубатынын аздыгы тууралуу берилиштерди окуганга уруксат берет. Колдонмого сиз пайдаланып жаткан колдонмолор тууралуу кеңири маалыматтарды алууга жол берет."</string>
-    <string name="permlab_updateBatteryStats" msgid="3719689764536379557">"батарей статистикасын өзгөртүү"</string>
-    <string name="permdesc_updateBatteryStats" msgid="6862817857178025002">"Колдонмого чогултулган батарей статистикасын өзгөртүү уруксатын берет. Жөнөкөй колдонмолор үчүн эмес."</string>
-    <string name="permlab_getAppOpsStats" msgid="1508779687436585744">"колдонмонун иштөө статистикасын алуу"</string>
-    <string name="permdesc_getAppOpsStats" msgid="6243887041577912877">"Колдонмого анын иштөөсү боюнча статистика алуу мүмкүнчүлүгүн берет. Жөнөкөй колдонмолор үчүн эмес."</string>
-    <string name="permlab_updateAppOpsStats" msgid="8829097373851521505">"колдонмонун иштөө статистикасын өзгөртүү"</string>
-    <string name="permdesc_updateAppOpsStats" msgid="50784596594403483">"Колдонмого өзүнүн иштөөсү боюнча чогултулган статистиканы өзгөртүү мүмкүнчүлүгүн берет. Жөнөкөй колдонмолор үчүн эмес."</string>
-    <!-- no translation found for permlab_backup (470013022865453920) -->
-    <skip />
-    <string name="permdesc_backup" msgid="6912230525140589891">"Колдонмого тутумдун камдык көчүрмөсүн сактоо жана калыбына келтирүү механизмин көзөмөлдөө мүмкүнчүлүгүн берет. Кадимки колдонмолор үчүн эмес."</string>
-    <!-- no translation found for permlab_confirm_full_backup (5557071325804469102) -->
-    <skip />
-    <string name="permdesc_confirm_full_backup" msgid="1748762171637699562">"Колдонмого UI ырастамасынын камдык көчүрмөсүн толугу менен ишке киргизүү мүмкүнчүлүгүн берет. Бир дагы колдонмодо колдонулбайт."</string>
-    <!-- no translation found for permlab_internalSystemWindow (2148563628140193231) -->
-    <skip />
-    <string name="permdesc_internalSystemWindow" msgid="7458387759461466397">"Колдонмого ички системдик колдонуучунун интерфейси колдонуу үчүн түзүлгөн терезелерди жаратуу уруксатын берет. Жөнөкөй колдонмолор үчүн эмес."</string>
     <string name="permlab_systemAlertWindow" msgid="3543347980839518613">"башка колдонмолордон алып өтүү"</string>
     <string name="permdesc_systemAlertWindow" msgid="8584678381972820118">"Колдонмого башка колдонмолордун же колдонуучу интерфейсинин бөлүктөрүнүн үстүнө графика жайгаштыруу уруксатын берет. Бул колдонмолорду пайдаланганга тоскоол кылышы же сиз көрүп жаткан нерселердин көрүнүшүн өзгөртүшү мүмкүн."</string>
-    <!-- no translation found for permlab_setAnimationScale (2805103241153907174) -->
-    <skip />
-    <string name="permdesc_setAnimationScale" msgid="7690063428924343571">"Колдонмого телефондун анимацияларынын ылдамдыгын каалаган убакта өзгөртүү (анимацияларды ылдамыраак же жайыраак кылат) уруксатын берет."</string>
-    <string name="permlab_manageAppTokens" msgid="1286505717050121370">"колдонмо энбелгилерин башкаруу"</string>
-    <string name="permdesc_manageAppTokens" msgid="8043431713014395671">"Колдонмого адаттагы Z-буйрутмаларынан кыйгап өтүп, өз энбелгилерин түзүү жана башкаруу мүмкүнчүлүгүн берет. Кадимки колдонмолорго эч качан талап кылынбайт."</string>
-    <string name="permlab_freezeScreen" msgid="4708181184441880175">"экранды катыруу"</string>
-    <string name="permdesc_freezeScreen" msgid="8558923789222670064">"Колдонмого толук экран абалына өтүш үчүн, экранды убактылуу катыруу уруксатын берет."</string>
-    <!-- no translation found for permlab_injectEvents (1378746584023586600) -->
-    <skip />
-    <string name="permdesc_injectEvents" product="tablet" msgid="206352565599968632">"Колдонмого өзүнүн киргизилген окуяларын (баскычты басуулар ж.б.) башка колдонмолорго өткөрүү мүмкүнчүлүгүн берет. Кесепеттүү колдонмолор бул мүмкүнчүлүктөн пайдаланып планшетти тартып алышы мүмкүн."</string>
-    <string name="permdesc_injectEvents" product="tv" msgid="4681361983270791611">"Колдонмого өз киргизүү окуяларын (баскыч басуулар, ж.б.) башка колдонмолорго жеткирүү мүмкүнчүлүгүн берет. Зыянкеч колдонмолор ушуну менен сыналгыны тартып алышы мүмкүн."</string>
-    <string name="permdesc_injectEvents" product="default" msgid="653128057572326253">"Колдонмого өзүнүн киргизилген окуяларын (баскычты басуулар ж.б.) башка колдонмолорго өткөрүү мүмкүнчүлүгүн берет. Кесепеттүү колдонмолор бул мүмкүнчүлүктөн пайдаланып телефонду тартып алышы мүмкүн."</string>
-    <!-- no translation found for permlab_readInputState (469428900041249234) -->
-    <skip />
-    <string name="permdesc_readInputState" msgid="8387754901688728043">"Колдонмого башка колдонмодо иштеп жатканда да (мисалы, сырсөздү терип жатканда) басылып жаткан баскычтарды көрүү мүмкүнчүлүгүн берет. Кадимки колдонмолорго эч качан талап кылынбайт."</string>
-    <!-- no translation found for permlab_bindInputMethod (3360064620230515776) -->
-    <skip />
-    <string name="permdesc_bindInputMethod" msgid="3250440322807286331">"Кармоочуга киргизүү ыкмасынын жогорку деңгээлдеги интерфейсине жалгашуу мүмкүнчүлүгүн берет. Кадимки колдонмолорго эч качан талап кылынбайт."</string>
-    <string name="permlab_bindAccessibilityService" msgid="5357733942556031593">"атайын мүмкүнчүлүктөр кызматына туташуу"</string>
-    <string name="permdesc_bindAccessibilityService" msgid="7034615928609331368">"Ээсине атайын мүмкүнчүлүктөр кызматынын жогорку деңгээл интерфейсине туташуу уруксатын берет. Жалпыга багышталган колдонмолордо эч качан колдонулбашы керек."</string>
-    <string name="permlab_bindPrintService" msgid="8462815179572748761">"принтер-кызматына байланыштыруу"</string>
-    <string name="permdesc_bindPrintService" msgid="7960067623209111135">"Ээсине принтер-сервистин жогорку деңгээл интерфейсине туташуу мүмкүнчүлүгүн берет. Жалпыга багышталган колдонмолордо эч качан колдонулбашы керек."</string>
-    <string name="permlab_bindPrintSpoolerService" msgid="6807762783744125954">"принтер буфери кызматына байланыштыруу"</string>
-    <string name="permdesc_bindPrintSpoolerService" msgid="3680552285933318372">"Ээсине принтер буфери кызматынын жогорку деңгээл интерфейсине туташуу мүмкүнчүлүгүн берет. Жалпыга багышталган колдонмолордо эч качан колдонулбашы керек."</string>
-    <string name="permlab_bindNfcService" msgid="2752731300419410724">"NFC кызматына байланыштыруу"</string>
-    <string name="permdesc_bindNfcService" msgid="6120647629174066862">"Ээсине NFC-карталарды эмуляциялаган колдонмолорду туташтыруу мүмкүнчүлүгүн берет. Жалпыга багышталган колдонмолордо эч качан колдонулбашы керек."</string>
-    <string name="permlab_bindTextService" msgid="7358378401915287938">"билдирүүлөр кызматына байлаштыруу"</string>
-    <string name="permdesc_bindTextService" msgid="8151968910973998670">"Кармоочуга текст кызматынын жогорку деңгээлдеги интерфейсине жалгашуу мүмкүнчүлүгүн берет(М.: SpellCheckerService). Кадимки колдонмолорго эч качан талап кылынбайт."</string>
-    <string name="permlab_bindVpnService" msgid="4708596021161473255">"VPN кзыматына байлаштыруу"</string>
-    <string name="permdesc_bindVpnService" msgid="2067845564581693905">"Кармоочуга Vpn кызматынын жогорку деңгээлдеги интерфейсине жалгашуу мүмкүнчүлүгүн берет. Кадимки колдонмолорго эч качан талап кылынбайт."</string>
-    <!-- no translation found for permlab_bindWallpaper (8716400279937856462) -->
-    <skip />
-    <string name="permdesc_bindWallpaper" msgid="7108428692595491668">"Кармоочуга тушкагаздын жогорку деңгээлдеги интерфейсине жалгашуу мүмкүнчүлүгүн берет. Кадимки колдонмолорго эч качан талап кылынбайт."</string>
-    <string name="permlab_bindVoiceInteraction" msgid="5334852580713715068">"үн интеракторуна жалгаштыруу"</string>
-    <string name="permdesc_bindVoiceInteraction" msgid="2345721766501778101">"Кармоочуга үн аракеттер кызматынын жогорку деңгээлдеги интерфейсине жалгашуу мүмкүнчүлүгүн берет. Кадимки колдонмолорго эч качан талап кылынбайт."</string>
-    <string name="permlab_manageVoiceKeyphrases" msgid="1252285102392793548">"үн ачкыч сөздөрүн башкаруу"</string>
-    <string name="permdesc_manageVoiceKeyphrases" msgid="8476560722907530008">"Колдонуучуга айтылган шилтем сөздү табуу үчүн ачкыч сөздөрдү башкаруу мүмкүнчүлүгүн берет. Кадимки колдонмолорго талап кылынбайт."</string>
-    <string name="permlab_bindRemoteDisplay" msgid="1782923938029941960">"аралыктагы дисплейге байланыштыруу"</string>
-    <string name="permdesc_bindRemoteDisplay" msgid="1261242718727295981">"Ээсине аралыктагы дисплейдин жогорку деңгээл интерфейсине туташуу мүмкүнчүлүгүн берет. Жалпыга багышталган колдонмолордо эч качан колдонулбашы керек."</string>
-    <!-- no translation found for permlab_bindRemoteViews (5697987759897367099) -->
-    <skip />
-    <string name="permdesc_bindRemoteViews" msgid="4717987810137692572">"Кармоочуга виджет кызматынын жогорку деңгээлдеги интерфейсине жалгашуу мүмкүнчүлүгүн берет. Кадимки колдонмолорго эч качан талап кылынбайт."</string>
-    <string name="permlab_bindRouteProvider" msgid="4869394607915096847">"багыт берүүчү кызматка жалгаштыруу"</string>
-    <string name="permdesc_bindRouteProvider" msgid="4703804520859960329">"Кармоочуга катталган багыт берүүчүлөргө жалгашуу мүмкүнчүлүгүн берет. Кадимки колдонмолорго эч качан талап кылынбайт."</string>
-    <!-- no translation found for permlab_bindDeviceAdmin (8704986163711455010) -->
-    <skip />
-    <string name="permdesc_bindDeviceAdmin" msgid="569715419543907930">"Кармоочуга түзмөк администраторуна ниетин билдирүү мүмкүнчүлүгүн берет. Кадимки колдонмолорго эч качан талап кылынбайт."</string>
-    <string name="permlab_bindTvInput" msgid="5601264742478168987">"TV берүүсүнө жалгаштыруу"</string>
-    <string name="permdesc_bindTvInput" msgid="2371008331852001924">"Кармоочуга теле сигналдын жогорку деңгээлдеги интерфейсине жалгашуу мүмкүнчүлүгүн берет. Кадимки колдонмолорго эч качан талап кылынбайт."</string>
-    <string name="permlab_modifyParentalControls" msgid="4611318225997592242">"ата-энелик көзөмөл чараларын өзгөртүү"</string>
-    <string name="permdesc_modifyParentalControls" msgid="7438482894162282039">"Кармоочуга тутумдун ата-энелик көзөмөл дайындарын өзгөртүү мүмкүнчүлүгүн берет. Кадимки колдонмолорго эч качан талап кылынбайт."</string>
-    <string name="permlab_manageDeviceAdmins" msgid="4248828900045808722">"түзмөк админдерин кошуу же алып салуу"</string>
-    <string name="permdesc_manageDeviceAdmins" msgid="5025608167709942485">"Түзмөктүн ээсине учурдагы администраторлорду кошуу же алып салуу мүмкүнчүлүгүн берет. Жалпыга багышталган колдонмолордо эч качан колдонулбашы керек."</string>
-    <!-- no translation found for permlab_setOrientation (3365947717163866844) -->
-    <skip />
-    <string name="permdesc_setOrientation" msgid="3046126619316671476">"Колдонмого экрандын айлануусун каалаган убакта өзгөртүү мүмкүнчүлүгүн берет. Кадимки колдонмолорго эч качан талап кылынбайт."</string>
-    <!-- no translation found for permlab_setPointerSpeed (9175371613322562934) -->
-    <skip />
-    <string name="permdesc_setPointerSpeed" msgid="6866563234274104233">"Колдонмого чычкандын же сенсордук көрсөткүчтүн ылдамдыгын өзгөртүү мүмкүнчүлүгүн берет. Кадимки колдонмолорго эч качан талап кылынбайт."</string>
-    <string name="permlab_setKeyboardLayout" msgid="4778731703600909340">"тергич жайгашуусун өзгөртүү"</string>
-    <string name="permdesc_setKeyboardLayout" msgid="8480016771134175879">"Колдонмого тергич жайгашуусун өзгөртүүгө жол берет. Жалпыга багышталган колдонмолордо колдонулбашы керек."</string>
-    <string name="permlab_signalPersistentProcesses" msgid="4539002991947376659">"колдонмолорго Linux сигналдарын жөнөтүү"</string>
-    <string name="permdesc_signalPersistentProcesses" msgid="4896992079182649141">"Колдонмого алынган сигналды бардык туруктуу процесстерге жөнөтүүнү өтүнүү мүмкүнчүлүгүн берет."</string>
     <string name="permlab_persistentActivity" msgid="8841113627955563938">"колдонмону үзгүлтүксүз иштетүү"</string>
     <string name="permdesc_persistentActivity" product="tablet" msgid="8525189272329086137">"Колдонмого өзүнүн бөлүктөрүн эстутумда туруктуу кармоого уруксат берет.Бул эстутумдун башка колдонмолорго жетиштүүлүгүн чектеши жана телефондун иштешин жайлатышы мүмкүн."</string>
     <string name="permdesc_persistentActivity" product="tv" msgid="5086862529499103587">"Колдонмого эстутумдагы өз бөлүктөрүн туруктуу кылуу мүмкүнчүлүгүн берет. Ушуну менен сыналгы жай иштеп, башка колдонмолорго жеткиликтүү эстутум чектелиши мүмкүн."</string>
     <string name="permdesc_persistentActivity" product="default" msgid="4384760047508278272">"Колдонмого  өзүнүн бөлүктөрүн эстутумда туруктуу кармоого уруксат берет. Бул эстутумдун башка колдонмолорго жетиштүүлүгүн чектеши жана телефондун иштешин жайлатышы мүмкүн."</string>
-    <string name="permlab_deletePackages" msgid="184385129537705938">"колдонмолорду жок кылуу"</string>
-    <string name="permdesc_deletePackages" msgid="7411480275167205081">"Колдонмого Android топтомдорун жок кылуу мүмкүнчүлүгүн берет. Кесепеттүү колдонмолор бул мүмкүнчүлүктөн пайдаланып маанилүү колдонмолорду жок кылып салышы ыктымал."</string>
-    <string name="permlab_clearAppUserData" msgid="274109191845842756">"башка колдонмо дайындарын жок кылуу"</string>
-    <string name="permdesc_clearAppUserData" msgid="4625323684125459488">"Колдонмого колдонуучунун дайындарын тазалоо мүмкүнчүлүгүн берет."</string>
-    <string name="permlab_deleteCacheFiles" msgid="3128665571837408675">"башка колдонмолордун кэштерин жок кылуу"</string>
-    <string name="permdesc_deleteCacheFiles" msgid="3812998599006730196">"Колдонмого кэш файлдарын жок кылуу мүмкүнчүлүгүн берет."</string>
     <string name="permlab_getPackageSize" msgid="7472921768357981986">"колдонмо сактагычынын мейкиндигин өлчөө"</string>
     <string name="permdesc_getPackageSize" msgid="3921068154420738296">"Колдонмого өз кодун, дайындарын жана кэш өлчөмдөрүн түшүрүп алуу мүмкүнчүлүгүн берет"</string>
-    <string name="permlab_installPackages" msgid="2199128482820306924">"колдонмолорду түз орнотуу"</string>
-    <string name="permdesc_installPackages" msgid="5628530972548071284">"Колдонмого жаңы же жаңыртылган Android топтомдорун орнотуу мүмкүнчүлүгүн берет. Кесепеттүү колдонмолор бул мүмкүнчүлүктөн пайдаланышып күчтүү уруксаттары бар жаңы колдонмолорду кошуп коюшу мүмкүн."</string>
-    <string name="permlab_clearAppCache" msgid="7487279391723526815">"бардык колдонмо кэш дайындарын жок кылуу"</string>
-    <string name="permdesc_clearAppCache" product="tablet" msgid="8974640871945434565">"Колдонмого планшеттин сактагычын башка колдонмолордун кэш директорияларындагы файлдарды жок кылуу аркылуу тазалоого уруксат берет. Бул башка колдонмолордун башында жайыраак иштешине алып келиши мүмкүн, анткени алар өздөрүнүн берилиштерин кайрадан топтошу керек болот."</string>
-    <string name="permdesc_clearAppCache" product="tv" msgid="244647416303997022">"Колдонмого башка колдонмолордогу кэш каталогдорунун файлдарын жок кылуу менен, сыналгы сактагычында орун бошотуу мүмкүнчүлүгүн берет. Ушуну менен башка колдонмолордун дайындары кайра калыбына келтирилгендиктен, алар жайыраак иштеп башташы мүмкүн."</string>
-    <string name="permdesc_clearAppCache" product="default" msgid="2459441021956436779">"Колдонмого телефондун сактагычын башка колдонмолордун кэш директорияларындагы файлдарды жок кылуу аркылуу тазалоого уруксат берет. Бул башка колдонмолордун башында жайыраак иштешине алып келиши мүмкүн, анткени алар өздөрүнүн берилиштерин кайрадан топтошу керек болот."</string>
-    <string name="permlab_movePackage" msgid="3289890271645921411">"колдонмо ресурстарын жылдыруу"</string>
-    <string name="permdesc_movePackage" msgid="319562217778244524">"Колдонмого колдонмо ресурстарын ичкиден медиадан сырткысына жана тескерисинче жылдыруу мүмкүнчүлүгүн берет."</string>
-    <!-- no translation found for permlab_readLogs (6615778543198967614) -->
-    <skip />
-    <string name="permdesc_readLogs" product="tablet" msgid="82061313293455151">"Колдонмого тутумдагы ар кандай таржымал файлдарын окуу мүмкүнчүлүгүн берет. Ушуну менен планшетте аткарылып жаткан аракеттер, ошондой эле жеке дайындар жөнүндө жалпы маалымат алып турсаңыз болот."</string>
-    <string name="permdesc_readLogs" product="tv" msgid="9023899974809538988">"Колдонмого тутумдагы ар түрдүү таржымал файлдарын окуу мүмкүнчүлүгүн берет. Ушуну менен, сыналгыда жасалып жаткан аракеттериңиз тууралуу жалпы маалыматты, ошондой эле жеке же купуя маалыматты көрө аласыз."</string>
-    <string name="permdesc_readLogs" product="default" msgid="2063438140241560443">"Колдонмого тутумдагы ар кандай таржымал файлдарын окуу мүмкүнчүлүгүн берет. Ушуну менен телефондо аткарылып жаткан аракеттер, ошондой эле жеке дайындар жөнүндө жалпы маалымат алып турсаңыз болот."</string>
-    <string name="permlab_anyCodecForPlayback" msgid="715805555823881818">"ойнотуу үчүн болгон медиа декодерлерди колдонуу"</string>
-    <string name="permdesc_anyCodecForPlayback" msgid="8283912488433189010">"Колдонмого орнотулган медиа декодерлерди пайдаланып ойнотууга уруксат берет."</string>
-    <string name="permlab_manageCaCertificates" msgid="1678391896786882014">"ишенимдүү сертификаттарды башкаруу"</string>
-    <string name="permdesc_manageCaCertificates" msgid="4015644047196937014">"Колдонмого СБ сертификаттарын ишенимдүү катары  орнотуу жана аларды алып салуу мүмкүнчүлүгүн берет."</string>
-    <string name="permlab_bindJobService" msgid="3637568367978271086">"колдонмонун ыраатталган фондук режимин иштетүү"</string>
-    <string name="permdesc_bindJobService" msgid="3473288460524119838">"Бул уруксат Android тутумуна, сурамга жараша, колдонмону фон режиминде иштеткенге мүмкүнчүлүк берет."</string>
-    <!-- no translation found for permlab_diagnostic (8076743953908000342) -->
-    <skip />
-    <string name="permdesc_diagnostic" msgid="6608295692002452283">"Колдонмого диалог тобунун ресурстарын, мисалы, түзмөктөгү файлдарды окуу жана жазуу мүмкүнчүлүгүн берет. Бул тутумдун туруктуулугун жана коопсуздугун бузуп коюшу мүмкүн. Андыктан аны өндүрүүчү же оператор аппараттык бөлүктөрдүн мүчүлүштүктөрүн аныктоо үчүн ГАНА колдонушу керек."</string>
-    <string name="permlab_changeComponentState" msgid="6335576775711095931">"колдонмонун курамдык бөлүктөрүн иштетүү же өчүрүү"</string>
-    <string name="permdesc_changeComponentState" product="tablet" msgid="8887435740982237294">"Колдонмого башка колдонмонун курамдык бөлүгүн иштетүү же иштетпөө мүмкүнчүлүгүн берет. Кесепеттүү колдонмолор бул мүмкүнчүлүктөн пайдаланып, планшеттин маанилүү мүмкүнчүлүктөрүн өчүрүп салышы мүмкүн. Бул уруксат менен этият болуу керек, себеби колдонмонун курамдык бөлүктөрүн колдонулгус, ылайыксыз же туруксуз абалга келтирип салышы ыктымал."</string>
-    <string name="permdesc_changeComponentState" product="tv" msgid="9151634188264231389">"Колдонмого башка бир колдонмонун курамынын иштетилип же иштетилбегенин өзгөртүү мүмкүнчүлүгүн берет. Зыянкеч колдонмолор ушуну менен маанилүү сыналгы мүмкүнчүлүктөрүн өчүрүп коёт. Бул уруксатка этият мамиле жасоо керек, себеби ал колдонмо курамдарын жараксыз, дал келбеген же туруксуз абалга келтириши мүмкүн."</string>
-    <string name="permdesc_changeComponentState" product="default" msgid="1827232484416505615">"Колдонмого башка колдонмонун курамдык бөлүгүн иштетүү же иштетпөө мүмкүнчүлүгүн берет. Кесепеттүү колдонмолор бул мүмкүнчүлүктөн пайдаланып, телефондун маанилүү мүмкүнчүлүктөрүн өчүрүп салышы мүмкүн. Бул уруксат менен этият болуу керек, себеби колдонмонун курамдык бөлүктөрүн колдонулгус, ылайыксыз же туруксуз абалга келтирип салышы ыктымал."</string>
-    <string name="permlab_grantRevokePermissions" msgid="4627315351093508795">"уруксаттарды берүү жана кайтарып алуу"</string>
-    <string name="permdesc_grantRevokePermissions" msgid="4088642654085850662">"Колдонмого өзгөчө уруксаттарды өзүнө же башка колдонмолорго берүүгө жана алып салууга уруксат берет. Зыяндуу колдонмолор муну колдонуп, сиз бербеген мүмкүнчүлүктөргө ээ болуп алышы мүмкүн."</string>
-    <string name="permlab_setPreferredApplications" msgid="8463181628695396391">"жактырылган колдонмолорду коюу"</string>
-    <string name="permdesc_setPreferredApplications" msgid="4973986762241783712">"Колдонмого жактырган колдонмолоруңузду өзгөртүү мүмкүнчүлүгүн берет. Кесепеттүү колдонмолор учурдагы колдонмолоруңузду кыйгап өтүп, жеке дайындарыңызды топтоп, иштеп жаткан колдонмону тымызын өзгөртүп салышы мүмкүн."</string>
     <string name="permlab_writeSettings" msgid="2226195290955224730">"система тууралоолорун өзгөртүү"</string>
     <string name="permdesc_writeSettings" msgid="7775723441558907181">"Колдонмого тутумдун коопсуздук жөндөөлөрүнүн дайындарын өзгөртүү мүмкүнчүлүгүн берет. Кесепттүү колдонмолор тутумуңуздун конфигурациясын бузуп салышы мүмкүн."</string>
-    <!-- no translation found for permlab_writeSecureSettings (204676251876718288) -->
-    <skip />
-    <string name="permdesc_writeSecureSettings" msgid="8159535613020137391">"Колдонмого тутумдун коопсуздук жөндөөлөрүнүн дайындарын өзгөртүү мүмкүнчүлүгүн берет. Кадимки колдонмолор үчүн эмес."</string>
-    <!-- no translation found for permlab_writeGservices (2149426664226152185) -->
-    <skip />
-    <string name="permdesc_writeGservices" msgid="1287309437638380229">"Колдонмого Google кызматтарынын картасын өзгөртүү мүмкүнчүлүгүн берет. Кадимки колдонмолор үчүн эмес."</string>
     <string name="permlab_receiveBootCompleted" msgid="5312965565987800025">"түзмөктү жандырганда иштеп баштоо"</string>
     <string name="permdesc_receiveBootCompleted" product="tablet" msgid="7390304664116880704">"Колдонмого тутум жүктөлүп бүтөөрү менен өзүн-өзү иштетүү мүмкүнчүлүгүн берет. Бул планшеттин ишке киргизилишин кыйла создуктуруп, планшеттин үзгүлтүксүз иштешин жайлатып салышы мүмкүн."</string>
     <string name="permdesc_receiveBootCompleted" product="tv" msgid="4525890122209673621">"Тутум күйгүзүлүп бүтөөрү менен, колдонмо өз алдынча иштеп баштайт. Ушуну менен, сыналгы кечирээк күйгүзүлүп, колдонмо такай иштеп тургандыктан, планшет жайыраак иштеп калышы мүмкүн."</string>
@@ -714,39 +471,10 @@
     <!-- no translation found for permlab_accessLocationExtraCommands (2836308076720553837) -->
     <skip />
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"Колдонмого жайгашкан жерди табуучу кошумча жабдуучулардын буйруктарын колдонуу мүмкүнчүлүгүн берет. Ушуну менен колдонмо GPS\'тин ишине жана башка жайгашкан жерлерди аныктоо кызматтарына кийлигише алат."</string>
-    <!-- no translation found for permlab_installLocationProvider (6578101199825193873) -->
-    <skip />
-    <string name="permdesc_installLocationProvider" msgid="9066146120470591509">"Сыноо максатында жайгашуунун жасалма булактарын түзүңүз же башка жайгаштыруу камсыздоочусун орнотуңуз. Бул колдонмого GPS же башка жайгашууну аныктоочу булактар кайтарган жайгашууну жана/же абалдарын кайта жазууга уруксат берет."</string>
     <string name="permlab_accessFineLocation" msgid="1191898061965273372">"так жайгаштыруу (GPS жана түйүн негизинде)"</string>
     <string name="permdesc_accessFineLocation" msgid="5295047563564981250">"Колдонмого Глобалдык Позициялоо Системасын (GPS), же базалык станциялар жана Wi-Fi сыяктуу түйүндүк булактардын жайгашуусунун пайдалануу аркылуу сиздин так жайгашууңузду аныктоого уруксат берет. Колдонмолор муну пайдалана алышы үчүн, жайгаштыруу кызматтары жандырылган жана түзмөгүңүзгө жеткиликтүү болушу керек. Колдонмолор муну сиздин жайгашкан жериңизди аныкташ үчүн пайдаланышы жана кошумча батарей кубаты сарпталышы мүмкүн."</string>
     <string name="permlab_accessCoarseLocation" msgid="4887895362354239628">"божомолдуу жайгаштыруу (түйүн негизинде)"</string>
     <string name="permdesc_accessCoarseLocation" msgid="2538200184373302295">"Колдонмого сиздин болжолдуу жайгашууңузду аныктоо уруксаты берет. Мындай жайгаштыруу базалык станциялар жана Wi-Fi сыяктуу түйүндүк булактардын жайгашуусу аркылуу аныкталат. Колдонмоңуз буларды пайдалана алышы үчүн, мындай  жайгаштыруу кызматтары жандырылган жана түзмөгүңүзгө жеткиликтүү болушу керек. Колдонмолор муну сиздин жайгашкан жериңизди болжолдош үчүн пайдаланышы мүмкүн."</string>
-    <!-- no translation found for permlab_accessSurfaceFlinger (2363969641792388947) -->
-    <skip />
-    <string name="permdesc_accessSurfaceFlinger" msgid="1041619516733293551">"Колдонмого SurfaceFlinger\'дин төмөнкү деңгээлдеги мүмкүнчүлүктөрүн колдонууга уруксат берилет."</string>
-    <!-- no translation found for permlab_readFrameBuffer (6690504248178498136) -->
-    <skip />
-    <string name="permdesc_readFrameBuffer" msgid="4937405521809454680">"Колдонмого алкак буфериндеги мазмунду окуу мүмкүнчүлүгүн берет."</string>
-    <string name="permlab_accessInputFlinger" msgid="5348635270689553857">"InputFlinger менен иштөө"</string>
-    <string name="permdesc_accessInputFlinger" msgid="2104864941201226616">"Колдонмого InputFlinger\'дин төмөнкү деңгээл мүмкүнчүлүктөрүн колдонгонго мүмкүнчүлүк берет."</string>
-    <string name="permlab_configureWifiDisplay" msgid="5595661694746742168">"Wifi дисплейлерин тууралоо"</string>
-    <string name="permdesc_configureWifiDisplay" msgid="7916815158690218065">"Колдонмого тууралоолорду жүргүзүп, Wifi-дисплейлерге туташуу уруксатын берет."</string>
-    <string name="permlab_controlWifiDisplay" msgid="393641276723695496">"Wifi дисплейлерин башкаруу"</string>
-    <string name="permdesc_controlWifiDisplay" msgid="4543912292681826986">"Колдонмого Wifi-дисплейлердин төмөнкү деңгээл мүмкүнчүлүктөрүн башкаруу уруксатын берет."</string>
-    <string name="permlab_controlVpn" msgid="2618442789397588200">"Виртуалдык жеке тармактарды көзөмөлдөө"</string>
-    <string name="permdesc_controlVpn" msgid="762852603315861214">"Колдонмо Виртуалдык жеке тармактардын төмөнкү деңгээлдеги мүмкүнчүлүктөрүн көзөмөлдөй алат."</string>
-    <string name="permlab_captureAudioOutput" msgid="6857134498402346708">"аудио чыгарылышты жаздыруу"</string>
-    <string name="permdesc_captureAudioOutput" msgid="6210597754212208853">"Колдонмого аудио чыгарылышты жаздырып, аны кайра багыттоо мүмкүнчүлүгүн берет."</string>
-    <string name="permlab_captureAudioHotword" msgid="1890553935650349808">"Ачкыч сөз таануу"</string>
-    <string name="permdesc_captureAudioHotword" msgid="9151807958153056810">"Колдонмого ачкыч сөздү каттоо үчүн үн жаздыруу мүмкүнчүлүгүн берет. Үн угуу фондо жүрүп турушу мүмкүн, бирок башка аудио жаздырууларды (мис. Camcorder) бөгөттөбөйт."</string>
-    <string name="permlab_modifyAudioRouting" msgid="7738060354490807723">"Аудио багыттагыч"</string>
-    <string name="permdesc_modifyAudioRouting" msgid="7205731074267199735">"Колдонмого аудио багыттаманы түздөн-түз көзөмөлдөп, аудио саясатынын чечимдеринен кыйгап өткөнгө мүмкүнчүлүк берет."</string>
-    <string name="permlab_captureVideoOutput" msgid="2246828773589094023">"видео чыгарылышты жаздыруу"</string>
-    <string name="permdesc_captureVideoOutput" msgid="359481658034149860">"Колдонмого видео чыгарылышты жаздырып, аны кайра багыттоо мүмкүнчүлүгүн берет."</string>
-    <string name="permlab_captureSecureVideoOutput" msgid="7815398969303382016">"корголгон видео чыгарылышты жаздыруу"</string>
-    <string name="permdesc_captureSecureVideoOutput" msgid="2779793064709350289">"Колдонмого корголгон видео чыгарылышты жаздырып, аны кайра багыттоо мүмкүнчүлүгүн берет."</string>
-    <string name="permlab_mediaContentControl" msgid="8749790560720562511">"медиа ойнотууну жана метаберилиштерге жетки алууну башкаруу"</string>
-    <string name="permdesc_mediaContentControl" msgid="1637478200272062">"Колдонмого медиа ойнотуу жана медиа маалыматтарына (аталыштар, аткаруучулар...) жетүү мүмкүнчүлүгүн берет."</string>
     <!-- no translation found for permlab_modifyAudioSettings (6095859937069146086) -->
     <skip />
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"Колдонмого үн деңгээли жана кайсы динамик аркылуу үн чыгарылышы керек сыяктуу түзмөктүн аудио тууралоолорун өзгөртүүгө уруксат берет."</string>
@@ -758,94 +486,16 @@
     <!-- no translation found for permlab_camera (3616391919559751192) -->
     <skip />
     <string name="permdesc_camera" msgid="8497216524735535009">"Колдонмого камера аркылуу видео жана сүрөт тартуу уруксатын берет. Бул уруксат, камераны каалаган убакта, сиздин ырастооңузсуз колдонуу уруксатын берет."</string>
-    <string name="permlab_cameraDisableTransmitLed" msgid="2651072630501126222">"өткөрүүчүнүн LED индикаторун камера иштеп жатканда өчүрүү"</string>
-    <string name="permdesc_cameraDisableTransmitLed" msgid="4764585465480295341">"Камтылган системалык колдонмолорго камеранын LED\'ди колдонуусун өчүрүү мүмкүнчүлүгүн берет."</string>
-    <string name="permdesc_cameraSendSystemEvent" msgid="8642231538552298107">"Алдыртан орнотулган тутум колдонмосуна камера кызматынын тутумдук окуяларын жөнөтүү мүмкүнчүлүгүн берет."</string>
-    <!-- no translation found for permlab_brick (2961292205764488304) -->
-    <skip />
-    <string name="permlab_brick" product="tv" msgid="4912674222121249410">"сыналгыны биротоло өчүрүү"</string>
-    <!-- no translation found for permlab_brick (8337817093326370537) -->
-    <skip />
-    <string name="permdesc_brick" product="tablet" msgid="4334818808001699530">"Колдонмого бүтүндөй планшетти биротоло өчүрүү мүмкүнчүлүгүн берет. Андыктан аябай этият болуңуз."</string>
-    <string name="permdesc_brick" product="tv" msgid="7070924544316356349">"Колдонмого бүтүндөй сыналгыны биротоло өчүрүү мүмкүнчүлүгүн берет. Бул өтө кооптуу."</string>
-    <string name="permdesc_brick" product="default" msgid="5788903297627283099">"Колдонмого бүтүндөй телефонду биротоло өчүрүү мүмкүнчүлүгүн берет. Андыктан аябай этият болуңуз."</string>
-    <!-- no translation found for permlab_reboot (3436634972561795002) -->
-    <skip />
-    <string name="permlab_reboot" product="tv" msgid="2112102119558886236">"сыналгыны өчүрүп-күйгүзүү"</string>
-    <!-- no translation found for permlab_reboot (2898560872462638242) -->
-    <skip />
-    <string name="permdesc_reboot" product="tablet" msgid="8172056180063700741">"Колдонмого планшетти өчүрүп күйгүзүү мүмкүнчүлүгүн берет."</string>
-    <string name="permdesc_reboot" product="tv" msgid="7116222694344401650">"Колдонмого сыналгыны өчүрүп-күйгүзүү мүмкүнчүлүгүн берет."</string>
-    <string name="permdesc_reboot" product="default" msgid="5326008124289989969">"Колдонмого телефонду өчүрүп күйгүзүү мүмкүнчүлүгүн берет."</string>
-    <string name="permlab_mount_unmount_filesystems" product="nosdcard" msgid="2927361537942591841">"USB сактагычтын файл системасына жетки алуу"</string>
-    <string name="permlab_mount_unmount_filesystems" product="default" msgid="4402305049890953810">"SD-картанын файл системасына жетки алуу"</string>
-    <string name="permdesc_mount_unmount_filesystems" msgid="1829290701658992347">"Колдонмого алып-салма сактагычынын файл тутумун орнотуу жана чыгарып салуу мүмкүнчүлүгүн берет."</string>
-    <string name="permlab_mount_format_filesystems" product="nosdcard" msgid="6227819582624904972">"USB сактагычты тазалоо"</string>
-    <string name="permlab_mount_format_filesystems" product="default" msgid="262582698639274056">"SD-картаны тазалоо"</string>
-    <string name="permdesc_mount_format_filesystems" msgid="8784268246779198627">"Колдонмого алып-салма сактагычты форматтоо мүмкүнчүлүгүн берет."</string>
-    <!-- no translation found for permlab_asec_access (3411338632002193846) -->
-    <skip />
-    <string name="permdesc_asec_access" msgid="3094563844593878548">"Колдонмого ички сактагычтагы маалыматты алуу мүмкүнчүлүгүн берет."</string>
-    <!-- no translation found for permlab_asec_create (6414757234789336327) -->
-    <skip />
-    <string name="permdesc_asec_create" msgid="4558869273585856876">"Колдонмого ички сактагычты түзүү мүмкүнчүлүгүн берет."</string>
-    <!-- no translation found for permlab_asec_destroy (526928328301618022) -->
-    <skip />
-    <string name="permdesc_asec_destroy" msgid="7218749286145526537">"Колдонмого ички сактагычты бузуу мүмкүнчүлүгүн берет."</string>
-    <string name="permlab_asec_mount_unmount" msgid="8877998101944999386">"ички сактагычты орнотуу/чыгарып салуу"</string>
-    <string name="permdesc_asec_mount_unmount" msgid="3451360114902490929">"Колдонмого ички сактагычты орнотуу/чыгарып салуу мүмкүнчүлүгүн берет."</string>
-    <!-- no translation found for permlab_asec_rename (7496633954080472417) -->
-    <skip />
-    <string name="permdesc_asec_rename" msgid="1794757588472127675">"Колдонмого ички сактагычтын аталышын өзгөртүү мүмкүнчүлүгүн берет."</string>
     <string name="permlab_vibrate" msgid="7696427026057705834">"титирөөнү башкаруу"</string>
     <string name="permdesc_vibrate" msgid="6284989245902300945">"Колдонмого дирилдегичти көзөмөлдөө мүмкүнчүлүгүн берет."</string>
     <!-- no translation found for permlab_flashlight (2155920810121984215) -->
     <skip />
     <string name="permdesc_flashlight" msgid="6522284794568368310">"Колдонмого колчыракты көзөмөлдөө мүмкүнчүлүгүн берет."</string>
-    <!-- no translation found for permlab_manageUsb (1113453430645402723) -->
-    <skip />
-    <string name="permdesc_manageUsb" msgid="7776155430218239833">"Колдонмого USB түзмөктөрү үчүн жактырууларды жана уруксаттарды башкаруу мүмкүнчүлүгүн берет."</string>
-    <!-- no translation found for permlab_accessMtp (4953468676795917042) -->
-    <skip />
-    <!-- no translation found for permdesc_accessMtp (6532961200486791570) -->
-    <skip />
-    <!-- no translation found for permlab_hardware_test (4148290860400659146) -->
-    <skip />
-    <string name="permdesc_hardware_test" msgid="6597964191208016605">"Колдонмого аппараттык бөлүктөрдү сыноо үчүн тышкы жабдууларды көзөмөлдөө мүмкүнчүлүгүн берет."</string>
-    <string name="permlab_fm" msgid="8749504526866832">"FM радиого кирүү"</string>
-    <string name="permdesc_fm" msgid="4145699441237962818">"Колдонмого программаларды угуу үчүн FM радиого кирүү мүмкүнчүлүгүн берет."</string>
     <!-- no translation found for permlab_callPhone (3925836347681847954) -->
     <skip />
     <string name="permdesc_callPhone" msgid="3740797576113760827">"Колдонмого сиздин катышууңузсуз телефон номурларга чалуу уруксатын берет. Бул сиз күтпөгөн чыгымдарга же чалууларга алып келиши мүмкүн. Бул куткаруучулардын номурларына чалууга уруксат бербей тургандыгын эске алыңыз. Зыяндуу колдонмолор, сиздин ырастооңузсуз чалууларды аткарып, көп чыгымдарга себепкер болушу мүмкүн."</string>
-    <!-- no translation found for permlab_callPrivileged (4198349211108497879) -->
-    <skip />
-    <string name="permdesc_callPrivileged" msgid="1689024901509996810">"Колдонмого сиздин кийлигишүүңүзсүз каалаган телефон номерине, ошондой эле өзгөчө кырдаалдагы номерлерге чалуу мүмкүнчүлүгүн берет. Кесепеттүү колдонмолор жүйөөлүү себептерсиз эле өзгөчө кырдаалдагы номерлерге чалып салышы мүмкүн."</string>
-    <!-- no translation found for permlab_performCdmaProvisioning (4842576994144604821) -->
-    <skip />
-    <string name="permlab_performCdmaProvisioning" product="tv" msgid="3485391974208100809">"CDMA сыналгысын түз орнотуп баштоо"</string>
-    <!-- no translation found for permlab_performCdmaProvisioning (5604848095315421425) -->
-    <skip />
-    <string name="permdesc_performCdmaProvisioning" msgid="1994193538802314186">"Колдонмого CDMA\'ды ишке киргизүү мүмкүнчүлүгүн берет. Кесепеттүү колдонмолор кереги жок CDMA\'ди ишке киргизип башташы мүмкүн."</string>
-    <!-- no translation found for permlab_performSimActivation (1651116521896665009) -->
-    <skip />
-    <!-- no translation found for permdesc_performSimActivation (1778214876348917401) -->
-    <skip />
-    <!-- no translation found for permlab_locationUpdates (7785408253364335740) -->
-    <skip />
-    <string name="permdesc_locationUpdates" msgid="1120741557891438876">"Колдонмого радиодон алынган жайгашкан жердин жаңыртуулары жөнүндө эскертмелерди иштетүү/өчүрүү мүмкүнчүлүгүн берет. Кадимки колдонмолор үчүн эмес."</string>
-    <!-- no translation found for permlab_checkinProperties (7855259461268734914) -->
-    <skip />
-    <string name="permdesc_checkinProperties" msgid="4024526968630194128">"Колдонмого катталуу кызматы жүктөп берген касиеттерди окуу/жазуу мүмкүнчүлүгүн берет. Кадимки колдонмолор үчүн эмес."</string>
-    <!-- no translation found for permlab_bindGadget (776905339015863471) -->
-    <skip />
-    <string name="permdesc_bindGadget" msgid="8261326938599049290">"Колдонмого кайсы виджет кайсы колдонмодо колдонула тургандыгын айтуу мүмкүнчүлүгүн берет. Мындай уруксаты бар колдонмо башка колдонмолорго жеке дайындарды пайдалануу мүмкүнчүлүгүн бере алат. Кадимки колдонмолор үчүн эмес."</string>
-    <!-- no translation found for permlab_modifyPhoneState (8423923777659292228) -->
-    <skip />
-    <string name="permdesc_modifyPhoneState" msgid="1029877529007686732">"Колдонмого түзмөктөгү телефон мүмкүнчүлүктөрүн көзөмөлдөөгө уруксат берет. Мындай уруксаты бар колдонмо сизди эскертпестен тармактарды которуштуруу, телефондун радиосун күйгүзүү же өчүрүү сыяктуу аракеттерди аткара алат."</string>
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"телефондун абалын жана аныктыгын окуу"</string>
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"Колдонмого түзмөктүн чалуу мүмкүнчүлүктөрүнө жетки алуу уруксатын берет. Бул уруксат колдонмого, телефондун номурун, түзмөктүн ID-син, чалуунун абалын жана байланышта чыккан номурду аныктоого жол берет."</string>
-    <string name="permlab_readPrecisePhoneState" msgid="5476483020282007597">"телефон абалдары тууралуу так маалымат окуу"</string>
-    <string name="permdesc_readPrecisePhoneState" msgid="6648009074263855418">"Колдонмого телефондун абалдары боюнча так маалымат алуу мүмкүнчүлүгүн берет. Бул уруксат колдонмого чалуунун учурдагы абалын -- чалуунун жигердүү болуп же фондо турганын, чалуунун кыйрашын, берилиштер алмашуу абалы жана берилиштер алмашуу кыйроосу боюнча так маалыматтарды -- аныктоо мүмкүнчүлүгүн берет."</string>
     <!-- no translation found for permlab_wakeLock (1531731435011495015) -->
     <skip />
     <string name="permlab_wakeLock" product="tv" msgid="2601193288949154131">"сыналгыны көшүтпөө"</string>
@@ -858,44 +508,16 @@
     <string name="permdesc_transmitIr" product="tablet" msgid="5358308854306529170">"Колдонмого планшеттин инфракызыл өткөргүчүн колдонуу мүмкүнчүлүгүн берет."</string>
     <string name="permdesc_transmitIr" product="tv" msgid="3926790828514867101">"Колдонмого сыналгынын инфракызыл өткөргүчүн пайдалануу мүмкүнчүлүгүн берет."</string>
     <string name="permdesc_transmitIr" product="default" msgid="7957763745020300725">"Колдонмого телефондун инфракызыл өткөргүчүн колдонуу мүмкүнчүлүгүн берет."</string>
-    <!-- no translation found for permlab_devicePower (2787034722616350417) -->
-    <skip />
-    <string name="permlab_devicePower" product="tv" msgid="7579718349658943416">"сыналгыны күйгүзүү же өчүрүү"</string>
-    <!-- no translation found for permlab_devicePower (4928622470980943206) -->
-    <skip />
-    <string name="permdesc_devicePower" product="tablet" msgid="6689862878984631831">"Колдонмого планшетти күйгүзүп же өчүрүү мүмкүнчүлүгүн берет."</string>
-    <string name="permdesc_devicePower" product="tv" msgid="1334908641773273512">"Колдонмого сыналгыны күйгүзүп же өчүрүү мүмкүнчүлүгүн берет."</string>
-    <string name="permdesc_devicePower" product="default" msgid="6037057348463131032">"Колдонмого телефонду күйгүзүп же өчүрүү мүмкүнчүлүгүн берет."</string>
-    <string name="permlab_userActivity" msgid="1677844893921729548">"дисплейдин күтүү убакытын кайра коюу"</string>
-    <string name="permdesc_userActivity" msgid="651746160252248024">"Колдонмонун дисплейин күтүү убакытын кайра коюу мүмкүнчүлүгүн берет."</string>
-    <!-- no translation found for permlab_factoryTest (3715225492696416187) -->
-    <skip />
-    <!-- no translation found for permdesc_factoryTest (3952059318359653091) -->
-    <skip />
-    <string name="permdesc_factoryTest" product="tv" msgid="2105643629211155695">"Сыналгынын аппараттык камсыздоосун толугу менен колдонуу мүмкүнчүлүгүн берип, төмөнкү деңгээлдеги өндүрүүчүнү сынагы катары иштетүү. Сыналгы өндүрүүчүнүн сынак режиминде иштеп жатканда гана жеткиликтүү."</string>
-    <!-- no translation found for permdesc_factoryTest (8136644990319244802) -->
-    <skip />
     <!-- no translation found for permlab_setWallpaper (6627192333373465143) -->
     <skip />
     <string name="permdesc_setWallpaper" msgid="7373447920977624745">"Колдонмого тутумдун тушкагазын коюу мүмкүнчүлүгүн берет."</string>
     <string name="permlab_setWallpaperHints" msgid="3278608165977736538">"тушкагазыңыздын өлчөмүн өзгөртүү"</string>
     <string name="permdesc_setWallpaperHints" msgid="8235784384223730091">"Колдонмого тутум тушкагазынын өлчөмдөрүн коюу мүмкүнчүлүгүн берет."</string>
-    <!-- no translation found for permlab_masterClear (2315750423139697397) -->
-    <skip />
-    <string name="permdesc_masterClear" msgid="3665380492633910226">"Колдонмого бардык дайындарды, конфигурация жана орнотулган колдонмолорду тазалап, тутумду толугу менен демейки жөндөөлөргө кайтаруу мүмкүнчүлүгүн берет."</string>
-    <!-- no translation found for permlab_setTime (2021614829591775646) -->
-    <skip />
-    <string name="permdesc_setTime" product="tablet" msgid="1896341438151152881">"Колдонмого планшеттеги сааттын убакытын өзгөртүү мүмкүнчүлүгүн берет."</string>
-    <string name="permdesc_setTime" product="tv" msgid="1826398919861882682">"Колдонмого сыналгынын саатын өзгөртүү мүмкүнчүлүгүн берет."</string>
-    <string name="permdesc_setTime" product="default" msgid="1855702730738020">"Колдонмого телефондогу сааттын убакытын өзгөртүү мүмкүнчүлүгүн берет."</string>
     <!-- no translation found for permlab_setTimeZone (2945079801013077340) -->
     <skip />
     <string name="permdesc_setTimeZone" product="tablet" msgid="1676983712315827645">"Колдонмого планшеттеги убакыт алкагын өзгөртүү мүмкүнчүлүгүн берет."</string>
     <string name="permdesc_setTimeZone" product="tv" msgid="888864653946175955">"Колдонмого сыналгынын убакыт алкагын өзгөртүү мүмкүнчүлүгүн берет."</string>
     <string name="permdesc_setTimeZone" product="default" msgid="4499943488436633398">"Колдонмого телефондогу убакыт алкагын өзгөртүү мүмкүнчүлүгүн берет."</string>
-    <!-- no translation found for permlab_accountManagerService (4829262349691386986) -->
-    <skip />
-    <string name="permdesc_accountManagerService" msgid="1948455552333615954">"Колдонмого AccountAuthenticators\'ко чалууларды аткаруу уруксатын берет."</string>
     <string name="permlab_getAccounts" msgid="1086795467760122114">"түзмөктөн эсептерди табуу"</string>
     <string name="permdesc_getAccounts" product="tablet" msgid="2741496534769660027">"Колдонмого планшетке белгилүү эсептердин тизмегин алуу уруксатын берет. Буларга сиз орноткон колдонмолор аркылуу түзүлгөн эсептер кириши мүмкүн."</string>
     <string name="permdesc_getAccounts" product="tv" msgid="4190633395633907543">"Колдонмого сыналгыга белгилүү каттоо эсептеринин тизмесин алуу мүмкүнчүлүгүн берет. Анда орнотулган колдонмолор түзгөн каттоо эсептеринин бардыгы камтылышы мүмкүн."</string>
@@ -910,16 +532,11 @@
     <string name="permdesc_accessNetworkState" msgid="8318964424675960975">"Колдонмого желелердин бардыгы жана байланыштар сыяктуу желе маалыматтарын көргөнгө уруксат берет."</string>
     <string name="permlab_createNetworkSockets" msgid="8018758136404323658">"желеге толук жетки алуу"</string>
     <string name="permdesc_createNetworkSockets" msgid="3403062187779724185">"Колдонмого түйүн сокеттерин түзүү жана ылайыкташтырылган түйүн протоколдорун пайдалануу уруксаттарын берет. Серепчи жана башка колдонмолорго интернетке берилиштерди жөнөтүү жолдорун берет, ошондуктан, интернетке берилиштерди жөнөтүү үчүн, бул уруксатты алуу талап кылынбай."</string>
-    <string name="permlab_writeApnSettings" msgid="505660159675751896">"желе тууралоолорун жана трафикти өзгөртүү/тосуу"</string>
-    <string name="permdesc_writeApnSettings" msgid="5333798886412714193">"Колдонмого тармак жөндөөлөрүн өзгөртүү жана бардык тармак трафигин тосуп калуу жана иликтөө мүмкүнчүлүгүн берет, мисалы, проксини же APN портун өзгөртүү үчүн. Кесепеттүү колдонмолор тымызын тармак топтомдорун башкарып, башкага буруп же өзгөртүп салышы мүмкүн."</string>
     <!-- no translation found for permlab_changeNetworkState (958884291454327309) -->
     <skip />
     <string name="permdesc_changeNetworkState" msgid="6789123912476416214">"Колдонмого тармактык туташуунун абалын өзгөртүү мүмкүнчүлүгүн берет."</string>
     <string name="permlab_changeTetherState" msgid="5952584964373017960">"интернет бөлүшүү байланышын өзгөртүү"</string>
     <string name="permdesc_changeTetherState" msgid="1524441344412319780">"Колдонмого тетеринг тармактык туташуусунун абалын өзгөртүү мүмкүнчүлүгүн берет."</string>
-    <!-- no translation found for permlab_changeBackgroundDataSetting (1400666012671648741) -->
-    <skip />
-    <string name="permdesc_changeBackgroundDataSetting" msgid="5347729578468744379">"Колдонмого фондук дайындарды колдонуу жөндөөлөрүн өзгөртүү мүмкүнчүлүгүн берет."</string>
     <string name="permlab_accessWifiState" msgid="5202012949247040011">"Wi-Fi туташууларын көрүү"</string>
     <string name="permdesc_accessWifiState" msgid="5002798077387803726">"Колдонмого Wi-Fi жандырылгандыгы жана туташкан Wi-Fi түзмөктөрдүн аттары сыяктуу, Wi-Fi түйүндөрүнүн маалыматтарын көрүүгө уруксаты берет."</string>
     <string name="permlab_changeWifiState" msgid="6550641188749128035">"Wi-Fi менен туташуу жана ажыратуу"</string>
@@ -933,24 +550,12 @@
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="6921177471748882137">"Колдонмого жергиликтүү Bluetooth планшетин конфигурациялап, ыраактагы түзмөктөрдү таап, жупташуу мүмкүнчүлүгүн берет."</string>
     <string name="permdesc_bluetoothAdmin" product="tv" msgid="3373125682645601429">"Колдонмого жергиликтүү Bluetooth сыналгысын конфигурациялап, алыскы түзмөктөрдү таап жупташуу мүмкүнчүлүгүн берет."</string>
     <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"Колдонмого жергиликтүү Bluetooth телефонун конфигурациялап, ыраактагы түзмөктөрдү таап, жупташуу мүмкүнчүлүгүн берет."</string>
-    <string name="permlab_bluetoothPriv" msgid="4009494246009513828">"колдонмого Bluetooth аркылуу байланышуу уруксатын берүү"</string>
-    <string name="permdesc_bluetoothPriv" product="tablet" msgid="8045735193417468857">"Колдонмого аралыктагы түзмөктөргө колдонуучунун катышуусуз туташуу мүмкүнчүлүгүн берет."</string>
-    <string name="permdesc_bluetoothPriv" product="tv" msgid="8045735193417468857">"Колдонмого аралыктагы түзмөктөргө колдонуучунун катышуусуз туташуу мүмкүнчүлүгүн берет."</string>
-    <string name="permdesc_bluetoothPriv" product="default" msgid="8045735193417468857">"Колдонмого аралыктагы түзмөктөргө колдонуучунун катышуусуз туташуу мүмкүнчүлүгүн берет."</string>
-    <string name="permlab_bluetoothMap" msgid="6372198338939197349">"Bluetooth MAP дайындарын колдонуу мүмкүнчүлүгү"</string>
-    <string name="permdesc_bluetoothMap" product="tablet" msgid="5784090105926959958">"Колдонмого Bluetooth MAP дайындарын пайдалануу мүмкүнчүлүгүн берет."</string>
-    <string name="permdesc_bluetoothMap" product="tv" msgid="5784090105926959958">"Колдонмого Bluetooth MAP дайындарын пайдалануу мүмкүнчүлүгүн берет."</string>
-    <string name="permdesc_bluetoothMap" product="default" msgid="5784090105926959958">"Колдонмого Bluetooth MAP дайындарын пайдалануу мүмкүнчүлүгүн берет."</string>
     <string name="permlab_accessWimaxState" msgid="4195907010610205703">"WiMAX түйүнүнө туташуу жана андан ажыроо"</string>
     <string name="permdesc_accessWimaxState" msgid="6360102877261978887">"Колдонмого WiMAX жандырылгандыгы жана туташкан WiMAX түйүндөрү тууралуу маалыматтарын көрүүгө уруксат берет."</string>
     <string name="permlab_changeWimaxState" msgid="2405042267131496579">"WiMAX абалын өзгөртүү"</string>
     <string name="permdesc_changeWimaxState" product="tablet" msgid="3156456504084201805">"Колдонмого планшетти WiMAX түйүндөрүнө туташтыруу жана ажыратуу уруксаттары берилет."</string>
     <string name="permdesc_changeWimaxState" product="tv" msgid="6022307083934827718">"Колдонмого сыналгыны WiMAX тармактарына туташтырып, алардан ажыратуу мүмкүнчүлүгүн берет."</string>
     <string name="permdesc_changeWimaxState" product="default" msgid="697025043004923798">"Колдонмого телефонду WiMAX түйүндөрүнө туташтыруу жана ажыратуу уруксаттары берилет."</string>
-    <string name="permlab_scoreNetworks" msgid="6445777779383587181">"тармактарды эсептөө"</string>
-    <string name="permdesc_scoreNetworks" product="tablet" msgid="1304304745850215556">"Колдонмого тармактарды даражалап, планшет колдоно турган тармактарга таасир этүү мүмкүнчүлүгүн берет."</string>
-    <string name="permdesc_scoreNetworks" product="tv" msgid="5444434643862417649">"Колдонмого тармактарды даражалап, сыналгы тандай турган тармактарга таасир этүү мүмкүнчүлүгүн берет."</string>
-    <string name="permdesc_scoreNetworks" product="default" msgid="1831501848178651379">"Колдонмого тармактарды даражалап, телефон колдоно турган тармактарга таасир этүү мүмкүнчүлүгүн берет."</string>
     <string name="permlab_bluetooth" msgid="6127769336339276828">"Bluetooth түзмөктөрү менен жупташуу"</string>
     <string name="permdesc_bluetooth" product="tablet" msgid="3480722181852438628">"Колдонмого планшеттин Bluetooth конфигурацияларын көрүү, жупталган түзмөктөр менен байланыш түзүү жана кабыл алуу уруксатын берет."</string>
     <string name="permdesc_bluetooth" product="tv" msgid="3974124940101104206">"Колдонмого сыналгыдагы Bluetooth конфигурациясын көрүп, жупташтырылган түзмөктөргө туташуу жана кабыл алуу мүмкүнчүлүгүн берет."</string>
@@ -988,12 +593,6 @@
     <!-- no translation found for permlab_readSyncStats (7396577451360202448) -->
     <skip />
     <string name="permdesc_readSyncStats" msgid="1510143761757606156">"Колдонмого эсептин статистикасын, синхрондоштуруу тарыхын, анын ичинде, канча берилиштер синхрондошкондугун окуганга уруксат берет."</string>
-    <!-- no translation found for permlab_subscribedFeedsRead (4756609637053353318) -->
-    <skip />
-    <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"Колдонмого учурда шайкештештирилген каналдардын чоо-жайларын алуу мүмкүнчүлүгүн берет."</string>
-    <!-- no translation found for permlab_subscribedFeedsWrite (9015246325408209296) -->
-    <skip />
-    <string name="permdesc_subscribedFeedsWrite" msgid="6928930188826089413">"Колдонмого учурда шайкештештирилген каналдарыңызды өзгөртүү мүмкүнчүлүгүн берет. Кесепеттүү колдонмолор шайкештештирилген каналдарыңызды өзгөртүп салышы мүмкүн."</string>
     <string name="permlab_readDictionary" msgid="4107101525746035718">"сөздүккө кошкон терминдериңизди окуу"</string>
     <string name="permdesc_readDictionary" msgid="659614600338904243">"Колдонмого колдонуучу сөздүгүндө сакталган бардык сөздөрдү, аттарды жана фразаларды окуганга уруксат берет."</string>
     <string name="permlab_writeDictionary" msgid="2183110402314441106">"колдонуучунун сөздүгүнө сөздөрдү кошуу"</string>
@@ -1006,67 +605,8 @@
     <string name="permlab_sdcardWrite" product="default" msgid="8805693630050458763">"SD-картаңыздын мазмунун өзгөртүү же жок кылуу"</string>
     <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6175406299445710888">"Колдонмого USB сактагычына жазуу мүмкүнчүлүгүн берет."</string>
     <string name="permdesc_sdcardWrite" product="default" msgid="4337417790936632090">"Колдонмого SD картага жазуу мүмкүнчүлүгүн берет."</string>
-    <!-- no translation found for permlab_mediaStorageWrite (6859839199706879015) -->
-    <skip />
-    <string name="permdesc_mediaStorageWrite" product="default" msgid="8189160597698529185">"Колдонмого ички медиа сактагычтын мазмундарын өзгөртүү мүмкүнчүлүгүн берет."</string>
-    <string name="permlab_manageDocs" product="default" msgid="5778318598448849829">"документ кампасын башкаруу"</string>
-    <string name="permdesc_manageDocs" product="default" msgid="8704323176914121484">"Колдонмого документ кампасын башкаруу мүмкүнчүлүгүн берет."</string>
-    <string name="permlab_sdcardAccessAll" msgid="8150613823900460576">"бардык колдонуучулардын тышкы сактагычына жетки алуу"</string>
-    <string name="permdesc_sdcardAccessAll" msgid="3215208357415891320">"Колдонмо бардык колдонуучулардын тышкы сактагычына жеткенге мүмкүнчүлүк алат."</string>
-    <!-- no translation found for permlab_cache_filesystem (5656487264819669824) -->
-    <skip />
-    <string name="permdesc_cache_filesystem" msgid="5578967642265550955">"Колдонмого кэш файл тутумун окуу жана жазуу мүмкүнчүлүгүн берет."</string>
     <string name="permlab_use_sip" msgid="2052499390128979920">"SIP чалуу/чалууну кабыл алуу"</string>
     <string name="permdesc_use_sip" msgid="2297804849860225257">"Колдонмого SIP чалууларга жана чалууларды кабыл алууга мүмкүнчүлүк берет."</string>
-    <string name="permlab_register_sim_subscription" msgid="3166535485877549177">"жаңы телеком SIM туташууларын каттоо"</string>
-    <string name="permdesc_register_sim_subscription" msgid="2138909035926222911">"Колдонмого жаңы телеком SIM туташууларын каттоо мүмкүнчүлүгүн берет."</string>
-    <string name="permlab_register_call_provider" msgid="108102120289029841">"жаңы телеком туташууларын каттоо"</string>
-    <string name="permdesc_register_call_provider" msgid="7034310263521081388">"Колдонмого жаңы телеком туташууларын каттоо мүмкүнчүлүгүн берет."</string>
-    <string name="permlab_connection_manager" msgid="1116193254522105375">"телеком туташууларын башкаруу"</string>
-    <string name="permdesc_connection_manager" msgid="5925480810356483565">"Колдонмого телеком туташууларын башкаруу мүмкүнчүлүгүн берет."</string>
-    <string name="permlab_bind_incall_service" msgid="6773648341975287125">"чалуу экраны менен байланыштыруу"</string>
-    <string name="permdesc_bind_incall_service" msgid="8343471381323215005">"Колдонмого чалуу экраны качан жана кандай көрүнө тургандыгын башкаруу мүмкүнчүлүгүн берет."</string>
-    <string name="permlab_bind_connection_service" msgid="3557341439297014940">"телефония кызматтары"</string>
-    <string name="permdesc_bind_connection_service" msgid="4008754499822478114">"Колдонмого чалууларды жасоо/кабыл алуу үчүн телефония кызматтары менен байланышууга уруксат берет."</string>
-    <string name="permlab_control_incall_experience" msgid="9061024437607777619">"чалуу ичиндеги колдонуучу тажрыйбасын камсыз кылуу"</string>
-    <string name="permdesc_control_incall_experience" msgid="915159066039828124">"Колдонмого чалуу учурундагы колдонуучу тажрыйбасын камсыз кылуу мүмкүнчүлүгүн берет."</string>
-    <!-- no translation found for permlab_readNetworkUsageHistory (7862593283611493232) -->
-    <skip />
-    <string name="permdesc_readNetworkUsageHistory" msgid="7689060749819126472">"Колдонмого белгилүү бир тармактарга жана колдонмолорго байланыштуу тармактын колдонулушу жөнүндө таржымалды окуу мүмкүнчүлүгүн берет."</string>
-    <!-- no translation found for permlab_manageNetworkPolicy (2562053592339859990) -->
-    <skip />
-    <string name="permdesc_manageNetworkPolicy" msgid="7537586771559370668">"Колдонмого тармак саясаттарын башкаруу жана колдонмого мүнөздүү эрежелерди белгилөө мүмкүнчүлүгүн берет."</string>
-    <!-- no translation found for permlab_modifyNetworkAccounting (5088217309088729650) -->
-    <skip />
-    <string name="permdesc_modifyNetworkAccounting" msgid="5443412866746198123">"Колдонмого желени башка колдонмолордун пайдалануусун башкарган тууралоолорду киргизүү уруксатын берет. Жөнөкөй колдонмолор үчүн эмес."</string>
-    <string name="permlab_accessNotifications" msgid="7673416487873432268">"эскертүүлөр менен иштөө"</string>
-    <string name="permdesc_accessNotifications" msgid="458457742683431387">"Колдонмого (башка колдонмолор жайгаштырган дагы) эскертүүлөрдү алуу, изилдөө, жана аларды тазалоо мүмкүнчүлүгүн берет."</string>
-    <string name="permlab_bindNotificationListenerService" msgid="7057764742211656654">"эскертүү тыңшагыч кызматына байланыштыруу"</string>
-    <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"Ээсине эскертүү тыңшагыч кызматтын жогорку деңгээл интерфейсине туташуу мүмкүнчүлүгүн берет. Жөнөкөй колдонмолордо эч качан керектелбейт."</string>
-    <string name="permlab_bindChooserTargetService" msgid="3443261076710185673">"тандоочунун каалоосу кызматына туташуу"</string>
-    <string name="permdesc_bindChooserTargetService" msgid="1413908999583734970">"Кармоочуга тандоочунун каалоосу кызматынын жогорку деңгээл интерфейсин жалгаштырууга мүмкүндүк берет. Кадимки колдонмолорго эч качан талап кылынбайт."</string>
-    <string name="permlab_bindConditionProviderService" msgid="1180107672332704641">"шарт түзүүчү кызматына жалгаштыруу"</string>
-    <string name="permdesc_bindConditionProviderService" msgid="1680513931165058425">"Кармоочуга шарт түзүүчү кызматтын жогорку деңгээлдеги интерфейсине жалгашуу мүмкүнчүлүгүн берет. Кадимки колдонмолорго эч качан талап кылынбайт."</string>
-    <string name="permlab_bindMediaRouteService" msgid="6637740382272686835">"медиа жол кызматына жалгаштыруу"</string>
-    <string name="permdesc_bindMediaRouteService" msgid="6436655024972496687">"Кармоочуга медиа жол кызматынын жогорку деңгээл интерфейсин жалгаштырууга мүмкүндүк берет. Кадимки колдонмолорго эч качан талап кылынбайт."</string>
-    <string name="permlab_bindDreamService" msgid="4153646965978563462">"dream кызматына жалгаштыруу"</string>
-    <string name="permdesc_bindDreamService" msgid="7325825272223347863">"Кармоочуга dream кызматынын жогорку деңгээлдеги интерфейсине жалгашуу мүмкүнчүлүгүн берет. Кадимки колдонмолорго эч качан талап кылынбайт."</string>
-    <string name="permlab_invokeCarrierSetup" msgid="3699600833975117478">"оператордун конфигурациялык колдонмосун чакыруу"</string>
-    <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"Ээсине оператор тарабынан берилген конфигурация колдонмосун чакыруу мүмкүнчүлүгүн берет. Жалпыга багышталган колдонмолордо эч качан колдонулбашы керек."</string>
-    <string name="permlab_accessNetworkConditions" msgid="8206077447838909516">"тармак абалынын көрсөткүчтөрүн тыңшоо"</string>
-    <string name="permdesc_accessNetworkConditions" msgid="6899102075825272211">"Колдонмого тармак абалынын көрсөткүчтөрүн тыңшоо мүмкүнчүлүгүн берет. Жалпыга багышталган колдонмолордо эч качан колдонулбашы керек."</string>
-    <string name="permlab_setInputCalibration" msgid="4902620118878467615">"киргизүү түзмөгүнүн калибрлөөсүн өзгөртүү"</string>
-    <string name="permdesc_setInputCalibration" msgid="4527511047549456929">"Колдонмого сенсордук экрандын калибрлөө параметрлерин өзгөртүү мүмкүнчүлүгүн берет. Кадимки колдонмолорго эч качан талап кылынбайт."</string>
-    <string name="permlab_accessDrmCertificates" msgid="7436886640723203615">"DRM тастыктамаларына кирүү"</string>
-    <string name="permdesc_accessDrmCertificates" msgid="8073288354426159089">"Колдонмого DRM тастыктамаларын ишке киргизип, колдонуу мүмкүнчүлүгүн берет. Кадимки колдонмолорго эч качан талап кылынбайт."</string>
-    <string name="permlab_handoverStatus" msgid="1159132046126626731">"Android Beam өткөрүү абалын алуу"</string>
-    <string name="permdesc_handoverStatus" msgid="4788144087245714948">"Бул колдонмого учурдагы Android Beam өткөрүүлөрү жөнүндө маалымат алуу мүмкүнчүлүгүн берет"</string>
-    <string name="permlab_removeDrmCertificates" msgid="7044888287209892751">"DRM тастыктамаларын алып салуу"</string>
-    <string name="permdesc_removeDrmCertificates" msgid="7272999075113400993">"Колдонмого DRM тастыктамаларын алып салуу мүмкүнчүлүгүн берет. Кадимки колдонмолорго эч качан талап кылынбайт."</string>
-    <string name="permlab_bindCarrierMessagingService" msgid="1490229371796969158">"оператордун билдирүү кызматына байланышуу"</string>
-    <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"Кармоочуга оператордун билдирүү кызматынын жогорку деңгээлдеги интерфейсине байланышуу мүмкүнчүлүгүн берет. Кадимки колдонмолорго эч качан талап кылынбашы мүмкүн."</string>
-    <string name="permlab_accessVoiceInteractionService" msgid="4183835260471435605">"үн катнаштык кызматы менен карым-катнаш кылуу"</string>
-    <string name="permdesc_accessVoiceInteractionService" msgid="836587728238433459">"Кармоочуга учурдагы жигердүү үн катнаштык кызматы менен карым-катнаш кылуу мүмкүнчүлүгүн берет. Кадимки колдонмолорго талап кылынбайт."</string>
     <!-- no translation found for policylab_limitPassword (4497420728857585791) -->
     <skip />
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"Экран кулпусунун сырсөздөрү менен PIN\'дерине уруксат берилген узундук менен белгилерди көзөмөлдөө."</string>
@@ -1468,28 +1008,10 @@
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="8497389531014185509">"Колдонмого телефонуңузда сакталган Серепчинин тарыхын жана Серепчинин бүктөмөлөрүн өзгөртүү уруксатын берет. Бул колдонмого Серепчинин берилиштерин өчүрүү же өзгөртүү уруксатын берет. Эскертүү: бул уруксат үчүнчү тараптык интернет-серепчилерге, же интернетке кирүү мүмкүнчүлүгү бар колдонмолорго таасир этпеши мүмкүн."</string>
     <string name="permlab_setAlarm" msgid="1379294556362091814">"ойготкуч коюу"</string>
     <string name="permdesc_setAlarm" msgid="316392039157473848">"Колдонмого ойготкуч саат колдонмосуна үн ишаратын коюу мүмкүнчүлүгүн берет. Айрым ойготкуч саат колдонмолорунда бул мүмкүнчүлүк иштебеши мүмкүн."</string>
-    <string name="permlab_writeVoicemail" msgid="7309899891683938100">"үн почталарын жазуу"</string>
-    <string name="permdesc_writeVoicemail" msgid="6592572839715924830">"Колдонмонун үн почтаңыздын кирүү кутусунан билдирүүлөрдү өзгөртүп жана алып салуусуна жол ачат."</string>
     <string name="permlab_addVoicemail" msgid="5525660026090959044">"үнкат кошуу"</string>
     <string name="permdesc_addVoicemail" msgid="6604508651428252437">"Колдонмого үн почтаңыздын кирүү кутусуна билдирүүлөрдү кошуу мүмкүнчүлүгүн берет."</string>
-    <string name="permlab_readVoicemail" msgid="8415201752589140137">"үн почтасын окуу"</string>
-    <string name="permdesc_readVoicemail" msgid="8926534735321616550">"Колдонмонун үн почталарыңызды окуусуна жол ачат."</string>
     <string name="permlab_writeGeolocationPermissions" msgid="5962224158955273932">"Серепчинин гео-жайгашуу уруксаттарын өзгөртүү"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="1083743234522638747">"Колдонмого Серепчинин гео-жайгашуу уруксаттарын өзгөртүү мүмкүнчүлүгүн берет. Кесепеттүү колдонмолор ушундай мүмкүнчүлүктөн пайдаланып ар кайсы вебсайтка жайгашкан жер жөнүндө маалыматтын жөнөтүлүшүнө уруксат берип салышы мүмкүн."</string>
-    <string name="permlab_packageVerificationAgent" msgid="5568139100645829117">"таңгактарды текшерүү"</string>
-    <string name="permdesc_packageVerificationAgent" msgid="8437590190990843381">"Колдонмого топтомдун орнотула тургандыгын текшерүү мүмкүнчүлүгүн берет."</string>
-    <string name="permlab_bindPackageVerifier" msgid="4187786793360326654">"таңгак текшерүүчүгө байлаштыруу"</string>
-    <string name="permdesc_bindPackageVerifier" msgid="3180741773233862126">"Кармоочуга топтом текшергичтеринин атынан өтүнүү мүмкүнчүлүгүн берет. Кадимки колдонмолорго эч качан талап кылынбайт."</string>
-    <string name="permlab_intentFilterVerificationAgent" msgid="1135788294400437497">"ниет чыпкасын текшерүү"</string>
-    <string name="permdesc_intentFilterVerificationAgent" msgid="5853902808424716312">"Колдонмого ниет чыпкасы текшерилген же текшерилбегенин кароо уруксатын берет."</string>
-    <string name="permlab_bindIntentFilterVerifier" msgid="8567268159430779210">"ниет чыпкасын текшергичке туташуу"</string>
-    <string name="permdesc_bindIntentFilterVerifier" msgid="681128728719578778">"Кармоочуга ниет чыпкасын текшергичтеринин атынан өтүнүү мүмкүнчүлүгүн берет. Кадимки колдонмолорго эч качан талап кылынбайт."</string>
-    <string name="permlab_serialPort" msgid="546083327654631076">"сериялык портторго жетүү"</string>
-    <string name="permdesc_serialPort" msgid="2991639985224598193">"Ээсине SerialManager API\'ни колдонуп, серия портуна жеткенге уруксат берүү."</string>
-    <string name="permlab_accessContentProvidersExternally" msgid="5077774297943409285">"тышкы контент провайдерлерге жетки алуу"</string>
-    <string name="permdesc_accessContentProvidersExternally" msgid="4544346486697853685">"Ээсине контент-провайдерлерге командалык кабыктан жетүү уруксатын берет. Жалпыга багышталган колдонмолордо эч качан колдонулбашы керек."</string>
-    <string name="permlab_updateLock" msgid="3527558366616680889">"түзмөктүн автоматтык жаңыртууларын ырастабоо"</string>
-    <string name="permdesc_updateLock" msgid="1655625832166778492">"Түзмөктүн ээсине интерактивдүү эмес түрдө кайра жандырууга ылайык убакыт келгени жөнүндө системге маалымат сунуштоо уруксатын берет."</string>
     <!-- no translation found for save_password_message (767344687139195790) -->
     <skip />
     <!-- no translation found for save_password_notnow (6389675316706699758) -->
@@ -1907,29 +1429,8 @@
     <!-- no translation found for ext_media_nomedia_notification_message (3870120652983659641) -->
     <skip />
     <string name="activity_list_empty" msgid="1675388330786841066">"Туура келген аракеттер табылбады."</string>
-    <!-- no translation found for permlab_pkgUsageStats (8787352074326748892) -->
-    <skip />
-    <string name="permdesc_pkgUsageStats" msgid="1106612424254277630">"Колдонмого курамдык бөлүктүн колдонулушу боюнча топтолгон статистиканы өзгөртүү мүмкүнчүлүгүн берет. Кадимки колдонмолор үчүн эмес."</string>
-    <string name="permlab_copyProtectedData" msgid="4341036311211406692">"мазмунду көчүрүү"</string>
-    <string name="permdesc_copyProtectedData" msgid="4390697124288317831">"Колдонмого мазмунду көчүрүү үчүн, демейки контейнер кызматын иштетүү мүмкүнчүлүгүн берет. Кадимки колдонмолор үчүн эмес."</string>
     <string name="permlab_route_media_output" msgid="1642024455750414694">"Медиа чыгарылышын багыттоо"</string>
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"Колдонмого  медиа мазмунду башка тышкы түзмөктөргө багыттоо уруксатын берет."</string>
-    <string name="permlab_access_keyguard_secure_storage" msgid="7565552237977815047">"Тергич бөгөттөөсүнүн корголгон кампасы менен иштөө"</string>
-    <string name="permdesc_access_keyguard_secure_storage" msgid="5866245484303285762">"Колдонмого корголгон тергичти бөгөттөөө кампасына жеткенге уруксат берет."</string>
-    <string name="permlab_control_keyguard" msgid="172195184207828387">"Тергич бөгөттөөсүн көрсөтүүнү жана жашырууну башкаруу"</string>
-    <string name="permdesc_control_keyguard" msgid="3043732290518629061">"Колдонмого тергич бөгөттөгүчүн башкаруу мүмкүнчүлүгүн берет."</string>
-    <string name="permlab_trust_listener" msgid="1765718054003704476">"Ишенимдүу абал өзгөрүүлөрүн угуу."</string>
-    <string name="permdesc_trust_listener" msgid="8233895334214716864">"Колдонмого ишеним абалындагы өзгөртүүлөрдү угуу мүмкүнчүлүгүн берет."</string>
-    <string name="permlab_provide_trust_agent" msgid="5465587586091358316">"Ишенимдүү агент менен камсыз кылуу."</string>
-    <string name="permdesc_provide_trust_agent" msgid="3865702641053068148">"Колдонмого ишенимдүү агент менен камсыз кылууга мүмкүнчүлүк берет."</string>
-    <string name="permlab_launch_trust_agent_settings" msgid="5859430082240410200">"Ишенимдүү агенттин жөндөөлөрү менюсун ишке киргизиңиз."</string>
-    <string name="permdesc_launch_trust_agent_settings" msgid="8185142708644913381">"Колдонмого ишенимдүү агенттин жүрүм-турумун өзгөртүүчү аракетти ишке киргизүү мүмкүнчүлүгүн берет."</string>
-    <string name="permlab_bind_trust_agent_service" msgid="8242093169457695334">"Ишенимдүү агент кызматына жалгаштыруу"</string>
-    <string name="permdesc_bind_trust_agent_service" msgid="7041930026024507515">"Колдонмого ишенимдүү агент кызматына жалгашууга мүмкүнчүлүк берет."</string>
-    <string name="permlab_recovery" msgid="3157024487744125846">"Калыбына келтирүү системасы жана жаңыртуулар менен иштөө"</string>
-    <string name="permdesc_recovery" msgid="8511774533266359571">"Колдонмого калыбына келтирүү системасы жана система жаңыртуулары менен карым-катнашуу мүмкүнчүлүгүн берет."</string>
-    <string name="permlab_manageMediaProjection" msgid="1120495449419929218">"Медиа чагылтуу сеанстарын башкаруу"</string>
-    <string name="permdesc_manageMediaProjection" msgid="8053759147529492856">"Колдонмого медиа чагылдыруу сеанстарын башкаруу мүмкүнчүлүгүн берет. Мындай сеанстардын жардамы менен, колдонмолор дисплей жана видео мазмунду сүрөткө тартып турушат. Кадимки колдонмолор үчүн талап кылынбайт."</string>
     <string name="permlab_readInstallSessions" msgid="6165432407628065939">"Орнотуу сеанстарын окуу"</string>
     <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"Колдонмого орнотуу сеанстарын окуу мүмкүнчүлүгүн берет. Ушуну менен, ал жигердүү топтом орнотууларынын чоо-жайын көрө алат."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"Чен өлчөмүн көзөмөлдөө үчүн эки жолу тийип коюңуз"</string>
@@ -2361,13 +1862,9 @@
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Бошотуудан мурун PIN суралсын"</string>
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"Бошотуудан мурун кулпуну ачкан үлгү суралсын"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Бошотуудан мурун сырсөз суралсын"</string>
-    <!-- no translation found for package_installed_device_owner (8420696545959087545) -->
-    <skip />
-    <!-- no translation found for package_deleted_device_owner (7650577387493101353) -->
-    <skip />
+    <string name="package_installed_device_owner" msgid="8420696545959087545">"Администраторуңуз тарабынан орнотулган"</string>
+    <string name="package_deleted_device_owner" msgid="7650577387493101353">"Администраторуңуз тарабынан жок кылынган"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"Батареянын өмүрүн узартуу үчүн, батареяны үнөмдөгүч түзмөгүңүздүн ишинин майнаптуулугун азайтып, дирилдөө, жайгашкан жерди аныктоо кызматтары жана фондук дайындардын көпчүлүгүн чектеп коёт. Электрондук почта, билдирүү жазышуу жана башка шайкештештирүүгө байланыштуу колдонмолор ачылмайынча жаңыртылбай калышы мүмкүн.\n\nБатарея үнөмдөгүч түзмөгүңүз кубатталып жатканда автоматтык түрдө өчүп калат."</string>
-    <string name="downtime_condition_summary" msgid="8761776337475705749">"Иштебей турган абал <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> аяктамайынча"</string>
-    <string name="downtime_condition_line_one" msgid="8762708714645352010">"Аракетсиз убакытыңыз бүткүчө"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
       <item quantity="other">%1$d мүнөткө (<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g> чейин)</item>
       <item quantity="one">Бир мүнөткө (<xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g> чейин)</item>
@@ -2386,9 +1883,17 @@
     </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> чейин"</string>
     <string name="zen_mode_forever" msgid="7420011936770086993">"Бул өчүрүлгөнгө чейин"</string>
+    <!-- no translation found for zen_mode_rule_name_combination (191109939968076477) -->
+    <skip />
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"Жыйнап коюу"</string>
-    <string name="zen_mode_next_alarm_summary" msgid="5915140424683747372">"Саат <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> боло турган кийинки айгайга чейин"</string>
-    <string name="zen_mode_next_alarm_line_one" msgid="5537042951553420916">"Кийинки айгайга чейин"</string>
+    <!-- no translation found for zen_mode_feature_name (289097150786114338) -->
+    <skip />
+    <!-- no translation found for zen_mode_downtime_feature_name (2626974636779860146) -->
+    <skip />
+    <!-- no translation found for zen_mode_default_weeknights_name (2069189413656431610) -->
+    <skip />
+    <!-- no translation found for zen_mode_default_weekends_name (2377398437072017011) -->
+    <skip />
     <string name="muted_by" msgid="6147073845094180001">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> тарабынан үнсүздөлдү"</string>
     <string name="system_error_wipe_data" msgid="6608165524785354962">"Түзмөгүңүздө ички көйгөй бар жана ал баштапкы абалга кайтарылмайынча туруктуу иштебей коюшу мүмкүн."</string>
     <string name="system_error_manufacturer" msgid="8086872414744210668">"Түзмөгүңүздө ички көйгөй бар. Анын чоо-жайын билүү үчүн өндүрүүчүңүзгө кайрылыңыз."</string>
@@ -2398,6 +1903,13 @@
     <string name="stk_cc_ss_to_dial" msgid="2151304435775557162">"SS сурамы DIAL сурамына өзгөртүлдү."</string>
     <string name="stk_cc_ss_to_ussd" msgid="3951862188105305589">"SS сурамы USSD сурамына өзгөртүлдү."</string>
     <string name="stk_cc_ss_to_ss" msgid="5470768854991452695">"SS сурамы жаңы SS сурамына өзгөртүлдү."</string>
+    <!-- no translation found for usb_midi_peripheral_name (7221113987741003817) -->
+    <skip />
     <string name="usb_midi_peripheral_manufacturer_name" msgid="7176526170008970168">"Android"</string>
-    <string name="usb_midi_peripheral_model_name" msgid="1959288763942653301">"USB Сырткы оюкча"</string>
+    <!-- no translation found for usb_midi_peripheral_product_name (4971827859165280403) -->
+    <skip />
+    <!-- no translation found for floating_toolbar_open_overflow_description (4797287862999444631) -->
+    <skip />
+    <!-- no translation found for floating_toolbar_close_overflow_description (559796923090723804) -->
+    <skip />
 </resources>

@@ -22,7 +22,11 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <!-- no translation found for wfcOperatorErrorAlertMessages:0 (7239039348648848288) -->
-    <!-- no translation found for wfcOperatorErrorNotificationMessages:0 (483847327467331298) -->
+  <string-array name="wfcOperatorErrorAlertMessages">
+    <item msgid="7239039348648848288">"Til að hringja og senda skilaboð yfir Wi-Fi þarftu fyrst að biðja símafyrirtækið þitt um að setja þá þjónustu upp. Kveiktu síðan á Wi-Fi símtölum í stillingunum."</item>
+  </string-array>
+  <string-array name="wfcOperatorErrorNotificationMessages">
+    <item msgid="483847327467331298">"Skráðu þig hjá símafyrirtækinu"</item>
+  </string-array>
     <string name="wfcSpnFormat" msgid="4982938551498609442">"%s Wi-Fi símtöl"</string>
 </resources>
