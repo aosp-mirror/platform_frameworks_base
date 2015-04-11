@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <style name="App" parent="android:Theme.Material">
+    <style name="App" parent="android.appcompat:Platform.AppCompat">
         <item name="android:background">@color/primary</item>
         <item name="android:colorPrimary">@color/primary</item>
         <item name="android:colorPrimaryDark">@color/primary_dark</item>

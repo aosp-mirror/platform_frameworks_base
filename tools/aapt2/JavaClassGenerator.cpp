@@ -15,6 +15,7 @@
  */
 
 #include "JavaClassGenerator.h"
+#include "NameMangler.h"
 #include "Resource.h"
 #include "ResourceTable.h"
 #include "ResourceValues.h"
@@ -31,7 +32,7 @@ namespace aapt {
 // The number of attributes to emit per line in a Styleable array.
 constexpr size_t kAttribsPerLine = 4;
 
-JavaClassGenerator::JavaClassGenerator(std::shared_ptr<const ResourceTable> table,
+JavaClassGenerator::JavaClassGenerator(const std::shared_ptr<const ResourceTable>& table,
                                        Options options) :
         mTable(table), mOptions(options) {
 }
@@ -79,42 +80,18 @@ static std::u16string transform(const StringPiece16& symbol) {
     return output;
 }
 
-bool JavaClassGenerator::generateType(std::ostream& out, const ResourceTableType& type,
-                                      size_t packageId) {
-    const StringPiece finalModifier = mOptions.useFinal ? " final" : "";
-
-    for (const auto& entry : type.entries) {
-        ResourceId id = { packageId, type.typeId, entry->entryId };
-        assert(id.isValid());
-
-        if (!isValidSymbol(entry->name)) {
-            std::stringstream err;
-            err << "invalid symbol name '"
-                << StringPiece16(entry->name)
-                << "'";
-            mError = err.str();
-            return false;
-        }
-
-        out << "        "
-            << "public static" << finalModifier
-            << " int " << transform(entry->name) << " = " << id << ";" << std::endl;
-    }
-    return true;
-}
-
 struct GenArgs : ValueVisitorArgs {
-    GenArgs(std::ostream& o, const ResourceEntry& e) : out(o), entry(e) {
+    GenArgs(std::ostream* o, std::u16string* e) : out(o), entryName(e) {
     }
 
-    std::ostream& out;
-    const ResourceEntry& entry;
+    std::ostream* out;
+    std::u16string* entryName;
 };
 
 void JavaClassGenerator::visit(const Styleable& styleable, ValueVisitorArgs& a) {
     const StringPiece finalModifier = mOptions.useFinal ? " final" : "";
-    std::ostream& out = static_cast<GenArgs&>(a).out;
-    const ResourceEntry& entry = static_cast<GenArgs&>(a).entry;
+    std::ostream* out = static_cast<GenArgs&>(a).out;
+    std::u16string* entryName = static_cast<GenArgs&>(a).entryName;
 
     // This must be sorted by resource ID.
     std::vector<std::pair<ResourceId, StringPiece16>> sortedAttributes;
@@ -127,59 +104,86 @@ void JavaClassGenerator::visit(const Styleable& styleable, ValueVisitorArgs& a) 
     std::sort(sortedAttributes.begin(), sortedAttributes.end());
 
     // First we emit the array containing the IDs of each attribute.
-    out << "        "
-        << "public static final int[] " << transform(entry.name) << " = {";
+    *out << "        "
+         << "public static final int[] " << transform(*entryName) << " = {";
 
     const size_t attrCount = sortedAttributes.size();
     for (size_t i = 0; i < attrCount; i++) {
         if (i % kAttribsPerLine == 0) {
-            out << std::endl << "            ";
+            *out << std::endl << "            ";
         }
 
-        out << sortedAttributes[i].first;
+        *out << sortedAttributes[i].first;
         if (i != attrCount - 1) {
-            out << ", ";
+            *out << ", ";
         }
     }
-    out << std::endl << "        };" << std::endl;
+    *out << std::endl << "        };" << std::endl;
 
     // Now we emit the indices into the array.
     for (size_t i = 0; i < attrCount; i++) {
-        out << "        "
-            << "public static" << finalModifier
-            << " int " << transform(entry.name) << "_" << transform(sortedAttributes[i].second)
-            << " = " << i << ";" << std::endl;
+        *out << "        "
+             << "public static" << finalModifier
+             << " int " << transform(*entryName) << "_" << transform(sortedAttributes[i].second)
+             << " = " << i << ";" << std::endl;
     }
 }
 
-bool JavaClassGenerator::generate(std::ostream& out) {
+bool JavaClassGenerator::generateType(const std::u16string& package, size_t packageId,
+                                      const ResourceTableType& type, std::ostream& out) {
+    const StringPiece finalModifier = mOptions.useFinal ? " final" : "";
+
+    std::u16string unmangledPackage;
+    std::u16string unmangledName;
+    for (const auto& entry : type.entries) {
+        ResourceId id = { packageId, type.typeId, entry->entryId };
+        assert(id.isValid());
+
+        unmangledName = entry->name;
+        if (NameMangler::unmangle(&unmangledName, &unmangledPackage)) {
+            // The entry name was mangled, and we successfully unmangled it.
+            // Check that we want to emit this symbol.
+            if (package != unmangledPackage) {
+                // Skip the entry if it doesn't belong to the package we're writing.
+                continue;
+            }
+        } else {
+            if (package != mTable->getPackage()) {
+                // We are processing a mangled package name,
+                // but this is a non-mangled resource.
+                continue;
+            }
+        }
+
+        if (!isValidSymbol(unmangledName)) {
+            ResourceNameRef resourceName = { package, type.type, unmangledName };
+            std::stringstream err;
+            err << "invalid symbol name '" << resourceName << "'";
+            mError = err.str();
+            return false;
+        }
+
+        if (type.type == ResourceType::kStyleable) {
+            assert(!entry->values.empty());
+            entry->values.front().value->accept(*this, GenArgs{ &out, &unmangledName });
+        } else {
+            out << "        " << "public static" << finalModifier
+                << " int " << transform(unmangledName) << " = " << id << ";" << std::endl;
+        }
+    }
+    return true;
+}
+
+bool JavaClassGenerator::generate(const std::u16string& package, std::ostream& out) {
     const size_t packageId = mTable->getPackageId();
 
-    generateHeader(out, mTable->getPackage());
+    generateHeader(out, package);
 
     out << "public final class R {" << std::endl;
 
     for (const auto& type : *mTable) {
         out << "    public static final class " << type->type << " {" << std::endl;
-        bool result;
-        if (type->type == ResourceType::kStyleable) {
-            for (const auto& entry : type->entries) {
-                assert(!entry->values.empty());
-                if (!isValidSymbol(entry->name)) {
-                    std::stringstream err;
-                    err << "invalid symbol name '"
-                        << StringPiece16(entry->name)
-                        << "'";
-                    mError = err.str();
-                    return false;
-                }
-                entry->values.front().value->accept(*this, GenArgs{ out, *entry });
-            }
-        } else {
-            result = generateType(out, *type, packageId);
-        }
-
-        if (!result) {
+        if (!generateType(package, packageId, *type, out)) {
             return false;
         }
         out << "    }" << std::endl;

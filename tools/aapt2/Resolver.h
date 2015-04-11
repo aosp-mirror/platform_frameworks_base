@@ -26,6 +26,7 @@
 #include <androidfw/ResourceTypes.h>
 #include <memory>
 #include <vector>
+#include <unordered_set>
 
 namespace aapt {
 
@@ -94,6 +95,7 @@ private:
     std::shared_ptr<const ResourceTable> mTable;
     std::shared_ptr<const android::AssetManager> mSources;
     std::map<ResourceName, CacheEntry> mCache;
+    std::unordered_set<std::u16string> mIncludedPackages;
 };
 
 inline const std::u16string& Resolver::getDefaultPackage() const {

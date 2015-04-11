@@ -17,6 +17,7 @@
 #include "BinaryResourceParser.h"
 #include "Logger.h"
 #include "ResChunkPullParser.h"
+#include "Resolver.h"
 #include "ResourceParser.h"
 #include "ResourceTable.h"
 #include "ResourceTypeExtensions.h"
@@ -33,28 +34,14 @@ namespace aapt {
 
 using namespace android;
 
-template <typename T>
-inline static const T* convertTo(const ResChunk_header* chunk) {
-    if (chunk->headerSize < sizeof(T)) {
-        return nullptr;
-    }
-    return reinterpret_cast<const T*>(chunk);
-}
-
-inline static const uint8_t* getChunkData(const ResChunk_header& chunk) {
-    return reinterpret_cast<const uint8_t*>(&chunk) + chunk.headerSize;
-}
-
-inline static size_t getChunkDataLen(const ResChunk_header& chunk) {
-    return chunk.size - chunk.headerSize;
-}
-
 /*
  * Visitor that converts a reference's resource ID to a resource name,
  * given a mapping from resource ID to resource name.
  */
 struct ReferenceIdToNameVisitor : ValueVisitor {
-    ReferenceIdToNameVisitor(const std::map<ResourceId, ResourceName>& cache) : mCache(cache) {
+    ReferenceIdToNameVisitor(const std::shared_ptr<Resolver>& resolver,
+                             std::map<ResourceId, ResourceName>* cache) :
+            mResolver(resolver), mCache(cache) {
     }
 
     void visit(Reference& reference, ValueVisitorArgs&) override {
@@ -104,24 +91,39 @@ private:
             return;
         }
 
-        auto cacheIter = mCache.find(reference.id);
-        if (cacheIter == std::end(mCache)) {
-            Logger::note() << "failed to find " << reference.id << std::endl;
-        } else {
+        auto cacheIter = mCache->find(reference.id);
+        if (cacheIter != mCache->end()) {
             reference.name = cacheIter->second;
             reference.id = 0;
+        } else {
+            const android::ResTable& table = mResolver->getResTable();
+            android::ResTable::resource_name resourceName;
+            if (table.getResourceName(reference.id.id, false, &resourceName)) {
+                const ResourceType* type = parseResourceType(StringPiece16(resourceName.type,
+                                                                           resourceName.typeLen));
+                assert(type);
+                reference.name.package.assign(resourceName.package, resourceName.packageLen);
+                reference.name.type = *type;
+                reference.name.entry.assign(resourceName.name, resourceName.nameLen);
+                reference.id = 0;
+
+                // Add to cache.
+                mCache->insert({reference.id, reference.name});
+            }
         }
     }
 
-    const std::map<ResourceId, ResourceName>& mCache;
+    std::shared_ptr<Resolver> mResolver;
+    std::map<ResourceId, ResourceName>* mCache;
 };
 
 
-BinaryResourceParser::BinaryResourceParser(std::shared_ptr<ResourceTable> table,
+BinaryResourceParser::BinaryResourceParser(const std::shared_ptr<ResourceTable>& table,
+                                           const std::shared_ptr<Resolver>& resolver,
                                            const Source& source,
                                            const void* data,
                                            size_t len) :
-        mTable(table), mSource(source), mData(data), mDataLen(len) {
+        mTable(table), mResolver(resolver), mSource(source), mData(data), mDataLen(len) {
 }
 
 bool BinaryResourceParser::parse() {
@@ -421,7 +423,7 @@ bool BinaryResourceParser::parsePackage(const ResChunk_header* chunk) {
     // Now go through the table and change resource ID references to
     // symbolic references.
 
-    ReferenceIdToNameVisitor visitor(mIdIndex);
+    ReferenceIdToNameVisitor visitor(mResolver, &mIdIndex);
     for (auto& type : *mTable) {
         for (auto& entry : type->entries) {
             for (auto& configValue : entry->values) {
@@ -676,7 +678,8 @@ std::unique_ptr<Value> BinaryResourceParser::parseMapEntry(const ResourceNameRef
 std::unique_ptr<Style> BinaryResourceParser::parseStyle(const ResourceNameRef& name,
                                                         const ConfigDescription& config,
                                                         const ResTable_map_entry* map) {
-    std::unique_ptr<Style> style = util::make_unique<Style>();
+    const bool isWeak = (map->flags & ResTable_entry::FLAG_WEAK) != 0;
+    std::unique_ptr<Style> style = util::make_unique<Style>(isWeak);
     if (map->parent.ident == 0) {
         // The parent is either not set or it is an unresolved symbol.
         // Check to see if it is a symbol.
@@ -759,7 +762,17 @@ std::unique_ptr<Styleable> BinaryResourceParser::parseStyleable(const ResourceNa
                                                                 const ResTable_map_entry* map) {
     std::unique_ptr<Styleable> styleable = util::make_unique<Styleable>();
     for (const ResTable_map& mapEntry : map) {
-        styleable->entries.emplace_back(mapEntry.name.ident);
+        if (mapEntry.name.ident == 0) {
+            // The map entry's key (attribute) is not set. This must be
+            // a symbol reference, so resolve it.
+            ResourceNameRef symbol;
+            bool result = getSymbol(&mapEntry.name.ident, &symbol);
+            assert(result);
+            styleable->entries.emplace_back(symbol);
+        } else {
+            // The map entry's key (attribute) is a regular reference.
+            styleable->entries.emplace_back(mapEntry.name.ident);
+        }
     }
     return styleable;
 }

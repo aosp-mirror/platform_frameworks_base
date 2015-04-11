@@ -162,6 +162,16 @@ TEST(StringPoolTest, DoNotDedupeStyleWithSameStringAsNonStyle) {
     EXPECT_NE(ref.getIndex(), styleRef.getIndex());
 }
 
+TEST(StringPoolTest, FlattenEmptyStringPoolUtf8) {
+    StringPool pool;
+    BigBuffer buffer(1024);
+    StringPool::flattenUtf8(&buffer, pool);
+
+    std::unique_ptr<uint8_t[]> data = util::copy(buffer);
+    android::ResStringPool test;
+    ASSERT_EQ(test.setTo(data.get(), buffer.size()), android::NO_ERROR);
+}
+
 constexpr const char16_t* sLongString = u"バッテリーを長持ちさせるため、バッテリーセーバーは端末のパフォーマンスを抑え、バイブレーション、位置情報サービス、大半のバックグラウンドデータを制限します。メール、SMSや、同期を使 用するその他のアプリは、起動しても更新されないことがあります。バッテリーセーバーは端末の充電中は自動的にOFFになります。";
 
 TEST(StringPoolTest, FlattenUtf8) {
@@ -183,16 +193,10 @@ TEST(StringPoolTest, FlattenUtf8) {
     BigBuffer buffer(1024);
     StringPool::flattenUtf8(&buffer, pool);
 
-    uint8_t* data = new uint8_t[buffer.size()];
-    uint8_t* p = data;
-    for (const auto& b : buffer) {
-        memcpy(p, b.buffer.get(), b.size);
-        p += b.size;
-    }
-
+    std::unique_ptr<uint8_t[]> data = util::copy(buffer);
     {
-        ResStringPool test;
-        ASSERT_TRUE(test.setTo(data, buffer.size()) == NO_ERROR);
+        android::ResStringPool test;
+        ASSERT_EQ(test.setTo(data.get(), buffer.size()), android::NO_ERROR);
 
         EXPECT_EQ(util::getString(test, 0), u"hello");
         EXPECT_EQ(util::getString(test, 1), u"goodbye");
@@ -214,7 +218,6 @@ TEST(StringPoolTest, FlattenUtf8) {
 
         EXPECT_EQ(ResStringPool_span::END, span->name.index);
     }
-    delete[] data;
 }
 
 } // namespace aapt

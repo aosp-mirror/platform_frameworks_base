@@ -64,6 +64,17 @@ public:
                                            ResourceNameRef* outReference);
 
     /*
+     * Returns true if the string `str` was parsed as a valid reference to a style.
+     * The format for a style parent is slightly more flexible than a normal reference:
+     *
+     * @[package:]style/<entry> or
+     * ?[package:]style/<entry> or
+     * <package>:[style/]<entry>
+     */
+    static bool parseStyleParentReference(const StringPiece16& str, Reference* outReference,
+                                          std::string* outError);
+
+    /*
      * Returns a Reference object if the string was parsed as a resource or attribute reference,
      * ( @[+][package:]type/name | ?[package:]type/name )
      * assigning defaultPackage if the package was not present in the string, and setting
@@ -166,7 +177,7 @@ private:
     bool parsePublic(XmlPullParser* parser, const StringPiece16& name);
     bool parseAttr(XmlPullParser* parser, const ResourceNameRef& resourceName);
     std::unique_ptr<Attribute> parseAttrImpl(XmlPullParser* parser,
-                                             const ResourceNameRef& resourceName,
+                                             ResourceName* resourceName,
                                              bool weak);
     bool parseEnumOrFlagItem(XmlPullParser* parser, const StringPiece16& tag,
                              Attribute::Symbol* outSymbol);

@@ -128,6 +128,20 @@ const Linker::ResourceNameToSourceMap& Linker::getUnresolvedReferences() const {
 void Linker::visit(Reference& reference, ValueVisitorArgs& a) {
     Args& args = static_cast<Args&>(a);
 
+    if (!reference.name.isValid()) {
+        // We can't have a completely bad reference.
+        assert(reference.id.isValid());
+
+        // This reference has no name but has an ID.
+        // It is a really bad error to have no name and have the same
+        // package ID.
+        assert(reference.id.packageId() != mTable->getPackageId());
+
+        // The reference goes outside this package, let it stay as a
+        // resource ID because it will not change.
+        return;
+    }
+
     Maybe<ResourceId> result = mResolver->findId(reference.name);
     if (!result) {
         addUnresolvedSymbol(reference.name, args.source);
@@ -206,7 +220,7 @@ void Linker::processAttributeValue(const ResourceNameRef& name, const SourceLine
 void Linker::visit(Style& style, ValueVisitorArgs& a) {
     Args& args = static_cast<Args&>(a);
 
-    if (style.parent.name.isValid()) {
+    if (style.parent.name.isValid() || style.parent.id.isValid()) {
         visit(style.parent, a);
     }
 

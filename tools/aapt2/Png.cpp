@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#include "BigBuffer.h"
 #include "Logger.h"
 #include "Png.h"
 #include "Source.h"
@@ -85,17 +86,12 @@ static void readDataFromStream(png_structp readPtr, png_bytep data, png_size_t l
 }
 
 static void writeDataToStream(png_structp writePtr, png_bytep data, png_size_t length) {
-    std::ostream* output = reinterpret_cast<std::ostream*>(png_get_io_ptr(writePtr));
-    if (!output->write(reinterpret_cast<const char*>(data), length)) {
-        png_error(writePtr, strerror(errno));
-    }
+    BigBuffer* outBuffer = reinterpret_cast<BigBuffer*>(png_get_io_ptr(writePtr));
+    png_bytep buf = outBuffer->nextBlock<png_byte>(length);
+    memcpy(buf, data, length);
 }
 
-static void flushDataToStream(png_structp writePtr) {
-    std::ostream* output = reinterpret_cast<std::ostream*>(png_get_io_ptr(writePtr));
-    if (!output->flush()) {
-        png_error(writePtr, strerror(errno));
-    }
+static void flushDataToStream(png_structp /*writePtr*/) {
 }
 
 static void logWarning(png_structp readPtr, png_const_charp warningMessage) {
@@ -1196,7 +1192,7 @@ getout:
 }
 
 
-bool Png::process(const Source& source, std::istream& input, std::ostream& output,
+bool Png::process(const Source& source, std::istream& input, BigBuffer* outBuffer,
                   const Options& options, std::string* outError) {
     png_byte signature[kPngSignatureSize];
 
@@ -1262,7 +1258,7 @@ bool Png::process(const Source& source, std::istream& input, std::ostream& outpu
     png_set_error_fn(writePtr, nullptr, nullptr, logWarning);
 
     // Set the write function to write to std::ostream.
-    png_set_write_fn(writePtr, (png_voidp)&output, writeDataToStream, flushDataToStream);
+    png_set_write_fn(writePtr, (png_voidp)outBuffer, writeDataToStream, flushDataToStream);
 
     if (!writePng(writePtr, writeInfoPtr, &pngInfo, options.grayScaleTolerance, &logger,
                   outError)) {

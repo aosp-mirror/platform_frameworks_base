@@ -158,6 +158,12 @@ public:
     StyleRef makeRef(const StyleString& str, const Context& context);
 
     /**
+     * Adds a style from another string pool. Returns a reference to the
+     * style in the string pool.
+     */
+    StyleRef makeRef(const StyleRef& ref);
+
+    /**
      * Moves pool into this one without coalescing strings. When this
      * function returns, pool will be empty.
      */

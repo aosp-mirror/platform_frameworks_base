@@ -47,7 +47,7 @@ public:
         table->addResource(ResourceName{ {}, ResourceType::kId, u"test" },
                            ResourceId{ 0x01020000 }, {}, {}, util::make_unique<Id>());
 
-        mFlattener = std::make_shared<XmlFlattener>(
+        mFlattener = std::make_shared<XmlFlattener>(nullptr,
                 std::make_shared<Resolver>(table, std::make_shared<AssetManager>()));
     }
 

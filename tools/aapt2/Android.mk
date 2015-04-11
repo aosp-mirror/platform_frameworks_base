@@ -27,6 +27,7 @@ main := Main.cpp
 sources := \
 	BigBuffer.cpp \
 	BinaryResourceParser.cpp \
+	BinaryXmlPullParser.cpp \
 	BindingXmlPullParser.cpp \
 	ConfigDescription.cpp \
 	Files.cpp \
@@ -51,7 +52,9 @@ sources := \
 	ScopedXmlPullParser.cpp \
 	SourceXmlPullParser.cpp \
 	XliffXmlPullParser.cpp \
-	XmlFlattener.cpp
+	XmlFlattener.cpp \
+	ZipEntry.cpp \
+	ZipFile.cpp
 
 testSources := \
 	BigBuffer_test.cpp \
@@ -63,6 +66,7 @@ testSources := \
 	Locale_test.cpp \
 	ManifestParser_test.cpp \
 	Maybe_test.cpp \
+	NameMangler_test.cpp \
 	ResourceParser_test.cpp \
 	Resource_test.cpp \
 	ResourceTable_test.cpp \

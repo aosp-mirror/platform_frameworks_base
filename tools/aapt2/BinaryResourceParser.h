@@ -17,6 +17,7 @@
 #ifndef AAPT_BINARY_RESOURCE_PARSER_H
 #define AAPT_BINARY_RESOURCE_PARSER_H
 
+#include "Resolver.h"
 #include "ResourceTable.h"
 #include "ResourceValues.h"
 #include "Source.h"
@@ -41,7 +42,9 @@ public:
      * Creates a parser, which will read `len` bytes from `data`, and
      * add any resources parsed to `table`. `source` is for logging purposes.
      */
-    BinaryResourceParser(std::shared_ptr<ResourceTable> table, const Source& source,
+    BinaryResourceParser(const std::shared_ptr<ResourceTable>& table,
+                         const std::shared_ptr<Resolver>& resolver,
+                         const Source& source,
                          const void* data, size_t len);
 
     BinaryResourceParser(const BinaryResourceParser&) = delete; // No copy.
@@ -88,6 +91,8 @@ private:
             const ConfigDescription& config, const android::ResTable_map_entry* map);
 
     std::shared_ptr<ResourceTable> mTable;
+
+    std::shared_ptr<Resolver> mResolver;
 
     const Source mSource;
 

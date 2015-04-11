@@ -19,6 +19,13 @@ digraph aapt {
     res_layout_fr_main_xml [label="res/layout-fr/main.xml"];
     res_values_fr_strings_xml [label="res/values-fr/strings.xml"];
 
+    lib_apk_resources_arsc [label="lib.apk:resources.arsc",color=green];
+    lib_apk_res_layout_main_xml [label="lib.apk:res/layout/main.xml",color=green];
+    lib_apk_res_drawable_icon_png [label="lib.apk:res/drawable/icon.png",color=green];
+    lib_apk_fr_res_layout_main_xml [label="lib.apk:res/layout-fr/main.xml",color=green];
+    lib_apk_fr_res_drawable_icon_png [label="lib.apk:res/drawable-fr/icon.png",color=green];
+    out_res_layout_lib_main_xml [label="out/res/layout/lib-main.xml"];
+
     out_package -> package_default;
     out_fr_package -> package_fr;
 
@@ -26,6 +33,7 @@ digraph aapt {
     package_default -> out_table_aligned;
     package_default -> out_res_layout_main_xml;
     package_default -> out_res_layout_v21_main_xml [color=red];
+    package_default -> out_res_layout_lib_main_xml;
 
     package_fr [shape=box,label="Assemble",color=blue];
     package_fr -> out_table_fr_aligned;
@@ -44,6 +52,7 @@ digraph aapt {
     link_tables [shape=box,label="Link",color=blue];
     link_tables -> out_values_table;
     link_tables -> out_layout_table;
+    link_tables -> lib_apk_resources_arsc;
 
     out_values_table -> compile_values;
 
@@ -61,10 +70,11 @@ digraph aapt {
     link_fr_tables [shape=box,label="Link",color=blue];
     link_fr_tables -> out_values_fr_table;
     link_fr_tables -> out_layout_fr_table;
+    link_fr_tables -> lib_apk_resources_arsc;
 
     out_values_fr_table -> compile_values_fr;
 
-    compile_values_fr [shape=box,label="Compile",color=blue];
+    compile_values_fr [shape=box,label="Collect",color=blue];
     compile_values_fr -> res_values_fr_strings_xml;
 
     out_layout_fr_table -> collect_xml_fr;
@@ -89,4 +99,10 @@ digraph aapt {
 
     compile_res_layout_fr_main_xml -> res_layout_fr_main_xml;
     compile_res_layout_fr_main_xml -> out_table_fr_aligned;
+
+    out_res_layout_lib_main_xml -> compile_res_layout_lib_main_xml;
+
+    compile_res_layout_lib_main_xml [shape=box,label="Compile",color=blue];
+    compile_res_layout_lib_main_xml -> out_table_aligned;
+    compile_res_layout_lib_main_xml -> lib_apk_res_layout_main_xml;
 }

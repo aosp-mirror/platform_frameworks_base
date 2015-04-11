@@ -16,6 +16,7 @@
 
 #include "ConfigDescription.h"
 #include "Logger.h"
+#include "NameMangler.h"
 #include "ResourceTable.h"
 #include "ResourceValues.h"
 #include "Util.h"
@@ -307,6 +308,71 @@ bool ResourceTable::markPublic(const ResourceNameRef& name, const ResourceId res
     if (entry->values.empty()) {
         entry->values.push_back(ResourceConfigValue{ {}, source, {},
                                     util::make_unique<Sentinel>() });
+    }
+    return true;
+}
+
+bool ResourceTable::merge(ResourceTable&& other) {
+    const bool mangleNames = mPackage != other.getPackage();
+    std::u16string mangledName;
+
+    for (auto& otherType : other) {
+        std::unique_ptr<ResourceTableType>& type = findOrCreateType(otherType->type);
+        if (type->publicStatus.isPublic && otherType->publicStatus.isPublic &&
+                type->typeId != otherType->typeId) {
+            Logger::error() << "can not merge type '" << type->type << "': conflicting public IDs "
+                            << "(" << type->typeId << " vs " << otherType->typeId << ")."
+                            << std::endl;
+            return false;
+        }
+
+        for (auto& otherEntry : otherType->entries) {
+            const std::u16string* nameToAdd = &otherEntry->name;
+            if (mangleNames) {
+                mangledName = otherEntry->name;
+                NameMangler::mangle(other.getPackage(), &mangledName);
+                nameToAdd = &mangledName;
+            }
+
+            std::unique_ptr<ResourceEntry>& entry = findOrCreateEntry(type, *nameToAdd);
+            if (entry->publicStatus.isPublic && otherEntry->publicStatus.isPublic &&
+                    entry->entryId != otherEntry->entryId) {
+                Logger::error() << "can not merge entry '" << type->type << "/" << entry->name
+                                << "': conflicting public IDs "
+                                << "(" << entry->entryId << " vs " << entry->entryId << ")."
+                                << std::endl;
+                return false;
+            }
+
+            for (ResourceConfigValue& otherValue : otherEntry->values) {
+                auto iter = std::lower_bound(entry->values.begin(), entry->values.end(),
+                                             otherValue.config, compareConfigs);
+                if (iter != entry->values.end() && iter->config == otherValue.config) {
+                    int collisionResult = defaultCollisionHandler(*iter->value, *otherValue.value);
+                    if (collisionResult > 0) {
+                        // Take the incoming value.
+                        iter->source = std::move(otherValue.source);
+                        iter->comment = std::move(otherValue.comment);
+                        iter->value = std::unique_ptr<Value>(otherValue.value->clone(&mValuePool));
+                    } else if (collisionResult == 0) {
+                        ResourceNameRef resourceName = { mPackage, type->type, entry->name };
+                        Logger::error(otherValue.source)
+                                << "resource '" << resourceName << "' has a conflicting value for "
+                                << "configuration (" << otherValue.config << ")."
+                                << std::endl;
+                        Logger::note(iter->source) << "originally defined here." << std::endl;
+                        return false;
+                    }
+                } else {
+                    entry->values.insert(iter, ResourceConfigValue{
+                            otherValue.config,
+                            std::move(otherValue.source),
+                            std::move(otherValue.comment),
+                            std::unique_ptr<Value>(otherValue.value->clone(&mValuePool)),
+                    });
+                }
+            }
+        }
     }
     return true;
 }

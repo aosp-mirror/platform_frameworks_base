@@ -193,8 +193,7 @@ inline ::std::ostream& operator<<(::std::ostream& out,
 // ResourceType implementation.
 //
 
-inline ::std::ostream& operator<<(::std::ostream& out,
-        const ResourceType& val) {
+inline ::std::ostream& operator<<(::std::ostream& out, const ResourceType& val) {
     return out << toString(val);
 }
 
@@ -220,6 +219,14 @@ inline bool ResourceName::operator!=(const ResourceName& rhs) const {
     return std::tie(package, type, entry)
             != std::tie(rhs.package, rhs.type, rhs.entry);
 }
+
+inline ::std::ostream& operator<<(::std::ostream& out, const ResourceName& name) {
+    if (!name.package.empty()) {
+        out << name.package << ":";
+    }
+    return out << name.type << "/" << name.entry;
+}
+
 
 //
 // ResourceNameRef implementation.
@@ -264,8 +271,7 @@ inline bool ResourceNameRef::operator!=(const ResourceNameRef& rhs) const {
             != std::tie(rhs.package, rhs.type, rhs.entry);
 }
 
-inline ::std::ostream& operator<<(::std::ostream& out,
-        const ResourceNameRef& name) {
+inline ::std::ostream& operator<<(::std::ostream& out, const ResourceNameRef& name) {
     if (!name.package.empty()) {
         out << name.package << ":";
     }

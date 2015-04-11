@@ -22,6 +22,8 @@
 #include "Util.h"
 #include "XliffXmlPullParser.h"
 
+#include <sstream>
+
 namespace aapt {
 
 void ResourceParser::extractResourceName(const StringPiece16& str, StringPiece16* outPackage,
@@ -105,6 +107,71 @@ bool ResourceParser::tryParseAttributeReference(const StringPiece16& str,
         return true;
     }
     return false;
+}
+
+/*
+ * Style parent's are a bit different. We accept the following formats:
+ *
+ * @[package:]style/<entry>
+ * ?[package:]style/<entry>
+ * <package>:[style/]<entry>
+ * [package:style/]<entry>
+ */
+bool ResourceParser::parseStyleParentReference(const StringPiece16& str, Reference* outReference,
+                                               std::string* outError) {
+    if (str.empty()) {
+        return true;
+    }
+
+    StringPiece16 name = str;
+
+    bool hasLeadingIdentifiers = false;
+    bool privateRef = false;
+
+    // Skip over these identifiers. A style's parent is a normal reference.
+    if (name.data()[0] == u'@' || name.data()[0] == u'?') {
+        hasLeadingIdentifiers = true;
+        name = name.substr(1, name.size() - 1);
+        if (name.data()[0] == u'*') {
+            privateRef = true;
+            name = name.substr(1, name.size() - 1);
+        }
+    }
+
+    ResourceNameRef ref;
+    ref.type = ResourceType::kStyle;
+
+    StringPiece16 typeStr;
+    extractResourceName(name, &ref.package, &typeStr, &ref.entry);
+    if (!typeStr.empty()) {
+        // If we have a type, make sure it is a Style.
+        const ResourceType* parsedType = parseResourceType(typeStr);
+        if (!parsedType || *parsedType != ResourceType::kStyle) {
+            std::stringstream err;
+            err << "invalid resource type '" << typeStr << "' for parent of style";
+            *outError = err.str();
+            return false;
+        }
+    } else {
+        // No type was defined, this should not have a leading identifier.
+        if (hasLeadingIdentifiers) {
+            std::stringstream err;
+            err << "invalid parent reference '" << str << "'";
+            *outError = err.str();
+            return false;
+        }
+    }
+
+    if (!hasLeadingIdentifiers && ref.package.empty() && !typeStr.empty()) {
+        std::stringstream err;
+        err << "invalid parent reference '" << str << "'";
+        *outError = err.str();
+        return false;
+    }
+
+    outReference->name = ref.toResourceName();
+    outReference->privateReference = privateRef;
+    return true;
 }
 
 std::unique_ptr<Reference> ResourceParser::tryParseReference(const StringPiece16& str,
@@ -885,15 +952,16 @@ static uint32_t parseFormatAttribute(const StringPiece16& str) {
 
 bool ResourceParser::parseAttr(XmlPullParser* parser, const ResourceNameRef& resourceName) {
     const SourceLine source = mSource.line(parser->getLineNumber());
-    std::unique_ptr<Attribute> attr = parseAttrImpl(parser, resourceName, false);
+    ResourceName actualName = resourceName.toResourceName();
+    std::unique_ptr<Attribute> attr = parseAttrImpl(parser, &actualName, false);
     if (!attr) {
         return false;
     }
-    return mTable->addResource(resourceName, mConfig, source, std::move(attr));
+    return mTable->addResource(actualName, mConfig, source, std::move(attr));
 }
 
 std::unique_ptr<Attribute> ResourceParser::parseAttrImpl(XmlPullParser* parser,
-                                                         const ResourceNameRef& resourceName,
+                                                         ResourceName* resourceName,
                                                          bool weak) {
     uint32_t typeMask = 0;
 
@@ -908,6 +976,18 @@ std::unique_ptr<Attribute> ResourceParser::parseAttrImpl(XmlPullParser* parser,
                     << "'."
                     << std::endl;
             return {};
+        }
+    }
+
+    // If this is a declaration, the package name may be in the name. Separate these out.
+    // Eg. <attr name="android:text" />
+    // No format attribute is allowed.
+    if (weak && formatAttrIter == endAttrIter) {
+        StringPiece16 package, type, name;
+        extractResourceName(resourceName->entry, &package, &type, &name);
+        if (type.empty() && !package.empty()) {
+            resourceName->package = package.toString();
+            resourceName->entry = name.toString();
         }
     }
 
@@ -1079,31 +1159,15 @@ bool ResourceParser::parseUntypedItem(XmlPullParser* parser, Style& style) {
 
 bool ResourceParser::parseStyle(XmlPullParser* parser, const ResourceNameRef& resourceName) {
     const SourceLine source = mSource.line(parser->getLineNumber());
-    std::unique_ptr<Style> style = util::make_unique<Style>();
+    std::unique_ptr<Style> style = util::make_unique<Style>(false);
 
     const auto endAttrIter = parser->endAttributes();
     const auto parentAttrIter = parser->findAttribute(u"", u"parent");
     if (parentAttrIter != endAttrIter) {
-        ResourceNameRef ref;
-        bool create = false;
-        bool privateRef = false;
-        if (tryParseReference(parentAttrIter->value, &ref, &create, &privateRef)) {
-            if (create) {
-                mLogger.error(source.line)
-                        << "parent of style can not be an ID."
-                        << std::endl;
-                return false;
-            }
-            style->parent.name = ref.toResourceName();
-            style->parent.privateReference = privateRef;
-        } else if (tryParseAttributeReference(parentAttrIter->value, &ref)) {
-            style->parent.name = ref.toResourceName();
-        } else {
-            // TODO(adamlesinski): Try parsing without the '@' or '?'.
-            // Also, make sure to check the entry name for weird symbols.
-            style->parent.name = ResourceName {
-                {}, ResourceType::kStyle, parentAttrIter->value
-            };
+        std::string errStr;
+        if (!parseStyleParentReference(parentAttrIter->value, &style->parent, &errStr)) {
+            mLogger.error(source.line) << errStr << "." << std::endl;
+            return false;
         }
 
         if (style->parent.name.package.empty()) {
@@ -1277,15 +1341,13 @@ bool ResourceParser::parseDeclareStyleable(XmlPullParser* parser,
             }
 
             // Copy because our iterator will be invalidated.
-            std::u16string attrName = attrIter->value;
-
-            ResourceNameRef attrResourceName = {
+            ResourceName attrResourceName = {
                     mTable->getPackage(),
                     ResourceType::kAttr,
-                    attrName
+                    attrIter->value
             };
 
-            std::unique_ptr<Attribute> attr = parseAttrImpl(&childParser, attrResourceName, true);
+            std::unique_ptr<Attribute> attr = parseAttrImpl(&childParser, &attrResourceName, true);
             if (!attr) {
                 success = false;
                 continue;
@@ -1293,9 +1355,13 @@ bool ResourceParser::parseDeclareStyleable(XmlPullParser* parser,
 
             styleable->entries.emplace_back(attrResourceName);
 
-            success &= mTable->addResource(attrResourceName, mConfig,
-                                           mSource.line(childParser.getLineNumber()),
-                                           std::move(attr));
+            // The package may have been corrected to another package. If that is so,
+            // we don't add the declaration.
+            if (attrResourceName.package == mTable->getPackage()) {
+                success &= mTable->addResource(attrResourceName, mConfig,
+                                               mSource.line(childParser.getLineNumber()),
+                                               std::move(attr));
+            }
 
         } else if (elementName != u"eat-comment" && elementName != u"skip") {
             mLogger.error(childParser.getLineNumber())
