@@ -51,6 +51,7 @@ import static android.content.pm.PackageManager.INTENT_FILTER_DOMAIN_VERIFICATIO
 import static android.content.pm.PackageManager.INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_UNDEFINED;
 import static android.content.pm.PackageManager.MOVE_EXTERNAL_MEDIA;
 import static android.content.pm.PackageManager.MOVE_FAILED_DOESNT_EXIST;
+import static android.content.pm.PackageManager.MOVE_FAILED_INTERNAL_ERROR;
 import static android.content.pm.PackageManager.MOVE_FAILED_OPERATION_PENDING;
 import static android.content.pm.PackageManager.MOVE_FAILED_SYSTEM_PACKAGE;
 import static android.content.pm.PackageManager.MOVE_INTERNAL;
@@ -71,7 +72,6 @@ import static com.android.server.pm.InstructionSets.getPreferredInstructionSet;
 import static com.android.server.pm.InstructionSets.getPrimaryInstructionSet;
 
 import android.Manifest;
-import org.xmlpull.v1.XmlPullParser;
 import android.app.ActivityManager;
 import android.app.ActivityManagerNative;
 import android.app.AppGlobals;
@@ -202,6 +202,7 @@ import com.android.server.Watchdog;
 import com.android.server.pm.Settings.DatabaseVersion;
 import com.android.server.storage.DeviceStorageMonitorInternal;
 
+import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlSerializer;
 
 import java.io.BufferedInputStream;
@@ -2566,8 +2567,8 @@ public class PackageManagerService extends IPackageManager.Stub {
                 pkg.applicationInfo.packageName = packageName;
                 pkg.applicationInfo.flags = ps.pkgFlags | ApplicationInfo.FLAG_IS_DATA_ONLY;
                 pkg.applicationInfo.privateFlags = ps.pkgPrivateFlags;
-                pkg.applicationInfo.dataDir =
-                        getDataPathForPackage(packageName, 0).getPath();
+                pkg.applicationInfo.dataDir = PackageManager.getDataDirForUser(ps.volumeUuid,
+                        packageName, userId).getAbsolutePath();
                 pkg.applicationInfo.primaryCpuAbi = ps.primaryCpuAbiString;
                 pkg.applicationInfo.secondaryCpuAbi = ps.secondaryCpuAbiString;
             }
@@ -5072,6 +5073,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
 
         // Set application objects path explicitly.
+        pkg.applicationInfo.volumeUuid = pkg.volumeUuid;
         pkg.applicationInfo.setCodePath(pkg.codePath);
         pkg.applicationInfo.setBaseCodePath(pkg.baseCodePath);
         pkg.applicationInfo.setSplitCodePaths(pkg.splitCodePaths);
@@ -5477,20 +5479,6 @@ public class PackageManagerService extends IPackageManager.Stub {
             return false;
         }
         return true;
-    }
-
-    private File getDataPathForPackage(String packageName, int userId) {
-        /*
-         * Until we fully support multiple users, return the directory we
-         * previously would have. The PackageManagerTests will need to be
-         * revised when this is changed back..
-         */
-        if (userId == 0) {
-            return new File(mAppDataDir, packageName);
-        } else {
-            return new File(mUserAppDataDir.getAbsolutePath() + File.separator + userId
-                + File.separator + packageName);
-        }
     }
 
     private int createDataDirsLI(String packageName, int uid, String seinfo) {
@@ -6012,7 +6000,8 @@ public class PackageManagerService extends IPackageManager.Stub {
 
         } else {
             // This is a normal package, need to make its data directory.
-            dataPath = getDataPathForPackage(pkg.packageName, 0);
+            dataPath = PackageManager.getDataDirForUser(pkg.volumeUuid, pkg.packageName,
+                    UserHandle.USER_OWNER);
 
             boolean uidError = false;
             if (dataPath.exists()) {
@@ -10127,6 +10116,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                         pkg.splitCodePaths);
 
                 // Reflect the rename in app info
+                pkg.applicationInfo.volumeUuid = pkg.volumeUuid;
                 pkg.applicationInfo.setCodePath(pkg.codePath);
                 pkg.applicationInfo.setBaseCodePath(pkg.baseCodePath);
                 pkg.applicationInfo.setSplitCodePaths(pkg.splitCodePaths);
@@ -10417,6 +10407,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                     pkg.splitCodePaths);
 
             // Reflect the rename in app info
+            pkg.applicationInfo.volumeUuid = pkg.volumeUuid;
             pkg.applicationInfo.setCodePath(pkg.codePath);
             pkg.applicationInfo.setBaseCodePath(pkg.baseCodePath);
             pkg.applicationInfo.setSplitCodePaths(pkg.splitCodePaths);
@@ -10675,7 +10666,8 @@ public class PackageManagerService extends IPackageManager.Stub {
         String pkgName = pkg.packageName;
 
         if (DEBUG_INSTALL) Slog.d(TAG, "installNewPackageLI: " + pkg);
-        boolean dataDirExists = getDataPathForPackage(pkg.packageName, 0).exists();
+        final boolean dataDirExists = PackageManager.getDataDirForUser(volumeUuid, pkgName,
+                UserHandle.USER_OWNER).exists();
         synchronized(mPackages) {
             if (mSettings.mRenamedPackages.containsKey(pkgName)) {
                 // A package with the same name is already installed, though
@@ -11047,7 +11039,6 @@ public class PackageManagerService extends IPackageManager.Stub {
             res.pkg = newPackage;
             mSettings.setInstallStatus(pkgName, PackageSettingBase.PKG_INSTALL_COMPLETE);
             mSettings.setInstallerPackageName(pkgName, installerPackageName);
-            mSettings.setVolumeUuid(pkgName, volumeUuid);
             res.returnCode = PackageManager.INSTALL_SUCCEEDED;
             //to update install status
             mSettings.writeLPr();
@@ -14166,11 +14157,12 @@ public class PackageManagerService extends IPackageManager.Stub {
             boolean andData, final IPackageMoveObserver observer) throws PackageManagerException {
         final UserHandle user = new UserHandle(UserHandle.getCallingUserId());
 
-        File codeFile = null;
-        String installerPackageName = null;
-        String packageAbiOverride = null;
-
-        // TOOD: move app private data before installing
+        final String currentVolumeUuid;
+        final File codeFile;
+        final String installerPackageName;
+        final String packageAbiOverride;
+        final int appId;
+        final String seinfo;
 
         // reader
         synchronized (mPackages) {
@@ -14192,9 +14184,31 @@ public class PackageManagerService extends IPackageManager.Stub {
 
             pkg.mOperationPending = true;
 
+            currentVolumeUuid = ps.volumeUuid;
             codeFile = new File(pkg.codePath);
             installerPackageName = ps.installerPackageName;
             packageAbiOverride = ps.cpuAbiOverrideString;
+            appId = UserHandle.getAppId(pkg.applicationInfo.uid);
+            seinfo = pkg.applicationInfo.seinfo;
+        }
+
+        if (andData) {
+            Slog.d(TAG, "Moving " + packageName + " private data from " + currentVolumeUuid + " to "
+                    + volumeUuid);
+            synchronized (mInstallLock) {
+                if (mInstaller.moveUserDataDirs(currentVolumeUuid, volumeUuid, packageName, appId,
+                        seinfo) != 0) {
+                    synchronized (mPackages) {
+                        final PackageParser.Package pkg = mPackages.get(packageName);
+                        if (pkg != null) {
+                            pkg.mOperationPending = false;
+                        }
+                    }
+
+                    throw new PackageManagerException(MOVE_FAILED_INTERNAL_ERROR,
+                            "Failed to move private data");
+                }
+            }
         }
 
         final IPackageInstallObserver2 installObserver = new IPackageInstallObserver2.Stub() {

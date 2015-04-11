@@ -261,6 +261,22 @@ public final class Installer extends SystemService {
         return mInstaller.execute(builder.toString());
     }
 
+    public int moveUserDataDirs(String fromUuid, String toUuid, String packageName, int appId,
+            String seinfo) {
+        StringBuilder builder = new StringBuilder("mvuserdata");
+        builder.append(' ');
+        builder.append(escapeNull(fromUuid));
+        builder.append(' ');
+        builder.append(escapeNull(toUuid));
+        builder.append(' ');
+        builder.append(packageName);
+        builder.append(' ');
+        builder.append(appId);
+        builder.append(' ');
+        builder.append(seinfo);
+        return mInstaller.execute(builder.toString());
+    }
+
     @Deprecated
     public int clearUserData(String name, int userId) {
         return clearUserData(null, name, userId);

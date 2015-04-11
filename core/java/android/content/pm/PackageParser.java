@@ -111,6 +111,9 @@ public class PackageParser {
     /** File name in an APK for the Android manifest. */
     private static final String ANDROID_MANIFEST_FILENAME = "AndroidManifest.xml";
 
+    /** Path prefix for apps on expanded storage */
+    private static final String MNT_EXPAND = "/mnt/expand/";
+
     /** @hide */
     public static class NewPermissionInfo {
         public final String name;
@@ -860,6 +863,12 @@ public class PackageParser {
             throws PackageParserException {
         final String apkPath = apkFile.getAbsolutePath();
 
+        String volumeUuid = null;
+        if (apkPath.startsWith(MNT_EXPAND)) {
+            final int end = apkPath.indexOf('/', MNT_EXPAND.length());
+            volumeUuid = apkPath.substring(MNT_EXPAND.length(), end);
+        }
+
         mParseError = PackageManager.INSTALL_SUCCEEDED;
         mArchiveSourcePath = apkFile.getAbsolutePath();
 
@@ -882,6 +891,7 @@ public class PackageParser {
                         apkPath + " (at " + parser.getPositionDescription() + "): " + outError[0]);
             }
 
+            pkg.volumeUuid = volumeUuid;
             pkg.baseCodePath = apkPath;
             pkg.mSignatures = null;
 
@@ -4206,6 +4216,8 @@ public class PackageParser {
 
         // TODO: work towards making these paths invariant
 
+        public String volumeUuid;
+
         /**
          * Path where this package was found on disk. For monolithic packages
          * this is path to single base APK file; for cluster packages this is
@@ -4727,7 +4739,8 @@ public class PackageParser {
         ApplicationInfo ai = new ApplicationInfo(p.applicationInfo);
         if (userId != 0) {
             ai.uid = UserHandle.getUid(userId, ai.uid);
-            ai.dataDir = PackageManager.getDataDirForUser(userId, ai.packageName);
+            ai.dataDir = PackageManager.getDataDirForUser(ai.volumeUuid, ai.packageName, userId)
+                    .getAbsolutePath();
         }
         if ((flags & PackageManager.GET_META_DATA) != 0) {
             ai.metaData = p.mAppMetaData;
@@ -4755,7 +4768,8 @@ public class PackageParser {
         ai = new ApplicationInfo(ai);
         if (userId != 0) {
             ai.uid = UserHandle.getUid(userId, ai.uid);
-            ai.dataDir = PackageManager.getDataDirForUser(userId, ai.packageName);
+            ai.dataDir = PackageManager.getDataDirForUser(ai.volumeUuid, ai.packageName, userId)
+                    .getAbsolutePath();
         }
         if (state.stopped) {
             ai.flags |= ApplicationInfo.FLAG_STOPPED;

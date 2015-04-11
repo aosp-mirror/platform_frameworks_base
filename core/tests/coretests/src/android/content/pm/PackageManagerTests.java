@@ -576,14 +576,6 @@ public class PackageManagerTests extends AndroidTestCase {
             fail(pkgName + " shouldnt be installed");
         } catch (NameNotFoundException e) {
         }
-
-        UserManager um = (UserManager) mContext.getSystemService(Context.USER_SERVICE);
-        List<UserInfo> users = um.getUsers();
-        for (UserInfo user : users) {
-            String dataDir = PackageManager.getDataDirForUser(user.id, pkgName);
-            assertFalse("Application data directory should not exist: " + dataDir,
-                    new File(dataDir).exists());
-        }
     }
 
     class InstallParams {

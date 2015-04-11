@@ -18,7 +18,6 @@ package android.app;
 
 import android.text.TextUtils;
 import android.util.ArrayMap;
-
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -46,6 +45,7 @@ import android.util.SparseArray;
 import android.view.DisplayAdjustments;
 import android.view.Display;
 import android.os.SystemProperties;
+
 import dalvik.system.VMRuntime;
 
 import java.io.File;
@@ -136,10 +136,6 @@ public final class LoadedApk {
         mSplitAppDirs = aInfo.splitSourceDirs;
         mSplitResDirs = aInfo.uid == myUid ? aInfo.splitSourceDirs : aInfo.splitPublicSourceDirs;
         mOverlayDirs = aInfo.resourceDirs;
-        if (!UserHandle.isSameUser(aInfo.uid, myUid) && !Process.isIsolated()) {
-            aInfo.dataDir = PackageManager.getDataDirForUser(UserHandle.getUserId(myUid),
-                    mPackageName);
-        }
         mSharedLibraries = aInfo.sharedLibraryFiles;
         mDataDir = aInfo.dataDir;
         mDataDirFile = mDataDir != null ? new File(mDataDir) : null;

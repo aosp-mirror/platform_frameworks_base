@@ -350,13 +350,6 @@ final class Settings {
         }
     }
 
-    void setVolumeUuid(String pkgName, String volumeUuid) {
-        PackageSetting p = mPackages.get(pkgName);
-        if (p != null) {
-            p.setVolumeUuid(volumeUuid);
-        }
-    }
-
     SharedUserSetting getSharedUserLPw(String name,
             int pkgFlags, int pkgPrivateFlags, boolean create) {
         SharedUserSetting s = mSharedUsers.get(name);
@@ -699,19 +692,26 @@ final class Settings {
         p.pkg = pkg;
         // pkg.mSetEnabled = p.getEnabled(userId);
         // pkg.mSetStopped = p.getStopped(userId);
+        final String volumeUuid = pkg.applicationInfo.volumeUuid;
         final String codePath = pkg.applicationInfo.getCodePath();
         final String resourcePath = pkg.applicationInfo.getResourcePath();
         final String legacyNativeLibraryPath = pkg.applicationInfo.nativeLibraryRootDir;
+        // Update volume if needed
+        if (!Objects.equals(volumeUuid, p.volumeUuid)) {
+            Slog.w(PackageManagerService.TAG, "Volume for " + p.pkg.packageName +
+                    " changing from " + p.volumeUuid + " to " + volumeUuid);
+            p.volumeUuid = volumeUuid;
+        }
         // Update code path if needed
         if (!Objects.equals(codePath, p.codePathString)) {
-            Slog.w(PackageManagerService.TAG, "Code path for pkg : " + p.pkg.packageName +
+            Slog.w(PackageManagerService.TAG, "Code path for " + p.pkg.packageName +
                     " changing from " + p.codePathString + " to " + codePath);
             p.codePath = new File(codePath);
             p.codePathString = codePath;
         }
         //Update resource path if needed
         if (!Objects.equals(resourcePath, p.resourcePathString)) {
-            Slog.w(PackageManagerService.TAG, "Resource path for pkg : " + p.pkg.packageName +
+            Slog.w(PackageManagerService.TAG, "Resource path for " + p.pkg.packageName +
                     " changing from " + p.resourcePathString + " to " + resourcePath);
             p.resourcePath = new File(resourcePath);
             p.resourcePathString = resourcePath;
