@@ -131,14 +131,10 @@
   <string-array name="wfcOperatorErrorNotificationMessages">
   </string-array>
     <string name="wfcSpnFormat" msgid="8211621332478306568">"%s"</string>
-    <!-- no translation found for wifi_calling_off_summary (8720659586041656098) -->
-    <skip />
-    <!-- no translation found for wfc_mode_wifi_preferred_summary (1994113411286935263) -->
-    <skip />
-    <!-- no translation found for wfc_mode_cellular_preferred_summary (5920549484600758786) -->
-    <skip />
-    <!-- no translation found for wfc_mode_wifi_only_summary (2379919155237869320) -->
-    <skip />
+    <string name="wifi_calling_off_summary" msgid="8720659586041656098">"Išjungta"</string>
+    <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Pageidautinas „Wi-Fi“ ryšys"</string>
+    <string name="wfc_mode_cellular_preferred_summary" msgid="5920549484600758786">"Pageidautinas mobilusis ryšys"</string>
+    <string name="wfc_mode_wifi_only_summary" msgid="2379919155237869320">"Tik „Wi-Fi“"</string>
     <string name="cfTemplateNotForwarded" msgid="1683685883841272560">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: neperadresuota"</string>
     <string name="cfTemplateForwarded" msgid="1302922117498590521">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
     <string name="cfTemplateForwardedTime" msgid="9206251736527085256">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g> po <xliff:g id="TIME_DELAY">{2}</xliff:g> sek."</string>
@@ -224,69 +220,42 @@
     <string name="android_system_label" msgid="6577375335728551336">"„Android“ sistema"</string>
     <string name="user_owner_label" msgid="6465364741001216388">"Asmeninės programos"</string>
     <string name="managed_profile_label" msgid="6260850669674791528">"Darbo"</string>
-    <string name="permgrouplab_costMoney" msgid="5429808217861460401">"Paslaugos, už kurias mokėjote"</string>
-    <string name="permgroupdesc_costMoney" msgid="3293301903409869495">"Atlikite mokamus veiksmus."</string>
-    <string name="permgrouplab_messages" msgid="7521249148445456662">"Jūsų pranešimai"</string>
-    <string name="permgroupdesc_messages" msgid="7821999071003699236">"Skaitykite ir rašykite SMS, el. laiškus ir kitus pranešimus."</string>
-    <string name="permgrouplab_personalInfo" msgid="3519163141070533474">"Asmeninė informacija"</string>
-    <string name="permgroupdesc_personalInfo" msgid="8426453129788861338">"Tiesioginė prieiga prie informacijos, saugomos kontaktinėje kortelėje."</string>
+    <!-- no translation found for permgrouplab_contacts (3657758145679177612) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_contacts (1437393511338346185) -->
+    <skip />
+    <!-- no translation found for permgrouplab_location (7275582855722310164) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_location (536889867433972794) -->
+    <skip />
     <string name="permgrouplab_socialInfo" msgid="5799096623412043791">"Socialinė informacija"</string>
     <string name="permgroupdesc_socialInfo" msgid="7129842457611643493">"Tiesioginė prieiga prie kontaktų ir socialinių ryšių informacijos."</string>
-    <string name="permgrouplab_location" msgid="635149742436692049">"Jūsų vieta"</string>
-    <string name="permgroupdesc_location" msgid="5704679763124170100">"Stebėti fizinę vietą."</string>
-    <string name="permgrouplab_network" msgid="5808983377727109831">"Tinklo ryšys"</string>
-    <string name="permgroupdesc_network" msgid="4478299413241861987">"Pasiekti įvairias tinklo funkcijas."</string>
-    <string name="permgrouplab_bluetoothNetwork" msgid="1585403544162128109">"Bluetooth"</string>
-    <string name="permgroupdesc_bluetoothNetwork" msgid="5625288577164282391">"Pasiekti įrenginius ir tinklus naudojant „Bluetooth“."</string>
-    <string name="permgrouplab_audioSettings" msgid="8329261670151871235">"Garso nustatymai"</string>
-    <string name="permgroupdesc_audioSettings" msgid="2641515403347568130">"Keisti garso nustatymus."</string>
-    <string name="permgrouplab_affectsBattery" msgid="6209246653424798033">"Paveikia akumuliatorių"</string>
-    <string name="permgroupdesc_affectsBattery" msgid="6441275320638916947">"Naudoti funkcijas, galinčias greitai iškrauti akumuliatorių."</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"Kalendorius"</string>
-    <string name="permgroupdesc_calendar" msgid="5777534316982184416">"Tiesioginė prieiga prie kalendoriaus ir įvykių."</string>
-    <string name="permgrouplab_dictionary" msgid="4148597128843641379">"Skaityti naudotojo žodyną"</string>
-    <string name="permgroupdesc_dictionary" msgid="7921166355964764490">"Skaityti žodžius naudotojo žodyne."</string>
-    <string name="permgrouplab_writeDictionary" msgid="8090237702432576788">"Rašyti į naudotojo žodyną"</string>
-    <string name="permgroupdesc_writeDictionary" msgid="2711561994497361646">"Pridėti žodžius į naudotojo žodyną."</string>
+    <!-- no translation found for permgroupdesc_calendar (2116049656685591803) -->
+    <skip />
+    <!-- no translation found for permgrouplab_sms (228308803364967808) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_sms (3695085582674524761) -->
+    <skip />
+    <string name="permgrouplab_dictionary" msgid="8114410334955871144">"Naudotojo žodynas"</string>
+    <!-- no translation found for permgroupdesc_dictionary (7586787746354378335) -->
+    <skip />
     <string name="permgrouplab_bookmarks" msgid="1949519673103968229">"Žymės ir istorija"</string>
     <string name="permgroupdesc_bookmarks" msgid="4169771606257963028">"Tiesioginė prieiga prie žymių ir naršyklės istorijos."</string>
-    <string name="permgrouplab_deviceAlarms" msgid="6117704629728824101">"Signalas"</string>
-    <string name="permgroupdesc_deviceAlarms" msgid="4769356362251641175">"Nustatyti žadintuvo signalą."</string>
-    <string name="permgrouplab_voicemail" msgid="4162237145027592133">"Balso paštas"</string>
-    <string name="permgroupdesc_voicemail" msgid="2498403969862951393">"Tiesioginė prieiga prie balso pašto."</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"Mikrofonas"</string>
-    <string name="permgroupdesc_microphone" msgid="7106618286905738408">"Tiesioginė prieiga prie mikrofono, kad būtų galima įrašyti garsą."</string>
+    <!-- no translation found for permgroupdesc_microphone (1296196977187629181) -->
+    <skip />
     <string name="permgrouplab_camera" msgid="4820372495894586615">"Fotoaparatas"</string>
-    <string name="permgroupdesc_camera" msgid="2933667372289567714">"Tiesioginė prieiga prie fotoaparato, kad būtų galima fotografuoti vaizdus arba įrašyti vaizdo įrašus."</string>
-    <string name="permgrouplab_screenlock" msgid="8275500173330718168">"Užrakinti ekraną"</string>
-    <string name="permgroupdesc_screenlock" msgid="7067497128925499401">"Galimybė paveikti užrakinimo ekrano veikimą įrenginyje."</string>
-    <string name="permgrouplab_appInfo" msgid="8028789762634147725">"Programų informacija"</string>
-    <string name="permgroupdesc_appInfo" msgid="3950378538049625907">"Galimybė paveikti kitų įrenginio programų veikimą."</string>
-    <string name="permgrouplab_wallpaper" msgid="3850280158041175998">"Ekrano fonas"</string>
-    <string name="permgroupdesc_wallpaper" msgid="5630417854750540154">"Keisti įrenginio ekrano fono nustatymus."</string>
-    <string name="permgrouplab_systemClock" msgid="406535759236612992">"Laikrodis"</string>
-    <string name="permgroupdesc_systemClock" msgid="3944359833624094992">"Keisti įrenginio laiką arba laiko juostą."</string>
-    <string name="permgrouplab_statusBar" msgid="2095862568113945398">"Būsenos juosta"</string>
-    <string name="permgroupdesc_statusBar" msgid="6242593432226807171">"Keisti įrenginio būsenos juostos nustatymus."</string>
-    <string name="permgrouplab_syncSettings" msgid="3341990986147826541">"Sinchronizavimo nustatymai"</string>
-    <string name="permgroupdesc_syncSettings" msgid="7603195265129031797">"Prieiga prie sinchronizavimo nustatymų."</string>
-    <string name="permgrouplab_accounts" msgid="3359646291125325519">"Jūsų paskyros"</string>
-    <string name="permgroupdesc_accounts" msgid="4948732641827091312">"Pasiekite galimas paskyras."</string>
-    <string name="permgrouplab_hardwareControls" msgid="7998214968791599326">"Aparatinės įrangos valdikliai"</string>
-    <string name="permgroupdesc_hardwareControls" msgid="4357057861225462702">"Tiesioginė prieiga prie aparatinės įrangos telefono ragelyje."</string>
-    <string name="permgrouplab_phoneCalls" msgid="9067173988325865923">"Telefono skambučiai"</string>
-    <string name="permgroupdesc_phoneCalls" msgid="7489701620446183770">"Stebėti, įrašyti ir apdoroti telefono skambučius."</string>
-    <string name="permgrouplab_systemTools" msgid="4652191644082714048">"Sistemos įrankiai"</string>
-    <string name="permgroupdesc_systemTools" msgid="8162102602190734305">"Žemesnio lygio prieiga prie sistemos ir jos valdymas."</string>
-    <string name="permgrouplab_developmentTools" msgid="3446164584710596513">"Kūrėjo įrankiai"</string>
-    <string name="permgroupdesc_developmentTools" msgid="7058828032358142018">"Funkcijos reikalingos tik programos kūrėjams."</string>
-    <string name="permgrouplab_display" msgid="4279909676036402636">"Kitų programų naudotojo sąsaja"</string>
-    <string name="permgroupdesc_display" msgid="6051002031933013714">"Paveikti kitų programų naudotojo sąsają."</string>
-    <string name="permgrouplab_storage" msgid="1971118770546336966">"Saugykla"</string>
-    <string name="permgroupdesc_storage" product="nosdcard" msgid="7442318502446874999">"Pasiekti USB atmintinę."</string>
-    <string name="permgroupdesc_storage" product="default" msgid="9203302214915355774">"Pasiekite SD kortelę."</string>
-    <string name="permgrouplab_accessibilityFeatures" msgid="7919025602283593907">"Pritaikymo neįgaliesiems funkcijos"</string>
-    <string name="permgroupdesc_accessibilityFeatures" msgid="4205196881678144335">"Funkcijos, kurių užklausas gali teikti pagalbinė technologija."</string>
+    <!-- no translation found for permgroupdesc_camera (2429930670410559293) -->
+    <skip />
+    <!-- no translation found for permgrouplab_phone (5229115638567440675) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_phone (2016641188146068700) -->
+    <skip />
+    <!-- no translation found for permgrouplab_sensors (7416703484233940260) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_sensors (2987451839455524494) -->
+    <skip />
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Gauti lango turinį"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Tikrinti lango, su kuriuo sąveikaujate, turinį."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Įjungti „Naršyti paliečiant“"</string>
@@ -311,14 +280,8 @@
     <string name="permdesc_receiveSms" msgid="6424387754228766939">"Leidžiama programai gauti ir apdoroti SMS pranešimus. Tai reiškia, kad programa gali stebėti ir ištrinti į jūsų įrenginį siunčiamus pranešimus jums jų neparodžiusi."</string>
     <string name="permlab_receiveMms" msgid="1821317344668257098">"gauti teksto pranešimus (MMS)"</string>
     <string name="permdesc_receiveMms" msgid="533019437263212260">"Leidžiama programai gauti ir apdoroti MMS pranešimus. Tai reiškia, kad programa gali stebėti ir ištrinti į jūsų įrenginį siunčiamus pranešimus jums jų neparodžiusi."</string>
-    <string name="permlab_receiveEmergencyBroadcast" msgid="1803477660846288089">"gauti kritinės padėties transliacijas"</string>
-    <string name="permdesc_receiveEmergencyBroadcast" msgid="848524070262431974">"Leidžiama programai gauti ir apdoroti skubiai pateikiamus pranešimus. Šis leidimas galimas tik sistemos programoms."</string>
-    <string name="permlab_readCellBroadcasts" msgid="1598328843619646166">"skaityti mobiliuoju transliuojamus pranešimus"</string>
-    <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"Programai leidžiama skaityti mobiliuoju transliuojamus pranešimus, gaunamus jūsų įrenginyje. Mobiliuoju transliuojami įspėjimai pristatomi kai kuriose vietose, kad įspėtų apie kritines situacijas. Kai gaunamas  mobiliuoju transliuojamas pranešimas apie kritinę situaciją, kenkėjiškos programos gali trukdyti įrenginiui veikti ar jį naudoti."</string>
     <string name="permlab_sendSms" msgid="5600830612147671529">"siųsti SMS pranešimus"</string>
     <string name="permdesc_sendSms" msgid="7094729298204937667">"Leidžiama programai siųsti SMS pranešimus. Dėl to gali atsirasti nenumatytų apmokestinimų. Kenkėjiškos programos gali siųsti mokamus pranešimus be jūsų patvirtinimo."</string>
-    <string name="permlab_sendRespondViaMessageRequest" msgid="8713889105305943200">"siųsti atsakymų pranešimu įvykius"</string>
-    <string name="permdesc_sendRespondViaMessageRequest" msgid="7107648548468778734">"Programai leidžiama siųsti užklausas į kitas susirašinėjimo pranešimais programas, kad būtų galima apdoroti atsakymų pranešimu įvykius, susijusius su gaunamaisiais skambučiais."</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"skaityti teksto pranešimus (SMS arba MMS)"</string>
     <string name="permdesc_readSms" product="tablet" msgid="2467981548684735522">"Leidžiama programai skaityti planšetiniame kompiuteryje ar SIM kortelėje saugomus SMS pranešimus. Taip programai leidžiama skaityti visus SMS pranešimus, neatsižvelgiant į turinį ar konfidencialumą."</string>
     <string name="permdesc_readSms" product="tv" msgid="5102425513647038535">"Programai leidžiama nuskaityti TV arba SIM kortelėje saugomus SMS pranešimus. Taip programos gali nuskaityti visus SMS pranešimus, neatsižvelgiant į turinį ar konfidencialumą."</string>
@@ -329,188 +292,24 @@
     <string name="permdesc_writeSms" product="default" msgid="7268668709052328567">"Leidžiama programai rašyti SMS pranešimus, išsaugotus jūsų telefone ar SIM kortelėje. Kenkėjiškos programos gali ištrinti jūsų pranešimus."</string>
     <string name="permlab_receiveWapPush" msgid="5991398711936590410">"gauti teksto pranešimus (WAP)"</string>
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"Leidžiama programai gauti ir apdoroti WAP pranešimus. Šis leidimas apima galimybę stebėti ar ištrinti jums siunčiamus pranešimus jums jų neparodžius."</string>
-    <string name="permlab_receiveBluetoothMap" msgid="7593811487142360528">"gauti „Bluetooth“ pranešimus (MAP)"</string>
-    <string name="permdesc_receiveBluetoothMap" msgid="8656755936919466345">"Programai leidžiama gauti ir apdoroti „Bluetooth“ MAP pranešimus. Tai reiškia, kad programa gali stebėti ir ištrinti į jūsų įrenginį siunčiamus pranešimus jums jų neparodžiusi."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"nuskaityti vykdomas programas"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"Leidžiama programai nuskaityti informaciją apie šiuo ir pastaruoju metu vykdomas užduotis. Taip programa gali atrasti informacijos, kokios programos naudojamos įrenginyje."</string>
-    <string name="permlab_startTasksFromRecents" msgid="8990073877885690623">"pradėti užduotį iš naujausių"</string>
-    <string name="permdesc_startTasksFromRecents" msgid="7382133554871222235">"Programai leidžiama naudoti objektą „ActivityManager.RecentTaskInfo“, kad būtų galima paleisti nebegaliojančią užduotį, pateiktą naudojant „ActivityManager.getRecentTaskList()“."</string>
-    <string name="permlab_interactAcrossUsers" msgid="7114255281944211682">"sąveikauti su naudotojais"</string>
-    <string name="permdesc_interactAcrossUsers" msgid="364670963623385786">"Leidžiama programai atlikti veiksmus skirtingų įrenginio naudotojų profiliuose. Kenkėjiškos programos gali pasinaudoti šiuo leidimu, kad pažeistų naudotojų saugumą."</string>
-    <string name="permlab_interactAcrossUsersFull" msgid="2567734285545074105">"visa licencija, leidžianti sąveikauti su naudotojais"</string>
-    <string name="permdesc_interactAcrossUsersFull" msgid="376841368395502366">"Leidžiama bet kokia sąveika tarp naudotojų."</string>
-    <string name="permlab_manageUsers" msgid="1676150911672282428">"tvarkyti naudotojus"</string>
-    <string name="permdesc_manageUsers" msgid="8409306667645355638">"Leidžia programoms tvarkyti įrenginio naudotojų duomenis, įskaitant užklausų teikimą, duomenų kūrimą ir ištrynimą."</string>
-    <string name="permlab_getDetailedTasks" msgid="6229468674753529501">"nuskaityti veikiančių programų išsamią informaciją"</string>
-    <string name="permdesc_getDetailedTasks" msgid="153824741440717599">"Leidžiama programai nuskaityti išsamią informaciją apie šiuo ir pastaruoju metu vykdomas užduotis. Kenkėjiškos programos gali surasti privačios informacijos apie kitas programas."</string>
     <string name="permlab_reorderTasks" msgid="2018575526934422779">"pertvarkyti vykdomas programas"</string>
     <string name="permdesc_reorderTasks" msgid="7734217754877439351">"Leidžiama programai perkelti užduotis į priekinį planą ir foną. Programa gali tai daryti be jūsų įsikišimo."</string>
-    <string name="permlab_removeTasks" msgid="6821513401870377403">"sustabdyti vykdomas programas"</string>
-    <string name="permdesc_removeTasks" msgid="1394714352062635493">"Leidžiama programai pašalinti užduotis ir panaikinti jų programas. Kenkėjiškos programos gali trikdyti kitų programų veikimą."</string>
-    <string name="permlab_manageActivityStacks" msgid="7391191384027303065">"tvarkyti veiklos krūvas"</string>
-    <string name="permdesc_manageActivityStacks" msgid="1615881933034084440">"Programai leidžiama pridėti, pašalinti ir modifikuoti veiklos krūvas, kuriose paleistos kitos programos. Kenkėjiškos programos gali trikdyti kitų programų elgseną."</string>
-    <string name="permlab_startAnyActivity" msgid="2918768238045206456">"pradėti bet kokią veiklą"</string>
-    <string name="permdesc_startAnyActivity" msgid="997823695343584001">"Programai leidžiama pradėti bet kokią veiklą, nepaisant leidimo apsaugos ar eksportuotos būsenos."</string>
-    <string name="permlab_setScreenCompatibility" msgid="6975387118861842061">"nustatyti ekrano suderinamumo režimą"</string>
-    <string name="permdesc_setScreenCompatibility" msgid="692043618693917374">"Programai leidžiama valdyti kitų programų ekrano suderinamumo režimą. Kenkėjiškos programos gali kliudyti veikti kitoms programoms."</string>
-    <string name="permlab_setDebugApp" msgid="3022107198686584052">"įgalinti programos derinimą"</string>
-    <string name="permdesc_setDebugApp" msgid="4474512416299013256">"Leidžiama programai įjungti kitos programos derinimą. Kenkėjiškos programos gali tai naudoti, kad išjungtų kitas programas."</string>
-    <string name="permlab_changeConfiguration" msgid="4162092185124234480">"keisti sistemos rodymo nustatymus"</string>
-    <string name="permdesc_changeConfiguration" msgid="4372223873154296076">"Leidžiama programai keisti dabartinę konfigūraciją, pvz., lokalę ar viso šrifto dydį."</string>
     <string name="permlab_enableCarMode" msgid="5684504058192921098">"įgalinti automobilio režimą"</string>
     <string name="permdesc_enableCarMode" msgid="4853187425751419467">"Leidžiama programai įgalinti automobilio režimą."</string>
     <string name="permlab_killBackgroundProcesses" msgid="3914026687420177202">"uždaryti kitas programas"</string>
     <string name="permdesc_killBackgroundProcesses" msgid="4593353235959733119">"Leidžiama programai baigti kitų programų fone vykdomus procesus. Dėl to gali būti sustabdytos kitos programos."</string>
-    <string name="permlab_forceStopPackages" msgid="2329627428832067700">"priverstinai stabdyti kitas programas"</string>
-    <string name="permdesc_forceStopPackages" msgid="5253157296183940812">"Leidžiama programai priverstinai stabdyti kitas programas."</string>
-    <string name="permlab_forceBack" msgid="652935204072584616">"priverstinai uždaryti programą"</string>
-    <string name="permdesc_forceBack" msgid="3892295830419513623">"Leidžiama programai priverstinai uždaryti priekiniame plane esančią programą ir grįžti atgal. Įprastoms programoms to neturėtų prireikti."</string>
-    <string name="permlab_dump" msgid="1681799862438954752">"nuskaityti sistemos vidinę būseną"</string>
-    <string name="permdesc_dump" msgid="1778299088692290329">"Leidžiama programai nuskaityti vidinę sistemos būseną. Kenkėjiškos programos gali nuskaityti daug įvairios privačios ir saugios informacijos, kurios paprastai joms niekada neturėtų reikėti."</string>
-    <string name="permlab_retrieve_window_content" msgid="8022588608994589938">"nuskaityti ekrano turinį"</string>
-    <string name="permdesc_retrieve_window_content" msgid="3193269069469700265">"Leidžiama programai nuskaityti aktyvaus lango turinį. Kenkėjiškos programos gali bandyti išgauti viso lango turinį ir tirti visą jo tekstą, išskyrus slaptažodžius."</string>
-    <string name="permlab_temporary_enable_accessibility" msgid="2312612135127310254">"laikinai įgalinti pritaikymą neįgaliesiems"</string>
-    <string name="permdesc_temporary_enable_accessibility" msgid="8079456293182975464">"Leidžiama programai laikinai įgalinti pritaikymą neįgaliesiems įrenginyje. Kenkėjiškos programos pritaikymą neįgaliesiems gali įgalinti be naudotojo sutikimo."</string>
-    <string name="permlab_retrieveWindowToken" msgid="7154762602367758602">"gauti lango prieigos raktą"</string>
-    <string name="permdesc_retrieveWindowToken" msgid="668173747687795074">"Programai leidžiama gauti lango prieigos raktą. Kenkėjiškos programos gali vykdyti neteisėtą sąveiką su programos langu mėgdžiodamos sistemą."</string>
-    <string name="permlab_frameStats" msgid="7056374987314361639">"gauti kadrų statistinius duomenis"</string>
-    <string name="permdesc_frameStats" msgid="4758001089491284919">"Programai leidžiama rinkti kadrų statistinius duomenis. Kenkėjiškos programos gali stebėti kadrų statistinius duomenis iš kitų programų langų."</string>
-    <string name="permlab_filter_events" msgid="8675535648807427389">"filtrų įvykiai"</string>
-    <string name="permdesc_filter_events" msgid="8006236315888347680">"Leidžiama programai registruoti įvesties filtrą, kuriuo filtruojamas visų naudotojo įvykių srautas prieš juos išsiunčiant. Kenkėjiška programa gali kontroliuoti sistemos naudotojo sąsają be naudotojo įsikišimo."</string>
-    <string name="permlab_shutdown" msgid="7185747824038909016">"dalinis išjungimas"</string>
-    <string name="permdesc_shutdown" msgid="7046500838746291775">"Veiklos tvarkyklę perjungia į išsijungimo būseną. Neišjungia visiškai."</string>
-    <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"neleisti perjungti programų"</string>
-    <string name="permdesc_stopAppSwitches" msgid="8262195802582255021">"Neleidžiama naudotojui perjungti į kitą programą."</string>
-    <string name="permlab_getTopActivityInfo" msgid="2537922311411546016">"gauti esamos programos informaciją"</string>
-    <string name="permdesc_getTopActivityInfo" msgid="2512448855496067131">"Savininkui leidžiama gauti privačią esamos pirmaeilės ekrano programos informaciją."</string>
-    <string name="permlab_runSetActivityWatcher" msgid="892239094867182656">"stebėti ir valdyti visų programų paleidimą"</string>
-    <string name="permdesc_runSetActivityWatcher" msgid="6003603162578577406">"Leidžiama programai stebėti ir valdyti, kaip sistema paleidžia veiklą. Kenkėjiškos programos gali visiškai pažeisti sistemą. Šis leidimas reikalingas tik kuriant ir jo niekada nereikia naudojant įprastai."</string>
-    <string name="permlab_broadcastPackageRemoved" msgid="2576333434893532475">"siųsti pašalinto paketo perdavimą"</string>
-    <string name="permdesc_broadcastPackageRemoved" msgid="6621901216207931089">"Leidžiama programai pateikti pranešimą, kad buvo pašalintas programos paketas. Kenkėjiškos programos gali tai naudoti, kad nutrauktų bet kurią kitą vykdomą programą."</string>
-    <string name="permlab_broadcastSmsReceived" msgid="5689095009030336593">"siųsti SMS gautą perdavimą"</string>
-    <string name="permdesc_broadcastSmsReceived" msgid="4152037720034365492">"Leidžiama programai pateikti pranešimą, kad buvo gautas SMS pranešimas. Kenkėjiškos programos gali tai naudoti, kad klastotų gaunamuosius SMS pranešimus."</string>
-    <string name="permlab_broadcastWapPush" msgid="3145347413028582371">"siųsti „WAP-PUSH-received“ perdavimą"</string>
-    <string name="permdesc_broadcastWapPush" msgid="4783402525039442729">"Leidžiama programai pateikti pranešimą, kai gaunamas WAP PUSH pranešimas. Kenkėjiškos programos gali tai naudoti, kad klastotų MMS pranešimo gavimą ar kad nepastebimai pakeistų bet kurio tinklalapio turinį kenkėjiškais variantais."</string>
-    <string name="permlab_setProcessLimit" msgid="2451873664363662666">"riboti vykdomų procesų skaičių"</string>
-    <string name="permdesc_setProcessLimit" msgid="7318061314040879542">"Leidžiama programai valdyti didžiausią vykdomų procesų skaičių. Nereikalinga įprastoms programoms."</string>
-    <string name="permlab_setAlwaysFinish" msgid="550958507798796965">"priverstinai uždaryti fonines programas"</string>
-    <string name="permdesc_setAlwaysFinish" msgid="7471310652868841499">"Leidžiama programai valdyti, ar veiksmai visada užbaigiami, kai jie perkeliami į foną. Nereikalinga įprastoms programoms."</string>
-    <string name="permlab_batteryStats" msgid="2789610673514103364">"skaityti akumuliatoriaus statistiką"</string>
-    <string name="permdesc_batteryStats" msgid="5897346582882915114">"Leidžiama programai skaityti dabartinius išsikraunančio akumuliatoriaus naudojimo duomenis. Gali būti leidžiama programai sužinoti išsamią informaciją apie jūsų naudojamas programas."</string>
-    <string name="permlab_updateBatteryStats" msgid="3719689764536379557">"keisti akumuliatoriaus statistiką"</string>
-    <string name="permdesc_updateBatteryStats" msgid="6862817857178025002">"Leidžiama programai keisti surinktą akumuliatoriaus statistiką. Neskirta naudoti įprastoms programoms."</string>
-    <string name="permlab_getAppOpsStats" msgid="1508779687436585744">"nuskaityti programos naudojimo statistiką"</string>
-    <string name="permdesc_getAppOpsStats" msgid="6243887041577912877">"Programai leidžiama nuskaityti surinktą programos naudojimo statistiką. Neskirta naudoti įprastoms programoms."</string>
-    <string name="permlab_updateAppOpsStats" msgid="8829097373851521505">"keisti programos naudojimo statistiką"</string>
-    <string name="permdesc_updateAppOpsStats" msgid="50784596594403483">"Programai leidžiama keisti surinktą programos naudojimo statistiką. Neskirta naudoti įprastoms programoms."</string>
-    <string name="permlab_backup" msgid="470013022865453920">"valdyti sistemos atsarginę kopiją ir atkūrimą"</string>
-    <string name="permdesc_backup" msgid="6912230525140589891">"Leidžiama programai valdyti sistemos atsarginės kopijos ir atkūrimo mechanizmą. Neskirta naudoti įprastose programose."</string>
-    <string name="permlab_confirm_full_backup" msgid="5557071325804469102">"patvirtinkite visos atsarginės kopijos kūrimą arba atkurkite operaciją"</string>
-    <string name="permdesc_confirm_full_backup" msgid="1748762171637699562">"Leidžiama programai paleisti visą atsarginę patvirtinimo NS. Neskirta naudoti bet kokiai programai."</string>
-    <string name="permlab_internalSystemWindow" msgid="2148563628140193231">"pateikti neteisėtus langus"</string>
-    <string name="permdesc_internalSystemWindow" msgid="7458387759461466397">"Leidžiama programai kurti langus, kuriuos turėtų naudoti vidinės sistemos naudotojo sąsaja. Neskirta naudoti įprastoms programoms."</string>
     <string name="permlab_systemAlertWindow" msgid="3543347980839518613">"perrašyti kitas programas"</string>
     <string name="permdesc_systemAlertWindow" msgid="8584678381972820118">"Leidžiama programai pasinaudoti kitomis programomis ar naudotojo sąsajos dalimis. Jos gali trukdyti jums naudoti sąsają bet kokioje programoje arba pakeisti tai, ką, jūsų manymu, matote kitose programose."</string>
-    <string name="permlab_setAnimationScale" msgid="2805103241153907174">"keisti visos animacijos greitį"</string>
-    <string name="permdesc_setAnimationScale" msgid="7690063428924343571">"Leidžiama programai bet kuriuo metu keisti visą animacijos greitį (greitesnių ar lėtesnių animacijų)."</string>
-    <string name="permlab_manageAppTokens" msgid="1286505717050121370">"valdyti programos prieigos raktus"</string>
-    <string name="permdesc_manageAppTokens" msgid="8043431713014395671">"Leidžiama programai kurti ir valdyti prieigos raktus, apeinant įprastą Z tvarką. Įprastoms programoms to neturėtų prireikti."</string>
-    <string name="permlab_freezeScreen" msgid="4708181184441880175">"užfiksuoti ekraną"</string>
-    <string name="permdesc_freezeScreen" msgid="8558923789222670064">"Leidžiama programai laikinai užfiksuoti ekraną, kad būtų galima perkelti visą ekraną."</string>
-    <string name="permlab_injectEvents" msgid="1378746584023586600">"paspauskite klavišus ir valdymo mygtukus"</string>
-    <string name="permdesc_injectEvents" product="tablet" msgid="206352565599968632">"Leidžiama programai kitoms programoms pateikti savo įvesties įvykius (klavišų paspaudimus ir kt.). Kenkėjiškos programos gali tai naudoti, kad užvaldytų planšetinį kompiuterį."</string>
-    <string name="permdesc_injectEvents" product="tv" msgid="4681361983270791611">"Programai leidžiama teikti kitoms programoms savo sukurtus įvesties įvykius (klavišo paspaudimus ir t. t.). Kenkėjiškos programos gali naudoti šią funkciją norėdamos užvaldyti TV."</string>
-    <string name="permdesc_injectEvents" product="default" msgid="653128057572326253">"Leidžiama programai kitoms programoms pateikti savo įvesties įvykius (klavišų paspaudimus ir kt.). Kenkėjiškos programos gali tai naudoti, kad užvaldytų telefoną."</string>
-    <string name="permlab_readInputState" msgid="469428900041249234">"įrašas, kurį įvedate ir veiksmai, kuriuos atliekate"</string>
-    <string name="permdesc_readInputState" msgid="8387754901688728043">"Leidžiama programai stebėti paspaudžiamus klavišus, net kai sąveikaujama su kita programa (pvz., įvedant slaptažodį). Įprastoms programoms to neturėtų prireikti."</string>
-    <string name="permlab_bindInputMethod" msgid="3360064620230515776">"susaistyti įvesties būdą"</string>
-    <string name="permdesc_bindInputMethod" msgid="3250440322807286331">"Leidžiama savininką susaistyti su įvesties metodo aukščiausio lygio sąsaja. Įprastoms programoms to neturėtų prireikti."</string>
-    <string name="permlab_bindAccessibilityService" msgid="5357733942556031593">"susisaistyti su pasiekiamumo paslauga"</string>
-    <string name="permdesc_bindAccessibilityService" msgid="7034615928609331368">"Savininkui leidžiama susisaistyti su aukščiausio lygio pasiekiamumo paslaugos sąsaja. Įprastoms programoms to neturėtų prireikti."</string>
-    <string name="permlab_bindPrintService" msgid="8462815179572748761">"susisaistyti su spausdinimo paslauga"</string>
-    <string name="permdesc_bindPrintService" msgid="7960067623209111135">"Turėtojui leidžiama susisaistyti su spausdinimo paslaugos aukščiausio lygio sąsaja. Įprastoms programoms to neturėtų prireikti."</string>
-    <string name="permlab_bindPrintSpoolerService" msgid="6807762783744125954">"susaistyti su spausdinimo kaupimo paslauga"</string>
-    <string name="permdesc_bindPrintSpoolerService" msgid="3680552285933318372">"Turėtojui leidžiama susaistyti programą su spausdinimo kaupimo paslaugos aukščiausio lygio sąsaja. Įprastoms programoms to neturėtų prireikti."</string>
-    <string name="permlab_bindNfcService" msgid="2752731300419410724">"susaistyti su ALR paslauga"</string>
-    <string name="permdesc_bindNfcService" msgid="6120647629174066862">"Savininkui leidžiama susaistyti programas, kurios kopijuoja ALR korteles. Neturėtų prireikti įprastoms programoms."</string>
-    <string name="permlab_bindTextService" msgid="7358378401915287938">"priskirti teksto paslaugą"</string>
-    <string name="permdesc_bindTextService" msgid="8151968910973998670">"Leidžiama savininkui priskirti aukščiausio lygio teksto paslaugos (pvz., „SpellCheckerService“) sąsają. Įprastoms programoms to neturėtų prireikti."</string>
-    <string name="permlab_bindVpnService" msgid="4708596021161473255">"susaistyti su VPN paslauga"</string>
-    <string name="permdesc_bindVpnService" msgid="2067845564581693905">"Leidžiama savininkui susisaistyti su aukščiausio lygio VPN paslaugos sąsaja. Įprastoms programoms to neturėtų prireikti."</string>
-    <string name="permlab_bindWallpaper" msgid="8716400279937856462">"susaistyti su darbalaukio fonu"</string>
-    <string name="permdesc_bindWallpaper" msgid="7108428692595491668">"Leidžiama savininką susaistyti su aukščiausio lygio darbalaukio fono sąsaja. Įprastoms programoms to neturėtų prireikti."</string>
-    <string name="permlab_bindVoiceInteraction" msgid="5334852580713715068">"susaistyti su sąveikos balsu priemone"</string>
-    <string name="permdesc_bindVoiceInteraction" msgid="2345721766501778101">"Turėtojui leidžiama susaistyti programą su sąveikos balsu paslaugos aukščiausio lygio sąsaja. Įprastoms programoms to niekada neturėtų prireikti."</string>
-    <string name="permlab_manageVoiceKeyphrases" msgid="1252285102392793548">"tvarkyti pagrindines balso frazes"</string>
-    <string name="permdesc_manageVoiceKeyphrases" msgid="8476560722907530008">"Savininkui leidžiama tvarkyti pagrindines aktyvinamiesiems žodžiams aptikti skirtas frazes. To niekada neturėtų prireikti naudojant įprastas programas."</string>
-    <string name="permlab_bindRemoteDisplay" msgid="1782923938029941960">"susisaistyti su nuotoliniu ekranu"</string>
-    <string name="permdesc_bindRemoteDisplay" msgid="1261242718727295981">"Leidžiama savininkui susisaistyti su aukščiausiojo lygio nuotolinio ekrano sąsaja. Įprastoms programoms to neturėtų prireikti."</string>
-    <string name="permlab_bindRemoteViews" msgid="5697987759897367099">"susaistyti su valdiklio paslauga"</string>
-    <string name="permdesc_bindRemoteViews" msgid="4717987810137692572">"Leidžiama savininkui susisaistyti su aukščiausio lygio valdiklio paslaugos sąsaja. Įprastoms programoms to neturėtų prireikti."</string>
-    <string name="permlab_bindRouteProvider" msgid="4869394607915096847">"susisaistyti su maršruto parinkimo paslauga"</string>
-    <string name="permdesc_bindRouteProvider" msgid="4703804520859960329">"Savininkui leidžiama susisaistyti su bet kokiomis registruotomis maršrutų parinkimo paslaugomis. To niekada neturėtų prireikti naudojant įprastas programas."</string>
-    <string name="permlab_bindDeviceAdmin" msgid="8704986163711455010">"sąveikauti su įrenginio administratoriumi"</string>
-    <string name="permdesc_bindDeviceAdmin" msgid="569715419543907930">"Leidžiama savininkui siųsti tikslus įrenginio administratoriui. Įprastoms programoms to neturėtų prireikti."</string>
-    <string name="permlab_bindTvInput" msgid="5601264742478168987">"susisaistyti su TV įvestimi"</string>
-    <string name="permdesc_bindTvInput" msgid="2371008331852001924">"Leidžiama savininkui susisaistyti su aukščiausio lygio TV įvesties sąsaja. Įprastoms programoms to neturėtų prireikti."</string>
-    <string name="permlab_modifyParentalControls" msgid="4611318225997592242">"keisti tėvų kontrolės duomenis"</string>
-    <string name="permdesc_modifyParentalControls" msgid="7438482894162282039">"Turėtojui leidžiama keisti sistemos tėvų kontrolės duomenis. Neturėtų prireikti naudojant įprastas programas."</string>
-    <string name="permlab_manageDeviceAdmins" msgid="4248828900045808722">"pridėti arba pašalinti įrenginio administratorių"</string>
-    <string name="permdesc_manageDeviceAdmins" msgid="5025608167709942485">"Savininkui leidžiama pridėti aktyvių įrenginio administratorių arba juos pašalinti. Neturėtų reikėti įprastoms programoms."</string>
-    <string name="permlab_setOrientation" msgid="3365947717163866844">"keisti ekrano padėtį"</string>
-    <string name="permdesc_setOrientation" msgid="3046126619316671476">"Leidžiama programai bet kada kaitalioti ekraną. Įprastoms programoms to neturėtų prireikti."</string>
-    <string name="permlab_setPointerSpeed" msgid="9175371613322562934">"keisti žymiklio greitį"</string>
-    <string name="permdesc_setPointerSpeed" msgid="6866563234274104233">"Leidžiama programai keisti pelės ar sensorinio pulto žymiklio greitį. Įprastoms programoms to neturėtų prireikti."</string>
-    <string name="permlab_setKeyboardLayout" msgid="4778731703600909340">"keisti klaviatūros išdėstymą"</string>
-    <string name="permdesc_setKeyboardLayout" msgid="8480016771134175879">"Leidžiama programai pakeisti klaviatūros išdėstymą. Įprastoms programoms to neturėtų prireikti."</string>
-    <string name="permlab_signalPersistentProcesses" msgid="4539002991947376659">"siųsti „Linux“ signalus programoms"</string>
-    <string name="permdesc_signalPersistentProcesses" msgid="4896992079182649141">"Leidžiama programai pateikti užklausą, kad teikiamas signalas būtų siunčiamas visiems nuolatiniams procesams."</string>
     <string name="permlab_persistentActivity" msgid="8841113627955563938">"nustatyti, kad programa būtų visada vykdoma"</string>
     <string name="permdesc_persistentActivity" product="tablet" msgid="8525189272329086137">"Leidžiama programai savo dalis įrašyti į atmintį. Dėl to gali būti apribota kitomis programomis pasiekiama atmintis ir sulėtėti planšetinio kompiuterio veikimas."</string>
     <string name="permdesc_persistentActivity" product="tv" msgid="5086862529499103587">"Programai leidžiama nustatyti, kad tam tikros jos dalys nuolat išliktų atmintyje. Dėl to gali sumažėti kitoms programoms pasiekiamos atminties ir sulėtėti TV."</string>
     <string name="permdesc_persistentActivity" product="default" msgid="4384760047508278272">"Leidžiama programai savo dalis įrašyti į atmintį. Dėl to gali būti apribota kitomis programomis pasiekiama atmintis ir sulėtėti telefono veikimas."</string>
-    <string name="permlab_deletePackages" msgid="184385129537705938">"ištrinti programas"</string>
-    <string name="permdesc_deletePackages" msgid="7411480275167205081">"Leidžiama programai ištrinti „Android“ paketus. Kenkėjiškos programos gali tai naudoti, kad ištrintų svarbias programas."</string>
-    <string name="permlab_clearAppUserData" msgid="274109191845842756">"ištrinti kitų programų duomenis"</string>
-    <string name="permdesc_clearAppUserData" msgid="4625323684125459488">"Leidžiama programai išvalyti naudotojo duomenis."</string>
-    <string name="permlab_deleteCacheFiles" msgid="3128665571837408675">"ištrinti kitų programų talpyklas"</string>
-    <string name="permdesc_deleteCacheFiles" msgid="3812998599006730196">"Leidžiama programai ištrinti talpyklos failus."</string>
     <string name="permlab_getPackageSize" msgid="7472921768357981986">"matuoti programos atmintinės vietą"</string>
     <string name="permdesc_getPackageSize" msgid="3921068154420738296">"Leidžiama programai nuskaityti kodą, duomenis ir talpykloje saugoti dydžius"</string>
-    <string name="permlab_installPackages" msgid="2199128482820306924">"tiesiogiai įdiegti programas"</string>
-    <string name="permdesc_installPackages" msgid="5628530972548071284">"Leidžiama programai įdiegti naujus ar atnaujintus „Android“ paketus. Kenkėjiškos programos gali tai naudoti, kad pridėtų naujų programų su nepagrįstai galingais leidimais."</string>
-    <string name="permlab_clearAppCache" msgid="7487279391723526815">"ištrinti visus programos talpyklos duomenis"</string>
-    <string name="permdesc_clearAppCache" product="tablet" msgid="8974640871945434565">"Leidžiama programai atlaisvinti planšetinio kompiuterio atmintinę ištrinant failus kitų programų talpykloje esančiuose kataloguose. Dėl ko kitos programos gali būti lėčiau paleidžiamos, nes joms reikia iš naujo gauti duomenis."</string>
-    <string name="permdesc_clearAppCache" product="tv" msgid="244647416303997022">"Programai leidžiama atlaisvinti TV saugyklos vietos ištrinant kitų programų talpyklos katalogų failus. Dėl to kitos programos gali būti paleidžiamos lėčiau, nes joms reikia iš naujo gauti duomenis."</string>
-    <string name="permdesc_clearAppCache" product="default" msgid="2459441021956436779">"Leidžiama programai atlaisvinti telefono atmintinę ištrinant failus kitų programų talpykloje esančiuose kataloguose. Dėl to kitos programos gali būti lėčiau paleidžiamos, nes joms reikia iš naujo gauti duomenis."</string>
-    <string name="permlab_movePackage" msgid="3289890271645921411">"perkelti programos išteklius"</string>
-    <string name="permdesc_movePackage" msgid="319562217778244524">"Leidžiama programai perkelti programos išteklius iš vidinės medijos į išorinę ir atvirkščiai."</string>
-    <string name="permlab_readLogs" msgid="6615778543198967614">"skaityti slaptus žurnalo duomenis"</string>
-    <string name="permdesc_readLogs" product="tablet" msgid="82061313293455151">"Leidžiama programai skaityti iš įvairių sistemos žurnalų failų. Taip galima atrasti bendrą informaciją apie tai, ką darote naudodami planšetinį kompiuterį, potencialiai įtraukiant asmeninę ar privačią informaciją."</string>
-    <string name="permdesc_readLogs" product="tv" msgid="9023899974809538988">"Programai leidžiama skaityti įvairius sistemos žurnalų failus. Taip galima atrasti bendrą TV naudojimo informaciją, įskaitant asmeninius arba privačius duomenis."</string>
-    <string name="permdesc_readLogs" product="default" msgid="2063438140241560443">"Leidžiama programai skaityti iš įvairių sistemos žurnalų failų. Taip galima atrasti bendrą informaciją apie tai, ką darote telefonu, potencialiai įtraukiant asmeninę ar privačią informaciją."</string>
-    <string name="permlab_anyCodecForPlayback" msgid="715805555823881818">"atkuriant naudoti bet kurį medijos dekoderį"</string>
-    <string name="permdesc_anyCodecForPlayback" msgid="8283912488433189010">"Leidžiama programai naudoti bet kurį įdiegtą medijos dekoderį norint iššifruoti atkūrimą."</string>
-    <string name="permlab_manageCaCertificates" msgid="1678391896786882014">"tvarkyti patikimus prisijungimo duomenis"</string>
-    <string name="permdesc_manageCaCertificates" msgid="4015644047196937014">"Programoje galima įdiegti ir iš jos pašalinti CA sertifikatus kaip patikimus prisijungimo duomenis."</string>
-    <string name="permlab_bindJobService" msgid="3637568367978271086">"vykdyti suplanuotą programos darbą fone"</string>
-    <string name="permdesc_bindJobService" msgid="3473288460524119838">"Šiuo leidimu sistemai „Android“ leidžiama fone vykdyti programą, kai to prašoma."</string>
-    <string name="permlab_diagnostic" msgid="8076743953908000342">"skaityti / rašyti ištekliuose, priklausančiuose diagnostikai"</string>
-    <string name="permdesc_diagnostic" msgid="6608295692002452283">"Leidžiama programai skaityti ir rašyti visuose diagnostikos grupei priklausančiuose ištekliuose, pvz., failuose, esančiuose /dev. Tai gali paveikti sistemos stabilumą ir saugą. Tai turėtų būti naudojama TIK gamintojui ar operatoriui atliekant aparatinės įrangos diagnostiką."</string>
-    <string name="permlab_changeComponentState" msgid="6335576775711095931">"įgalinti programos komponentus arba jų neleisti"</string>
-    <string name="permdesc_changeComponentState" product="tablet" msgid="8887435740982237294">"Leidžiama programai pakeisti, ar įgalintas kitos programos komponentas, ar ne. Kenkėjiškos programos gali tai naudoti, kad neleistų svarbių planšetinio kompiuterio funkcijų. Šį leidimą reikia naudoti atsargiai, nes programos komponentai gali tapti nenaudojami, nenuoseklūs ar nestabilūs."</string>
-    <string name="permdesc_changeComponentState" product="tv" msgid="9151634188264231389">"Programai leidžiama pakeisti, ar įgalintas kitos programos komponentas. Kenkėjiškos programos gali naudoti šią funkciją svarbioms TV funkcijoms išjungti. Taikykite šį leidimą atsargiai, nes programų komponentai gali tapti nenaudojami, nesuderinami arba nestabilūs."</string>
-    <string name="permdesc_changeComponentState" product="default" msgid="1827232484416505615">"Leidžiama programai pakeisti nustatymą, ar įgalintas kitos programos komponentas, ar ne. Kenkėjiškos programos gali tai naudoti, kad neleistų svarbių telefono funkcijų. Šį leidimą reikia naudoti atsargiai, nes programos komponentai gali tapti nenaudojami, nenuoseklūs ar nestabilūs."</string>
-    <string name="permlab_grantRevokePermissions" msgid="4627315351093508795">"suteikti arba panaikinti leidimus"</string>
-    <string name="permdesc_grantRevokePermissions" msgid="4088642654085850662">"Programai leidžiama suteikti arba panaikinti konkrečius savo arba kitų programų leidimus. Tuo pasinaudoję kenkėjiškos programos gali pasiekti funkcijas, kurių pasiekti joms neleidote."</string>
-    <string name="permlab_setPreferredApplications" msgid="8463181628695396391">"nustatyti pageidaujamas programas"</string>
-    <string name="permdesc_setPreferredApplications" msgid="4973986762241783712">"Leidžiama programai keisti jūsų pageidaujamas programas. Kenkėjiškos programos gali nepastebimai pakeisti vykdomas programas, klastodama esamas programas, kad rinktų jūsų privačius duomenis."</string>
     <string name="permlab_writeSettings" msgid="2226195290955224730">"keisti sistemos nustatymus"</string>
     <string name="permdesc_writeSettings" msgid="7775723441558907181">"Leidžiama programai keisti sistemos nustatymų duomenis. Kenkėjiškos programos gali sugadinti jūsų sistemos konfigūraciją."</string>
-    <string name="permlab_writeSecureSettings" msgid="204676251876718288">"keisti saugios sistemos nustatymus"</string>
-    <string name="permdesc_writeSecureSettings" msgid="8159535613020137391">"Leidžiama programai keisti sistemos saugių nustatymų duomenis. Neskirta naudoti įprastoms programoms."</string>
-    <string name="permlab_writeGservices" msgid="2149426664226152185">"keisti „Google“ paslaugų žemėlapį"</string>
-    <string name="permdesc_writeGservices" msgid="1287309437638380229">"Leidžiama programai keisti „Google“ paslaugų žemėlapį. Neskirta naudoti įprastoms programoms."</string>
     <string name="permlab_receiveBootCompleted" msgid="5312965565987800025">"paleisti paleidžiant"</string>
     <string name="permdesc_receiveBootCompleted" product="tablet" msgid="7390304664116880704">"Leidžiama programai pasileisti, kai baigsis sistemos įkėlimas iš naujo. Dėl to planšetinio kompiuterio paleidimas gali trukti ilgiau ir programa gali sulėtinti planšetinį kompiuterį, nes ji veiks visada."</string>
     <string name="permdesc_receiveBootCompleted" product="tv" msgid="4525890122209673621">"Programai leidžiama nustatyti, kad ji būtų paleidžiama iškart baigus paleisti sistemą. Taip gali ilgiau užtrukti TV paleidimas, o programa gali sulėtinti visą planšetinio kompiuterio sistemą, nes ji visada veikia."</string>
@@ -557,36 +356,10 @@
     <string name="permdesc_accessMockLocation" msgid="5808711039482051824">"Kurti bandomuosius imituojančius vietos nustatymo šaltinius arba įdiegti naują vietos nustatymo paslaugų teikėją. Programai leidžiama nepaisyti vietos ir (arba) būsenos, kurią pateikia kiti vietos nustatymo šaltiniai, pvz., GPS arba vietos nustatymo paslaugų teikėjai."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"pasiekti papildomas vietos teikimo įrankio komandas"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"Programai leidžiama pasiekti papildomas vietovės nustatymo paslaugų teikėjų komandas. Dėl to programa gali trukdyti veikti GPS ar kitiems vietovės nustatymo šaltiniams."</string>
-    <string name="permlab_installLocationProvider" msgid="6578101199825193873">"leidimas įdiegti vietos teikimo įrankį"</string>
-    <string name="permdesc_installLocationProvider" msgid="9066146120470591509">"Kurti bandomuosius imituojančius vietos nustatymo šaltinius arba įdiegti naują vietos nustatymo paslaugų teikėją. Programai leidžiama nepaisyti vietos ir (arba) būsenos, kurią pateikia kiti vietos nustatymo šaltiniai, pvz., GPS arba vietos nustatymo paslaugų teikėjai."</string>
     <string name="permlab_accessFineLocation" msgid="1191898061965273372">"tiksli vieta (pagrįsta pagal GPS ir tinklą)"</string>
     <string name="permdesc_accessFineLocation" msgid="5295047563564981250">"Leidžiama programai gauti jūsų tikslią vietą naudojant visuotinę vietos nustatymo sistemą (angl. „Global Positioning System“, GPS) arba tinklo vietos šaltinius, pvz., mobiliojo ryšio bokštus ir „Wi-Fi“. Šios vietos paslaugos turi būti įjungtos ir pasiekiamos įrenginyje, kad programa galėtų jas naudoti. Programos gali tai naudoti jūsų vietai nustatyti bei eikvoti papildomą akumuliatoriaus energiją."</string>
     <string name="permlab_accessCoarseLocation" msgid="4887895362354239628">"apytikslė vieta (pagrįsta pagal tinklą)"</string>
     <string name="permdesc_accessCoarseLocation" msgid="2538200184373302295">"Leidžiama programai gauti jūsų apytikslę vietą. Ši vieta gaunama vietos paslaugų naudojant tinklo vietos šaltinius, pvz., mobiliojo ryšio bokštus ir „Wi-Fi“. Šios vietos paslaugos turi būti įjungtos ir pasiekiamos įrenginyje, kad programa galėtų jas naudoti. Programos gali tai naudoti jūsų apytikslei vietai nustatyti."</string>
-    <string name="permlab_accessSurfaceFlinger" msgid="2363969641792388947">"pasiekti „SurfaceFlinger“"</string>
-    <string name="permdesc_accessSurfaceFlinger" msgid="1041619516733293551">"Leidžiama programai naudoti „SurfaceFlinger“ žemo lygio funkcijas."</string>
-    <string name="permlab_readFrameBuffer" msgid="6690504248178498136">"skaityti kadrų buferį"</string>
-    <string name="permdesc_readFrameBuffer" msgid="4937405521809454680">"Leidžiama programai skaityti rėmelio buferio turinį."</string>
-    <string name="permlab_accessInputFlinger" msgid="5348635270689553857">"pasiekti „InputFlinger“"</string>
-    <string name="permdesc_accessInputFlinger" msgid="2104864941201226616">"Programai leidžiama naudoti „InputFlinger“ žemo lygio funkcijas."</string>
-    <string name="permlab_configureWifiDisplay" msgid="5595661694746742168">"konfigūruoti „Wi-Fi“ pateiktis"</string>
-    <string name="permdesc_configureWifiDisplay" msgid="7916815158690218065">"Leidžiama programai konfigūruoti ir prisijungti prie „Wi-Fi“ pateikčių."</string>
-    <string name="permlab_controlWifiDisplay" msgid="393641276723695496">"valdyti „Wi-Fi“ pateiktis"</string>
-    <string name="permdesc_controlWifiDisplay" msgid="4543912292681826986">"Leidžiama programai valdyti „Wi-Fi“ pateikčių žemo lygio funkcijas."</string>
-    <string name="permlab_controlVpn" msgid="2618442789397588200">"valdyti virtualiuosius privačiuosius tinklus"</string>
-    <string name="permdesc_controlVpn" msgid="762852603315861214">"Programai leidžiama valdyti pagrindines virtualiųjų privačiųjų tinklų funkcijas."</string>
-    <string name="permlab_captureAudioOutput" msgid="6857134498402346708">"fiksuoti garso išvestį"</string>
-    <string name="permdesc_captureAudioOutput" msgid="6210597754212208853">"Programai leidžiama fiksuoti ir peradresuoti garso išvestį."</string>
-    <string name="permlab_captureAudioHotword" msgid="1890553935650349808">"Aktyvinamųjų žodžių aptikimas"</string>
-    <string name="permdesc_captureAudioHotword" msgid="9151807958153056810">"Programai leidžiama įrašyti garsą, kad būtų galima aptikti aktyvinamuosius žodžius. Įrašymas gali būti vykdomas fone, bet tai netrikdo kitų garso įrašymo veiksmų (pvz., įrašymo vaizdo kamera)."</string>
-    <string name="permlab_modifyAudioRouting" msgid="7738060354490807723">"Garso nukreipimas"</string>
-    <string name="permdesc_modifyAudioRouting" msgid="7205731074267199735">"Programai leidžiama tiesiogiai valdyti garso nukreipimo ir garso nepaisymo politikos sprendimus."</string>
-    <string name="permlab_captureVideoOutput" msgid="2246828773589094023">"fiksuoti vaizdo išvestį"</string>
-    <string name="permdesc_captureVideoOutput" msgid="359481658034149860">"Programai leidžiama fiksuoti ir peradresuoti vaizdo išvestį."</string>
-    <string name="permlab_captureSecureVideoOutput" msgid="7815398969303382016">"fiksuoti saugią vaizdo išvestį"</string>
-    <string name="permdesc_captureSecureVideoOutput" msgid="2779793064709350289">"Programai leidžiama fiksuoti ir peradresuoti saugią vaizdo išvestį."</string>
-    <string name="permlab_mediaContentControl" msgid="8749790560720562511">"medijos atkūrimo ir prieigos prie metaduomenų valdymas"</string>
-    <string name="permdesc_mediaContentControl" msgid="1637478200272062">"Programai leidžiama valdyti medijos atkūrimą ir pasiekti medijos informaciją (pavadinimą, autorių ir t. t.)."</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"keisti garso nustatymus"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"Leidžiama programai keisti visuotinius garso nustatymus, pvz., garsumą ir tai, kuris garsiakalbis naudojamas išvesčiai."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"įrašyti garsą"</string>
@@ -595,73 +368,14 @@
     <string name="permdesc_sim_communication" msgid="5725159654279639498">"Programai leidžiama siųsti komandas į SIM kortelę. Tai labai pavojinga."</string>
     <string name="permlab_camera" msgid="3616391919559751192">"fotografuoti ir filmuoti"</string>
     <string name="permdesc_camera" msgid="8497216524735535009">"Leidžiama programai fotografuoti ir filmuoti kamera. Šis leidimas suteikia teisę programai naudoti kamerą bet kada be jūsų patvirtinimo."</string>
-    <string name="permlab_cameraDisableTransmitLed" msgid="2651072630501126222">"neleisti perduoti LED indikatoriaus, kai naudojamas fotoaparatas"</string>
-    <string name="permdesc_cameraDisableTransmitLed" msgid="4764585465480295341">"Leidžiama iš anksto įdiegtai sistemos programai išjungti fotoaparato naudojimo indikatoriaus LED."</string>
-    <string name="permdesc_cameraSendSystemEvent" msgid="8642231538552298107">"Iš anksto įdiegtai sistemos programai leidžiama siųsti sistemos įvykius fotoaparato paslaugai."</string>
-    <string name="permlab_brick" product="tablet" msgid="2961292205764488304">"visam laikui neleisti planšetinio kompiuterio"</string>
-    <string name="permlab_brick" product="tv" msgid="4912674222121249410">"visam laikui išjungti TV"</string>
-    <string name="permlab_brick" product="default" msgid="8337817093326370537">"visam laikui išjungti telefoną"</string>
-    <string name="permdesc_brick" product="tablet" msgid="4334818808001699530">"Leidžiama programai visam laikui išjungti visą planšetinį kompiuterį. Tai labai pavojinga."</string>
-    <string name="permdesc_brick" product="tv" msgid="7070924544316356349">"Programai leidžiama visam laikui išjungti visas TV funkcijas. Tai labai pavojinga."</string>
-    <string name="permdesc_brick" product="default" msgid="5788903297627283099">"Leidžiama programai išjungti visą telefoną visam laikui. Tai labai pavojinga."</string>
-    <string name="permlab_reboot" product="tablet" msgid="3436634972561795002">"versti iš naujo įkelti planšetinio kompiuterio operacinę sistemą"</string>
-    <string name="permlab_reboot" product="tv" msgid="2112102119558886236">"priverstinai iš naujo paleisti TV"</string>
-    <string name="permlab_reboot" product="default" msgid="2898560872462638242">"pradėti telefono perkrovimą"</string>
-    <string name="permdesc_reboot" product="tablet" msgid="8172056180063700741">"Leidžiama programai versti iš naujo paleisti planšetinio kompiuterio operacinę sistemą."</string>
-    <string name="permdesc_reboot" product="tv" msgid="7116222694344401650">"Programai leidžiama priverstinai iš naujo paleisti TV."</string>
-    <string name="permdesc_reboot" product="default" msgid="5326008124289989969">"Leidžiama programai versti iš naujo paleisti telefono operacinę sistemą."</string>
-    <string name="permlab_mount_unmount_filesystems" product="nosdcard" msgid="2927361537942591841">"pasiekti USB atm. failų sist."</string>
-    <string name="permlab_mount_unmount_filesystems" product="default" msgid="4402305049890953810">"pasiekti SD kortelės failų sistemą"</string>
-    <string name="permdesc_mount_unmount_filesystems" msgid="1829290701658992347">"Leidžiama programai įrengti ir pašalinti keičiamos atmintinės failų sistemas."</string>
-    <string name="permlab_mount_format_filesystems" product="nosdcard" msgid="6227819582624904972">"ištrinti USB atmintį"</string>
-    <string name="permlab_mount_format_filesystems" product="default" msgid="262582698639274056">"ištrinti SD kortelę"</string>
-    <string name="permdesc_mount_format_filesystems" msgid="8784268246779198627">"Leidžiama programai formatuoti keičiamą saugyklą."</string>
-    <string name="permlab_asec_access" msgid="3411338632002193846">"gauti informacijos apie vidinę atmintinę"</string>
-    <string name="permdesc_asec_access" msgid="3094563844593878548">"Leidžiama programai gauti informacijos apie vidinę atmintį."</string>
-    <string name="permlab_asec_create" msgid="6414757234789336327">"kurti vidinę atmintinę"</string>
-    <string name="permdesc_asec_create" msgid="4558869273585856876">"Leidžiama programai sukurti vidinę atmintį."</string>
-    <string name="permlab_asec_destroy" msgid="526928328301618022">"sunaikinti vidinę atmintinę"</string>
-    <string name="permdesc_asec_destroy" msgid="7218749286145526537">"Leidžiama programai sunaikinti vidinę atmintį."</string>
-    <string name="permlab_asec_mount_unmount" msgid="8877998101944999386">"įrengti / pašalinti vidinę saugyklą"</string>
-    <string name="permdesc_asec_mount_unmount" msgid="3451360114902490929">"Leidžiama programai įrengti / pašalinti vidinę atmintį."</string>
-    <string name="permlab_asec_rename" msgid="7496633954080472417">"iš naujo pavadinti vidinę atmintinę"</string>
-    <string name="permdesc_asec_rename" msgid="1794757588472127675">"Leidžiama programai pervardyti vidinę atmintį."</string>
     <string name="permlab_vibrate" msgid="7696427026057705834">"valdyti vibraciją"</string>
     <string name="permdesc_vibrate" msgid="6284989245902300945">"Leidžiama programai valdyti vibravimą."</string>
     <string name="permlab_flashlight" msgid="2155920810121984215">"valdyti šviesos signalą"</string>
     <string name="permdesc_flashlight" msgid="6522284794568368310">"Leidžiama programai valdyti šviesos signalą."</string>
-    <string name="permlab_manageUsb" msgid="1113453430645402723">"valdyti USB įrenginių nuostatas ir leidimus"</string>
-    <string name="permdesc_manageUsb" msgid="7776155430218239833">"Leidžiama programai valdyti USB įrenginių nuostatas ir leidimus."</string>
-    <string name="permlab_accessMtp" msgid="4953468676795917042">"taikyti MTP protokolą"</string>
-    <string name="permdesc_accessMtp" msgid="6532961200486791570">"Leidžiama prieiga prie pagrindinės MTP tvarkyklės taikyti MTP USB protokolą."</string>
-    <string name="permlab_hardware_test" msgid="4148290860400659146">"bandyti aparatinę įrangą"</string>
-    <string name="permdesc_hardware_test" msgid="6597964191208016605">"Leidžiama programai valdyti įvairius periferinius įrenginius aparatinės įrangos bandymo tikslais."</string>
-    <string name="permlab_fm" msgid="8749504526866832">"pasiekti FM radiją"</string>
-    <string name="permdesc_fm" msgid="4145699441237962818">"Programai leidžiama pasiekti FM radiją ir klausytis programų."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"skambinti tiesiogiai telefono numeriais"</string>
     <string name="permdesc_callPhone" msgid="3740797576113760827">"Leidžiama programai skambinti telefonų numeriais be jūsų įsikišimo. Dėl to gali atsirasti nenumatytų apmokestinimų ar skambučių. Atminkite, kad programai neleidžiama skambinti pagalbos telefonų numeriais. Kenkėjiškos programos gali skambinti be jūsų patvirtinimo, o dėl to jums gali būti taikomi mokesčiai."</string>
-    <string name="permlab_callPrivileged" msgid="4198349211108497879">"skambinti tiesiogiai telefonų numeriais"</string>
-    <string name="permdesc_callPrivileged" msgid="1689024901509996810">"Leidžiama programai skambinti bet kuriuo telefono numeriu, įskaitant skubios pagalbos numerius, be jūsų įsikišimo. Kenkėjiškos programos gali atlikti nereikalingus ir neteisėtus skambučius skubios pagalbos numeriais."</string>
-    <string name="permlab_performCdmaProvisioning" product="tablet" msgid="4842576994144604821">"tiesiogiai pradėti CDMA planšetinio kompiuterio sąranką"</string>
-    <string name="permlab_performCdmaProvisioning" product="tv" msgid="3485391974208100809">"tiesiogiai pradėti CDMA TV sąranką"</string>
-    <string name="permlab_performCdmaProvisioning" product="default" msgid="5604848095315421425">"tiesiogiai pradėti CDMA telefono sąranką"</string>
-    <string name="permdesc_performCdmaProvisioning" msgid="1994193538802314186">"Leidžiama programai pradėti CDMA parengimą. Kenkėjiškos programos gali be reikalo pradėti CDMA parengimą."</string>
-    <!-- no translation found for permlab_performSimActivation (1651116521896665009) -->
-    <skip />
-    <!-- no translation found for permdesc_performSimActivation (1778214876348917401) -->
-    <skip />
-    <string name="permlab_locationUpdates" msgid="7785408253364335740">"valdyti vietos atnaujinimo įspėjimus"</string>
-    <string name="permdesc_locationUpdates" msgid="1120741557891438876">"Leidžiama programai įgalinti vietos atnaujinimo pranešimus, gautus iš radijo, ar jų neleisti. Neskirta naudoti įprastoms programoms."</string>
-    <string name="permlab_checkinProperties" msgid="7855259461268734914">"pasiekti registravimo ypatybes"</string>
-    <string name="permdesc_checkinProperties" msgid="4024526968630194128">"Programai suteikiama skaitymo / rašymo prieiga prie ypatybių, kurias įkėlė tikrinimo paslauga. Neskirta naudoti įprastoms programoms."</string>
-    <string name="permlab_bindGadget" msgid="776905339015863471">"pasirinkti valdiklius"</string>
-    <string name="permdesc_bindGadget" msgid="8261326938599049290">"Leidžiama programai pranešti, kurios programos kuriuos valdiklius gali naudoti. Šį leidimą turinti programa gali kitoms programoms suteikti prieigą prie asmeninių duomenų. Neskirta naudoti įprastoms programoms."</string>
-    <string name="permlab_modifyPhoneState" msgid="8423923777659292228">"keisti telefono būseną"</string>
-    <string name="permdesc_modifyPhoneState" msgid="1029877529007686732">"Leidžiama programai valdyti įrenginio telefono funkcijas. Šį leidimą turinti programa gali perjungti tinklus, įjungti ir išjungti telefono radiją ir atlikti panašius veiksmus jūsų neįspėdama."</string>
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"skaityti telefono būseną ir tapatybę"</string>
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"Leidžiama programai pasiekti telefono funkcijas įrenginyje. Šis leidimas suteikia teisę programai nustatyti telefono numerį ir įrenginio ID, tai, ar skambutis aktyvus, ir skambučiu prijungtą nuotolinį numerį."</string>
-    <string name="permlab_readPrecisePhoneState" msgid="5476483020282007597">"skaityti tikslias telefono būsenas"</string>
-    <string name="permdesc_readPrecisePhoneState" msgid="6648009074263855418">"Programai leidžiama pasiekti tikslias telefono būsenas. Šiuo leidimu programai leidžiama nustatyti tikrą skambučio būseną, ar skambutis yra aktyvus, ar vyksta fone, ar paskambinti nepavyksta, tikslią duomenų ryšio būseną ir ar nepavyksta užmegzti duomenų ryšio."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"neleisti planšetiniam kompiuteriui užmigti"</string>
     <string name="permlab_wakeLock" product="tv" msgid="2601193288949154131">"neleisti įjungti TV miego būsenos"</string>
     <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"neleisti telefonui snausti"</string>
@@ -672,34 +386,14 @@
     <string name="permdesc_transmitIr" product="tablet" msgid="5358308854306529170">"Programai leidžiama naudoti planšetinio kompiuterio infraraudonųjų spindulių perdavimo įrenginį."</string>
     <string name="permdesc_transmitIr" product="tv" msgid="3926790828514867101">"Programai leidžiama naudoti TV infraraudonųjų spindulių siųstuvą."</string>
     <string name="permdesc_transmitIr" product="default" msgid="7957763745020300725">"Programai leidžiama naudoti telefono infraraudonųjų spindulių perdavimo įrenginį."</string>
-    <string name="permlab_devicePower" product="tablet" msgid="2787034722616350417">"įjungti arba išjungti planšetinį kompiuterį"</string>
-    <string name="permlab_devicePower" product="tv" msgid="7579718349658943416">"įjungti arba išjungti TV"</string>
-    <string name="permlab_devicePower" product="default" msgid="4928622470980943206">"telefono įjungimas ir išjungimas"</string>
-    <string name="permdesc_devicePower" product="tablet" msgid="6689862878984631831">"Leidžiama programai įjungti ar išjungti planšetinį kompiuterį."</string>
-    <string name="permdesc_devicePower" product="tv" msgid="1334908641773273512">"Programai leidžiama įjungti arba išjungti TV."</string>
-    <string name="permdesc_devicePower" product="default" msgid="6037057348463131032">"Leidžiama programai įjungti ar išjungti telefoną."</string>
-    <string name="permlab_userActivity" msgid="1677844893921729548">"iš naujo nustatyti vaizdo skirtąjį laiką"</string>
-    <string name="permdesc_userActivity" msgid="651746160252248024">"Leidžiama programai iš naujo nustatyti vaizdo skirtąjį laiką."</string>
-    <string name="permlab_factoryTest" msgid="3715225492696416187">"paleisti gamyklos bandymo režime"</string>
-    <string name="permdesc_factoryTest" product="tablet" msgid="3952059318359653091">"Paleisti kaip žemo lygio gamintojo bandymą, leidžiant užbaigti prieigą prie aparatinės planšetinio kompiuterio įrangos. Pasiekiama tik tada, kai planšetinis kompiuteris veikia gamintojo bandymo režimu."</string>
-    <string name="permdesc_factoryTest" product="tv" msgid="2105643629211155695">"Paleisti kaip žemo lygio gamintojo bandymą ir pasiekti TV aparatinę įrangą. Pasiekiama, tik kai TV veikia gamintojo bandymo režimu."</string>
-    <string name="permdesc_factoryTest" product="default" msgid="8136644990319244802">"Paleisti kaip žemo lygio gamintojo bandymą, leidžiant užbaigti prieigą prie aparatinės telefono įrangos. Galima tik kai telefonas veikia gamintojo bandymo režimu."</string>
     <string name="permlab_setWallpaper" msgid="6627192333373465143">"nustatyti darbalaukio foną"</string>
     <string name="permdesc_setWallpaper" msgid="7373447920977624745">"Leidžiama programai nustatyti sistemos darbalaukio foną."</string>
     <string name="permlab_setWallpaperHints" msgid="3278608165977736538">"keisti ekrano fono dydį"</string>
     <string name="permdesc_setWallpaperHints" msgid="8235784384223730091">"Leidžiama programai nustatyti sistemos darbalaukio fono dydžio užuominas."</string>
-    <string name="permlab_masterClear" msgid="2315750423139697397">"iš naujo nustatyti sistemą į gamyklos nustatymus"</string>
-    <string name="permdesc_masterClear" msgid="3665380492633910226">"Leidžiama programai visiškai iš naujo nustatyti sistemos nustatymus į gamyklinius ištrinant visus duomenis, konfigūraciją ir įdiegtas programas."</string>
-    <string name="permlab_setTime" msgid="2021614829591775646">"nustatyti laiką"</string>
-    <string name="permdesc_setTime" product="tablet" msgid="1896341438151152881">"Leidžiama programai keisti planšetinio kompiuterio laiką."</string>
-    <string name="permdesc_setTime" product="tv" msgid="1826398919861882682">"Programai leidžiama pakeisti TV laikrodžio laiką."</string>
-    <string name="permdesc_setTime" product="default" msgid="1855702730738020">"Leidžiama programai keisti telefono laiką."</string>
     <string name="permlab_setTimeZone" msgid="2945079801013077340">"nustatyti laiko zoną"</string>
     <string name="permdesc_setTimeZone" product="tablet" msgid="1676983712315827645">"Leidžiama programai keisti planšetinio kompiuterio laiko juostą."</string>
     <string name="permdesc_setTimeZone" product="tv" msgid="888864653946175955">"Programai leidžiama pakeisti TV laiko juostą."</string>
     <string name="permdesc_setTimeZone" product="default" msgid="4499943488436633398">"Leidžiama programai keisti telefono laiko juostą."</string>
-    <string name="permlab_accountManagerService" msgid="4829262349691386986">"veikia kaip „AccountManagerService“"</string>
-    <string name="permdesc_accountManagerService" msgid="1948455552333615954">"Leidžiama programai kreiptis „AccountAuthenticators“."</string>
     <string name="permlab_getAccounts" msgid="1086795467760122114">"rasti paskyras įrenginyje"</string>
     <string name="permdesc_getAccounts" product="tablet" msgid="2741496534769660027">"Leidžiama programai gauti planšetinio kompiuterio žinomų paskyrų sąrašą. Gali būti įtrauktos visos paskyros, sukurtos įdiegtomis programomis."</string>
     <string name="permdesc_getAccounts" product="tv" msgid="4190633395633907543">"Programai leidžiama gauti TV pasiekiamų paskyrų sąrašą. Tai gali būti įdiegtų programų sukurtos paskyros."</string>
@@ -714,14 +408,10 @@
     <string name="permdesc_accessNetworkState" msgid="8318964424675960975">"Leidžiama programai peržiūrėti informaciją apie tinklo ryšius, pvz., kurie tinklai pasiekiami ir prijungti."</string>
     <string name="permlab_createNetworkSockets" msgid="8018758136404323658">"visateisė tinklo prieiga"</string>
     <string name="permdesc_createNetworkSockets" msgid="3403062187779724185">"Leidžiama programai kurti tinklo programines jungtis ir naudoti tinkintus tinklo protokolus. Naršyklė ir kitos programos teikia priemones siųsti duomenis į internetą, todėl norint siųsti duomenis į internetą šis leidimas nebūtinas."</string>
-    <string name="permlab_writeApnSettings" msgid="505660159675751896">"keisti / perimti tinklo nustatymus ir srautą"</string>
-    <string name="permdesc_writeApnSettings" msgid="5333798886412714193">"Leidžiama programai pakeisti tinklo nustatymus ir perimti bei tirti visą tinklo srautą, kad, pvz., pakeistų tarpinį serverį ir bet kurio APN prievadą. Kenkėjiškos programos gali stebėti, peradresuoti ar keisti tinklo paketus jums nežinant."</string>
     <string name="permlab_changeNetworkState" msgid="958884291454327309">"keisti tinklo jungiamumą"</string>
     <string name="permdesc_changeNetworkState" msgid="6789123912476416214">"Leidžiama programai keisti tinklo jungiamumo būseną."</string>
     <string name="permlab_changeTetherState" msgid="5952584964373017960">"keisti susietą jungiamumą"</string>
     <string name="permdesc_changeTetherState" msgid="1524441344412319780">"Leidžiama programai keisti susieto tinklo jungiamumą."</string>
-    <string name="permlab_changeBackgroundDataSetting" msgid="1400666012671648741">"keisti fono duomenų naudojimo nustatymą"</string>
-    <string name="permdesc_changeBackgroundDataSetting" msgid="5347729578468744379">"Leidžiama programai keisti fono duomenų naudojimo nustatymą."</string>
     <string name="permlab_accessWifiState" msgid="5202012949247040011">"žiūrėti „Wi-Fi“ ryšius"</string>
     <string name="permdesc_accessWifiState" msgid="5002798077387803726">"Leidžiama programai peržiūrėti informaciją apie „Wi-Fi“ ryšio tinklus, pvz., ar įgalintas „Wi-Fi“, ir prijungtų „Wi-Fi“ įrenginių pavadinimus."</string>
     <string name="permlab_changeWifiState" msgid="6550641188749128035">"prijungti prie „Wi-Fi“ ir atjungti nuo jo"</string>
@@ -734,24 +424,12 @@
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="6921177471748882137">"Leidžiama programai konfigūruoti vietinį „Bluetooth“ planšetinį kompiuterį ir atrasti nuotolinius įrenginius bei su jais susieti."</string>
     <string name="permdesc_bluetoothAdmin" product="tv" msgid="3373125682645601429">"Programai leidžiama konfigūruoti TV „Bluetooth“ ir aptikti bei susieti TV su nuotoliniais įrenginiais."</string>
     <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"Leidžiama programai konfigūruoti vietinį „Bluetooth“ telefoną ir atrasti bei susieti su nuotoliniais įrenginiais."</string>
-    <string name="permlab_bluetoothPriv" msgid="4009494246009513828">"leisti „Bluetooth“ susiejimą naudojant programą"</string>
-    <string name="permdesc_bluetoothPriv" product="tablet" msgid="8045735193417468857">"Leidžiama programai susieti su nuotolinio valdymo įrenginiais be naudotojo įsikišimo."</string>
-    <string name="permdesc_bluetoothPriv" product="tv" msgid="8045735193417468857">"Leidžiama programai susieti su nuotolinio valdymo įrenginiais be naudotojo įsikišimo."</string>
-    <string name="permdesc_bluetoothPriv" product="default" msgid="8045735193417468857">"Leidžiama programai susieti su nuotolinio valdymo įrenginiais be naudotojo įsikišimo."</string>
-    <string name="permlab_bluetoothMap" msgid="6372198338939197349">"pasiekti „Bluetooth“ MAP duomenis"</string>
-    <string name="permdesc_bluetoothMap" product="tablet" msgid="5784090105926959958">"Programai leidžiama pasiekti „Bluetooth“ MAP duomenis."</string>
-    <string name="permdesc_bluetoothMap" product="tv" msgid="5784090105926959958">"Programai leidžiama pasiekti „Bluetooth“ MAP duomenis."</string>
-    <string name="permdesc_bluetoothMap" product="default" msgid="5784090105926959958">"Programai leidžiama pasiekti „Bluetooth“ MAP duomenis."</string>
     <string name="permlab_accessWimaxState" msgid="4195907010610205703">"prisijungti prie WiMAX ir atsijungti nuo jo"</string>
     <string name="permdesc_accessWimaxState" msgid="6360102877261978887">"Leidžiama programai nustatyti, ar įgalintas „WiMAX“, ir informaciją apie visus prijungtus tinklus."</string>
     <string name="permlab_changeWimaxState" msgid="2405042267131496579">"Keisti „WiMAX“ būseną"</string>
     <string name="permdesc_changeWimaxState" product="tablet" msgid="3156456504084201805">"Leidžia programai prijungti planšetinį kompiuterį prie „WiMAX“ ryšio tinklų ir nuo jų atjungti."</string>
     <string name="permdesc_changeWimaxState" product="tv" msgid="6022307083934827718">"Programai leidžiama prijungti TV prie „WiMAX“ tinklų ir atjungti nuo jų."</string>
     <string name="permdesc_changeWimaxState" product="default" msgid="697025043004923798">"Leidžia programai prijungti telefoną prie „WiMAX“ ryšio tinklų ir nuo jų atjungti."</string>
-    <string name="permlab_scoreNetworks" msgid="6445777779383587181">"įvertinti tinklus"</string>
-    <string name="permdesc_scoreNetworks" product="tablet" msgid="1304304745850215556">"Programai leidžiama įvertinti tinklus ir nustatyti, kuriems tinklams planšetiniame kompiuteryje turėtų būti taikoma pirmenybė."</string>
-    <string name="permdesc_scoreNetworks" product="tv" msgid="5444434643862417649">"Programai leidžiama įvertinti tinklus ir nustatyti, kuriems tinklams TV turėtų teikti pirmenybę."</string>
-    <string name="permdesc_scoreNetworks" product="default" msgid="1831501848178651379">"Programai leidžiama įvertinti tinklus ir nustatyti, kuriems tinklams telefone turėtų būti taikoma pirmenybė."</string>
     <string name="permlab_bluetooth" msgid="6127769336339276828">"susieti su „Bluetooth“ įrenginiais"</string>
     <string name="permdesc_bluetooth" product="tablet" msgid="3480722181852438628">"Leidžiama programai peržiūrėti „Bluetooth“ konfigūraciją planšetiniame kompiuteryje ir užmegzti bei priimti ryšius iš susietų įrenginių."</string>
     <string name="permdesc_bluetooth" product="tv" msgid="3974124940101104206">"Programai leidžiama peržiūrėti TV „Bluetooth“ konfigūraciją ir kurti bei priimti ryšius su susietais įrenginiais."</string>
@@ -786,10 +464,6 @@
     <string name="permdesc_writeSyncSettings" msgid="8956262591306369868">"Leidžiama programai keisti sinchronizuotus paskyros nustatymus. Pvz., tai gali būti naudojama norint įgalinti Žmonių programos sinchronizavimą su paskyra."</string>
     <string name="permlab_readSyncStats" msgid="7396577451360202448">"skaityti sinchronizavimo statistiką"</string>
     <string name="permdesc_readSyncStats" msgid="1510143761757606156">"Leidžiama programai skaityti sinchronizuotą paskyros statistiką, įskaitant sinchronizuotų įvykių istoriją ir informaciją, kiek duomenų sinchronizuota."</string>
-    <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"skaityti prenumeruojamus tiekimus"</string>
-    <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"Leidžiama programai gauti išsamios informacijos apie šiuo metu sinchronizuojamus sklaidos kanalus."</string>
-    <string name="permlab_subscribedFeedsWrite" msgid="9015246325408209296">"rašyti prenumeruojamus kanalus"</string>
-    <string name="permdesc_subscribedFeedsWrite" msgid="6928930188826089413">"Leidžiama programai keisti šiuo metu sinchronizuojamus sklaidos kanalus. Kenkėjiškos programos gali pakeisti sinchronizuojamus sklaidos kanalus."</string>
     <string name="permlab_readDictionary" msgid="4107101525746035718">"skaityti terminus, kuriuos pridėjote į žodyną"</string>
     <string name="permdesc_readDictionary" msgid="659614600338904243">"Leidžiama programai skaityti visus žodžius, vardus ir frazes, kuriuos naudotojas išsaugojo naudotojo žodyne."</string>
     <string name="permlab_writeDictionary" msgid="2183110402314441106">"pridėti žodžių prie naudotojo apibrėžto žodyno"</string>
@@ -802,62 +476,8 @@
     <string name="permlab_sdcardWrite" product="default" msgid="8805693630050458763">"keisti arba trinti SD kortelės turinį"</string>
     <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6175406299445710888">"Leidž. progr. raš. į USB atm."</string>
     <string name="permdesc_sdcardWrite" product="default" msgid="4337417790936632090">"Leidžiama programai rašyti į SD kortelę."</string>
-    <string name="permlab_mediaStorageWrite" product="default" msgid="6859839199706879015">"keisti / ištr. vid. med. atm. tur."</string>
-    <string name="permdesc_mediaStorageWrite" product="default" msgid="8189160597698529185">"Leidžiama programai keisti vidinės medijos saugyklos turinį."</string>
-    <string name="permlab_manageDocs" product="default" msgid="5778318598448849829">"tvarkyti dokumentų saugyklą"</string>
-    <string name="permdesc_manageDocs" product="default" msgid="8704323176914121484">"Leidžiama programai tvarkyti dokumentų saugyklą."</string>
-    <string name="permlab_sdcardAccessAll" msgid="8150613823900460576">"pasiekti visų naud. išor. atm."</string>
-    <string name="permdesc_sdcardAccessAll" msgid="3215208357415891320">"Leidžiama programai pasiekti visų naudotojų išorinę atmintinę."</string>
-    <string name="permlab_cache_filesystem" msgid="5656487264819669824">"pasiekti talpyklos failų sistemą"</string>
-    <string name="permdesc_cache_filesystem" msgid="5578967642265550955">"Leidžiama programai skaityti talpyklos failų sistemą ir į ją rašyti."</string>
     <string name="permlab_use_sip" msgid="2052499390128979920">"skambinti / priimti SIP skambučius"</string>
     <string name="permdesc_use_sip" msgid="2297804849860225257">"Leidžiama programai skambinti ir priimti SIP skambučius."</string>
-    <string name="permlab_register_sim_subscription" msgid="3166535485877549177">"registruoti naujus telekomunikacijų SIM ryšius"</string>
-    <string name="permdesc_register_sim_subscription" msgid="2138909035926222911">"Programai leidžiama registruoti naujus telekomunikacijų SIM ryšius."</string>
-    <string name="permlab_register_call_provider" msgid="108102120289029841">"registruoti naujus telekomunikacijų ryšius"</string>
-    <string name="permdesc_register_call_provider" msgid="7034310263521081388">"Programai leidžiama registruoti naujus telekomunikacijų ryšius."</string>
-    <string name="permlab_connection_manager" msgid="1116193254522105375">"tvarkyti telekomunikacijų ryšius"</string>
-    <string name="permdesc_connection_manager" msgid="5925480810356483565">"Programai leidžiama tvarkyti telekomunikacijų ryšius."</string>
-    <string name="permlab_bind_incall_service" msgid="6773648341975287125">"sąveika su gaunamojo skambučio ekranu"</string>
-    <string name="permdesc_bind_incall_service" msgid="8343471381323215005">"Programai leidžiama valdyti, kada ir kaip naudotojai matys gaunamojo skambučio ekraną."</string>
-    <string name="permlab_bind_connection_service" msgid="3557341439297014940">"sąveikauti su telefonijos paslaugomis"</string>
-    <string name="permdesc_bind_connection_service" msgid="4008754499822478114">"Programai leidžiama sąveikauti su telefonijos paslaugomis skambučiams atlikti / gauti."</string>
-    <string name="permlab_control_incall_experience" msgid="9061024437607777619">"naudotojui teikti paslaugas vykstant skambučiui"</string>
-    <string name="permdesc_control_incall_experience" msgid="915159066039828124">"Programai leidžiama teikti naudotojui paslaugas vykstant skambučiui."</string>
-    <string name="permlab_readNetworkUsageHistory" msgid="7862593283611493232">"skaityti tinklo naudojimo istoriją"</string>
-    <string name="permdesc_readNetworkUsageHistory" msgid="7689060749819126472">"Leidžiama programai skaityti konkrečių tinklų ir programų tinklo naudojimo istoriją."</string>
-    <string name="permlab_manageNetworkPolicy" msgid="2562053592339859990">"valdyti tinklo politiką"</string>
-    <string name="permdesc_manageNetworkPolicy" msgid="7537586771559370668">"Leidžiama programai valdyti tinklo politiką ir apibrėžti konkrečios programos taisykles."</string>
-    <string name="permlab_modifyNetworkAccounting" msgid="5088217309088729650">"keisti tinklo naudojimo apskaitą"</string>
-    <string name="permdesc_modifyNetworkAccounting" msgid="5443412866746198123">"Leidžiama programai keisti, kaip tinklas naudojamas, palyginti su programomis. Neskirta naudoti įprastoms programoms."</string>
-    <string name="permlab_accessNotifications" msgid="7673416487873432268">"pasiekti pranešimus"</string>
-    <string name="permdesc_accessNotifications" msgid="458457742683431387">"Programai leidžiama gauti, patikrinti ir išvalyti pranešimus, įskaitant pranešimus, kuriuos paskelbė kitos programos."</string>
-    <string name="permlab_bindNotificationListenerService" msgid="7057764742211656654">"susisaistyti su pranešimų skaitymo priemonės paslauga"</string>
-    <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"Leidžiama turėtojui susisaistyti su pranešimų skaitymo priemonės paslaugos aukščiausio lygio sąsaja. Įprastoms programoms to neturėtų prireikti."</string>
-    <string name="permlab_bindChooserTargetService" msgid="3443261076710185673">"susaistyti programą su tikslo pasirinkimo paslauga"</string>
-    <string name="permdesc_bindChooserTargetService" msgid="1413908999583734970">"Savininkui leidžiama susaistyti programą su tikslo pasirinkimo paslaugos aukščiausio lygio sąsaja. Įprastoms programoms to neturėtų prireikti."</string>
-    <string name="permlab_bindConditionProviderService" msgid="1180107672332704641">"susaistyti su sąlygos teikėjo paslauga"</string>
-    <string name="permdesc_bindConditionProviderService" msgid="1680513931165058425">"Turėtojui leidžiama susaistyti programą su sąlygos teikėjo paslaugos aukščiausio lygio sąsaja. Įprastoms programoms to niekada neturėtų prireikti."</string>
-    <string name="permlab_bindMediaRouteService" msgid="6637740382272686835">"susaistyti su medijos maršruto paslauga"</string>
-    <string name="permdesc_bindMediaRouteService" msgid="6436655024972496687">"Leidžiama savininką susaistyti su aukščiausio lygio medijos maršruto paslaugos sąsaja. Niekada neturėtų būti reikalinga įprastoms programoms."</string>
-    <string name="permlab_bindDreamService" msgid="4153646965978563462">"susisaistyti su mėgstama paslauga"</string>
-    <string name="permdesc_bindDreamService" msgid="7325825272223347863">"Savininkui leidžiama susisaistyti su mėgstamos paslaugos aukščiausio lygio sąsaja. Įprastoms programoms to neturėtų prireikti."</string>
-    <string name="permlab_invokeCarrierSetup" msgid="3699600833975117478">"iškviesti operatoriaus pateiktą konfigūravimo programą"</string>
-    <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"Turėtojui leidžiama iškviesti operatoriaus pateiktą konfigūravimo programą. Įprastoms programoms to neturėtų prireikti."</string>
-    <string name="permlab_accessNetworkConditions" msgid="8206077447838909516">"vykdyti tinklo sąlygų stebėjimą"</string>
-    <string name="permdesc_accessNetworkConditions" msgid="6899102075825272211">"Leidžiama programai vykdyti tinklo sąlygų stebėjimą. To niekada neturėtų prireikti naudojant įprastas programas."</string>
-    <string name="permlab_setInputCalibration" msgid="4902620118878467615">"keisti įvesties įrenginio kalibravimą"</string>
-    <string name="permdesc_setInputCalibration" msgid="4527511047549456929">"Leidžiama programai keisti jutiklinio ekrano kalibravimo parametrus. Neturėtų prireikti naudojant įprastas programas."</string>
-    <string name="permlab_accessDrmCertificates" msgid="7436886640723203615">"gali pasiekti DRM sertifikatus"</string>
-    <string name="permdesc_accessDrmCertificates" msgid="8073288354426159089">"Programai leidžiama pasiekti ir naudoti DRM sertifikatus. Neturėtų prireikti naudojant įprastas programas."</string>
-    <string name="permlab_handoverStatus" msgid="1159132046126626731">"Gauti „Android“ perdavimo funkcijos perkėlimo būseną"</string>
-    <string name="permdesc_handoverStatus" msgid="4788144087245714948">"Programai leidžiama gauti informaciją apie dabartinius „Android“ perdavimo funkcijos perkėlimus"</string>
-    <string name="permlab_removeDrmCertificates" msgid="7044888287209892751">"pašalinti DRM sertifikatus"</string>
-    <string name="permdesc_removeDrmCertificates" msgid="7272999075113400993">"Programai leidžiama pašalinti DRM sertifikatus. Neturėtų prireikti naudojant įprastas programas."</string>
-    <string name="permlab_bindCarrierMessagingService" msgid="1490229371796969158">"susaistyti su operatoriaus susirašinėjimo žinutėmis paslauga"</string>
-    <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"Leidžiama savininkui susisaistyti su aukščiausio lygio operatoriaus susirašinėjimo žinutėmis paslaugos sąsaja. Įprastoms programoms to neturėtų prireikti."</string>
-    <string name="permlab_accessVoiceInteractionService" msgid="4183835260471435605">"sąveikauti su balso sąveikos paslauga"</string>
-    <string name="permdesc_accessVoiceInteractionService" msgid="836587728238433459">"Savininkui leidžiama naudoti šiuo metu suaktyvintą balso sąveikos paslaugą. Įprastoms programoms to neturėtų prireikti."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Nustatyti slaptažodžio taisykles"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"Valdykite, kokio ilgio ekrano užrakto slaptažodžius ir PIN kodus galima naudoti."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Stebėti bandymus atrakinti ekraną"</string>
@@ -1143,28 +763,10 @@
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="8497389531014185509">"Leidžiama programai keisti naršyklės istoriją ar žymes, išsaugotas telefone. Dėl to programai gali būti leidžiama ištrinti ar keisti naršyklės duomenis. Pastaba: šis leidimas nesuteikiamas trečiosios šalies naršyklėms ar kitoms programoms, kuriomis galima naršyti žiniatinklį."</string>
     <string name="permlab_setAlarm" msgid="1379294556362091814">"nustatyti pavojaus signalą"</string>
     <string name="permdesc_setAlarm" msgid="316392039157473848">"Leidžiama programai nustatyti signalą įdiegtoje žadintuvo programoje. Kai kuriose žadintuvo programose ši funkcija gali nebūti nevykdoma."</string>
-    <string name="permlab_writeVoicemail" msgid="7309899891683938100">"rašyti balso pašto pranešimus"</string>
-    <string name="permdesc_writeVoicemail" msgid="6592572839715924830">"Programai leidžiama keisti ir šalinti pranešimus iš balso pašto gautųjų."</string>
     <string name="permlab_addVoicemail" msgid="5525660026090959044">"pridėti balso pašto pranešimų"</string>
     <string name="permdesc_addVoicemail" msgid="6604508651428252437">"Leidžia programai pridėti pranešimų prie jūsų balso pašto gautųjų."</string>
-    <string name="permlab_readVoicemail" msgid="8415201752589140137">"skaityti balso pašto pranešimus"</string>
-    <string name="permdesc_readVoicemail" msgid="8926534735321616550">"Programai leidžiama skaityti balso pašto pranešimus."</string>
     <string name="permlab_writeGeolocationPermissions" msgid="5962224158955273932">"keisti naršyklės geografinės vietos leidimus"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="1083743234522638747">"Leidžiama programai keisti naršyklės geografinės vietos leidimus. Kenkėjiškos programos gali tai naudoti, kad leistų siųsti vietos informaciją abejotinoms svetainėms."</string>
-    <string name="permlab_packageVerificationAgent" msgid="5568139100645829117">"patikrinti paketus"</string>
-    <string name="permdesc_packageVerificationAgent" msgid="8437590190990843381">"Leidžiama programai patikrinti, ar paketą galima įdiegti."</string>
-    <string name="permlab_bindPackageVerifier" msgid="4187786793360326654">"susaistyti su paketo tikrinimo programa"</string>
-    <string name="permdesc_bindPackageVerifier" msgid="3180741773233862126">"Savininkui leidžiama teikti užklausas patikrinti paketą. Įprastoms programoms to neturėtų prireikti."</string>
-    <string name="permlab_intentFilterVerificationAgent" msgid="1135788294400437497">"patvirtinti tikslinį filtrą"</string>
-    <string name="permdesc_intentFilterVerificationAgent" msgid="5853902808424716312">"Leidžiama programai patikrinti, ar tikslinis filtras patvirtintas."</string>
-    <string name="permlab_bindIntentFilterVerifier" msgid="8567268159430779210">"priskirti tikslinio filtro tvirtin. pr."</string>
-    <string name="permdesc_bindIntentFilterVerifier" msgid="681128728719578778">"Savininkui leidžiama teikti užklausas patvirtinti tikslinį filtrą. Įprastoms programoms to neturėtų prireikti."</string>
-    <string name="permlab_serialPort" msgid="546083327654631076">"pasiekti nuosekliuosius prievadus"</string>
-    <string name="permdesc_serialPort" msgid="2991639985224598193">"Leidžiama savininkui pasiekti nuosekliuosius prievadus naudojant „SerialManager“ API."</string>
-    <string name="permlab_accessContentProvidersExternally" msgid="5077774297943409285">"pasiekti turinio teikėjus iš išorės"</string>
-    <string name="permdesc_accessContentProvidersExternally" msgid="4544346486697853685">"Leidžiama savininkui pasiekti turinio teikėjus naudojant apvalkalą. To niekada neturėtų prireikti naudojant įprastas programas."</string>
-    <string name="permlab_updateLock" msgid="3527558366616680889">"Atsisakyti autom. įrenginio atnaujinimų"</string>
-    <string name="permdesc_updateLock" msgid="1655625832166778492">"Leidžia savininkui pateikti pasiūlymą sistemai dėl tinkamo laiko iš naujo neinteraktyviai įkelti programą, kad būtų naujovinamas įrenginys."</string>
     <string name="save_password_message" msgid="767344687139195790">"Ar norite, kad naršyklė atsimintų šį slaptažodį?"</string>
     <string name="save_password_notnow" msgid="6389675316706699758">"Ne dabar"</string>
     <string name="save_password_remember" msgid="6491879678996749466">"Atsiminti"</string>
@@ -1472,28 +1074,8 @@
     <string name="ext_media_nomedia_notification_message" product="nosdcard" msgid="6921126162580574143">"USB atmintinė pašalinta. Įdėti naują mediją."</string>
     <string name="ext_media_nomedia_notification_message" product="default" msgid="3870120652983659641">"SD kortelė pašalinta. Įdėkite naują."</string>
     <string name="activity_list_empty" msgid="1675388330786841066">"Nerasta atitinkančios veiklos."</string>
-    <string name="permlab_pkgUsageStats" msgid="8787352074326748892">"atnaujinti komponento naudojimo statistiką"</string>
-    <string name="permdesc_pkgUsageStats" msgid="1106612424254277630">"Leidžiama programai keisti surinktą komponento naudojimo statistiką. Neskirta naudoti įprastoms programoms."</string>
-    <string name="permlab_copyProtectedData" msgid="4341036311211406692">"kopijuoti turinį"</string>
-    <string name="permdesc_copyProtectedData" msgid="4390697124288317831">"Leidžiama programai iškviesti numatytąją sudėtinio rodinio paslaugą, kad būtų kopijuojamas turinys. Neskirta naudoti įprastoms programoms."</string>
     <string name="permlab_route_media_output" msgid="1642024455750414694">"Medijos išvesties nukreipimas"</string>
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"Leidžiama programai nukreipti medijos išvestį į kitus išorinius įrenginius."</string>
-    <string name="permlab_access_keyguard_secure_storage" msgid="7565552237977815047">"Pasiekti „KeyGuard“ saugyklą"</string>
-    <string name="permdesc_access_keyguard_secure_storage" msgid="5866245484303285762">"Programai leidžiama pasiekti „KeyGuard“ saugyklą."</string>
-    <string name="permlab_control_keyguard" msgid="172195184207828387">"Valdyti „KeyGuard“ rodymą ir slėpimą"</string>
-    <string name="permdesc_control_keyguard" msgid="3043732290518629061">"Programai leidžiama valdyti „KeyGuard“."</string>
-    <string name="permlab_trust_listener" msgid="1765718054003704476">"Atsižvelgti į patikimos būsenos pakeitimus."</string>
-    <string name="permdesc_trust_listener" msgid="8233895334214716864">"Programai leidžiama atsižvelgti į patikimos būsenos pakeitimus."</string>
-    <string name="permlab_provide_trust_agent" msgid="5465587586091358316">"Teikti patikimos priemonės paslaugą."</string>
-    <string name="permdesc_provide_trust_agent" msgid="3865702641053068148">"Programai leidžiama teikti patikimos priemonės paslaugą."</string>
-    <string name="permlab_launch_trust_agent_settings" msgid="5859430082240410200">"Paleisti patikimos priemonės nustatymų meniu."</string>
-    <string name="permdesc_launch_trust_agent_settings" msgid="8185142708644913381">"Programai leidžiama paleisti veiklą, keičiančią patikimos priemonės elgseną."</string>
-    <string name="permlab_bind_trust_agent_service" msgid="8242093169457695334">"Susisaistyti su patikimos priemonės paslauga"</string>
-    <string name="permdesc_bind_trust_agent_service" msgid="7041930026024507515">"Programai leidžiama susisaistyti su patikimos priemonės paslauga."</string>
-    <string name="permlab_recovery" msgid="3157024487744125846">"Sąveikauti su naujiniu ir atkūrimo sistema"</string>
-    <string name="permdesc_recovery" msgid="8511774533266359571">"Programai leidžiama sąveikauti su atkūrimo sistema ir sistemos naujiniais."</string>
-    <string name="permlab_manageMediaProjection" msgid="1120495449419929218">"Tvarkyti medijos projektų sesijas"</string>
-    <string name="permdesc_manageMediaProjection" msgid="8053759147529492856">"Programai leidžiama tvarkyti medijos projektų sesijas. Šios sesijos leidžia programoms fiksuoti vaizdo ir garso turinį. Neturėtų prireikti naudojant įprastas programas."</string>
     <string name="permlab_readInstallSessions" msgid="6165432407628065939">"Skaityti diegimo seansus"</string>
     <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"Leidžiama programai skaityti diegimo seansus. Leidžiama peržiūrėti išsamią aktyvių paketų diegimo informaciją."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"Dukart palieskite, kad valdytumėte mastelio keitimą"</string>
@@ -1848,8 +1430,8 @@
     <string name="immersive_cling_description" msgid="3482371193207536040">"Jei norite išeiti, perbraukite žemyn iš viršaus."</string>
     <string name="immersive_cling_positive" msgid="5016839404568297683">"Supratau"</string>
     <string name="done_label" msgid="2093726099505892398">"Atlikta"</string>
-    <string name="hour_picker_description" msgid="6698199186859736512">"Apskritas valandų slankiklis"</string>
-    <string name="minute_picker_description" msgid="8606010966873791190">"Apskritas minučių slankiklis"</string>
+    <string name="hour_picker_description" msgid="6698199186859736512">"Apskritas valandų šliaužiklis"</string>
+    <string name="minute_picker_description" msgid="8606010966873791190">"Apskritas minučių šliaužiklis"</string>
     <string name="select_hours" msgid="6043079511766008245">"Pasirinkite valandas"</string>
     <string name="select_minutes" msgid="3974345615920336087">"Pasirinkite minutes"</string>
     <string name="select_day" msgid="7774759604701773332">"Pasirinkite mėnesį ir dieną"</string>
@@ -1864,13 +1446,9 @@
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Prašyti PIN kodo prieš atsegant"</string>
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"Prašyti atrakinimo piešinio prieš atsegant"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Prašyti slaptažodžio prieš atsegant"</string>
-    <!-- no translation found for package_installed_device_owner (8420696545959087545) -->
-    <skip />
-    <!-- no translation found for package_deleted_device_owner (7650577387493101353) -->
-    <skip />
+    <string name="package_installed_device_owner" msgid="8420696545959087545">"Įdiegė administratorius"</string>
+    <string name="package_deleted_device_owner" msgid="7650577387493101353">"Ištrynė administratorius"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"Kad tausotų akumuliatoriaus energiją akumuliatoriaus tausojimo priemonė sumažina įrenginio veikimą ir apriboja vibravimą, vietovės paslaugas bei daugumą foninių duomenų. El. pašto, susirašinėjimo žinutėmis ir kitos programos, kurios veikia sinchronizavimo pagrindu, gali būti neatnaujintos, nebent jas atidarysite.\n\nAkumuliatoriaus tausojimo priemonė automatiškai išjungiama, kai įrenginys įkraunamas."</string>
-    <string name="downtime_condition_summary" msgid="8761776337475705749">"Kol jūsų prastova baigsis <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
-    <string name="downtime_condition_line_one" msgid="8762708714645352010">"Kol baigsis prastova"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
       <item quantity="one">%1$d minutę (iki <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
       <item quantity="few">%1$d minutes (iki <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
@@ -1897,9 +1475,17 @@
     </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"Iki <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_forever" msgid="7420011936770086993">"Kol išjungsite"</string>
+    <!-- no translation found for zen_mode_rule_name_combination (191109939968076477) -->
+    <skip />
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"Sutraukti"</string>
-    <string name="zen_mode_next_alarm_summary" msgid="5915140424683747372">"Iki kito įspėjimo <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
-    <string name="zen_mode_next_alarm_line_one" msgid="5537042951553420916">"Iki kito įspėjimo"</string>
+    <!-- no translation found for zen_mode_feature_name (289097150786114338) -->
+    <skip />
+    <!-- no translation found for zen_mode_downtime_feature_name (2626974636779860146) -->
+    <skip />
+    <!-- no translation found for zen_mode_default_weeknights_name (2069189413656431610) -->
+    <skip />
+    <!-- no translation found for zen_mode_default_weekends_name (2377398437072017011) -->
+    <skip />
     <string name="muted_by" msgid="6147073845094180001">"Nutildė <xliff:g id="THIRD_PARTY">%1$s</xliff:g>"</string>
     <string name="system_error_wipe_data" msgid="6608165524785354962">"Iškilo vidinė su jūsų įrenginiu susijusi problema, todėl įrenginys gali veikti nestabiliai, kol neatkursite gamyklinių duomenų."</string>
     <string name="system_error_manufacturer" msgid="8086872414744210668">"Iškilo vidinė su jūsų įrenginiu susijusi problema. Jei reikia išsamios informacijos, susisiekite su gamintoju."</string>
@@ -1909,6 +1495,11 @@
     <string name="stk_cc_ss_to_dial" msgid="2151304435775557162">"SS užklausa pakeista į DIAL užklausą."</string>
     <string name="stk_cc_ss_to_ussd" msgid="3951862188105305589">"SS užklausa pakeista į USSD užklausą."</string>
     <string name="stk_cc_ss_to_ss" msgid="5470768854991452695">"SS užklausa pakeista į naują SS užklausą."</string>
+    <!-- no translation found for usb_midi_peripheral_name (7221113987741003817) -->
+    <skip />
     <string name="usb_midi_peripheral_manufacturer_name" msgid="7176526170008970168">"Android"</string>
-    <string name="usb_midi_peripheral_model_name" msgid="1959288763942653301">"USB išorinis prievadas"</string>
+    <!-- no translation found for usb_midi_peripheral_product_name (4971827859165280403) -->
+    <skip />
+    <string name="floating_toolbar_open_overflow_description" msgid="4797287862999444631">"Daugiau parinkčių"</string>
+    <string name="floating_toolbar_close_overflow_description" msgid="559796923090723804">"Uždaryti perpildymo sritį"</string>
 </resources>

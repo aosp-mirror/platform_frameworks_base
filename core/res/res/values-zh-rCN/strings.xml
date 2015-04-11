@@ -129,14 +129,10 @@
   <string-array name="wfcOperatorErrorNotificationMessages">
   </string-array>
     <string name="wfcSpnFormat" msgid="8211621332478306568">"%s"</string>
-    <!-- no translation found for wifi_calling_off_summary (8720659586041656098) -->
-    <skip />
-    <!-- no translation found for wfc_mode_wifi_preferred_summary (1994113411286935263) -->
-    <skip />
-    <!-- no translation found for wfc_mode_cellular_preferred_summary (5920549484600758786) -->
-    <skip />
-    <!-- no translation found for wfc_mode_wifi_only_summary (2379919155237869320) -->
-    <skip />
+    <string name="wifi_calling_off_summary" msgid="8720659586041656098">"关闭"</string>
+    <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"首选 WLAN"</string>
+    <string name="wfc_mode_cellular_preferred_summary" msgid="5920549484600758786">"首选移动网络"</string>
+    <string name="wfc_mode_wifi_only_summary" msgid="2379919155237869320">"仅限 WLAN"</string>
     <string name="cfTemplateNotForwarded" msgid="1683685883841272560">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>：无法转接"</string>
     <string name="cfTemplateForwarded" msgid="1302922117498590521">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>：<xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
     <string name="cfTemplateForwardedTime" msgid="9206251736527085256">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>：<xliff:g id="TIME_DELAY">{2}</xliff:g>秒后<xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
@@ -222,69 +218,42 @@
     <string name="android_system_label" msgid="6577375335728551336">"Android系统"</string>
     <string name="user_owner_label" msgid="6465364741001216388">"个人应用"</string>
     <string name="managed_profile_label" msgid="6260850669674791528">"工作"</string>
-    <string name="permgrouplab_costMoney" msgid="5429808217861460401">"需要您付费的服务"</string>
-    <string name="permgroupdesc_costMoney" msgid="3293301903409869495">"执行可能需要您付费的操作。"</string>
-    <string name="permgrouplab_messages" msgid="7521249148445456662">"您的信息"</string>
-    <string name="permgroupdesc_messages" msgid="7821999071003699236">"读写短信、电子邮件和其他消息。"</string>
-    <string name="permgrouplab_personalInfo" msgid="3519163141070533474">"您的个人信息"</string>
-    <string name="permgroupdesc_personalInfo" msgid="8426453129788861338">"直接访问您存储在名片上的信息。"</string>
+    <!-- no translation found for permgrouplab_contacts (3657758145679177612) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_contacts (1437393511338346185) -->
+    <skip />
+    <!-- no translation found for permgrouplab_location (7275582855722310164) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_location (536889867433972794) -->
+    <skip />
     <string name="permgrouplab_socialInfo" msgid="5799096623412043791">"您的社交信息"</string>
     <string name="permgroupdesc_socialInfo" msgid="7129842457611643493">"直接访问与您的联系人和社交人脉相关的信息。"</string>
-    <string name="permgrouplab_location" msgid="635149742436692049">"您的位置"</string>
-    <string name="permgroupdesc_location" msgid="5704679763124170100">"监视您的实际位置。"</string>
-    <string name="permgrouplab_network" msgid="5808983377727109831">"网络通信"</string>
-    <string name="permgroupdesc_network" msgid="4478299413241861987">"使用各种网络功能。"</string>
-    <string name="permgrouplab_bluetoothNetwork" msgid="1585403544162128109">"蓝牙"</string>
-    <string name="permgroupdesc_bluetoothNetwork" msgid="5625288577164282391">"通过蓝牙访问设备和网络。"</string>
-    <string name="permgrouplab_audioSettings" msgid="8329261670151871235">"音频设置"</string>
-    <string name="permgroupdesc_audioSettings" msgid="2641515403347568130">"更改音频设置。"</string>
-    <string name="permgrouplab_affectsBattery" msgid="6209246653424798033">"影响电池的使用"</string>
-    <string name="permgroupdesc_affectsBattery" msgid="6441275320638916947">"使用耗电量较大的功能。"</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"日历"</string>
-    <string name="permgroupdesc_calendar" msgid="5777534316982184416">"直接访问日历和活动。"</string>
-    <string name="permgrouplab_dictionary" msgid="4148597128843641379">"读取用户字典"</string>
-    <string name="permgroupdesc_dictionary" msgid="7921166355964764490">"读取用户字典中的字词。"</string>
-    <string name="permgrouplab_writeDictionary" msgid="8090237702432576788">"写入用户字典"</string>
-    <string name="permgroupdesc_writeDictionary" msgid="2711561994497361646">"将字词添加到用户字典。"</string>
+    <!-- no translation found for permgroupdesc_calendar (2116049656685591803) -->
+    <skip />
+    <!-- no translation found for permgrouplab_sms (228308803364967808) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_sms (3695085582674524761) -->
+    <skip />
+    <string name="permgrouplab_dictionary" msgid="8114410334955871144">"用户字典"</string>
+    <!-- no translation found for permgroupdesc_dictionary (7586787746354378335) -->
+    <skip />
     <string name="permgrouplab_bookmarks" msgid="1949519673103968229">"书签和历史记录"</string>
     <string name="permgroupdesc_bookmarks" msgid="4169771606257963028">"直接访问书签和浏览器历史记录。"</string>
-    <string name="permgrouplab_deviceAlarms" msgid="6117704629728824101">"闹钟"</string>
-    <string name="permgroupdesc_deviceAlarms" msgid="4769356362251641175">"设置闹钟。"</string>
-    <string name="permgrouplab_voicemail" msgid="4162237145027592133">"语音信箱"</string>
-    <string name="permgroupdesc_voicemail" msgid="2498403969862951393">"直接访问语音信箱。"</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"麦克风"</string>
-    <string name="permgroupdesc_microphone" msgid="7106618286905738408">"直接使用麦克风以录制音频。"</string>
+    <!-- no translation found for permgroupdesc_microphone (1296196977187629181) -->
+    <skip />
     <string name="permgrouplab_camera" msgid="4820372495894586615">"相机"</string>
-    <string name="permgroupdesc_camera" msgid="2933667372289567714">"直接使用相机以拍摄图片或视频。"</string>
-    <string name="permgrouplab_screenlock" msgid="8275500173330718168">"锁定屏幕"</string>
-    <string name="permgroupdesc_screenlock" msgid="7067497128925499401">"影响设备的锁定屏幕。"</string>
-    <string name="permgrouplab_appInfo" msgid="8028789762634147725">"您的应用信息"</string>
-    <string name="permgroupdesc_appInfo" msgid="3950378538049625907">"能够影响设备上其他应用的行为。"</string>
-    <string name="permgrouplab_wallpaper" msgid="3850280158041175998">"壁纸"</string>
-    <string name="permgroupdesc_wallpaper" msgid="5630417854750540154">"更改设备的壁纸设置。"</string>
-    <string name="permgrouplab_systemClock" msgid="406535759236612992">"时钟"</string>
-    <string name="permgroupdesc_systemClock" msgid="3944359833624094992">"更改设备的时间或时区。"</string>
-    <string name="permgrouplab_statusBar" msgid="2095862568113945398">"状态栏"</string>
-    <string name="permgroupdesc_statusBar" msgid="6242593432226807171">"更改设备的状态栏设置。"</string>
-    <string name="permgrouplab_syncSettings" msgid="3341990986147826541">"同步设置"</string>
-    <string name="permgroupdesc_syncSettings" msgid="7603195265129031797">"访问同步设置。"</string>
-    <string name="permgrouplab_accounts" msgid="3359646291125325519">"您的帐户"</string>
-    <string name="permgroupdesc_accounts" msgid="4948732641827091312">"访问可用的帐户。"</string>
-    <string name="permgrouplab_hardwareControls" msgid="7998214968791599326">"硬件控制"</string>
-    <string name="permgroupdesc_hardwareControls" msgid="4357057861225462702">"直接访问手机上的硬件。"</string>
-    <string name="permgrouplab_phoneCalls" msgid="9067173988325865923">"电话"</string>
-    <string name="permgroupdesc_phoneCalls" msgid="7489701620446183770">"监管、记录和处理电话呼叫。"</string>
-    <string name="permgrouplab_systemTools" msgid="4652191644082714048">"系统工具"</string>
-    <string name="permgroupdesc_systemTools" msgid="8162102602190734305">"对系统进行低级访问和控制。"</string>
-    <string name="permgrouplab_developmentTools" msgid="3446164584710596513">"开发工具"</string>
-    <string name="permgroupdesc_developmentTools" msgid="7058828032358142018">"只有应用开发者才需要的功能。"</string>
-    <string name="permgrouplab_display" msgid="4279909676036402636">"其他应用的用户界面"</string>
-    <string name="permgroupdesc_display" msgid="6051002031933013714">"影响其他应用的用户界面。"</string>
-    <string name="permgrouplab_storage" msgid="1971118770546336966">"存储"</string>
-    <string name="permgroupdesc_storage" product="nosdcard" msgid="7442318502446874999">"访问USB存储设备。"</string>
-    <string name="permgroupdesc_storage" product="default" msgid="9203302214915355774">"访问SD卡。"</string>
-    <string name="permgrouplab_accessibilityFeatures" msgid="7919025602283593907">"无障碍功能"</string>
-    <string name="permgroupdesc_accessibilityFeatures" msgid="4205196881678144335">"辅助技术可请求启用的功能。"</string>
+    <!-- no translation found for permgroupdesc_camera (2429930670410559293) -->
+    <skip />
+    <!-- no translation found for permgrouplab_phone (5229115638567440675) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_phone (2016641188146068700) -->
+    <skip />
+    <!-- no translation found for permgrouplab_sensors (7416703484233940260) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_sensors (2987451839455524494) -->
+    <skip />
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"检索窗口内容"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"检查您正与其进行互动的窗口的内容。"</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"启用触摸浏览"</string>
@@ -309,14 +278,8 @@
     <string name="permdesc_receiveSms" msgid="6424387754228766939">"允许该应用接收和处理短信。这就意味着，该应用可能会监视发送到您设备的短信，或删除发送到您设备的短信而不向您显示。"</string>
     <string name="permlab_receiveMms" msgid="1821317344668257098">"接收讯息（彩信）"</string>
     <string name="permdesc_receiveMms" msgid="533019437263212260">"允许该应用接收和处理彩信。这就意味着，该应用可能会监视发送到您设备的彩信，或删除发送到您设备的彩信而不向您显示。"</string>
-    <string name="permlab_receiveEmergencyBroadcast" msgid="1803477660846288089">"接收紧急广播"</string>
-    <string name="permdesc_receiveEmergencyBroadcast" msgid="848524070262431974">"允许应用接收和处理紧急广播消息。此权限仅适用于系统应用。"</string>
-    <string name="permlab_readCellBroadcasts" msgid="1598328843619646166">"读取小区广播消息"</string>
-    <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"允许应用读取您的设备收到的小区广播消息。小区广播消息是在某些地区发送的、用于发布紧急情况警告的提醒信息。恶意应用可能会在您收到小区紧急广播时干扰您设备的性能或操作。"</string>
     <string name="permlab_sendSms" msgid="5600830612147671529">"发送短信"</string>
     <string name="permdesc_sendSms" msgid="7094729298204937667">"允许该应用发送短信。此权限可能会导致意外收费。恶意应用可能会未经您的确认而发送短信，由此产生相关费用。"</string>
-    <string name="permlab_sendRespondViaMessageRequest" msgid="8713889105305943200">"发送“通过信息回复”事件"</string>
-    <string name="permdesc_sendRespondViaMessageRequest" msgid="7107648548468778734">"允许应用向其他信息应用发送请求，以便处理来电的“通过信息回复”事件。"</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"读取您的讯息（短信或彩信）"</string>
     <string name="permdesc_readSms" product="tablet" msgid="2467981548684735522">"允许该应用读取您平板电脑或SIM卡上存储的短信。此权限可让该应用读取所有短信，而不考虑短信内容或机密性。"</string>
     <string name="permdesc_readSms" product="tv" msgid="5102425513647038535">"允许应用读取您的电视或 SIM 卡上存储的短信。此权限会允许应用读取所有短信，而不论短信内容是什么或是否属于机密内容。"</string>
@@ -327,188 +290,24 @@
     <string name="permdesc_writeSms" product="default" msgid="7268668709052328567">"允许应用对手机或SIM卡上存储的短信执行写入操作。恶意应用可能会删除您的短信。"</string>
     <string name="permlab_receiveWapPush" msgid="5991398711936590410">"接收讯息 (WAP)"</string>
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"允许该应用接收和处理 WAP 消息。此权限包括监视发送给您的消息或删除发送给您的消息而不向您显示的功能。"</string>
-    <string name="permlab_receiveBluetoothMap" msgid="7593811487142360528">"接收蓝牙信息(MAP)"</string>
-    <string name="permdesc_receiveBluetoothMap" msgid="8656755936919466345">"允许此应用接收和处理蓝牙MAP信息。这意味着，该应用可能会监视发送或到您设备的信息，在您阅读发送到您设备的信息之前擅自删除信息。"</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"检索正在运行的应用"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"允许该应用检索近期运行的和当前正在运行的任务的相关信息。此权限可让该应用了解设备上使用了哪些应用。"</string>
-    <string name="permlab_startTasksFromRecents" msgid="8990073877885690623">"从“最近”发起任务"</string>
-    <string name="permdesc_startTasksFromRecents" msgid="7382133554871222235">"允许应用使用ActivityManager.RecentTaskInfo对象发起从ActivityManager.getRecentTaskList()返回的无效任务。"</string>
-    <string name="permlab_interactAcrossUsers" msgid="7114255281944211682">"用户间互动"</string>
-    <string name="permdesc_interactAcrossUsers" msgid="364670963623385786">"允许该应用在设备上跨多个用户执行操作。恶意应用可能会借此破坏用户之间的保护措施。"</string>
-    <string name="permlab_interactAcrossUsersFull" msgid="2567734285545074105">"完全允许在用户之间进行互动"</string>
-    <string name="permdesc_interactAcrossUsersFull" msgid="376841368395502366">"允许在用户之间进行所有可能的互动。"</string>
-    <string name="permlab_manageUsers" msgid="1676150911672282428">"管理用户"</string>
-    <string name="permdesc_manageUsers" msgid="8409306667645355638">"允许应用管理设备上的用户（包括查询、创建和删除用户）。"</string>
-    <string name="permlab_getDetailedTasks" msgid="6229468674753529501">"检索正在运行的应用的详细信息"</string>
-    <string name="permdesc_getDetailedTasks" msgid="153824741440717599">"允许该应用检索当前正在运行和近期运行的任务的详细信息。恶意应用可能会发现有关其他应用的私密信息。"</string>
     <string name="permlab_reorderTasks" msgid="2018575526934422779">"对正在运行的应用重新排序"</string>
     <string name="permdesc_reorderTasks" msgid="7734217754877439351">"允许该应用将任务移动到前台和后台。该应用可能不经您的命令自行执行此操作。"</string>
-    <string name="permlab_removeTasks" msgid="6821513401870377403">"停止正在运行的应用"</string>
-    <string name="permdesc_removeTasks" msgid="1394714352062635493">"允许该应用删除任务并终止这些任务的应用。恶意应用可以籍此影响其他应用的行为。"</string>
-    <string name="permlab_manageActivityStacks" msgid="7391191384027303065">"管理活动栈"</string>
-    <string name="permdesc_manageActivityStacks" msgid="1615881933034084440">"允许应用添加、删除和修改其他应用的运行活动栈。恶意应用可以籍此影响其他应用的行为。"</string>
-    <string name="permlab_startAnyActivity" msgid="2918768238045206456">"启动任何活动"</string>
-    <string name="permdesc_startAnyActivity" msgid="997823695343584001">"允许该应用启动任何活动（不考虑权限保护或导出状态）。"</string>
-    <string name="permlab_setScreenCompatibility" msgid="6975387118861842061">"设置屏幕兼容性"</string>
-    <string name="permdesc_setScreenCompatibility" msgid="692043618693917374">"允许该应用控制其他应用的屏幕兼容模式。恶意应用可以籍此影响其他应用的行为。"</string>
-    <string name="permlab_setDebugApp" msgid="3022107198686584052">"启用应用调试"</string>
-    <string name="permdesc_setDebugApp" msgid="4474512416299013256">"允许该应用对其他应用启用调试。恶意应用可以籍此终止其他的应用。"</string>
-    <string name="permlab_changeConfiguration" msgid="4162092185124234480">"更改系统显示设置"</string>
-    <string name="permdesc_changeConfiguration" msgid="4372223873154296076">"允许该应用更改当前配置，例如语言区域或整体的字体大小。"</string>
     <string name="permlab_enableCarMode" msgid="5684504058192921098">"启用车载模式"</string>
     <string name="permdesc_enableCarMode" msgid="4853187425751419467">"允许应用启用车载模式。"</string>
     <string name="permlab_killBackgroundProcesses" msgid="3914026687420177202">"关闭其他应用"</string>
     <string name="permdesc_killBackgroundProcesses" msgid="4593353235959733119">"允许该应用结束其他应用的后台进程。此权限可导致其他应用停止运行。"</string>
-    <string name="permlab_forceStopPackages" msgid="2329627428832067700">"强行停止其他应用"</string>
-    <string name="permdesc_forceStopPackages" msgid="5253157296183940812">"允许应用强行停止其他应用。"</string>
-    <string name="permlab_forceBack" msgid="652935204072584616">"强制应用关闭"</string>
-    <string name="permdesc_forceBack" msgid="3892295830419513623">"允许应用强制关闭任何前台活动并返回。普通应用绝不需要此权限。"</string>
-    <string name="permlab_dump" msgid="1681799862438954752">"检索系统内部状态"</string>
-    <string name="permdesc_dump" msgid="1778299088692290329">"允许应用检索系统的内部状态。恶意应用可能会检索一般情况下绝不需要检索的多种私人信息和安全信息。"</string>
-    <string name="permlab_retrieve_window_content" msgid="8022588608994589938">"检索屏幕内容"</string>
-    <string name="permdesc_retrieve_window_content" msgid="3193269069469700265">"允许应用检索活动窗口的内容。恶意应用可能会检索整个窗口的内容，并检查其中除密码以外的所有文字。"</string>
-    <string name="permlab_temporary_enable_accessibility" msgid="2312612135127310254">"暂时启用无障碍功能"</string>
-    <string name="permdesc_temporary_enable_accessibility" msgid="8079456293182975464">"允许应用在设备上暂时启用无障碍功能。恶意应用可能会在未经用户同意的情况下擅自启用无障碍功能。"</string>
-    <string name="permlab_retrieveWindowToken" msgid="7154762602367758602">"检索窗口令牌"</string>
-    <string name="permdesc_retrieveWindowToken" msgid="668173747687795074">"允许应用检索窗口令牌。恶意软件可能会借此在未经授权的情况下冒充系统与应用窗口进行互动。"</string>
-    <string name="permlab_frameStats" msgid="7056374987314361639">"检索框架统计信息"</string>
-    <string name="permdesc_frameStats" msgid="4758001089491284919">"允许应用收集框架统计信息。恶意应用可能会借此监测其他应用的窗口框架统计信息。"</string>
-    <string name="permlab_filter_events" msgid="8675535648807427389">"过滤事件"</string>
-    <string name="permdesc_filter_events" msgid="8006236315888347680">"允许应用注册输入过滤器，这类过滤器会在所有用户事件分派之前对用户事件流进行过滤。恶意应用可能会在没有用户干预的情况下控制系统用户界面。"</string>
-    <string name="permlab_shutdown" msgid="7185747824038909016">"部分关机"</string>
-    <string name="permdesc_shutdown" msgid="7046500838746291775">"使活动管理器进入关闭状态。不执行彻底关机。"</string>
-    <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"禁止切换应用"</string>
-    <string name="permdesc_stopAppSwitches" msgid="8262195802582255021">"阻止用户切换到其他应用。"</string>
-    <string name="permlab_getTopActivityInfo" msgid="2537922311411546016">"获取当前应用的信息"</string>
-    <string name="permdesc_getTopActivityInfo" msgid="2512448855496067131">"允许应用检索目前在屏幕前台运行的应用专有的信息。"</string>
-    <string name="permlab_runSetActivityWatcher" msgid="892239094867182656">"监控所有应用的启动"</string>
-    <string name="permdesc_runSetActivityWatcher" msgid="6003603162578577406">"允许应用监视和控制系统是如何启动活动的。恶意应用可能会完全破坏系统。此权限只有在进行开发时才需要，正常使用情况下绝不需要。"</string>
-    <string name="permlab_broadcastPackageRemoved" msgid="2576333434893532475">"发送软件包被移除的广播"</string>
-    <string name="permdesc_broadcastPackageRemoved" msgid="6621901216207931089">"允许应用广播一条关于某个软件包已被移除的通知。恶意应用可能借此终止其他正在运行的应用。"</string>
-    <string name="permlab_broadcastSmsReceived" msgid="5689095009030336593">"发送短信收到的广播"</string>
-    <string name="permdesc_broadcastSmsReceived" msgid="4152037720034365492">"允许应用广播一条有关已收到短信的通知。恶意应用可能借此伪造接到的短信。"</string>
-    <string name="permlab_broadcastWapPush" msgid="3145347413028582371">"发送 WAP-PUSH 收到的广播"</string>
-    <string name="permdesc_broadcastWapPush" msgid="4783402525039442729">"允许应用广播一条有关已收到 WAP PUSH 短信的通知。恶意应用可能借此伪造短信接收，或在后台将任意网页的内容替换为恶意内容。"</string>
-    <string name="permlab_setProcessLimit" msgid="2451873664363662666">"限制运行的进程数量"</string>
-    <string name="permdesc_setProcessLimit" msgid="7318061314040879542">"允许应用控制将运行的进程数上限。普通应用绝不需要此权限。"</string>
-    <string name="permlab_setAlwaysFinish" msgid="550958507798796965">"强制关闭后台应用"</string>
-    <string name="permdesc_setAlwaysFinish" msgid="7471310652868841499">"允许应用控制活动在转入后台后是否立即结束。普通应用绝不需要此权限。"</string>
-    <string name="permlab_batteryStats" msgid="2789610673514103364">"读取电池使用统计信息"</string>
-    <string name="permdesc_batteryStats" msgid="5897346582882915114">"允许应用读取当前电量使用情况的基础数据，此权限可让应用了解关于您使用了哪些应用的详细信息。"</string>
-    <string name="permlab_updateBatteryStats" msgid="3719689764536379557">"修改电池使用统计信息"</string>
-    <string name="permdesc_updateBatteryStats" msgid="6862817857178025002">"允许该应用修改收集到的电池统计信息。普通应用不应使用此权限。"</string>
-    <string name="permlab_getAppOpsStats" msgid="1508779687436585744">"检索应用操作统计信息"</string>
-    <string name="permdesc_getAppOpsStats" msgid="6243887041577912877">"允许该应用检索收集到的应用操作统计信息。普通应用不应使用此权限。"</string>
-    <string name="permlab_updateAppOpsStats" msgid="8829097373851521505">"修改应用操作统计信息"</string>
-    <string name="permdesc_updateAppOpsStats" msgid="50784596594403483">"允许该应用修改收集到的应用操作统计信息。普通应用不应使用此权限。"</string>
-    <string name="permlab_backup" msgid="470013022865453920">"控制系统备份和还原"</string>
-    <string name="permdesc_backup" msgid="6912230525140589891">"允许应用控制系统的备份和还原机制。普通应用不应使用此权限。"</string>
-    <string name="permlab_confirm_full_backup" msgid="5557071325804469102">"确认完整备份或恢复操作"</string>
-    <string name="permdesc_confirm_full_backup" msgid="1748762171637699562">"允许应用启动完整备份确认用户界面。不用于任何应用。"</string>
-    <string name="permlab_internalSystemWindow" msgid="2148563628140193231">"显示未授权的窗口"</string>
-    <string name="permdesc_internalSystemWindow" msgid="7458387759461466397">"允许该应用创建供内部系统用户界面使用的窗口。普通应用不应使用此权限。"</string>
     <string name="permlab_systemAlertWindow" msgid="3543347980839518613">"在其他应用之上显示内容"</string>
     <string name="permdesc_systemAlertWindow" msgid="8584678381972820118">"允许该应用在其他应用之上或用户界面的特定部分绘图。这可能会干扰您对所有应用界面的使用，或使您在其他应用中看到的内容发生变化。"</string>
-    <string name="permlab_setAnimationScale" msgid="2805103241153907174">"修改全局动画速度"</string>
-    <string name="permdesc_setAnimationScale" msgid="7690063428924343571">"允许该应用随时更改全局动画速度（加快或减慢）。"</string>
-    <string name="permlab_manageAppTokens" msgid="1286505717050121370">"管理应用令牌"</string>
-    <string name="permdesc_manageAppTokens" msgid="8043431713014395671">"允许应用绕过其正常的 Z 排序创建和管理自己的令牌。普通应用绝不需要此权限。"</string>
-    <string name="permlab_freezeScreen" msgid="4708181184441880175">"冻结屏幕"</string>
-    <string name="permdesc_freezeScreen" msgid="8558923789222670064">"允许应用暂时冻结屏幕进行全屏转换。"</string>
-    <string name="permlab_injectEvents" msgid="1378746584023586600">"按键和控制按钮"</string>
-    <string name="permdesc_injectEvents" product="tablet" msgid="206352565599968632">"允许应用将自身的输入活动（例如按键操作等）提供给其他应用。恶意应用可能借此控制平板电脑。"</string>
-    <string name="permdesc_injectEvents" product="tv" msgid="4681361983270791611">"允许应用将自身的输入事件（例如按键操作等）发送给其他应用。恶意应用可能借此控制电视。"</string>
-    <string name="permdesc_injectEvents" product="default" msgid="653128057572326253">"允许应用将自身的输入活动（例如按键操作等）提供给其他应用。恶意应用可能借此控制手机。"</string>
-    <string name="permlab_readInputState" msgid="469428900041249234">"记录您键入的内容和执行的操作"</string>
-    <string name="permdesc_readInputState" msgid="8387754901688728043">"允许应用记录您所按的键，包括与其他应用进行交互（如输入密码）时按的键。普通应用绝不需要此权限。"</string>
-    <string name="permlab_bindInputMethod" msgid="3360064620230515776">"绑定至输入法"</string>
-    <string name="permdesc_bindInputMethod" msgid="3250440322807286331">"允许应用绑定至输入法的顶级接口。普通应用绝不需要此权限。"</string>
-    <string name="permlab_bindAccessibilityService" msgid="5357733942556031593">"绑定至无障碍服务"</string>
-    <string name="permdesc_bindAccessibilityService" msgid="7034615928609331368">"允许应用绑定至无障碍服务的顶级接口。普通应用绝不需要此权限。"</string>
-    <string name="permlab_bindPrintService" msgid="8462815179572748761">"绑定至打印服务"</string>
-    <string name="permdesc_bindPrintService" msgid="7960067623209111135">"允许应用绑定至打印服务的顶级接口。普通应用绝不需要此权限。"</string>
-    <string name="permlab_bindPrintSpoolerService" msgid="6807762783744125954">"绑定至打印处理服务"</string>
-    <string name="permdesc_bindPrintSpoolerService" msgid="3680552285933318372">"允许应用绑定至打印处理服务的顶级接口。普通应用绝不需要此权限。"</string>
-    <string name="permlab_bindNfcService" msgid="2752731300419410724">"绑定到NFC服务"</string>
-    <string name="permdesc_bindNfcService" msgid="6120647629174066862">"允许应用绑定到模拟NFC卡的应用。普通应用绝不需要此权限。"</string>
-    <string name="permlab_bindTextService" msgid="7358378401915287938">"绑定至文字服务"</string>
-    <string name="permdesc_bindTextService" msgid="8151968910973998670">"允许应用绑定至文本服务（如 SpellCheckerService）的顶级接口。普通应用绝不需要此权限。"</string>
-    <string name="permlab_bindVpnService" msgid="4708596021161473255">"绑定到VPN服务"</string>
-    <string name="permdesc_bindVpnService" msgid="2067845564581693905">"允许应用绑定到VPN服务的顶级接口。普通应用绝不需要此权限。"</string>
-    <string name="permlab_bindWallpaper" msgid="8716400279937856462">"绑定到壁纸"</string>
-    <string name="permdesc_bindWallpaper" msgid="7108428692595491668">"允许应用绑定到壁纸的顶级接口。普通应用绝不需要此权限。"</string>
-    <string name="permlab_bindVoiceInteraction" msgid="5334852580713715068">"绑定到语音互动器"</string>
-    <string name="permdesc_bindVoiceInteraction" msgid="2345721766501778101">"允许应用绑定到语音互动服务的顶级接口。普通应用绝不需要此权限。"</string>
-    <string name="permlab_manageVoiceKeyphrases" msgid="1252285102392793548">"管理语音关键短语"</string>
-    <string name="permdesc_manageVoiceKeyphrases" msgid="8476560722907530008">"允许应用管理用于语音启动指令检测的关键短语。普通应用绝不需要此权限。"</string>
-    <string name="permlab_bindRemoteDisplay" msgid="1782923938029941960">"绑定至远程显示屏"</string>
-    <string name="permdesc_bindRemoteDisplay" msgid="1261242718727295981">"允许应用绑定至远程显示屏的顶级接口。普通应用绝不需要此权限。"</string>
-    <string name="permlab_bindRemoteViews" msgid="5697987759897367099">"绑定到小部件服务"</string>
-    <string name="permdesc_bindRemoteViews" msgid="4717987810137692572">"允许应用绑定到小部件服务的顶级接口。普通应用绝不需要此权限。"</string>
-    <string name="permlab_bindRouteProvider" msgid="4869394607915096847">"绑定到路由程序服务"</string>
-    <string name="permdesc_bindRouteProvider" msgid="4703804520859960329">"允许应用绑定到任何已注册的路由程序。普通应用绝不需要此权限。"</string>
-    <string name="permlab_bindDeviceAdmin" msgid="8704986163711455010">"与设备管理器交互"</string>
-    <string name="permdesc_bindDeviceAdmin" msgid="569715419543907930">"允许应用向设备管理器发送Intent。普通应用绝不需要此权限。"</string>
-    <string name="permlab_bindTvInput" msgid="5601264742478168987">"绑定至电视输入设备"</string>
-    <string name="permdesc_bindTvInput" msgid="2371008331852001924">"允许应用绑定至电视输入设备的顶级接口。普通应用绝不需要此权限。"</string>
-    <string name="permlab_modifyParentalControls" msgid="4611318225997592242">"修改家长控制"</string>
-    <string name="permdesc_modifyParentalControls" msgid="7438482894162282039">"允许应用修改系统的家长控制数据。普通应用绝不需要此权限。"</string>
-    <string name="permlab_manageDeviceAdmins" msgid="4248828900045808722">"添加或删除设备管理员"</string>
-    <string name="permdesc_manageDeviceAdmins" msgid="5025608167709942485">"允许应用添加或删除有效的设备管理员。普通应用绝不需要此权限。"</string>
-    <string name="permlab_setOrientation" msgid="3365947717163866844">"更改屏幕显示方向"</string>
-    <string name="permdesc_setOrientation" msgid="3046126619316671476">"允许应用随时更改屏幕的旋转状态。普通应用绝不需要此权限。"</string>
-    <string name="permlab_setPointerSpeed" msgid="9175371613322562934">"更改指针速度"</string>
-    <string name="permdesc_setPointerSpeed" msgid="6866563234274104233">"允许应用随时更改鼠标或触控板指针速度。普通应用绝不需要此权限。"</string>
-    <string name="permlab_setKeyboardLayout" msgid="4778731703600909340">"更改键盘布局"</string>
-    <string name="permdesc_setKeyboardLayout" msgid="8480016771134175879">"允许应用更改键盘布局。普通应用绝不需要此权限。"</string>
-    <string name="permlab_signalPersistentProcesses" msgid="4539002991947376659">"向应用发送 Linux 信号"</string>
-    <string name="permdesc_signalPersistentProcesses" msgid="4896992079182649141">"允许应用请求将提供的信号发送给所有持续的进程。"</string>
     <string name="permlab_persistentActivity" msgid="8841113627955563938">"让应用始终运行"</string>
     <string name="permdesc_persistentActivity" product="tablet" msgid="8525189272329086137">"允许该应用在内存中持续保留其自身的某些组件。这会限制其他应用可用的内存，从而减缓平板电脑运行速度。"</string>
     <string name="permdesc_persistentActivity" product="tv" msgid="5086862529499103587">"允许应用在内存中持续保留其自身的部分组件。此权限可能会限制其他应用可用的内存，从而减缓电视运行速度。"</string>
     <string name="permdesc_persistentActivity" product="default" msgid="4384760047508278272">"允许该应用在内存中持续保留其自身的某些组件。这会限制其他应用可用的内存，从而减缓手机运行速度。"</string>
-    <string name="permlab_deletePackages" msgid="184385129537705938">"删除应用"</string>
-    <string name="permdesc_deletePackages" msgid="7411480275167205081">"允许应用删除Android软件包。恶意应用可能借此删除重要的应用。"</string>
-    <string name="permlab_clearAppUserData" msgid="274109191845842756">"删除其他应用的数据"</string>
-    <string name="permdesc_clearAppUserData" msgid="4625323684125459488">"允许应用清除用户数据。"</string>
-    <string name="permlab_deleteCacheFiles" msgid="3128665571837408675">"删除其他应用的缓存"</string>
-    <string name="permdesc_deleteCacheFiles" msgid="3812998599006730196">"允许应用删除缓存文件。"</string>
     <string name="permlab_getPackageSize" msgid="7472921768357981986">"计算应用存储空间"</string>
     <string name="permdesc_getPackageSize" msgid="3921068154420738296">"允许应用检索其代码、数据和缓存大小"</string>
-    <string name="permlab_installPackages" msgid="2199128482820306924">"直接安装应用"</string>
-    <string name="permdesc_installPackages" msgid="5628530972548071284">"允许应用安装新的（或新版本的）Andr​​oid软件包。恶意应用可能借此添加具有任意权限的新应用。"</string>
-    <string name="permlab_clearAppCache" msgid="7487279391723526815">"删除所有应用缓存数据"</string>
-    <string name="permdesc_clearAppCache" product="tablet" msgid="8974640871945434565">"允许该应用删除其他应用的缓存目录中的文件，从而释放平板电脑存储空间。此权限可能会导致其他应用的启动速度变慢，因为应用必须重新检索数据。"</string>
-    <string name="permdesc_clearAppCache" product="tv" msgid="244647416303997022">"允许应用删除其他应用的缓存目录中的文件，从而释放电视存储空间。此权限可能会导致其他应用的启动速度变慢，因为这些应用必须重新检索数据。"</string>
-    <string name="permdesc_clearAppCache" product="default" msgid="2459441021956436779">"允许该应用删除其他应用的缓存目录中的文件，从而释放手机存储空间。此权限可能会导致其他应用的启动速度变慢，因为应用必须重新检索数据。"</string>
-    <string name="permlab_movePackage" msgid="3289890271645921411">"移动应用资源"</string>
-    <string name="permdesc_movePackage" msgid="319562217778244524">"允许应用在内部与外部媒体之间移动应用资源。"</string>
-    <string name="permlab_readLogs" msgid="6615778543198967614">"查阅敏感日志数据"</string>
-    <string name="permdesc_readLogs" product="tablet" msgid="82061313293455151">"允许应用从系统的各种日志文件中读取信息。这样，应用就可以发现关于您平板电脑使用情况的一般信息，其中可能包含个人信息或隐私信息。"</string>
-    <string name="permdesc_readLogs" product="tv" msgid="9023899974809538988">"允许应用从系统的各种日志文件中读取信息。此权限会允许应用搜索您的电视使用情况的一般信息，其中可能包括您的个人信息或隐私信息。"</string>
-    <string name="permdesc_readLogs" product="default" msgid="2063438140241560443">"允许应用从系统的各个日志文件中读取信息。这样，应用就可以发现关于您手机使用情况的一般信息，其中可能包含个人信息或隐私信息。"</string>
-    <string name="permlab_anyCodecForPlayback" msgid="715805555823881818">"使用任何媒体解码器进行播放"</string>
-    <string name="permdesc_anyCodecForPlayback" msgid="8283912488433189010">"允许该应用使用任何已安装的媒体解码器进行解码，以便播放媒体。"</string>
-    <string name="permlab_manageCaCertificates" msgid="1678391896786882014">"管理信任的凭据"</string>
-    <string name="permdesc_manageCaCertificates" msgid="4015644047196937014">"允许应用安装和卸载CA证书（作为信任的凭据）。"</string>
-    <string name="permlab_bindJobService" msgid="3637568367978271086">"运行应用的排定后台工作"</string>
-    <string name="permdesc_bindJobService" msgid="3473288460524119838">"Android系统收到请求后会在后台运行具有此权限的应用。"</string>
-    <string name="permlab_diagnostic" msgid="8076743953908000342">"读取/写入诊断所拥有的资源"</string>
-    <string name="permdesc_diagnostic" msgid="6608295692002452283">"允许应用读取/写入诊断组拥有的所有资源（例如 /dev 中的文件）。这可能会影响系统的稳定性和安全性。此权限仅供制造商或运营商诊断硬件方面的问题时使用。"</string>
-    <string name="permlab_changeComponentState" msgid="6335576775711095931">"启用或停用应用组件"</string>
-    <string name="permdesc_changeComponentState" product="tablet" msgid="8887435740982237294">"允许应用启用或停用其他应用的组件。恶意应用可能借此停用重要的平板电脑功能。请务必谨慎使用此权限，因为这可能导致某些应用组件处于无法使用、不一致或不稳定的状态。"</string>
-    <string name="permdesc_changeComponentState" product="tv" msgid="9151634188264231389">"允许应用启用或停用其他应用的组件。恶意应用可能借此停用重要的电视功能。请务必谨慎使用此权限，因为这可能导致某些应用组件进入无法使用、不一致或不稳定的状态。"</string>
-    <string name="permdesc_changeComponentState" product="default" msgid="1827232484416505615">"允许应用启用或停用其他应用的组件。恶意应用可能借此停用重要的手机功能。请务必谨慎使用此权限，因为这可能导致某些应用组件进入无法使用、不一致或不稳定的状态。"</string>
-    <string name="permlab_grantRevokePermissions" msgid="4627315351093508795">"授予或撤消权限"</string>
-    <string name="permdesc_grantRevokePermissions" msgid="4088642654085850662">"允许应用针对自身或其他应用授予或撤消特定权限。恶意应用可能会借此访问您未授权它们访问的功能。"</string>
-    <string name="permlab_setPreferredApplications" msgid="8463181628695396391">"设置首选应用"</string>
-    <string name="permdesc_setPreferredApplications" msgid="4973986762241783712">"允许应用修改您的首选应用。恶意应用可能会在后台更改运行的应用，欺骗您现有的应用，以收集您的私人数据。"</string>
     <string name="permlab_writeSettings" msgid="2226195290955224730">"修改系统设置"</string>
     <string name="permdesc_writeSettings" msgid="7775723441558907181">"允许应用修改系统的设置数据。恶意应用可能会破坏您的系统配置。"</string>
-    <string name="permlab_writeSecureSettings" msgid="204676251876718288">"修改安全系统设置"</string>
-    <string name="permdesc_writeSecureSettings" msgid="8159535613020137391">"允许应用修改系统的安全设置数据。普通应用不应使用此权限。"</string>
-    <string name="permlab_writeGservices" msgid="2149426664226152185">"修改Google服务地图"</string>
-    <string name="permdesc_writeGservices" msgid="1287309437638380229">"允许应用修改Google服务地图。普通应用不应使用此权限。"</string>
     <string name="permlab_receiveBootCompleted" msgid="5312965565987800025">"开机启动"</string>
     <string name="permdesc_receiveBootCompleted" product="tablet" msgid="7390304664116880704">"允许应用在系统完成引导后立即自动启动。这样可能会延长平板电脑的启动时间，并允许应用始终运行，从而导致平板电脑总体运行速度减慢。"</string>
     <string name="permdesc_receiveBootCompleted" product="tv" msgid="4525890122209673621">"允许应用在系统启动完毕后立即自行启动。此权限可能会延长电视的启动时间，而且会因为系统一直运行该应用而导致电视的整体运行速度变慢。"</string>
@@ -555,36 +354,10 @@
     <string name="permdesc_accessMockLocation" msgid="5808711039482051824">"创建用于测试的模拟位置源或安装新的位置提供程序。此权限可让该应用覆盖由其他位置源（如GPS）或位置提供程序返回的位置和/或状态信息。"</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"获取额外的位置信息提供程序命令"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"允许该应用使用其他的位置信息提供程序命令。此权限使该应用可以干扰GPS或其他位置信息源的运作。"</string>
-    <string name="permlab_installLocationProvider" msgid="6578101199825193873">"允许安装位置信息提供程序"</string>
-    <string name="permdesc_installLocationProvider" msgid="9066146120470591509">"创建用于测试的模拟位置源或安装新的位置提供程序。此权限可让该应用覆盖由其他位置源（如GPS）或位置提供程序返回的位置和/或状态信息。"</string>
     <string name="permlab_accessFineLocation" msgid="1191898061965273372">"精确位置（基于GPS和网络）"</string>
     <string name="permdesc_accessFineLocation" msgid="5295047563564981250">"允许该应用通过全球定位系统(GPS)或网络位置信息源（例如基站和WLAN）获取您的精确位置信息。您必须在设备上开启这些位置信息服务，应用才能获得位置信息。应用会使用此类服务确定您的位置，这可能会消耗更多电量。"</string>
     <string name="permlab_accessCoarseLocation" msgid="4887895362354239628">"大致位置（基于网络）"</string>
     <string name="permdesc_accessCoarseLocation" msgid="2538200184373302295">"允许该应用获取您的大致位置信息。这类位置信息来自于使用网络位置信息源（例如基站和WLAN）的位置信息服务。您必须在设备上开启这些位置信息服务，应用才能获得位置信息。应用会使用此类服务确定您的大概位置。"</string>
-    <string name="permlab_accessSurfaceFlinger" msgid="2363969641792388947">"访问 SurfaceFlinger"</string>
-    <string name="permdesc_accessSurfaceFlinger" msgid="1041619516733293551">"允许应用使用 SurfaceFlinger 低级功能。"</string>
-    <string name="permlab_readFrameBuffer" msgid="6690504248178498136">"读取帧缓冲区"</string>
-    <string name="permdesc_readFrameBuffer" msgid="4937405521809454680">"允许应用读取帧缓冲区的内容。"</string>
-    <string name="permlab_accessInputFlinger" msgid="5348635270689553857">"使用 InputFlinger"</string>
-    <string name="permdesc_accessInputFlinger" msgid="2104864941201226616">"允许应用使用 InputFlinger 底层功能。"</string>
-    <string name="permlab_configureWifiDisplay" msgid="5595661694746742168">"配置WLAN显示设备"</string>
-    <string name="permdesc_configureWifiDisplay" msgid="7916815158690218065">"允许应用配置并连接到WLAN显示设备。"</string>
-    <string name="permlab_controlWifiDisplay" msgid="393641276723695496">"控制WLAN显示设备"</string>
-    <string name="permdesc_controlWifiDisplay" msgid="4543912292681826986">"允许应用控制WLAN显示设备的基础功能。"</string>
-    <string name="permlab_controlVpn" msgid="2618442789397588200">"控制 VPN"</string>
-    <string name="permdesc_controlVpn" msgid="762852603315861214">"允许应用控制 VPN 的底层功能。"</string>
-    <string name="permlab_captureAudioOutput" msgid="6857134498402346708">"捕获音频输出"</string>
-    <string name="permdesc_captureAudioOutput" msgid="6210597754212208853">"允许该应用捕获和重定向音频输出。"</string>
-    <string name="permlab_captureAudioHotword" msgid="1890553935650349808">"启动指令检测"</string>
-    <string name="permdesc_captureAudioHotword" msgid="9151807958153056810">"允许应用捕获音频以便检测语音启动指令。捕获操作会在后台进行，但不会妨碍其他音频捕获工具（例如摄像机）。"</string>
-    <string name="permlab_modifyAudioRouting" msgid="7738060354490807723">"音频转接"</string>
-    <string name="permdesc_modifyAudioRouting" msgid="7205731074267199735">"允许应用直接控制音频转接以及覆盖音频规范决策。"</string>
-    <string name="permlab_captureVideoOutput" msgid="2246828773589094023">"捕获视频输出"</string>
-    <string name="permdesc_captureVideoOutput" msgid="359481658034149860">"允许该应用捕获和重定向视频输出。"</string>
-    <string name="permlab_captureSecureVideoOutput" msgid="7815398969303382016">"捕获安全视频输出"</string>
-    <string name="permdesc_captureSecureVideoOutput" msgid="2779793064709350289">"允许该应用捕获和重定向安全视频输出。"</string>
-    <string name="permlab_mediaContentControl" msgid="8749790560720562511">"控制媒体播放和使用元数据"</string>
-    <string name="permdesc_mediaContentControl" msgid="1637478200272062">"允许应用控制媒体播放及使用媒体信息（标题、作者…）"</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"更改您的音频设置"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"允许该应用修改全局音频设置，例如音量和用于输出的扬声器。"</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"录音"</string>
@@ -593,73 +366,14 @@
     <string name="permdesc_sim_communication" msgid="5725159654279639498">"允许应用向SIM卡发送命令（此权限具有很高的危险性）。"</string>
     <string name="permlab_camera" msgid="3616391919559751192">"拍摄照片和视频"</string>
     <string name="permdesc_camera" msgid="8497216524735535009">"允许该应用使用相机拍摄照片和视频。此权限可让该应用随时使用相机，而无需您的确认。"</string>
-    <string name="permlab_cameraDisableTransmitLed" msgid="2651072630501126222">"在相机使用过程中停用传输指示灯 LED"</string>
-    <string name="permdesc_cameraDisableTransmitLed" msgid="4764585465480295341">"允许预装的系统应用禁止相机使用指示灯 LED。"</string>
-    <string name="permdesc_cameraSendSystemEvent" msgid="8642231538552298107">"允许预装的系统应用发送相机服务系统事件。"</string>
-    <string name="permlab_brick" product="tablet" msgid="2961292205764488304">"永久停用平板电脑"</string>
-    <string name="permlab_brick" product="tv" msgid="4912674222121249410">"永久停用电视"</string>
-    <string name="permlab_brick" product="default" msgid="8337817093326370537">"永久停用手机"</string>
-    <string name="permdesc_brick" product="tablet" msgid="4334818808001699530">"允许应用永久停用整个平板电脑，这样做非常危险。"</string>
-    <string name="permdesc_brick" product="tv" msgid="7070924544316356349">"允许应用永久停用整个电视，这样做非常危险。"</string>
-    <string name="permdesc_brick" product="default" msgid="5788903297627283099">"允许应用永久停用整个手机，这样做非常危险。"</string>
-    <string name="permlab_reboot" product="tablet" msgid="3436634972561795002">"强行重新启动平板电脑"</string>
-    <string name="permlab_reboot" product="tv" msgid="2112102119558886236">"强行重启电视"</string>
-    <string name="permlab_reboot" product="default" msgid="2898560872462638242">"强行重新启动手机"</string>
-    <string name="permdesc_reboot" product="tablet" msgid="8172056180063700741">"允许应用强行重新启动平板电脑。"</string>
-    <string name="permdesc_reboot" product="tv" msgid="7116222694344401650">"允许应用强行重新启动电视。"</string>
-    <string name="permdesc_reboot" product="default" msgid="5326008124289989969">"允许应用强行重新启动手机。"</string>
-    <string name="permlab_mount_unmount_filesystems" product="nosdcard" msgid="2927361537942591841">"访问USB存储设备的文件系统"</string>
-    <string name="permlab_mount_unmount_filesystems" product="default" msgid="4402305049890953810">"访问SD卡文件系统"</string>
-    <string name="permdesc_mount_unmount_filesystems" msgid="1829290701658992347">"允许应用装载和卸载可移动存储设备的文件系统。"</string>
-    <string name="permlab_mount_format_filesystems" product="nosdcard" msgid="6227819582624904972">"清除USB存储设备内容"</string>
-    <string name="permlab_mount_format_filesystems" product="default" msgid="262582698639274056">"清除SD卡内容"</string>
-    <string name="permdesc_mount_format_filesystems" msgid="8784268246779198627">"允许应用格式化可移动存储设备。"</string>
-    <string name="permlab_asec_access" msgid="3411338632002193846">"获取有关内部存储设备的信息"</string>
-    <string name="permdesc_asec_access" msgid="3094563844593878548">"允许应用获取有关内部存储设备的信息。"</string>
-    <string name="permlab_asec_create" msgid="6414757234789336327">"创建内部存储设备"</string>
-    <string name="permdesc_asec_create" msgid="4558869273585856876">"允许应用创建内部存储设备。"</string>
-    <string name="permlab_asec_destroy" msgid="526928328301618022">"清除内部存储设备"</string>
-    <string name="permdesc_asec_destroy" msgid="7218749286145526537">"允许应用清除内部存储设备。"</string>
-    <string name="permlab_asec_mount_unmount" msgid="8877998101944999386">"装载/卸载内部存储设备"</string>
-    <string name="permdesc_asec_mount_unmount" msgid="3451360114902490929">"允许应用装载/卸载内部存储设备。"</string>
-    <string name="permlab_asec_rename" msgid="7496633954080472417">"重命名内部存储设备"</string>
-    <string name="permdesc_asec_rename" msgid="1794757588472127675">"允许应用重命名内部存储设备。"</string>
     <string name="permlab_vibrate" msgid="7696427026057705834">"控制振动"</string>
     <string name="permdesc_vibrate" msgid="6284989245902300945">"允许应用控制振动器。"</string>
     <string name="permlab_flashlight" msgid="2155920810121984215">"控制闪光灯"</string>
     <string name="permdesc_flashlight" msgid="6522284794568368310">"允许应用控制闪光灯。"</string>
-    <string name="permlab_manageUsb" msgid="1113453430645402723">"管理USB设备的偏好设置和权限"</string>
-    <string name="permdesc_manageUsb" msgid="7776155430218239833">"允许应用管理针对USB设备的偏好设置和权限。"</string>
-    <string name="permlab_accessMtp" msgid="4953468676795917042">"实现MTP协议"</string>
-    <string name="permdesc_accessMtp" msgid="6532961200486791570">"允许访问内核MTP驱动程序，以便实现MTP USB协议。"</string>
-    <string name="permlab_hardware_test" msgid="4148290860400659146">"测试硬件"</string>
-    <string name="permdesc_hardware_test" msgid="6597964191208016605">"允许应用控制各种外围设备以进行硬件测试。"</string>
-    <string name="permlab_fm" msgid="8749504526866832">"接收FM电台"</string>
-    <string name="permdesc_fm" msgid="4145699441237962818">"允许应用接收FM电台以收听节目。"</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"直接拨打电话号码"</string>
     <string name="permdesc_callPhone" msgid="3740797576113760827">"允许该应用在您未执行操作的情况下拨打电话号码。此权限可能会导致意外收费或呼叫。请注意，此权限不允许该应用拨打紧急电话号码。恶意应用可通过拨打电话产生相关费用，而无需您的确认。"</string>
-    <string name="permlab_callPrivileged" msgid="4198349211108497879">"直接呼叫任何电话号码"</string>
-    <string name="permdesc_callPrivileged" msgid="1689024901509996810">"允许应用在没有您干预的情况下拨打任何电话号码，包括紧急呼救号码。恶意应用可能会多余以及非法地拨打紧急服务的号码。"</string>
-    <string name="permlab_performCdmaProvisioning" product="tablet" msgid="4842576994144604821">"直接启动 CDMA 平板电脑设置"</string>
-    <string name="permlab_performCdmaProvisioning" product="tv" msgid="3485391974208100809">"直接启动 CDMA 电视设置"</string>
-    <string name="permlab_performCdmaProvisioning" product="default" msgid="5604848095315421425">"直接启动 CDMA 电话设置"</string>
-    <string name="permdesc_performCdmaProvisioning" msgid="1994193538802314186">"允许应用启动 CDMA 配置。恶意应用可能会无端启动 CDMA 配置。"</string>
-    <!-- no translation found for permlab_performSimActivation (1651116521896665009) -->
-    <skip />
-    <!-- no translation found for permdesc_performSimActivation (1778214876348917401) -->
-    <skip />
-    <string name="permlab_locationUpdates" msgid="7785408253364335740">"控制位置更新通知"</string>
-    <string name="permdesc_locationUpdates" msgid="1120741557891438876">"允许应用启用/停用来自无线装置的位置更新通知。普通应用不应使用此权限。"</string>
-    <string name="permlab_checkinProperties" msgid="7855259461268734914">"访问检入属性"</string>
-    <string name="permdesc_checkinProperties" msgid="4024526968630194128">"允许应用对登记服务上传的属性拥有读取/写入权限。普通应用不应使用此权限。"</string>
-    <string name="permlab_bindGadget" msgid="776905339015863471">"选择小部件"</string>
-    <string name="permdesc_bindGadget" msgid="8261326938599049290">"允许应用告知系统哪些小部件可供哪个应用使用。拥有此权限的应用可向其他应用授予对个人数据的访问权限。普通应用不应使用此权限。"</string>
-    <string name="permlab_modifyPhoneState" msgid="8423923777659292228">"修改手机状态"</string>
-    <string name="permdesc_modifyPhoneState" msgid="1029877529007686732">"允许应用控制设备的电话功能。拥有此权限的应用可在不通知您的情况下执行切换网络、开关手机无线装置等此类操作。"</string>
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"读取手机状态和身份"</string>
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"允许该应用访问设备的电话功能。此权限可让该应用确定本机号码和设备 ID、是否正处于通话状态以及拨打的号码。"</string>
-    <string name="permlab_readPrecisePhoneState" msgid="5476483020282007597">"读取确切的手机状态"</string>
-    <string name="permdesc_readPrecisePhoneState" msgid="6648009074263855418">"允许应用获取确切的手机状态。此权限可让应用确定实际通话状态、通话是在界面上进行还是在后台进行、通话未接通情况、确切的数据网络连接状态，以及数据网络连接失败情况。"</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"阻止平板电脑进入休眠状态"</string>
     <string name="permlab_wakeLock" product="tv" msgid="2601193288949154131">"阻止电视进入休眠状态"</string>
     <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"防止手机休眠"</string>
@@ -670,34 +384,14 @@
     <string name="permdesc_transmitIr" product="tablet" msgid="5358308854306529170">"允许应用使用平板电脑的红外线发射器。"</string>
     <string name="permdesc_transmitIr" product="tv" msgid="3926790828514867101">"允许应用使用电视的红外线发射器。"</string>
     <string name="permdesc_transmitIr" product="default" msgid="7957763745020300725">"允许应用使用手机的红外线发射器。"</string>
-    <string name="permlab_devicePower" product="tablet" msgid="2787034722616350417">"打开或关闭平板电脑"</string>
-    <string name="permlab_devicePower" product="tv" msgid="7579718349658943416">"打开或关闭电视"</string>
-    <string name="permlab_devicePower" product="default" msgid="4928622470980943206">"开机或关机"</string>
-    <string name="permdesc_devicePower" product="tablet" msgid="6689862878984631831">"允许应用打开或关闭平板电脑。"</string>
-    <string name="permdesc_devicePower" product="tv" msgid="1334908641773273512">"允许应用打开或关闭电视。"</string>
-    <string name="permdesc_devicePower" product="default" msgid="6037057348463131032">"允许应用打开或关闭手机。"</string>
-    <string name="permlab_userActivity" msgid="1677844893921729548">"重置显示屏超时"</string>
-    <string name="permdesc_userActivity" msgid="651746160252248024">"允许该应用重置显示屏超时。"</string>
-    <string name="permlab_factoryTest" msgid="3715225492696416187">"在出厂测试模式下运行"</string>
-    <string name="permdesc_factoryTest" product="tablet" msgid="3952059318359653091">"作为低级别的制造商测试项目运行，这会授予应用对平板电脑硬件的完全访问权限。仅当平板电脑在制造商测试模式下运行时，此选项才可用。"</string>
-    <string name="permdesc_factoryTest" product="tv" msgid="2105643629211155695">"作为低级别的制造商测试项目运行，这会授予应用对电视硬件的完全访问权限。仅当电视在制造商测试模式下运行时，此选项才可用。"</string>
-    <string name="permdesc_factoryTest" product="default" msgid="8136644990319244802">"作为低级别的制造商测试项目运行，这会授予应用对手机硬件的完全访问权限。仅当手机在制造商测试模式下运行时，此选项才可用。"</string>
     <string name="permlab_setWallpaper" msgid="6627192333373465143">"设置壁纸"</string>
     <string name="permdesc_setWallpaper" msgid="7373447920977624745">"允许应用设置系统壁纸。"</string>
     <string name="permlab_setWallpaperHints" msgid="3278608165977736538">"调整您的壁纸大小"</string>
     <string name="permdesc_setWallpaperHints" msgid="8235784384223730091">"允许应用设置有关系统壁纸大小的提示。"</string>
-    <string name="permlab_masterClear" msgid="2315750423139697397">"将系统恢复为出厂设置"</string>
-    <string name="permdesc_masterClear" msgid="3665380492633910226">"允许应用将系统完全恢复为出厂设置，这会清除所有数据、配置和已安装的应用。"</string>
-    <string name="permlab_setTime" msgid="2021614829591775646">"设置时间"</string>
-    <string name="permdesc_setTime" product="tablet" msgid="1896341438151152881">"允许应用更改平板电脑的时间。"</string>
-    <string name="permdesc_setTime" product="tv" msgid="1826398919861882682">"允许应用更改电视的时钟时间。"</string>
-    <string name="permdesc_setTime" product="default" msgid="1855702730738020">"允许应用更改手机的时间。"</string>
     <string name="permlab_setTimeZone" msgid="2945079801013077340">"设置时区"</string>
     <string name="permdesc_setTimeZone" product="tablet" msgid="1676983712315827645">"允许应用更改平板电脑的时区。"</string>
     <string name="permdesc_setTimeZone" product="tv" msgid="888864653946175955">"允许应用更改电视的时区。"</string>
     <string name="permdesc_setTimeZone" product="default" msgid="4499943488436633398">"允许应用更改手机的时区。"</string>
-    <string name="permlab_accountManagerService" msgid="4829262349691386986">"作为 AccountManagerService"</string>
-    <string name="permdesc_accountManagerService" msgid="1948455552333615954">"允许该应用调用 AccountAuthenticators。"</string>
     <string name="permlab_getAccounts" msgid="1086795467760122114">"查找设备上的帐户"</string>
     <string name="permdesc_getAccounts" product="tablet" msgid="2741496534769660027">"允许该应用获取平板电脑已知的帐户列表，其中可能包括由已安装的应用创建的所有帐户。"</string>
     <string name="permdesc_getAccounts" product="tv" msgid="4190633395633907543">"允许应用获取电视已知的帐户列表，其中可能包括由已安装的应用创建的所有帐户。"</string>
@@ -712,14 +406,10 @@
     <string name="permdesc_accessNetworkState" msgid="8318964424675960975">"允许该应用查看网络连接的相关信息，例如存在和连接的网络。"</string>
     <string name="permlab_createNetworkSockets" msgid="8018758136404323658">"完全的网络访问权限"</string>
     <string name="permdesc_createNetworkSockets" msgid="3403062187779724185">"允许该应用创建网络套接字和使用自定义网络协议。浏览器和其他某些应用提供了向互联网发送数据的途径，因此应用无需该权限即可向互联网发送数据。"</string>
-    <string name="permlab_writeApnSettings" msgid="505660159675751896">"更改/拦截网络设置和流量"</string>
-    <string name="permdesc_writeApnSettings" msgid="5333798886412714193">"允许应用更改网络设置，并拦截和检查所有网络流量，例如更改任意 APN 的代理和端口。恶意应用可能会在您不知情的情况下监视、重定向或修改网络数据包。"</string>
     <string name="permlab_changeNetworkState" msgid="958884291454327309">"更改网络连接性"</string>
     <string name="permdesc_changeNetworkState" msgid="6789123912476416214">"允许应用更改网络连接的状态。"</string>
     <string name="permlab_changeTetherState" msgid="5952584964373017960">"更改网络共享连接"</string>
     <string name="permdesc_changeTetherState" msgid="1524441344412319780">"允许应用更改绑定网络连接的状态。"</string>
-    <string name="permlab_changeBackgroundDataSetting" msgid="1400666012671648741">"更改后台流量设置"</string>
-    <string name="permdesc_changeBackgroundDataSetting" msgid="5347729578468744379">"允许应用更改后台流量设置。"</string>
     <string name="permlab_accessWifiState" msgid="5202012949247040011">"查看WLAN连接"</string>
     <string name="permdesc_accessWifiState" msgid="5002798077387803726">"允许该应用查看WLAN网络的相关信息，例如是否启用了WLAN以及连接的WLAN设备的名称。"</string>
     <string name="permlab_changeWifiState" msgid="6550641188749128035">"连接WLAN网络和断开连接"</string>
@@ -732,24 +422,12 @@
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="6921177471748882137">"允许应用配置本地蓝牙平板电脑，并允许其查找远程设备且与之配对。"</string>
     <string name="permdesc_bluetoothAdmin" product="tv" msgid="3373125682645601429">"允许应用配置本地蓝牙电视，并允许其查找远程设备且与之配对。"</string>
     <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"允许应用配置本地蓝牙手机，并允许其查找远程设备且与之配对。"</string>
-    <string name="permlab_bluetoothPriv" msgid="4009494246009513828">"允许应用进行蓝牙配对"</string>
-    <string name="permdesc_bluetoothPriv" product="tablet" msgid="8045735193417468857">"允许应用自行与远程设备配对。"</string>
-    <string name="permdesc_bluetoothPriv" product="tv" msgid="8045735193417468857">"允许应用自行与远程设备配对。"</string>
-    <string name="permdesc_bluetoothPriv" product="default" msgid="8045735193417468857">"允许应用自行与远程设备配对。"</string>
-    <string name="permlab_bluetoothMap" msgid="6372198338939197349">"访问蓝牙MAP数据"</string>
-    <string name="permdesc_bluetoothMap" product="tablet" msgid="5784090105926959958">"允许该应用访问蓝牙MAP数据。"</string>
-    <string name="permdesc_bluetoothMap" product="tv" msgid="5784090105926959958">"允许该应用访问蓝牙MAP数据。"</string>
-    <string name="permdesc_bluetoothMap" product="default" msgid="5784090105926959958">"允许该应用访问蓝牙MAP数据。"</string>
     <string name="permlab_accessWimaxState" msgid="4195907010610205703">"建立或中断 WiMAX 网络连接"</string>
     <string name="permdesc_accessWimaxState" msgid="6360102877261978887">"允许该应用确定是否启用了 WiMAX 以及连接的任何 WiMAX 网络的相关信息。"</string>
     <string name="permlab_changeWimaxState" msgid="2405042267131496579">"更改 WiMAX 状态"</string>
     <string name="permdesc_changeWimaxState" product="tablet" msgid="3156456504084201805">"允许该应用建立和断开平板电脑与 WiMAX 网络之间的连接。"</string>
     <string name="permdesc_changeWimaxState" product="tv" msgid="6022307083934827718">"允许应用建立和断开电视与 WiMAX 网络之间的连接。"</string>
     <string name="permdesc_changeWimaxState" product="default" msgid="697025043004923798">"允许该应用建立和断开手机与 WiMAX 网络之间的连接。"</string>
-    <string name="permlab_scoreNetworks" msgid="6445777779383587181">"为网络评分"</string>
-    <string name="permdesc_scoreNetworks" product="tablet" msgid="1304304745850215556">"允许应用为网络评分，并控制平板电脑应优先使用的网络。"</string>
-    <string name="permdesc_scoreNetworks" product="tv" msgid="5444434643862417649">"允许应用为网络评分，并控制电视应优先使用的网络。"</string>
-    <string name="permdesc_scoreNetworks" product="default" msgid="1831501848178651379">"允许应用为网络评分，并控制手机应优先使用的网络。"</string>
     <string name="permlab_bluetooth" msgid="6127769336339276828">"与蓝牙设备配对"</string>
     <string name="permdesc_bluetooth" product="tablet" msgid="3480722181852438628">"允许该应用查看平板电脑上的蓝牙配置，以及与配对设备建立连接或接受其连接请求。"</string>
     <string name="permdesc_bluetooth" product="tv" msgid="3974124940101104206">"允许应用查看电视上的蓝牙配置，以及与配对设备建立连接或接受其连接请求。"</string>
@@ -784,10 +462,6 @@
     <string name="permdesc_writeSyncSettings" msgid="8956262591306369868">"允许该应用修改某个帐户的同步设置。例如，此权限可用于在“联系人”应用与某个帐户之间启用同步。"</string>
     <string name="permlab_readSyncStats" msgid="7396577451360202448">"读取同步统计信息"</string>
     <string name="permdesc_readSyncStats" msgid="1510143761757606156">"允许该应用读取某个帐户的同步统计信息，包括同步活动历史记录和同步数据量。"</string>
-    <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"读取订阅的供稿"</string>
-    <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"允许应用获取有关当前同步的 Feed 的详情。"</string>
-    <string name="permlab_subscribedFeedsWrite" msgid="9015246325408209296">"写入订阅的供稿"</string>
-    <string name="permdesc_subscribedFeedsWrite" msgid="6928930188826089413">"允许应用修改您当前同步的 Feed。恶意应用可能会更改您的同步 Feed。"</string>
     <string name="permlab_readDictionary" msgid="4107101525746035718">"读取您添加到字典的字词"</string>
     <string name="permdesc_readDictionary" msgid="659614600338904243">"允许该应用读取用户可能已在用户字典中存储的所有字词、名称和词组。"</string>
     <string name="permlab_writeDictionary" msgid="2183110402314441106">"向用户定义的字典添加字词"</string>
@@ -800,62 +474,8 @@
     <string name="permlab_sdcardWrite" product="default" msgid="8805693630050458763">"修改或删除您的SD卡中的内容"</string>
     <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6175406299445710888">"允许应用写入USB存储设备。"</string>
     <string name="permdesc_sdcardWrite" product="default" msgid="4337417790936632090">"允许应用写入SD卡。"</string>
-    <string name="permlab_mediaStorageWrite" product="default" msgid="6859839199706879015">"修改/删除内部媒体存储设备的内容"</string>
-    <string name="permdesc_mediaStorageWrite" product="default" msgid="8189160597698529185">"允许应用修改内部媒体存储设备的内容。"</string>
-    <string name="permlab_manageDocs" product="default" msgid="5778318598448849829">"管理文档存储空间"</string>
-    <string name="permdesc_manageDocs" product="default" msgid="8704323176914121484">"允许应用管理文档存储空间。"</string>
-    <string name="permlab_sdcardAccessAll" msgid="8150613823900460576">"访问所有用户的外部存储设备"</string>
-    <string name="permdesc_sdcardAccessAll" msgid="3215208357415891320">"允许应用访问所有用户的外部存储设备。"</string>
-    <string name="permlab_cache_filesystem" msgid="5656487264819669824">"访问缓存文件系统"</string>
-    <string name="permdesc_cache_filesystem" msgid="5578967642265550955">"允许应用读取和写入缓存文件系统。"</string>
     <string name="permlab_use_sip" msgid="2052499390128979920">"拨打/接听SIP电话"</string>
     <string name="permdesc_use_sip" msgid="2297804849860225257">"允许该应用拨打和接听SIP电话。"</string>
-    <string name="permlab_register_sim_subscription" msgid="3166535485877549177">"注册新的电信 SIM 卡连接"</string>
-    <string name="permdesc_register_sim_subscription" msgid="2138909035926222911">"允许该应用注册新的电信 SIM 卡连接。"</string>
-    <string name="permlab_register_call_provider" msgid="108102120289029841">"注册新的电信网络连接"</string>
-    <string name="permdesc_register_call_provider" msgid="7034310263521081388">"允许该应用注册新的电信网络连接。"</string>
-    <string name="permlab_connection_manager" msgid="1116193254522105375">"管理电信网络连接"</string>
-    <string name="permdesc_connection_manager" msgid="5925480810356483565">"允许该应用管理电信网络连接。"</string>
-    <string name="permlab_bind_incall_service" msgid="6773648341975287125">"与通话屏幕互动"</string>
-    <string name="permdesc_bind_incall_service" msgid="8343471381323215005">"允许应用控制用户看到通话屏幕的时机和方式。"</string>
-    <string name="permlab_bind_connection_service" msgid="3557341439297014940">"与电话服务交互"</string>
-    <string name="permdesc_bind_connection_service" msgid="4008754499822478114">"允许该应用与电话服务交互以便接打电话。"</string>
-    <string name="permlab_control_incall_experience" msgid="9061024437607777619">"向用户提供通话体验"</string>
-    <string name="permdesc_control_incall_experience" msgid="915159066039828124">"允许应用向用户提供通话体验。"</string>
-    <string name="permlab_readNetworkUsageHistory" msgid="7862593283611493232">"读取网络使用情况历史记录"</string>
-    <string name="permdesc_readNetworkUsageHistory" msgid="7689060749819126472">"允许应用读取特定网络和应用的网络使用情况历史记录。"</string>
-    <string name="permlab_manageNetworkPolicy" msgid="2562053592339859990">"管理网络政策"</string>
-    <string name="permdesc_manageNetworkPolicy" msgid="7537586771559370668">"允许应用管理网络规范和定义专门针对应用的规则。"</string>
-    <string name="permlab_modifyNetworkAccounting" msgid="5088217309088729650">"修改网络使用情况记录方式"</string>
-    <string name="permdesc_modifyNetworkAccounting" msgid="5443412866746198123">"允许该应用修改对于各应用的网络使用情况的统计方式。普通应用不应使用此权限。"</string>
-    <string name="permlab_accessNotifications" msgid="7673416487873432268">"访问通知"</string>
-    <string name="permdesc_accessNotifications" msgid="458457742683431387">"允许该应用检索、检查并清除通知，包括其他应用发布的通知。"</string>
-    <string name="permlab_bindNotificationListenerService" msgid="7057764742211656654">"绑定到通知侦听器服务"</string>
-    <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"允许应用绑定到通知侦听器服务的顶级接口（普通应用绝不需要此权限）。"</string>
-    <string name="permlab_bindChooserTargetService" msgid="3443261076710185673">"绑定到选择器目标服务"</string>
-    <string name="permdesc_bindChooserTargetService" msgid="1413908999583734970">"允许该应用绑定到选择器目标服务的顶级接口。普通应用绝不需要此权限。"</string>
-    <string name="permlab_bindConditionProviderService" msgid="1180107672332704641">"绑定到条件提供程序服务"</string>
-    <string name="permdesc_bindConditionProviderService" msgid="1680513931165058425">"允许应用绑定到条件提供程序服务的顶级接口。普通应用绝不需要此权限。"</string>
-    <string name="permlab_bindMediaRouteService" msgid="6637740382272686835">"绑定至媒体转接服务"</string>
-    <string name="permdesc_bindMediaRouteService" msgid="6436655024972496687">"允许应用绑定至媒体转接服务的顶级接口。普通应用绝不需要此权限。"</string>
-    <string name="permlab_bindDreamService" msgid="4153646965978563462">"绑定到互动屏保服务"</string>
-    <string name="permdesc_bindDreamService" msgid="7325825272223347863">"允许应用绑定到互动屏保服务的顶级接口。普通应用绝不需要此权限。"</string>
-    <string name="permlab_invokeCarrierSetup" msgid="3699600833975117478">"调用运营商提供的配置应用"</string>
-    <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"允许应用调用运营商提供的配置应用。普通应用绝不需要此权限。"</string>
-    <string name="permlab_accessNetworkConditions" msgid="8206077447838909516">"监听网络状况的观测信息"</string>
-    <string name="permdesc_accessNetworkConditions" msgid="6899102075825272211">"允许应用监听网络状况的观测信息。普通应用绝不需要此权限。"</string>
-    <string name="permlab_setInputCalibration" msgid="4902620118878467615">"更改输入设备校准设置"</string>
-    <string name="permdesc_setInputCalibration" msgid="4527511047549456929">"允许应用修改触摸屏的校准参数。普通应用绝不需要此权限。"</string>
-    <string name="permlab_accessDrmCertificates" msgid="7436886640723203615">"访问DRM证书"</string>
-    <string name="permdesc_accessDrmCertificates" msgid="8073288354426159089">"允许应用配置和使用DRM证书。普通应用绝不需要此权限。"</string>
-    <string name="permlab_handoverStatus" msgid="1159132046126626731">"接收Android Beam的传输状态"</string>
-    <string name="permdesc_handoverStatus" msgid="4788144087245714948">"允许此应用接收Android Beam当前传输内容的相关信息"</string>
-    <string name="permlab_removeDrmCertificates" msgid="7044888287209892751">"移除DRM证书"</string>
-    <string name="permdesc_removeDrmCertificates" msgid="7272999075113400993">"允许应用移除DRM证书。普通应用绝不需要此权限。"</string>
-    <string name="permlab_bindCarrierMessagingService" msgid="1490229371796969158">"绑定到运营商消息传递服务"</string>
-    <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"允许应用绑定到运营商消息传递服务的顶级接口。普通应用绝不需要此权限。"</string>
-    <string name="permlab_accessVoiceInteractionService" msgid="4183835260471435605">"与语音互动服务进行互动"</string>
-    <string name="permdesc_accessVoiceInteractionService" msgid="836587728238433459">"允许应用与当前启用的语音互动服务进行互动。普通应用绝不需要此权限。"</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"设置密码规则"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"控制锁屏密码和 PIN 码所允许的长度和字符。"</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"监视屏幕解锁尝试次数"</string>
@@ -1141,28 +761,10 @@
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="8497389531014185509">"允许该应用修改您手机上存储的浏览器历史记录或浏览器书签。此权限可让该应用清除或修改浏览器数据。请注意：此权限可能不适用于第三方浏览器或具备网页浏览功能的其他应用。"</string>
     <string name="permlab_setAlarm" msgid="1379294556362091814">"设置闹钟"</string>
     <string name="permdesc_setAlarm" msgid="316392039157473848">"允许应用在已安装的闹钟应用中设置闹钟。有些闹钟应用可能无法实现此功能。"</string>
-    <string name="permlab_writeVoicemail" msgid="7309899891683938100">"写入语音邮件"</string>
-    <string name="permdesc_writeVoicemail" msgid="6592572839715924830">"允许应用修改和移除您语音信箱中的语音邮件。"</string>
     <string name="permlab_addVoicemail" msgid="5525660026090959044">"添加语音邮件"</string>
     <string name="permdesc_addVoicemail" msgid="6604508651428252437">"允许应用向您的语音信箱收件箱添加邮件。"</string>
-    <string name="permlab_readVoicemail" msgid="8415201752589140137">"读取语音邮件"</string>
-    <string name="permdesc_readVoicemail" msgid="8926534735321616550">"允许应用读取您的语音邮件。"</string>
     <string name="permlab_writeGeolocationPermissions" msgid="5962224158955273932">"修改“浏览器”地理位置的权限"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="1083743234522638747">"允许应用修改“浏览器”的地理位置权限。恶意应用可能借此向任意网站发送位置信息。"</string>
-    <string name="permlab_packageVerificationAgent" msgid="5568139100645829117">"验证软件包"</string>
-    <string name="permdesc_packageVerificationAgent" msgid="8437590190990843381">"允许应用验证软件包是否可安装。"</string>
-    <string name="permlab_bindPackageVerifier" msgid="4187786793360326654">"绑定到软件包验证程序"</string>
-    <string name="permdesc_bindPackageVerifier" msgid="3180741773233862126">"允许应用申请使用软件包验证程序。普通应用绝不需要此权限。"</string>
-    <string name="permlab_intentFilterVerificationAgent" msgid="1135788294400437497">"验证 Intent 过滤器"</string>
-    <string name="permdesc_intentFilterVerificationAgent" msgid="5853902808424716312">"允许该应用检查 Intent 过滤器是否已经过验证。"</string>
-    <string name="permlab_bindIntentFilterVerifier" msgid="8567268159430779210">"绑定至 Intent 过滤器验证程序"</string>
-    <string name="permdesc_bindIntentFilterVerifier" msgid="681128728719578778">"允许应用请求使用 Intent 过滤器验证程序。普通应用绝不需要此权限。"</string>
-    <string name="permlab_serialPort" msgid="546083327654631076">"访问串行端口"</string>
-    <string name="permdesc_serialPort" msgid="2991639985224598193">"允许应用通过SerialManager API使用串行端口。"</string>
-    <string name="permlab_accessContentProvidersExternally" msgid="5077774297943409285">"从外部访问内容提供程序"</string>
-    <string name="permdesc_accessContentProvidersExternally" msgid="4544346486697853685">"允许应用通过接口访问内容提供程序。普通应用绝不需要此权限。"</string>
-    <string name="permlab_updateLock" msgid="3527558366616680889">"阻止自动设备更新"</string>
-    <string name="permdesc_updateLock" msgid="1655625832166778492">"允许应用向系统提供相关信息，以确定何时适合执行非交互式重启以升级设备。"</string>
     <string name="save_password_message" msgid="767344687139195790">"是否希望浏览器记住此密码？"</string>
     <string name="save_password_notnow" msgid="6389675316706699758">"暂不保存"</string>
     <string name="save_password_remember" msgid="6491879678996749466">"记住"</string>
@@ -1458,28 +1060,8 @@
     <string name="ext_media_nomedia_notification_message" product="nosdcard" msgid="6921126162580574143">"USB存储设备已移除。请插入新媒体。"</string>
     <string name="ext_media_nomedia_notification_message" product="default" msgid="3870120652983659641">"SD卡已移除。请插入新的SD卡。"</string>
     <string name="activity_list_empty" msgid="1675388330786841066">"未找到匹配的活动。"</string>
-    <string name="permlab_pkgUsageStats" msgid="8787352074326748892">"更新组件使用情况统计"</string>
-    <string name="permdesc_pkgUsageStats" msgid="1106612424254277630">"允许应用修改收集到的组件使用情况统计信息。普通应用不应使用此权限。"</string>
-    <string name="permlab_copyProtectedData" msgid="4341036311211406692">"复制内容"</string>
-    <string name="permdesc_copyProtectedData" msgid="4390697124288317831">"允许应用调用默认的容器服务，以便复制内容。普通应用不应使用此权限。"</string>
     <string name="permlab_route_media_output" msgid="1642024455750414694">"更改媒体输出线路"</string>
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"允许该应用将媒体输出线路更改到其他外部设备。"</string>
-    <string name="permlab_access_keyguard_secure_storage" msgid="7565552237977815047">"访问锁屏安全存储空间"</string>
-    <string name="permdesc_access_keyguard_secure_storage" msgid="5866245484303285762">"允许应用访问密钥保护安全存储空间。"</string>
-    <string name="permlab_control_keyguard" msgid="172195184207828387">"控制锁屏界面的显示和隐藏状态"</string>
-    <string name="permdesc_control_keyguard" msgid="3043732290518629061">"允许应用控制锁屏。"</string>
-    <string name="permlab_trust_listener" msgid="1765718054003704476">"检测信任状态的变化。"</string>
-    <string name="permdesc_trust_listener" msgid="8233895334214716864">"允许应用检测信任状态的变化。"</string>
-    <string name="permlab_provide_trust_agent" msgid="5465587586091358316">"提供信任的代理。"</string>
-    <string name="permdesc_provide_trust_agent" msgid="3865702641053068148">"允许应用提供信任的代理。"</string>
-    <string name="permlab_launch_trust_agent_settings" msgid="5859430082240410200">"启动信任的代理设置菜单。"</string>
-    <string name="permdesc_launch_trust_agent_settings" msgid="8185142708644913381">"允许应用启动可变更信任的代理行为的活动。"</string>
-    <string name="permlab_bind_trust_agent_service" msgid="8242093169457695334">"绑定至信任的代理服务"</string>
-    <string name="permdesc_bind_trust_agent_service" msgid="7041930026024507515">"允许应用绑定至信任的代理服务。"</string>
-    <string name="permlab_recovery" msgid="3157024487744125846">"与更新和恢复系统互动"</string>
-    <string name="permdesc_recovery" msgid="8511774533266359571">"允许应用与恢复系统和系统更新互动。"</string>
-    <string name="permlab_manageMediaProjection" msgid="1120495449419929218">"管理媒体投影会话"</string>
-    <string name="permdesc_manageMediaProjection" msgid="8053759147529492856">"允许应用管理媒体投影会话。这些会话可让应用截取显示内容和音频内容。普通应用绝不需要此权限。"</string>
     <string name="permlab_readInstallSessions" msgid="6165432407628065939">"读取安装会话"</string>
     <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"允许应用读取安装会话。这样，应用将可以查看有关当前软件包安装的详情。"</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"触摸两次可进行缩放控制"</string>
@@ -1846,13 +1428,9 @@
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"取消时要求输入PIN码"</string>
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"取消时要求绘制解锁图案"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"取消时要求输入密码"</string>
-    <!-- no translation found for package_installed_device_owner (8420696545959087545) -->
-    <skip />
-    <!-- no translation found for package_deleted_device_owner (7650577387493101353) -->
-    <skip />
+    <string name="package_installed_device_owner" msgid="8420696545959087545">"已由管理员安装"</string>
+    <string name="package_deleted_device_owner" msgid="7650577387493101353">"已被管理员删除"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"为了延长电池的续航时间，节电助手会降低设备的性能，并限制振动、位置信息服务和大部分后台流量。对于电子邮件、聊天工具等依赖于同步功能的应用，可能要打开这类应用时才能收到新信息。\n\n节电助手会在设备充电时自动关闭。"</string>
-    <string name="downtime_condition_summary" msgid="8761776337475705749">"直到休息时间结束（<xliff:g id="FORMATTEDTIME">%1$s</xliff:g>）"</string>
-    <string name="downtime_condition_line_one" msgid="8762708714645352010">"到休息时间结束"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
       <item quantity="other">%1$d 分钟（到<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>）</item>
       <item quantity="one">1 分钟（到<xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>）</item>
@@ -1871,9 +1449,17 @@
     </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"到<xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_forever" msgid="7420011936770086993">"直到您将其关闭"</string>
+    <!-- no translation found for zen_mode_rule_name_combination (191109939968076477) -->
+    <skip />
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"收起"</string>
-    <string name="zen_mode_next_alarm_summary" msgid="5915140424683747372">"到下次闹钟时间（<xliff:g id="FORMATTEDTIME">%1$s</xliff:g>）"</string>
-    <string name="zen_mode_next_alarm_line_one" msgid="5537042951553420916">"到下次闹钟时间"</string>
+    <!-- no translation found for zen_mode_feature_name (289097150786114338) -->
+    <skip />
+    <!-- no translation found for zen_mode_downtime_feature_name (2626974636779860146) -->
+    <skip />
+    <!-- no translation found for zen_mode_default_weeknights_name (2069189413656431610) -->
+    <skip />
+    <!-- no translation found for zen_mode_default_weekends_name (2377398437072017011) -->
+    <skip />
     <string name="muted_by" msgid="6147073845094180001">"已被<xliff:g id="THIRD_PARTY">%1$s</xliff:g>设为静音"</string>
     <string name="system_error_wipe_data" msgid="6608165524785354962">"您的设备内部出现了问题。如果不将设备恢复出厂设置，设备运行可能会不稳定。"</string>
     <string name="system_error_manufacturer" msgid="8086872414744210668">"您的设备内部出现了问题。请联系您的设备制造商了解详情。"</string>
@@ -1883,6 +1469,13 @@
     <string name="stk_cc_ss_to_dial" msgid="2151304435775557162">"SS 请求已修改为 DIAL 请求。"</string>
     <string name="stk_cc_ss_to_ussd" msgid="3951862188105305589">"SS 请求已修改为 USSD 请求。"</string>
     <string name="stk_cc_ss_to_ss" msgid="5470768854991452695">"SS 请求已修改为新的 SS 请求。"</string>
+    <!-- no translation found for usb_midi_peripheral_name (7221113987741003817) -->
+    <skip />
     <string name="usb_midi_peripheral_manufacturer_name" msgid="7176526170008970168">"Android"</string>
-    <string name="usb_midi_peripheral_model_name" msgid="1959288763942653301">"USB 外设端口"</string>
+    <!-- no translation found for usb_midi_peripheral_product_name (4971827859165280403) -->
+    <skip />
+    <!-- no translation found for floating_toolbar_open_overflow_description (4797287862999444631) -->
+    <skip />
+    <!-- no translation found for floating_toolbar_close_overflow_description (559796923090723804) -->
+    <skip />
 </resources>

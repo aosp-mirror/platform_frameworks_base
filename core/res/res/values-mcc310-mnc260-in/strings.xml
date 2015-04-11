@@ -23,10 +23,10 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
   <string-array name="wfcOperatorErrorAlertMessages">
-    <item msgid="7239039348648848288">"Untuk melakukan panggilan telepon dan mengirim pesan melalui Wi-Fi, terlebih dahulu minta operator untuk menyiapkan layana ini. Lalu, aktifkan panggilan telepon Wi-Fi lagi dari Setelan."</item>
+    <item msgid="7239039348648848288">"Untuk melakukan panggilan telepon dan mengirim pesan melalui Wi-Fi, terlebih dahulu minta operator untuk menyiapkan layanan ini. Lalu, aktifkan lagi panggilan telepon Wi-Fi dari Setelan."</item>
   </string-array>
   <string-array name="wfcOperatorErrorNotificationMessages">
-    <item msgid="483847327467331298">"Mendaftar di operator"</item>
+    <item msgid="483847327467331298">"Harap daftarkan ke operator"</item>
   </string-array>
     <string name="wfcSpnFormat" msgid="4982938551498609442">"%s Panggilan Wi-Fi"</string>
 </resources>

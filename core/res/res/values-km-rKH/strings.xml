@@ -218,69 +218,43 @@
     <string name="android_system_label" msgid="6577375335728551336">"ប្រព័ន្ធ​​ Android"</string>
     <string name="user_owner_label" msgid="6465364741001216388">"កម្មវិធី​ផ្ទាល់​ខ្លួន"</string>
     <string name="managed_profile_label" msgid="6260850669674791528">"កន្លែង​ធ្វើ​ការ"</string>
-    <string name="permgrouplab_costMoney" msgid="5429808217861460401">"សេវាកម្ម​ដែល​កាត់​លុយ​របស់​អ្នក"</string>
-    <string name="permgroupdesc_costMoney" msgid="3293301903409869495">"ធ្វើ​អ្វី​ដែល​អាច​កាត់​លុយ​របស់​អ្នក។"</string>
-    <string name="permgrouplab_messages" msgid="7521249148445456662">"សារ​របស់​អ្នក"</string>
-    <string name="permgroupdesc_messages" msgid="7821999071003699236">"អាន និង​សរសេរ​សារ SMS, អ៊ីមែល និង​សារ​ផ្សេងៗ​ទៀត​របស់​អ្នក។"</string>
-    <string name="permgrouplab_personalInfo" msgid="3519163141070533474">"ព័ត៌មាន​ផ្ទាល់ខ្លួន​របស់​អ្នក"</string>
-    <string name="permgroupdesc_personalInfo" msgid="8426453129788861338">"ចូល​ដំណើរការ​ព័ត៌មាន​ដោយ​ផ្ទាល់​អំពី​អ្នក​ ដែល​បា​ន​រក្សាទុក​ក្នុង​កាត​ទំនាក់ទំនង​របស់​អ្នក។​"</string>
+    <!-- no translation found for permgrouplab_contacts (3657758145679177612) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_contacts (1437393511338346185) -->
+    <skip />
+    <!-- no translation found for permgrouplab_location (7275582855722310164) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_location (536889867433972794) -->
+    <skip />
     <string name="permgrouplab_socialInfo" msgid="5799096623412043791">"ព័ត៌មាន​សង្គម​របស់​អ្នក"</string>
     <string name="permgroupdesc_socialInfo" msgid="7129842457611643493">"ចូល​ដំណើរការ​ព័ត៌មាន​ដោយ​ផ្ទាល់​អំពី​ទំនាក់ទំនង និង​ការ​ភ្ជាប់​សង្គម​របស់​អ្នក។"</string>
-    <string name="permgrouplab_location" msgid="635149742436692049">"ទីតាំង​របស់​អ្នក"</string>
-    <string name="permgroupdesc_location" msgid="5704679763124170100">"តាមដាន​ទីតាំង​ជាក់ស្ដែង​របស់​អ្នក។"</string>
-    <string name="permgrouplab_network" msgid="5808983377727109831">"ការ​ទាក់ទង​បណ្ដាញ"</string>
-    <string name="permgroupdesc_network" msgid="4478299413241861987">"ចូល​ដំណើរការ​លក្ខណៈ​​បណ្ដាញ​ផ្សេងៗ។"</string>
-    <string name="permgrouplab_bluetoothNetwork" msgid="1585403544162128109">"ប៊្លូធូស"</string>
-    <string name="permgroupdesc_bluetoothNetwork" msgid="5625288577164282391">"ចូល​ដំណើរការ​ឧបករណ៍ និង​បណ្ដាញ​តាម​ប៊្លូធូស។"</string>
-    <string name="permgrouplab_audioSettings" msgid="8329261670151871235">"ការ​កំណត់​អូឌីយ៉ូ"</string>
-    <string name="permgroupdesc_audioSettings" msgid="2641515403347568130">"ប្ដូរ​ការ​កំណត់​អូឌីយ៉ូ។"</string>
-    <string name="permgrouplab_affectsBattery" msgid="6209246653424798033">"ប៉ះពាល់​ដល់​ថ្ម"</string>
-    <string name="permgroupdesc_affectsBattery" msgid="6441275320638916947">"ប្រើ​លក្ខណៈ​ដែល​អាច​ប្រើ​ថាមពល​ថ្ម​យ៉ាង​រហ័ស។"</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"ប្រតិទិន"</string>
-    <string name="permgroupdesc_calendar" msgid="5777534316982184416">"​ចូល​ដំណើរការ​​ប្រតិទិន​\"និង​ព្រឹត្តិការណ៍​ដោយ​ផ្ទាល់​។"</string>
-    <string name="permgrouplab_dictionary" msgid="4148597128843641379">"អាន​វចនានុក្រម​អ្នក​ប្រើ"</string>
-    <string name="permgroupdesc_dictionary" msgid="7921166355964764490">"អាន​ពាក្យ​នៅ​ក្នុង​វចនានុក្រម​​អ្នក​ប្រើ​។"</string>
-    <string name="permgrouplab_writeDictionary" msgid="8090237702432576788">"សរសេរ​វចនានុក្រម​អ្នក​ប្រើ"</string>
-    <string name="permgroupdesc_writeDictionary" msgid="2711561994497361646">"បន្ថែម​ពាក្យ​ទៅ​វចនានុក្រម​អ្នក​ប្រើ។"</string>
+    <!-- no translation found for permgroupdesc_calendar (2116049656685591803) -->
+    <skip />
+    <!-- no translation found for permgrouplab_sms (228308803364967808) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_sms (3695085582674524761) -->
+    <skip />
+    <!-- no translation found for permgrouplab_dictionary (8114410334955871144) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_dictionary (7586787746354378335) -->
+    <skip />
     <string name="permgrouplab_bookmarks" msgid="1949519673103968229">"ចំណាំ​ និង​ប្រវត្តិ"</string>
     <string name="permgroupdesc_bookmarks" msgid="4169771606257963028">"ចូល​​ដំណើរការ​ចំណាំ និង​ប្រវត្តិ​កម្មវិធី​អ៊ីនធឺណិត​ដោយ​ផ្ទាល់។"</string>
-    <string name="permgrouplab_deviceAlarms" msgid="6117704629728824101">"រោទ៍"</string>
-    <string name="permgroupdesc_deviceAlarms" msgid="4769356362251641175">"កំណត់​នាឡិកា​រោទ៍"</string>
-    <string name="permgrouplab_voicemail" msgid="4162237145027592133">"សារ​ជា​សំឡេង"</string>
-    <string name="permgroupdesc_voicemail" msgid="2498403969862951393">"ចូល​ដំណើរការ​សារ​ជា​សំឡេង​ដោយ​ផ្ទាល់។"</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"មីក្រូ​ហ្វូន"</string>
-    <string name="permgroupdesc_microphone" msgid="7106618286905738408">"ចូល​ដំណើរការ​​មីក្រូហ្វូន​ដោយ​ផ្ទាល់ ​ដើម្បី​ថត​សំឡេង​។"</string>
+    <!-- no translation found for permgroupdesc_microphone (1296196977187629181) -->
+    <skip />
     <string name="permgrouplab_camera" msgid="4820372495894586615">"ម៉ាស៊ីន​ថត"</string>
-    <string name="permgroupdesc_camera" msgid="2933667372289567714">"ចូល​ដំណើរការ​ម៉ាស៊ីន​ថត​រូប ឬ​វីដេអូ​ដោយ​ផ្ទាល់។"</string>
-    <string name="permgrouplab_screenlock" msgid="8275500173330718168">"ចាក់សោ​​អេក្រង់"</string>
-    <string name="permgroupdesc_screenlock" msgid="7067497128925499401">"មាន​សមត្ថភាព​ប៉ះពាល់​ឥរិយាបថ​ការ​ចាក់​សោ​អេក្រង់​លើ​ឧបករណ៍​របស់​អ្នក។"</string>
-    <string name="permgrouplab_appInfo" msgid="8028789762634147725">"ព័ត៌មាន​កម្មវិធី​របស់​អ្នក"</string>
-    <string name="permgroupdesc_appInfo" msgid="3950378538049625907">"លទ្ធភាព​ប៉ះពាល់​ដល់​ឥរិយាបថ​កម្មវិធី​ផ្សេងៗ​លើ​ឧបករណ៍​របស់​អ្នក។"</string>
-    <string name="permgrouplab_wallpaper" msgid="3850280158041175998">"ផ្ទាំង​រូបភាព"</string>
-    <string name="permgroupdesc_wallpaper" msgid="5630417854750540154">"ប្ដូរ​ការ​កំណត់​ផ្ទាំង​រូបភាព​ឧបករណ៍"</string>
-    <string name="permgrouplab_systemClock" msgid="406535759236612992">"នាឡិកា"</string>
-    <string name="permgroupdesc_systemClock" msgid="3944359833624094992">"ប្ដូរ​ពេលវេលា ឬ​តំបន់​ពេលវេលា​ឧបករណ៍"</string>
-    <string name="permgrouplab_statusBar" msgid="2095862568113945398">"របារ​ស្ថានភាព"</string>
-    <string name="permgroupdesc_statusBar" msgid="6242593432226807171">"ប្ដូរ​ការ​កំណត់​របារ​ស្ថានភាព​ឧបករណ៍។"</string>
-    <string name="permgrouplab_syncSettings" msgid="3341990986147826541">"ការ​កំណត់​​​ធ្វើ​សម​កាល​កម្ម"</string>
-    <string name="permgroupdesc_syncSettings" msgid="7603195265129031797">"ចូល​ដំណើរការ​ការ​កំណត់​ធ្វើ​សម​កាល​កម្ម។"</string>
-    <string name="permgrouplab_accounts" msgid="3359646291125325519">"គណនី​របស់​អ្នក"</string>
-    <string name="permgroupdesc_accounts" msgid="4948732641827091312">"ចូល​ដំណើរការ​គណនី​ដែល​មាន។"</string>
-    <string name="permgrouplab_hardwareControls" msgid="7998214968791599326">"ពិនិត្យ​ផ្នែករឹង"</string>
-    <string name="permgroupdesc_hardwareControls" msgid="4357057861225462702">"ចូល​ដំណើរការ​ផ្នែក​រឹង​ដោយ​ផ្ទាល់​ក្នុង​ទូរស័ព្ទ។"</string>
-    <string name="permgrouplab_phoneCalls" msgid="9067173988325865923">"ហៅ​ទូរស័ព្ទ"</string>
-    <string name="permgroupdesc_phoneCalls" msgid="7489701620446183770">"តាមដាន ថត និង​ដំណើរការ​ការ​ហៅ​ទូរស័ព្ទ។"</string>
-    <string name="permgrouplab_systemTools" msgid="4652191644082714048">"ឧបករណ៍​ប្រព័ន្ធ"</string>
-    <string name="permgroupdesc_systemTools" msgid="8162102602190734305">"ចូល​ដំណើរការ​កម្រិត​ទាប និង​ពិនិត្យ​ប្រព័ន្ធ។"</string>
-    <string name="permgrouplab_developmentTools" msgid="3446164584710596513">"ឧបករណ៍​​អភិវឌ្ឍ"</string>
-    <string name="permgroupdesc_developmentTools" msgid="7058828032358142018">"លក្ខណៈ​ចាំបាច់​សម្រាប់​តែ​អ្នក​អភិវឌ្ឍ​កម្មវិធី។"</string>
-    <string name="permgrouplab_display" msgid="4279909676036402636">"ចំណុច​ប្រទាក់​អ្នក​ប្រើ​កម្មវិធី​ផ្សេងៗ"</string>
-    <string name="permgroupdesc_display" msgid="6051002031933013714">"ប្រសិទ្ធ​ភាព​ចំណុច​ប្រទាក់​អ្នក​ប្រើ​នៃ​កម្មវិធី​ផ្សេងៗ។"</string>
-    <string name="permgrouplab_storage" msgid="1971118770546336966">"ការ​ផ្ទុក"</string>
-    <string name="permgroupdesc_storage" product="nosdcard" msgid="7442318502446874999">"ចូល​ដំណើរការ​ឧបករណ៍​ផ្ទុក​យូអេសប៊ី។"</string>
-    <string name="permgroupdesc_storage" product="default" msgid="9203302214915355774">"ចូល​ដំណើរការ​កាត​អេសឌី"</string>
-    <string name="permgrouplab_accessibilityFeatures" msgid="7919025602283593907">"លក្ខណៈ​ភាព​ងាយស្រួល"</string>
-    <string name="permgroupdesc_accessibilityFeatures" msgid="4205196881678144335">"លក្ខណៈ​ដែល​ជា​បច្ចេកវិទ្យា​ជំនួយ​អាច​ស្នើ។"</string>
+    <!-- no translation found for permgroupdesc_camera (2429930670410559293) -->
+    <skip />
+    <!-- no translation found for permgrouplab_phone (5229115638567440675) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_phone (2016641188146068700) -->
+    <skip />
+    <!-- no translation found for permgrouplab_sensors (7416703484233940260) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_sensors (2987451839455524494) -->
+    <skip />
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"ទៅ​យក​មាតិកា​បង្អួច"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"ពិនិត្យ​មាតិកា​បង្អួច​ដែល​អ្នក​កំពុង​ទាក់ទង​ជា​មួយ។"</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"បើក​ការ​រក​មើល​​ដោយ​ប៉ះ"</string>
@@ -305,14 +279,8 @@
     <string name="permdesc_receiveSms" msgid="6424387754228766939">"ឲ្យ​កម្មវិធី​ទទួល និង​ដំណើរការ​​សារ MMS ។ មាន​ន័យ​ថា កម្មវិធី​អាច​ត្រួតពិនិត្យ​ ឬ​លុប​សារ​ដែល​បាន​ផ្ញើ​ទៅ​ឧបករណ៍​របស់​អ្នក ដោយ​​មិន​បង្ហាញ​អ្នក។"</string>
     <string name="permlab_receiveMms" msgid="1821317344668257098">"ទទួល​សារ​អត្ថបទ (MMS​)"</string>
     <string name="permdesc_receiveMms" msgid="533019437263212260">"ឲ្យ​កម្មវិធី​ទទួល និង​ដំណើរការ​​សារ​ MMS ។ វា​មាន​ន័យ​ថា កម្មវិធី​អាច​តាមដាន​ ឬ​លុប​សារ​ដែល​បាន​ផ្ញើ​ទៅ​ឧបករណ៍​របស់​អ្នក​ដោយ​មិន​បង្ហាញ​ពួកវា។"</string>
-    <string name="permlab_receiveEmergencyBroadcast" msgid="1803477660846288089">"ទទួល​ការ​ប្រកាស​ពេល​​​អាសន្ន"</string>
-    <string name="permdesc_receiveEmergencyBroadcast" msgid="848524070262431974">"ឲ្យ​កម្មវិធី​ទទួល​​ដំណើរការ​សារ​ប្រកាស​ពេល​អាសន្ន។ សិទ្ធិ​នេះ​មាន​តែ​​កម្មវិធី​ប្រព័ន្ធ​ប៉ុណ្ណោះ​​អាច​ប្រើ​បាន​។"</string>
-    <string name="permlab_readCellBroadcasts" msgid="1598328843619646166">"អាន​សារ​ប្រកាស​ចល័ត"</string>
-    <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"ឲ្យ​កម្មវិធី​អាន​សារ​ប្រកាស​ការ​ហៅ​ដែល​ឧបករណ៍​របស់​​អ្នក​បាន​ទទួល។ ការ​ជូន​ដំណឹង​ប្រកាស​ចល័ត​ត្រូវ​បាន​បញ្ជូន​ទៅ​ទីតាំង​មួយ​ចំនួន ដើម្បី​ព្រមាន​អ្នក​អំពី​ស្ថានភាព​អាសន្ន។ កម្មវិធី​ព្យាបាទ​អាច​ជ្រៀតជ្រែក​ការ​អនុវត្ត ឬ​ប្រតិបត្តិការ​ឧបករណ៍​របស់​អ្នក​​ពេល​ទទួល​ការ​ប្រកាស​ចល័ត​ពេល​អាសន្ន។"</string>
     <string name="permlab_sendSms" msgid="5600830612147671529">"ផ្ញើ​សារ SMS"</string>
     <string name="permdesc_sendSms" msgid="7094729298204937667">"ឲ្យ​កម្មវិធី​ផ្ញើ​សារ​ SMS ។ វា​អាច​គិត​ថ្លៃ​សេវាកម្ម​ដែល​មិន​រំពឹង​ទុក។ កម្មវិធី​ព្យាបាទ​អាច​គិត​ថ្លៃ​សេវាកម្ម​ពី​អ្នក​ ដោយ​ផ្ញើ​សារ​ដោយ​គ្មាន​ការ​បញ្ជាក់​របស់​អ្នក។"</string>
-    <string name="permlab_sendRespondViaMessageRequest" msgid="8713889105305943200">"ផ្ញើ​ព្រឹត្តិការណ៍​សារ​តាមរយៈ​ការ​ឆ្លើយតប"</string>
-    <string name="permdesc_sendRespondViaMessageRequest" msgid="7107648548468778734">"ឲ្យ​កម្មវិធី​ផ្ញើ​សំណើ​ទៅ​កម្មវិធី​ផ្ញើ​សារ ដើម្បី​គ្រប់គ្រង​ព្រឹត្តិការណ៍​សារ​តាម​រយៈ​ការ​ឆ្លើយតប​សម្រាប់​ការ​ហៅ​ចូល។"</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"អាន​សារ​អត្ថបទ​របស់​អ្នក (SMS ឬ MMS​)"</string>
     <string name="permdesc_readSms" product="tablet" msgid="2467981548684735522">"ឲ្យ​កម្មវិធី​​អាន​សារ SMS ដែល​មាន​ក្នុង​កុំព្យូទ័រ​បន្ទះ ឬ​ស៊ីម​កាត។ វា​ឲ្យ​កម្មវិធី​អាន​សារ SMS ទាក់ទង​នឹង​មាតិកា ឬ​ព័ត៌មាន​សម្ងាត់។"</string>
     <string name="permdesc_readSms" product="tv" msgid="5102425513647038535">"អនុញ្ញាតឲ្យកម្មវិធីអានសារ SMS ដែលបានផ្ទុកនៅក្នុងទូរទស្សន៍ ឬស៊ីមកាតរបស់អ្នក។ វាអនុញ្ញាតឲ្យកម្មវិធីអានសារ SMS ទាំងអស់ ដោយមិនគិតពីមាតិកា ឬព័ត៌មានសម្ងាត់ឡើយ។"</string>
@@ -323,188 +291,24 @@
     <string name="permdesc_writeSms" product="default" msgid="7268668709052328567">"ឲ្យ​កម្មវិធី​សរសេរ​សារ SMS ដែល​បាន​រក្សាទុក​ក្នុង​ទូរស័ព្ទ ឬ​​ស៊ីម​កាត។ កម្មវិធី​ព្យាបាទ​អាច​លុប​សារ​របស់​អ្នក។"</string>
     <string name="permlab_receiveWapPush" msgid="5991398711936590410">"ទទួល​សារ​អត្ថបទ (WAP​)"</string>
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"ឲ្យ​កម្មវិធី​ទទួល និង​ដំណើរការ​សារ WAP ។ សិទ្ធិ​នេះ​​មានលទ្ធភាព​តាមដាន ឬ​លុប​សារ​ដែល​បាន​ផ្ញើ​ឲ្យ​អ្នក​ដោយ​មិន​បង្ហា​ញ។"</string>
-    <string name="permlab_receiveBluetoothMap" msgid="7593811487142360528">"ទទួល​សារ​ប៊្លូធូស (MAP)"</string>
-    <string name="permdesc_receiveBluetoothMap" msgid="8656755936919466345">"ឲ្យ​កម្មវិធី​ទទួល និង​ដំណើរការ​សារ MAP ប៊្លូធូស។ មាន​ន័យ​ថា កម្មវិធី​អាច​តាមដាន​ ឬ​លុប​សារ​ដែល​បាន​ផ្ញើ​ទៅ​ឧបករណ៍​របស់​អ្នក​ដោយ​​មិន​បង្ហាញ​ពួកវា​ដល់​អ្នក។"</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"ទៅ​យក​កម្មវិធី​កំពុង​ដំណើរការ"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"ឲ្យ​កម្មវិធី​ទៅ​យក​ព័ត៌មាន​លម្អិត​អំពី​កិច្ចការ​ដែល​កំពុង​ដំណើរការ​បច្ចុប្បន្ន។ វា​អាច​ឲ្យ​កម្មវិធី​រកមើល​ព័ត៌មាន​ថា​តើ​កម្មវិធី​ណាមួយ​ត្រូវ​បាន​ប្រើ​លើ​ឧបករណ៍។"</string>
-    <string name="permlab_startTasksFromRecents" msgid="8990073877885690623">"ចាប់ផ្ដើម​ភារកិច្ច​ពី​ពេល​ថ្មីៗ"</string>
-    <string name="permdesc_startTasksFromRecents" msgid="7382133554871222235">"ឲ្យ​កម្មវិធី​ប្រើ ActivityManager.RecentTaskInfo ដើម្បី​ចាប់ផ្ដើម​ភារកិច្ច​ដែល​លែង​ប្រើ​ដែល​ត្រូវ​បាន​ត្រឡប់​ពី ActivityManager.getRecentTaskList() ។"</string>
-    <string name="permlab_interactAcrossUsers" msgid="7114255281944211682">"អន្តរកម្ម​តាម​​អ្នក​ប្រើ"</string>
-    <string name="permdesc_interactAcrossUsers" msgid="364670963623385786">"ឲ្យ​កម្មវិធី​អនុវត្ត​សកម្មភាព​ឆ្លង​អ្នកប្រើ​ផ្សេងៗ​​លើ​ឧបករណ៍។ កម្មវិធី​ព្យាបាទ​អាច​ប្រើ​វា ដើម្បី​បំពាន​ការ​ការពារ​រវាង​អ្នក​ប្រើ។"</string>
-    <string name="permlab_interactAcrossUsersFull" msgid="2567734285545074105">"អាជ្ញាប័ណ្ណ​ពេញលេញ​ ដើម្បី​ទាក់ទង​អ្នក​ប្រើ"</string>
-    <string name="permdesc_interactAcrossUsersFull" msgid="376841368395502366">"ឲ្យ​អន្តរកម្ម​ដែល​មាន​ទាំង​អស់​គ្រប់​អ្នក​ប្រើ។"</string>
-    <string name="permlab_manageUsers" msgid="1676150911672282428">"គ្រប់គ្រង​អ្នក​ប្រើ"</string>
-    <string name="permdesc_manageUsers" msgid="8409306667645355638">"ឲ្យ​កម្មវិធី​គ្រប់គ្រង​អ្នកប្រើ​លើ​ឧបករណ៍ រួមមាន​ការ​ច្រោះ បង្កើត និង​លុប។"</string>
-    <string name="permlab_getDetailedTasks" msgid="6229468674753529501">"ទៅ​យក​សេចក្ដី​លម្អិត​កម្មវិធី​កំពុង​ដំណើរការ"</string>
-    <string name="permdesc_getDetailedTasks" msgid="153824741440717599">"ឲ្យ​កម្មវិធី​ទៅ​យក​ព័ត៌មាន​លម្អិត​អំពី​កិច្ចការ​ដែល​កំពុង​ដំណើរការ​បច្ចុប្បន្ន។ កម្មវិធី​ព្យាបាទ​អាច​រកមើល​ព័ត៌មាន​ឯកជន​អំពី​កម្មវិធី​ផ្សេងៗ។"</string>
     <string name="permlab_reorderTasks" msgid="2018575526934422779">"តម្រៀប​កម្មវិធី​កំពុង​ដំណើរការ​ឡើងវិញ"</string>
     <string name="permdesc_reorderTasks" msgid="7734217754877439351">"ឲ្យ​កម្មវិធី​ផ្លាស់ទី​ភារកិច្ច​​ទៅ​ផ្ទៃ​ខាង​មុខ។​ កម្មវិធី​អាច​ធ្វើ​វា​ដោយ​គ្មាន​ការ​បញ្ចូល​របស់​អ្នក។"</string>
-    <string name="permlab_removeTasks" msgid="6821513401870377403">"បញ្ឈប់​ដំណើរការ​កម្មវិធី"</string>
-    <string name="permdesc_removeTasks" msgid="1394714352062635493">"ឲ្យ​កម្មវិធី​លុប​ភារកិច្ច​ និង​បញ្ឈប់​កម្មវិធី​របស់​ពួកវា។ កម្មវិធី​ព្យាបាទ​អាច​រំខាន​ឥរិយាបថ​កម្មវិធី​ផ្សេងៗ។"</string>
-    <string name="permlab_manageActivityStacks" msgid="7391191384027303065">"គ្រប់គ្រង​ជង់​សកម្មភាព"</string>
-    <string name="permdesc_manageActivityStacks" msgid="1615881933034084440">"ឲ្យ​កម្មវិធី​បន្ថែម, លុប និង​កែ​ជង់​សកម្មភាព​ដែល​កម្មវិធី​ផ្សេង​ដំណើរការ។ កម្មវិធី​ព្យាបាទ​អាច​រំខាន​ឥរិយាបថ​កម្មវិធី។"</string>
-    <string name="permlab_startAnyActivity" msgid="2918768238045206456">"ចាប់ផ្ដើម​សកម្មភាព​ណា​មួយ"</string>
-    <string name="permdesc_startAnyActivity" msgid="997823695343584001">"ឲ្យ​កម្មវិធី​ចាប់ផ្ដើម​សកម្មភាព​ណា​មួយ ទាក់ទង​នឹង​សិទ្ធិ​ការពារ​ ឬ​ស្ថានភាព​បាន​នាំចេញ។"</string>
-    <string name="permlab_setScreenCompatibility" msgid="6975387118861842061">"កំណត់​ភាព​ឆប​គ្នា​នៃ​អេក្រង់"</string>
-    <string name="permdesc_setScreenCompatibility" msgid="692043618693917374">"ឲ្យ​កម្មវិធី​ពិនិត្យ​របៀប​​ត្រូវ​​គ្នា​របស់​​អេក្រង់​នៃ​កម្មវិធី​ផ្សេងៗ។ កម្មវិធី​ព្យាបាទ​អាច​បំផ្លាញ​ឥរិយាបថ​នៃ​កម្មវិធី​ផ្សេងៗ។"</string>
-    <string name="permlab_setDebugApp" msgid="3022107198686584052">"បើក​ការ​កែ​កំហុស​កម្មវិធី"</string>
-    <string name="permdesc_setDebugApp" msgid="4474512416299013256">"ឲ្យ​កម្មវិធី​បើក​ការ​កែ​កំហុស​សម្រាប់​កម្មវិធី​ផ្សេង​ទៀត។ កម្មវិធី​ព្យាបាទ​អាច​ប្រើ​វា ដើម្បី​បញ្ឈប់​កម្មវិធី​ផ្សេង។"</string>
-    <string name="permlab_changeConfiguration" msgid="4162092185124234480">"ប្ដូរ​ការ​កំណត់​បង្ហាញ​ប្រព័ន្ធ"</string>
-    <string name="permdesc_changeConfiguration" msgid="4372223873154296076">"ឲ្យ​កម្មវិធី​ប្ដូរ​ការ​កំណត់​​រចនាសម្ព័ន្ធ​បច្ចុប្បន្ន ដូច​ជា​មូលដ្ឋាន ឬ​ទំហំ​ពុម្ពអក្សរ​ទាំងអស់។"</string>
     <string name="permlab_enableCarMode" msgid="5684504058192921098">"បើក​របៀប​រថយន្ត"</string>
     <string name="permdesc_enableCarMode" msgid="4853187425751419467">"ឲ្យ​កម្មវិធី​បើក​របៀប​រថយន្ត។"</string>
     <string name="permlab_killBackgroundProcesses" msgid="3914026687420177202">"បិទ​កម្មវិធី​ផ្សេងៗ"</string>
     <string name="permdesc_killBackgroundProcesses" msgid="4593353235959733119">"ឲ្យ​កម្មវិធី​បញ្ឈប់​ដំណើរការ​​ផ្ទៃ​ខាង​ក្រោយ​នៃ​កម្មវិធី​ផ្សេងៗ​។ វា​អាច​ធ្វើ​ឲ្យ​កម្មវិធី​ផ្សេង​ឈប់​ដំណើរការ។"</string>
-    <string name="permlab_forceStopPackages" msgid="2329627428832067700">"បង្ខំ​ឲ្យ​បញ្ឈប់​កម្មវិធី​ផ្សេង"</string>
-    <string name="permdesc_forceStopPackages" msgid="5253157296183940812">"ឲ្យ​កម្មវិធី​បញ្ឈប់​កម្មវិធី​ផ្សេង​ដោយ​បង្ខំ។"</string>
-    <string name="permlab_forceBack" msgid="652935204072584616">"បង្ខំ​ឲ្យ​កម្មវិធី​បិទ"</string>
-    <string name="permdesc_forceBack" msgid="3892295830419513623">"ឲ្យ​កម្មវិធី​បង្ខំ​សកម្មភាព​ផ្សេងៗ​ដែល​នៅ​ក្នុង​ផ្ទៃ​ខាង​មុខ​បិទ និង​ទៅ​ក្នុង​ផ្ទៃ​ខាង​ក្រោយ។ មិន​គួរ​ចាំបាច់​សម្រាប់​កម្មវិធី​ធម្មតា​ទេ។"</string>
-    <string name="permlab_dump" msgid="1681799862438954752">"ទៅ​យក​ស្ថានភាព​ខាង​ក្នុង​ប្រព័ន្ធ"</string>
-    <string name="permdesc_dump" msgid="1778299088692290329">"ឲ្យ​កម្មវិធី​ទៅ​យក​ស្ថានភាព​ខាង​ក្នុង​នៃ​ប្រព័ន្ធ។ កម្មវិធី​ព្យាបាទ​អាច​ទៅ​យក​ព័ត៌មាន​ឯកជន​និង​មាន​សុវត្ថិភាព​ផ្សេងៗ​ដែល​ពួកវា​មិន​គួរ​ត្រូវការ​តាម​ធម្មតា។"</string>
-    <string name="permlab_retrieve_window_content" msgid="8022588608994589938">"ទៅ​យក​មាតិកា​អេក្រង់"</string>
-    <string name="permdesc_retrieve_window_content" msgid="3193269069469700265">"ឲ្យ​កម្មវិធី​ទៅ​យក​មាតិកា​បង្អួច​សកម្ម។ កម្មវិធី​ព្យាបាទ​អាច​ទៅ​យក​មាតិកា​បង្អួច​ទាំង​មូល និង​ពិនិត្យ​អត្ថបទ​ទាំងអស់ លើកលែង​តែ​ពាក្យ​សម្ងាត់។"</string>
-    <string name="permlab_temporary_enable_accessibility" msgid="2312612135127310254">"បើក​មធ្យោបាយ​ងាយស្រួល​ជា​បណ្ដោះ​អាសន្ន"</string>
-    <string name="permdesc_temporary_enable_accessibility" msgid="8079456293182975464">"ឲ្យ​កម្មវិធី​បើក​ភាព​ងាយស្រួល​លើ​ឧបករណ៍​ជា​បណ្ដោះអាសន្ន។ កម្មវិធី​ព្យាបាទ​អាច​បើក​ភាព​ងាយស្រួល​ដោយ​មិន​ឲ្យ​អ្នក​ប្រើ​ដឹង។"</string>
-    <string name="permlab_retrieveWindowToken" msgid="7154762602367758602">"ទៅ​យក​និមិត្តសញ្ញា​​បង្អួច"</string>
-    <string name="permdesc_retrieveWindowToken" msgid="668173747687795074">"ឲ្យ​កម្មវិធី​ទៅ​យក​និមិត្តសញ្ញា​បង្អួច។ កម្មវិធី​ព្យាបាទ​អាច​អនុវត្ត​អន្តរកម្ម​ដែល​មិន​បាន​អនុញ្ញាត​ជា​មួយ​​បង្អួច​កម្មវិធី​ដោយ​ក្លែង​ធ្វើ​ជា​ប្រព័ន្ធ។"</string>
-    <string name="permlab_frameStats" msgid="7056374987314361639">"ទៅ​យក​ស្ថិតិ​ស៊ុម"</string>
-    <string name="permdesc_frameStats" msgid="4758001089491284919">"ឲ្យ​កម្មវិធី​ប្រមូល​ស្ថិតិ​ស៊ុម​។ កម្មវិធី​ព្យាបាទ​អាច​សង្កេត​មើល​បង្អួច​ស្ថិតិ​ស៊ុម​ពី​កម្មវិធី​ផ្សេង។"</string>
-    <string name="permlab_filter_events" msgid="8675535648807427389">"ច្រោះ​ព្រឹត្តិការណ៍"</string>
-    <string name="permdesc_filter_events" msgid="8006236315888347680">"ឲ្យ​កម្មវិធី​ចុះ​ឈ្មោះ​តម្រង​បញ្ចូល​​ដែល​ច្រោះ​​ព្រឹត្តិការណ៍​របស់​អ្នក​ប្រើ​ទាំងអស់​មុន​ពេល​ពួក​វា​ត្រូវ​បាន​ផ្ដាច់។ កម្មវិធី​ព្យាបាទ​អាច​ពិនិត្យ​ចំណុច​ប្រទាក់​ប្រព័ន្ធ​ដោយ​គ្មាន​អំពើ​ពី​អ្នក​ប្រើ។"</string>
-    <string name="permlab_shutdown" msgid="7185747824038909016">"បិទ​​ដោយ​ផ្នែក"</string>
-    <string name="permdesc_shutdown" msgid="7046500838746291775">"ដាក់​កម្មវិធី​គ្រប់គ្រង​​សកម្មភាព​ក្នុង​ស្ថាន​ភាព​បិទ។ មិន​អនុវត្ត​ការ​បិទ​ពេញលេញ​ទេ។"</string>
-    <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"ការ​ពារ​​ការ​ប្ដូរ​កម្មវិធី"</string>
-    <string name="permdesc_stopAppSwitches" msgid="8262195802582255021">"ការ​ពារ​អ្នក​ប្រើ​មិន​ឲ្យ​ប្ដូរ​​ទៅ​កម្មវិធី​ផ្សេង។"</string>
-    <string name="permlab_getTopActivityInfo" msgid="2537922311411546016">"យក​ព័ត៌មាន​កម្មវិធី​បច្ចុប្បន្ន"</string>
-    <string name="permdesc_getTopActivityInfo" msgid="2512448855496067131">"ឲ្យ​ម្ចាស់​ទៅ​យក​ព័ត៌មាន​ផ្ទាល់ខ្លួន​អំពី​កម្មវិធី​បច្ចុប្បន្ន​ក្នុង​ផ្ទៃ​ខាង​មុខ​នៃ​អេក្រង់។"</string>
-    <string name="permlab_runSetActivityWatcher" msgid="892239094867182656">"តាមដាន និង​ពិនិត្យ​ការ​ចាប់ផ្ដើម​កម្មវិធី"</string>
-    <string name="permdesc_runSetActivityWatcher" msgid="6003603162578577406">"ឲ្យ​កម្មវិធី​តាមដាន និង​ពិនិត្យ​វិធី​ដែល​ប្រព័ន្ធ​ចាប់ផ្ដើម​​សកម្មភាព។ កម្មវិធី​ព្យាបាទ​អាច​​សម្របសម្រួល​ប្រព័ន្ធ​ទាំង​ស្រុង។ សិទ្ធិ​នេះ​ចាំបាច់​សម្រាប់​តែ​ការ​អភិវឌ្ឍ មិន​សម្រាប់​​ប្រើ​ធម្ម​តា​ទេ។"</string>
-    <string name="permlab_broadcastPackageRemoved" msgid="2576333434893532475">"ផ្ញើ​កញ្ចប់​​ការ​ប្រកាស​បាន​យកចេញ"</string>
-    <string name="permdesc_broadcastPackageRemoved" msgid="6621901216207931089">"ឲ្យ​កម្មវិធី​ប្រកាស​ការ​ជូន​ដំណឹង​ថា កញ្ចប់​កម្មវិធី​ត្រូវ​បាន​លុប​។ កម្មវិធី​ព្យាបាទ​អាច​ប្រើ​វា ដើម្បី​​បញ្ឈប់​កម្មវិធី​ដែល​កំពុង​ដំណើរ​ការ​ផ្សេង​ៗ។"</string>
-    <string name="permlab_broadcastSmsReceived" msgid="5689095009030336593">"ផ្ញើ​ការ​ប្រកាស​បាន​ទទួល SMS"</string>
-    <string name="permdesc_broadcastSmsReceived" msgid="4152037720034365492">"ឲ្យ​កម្មវិធី​ប្រកាស​ការ​ជូន​ដំណឹង​​ការ​ទទួល​សារ​ SMS ។ កម្មវិធី​ព្យាបាទ​អាច​ប្រើ​វា​​ដើម្បី​​បន្លំ​សារ SMS ចូល។"</string>
-    <string name="permlab_broadcastWapPush" msgid="3145347413028582371">"ផ្ញើ​ការ​ប្រកាស​បាន​ទទួល​ WAP-PUSH"</string>
-    <string name="permdesc_broadcastWapPush" msgid="4783402525039442729">"ឲ្យ​កម្មវិធី​ប្រកាស​ការ​ជូន​ដំណឹង​ថា​បាន​ទទួល​សារ WAP PUSH ។ កម្មវិធី​ព្យាបាទ​អាច​ប្រើ​វា​ដើម្បី​​ក្លែង​​បង្កាន់ដៃ​សារ MMS ឬ​ជំនួស​មាតិកា​ទំព័រ​បណ្ដាញ​ណាមួយ​ស្ងាត់​ៗ​​​ដោយ​អ្វី​ដែល​ក្លែងក្លាយ។"</string>
-    <string name="permlab_setProcessLimit" msgid="2451873664363662666">"កំណត់​ចំនួន​ដំណើរការ​ដែល​កំពុង​ដំណើរការ"</string>
-    <string name="permdesc_setProcessLimit" msgid="7318061314040879542">"ឲ្យ​កម្មវិធី​ពិនិត្យ​ចំនួន​ដំណើរការ​អតិបរមា​ដែល​នឹង​ដំណើរការ។ មិន​ចាំបាច់​សម្រាប់​កម្មវិធី​ធម្មតា​ទេ។"</string>
-    <string name="permlab_setAlwaysFinish" msgid="550958507798796965">"បង្ខំ​​ឲ្យ​បិទ​កម្មវិធី​ក្នុង​ផ្ទៃ​ខាង​ក្រោយ"</string>
-    <string name="permdesc_setAlwaysFinish" msgid="7471310652868841499">"ឲ្យ​កម្មវិធី​ពិនិត្យ​ថា​តើ​សកម្មភាព​​ត្រូវ​បាន​បញ្ចប់​ជា​និច្ច​ដរាប​ណា​ពួកគេ​​ទៅ​ក្នុង​ផ្ទៃ​ខាង​ក្រោយ។ មិន​ចាំបាច់​សម្រាប់​កម្មវិធី​ធម្មតា​ទេ។"</string>
-    <string name="permlab_batteryStats" msgid="2789610673514103364">"អាន​ស្ថិតិ​ថ្ម"</string>
-    <string name="permdesc_batteryStats" msgid="5897346582882915114">"ឲ្យ​កម្មវិធី​អាន​ទិន្នន័យ​ប្រើ​ថ្ម​កម្រិត​ទាប​បច្ចុប្បន្ន។ អាច​ឲ្យ​កម្មវិធី​ស្វែងយល់​ព័ត៌មាន​លម្អិត​អំពី​កម្មវិធី​ដែល​អ្នក​ប្រើ។"</string>
-    <string name="permlab_updateBatteryStats" msgid="3719689764536379557">"កែ​ស្ថិតិ​ថ្ម"</string>
-    <string name="permdesc_updateBatteryStats" msgid="6862817857178025002">"ឲ្យ​កម្មវិធី​កែ​ស្ថិតិ​ថ្ម​ដែល​បាន​ប្រមូល។ មិន​សម្រាប់​ប្រើ​ដោយ​កម្មវិធី​ធម្មតា​ទេ។"</string>
-    <string name="permlab_getAppOpsStats" msgid="1508779687436585744">"ទៅ​យក​ស្ថិតិ​ប្រតិបត្តិការ​កម្មវិធី"</string>
-    <string name="permdesc_getAppOpsStats" msgid="6243887041577912877">"ឲ្យ​កម្មវិធី​ទៅ​យក​ស្ថិតិ​ប្រតិបត្តិការ​កម្មវិធី​បាន​ប្រមូល។ មិន​សម្រាប់​ប្រើ​ដោយ​កម្មវិធី​ធម្មតា។"</string>
-    <string name="permlab_updateAppOpsStats" msgid="8829097373851521505">"កែ​ស្ថិតិ​ប្រតិបត្តិការ​​កម្មវិធី"</string>
-    <string name="permdesc_updateAppOpsStats" msgid="50784596594403483">"ឲ្យ​កម្មវិធី​កែ​ស្ថិតិ​ប្រតិបត្តិការ​កម្មវិធី​បាន​ប្រមូល។ មិន​សម្រាប់​ប្រើ​ដោយ​កម្មវិធី​ធម្មតា។"</string>
-    <string name="permlab_backup" msgid="470013022865453920">"ពិនិត្យ​ការ​ស្ដារ និង​បម្រុង​ទុក​ប្រព័ន្ធ"</string>
-    <string name="permdesc_backup" msgid="6912230525140589891">"ឲ្យ​កម្មវិធី​ពិនិត្យ​​យន្តការ​​បម្រុងទុក​ និង​ស្ដារ​ឡើងវិញ​របស់​ប្រព័ន្ធ។ មិន​សម្រាប់​ប្រើ​ដោយ​កម្មវិធី​ធម្មតា​ទេ។"</string>
-    <string name="permlab_confirm_full_backup" msgid="5557071325804469102">"បញ្ជាក់​​ប្រតិបត្តិការ​ស្ដារ​ឡើងវិញ ឬ​បម្រុង​ទុក​ពេញលេញ"</string>
-    <string name="permdesc_confirm_full_backup" msgid="1748762171637699562">"ឲ្យ​កម្មវិធី​ចាប់ផ្ដើម​ចំណុច​ប្រទាក់​​បញ្ជាក់​ការ​បម្រុង​ទុក​ពេញលេញ។ មិន​សម្រាប់​ប្រើ​ដោយ​កម្មវិធី​ធម្មតា​ទេ។"</string>
-    <string name="permlab_internalSystemWindow" msgid="2148563628140193231">"បង្ហាញ​បង្អួច​គ្មាន​សិទ្ធិ"</string>
-    <string name="permdesc_internalSystemWindow" msgid="7458387759461466397">"ឲ្យ​កម្មវិធី​បង្កើត​បង្អួច​​សម្រាប់​ប្រើ​ដោយ​ចំណុច​ប្រទាក់​អ្នកប្រើ​ប្រព័ន្ធ​ខាង​ក្នុង។ មិន​សម្រាប់​ប្រើ​ដោយ​កម្មវិធី​ធម្មតា​ទេ។"</string>
     <string name="permlab_systemAlertWindow" msgid="3543347980839518613">"គូរ​លើ​កម្មវិធី​ផ្សេង"</string>
     <string name="permdesc_systemAlertWindow" msgid="8584678381972820118">"ឲ្យ​​កម្មវិធី​គូរ​លើ​ផ្នែក​ខាង​លើ​នៃ​កម្មវិធី​ផ្សេងៗ ឬ​ជា​ផ្នែក​នៃ​ចំណុច​ប្រទាក់។ វា​អាច​រំខាន​ការ​ប្រើ​ចំណុច​ប្រទាក់​របស់​អ្នក​​ក្នុង​កម្មវិធី​ណាមួយ ឬ​ប្ដូរ​អ្វី​ដែល​អ្នក​គិត​ថា​អ្នក​កំពុង​មើល​ក្នុង​កម្មវិធី​ផ្សេងៗ។"</string>
-    <string name="permlab_setAnimationScale" msgid="2805103241153907174">"កែ​ល្បឿន​ចលនា​សកល"</string>
-    <string name="permdesc_setAnimationScale" msgid="7690063428924343571">"ឲ្យ​កម្មវិធី​ប្ដូរ​ល្បឿន​ចលនា​សកល (ចលនា​លឿន​ ឬ​យឺត) នៅ​ពេលណា​មួយ។"</string>
-    <string name="permlab_manageAppTokens" msgid="1286505717050121370">"គ្រប់គ្រង​និមិត្តសញ្ញា​កម្មវិធី"</string>
-    <string name="permdesc_manageAppTokens" msgid="8043431713014395671">"ឲ្យ​កម្មវិធី​បង្កើត និង​គ្រប់គ្រង​និមិត្តសញ្ញា​ផ្ទាល់​របស់​ពួក​វា ដោយ​ឆ្លង​កាត់​លំដាប់ Z ធម្មតា​របស់​វា។ មិន​គួរ​​ចាំបាច់​សម្រាប់​កម្មវិធី​ធម្មតា​ទេ។"</string>
-    <string name="permlab_freezeScreen" msgid="4708181184441880175">"បង្ក​ក​​អេក្រង់"</string>
-    <string name="permdesc_freezeScreen" msgid="8558923789222670064">"ឲ្យ​កម្មវិធី​បង្កក​អេក្រង់​ជា​បណ្ដោះអាសន្ន​សម្រាប់​​ការ​​ផ្លាស់ប្ដូរ​ពេញ​អេក្រង់។"</string>
-    <string name="permlab_injectEvents" msgid="1378746584023586600">"ចុច​គ្រាប់ចុច និង​គ្រប់គ្រង​ប៊ូតុង"</string>
-    <string name="permdesc_injectEvents" product="tablet" msgid="206352565599968632">"ឲ្យ​កម្មវិធី​ផ្ដល់​ព្រឹត្តិការណ៍​បញ្ចូល​ផ្ទាល់​ខ្លួន​(ចុច​គ្រាប់ចុច ។ល។) ទៅ​កម្មវិធី​ផ្សេង។​ កម្មវិធី​ព្យាបាទ​អាច​ប្រើ​វា​ដើម្បី​គ្រប់គ្រង​កុំព្យូទ័រ​បន្ទះ។"</string>
-    <string name="permdesc_injectEvents" product="tv" msgid="4681361983270791611">"អនុញ្ញាតឲ្យកម្មវិធីចែកចាយព្រឹត្តិការណ៍ធាតុបញ្ចូលដោយផ្ទាល់របស់វា (ប៊ូតុងចុច ជាដើម) ទៅកម្មវិធីផ្សេងទៀត។ កម្មវិធីព្យាបាទអាចប្រើវាដើម្បីគ្រប់គ្រងទូរទស្សន៍របស់អ្នក។"</string>
-    <string name="permdesc_injectEvents" product="default" msgid="653128057572326253">"ឲ្យ​កម្មវិធី​ផ្ដល់​ព្រឹត្តិការណ៍​បញ្ចូល​ផ្ទាល់​ខ្លួន​របស់​វា (ចុច​គ្រាប់​ចុច ។ល។) ចំពោះ​កម្មវិធី​ផ្សេងៗ។ កម្មវិធី​ព្យាបាទ​អាច​ប្រើ​វា​ដើម្បី​គ្រប់គ្រង​ទូរស័ព្ទ។"</string>
-    <string name="permlab_readInputState" msgid="469428900041249234">"កត់ត្រា​នូវ​អ្វី​ដែល​អ្នក​វាយ​ និង​សកម្មភាព​ដែល​អ្នក​បាន​យក"</string>
-    <string name="permdesc_readInputState" msgid="8387754901688728043">"ឲ្យ​កម្មវិធី​មើល​គ្រាប់​ចុច​ដែល​អ្នក​ចុច​ពេល​មាន​អន្តរកម្ម​ជា​មួយ​កម្មវិធី​ផ្សេង (ដូចជា បញ្ចូល​ពាក្យ​សម្ងាត់)។ មិន​គួរ​ចាំបាច់​សម្រាប់​កម្មវិធី​ធម្មតា​ទេ។"</string>
-    <string name="permlab_bindInputMethod" msgid="3360064620230515776">"ចង​ទៅ​វិធីសាស្ត្រ​បញ្ចូល"</string>
-    <string name="permdesc_bindInputMethod" msgid="3250440322807286331">"ឲ្យ​ម្ចាស់​ចង​ចំណុច​ប្រទាក់​កម្រិត​កំពូល​នៃ​វិធី​សាស្ត្រ​បញ្ចូល។ មិន​គួរ​​ចាំបាច់​សម្រាប់​កម្មវិធី​ធម្មតា​ទេ។"</string>
-    <string name="permlab_bindAccessibilityService" msgid="5357733942556031593">"ចង​សេវា​កម្ម​ភាព​មធ្យោបាយ​ងាយស្រួល​"</string>
-    <string name="permdesc_bindAccessibilityService" msgid="7034615928609331368">"ឲ្យ​​ម្ចាស់​ចង​ចំណុច​ប្រទាក់​កម្រិត​កំពូល​នៃ​សេវាកម្ម​ភាព​ងាយស្រួល។ មិន​គួរ​ចាំបាច់​សម្រាប់​កម្មវិធី​ធម្មតា​ទេ។"</string>
-    <string name="permlab_bindPrintService" msgid="8462815179572748761">"ចង​សេវាកម្ម​​បោះពុម្ព"</string>
-    <string name="permdesc_bindPrintService" msgid="7960067623209111135">"ឲ្យ​ម្ចាស់​ចង​ចំណុច​ប្រទាក់​កម្រិត​កំពូល​នៃ​សេវាកម្ម​ធាតុ​ក្រាហ្វិក។ មិន​គួរ​​ចាំបាច់​សម្រាប់​កម្មវិធី​ធម្មតា​ទេ។"</string>
-    <string name="permlab_bindPrintSpoolerService" msgid="6807762783744125954">"ភ្ជាប់​ទៅ​សេវាកម្ម print spooler"</string>
-    <string name="permdesc_bindPrintSpoolerService" msgid="3680552285933318372">"អនុញ្ញាត​ឲ្យ​ម្ចាស់​ភ្ជាប់​ទៅ​ចំណុច​ប្រទាក់​កម្រិត​កំពូល​នៃ​សេវាកម្ម print spooler ។ មិន​គួរ​ទាមទារ​សម្រាប់​កម្មវិធី​ធម្មតា​ទេ។"</string>
-    <string name="permlab_bindNfcService" msgid="2752731300419410724">"ភ្ជាប់​ជាមួយ​សេវាកម្ម NFC"</string>
-    <string name="permdesc_bindNfcService" msgid="6120647629174066862">"អនុញ្ញាត​ឲ្យ​​ភ្ជាប់​​​បញ្ជី​ជាមួយ​​កម្មវិធី​ដែល​ត្រូវ​បាន​ត្រាប់​តាម​​កាត NFC ។ មិន​គួរ​ត្រូវ​​ការ​សម្រាប់​កម្មវិធី​ធម្មតា​។"</string>
-    <string name="permlab_bindTextService" msgid="7358378401915287938">"ចង​សេវា​កម្ម​អត្ថបទ"</string>
-    <string name="permdesc_bindTextService" msgid="8151968910973998670">"ឲ្យ​ម្ចាស់​ចង​ចំណុច​ប្រទាក់​កម្រិត​កំពូល​នៃ​សេវាកម្ម​អត្ថបទ (ឧ. SpellCheckerService) ។ មិន​គួរ​ប្រើ​សម្រាប់​កម្មវិធី​ធម្មតា​ទេ។"</string>
-    <string name="permlab_bindVpnService" msgid="4708596021161473255">"ចង​ជា​មួយ​សេវាកម្ម VPN"</string>
-    <string name="permdesc_bindVpnService" msgid="2067845564581693905">"ឲ្យ​ម្ចាស់​ចង​ចំណុច​ប្រទាក់​កម្រិត​កំពូល​នៃ​សេវាកម្ម Vpn ។​ មិន​គួរ​ចាំបាច់​សម្រាប់​កម្មវិធី​ធម្មតា​ទេ។"</string>
-    <string name="permlab_bindWallpaper" msgid="8716400279937856462">"ចង​ទៅ​ផ្ទាំង​រូបភាព"</string>
-    <string name="permdesc_bindWallpaper" msgid="7108428692595491668">"ឲ្យ​ម្ចាស់​ចង​ចំណុចប្រទាក់​កម្រិត​កំពូល​នៃ​ផ្ទាំង​រូបភាព។ មិន​គួរ​ចាំបាច់​សម្រាប់​កម្មវិធី​ធម្មតា​ទេ។"</string>
-    <string name="permlab_bindVoiceInteraction" msgid="5334852580713715068">"ភ្ជាប់​ទៅ​​អ្នក​សហការ​សំឡេង"</string>
-    <string name="permdesc_bindVoiceInteraction" msgid="2345721766501778101">"អនុញ្ញាត​ឲ្យ​ម្ចាស់​ភ្ជាប់​ទៅ​ចំណុច​ប្រទាក់​កម្រិត​កំពូល​​របស់​សេវាកម្ម​អន្តរកម្ម​សំឡេង។ មិន​គួរ​ចាំបាច់​សម្រាប់​កម្មវិធី​ធម្មតា​ទេ។"</string>
-    <string name="permlab_manageVoiceKeyphrases" msgid="1252285102392793548">"គ្រប់គ្រង​ឃ្លា​សំឡេង"</string>
-    <string name="permdesc_manageVoiceKeyphrases" msgid="8476560722907530008">"អនុញ្ញាត​ឲ្យ​ម្ចាស់​គ្រប់គ្រង​ឃ្លា​​សម្រាប់​​ការ​រក​ឃើញ​​​ពាក្យ​​ជា​សំឡេង។ មិន​គួរ​ចាំបាច់​សម្រាប់​កម្មវិធី​ធម្មតា​ទេ។"</string>
-    <string name="permlab_bindRemoteDisplay" msgid="1782923938029941960">"ភ្ជាប់​ទៅ​ការ​បង្ហាញ​ពី​ចម្ងាយ"</string>
-    <string name="permdesc_bindRemoteDisplay" msgid="1261242718727295981">"អនុញ្ញាត​ឲ្យ​ម្ចាស់​ភ្ជាប់​​ទៅ​ចំណុច​ប្រទាក់​កម្រិត​កំពូល​នៃ​ការ​បង្ហាញ​ពី​ចម្ងាយ។ មិន​គួរ​ចាំបាច់​សម្រាប់​កម្មវិធី​ធម្មតា​ទេ។"</string>
-    <string name="permlab_bindRemoteViews" msgid="5697987759897367099">"ចង​សេវា​កម្ម​ធាតុ​ក្រាហ្វិក​"</string>
-    <string name="permdesc_bindRemoteViews" msgid="4717987810137692572">"ឲ្យ​ម្ចាស់​ចង​ចំណុច​ប្រទាក់​កម្រិត​កំពូល​នៃ​សេវាកម្ម​ធាតុ​ក្រាហ្វិក។ មិន​គួរ​​ចាំបាច់​សម្រាប់​កម្មវិធី​ធម្មតា​ទេ។"</string>
-    <string name="permlab_bindRouteProvider" msgid="4869394607915096847">"ភ្ជាប់​ទៅ​សេវាកម្ម​ក្រុមហ៊ុន​ផ្ដល់​ច្រក"</string>
-    <string name="permdesc_bindRouteProvider" msgid="4703804520859960329">"អនុញ្ញាត​ឲ្យ​ម្ចាស់​ភ្ជាប់​ទៅ​ក្រុមហ៊ុន​ផ្ដល់​​ច្រក​ដែល​បាន​ចុះ​ឈ្មោះ។ មិន​គួរ​ចាំបាច់​សម្រាប់​កម្មវិធី​ធម្មតា​ទេ។"</string>
-    <string name="permlab_bindDeviceAdmin" msgid="8704986163711455010">"ទាក់ទង​ជា​មួយ​អ្នកគ្រប់គ្រង​ឧបករណ៍"</string>
-    <string name="permdesc_bindDeviceAdmin" msgid="569715419543907930">"ឲ្យ​ម្ចាស់​ផ្ញើ​គោលបំណង​​ទៅ​អ្នក​គ្រប់គ្រង​ឧបករណ៍។ មិន​គួរ​ចាំបាច់​សម្រាប់​កម្មវិធី​ធម្មតា​ទេ។"</string>
-    <string name="permlab_bindTvInput" msgid="5601264742478168987">"ភ្ជាប់​ទៅ​ការ​បញ្ចូល​ទូរទស្សន៍"</string>
-    <string name="permdesc_bindTvInput" msgid="2371008331852001924">"អនុញ្ញាត​ឲ្យ​ម្ចាស់​ភ្ជាប់​ទៅ​ចំណុចប្រទាក់​កម្រិត​ខ្ពស់​នៃ​ការ​បញ្ចូល​ទូរទស្សន៍។ មិន​គួរ​ចាំបាច់​សម្រាប់​កម្មវិធី​ធម្មតា​ទេ។"</string>
-    <string name="permlab_modifyParentalControls" msgid="4611318225997592242">"កែប្រែ​ការ​ត្រួតពិនិត្យ​មាតាបិតា"</string>
-    <string name="permdesc_modifyParentalControls" msgid="7438482894162282039">"អនុញ្ញាត​ឲ្យ​ម្ចាស់​​កែប្រែ​ទិន្នន័យ​ការ​ត្រួតពិនិត្យ​មាតាបិតា​​របស់​ប្រព័ន្ធ​។ គួរ​តែ​មិន​ត្រូវការ​សម្រាប់​កម្មវិធី​ធម្មតា​។"</string>
-    <string name="permlab_manageDeviceAdmins" msgid="4248828900045808722">"បន្ថែម​ ឬ​លុប​កម្មវិធី​គ្រប់គ្រង​​​ឧបករណ៍​​"</string>
-    <string name="permdesc_manageDeviceAdmins" msgid="5025608167709942485">"អនុញ្ញាត​​​ឲ្យ​ម្ចាស់​​​បន្ថែម​ ឬ​លុប​កម្មវិធី​គ្រប់គ្រង​ឧបករណ៍​សកម្ម​ចេញ​។ មិន​គួរ​ប្រើ​សម្រាប់​កម្មវិធី​​ធម្មតា​ទេ​។"</string>
-    <string name="permlab_setOrientation" msgid="3365947717163866844">"ប្ដូរ​ទិស​អេក្រង់"</string>
-    <string name="permdesc_setOrientation" msgid="3046126619316671476">"ឲ្យ​កម្មវិធី​ប្ដូរ​ការ​បង្វិល​អេក្រង់​នៅ​ពេល​ណា​មួយ។ មិន​ចាំបាច់​សម្រាប់​កម្មវិធី​ធម្មតា​ទេ។"</string>
-    <string name="permlab_setPointerSpeed" msgid="9175371613322562934">"ប្ដូរ​ល្បឿន​ទ្រនិច"</string>
-    <string name="permdesc_setPointerSpeed" msgid="6866563234274104233">"ឲ្យ​កម្មវិធី​ប្ដូរ​ល្បឿន​ទ្រនិច​​កណ្ដុរ ឬ​បន្ទះ​ប៉ះ​​​នៅ​ពេល​ណា​មួយ។ មិន​គួរ​ចាំបាច់​សម្រាប់​កម្មវិធី​ធម្មតា​ទេ។"</string>
-    <string name="permlab_setKeyboardLayout" msgid="4778731703600909340">"ប្ដូរ​ប្លង់​ក្ដារ​ចុច"</string>
-    <string name="permdesc_setKeyboardLayout" msgid="8480016771134175879">"ឲ្យ​កម្មវិធី​ប្ដូរ​ប្លង់​ក្ដារ​ចុច។ មិន​គួរ​ចាំបាច់​សម្រាប់​កម្មវិធី​ធម្មតា​ទេ។"</string>
-    <string name="permlab_signalPersistentProcesses" msgid="4539002991947376659">"ផ្ញើ​សញ្ញា​លីនុច​ទៅ​កម្មវិធី"</string>
-    <string name="permdesc_signalPersistentProcesses" msgid="4896992079182649141">"ឲ្យ​កម្មវិធី​ស្នើ​​សញ្ញា​ដែល​បាន​ផ្ដល់​ត្រូវ​ផ្ញើ​ទៅ​ដំណើរការ​ស្ថិតស្ថេរ​​ទាំង​អស់។"</string>
     <string name="permlab_persistentActivity" msgid="8841113627955563938">"ធ្វើ​ឲ្យ​កម្មវិធី​ដំណើរការ​ជា​និច្ច"</string>
     <string name="permdesc_persistentActivity" product="tablet" msgid="8525189272329086137">"ឲ្យ​កម្មវិធី​ធ្វើជា​ផ្នែក​​ស្ថិតស្ថេរ​ដោយ​ខ្លួន​ឯង​ក្នុង​អង្គ​ចងចាំ។ វា​អាច​កំណត់​អង្គ​ចងចាំ​ដែល​អាច​ប្រើ​បាន​ចំពោះ​កម្មវិធី​ផ្សេងៗ​ ដោយ​ធ្វើឲ្យ​កុំព្យូទ័រ​បន្ទះ​យឺត។"</string>
     <string name="permdesc_persistentActivity" product="tv" msgid="5086862529499103587">"អនុញ្ញាតឲ្យកម្មវិធីធ្វើឲ្យផ្នែកមួយចំនួនរបស់វាបន្តនៅក្នុងមេម៉ូរី។ វាអាចកម្រិតមេម៉ូរីដែលមានសម្រាប់កម្មវិធីផ្សេងទៀត ដែលធ្វើឲ្យទូរទស្សន៍ដើរយឺត។"</string>
     <string name="permdesc_persistentActivity" product="default" msgid="4384760047508278272">"ឲ្យ​កម្មវិធី ធ្វើជា​ផ្នែក​អចិន្ត្រៃយ៍​នៃ​ខ្លួន​ក្នុង​អង្គ​ចងចាំ។ វា​អាច​កម្រិត​អង្គ​ចងចាំ​អាច​ប្រើ​បាន​ ដើម្បី​ធ្វើ​ឲ្យ​កម្មវិធី​ផ្សេង​ធ្វើ​ឲ្យ​ទូរស័ព្ទ​របស់​អ្នក​យឺត។​"</string>
-    <string name="permlab_deletePackages" msgid="184385129537705938">"លុប​កម្មវិធី"</string>
-    <string name="permdesc_deletePackages" msgid="7411480275167205081">"ឲ្យ​កម្មវិធី​លុប​កញ្ចប់ Android ។ កម្មវិធី​ព្យាបាទ​អាច​ប្រើ​វា ដើម្បី​លុប​កម្មវិធី​សំខាន់​ៗ។ ​"</string>
-    <string name="permlab_clearAppUserData" msgid="274109191845842756">"លុប​ទិន្នន័យ​របស់​​កម្មវិធី​ផ្សេង"</string>
-    <string name="permdesc_clearAppUserData" msgid="4625323684125459488">"ឲ្យ​កម្មវិធី​សម្អាត​ទិន្នន័យ​អ្នក​ប្រើ។"</string>
-    <string name="permlab_deleteCacheFiles" msgid="3128665571837408675">"លុប​ឃ្លាំង​សម្ងាត់​កម្មវិធី​ផ្សេងៗ"</string>
-    <string name="permdesc_deleteCacheFiles" msgid="3812998599006730196">"ឲ្យ​កម្មវិធី​លុប​ឯកសារ​ឃ្លាំង​សម្ងាត់។"</string>
     <string name="permlab_getPackageSize" msgid="7472921768357981986">"វាស់​ទំហំ​ការ​ផ្ទុក​​កម្មវិធី"</string>
     <string name="permdesc_getPackageSize" msgid="3921068154420738296">"ឲ្យ​កម្មវិធី​ទៅ​យក​កូដ ទិន្នន័យ និង​ទំហំ​ឃ្លាំង​សម្ងាត់​របស់​វា"</string>
-    <string name="permlab_installPackages" msgid="2199128482820306924">"ដំឡើង​កម្មវិធី​ដោយ​ផ្ទាល់"</string>
-    <string name="permdesc_installPackages" msgid="5628530972548071284">"ឲ្យ​កម្មវិធី​ដំឡើង​កញ្ចប់​ Android ដែល​បាន​ធ្វើ​បច្ចុប្បន្ន ឬ​ថ្មី។ កម្មវិធី​ព្យាបាទ​អាច​ប្រើ​វា ដើម្បី​បន្ថែម​កម្មវិធី​ដែល​មាន​សិទ្ធិ​ដោយ​បំពាន។"</string>
-    <string name="permlab_clearAppCache" msgid="7487279391723526815">"លុប​ទិន្នន័យ​ឃ្លាំង​សម្ងាត់​កម្មវិធី​ទាំងអស់"</string>
-    <string name="permdesc_clearAppCache" product="tablet" msgid="8974640871945434565">"ឲ្យ​កម្មវិធី​បង្កើន​ទំហំ​ផ្ទុក​កុំព្យូទ័រ​បន្ទះ ដោយ​លុប​ឯកសារ​ក្នុង​ថត​ឃ្លាំង​សម្ងាត់​នៃ​កម្មវិធី​ផ្សេង។ វា​អាច​ធ្វើ​ឲ្យ​កម្មវិធី​ផ្សេង​ចាប់ផ្ដើម​យឺត​ព្រោះថា​​ពួកវា​ត្រូវ​ទៅ​យក​ទិន្នន័យ​ឡើងវិញ។"</string>
-    <string name="permdesc_clearAppCache" product="tv" msgid="244647416303997022">"អនុញ្ញាតឲ្យកម្មវិធីធ្វើឲ្យឧបករណ៍ផ្ទុកទិន្នន័យទូរទស្សន៍មានចន្លោះទំនេរដោយការលុបឯកសារនៅក្នុងថតឃ្លាំងសម្ងាត់នៃកម្មវិធី។ វាអាចបណ្តាលឲ្យការចាប់ផ្តើមកម្មវិធីផ្សេងទៀតយឺតជាងមុន ដោយសារពួកវាត្រូវការទាញត្រលប់ទិន្នន័យរបស់ពួកវាវិញ។"</string>
-    <string name="permdesc_clearAppCache" product="default" msgid="2459441021956436779">"ឲ្យ​កម្មវិធី​បង្កើន​ទំហំ​ផ្ទុក​ទូរស័ព្ទ​ ដោយ​លុប​ឯកសារ​ក្នុង​ថត​ឃ្លាំង​សម្ងាត់​កម្មវិធី។ វា​អាច​ធ្វើ​ឲ្យ​កម្មវិធី​ផ្សេង​កាន់​តែ​យឺត ព្រោះ​ថា​ពួកវា​​ត្រូវ​ទៅ​យក​ទិន្នន័យ​របស់​ពួកវា។"</string>
-    <string name="permlab_movePackage" msgid="3289890271645921411">"ផ្លាស់ទី​ធនធាន​កម្មវិធី"</string>
-    <string name="permdesc_movePackage" msgid="319562217778244524">"ឲ្យ​កម្មវិធី​ផ្លាស់ទី​ប្រភព​កម្មវិធី​ពី​មេឌៀ​ខាង​ក្នុង​ទៅ​ខាង​ក្រៅ​​ និង​ផ្ទុយ​មក​វិញ។"</string>
-    <string name="permlab_readLogs" msgid="6615778543198967614">"អាន​ទិន្នន័យ​កំណត់​ហេតុ​ប្រែប្រួល"</string>
-    <string name="permdesc_readLogs" product="tablet" msgid="82061313293455151">"ឲ្យ​កម្មវិធី​អាន​ពី​ឯកសារ​កំណត់ហេតុ​ប្រព័ន្ធ។ វា​អនុញ្ញាត​ឲ្យ​រក​មើល​ព័ត៌មាន​ទូទៅ​អំពី​អ្វី​ដែល​អ្នក​កំពុង​ធ្វើជា​មួយ​កុំព្យូទ័រ​បន្ទះ សំខាន់​រួមមាន​ព័ត៌មាន​ផ្ទាល់​ខ្លួន​ ឬ​ឯកជន។"</string>
-    <string name="permdesc_readLogs" product="tv" msgid="9023899974809538988">"អនុញ្ញាតឲ្យកម្មវិធីអានចេញពីឯកសារកំណត់ហេតុផ្សេងៗរបស់ប្រព័ន្ធ។ ដែលអនុញ្ញាតឲ្យវាស្វែងរកព័ត៌មានទូទៅអំពីអ្វីដែលអ្នកកំពុងធ្វើជាមួយទូរទស្សន៍របស់អ្នក ដោយរាប់បញ្ចូលទាំងព័ត៌មានឯកជន ឬផ្ទាល់ខ្លួនផងដែរ។"</string>
-    <string name="permdesc_readLogs" product="default" msgid="2063438140241560443">"ឲ្យ​កម្មវិធី​អាន​ពី​ឯកសារ​កំណត់ហេតុ​ប្រព័ន្ធ។ វា​អនុញ្ញាត​ឲ្យ​រក​មើល​ព័ត៌មាន​ទូទៅ​អំពី​អ្វី​ដែល​អ្នក​កំពុង​ធ្វើជា​មួយ​កុំព្យូទ័រ​បន្ទះ សំខាន់​រួមមាន​ព័ត៌មាន​ផ្ទាល់​ខ្លួន​ ឬ​ឯកជន។"</string>
-    <string name="permlab_anyCodecForPlayback" msgid="715805555823881818">"ប្រើ​កម្មវិធី​ឌិកូដ​​មេឌៀ​ណា​មួយ​សម្រាប់​ចាក់​ឡើងវិញ"</string>
-    <string name="permdesc_anyCodecForPlayback" msgid="8283912488433189010">"ឲ្យ​កម្មវិធី​ប្រើ​កម្មវិធី​ឌិកូដ​មេឌៀ​ដែល​បាន​ដំឡើង ដើម្បី​ឌិកូដ​សម្រាប់​ការ​ចាក់​ឡើងវិញ។"</string>
-    <string name="permlab_manageCaCertificates" msgid="1678391896786882014">"គ្រប់គ្រង​ព័ត៌មាន​សម្ងាត់​ដែល​ទុកចិត្ត"</string>
-    <string name="permdesc_manageCaCertificates" msgid="4015644047196937014">"អនុញ្ញាត​ឲ្យ​កម្មវិធី​ដំឡើង និង​លុប​វិញ្ញាបនបត្រ CA នៅ​ពេល​មាន​ព័ត៌មាន​សម្ងាត់​ដែល​ទុកចិត្ត។"</string>
-    <string name="permlab_bindJobService" msgid="3637568367978271086">"ដំណើរការ​ការងារ​ក្នុង​ផ្ទៃ​ខាង​ក្រោយ​ដែល​បាន​កំណត់​ពេលវេលា​សម្រាប់​​កម្មវិធី"</string>
-    <string name="permdesc_bindJobService" msgid="3473288460524119838">"សិទ្ធិ​នេះ​អនុញ្ញាត​ឲ្យ​ប្រព័ន្ធ Android ​ដំណើរ​ការ​កម្មវិធី​ក្នុង​ផ្ទៃ​ខាង​ក្រោយ​ពេល​បាន​ស្នើ។"</string>
-    <string name="permlab_diagnostic" msgid="8076743953908000342">"អាន/សរសេរ​ធនធាន​គ្រប់គ្រង​ប្រអប់"</string>
-    <string name="permdesc_diagnostic" msgid="6608295692002452283">"ឲ្យ​កម្មវិធី​អាន និង​សរសេរ​ប្រភព​ណាមួយ​ដែល​គ្រប់គ្រង​ដោយ​ក្រុម​អ្នក​វិនិច្ឆ័យ ឧទាហរណ៍ ឯកសារ​នៅ​ក្នុង /dev ។ វា​អាច​ប៉ះពាល់​យ៉ាង​ខ្លាំង​ដល់​ស្ថេរ​ភាព​ និង​សុវត្ថិភាព​ប្រព័ន្ធ។ វា​គួរ​ត្រូវ​បាន​ប្រើ​សម្រាប់​វិនិច្ឆ័យ​ផ្នែក​រឹង​ជាក់​លាក់​ដោយ​ក្រុមហ៊ុន​ផលិត ឬ​ប្រតិបត្តិ​ករ។"</string>
-    <string name="permlab_changeComponentState" msgid="6335576775711095931">"បិទ ឬ​បើក​សមាសធាតុ​កម្មវិធី"</string>
-    <string name="permdesc_changeComponentState" product="tablet" msgid="8887435740982237294">"ឲ្យ​កម្មវិធី​ប្ដូរ​ថា​តើ​សមាសធាតុ​កម្មវិធី​ផ្សេង​ត្រូវ​បាន​បើក​​ ឬ​ក៏​អត់។ កម្មវិធី​ព្យាបាទ​អាច​ប្រើ​វា ដើម្បី​បិទ​សមត្ថភាព​ទូរស័ព្ទ​សំខាន់។ ប្រើ​ដោយ​ប្រុងប្រយ័ត្ន​ជា​មួយ​​សិទ្ធិ​នេះ ព្រោះ​ថា​វា​អាច​ធ្វើ​ឲ្យ​សមាសធាតុ​មិន​អាច​ប្រើ​បាន​ ស្ថិតស្ថេរ ឬ​​មិន​ស្ថិតស្ថេរ។"</string>
-    <string name="permdesc_changeComponentState" product="tv" msgid="9151634188264231389">"អនុញ្ញាតឲ្យកម្មវិធីប្តូរថាតើសមាសធាតុនៃកម្មវិធីផ្សេងទៀតបើកដំណើរការ ឬអត់។ កម្មវិធីព្យាបាទអាចប្រើវាដើម្បីបិទដំណើរការសមត្ថភាពទូរទស្សន៍សំខាន់ៗ។ ត្រូវប្រើវាដោយប្រុងប្រយ័ត្ន ដោយសារតែវាអាចបង្កឲ្យសមាសធាតុកម្មវិធីធ្លាក់ចូលទៅក្នុងស្ថានភាពមិនអាចប្រើប្រាស់បាន មិនស៊ីចង្វាក់ និងមិនមានស្ថេរភាព។"</string>
-    <string name="permdesc_changeComponentState" product="default" msgid="1827232484416505615">"ឲ្យ​កម្មវិធី​ប្ដូរ​ថាតើ​សមាសធាតុ​កម្មវិធី​ផ្សេង​ត្រូវ​បាន​បើក​​ ឬ​ក៏​អត់។ កម្មវិធី​ព្យាបាទ​អាច​ប្រើ​វា ដើម្បី​បិទ​សមត្ថភាព​ទូរស័ព្ទ​សំខាន់។ ប្រើ​ដោយ​ប្រុងប្រយ័ត្ន​ជា​មួយ​​សិទ្ធិ​នេះ ព្រោះ​ថា​វា​អាច​ធ្វើ​ឲ្យ​សមាសធាតុ​មិន​អាច​ប្រើ​បាន​ ស្ថិតស្ថេរ ឬ​​មិន​ស្ថិតស្ថេរ។"</string>
-    <string name="permlab_grantRevokePermissions" msgid="4627315351093508795">"ផ្ដល់ ឬ​ដក​សិទ្ធិ"</string>
-    <string name="permdesc_grantRevokePermissions" msgid="4088642654085850662">"ឲ្យ​កម្មវិធី​ផ្ដល់ ឬ​ដក​សិទ្ធិ​ជាក់លាក់​សម្រាប់​វា ឬ​កម្មវិធី​ផ្សេង។ កម្មវិធី​ព្យាបាទ​អាច​ប្រើ​វា​ដើម្បី​ចូល​លក្ខណៈ​ដែល​អ្នក​មិន​បាន​ផ្ដល់​ឲ្យ​ពួកវា។"</string>
-    <string name="permlab_setPreferredApplications" msgid="8463181628695396391">"កំណត់​កម្មវិធី​ពេញ​ចិត្ត"</string>
-    <string name="permdesc_setPreferredApplications" msgid="4973986762241783712">"ឲ្យ​កម្មវិធី​កែ​កម្មវិធី​ដែល​អ្នក​ពេញ​ចិត្ត។ កម្មវិធី​ព្យាបាទ​អាច​ប្ដូរ​កម្មវិធី​ដែល​ដំណើរការ​ស្ងាត់​ៗ ដោយ​​​បញ្ឆោត​កម្មវិធី​ដែល​មាន​ស្រាប់​​របស់​អ្នក​ ដើម្បី​ប្រមូល​ទិន្នន័យ​ឯកជន​​ពី​អ្នក។"</string>
     <string name="permlab_writeSettings" msgid="2226195290955224730">"កែ​​ការ​កំណត់​ប្រព័ន្ធ"</string>
     <string name="permdesc_writeSettings" msgid="7775723441558907181">"ឲ្យ​កម្មវិធី​កែ​ទិន្នន័យ​កំណត់​ប្រព័ន្ធ។ កម្មវិធី​ព្យាបាទ​អាច​បង្ខូច​ការ​កំណត់​រចនាសម័្ពន្ធ​នៃ​ប្រព័ន្ធ​របស់​អ្នក។"</string>
-    <string name="permlab_writeSecureSettings" msgid="204676251876718288">"កែ​ការ​កំណត់​ប្រព័ន្ធ​សុវត្ថិភាព"</string>
-    <string name="permdesc_writeSecureSettings" msgid="8159535613020137391">"ឲ្យ​កម្មវិធី​កែ​ទិន្នន័យ​កំណត់​​សុវត្ថិភាព​​របស់​ប្រព័ន្ធ។ មិន​សម្រាប់​ប្រើ​ដោយ​កម្មវិធី​ធម្មតា​ទេ។"</string>
-    <string name="permlab_writeGservices" msgid="2149426664226152185">"កែ​ផែនទី​សេវាកម្ម​ Google"</string>
-    <string name="permdesc_writeGservices" msgid="1287309437638380229">"ឲ្យ​កម្មវិធី​កែ​ផែនទី​សេវាកម្ម​ Google ។ មិន​សម្រាប់​ប្រើ​ដោយ​កម្មវិធី​ធម្មតា​ទេ។"</string>
     <string name="permlab_receiveBootCompleted" msgid="5312965565987800025">"ដំណើរការ​ពេល​ចាប់ផ្ដើម"</string>
     <string name="permdesc_receiveBootCompleted" product="tablet" msgid="7390304664116880704">"ឲ្យ​កម្មវិធី​ចាប់ផ្ដើម​ដោយ​ខ្លួន​វា​ផ្ទាល់​ដរាប​​ណា​ប្រព័ន្ធ​​បាន​ចាប់ផ្ដើម​​រួចរាល់។ វា​អាច​​ចំណាយ​ពេល​យូរ​ដើម្បី​ចាប់ផ្ដើម​កុំព្យូទ័រ​បន្ទះ និង​ឲ្យ​កម្មវិធី​ធ្វើ​ឲ្យ​កុំព្យូទ័រ​បន្ទះ​យឺត​ដោយ​ដំណើរការ​ជា​និច្ច។"</string>
     <string name="permdesc_receiveBootCompleted" product="tv" msgid="4525890122209673621">"អនុញ្ញាតឲ្យកម្មវិធីចាប់ផ្តើមដោយខ្លួនវានៅពេលដែលប្រព័ន្ធបញ្ចប់ការចាប់ផ្តើម។ វាអាចចំណាយពេលយូរបន្តិចក្នុងការចាប់ផ្តើមទូរទស្សន៍ ហើយអនុញ្ញាតឲ្យកម្មវិធីឲ្យថេប្លេតទាំងមូលដើរយឺតដោយសារការដំណើរការជាប់ពេក។"</string>
@@ -551,36 +355,10 @@
     <string name="permdesc_accessMockLocation" msgid="5808711039482051824">"បង្កើត​ប្រភព​ទីតាំង​ក្លែង​ក្លាយ​សម្រាប់​សាកល្បង ឬ​ដំឡើង​ក្រុមហ៊ុន​ផ្ដល់​ទីតាំង​ថ្មី។ វា​អនុញ្ញាត​ឲ្យ​កម្មវិធី​បដិសេធ​ទីតាំង​​ និង/ឬ​ស្ថានភាព​បាន​ត្រឡប់​ដោយ​ប្រភព​ទីតាំង​ផ្សេង​ដូច​ជា GPS ឬ​ក្រុមហ៊ុន​ផ្ដល់​ទីតាំង។"</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"ចូល​ដំណើរការ​ពាក្យ​បញ្ជា​ក្រុមហ៊ុន​ផ្ដល់​ទីតាំង"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"ឲ្យ​កម្មវិធី​ចូល​ដំណើរការ​ពាក្យ​បញ្ជា​កម្មវិធី​ផ្ដល់​​ទីតាំង​បន្ថែម។ វា​អាច​អនុញ្ញាត​ឲ្យ​កម្មវិធី​ទាក់ទង​ជា​មួយ​ប្រតិបត្តិការ​ជីភីអេស ឬ​ប្រភព​ទីតាំង​ផ្សេង។"</string>
-    <string name="permlab_installLocationProvider" msgid="6578101199825193873">"សិទ្ធិ ដើម្បី​ដំឡើង​ក្រុមហ៊ុន​ផ្ដល់​ទីតាំង"</string>
-    <string name="permdesc_installLocationProvider" msgid="9066146120470591509">"បង្កើត​ប្រភព​ទីតាំង​ក្លែងក្លាយ​សម្រាប់​សាកល្បង ឬ​ដំឡើង​ក្រុមហ៊ុន​ផ្ដល់​ទីតាំង​ថ្មី។ វា​អនុញ្ញាត​ឲ្យ​កម្មវិធី​បដិសេធ​ទីតាំង​ និង/ឬ​ស្ថានភាព​បាន​ត្រឡប់​ដោយ​ប្រភព​ទីតាំង​ផ្សេងៗ​ដូចជា GPS ឬ​ក្រុមហ៊ុន​ផ្ដល់​ទីតាំង។"</string>
     <string name="permlab_accessFineLocation" msgid="1191898061965273372">"ទីតាំង​ពិតប្រាកដ (GPS និង​មាន​មូលដ្ឋាន​លើ​បណ្ដាញ)"</string>
     <string name="permdesc_accessFineLocation" msgid="5295047563564981250">"ឲ្យ​កម្មវិធី​ទទួល​ទីតាំង​ពិតប្រាកដ​របស់​អ្នក ដោយ​ប្រើ​ប្រព័ន្ធ​កំណត់​ទីតាំង​សកម្ម (GPS) ឬ​ប្រភព​ទីតាំង​បណ្ដាញ​ដូច​ជា អង់តែន​ចល័ត និង​វ៉ាយហ្វាយ។ សេវាកម្ម​ទីតាំង​ទាំង​នេះ​ត្រូវតែ​បើក និង​អាច​ប្រើ​ចំពោះ​ឧបករណ៍​របស់​អ្នក​សម្រាប់​កម្មវិធី​ដែល​ប្រើ​ពួក​វា។ កម្មវិធី​អាច​ប្រើ​វា ដើម្បី​កំណត់​​ទីកន្លែង​របស់​អ្នក និង​អាច​ប្រើ​ថាមពល​ថ្ម​បន្ថែម។"</string>
     <string name="permlab_accessCoarseLocation" msgid="4887895362354239628">"ទីតាំង​ប្រហាក់ប្រហែល (​​មាន​មូលដ្ឋាន​លើ​បណ្ដាញ)"</string>
     <string name="permdesc_accessCoarseLocation" msgid="2538200184373302295">"ឲ្យ​កម្មវិធី​ទទួល​ទីតាំង​ប្រហាក់ប្រហែល។ ទីតាំង​នេះ​ត្រូវ​បាន​ទទួល​តាម​សេវាកម្ម​ទីតាំង​ដោយ​ប្រើ​ប្រភព​ទីតាំង​បណ្ដាញ​ដូច​ជា អង់តែន និង​វ៉ាយហ្វាយ។ សេវាកម្ម​ទីតាំង​ទាំង​នេះ​ត្រូវ​តែ​បើក និង​អាច​ប្រើ​បាន​ចំពោះ​ឧបករណ៍​របស់​អ្នក​សម្រាប់​កម្មវិធី​ដែល​ប្រើ​ពួកវា។ កម្មវិធី​អាច​ប្រើ​វា ដើម្បី​កំណត់កន្លែង​ដែល​អ្នក​នៅ​ប្រហាក់ប្រហែល។"</string>
-    <string name="permlab_accessSurfaceFlinger" msgid="2363969641792388947">"ចូល​ដំណើរការ​ SurfaceFlinger"</string>
-    <string name="permdesc_accessSurfaceFlinger" msgid="1041619516733293551">"ឲ្យ​កម្មវិធី​ប្រើ​លក្ខណៈ​កម្រិត​ទាប​របស់ SurfaceFlinger ។"</string>
-    <string name="permlab_readFrameBuffer" msgid="6690504248178498136">"អាន​អង្គ​ចងចាំ​បណ្ដោះ​អាសន្ន"</string>
-    <string name="permdesc_readFrameBuffer" msgid="4937405521809454680">"ឲ្យ​កម្មវិធី​អាន​មាតិកា​នៃ​អង្គ​ចងចាំ​បណ្ដោះ​អាសន្ន។"</string>
-    <string name="permlab_accessInputFlinger" msgid="5348635270689553857">"ចូល​ដំណើរការ InputFlinger"</string>
-    <string name="permdesc_accessInputFlinger" msgid="2104864941201226616">"ឲ្យ​កម្មវិធី​ប្រើ​លក្ខណៈ​កម្រិត​ទាប InputFlinger ។"</string>
-    <string name="permlab_configureWifiDisplay" msgid="5595661694746742168">"កំណត់​រចនាសម្ព័ន្ធ​ការ​បង្ហាញ​វ៉ាយហ្វាយ"</string>
-    <string name="permdesc_configureWifiDisplay" msgid="7916815158690218065">"ឲ្យ​កម្មវិធី​កំណត់​រចនាសម្ព័ន្ធ​ និង​ភ្ជាប់​ទៅ​ការ​បង្ហាញ​វ៉ាយហ្វាយ។"</string>
-    <string name="permlab_controlWifiDisplay" msgid="393641276723695496">"ពិនិត្យ​ការ​បង្ហាញ​វ៉ាយហ្វាយ"</string>
-    <string name="permdesc_controlWifiDisplay" msgid="4543912292681826986">"ឲ្យ​កម្មវិធី​ពិនិត្យ​លក្ខណៈ​កម្រិត​ទាប​​នៃ​ការ​បង្ហាញ​វ៉ាយហ្វាយ។"</string>
-    <string name="permlab_controlVpn" msgid="2618442789397588200">"គ្រប់គ្រង បណ្តាញឯកជននិមិត្ម"</string>
-    <string name="permdesc_controlVpn" msgid="762852603315861214">"អនុញ្ញាតឲ្យកម្មវិធីគ្រប់គ្រងលក្ខណៈពិសេសកម្រិតទាបនៃបណ្តាញឯកជននិមិត្ម Virtual Private Networks។"</string>
-    <string name="permlab_captureAudioOutput" msgid="6857134498402346708">"ចាប់​យក​លទ្ធផល​អូឌីយ៉ូ"</string>
-    <string name="permdesc_captureAudioOutput" msgid="6210597754212208853">"​ឱ្យ​កម្មវិធី​ដើម្បី​ចាប់​យក​ និង​​ប្ដូរ​​ទិស​លទ្ធផល​អូឌីយ៉ូ​។"</string>
-    <string name="permlab_captureAudioHotword" msgid="1890553935650349808">"ការ​រក​ឃើញ​ពាក្យ"</string>
-    <string name="permdesc_captureAudioHotword" msgid="9151807958153056810">"ឲ្យ​កម្មវិធី​​ថត​អូឌីយ៉ូ​សម្រាប់​កា​រ​រក​ឃើញ​ពាក្យ។​ ការ​ថត​អាច​កើត​ឡើង​ក្នុង​ផ្ទៃ​ខាងក្រោយ​​ ប៉ុន្តែ​មិន​រារាំង​ការ​ថត​អូឌីយ៉ូ​ផ្សេង​ទេ (ឧ. ម៉ាស៊ីន​ថត​វីដេអូ)។"</string>
-    <string name="permlab_modifyAudioRouting" msgid="7738060354490807723">"ការ​នាំ​ផ្លូវ​អូឌីយ៉ូ"</string>
-    <string name="permdesc_modifyAudioRouting" msgid="7205731074267199735">"ឲ្យ​កម្មវិធី​ពិនិត្យ​ផ្លូវ​អូឌីយ៉ូ​ដោយ​ផ្ទាល់ ហើយ​បដិសេធ​ការ​សម្រេចចិត្ត​គោលនយោបាយ​អូឌីយ៉ូ។"</string>
-    <string name="permlab_captureVideoOutput" msgid="2246828773589094023">"ចាប់​យក​លទ្ធផល​វីដេអូ"</string>
-    <string name="permdesc_captureVideoOutput" msgid="359481658034149860">"ឲ្យ​កម្មវិធី​ចាប់​យក​ និង​ប្ដូរ​​ទិស​លទ្ធផល​វីដេអូ​។"</string>
-    <string name="permlab_captureSecureVideoOutput" msgid="7815398969303382016">"ចាប់​យក​លទ្ធផល​វីដេអូ​សុវត្ថិភាព"</string>
-    <string name="permdesc_captureSecureVideoOutput" msgid="2779793064709350289">"ឲ្យ​​កម្មវិធី​​​ចាប់​យក ​និង​ប្ដូរ​ទិស​លទ្ធផល​វីដេអូ​ដែល​មាន​សុវត្ថិភាព​។"</string>
-    <string name="permlab_mediaContentControl" msgid="8749790560720562511">"ពិនិត្យ​ការ​ចាក់​មេឌៀ​ឡើងវិញ និង​ចូល​ដំណើរការ​ទិន្នន័យ​មេតា"</string>
-    <string name="permdesc_mediaContentControl" msgid="1637478200272062">"ឲ្យ​កម្មវិធី​ពិនិត្យ​កម្មវិធី​ចាក់​មេឌៀ​ឡើង​វិញ និង​ចូល​ដំណើរការ​ព័ត៌មាន​មេឌៀ (ចំណងជើង, អ្នកនិពន្ធ...)។"</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"ប្ដូរ​ការ​កំណត់​អូឌីយូ​របស់​អ្នក"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"ឲ្យ​កម្មវិធី​កែ​ការ​កំណត់​សំឡេង​សកល ដូច​ជា​កម្រិត​សំឡេង និង​អូប៉ាល័រ​ដែល​បាន​ប្រើ​សម្រាប់​លទ្ធផល។"</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"ថត​សំឡេង"</string>
@@ -589,71 +367,14 @@
     <string name="permdesc_sim_communication" msgid="5725159654279639498">"ឲ្យ​កម្មវិធី​ផ្ញើ​ពាក្យ​បញ្ជា​ទៅ​ស៊ីម​កាត។ វា​គ្រោះ​ថ្នាក់​ណាស់។"</string>
     <string name="permlab_camera" msgid="3616391919559751192">"ថត​រូប និងវីដេអូ"</string>
     <string name="permdesc_camera" msgid="8497216524735535009">"ឲ្យ​កម្មវិធី​ថត​រូប និង​វីដេអូ​ដោយ​ប្រើ​ម៉ាស៊ីន​ថត។ វា​ឲ្យ​កម្មវិធី​​ប្រើ​ម៉ាស៊ីន​ថត​នៅ​ពេល​​ណាមួយ​ដោយ​គ្មាន​ការ​បញ្ជាក់​របស់​អ្នក។"</string>
-    <string name="permlab_cameraDisableTransmitLed" msgid="2651072630501126222">"បិទ​​ពន្លឺ​បង្ហាញ​ការ​បញ្ជូន​​ពេល​ម៉ាស៊ីន​ថត​កំពុង​ប្រើ"</string>
-    <string name="permdesc_cameraDisableTransmitLed" msgid="4764585465480295341">"ឲ្យ​កម្មវិធី​ប្រព័ន្ធ​ដែល​បាន​ដំឡើង​រួច​បិទ​​ LED បង្ហាញ​ការ​ប្រើ​ម៉ាស៊ីន​ថត។"</string>
-    <string name="permdesc_cameraSendSystemEvent" msgid="8642231538552298107">"អនុញ្ញតឲ្យកម្មវិធីប្រព័ន្ធដែលបានដំឡើងជាមុនផ្ញើព្រឹត្តិការណ៍ប្រព័ន្ធសេវាកាមេរ៉ា។"</string>
-    <string name="permlab_brick" product="tablet" msgid="2961292205764488304">"បិទ​កុំព្យូទ័រ​បន្ទះ​ជា​អចិន្ត្រៃយ៍"</string>
-    <string name="permlab_brick" product="tv" msgid="4912674222121249410">"បិទដំណើរការទូរទស្សន៍ជាអចិន្ត្រៃយ៍"</string>
-    <string name="permlab_brick" product="default" msgid="8337817093326370537">"បិទ​ទូរស័ព្ទ​ជា​អចិន្ត្រៃយ៍"</string>
-    <string name="permdesc_brick" product="tablet" msgid="4334818808001699530">"ឲ្យ​កម្មវិធី​បិទ​កុំព្យូទ័រ​បន្ទះ​​​ជា​អចិន្ត្រៃយ៍។ វា​មាន​គ្រោះថ្នាក់​ណាស់។"</string>
-    <string name="permdesc_brick" product="tv" msgid="7070924544316356349">"អនុញ្ញាតឲ្យកម្មវិធីបិទដំណើរការទូរទស្សន៍ទាំងស្រុងជាអចិន្ត្រៃយ៍។ វាមានគ្រោះថ្នាក់ណាស់។"</string>
-    <string name="permdesc_brick" product="default" msgid="5788903297627283099">"ឲ្យ​កម្មវិធី​បិទ​ទូរស័ព្ទ​ទាំង​មូល​​ជា​អចិន្ត្រៃយ៍។ វា​មាន​គ្រោះ​ថ្នាក់​ណាស់។"</string>
-    <string name="permlab_reboot" product="tablet" msgid="3436634972561795002">"បង្ខំ​ឲ្យ​ចាប់ផ្ដើម​កុំព្យូទ័រ​បន្ទះ​ឡើង​វិញ"</string>
-    <string name="permlab_reboot" product="tv" msgid="2112102119558886236">"បង្ខំឲ្យទូរទស្សន៍ចាប់ផ្តើមឡើងវិញ"</string>
-    <string name="permlab_reboot" product="default" msgid="2898560872462638242">"បង្ខំ​ឲ្យ​ទូរស័ព្ទ​ចាប់ផ្ដើម​ឡើងវិញ"</string>
-    <string name="permdesc_reboot" product="tablet" msgid="8172056180063700741">"ឲ្យ​កម្មវិធី​បង្ខំ​ឲ្យ​​កុំព្យូទ័រ​បន្ទះ​ចាប់ផ្ដើម​ឡើងវិញ។"</string>
-    <string name="permdesc_reboot" product="tv" msgid="7116222694344401650">"អនុញ្ញាតឲ្យកម្មវិធីបង្ខំទូរទស្សន៍ចាប់ផ្តើមឡើងវិញ។"</string>
-    <string name="permdesc_reboot" product="default" msgid="5326008124289989969">"ឲ្យ​កម្មវិធី​បង្ខំ​​ឲ្យ​ទូរស័ព្ទ​ចាប់ផ្ដើម​ឡើងវិញ។"</string>
-    <string name="permlab_mount_unmount_filesystems" product="nosdcard" msgid="2927361537942591841">"ការ​ចូល​ដំណើរការ​ប្រព័ន្ធ​ឯកសារ​ឧបករណ៍​ផ្ទុក​យូអេសប៊ី"</string>
-    <string name="permlab_mount_unmount_filesystems" product="default" msgid="4402305049890953810">"ការ​ចូល​ដំណើរការ​ប្រព័ន្ធ​ឯកសារ​កាត​អេសឌី"</string>
-    <string name="permdesc_mount_unmount_filesystems" msgid="1829290701658992347">"ឲ្យ​កម្មវិធី​ភ្ជាប់ និង​ផ្ដាច់​ប្រព័ន្ធ​ឯកសារ​សម្រាប់​ឧបករណ៍​ផ្ទុក​ចល័ត។"</string>
-    <string name="permlab_mount_format_filesystems" product="nosdcard" msgid="6227819582624904972">"លុប​ឧបករណ៍​ផ្ទុក​យូអេសប៊ី"</string>
-    <string name="permlab_mount_format_filesystems" product="default" msgid="262582698639274056">"លុប​កាត​អេសឌី"</string>
-    <string name="permdesc_mount_format_filesystems" msgid="8784268246779198627">"ឲ្យ​កម្មវិធី​ធ្វើ​ទ្រង់ទ្រាយ​ឧបករណ៍​ផ្ទុក​ចល័ត។"</string>
-    <string name="permlab_asec_access" msgid="3411338632002193846">"យក​​ព័ត៌មាន​នៅ​លើ​ឧបករណ៍​​ផ្ទុក​ខាងក្នុង"</string>
-    <string name="permdesc_asec_access" msgid="3094563844593878548">"ឲ្យ​កម្មវិធី​យក​ព័ត៌មាន​លើ​ការ​​ផ្ទុក​ខាង​ក្នុង។"</string>
-    <string name="permlab_asec_create" msgid="6414757234789336327">"បង្កើត​​ឧបករណ៍​ផ្ទុក​ខាងក្នុង"</string>
-    <string name="permdesc_asec_create" msgid="4558869273585856876">"ឲ្យ​កម្មវិធី​បង្កើត​ឧបករណ៍​ផ្ទុក​ខាង​ក្នុង។"</string>
-    <string name="permlab_asec_destroy" msgid="526928328301618022">"បំផ្លាញ​​ឧបករណ៍​​ផ្ទុក​ខាងក្នុង"</string>
-    <string name="permdesc_asec_destroy" msgid="7218749286145526537">"ឲ្យ​កម្មវិធី​បំផ្លាញ​ឧបករណ៍​ផ្ទុក​ខាង​ក្នុង។"</string>
-    <string name="permlab_asec_mount_unmount" msgid="8877998101944999386">"ភ្ជាប់/ផ្ដាច់​ឧបករណ៍​ផ្ទុក​ខាង​ក្នុង"</string>
-    <string name="permdesc_asec_mount_unmount" msgid="3451360114902490929">"ឲ្យ​កម្មវិធី​ភ្ជាប់/ផ្ដាច់​ឧបករណ៍​ផ្ទុក​ខាង​ក្នុង។"</string>
-    <string name="permlab_asec_rename" msgid="7496633954080472417">"ប្ដូរ​ឈ្មោះ​ឧបករណ៍​ផ្ទុក​ខាង​ក្នុង"</string>
-    <string name="permdesc_asec_rename" msgid="1794757588472127675">"ឲ្យ​កម្មវិធី​ប្ដូរ​ឈ្មោះ​ឧបករណ៍​ផ្ទុក​ខាង​ក្នុង។"</string>
     <string name="permlab_vibrate" msgid="7696427026057705834">"ពិនិត្យ​ការ​ញ័រ"</string>
     <string name="permdesc_vibrate" msgid="6284989245902300945">"ឲ្យ​កម្មវិធី​គ្រប់គ្រង​កម្មវិធី​ញ័រ។"</string>
     <string name="permlab_flashlight" msgid="2155920810121984215">"ត្រួតពិនិត្យ​ពិល"</string>
     <string name="permdesc_flashlight" msgid="6522284794568368310">"ឲ្យ​កម្មវិធី​ពិនិត្យ​ពិល។"</string>
-    <string name="permlab_manageUsb" msgid="1113453430645402723">"គ្រប់គ្រង​ចំណូល​ចិត្ត និង​សិទ្ធិ​សម្រាប់​ឧបករណ៍​យូអេសប៊ី"</string>
-    <string name="permdesc_manageUsb" msgid="7776155430218239833">"ឲ្យ​កម្មវិធី​គ្រប់គ្រង​ចំណូល​ចិត្ត និង​សិទ្ធិ​ឧបករណ៍​យូអេសប៊ី។"</string>
-    <string name="permlab_accessMtp" msgid="4953468676795917042">"អនុវត្ត​ពិធីការ MTP"</string>
-    <string name="permdesc_accessMtp" msgid="6532961200486791570">"ចូល​ដំណើរការ​កម្មវិធី​បញ្ជា kernel MTP ដើម្បី​អនុវត្ត​ពិធីការ​យូអេសប៊ី MTP ។"</string>
-    <string name="permlab_hardware_test" msgid="4148290860400659146">"សាកល្បង​ផ្នែក​រឹង"</string>
-    <string name="permdesc_hardware_test" msgid="6597964191208016605">"ឲ្យ​កម្មវិធី​ពិនិត្យ​គ្រឿង​ផ្សេងៗ​​សម្រាប់​សាកល្បង​ផ្នែក​រឹង។"</string>
-    <string name="permlab_fm" msgid="8749504526866832">"ចូល​ដំណើរការ​វិទ្យុ FM"</string>
-    <string name="permdesc_fm" msgid="4145699441237962818">"ឲ្យ​កម្មវិធី​ចូល​ដំណើរការ​វិទ្យុ FM ដើម្បី​ស្ដាប់​កម្មវិធី។"</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"ហៅ​លេខ​ទូរស័ព្ទ​ដោយ​ផ្ទាល់"</string>
     <string name="permdesc_callPhone" msgid="3740797576113760827">"ឲ្យ​កម្មវិធី​ហៅ​លេខ​ទូរស័ព្ទ​ដោយ​គ្មាន​សកម្មភាព​របស់​អ្នក។​ វា​អាច​កាត់​លុយ​ ឬ​ហៅ​ដោយ​មិន​រំពឹង​ទុក។ ចំណាំ​ថា​ វា​មិន​អនុញ្ញាត​ឲ្យ​កម្មវិធី​ហៅ​លេខ​ពេល​អាសន្ន​ទេ។ កម្មវិធី​ព្យាបាទ​អាច​កាត់​លុយ​របស់​អ្នក​ ដោយ​ធ្វើការ​ហៅ​ដោយ​គ្មាន​ការ​បញ្ជាក់​របស់​អ្នក។"</string>
-    <string name="permlab_callPrivileged" msgid="4198349211108497879">"ហៅ​លេខ​ទូរស័ព្ទ​ណាមួយ​ដោយ​ផ្ទាល់"</string>
-    <string name="permdesc_callPrivileged" msgid="1689024901509996810">"ឲ្យ​កម្មវិធី​ហៅ​លេខ​ទូរស័ព្ទ រួមមាន​លេខ​ពេល​អាសន្ន​ដោយ​គ្មាន​​អំពើ​របស់​អ្នក។ កម្មវិធី​ព្យាបាទ​អាច​ដាក់​ការ​ហៅ​មិន​ត្រឹមត្រូវ និង​ចាំបាច់​ទៅ​សេវាកម្ម​ពេល​អាសន្ន។"</string>
-    <string name="permlab_performCdmaProvisioning" product="tablet" msgid="4842576994144604821">"ចាប់ផ្ដើម​រៀបចំ​កុំព្យូទ័រ​បន្ទះ CDMA ដោយ​ផ្ទាល់"</string>
-    <string name="permlab_performCdmaProvisioning" product="tv" msgid="3485391974208100809">"ចាប់ផ្តើមកំណត់ទូរទស្សន៍ CDMA ដោយផ្ទាល់"</string>
-    <string name="permlab_performCdmaProvisioning" product="default" msgid="5604848095315421425">"ចាប់ផ្ដើម​រៀបចំ​កុំព្យូទ័រ​បន្ទះ CDMA ដោយ​ផ្ទាល់"</string>
-    <string name="permdesc_performCdmaProvisioning" msgid="1994193538802314186">"ឲ្យ​កម្មវិធី​ចាប់ផ្ដើម​ការ​ផ្ដល់ CDMA ។ កម្មវិធី​ព្យាបាទ​អាច​មិន​ចាំបាច់​ចាប់ផ្ដើម​ការ​ផ្ដល់ CDMA ។"</string>
-    <string name="permlab_performSimActivation" msgid="1651116521896665009">"ចាប់ផ្តើមការដំឡើងស៊ីមកាត"</string>
-    <string name="permdesc_performSimActivation" msgid="1778214876348917401">"អនុញ្ញាតឲ្យកម្មវិធីគ្រប់គ្រងសំណើធ្វើឲ្យសកម្មស៊ីមកាត។ កម្មវិធីនេះអាចដំណើរការធ្វើឲ្យសកម្មដោយផ្ទាល់ ឬក៏ផ្ទេរសិទ្ធិទៅឲ្យកម្មវិធីមួយផ្សេងទៀត។"</string>
-    <string name="permlab_locationUpdates" msgid="7785408253364335740">"ពិនិត្យ​​ការ​ជូន​ដំណឹង​បច្ចុប្បន្ន​ភាព​ទីតាំង"</string>
-    <string name="permdesc_locationUpdates" msgid="1120741557891438876">"ឲ្យ​កម្មវិធី​បិទ/បើក​ការ​ជូន​ដំណឹង​បច្ចុប្បន្នភាព​ទីតាំង​ពី​វិទ្យុ។ មិន​សម្រាប់​ប្រើ​ដោយ​កម្មវិធី​ធម្មតា​ទេ។។"</string>
-    <string name="permlab_checkinProperties" msgid="7855259461268734914">"ចូល​ដំណើរការ​លក្ខណៈ​សម្បត្តិ​ពិនិត្យ​មើល"</string>
-    <string name="permdesc_checkinProperties" msgid="4024526968630194128">"ឲ្យ​កម្មវិធី​អាន/សរសេរ​លក្ខណសម្បត្តិ​បាន​ផ្ទុក​ឡើង​ដោយ​សេវាកម្ម​ពិនិត្យ​មើល។ មិន​សម្រាប់​ប្រើ​ដោយ​កម្មវិធី​ធម្មតា។"</string>
-    <string name="permlab_bindGadget" msgid="776905339015863471">"ជ្រើស​​ធាតុ​ក្រាហ្វិក"</string>
-    <string name="permdesc_bindGadget" msgid="8261326938599049290">"ឲ្យ​កម្មវិធី​ប្រាប់​ប្រព័ន្ធ​ថា​ធាតុ​ក្រាហ្វិក​ណាមួយ​​អាច​ត្រូវ​បាន​ប្រើ​ដោយ​​កម្មវិធី​ណា​មួយ។​កម្មវិធី​ដែល​មាន​សិទ្ធិ​នេះ​អាច​ឲ្យ​កម្មវិធី​ផ្សេង​ចូល​ដំណើរការ​ទិន្នន័យ​ផ្ទាល់ខ្លួន។ មិន​សម្រាប់​ប្រើ​ដោយ​កម្មវិធី​ធម្មតា។"</string>
-    <string name="permlab_modifyPhoneState" msgid="8423923777659292228">"កែ​ស្ថានភាព​ទូរស័ព្ទ"</string>
-    <string name="permdesc_modifyPhoneState" msgid="1029877529007686732">"ឲ្យ​កម្មវិធី​ពិនិត្យ​លក្ខណៈ​ទូរស័ព្ទ​នៃ​ឧបករណ៍។ កម្មវិធី​ដែល​មាន​សិទ្ធិ​នេះ​អាច​ប្ដូរ​បណ្ដាញ បិទ និង​បើកវិទ្យុ​ក្នុង​ទូរស័ព្ទ​ដោយ​មិន​ជូន​ដំណឹង​អ្នក។"</string>
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"អាន​ស្ថានភាព និង​អត្តសញ្ញាណ​ទូរស័ព្ទ"</string>
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"ឲ្យ​កម្មវិធី​ចូល​ដំណើរការ​លក្ខណៈ​ទូរស័ព្ទ​នៃ​ឧបករណ៍។ សិទ្ធិ​នេះ​​ឲ្យ​កម្មវិធី​កំណត់​លេខ​ទូរស័ព្ទ និង​លេខ​សម្គាល់​ឧបករណ៍ ថា​តើ​ការ​ហៅ​សកម្ម និង​លេខ​ពី​ចម្ងាយ​បាន​ភ្ជាប់​ដោយ​ការ​ហៅ។"</string>
-    <string name="permlab_readPrecisePhoneState" msgid="5476483020282007597">"អាន​ស្ថានភាព​ទូរស័ព្ទ​ត្រឹមត្រូវ"</string>
-    <string name="permdesc_readPrecisePhoneState" msgid="6648009074263855418">"ឲ្យ​កម្មវិធី​ចូល​ដំណើរ​ការ​ស្ថានភាព​ទូរស័ព្ទ​​​ត្រឹមត្រូវ។ សិទ្ធិ​នេះ​អនុញ្ញាត​ឲ្យ​កម្មវិធី​កំណត់​ស្ថានភាព​ហៅ​ជាក់ស្ដែង ថា​តើ​ការ​ហៅ​សកម្ម ឬ​ស្ថិត​ក្នុង​ផ្ទៃ​ខាងក្រោយ ការ​ហៅ​បរាជ័យ ស្ថានភាព​ភ្ជាប់​ទិន្នន័យ​ត្រឹមត្រូវ និង​ការ​ភ្ជាប់​ទិន្នន័យ​បរាជ័យ។"</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"ការពារ​​កុំព្យូទ័រ​បន្ទះ​មិន​ឲ្យ​ដេក"</string>
     <string name="permlab_wakeLock" product="tv" msgid="2601193288949154131">"បង្ការទូរទស្សន៍ពីការបិទពន្លឺ"</string>
     <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"ការ​ពារ​ទូរស័ព្ទ​មិន​ឲ្យ​ដេក"</string>
@@ -664,34 +385,14 @@
     <string name="permdesc_transmitIr" product="tablet" msgid="5358308854306529170">"ឲ្យ​កម្មវិធី​ប្រើ​កម្មវិធី​បញ្ជូន​​អ៊ីនហ្វ្រា​រ៉េ​ដ​​របស់​កុំព្យូទ័រ​បន្ទះ។"</string>
     <string name="permdesc_transmitIr" product="tv" msgid="3926790828514867101">"អនុញ្ញាតឲ្យកម្មវិធីអានដើម្បីប្រើឧបករណ៍បញ្ចូនអ៊ីនហ្វ្រារេដរបស់ទូរទស្សន៍។"</string>
     <string name="permdesc_transmitIr" product="default" msgid="7957763745020300725">"ឲ្យ​កម្មវិធី​ប្រើ​កម្មវិធី​បញ្ជូន​តាម​អ៊ីនហ្វ្រា​រ៉េ​ដ​​របស់​ទូរស័ព្ទ។"</string>
-    <string name="permlab_devicePower" product="tablet" msgid="2787034722616350417">"បិទ/បើក​កុំព្យូទ័រ​បន្ទះ"</string>
-    <string name="permlab_devicePower" product="tv" msgid="7579718349658943416">"បិទ ឬបើកទូរទស្សន៍"</string>
-    <string name="permlab_devicePower" product="default" msgid="4928622470980943206">"បិទ/បើក​ទូរស័ព្ទ"</string>
-    <string name="permdesc_devicePower" product="tablet" msgid="6689862878984631831">"ឲ្យ​កម្មវិធី​បិទ/បើក​កុំព្យូទ័រ​បន្ទះ។"</string>
-    <string name="permdesc_devicePower" product="tv" msgid="1334908641773273512">"អនុញ្ញាតឲ្យកម្មវិធីបើក ឬបិទទូរទស្សន៍។"</string>
-    <string name="permdesc_devicePower" product="default" msgid="6037057348463131032">"ឲ្យ​កម្មវិធី​បិទ/បើក​ទូរស័ព្ទ។"</string>
-    <string name="permlab_userActivity" msgid="1677844893921729548">"កំណត់​ការ​អស់​ពេល​បង្ហាញ​ឡើងវិញ"</string>
-    <string name="permdesc_userActivity" msgid="651746160252248024">"ឲ្យ​កម្មវិធី​កំណត់​ការ​អស់​ពេល​បង្ហាញ​ឡើងវិញ។"</string>
-    <string name="permlab_factoryTest" msgid="3715225492696416187">"ដំណើរការ​ក្នុង​របៀប​សាកល្បង​ពី​រោងចក្រ"</string>
-    <string name="permdesc_factoryTest" product="tablet" msgid="3952059318359653091">"ដំណើរការ​សាកល្បង​ក្រុមហ៊ុន​ផលិត​កម្រិត​ទាប ដោយ​អនុញ្ញាត​ឲ្យ​ចូល​ផ្នែក​រឹង​កុំព្យូទ័រ​បន្ទះ។ អាច​ប្រើ​​បាន​តែ​ពេល​កុំព្យូទ័រ​កំពុង​ដំណើរការ​ក្នុង​របៀប​សាកល្បង​ក្រុមហ៊ុន​ផលិត។"</string>
-    <string name="permdesc_factoryTest" product="tv" msgid="2105643629211155695">"ដំណើរជាការសាកល្បងអ្នកផលិតកម្រិតទាប អនុញ្ញាតឲ្យមានការចូលប្រើទាំងស្រុងលើផ្នែករឹងរបស់ទូរទស្សន៍។ មាននៅពេលដែលទូរទស្សន៍ដំណើរការនៅក្នុងរបៀបការសាកល្បងអ្នកផលិតប៉ុណ្ណោះ។"</string>
-    <string name="permdesc_factoryTest" product="default" msgid="8136644990319244802">"ដំណើរ​ការ​ការ​សាកល្បង​ក្រុមហ៊ុន​ផលិត​កម្រិត​ទាប ដោយ​អនុញ្ញាត​ការ​ចូល​ដំណើរការ​ផ្នែក​រឹង​ទូរស័ព្ទ។ អាច​ប្រើ​បាន​តែ​នៅ​ពេល​ទូរស័ព្ទ​កំពុង​ដំណើរការ​របៀប​សាកល្បង​ក្រុមហ៊ុន​ផលិត។"</string>
     <string name="permlab_setWallpaper" msgid="6627192333373465143">"កំណត់​ផ្ទាំង​រូបភាព"</string>
     <string name="permdesc_setWallpaper" msgid="7373447920977624745">"ឲ្យ​កម្មវិធី​កំណត់​ផ្ទាំង​រូបភាព​ប្រព័ន្ធ។"</string>
     <string name="permlab_setWallpaperHints" msgid="3278608165977736538">"កែតម្រូវ​ទំហំ​ផ្ទាំង​រូបភាព​របស់​អ្នក"</string>
     <string name="permdesc_setWallpaperHints" msgid="8235784384223730091">"ឲ្យ​កម្មវិធី​កំណត់​ជំនួយ​ទំហំ​ផ្ទាំង​រូបភាព​ប្រព័ន្ធ។"</string>
-    <string name="permlab_masterClear" msgid="2315750423139697397">"កំណត់​ប្រព័ន្ធ​ទៅ​លំនាំដើម​រោងចក្រ​ឡើងវិញ"</string>
-    <string name="permdesc_masterClear" msgid="3665380492633910226">"ឲ្យ​កម្មវិធី​កំណត់​ប្រព័ន្ធ​​ដូច​ការ​កំណត់​ចេញ​ពី​រោងចក្រ​ឡើងវិញ​ពេញលេញ ដោយ​លុប​ទិន្នន័យ ការ​កំណត់​រចនាសម្ព័ន្ធ និង​កម្មវិធី​បាន​ដំឡើង។"</string>
-    <string name="permlab_setTime" msgid="2021614829591775646">"កំណត់​​ម៉ោង​"</string>
-    <string name="permdesc_setTime" product="tablet" msgid="1896341438151152881">"ឲ្យ​កម្មវិធី​ប្ដូរ​ម៉ោង​កុំព្យូទ័រ​បន្ទះ។"</string>
-    <string name="permdesc_setTime" product="tv" msgid="1826398919861882682">"អនុញ្ញាតឲ្យកម្មវិធីផ្លាស់ប្តូរម៉ោងទូរទស្សន៍។"</string>
-    <string name="permdesc_setTime" product="default" msgid="1855702730738020">"ឲ្យ​កម្មវិធី​ប្ដូរ​ម៉ោង​ទូរស័ព្ទ។"</string>
     <string name="permlab_setTimeZone" msgid="2945079801013077340">"កំណត់​តំបន់​ពេលវេលា"</string>
     <string name="permdesc_setTimeZone" product="tablet" msgid="1676983712315827645">"ឲ្យ​កម្មវិធី​ប្ដូរ​តំបន់​ពេលវេលា​របស់​កុំព្យូទ័រ​បន្ទះ​នេះ។"</string>
     <string name="permdesc_setTimeZone" product="tv" msgid="888864653946175955">"អនុញ្ញាតឲ្យកម្មវិធីផ្លាស់ប្តូរល្វែងម៉ោងទូរទស្សន៍។"</string>
     <string name="permdesc_setTimeZone" product="default" msgid="4499943488436633398">"ឲ្យ​កម្មវិធី​ប្ដូរ​តំបន់​ពេលវេលា​របស់​ទូរស័ព្ទ។"</string>
-    <string name="permlab_accountManagerService" msgid="4829262349691386986">"ដើរ​តួ​ជា AccountManagerService"</string>
-    <string name="permdesc_accountManagerService" msgid="1948455552333615954">"ឲ្យ​កម្មវិធី​ហៅ​ទៅ​​កម្មវិធី​​ផ្ទៀងផ្ទាត់​គណនី។"</string>
     <string name="permlab_getAccounts" msgid="1086795467760122114">"រក​គណនី​លើ​ឧបករណ៍"</string>
     <string name="permdesc_getAccounts" product="tablet" msgid="2741496534769660027">"ឲ្យ​កម្មវិធី​ទទួល​បញ្ជី​គណនី​ដែល​បាន​ស្គាល់​ដោយ​កុំព្យូទ័រ​បន្ទះ។ វា​អាច​រួម​មាន​គណនី​ណាមួយ​ដែល​បាន​បង្កើត​ដោយ​កម្មវិធី​ដែល​អ្នក​បាន​ដំឡើង។"</string>
     <string name="permdesc_getAccounts" product="tv" msgid="4190633395633907543">"អនុញ្ញាតឲ្យកម្មវិធីទទួលយកបញ្ជីគណនីដែលទូរទស្សន៍បានស្គាល់។ វាអាចរាប់បញ្ចូលទាំងគណនីទាំងឡាយដែលបានបង្កើតដោយកម្មវិធីដែលអ្នកបានដំឡើង។"</string>
@@ -706,14 +407,10 @@
     <string name="permdesc_accessNetworkState" msgid="8318964424675960975">"ឲ្យ​កម្មវិធី​មើល​ព័ត៌មាន​អំពី​ការ​តភ្ជាប់​បណ្ដាញ​ដូចជា​​មាន​បណ្ដាញ​ណាមួយ​ និង​បណ្ដាញ​ត្រូវ​បាន​ភ្ជាប់។"</string>
     <string name="permlab_createNetworkSockets" msgid="8018758136404323658">"ចូល​ដំណើរការ​បណ្ដាញ​ពេញ​លេញ"</string>
     <string name="permdesc_createNetworkSockets" msgid="3403062187779724185">"ឲ្យ​កម្មវិធី​បង្កើត​រន្ធ​បណ្ដាញ​ និង​ប្រើ​ពិធីការ​បណ្ដាញ​តាម​បំណង។ កម្មវិធី​អ៊ីនធឺណិត​ និង​កម្មវិធី​ផ្សេង​ៗ​ផ្ដល់​វិធី​ផ្ញើ​ទិន្នន័យ​ទៅ​អ៊ីនធឺណិត ដូច្នេះ​សិទ្ធិ​នេះ​មិន​ទាមទារ​ឲ្យ​ផ្ញើ​ទិន្នន័យ​ទៅ​អ៊ីនធឺណិត។"</string>
-    <string name="permlab_writeApnSettings" msgid="505660159675751896">"ប្ដូរ/បញ្ឈប់​ចរាចរណ៍ និង​ការ​កំណត់​​បណ្ដាញ"</string>
-    <string name="permdesc_writeApnSettings" msgid="5333798886412714193">"ឲ្យ​កម្មវិធី​ប្ដូរ​ការ​កំណត់​បណ្ដាញ និង​រារាំង​ និង​តាមដាន​ចរាចរណ៍​បណ្ដាញ ឧទាហរណ៍ ដើម្បី​ប្ដូរ​ប្រូកស៊ី និង​ច្រក APN ។​ កម្មវិធី​ព្យាបាទ​អាច​ពិនិត្យ បញ្ជូន​បន្ត ឬ​កែ​កញ្ចប់​ព័ត៌មាន​បណ្ដាញ​ដោយ​មិន​ឲ្យ​អ្នក​ដឹង។"</string>
     <string name="permlab_changeNetworkState" msgid="958884291454327309">"ប្ដូរ​ការ​តភ្ជាប់​បណ្ដាញ"</string>
     <string name="permdesc_changeNetworkState" msgid="6789123912476416214">"ឲ្យ​កម្មវិធី​ប្ដូរ​ស្ថានភាព​តភ្ជាប់​បណ្ដាញ។"</string>
     <string name="permlab_changeTetherState" msgid="5952584964373017960">"ប្ដូរ​ការ​តភ្ជាប់​ដែល​បាន​​ភ្ជាប់"</string>
     <string name="permdesc_changeTetherState" msgid="1524441344412319780">"ឲ្យ​កម្មវិធី​ប្ដូរ​ស្ថានភាព​ការ​តភ្ជាប់​បណ្ដាញ​ដែល​បាន​ភ្ជាប់។"</string>
-    <string name="permlab_changeBackgroundDataSetting" msgid="1400666012671648741">"ប្ដូរ​ការ​កំណត់​ប្រើ​ទិន្នន័យ​ផ្ទៃ​ខាង​ក្រោយ"</string>
-    <string name="permdesc_changeBackgroundDataSetting" msgid="5347729578468744379">"ឲ្យ​កម្មវិធី​ប្ដូរ​ការ​កំណត់​ការ​ប្រើ​ទិន្នន័យ​ផ្ទៃ​ខាង​ក្រោយ។"</string>
     <string name="permlab_accessWifiState" msgid="5202012949247040011">"មើល​ការ​តភ្ជាប់​វ៉ាយហ្វាយ"</string>
     <string name="permdesc_accessWifiState" msgid="5002798077387803726">"ឲ្យ​កម្មវិធី​មើល​ព័ត៌មាន​អំពី​បណ្ដាញ​វ៉ាយហ្វាយ ដូច​ជា​ថា​តើ​វ៉ាយហ្វាយ​បាន​បើក​ដែរ​ឬទេ និង​ឈ្មោះ​ឧបករណ៍​វ៉ាយហ្វាយ​ដែល​បាន​តភ្ជាប់។"</string>
     <string name="permlab_changeWifiState" msgid="6550641188749128035">"ភ្ជាប់ និង​ផ្ដាច់​ពី​វ៉ាយហ្វាយ"</string>
@@ -726,24 +423,12 @@
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="6921177471748882137">"ឲ្យ​កម្មវិធី​កំណត់​រចនាសម្ព័ន្ធ​កុំព្យូទ័រ​បន្ទះ​ប៊្លូធូស​មូលដ្ឋាន និង​រកមើល ព្រម​ទាំង​ផ្គូផ្គង​ជា​មួយ​ឧបករណ៍​ពី​ចម្ងាយ។"</string>
     <string name="permdesc_bluetoothAdmin" product="tv" msgid="3373125682645601429">"អនុញ្ញាតឲ្យកម្មវិធីកំណត់ទូរទស្សន៍ប៊្លូធូសមូលដ្ឋាន និងដើម្បីស្វែងរក និងភ្ជាប់ជាមួយឧបករណ៍ពីចម្ងាយ។"</string>
     <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"ឲ្យ​កម្មវិធី​មើល​​ការ​កំណត់​រចនាសម្ព័ន្ធ​ប៊្លូធូស​ក្នុង​ទូរស័ព្ទ ដើម្បី​រកមើល និង​ផ្គូផ្គង​ជា​មួយ​ឧបករណ៍​ពី​ចម្ងាយ។"</string>
-    <string name="permlab_bluetoothPriv" msgid="4009494246009513828">"ឲ្យ​ប៊្លូធូស​ផ្គូផ្គង​ជា​មួយ​កម្មវិធី"</string>
-    <string name="permdesc_bluetoothPriv" product="tablet" msgid="8045735193417468857">"ឲ្យ​កម្មវិធី​ផ្គូផ្គង​ជា​មួយ​ឧបករណ៍​ពី​ចម្ងាយ​ដោយ​គ្មាន​អំពើ​​ពី​អ្នកប្រើ។"</string>
-    <string name="permdesc_bluetoothPriv" product="tv" msgid="8045735193417468857">"ឲ្យ​កម្មវិធី​ផ្គូផ្គង​ជា​មួយ​ឧបករណ៍​ពី​ចម្ងាយ​ដោយ​គ្មាន​អំពើ​​ពី​អ្នកប្រើ។"</string>
-    <string name="permdesc_bluetoothPriv" product="default" msgid="8045735193417468857">"ឲ្យ​កម្មវិធី​ផ្គូផ្គង​ជា​មួយ​ឧបករណ៍​ពី​ចម្ងាយ​ដោយ​គ្មាន​អំពើ​​ពី​អ្នកប្រើ។"</string>
-    <string name="permlab_bluetoothMap" msgid="6372198338939197349">"ចូល​ប្រើ​ទិន្នន័យ MAP ប៊្លូធូស"</string>
-    <string name="permdesc_bluetoothMap" product="tablet" msgid="5784090105926959958">"ឲ្យ​កម្មវិធី​ចូល​ប្រើ​ទិន្នន័យ MAP ប៊្លូធូស។"</string>
-    <string name="permdesc_bluetoothMap" product="tv" msgid="5784090105926959958">"ឲ្យ​កម្មវិធី​ចូល​ប្រើ​ទិន្នន័យ MAP ប៊្លូធូស។"</string>
-    <string name="permdesc_bluetoothMap" product="default" msgid="5784090105926959958">"ឲ្យ​កម្មវិធី​ចូល​ប្រើ​ទិន្នន័យ MAP ប៊្លូធូស។"</string>
     <string name="permlab_accessWimaxState" msgid="4195907010610205703">"ភ្ជាប់ និង​ផ្ដាច់​ពី WiMAX"</string>
     <string name="permdesc_accessWimaxState" msgid="6360102877261978887">"ឲ្យ​កម្មវិធី​កំណត់​ថា​តើ WiMAX ត្រូវ​បាន​បើក និង​ព័ត៌មាន​អំពី​បណ្ដាញ WiMAX ដែល​ត្រូវ​បាន​តភ្ជាប់។"</string>
     <string name="permlab_changeWimaxState" msgid="2405042267131496579">"ប្ដូរ​ស្ថានភាព WiMAX"</string>
     <string name="permdesc_changeWimaxState" product="tablet" msgid="3156456504084201805">"ឲ្យ​កម្មវិធី​តភ្ជាប់​ និង​ផ្ដាច់​កុំព្យូទ័រ​បន្ទះ​ពី​បណ្ដាញ WiMAX ។"</string>
     <string name="permdesc_changeWimaxState" product="tv" msgid="6022307083934827718">"អនុញ្ញាតឲ្យកម្មវិធីភ្ជាប់ទៅទូរទស្សន៍ ហើយផ្តាច់ទូរទស្សន៍ពីបណ្តាញ WiMAX។"</string>
     <string name="permdesc_changeWimaxState" product="default" msgid="697025043004923798">"ឲ្យ​កម្មវិធី​ភ្ជាប់​ទូរស័ព្ទ​ និង​ផ្ដាច់​ពី​បណ្ដាញ WiMAX ។"</string>
-    <string name="permlab_scoreNetworks" msgid="6445777779383587181">"ដាក់​ពិន្ទុ​បណ្ដាញ"</string>
-    <string name="permdesc_scoreNetworks" product="tablet" msgid="1304304745850215556">"ឲ្យ​កម្មវិធី​ចាត់​ថ្នាក់​បណ្ដាញ និង​​មាន​ឥទ្ធិពល​លើ​បណ្ដាញ​ណា​មួយ​ដែល​​កុំព្យូទ័រ​បន្ទះ​ប្រើ។"</string>
-    <string name="permdesc_scoreNetworks" product="tv" msgid="5444434643862417649">"អនុញ្ញាតឲ្យកម្មវិធីវាយតម្លៃបណ្តាញ និងជ្រើសរើសបណ្តាញដែលទូរទស្សន៍គួរប្រើ។"</string>
-    <string name="permdesc_scoreNetworks" product="default" msgid="1831501848178651379">"ឲ្យ​កម្មវិធី​ចាត់​ថ្នាក់​បណ្ដាញ និង​​មាន​ឥទ្ធិពល​លើ​បណ្ដាញ​ណា​មួយ​ដែល​ទូរស័ព្ទ​គួរ​ប្រើ។"</string>
     <string name="permlab_bluetooth" msgid="6127769336339276828">"ផ្គូផ្គង​ជា​មួយ​ឧបករណ៍​ប៊្លូធូស"</string>
     <string name="permdesc_bluetooth" product="tablet" msgid="3480722181852438628">"ឲ្យ​កម្មវិធី​មើល​ការ​កំណត់​រចនាសម្ព័ន្ធ​​ប៊្លូធូស​លើ​​កុំព្យូទ័រ​បន្ទះ ព្រម​ទាំង​ធ្វើ​ការ​តភ្ជាប់ និង​ទទួល​​ជា​មួយ​ឧបករណ៍​បាន​ផ្គូផ្គង។"</string>
     <string name="permdesc_bluetooth" product="tv" msgid="3974124940101104206">"អនុញ្ញាតឲ្យកម្មវិធីមើលការកំណត់ប៊្លូធូសនៅលើទូរទស្សន៍ និងដើម្បីធ្វើ និងទទួលការភ្ជាប់ជាមួយឧបករណ៍ដែលបានភ្ជាប់។"</string>
@@ -778,10 +463,6 @@
     <string name="permdesc_writeSyncSettings" msgid="8956262591306369868">"ឲ្យ​កម្មវិធី​កែ​ការ​កំណត់​ធ្វើ​សម​កាល​កម្ម​សម្រាប់​គណនី។ ឧទាហរណ៍ វា​អាច​ត្រូវ​បាន​ប្រើ​ដើម្បី​បើក​ការ​ធ្វើ​សម​កាល​កម្ម​កម្មវិធី​របស់​មនុស្ស​ជា​មួយ​គណនី។"</string>
     <string name="permlab_readSyncStats" msgid="7396577451360202448">"អាន​ស្ថិតិ​ធ្វើ​សម​កាល​កម្ម"</string>
     <string name="permdesc_readSyncStats" msgid="1510143761757606156">"ឲ្យ​កម្មវិធី​អាន​ស្ថានភាព​ធ្វើ​សម​កាល​កម្ម​សម្រាប់​គណនី រួមមាន​ព្រឹត្តិការណ៍​ប្រវត្តិ​ធ្វើ​សម​កាល​កម្ម ​និង​ទំហំ​ទិន្នន័យ​បាន​ធ្វើ​សម​កាល​កម្ម។"</string>
-    <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"អាន​អត្ថបទ​ព័ត៌មាន​បាន​ជាវ"</string>
-    <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"ឲ្យ​កម្មវិធី​ទទួល​ព័ត៌មាន​លម្អិត​អំពី​អត្ថបទ​ព័ត៌មាន​​បាន​ធ្វើ​សម​កាល​កម្ម​បច្ចុប្បន្ន។"</string>
-    <string name="permlab_subscribedFeedsWrite" msgid="9015246325408209296">"សរសេរ​​អត្ថបទ​ព័ត៌មាន​ដែល​​បាន​ជាវ"</string>
-    <string name="permdesc_subscribedFeedsWrite" msgid="6928930188826089413">"ឲ្យ​កម្មវិធី​កែ​អត្ថបទ​ព័ត៌មាន​បាន​ធ្វើ​សម​កាល​កម្ម​បច្ចុប្បន្ន​របស់​អ្នក។ កម្មវិធី​ព្យាបាទ​អាច​ប្ដូរ​អត្ថបទ​បាន​ធ្វើ​សម​កាល​កម្ម​របស់​អ្នក។"</string>
     <string name="permlab_readDictionary" msgid="4107101525746035718">"អាន​ពាក្យ​ដែល​អ្នក​បាន​បន្ថែម​ទៅ​វចនានុក្រម"</string>
     <string name="permdesc_readDictionary" msgid="659614600338904243">"ឲ្យ​កម្មវិធី​អាន​ពាក្យ ឈ្មោះ និង​ឃ្លា​ទាំងអស់​ដែល​អ្នកប្រើ​អាច​​រក្សាទុក​ក្នុង​វចនានុក្រម​​អ្នកប្រើ។"</string>
     <string name="permlab_writeDictionary" msgid="2183110402314441106">"បន្ថែម​ពាក្យ​ទៅ​វចនានុក្រម​កំណត់​ដោយ​អ្នកប្រើ"</string>
@@ -794,62 +475,8 @@
     <string name="permlab_sdcardWrite" product="default" msgid="8805693630050458763">"កែ ឬ​លុប​មាតិកា​កាត​អេសឌី"</string>
     <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6175406299445710888">"ឲ្យ​កម្មវិធី​សរសេរ​ឧបករណ៍​ផ្ទុក​យូអេសប៊ី។"</string>
     <string name="permdesc_sdcardWrite" product="default" msgid="4337417790936632090">"ឲ្យ​​កម្មវិធី​សរសេរ​ទៅ​កាត​អេសឌី។"</string>
-    <string name="permlab_mediaStorageWrite" product="default" msgid="6859839199706879015">"កែ/លុប​មាតិកា​ឧបករណ៍​ផ្ទុក​មេឌៀ​ខាង​ក្នុង"</string>
-    <string name="permdesc_mediaStorageWrite" product="default" msgid="8189160597698529185">"ឲ្យ​កម្មវិធី​កែ​មាតិកា​នៃ​ឧបករណ៍​ផ្ទុក​ខាង​ក្នុង។"</string>
-    <string name="permlab_manageDocs" product="default" msgid="5778318598448849829">"គ្រប់គ្រង​ការ​ផ្ទុក​ឯកសារ"</string>
-    <string name="permdesc_manageDocs" product="default" msgid="8704323176914121484">"ឲ្យ​កម្មវិធី​គ្រប់គ្រង​ការ​ផ្ទុក​ឯកសារ។"</string>
-    <string name="permlab_sdcardAccessAll" msgid="8150613823900460576">"ចូល​ដំណើរការ​ឧបករណ៍​ផ្ទុក​ខាង​ក្រៅ​នៃ​អ្នកប្រើ​ទាំងអស់"</string>
-    <string name="permdesc_sdcardAccessAll" msgid="3215208357415891320">"ឲ្យ​កម្មវិធី​ចូល​ដំណើរការ​ឧបករណ៍​ផ្ទុក​ខាង​ក្រៅ​សម្រាប់​អ្នកប្រើ​ទាំងអស់។"</string>
-    <string name="permlab_cache_filesystem" msgid="5656487264819669824">"ចូល​ដំណើរការ​ប្រព័ន្ធ​​​ឯកសារ​ឃ្លាំង​សម្ងាត់"</string>
-    <string name="permdesc_cache_filesystem" msgid="5578967642265550955">"ឲ្យ​កម្មវិធី​អាន និង​សរសេរ​ប្រព័ន្ធ​ឯកសារ​ឃ្លាំង​សម្ងាត់។"</string>
     <string name="permlab_use_sip" msgid="2052499390128979920">"បង្កើត/ទទួល ការ​ហៅ SIP"</string>
     <string name="permdesc_use_sip" msgid="2297804849860225257">"​ឲ្យ​​កម្មវិធី បង្កើត និង​ទទួល​ការ​ហៅ SIP ។"</string>
-    <string name="permlab_register_sim_subscription" msgid="3166535485877549177">"ចុះ​ឈ្មោះ​ការ​ភ្ជាប់​ស៊ី​ម​ទូរគមនាគមន៍​ថ្មី"</string>
-    <string name="permdesc_register_sim_subscription" msgid="2138909035926222911">"អនុញ្ញាត​ឲ្យ​កម្មវិធី​ចុះ​ឈ្មោះ​​​ជា​មួយ​ស៊ី​ម​ទូរគមនាគមន៍​ថ្មី"</string>
-    <string name="permlab_register_call_provider" msgid="108102120289029841">"ចុះ​ឈ្មោះ​ការ​ភ្ជាប់​ទូរគមនាគមន៍​ថ្មី"</string>
-    <string name="permdesc_register_call_provider" msgid="7034310263521081388">"ឲ្យ​កម្មវិធី​ចុះ​ឈ្មោះ​ការ​ភ្ជាប់​ទូរគមនាគមន៍​ថ្មី។"</string>
-    <string name="permlab_connection_manager" msgid="1116193254522105375">"គ្រប់គ្រង​ការ​ភ្ជាប់​ទូរគមនាគមន៍"</string>
-    <string name="permdesc_connection_manager" msgid="5925480810356483565">"ឲ្យ​កម្មវិធី​គ្រប់គ្រង​ការ​ភ្ជាប់​ទូរគមនាគមន៍។"</string>
-    <string name="permlab_bind_incall_service" msgid="6773648341975287125">"ទាក់ទង​ជា​មួយ​អេក្រង់​ហៅ​ចូល"</string>
-    <string name="permdesc_bind_incall_service" msgid="8343471381323215005">"ឲ្យ​កម្មវិធី​ពិនិត្យ​ពេលវេលា និង​វិធី​ដែល​អ្នកប្រើ​មើល​ឃើញ​អេក្រង់​ហៅ​ចូល។"</string>
-    <string name="permlab_bind_connection_service" msgid="3557341439297014940">"ទាក់ទង​ជា​មួយ​សេវាកម្ម​ទូរស័ព្ទ"</string>
-    <string name="permdesc_bind_connection_service" msgid="4008754499822478114">"ឲ្យ​កម្មវិធី​ទាក់ទង​ជា​មួយ​សេវាកម្ម​ទូរស័ព្ទ ដើម្បី​ហៅ/ទទួល​ការ​ហៅ។"</string>
-    <string name="permlab_control_incall_experience" msgid="9061024437607777619">"ផ្ដល់​​បទពិសោធន៍​អ្នក​ប្រើ​ហៅ​ចូល"</string>
-    <string name="permdesc_control_incall_experience" msgid="915159066039828124">"ឲ្យ​កម្មវិធី​ផ្ដល់​បទពិសោធន៍​អ្នក​ប្រើ​ហៅ​ចូល។"</string>
-    <string name="permlab_readNetworkUsageHistory" msgid="7862593283611493232">"អាន​ការ​ប្រើ​បណ្ដាញ​ពិសេស"</string>
-    <string name="permdesc_readNetworkUsageHistory" msgid="7689060749819126472">"ឲ្យ​កម្មវិធី​អាន​ការ​ប្រើ​បណ្ដាញ​ជា​ប្រវត្តិ​សាស្ត្រ​សម្រាប់​បណ្ដាញ និង​កម្មវិធី​ជាក់លាក់។"</string>
-    <string name="permlab_manageNetworkPolicy" msgid="2562053592339859990">"គ្រប់គ្រង​គោលនយោបាយ​បណ្ដាញ"</string>
-    <string name="permdesc_manageNetworkPolicy" msgid="7537586771559370668">"ឲ្យ​កម្មវិធី​គ្រប់គ្រង​គោលនយោបាយ​បណ្ដាញ និង​កំណត់​ក្បួន​ជាក់លាក់​សម្រាប់​កម្មវិធី។"</string>
-    <string name="permlab_modifyNetworkAccounting" msgid="5088217309088729650">"កែ​គណនី​ប្រើ​បណ្ដាញ"</string>
-    <string name="permdesc_modifyNetworkAccounting" msgid="5443412866746198123">"ឲ្យ​កម្មវិធី​កែ​វិធី​គិត​ថ្លៃ​សេវាកម្ម​ប្រើ​បណ្ដាញ​​តាម​កម្មវិធី។ មិន​សម្រាប់​ប្រើ​ដោយ​កម្មវិធី​ធម្មតា។"</string>
-    <string name="permlab_accessNotifications" msgid="7673416487873432268">"ចូល​ដំណើរ​ការ​ការ​ជូន​ដំណឹង"</string>
-    <string name="permdesc_accessNotifications" msgid="458457742683431387">"ឲ្យ​កម្មវិធី​ទៅ​យក ពិនិត្យ និង​សម្អាត​ការ​ជូន​ដំណឹង រួមមាន​​ប្រកាស​ដោយ​កម្មវិធី​ផ្សេងៗ។"</string>
-    <string name="permlab_bindNotificationListenerService" msgid="7057764742211656654">"ចង​ទៅ​សេវាកម្ម​ស្ដាប់​ការ​ជូន​ដំណឹង"</string>
-    <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"ឲ្យ​ម្ចាស់​ចង​ចំណុច​ប្រទាក់​កម្រិត​កំពូល​នៃ​សេវាកម្ម​កម្មវិធី​ស្ដាប់​ការ​ជូន​ដំណឹង។ មិន​គួរ​ចាំបាច់​សម្រាប់​កម្មវិធី​ធម្មតា​​ទេ។"</string>
-    <string name="permlab_bindChooserTargetService" msgid="3443261076710185673">"ចងភ្ជាប់ទៅសេវាកម្មគោលដៅជ្រើសរើស"</string>
-    <string name="permdesc_bindChooserTargetService" msgid="1413908999583734970">"អនុញ្ញាតឲ្យអ្នកប្រើចងភ្ជាប់ទៅអ៊ីនធឺហ្វេសកម្រិតខ្ពស់នៃសេវាកម្មគោលដៅជ្រើសរើស។ អាចនឹងមិនចាំបាច់សម្រាប់កម្មវិធីធម្មតាទេ។"</string>
-    <string name="permlab_bindConditionProviderService" msgid="1180107672332704641">"ភ្ជាប់​ទៅ​សេវាកម្ម​ក្រុមហ៊ុន​ផ្ដល់​លក្ខខណ្ឌ"</string>
-    <string name="permdesc_bindConditionProviderService" msgid="1680513931165058425">"អនុញ្ញាត​ឲ្យ​ម្ចាស់​ភ្ជាប់​ទៅ​ចំណុច​ប្រទាក់​កម្រិត​កំពូល​​របស់​សេវាកម្ម​ក្រុមហ៊ុន​ផ្ដល់​លក្ខខណ្ឌ។ មិន​គួរ​ចាំបាច់​សម្រាប់​កម្មវិធី​ធម្មតា​ទេ។"</string>
-    <string name="permlab_bindMediaRouteService" msgid="6637740382272686835">"ភ្ជាប់​​ទៅ​សេវា​ផ្លូវ​មេឌៀ"</string>
-    <string name="permdesc_bindMediaRouteService" msgid="6436655024972496687">"អនុញ្ញាត​ឲ្យ​ម្ចាស់​​ភ្ជាប់​​ទៅ​ចំណុច​ប្រទាក់​ពេញ​និយម​នៃ​សេវាកម្ម​ផ្លូវ​មេឌៀ​។ មិន​គួរ​ចាំបាច់​សម្រាប់​កម្មវិធី​ធម្មតា​ទេ​។"</string>
-    <string name="permlab_bindDreamService" msgid="4153646965978563462">"ភ្ជាប់​ទៅ​សេវាកម្ម​ស្រមោល​ស្រមៃ"</string>
-    <string name="permdesc_bindDreamService" msgid="7325825272223347863">"អនុញ្ញាត​ឲ្យ​ម្ចាស់​ភ្ជាប់​ទៅ​ចំណុច​ប្រទាក់​កម្រិត​កំពូល​នៃ​សេវាកម្ម​ស្រមើ​ស្រមៃ។ មិន​គួរ​ចាំបាច់​​សម្រាប់​កម្មវិធី​ធម្មតា​ទេ។"</string>
-    <string name="permlab_invokeCarrierSetup" msgid="3699600833975117478">"ដកហូត​កម្មវិធី​កំណត់​រចនាសម្ព័ន្ធ​ដែល​បាន​ផ្ដល់​ដោយ​ក្រុមហ៊ុន​បញ្ជូន"</string>
-    <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"អនុញ្ញាត​ឲ្យ​ម្ចាស់​ដក​ហូត​កម្មវិធី​កំណត់​រចនាសម្ព័ន្ធ​ដែល​បាន​ផ្ដល់​ដោយ​ក្រុមហ៊ុន​បញ្ជូន។ មិន​គួរ​ចាំបាច់​សម្រាប់​កម្មវិធី​ធម្មតា​ទេ។"</string>
-    <string name="permlab_accessNetworkConditions" msgid="8206077447838909516">"សង្កេត​មើល​លើ​លក្ខខណ្ឌ​បណ្ដាញ"</string>
-    <string name="permdesc_accessNetworkConditions" msgid="6899102075825272211">"ឲ្យ​កម្មវិធី​សង្កេត​មើល​​លើ​លក្ខខណ្ឌ​បណ្ដាញ​។ មិន​គួរ​ចាំបាច់​សម្រាប់​កម្មវិធី​ធម្មតា​ទេ។"</string>
-    <string name="permlab_setInputCalibration" msgid="4902620118878467615">"ប្ដូរ​​ចំណុច​ឧបករណ៍​បញ្ចូល"</string>
-    <string name="permdesc_setInputCalibration" msgid="4527511047549456929">"ឲ្យ​​កម្មវិធី​កែ​ប៉ារ៉ាម៉ែត្រ​កែ​ចំណុច​​នៃ​ការ​ប៉ះ​អេក្រង់។ មិន​គួរ​ចាំបាច់​សម្រាប់​កម្មវិធី​ធម្មតា​ទេ។"</string>
-    <string name="permlab_accessDrmCertificates" msgid="7436886640723203615">"ចូល​មើល​វិញ្ញាបនបត្រ DRM"</string>
-    <string name="permdesc_accessDrmCertificates" msgid="8073288354426159089">"ឲ្យ​កម្មវិធី​ផ្ដល់ និង​ប្រើ​វិញ្ញាបនបត្រ DRM ។ មិន​គួរ​ចាំបាច់​សម្រាប់​កម្មវិធី​ធម្មតា​ទេ។"</string>
-    <string name="permlab_handoverStatus" msgid="1159132046126626731">"ទទួល​ស្ថានភាព​ផ្ទេរ Android Beam"</string>
-    <string name="permdesc_handoverStatus" msgid="4788144087245714948">"ឲ្យ​កម្មវិធី​ទទួល​ព័ត៌មាន​អំពី​ការ​ផ្ទេរ​​ Android Beam បច្ចុប្បន្ន"</string>
-    <string name="permlab_removeDrmCertificates" msgid="7044888287209892751">"លុប​​វិញ្ញាបនបត្រ DRM ចេញ"</string>
-    <string name="permdesc_removeDrmCertificates" msgid="7272999075113400993">"អនុញ្ញាត​ឲ្យ​​កម្មវិធី​លុប​ចេញ​វិញ្ញាបនបត្រ DRM ​។ គួរ​តែ​មិន​ត្រូវការ​សម្រាប់​កម្មវិធី​ធម្មតា​។"</string>
-    <string name="permlab_bindCarrierMessagingService" msgid="1490229371796969158">"ភ្ជាប់ទៅសេវាកម្មសារអ្នកផ្តល់សេវាកម្មទូរស័ព្ទ"</string>
-    <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"អនុញ្ញាតឲ្យអ្នកប្រើភ្ជាប់ទៅអ៊ីនធឺហ្វេសកម្រិតខ្ពស់នៃសេវាកម្មសារអ្នកផ្តល់សេវាកម្មទូរស័ព្ទ។ មិនគួរចាំបាច់សម្រាប់កម្មវិធីធម្មតាទេ។"</string>
-    <string name="permlab_accessVoiceInteractionService" msgid="4183835260471435605">"ធ្វើអន្តរកម្មជាមួយសេវាកម្មអន្តរកម្មសម្លេងដែលសកម្ម"</string>
-    <string name="permdesc_accessVoiceInteractionService" msgid="836587728238433459">"អនុញ្ញាតឲ្យម្ចាស់ធ្វើអន្តរកម្មជាមួយសេវាកម្មអន្តរកម្មសម្លេងដែលសកម្មថ្មីៗនេះ។ មិនគួរចាំបាច់សម្រាប់កម្មវិធីធម្មតាទេ។"</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"កំណត់​ក្បួន​ពាក្យ​សម្ងាត់"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"គ្រប់គ្រងប្រវែង និងតួអក្សរដែលអនុញ្ញាតឲ្យប្រើក្នុងពាក្យសម្ងាត់ និងលេខសម្ងាត់ចាក់សោអេក្រង់។"</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"ពិនិត្យ​ការ​ព្យាយាម​ដោះ​សោ​អេក្រង់"</string>
@@ -1135,28 +762,10 @@
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="8497389531014185509">"ឲ្យ​កម្មវិធី​កែ​ប្រវត្តិ ឬ​ចំណាំ​របស់​កម្មវិធី​អ៊ីនធឺណិត​ដែល​បាន​រក្សាទុក​ក្នុង​ទូរស័ព្ទ​​របស់​អ្នក។ កម្មវិធី​ព្យាបាទ​អាច​ប្រើ​វា​ដើម្បី​លុប ឬ​កែ​ទិន្នន័យ​នៃ​កម្មវិធី​អ៊ីនធឺណិត​របស់​អ្នក។ ចំណាំ៖ សិទ្ធិ​នេះ​អាច​ត្រូវ​បាន​បង្ខំ​ដោយ​កម្មវិធី​អ៊ីនធឺណិត​​ភាគី​ទីបី​ ឬ​​កម្មវិធី​ផ្សេង​ដែល​មាន​សមត្ថភាព​រុករក​បណ្ដាញ។ស"</string>
     <string name="permlab_setAlarm" msgid="1379294556362091814">"កំណត់​សំឡេង​រោទ៍"</string>
     <string name="permdesc_setAlarm" msgid="316392039157473848">"ឲ្យ​កម្មវិធី​កំណត់​​សំឡេង​រោទ៍​ក្នុង​កម្មវិធី​នាឡិកា​រោទ៍​បាន​ដំឡើង។​ កម្មវិធី​នាឡិកា​រោទ៍​មួយ​ចំនួន​អាច​មិន​អនុវត្ត​លក្ខណៈ​នេះ។"</string>
-    <string name="permlab_writeVoicemail" msgid="7309899891683938100">"សរសេរ​សារ​ជា​សំឡេង"</string>
-    <string name="permdesc_writeVoicemail" msgid="6592572839715924830">"ឲ្យ​កម្មវិធី​កែប្រែ​ និង​លុប​សារ​ចេញពី​ប្រអប់​ទទួល​សារ​ជា​សំឡេង​របស់​អ្នក។"</string>
     <string name="permlab_addVoicemail" msgid="5525660026090959044">"បន្ថែម​សារ​ជា​សំឡេង"</string>
     <string name="permdesc_addVoicemail" msgid="6604508651428252437">"ឲ្យ​កម្មវិធី​បន្ថែម​សារ​ទៅ​ប្រអប់​ទទួល​សារ​ជា​សំឡេង​របស់​អ្នក។"</string>
-    <string name="permlab_readVoicemail" msgid="8415201752589140137">"អាន​សារ​ជា​សំឡេង"</string>
-    <string name="permdesc_readVoicemail" msgid="8926534735321616550">"ឲ្យ​កម្មវិធី​អាន​សារ​ជា​សំឡេង​របស់​អ្នក។"</string>
     <string name="permlab_writeGeolocationPermissions" msgid="5962224158955273932">"កែ​សិទ្ធិ​ទីតាំង​ភូមិសាស្ត្រ​របស់​​កម្មវិធី​អ៊ីនធឺណិត"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="1083743234522638747">"ឲ្យ​កម្មវិធី​កែ​​សិទ្ធិ​ទី​តាំង​ភូមិសាស្ត្រ​របស់​កម្មវិធី​អ៊ីនធឺណិត។ កម្មវិធី​ព្យាបាទ​អាច​ប្រើ​វា ដើម្បី​ឲ្យ​ផ្ញើ​ព័ត៌មាន​ទីតាំង​ទៅ​តំបន់បណ្ដាញ​ដោយ​បំពាន។"</string>
-    <string name="permlab_packageVerificationAgent" msgid="5568139100645829117">"ផ្ទៀងផ្ទាត់​កញ្ចប់"</string>
-    <string name="permdesc_packageVerificationAgent" msgid="8437590190990843381">"ឲ្យ​កម្មវិធី​ផ្ទៀងផ្ទាត់​កញ្ចប់​ដែល​អាច​ដំឡើង​បាន។"</string>
-    <string name="permlab_bindPackageVerifier" msgid="4187786793360326654">"ចង​ទៅ​កម្មវិធី​ផ្ទៀងផ្ទាត់​កញ្ចប់"</string>
-    <string name="permdesc_bindPackageVerifier" msgid="3180741773233862126">"ឲ្យ​ម្ចាស់​ស្នើ​កម្មវិធី​ផ្ទៀងផ្ទាត់​កញ្ចប់។ មិន​គួរ​ចាំបាច់​សម្រាប់​កម្មវិធី​ធម្មតា​ទេ។"</string>
-    <string name="permlab_intentFilterVerificationAgent" msgid="1135788294400437497">"ផ្ទៀងផ្ទាត់តម្រងចេតនា"</string>
-    <string name="permdesc_intentFilterVerificationAgent" msgid="5853902808424716312">"អនុញ្ញាតឲ្យកម្មវិធីពិនិត្យមើលថាតើតម្រងចេតនាត្រូវបានផ្ទៀងផ្ទាត់ហើយឬនៅ។"</string>
-    <string name="permlab_bindIntentFilterVerifier" msgid="8567268159430779210">"ចងភ្ជាប់ទៅកម្មវិធីផ្ទៀងផ្ទាត់តម្រងចេតនា"</string>
-    <string name="permdesc_bindIntentFilterVerifier" msgid="681128728719578778">"អនុញ្ញាតឲ្យអ្នកគ្រប់គ្រងធ្វើការស្នើកម្មវិធីផ្ទៀងផ្ទាត់តម្រងចេតនា។ មិនគួរចាំបាច់សម្រាប់កម្មវិធីធម្មតានោះទេ។"</string>
-    <string name="permlab_serialPort" msgid="546083327654631076">"ចូល​ដំណើរការ​ច្រក​ស៊េរី"</string>
-    <string name="permdesc_serialPort" msgid="2991639985224598193">"អនុញ្ញាត​ឱ្យ​ចូល​ដំណើរ​ការ​ទៅ​កាន់​ច្រក​សៀរៀល​ដោយ​ប្រើ SerialManager API ។"</string>
-    <string name="permlab_accessContentProvidersExternally" msgid="5077774297943409285">"ចូល​ដំណើរការ​ក្រុមហ៊ុន​ផ្ដល់​មាតិកា​ខាង​ក្រៅ"</string>
-    <string name="permdesc_accessContentProvidersExternally" msgid="4544346486697853685">"ឲ្យ​ម្ចាស់​ចូល​ដំណើរការ​ក្រុមហ៊ុន​ផ្ដល់​មាតិកា​ពី​សែល។ មិន​គួរ​ចាំបាច់​សម្រាប់​កម្មវិធី​ធម្មតា​ទេ។"</string>
-    <string name="permlab_updateLock" msgid="3527558366616680889">"ការ​ពារ​បច្ចុប្បន្នភាព​ឧបករណ៍​ស្វ័យ​ប្រវត្តិ"</string>
-    <string name="permdesc_updateLock" msgid="1655625832166778492">"ឲ្យ​ម្ចាស់​ផ្ដល់​ព័ត៌មាន​ទៅ​ប្រព័ន្ធ​អំពី​ពេលវេលា​ដែល​ល្អ​សម្រាប់​ចាប់ផ្ដើម​ឡើងវិញ​ដោយ​គ្មាន​អន្តរកម្ម ដើម្បី​ធ្វើ​បច្ចុប្បន្ន​ឧបករណ៍។"</string>
     <string name="save_password_message" msgid="767344687139195790">"តើ​អ្នក​ចង់​ឲ្យ​កម្មវិធី​អ៊ីនធឺណិត​ចងចាំ​ពាក្យ​សម្ងាត់​នេះ?"</string>
     <string name="save_password_notnow" msgid="6389675316706699758">"មិនមែន​ឥឡូវ"</string>
     <string name="save_password_remember" msgid="6491879678996749466">"ចងចាំ"</string>
@@ -1454,28 +1063,8 @@
     <string name="ext_media_nomedia_notification_message" product="nosdcard" msgid="6921126162580574143">"បាន​ដក​ឧបករណ៍​ផ្ទុក​យូអេសប៊ី។ បញ្ចូល​មេឌៀ​ថ្មី។"</string>
     <string name="ext_media_nomedia_notification_message" product="default" msgid="3870120652983659641">"បាន​ដក​កាត​អេសឌី។ បញ្ចូល​ថ្មី​មួយ។"</string>
     <string name="activity_list_empty" msgid="1675388330786841066">"រក​មិន​ឃើញ​សកម្មភាព​ផ្គូផ្គង។"</string>
-    <string name="permlab_pkgUsageStats" msgid="8787352074326748892">"ធ្វើ​បច្ចុប្បន្ន​សមាសធាតុ​ស្ថិតិ​ការ​ប្រើ"</string>
-    <string name="permdesc_pkgUsageStats" msgid="1106612424254277630">"ឲ្យ​កម្មវិធី​កែ​ស្ថិតិ​ប្រើ​សមាសភាគ​ដែល​បា​ន​ប្រមូល។​​ មិន​សម្រាប់​ប្រើ​ដោយ​កម្មវិធី​ធម្មតា​ទេ។"</string>
-    <string name="permlab_copyProtectedData" msgid="4341036311211406692">"ចម្លង​មាតិកា"</string>
-    <string name="permdesc_copyProtectedData" msgid="4390697124288317831">"ឲ្យ​កម្មវិធី​ដក​សេវាកម្ម​នៃ​កម្មវិធី​ផ្ទុក​​លំនាំដើម ដើម្បី​ចម្លង​មាតិកា។​ មិន​សម្រាប់​ប្រើ​ដោយ​កម្មវិធី​លំនាំដើម។"</string>
     <string name="permlab_route_media_output" msgid="1642024455750414694">"នាំ​ផ្លូវ​លទ្ធផល​មេឌៀ"</string>
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"ឲ្យ​កម្មវិធី​នាំ​ផ្លូវ​លទ្ធផល​មេឌៀ​ទៅ​ឧបករណ៍​​ខាង​ក្រៅ​ផ្សេង។"</string>
-    <string name="permlab_access_keyguard_secure_storage" msgid="7565552237977815047">"ចូល​ដំណើរការ​ឧបករណ៍​ផ្ទុក​សុវត្ថិភាព​"</string>
-    <string name="permdesc_access_keyguard_secure_storage" msgid="5866245484303285762">"ឲ្យ​កម្មវិធី​ចូល​​ការ​ផ្ទុក​មាន​សុវត្ថិភាព keguard ។"</string>
-    <string name="permlab_control_keyguard" msgid="172195184207828387">"ពិនិត្យ​ការ​បង្ហាញ និង​លាក់​ការ​ការពារ"</string>
-    <string name="permdesc_control_keyguard" msgid="3043732290518629061">"ឲ្យ​កម្មវិធី​គ្រប់គ្រង keguard ។"</string>
-    <string name="permlab_trust_listener" msgid="1765718054003704476">"ស្ដាប់​ការ​ផ្លាស់ប្ដូរ​ស្ថានភាព​ដែល​ទុកចិត្ត។"</string>
-    <string name="permdesc_trust_listener" msgid="8233895334214716864">"ឲ្យ​កម្មវិធី​ស្ដាប់​ការ​ផ្លាស់ប្ដូរ​ក្នុង​ស្ថានភាព​ដែល​​ទុកចិត្ត។"</string>
-    <string name="permlab_provide_trust_agent" msgid="5465587586091358316">"ផ្ដល់​ភ្នាក់ងារ​ដែល​ទុកចិត្ត។"</string>
-    <string name="permdesc_provide_trust_agent" msgid="3865702641053068148">"អនុញ្ញាត​ឲ្យ​កម្មវិធី​ផ្ដល់​​ភ្នាក់ងារ​ដែល​ទុក​ចិត្ត។"</string>
-    <string name="permlab_launch_trust_agent_settings" msgid="5859430082240410200">"ចាប់ផ្ដើម​ម៉ឺនុយ​ការ​កំណត់​ភ្នាក់ងារ​ដែល​ទុក​ចិត្ត"</string>
-    <string name="permdesc_launch_trust_agent_settings" msgid="8185142708644913381">"អនុញ្ញាត​ឲ្យ​កម្មវិធី​ចាប់ផ្ដើម​សកម្មភាព​ដែល​ប្ដូរ​ឥរិយាបថ​ភ្នាក់ងារ​ដែល​ទុក​ចិត្ត។"</string>
-    <string name="permlab_bind_trust_agent_service" msgid="8242093169457695334">"ភ្ជាប់​ទៅ​សេវាកម្ម​ភ្នាក់ងារ​ដែល​ទុកចិត្ត"</string>
-    <string name="permdesc_bind_trust_agent_service" msgid="7041930026024507515">"អនុញ្ញាត​ឲ្យ​កម្មវិធី​ភ្ជាប់​សេវាកម្ម​ភ្នាក់ងារ​ដែល​ទុក​ចិត្ត។"</string>
-    <string name="permlab_recovery" msgid="3157024487744125846">"អន្តរកម្ម​ជា​មួយ​បច្ចុប្បន្នភាព និង​ប្រព័ន្ធ​សង្គ្រោះ"</string>
-    <string name="permdesc_recovery" msgid="8511774533266359571">"ឲ្យ​កម្មវិធី​មាន​អន្តរកម្ម​ជា​មួយ​ប្រព័ន្ធ​សង្គ្រោះ និង​បច្ចុប្បន្នភាព​ប្រព័ន្ធ។"</string>
-    <string name="permlab_manageMediaProjection" msgid="1120495449419929218">"គ្រប់គ្រង​សម័យ​​ការ​បង្ហាញ​​មេឌៀ"</string>
-    <string name="permdesc_manageMediaProjection" msgid="8053759147529492856">"ឲ្យ​កម្មវិធី​គ្រប់គ្រង​សម័យ​ការ​បង្ហាញ​​មេឌៀ។ សម័យ​ទាំង​នេះ​អាច​​ឲ្យ​កម្មវិធី​ចាប់​យក​មាតិកា​​​បង្ហាញ និង​អូឌីយ៉ូ។ មិន​គួរ​ចាំបាច់​ដោយ​កម្មវិធី​ធម្មតា​ទេ។"</string>
     <string name="permlab_readInstallSessions" msgid="6165432407628065939">"អាន​សម័យ​ដំឡើង"</string>
     <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"ឲ្យ​កម្មវិធី​អាន​សម័យ​ដំឡើង។ វា​អនុញ្ញាត​ឲ្យ​ឃើញ​ព័ត៌មាន​លម្អិត​អំពី​​ការដំឡើង​កញ្ចប់​សកម្ម។"</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"ប៉ះ​ពីរ​ដង ​​ដើម្បី​គ្រប់គ្រង​ការ​ពង្រីក"</string>
@@ -1842,13 +1431,9 @@
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"សួរ​រក​កូដ PIN មុន​ពេល​ផ្ដាច់"</string>
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"សួរ​រក​លំនាំ​ដោះ​សោ​មុន​ពេល​ផ្ដាច់"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"សួរ​រក​ពាក្យ​សម្ងាត់​មុន​ពេល​ផ្ដាច់"</string>
-    <!-- no translation found for package_installed_device_owner (8420696545959087545) -->
-    <skip />
-    <!-- no translation found for package_deleted_device_owner (7650577387493101353) -->
-    <skip />
+    <string name="package_installed_device_owner" msgid="8420696545959087545">"បានដំឡើងដោយអ្នកគ្រប់គ្រងរបស់អ្នក"</string>
+    <string name="package_deleted_device_owner" msgid="7650577387493101353">"បានលុបដោយអ្នកគ្រប់គ្រងរបស់អ្នក"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"ដើម្បីជួយឲ្យថាមពលថ្មប្រសើរឡើង កម្មវិធីសន្សំសំចៃថាមពលថ្មកាត់បន្ថយប្រតិបត្តិការឧបករណ៍របស់អ្នក និងកម្រិតភាពញ័រ សេវាកម្មទីតាំង និងទិន្នន័យផ្ទៃខាងក្រោយស្ទើរតែទាំងអស់។ ការផ្ញើសារអ៊ីម៉ែល និងកម្មវិធីផ្សេងទៀតដែលពឹងផ្អែកលើការធ្វើសមកាលកម្មអាចនឹងមិនធ្វើបច្ចុប្បន្នភាពទេ លុះត្រាតែអ្នកបើកពួកវា។\n\nកម្មវិធីសន្សំសំចៃបិទដោយស្វ័យប្រវត្តិ នៅពេលដែលឧបករណ៍របស់អ្នកកំពុងសាកថ្ម។"</string>
-    <string name="downtime_condition_summary" msgid="8761776337475705749">"រហូត​ដល់ម៉ោង​សម្រាក ឬរវល់​របស់​អ្នក​បញ្ចប់​នៅ <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
-    <string name="downtime_condition_line_one" msgid="8762708714645352010">"រហូត​ដល់​ម៉ោង​រាប់​ថយក្រោយ​ចប់"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
       <item quantity="other">រយៈពេល %1$d នាទី (រហូតដល់ <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
       <item quantity="one">រយៈពេលមួយនាទី (រហូតដល់ <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>
@@ -1867,9 +1452,17 @@
     </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"រហូត​ដល់ <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_forever" msgid="7420011936770086993">"រហូត​ដល់ពេល​​អ្នក​បិទ​វា"</string>
+    <!-- no translation found for zen_mode_rule_name_combination (191109939968076477) -->
+    <skip />
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"បង្រួម"</string>
-    <string name="zen_mode_next_alarm_summary" msgid="5915140424683747372">"រហូត​ដល់​ការ​ជូន​ដំណឹង​បន្ទាប់​នៅ <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
-    <string name="zen_mode_next_alarm_line_one" msgid="5537042951553420916">"រហូត​ការ​ជូន​ដំណឹង​បន្ទាប់"</string>
+    <!-- no translation found for zen_mode_feature_name (289097150786114338) -->
+    <skip />
+    <!-- no translation found for zen_mode_downtime_feature_name (2626974636779860146) -->
+    <skip />
+    <!-- no translation found for zen_mode_default_weeknights_name (2069189413656431610) -->
+    <skip />
+    <!-- no translation found for zen_mode_default_weekends_name (2377398437072017011) -->
+    <skip />
     <string name="muted_by" msgid="6147073845094180001">"បាន​បិទ​សំឡេង​ដោយ <xliff:g id="THIRD_PARTY">%1$s</xliff:g>"</string>
     <string name="system_error_wipe_data" msgid="6608165524785354962">"មានបញ្ហាខាងក្នុងឧបករណ៍របស់អ្នក ហើយវាអ្នកមិនមានស្ថេរភាព រហូតទាល់តែអ្នកកំណត់ដូចដើមវិញទាំងស្រុង។"</string>
     <string name="system_error_manufacturer" msgid="8086872414744210668">"មានបញ្ហាខាងក្នុងឧបករណ៍របស់អ្នក ទំនាក់ទំនងក្រុមហ៊ុនផលិតឧបករណ៍របស់អ្នកសម្រាប់ព័ត៌មានបន្ថែម។"</string>
@@ -1879,6 +1472,13 @@
     <string name="stk_cc_ss_to_dial" msgid="2151304435775557162">"សំណើរ SS ត្រូវបានកែសម្រួលទៅតាមសំណើរការហៅទូរស័ព្ទ។"</string>
     <string name="stk_cc_ss_to_ussd" msgid="3951862188105305589">"សំណើរ SS ត្រូវបានកែសម្រួលទៅតាមសំណើរ USSD។"</string>
     <string name="stk_cc_ss_to_ss" msgid="5470768854991452695">"សំណើរ SS ត្រូវបានកែសម្រួលទៅតាមសំណើរ SS ថ្មី។"</string>
+    <!-- no translation found for usb_midi_peripheral_name (7221113987741003817) -->
+    <skip />
     <string name="usb_midi_peripheral_manufacturer_name" msgid="7176526170008970168">"Android"</string>
-    <string name="usb_midi_peripheral_model_name" msgid="1959288763942653301">"ឧបករណ៍រន្ធ USB បន្ថែម"</string>
+    <!-- no translation found for usb_midi_peripheral_product_name (4971827859165280403) -->
+    <skip />
+    <!-- no translation found for floating_toolbar_open_overflow_description (4797287862999444631) -->
+    <skip />
+    <!-- no translation found for floating_toolbar_close_overflow_description (559796923090723804) -->
+    <skip />
 </resources>

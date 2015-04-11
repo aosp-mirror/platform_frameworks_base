@@ -23,7 +23,7 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
   <string-array name="wfcOperatorErrorAlertMessages">
-    <item msgid="7239039348648848288">"Kupiga simu na kutuma ujumbe kupitia Wi-Fi, mwambie mtoa huduma wako asanidi huduma hii kwanza. Kisha washa upigaji simu kwa Wi-Fi tena kutoka Mipangilio."</item>
+    <item msgid="7239039348648848288">"Ili upige simu na kutuma ujumbe kupitia Wi-Fi, mwambie mtoa huduma wako asanidi huduma hii kwanza. Kisha uwashe tena upigaji simu kwa Wi-Fi kutoka kwenye Mipangilio."</item>
   </string-array>
   <string-array name="wfcOperatorErrorNotificationMessages">
     <item msgid="483847327467331298">"Jisajili na mtoa huduma wako"</item>

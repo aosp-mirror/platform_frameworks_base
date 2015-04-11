@@ -129,14 +129,10 @@
   <string-array name="wfcOperatorErrorNotificationMessages">
   </string-array>
     <string name="wfcSpnFormat" msgid="8211621332478306568">"%s"</string>
-    <!-- no translation found for wifi_calling_off_summary (8720659586041656098) -->
-    <skip />
-    <!-- no translation found for wfc_mode_wifi_preferred_summary (1994113411286935263) -->
-    <skip />
-    <!-- no translation found for wfc_mode_cellular_preferred_summary (5920549484600758786) -->
-    <skip />
-    <!-- no translation found for wfc_mode_wifi_only_summary (2379919155237869320) -->
-    <skip />
+    <string name="wifi_calling_off_summary" msgid="8720659586041656098">"Av"</string>
+    <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Wi-Fi i första hand"</string>
+    <string name="wfc_mode_cellular_preferred_summary" msgid="5920549484600758786">"Mobil i första hand"</string>
+    <string name="wfc_mode_wifi_only_summary" msgid="2379919155237869320">"Endast Wi-Fi"</string>
     <string name="cfTemplateNotForwarded" msgid="1683685883841272560">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: Vidarebefordras inte"</string>
     <string name="cfTemplateForwarded" msgid="1302922117498590521">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
     <string name="cfTemplateForwardedTime" msgid="9206251736527085256">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g><xliff:g id="DIALING_NUMBER">{1}</xliff:g> efter <xliff:g id="TIME_DELAY">{2}</xliff:g> sekunder"</string>
@@ -222,69 +218,42 @@
     <string name="android_system_label" msgid="6577375335728551336">"Android-system"</string>
     <string name="user_owner_label" msgid="6465364741001216388">"Personliga appar"</string>
     <string name="managed_profile_label" msgid="6260850669674791528">"Arbetet"</string>
-    <string name="permgrouplab_costMoney" msgid="5429808217861460401">"Tjänster som kostar pengar"</string>
-    <string name="permgroupdesc_costMoney" msgid="3293301903409869495">"Göra saker som kan kosta pengar."</string>
-    <string name="permgrouplab_messages" msgid="7521249148445456662">"Dina meddelanden"</string>
-    <string name="permgroupdesc_messages" msgid="7821999071003699236">"Läsa och skriva SMS, e-post och andra meddelanden."</string>
-    <string name="permgrouplab_personalInfo" msgid="3519163141070533474">"Dina personliga uppgifter"</string>
-    <string name="permgroupdesc_personalInfo" msgid="8426453129788861338">"Direktåtkomst till information om dig som lagras på ditt kontaktkort."</string>
+    <!-- no translation found for permgrouplab_contacts (3657758145679177612) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_contacts (1437393511338346185) -->
+    <skip />
+    <!-- no translation found for permgrouplab_location (7275582855722310164) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_location (536889867433972794) -->
+    <skip />
     <string name="permgrouplab_socialInfo" msgid="5799096623412043791">"Dina sociala uppgifter"</string>
     <string name="permgroupdesc_socialInfo" msgid="7129842457611643493">"Direktåtkomst till information om dina kontakter och sociala kontakter."</string>
-    <string name="permgrouplab_location" msgid="635149742436692049">"Din plats"</string>
-    <string name="permgroupdesc_location" msgid="5704679763124170100">"Övervaka din fysiska plats."</string>
-    <string name="permgrouplab_network" msgid="5808983377727109831">"Nätverkskommunikation"</string>
-    <string name="permgroupdesc_network" msgid="4478299413241861987">"Åtkomst till olika nätverksfunktioner."</string>
-    <string name="permgrouplab_bluetoothNetwork" msgid="1585403544162128109">"Bluetooth"</string>
-    <string name="permgroupdesc_bluetoothNetwork" msgid="5625288577164282391">"Få åtkomst till enheter och nätverk via Bluetooth."</string>
-    <string name="permgrouplab_audioSettings" msgid="8329261670151871235">"Ljudinställningar"</string>
-    <string name="permgroupdesc_audioSettings" msgid="2641515403347568130">"Ändra ljudinställningar."</string>
-    <string name="permgrouplab_affectsBattery" msgid="6209246653424798033">"Påverkar batteriet"</string>
-    <string name="permgroupdesc_affectsBattery" msgid="6441275320638916947">"Använda funktioner som gör att batteriet tar slut snabbt."</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"Kalender"</string>
-    <string name="permgroupdesc_calendar" msgid="5777534316982184416">"Direktåtkomst till kalender och händelser."</string>
-    <string name="permgrouplab_dictionary" msgid="4148597128843641379">"Läsa den egna ordlistan"</string>
-    <string name="permgroupdesc_dictionary" msgid="7921166355964764490">"Läsa ord i den egna ordlistan."</string>
-    <string name="permgrouplab_writeDictionary" msgid="8090237702432576788">"Skriva i den egna ordlistan"</string>
-    <string name="permgroupdesc_writeDictionary" msgid="2711561994497361646">"Lägga till ord i den egna ordlistan."</string>
+    <!-- no translation found for permgroupdesc_calendar (2116049656685591803) -->
+    <skip />
+    <!-- no translation found for permgrouplab_sms (228308803364967808) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_sms (3695085582674524761) -->
+    <skip />
+    <string name="permgrouplab_dictionary" msgid="8114410334955871144">"Egen ordlista"</string>
+    <!-- no translation found for permgroupdesc_dictionary (7586787746354378335) -->
+    <skip />
     <string name="permgrouplab_bookmarks" msgid="1949519673103968229">"Bokmärken och historik"</string>
     <string name="permgroupdesc_bookmarks" msgid="4169771606257963028">"Direktåtkomst till bokmärken och webbläsarhistorik."</string>
-    <string name="permgrouplab_deviceAlarms" msgid="6117704629728824101">"Larm"</string>
-    <string name="permgroupdesc_deviceAlarms" msgid="4769356362251641175">"Ställa alarmet."</string>
-    <string name="permgrouplab_voicemail" msgid="4162237145027592133">"Röstmeddelanden"</string>
-    <string name="permgroupdesc_voicemail" msgid="2498403969862951393">"Direktåtkomst till röstbrevlådan."</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"Mikrofon"</string>
-    <string name="permgroupdesc_microphone" msgid="7106618286905738408">"Direktåtkomst till mikrofonen för att spela in ljud."</string>
+    <!-- no translation found for permgroupdesc_microphone (1296196977187629181) -->
+    <skip />
     <string name="permgrouplab_camera" msgid="4820372495894586615">"Kamera"</string>
-    <string name="permgroupdesc_camera" msgid="2933667372289567714">"Direktåtkomst till kamera för att ta bilder eller spela in video."</string>
-    <string name="permgrouplab_screenlock" msgid="8275500173330718168">"Låsa skärmen"</string>
-    <string name="permgroupdesc_screenlock" msgid="7067497128925499401">"Möjlighet att påverka funktionen för enhetens låsskärm."</string>
-    <string name="permgrouplab_appInfo" msgid="8028789762634147725">"Information i dina appar"</string>
-    <string name="permgroupdesc_appInfo" msgid="3950378538049625907">"Kan påverka beteendet hos andra appar på enheten."</string>
-    <string name="permgrouplab_wallpaper" msgid="3850280158041175998">"Bakgrund"</string>
-    <string name="permgroupdesc_wallpaper" msgid="5630417854750540154">"Ändra inställningarna för enhetens bakgrund."</string>
-    <string name="permgrouplab_systemClock" msgid="406535759236612992">"Klocka"</string>
-    <string name="permgroupdesc_systemClock" msgid="3944359833624094992">"Ändra tid eller tidszon i enheten."</string>
-    <string name="permgrouplab_statusBar" msgid="2095862568113945398">"Statusfält"</string>
-    <string name="permgroupdesc_statusBar" msgid="6242593432226807171">"Ändra inställningarna för enhetens statusfält."</string>
-    <string name="permgrouplab_syncSettings" msgid="3341990986147826541">"Synkroniseringsinställningar"</string>
-    <string name="permgroupdesc_syncSettings" msgid="7603195265129031797">"Åtkomst till synkroniseringsinställningarna."</string>
-    <string name="permgrouplab_accounts" msgid="3359646291125325519">"Dina konton"</string>
-    <string name="permgroupdesc_accounts" msgid="4948732641827091312">"Få åtkomst till tillgängliga konton."</string>
-    <string name="permgrouplab_hardwareControls" msgid="7998214968791599326">"Kontroller för maskinvara"</string>
-    <string name="permgroupdesc_hardwareControls" msgid="4357057861225462702">"Direkt åtkomst till maskinvara på handenheten."</string>
-    <string name="permgrouplab_phoneCalls" msgid="9067173988325865923">"Telefonsamtal"</string>
-    <string name="permgroupdesc_phoneCalls" msgid="7489701620446183770">"Övervaka, spela in och bearbeta telefonsamtal"</string>
-    <string name="permgrouplab_systemTools" msgid="4652191644082714048">"Systemverktyg"</string>
-    <string name="permgroupdesc_systemTools" msgid="8162102602190734305">"Åtkomst och kontroll av systemet på lägre nivå."</string>
-    <string name="permgrouplab_developmentTools" msgid="3446164584710596513">"Utvecklingsverktyg"</string>
-    <string name="permgroupdesc_developmentTools" msgid="7058828032358142018">"Funktioner som endast behövs för apputvecklare."</string>
-    <string name="permgrouplab_display" msgid="4279909676036402636">"Gränssnitt i annan app"</string>
-    <string name="permgroupdesc_display" msgid="6051002031933013714">"Påverka gränssnittet i andra appar."</string>
-    <string name="permgrouplab_storage" msgid="1971118770546336966">"Lagring"</string>
-    <string name="permgroupdesc_storage" product="nosdcard" msgid="7442318502446874999">"Få åtkomst till USB-enheten."</string>
-    <string name="permgroupdesc_storage" product="default" msgid="9203302214915355774">"Få åtkomst till SD-kortet."</string>
-    <string name="permgrouplab_accessibilityFeatures" msgid="7919025602283593907">"Tillgänglighetsfunktioner"</string>
-    <string name="permgroupdesc_accessibilityFeatures" msgid="4205196881678144335">"Funktioner som kan behövas med hjälpmedel."</string>
+    <!-- no translation found for permgroupdesc_camera (2429930670410559293) -->
+    <skip />
+    <!-- no translation found for permgrouplab_phone (5229115638567440675) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_phone (2016641188146068700) -->
+    <skip />
+    <!-- no translation found for permgrouplab_sensors (7416703484233940260) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_sensors (2987451839455524494) -->
+    <skip />
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Hämta fönsterinnehåll"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Granska innehållet i ett fönster som du interagerar med."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Aktivera Explore by Touch"</string>
@@ -309,14 +278,8 @@
     <string name="permdesc_receiveSms" msgid="6424387754228766939">"Tillåter att appen tar emot och hanterar SMS. Detta innebär att appen kan övervaka eller ta bort meddelanden som skickats till enheten utan att visa dem för dig."</string>
     <string name="permlab_receiveMms" msgid="1821317344668257098">"ta emot textmeddelanden (MMS)"</string>
     <string name="permdesc_receiveMms" msgid="533019437263212260">"Tillåter att appen tar emot och hanterar MMS-meddelanden. Detta innebär att appen kan övervaka eller ta bort meddelanden som skickats till enheten utan att visa dem för dig."</string>
-    <string name="permlab_receiveEmergencyBroadcast" msgid="1803477660846288089">"ta emot sändningar i nödsituationer"</string>
-    <string name="permdesc_receiveEmergencyBroadcast" msgid="848524070262431974">"Tillåter att appen tar emot och bearbetar sändningar i nödsituationer. Behörigheten är bara tillgänglig för systemappar."</string>
-    <string name="permlab_readCellBroadcasts" msgid="1598328843619646166">"läsa SMS-meddelanden"</string>
-    <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"Appen tillåts läsa SMS som skickas till din enhet. På vissa platser skickas SMS för att varna för nödsituationer. Skadliga appar kan påverka enhetens prestanda eller funktionalitet när du får ett meddelande om en nödsituation via SMS."</string>
     <string name="permlab_sendSms" msgid="5600830612147671529">"skicka SMS"</string>
     <string name="permdesc_sendSms" msgid="7094729298204937667">"Tillåter att appen skickar SMS. Detta kan leda till oväntade avgifter. Skadliga appar kan skicka meddelanden utan ditt godkännande vilket kan kosta pengar."</string>
-    <string name="permlab_sendRespondViaMessageRequest" msgid="8713889105305943200">"skicka svar via meddelanden"</string>
-    <string name="permdesc_sendRespondViaMessageRequest" msgid="7107648548468778734">"Tillåter att appen skickar förfrågningar till andra meddelandeappar för att kunna skicka meddelanden som svar på inkommande samtal."</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"läsa dina textmeddelanden (SMS eller MMS)"</string>
     <string name="permdesc_readSms" product="tablet" msgid="2467981548684735522">"Tillåter att appen läser SMS som sparats på surfplattan eller på SIM-kortet. Med den här behörigheten tillåts appen att läsa alla SMS oavsett innehåll eller sekretess."</string>
     <string name="permdesc_readSms" product="tv" msgid="5102425513647038535">"Tillåter att appen läser sms som har sparats på tv:n eller SIM-kortet. På så sätt kan appen läsa alla sms oavsett innehåll eller sekretess."</string>
@@ -327,188 +290,24 @@
     <string name="permdesc_writeSms" product="default" msgid="7268668709052328567">"Tillåter att appen skriver till SMS som lagras på mobilen eller SIM-kortet. Skadliga appar kan radera dina meddelanden."</string>
     <string name="permlab_receiveWapPush" msgid="5991398711936590410">"ta emot textmeddelanden (WAP)"</string>
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"Tillåter att appen tar emot och hanterar WAP-meddelanden. Med den här behörigheten kan appen övervaka eller ta bort meddelanden som skickats till dig utan att visa dem för dig."</string>
-    <string name="permlab_receiveBluetoothMap" msgid="7593811487142360528">"ta emot Bluetooth-meddelanden (MAP)"</string>
-    <string name="permdesc_receiveBluetoothMap" msgid="8656755936919466345">"Tillåter att appen tar emot och hanterar Bluetooth MAP-meddelanden. Detta innebär att appen kan övervaka eller ta bort meddelanden som skickats till enheten utan att visa dem för dig."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"hämta appar som körs"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"Tillåter att appen hämtar information om nyligen körda och pågående aktiviteter. Detta kan innebära att appen tillåts ta reda på vilka appar som används på enheten."</string>
-    <string name="permlab_startTasksFromRecents" msgid="8990073877885690623">"starta en aktivitet från Senaste"</string>
-    <string name="permdesc_startTasksFromRecents" msgid="7382133554871222235">"Tillåt att appen använder objektet ActivityManager.RecentTaskInfo för att starta en aktivitet som har slutat fungera och som returnerades från ActivityManager.getRecentTaskList()."</string>
-    <string name="permlab_interactAcrossUsers" msgid="7114255281944211682">"interagera mellan användare"</string>
-    <string name="permdesc_interactAcrossUsers" msgid="364670963623385786">"Tillåter att appen utför åtgärder mellan användare på enheten. Skadliga appar kan använda detta som ett sätt att kringgå skyddet mellan användare."</string>
-    <string name="permlab_interactAcrossUsersFull" msgid="2567734285545074105">"fullständig behörighet att interagera mellan användare"</string>
-    <string name="permdesc_interactAcrossUsersFull" msgid="376841368395502366">"Tillåter all slags interaktion mellan användare."</string>
-    <string name="permlab_manageUsers" msgid="1676150911672282428">"hantera användare"</string>
-    <string name="permdesc_manageUsers" msgid="8409306667645355638">"Tillåter att appen hanterar användare på enheten, inklusive att söka efter, skapa och radera användarinformation."</string>
-    <string name="permlab_getDetailedTasks" msgid="6229468674753529501">"hämta information om aktiva appar"</string>
-    <string name="permdesc_getDetailedTasks" msgid="153824741440717599">"Tillåter att appen hämtar detaljerad information om uppgifter som körs och har körts. Skadliga appar kan upptäcka personliga uppgifter om andra appar."</string>
     <string name="permlab_reorderTasks" msgid="2018575526934422779">"byt ordning på appar som körs"</string>
     <string name="permdesc_reorderTasks" msgid="7734217754877439351">"Tillåter att appen flyttar aktiviteter till förgrunden eller bakgrunden. Appen kan göra detta utan åtgärd från dig."</string>
-    <string name="permlab_removeTasks" msgid="6821513401870377403">"avsluta appar som körs"</string>
-    <string name="permdesc_removeTasks" msgid="1394714352062635493">"Tillåter att appen tar bort uppgifter och avslutar appar. Skadliga appar kan störa funktionen i andra appar."</string>
-    <string name="permlab_manageActivityStacks" msgid="7391191384027303065">"hantera aktivitetsstaplar"</string>
-    <string name="permdesc_manageActivityStacks" msgid="1615881933034084440">"Appen tillåts att lägga till, ta bort och ändra aktivitetsstaplar som andra appar körs i. Skadliga appar kan störa funktionerna i andra appar."</string>
-    <string name="permlab_startAnyActivity" msgid="2918768238045206456">"starta alla aktiviteter"</string>
-    <string name="permdesc_startAnyActivity" msgid="997823695343584001">"Appen tillåts starta alla aktiviteter oavsett behörighetsskydd eller exportstatus."</string>
-    <string name="permlab_setScreenCompatibility" msgid="6975387118861842061">"ange skärmkompatibilitet"</string>
-    <string name="permdesc_setScreenCompatibility" msgid="692043618693917374">"Tillåter att appen styr skärmkompatibilitetsläget i andra appar. Skadliga appar kan störa andra appars funktion."</string>
-    <string name="permlab_setDebugApp" msgid="3022107198686584052">"aktivera felsökning av appar"</string>
-    <string name="permdesc_setDebugApp" msgid="4474512416299013256">"Tillåter att appen aktiverar felsökning för en annan app. Skadliga appar kan använda detta för att avsluta andra appar."</string>
-    <string name="permlab_changeConfiguration" msgid="4162092185124234480">"ändra systemets skärminställningar"</string>
-    <string name="permdesc_changeConfiguration" msgid="4372223873154296076">"Tillåter att appen ändrar den aktuella konfigurationen, till exempel språk eller övergripande teckenformat."</string>
     <string name="permlab_enableCarMode" msgid="5684504058192921098">"aktivera trafikläge"</string>
     <string name="permdesc_enableCarMode" msgid="4853187425751419467">"Tillåter att appen aktiverar billäge."</string>
     <string name="permlab_killBackgroundProcesses" msgid="3914026687420177202">"stänga andra appar"</string>
     <string name="permdesc_killBackgroundProcesses" msgid="4593353235959733119">"Tillåter att appen avslutar andra appars bakgrundsprocesser. Detta kan göra så att andra appar avslutas."</string>
-    <string name="permlab_forceStopPackages" msgid="2329627428832067700">"tvinga andra appar att avslutas"</string>
-    <string name="permdesc_forceStopPackages" msgid="5253157296183940812">"Tillåter att appen avslutar andra appar."</string>
-    <string name="permlab_forceBack" msgid="652935204072584616">"tvinga appen att avslutas"</string>
-    <string name="permdesc_forceBack" msgid="3892295830419513623">"Tillåter att appen tvingar en aktivitet i förgrunden att avsluta och gå tillbaka. Behövs inte för vanliga appar."</string>
-    <string name="permlab_dump" msgid="1681799862438954752">"hämta systemets interna status"</string>
-    <string name="permdesc_dump" msgid="1778299088692290329">"Tillåter att appen hämtar systemets interna status. Skadliga appar kan hämta privat och skyddad information som normalt aldrig ska behövas."</string>
-    <string name="permlab_retrieve_window_content" msgid="8022588608994589938">"hämta skärminnehåll"</string>
-    <string name="permdesc_retrieve_window_content" msgid="3193269069469700265">"Tillåter att appen hämtar innehållet i det aktiva fönstret. Skadliga appar kan hämta allt innehåll i fönstret och läsa all text utom lösenord."</string>
-    <string name="permlab_temporary_enable_accessibility" msgid="2312612135127310254">"aktivera tillgänglighetsläget tillfälligt"</string>
-    <string name="permdesc_temporary_enable_accessibility" msgid="8079456293182975464">"Tillåt att en app tillfälligt aktiverar tillgänglighetsläget på enheten. Skadliga appar kan aktivera tillgänglighetsläget utan användarens medgivande."</string>
-    <string name="permlab_retrieveWindowToken" msgid="7154762602367758602">"hämta fönstrets token"</string>
-    <string name="permdesc_retrieveWindowToken" msgid="668173747687795074">"Appen tillåts hämta fönstrets token. Skadliga appar kan interagera med appens fönster på ett otillåtet sätt och efterlikna systemet."</string>
-    <string name="permlab_frameStats" msgid="7056374987314361639">"hämta ramstatistik"</string>
-    <string name="permdesc_frameStats" msgid="4758001089491284919">"Appen tillåts samla in ramstatistik. Skadliga appar kan registrera statistik om ramar i andra appars fönster."</string>
-    <string name="permlab_filter_events" msgid="8675535648807427389">"filtrera händelser"</string>
-    <string name="permdesc_filter_events" msgid="8006236315888347680">"Tillåter att appen registrerar indatafilter som filtrerar flödet med användarhändelser innan de skickas. Skadliga appar kan styra systemets användargränssnitt utan att användaren gör något."</string>
-    <string name="permlab_shutdown" msgid="7185747824038909016">"avsluta delvis"</string>
-    <string name="permdesc_shutdown" msgid="7046500838746291775">"Sätter aktivitetshanteraren i avstängningsläge. Utför inte en fullständig avstängning."</string>
-    <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"förhindrar programbyten"</string>
-    <string name="permdesc_stopAppSwitches" msgid="8262195802582255021">"Hindrar användaren från att byta till en annan app."</string>
-    <string name="permlab_getTopActivityInfo" msgid="2537922311411546016">"hämta information om aktuell app"</string>
-    <string name="permdesc_getTopActivityInfo" msgid="2512448855496067131">"Innehavaren tillåts att hämta privat information om den app som för tillfället är i förgrunden på skärmen."</string>
-    <string name="permlab_runSetActivityWatcher" msgid="892239094867182656">"övervaka och styra alla appar som öppnas"</string>
-    <string name="permdesc_runSetActivityWatcher" msgid="6003603162578577406">"Tillåter att appen övervakar och styr hur systemet startar aktiviteter. Skadliga appar kan kompromettera systemet helt. Den här behörigheten behövs bara för programmering, aldrig för vanlig användning."</string>
-    <string name="permlab_broadcastPackageRemoved" msgid="2576333434893532475">"skicka meddelande om borttaget paket"</string>
-    <string name="permdesc_broadcastPackageRemoved" msgid="6621901216207931089">"Tillåter att appen skickar ett meddelande om att ett programpaket har tagits bort. Skadliga appar kan använda detta för att avsluta alla andra appar som körs."</string>
-    <string name="permlab_broadcastSmsReceived" msgid="5689095009030336593">"skicka SMS-mottagen sändning"</string>
-    <string name="permdesc_broadcastSmsReceived" msgid="4152037720034365492">"Tillåter att appen sänder ut en avisering när SMS tas emot. Skadliga appar kan använda detta för att förfalska inkommande SMS."</string>
-    <string name="permlab_broadcastWapPush" msgid="3145347413028582371">"skicka WAP-PUSH-mottagen sändning"</string>
-    <string name="permdesc_broadcastWapPush" msgid="4783402525039442729">"Tillåter att appen skickar ett meddelande om att ett WAP PUSH-meddelande har tagits emot. Skadliga appar kan använda detta för att förfalska mottagning av MMS eller för att obemärkt byta ut innehållet på en webbsida mot skadligt innehåll."</string>
-    <string name="permlab_setProcessLimit" msgid="2451873664363662666">"begränsa antalet processer som körs"</string>
-    <string name="permdesc_setProcessLimit" msgid="7318061314040879542">"Tillåter att appen styr högsta antalet processer som körs. Behövs inte för vanliga appar."</string>
-    <string name="permlab_setAlwaysFinish" msgid="550958507798796965">"tvinga bakgrundsappar att avslutas"</string>
-    <string name="permdesc_setAlwaysFinish" msgid="7471310652868841499">"Tillåter att appen bestämmer om aktiviteter alltid är slutförda när de hamnar i bakgrunden. Ska inte behövas för vanliga appar."</string>
-    <string name="permlab_batteryStats" msgid="2789610673514103364">"läs batteristatistik"</string>
-    <string name="permdesc_batteryStats" msgid="5897346582882915114">"Tillåter att en app läser de aktuella uppgifterna om låg batterianvändningsnivå. Appen kan tillåtas få reda på detaljerade uppgifter om vilka appar du använder."</string>
-    <string name="permlab_updateBatteryStats" msgid="3719689764536379557">"ändra batteristatistik"</string>
-    <string name="permdesc_updateBatteryStats" msgid="6862817857178025002">"Tillåter att appen ändrar samlad batteristatistik. Används inte av vanliga appar."</string>
-    <string name="permlab_getAppOpsStats" msgid="1508779687436585744">"hämta åtgärdsstatistik för appar"</string>
-    <string name="permdesc_getAppOpsStats" msgid="6243887041577912877">"Tillåter att appen hämtar samlad åtgärdsstatistik för appar. Används inte av vanliga appar."</string>
-    <string name="permlab_updateAppOpsStats" msgid="8829097373851521505">"ändra appars åtgärdsstatistik"</string>
-    <string name="permdesc_updateAppOpsStats" msgid="50784596594403483">"Tillåter att appen ändrar samlad åtgärdsstatistik för appar. Används inte av vanliga appar."</string>
-    <string name="permlab_backup" msgid="470013022865453920">"kontrollera säkerhetskopiering och återställning av systemet"</string>
-    <string name="permdesc_backup" msgid="6912230525140589891">"Tillåter att appen styr över systemets mekanism för säkerhetskopiering och återställning. Används inte av vanliga appar."</string>
-    <string name="permlab_confirm_full_backup" msgid="5557071325804469102">"Bekräfta fullständig säkerhetskopia eller återställning"</string>
-    <string name="permdesc_confirm_full_backup" msgid="1748762171637699562">"Tillåter att appen startar användargränssnittet för bekräftelse av fullständig säkerhetskopia. Ska inte användas av någon app."</string>
-    <string name="permlab_internalSystemWindow" msgid="2148563628140193231">"visa otillåtna fönster"</string>
-    <string name="permdesc_internalSystemWindow" msgid="7458387759461466397">"Tillåter att appen skapar fönster som ska användas av det interna systemgränssnittet. Används inte av vanliga appar."</string>
     <string name="permlab_systemAlertWindow" msgid="3543347980839518613">"skriva över andra appar"</string>
     <string name="permdesc_systemAlertWindow" msgid="8584678381972820118">"Tillåter att appen att dras ovanpå andra appar eller delar av användargränssnittet. De kan störa din användning av gränssnittet i olika appar eller ändra vad du tror visas i andra appar."</string>
-    <string name="permlab_setAnimationScale" msgid="2805103241153907174">"ändra global animeringshastighet"</string>
-    <string name="permdesc_setAnimationScale" msgid="7690063428924343571">"Tillåter att appen när som helst ändrar den globala animeringshastigheten (snabbare eller långsammare)."</string>
-    <string name="permlab_manageAppTokens" msgid="1286505717050121370">"hantera token i appar"</string>
-    <string name="permdesc_manageAppTokens" msgid="8043431713014395671">"Tillåter att appen skapar och hanterar egna token och förbigår normala Z-beställningar. Behövs inte för vanliga appar."</string>
-    <string name="permlab_freezeScreen" msgid="4708181184441880175">"frysa skärmen"</string>
-    <string name="permdesc_freezeScreen" msgid="8558923789222670064">"Tillåter att appen tillfälligt fryser skärmen för övergång till helskärm."</string>
-    <string name="permlab_injectEvents" msgid="1378746584023586600">"trycka på knappar och styrknappar"</string>
-    <string name="permdesc_injectEvents" product="tablet" msgid="206352565599968632">"Tillåter att appen levererar egna inmatningshändelser (knapptryckningar osv.) till andra appar. Skadliga appar kan använda detta för att kapa surfplattan."</string>
-    <string name="permdesc_injectEvents" product="tv" msgid="4681361983270791611">"Tillåter att appen levererar egna händelseinmatningar (knapptryckningar osv.) till andra appar. Skadliga appar kan använda detta för att kapa tv:n."</string>
-    <string name="permdesc_injectEvents" product="default" msgid="653128057572326253">"Tillåter att appen levererar egna inmatningshändelser (knapptryckningar osv.) till andra appar. Skadliga appar kan använda detta för att kapa mobilen."</string>
-    <string name="permlab_readInputState" msgid="469428900041249234">"registrera vad du skriver och vilka åtgärder du vidtar"</string>
-    <string name="permdesc_readInputState" msgid="8387754901688728043">"Tillåter att appen övervakar knapparna som du trycker på, till och med när du använder andra appar (till exempel när du anger ett lösenord). Ska inte behövas för vanliga appar."</string>
-    <string name="permlab_bindInputMethod" msgid="3360064620230515776">"binda till en metod för indata"</string>
-    <string name="permdesc_bindInputMethod" msgid="3250440322807286331">"Innehavaren tillåts att binda till den översta nivåns gränssnitt för en inmatningsmetod. Ska inte behövas för vanliga appar."</string>
-    <string name="permlab_bindAccessibilityService" msgid="5357733942556031593">"bind till en tillgänglighetstjänst"</string>
-    <string name="permdesc_bindAccessibilityService" msgid="7034615928609331368">"Innehavaren tillåts att binda till den översta nivåns gränssnitt för en tillgänglighetstjänst. Ska inte behövas för vanliga appar."</string>
-    <string name="permlab_bindPrintService" msgid="8462815179572748761">"binda till en utskriftstjänst"</string>
-    <string name="permdesc_bindPrintService" msgid="7960067623209111135">"Innehavaren tillåts att binda till den översta nivåns gränssnitt för en utskriftstjänst. Ska inte behövas för vanliga appar."</string>
-    <string name="permlab_bindPrintSpoolerService" msgid="6807762783744125954">"binda till en utskriftskö"</string>
-    <string name="permdesc_bindPrintSpoolerService" msgid="3680552285933318372">"Innehavaren tillåts att binda till den översta nivåns gränssnitt för en utskriftskö. Ska inte behövas för vanliga appar."</string>
-    <string name="permlab_bindNfcService" msgid="2752731300419410724">"låsa till NFC-tjänsten"</string>
-    <string name="permdesc_bindNfcService" msgid="6120647629174066862">"Innehavaren får låsa appar som fungerar som NFC-kort. Behövs normalt inte för vanliga appar."</string>
-    <string name="permlab_bindTextService" msgid="7358378401915287938">"bind till en texttjänst"</string>
-    <string name="permdesc_bindTextService" msgid="8151968910973998670">"Tillåter innehavaren att binda mot den högsta gränssnittsnivån i en texttjänst (t.ex. SpellCheckerService). Bör aldrig behövas för normala appar."</string>
-    <string name="permlab_bindVpnService" msgid="4708596021161473255">"bind till en VPN-tjänst"</string>
-    <string name="permdesc_bindVpnService" msgid="2067845564581693905">"Innehavaren tillåts att binda till den översta nivåns gränssnitt för en VPN-tjänst. Ska inte behövas för vanliga appar."</string>
-    <string name="permlab_bindWallpaper" msgid="8716400279937856462">"binda till en bakgrund"</string>
-    <string name="permdesc_bindWallpaper" msgid="7108428692595491668">"Innehavaren kan binda till den översta nivåns gränssnitt för en bakgrund. Ska inte behövas för vanliga appar."</string>
-    <string name="permlab_bindVoiceInteraction" msgid="5334852580713715068">"bind till en röstkomponent"</string>
-    <string name="permdesc_bindVoiceInteraction" msgid="2345721766501778101">"Innehavaren tillåts att binda till den översta nivåns gränssnitt för en rösttjänst. Ska inte behövas för vanliga appar."</string>
-    <string name="permlab_manageVoiceKeyphrases" msgid="1252285102392793548">"hantera sökfraser för röstkommandon"</string>
-    <string name="permdesc_manageVoiceKeyphrases" msgid="8476560722907530008">"Innehavaren får hantera sökfraser för identifiering av röstkommandon. Detta ska inte behövas för vanliga appar."</string>
-    <string name="permlab_bindRemoteDisplay" msgid="1782923938029941960">"bind till en fjärrskärm"</string>
-    <string name="permdesc_bindRemoteDisplay" msgid="1261242718727295981">"Innehavaren tillåts att binda till den översta nivåns gränssnitt för en fjärrskärm. Ska inte behövas för vanliga appar."</string>
-    <string name="permlab_bindRemoteViews" msgid="5697987759897367099">"bind till en widget"</string>
-    <string name="permdesc_bindRemoteViews" msgid="4717987810137692572">"Innehavaren tillåts att binda till den översta nivåns gränssnitt för en widget. Ska inte behövas för vanliga appar."</string>
-    <string name="permlab_bindRouteProvider" msgid="4869394607915096847">"bind till en ruttleverantörstjänst"</string>
-    <string name="permdesc_bindRouteProvider" msgid="4703804520859960329">"Tillåter att innehavaren binds till en registrerad ruttleverantör. Detta ska inte behövas för vanliga appar."</string>
-    <string name="permlab_bindDeviceAdmin" msgid="8704986163711455010">"arbeta med en enhetsadministratör"</string>
-    <string name="permdesc_bindDeviceAdmin" msgid="569715419543907930">"Tillåter att innehavaren skickar avsikter till en enhetsadministratör. Vanliga appar behöver aldrig göra detta."</string>
-    <string name="permlab_bindTvInput" msgid="5601264742478168987">"binda till en tv-insignal"</string>
-    <string name="permdesc_bindTvInput" msgid="2371008331852001924">"Innehavaren tillåts att binda till den översta nivåns gränssnitt för en tv-insignal. Ska inte behövas för vanliga appar."</string>
-    <string name="permlab_modifyParentalControls" msgid="4611318225997592242">"ändra föräldrakontroll"</string>
-    <string name="permdesc_modifyParentalControls" msgid="7438482894162282039">"Tillåter innehavaren att ändra systemets föräldrakontrolldata. Behövs inte för vanliga appar."</string>
-    <string name="permlab_manageDeviceAdmins" msgid="4248828900045808722">"lägga till eller ta bort en enhetsadministratör"</string>
-    <string name="permdesc_manageDeviceAdmins" msgid="5025608167709942485">"Innehavaren får lägga till eller ta bort aktiva enhetsadministratörer. Detta ska normalt inte behövas för vanliga appar."</string>
-    <string name="permlab_setOrientation" msgid="3365947717163866844">"ändra bildskärmens rikting"</string>
-    <string name="permdesc_setOrientation" msgid="3046126619316671476">"Gör att appen när som helst kan ändra skärmläget. Behövs inte för vanliga appar."</string>
-    <string name="permlab_setPointerSpeed" msgid="9175371613322562934">"ändra markörens hastighet"</string>
-    <string name="permdesc_setPointerSpeed" msgid="6866563234274104233">"Tillåter att appen när som helst ändrar hastigheten för musens eller styrplattans markör. Ska inte behövas för vanliga appar."</string>
-    <string name="permlab_setKeyboardLayout" msgid="4778731703600909340">"ändra tangentbordslayout"</string>
-    <string name="permdesc_setKeyboardLayout" msgid="8480016771134175879">"Tillåter att appen ändrar tangentbordets layout. Ska inte behövas för vanliga appar."</string>
-    <string name="permlab_signalPersistentProcesses" msgid="4539002991947376659">"skicka Linux-signaler till appar"</string>
-    <string name="permdesc_signalPersistentProcesses" msgid="4896992079182649141">"Tillåter att appen begär att den angivna signalen skickas till alla beständiga processer."</string>
     <string name="permlab_persistentActivity" msgid="8841113627955563938">"se till att appen alltid körs"</string>
     <string name="permdesc_persistentActivity" product="tablet" msgid="8525189272329086137">"Tillåter att delar av appen läggs beständigt i minnet. Detta kan innebära att det tillgängliga minnet för andra appar begränsas, vilket gör surfplattan långsam."</string>
     <string name="permdesc_persistentActivity" product="tv" msgid="5086862529499103587">"Tillåter att en app gör vissa delar beständiga i minnet. Det kan begränsa mängden minne som är tillgänglig för andra appar och gör tv:n långsammare."</string>
     <string name="permdesc_persistentActivity" product="default" msgid="4384760047508278272">"Tillåter att delar av appen läggs beständigt i minnet. Detta kan innebära att det tillgängliga minnet för andra appar begränsas, vilket gör mobilen långsam."</string>
-    <string name="permlab_deletePackages" msgid="184385129537705938">"ta bort appar"</string>
-    <string name="permdesc_deletePackages" msgid="7411480275167205081">"Tillåter att appen tar bort Android-paket. Skadliga appar kan använda detta för att ta bort viktiga appar."</string>
-    <string name="permlab_clearAppUserData" msgid="274109191845842756">"ta bort uppgifter i andra appar"</string>
-    <string name="permdesc_clearAppUserData" msgid="4625323684125459488">"Tillåter att appen tar bort användardata."</string>
-    <string name="permlab_deleteCacheFiles" msgid="3128665571837408675">"ta bort andra cachelagrade appar"</string>
-    <string name="permdesc_deleteCacheFiles" msgid="3812998599006730196">"Tillåter att appen raderar cachelagrade filer."</string>
     <string name="permlab_getPackageSize" msgid="7472921768357981986">"mäta appens lagringsplats"</string>
     <string name="permdesc_getPackageSize" msgid="3921068154420738296">"Tillåter att appen hämtar kod, data och cachestorlekar"</string>
-    <string name="permlab_installPackages" msgid="2199128482820306924">"installera appar direkt"</string>
-    <string name="permdesc_installPackages" msgid="5628530972548071284">"Tillåter att appen installerar nya eller uppdaterade Android-paket. Skadliga appar kan använda detta för att lägga till nya appar med godtyckliga och starka behörigheter."</string>
-    <string name="permlab_clearAppCache" msgid="7487279391723526815">"ta bort cacheinformation för alla appar"</string>
-    <string name="permdesc_clearAppCache" product="tablet" msgid="8974640871945434565">"Tillåter att appen frigör utrymme på surfplattan genom att ta bort filer i andra appars cachekataloger. Detta kan medföra att andra appar startar långsammare eftersom samma data måste hämtas på nytt."</string>
-    <string name="permdesc_clearAppCache" product="tv" msgid="244647416303997022">"Tillåter att appen frigör lagringsutrymme på tv:n genom att ta bort filer i andra appars cachekataloger. Detta kan medföra att andra appar startar långsammare eftersom samma data måste hämtas på nytt."</string>
-    <string name="permdesc_clearAppCache" product="default" msgid="2459441021956436779">"Tillåter att appen frigör utrymme på mobilen genom att ta bort filer i andra appars cachekataloger. Detta kan medföra att andra appar startar långsammare eftersom samma data måste hämtas på nytt."</string>
-    <string name="permlab_movePackage" msgid="3289890271645921411">"flytta appresurser"</string>
-    <string name="permdesc_movePackage" msgid="319562217778244524">"Tillåter att appen flyttar appresurser från interna till externa medier och tvärtom."</string>
-    <string name="permlab_readLogs" msgid="6615778543198967614">"läsa känsliga loggdata"</string>
-    <string name="permdesc_readLogs" product="tablet" msgid="82061313293455151">"Tillåter att appen läser från systemets olika loggfiler. Det innebär att appen kan upptäcka allmän information om vad du gör med surfplattan, vilket kan inkludera personlig eller privat information."</string>
-    <string name="permdesc_readLogs" product="tv" msgid="9023899974809538988">"Tillåter att appen läser från systemets olika loggfiler. Det innebär att appen kan upptäcka allmän information om vad du gör med tv:n, vilket kan inkludera personliga eller privata uppgifter."</string>
-    <string name="permdesc_readLogs" product="default" msgid="2063438140241560443">"Tillåter att appen läser från systemets olika loggfiler. Det innebär att appen kan upptäcka allmän information om vad du gör med mobilen, vilket kan inkludera personlig eller privat information."</string>
-    <string name="permlab_anyCodecForPlayback" msgid="715805555823881818">"använda alla medieavkodare för uppspelning"</string>
-    <string name="permdesc_anyCodecForPlayback" msgid="8283912488433189010">"Tillåter att appen använder installerade medieavkodare för att avkoda media för uppspelning."</string>
-    <string name="permlab_manageCaCertificates" msgid="1678391896786882014">"hantera betrodda uppgifter"</string>
-    <string name="permdesc_manageCaCertificates" msgid="4015644047196937014">"Tillåter att appen installerar och avinstallerar CA-certifikat som betrodda uppgifter."</string>
-    <string name="permlab_bindJobService" msgid="3637568367978271086">"kör appens schemalagda bakgrundsarbete"</string>
-    <string name="permdesc_bindJobService" msgid="3473288460524119838">"Med den här behörigheten får Android-systemet köra appen i bakgrunden när detta begärs."</string>
-    <string name="permlab_diagnostic" msgid="8076743953908000342">"läsa/skriva till resurser som ägs av diag"</string>
-    <string name="permdesc_diagnostic" msgid="6608295692002452283">"Tillåter att appen läser och skriver till en resurs som ägs av diag-gruppen, till exempel filer i /dev. Detta kan eventuellt påverka systemets stabilitet och säkerhet. Detta bör ENDAST användas av tillverkaren eller operatören för maskinvaruspecifik diagnostik."</string>
-    <string name="permlab_changeComponentState" msgid="6335576775711095931">"aktivera eller inaktivera appkomponenter"</string>
-    <string name="permdesc_changeComponentState" product="tablet" msgid="8887435740982237294">"Tillåter att appen ändrar inställningen för om en komponent i en annan app ska aktiveras eller inte. Skadliga appar kan använda detta för att inaktivera viktiga funktioner i surfplattan. Var försiktig med behörigheten, eftersom appkomponenter kan bli oanvändbara, inkonsekventa eller instabila."</string>
-    <string name="permdesc_changeComponentState" product="tv" msgid="9151634188264231389">"Tillåter att appen ändrar om en komponent i en annan app är aktiverad eller inte. Skadliga appar kan på så sätt inaktivera viktiga tv-funktioner. Var försiktig när du använder denna behörighet eftersom appkomponenter kan bli oanvändbara, inkonsekventa eller instabila."</string>
-    <string name="permdesc_changeComponentState" product="default" msgid="1827232484416505615">"Tillåter att appen ändrar inställningen för om en komponent i en annan app ska aktiveras eller inte. Skadliga appar kan använda detta för att inaktivera viktiga funktioner i surfplattan. Var försiktig med behörigheten, eftersom programkomponenter kan bli oanvändbara, inkonsekventa eller instabila."</string>
-    <string name="permlab_grantRevokePermissions" msgid="4627315351093508795">"bevilja eller återkalla behörighet"</string>
-    <string name="permdesc_grantRevokePermissions" msgid="4088642654085850662">"Tillåter att en app beviljar eller återkallar specifik behörighet, för sig själv eller andra appar. Skadlig programvara kan utnyttja detta för att få åtkomst till funktioner som du inte har beviljat behörighet till."</string>
-    <string name="permlab_setPreferredApplications" msgid="8463181628695396391">"ange önskade appar"</string>
-    <string name="permdesc_setPreferredApplications" msgid="4973986762241783712">"Tillåter att appen ändrar dina önskade appar. Skadliga appar kan utan förvarning ändra de appar som körs och kapa dina befintliga appar så att de börjar samla privata uppgifter från dig."</string>
     <string name="permlab_writeSettings" msgid="2226195290955224730">"ändra systeminställningar"</string>
     <string name="permdesc_writeSettings" msgid="7775723441558907181">"Tillåter att appen ändrar systemets inställningar. Skadliga appar kan skada systemets konfiguration."</string>
-    <string name="permlab_writeSecureSettings" msgid="204676251876718288">"ändra skyddade systeminställningar"</string>
-    <string name="permdesc_writeSecureSettings" msgid="8159535613020137391">"Tillåter att appen ändrar systemets säkerhetsinställningar. Används inte av vanliga appar."</string>
-    <string name="permlab_writeGservices" msgid="2149426664226152185">"ändra kartan för Googles tjänster"</string>
-    <string name="permdesc_writeGservices" msgid="1287309437638380229">"Tillåter att appen ändrar kartan för Googles tjänster. Används inte av vanliga appar."</string>
     <string name="permlab_receiveBootCompleted" msgid="5312965565987800025">"köra vid start"</string>
     <string name="permdesc_receiveBootCompleted" product="tablet" msgid="7390304664116880704">"Tillåter att appen startar automatiskt när systemet har startats om. Detta kan innebära att det tar längre tid att starta surfplattan och att surfplattan blir långsammare i och med att appen hela tiden körs i bakgrunden."</string>
     <string name="permdesc_receiveBootCompleted" product="tv" msgid="4525890122209673621">"Tillåter att appen startas så snart systemet har slutat starta om. Det kan göra att det tar längre tid att starta tv:n och dessutom kan appen göra hela surfplattan långsammare genom att alltid köra den."</string>
@@ -555,36 +354,10 @@
     <string name="permdesc_accessMockLocation" msgid="5808711039482051824">"Skapa skenplatser för tester eller installera en ny platsleverantör. Detta innebär att appen tillåts åsidosätta den plats och/eller status som returneras av andra platskällor, till exempel GPS eller platsleverantörer."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"få åtkomst till extra kommandon för platsleverantör"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"Tillåter att appen får åtkomst till extra kommandon för platsleverantör. Detta kan innebära att appen tillåts störa funktionen för GPS eller andra platskällor."</string>
-    <string name="permlab_installLocationProvider" msgid="6578101199825193873">"behörighet att installera en platsleverantör"</string>
-    <string name="permdesc_installLocationProvider" msgid="9066146120470591509">"Skapa skenplatser för tester eller installera en ny platsleverantör. Detta innebär att appen tillåts åsidosätta den plats och/eller status som returneras av andra platskällor, som GPS eller platsleverantörer."</string>
     <string name="permlab_accessFineLocation" msgid="1191898061965273372">"exakt plats (GPS- och nätverksbaserad)"</string>
     <string name="permdesc_accessFineLocation" msgid="5295047563564981250">"Tillåter att appen känner av din ungefärliga position med hjälp av GPS eller platstjänster som mobilmaster och Wi-Fi. Platstjänsterna måste vara aktiverade och tillgängliga på enheten för att appen ska kunna använda dem. Appar kan använda detta för att avgöra ungefär var du befinner dig."</string>
     <string name="permlab_accessCoarseLocation" msgid="4887895362354239628">"ungefärlig position (nätverksbaserad)"</string>
     <string name="permdesc_accessCoarseLocation" msgid="2538200184373302295">"Tillåter att appen känner av din ungefärliga position. Platsen avgörs genom platstjänster med hjälp av nätverksplatskällor som mobilmaster och Wi-Fi. Platstjänsterna måste vara aktiverade och tillgängliga på enheten för att appen ska kunna använda dem. Appar kan använda detta för att avgöra ungefär var du befinner dig."</string>
-    <string name="permlab_accessSurfaceFlinger" msgid="2363969641792388947">"få åtkomst till SurfaceFlinger"</string>
-    <string name="permdesc_accessSurfaceFlinger" msgid="1041619516733293551">"Tillåter att appen använder lågnivåfunktioner i SurfaceFlinger."</string>
-    <string name="permlab_readFrameBuffer" msgid="6690504248178498136">"läsa rambuffert"</string>
-    <string name="permdesc_readFrameBuffer" msgid="4937405521809454680">"Tillåter att appen läser innehållet i rambufferten."</string>
-    <string name="permlab_accessInputFlinger" msgid="5348635270689553857">"få tillgång till InputFlinger"</string>
-    <string name="permdesc_accessInputFlinger" msgid="2104864941201226616">"Tillåter att appen använder lågnivåfunktioner i InputFlinger."</string>
-    <string name="permlab_configureWifiDisplay" msgid="5595661694746742168">"konfigurerar Wi-Fi-skärmar"</string>
-    <string name="permdesc_configureWifiDisplay" msgid="7916815158690218065">"Tillåter att appen konfigurerar och ansluter till Wi-Fi-skärmar."</string>
-    <string name="permlab_controlWifiDisplay" msgid="393641276723695496">"kontrollerar Wi-Fi-skärmar"</string>
-    <string name="permdesc_controlWifiDisplay" msgid="4543912292681826986">"Tillåter att appen kontrollerar grundläggande funktioner för Wi-Fi-skärmar."</string>
-    <string name="permlab_controlVpn" msgid="2618442789397588200">"styra virtuella privata nätverk"</string>
-    <string name="permdesc_controlVpn" msgid="762852603315861214">"Tillåter att appen styr grundläggande funktioner i virtuella privata nätverk."</string>
-    <string name="permlab_captureAudioOutput" msgid="6857134498402346708">"fånga upp ljudutgång"</string>
-    <string name="permdesc_captureAudioOutput" msgid="6210597754212208853">"Tillåt att appen fångar upp och omdirigerar ljudutgången."</string>
-    <string name="permlab_captureAudioHotword" msgid="1890553935650349808">"Kommandoordsidentifiering"</string>
-    <string name="permdesc_captureAudioHotword" msgid="9151807958153056810">"Tillåter att appen spelar in ljud för att upptäcka kommandoord. Inspelningen kan pågå i bakgrunden utan att hindra andra ljudinspelningar (t.ex. med videokamera)."</string>
-    <string name="permlab_modifyAudioRouting" msgid="7738060354490807723">"Ljuddirigering"</string>
-    <string name="permdesc_modifyAudioRouting" msgid="7205731074267199735">"Tillåter att appen styr ljuddirigeringen direkt och åsidosätter ljudpolicybeslut."</string>
-    <string name="permlab_captureVideoOutput" msgid="2246828773589094023">"fånga upp videoutgång"</string>
-    <string name="permdesc_captureVideoOutput" msgid="359481658034149860">"Tillåt att appen fångar upp och omdirigerar videoutgången."</string>
-    <string name="permlab_captureSecureVideoOutput" msgid="7815398969303382016">"fånga upp säker videoutgång"</string>
-    <string name="permdesc_captureSecureVideoOutput" msgid="2779793064709350289">"Tillåt att appen fångar upp och omdirigerar säker videoutgång."</string>
-    <string name="permlab_mediaContentControl" msgid="8749790560720562511">"styra medieuppspelning och tillgång till metadata"</string>
-    <string name="permdesc_mediaContentControl" msgid="1637478200272062">"Låter appen kontrollera medieuppspelningen och ger den åtkomst till medieuppgifter (titel, författare m.m.)."</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"ändra dina ljudinställningar"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"Tillåter att appen ändrar globala ljudinställningar som volym och vilken högtalarutgång som används."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"spela in ljud"</string>
@@ -593,73 +366,14 @@
     <string name="permdesc_sim_communication" msgid="5725159654279639498">"Tillåter att appen skickar kommandon till SIM-kortet. Detta är mycket farligt."</string>
     <string name="permlab_camera" msgid="3616391919559751192">"ta bilder och spela in videoklipp"</string>
     <string name="permdesc_camera" msgid="8497216524735535009">"Tillåter att appen tar bilder och spelar in videor med kameran. Med den här behörigheten tillåts appen att använda kameran när som helst utan ditt godkännande."</string>
-    <string name="permlab_cameraDisableTransmitLed" msgid="2651072630501126222">"inaktivera LED-sändningsindikator när kameran används"</string>
-    <string name="permdesc_cameraDisableTransmitLed" msgid="4764585465480295341">"Tillåter att en förinstallerad systemapp inaktiverar LED-indikatorn för kameranvändning."</string>
-    <string name="permdesc_cameraSendSystemEvent" msgid="8642231538552298107">"Tillåter att en förinstallerad systemapp skickar systemmeddelanden till kameratjänsten."</string>
-    <string name="permlab_brick" product="tablet" msgid="2961292205764488304">"inaktivera surfplattan permanent"</string>
-    <string name="permlab_brick" product="tv" msgid="4912674222121249410">"inaktivera tv:n permanent"</string>
-    <string name="permlab_brick" product="default" msgid="8337817093326370537">"inaktivera telefonen permanent"</string>
-    <string name="permdesc_brick" product="tablet" msgid="4334818808001699530">"Tillåter att appen inaktiverar hela surfplattan permanent. Detta är mycket farligt."</string>
-    <string name="permdesc_brick" product="tv" msgid="7070924544316356349">"Tillåter att appen inaktiverar hela tv:n permanent. Detta är mycket farligt."</string>
-    <string name="permdesc_brick" product="default" msgid="5788903297627283099">"Tillåter att appen inaktiverar hela mobilen permanent. Detta är mycket farligt."</string>
-    <string name="permlab_reboot" product="tablet" msgid="3436634972561795002">"tvinga omstart av surfplatta"</string>
-    <string name="permlab_reboot" product="tv" msgid="2112102119558886236">"tvinga fram omstart av tv:n"</string>
-    <string name="permlab_reboot" product="default" msgid="2898560872462638242">"tvinga omstart av telefon"</string>
-    <string name="permdesc_reboot" product="tablet" msgid="8172056180063700741">"Tillåter att appen tvingar surfplattan att starta om."</string>
-    <string name="permdesc_reboot" product="tv" msgid="7116222694344401650">"Tillåter att appen tvingar tv:n att starta om."</string>
-    <string name="permdesc_reboot" product="default" msgid="5326008124289989969">"Tillåter att appen tvingar mobilen att starta om."</string>
-    <string name="permlab_mount_unmount_filesystems" product="nosdcard" msgid="2927361537942591841">"få åtkomst till USB-lagringen"</string>
-    <string name="permlab_mount_unmount_filesystems" product="default" msgid="4402305049890953810">"få åtkomst till SD-kortets filsystem"</string>
-    <string name="permdesc_mount_unmount_filesystems" msgid="1829290701658992347">"Tillåter att appen monterar och monterar bort filsystem för flyttbara lagringsmedia."</string>
-    <string name="permlab_mount_format_filesystems" product="nosdcard" msgid="6227819582624904972">"radera USB-lagring"</string>
-    <string name="permlab_mount_format_filesystems" product="default" msgid="262582698639274056">"radera SD-kort"</string>
-    <string name="permdesc_mount_format_filesystems" msgid="8784268246779198627">"Tillåter att appen formaterar flyttbara lagringsmedia."</string>
-    <string name="permlab_asec_access" msgid="3411338632002193846">"få information om intern lagring"</string>
-    <string name="permdesc_asec_access" msgid="3094563844593878548">"Gör att appen får tillgång till information om internt minne."</string>
-    <string name="permlab_asec_create" msgid="6414757234789336327">"skapa intern lagring"</string>
-    <string name="permdesc_asec_create" msgid="4558869273585856876">"Tillåter att appen skapar internt minne."</string>
-    <string name="permlab_asec_destroy" msgid="526928328301618022">"förstör intern lagring"</string>
-    <string name="permdesc_asec_destroy" msgid="7218749286145526537">"Tillåter att appen förstör det interna minnet."</string>
-    <string name="permlab_asec_mount_unmount" msgid="8877998101944999386">"montera/montera bort internt minne"</string>
-    <string name="permdesc_asec_mount_unmount" msgid="3451360114902490929">"Tillåter att appen monterar/monterar bort internt minne."</string>
-    <string name="permlab_asec_rename" msgid="7496633954080472417">"byt namn på intern lagring"</string>
-    <string name="permdesc_asec_rename" msgid="1794757588472127675">"Tillåter att appen byter namn på det interna minnet."</string>
     <string name="permlab_vibrate" msgid="7696427026057705834">"styra vibration"</string>
     <string name="permdesc_vibrate" msgid="6284989245902300945">"Tillåter att appen styr vibrationen."</string>
     <string name="permlab_flashlight" msgid="2155920810121984215">"styra lampa"</string>
     <string name="permdesc_flashlight" msgid="6522284794568368310">"Tillåter att appen styr lampan."</string>
-    <string name="permlab_manageUsb" msgid="1113453430645402723">"hantera inställningar och behörighet för USB-enheter"</string>
-    <string name="permdesc_manageUsb" msgid="7776155430218239833">"Tillåter att appen hanterar inställningar och behörigheter för USB-enheter."</string>
-    <string name="permlab_accessMtp" msgid="4953468676795917042">"implementera MTP-protokoll"</string>
-    <string name="permdesc_accessMtp" msgid="6532961200486791570">"Ger åtkomst till MTP-kerneldrivrutinen för att implementera MTP/USB-protokollet."</string>
-    <string name="permlab_hardware_test" msgid="4148290860400659146">"testa maskinvara"</string>
-    <string name="permdesc_hardware_test" msgid="6597964191208016605">"Tillåter att appen styr kringutrustning i syfte att testa maskinvara."</string>
-    <string name="permlab_fm" msgid="8749504526866832">"åtkomst till FM-radio"</string>
-    <string name="permdesc_fm" msgid="4145699441237962818">"Tillåter att appen får åtkomst till FM-radio för att spela upp program."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"ringa telefonnummer direkt"</string>
     <string name="permdesc_callPhone" msgid="3740797576113760827">"Tillåter att appen ringer telefonnummer utan någon aktiv åtgärd från dig. Detta kan leda till oväntade avgifter och samtal. Observera att appen inte tillåts ringa nödsamtal. Skadliga appar kan ringa utan ditt godkännande och detta kan kosta pengar."</string>
-    <string name="permlab_callPrivileged" msgid="4198349211108497879">"ringa telefonnummer direkt"</string>
-    <string name="permdesc_callPrivileged" msgid="1689024901509996810">"Tillåter att appen ringer ett telefonnummer, inklusive nödnummer, utan åtgärd från dig. Skadliga appar kan ringa onödiga och olagliga samtal till räddningstjänsten."</string>
-    <string name="permlab_performCdmaProvisioning" product="tablet" msgid="4842576994144604821">"starta CDMA-pekdatorinställningar direkt"</string>
-    <string name="permlab_performCdmaProvisioning" product="tv" msgid="3485391974208100809">"starta konfiguration av CDMA-tv direkt"</string>
-    <string name="permlab_performCdmaProvisioning" product="default" msgid="5604848095315421425">"starta CDMA-telefoninställningar direkt"</string>
-    <string name="permdesc_performCdmaProvisioning" msgid="1994193538802314186">"Tillåter att appen startar CDMA-anslutning. Skadliga appar kan starta CDMA-anslutningar i onödan."</string>
-    <!-- no translation found for permlab_performSimActivation (1651116521896665009) -->
-    <skip />
-    <!-- no translation found for permdesc_performSimActivation (1778214876348917401) -->
-    <skip />
-    <string name="permlab_locationUpdates" msgid="7785408253364335740">"styra meddelanden för platsuppdatering"</string>
-    <string name="permdesc_locationUpdates" msgid="1120741557891438876">"Tillåter att appen aktiverar/inaktiverar meddelanden om platsuppdateringar från radion. Används inte av vanliga appar."</string>
-    <string name="permlab_checkinProperties" msgid="7855259461268734914">"få åtkomst till incheckningsegenskaper"</string>
-    <string name="permdesc_checkinProperties" msgid="4024526968630194128">"Tillåter att appen får läs/skrivåtkomst till egenskaper som läggs upp via incheckningstjänsten. Används inte av vanliga appar."</string>
-    <string name="permlab_bindGadget" msgid="776905339015863471">"välja widgetar"</string>
-    <string name="permdesc_bindGadget" msgid="8261326938599049290">"Tillåter att appen meddelar systemet vilka widgetar som kan användas av vilka appar. Med den här behörigheten kan andra appar få åtkomst till personliga uppgifter. Används inte av vanliga appar."</string>
-    <string name="permlab_modifyPhoneState" msgid="8423923777659292228">"ändra telefonstatus"</string>
-    <string name="permdesc_modifyPhoneState" msgid="1029877529007686732">"Tillåter att appen styr enhetens telefonfunktioner. En app med den här behörigheten kan byta nätverk, aktivera/inaktivera mobilens radio och liknande utan att meddela dig."</string>
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"läsa telefonens status och identitet"</string>
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"Tillåter att appen kommer åt enhetens telefonfunktioner. Med den här behörigheten tillåts appen att identifiera mobilens telefonnummer och enhets-ID, om ett samtal pågår och vilket nummer samtalet är kopplat till."</string>
-    <string name="permlab_readPrecisePhoneState" msgid="5476483020282007597">"läsa mobilens exakta status"</string>
-    <string name="permdesc_readPrecisePhoneState" msgid="6648009074263855418">"Tillåter att appen får tillgång till mobilens exakta status. Appen får behörighet att avgöra mobilens faktiska samtalsstatus, om samtalet är aktivt eller i bakgrunden, om samtal misslyckas, mobilens exakta dataanslutningsstatus och om dataanslutningar misslyckas."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"förhindra att surfplattan går in i viloläge"</string>
     <string name="permlab_wakeLock" product="tv" msgid="2601193288949154131">"förhindra att tv:n försätts i viloläge"</string>
     <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"förhindra att telefonen sätts i viloläge"</string>
@@ -670,34 +384,14 @@
     <string name="permdesc_transmitIr" product="tablet" msgid="5358308854306529170">"Tillåter att appen använder surfplattans IR-sändare."</string>
     <string name="permdesc_transmitIr" product="tv" msgid="3926790828514867101">"Tillåter att appen använder den infraröda sändaren på tv:n."</string>
     <string name="permdesc_transmitIr" product="default" msgid="7957763745020300725">"Tillåter att appen använder mobilens IR-sändare."</string>
-    <string name="permlab_devicePower" product="tablet" msgid="2787034722616350417">"slå på eller stänga av surfplattan"</string>
-    <string name="permlab_devicePower" product="tv" msgid="7579718349658943416">"slå på eller stänga av tv:n"</string>
-    <string name="permlab_devicePower" product="default" msgid="4928622470980943206">"sätta på eller stänga av telefonen"</string>
-    <string name="permdesc_devicePower" product="tablet" msgid="6689862878984631831">"Tillåter att appen slår på eller stänger av surfplattan."</string>
-    <string name="permdesc_devicePower" product="tv" msgid="1334908641773273512">"Tillåter att appen slår på eller stänger av tv:n."</string>
-    <string name="permdesc_devicePower" product="default" msgid="6037057348463131032">"Tillåter att appen slår på eller stänger av mobilen."</string>
-    <string name="permlab_userActivity" msgid="1677844893921729548">"återställa tidsgräns för skärm"</string>
-    <string name="permdesc_userActivity" msgid="651746160252248024">"Gör att appen kan återställa tidsgränsen för skärmen."</string>
-    <string name="permlab_factoryTest" msgid="3715225492696416187">"kör i fabrikstestläge"</string>
-    <string name="permdesc_factoryTest" product="tablet" msgid="3952059318359653091">"Köra som ett testläge för tillverkaren på låg nivå. På så sätt får du fullständig åtkomst till surfplattans maskinvara. Är endast tillgänglig när surfplattan körs i tillverkarens testläge."</string>
-    <string name="permdesc_factoryTest" product="tv" msgid="2105643629211155695">"Köra som ett testläge på låg nivå för tillverkaren. På så sätt får du fullständig åtkomst till tv:ns maskinvara. Är endast tillgängligt när tv:n körs i tillverkarens testläge."</string>
-    <string name="permdesc_factoryTest" product="default" msgid="8136644990319244802">"Köra som ett testläge för tillverkaren på låg nivå. På så sätt får du fullständig åtkomst till telefonens maskinvara. Är endast tillgänglig när telefonen körs i tillverkarens testläge."</string>
     <string name="permlab_setWallpaper" msgid="6627192333373465143">"ange bakgrund"</string>
     <string name="permdesc_setWallpaper" msgid="7373447920977624745">"Tillåter att appen anger systemets bakgrund."</string>
     <string name="permlab_setWallpaperHints" msgid="3278608165977736538">"anpassa bakgrundsstorleken"</string>
     <string name="permdesc_setWallpaperHints" msgid="8235784384223730091">"Tillåter att appen ger tips om systemets bakgrundsstorlek."</string>
-    <string name="permlab_masterClear" msgid="2315750423139697397">"återställa systemets fabriksinställningar"</string>
-    <string name="permdesc_masterClear" msgid="3665380492633910226">"Tillåter att appen helt återställer systemets fabriksinställningar. Alla data, inställningar och installerade appar raderas."</string>
-    <string name="permlab_setTime" msgid="2021614829591775646">"ange tid"</string>
-    <string name="permdesc_setTime" product="tablet" msgid="1896341438151152881">"Tillåter att appen ändrar pekdatorns tid."</string>
-    <string name="permdesc_setTime" product="tv" msgid="1826398919861882682">"Tillåter att appen ändrar tiden på tv:n."</string>
-    <string name="permdesc_setTime" product="default" msgid="1855702730738020">"Tillåter att appen ändrar mobilens tid."</string>
     <string name="permlab_setTimeZone" msgid="2945079801013077340">"ange tidszon"</string>
     <string name="permdesc_setTimeZone" product="tablet" msgid="1676983712315827645">"Tillåter att appen ändrar pekdatorns tidszon."</string>
     <string name="permdesc_setTimeZone" product="tv" msgid="888864653946175955">"Tillåter att appen ändrar tidszonen på tv:n."</string>
     <string name="permdesc_setTimeZone" product="default" msgid="4499943488436633398">"Tillåter att appen ändrar mobilens tidszon."</string>
-    <string name="permlab_accountManagerService" msgid="4829262349691386986">"fungera som AccountManagerService"</string>
-    <string name="permdesc_accountManagerService" msgid="1948455552333615954">"Tillåter att appen anropar AccountAuthenticators."</string>
     <string name="permlab_getAccounts" msgid="1086795467760122114">"hitta konton på enheten"</string>
     <string name="permdesc_getAccounts" product="tablet" msgid="2741496534769660027">"Tillåter att appen hämtar en lista över alla kända konton på surfplattan. Detta kan inkludera konton som har skapats av appar som du har installerat."</string>
     <string name="permdesc_getAccounts" product="tv" msgid="4190633395633907543">"Tillåter att appen hämtar listan med konton som tv:n kan identifiera. Den kan innehålla konton som skapats av appar som du har installerat."</string>
@@ -712,14 +406,10 @@
     <string name="permdesc_accessNetworkState" msgid="8318964424675960975">"Tillåter att appen kommer åt information om nätverksanslutningarna, till exempel vilka nätverk som finns och är anslutna."</string>
     <string name="permlab_createNetworkSockets" msgid="8018758136404323658">"fullständig nätverksåtkomst"</string>
     <string name="permdesc_createNetworkSockets" msgid="3403062187779724185">"Tillåter att appen skapar nätverksuttag och använder anpassade nätverksprotokoll. Webbläsaren och andra appar gör det möjligt att skicka data till Internet, så den här behörigheten krävs inte för att skicka data till Internet."</string>
-    <string name="permlab_writeApnSettings" msgid="505660159675751896">"ändra/spärra nätverksinställningar och trafik"</string>
-    <string name="permdesc_writeApnSettings" msgid="5333798886412714193">"Tillåter att appen ändrar nätverksinställningar och spärrar och undersöker all nätverkstrafik, t.ex. ändrar proxyservern och porten till en APN. Skadliga appar kan övervaka, omdirigera eller ändra nätverkspaket utan din vetskap."</string>
     <string name="permlab_changeNetworkState" msgid="958884291454327309">"ändra nätverksanslutning"</string>
     <string name="permdesc_changeNetworkState" msgid="6789123912476416214">"Tillåter att appen ändrar statusen för en nätverksanslutning."</string>
     <string name="permlab_changeTetherState" msgid="5952584964373017960">"ändra sammanlänkad anslutning"</string>
     <string name="permdesc_changeTetherState" msgid="1524441344412319780">"Tillåter att appen ändrar statusen för en delad nätverksanslutning."</string>
-    <string name="permlab_changeBackgroundDataSetting" msgid="1400666012671648741">"ändra inställningar för användning av bakgrundsdata"</string>
-    <string name="permdesc_changeBackgroundDataSetting" msgid="5347729578468744379">"Tillåter att appen ändrar inställningen för användning av bakgrundsdata."</string>
     <string name="permlab_accessWifiState" msgid="5202012949247040011">"visa Wi-Fi-anslutningar"</string>
     <string name="permdesc_accessWifiState" msgid="5002798077387803726">"Tillåter att appen kommer åt information om Wi-Fi-nätverk, till exempel om Wi-Fi är aktiverat och namn på anslutna Wi-Fi-enheter."</string>
     <string name="permlab_changeWifiState" msgid="6550641188749128035">"anslut och koppla från Wi-Fi"</string>
@@ -732,24 +422,12 @@
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="6921177471748882137">"Tillåter att appen konfigurerar den lokala Bluetooth-surfplattan samt upptäcker och parkopplar den med fjärranslutna enheter."</string>
     <string name="permdesc_bluetoothAdmin" product="tv" msgid="3373125682645601429">"Tillåter att appen konfigurerar den lokala Bluetooth-tv:n och identifierar och kopplar den till fjärrenheter."</string>
     <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"Tillåter att appen konfigurerar den lokala Bluetooth-mobilen samt upptäcker och parkopplar den med fjärranslutna enheter."</string>
-    <string name="permlab_bluetoothPriv" msgid="4009494246009513828">"tillåt Bluetooth-koppling för appen"</string>
-    <string name="permdesc_bluetoothPriv" product="tablet" msgid="8045735193417468857">"Tillåter att appen kopplas till fjärrenheter utan interaktion med användare."</string>
-    <string name="permdesc_bluetoothPriv" product="tv" msgid="8045735193417468857">"Tillåter att appen kopplas till fjärrenheter utan interaktion med användare."</string>
-    <string name="permdesc_bluetoothPriv" product="default" msgid="8045735193417468857">"Tillåter att appen kopplas till fjärrenheter utan interaktion med användare."</string>
-    <string name="permlab_bluetoothMap" msgid="6372198338939197349">"tillgång till Bluetooth MAP-uppgifter"</string>
-    <string name="permdesc_bluetoothMap" product="tablet" msgid="5784090105926959958">"Tillåter att appen får åtkomst till Bluetooth MAP-uppgifter."</string>
-    <string name="permdesc_bluetoothMap" product="tv" msgid="5784090105926959958">"Tillåter att appen får åtkomst till Bluetooth MAP-uppgifter."</string>
-    <string name="permdesc_bluetoothMap" product="default" msgid="5784090105926959958">"Tillåter att appen får åtkomst till Bluetooth MAP-uppgifter."</string>
     <string name="permlab_accessWimaxState" msgid="4195907010610205703">"ansluta till och koppla från WiMAX"</string>
     <string name="permdesc_accessWimaxState" msgid="6360102877261978887">"Tillåter att appen avgör om WiMAX är aktiverat och kommer åt information om eventuella anslutna WiMAX-nätverk."</string>
     <string name="permlab_changeWimaxState" msgid="2405042267131496579">"ändra WiMAX-status"</string>
     <string name="permdesc_changeWimaxState" product="tablet" msgid="3156456504084201805">"Tillåter att appen ansluter surfplattan till eller kopplar från WiMAX-nätverk."</string>
     <string name="permdesc_changeWimaxState" product="tv" msgid="6022307083934827718">"Tillåter att appen ansluter tv:n till och kopplar från tv:n från WiMAX-nätverk."</string>
     <string name="permdesc_changeWimaxState" product="default" msgid="697025043004923798">"Tillåter att appen ansluter mobilen till eller kopplar från WiMAX-nätverk."</string>
-    <string name="permlab_scoreNetworks" msgid="6445777779383587181">"betygsätt nätverk"</string>
-    <string name="permdesc_scoreNetworks" product="tablet" msgid="1304304745850215556">"Tillåter att appen betygsätter nätverk och påverkar vilka nätverk som ska användas i första hand av surfplattan."</string>
-    <string name="permdesc_scoreNetworks" product="tv" msgid="5444434643862417649">"Tillåter att appen betygsätter nätverk och påverkar vilka nätverk som ska användas i första hand av tv:n."</string>
-    <string name="permdesc_scoreNetworks" product="default" msgid="1831501848178651379">"Tillåter att appen betygsätter nätverk och påverkar vilka nätverk som ska användas i första hand av mobilen."</string>
     <string name="permlab_bluetooth" msgid="6127769336339276828">"koppla till Bluetooth-enheter"</string>
     <string name="permdesc_bluetooth" product="tablet" msgid="3480722181852438628">"Tillåter att appen kommer åt pekdatorns Bluetooth-konfiguration och upprättar och godkänner anslutningar till parkopplade enheter."</string>
     <string name="permdesc_bluetooth" product="tv" msgid="3974124940101104206">"Tillåter att appen visar konfigurationen av Bluetooth på tv:n och godkänner alla anslutningar till kopplade enheter."</string>
@@ -784,10 +462,6 @@
     <string name="permdesc_writeSyncSettings" msgid="8956262591306369868">"Tillåter att appen ändrar synkroniseringsinställningarna för ett konto. Detta kan användas till exempel för att synkronisera appen Personer med ett konto."</string>
     <string name="permlab_readSyncStats" msgid="7396577451360202448">"läsa synkroniseringsstatistik"</string>
     <string name="permdesc_readSyncStats" msgid="1510143761757606156">"Tillåter att appen läser synkroniseringsstatistik för ett konto, inklusive historiken för synkroniseringshändelser och mängden data som synkroniseras."</string>
-    <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"läsa flöden som du prenumererar på"</string>
-    <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"Tillåter att appen får information om aktuella synkroniserade flöden."</string>
-    <string name="permlab_subscribedFeedsWrite" msgid="9015246325408209296">"skriva flöden som du prenumererar på"</string>
-    <string name="permdesc_subscribedFeedsWrite" msgid="6928930188826089413">"Tillåter att appen ändrar dina aktuella synkroniserade flöden. Skadliga appar kan ändra dina synkroniserade flöden."</string>
     <string name="permlab_readDictionary" msgid="4107101525746035718">"läsa termer som du har lagt till i ordlistan"</string>
     <string name="permdesc_readDictionary" msgid="659614600338904243">"Tillåter att appen läser alla ord, namn och fraser som användaren har sparat i ordlistan."</string>
     <string name="permlab_writeDictionary" msgid="2183110402314441106">"lägga till ord i den användardefinierade ordlistan"</string>
@@ -800,62 +474,8 @@
     <string name="permlab_sdcardWrite" product="default" msgid="8805693630050458763">"ändra eller ta bort innehåll på SD-kortet"</string>
     <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6175406299445710888">"Gör att app skriver till USB."</string>
     <string name="permdesc_sdcardWrite" product="default" msgid="4337417790936632090">"Tillåter att appen skriver till SD-kortet."</string>
-    <string name="permlab_mediaStorageWrite" product="default" msgid="6859839199706879015">"ändra/ta bort innehåll"</string>
-    <string name="permdesc_mediaStorageWrite" product="default" msgid="8189160597698529185">"Tillåter att appen ändrar innehållet på den interna lagringsenheten."</string>
-    <string name="permlab_manageDocs" product="default" msgid="5778318598448849829">"hantera dokumentlagring"</string>
-    <string name="permdesc_manageDocs" product="default" msgid="8704323176914121484">"Tillåter att appen hanterar dokumentlagring."</string>
-    <string name="permlab_sdcardAccessAll" msgid="8150613823900460576">"åtkomst till lagringsutrymme"</string>
-    <string name="permdesc_sdcardAccessAll" msgid="3215208357415891320">"Tillåter att appen får åtkomst till en extern lagringsenhet för alla användare."</string>
-    <string name="permlab_cache_filesystem" msgid="5656487264819669824">"åtkomst till cachefilsystemet"</string>
-    <string name="permdesc_cache_filesystem" msgid="5578967642265550955">"Tillåter att appen läser och skriver till cachefilsystemet."</string>
     <string name="permlab_use_sip" msgid="2052499390128979920">"gör/ta emot SIP-anrop"</string>
     <string name="permdesc_use_sip" msgid="2297804849860225257">"Tillåter att appen gör och tar emot SIP-anrop."</string>
-    <string name="permlab_register_sim_subscription" msgid="3166535485877549177">"registrera nya telekommunikationsanslutningar för SIM-kortet"</string>
-    <string name="permdesc_register_sim_subscription" msgid="2138909035926222911">"Tillåter att appen registrerar nya telekommunikationsanslutningar för SIM-kortet."</string>
-    <string name="permlab_register_call_provider" msgid="108102120289029841">"registrera nya telekommunikationsanslutningar"</string>
-    <string name="permdesc_register_call_provider" msgid="7034310263521081388">"Tillåter att appen registrerar nya telekommunikationsanslutningar."</string>
-    <string name="permlab_connection_manager" msgid="1116193254522105375">"hantera telekommunikationsanslutningar"</string>
-    <string name="permdesc_connection_manager" msgid="5925480810356483565">"Tillåter att appen hanterar telekommunikationsanslutningar."</string>
-    <string name="permlab_bind_incall_service" msgid="6773648341975287125">"interagera med skärmen för inkommande samtal"</string>
-    <string name="permdesc_bind_incall_service" msgid="8343471381323215005">"Tillåter att appen kontrollerar hur och när användaren ser skärmen för inkommande samtal."</string>
-    <string name="permlab_bind_connection_service" msgid="3557341439297014940">"samverka med telefonitjänster"</string>
-    <string name="permdesc_bind_connection_service" msgid="4008754499822478114">"Tillåter appen att använda telefonitjänster för att ringa/ta emot samtal."</string>
-    <string name="permlab_control_incall_experience" msgid="9061024437607777619">"förbättra användarupplevelsen för inkommande samtal."</string>
-    <string name="permdesc_control_incall_experience" msgid="915159066039828124">"Tillåter att appen förbättrar användarupplevelsen för inkommande samtal."</string>
-    <string name="permlab_readNetworkUsageHistory" msgid="7862593283611493232">"läsa historisk nätverksanvändning"</string>
-    <string name="permdesc_readNetworkUsageHistory" msgid="7689060749819126472">"Tillåter att appen läser den historiska nätverksanvändningen för specifika nätverk och appar."</string>
-    <string name="permlab_manageNetworkPolicy" msgid="2562053592339859990">"hantera nätverkspolicy"</string>
-    <string name="permdesc_manageNetworkPolicy" msgid="7537586771559370668">"Tillåter att appen hanterar nätverkspolicyer och definierar appspecifika regler."</string>
-    <string name="permlab_modifyNetworkAccounting" msgid="5088217309088729650">"ändra nätverksredovisningen"</string>
-    <string name="permdesc_modifyNetworkAccounting" msgid="5443412866746198123">"Tillåter att appen ändrar hur nätverksanvändning redovisas för appar. Används inte av vanliga appar."</string>
-    <string name="permlab_accessNotifications" msgid="7673416487873432268">"få åtkomst till meddelanden"</string>
-    <string name="permdesc_accessNotifications" msgid="458457742683431387">"Tillåter att appen hämtar, granskar och raderar meddelanden, även sådana som skickats av andra appar."</string>
-    <string name="permlab_bindNotificationListenerService" msgid="7057764742211656654">"binda till en meddelandelyssnare"</string>
-    <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"Innehavaren tillåts att binda till den översta nivåns gränssnitt för en meddelandelyssnare. Ska inte behövas för vanliga appar."</string>
-    <string name="permlab_bindChooserTargetService" msgid="3443261076710185673">"binda till en målväljartjänst"</string>
-    <string name="permdesc_bindChooserTargetService" msgid="1413908999583734970">"Innehavaren tillåts att binda till den översta nivåns gränssnitt för en målväljartjänst. Ska inte behövas för vanliga appar."</string>
-    <string name="permlab_bindConditionProviderService" msgid="1180107672332704641">"bind till en leverantörstjänst"</string>
-    <string name="permdesc_bindConditionProviderService" msgid="1680513931165058425">"Innehavaren tillåts att binda till den översta nivåns gränssnitt för en leverantörstjänst. Ska inte behövas för vanliga appar."</string>
-    <string name="permlab_bindMediaRouteService" msgid="6637740382272686835">"binda till medieruttjänst"</string>
-    <string name="permdesc_bindMediaRouteService" msgid="6436655024972496687">"Tillåter att innehavaren kan binda till den översta nivåns gränssnitt för en medieruttjänst. Detta ska inte behövas för vanliga appar."</string>
-    <string name="permlab_bindDreamService" msgid="4153646965978563462">"binda till en drömtjänst"</string>
-    <string name="permdesc_bindDreamService" msgid="7325825272223347863">"Innehavaren tillåts att binda till den översta nivåns gränssnitt för en drömtjänst. Ska inte behövas för vanliga appar."</string>
-    <string name="permlab_invokeCarrierSetup" msgid="3699600833975117478">"anropa konfigurationsappen från operatören"</string>
-    <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"Innehavaren tillåts att anropa konfigurationsappen från operatören. Ska inte behövas för vanliga appar."</string>
-    <string name="permlab_accessNetworkConditions" msgid="8206077447838909516">"lyssna efter information om nätverksförhållanden"</string>
-    <string name="permdesc_accessNetworkConditions" msgid="6899102075825272211">"Tillåter att appen lyssnar efter information om nätverksförhållanden. Vanliga appar bör aldrig behöva den här behörigheten."</string>
-    <string name="permlab_setInputCalibration" msgid="4902620118878467615">"ändra kalibreringen för inmatningsenheten"</string>
-    <string name="permdesc_setInputCalibration" msgid="4527511047549456929">"Tillåter att appen ändrar kalibreringsparametrarna för pekskärmen. Detta behövs aldrig för vanliga appar."</string>
-    <string name="permlab_accessDrmCertificates" msgid="7436886640723203615">"tillgång till DRM-certifikat"</string>
-    <string name="permdesc_accessDrmCertificates" msgid="8073288354426159089">"Tillåter att en app tillhandahåller och använder DRM-certifikat. Behövs inte för vanliga appar."</string>
-    <string name="permlab_handoverStatus" msgid="1159132046126626731">"Ta emot status för Android Beam-överföring"</string>
-    <string name="permdesc_handoverStatus" msgid="4788144087245714948">"Tillåter att appen tar emot information om aktuella Android Beam-överföringar"</string>
-    <string name="permlab_removeDrmCertificates" msgid="7044888287209892751">"ta bort DRM-certifikat"</string>
-    <string name="permdesc_removeDrmCertificates" msgid="7272999075113400993">"Tillåter ett program att ta bort DRM-certifikat. Behövs inte för vanliga appar."</string>
-    <string name="permlab_bindCarrierMessagingService" msgid="1490229371796969158">"binda till en operatörs meddelandetjänst"</string>
-    <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"Innehavaren tillåts att binda till den översta nivåns gränssnitt för en operatörs meddelandetjänst. Ska inte behövas för vanliga appar."</string>
-    <string name="permlab_accessVoiceInteractionService" msgid="4183835260471435605">"interagera med rösttjänsten"</string>
-    <string name="permdesc_accessVoiceInteractionService" msgid="836587728238433459">"Innehavaren får interagera med den för tillfället aktiva rösttjänsten. Detta ska inte behövas för vanliga appar."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Ange lösenordsregler"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"Styr tillåten längd och tillåtna tecken i lösenord och pinkoder för skärmlåset."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Övervaka försök att låsa upp skärmen"</string>
@@ -1141,28 +761,10 @@
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="8497389531014185509">"Tillåter att appen ändrar historiken för besökta sidor i webbläsaren eller bokmärken som sparats på telefonen. Det kan innebära att appen kan ta bort eller ändra webbläsarinformation. Observera att den här behörigheten kanske inte är tillämplig för webbläsare från tredje part eller andra appar med surffunktion."</string>
     <string name="permlab_setAlarm" msgid="1379294556362091814">"ställa in ett alarm"</string>
     <string name="permdesc_setAlarm" msgid="316392039157473848">"Tillåter att appen ställer in ett alarm i en befintlig alarmapp. Vissa alarmappar har inte den här funktionen."</string>
-    <string name="permlab_writeVoicemail" msgid="7309899891683938100">"skriva röstmeddelanden"</string>
-    <string name="permdesc_writeVoicemail" msgid="6592572839715924830">"Tillåter att appen ändrar och tar bort meddelanden från röstbrevlådans inkorg."</string>
     <string name="permlab_addVoicemail" msgid="5525660026090959044">"lägg till röstbrevlåda"</string>
     <string name="permdesc_addVoicemail" msgid="6604508651428252437">"Gör att appen lägger till meddelanden i röstbrevlådans inkorg."</string>
-    <string name="permlab_readVoicemail" msgid="8415201752589140137">"läsa röstmeddelanden"</string>
-    <string name="permdesc_readVoicemail" msgid="8926534735321616550">"Tillåter att appen läser dina röstmeddelanden."</string>
     <string name="permlab_writeGeolocationPermissions" msgid="5962224158955273932">"Ändra geografisk plats för webbläsaren"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="1083743234522638747">"Tillåter att appen ändrar webbläsarens behörigheter för geografisk plats. Skadliga appar kan använda detta för att tillåta att platsinformation skickas till godtyckliga webbplatser."</string>
-    <string name="permlab_packageVerificationAgent" msgid="5568139100645829117">"kontrollera paket"</string>
-    <string name="permdesc_packageVerificationAgent" msgid="8437590190990843381">"Tillåter att appen kontrollerar om ett paket går att installera."</string>
-    <string name="permlab_bindPackageVerifier" msgid="4187786793360326654">"binda till en paketverifierare"</string>
-    <string name="permdesc_bindPackageVerifier" msgid="3180741773233862126">"Tillåter att innehavaren skickar förfrågningar till paketverifierare. Det ska inte behövas för vanliga appar."</string>
-    <string name="permlab_intentFilterVerificationAgent" msgid="1135788294400437497">"verifiera intent-filter"</string>
-    <string name="permdesc_intentFilterVerificationAgent" msgid="5853902808424716312">"Tillåter att appen kontrollerar om ett intent-filter har verifierats eller inte."</string>
-    <string name="permlab_bindIntentFilterVerifier" msgid="8567268159430779210">"binda till en intent-filterverifierare"</string>
-    <string name="permdesc_bindIntentFilterVerifier" msgid="681128728719578778">"Tillåter att innehavaren skickar begäranden till intent-filterverifierare. Behövs inte för vanliga appar."</string>
-    <string name="permlab_serialPort" msgid="546083327654631076">"åtkomst till serieportar"</string>
-    <string name="permdesc_serialPort" msgid="2991639985224598193">"Innebär att innehavaren får åtkomst till serieportar med programmeringsgränssnittet för SerialManager."</string>
-    <string name="permlab_accessContentProvidersExternally" msgid="5077774297943409285">"komma åt innehållsleverantörer externt"</string>
-    <string name="permdesc_accessContentProvidersExternally" msgid="4544346486697853685">"Innehavaren kan få åtkomst till innehållsleverantörer från skalet. Ska inte behövas för vanliga appar."</string>
-    <string name="permlab_updateLock" msgid="3527558366616680889">"hindra automatiska enhetsuppdateringar"</string>
-    <string name="permdesc_updateLock" msgid="1655625832166778492">"Innehavaren kan informera systemet när det är lämpligt att göra en omstart utan interaktivitet för att uppgradera enheten."</string>
     <string name="save_password_message" msgid="767344687139195790">"Vill du att webbläsaren ska komma ihåg lösenordet?"</string>
     <string name="save_password_notnow" msgid="6389675316706699758">"Inte nu"</string>
     <string name="save_password_remember" msgid="6491879678996749466">"Kom ihåg"</string>
@@ -1458,28 +1060,8 @@
     <string name="ext_media_nomedia_notification_message" product="nosdcard" msgid="6921126162580574143">"USB-lagringsenheten har tagits bort. Sätt i en ny."</string>
     <string name="ext_media_nomedia_notification_message" product="default" msgid="3870120652983659641">"SD-kortet har tagits bort. Sätt i ett nytt."</string>
     <string name="activity_list_empty" msgid="1675388330786841066">"Det gick inte att hitta några matchande aktiviteter."</string>
-    <string name="permlab_pkgUsageStats" msgid="8787352074326748892">"uppdatera statistik över användning av komponenter"</string>
-    <string name="permdesc_pkgUsageStats" msgid="1106612424254277630">"Tillåter att appen ändrar samlad komponentstatistik. Används inte av vanliga appar."</string>
-    <string name="permlab_copyProtectedData" msgid="4341036311211406692">"kopiera innehåll"</string>
-    <string name="permdesc_copyProtectedData" msgid="4390697124288317831">"Tillåter att appen kopierar innehåll genom att standardbehållartjänsten startas. Används inte av vanliga appar."</string>
     <string name="permlab_route_media_output" msgid="1642024455750414694">"Omdirigera medieuppspelning"</string>
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"Tillåter att appen omdirigerar medieuppspelningar till andra externa enheter."</string>
-    <string name="permlab_access_keyguard_secure_storage" msgid="7565552237977815047">"Åtkomst till säkert keyguard-lagringsutrymme"</string>
-    <string name="permdesc_access_keyguard_secure_storage" msgid="5866245484303285762">"Tillåter att en app får åtkomst till säkert keyguard-lagringsutrymme."</string>
-    <string name="permlab_control_keyguard" msgid="172195184207828387">"Kontrollera hur knapplåset visas och döljs"</string>
-    <string name="permdesc_control_keyguard" msgid="3043732290518629061">"Tillåter att en app kontrollerar knapplåsfunktionen."</string>
-    <string name="permlab_trust_listener" msgid="1765718054003704476">"Lyssna efter ändringar i betrodda agenters status."</string>
-    <string name="permdesc_trust_listener" msgid="8233895334214716864">"Tillåter att en app lyssnar efter ändringar i den betrodda agentens status."</string>
-    <string name="permlab_provide_trust_agent" msgid="5465587586091358316">"Tillhandahåll en betrodd agent."</string>
-    <string name="permdesc_provide_trust_agent" msgid="3865702641053068148">"Tillåter att en app tillhandahåller en betrodd agent."</string>
-    <string name="permlab_launch_trust_agent_settings" msgid="5859430082240410200">"Starta den betrodda agentens inställningsmeny."</string>
-    <string name="permdesc_launch_trust_agent_settings" msgid="8185142708644913381">"Ger en app behörighet att starta en aktivitet som ändrar en betrodd agents beteende."</string>
-    <string name="permlab_bind_trust_agent_service" msgid="8242093169457695334">"Bind till en tjänst från en betrodd agent"</string>
-    <string name="permdesc_bind_trust_agent_service" msgid="7041930026024507515">"Tillåter att en app binds vid en tjänst från en betrodd agent."</string>
-    <string name="permlab_recovery" msgid="3157024487744125846">"Interagera med uppdaterings- och återställningssystemet"</string>
-    <string name="permdesc_recovery" msgid="8511774533266359571">"Tillåter att en app interagerar med systemuppdateringar och återställningssystemet."</string>
-    <string name="permlab_manageMediaProjection" msgid="1120495449419929218">"Hantera medieprojektionssessioner"</string>
-    <string name="permdesc_manageMediaProjection" msgid="8053759147529492856">"Tillåter att en app hanterar sessioner för medieprojektion. Dessa sessioner kan ge appar möjlighet att spela in skärm- och ljudinnehåll. Detta ska aldrig behövas för vanliga appar."</string>
     <string name="permlab_readInstallSessions" msgid="6165432407628065939">"Läsa installationssessioner"</string>
     <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"Tillåt appen att läsa installationssessioner. Det ger den tillgång till uppgifter om aktiva paketinstallationer."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"Tryck två gånger för zoomkontroll"</string>
@@ -1846,13 +1428,9 @@
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Be om pinkod innan skärmen slutar fästas"</string>
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"Be om upplåsningsmönster innan skärmen slutar fästas"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Be om lösenord innan skärmen slutar fästas"</string>
-    <!-- no translation found for package_installed_device_owner (8420696545959087545) -->
-    <skip />
-    <!-- no translation found for package_deleted_device_owner (7650577387493101353) -->
-    <skip />
+    <string name="package_installed_device_owner" msgid="8420696545959087545">"Paketet har installerats av administratören"</string>
+    <string name="package_deleted_device_owner" msgid="7650577387493101353">"Paketet har raderats av administratören"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"I batterisparläget reduceras enhetens prestanda så att batteriet ska räcka längre och vibration, platstjänster samt den mesta användningen av bakgrundsdata begränsas. Det kan hända att appar för e-post, sms och annat som kräver synkronisering inte uppdateras förrän du öppnar dem.\n\nBatterisparläget inaktiveras automatiskt när enheten laddas."</string>
-    <string name="downtime_condition_summary" msgid="8761776337475705749">"Tills avbrottstiden är slut <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
-    <string name="downtime_condition_line_one" msgid="8762708714645352010">"Tills avbrottstiden är slut"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
       <item quantity="other">I %1$d minuter (till kl. <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
       <item quantity="one">I en minut (till kl. <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>
@@ -1871,9 +1449,17 @@
     </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"Till kl. <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_forever" msgid="7420011936770086993">"Tills du inaktiverar detta"</string>
+    <!-- no translation found for zen_mode_rule_name_combination (191109939968076477) -->
+    <skip />
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"Komprimera"</string>
-    <string name="zen_mode_next_alarm_summary" msgid="5915140424683747372">"Till nästa alarm kl. <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
-    <string name="zen_mode_next_alarm_line_one" msgid="5537042951553420916">"Till nästa alarm"</string>
+    <!-- no translation found for zen_mode_feature_name (289097150786114338) -->
+    <skip />
+    <!-- no translation found for zen_mode_downtime_feature_name (2626974636779860146) -->
+    <skip />
+    <!-- no translation found for zen_mode_default_weeknights_name (2069189413656431610) -->
+    <skip />
+    <!-- no translation found for zen_mode_default_weekends_name (2377398437072017011) -->
+    <skip />
     <string name="muted_by" msgid="6147073845094180001">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> har stängt av ljudet"</string>
     <string name="system_error_wipe_data" msgid="6608165524785354962">"Ett internt problem har uppstått i enheten, och det kan hända att problemet kvarstår tills du återställer standardinställningarna."</string>
     <string name="system_error_manufacturer" msgid="8086872414744210668">"Ett internt problem har uppstått i enheten. Kontakta tillverkaren om du vill veta mer."</string>
@@ -1883,6 +1469,11 @@
     <string name="stk_cc_ss_to_dial" msgid="2151304435775557162">"SS-begäran har ändrats till en DIAL-begäran."</string>
     <string name="stk_cc_ss_to_ussd" msgid="3951862188105305589">"SS-begäran har ändrats till en USSD-begäran."</string>
     <string name="stk_cc_ss_to_ss" msgid="5470768854991452695">"SS-begäran har ändrats till en ny SS-begäran."</string>
+    <!-- no translation found for usb_midi_peripheral_name (7221113987741003817) -->
+    <skip />
     <string name="usb_midi_peripheral_manufacturer_name" msgid="7176526170008970168">"Android"</string>
-    <string name="usb_midi_peripheral_model_name" msgid="1959288763942653301">"Perifer USB-port"</string>
+    <!-- no translation found for usb_midi_peripheral_product_name (4971827859165280403) -->
+    <skip />
+    <string name="floating_toolbar_open_overflow_description" msgid="4797287862999444631">"Fler alternativ"</string>
+    <string name="floating_toolbar_close_overflow_description" msgid="559796923090723804">"Dölj utökat verktygsfält"</string>
 </resources>

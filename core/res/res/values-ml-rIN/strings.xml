@@ -218,69 +218,43 @@
     <string name="android_system_label" msgid="6577375335728551336">"Android സിസ്റ്റം"</string>
     <string name="user_owner_label" msgid="6465364741001216388">"വ്യക്തിഗത അപ്ലിക്കേഷനുകൾ"</string>
     <string name="managed_profile_label" msgid="6260850669674791528">"ഔദ്യോഗിക പ്രൊഫൈൽ"</string>
-    <string name="permgrouplab_costMoney" msgid="5429808217861460401">"നിങ്ങളിൽ നിന്ന് പണമീടാക്കുന്ന സേവനങ്ങൾ"</string>
-    <string name="permgroupdesc_costMoney" msgid="3293301903409869495">"നിങ്ങൾക്ക് പണച്ചെലവിനിടയാക്കുന്ന കാര്യങ്ങൾ ചെയ്യുക."</string>
-    <string name="permgrouplab_messages" msgid="7521249148445456662">"നിങ്ങളുടെ സന്ദേശങ്ങൾ"</string>
-    <string name="permgroupdesc_messages" msgid="7821999071003699236">"നിഒങ്ങളുടെ SMS, ഇമെയിൽ, മറ്റ് സന്ദേശങ്ങൾ എന്നിവ വായിക്കുക എഴുതുക."</string>
-    <string name="permgrouplab_personalInfo" msgid="3519163141070533474">"നിങ്ങളുടെ വ്യക്തിഗത വിവരം"</string>
-    <string name="permgroupdesc_personalInfo" msgid="8426453129788861338">"നിങ്ങളുടെ കോൺടാക്റ്റ് കാർഡിൽ സംഭരിച്ചിരിക്കുന്ന നിങ്ങളെക്കുറിച്ചുള്ള വിവരങ്ങളിലേക്കുള്ള നേരിട്ടുള്ള ആക്‌സസ്സ്."</string>
+    <!-- no translation found for permgrouplab_contacts (3657758145679177612) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_contacts (1437393511338346185) -->
+    <skip />
+    <!-- no translation found for permgrouplab_location (7275582855722310164) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_location (536889867433972794) -->
+    <skip />
     <string name="permgrouplab_socialInfo" msgid="5799096623412043791">"നിങ്ങളുടെ സോഷ്യൽ വിവരം"</string>
     <string name="permgroupdesc_socialInfo" msgid="7129842457611643493">"നിങ്ങളുടെ കോൺടാക്റ്റുകളേയും സോഷ്യൽ കണക്ഷനുകളേയും സംബന്ധിച്ച വിവരങ്ങളിലേക്കുള്ള നേരിട്ടുള്ള ആക്‌സസ്സ്."</string>
-    <string name="permgrouplab_location" msgid="635149742436692049">"നിങ്ങളുടെ ലൊക്കേഷൻ"</string>
-    <string name="permgroupdesc_location" msgid="5704679763124170100">"നിങ്ങളുടെ ഭൗതിക ലൊക്കേഷൻ നിരീക്ഷിക്കുക."</string>
-    <string name="permgrouplab_network" msgid="5808983377727109831">"നെറ്റ്‌വർക്ക് ആശയവിനിമയം"</string>
-    <string name="permgroupdesc_network" msgid="4478299413241861987">"വ്യത്യസ്‌ത നെറ്റ്‌വർക്ക് സവിശേഷതകൾ ആക്‌സസ്സുചെയ്യുക."</string>
-    <string name="permgrouplab_bluetoothNetwork" msgid="1585403544162128109">"ബ്ലൂടൂത്ത്"</string>
-    <string name="permgroupdesc_bluetoothNetwork" msgid="5625288577164282391">"ബ്ലൂടൂത്ത് മുഖേന ഉപകരണങ്ങളും നെറ്റ്‌വർക്കുകളും ആക്‌സസ്സുചെയ്യുക."</string>
-    <string name="permgrouplab_audioSettings" msgid="8329261670151871235">"ഓഡിയോ ക്രമീകരണങ്ങൾ"</string>
-    <string name="permgroupdesc_audioSettings" msgid="2641515403347568130">"ഓഡിയോ ക്രമീകരണങ്ങൾ മാറ്റുക."</string>
-    <string name="permgrouplab_affectsBattery" msgid="6209246653424798033">"ബാറ്ററിയെ ബാധിക്കുന്നു"</string>
-    <string name="permgroupdesc_affectsBattery" msgid="6441275320638916947">"വളരെ വേഗത്തിൽ ബാറ്ററി ശൂന്യമാക്കുന്ന സവിശേഷതകൾ ഉപയോഗിക്കുക."</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"കലണ്ടർ"</string>
-    <string name="permgroupdesc_calendar" msgid="5777534316982184416">"കലണ്ടറിലേക്കും ഇവന്റുകളിലേക്കുമുള്ള നേരിട്ടുള്ള ആക്‌സസ്സ്."</string>
-    <string name="permgrouplab_dictionary" msgid="4148597128843641379">"ഉപയോക്തൃ നിഘണ്ടു വായിക്കുക"</string>
-    <string name="permgroupdesc_dictionary" msgid="7921166355964764490">"ഉപയോക്തൃ നിഘണ്ടുവിലെ പദങ്ങൾ വായിക്കുക."</string>
-    <string name="permgrouplab_writeDictionary" msgid="8090237702432576788">"ഉപയോക്തൃ നിഘണ്ടു എഴുതുക"</string>
-    <string name="permgroupdesc_writeDictionary" msgid="2711561994497361646">"ഉപയോക്തൃ നിഘണ്ടുവിലേക്ക് പദങ്ങൾ ചേർക്കുക."</string>
+    <!-- no translation found for permgroupdesc_calendar (2116049656685591803) -->
+    <skip />
+    <!-- no translation found for permgrouplab_sms (228308803364967808) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_sms (3695085582674524761) -->
+    <skip />
+    <!-- no translation found for permgrouplab_dictionary (8114410334955871144) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_dictionary (7586787746354378335) -->
+    <skip />
     <string name="permgrouplab_bookmarks" msgid="1949519673103968229">"ബുക്ക്‌മാർക്കുകളും ചരിത്രവും"</string>
     <string name="permgroupdesc_bookmarks" msgid="4169771606257963028">"ബുക്ക്‌മാർക്കുകളിലേക്കും ബ്രൗസർ ചരിത്രത്തിലേക്കുമുള്ള നേരിട്ടുള്ള ആക്‌സസ്സ്."</string>
-    <string name="permgrouplab_deviceAlarms" msgid="6117704629728824101">"അലാറം"</string>
-    <string name="permgroupdesc_deviceAlarms" msgid="4769356362251641175">"അലാറം ക്ലോക്ക് സജ്ജീകരിക്കുക."</string>
-    <string name="permgrouplab_voicemail" msgid="4162237145027592133">"വോയ്സ് മെയില്‍"</string>
-    <string name="permgroupdesc_voicemail" msgid="2498403969862951393">"വോയ്‌സ്‌മെയിലിലേക്കുള്ള നേരിട്ടുള്ള ആക്‌സസ്സ്."</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"മൈക്രോഫോണ്‍"</string>
-    <string name="permgroupdesc_microphone" msgid="7106618286905738408">"ഓഡിയോ റെക്കോർഡുചെയ്യാൻ മൈക്രോഫോണിലേക്കുള്ള നേരിട്ടുള്ള ആക്‌സസ്സ്."</string>
+    <!-- no translation found for permgroupdesc_microphone (1296196977187629181) -->
+    <skip />
     <string name="permgrouplab_camera" msgid="4820372495894586615">"ക്യാമറ"</string>
-    <string name="permgroupdesc_camera" msgid="2933667372289567714">"ചിത്രം അല്ലെങ്കിൽ വീഡിയോ എടുക്കാൻ ക്യാമറയ്‌ക്കുള്ള നേരിട്ടുള്ള ആക്‌സസ്സ്."</string>
-    <string name="permgrouplab_screenlock" msgid="8275500173330718168">"ലോക്ക് സ്‌ക്രീൻ"</string>
-    <string name="permgroupdesc_screenlock" msgid="7067497128925499401">"നിങ്ങളുടെ ഉപകരണത്തിലെ ലോക്ക് സ്‌ക്രീനിന്റെ പ്രവർത്തനരീതിയെ ബാധിക്കാനുള്ള കഴിവ്."</string>
-    <string name="permgrouplab_appInfo" msgid="8028789762634147725">"നിങ്ങളുടെ അപ്ലിക്കേഷനുകളുടെ വിവരം"</string>
-    <string name="permgroupdesc_appInfo" msgid="3950378538049625907">"നിങ്ങളുടെ ഉപകരണത്തിലെ മറ്റ് അപ്ലിക്കേഷനുകളുടെ പ്രവർത്തനരീതിയെ ബാധിക്കാനുള്ള കഴിവ്."</string>
-    <string name="permgrouplab_wallpaper" msgid="3850280158041175998">"വാൾപേപ്പർ"</string>
-    <string name="permgroupdesc_wallpaper" msgid="5630417854750540154">"ഉപകരണ വാൾപേപ്പർ ക്രമീകരണങ്ങൾ മാറ്റുക."</string>
-    <string name="permgrouplab_systemClock" msgid="406535759236612992">"ക്ലോക്ക്"</string>
-    <string name="permgroupdesc_systemClock" msgid="3944359833624094992">"ഉപകരണ സമയമോ സമയമേഖലയോ മാറ്റുക."</string>
-    <string name="permgrouplab_statusBar" msgid="2095862568113945398">"സ്റ്റാറ്റസ് ബാർ"</string>
-    <string name="permgroupdesc_statusBar" msgid="6242593432226807171">"ഉപകരണ നില ബാർ ക്രമീകരണങ്ങൾ മാറ്റുക."</string>
-    <string name="permgrouplab_syncSettings" msgid="3341990986147826541">"സമന്വയ ക്രമീകരണങ്ങൾ"</string>
-    <string name="permgroupdesc_syncSettings" msgid="7603195265129031797">"സമന്വയ ക്രമീകരണങ്ങൾ ആക്‌സസ്സുചെയ്യുക."</string>
-    <string name="permgrouplab_accounts" msgid="3359646291125325519">"നിങ്ങളുടെ അക്കൗണ്ടുകൾ"</string>
-    <string name="permgroupdesc_accounts" msgid="4948732641827091312">"ലഭ്യമായ അക്കൗണ്ടുകൾ ആക്‌സസ്സ് ചെയ്യുക."</string>
-    <string name="permgrouplab_hardwareControls" msgid="7998214968791599326">"ഹാർഡ്‌വെയർ നിയന്ത്രണങ്ങൾ"</string>
-    <string name="permgroupdesc_hardwareControls" msgid="4357057861225462702">"ഹാൻഡ്സെറ്റിലെ ഹാർഡ്‌വെയറിലേക്കുള്ള നേരിട്ടുള്ള ആക്സസ്സ്."</string>
-    <string name="permgrouplab_phoneCalls" msgid="9067173988325865923">"ഫോണ്‍‌ കോളുകൾ"</string>
-    <string name="permgroupdesc_phoneCalls" msgid="7489701620446183770">"ഫോൺ കോളുകൾ നിരീക്ഷിക്കുക, റെക്കോർഡുചെയ്യുക, പ്രോസസ്സുചെയ്യുക."</string>
-    <string name="permgrouplab_systemTools" msgid="4652191644082714048">"സിസ്‌റ്റം ഉപകരണങ്ങൾ"</string>
-    <string name="permgroupdesc_systemTools" msgid="8162102602190734305">"കുറഞ്ഞ നിലയിലുള്ള ആക്‌സസ്സും സിസ്റ്റം നിയന്ത്രണവും."</string>
-    <string name="permgrouplab_developmentTools" msgid="3446164584710596513">"വികസന ഉപകരണങ്ങൾ"</string>
-    <string name="permgroupdesc_developmentTools" msgid="7058828032358142018">"സവിശേഷതകൾ അപ്ലിക്കേഷൻ ഡവലപ്പറുകൾക്ക് മാത്രമേ ആവശ്യമുള്ളൂ."</string>
-    <string name="permgrouplab_display" msgid="4279909676036402636">"മറ്റ് അപ്ലിക്കേഷൻ UI"</string>
-    <string name="permgroupdesc_display" msgid="6051002031933013714">"മറ്റ് അപ്ലിക്കേഷനുകളിലെ UI ബാധകമാക്കുക."</string>
-    <string name="permgrouplab_storage" msgid="1971118770546336966">"സംഭരണം"</string>
-    <string name="permgroupdesc_storage" product="nosdcard" msgid="7442318502446874999">"USB സംഭരണം ആക്‌സസ്സ് ചെയ്യുക."</string>
-    <string name="permgroupdesc_storage" product="default" msgid="9203302214915355774">"SD കാർഡ് ആക്സസ്സ് ചെയ്യുക."</string>
-    <string name="permgrouplab_accessibilityFeatures" msgid="7919025602283593907">"പ്രവേശനക്ഷമതാ സവിശേഷതകൾ"</string>
-    <string name="permgroupdesc_accessibilityFeatures" msgid="4205196881678144335">"സഹായകരമായ സാങ്കേതികവിദ്യ അഭ്യർത്ഥിക്കാനാകുന്ന സവിശേഷതകൾ."</string>
+    <!-- no translation found for permgroupdesc_camera (2429930670410559293) -->
+    <skip />
+    <!-- no translation found for permgrouplab_phone (5229115638567440675) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_phone (2016641188146068700) -->
+    <skip />
+    <!-- no translation found for permgrouplab_sensors (7416703484233940260) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_sensors (2987451839455524494) -->
+    <skip />
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"വിൻഡോ ഉള്ളടക്കം വീണ്ടെടുക്കുക"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"നിങ്ങൾ സംവദിക്കുന്ന ഒരു വിൻഡോയുടെ ഉള്ളടക്കം പരിശോധിക്കുക."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"സ്‌പർശനം വഴി പര്യവേക്ഷണം ചെയ്യുക ഓൺ ചെയ്യുക"</string>
@@ -305,14 +279,8 @@
     <string name="permdesc_receiveSms" msgid="6424387754228766939">"SMS സന്ദേശങ്ങൾ നേടാനും പ്രോസസ്സുചെയ്യാനും അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു. നിങ്ങളുടെ ഉപകരണത്തിലേക്ക് അയയ്‌ക്കുന്ന സന്ദേശങ്ങൾ നിങ്ങൾക്ക് ദൃശ്യമാക്കാതെ തന്നെ അപ്ലിക്കേഷന് നിരീക്ഷിക്കാനോ ഇല്ലാതാക്കാനോ കഴിയുമെന്നാണ് ഇതിനർത്ഥം."</string>
     <string name="permlab_receiveMms" msgid="1821317344668257098">"വാചക സന്ദേശം നേടുക (MMS)"</string>
     <string name="permdesc_receiveMms" msgid="533019437263212260">"MMS സന്ദേശങ്ങൾ നേടാനും പ്രോസസ്സുചെയ്യാനും അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു. നിങ്ങളുടെ ഉപകരണത്തിലേക്ക് അയയ്‌ക്കുന്ന സന്ദേശങ്ങൾ നിങ്ങൾക്ക് ദൃശ്യമാക്കാതെ തന്നെ അപ്ലിക്കേഷന് നിരീക്ഷിക്കാനോ ഇല്ലാതാക്കാനോ കഴിയുമെന്നാണ് ഇതിനർത്ഥം."</string>
-    <string name="permlab_receiveEmergencyBroadcast" msgid="1803477660846288089">"അടിയന്തര പ്രക്ഷേപണങ്ങൾ നേടുക"</string>
-    <string name="permdesc_receiveEmergencyBroadcast" msgid="848524070262431974">"അടിയന്തിര പ്രക്ഷേപണ സന്ദേശങ്ങൾ സ്വീകരിക്കുന്നതിനും പ്രോസസ്സുചെയ്യുന്നതിനും അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു. ഈ അനുമതി സി‌സ്‌റ്റം അപ്ലിക്കേഷനുകൾക്ക് മാത്രം ലഭ്യമാണ്."</string>
-    <string name="permlab_readCellBroadcasts" msgid="1598328843619646166">"സെൽ പ്രക്ഷേപണ സന്ദേശങ്ങൾ റീഡുചെയ്യുക"</string>
-    <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"നിങ്ങളുടെ ഉപകരണത്തിൽ ലഭിച്ച സെൽ പ്രക്ഷേപണ സന്ദേശങ്ങൾ റീഡുചെയ്യാൻ അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു. അടിയന്തര സാഹചര്യങ്ങളെക്കുറിച്ച് നിങ്ങൾക്ക് മുന്നറിയിപ്പ് നൽകാനായി ചില ലൊക്കേഷനുകളിൽ നൽകപ്പെടുന്നവയാണ് സെൽ പ്രക്ഷേപണ അലേർട്ടുകൾ. ഒരു അടിയന്തര സെൽ പ്രക്ഷേപണം ലഭിക്കുമ്പോൾ, ക്ഷുദ്രകരമായ അപ്ലിക്കേഷനുകൾ നിങ്ങളുടെ ഉപകരണത്തിന്റെ പ്രകടനമോ പ്രവർത്തനമോ തടസ്സപ്പെടുത്താനിടയുണ്ട്."</string>
     <string name="permlab_sendSms" msgid="5600830612147671529">"SMS സന്ദേശങ്ങൾ അയയ്‌ക്കുക"</string>
     <string name="permdesc_sendSms" msgid="7094729298204937667">"SMS സന്ദേശങ്ങൾ അയയ്‌ക്കാൻ അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു. ഇത് അപ്രതീക്ഷിത നിരക്കുകൾക്കിടയാക്കാം. ക്ഷുദ്രകരമായ അപ്ലിക്കേഷനുകൾ നിങ്ങളുടെ സ്ഥിരീകരണമില്ലാതെ സന്ദേശങ്ങൾ അയയ്‌ക്കുന്നത് പണച്ചെലവിനിടയാക്കാം."</string>
-    <string name="permlab_sendRespondViaMessageRequest" msgid="8713889105305943200">"സന്ദേശം വഴി പ്രതികരിക്കുക ഇവന്റുകൾ അയയ്‌ക്കുക"</string>
-    <string name="permdesc_sendRespondViaMessageRequest" msgid="7107648548468778734">"ഇൻകമിംഗ് കോളുകൾക്കായി സന്ദേശം മുഖേന പ്രതികരിക്കുക ഇവന്റുകൾ കൈകാര്യം ചെയ്യുന്ന മറ്റ് സന്ദേശമയയ്‌ക്കൽ അപ്ലിക്കേഷനുകൾക്ക് അഭ്യർത്ഥനകൾ അയയ്‌ക്കാൻ അപ്ലിക്കേഷനുകളെ അനുവദിക്കുന്നു."</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"നിങ്ങളുടെ വാചക സന്ദേശങ്ങൾ വായിക്കുക (SMS അല്ലെങ്കിൽ MMS)"</string>
     <string name="permdesc_readSms" product="tablet" msgid="2467981548684735522">"നിങ്ങളുടെ ടാബ്‌ലെറ്റിലോ സിം കാർഡിലോ സംഭരിച്ചിരിക്കുന്ന SMS സന്ദേശങ്ങൾ വായിക്കാൻ അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു. ഇത് ഉള്ളടക്കമോ രഹസ്യാത്മകതയോ പരിഗണിക്കാതെ എല്ലാ SMS സന്ദേശങ്ങളും വായിക്കാൻ അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
     <string name="permdesc_readSms" product="tv" msgid="5102425513647038535">"നിങ്ങളുടെ ടിവിയിലോ SIM കാർഡിലോ സംഭരിച്ചിരിക്കുന്ന SMS സന്ദേശങ്ങൾ റീഡുചെയ്യുന്നതിന് അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു. ഉള്ളടക്കമോ രഹസ്യാത്മകതയോ ഇല്ലാത്ത എല്ലാ SMS സന്ദേശങ്ങളും വായിക്കുന്നതിന് ഇത് അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
@@ -323,188 +291,24 @@
     <string name="permdesc_writeSms" product="default" msgid="7268668709052328567">"നിങ്ങളുടെ ഫോണിലോ സിം കാർഡിലോ സംഭരിച്ചിരിക്കുന്ന SMS സന്ദേശങ്ങളിലേക്ക് റൈറ്റുചെയ്യുന്നതിന് അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു. ദോഷകരമായ അപ്ലിക്കേഷനുകൾ നിങ്ങളുടെ സന്ദേശങ്ങളെ ഇല്ലാതാക്കിയേക്കാം."</string>
     <string name="permlab_receiveWapPush" msgid="5991398711936590410">"വാചക സന്ദേശം നേടുക (WAP)"</string>
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"WAP സന്ദേശങ്ങൾ നേടാനും പ്രോസസ്സുചെയ്യാനും അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു. നിങ്ങൾക്ക് അയയ്‌ക്കുന്ന സന്ദേശങ്ങൾ നിങ്ങൾക്ക് ദൃശ്യമാക്കാതെ തന്നെ നിരീക്ഷിക്കാനോ ഇല്ലാതാക്കാനോ ഉള്ള കഴിവ് ഈ അനുമതികളിൽ ഉൾപ്പെടുന്നു."</string>
-    <string name="permlab_receiveBluetoothMap" msgid="7593811487142360528">"ബ്ലൂടൂത്ത് സന്ദേശങ്ങൾ (MAP) സ്വീകരിക്കുക"</string>
-    <string name="permdesc_receiveBluetoothMap" msgid="8656755936919466345">"ബ്ലൂടൂത്ത് MAP സന്ദേശങ്ങൾ സ്വീകരിക്കുന്നതിനും പ്രോസസ്സുചെയ്യുന്നതിനും അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു. ഉപകരണത്തിലേക്ക് അയച്ച സന്ദേശങ്ങൾ നിങ്ങളെ കാണിക്കാതെ തന്നെ നിരീക്ഷിക്കാനോ ഇല്ലാതാക്കാനോ അപ്ലിക്കേഷനാവും."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"പ്രവർത്തിക്കുന്ന അപ്ലിക്കേഷനുകൾ വീണ്ടെടുക്കുക"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"നിലവിലും സമീപകാലത്തും പ്രവർത്തിക്കുന്ന ടാസ്‌ക്കുകളെക്കുറിച്ചുള്ള വവിവരങ്ങൾ വീണ്ടെടുക്കാൻ അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു. ഇത് ഉപകരണത്തിൽ ഉപയോഗിച്ച അപ്ലിക്കേഷനുകളെക്കുറിച്ചുള്ള വിവരം കണ്ടെത്താൻ അപ്ലിക്കേഷനെ അനുവദിക്കാനിടയുണ്ട്."</string>
-    <string name="permlab_startTasksFromRecents" msgid="8990073877885690623">"\'അടുത്തിടെയുള്ളവ\' എന്നതിൽ നിന്ന് ഒരു ടാസ്‌ക് ആരംഭിക്കുക"</string>
-    <string name="permdesc_startTasksFromRecents" msgid="7382133554871222235">"ActivityManager.getRecentTaskList() എന്നതിൽ നിന്ന് ലഭിച്ച ഒരു നിഷ്‌ക്രിയ ടാസ്‌ക് സമാരംഭിക്കുന്നതിനായി ActivityManager.RecentTaskInfo ഒബ്‌ജക്‌റ്റ് ഉപയോഗിക്കുന്നതിന് അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
-    <string name="permlab_interactAcrossUsers" msgid="7114255281944211682">"എല്ലാ ഉപയോക്താക്കളുമായും സംവദിക്കുക"</string>
-    <string name="permdesc_interactAcrossUsers" msgid="364670963623385786">"ഉപകരണത്തിലെ വ്യത്യസ്‌ത ഉപയോക്താക്കളിലുടനീളം പ്രവർത്തനങ്ങൾ നടത്താൻ അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു. ക്ഷുദ്രകരമായ അപ്ലിക്കേഷനുകൾ ഉപയോക്താക്കൾക്കിടയിലുള്ള പരിരക്ഷ ലംഘിക്കാൻ ഇത് ഉപയോഗിക്കാനിടയുണ്ട്."</string>
-    <string name="permlab_interactAcrossUsersFull" msgid="2567734285545074105">"എല്ലാ ഉപയോക്താക്കളുമായും സംവദിക്കാനുള്ള പൂർണ്ണ ലൈസൻസ്"</string>
-    <string name="permdesc_interactAcrossUsersFull" msgid="376841368395502366">"ഉപയോക്താക്കൾക്കിടയിൽ സാധ്യമായ എല്ലാ ഇടപെടലുകളും അനുവദിക്കുന്നു."</string>
-    <string name="permlab_manageUsers" msgid="1676150911672282428">"ഉപയോക്താക്കളെ നിയന്ത്രിക്കുക"</string>
-    <string name="permdesc_manageUsers" msgid="8409306667645355638">"അന്വേഷണവും സൃഷ്‌ടിക്കലും ഇല്ലാതാക്കലും ഉൾപ്പെടെ ഉപകരണത്തിലെ ഉപയോക്താക്കളെ നിയന്ത്രിക്കാൻ അപ്ലിക്കേഷനുകളെ അനുവദിക്കുന്നു."</string>
-    <string name="permlab_getDetailedTasks" msgid="6229468674753529501">"പ്രവർത്തിക്കുന്ന അപ്ലിക്കേഷനുകളുടെ വിശദാംശങ്ങൾ വീണ്ടെടുക്കുക"</string>
-    <string name="permdesc_getDetailedTasks" msgid="153824741440717599">"നിലവിലും സമീപകാലത്തും പ്രവർത്തിക്കുന്ന ടാസ്‌ക്കുകളെക്കുറിച്ചുള്ള വിശദവിവരങ്ങൾ വീണ്ടെടുക്കാൻ അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു. ക്ഷുദ്രകരമായ അപ്ലിക്കേഷനുകൾ മറ്റ് അപ്ലിക്കേഷനുകളെക്കുറിച്ചുള്ള സ്വകാര്യ വിവരം കണ്ടെത്താനിടയുണ്ട്."</string>
     <string name="permlab_reorderTasks" msgid="2018575526934422779">"പ്രവർത്തിക്കുന്ന അപ്ലിക്കേഷനുകൾ പുനഃക്രമീകരിക്കുക"</string>
     <string name="permdesc_reorderTasks" msgid="7734217754877439351">"ടാസ്‌ക്കുകളെ മുന്നിലേക്കോ പശ്ചാത്തലത്തിലേക്കോ നീക്കാൻ അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു. ഇത് അപ്ലിക്കേഷൻ നിങ്ങളുടെ ഇടപെടലില്ലാതെ ചെയ്യാനിടയുണ്ട്."</string>
-    <string name="permlab_removeTasks" msgid="6821513401870377403">"പ്രവർത്തിക്കുന്ന അപ്ലിക്കേഷനുകൾ നിർത്തുക"</string>
-    <string name="permdesc_removeTasks" msgid="1394714352062635493">"ടാസ്‌ക്കുകൾ നീക്കംചെയ്യാനും അവയുടെ അപ്ലിക്കേഷനെ ഇല്ലാതാക്കാനും അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു. ക്ഷുദ്രകരമായ അപ്ലിക്കേഷനുകൾ മറ്റ് അപ്ലിക്കേഷനുകളുടെ പ്രവർത്തനരീതിയെ തടസ്സപ്പെടുത്താം."</string>
-    <string name="permlab_manageActivityStacks" msgid="7391191384027303065">"പ്രവർത്തന ശേഖരങ്ങൾ നിയന്ത്രിക്കുക"</string>
-    <string name="permdesc_manageActivityStacks" msgid="1615881933034084440">"പ്രവർത്തിക്കുന്ന മറ്റ് അപ്ലിക്കേഷനുകളിലെ പ്രവർത്തന ശേഖരങ്ങൾ ചേർക്കാനും നീക്കംചെയ്യാനും പരിഷ്ക്കരിക്കാനും അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു. ക്ഷുദ്രകരമായ അപ്ലിക്കേഷനുകൾ മറ്റ് അപ്ലിക്കേഷനുകളുടെ പ്രവർത്തനരീതിയെ തടസ്സപ്പെടുത്താം."</string>
-    <string name="permlab_startAnyActivity" msgid="2918768238045206456">"ഏതെങ്കിലും പ്രവർത്തനം ആരംഭിക്കുക"</string>
-    <string name="permdesc_startAnyActivity" msgid="997823695343584001">"അനുമതി പരിരക്ഷയോ എക്‌സ്‌പോർട്ടുചെയ്‌ത നിലയോ പരിഗണിക്കാതെ തന്നെ, ഏതൊരു പ്രവർത്തനവും ആരംഭിക്കാൻ അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
-    <string name="permlab_setScreenCompatibility" msgid="6975387118861842061">"സ്‌ക്രീൻ അനുയോജ്യത മാറ്റുക"</string>
-    <string name="permdesc_setScreenCompatibility" msgid="692043618693917374">"മറ്റ് അപ്ലിക്കേഷനുകളുടെ സ്‌ക്രീൻ അനുയോജ്യതാ മോഡ് നിയന്ത്രിക്കാൻ അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു. ക്ഷുദ്രകരമായ അപ്ലിക്കേഷനുകൾ മറ്റ് അപ്ലിക്കേഷനുകളുടെ പ്രവർത്തനരീതി വ്യത്യാസപ്പെടുത്താനിടയുണ്ട്."</string>
-    <string name="permlab_setDebugApp" msgid="3022107198686584052">"അപ്ലിക്കേഷൻ ഡീബഗ്ഗുചെയ്യൽ പ്രവർത്തക്ഷമമാക്കുക"</string>
-    <string name="permdesc_setDebugApp" msgid="4474512416299013256">"മറ്റൊരു അപ്ലിക്കേഷനായി ഡീബഗുചെയ്യൽ പ്രവർത്തിപ്പിക്കാൻ അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു. ക്ഷുദ്രകരമായ അപ്ലിക്കേഷനുകൾ മറ്റ് അപ്ലിക്കേഷനുകളെ ഇല്ലാതാക്കാൻ ഇത് ഉപയോഗിക്കാനിടയുണ്ട്."</string>
-    <string name="permlab_changeConfiguration" msgid="4162092185124234480">"സിസ്റ്റം ഡിസ്‌പ്ലെ ക്രമീകരണങ്ങൾ മാറ്റുക"</string>
-    <string name="permdesc_changeConfiguration" msgid="4372223873154296076">"ഭാഷയോ മൊത്തത്തിലുള്ള ഫോണ്ട് വലുപ്പമോ പോലുള്ള നിലവിലെ കോൺഫിഗറേഷൻ മാറ്റാൻ അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
     <string name="permlab_enableCarMode" msgid="5684504058192921098">"കാർ മോഡ് പ്രവർത്തനക്ഷമമാക്കുക"</string>
     <string name="permdesc_enableCarMode" msgid="4853187425751419467">"കാർ മോഡ് പ്രവർത്തനക്ഷമമാക്കുന്നതിന് അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
     <string name="permlab_killBackgroundProcesses" msgid="3914026687420177202">"മറ്റ് അപ്ലിക്കേഷനുകൾ അടയ്‌ക്കുക"</string>
     <string name="permdesc_killBackgroundProcesses" msgid="4593353235959733119">"മറ്റ് അപ്ലിക്കേഷനുകളുടെ പശ്ചാത്തല പ്രോസസ്സുകൾ അവസാനിപ്പിക്കാൻ അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു. ഇത് മറ്റ് അപ്ലിക്കേഷനുകൾ പ്രവർത്തനം നിർത്താനിടയാക്കാം."</string>
-    <string name="permlab_forceStopPackages" msgid="2329627428832067700">"മറ്റ് അപ്ലിക്കേഷനുകൾ നിർത്തുന്നതിന് നിർബന്ധിക്കുക"</string>
-    <string name="permdesc_forceStopPackages" msgid="5253157296183940812">"മറ്റ് അപ്ലിക്കേഷനുകളെ നിർബന്ധിതമായി നിർത്തുന്നതിന് അപ്ലിക്കേഷനെ അനുവദിക്കുക."</string>
-    <string name="permlab_forceBack" msgid="652935204072584616">"അപ്ലിക്കേഷൻ അടയ്ക്കുന്നതിന് നിർബന്ധിക്കുക"</string>
-    <string name="permdesc_forceBack" msgid="3892295830419513623">"നിലവിൽ നടക്കുന്ന ഏതൊരു പ്രവർത്തനത്തെയും അടയ്ക്കുന്നതിനും തിരികെ മടങ്ങുന്നതിനും ആവശ്യപ്പെടുന്നതിന് അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു. സാധാരണ അപ്ലിക്കേഷനുകൾക്ക് ഒരിക്കലും ആവശ്യമില്ല."</string>
-    <string name="permlab_dump" msgid="1681799862438954752">"സിസ്റ്റം ആന്തരിക നില വീണ്ടെടുക്കുക"</string>
-    <string name="permdesc_dump" msgid="1778299088692290329">"സിസ്‌റ്റത്തിന്റെ ആന്തരിക നില വീണ്ടെടുക്കുന്നതിന് അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു. സാധാരണയായി ഒരിക്കലും ആവശ്യമില്ലാത്ത വ്യത്യസ്‌തമായ സ്വകാര്യവും സുരക്ഷിതവുമായ വിവരം ദോഷകരമായ അപ്ലിക്കേഷനുകൾ വീണ്ടെടുത്തേക്കാം."</string>
-    <string name="permlab_retrieve_window_content" msgid="8022588608994589938">"സ്‌ക്രീൻ ഉള്ളടക്കം വീണ്ടെടുക്കുക"</string>
-    <string name="permdesc_retrieve_window_content" msgid="3193269069469700265">"സജീവ വിൻഡോയുടെ ഉള്ളടക്കം വീണ്ടെടുക്കുന്നതിന് അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു. ദോഷകരമായ അപ്ലിക്കേഷനുകൾ, മൊത്തം വിൻഡോ ഉള്ളടക്കത്തേയും വീണ്ടെടുക്കുകയും പാസ്‌വേഡുകൾ ഒഴികെയുള്ള അതിന്റെ എല്ലാ ടെക്‌സ്റ്റും പരിശോധിക്കുകയും ചെയ്‌തേക്കാം."</string>
-    <string name="permlab_temporary_enable_accessibility" msgid="2312612135127310254">"പ്രവേശനക്ഷമത താൽക്കാലികമായി പ്രവർത്തനരഹിതമാക്കുക"</string>
-    <string name="permdesc_temporary_enable_accessibility" msgid="8079456293182975464">"ഉപകരണത്തിലെ പ്രവേശനക്ഷമതാ താൽക്കാലികമായി പ്രവർത്തനക്ഷമമാക്കാൻ ഒരു അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു. ക്ഷുദ്രകരമായ അപ്ലിക്കേഷനുകൾ ഉപയോക്താവിന്റെ സമ്മതമില്ലാതെ പ്രവേശനക്ഷമത പ്രവർത്തനക്ഷമമാക്കാനിടയുണ്ട്."</string>
-    <string name="permlab_retrieveWindowToken" msgid="7154762602367758602">"വിൻഡോ ടോക്കൺ വീണ്ടെടുക്കുക"</string>
-    <string name="permdesc_retrieveWindowToken" msgid="668173747687795074">"വിൻഡോ ടോക്കൺ വീണ്ടെടുക്കുന്നതിന് അപ്ലിക്കേഷൻ അനുവദിക്കുന്നു. ദോഷകരമായ അപ്ലിക്കേഷനുകൾ, സിസ്‌റ്റത്തെ അനുകരിക്കുന്നതിന് അപ്ലിക്കേഷൻ വിൻഡോയോടൊപ്പം അംഗീകാരമില്ലാത്ത ഇടപെടൽ നടത്തിയേക്കാം."</string>
-    <string name="permlab_frameStats" msgid="7056374987314361639">"ഫ്രെയിം സ്ഥിതിവിവരക്കണക്കുകൾ വീണ്ടെടുക്കുക"</string>
-    <string name="permdesc_frameStats" msgid="4758001089491284919">"ഫ്രെയിം സ്ഥിതിവിവരക്കണക്കുകൾ ശേഖരിക്കുന്നതിന് അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു. ദോഷകരമായ അപ്ലിക്കേഷനുകൾ മറ്റ് അപ്ലിക്കേഷനുകളിൽ നിന്ന് windows-ന്റെ ഫ്രെയിം സ്ഥിതിവിവരക്കണക്കുകൾ നിരീക്ഷിച്ചേക്കാം."</string>
-    <string name="permlab_filter_events" msgid="8675535648807427389">"ഇവന്റുകൾ ഫിൽട്ടർ ചെയ്യുക"</string>
-    <string name="permdesc_filter_events" msgid="8006236315888347680">"എല്ലാ ഉപയോക്തൃ ഇവന്റുകളുടേയും സ്‌ട്രീം അയയ്‌ക്കുന്നതിന് മുമ്പായി ഫിൽട്ടർ ചെയ്യുന്ന ഒരു ഇൻപുട്ട് ഫിൽട്ടർ രജിസ്റ്റർ ചെയ്യാൻ അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു. ക്ഷുദ്രകരമായ അപ്ലിക്കേഷനുകൾ ഉപയോക്തൃ ഇടപെടലില്ലാതെ സിസ്റ്റം UI നിയന്ത്രിക്കാനിടയുണ്ട്."</string>
-    <string name="permlab_shutdown" msgid="7185747824038909016">"ഭാഗികമായി ഷട്ട്ഡൗൺ ചെയ്യുക"</string>
-    <string name="permdesc_shutdown" msgid="7046500838746291775">"പ്രവർത്തന മാനേജറിനെ ഷട്ട്ഡൗൺ നിലയിലാക്കുക. പൂർണ്ണമായ ഷട്ട്ഡൗൺ നടപ്പിലാക്കില്ല"</string>
-    <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"അപ്ലിക്കേഷൻ മാറ്റങ്ങൾ തടയുക"</string>
-    <string name="permdesc_stopAppSwitches" msgid="8262195802582255021">"മറ്റ് അപ്ലിക്കേഷനിലേക്ക് മാറുന്നതിൽ നിന്ന് ഉപയോക്താവിനെ തടയുന്നു."</string>
-    <string name="permlab_getTopActivityInfo" msgid="2537922311411546016">"നിലവിലെ അപ്ലിക്കേഷൻ വിവരം നേടുക"</string>
-    <string name="permdesc_getTopActivityInfo" msgid="2512448855496067131">"സ്‌ക്രീനിന്റെ ഫോർഗ്രൗണ്ടിലെ നിലവിലെ അപ്ലിക്കേഷനെക്കുറിച്ചുള്ള സ്വകാര്യ വിവരങ്ങൾ വീണ്ടെടുക്കാൻ ഹോൾഡറിനെ അനുവദിക്കുന്നു."</string>
-    <string name="permlab_runSetActivityWatcher" msgid="892239094867182656">"എല്ലാ അപ്ലിക്കേഷൻ സമാരംഭിക്കലുകളും നിരീക്ഷിക്കുകയും നിയന്ത്രിക്കുകയും ചെയ്യുക"</string>
-    <string name="permdesc_runSetActivityWatcher" msgid="6003603162578577406">"സിസ്‌റ്റം പ്രവർത്തനങ്ങൾ ആരംഭിക്കുന്നതിനെ നിരീക്ഷിക്കുന്നതിനും നിയന്ത്രിക്കുന്നതിനും അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു. ദോഷകരമായ അപ്ലിക്കേഷനുകൾ സിസ്‌റ്റത്തെ പൂർണ്ണമായും അപഹരിച്ചേക്കാം. സാധാരണ ഉപയോഗത്തിനല്ലാതെ ഈ അനുമതി വികസനങ്ങൾക്ക് മാത്രമാണ് ആവശ്യം."</string>
-    <string name="permlab_broadcastPackageRemoved" msgid="2576333434893532475">"പാക്കേജ് നീക്കംചെയ്‌ത പ്രക്ഷേപണം അയ‌യ്‌ക്കുക"</string>
-    <string name="permdesc_broadcastPackageRemoved" msgid="6621901216207931089">"ഒരു അപ്ലിക്കേഷൻ പാക്കേജ് നീക്കംചെയ്‌തുവെന്ന അറിയിപ്പ് പ്രക്ഷേപണം ചെയ്യുന്നതിന് അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു. പ്രവർത്തിക്കുന്ന മറ്റ് അപ്ലിക്കേഷനെ നശിപ്പിക്കുന്നതിന് ദോഷകരമായ അപ്ലിക്കേഷനുകൾ ഇത് ഉപയോഗിച്ചേക്കാം."</string>
-    <string name="permlab_broadcastSmsReceived" msgid="5689095009030336593">"സന്ദേശം ലഭിച്ച പ്രക്ഷേപണം അയ‌യ്‌ക്കുക"</string>
-    <string name="permdesc_broadcastSmsReceived" msgid="4152037720034365492">"ഒരു SMS സന്ദേശം ലഭിച്ചുവെന്ന അറിയിപ്പ് പ്രക്ഷേപണം ചെയ്യുന്നതിന് അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു. ഇൻകമിംഗ് SMS സന്ദേശങ്ങൾ തെറ്റായ ആവശ്യത്തിനായി പകർപ്പെടുക്കുന്നതിന് ദോഷകരമായ അപ്ലിക്കേഷനുകൾ ഇത് ഉപയോഗിച്ചേക്കാം."</string>
-    <string name="permlab_broadcastWapPush" msgid="3145347413028582371">"WAP-PUSH ലഭിച്ച പ്രക്ഷേപണം അയ‌യ്‌ക്കുക"</string>
-    <string name="permdesc_broadcastWapPush" msgid="4783402525039442729">"ഒരു WAP പുഷ് സന്ദേശം ലഭിച്ചുവെന്ന അറിയിപ്പ് പ്രക്ഷേപണം ചെയ്യുന്നതിന് അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു. MMS സന്ദേശ രസീതുകൾ തെറ്റായ ആവശ്യത്തിനായി പകർപ്പെടുക്കുന്നതിന് ദോഷകരമായ വകഭേദങ്ങൾ ഉപയോഗിച്ച് ഏതെങ്കിലും വെബ്പേജിന്റെ ഉള്ളടക്കം മാറ്റിസ്ഥാപിക്കുന്നതിനോ ദോഷകരമായ അപ്ലിക്കേഷനുകൾ ഇത് ഉപയോഗിച്ചേക്കാം."</string>
-    <string name="permlab_setProcessLimit" msgid="2451873664363662666">"പ്രവർത്തിക്കുന്ന പ്രോസസ്സുകളുടെ എണ്ണം പരിമിതപ്പെടുത്തുക"</string>
-    <string name="permdesc_setProcessLimit" msgid="7318061314040879542">"പ്രവർത്തിക്കുന്നതിനുള്ള പ്രോസസ്സുകളുടെ പരമാവധി എണ്ണത്തെ നിയന്ത്രിക്കുന്നതിന് അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു. സാധാരണ അപ്ലിക്കേഷനുകൾക്ക് ഒരിക്കലും ആവശ്യമില്ല."</string>
-    <string name="permlab_setAlwaysFinish" msgid="550958507798796965">"പശ്ചാത്തല അപ്ലിക്കേഷനുകൾ അടയ്‌ക്കാൻ നിർബന്ധിതമാക്കുക"</string>
-    <string name="permdesc_setAlwaysFinish" msgid="7471310652868841499">"പശ്ചാത്തലത്തിലേക്ക് പോകുമ്പോഴെല്ലാം പ്രവർത്തനങ്ങൾ പൂർത്തിയായി എന്നത് നിയന്ത്രിക്കുന്നതിന് അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു. സാധാരണ അപ്ലിക്കേഷനുകൾക്ക് ഒരിക്കലും ആവശ്യമില്ല."</string>
-    <string name="permlab_batteryStats" msgid="2789610673514103364">"ബാറ്ററി സ്ഥിതിവിവരക്കണക്ക് റീഡുചെയ്യുക"</string>
-    <string name="permdesc_batteryStats" msgid="5897346582882915114">"നിലവിലെ കുറഞ്ഞ നിലയിലുള്ള ബാറ്ററി ഉപയോഗ ഡാറ്റ റീഡുചെയ്യാൻ ഒരു അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു. നിങ്ങൾ ഉപയോഗിക്കുന്ന അപ്ലിക്കേഷനുകളെക്കുറിച്ചുള്ള വിശദമായ വിവരങ്ങൾ കണ്ടെത്താൻ അപ്ലിക്കേഷനെ അനുവദിച്ചേക്കാം."</string>
-    <string name="permlab_updateBatteryStats" msgid="3719689764536379557">"ബാറ്ററി സ്ഥിതിവിവരക്കണക്കുകൾ പരിഷ്‌ക്കരിക്കുക"</string>
-    <string name="permdesc_updateBatteryStats" msgid="6862817857178025002">"ശേഖരിച്ച ബാറ്ററി സ്ഥിതിവിവരക്കണക്കുകൾ പരിഷ്ക്കരിക്കാൻ അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു. സാധാരണ അപ്ലിക്കേഷനുകളുടെ ഉപയോഗത്തിനുള്ളതല്ല."</string>
-    <string name="permlab_getAppOpsStats" msgid="1508779687436585744">"അപ്ലിക്കേഷൻ ops സ്ഥിതിവിവരക്കണക്കുകൾ വീണ്ടെടുക്കുക"</string>
-    <string name="permdesc_getAppOpsStats" msgid="6243887041577912877">"ശേഖരിച്ച അപ്ലിക്കേഷൻ പ്രവർത്തന സ്ഥിതിവിവരക്കണക്കുകൾ വീണ്ടെടുക്കാൻ അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു. സാധാരണ അപ്ലിക്കേഷനുകളുടെ ഉപയോഗത്തിനുള്ളതല്ല."</string>
-    <string name="permlab_updateAppOpsStats" msgid="8829097373851521505">"അപ്ലിക്കേഷൻ ops സ്ഥിതിവിവരക്കണക്കുകൾ പരിഷ്‌ക്കരിക്കുക"</string>
-    <string name="permdesc_updateAppOpsStats" msgid="50784596594403483">"ശേഖരിച്ച അപ്ലിക്കേഷൻ പ്രവർത്തന സ്ഥിതിവിവരക്കണക്കുകൾ പരിഷ്‌ക്കരിക്കാൻ അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു. സാധാരണ അപ്ലിക്കേഷനുകളുടെ ഉപയോഗത്തിനുള്ളതല്ല."</string>
-    <string name="permlab_backup" msgid="470013022865453920">"സിസ്റ്റം ബാക്കപ്പും പുനഃസ്ഥാപിക്കലും നിയന്ത്രിക്കുക"</string>
-    <string name="permdesc_backup" msgid="6912230525140589891">"സിസ്‌റ്റത്തിന്റെ ബാക്കപ്പും പുനഃസ്ഥാപിക്കൽ മെക്കാനിസവും നിയന്ത്രിക്കുന്നതിന് അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു. സാധാരണ അപ്ലിക്കേഷനുകളുടെ ഉപയോഗത്തിനല്ല."</string>
-    <string name="permlab_confirm_full_backup" msgid="5557071325804469102">"പൂർണ്ണമായ ബാക്കപ്പോ പുനഃസ്ഥാപിക്കൽ പ്രവർത്തനമോ സ്ഥിരീകരിക്കുക"</string>
-    <string name="permdesc_confirm_full_backup" msgid="1748762171637699562">"പൂർണ്ണ ബാക്കപ്പ് സ്ഥിരീകരണ UI സമാരംഭിക്കുന്നതിന് അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു. ഒരു അപ്ലിക്കേഷനും ഉപയോഗിക്കേണ്ടതില്ല."</string>
-    <string name="permlab_internalSystemWindow" msgid="2148563628140193231">"അംഗീകൃതമല്ലാത്ത വിൻഡോകൾ പ്രദർശിപ്പിക്കുക"</string>
-    <string name="permdesc_internalSystemWindow" msgid="7458387759461466397">"ആന്തരിക സിസ്റ്റം ഉപയോക്തൃ ഇന്റർഫേസിന് ഉപയോഗിക്കാനുള്ള വിൻഡോകൾ സൃഷ്‌ടിക്കാൻ അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു. സാധാരണ അപ്ലിക്കേഷനുകളുടെ ഉപയോഗത്തിനുള്ളതല്ല."</string>
     <string name="permlab_systemAlertWindow" msgid="3543347980839518613">"മറ്റ് അപ്ലിക്കേഷനുകളിൽ ഇഴയ്‌ക്കുക"</string>
     <string name="permdesc_systemAlertWindow" msgid="8584678381972820118">"മറ്റ് അപ്ലിക്കേഷനുകളുടെ മുകൾഭാഗത്തോ ഉപയോക്തൃ ഇന്റർഫേസിന്റെ ഭാഗങ്ങളിലോ ഇഴയ്‌ക്കാൻ അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു. ഏതൊരു അപ്ലിക്കേഷനിലെയും നിങ്ങളുടെ ഇന്റർഫേസ് ഉപയോഗത്തെ തടസ്സപ്പെടുത്തുകയോ മറ്റ് അപ്ലിക്കേഷനുകളിൽ നിങ്ങൾ കാണുന്നത് മാറ്റുകയോ ചെയ്യാം."</string>
-    <string name="permlab_setAnimationScale" msgid="2805103241153907174">"ആഗോള ആനിമേഷൻ വേഗത പരിഷ്‌ക്കരിക്കുക"</string>
-    <string name="permdesc_setAnimationScale" msgid="7690063428924343571">"ഏതുസമയത്തും ആഗോള ആനിമേഷൻ വേഗത (വേഗമേറിയതോ വേഗത കുറഞ്ഞതോ ആയ ആനിമേഷനുകൾ) മാറ്റാൻ അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
-    <string name="permlab_manageAppTokens" msgid="1286505717050121370">"അപ്ലിക്കേഷൻ ടോക്കണുകൾ നിയന്ത്രിക്കുക"</string>
-    <string name="permdesc_manageAppTokens" msgid="8043431713014395671">"അപ്ലിക്കേഷന്റെ ടോക്കണുകൾ സൃഷ്‌ടിക്കുന്നതിനും നിയന്ത്രിക്കുന്നതിനും അവയുടെ സാധാരണ Z-ഓർഡറിംഗ് ഒഴിവാക്കുന്നതിനും അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു. സാധാരണ അപ്ലിക്കേഷനുകൾക്ക് ഒരിക്കലും ആവശ്യമില്ല."</string>
-    <string name="permlab_freezeScreen" msgid="4708181184441880175">"സ്‌ക്രീൻ നിശ്ചലമാക്കുക"</string>
-    <string name="permdesc_freezeScreen" msgid="8558923789222670064">"ഒരു പൂർണ്ണസ്‌ക്രീൻ സംക്രമണത്തിനായി സ്‌ക്രീൻ താൽക്കാലികമായി നിശ്ചലമാക്കാൻ അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
-    <string name="permlab_injectEvents" msgid="1378746584023586600">"കീകളും നിയന്ത്രണ ബട്ടണുകളും അമർത്തുക"</string>
-    <string name="permdesc_injectEvents" product="tablet" msgid="206352565599968632">"മറ്റ് അപ്ലിക്കേഷനുകളിലേക്കുള്ള അപ്ലിക്കേഷന്റെ തന്നെ ഇൻപുട്ട് ഇവന്റുകൾ (കീ അമർത്തലുകൾ, തുടങ്ങിയവ) അവ അനുവദിക്കുന്നു. ടാബ്‌ലെറ്റിനെ നിയന്ത്രിക്കുന്നതിന് ദോഷകരമായ അപ്ലിക്കേഷനുകൾ ഇത് ഉപയോഗിച്ചേക്കാം."</string>
-    <string name="permdesc_injectEvents" product="tv" msgid="4681361983270791611">"മറ്റ് അപ്ലിക്കേഷനുകളിലേക്കുള്ള അപ്ലിക്കേഷന്റെ തന്നെ ഇൻപുട്ട് ഇവന്റുകൾ (കീ അമർത്തലുകൾ, തുടങ്ങിയവ) അവ അനുവദിക്കുന്നു. ടിവിയെ നിയന്ത്രിക്കുന്നതിന് ദോഷകരമായ അപ്ലിക്കേഷനുകൾ ഇത് ഉപയോഗിച്ചേക്കാം."</string>
-    <string name="permdesc_injectEvents" product="default" msgid="653128057572326253">"മറ്റ് അപ്ലിക്കേഷനുകളിലേക്കുള്ള അപ്ലിക്കേഷന്റെ തന്നെ ഇൻപുട്ട് ഇവന്റുകൾ (കീ അമർത്തലുകൾ, തുടങ്ങിയവ) അവ അനുവദിക്കുന്നു. ഫോണിനെ നിയന്ത്രിക്കുന്നതിന് ദോഷകരമായ അപ്ലിക്കേഷനുകൾ ഇത് ഉപയോഗിച്ചേക്കാം."</string>
-    <string name="permlab_readInputState" msgid="469428900041249234">"നിങ്ങൾ ടൈപ്പുചെയ്യുന്നതും നടത്തുന്ന പ്രവർത്തനങ്ങളും റെക്കോർഡുചെയ്യുക"</string>
-    <string name="permdesc_readInputState" msgid="8387754901688728043">"മറ്റ് അപ്ലിക്കേഷനുമായി ഇടപെടുമ്പോഴും (പാസ്‌വേഡ് ടൈപ്പുചെയ്യുന്നത് പോലുള്ളവ) നിങ്ങൾ അമർത്തുന്ന കീകൾ നിരീക്ഷിക്കുന്നതിന് അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു. സാധാരണ അപ്ലിക്കേഷനുകൾക്ക് ഒരിക്കലും ആവശ്യമില്ല."</string>
-    <string name="permlab_bindInputMethod" msgid="3360064620230515776">"ഒരു ടൈപ്പുചെയ്യൽ രീതിയിലേക്ക് ബന്ധപ്പെടുത്തുക"</string>
-    <string name="permdesc_bindInputMethod" msgid="3250440322807286331">"ഒരു ടൈപ്പുചെയ്യൽ രീതിയുടെ ഉയർന്ന നിലയിലുള്ള ഇന്റർഫേസുമായി ബന്ധിപ്പിക്കാൻ ദാതാവിനെ അനുവദിക്കുന്നു. സാധാരണ അപ്ലിക്കേഷനുകൾക്ക് ഒരിക്കലും ആവശ്യമില്ല."</string>
-    <string name="permlab_bindAccessibilityService" msgid="5357733942556031593">"ഒരു പ്രവേശനക്ഷമതാ സേവനത്തിലേക്ക് ബന്ധിപ്പിക്കുക"</string>
-    <string name="permdesc_bindAccessibilityService" msgid="7034615928609331368">"ഒരു പ്രവേശനക്ഷമതാ സേവനത്തിന്റെ ഉയർന്ന നിലയിലുള്ള ഇന്റർഫേസുമായി ബന്ധിപ്പിക്കാൻ ഒരു ദാതാവിനെ അനുവദിക്കുന്നു. സാധാരണ അപ്ലിക്കേഷനുകൾക്ക് ഒരിക്കലും ആവശ്യമില്ല."</string>
-    <string name="permlab_bindPrintService" msgid="8462815179572748761">"ഒരു പ്രിന്റ് സേവനവുമായി ബന്ധിപ്പിക്കുക"</string>
-    <string name="permdesc_bindPrintService" msgid="7960067623209111135">"ഒരു പ്രിന്റ് സേവനത്തിന്റെ ഉയർന്ന നിലയിലുള്ള ഇന്റർഫേസിലേക്ക് ബന്ധിപ്പിക്കാൻ ഹോൾഡറിനെ അനുവദിക്കുന്നു. സാധാരണ അപ്ലിക്കേഷനുകൾക്ക് ഒരിക്കലും ആവശ്യമില്ല."</string>
-    <string name="permlab_bindPrintSpoolerService" msgid="6807762783744125954">"ഒരു പ്രിന്റ് സ്‌പൂളർ സേവനവുമായി ബന്ധിപ്പിക്കുക"</string>
-    <string name="permdesc_bindPrintSpoolerService" msgid="3680552285933318372">"ഒരു പ്രിന്റ് സ്‌പൂളർ സേവനത്തിന്റെ ഉയർന്ന നിലയിലുള്ള ഇന്റർഫേസിലേക്ക് ബന്ധിപ്പിക്കാൻ ഹോൾഡറിനെ അനുവദിക്കുന്നു. സാധാരണ അപ്ലിക്കേഷനുകൾക്ക് ഒരിക്കലും ആവശ്യമില്ല."</string>
-    <string name="permlab_bindNfcService" msgid="2752731300419410724">"NFC സേവനവുമായി ബന്ധിപ്പിക്കുക"</string>
-    <string name="permdesc_bindNfcService" msgid="6120647629174066862">"NFC കാർഡുകളെ അനുകരിക്കുന്ന അപ്ലിക്കേഷനുകളിലേക്ക് ബന്ധിപ്പിക്കാൻ ഹോൾഡറിനെ അനുവദിക്കുന്നു. സാധാരണ അപ്ലിക്കേഷനുകൾക്ക് ഒരിക്കലും ആവശ്യമില്ല."</string>
-    <string name="permlab_bindTextService" msgid="7358378401915287938">"ഒരു ടെസ്‌റ്റ് സേവനവുമായി ബന്ധിപ്പിക്കുക"</string>
-    <string name="permdesc_bindTextService" msgid="8151968910973998670">"ഒരു ടെക്‌സ്റ്റ് സേവനത്തിന്റെ ഉയർന്ന നിലയിലുള്ള ഇന്റർഫേസിലേക്ക് ബന്ധിപ്പിക്കാൻ ഹോൾഡറിനെ അനുവദിക്കുന്നു (ഉദാ. SpellCheckerService). സാധാരണ അപ്ലിക്കേഷനുകൾക്ക് ഒരിക്കലും ആവശ്യമില്ല."</string>
-    <string name="permlab_bindVpnService" msgid="4708596021161473255">"ഒരു VPN സേവനവുമായി ബന്ധിപ്പിക്കുക"</string>
-    <string name="permdesc_bindVpnService" msgid="2067845564581693905">"ഒരു Vpn സേവനത്തിന്റെ ഉയർന്ന നിലയിലുള്ള ഇന്റർഫേസിലേക്ക് ബന്ധിപ്പിക്കാൻ ദാതാവിനെ അനുവദിക്കുന്നു. സാധാരണ അപ്ലിക്കേഷനുകൾക്ക് ഒരിക്കലും ആവശ്യമില്ല."</string>
-    <string name="permlab_bindWallpaper" msgid="8716400279937856462">"ഒരു വാൾപേപ്പറുമായി ബന്ധിപ്പിക്കുക"</string>
-    <string name="permdesc_bindWallpaper" msgid="7108428692595491668">"ഒരു വാൾപേപ്പറിന്റെ ഉയർന്ന നിലയിലുള്ള ഇന്റർഫേസിലേക്ക് ബന്ധിപ്പിക്കാൻ ഹോൾഡറിനെ അനുവദിക്കുന്നു. സാധാരണ അപ്ലിക്കേഷനുകൾക്ക് ഒരിക്കലും ആവശ്യമില്ല."</string>
-    <string name="permlab_bindVoiceInteraction" msgid="5334852580713715068">"വോയ്‌സ് ഇന്ററാക്‌റ്ററുമായി ബന്ധിപ്പിക്കുക"</string>
-    <string name="permdesc_bindVoiceInteraction" msgid="2345721766501778101">"ഒരു വോയ്‌സ് ഇടപെടൽ സേവനത്തിന്റെ ഉയർന്ന നിലയിലുള്ള ഇന്റർഫേസിലേക്ക് ബന്ധിപ്പിക്കാൻ ദാതവിനെ അനുവദിക്കുന്നു. സാധാരണ അപ്ലിക്കേഷനുകൾക്ക് ഒരിക്കലും ആവശ്യമില്ല."</string>
-    <string name="permlab_manageVoiceKeyphrases" msgid="1252285102392793548">"വോയ്‌സ് കീഫ്രെയ്‌സുകൾ നിയന്ത്രിക്കുക"</string>
-    <string name="permdesc_manageVoiceKeyphrases" msgid="8476560722907530008">"വോയ്‌സ് ഹോട്ട്‌വേഡ് കണ്ടെത്തലിനായുള്ള കീഫ്രെയ്‌സുകൾ നിയന്ത്രിക്കാൻ ഉടമയെ അനുവദിക്കുന്നു. സാധാരണ അപ്ലിക്കേഷനുകൾക്കായി ഒരിക്കലും ആവശ്യമില്ല."</string>
-    <string name="permlab_bindRemoteDisplay" msgid="1782923938029941960">"ഒരു വിദൂര ഡിസ്‌പ്ലേയുമായി ബന്ധിപ്പിക്കുക"</string>
-    <string name="permdesc_bindRemoteDisplay" msgid="1261242718727295981">"ഒരു വിദൂര ഡിസ്‌പ്ലേയുടെ ഉയർന്ന നിലയിലുള്ള ഇന്റർഫേസിലേക്ക് ബന്ധിപ്പിക്കാൻ ഹോൾഡറിനെ അനുവദിക്കുന്നു. സാധാരണ അപ്ലിക്കേഷനുകൾക്ക് ഒരിക്കലും ആവശ്യമില്ല."</string>
-    <string name="permlab_bindRemoteViews" msgid="5697987759897367099">"ഒരു വിജറ്റ് സേവനവുമായി ബന്ധിപ്പിക്കുക"</string>
-    <string name="permdesc_bindRemoteViews" msgid="4717987810137692572">"ഒരു വിജറ്റ് സേവനത്തിന്റെ ഉയർന്ന നിലയിലുള്ള ഇന്റർഫേസിലേക്ക് ബന്ധിപ്പിക്കാൻ ഹോൾഡറിനെ അനുവദിക്കുന്നു. സാധാരണ അപ്ലിക്കേഷനുകൾക്ക് ഒരിക്കലും ആവശ്യമില്ല."</string>
-    <string name="permlab_bindRouteProvider" msgid="4869394607915096847">"റൂട്ട് പ്രൊവൈഡർ സേവനവുമായി ബന്ധിപ്പിക്കുക"</string>
-    <string name="permdesc_bindRouteProvider" msgid="4703804520859960329">"ഏതെങ്കിലും രജിസ്‌റ്റർചെയ്‌ത റൂട്ട് ദാതാക്കളുമായി ബന്ധിപ്പിക്കാൻ ഹോൾഡറിനെ അനുവദിക്കുന്നു. സാധാരണ അപ്ലിക്കേഷനുകൾക്ക് ഒരിക്കലും ആവശ്യമില്ല."</string>
-    <string name="permlab_bindDeviceAdmin" msgid="8704986163711455010">"ഒരു ഉപകരണ അഡ്‌മിനുമായി സംവദിക്കുക"</string>
-    <string name="permdesc_bindDeviceAdmin" msgid="569715419543907930">"ഒരു ഉപകരണ അഡ്മിനിസ്‌ട്രേറ്ററിലേക്ക് ഇന്റന്റുകൾ അയയ്ക്കുന്നതിന് ദാതാവിനെ അനുവദിക്കുന്നു. സാധാരണ അപ്ലിക്കേഷനുകൾക്ക് ഒരിക്കലും ആവശ്യമില്ല."</string>
-    <string name="permlab_bindTvInput" msgid="5601264742478168987">"TV ഇൻപുട്ടുമായി ബന്ധിപ്പിക്കുക"</string>
-    <string name="permdesc_bindTvInput" msgid="2371008331852001924">"ഒരു ടിവി ഇൻപുട്ടിന്റെ ഉയർന്ന നിലയിലുള്ള ഇന്റർഫേസിലേക്ക് ബന്ധിപ്പിക്കാൻ ദാതാവിനെ അനുവദിക്കുന്നു. സാധാരണ അപ്ലിക്കേഷനുകൾക്ക് ഒരിക്കലും ആവശ്യമില്ല."</string>
-    <string name="permlab_modifyParentalControls" msgid="4611318225997592242">"രക്ഷാകർതൃ നിയന്ത്രണങ്ങൾ പരിഷ്‌ക്കരിക്കുക"</string>
-    <string name="permdesc_modifyParentalControls" msgid="7438482894162282039">"സിസ്‌റ്റത്തിന്റെ രക്ഷാകർതൃ നിയന്ത്രണ ഡാറ്റ പരിഷ്കരിക്കുന്നതിന് ഉടമയെ അനുവദിക്കുന്നു. സാധാരണ അപ്ലിക്കേഷനുകൾക്ക് ഒരിക്കലും ആവശ്യമില്ല."</string>
-    <string name="permlab_manageDeviceAdmins" msgid="4248828900045808722">"ഒരു ഉപകരണ അഡ്‌മിൻ ചേർക്കുക അല്ലെങ്കിൽ നീക്കംചെയ്യുക"</string>
-    <string name="permdesc_manageDeviceAdmins" msgid="5025608167709942485">"സജീവ ഉപകരണ അഡ്‌മിനിസ്‌ട്രേറ്ററുകൾ ചേർക്കാനോ നീക്കംചെയ്യാനോ ഹോൾഡറിനെ അനുവദിക്കുന്നു. സാധാരണ അപ്ലിക്കേഷനുകൾക്ക് ഒരിക്കലും ആവശ്യമില്ല."</string>
-    <string name="permlab_setOrientation" msgid="3365947717163866844">"സ്ക്രീൻ ഓറിയന്റേഷൻ മാറ്റുക"</string>
-    <string name="permdesc_setOrientation" msgid="3046126619316671476">"ഏത് സമയത്തും സ്ക്രീൻ തിരിയുന്നത് മാറ്റുന്നതിന് അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു. സാധാരണ അപ്ലിക്കേഷനുകൾക്ക് ഒരിക്കലും ആവശ്യമില്ല."</string>
-    <string name="permlab_setPointerSpeed" msgid="9175371613322562934">"പോയിന്റർ വേഗത മാറ്റുക"</string>
-    <string name="permdesc_setPointerSpeed" msgid="6866563234274104233">"ഏത് സമയത്തും മൗസിന്റെ അല്ലെങ്കിൽ ട്രാക്ക്പാഡിന്റെ പോയിന്റർ വേഗത മാറ്റുന്നതിന് അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു. സാധാരണ അപ്ലിക്കേഷനുകൾക്ക് ഒരിക്കലും ആവശ്യമില്ല."</string>
-    <string name="permlab_setKeyboardLayout" msgid="4778731703600909340">"കീബോർട്ട് ലേഔട്ട് മാറ്റുക"</string>
-    <string name="permdesc_setKeyboardLayout" msgid="8480016771134175879">"കീബോർഡ് ലേഔട്ട് മാറ്റാൻ അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു. സാധാരണ അപ്ലിക്കേഷനുകൾക്ക് ഒരിക്കലും ആവശ്യമില്ല."</string>
-    <string name="permlab_signalPersistentProcesses" msgid="4539002991947376659">"അപ്ലിക്കേഷനുകളിലേക്ക് Linux സിഗ്‌നലുകൾ അയയ്ക്കുക"</string>
-    <string name="permdesc_signalPersistentProcesses" msgid="4896992079182649141">"എല്ലാ സ്ഥിരമായ പ്രോസസ്സുകളിലേക്കും അയച്ച വിതരണ സി‌ഗ്‌നൽ അഭ്യർത്ഥിക്കുന്നതിന് അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
     <string name="permlab_persistentActivity" msgid="8841113627955563938">"അപ്ലിക്കേഷൻ എപ്പോഴും പ്രവർത്തിക്കുന്നതാക്കുക"</string>
     <string name="permdesc_persistentActivity" product="tablet" msgid="8525189272329086137">"മെമ്മറിയിൽ അപ്ലിക്കേഷനുകളുടെ ഭാഗങ്ങൾ നിലനിർത്താൻ സ്വയം അനുവദിക്കുന്നു. ഇത് ടാബ്‌ലെറ്റിനെ മന്ദഗതിയിലാക്കുന്ന വിധത്തിൽ മറ്റ് അപ്ലിക്കേഷനുകൾക്ക് ലഭ്യമായ മെമ്മറി പരിമിതപ്പെടുത്താനിടയുണ്ട്."</string>
     <string name="permdesc_persistentActivity" product="tv" msgid="5086862529499103587">"മെമ്മറിയിൽ സ്ഥിരതയുള്ളതാക്കുന്നതിന് അപ്ലിക്കേഷൻ അനുവദിക്കുന്നു. ടിവിയെ സാവധാനത്തിലാക്കുന്ന മറ്റ് അപ്ലിക്കേഷനുകളിലേക്കുള്ള മെമ്മറി ലഭ്യതയെ ഇതിന് പരിമിതമാക്കാനാവും."</string>
     <string name="permdesc_persistentActivity" product="default" msgid="4384760047508278272">"മെമ്മറിയിൽ അപ്ലിക്കേഷനുകളുടെ ഭാഗങ്ങൾ നിലനിർത്താൻ സ്വയം അനുവദിക്കുന്നു. ഇത് ഫോണിനെ മന്ദഗതിയിലാക്കുന്ന വിധത്തിൽ മറ്റ് അപ്ലിക്കേഷനുകൾക്ക് ലഭ്യമായ മെമ്മറി പരിമിതപ്പെടുത്താനിടയുണ്ട്."</string>
-    <string name="permlab_deletePackages" msgid="184385129537705938">"അപ്ലിക്കേഷനുകൾ ഇല്ലാതാക്കുക"</string>
-    <string name="permdesc_deletePackages" msgid="7411480275167205081">"Android പാക്കേജുകളെ ഇല്ലാതാക്കുന്നതിന് അപ്ലിക്കേഷനുകളെ അനുവദിക്കുന്നു. പ്രധാനപ്പെട്ട അപ്ലിക്കേഷനുകൾ ഇല്ലാതാക്കുന്നതിന് ദോഷകരമായ അപ്ലിക്കേഷനുകൾ ഇത് ഉപയോഗിച്ചേക്കാം."</string>
-    <string name="permlab_clearAppUserData" msgid="274109191845842756">"മറ്റ് അപ്ലിക്കേഷന്റെ ഡാറ്റ ഇല്ലാതാക്കുക"</string>
-    <string name="permdesc_clearAppUserData" msgid="4625323684125459488">"ഉപയോക്തൃ ഡാറ്റ മായ്‌ക്കുന്നതിന് അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
-    <string name="permlab_deleteCacheFiles" msgid="3128665571837408675">"മറ്റ് അപ്ലിക്കേഷനുകളുടെ കാഷെകൾ ഇല്ലാതാക്കുക"</string>
-    <string name="permdesc_deleteCacheFiles" msgid="3812998599006730196">"കാഷെ ഫയലുകൾ ഇല്ലാതാക്കുന്നതിന് അപ്ലിക്കേഷനുകളെ അനുവദിക്കുന്നു."</string>
     <string name="permlab_getPackageSize" msgid="7472921768357981986">"അപ്ലിക്കേഷൻ സംഭരണയിടം അളക്കുക"</string>
     <string name="permdesc_getPackageSize" msgid="3921068154420738296">"അപ്ലിക്കേഷന്റെ കോഡ്, ഡാറ്റ, കാഷെ വലുപ്പങ്ങൾ എന്നിവ വീണ്ടെടുക്കുന്നതിന് അതിനെ അനുവദിക്കുക"</string>
-    <string name="permlab_installPackages" msgid="2199128482820306924">"അപ്ലിക്കേഷനുകൾ നേരിട്ട് ഇൻസ്റ്റാളുചെയ്യുക"</string>
-    <string name="permdesc_installPackages" msgid="5628530972548071284">"പുതിയതോ അപ്‌ഡേറ്റുചെയ്‌തതോ ആയ Android പാക്കേജുകൾ ഇൻസ്റ്റാളുചെയ്യുന്നതിന് അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു. അനിയന്ത്രിതമായ ശക്‌തമായ അനുമതികളുള്ള പുതിയ അപ്ലിക്കേഷനുകളെ ചേർക്കുന്നതിന് ദോഷകരമായ അപ്ലിക്കേഷനുകൾ ഇത് ഉപയോഗിച്ചേക്കാം."</string>
-    <string name="permlab_clearAppCache" msgid="7487279391723526815">"എല്ലാ അപ്ലിക്കേഷൻ കാഷെ ഡാറ്റയും ഇല്ലാതാക്കുക"</string>
-    <string name="permdesc_clearAppCache" product="tablet" msgid="8974640871945434565">"മറ്റ് അപ്ലിക്കേഷനുകളുടെ കാഷെ ഡയറക്‌ടറികളിലെ ഫയലുകൾ ഇല്ലാതാക്കുന്നതിലൂടെ ടാബ്‌ലെറ്റ് സംഭരണം ശൂന്യമാക്കാൻ അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു. മറ്റ് അപ്ലിക്കേഷനുകൾക്ക് അവയുടെ ഡാറ്റ ഒരുതവണകൂടി വീണ്ടെടുക്കേണ്ടതിന് ഇടയാക്കുന്നതിനാൽ, അവ ആരംഭിക്കുന്നതിനെ ഇത് വളരെ മന്ദഗതിയിലാക്കുന്നു."</string>
-    <string name="permdesc_clearAppCache" product="tv" msgid="244647416303997022">"മറ്റ് അപ്ലിക്കേഷനുകളുടെ കാഷെ ഡയറക്‌റ്ററികളിലെ ഫയലുകൾ ഇല്ലാതാക്കിക്കൊണ്ട് ടിവി സംഭരണം ശൂന്യമാക്കിയിടാൻ അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു. അവയുടെ വിവരം വീണ്ടും വീണ്ടെടുക്കേണ്ടപ്പോൾ മറ്റു അപ്ലിക്കേഷനുകൾ ആരംഭിക്കുന്നത് വളരെ സാവധാനത്തിലാക്കുന്നതിനിടയാക്കാം."</string>
-    <string name="permdesc_clearAppCache" product="default" msgid="2459441021956436779">"മറ്റ് അപ്ലിക്കേഷനുകളുടെ കാഷെ ഡയറക്‌ടറികളിലെ ഫയലുകൾ ഇല്ലാതാക്കുന്നതിലൂടെ ഫോൺ സംഭരണം ശൂന്യമാക്കാൻ അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു. മറ്റ് അപ്ലിക്കേഷനുകൾക്ക് അവയുടെ ഡാറ്റ ഒരുതവണകൂടി വീണ്ടെടുക്കേണ്ടതിന് ഇടയാക്കുന്നതിനാൽ, അവ ആരംഭിക്കുന്നതിനെ ഇത് വളരെ സാവധാനത്തിലാക്കുന്നു."</string>
-    <string name="permlab_movePackage" msgid="3289890271645921411">"അപ്ലിക്കേഷൻ ഉറവിടങ്ങൾ നീക്കുക"</string>
-    <string name="permdesc_movePackage" msgid="319562217778244524">"ആന്തരിക മീഡിയയിൽ നിന്ന് ബാഹ്യ മീഡിയയിലേക്കും തിരിച്ചും അപ്ലിക്കേഷൻ ഉറവിടങ്ങളെ നീക്കുന്നതിന് അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
-    <string name="permlab_readLogs" msgid="6615778543198967614">"തന്ത്രപ്രധാന ലോഗ് ഡാറ്റ വായിക്കുക"</string>
-    <string name="permdesc_readLogs" product="tablet" msgid="82061313293455151">"സിസ്‌റ്റത്തിന്റെ വ്യത്യസ്‌ത ലോഗ് ഫയലുകളിൽ നിന്ന് റീഡുചെയ്യുന്നതിന് അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു. വ്യക്തിഗതമായതോ സ്വകാര്യമായതോ ആയ വിവരം ഉൾപ്പെടെ നിങ്ങൾ ടാബ്‌ലെറ്റിൽ ചെയ്യുന്ന കാര്യങ്ങളെക്കുറിച്ചുള്ള പൊതുവായ വിവരം കണ്ടെത്തുന്നതിന് ഇത് അനുവദിക്കുന്നു."</string>
-    <string name="permdesc_readLogs" product="tv" msgid="9023899974809538988">"സിസ്‌റ്റത്തിന്റെ വ്യത്യസ്‌തമായ ലോഗ് ഫയലുകളിൽ നിന്ന് റീഡുചെയ്യുന്നതിന് അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു. വ്യക്തിഗതമോ സ്വകാര്യമോ ആയ വിവരം ഉൾപ്പെടെ നിങ്ങൾ ടിവി ഉപയോഗിച്ച് ചെയ്യുന്നതിനെക്കുറിച്ചുള്ള പൊതുവിവരം കണ്ടെത്തുന്നതിന് ഇത് അനുവദിക്കുന്നു."</string>
-    <string name="permdesc_readLogs" product="default" msgid="2063438140241560443">"സിസ്‌റ്റത്തിന്റെ വ്യത്യസ്‌ത ലോഗ് ഫയലുകളിൽ നിന്ന് റീഡുചെയ്യുന്നതിന് അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു. വ്യക്തിഗതമായതോ സ്വകാര്യമായതോ ആയ വിവരം പ്രത്യക്ഷത്തിൽ ഉൾപ്പെടുത്തിക്കൊണ്ട് നിങ്ങൾ ഫോണിൽ ചെയ്യുന്ന കാര്യങ്ങളെക്കുറിച്ചുള്ള പൊതുവായ വിവരം കണ്ടെത്തുന്നതിന് ഇത് അനുവദിക്കുന്നു."</string>
-    <string name="permlab_anyCodecForPlayback" msgid="715805555823881818">"പ്ലേബാക്കിനായി ഏത് മീഡിയ ഡീക്കോഡറും ഉപയോഗിക്കുക"</string>
-    <string name="permdesc_anyCodecForPlayback" msgid="8283912488433189010">"പ്ലേബാക്കിനായി ഡീകോഡുചെയ്യാൻ ഇൻസ്റ്റാളുചെയ്‌തിരിക്കുന്ന ഏതെങ്കിലും മീഡിയ ഡീകോഡർ ഉപയോഗിക്കാൻ അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
-    <string name="permlab_manageCaCertificates" msgid="1678391896786882014">"വിശ്വസനീയ ക്രെഡൻഷ്യലുകൾ നിയന്ത്രിക്കുക"</string>
-    <string name="permdesc_manageCaCertificates" msgid="4015644047196937014">"വിശ്വസനീയ ക്രെഡൻഷ്യലുകളായി CA സർട്ടിഫിക്കറ്റുകൾ ഇൻസ്റ്റാളുചെയ്യാനും അൺഇൻസ്റ്റാളുചെയ്യാനും അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
-    <string name="permlab_bindJobService" msgid="3637568367978271086">"അപ്ലിക്കേഷനുകളുടെ ഷെഡ്യൂൾ ചെ‌യ്‌ത പശ്‌ചാത്തല പ്രവർത്തനം പ്രവർത്തിപ്പിക്കുക"</string>
-    <string name="permdesc_bindJobService" msgid="3473288460524119838">"അഭ്യർത്ഥിക്കുമ്പോൾ, പശ്ചാത്തലത്തിൽ അപ്ലിക്കേഷൻ പ്രവർത്തിപ്പിക്കുന്നതിന് Android സിസ്റ്റത്തെ ഈ അനുമതി അനുവദിക്കുന്നു."</string>
-    <string name="permlab_diagnostic" msgid="8076743953908000342">"ഡയാഗിന്റെ ഉടമസ്ഥതയിലുള്ള ഉറവിടങ്ങൾ വായിക്കുക/എഴുതുക"</string>
-    <string name="permdesc_diagnostic" msgid="6608295692002452283">"diag ഗ്രൂപ്പിന്റെ ഉടമസ്ഥതയിലുള്ള ഏതെങ്കിലും ഉറവിടത്തെ, ഉദാഹരണത്തിന് /dev എന്നതിലെ ഫയലുകൾ റീഡുചെയ്യുന്നതിനും റൈറ്റുചെയ്യുന്നതിനും അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു. സിസ്‌റ്റം സ്ഥിരതയെയും സുരക്ഷയെയും ഇത് പൂർണ്ണമായും ബാധിക്കുന്നു. നിർമ്മാതാവോ ഓപ്പറേറ്ററോ ഇത് ഹാർഡ്‌വെയർ നിർദ്ദിഷ്‌ട ഡയഗനോസ്‌റ്റിക്‌സിനുമാത്രം ഉപയോഗിക്കുന്നു."</string>
-    <string name="permlab_changeComponentState" msgid="6335576775711095931">"അപ്ലിക്കേഷൻ ഘടകങ്ങൾ പ്രവർത്തനക്ഷമമാക്കുക അല്ലെങ്കിൽ പ്രവർത്തനരഹിതമാക്കുക"</string>
-    <string name="permdesc_changeComponentState" product="tablet" msgid="8887435740982237294">"മറ്റൊരു അപ്ലിക്കേഷന്റെ ഘടകം പ്രവർത്തനക്ഷമമാണ് അല്ലെങ്കിൽ അല്ല എന്നത് മാറ്റുന്നതിന് അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു. ടാബ്‌ലെറ്റിന്റെ പ്രധാനപ്പെട്ട ശേഷികളെ പ്രവർത്തനരഹിതമാക്കുന്നതിന് ദോഷകരമായ അപ്ലിക്കേഷനുകൾ ഇത് ഉപയോഗിച്ചേക്കാം. ഉപയോഗപ്രദമല്ലാത്തതോ പൊരുത്തമില്ലാത്തതോ അസ്ഥിരമായ നിലയിലുള്ളതോ ആയ ഘടകങ്ങൾ നേടുന്നതിന് സാധ്യതയുള്ളതുകൊണ്ട് ഈ അനുമതി ശ്രദ്ധാപൂർവ്വം ഉപയോഗിക്കേണ്ടതാണ്."</string>
-    <string name="permdesc_changeComponentState" product="tv" msgid="9151634188264231389">"മറ്റൊരു അപ്ലിക്കേഷന്റെ ഘടകം പ്രവർത്തനക്ഷമമാക്കണോ വേണ്ടയോ എന്ന് മാറ്റാൻ അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു. ടിവിയുടെ പ്രധാനപ്പെട്ട ശേഷികളെ പ്രവർത്തനരഹിതമാക്കുന്നതിന് ദോഷകരമായ അപ്ലിക്കേഷനുകൾ ഇത് ഉപയോഗിച്ചേക്കാം. ഉപയോഗപ്രദമല്ലാത്തതോ പൊരുത്തമില്ലാത്തതോ അസ്ഥിരമായ നിലയിലുള്ളതോ ആയ അപ്ലിക്കേഷൻ ഘടകങ്ങൾ സ്വീകരിക്കുന്നതിന് സാധ്യതയുള്ളതുകൊണ്ട് ഈ അനുമതി ശ്രദ്ധാപൂർവ്വം ഉപയോഗിക്കേണ്ടതാണ്."</string>
-    <string name="permdesc_changeComponentState" product="default" msgid="1827232484416505615">"മറ്റൊരു അപ്ലിക്കേഷന്റെ ഘടകം പ്രവർത്തനക്ഷമമാണ് അല്ലെങ്കിൽ അല്ല എന്നത് മാറ്റുന്നതിന് അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു. ഫോണിന്റെ പ്രധാനപ്പെട്ട ശേഷികളെ പ്രവർത്തനരഹിതമാക്കുന്നതിന് ദോഷകരമായ അപ്ലിക്കേഷനുകൾ ഇത് ഉപയോഗിച്ചേക്കാം. ഉപയോഗപ്രദമല്ലാത്തതോ പൊരുത്തമില്ലാത്തതോ അസ്ഥിരമായ നിലയിലുള്ളതോ ആയ അപ്ലിക്കേഷൻ ഘടകങ്ങൾ നേടുന്നതിന് സാധ്യതയുള്ളതുകൊണ്ട് ഈ അനുമതി ശ്രദ്ധാപൂർവ്വം ഉപയോഗിക്കേണ്ടതാണ്."</string>
-    <string name="permlab_grantRevokePermissions" msgid="4627315351093508795">"അനുമതികൾ നൽകുക അല്ലെങ്കിൽ റദ്ദാക്കുക"</string>
-    <string name="permdesc_grantRevokePermissions" msgid="4088642654085850662">"ഒരു അപ്ലിക്കേഷന് സ്വയമായോ മറ്റ് അപ്ലിക്കേഷനുകൾക്കായോ നിശ്ചിത അനുമതികൾ നൽകാനോ റദ്ദാക്കാനോ അതിനെ അനുവദിക്കുന്നു. ക്ഷുദ്രകരമായ അപ്ലിക്കേഷനുകൾക്ക് നിങ്ങൾ നൽകിയിട്ടില്ലാത്ത സവിശേഷതകൾ സ്വയം ആക്‌സസ്സുചെയ്യാൻ അവ ഇത് ഉപയോഗിക്കാനിടയുണ്ട്."</string>
-    <string name="permlab_setPreferredApplications" msgid="8463181628695396391">"തിരഞ്ഞെടുത്ത അപ്ലിക്കേഷനുകൾ സജ്ജീകരിക്കുക"</string>
-    <string name="permdesc_setPreferredApplications" msgid="4973986762241783712">"നിങ്ങൾ തിരഞ്ഞെടുത്ത അപ്ലിക്കേഷനുകൾ പരിഷ്‌ക്കരിക്കുന്നതിന് അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു. നിങ്ങളിൽ നിന്നുള്ള സ്വകാര്യ ഡാറ്റ ശേഖരിക്കുന്നതിന് ദോഷകരമായ അപ്ലിക്കേഷനുകൾ നിങ്ങളുടെ നിലനിൽക്കുന്ന അപ്ലിക്കേഷനുകളെ കബളിപ്പിച്ചുകൊണ്ട് പ്രവർത്തിക്കുന്ന അപ്ലിക്കേഷനുകളെ നിശബ്‌ദമായി മാറ്റിയേക്കാം."</string>
     <string name="permlab_writeSettings" msgid="2226195290955224730">"സിസ്റ്റം ക്രമീകരണങ്ങൾ പരിഷ്‌ക്കരിക്കുക"</string>
     <string name="permdesc_writeSettings" msgid="7775723441558907181">"സിസ്‌‌റ്റത്തിന്റെ സുരക്ഷ ക്രമീകരണങ്ങളുടെ ഡാറ്റ പരിഷ്‌ക്കരിക്കുന്നതിന് അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു. ദോഷകരമായ അപ്ലിക്കേഷനുകൾ നിങ്ങളുടെ സി‌സ്റ്റത്തിന്റെ കോൺഫിഗറേഷനെ കേടാക്കിയേക്കാം."</string>
-    <string name="permlab_writeSecureSettings" msgid="204676251876718288">"സുരക്ഷാ സംവിധാന ക്രമീകരണങ്ങൾ പരിഷ്‌ക്കരിക്കുക"</string>
-    <string name="permdesc_writeSecureSettings" msgid="8159535613020137391">"സിസ്‌‌റ്റത്തിന്റെ സുരക്ഷ ക്രമീകരണങ്ങളുടെ ഡാറ്റ പരിഷ്‌ക്കരിക്കുന്നതിന് അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു. സാധാരണ അപ്ലിക്കേഷനുകൾ ഉപയോഗിക്കില്ല."</string>
-    <string name="permlab_writeGservices" msgid="2149426664226152185">"Google സേവനങ്ങളുടെ മാപ്പ് പരിഷ്‌കരിക്കുക"</string>
-    <string name="permdesc_writeGservices" msgid="1287309437638380229">"Google സേവനങ്ങളുടെ മാപ്പ് പരിഷ്‌ക്കരിക്കുന്നതിന് അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു. സാധാരണ അപ്ലിക്കേഷനുകൾ ഉപയോഗിക്കില്ല."</string>
     <string name="permlab_receiveBootCompleted" msgid="5312965565987800025">"സ്റ്റാർട്ടപ്പിൽ പ്രവർത്തിക്കുക"</string>
     <string name="permdesc_receiveBootCompleted" product="tablet" msgid="7390304664116880704">"സിസ്‌റ്റം ബൂട്ടുചെയ്യുന്നത് പൂർത്തിയാകുമ്പോൾ തന്നെ സ്വയം ആരംഭിക്കുന്നതിന് അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു. ഇത് ടാബ്‌ലെറ്റ് അരംഭിക്കുന്നതിന് കൂടുതൽ ദൈർഘ്യമെടുക്കുന്നതിന് കാരണമാകാം ഒപ്പം പ്രവർത്തിക്കുമ്പോഴെല്ലാം ടാബ്‌ലെറ്റിന്റെ മൊത്തത്തിലുള്ള വേഗത കുറയ്ക്കുന്നതിന് അപ്ലിക്കേഷനെ അനുവദിക്കും."</string>
     <string name="permdesc_receiveBootCompleted" product="tv" msgid="4525890122209673621">"സിസ്‌റ്റം ബൂട്ടുചെയ്യുന്നത് പൂർത്തിയാകുമ്പോൾ തന്നെ സ്വയം ആരംഭിക്കുന്നതിന് അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു. ഇതിന് ടിവി ഓണാക്കുന്നത് സാവധാനത്തിലാക്കുന്നതിനും എപ്പോൾ പ്രവർത്തിക്കുമ്പോഴും ടാബ്‌ലെറ്റ് പൂർണ്ണമായും സാവധാനത്തിലാക്കുന്നതിന് അപ്ലിക്കേഷനെ അനുവദിക്കുന്നതിനും കഴിയും."</string>
@@ -551,36 +355,10 @@
     <string name="permdesc_accessMockLocation" msgid="5808711039482051824">"പുതിയ ലൊക്കേഷൻ ദാതാവിനെ പരിശോധിക്കാനോ ഇൻസ്റ്റാളുചെയ്യാനോ യഥാർത്ഥമല്ലാത്ത ലൊക്കേഷൻ ഉറവിടങ്ങൾ സൃഷ്‌ടിക്കുന്നു. ഇത് GPS അല്ലെങ്കിൽ ലൊക്കേഷൻ ദാതാക്കൾ പോലുള്ള മറ്റ് ലൊക്കേഷൻ ഉറവിടങ്ങൾ നൽകുന്ന ലൊക്കേഷനോ കൂടാതെ/അല്ലെങ്കിൽ നിലയോ അസാധുവാക്കാൻ അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"ലൊക്കേഷൻ ദാതാവിന്റെ അധിക കമാൻഡുകൾ ആക്‌സസ്സുചെയ്യുക"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"ലൊക്കേഷൻ ദാതാവിന്റെ അധിക കമാൻഡുകൾ ആക്‌സസ്സുചെയ്യാൻ അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു. ഇത് GPS-ന്റെയോ മറ്റ് ലൊക്കേഷൻ ഉറവിടങ്ങളുടെയോ പ്രവർത്തനത്തിൽ ഇടപെടാൻ അപ്ലിക്കേഷനെ അനുവദിക്കാനിടയുണ്ട്."</string>
-    <string name="permlab_installLocationProvider" msgid="6578101199825193873">"ലൊക്കേഷൻ ദാതാവ് ഇൻസ്‌റ്റാളുചെയ്യുന്നതിനുള്ള അനുമതി"</string>
-    <string name="permdesc_installLocationProvider" msgid="9066146120470591509">"പുതിയ ലൊക്കേഷൻ ദാതാവിനെ പരിശോധിക്കാനോ ഇൻസ്റ്റാളുചെയ്യാനോ യഥാർത്ഥമല്ലാത്ത ലൊക്കേഷൻ ഉറവിടങ്ങൾ സൃഷ്‌ടിക്കുന്നു. ഇത് GPS അല്ലെങ്കിൽ ലൊക്കേഷൻ ദാതാക്കൾ പോലുള്ള മറ്റ് ലൊക്കേഷൻ ഉറവിടങ്ങൾ നൽകുന്ന ലൊക്കേഷനോ കൂടാതെ/അല്ലെങ്കിൽ നിലയോ അസാധുവാക്കാൻ അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
     <string name="permlab_accessFineLocation" msgid="1191898061965273372">"കൃത്യമായ ലൊക്കേഷൻ (GPS-ഉം നെറ്റ്‌വർക്കും അടിസ്ഥാനമാക്കിയുള്ളത്)"</string>
     <string name="permdesc_accessFineLocation" msgid="5295047563564981250">"ഗ്ലോബൽ പൊസിഷനിംഗ് സിസ്റ്റമോ (GPS) സെൽ ടവറുകളും Wi-Fi-യും പോലുള്ള നെറ്റ്‌വർക്ക് ലൊക്കേഷൻ ഉറവിടങ്ങളോ ഉപയോഗിച്ച് നിങ്ങളുടെ കൃത്യമായ ലൊക്കേഷൻ നേടാൻ അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു. അപ്ലിക്കേഷനുകൾ അവ ഉപയോഗിക്കാൻ നിങ്ങളുടെ ഉപകരണത്തിൽ ഈ ലൊക്കേഷൻ സേവനങ്ങൾ ഓൺ ചെയ്‌ത് ലഭ്യമാക്കേണ്ടതുണ്ട്. നിങ്ങൾ എവിടെയാണെന്ന് ഏകദേശം നിർണ്ണയിക്കാൻ അപ്ലിക്കേഷനുകൾ ഇത് ഉപയോഗിക്കാം, അവ കൂടുതൽ ബാറ്ററി പവർ ഉപയോഗിക്കാനിടയുണ്ട്."</string>
     <string name="permlab_accessCoarseLocation" msgid="4887895362354239628">"ഏകദേശ ലൊക്കേഷൻ (നെറ്റ്‌വർക്ക് അടിസ്ഥാനമാക്കിയുള്ളത്)"</string>
     <string name="permdesc_accessCoarseLocation" msgid="2538200184373302295">"നിങ്ങളുടെ ഏകദേശ ലൊക്കേഷൻ നേടാൻ അപ്ലിക്കേഷനുകളെ അനുവദിക്കുക. ഈ ലൊക്കേഷനെ സെൽ ടവറുകളും Wi-Fi-യും പോലുള്ള നെറ്റ്‌വർക്ക് ലൊക്കേഷൻ ഉറവിടങ്ങൾ ഉപയോഗിച്ച് ലൊക്കേഷൻ സേവനങ്ങൾ അനുമാനിക്കുന്നു. അപ്ലിക്കേഷനുകൾ അവ ഉപയോഗിക്കാൻ നിങ്ങളുടെ ഉപകരണത്തിൽ ഈ ലൊക്കേഷൻ സേവനങ്ങൾ ഓൺ ചെയ്‌ത് ലഭ്യമാക്കേണ്ടതുണ്ട്. നിങ്ങൾ എവിടെയാണെന്ന് ഏകദേശം നിർണ്ണയിക്കാൻ അപ്ലിക്കേഷനുകൾ ഇത് ഉപയോഗിക്കാം."</string>
-    <string name="permlab_accessSurfaceFlinger" msgid="2363969641792388947">"SurfaceFlinger ആക്‌സസ്സ് ചെയ്യുക"</string>
-    <string name="permdesc_accessSurfaceFlinger" msgid="1041619516733293551">"SurfaceFlinger കുറഞ്ഞ നിലയിലുള്ള സവിശേഷതകൾ ഉപയോഗിക്കാൻ അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
-    <string name="permlab_readFrameBuffer" msgid="6690504248178498136">"ഫ്രെയിം ബഫർ വായിക്കുക"</string>
-    <string name="permdesc_readFrameBuffer" msgid="4937405521809454680">"ഫ്രെയിം ബഫറിന്റെ ഉള്ളടക്കം റീഡുചെയ്യുന്നതിന് അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
-    <string name="permlab_accessInputFlinger" msgid="5348635270689553857">"InputFlinger ആക്‌സസ്സുചെയ്യുക"</string>
-    <string name="permdesc_accessInputFlinger" msgid="2104864941201226616">"InputFlinger കുറഞ്ഞ നിലയിലുള്ള സവിശേഷതകൾ ഉപയോഗിക്കാൻ അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
-    <string name="permlab_configureWifiDisplay" msgid="5595661694746742168">"വൈഫൈ ഡിസ്‌പ്ലേകൾ കോൺഫിഗർ ചെയ്യുക"</string>
-    <string name="permdesc_configureWifiDisplay" msgid="7916815158690218065">"വൈഫൈ ഡിസ്പ്ലേകൾ കോൺഫിഗർ ചെയ്യാനും അതിലേക്ക് കണക്റ്റുചെയ്യാനും അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
-    <string name="permlab_controlWifiDisplay" msgid="393641276723695496">"വൈഫൈ ഡിസ്‌പ്ലേകൾ നിയന്ത്രിക്കുക"</string>
-    <string name="permdesc_controlWifiDisplay" msgid="4543912292681826986">"വൈഫൈ ഡിസ്‌പ്ലേകളുടെ കുറഞ്ഞ നിലയിലുള്ള സവിശേഷതകൾ നിയന്ത്രിക്കാൻ അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
-    <string name="permlab_controlVpn" msgid="2618442789397588200">"വെർച്വൽ സ്വകാര്യ നെറ്റ്‌വർക്കുകൾ നിയന്ത്രിക്കുക"</string>
-    <string name="permdesc_controlVpn" msgid="762852603315861214">"വെർച്വൽ സ്വകാര്യ നെറ്റ്‌വർക്കുകളുടെ താഴ്‌ന്ന നിലയിലുള്ള ഫീച്ചറുകൾ നിയന്ത്രിക്കാൻ അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
-    <string name="permlab_captureAudioOutput" msgid="6857134498402346708">"ഓഡിയോ ഔട്ട്പുട്ട് ക്യാപ്‌ചർ ചെയ്യുക"</string>
-    <string name="permdesc_captureAudioOutput" msgid="6210597754212208853">"ഓഡിയോ ഔട്ട്‌പുട്ട് ക്യാപ്‌ചർ ചെയ്‌ത് റീഡയറക്‌ടുചെയ്യാൻ അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
-    <string name="permlab_captureAudioHotword" msgid="1890553935650349808">"ഹോട്ട്‌വേഡ് തിരിച്ചറിയൽ"</string>
-    <string name="permdesc_captureAudioHotword" msgid="9151807958153056810">"ഹോട്ട്‌വേഡ് തിരിച്ചറിയലിനായി ഓഡിയോ ക്യാപ്‌ചർ ചെയ്യാൻ അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു. ക്യാപ്‌ചർ പശ്ചാത്തലത്തിൽ സംഭവിക്കാമെങ്കിലും മറ്റ് ഓഡിയോ ക്യാപ്‌ചറിനെ തടയുകയില്ല (ഉദാ. ക്യാംകോഡർ)."</string>
-    <string name="permlab_modifyAudioRouting" msgid="7738060354490807723">"ഓഡിയോ റൂട്ടിംഗ്"</string>
-    <string name="permdesc_modifyAudioRouting" msgid="7205731074267199735">"ഓഡിയോ റൂട്ടിംഗ് നേരിട്ട് നിയന്ത്രിക്കാനും ഓഡിയോ നയ തീരുമാനങ്ങൾ അസാധുവാക്കാനും അപ്ലിക്കേഷനെ അനുവദിക്കുക."</string>
-    <string name="permlab_captureVideoOutput" msgid="2246828773589094023">"വീഡിയോ ഔട്ട്പുട്ട് ക്യാപ്‌ചർ ചെയ്യുക"</string>
-    <string name="permdesc_captureVideoOutput" msgid="359481658034149860">"വീഡിയോ ഇൻപുട്ട് ക്യാപ്‌ചർ ചെയ്‌ത് റീഡയറക്‌ടുചെയ്യാൻ അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
-    <string name="permlab_captureSecureVideoOutput" msgid="7815398969303382016">"സുരക്ഷിത വീഡിയോ ഔട്ട്പുട്ട് ക്യാപ്‌ചർ ചെയ്യുക"</string>
-    <string name="permdesc_captureSecureVideoOutput" msgid="2779793064709350289">"സുരക്ഷിത വീഡിയോ ഔട്ട്‌പുട്ട് ക്യാപ്‌ചർ ചെയ്‌ത് റീഡയറക്‌ടുചെയ്യാൻ അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
-    <string name="permlab_mediaContentControl" msgid="8749790560720562511">"മീഡിയ പ്ലേബാക്കും മെറ്റാഡാറ്റ ആക്‌സസ്സും നിയന്ത്രിക്കുക"</string>
-    <string name="permdesc_mediaContentControl" msgid="1637478200272062">"മീഡിയ പ്ലേബാക്ക് നിയന്ത്രിക്കാനും മീഡിയ വിവരം (ശീർഷകം, രചയിതാവ് തുടങ്ങിയവ) ആക്‌സസ്സുചെയ്യാനും അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"നിങ്ങളുടെ ഓഡിയോ ക്രമീകരണങ്ങൾ മാറ്റുക"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"വോളിയവും ഔട്ട്പുട്ടിനായി ഉപയോഗിച്ച സ്‌പീക്കറും പോലുള്ള ആഗോള ഓഡിയോ ക്രമീകരണങ്ങൾ പരിഷ്‌ക്കരിക്കാൻ അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"ഓഡിയോ റെക്കോർഡ് ചെയ്യുക"</string>
@@ -589,71 +367,14 @@
     <string name="permdesc_sim_communication" msgid="5725159654279639498">"സിമ്മിലേക്ക് കമാൻഡുകൾ അയയ്‌ക്കാൻ അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു. ഇത് വളരെ അപകടകരമാണ്."</string>
     <string name="permlab_camera" msgid="3616391919559751192">"ചിത്രങ്ങളും വീഡിയോകളും എടുക്കുക"</string>
     <string name="permdesc_camera" msgid="8497216524735535009">"ക്യാമറ ഉപയോഗിച്ച് ചിത്രങ്ങളും വീഡിയോകളും എടുക്കാൻ അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു. നിങ്ങളുടെ സ്ഥിരീകരണമില്ലാതെ ഏതുസമയത്തും ക്യാമറ ഉപയോഗിക്കാൻ ഈ അനുമതി അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
-    <string name="permlab_cameraDisableTransmitLed" msgid="2651072630501126222">"ക്യാമറ ഉപയോഗത്തിലായിരിക്കുമ്പോൾ ട്രാൻസ്‌മിറ്റ് ഇൻഡിക്കേറ്റർ LED പ്രവർത്തനരഹിതമാക്കുക"</string>
-    <string name="permdesc_cameraDisableTransmitLed" msgid="4764585465480295341">"ക്യാമറയുടെ ഇൻഡിക്കേറ്റർ LED-യുടെ ഉപയോഗം പ്രവർത്തനരഹിതമാക്കാൻ മുൻകൂട്ടി ഇൻസ്റ്റാളുചെയ്‌ത സിസ്റ്റം അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
-    <string name="permdesc_cameraSendSystemEvent" msgid="8642231538552298107">"ക്യാമറ സേവന സിസ്റ്റം ഇവന്റുകൾ അയയ്‌ക്കാൻ മുൻകൂട്ടി ഇൻസ്റ്റാളുചെയ്‌ത ഒരു സിസ്റ്റം അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
-    <string name="permlab_brick" product="tablet" msgid="2961292205764488304">"ശാശ്വതമായി ടാബ്‌ലെറ്റ് പ്രവർത്തനരഹിതമാക്കുക"</string>
-    <string name="permlab_brick" product="tv" msgid="4912674222121249410">"ടിവിയെ ശാശ്വതമായി പ്രവർത്തനരഹിതമാക്കുക"</string>
-    <string name="permlab_brick" product="default" msgid="8337817093326370537">"ശാശ്വതമായി ഫോൺ പ്രവർത്തനരഹിതമാക്കുക"</string>
-    <string name="permdesc_brick" product="tablet" msgid="4334818808001699530">"ടാബ്‌ലെറ്റ് പൂർണ്ണമായും ശാശ്വതമായി പ്രവർത്തനരഹിതമാക്കാൻ അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു. ഇത് വളരെ അപകടകരമാണ്."</string>
-    <string name="permdesc_brick" product="tv" msgid="7070924544316356349">"ടിവി മൊത്തം ശാശ്വതമായി പ്രവർത്തനരഹിതമാക്കാൻ അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു. ഇത് വളരെ അപകടകരമാണ്."</string>
-    <string name="permdesc_brick" product="default" msgid="5788903297627283099">"ഫോൺ പൂർണ്ണമായും ശാശ്വതമായി പ്രവർത്തനരഹിതമാക്കാൻ അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു. ഇത് വളരെ അപകടകരമാണ്."</string>
-    <string name="permlab_reboot" product="tablet" msgid="3436634972561795002">"ടാബ്‌ലെറ്റ് റീബൂട്ട് ചെയ്യാൻ നിർബന്ധിക്കുക"</string>
-    <string name="permlab_reboot" product="tv" msgid="2112102119558886236">"നിർബന്ധിതമായി ടിവി റീബൂട്ടുചെയ്യുക"</string>
-    <string name="permlab_reboot" product="default" msgid="2898560872462638242">"ഫോൺ റീബൂട്ട് ചെയ്യാൻ നിർബന്ധിക്കുക"</string>
-    <string name="permdesc_reboot" product="tablet" msgid="8172056180063700741">"റീബൂട്ട് ചെയ്യാൻ ടാബ്‌ലെറ്റിനോട് ആവശ്യപ്പെടാൻ അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
-    <string name="permdesc_reboot" product="tv" msgid="7116222694344401650">"ടിവി വീണ്ടും റീബൂട്ടുചെയ്യുന്നതിന് അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
-    <string name="permdesc_reboot" product="default" msgid="5326008124289989969">"റീബൂട്ട് ചെയ്യാൻ ഫോണിനെ നിർബന്ധിക്കുന്നതിന് അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
-    <string name="permlab_mount_unmount_filesystems" product="nosdcard" msgid="2927361537942591841">"USB സംഭരണ ഫയൽ സിസ്റ്റം ആക്‌സസ്സുചെയ്യുക"</string>
-    <string name="permlab_mount_unmount_filesystems" product="default" msgid="4402305049890953810">"SD കാർഡ് ഫയൽ സിസ്റ്റം ആക്‌സസ്സുചെയ്യുക"</string>
-    <string name="permdesc_mount_unmount_filesystems" msgid="1829290701658992347">"നീക്കംചെയ്യാനാവുന്ന സംഭരണത്തിന് ഫയൽ സിസ്‌റ്റങ്ങളെ മൗണ്ട് ചെയ്യുന്നതിനും അൺമൗണ്ട് ചെയ്യുന്നതിനും അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
-    <string name="permlab_mount_format_filesystems" product="nosdcard" msgid="6227819582624904972">"USB സംഭരണം മായ്‌ക്കുക"</string>
-    <string name="permlab_mount_format_filesystems" product="default" msgid="262582698639274056">"SD കാർഡ് മായ്‌ക്കുക"</string>
-    <string name="permdesc_mount_format_filesystems" msgid="8784268246779198627">"നീക്കംചെയ്യാനാകുന്ന സംഭരണം ഫോർമാറ്റുചെയ്യാൻ അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
-    <string name="permlab_asec_access" msgid="3411338632002193846">"ആന്തരിക സംഭരണത്തെക്കുറിച്ചുള്ള വിവരം നേടുക"</string>
-    <string name="permdesc_asec_access" msgid="3094563844593878548">"ആന്തരിക സംഭരണത്തിലെ വിവരം നേടുന്നതിന് അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
-    <string name="permlab_asec_create" msgid="6414757234789336327">"ആന്തരിക സംഭരണം സൃഷ്‌ടിക്കുക"</string>
-    <string name="permdesc_asec_create" msgid="4558869273585856876">"ആന്തരിക സംഭരണം സൃഷ്‌ടിക്കുന്നതിന് അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
-    <string name="permlab_asec_destroy" msgid="526928328301618022">"ആന്തരിക സംഭരണം ഇല്ലാതാക്കുക"</string>
-    <string name="permdesc_asec_destroy" msgid="7218749286145526537">"ആന്തരിക സംഭരണം നശിപ്പിക്കുന്നതിന് അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
-    <string name="permlab_asec_mount_unmount" msgid="8877998101944999386">"ആന്തരിക സംഭരണം മൗണ്ട് ചെയ്യുക/അൺമൗണ്ട് ചെയ്യുക"</string>
-    <string name="permdesc_asec_mount_unmount" msgid="3451360114902490929">"ആന്തരിക സംഭരണം മൗണ്ട് ചെയ്യുന്നതിന്/അൺമൗണ്ട് ചെയ്യുന്നതിന് അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
-    <string name="permlab_asec_rename" msgid="7496633954080472417">"ആന്തരിക സംഭരണത്തിന്റെ പേരുമാറ്റുക"</string>
-    <string name="permdesc_asec_rename" msgid="1794757588472127675">"ആന്തരിക സംഭരണത്തിന്റെ പേര് മാറ്റുന്നതിന് അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
     <string name="permlab_vibrate" msgid="7696427026057705834">"വൈബ്രേറ്റുചെയ്യൽ നിയന്ത്രിക്കുക"</string>
     <string name="permdesc_vibrate" msgid="6284989245902300945">"വൈബ്രേറ്റർ നിയന്ത്രിക്കുന്നതിന് അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
     <string name="permlab_flashlight" msgid="2155920810121984215">"ഫ്ലാഷ്ലൈറ്റ് നിയന്ത്രിക്കുക"</string>
     <string name="permdesc_flashlight" msgid="6522284794568368310">"ഫ്ലാഷ്ലൈറ്റിനെ നിയന്ത്രിക്കുന്നതിന് അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
-    <string name="permlab_manageUsb" msgid="1113453430645402723">"USB ഉപകരണങ്ങൾക്കായുള്ള മുൻഗണനകളും അനുമതികളും നിയന്ത്രിക്കുക"</string>
-    <string name="permdesc_manageUsb" msgid="7776155430218239833">"USB ഉപകരണങ്ങൾക്കുള്ള മുൻഗണനകളും അനുമതികളും നിയന്ത്രിക്കുന്നതിന് അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
-    <string name="permlab_accessMtp" msgid="4953468676795917042">"MTP പ്രോട്ടോക്കോൾ നടപ്പിലാക്കുക"</string>
-    <string name="permdesc_accessMtp" msgid="6532961200486791570">"MTP USB പ്രോട്ടോകോൾ നടപ്പിലാക്കുന്നതിനായി പ്രധാന MTP ഡ്രൈവറിലേക്ക് ആക്‌സസ്സ് അനുവദിക്കുക."</string>
-    <string name="permlab_hardware_test" msgid="4148290860400659146">"ഹാർഡ്‌വെയർ പരിശോധിക്കുക"</string>
-    <string name="permdesc_hardware_test" msgid="6597964191208016605">"ഹാർഡ്‌വെയർ പരിശോധനയ്‌ക്കുള്ള വ്യത്യസ്‌ത പെരിഫെറലുകൾ നിയന്ത്രിക്കുന്നതിന് അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
-    <string name="permlab_fm" msgid="8749504526866832">"FM റേഡിയോയ്‌ക്കുള്ള ആക്‌സസ്സ്"</string>
-    <string name="permdesc_fm" msgid="4145699441237962818">"പരിപാടികൾ കേൾക്കുന്നതിനുള്ള FM റേഡിയോ ആക്‌സസ്സ് ചെയ്യുന്നതിന് അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"ഫോൺ നമ്പറുകളിലേക്ക് നേരിട്ട് വിളിക്കുക"</string>
     <string name="permdesc_callPhone" msgid="3740797576113760827">"നിങ്ങളുടെ ഇടപെടൽ ഇല്ലാതെ ഫോൺ നമ്പറുകളിലേക്ക് കോൾ ചെയ്യാൻ അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു. ഇത് അപ്രതീക്ഷിത നിരക്കുകൾക്കോ കോളുകൾക്കോ ഇടയാക്കാം. ഇത് അടിയന്തര നമ്പറുകളിലേക്ക് വിളിക്കാൻ അപ്ലിക്കേഷനെ അനുവദിക്കില്ലെന്ന കാര്യം ശ്രദ്ധിക്കുക. ക്ഷുദ്രകരമായ അപ്ലിക്കേഷനുകൾ നിങ്ങളുടെ സ്ഥിരീകരണമില്ലാതെ കോളുകൾ ചെയ്യുന്നത് പണച്ചെലവിനിടയാക്കാം."</string>
-    <string name="permlab_callPrivileged" msgid="4198349211108497879">"ഏത് ഫോൺ നമ്പറുകളിലേക്കും നേരിട്ട് വിളിക്കുക"</string>
-    <string name="permdesc_callPrivileged" msgid="1689024901509996810">"നിങ്ങളുടെ അനുമതിയില്ലാതെ, അടിയന്തിര നമ്പരുകൾ ഉൾപ്പടെ ഏത് ഫോൺ നമ്പരിലേക്കും വിളിക്കുന്നതിന് അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു. അടിയന്തിര സേവനങ്ങളിലേക്ക് ആവശ്യമില്ലാത്തതും നിയമവിരുദ്ധമായതുമായ കോളുകളെ ദോഷകരമായ അപ്ലിക്കേഷനുകൾ സ്ഥാപിച്ചേക്കാം."</string>
-    <string name="permlab_performCdmaProvisioning" product="tablet" msgid="4842576994144604821">"CDMA ടാബ്‌ലെറ്റ് സജ്ജീകരണം നേരിട്ട് ആരംഭിക്കുക"</string>
-    <string name="permlab_performCdmaProvisioning" product="tv" msgid="3485391974208100809">"CDMA സജ്ജീകരണം നേരിട്ട് ആരംഭിക്കുന്നു"</string>
-    <string name="permlab_performCdmaProvisioning" product="default" msgid="5604848095315421425">"CDMA ഫോൺ സജ്ജീകരണം നേരിട്ട് ആരംഭിക്കുക"</string>
-    <string name="permdesc_performCdmaProvisioning" msgid="1994193538802314186">"CDMA പ്രൊവിഷനിംഗ് ആരംഭിക്കുന്നതിന് അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു. ദോഷകരമായ അപ്ലിക്കേഷനുകൾ അനാവശ്യമായി CDMA പ്രൊവിഷനിംഗ് ആരംഭിച്ചേക്കാം."</string>
-    <string name="permlab_performSimActivation" msgid="1651116521896665009">"SIM കാർഡ് സജ്ജമാക്കാൻ ആരംഭിക്കുക"</string>
-    <string name="permdesc_performSimActivation" msgid="1778214876348917401">"SIM സജീവമാക്കൽ അഭ്യർത്ഥനകൾ കൈകാര്യം ചെയ്യാൻ അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു. അപ്ലിക്കേഷൻ നേരിട്ട് ആക്റ്റിവേഷൻ ചെയ്യുകയോ മറ്റൊരു അപ്ലിക്കേഷൻ നിയുക്തമാക്കുകയോ ചെയ്യാം."</string>
-    <string name="permlab_locationUpdates" msgid="7785408253364335740">"ലൊക്കേഷൻ അപ്‌ഡേറ്റ് അറിയിപ്പുകൾ നിയന്ത്രിക്കുക"</string>
-    <string name="permdesc_locationUpdates" msgid="1120741557891438876">"റേഡിയോയിൽ നിന്ന് ലൊക്കേഷൻ അപ്ഡേറ്റ് അറിയിപ്പുകൾ പ്രവർത്തനക്ഷമമാക്കുന്നതിന്/പ്രവർത്തനരഹിതമാക്കുന്നതിന് അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു. സാധാരണ അപ്ലിക്കേഷനുകൾക്കായുഌഅ ഉപയോഗത്തിനല്ല."</string>
-    <string name="permlab_checkinProperties" msgid="7855259461268734914">"ചെക്ക്ഇൻ പ്രോപ്പർട്ടികൾ ആക്‌സസ്സ് ചെയ്യുക"</string>
-    <string name="permdesc_checkinProperties" msgid="4024526968630194128">"ചെക്ക്ഇൻ സേവനം അപ്‌ലോഡുചെയ്‌ത പ്രോപ്പർട്ടികൾ റീഡുചെയ്യുന്നതിനുള്ള/റൈറ്റ്ചെയ്യുന്നതിനുള്ള ആക്‌സസ്സിന് അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു. സാധാരണ അപ്ലിക്കേഷനുകളുടെ ഉപയോഗത്തിനല്ല."</string>
-    <string name="permlab_bindGadget" msgid="776905339015863471">"വിജറ്റുകൾ തിരഞ്ഞെടുക്കുക"</string>
-    <string name="permdesc_bindGadget" msgid="8261326938599049290">"ഏത് അപ്ലിക്കേഷന്, ഏത് വിജറ്റുകളാണ് ഉപയോഗിക്കാനാവുന്നതെന്ന് സി‌സ്റ്റത്തോട് പറയാൻ അപ്ലിക്കേഷൻ അനുവദിക്കുന്നു. ഈ അനുമതിയുള്ള അപ്ലിക്കേഷന് മറ്റ് അപ്ലിക്കേഷനുകളിലേക്ക് സ്വകാര്യ ഡാറ്റയിലേക്ക് ആക്‌സസ്സ് നൽകാനാവും. സാധാരണ അപ്ലിക്കേഷനുകളുടെ ഉപയോഗത്തിനല്ല."</string>
-    <string name="permlab_modifyPhoneState" msgid="8423923777659292228">"ഫോൺ നില പരിഷ്‌ക്കരിക്കുക"</string>
-    <string name="permdesc_modifyPhoneState" msgid="1029877529007686732">"ഉപകരണത്തിലെ ഫോൺ സവിശേഷതകളെ നിയന്ത്രിക്കുന്നതിന് അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു. നിങ്ങളെ ഒരിക്കലും അറിയിക്കാതെ നെറ്റ്‌വർക്കുകൾ മാറുന്നതിനും ഫോണും റേഡിയോയും ഓണാക്കുന്നതിനും ഓഫാക്കുന്നതിനും അതുപോലുള്ളവയും ചെയ്യുന്നതിന് ഈ അനുമതി ഉപയോഗിക്കുന്ന അപ്ലിക്കേഷന് കഴിയും."</string>
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"ഫോൺ നിലയും ഐഡന്റിറ്റിയും റീഡുചെയ്യുക"</string>
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"ഉപകരണത്തിന്റെ ഫോൺ സവിശേഷതകൾ ആക്‌സസ്സുചെയ്യാൻ അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു. ഈ അനുമതി ഫോൺ നമ്പർ, ഉപകരണ ഐഡികൾ, ഒരു കോൾ സജീവമാണോയെന്നത്, ഒരു കോൾ കണക്റ്റുചെയ്‌ത വിദൂര നമ്പർ എന്നിവ നിർണ്ണയിക്കാൻ അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
-    <string name="permlab_readPrecisePhoneState" msgid="5476483020282007597">"കൃത്യമായ ഫോൺ സ്ഥിതിവിവരക്കണക്കുകൾ വായിക്കുക"</string>
-    <string name="permdesc_readPrecisePhoneState" msgid="6648009074263855418">"കൃത്യമായ ഫോൺ സ്ഥിതിവിവരക്കണക്കുകൾ ആക്‌സസ്സുചെയ്യാൻ അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു. യഥാർത്ഥ കോൾ നില, കോൾ സജീവമാണോ പശ്‌ചാത്തലത്തിലാണോയെന്ന കാര്യം, കോൾ പരാജയങ്ങൾ, കൃത്യമായ ഡാറ്റ കണക്ഷൻ നില, ഡാറ്റ കണക്ഷൻ പരാജയങ്ങൾ എന്നിവ നിർണ്ണയിക്കാൻ ഈ അനുമതി അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"സുഷുപ്‌തിയിലാകുന്നതിൽ നിന്ന് ടാബ്‌ലെറ്റിനെ തടയുക"</string>
     <string name="permlab_wakeLock" product="tv" msgid="2601193288949154131">"ടിവിയെ നിർജ്ജീവമാകുന്നതിൽ നിന്ന് തടയുക"</string>
     <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"സുഷുപ്‌തിയിലാകുന്നതിൽ നിന്ന് ഫോണിനെ തടയുക"</string>
@@ -664,34 +385,14 @@
     <string name="permdesc_transmitIr" product="tablet" msgid="5358308854306529170">"ടാബ്‌ലെറ്റിന്റെ ഇൻഫ്രാറെഡ് ട്രാൻസ്‌മിറ്റർ ഉപയോഗിക്കാൻ അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
     <string name="permdesc_transmitIr" product="tv" msgid="3926790828514867101">"ടിവിയുടെ ഇൻഫ്രാറെഡ് ട്രാൻസ്‌മിറ്ററിനെ ഉപയോഗിക്കുന്നതിന് അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
     <string name="permdesc_transmitIr" product="default" msgid="7957763745020300725">"ഫോണിന്റെ ഇൻഫ്രാറെഡ് ട്രാൻസ്‌മിറ്റർ ഉപയോഗിക്കാൻ അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
-    <string name="permlab_devicePower" product="tablet" msgid="2787034722616350417">"ടാബ്‌ലെറ്റ് ഓണാക്കുക അല്ലെങ്കിൽ ഓഫാക്കുക"</string>
-    <string name="permlab_devicePower" product="tv" msgid="7579718349658943416">"ടിവി പവർ ഓണാക്കുക അല്ലെങ്കിൽ ഓഫാക്കുക"</string>
-    <string name="permlab_devicePower" product="default" msgid="4928622470980943206">"ഫോൺ ഓണാക്കുക അല്ലെങ്കിൽ ഓഫാക്കുക"</string>
-    <string name="permdesc_devicePower" product="tablet" msgid="6689862878984631831">"ടാബ്‌ലെറ്റ് ഓൺ ചെയ്യുന്നതിനോ ഓഫുചെയ്യുന്നതിനോ അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
-    <string name="permdesc_devicePower" product="tv" msgid="1334908641773273512">"ടിവി ഓൺ ചെയ്യുന്നതിനോ ഓഫാക്കുന്നതിനോ അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
-    <string name="permdesc_devicePower" product="default" msgid="6037057348463131032">"ഫോൺ ഓൺ ചെയ്യുന്നതിനോ ഓഫുചെയ്യുന്നതിനോ അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
-    <string name="permlab_userActivity" msgid="1677844893921729548">"ഡിസ്പ്ലേ കാലഹരണപ്പെടൽ പുനഃസജ്ജമാക്കുക"</string>
-    <string name="permdesc_userActivity" msgid="651746160252248024">"ഡിസ്പ്ലേ കാലഹരണപ്പെടൽ പുനഃസജ്ജമാക്കാൻ അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
-    <string name="permlab_factoryTest" msgid="3715225492696416187">"ഫാക്‌ടറി പരീക്ഷണ മോഡിൽ പ്രവർത്തിപ്പിക്കുക"</string>
-    <string name="permdesc_factoryTest" product="tablet" msgid="3952059318359653091">"കുറഞ്ഞ നിലയിലുള്ള നിർമ്മാതാവിന്റെ പരീക്ഷണമായി പ്രവർത്തിപ്പിക്കുന്നത്, ടാബ്‌ലെറ്റ് ഹാർഡ്‌വെയറിലേക്ക് പൂർണ്ണ ആക്‌സസ്സ് അനുവദിക്കുന്നു. നിർമ്മാതാവിന്റെ പരീക്ഷണ മോഡിൽ ഒരു ടാബ്‌ലെറ്റ് പ്രവർത്തിക്കുമ്പോൾ മാത്രമേ ലഭ്യമാകൂ."</string>
-    <string name="permdesc_factoryTest" product="tv" msgid="2105643629211155695">"താഴ്‌‌ന്ന നിലയിലുള്ള മാനുഫാക്‌ചറർ ടെ‌സ്റ്റായി പ്രവർത്തിക്കുന്നത് ടിവി ഹാർഡ്‌വെയറിലേക്ക് പൂർണ്ണ ആക്‌സസ്സ് അനുവദിക്കുന്നു. ഒരു ടിവി മാനുഫാക്‌ചറർ ടെ‌സ്‌‌റ്റ് മോഡായി പ്രവർത്തിക്കുമ്പോൾ മാത്രം ലഭ്യമാകുന്നു."</string>
-    <string name="permdesc_factoryTest" product="default" msgid="8136644990319244802">"കുറഞ്ഞ നിലയിലുള്ള നിർമ്മാതാവിന്റെ പരീക്ഷണമായി പ്രവർത്തിപ്പിക്കുന്നത്, ഫോൺ ഹാർഡ്‌വെയറിലേക്ക് പൂർണ്ണ ആക്‌സസ്സ് അനുവദിക്കുന്നു. നിർമ്മാതാവിന്റെ പരീക്ഷണ മോഡിൽ ഒരു ഫോൺ പ്രവർത്തിക്കുമ്പോൾ മാത്രമേ ലഭ്യമാകൂ."</string>
     <string name="permlab_setWallpaper" msgid="6627192333373465143">"വാൾപേപ്പർ സജ്ജീകരിക്കുക"</string>
     <string name="permdesc_setWallpaper" msgid="7373447920977624745">"സിസ്‌റ്റം വാൾപേപ്പറിനെ സജ്ജീകരിക്കുന്നതിന് അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
     <string name="permlab_setWallpaperHints" msgid="3278608165977736538">"നിങ്ങളുടെ വാൾപേപ്പർ വലുപ്പം ക്രമീകരിക്കുക"</string>
     <string name="permdesc_setWallpaperHints" msgid="8235784384223730091">"സിസ്‌റ്റം വലുപ്പ സൂചനകളെ സജ്ജീകരിക്കുന്നതിന് അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
-    <string name="permlab_masterClear" msgid="2315750423139697397">"ഫാക്‌ടറി സ്ഥിരമായതിലേക്ക് സിസ്റ്റം പുനഃസജ്ജമാക്കുക"</string>
-    <string name="permdesc_masterClear" msgid="3665380492633910226">"അപ്ലിക്കേഷന്റെ ഫാക്‌ടറി ക്രമീകരണങ്ങൾക്കും എല്ലാ ഡാറ്റയും മായ്‌ക്കുന്നതിനും കോൺഫിഗറേഷനും ഇൻസ്റ്റാളുചെയ്‌ത അപ്ലിക്കേഷനുകൾക്കും സിസ്‌റ്റം പൂർണ്ണമായും പുനഃസജ്ജീകരിക്കുന്നതിന് അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
-    <string name="permlab_setTime" msgid="2021614829591775646">"സമയം സജ്ജീകരിക്കുക"</string>
-    <string name="permdesc_setTime" product="tablet" msgid="1896341438151152881">"ടാബ്‌ലെറ്റിന്റെ ക്ലോക്ക് സമയത്തെ മാറ്റുന്നതിന് അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
-    <string name="permdesc_setTime" product="tv" msgid="1826398919861882682">"ടിവിയുടെ ക്ലോക്ക് സമയം മാറ്റുന്നതിന് അപ്ലിക്കേഷനെ അനുവദിക്കുക."</string>
-    <string name="permdesc_setTime" product="default" msgid="1855702730738020">"ഫോണിന്റെ ക്ലോക്ക് സമയത്തെ മാറ്റുന്നതിന് അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
     <string name="permlab_setTimeZone" msgid="2945079801013077340">"സമയ മേഖല സജ്ജീകരിക്കുക"</string>
     <string name="permdesc_setTimeZone" product="tablet" msgid="1676983712315827645">"ടാബ്‌ലെറ്റിന്റെ സമയ മേഖലയെ മാറ്റുന്നതിന് അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
     <string name="permdesc_setTimeZone" product="tv" msgid="888864653946175955">"ടിവിയുടെ സമയ മേഖല മാറ്റുന്നതിന് അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
     <string name="permdesc_setTimeZone" product="default" msgid="4499943488436633398">"ഫോണിന്റെ സമയ മേഖലയെ മാറ്റുന്നതിന് അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
-    <string name="permlab_accountManagerService" msgid="4829262349691386986">"AccountManagerService ആയി പ്രവർത്തിക്കുന്നു"</string>
-    <string name="permdesc_accountManagerService" msgid="1948455552333615954">"AccountAuthenticators-ലേക്ക് കോളുകൾ നടത്താൻ അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
     <string name="permlab_getAccounts" msgid="1086795467760122114">"ഉപകരണത്തിലെ അക്കൗണ്ടുകൾ കണ്ടെത്തുക"</string>
     <string name="permdesc_getAccounts" product="tablet" msgid="2741496534769660027">"ടാബ്‌ലെറ്റ് തിരിച്ചറിയുന്ന അക്കൗണ്ടുകളുടെ ലിസ്റ്റ് നേടാൻ അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു. ഇതിൽ നിങ്ങൾ ഇൻസ്റ്റാളുചെയ്‌ത അപ്ലിക്കേഷനുകൾ സൃഷ്‌ടിച്ച എല്ലാ അക്കൗണ്ടുകളും ഉൾപ്പെടാം."</string>
     <string name="permdesc_getAccounts" product="tv" msgid="4190633395633907543">"ടിവിയ്‌ക്ക് പരിചയമുള്ള അക്കൗണ്ടുകളുടെ ലിസ്‌റ്റ് സ്വീകരിക്കുന്നതിന് അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു. ഇത് നിങ്ങൾ ഇൻസ്റ്റാളുചെയ്‌തിരിക്കുന്ന അപ്ലിക്കേഷനുകൾ സൃഷ്‌ടിച്ച ഏത് അക്കൗണ്ടുകളെയും ഉൾപ്പെടുത്തിയേക്കാം."</string>
@@ -706,14 +407,10 @@
     <string name="permdesc_accessNetworkState" msgid="8318964424675960975">"ഏതെല്ലാം നെറ്റ്‌വർക്കുകൾ നിലവിലുണ്ടെന്നതും കണക്റ്റുചെയ്‌തിട്ടുണ്ടെന്നതും പോലുള്ള നെറ്റ്‌വർക്ക് കണക്ഷനുകളെക്കുറിച്ചുള്ള വിവരം കാണാൻ അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
     <string name="permlab_createNetworkSockets" msgid="8018758136404323658">"പൂർണ്ണ നെറ്റ്‌വർക്ക് ആക്‌സസ്സ്"</string>
     <string name="permdesc_createNetworkSockets" msgid="3403062187779724185">"നെറ്റ്‌വർക്ക് സോക്കറ്റുകൾ സൃഷ്‌ടിക്കാനും ഇഷ്‌ടാനുസൃത നെറ്റ്‌വർക്ക് പ്രോട്ടോക്കോളുകൾ ഉപയോഗിക്കാനും അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു. ഇന്റർനെറ്റിലേക്ക് ഡാറ്റ അയയ്‌ക്കുന്നതിനായി ബ്രൗസറും മറ്റ് അപ്ലിക്കേഷനുകളും ഉള്ളതിനാൽ, ഇന്റർനെറ്റിലേക്ക് ഡാറ്റ അയയ്‌ക്കാൻ ഈ അനുമതി ആവശ്യമില്ല."</string>
-    <string name="permlab_writeApnSettings" msgid="505660159675751896">"നെറ്റ്‌വർക്ക് ക്രമീകരണങ്ങളും ട്രാഫിക്കും മാറ്റുക/തടയുക"</string>
-    <string name="permdesc_writeApnSettings" msgid="5333798886412714193">"നെറ്റ്‌വർക്ക് ക്രമീകരണങ്ങൾ മാറ്റി ഏതെങ്കിലും APN-ന്റെ പ്രോക്‌സിയോ പോർട്ടോ മാറ്റുന്നതുപോലുള്ള എല്ലാ നെറ്റ്‌വർക്ക് ട്രാഫിക്കുകളേയും തടയുകയും പരിശോധിക്കുകയും ചെയ്യുന്നതിന് അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു. നിങ്ങളുടെ അറിയിക്കാതെ ദോഷകരമായ അപ്ലിക്കേഷൻ നെറ്റ്‌വർക്ക് പാക്കറ്റുകളെ നിയന്ത്രിക്കുകയോ റീഡയറക്‌റ്റുചെയ്യുകയോ പരിഷ്‌ക്കരിക്കുകയോ ചെയ്‌തേക്കാം."</string>
     <string name="permlab_changeNetworkState" msgid="958884291454327309">"നെറ്റ്‌വർക്ക് കണക്‌റ്റിവിറ്റി മാറ്റുക"</string>
     <string name="permdesc_changeNetworkState" msgid="6789123912476416214">"നെറ്റ്‌വർക്ക് കണക്‌റ്റി‌വിറ്റിയുടെ നില മാറ്റുന്നതിന് അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
     <string name="permlab_changeTetherState" msgid="5952584964373017960">"ടെതർ ചെയ്‌ത കണക്‌റ്റിവിറ്റി മാറ്റുക"</string>
     <string name="permdesc_changeTetherState" msgid="1524441344412319780">"ടെതർചെയ്‌ത നെറ്റ്‌വർക്ക് കണക്‌റ്റിവിറ്റിയുടെ നിലമാറ്റുന്നതിന് അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
-    <string name="permlab_changeBackgroundDataSetting" msgid="1400666012671648741">"പശ്ചാത്തല ഡാറ്റ ഉപയോഗ ക്രമീകരണം മാറ്റുക"</string>
-    <string name="permdesc_changeBackgroundDataSetting" msgid="5347729578468744379">"പശ്ചാത്തല ഡാറ്റ ഉപയോഗ ക്രമീകരണം മാറ്റുന്നതിന് അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
     <string name="permlab_accessWifiState" msgid="5202012949247040011">"Wi-Fi കണക്ഷനുകൾ കാണുക"</string>
     <string name="permdesc_accessWifiState" msgid="5002798077387803726">"Wi-Fi പ്രവർത്തനക്ഷമമാണോ എന്നതും കണക്റ്റുചെയ്‌തിരിക്കുന്ന Wi-Fi ഉപകരണങ്ങളുടെ പേരും പോലുള്ള, Wi-Fi നെറ്റ്‌വർക്കിംഗിനെക്കുറിച്ചുള്ള വിവരം കാണാൻ അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
     <string name="permlab_changeWifiState" msgid="6550641188749128035">"Wi-Fi കണക്റ്റുചെയ്യുക, അതിൽ നിന്നും വിച്ഛേദിക്കുക"</string>
@@ -726,24 +423,12 @@
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="6921177471748882137">"ഒരു പ്രാദേശിക ബ്ലൂടൂത്ത് ടാബ്‌ലെറ്റ് കോൺഫിഗർചെയ്യുന്നതിനും വിദൂര ഉപകരണങ്ങളെ കണ്ടെത്തി ജോടിയാക്കുന്നതിനും അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
     <string name="permdesc_bluetoothAdmin" product="tv" msgid="3373125682645601429">"പ്രാദേശിക Bluetooth ടിവി കോൺഫിഗർചെയ്യുന്നതിനും വിദൂര ഉപകരണങ്ങൾ കണ്ടെത്തി ജോടിയാക്കുന്നതിനും അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
     <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"ഒരു പ്രാദേശിക ബ്ലൂടൂത്ത് ഫോണിനെ കോൺഫിഗർചെയ്യുന്നതിനും വിദൂര ഉപകരണങ്ങളെ കണ്ടെത്തി ജോടിയാക്കുന്നതിനും അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
-    <string name="permlab_bluetoothPriv" msgid="4009494246009513828">"അപ്ലിക്കേഷൻ ഉപയോഗിച്ച് ബ്ലൂടൂത്ത് ജോടിയാക്കൽ അനുവദിക്കുക"</string>
-    <string name="permdesc_bluetoothPriv" product="tablet" msgid="8045735193417468857">"ഉപയോക്തൃ ഇടപെടലില്ലാതെ വിദൂര ഉപകരണങ്ങളുമായി ജോടിയാക്കാൻ അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
-    <string name="permdesc_bluetoothPriv" product="tv" msgid="8045735193417468857">"ഉപയോക്തൃ ഇടപെടലില്ലാതെ വിദൂര ഉപകരണങ്ങളുമായി ജോടിയാക്കാൻ അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
-    <string name="permdesc_bluetoothPriv" product="default" msgid="8045735193417468857">"ഉപയോക്തൃ ഇടപെടലില്ലാതെ വിദൂര ഉപകരണങ്ങളുമായി ജോടിയാക്കാൻ അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
-    <string name="permlab_bluetoothMap" msgid="6372198338939197349">"ബ്ലൂടൂത്ത് MAP ഡാറ്റ ആക്‌സസ്സുചെയ്യുക"</string>
-    <string name="permdesc_bluetoothMap" product="tablet" msgid="5784090105926959958">"ബ്ലൂടൂത്ത് MAP ഡാറ്റ ആക്‌സസ്സുചെയ്യാൻ അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
-    <string name="permdesc_bluetoothMap" product="tv" msgid="5784090105926959958">"ബ്ലൂടൂത്ത് MAP ഡാറ്റ ആക്‌സസ്സുചെയ്യാൻ അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
-    <string name="permdesc_bluetoothMap" product="default" msgid="5784090105926959958">"ബ്ലൂടൂത്ത് MAP ഡാറ്റ ആക്‌സസ്സുചെയ്യാൻ അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
     <string name="permlab_accessWimaxState" msgid="4195907010610205703">"WiMAX കണക്റ്റുചെയ്യുക, അതിൽ നിന്നും വിച്ഛേദിക്കുക"</string>
     <string name="permdesc_accessWimaxState" msgid="6360102877261978887">"WiMAX പ്രവർത്തനക്ഷമമാണോയെന്നതും കണക്റ്റുചെയ്‌തിരിക്കുന്ന ഏതെങ്കിലും WiMAX നെറ്റ്‌വർക്കുകളെക്കുറിച്ചുള്ള വിവരങ്ങളും നിർണ്ണയിക്കാൻ അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
     <string name="permlab_changeWimaxState" msgid="2405042267131496579">"WiMAX നില മാറ്റുക"</string>
     <string name="permdesc_changeWimaxState" product="tablet" msgid="3156456504084201805">"WiMAX നെറ്റ്‌വർക്കുകളിലേക്ക് ടാബ്‌ലെറ്റ് കണക്റ്റുചെയ്യാനും അതിൽ നിന്ന് വിച്ഛേദിക്കാനും അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
     <string name="permdesc_changeWimaxState" product="tv" msgid="6022307083934827718">"WiMAX നെറ്റ്‌വർക്കുകളിൽ നിന്ന് ടിവി കണക്‌റ്റുചെയ്യുന്നതിനും വിച്‌ഛേദിക്കുന്നതിനും അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
     <string name="permdesc_changeWimaxState" product="default" msgid="697025043004923798">"WiMAX നെറ്റ്‌വർക്കുകളിലേക്ക് ഫോൺ കണക്റ്റുചെയ്യാനും അതിൽ നിന്ന് വിച്ഛേദിക്കാനും അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
-    <string name="permlab_scoreNetworks" msgid="6445777779383587181">"സ്കോർ നെറ്റ്‌വർക്ക്"</string>
-    <string name="permdesc_scoreNetworks" product="tablet" msgid="1304304745850215556">"നെറ്റ്‌വർക്കുകളെ റാങ്ക് ചെയ്യുന്നതിനും ടാബ്‌ലെറ്റ് മുൻഗണന നൽകുന്ന നെറ്റ്‌വർക്കിനെ സ്വാധീനിക്കുന്നതിനും അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
-    <string name="permdesc_scoreNetworks" product="tv" msgid="5444434643862417649">"നെറ്റ്‌വർക്കുകളെ റാങ്ക് ചെയ്യുന്നതിനും ടിവി മുൻഗണന നൽകുന്ന നെറ്റ്‌വർക്കുകളെ സ്വാധീനിക്കുന്നതിനും അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
-    <string name="permdesc_scoreNetworks" product="default" msgid="1831501848178651379">"നെറ്റ്‌വർക്കുകളെ റാങ്ക് ചെയ്യുന്നതിനും ഫോൺ മുൻഗണന നൽകുന്ന നെറ്റ്‌വർക്കുകളെ സ്വാധീനിക്കുന്നതിനും അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
     <string name="permlab_bluetooth" msgid="6127769336339276828">"ബ്ലൂടൂത്ത് ഉപകരണങ്ങളുമായി ജോടിയാക്കുക"</string>
     <string name="permdesc_bluetooth" product="tablet" msgid="3480722181852438628">"ടാബ്‌ലെറ്റിലെ ബ്ലൂടൂത്ത് കോൺഫിഗറേഷൻ കാണാനും ജോടിയാക്കിയ ഉപകരണങ്ങളുമായി കണക്ഷനുകൾ നടത്തി അംഗീകരിക്കാനും അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
     <string name="permdesc_bluetooth" product="tv" msgid="3974124940101104206">"ടിവിയിലെ Bluetooth-ന്റെ കോൺഫിഗറേഷൻ കാണുന്നതിനൊപ്പം ജോടിയാക്കിയ ഉപകരണങ്ങളുമായുള്ള കണക്ഷനുകൾ സൃഷ്‌ടിക്കാനും അംഗീകരിക്കാനും അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
@@ -778,10 +463,6 @@
     <string name="permdesc_writeSyncSettings" msgid="8956262591306369868">"ഒരു അക്കൗണ്ടിനായി സമന്വയ ക്രമീകരണങ്ങൾ പരിഷ്‌ക്കരിക്കാൻ അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു. ഉദാഹരണത്തിന്, ആളുകൾ അപ്ലിക്കേഷൻ ഒരു അക്കൗണ്ടിൽ സമന്വയിപ്പിക്കുന്നത് പ്രവർത്തനക്ഷമമാക്കാൻ ഇത് ഉപയോഗിക്കാം."</string>
     <string name="permlab_readSyncStats" msgid="7396577451360202448">"സമന്വയ സ്ഥിതിവിവരണക്കണക്കുകൾ വായിക്കുക"</string>
     <string name="permdesc_readSyncStats" msgid="1510143761757606156">"സമന്വയ ഇവന്റുകളുടെ ചരിത്രവും ഡാറ്റ എത്രത്തോളം സമന്വയിപ്പിച്ചുവെന്നതും ഉൾപ്പെടെ, ഒരു അക്കൗണ്ടിനായി സമന്വയ സ്ഥിതിവിവരക്കണക്കുകൾ റീഡുചെയ്യാൻ അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
-    <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"സബ്‌സ്ക്രൈബ് ചെയ്‌ത ഫീഡുകൾ വായിക്കുക"</string>
-    <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"നിലവിൽ സമന്വയിപ്പിച്ച ഫീഡുകളെക്കുറിച്ചുള്ള വിശദാംശങ്ങൾ നേടുന്നതിന് അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
-    <string name="permlab_subscribedFeedsWrite" msgid="9015246325408209296">"സബ്‌സ്ക്രൈബ് ചെയ്‌ത ഫീഡുകൾ എഴുതുക"</string>
-    <string name="permdesc_subscribedFeedsWrite" msgid="6928930188826089413">"നിലവിൽ സമന്വയിപ്പിച്ച ഫീഡുകളെക്കുറിച്ചുള്ള വിശദാംശങ്ങൾ നേടുന്നതിന് അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു. ദോഷകരമായ അപ്ലിക്കേഷനുകൾ, നിങ്ങളുടെ സമന്വയിപ്പിച്ച ഫീഡുകളെ മാറ്റിയേക്കാം."</string>
     <string name="permlab_readDictionary" msgid="4107101525746035718">"നിഘണ്ടുവിൽ നിങ്ങൾ ചേർത്ത പദങ്ങൾ വായിക്കുക"</string>
     <string name="permdesc_readDictionary" msgid="659614600338904243">"ഉപയോക്തൃ നിഘണ്ടുവിൽ ഉപയോക്താവ് സംഭരിച്ചിരിക്കാനിടയുള്ള എല്ലാ പദങ്ങളും പേരുകളും വാക്യങ്ങളും വായിക്കാൻ അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
     <string name="permlab_writeDictionary" msgid="2183110402314441106">"ഉപയോക്തൃ നിർവചിത നിഘണ്ടുവിൽ പദങ്ങൾ ചേർക്കുക"</string>
@@ -794,62 +475,8 @@
     <string name="permlab_sdcardWrite" product="default" msgid="8805693630050458763">"നിങ്ങളുടെ SD കാർഡ് ഉള്ളടക്കങ്ങൾ പരിഷ്‌ക്കരിക്കുകയോ ഇല്ലാതാക്കുകയോ ചെയ്യുക"</string>
     <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6175406299445710888">"USB സംഭരണത്തിൽ റൈറ്റുചെയ്യുന്നതിന് അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
     <string name="permdesc_sdcardWrite" product="default" msgid="4337417790936632090">"SD കാർഡിൽ റൈറ്റുചെയ്യുന്നതിന് അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
-    <string name="permlab_mediaStorageWrite" product="default" msgid="6859839199706879015">"ആന്തരിക മീഡിയ സംഭരണ ഉള്ളടക്കങ്ങൾ പരിഷ്‌ക്കരിക്കുക/ഇല്ലാതാക്കുക"</string>
-    <string name="permdesc_mediaStorageWrite" product="default" msgid="8189160597698529185">"ആന്തരിക മീഡിയ സംഭരണത്തിന്റെ ഉള്ളടക്കങ്ങൾ പരിഷ്‌ക്കരിക്കുന്നതിന് അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
-    <string name="permlab_manageDocs" product="default" msgid="5778318598448849829">"പ്രമാണ സംഭരണം നിയന്ത്രിക്കുക"</string>
-    <string name="permdesc_manageDocs" product="default" msgid="8704323176914121484">"പ്രമാണ സംഭരണം നിയന്ത്രിക്കാൻ അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
-    <string name="permlab_sdcardAccessAll" msgid="8150613823900460576">"എല്ലാ ഉപയോക്താക്കളുടേയും ബാഹ്യ സംഭരണം ആക്‌സസ്സുചെയ്യുക"</string>
-    <string name="permdesc_sdcardAccessAll" msgid="3215208357415891320">"എല്ലാ ഉപയോക്താക്കൾക്കായും ബാഹ്യ സംഭരണം ആക്‌സസ്സുചെയ്യാൻ അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
-    <string name="permlab_cache_filesystem" msgid="5656487264819669824">"കാഷെ ഫയൽ സിസ്റ്റം ആക്‌സസ്സ് ചെയ്യുക"</string>
-    <string name="permdesc_cache_filesystem" msgid="5578967642265550955">"കാഷെ ഫയൽ സിസ്‌റ്റം റീഡുചെയ്യുന്നതിനും റൈറ്റുചെയ്യുന്നതിനും അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
     <string name="permlab_use_sip" msgid="2052499390128979920">"SIP കോളുകൾ വിളിക്കുക/സ്വീകരിക്കുക"</string>
     <string name="permdesc_use_sip" msgid="2297804849860225257">"SIP കോളുകൾ വിളിക്കാനും സ്വീകരിക്കാനും അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
-    <string name="permlab_register_sim_subscription" msgid="3166535485877549177">"പുതിയ ടെലികോം SIM കണക്ഷനുകൾ രജിസ്‌റ്റർ ചെയ്യുക"</string>
-    <string name="permdesc_register_sim_subscription" msgid="2138909035926222911">"പുതിയ ടെലികോം SIM കണക്ഷനുകൾ രജിസ്‌റ്റർ ചെയ്യാൻ അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
-    <string name="permlab_register_call_provider" msgid="108102120289029841">"പുതിയ ടെലികോം കണക്ഷനുകൾ രജിസ്‌റ്റർ ചെയ്യുക"</string>
-    <string name="permdesc_register_call_provider" msgid="7034310263521081388">"പുതിയ ടെലികോം കണക്ഷനുകൾ രജിസ്‌റ്റർ ചെയ്യാൻ അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
-    <string name="permlab_connection_manager" msgid="1116193254522105375">"ടെലികോം കണക്ഷനുകൾ നിയന്ത്രിക്കുക"</string>
-    <string name="permdesc_connection_manager" msgid="5925480810356483565">"ടെലികോം കണക്ഷനുകൾ നിയന്ത്രിക്കാൻ അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
-    <string name="permlab_bind_incall_service" msgid="6773648341975287125">"ഇൻ-കോൾ സ്‌ക്രീനുമായി സംവദിക്കുക"</string>
-    <string name="permdesc_bind_incall_service" msgid="8343471381323215005">"ഉപയോക്താവ് ഇൻ-കോൾ സ്‌ക്രീൻ എപ്പോൾ, എങ്ങനെ കാണുന്നുവെന്നത് നിയന്ത്രിക്കാൻ അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
-    <string name="permlab_bind_connection_service" msgid="3557341439297014940">"ടെലിഫോണി സേവനങ്ങൾ ഉപയോഗിച്ച് സംവദിക്കുക"</string>
-    <string name="permdesc_bind_connection_service" msgid="4008754499822478114">"കോളുകൾ ചെയ്യുന്നതിനോ/സ്വീകരിക്കുന്നതിനോ ടെലിഫോണി സേവനങ്ങൾ ഉപയോഗിച്ച് സംവദിക്കാൻ അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
-    <string name="permlab_control_incall_experience" msgid="9061024437607777619">"ഇൻ‌-കോൾ ഉപയോക്തൃ അനുഭവം നൽകുക"</string>
-    <string name="permdesc_control_incall_experience" msgid="915159066039828124">"ഇൻ- കോൾ ഉപയോക്തൃ അനുഭവം നൽകുന്നതിന് അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
-    <string name="permlab_readNetworkUsageHistory" msgid="7862593283611493232">"ചരിത്രപരമായ നെറ്റ്‌വർക്ക് ഉപയോഗം വായിക്കുക"</string>
-    <string name="permdesc_readNetworkUsageHistory" msgid="7689060749819126472">"നിർദ്ദി‌ഷ്‌ട നെറ്റ്‌വർക്കുകൾക്കും അപ്ലിക്കേഷനുകൾക്കുമുള്ള ചരിത്രപരമായ നെറ്റ്‌വർക്ക് ഉപയോഗം റീഡുചെയ്യുന്നതിന് അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
-    <string name="permlab_manageNetworkPolicy" msgid="2562053592339859990">"നെറ്റ്‌വർക്ക് നയം നിയന്ത്രിക്കുക"</string>
-    <string name="permdesc_manageNetworkPolicy" msgid="7537586771559370668">"നെറ്റ്‌വർക്ക് നയങ്ങൾ നിയന്ത്രിക്കുന്നതിനും നിർദ്ദിഷ്‌ട അപ്ലിക്കേഷൻ നിയമങ്ങൾ നിർവ്വചിക്കുന്നതിനും അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
-    <string name="permlab_modifyNetworkAccounting" msgid="5088217309088729650">"നെറ്റ്‌വർക്ക് ഉപയോഗ അക്കൗണ്ടിംഗ് പരിഷ്‌ക്കരിക്കുക"</string>
-    <string name="permdesc_modifyNetworkAccounting" msgid="5443412866746198123">"നെറ്റ്‌വർക്ക് ഉപയോഗം അപ്ലിക്കേഷനുകളിൽ കണക്കാക്കുന്നതെങ്ങനെയെന്ന് പരിഷ്‌ക്കരിക്കാൻ അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു. സാധാരണ അപ്ലിക്കേഷനുകളുടെ ഉപയോഗത്തിനുള്ളതല്ല."</string>
-    <string name="permlab_accessNotifications" msgid="7673416487873432268">"അറിയിപ്പുകൾ ആക്‌സസ്സുചെയ്യുക"</string>
-    <string name="permdesc_accessNotifications" msgid="458457742683431387">"മറ്റ് അപ്ലിക്കേഷനുകൾ പോസ്റ്റുചെയ്‌തവയുൾപ്പെടെയുള്ള, അറിയിപ്പുകൾ വീണ്ടെടുക്കാനും പരിശോധിക്കാനും മായ്‌ക്കാനും അപ്ലിക്കേഷനുകളെ അനുവദിക്കുന്നു."</string>
-    <string name="permlab_bindNotificationListenerService" msgid="7057764742211656654">"ഒരു അറിയിപ്പ് ലിസണർ സേവനവുമായി ബന്ധിപ്പിക്കുക"</string>
-    <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"ഒരു അറിയിപ്പ് ലിസണർ സേവനത്തിന്റെ ഉയർന്ന നിലയിലുള്ള ഇന്റർഫേസിലേക്ക് ബന്ധിപ്പിക്കാൻ ഹോൾഡറിനെ അനുവദിക്കുന്നു. സാധാരണ അപ്ലിക്കേഷനുകൾക്ക് ഒരിക്കലും ആവശ്യമില്ല."</string>
-    <string name="permlab_bindChooserTargetService" msgid="3443261076710185673">"ഒരു ചൂസർ ടാർഗെറ്റ് സേവനത്തിലേക്ക് ബന്ധിപ്പിക്കുക"</string>
-    <string name="permdesc_bindChooserTargetService" msgid="1413908999583734970">"ഒരു ചൂസർ ടാർഗെറ്റ് സേവനത്തിന്റെ ഉയർന്ന ലെവൽ ഇന്റർഫേസിലേക്ക് ബന്ധിപ്പിക്കാൻ ഉടമയെ അനുവദിക്കുന്നു. സാധാരണ അപ്ലിക്കേഷനുകൾക്ക് ഒരിക്കലും ആവശ്യമില്ല."</string>
-    <string name="permlab_bindConditionProviderService" msgid="1180107672332704641">"കണ്ടീഷൻ പ്രൊവൈഡർ സേവനവുമായി ബന്ധിപ്പിക്കുക"</string>
-    <string name="permdesc_bindConditionProviderService" msgid="1680513931165058425">"ഒരു കണ്ടീഷൻ പ്രൊവൈഡർ സേവനത്തിന്റെ ഉയർന്ന നിലയിലുള്ള ഇന്റർഫേസിലേക്ക് ബന്ധിപ്പിക്കാൻ ഹോൾഡറിനെ അനുവദിക്കുന്നു. സാധാരണ അപ്ലിക്കേഷനുകൾക്ക് ഒരിക്കലും ആവശ്യമില്ല."</string>
-    <string name="permlab_bindMediaRouteService" msgid="6637740382272686835">"മീഡിയ റൂട്ട് സേവനവുമായി ബന്ധിപ്പിക്കുക"</string>
-    <string name="permdesc_bindMediaRouteService" msgid="6436655024972496687">"ഒരു മീഡിയ റൂട്ട് സേവനത്തിന്റെ ഉയർന്ന നിലയിലുള്ള ഇന്റർഫേസിലേക്ക് ബന്ധിപ്പിക്കാൻ ദാതാവിനെ അനുവദിക്കുന്നു. സാധാരണ അപ്ലിക്കേഷനുകൾക്ക് ഒരിക്കലും ആവശ്യമില്ല."</string>
-    <string name="permlab_bindDreamService" msgid="4153646965978563462">"സ്വപ്‌നതുല്യമായ ഒരു സേവനത്തിലേക്ക് ബന്ധിപ്പിക്കുക"</string>
-    <string name="permdesc_bindDreamService" msgid="7325825272223347863">"സ്വപ്‌നതുല്യമായ ഒരു സേവനത്തിന്റെ ഉയർന്ന നിലയിലുള്ള ഇന്റർഫേസിലേക്ക് ബന്ധിപ്പിക്കാൻ ദാതാവിനെ അനുവദിക്കുന്നു. സാധാരണ അപ്ലിക്കേഷനുകൾക്ക് ഒരിക്കലും ആവശ്യമില്ല."</string>
-    <string name="permlab_invokeCarrierSetup" msgid="3699600833975117478">"കാരിയർ നൽകിയ കോൺഫിഗറേഷൻ അപ്ലിക്കേഷൻ റദ്ദാക്കുക"</string>
-    <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"കാരിയർ നൽകിയ കോൺഫിഗറേഷൻ അപ്ലിക്കേഷൻ റദ്ദാക്കാൻ ഹോൾഡറിനെ അനുവദിക്കുന്നു. സാധാരണ അപ്ലിക്കേഷനുകൾക്ക് ഒരിക്കലും ആവശ്യമില്ല."</string>
-    <string name="permlab_accessNetworkConditions" msgid="8206077447838909516">"നെറ്റ്‌വർക്ക് നിലകളിൽ നിരീക്ഷണത്തിനായി കേൾക്കുക"</string>
-    <string name="permdesc_accessNetworkConditions" msgid="6899102075825272211">"നെറ്റ്‌വർക്ക് അവസ്ഥകളിൽ നിരീക്ഷണങ്ങൾ ശ്രവിക്കാൻ ഒരു അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു. സാധാരണ അപ്ലിക്കേഷനുകൾക്ക് ഒരിക്കലും ആവശ്യമില്ല."</string>
-    <string name="permlab_setInputCalibration" msgid="4902620118878467615">"ഇൻപുട്ട് ഉപകരണ കാലിബ്രേഷൻ മാറ്റുക"</string>
-    <string name="permdesc_setInputCalibration" msgid="4527511047549456929">"ടച്ച് സ്‌ക്രീനിന്റെ കാലിബ്രേഷൻ പാരാമീറ്ററുകൾ പരിഷ്‌ക്കരിക്കുന്നതിന് അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു. സാധാരണ അപ്ലിക്കേഷനുകൾക്ക് ഒരിക്കലും ആവശ്യമില്ല."</string>
-    <string name="permlab_accessDrmCertificates" msgid="7436886640723203615">"DRM സർട്ടിഫിക്കറ്റുകൾക്കുള്ള ആക്‌സസ്സ്"</string>
-    <string name="permdesc_accessDrmCertificates" msgid="8073288354426159089">"പ്രൊവിഷൻ ചെയ്യുന്നതിനും DRM സർട്ടിഫിക്കറ്റുകൾ ഉപയോഗിക്കുന്നതിനും അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു. സാധാരണ അപ്ലിക്കേഷനുകൾക്ക് ഒരിക്കലും ആവശ്യമില്ല."</string>
-    <string name="permlab_handoverStatus" msgid="1159132046126626731">"Android ബീം കൈമാറൽ നില നേടുക"</string>
-    <string name="permdesc_handoverStatus" msgid="4788144087245714948">"നിലവിലെ Android ബീം കൈമാറ്റങ്ങളെക്കുറിച്ച് വിവരങ്ങൾ നേടാൻ ഈ അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു"</string>
-    <string name="permlab_removeDrmCertificates" msgid="7044888287209892751">"DRM സർട്ടിഫിക്കറ്റുകൾ നീക്കം ചെയ്യുക"</string>
-    <string name="permdesc_removeDrmCertificates" msgid="7272999075113400993">"DRM സർട്ടിഫിക്കറ്റുകൾ നീക്കംചെയ്യുന്നതിന് അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു. സാധാരണ അപ്ലിക്കേഷനുകൾക്ക് ഒരിക്കലും ആവശ്യമില്ല."</string>
-    <string name="permlab_bindCarrierMessagingService" msgid="1490229371796969158">"കാരിയർ സന്ദേശമയയ്‌ക്കൽ സേവനത്തിലേക്ക് ബന്ധിപ്പിക്കുക"</string>
-    <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"ഒരു കാരിയർ സന്ദേശമയയ്‌ക്കൽ സേവനത്തിന്റെ ഉയർന്ന നിലയിലുള്ള ഇന്റർഫേസിലേക്ക് ബന്ധിപ്പിക്കാൻ ദാതാവിനെ അനുവദിക്കുന്നു. സാധാരണ അപ്ലിക്കേഷനുകൾക്ക് ഒരിക്കലും ആവശ്യമില്ല."</string>
-    <string name="permlab_accessVoiceInteractionService" msgid="4183835260471435605">"വോയ്‌സ് ഇന്ററാക്ഷൻ സേവനവുമായി ഇടപെടുക"</string>
-    <string name="permdesc_accessVoiceInteractionService" msgid="836587728238433459">"നിലവിൽ സജീവമായിരിക്കുന്ന വോയ്‌സ് ഇന്ററാക്ഷൻ സേവനവുമായി ഇടപെടാൻ ഉടമയെ അനുവദിക്കുന്നു. സാധാരണ അപ്ലിക്കേഷനുകൾക്ക് ഒരിക്കലും ആവശ്യമില്ല."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"പാസ്‌വേഡ് നിയമങ്ങൾ സജ്ജീകരിക്കുക"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"സ്‌ക്രീൻ ലോക്ക് പാസ്‌വേഡുകളിലും PIN-കളിലും അനുവദിച്ചിരിക്കുന്ന ദൈർഘ്യവും പ്രതീകങ്ങളും നിയന്ത്രിക്കുക."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"സ്‌ക്രീൻ അൺലോക്ക് ശ്രമങ്ങൾ നിരീക്ഷിക്കുക"</string>
@@ -1135,28 +762,10 @@
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="8497389531014185509">"നിങ്ങളുടെ ഫോണിൽ സംഭരിച്ചിരിക്കുന്ന ബ്രൗസറിന്റെ ചരിത്രമോ ബുക്ക്‌മാർക്കുകളോ പരിഷ്‌ക്കരിക്കാൻ അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു. ഇത് ബ്രൗസർ ഡാറ്റ മായ്‌ക്കാനോ പരിഷ്‌ക്കരിക്കാനോ അപ്ലിക്കേഷനെ അനുവദിക്കാനിടയുണ്ട്. ശ്രദ്ധിക്കുക: ഈ അനുമതി മൂന്നാം കക്ഷി ബ്രൗസറുകളോ വെബ് ബ്രൗസിംഗ് കഴിവുകളുള്ള മറ്റ് അപ്ലിക്കേഷനുകളോ നടപ്പിലാക്കാനിടയില്ല."</string>
     <string name="permlab_setAlarm" msgid="1379294556362091814">"ഒരു അലാറം സജ്ജീകരിക്കുക"</string>
     <string name="permdesc_setAlarm" msgid="316392039157473848">"ഒരു ഇൻസ്റ്റാളുചെയ്‌ത അലാറം ക്ലോക്ക് അപ്ലിക്കേഷനിൽ അലാറം സജ്ജീകരിക്കുന്നതിന് അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു. ചില അലാറം ക്ലോക്ക് അപ്ലിക്കേഷനുകൾ ഈ സവിശേഷത നടപ്പിലാക്കാതിരുന്നേക്കാം."</string>
-    <string name="permlab_writeVoicemail" msgid="7309899891683938100">"വോയ്‌സ്‌മെയിലുകൾ റൈറ്റുചെയ്യുക"</string>
-    <string name="permdesc_writeVoicemail" msgid="6592572839715924830">"നിങ്ങളുടെ വോയ്‌സ്മെയിൽ ഇൻബോക്‌സിൽ നിന്നും സന്ദേശങ്ങൾ പരിഷ്ക്കരിക്കാനും നീക്കംചെയ്യാനും അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
     <string name="permlab_addVoicemail" msgid="5525660026090959044">"വോയ്‌സ് മെയിൽ ചേർക്കുക"</string>
     <string name="permdesc_addVoicemail" msgid="6604508651428252437">"നിങ്ങളുടെ വോയ്‌സ്മെയിൽ ഇൻബോക്‌സിലേക്ക് സന്ദേശങ്ങൾ ചേർക്കാൻ അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
-    <string name="permlab_readVoicemail" msgid="8415201752589140137">"വോയ്‌സ്‌മെയിൽ റീഡുചെയ്യുക"</string>
-    <string name="permdesc_readVoicemail" msgid="8926534735321616550">"നിങ്ങളുടെ വോയ്‌സ്‌മെയിലുകൾ റീഡുചെയ്യാൻ അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
     <string name="permlab_writeGeolocationPermissions" msgid="5962224158955273932">"ബ്രൗസർ ജിയോലൊക്കേഷൻ അനുമതികൾ പരിഷ്‌ക്കരിക്കുക"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="1083743234522638747">"ബ്രൗസറിന്റെ ജിയോലൊക്കേഷൻ അനുമതികളെ പരിഷ്‌ക്കരിക്കുന്നതിന് അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു. അനിയന്ത്രിതമായ വെബ്‌സൈറ്റുകളിലേക്ക് ലൊക്കേഷൻ വിവരം അയയ്ക്കാൻ അനുവദിക്കുന്നതിന് ദോഷകരമായ അപ്ലിക്കേഷനുകൾ ഇത് ഉപയോഗിച്ചേക്കാം."</string>
-    <string name="permlab_packageVerificationAgent" msgid="5568139100645829117">"പാക്കേജുകൾ പരിശോധിച്ചുറപ്പിക്കുക"</string>
-    <string name="permdesc_packageVerificationAgent" msgid="8437590190990843381">"ഒരു പാക്കേജ് ഇൻസ്റ്റാളുചെയ്യാനാവുന്നതാണോ എന്ന് പരിശോധിച്ചുറപ്പിക്കുന്നതിന് അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
-    <string name="permlab_bindPackageVerifier" msgid="4187786793360326654">"ഒരു പാക്കേജ് വെരിഫയറുമായി ബന്ധപ്പെടുത്തുക"</string>
-    <string name="permdesc_bindPackageVerifier" msgid="3180741773233862126">"പാക്കേജ് പരിശോധകരുടെ അഭ്യർത്ഥനകൾക്ക് ഹോൾഡറിനെ അനുവദിക്കുന്നു. സാധാരണ അപ്ലിക്കേഷനുകൾക്ക് ഒരിക്കലും ആവശ്യമില്ല."</string>
-    <string name="permlab_intentFilterVerificationAgent" msgid="1135788294400437497">"ഉദ്ദേശിക്കുന്ന ഫിൽട്ടർ പരിശോധിച്ചുറപ്പിക്കുക"</string>
-    <string name="permdesc_intentFilterVerificationAgent" msgid="5853902808424716312">"ഒരു ഉദ്ദേശിക്കുന്ന ഫിൽട്ടർ പരിശോധിച്ചുറപ്പിച്ചോ ഇല്ലയോ എന്ന് പരിശോധിക്കാൻ അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
-    <string name="permlab_bindIntentFilterVerifier" msgid="8567268159430779210">"ഒരു ഉദ്ദേശിക്കുന്ന ഫിൽട്ടർ പരിശോധകനിലേക്ക് ബന്ധിപ്പിക്കുക"</string>
-    <string name="permdesc_bindIntentFilterVerifier" msgid="681128728719578778">"ഉദ്ദേശിക്കുന്ന ഫിൽട്ടർ പരിശോധകരുടെ അഭ്യർത്ഥനകൾക്ക് ഉടമയെ അനുവദിക്കുന്നു. സാധാരണ അപ്ലിക്കേഷനുകൾക്ക് ഒരിക്കലും ആവശ്യമില്ല."</string>
-    <string name="permlab_serialPort" msgid="546083327654631076">"സീരിയൽ പോർട്ടുകൾ ആക്‌സസ്സ് ചെയ്യുക"</string>
-    <string name="permdesc_serialPort" msgid="2991639985224598193">"SerialManager API ഉപയോഗിക്കുന്ന സീരിയൽ പോർട്ടുകൾ ആക്‌സസ്സ് ചെയ്യാൻ ദാതാവിനെ അനുവദിക്കുന്നു."</string>
-    <string name="permlab_accessContentProvidersExternally" msgid="5077774297943409285">"ഉള്ളടക്ക ദാതാക്കളെ ബാഹ്യമായി ആക്‌സസ്സുചെയ്യുക"</string>
-    <string name="permdesc_accessContentProvidersExternally" msgid="4544346486697853685">"ഷെല്ലിൽ നിന്നും ഉള്ളടക്ക ദാതാക്കളെ ആക്‌സസ്സുചെയ്യാൻ ദാതാവിനെ അനുവദിക്കുന്നു. സാധാരണ അപ്ലിക്കേഷനുകൾക്ക് ഒരിക്കലും ആവശ്യമില്ല."</string>
-    <string name="permlab_updateLock" msgid="3527558366616680889">"യാന്ത്രിക ഉപകരണ അപ്‌ഡേറ്റുകൾ നിരുൽസാഹപ്പെടുത്തുക"</string>
-    <string name="permdesc_updateLock" msgid="1655625832166778492">"ഉപകരണം അപ്‌ഗ്രേഡുചെയ്യാൻ ഉപയോക്തൃ ഇടപെടലില്ലാതെ റീബൂട്ട് ചെയ്യുന്നതിനുള്ള മികച്ച സമയം എപ്പോഴാണെന്നതിനെക്കുറിച്ച് സിസ്റ്റത്തിന് വിവരം നൽകാൻ ദാതാവിനെ അനുവദിക്കുന്നു."</string>
     <string name="save_password_message" msgid="767344687139195790">"ബ്രൗസർ ഈ പാസ്‌വേഡ് ഓർക്കേണ്ടതുണ്ടോ?"</string>
     <string name="save_password_notnow" msgid="6389675316706699758">"ഇപ്പോൾ വേണ്ട"</string>
     <string name="save_password_remember" msgid="6491879678996749466">"ഓർമ്മിക്കുക"</string>
@@ -1452,28 +1061,8 @@
     <string name="ext_media_nomedia_notification_message" product="nosdcard" msgid="6921126162580574143">"USB സംഭരണം നീക്കംചെയ്‌തു. പുതിയ മീഡിയ ചേർക്കുക."</string>
     <string name="ext_media_nomedia_notification_message" product="default" msgid="3870120652983659641">"SD കാർഡ് നീക്കംചെയ്‌തു. പുതിയതൊന്ന് ചേർക്കുക."</string>
     <string name="activity_list_empty" msgid="1675388330786841066">"പൊരുത്തമുള്ള പ്രവർത്തനങ്ങളൊന്നും കണ്ടെത്തിയില്ല."</string>
-    <string name="permlab_pkgUsageStats" msgid="8787352074326748892">"ഘടക ഉപയോഗ സ്ഥിതിവിവരക്കണക്കുകൾ അപ്‌ഡേറ്റുചെയ്യുക"</string>
-    <string name="permdesc_pkgUsageStats" msgid="1106612424254277630">"ശേഖരിച്ച ഘടക ഉപയോഗ സ്ഥിതിവിവരക്കണക്കുകളെ പരിഷ്ക്കരിക്കുന്നതിന് അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു. സാധാരണ അപ്ലിക്കേഷനുകളുടെ ഉപയോഗത്തിനല്ല."</string>
-    <string name="permlab_copyProtectedData" msgid="4341036311211406692">"ഉള്ളടക്കം പകർത്തുക"</string>
-    <string name="permdesc_copyProtectedData" msgid="4390697124288317831">"ഉള്ളടക്കം പകർത്തുന്നതിനുള്ള സ്ഥിര കണ്ടെയ്‌നർ സേവനം അഭ്യർത്ഥിക്കുന്നതിന് അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു. സാധാരണ അപ്ലിക്കേഷനുകളുടെ ഉപയോഗത്തിനല്ല."</string>
     <string name="permlab_route_media_output" msgid="1642024455750414694">"മീഡിയ ഔട്ട്പുട്ട് റൂട്ടുചെയ്യുക"</string>
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"മീഡിയ ഔട്ട്‌പുട്ടിനെ മറ്റ് ബാഹ്യ ഉപകരണങ്ങളിലേക്ക് റൂട്ടുചെയ്യാൻ ഒരു അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
-    <string name="permlab_access_keyguard_secure_storage" msgid="7565552237977815047">"കീഗാർഡ് സുരക്ഷിത സംഭരണം ആക്‌സസ്സുചെയ്യുക"</string>
-    <string name="permdesc_access_keyguard_secure_storage" msgid="5866245484303285762">"കീഗാർഡ് സുരക്ഷിത സംഭരണം ആക്‌സസ്സുചെയ്യാൻ ഒരു അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
-    <string name="permlab_control_keyguard" msgid="172195184207828387">"കീഗാർഡ് ദൃശ്യമാക്കുന്നതും മറയ്‌ക്കുന്നതും നിയന്ത്രിക്കുക"</string>
-    <string name="permdesc_control_keyguard" msgid="3043732290518629061">"കീഗാർഡ് നിയന്ത്രിക്കാൻ ഒരു അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
-    <string name="permlab_trust_listener" msgid="1765718054003704476">"വിശ്വസ്‌ത സ്റ്റേറ്റ് മാറ്റങ്ങൾ കേൾക്കുക."</string>
-    <string name="permdesc_trust_listener" msgid="8233895334214716864">"വിശ്വസ്‌ത സ്റ്റേറ്റിലെ മാറ്റങ്ങൾ കേൾക്കുന്നതിന് അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
-    <string name="permlab_provide_trust_agent" msgid="5465587586091358316">"ഒരു പരിചിത ഏജന്റിനെ നൽകുക."</string>
-    <string name="permdesc_provide_trust_agent" msgid="3865702641053068148">"ഒരു പരിചിത ഏജന്റിനെ നൽകാൻ ഒരു അപ്ലിക്കേഷൻ അനുവദിക്കുന്നു."</string>
-    <string name="permlab_launch_trust_agent_settings" msgid="5859430082240410200">"പരിചിത ഏജന്റ് ക്രമീകരണ മെനു സമാരംഭിക്കുക."</string>
-    <string name="permdesc_launch_trust_agent_settings" msgid="8185142708644913381">"പരിചിത ഏജന്റിന്റെ പ്രവർത്തനരീതിയെ മാറ്റുന്ന, ഒരു പ്രവർത്തനം സമാരംഭിക്കാൻ ഒരു അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
-    <string name="permlab_bind_trust_agent_service" msgid="8242093169457695334">"പരിചിത ഏജന്റ് സേവനവുമായി ബന്ധിപ്പിക്കുക"</string>
-    <string name="permdesc_bind_trust_agent_service" msgid="7041930026024507515">"ഒരു പരിചിത ഏജന്റ് സേവനത്തിലേക്ക് ബന്ധിപ്പിക്കാൻ അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
-    <string name="permlab_recovery" msgid="3157024487744125846">"അപ്‌ഡേറ്റ്, വീണ്ടെടുക്കൽ സിസ്റ്റവുമായി സംവദിക്കുക"</string>
-    <string name="permdesc_recovery" msgid="8511774533266359571">"വീണ്ടെടുക്കൽ സിസ്റ്റവുമായും സിസ്റ്റം അപ്‌ഡേറ്റുകളുമായും സംവദിക്കാൻ ഒരു അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
-    <string name="permlab_manageMediaProjection" msgid="1120495449419929218">"മീഡിയ പ്രൊജക്ഷൻ സെഷനുകൾ നിയന്ത്രിക്കുക"</string>
-    <string name="permdesc_manageMediaProjection" msgid="8053759147529492856">"മീഡിയ പ്രൊജക്ഷൻ സെഷനുകൾ നിയന്ത്രിക്കുന്നതിന് അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു. അപ്ലിക്കേഷനുകൾക്ക് ഡിസ്‌പ്ലേയും ഓഡിയോ ഉള്ളടക്കങ്ങളും ക്യാപ്‌ചർചെയ്യുന്നതിനുള്ള കഴിവ് നൽകാൻ ഈ സെഷനുകൾക്കാവും. സാധാരണ അപ്ലിക്കേഷനുകൾക്ക് ഒരിക്കലും ആവശ്യമില്ല."</string>
     <string name="permlab_readInstallSessions" msgid="6165432407628065939">"ഇൻസ്‌റ്റാൾ സെഷനുകൾ റീഡുചെയ്യുക"</string>
     <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"ഇൻസ്റ്റാൾ ചെയ്‌ത സെഷനുകൾ റീഡുചെയ്യുന്നതിന് ഒരു അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു. സജീവ പാക്കേജ് ഇൻസ്റ്റാളേഷനുകളെക്കുറിച്ചുള്ള വിശദാംശങ്ങൾ കാണുന്നതിന് ഇത് അനുവദിക്കുന്നു."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"സൂം ചെയ്യൽ നിയന്ത്രണങ്ങൾക്ക് രണ്ട് തവണ സ്‌പർശിക്കുക"</string>
@@ -1840,13 +1429,9 @@
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"അൺപിൻ ചെയ്യുന്നതിനുമുമ്പ് പിൻ ആവശ്യപ്പെടുക"</string>
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"അൺപിൻ ചെയ്യുന്നതിനുമുമ്പ് അൺലോക്ക് പാറ്റേൺ ആവശ്യപ്പെടുക"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"അൺപിൻ ചെയ്യുന്നതിനുമുമ്പ് പാസ്‌വേഡ് ആവശ്യപ്പെടുക"</string>
-    <!-- no translation found for package_installed_device_owner (8420696545959087545) -->
-    <skip />
-    <!-- no translation found for package_deleted_device_owner (7650577387493101353) -->
-    <skip />
+    <string name="package_installed_device_owner" msgid="8420696545959087545">"നിങ്ങളുടെ അഡ്‌മിനിസ്‌ട്രേറ്റർ ഇൻസ്റ്റാളുചെയ്‌തു"</string>
+    <string name="package_deleted_device_owner" msgid="7650577387493101353">"നിങ്ങളുടെ അഡ്‌മിനിസ്‌ട്രേറ്റർ ഇല്ലാതാക്കി"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"ബാറ്ററി ആയുസ്സ് മെച്ചപ്പെടുത്താൻ സഹായിക്കുന്നതിന്, ബാറ്ററി സേവർ നിങ്ങളുടെ ഉപകരണത്തിന്റെ പ്രകടനത്തെ കുറയ്‌ക്കുകയും വൈബ്രേഷനെയും മിക്ക പശ്ചാത്തല വിവരത്തെയും പരിമിതപ്പെടുത്തുകയും ചെയ്യുന്നു. ഇമെയിൽ, സന്ദേശമയയ്‌ക്കൽ, സമന്വയിപ്പിക്കലിനെ ആശ്രയിച്ചുള്ള മറ്റ് അപ്ലിക്കേഷനുകൾ എന്നിവ നിങ്ങൾ തുറക്കുന്നതുവരെ അപ്‌ഡേറ്റുചെയ്യാനിടയില്ല.\n\nനിങ്ങളുടെ ഉപകരണം ചാർജ്ജുചെയ്യുമ്പോൾ ബാറ്ററി സേവർ സ്വയം ഓഫാകും."</string>
-    <string name="downtime_condition_summary" msgid="8761776337475705749">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g>-ന് നിങ്ങളുടെ കാലാവധി അവസാനിക്കുന്നതുവരെ"</string>
-    <string name="downtime_condition_line_one" msgid="8762708714645352010">"പ്രവർത്തനരഹിതമായിരിക്കുന്ന സമയം അവസാനിക്കുന്നതുവരെ"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
       <item quantity="other">%1$d മിനിറ്റ് സമയത്തേക്ക് (<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g> വരെ)</item>
       <item quantity="one">ഒരു മിനിറ്റ് സമയത്തേക്ക് (<xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g> വരെ)</item>
@@ -1865,9 +1450,17 @@
     </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> വരെ"</string>
     <string name="zen_mode_forever" msgid="7420011936770086993">"നിങ്ങൾ ഇത് ഓ‌ഫാക്കും വരെ"</string>
+    <!-- no translation found for zen_mode_rule_name_combination (191109939968076477) -->
+    <skip />
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"ചുരുക്കുക"</string>
-    <string name="zen_mode_next_alarm_summary" msgid="5915140424683747372">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g>-നുള്ള അടുത്ത അലാറം വരെ"</string>
-    <string name="zen_mode_next_alarm_line_one" msgid="5537042951553420916">"അടുത്ത അലാറം വരെ"</string>
+    <!-- no translation found for zen_mode_feature_name (289097150786114338) -->
+    <skip />
+    <!-- no translation found for zen_mode_downtime_feature_name (2626974636779860146) -->
+    <skip />
+    <!-- no translation found for zen_mode_default_weeknights_name (2069189413656431610) -->
+    <skip />
+    <!-- no translation found for zen_mode_default_weekends_name (2377398437072017011) -->
+    <skip />
     <string name="muted_by" msgid="6147073845094180001">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g>, മ്യൂട്ടുചെയ്‌തു"</string>
     <string name="system_error_wipe_data" msgid="6608165524785354962">"നിങ്ങളുടെ ഉപകരണത്തിൽ ഒരു ആന്തരിക പ്രശ്‌നമുണ്ട്, ഫാക്‌ടറി വിവര പുനഃസജ്ജീകരണം ചെയ്യുന്നതുവരെ ഇതു അസ്ഥിരമായിരിക്കാനിടയുണ്ട്."</string>
     <string name="system_error_manufacturer" msgid="8086872414744210668">"നിങ്ങളുടെ ഉപകരണത്തിൽ ഒരു ആന്തരിക പ്രശ്‌നമുണ്ട്. വിശദാംശങ്ങൾക്കായി നിർമ്മാതാവിനെ ബന്ധപ്പെടുക."</string>
@@ -1877,6 +1470,11 @@
     <string name="stk_cc_ss_to_dial" msgid="2151304435775557162">"SS അഭ്യർത്ഥന, DIAL അഭ്യർത്ഥനയായി പരിഷ്‌ക്കരിച്ചു."</string>
     <string name="stk_cc_ss_to_ussd" msgid="3951862188105305589">"SS അഭ്യർത്ഥന, USSD അഭ്യർത്ഥനയായി പരിഷ്‌ക്കരിച്ചു."</string>
     <string name="stk_cc_ss_to_ss" msgid="5470768854991452695">"SS അഭ്യർത്ഥന, പുതിയ SS അഭ്യർത്ഥനയായി പരിഷ്‌ക്കരിച്ചു."</string>
+    <!-- no translation found for usb_midi_peripheral_name (7221113987741003817) -->
+    <skip />
     <string name="usb_midi_peripheral_manufacturer_name" msgid="7176526170008970168">"Android"</string>
-    <string name="usb_midi_peripheral_model_name" msgid="1959288763942653301">"USB പെരിഫറൽ പോർട്ട്"</string>
+    <!-- no translation found for usb_midi_peripheral_product_name (4971827859165280403) -->
+    <skip />
+    <string name="floating_toolbar_open_overflow_description" msgid="4797287862999444631">"കൂടുതല്‍ ഓപ്ഷനുകള്‍"</string>
+    <string name="floating_toolbar_close_overflow_description" msgid="559796923090723804">"ഓവർഫ്ലോ അടയ്‌ക്കുക"</string>
 </resources>
