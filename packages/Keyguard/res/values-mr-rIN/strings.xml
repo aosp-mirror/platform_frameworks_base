@@ -56,7 +56,7 @@
     <string name="keyguard_accessibility_next_alarm" msgid="7269583073750518672">"पुढील अलार्म <xliff:g id="ALARM">%1$s</xliff:g> साठी सेट केला"</string>
     <string name="keyboardview_keycode_delete" msgid="3337914833206635744">"हटवा"</string>
     <string name="keyboardview_keycode_enter" msgid="2985864015076059467">"प्रविष्ट करा"</string>
-    <string name="kg_emergency_call_label" msgid="684946192523830531">"आणीबाणीचा कॉल"</string>
+    <string name="kg_emergency_call_label" msgid="635955021540347194">"आणीबाणी"</string>
     <string name="kg_forgot_pattern_button_text" msgid="8852021467868220608">"नमुना विसरलात"</string>
     <string name="kg_wrong_pattern" msgid="1850806070801358830">"चुकीचा नमुना"</string>
     <string name="kg_wrong_password" msgid="2333281762128113157">"चुकीचा संकेतशब्द"</string>
@@ -110,4 +110,6 @@
     <string name="keyguard_carrier_default" msgid="8700650403054042153">"सेवा नाही."</string>
     <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"इनपुट पद्धत स्‍विच करा बटण."</string>
     <string name="airplane_mode" msgid="3122107900897202805">"विमान मोड"</string>
+    <!-- no translation found for fingerprint_not_recognized (2690661881608146617) -->
+    <skip />
 </resources>

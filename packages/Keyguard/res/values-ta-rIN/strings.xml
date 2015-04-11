@@ -56,7 +56,7 @@
     <string name="keyguard_accessibility_next_alarm" msgid="7269583073750518672">"அடுத்த அலாரம் <xliff:g id="ALARM">%1$s</xliff:g>க்கு அமைக்கப்பட்டது"</string>
     <string name="keyboardview_keycode_delete" msgid="3337914833206635744">"நீக்கு"</string>
     <string name="keyboardview_keycode_enter" msgid="2985864015076059467">"உள்ளிடு"</string>
-    <string name="kg_emergency_call_label" msgid="684946192523830531">"அவசரகால அழைப்பு"</string>
+    <string name="kg_emergency_call_label" msgid="635955021540347194">"அவசர அழைப்பு"</string>
     <string name="kg_forgot_pattern_button_text" msgid="8852021467868220608">"வடிவத்தை மறந்துவிட்டீர்களா"</string>
     <string name="kg_wrong_pattern" msgid="1850806070801358830">"தவறான வடிவம்"</string>
     <string name="kg_wrong_password" msgid="2333281762128113157">"தவறான கடவுச்சொல்"</string>
@@ -110,4 +110,6 @@
     <string name="keyguard_carrier_default" msgid="8700650403054042153">"சேவை இல்லை."</string>
     <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"உள்ளீட்டு முறையை மாற்றும் பொத்தான்."</string>
     <string name="airplane_mode" msgid="3122107900897202805">"விமானப் பயன்முறை"</string>
+    <!-- no translation found for fingerprint_not_recognized (2690661881608146617) -->
+    <skip />
 </resources>
