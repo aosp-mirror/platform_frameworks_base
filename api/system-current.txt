@@ -15876,6 +15876,7 @@ package android.media {
     method public int getState();
     method public int read(byte[], int, int);
     method public int read(short[], int, int);
+    method public int read(float[], int, int, int);
     method public int read(java.nio.ByteBuffer, int);
     method public void release();
     method public int setNotificationMarkerPosition(int);
@@ -15888,6 +15889,8 @@ package android.media {
     field public static final int ERROR = -1; // 0xffffffff
     field public static final int ERROR_BAD_VALUE = -2; // 0xfffffffe
     field public static final int ERROR_INVALID_OPERATION = -3; // 0xfffffffd
+    field public static final int READ_BLOCKING = 0; // 0x0
+    field public static final int READ_NON_BLOCKING = 1; // 0x1
     field public static final int RECORDSTATE_RECORDING = 3; // 0x3
     field public static final int RECORDSTATE_STOPPED = 1; // 0x1
     field public static final int STATE_INITIALIZED = 1; // 0x1
