@@ -387,5 +387,6 @@
     <string name="volumeui_prompt_deny" msgid="5720663643411696731">"नकार द्या"</string>
     <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g> हा व्हॉल्यूम संवाद आहे"</string>
     <string name="volumeui_notification_text" msgid="1826889705095768656">"मूळ पुनर्संचयित करण्यासाठी स्पर्श करा."</string>
-    <string name="volume_zen_switch_text" msgid="6388350641576595452">"व्यत्यय अवरोधित करा"</string>
+    <!-- no translation found for volume_zen_switch_text (8149183012610587643) -->
+    <skip />
 </resources>
