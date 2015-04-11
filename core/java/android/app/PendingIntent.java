@@ -151,6 +151,14 @@ public final class PendingIntent implements Parcelable {
     public static final int FLAG_UPDATE_CURRENT = 1<<27;
 
     /**
+     * Flag indicating that the created PendingIntent should be immutable.
+     * This means that the additional intent argument passed to the send
+     * methods to fill in unpopulated properties of this intent will be
+     * ignored.
+     */
+    public static final int FLAG_IMMUTABLE = 1<<26;
+
+    /**
      * Exception thrown when trying to send through a PendingIntent that
      * has been canceled or is otherwise no longer able to execute the request.
      */
@@ -618,7 +626,8 @@ public final class PendingIntent implements Parcelable {
      * @param code Result code to supply back to the PendingIntent's target.
      * @param intent Additional Intent data.  See {@link Intent#fillIn
      * Intent.fillIn()} for information on how this is applied to the
-     * original Intent.
+     * original Intent. If flag {@link #FLAG_IMMUTABLE} was set when this
+     * pending intent was created, this argument will be ignored.
      *
      * @see #send(Context, int, Intent, android.app.PendingIntent.OnFinished, Handler)
      *
@@ -667,6 +676,8 @@ public final class PendingIntent implements Parcelable {
      * @param intent Additional Intent data.  See {@link Intent#fillIn
      * Intent.fillIn()} for information on how this is applied to the
      * original Intent.  Use null to not modify the original Intent.
+     * If flag {@link #FLAG_IMMUTABLE} was set when this pending intent was
+     * created, this argument will be ignored.
      * @param onFinished The object to call back on when the send has
      * completed, or null for no callback.
      * @param handler Handler identifying the thread on which the callback
@@ -703,6 +714,8 @@ public final class PendingIntent implements Parcelable {
      * @param intent Additional Intent data.  See {@link Intent#fillIn
      * Intent.fillIn()} for information on how this is applied to the
      * original Intent.  Use null to not modify the original Intent.
+     * If flag {@link #FLAG_IMMUTABLE} was set when this pending intent was
+     * created, this argument will be ignored.
      * @param onFinished The object to call back on when the send has
      * completed, or null for no callback.
      * @param handler Handler identifying the thread on which the callback

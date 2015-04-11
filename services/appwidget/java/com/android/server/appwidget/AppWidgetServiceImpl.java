@@ -674,7 +674,7 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
 
     @Override
     public IntentSender createAppWidgetConfigIntentSender(String callingPackage, int appWidgetId,
-            int intentFlags) {
+            final int intentFlags) {
         final int userId = UserHandle.getCallingUserId();
 
         if (DEBUG) {
@@ -701,18 +701,21 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
                 throw new IllegalArgumentException("Widget not bound " + appWidgetId);
             }
 
+            // Make sure only safe flags can be passed it.
+            final int secureFlags = intentFlags & ~Intent.IMMUTABLE_FLAGS;
+
             Intent intent = new Intent(AppWidgetManager.ACTION_APPWIDGET_CONFIGURE);
             intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId);
             intent.setComponent(provider.info.configure);
-            intent.setFlags(intentFlags);
+            intent.setFlags(secureFlags);
 
             // All right, create the sender.
             final long identity = Binder.clearCallingIdentity();
             try {
                 return PendingIntent.getActivityAsUser(
                         mContext, 0, intent, PendingIntent.FLAG_ONE_SHOT
-                                | PendingIntent.FLAG_CANCEL_CURRENT, null,
-                                new UserHandle(provider.getUserId()))
+                                | PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_CANCEL_CURRENT,
+                                null, new UserHandle(provider.getUserId()))
                         .getIntentSender();
             } finally {
                 Binder.restoreCallingIdentity(identity);
