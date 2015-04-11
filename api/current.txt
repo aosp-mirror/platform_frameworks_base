@@ -13053,6 +13053,7 @@ package android.hardware.camera2 {
     method public abstract android.hardware.camera2.CameraDevice getDevice();
     method public abstract android.view.Surface getInputSurface();
     method public abstract boolean isReprocessible();
+    method public abstract void prepare(android.view.Surface) throws android.hardware.camera2.CameraAccessException;
     method public abstract int setRepeatingBurst(java.util.List<android.hardware.camera2.CaptureRequest>, android.hardware.camera2.CameraCaptureSession.CaptureCallback, android.os.Handler) throws android.hardware.camera2.CameraAccessException;
     method public abstract int setRepeatingRequest(android.hardware.camera2.CaptureRequest, android.hardware.camera2.CameraCaptureSession.CaptureCallback, android.os.Handler) throws android.hardware.camera2.CameraAccessException;
     method public abstract void stopRepeating() throws android.hardware.camera2.CameraAccessException;
@@ -13075,6 +13076,7 @@ package android.hardware.camera2 {
     method public abstract void onConfigureFailed(android.hardware.camera2.CameraCaptureSession);
     method public abstract void onConfigured(android.hardware.camera2.CameraCaptureSession);
     method public void onReady(android.hardware.camera2.CameraCaptureSession);
+    method public void onSurfacePrepared(android.hardware.camera2.CameraCaptureSession, android.view.Surface);
   }
 
   public final class CameraCharacteristics extends android.hardware.camera2.CameraMetadata {
@@ -57333,4 +57335,3 @@ package org.xmlpull.v1.sax2 {
   }
 
 }
-

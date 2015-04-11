@@ -23,6 +23,7 @@ import android.hardware.camera2.CaptureResult;
 import android.hardware.camera2.TotalCaptureResult;
 import android.hardware.camera2.dispatch.Dispatchable;
 import android.hardware.camera2.dispatch.MethodNameInvoker;
+import android.view.Surface;
 
 import static com.android.internal.util.Preconditions.*;
 
@@ -175,6 +176,12 @@ public class CallbackProxies {
         public void onClosed(CameraCaptureSession session) {
             mProxy.invoke("onClosed", session);
         }
+
+        @Override
+        public void onSurfacePrepared(CameraCaptureSession session, Surface surface) {
+            mProxy.invoke("onSurfacePrepared", session, surface);
+        }
+
     }
 
     private CallbackProxies() {

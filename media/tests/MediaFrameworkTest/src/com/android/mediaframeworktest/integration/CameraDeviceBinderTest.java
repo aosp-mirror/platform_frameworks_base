@@ -132,6 +132,16 @@ public class CameraDeviceBinderTest extends AndroidTestCase {
             // TODO Auto-generated method stub
 
         }
+
+        /*
+         * (non-Javadoc)
+         * @see android.hardware.camera2.ICameraDeviceCallbacks#onPrepared()
+         */
+        @Override
+        public void onPrepared(int streamId) throws RemoteException {
+            // TODO Auto-generated method stub
+
+        }
     }
 
     class IsMetadataNotEmpty extends ArgumentMatcher<CameraMetadataNative> {

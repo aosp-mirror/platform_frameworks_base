@@ -252,6 +252,11 @@ public class CameraDeviceUserShim implements ICameraDeviceUser {
         }
 
         @Override
+        public void onPrepared(int streamId) {
+            // TODO
+        }
+
+        @Override
         public IBinder asBinder() {
             // This is solely intended to be used for in-process binding.
             return null;
@@ -614,6 +619,19 @@ public class CameraDeviceUserShim implements ICameraDeviceUser {
         if (lastFrameNumber != null) {
             lastFrameNumber.setNumber(lastFrame);
         }
+        return CameraBinderDecorator.NO_ERROR;
+    }
+
+    public int prepare(int streamId) {
+        if (DEBUG) {
+            Log.d(TAG, "prepare called.");
+        }
+        if (mLegacyDevice.isClosed()) {
+            Log.e(TAG, "Cannot prepare stream, device has been closed.");
+            return CameraBinderDecorator.ENODEV;
+        }
+
+        // TODO: Implement and fire callback
         return CameraBinderDecorator.NO_ERROR;
     }
 

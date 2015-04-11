@@ -31,4 +31,5 @@ interface ICameraDeviceCallbacks
     oneway void onCaptureStarted(in CaptureResultExtras resultExtras, long timestamp);
     oneway void onResultReceived(in CameraMetadataNative result,
                                  in CaptureResultExtras resultExtras);
+    oneway void onPrepared(int streamId);
 }

@@ -98,4 +98,6 @@ interface ICameraDeviceUser
     int waitUntilIdle();
 
     int flush(out LongParcelable lastFrameNumber);
+
+    int prepare(int streamId);
 }

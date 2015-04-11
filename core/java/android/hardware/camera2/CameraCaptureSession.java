@@ -18,6 +18,7 @@ package android.hardware.camera2;
 
 import android.os.Handler;
 import android.view.Surface;
+
 import java.util.List;
 
 
@@ -69,6 +70,61 @@ public abstract class CameraCaptureSession implements AutoCloseable {
     public abstract CameraDevice getDevice();
 
     /**
+     * <p>Pre-allocate all buffers for an output Surface.</p>
+     *
+     * <p>Normally, the image buffers for a given output Surface are allocated on-demand,
+     * to minimize startup latency and memory overhead.</p>
+     *
+     * <p>However, in some cases, it may be desirable for the buffers to be allocated before
+     * any requests targeting the Surface are actually submitted to the device. Large buffers
+     * may take some time to allocate, which can result in delays in submitting requests until
+     * sufficient buffers are allocated to reach steady-state behavior. Such delays can cause
+     * bursts to take longer than desired, or cause skips or stutters in preview output.</p>
+     *
+     * <p>The prepare() method can be used to perform this preallocation. It may only be called for
+     * a given output Surface before that Surface is used as a target for a request. The number of
+     * buffers allocated is the sum of the count needed by the consumer providing the output
+     * Surface, and the maximum number needed by the camera device to fill its pipeline. Since this
+     * may be a larger number than what is actually required for steady-state operation, using
+     * prepare may result in higher memory consumption than the normal on-demand behavior results
+     * in. Prepare() will also delay the time to first output to a given Surface, in exchange for
+     * smoother frame rate once the allocation is complete.</p>
+     *
+     * <p>For example, an application that creates an
+     * {@link android.media.ImageReader#newInstance ImageReader} with a maxImages argument of 10,
+     * but only uses 3 simultaneous Images at once would normally only cause those 3 images to be
+     * allocated (plus what is needed by the camera device for smooth operation).  But using
+     * prepare() on the ImageReader Surface will result in all 10 Images being allocated. So
+     * applications using this method should take care to request only the number of buffers
+     * actually necessary for their application.</p>
+     *
+     * <p>If the same output Surface is used in consecutive sessions (without closing the first
+     * session explicitly), then its already-allocated buffers are carried over, and if it was
+     * used as a target of a capture request in the first session, prepare cannot be called on it
+     * in the second session.</p>
+     *
+     * <p>Once allocation is complete, {@link StateCallback#onSurfacePrepared} will be invoked with
+     * the Surface provided to this method. Between the prepare call and the onSurfacePrepared call,
+     * the Surface provided to prepare must not be used as a target of a CaptureRequest submitted
+     * to this session.</p>
+     *
+     * @param surface the output Surface for which buffers should be pre-allocated. Must be one of
+     * the output Surfaces used to create this session.
+     *
+     * @throws CameraAccessException if the camera device is no longer connected or has
+     *                               encountered a fatal error
+     * @throws IllegalStateException if this session is no longer active, either because the session
+     *                               was explicitly closed, a new session has been created
+     *                               or the camera device has been closed.
+     * @throws IllegalArgumentException if the Surface is invalid, not part of this Session, or has
+     *                                  already been used as a target of a CaptureRequest in this
+     *                                  session or immediately prior sessions.
+     *
+     * @see StateCallback#onSurfacePrepared
+     */
+    public abstract void prepare(Surface surface) throws CameraAccessException;
+
+    /**
      * <p>Submit a request for an image to be captured by the camera device.</p>
      *
      * <p>The request defines all the parameters for capturing the single image,
@@ -110,9 +166,10 @@ public abstract class CameraCaptureSession implements AutoCloseable {
      *                               was explicitly closed, a new session has been created
      *                               or the camera device has been closed.
      * @throws IllegalArgumentException if the request targets no Surfaces or Surfaces that are not
-     *                                  configured as outputs for this session. Or if a reprocess
+     *                                  configured as outputs for this session; or a reprocess
      *                                  capture request is submitted in a non-reprocessible capture
-     *                                  session. Or if the handler is
+     *                                  session; or the capture targets a Surface in the middle
+     *                                  of being {@link #prepare prepared}; or the handler is
      *                                  null, the listener is not null, and the calling thread has
      *                                  no looper.
      *
@@ -164,13 +221,15 @@ public abstract class CameraCaptureSession implements AutoCloseable {
      * @throws IllegalStateException if this session is no longer active, either because the session
      *                               was explicitly closed, a new session has been created
      *                               or the camera device has been closed.
-     * @throws IllegalArgumentException If the requests target no Surfaces, or target Surfaces not
-     *                                  currently configured as outputs. Or if a reprocess
+     * @throws IllegalArgumentException If the requests target no Surfaces, or the requests target
+     *                                  Surfaces not currently configured as outputs; or a reprocess
      *                                  capture request is submitted in a non-reprocessible capture
-     *                                  session. Or if the list of requests contains both requests
-     *                                  to capture images from the camera and reprocess capture
-     *                                  requests. Or if the handler is null, the listener is not
-     *                                  null, and the calling thread has no looper.
+     *                                  session; or the list of requests contains both requests to
+     *                                  capture images from the camera and reprocess capture
+     *                                  requests; or one of the captures targets a Surface in the
+     *                                  middle of being {@link #prepare prepared}; or if the handler
+     *                                  is null, the listener is not null, and the calling thread
+     *                                  has no looper.
      *
      * @see #capture
      * @see #setRepeatingRequest
@@ -230,11 +289,12 @@ public abstract class CameraCaptureSession implements AutoCloseable {
      * @throws IllegalStateException if this session is no longer active, either because the session
      *                               was explicitly closed, a new session has been created
      *                               or the camera device has been closed.
-     * @throws IllegalArgumentException If the requests reference no Surfaces or Surfaces that are
-     *                                  not currently configured as outputs. Or if the request is
-     *                                  a reprocess capture request. Or if the handler is null, the
-     *                                  listener is not null, and the calling thread has no looper.
-     *                                  Or if no requests were passed in.
+     * @throws IllegalArgumentException If the request references no Surfaces or references Surfaces
+     *                                  that are not currently configured as outputs; or the request
+     *                                  is a reprocess capture request; or the capture targets a
+     *                                  Surface in the middle of being {@link #prepare prepared}; or
+     *                                  the handler is null, the listener is not null, and the
+     *                                  calling thread has no looper; or no requests were passed in.
      *
      * @see #capture
      * @see #captureBurst
@@ -299,11 +359,13 @@ public abstract class CameraCaptureSession implements AutoCloseable {
      * @throws IllegalStateException if this session is no longer active, either because the session
      *                               was explicitly closed, a new session has been created
      *                               or the camera device has been closed.
-     * @throws IllegalArgumentException If the requests reference no Surfaces or Surfaces not
-     *                                  currently configured as outputs. Or if one of the requests
-     *                                  is a reprocess capture request. Or if the handler is null,
-     *                                  the listener is not null, and the calling thread has no
-     *                                  looper. Or if no requests were passed in.
+     * @throws IllegalArgumentException If the requests reference no Surfaces or reference Surfaces
+     *                                  not currently configured as outputs; or one of the requests
+     *                                  is a reprocess capture request; or one of the captures
+     *                                  targets a Surface in the middle of being
+     *                                  {@link #prepare prepared}; or the handler is null, the
+     *                                  listener is not null, and the calling thread has no looper;
+     *                                  or no requests were passed in.
      *
      * @see #capture
      * @see #captureBurst
@@ -512,6 +574,25 @@ public abstract class CameraCaptureSession implements AutoCloseable {
          * @param session the session returned by {@link CameraDevice#createCaptureSession}
          */
         public void onClosed(CameraCaptureSession session) {
+            // default empty implementation
+        }
+
+        /**
+         * This method is called when the buffer pre-allocation for an output Surface is complete.
+         *
+         * <p>Buffer pre-allocation for an output Surface is started by the {@link #prepare} call.
+         * While allocation is underway, the Surface must not be used as a capture target.
+         * Once this callback fires, the output Surface provided can again be used as a target for
+         * a capture request.</p>
+         *
+         * <p>In case of a error during pre-allocation (such as running out of suitable memory),
+         * this callback is still invoked after the error is encountered, though some buffers may
+         * not have been successfully pre-allocated.</p>
+         *
+         * @param session the session returned by {@link CameraDevice#createCaptureSession}
+         * @param surface the Surface that was used with the {@link #prepare} call.
+         */
+        public void onSurfacePrepared(CameraCaptureSession session, Surface surface) {
             // default empty implementation
         }
     }

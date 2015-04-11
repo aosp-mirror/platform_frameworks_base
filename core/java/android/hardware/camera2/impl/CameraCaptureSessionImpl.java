@@ -144,6 +144,11 @@ public class CameraCaptureSessionImpl extends CameraCaptureSession {
     }
 
     @Override
+    public void prepare(Surface surface) throws CameraAccessException {
+        mDeviceImpl.prepare(surface);
+    }
+
+    @Override
     public synchronized int capture(CaptureRequest request, CaptureCallback callback,
             Handler handler) throws CameraAccessException {
         if (request == null) {
@@ -589,6 +594,13 @@ public class CameraCaptureSessionImpl extends CameraCaptureSession {
                     }
                 }
             }
+
+            @Override
+            public void onSurfacePrepared(Surface surface) {
+                if (VERBOSE) Log.v(TAG, mIdString + "onPrepared");
+                mStateCallback.onSurfacePrepared(session, surface);
+            }
+
         };
 
     }
