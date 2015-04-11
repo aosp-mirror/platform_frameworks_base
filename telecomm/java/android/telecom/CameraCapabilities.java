@@ -26,16 +26,6 @@ import android.os.Parcelable;
 public final class CameraCapabilities implements Parcelable {
 
     /**
-     * Whether the camera supports zoom.
-     */
-    private final boolean mZoomSupported;
-
-    /**
-     * The maximum zoom supported by the camera.
-     */
-    private final float mMaxZoom;
-
-    /**
      * The width of the camera video in pixels.
      */
     private final int mWidth;
@@ -46,18 +36,39 @@ public final class CameraCapabilities implements Parcelable {
     private final int mHeight;
 
     /**
-     * Create a call camera capabilities instance.
+     * Whether the camera supports zoom.
+     */
+    private final boolean mZoomSupported;
+
+    /**
+     * The maximum zoom supported by the camera.
+     */
+    private final float mMaxZoom;
+
+    /**
+     * Create a call camera capabilities instance that doesn't support zoom.
      *
-     * @param zoomSupported True when camera supports zoom.
-     * @param maxZoom Maximum zoom supported by camera.
      * @param width The width of the camera video (in pixels).
      * @param height The height of the camera video (in pixels).
      */
-    public CameraCapabilities(boolean zoomSupported, float maxZoom, int width, int height) {
-        mZoomSupported = zoomSupported;
-        mMaxZoom = maxZoom;
+    public CameraCapabilities(int width, int height) {
+        this(width, height, false, 1.0f);
+    }
+
+    /**
+     * Create a call camera capabilities instance.
+     *
+     * @param width The width of the camera video (in pixels).
+     * @param height The height of the camera video (in pixels).
+     * @param zoomSupported True when camera supports zoom.
+     * @param maxZoom Maximum zoom supported by camera.
+     * @hide
+     */
+    public CameraCapabilities(int width, int height, boolean zoomSupported, float maxZoom) {
         mWidth = width;
         mHeight = height;
+        mZoomSupported = zoomSupported;
+        mMaxZoom = maxZoom;
     }
 
     /**
@@ -73,12 +84,12 @@ public final class CameraCapabilities implements Parcelable {
                  */
                 @Override
                 public CameraCapabilities createFromParcel(Parcel source) {
-                    boolean supportsZoom = source.readByte() != 0;
-                    float maxZoom = source.readFloat();
                     int width = source.readInt();
                     int height = source.readInt();
+                    boolean supportsZoom = source.readByte() != 0;
+                    float maxZoom = source.readFloat();
 
-                    return new CameraCapabilities(supportsZoom, maxZoom, width, height);
+                    return new CameraCapabilities(width, height, supportsZoom, maxZoom);
                 }
 
                 @Override
@@ -108,24 +119,10 @@ public final class CameraCapabilities implements Parcelable {
      */
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeByte((byte) (isZoomSupported() ? 1 : 0));
-        dest.writeFloat(getMaxZoom());
         dest.writeInt(getWidth());
         dest.writeInt(getHeight());
-    }
-
-    /**
-     * Whether the camera supports zoom.
-     */
-    public boolean isZoomSupported() {
-        return mZoomSupported;
-    }
-
-    /**
-     * The maximum zoom supported by the camera.
-     */
-    public float getMaxZoom() {
-        return mMaxZoom;
+        dest.writeByte((byte) (isZoomSupported() ? 1 : 0));
+        dest.writeFloat(getMaxZoom());
     }
 
     /**
@@ -140,5 +137,21 @@ public final class CameraCapabilities implements Parcelable {
      */
     public int getHeight() {
         return mHeight;
+    }
+
+    /**
+     * Whether the camera supports zoom.
+     * @hide
+     */
+    public boolean isZoomSupported() {
+        return mZoomSupported;
+    }
+
+    /**
+     * The maximum zoom supported by the camera.
+     * @hide
+     */
+    public float getMaxZoom() {
+        return mMaxZoom;
     }
 }
