@@ -66,4 +66,6 @@
       <item quantity="other">מעתיק <xliff:g id="COUNT_1">%1$d</xliff:g> קבצים.</item>
       <item quantity="one">מעתיק קובץ <xliff:g id="COUNT_0">%1$d</xliff:g>.</item>
     </plurals>
+    <!-- no translation found for copy_preparing (3896202461003039386) -->
+    <skip />
 </resources>

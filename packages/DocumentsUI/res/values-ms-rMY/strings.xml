@@ -59,9 +59,11 @@
     <string name="share_via" msgid="8966594246261344259">"Kongsi melalui"</string>
     <string name="cancel" msgid="6442560571259935130">"Batal"</string>
     <string name="copy_notification_title" msgid="6374299806748219777">"Menyalin fail"</string>
-    <string name="copy_remaining" msgid="6283790937387975095">"<xliff:g id="DURATION">%s</xliff:g> yang tinggal"</string>
+    <string name="copy_remaining" msgid="6283790937387975095">"<xliff:g id="DURATION">%s</xliff:g> lagi"</string>
     <plurals name="copy_begin" formatted="false" msgid="9071199452634086365">
       <item quantity="other">Menyalin <xliff:g id="COUNT_1">%1$d</xliff:g> fail.</item>
       <item quantity="one">Menyalin <xliff:g id="COUNT_0">%1$d</xliff:g> fail.</item>
     </plurals>
+    <!-- no translation found for copy_preparing (3896202461003039386) -->
+    <skip />
 </resources>

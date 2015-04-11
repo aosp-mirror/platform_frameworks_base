@@ -64,4 +64,6 @@
       <item quantity="other">正在复制 <xliff:g id="COUNT_1">%1$d</xliff:g> 个文件。</item>
       <item quantity="one">正在复制 <xliff:g id="COUNT_0">%1$d</xliff:g> 个文件。</item>
     </plurals>
+    <!-- no translation found for copy_preparing (3896202461003039386) -->
+    <skip />
 </resources>

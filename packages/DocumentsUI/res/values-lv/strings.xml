@@ -65,4 +65,6 @@
       <item quantity="one">Notiek <xliff:g id="COUNT_1">%1$d</xliff:g> faila kopēšana.</item>
       <item quantity="other">Notiek <xliff:g id="COUNT_1">%1$d</xliff:g> failu kopēšana.</item>
     </plurals>
+    <!-- no translation found for copy_preparing (3896202461003039386) -->
+    <skip />
 </resources>

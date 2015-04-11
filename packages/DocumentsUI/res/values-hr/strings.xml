@@ -65,4 +65,6 @@
       <item quantity="few">Kopiranje <xliff:g id="COUNT_1">%1$d</xliff:g> datoteke.</item>
       <item quantity="other">Kopiranje <xliff:g id="COUNT_1">%1$d</xliff:g> datoteka.</item>
     </plurals>
+    <!-- no translation found for copy_preparing (3896202461003039386) -->
+    <skip />
 </resources>

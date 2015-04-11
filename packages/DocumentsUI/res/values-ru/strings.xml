@@ -66,4 +66,6 @@
       <item quantity="many">Копируется <xliff:g id="COUNT_1">%1$d</xliff:g> файлов...</item>
       <item quantity="other">Копируется <xliff:g id="COUNT_1">%1$d</xliff:g> файла...</item>
     </plurals>
+    <!-- no translation found for copy_preparing (3896202461003039386) -->
+    <skip />
 </resources>

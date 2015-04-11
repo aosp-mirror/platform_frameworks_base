@@ -66,4 +66,6 @@
       <item quantity="other">Kopíruje sa <xliff:g id="COUNT_1">%1$d</xliff:g> súborov.</item>
       <item quantity="one">Kopíruje sa <xliff:g id="COUNT_0">%1$d</xliff:g> súbor.</item>
     </plurals>
+    <!-- no translation found for copy_preparing (3896202461003039386) -->
+    <skip />
 </resources>

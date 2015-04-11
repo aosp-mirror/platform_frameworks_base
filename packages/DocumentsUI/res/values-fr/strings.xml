@@ -64,4 +64,6 @@
       <item quantity="one">Copie de <xliff:g id="COUNT_1">%1$d</xliff:g> fichier en cours…</item>
       <item quantity="other">Copie de <xliff:g id="COUNT_1">%1$d</xliff:g> fichiers en cours…</item>
     </plurals>
+    <!-- no translation found for copy_preparing (3896202461003039386) -->
+    <skip />
 </resources>

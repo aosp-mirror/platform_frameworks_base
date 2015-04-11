@@ -64,4 +64,6 @@
       <item quantity="other">Copiando <xliff:g id="COUNT_1">%1$d</xliff:g> ficheiros.</item>
       <item quantity="one">Copianto <xliff:g id="COUNT_0">%1$d</xliff:g> ficheiro.</item>
     </plurals>
+    <!-- no translation found for copy_preparing (3896202461003039386) -->
+    <skip />
 </resources>

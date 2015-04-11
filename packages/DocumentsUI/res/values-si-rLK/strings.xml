@@ -59,9 +59,11 @@
     <string name="share_via" msgid="8966594246261344259">"හරහා බෙදාගන්න"</string>
     <string name="cancel" msgid="6442560571259935130">"අවලංගු කරන්න"</string>
     <string name="copy_notification_title" msgid="6374299806748219777">"ගොනු පිටපත් කරමින්"</string>
-    <string name="copy_remaining" msgid="6283790937387975095">"<xliff:g id="DURATION">%s</xliff:g>DURATION ඉතිරියි"</string>
+    <string name="copy_remaining" msgid="6283790937387975095">"<xliff:g id="DURATION">%s</xliff:g> ඉතිරියි"</string>
     <plurals name="copy_begin" formatted="false" msgid="9071199452634086365">
       <item quantity="one">ගොනු <xliff:g id="COUNT_1">%1$d</xliff:g> ක් පිටපත් කරමින්.</item>
       <item quantity="other">ගොනු <xliff:g id="COUNT_1">%1$d</xliff:g> ක් පිටපත් කරමින්.</item>
     </plurals>
+    <!-- no translation found for copy_preparing (3896202461003039386) -->
+    <skip />
 </resources>

@@ -61,7 +61,9 @@
     <string name="copy_notification_title" msgid="6374299806748219777">"파일 복사 중"</string>
     <string name="copy_remaining" msgid="6283790937387975095">"<xliff:g id="DURATION">%s</xliff:g> 남음"</string>
     <plurals name="copy_begin" formatted="false" msgid="9071199452634086365">
-      <item quantity="other">파일 <xliff:g id="COUNT_1">%1$d</xliff:g>개를 복사하는 중입니다.</item>
-      <item quantity="one">파일 <xliff:g id="COUNT_0">%1$d</xliff:g>개를 복사하는 중입니다.</item>
+      <item quantity="other">파일 <xliff:g id="COUNT_1">%1$d</xliff:g>개를 복사합니다.</item>
+      <item quantity="one">파일 <xliff:g id="COUNT_0">%1$d</xliff:g>개를 복사합니다.</item>
     </plurals>
+    <!-- no translation found for copy_preparing (3896202461003039386) -->
+    <skip />
 </resources>

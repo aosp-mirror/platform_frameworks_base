@@ -66,4 +66,6 @@
       <item quantity="other">Kopírování <xliff:g id="COUNT_1">%1$d</xliff:g> souborů</item>
       <item quantity="one">Kopírování <xliff:g id="COUNT_0">%1$d</xliff:g> souboru</item>
     </plurals>
+    <!-- no translation found for copy_preparing (3896202461003039386) -->
+    <skip />
 </resources>

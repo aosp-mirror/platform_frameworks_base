@@ -64,4 +64,6 @@
       <item quantity="one">Afritar <xliff:g id="COUNT_1">%1$d</xliff:g> skrá.</item>
       <item quantity="other">Afritar <xliff:g id="COUNT_1">%1$d</xliff:g> skrár.</item>
     </plurals>
+    <!-- no translation found for copy_preparing (3896202461003039386) -->
+    <skip />
 </resources>

@@ -64,4 +64,6 @@
       <item quantity="one"><xliff:g id="COUNT_1">%1$d</xliff:g>টি ফাইল অনুলিপি করা হচ্ছে৷</item>
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g>টি ফাইল অনুলিপি করা হচ্ছে৷</item>
     </plurals>
+    <!-- no translation found for copy_preparing (3896202461003039386) -->
+    <skip />
 </resources>

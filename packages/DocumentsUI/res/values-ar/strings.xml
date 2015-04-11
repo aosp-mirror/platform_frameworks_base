@@ -68,4 +68,6 @@
       <item quantity="other">جارٍ نسخ <xliff:g id="COUNT_1">%1$d</xliff:g> من الملفات.</item>
       <item quantity="one">جارٍ نسخ ملف واحد (<xliff:g id="COUNT_0">%1$d</xliff:g>).</item>
     </plurals>
+    <!-- no translation found for copy_preparing (3896202461003039386) -->
+    <skip />
 </resources>

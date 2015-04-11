@@ -64,4 +64,6 @@
       <item quantity="one"><xliff:g id="COUNT_1">%1$d</xliff:g> ፋይሎች በመቅዳት ላይ።</item>
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> ፋይሎች በመቅዳት ላይ።</item>
     </plurals>
+    <!-- no translation found for copy_preparing (3896202461003039386) -->
+    <skip />
 </resources>
