@@ -170,6 +170,8 @@ final class Settings {
     static final String TAG_CROSS_PROFILE_INTENT_FILTERS =
             "crossProfile-intent-filters";
     public static final String TAG_DOMAIN_VERIFICATION = "domain-verification";
+    public static final String TAG_DEFAULT_APPS= "default-apps";
+    public static final String TAG_DEFAULT_BROWSER= "default-browser";
 
     private static final String ATTR_NAME = "name";
     private static final String ATTR_USER = "user";
@@ -185,6 +187,7 @@ final class Settings {
     private static final String ATTR_INSTALLED = "inst";
     private static final String ATTR_BLOCK_UNINSTALL = "blockUninstall";
     private static final String ATTR_DOMAIN_VERIFICATON_STATE = "domainVerificationStatus";
+    private static final String ATTR_PACKAGE_NAME= "packageName";
 
     private final Object mLock;
 
@@ -272,7 +275,10 @@ final class Settings {
     // names.  The packages appear everwhere else under their original
     // names.
     final ArrayMap<String, String> mRenamedPackages = new ArrayMap<String, String>();
-    
+
+    // For every user, it is used to find the package name of the default Browser App.
+    final SparseArray<String> mDefaultBrowserApp = new SparseArray<String>();
+
     final StringBuilder mReadMessages = new StringBuilder();
 
     /**
@@ -1067,6 +1073,19 @@ final class Settings {
         }
     }
 
+    boolean setDefaultBrowserPackageNameLPr(String packageName, int userId) {
+        if (userId == UserHandle.USER_ALL) {
+            return false;
+        }
+        mDefaultBrowserApp.put(userId, packageName);
+        writePackageRestrictionsLPr(userId);
+        return true;
+    }
+
+    String getDefaultBrowserPackageNameLPw(int userId) {
+        return (userId == UserHandle.USER_ALL) ? null : mDefaultBrowserApp.get(userId);
+    }
+
     private File getUserPackagesStateFile(int userId) {
         // TODO: Implement a cleaner solution when adding tests.
         // This instead of Environment.getUserSystemDirectory(userId) to support testing.
@@ -1232,15 +1251,25 @@ final class Settings {
         Log.d(TAG, "Read domain verification for package:" + ivi.getPackageName());
     }
 
-    void writeDomainVerificationsLPr(XmlSerializer serializer, String packageName,
-                                     IntentFilterVerificationInfo verificationInfo)
-            throws IllegalArgumentException, IllegalStateException, IOException {
-        if (verificationInfo != null && verificationInfo.getPackageName() != null) {
-            serializer.startTag(null, TAG_DOMAIN_VERIFICATION);
-            verificationInfo.writeToXml(serializer);
-            Log.d(TAG, "Wrote domain verification for package: "
-                    + verificationInfo.getPackageName());
-            serializer.endTag(null, TAG_DOMAIN_VERIFICATION);
+    private void readDefaultAppsLPw(XmlPullParser parser, int userId)
+            throws XmlPullParserException, IOException {
+        int outerDepth = parser.getDepth();
+        int type;
+        while ((type = parser.next()) != XmlPullParser.END_DOCUMENT
+                && (type != XmlPullParser.END_TAG || parser.getDepth() > outerDepth)) {
+            if (type == XmlPullParser.END_TAG || type == XmlPullParser.TEXT) {
+                continue;
+            }
+            String tagName = parser.getName();
+            if (tagName.equals(TAG_DEFAULT_BROWSER)) {
+                String packageName = parser.getAttributeValue(null, ATTR_PACKAGE_NAME);
+                mDefaultBrowserApp.put(userId, packageName);
+            } else {
+                String msg = "Unknown element under " +  TAG_DEFAULT_APPS + ": " +
+                        parser.getName();
+                PackageManagerService.reportSettingsProblem(Log.WARN, msg);
+                XmlUtils.skipCurrentTag(parser);
+            }
         }
     }
 
@@ -1392,6 +1421,8 @@ final class Settings {
                     readPersistentPreferredActivitiesLPw(parser, userId);
                 } else if (tagName.equals(TAG_CROSS_PROFILE_INTENT_FILTERS)) {
                     readCrossProfileIntentFiltersLPw(parser, userId);
+                } else if (tagName.equals(TAG_DEFAULT_APPS)) {
+                    readDefaultAppsLPw(parser, userId);
                 } else {
                     Slog.w(PackageManagerService.TAG, "Unknown element under <stopped-packages>: "
                           + parser.getName());
@@ -1488,6 +1519,30 @@ final class Settings {
             }
         }
         serializer.endTag(null, TAG_CROSS_PROFILE_INTENT_FILTERS);
+    }
+
+    void writeDomainVerificationsLPr(XmlSerializer serializer,
+                                     IntentFilterVerificationInfo verificationInfo)
+            throws IllegalArgumentException, IllegalStateException, IOException {
+        if (verificationInfo != null && verificationInfo.getPackageName() != null) {
+            serializer.startTag(null, TAG_DOMAIN_VERIFICATION);
+            verificationInfo.writeToXml(serializer);
+            Log.d(TAG, "Wrote domain verification for package: "
+                    + verificationInfo.getPackageName());
+            serializer.endTag(null, TAG_DOMAIN_VERIFICATION);
+        }
+    }
+
+    void writeDefaultAppsLPr(XmlSerializer serializer, int userId)
+            throws IllegalArgumentException, IllegalStateException, IOException {
+        serializer.startTag(null, TAG_DEFAULT_APPS);
+        String packageName = mDefaultBrowserApp.get(userId);
+        if (!TextUtils.isEmpty(packageName)) {
+            serializer.startTag(null, TAG_DEFAULT_BROWSER);
+            serializer.attribute(null, ATTR_PACKAGE_NAME, packageName);
+            serializer.endTag(null, TAG_DEFAULT_BROWSER);
+        }
+        serializer.endTag(null, TAG_DEFAULT_APPS);
     }
 
     void writePackageRestrictionsLPr(int userId) {
@@ -1600,6 +1655,7 @@ final class Settings {
             writePreferredActivitiesLPr(serializer, userId, true);
             writePersistentPreferredActivitiesLPr(serializer, userId);
             writeCrossProfileIntentFiltersLPr(serializer, userId);
+            writeDefaultAppsLPr(serializer, userId);
 
             serializer.endTag(null, TAG_PACKAGE_RESTRICTIONS);
 
@@ -2114,7 +2170,7 @@ final class Settings {
         writeSigningKeySetLPr(serializer, pkg.keySetData);
         writeUpgradeKeySetsLPr(serializer, pkg.keySetData);
         writeKeySetAliasesLPr(serializer, pkg.keySetData);
-        writeDomainVerificationsLPr(serializer, pkg.name, pkg.verificationInfo);
+        writeDomainVerificationsLPr(serializer, pkg.verificationInfo);
 
         serializer.endTag(null, "package");
     }
@@ -2283,8 +2339,9 @@ final class Settings {
                     // TODO: check whether this is okay! as it is very
                     // similar to how preferred-activities are treated
                     readCrossProfileIntentFiltersLPw(parser, 0);
-                }
-                else if (tagName.equals("updated-package")) {
+                } else if (tagName.equals(TAG_DEFAULT_BROWSER)) {
+                    readDefaultAppsLPw(parser, 0);
+                } else if (tagName.equals("updated-package")) {
                     readDisabledSysPackageLPw(parser);
                 } else if (tagName.equals("cleaning-package")) {
                     String name = parser.getAttributeValue(null, ATTR_NAME);
@@ -4044,7 +4101,8 @@ final class Settings {
 
     void dumpGidsLPr(PrintWriter pw, String prefix, int[] gids) {
         if (!ArrayUtils.isEmpty(gids)) {
-            pw.print(prefix); pw.print("gids="); pw.println(
+            pw.print(prefix);
+            pw.print("gids="); pw.println(
                     PackageManagerService.arrayToString(gids));
         }
     }

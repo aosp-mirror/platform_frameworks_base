@@ -450,6 +450,9 @@ interface IPackageManager {
     List<IntentFilterVerificationInfo> getIntentFilterVerifications(String packageName);
     List<IntentFilter> getAllIntentFilters(String packageName);
 
+    boolean setDefaultBrowserPackageName(String packageName, int userId);
+    String getDefaultBrowserPackageName(int userId);
+
     VerifierDeviceIdentity getVerifierDeviceIdentity();
 
     boolean isFirstBoot();

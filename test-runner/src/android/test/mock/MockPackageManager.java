@@ -764,6 +764,16 @@ public class MockPackageManager extends PackageManager {
         throw new UnsupportedOperationException();
     }
 
+    @Override
+    public String getDefaultBrowserPackageName(int userId) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public boolean setDefaultBrowserPackageName(String packageName, int userId) {
+        throw new UnsupportedOperationException();
+    }
+
     /**
      * @hide
      */

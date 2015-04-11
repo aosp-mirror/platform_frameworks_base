@@ -33322,6 +33322,7 @@ package android.test.mock {
     method public android.graphics.drawable.Drawable getApplicationLogo(java.lang.String) throws android.content.pm.PackageManager.NameNotFoundException;
     method public int getComponentEnabledSetting(android.content.ComponentName);
     method public android.graphics.drawable.Drawable getDefaultActivityIcon();
+    method public java.lang.String getDefaultBrowserPackageName(int);
     method public android.graphics.drawable.Drawable getDrawable(java.lang.String, int, android.content.pm.ApplicationInfo);
     method public java.util.List<android.content.pm.ApplicationInfo> getInstalledApplications(int);
     method public java.util.List<android.content.pm.PackageInfo> getInstalledPackages(int);
@@ -33371,6 +33372,7 @@ package android.test.mock {
     method public void revokePermission(java.lang.String, java.lang.String, android.os.UserHandle);
     method public void setApplicationEnabledSetting(java.lang.String, int, int);
     method public void setComponentEnabledSetting(android.content.ComponentName, int, int);
+    method public boolean setDefaultBrowserPackageName(java.lang.String, int);
     method public void setInstallerPackageName(java.lang.String, java.lang.String);
     method public void verifyPendingInstall(int, int);
   }

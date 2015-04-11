@@ -3667,6 +3667,32 @@ public abstract class PackageManager {
     public abstract List<IntentFilter> getAllIntentFilters(String packageName);
 
     /**
+     * Get the default Browser package name for a specific user.
+     *
+     * @param userId The user id.
+     *
+     * @return the package name of the default Browser for the specified user. If the user id passed
+     *         is -1 (all users) it will return a null value.
+     *
+     * @hide
+     */
+    public abstract String getDefaultBrowserPackageName(int userId);
+
+    /**
+     * Set the default Browser package name for a specific user.
+     *
+     * @param packageName The package name of the default Browser.
+     * @param userId The user id.
+     *
+     * @return true if the default Browser for the specified user has been set,
+     *         otherwise return false. If the user id passed is -1 (all users) this call will not
+     *         do anything and just return false.
+     *
+     * @hide
+     */
+    public abstract boolean setDefaultBrowserPackageName(String packageName, int userId);
+
+    /**
      * Change the installer associated with a given package.  There are limitations
      * on how the installer package can be changed; in particular:
      * <ul>

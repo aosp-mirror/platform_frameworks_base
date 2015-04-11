@@ -729,37 +729,6 @@ public class PackageManagerService extends IPackageManager.Stub {
             }
             return false;
         }
-        ArrayList<String> hosts = filter.getHostsList();
-        if (hosts.size() == 0) {
-            if (logging) {
-                Slog.d(TAG, "IntentFilter does not contain any data hosts");
-            }
-            // We still return true as this is the case of any Browser
-            return true;
-        }
-        String hostEndBase = null;
-        for (String host : hosts) {
-            String[] hostParts = host.split("\\.");
-            // Should be at minimum a host like "example.com"
-            if (hostParts.length < 2) {
-                if (logging) {
-                    Slog.d(TAG, "IntentFilter does not contain a valid data host name: " + host);
-                }
-                return false;
-            }
-            // Verify that we have the same ending domain
-            int length = hostParts.length;
-            String hostEnd = hostParts[length - 1] + hostParts[length - 2];
-            if (hostEndBase == null) {
-                hostEndBase = hostEnd;
-            }
-            if (!hostEnd.equalsIgnoreCase(hostEndBase)) {
-                if (logging) {
-                    Slog.d(TAG, "IntentFilter does not contain the same data domains");
-                }
-                return false;
-            }
-        }
         return true;
     }
 
@@ -9093,6 +9062,20 @@ public class PackageManagerService extends IPackageManager.Stub {
                 }
             }
             return result;
+        }
+    }
+
+    @Override
+    public boolean setDefaultBrowserPackageName(String packageName, int userId) {
+        synchronized (mPackages) {
+            return mSettings.setDefaultBrowserPackageNameLPr(packageName, userId);
+        }
+    }
+
+    @Override
+    public String getDefaultBrowserPackageName(int userId) {
+        synchronized (mPackages) {
+            return mSettings.getDefaultBrowserPackageNameLPw(userId);
         }
     }
 
