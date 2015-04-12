@@ -88,7 +88,8 @@ abstract class BaseActivity extends Activity {
         public static final int ACTION_GET_CONTENT = 3;
         public static final int ACTION_OPEN_TREE = 4;
         public static final int ACTION_MANAGE = 5;
-        public static final int ACTION_MANAGE_ALL = 6;
+        public static final int ACTION_BROWSE = 6;
+        public static final int ACTION_BROWSE_ALL = 7;
 
         public static final int MODE_UNKNOWN = 0;
         public static final int MODE_LIST = 1;

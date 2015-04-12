@@ -16,7 +16,7 @@
 
 package android.os.storage;
 
-import android.content.Context;
+import android.content.res.Resources;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.DebugUtils;
@@ -57,12 +57,12 @@ public class DiskInfo implements Parcelable {
         volumes = parcel.readStringArray();
     }
 
-    public String getDescription(Context context) {
+    public String getDescription() {
         // TODO: splice vendor label into these strings
         if ((flags & FLAG_SD) != 0) {
-            return context.getString(com.android.internal.R.string.storage_sd_card);
+            return Resources.getSystem().getString(com.android.internal.R.string.storage_sd_card);
         } else if ((flags & FLAG_USB) != 0) {
-            return context.getString(com.android.internal.R.string.storage_usb);
+            return Resources.getSystem().getString(com.android.internal.R.string.storage_usb);
         } else {
             return null;
         }
@@ -119,7 +119,7 @@ public class DiskInfo implements Parcelable {
     @Override
     public void writeToParcel(Parcel parcel, int flags) {
         parcel.writeString(id);
-        parcel.writeInt(flags);
+        parcel.writeInt(this.flags);
         parcel.writeLong(size);
         parcel.writeString(label);
         parcel.writeStringArray(volumes);

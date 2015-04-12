@@ -69,7 +69,9 @@ public interface MetricsConstants {
     public static final int DEVELOPMENT = 39;
     public static final int DEVICEINFO = 40;
     public static final int DEVICEINFO_IMEI_INFORMATION = 41;
+    @Deprecated
     public static final int DEVICEINFO_MEMORY = 42;
+    public static final int DEVICEINFO_STORAGE = 42;
     public static final int DEVICEINFO_SIM_STATUS = 43;
     public static final int DEVICEINFO_STATUS = 44;
     public static final int DEVICEINFO_USB = 45;

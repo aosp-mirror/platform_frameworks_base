@@ -20,6 +20,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.Resources;
 import android.mtp.MtpStorage;
 import android.os.Environment;
 import android.os.Parcel;
@@ -44,6 +45,8 @@ import java.io.File;
  * @hide
  */
 public class VolumeInfo implements Parcelable {
+    /** Stub volume representing internal private storage */
+    public static final String ID_PRIVATE_INTERNAL = "private";
     /** Real volume representing internal emulated storage */
     public static final String ID_EMULATED_INTERNAL = "emulated";
 
@@ -59,6 +62,7 @@ public class VolumeInfo implements Parcelable {
     public static final int STATE_FORMATTING = 3;
     public static final int STATE_UNMOUNTING = 4;
     public static final int STATE_UNMOUNTABLE = 5;
+    public static final int STATE_REMOVED = 6;
 
     public static final int FLAG_PRIMARY = 1 << 0;
     public static final int FLAG_VISIBLE = 1 << 1;
@@ -73,12 +77,14 @@ public class VolumeInfo implements Parcelable {
         sStateToEnvironment.put(VolumeInfo.STATE_FORMATTING, Environment.MEDIA_UNMOUNTED);
         sStateToEnvironment.put(VolumeInfo.STATE_UNMOUNTING, Environment.MEDIA_EJECTING);
         sStateToEnvironment.put(VolumeInfo.STATE_UNMOUNTABLE, Environment.MEDIA_UNMOUNTABLE);
+        sStateToEnvironment.put(VolumeInfo.STATE_REMOVED, Environment.MEDIA_REMOVED);
 
         sEnvironmentToBroadcast.put(Environment.MEDIA_UNMOUNTED, Intent.ACTION_MEDIA_UNMOUNTED);
         sEnvironmentToBroadcast.put(Environment.MEDIA_CHECKING, Intent.ACTION_MEDIA_CHECKING);
         sEnvironmentToBroadcast.put(Environment.MEDIA_MOUNTED, Intent.ACTION_MEDIA_MOUNTED);
         sEnvironmentToBroadcast.put(Environment.MEDIA_EJECTING, Intent.ACTION_MEDIA_EJECT);
         sEnvironmentToBroadcast.put(Environment.MEDIA_UNMOUNTABLE, Intent.ACTION_MEDIA_UNMOUNTABLE);
+        sEnvironmentToBroadcast.put(Environment.MEDIA_REMOVED, Intent.ACTION_MEDIA_REMOVED);
     }
 
     /** vold state */
@@ -95,8 +101,6 @@ public class VolumeInfo implements Parcelable {
     /** Framework state */
     public final int mtpIndex;
     public String nickname;
-
-    public DiskInfo disk;
 
     public VolumeInfo(String id, int type, int mtpIndex) {
         this.id = Preconditions.checkNotNull(id);
@@ -135,9 +139,9 @@ public class VolumeInfo implements Parcelable {
         return getBroadcastForEnvironment(getEnvironmentForState(state));
     }
 
-    public String getDescription(Context context) {
-        if (ID_EMULATED_INTERNAL.equals(id)) {
-            return context.getString(com.android.internal.R.string.storage_internal);
+    public @Nullable String getDescription() {
+        if (ID_PRIVATE_INTERNAL.equals(id)) {
+            return Resources.getSystem().getString(com.android.internal.R.string.storage_internal);
         } else if (!TextUtils.isEmpty(nickname)) {
             return nickname;
         } else if (!TextUtils.isEmpty(fsLabel)) {
@@ -189,7 +193,7 @@ public class VolumeInfo implements Parcelable {
             userPath = new File("/dev/null");
         }
 
-        String description = getDescription(context);
+        String description = getDescription();
         if (description == null) {
             description = context.getString(android.R.string.unknownName);
         }
@@ -283,7 +287,7 @@ public class VolumeInfo implements Parcelable {
     public void writeToParcel(Parcel parcel, int flags) {
         parcel.writeString(id);
         parcel.writeInt(type);
-        parcel.writeInt(flags);
+        parcel.writeInt(this.flags);
         parcel.writeInt(userId);
         parcel.writeInt(state);
         parcel.writeString(fsType);

@@ -106,6 +106,9 @@ public final class DocumentsContract {
     /** {@hide} */
     public static final String ACTION_MANAGE_DOCUMENT = "android.provider.action.MANAGE_DOCUMENT";
 
+    /** {@hide} */
+    public static final String ACTION_BROWSE_ROOT = "android.provider.action.BROWSE_ROOT";
+
     /**
      * Buffer is large enough to rewind past any EXIF headers.
      */

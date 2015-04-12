@@ -16,10 +16,7 @@
 
 package com.android.documentsui;
 
-import static com.android.documentsui.DirectoryFragment.ANIM_DOWN;
-import static com.android.documentsui.DirectoryFragment.ANIM_NONE;
-import static com.android.documentsui.DirectoryFragment.ANIM_SIDE;
-import static com.android.documentsui.DirectoryFragment.ANIM_UP;
+import static com.android.documentsui.BaseActivity.State.ACTION_BROWSE;
 import static com.android.documentsui.BaseActivity.State.ACTION_CREATE;
 import static com.android.documentsui.BaseActivity.State.ACTION_GET_CONTENT;
 import static com.android.documentsui.BaseActivity.State.ACTION_MANAGE;
@@ -27,8 +24,12 @@ import static com.android.documentsui.BaseActivity.State.ACTION_OPEN;
 import static com.android.documentsui.BaseActivity.State.ACTION_OPEN_TREE;
 import static com.android.documentsui.BaseActivity.State.MODE_GRID;
 import static com.android.documentsui.BaseActivity.State.MODE_LIST;
+import static com.android.documentsui.DirectoryFragment.ANIM_DOWN;
+import static com.android.documentsui.DirectoryFragment.ANIM_NONE;
+import static com.android.documentsui.DirectoryFragment.ANIM_SIDE;
+import static com.android.documentsui.DirectoryFragment.ANIM_UP;
+
 import android.app.Activity;
-import android.app.Fragment;
 import android.app.FragmentManager;
 import android.content.ActivityNotFoundException;
 import android.content.ClipData;
@@ -69,14 +70,14 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.Toolbar;
 
+import libcore.io.IoUtils;
+
 import com.android.documentsui.RecentsProvider.RecentColumns;
 import com.android.documentsui.RecentsProvider.ResumeColumns;
 import com.android.documentsui.model.DocumentInfo;
 import com.android.documentsui.model.DocumentStack;
 import com.android.documentsui.model.DurableUtils;
 import com.android.documentsui.model.RootInfo;
-
-import libcore.io.IoUtils;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -176,7 +177,7 @@ public class DocumentsActivity extends BaseActivity {
         setActionBar(mToolbar);
 
         // Hide roots when we're managing a specific root
-        if (mState.action == ACTION_MANAGE) {
+        if (mState.action == ACTION_MANAGE || mState.action == ACTION_BROWSE) {
             if (mShowAsDialog) {
                 findViewById(R.id.container_roots).setVisibility(View.GONE);
             } else {
@@ -203,7 +204,7 @@ public class DocumentsActivity extends BaseActivity {
         }
 
         if (!mState.restored) {
-            if (mState.action == ACTION_MANAGE) {
+            if (mState.action == ACTION_MANAGE || mState.action == ACTION_BROWSE) {
                 final Uri rootUri = getIntent().getData();
                 new RestoreRootTask(rootUri).executeOnExecutor(getCurrentExecutor());
             } else {
@@ -229,6 +230,8 @@ public class DocumentsActivity extends BaseActivity {
             mState.action = ACTION_OPEN_TREE;
         } else if (DocumentsContract.ACTION_MANAGE_ROOT.equals(action)) {
             mState.action = ACTION_MANAGE;
+        } else if (DocumentsContract.ACTION_BROWSE_ROOT.equals(action)) {
+            mState.action = ACTION_BROWSE;
         }
 
         if (mState.action == ACTION_OPEN || mState.action == ACTION_GET_CONTENT) {
@@ -236,7 +239,7 @@ public class DocumentsActivity extends BaseActivity {
                     Intent.EXTRA_ALLOW_MULTIPLE, false);
         }
 
-        if (mState.action == ACTION_MANAGE) {
+        if (mState.action == ACTION_MANAGE || mState.action == ACTION_BROWSE) {
             mState.acceptMimes = new String[] { "*/*" };
             mState.allowMultiple = true;
         } else if (intent.hasExtra(Intent.EXTRA_MIME_TYPES)) {
@@ -250,7 +253,7 @@ public class DocumentsActivity extends BaseActivity {
         mState.showAdvanced = mState.forceAdvanced
                 | LocalPreferences.getDisplayAdvancedDevices(this);
 
-        if (mState.action == ACTION_MANAGE) {
+        if (mState.action == ACTION_MANAGE || mState.action == ACTION_BROWSE) {
             mState.showSize = true;
         } else {
             mState.showSize = LocalPreferences.getDisplayFileSize(this);
@@ -413,7 +416,8 @@ public class DocumentsActivity extends BaseActivity {
         }
 
         final RootInfo root = getCurrentRoot();
-        final boolean showRootIcon = mShowAsDialog || (mState.action == ACTION_MANAGE);
+        final boolean showRootIcon = mShowAsDialog
+                || (mState.action == ACTION_MANAGE || mState.action == ACTION_BROWSE);
         if (showRootIcon) {
             mToolbar.setNavigationIcon(
                     root != null ? root.loadToolbarIcon(mToolbar.getContext()) : null);
@@ -571,7 +575,8 @@ public class DocumentsActivity extends BaseActivity {
         sortSize.setVisible(mState.showSize);
 
         boolean searchVisible;
-        boolean fileSizeVisible = mState.action != ACTION_MANAGE;
+        boolean fileSizeVisible = !(mState.action == ACTION_MANAGE
+                || mState.action == ACTION_BROWSE);
         if (mState.action == ACTION_CREATE || mState.action == ACTION_OPEN_TREE) {
             createDir.setVisible(cwd != null && cwd.isCreateSupported());
             searchVisible = false;
@@ -601,7 +606,7 @@ public class DocumentsActivity extends BaseActivity {
         fileSize.setTitle(LocalPreferences.getDisplayFileSize(this)
                 ? R.string.menu_file_size_hide : R.string.menu_file_size_show);
 
-        advanced.setVisible(mState.action != ACTION_MANAGE);
+        advanced.setVisible(!(mState.action == ACTION_MANAGE || mState.action == ACTION_BROWSE));
         fileSize.setVisible(fileSizeVisible);
 
         return true;
@@ -1017,6 +1022,17 @@ public class DocumentsActivity extends BaseActivity {
                 } catch (ActivityNotFoundException ex2) {
                     Toast.makeText(this, R.string.toast_no_application, Toast.LENGTH_SHORT).show();
                 }
+            }
+        } else if (mState.action == ACTION_BROWSE) {
+            // Go straight to viewing
+            final Intent view = new Intent(Intent.ACTION_VIEW);
+            view.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            view.setData(doc.derivedUri);
+
+            try {
+                startActivity(view);
+            } catch (ActivityNotFoundException ex) {
+                Toast.makeText(this, R.string.toast_no_application, Toast.LENGTH_SHORT).show();
             }
         }
     }

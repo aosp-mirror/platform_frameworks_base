@@ -16,13 +16,15 @@
 
 package com.android.documentsui;
 
-import static com.android.documentsui.DocumentsActivity.TAG;
+import static com.android.documentsui.BaseActivity.State.ACTION_BROWSE;
+import static com.android.documentsui.BaseActivity.State.ACTION_BROWSE_ALL;
 import static com.android.documentsui.BaseActivity.State.ACTION_CREATE;
 import static com.android.documentsui.BaseActivity.State.ACTION_MANAGE;
 import static com.android.documentsui.BaseActivity.State.MODE_GRID;
 import static com.android.documentsui.BaseActivity.State.MODE_LIST;
 import static com.android.documentsui.BaseActivity.State.MODE_UNKNOWN;
 import static com.android.documentsui.BaseActivity.State.SORT_ORDER_UNKNOWN;
+import static com.android.documentsui.DocumentsActivity.TAG;
 import static com.android.documentsui.model.DocumentInfo.getCursorInt;
 import static com.android.documentsui.model.DocumentInfo.getCursorLong;
 import static com.android.documentsui.model.DocumentInfo.getCursorString;
@@ -79,7 +81,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.android.documentsui.BaseActivity.State;
-import com.android.documentsui.CopyService;
 import com.android.documentsui.ProviderExecutor.Preemptable;
 import com.android.documentsui.RecentsProvider.StateColumns;
 import com.android.documentsui.model.DocumentInfo;
@@ -507,13 +508,15 @@ public class DirectoryFragment extends Fragment {
             final MenuItem delete = menu.findItem(R.id.menu_delete);
             final MenuItem copy = menu.findItem(R.id.menu_copy);
 
-            final boolean manageMode = state.action == ACTION_MANAGE;
-            open.setVisible(!manageMode);
-            share.setVisible(manageMode);
-            delete.setVisible(manageMode);
-            // Hide the copy menu item in the recents folder. For now, also hide it by default
-            // unless the debug flag is enabled.
-            copy.setVisible((mType != TYPE_RECENT_OPEN) &&
+            final boolean manageOrBrowse = (state.action == ACTION_MANAGE
+                    || state.action == ACTION_BROWSE || state.action == ACTION_BROWSE_ALL);
+
+            open.setVisible(!manageOrBrowse);
+            share.setVisible(manageOrBrowse);
+            delete.setVisible(manageOrBrowse);
+
+            // TODO: unhide copying when ready
+            copy.setVisible(manageOrBrowse &&
                     SystemProperties.getBoolean("debug.documentsui.enable_copy", false));
 
             return true;
