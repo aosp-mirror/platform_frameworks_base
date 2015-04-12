@@ -255,4 +255,11 @@ interface IImsCallSession {
      * @return {@code True} if the session is multiparty.
      */
     boolean isMultiparty();
+
+    /**
+     * Gets the call substate for this session.
+     *
+     * @return the call substate for this session.
+     */
+    int getCallSubstate();
 }

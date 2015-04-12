@@ -186,9 +186,57 @@ public abstract class Connection implements IConferenceable {
      */
     public static final int CAPABILITY_SPEED_UP_MT_AUDIO = 0x00040000;
 
+    /**
+     * Call type can be modified for IMS call
+     * @hide
+     */
+    public static final int CAPABILITY_CAN_UPGRADE_TO_VIDEO = 0x00080000;
+
     //**********************************************************************************************
-    // Next CAPABILITY value: 0x00080000
+    // Next CAPABILITY value: 0x00100000
     //**********************************************************************************************
+
+    /**
+     * Call substate bitmask values
+     */
+
+    /* Default case */
+    /**
+     * @hide
+     */
+    public static final int SUBSTATE_NONE = 0;
+
+    /* Indicates that the call is connected but audio attribute is suspended */
+    /**
+     * @hide
+     */
+    public static final int SUBSTATE_AUDIO_CONNECTED_SUSPENDED = 0x1;
+
+    /* Indicates that the call is connected but video attribute is suspended */
+    /**
+     * @hide
+     */
+    public static final int SUBSTATE_VIDEO_CONNECTED_SUSPENDED = 0x2;
+
+    /* Indicates that the call is established but media retry is needed */
+    /**
+     * @hide
+     */
+    public static final int SUBSTATE_AVP_RETRY = 0x4;
+
+    /* Indicates that the call is multitasking */
+    /**
+     * @hide
+     */
+    public static final int SUBSTATE_MEDIA_PAUSED = 0x8;
+
+    /* Mask containing all the call substate bits set */
+    /**
+     * @hide
+     */
+    public static final int SUBSTATE_ALL = SUBSTATE_AUDIO_CONNECTED_SUSPENDED |
+        SUBSTATE_VIDEO_CONNECTED_SUSPENDED | SUBSTATE_AVP_RETRY |
+        SUBSTATE_MEDIA_PAUSED;
 
     // Flag controlling whether PII is emitted into the logs
     private static final boolean PII_DEBUG = Log.isLoggable(android.util.Log.DEBUG);
@@ -294,6 +342,9 @@ public abstract class Connection implements IConferenceable {
         if (can(capabilities, CAPABILITY_SPEED_UP_MT_AUDIO)) {
             builder.append(" CAPABILITY_SPEED_UP_MT_AUDIO");
         }
+        if (can(capabilities, CAPABILITY_CAN_UPGRADE_TO_VIDEO)) {
+            builder.append(" CAPABILITY_CAN_UPGRADE_TO_VIDEO");
+        }
         builder.append("]");
         return builder.toString();
     }
@@ -322,6 +373,7 @@ public abstract class Connection implements IConferenceable {
         public void onConferenceParticipantsChanged(Connection c,
                 List<ConferenceParticipant> participants) {}
         public void onConferenceStarted() {}
+        public void onCallSubstateChanged(Connection c, int substate) {}
     }
 
     /** @hide */
@@ -376,6 +428,16 @@ public abstract class Connection implements IConferenceable {
          * Session modify request ignored due to invalid parameters.
          */
         public static final int SESSION_MODIFY_REQUEST_INVALID = 3;
+
+        /**
+         * Session modify request timed out.
+         */
+        public static final int SESSION_MODIFY_REQUEST_TIMED_OUT = 4;
+
+        /**
+         * Session modify request rejected by remote UE.
+         */
+        public static final int SESSION_MODIFY_REQUEST_REJECTED_BY_REMOTE = 5;
 
         private static final int MSG_SET_VIDEO_CALLBACK = 1;
         private static final int MSG_SET_CAMERA = 2;
@@ -462,7 +524,8 @@ public abstract class Connection implements IConferenceable {
             }
 
             public void setDeviceOrientation(int rotation) {
-                mMessageHandler.obtainMessage(MSG_SET_DEVICE_ORIENTATION, rotation).sendToTarget();
+                mMessageHandler.obtainMessage(
+                        MSG_SET_DEVICE_ORIENTATION, rotation, 0).sendToTarget();
             }
 
             public void setZoom(float value) {
@@ -656,7 +719,7 @@ public abstract class Connection implements IConferenceable {
          *
          * @param dataUsage The updated data usage.
          */
-        public void changeCallDataUsage(int dataUsage) {
+        public void changeCallDataUsage(long dataUsage) {
             if (mVideoCallback != null) {
                 try {
                     mVideoCallback.changeCallDataUsage(dataUsage);
@@ -674,6 +737,20 @@ public abstract class Connection implements IConferenceable {
             if (mVideoCallback != null) {
                 try {
                     mVideoCallback.changeCameraCapabilities(cameraCapabilities);
+                } catch (RemoteException ignored) {
+                }
+            }
+        }
+
+        /**
+         * Invokes callback method defined in In-Call UI.
+         *
+         * @param videoQuality The updated video quality.
+         */
+        public void changeVideoQuality(int videoQuality) {
+            if (mVideoCallback != null) {
+                try {
+                    mVideoCallback.changeVideoQuality(videoQuality);
                 } catch (RemoteException ignored) {
                 }
             }
@@ -724,6 +801,7 @@ public abstract class Connection implements IConferenceable {
     private DisconnectCause mDisconnectCause;
     private Conference mConference;
     private ConnectionService mConnectionService;
+    private int mCallSubstate;
 
     /**
      * Create a new Connection.
@@ -779,6 +857,21 @@ public abstract class Connection implements IConferenceable {
      */
     public final int getVideoState() {
         return mVideoState;
+    }
+
+    /**
+     * Returns the call substate of the call.
+     * Valid values: {@link Connection#SUBSTATE_NONE},
+     * {@link Connection#SUBSTATE_AUDIO_CONNECTED_SUSPENDED},
+     * {@link Connection#SUBSTATE_VIDEO_CONNECTED_SUSPENDED},
+     * {@link Connection#SUBSTATE_AVP_RETRY},
+     * {@link Connection#SUBSTATE_MEDIA_PAUSED}.
+     *
+     * @param callSubstate The new call substate.
+     * @hide
+     */
+    public final int getCallSubstate() {
+        return mCallSubstate;
     }
 
     /**
@@ -956,6 +1049,25 @@ public abstract class Connection implements IConferenceable {
         mVideoState = videoState;
         for (Listener l : mListeners) {
             l.onVideoStateChanged(this, mVideoState);
+        }
+    }
+
+    /**
+     * Set the call substate for the connection.
+     * Valid values: {@link Connection#SUBSTATE_NONE},
+     * {@link Connection#SUBSTATE_AUDIO_CONNECTED_SUSPENDED},
+     * {@link Connection#SUBSTATE_VIDEO_CONNECTED_SUSPENDED},
+     * {@link Connection#SUBSTATE_AVP_RETRY},
+     * {@link Connection#SUBSTATE_MEDIA_PAUSED}.
+     *
+     * @param callSubstate The new call substate.
+     * @hide
+     */
+    public final void setCallSubstate(int callSubstate) {
+        Log.d(this, "setCallSubstate %d", callSubstate);
+        mCallSubstate = callSubstate;
+        for (Listener l : mListeners) {
+            l.onCallSubstateChanged(this, mCallSubstate);
         }
     }
 

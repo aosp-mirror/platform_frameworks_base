@@ -17,10 +17,12 @@
 package android.telecom;
 
 import android.annotation.SystemApi;
+import android.telecom.Connection.VideoProvider;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CopyOnWriteArraySet;
@@ -49,6 +51,8 @@ public abstract class Conference implements IConferenceable {
         public void onDestroyed(Conference conference) {}
         public void onConnectionCapabilitiesChanged(
                 Conference conference, int connectionCapabilities) {}
+        public void onVideoStateChanged(Conference c, int videoState) { }
+        public void onVideoProviderChanged(Conference c, Connection.VideoProvider videoProvider) {}
     }
 
     private final Set<Listener> mListeners = new CopyOnWriteArraySet<>();
@@ -177,6 +181,22 @@ public abstract class Conference implements IConferenceable {
      */
     public final AudioState getAudioState() {
         return mAudioState;
+    }
+
+    /**
+     * Returns VideoProvider of the primary call. This can be null.
+     *  @hide
+     */
+    public VideoProvider getVideoProvider() {
+        return null;
+    }
+
+    /**
+     * Returns video state of the primary call.
+     *  @hide
+     */
+    public int getVideoState() {
+        return VideoProfile.VideoState.AUDIO_ONLY;
     }
 
     /**
@@ -309,6 +329,7 @@ public abstract class Conference implements IConferenceable {
      * @return True if the connection was successfully added.
      */
     public final boolean addConnection(Connection connection) {
+        Log.d(this, "Connection=%s, connection=", connection);
         if (connection != null && !mChildConnections.contains(connection)) {
             if (connection.setConference(this)) {
                 mChildConnections.add(connection);
@@ -353,6 +374,38 @@ public abstract class Conference implements IConferenceable {
             }
         }
         fireOnConferenceableConnectionsChanged();
+    }
+
+    /**
+     * Set the video state for the conference.
+     * Valid values: {@link VideoProfile.VideoState#AUDIO_ONLY},
+     * {@link VideoProfile.VideoState#BIDIRECTIONAL},
+     * {@link VideoProfile.VideoState#TX_ENABLED},
+     * {@link VideoProfile.VideoState#RX_ENABLED}.
+     *
+     * @param videoState The new video state.
+     * @hide
+     */
+    public final void setVideoState(Connection c, int videoState) {
+        Log.d(this, "setVideoState Conference: %s Connection: %s VideoState: %s",
+                this, c, videoState);
+        for (Listener l : mListeners) {
+            l.onVideoStateChanged(this, videoState);
+        }
+    }
+
+    /**
+     * Sets the video connection provider.
+     *
+     * @param videoProvider The video provider.
+     * @hide
+     */
+    public final void setVideoProvider(Connection c, Connection.VideoProvider videoProvider) {
+        Log.d(this, "setVideoProvider Conference: %s Connection: %s VideoState: %s",
+                this, c, videoProvider);
+        for (Listener l : mListeners) {
+            l.onVideoProviderChanged(this, videoProvider);
+        }
     }
 
     private final void fireOnConferenceableConnectionsChanged() {
@@ -483,5 +536,16 @@ public abstract class Conference implements IConferenceable {
             c.removeConnectionListener(mConnectionDeathListener);
         }
         mConferenceableConnections.clear();
+    }
+
+    @Override
+    public String toString() {
+        return String.format(Locale.US,
+                "[State: %s,Capabilites: %s, VideoState: %s, VideoProvider: %s, ThisObject %s]",
+                Connection.stateToString(mState),
+                Call.Details.capabilitiesToString(mConnectionCapabilities),
+                getVideoState(),
+                getVideoProvider(),
+                super.toString());
     }
 }

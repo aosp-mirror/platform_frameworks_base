@@ -97,7 +97,7 @@ public class CaptivePortalLoginActivity extends Activity {
         final ConnectivityManager cm = ConnectivityManager.from(this);
         final Network network = new Network(mNetId);
         // Also initializes proxy system properties.
-        cm.setProcessDefaultNetwork(network);
+        cm.bindProcessToNetwork(network);
 
         // Proxy system properties must be initialized before setContentView is called because
         // setContentView initializes the WebView logic which in turn reads the system properties.

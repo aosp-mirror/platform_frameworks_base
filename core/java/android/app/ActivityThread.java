@@ -865,10 +865,10 @@ public final class ActivityThread {
         }
 
         public void setHttpProxy(String host, String port, String exclList, Uri pacFileUrl) {
-            final Network network = ConnectivityManager.getProcessDefaultNetwork();
+            final ConnectivityManager cm = ConnectivityManager.from(getSystemContext());
+            final Network network = cm.getBoundNetworkForProcess();
             if (network != null) {
-                Proxy.setHttpProxySystemProperty(
-                        ConnectivityManager.from(getSystemContext()).getDefaultProxy());
+                Proxy.setHttpProxySystemProperty(cm.getDefaultProxy());
             } else {
                 Proxy.setHttpProxySystemProperty(host, port, exclList, pacFileUrl);
             }

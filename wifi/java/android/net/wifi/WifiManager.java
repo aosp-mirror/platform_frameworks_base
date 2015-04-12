@@ -645,6 +645,20 @@ public class WifiManager {
     }
 
     /**
+     * Returns a WifiConfiguration matching this ScanResult
+     * @param scanResult scanResult that represents the BSSID
+     * @return {@link WifiConfiguration} that matches this BSSID or null
+     * @hide
+     */
+    public WifiConfiguration getMatchingWifiConfig(ScanResult scanResult) {
+        try {
+            return mService.getMatchingWifiConfig(scanResult);
+        } catch (RemoteException e) {
+            return null;
+        }
+    }
+
+    /**
      * Add a new network description to the set of configured networks.
      * The {@code networkId} field of the supplied configuration object
      * is ignored.
@@ -1482,6 +1496,20 @@ public class WifiManager {
     public WifiConfiguration getWifiApConfiguration() {
         try {
             return mService.getWifiApConfiguration();
+        } catch (RemoteException e) {
+            return null;
+        }
+    }
+
+    /**
+     * Builds a WifiConfiguration from Hotspot 2.0 MIME file.
+     * @return AP details in WifiConfiguration
+     *
+     * @hide Dont open yet
+     */
+    public WifiConfiguration buildWifiConfig(String uriString, String mimeType, byte[] data) {
+        try {
+            return mService.buildWifiConfig(uriString, mimeType, data);
         } catch (RemoteException e) {
             return null;
         }

@@ -159,7 +159,7 @@ public class NetworkUtils {
      * Return the netId last passed to {@link #bindProcessToNetwork}, or NETID_UNSET if
      * {@link #unbindProcessToNetwork} has been called since {@link #bindProcessToNetwork}.
      */
-    public native static int getNetworkBoundToProcess();
+    public native static int getBoundNetworkForProcess();
 
     /**
      * Binds host resolutions performed by this process to the network designated by {@code netId}.

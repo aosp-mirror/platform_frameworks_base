@@ -25,6 +25,7 @@ import android.net.StaticIpConfiguration;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
+import android.util.Log;
 
 import java.util.HashMap;
 import java.util.BitSet;
@@ -910,41 +911,52 @@ public class WifiConfiguration implements Parcelable {
      * @hide
      */
     public boolean isValid() {
+        String reason = strIsValid();
+        if (reason != null) {
+            Log.e("WFII", "WiFi Config not valid: " + reason);
+            return false;
+        }
+        else {
+            return true;
+        }
+    }
+
+    private String strIsValid() {
 
         if (allowedKeyManagement == null)
-            return false;
+            return "allowed kmgmt";
 
         if (allowedKeyManagement.cardinality() > 1) {
             if (allowedKeyManagement.cardinality() != 2) {
-                return false;
+                return "cardinality != 2";
             }
-            if (allowedKeyManagement.get(KeyMgmt.WPA_EAP) == false) {
-                return false;
+            if (!allowedKeyManagement.get(KeyMgmt.WPA_EAP)) {
+                return "not WPA_EAP";
             }
-            if ((allowedKeyManagement.get(KeyMgmt.IEEE8021X) == false)
-                    && (allowedKeyManagement.get(KeyMgmt.WPA_PSK) == false)) {
-                return false;
+            if ((!allowedKeyManagement.get(KeyMgmt.IEEE8021X))
+                    && (!allowedKeyManagement.get(KeyMgmt.WPA_PSK))) {
+                return "not PSK or 8021X";
             }
         }
 
-        if (TextUtils.isEmpty(FQDN) == false) {
+        if (!TextUtils.isEmpty(FQDN)) {
             /* this is passpoint configuration; it must not have an SSID */
-            if (TextUtils.isEmpty(SSID) == false) {
-                return false;
+            if (!TextUtils.isEmpty(SSID)) {
+                return "no SSID";
             }
             /* this is passpoint configuration; it must have a providerFriendlyName */
             if (TextUtils.isEmpty(providerFriendlyName)) {
-                return false;
+                return "no provider friendly name";
             }
             /* this is passpoint configuration; it must have enterprise config */
             if (enterpriseConfig == null
                     || enterpriseConfig.getEapMethod() == WifiEnterpriseConfig.Eap.NONE ) {
-                return false;
+                return "no enterprise config";
             }
         }
 
         // TODO: Add more checks
-        return true;
+        return null;
     }
 
     /**

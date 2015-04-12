@@ -100,4 +100,24 @@ interface IImsConfig {
      * @return void
      */
     boolean getVolteProvisioned();
+
+    /**
+     *
+     * Gets the value for ims fature item video quality.
+     *
+     * @param listener. Video quality value returned asynchronously through listener.
+     * @return void
+     */
+    oneway void getVideoQuality(ImsConfigListener listener);
+
+    /**
+     * Sets the value for IMS feature item video quality.
+     *
+     * @param quality, defines the value of video quality.
+     * @param listener, provided if caller needs to be notified for set result.
+     * @return void
+     *
+     * @throws ImsException if calling the IMS service results in an error.
+     */
+     oneway void setVideoQuality(int quality, ImsConfigListener listener);
 }
