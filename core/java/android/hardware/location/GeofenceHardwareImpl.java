@@ -53,6 +53,7 @@ public final class GeofenceHardwareImpl {
 
     private IFusedGeofenceHardware mFusedService;
     private IGpsGeofenceHardware mGpsService;
+    private int mCapabilities;
 
     private int[] mSupportedMonitorTypes = new int[GeofenceHardware.NUM_MONITORS];
 
@@ -88,6 +89,9 @@ public final class GeofenceHardwareImpl {
     private static final int RESOLUTION_LEVEL_NONE = 1;
     private static final int RESOLUTION_LEVEL_COARSE = 2;
     private static final int RESOLUTION_LEVEL_FINE = 3;
+
+    // Capability constant corresponding to fused_location.h entry when geofencing supports GNNS.
+    private static final int CAPABILITY_GNSS = 1;
 
     public synchronized static GeofenceHardwareImpl getInstance(Context context) {
         if (sInstance == null) {
@@ -141,7 +145,9 @@ public final class GeofenceHardwareImpl {
     private void updateFusedHardwareAvailability() {
         boolean fusedSupported;
         try {
-            fusedSupported = (mFusedService != null ? mFusedService.isSupported() : false);
+            fusedSupported = (mFusedService != null
+                    ? mFusedService.isSupported() && (mCapabilities & CAPABILITY_GNSS) != 0
+                    : false);
         } catch (RemoteException e) {
             Log.e(TAG, "RemoteException calling LocationManagerService");
             fusedSupported = false;
@@ -164,6 +170,11 @@ public final class GeofenceHardwareImpl {
         } else {
             Log.e(TAG, "Error: GpsService being set again.");
         }
+    }
+
+    public void onCapabilities(int capabilities) {
+        mCapabilities = capabilities;
+        updateFusedHardwareAvailability();
     }
 
     public void setFusedGeofenceHardware(IFusedGeofenceHardware service) {
@@ -210,6 +221,20 @@ public final class GeofenceHardwareImpl {
             }
             return mSupportedMonitorTypes[monitoringType];
         }
+    }
+
+    public int getCapabilitiesForMonitoringType(int monitoringType) {
+        switch (mSupportedMonitorTypes[monitoringType]) {
+            case GeofenceHardware.MONITOR_CURRENTLY_AVAILABLE:
+                switch (monitoringType) {
+                    case GeofenceHardware.MONITORING_TYPE_GPS_HARDWARE:
+                        return CAPABILITY_GNSS;
+                    case GeofenceHardware.MONITORING_TYPE_FUSED_HARDWARE:
+                        return mCapabilities;
+                }
+                break;
+        }
+        return 0;
     }
 
     public boolean addCircularFence(

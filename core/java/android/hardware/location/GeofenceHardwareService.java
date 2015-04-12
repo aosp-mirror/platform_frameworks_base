@@ -65,14 +65,17 @@ public class GeofenceHardwareService extends Service {
     }
 
     private IBinder mBinder = new IGeofenceHardware.Stub() {
+        @Override
         public void setGpsGeofenceHardware(IGpsGeofenceHardware service) {
             mGeofenceHardwareImpl.setGpsHardwareGeofence(service);
         }
 
+        @Override
         public void setFusedGeofenceHardware(IFusedGeofenceHardware service) {
             mGeofenceHardwareImpl.setFusedGeofenceHardware(service);
         }
 
+        @Override
         public int[] getMonitoringTypes() {
             mContext.enforceCallingPermission(Manifest.permission.LOCATION_HARDWARE,
                     "Location Hardware permission not granted to access hardware geofence");
@@ -80,12 +83,15 @@ public class GeofenceHardwareService extends Service {
             return mGeofenceHardwareImpl.getMonitoringTypes();
         }
 
+        @Override
         public int getStatusOfMonitoringType(int monitoringType) {
             mContext.enforceCallingPermission(Manifest.permission.LOCATION_HARDWARE,
                     "Location Hardware permission not granted to access hardware geofence");
 
             return mGeofenceHardwareImpl.getStatusOfMonitoringType(monitoringType);
         }
+
+        @Override
         public boolean addCircularFence(
                 int monitoringType,
                 GeofenceHardwareRequestParcelable request,
@@ -96,6 +102,7 @@ public class GeofenceHardwareService extends Service {
             return mGeofenceHardwareImpl.addCircularFence(monitoringType, request, callback);
         }
 
+        @Override
         public boolean removeGeofence(int id, int monitoringType) {
             mContext.enforceCallingPermission(Manifest.permission.LOCATION_HARDWARE,
                     "Location Hardware permission not granted to access hardware geofence");
@@ -104,6 +111,7 @@ public class GeofenceHardwareService extends Service {
             return mGeofenceHardwareImpl.removeGeofence(id, monitoringType);
         }
 
+        @Override
         public boolean pauseGeofence(int id, int monitoringType) {
             mContext.enforceCallingPermission(Manifest.permission.LOCATION_HARDWARE,
                     "Location Hardware permission not granted to access hardware geofence");
@@ -112,6 +120,7 @@ public class GeofenceHardwareService extends Service {
             return mGeofenceHardwareImpl.pauseGeofence(id, monitoringType);
         }
 
+        @Override
         public boolean resumeGeofence(int id, int monitoringType, int monitorTransitions) {
             mContext.enforceCallingPermission(Manifest.permission.LOCATION_HARDWARE,
                     "Location Hardware permission not granted to access hardware geofence");
@@ -120,6 +129,7 @@ public class GeofenceHardwareService extends Service {
             return mGeofenceHardwareImpl.resumeGeofence(id, monitoringType, monitorTransitions);
         }
 
+        @Override
         public boolean registerForMonitorStateChangeCallback(int monitoringType,
                 IGeofenceHardwareMonitorCallback callback) {
             mContext.enforceCallingPermission(Manifest.permission.LOCATION_HARDWARE,
@@ -130,6 +140,7 @@ public class GeofenceHardwareService extends Service {
                     callback);
         }
 
+        @Override
         public boolean unregisterForMonitorStateChangeCallback(int monitoringType,
                 IGeofenceHardwareMonitorCallback callback) {
             mContext.enforceCallingPermission(Manifest.permission.LOCATION_HARDWARE,

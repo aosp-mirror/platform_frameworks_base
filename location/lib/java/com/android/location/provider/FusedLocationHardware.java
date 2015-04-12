@@ -34,7 +34,7 @@ import java.util.Map;
  * Class that exposes IFusedLocationHardware functionality to unbundled services.
  */
 public final class FusedLocationHardware {
-    private final String TAG = "FusedLocationHardware";
+    private static final String TAG = "FusedLocationHardware";
 
     private IFusedLocationHardware mLocationHardware;
 
@@ -51,6 +51,11 @@ public final class FusedLocationHardware {
         @Override
         public void onDiagnosticDataAvailable(String data) {
             dispatchDiagnosticData(data);
+        }
+
+        @Override
+        public void onCapabilities(int capabilities) {
+            dispatchCapabilities(capabilities);
         }
     };
 
@@ -204,6 +209,7 @@ public final class FusedLocationHardware {
     private class DispatcherHandler extends Handler {
         public static final int DISPATCH_LOCATION = 1;
         public static final int DISPATCH_DIAGNOSTIC_DATA = 2;
+        public static final int DISPATCH_CAPABILITIES = 3;
 
         public DispatcherHandler(Looper looper) {
             super(looper, null /*callback*/ , true /*async*/);
@@ -218,6 +224,10 @@ public final class FusedLocationHardware {
                     break;
                 case DISPATCH_DIAGNOSTIC_DATA:
                     command.dispatchDiagnosticData();
+                    break;
+                case DISPATCH_CAPABILITIES:
+                    command.dispatchCapabilities();
+                    break;
                 default:
                     Log.e(TAG, "Invalid dispatch message");
                     break;
@@ -229,14 +239,17 @@ public final class FusedLocationHardware {
         private final FusedLocationHardwareSink mSink;
         private final Location[] mLocations;
         private final String mData;
+        private final int mCapabilities;
 
         public MessageCommand(
                 FusedLocationHardwareSink sink,
                 Location[] locations,
-                String data) {
+                String data,
+                int capabilities) {
             mSink = sink;
             mLocations = locations;
             mData = data;
+            mCapabilities = capabilities;
         }
 
         public void dispatchLocation() {
@@ -245,6 +258,10 @@ public final class FusedLocationHardware {
 
         public void dispatchDiagnosticData() {
             mSink.onDiagnosticDataAvailable(mData);
+        }
+
+        public void dispatchCapabilities() {
+            mSink.onCapabilities(mCapabilities);
         }
     }
 
@@ -258,7 +275,7 @@ public final class FusedLocationHardware {
             Message message = Message.obtain(
                     entry.getValue(),
                     DispatcherHandler.DISPATCH_LOCATION,
-                    new MessageCommand(entry.getKey(), locations, null /*data*/));
+                    new MessageCommand(entry.getKey(), locations, null /*data*/, 0));
             message.sendToTarget();
         }
     }
@@ -273,7 +290,22 @@ public final class FusedLocationHardware {
             Message message = Message.obtain(
                     entry.getValue(),
                     DispatcherHandler.DISPATCH_DIAGNOSTIC_DATA,
-                    new MessageCommand(entry.getKey(), null /*locations*/, data));
+                    new MessageCommand(entry.getKey(), null /*locations*/, data, 0));
+            message.sendToTarget();
+        }
+    }
+
+    private void dispatchCapabilities(int capabilities) {
+        HashMap<FusedLocationHardwareSink, DispatcherHandler> sinks;
+        synchronized(mSinkList) {
+            sinks = mSinkList;
+        }
+
+        for(Map.Entry<FusedLocationHardwareSink, DispatcherHandler> entry : sinks.entrySet()) {
+            Message message = Message.obtain(
+                    entry.getValue(),
+                    DispatcherHandler.DISPATCH_CAPABILITIES,
+                    new MessageCommand(entry.getKey(), null /*locations*/, null, capabilities));
             message.sendToTarget();
         }
     }

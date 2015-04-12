@@ -44,6 +44,9 @@ import android.util.Log;
 public class FlpHardwareProvider {
     private GeofenceHardwareImpl mGeofenceHardwareSink = null;
     private IFusedLocationHardwareSink mLocationSink = null;
+    // Capabilities provided by FlpCallbacks
+    private boolean mHaveBatchingCapabilities;
+    private int mBatchingCapabilities;
 
     private static FlpHardwareProvider sSingletonInstance = null;
 
@@ -118,6 +121,33 @@ public class FlpHardwareProvider {
         try {
             if (sink != null) {
                 sink.onLocationAvailable(locations);
+            }
+        } catch (RemoteException e) {
+            Log.e(TAG, "RemoteException calling onLocationAvailable");
+        }
+    }
+
+    private void onBatchingCapabilities(int capabilities) {
+        synchronized (mLocationSinkLock) {
+            mHaveBatchingCapabilities = true;
+            mBatchingCapabilities = capabilities;
+        }
+
+        maybeSendCapabilities();
+    }
+
+    private void maybeSendCapabilities() {
+        IFusedLocationHardwareSink sink;
+        boolean haveBatchingCapabilities;
+        int batchingCapabilities;
+        synchronized (mLocationSinkLock) {
+            sink = mLocationSink;
+            haveBatchingCapabilities = mHaveBatchingCapabilities;
+            batchingCapabilities = mBatchingCapabilities;
+        }
+        try {
+            if (sink != null && haveBatchingCapabilities) {
+                sink.onCapabilities(batchingCapabilities);
             }
         } catch (RemoteException e) {
             Log.e(TAG, "RemoteException calling onLocationAvailable");
@@ -209,6 +239,10 @@ public class FlpHardwareProvider {
                 translateToGeofenceHardwareStatus(result));
     }
 
+    private void onGeofencingCapabilities(int capabilities) {
+        getGeofenceHardwareSink().onCapabilities(capabilities);
+    }
+
     /**
      * Private native methods accessing FLP HAL.
      */
@@ -277,6 +311,7 @@ public class FlpHardwareProvider {
 
                 mLocationSink = eventSink;
             }
+            maybeSendCapabilities();
         }
 
         @Override

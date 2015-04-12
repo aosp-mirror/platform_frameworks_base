@@ -30,12 +30,18 @@ interface IFusedLocationHardwareSink {
      *
      * @param locations     The batch of location information available.
      */
-    void onLocationAvailable(in Location[] locations);
+    void onLocationAvailable(in Location[] locations) = 0;
 
     /**
      * Event generated from FLP HAL to provide diagnostic data to the platform.
      *
      * @param data      The diagnostic data provided by FLP HAL.
      */
-    void onDiagnosticDataAvailable(in String data);
+    void onDiagnosticDataAvailable(in String data) = 1;
+
+    /**
+     * Event generated from FLP HAL to provide a mask of supported
+     * capabilities.  Should be called immediatly after init.
+     */
+    void onCapabilities(int capabilities) = 2;
 }
