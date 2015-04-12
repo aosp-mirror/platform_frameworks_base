@@ -254,6 +254,8 @@ public class VoicemailContract {
          * @param context The context of the app doing the inserting
          * @param voicemail Data to be inserted
          * @return {@link Uri} of the newly inserted {@link Voicemail}
+         *
+         * @hide
          */
         public static Uri insert(Context context, Voicemail voicemail) {
             ContentResolver contentResolver = context.getContentResolver();
@@ -267,6 +269,8 @@ public class VoicemailContract {
          * @param context The context of the app doing the inserting
          * @param voicemails Data to be inserted
          * @return the number of voicemails inserted
+         *
+         * @hide
          */
         public static int insert(Context context, List<Voicemail> voicemails) {
             ContentResolver contentResolver = context.getContentResolver();
@@ -283,6 +287,8 @@ public class VoicemailContract {
          * package. By default, a package only has permission to delete voicemails it inserted.
          *
          * @return the number of voicemails deleted
+         *
+         * @hide
          */
         public static int deleteAll(Context context) {
             return context.getContentResolver().delete(
@@ -439,6 +445,8 @@ public class VoicemailContract {
          * @param configurationState See {@link Status#CONFIGURATION_STATE}
          * @param dataChannelState See {@link Status#DATA_CHANNEL_STATE}
          * @param notificationChannelState See {@link Status#NOTIFICATION_CHANNEL_STATE}
+         *
+         * @hide
          */
         public static void setStatus(Context context, PhoneAccountHandle accountHandle,
                 int configurationState, int dataChannelState, int notificationChannelState) {
