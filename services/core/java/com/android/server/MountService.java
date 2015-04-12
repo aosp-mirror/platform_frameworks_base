@@ -197,6 +197,7 @@ class MountService extends IMountService.Stub
         public static final int DISK_SIZE_CHANGED = 641;
         public static final int DISK_LABEL_CHANGED = 642;
         public static final int DISK_VOLUME_CREATED = 643;
+        public static final int DISK_VOLUME_DESTROYED = 644;
         public static final int DISK_DESTROYED = 649;
 
         public static final int VOLUME_CREATED = 650;
@@ -565,6 +566,13 @@ class MountService extends IMountService.Stub
             mDisks.clear();
             mVolumes.clear();
 
+            // Create a stub volume that represents internal storage
+            final VolumeInfo internal = new VolumeInfo(VolumeInfo.ID_PRIVATE_INTERNAL,
+                    VolumeInfo.TYPE_PRIVATE, 0);
+            internal.state = VolumeInfo.STATE_MOUNTED;
+            internal.path = Environment.getDataDirectory().getAbsolutePath();
+            mVolumes.put(internal.id, internal);
+
             try {
                 mConnector.execute("volume", "reset");
             } catch (NativeDaemonConnectorException e) {
@@ -739,6 +747,15 @@ class MountService extends IMountService.Stub
                 }
                 break;
             }
+            case VoldResponseCode.DISK_VOLUME_DESTROYED: {
+                if (cooked.length != 3) break;
+                final DiskInfo disk = mDisks.get(cooked[1]);
+                final String volId = cooked[2];
+                if (disk != null) {
+                    disk.volumes = ArrayUtils.removeElement(String.class, disk.volumes, volId);
+                }
+                break;
+            }
             case VoldResponseCode.DISK_DESTROYED: {
                 if (cooked.length != 2) break;
                 mDisks.remove(cooked[1]);
@@ -799,7 +816,6 @@ class MountService extends IMountService.Stub
                 break;
             }
             case VoldResponseCode.VOLUME_DESTROYED: {
-                // TODO: send ACTION_MEDIA_REMOVED broadcast
                 if (cooked.length != 2) break;
                 mVolumes.remove(cooked[1]);
                 break;
@@ -820,7 +836,8 @@ class MountService extends IMountService.Stub
     private void onVolumeCreatedLocked(VolumeInfo vol) {
         final boolean primaryPhysical = SystemProperties.getBoolean(
                 StorageManager.PROP_PRIMARY_PHYSICAL, false);
-        if (vol.type == VolumeInfo.TYPE_EMULATED && !primaryPhysical) {
+        // TODO: enable switching to another emulated primary
+        if (VolumeInfo.ID_EMULATED_INTERNAL.equals(vol.id) && !primaryPhysical) {
             vol.flags |= VolumeInfo.FLAG_PRIMARY;
             vol.flags |= VolumeInfo.FLAG_VISIBLE;
             mHandler.obtainMessage(H_VOLUME_MOUNT, vol).sendToTarget();

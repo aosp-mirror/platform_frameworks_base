@@ -162,7 +162,7 @@ public class StandaloneActivity extends BaseActivity {
         mState = new State();
 
         final Intent intent = getIntent();
-        mState.action = State.ACTION_MANAGE_ALL;
+        mState.action = State.ACTION_BROWSE_ALL;
         mState.acceptMimes = new String[] { "*/*" };
         mState.allowMultiple = true;
         mState.acceptMimes = new String[] { intent.getType() };

@@ -16,6 +16,8 @@
 
 package com.android.internal.util;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.util.ArraySet;
 
 import dalvik.system.VMRuntime;
@@ -24,13 +26,13 @@ import libcore.util.EmptyArray;
 
 import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.Objects;
 
 /**
  * ArrayUtils contains some methods that you can call to find out
  * the most efficient increments by which to grow arrays.
  */
-public class ArrayUtils
-{
+public class ArrayUtils {
     private static final int CACHE_SIZE = 73;
     private static Object[] sCache = new Object[CACHE_SIZE];
 
@@ -158,11 +160,7 @@ public class ArrayUtils
     public static <T> int indexOf(T[] array, T value) {
         if (array == null) return -1;
         for (int i = 0; i < array.length; i++) {
-            if (array[i] == null) {
-                if (value == null) return i;
-            } else {
-                if (value != null && array[i].equals(value)) return i;
-            }
+            if (Objects.equals(array[i], value)) return i;
         }
         return -1;
     }
@@ -209,17 +207,15 @@ public class ArrayUtils
     }
 
     /**
-     * Appends an element to a copy of the array and returns the copy.
-     * @param array The original array, or null to represent an empty array.
-     * @param element The element to add.
-     * @return A new array that contains all of the elements of the original array
-     * with the specified element added at the end.
+     * Adds value to given array if not already present, providing set-like
+     * behavior.
      */
     @SuppressWarnings("unchecked")
-    public static <T> T[] appendElement(Class<T> kind, T[] array, T element) {
+    public static @NonNull <T> T[] appendElement(Class<T> kind, @Nullable T[] array, T element) {
         final T[] result;
         final int end;
         if (array != null) {
+            if (contains(array, element)) return array;
             end = array.length;
             result = (T[])Array.newInstance(kind, end + 1);
             System.arraycopy(array, 0, result, 0, end);
@@ -232,21 +228,15 @@ public class ArrayUtils
     }
 
     /**
-     * Removes an element from a copy of the array and returns the copy.
-     * If the element is not present, then the original array is returned unmodified.
-     * @param array The original array, or null to represent an empty array.
-     * @param element The element to remove.
-     * @return A new array that contains all of the elements of the original array
-     * except the first copy of the specified element removed.  If the specified element
-     * was not present, then returns the original array.  Returns null if the result
-     * would be an empty array.
+     * Removes value from given array if present, providing set-like behavior.
      */
     @SuppressWarnings("unchecked")
-    public static <T> T[] removeElement(Class<T> kind, T[] array, T element) {
+    public static @Nullable <T> T[] removeElement(Class<T> kind, @Nullable T[] array, T element) {
         if (array != null) {
+            if (!contains(array, element)) return array;
             final int length = array.length;
             for (int i = 0; i < length; i++) {
-                if (array[i] == element) {
+                if (Objects.equals(array[i], element)) {
                     if (length == 1) {
                         return null;
                     }
@@ -261,14 +251,10 @@ public class ArrayUtils
     }
 
     /**
-     * Appends a new value to a copy of the array and returns the copy.  If
-     * the value is already present, the original array is returned
-     * @param cur The original array, or null to represent an empty array.
-     * @param val The value to add.
-     * @return A new array that contains all of the values of the original array
-     * with the new value added, or the original array.
+     * Adds value to given array if not already present, providing set-like
+     * behavior.
      */
-    public static int[] appendInt(int[] cur, int val) {
+    public static @NonNull int[] appendInt(@Nullable int[] cur, int val) {
         if (cur == null) {
             return new int[] { val };
         }
@@ -284,7 +270,10 @@ public class ArrayUtils
         return ret;
     }
 
-    public static int[] removeInt(int[] cur, int val) {
+    /**
+     * Removes value from given array if present, providing set-like behavior.
+     */
+    public static @Nullable int[] removeInt(@Nullable int[] cur, int val) {
         if (cur == null) {
             return null;
         }
@@ -305,14 +294,10 @@ public class ArrayUtils
     }
 
     /**
-     * Appends a new value to a copy of the array and returns the copy.  If
-     * the value is already present, the original array is returned
-     * @param cur The original array, or null to represent an empty array.
-     * @param val The value to add.
-     * @return A new array that contains all of the values of the original array
-     * with the new value added, or the original array.
+     * Adds value to given array if not already present, providing set-like
+     * behavior.
      */
-    public static long[] appendLong(long[] cur, long val) {
+    public static @NonNull long[] appendLong(@Nullable long[] cur, long val) {
         if (cur == null) {
             return new long[] { val };
         }
@@ -328,7 +313,10 @@ public class ArrayUtils
         return ret;
     }
 
-    public static long[] removeLong(long[] cur, long val) {
+    /**
+     * Removes value from given array if present, providing set-like behavior.
+     */
+    public static @Nullable long[] removeLong(@Nullable long[] cur, long val) {
         if (cur == null) {
             return null;
         }
