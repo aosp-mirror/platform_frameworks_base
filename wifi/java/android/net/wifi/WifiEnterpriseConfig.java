@@ -601,7 +601,7 @@ public class WifiEnterpriseConfig implements Parcelable {
     }
 
     /**
-     * Set plmn for passpoint credential
+     * Get plmn for passpoint credential
      * @return the plmn
      */
     public String getPlmn() {

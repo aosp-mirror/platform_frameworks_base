@@ -330,8 +330,10 @@ public class DhcpClient extends BaseDhcpStateMachine {
                         maybeLog("Received packet: " + packet);
                         sendMessage(CMD_RECEIVED_PACKET, packet);
                     }
-                } catch(IOException|ErrnoException e) {
-                    Log.e(TAG, "Read error", e);
+                } catch (IOException|ErrnoException e) {
+                    if (!stopped) {
+                        Log.e(TAG, "Read error", e);
+                    }
                 }
             }
             maybeLog("Stopping receive thread");
