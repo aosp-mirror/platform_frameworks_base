@@ -56,7 +56,7 @@ public class FingerprintManager {
     private static final boolean DEBUG = true;
     private static final int MSG_ENROLL_RESULT = 100;
     private static final int MSG_ACQUIRED = 101;
-    private static final int MSG_PROCESSED = 102;
+    private static final int MSG_AUTHENTICATED = 102;
     private static final int MSG_ERROR = 103;
     private static final int MSG_REMOVED = 104;
 
@@ -102,6 +102,11 @@ public class FingerprintManager {
      * @hide
      */
     public static final int FINGERPRINT_ERROR_UNABLE_TO_REMOVE = 6;
+
+   /**
+     * The operation was canceled because the API is locked out due to too many attempts.
+     */
+    public static final int FINGERPRINT_ERROR_LOCKOUT = 7;
 
     /**
      * Hardware vendors may extend this list if there are conditions that do not fall under one of
@@ -169,15 +174,9 @@ public class FingerprintManager {
     private Fingerprint mRemovalFingerprint;
 
     private class OnEnrollCancelListener implements OnCancelListener {
-        private long mChallenge;
-
-        public OnEnrollCancelListener(long challenge) {
-            mChallenge = challenge;
-        }
-
         @Override
         public void onCancel() {
-            cancelEnrollment(mChallenge);
+            cancelEnrollment();
         }
     }
 
@@ -437,14 +436,14 @@ public class FingerprintManager {
      * {@link EnrollmentCallback#onEnrollmentProgress(int) is called with remaining == 0, at
      * which point the object is no longer valid. The operation can be canceled by using the
      * provided cancel object.
-     * @param challenge a unique id provided by a recent verification of device credentials
-     *     (e.g. pin, pattern or password).
+     * @param token a unique token provided by a recent creation or verification of device
+     * credentials (e.g. pin, pattern or password).
      * @param cancel an object that can be used to cancel enrollment
      * @param callback an object to receive enrollment events
      * @param flags optional flags
      * @hide
      */
-    public void enroll(long challenge, CancellationSignal cancel, EnrollmentCallback callback,
+    public void enroll(byte [] token, CancellationSignal cancel, EnrollmentCallback callback,
             int flags) {
         if (callback == null) {
             throw new IllegalArgumentException("Must supply an enrollment callback");
@@ -455,13 +454,13 @@ public class FingerprintManager {
                 Log.w(TAG, "enrollment already canceled");
                 return;
             } else {
-                cancel.setOnCancelListener(new OnEnrollCancelListener(challenge));
+                cancel.setOnCancelListener(new OnEnrollCancelListener());
             }
         }
 
         if (mService != null) try {
             mEnrollmentCallback = callback;
-            mService.enroll(mToken, challenge, getCurrentUserId(), mServiceReceiver, flags);
+            mService.enroll(mToken, token, getCurrentUserId(), mServiceReceiver, flags);
         } catch (RemoteException e) {
             Log.w(TAG, "Remote exception in enroll: ", e);
             if (callback != null) {
@@ -574,8 +573,8 @@ public class FingerprintManager {
                 case MSG_ACQUIRED:
                     sendAcquiredResult((Long) msg.obj /* deviceId */, msg.arg1 /* acquire info */);
                     break;
-                case MSG_PROCESSED:
-                    sendProcessedResult((Fingerprint) msg.obj);
+                case MSG_AUTHENTICATED:
+                    sendAuthenticatedResult((Fingerprint) msg.obj);
                     break;
                 case MSG_ERROR:
                     sendErrorResult((Long) msg.obj /* deviceId */, msg.arg1 /* errMsgId */);
@@ -617,7 +616,7 @@ public class FingerprintManager {
             }
         }
 
-        private void sendProcessedResult(Fingerprint fp) {
+        private void sendAuthenticatedResult(Fingerprint fp) {
             if (mAuthenticationCallback != null) {
                 if (fp.getFingerId() == 0 && fp.getGroupId() == 0) {
                     // Fingerprint template valid but doesn't match one in database
@@ -667,7 +666,7 @@ public class FingerprintManager {
         mRemovalCallback = null;
     }
 
-    private void cancelEnrollment(long challenge) {
+    private void cancelEnrollment() {
         if (mService != null) try {
             mService.cancelEnrollment(mToken);
         } catch (RemoteException e) {
@@ -695,8 +694,11 @@ public class FingerprintManager {
                 return mContext.getString(
                     com.android.internal.R.string.fingerprint_error_no_space);
             case FINGERPRINT_ERROR_TIMEOUT:
-                return mContext.getString(
-                    com.android.internal.R.string.fingerprint_error_timeout);
+                return mContext.getString(com.android.internal.R.string.fingerprint_error_timeout);
+            case FINGERPRINT_ERROR_CANCELED:
+                return mContext.getString(com.android.internal.R.string.fingerprint_error_canceled);
+            case FINGERPRINT_ERROR_LOCKOUT:
+                return mContext.getString(com.android.internal.R.string.fingerprint_error_lockout);
             default:
                 if (errMsg >= FINGERPRINT_ERROR_VENDOR_BASE) {
                     int msgNumber = errMsg - FINGERPRINT_ERROR_VENDOR_BASE;
@@ -753,8 +755,8 @@ public class FingerprintManager {
             mHandler.obtainMessage(MSG_ACQUIRED, acquireInfo, 0, deviceId).sendToTarget();
         }
 
-        public void onProcessed(long deviceId, int fingerId, int groupId) {
-            mHandler.obtainMessage(MSG_PROCESSED,
+        public void onAuthenticated(long deviceId, int fingerId, int groupId) {
+            mHandler.obtainMessage(MSG_AUTHENTICATED,
                     new Fingerprint(null, groupId, fingerId, deviceId)).sendToTarget();
         }
 

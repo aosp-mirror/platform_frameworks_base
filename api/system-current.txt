@@ -14070,6 +14070,7 @@ package android.hardware.fingerprint {
     field public static final int FINGERPRINT_ACQUIRED_VENDOR_BASE = 1000; // 0x3e8
     field public static final int FINGERPRINT_ERROR_CANCELED = 5; // 0x5
     field public static final int FINGERPRINT_ERROR_HW_UNAVAILABLE = 1; // 0x1
+    field public static final int FINGERPRINT_ERROR_LOCKOUT = 7; // 0x7
     field public static final int FINGERPRINT_ERROR_NO_SPACE = 4; // 0x4
     field public static final int FINGERPRINT_ERROR_TIMEOUT = 3; // 0x3
     field public static final int FINGERPRINT_ERROR_UNABLE_TO_PROCESS = 2; // 0x2

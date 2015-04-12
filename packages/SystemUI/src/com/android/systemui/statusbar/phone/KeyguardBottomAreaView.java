@@ -28,6 +28,7 @@ import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.InsetDrawable;
+import android.hardware.fingerprint.FingerprintManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.RemoteException;
@@ -625,6 +626,7 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
         public void onFingerprintError(int msgId, String errString) {
             // TODO: Go to bouncer if this is "too many attempts" (lockout) error.
             Log.i(TAG, "FP Error: " + errString);
+            updateLockIcon();
         }
     };
 
