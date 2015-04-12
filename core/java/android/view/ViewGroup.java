@@ -19,6 +19,7 @@ package android.view;
 import android.animation.LayoutTransition;
 import android.annotation.IdRes;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.content.res.TypedArray;
@@ -811,6 +812,25 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             }
         }
         return null;
+    }
+
+    /**
+     * @hide
+     */
+    @Override
+    public boolean dispatchActivityResult(
+            String who, int requestCode, int resultCode, Intent data) {
+        if (super.dispatchActivityResult(who, requestCode, resultCode, data)) {
+            return true;
+        }
+        int childCount = getChildCount();
+        for (int i = 0; i < childCount; i++) {
+            View child = getChildAt(i);
+            if (child.dispatchActivityResult(who, requestCode, resultCode, data)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**

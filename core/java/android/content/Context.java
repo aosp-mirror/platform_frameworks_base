@@ -1298,6 +1298,34 @@ public abstract class Context {
     }
 
     /**
+     * Version of {@link #startActivity(Intent, Bundle)} that returns a result to the caller. This
+     * is only supported for Views and Fragments.
+     * @param who The identifier for the calling element that will receive the result.
+     * @param intent The intent to start.
+     * @param requestCode The code that will be returned with onActivityResult() identifying this
+     *          request.
+     * @param options Additional options for how the Activity should be started.
+     *          May be null if there are no options.  See {@link android.app.ActivityOptions}
+     *          for how to build the Bundle supplied here; there are no supported definitions
+     *          for building it manually.
+     * @hide
+     */
+    public void startActivityForResult(
+            @NonNull String who, Intent intent, int requestCode, @Nullable Bundle options) {
+        throw new RuntimeException("This method is only implemented for Activity-based Contexts. "
+                + "Check canStartActivityForResult() before calling.");
+    }
+
+    /**
+     * Identifies whether this Context instance will be able to process calls to
+     * {@link #startActivityForResult(String, Intent, int, Bundle)}.
+     * @hide
+     */
+    public boolean canStartActivityForResult() {
+        return false;
+    }
+
+    /**
      * Same as {@link #startActivities(Intent[], Bundle)} with no options
      * specified.
      *

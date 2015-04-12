@@ -30,6 +30,7 @@ import android.annotation.Nullable;
 import android.annotation.Size;
 import android.content.ClipData;
 import android.content.Context;
+import android.content.Intent;
 import android.content.res.ColorStateList;
 import android.content.res.Configuration;
 import android.content.res.Resources;
@@ -3550,6 +3551,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     private static SparseArray<String> mAttributeMap;
 
     /**
+     * @hide
+     */
+    String mStartActivityRequestWho;
+
+    /**
      * Simple constructor to use when creating a view from code.
      *
      * @param context The Context the view is running in, through which it can
@@ -4912,6 +4918,58 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             // Older implementations of custom views might not implement this.
             return parent.startActionModeForChild(this, callback);
         }
+    }
+
+    /**
+     * Call {@link Context#startActivityForResult(String, Intent, int, Bundle)} for the View's
+     * Context, creating a unique View identifier to retrieve the result.
+     *
+     * @param intent The Intent to be started.
+     * @param requestCode The request code to use.
+     * @hide
+     */
+    public void startActivityForResult(Intent intent, int requestCode) {
+        mStartActivityRequestWho = "@android:view:" + System.identityHashCode(this);
+        getContext().startActivityForResult(mStartActivityRequestWho, intent, requestCode, null);
+    }
+
+    /**
+     * If this View corresponds to the calling who, dispatches the activity result.
+     * @param who The identifier for the targeted View to receive the result.
+     * @param requestCode The integer request code originally supplied to
+     *                    startActivityForResult(), allowing you to identify who this
+     *                    result came from.
+     * @param resultCode The integer result code returned by the child activity
+     *                   through its setResult().
+     * @param data An Intent, which can return result data to the caller
+     *               (various data can be attached to Intent "extras").
+     * @return {@code true} if the activity result was dispatched.
+     * @hide
+     */
+    public boolean dispatchActivityResult(
+            String who, int requestCode, int resultCode, Intent data) {
+        if (mStartActivityRequestWho != null && mStartActivityRequestWho.equals(who)) {
+            onActivityResult(requestCode, resultCode, data);
+            mStartActivityRequestWho = null;
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Receive the result from a previous call to {@link #startActivityForResult(Intent, int)}.
+     *
+     * @param requestCode The integer request code originally supplied to
+     *                    startActivityForResult(), allowing you to identify who this
+     *                    result came from.
+     * @param resultCode The integer result code returned by the child activity
+     *                   through its setResult().
+     * @param data An Intent, which can return result data to the caller
+     *               (various data can be attached to Intent "extras").
+     * @hide
+     */
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        // Do nothing.
     }
 
     /**
@@ -13980,6 +14038,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     @CallSuper
     protected Parcelable onSaveInstanceState() {
         mPrivateFlags |= PFLAG_SAVE_STATE_CALLED;
+        if (mStartActivityRequestWho != null) {
+            BaseSavedState state = new BaseSavedState(AbsSavedState.EMPTY_STATE);
+            state.mStartActivityRequestWhoSaved = mStartActivityRequestWho;
+            return state;
+        }
         return BaseSavedState.EMPTY_STATE;
     }
 
@@ -14039,12 +14102,15 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     @CallSuper
     protected void onRestoreInstanceState(Parcelable state) {
         mPrivateFlags |= PFLAG_SAVE_STATE_CALLED;
-        if (state != BaseSavedState.EMPTY_STATE && state != null) {
+        if (state != null && !(state instanceof AbsSavedState)) {
             throw new IllegalArgumentException("Wrong state class, expecting View State but "
                     + "received " + state.getClass().toString() + " instead. This usually happens "
                     + "when two views of different type have the same id in the same hierarchy. "
                     + "This view's id is " + ViewDebug.resolveId(mContext, getId()) + ". Make sure "
                     + "other views do not use the same id.");
+        }
+        if (state != null && state instanceof BaseSavedState) {
+            mStartActivityRequestWho = ((BaseSavedState) state).mStartActivityRequestWhoSaved;
         }
     }
 
@@ -20735,6 +20801,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * state in {@link android.view.View#onSaveInstanceState()}.
      */
     public static class BaseSavedState extends AbsSavedState {
+        String mStartActivityRequestWhoSaved;
+
         /**
          * Constructor used when reading from a parcel. Reads the state of the superclass.
          *
@@ -20742,6 +20810,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
          */
         public BaseSavedState(Parcel source) {
             super(source);
+            mStartActivityRequestWhoSaved = source.readString();
         }
 
         /**
@@ -20751,6 +20820,12 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
          */
         public BaseSavedState(Parcelable superState) {
             super(superState);
+        }
+
+        @Override
+        public void writeToParcel(Parcel out, int flags) {
+            super.writeToParcel(out, flags);
+            out.writeString(mStartActivityRequestWhoSaved);
         }
 
         public static final Parcelable.Creator<BaseSavedState> CREATOR =
