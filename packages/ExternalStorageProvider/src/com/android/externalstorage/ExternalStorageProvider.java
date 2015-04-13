@@ -162,6 +162,7 @@ public class ExternalStorageProvider extends DocumentsProvider {
                     } else {
                         root.title = volume.getDescription(getContext());
                     }
+                    root.flags |= Root.FLAG_HAS_SETTINGS;
                 }
                 root.docId = getDocIdForFile(path);
                 mRoots.add(root);
