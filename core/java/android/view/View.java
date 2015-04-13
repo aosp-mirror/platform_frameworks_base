@@ -1795,6 +1795,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *                          11       PFLAG2_TEXT_DIRECTION_FLAGS[3]
      *                         1         PFLAG2_TEXT_DIRECTION_FLAGS[4]
      *                         1 1       PFLAG2_TEXT_DIRECTION_FLAGS[5]
+     *                         11        PFLAG2_TEXT_DIRECTION_FLAGS[6]
+     *                         111       PFLAG2_TEXT_DIRECTION_FLAGS[7]
      *                         111       PFLAG2_TEXT_DIRECTION_MASK
      *                        1          PFLAG2_TEXT_DIRECTION_RESOLVED
      *                       1           PFLAG2_TEXT_DIRECTION_RESOLVED_DEFAULT
@@ -1968,6 +1970,20 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     public static final int TEXT_DIRECTION_LOCALE = 5;
 
     /**
+     * Text direction is using "first strong algorithm". The first strong directional character
+     * determines the paragraph direction. If there is no strong directional character, the
+     * paragraph direction is LTR.
+     */
+    public static final int TEXT_DIRECTION_FIRST_STRONG_LTR = 6;
+
+    /**
+     * Text direction is using "first strong algorithm". The first strong directional character
+     * determines the paragraph direction. If there is no strong directional character, the
+     * paragraph direction is RTL.
+     */
+    public static final int TEXT_DIRECTION_FIRST_STRONG_RTL = 7;
+
+    /**
      * Default text direction is inherited
      */
     private static final int TEXT_DIRECTION_DEFAULT = TEXT_DIRECTION_INHERIT;
@@ -2002,7 +2018,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             TEXT_DIRECTION_ANY_RTL << PFLAG2_TEXT_DIRECTION_MASK_SHIFT,
             TEXT_DIRECTION_LTR << PFLAG2_TEXT_DIRECTION_MASK_SHIFT,
             TEXT_DIRECTION_RTL << PFLAG2_TEXT_DIRECTION_MASK_SHIFT,
-            TEXT_DIRECTION_LOCALE << PFLAG2_TEXT_DIRECTION_MASK_SHIFT
+            TEXT_DIRECTION_LOCALE << PFLAG2_TEXT_DIRECTION_MASK_SHIFT,
+            TEXT_DIRECTION_FIRST_STRONG_LTR << PFLAG2_TEXT_DIRECTION_MASK_SHIFT,
+            TEXT_DIRECTION_FIRST_STRONG_RTL << PFLAG2_TEXT_DIRECTION_MASK_SHIFT
     };
 
     /**
@@ -19636,11 +19654,13 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @return the defined text direction. It can be one of:
      *
      * {@link #TEXT_DIRECTION_INHERIT},
-     * {@link #TEXT_DIRECTION_FIRST_STRONG}
+     * {@link #TEXT_DIRECTION_FIRST_STRONG},
      * {@link #TEXT_DIRECTION_ANY_RTL},
      * {@link #TEXT_DIRECTION_LTR},
      * {@link #TEXT_DIRECTION_RTL},
-     * {@link #TEXT_DIRECTION_LOCALE}
+     * {@link #TEXT_DIRECTION_LOCALE},
+     * {@link #TEXT_DIRECTION_FIRST_STRONG_LTR},
+     * {@link #TEXT_DIRECTION_FIRST_STRONG_RTL}
      *
      * @attr ref android.R.styleable#View_textDirection
      *
@@ -19652,7 +19672,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             @ViewDebug.IntToString(from = TEXT_DIRECTION_ANY_RTL, to = "ANY_RTL"),
             @ViewDebug.IntToString(from = TEXT_DIRECTION_LTR, to = "LTR"),
             @ViewDebug.IntToString(from = TEXT_DIRECTION_RTL, to = "RTL"),
-            @ViewDebug.IntToString(from = TEXT_DIRECTION_LOCALE, to = "LOCALE")
+            @ViewDebug.IntToString(from = TEXT_DIRECTION_LOCALE, to = "LOCALE"),
+            @ViewDebug.IntToString(from = TEXT_DIRECTION_FIRST_STRONG_LTR, to = "FIRST_STRONG_LTR"),
+            @ViewDebug.IntToString(from = TEXT_DIRECTION_FIRST_STRONG_RTL, to = "FIRST_STRONG_RTL")
     })
     public int getRawTextDirection() {
         return (mPrivateFlags2 & PFLAG2_TEXT_DIRECTION_MASK) >> PFLAG2_TEXT_DIRECTION_MASK_SHIFT;
@@ -19664,11 +19686,13 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @param textDirection the direction to set. Should be one of:
      *
      * {@link #TEXT_DIRECTION_INHERIT},
-     * {@link #TEXT_DIRECTION_FIRST_STRONG}
+     * {@link #TEXT_DIRECTION_FIRST_STRONG},
      * {@link #TEXT_DIRECTION_ANY_RTL},
      * {@link #TEXT_DIRECTION_LTR},
      * {@link #TEXT_DIRECTION_RTL},
      * {@link #TEXT_DIRECTION_LOCALE}
+     * {@link #TEXT_DIRECTION_FIRST_STRONG_LTR},
+     * {@link #TEXT_DIRECTION_FIRST_STRONG_RTL},
      *
      * Resolution will be done if the value is set to TEXT_DIRECTION_INHERIT. The resolution
      * proceeds up the parent chain of the view to get the value. If there is no parent, then it will
@@ -19698,11 +19722,13 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *
      * @return the resolved text direction. Returns one of:
      *
-     * {@link #TEXT_DIRECTION_FIRST_STRONG}
+     * {@link #TEXT_DIRECTION_FIRST_STRONG},
      * {@link #TEXT_DIRECTION_ANY_RTL},
      * {@link #TEXT_DIRECTION_LTR},
      * {@link #TEXT_DIRECTION_RTL},
-     * {@link #TEXT_DIRECTION_LOCALE}
+     * {@link #TEXT_DIRECTION_LOCALE},
+     * {@link #TEXT_DIRECTION_FIRST_STRONG_LTR},
+     * {@link #TEXT_DIRECTION_FIRST_STRONG_RTL}
      *
      * @attr ref android.R.styleable#View_textDirection
      */
@@ -19712,7 +19738,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             @ViewDebug.IntToString(from = TEXT_DIRECTION_ANY_RTL, to = "ANY_RTL"),
             @ViewDebug.IntToString(from = TEXT_DIRECTION_LTR, to = "LTR"),
             @ViewDebug.IntToString(from = TEXT_DIRECTION_RTL, to = "RTL"),
-            @ViewDebug.IntToString(from = TEXT_DIRECTION_LOCALE, to = "LOCALE")
+            @ViewDebug.IntToString(from = TEXT_DIRECTION_LOCALE, to = "LOCALE"),
+            @ViewDebug.IntToString(from = TEXT_DIRECTION_FIRST_STRONG_LTR, to = "FIRST_STRONG_LTR"),
+            @ViewDebug.IntToString(from = TEXT_DIRECTION_FIRST_STRONG_RTL, to = "FIRST_STRONG_RTL")
     })
     public int getTextDirection() {
         return (mPrivateFlags2 & PFLAG2_TEXT_DIRECTION_RESOLVED_MASK) >> PFLAG2_TEXT_DIRECTION_RESOLVED_MASK_SHIFT;
@@ -19771,6 +19799,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                         case TEXT_DIRECTION_LTR:
                         case TEXT_DIRECTION_RTL:
                         case TEXT_DIRECTION_LOCALE:
+                        case TEXT_DIRECTION_FIRST_STRONG_LTR:
+                        case TEXT_DIRECTION_FIRST_STRONG_RTL:
                             mPrivateFlags2 |=
                                     (parentResolvedDirection << PFLAG2_TEXT_DIRECTION_RESOLVED_MASK_SHIFT);
                             break;
@@ -19784,6 +19814,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 case TEXT_DIRECTION_LTR:
                 case TEXT_DIRECTION_RTL:
                 case TEXT_DIRECTION_LOCALE:
+                case TEXT_DIRECTION_FIRST_STRONG_LTR:
+                case TEXT_DIRECTION_FIRST_STRONG_RTL:
                     // Resolved direction is the same as text direction
                     mPrivateFlags2 |= (textDirection << PFLAG2_TEXT_DIRECTION_RESOLVED_MASK_SHIFT);
                     break;

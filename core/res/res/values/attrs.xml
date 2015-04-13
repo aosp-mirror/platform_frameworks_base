@@ -2520,6 +2520,12 @@
             <enum name="rtl" value="4" />
             <!-- The paragraph direction is coming from the system Locale. -->
             <enum name="locale" value="5" />
+            <!-- The first strong directional character determines the paragraph direction. If
+                 there is no strong directional character, the paragraph direction is LTR. -->
+            <enum name="firstStrongLtr" value="6" />
+            <!-- The first strong directional character determines the paragraph direction. If
+                 there is no strong directional character, the paragraph direction is RTL. -->
+            <enum name="firstStrongRtl" value="7" />
         </attr>
 
         <!-- Defines the alignment of the text. A heuristic is used to determine the resolved
