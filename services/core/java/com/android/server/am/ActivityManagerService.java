@@ -1277,6 +1277,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     static final int NOTIFY_CLEARTEXT_NETWORK_MSG = 50;
     static final int POST_DUMP_HEAP_NOTIFICATION_MSG = 51;
     static final int DELETE_DUMPHEAP_MSG = 52;
+    static final int FOREGROUND_PROFILE_CHANGED_MSG = 53;
 
     static final int FIRST_ACTIVITY_STACK_MSG = 100;
     static final int FIRST_BROADCAST_QUEUE_MSG = 200;
@@ -1915,6 +1916,9 @@ public final class ActivityManagerService extends ActivityManagerNative
                     mMemWatchDumpUid = -1;
                 }
             } break;
+            case FOREGROUND_PROFILE_CHANGED_MSG: {
+                dispatchForegroundProfileChanged(msg.arg1);
+            } break;
             }
         }
     };
@@ -2509,6 +2513,11 @@ public final class ActivityManagerService extends ActivityManagerNative
                 mWindowManager.setFocusedApp(r.appToken, true);
             }
             applyUpdateLockStateLocked(r);
+            if (last != null && last.userId != mFocusedActivity.userId) {
+                mHandler.removeMessages(FOREGROUND_PROFILE_CHANGED_MSG);
+                mHandler.sendMessage(mHandler.obtainMessage(FOREGROUND_PROFILE_CHANGED_MSG,
+                                mFocusedActivity.userId, 0));
+            }
         }
         EventLog.writeEvent(EventLogTags.AM_FOCUSED_ACTIVITY, mCurrentUserId,
                 mFocusedActivity == null ? "NULL" : mFocusedActivity.shortComponentName);
@@ -19030,6 +19039,18 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
 
         return true;
+    }
+
+    void dispatchForegroundProfileChanged(int userId) {
+        final int N = mUserSwitchObservers.beginBroadcast();
+        for (int i = 0; i < N; i++) {
+            try {
+                mUserSwitchObservers.getBroadcastItem(i).onForegroundProfileSwitch(userId);
+            } catch (RemoteException e) {
+                // Ignore
+            }
+        }
+        mUserSwitchObservers.finishBroadcast();
     }
 
     void sendUserSwitchBroadcastsLocked(int oldUserId, int newUserId) {
