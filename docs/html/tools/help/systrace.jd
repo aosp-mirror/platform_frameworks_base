@@ -68,7 +68,8 @@ or the Android <a href="{@docRoot}tools/help/monitor.html">Device Monitor</a>.
   <ol>
     <li>In <a href="{@docRoot}sdk/installing/studio.html">Android Studio</a>, open an
       Android application project.</li>
-    <li>Open the Device Monitor by selecting <strong>Tools &gt; Android &gt; Monitor</strong>.</li>
+    <li>Open the Device Monitor by selecting <strong>Tools &gt; Android &gt; Android Device
+      Monitor</strong>.</li>
     <li>In the <strong>Devices</strong> tab, select the device on which to run a trace. If no
       devices are listed, make sure your device is connected via USB cable and that debugging is
       enabled on the device.</li>
