@@ -99,6 +99,7 @@ public class ZenFooter extends LinearLayout {
         mController = controller;
         mZenModePanel.init(controller);
         mZenModePanel.setEmbedded(true);
+        mZenModePanel.setCallback(mZenModePanelCallback);
         mSwitch.setOnCheckedChangeListener(mCheckedListener);
         mController.addCallback(new ZenModeController.Callback() {
             @Override
@@ -212,6 +213,32 @@ public class ZenFooter extends LinearLayout {
         Util.setText(mSummaryLine2, line2);
     }
 
+    private final ZenModePanel.Callback mZenModePanelCallback = new ZenModePanel.Callback() {
+        @Override
+        public void onMoreSettings() {
+            if (mCallback != null) {
+                mCallback.onSettingsClicked();
+            }
+        }
+
+        @Override
+        public void onPrioritySettings() {
+            if (mCallback != null) {
+                mCallback.onPrioritySettingsClicked();
+            }
+        }
+
+        @Override
+        public void onInteraction() {
+            // noop
+        }
+
+        @Override
+        public void onExpanded(boolean expanded) {
+            // noop
+        }
+    };
+
     private final OnCheckedChangeListener mCheckedListener = new OnCheckedChangeListener() {
         @Override
         public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
@@ -230,5 +257,6 @@ public class ZenFooter extends LinearLayout {
         void onFooterExpanded();
         void onSettingsClicked();
         void onDoneClicked();
+        void onPrioritySettingsClicked();
     }
 }

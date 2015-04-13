@@ -24,7 +24,7 @@ import android.preference.PreferenceManager;
 /**
  *  Configuration for the volume dialog + related policy.
  */
-public class Prefs {
+public class VolumePrefs {
 
     public static final String PREF_ENABLE_PROTOTYPE = "pref_enable_prototype";  // not persistent
     public static final String PREF_SHOW_ALARMS = "pref_show_alarms";

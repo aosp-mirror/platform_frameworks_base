@@ -41,8 +41,6 @@
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:paddingBottom="4dp"
-        android:paddingEnd="4dp"
-        android:paddingStart="4dp"
         android:paddingTop="6dp" >
 
         <!-- volume rows added and removed here! :-) -->

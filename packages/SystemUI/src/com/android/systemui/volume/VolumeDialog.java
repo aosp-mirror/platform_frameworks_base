@@ -107,20 +107,22 @@ public class VolumeDialog {
     private boolean mShowing;
     private boolean mExpanded;
     private int mActiveStream;
-    private boolean mShowHeaders = Prefs.DEFAULT_SHOW_HEADERS;
-    private boolean mShowFooter = Prefs.DEFAULT_SHOW_FOOTER;
-    private boolean mShowZenFooter = Prefs.DEFAULT_ZEN_FOOTER;
-    private boolean mAutomute = Prefs.DEFAULT_ENABLE_AUTOMUTE;
-    private boolean mSilentMode = Prefs.DEFAULT_ENABLE_SILENT_MODE;
+    private boolean mShowHeaders = VolumePrefs.DEFAULT_SHOW_HEADERS;
+    private boolean mShowFooter = VolumePrefs.DEFAULT_SHOW_FOOTER;
+    private boolean mShowZenFooter = VolumePrefs.DEFAULT_ZEN_FOOTER;
+    private boolean mAutomute = VolumePrefs.DEFAULT_ENABLE_AUTOMUTE;
+    private boolean mSilentMode = VolumePrefs.DEFAULT_ENABLE_SILENT_MODE;
     private State mState;
     private int mExpandButtonRes;
     private boolean mExpanding;
     private SafetyWarningDialog mSafetyWarning;
+    private Callback mCallback;
 
     public VolumeDialog(Context context, VolumeDialogController controller,
-            ZenModeController zenModeController) {
+            ZenModeController zenModeController, Callback callback) {
         mContext = context;
         mController = controller;
+        mCallback = callback;
         mSpTexts = new SpTexts(mContext);
         mKeyguard = (KeyguardManager) context.getSystemService(Context.KEYGUARD_SERVICE);
 
@@ -419,14 +421,6 @@ public class VolumeDialog {
 
     public void dismiss(int reason) {
         mHandler.obtainMessage(H.DISMISS, reason, 0).sendToTarget();
-    }
-
-    protected void onSettingsClickedH() {
-        // hook for subclasses
-    }
-
-    protected void onZenSettingsClickedH() {
-        // hook for subclasses
     }
 
     private void showH(int reason) {
@@ -885,7 +879,9 @@ public class VolumeDialog {
                 @Override
                 public void run() {
                     Events.writeEvent(Events.EVENT_SETTINGS_CLICK);
-                    onSettingsClickedH();
+                    if (mCallback != null) {
+                        mCallback.onSettingsClicked();
+                    }
                 }
             }, WAIT_FOR_RIPPLE);
         }
@@ -912,12 +908,22 @@ public class VolumeDialog {
         @Override
         public void onSettingsClicked() {
             dismiss(Events.DISMISS_REASON_SETTINGS_CLICKED);
-            onZenSettingsClickedH();
+            if (mCallback != null) {
+                mCallback.onZenSettingsClicked();
+            }
         }
 
         @Override
         public void onDoneClicked() {
             dismiss(Events.DISMISS_REASON_DONE_CLICKED);
+        }
+
+        @Override
+        public void onPrioritySettingsClicked() {
+            dismiss(Events.DISMISS_REASON_SETTINGS_CLICKED);
+            if (mCallback != null) {
+                mCallback.onZenPrioritySettingsClicked();
+            }
         }
     };
 
@@ -1052,10 +1058,16 @@ public class VolumeDialog {
         private boolean important;
         private int cachedIconRes;
         private int iconState;  // from Events
-        private boolean cachedShowHeaders = Prefs.DEFAULT_SHOW_HEADERS;
+        private boolean cachedShowHeaders = VolumePrefs.DEFAULT_SHOW_HEADERS;
         private int cachedExpandButtonRes;
         private ObjectAnimator anim;  // slider progress animation for non-touch-related updates
         private int animTargetProgress;
         private int lastAudibleLevel = 1;
+    }
+
+    public interface Callback {
+        void onSettingsClicked();
+        void onZenSettingsClicked();
+        void onZenPrioritySettingsClicked();
     }
 }

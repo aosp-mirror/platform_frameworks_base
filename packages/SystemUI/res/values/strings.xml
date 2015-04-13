@@ -410,6 +410,8 @@
     <string name="accessibility_desc_settings">Settings</string>
     <!-- Content description for the recent apps panel (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_desc_recent_apps">Overview.</string>
+    <!-- Content description for the confirm button in the zen mode panel introduction message. [CHAR LIMIT=NONE] -->
+    <string name="accessibility_desc_confirm">Confirm</string>
 
     <!-- Content description of the user tile in quick settings (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_quick_settings_user">User <xliff:g id="user" example="John Doe">%s</xliff:g>.</string>
@@ -722,6 +724,12 @@
 
     <!-- Zen mode: No interruptions title, with a warning about alarms. [CHAR LIMIT=60] -->
     <string name="zen_no_interruptions_with_warning">No interruptions. Not even alarms.</string>
+
+    <!-- Zen mode: Priority only introduction message on first use -->
+    <string name="zen_priority_introduction">You won\'t be disturbed by sounds and vibrations, except from alarms, reminders, events, and callers you specify.</string>
+
+    <!-- Zen mode: Priority only customization button label -->
+    <string name="zen_priority_customize_button">Customize</string>
 
     <!-- Zen mode: No interruptions. [CHAR LIMIT=40] -->
     <string name="zen_no_interruptions">No interruptions</string>

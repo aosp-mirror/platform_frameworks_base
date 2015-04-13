@@ -428,6 +428,13 @@ public class VolumePanel extends Handler implements DemoMode {
             }
 
             @Override
+            public void onPrioritySettings() {
+                if (mCallback != null) {
+                    mCallback.onZenPrioritySettings();
+                }
+            }
+
+            @Override
             public void onInteraction() {
                 resetTimeout();
             }
@@ -1524,6 +1531,7 @@ public class VolumePanel extends Handler implements DemoMode {
 
     public interface Callback {
         void onZenSettings();
+        void onZenPrioritySettings();
         void onInteraction();
         void onVisible(boolean visible);
     }

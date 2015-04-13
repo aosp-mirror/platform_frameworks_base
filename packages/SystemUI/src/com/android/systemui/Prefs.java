@@ -35,7 +35,10 @@ public final class Prefs {
         Key.HOTSPOT_TILE_LAST_USED,
         Key.COLOR_INVERSION_TILE_LAST_USED,
         Key.DND_TILE_VISIBLE,
-        Key.DND_TILE_COMBINED_ICON
+        Key.DND_TILE_COMBINED_ICON,
+        Key.DND_CONFIRMED_PRIORITY_INTRODUCTION,
+        Key.DND_FAVORITE_BUCKET_INDEX,
+        Key.DND_NONE_SELECTED,
     })
     public @interface Key {
         String SEARCH_APP_WIDGET_ID = "searchAppWidgetId";
@@ -44,6 +47,9 @@ public final class Prefs {
         String COLOR_INVERSION_TILE_LAST_USED = "ColorInversionTileLastUsed";
         String DND_TILE_VISIBLE = "DndTileVisible";
         String DND_TILE_COMBINED_ICON = "DndTileCombinedIcon";
+        String DND_CONFIRMED_PRIORITY_INTRODUCTION = "DndConfirmedPriorityIntroduction";
+        String DND_FAVORITE_BUCKET_INDEX = "DndCountdownMinuteIndex";
+        String DND_NONE_SELECTED = "DndNoneSelected";
     }
 
     public static boolean getBoolean(Context context, @Key String key, boolean defaultValue) {
