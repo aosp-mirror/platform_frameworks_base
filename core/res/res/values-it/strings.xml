@@ -446,7 +446,6 @@
     <string name="fingerprint_acquired_too_fast" msgid="5303368850245663580">"Movimento del dito troppo rapido. Riprova."</string>
     <string name="fingerprint_acquired_too_slow" msgid="7381891107120721078">"Movimento del dito troppo lento. Riprova."</string>
   <string-array name="fingerprint_acquired_vendor">
-    <item msgid="2892952818207766996">"Messaggio di errore di acquisizione specifico del fornitore: 0"</item>
   </string-array>
     <string name="fingerprint_error_unable_to_process" msgid="4232401562838100026">"Impossibile elaborare l\'impronta. Riprova."</string>
     <string name="fingerprint_error_hw_not_available" msgid="6162709753784993771">"Hardware non disponibile."</string>
@@ -454,7 +453,6 @@
     <string name="fingerprint_error_timeout" msgid="3927186043737732875">"Timeout impronta digitale. Riprova."</string>
     <string name="fingerprint_error_vendor" msgid="3175724710791609491">"Timeout impronta digitale. Riprova."</string>
   <string-array name="fingerprint_error_vendor">
-    <item msgid="5804600450373644614">"Messaggio di errore specifico del fornitore."</item>
   </string-array>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"lettura impostazioni di sincronizz."</string>
     <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"Consente all\'applicazione di leggere le impostazioni di sincronizzazione per un account. Ad esempio, questa autorizzazione può determinare se l\'applicazione Persone è sincronizzata con un account."</string>

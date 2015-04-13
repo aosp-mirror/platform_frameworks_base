@@ -447,7 +447,6 @@
     <string name="fingerprint_acquired_too_fast" msgid="5303368850245663580">"Prebrzo pomicanje prsta. Pokušajte ponovo."</string>
     <string name="fingerprint_acquired_too_slow" msgid="7381891107120721078">"Presporo pomicanje prsta. Pokušajte ponovo."</string>
   <string-array name="fingerprint_acquired_vendor">
-    <item msgid="2892952818207766996">"Poruka pogreške prilikom dohvaćanja vezana uz dobavljača 0"</item>
   </string-array>
     <string name="fingerprint_error_unable_to_process" msgid="4232401562838100026">"Nije obrađeno. Pokušajte ponovo."</string>
     <string name="fingerprint_error_hw_not_available" msgid="6162709753784993771">"Hardver nije dostupan."</string>
@@ -455,7 +454,6 @@
     <string name="fingerprint_error_timeout" msgid="3927186043737732875">"Isteklo je vrijeme čekanja za otisak prsta. Pokušajte ponovo."</string>
     <string name="fingerprint_error_vendor" msgid="3175724710791609491">"Isteklo je vrijeme čekanja za otisak prsta. Pokušajte ponovo."</string>
   <string-array name="fingerprint_error_vendor">
-    <item msgid="5804600450373644614">"Poruka pogreške vezana uz dobavljača."</item>
   </string-array>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"čitanje postavki sinkronizacije"</string>
     <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"Aplikaciji omogućuje čitanje postavki sinkronizacije za račun. Time se, primjerice, može utvrditi je li aplikacija Osobe sinkronizirana s računom."</string>
@@ -1487,8 +1485,6 @@
     <string name="usb_midi_peripheral_manufacturer_name" msgid="7176526170008970168">"Android"</string>
     <!-- no translation found for usb_midi_peripheral_product_name (4971827859165280403) -->
     <skip />
-    <!-- no translation found for floating_toolbar_open_overflow_description (4797287862999444631) -->
-    <skip />
-    <!-- no translation found for floating_toolbar_close_overflow_description (559796923090723804) -->
-    <skip />
+    <string name="floating_toolbar_open_overflow_description" msgid="4797287862999444631">"Više opcija"</string>
+    <string name="floating_toolbar_close_overflow_description" msgid="559796923090723804">"Zatvori dodatni izbornik"</string>
 </resources>

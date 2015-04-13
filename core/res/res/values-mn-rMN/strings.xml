@@ -447,7 +447,6 @@
     <string name="fingerprint_acquired_too_fast" msgid="5303368850245663580">"Хурууг уншиж дуусаагүй байхад авсан байна. Та дахин уншуулна уу."</string>
     <string name="fingerprint_acquired_too_slow" msgid="7381891107120721078">"Хурууг хэт удаан уншуулсан байна. Та дахин уншуулна уу."</string>
   <string-array name="fingerprint_acquired_vendor">
-    <item msgid="2892952818207766996">"Борлуулагч-хурууны хээ авахад гардаг алдаа 0"</item>
   </string-array>
     <string name="fingerprint_error_unable_to_process" msgid="4232401562838100026">"Мэдээллийг оруулах боломжгүй байна. Дахин оролдоно уу."</string>
     <string name="fingerprint_error_hw_not_available" msgid="6162709753784993771">"Техник хангамж бэлэн бус байна"</string>
@@ -455,7 +454,6 @@
     <string name="fingerprint_error_timeout" msgid="3927186043737732875">"Хурууны хээ оруулах хугацаа өнгөрсөн байна. Дахин оруулна уу."</string>
     <string name="fingerprint_error_vendor" msgid="3175724710791609491">"Хурууны хээ оруулах хугацаа өнгөрсөн байна. Дахин оруулна уу."</string>
   <string-array name="fingerprint_error_vendor">
-    <item msgid="5804600450373644614">"Борлуулаг-тодорхой алдааны зурвас"</item>
   </string-array>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"синк тохиргоог унших"</string>
     <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"Апп нь акаунтын синк тохиргоог унших боломжтой. Жишээ нь энэ нь Хүмүүс апп акаунттай синк хийгдсэн эсэхийг тодорхойлох боломжтой."</string>
@@ -1473,8 +1471,6 @@
     <string name="usb_midi_peripheral_manufacturer_name" msgid="7176526170008970168">"Android"</string>
     <!-- no translation found for usb_midi_peripheral_product_name (4971827859165280403) -->
     <skip />
-    <!-- no translation found for floating_toolbar_open_overflow_description (4797287862999444631) -->
-    <skip />
-    <!-- no translation found for floating_toolbar_close_overflow_description (559796923090723804) -->
-    <skip />
+    <string name="floating_toolbar_open_overflow_description" msgid="4797287862999444631">"Нэмэлт сонголтууд"</string>
+    <string name="floating_toolbar_close_overflow_description" msgid="559796923090723804">"Илүү цонхнуудыг хаах"</string>
 </resources>

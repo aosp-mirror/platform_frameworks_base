@@ -447,7 +447,6 @@
     <string name="fingerprint_acquired_too_fast" msgid="5303368850245663580">"వేలిని చాలా తొందరగా కదిలించారు. దయచేసి మళ్లీ ప్రయత్నించండి."</string>
     <string name="fingerprint_acquired_too_slow" msgid="7381891107120721078">"వేలిని చాలా నిదానంగా కదిలించారు. దయచేసి మళ్లీ ప్రయత్నించండి."</string>
   <string-array name="fingerprint_acquired_vendor">
-    <item msgid="2892952818207766996">"విక్రేత-నిర్దిష్ట సేకరణ లోప సందేశం 0"</item>
   </string-array>
     <string name="fingerprint_error_unable_to_process" msgid="4232401562838100026">"ప్రాసెస్ చేయడం సాధ్యపడలేదు. మళ్లీ ప్రయత్నించండి."</string>
     <string name="fingerprint_error_hw_not_available" msgid="6162709753784993771">"హార్డ్‌వేర్ అందుబాటులో లేదు."</string>
@@ -455,7 +454,6 @@
     <string name="fingerprint_error_timeout" msgid="3927186043737732875">"వేలిముద్ర గడువు సమయం చేరుకుంది. మళ్లీ ప్రయత్నించండి."</string>
     <string name="fingerprint_error_vendor" msgid="3175724710791609491">"వేలిముద్ర గడువు సమయం చేరుకుంది. మళ్లీ ప్రయత్నించండి."</string>
   <string-array name="fingerprint_error_vendor">
-    <item msgid="5804600450373644614">"విక్రేత-నిర్దిష్ట లోప సందేశం."</item>
   </string-array>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"సమకాలీకరణ సెట్టింగ్‌లను చదవడం"</string>
     <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"ఖాతా యొక్క సమకాలీకరణ సెట్టింగ్‌లను చదవడానికి అనువర్తనాన్ని అనుమతిస్తుంది. ఉదాహరణకు, వ్యక్తుల అనువర్తనం ఖాతాతో సమకాలీకరించబడాలా లేదా అనే విషయాన్ని ఇది నిశ్చయించవచ్చు."</string>

@@ -447,7 +447,6 @@
     <string name="fingerprint_acquired_too_fast" msgid="5303368850245663580">"Barmoq juda tez harakatlandi. Qayta urinib ko‘ring."</string>
     <string name="fingerprint_acquired_too_slow" msgid="7381891107120721078">"Barmoq juda sekin harakatlandi. Qayta urinib ko‘ring."</string>
   <string-array name="fingerprint_acquired_vendor">
-    <item msgid="2892952818207766996">"Sotuvchidan barmoq izini olishda sodir bo‘ladigan xatolik xabari 0"</item>
   </string-array>
     <string name="fingerprint_error_unable_to_process" msgid="4232401562838100026">"Barmoq izini aniqlab bo‘lmadi. Qayta urinib ko‘ring."</string>
     <string name="fingerprint_error_hw_not_available" msgid="6162709753784993771">"Barmoq izi sensoridan foydalanib bo‘lmaydi."</string>
@@ -455,7 +454,6 @@
     <string name="fingerprint_error_timeout" msgid="3927186043737732875">"Barmoq izini aniqlash vaqti tugab qoldi. Qayta urinib ko‘ring."</string>
     <string name="fingerprint_error_vendor" msgid="3175724710791609491">"Barmoq izini aniqlash vaqti tugab qoldi. Qayta urinib ko‘ring."</string>
   <string-array name="fingerprint_error_vendor">
-    <item msgid="5804600450373644614">"Xizmat bilan bog‘liq xatolik xabari."</item>
   </string-array>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"sinx-sh sozlamalarini o‘qish"</string>
     <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"Ilovaga hisobning sinxronlash sozlamalarini o‘qish uchun ruxsat beradi. Masalan, bu \"Odamlar\" ilovasi hisob bilan sinxronlangan yoki aksini aniqlay oladi."</string>
@@ -1450,17 +1448,12 @@
     </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"Ushbu vaqtgacha: <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_forever" msgid="7420011936770086993">"Men o‘chirmaguncha"</string>
-    <!-- no translation found for zen_mode_rule_name_combination (191109939968076477) -->
-    <skip />
+    <string name="zen_mode_rule_name_combination" msgid="191109939968076477">"<xliff:g id="FIRST">%1$s</xliff:g> / <xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"Yig‘ish"</string>
-    <!-- no translation found for zen_mode_feature_name (289097150786114338) -->
-    <skip />
-    <!-- no translation found for zen_mode_downtime_feature_name (2626974636779860146) -->
-    <skip />
-    <!-- no translation found for zen_mode_default_weeknights_name (2069189413656431610) -->
-    <skip />
-    <!-- no translation found for zen_mode_default_weekends_name (2377398437072017011) -->
-    <skip />
+    <string name="zen_mode_feature_name" msgid="289097150786114338">"Bezovta qilinishlar"</string>
+    <string name="zen_mode_downtime_feature_name" msgid="2626974636779860146">"Nofaol vaqt"</string>
+    <string name="zen_mode_default_weeknights_name" msgid="2069189413656431610">"Ish kunlari kechasi"</string>
+    <string name="zen_mode_default_weekends_name" msgid="2377398437072017011">"Dam olish kunlari"</string>
     <string name="muted_by" msgid="6147073845094180001">"“<xliff:g id="THIRD_PARTY">%1$s</xliff:g>” tomonidan ovozsiz qilingan"</string>
     <string name="system_error_wipe_data" msgid="6608165524785354962">"Qurilmangiz bilan bog‘liq ichki muammo mavjud. U zavod sozlamalari tiklanmaguncha barqaror ishlamasligi mumkin."</string>
     <string name="system_error_manufacturer" msgid="8086872414744210668">"Qurilmangiz bilan bog‘liq ichki muammo mavjud. Tafsilotlar uchun qurilmangiz ishlab chiqaruvchisiga murojaat qiling."</string>
@@ -1470,13 +1463,9 @@
     <string name="stk_cc_ss_to_dial" msgid="2151304435775557162">"SS so‘rovi DIAL so‘roviga o‘zgartirildi."</string>
     <string name="stk_cc_ss_to_ussd" msgid="3951862188105305589">"SS so‘rovi USSD so‘roviga o‘zgartirildi."</string>
     <string name="stk_cc_ss_to_ss" msgid="5470768854991452695">"SS so‘rovi yangi SS so‘roviga o‘zgartirildi."</string>
-    <!-- no translation found for usb_midi_peripheral_name (7221113987741003817) -->
-    <skip />
+    <string name="usb_midi_peripheral_name" msgid="7221113987741003817">"Android tashqi USB porti"</string>
     <string name="usb_midi_peripheral_manufacturer_name" msgid="7176526170008970168">"Android"</string>
-    <!-- no translation found for usb_midi_peripheral_product_name (4971827859165280403) -->
-    <skip />
-    <!-- no translation found for floating_toolbar_open_overflow_description (4797287862999444631) -->
-    <skip />
-    <!-- no translation found for floating_toolbar_close_overflow_description (559796923090723804) -->
-    <skip />
+    <string name="usb_midi_peripheral_product_name" msgid="4971827859165280403">"Tashqi USB porti"</string>
+    <string name="floating_toolbar_open_overflow_description" msgid="4797287862999444631">"Ko‘proq"</string>
+    <string name="floating_toolbar_close_overflow_description" msgid="559796923090723804">"Qalqib turuvchi asboblar panelini yopish"</string>
 </resources>

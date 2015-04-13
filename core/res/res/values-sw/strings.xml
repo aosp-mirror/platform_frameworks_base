@@ -446,7 +446,6 @@
     <string name="fingerprint_acquired_too_fast" msgid="5303368850245663580">"Ulisogeza kidole kwa kasi mno. Tafadhali jaribu tena."</string>
     <string name="fingerprint_acquired_too_slow" msgid="7381891107120721078">"Ulisogeza kidole pole pole mno. Tafadhali jaribu tena."</string>
   <string-array name="fingerprint_acquired_vendor">
-    <item msgid="2892952818207766996">"Ujumbe maalum kwa muuzaji kuhusu hitilafu ya uletaji wa kitambulisho 0"</item>
   </string-array>
     <string name="fingerprint_error_unable_to_process" msgid="4232401562838100026">"Haikuweza kuchakata. Jaribu tena."</string>
     <string name="fingerprint_error_hw_not_available" msgid="6162709753784993771">"Maunzi hayapatikani."</string>
@@ -454,7 +453,6 @@
     <string name="fingerprint_error_timeout" msgid="3927186043737732875">"Muda wa kitambulisho umekwisha. Jaribu tena."</string>
     <string name="fingerprint_error_vendor" msgid="3175724710791609491">"Muda wa kitambulisho umekwisha. Jaribu tena."</string>
   <string-array name="fingerprint_error_vendor">
-    <item msgid="5804600450373644614">"Ujumbe maalum kwa muuzaji kuhusu hitilafu."</item>
   </string-array>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"kusoma mipangilio ya usawazishaji"</string>
     <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"Inaruhusu programu kusoma mipangilio ya upatanishi wa akaunti. Kwa mfano, huku kunaweza kuamua kama programu ya Watu imepatanishwa na akaunti."</string>
@@ -1428,7 +1426,7 @@
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Omba PIN kabla hujabandua"</string>
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"Omba mchoro wa kufungua kabla hujabandua"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Omba nenosiri kabla hujabandua"</string>
-    <string name="package_installed_device_owner" msgid="8420696545959087545">"Kiliwekwa na msimamizi wako"</string>
+    <string name="package_installed_device_owner" msgid="8420696545959087545">"Kilisakinishwa na msimamizi wako"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"Kilifutwa na msimamizi wako"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"Kusaidia kuboresha muda wa matumizi ya betri, inayookoa betri hupunguza utendaji wa kifaa chako na kupunguza mtetemo, huduma za utambuzi wa mahali, na data nyingi ya chini chini. Barua pepe, ujumbe na programu nyingine zinazotege,ea usawazishaji huenda zisisasishwe usipozifungua.\n\nInayookoa betri hujizima kiotomatiki kifaa chako kinapokuwa kinachaji."</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">

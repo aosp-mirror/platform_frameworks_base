@@ -446,7 +446,6 @@
     <string name="fingerprint_acquired_too_fast" msgid="5303368850245663580">"ጣት በጣም በፍጥነት ተንቀሳቅሷል። እባክዎ እንደገና ይሞክሩ።"</string>
     <string name="fingerprint_acquired_too_slow" msgid="7381891107120721078">"ጣት በጣም በዝግታ ተንቀሳቅሷል። እባክዎ እንደገና ይሞክሩ።"</string>
   <string-array name="fingerprint_acquired_vendor">
-    <item msgid="2892952818207766996">"አቅራቢ-ተኮር ግዢ የስህተት መልዕክት 0"</item>
   </string-array>
     <string name="fingerprint_error_unable_to_process" msgid="4232401562838100026">"ሂደትን ማከናወን አልተቻለም። እንደገና ይሞክሩ።"</string>
     <string name="fingerprint_error_hw_not_available" msgid="6162709753784993771">"ሃርድዌር አይገኝም።"</string>
@@ -454,7 +453,6 @@
     <string name="fingerprint_error_timeout" msgid="3927186043737732875">"የጣት አሻራ ማብቂያ ጊዜ ደርሷል። እንደገና ይሞክሩ።"</string>
     <string name="fingerprint_error_vendor" msgid="3175724710791609491">"የጣት አሻራ ማብቂያ ጊዜ ደርሷል። እንደገና ይሞክሩ።"</string>
   <string-array name="fingerprint_error_vendor">
-    <item msgid="5804600450373644614">"አቅራቢ-ተኮር የስህተት መልዕክት"</item>
   </string-array>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"የሥምሪያ ቅንብሮች አንብብ"</string>
     <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"መተግበሪያው የአንድ መለያ የማመሳሰል ቅንብሮችን እንዲያነብ ይፈቅድለታል። ለምሳሌ ይህ የሰዎች መተግበሪያ ከመለያ ጋር መመሳሰሉን አለመመሳሰሉን ሊወስን ይችላል።"</string>

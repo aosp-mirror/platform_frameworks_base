@@ -446,7 +446,6 @@
     <string name="fingerprint_acquired_too_fast" msgid="5303368850245663580">"Du bevægede fingeren for hurtigt. Prøv igen."</string>
     <string name="fingerprint_acquired_too_slow" msgid="7381891107120721078">"Du bevægede fingeren for langsomt. Prøv igen."</string>
   <string-array name="fingerprint_acquired_vendor">
-    <item msgid="2892952818207766996">"Leverandørspecifik fejlmeddelelse 0 i forbindelse med hentning"</item>
   </string-array>
     <string name="fingerprint_error_unable_to_process" msgid="4232401562838100026">"Registreringen kan ikke gennemføres. Prøv igen."</string>
     <string name="fingerprint_error_hw_not_available" msgid="6162709753784993771">"Hardwaren er ikke tilgængelig."</string>
@@ -454,7 +453,6 @@
     <string name="fingerprint_error_timeout" msgid="3927186043737732875">"Registrering af fingeraftryk fik timeout. Prøv igen."</string>
     <string name="fingerprint_error_vendor" msgid="3175724710791609491">"Registrering af fingeraftryk fik timeout. Prøv igen."</string>
   <string-array name="fingerprint_error_vendor">
-    <item msgid="5804600450373644614">"Leverandørspecifik fejlmeddelelse."</item>
   </string-array>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"læse indstillinger for synkronisering"</string>
     <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"Tillader, at appen kan læse synkroniseringsindstillingerne for en konto. Denne tilladelse kan f.eks. fastslå, om appen Personer er synkroniseret med en konto."</string>

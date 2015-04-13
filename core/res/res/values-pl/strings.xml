@@ -448,7 +448,6 @@
     <string name="fingerprint_acquired_too_fast" msgid="5303368850245663580">"Palec został uniesiony zbyt szybko. Spróbuj ponownie."</string>
     <string name="fingerprint_acquired_too_slow" msgid="7381891107120721078">"Palec został przesunięty zbyt wolno. Spróbuj ponownie."</string>
   <string-array name="fingerprint_acquired_vendor">
-    <item msgid="2892952818207766996">"Komunikat o błędzie pozyskania specyficzny dla dostawcy 0"</item>
   </string-array>
     <string name="fingerprint_error_unable_to_process" msgid="4232401562838100026">"Nie można przetworzyć. Spróbuj ponownie."</string>
     <string name="fingerprint_error_hw_not_available" msgid="6162709753784993771">"Czytnik jest niedostępny."</string>
@@ -456,7 +455,6 @@
     <string name="fingerprint_error_timeout" msgid="3927186043737732875">"Osiągnięto limit czasu odczytu linii papilarnych. Spróbuj ponownie."</string>
     <string name="fingerprint_error_vendor" msgid="3175724710791609491">"Osiągnięto limit czasu odczytu linii papilarnych. Spróbuj ponownie."</string>
   <string-array name="fingerprint_error_vendor">
-    <item msgid="5804600450373644614">"Komunikat o błędzie specyficzny dla dostawcy."</item>
   </string-array>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"czytanie ustawień synchronizacji"</string>
     <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"Zezwala aplikacji na odczyt ustawień synchronizacji konta. Pozwala to na przykład określić, czy aplikacja Ludzie jest zsynchronizowana z kontem."</string>

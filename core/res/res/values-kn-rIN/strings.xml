@@ -447,7 +447,6 @@
     <string name="fingerprint_acquired_too_fast" msgid="5303368850245663580">"ಬೆರಳನ್ನು ವೇಗವಾಗಿ ಸರಿಸಲಾಗಿದೆ. ದಯವಿಟ್ಟು ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ."</string>
     <string name="fingerprint_acquired_too_slow" msgid="7381891107120721078">"ಬೆರಳನ್ನು ನಿಧಾನವಾಗಿ ಸರಿಸಲಾಗಿದೆ. ದಯವಿಟ್ಟು ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ."</string>
   <string-array name="fingerprint_acquired_vendor">
-    <item msgid="2892952818207766996">"ಮಾರಾಟಗಾರ-ನಿರ್ದಿಷ್ಟ ಸ್ವಾಧೀನ ದೋಷ ಸಂದೇಶ 0"</item>
   </string-array>
     <string name="fingerprint_error_unable_to_process" msgid="4232401562838100026">"ಪ್ರಕ್ರಿಯೆಗೊಳಿಸಲು ಸಾಧ್ಯವಿಲ್ಲ. ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ."</string>
     <string name="fingerprint_error_hw_not_available" msgid="6162709753784993771">"ಹಾರ್ಡ್‌ವೇರ್ ಲಭ್ಯವಿಲ್ಲ."</string>
@@ -455,7 +454,6 @@
     <string name="fingerprint_error_timeout" msgid="3927186043737732875">"ಫಿಂಗರ್‌ಪ್ರಿಂಟ್ ಅವಧಿ ಮೀರಿದೆ. ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ."</string>
     <string name="fingerprint_error_vendor" msgid="3175724710791609491">"ಫಿಂಗರ್‌ಪ್ರಿಂಟ್ ಅವಧಿ ಮೀರಿದೆ. ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ."</string>
   <string-array name="fingerprint_error_vendor">
-    <item msgid="5804600450373644614">"ಮಾರಾಟಗಾರ-ನಿರ್ದಿಷ್ಟ ದೋಷ ಸಂದೇಶ."</item>
   </string-array>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"ಸಿಂಕ್ ಸೆಟ್ಟಿಂಗ್‌ಗಳನ್ನು ರೀಡ್‌ ಮಾಡು"</string>
     <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"ಒಂದು ಖಾತೆಯ ಸಿಂಕ್ ಸೆಟ್ಟಿಂಗ್‍‍ಗಳನ್ನು ಓದಲು ಅಪ್ಲಿಕೇಶನ್‍‍ಗೆ ಅವಕಾಶ ನೀಡುತ್ತದೆ. ಉದಾಹರಣೆಗೆ, ಖಾತೆಯೊಂದಿಗೆ ಜನರ ಅಪ್ಲಿಕೇಶನ್ ಸಿಂಕ್ ಮಾಡಲಾಗಿದೆಯೇ ಎಂಬುದನ್ನು ಇದು ನಿರ್ಧರಿಸಬಹುದು."</string>

@@ -446,7 +446,6 @@
     <string name="fingerprint_acquired_too_fast" msgid="5303368850245663580">"Finger zu schnell bewegt. Versuchen Sie es erneut."</string>
     <string name="fingerprint_acquired_too_slow" msgid="7381891107120721078">"Finger zu langsam bewegt. Versuchen Sie es erneut."</string>
   <string-array name="fingerprint_acquired_vendor">
-    <item msgid="2892952818207766996">"Anbieterspezifische Erfassungsfehlermeldung 0"</item>
   </string-array>
     <string name="fingerprint_error_unable_to_process" msgid="4232401562838100026">"Unbrauchbar. Versuchen Sie es erneut."</string>
     <string name="fingerprint_error_hw_not_available" msgid="6162709753784993771">"Hardware nicht verfügbar"</string>
@@ -454,7 +453,6 @@
     <string name="fingerprint_error_timeout" msgid="3927186043737732875">"Zeitüberschreitung für Fingerabdruck. Versuchen Sie es erneut."</string>
     <string name="fingerprint_error_vendor" msgid="3175724710791609491">"Zeitüberschreitung für Fingerabdruck. Versuchen Sie es erneut."</string>
   <string-array name="fingerprint_error_vendor">
-    <item msgid="5804600450373644614">"Anbieterspezifische Fehlermeldung"</item>
   </string-array>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"Synchronisierungseinstellungen lesen"</string>
     <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"Ermöglicht der App, die Synchronisierungseinstellungen eines Kontos zu lesen. Beispielsweise kann damit festgestellt werden, ob Kontakte mit einem Konto synchronisiert werden."</string>

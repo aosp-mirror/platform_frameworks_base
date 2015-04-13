@@ -447,7 +447,6 @@
     <string name="fingerprint_acquired_too_fast" msgid="5303368850245663580">"Le doigt a bougé trop vite. Veuillez essayer de nouveau."</string>
     <string name="fingerprint_acquired_too_slow" msgid="7381891107120721078">"Le doigt a bougé trop lentement. Veuillez essayer de nouveau."</string>
   <string-array name="fingerprint_acquired_vendor">
-    <item msgid="2892952818207766996">"Message d\'erreur d\'acquisition propre au fournisseur 0"</item>
   </string-array>
     <string name="fingerprint_error_unable_to_process" msgid="4232401562838100026">"Traitement impossible. Essayer de nouveau."</string>
     <string name="fingerprint_error_hw_not_available" msgid="6162709753784993771">"Matériel non disponible."</string>
@@ -455,7 +454,6 @@
     <string name="fingerprint_error_timeout" msgid="3927186043737732875">"Le temps attribué pour lire l\'empreinte est écoulé. Veuillez essayer de nouveau."</string>
     <string name="fingerprint_error_vendor" msgid="3175724710791609491">"Le temps attribué pour lire l\'empreinte est écoulé. Veuillez essayer de nouveau."</string>
   <string-array name="fingerprint_error_vendor">
-    <item msgid="5804600450373644614">"Message d\'erreur propre au fournisseur."</item>
   </string-array>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"lire les paramètres de synchronisation"</string>
     <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"Permet à l\'application d\'accéder aux paramètres de synchronisation d\'un compte. Par exemple, cette autorisation peut permettre de déterminer si l\'application Contacts est synchronisée avec un compte ou non."</string>

@@ -446,7 +446,6 @@
     <string name="fingerprint_acquired_too_fast" msgid="5303368850245663580">"O dedo moveu-se demasiado rápido. Tente novamente."</string>
     <string name="fingerprint_acquired_too_slow" msgid="7381891107120721078">"O dedo moveu-se demasiado devagar. Tente novamente."</string>
   <string-array name="fingerprint_acquired_vendor">
-    <item msgid="2892952818207766996">"Mensagem de erro de aquisição específica do fornecedor 0"</item>
   </string-array>
     <string name="fingerprint_error_unable_to_process" msgid="4232401562838100026">"Não é possível processar. Tente novamente."</string>
     <string name="fingerprint_error_hw_not_available" msgid="6162709753784993771">"Hardware não disponível."</string>
@@ -454,7 +453,6 @@
     <string name="fingerprint_error_timeout" msgid="3927186043737732875">"Foi atingido o limite de tempo da impressão digital. Tente novamente."</string>
     <string name="fingerprint_error_vendor" msgid="3175724710791609491">"Foi atingido o limite de tempo da impressão digital. Tente novamente."</string>
   <string-array name="fingerprint_error_vendor">
-    <item msgid="5804600450373644614">"Mensagem de erro específica do fornecedor."</item>
   </string-array>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"ler definições de sincronização"</string>
     <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"Permite que a aplicação leia as definições de sincronização de uma conta. Por exemplo, pode determinar se a aplicação Pessoas está sincronizada com uma conta."</string>

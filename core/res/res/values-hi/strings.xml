@@ -446,7 +446,6 @@
     <string name="fingerprint_acquired_too_fast" msgid="5303368850245663580">"अंगुली को तेज़ी से चलाया गया. कृपया पुनः प्रयास करें."</string>
     <string name="fingerprint_acquired_too_slow" msgid="7381891107120721078">"अंगुली को धीरे चलाया गया. कृपया पुनः प्रयास करें."</string>
   <string-array name="fingerprint_acquired_vendor">
-    <item msgid="2892952818207766996">"विक्रेता-विशिष्‍ट प्राप्‍ति त्रुटि संदेश 0"</item>
   </string-array>
     <string name="fingerprint_error_unable_to_process" msgid="4232401562838100026">"संसाधित करने में असमर्थ. पुनः प्रयास करें."</string>
     <string name="fingerprint_error_hw_not_available" msgid="6162709753784993771">"हार्डवेयर उपलब्ध नहीं है."</string>
@@ -454,7 +453,6 @@
     <string name="fingerprint_error_timeout" msgid="3927186043737732875">"फ़िंगरप्रिंट का समय समाप्त हो गया. पुनः प्रयास करें."</string>
     <string name="fingerprint_error_vendor" msgid="3175724710791609491">"फ़िंगरप्रिंट का समय समाप्त हो गया. पुनः प्रयास करें."</string>
   <string-array name="fingerprint_error_vendor">
-    <item msgid="5804600450373644614">"विक्रेता-विशिष्‍ट त्रुटि संदेश."</item>
   </string-array>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"समन्वयन सेटिंग पढ़ें"</string>
     <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"ऐप्स  को किसी खाते की समन्वयन सेटिंग पढ़ने देता है. उदाहरण के लिए, इससे यह निर्धारित किया जा सकता है कि लोग ऐप्स  किसी खाते के साथ समन्‍वयित है या नहीं."</string>

@@ -447,7 +447,6 @@
     <string name="fingerprint_acquired_too_fast" msgid="5303368850245663580">"Hatza bizkorregi mugitu duzu. Saiatu berriro."</string>
     <string name="fingerprint_acquired_too_slow" msgid="7381891107120721078">"Hatza mantsoegi mugitu duzu. Saiatu berriro."</string>
   <string-array name="fingerprint_acquired_vendor">
-    <item msgid="2892952818207766996">"Saltzailearen berariazko errore-mezua, erosketarekin erlazionatuta"</item>
   </string-array>
     <string name="fingerprint_error_unable_to_process" msgid="4232401562838100026">"Ezin da prozesatu. Saiatu berriro."</string>
     <string name="fingerprint_error_hw_not_available" msgid="6162709753784993771">"Hardwarea ez dago erabilgarri."</string>
@@ -455,7 +454,6 @@
     <string name="fingerprint_error_timeout" msgid="3927186043737732875">"Hatz-marka digitalak prozesatzeko denbora-muga gainditu da. Saiatu berriro."</string>
     <string name="fingerprint_error_vendor" msgid="3175724710791609491">"Hatz-marka digitalak prozesatzeko denbora-muga gainditu da. Saiatu berriro."</string>
   <string-array name="fingerprint_error_vendor">
-    <item msgid="5804600450373644614">"Saltzailearen berariazko errore-mezua."</item>
   </string-array>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"Irakurri sinkronizazio-ezarpenak"</string>
     <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"Kontu baten sinkronizazio-ezarpenak irakurtzeko baimena ematen die aplikazioei. Adibidez, Jendea aplikazioa konturen batekin sinkronizatuta dagoen zehatz dezake."</string>
@@ -1475,8 +1473,6 @@
     <string name="usb_midi_peripheral_manufacturer_name" msgid="7176526170008970168">"Android"</string>
     <!-- no translation found for usb_midi_peripheral_product_name (4971827859165280403) -->
     <skip />
-    <!-- no translation found for floating_toolbar_open_overflow_description (4797287862999444631) -->
-    <skip />
-    <!-- no translation found for floating_toolbar_close_overflow_description (559796923090723804) -->
-    <skip />
+    <string name="floating_toolbar_open_overflow_description" msgid="4797287862999444631">"Aukera gehiago"</string>
+    <string name="floating_toolbar_close_overflow_description" msgid="559796923090723804">"Itxi gainfluxua"</string>
 </resources>
