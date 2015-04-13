@@ -110,6 +110,5 @@
     <string name="keyguard_carrier_default" msgid="8700650403054042153">"Walang serbisyo."</string>
     <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"Ilipat ang button na pamamaraan ng pag-input."</string>
     <string name="airplane_mode" msgid="3122107900897202805">"Airplane mode"</string>
-    <!-- no translation found for fingerprint_not_recognized (2690661881608146617) -->
-    <skip />
+    <string name="fingerprint_not_recognized" msgid="2690661881608146617">"Hindi nakilala"</string>
 </resources>
