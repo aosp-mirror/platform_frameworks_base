@@ -412,7 +412,11 @@ public class ScriptGroup2 extends BaseObj {
             return addInvoke(invoke, args.toArray(), bindingMap);
         }
 
-        public ScriptGroup2 create(Future... outputs) {
+        public ScriptGroup2 create(String name, Future... outputs) {
+            if (name == null || name.isEmpty() || name.length() > 100 ||
+                !name.equals(name.replaceAll("[^a-zA-Z0-9-]", "_"))) {
+                throw new RSIllegalArgumentException("invalid script group name");
+            }
             ScriptGroup2 ret = new ScriptGroup2(mRS, mClosures, mInputs, outputs);
             return ret;
         }
