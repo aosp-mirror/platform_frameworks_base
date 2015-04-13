@@ -170,9 +170,8 @@ public class AlertController {
     }
 
     private static boolean shouldCenterSingleButton(Context context) {
-        TypedValue outValue = new TypedValue();
-        context.getTheme().resolveAttribute(com.android.internal.R.attr.alertDialogCenterButtons,
-                outValue, true);
+        final TypedValue outValue = new TypedValue();
+        context.getTheme().resolveAttribute(R.attr.alertDialogCenterButtons, outValue, true);
         return outValue.data != 0;
     }
 
@@ -182,27 +181,25 @@ public class AlertController {
         mWindow = window;
         mHandler = new ButtonHandler(di);
 
-        TypedArray a = context.obtainStyledAttributes(null,
-                com.android.internal.R.styleable.AlertDialog,
-                com.android.internal.R.attr.alertDialogStyle, 0);
+        final TypedArray a = context.obtainStyledAttributes(null,
+                R.styleable.AlertDialog, R.attr.alertDialogStyle, 0);
 
-        mAlertDialogLayout = a.getResourceId(com.android.internal.R.styleable.AlertDialog_layout,
-                com.android.internal.R.layout.alert_dialog);
+        mAlertDialogLayout = a.getResourceId(
+                R.styleable.AlertDialog_layout, R.layout.alert_dialog);
         mButtonPanelSideLayout = a.getResourceId(
-                com.android.internal.R.styleable.AlertDialog_buttonPanelSideLayout, 0);
-
+                R.styleable.AlertDialog_buttonPanelSideLayout, 0);
         mListLayout = a.getResourceId(
-                com.android.internal.R.styleable.AlertDialog_listLayout,
-                com.android.internal.R.layout.select_dialog);
+                R.styleable.AlertDialog_listLayout, R.layout.select_dialog);
+
         mMultiChoiceItemLayout = a.getResourceId(
-                com.android.internal.R.styleable.AlertDialog_multiChoiceItemLayout,
-                com.android.internal.R.layout.select_dialog_multichoice);
+                R.styleable.AlertDialog_multiChoiceItemLayout,
+                R.layout.select_dialog_multichoice);
         mSingleChoiceItemLayout = a.getResourceId(
-                com.android.internal.R.styleable.AlertDialog_singleChoiceItemLayout,
-                com.android.internal.R.layout.select_dialog_singlechoice);
+                R.styleable.AlertDialog_singleChoiceItemLayout,
+                R.layout.select_dialog_singlechoice);
         mListItemLayout = a.getResourceId(
-                com.android.internal.R.styleable.AlertDialog_listItemLayout,
-                com.android.internal.R.layout.select_dialog_item);
+                R.styleable.AlertDialog_listItemLayout,
+                R.layout.select_dialog_item);
 
         a.recycle();
     }
@@ -1067,9 +1064,9 @@ public class AlertController {
         }
 
         private void createListView(final AlertController dialog) {
-            final RecycleListView listView = (RecycleListView)
-                    mInflater.inflate(dialog.mListLayout, null);
-            ListAdapter adapter;
+            final RecycleListView listView =
+                    (RecycleListView) mInflater.inflate(dialog.mListLayout, null);
+            final ListAdapter adapter;
 
             if (mIsMultiChoice) {
                 if (mCursor == null) {
@@ -1115,14 +1112,20 @@ public class AlertController {
                     };
                 }
             } else {
-                int layout = mIsSingleChoice
-                        ? dialog.mSingleChoiceItemLayout : dialog.mListItemLayout;
-                if (mCursor == null) {
-                    adapter = (mAdapter != null) ? mAdapter
-                            : new CheckedItemAdapter(mContext, layout, R.id.text1, mItems);
+                final int layout;
+                if (mIsSingleChoice) {
+                    layout = dialog.mSingleChoiceItemLayout;
                 } else {
-                    adapter = new SimpleCursorAdapter(mContext, layout,
-                            mCursor, new String[]{mLabelColumn}, new int[]{R.id.text1});
+                    layout = dialog.mListItemLayout;
+                }
+
+                if (mCursor != null) {
+                    adapter = new SimpleCursorAdapter(mContext, layout, mCursor,
+                            new String[] { mLabelColumn }, new int[] { R.id.text1 });
+                } else if (mAdapter != null) {
+                    adapter = mAdapter;
+                } else {
+                    adapter = new CheckedItemAdapter(mContext, layout, R.id.text1, mItems);
                 }
             }
 
