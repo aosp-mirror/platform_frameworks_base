@@ -38458,10 +38458,10 @@ package android.view {
     method public int indexOfChild(android.view.View);
     method public final void invalidateChild(android.view.View, android.graphics.Rect);
     method public android.view.ViewParent invalidateChildInParent(int[], android.graphics.Rect);
-    method public boolean isAlwaysDrawnWithCacheEnabled();
-    method public boolean isAnimationCacheEnabled();
+    method public deprecated boolean isAlwaysDrawnWithCacheEnabled();
+    method public deprecated boolean isAnimationCacheEnabled();
     method protected boolean isChildrenDrawingOrderEnabled();
-    method protected boolean isChildrenDrawnWithCacheEnabled();
+    method protected deprecated boolean isChildrenDrawnWithCacheEnabled();
     method public boolean isMotionEventSplittingEnabled();
     method public boolean isTransitionGroup();
     method public final void layout(int, int, int, int);
@@ -38500,11 +38500,11 @@ package android.view {
     method public void requestTransparentRegion(android.view.View);
     method public void scheduleLayoutAnimation();
     method public void setAddStatesFromChildren(boolean);
-    method public void setAlwaysDrawnWithCacheEnabled(boolean);
-    method public void setAnimationCacheEnabled(boolean);
+    method public deprecated void setAlwaysDrawnWithCacheEnabled(boolean);
+    method public deprecated void setAnimationCacheEnabled(boolean);
     method protected void setChildrenDrawingCacheEnabled(boolean);
     method protected void setChildrenDrawingOrderEnabled(boolean);
-    method protected void setChildrenDrawnWithCacheEnabled(boolean);
+    method protected deprecated void setChildrenDrawnWithCacheEnabled(boolean);
     method public void setClipChildren(boolean);
     method public void setClipToPadding(boolean);
     method public void setDescendantFocusability(int);
