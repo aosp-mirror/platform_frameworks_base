@@ -6645,86 +6645,94 @@ public class PackageManagerService extends IPackageManager.Stub {
             r = null;
             for (i=0; i<N; i++) {
                 PackageParser.Permission p = pkg.permissions.get(i);
+
+                // Now that permission groups have a special meaning, we ignore permission
+                // groups for legacy apps to prevent unexpected behavior. In particular,
+                // permissions for one app being granted to someone just becuase they happen
+                // to be in a group defined by another app (before this had no implications).
+                if (pkg.applicationInfo.targetSdkVersion > Build.VERSION_CODES.LOLLIPOP_MR1) {
+                    p.group = mPermissionGroups.get(p.info.group);
+                    // Warn for a permission in an unknown group.
+                    if (p.info.group != null && p.group == null) {
+                        Slog.w(TAG, "Permission " + p.info.name + " from package "
+                                + p.info.packageName + " in an unknown group " + p.info.group);
+                    }
+                }
+
                 ArrayMap<String, BasePermission> permissionMap =
                         p.tree ? mSettings.mPermissionTrees
-                        : mSettings.mPermissions;
-                p.group = mPermissionGroups.get(p.info.group);
-                if (p.info.group == null || p.group != null) {
-                    BasePermission bp = permissionMap.get(p.info.name);
+                                : mSettings.mPermissions;
+                BasePermission bp = permissionMap.get(p.info.name);
 
-                    // Allow system apps to redefine non-system permissions
-                    if (bp != null && !Objects.equals(bp.sourcePackage, p.info.packageName)) {
-                        final boolean currentOwnerIsSystem = (bp.perm != null
-                                && isSystemApp(bp.perm.owner));
-                        if (isSystemApp(p.owner)) {
-                            if (bp.type == BasePermission.TYPE_BUILTIN && bp.perm == null) {
-                                // It's a built-in permission and no owner, take ownership now
-                                bp.packageSetting = pkgSetting;
-                                bp.perm = p;
-                                bp.uid = pkg.applicationInfo.uid;
-                                bp.sourcePackage = p.info.packageName;
-                            } else if (!currentOwnerIsSystem) {
-                                String msg = "New decl " + p.owner + " of permission  "
-                                        + p.info.name + " is system; overriding " + bp.sourcePackage;
-                                reportSettingsProblem(Log.WARN, msg);
-                                bp = null;
-                            }
+                // Allow system apps to redefine non-system permissions
+                if (bp != null && !Objects.equals(bp.sourcePackage, p.info.packageName)) {
+                    final boolean currentOwnerIsSystem = (bp.perm != null
+                            && isSystemApp(bp.perm.owner));
+                    if (isSystemApp(p.owner)) {
+                        if (bp.type == BasePermission.TYPE_BUILTIN && bp.perm == null) {
+                            // It's a built-in permission and no owner, take ownership now
+                            bp.packageSetting = pkgSetting;
+                            bp.perm = p;
+                            bp.uid = pkg.applicationInfo.uid;
+                            bp.sourcePackage = p.info.packageName;
+                        } else if (!currentOwnerIsSystem) {
+                            String msg = "New decl " + p.owner + " of permission  "
+                                    + p.info.name + " is system; overriding " + bp.sourcePackage;
+                            reportSettingsProblem(Log.WARN, msg);
+                            bp = null;
                         }
                     }
+                }
 
-                    if (bp == null) {
-                        bp = new BasePermission(p.info.name, p.info.packageName,
-                                BasePermission.TYPE_NORMAL);
-                        permissionMap.put(p.info.name, bp);
-                    }
+                if (bp == null) {
+                    bp = new BasePermission(p.info.name, p.info.packageName,
+                            BasePermission.TYPE_NORMAL);
+                    permissionMap.put(p.info.name, bp);
+                }
 
-                    if (bp.perm == null) {
-                        if (bp.sourcePackage == null
-                                || bp.sourcePackage.equals(p.info.packageName)) {
-                            BasePermission tree = findPermissionTreeLP(p.info.name);
-                            if (tree == null
-                                    || tree.sourcePackage.equals(p.info.packageName)) {
-                                bp.packageSetting = pkgSetting;
-                                bp.perm = p;
-                                bp.uid = pkg.applicationInfo.uid;
-                                bp.sourcePackage = p.info.packageName;
-                                if ((parseFlags&PackageParser.PARSE_CHATTY) != 0) {
-                                    if (r == null) {
-                                        r = new StringBuilder(256);
-                                    } else {
-                                        r.append(' ');
-                                    }
-                                    r.append(p.info.name);
+                if (bp.perm == null) {
+                    if (bp.sourcePackage == null
+                            || bp.sourcePackage.equals(p.info.packageName)) {
+                        BasePermission tree = findPermissionTreeLP(p.info.name);
+                        if (tree == null
+                                || tree.sourcePackage.equals(p.info.packageName)) {
+                            bp.packageSetting = pkgSetting;
+                            bp.perm = p;
+                            bp.uid = pkg.applicationInfo.uid;
+                            bp.sourcePackage = p.info.packageName;
+                            if ((parseFlags&PackageParser.PARSE_CHATTY) != 0) {
+                                if (r == null) {
+                                    r = new StringBuilder(256);
+                                } else {
+                                    r.append(' ');
                                 }
-                            } else {
-                                Slog.w(TAG, "Permission " + p.info.name + " from package "
-                                        + p.info.packageName + " ignored: base tree "
-                                        + tree.name + " is from package "
-                                        + tree.sourcePackage);
+                                r.append(p.info.name);
                             }
                         } else {
                             Slog.w(TAG, "Permission " + p.info.name + " from package "
-                                    + p.info.packageName + " ignored: original from "
-                                    + bp.sourcePackage);
+                                    + p.info.packageName + " ignored: base tree "
+                                    + tree.name + " is from package "
+                                    + tree.sourcePackage);
                         }
-                    } else if ((parseFlags&PackageParser.PARSE_CHATTY) != 0) {
-                        if (r == null) {
-                            r = new StringBuilder(256);
-                        } else {
-                            r.append(' ');
-                        }
-                        r.append("DUP:");
-                        r.append(p.info.name);
+                    } else {
+                        Slog.w(TAG, "Permission " + p.info.name + " from package "
+                                + p.info.packageName + " ignored: original from "
+                                + bp.sourcePackage);
                     }
-                    if (bp.perm == p) {
-                        bp.protectionLevel = p.info.protectionLevel;
+                } else if ((parseFlags&PackageParser.PARSE_CHATTY) != 0) {
+                    if (r == null) {
+                        r = new StringBuilder(256);
+                    } else {
+                        r.append(' ');
                     }
-                } else {
-                    Slog.w(TAG, "Permission " + p.info.name + " from package "
-                            + p.info.packageName + " ignored: no group "
-                            + p.group);
+                    r.append("DUP:");
+                    r.append(p.info.name);
+                }
+                if (bp.perm == p) {
+                    bp.protectionLevel = p.info.protectionLevel;
                 }
             }
+
             if (r != null) {
                 if (DEBUG_PACKAGE_SCANNING) Log.d(TAG, "  Permissions: " + r);
             }
