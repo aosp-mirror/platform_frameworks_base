@@ -50,4 +50,17 @@ public class FusedLocationHardwareSink {
     public void onCapabilities(int capabilities) {
         // default do nothing
     }
+
+    /**
+     * Called when the status changes in the underlying FLP HAL
+     * implementation (the ability to compute location).  This
+     * callback will only be made on API 23 or later.
+     *
+     * @param status One of FLP_STATUS_LOCATION_AVAILABLE or
+     *               FLP_STATUS_LOCATION_UNAVAILABLE as defined in
+     *               fused_location.h.
+     */
+    public void onStatusChanged(int status) {
+        // default do nothing
+    }
 }

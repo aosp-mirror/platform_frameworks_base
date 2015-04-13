@@ -57,6 +57,11 @@ public final class FusedLocationHardware {
         public void onCapabilities(int capabilities) {
             dispatchCapabilities(capabilities);
         }
+
+        @Override
+        public void onStatusChanged(int status) {
+            dispatchStatus(status);
+        }
     };
 
     /**
@@ -210,6 +215,7 @@ public final class FusedLocationHardware {
         public static final int DISPATCH_LOCATION = 1;
         public static final int DISPATCH_DIAGNOSTIC_DATA = 2;
         public static final int DISPATCH_CAPABILITIES = 3;
+        public static final int DISPATCH_STATUS = 4;
 
         public DispatcherHandler(Looper looper) {
             super(looper, null /*callback*/ , true /*async*/);
@@ -228,6 +234,9 @@ public final class FusedLocationHardware {
                 case DISPATCH_CAPABILITIES:
                     command.dispatchCapabilities();
                     break;
+                case DISPATCH_STATUS:
+                    command.dispatchStatus();
+                    break;
                 default:
                     Log.e(TAG, "Invalid dispatch message");
                     break;
@@ -240,16 +249,19 @@ public final class FusedLocationHardware {
         private final Location[] mLocations;
         private final String mData;
         private final int mCapabilities;
+        private final int mStatus;
 
         public MessageCommand(
                 FusedLocationHardwareSink sink,
                 Location[] locations,
                 String data,
-                int capabilities) {
+                int capabilities,
+                int status) {
             mSink = sink;
             mLocations = locations;
             mData = data;
             mCapabilities = capabilities;
+            mStatus = status;
         }
 
         public void dispatchLocation() {
@@ -263,6 +275,10 @@ public final class FusedLocationHardware {
         public void dispatchCapabilities() {
             mSink.onCapabilities(mCapabilities);
         }
+
+        public void dispatchStatus() {
+            mSink.onStatusChanged(mStatus);
+        }
     }
 
     private void dispatchLocations(Location[] locations) {
@@ -275,7 +291,7 @@ public final class FusedLocationHardware {
             Message message = Message.obtain(
                     entry.getValue(),
                     DispatcherHandler.DISPATCH_LOCATION,
-                    new MessageCommand(entry.getKey(), locations, null /*data*/, 0));
+                    new MessageCommand(entry.getKey(), locations, null /*data*/, 0, 0));
             message.sendToTarget();
         }
     }
@@ -290,7 +306,7 @@ public final class FusedLocationHardware {
             Message message = Message.obtain(
                     entry.getValue(),
                     DispatcherHandler.DISPATCH_DIAGNOSTIC_DATA,
-                    new MessageCommand(entry.getKey(), null /*locations*/, data, 0));
+                    new MessageCommand(entry.getKey(), null /*locations*/, data, 0, 0));
             message.sendToTarget();
         }
     }
@@ -305,7 +321,22 @@ public final class FusedLocationHardware {
             Message message = Message.obtain(
                     entry.getValue(),
                     DispatcherHandler.DISPATCH_CAPABILITIES,
-                    new MessageCommand(entry.getKey(), null /*locations*/, null, capabilities));
+                    new MessageCommand(entry.getKey(), null /*locations*/, null, capabilities, 0));
+            message.sendToTarget();
+        }
+    }
+
+    private void dispatchStatus(int status) {
+        HashMap<FusedLocationHardwareSink, DispatcherHandler> sinks;
+        synchronized(mSinkList) {
+            sinks = mSinkList;
+        }
+
+        for(Map.Entry<FusedLocationHardwareSink, DispatcherHandler> entry : sinks.entrySet()) {
+            Message message = Message.obtain(
+                    entry.getValue(),
+                    DispatcherHandler.DISPATCH_STATUS,
+                    new MessageCommand(entry.getKey(), null /*locations*/, null, 0, status));
             message.sendToTarget();
         }
     }
