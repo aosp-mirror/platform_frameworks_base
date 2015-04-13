@@ -78,17 +78,19 @@ public final class KeyPairGeneratorSpec implements AlgorithmParameterSpec {
 
     private final Date mKeyValidityForConsumptionEnd;
 
-    private final @KeyStoreKeyConstraints.PurposeEnum int mPurposes;
+    private final @KeyStoreKeyProperties.PurposeEnum int mPurposes;
 
-    private final @KeyStoreKeyConstraints.DigestEnum int mDigests;
+    private final String[] mDigests;
 
-    private final @KeyStoreKeyConstraints.PaddingEnum int mPaddings;
+    private final String[] mEncryptionPaddings;
 
-    private final @KeyStoreKeyConstraints.BlockModeEnum int mBlockModes;
+    private final String[] mSignaturePaddings;
+
+    private final String[] mBlockModes;
 
     private final boolean mRandomizedEncryptionRequired;
 
-    private final @KeyStoreKeyConstraints.UserAuthenticatorEnum int mUserAuthenticators;
+    private final @KeyStoreKeyProperties.UserAuthenticatorEnum int mUserAuthenticators;
 
     private final int mUserAuthenticationValidityDurationSeconds;
 
@@ -132,12 +134,13 @@ public final class KeyPairGeneratorSpec implements AlgorithmParameterSpec {
             Date keyValidityStart,
             Date keyValidityForOriginationEnd,
             Date keyValidityForConsumptionEnd,
-            @KeyStoreKeyConstraints.PurposeEnum int purposes,
-            @KeyStoreKeyConstraints.DigestEnum int digests,
-            @KeyStoreKeyConstraints.PaddingEnum int paddings,
-            @KeyStoreKeyConstraints.BlockModeEnum int blockModes,
+            @KeyStoreKeyProperties.PurposeEnum int purposes,
+            String[] digests,
+            String[] encryptionPaddings,
+            String[] signaturePaddings,
+            String[] blockModes,
             boolean randomizedEncryptionRequired,
-            @KeyStoreKeyConstraints.UserAuthenticatorEnum int userAuthenticators,
+            @KeyStoreKeyProperties.UserAuthenticatorEnum int userAuthenticators,
             int userAuthenticationValidityDurationSeconds,
             boolean invalidatedOnNewFingerprintEnrolled) {
         if (context == null) {
@@ -174,9 +177,11 @@ public final class KeyPairGeneratorSpec implements AlgorithmParameterSpec {
         mKeyValidityForOriginationEnd = keyValidityForOriginationEnd;
         mKeyValidityForConsumptionEnd = keyValidityForConsumptionEnd;
         mPurposes = purposes;
-        mDigests = digests;
-        mPaddings = paddings;
-        mBlockModes = blockModes;
+        mDigests = ArrayUtils.cloneIfNotEmpty(ArrayUtils.nullToEmpty(digests));
+        mEncryptionPaddings =
+                ArrayUtils.cloneIfNotEmpty(ArrayUtils.nullToEmpty(encryptionPaddings));
+        mSignaturePaddings = ArrayUtils.cloneIfNotEmpty(ArrayUtils.nullToEmpty(signaturePaddings));
+        mBlockModes = ArrayUtils.cloneIfNotEmpty(ArrayUtils.nullToEmpty(blockModes));
         mRandomizedEncryptionRequired = randomizedEncryptionRequired;
         mUserAuthenticators = userAuthenticators;
         mUserAuthenticationValidityDurationSeconds = userAuthenticationValidityDurationSeconds;
@@ -204,14 +209,16 @@ public final class KeyPairGeneratorSpec implements AlgorithmParameterSpec {
                 startDate,
                 endDate,
                 endDate,
-                0,
-                0,
-                0,
-                0,
-                true,
-                0,
-                -1,
-                false);
+                0, // purposes
+                null, // digests
+                null, // encryption paddings
+                null, // signature paddings
+                null, // block modes
+                false, // randomized encryption required
+                0, // user authenticators
+                -1, // user authentication validity duration (seconds)
+                false // invalidate on new fingerprint enrolled
+                );
     }
 
     /**
@@ -339,35 +346,44 @@ public final class KeyPairGeneratorSpec implements AlgorithmParameterSpec {
      *
      * @hide
      */
-    public @KeyStoreKeyConstraints.PurposeEnum int getPurposes() {
+    public @KeyStoreKeyProperties.PurposeEnum int getPurposes() {
         return mPurposes;
     }
 
     /**
-     * Gets the set of digests to which the key is restricted.
+     * Gets the set of digest algorithms with which the key can be used.
      *
      * @hide
      */
-    public @KeyStoreKeyConstraints.DigestEnum int getDigests() {
-        return mDigests;
+    public String[] getDigests() {
+        return ArrayUtils.cloneIfNotEmpty(mDigests);
     }
 
     /**
-     * Gets the set of padding schemes to which the key is restricted.
+     * Gets the set of padding schemes with which the key can be used when encrypting/decrypting.
      *
      * @hide
      */
-    public @KeyStoreKeyConstraints.PaddingEnum int getPaddings() {
-        return mPaddings;
+    public String[] getEncryptionPaddings() {
+        return ArrayUtils.cloneIfNotEmpty(mEncryptionPaddings);
     }
 
     /**
-     * Gets the set of block modes to which the key is restricted.
+     * Gets the set of padding schemes with which the key can be used when signing/verifying.
      *
      * @hide
      */
-    public @KeyStoreKeyConstraints.BlockModeEnum int getBlockModes() {
-        return mBlockModes;
+    public String[] getSignaturePaddings() {
+        return ArrayUtils.cloneIfNotEmpty(mSignaturePaddings);
+    }
+
+    /**
+     * Gets the set of block modes with which the key can be used.
+     *
+     * @hide
+     */
+    public String[] getBlockModes() {
+        return ArrayUtils.cloneIfNotEmpty(mBlockModes);
     }
 
     /**
@@ -396,7 +412,7 @@ public final class KeyPairGeneratorSpec implements AlgorithmParameterSpec {
      *
      * @hide
      */
-    public @KeyStoreKeyConstraints.UserAuthenticatorEnum int getUserAuthenticators() {
+    public @KeyStoreKeyProperties.UserAuthenticatorEnum int getUserAuthenticators() {
         return mUserAuthenticators;
     }
 
@@ -477,17 +493,19 @@ public final class KeyPairGeneratorSpec implements AlgorithmParameterSpec {
 
         private Date mKeyValidityForConsumptionEnd;
 
-        private @KeyStoreKeyConstraints.PurposeEnum int mPurposes;
+        private @KeyStoreKeyProperties.PurposeEnum int mPurposes;
 
-        private @KeyStoreKeyConstraints.DigestEnum int mDigests;
+        private String[] mDigests;
 
-        private @KeyStoreKeyConstraints.PaddingEnum int mPaddings;
+        private String[] mEncryptionPaddings;
 
-        private @KeyStoreKeyConstraints.BlockModeEnum int mBlockModes;
+        private String[] mSignaturePaddings;
+
+        private String[] mBlockModes;
 
         private boolean mRandomizedEncryptionRequired = true;
 
-        private @KeyStoreKeyConstraints.UserAuthenticatorEnum int mUserAuthenticators;
+        private @KeyStoreKeyProperties.UserAuthenticatorEnum int mUserAuthenticators;
 
         private int mUserAuthenticationValidityDurationSeconds = -1;
 
@@ -679,53 +697,68 @@ public final class KeyPairGeneratorSpec implements AlgorithmParameterSpec {
         }
 
         /**
-         * Restricts the key to being used only for the provided set of purposes.
+         * Sets the set of purposes for which the key can be used.
          *
-         * <p>This restriction must be specified. There is no default.
+         * <p>This must be specified for all keys. There is no default.
          *
          * @hide
          */
-        public Builder setPurposes(@KeyStoreKeyConstraints.PurposeEnum int purposes) {
+        public Builder setPurposes(@KeyStoreKeyProperties.PurposeEnum int purposes) {
             mPurposes = purposes;
             return this;
         }
 
         /**
-         * Restricts the key to being used only with the provided digests. Attempts to use the key
-         * with any other digests be rejected.
+         * Sets the set of digests with which the key can be used when signing/verifying. Attempts
+         * to use the key with any other digest will be rejected.
          *
-         * <p>This restriction must be specified for keys which are used for signing/verification.
+         * <p>This must be specified for keys which are used for signing/verification.
          *
          * @hide
          */
-        public Builder setDigests(@KeyStoreKeyConstraints.DigestEnum int digests) {
-            mDigests = digests;
+        public Builder setDigests(String... digests) {
+            mDigests = ArrayUtils.cloneIfNotEmpty(digests);
             return this;
         }
 
         /**
-         * Restricts the key to being used only with the provided padding schemes. Attempts to use
-         * the key with any other padding will be rejected.
+         * Sets the set of padding schemes with which the key can be used when
+         * encrypting/decrypting. Attempts to use the key with any other padding scheme will be
+         * rejected.
          *
-         * <p>This restriction must be specified for keys which are used for encryption/decryption.
+         * <p>This must be specified for keys which are used for encryption/decryption.
          *
          * @hide
          */
-        public Builder setPaddings(@KeyStoreKeyConstraints.PaddingEnum int paddings) {
-            mPaddings = paddings;
+        public Builder setEncryptionPaddings(String... paddings) {
+            mEncryptionPaddings = ArrayUtils.cloneIfNotEmpty(paddings);
             return this;
         }
 
         /**
-         * Restricts the key to being used only with the provided block mode when encrypting or
-         * decrypting. Attempts to use the key with any other block modes will be rejected.
+         * Sets the set of padding schemes with which the key can be used when
+         * signing/verifying. Attempts to use the key with any other padding scheme will be
+         * rejected.
          *
-         * <p>This restriction must be specified for keys which are used for encryption/decryption.
+         * <p>This must be specified for RSA keys which are used for signing/verification.
          *
          * @hide
          */
-        public Builder setBlockModes(@KeyStoreKeyConstraints.BlockModeEnum int blockModes) {
-            mBlockModes = blockModes;
+        public Builder setSignaturePaddings(String... paddings) {
+            mSignaturePaddings = ArrayUtils.cloneIfNotEmpty(paddings);
+            return this;
+        }
+
+        /**
+         * Sets the set of block modes with which the key can be used when encrypting/decrypting.
+         * Attempts to use the key with any other block modes will be rejected.
+         *
+         * <p>This must be specified for encryption/decryption keys.
+         *
+         * @hide
+         */
+        public Builder setBlockModes(String... blockModes) {
+            mBlockModes = ArrayUtils.cloneIfNotEmpty(blockModes);
             return this;
         }
 
@@ -773,7 +806,7 @@ public final class KeyPairGeneratorSpec implements AlgorithmParameterSpec {
          * @hide
          */
         public Builder setUserAuthenticators(
-                @KeyStoreKeyConstraints.UserAuthenticatorEnum int userAuthenticators) {
+                @KeyStoreKeyProperties.UserAuthenticatorEnum int userAuthenticators) {
             mUserAuthenticators = userAuthenticators;
             return this;
         }
@@ -837,7 +870,8 @@ public final class KeyPairGeneratorSpec implements AlgorithmParameterSpec {
                     mKeyValidityForConsumptionEnd,
                     mPurposes,
                     mDigests,
-                    mPaddings,
+                    mEncryptionPaddings,
+                    mSignaturePaddings,
                     mBlockModes,
                     mRandomizedEncryptionRequired,
                     mUserAuthenticators,

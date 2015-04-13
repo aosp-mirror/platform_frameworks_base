@@ -19,10 +19,14 @@ package android.security;
 import android.security.keymaster.KeyCharacteristics;
 import android.security.keymaster.KeymasterDefs;
 
+import libcore.util.EmptyArray;
+
 import java.security.InvalidKeyException;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.KeySpec;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import javax.crypto.SecretKey;
 import javax.crypto.SecretKeyFactorySpi;
@@ -71,84 +75,90 @@ public class KeyStoreSecretKeyFactorySpi extends SecretKeyFactorySpi {
         }
 
         boolean teeBacked;
-        @KeyStoreKeyCharacteristics.OriginEnum int origin;
+        @KeyStoreKeyProperties.OriginEnum int origin;
         int keySize;
-        @KeyStoreKeyConstraints.PurposeEnum int purposes;
-        @KeyStoreKeyConstraints.AlgorithmEnum int algorithm;
-        @KeyStoreKeyConstraints.PaddingEnum int paddings;
-        @KeyStoreKeyConstraints.DigestEnum int digests;
-        @KeyStoreKeyConstraints.BlockModeEnum int blockModes;
-        @KeyStoreKeyConstraints.UserAuthenticatorEnum int userAuthenticators;
-        @KeyStoreKeyConstraints.UserAuthenticatorEnum int teeEnforcedUserAuthenticators;
+        @KeyStoreKeyProperties.PurposeEnum int purposes;
+        String[] encryptionPaddings;
+        String[] digests;
+        String[] blockModes;
+        @KeyStoreKeyProperties.UserAuthenticatorEnum int userAuthenticators;
+        @KeyStoreKeyProperties.UserAuthenticatorEnum int teeEnforcedUserAuthenticators;
         try {
             if (keyCharacteristics.hwEnforced.containsTag(KeymasterDefs.KM_TAG_ORIGIN)) {
                 teeBacked = true;
-                origin = KeyStoreKeyCharacteristics.Origin.fromKeymaster(
+                origin = KeyStoreKeyProperties.Origin.fromKeymaster(
                         keyCharacteristics.hwEnforced.getInt(KeymasterDefs.KM_TAG_ORIGIN, -1));
             } else if (keyCharacteristics.swEnforced.containsTag(KeymasterDefs.KM_TAG_ORIGIN)) {
                 teeBacked = false;
-                origin = KeyStoreKeyCharacteristics.Origin.fromKeymaster(
+                origin = KeyStoreKeyProperties.Origin.fromKeymaster(
                         keyCharacteristics.swEnforced.getInt(KeymasterDefs.KM_TAG_ORIGIN, -1));
             } else {
                 throw new InvalidKeySpecException("Key origin not available");
             }
-            Integer keySizeInteger =
-                    KeymasterUtils.getInt(keyCharacteristics, KeymasterDefs.KM_TAG_KEY_SIZE);
+            Integer keySizeInteger = keyCharacteristics.getInteger(KeymasterDefs.KM_TAG_KEY_SIZE);
             if (keySizeInteger == null) {
                 throw new InvalidKeySpecException("Key size not available");
             }
             keySize = keySizeInteger;
-            purposes = KeyStoreKeyConstraints.Purpose.allFromKeymaster(
-                    KeymasterUtils.getInts(keyCharacteristics, KeymasterDefs.KM_TAG_PURPOSE));
-            Integer alg = KeymasterUtils.getInt(keyCharacteristics, KeymasterDefs.KM_TAG_ALGORITHM);
-            if (alg == null) {
-                throw new InvalidKeySpecException("Key algorithm not available");
-            }
-            algorithm = KeyStoreKeyConstraints.Algorithm.fromKeymaster(alg);
-            paddings = KeyStoreKeyConstraints.Padding.allFromKeymaster(
-                    KeymasterUtils.getInts(keyCharacteristics, KeymasterDefs.KM_TAG_PADDING));
-            digests = KeyStoreKeyConstraints.Digest.allFromKeymaster(
-                    KeymasterUtils.getInts(keyCharacteristics, KeymasterDefs.KM_TAG_DIGEST));
-            blockModes = KeyStoreKeyConstraints.BlockMode.allFromKeymaster(
-                    KeymasterUtils.getInts(keyCharacteristics, KeymasterDefs.KM_TAG_BLOCK_MODE));
+            purposes = KeyStoreKeyProperties.Purpose.allFromKeymaster(
+                    keyCharacteristics.getInts(KeymasterDefs.KM_TAG_PURPOSE));
 
-            @KeyStoreKeyConstraints.UserAuthenticatorEnum
+            List<String> encryptionPaddingsList = new ArrayList<String>();
+            for (int keymasterPadding : keyCharacteristics.getInts(KeymasterDefs.KM_TAG_PADDING)) {
+                String jcaPadding;
+                try {
+                    jcaPadding = KeymasterUtils.getJcaEncryptionPaddingFromKeymasterPadding(
+                            keymasterPadding);
+                } catch (IllegalArgumentException e) {
+                    throw new InvalidKeySpecException(
+                            "Unsupported encryption padding: " + keymasterPadding);
+                }
+                encryptionPaddingsList.add(jcaPadding);
+            }
+            encryptionPaddings =
+                    encryptionPaddingsList.toArray(new String[encryptionPaddingsList.size()]);
+
+            digests = KeymasterUtils.getJcaDigestAlgorithmsFromKeymasterDigests(
+                    keyCharacteristics.getInts(KeymasterDefs.KM_TAG_DIGEST));
+            blockModes = KeymasterUtils.getJcaBlockModesFromKeymasterBlockModes(
+                    keyCharacteristics.getInts(KeymasterDefs.KM_TAG_BLOCK_MODE));
+
+            @KeyStoreKeyProperties.UserAuthenticatorEnum
             int swEnforcedKeymasterUserAuthenticators =
                     keyCharacteristics.swEnforced.getInt(KeymasterDefs.KM_TAG_USER_AUTH_TYPE, 0);
-            @KeyStoreKeyConstraints.UserAuthenticatorEnum
+            @KeyStoreKeyProperties.UserAuthenticatorEnum
             int hwEnforcedKeymasterUserAuthenticators =
                     keyCharacteristics.hwEnforced.getInt(KeymasterDefs.KM_TAG_USER_AUTH_TYPE, 0);
-            @KeyStoreKeyConstraints.UserAuthenticatorEnum
+            @KeyStoreKeyProperties.UserAuthenticatorEnum
             int keymasterUserAuthenticators =
                     swEnforcedKeymasterUserAuthenticators | hwEnforcedKeymasterUserAuthenticators;
-            userAuthenticators = KeyStoreKeyConstraints.UserAuthenticator.allFromKeymaster(
+            userAuthenticators = KeyStoreKeyProperties.UserAuthenticator.allFromKeymaster(
                     keymasterUserAuthenticators);
             teeEnforcedUserAuthenticators =
-                    KeyStoreKeyConstraints.UserAuthenticator.allFromKeymaster(
+                    KeyStoreKeyProperties.UserAuthenticator.allFromKeymaster(
                             hwEnforcedKeymasterUserAuthenticators);
         } catch (IllegalArgumentException e) {
             throw new InvalidKeySpecException("Unsupported key characteristic", e);
         }
 
-        Date keyValidityStart =
-                KeymasterUtils.getDate(keyCharacteristics, KeymasterDefs.KM_TAG_ACTIVE_DATETIME);
+        Date keyValidityStart = keyCharacteristics.getDate(KeymasterDefs.KM_TAG_ACTIVE_DATETIME);
         if ((keyValidityStart != null) && (keyValidityStart.getTime() <= 0)) {
             keyValidityStart = null;
         }
-        Date keyValidityForOriginationEnd = KeymasterUtils.getDate(keyCharacteristics,
-                KeymasterDefs.KM_TAG_ORIGINATION_EXPIRE_DATETIME);
+        Date keyValidityForOriginationEnd =
+                keyCharacteristics.getDate(KeymasterDefs.KM_TAG_ORIGINATION_EXPIRE_DATETIME);
         if ((keyValidityForOriginationEnd != null)
                 && (keyValidityForOriginationEnd.getTime() == Long.MAX_VALUE)) {
             keyValidityForOriginationEnd = null;
         }
-        Date keyValidityForConsumptionEnd = KeymasterUtils.getDate(keyCharacteristics,
-                KeymasterDefs.KM_TAG_USAGE_EXPIRE_DATETIME);
+        Date keyValidityForConsumptionEnd =
+                keyCharacteristics.getDate(KeymasterDefs.KM_TAG_USAGE_EXPIRE_DATETIME);
         if ((keyValidityForConsumptionEnd != null)
                 && (keyValidityForConsumptionEnd.getTime() == Long.MAX_VALUE)) {
             keyValidityForConsumptionEnd = null;
         }
-        Integer userAuthenticationValidityDurationSeconds =
-                KeymasterUtils.getInt(keyCharacteristics, KeymasterDefs.KM_TAG_AUTH_TIMEOUT);
+        int userAuthenticationValidityDurationSeconds =
+                keyCharacteristics.getInt(KeymasterDefs.KM_TAG_AUTH_TIMEOUT, -1);
 
         // TODO: Populate the value below from key characteristics once Keymaster is ready.
         boolean invalidatedOnNewFingerprintEnrolled = false;
@@ -161,14 +171,13 @@ public class KeyStoreSecretKeyFactorySpi extends SecretKeyFactorySpi {
                 keyValidityForOriginationEnd,
                 keyValidityForConsumptionEnd,
                 purposes,
-                algorithm,
-                paddings,
+                encryptionPaddings,
+                EmptyArray.STRING, // no signature paddings -- this is symmetric crypto
                 digests,
                 blockModes,
                 userAuthenticators,
                 teeEnforcedUserAuthenticators,
-                ((userAuthenticationValidityDurationSeconds != null)
-                        ? userAuthenticationValidityDurationSeconds : -1),
+                userAuthenticationValidityDurationSeconds,
                 invalidatedOnNewFingerprintEnrolled);
     }
 

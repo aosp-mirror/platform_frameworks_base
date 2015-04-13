@@ -37,68 +37,68 @@ public abstract class KeyStoreKeyGeneratorSpi extends KeyGeneratorSpi {
 
     public static class AES extends KeyStoreKeyGeneratorSpi {
         public AES() {
-            super(KeyStoreKeyConstraints.Algorithm.AES, 128);
+            super(KeymasterDefs.KM_ALGORITHM_AES, 128);
         }
     }
 
     protected static abstract class HmacBase extends KeyStoreKeyGeneratorSpi {
-        protected HmacBase(@KeyStoreKeyConstraints.DigestEnum int digest) {
-            super(KeyStoreKeyConstraints.Algorithm.HMAC,
-                    digest,
-                    KeyStoreKeyConstraints.Digest.getOutputSizeBytes(digest) * 8);
+        protected HmacBase(int keymasterDigest) {
+            super(KeymasterDefs.KM_ALGORITHM_HMAC,
+                    keymasterDigest,
+                    KeymasterUtils.getDigestOutputSizeBytes(keymasterDigest) * 8);
         }
     }
 
     public static class HmacSHA1 extends HmacBase {
         public HmacSHA1() {
-            super(KeyStoreKeyConstraints.Digest.SHA1);
+            super(KeymasterDefs.KM_DIGEST_SHA1);
         }
     }
 
     public static class HmacSHA224 extends HmacBase {
         public HmacSHA224() {
-            super(KeyStoreKeyConstraints.Digest.SHA224);
+            super(KeymasterDefs.KM_DIGEST_SHA_2_224);
         }
     }
 
     public static class HmacSHA256 extends HmacBase {
         public HmacSHA256() {
-            super(KeyStoreKeyConstraints.Digest.SHA256);
+            super(KeymasterDefs.KM_DIGEST_SHA_2_256);
         }
     }
 
     public static class HmacSHA384 extends HmacBase {
         public HmacSHA384() {
-            super(KeyStoreKeyConstraints.Digest.SHA384);
+            super(KeymasterDefs.KM_DIGEST_SHA_2_384);
         }
     }
 
     public static class HmacSHA512 extends HmacBase {
         public HmacSHA512() {
-            super(KeyStoreKeyConstraints.Digest.SHA512);
+            super(KeymasterDefs.KM_DIGEST_SHA_2_512);
         }
     }
 
     private final KeyStore mKeyStore = KeyStore.getInstance();
-    private final @KeyStoreKeyConstraints.AlgorithmEnum int mAlgorithm;
-    private final @KeyStoreKeyConstraints.DigestEnum Integer mDigest;
+    private final int mKeymasterAlgorithm;
+    private final int mKeymasterDigest;
     private final int mDefaultKeySizeBits;
 
     private KeyGeneratorSpec mSpec;
     private SecureRandom mRng;
 
     protected KeyStoreKeyGeneratorSpi(
-            @KeyStoreKeyConstraints.AlgorithmEnum int algorithm,
+            int keymasterAlgorithm,
             int defaultKeySizeBits) {
-        this(algorithm, null, defaultKeySizeBits);
+        this(keymasterAlgorithm, -1, defaultKeySizeBits);
     }
 
     protected KeyStoreKeyGeneratorSpi(
-            @KeyStoreKeyConstraints.AlgorithmEnum int algorithm,
-            @KeyStoreKeyConstraints.DigestEnum Integer digest,
+            int keymasterAlgorithm,
+            int keymasterDigest,
             int defaultKeySizeBits) {
-        mAlgorithm = algorithm;
-        mDigest = digest;
+        mKeymasterAlgorithm = keymasterAlgorithm;
+        mKeymasterDigest = keymasterDigest;
         mDefaultKeySizeBits = defaultKeySizeBits;
     }
 
@@ -117,58 +117,55 @@ public abstract class KeyStoreKeyGeneratorSpi extends KeyGeneratorSpi {
         }
 
         KeymasterArguments args = new KeymasterArguments();
-        args.addInt(KeymasterDefs.KM_TAG_ALGORITHM,
-                KeyStoreKeyConstraints.Algorithm.toKeymaster(mAlgorithm));
-        if (mDigest != null) {
-            args.addInt(KeymasterDefs.KM_TAG_DIGEST,
-                    KeyStoreKeyConstraints.Digest.toKeymaster(mDigest));
-            Integer digestOutputSizeBytes =
-                    KeyStoreKeyConstraints.Digest.getOutputSizeBytes(mDigest);
-            if (digestOutputSizeBytes != null) {
+        args.addInt(KeymasterDefs.KM_TAG_ALGORITHM, mKeymasterAlgorithm);
+        if (mKeymasterDigest != -1) {
+            args.addInt(KeymasterDefs.KM_TAG_DIGEST, mKeymasterDigest);
+            int digestOutputSizeBytes =
+                    KeymasterUtils.getDigestOutputSizeBytes(mKeymasterDigest);
+            if (digestOutputSizeBytes != -1) {
                 // TODO: Remove MAC length constraint once Keymaster API no longer requires it.
                 // TODO: Switch to bits instead of bytes, once this is fixed in Keymaster
                 args.addInt(KeymasterDefs.KM_TAG_MAC_LENGTH, digestOutputSizeBytes);
             }
         }
-        if (mAlgorithm == KeyStoreKeyConstraints.Algorithm.HMAC) {
-            if (mDigest == null) {
-                throw new IllegalStateException("Digest algorithm must be specified for key"
-                        + " algorithm " + KeyStoreKeyConstraints.Algorithm.toString(mAlgorithm));
+        if (mKeymasterAlgorithm == KeymasterDefs.KM_ALGORITHM_HMAC) {
+            if (mKeymasterDigest == -1) {
+                throw new IllegalStateException("Digest algorithm must be specified for HMAC key");
             }
         }
         int keySizeBits = (spec.getKeySize() != null) ? spec.getKeySize() : mDefaultKeySizeBits;
         args.addInt(KeymasterDefs.KM_TAG_KEY_SIZE, keySizeBits);
-        @KeyStoreKeyConstraints.PurposeEnum int purposes = spec.getPurposes();
-        @KeyStoreKeyConstraints.BlockModeEnum int blockModes = spec.getBlockModes();
-        if (((purposes & KeyStoreKeyConstraints.Purpose.ENCRYPT) != 0)
+        @KeyStoreKeyProperties.PurposeEnum int purposes = spec.getPurposes();
+        int[] keymasterBlockModes = KeymasterUtils.getKeymasterBlockModesFromJcaBlockModes(
+                spec.getBlockModes());
+        if (((purposes & KeyStoreKeyProperties.Purpose.ENCRYPT) != 0)
                 && (spec.isRandomizedEncryptionRequired())) {
-            @KeyStoreKeyConstraints.BlockModeEnum int incompatibleBlockModes =
-                    blockModes & ~KeyStoreKeyConstraints.BlockMode.IND_CPA_COMPATIBLE_MODES;
-            if (incompatibleBlockModes != 0) {
-                throw new IllegalStateException(
-                        "Randomized encryption (IND-CPA) required but may be violated by block"
-                        + " mode(s): "
-                        + KeyStoreKeyConstraints.BlockMode.allToString(incompatibleBlockModes)
-                        + ". See KeyGeneratorSpec documentation.");
+            for (int keymasterBlockMode : keymasterBlockModes) {
+                if (!KeymasterUtils.isKeymasterBlockModeIndCpaCompatible(keymasterBlockMode)) {
+                    throw new IllegalStateException(
+                            "Randomized encryption (IND-CPA) required but may be violated by block"
+                            + " mode: "
+                            + KeymasterUtils.getJcaBlockModeFromKeymasterBlockMode(
+                                    keymasterBlockMode)
+                            + ". See KeyGeneratorSpec documentation.");
+                }
             }
         }
 
         for (int keymasterPurpose :
-            KeyStoreKeyConstraints.Purpose.allToKeymaster(purposes)) {
+            KeyStoreKeyProperties.Purpose.allToKeymaster(purposes)) {
             args.addInt(KeymasterDefs.KM_TAG_PURPOSE, keymasterPurpose);
         }
-        for (int keymasterBlockMode : KeyStoreKeyConstraints.BlockMode.allToKeymaster(blockModes)) {
-            args.addInt(KeymasterDefs.KM_TAG_BLOCK_MODE, keymasterBlockMode);
-        }
-        for (int keymasterPadding :
-            KeyStoreKeyConstraints.Padding.allToKeymaster(spec.getPaddings())) {
-            args.addInt(KeymasterDefs.KM_TAG_PADDING, keymasterPadding);
-        }
+        args.addInts(KeymasterDefs.KM_TAG_BLOCK_MODE, keymasterBlockModes);
+        args.addInts(
+                KeymasterDefs.KM_TAG_PADDING,
+                KeymasterUtils.getKeymasterPaddingsFromJcaEncryptionPaddings(
+                        spec.getEncryptionPaddings()));
         if (spec.getUserAuthenticators() == 0) {
             args.addBoolean(KeymasterDefs.KM_TAG_NO_AUTH_REQUIRED);
         } else {
             args.addInt(KeymasterDefs.KM_TAG_USER_AUTH_TYPE,
-                    KeyStoreKeyConstraints.UserAuthenticator.allToKeymaster(
+                    KeyStoreKeyProperties.UserAuthenticator.allToKeymaster(
                             spec.getUserAuthenticators()));
         }
         if (spec.isInvalidatedOnNewFingerprintEnrolled()) {
@@ -189,7 +186,7 @@ public abstract class KeyStoreKeyGeneratorSpi extends KeyGeneratorSpi {
                 (spec.getKeyValidityForConsumptionEnd() != null)
                 ? spec.getKeyValidityForConsumptionEnd() : new Date(Long.MAX_VALUE));
 
-        if (((purposes & KeyStoreKeyConstraints.Purpose.ENCRYPT) != 0)
+        if (((purposes & KeyStoreKeyProperties.Purpose.ENCRYPT) != 0)
                 && (!spec.isRandomizedEncryptionRequired())) {
             // Permit caller-provided IV when encrypting with this key
             args.addBoolean(KeymasterDefs.KM_TAG_CALLER_NONCE);
@@ -210,7 +207,7 @@ public abstract class KeyStoreKeyGeneratorSpi extends KeyGeneratorSpi {
             throw KeyStore.getCryptoOperationException(errorCode);
         }
         String keyAlgorithmJCA =
-                KeyStoreKeyConstraints.Algorithm.toJCASecretKeyAlgorithm(mAlgorithm, mDigest);
+                KeymasterUtils.getJcaSecretKeyAlgorithm(mKeymasterAlgorithm, mKeymasterDigest);
         return new KeyStoreSecretKey(keyAliasInKeystore, keyAlgorithmJCA);
     }
 
