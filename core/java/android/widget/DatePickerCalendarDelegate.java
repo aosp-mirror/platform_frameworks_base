@@ -534,22 +534,23 @@ class DatePickerCalendarDelegate extends DatePicker.AbstractDatePickerDelegate {
 
     @Override
     public void onRestoreInstanceState(Parcelable state) {
-        SavedState ss = (SavedState) state;
+        final SavedState ss = (SavedState) state;
 
         // TODO: Move instance state into DayPickerView, YearPickerView.
         mCurrentDate.set(ss.getSelectedYear(), ss.getSelectedMonth(), ss.getSelectedDay());
-        mCurrentView = ss.getCurrentView();
         mMinDate.setTimeInMillis(ss.getMinDate());
         mMaxDate.setTimeInMillis(ss.getMaxDate());
 
         onCurrentDateChanged(false);
-        setCurrentView(mCurrentView);
+
+        final int currentView = ss.getCurrentView();
+        setCurrentView(currentView);
 
         final int listPosition = ss.getListPosition();
         if (listPosition != -1) {
-            if (mCurrentView == VIEW_MONTH_DAY) {
+            if (currentView == VIEW_MONTH_DAY) {
                 mDayPickerView.setCurrentItem(listPosition);
-            } else if (mCurrentView == VIEW_YEAR) {
+            } else if (currentView == VIEW_YEAR) {
                 final int listPositionOffset = ss.getListPositionOffset();
                 mYearPickerView.setSelectionFromTop(listPosition, listPositionOffset);
             }
@@ -601,7 +602,6 @@ class DatePickerCalendarDelegate extends DatePicker.AbstractDatePickerDelegate {
      * Class for managing state storing/restoring.
      */
     private static class SavedState extends View.BaseSavedState {
-
         private final int mSelectedYear;
         private final int mSelectedMonth;
         private final int mSelectedDay;

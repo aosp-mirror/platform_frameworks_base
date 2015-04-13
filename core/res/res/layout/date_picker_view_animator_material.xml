@@ -15,23 +15,23 @@
      limitations under the License.
 -->
 
-<ViewAnimator xmlns:android="http://schemas.android.com/apk/res/android"
+<com.android.internal.widget.DialogViewAnimator xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/animator"
     android:layout_width="match_parent"
-    android:layout_height="0dp"
-    android:layout_weight="1"
-    android:gravity="center">
+    android:layout_height="wrap_content"
+    android:gravity="center"
+    android:inAnimation="@anim/date_picker_fade_in_material"
+    android:outAnimation="@anim/date_picker_fade_out_material"
+    android:measureAllChildren="true">
 
     <android.widget.DayPickerView
         android:id="@+id/date_picker_day_picker"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:inAnimation="@anim/fade_in"
-        android:outAnimation="@anim/fade_out" />
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
 
     <android.widget.YearPickerView
         android:id="@+id/date_picker_year_picker"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
-</ViewAnimator>
+</com.android.internal.widget.DialogViewAnimator>

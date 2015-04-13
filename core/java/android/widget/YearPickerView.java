@@ -178,24 +178,29 @@ class YearPickerView extends ListView {
 
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
-            if (convertView == null) {
-                convertView = mInflater.inflate(ITEM_LAYOUT, parent, false);
+            final TextView v;
+            final boolean hasNewView = convertView == null;
+            if (hasNewView) {
+                v = (TextView) mInflater.inflate(ITEM_LAYOUT, parent, false);
+            } else {
+                v = (TextView) convertView;
             }
 
             final int year = getYearForPosition(position);
             final boolean activated = mActivatedYear == year;
 
-            final int textAppearanceResId;
-            if (activated && ITEM_TEXT_ACTIVATED_APPEARANCE != 0) {
-                textAppearanceResId = ITEM_TEXT_ACTIVATED_APPEARANCE;
-            } else {
-                textAppearanceResId = ITEM_TEXT_APPEARANCE;
+            if (hasNewView || v.isActivated() != activated) {
+                final int textAppearanceResId;
+                if (activated && ITEM_TEXT_ACTIVATED_APPEARANCE != 0) {
+                    textAppearanceResId = ITEM_TEXT_ACTIVATED_APPEARANCE;
+                } else {
+                    textAppearanceResId = ITEM_TEXT_APPEARANCE;
+                }
+                v.setTextAppearance(textAppearanceResId);
+                v.setActivated(activated);
             }
 
-            final TextView v = (TextView) convertView;
-            v.setText("" + year);
-            v.setTextAppearance(v.getContext(), textAppearanceResId);
-            v.setActivated(activated);
+            v.setText(Integer.toString(year));
             return v;
         }
 

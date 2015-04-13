@@ -585,7 +585,6 @@ class SimpleMonthView extends View {
                 mToday = day;
             }
         }
-        mNumWeeks = calculateNumRows();
 
         // Invalidate the old title.
         mTitle = null;
@@ -616,18 +615,6 @@ class SimpleMonthView extends View {
         }
     }
 
-    public void reuse() {
-        mNumWeeks = MAX_WEEKS_IN_MONTH;
-        requestLayout();
-    }
-
-    private int calculateNumRows() {
-        final int offset = findDayOffset();
-        final int dividend = (offset + mDaysInMonth) / DAYS_IN_WEEK;
-        final int remainder = (offset + mDaysInMonth) % DAYS_IN_WEEK;
-        return dividend + (remainder > 0 ? 1 : 0);
-    }
-
     private boolean sameDay(int day, Calendar today) {
         return mYear == today.get(Calendar.YEAR) && mMonth == today.get(Calendar.MONTH)
                 && day == today.get(Calendar.DAY_OF_MONTH);
@@ -635,8 +622,9 @@ class SimpleMonthView extends View {
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        final int preferredHeight = mDesiredDayHeight * mNumWeeks + mDesiredDayOfWeekHeight
-                + mDesiredMonthHeight + getPaddingTop() + getPaddingBottom();
+        final int preferredHeight = mDesiredDayHeight * MAX_WEEKS_IN_MONTH
+                + mDesiredDayOfWeekHeight + mDesiredMonthHeight
+                + getPaddingTop() + getPaddingBottom();
         final int preferredWidth = mDesiredCellWidth * DAYS_IN_WEEK
                 + getPaddingStart() + getPaddingEnd();
         final int resolvedWidth = resolveSize(preferredWidth, widthMeasureSpec);
