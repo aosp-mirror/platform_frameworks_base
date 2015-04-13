@@ -20431,11 +20431,12 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
         static int adjust(int measureSpec, int delta) {
             final int mode = getMode(measureSpec);
+            int size = getSize(measureSpec);
             if (mode == UNSPECIFIED) {
                 // No need to adjust size for UNSPECIFIED mode.
-                return makeMeasureSpec(0, UNSPECIFIED);
+                return makeMeasureSpec(size, UNSPECIFIED);
             }
-            int size = getSize(measureSpec) + delta;
+            size += delta;
             if (size < 0) {
                 Log.e(VIEW_LOG_TAG, "MeasureSpec.adjust: new size would be negative! (" + size +
                         ") spec: " + toString(measureSpec) + " delta: " + delta);

@@ -400,11 +400,13 @@ public class SlidingTab extends ViewGroup {
         /**
          * Ensure all the dependent widgets are measured.
          */
-        public void measure() {
-            tab.measure(View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED),
-                    View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED));
-            text.measure(View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED),
-                    View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED));
+        public void measure(int widthMeasureSpec, int heightMeasureSpec) {
+            int width = MeasureSpec.getSize(widthMeasureSpec);
+            int height = MeasureSpec.getSize(heightMeasureSpec);
+            tab.measure(View.MeasureSpec.makeMeasureSpec(width, View.MeasureSpec.UNSPECIFIED),
+                    View.MeasureSpec.makeMeasureSpec(height, View.MeasureSpec.UNSPECIFIED));
+            text.measure(View.MeasureSpec.makeMeasureSpec(width, View.MeasureSpec.UNSPECIFIED),
+                    View.MeasureSpec.makeMeasureSpec(height, View.MeasureSpec.UNSPECIFIED));
         }
 
         /**
@@ -491,8 +493,8 @@ public class SlidingTab extends ViewGroup {
             }
         }
 
-        mLeftSlider.measure();
-        mRightSlider.measure();
+        mLeftSlider.measure(widthMeasureSpec, heightMeasureSpec);
+        mRightSlider.measure(widthMeasureSpec, heightMeasureSpec);
         final int leftTabWidth = mLeftSlider.getTabWidth();
         final int rightTabWidth = mRightSlider.getTabWidth();
         final int leftTabHeight = mLeftSlider.getTabHeight();

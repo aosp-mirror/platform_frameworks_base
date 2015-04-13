@@ -173,11 +173,12 @@ public class TabWidget extends LinearLayout implements OnFocusChangeListener {
         }
 
         // First, measure with no constraint
-        final int unspecifiedWidth = MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED);
+        final int width = MeasureSpec.getSize(widthMeasureSpec);
+        final int unspecifiedWidth = MeasureSpec.makeMeasureSpec(width, MeasureSpec.UNSPECIFIED);
         mImposedTabsHeight = -1;
         super.measureHorizontal(unspecifiedWidth, heightMeasureSpec);
 
-        int extraWidth = getMeasuredWidth() - MeasureSpec.getSize(widthMeasureSpec);
+        int extraWidth = getMeasuredWidth() - width;
         if (extraWidth > 0) {
             final int count = getChildCount();
 
