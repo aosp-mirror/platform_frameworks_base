@@ -43,24 +43,26 @@ public final class KeyStoreParameter implements ProtectionParameter {
     private final Date mKeyValidityStart;
     private final Date mKeyValidityForOriginationEnd;
     private final Date mKeyValidityForConsumptionEnd;
-    private final @KeyStoreKeyConstraints.PurposeEnum int mPurposes;
-    private final @KeyStoreKeyConstraints.PaddingEnum int mPaddings;
-    private final @KeyStoreKeyConstraints.DigestEnum Integer mDigests;
-    private final @KeyStoreKeyConstraints.BlockModeEnum int mBlockModes;
+    private final @KeyStoreKeyProperties.PurposeEnum int mPurposes;
+    private final String[] mEncryptionPaddings;
+    private final String[] mSignaturePaddings;
+    private final String[] mDigests;
+    private final String[] mBlockModes;
     private final boolean mRandomizedEncryptionRequired;
-    private final @KeyStoreKeyConstraints.UserAuthenticatorEnum int mUserAuthenticators;
+    private final @KeyStoreKeyProperties.UserAuthenticatorEnum int mUserAuthenticators;
     private final int mUserAuthenticationValidityDurationSeconds;
 
     private KeyStoreParameter(int flags,
             Date keyValidityStart,
             Date keyValidityForOriginationEnd,
             Date keyValidityForConsumptionEnd,
-            @KeyStoreKeyConstraints.PurposeEnum int purposes,
-            @KeyStoreKeyConstraints.PaddingEnum int paddings,
-            @KeyStoreKeyConstraints.DigestEnum Integer digests,
-            @KeyStoreKeyConstraints.BlockModeEnum int blockModes,
+            @KeyStoreKeyProperties.PurposeEnum int purposes,
+            String[] encryptionPaddings,
+            String[] signaturePaddings,
+            String[] digests,
+            String[] blockModes,
             boolean randomizedEncryptionRequired,
-            @KeyStoreKeyConstraints.UserAuthenticatorEnum int userAuthenticators,
+            @KeyStoreKeyProperties.UserAuthenticatorEnum int userAuthenticators,
             int userAuthenticationValidityDurationSeconds) {
         if ((userAuthenticationValidityDurationSeconds < 0)
                 && (userAuthenticationValidityDurationSeconds != -1)) {
@@ -73,9 +75,12 @@ public final class KeyStoreParameter implements ProtectionParameter {
         mKeyValidityForOriginationEnd = keyValidityForOriginationEnd;
         mKeyValidityForConsumptionEnd = keyValidityForConsumptionEnd;
         mPurposes = purposes;
-        mPaddings = paddings;
-        mDigests = digests;
-        mBlockModes = blockModes;
+        mEncryptionPaddings =
+                ArrayUtils.cloneIfNotEmpty(ArrayUtils.nullToEmpty(encryptionPaddings));
+        mSignaturePaddings =
+                ArrayUtils.cloneIfNotEmpty(ArrayUtils.nullToEmpty(signaturePaddings));
+        mDigests = ArrayUtils.cloneIfNotEmpty(digests);
+        mBlockModes = ArrayUtils.cloneIfNotEmpty(ArrayUtils.nullToEmpty(blockModes));
         mRandomizedEncryptionRequired = randomizedEncryptionRequired;
         mUserAuthenticators = userAuthenticators;
         mUserAuthenticationValidityDurationSeconds = userAuthenticationValidityDurationSeconds;
@@ -133,37 +138,48 @@ public final class KeyStoreParameter implements ProtectionParameter {
      *
      * @hide
      */
-    public @KeyStoreKeyConstraints.PurposeEnum int getPurposes() {
+    public @KeyStoreKeyProperties.PurposeEnum int getPurposes() {
         return mPurposes;
     }
 
     /**
-     * Gets the set of padding schemes to which the key is restricted.
+     * Gets the set of padding schemes with which the key can be used when encrypting/decrypting.
      *
      * @hide
      */
-    public @KeyStoreKeyConstraints.PaddingEnum int getPaddings() {
-        return mPaddings;
+    public String[] getEncryptionPaddings() {
+        return ArrayUtils.cloneIfNotEmpty(mEncryptionPaddings);
     }
 
     /**
-     * Gets the set of digests to which the key is restricted.
+     * Gets the set of padding schemes with which the key can be used when signing or verifying
+     * signatures.
      *
-     * @throws IllegalStateException if this restriction has not been specified.
+     * @hide
+     */
+    public String[] getSignaturePaddings() {
+        return ArrayUtils.cloneIfNotEmpty(mSignaturePaddings);
+    }
+
+    /**
+     * Gets the set of digest algorithms with which the key can be used.
+     *
+     * @throws IllegalStateException if this set has not been specified.
      *
      * @see #isDigestsSpecified()
      *
      * @hide
      */
-    public @KeyStoreKeyConstraints.DigestEnum int getDigests() {
+    public String[] getDigests() {
         if (mDigests == null) {
             throw new IllegalStateException("Digests not specified");
         }
-        return mDigests;
+        return ArrayUtils.cloneIfNotEmpty(mDigests);
     }
 
     /**
-     * Returns {@code true} if digest restrictions have been specified.
+     * Returns {@code true} if the set of digest algorithms with which the key can be used has been
+     * specified.
      *
      * @see #getDigests()
      *
@@ -174,12 +190,12 @@ public final class KeyStoreParameter implements ProtectionParameter {
     }
 
     /**
-     * Gets the set of block modes to which the key is restricted.
+     * Gets the set of block modes with which the key can be used.
      *
      * @hide
      */
-    public @KeyStoreKeyConstraints.BlockModeEnum int getBlockModes() {
-        return mBlockModes;
+    public String[] getBlockModes() {
+        return ArrayUtils.cloneIfNotEmpty(mBlockModes);
     }
 
     /**
@@ -205,7 +221,7 @@ public final class KeyStoreParameter implements ProtectionParameter {
      *
      * @hide
      */
-    public @KeyStoreKeyConstraints.UserAuthenticatorEnum int getUserAuthenticators() {
+    public @KeyStoreKeyProperties.UserAuthenticatorEnum int getUserAuthenticators() {
         return mUserAuthenticators;
     }
 
@@ -244,12 +260,13 @@ public final class KeyStoreParameter implements ProtectionParameter {
         private Date mKeyValidityStart;
         private Date mKeyValidityForOriginationEnd;
         private Date mKeyValidityForConsumptionEnd;
-        private @KeyStoreKeyConstraints.PurposeEnum int mPurposes;
-        private @KeyStoreKeyConstraints.PaddingEnum int mPaddings;
-        private @KeyStoreKeyConstraints.DigestEnum Integer mDigests;
-        private @KeyStoreKeyConstraints.BlockModeEnum int mBlockModes;
+        private @KeyStoreKeyProperties.PurposeEnum int mPurposes;
+        private String[] mEncryptionPaddings;
+        private String[] mSignaturePaddings;
+        private String[] mDigests;
+        private String[] mBlockModes;
         private boolean mRandomizedEncryptionRequired = true;
-        private @KeyStoreKeyConstraints.UserAuthenticatorEnum int mUserAuthenticators;
+        private @KeyStoreKeyProperties.UserAuthenticatorEnum int mUserAuthenticators;
         private int mUserAuthenticationValidityDurationSeconds = -1;
 
         /**
@@ -342,55 +359,70 @@ public final class KeyStoreParameter implements ProtectionParameter {
         }
 
         /**
-         * Restricts the key to being used only for the provided set of purposes.
+         * Sets the set of purposes for which the key can be used.
          *
-         * <p>This restriction must be specified. There is no default.
+         * <p>This must be specified for all keys. There is no default.
          *
          * @hide
          */
-        public Builder setPurposes(@KeyStoreKeyConstraints.PurposeEnum int purposes) {
+        public Builder setPurposes(@KeyStoreKeyProperties.PurposeEnum int purposes) {
             mPurposes = purposes;
             return this;
         }
 
         /**
-         * Restricts the key to being used only with the provided padding schemes. Attempts to use
-         * the key with any other padding will be rejected.
+         * Sets the set of padding schemes with which the key can be used when
+         * encrypting/decrypting. Attempts to use the key with any other padding scheme will be
+         * rejected.
          *
-         * <p>This restriction must be specified for keys which are used for encryption/decryption.
+         * <p>This must be specified for keys which are used for encryption/decryption.
          *
          * @hide
          */
-        public Builder setPaddings(@KeyStoreKeyConstraints.PaddingEnum int paddings) {
-            mPaddings = paddings;
+        public Builder setEncryptionPaddings(String... paddings) {
+            mEncryptionPaddings = ArrayUtils.cloneIfNotEmpty(paddings);
             return this;
         }
 
         /**
-         * Restricts the key to being used only with the provided digests when generating signatures
-         * or HMACs. Attempts to use the key with any other digest will be rejected.
+         * Sets the set of padding schemes with which the key can be used when
+         * signing/verifying. Attempts to use the key with any other padding scheme will be
+         * rejected.
          *
-         * <p>For HMAC keys, the default is to restrict to the digest specified in
-         * {@link Key#getAlgorithm()}. For asymmetric signing keys this constraint must be specified
-         * because there is no default.
+         * <p>This must be specified for RSA keys which are used for signing/verification.
          *
          * @hide
          */
-        public Builder setDigests(@KeyStoreKeyConstraints.DigestEnum int digests) {
-            mDigests = digests;
+        public Builder setSignaturePaddings(String... paddings) {
+            mSignaturePaddings = ArrayUtils.cloneIfNotEmpty(paddings);
+            return this;
+        }
+
+
+        /**
+         * Sets the set of digests with which the key can be used when signing/verifying or
+         * generating MACs. Attempts to use the key with any other digest will be rejected.
+         *
+         * <p>For HMAC keys, the default is the digest specified in {@link Key#getAlgorithm()}. For
+         * asymmetric signing keys this constraint must be specified.
+         *
+         * @hide
+         */
+        public Builder setDigests(String... digests) {
+            mDigests = ArrayUtils.cloneIfNotEmpty(digests);
             return this;
         }
 
         /**
-         * Restricts the key to being used only with the provided block modes. Attempts to use the
-         * key with any other block modes will be rejected.
+         * Sets the set of block modes with which the key can be used when encrypting/decrypting.
+         * Attempts to use the key with any other block modes will be rejected.
          *
-         * <p>This restriction must be specified for symmetric encryption/decryption keys.
+         * <p>This must be specified for encryption/decryption keys.
          *
          * @hide
          */
-        public Builder setBlockModes(@KeyStoreKeyConstraints.BlockModeEnum int blockModes) {
-            mBlockModes = blockModes;
+        public Builder setBlockModes(String... blockModes) {
+            mBlockModes = ArrayUtils.cloneIfNotEmpty(blockModes);
             return this;
         }
 
@@ -449,7 +481,7 @@ public final class KeyStoreParameter implements ProtectionParameter {
          * @hide
          */
         public Builder setUserAuthenticators(
-                @KeyStoreKeyConstraints.UserAuthenticatorEnum int userAuthenticators) {
+                @KeyStoreKeyProperties.UserAuthenticatorEnum int userAuthenticators) {
             mUserAuthenticators = userAuthenticators;
             return this;
         }
@@ -484,7 +516,8 @@ public final class KeyStoreParameter implements ProtectionParameter {
                     mKeyValidityForOriginationEnd,
                     mKeyValidityForConsumptionEnd,
                     mPurposes,
-                    mPaddings,
+                    mEncryptionPaddings,
+                    mSignaturePaddings,
                     mDigests,
                     mBlockModes,
                     mRandomizedEncryptionRequired,
