@@ -7708,6 +7708,13 @@ public final class Settings {
          */
         public static final String[] MULTI_SIM_USER_PREFERRED_SUBS = {"user_preferred_sub1",
                 "user_preferred_sub2","user_preferred_sub3"};
+
+        /**
+         * Whether to enable new contacts aggregator or not.
+         * The value 1 - enable, 0 - disable
+         * @hide
+         */
+        public static final String NEW_CONTACT_AGGREGATOR = "new_contact_aggregator";
     }
 
     /**
