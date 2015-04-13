@@ -538,11 +538,6 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
                         @Override
                         public void onUserSwitchComplete(int newUserId) throws RemoteException {
                         }
-
-                        @Override
-                        public void onForegroundProfileSwitch(int newProfileId) {
-                            // Ignore.
-                        }
                     });
         } catch (RemoteException e) {
             // TODO Auto-generated catch block

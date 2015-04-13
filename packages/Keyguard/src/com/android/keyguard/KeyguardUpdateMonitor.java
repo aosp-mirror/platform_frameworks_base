@@ -763,10 +763,6 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
                             mSwitchingUser = false;
                             startListeningForFingerprint();
                         }
-                        @Override
-                        public void onForegroundProfileSwitch(int newProfileId) {
-                            // Ignore.
-                        }
                     });
         } catch (RemoteException e) {
             // TODO Auto-generated catch block
