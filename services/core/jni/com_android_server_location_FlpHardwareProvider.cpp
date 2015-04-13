@@ -847,6 +847,14 @@ static void GetBatchedLocation(JNIEnv* env, jobject /* object */, jint lastNLoca
   sFlpInterface->get_batched_location(lastNLocations);
 }
 
+static void FlushBatchedLocations(JNIEnv* env, jobject /* object */) {
+  if(sFlpInterface == NULL) {
+    ThrowOnError(env, FLP_RESULT_ERROR, __FUNCTION__);
+  }
+
+  sFlpInterface->flush_batched_locations();
+}
+
 static void InjectLocation(JNIEnv* env, jobject /* object */, jobject locationObject) {
   if(locationObject == NULL) {
     ALOGE("Invalid location for injection: %p", locationObject);
@@ -1029,6 +1037,9 @@ static JNINativeMethod sMethods[] = {
   {"nativeRequestBatchedLocation",
         "(I)V",
         reinterpret_cast<void*>(GetBatchedLocation)},
+  {"nativeFlushBatchedLocations",
+          "()V",
+          reinterpret_cast<void*>(FlushBatchedLocations)},
   {"nativeInjectLocation",
         "(Landroid/location/Location;)V",
         reinterpret_cast<void*>(InjectLocation)},

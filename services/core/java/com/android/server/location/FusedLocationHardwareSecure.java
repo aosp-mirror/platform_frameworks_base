@@ -116,4 +116,10 @@ public class FusedLocationHardwareSecure extends IFusedLocationHardware.Stub {
         checkPermissions();
         mLocationHardware.injectDeviceContext(deviceEnabledContext);
     }
+
+    @Override
+    public void flushBatchedLocations() throws RemoteException {
+        checkPermissions();
+        mLocationHardware.flushBatchedLocations();
+    }
 }

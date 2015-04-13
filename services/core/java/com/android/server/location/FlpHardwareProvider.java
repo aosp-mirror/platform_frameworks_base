@@ -273,6 +273,7 @@ public class FlpHardwareProvider {
     private native void nativeUpdateBatchingOptions(int requestId, FusedBatchOptions optionsObject);
     private native void nativeStopBatching(int id);
     private native void nativeRequestBatchedLocation(int lastNLocations);
+    private native void nativeFlushBatchedLocations();
     private native void nativeInjectLocation(Location location);
     // TODO [Fix] sort out the lifetime of the instance
     private native void nativeCleanup();
@@ -361,6 +362,11 @@ public class FlpHardwareProvider {
         @Override
         public void requestBatchOfLocations(int batchSizeRequested) {
             nativeRequestBatchedLocation(batchSizeRequested);
+        }
+
+        @Override
+        public void flushBatchedLocations() {
+            nativeFlushBatchedLocations();
         }
 
         @Override

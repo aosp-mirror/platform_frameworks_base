@@ -32,21 +32,21 @@ interface IFusedLocationHardware {
      *
      * @param eventSink     The sink to register.
      */
-    void registerSink(in IFusedLocationHardwareSink eventSink);
+    void registerSink(in IFusedLocationHardwareSink eventSink) = 0;
 
     /**
      * Unregisters a sink with the Location Hardware object.
      *
      * @param eventSink     The sink to unregister.
      */
-    void unregisterSink(in IFusedLocationHardwareSink eventSink);
+    void unregisterSink(in IFusedLocationHardwareSink eventSink) = 1;
 
     /**
      * Provides access to the batch size available in Hardware.
      *
      * @return The batch size the hardware supports.
      */
-    int getSupportedBatchSize();
+    int getSupportedBatchSize() = 2;
 
     /**
      * Requests the Hardware to start batching locations.
@@ -56,7 +56,7 @@ interface IFusedLocationHardware {
      *
      * @throws RuntimeException if the request Id exists.
      */
-    void startBatching(in int id, in FusedBatchOptions batchOptions);
+    void startBatching(in int id, in FusedBatchOptions batchOptions) = 3;
 
     /**
      * Requests the Hardware to stop batching for the given Id.
@@ -64,7 +64,7 @@ interface IFusedLocationHardware {
      * @param id    The request that needs to be stopped.
      * @throws RuntimeException if the request Id is unknown.
      */
-    void stopBatching(in int id);
+    void stopBatching(in int id) = 4;
 
     /**
      * Updates a batching operation in progress.
@@ -74,7 +74,7 @@ interface IFusedLocationHardware {
      *
      * @throws RuntimeException if the Id of the request is unknown.
      */
-    void updateBatchingOptions(in int id, in FusedBatchOptions batchOptions);
+    void updateBatchingOptions(in int id, in FusedBatchOptions batchOptions) = 5;
 
     /**
      * Requests the most recent locations available in Hardware.
@@ -83,14 +83,14 @@ interface IFusedLocationHardware {
      *
      * @param batchSizeRequested    The number of locations requested.
      */
-    void requestBatchOfLocations(in int batchSizeRequested);
+    void requestBatchOfLocations(in int batchSizeRequested) = 6;
 
     /**
      * Flags if the Hardware supports injection of diagnostic data.
      *
      * @return True if data injection is supported, false otherwise.
      */
-    boolean supportsDiagnosticDataInjection();
+    boolean supportsDiagnosticDataInjection() = 7;
 
     /**
      * Injects diagnostic data into the Hardware subsystem.
@@ -98,14 +98,14 @@ interface IFusedLocationHardware {
      * @param data  The data to inject.
      * @throws RuntimeException if injection is not supported.
      */
-    void injectDiagnosticData(in String data);
+    void injectDiagnosticData(in String data) = 8;
 
     /**
      * Flags if the Hardware supports injection of device context information.
      *
      * @return True if device context injection is supported, false otherwise.
      */
-    boolean supportsDeviceContextInjection();
+    boolean supportsDeviceContextInjection() = 9;
 
     /**
      * Injects device context information into the Hardware subsystem.
@@ -113,5 +113,12 @@ interface IFusedLocationHardware {
      * @param deviceEnabledContext  The context to inject.
      * @throws RuntimeException if injection is not supported.
      */
-    void injectDeviceContext(in int deviceEnabledContext);
+    void injectDeviceContext(in int deviceEnabledContext) = 10;
+
+    /**
+     * Requests all batched locations currently available in Hardware
+     * and clears the buffer.  Any subsequent calls will not return any
+     * of the locations returned in this call.
+     */
+    void flushBatchedLocations() = 11;
 }

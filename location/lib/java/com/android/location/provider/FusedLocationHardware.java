@@ -174,6 +174,14 @@ public final class FusedLocationHardware {
         }
     }
 
+    public void flushBatchedLocations() {
+        try {
+            mLocationHardware.flushBatchedLocations();
+        } catch(RemoteException e) {
+            Log.e(TAG, "RemoteException at flushBatchedLocations");
+        }
+    }
+
     public boolean supportsDiagnosticDataInjection() {
         try {
             return mLocationHardware.supportsDiagnosticDataInjection();
