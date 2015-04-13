@@ -85,11 +85,10 @@ public class EcIesParameterSpec implements AlgorithmParameterSpec {
     }
 
     /**
-     * Default parameter spec: NIST P-256 curve (aka secp256r1 aka prime256v1), compressed point
-     * format, {@code HKDFwithSHA256}, DEM uses 128-bit AES GCM.
+     * Default parameter spec: compressed point format, {@code HKDFwithSHA256}, DEM uses 128-bit AES
+     * GCM.
      */
     public static final EcIesParameterSpec DEFAULT = new EcIesParameterSpec(
-            "P-256",
             PointFormat.COMPRESSED,
             "HKDFwithSHA256",
             "AES/GCM/NoPadding",
@@ -97,7 +96,6 @@ public class EcIesParameterSpec implements AlgorithmParameterSpec {
             null,
             0);
 
-    private final String mKemCurveName;
     private final @PointFormatEnum int mKemPointFormat;
     private final String mKemKdfAlgorithm;
     private final String mDemCipherTransformation;
@@ -106,27 +104,18 @@ public class EcIesParameterSpec implements AlgorithmParameterSpec {
     private final int mDemMacKeySize;
 
     private EcIesParameterSpec(
-            String kemCurveName,
             @PointFormatEnum int kemPointFormat,
             String kemKdfAlgorithm,
             String demCipherTransformation,
             int demCipherKeySize,
             String demMacAlgorithm,
             int demMacKeySize) {
-        mKemCurveName = kemCurveName;
         mKemPointFormat = kemPointFormat;
         mKemKdfAlgorithm = kemKdfAlgorithm;
         mDemCipherTransformation = demCipherTransformation;
         mDemCipherKeySize = demCipherKeySize;
         mDemMacAlgorithm = demMacAlgorithm;
         mDemMacKeySize = demMacKeySize;
-    }
-
-    /**
-     * Returns KEM EC curve name (e.g., {@code secp256r1}) or {@code null} if not specified.
-     */
-    public String getKemCurveName() {
-        return mKemCurveName;
     }
 
     /**
@@ -188,23 +177,12 @@ public class EcIesParameterSpec implements AlgorithmParameterSpec {
      * Builder of {@link EcIesParameterSpec}.
      */
     public static class Builder {
-        private String mKemCurveName;
         private @PointFormatEnum int mKemPointFormat = PointFormat.UNSPECIFIED;
         private String mKemKdfAlgorithm;
         private String mDemCipherTransformation;
         private int mDemCipherKeySize = 128;
         private String mDemMacAlgorithm;
         private int mDemMacKeySize = -1;
-
-        /**
-         * Sets KEM EC curve name. For example, {@code P-256} or {@code secp256r1}.
-         *
-         * <p>NOTE: Only curves with cofactor of {@code 1} are supported.
-         */
-        public Builder setKemCurveName(String name) {
-            mKemCurveName = name;
-            return this;
-        }
 
         /**
          * Sets KEM EC point wire format.
@@ -274,7 +252,6 @@ public class EcIesParameterSpec implements AlgorithmParameterSpec {
         public EcIesParameterSpec build() {
             int demMacKeySize = (mDemMacKeySize != -1) ? mDemMacKeySize : mDemCipherKeySize;
             return new EcIesParameterSpec(
-                    mKemCurveName,
                     mKemPointFormat,
                     mKemKdfAlgorithm,
                     mDemCipherTransformation,
