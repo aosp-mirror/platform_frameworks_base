@@ -16998,6 +16998,7 @@ package android.net {
   }
 
   public final class IpPrefix implements android.os.Parcelable {
+    method public boolean contains(java.net.InetAddress);
     method public int describeContents();
     method public java.net.InetAddress getAddress();
     method public int getPrefixLength();
