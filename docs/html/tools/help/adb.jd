@@ -962,7 +962,6 @@ install [options]  &lt;PATH>
 </code></td>
 <td>Installs a package (specified by {@code &lt;PATH>}) to the system.  <p>Options:
   <ul>
-    <li>{@code -l}: Install the package with forward lock.
     <li>{@code -r}: Reinstall an exisiting app, keeping its data.
     <li>{@code -t}: Allow test APKs to be installed.
     <li>{@code -i &lt;INSTALLER_PACKAGE_NAME>}: Specify the installer package name.
