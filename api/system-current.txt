@@ -25319,7 +25319,7 @@ package android.os {
     method public android.os.Bundle getApplicationRestrictions(java.lang.String);
     method public long getSerialNumberForUser(android.os.UserHandle);
     method public int getUserCount();
-    method public long getUserCreationTime(int);
+    method public long getUserCreationTime(android.os.UserHandle);
     method public android.os.UserHandle getUserForSerialNumber(long);
     method public java.lang.String getUserName();
     method public java.util.List<android.os.UserHandle> getUserProfiles();

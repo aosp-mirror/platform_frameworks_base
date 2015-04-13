@@ -138,14 +138,16 @@ public class UserManagerTest extends AndroidTestCase {
         assertNotNull(profile);
         assertTrue("creationTime must be set when the profile is created",
                 profile.creationTime > 0);
-        assertEquals(profile.creationTime, mUserManager.getUserCreationTime(profile.id));
+        assertEquals(profile.creationTime, mUserManager.getUserCreationTime(
+                new UserHandle(profile.id)));
 
         long ownerCreationTime = mUserManager.getUserInfo(UserHandle.USER_OWNER).creationTime;
-        assertEquals(ownerCreationTime, mUserManager.getUserCreationTime(UserHandle.USER_OWNER));
+        assertEquals(ownerCreationTime, mUserManager.getUserCreationTime(
+                new UserHandle(UserHandle.USER_OWNER)));
 
         try {
             int noSuchUserId = 100500;
-            mUserManager.getUserCreationTime(noSuchUserId);
+            mUserManager.getUserCreationTime(new UserHandle(noSuchUserId));
             fail("SecurityException should be thrown for nonexistent user");
         } catch (Exception e) {
             assertTrue("SecurityException should be thrown for nonexistent user, but was: " + e,
@@ -154,7 +156,7 @@ public class UserManagerTest extends AndroidTestCase {
 
         UserInfo user = createUser("User 1", 0);
         try {
-            mUserManager.getUserCreationTime(user.id);
+            mUserManager.getUserCreationTime(new UserHandle(user.id));
             fail("SecurityException should be thrown for other user");
         } catch (Exception e) {
             assertTrue("SecurityException should be thrown for other user, but was: " + e,

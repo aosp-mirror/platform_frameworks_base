@@ -1327,9 +1327,9 @@ public class UserManager {
      *                   calling user.
      * @return creation time in milliseconds since Epoch time.
      */
-    public long getUserCreationTime(int userHandle) {
+    public long getUserCreationTime(UserHandle userHandle) {
         try {
-            return mService.getUserCreationTime(userHandle);
+            return mService.getUserCreationTime(userHandle.getIdentifier());
         } catch (RemoteException re) {
             Log.w(TAG, "Could not get user creation time", re);
             return 0;
