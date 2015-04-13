@@ -41,6 +41,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.PhoneWindow;
+import android.view.SearchEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
@@ -328,6 +329,12 @@ public class DreamService extends Service implements Window.Callback {
     /** {@inheritDoc} */
     @Override
     public void onPanelClosed(int featureId, Menu menu) {
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public boolean onSearchRequested(SearchEvent event) {
+        return onSearchRequested();
     }
 
     /** {@inheritDoc} */

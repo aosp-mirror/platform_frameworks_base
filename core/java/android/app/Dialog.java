@@ -49,6 +49,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.PhoneWindow;
+import android.view.SearchEvent;
 import android.view.View;
 import android.view.View.OnCreateContextMenuListener;
 import android.view.ViewGroup;
@@ -122,6 +123,8 @@ public class Dialog implements DialogInterface, Window.Callback,
     private static final int SHOW = 0x45;
 
     private Handler mListenersHandler;
+
+    private SearchEvent mSearchEvent;
 
     private ActionMode mActionMode;
 
@@ -995,6 +998,14 @@ public class Dialog implements DialogInterface, Window.Callback,
     /**
      * This hook is called when the user signals the desire to start a search.
      */
+    public boolean onSearchRequested(SearchEvent searchEvent) {
+        mSearchEvent = searchEvent;
+        return onSearchRequested();
+    }
+
+    /**
+     * This hook is called when the user signals the desire to start a search.
+     */
     public boolean onSearchRequested() {
         final SearchManager searchManager = (SearchManager) mContext
                 .getSystemService(Context.SEARCH_SERVICE);
@@ -1008,6 +1019,17 @@ public class Dialog implements DialogInterface, Window.Callback,
         } else {
             return false;
         }
+    }
+
+    /**
+     * During the onSearchRequested() callbacks, this function will return the
+     * {@link SearchEvent} that triggered the callback, if it exists.
+     *
+     * @return SearchEvent The SearchEvent that triggered the {@link
+     *                    #onSearchRequested} callback.
+     */
+    public final SearchEvent getSearchEvent() {
+        return mSearchEvent;
     }
 
     /**

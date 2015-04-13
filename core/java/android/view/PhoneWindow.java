@@ -1916,7 +1916,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                     break;
                 }
                 if (event.isTracking() && !event.isCanceled()) {
-                    launchDefaultSearch();
+                    launchDefaultSearch(event);
                 }
                 return true;
             }
@@ -4245,14 +4245,19 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
      *
      * @return true if search window opened
      */
-    private boolean launchDefaultSearch() {
+    private boolean launchDefaultSearch(KeyEvent event) {
         boolean result;
         final Callback cb = getCallback();
         if (cb == null || isDestroyed()) {
             result = false;
         } else {
             sendCloseSystemWindows("search");
-            result = cb.onSearchRequested();
+            int deviceId = event.getDeviceId();
+            SearchEvent searchEvent = null;
+            if (deviceId != 0) {
+                searchEvent = new SearchEvent(InputDevice.getDevice(deviceId));
+            }
+            result = cb.onSearchRequested(searchEvent);
         }
         if (!result && (getContext().getResources().getConfiguration().uiMode
                 & Configuration.UI_MODE_TYPE_MASK) == Configuration.UI_MODE_TYPE_TELEVISION) {
