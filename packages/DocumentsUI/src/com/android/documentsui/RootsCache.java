@@ -360,6 +360,7 @@ public class RootsCache {
 
             // Exclude read-only devices when creating
             if (state.action == State.ACTION_CREATE && !supportsCreate) continue;
+            if (state.action == State.ACTION_OPEN_COPY_DESTINATION && !supportsCreate) continue;
             // Exclude roots that don't support directory picking
             if (state.action == State.ACTION_OPEN_TREE && !supportsIsChild) continue;
             // Exclude advanced devices when not requested
@@ -367,7 +368,9 @@ public class RootsCache {
             // Exclude non-local devices when local only
             if (state.localOnly && !localOnly) continue;
             // Only show empty roots when creating
-            if (state.action != State.ACTION_CREATE && empty) continue;
+            if ((state.action != State.ACTION_CREATE ||
+                 state.action != State.ACTION_OPEN_TREE ||
+                 state.action != State.ACTION_OPEN_COPY_DESTINATION) && empty) continue;
 
             // Only include roots that serve requested content
             final boolean overlap =

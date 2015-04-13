@@ -33,6 +33,9 @@ import com.android.documentsui.model.RootInfo;
 import com.google.common.collect.Maps;
 
 abstract class BaseActivity extends Activity {
+    /** Intent action name to open copy destination. */
+    public static String ACTION_OPEN_COPY_DESTINATION_STRING =
+        "com.android.documentsui.OPEN_COPY_DESTINATION";
 
     public abstract State getDisplayState();
     public abstract RootInfo getCurrentRoot();
@@ -90,6 +93,7 @@ abstract class BaseActivity extends Activity {
         public static final int ACTION_MANAGE = 5;
         public static final int ACTION_BROWSE = 6;
         public static final int ACTION_BROWSE_ALL = 7;
+        public static final int ACTION_OPEN_COPY_DESTINATION = 8;
 
         public static final int MODE_UNKNOWN = 0;
         public static final int MODE_LIST = 1;

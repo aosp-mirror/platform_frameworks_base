@@ -682,7 +682,11 @@ public class DirectoryFragment extends Fragment {
 
         // Pop up a dialog to pick a destination.  This is inadequate but works for now.
         // TODO: Implement a picker that is to spec.
-        Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT_TREE);
+        final Intent intent = new Intent(
+                BaseActivity.ACTION_OPEN_COPY_DESTINATION_STRING,
+                Uri.EMPTY,
+                getActivity(),
+                DocumentsActivity.class);
         startActivityForResult(intent, REQUEST_COPY_DESTINATION);
     }
 
