@@ -562,7 +562,18 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
           <span class="en">Wallet</span>
       </a></div>
   </li>
-
+  <li class="nav-section">
+    <div class="nav-section-header"><a href="/google/play/safetynet/index.html">
+          <span class="en">SafetyNet</span>
+      </a></div>
+      <ul>
+        <li>
+          <a href="/google/play/safetynet/start.html">
+            <span class="en">Getting Started</span>
+          </a>
+        </li>
+      </ul>
+  </li>
 
   <li class="nav-section">
     <div class="nav-section-header"><a href="/google/play-services/index.html">
@@ -829,7 +840,7 @@ Summary:
 <div id="jd-header">
     public
      
-    final 
+
     
     class
 <h1 itemprop="name">CampaignTrackingReceiver</h1>
@@ -891,6 +902,48 @@ Summary:
 
 
 
+<table class="jd-sumtable jd-sumtable-subclasses"><tr><td colspan="12" style="border:none;margin:0;padding:0;">
+
+  <a href="#" onclick="return toggleInherited(this, null)" id="subclasses-direct" class="jd-expando-trigger closed"
+          ><img id="subclasses-direct-trigger"
+          src="/assets/images/triangle-closed.png"
+          class="jd-expando-trigger-img" /></a>Known Direct Subclasses
+
+  <div id="subclasses-direct">
+      <div id="subclasses-direct-list"
+              class="jd-inheritedlinks"
+
+              >
+
+
+              <a href="/reference/com/google/android/gms/tagmanager/InstallReferrerReceiver.html">InstallReferrerReceiver</a>
+
+
+      </div>
+      <div id="subclasses-direct-summary"
+              style="display: none;"
+              >
+
+  <table class="jd-sumtable-expando">
+
+      <tr class="alt-color api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/tagmanager/InstallReferrerReceiver.html">InstallReferrerReceiver</a></td>
+        <td class="jd-descrcol" width="100%">
+          The Google Play <code>com.android.vending.INSTALL_REFERRER</code> <code><a href="/reference/android/content/Intent.html">Intent</a></code> is broadcast when an
+ app is installed from the Google Play Store.&nbsp;
+
+
+
+        </td>
+      </tr>
+
+
+  </table>
+
+      </div>
+  </div>
+</td></tr></table>
+
 
 
 
@@ -898,29 +951,37 @@ Summary:
 
 
 <h2>Class Overview</h2>
-<p itemprop="articleBody">The Google Play <code>com.android.vending.INSTALL_REFERRER</code> <code><a href="/reference/android/content/Intent.html">Intent</a></code> is broadcast when an
- app is installed from the Google Play Store and has campaign data available (i.e. the app was
- installed from a link to the Google Play Store). This <code><a href="/reference/android/content/BroadcastReceiver.html">BroadcastReceiver</a></code> listens for that
- <code><a href="/reference/android/content/Intent.html">Intent</a></code>, passing the campaign data to Google Analytics.
- <p>
- To enable this receiver, add the following to your AndroidManifest.xml file:
+<p itemprop="articleBody">Google Analytics receiver for <code>com.android.vending.INSTALL_REFERRER</code>. Google Play will
+ broadcast the intent when an app is installed from the Google Play Store and has campaign data
+ available (i.e. the app was installed from a link to the Google Play Store).
+ This <code><a href="/reference/android/content/BroadcastReceiver.html">BroadcastReceiver</a></code> registers for that <code><a href="/reference/android/content/Intent.html">Intent</a></code> and passes the campaign data
+ to Google Analytics.
 
- <pre>
- <code>&lt;!-- Used for install referrer tracking--&gt;
- &lt;service android:name="com.google.android.gms.analytics.CampaignTrackingService"/&gt;
- &lt;receiver
-     android:name="com.google.android.gms.analytics.CampaignTrackingReceiver"
-     android:exported="true"&gt;
-     &lt;intent-filter&gt;
-         &lt;action android:name="com.android.vending.INSTALL_REFERRER" /&gt;
-     &lt;/intent-filter&gt;
- &lt;/receiver&gt;
- </code>
- </pre>
+ <p><p> To enable installation campaign reporting register both CampaignTrackingReceiver and
+ CampaignTrackingService in your AndroidManifest.xml file:
 
- Only one receiver can receive the install referrer setting. If Google Tag Manager is being
- used by the application, then only the Google Tag Manager receiver needs to be enabled.
- The Google Tag Manager receiver will invoke the Google Analytics receiver automatically.
+ <pre><code>&lt;manifest&gt;
+   &lt;application&gt;
+     &lt;!-- ... --&gt;
+
+     &lt;receiver android:name="com.google.android.gms.analytics.CampaignTrackingReceiver"
+         android:enabled="true"&gt;
+         &lt;intent-filter&gt;
+             &lt;action android:name="com.android.vending.INSTALL_REFERRER" /&gt;
+         &lt;/intent-filter&gt;
+     &lt;/receiver&gt;
+     &lt;service android:name="com.google.android.gms.analytics.CampaignTrackingService"
+         android:enabled="true"
+         android:exported="false"/&gt;
+
+     &lt;!-- ... --&gt;
+   &lt;/application&gt;
+ &lt;/manifest&gt;
+ </code></pre>
+
+ Only one receiver can receive the install referrer setting. If Google Tag Manager is being used
+ by the application, then only the Google Tag Manager receiver needs to be enabled. The Google Tag
+ Manager receiver will invoke the Google Analytics receiver automatically.
 </p>
 
 
@@ -1016,7 +1077,7 @@ Summary:
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/analytics/CampaignTrackingReceiver.html#onReceive(android.content.Context, android.content.Intent)">onReceive</a></span>(Context ctx, Intent intent)</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/analytics/CampaignTrackingReceiver.html#onReceive(android.content.Context, android.content.Intent)">onReceive</a></span>(Context context, Intent intent)</nobr>
         
   </td></tr>
 
@@ -1645,7 +1706,7 @@ From class
         void
       </span>
       <span class="sympad">onReceive</span>
-      <span class="normal">(Context ctx, Intent intent)</span>
+      <span class="normal">(Context context, Intent intent)</span>
     </h4>
       <div class="api-level">
         <div></div>

@@ -562,7 +562,18 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
           <span class="en">Wallet</span>
       </a></div>
   </li>
-
+  <li class="nav-section">
+    <div class="nav-section-header"><a href="/google/play/safetynet/index.html">
+          <span class="en">SafetyNet</span>
+      </a></div>
+      <ul>
+        <li>
+          <a href="/google/play/safetynet/start.html">
+            <span class="en">Getting Started</span>
+          </a>
+        </li>
+      </ul>
+  </li>
 
   <li class="nav-section">
     <div class="nav-section-header"><a href="/google/play-services/index.html">
@@ -990,7 +1001,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         <span class="sympad"><a href="/reference/com/google/android/gms/wearable/NodeApi.html#getConnectedNodes(com.google.android.gms.common.api.GoogleApiClient)">getConnectedNodes</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> client)</nobr>
         
         <div class="jd-descrdiv">
-          Gets a list of nodes to which this device is currently connected.
+          Gets a list of nodes to which this device is currently connected, either directly or
+ indirectly via a directly connected node.
           
     
 
@@ -1120,7 +1132,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
     
 
       
-  <div class="jd-tagdata jd-tagdescr"><p>Registers a listener to receive all node events. Calls to this method should balanced
+  <div class="jd-tagdata jd-tagdescr"><p>Registers a listener to receive all node events. Calls to this method should be balanced
  with <code><a href="/reference/com/google/android/gms/wearable/NodeApi.html#removeListener(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.wearable.NodeApi.NodeListener)">removeListener(GoogleApiClient, NodeListener)</a></code>, to avoid leaking resources.
 
  <p>Callers wishing to be notified of node events in the background should use
@@ -1157,7 +1169,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
     
 
       
-  <div class="jd-tagdata jd-tagdescr"><p>Gets a list of nodes to which this device is currently connected.
+  <div class="jd-tagdata jd-tagdescr"><p>Gets a list of nodes to which this device is currently connected, either directly or
+ indirectly via a directly connected node.
 
  <p>The returned list will not include the
  <a href="/reference/com/google/android/gms/wearable/NodeApi.html#getLocalNode(com.google.android.gms.common.api.GoogleApiClient)">local node</a></a>.

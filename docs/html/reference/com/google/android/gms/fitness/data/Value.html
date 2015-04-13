@@ -562,7 +562,18 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
           <span class="en">Wallet</span>
       </a></div>
   </li>
-
+  <li class="nav-section">
+    <div class="nav-section-header"><a href="/google/play/safetynet/index.html">
+          <span class="en">SafetyNet</span>
+      </a></div>
+      <ul>
+        <li>
+          <a href="/google/play/safetynet/start.html">
+            <span class="en">Getting Started</span>
+          </a>
+        </li>
+      </ul>
+  </li>
 
   <li class="nav-section">
     <div class="nav-section-header"><a href="/google/play-services/index.html">
@@ -803,9 +814,6 @@ Summary:
   
 
 
-  &#124; <a href="#lfields">Fields</a>
-  
-
 
 
 
@@ -1005,31 +1013,6 @@ android.os.Parcelable
 
 
 
-<!-- =========== FIELD SUMMARY =========== -->
-<table id="lfields" class="jd-sumtable"><tr><th colspan="12">Fields</th></tr>
-
-
-    
-      <tr class="alt-color api apilevel-" >
-          <td class="jd-typecol"><nobr>
-          public
-          static
-          final
-          Creator&lt;<a href="/reference/com/google/android/gms/fitness/data/Value.html">Value</a>&gt;</nobr></td>
-          <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/data/Value.html#CREATOR">CREATOR</a></td>
-          <td class="jd-descrcol" width="100%">
-            
-            
-    
-
-          </td>
-      </tr>
-      
-    
-
-</table>
-
-
 
 
 
@@ -1121,6 +1104,52 @@ android.os.Parcelable
             
             
             
+            String</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/fitness/data/Value.html#asString()">asString</a></span>()</nobr>
+
+        <div class="jd-descrdiv">
+          Returns the value of this object as a string.
+
+
+
+        </div>
+
+  </td></tr>
+
+
+
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/fitness/data/Value.html#clearKey(java.lang.String)">clearKey</a></span>(String key)</nobr>
+
+        <div class="jd-descrdiv">
+          Clears any value currently associated with the given <code>key</code> in the map.
+
+
+
+        </div>
+
+  </td></tr>
+
+
+
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
             int</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
@@ -1177,6 +1206,29 @@ android.os.Parcelable
             
             
             
+            Float</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/fitness/data/Value.html#getKeyValue(java.lang.String)">getKeyValue</a></span>(String key)</nobr>
+
+        <div class="jd-descrdiv">
+          Returns the value of the given key in the map as a float.
+
+
+
+        </div>
+
+  </td></tr>
+
+
+
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
             int</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
@@ -1186,7 +1238,7 @@ android.os.Parcelable
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -1209,7 +1261,7 @@ android.os.Parcelable
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -1232,7 +1284,7 @@ android.os.Parcelable
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -1255,7 +1307,7 @@ android.os.Parcelable
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -1278,6 +1330,29 @@ android.os.Parcelable
 
 
 	 
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/fitness/data/Value.html#setKeyValue(java.lang.String, float)">setKeyValue</a></span>(String key, float value)</nobr>
+
+        <div class="jd-descrdiv">
+          Updates the value for a given key in the map to the given float value.
+
+
+
+        </div>
+
+  </td></tr>
+
+
+
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             
@@ -1285,6 +1360,29 @@ android.os.Parcelable
             
             
             
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/fitness/data/Value.html#setString(java.lang.String)">setString</a></span>(String value)</nobr>
+
+        <div class="jd-descrdiv">
+          Updates this value object to represent a string value.
+
+
+
+        </div>
+
+  </td></tr>
+
+
+
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
             String</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
@@ -1294,7 +1392,7 @@ android.os.Parcelable
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -1609,44 +1707,6 @@ From interface
 <!-- Fields -->
 
 
-<!-- ========= FIELD DETAIL ======== -->
-<h2>Fields</h2>
-
-
-
-
-<A NAME="CREATOR"></A>
-
-<div class="jd-details api apilevel-"> 
-    <h4 class="jd-details-title">
-      <span class="normal">
-        public 
-        static 
-        final 
-        Creator&lt;<a href="/reference/com/google/android/gms/fitness/data/Value.html">Value</a>&gt;
-      </span>
-        CREATOR
-    </h4>
-      <div class="api-level">
-        
-        
-  
-
-      </div>
-    <div class="jd-details-descr">
-      
-    
-
-      
-  <div class="jd-tagdata jd-tagdescr"><p></p></div>
-
-    
-    </div>
-</div>
-
-
-
-
 <!-- Public ctors -->
 
 
@@ -1795,6 +1855,91 @@ From interface
 </div>
 
 
+<A NAME="asString()"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+
+
+
+
+        String
+      </span>
+      <span class="sympad">asString</span>
+      <span class="normal">()</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+
+
+
+  <div class="jd-tagdata jd-tagdescr"><p>Returns the value of this object as a string.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Throws</h5>
+      <table class="jd-tagtable">
+        <tr>
+            <th>IllegalStateException</td>
+            <td>if the object does not hold a string value
+</td>
+        </tr>
+      </table>
+  </div>
+
+    </div>
+</div>
+
+
+<A NAME="clearKey(java.lang.String)"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+
+
+
+
+        void
+      </span>
+      <span class="sympad">clearKey</span>
+      <span class="normal">(String key)</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+
+
+
+  <div class="jd-tagdata jd-tagdescr"><p>Clears any value currently associated with the given <code>key</code> in the map. This method can
+ be used only on <code><a href="/reference/com/google/android/gms/fitness/data/Field.html#FORMAT_MAP">map</a></code> values.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>key</td>
+          <td>the key we're modifying
+</td>
+        </tr>
+      </table>
+  </div>
+
+    </div>
+</div>
+
+
 <A NAME="describeContents()"></A>
 
 <div class="jd-details api apilevel-"> 
@@ -1891,6 +2036,52 @@ From interface
       <h5 class="jd-tagtitle">Returns</h5>
       <ul class="nolist"><li>one of the format constants from <code><a href="/reference/com/google/android/gms/fitness/data/Field.html">Field</a></code>
 </li></ul>
+  </div>
+
+    </div>
+</div>
+
+
+<A NAME="getKeyValue(java.lang.String)"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+
+
+
+
+        Float
+      </span>
+      <span class="sympad">getKeyValue</span>
+      <span class="normal">(String key)</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+
+
+
+  <div class="jd-tagdata jd-tagdescr"><p>Returns the value of the given key in the map as a float.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li><code>null</code> if the key doesn't have a set value in the map
+</li></ul>
+  </div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Throws</h5>
+      <table class="jd-tagtable">
+        <tr>
+            <th>IllegalStateException</td>
+            <td>if the object does not hold a map value</td>
+        </tr>
+      </table>
   </div>
 
     </div>
@@ -2082,6 +2273,103 @@ From interface
         <tr>
           <th>value</td>
           <td>the new value that this object holds
+</td>
+        </tr>
+      </table>
+  </div>
+
+    </div>
+</div>
+
+
+<A NAME="setKeyValue(java.lang.String, float)"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+
+
+
+
+        void
+      </span>
+      <span class="sympad">setKeyValue</span>
+      <span class="normal">(String key, float value)</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+
+
+
+  <div class="jd-tagdata jd-tagdescr"><p>Updates the value for a given key in the map to the given float value.  Any previous
+ values associated with the key are erased.  This method can be used only on
+ <code><a href="/reference/com/google/android/gms/fitness/data/Field.html#FORMAT_MAP">map</a></code> values.
+
+ <p>Key values should be kept small whenever possible.  This is specially important for high
+ frequency streams, since large keys may result in down sampling.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>key</td>
+          <td>the key we're modifying</td>
+        </tr>
+        <tr>
+          <th>value</td>
+          <td>the new value for the given key
+</td>
+        </tr>
+      </table>
+  </div>
+
+    </div>
+</div>
+
+
+<A NAME="setString(java.lang.String)"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+
+
+
+
+        void
+      </span>
+      <span class="sympad">setString</span>
+      <span class="normal">(String value)</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+
+
+
+  <div class="jd-tagdata jd-tagdescr"><p>Updates this value object to represent a string value.  Any previous values associated
+ with this object are erased.
+
+ <p>String values should be kept small whenever possible.  This is specially important for
+ high frequency streams, since large values may result in down sampling.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>value</td>
+          <td>the new value that this objects holds
 </td>
         </tr>
       </table>
