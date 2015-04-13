@@ -239,6 +239,9 @@
         <font weight="400" style="normal">NotoSansBalinese-Regular.ttf</font>
     </family>
     <family>
+        <font weight="400" style="normal">NotoSansBamum-Regular.ttf</font>
+    </family>
+    <family>
         <font weight="400" style="normal">NotoSansBatak-Regular.ttf</font>
     </family>
     <family>
@@ -275,7 +278,19 @@
         <font weight="400" style="normal">NotoSansLimbu-Regular.ttf</font>
     </family>
     <family>
+        <font weight="400" style="normal">NotoSansLisu-Regular.ttf</font>
+    </family>
+    <family>
+        <font weight="400" style="normal">NotoSansMandaic-Regular.ttf</font>
+    </family>
+    <family>
         <font weight="400" style="normal">NotoSansMeeteiMayek-Regular.ttf</font>
+    </family>
+    <family>
+        <font weight="400" style="normal">NotoSansNewTaiLue-Regular.ttf</font>
+    </family>
+    <family>
+        <font weight="400" style="normal">NotoSansNKo-Regular.ttf</font>
     </family>
     <family>
         <font weight="400" style="normal">NotoSansOlChiki-Regular.ttf</font>
@@ -293,6 +308,9 @@
         <font weight="400" style="normal">NotoSansSylotiNagri-Regular.ttf</font>
     </family>
     <family>
+        <font weight="400" style="normal">NotoSansSyriacEstrangela-Regular.ttf</font>
+    </family>
+    <family>
         <font weight="400" style="normal">NotoSansTagbanwa-Regular.ttf</font>
     </family>
     <family>
@@ -303,6 +321,9 @@
     </family>
     <family>
         <font weight="400" style="normal">NotoSansTifinagh-Regular.ttf</font>
+    </family>
+    <family>
+        <font weight="400" style="normal">NotoSansVai-Regular.ttf</font>
     </family>
     <family>
         <font weight="400" style="normal">NotoSansYi-Regular.ttf</font>
@@ -335,10 +356,13 @@
         <font weight="400" style="normal">MTLmr3m.ttf</font>
     </family>
     <!--
-        Noto Sans Tai Le is intentionally kept last, to make sure it doesn't override
+        Tai Le and Mongolian are intentionally kept last, to make sure they don't override
         the East Asian punctuation for Chinese.
     -->
     <family>
         <font weight="400" style="normal">NotoSansTaiLe-Regular.ttf</font>
+    </family>
+    <family>
+        <font weight="400" style="normal">NotoSansMongolian-Regular.ttf</font>
     </family>
 </familyset>
