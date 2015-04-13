@@ -42,8 +42,7 @@ public class BitmapShader extends Shader {
         mBitmap = bitmap;
         mTileX = tileX;
         mTileY = tileY;
-        final long b = bitmap.getSkBitmap();
-        init(nativeCreate(b, tileX.nativeInt, tileY.nativeInt));
+        init(nativeCreate(bitmap, tileX.nativeInt, tileY.nativeInt));
     }
 
     /**
@@ -56,6 +55,6 @@ public class BitmapShader extends Shader {
         return copy;
     }
 
-    private static native long nativeCreate(long native_bitmap, int shaderTileModeX,
+    private static native long nativeCreate(Bitmap bitmap, int shaderTileModeX,
             int shaderTileModeY);
 }

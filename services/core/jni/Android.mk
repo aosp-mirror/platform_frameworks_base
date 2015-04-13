@@ -33,6 +33,7 @@ LOCAL_C_INCLUDES += \
     $(JNI_H_INCLUDE) \
     frameworks/base/services \
     frameworks/base/libs \
+    frameworks/base/libs/hwui \
     frameworks/base/core/jni \
     frameworks/native/services \
     libcore/include \

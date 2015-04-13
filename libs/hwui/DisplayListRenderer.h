@@ -138,7 +138,7 @@ public:
 // ----------------------------------------------------------------------------
     virtual SkCanvas* asSkCanvas() override;
 
-    virtual void setBitmap(SkBitmap* bitmap, bool copyState) override {
+    virtual void setBitmap(const SkBitmap& bitmap) override {
         LOG_ALWAYS_FATAL("DisplayListRenderer is not backed by a bitmap.");
     }
 

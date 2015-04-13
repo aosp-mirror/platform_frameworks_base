@@ -8,6 +8,7 @@
 #include "SkPoint.h"
 #include "SkRect.h"
 #include "SkImageDecoder.h"
+#include <Canvas.h>
 #include <jni.h>
 
 class SkBitmapRegionDecoder;
@@ -47,7 +48,7 @@ public:
     static SkPoint* jpointf_to_point(JNIEnv*, jobject jpointf, SkPoint* point);
     static void point_to_jpointf(const SkPoint& point, JNIEnv*, jobject jpointf);
 
-    static SkCanvas* getNativeCanvas(JNIEnv*, jobject canvas);
+    static android::Canvas* getNativeCanvas(JNIEnv*, jobject canvas);
     static SkBitmap* getSkBitmapDeprecated(JNIEnv*, jobject bitmap);
     static void getSkBitmap(JNIEnv*, jobject bitmap, SkBitmap* outBitmap);
     static SkPixelRef* getSkPixelRef(JNIEnv*, jobject bitmap);

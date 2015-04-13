@@ -293,11 +293,11 @@ CREATE_BRIDGE3(copyLayerInto, CanvasContext* context, DeferredLayerUpdater* laye
     return (void*) success;
 }
 
-bool RenderProxy::copyLayerInto(DeferredLayerUpdater* layer, SkBitmap* bitmap) {
+bool RenderProxy::copyLayerInto(DeferredLayerUpdater* layer, SkBitmap& bitmap) {
     SETUP_TASK(copyLayerInto);
     args->context = mContext;
     args->layer = layer;
-    args->bitmap = bitmap;
+    args->bitmap = &bitmap;
     return (bool) postAndWait(task);
 }
 
