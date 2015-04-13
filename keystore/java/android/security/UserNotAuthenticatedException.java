@@ -19,8 +19,6 @@ package android.security;
 /**
  * Indicates that a cryptographic operation could not be performed because the user has not been
  * authenticated recently enough.
- *
- * @hide
  */
 public class UserNotAuthenticatedException extends CryptoOperationException {
 

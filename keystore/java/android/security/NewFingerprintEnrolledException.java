@@ -19,8 +19,6 @@ package android.security;
 /**
  * Indicates that a cryptographic operation could not be performed because the key used by the
  * operation is permanently invalid because a new fingerprint was enrolled.
- *
- * @hide
  */
 public class NewFingerprintEnrolledException extends CryptoOperationException {
 

@@ -25,8 +25,6 @@ package android.security;
  * permitted to throw a checked exception during operation. Because crypto operations can fail
  * for a variety of reasons after initialization, this base class provides type-safety for unchecked
  * exceptions that may be thrown in those cases.
- *
- * @hide
  */
 public class CryptoOperationException extends RuntimeException {
 

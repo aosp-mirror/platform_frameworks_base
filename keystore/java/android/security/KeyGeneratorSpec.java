@@ -37,15 +37,13 @@ import javax.crypto.SecretKey;
  * <p>After generation, the {@code keyStoreAlias} is used with the
  * {@link java.security.KeyStore#getEntry(String, java.security.KeyStore.ProtectionParameter)}
  * interface to retrieve the {@link SecretKey}.
- *
- * @hide
  */
 public class KeyGeneratorSpec implements AlgorithmParameterSpec {
 
     private final Context mContext;
     private final String mKeystoreAlias;
     private final int mFlags;
-    private final Integer mKeySize;
+    private final int mKeySize;
     private final Date mKeyValidityStart;
     private final Date mKeyValidityForOriginationEnd;
     private final Date mKeyValidityForConsumptionEnd;
@@ -61,7 +59,7 @@ public class KeyGeneratorSpec implements AlgorithmParameterSpec {
             Context context,
             String keyStoreAlias,
             int flags,
-            Integer keySize,
+            int keySize,
             Date keyValidityStart,
             Date keyValidityForOriginationEnd,
             Date keyValidityForConsumptionEnd,
@@ -122,9 +120,9 @@ public class KeyGeneratorSpec implements AlgorithmParameterSpec {
     }
 
     /**
-     * Gets the requested key size or {@code null} if the default size should be used.
+     * Returns the requested key size or {@code -1} if default size should be used.
      */
-    public Integer getKeySize() {
+    public int getKeySize() {
         return mKeySize;
     }
 
@@ -216,8 +214,6 @@ public class KeyGeneratorSpec implements AlgorithmParameterSpec {
      * authenticators protecting access to this key.
      *
      * @see #getUserAuthenticators()
-     *
-     * @hide
      */
     public boolean isInvalidatedOnNewFingerprintEnrolled() {
         return mInvalidatedOnNewFingerprintEnrolled;
@@ -234,7 +230,7 @@ public class KeyGeneratorSpec implements AlgorithmParameterSpec {
         private final Context mContext;
         private String mKeystoreAlias;
         private int mFlags;
-        private Integer mKeySize;
+        private int mKeySize = -1;
         private Date mKeyValidityStart;
         private Date mKeyValidityForOriginationEnd;
         private Date mKeyValidityForConsumptionEnd;
@@ -460,8 +456,6 @@ public class KeyGeneratorSpec implements AlgorithmParameterSpec {
          * <p>By default, enrolling a new fingerprint does not invalidate the key.
          *
          * @see #setUserAuthenticators(Set)
-         *
-         * @hide
          */
         public Builder setInvalidatedOnNewFingerprintEnrolled(boolean invalidated) {
             mInvalidatedOnNewFingerprintEnrolled = invalidated;

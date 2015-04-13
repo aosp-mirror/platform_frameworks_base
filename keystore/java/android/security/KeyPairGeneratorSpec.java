@@ -311,8 +311,6 @@ public final class KeyPairGeneratorSpec implements AlgorithmParameterSpec {
      * Gets the time instant before which the key pair is not yet valid.
      *
      * @return instant or {@code null} if not restricted.
-     *
-     * @hide
      */
     public Date getKeyValidityStart() {
         return mKeyValidityStart;
@@ -323,8 +321,6 @@ public final class KeyPairGeneratorSpec implements AlgorithmParameterSpec {
      * verification.
      *
      * @return instant or {@code null} if not restricted.
-     *
-     * @hide
      */
     public Date getKeyValidityForConsumptionEnd() {
         return mKeyValidityForConsumptionEnd;
@@ -334,8 +330,6 @@ public final class KeyPairGeneratorSpec implements AlgorithmParameterSpec {
      * Gets the time instant after which the key pair is no longer valid for encryption and signing.
      *
      * @return instant or {@code null} if not restricted.
-     *
-     * @hide
      */
     public Date getKeyValidityForOriginationEnd() {
         return mKeyValidityForOriginationEnd;
@@ -343,8 +337,6 @@ public final class KeyPairGeneratorSpec implements AlgorithmParameterSpec {
 
     /**
      * Gets the set of purposes for which the key can be used.
-     *
-     * @hide
      */
     public @KeyStoreKeyProperties.PurposeEnum int getPurposes() {
         return mPurposes;
@@ -352,8 +344,6 @@ public final class KeyPairGeneratorSpec implements AlgorithmParameterSpec {
 
     /**
      * Gets the set of digest algorithms with which the key can be used.
-     *
-     * @hide
      */
     public String[] getDigests() {
         return ArrayUtils.cloneIfNotEmpty(mDigests);
@@ -361,8 +351,6 @@ public final class KeyPairGeneratorSpec implements AlgorithmParameterSpec {
 
     /**
      * Gets the set of padding schemes with which the key can be used when encrypting/decrypting.
-     *
-     * @hide
      */
     public String[] getEncryptionPaddings() {
         return ArrayUtils.cloneIfNotEmpty(mEncryptionPaddings);
@@ -370,8 +358,6 @@ public final class KeyPairGeneratorSpec implements AlgorithmParameterSpec {
 
     /**
      * Gets the set of padding schemes with which the key can be used when signing/verifying.
-     *
-     * @hide
      */
     public String[] getSignaturePaddings() {
         return ArrayUtils.cloneIfNotEmpty(mSignaturePaddings);
@@ -379,8 +365,6 @@ public final class KeyPairGeneratorSpec implements AlgorithmParameterSpec {
 
     /**
      * Gets the set of block modes with which the key can be used.
-     *
-     * @hide
      */
     public String[] getBlockModes() {
         return ArrayUtils.cloneIfNotEmpty(mBlockModes);
@@ -394,8 +378,6 @@ public final class KeyPairGeneratorSpec implements AlgorithmParameterSpec {
      * weaknesses due to which ciphertext may leak information about plaintext.  For example, if a
      * given plaintext always produces the same ciphertext, an attacker may see the repeated
      * ciphertexts and be able to deduce something about the plaintext.
-     *
-     * @hide
      */
     public boolean isRandomizedEncryptionRequired() {
         return mRandomizedEncryptionRequired;
@@ -409,8 +391,6 @@ public final class KeyPairGeneratorSpec implements AlgorithmParameterSpec {
      * restricted.
      *
      * @return user authenticators or {@code 0} if the key can be used without user authentication.
-     *
-     * @hide
      */
     public @KeyStoreKeyProperties.UserAuthenticatorEnum int getUserAuthenticators() {
         return mUserAuthenticators;
@@ -425,8 +405,6 @@ public final class KeyPairGeneratorSpec implements AlgorithmParameterSpec {
      *
      * @return duration in seconds or {@code -1} if not restricted. {@code 0} means authentication
      *         is required for every use of the key.
-     *
-     * @hide
      */
     public int getUserAuthenticationValidityDurationSeconds() {
         return mUserAuthenticationValidityDurationSeconds;
@@ -438,8 +416,6 @@ public final class KeyPairGeneratorSpec implements AlgorithmParameterSpec {
      * authenticators protecting access to this key.
      *
      * @see #getUserAuthenticators()
-     *
-     * @hide
      */
     public boolean isInvalidatedOnNewFingerprintEnrolled() {
         return mInvalidatedOnNewFingerprintEnrolled;
@@ -642,8 +618,6 @@ public final class KeyPairGeneratorSpec implements AlgorithmParameterSpec {
          * <p>By default, the key is valid at any instant.
          *
          * @see #setKeyValidityEnd(Date)
-         *
-         * @hide
          */
         public Builder setKeyValidityStart(Date startDate) {
             mKeyValidityStart = startDate;
@@ -658,8 +632,6 @@ public final class KeyPairGeneratorSpec implements AlgorithmParameterSpec {
          * @see #setKeyValidityStart(Date)
          * @see #setKeyValidityForConsumptionEnd(Date)
          * @see #setKeyValidityForOriginationEnd(Date)
-         *
-         * @hide
          */
         public Builder setKeyValidityEnd(Date endDate) {
             setKeyValidityForOriginationEnd(endDate);
@@ -673,8 +645,6 @@ public final class KeyPairGeneratorSpec implements AlgorithmParameterSpec {
          * <p>By default, the key is valid at any instant.
          *
          * @see #setKeyValidityForConsumptionEnd(Date)
-         *
-         * @hide
          */
         public Builder setKeyValidityForOriginationEnd(Date endDate) {
             mKeyValidityForOriginationEnd = endDate;
@@ -688,8 +658,6 @@ public final class KeyPairGeneratorSpec implements AlgorithmParameterSpec {
          * <p>By default, the key is valid at any instant.
          *
          * @see #setKeyValidityForOriginationEnd(Date)
-         *
-         * @hide
          */
         public Builder setKeyValidityForConsumptionEnd(Date endDate) {
             mKeyValidityForConsumptionEnd = endDate;
@@ -700,8 +668,6 @@ public final class KeyPairGeneratorSpec implements AlgorithmParameterSpec {
          * Sets the set of purposes for which the key can be used.
          *
          * <p>This must be specified for all keys. There is no default.
-         *
-         * @hide
          */
         public Builder setPurposes(@KeyStoreKeyProperties.PurposeEnum int purposes) {
             mPurposes = purposes;
@@ -713,8 +679,6 @@ public final class KeyPairGeneratorSpec implements AlgorithmParameterSpec {
          * to use the key with any other digest will be rejected.
          *
          * <p>This must be specified for keys which are used for signing/verification.
-         *
-         * @hide
          */
         public Builder setDigests(String... digests) {
             mDigests = ArrayUtils.cloneIfNotEmpty(digests);
@@ -727,8 +691,6 @@ public final class KeyPairGeneratorSpec implements AlgorithmParameterSpec {
          * rejected.
          *
          * <p>This must be specified for keys which are used for encryption/decryption.
-         *
-         * @hide
          */
         public Builder setEncryptionPaddings(String... paddings) {
             mEncryptionPaddings = ArrayUtils.cloneIfNotEmpty(paddings);
@@ -741,8 +703,6 @@ public final class KeyPairGeneratorSpec implements AlgorithmParameterSpec {
          * rejected.
          *
          * <p>This must be specified for RSA keys which are used for signing/verification.
-         *
-         * @hide
          */
         public Builder setSignaturePaddings(String... paddings) {
             mSignaturePaddings = ArrayUtils.cloneIfNotEmpty(paddings);
@@ -754,8 +714,6 @@ public final class KeyPairGeneratorSpec implements AlgorithmParameterSpec {
          * Attempts to use the key with any other block modes will be rejected.
          *
          * <p>This must be specified for encryption/decryption keys.
-         *
-         * @hide
          */
         public Builder setBlockModes(String... blockModes) {
             mBlockModes = ArrayUtils.cloneIfNotEmpty(blockModes);
@@ -781,8 +739,6 @@ public final class KeyPairGeneratorSpec implements AlgorithmParameterSpec {
          * <li>If you are using RSA encryption without padding, consider switching to padding
          * schemes which offer {@code IND-CPA}, such as PKCS#1 or OAEP.</li>
          * </ul>
-         *
-         * @hide
          */
         public Builder setRandomizedEncryptionRequired(boolean required) {
             mRandomizedEncryptionRequired = required;
@@ -802,8 +758,6 @@ public final class KeyPairGeneratorSpec implements AlgorithmParameterSpec {
          *        without user authentication.
          *
          * @see #setUserAuthenticationValidityDurationSeconds(int)
-         *
-         * @hide
          */
         public Builder setUserAuthenticators(
                 @KeyStoreKeyProperties.UserAuthenticatorEnum int userAuthenticators) {
@@ -824,8 +778,6 @@ public final class KeyPairGeneratorSpec implements AlgorithmParameterSpec {
          *        every use of the key.
          *
          * @see #setUserAuthenticators(int)
-         *
-         * @hide
          */
         public Builder setUserAuthenticationValidityDurationSeconds(int seconds) {
             mUserAuthenticationValidityDurationSeconds = seconds;
@@ -840,8 +792,6 @@ public final class KeyPairGeneratorSpec implements AlgorithmParameterSpec {
          * <p>By default, enrolling a new fingerprint does not invalidate the key.
          *
          * @see #setUserAuthenticators(Set)
-         *
-         * @hide
          */
         public Builder setInvalidatedOnNewFingerprintEnrolled(boolean invalidated) {
             mInvalidatedOnNewFingerprintEnrolled = invalidated;

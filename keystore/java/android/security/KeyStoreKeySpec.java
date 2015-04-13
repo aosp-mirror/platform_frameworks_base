@@ -22,8 +22,6 @@ import java.util.Date;
 /**
  * Information about a key from the <a href="{@docRoot}training/articles/keystore.html">Android
  * KeyStore</a>.
- *
- * @hide
  */
 public class KeyStoreKeySpec implements KeySpec {
     private final String mKeystoreAlias;

@@ -27,8 +27,6 @@ import java.util.Collection;
 
 /**
  * Properties of {@code AndroidKeyStore} keys.
- *
- * @hide
  */
 public abstract class KeyStoreKeyProperties {
     private KeyStoreKeyProperties() {}
