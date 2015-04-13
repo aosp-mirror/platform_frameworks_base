@@ -387,6 +387,5 @@
     <string name="volumeui_prompt_deny" msgid="5720663643411696731">"Phika"</string>
     <string name="volumeui_notification_title" msgid="4906770126345910955">"I-<xliff:g id="APP_NAME">%1$s</xliff:g> yingxoxo yevolumu"</string>
     <string name="volumeui_notification_text" msgid="1826889705095768656">"Thinta ukuze ubuyisele kokwangempela."</string>
-    <!-- no translation found for volume_zen_switch_text (8149183012610587643) -->
-    <skip />
+    <string name="volume_zen_switch_text" msgid="8149183012610587643">"@*android:string/zen_mode_feature_name"</string>
 </resources>
