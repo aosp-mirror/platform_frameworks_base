@@ -691,6 +691,20 @@ public class TrustManagerService extends SystemService {
             return isDeviceLockedInner(userId);
         }
 
+        @Override
+        public boolean isDeviceSecure(int userId) throws RemoteException {
+            userId = ActivityManager.handleIncomingUser(getCallingPid(), getCallingUid(), userId,
+                    false /* allowAll */, true /* requireFull */, "isDeviceSecure", null);
+            userId = resolveProfileParent(userId);
+
+            long token = Binder.clearCallingIdentity();
+            try {
+                return new LockPatternUtils(mContext).isSecure(userId);
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+        }
+
         private void enforceReportPermission() {
             mContext.enforceCallingOrSelfPermission(
                     Manifest.permission.ACCESS_KEYGUARD_SECURE_STORAGE, "reporting trust events");
