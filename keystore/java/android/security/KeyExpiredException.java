@@ -19,8 +19,6 @@ package android.security;
 /**
  * Indicates that a cryptographic operation failed because the employed key's validity end date
  * is in the past.
- *
- * @hide
  */
 public class KeyExpiredException extends CryptoOperationException {
 

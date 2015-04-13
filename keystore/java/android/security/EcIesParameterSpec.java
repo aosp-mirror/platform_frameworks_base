@@ -46,8 +46,6 @@ import javax.crypto.Mac;
  * MAC algorithm specified by {@link #getDemMacAlgorithm()} (e.g., {@code HmacSHA1} for standard
  * DEM1).</li>
  * </ul>
- *
- * @hide
  */
 public class EcIesParameterSpec implements AlgorithmParameterSpec {
 
@@ -124,6 +122,8 @@ public class EcIesParameterSpec implements AlgorithmParameterSpec {
 
     /**
      * Returns KEM EC curve name (e.g., {@code secp256r1}) or {@code null} if not specified.
+     *
+     * @hide
      */
     public String getKemCurveName() {
         return mKemCurveName;
@@ -200,6 +200,8 @@ public class EcIesParameterSpec implements AlgorithmParameterSpec {
          * Sets KEM EC curve name. For example, {@code P-256} or {@code secp256r1}.
          *
          * <p>NOTE: Only curves with cofactor of {@code 1} are supported.
+         *
+         * @hide
          */
         public Builder setKemCurveName(String name) {
             mKemCurveName = name;

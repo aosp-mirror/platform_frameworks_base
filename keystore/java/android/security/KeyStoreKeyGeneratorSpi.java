@@ -133,7 +133,7 @@ public abstract class KeyStoreKeyGeneratorSpi extends KeyGeneratorSpi {
                 throw new IllegalStateException("Digest algorithm must be specified for HMAC key");
             }
         }
-        int keySizeBits = (spec.getKeySize() != null) ? spec.getKeySize() : mDefaultKeySizeBits;
+        int keySizeBits = (spec.getKeySize() != -1) ? spec.getKeySize() : mDefaultKeySizeBits;
         args.addInt(KeymasterDefs.KM_TAG_KEY_SIZE, keySizeBits);
         @KeyStoreKeyProperties.PurposeEnum int purposes = spec.getPurposes();
         int[] keymasterBlockModes = KeymasterUtils.getKeymasterBlockModesFromJcaBlockModes(

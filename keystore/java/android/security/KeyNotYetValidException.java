@@ -19,8 +19,6 @@ package android.security;
 /**
  * Indicates that a cryptographic operation failed because the employed key's validity start date
  * is in the future.
- *
- * @hide
  */
 public class KeyNotYetValidException extends CryptoOperationException {
 
