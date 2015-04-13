@@ -64,6 +64,5 @@
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> ဖိုင်များကို ကူးယူနေသည်။</item>
       <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> ဖိုင် ကူးယူနေသည်။</item>
     </plurals>
-    <!-- no translation found for copy_preparing (3896202461003039386) -->
-    <skip />
+    <string name="copy_preparing" msgid="3896202461003039386">"မိတ္တူကူးရန်ပြင်ဆင်နေ..."</string>
 </resources>

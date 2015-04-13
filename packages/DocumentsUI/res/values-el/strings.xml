@@ -64,6 +64,5 @@
       <item quantity="other">Αντιγραφή <xliff:g id="COUNT_1">%1$d</xliff:g> αρχείων.</item>
       <item quantity="one">Αντιγραφή <xliff:g id="COUNT_0">%1$d</xliff:g> αρχείου.</item>
     </plurals>
-    <!-- no translation found for copy_preparing (3896202461003039386) -->
-    <skip />
+    <string name="copy_preparing" msgid="3896202461003039386">"Προετοιμασία για αντιγραφή…"</string>
 </resources>

@@ -64,6 +64,5 @@
       <item quantity="one">Kumokopya ng <xliff:g id="COUNT_1">%1$d</xliff:g> file.</item>
       <item quantity="other">Kumokopya ng <xliff:g id="COUNT_1">%1$d</xliff:g> na file.</item>
     </plurals>
-    <!-- no translation found for copy_preparing (3896202461003039386) -->
-    <skip />
+    <string name="copy_preparing" msgid="3896202461003039386">"Naghahanda para sa pagkopya…"</string>
 </resources>

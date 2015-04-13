@@ -64,6 +64,5 @@
       <item quantity="one">Ikopisha amafayela angu-<xliff:g id="COUNT_1">%1$d</xliff:g>.</item>
       <item quantity="other">Ikopisha amafayela angu-<xliff:g id="COUNT_1">%1$d</xliff:g>.</item>
     </plurals>
-    <!-- no translation found for copy_preparing (3896202461003039386) -->
-    <skip />
+    <string name="copy_preparing" msgid="3896202461003039386">"Ilungiselela ukukopisha..."</string>
 </resources>

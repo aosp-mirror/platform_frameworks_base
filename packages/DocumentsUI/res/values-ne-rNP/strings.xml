@@ -64,6 +64,5 @@
       <item quantity="other"> <xliff:g id="COUNT_1">%1$d</xliff:g>फाइलहरू प्रतिलिप गर्दै।</item>
       <item quantity="one"> <xliff:g id="COUNT_0">%1$d</xliff:g> फाइल प्रतिलिपि गर्दै।</item>
     </plurals>
-    <!-- no translation found for copy_preparing (3896202461003039386) -->
-    <skip />
+    <string name="copy_preparing" msgid="3896202461003039386">"प्रतिलिपिको लागि तयारी गर्दै ..."</string>
 </resources>
