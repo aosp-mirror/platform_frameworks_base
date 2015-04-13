@@ -15187,27 +15187,33 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
     /**
      * This method is called by ViewGroup.drawChild() to have each child view draw itself.
-     * This draw() method is an implementation detail and is not intended to be overridden or
-     * to be called from anywhere else other than ViewGroup.drawChild().
+     *
+     * This is where the View specializes rendering behavior based on layer type,
+     * and hardware acceleration.
      */
     boolean draw(Canvas canvas, ViewGroup parent, long drawingTime) {
-        boolean usingRenderNodeProperties = mAttachInfo != null && mAttachInfo.mHardwareAccelerated;
+        final boolean hardwareAcceleratedCanvas = canvas.isHardwareAccelerated();
+        /* If an attached view draws to a HW canvas, it may use its RenderNode + DisplayList.
+         *
+         * If a view is dettached, its DisplayList shouldn't exist. If the canvas isn't
+         * HW accelerated, it can't handle drawing RenderNodes.
+         */
+        boolean drawingWithRenderNode = mAttachInfo != null
+                && mAttachInfo.mHardwareAccelerated
+                && hardwareAcceleratedCanvas;
+
         boolean more = false;
         final boolean childHasIdentityMatrix = hasIdentityMatrix();
-        final int flags = parent.mGroupFlags;
+        final int parentFlags = parent.mGroupFlags;
 
-        if ((flags & ViewGroup.FLAG_CLEAR_TRANSFORMATION) == ViewGroup.FLAG_CLEAR_TRANSFORMATION) {
+        if ((parentFlags & ViewGroup.FLAG_CLEAR_TRANSFORMATION) != 0) {
             parent.getChildTransformation().clear();
             parent.mGroupFlags &= ~ViewGroup.FLAG_CLEAR_TRANSFORMATION;
         }
 
         Transformation transformToApply = null;
         boolean concatMatrix = false;
-
-        boolean scalingRequired = mAttachInfo != null && mAttachInfo.mScalingRequired;
-        int layerType = getLayerType();
-        final boolean hardwareAccelerated = canvas.isHardwareAccelerated();
-
+        final boolean scalingRequired = mAttachInfo != null && mAttachInfo.mScalingRequired;
         final Animation a = getAnimation();
         if (a != null) {
             more = applyLegacyAnimation(parent, drawingTime, a, scalingRequired);
@@ -15222,8 +15228,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 mRenderNode.setAnimationMatrix(null);
                 mPrivateFlags3 &= ~PFLAG3_VIEW_IS_ANIMATING_TRANSFORM;
             }
-            if (!usingRenderNodeProperties &&
-                    (flags & ViewGroup.FLAG_SUPPORT_STATIC_TRANSFORMATIONS) != 0) {
+            if (!drawingWithRenderNode
+                    && (parentFlags & ViewGroup.FLAG_SUPPORT_STATIC_TRANSFORMATIONS) != 0) {
                 final Transformation t = parent.getChildTransformation();
                 final boolean hasTransform = parent.getChildStaticTransformation(this, t);
                 if (hasTransform) {
@@ -15241,7 +15247,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         mPrivateFlags |= PFLAG_DRAWN;
 
         if (!concatMatrix &&
-                (flags & (ViewGroup.FLAG_SUPPORT_STATIC_TRANSFORMATIONS |
+                (parentFlags & (ViewGroup.FLAG_SUPPORT_STATIC_TRANSFORMATIONS |
                         ViewGroup.FLAG_CLIP_CHILDREN)) == ViewGroup.FLAG_CLIP_CHILDREN &&
                 canvas.quickReject(mLeft, mTop, mRight, mBottom, Canvas.EdgeType.BW) &&
                 (mPrivateFlags & PFLAG_DRAW_ANIMATION) == 0) {
@@ -15250,81 +15256,61 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         }
         mPrivateFlags2 &= ~PFLAG2_VIEW_QUICK_REJECTED;
 
-        if (hardwareAccelerated) {
+        if (hardwareAcceleratedCanvas) {
             // Clear INVALIDATED flag to allow invalidation to occur during rendering, but
             // retain the flag's value temporarily in the mRecreateDisplayList flag
-            mRecreateDisplayList = (mPrivateFlags & PFLAG_INVALIDATED) == PFLAG_INVALIDATED;
+            mRecreateDisplayList = (mPrivateFlags & PFLAG_INVALIDATED) != 0;
             mPrivateFlags &= ~PFLAG_INVALIDATED;
         }
 
         RenderNode renderNode = null;
         Bitmap cache = null;
-        boolean hasDisplayList = false;
-        if (!hardwareAccelerated) {
-            if (layerType != LAYER_TYPE_NONE) {
-                layerType = LAYER_TYPE_SOFTWARE;
-                buildDrawingCache(true);
-            }
+        int layerType = getLayerType();
+        if (layerType == LAYER_TYPE_SOFTWARE
+                || (!drawingWithRenderNode && layerType != LAYER_TYPE_NONE)) {
+            layerType = LAYER_TYPE_SOFTWARE;
+            buildDrawingCache(true);
             cache = getDrawingCache(true);
-        } else {
-            switch (layerType) {
-                case LAYER_TYPE_SOFTWARE:
-                    if (usingRenderNodeProperties) {
-                        hasDisplayList = canHaveDisplayList();
-                    } else {
-                        buildDrawingCache(true);
-                        cache = getDrawingCache(true);
-                    }
-                    break;
-                case LAYER_TYPE_HARDWARE:
-                    if (usingRenderNodeProperties) {
-                        hasDisplayList = canHaveDisplayList();
-                    }
-                    break;
-                case LAYER_TYPE_NONE:
-                    // Delay getting the display list until animation-driven alpha values are
-                    // set up and possibly passed on to the view
-                    hasDisplayList = canHaveDisplayList();
-                    break;
-            }
         }
-        usingRenderNodeProperties &= hasDisplayList;
-        if (usingRenderNodeProperties) {
+
+        if (drawingWithRenderNode) {
+            // Delay getting the display list until animation-driven alpha values are
+            // set up and possibly passed on to the view
             renderNode = getDisplayList();
             if (!renderNode.isValid()) {
                 // Uncommon, but possible. If a view is removed from the hierarchy during the call
                 // to getDisplayList(), the display list will be marked invalid and we should not
                 // try to use it again.
                 renderNode = null;
-                hasDisplayList = false;
-                usingRenderNodeProperties = false;
+                drawingWithRenderNode = false;
             }
         }
 
         int sx = 0;
         int sy = 0;
-        if (!hasDisplayList) {
+        if (!drawingWithRenderNode) {
             computeScroll();
             sx = mScrollX;
             sy = mScrollY;
         }
 
-        final boolean hasNoCache = cache == null || hasDisplayList;
-        final boolean offsetForScroll = cache == null && !hasDisplayList &&
-                layerType != LAYER_TYPE_HARDWARE;
+        final boolean hasNoCache = cache == null || drawingWithRenderNode;
+        final boolean offsetForScroll = cache == null
+                && !drawingWithRenderNode
+                && layerType != LAYER_TYPE_HARDWARE;
 
         int restoreTo = -1;
-        if (!usingRenderNodeProperties || transformToApply != null) {
+        if (!drawingWithRenderNode || transformToApply != null) {
             restoreTo = canvas.save();
         }
         if (offsetForScroll) {
             canvas.translate(mLeft - sx, mTop - sy);
         } else {
-            if (!usingRenderNodeProperties) {
+            if (!drawingWithRenderNode) {
                 canvas.translate(mLeft, mTop);
             }
             if (scalingRequired) {
-                if (usingRenderNodeProperties) {
+                if (drawingWithRenderNode) {
                     // TODO: Might not need this if we put everything inside the DL
                     restoreTo = canvas.save();
                 }
@@ -15334,9 +15320,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             }
         }
 
-        float alpha = usingRenderNodeProperties ? 1 : (getAlpha() * getTransitionAlpha());
-        if (transformToApply != null || alpha < 1 ||  !hasIdentityMatrix() ||
-                (mPrivateFlags3 & PFLAG3_VIEW_IS_ANIMATING_ALPHA) == PFLAG3_VIEW_IS_ANIMATING_ALPHA) {
+        float alpha = drawingWithRenderNode ? 1 : (getAlpha() * getTransitionAlpha());
+        if (transformToApply != null
+                || alpha < 1
+                || !hasIdentityMatrix()
+                || (mPrivateFlags3 & PFLAG3_VIEW_IS_ANIMATING_ALPHA) != 0) {
             if (transformToApply != null || !childHasIdentityMatrix) {
                 int transX = 0;
                 int transY = 0;
@@ -15348,7 +15336,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
                 if (transformToApply != null) {
                     if (concatMatrix) {
-                        if (usingRenderNodeProperties) {
+                        if (drawingWithRenderNode) {
                             renderNode.setAnimationMatrix(transformToApply.getMatrix());
                         } else {
                             // Undo the scroll translation, apply the transformation matrix,
@@ -15367,7 +15355,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                     }
                 }
 
-                if (!childHasIdentityMatrix && !usingRenderNodeProperties) {
+                if (!childHasIdentityMatrix && !drawingWithRenderNode) {
                     canvas.translate(-transX, -transY);
                     canvas.concat(getMatrix());
                     canvas.translate(transX, transY);
@@ -15375,8 +15363,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             }
 
             // Deal with alpha if it is or used to be <1
-            if (alpha < 1 ||
-                    (mPrivateFlags3 & PFLAG3_VIEW_IS_ANIMATING_ALPHA) == PFLAG3_VIEW_IS_ANIMATING_ALPHA) {
+            if (alpha < 1 || (mPrivateFlags3 & PFLAG3_VIEW_IS_ANIMATING_ALPHA) != 0) {
                 if (alpha < 1) {
                     mPrivateFlags3 |= PFLAG3_VIEW_IS_ANIMATING_ALPHA;
                 } else {
@@ -15387,17 +15374,14 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                     final int multipliedAlpha = (int) (255 * alpha);
                     if (!onSetAlpha(multipliedAlpha)) {
                         int layerFlags = Canvas.HAS_ALPHA_LAYER_SAVE_FLAG;
-                        if ((flags & ViewGroup.FLAG_CLIP_CHILDREN) != 0 ||
-                                layerType != LAYER_TYPE_NONE) {
+                        if ((parentFlags & ViewGroup.FLAG_CLIP_CHILDREN) != 0
+                                || layerType != LAYER_TYPE_NONE) {
                             layerFlags |= Canvas.CLIP_TO_LAYER_SAVE_FLAG;
                         }
-                        if (usingRenderNodeProperties) {
+                        if (drawingWithRenderNode) {
                             renderNode.setAlpha(alpha * getAlpha() * getTransitionAlpha());
-                        } else  if (layerType == LAYER_TYPE_NONE) {
-                            final int scrollX = hasDisplayList ? 0 : sx;
-                            final int scrollY = hasDisplayList ? 0 : sy;
-                            canvas.saveLayerAlpha(scrollX, scrollY,
-                                    scrollX + (mRight - mLeft), scrollY + (mBottom - mTop),
+                        } else if (layerType == LAYER_TYPE_NONE) {
+                            canvas.saveLayerAlpha(sx, sy, sx + getWidth(), sy + getHeight(),
                                     multipliedAlpha, layerFlags);
                         }
                     } else {
@@ -15411,15 +15395,14 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             mPrivateFlags &= ~PFLAG_ALPHA_SET;
         }
 
-        if (!usingRenderNodeProperties) {
+        if (!drawingWithRenderNode) {
             // apply clips directly, since RenderNode won't do it for this draw
-            if ((flags & ViewGroup.FLAG_CLIP_CHILDREN) == ViewGroup.FLAG_CLIP_CHILDREN
-                    && cache == null) {
+            if ((parentFlags & ViewGroup.FLAG_CLIP_CHILDREN) != 0 && cache == null) {
                 if (offsetForScroll) {
-                    canvas.clipRect(sx, sy, sx + (mRight - mLeft), sy + (mBottom - mTop));
+                    canvas.clipRect(sx, sy, sx + getWidth(), sy + getHeight());
                 } else {
                     if (!scalingRequired || cache == null) {
-                        canvas.clipRect(0, 0, mRight - mLeft, mBottom - mTop);
+                        canvas.clipRect(0, 0, getWidth(), getHeight());
                     } else {
                         canvas.clipRect(0, 0, cache.getWidth(), cache.getHeight());
                     }
@@ -15432,22 +15415,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             }
         }
 
-
-
-        if (!usingRenderNodeProperties && hasDisplayList) {
-            renderNode = getDisplayList();
-            if (!renderNode.isValid()) {
-                // Uncommon, but possible. If a view is removed from the hierarchy during the call
-                // to getDisplayList(), the display list will be marked invalid and we should not
-                // try to use it again.
-                renderNode = null;
-                hasDisplayList = false;
-            }
-        }
-
         if (hasNoCache) {
             boolean layerRendered = false;
-            if (layerType == LAYER_TYPE_HARDWARE && !usingRenderNodeProperties) {
+            if (layerType == LAYER_TYPE_HARDWARE && !drawingWithRenderNode) {
                 final HardwareLayer layer = getHardwareLayer();
                 if (layer != null && layer.isValid()) {
                     int restoreAlpha = mLayerPaint.getAlpha();
@@ -15456,16 +15426,12 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                     mLayerPaint.setAlpha(restoreAlpha);
                     layerRendered = true;
                 } else {
-                    final int scrollX = hasDisplayList ? 0 : sx;
-                    final int scrollY = hasDisplayList ? 0 : sy;
-                    canvas.saveLayer(scrollX, scrollY,
-                            scrollX + mRight - mLeft, scrollY + mBottom - mTop, mLayerPaint,
-                            Canvas.HAS_ALPHA_LAYER_SAVE_FLAG | Canvas.CLIP_TO_LAYER_SAVE_FLAG);
+                    canvas.saveLayer(sx, sy, sx + getWidth(), sy + getHeight(), mLayerPaint);
                 }
             }
 
             if (!layerRendered) {
-                if (!hasDisplayList) {
+                if (!drawingWithRenderNode) {
                     // Fast path for layouts with no backgrounds
                     if ((mPrivateFlags & PFLAG_SKIP_DRAW) == PFLAG_SKIP_DRAW) {
                         mPrivateFlags &= ~PFLAG_DIRTY_MASK;
@@ -15475,7 +15441,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                     }
                 } else {
                     mPrivateFlags &= ~PFLAG_DIRTY_MASK;
-                    ((DisplayListCanvas) canvas).drawRenderNode(renderNode, flags);
+                    ((DisplayListCanvas) canvas).drawRenderNode(renderNode, parentFlags);
                 }
             }
         } else if (cache != null) {
@@ -15504,13 +15470,13 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         }
 
         if (a != null && !more) {
-            if (!hardwareAccelerated && !a.getFillAfter()) {
+            if (!hardwareAcceleratedCanvas && !a.getFillAfter()) {
                 onSetAlpha(255);
             }
             parent.finishAnimatingView(this, a);
         }
 
-        if (more && hardwareAccelerated) {
+        if (more && hardwareAcceleratedCanvas) {
             if (a.hasAlpha() && (mPrivateFlags & PFLAG_ALPHA_SET) == PFLAG_ALPHA_SET) {
                 // alpha animations should cause the child to recreate its display list
                 invalidate(true);
