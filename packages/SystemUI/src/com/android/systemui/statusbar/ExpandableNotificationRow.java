@@ -181,8 +181,12 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
     }
 
     public void setHeadsUp(boolean isHeadsUp) {
+        int intrinsicBefore = getIntrinsicHeight();
         mIsHeadsUp = isHeadsUp;
         mPrivateLayout.setHeadsUp(isHeadsUp);
+        if (intrinsicBefore != getIntrinsicHeight()) {
+            notifyHeightChanged(false  /* needsAnimation */);
+        }
     }
 
     public void setGroupManager(NotificationGroupManager groupManager) {
