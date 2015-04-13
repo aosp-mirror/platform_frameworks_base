@@ -30,6 +30,8 @@ import android.provider.DocumentsContract.Root;
 import android.provider.DocumentsContract.Root;
 import android.provider.DocumentsProvider;
 
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -52,6 +54,7 @@ public class StubProvider extends DocumentsProvider {
     private String mRootDocumentId;
     private HashMap<String, File> mStorage = new HashMap<String, File>();
     private int mStorageUsedBytes;
+    private Object mWriteLock = new Object();
 
     @Override
     public boolean onCreate() {
@@ -147,17 +150,85 @@ public class StubProvider extends DocumentsProvider {
     @Override
     public ParcelFileDescriptor openDocument(String docId, String mode, CancellationSignal signal)
             throws FileNotFoundException {
-        final File file = mStorage.get(docId);
-        if (file == null || !file.isFile())
-            throw new FileNotFoundException();
-        // TODO: Simulate running out of storage.
-        return ParcelFileDescriptor.open(file, ParcelFileDescriptor.MODE_READ_WRITE);
+        // TODO: Add support for reading files.
+        if ("w".equals(mode)) {
+            return startWrite(docId);
+        }
+        throw new FileNotFoundException();
     }
 
     @Override
     public AssetFileDescriptor openDocumentThumbnail(
             String docId, Point sizeHint, CancellationSignal signal) throws FileNotFoundException {
         throw new FileNotFoundException();
+    }
+
+    private ParcelFileDescriptor startWrite(String docId)
+            throws FileNotFoundException {
+        final File file = mStorage.get(docId);
+        if (file == null || !file.isFile())
+            throw new FileNotFoundException();
+        ParcelFileDescriptor[] pipe;
+        try {
+            pipe = ParcelFileDescriptor.createReliablePipe();
+        }
+        catch (IOException exception) {
+            throw new FileNotFoundException();
+        }
+        final ParcelFileDescriptor readPipe = pipe[0];
+        final ParcelFileDescriptor writePipe = pipe[1];
+
+        new Thread() {
+            @Override
+            public void run() {
+                try {
+                    final FileInputStream inputStream = new FileInputStream(readPipe.getFileDescriptor());
+                    final FileOutputStream outputStream = new FileOutputStream(file);
+                    byte[] buffer = new byte[32 * 1024];
+                    int bytesToRead;
+                    int bytesRead = 0;
+                    while (bytesRead != -1) {
+                        synchronized (mWriteLock) {
+                            bytesToRead = Math.min(STORAGE_SIZE - mStorageUsedBytes, buffer.length);
+                            if (bytesToRead == 0) {
+                                closePipeWithErrorSilently(readPipe, "Not enough space.");
+                                break;
+                            }
+                            bytesRead = inputStream.read(buffer, 0, bytesToRead);
+                            if (bytesRead == -1) {
+                                break;
+                            }
+                            outputStream.write(buffer, 0, bytesRead);
+                            mStorageUsedBytes += bytesRead;
+                        }
+                    }
+                }
+                catch (IOException e) {
+                    closePipeWithErrorSilently(readPipe, e.getMessage());
+                }
+                finally {
+                    closePipeSilently(readPipe);
+                }
+            }
+        }.start();
+
+        return writePipe;
+    }
+
+    private void closePipeWithErrorSilently(ParcelFileDescriptor pipe, String error) {
+        try {
+            pipe.closeWithError(error);
+        }
+        catch (IOException ignore) {
+        }
+    }
+
+    private void closePipeSilently(ParcelFileDescriptor pipe) {
+        try {
+            pipe.close();
+        }
+        catch (IOException ignore) {
+        }
     }
 
     private void includeFile(MatrixCursor result, File file) {
