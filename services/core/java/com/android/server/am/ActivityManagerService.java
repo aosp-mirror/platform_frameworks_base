@@ -2179,6 +2179,15 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
     }
 
+    public static final class BinderThreadMonitor implements Watchdog.Monitor {
+        /** This method will block until there is a binder thread available to process
+         * in coming IPCs to make sure other processes can still communicate with the service.
+         */
+        @Override
+        public void monitor() {
+            Binder.blockUntilThreadAvailable();
+        }
+    }
     // Note: This method is invoked on the main thread but may need to attach various
     // handlers to other threads.  So take care to be explicit about the looper.
     public ActivityManagerService(Context systemContext) {
@@ -2273,6 +2282,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         };
 
         Watchdog.getInstance().addMonitor(this);
+        Watchdog.getInstance().addMonitor(new BinderThreadMonitor());
         Watchdog.getInstance().addThread(mHandler);
     }
 

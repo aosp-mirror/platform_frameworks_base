@@ -46,7 +46,6 @@ import java.util.ArrayList;
 /** This class calls its monitor every minute. Killing this process if they don't return **/
 public class Watchdog extends Thread {
     static final String TAG = "Watchdog";
-    static final boolean localLOGV = false || false;
 
     // Set this to true to use debug default values.
     static final boolean DB = false;
@@ -73,7 +72,7 @@ public class Watchdog extends Thread {
     static Watchdog sWatchdog;
 
     /* This handler will be used to post message back onto the main thread */
-    final ArrayList<HandlerChecker> mHandlerCheckers = new ArrayList<HandlerChecker>();
+    final ArrayList<HandlerChecker> mHandlerCheckers = new ArrayList<>();
     final HandlerChecker mMonitorChecker;
     ContentResolver mResolver;
     ActivityManagerService mActivity;
