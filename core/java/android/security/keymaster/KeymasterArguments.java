@@ -34,9 +34,12 @@ public class KeymasterArguments implements Parcelable {
 
     public static final Parcelable.Creator<KeymasterArguments> CREATOR = new
             Parcelable.Creator<KeymasterArguments>() {
+                @Override
                 public KeymasterArguments createFromParcel(Parcel in) {
                     return new KeymasterArguments(in);
                 }
+
+                @Override
                 public KeymasterArguments[] newArray(int size) {
                     return new KeymasterArguments[size];
                 }
@@ -52,6 +55,12 @@ public class KeymasterArguments implements Parcelable {
 
     public void addInt(int tag, int value) {
         mArguments.add(new KeymasterIntArgument(tag, value));
+    }
+
+    public void addInts(int tag, int... values) {
+        for (int value : values) {
+            addInt(tag, value);
+        }
     }
 
     public void addBoolean(int tag) {

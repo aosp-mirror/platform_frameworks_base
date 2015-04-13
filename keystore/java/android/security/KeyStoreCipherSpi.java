@@ -48,68 +48,67 @@ import javax.crypto.spec.IvParameterSpec;
 public abstract class KeyStoreCipherSpi extends CipherSpi implements KeyStoreCryptoOperation {
 
     public abstract static class AES extends KeyStoreCipherSpi {
-        protected AES(@KeyStoreKeyConstraints.BlockModeEnum int blockMode,
-                @KeyStoreKeyConstraints.PaddingEnum int padding, boolean ivUsed) {
-            super(KeyStoreKeyConstraints.Algorithm.AES,
-                    blockMode,
-                    padding,
+        protected AES(int keymasterBlockMode, int keymasterPadding, boolean ivUsed) {
+            super(KeymasterDefs.KM_ALGORITHM_AES,
+                    keymasterBlockMode,
+                    keymasterPadding,
                     16,
                     ivUsed);
         }
 
         public abstract static class ECB extends AES {
-            protected ECB(@KeyStoreKeyConstraints.PaddingEnum int padding) {
-                super(KeyStoreKeyConstraints.BlockMode.ECB, padding, false);
+            protected ECB(int keymasterPadding) {
+                super(KeymasterDefs.KM_MODE_ECB, keymasterPadding, false);
             }
 
             public static class NoPadding extends ECB {
                 public NoPadding() {
-                    super(KeyStoreKeyConstraints.Padding.NONE);
+                    super(KeymasterDefs.KM_PAD_NONE);
                 }
             }
 
             public static class PKCS7Padding extends ECB {
                 public PKCS7Padding() {
-                    super(KeyStoreKeyConstraints.Padding.PKCS7);
+                    super(KeymasterDefs.KM_PAD_PKCS7);
                 }
             }
         }
 
         public abstract static class CBC extends AES {
-            protected CBC(@KeyStoreKeyConstraints.BlockModeEnum int padding) {
-                super(KeyStoreKeyConstraints.BlockMode.CBC, padding, true);
+            protected CBC(int keymasterPadding) {
+                super(KeymasterDefs.KM_MODE_CBC, keymasterPadding, true);
             }
 
             public static class NoPadding extends CBC {
                 public NoPadding() {
-                    super(KeyStoreKeyConstraints.Padding.NONE);
+                    super(KeymasterDefs.KM_PAD_NONE);
                 }
             }
 
             public static class PKCS7Padding extends CBC {
                 public PKCS7Padding() {
-                    super(KeyStoreKeyConstraints.Padding.PKCS7);
+                    super(KeymasterDefs.KM_PAD_PKCS7);
                 }
             }
         }
 
         public abstract static class CTR extends AES {
-            protected CTR(@KeyStoreKeyConstraints.BlockModeEnum int padding) {
-                super(KeyStoreKeyConstraints.BlockMode.CTR, padding, true);
+            protected CTR(int keymasterPadding) {
+                super(KeymasterDefs.KM_MODE_CTR, keymasterPadding, true);
             }
 
             public static class NoPadding extends CTR {
                 public NoPadding() {
-                    super(KeyStoreKeyConstraints.Padding.NONE);
+                    super(KeymasterDefs.KM_PAD_NONE);
                 }
             }
         }
     }
 
     private final KeyStore mKeyStore;
-    private final @KeyStoreKeyConstraints.AlgorithmEnum int mAlgorithm;
-    private final @KeyStoreKeyConstraints.BlockModeEnum int mBlockMode;
-    private final @KeyStoreKeyConstraints.PaddingEnum int mPadding;
+    private final int mKeymasterAlgorithm;
+    private final int mKeymasterBlockMode;
+    private final int mKeymasterPadding;
     private final int mBlockSizeBytes;
 
     /** Whether this transformation requires an IV. */
@@ -138,15 +137,15 @@ public abstract class KeyStoreCipherSpi extends CipherSpi implements KeyStoreCry
     private KeyStoreCryptoOperationChunkedStreamer mMainDataStreamer;
 
     protected KeyStoreCipherSpi(
-            @KeyStoreKeyConstraints.AlgorithmEnum int algorithm,
-            @KeyStoreKeyConstraints.BlockModeEnum int blockMode,
-            @KeyStoreKeyConstraints.PaddingEnum int padding,
+            int keymasterAlgorithm,
+            int keymasterBlockMode,
+            int keymasterPadding,
             int blockSizeBytes,
             boolean ivUsed) {
         mKeyStore = KeyStore.getInstance();
-        mAlgorithm = algorithm;
-        mBlockMode = blockMode;
-        mPadding = padding;
+        mKeymasterAlgorithm = keymasterAlgorithm;
+        mKeymasterBlockMode = keymasterBlockMode;
+        mKeymasterPadding = keymasterPadding;
         mBlockSizeBytes = blockSizeBytes;
         mIvRequired = ivUsed;
     }
@@ -236,9 +235,9 @@ public abstract class KeyStoreCipherSpi extends CipherSpi implements KeyStoreCry
         }
 
         KeymasterArguments keymasterInputArgs = new KeymasterArguments();
-        keymasterInputArgs.addInt(KeymasterDefs.KM_TAG_ALGORITHM, mAlgorithm);
-        keymasterInputArgs.addInt(KeymasterDefs.KM_TAG_BLOCK_MODE, mBlockMode);
-        keymasterInputArgs.addInt(KeymasterDefs.KM_TAG_PADDING, mPadding);
+        keymasterInputArgs.addInt(KeymasterDefs.KM_TAG_ALGORITHM, mKeymasterAlgorithm);
+        keymasterInputArgs.addInt(KeymasterDefs.KM_TAG_BLOCK_MODE, mKeymasterBlockMode);
+        keymasterInputArgs.addInt(KeymasterDefs.KM_TAG_PADDING, mKeymasterPadding);
         addAlgorithmSpecificParametersToBegin(keymasterInputArgs);
 
         KeymasterArguments keymasterOutputArgs = new KeymasterArguments();
