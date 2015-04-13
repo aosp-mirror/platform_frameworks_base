@@ -32,12 +32,13 @@ not exhaustive for all available Android-powered devices.</p>
 To start developing with your device, read <a
 href="{@docRoot}tools/device.html">Using Hardware Devices</a>.</p>
 
-<p class="note"><strong>Note:</strong> If your device is one of the Android Developer Phones
-(ADP), a Nexus One, or a Nexus S, then you need
-the <a href="{@docRoot}sdk/win-usb.html">Google USB Driver</a>, instead of an OEM driver. The Galaxy
-Nexus driver, however, is distributed by <a
-href="http://www.samsung.com/us/support/downloads/verizon-wireless/SCH-I515MSAVZW">Samsung</a>
-(listed as model SCH-I515).</p>
+<p>The Google USB Driver is <strong>required for Windows only</strong> in order to perform
+<a href="{@docRoot}tools/help/adb.html">adb</a> debugging with any of
+the <strong>Google Nexus devices</strong>. The one exception is the
+Galaxy Nexus: the driver for Galaxy Nexus is distributed by <a
+href="http://www.samsung.com/us/support/owners/product/GT-I9250TSGGEN">Samsung</a>
+(listed as model GT-I9250TSGGEN).</p>
+
 
 
 <h2 id="InstallingDriver">Installing a USB Driver</h2>
@@ -99,7 +100,7 @@ driver:</p>
   <li>Select <strong>Device Manager</strong> in the left pane of the Computer Management
   window.</li>
   <li>Locate and expand <em>Android Phone</em> in the right pane.</li>
-  <li>Right-click <em>Android Composite ADB Interface</em> and select <strong>Update
+  <li>Right-click on <em>Android Composite ADB Interface</em> and select <strong>Update
   Driver</strong>.
     This will launch the Hardware Update Wizard.</li>
   <li>Select <strong>Install from a list or specific location</strong> and click
@@ -145,14 +146,14 @@ driver:</p>
     and select <strong>Manage</strong>.</li>
   <li>Select <strong>Device Manager</strong> in the left pane.</li>
   <li>Locate and expand <em>ADB Interface</em> in the right pane.</li>
-  <li>Right-click on <em>HTC Dream Composite ADB Interface</em>, and select <strong>Update
+  <li>Right-click on <em>Android Composite ADB Interface</em>, and select <strong>Update
   Driver Software</strong>.</li>
   <li>When Vista starts updating the driver, a prompt will ask how you want to
   search for the driver
     software. Select <strong>Browse my computer for driver software</strong>.</li>
   <li>Click <strong>Browse</strong> and locate the USB driver folder. (The Google USB
 Driver is located in {@code &lt;sdk&gt;\extras\google\usb_driver\}.) As long as you specified the
-exact location of the 
+exact location of the
     installation package, you may leave <strong>Include subfolders</strong> checked or
     unchecked&mdash;it doesn't matter.</li>
   <li>Click <strong>Next</strong>. Vista might prompt you to confirm the privilege elevation
@@ -163,13 +164,6 @@ exact location of the
   
 
 <h2 id="Drivers">OEM Drivers</h2>
-
-<p class="note"><strong>Note:</strong> If your device is one of the Android Developer Phones
-(purchased from the Google Play Developer Console), a Nexus One, or a Nexus S, then you need
-the <a href="{@docRoot}sdk/win-usb.html">Google USB Driver</a>, instead of an OEM driver. The Galaxy
-Nexus driver, however, is distributed by <a
-href="http://www.samsung.com/us/support/downloads/verizon-wireless/SCH-I515MSAVZW">Samsung</a>
-(listed as model SCH-I515).</p>
 
 
 <table><tr>
