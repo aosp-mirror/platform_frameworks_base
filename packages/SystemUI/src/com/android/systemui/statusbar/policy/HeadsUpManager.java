@@ -438,6 +438,15 @@ public class HeadsUpManager implements ViewTreeObserver.OnComputeInternalInsetsL
         return topEntry != null ? topEntry.entry.row.getHeadsUpHeight() : 0;
     }
 
+    public int compare(NotificationData.Entry a, NotificationData.Entry b) {
+        HeadsUpEntry aEntry = getHeadsUpEntry(a.key);
+        HeadsUpEntry bEntry = getHeadsUpEntry(b.key);
+        if (aEntry == null || bEntry == null) {
+            return aEntry == null ? 1 : -1;
+        }
+        return aEntry.compareTo(bEntry);
+    }
+
     public class HeadsUpEntry implements Comparable<HeadsUpEntry> {
         public NotificationData.Entry entry;
         public long postTime;

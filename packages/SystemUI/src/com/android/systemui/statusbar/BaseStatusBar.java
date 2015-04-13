@@ -1925,9 +1925,9 @@ public abstract class BaseStatusBar extends SystemUI implements
             entry.icon.set(ic);
             inflateViews(entry, mStackScroller);
         }
+        updateHeadsUp(key, entry, shouldInterrupt, alertAgain);
         mNotificationData.updateRanking(ranking);
         updateNotifications();
-        updateHeadsUp(key, entry, shouldInterrupt, alertAgain);
 
         // Update the veto button accordingly (and as a result, whether this row is
         // swipe-dismissable)
