@@ -651,6 +651,45 @@ public class DevicePolicyManager {
             = "android.app.action.SET_PROFILE_OWNER";
 
     /**
+     * Protected broadcast action that will be sent to managed provisioning to notify it that a
+     * status update has been reported by the device initializer. The status update will be
+     * reported to the remote setup device over Bluetooth.
+     *
+     * <p>Broadcasts with this action must supply a
+     * {@linkplain DeviceInitializerStatus#isCustomStatus(int) custom} status code in the
+     * {@link EXTRA_DEVICE_INITIALIZER_STATUS_CODE} extra.
+     *
+     * <p>Broadcasts may optionally contain a description in the
+     * {@link EXTRA_DEVICE_INITIALIZER_STATUS_DESCRIPTION} extra.
+     * @hide
+     */
+    @SystemApi
+    public static final String ACTION_SEND_DEVICE_INITIALIZER_STATUS
+            = "android.app.action.SEND_DEVICE_INITIALIZER_STATUS";
+
+    /**
+     * An integer extra that contains the status code that defines a status update. This extra must
+     * sent as part of a broadcast with an action of {@code ACTION_SEND_DEVICE_INITIALIZER_STATUS}.
+     *
+     * <p>The status code sent with this extra must be a custom status code as defined by
+     * {@link DeviceInitializerStatus#isCustomStatus(int)}.
+     * @hide
+     */
+    @SystemApi
+    public static final String EXTRA_DEVICE_INITIALIZER_STATUS_CODE
+            = "android.app.extra.DEVICE_INITIALIZER_STATUS_CODE";
+
+    /**
+     * A {@code String} extra that contains an optional description accompanying a status update.
+     * This extra my be sent as part of a broadcast with an action of
+     * {@code ACTION_SEND_DEVICE_INITIALIZER_STATUS}.
+     * @hide
+     */
+    @SystemApi
+    public static final String EXTRA_DEVICE_INITIALIZER_STATUS_DESCRIPTION
+            = "android.app.extra.DEVICE_INITIALIZER_STATUS_DESCRIPTION";
+
+    /**
      * @hide
      * Name of the profile owner admin that controls the user.
      */
@@ -4010,6 +4049,21 @@ public class DevicePolicyManager {
             mService.setUserIcon(admin, icon);
         } catch (RemoteException re) {
             Log.w(TAG, "Could not set the user icon ", re);
+        }
+    }
+
+    /**
+     * Called by device initializer to send a provisioning status update to the remote setup device.
+     *
+     * @param statusCode a custom status code value as defined by
+     *    {@link DeviceInitializerStatus#isCustomStatus(int)}.
+     * @param description custom description of the status code sent
+     */
+    public void sendDeviceInitializerStatus(int statusCode, String description) {
+        try {
+            mService.sendDeviceInitializerStatus(statusCode, description);
+        } catch (RemoteException re) {
+            Log.w(TAG, "Could not send device initializer status", re);
         }
     }
 }

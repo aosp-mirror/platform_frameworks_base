@@ -87,6 +87,7 @@
     <protected-broadcast android:name="android.app.action.ENTER_DESK_MODE" />
     <protected-broadcast android:name="android.app.action.EXIT_DESK_MODE" />
     <protected-broadcast android:name="android.app.action.NEXT_ALARM_CLOCK_CHANGED" />
+    <protected-broadcast android:name="android.app.action.SEND_DEVICE_INITIALIZER_STATUS" />
 
     <protected-broadcast android:name="android.appwidget.action.APPWIDGET_UPDATE_OPTIONS" />
     <protected-broadcast android:name="android.appwidget.action.APPWIDGET_DELETED" />
@@ -2373,6 +2374,12 @@
      @hide -->
     <permission android:name="android.permission.INSTALL_GRANT_RUNTIME_PERMISSIONS"
         android:protectionLevel="signature" />
+
+    <!-- Allows receiving status updates from a device initializer.
+         @hide Not for use by third-party applications. -->
+    <permission android:name="android.permission.RECEIVE_DEVICE_INITIALIZER_STATUS"
+                android:permissionGroup="android.permission-group.SYSTEM_TOOLS"
+                android:protectionLevel="signature" />
 
     <!-- The system process is explicitly the only one allowed to launch the
          confirmation UI for full backup/restore -->
