@@ -38,7 +38,7 @@ import java.util.Date;
 
 /** Built-in zen condition provider for simple time-based conditions */
 public class CountdownConditionProvider extends SystemConditionProviderService {
-    private static final String TAG = "CountdownConditions";
+    private static final String TAG = "ConditionProviders";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
     public static final ComponentName COMPONENT =

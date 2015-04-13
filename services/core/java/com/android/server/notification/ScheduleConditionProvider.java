@@ -43,7 +43,7 @@ import java.util.TimeZone;
  * Built-in zen condition provider for daily scheduled time-based conditions.
  */
 public class ScheduleConditionProvider extends SystemConditionProviderService {
-    private static final String TAG = "ScheduleConditions";
+    private static final String TAG = "ConditionProviders";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
     public static final ComponentName COMPONENT =

@@ -175,7 +175,7 @@ public class ZenModeHelper {
         if (zenMode == Global.ZEN_MODE_OFF) {
             newConfig.manualRule = null;
             for (ZenRule automaticRule : newConfig.automaticRules.values()) {
-                if (automaticRule.isTrueOrUnknown()) {
+                if (automaticRule.isAutomaticActive()) {
                     automaticRule.snoozing = true;
                 }
             }
@@ -286,8 +286,7 @@ public class ZenModeHelper {
         if (mConfig.manualRule != null) return mConfig.manualRule.zenMode;
         int zen = Global.ZEN_MODE_OFF;
         for (ZenRule automaticRule : mConfig.automaticRules.values()) {
-            if (automaticRule.enabled && !automaticRule.snoozing
-                    && automaticRule.isTrueOrUnknown()) {
+            if (automaticRule.isAutomaticActive()) {
                 if (zenSeverity(automaticRule.zenMode) > zenSeverity(zen)) {
                     zen = automaticRule.zenMode;
                 }
