@@ -562,7 +562,18 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
           <span class="en">Wallet</span>
       </a></div>
   </li>
-
+  <li class="nav-section">
+    <div class="nav-section-header"><a href="/google/play/safetynet/index.html">
+          <span class="en">SafetyNet</span>
+      </a></div>
+      <ul>
+        <li>
+          <a href="/google/play/safetynet/start.html">
+            <span class="en">Getting Started</span>
+          </a>
+        </li>
+      </ul>
+  </li>
 
   <li class="nav-section">
     <div class="nav-section-header"><a href="/google/play-services/index.html">
@@ -1207,6 +1218,13 @@ android.os.Parcelable
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/fitness/result/DataReadResult.html#getStatus()">getStatus</a></span>()</nobr>
         
+        <div class="jd-descrdiv">
+          Returns the status of this result.
+
+
+
+        </div>
+
   </td></tr>
 
 
@@ -1507,6 +1525,13 @@ From interface
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/common/api/Result.html#getStatus()">getStatus</a></span>()</nobr>
         
+        <div class="jd-descrdiv">
+          Returns the status of this result.
+
+
+
+        </div>
+
   </td></tr>
 
 
@@ -1744,10 +1769,18 @@ From interface
     
 
       
-  <div class="jd-tagdata jd-tagdescr"><p>Returns all of the <code><a href="/reference/com/google/android/gms/fitness/data/Bucket.html">Buckets</a></code> with aggregated data.  There will be exactly one
- data set for each aggregated data source requested in the <code><a href="/reference/com/google/android/gms/fitness/request/DataReadRequest.html">DataReadRequest</a></code> per
- bucket.  Returns an empty list if the read request failed.
-</p></div>
+  <div class="jd-tagdata jd-tagdescr"><p>Returns all of the <code><a href="/reference/com/google/android/gms/fitness/data/Bucket.html">Buckets</a></code> with aggregated data.  In each bucket,
+ there will be exactly one data set for each aggregated data source requested in the
+ <code><a href="/reference/com/google/android/gms/fitness/request/DataReadRequest.html">DataReadRequest</a></code>.
+ <p>
+ Buckets only contain aggregated data requested via
+ <code><a href="/reference/com/google/android/gms/fitness/request/DataReadRequest.Builder.html#aggregate(com.google.android.gms.fitness.data.DataSource, com.google.android.gms.fitness.data.DataType)">aggregate(DataSource, DataType)</a></code>.  Non-aggregated data can
+ be accessed via <code><a href="/reference/com/google/android/gms/fitness/result/DataReadResult.html#getDataSet(com.google.android.gms.fitness.data.DataType)">getDataSet(DataType)</a></code>.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li>an empty list if the read request failed.
+</li></ul>
+  </div>
 
     </div>
 </div>
@@ -1779,7 +1812,11 @@ From interface
     
 
       
-  <div class="jd-tagdata jd-tagdescr"><p>Returns the resulting data set for the given <code>dataSource</code>.</p></div>
+  <div class="jd-tagdata jd-tagdescr"><p>Returns the resulting data set for the given <code>dataSource</code>.
+ <p>
+ This method returns only non-aggregated data sets that were queried via
+ <code><a href="/reference/com/google/android/gms/fitness/request/DataReadRequest.Builder.html#read(com.google.android.gms.fitness.data.DataSource)">read(DataSource)</a></code>.  Aggregated data can be queried via
+ <code><a href="/reference/com/google/android/gms/fitness/result/DataReadResult.html#getBuckets()">getBuckets()</a></code>.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
       <ul class="nolist"><li>a data set for the given data source, empty if no data was found.</li></ul>
@@ -1827,7 +1864,12 @@ From interface
       
   <div class="jd-tagdata jd-tagdescr"><p>Returns the resulting data set for the given <code>dataType</code>.  If more than one data source
  for the given data type was requested, this method will return the data for an arbitrary
- one.  Use <code><a href="/reference/com/google/android/gms/fitness/result/DataReadResult.html#getDataSet(com.google.android.gms.fitness.data.DataSource)">getDataSet(DataSource)</a></code> to read each specific data source.</p></div>
+ one.  Use <code><a href="/reference/com/google/android/gms/fitness/result/DataReadResult.html#getDataSet(com.google.android.gms.fitness.data.DataSource)">getDataSet(DataSource)</a></code> to read each specific data source.
+ <p>
+ This method returns only non-aggregated data sets that were queried via
+ <code><a href="/reference/com/google/android/gms/fitness/request/DataReadRequest.Builder.html#read(com.google.android.gms.fitness.data.DataType)">read(DataType)</a></code> or
+ <code><a href="/reference/com/google/android/gms/fitness/request/DataReadRequest.Builder.html#read(com.google.android.gms.fitness.data.DataSource)">read(DataSource)</a></code>.
+ Aggregated data can be queried via <code><a href="/reference/com/google/android/gms/fitness/result/DataReadResult.html#getBuckets()">getBuckets()</a></code>.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
       <ul class="nolist"><li>a data set for the given data type, empty if no data was found.</li></ul>
@@ -1875,6 +1917,11 @@ From interface
       
   <div class="jd-tagdata jd-tagdescr"><p>Returns all of the data sets in the result.  There will be exactly one data set for each
  data source requested in the <code><a href="/reference/com/google/android/gms/fitness/request/DataReadRequest.html">DataReadRequest</a></code>.
+ <p>
+ This method returns only non-aggregated data sets that were queried via
+ <code><a href="/reference/com/google/android/gms/fitness/request/DataReadRequest.Builder.html#read(com.google.android.gms.fitness.data.DataType)">read(DataType)</a></code> or
+ <code><a href="/reference/com/google/android/gms/fitness/request/DataReadRequest.Builder.html#read(com.google.android.gms.fitness.data.DataSource)">read(DataSource)</a></code>.
+ Aggregated data can be queried via <code><a href="/reference/com/google/android/gms/fitness/result/DataReadResult.html#getBuckets()">getBuckets()</a></code>.
 </p></div>
 
     </div>
@@ -1907,7 +1954,13 @@ From interface
     
 
       
-  <div class="jd-tagdata jd-tagdescr"><p></p></div>
+  <div class="jd-tagdata jd-tagdescr"><p>Returns the status of this result.  Use <code><a href="/reference/com/google/android/gms/common/api/Status.html#isSuccess()">isSuccess()</a></code> to determine whether the
+ call was successful, and <code><a href="/reference/com/google/android/gms/common/api/Status.html#getStatusCode()">getStatusCode()</a></code> to determine what the error cause
+ was.
+
+ <p>Certain errors are due to failures that can be resolved by launching a particular intent.
+ The resolution intent is available via <code><a href="/reference/com/google/android/gms/common/api/Status.html#getResolution()">getResolution()</a></code>.
+</p></div>
 
     </div>
 </div>

@@ -562,7 +562,18 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
           <span class="en">Wallet</span>
       </a></div>
   </li>
-
+  <li class="nav-section">
+    <div class="nav-section-header"><a href="/google/play/safetynet/index.html">
+          <span class="en">SafetyNet</span>
+      </a></div>
+      <ul>
+        <li>
+          <a href="/google/play/safetynet/start.html">
+            <span class="en">Getting Started</span>
+          </a>
+        </li>
+      </ul>
+  </li>
 
   <li class="nav-section">
     <div class="nav-section-header"><a href="/google/play-services/index.html">
@@ -792,9 +803,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   
   
 
-  
-  
 
+  
+  
 
   
   
@@ -918,7 +929,7 @@ Summary:
  Refer to <code><a href="/reference/com/google/android/gms/drive/events/DriveEvent.html">DriveEvent</a></code> for additional information about event listeners and subscriptions.
 
  <p>
- Completion events are only delivered to the application that committed the original change. If
+ Completion events are only delivered to the application that committed the original request. If
  the original change modified the metadata or content of the file and the action failed to
  complete on the server, this class provides access to the modified versions of the metadata and
  content that could not be committed.
@@ -1355,7 +1366,8 @@ android.os.Parcelable
         <span class="sympad"><a href="/reference/com/google/android/gms/drive/events/CompletionEvent.html#getTrackingTags()">getTrackingTags</a></span>()</nobr>
         
         <div class="jd-descrdiv">
-          Returns a <code><a href="/reference/java/util/List.html">List</a></code> of tracking tags provided through <code><a href="/reference/com/google/android/gms/drive/DriveContents.html#commit(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.drive.MetadataChangeSet)">commit(GoogleApiClient, MetadataChangeSet)</a></code>.
+          Returns a <code><a href="/reference/java/util/List.html">List</a></code> of tracking tags provided through
+ <code><a href="/reference/com/google/android/gms/drive/ExecutionOptions.Builder.html#setTrackingTag(java.lang.String)">setTrackingTag(String)</a></code>.
           
     
 
@@ -2144,8 +2156,9 @@ From interface
   <div class="jd-tagdata jd-tagdescr"><p>Returns the account name that was used by the GoogleApiClient that requested this
  notification, or <code>null</code> if the default account was used.
 
- <p>This method is provided so that when a completion event is delivered, the correct
- GoogleApiClient can be built to work with the file.
+ <p>
+ This method is provided so that when a completion event is delivered, the correct
+ <code><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a></code> can be built to work with the file.
 </p></div>
 
     </div>
@@ -2378,9 +2391,9 @@ From interface
     
 
       
-  <div class="jd-tagdata jd-tagdescr"><p>Returns a <code><a href="/reference/java/util/List.html">List</a></code> of tracking tags provided through <code><a href="/reference/com/google/android/gms/drive/DriveContents.html#commit(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.drive.MetadataChangeSet)">commit(GoogleApiClient, MetadataChangeSet)</a></code>. The
- application can use these tags to relate this event with the specific method execution that
- generated it.
+  <div class="jd-tagdata jd-tagdescr"><p>Returns a <code><a href="/reference/java/util/List.html">List</a></code> of tracking tags provided through
+ <code><a href="/reference/com/google/android/gms/drive/ExecutionOptions.Builder.html#setTrackingTag(java.lang.String)">setTrackingTag(String)</a></code>. The application can use these tags to relate
+ this event with the specific method execution that generated it.
 
  <p>
  If the list contains multiple elements, the ordering of the elements is guaranteed to be the

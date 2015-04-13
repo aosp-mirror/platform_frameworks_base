@@ -562,7 +562,18 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
           <span class="en">Wallet</span>
       </a></div>
   </li>
-
+  <li class="nav-section">
+    <div class="nav-section-header"><a href="/google/play/safetynet/index.html">
+          <span class="en">SafetyNet</span>
+      </a></div>
+      <ul>
+        <li>
+          <a href="/google/play/safetynet/start.html">
+            <span class="en">Getting Started</span>
+          </a>
+        </li>
+      </ul>
+  </li>
 
   <li class="nav-section">
     <div class="nav-section-header"><a href="/google/play-services/index.html">
@@ -853,12 +864,12 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
      PendingResult&lt;DataReadResult&gt; pendingResult = Fitness.HistoryApi.readData(
          client,
          new DataReadRequest.Builder()
-             .read(DataTypes.STEP_COUNT_DELTA)
+             .read(DataType.TYPE_STEP_COUNT_DELTA)
              .setTimeRange(startTime.getMillis(), endTime.getMillis(), TimeUnit.MILLISECONDS)
              .build());
 
      DataReadResult readDataResult = pendingResult.await();
-     DataSet dataSet = readDataResult.getDataSet(DataTypes.STEP_COUNT_DELTA);
+     DataSet dataSet = readDataResult.getDataSet(DataType.TYPE_STEP_COUNT_DELTA);
  </pre>
 </p>
 
@@ -999,6 +1010,29 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
             
             
             
+            <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/fitness/result/DailyTotalResult.html">DailyTotalResult</a>&gt;</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/fitness/HistoryApi.html#readDailyTotal(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.fitness.data.DataType)">readDailyTotal</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> client, <a href="/reference/com/google/android/gms/fitness/data/DataType.html">DataType</a> dataType)</nobr>
+
+        <div class="jd-descrdiv">
+          Reads the current daily total for the given <code>dataType</code>.
+
+
+
+        </div>
+
+  </td></tr>
+
+
+
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            abstract
+
+
+
+
             <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/fitness/result/DataReadResult.html">DataReadResult</a>&gt;</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
@@ -1167,6 +1201,74 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
       <ul class="nolist"><li>a pending result containing the status of the request
+</li></ul>
+  </div>
+
+    </div>
+</div>
+
+
+<A NAME="readDailyTotal(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.fitness.data.DataType)"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+
+
+        abstract
+
+        <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/fitness/result/DailyTotalResult.html">DailyTotalResult</a>&gt;
+      </span>
+      <span class="sympad">readDailyTotal</span>
+      <span class="normal">(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> client, <a href="/reference/com/google/android/gms/fitness/data/DataType.html">DataType</a> dataType)</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+
+
+
+  <div class="jd-tagdata jd-tagdescr"><p>Reads the current daily total for the given <code>dataType</code>.  The daily total will be
+ computed from midnight of the current day on the device's current timezone.  The method
+ can be used as follows:
+ <pre>
+   PendingResult&lt;DailyTotalResult&gt; result = HistoryApi.readDailyTotal(client, TYPE_STEP_COUNT_DELTA);
+   DailyTotalResult totalResult = result.await(30, SECONDS);
+   if (totalResult.getStatus().isSuccess()) {
+     DataSet totalSet = totalResult.getTotal();
+     long total = totalSet.isEmpty()
+         ? 0
+         : totalSet.getDataPoints().get(0).getValue(FIELD_STEPS).asInt();
+   } else {
+     // handle failure
+   }
+ </pre>
+
+ <p>This is a simplified version of
+ <code><a href="/reference/com/google/android/gms/fitness/HistoryApi.html#readData(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.fitness.request.DataReadRequest)">readData()</a></code>. When the requested data
+ type is <code><a href="/reference/com/google/android/gms/fitness/data/DataType.html#TYPE_STEP_COUNT_DELTA">TYPE_STEP_COUNT_DELTA</a></code>, authentication is not required to call this
+ method, making it specially suited for use by Watchface and Widget activities that don't
+ have the ability to show an authentication panel to the user.
+
+ <p>This method is equivalent to:
+ <pre>
+   readData(client, new DataReadRequest.Builder()
+       .setTimeRange(midnight.getMillis(), now.getMillis(), TimeUnit.MILLISECONDS)
+       .bucketByTime(1, TimeUnit.DAYS)
+       .aggregate(DataTypes.STEP_COUNT_DELTA, AggregateDataTypes.STEP_COUNT_DELTA)
+       .build());
+ </pre></p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li>a pending result containing the requested data.  The pending result will contain a
+     single DataSet.  If no data has been collected for the requested data type today, the
+     DataSet will be empty.
 </li></ul>
   </div>
 

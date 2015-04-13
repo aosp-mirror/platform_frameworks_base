@@ -562,7 +562,18 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
           <span class="en">Wallet</span>
       </a></div>
   </li>
-
+  <li class="nav-section">
+    <div class="nav-section-header"><a href="/google/play/safetynet/index.html">
+          <span class="en">SafetyNet</span>
+      </a></div>
+      <ul>
+        <li>
+          <a href="/google/play/safetynet/start.html">
+            <span class="en">Getting Started</span>
+          </a>
+        </li>
+      </ul>
+  </li>
 
   <li class="nav-section">
     <div class="nav-section-header"><a href="/google/play-services/index.html">
@@ -889,28 +900,23 @@ Summary:
 
 
 <h2>Class Overview</h2>
-<p itemprop="articleBody">Used to catch any uncaught exceptions and report them to Google Analytics.
- This class will call <code><a href="/reference/com/google/android/gms/analytics/GoogleAnalytics.html#dispatchLocalHits()">dispatchLocalHits()</a></code> after calling
- <code><a href="/reference/com/google/android/gms/analytics/Tracker.html#send(java.util.Map<java.lang.String, java.lang.String>)">send(Map<String, String>)</a></code>.
- <p>
- The exact message reported is determined by the <code><a href="/reference/com/google/android/gms/analytics/ExceptionParser.html">ExceptionParser</a></code> set
- via the <code><a href="/reference/com/google/android/gms/analytics/ExceptionReporter.html#setExceptionParser(com.google.android.gms.analytics.ExceptionParser)">setExceptionParser(ExceptionParser)</a></code> method.  See <code><a href="/reference/com/google/android/gms/analytics/StandardExceptionParser.html">StandardExceptionParser</a></code>
- for an example of an implementation of <code><a href="/reference/com/google/android/gms/analytics/ExceptionParser.html">ExceptionParser</a></code>.
- <p>
- All exceptions reported via this class will be reported as fatal exceptions.
- <p>
+<p itemprop="articleBody">Used to catch any uncaught exceptions and report them to Google Analytics. This class will call
+ <code><a href="/reference/com/google/android/gms/analytics/GoogleAnalytics.html#dispatchLocalHits()">dispatchLocalHits()</a></code> after calling <code><a href="/reference/com/google/android/gms/analytics/Tracker.html#send(java.util.Map<java.lang.String, java.lang.String>)">send(Map<String, String>)</a></code>. <p> The exact
+ message reported is determined by the <code><a href="/reference/com/google/android/gms/analytics/ExceptionParser.html">ExceptionParser</a></code> set via the <code><a href="/reference/com/google/android/gms/analytics/ExceptionReporter.html#setExceptionParser(com.google.android.gms.analytics.ExceptionParser)">setExceptionParser(ExceptionParser)</a></code> method.  See <code><a href="/reference/com/google/android/gms/analytics/StandardExceptionParser.html">StandardExceptionParser</a></code> for an example of an
+ implementation of <code><a href="/reference/com/google/android/gms/analytics/ExceptionParser.html">ExceptionParser</a></code>. <p> All exceptions reported via this class will be
+ reported as fatal exceptions. <p>
 
  Usage:
  <pre>
  UncaughtExceptionHandler myHandler = new ExceptionReporter(
    myTracker,                                     // Currently used Tracker.
-   GAServiceManager.getInstance(),                // GAServiceManager singleton.
    Thread.getDefaultUncaughtExceptionHandler(),   // Current default uncaught exception handler.
    context);                                      // Context of the application.
 
  // Make myHandler the new default uncaught exception handler.
  Thread.setDefaultUncaughtExceptionHandler(myHandler);
- </pre></p>
+ </pre>
+</p>
 
 
 
