@@ -24,6 +24,7 @@
 #include <android_os_MessageQueue.h>
 #include <hardware/hardware.h>
 #include <hardware/fingerprint.h>
+#include <hardware/hw_auth_token.h>
 #include <utils/Log.h>
 #include <utils/Looper.h>
 #include "core_jni_helpers.h"
@@ -72,9 +73,10 @@ static void hal_notify_callback(fingerprint_msg_t msg) {
         case FINGERPRINT_ACQUIRED:
             arg1 = msg.data.acquired.acquired_info;
             break;
-        case FINGERPRINT_PROCESSED:
-            arg1 = msg.data.processed.finger.fid;
-            arg2 = msg.data.processed.finger.gid;
+        case FINGERPRINT_AUTHENTICATED:
+            arg1 = msg.data.authenticated.finger.fid;
+            arg2 = msg.data.authenticated.finger.gid;
+            // Jim, arg3 would be the hw_auth_token_t, please pass it the way you like.
             break;
         case FINGERPRINT_TEMPLATE_ENROLLING:
             arg1 = msg.data.enroll.finger.fid;
@@ -101,9 +103,11 @@ static void nativeInit(JNIEnv *env, jobject clazz, jobject mQueue, jobject callb
     gLooper = android_os_MessageQueue_getMessageQueue(env, mQueue)->getLooper();
 }
 
-static jint nativeEnroll(JNIEnv* env, jobject clazz, jlong challenge, jint groupId, jint timeout) {
+static jint nativeEnroll(JNIEnv* env, jobject clazz, jint groupId, jint timeout) {
+    hw_auth_token_t *hat = NULL;  // This is here as a placeholder,
+    // please figure out your favorite way to send the hat struct through JNI
     ALOG(LOG_VERBOSE, LOG_TAG, "nativeEnroll(gid=%d, timeout=%d)\n", groupId, timeout);
-    int ret = gContext.device->enroll(gContext.device, groupId, timeout);
+    int ret = gContext.device->enroll(gContext.device, hat, groupId, timeout);
     return reinterpret_cast<jint>(ret);
 }
 
