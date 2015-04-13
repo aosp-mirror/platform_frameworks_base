@@ -259,6 +259,8 @@ public final class ActivityThread {
         IActivityManager.ContentProviderHolder holder;
         boolean acquiring = true;
         int requests = 1;
+        // Set if there was a runtime exception when trying to acquire the provider.
+        RuntimeException runtimeException = null;
     }
 
     // The lock of mProviderMap protects the following variables.
@@ -4728,39 +4730,55 @@ public final class ActivityThread {
         }
 
         IActivityManager.ContentProviderHolder holder = null;
-        if (first) {
-            // Multiple threads may try to acquire the same provider at the same time.
-            // When this happens, we only let the first one really gets provider.
-            // Other threads just wait for its result.
-            // Note that we cannot hold the lock while acquiring and installing the
-            // provider since it might take a long time to run and it could also potentially
-            // be re-entrant in the case where the provider is in the same process.
-            try {
+        try {
+            if (first) {
+                // Multiple threads may try to acquire the same provider at the same time.
+                // When this happens, we only let the first one really gets provider.
+                // Other threads just wait for its result.
+                // Note that we cannot hold the lock while acquiring and installing the
+                // provider since it might take a long time to run and it could also potentially
+                // be re-entrant in the case where the provider is in the same process.
                 holder = ActivityManagerNative.getDefault().getContentProvider(
                         getApplicationThread(), auth, userId, stable);
-            } catch (RemoteException ex) {
-            }
-            synchronized (r) {
-                r.holder = holder;
-                r.acquiring = false;
-                r.notifyAll();
-            }
-        } else {
-            synchronized (r) {
-                while (r.acquiring) {
-                    try {
-                        r.wait();
-                    } catch (InterruptedException e) {
+            } else {
+                synchronized (r) {
+                    while (r.acquiring) {
+                        try {
+                            r.wait();
+                        } catch (InterruptedException e) {
+                        }
                     }
+                    holder = r.holder;
                 }
-                holder = r.holder;
+            }
+        } catch (RemoteException ex) {
+        } catch (RuntimeException e) {
+            synchronized (r) {
+                r.runtimeException = e;
+            }
+        } finally {
+            if (first) {
+                synchronized (r) {
+                    r.holder = holder;
+                    r.acquiring = false;
+                    r.notifyAll();
+                }
+            }
+
+            synchronized (mAcquiringProviderMap) {
+                if (--r.requests == 0) {
+                    mAcquiringProviderMap.remove(key);
+                }
+            }
+
+            if (r.runtimeException != null) {
+                // Was set when the first thread tried to acquire the provider,
+                // but we should make sure it is thrown for all threads trying to
+                // acquire the provider.
+                throw r.runtimeException;
             }
         }
-        synchronized (mAcquiringProviderMap) {
-            if (--r.requests == 0) {
-                mAcquiringProviderMap.remove(key);
-            }
-        }
+
         if (holder == null) {
             Slog.e(TAG, "Failed to find provider info for " + auth);
             return null;
