@@ -120,7 +120,7 @@ public class CPUInfoService extends Service {
             mOnlinePaint = new Paint();
             mOnlinePaint.setAntiAlias(true);
             mOnlinePaint.setTextSize(textSize);
-            mOnlinePaint.setARGB(255, 255, 255, 255);
+            mOnlinePaint.setARGB(255, 0, 255, 0);
 
             mOfflinePaint = new Paint();
             mOfflinePaint.setAntiAlias(true);
