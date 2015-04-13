@@ -116,11 +116,6 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
                         @Override
                         public void onUserSwitchComplete(int newUserId) throws RemoteException {
                         }
-
-                        @Override
-                        public void onForegroundProfileSwitch(int newProfileId) {
-                            // Ignore.
-                        }
                     });
             userId = ActivityManagerNative.getDefault().getCurrentUser().id;
         } catch (RemoteException e) {
