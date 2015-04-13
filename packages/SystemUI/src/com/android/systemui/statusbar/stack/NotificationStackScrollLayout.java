@@ -1397,12 +1397,9 @@ public class NotificationStackScrollLayout extends ViewGroup
                     // add the padding before this element
                     height += mPaddingBetweenElements;
                 }
-                if (child instanceof ExpandableNotificationRow) {
-                    ExpandableNotificationRow row = (ExpandableNotificationRow) child;
-                    height += row.getIntrinsicHeight();
-                } else if (child instanceof ExpandableView) {
+                if (child instanceof ExpandableView) {
                     ExpandableView expandableView = (ExpandableView) child;
-                    height += expandableView.getActualHeight();
+                    height += expandableView.getIntrinsicHeight();
                 }
             }
         }

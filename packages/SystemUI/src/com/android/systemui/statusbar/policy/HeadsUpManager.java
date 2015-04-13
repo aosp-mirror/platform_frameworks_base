@@ -98,7 +98,7 @@ public class HeadsUpManager implements ViewTreeObserver.OnComputeInternalInsetsL
         mDefaultSnoozeLengthMs = resources.getInteger(R.integer.heads_up_default_snooze_length_ms);
         mSnoozeLengthMs = mDefaultSnoozeLengthMs;
         mMinimumDisplayTime = resources.getInteger(R.integer.heads_up_notification_minimum_time);
-        mHeadsUpNotificationDecay = 200000000/*resources.getInteger(R.integer.heads_up_notification_decay)*/;;
+        mHeadsUpNotificationDecay = resources.getInteger(R.integer.heads_up_notification_decay);
         mClock = new Clock();
         // TODO: shadow mSwipeHelper.setMaxSwipeProgress(mMaxAlpha);
 

@@ -524,8 +524,8 @@ public class StackScrollAlgorithm {
                     // Ensure that a headsUp is never below the topmost headsUp
                     StackViewState topState = resultState.getViewStateForView(topHeadsUpEntry);
                     childState.height = row.getHeadsUpHeight();
-                    childState.yTranslation = Math.min(childState.yTranslation,
-                            topState.yTranslation + topState.height - childState.height);
+                    childState.yTranslation = topState.yTranslation + topState.height
+                            - childState.height;
                 }
             } else if (mIsExpanded) {
                 if (isTopEntry) {
