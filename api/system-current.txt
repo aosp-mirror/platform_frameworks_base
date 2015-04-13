@@ -28997,7 +28997,6 @@ package android.provider {
 
   public static final class VoicemailContract.Status implements android.provider.BaseColumns {
     method public static android.net.Uri buildSourceUri(java.lang.String);
-    method public static void setStatus(android.content.Context, android.telecom.PhoneAccountHandle, int, int, int);
     field public static final java.lang.String CONFIGURATION_STATE = "configuration_state";
     field public static final int CONFIGURATION_STATE_CAN_BE_CONFIGURED = 2; // 0x2
     field public static final int CONFIGURATION_STATE_NOT_CONFIGURED = 1; // 0x1
@@ -29021,9 +29020,6 @@ package android.provider {
 
   public static final class VoicemailContract.Voicemails implements android.provider.BaseColumns android.provider.OpenableColumns {
     method public static android.net.Uri buildSourceUri(java.lang.String);
-    method public static int deleteAll(android.content.Context);
-    method public static android.net.Uri insert(android.content.Context, android.telecom.Voicemail);
-    method public static int insert(android.content.Context, java.util.List<android.telecom.Voicemail>);
     field public static final android.net.Uri CONTENT_URI;
     field public static final java.lang.String DATE = "date";
     field public static final java.lang.String DELETED = "deleted";

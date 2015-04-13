@@ -19,7 +19,6 @@ package android.provider;
 import android.Manifest;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
-import android.annotation.SystemApi;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
@@ -258,7 +257,6 @@ public class VoicemailContract {
          *
          * @hide
          */
-        @SystemApi
         public static Uri insert(Context context, Voicemail voicemail) {
             ContentResolver contentResolver = context.getContentResolver();
             ContentValues contentValues = getContentValues(voicemail);
@@ -274,7 +272,6 @@ public class VoicemailContract {
          *
          * @hide
          */
-        @SystemApi
         public static int insert(Context context, List<Voicemail> voicemails) {
             ContentResolver contentResolver = context.getContentResolver();
             int count = voicemails.size();
@@ -293,7 +290,6 @@ public class VoicemailContract {
          *
          * @hide
          */
-        @SystemApi
         public static int deleteAll(Context context) {
             return context.getContentResolver().delete(
                     buildSourceUri(context.getPackageName()), "", new String[0]);
@@ -452,7 +448,6 @@ public class VoicemailContract {
          *
          * @hide
          */
-        @SystemApi
         public static void setStatus(Context context, PhoneAccountHandle accountHandle,
                 int configurationState, int dataChannelState, int notificationChannelState) {
             ContentResolver contentResolver = context.getContentResolver();
