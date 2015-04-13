@@ -14799,7 +14799,7 @@ package android.media {
     method public static float getMaxVolume();
     method public static int getMinBufferSize(int, int, int);
     method public static float getMinVolume();
-    method protected deprecated int getNativeFrameCount();
+    method public int getNativeFrameCount() throws java.lang.IllegalStateException;
     method public static int getNativeOutputSampleRate(int);
     method public int getNotificationMarkerPosition();
     method public int getPlayState();

@@ -214,6 +214,8 @@ public class AudioTrack
     private final Object mPlayStateLock = new Object();
     /**
      * Sizes of the native audio buffer.
+     * These values are set during construction and can be stale.
+     * To obtain the current native audio buffer frame count use {@link #getNativeFrameCount()}.
      */
     private int mNativeBufferSizeInBytes = 0;
     private int mNativeBufferSizeInFrames = 0;
@@ -312,15 +314,20 @@ public class AudioTrack
      *   {@link AudioFormat#ENCODING_PCM_8BIT},
      *   and {@link AudioFormat#ENCODING_PCM_FLOAT}.
      * @param bufferSizeInBytes the total size (in bytes) of the internal buffer where audio data is
-     *   read from for playback.
-     *   If track's creation mode is {@link #MODE_STREAM}, you can write data into
-     *   this buffer in chunks less than or equal to this size, and it is typical to use
-     *   chunks of 1/2 of the total size to permit double-buffering.
-     *   If the track's creation mode is {@link #MODE_STATIC},
+     *   read from for playback. This should be a multiple of the frame size in bytes.
+     *   <p> If the track's creation mode is {@link #MODE_STATIC},
      *   this is the maximum length sample, or audio clip, that can be played by this instance.
-     *   See {@link #getMinBufferSize(int, int, int)} to determine the minimum required buffer size
-     *   for the successful creation of an AudioTrack instance in streaming mode. Using values
-     *   smaller than getMinBufferSize() will result in an initialization failure.
+     *   <p> If the track's creation mode is {@link #MODE_STREAM},
+     *   this should be the desired buffer size
+     *   for the <code>AudioTrack</code> to satisfy the application's
+     *   natural latency requirements.
+     *   If <code>bufferSizeInBytes</code> is less than the
+     *   minimum buffer size for the output sink, it is automatically increased to the minimum
+     *   buffer size.
+     *   The method {@link #getNativeFrameCount()} returns the
+     *   actual size in frames of the native buffer created, which
+     *   determines the frequency to write
+     *   to the streaming <code>AudioTrack</code> to avoid underrun.
      * @param mode streaming or static buffer. See {@link #MODE_STATIC} and {@link #MODE_STREAM}
      * @throws java.lang.IllegalArgumentException
      */
@@ -512,8 +519,10 @@ public class AudioTrack
      * {@link AudioManager#PROPERTY_OUTPUT_SAMPLE_RATE}), its channel configuration will be
      * {@link AudioFormat#CHANNEL_OUT_STEREO} and the encoding will be
      * {@link AudioFormat#ENCODING_PCM_16BIT}.
+     * <br>If the buffer size is not specified with {@link #setBufferSizeInBytes(int)},
+     * and the mode is {@link AudioTrack#MODE_STREAM}, the minimum buffer size is used.
      * <br>If the transfer mode is not specified with {@link #setTransferMode(int)},
-     * {@link AudioTrack#MODE_STREAM} will be used.
+     * <code>MODE_STREAM</code> will be used.
      * <br>If the session ID is not specified with {@link #setSessionId(int)}, a new one will
      * be generated.
      */
@@ -648,6 +657,13 @@ public class AudioTrack
                         .build();
             }
             try {
+                // If the buffer size is not specified in streaming mode,
+                // use a single frame for the buffer size and let the
+                // native code figure out the minimum buffer size.
+                if (mMode == MODE_STREAM && mBufferSizeInBytes == 0) {
+                    mBufferSizeInBytes = mFormat.getChannelCount()
+                            * mFormat.getBytesPerSample(mFormat.getEncoding());
+                }
                 return new AudioTrack(mAttributes, mFormat, mBufferSizeInBytes, mMode, mSessionId);
             } catch (IllegalArgumentException e) {
                 throw new UnsupportedOperationException(e.getMessage());
@@ -986,19 +1002,22 @@ public class AudioTrack
     }
 
     /**
-     *  Returns the "native frame count", derived from the bufferSizeInBytes specified at
-     *  creation time and converted to frame units.
-     *  If track's creation mode is {@link #MODE_STATIC},
-     *  it is equal to the specified bufferSizeInBytes converted to frame units.
-     *  If track's creation mode is {@link #MODE_STREAM},
-     *  it is typically greater than or equal to the specified bufferSizeInBytes converted to frame
-     *  units; it may be rounded up to a larger value if needed by the target device implementation.
-     *  @deprecated Only accessible by subclasses, which are not recommended for AudioTrack.
-     *  See {@link AudioManager#getProperty(String)} for key
+     *  Returns the "native frame count" of the <code>AudioTrack</code> buffer.
+     *  <p> If the track's creation mode is {@link #MODE_STATIC},
+     *  it is equal to the specified bufferSizeInBytes on construction, converted to frame units.
+     *  A static track's native frame count will not change.
+     *  <p> If the track's creation mode is {@link #MODE_STREAM},
+     *  it is greater than or equal to the specified bufferSizeInBytes converted to frame units.
+     *  For streaming tracks, this value may be rounded up to a larger value if needed by
+     *  the target output sink, and
+     *  if the track is subsequently routed to a different output sink, the native
+     *  frame count may enlarge to accommodate.
+     *  See also {@link AudioManager#getProperty(String)} for key
      *  {@link AudioManager#PROPERTY_OUTPUT_FRAMES_PER_BUFFER}.
+     *  @return current size in frames of the audio track buffer.
+     *  @throws IllegalStateException
      */
-    @Deprecated
-    protected int getNativeFrameCount() {
+    public int getNativeFrameCount() throws IllegalStateException {
         return native_get_native_frame_count();
     }
 
