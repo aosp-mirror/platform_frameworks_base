@@ -380,6 +380,26 @@ public class FingerprintManager {
      */
     public void authenticate(@Nullable CryptoObject crypto, @Nullable CancellationSignal cancel,
             @NonNull AuthenticationCallback callback, int flags) {
+        authenticate(crypto, cancel, callback, flags, UserHandle.myUserId());
+    }
+
+    /**
+     * Request authentication of a crypto object. This call warms up the fingerprint hardware
+     * and starts scanning for a fingerprint. It terminates when
+     * {@link AuthenticationCallback#onAuthenticationError(int, CharSequence)} or
+     * {@link AuthenticationCallback#onAuthenticationSucceeded(AuthenticationResult) is called, at
+     * which point the object is no longer valid. The operation can be canceled by using the
+     * provided cancel object.
+     *
+     * @param crypto object associated with the call or null if none required.
+     * @param cancel an object that can be used to cancel authentication
+     * @param callback an object to receive authentication events
+     * @param flags optional flags; should be 0
+     * @param userId the userId the fingerprint belongs to
+     * @hide
+     */
+    public void authenticate(@Nullable CryptoObject crypto, @Nullable CancellationSignal cancel,
+            @NonNull AuthenticationCallback callback, int flags, int userId) {
         if (callback == null) {
             throw new IllegalArgumentException("Must supply an authentication callback");
         }
@@ -397,7 +417,7 @@ public class FingerprintManager {
             mAuthenticationCallback = callback;
             mCryptoObject = crypto;
             long sessionId = crypto != null ? crypto.getOpId() : 0;
-            mService.authenticate(mToken, sessionId, getCurrentUserId(), mServiceReceiver, flags);
+            mService.authenticate(mToken, sessionId, userId, mServiceReceiver, flags);
         } catch (RemoteException e) {
             Log.w(TAG, "Remote exception while authenticating: ", e);
             if (callback != null) {

@@ -16,6 +16,7 @@
 
 package com.android.keyguard;
 
+import android.app.ActivityManager;
 import android.app.ActivityManagerNative;
 import android.app.AlarmManager;
 import android.app.IUserSwitchObserver;
@@ -795,7 +796,8 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
                 mFingerprintCancelSignal.cancel();
             }
             mFingerprintCancelSignal = new CancellationSignal();
-            mFpm.authenticate(null, mFingerprintCancelSignal, mAuthenticationCallback, 0);
+            mFpm.authenticate(null, mFingerprintCancelSignal, mAuthenticationCallback, 0,
+                    ActivityManager.getCurrentUser());
             setFingerprintRunningDetectionRunning(true);
         }
     }
