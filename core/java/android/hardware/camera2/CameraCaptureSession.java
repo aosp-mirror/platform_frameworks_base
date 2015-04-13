@@ -65,6 +65,12 @@ import java.util.List;
 public abstract class CameraCaptureSession implements AutoCloseable {
 
     /**
+     * Used to identify invalid session ID.
+     * @hide
+     */
+    public static final int SESSION_ID_NONE = -1;
+
+    /**
      * Get the camera device that this session is created for.
      */
     public abstract CameraDevice getDevice();
@@ -168,10 +174,11 @@ public abstract class CameraCaptureSession implements AutoCloseable {
      * @throws IllegalArgumentException if the request targets no Surfaces or Surfaces that are not
      *                                  configured as outputs for this session; or a reprocess
      *                                  capture request is submitted in a non-reprocessible capture
-     *                                  session; or the capture targets a Surface in the middle
-     *                                  of being {@link #prepare prepared}; or the handler is
-     *                                  null, the listener is not null, and the calling thread has
-     *                                  no looper.
+     *                                  session; or the reprocess capture request was created with
+     *                                  a {@link TotalCaptureResult} from a different session; or
+     *                                  the capture targets a Surface in the middle of being
+     *                                  {@link #prepare prepared}; or the handler is null, the
+     *                                  listener is not null, and the calling thread has no looper.
      *
      * @see #captureBurst
      * @see #setRepeatingRequest
@@ -226,7 +233,9 @@ public abstract class CameraCaptureSession implements AutoCloseable {
      *                                  capture request is submitted in a non-reprocessible capture
      *                                  session; or the list of requests contains both requests to
      *                                  capture images from the camera and reprocess capture
-     *                                  requests; or one of the captures targets a Surface in the
+     *                                  requests; or one of the reprocess capture requests was
+     *                                  created with a {@link TotalCaptureResult} from a different
+     *                                  session; or one of the captures targets a Surface in the
      *                                  middle of being {@link #prepare prepared}; or if the handler
      *                                  is null, the listener is not null, and the calling thread
      *                                  has no looper.

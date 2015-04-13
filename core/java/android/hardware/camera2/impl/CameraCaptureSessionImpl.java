@@ -156,8 +156,9 @@ public class CameraCaptureSessionImpl extends CameraCaptureSession {
         } else if (request.isReprocess() && !isReprocessible()) {
             throw new IllegalArgumentException("this capture session cannot handle reprocess " +
                     "requests");
+        } else if (request.isReprocess() && request.getReprocessibleSessionId() != mId) {
+            throw new IllegalArgumentException("capture request was created for another session");
         }
-
 
         checkNotClosed();
 
@@ -185,12 +186,17 @@ public class CameraCaptureSessionImpl extends CameraCaptureSession {
         if (reprocess && !isReprocessible()) {
             throw new IllegalArgumentException("this capture session cannot handle reprocess " +
                     "requests");
+        } else if (reprocess && requests.get(0).getReprocessibleSessionId() != mId) {
+            throw new IllegalArgumentException("capture request was created for another session");
         }
 
         for (int i = 1; i < requests.size(); i++) {
             if (requests.get(i).isReprocess() != reprocess) {
                 throw new IllegalArgumentException("cannot mix regular and reprocess capture " +
                         " requests");
+            } else if (reprocess && requests.get(i).getReprocessibleSessionId() != mId) {
+                throw new IllegalArgumentException("capture request was created for another " +
+                    "session");
             }
         }
 
