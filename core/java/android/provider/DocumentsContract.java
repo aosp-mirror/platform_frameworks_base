@@ -107,7 +107,12 @@ public final class DocumentsContract {
     public static final String ACTION_MANAGE_DOCUMENT = "android.provider.action.MANAGE_DOCUMENT";
 
     /** {@hide} */
-    public static final String ACTION_BROWSE_ROOT = "android.provider.action.BROWSE_ROOT";
+    public static final String
+            ACTION_BROWSE_DOCUMENT_ROOT = "android.provider.action.BROWSE_DOCUMENT_ROOT";
+
+    /** {@hide} */
+    public static final String
+            ACTION_DOCUMENT_ROOT_SETTINGS = "android.provider.action.DOCUMENT_ROOT_SETTINGS";
 
     /**
      * Buffer is large enough to rewind past any EXIF headers.
@@ -476,6 +481,15 @@ public final class DocumentsContract {
          * @hide
          */
         public static final int FLAG_ADVANCED = 1 << 17;
+
+        /**
+         * Flag indicating that this root has settings.
+         *
+         * @see #COLUMN_FLAGS
+         * @see DocumentsContract#ACTION_DOCUMENT_ROOT_SETTINGS
+         * @hide
+         */
+        public static final int FLAG_HAS_SETTINGS = 1 << 18;
     }
 
     /**

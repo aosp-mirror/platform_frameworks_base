@@ -235,7 +235,7 @@ public class DocumentsActivity extends BaseActivity {
             mState.action = ACTION_OPEN_TREE;
         } else if (DocumentsContract.ACTION_MANAGE_ROOT.equals(action)) {
             mState.action = ACTION_MANAGE;
-        } else if (DocumentsContract.ACTION_BROWSE_ROOT.equals(action)) {
+        } else if (DocumentsContract.ACTION_BROWSE_DOCUMENT_ROOT.equals(action)) {
             mState.action = ACTION_BROWSE;
         } else if (ACTION_OPEN_COPY_DESTINATION_STRING.equals(action)) {
             mState.action = ACTION_OPEN_COPY_DESTINATION;
@@ -557,6 +557,7 @@ public class DocumentsActivity extends BaseActivity {
         final MenuItem list = menu.findItem(R.id.menu_list);
         final MenuItem advanced = menu.findItem(R.id.menu_advanced);
         final MenuItem fileSize = menu.findItem(R.id.menu_file_size);
+        final MenuItem settings = menu.findItem(R.id.menu_settings);
 
         sort.setVisible(cwd != null);
         grid.setVisible(mState.derivedMode != MODE_GRID);
@@ -618,6 +619,9 @@ public class DocumentsActivity extends BaseActivity {
         advanced.setVisible(!(mState.action == ACTION_MANAGE || mState.action == ACTION_BROWSE));
         fileSize.setVisible(fileSizeVisible);
 
+        settings.setVisible((mState.action == ACTION_MANAGE || mState.action == ACTION_BROWSE)
+                && (root.flags & Root.FLAG_HAS_SETTINGS) != 0);
+
         return true;
     }
 
@@ -656,6 +660,13 @@ public class DocumentsActivity extends BaseActivity {
             return true;
         } else if (id == R.id.menu_file_size) {
             setDisplayFileSize(!LocalPreferences.getDisplayFileSize(this));
+            return true;
+        } else if (id == R.id.menu_settings) {
+            final RootInfo root = getCurrentRoot();
+            final Intent intent = new Intent(DocumentsContract.ACTION_DOCUMENT_ROOT_SETTINGS);
+            intent.setDataAndType(DocumentsContract.buildRootUri(root.authority, root.rootId),
+                    DocumentsContract.Root.MIME_TYPE_ITEM);
+            startActivity(intent);
             return true;
         } else {
             return super.onOptionsItemSelected(item);

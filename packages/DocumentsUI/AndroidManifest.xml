@@ -41,7 +41,7 @@
                 <data android:mimeType="vnd.android.document/root" />
             </intent-filter>
             <intent-filter>
-                <action android:name="android.provider.action.BROWSE_ROOT" />
+                <action android:name="android.provider.action.BROWSE_DOCUMENT_ROOT" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <data android:mimeType="vnd.android.document/root" />
             </intent-filter>
