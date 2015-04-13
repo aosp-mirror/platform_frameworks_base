@@ -110,6 +110,5 @@
     <string name="keyguard_carrier_default" msgid="8700650403054042153">"No service."</string>
     <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"Switch input method button."</string>
     <string name="airplane_mode" msgid="3122107900897202805">"Aeroplane mode"</string>
-    <!-- no translation found for fingerprint_not_recognized (2690661881608146617) -->
-    <skip />
+    <string name="fingerprint_not_recognized" msgid="2690661881608146617">"Not recognised"</string>
 </resources>

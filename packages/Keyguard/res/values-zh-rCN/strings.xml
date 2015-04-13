@@ -56,8 +56,7 @@
     <string name="keyguard_accessibility_next_alarm" msgid="7269583073750518672">"下次闹钟时间已设置为<xliff:g id="ALARM">%1$s</xliff:g>"</string>
     <string name="keyboardview_keycode_delete" msgid="3337914833206635744">"Delete"</string>
     <string name="keyboardview_keycode_enter" msgid="2985864015076059467">"Enter"</string>
-    <!-- no translation found for kg_emergency_call_label (635955021540347194) -->
-    <skip />
+    <string name="kg_emergency_call_label" msgid="635955021540347194">"紧急呼救"</string>
     <string name="kg_forgot_pattern_button_text" msgid="8852021467868220608">"忘记了图案"</string>
     <string name="kg_wrong_pattern" msgid="1850806070801358830">"图案错误"</string>
     <string name="kg_wrong_password" msgid="2333281762128113157">"密码错误"</string>

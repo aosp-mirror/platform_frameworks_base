@@ -110,6 +110,5 @@
     <string name="keyguard_carrier_default" msgid="8700650403054042153">"कुनै सेवा छैन।"</string>
     <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"इनपुट विधि बटन स्विच गर्नुहोस्।"</string>
     <string name="airplane_mode" msgid="3122107900897202805">"हवाइजहाज मोड"</string>
-    <!-- no translation found for fingerprint_not_recognized (2690661881608146617) -->
-    <skip />
+    <string name="fingerprint_not_recognized" msgid="2690661881608146617">"चिनिएको छैन"</string>
 </resources>
