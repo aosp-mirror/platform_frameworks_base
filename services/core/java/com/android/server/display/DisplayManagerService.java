@@ -40,11 +40,13 @@ import android.os.IBinder;
 import android.os.IBinder.DeathRecipient;
 import android.os.Looper;
 import android.os.Message;
+import android.os.PowerManager;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.SystemProperties;
+import android.os.Trace;
 import android.text.TextUtils;
 import android.util.Slog;
 import android.util.SparseArray;
@@ -179,7 +181,11 @@ public final class DisplayManagerService extends SystemService {
 
     // The overall display state, independent of changes that might influence one
     // display or another in particular.
-    private int mGlobalDisplayState = Display.STATE_UNKNOWN;
+    private int mGlobalDisplayState = Display.STATE_ON;
+
+    // The overall display brightness.
+    // For now, this only applies to the built-in display but we may split it up eventually.
+    private int mGlobalDisplayBrightness = PowerManager.BRIGHTNESS_DEFAULT;
 
     // Set to true when there are pending display changes that have yet to be applied
     // to the surface flinger state.
@@ -226,6 +232,9 @@ public final class DisplayManagerService extends SystemService {
         mUiHandler = UiThread.getHandler();
         mDisplayAdapterListener = new DisplayAdapterListener();
         mSingleDisplayDemoMode = SystemProperties.getBoolean("persist.demo.singledisplay", false);
+
+        PowerManager pm = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
+        mGlobalDisplayBrightness = pm.getDefaultScreenBrightnessSetting();
     }
 
     @Override
@@ -322,16 +331,34 @@ public final class DisplayManagerService extends SystemService {
         }
     }
 
-    private void requestGlobalDisplayStateInternal(int state) {
+    private void requestGlobalDisplayStateInternal(int state, int brightness) {
+        if (state == Display.STATE_UNKNOWN) {
+            state = Display.STATE_ON;
+        }
+        if (state == Display.STATE_OFF) {
+            brightness = PowerManager.BRIGHTNESS_OFF;
+        } else if (brightness < 0) {
+            brightness = PowerManager.BRIGHTNESS_DEFAULT;
+        } else if (brightness > PowerManager.BRIGHTNESS_ON) {
+            brightness = PowerManager.BRIGHTNESS_ON;
+        }
+
         synchronized (mTempDisplayStateWorkQueue) {
             try {
                 // Update the display state within the lock.
                 synchronized (mSyncRoot) {
-                    if (mGlobalDisplayState != state) {
-                        mGlobalDisplayState = state;
-                        updateGlobalDisplayStateLocked(mTempDisplayStateWorkQueue);
-                        scheduleTraversalLocked(false);
+                    if (mGlobalDisplayState == state
+                            && mGlobalDisplayBrightness == brightness) {
+                        return; // no change
                     }
+
+                    Trace.traceBegin(Trace.TRACE_TAG_POWER, "requestGlobalDisplayState("
+                            + Display.stateToString(state)
+                            + ", brightness=" + brightness + ")");
+                    mGlobalDisplayState = state;
+                    mGlobalDisplayBrightness = brightness;
+                    updateGlobalDisplayStateLocked(mTempDisplayStateWorkQueue);
+                    scheduleTraversalLocked(false);
                 }
 
                 // Setting the display power state can take hundreds of milliseconds
@@ -341,6 +368,7 @@ public final class DisplayManagerService extends SystemService {
                 for (int i = 0; i < mTempDisplayStateWorkQueue.size(); i++) {
                     mTempDisplayStateWorkQueue.get(i).run();
                 }
+                Trace.traceEnd(Trace.TRACE_TAG_POWER);
             } finally {
                 mTempDisplayStateWorkQueue.clear();
             }
@@ -708,7 +736,7 @@ public final class DisplayManagerService extends SystemService {
         // by the display power controller (if known).
         DisplayDeviceInfo info = device.getDisplayDeviceInfoLocked();
         if ((info.flags & DisplayDeviceInfo.FLAG_NEVER_BLANK) == 0) {
-            return device.requestDisplayStateLocked(mGlobalDisplayState);
+            return device.requestDisplayStateLocked(mGlobalDisplayState, mGlobalDisplayBrightness);
         }
         return null;
     }
@@ -1462,16 +1490,16 @@ public final class DisplayManagerService extends SystemService {
             synchronized (mSyncRoot) {
                 DisplayBlanker blanker = new DisplayBlanker() {
                     @Override
-                    public void requestDisplayState(int state) {
+                    public void requestDisplayState(int state, int brightness) {
                         // The order of operations is important for legacy reasons.
                         if (state == Display.STATE_OFF) {
-                            requestGlobalDisplayStateInternal(state);
+                            requestGlobalDisplayStateInternal(state, brightness);
                         }
 
                         callbacks.onDisplayStateChange(state);
 
                         if (state != Display.STATE_OFF) {
-                            requestGlobalDisplayStateInternal(state);
+                            requestGlobalDisplayStateInternal(state, brightness);
                         }
                     }
                 };

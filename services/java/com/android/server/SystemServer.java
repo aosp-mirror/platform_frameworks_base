@@ -325,6 +325,9 @@ public final class SystemServer {
         // initialize power management features.
         mActivityManagerService.initPowerManagement();
 
+        // Manages LEDs and display backlight so we need it to bring up the display.
+        mSystemServiceManager.startService(LightsService.class);
+
         // Display manager is needed to provide display metrics before package manager
         // starts up.
         mDisplayManagerService = mSystemServiceManager.startService(DisplayManagerService.class);
@@ -363,9 +366,6 @@ public final class SystemServer {
      * Starts some essential services that are not tangled up in the bootstrap process.
      */
     private void startCoreServices() {
-        // Manages LEDs and display backlight.
-        mSystemServiceManager.startService(LightsService.class);
-
         // Tracks the battery level.  Requires LightService.
         mSystemServiceManager.startService(BatteryService.class);
 

@@ -19,15 +19,10 @@ package com.android.server.lights;
 import com.android.server.SystemService;
 
 import android.content.Context;
-import android.content.pm.PackageManager;
 import android.os.Handler;
-import android.os.IHardwareService;
 import android.os.Message;
 import android.os.Trace;
 import android.util.Slog;
-
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 
 public class LightsService extends SystemService {
     static final String TAG = "LightsService";
@@ -124,46 +119,6 @@ public class LightsService extends SystemService {
         private boolean mFlashing;
     }
 
-    /* This class implements an obsolete API that was removed after eclair and re-added during the
-     * final moments of the froyo release to support flashlight apps that had been using the private
-     * IHardwareService API. This is expected to go away in the next release.
-     */
-    private final IHardwareService.Stub mLegacyFlashlightHack = new IHardwareService.Stub() {
-
-        private static final String FLASHLIGHT_FILE = "/sys/class/leds/spotlight/brightness";
-
-        public boolean getFlashlightEnabled() {
-            try {
-                FileInputStream fis = new FileInputStream(FLASHLIGHT_FILE);
-                int result = fis.read();
-                fis.close();
-                return (result != '0');
-            } catch (Exception e) {
-                return false;
-            }
-        }
-
-        public void setFlashlightEnabled(boolean on) {
-            final Context context = getContext();
-            if (context.checkCallingOrSelfPermission(android.Manifest.permission.FLASHLIGHT)
-                    != PackageManager.PERMISSION_GRANTED &&
-                    context.checkCallingOrSelfPermission(android.Manifest.permission.HARDWARE_TEST)
-                    != PackageManager.PERMISSION_GRANTED) {
-                throw new SecurityException("Requires FLASHLIGHT or HARDWARE_TEST permission");
-            }
-            try {
-                FileOutputStream fos = new FileOutputStream(FLASHLIGHT_FILE);
-                byte[] bytes = new byte[2];
-                bytes[0] = (byte)(on ? '1' : '0');
-                bytes[1] = '\n';
-                fos.write(bytes);
-                fos.close();
-            } catch (Exception e) {
-                // fail silently
-            }
-        }
-    };
-
     public LightsService(Context context) {
         super(context);
 
@@ -176,13 +131,12 @@ public class LightsService extends SystemService {
 
     @Override
     public void onStart() {
-        publishBinderService("hardware", mLegacyFlashlightHack);
         publishLocalService(LightsManager.class, mService);
     }
 
     private final LightsManager mService = new LightsManager() {
         @Override
-        public com.android.server.lights.Light getLight(int id) {
+        public Light getLight(int id) {
             if (id < LIGHT_ID_COUNT) {
                 return mLights[id];
             } else {
