@@ -55,7 +55,7 @@ public class StubProvider extends DocumentsProvider {
     };
 
     private String mRootDocumentId;
-    private HashMap<String, File> mStorage = new HashMap<String, File>();
+    private HashMap<String, StubDocument> mStorage = new HashMap<String, StubDocument>();
     private int mStorageUsedBytes;
     private Object mWriteLock = new Object();
     private String mAuthority;
@@ -70,8 +70,9 @@ public class StubProvider extends DocumentsProvider {
     public boolean onCreate() {
         final File cacheDir = getContext().getCacheDir();
         removeRecursively(cacheDir);
-        mRootDocumentId = getDocumentIdForFile(cacheDir);
-        mStorage.put(mRootDocumentId, cacheDir);
+        final StubDocument document = new StubDocument(cacheDir, Document.MIME_TYPE_DIR);
+        mRootDocumentId = document.documentId;
+        mStorage.put(mRootDocumentId, document);
         return true;
     }
 
@@ -90,7 +91,7 @@ public class StubProvider extends DocumentsProvider {
     @Override
     public Cursor queryDocument(String documentId, String[] projection) throws FileNotFoundException {
         final MatrixCursor result = new MatrixCursor(projection != null ? projection : DEFAULT_DOCUMENT_PROJECTION);
-        final File file = mStorage.get(documentId);
+        final StubDocument file = mStorage.get(documentId);
         if (file == null) {
             throw new FileNotFoundException();
         }
@@ -100,23 +101,19 @@ public class StubProvider extends DocumentsProvider {
 
     @Override
     public boolean isChildDocument(String parentDocId, String docId) {
-        try {
-            final File parentFile = getFileForDocumentId(parentDocId).getCanonicalFile();
-            final File childFile = getFileForDocumentId(docId).getCanonicalFile();
-            return FileUtils.contains(parentFile, childFile);
-        } catch (IOException e) {
-            throw new IllegalArgumentException();
-        }
+        final StubDocument parentDocument = mStorage.get(parentDocId);
+        final StubDocument childDocument = mStorage.get(docId);
+        return FileUtils.contains(parentDocument.file, childDocument.file);
     }
 
     @Override
     public String createDocument(String parentDocumentId, String mimeType, String displayName)
             throws FileNotFoundException {
-        final File parentFile = mStorage.get(parentDocumentId);
-        if (parentFile == null || !parentFile.isDirectory()) {
+        final StubDocument parentDocument = mStorage.get(parentDocumentId);
+        if (parentDocument == null || !parentDocument.file.isDirectory()) {
             throw new FileNotFoundException();
         }
-        final File file = new File(parentFile, displayName);
+        final File file = new File(parentDocument.file, displayName);
         if (mimeType.equals(Document.MIME_TYPE_DIR)) {
             if (!file.mkdirs()) {
                 throw new FileNotFoundException();
@@ -132,17 +129,17 @@ public class StubProvider extends DocumentsProvider {
             }
         }
 
-        final String documentId = getDocumentIdForFile(file);
-        mStorage.put(documentId, file);
-        return documentId;
+        final StubDocument document = new StubDocument(file, mimeType);
+        mStorage.put(document.documentId, document);
+        return document.documentId;
     }
 
     @Override
     public void deleteDocument(String documentId)
             throws FileNotFoundException {
-        final File file = mStorage.get(documentId);
-        final long fileSize = file.length();
-        if (file == null || !file.delete())
+        final StubDocument document = mStorage.get(documentId);
+        final long fileSize = document.file.length();
+        if (document == null || !document.file.delete())
             throw new FileNotFoundException();
         synchronized (mWriteLock) {
             mStorageUsedBytes -= fileSize;
@@ -154,12 +151,15 @@ public class StubProvider extends DocumentsProvider {
     public Cursor queryChildDocuments(String parentDocumentId, String[] projection, String sortOrder)
             throws FileNotFoundException {
         final MatrixCursor result = new MatrixCursor(projection != null ? projection : DEFAULT_DOCUMENT_PROJECTION);
-        final File parentFile = mStorage.get(parentDocumentId);
-        if (parentFile == null || parentFile.isFile()) {
+        final StubDocument parentDocument = mStorage.get(parentDocumentId);
+        if (parentDocument == null || parentDocument.file.isFile()) {
             throw new FileNotFoundException();
         }
-        for (File file : parentFile.listFiles()) {
-            includeFile(result, file);
+        StubDocument document;
+        for (File file : parentDocument.file.listFiles()) {
+            document = mStorage.get(StubDocument.getDocumentIdForFile(file));
+            if (document != null)
+                includeFile(result, document);
         }
         return result;
     }
@@ -173,10 +173,17 @@ public class StubProvider extends DocumentsProvider {
     @Override
     public ParcelFileDescriptor openDocument(String docId, String mode, CancellationSignal signal)
             throws FileNotFoundException {
-        // TODO: Add support for reading files.
-        if ("w".equals(mode)) {
-            return startWrite(docId);
+        final StubDocument document = mStorage.get(docId);
+        if (document == null || !document.file.isFile())
+            throw new FileNotFoundException();
+
+        if ("r".equals(mode)) {
+            return ParcelFileDescriptor.open(document.file, ParcelFileDescriptor.MODE_READ_ONLY);
         }
+        if ("w".equals(mode)) {
+            return startWrite(document);
+        }
+
         throw new FileNotFoundException();
     }
 
@@ -186,11 +193,8 @@ public class StubProvider extends DocumentsProvider {
         throw new FileNotFoundException();
     }
 
-    private ParcelFileDescriptor startWrite(String docId)
+    private ParcelFileDescriptor startWrite(final StubDocument document)
             throws FileNotFoundException {
-        final File file = mStorage.get(docId);
-        if (file == null || !file.isFile())
-            throw new FileNotFoundException();
         ParcelFileDescriptor[] pipe;
         try {
             pipe = ParcelFileDescriptor.createReliablePipe();
@@ -206,7 +210,7 @@ public class StubProvider extends DocumentsProvider {
             public void run() {
                 try {
                     final FileInputStream inputStream = new FileInputStream(readPipe.getFileDescriptor());
-                    final FileOutputStream outputStream = new FileOutputStream(file);
+                    final FileOutputStream outputStream = new FileOutputStream(document.file);
                     byte[] buffer = new byte[32 * 1024];
                     int bytesToRead;
                     int bytesRead = 0;
@@ -259,30 +263,21 @@ public class StubProvider extends DocumentsProvider {
         getContext().getContentResolver().notifyChange(DocumentsContract.buildRootsUri(mAuthority), null, false);
     }
 
-    private void includeFile(MatrixCursor result, File file) {
+    private void includeFile(MatrixCursor result, StubDocument document) {
         final RowBuilder row = result.newRow();
-        row.add(Document.COLUMN_DOCUMENT_ID, getDocumentIdForFile(file));
-        row.add(Document.COLUMN_DISPLAY_NAME, file.getName());
-        row.add(Document.COLUMN_SIZE, file.length());
-        // TODO: Provide real mime type for files.
-        row.add(Document.COLUMN_MIME_TYPE, file.isDirectory() ? Document.MIME_TYPE_DIR : "application/octet-stream");
+        row.add(Document.COLUMN_DOCUMENT_ID, document.documentId);
+        row.add(Document.COLUMN_DISPLAY_NAME, document.file.getName());
+        row.add(Document.COLUMN_SIZE, document.file.length());
+        row.add(Document.COLUMN_MIME_TYPE, document.mimeType);
         int flags = Document.FLAG_SUPPORTS_DELETE;
         // TODO: Add support for renaming.
-        if (file.isDirectory()) {
+        if (document.file.isDirectory()) {
             flags |= Document.FLAG_DIR_SUPPORTS_CREATE;
         } else {
             flags |= Document.FLAG_SUPPORTS_WRITE;
         }
         row.add(Document.COLUMN_FLAGS, flags);
-        row.add(Document.COLUMN_LAST_MODIFIED, file.lastModified());
-    }
-
-    private String getDocumentIdForFile(File file) {
-        return file.getAbsolutePath();
-    }
-
-    private File getFileForDocumentId(String documentId) {
-        return new File(documentId);
+        row.add(Document.COLUMN_LAST_MODIFIED, document.file.lastModified());
     }
 
     private void removeRecursively(File file) {
@@ -292,5 +287,21 @@ public class StubProvider extends DocumentsProvider {
             }
             childFile.delete();
         }
+    }
+}
+
+class StubDocument {
+    public final File file;
+    public final String mimeType;
+    public final String documentId;
+
+    StubDocument(File file, String mimeType) {
+        this.file = file;
+        this.mimeType = this.mimeType;
+        this.documentId = getDocumentIdForFile(file);
+    }
+
+    public static String getDocumentIdForFile(File file) {
+        return file.getAbsolutePath();
     }
 }
