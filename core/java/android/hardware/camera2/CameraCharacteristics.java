@@ -639,7 +639,8 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
 
     /**
      * <p>Whether the camera device supports {@link CaptureRequest#CONTROL_AE_LOCK android.control.aeLock}</p>
-     * <p>LIMITED or FULL devices will always list <code>true</code></p>
+     * <p>Devices with MANUAL_SENSOR capability or BURST_CAPTURE capability will always
+     * list <code>true</code>. This includes FULL devices.</p>
      * <p>This key is available on all devices.</p>
      *
      * @see CaptureRequest#CONTROL_AE_LOCK
@@ -650,7 +651,8 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
 
     /**
      * <p>Whether the camera device supports {@link CaptureRequest#CONTROL_AWB_LOCK android.control.awbLock}</p>
-     * <p>LIMITED or FULL devices will always list <code>true</code></p>
+     * <p>Devices with MANUAL_POST_PROCESSING capability or BURST_CAPTURE capability will
+     * always list <code>true</code>. This includes FULL devices.</p>
      * <p>This key is available on all devices.</p>
      *
      * @see CaptureRequest#CONTROL_AWB_LOCK
