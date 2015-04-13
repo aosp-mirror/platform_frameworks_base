@@ -6042,6 +6042,7 @@
             <!-- child animations should be played sequentially, in the same order as the xml. -->
             <enum name="sequentially" value="1" />
         </attr>
+        <attr name="durationScaleHint" />
     </declare-styleable>
 
     <!-- ========================== -->

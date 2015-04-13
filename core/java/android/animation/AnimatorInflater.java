@@ -698,7 +698,7 @@ public class AnimatorInflater {
                 int ordering = a.getInt(R.styleable.AnimatorSet_ordering, TOGETHER);
                 createAnimatorFromXml(res, theme, parser, attrs, (AnimatorSet) anim, ordering,
                         pixelSize);
-                final int hint = a.getInt(R.styleable.Animator_durationScaleHint,
+                final int hint = a.getInt(R.styleable.AnimatorSet_durationScaleHint,
                         HINT_NO_SCALE);
                 anim.setDurationScaleHint(hint, res);
                 a.recycle();
