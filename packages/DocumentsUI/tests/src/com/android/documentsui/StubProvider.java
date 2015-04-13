@@ -70,7 +70,7 @@ public class StubProvider extends DocumentsProvider {
     public boolean onCreate() {
         final File cacheDir = getContext().getCacheDir();
         removeRecursively(cacheDir);
-        final StubDocument document = new StubDocument(cacheDir, Document.MIME_TYPE_DIR);
+        final StubDocument document = new StubDocument(cacheDir, Document.MIME_TYPE_DIR, null);
         mRootDocumentId = document.documentId;
         mStorage.put(mRootDocumentId, document);
         return true;
@@ -95,7 +95,7 @@ public class StubProvider extends DocumentsProvider {
         if (file == null) {
             throw new FileNotFoundException();
         }
-        includeFile(result, file);
+        includeDocument(result, file);
         return result;
     }
 
@@ -129,8 +129,9 @@ public class StubProvider extends DocumentsProvider {
             }
         }
 
-        final StubDocument document = new StubDocument(file, mimeType);
+        final StubDocument document = new StubDocument(file, mimeType, parentDocument);
         mStorage.put(document.documentId, document);
+        notifyParentChanged(document.parentId);
         return document.documentId;
     }
 
@@ -144,22 +145,25 @@ public class StubProvider extends DocumentsProvider {
         synchronized (mWriteLock) {
             mStorageUsedBytes -= fileSize;
         }
-        notifyStorageChanged();
+        notifyParentChanged(document.parentId);
     }
 
     @Override
     public Cursor queryChildDocuments(String parentDocumentId, String[] projection, String sortOrder)
             throws FileNotFoundException {
-        final MatrixCursor result = new MatrixCursor(projection != null ? projection : DEFAULT_DOCUMENT_PROJECTION);
         final StubDocument parentDocument = mStorage.get(parentDocumentId);
         if (parentDocument == null || parentDocument.file.isFile()) {
             throw new FileNotFoundException();
         }
+        final MatrixCursor result = new MatrixCursor(projection != null ? projection : DEFAULT_DOCUMENT_PROJECTION);
+        result.setNotificationUri(getContext().getContentResolver(),
+                DocumentsContract.buildChildDocumentsUri(mAuthority, parentDocumentId));
         StubDocument document;
         for (File file : parentDocument.file.listFiles()) {
             document = mStorage.get(StubDocument.getDocumentIdForFile(file));
-            if (document != null)
-                includeFile(result, document);
+            if (document != null) {
+                includeDocument(result, document);
+            }
         }
         return result;
     }
@@ -235,7 +239,7 @@ public class StubProvider extends DocumentsProvider {
                 }
                 finally {
                     closePipeSilently(readPipe);
-                    notifyStorageChanged();
+                    notifyParentChanged(document.parentId);
                 }
             }
         }.start();
@@ -259,11 +263,14 @@ public class StubProvider extends DocumentsProvider {
         }
     }
 
-    private void notifyStorageChanged() {
+    private void notifyParentChanged(String parentId) {
+        getContext().getContentResolver().notifyChange(
+                DocumentsContract.buildChildDocumentsUri(mAuthority, parentId), null, false);
+        // Notify also about possible change in remaining space on the root.
         getContext().getContentResolver().notifyChange(DocumentsContract.buildRootsUri(mAuthority), null, false);
     }
 
-    private void includeFile(MatrixCursor result, StubDocument document) {
+    private void includeDocument(MatrixCursor result, StubDocument document) {
         final RowBuilder row = result.newRow();
         row.add(Document.COLUMN_DOCUMENT_ID, document.documentId);
         row.add(Document.COLUMN_DISPLAY_NAME, document.file.getName());
@@ -294,11 +301,13 @@ class StubDocument {
     public final File file;
     public final String mimeType;
     public final String documentId;
+    public final String parentId;
 
-    StubDocument(File file, String mimeType) {
+    StubDocument(File file, String mimeType, StubDocument parent) {
         this.file = file;
-        this.mimeType = this.mimeType;
+        this.mimeType = mimeType;
         this.documentId = getDocumentIdForFile(file);
+        this.parentId = parent != null ? parent.documentId : null;
     }
 
     public static String getDocumentIdForFile(File file) {
