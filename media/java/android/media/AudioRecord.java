@@ -53,6 +53,12 @@ public class AudioRecord
     //---------------------------------------------------------
     // Constants
     //--------------------
+
+    /** Minimum value for sample rate */
+    private static final int SAMPLE_RATE_HZ_MIN = 4000;
+    /** Maximum value for sample rate */
+    private static final int SAMPLE_RATE_HZ_MAX = 96000;
+
     /**
      *  indicates AudioRecord state is not successfully initialized.
      */
@@ -571,7 +577,7 @@ public class AudioRecord
 
         //--------------
         // sample rate
-        if ( (sampleRateInHz < 4000) || (sampleRateInHz > 48000) ) {
+        if ((sampleRateInHz < SAMPLE_RATE_HZ_MIN) || (sampleRateInHz > SAMPLE_RATE_HZ_MAX)) {
             throw new IllegalArgumentException(sampleRateInHz
                     + "Hz is not a supported sample rate.");
         }
