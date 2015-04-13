@@ -122,8 +122,6 @@
     <!-- Description of the Enter button in a KeyboardView. [CHAR LIMIT=NONE] -->
     <string name="keyboardview_keycode_enter">Enter</string>
 
-    <!-- Label shown on emergency call button in keyguard -->
-    <string name="kg_emergency_call_label">Emergency</string>
     <!-- Message shown in pattern unlock after some number of unsuccessful attempts -->
     <string name="kg_forgot_pattern_button_text">Forgot Pattern</string>
     <!-- Message shown when user enters wrong pattern -->

@@ -46,7 +46,7 @@
         android:layout_height="wrap_content"
         android:layout_weight="1"
         android:layout_marginTop="@dimen/eca_overlap"
-        android:text="@string/kg_emergency_call_label"
+        android:text="@*android:string/lockscreen_emergency_call"
         style="?android:attr/buttonBarButtonStyle"
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:textSize="@dimen/kg_status_line_font_size"
