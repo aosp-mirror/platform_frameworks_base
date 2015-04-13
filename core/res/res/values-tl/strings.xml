@@ -446,7 +446,6 @@
     <string name="fingerprint_acquired_too_fast" msgid="5303368850245663580">"Masyadong mabilis ang paggalaw ng daliri. Pakisubukang muli."</string>
     <string name="fingerprint_acquired_too_slow" msgid="7381891107120721078">"Masyadong mabagal ang paggalaw ng daliri. Pakisubukang muli."</string>
   <string-array name="fingerprint_acquired_vendor">
-    <item msgid="2892952818207766996">"Mensahe ng error sa pagkuha na partikular sa vendor 0"</item>
   </string-array>
     <string name="fingerprint_error_unable_to_process" msgid="4232401562838100026">"Hindi maproseso. Subukang muli."</string>
     <string name="fingerprint_error_hw_not_available" msgid="6162709753784993771">"Hindi available ang hardware."</string>
@@ -454,7 +453,6 @@
     <string name="fingerprint_error_timeout" msgid="3927186043737732875">"Nag-time out ang fingerprint. Subukang muli."</string>
     <string name="fingerprint_error_vendor" msgid="3175724710791609491">"Nag-time out ang fingerprint. Subukang muli."</string>
   <string-array name="fingerprint_error_vendor">
-    <item msgid="5804600450373644614">"Mensahe ng error na partikular sa vendor."</item>
   </string-array>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"basahin ang mga setting ng sync"</string>
     <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"Pinapayagan ang app na basahin ang mga setting ng pag-sync para sa isang account. Halimbawa, matutukoy nito kung naka-sync ang app na Mga Tao sa isang account."</string>
@@ -1449,17 +1447,12 @@
     </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"Hanggang <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_forever" msgid="7420011936770086993">"Hanggang sa i-off mo ito"</string>
-    <!-- no translation found for zen_mode_rule_name_combination (191109939968076477) -->
-    <skip />
+    <string name="zen_mode_rule_name_combination" msgid="191109939968076477">"<xliff:g id="FIRST">%1$s</xliff:g> / <xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"I-collapse"</string>
-    <!-- no translation found for zen_mode_feature_name (289097150786114338) -->
-    <skip />
-    <!-- no translation found for zen_mode_downtime_feature_name (2626974636779860146) -->
-    <skip />
-    <!-- no translation found for zen_mode_default_weeknights_name (2069189413656431610) -->
-    <skip />
-    <!-- no translation found for zen_mode_default_weekends_name (2377398437072017011) -->
-    <skip />
+    <string name="zen_mode_feature_name" msgid="289097150786114338">"I-block ang mga pagkaantala"</string>
+    <string name="zen_mode_downtime_feature_name" msgid="2626974636779860146">"Walang serbisyo"</string>
+    <string name="zen_mode_default_weeknights_name" msgid="2069189413656431610">"Mga Weeknight"</string>
+    <string name="zen_mode_default_weekends_name" msgid="2377398437072017011">"Sabado at Linggo"</string>
     <string name="muted_by" msgid="6147073845094180001">"Na-mute ng <xliff:g id="THIRD_PARTY">%1$s</xliff:g>"</string>
     <string name="system_error_wipe_data" msgid="6608165524785354962">"May internal na problema sa iyong device, at maaaring hindi ito maging stable hanggang sa i-reset mo ang factory data."</string>
     <string name="system_error_manufacturer" msgid="8086872414744210668">"May internal na problema sa iyong device. Makipag-ugnayan sa iyong manufacturer upang malaman ang mga detalye."</string>
@@ -1469,13 +1462,9 @@
     <string name="stk_cc_ss_to_dial" msgid="2151304435775557162">"Ginawang DIAL request ang SS request."</string>
     <string name="stk_cc_ss_to_ussd" msgid="3951862188105305589">"Ginawang USSD request ang SS request."</string>
     <string name="stk_cc_ss_to_ss" msgid="5470768854991452695">"Ginawang bagong SS request ang SS request."</string>
-    <!-- no translation found for usb_midi_peripheral_name (7221113987741003817) -->
-    <skip />
+    <string name="usb_midi_peripheral_name" msgid="7221113987741003817">"Android USB Peripheral Port"</string>
     <string name="usb_midi_peripheral_manufacturer_name" msgid="7176526170008970168">"Android"</string>
-    <!-- no translation found for usb_midi_peripheral_product_name (4971827859165280403) -->
-    <skip />
-    <!-- no translation found for floating_toolbar_open_overflow_description (4797287862999444631) -->
-    <skip />
-    <!-- no translation found for floating_toolbar_close_overflow_description (559796923090723804) -->
-    <skip />
+    <string name="usb_midi_peripheral_product_name" msgid="4971827859165280403">"USB Peripheral Port"</string>
+    <string name="floating_toolbar_open_overflow_description" msgid="4797287862999444631">"Higit pang mga opsyon"</string>
+    <string name="floating_toolbar_close_overflow_description" msgid="559796923090723804">"Isara ang overflow"</string>
 </resources>

@@ -446,7 +446,6 @@
     <string name="fingerprint_acquired_too_fast" msgid="5303368850245663580">"Jari digerakkan terlalu cepat. Sila cuba lagi."</string>
     <string name="fingerprint_acquired_too_slow" msgid="7381891107120721078">"Jari digerakkan terlalu perlahan. Sila cuba lagi."</string>
   <string-array name="fingerprint_acquired_vendor">
-    <item msgid="2892952818207766996">"Mesej ralat pemerolehan khusus vendor 0"</item>
   </string-array>
     <string name="fingerprint_error_unable_to_process" msgid="4232401562838100026">"Tidak dapat memproses. Cuba lagi."</string>
     <string name="fingerprint_error_hw_not_available" msgid="6162709753784993771">"Perkakasan tidak tersedia."</string>
@@ -454,7 +453,6 @@
     <string name="fingerprint_error_timeout" msgid="3927186043737732875">"Tamat masa cap jari dicapai. Cuba lagi."</string>
     <string name="fingerprint_error_vendor" msgid="3175724710791609491">"Tamat masa cap jari dicapai. Cuba lagi."</string>
   <string-array name="fingerprint_error_vendor">
-    <item msgid="5804600450373644614">"Mesej ralat khusus vendor"</item>
   </string-array>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"membaca tetapan penyegerakan"</string>
     <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"Membenarkan apl membaca tetapan segerak untuk akaun. Sebagai contoh, ini boleh menentukan sama ada apl Orang disegerakkan dengan akaun."</string>

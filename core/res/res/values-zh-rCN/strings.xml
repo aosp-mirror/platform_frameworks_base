@@ -446,7 +446,6 @@
     <string name="fingerprint_acquired_too_fast" msgid="5303368850245663580">"手指移动太快，请重试。"</string>
     <string name="fingerprint_acquired_too_slow" msgid="7381891107120721078">"手指移动太慢，请重试。"</string>
   <string-array name="fingerprint_acquired_vendor">
-    <item msgid="2892952818207766996">"针对供应商的指纹获取错误消息 0"</item>
   </string-array>
     <string name="fingerprint_error_unable_to_process" msgid="4232401562838100026">"无法处理指纹，请重试。"</string>
     <string name="fingerprint_error_hw_not_available" msgid="6162709753784993771">"硬件无法使用。"</string>
@@ -454,7 +453,6 @@
     <string name="fingerprint_error_timeout" msgid="3927186043737732875">"指纹录入操作超时，请重试。"</string>
     <string name="fingerprint_error_vendor" msgid="3175724710791609491">"指纹录入操作超时，请重试。"</string>
   <string-array name="fingerprint_error_vendor">
-    <item msgid="5804600450373644614">"针对供应商的错误消息。"</item>
   </string-array>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"读取同步设置"</string>
     <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"允许该应用读取某个帐户的同步设置。例如，此权限可确定“联系人”应用是否与某个帐户同步。"</string>

@@ -446,7 +446,6 @@
     <string name="fingerprint_acquired_too_fast" msgid="5303368850245663580">"手指移動速度過快，請再試一次。"</string>
     <string name="fingerprint_acquired_too_slow" msgid="7381891107120721078">"手指移動速度過慢，請再試一次。"</string>
   <string-array name="fingerprint_acquired_vendor">
-    <item msgid="2892952818207766996">"供應商自訂的指紋擷取錯誤訊息 0"</item>
   </string-array>
     <string name="fingerprint_error_unable_to_process" msgid="4232401562838100026">"無法辨識指紋，請再試一次。"</string>
     <string name="fingerprint_error_hw_not_available" msgid="6162709753784993771">"硬體無法使用。"</string>
@@ -454,7 +453,6 @@
     <string name="fingerprint_error_timeout" msgid="3927186043737732875">"指紋處理作業逾時，請再試一次。"</string>
     <string name="fingerprint_error_vendor" msgid="3175724710791609491">"指紋處理作業逾時，請再試一次。"</string>
   <string-array name="fingerprint_error_vendor">
-    <item msgid="5804600450373644614">"供應商自訂的錯誤訊息。"</item>
   </string-array>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"讀取同步處理設定"</string>
     <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"允許應用程式讀取帳戶的同步處理設定，例如判斷「使用者」應用程式是否和某個帳戶進行同步處理。"</string>
@@ -1474,8 +1472,6 @@
     <string name="usb_midi_peripheral_manufacturer_name" msgid="7176526170008970168">"Android"</string>
     <!-- no translation found for usb_midi_peripheral_product_name (4971827859165280403) -->
     <skip />
-    <!-- no translation found for floating_toolbar_open_overflow_description (4797287862999444631) -->
-    <skip />
-    <!-- no translation found for floating_toolbar_close_overflow_description (559796923090723804) -->
-    <skip />
+    <string name="floating_toolbar_open_overflow_description" msgid="4797287862999444631">"更多選項"</string>
+    <string name="floating_toolbar_close_overflow_description" msgid="559796923090723804">"關閉溢出模式"</string>
 </resources>

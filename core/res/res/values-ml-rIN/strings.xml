@@ -447,7 +447,6 @@
     <string name="fingerprint_acquired_too_fast" msgid="5303368850245663580">"വിരൽ വേഗത്തിൽ നീക്കി. വീണ്ടും ശ്രമിക്കുക."</string>
     <string name="fingerprint_acquired_too_slow" msgid="7381891107120721078">"വിരൽ പതുക്കെ നീക്കി. വീണ്ടും ശ്രമിക്കുക."</string>
   <string-array name="fingerprint_acquired_vendor">
-    <item msgid="2892952818207766996">"വെൻഡർ നിർദ്ദിഷ്‌ട നേടൽ പിശക് സന്ദേശം 0"</item>
   </string-array>
     <string name="fingerprint_error_unable_to_process" msgid="4232401562838100026">"പ്രോസസ്സ് ചെയ്യാനാവുന്നില്ല. വീണ്ടും ശ്രമിക്കുക."</string>
     <string name="fingerprint_error_hw_not_available" msgid="6162709753784993771">"ഹാർഡ്‌വെയർ ലഭ്യമല്ല."</string>
@@ -455,7 +454,6 @@
     <string name="fingerprint_error_timeout" msgid="3927186043737732875">"വിരലടയാളം നൽകേണ്ട സമയം കഴിഞ്ഞു. വീണ്ടും ശ്രമിക്കുക."</string>
     <string name="fingerprint_error_vendor" msgid="3175724710791609491">"വിരലടയാളം നൽകേണ്ട സമയം കഴിഞ്ഞു. വീണ്ടും ശ്രമിക്കുക."</string>
   <string-array name="fingerprint_error_vendor">
-    <item msgid="5804600450373644614">"വെൻഡർ നിർദ്ദിഷ്‌ട പിശക് സന്ദേശം."</item>
   </string-array>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"സമന്വയ ക്രമീകരണങ്ങൾ റീഡുചെയ്യുക"</string>
     <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"ഒരു അക്കൗണ്ടിനായി സമന്വയ ക്രമീകരണങ്ങൾ റീഡുചെയ്യാൻ അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു. ഉദാഹരണത്തിന്, ആളുകൾ അപ്ലിക്കേഷൻ ഒരു അക്കൗണ്ടിൽ സമന്വയിപ്പിച്ചിട്ടുണ്ടോയെന്നത് നിർണ്ണയിക്കാൻ ഇതിനാകും."</string>

@@ -446,7 +446,6 @@
     <string name="fingerprint_acquired_too_fast" msgid="5303368850245663580">"Moviste el dedo muy rápido. Vuelve a intentarlo."</string>
     <string name="fingerprint_acquired_too_slow" msgid="7381891107120721078">"Moviste el dedo muy despacio. Vuelve a intentarlo."</string>
   <string-array name="fingerprint_acquired_vendor">
-    <item msgid="2892952818207766996">"Mensaje de error de adquisición específico del proveedor 0"</item>
   </string-array>
     <string name="fingerprint_error_unable_to_process" msgid="4232401562838100026">"No se puede procesar. Vuelve a intentarlo."</string>
     <string name="fingerprint_error_hw_not_available" msgid="6162709753784993771">"El hardware no está disponible."</string>
@@ -454,7 +453,6 @@
     <string name="fingerprint_error_timeout" msgid="3927186043737732875">"Finalizó el tiempo de espera para la huella digital. Vuelve a intentarlo."</string>
     <string name="fingerprint_error_vendor" msgid="3175724710791609491">"Finalizó el tiempo de espera para la huella digital. Vuelve a intentarlo."</string>
   <string-array name="fingerprint_error_vendor">
-    <item msgid="5804600450373644614">"Mensaje de error específico del proveedor"</item>
   </string-array>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"leer la configuración de sincronización"</string>
     <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"Este permiso permite que la aplicación consulte la configuración de sincronización de una cuenta. Esto permite, por ejemplo, determinar si la aplicación Personas está sincronizada con una cuenta."</string>

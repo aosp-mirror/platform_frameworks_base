@@ -448,7 +448,6 @@
     <string name="fingerprint_acquired_too_fast" msgid="5303368850245663580">"Prehiter premik prsta. Poskusite znova."</string>
     <string name="fingerprint_acquired_too_slow" msgid="7381891107120721078">"Prepočasen premik prsta. Poskusite znova."</string>
   <string-array name="fingerprint_acquired_vendor">
-    <item msgid="2892952818207766996">"Vendor-specific acquisition error message 0"</item>
   </string-array>
     <string name="fingerprint_error_unable_to_process" msgid="4232401562838100026">"Obdelava ni mogoča. Poskusite znova."</string>
     <string name="fingerprint_error_hw_not_available" msgid="6162709753784993771">"Strojna oprema ni na voljo."</string>
@@ -456,7 +455,6 @@
     <string name="fingerprint_error_timeout" msgid="3927186043737732875">"Dosežena časovna omejitev za prstni odtis. Poskusite znova."</string>
     <string name="fingerprint_error_vendor" msgid="3175724710791609491">"Dosežena časovna omejitev za prstni odtis. Poskusite znova."</string>
   <string-array name="fingerprint_error_vendor">
-    <item msgid="5804600450373644614">"Vendor-specifc error message."</item>
   </string-array>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"branje nastavitev sinhronizacije"</string>
     <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"Aplikaciji omogoča branje nastavitev sinhronizacije za račun. S tem lahko aplikacija na primer ugotovi, ali je aplikacija Ljudje sinhronizirana z računom."</string>
@@ -1500,8 +1498,6 @@
     <string name="usb_midi_peripheral_manufacturer_name" msgid="7176526170008970168">"Android"</string>
     <!-- no translation found for usb_midi_peripheral_product_name (4971827859165280403) -->
     <skip />
-    <!-- no translation found for floating_toolbar_open_overflow_description (4797287862999444631) -->
-    <skip />
-    <!-- no translation found for floating_toolbar_close_overflow_description (559796923090723804) -->
-    <skip />
+    <string name="floating_toolbar_open_overflow_description" msgid="4797287862999444631">"Več možnosti"</string>
+    <string name="floating_toolbar_close_overflow_description" msgid="559796923090723804">"Zapri presežni element"</string>
 </resources>

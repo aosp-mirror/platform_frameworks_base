@@ -447,7 +447,6 @@
     <string name="fingerprint_acquired_too_fast" msgid="5303368850245663580">"Fingurinn hreyfðist of hratt. Reyndu aftur."</string>
     <string name="fingerprint_acquired_too_slow" msgid="7381891107120721078">"Fingurinn hreyfðist of hægt. Reyndu aftur."</string>
   <string-array name="fingerprint_acquired_vendor">
-    <item msgid="2892952818207766996">"Skráningarvilluboð 0 frá framleiðanda"</item>
   </string-array>
     <string name="fingerprint_error_unable_to_process" msgid="4232401562838100026">"Ekki var hægt að vinna úr þessu. Reyndu aftur."</string>
     <string name="fingerprint_error_hw_not_available" msgid="6162709753784993771">"Vélbúnaður er ekki tiltækur."</string>
@@ -455,7 +454,6 @@
     <string name="fingerprint_error_timeout" msgid="3927186043737732875">"Tímamörk runnu út fyrir fingrafar. Reyndu aftur."</string>
     <string name="fingerprint_error_vendor" msgid="3175724710791609491">"Tímamörk runnu út fyrir fingrafar. Reyndu aftur."</string>
   <string-array name="fingerprint_error_vendor">
-    <item msgid="5804600450373644614">"Villuboð frá framleiðanda."</item>
   </string-array>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"lesa samstillingar"</string>
     <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"Leyfir forriti að lesa kosti samstillingar fyrir reikning. Þetta er til dæmis hægt að nota til að komast að því hvort forritið Fólk er samstillt við reikning."</string>

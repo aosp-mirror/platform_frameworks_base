@@ -446,7 +446,6 @@
     <string name="fingerprint_acquired_too_fast" msgid="5303368850245663580">"انگشت خیلی سریع حرکت کرد. لطفاً دوباره امتحان کنید."</string>
     <string name="fingerprint_acquired_too_slow" msgid="7381891107120721078">"انگشت خیلی آهسته حرکت کرد. لطفاً دوباره امتحان کنید."</string>
   <string-array name="fingerprint_acquired_vendor">
-    <item msgid="2892952818207766996">"پیام خطای خرید خاص فروشنده ۰"</item>
   </string-array>
     <string name="fingerprint_error_unable_to_process" msgid="4232401562838100026">"پردازش ممکن نیست. دوباره امتحان کنید."</string>
     <string name="fingerprint_error_hw_not_available" msgid="6162709753784993771">"سخت‌افزار در دسترس نیست."</string>
@@ -454,7 +453,6 @@
     <string name="fingerprint_error_timeout" msgid="3927186043737732875">"مهلت زمانی ثبت اثر انگشت به پایان رسید. دوباره امتحان کنید."</string>
     <string name="fingerprint_error_vendor" msgid="3175724710791609491">"مهلت زمانی ثبت اثر انگشت به پایان رسید. دوباره امتحان کنید."</string>
   <string-array name="fingerprint_error_vendor">
-    <item msgid="5804600450373644614">"پیام خطای خاص فروشنده."</item>
   </string-array>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"خواندن تنظیمات همگام‌سازی"</string>
     <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"به برنامه اجازه می‌دهد تنظیمات را برای یک حساب بخواند. به‌عنوان مثال، این ویژگی می‌تواند تعیین کند آیا حساب «افراد» شما با یک حساب همگام‌سازی شده است."</string>

@@ -448,7 +448,6 @@
     <string name="fingerprint_acquired_too_fast" msgid="5303368850245663580">"Вы слишком быстро убрали палец. Повторите попытку."</string>
     <string name="fingerprint_acquired_too_slow" msgid="7381891107120721078">"Вы слишком долго удерживали палец. Повторите попытку."</string>
   <string-array name="fingerprint_acquired_vendor">
-    <item msgid="2892952818207766996">"Сообщение об ошибке при сканировании отпечатка (0)"</item>
   </string-array>
     <string name="fingerprint_error_unable_to_process" msgid="4232401562838100026">"Не удалось распознать отпечаток. Повторите попытку."</string>
     <string name="fingerprint_error_hw_not_available" msgid="6162709753784993771">"Сканер недоступен."</string>
@@ -456,7 +455,6 @@
     <string name="fingerprint_error_timeout" msgid="3927186043737732875">"Превышено время ожидания. Повторите попытку."</string>
     <string name="fingerprint_error_vendor" msgid="3175724710791609491">"Превышено время ожидания. Повторите попытку."</string>
   <string-array name="fingerprint_error_vendor">
-    <item msgid="5804600450373644614">"Сообщение об ошибке."</item>
   </string-array>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"Просмотр настроек синхронизации"</string>
     <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"Приложение сможет просматривать настройки синхронизации аккаунта, например определять, включена ли синхронизация для приложения \"Контакты\"."</string>

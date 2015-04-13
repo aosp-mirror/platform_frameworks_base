@@ -446,7 +446,6 @@
     <string name="fingerprint_acquired_too_fast" msgid="5303368850245663580">"Du flyttade fingret för snabbt. Försök igen."</string>
     <string name="fingerprint_acquired_too_slow" msgid="7381891107120721078">"Du flyttade fingret för långsamt. Försök igen."</string>
   <string-array name="fingerprint_acquired_vendor">
-    <item msgid="2892952818207766996">"Leverantörsspecifikt felmeddelande om förvärv 0"</item>
   </string-array>
     <string name="fingerprint_error_unable_to_process" msgid="4232401562838100026">"Det går inte att bearbeta fingeravtrycket. Försök igen."</string>
     <string name="fingerprint_error_hw_not_available" msgid="6162709753784993771">"Maskinvaran är inte tillgänglig."</string>
@@ -454,7 +453,6 @@
     <string name="fingerprint_error_timeout" msgid="3927186043737732875">"Tidsgränsen för fingeravtrycket har uppnåtts. Försök igen."</string>
     <string name="fingerprint_error_vendor" msgid="3175724710791609491">"Tidsgränsen för fingeravtrycket har uppnåtts. Försök igen."</string>
   <string-array name="fingerprint_error_vendor">
-    <item msgid="5804600450373644614">"Leverantörsspecifikt felmeddelande"</item>
   </string-array>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"läsa synkroniseringsinställningar"</string>
     <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"Tillåter att appen läser synkroniseringsinställningarna för ett konto. Detta kan användas till exempel för att avgöra om appen Personer är synkroniserad med ett konto."</string>

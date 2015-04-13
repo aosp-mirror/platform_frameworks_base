@@ -447,7 +447,6 @@
     <string name="fingerprint_acquired_too_fast" msgid="5303368850245663580">"விரலை வேகமாக எடுத்துவிட்டீர்கள். மீண்டும் முயலவும்."</string>
     <string name="fingerprint_acquired_too_slow" msgid="7381891107120721078">"விரலை மெதுவாக எடுத்துவிட்டீர்கள். மீண்டும் முயலவும்."</string>
   <string-array name="fingerprint_acquired_vendor">
-    <item msgid="2892952818207766996">"விற்பனையாளர் சார்ந்த பெறுதல் தொடர்பான பிழைச் செய்தி 0"</item>
   </string-array>
     <string name="fingerprint_error_unable_to_process" msgid="4232401562838100026">"செயல்படுத்த முடியவில்லை. மீண்டும் முயலவும்."</string>
     <string name="fingerprint_error_hw_not_available" msgid="6162709753784993771">"வன்பொருள் இல்லை."</string>
@@ -455,7 +454,6 @@
     <string name="fingerprint_error_timeout" msgid="3927186043737732875">"கைரேகைக்கான நேரம் முடிந்தது. மீண்டும் முயலவும்."</string>
     <string name="fingerprint_error_vendor" msgid="3175724710791609491">"கைரேகைக்கான நேரம் முடிந்தது. மீண்டும் முயலவும்."</string>
   <string-array name="fingerprint_error_vendor">
-    <item msgid="5804600450373644614">"விற்பனையாளர் சார்ந்த பிழைச் செய்தி."</item>
   </string-array>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"ஒத்திசைவு அமைப்புகளைப் படித்தல்"</string>
     <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"கணக்கிற்கான ஒத்திசைவு அமைப்புகளைப் படிக்க பயன்பாட்டை அனுமதிக்கிறது. எடுத்துக்காட்டாக, பீப்பிள் பயன்பாடு கணக்குடன் ஒத்திசைக்கப்பட்டுள்ளதா என்பதை இது தீர்மானிக்கலாம்."</string>

@@ -447,7 +447,6 @@
     <string name="fingerprint_acquired_too_fast" msgid="5303368850245663580">"ຍ້າຍ​ນີ້ວ​ມື​ໄປ​ໄວ​ເກີນ​ໄປ. ກະ​ລຸ​ນາ​ລອງ​ໃໝ່​ອີກ."</string>
     <string name="fingerprint_acquired_too_slow" msgid="7381891107120721078">"ຍ້າຍ​ນີ້ວ​ມື​ໄປ​ຊ້ເກີນ​ໄປ. ກະ​ລຸ​ນາ​ລອງ​ໃໝ່​ອີກ."</string>
   <string-array name="fingerprint_acquired_vendor">
-    <item msgid="2892952818207766996">"ຂໍ້​ຄວາມ​ການ​ຜິດ​ພາດ​ການ​ໄດ້​ມາ​ສະ​ເພາະ​ຜູ້​ຂາຍ 0"</item>
   </string-array>
     <string name="fingerprint_error_unable_to_process" msgid="4232401562838100026">"ບໍ່​ສາ​ມາດ​ປະ​ມວນ​ຜົນ​ໄດ້. ລອງ​ໃໝ່​ອີກ."</string>
     <string name="fingerprint_error_hw_not_available" msgid="6162709753784993771">"ບໍ່​ມີ​ຮາດ​ແວ​ໃຫ້​ຢູ່."</string>
@@ -455,7 +454,6 @@
     <string name="fingerprint_error_timeout" msgid="3927186043737732875">"ເວ​ລາ​ລາຍ​ນີ້ວ​ມື​ບໍ່​ເຂົ້າ​ເຖິງ​ໄດ້. ລອງ​ໃໝ່​ອີກ."</string>
     <string name="fingerprint_error_vendor" msgid="3175724710791609491">"ເວ​ລາ​ລາຍ​ນີ້ວ​ມື​ບໍ່​ເຂົ້າ​ເຖິງ​ໄດ້. ລອງ​ໃໝ່​ອີກ."</string>
   <string-array name="fingerprint_error_vendor">
-    <item msgid="5804600450373644614">"ຂໍ້​ຄວາມ​ການ​ຂັດ​ຂ້ອງ​ສະ​ເພາະ​ຜູ້​ຂາຍ"</item>
   </string-array>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"ອ່ານການຕັ້ງຄ່າຊິ້ງຂໍ້ມູນ"</string>
     <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"ອະນຸຍາດໃຫ້ແອັບຯ ອ່ານການຕັ້ງຄ່າການຊິ້ງຂໍ້ມູນຂອງບັນຊີໄດ້. ຕົວຢ່າງເຊັ່ນ: ມັນຈະສາມາດກວດສອບໄດ້ແອັບຯ People ຖືກຊິ້ງຂໍ້ມູນກັບບັນຊີໃດນຶ່ງແລ້ວຫຼືຍັງ."</string>
@@ -1450,17 +1448,12 @@
     </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"ຈົນ​ຮອດ <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_forever" msgid="7420011936770086993">"ຈົນກວ່າ​ທ່ານ​ຈະ​ປິດ​"</string>
-    <!-- no translation found for zen_mode_rule_name_combination (191109939968076477) -->
-    <skip />
+    <string name="zen_mode_rule_name_combination" msgid="191109939968076477">"<xliff:g id="FIRST">%1$s</xliff:g> / <xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"ຫຍໍ້"</string>
-    <!-- no translation found for zen_mode_feature_name (289097150786114338) -->
-    <skip />
-    <!-- no translation found for zen_mode_downtime_feature_name (2626974636779860146) -->
-    <skip />
-    <!-- no translation found for zen_mode_default_weeknights_name (2069189413656431610) -->
-    <skip />
-    <!-- no translation found for zen_mode_default_weekends_name (2377398437072017011) -->
-    <skip />
+    <string name="zen_mode_feature_name" msgid="289097150786114338">"ບ​ລັອກ​ການ​ລົບ​ກວນ"</string>
+    <string name="zen_mode_downtime_feature_name" msgid="2626974636779860146">"​ເວ​ລາ​ປິດ​ເຮັດ​ວຽກ"</string>
+    <string name="zen_mode_default_weeknights_name" msgid="2069189413656431610">"ຄືນ​ວັນ​ຈັນຫາ​ສຸກ"</string>
+    <string name="zen_mode_default_weekends_name" msgid="2377398437072017011">"ທ້າຍ​ອາ​ທິດ"</string>
     <string name="muted_by" msgid="6147073845094180001">"ຖືກ​ປິດ​ສຽງ​ໂດຍ <xliff:g id="THIRD_PARTY">%1$s</xliff:g>"</string>
     <string name="system_error_wipe_data" msgid="6608165524785354962">"ມີ​ບັນ​ຫາ​ພາຍ​ໃນ​ກັບ​ອຸ​ປະ​ກອນ​ຂອງ​ທ່ານ, ແລະ​ມັນ​ອາດ​ຈະ​ບໍ່​ສະ​ຖຽນ​ຈົນ​ກວ່າ​ທ່ານ​ຕັ້ງ​ເປັນ​ຂໍ້​ມູນ​ໂຮງ​ງານ​ຄືນ​ແລ້ວ."</string>
     <string name="system_error_manufacturer" msgid="8086872414744210668">"ມີ​ບັນ​ຫາ​ພາຍ​ໃນ​ກັບ​ອຸ​ປະ​ກອນ​ຂອງ​ທ່ານ. ຕິດ​ຕໍ່ຜູ້​ຜະ​ລິດ​ຂອງ​ທ່ານ​ສຳ​ລັບ​ລາຍ​ລະ​ອຽດ​ຕ່າງໆ."</string>
@@ -1470,13 +1463,9 @@
     <string name="stk_cc_ss_to_dial" msgid="2151304435775557162">"ການ​ຂໍ SS ຖືກ​ດັດ​ແປງ​ເປັນ​ການ​ຂໍ DIAL ແລ້ວ."</string>
     <string name="stk_cc_ss_to_ussd" msgid="3951862188105305589">"ການ​ຂໍ SS ຖືກ​ດັດ​ແປງ​ເປັນ​ການ​ຂໍ USSD ແລ້ວ."</string>
     <string name="stk_cc_ss_to_ss" msgid="5470768854991452695">"ການ​ຂໍ SS ຖືກ​ດັດ​ແປງ​ເປັນ​ການ​ຂໍ SS ໃໝ່​ແລ້ວ."</string>
-    <!-- no translation found for usb_midi_peripheral_name (7221113987741003817) -->
-    <skip />
+    <string name="usb_midi_peripheral_name" msgid="7221113987741003817">"ຜອດ​ຮອບນອກ Android USB"</string>
     <string name="usb_midi_peripheral_manufacturer_name" msgid="7176526170008970168">"Android"</string>
-    <!-- no translation found for usb_midi_peripheral_product_name (4971827859165280403) -->
-    <skip />
-    <!-- no translation found for floating_toolbar_open_overflow_description (4797287862999444631) -->
-    <skip />
-    <!-- no translation found for floating_toolbar_close_overflow_description (559796923090723804) -->
-    <skip />
+    <string name="usb_midi_peripheral_product_name" msgid="4971827859165280403">"ຜອດ​ຮອບນອກ USB"</string>
+    <string name="floating_toolbar_open_overflow_description" msgid="4797287862999444631">"ໂຕ​ເລືອກ​ເພີ່ມ​ເຕີມ"</string>
+    <string name="floating_toolbar_close_overflow_description" msgid="559796923090723804">"ປິດ​ການ​ໄຫຼ​ລົ້ນ​ອອກ​ມາ"</string>
 </resources>

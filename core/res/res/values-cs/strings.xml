@@ -448,7 +448,6 @@
     <string name="fingerprint_acquired_too_fast" msgid="5303368850245663580">"Pohyb prstem byl příliš rychlý. Zkuste to znovu."</string>
     <string name="fingerprint_acquired_too_slow" msgid="7381891107120721078">"Pohyb prstem byl příliš pomalý. Zkuste to znovu."</string>
   <string-array name="fingerprint_acquired_vendor">
-    <item msgid="2892952818207766996">"Chybová zpráva 0 dodavatele ohledně načtení otisků"</item>
   </string-array>
     <string name="fingerprint_error_unable_to_process" msgid="4232401562838100026">"Otisk prstu nelze zpracovat. Zkuste to znovu."</string>
     <string name="fingerprint_error_hw_not_available" msgid="6162709753784993771">"Hardware není dostupný."</string>
@@ -456,7 +455,6 @@
     <string name="fingerprint_error_timeout" msgid="3927186043737732875">"Časový limit sejmutí otisku prstu vypršel. Zkuste to znovu."</string>
     <string name="fingerprint_error_vendor" msgid="3175724710791609491">"Časový limit sejmutí otisku prstu vypršel. Zkuste to znovu."</string>
   <string-array name="fingerprint_error_vendor">
-    <item msgid="5804600450373644614">"Chybová zpráva dodavatele"</item>
   </string-array>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"čtení nastavení synchronizace"</string>
     <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"Umožňuje aplikaci číst nastavení synchronizace v účtu. Může například určit, zda je s účtem synchronizována aplikace Lidé."</string>
@@ -1500,8 +1498,6 @@
     <string name="usb_midi_peripheral_manufacturer_name" msgid="7176526170008970168">"Android"</string>
     <!-- no translation found for usb_midi_peripheral_product_name (4971827859165280403) -->
     <skip />
-    <!-- no translation found for floating_toolbar_open_overflow_description (4797287862999444631) -->
-    <skip />
-    <!-- no translation found for floating_toolbar_close_overflow_description (559796923090723804) -->
-    <skip />
+    <string name="floating_toolbar_open_overflow_description" msgid="4797287862999444631">"Další možnosti"</string>
+    <string name="floating_toolbar_close_overflow_description" msgid="559796923090723804">"Zavřít rozbalovací nabídku"</string>
 </resources>
