@@ -3027,9 +3027,14 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
     @Override
     public boolean installKeyPair(ComponentName who, byte[] privKey, byte[] cert, String alias) {
-        Preconditions.checkNotNull(who, "ComponentName is null");
-        synchronized (this) {
-            getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
+        if (who == null) {
+            if (!isCallerDelegatedCertInstaller()) {
+                throw new SecurityException("who == null, but caller is not cert installer");
+            }
+        } else {
+            synchronized (this) {
+                getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
+            }
         }
         final UserHandle userHandle = new UserHandle(UserHandle.getCallingUserId());
         final long id = Binder.clearCallingIdentity();
