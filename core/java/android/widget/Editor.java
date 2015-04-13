@@ -17,6 +17,7 @@
 package android.widget;
 
 import android.R;
+import android.annotation.Nullable;
 import android.app.PendingIntent;
 import android.app.PendingIntent.CanceledException;
 import android.content.ClipData;
@@ -1281,74 +1282,79 @@ public class Editor {
                 EXTRACT_UNKNOWN, outText);
     }
 
-    private boolean extractTextInternal(ExtractedTextRequest request,
+    private boolean extractTextInternal(@Nullable ExtractedTextRequest request,
             int partialStartOffset, int partialEndOffset, int delta,
-            ExtractedText outText) {
-        final CharSequence content = mTextView.getText();
-        if (content != null) {
-            if (partialStartOffset != EXTRACT_NOTHING) {
-                final int N = content.length();
-                if (partialStartOffset < 0) {
-                    outText.partialStartOffset = outText.partialEndOffset = -1;
-                    partialStartOffset = 0;
-                    partialEndOffset = N;
-                } else {
-                    // Now use the delta to determine the actual amount of text
-                    // we need.
-                    partialEndOffset += delta;
-                    // Adjust offsets to ensure we contain full spans.
-                    if (content instanceof Spanned) {
-                        Spanned spanned = (Spanned)content;
-                        Object[] spans = spanned.getSpans(partialStartOffset,
-                                partialEndOffset, ParcelableSpan.class);
-                        int i = spans.length;
-                        while (i > 0) {
-                            i--;
-                            int j = spanned.getSpanStart(spans[i]);
-                            if (j < partialStartOffset) partialStartOffset = j;
-                            j = spanned.getSpanEnd(spans[i]);
-                            if (j > partialEndOffset) partialEndOffset = j;
-                        }
-                    }
-                    outText.partialStartOffset = partialStartOffset;
-                    outText.partialEndOffset = partialEndOffset - delta;
-
-                    if (partialStartOffset > N) {
-                        partialStartOffset = N;
-                    } else if (partialStartOffset < 0) {
-                        partialStartOffset = 0;
-                    }
-                    if (partialEndOffset > N) {
-                        partialEndOffset = N;
-                    } else if (partialEndOffset < 0) {
-                        partialEndOffset = 0;
-                    }
-                }
-                if ((request.flags&InputConnection.GET_TEXT_WITH_STYLES) != 0) {
-                    outText.text = content.subSequence(partialStartOffset,
-                            partialEndOffset);
-                } else {
-                    outText.text = TextUtils.substring(content, partialStartOffset,
-                            partialEndOffset);
-                }
-            } else {
-                outText.partialStartOffset = 0;
-                outText.partialEndOffset = 0;
-                outText.text = "";
-            }
-            outText.flags = 0;
-            if (MetaKeyKeyListener.getMetaState(content, MetaKeyKeyListener.META_SELECTING) != 0) {
-                outText.flags |= ExtractedText.FLAG_SELECTING;
-            }
-            if (mTextView.isSingleLine()) {
-                outText.flags |= ExtractedText.FLAG_SINGLE_LINE;
-            }
-            outText.startOffset = 0;
-            outText.selectionStart = mTextView.getSelectionStart();
-            outText.selectionEnd = mTextView.getSelectionEnd();
-            return true;
+            @Nullable ExtractedText outText) {
+        if (request == null || outText == null) {
+            return false;
         }
-        return false;
+
+        final CharSequence content = mTextView.getText();
+        if (content == null) {
+            return false;
+        }
+
+        if (partialStartOffset != EXTRACT_NOTHING) {
+            final int N = content.length();
+            if (partialStartOffset < 0) {
+                outText.partialStartOffset = outText.partialEndOffset = -1;
+                partialStartOffset = 0;
+                partialEndOffset = N;
+            } else {
+                // Now use the delta to determine the actual amount of text
+                // we need.
+                partialEndOffset += delta;
+                // Adjust offsets to ensure we contain full spans.
+                if (content instanceof Spanned) {
+                    Spanned spanned = (Spanned)content;
+                    Object[] spans = spanned.getSpans(partialStartOffset,
+                            partialEndOffset, ParcelableSpan.class);
+                    int i = spans.length;
+                    while (i > 0) {
+                        i--;
+                        int j = spanned.getSpanStart(spans[i]);
+                        if (j < partialStartOffset) partialStartOffset = j;
+                        j = spanned.getSpanEnd(spans[i]);
+                        if (j > partialEndOffset) partialEndOffset = j;
+                    }
+                }
+                outText.partialStartOffset = partialStartOffset;
+                outText.partialEndOffset = partialEndOffset - delta;
+
+                if (partialStartOffset > N) {
+                    partialStartOffset = N;
+                } else if (partialStartOffset < 0) {
+                    partialStartOffset = 0;
+                }
+                if (partialEndOffset > N) {
+                    partialEndOffset = N;
+                } else if (partialEndOffset < 0) {
+                    partialEndOffset = 0;
+                }
+            }
+            if ((request.flags&InputConnection.GET_TEXT_WITH_STYLES) != 0) {
+                outText.text = content.subSequence(partialStartOffset,
+                        partialEndOffset);
+            } else {
+                outText.text = TextUtils.substring(content, partialStartOffset,
+                        partialEndOffset);
+            }
+        } else {
+            outText.partialStartOffset = 0;
+            outText.partialEndOffset = 0;
+            outText.text = "";
+        }
+        outText.flags = 0;
+        if (MetaKeyKeyListener.getMetaState(content, MetaKeyKeyListener.META_SELECTING) != 0) {
+            outText.flags |= ExtractedText.FLAG_SELECTING;
+        }
+        if (mTextView.isSingleLine()) {
+            outText.flags |= ExtractedText.FLAG_SINGLE_LINE;
+        }
+        outText.startOffset = 0;
+        outText.selectionStart = mTextView.getSelectionStart();
+        outText.selectionEnd = mTextView.getSelectionEnd();
+        return true;
     }
 
     boolean reportExtractedText() {
