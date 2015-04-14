@@ -33,12 +33,14 @@ static hw_device_t* sHardwareDevice = NULL;
 
 static jmethodID sOnLocationReport = NULL;
 static jmethodID sOnDataReport = NULL;
+static jmethodID sOnBatchingCapabilities = NULL;
 static jmethodID sOnGeofenceTransition = NULL;
 static jmethodID sOnGeofenceMonitorStatus = NULL;
 static jmethodID sOnGeofenceAdd = NULL;
 static jmethodID sOnGeofenceRemove = NULL;
 static jmethodID sOnGeofencePause = NULL;
 static jmethodID sOnGeofenceResume = NULL;
+static jmethodID sOnGeofencingCapabilities = NULL;
 
 static const FlpLocationInterface* sFlpInterface = NULL;
 static const FlpDiagnosticInterface* sFlpDiagnosticInterface = NULL;
@@ -83,6 +85,19 @@ static bool IsValidCallbackThread() {
   }
 
   return true;
+}
+
+static void BatchingCapabilitiesCallback(int32_t capabilities) {
+  if(!IsValidCallbackThread()) {
+    return;
+  }
+
+  sCallbackEnv->CallVoidMethod(
+      sCallbacksObj,
+      sOnBatchingCapabilities,
+      capabilities
+      );
+  CheckExceptions(sCallbackEnv, __FUNCTION__);
 }
 
 static int SetThreadEvent(ThreadEvent event) {
@@ -156,6 +171,14 @@ static void ClassInit(JNIEnv* env, jclass clazz) {
       "onDataReport",
       "(Ljava/lang/String;)V"
       );
+    sOnBatchingCapabilities = env->GetMethodID(
+        clazz,
+        "onBatchingCapabilities",
+        "(I)V");
+    sOnGeofencingCapabilities = env->GetMethodID(
+            clazz,
+            "onGeofencingCapabilities",
+            "(I)V");
   sOnGeofenceTransition = env->GetMethodID(
       clazz,
       "onGeofenceTransition",
@@ -534,7 +557,8 @@ FlpCallbacks sFlpCallbacks = {
   LocationCallback,
   AcquireWakelock,
   ReleaseWakelock,
-  SetThreadEvent
+  SetThreadEvent,
+  BatchingCapabilitiesCallback
 };
 
 static void ReportData(char* data, int length) {
@@ -670,6 +694,19 @@ static void GeofenceResumeCallback(int32_t geofenceId, int32_t result) {
   CheckExceptions(sCallbackEnv, __FUNCTION__);
 }
 
+static void GeofencingCapabilitiesCallback(int32_t capabilities) {
+  if(!IsValidCallbackThread()) {
+    return;
+  }
+
+  sCallbackEnv->CallVoidMethod(
+      sCallbacksObj,
+      sOnGeofencingCapabilities,
+      capabilities
+      );
+  CheckExceptions(sCallbackEnv, __FUNCTION__);
+}
+
 FlpGeofenceCallbacks sFlpGeofenceCallbacks = {
   sizeof(FlpGeofenceCallbacks),
   GeofenceTransitionCallback,
@@ -678,7 +715,8 @@ FlpGeofenceCallbacks sFlpGeofenceCallbacks = {
   GeofenceRemoveCallback,
   GeofencePauseCallback,
   GeofenceResumeCallback,
-  SetThreadEvent
+  SetThreadEvent,
+  GeofencingCapabilitiesCallback
 };
 
 /*
