@@ -3154,6 +3154,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                 case WindowManager.LayoutParams.TYPE_APPLICATION_PANEL:
                 case WindowManager.LayoutParams.TYPE_APPLICATION_STARTING:
                 case WindowManager.LayoutParams.TYPE_APPLICATION_SUB_PANEL:
+                case WindowManager.LayoutParams.TYPE_APPLICATION_ABOVE_SUB_PANEL:
                 case WindowManager.LayoutParams.TYPE_BASE_APPLICATION:
                 case WindowManager.LayoutParams.TYPE_PHONE:
                 case WindowManager.LayoutParams.TYPE_PRIORITY_PHONE:
