@@ -5988,11 +5988,11 @@
             <enum name="noScale" value="0"/>
             <!-- This should be used when the animation's moving distance is proportional to screen,
                  as the scaling is based on screen size. -->
-            <enum name="screen" value="1"/>
+            <enum name="screenBased" value="1"/>
             <!-- This is for animations that have a distance defined in dp, which will be the same
                  across different devices. In this case, scaling is based on the physical distance
                  per dp on the current device. -->
-            <enum name="dp" value="2"/>
+            <enum name="dpBased" value="2"/>
         </attr>
     </declare-styleable>
 
