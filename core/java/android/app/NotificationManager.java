@@ -16,14 +16,19 @@
 
 package android.app;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.SdkConstant;
 import android.app.Notification.Builder;
+import android.app.NotificationManager.Policy.Token;
 import android.content.ComponentName;
 import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.StrictMode;
@@ -32,6 +37,8 @@ import android.provider.Settings.Global;
 import android.service.notification.IConditionListener;
 import android.service.notification.ZenModeConfig;
 import android.util.Log;
+
+import java.util.Objects;
 
 /**
  * Class to notify the user of events that happen.  This is how you tell
@@ -88,6 +95,14 @@ public class NotificationManager
     @SdkConstant(SdkConstant.SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_EFFECTS_SUPPRESSOR_CHANGED
             = "android.os.action.ACTION_EFFECTS_SUPPRESSOR_CHANGED";
+
+    /**
+     * Intent that is broadcast when the state of getNotificationPolicy() changes.
+     * This broadcast is only sent to registered receivers.
+     */
+    @SdkConstant(SdkConstant.SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_NOTIFICATION_POLICY_CHANGED
+            = "android.app.action.NOTIFICATION_POLICY_CHANGED";
 
     private static INotificationManager sService;
 
@@ -338,5 +353,293 @@ public class NotificationManager
         return null;
     }
 
+    /**
+     * Requests a notification policy token for the calling package.
+     *
+     * @param callback required, used to receive the granted token or the deny signal.
+     * @param handler The handler used when receiving the result.
+     *                If null, the current thread is used.
+     */
+    public void requestNotificationPolicyToken(@NonNull final Policy.Token.RequestCallback callback,
+            @Nullable Handler handler) {
+        checkRequired("callback", callback);
+        final Handler h = handler != null ? handler : new Handler();
+        INotificationManager service = getService();
+        try {
+            service.requestNotificationPolicyToken(mContext.getOpPackageName(),
+                    new INotificationManagerCallback.Stub() {
+                @Override
+                public void onPolicyToken(final Token token) throws RemoteException {
+                    h.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            if (token != null) {
+                                callback.onTokenGranted(token);
+                            } else {
+                                callback.onTokenDenied();
+                            }
+                        }
+                    });
+                }
+            });
+        } catch (RemoteException e) {
+        }
+    }
+
+    /**
+     * Checks a given notification policy token.
+     *
+     * Returns true if the token is still valid for managing policy.
+     */
+    public boolean isNotificationPolicyTokenValid(@NonNull Policy.Token token) {
+        if (token == null) return false;
+        INotificationManager service = getService();
+        try {
+            return service.isNotificationPolicyTokenValid(mContext.getOpPackageName(), token);
+        } catch (RemoteException e) {
+        }
+        return false;
+    }
+
+    /**
+     * Gets the current notification policy.
+     *
+     * @param token A valid notification policy token is required to access the current policy.
+     */
+    public Policy getNotificationPolicy(@NonNull Policy.Token token) {
+        checkRequired("token", token);
+        INotificationManager service = getService();
+        try {
+            return service.getNotificationPolicy(token);
+        } catch (RemoteException e) {
+        }
+        return null;
+    }
+
+    /**
+     * Sets the current notification policy.
+     *
+     * @param token  A valid notification policy token is required to modify the current policy.
+     * @param policy The new desired policy.
+     */
+    public void setNotificationPolicy(@NonNull Policy.Token token, @NonNull Policy policy) {
+        checkRequired("token", token);
+        checkRequired("policy", policy);
+        INotificationManager service = getService();
+        try {
+            service.setNotificationPolicy(token, policy);
+        } catch (RemoteException e) {
+        }
+    }
+
     private Context mContext;
+
+    private static void checkRequired(String name, Object value) {
+        if (value == null) {
+            throw new IllegalArgumentException(name + " is required");
+        }
+    }
+
+    /**
+     * Notification policy configuration.  Represents user-preferences for notification
+     * filtering and prioritization.
+     */
+    public static class Policy implements android.os.Parcelable {
+        /** Reminder notifications are prioritized. */
+        public static final int PRIORITY_CATEGORY_REMINDERS = 1 << 0;
+        /** Event notifications are prioritized. */
+        public static final int PRIORITY_CATEGORY_EVENTS = 1 << 1;
+        /** Message notifications are prioritized. */
+        public static final int PRIORITY_CATEGORY_MESSAGES = 1 << 2;
+        /** Calls are prioritized. */
+        public static final int PRIORITY_CATEGORY_CALLS = 1 << 3;
+        /** Calls from repeat callers are prioritized. */
+        public static final int PRIORITY_CATEGORY_REPEAT_CALLERS = 1 << 4;
+
+        private static final int[] ALL_PRIORITY_CATEGORIES = {
+            PRIORITY_CATEGORY_REMINDERS,
+            PRIORITY_CATEGORY_EVENTS,
+            PRIORITY_CATEGORY_MESSAGES,
+            PRIORITY_CATEGORY_CALLS,
+            PRIORITY_CATEGORY_REPEAT_CALLERS,
+        };
+
+        /** Any sender is prioritized. */
+        public static final int PRIORITY_SENDERS_ANY = 0;
+        /** Saved contacts are prioritized. */
+        public static final int PRIORITY_SENDERS_CONTACTS = 1;
+        /** Only starred contacts are prioritized. */
+        public static final int PRIORITY_SENDERS_STARRED = 2;
+
+        /** Notification categories to prioritize. Bitmask of PRIORITY_CATEGORY_* constants. */
+        public final int priorityCategories;
+
+        /** Notification senders to prioritize. One of:
+         * PRIORITY_SENDERS_ANY, PRIORITY_SENDERS_CONTACTS, PRIORITY_SENDERS_STARRED */
+        public final int prioritySenders;
+
+        public Policy(int priorityCategories, int prioritySenders) {
+            this.priorityCategories = priorityCategories;
+            this.prioritySenders = prioritySenders;
+        }
+
+        /** @hide */
+        public Policy(Parcel source) {
+            this(source.readInt(), source.readInt());
+        }
+
+        @Override
+        public void writeToParcel(Parcel dest, int flags) {
+            dest.writeInt(priorityCategories);
+            dest.writeInt(prioritySenders);
+        }
+
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(priorityCategories, prioritySenders);
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (!(o instanceof Policy)) return false;
+            if (o == this) return true;
+            final Policy other = (Policy) o;
+            return other.priorityCategories == priorityCategories
+                    && other.prioritySenders == prioritySenders;
+        }
+
+        @Override
+        public String toString() {
+            return "NotificationManager.Policy["
+                    + "priorityCategories=" + priorityCategoriesToString(priorityCategories)
+                    + ",prioritySenders=" + prioritySendersToString(prioritySenders)
+                    + "]";
+        }
+
+        public static String priorityCategoriesToString(int priorityCategories) {
+            if (priorityCategories == 0) return "";
+            final StringBuilder sb = new StringBuilder();
+            for (int i = 0; i < ALL_PRIORITY_CATEGORIES.length; i++) {
+                final int priorityCategory = ALL_PRIORITY_CATEGORIES[i];
+                if ((priorityCategories & priorityCategory) != 0) {
+                    if (sb.length() > 0) sb.append(',');
+                    sb.append(priorityCategoryToString(priorityCategory));
+                }
+                priorityCategories &= ~priorityCategory;
+            }
+            if (priorityCategories != 0) {
+                if (sb.length() > 0) sb.append(',');
+                sb.append("PRIORITY_CATEGORY_UNKNOWN_").append(priorityCategories);
+            }
+            return sb.toString();
+        }
+
+        private static String priorityCategoryToString(int priorityCategory) {
+            switch (priorityCategory) {
+                case PRIORITY_CATEGORY_REMINDERS: return "PRIORITY_CATEGORY_REMINDERS";
+                case PRIORITY_CATEGORY_EVENTS: return "PRIORITY_CATEGORY_EVENTS";
+                case PRIORITY_CATEGORY_MESSAGES: return "PRIORITY_CATEGORY_MESSAGES";
+                case PRIORITY_CATEGORY_CALLS: return "PRIORITY_CATEGORY_CALLS";
+                case PRIORITY_CATEGORY_REPEAT_CALLERS: return "PRIORITY_CATEGORY_REPEAT_CALLERS";
+                default: return "PRIORITY_CATEGORY_UNKNOWN_" + priorityCategory;
+            }
+        }
+
+        public static String prioritySendersToString(int prioritySenders) {
+            switch (prioritySenders) {
+                case PRIORITY_SENDERS_ANY: return "PRIORITY_SENDERS_ANY";
+                case PRIORITY_SENDERS_CONTACTS: return "PRIORITY_SENDERS_CONTACTS";
+                case PRIORITY_SENDERS_STARRED: return "PRIORITY_SENDERS_STARRED";
+                default: return "PRIORITY_SENDERS_UNKNOWN_" + prioritySenders;
+            }
+        }
+
+        public static final Parcelable.Creator<Policy> CREATOR = new Parcelable.Creator<Policy>() {
+            @Override
+            public Policy createFromParcel(Parcel in) {
+                return new Policy(in);
+            }
+
+            @Override
+            public Policy[] newArray(int size) {
+                return new Policy[size];
+            }
+        };
+
+        /**
+         * Represents a client-specific token required to manage notification policy.
+         */
+        public static class Token implements Parcelable {
+            private final IBinder mBinder;
+
+            /** @hide */
+            public Token(IBinder binder) {
+                if (binder == null) throw new IllegalArgumentException("Binder required for token");
+                mBinder = binder;
+            }
+
+            @Override
+            public int describeContents() {
+                return 0;
+            }
+
+            @Override
+            public int hashCode() {
+                return Objects.hash(mBinder);
+            }
+
+            @Override
+            public boolean equals(Object o) {
+                if (!(o instanceof Token)) return false;
+                if (o == this) return true;
+                final Token other = (Token) o;
+                return Objects.equals(other.mBinder, mBinder);
+            }
+
+            @Override
+            public String toString() {
+                return String.format("NotificationManager.Token[0x%08x]",
+                        System.identityHashCode(mBinder));
+            }
+
+            @Override
+            public void writeToParcel(Parcel dest, int flags) {
+                dest.writeStrongBinder(mBinder);
+            }
+
+            public static final Parcelable.Creator<Token> CREATOR
+                    = new Parcelable.Creator<Token>() {
+                @Override
+                public Token createFromParcel(Parcel in) {
+                    return new Token(in.readStrongBinder());
+                }
+
+                @Override
+                public Token[] newArray(int size) {
+                    return new Token[size];
+                }
+            };
+
+            /** Callback for receiving the result of a token request. */
+            public static abstract class RequestCallback {
+                /**
+                 * Received if the request was granted for this package.
+                 *
+                 * @param token can be used to manage notification policy.
+                 */
+                public abstract void onTokenGranted(Policy.Token token);
+
+                /**
+                 * Received if the request was denied for this package.
+                 */
+                public abstract void onTokenDenied();
+            }
+        }
+    }
+
 }

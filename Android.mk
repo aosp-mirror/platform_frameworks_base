@@ -74,6 +74,7 @@ LOCAL_SRC_FILES += \
 	core/java/android/app/IBackupAgent.aidl \
 	core/java/android/app/IInstrumentationWatcher.aidl \
 	core/java/android/app/INotificationManager.aidl \
+	core/java/android/app/INotificationManagerCallback.aidl \
 	core/java/android/app/IProcessObserver.aidl \
 	core/java/android/app/ISearchManager.aidl \
 	core/java/android/app/ISearchManagerCallback.aidl \
@@ -555,6 +556,7 @@ aidl_files := \
 	frameworks/base/core/java/android/app/AssistStructure.aidl \
 	frameworks/base/core/java/android/app/AssistContent.aidl \
 	frameworks/base/core/java/android/app/Notification.aidl \
+	frameworks/base/core/java/android/app/NotificationManager.aidl \
 	frameworks/base/core/java/android/app/WallpaperInfo.aidl \
 	frameworks/base/core/java/android/app/AppOpsManager.aidl \
 	frameworks/base/core/java/android/app/ActivityManager.aidl \

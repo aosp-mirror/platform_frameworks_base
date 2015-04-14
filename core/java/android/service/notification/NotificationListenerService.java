@@ -21,6 +21,7 @@ import android.annotation.SdkConstant;
 import android.app.INotificationManager;
 import android.app.Notification;
 import android.app.Notification.Builder;
+import android.app.NotificationManager.Policy;
 import android.app.Service;
 import android.content.ComponentName;
 import android.content.Context;
@@ -497,6 +498,22 @@ public abstract class NotificationListenerService extends Service {
         } catch (android.os.RemoteException ex) {
             Log.v(TAG, "Unable to contact notification manager", ex);
             return INTERRUPTION_FILTER_UNKNOWN;
+        }
+    }
+
+    /**
+     * Gets the notification policy token associated with this listener.
+     *
+     * <p>
+     * Returns null if this listener is not currently active.
+     */
+    public final Policy.Token getNotificationPolicyToken() {
+        if (!isBound()) return null;
+        try {
+            return getNotificationInterface().getPolicyTokenFromListener(mWrapper);
+        } catch (android.os.RemoteException ex) {
+            Log.v(TAG, "Unable to contact notification manager", ex);
+            return null;
         }
     }
 

@@ -16,6 +16,7 @@
 
 package android.service.notification;
 
+import android.app.NotificationManager.Policy;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.res.Resources;
@@ -470,6 +471,59 @@ public class ZenModeConfig implements Parcelable {
         }
     };
 
+    public Policy toNotificationPolicy() {
+        int priorityCategories = 0;
+        int prioritySenders = Policy.PRIORITY_SENDERS_ANY;
+        if (allowCalls) {
+            priorityCategories |= Policy.PRIORITY_CATEGORY_CALLS;
+        }
+        if (allowMessages) {
+            priorityCategories |= Policy.PRIORITY_CATEGORY_MESSAGES;
+        }
+        if (allowEvents) {
+            priorityCategories |= Policy.PRIORITY_CATEGORY_EVENTS;
+        }
+        if (allowReminders) {
+            priorityCategories |= Policy.PRIORITY_CATEGORY_REMINDERS;
+        }
+        if (allowRepeatCallers) {
+            priorityCategories |= Policy.PRIORITY_CATEGORY_REPEAT_CALLERS;
+        }
+        switch (allowFrom) {
+            case SOURCE_ANYONE:
+                prioritySenders = Policy.PRIORITY_SENDERS_ANY;
+                break;
+            case SOURCE_CONTACT:
+                prioritySenders = Policy.PRIORITY_SENDERS_CONTACTS;
+                break;
+            case SOURCE_STAR:
+                prioritySenders = Policy.PRIORITY_SENDERS_STARRED;
+                break;
+        }
+        return new Policy(priorityCategories, prioritySenders);
+    }
+
+    public void applyNotificationPolicy(Policy policy) {
+        if (policy == null) return;
+        allowCalls = (policy.priorityCategories & Policy.PRIORITY_CATEGORY_CALLS) != 0;
+        allowMessages = (policy.priorityCategories & Policy.PRIORITY_CATEGORY_MESSAGES) != 0;
+        allowEvents = (policy.priorityCategories & Policy.PRIORITY_CATEGORY_EVENTS) != 0;
+        allowReminders = (policy.priorityCategories & Policy.PRIORITY_CATEGORY_REMINDERS) != 0;
+        allowRepeatCallers = (policy.priorityCategories & Policy.PRIORITY_CATEGORY_REPEAT_CALLERS)
+                != 0;
+        switch (policy.prioritySenders) {
+            case Policy.PRIORITY_SENDERS_CONTACTS:
+                allowFrom = SOURCE_CONTACT;
+                break;
+            case Policy.PRIORITY_SENDERS_STARRED:
+                allowFrom = SOURCE_STAR;
+                break;
+            default:
+                allowFrom = SOURCE_ANYONE;
+                break;
+        }
+    }
+
     public static Condition toTimeCondition(Context context, int minutesFromNow, int userHandle) {
         final long now = System.currentTimeMillis();
         final long millis = minutesFromNow == 0 ? ZERO_VALUE_MS : minutesFromNow * MINUTES_MS;
@@ -881,4 +935,5 @@ public class ZenModeConfig implements Parcelable {
     public interface Migration {
         ZenModeConfig migrate(XmlV1 v1);
     }
+
 }
