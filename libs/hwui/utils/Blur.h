@@ -34,7 +34,7 @@ public:
     // accounts for that error and snaps to the appropriate integer boundary.
     static uint32_t convertRadiusToInt(float radius);
 
-    static void generateGaussianWeights(float* weights, int32_t radius);
+    static void generateGaussianWeights(float* weights, float radius);
     static void horizontal(float* weights, int32_t radius, const uint8_t* source,
         uint8_t* dest, int32_t width, int32_t height);
     static void vertical(float* weights, int32_t radius, const uint8_t* source,

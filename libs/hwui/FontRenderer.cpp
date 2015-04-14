@@ -773,7 +773,7 @@ void FontRenderer::blurImage(uint8_t** image, int32_t width, int32_t height, flo
 #endif
 
     float *gaussian = new float[2 * intRadius + 1];
-    Blur::generateGaussianWeights(gaussian, intRadius);
+    Blur::generateGaussianWeights(gaussian, radius);
 
     uint8_t* scratch = new uint8_t[width * height];
     Blur::horizontal(gaussian, intRadius, *image, scratch, width, height);
