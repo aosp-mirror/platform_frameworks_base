@@ -26,7 +26,7 @@ nonavpage=true
   <div class="resource-widget resource-flow-layout landing col-16"
     data-query="collection:distribute/gp/gpfelanding"
     data-cardSizes="6x6"
-    data-maxResults="3">
+    data-maxResults="5">
   </div>
 
   <h3>Related resources</h3>
