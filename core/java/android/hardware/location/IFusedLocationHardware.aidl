@@ -121,4 +121,9 @@ interface IFusedLocationHardware {
      * of the locations returned in this call.
      */
     void flushBatchedLocations() = 11;
+
+    /**
+     * Returns the version of this FLP HAL implementation.
+     */
+    int getVersion() = 12;
 }

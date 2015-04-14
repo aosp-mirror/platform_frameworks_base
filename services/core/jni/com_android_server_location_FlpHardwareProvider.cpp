@@ -31,6 +31,7 @@ static jobject sCallbacksObj = NULL;
 static JNIEnv *sCallbackEnv = NULL;
 static hw_device_t* sHardwareDevice = NULL;
 
+static jmethodID sSetVersion = NULL;
 static jmethodID sOnLocationReport = NULL;
 static jmethodID sOnDataReport = NULL;
 static jmethodID sOnBatchingCapabilities = NULL;
@@ -141,6 +142,14 @@ static int SetThreadEvent(ThreadEvent event) {
       }
 
       ALOGV("Callback thread attached: %p", sCallbackEnv);
+
+      // Send the version to the upper layer.
+      sCallbackEnv->CallVoidMethod(
+            sCallbacksObj,
+            sSetVersion,
+            sFlpInterface->size == sizeof(FlpLocationInterface) ? 2 : 1
+            );
+      CheckExceptions(sCallbackEnv, __FUNCTION__);
       break;
     }
     case DISASSOCIATE_JVM:
@@ -176,6 +185,10 @@ static void ClassInit(JNIEnv* env, jclass clazz) {
   sFlpInterface = NULL;
 
   // get references to the Java provider methods
+  sSetVersion = env->GetMethodID(
+        clazz,
+        "setVersion",
+        "(I)V");
   sOnLocationReport = env->GetMethodID(
       clazz,
       "onLocationReport",
