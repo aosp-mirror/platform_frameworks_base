@@ -29,6 +29,10 @@ import junit.framework.TestCase;
 
 public class IpPrefixTest extends TestCase {
 
+    private static InetAddress Address(String addr) {
+        return InetAddress.parseNumericAddress(addr);
+    }
+
     // Explicitly cast everything to byte because "error: possible loss of precision".
     private static final byte[] IPV4_BYTES = { (byte) 192, (byte) 0, (byte) 2, (byte) 4};
     private static final byte[] IPV6_BYTES = {
@@ -206,6 +210,34 @@ public class IpPrefixTest extends TestCase {
 
         p2 = new IpPrefix(IPV4_BYTES, 32);
         assertAreNotEqual(p1, p2);
+    }
+
+    @SmallTest
+    public void testContains() {
+        IpPrefix p = new IpPrefix("2001:db8:f00::ace:d00d/127");
+        assertTrue(p.contains(Address("2001:db8:f00::ace:d00c")));
+        assertTrue(p.contains(Address("2001:db8:f00::ace:d00d")));
+        assertFalse(p.contains(Address("2001:db8:f00::ace:d00e")));
+        assertFalse(p.contains(Address("2001:db8:f00::bad:d00d")));
+        assertFalse(p.contains(Address("2001:4868:4860::8888")));
+        assertFalse(p.contains(null));
+        assertFalse(p.contains(Address("8.8.8.8")));
+
+        p = new IpPrefix("192.0.2.0/23");
+        assertTrue(p.contains(Address("192.0.2.43")));
+        assertTrue(p.contains(Address("192.0.3.21")));
+        assertFalse(p.contains(Address("192.0.0.21")));
+        assertFalse(p.contains(Address("8.8.8.8")));
+        assertFalse(p.contains(Address("2001:4868:4860::8888")));
+
+        IpPrefix ipv6Default = new IpPrefix("::/0");
+        assertTrue(ipv6Default.contains(Address("2001:db8::f00")));
+        assertFalse(ipv6Default.contains(Address("192.0.2.1")));
+
+        IpPrefix ipv4Default = new IpPrefix("0.0.0.0/0");
+        assertTrue(ipv4Default.contains(Address("255.255.255.255")));
+        assertTrue(ipv4Default.contains(Address("192.0.2.1")));
+        assertFalse(ipv4Default.contains(Address("2001:db8::f00")));
     }
 
     @SmallTest
