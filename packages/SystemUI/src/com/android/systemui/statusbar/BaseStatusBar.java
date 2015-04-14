@@ -80,6 +80,7 @@ import android.widget.DateTimeView;
 import android.widget.ImageView;
 import android.widget.RemoteViews;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.statusbar.StatusBarIcon;
@@ -378,6 +379,23 @@ public abstract class BaseStatusBar extends SystemUI implements
                 userSwitched(mCurrentUserId);
             } else if (Intent.ACTION_USER_ADDED.equals(action)) {
                 updateCurrentProfilesCache();
+            } else if (Intent.ACTION_USER_PRESENT.equals(action)) {
+                List<ActivityManager.RecentTaskInfo> recentTask = null;
+                try {
+                    recentTask = ActivityManagerNative.getDefault().getRecentTasks(1,
+                            ActivityManager.RECENT_WITH_EXCLUDED
+                            | ActivityManager.RECENT_INCLUDE_PROFILES,
+                            mCurrentUserId);
+                } catch (RemoteException e) {
+                    // Abandon hope activity manager not running.
+                }
+                if (recentTask != null && recentTask.size() > 0) {
+                    UserInfo user = mUserManager.getUserInfo(recentTask.get(0).userId);
+                    if (user != null && user.isManagedProfile()) {
+                        Toast.makeText(mContext, R.string.managed_profile_foreground_toast,
+                                Toast.LENGTH_SHORT).show();
+                    }
+                }
             } else if (DevicePolicyManager.ACTION_DEVICE_POLICY_MANAGER_STATE_CHANGED.equals(
                     action)) {
                 mUsersAllowingPrivateNotifications.clear();
@@ -612,6 +630,7 @@ public abstract class BaseStatusBar extends SystemUI implements
         IntentFilter filter = new IntentFilter();
         filter.addAction(Intent.ACTION_USER_SWITCHED);
         filter.addAction(Intent.ACTION_USER_ADDED);
+        filter.addAction(Intent.ACTION_USER_PRESENT);
         filter.addAction(BANNER_ACTION_CANCEL);
         filter.addAction(BANNER_ACTION_SETUP);
         filter.addAction(DevicePolicyManager.ACTION_DEVICE_POLICY_MANAGER_STATE_CHANGED);
