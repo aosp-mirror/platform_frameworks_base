@@ -93,6 +93,7 @@
   <item type="id" name="undo" />
   <item type="id" name="redo" />
   <item type="id" name="replaceText" />
+  <item type="id" name="shareText" />
 
   <!-- Accessibility action identifier for {@link android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction#ACTION_SHOW_ON_SCREEN}. -->
   <item type="id" name="accessibilityActionShowOnScreen" />
