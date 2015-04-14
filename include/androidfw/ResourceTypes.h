@@ -372,7 +372,8 @@ struct Res_value
     };
 
     // The data for this item, as interpreted according to dataType.
-    uint32_t data;
+    typedef uint32_t data_type;
+    data_type data;
 
     void copyFrom_dtoh(const Res_value& src);
 };
@@ -1501,6 +1502,8 @@ private:
     uint8_t                         mLookupTable[256];
     KeyedVector<String16, uint8_t>  mEntries;
 };
+
+bool U16StringToInt(const char16_t* s, size_t len, Res_value* outValue);
 
 /**
  * Convenience class for accessing data in a ResTable resource.
