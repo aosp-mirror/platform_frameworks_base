@@ -603,6 +603,27 @@ public class ConnectivityManager {
     }
 
     /**
+     * Returns a {@link Network} object corresponding to the currently active
+     * default data network.  In the event that the current active default data
+     * network disconnects, the returned {@code Network} object will no longer
+     * be usable.  This will return {@code null} when there is no default
+     * network.
+     *
+     * @return a {@link Network} object for the current default network or
+     *        {@code null} if no default network is currently active
+     *
+     * <p>This method requires the caller to hold the permission
+     * {@link android.Manifest.permission#ACCESS_NETWORK_STATE}.
+     */
+    public Network getActiveNetwork() {
+        try {
+            return mService.getActiveNetwork();
+        } catch (RemoteException e) {
+            return null;
+        }
+    }
+
+    /**
      * Returns details about the currently active default data network
      * for a given uid.  This is for internal use only to avoid spying
      * other apps.
@@ -821,48 +842,6 @@ public class ConnectivityManager {
             return null;
         }
     }
-
-    /**
-     * Tells each network type to set its radio power state as directed.
-     *
-     * @param turnOn a boolean, {@code true} to turn the radios on,
-     *        {@code false} to turn them off.
-     * @return a boolean, {@code true} indicating success.  All network types
-     *        will be tried, even if some fail.
-     *
-     * <p>This method requires the caller to hold the permission
-     * {@link android.Manifest.permission#CHANGE_NETWORK_STATE}.
-     * {@hide}
-     */
-// TODO - check for any callers and remove
-//    public boolean setRadios(boolean turnOn) {
-//        try {
-//            return mService.setRadios(turnOn);
-//        } catch (RemoteException e) {
-//            return false;
-//        }
-//    }
-
-    /**
-     * Tells a given networkType to set its radio power state as directed.
-     *
-     * @param networkType the int networkType of interest.
-     * @param turnOn a boolean, {@code true} to turn the radio on,
-     *        {@code} false to turn it off.
-     * @return a boolean, {@code true} indicating success.
-     *
-     * <p>This method requires the caller to hold the permission
-     * {@link android.Manifest.permission#CHANGE_NETWORK_STATE}.
-     * {@hide}
-     */
-// TODO - check for any callers and remove
-//    public boolean setRadio(int networkType, boolean turnOn) {
-//        try {
-//            return mService.setRadio(networkType, turnOn);
-//        } catch (RemoteException e) {
-//            return false;
-//        }
-//    }
 
     /**
      * Tells the underlying networking system that the caller wants to
@@ -1730,10 +1709,33 @@ public class ConnectivityManager {
      *
      * @param network The {@link Network} the application was attempting to use
      *                or {@code null} to indicate the current default network.
+     * @deprecated Use {@link #reportNetworkConnectivity} which allows reporting both
+     *             working and non-working connectivity.
      */
     public void reportBadNetwork(Network network) {
         try {
-            mService.reportBadNetwork(network);
+            // One of these will be ignored because it matches system's current state.
+            // The other will trigger the necessary reevaluation.
+            mService.reportNetworkConnectivity(network, true);
+            mService.reportNetworkConnectivity(network, false);
+        } catch (RemoteException e) {
+        }
+    }
+
+    /**
+     * Report to the framework whether a network has working connectivity.
+     * This provides a hint to the system that a particular network is providing
+     * working connectivity or not.  In response the framework may re-evaluate
+     * the network's connectivity and might take further action thereafter.
+     *
+     * @param network The {@link Network} the application was attempting to use
+     *                or {@code null} to indicate the current default network.
+     * @param hasConnectivity {@code true} if the application was able to successfully access the
+     *                        Internet using {@code network} or {@code false} if not.
+     */
+    public void reportNetworkConnectivity(Network network, boolean hasConnectivity) {
+        try {
+            mService.reportNetworkConnectivity(network, hasConnectivity);
         } catch (RemoteException e) {
         }
     }
@@ -1970,12 +1972,18 @@ public class ConnectivityManager {
         } catch (RemoteException e) { }
     }
 
-    /** {@hide} */
-    public void registerNetworkAgent(Messenger messenger, NetworkInfo ni, LinkProperties lp,
+    /**
+     * @hide
+     * Register a NetworkAgent with ConnectivityService.
+     * @return NetID corresponding to NetworkAgent.
+     */
+    public int registerNetworkAgent(Messenger messenger, NetworkInfo ni, LinkProperties lp,
             NetworkCapabilities nc, int score, NetworkMisc misc) {
         try {
-            mService.registerNetworkAgent(messenger, ni, lp, nc, score, misc);
-        } catch (RemoteException e) { }
+            return mService.registerNetworkAgent(messenger, ni, lp, nc, score, misc);
+        } catch (RemoteException e) {
+            return NETID_UNSET;
+        }
     }
 
     /**

@@ -275,4 +275,13 @@ public class ServerRequestHandler {
      */
     public void onClose() {
     }
+
+    /**
+     * Override to add Single Response Mode support - e.g. if the supplied
+     * transport is l2cap.
+     * @return True if SRM is supported, else False
+     */
+    public boolean isSrmSupported() {
+        return false;
+    }
 }

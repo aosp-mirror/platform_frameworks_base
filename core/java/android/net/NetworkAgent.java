@@ -39,6 +39,10 @@ import java.util.ArrayList;
  * @hide
  */
 public abstract class NetworkAgent extends Handler {
+    // Guaranteed to be valid (not NETID_UNSET), otherwise registerNetworkAgent() would have thrown
+    // an exception.
+    public final int netId;
+
     private volatile AsyncChannel mAsyncChannel;
     private final String LOG_TAG;
     private static final boolean DBG = true;
@@ -139,7 +143,7 @@ public abstract class NetworkAgent extends Handler {
         if (VDBG) log("Registering NetworkAgent");
         ConnectivityManager cm = (ConnectivityManager)mContext.getSystemService(
                 Context.CONNECTIVITY_SERVICE);
-        cm.registerNetworkAgent(new Messenger(this), new NetworkInfo(ni),
+        netId = cm.registerNetworkAgent(new Messenger(this), new NetworkInfo(ni),
                 new LinkProperties(lp), new NetworkCapabilities(nc), score, misc);
     }
 

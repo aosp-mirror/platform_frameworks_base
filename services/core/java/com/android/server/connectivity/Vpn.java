@@ -17,8 +17,13 @@
 package com.android.server.connectivity;
 
 import static android.Manifest.permission.BIND_VPN_SERVICE;
+import static android.net.ConnectivityManager.NETID_UNSET;
 import static android.net.RouteInfo.RTN_THROW;
 import static android.net.RouteInfo.RTN_UNREACHABLE;
+import static android.os.UserHandle.PER_USER_RANGE;
+import static android.system.OsConstants.AF_INET;
+import static android.system.OsConstants.AF_INET6;
+
 import android.Manifest;
 import android.app.AppGlobals;
 import android.app.AppOpsManager;
@@ -29,6 +34,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ResolveInfo;
@@ -64,6 +70,7 @@ import android.os.UserHandle;
 import android.os.UserManager;
 import android.security.Credentials;
 import android.security.KeyStore;
+import android.text.TextUtils;
 import android.util.Log;
 
 import com.android.internal.annotations.GuardedBy;
@@ -110,7 +117,6 @@ public class Vpn {
     private LegacyVpnRunner mLegacyVpnRunner;
     private PendingIntent mStatusIntent;
     private volatile boolean mEnableTeardown = true;
-    private final IConnectivityManager mConnService;
     private final INetworkManagementService mNetd;
     private VpnConfig mConfig;
     private NetworkAgent mNetworkAgent;
@@ -126,10 +132,9 @@ public class Vpn {
     private final int mUserHandle;
 
     public Vpn(Looper looper, Context context, INetworkManagementService netService,
-            IConnectivityManager connService, int userHandle) {
+            int userHandle) {
         mContext = context;
         mNetd = netService;
-        mConnService = connService;
         mUserHandle = userHandle;
         mLooper = looper;
 
@@ -334,6 +339,10 @@ public class Vpn {
 
     public NetworkInfo getNetworkInfo() {
         return mNetworkInfo;
+    }
+
+    public int getNetId() {
+        return mNetworkAgent != null ? mNetworkAgent.netId : NETID_UNSET;
     }
 
     private LinkProperties makeLinkProperties() {
@@ -1106,11 +1115,15 @@ public class Vpn {
             // registering
             mOuterInterface = mConfig.interfaze;
 
-            try {
-                mOuterConnection.set(
-                        mConnService.findConnectionTypeForIface(mOuterInterface));
-            } catch (Exception e) {
-                mOuterConnection.set(ConnectivityManager.TYPE_NONE);
+            if (!TextUtils.isEmpty(mOuterInterface)) {
+                final ConnectivityManager cm = ConnectivityManager.from(mContext);
+                for (Network network : cm.getAllNetworks()) {
+                    final LinkProperties lp = cm.getLinkProperties(network);
+                    if (lp != null && mOuterInterface.equals(lp.getInterfaceName())) {
+                        final NetworkInfo networkInfo = cm.getNetworkInfo(network);
+                        if (networkInfo != null) mOuterConnection.set(networkInfo.getType());
+                    }
+                }
             }
 
             IntentFilter filter = new IntentFilter();

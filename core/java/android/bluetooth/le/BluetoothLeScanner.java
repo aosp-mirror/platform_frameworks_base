@@ -409,8 +409,8 @@ public final class BluetoothLeScanner {
                         List <ScanFilter> filterList) {
         final int callbackType = settings.getCallbackType();
         // If onlost/onfound is requested, a non-empty filter is expected
-        if ((callbackType & ScanSettings.CALLBACK_TYPE_FIRST_MATCH
-                        | ScanSettings.CALLBACK_TYPE_MATCH_LOST) != 0) {
+        if ((callbackType & (ScanSettings.CALLBACK_TYPE_FIRST_MATCH
+                        | ScanSettings.CALLBACK_TYPE_MATCH_LOST)) != 0) {
             if (filterList == null) {
                 return false;
             }

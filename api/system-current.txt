@@ -7122,10 +7122,16 @@ package android.bluetooth {
   public final class BluetoothSocket implements java.io.Closeable {
     method public void close() throws java.io.IOException;
     method public void connect() throws java.io.IOException;
+    method public int getConnectionType();
     method public java.io.InputStream getInputStream() throws java.io.IOException;
+    method public int getMaxReceivePacketSize();
+    method public int getMaxTransmitPacketSize();
     method public java.io.OutputStream getOutputStream() throws java.io.IOException;
     method public android.bluetooth.BluetoothDevice getRemoteDevice();
     method public boolean isConnected();
+    field public static final int TYPE_L2CAP = 3; // 0x3
+    field public static final int TYPE_RFCOMM = 1; // 0x1
+    field public static final int TYPE_SCO = 2; // 0x2
   }
 
 }
@@ -19462,6 +19468,7 @@ package android.net {
   public class ConnectivityManager {
     method public void addDefaultNetworkActiveListener(android.net.ConnectivityManager.OnNetworkActiveListener);
     method public boolean bindProcessToNetwork(android.net.Network);
+    method public android.net.Network getActiveNetwork();
     method public android.net.NetworkInfo getActiveNetworkInfo();
     method public android.net.NetworkInfo[] getAllNetworkInfo();
     method public android.net.Network[] getAllNetworks();
@@ -19480,7 +19487,8 @@ package android.net {
     method public void registerNetworkCallback(android.net.NetworkRequest, android.net.ConnectivityManager.NetworkCallback);
     method public void releaseNetworkRequest(android.app.PendingIntent);
     method public void removeDefaultNetworkActiveListener(android.net.ConnectivityManager.OnNetworkActiveListener);
-    method public void reportBadNetwork(android.net.Network);
+    method public deprecated void reportBadNetwork(android.net.Network);
+    method public void reportNetworkConnectivity(android.net.Network, boolean);
     method public void requestNetwork(android.net.NetworkRequest, android.net.ConnectivityManager.NetworkCallback);
     method public void requestNetwork(android.net.NetworkRequest, android.app.PendingIntent);
     method public deprecated boolean requestRouteToHost(int, int);

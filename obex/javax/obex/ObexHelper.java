@@ -1,5 +1,6 @@
 /*
- * Copyright (C) 2014 The Android Open Source Project
+ * Copyright (C) 2015 The Android Open Source Project
+ * Copyright (C) 2015 Samsung LSI
  * Copyright (c) 2008-2009, Motorola, Inc.
  *
  * All rights reserved.
@@ -42,12 +43,16 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
 
+import android.util.Log;
+
 /**
  * This class defines a set of helper methods for the implementation of Obex.
  * @hide
  */
 public final class ObexHelper {
 
+    private static final String TAG = "ObexHelper";
+    public static final boolean VDBG = false;
     /**
      * Defines the basic packet length used by OBEX. Every OBEX packet has the
      * same basic format:<BR>
@@ -65,17 +70,23 @@ public final class ObexHelper {
      * should be the Max incoming MTU minus TODO: L2CAP package headers and
      * RFCOMM package headers. TODO: Retrieve the max incoming MTU from TODO:
      * LocalDevice.getProperty().
+     * NOTE: This value must be larger than or equal to the L2CAP SDU
      */
     /*
      * android note set as 0xFFFE to match remote MPS
      */
     public static final int MAX_PACKET_SIZE_INT = 0xFFFE;
 
+    // The minimum allowed max packet size is 255 according to the OBEX specification
+    public static final int LOWER_LIMIT_MAX_PACKET_SIZE = 255;
+
     /**
      * Temporary workaround to be able to push files to Windows 7.
      * TODO: Should be removed as soon as Microsoft updates their driver.
      */
     public static final int MAX_CLIENT_PACKET_SIZE = 0xFC00;
+
+    public static final int OBEX_OPCODE_FINAL_BIT_MASK = 0x80;
 
     public static final int OBEX_OPCODE_CONNECT = 0x80;
 
@@ -118,6 +129,12 @@ public final class ObexHelper {
     public static final int OBEX_AUTH_REALM_CHARSET_ISO_8859_9 = 0x09;
 
     public static final int OBEX_AUTH_REALM_CHARSET_UNICODE = 0xFF;
+
+    public static final byte OBEX_SRM_ENABLE         = 0x01; // For BT we only need enable/disable
+    public static final byte OBEX_SRM_DISABLE        = 0x00;
+    public static final byte OBEX_SRM_SUPPORT        = 0x02; // Unused for now
+
+    public static final byte OBEX_SRMP_WAIT          = 0x01; // Only SRMP value used by BT
 
     /**
      * Updates the HeaderSet with the headers received in the byte array
@@ -314,7 +331,7 @@ public final class ObexHelper {
                             }
                         } catch (Exception e) {
                             // Not a valid header so ignore
-                            throw new IOException("Header was not formatted properly");
+                            throw new IOException("Header was not formatted properly", e);
                         }
                         index += 4;
                         break;
@@ -322,7 +339,7 @@ public final class ObexHelper {
 
             }
         } catch (IOException e) {
-            throw new IOException("Header was not formatted properly");
+            throw new IOException("Header was not formatted properly", e);
         }
 
         return body;
@@ -672,6 +689,33 @@ public final class ObexHelper {
                 }
             }
 
+            // TODO:
+            // If the SRM and SRMP header is in use, they must be send in the same OBEX packet
+            // But the current structure of the obex code cannot handle this, and therefore
+            // it makes sense to put them in the tail of the headers, since we then reduce the
+            // chance of enabling SRM to soon. The down side is that SRM cannot be used while
+            // transferring non-body headers
+
+            // Add the SRM header
+            byteHeader = (Byte)headImpl.getHeader(HeaderSet.SINGLE_RESPONSE_MODE);
+            if (byteHeader != null) {
+                out.write((byte)HeaderSet.SINGLE_RESPONSE_MODE);
+                out.write(byteHeader.byteValue());
+                if (nullOut) {
+                    headImpl.setHeader(HeaderSet.SINGLE_RESPONSE_MODE, null);
+                }
+            }
+
+            // Add the SRM parameter header
+            byteHeader = (Byte)headImpl.getHeader(HeaderSet.SINGLE_RESPONSE_MODE_PARAMETER);
+            if (byteHeader != null) {
+                out.write((byte)HeaderSet.SINGLE_RESPONSE_MODE_PARAMETER);
+                out.write(byteHeader.byteValue());
+                if (nullOut) {
+                    headImpl.setHeader(HeaderSet.SINGLE_RESPONSE_MODE_PARAMETER, null);
+                }
+            }
+
         } catch (IOException e) {
         } finally {
             result = out.toByteArray();
@@ -701,6 +745,8 @@ public final class ObexHelper {
         int lastLength = -1;
         int index = start;
         int length = 0;
+
+        // TODO: Ensure SRM and SRMP headers are not split into two OBEX packets
 
         while ((fullLength < maxSize) && (index < headerArray.length)) {
             int headerID = (headerArray[index] < 0 ? headerArray[index] + 256 : headerArray[index]);
@@ -1007,5 +1053,40 @@ public final class ObexHelper {
         }
 
         return authChall;
+    }
+
+    /**
+     * Return the maximum allowed OBEX packet to transmit.
+     * OBEX packets transmitted must be smaller than this value.
+     * @param transport Reference to the ObexTransport in use.
+     * @return the maximum allowed OBEX packet to transmit
+     */
+    public static int getMaxTxPacketSize(ObexTransport transport) {
+        int size = transport.getMaxTransmitPacketSize();
+        return validateMaxPacketSize(size);
+    }
+
+    /**
+     * Return the maximum allowed OBEX packet to receive - used in OBEX connect.
+     * @param transport
+     * @return he maximum allowed OBEX packet to receive
+     */
+    public static int getMaxRxPacketSize(ObexTransport transport) {
+        int size = transport.getMaxReceivePacketSize();
+        return validateMaxPacketSize(size);
+    }
+
+    private static int validateMaxPacketSize(int size) {
+        if(VDBG && (size > MAX_PACKET_SIZE_INT)) Log.w(TAG,
+                "The packet size supported for the connection (" + size + ") is larger"
+                + " than the configured OBEX packet size: " + MAX_PACKET_SIZE_INT);
+        if(size != -1) {
+            if(size < LOWER_LIMIT_MAX_PACKET_SIZE) {
+                throw new IllegalArgumentException(size + " is less that the lower limit: "
+                        + LOWER_LIMIT_MAX_PACKET_SIZE);
+            }
+            return size;
+        }
+        return MAX_PACKET_SIZE_INT;
     }
 }

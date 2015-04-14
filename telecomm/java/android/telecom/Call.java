@@ -221,14 +221,21 @@ public final class Call {
          */
         public static final int CAPABILITY_SPEED_UP_MT_AUDIO = 0x00040000;
 
-         /**
-         * Call type can be modified for IMS call
+        /**
+         * Call can be upgraded to a video call.
          * @hide
          */
         public static final int CAPABILITY_CAN_UPGRADE_TO_VIDEO = 0x00080000;
 
+        /**
+         * For video calls, indicates whether the outgoing video for the call can be paused using
+         * the {@link android.telecom.VideoProfile.VideoState#PAUSED} VideoState.
+         * @hide
+         */
+        public static final int CAPABILITY_CAN_PAUSE_VIDEO = 0x00100000;
+
         //******************************************************************************************
-        // Next CAPABILITY value: 0x00100000
+        // Next CAPABILITY value: 0x00200000
         //******************************************************************************************
 
         private final Uri mHandle;
@@ -334,6 +341,9 @@ public final class Call {
             }
             if (can(capabilities, CAPABILITY_CAN_UPGRADE_TO_VIDEO)) {
                 builder.append(" CAPABILITY_CAN_UPGRADE_TO_VIDEO");
+            }
+            if (can(capabilities, CAPABILITY_CAN_PAUSE_VIDEO)) {
+                builder.append(" CAPABILITY_CAN_PAUSE_VIDEO");
             }
             builder.append("]");
             return builder.toString();

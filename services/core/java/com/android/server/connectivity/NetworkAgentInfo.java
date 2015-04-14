@@ -40,7 +40,10 @@ import java.util.ArrayList;
  */
 public class NetworkAgentInfo {
     public NetworkInfo networkInfo;
-    public Network network;
+    // This Network object should always be used if possible, so as to encourage reuse of the
+    // enclosed socket factory and connection pool.  Avoid creating other Network objects.
+    // This Network object is always valid.
+    public final Network network;
     public LinkProperties linkProperties;
     public NetworkCapabilities networkCapabilities;
     public final NetworkMonitor networkMonitor;
@@ -83,12 +86,12 @@ public class NetworkAgentInfo {
     // Used by ConnectivityService to keep track of 464xlat.
     public Nat464Xlat clatd;
 
-    public NetworkAgentInfo(Messenger messenger, AsyncChannel ac, NetworkInfo info,
+    public NetworkAgentInfo(Messenger messenger, AsyncChannel ac, Network net, NetworkInfo info,
             LinkProperties lp, NetworkCapabilities nc, int score, Context context, Handler handler,
             NetworkMisc misc, NetworkRequest defaultRequest) {
         this.messenger = messenger;
         asyncChannel = ac;
-        network = null;
+        network = net;
         networkInfo = info;
         linkProperties = lp;
         networkCapabilities = nc;

@@ -302,6 +302,12 @@ public final class BluetoothDevice implements Parcelable {
      */
     public static final int DEVICE_TYPE_DUAL = 3;
 
+
+    /** @hide */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_SDP_RECORD =
+            "android.bluetooth.device.action.SDP_RECORD";
+
     /**
      * Broadcast Action: This intent is used to broadcast the {@link UUID}
      * wrapped as a {@link android.os.ParcelUuid} of the remote device after it
@@ -526,6 +532,13 @@ public final class BluetoothDevice implements Parcelable {
      */
     public static final String EXTRA_UUID = "android.bluetooth.device.extra.UUID";
 
+    /** @hide */
+    public static final String EXTRA_SDP_RECORD =
+        "android.bluetooth.device.extra.SDP_RECORD";
+
+    /** @hide */
+    public static final String EXTRA_SDP_SEARCH_STATUS =
+            "android.bluetooth.device.extra.SDP_SEARCH_STATUS";
     /**
      * For {@link #getPhonebookAccessPermission}, {@link #setPhonebookAccessPermission},
      * {@link #getMessageAccessPermission} and {@link #setMessageAccessPermission}.
@@ -1054,14 +1067,34 @@ public final class BluetoothDevice implements Parcelable {
             return false;
     }
 
+     /**
+      * Perform a service discovery on the remote device to get the SDP records associated
+      * with the specified UUID.
+      *
+      * <p>This API is asynchronous and {@link #ACTION_SDP_RECORD} intent is sent,
+      * with the SDP records found on the remote end. If there is an error
+      * in getting the SDP records or if the process takes a long time,
+      * {@link #ACTION_SDP_RECORD} intent is sent with an status value in
+      * {@link #EXTRA_SDP_SEARCH_STATUS} different from 0.
+      * Detailed status error codes can be found by members of the Bluetooth package in
+      * the AbstractionLayer class.
+      * <p>Requires {@link android.Manifest.permission#BLUETOOTH}.
+      * The SDP record data will be stored in the intent as {@link #EXTRA_SDP_RECORD}.
+      * The object type will match one of the SdpXxxRecord types, depending on the UUID searched
+      * for.
+      *
+      * @return False if the sanity check fails, True if the process
+      *               of initiating an ACL connection to the remote device
+      *               was started.
+      */
      /** @hide */
-     public boolean fetchMasInstances() {
+     public boolean sdpSearch(ParcelUuid uuid) {
          if (sService == null) {
-             Log.e(TAG, "BT not enabled. Cannot query remote device for MAS instances");
+             Log.e(TAG, "BT not enabled. Cannot query remote device sdp records");
              return false;
          }
          try {
-             return sService.fetchRemoteMasInstances(this);
+             return sService.sdpSearch(this,uuid);
          } catch (RemoteException e) {Log.e(TAG, "", e);}
          return false;
      }
@@ -1257,6 +1290,36 @@ public final class BluetoothDevice implements Parcelable {
      */
     public BluetoothSocket createRfcommSocket(int channel) throws IOException {
         return new BluetoothSocket(BluetoothSocket.TYPE_RFCOMM, -1, true, true, this, channel,
+                null);
+    }
+
+    /**
+     * Create an L2cap {@link BluetoothSocket} ready to start a secure
+     * outgoing connection to this remote device on given channel.
+     * <p>The remote device will be authenticated and communication on this
+     * socket will be encrypted.
+     * <p> Use this socket only if an authenticated socket link is possible.
+     * Authentication refers to the authentication of the link key to
+     * prevent man-in-the-middle type of attacks.
+     * For example, for Bluetooth 2.1 devices, if any of the devices does not
+     * have an input and output capability or just has the ability to
+     * display a numeric key, a secure socket connection is not possible.
+     * In such a case, use {#link createInsecureRfcommSocket}.
+     * For more details, refer to the Security Model section 5.2 (vol 3) of
+     * Bluetooth Core Specification version 2.1 + EDR.
+     * <p>Use {@link BluetoothSocket#connect} to initiate the outgoing
+     * connection.
+     * <p>Valid L2CAP PSM channels are in range 1 to 2^16.
+     * <p>Requires {@link android.Manifest.permission#BLUETOOTH}
+     *
+     * @param channel L2cap PSM/channel to connect to
+     * @return a RFCOMM BluetoothServerSocket ready for an outgoing connection
+     * @throws IOException on error, for example Bluetooth not available, or
+     *                     insufficient permissions
+     * @hide
+     */
+    public BluetoothSocket createL2capSocket(int channel) throws IOException {
+        return new BluetoothSocket(BluetoothSocket.TYPE_L2CAP, -1, true, true, this, channel,
                 null);
     }
 
