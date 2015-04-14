@@ -3254,6 +3254,73 @@ public class DevicePolicyManager {
     }
 
     /**
+     * Called by a profile owner of a managed profile to set whether bluetooth
+     * devices can access enterprise contacts.
+     * <p>
+     * The calling device admin must be a profile owner. If it is not, a
+     * security exception will be thrown.
+     * <p>
+     * This API works on managed profile only.
+     *
+     * @param who Which {@link DeviceAdminReceiver} this request is associated
+     *            with.
+     * @param disabled If true, bluetooth devices cannot access enterprise
+     *            contacts.
+     */
+    public void setBluetoothContactSharingDisabled(ComponentName who, boolean disabled) {
+        if (mService != null) {
+            try {
+                mService.setBluetoothContactSharingDisabled(who, disabled);
+            } catch (RemoteException e) {
+                Log.w(TAG, "Failed talking with device policy service", e);
+            }
+        }
+    }
+
+    /**
+     * Called by a profile owner of a managed profile to determine whether or
+     * not Bluetooth devices cannot access enterprise contacts.
+     * <p>
+     * The calling device admin must be a profile owner. If it is not, a
+     * security exception will be thrown.
+     * <p>
+     * This API works on managed profile only.
+     *
+     * @param who Which {@link DeviceAdminReceiver} this request is associated
+     *            with.
+     */
+    public boolean getBluetoothContactSharingDisabled(ComponentName who) {
+        if (mService != null) {
+            try {
+                return mService.getBluetoothContactSharingDisabled(who);
+            } catch (RemoteException e) {
+                Log.w(TAG, "Failed talking with device policy service", e);
+            }
+        }
+        return true;
+    }
+
+    /**
+     * Determine whether or not Bluetooth devices cannot access contacts.
+     * <p>
+     * This API works on managed profile UserHandle only.
+     *
+     * @param userHandle The user for whom to check the caller-id permission
+     * @hide
+     */
+    public boolean getBluetoothContactSharingDisabled(UserHandle userHandle) {
+        if (mService != null) {
+            try {
+                return mService.getBluetoothContactSharingDisabledForUser(userHandle
+                        .getIdentifier());
+            } catch (RemoteException e) {
+                Log.w(TAG, "Failed talking with device policy service", e);
+            }
+        }
+        return true;
+    }
+
+    /**
      * Called by the profile owner of a managed profile so that some intents sent in the managed
      * profile can also be resolved in the parent, or vice versa.
      * Only activity intents are supported.
