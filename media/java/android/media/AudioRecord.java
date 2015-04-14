@@ -901,9 +901,36 @@ public class AudioRecord
      *    the parameters don't resolve to valid data and indexes.
      *    The number of bytes will not exceed sizeInBytes.
      */
-    public int read(byte[] audioData, int offsetInBytes, int sizeInBytes) {
-        if (mState != STATE_INITIALIZED) {
+    public int read(@NonNull byte[] audioData, int offsetInBytes, int sizeInBytes) {
+        return read(audioData, offsetInBytes, sizeInBytes, READ_BLOCKING);
+    }
+
+    /**
+     * Reads audio data from the audio hardware for recording into a byte array.
+     * The format specified in the AudioRecord constructor should be
+     * {@link AudioFormat#ENCODING_PCM_8BIT} to correspond to the data in the array.
+     * @param audioData the array to which the recorded audio data is written.
+     * @param offsetInBytes index in audioData from which the data is written expressed in bytes.
+     * @param sizeInBytes the number of requested bytes.
+     * @param readMode one of {@link #READ_BLOCKING}, {@link #READ_NON_BLOCKING}.
+     *     <br>With {@link #READ_BLOCKING}, the read will block until all the requested data
+     *     is read.
+     *     <br>With {@link #READ_NON_BLOCKING}, the read will return immediately after
+     *     reading as much audio data as possible without blocking.
+     * @return the number of bytes that were read or {@link #ERROR_INVALID_OPERATION}
+     *    if the object wasn't properly initialized, or {@link #ERROR_BAD_VALUE} if
+     *    the parameters don't resolve to valid data and indexes.
+     *    The number of bytes will not exceed sizeInBytes.
+     */
+    public int read(@NonNull byte[] audioData, int offsetInBytes, int sizeInBytes,
+            @ReadMode int readMode) {
+        if (mState != STATE_INITIALIZED  || mAudioFormat == AudioFormat.ENCODING_PCM_FLOAT) {
             return ERROR_INVALID_OPERATION;
+        }
+
+        if ((readMode != READ_BLOCKING) && (readMode != READ_NON_BLOCKING)) {
+            Log.e(TAG, "AudioRecord.read() called with invalid blocking mode");
+            return ERROR_BAD_VALUE;
         }
 
         if ( (audioData == null) || (offsetInBytes < 0 ) || (sizeInBytes < 0)
@@ -912,9 +939,9 @@ public class AudioRecord
             return ERROR_BAD_VALUE;
         }
 
-        return native_read_in_byte_array(audioData, offsetInBytes, sizeInBytes);
+        return native_read_in_byte_array(audioData, offsetInBytes, sizeInBytes,
+                readMode == READ_BLOCKING);
     }
-
 
     /**
      * Reads audio data from the audio hardware for recording into a short array.
@@ -928,9 +955,36 @@ public class AudioRecord
      *    the parameters don't resolve to valid data and indexes.
      *    The number of shorts will not exceed sizeInShorts.
      */
-    public int read(short[] audioData, int offsetInShorts, int sizeInShorts) {
-        if (mState != STATE_INITIALIZED) {
+    public int read(@NonNull short[] audioData, int offsetInShorts, int sizeInShorts) {
+        return read(audioData, offsetInShorts, sizeInShorts, READ_BLOCKING);
+    }
+
+    /**
+     * Reads audio data from the audio hardware for recording into a short array.
+     * The format specified in the AudioRecord constructor should be
+     * {@link AudioFormat#ENCODING_PCM_16BIT} to correspond to the data in the array.
+     * @param audioData the array to which the recorded audio data is written.
+     * @param offsetInShorts index in audioData from which the data is written expressed in shorts.
+     * @param sizeInShorts the number of requested shorts.
+     * @param readMode one of {@link #READ_BLOCKING}, {@link #READ_NON_BLOCKING}.
+     *     <br>With {@link #READ_BLOCKING}, the read will block until all the requested data
+     *     is read.
+     *     <br>With {@link #READ_NON_BLOCKING}, the read will return immediately after
+     *     reading as much audio data as possible without blocking.
+     * @return the number of shorts that were read or {@link #ERROR_INVALID_OPERATION}
+     *    if the object wasn't properly initialized, or {@link #ERROR_BAD_VALUE} if
+     *    the parameters don't resolve to valid data and indexes.
+     *    The number of shorts will not exceed sizeInShorts.
+     */
+    public int read(@NonNull short[] audioData, int offsetInShorts, int sizeInShorts,
+            @ReadMode int readMode) {
+        if (mState != STATE_INITIALIZED || mAudioFormat == AudioFormat.ENCODING_PCM_FLOAT) {
             return ERROR_INVALID_OPERATION;
+        }
+
+        if ((readMode != READ_BLOCKING) && (readMode != READ_NON_BLOCKING)) {
+            Log.e(TAG, "AudioRecord.read() called with invalid blocking mode");
+            return ERROR_BAD_VALUE;
         }
 
         if ( (audioData == null) || (offsetInShorts < 0 ) || (sizeInShorts < 0)
@@ -939,7 +993,8 @@ public class AudioRecord
             return ERROR_BAD_VALUE;
         }
 
-        return native_read_in_short_array(audioData, offsetInShorts, sizeInShorts);
+        return native_read_in_short_array(audioData, offsetInShorts, sizeInShorts,
+                readMode == READ_BLOCKING);
     }
 
     /**
@@ -950,22 +1005,33 @@ public class AudioRecord
      * @param offsetInFloats index in audioData from which the data is written.
      * @param sizeInFloats the number of requested floats.
      * @param readMode one of {@link #READ_BLOCKING}, {@link #READ_NON_BLOCKING}.
-     *     <BR>With {@link #READ_BLOCKING}, the read will block until all the requested data
+     *     <br>With {@link #READ_BLOCKING}, the read will block until all the requested data
      *     is read.
-     *     <BR>With {@link #READ_NON_BLOCKING}, the read will return immediately after
+     *     <br>With {@link #READ_NON_BLOCKING}, the read will return immediately after
      *     reading as much audio data as possible without blocking.
      * @return the number of floats that were read or {@link #ERROR_INVALID_OPERATION}
      *    if the object wasn't properly initialized, or {@link #ERROR_BAD_VALUE} if
      *    the parameters don't resolve to valid data and indexes.
      *    The number of floats will not exceed sizeInFloats.
      */
-    public int read(float[] audioData, int offsetInFloats, int sizeInFloats,
+    public int read(@NonNull float[] audioData, int offsetInFloats, int sizeInFloats,
             @ReadMode int readMode) {
-        if (mState != STATE_INITIALIZED) {
+        if (mState == STATE_UNINITIALIZED) {
+            Log.e(TAG, "AudioRecord.read() called in invalid state STATE_UNINITIALIZED");
             return ERROR_INVALID_OPERATION;
         }
 
-        if ( (audioData == null) || (offsetInFloats < 0 ) || (sizeInFloats < 0)
+        if (mAudioFormat != AudioFormat.ENCODING_PCM_FLOAT) {
+            Log.e(TAG, "AudioRecord.read(float[] ...) requires format ENCODING_PCM_FLOAT");
+            return ERROR_INVALID_OPERATION;
+        }
+
+        if ((readMode != READ_BLOCKING) && (readMode != READ_NON_BLOCKING)) {
+            Log.e(TAG, "AudioRecord.read() called with invalid blocking mode");
+            return ERROR_BAD_VALUE;
+        }
+
+        if ((audioData == null) || (offsetInFloats < 0) || (sizeInFloats < 0)
                 || (offsetInFloats + sizeInFloats < 0)  // detect integer overflow
                 || (offsetInFloats + sizeInFloats > audioData.length)) {
             return ERROR_BAD_VALUE;
@@ -992,18 +1058,48 @@ public class AudioRecord
      *    The number of bytes will not exceed sizeInBytes.
      *    The number of bytes read will truncated to be a multiple of the frame size.
      */
-    public int read(ByteBuffer audioBuffer, int sizeInBytes) {
+    public int read(@NonNull ByteBuffer audioBuffer, int sizeInBytes) {
+        return read(audioBuffer, sizeInBytes, READ_BLOCKING);
+    }
+
+    /**
+     * Reads audio data from the audio hardware for recording into a direct buffer. If this buffer
+     * is not a direct buffer, this method will always return 0.
+     * Note that the value returned by {@link java.nio.Buffer#position()} on this buffer is
+     * unchanged after a call to this method.
+     * The representation of the data in the buffer will depend on the format specified in
+     * the AudioRecord constructor, and will be native endian.
+     * @param audioBuffer the direct buffer to which the recorded audio data is written.
+     * @param sizeInBytes the number of requested bytes. It is recommended but not enforced
+     *    that the number of bytes requested be a multiple of the frame size (sample size in
+     *    bytes multiplied by the channel count).
+     * @param readMode one of {@link #READ_BLOCKING}, {@link #READ_NON_BLOCKING}.
+     *     <br>With {@link #READ_BLOCKING}, the read will block until all the requested data
+     *     is read.
+     *     <br>With {@link #READ_NON_BLOCKING}, the read will return immediately after
+     *     reading as much audio data as possible without blocking.
+     * @return the number of bytes that were read or {@link #ERROR_INVALID_OPERATION}
+     *    if the object wasn't properly initialized, or {@link #ERROR_BAD_VALUE} if
+     *    the parameters don't resolve to valid data and indexes.
+     *    The number of bytes will not exceed sizeInBytes.
+     *    The number of bytes read will truncated to be a multiple of the frame size.
+     */
+    public int read(@NonNull ByteBuffer audioBuffer, int sizeInBytes, @ReadMode int readMode) {
         if (mState != STATE_INITIALIZED) {
             return ERROR_INVALID_OPERATION;
+        }
+
+        if ((readMode != READ_BLOCKING) && (readMode != READ_NON_BLOCKING)) {
+            Log.e(TAG, "AudioRecord.read() called with invalid blocking mode");
+            return ERROR_BAD_VALUE;
         }
 
         if ( (audioBuffer == null) || (sizeInBytes < 0) ) {
             return ERROR_BAD_VALUE;
         }
 
-        return native_read_in_direct_buffer(audioBuffer, sizeInBytes);
+        return native_read_in_direct_buffer(audioBuffer, sizeInBytes, readMode == READ_BLOCKING);
     }
-
 
     //--------------------------------------------------------------------------
     // Initialization / configuration
@@ -1186,15 +1282,16 @@ public class AudioRecord
     private native final void native_stop();
 
     private native final int native_read_in_byte_array(byte[] audioData,
-            int offsetInBytes, int sizeInBytes);
+            int offsetInBytes, int sizeInBytes, boolean isBlocking);
 
     private native final int native_read_in_short_array(short[] audioData,
-            int offsetInShorts, int sizeInShorts);
+            int offsetInShorts, int sizeInShorts, boolean isBlocking);
 
     private native final int native_read_in_float_array(float[] audioData,
             int offsetInFloats, int sizeInFloats, boolean isBlocking);
 
-    private native final int native_read_in_direct_buffer(Object jBuffer, int sizeInBytes);
+    private native final int native_read_in_direct_buffer(Object jBuffer,
+            int sizeInBytes, boolean isBlocking);
 
     private native final int native_get_native_frame_count();
 

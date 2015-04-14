@@ -16120,9 +16120,12 @@ package android.media {
     method public int getSampleRate();
     method public int getState();
     method public int read(byte[], int, int);
+    method public int read(byte[], int, int, int);
     method public int read(short[], int, int);
+    method public int read(short[], int, int, int);
     method public int read(float[], int, int, int);
     method public int read(java.nio.ByteBuffer, int);
+    method public int read(java.nio.ByteBuffer, int, int);
     method public void release();
     method public int setNotificationMarkerPosition(int);
     method public int setPositionNotificationPeriod(int);

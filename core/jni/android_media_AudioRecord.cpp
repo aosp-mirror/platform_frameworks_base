@@ -356,95 +356,58 @@ static void android_media_AudioRecord_finalize(JNIEnv *env,  jobject thiz) {
     android_media_AudioRecord_release(env, thiz);
 }
 
-
-// ----------------------------------------------------------------------------
-static jint android_media_AudioRecord_readInByteArray(JNIEnv *env,  jobject thiz,
-                                                        jbyteArray javaAudioData,
-                                                        jint offsetInBytes, jint sizeInBytes) {
-    jbyte* recordBuff = NULL;
-    // get the audio recorder from which we'll read new audio samples
-    sp<AudioRecord> lpRecorder = getAudioRecord(env, thiz);
-    if (lpRecorder == NULL) {
-        ALOGE("Unable to retrieve AudioRecord object, can't record");
-        return 0;
-    }
-
-    if (!javaAudioData) {
-        ALOGE("Invalid Java array to store recorded audio, can't record");
-        return 0;
-    }
-
-    // get the pointer to where we'll record the audio
-    // NOTE: We may use GetPrimitiveArrayCritical() when the JNI implementation changes in such
-    // a way that it becomes much more efficient. When doing so, we will have to prevent the
-    // AudioSystem callback to be called while in critical section (in case of media server
-    // process crash for instance)
-    recordBuff = (jbyte *)env->GetByteArrayElements(javaAudioData, NULL);
-
-    if (recordBuff == NULL) {
-        ALOGE("Error retrieving destination for recorded audio data, can't record");
-        return 0;
-    }
-
-    // read the new audio data from the native AudioRecord object
-    ssize_t readSize = lpRecorder->read(recordBuff + offsetInBytes, sizeInBytes);
-    env->ReleaseByteArrayElements(javaAudioData, recordBuff, 0);
-
-    if (readSize < 0) {
-        readSize = (jint)AUDIO_JAVA_INVALID_OPERATION;
-    }
-    return (jint) readSize;
+// overloaded JNI array helper functions
+static inline
+jbyte *envGetArrayElements(JNIEnv *env, jbyteArray array, jboolean *isCopy) {
+    return env->GetByteArrayElements(array, isCopy);
 }
 
-// ----------------------------------------------------------------------------
-static jint android_media_AudioRecord_readInShortArray(JNIEnv *env,  jobject thiz,
-                                                        jshortArray javaAudioData,
-                                                        jint offsetInShorts, jint sizeInShorts) {
-
-    jshort* recordBuff = NULL;
-    // get the audio recorder from which we'll read new audio samples
-    sp<AudioRecord> lpRecorder = getAudioRecord(env, thiz);
-    if (lpRecorder == NULL) {
-        ALOGE("Unable to retrieve AudioRecord object, can't record");
-        return 0;
-    }
-
-    if (!javaAudioData) {
-        ALOGE("Invalid Java array to store recorded audio, can't record");
-        return 0;
-    }
-
-    // get the pointer to where we'll record the audio
-    // NOTE: We may use GetPrimitiveArrayCritical() when the JNI implementation changes in such
-    // a way that it becomes much more efficient. When doing so, we will have to prevent the
-    // AudioSystem callback to be called while in critical section (in case of media server
-    // process crash for instance)
-    recordBuff = (jshort *)env->GetShortArrayElements(javaAudioData, NULL);
-
-    if (recordBuff == NULL) {
-        ALOGE("Error retrieving destination for recorded audio data, can't record");
-        return 0;
-    }
-
-    // read the new audio data from the native AudioRecord object
-    const size_t sizeInBytes = sizeInShorts * sizeof(short);
-    ssize_t readSize = lpRecorder->read(recordBuff + offsetInShorts, sizeInBytes);
-
-    env->ReleaseShortArrayElements(javaAudioData, recordBuff, 0);
-
-    if (readSize < 0) {
-        readSize = (jint)AUDIO_JAVA_INVALID_OPERATION;
-    } else {
-        readSize /= sizeof(short);
-    }
-    return (jint) readSize;
+static inline
+void envReleaseArrayElements(JNIEnv *env, jbyteArray array, jbyte *elems, jint mode) {
+    env->ReleaseByteArrayElements(array, elems, mode);
 }
 
-// ----------------------------------------------------------------------------
-static jint android_media_AudioRecord_readInFloatArray(JNIEnv *env,  jobject thiz,
-                                                        jfloatArray javaAudioData,
-                                                        jint offsetInFloats, jint sizeInFloats,
-                                                        jboolean isReadBlocking) {
+static inline
+jshort *envGetArrayElements(JNIEnv *env, jshortArray array, jboolean *isCopy) {
+    return env->GetShortArrayElements(array, isCopy);
+}
+
+static inline
+void envReleaseArrayElements(JNIEnv *env, jshortArray array, jshort *elems, jint mode) {
+    env->ReleaseShortArrayElements(array, elems, mode);
+}
+
+static inline
+jfloat *envGetArrayElements(JNIEnv *env, jfloatArray array, jboolean *isCopy) {
+    return env->GetFloatArrayElements(array, isCopy);
+}
+
+static inline
+void envReleaseArrayElements(JNIEnv *env, jfloatArray array, jfloat *elems, jint mode) {
+    env->ReleaseFloatArrayElements(array, elems, mode);
+}
+
+static inline
+jint interpretReadSizeError(ssize_t readSize) {
+    ALOGE_IF(readSize != WOULD_BLOCK, "Error %zd during AudioRecord native read", readSize);
+    switch (readSize) {
+    case WOULD_BLOCK:
+        return (jint)0;
+    case BAD_VALUE:
+        return (jint)AUDIO_JAVA_BAD_VALUE;
+    default:
+        // may be possible for other errors such as
+        // NO_INIT to happen if restoreRecord_l fails.
+    case INVALID_OPERATION:
+        return (jint)AUDIO_JAVA_INVALID_OPERATION;
+    }
+}
+
+template <typename T>
+static jint android_media_AudioRecord_readInArray(JNIEnv *env,  jobject thiz,
+                                                  T javaAudioData,
+                                                  jint offsetInSamples, jint sizeInSamples,
+                                                  jboolean isReadBlocking) {
     // get the audio recorder from which we'll read new audio samples
     sp<AudioRecord> lpRecorder = getAudioRecord(env, thiz);
     if (lpRecorder == NULL) {
@@ -453,75 +416,67 @@ static jint android_media_AudioRecord_readInFloatArray(JNIEnv *env,  jobject thi
     }
 
     if (javaAudioData == NULL) {
-         ALOGE("Invalid Java array to store recorded audio");
-         return (jint)AUDIO_JAVA_BAD_VALUE;
-     }
+        ALOGE("Invalid Java array to store recorded audio");
+        return (jint)AUDIO_JAVA_BAD_VALUE;
+    }
 
-    // get the pointer to where we'll record the audio
     // NOTE: We may use GetPrimitiveArrayCritical() when the JNI implementation changes in such
     // a way that it becomes much more efficient. When doing so, we will have to prevent the
     // AudioSystem callback to be called while in critical section (in case of media server
     // process crash for instance)
-    jfloat *recordBuff = (jfloat *)env->GetFloatArrayElements(javaAudioData, NULL);
+
+    // get the pointer to where we'll record the audio
+    auto *recordBuff = envGetArrayElements(env, javaAudioData, NULL);
     if (recordBuff == NULL) {
         ALOGE("Error retrieving destination for recorded audio data");
         return (jint)AUDIO_JAVA_BAD_VALUE;
     }
 
     // read the new audio data from the native AudioRecord object
-    const size_t sizeInBytes = sizeInFloats * sizeof(float);
-    ssize_t readSize = lpRecorder->read(recordBuff + offsetInFloats, sizeInBytes);
+    const size_t sizeInBytes = sizeInSamples * sizeof(*recordBuff);
+    ssize_t readSize = lpRecorder->read(
+            recordBuff + offsetInSamples, sizeInBytes, isReadBlocking == JNI_TRUE /* blocking */);
 
-    env->ReleaseFloatArrayElements(javaAudioData, recordBuff, 0);
+    envReleaseArrayElements(env, javaAudioData, recordBuff, 0);
 
     if (readSize < 0) {
-        ALOGE_IF(readSize != WOULD_BLOCK, "Error %zd during AudioRecord native read", readSize);
-        switch (readSize) {
-        case WOULD_BLOCK:
-            return (jint)0;
-        case BAD_VALUE:
-            return (jint)AUDIO_JAVA_BAD_VALUE;
-        default:
-            // may be possible for other errors such as
-            // NO_INIT to happen if restoreRecord_l fails.
-        case INVALID_OPERATION:
-            return (jint)AUDIO_JAVA_INVALID_OPERATION;
-        }
+        return interpretReadSizeError(readSize);
     }
-    return (jint)(readSize / sizeof(float));
+    return (jint)(readSize / sizeof(*recordBuff));
 }
 
 // ----------------------------------------------------------------------------
 static jint android_media_AudioRecord_readInDirectBuffer(JNIEnv *env,  jobject thiz,
-                                                  jobject jBuffer, jint sizeInBytes) {
+                                                         jobject jBuffer, jint sizeInBytes,
+                                                         jboolean isReadBlocking) {
     // get the audio recorder from which we'll read new audio samples
     sp<AudioRecord> lpRecorder = getAudioRecord(env, thiz);
     if (lpRecorder==NULL)
-        return 0;
+        return (jint)AUDIO_JAVA_INVALID_OPERATION;
 
     // direct buffer and direct access supported?
     long capacity = env->GetDirectBufferCapacity(jBuffer);
     if (capacity == -1) {
         // buffer direct access is not supported
         ALOGE("Buffer direct access is not supported, can't record");
-        return 0;
+        return (jint)AUDIO_JAVA_BAD_VALUE;
     }
     //ALOGV("capacity = %ld", capacity);
     jbyte* nativeFromJavaBuf = (jbyte*) env->GetDirectBufferAddress(jBuffer);
     if (nativeFromJavaBuf==NULL) {
         ALOGE("Buffer direct access is not supported, can't record");
-        return 0;
+        return (jint)AUDIO_JAVA_BAD_VALUE;
     }
 
     // read new data from the recorder
     ssize_t readSize = lpRecorder->read(nativeFromJavaBuf,
-                                   capacity < sizeInBytes ? capacity : sizeInBytes);
+                                        capacity < sizeInBytes ? capacity : sizeInBytes,
+                                        isReadBlocking == JNI_TRUE /* blocking */);
     if (readSize < 0) {
-        readSize = (jint)AUDIO_JAVA_INVALID_OPERATION;
+        return interpretReadSizeError(readSize);
     }
     return (jint)readSize;
 }
-
 
 // ----------------------------------------------------------------------------
 static jint android_media_AudioRecord_get_native_frame_count(JNIEnv *env,  jobject thiz) {
@@ -633,12 +588,15 @@ static JNINativeMethod gMethods[] = {
     {"native_finalize",      "()V",    (void *)android_media_AudioRecord_finalize},
     {"native_release",       "()V",    (void *)android_media_AudioRecord_release},
     {"native_read_in_byte_array",
-                             "([BII)I", (void *)android_media_AudioRecord_readInByteArray},
+                             "([BIIZ)I",
+                                     (void *)android_media_AudioRecord_readInArray<jbyteArray>},
     {"native_read_in_short_array",
-                             "([SII)I", (void *)android_media_AudioRecord_readInShortArray},
+                             "([SIIZ)I",
+                                     (void *)android_media_AudioRecord_readInArray<jshortArray>},
     {"native_read_in_float_array",
-                             "([FIIZ)I", (void *)android_media_AudioRecord_readInFloatArray},
-    {"native_read_in_direct_buffer","(Ljava/lang/Object;I)I",
+                             "([FIIZ)I",
+                                     (void *)android_media_AudioRecord_readInArray<jfloatArray>},
+    {"native_read_in_direct_buffer","(Ljava/lang/Object;IZ)I",
                                        (void *)android_media_AudioRecord_readInDirectBuffer},
     {"native_get_native_frame_count",
                              "()I",    (void *)android_media_AudioRecord_get_native_frame_count},
