@@ -2813,7 +2813,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         try {
             LockPatternUtils utils = new LockPatternUtils(mContext);
             if (!TextUtils.isEmpty(password)) {
-                utils.saveLockPassword(password, quality, userHandle);
+                utils.saveLockPassword(password, null, quality, userHandle);
             } else {
                 utils.clearLock(userHandle);
             }
