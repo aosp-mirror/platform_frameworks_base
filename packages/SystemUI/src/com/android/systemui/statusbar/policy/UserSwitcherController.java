@@ -19,6 +19,9 @@ package com.android.systemui.statusbar.policy;
 import android.app.ActivityManager;
 import android.app.ActivityManagerNative;
 import android.app.Dialog;
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -63,6 +66,7 @@ public class UserSwitcherController {
     private static final boolean DEBUG = false;
     private static final String SIMPLE_USER_SWITCHER_GLOBAL_SETTING =
             "lockscreenSimpleUserSwitcher";
+    private static final String ACTION_REMOVE_GUEST = "com.android.systemui.REMOVE_GUEST";
 
     private final Context mContext;
     private final UserManager mUserManager;
@@ -89,6 +93,7 @@ public class UserSwitcherController {
         filter.addAction(Intent.ACTION_USER_INFO_CHANGED);
         filter.addAction(Intent.ACTION_USER_SWITCHED);
         filter.addAction(Intent.ACTION_USER_STOPPING);
+        filter.addAction(ACTION_REMOVE_GUEST);
         mContext.registerReceiverAsUser(mReceiver, UserHandle.OWNER, filter,
                 null /* permission */, null /* scheduler */);
 
@@ -296,6 +301,22 @@ public class UserSwitcherController {
                 Log.v(TAG, "Broadcast: a=" + intent.getAction()
                        + " user=" + intent.getIntExtra(Intent.EXTRA_USER_HANDLE, -1));
             }
+            if (ACTION_REMOVE_GUEST.equals(intent.getAction())) {
+                int currentUser = ActivityManager.getCurrentUser();
+                UserInfo userInfo = mUserManager.getUserInfo(currentUser);
+                if (userInfo != null && userInfo.isGuest()) {
+                    showExitGuestDialog(currentUser);
+                }
+                return;
+            }
+            if (Intent.ACTION_USER_ADDED.equals(intent.getAction())) {
+                final int currentId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, -1);
+                UserInfo userInfo = mUserManager.getUserInfo(currentId);
+                if (userInfo != null && userInfo.isGuest()) {
+                    showGuestNotification(currentId);
+                }
+            }
+
             if (Intent.ACTION_USER_SWITCHED.equals(intent.getAction())) {
                 if (mExitGuestDialog != null && mExitGuestDialog.isShowing()) {
                     mExitGuestDialog.cancel();
@@ -328,6 +349,24 @@ public class UserSwitcherController {
                         UserHandle.USER_NULL);
             }
             refreshUsers(forcePictureLoadForId);
+        }
+
+        private void showGuestNotification(int guestUserId) {
+            PendingIntent removeGuestPI = PendingIntent.getBroadcastAsUser(mContext,
+                    0, new Intent(ACTION_REMOVE_GUEST), 0, UserHandle.OWNER);
+            Notification notification = new Notification.Builder(mContext)
+                    .setVisibility(Notification.VISIBILITY_SECRET)
+                    .setPriority(Notification.PRIORITY_MIN)
+                    .setSmallIcon(R.drawable.ic_person)
+                    .setContentTitle(mContext.getString(R.string.guest_notification_title))
+                    .setContentText(mContext.getString(R.string.guest_notification_text))
+                    .setShowWhen(false)
+                    .addAction(R.drawable.ic_delete,
+                            mContext.getString(R.string.guest_notification_remove_action),
+                            removeGuestPI)
+                    .build();
+            NotificationManager.from(mContext).notifyAsUser(null, 0, notification,
+                    new UserHandle(guestUserId));
         }
     };
 
