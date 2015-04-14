@@ -1116,6 +1116,11 @@
     <permission android:name="android.permission.ACCESS_PDB_STATE"
         android:protectionLevel="signature" />
 
+    <!-- @hide Allows system update service to notify device owner about pending updates.
+   <p>Not for use by third-party applications. -->
+    <permission android:name="android.permission.NOTIFY_PENDING_SYSTEM_UPDATE"
+        android:protectionLevel="signatureOrSystem" />
+
     <!-- =========================================== -->
     <!-- Permissions associated with camera and image capture -->
     <!-- =========================================== -->

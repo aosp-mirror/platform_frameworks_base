@@ -5746,6 +5746,7 @@ package android.app.admin {
     method public void onProfileProvisioningComplete(android.content.Context, android.content.Intent);
     method public void onReadyForUserInitialization(android.content.Context, android.content.Intent);
     method public void onReceive(android.content.Context, android.content.Intent);
+    method public void onSystemUpdatePending(android.content.Context, android.content.Intent, long);
     field public static final java.lang.String ACTION_DEVICE_ADMIN_DISABLED = "android.app.action.DEVICE_ADMIN_DISABLED";
     field public static final java.lang.String ACTION_DEVICE_ADMIN_DISABLE_REQUESTED = "android.app.action.DEVICE_ADMIN_DISABLE_REQUESTED";
     field public static final java.lang.String ACTION_DEVICE_ADMIN_ENABLED = "android.app.action.DEVICE_ADMIN_ENABLED";
@@ -5851,6 +5852,7 @@ package android.app.admin {
     method public boolean isProfileOwnerApp(java.lang.String);
     method public boolean isUninstallBlocked(android.content.ComponentName, java.lang.String);
     method public void lockNow();
+    method public void notifyPendingSystemUpdate(long);
     method public void removeActiveAdmin(android.content.ComponentName);
     method public boolean removeCrossProfileWidgetProvider(android.content.ComponentName, java.lang.String);
     method public boolean removeUser(android.content.ComponentName, android.os.UserHandle);
