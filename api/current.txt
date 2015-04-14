@@ -13048,6 +13048,8 @@ package android.hardware.camera2 {
     method public abstract int captureBurst(java.util.List<android.hardware.camera2.CaptureRequest>, android.hardware.camera2.CameraCaptureSession.CaptureCallback, android.os.Handler) throws android.hardware.camera2.CameraAccessException;
     method public abstract void close();
     method public abstract android.hardware.camera2.CameraDevice getDevice();
+    method public abstract android.view.Surface getInputSurface();
+    method public abstract boolean isReprocessible();
     method public abstract int setRepeatingBurst(java.util.List<android.hardware.camera2.CaptureRequest>, android.hardware.camera2.CameraCaptureSession.CaptureCallback, android.os.Handler) throws android.hardware.camera2.CameraAccessException;
     method public abstract int setRepeatingRequest(android.hardware.camera2.CaptureRequest, android.hardware.camera2.CameraCaptureSession.CaptureCallback, android.os.Handler) throws android.hardware.camera2.CameraAccessException;
     method public abstract void stopRepeating() throws android.hardware.camera2.CameraAccessException;
@@ -13163,6 +13165,8 @@ package android.hardware.camera2 {
     method public abstract void close();
     method public abstract android.hardware.camera2.CaptureRequest.Builder createCaptureRequest(int) throws android.hardware.camera2.CameraAccessException;
     method public abstract void createCaptureSession(java.util.List<android.view.Surface>, android.hardware.camera2.CameraCaptureSession.StateCallback, android.os.Handler) throws android.hardware.camera2.CameraAccessException;
+    method public abstract android.hardware.camera2.CaptureRequest.Builder createReprocessCaptureRequest(android.hardware.camera2.TotalCaptureResult) throws android.hardware.camera2.CameraAccessException;
+    method public abstract void createReprocessibleCaptureSession(android.hardware.camera2.params.InputConfiguration, java.util.List<android.view.Surface>, android.hardware.camera2.CameraCaptureSession.StateCallback, android.os.Handler) throws android.hardware.camera2.CameraAccessException;
     method public abstract java.lang.String getId();
     field public static final int TEMPLATE_MANUAL = 6; // 0x6
     field public static final int TEMPLATE_PREVIEW = 1; // 0x1
@@ -13413,6 +13417,7 @@ package android.hardware.camera2 {
     method public int describeContents();
     method public T get(android.hardware.camera2.CaptureRequest.Key<T>);
     method public java.lang.Object getTag();
+    method public boolean isReprocess();
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.hardware.camera2.CaptureRequest.Key<java.lang.Boolean> BLACK_LEVEL_LOCK;
     field public static final android.hardware.camera2.CaptureRequest.Key<java.lang.Integer> COLOR_CORRECTION_ABERRATION_MODE;
@@ -13615,6 +13620,13 @@ package android.hardware.camera2.params {
     field public static final int ID_UNSUPPORTED = -1; // 0xffffffff
     field public static final int SCORE_MAX = 100; // 0x64
     field public static final int SCORE_MIN = 1; // 0x1
+  }
+
+  public final class InputConfiguration {
+    ctor public InputConfiguration(int, int, int);
+    method public int getFormat();
+    method public int getHeight();
+    method public int getWidth();
   }
 
   public final class LensShadingMap {

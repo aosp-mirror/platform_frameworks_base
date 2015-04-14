@@ -16,6 +16,7 @@
 
 package android.hardware.camera2;
 
+import android.hardware.camera2.params.InputConfiguration;
 import android.hardware.camera2.params.StreamConfigurationMap;
 import android.hardware.camera2.params.OutputConfiguration;
 import android.os.Handler;
@@ -135,7 +136,7 @@ public abstract class CameraDevice implements AutoCloseable {
      *
      * <p>The active capture session determines the set of potential output Surfaces for
      * the camera device for each capture request. A given request may use all
-     * or a only some of the outputs. Once the CameraCaptureSession is created, requests can be
+     * or only some of the outputs. Once the CameraCaptureSession is created, requests can be
      * can be submitted with {@link CameraCaptureSession#capture capture},
      * {@link CameraCaptureSession#captureBurst captureBurst},
      * {@link CameraCaptureSession#setRepeatingRequest setRepeatingRequest}, or
@@ -393,6 +394,75 @@ public abstract class CameraDevice implements AutoCloseable {
             List<OutputConfiguration> outputConfigurations,
             CameraCaptureSession.StateCallback callback, Handler handler)
             throws CameraAccessException;
+    /**
+     * Create a new reprocessible camera capture session by providing the desired reprocessing
+     * input Surface configuration and the target output set of Surfaces to the camera device.
+     *
+     * <p>If a camera device supports YUV reprocessing
+     * ({@link CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES_YUV_REPROCESSING}) or OPAQUE
+     * reprocessing
+     * ({@link CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES_OPAQUE_REPROCESSING}), besides
+     * the capture session created via {@link #createCaptureSession}, the application can also
+     * create a reprocessible capture session to submit reprocess capture requests in addition to
+     * regular capture requests. A reprocess capture request takes the next available buffer from
+     * the session's input Surface, and sends it through the camera device's processing pipeline
+     * again, to produce buffers for the request's target output Surfaces. No new image data is
+     * captured for a reprocess request. However the input buffer provided by
+     * the application must be captured previously by the same camera device in the same session
+     * directly (e.g. for Zero-Shutter-Lag use case) or indirectly (e.g. combining multiple output
+     * images).</p>
+     *
+     * <p>The active reprocessible capture session determines an input {@link Surface} and the set
+     * of potential output Surfaces for the camera devices for each capture request. The application
+     * can use {@link #createCaptureRequest} to create regular capture requests to capture new
+     * images from the camera device, and use {@link #createReprocessCaptureRequest} to create
+     * reprocess capture requests to process buffers from the input {@link Surface}. A request may
+     * use all or only some of the outputs. All the output Surfaces in one capture request will come
+     * from the same source, either from a new capture by the camera device, or from the input
+     * Surface depending on if the request is a reprocess capture request.</p>
+     *
+     * <p>Input formats and sizes supported by the camera device can be queried via
+     * {@link StreamConfigurationMap#getInputFormats} and
+     * {@link StreamConfigurationMap#getInputSizes}. For each supported input format, the camera
+     * device supports a set of output formats and sizes for reprocessing that can be queried via
+     * {@link StreamConfigurationMap#getValidOutputFormatsForInput} and
+     * {@link StreamConfigurationMap#getOutputSizes}. While output Surfaces with formats that
+     * aren't valid reprocess output targets for the input configuration can be part of a session,
+     * they cannot be used as targets for a reprocessing request.</p>
+     *
+     * <p>Since the application cannot access {@link android.graphics.ImageFormat#PRIVATE} images
+     * directly, an output Surface created by {@link android.media.ImageReader#newOpaqueInstance}
+     * will be considered as intended to be used for reprocessing input and thus the
+     * {@link android.media.ImageReader} size must match one of the supported input sizes for
+     * {@link android.graphics.ImageFormat#PRIVATE} format. Otherwise, creating a reprocessible
+     * capture session will fail.</p>
+     *
+     * @param inputConfig The configuration for the input {@link Surface}
+     * @param outputs The new set of Surfaces that should be made available as
+     *                targets for captured image data.
+     * @param callback The callback to notify about the status of the new capture session.
+     * @param handler The handler on which the callback should be invoked, or {@code null} to use
+     *                the current thread's {@link android.os.Looper looper}.
+     *
+     * @throws IllegalArgumentException if the input configuration is null or not supported, the set
+     *                                  of output Surfaces do not meet the requirements, the
+     *                                  callback is null, or the handler is null but the current
+     *                                  thread has no looper.
+     * @throws CameraAccessException if the camera device is no longer connected or has
+     *                               encountered a fatal error
+     * @throws IllegalStateException if the camera device has been closed
+     *
+     * @see CameraCaptureSession
+     * @see StreamConfigurationMap#getInputFormats
+     * @see StreamConfigurationMap#getInputSizes
+     * @see StreamConfigurationMap#getValidOutputFormatsForInput
+     * @see StreamConfigurationMap#getOutputSizes
+     * @see android.media.ImageWriter
+     * @see android.media.ImageReader
+     */
+    public abstract void createReprocessibleCaptureSession(InputConfiguration inputConfig,
+            List<Surface> outputs, CameraCaptureSession.StateCallback callback, Handler handler)
+            throws CameraAccessException;
 
     /**
      * <p>Create a {@link CaptureRequest.Builder} for new capture requests,
@@ -421,6 +491,36 @@ public abstract class CameraDevice implements AutoCloseable {
      */
     public abstract CaptureRequest.Builder createCaptureRequest(int templateType)
             throws CameraAccessException;
+
+    /**
+     * <p>Create a {@link CaptureRequest.Builder} for a new reprocess {@link CaptureRequest} from a
+     * {@link TotalCaptureResult}.
+     *
+     * <p>Each reprocess {@link CaptureRequest} processes one buffer from
+     * {@link CameraCaptureSession}'s input {@link Surface} to all output {@link Surface Surfaces}
+     * included in the reprocess capture request. The reprocess input images must be generated from
+     * one or multiple output images captured from the same camera device. The application can
+     * provide input images to camera device via
+     * {{@link android.media.ImageWriter#queueInputImage ImageWriter#queueInputImage}}.
+     * The application must use the capture result of one of those output images to create a
+     * reprocess capture request so that the camera device can use the information to achieve
+     * optimal reprocess image quality.
+     *
+     * @param inputResult The capture result of the output image or one of the output images used
+     *                       to generate the reprocess input image for this capture request.
+     *
+     * @throws IllegalArgumentException if inputResult is null.
+     * @throws CameraAccessException if the camera device is no longer connected or has
+     *                               encountered a fatal error
+     * @throws IllegalStateException if the camera device has been closed
+     *
+     * @see CaptureRequest.Builder
+     * @see TotalCaptureResult
+     * @see CameraDevice#createReprocessibleCaptureSession
+     * @see android.media.ImageWriter
+     */
+    public abstract CaptureRequest.Builder createReprocessCaptureRequest(
+            TotalCaptureResult inputResult) throws CameraAccessException;
 
     /**
      * Close the connection to this camera device as quickly as possible.

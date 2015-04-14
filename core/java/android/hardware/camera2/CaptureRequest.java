@@ -157,6 +157,7 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
 
     private final HashSet<Surface> mSurfaceSet;
     private final CameraMetadataNative mSettings;
+    private boolean mIsReprocess;
 
     private Object mUserTag;
 
@@ -168,6 +169,7 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
     private CaptureRequest() {
         mSettings = new CameraMetadataNative();
         mSurfaceSet = new HashSet<Surface>();
+        mIsReprocess = false;
     }
 
     /**
@@ -179,6 +181,7 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
     private CaptureRequest(CaptureRequest source) {
         mSettings = new CameraMetadataNative(source.mSettings);
         mSurfaceSet = (HashSet<Surface>) source.mSurfaceSet.clone();
+        mIsReprocess = source.mIsReprocess;
         mUserTag = source.mUserTag;
     }
 
@@ -187,9 +190,10 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
      *
      * Used by the Builder to create a mutable CaptureRequest.
      */
-    private CaptureRequest(CameraMetadataNative settings) {
+    private CaptureRequest(CameraMetadataNative settings, boolean isReprocess) {
         mSettings = CameraMetadataNative.move(settings);
         mSurfaceSet = new HashSet<Surface>();
+        mIsReprocess = isReprocess;
     }
 
     /**
@@ -257,10 +261,27 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
     }
 
     /**
+     * Determine if this is a reprocess capture request.
+     *
+     * <p>A reprocess capture request produces output images from an input buffer from the
+     * {@link CameraCaptureSession}'s input {@link Surface}. A reprocess capture request can be
+     * created by {@link CameraDevice#createReprocessCaptureRequest}.</p>
+     *
+     * @return {@code true} if this is a reprocess capture request. {@code false} if this is not a
+     * reprocess capture request.
+     *
+     * @see CameraDevice#createReprocessCaptureRequest
+     */
+    public boolean isReprocess() {
+        return mIsReprocess;
+    }
+
+    /**
      * Determine whether this CaptureRequest is equal to another CaptureRequest.
      *
      * <p>A request is considered equal to another is if it's set of key/values is equal, it's
-     * list of output surfaces is equal, and the user tag is equal.</p>
+     * list of output surfaces is equal, the user tag is equal, and the return values of
+     * isReprocess() are equal.</p>
      *
      * @param other Another instance of CaptureRequest.
      *
@@ -276,7 +297,8 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
         return other != null
                 && Objects.equals(mUserTag, other.mUserTag)
                 && mSurfaceSet.equals(other.mSurfaceSet)
-                && mSettings.equals(other.mSettings);
+                && mSettings.equals(other.mSettings)
+                && mIsReprocess == other.mIsReprocess;
     }
 
     @Override
@@ -323,6 +345,8 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
             Surface s = (Surface) p;
             mSurfaceSet.add(s);
         }
+
+        mIsReprocess = (in.readInt() == 0) ? false : true;
     }
 
     @Override
@@ -334,6 +358,7 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
     public void writeToParcel(Parcel dest, int flags) {
         mSettings.writeToParcel(dest, flags);
         dest.writeParcelableArray(mSurfaceSet.toArray(new Surface[mSurfaceSet.size()]), flags);
+        dest.writeInt(mIsReprocess ? 1 : 0);
     }
 
     /**
@@ -374,8 +399,8 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
          *
          * @hide
          */
-        public Builder(CameraMetadataNative template) {
-            mRequest = new CaptureRequest(template);
+        public Builder(CameraMetadataNative template, boolean reprocess) {
+            mRequest = new CaptureRequest(template, reprocess);
         }
 
         /**

@@ -148,7 +148,7 @@ public final class CameraManager {
      * new one provided.</p>
      *
      * <p>The first time a callback is registered, it is immediately called
-     * with the torch mode status of all currently known camera devices.</p>
+     * with the torch mode status of all currently known camera devices with a flash unit.</p>
      *
      * <p>Since this callback will be registered with the camera service, remember to unregister it
      * once it is no longer needed; otherwise the callback will continue to receive events
@@ -524,7 +524,7 @@ public final class CameraManager {
      * A callback for camera flash torch modes becoming unavailable, disabled, or enabled.
      *
      * <p>The torch mode becomes unavailable when the camera device it belongs to becomes
-     * unavailable or other camera resouces it needs become busy due to other higher priority
+     * unavailable or other camera resources it needs become busy due to other higher priority
      * camera activities. The torch mode becomes disabled when it was turned off or when the camera
      * device it belongs to is no longer in use and other camera resources it needs are no longer
      * busy. A camera's torch mode is turned off when an application calls {@link #setTorchMode} to

@@ -530,6 +530,18 @@ public class CameraDeviceUserShim implements ICameraDeviceUser {
     }
 
     @Override
+    public int createInputStream(int width, int height, int format) {
+        Log.e(TAG, "creating input stream is not supported on legacy devices");
+        return CameraBinderDecorator.INVALID_OPERATION;
+    }
+
+    @Override
+    public int getInputSurface(/*out*/ Surface surface) {
+        Log.e(TAG, "getting input surface is not supported on legacy devices");
+        return CameraBinderDecorator.INVALID_OPERATION;
+    }
+
+    @Override
     public int createDefaultRequest(int templateId, /*out*/CameraMetadataNative request) {
         if (DEBUG) {
             Log.d(TAG, "createDefaultRequest called.");
