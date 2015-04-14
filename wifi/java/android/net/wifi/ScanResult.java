@@ -261,6 +261,12 @@ public class ScanResult implements Parcelable {
         return freq > 4900 && freq < 5900;
     }
 
+    /**
+     *  @hide
+     * storing the raw bytes of full result IEs
+     **/
+    public byte[] bytes;
+
     /** information element from beacon
      * @hide
      */
