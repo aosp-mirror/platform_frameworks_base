@@ -643,6 +643,10 @@ public class SearchDialog extends Dialog {
         @Override
         public ActionMode startActionModeForChild(
                 View child, ActionMode.Callback callback, int type) {
+            // Disable Primary Action Modes in the SearchBar, as they overlap.
+            if (type != ActionMode.TYPE_PRIMARY) {
+                return super.startActionModeForChild(child, callback, type);
+            }
             return null;
         }
     }

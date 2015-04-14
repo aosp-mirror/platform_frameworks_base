@@ -251,12 +251,6 @@ public class ActionBarContainer extends FrameLayout {
     }
 
     @Override
-    public ActionMode startActionModeForChild(View child, ActionMode.Callback callback) {
-        // No starting an action mode for an action bar child! (Where would it go?)
-        return null;
-    }
-
-    @Override
     public ActionMode startActionModeForChild(
             View child, ActionMode.Callback callback, int type) {
         if (type != ActionMode.TYPE_PRIMARY) {
