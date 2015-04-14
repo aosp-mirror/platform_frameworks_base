@@ -37,6 +37,7 @@ LOCAL_C_INCLUDES += \
     frameworks/native/services \
     libcore/include \
     libcore/include/libsuspend \
+    system/security/keystore/include \
     $(call include-path-for, libhardware)/hardware \
     $(call include-path-for, libhardware_legacy)/hardware_legacy \
 
@@ -48,6 +49,7 @@ LOCAL_SHARED_LIBRARIES += \
     liblog \
     libhardware \
     libhardware_legacy \
+    libkeystore_binder \
     libnativehelper \
     libutils \
     libui \

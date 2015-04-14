@@ -22,12 +22,18 @@
 #include <android_runtime/AndroidRuntime.h>
 #include <android_runtime/Log.h>
 #include <android_os_MessageQueue.h>
+#include <binder/IServiceManager.h>
+#include <utils/String16.h>
+#include <utils/Looper.h>
+#include <keystore/IKeystoreService.h>
+
 #include <hardware/hardware.h>
 #include <hardware/fingerprint.h>
 #include <hardware/hw_auth_token.h>
+
 #include <utils/Log.h>
-#include <utils/Looper.h>
 #include "core_jni_helpers.h"
+
 
 namespace android {
 
@@ -61,6 +67,22 @@ public:
     }
 };
 
+static void notifyKeystore(uint8_t *auth_token, size_t auth_token_length) {
+    if (auth_token != NULL && auth_token_length > 0) {
+        // TODO: cache service?
+        sp<IServiceManager> sm = defaultServiceManager();
+        sp<IBinder> binder = sm->getService(String16("android.security.keystore"));
+        sp<IKeystoreService> service = interface_cast<IKeystoreService>(binder);
+        if (service != NULL) {
+            if (service->addAuthToken(auth_token, auth_token_length) != NO_ERROR) {
+                ALOGE("Falure sending auth token to KeyStore");
+            }
+        } else {
+            ALOGE("Unable to communicate with KeyStore");
+        }
+    }
+}
+
 // Called by the HAL to notify us of fingerprint events
 static void hal_notify_callback(fingerprint_msg_t msg) {
     uint32_t arg1 = 0;
@@ -76,7 +98,10 @@ static void hal_notify_callback(fingerprint_msg_t msg) {
         case FINGERPRINT_AUTHENTICATED:
             arg1 = msg.data.authenticated.finger.fid;
             arg2 = msg.data.authenticated.finger.gid;
-            // Jim, arg3 would be the hw_auth_token_t, please pass it the way you like.
+            if (arg1 != 0) {
+                notifyKeystore(&msg.data.authenticated.hat,
+                        sizeof(msg.data.authenticated.hat));
+            }
             break;
         case FINGERPRINT_TEMPLATE_ENROLLING:
             arg1 = msg.data.enroll.finger.fid;
@@ -197,6 +222,7 @@ static jint nativeCloseHal(JNIEnv* env, jobject clazz) {
 }
 
 // ----------------------------------------------------------------------------
+
 
 // TODO: clean up void methods
 static const JNINativeMethod g_methods[] = {
