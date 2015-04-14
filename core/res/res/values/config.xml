@@ -23,6 +23,7 @@
     <!-- Do not translate. Defines the slots for the right-hand side icons.  That is to say, the
          icons in the status bar that are not notifications. -->
     <string-array name="config_statusBarIcons">
+       <item><xliff:g id="id">managed_profile</xliff:g></item>
        <item><xliff:g id="id">ime</xliff:g></item>
        <item><xliff:g id="id">sync_failing</xliff:g></item>
        <item><xliff:g id="id">sync_active</xliff:g></item>
