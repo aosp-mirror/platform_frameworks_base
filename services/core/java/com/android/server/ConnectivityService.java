@@ -2461,25 +2461,27 @@ public class ConnectivityService extends IConnectivityManager.Stub
     public void reportInetCondition(int networkType, int percentage) {
         NetworkAgentInfo nai = mLegacyTypeTracker.getNetworkForType(networkType);
         if (nai == null) return;
-        boolean isGood = percentage > 50;
-        // Revalidate if the app report does not match our current validated state.
-        if (isGood != nai.lastValidated) {
-            // Make the message logged by reportBadNetwork below less confusing.
-            if (DBG && isGood) log("reportInetCondition: type=" + networkType + " ok, revalidate");
-            reportBadNetwork(nai.network);
-        }
+        reportNetworkConnectivity(nai.network, percentage > 50);
     }
 
-    public void reportBadNetwork(Network network) {
+    public void reportNetworkConnectivity(Network network, boolean hasConnectivity) {
         enforceAccessPermission();
         enforceInternetPermission();
 
-        if (network == null) return;
-
-        final int uid = Binder.getCallingUid();
-        NetworkAgentInfo nai = getNetworkAgentInfoForNetwork(network);
+        NetworkAgentInfo nai;
+        if (network == null) {
+            nai = getDefaultNetwork();
+        } else {
+            nai = getNetworkAgentInfoForNetwork(network);
+        }
         if (nai == null) return;
-        if (DBG) log("reportBadNetwork(" + nai.name() + ") by " + uid);
+        // Revalidate if the app report does not match our current validated state.
+        if (hasConnectivity == nai.lastValidated) return;
+        final int uid = Binder.getCallingUid();
+        if (DBG) {
+            log("reportNetworkConnectivity(" + nai.network.netId + ", " + hasConnectivity +
+                    ") by " + uid);
+        }
         synchronized (nai) {
             // Validating an uncreated network could result in a call to rematchNetworkAndRequests()
             // which isn't meant to work on uncreated networks.

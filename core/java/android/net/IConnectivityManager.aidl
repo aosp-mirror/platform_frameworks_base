@@ -95,7 +95,7 @@ interface IConnectivityManager
 
     void reportInetCondition(int networkType, int percentage);
 
-    void reportBadNetwork(in Network network);
+    void reportNetworkConnectivity(in Network network, boolean hasConnectivity);
 
     ProxyInfo getGlobalProxy();
 

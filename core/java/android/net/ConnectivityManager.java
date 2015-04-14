@@ -1708,10 +1708,33 @@ public class ConnectivityManager {
      *
      * @param network The {@link Network} the application was attempting to use
      *                or {@code null} to indicate the current default network.
+     * @deprecated Use {@link #reportNetworkConnectivity} which allows reporting both
+     *             working and non-working connectivity.
      */
     public void reportBadNetwork(Network network) {
         try {
-            mService.reportBadNetwork(network);
+            // One of these will be ignored because it matches system's current state.
+            // The other will trigger the necessary reevaluation.
+            mService.reportNetworkConnectivity(network, true);
+            mService.reportNetworkConnectivity(network, false);
+        } catch (RemoteException e) {
+        }
+    }
+
+    /**
+     * Report to the framework whether a network has working connectivity.
+     * This provides a hint to the system that a particular network is providing
+     * working connectivity or not.  In response the framework may re-evaluate
+     * the network's connectivity and might take further action thereafter.
+     *
+     * @param network The {@link Network} the application was attempting to use
+     *                or {@code null} to indicate the current default network.
+     * @param hasConnectivity {@code true} if the application was able to successfully access the
+     *                        Internet using {@code network} or {@code false} if not.
+     */
+    public void reportNetworkConnectivity(Network network, boolean hasConnectivity) {
+        try {
+            mService.reportNetworkConnectivity(network, hasConnectivity);
         } catch (RemoteException e) {
         }
     }
