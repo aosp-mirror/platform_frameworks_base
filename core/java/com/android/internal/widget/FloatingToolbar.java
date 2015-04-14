@@ -203,8 +203,8 @@ public final class FloatingToolbar {
         if (mContentRect.top > mPopup.getHeight()) {
             y = mContentRect.top - mPopup.getHeight();
             mOverflowDirection = FloatingToolbarPopup.OVERFLOW_DIRECTION_UP;
-        } else if (mContentRect.top > getEstimatedToolbarHeight(mContext)) {
-            y = mContentRect.top - getEstimatedToolbarHeight(mContext);
+        } else if (mContentRect.top > mPopup.getToolbarHeightWithVerticalMargin()) {
+            y = mContentRect.top - mPopup.getToolbarHeightWithVerticalMargin();
             mOverflowDirection = FloatingToolbarPopup.OVERFLOW_DIRECTION_DOWN;
         } else {
             y = mContentRect.bottom;
@@ -264,7 +264,8 @@ public final class FloatingToolbar {
         private final View mParent;
         private final PopupWindow mPopupWindow;
         private final ViewGroup mContentContainer;
-        private final int mPadding;
+        private final int mMarginHorizontal;
+        private final int mMarginVertical;
 
         private final Animation.AnimationListener mOnOverflowOpened =
                 new Animation.AnimationListener() {
@@ -365,7 +366,10 @@ public final class FloatingToolbar {
                                             .TOUCHABLE_INSETS_REGION);
                                 }
                             });
-            mPadding = parent.getResources().getDimensionPixelSize(R.dimen.floating_toolbar_margin);
+            mMarginHorizontal = parent.getResources()
+                    .getDimensionPixelSize(R.dimen.floating_toolbar_horizontal_margin);
+            mMarginVertical = parent.getResources()
+                    .getDimensionPixelSize(R.dimen.floating_toolbar_vertical_margin);
         }
 
         /**
@@ -474,6 +478,10 @@ public final class FloatingToolbar {
             return mContentContainer.getContext();
         }
 
+        int getToolbarHeightWithVerticalMargin() {
+            return getEstimatedToolbarHeight(mParent.getContext()) + mMarginVertical * 2;
+        }
+
         /**
          * Performs the "grow and fade in from the bottom" animation on the floating popup.
          */
@@ -506,7 +514,7 @@ public final class FloatingToolbar {
 
             mMainPanel.fadeOut(true);
             Size overflowPanelSize = mOverflowPanel.measure();
-            final int targetWidth = getOverflowWidth(mParent.getContext());
+            final int targetWidth = overflowPanelSize.getWidth();
             final int targetHeight = overflowPanelSize.getHeight();
             final boolean morphUpwards = (mOverflowDirection == OVERFLOW_DIRECTION_UP);
             final int startWidth = mContentContainer.getWidth();
@@ -624,10 +632,14 @@ public final class FloatingToolbar {
 
             // Make sure the main panel is at the correct position.
             if (mContentContainer.getChildAt(0) == mMainPanel.getView()) {
-                mContentContainer.setX(mPadding);
-                float y = mPadding;
+                float x = mPopupWindow.getWidth()
+                        - (mMainPanel.getView().getMeasuredWidth() + mMarginHorizontal);
+                mContentContainer.setX(x);
+
+                float y = mMarginVertical;
                 if  (mOverflowDirection == OVERFLOW_DIRECTION_UP) {
-                    y = getHeight() - getEstimatedToolbarHeight(mParent.getContext()) - mPadding;
+                    y = getHeight()
+                            - (mMainPanel.getView().getMeasuredHeight() + mMarginVertical);
                 }
                 mContentContainer.setY(y);
             }
@@ -661,8 +673,8 @@ public final class FloatingToolbar {
                 width = Math.max(width, overflowPanelSize.getWidth());
                 height = Math.max(height, overflowPanelSize.getHeight());
             }
-            mPopupWindow.setWidth(width + mPadding * 2);
-            mPopupWindow.setHeight(height + mPadding * 2);
+            mPopupWindow.setWidth(width + mMarginHorizontal * 2);
+            mPopupWindow.setHeight(height + mMarginVertical * 2);
         }
 
         /**
@@ -748,22 +760,22 @@ public final class FloatingToolbar {
                 final MenuItem menuItem = remainingMenuItems.peek();
                 Button menuItemButton = createMenuItemButton(mContext, menuItem);
 
-                // Adding additional left padding for the first button to even out button spacing.
+                // Adding additional start padding for the first button to even out button spacing.
                 if (isFirstItem) {
-                    menuItemButton.setPadding(
-                            2 * menuItemButton.getPaddingLeft(),
+                    menuItemButton.setPaddingRelative(
+                            (int) (1.5 * menuItemButton.getPaddingStart()),
                             menuItemButton.getPaddingTop(),
-                            menuItemButton.getPaddingRight(),
+                            menuItemButton.getPaddingEnd(),
                             menuItemButton.getPaddingBottom());
                     isFirstItem = false;
                 }
 
-                // Adding additional right padding for the last button to even out button spacing.
+                // Adding additional end padding for the last button to even out button spacing.
                 if (remainingMenuItems.size() == 1) {
-                    menuItemButton.setPadding(
-                            menuItemButton.getPaddingLeft(),
+                    menuItemButton.setPaddingRelative(
+                            menuItemButton.getPaddingStart(),
                             menuItemButton.getPaddingTop(),
-                            2 * menuItemButton.getPaddingRight(),
+                            (int) (1.5 * menuItemButton.getPaddingEnd()),
                             menuItemButton.getPaddingBottom());
                 }
 
@@ -836,10 +848,12 @@ public final class FloatingToolbar {
         private final ViewGroup mBackButtonContainer;
         private final View mBackButton;
         private final ListView mListView;
+        private final TextView mListViewItemWidthCalculator;
         private final ViewFader mViewFader;
         private final Runnable mCloseOverflow;
 
         private MenuItem.OnMenuItemClickListener mOnMenuItemClickListener;
+        private int mOverflowWidth = 0;
 
         /**
          * Initializes a floating toolbar popup overflow view panel.
@@ -865,7 +879,7 @@ public final class FloatingToolbar {
             mBackButtonContainer = new LinearLayout(context);
             mBackButtonContainer.addView(mBackButton);
 
-            mListView = createOverflowListView(context);
+            mListView = createOverflowListView();
             mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                 @Override
                 public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -878,6 +892,10 @@ public final class FloatingToolbar {
 
             mContentView.addView(mListView);
             mContentView.addView(mBackButtonContainer);
+
+            mListViewItemWidthCalculator = createOverflowMenuItemButton(context);
+            mListViewItemWidthCalculator.setLayoutParams(new ViewGroup.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
         }
 
         /**
@@ -888,6 +906,7 @@ public final class FloatingToolbar {
             overflowListViewAdapter.clear();
             overflowListViewAdapter.addAll(menuItems);
             setListViewHeight();
+            setOverflowWidth();
         }
 
         public void setOnMenuItemClickListener(MenuItem.OnMenuItemClickListener listener) {
@@ -943,7 +962,21 @@ public final class FloatingToolbar {
             mListView.setLayoutParams(params);
         }
 
-        private static ListView createOverflowListView(final Context context) {
+        private int setOverflowWidth() {
+            for (int i = 0; i < mListView.getAdapter().getCount(); i++) {
+                MenuItem menuItem = (MenuItem) mListView.getAdapter().getItem(i);
+                Preconditions.checkNotNull(menuItem);
+                mListViewItemWidthCalculator.setText(menuItem.getTitle());
+                mListViewItemWidthCalculator.measure(
+                        MeasureSpec.UNSPECIFIED, MeasureSpec.UNSPECIFIED);
+                mOverflowWidth = Math.max(
+                        mListViewItemWidthCalculator.getMeasuredWidth(), mOverflowWidth);
+            }
+            return mOverflowWidth;
+        }
+
+        private ListView createOverflowListView() {
+            final Context context = mContentView.getContext();
             final ListView overflowListView = new ListView(context);
             overflowListView.setLayoutParams(new ViewGroup.LayoutParams(
                     ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
@@ -962,6 +995,7 @@ public final class FloatingToolbar {
                             MenuItem menuItem = getItem(position);
                             menuButton.setText(menuItem.getTitle());
                             menuButton.setContentDescription(menuItem.getTitle());
+                            menuButton.setMinimumWidth(mOverflowWidth);
                             return menuButton;
                         }
                     };
@@ -1075,11 +1109,6 @@ public final class FloatingToolbar {
         shrinkFadeOutFromBottomAnimation.setStartDelay(150);
         shrinkFadeOutFromBottomAnimation.addListener(listener);
         return shrinkFadeOutFromBottomAnimation;
-    }
-
-    private static int getOverflowWidth(Context context) {
-        return context.getResources()
-                .getDimensionPixelSize(R.dimen.floating_toolbar_overflow_width);
     }
 
     private static int getEstimatedToolbarHeight(Context context) {
