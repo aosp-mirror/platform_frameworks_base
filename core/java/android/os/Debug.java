@@ -1173,7 +1173,6 @@ href="{@docRoot}guide/developing/tools/traceview.html">Traceview: A Graphical Lo
      *            the name of the runtime statistic to look up.
      * @return the value of the specified runtime statistic or {@code null} if the
      *         runtime statistic doesn't exist.
-     * @hide
      */
     public static String getRuntimeStat(String statName) {
         return VMDebug.getRuntimeStat(statName);
@@ -1184,7 +1183,6 @@ href="{@docRoot}guide/developing/tools/traceview.html">Traceview: A Graphical Lo
      * that {@link #getRuntimeStat(String)} supports.
      *
      * @return a map of the names/values of the supported runtime statistics.
-     * @hide
      */
     public static Map<String, String> getRuntimeStats() {
         return VMDebug.getRuntimeStats();
