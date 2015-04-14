@@ -30382,8 +30382,6 @@ package android.telecom {
     method public final void removeListener(android.telecom.Phone.Listener);
     method public final void setAudioRoute(int);
     method public final void setMuted(boolean);
-    method public final void setProximitySensorOff(boolean);
-    method public final void setProximitySensorOn();
   }
 
   public static abstract class Phone.Listener {
