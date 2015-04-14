@@ -2542,11 +2542,23 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * post-processing, arbitrary cropping regions, and has relaxed performance constraints.</p>
      * <p>Each higher level supports everything the lower level supports
      * in this order: FULL <code>&gt;</code> LIMITED <code>&gt;</code> LEGACY.</p>
+     * <p>A HIGH_RESOLUTION device is equivalent to a FULL device, except that:</p>
+     * <ul>
+     * <li>At least one output resolution of 8 megapixels or higher in uncompressed YUV is
+     *   supported at <code>&gt;=</code> 20 fps.</li>
+     * <li>Maximum-size (sensor resolution) uncompressed YUV is supported  at <code>&gt;=</code> 10
+     *   fps.</li>
+     * <li>For devices that list the RAW capability and support either RAW10 or RAW12 output,
+     *   maximum-resolution RAW10 or RAW12 capture will operate at least at the rate of
+     *   maximum-resolution YUV capture, and at least one supported output resolution of
+     *   8 megapixels or higher in RAW10 or RAW12 is supported <code>&gt;=</code> 20 fps.</li>
+     * </ul>
      * <p><b>Possible values:</b>
      * <ul>
      *   <li>{@link #INFO_SUPPORTED_HARDWARE_LEVEL_LIMITED LIMITED}</li>
      *   <li>{@link #INFO_SUPPORTED_HARDWARE_LEVEL_FULL FULL}</li>
      *   <li>{@link #INFO_SUPPORTED_HARDWARE_LEVEL_LEGACY LEGACY}</li>
+     *   <li>{@link #INFO_SUPPORTED_HARDWARE_LEVEL_HIGH_RESOLUTION HIGH_RESOLUTION}</li>
      * </ul></p>
      * <p>This key is available on all devices.</p>
      *
@@ -2564,6 +2576,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * @see #INFO_SUPPORTED_HARDWARE_LEVEL_LIMITED
      * @see #INFO_SUPPORTED_HARDWARE_LEVEL_FULL
      * @see #INFO_SUPPORTED_HARDWARE_LEVEL_LEGACY
+     * @see #INFO_SUPPORTED_HARDWARE_LEVEL_HIGH_RESOLUTION
      */
     @PublicKey
     public static final Key<Integer> INFO_SUPPORTED_HARDWARE_LEVEL =

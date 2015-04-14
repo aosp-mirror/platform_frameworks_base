@@ -545,6 +545,11 @@ public abstract class CameraMetadata<TKey> {
      * {@link CameraCharacteristics#CONTROL_AWB_LOCK_AVAILABLE android.control.awbLockAvailable} are also guaranteed
      * to be <code>true</code> so burst capture with these two locks ON
      * yields consistent image output.</p>
+     * <p>On a camera device that reports the HIGH_RESOLUTION hardware
+     * level, meaning the device supports very large capture sizes,
+     * BURST_CAPTURE means that at least 8-megapixel images can be
+     * captured at <code>&gt;=</code> 20 fps, and maximum-resolution images can be
+     * captured at <code>&gt;=</code> 10 fps.</p>
      *
      * @see CameraCharacteristics#CONTROL_AE_AVAILABLE_TARGET_FPS_RANGES
      * @see CameraCharacteristics#CONTROL_AE_LOCK_AVAILABLE
@@ -807,6 +812,13 @@ public abstract class CameraMetadata<TKey> {
      * @see CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL
      */
     public static final int INFO_SUPPORTED_HARDWARE_LEVEL_LEGACY = 2;
+
+    /**
+     * <p>This camera device is capable of supporting advanced imaging applications at full rate,
+     * and additional high-resolution outputs at lower rates.</p>
+     * @see CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL
+     */
+    public static final int INFO_SUPPORTED_HARDWARE_LEVEL_HIGH_RESOLUTION = 3;
 
     //
     // Enumeration values for CameraCharacteristics#SYNC_MAX_LATENCY
