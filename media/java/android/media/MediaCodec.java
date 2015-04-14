@@ -687,6 +687,7 @@ final public class MediaCodec {
         CodecException(int errorCode, int actionCode, String detailMessage) {
             super(detailMessage);
             mErrorCode = errorCode;
+            mReason = REASON_HARDWARE;
             mActionCode = actionCode;
 
             // TODO get this from codec
@@ -714,6 +715,15 @@ final public class MediaCodec {
         }
 
         /**
+         * Retrieve the reason associated with a CodecException.
+         * The reason could be one of {@link #REASON_HARDWARE} or {@link #REASON_RECLAIMED}.
+         *
+         */
+        public int getReason() {
+            return mReason;
+        }
+
+        /**
          * Retrieve the error code associated with a CodecException.
          * This is opaque diagnostic information and may depend on
          * hardware or API level.
@@ -734,6 +744,19 @@ final public class MediaCodec {
             return mDiagnosticInfo;
         }
 
+        /**
+         * This indicates the exception is caused by the hardware.
+         */
+        public static final int REASON_HARDWARE = 0;
+
+        /**
+         * This indicates the exception is because the resource manager reclaimed
+         * the media resource used by the codec.
+         * <p>
+         * With this exception, the codec must be released, as it has moved to terminal state.
+         */
+        public static final int REASON_RECLAIMED = 1;
+
         /* Must be in sync with android_media_MediaCodec.cpp */
         private final static int ACTION_FATAL = 0;
         private final static int ACTION_TRANSIENT = 1;
@@ -741,6 +764,7 @@ final public class MediaCodec {
 
         private final String mDiagnosticInfo;
         private final int mErrorCode;
+        private final int mReason;
         private final int mActionCode;
     }
 
