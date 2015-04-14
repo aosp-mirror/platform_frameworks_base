@@ -2010,27 +2010,47 @@ public class ActivityManager {
         public int lastTrimLevel;
 
         /**
-         * Constant for {@link #importance}: this process is running the
-         * foreground UI.
+         * Constant for {@link #importance}: This process is running the
+         * foreground UI; that is, it is the thing currently at the top of the screen
+         * that the user is interacting with.
          */
         public static final int IMPORTANCE_FOREGROUND = 100;
         
         /**
-         * Constant for {@link #importance}: this process is running something
+         * Constant for {@link #importance}: This process is running a foreground
+         * service, for example to perform music playback even while the user is
+         * not immediately in the app.  This generally indicates that the process
+         * is doing something the user actively cares about.
+         */
+        public static final int IMPORTANCE_FOREGROUND_SERVICE = 125;
+
+        /**
+         * Constant for {@link #importance}: This process is running the foreground
+         * UI, but the device is asleep so it is not visible to the user.  This means
+         * the user is not really aware of the process, because they can not see or
+         * interact with it, but it is quite important because it what they expect to
+         * return to once unlocking the device.
+         */
+        public static final int IMPORTANCE_TOP_SLEEPING = 150;
+
+        /**
+         * Constant for {@link #importance}: This process is running something
          * that is actively visible to the user, though not in the immediate
-         * foreground.
+         * foreground.  This may be running a window that is behind the current
+         * foreground (so paused and with its state saved, not interacting with
+         * the user, but visible to them to some degree); it may also be running
+         * other services under the system's control that it inconsiders important.
          */
         public static final int IMPORTANCE_VISIBLE = 200;
         
         /**
-         * Constant for {@link #importance}: this process is running something
-         * that is considered to be actively perceptible to the user.  An
-         * example would be an application performing background music playback.
+         * Constant for {@link #importance}: This process is not something the user
+         * is directly aware of, but is otherwise perceptable to them to some degree.
          */
         public static final int IMPORTANCE_PERCEPTIBLE = 130;
         
         /**
-         * Constant for {@link #importance}: this process is running an
+         * Constant for {@link #importance}: This process is running an
          * application that can not save its state, and thus can't be killed
          * while in the background.
          * @hide
@@ -2038,42 +2058,51 @@ public class ActivityManager {
         public static final int IMPORTANCE_CANT_SAVE_STATE = 170;
         
         /**
-         * Constant for {@link #importance}: this process is contains services
-         * that should remain running.
+         * Constant for {@link #importance}: This process is contains services
+         * that should remain running.  These are background services apps have
+         * started, not something the user is aware of, so they may be killed by
+         * the system relatively freely (though it is generally desired that they
+         * stay running as long as they want to).
          */
         public static final int IMPORTANCE_SERVICE = 300;
         
         /**
-         * Constant for {@link #importance}: this process process contains
+         * Constant for {@link #importance}: This process process contains
          * background code that is expendable.
          */
         public static final int IMPORTANCE_BACKGROUND = 400;
         
         /**
-         * Constant for {@link #importance}: this process is empty of any
+         * Constant for {@link #importance}: This process is empty of any
          * actively running code.
          */
         public static final int IMPORTANCE_EMPTY = 500;
 
         /**
-         * Constant for {@link #importance}: this process does not exist.
+         * Constant for {@link #importance}: This process does not exist.
          */
         public static final int IMPORTANCE_GONE = 1000;
 
         /** @hide */
         public static int procStateToImportance(int procState) {
-            if (procState >= ActivityManager.PROCESS_STATE_HOME) {
-                return ActivityManager.RunningAppProcessInfo.IMPORTANCE_BACKGROUND;
-            } else if (procState >= ActivityManager.PROCESS_STATE_SERVICE) {
-                return ActivityManager.RunningAppProcessInfo.IMPORTANCE_SERVICE;
-            } else if (procState > ActivityManager.PROCESS_STATE_HEAVY_WEIGHT) {
-                return ActivityManager.RunningAppProcessInfo.IMPORTANCE_CANT_SAVE_STATE;
-            } else if (procState >= ActivityManager.PROCESS_STATE_IMPORTANT_BACKGROUND) {
-                return ActivityManager.RunningAppProcessInfo.IMPORTANCE_PERCEPTIBLE;
-            } else if (procState >= ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE) {
-                return ActivityManager.RunningAppProcessInfo.IMPORTANCE_VISIBLE;
+            if (procState == PROCESS_STATE_NONEXISTENT) {
+                return IMPORTANCE_GONE;
+            } else if (procState >= PROCESS_STATE_HOME) {
+                return IMPORTANCE_BACKGROUND;
+            } else if (procState >= PROCESS_STATE_SERVICE) {
+                return IMPORTANCE_SERVICE;
+            } else if (procState > PROCESS_STATE_HEAVY_WEIGHT) {
+                return IMPORTANCE_CANT_SAVE_STATE;
+            } else if (procState >= PROCESS_STATE_IMPORTANT_BACKGROUND) {
+                return IMPORTANCE_PERCEPTIBLE;
+            } else if (procState >= PROCESS_STATE_IMPORTANT_FOREGROUND) {
+                return IMPORTANCE_VISIBLE;
+            } else if (procState >= PROCESS_STATE_TOP_SLEEPING) {
+                return IMPORTANCE_TOP_SLEEPING;
+            } else if (procState >= PROCESS_STATE_FOREGROUND_SERVICE) {
+                return IMPORTANCE_FOREGROUND_SERVICE;
             } else {
-                return ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND;
+                return IMPORTANCE_FOREGROUND;
             }
         }
 
@@ -2249,6 +2278,22 @@ public class ActivityManager {
             return ActivityManagerNative.getDefault().getRunningAppProcesses();
         } catch (RemoteException e) {
             return null;
+        }
+    }
+
+    /**
+     * Return the importance of a given package name, based on the processes that are
+     * currently running.  The return value is one of the importance constants defined
+     * in {@link RunningAppProcessInfo}, giving you the highest importance of all the
+     * processes that this package has code running inside of.  If there are no processes
+     * running its code, {@link RunningAppProcessInfo#IMPORTANCE_GONE} is returned.
+     */
+    public int getPackageImportance(String packageName) {
+        try {
+            int procState = ActivityManagerNative.getDefault().getPackageProcessState(packageName);
+            return RunningAppProcessInfo.procStateToImportance(procState);
+        } catch (RemoteException e) {
+            return RunningAppProcessInfo.IMPORTANCE_GONE;
         }
     }
 

@@ -49,16 +49,12 @@ public class AppIdleController extends StateController
     private static volatile AppIdleController sController;
     final ArrayList<JobStatus> mTrackedTasks = new ArrayList<JobStatus>();
     private final UsageStatsManagerInternal mUsageStatsInternal;
-    private final BatteryManagerInternal mBatteryManagerInternal;
+    private final BatteryManager mBatteryManager;
     private boolean mPluggedIn;
 
     private final BroadcastReceiver mReceiver = new BroadcastReceiver() {
         @Override public void onReceive(Context context, Intent intent) {
-            if (Intent.ACTION_BATTERY_CHANGED.equals(intent.getAction())) {
-                int plugged = intent.getIntExtra(BatteryManager.EXTRA_PLUGGED, 0);
-                // TODO: Allow any charger type
-                onPluggedIn((plugged & BatteryManager.BATTERY_PLUGGED_AC) != 0);
-            }
+            onPluggedIn(mBatteryManager.isCharging());
         }
     };
 
@@ -74,21 +70,17 @@ public class AppIdleController extends StateController
     private AppIdleController(StateChangedListener stateChangedListener, Context context) {
         super(stateChangedListener, context);
         mUsageStatsInternal = LocalServices.getService(UsageStatsManagerInternal.class);
-        mBatteryManagerInternal = LocalServices.getService(BatteryManagerInternal.class);
-        mPluggedIn = isPowered();
+        mBatteryManager = context.getSystemService(BatteryManager.class);
+        mPluggedIn = mBatteryManager.isCharging();
         mUsageStatsInternal.addAppIdleStateChangeListener(this);
         registerReceivers();
     }
 
     private void registerReceivers() {
         // Monitor battery charging state
-        IntentFilter filter = new IntentFilter(Intent.ACTION_BATTERY_CHANGED);
+        IntentFilter filter = new IntentFilter(BatteryManager.ACTION_CHARGING);
+        filter.addAction(BatteryManager.ACTION_DISCHARGING);
         mContext.registerReceiver(mReceiver, filter);
-    }
-
-    private boolean isPowered() {
-        // TODO: Allow any charger type
-        return mBatteryManagerInternal.isPowered(BatteryManager.BATTERY_PLUGGED_AC);
     }
 
     @Override

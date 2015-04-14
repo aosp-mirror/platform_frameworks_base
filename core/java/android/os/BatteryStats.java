@@ -1135,8 +1135,10 @@ public abstract class BatteryStats implements Parcelable {
         public static final int EVENT_PACKAGE_INSTALLED = 0x000c;
         // Event for a package being uninstalled.
         public static final int EVENT_PACKAGE_UNINSTALLED = 0x000d;
+        // Event for a package being uninstalled.
+        public static final int EVENT_ALARM = 0x000e;
         // Number of event types.
-        public static final int EVENT_COUNT = 0x000e;
+        public static final int EVENT_COUNT = 0x000f;
         // Mask to extract out only the type part of the event.
         public static final int EVENT_TYPE_MASK = ~(EVENT_FLAG_START|EVENT_FLAG_FINISH);
 
@@ -1158,6 +1160,8 @@ public abstract class BatteryStats implements Parcelable {
                 EVENT_USER_FOREGROUND | EVENT_FLAG_START;
         public static final int EVENT_USER_FOREGROUND_FINISH =
                 EVENT_USER_FOREGROUND | EVENT_FLAG_FINISH;
+        public static final int EVENT_ALARM_START = EVENT_ALARM | EVENT_FLAG_START;
+        public static final int EVENT_ALARM_FINISH = EVENT_ALARM | EVENT_FLAG_FINISH;
 
         // For CMD_EVENT.
         public int eventCode;
@@ -1789,12 +1793,12 @@ public abstract class BatteryStats implements Parcelable {
 
     public static final String[] HISTORY_EVENT_NAMES = new String[] {
             "null", "proc", "fg", "top", "sync", "wake_lock_in", "job", "user", "userfg", "conn",
-            "motion", "active", "pkginst", "pkgunin"
+            "motion", "active", "pkginst", "pkgunin", "alarm"
     };
 
     public static final String[] HISTORY_EVENT_CHECKIN_NAMES = new String[] {
             "Enl", "Epr", "Efg", "Etp", "Esy", "Ewl", "Ejb", "Eur", "Euf", "Ecn",
-            "Esm", "Eac", "Epi", "Epu"
+            "Esm", "Eac", "Epi", "Epu", "Eal"
     };
 
     /**

@@ -2692,6 +2692,32 @@ public final class BatteryStatsImpl extends BatteryStats {
         addHistoryEventLocked(elapsedRealtime, uptime, HistoryItem.EVENT_JOB_FINISH, name, uid);
     }
 
+    public void noteAlarmStartLocked(String name, int uid) {
+        if (!mRecordAllHistory) {
+            return;
+        }
+        uid = mapUid(uid);
+        final long elapsedRealtime = SystemClock.elapsedRealtime();
+        final long uptime = SystemClock.uptimeMillis();
+        if (!mActiveEvents.updateState(HistoryItem.EVENT_ALARM_START, name, uid, 0)) {
+            return;
+        }
+        addHistoryEventLocked(elapsedRealtime, uptime, HistoryItem.EVENT_ALARM_START, name, uid);
+    }
+
+    public void noteAlarmFinishLocked(String name, int uid) {
+        if (!mRecordAllHistory) {
+            return;
+        }
+        uid = mapUid(uid);
+        final long elapsedRealtime = SystemClock.elapsedRealtime();
+        final long uptime = SystemClock.uptimeMillis();
+        if (!mActiveEvents.updateState(HistoryItem.EVENT_ALARM_FINISH, name, uid, 0)) {
+            return;
+        }
+        addHistoryEventLocked(elapsedRealtime, uptime, HistoryItem.EVENT_ALARM_FINISH, name, uid);
+    }
+
     private void requestWakelockCpuUpdate() {
         if (!mHandler.hasMessages(MSG_UPDATE_WAKELOCKS)) {
             Message m = mHandler.obtainMessage(MSG_UPDATE_WAKELOCKS);
@@ -2709,6 +2735,7 @@ public final class BatteryStatsImpl extends BatteryStats {
         if (!enabled) {
             // Clear out any existing state.
             mActiveEvents.removeEvents(HistoryItem.EVENT_WAKE_LOCK);
+            mActiveEvents.removeEvents(HistoryItem.EVENT_ALARM);
             // Record the currently running processes as stopping, now that we are no
             // longer tracking them.
             HashMap<String, SparseIntArray> active = mActiveEvents.getStateForEvent(

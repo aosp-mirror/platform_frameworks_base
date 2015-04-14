@@ -262,7 +262,11 @@ public interface IActivityManager extends IInterface {
 
     public void enterSafeMode() throws RemoteException;
     
-    public void noteWakeupAlarm(IIntentSender sender, int sourceUid, String sourcePkg)
+    public void noteWakeupAlarm(IIntentSender sender, int sourceUid, String sourcePkg, String tag)
+            throws RemoteException;
+    public void noteAlarmStart(IIntentSender sender, int sourceUid, String tag)
+            throws RemoteException;
+    public void noteAlarmFinish(IIntentSender sender, int sourceUid, String tag)
             throws RemoteException;
 
     public boolean killPids(int[] pids, String reason, boolean secure) throws RemoteException;
@@ -489,6 +493,8 @@ public interface IActivityManager extends IInterface {
     public void setVoiceKeepAwake(IVoiceInteractionSession session, boolean keepAwake)
             throws RemoteException;
     public void updateLockTaskPackages(int userId, String[] packages) throws RemoteException;
+
+    public int getPackageProcessState(String packageName) throws RemoteException;
 
     /*
      * Private non-Binder interfaces
@@ -825,4 +831,7 @@ public interface IActivityManager extends IInterface {
     int DUMP_HEAP_FINISHED_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+288;
     int SET_VOICE_KEEP_AWAKE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+289;
     int UPDATE_LOCK_TASK_PACKAGES_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+290;
+    int NOTE_ALARM_START_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+291;
+    int NOTE_ALARM_FINISH_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+292;
+    int GET_PACKAGE_PROCESS_STATE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+293;
 }

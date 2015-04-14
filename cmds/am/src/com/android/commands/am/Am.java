@@ -124,6 +124,7 @@ public class Am extends BaseCommand {
                 "       am restart\n" +
                 "       am idle-maintenance\n" +
                 "       am screen-compat [on|off] <PACKAGE>\n" +
+                "       am package-importance <PACKAGE>\n" +
                 "       am to-uri [INTENT]\n" +
                 "       am to-intent-uri [INTENT]\n" +
                 "       am to-app-uri [INTENT]\n" +
@@ -232,6 +233,8 @@ public class Am extends BaseCommand {
                 "am idle-maintenance: perform idle maintenance now.\n" +
                 "\n" +
                 "am screen-compat: control screen compatibility mode of <PACKAGE>.\n" +
+                "\n" +
+                "am package-importance: print current importance of <PACKAGE>.\n" +
                 "\n" +
                 "am to-uri: print the given Intent specification as a URI.\n" +
                 "\n" +
@@ -365,6 +368,8 @@ public class Am extends BaseCommand {
             runIdleMaintenance();
         } else if (op.equals("screen-compat")) {
             runScreenCompat();
+        } else if (op.equals("package-importance")) {
+            runPackageImportance();
         } else if (op.equals("to-uri")) {
             runToUri(0);
         } else if (op.equals("to-intent-uri")) {
@@ -1602,6 +1607,16 @@ public class Am extends BaseCommand {
             }
             packageName = nextArg();
         } while (packageName != null);
+    }
+
+    private void runPackageImportance() throws Exception {
+        String packageName = nextArgRequired();
+        try {
+            int procState = mAm.getPackageProcessState(packageName);
+            System.out.println(
+                    ActivityManager.RunningAppProcessInfo.procStateToImportance(procState));
+        } catch (RemoteException e) {
+        }
     }
 
     private void runToUri(int flags) throws Exception {
