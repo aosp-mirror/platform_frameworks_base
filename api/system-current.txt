@@ -42449,6 +42449,7 @@ package android.widget {
     method public boolean getOverlapAnchor();
     method public int getSoftInputMode();
     method public int getWidth();
+    method public int getWindowLayoutType();
     method public boolean isAboveAnchor();
     method public boolean isAttachedInDecor();
     method public boolean isClippingEnabled();
@@ -42478,6 +42479,7 @@ package android.widget {
     method public void setTouchable(boolean);
     method public void setWidth(int);
     method public deprecated void setWindowLayoutMode(int, int);
+    method public void setWindowLayoutType(int);
     method public void showAsDropDown(android.view.View);
     method public void showAsDropDown(android.view.View, int, int);
     method public void showAsDropDown(android.view.View, int, int, int);
