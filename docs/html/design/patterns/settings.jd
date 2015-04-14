@@ -2,12 +2,21 @@ page.title=Settings
 page.tags=preferences,sharedpreferences
 @jd:body
 
+<a class="notice-designers-material"
+  href="http://www.google.com/design/spec/patterns/settings.html">
+  <div>
+    <h3>Material Design</h3>
+    <p>Settings<p>
+  </div>
+</a>
+
 <a class="notice-developers" href="{@docRoot}guide/topics/ui/settings.html">
   <div>
     <h3>Developer Docs</h3>
     <p>Settings</p>
   </div>
 </a>
+
 
 <p itemprop="description">Settings is a place in your app where users indicate their preferences for how your app should
 behave. This benefits users because:</p>

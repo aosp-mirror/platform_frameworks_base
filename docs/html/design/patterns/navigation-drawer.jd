@@ -3,6 +3,14 @@ page.tags=DrawerLayout,SlidingPaneLayout
 @jd:body
 
 
+<a class="notice-designers-material"
+  href="http://www.google.com/design/spec/layout/structure.html#structure-side-nav">
+  <div>
+    <h3>Material Design</h3>
+    <p>Side Nav<p>
+  </div>
+</a>
+
 <a class="notice-developers" href="{@docRoot}training/implementing-navigation/nav-drawer.html">
   <div>
     <h3>Developer Docs</h3>
@@ -12,7 +20,7 @@ page.tags=DrawerLayout,SlidingPaneLayout
 
 
 <p>The navigation drawer is a panel that transitions in from the left edge of the screen and
-displays the app’s main navigation options.</p> 
+displays the app’s main navigation options.</p>
 
 
 <h4>Displaying the navigation drawer</h4>
@@ -92,7 +100,7 @@ anywhere in the app, navigation up to the top level is faster and more efficient
 
 <p>The navigation drawer is a reflection of your app’s structure and displays its major
 navigation hubs. Think of navigation hubs as those places in your app that a user will want
-to visit frequently or use as a jumping-off point to other parts of the app. 
+to visit frequently or use as a jumping-off point to other parts of the app.
 At a minimum, the navigation hubs are the top-level views, since they correspond to your app’s
 major functional areas.</p>
 <p> If your app’s structure is deep, you can add screens from lower levels that your users will
@@ -125,8 +133,8 @@ likely visit often and make those navigation hubs as well.</p>
 <h2 id="Content">Content of the Navigation Drawer</h2>
 
 <p> Keep the content of the navigation drawer focused on app navigation. Expose the navigation
-hubs of your app as list items inside the navigation drawer - one item per row. 
-    
+hubs of your app as list items inside the navigation drawer - one item per row.
+
 <div class="layout-content-row">
   <div class="layout-content-col span-8">
   <h4>Titles, icons, and counters</h4>
@@ -139,7 +147,7 @@ hubs of your app as list items inside the navigation drawer - one item per row.
   <div class="layout-content-col span-5">
   <img src="{@docRoot}design/media/navigation_drawer_titles_icons.png">
   <div class="figure-caption">
-    Use titles and icons to organize your drawer. 
+    Use titles and icons to organize your drawer.
   </div>
   </div>
 </div>
@@ -149,13 +157,13 @@ hubs of your app as list items inside the navigation drawer - one item per row.
   <img src="{@docRoot}design/media/navigation_drawer_collapse.png">
   <div class="figure-caption">
     Collapsible navigation items are split. Use the left side for navigation and the right
-    to collapse and expand items. 
+    to collapse and expand items.
     </div>
   </div>
   <div class="layout-content-col span-5">
   <h4>Collapsible navigation items</h4>
   <p>If you have many views with some subordinate to others, consider collapsing them into one
-  expandable item to conserve space. 
+  expandable item to conserve space.
   The parent in the navigation drawer then turns into a split item. The left side allows
   navigation to the parent item’s view, and the right side collapses or expands the list of
   child items. </p>
@@ -189,7 +197,7 @@ is fully expanded:</p>
 <img src="{@docRoot}design/media/navigation_drawer_open_overflow.png">
 <div class="figure-caption">
   Clean up the action bar when the drawer is fully expanded. Remove actions that are not needed
-  and display your app's name in the title area. 
+  and display your app's name in the title area.
 </div>
 
 <h4>Actions</h4>
@@ -232,7 +240,7 @@ re-display the CAB.</p>
 
 <img src="{@docRoot}design/media/navigation_drawer_CAB.png">
 <div class="figure-caption">
-  Hide contextual action bars while the drawer is visible. 
+  Hide contextual action bars while the drawer is visible.
 </div>
 
 <p>If the user navigates away from a view with selected content, deselect the content before
