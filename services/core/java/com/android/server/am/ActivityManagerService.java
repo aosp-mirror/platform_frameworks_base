@@ -7851,6 +7851,27 @@ public final class ActivityManagerService extends ActivityManagerNative
         rti.lastActiveTime = tr.lastActiveTime;
         rti.affiliatedTaskId = tr.mAffiliatedTaskId;
         rti.affiliatedTaskColor = tr.mAffiliatedTaskColor;
+        rti.numActivities = 0;
+
+        ActivityRecord base = null;
+        ActivityRecord top = null;
+        ActivityRecord tmp;
+
+        for (int i = tr.mActivities.size() - 1; i >= 0; --i) {
+            tmp = tr.mActivities.get(i);
+            if (tmp.finishing) {
+                continue;
+            }
+            base = tmp;
+            if (top == null || (top.state == ActivityState.INITIALIZING)) {
+                top = base;
+            }
+            rti.numActivities++;
+        }
+
+        rti.baseActivity = (base != null) ? base.intent.getComponent() : null;
+        rti.topActivity = (top != null) ? top.intent.getComponent() : null;
+
         return rti;
     }
 

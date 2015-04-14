@@ -862,6 +862,23 @@ public class ActivityManager {
          */
         public int affiliatedTaskColor;
 
+        /**
+         * The component launched as the first activity in the task.
+         * This can be considered the "application" of this task.
+         */
+        public ComponentName baseActivity;
+
+        /**
+         * The activity component at the top of the history stack of the task.
+         * This is what the user is currently doing.
+         */
+        public ComponentName topActivity;
+
+        /**
+         * Number of activities in this task.
+         */
+        public int numActivities;
+
         public RecentTaskInfo() {
         }
 
@@ -895,6 +912,9 @@ public class ActivityManager {
             dest.writeLong(lastActiveTime);
             dest.writeInt(affiliatedTaskId);
             dest.writeInt(affiliatedTaskColor);
+            ComponentName.writeToParcel(baseActivity, dest);
+            ComponentName.writeToParcel(topActivity, dest);
+            dest.writeInt(numActivities);
         }
 
         public void readFromParcel(Parcel source) {
@@ -911,6 +931,9 @@ public class ActivityManager {
             lastActiveTime = source.readLong();
             affiliatedTaskId = source.readInt();
             affiliatedTaskColor = source.readInt();
+            baseActivity = ComponentName.readFromParcel(source);
+            topActivity = ComponentName.readFromParcel(source);
+            numActivities = source.readInt();
         }
 
         public static final Creator<RecentTaskInfo> CREATOR
