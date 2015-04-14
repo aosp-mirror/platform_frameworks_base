@@ -709,7 +709,7 @@ void SkiaCanvas::drawPosText(const uint16_t* text, const float* positions, int c
 
 void SkiaCanvas::drawTextOnPath(const uint16_t* glyphs, int count, const SkPath& path,
         float hOffset, float vOffset, const SkPaint& paint) {
-    mCanvas->drawTextOnPathHV(glyphs, count, path, hOffset, vOffset, paint);
+    mCanvas->drawTextOnPathHV(glyphs, count << 1, path, hOffset, vOffset, paint);
 }
 
 } // namespace android
