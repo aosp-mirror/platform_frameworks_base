@@ -216,6 +216,26 @@ public final class FusedLocationHardware {
         }
     }
 
+
+    /**
+     * Returns the version of the FLP HAL.
+     *
+     * <p>Version 1 is the initial release.
+     * <p>Version 2 adds the ability to use {@link #flushBatchedLocations},
+     * {@link FusedLocationHardwareSink#onCapabilities}, and
+     * {@link FusedLocationHardwareSink#onStatusChanged}.
+     *
+     * <p>This method is only available on API 23 or later.  Older APIs have version 1.
+     */
+    public int getVersion() {
+        try {
+            return mLocationHardware.getVersion();
+        } catch(RemoteException e) {
+            Log.e(TAG, "RemoteException at getVersion");
+        }
+        return 1;
+    }
+
     /*
      * Helper methods and classes
      */

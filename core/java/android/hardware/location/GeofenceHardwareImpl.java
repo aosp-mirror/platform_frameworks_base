@@ -41,6 +41,7 @@ import java.util.Iterator;
 public final class GeofenceHardwareImpl {
     private static final String TAG = "GeofenceHardwareImpl";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
+    private static final int FIRST_VERSION_WITH_CAPABILITIES = 2;
 
     private final Context mContext;
     private static GeofenceHardwareImpl sInstance;
@@ -54,6 +55,7 @@ public final class GeofenceHardwareImpl {
     private IFusedGeofenceHardware mFusedService;
     private IGpsGeofenceHardware mGpsService;
     private int mCapabilities;
+    private int mVersion = 1;
 
     private int[] mSupportedMonitorTypes = new int[GeofenceHardware.NUM_MONITORS];
 
@@ -145,8 +147,10 @@ public final class GeofenceHardwareImpl {
     private void updateFusedHardwareAvailability() {
         boolean fusedSupported;
         try {
+            final boolean hasGnnsCapabilities = (mVersion < FIRST_VERSION_WITH_CAPABILITIES)
+                    || (mCapabilities & CAPABILITY_GNSS) != 0;
             fusedSupported = (mFusedService != null
-                    ? mFusedService.isSupported() && (mCapabilities & CAPABILITY_GNSS) != 0
+                    ? mFusedService.isSupported() && hasGnnsCapabilities
                     : false);
         } catch (RemoteException e) {
             Log.e(TAG, "RemoteException calling LocationManagerService");
@@ -174,6 +178,11 @@ public final class GeofenceHardwareImpl {
 
     public void onCapabilities(int capabilities) {
         mCapabilities = capabilities;
+        updateFusedHardwareAvailability();
+    }
+
+    public void setVersion(int version) {
+        mVersion = version;
         updateFusedHardwareAvailability();
     }
 

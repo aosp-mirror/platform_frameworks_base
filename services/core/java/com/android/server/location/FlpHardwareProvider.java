@@ -42,11 +42,13 @@ import android.util.Log;
  * {@hide}
  */
 public class FlpHardwareProvider {
+    private static final int FIRST_VERSION_WITH_FLUSH_LOCATIONS = 2;
     private GeofenceHardwareImpl mGeofenceHardwareSink = null;
     private IFusedLocationHardwareSink mLocationSink = null;
     // Capabilities provided by FlpCallbacks
     private boolean mHaveBatchingCapabilities;
     private int mBatchingCapabilities;
+    private int mVersion;
 
     private static FlpHardwareProvider sSingletonInstance = null;
 
@@ -148,6 +150,11 @@ public class FlpHardwareProvider {
         } catch (RemoteException e) {
             Log.e(TAG, "RemoteException calling onBatchingStatus");
         }
+    }
+
+    private void setVersion(int version) {
+        mVersion = version;
+        getGeofenceHardwareSink().setVersion(version);
     }
 
     private void maybeSendCapabilities() {
@@ -366,7 +373,12 @@ public class FlpHardwareProvider {
 
         @Override
         public void flushBatchedLocations() {
-            nativeFlushBatchedLocations();
+            if (mVersion >= FIRST_VERSION_WITH_FLUSH_LOCATIONS) {
+                nativeFlushBatchedLocations();
+            } else {
+                Log.wtf(TAG,
+                        "Tried to call flushBatchedLocations on an unsupported implementation");
+            }
         }
 
         @Override
@@ -387,6 +399,11 @@ public class FlpHardwareProvider {
         @Override
         public void injectDeviceContext(int deviceEnabledContext) {
             nativeInjectDeviceContext(deviceEnabledContext);
+        }
+
+        @Override
+        public int getVersion() {
+            return mVersion;
         }
     };
 

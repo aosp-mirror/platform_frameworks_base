@@ -122,4 +122,10 @@ public class FusedLocationHardwareSecure extends IFusedLocationHardware.Stub {
         checkPermissions();
         mLocationHardware.flushBatchedLocations();
     }
+
+    @Override
+    public int getVersion() throws RemoteException {
+        checkPermissions();
+        return mLocationHardware.getVersion();
+    }
 }
