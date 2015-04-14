@@ -1406,8 +1406,9 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
 
         if (count == 0) {
             // Create a dummy child to get a single tab
-            TabSpec spec = tabHost.newTabSpec("tag").setIndicator("Tab Label",
-                    tabHost.getResources().getDrawable(android.R.drawable.ic_menu_info_details))
+            TabSpec spec = tabHost.newTabSpec("tag")
+                    .setIndicator("Tab Label", tabHost.getResources()
+                            .getDrawable(android.R.drawable.ic_menu_info_details, null))
                     .setContent(new TabHost.TabContentFactory() {
                         @Override
                         public View createTabContent(String tag) {
