@@ -83,6 +83,7 @@ import com.android.internal.os.BackgroundThread;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.accounts.AccountManagerService;
 import com.android.server.content.SyncStorageEngine.AuthorityInfo;
+import com.android.server.content.SyncStorageEngine.EndPoint;
 import com.android.server.content.SyncStorageEngine.OnSyncRequestListener;
 import com.google.android.collect.Lists;
 import com.google.android.collect.Maps;
@@ -107,7 +108,7 @@ import java.util.Set;
  * @hide
  */
 public class SyncManager {
-    private static final String TAG = "SyncManager";
+    static final String TAG = "SyncManager";
 
     /** Delay a sync due to local changes this long. In milliseconds */
     private static final long LOCAL_SYNC_DELAY;
@@ -198,6 +199,8 @@ public class SyncManager {
     private ConnectivityManager mConnManagerDoNotUseDirectly;
 
     protected SyncAdaptersCache mSyncAdapters;
+
+    private final AppIdleMonitor mAppIdleMonitor;
 
     private BroadcastReceiver mStorageIntentReceiver =
             new BroadcastReceiver() {
@@ -426,6 +429,8 @@ public class SyncManager {
 
         mSyncAlarmIntent = PendingIntent.getBroadcast(
                 mContext, 0 /* ignored */, new Intent(ACTION_SYNC_ALARM), 0);
+
+        mAppIdleMonitor = new AppIdleMonitor(this, mContext);
 
         IntentFilter intentFilter = new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION);
         context.registerReceiver(mConnectivityIntentReceiver, intentFilter);
@@ -1165,6 +1170,36 @@ public class SyncManager {
         mSyncStorageEngine.doDatabaseCleanup(new Account[0], userId);
         synchronized (mSyncQueue) {
             mSyncQueue.removeUserLocked(userId);
+        }
+    }
+
+    /**
+     * Clear backoff on operations in the sync queue that match the packageName and userId.
+     * @param packageName The package that just became active. Can be null to indicate that all
+     * packages are now considered active due to being plugged in.
+     * @param userId The user for which the package has become active. Can be USER_ALL if
+     * the device just plugged in.
+     */
+    void onAppNotIdle(String packageName, int userId) {
+        synchronized (mSyncQueue) {
+            // For all sync operations in sync queue, if marked as idle, compare with package name
+            // and unmark. And clear backoff for the operation.
+            final Iterator<SyncOperation> operationIterator =
+                    mSyncQueue.getOperations().iterator();
+            boolean changed = false;
+            while (operationIterator.hasNext()) {
+                final SyncOperation op = operationIterator.next();
+                if (op.appIdle
+                        && getPackageName(op.target).equals(packageName)
+                        && (userId == UserHandle.USER_ALL || op.target.userId == userId)) {
+                    op.appIdle = false;
+                    clearBackoffSetting(op);
+                    changed = true;
+                }
+            }
+            if (changed) {
+                sendCheckAlarmsMessage();
+            }
         }
     }
 
@@ -2447,6 +2482,19 @@ public class SyncManager {
                         }
                         continue;
                     }
+                    String packageName = getPackageName(op.target);
+                    // If app is considered idle, then skip for now and backoff
+                    if (packageName != null
+                            && mAppIdleMonitor.isAppIdle(packageName, op.target.userId)) {
+                        increaseBackoffSetting(op);
+                        op.appIdle = true;
+                        if (isLoggable) {
+                            Log.v(TAG, "Sync backing off idle app " + packageName);
+                        }
+                        continue;
+                    } else {
+                        op.appIdle = false;
+                    }
                     // Add this sync to be run.
                     operations.add(op);
                 }
@@ -3191,6 +3239,21 @@ public class SyncManager {
                     syncOperation.toEventLog(SyncStorageEngine.EVENT_STOP));
             mSyncStorageEngine.stopSyncEvent(rowId, elapsedTime,
                     resultMessage, downstreamActivity, upstreamActivity);
+        }
+    }
+
+    String getPackageName(EndPoint endpoint) {
+        if (endpoint.target_service) {
+            return endpoint.service.getPackageName();
+        } else {
+            SyncAdapterType syncAdapterType =
+                    SyncAdapterType.newKey(endpoint.provider, endpoint.account.type);
+            final RegisteredServicesCache.ServiceInfo<SyncAdapterType> syncAdapterInfo;
+            syncAdapterInfo = mSyncAdapters.getServiceInfo(syncAdapterType, endpoint.userId);
+            if (syncAdapterInfo == null) {
+                return null;
+            }
+            return syncAdapterInfo.componentName.getPackageName();
         }
     }
 

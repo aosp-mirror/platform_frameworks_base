@@ -90,6 +90,9 @@ public class SyncOperation implements Comparable {
     /** Descriptive string key for this operation */
     public String wakeLockName;
 
+    /** Whether this sync op was recently skipped due to the app being idle */
+    public boolean appIdle;
+
     public SyncOperation(Account account, int userId, int reason, int source, String provider,
             Bundle extras, long runTimeFromNow, long flexTime, long backoff,
             long delayUntil, boolean allowParallelSyncs) {

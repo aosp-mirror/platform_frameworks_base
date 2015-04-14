@@ -53,6 +53,7 @@ import android.util.SparseArray;
 
 import com.android.internal.os.BackgroundThread;
 import com.android.internal.util.IndentingPrintWriter;
+import com.android.server.SystemConfig;
 import com.android.server.SystemService;
 
 import java.io.File;
@@ -383,6 +384,9 @@ public class UsageStatsService extends SystemService implements
     }
 
     boolean isAppIdle(String packageName, int userId) {
+        if (SystemConfig.getInstance().getAllowInPowerSave().contains(packageName)) {
+            return false;
+        }
         final long lastUsed = getLastPackageAccessTime(packageName, userId);
         return hasPassedIdleDuration(lastUsed);
     }
