@@ -14992,7 +14992,6 @@ package android.media {
     field public static final java.lang.String PARAMETER_KEY_REQUEST_SYNC_FRAME = "request-sync";
     field public static final java.lang.String PARAMETER_KEY_SUSPEND = "drop-input-frames";
     field public static final java.lang.String PARAMETER_KEY_VIDEO_BITRATE = "video-bitrate";
-    field public static final int REASON_RECLAIMED = 1; // 0x1
     field public static final int VIDEO_SCALING_MODE_SCALE_TO_FIT = 1; // 0x1
     field public static final int VIDEO_SCALING_MODE_SCALE_TO_FIT_WITH_CROPPING = 2; // 0x2
   }
@@ -15008,7 +15007,6 @@ package android.media {
 
   public static abstract class MediaCodec.Callback {
     ctor public MediaCodec.Callback();
-    method public void onCodecReleased(android.media.MediaCodec, int);
     method public abstract void onError(android.media.MediaCodec, android.media.MediaCodec.CodecException);
     method public abstract void onInputBufferAvailable(android.media.MediaCodec, int);
     method public abstract void onOutputBufferAvailable(android.media.MediaCodec, int, android.media.MediaCodec.BufferInfo);
