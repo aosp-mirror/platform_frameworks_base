@@ -2628,12 +2628,13 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * point, <code>z_s = 1</code>, and <code>w_s</code> is a measurement of disparity
      * (depth) in pixel coordinates.</p>
      * <p><b>Units</b>:
-     * Pixels in the android.sensor.activeArraySize coordinate
+     * Pixels in the {@link CameraCharacteristics#SENSOR_INFO_ACTIVE_ARRAY_SIZE android.sensor.info.activeArraySize} coordinate
      * system.</p>
      * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
      *
      * @see CameraCharacteristics#LENS_POSE_ROTATION
      * @see CameraCharacteristics#LENS_POSE_TRANSLATION
+     * @see CameraCharacteristics#SENSOR_INFO_ACTIVE_ARRAY_SIZE
      */
     @PublicKey
     public static final Key<float[]> LENS_INTRINSIC_CALIBRATION =

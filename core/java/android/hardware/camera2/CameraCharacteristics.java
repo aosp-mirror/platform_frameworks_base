@@ -1030,12 +1030,13 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * point, <code>z_s = 1</code>, and <code>w_s</code> is a measurement of disparity
      * (depth) in pixel coordinates.</p>
      * <p><b>Units</b>:
-     * Pixels in the android.sensor.activeArraySize coordinate
+     * Pixels in the {@link CameraCharacteristics#SENSOR_INFO_ACTIVE_ARRAY_SIZE android.sensor.info.activeArraySize} coordinate
      * system.</p>
      * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
      *
      * @see CameraCharacteristics#LENS_POSE_ROTATION
      * @see CameraCharacteristics#LENS_POSE_TRANSLATION
+     * @see CameraCharacteristics#SENSOR_INFO_ACTIVE_ARRAY_SIZE
      */
     @PublicKey
     public static final Key<float[]> LENS_INTRINSIC_CALIBRATION =
@@ -1330,6 +1331,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      *   <li>{@link #REQUEST_AVAILABLE_CAPABILITIES_READ_SENSOR_SETTINGS READ_SENSOR_SETTINGS}</li>
      *   <li>{@link #REQUEST_AVAILABLE_CAPABILITIES_BURST_CAPTURE BURST_CAPTURE}</li>
      *   <li>{@link #REQUEST_AVAILABLE_CAPABILITIES_YUV_REPROCESSING YUV_REPROCESSING}</li>
+     *   <li>{@link #REQUEST_AVAILABLE_CAPABILITIES_DEPTH_OUTPUT DEPTH_OUTPUT}</li>
      * </ul></p>
      * <p>This key is available on all devices.</p>
      *
@@ -1342,6 +1344,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * @see #REQUEST_AVAILABLE_CAPABILITIES_READ_SENSOR_SETTINGS
      * @see #REQUEST_AVAILABLE_CAPABILITIES_BURST_CAPTURE
      * @see #REQUEST_AVAILABLE_CAPABILITIES_YUV_REPROCESSING
+     * @see #REQUEST_AVAILABLE_CAPABILITIES_DEPTH_OUTPUT
      */
     @PublicKey
     public static final Key<int[]> REQUEST_AVAILABLE_CAPABILITIES =
@@ -2706,6 +2709,29 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      */
     public static final Key<android.hardware.camera2.params.StreamConfigurationDuration[]> DEPTH_AVAILABLE_DEPTH_STALL_DURATIONS =
             new Key<android.hardware.camera2.params.StreamConfigurationDuration[]>("android.depth.availableDepthStallDurations", android.hardware.camera2.params.StreamConfigurationDuration[].class);
+
+    /**
+     * <p>Indicates whether a capture request may target both a
+     * DEPTH16 / DEPTH_POINT_CLOUD output, and normal color outputs (such as
+     * YUV_420_888, JPEG, or RAW) simultaneously.</p>
+     * <p>If TRUE, including both depth and color outputs in a single
+     * capture request is not supported. An application must interleave color
+     * and depth requests.  If FALSE, a single request can target both types
+     * of output.</p>
+     * <p>Typically, this restriction exists on camera devices that
+     * need to emit a specific pattern or wavelength of light to
+     * measure depth values, which causes the color image to be
+     * corrupted during depth measurement.</p>
+     * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
+     * <p><b>Limited capability</b> -
+     * Present on all camera devices that report being at least {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL_LIMITED HARDWARE_LEVEL_LIMITED} devices in the
+     * {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL android.info.supportedHardwareLevel} key</p>
+     *
+     * @see CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL
+     */
+    @PublicKey
+    public static final Key<Boolean> DEPTH_DEPTH_IS_EXCLUSIVE =
+            new Key<Boolean>("android.depth.depthIsExclusive", boolean.class);
 
     /*~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~
      * End generated code
