@@ -2232,4 +2232,7 @@
   <java-symbol type="layout" name="date_picker_month_item_material" />
   <java-symbol type="id" name="month_view" />
   <java-symbol type="integer" name="config_zen_repeat_callers_threshold" />
+  <java-symbol type="layout" name="chooser_grid" />
+  <java-symbol type="layout" name="resolve_grid_item" />
+  <java-symbol type="id" name="title_icon" />
 </resources>

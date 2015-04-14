@@ -394,4 +394,5 @@
      <dimen name="floating_toolbar_minimum_overflow_height">192dp</dimen>
      <dimen name="floating_toolbar_overflow_width">130dp</dimen>
      <dimen name="floating_toolbar_margin">2dp</dimen>
+     <dimen name="chooser_grid_padding">0dp</dimen>
 </resources>
