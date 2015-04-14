@@ -44,4 +44,10 @@ interface IFusedLocationHardwareSink {
      * capabilities.  Should be called immediatly after init.
      */
     void onCapabilities(int capabilities) = 2;
+
+    /**
+     * Event generated from FLP HAL when the status of location batching
+     * changes (location is successful/unsuccessful).
+     */
+    void onStatusChanged(int status) = 3;
 }

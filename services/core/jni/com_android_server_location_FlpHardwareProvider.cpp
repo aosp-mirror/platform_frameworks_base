@@ -34,6 +34,7 @@ static hw_device_t* sHardwareDevice = NULL;
 static jmethodID sOnLocationReport = NULL;
 static jmethodID sOnDataReport = NULL;
 static jmethodID sOnBatchingCapabilities = NULL;
+static jmethodID sOnBatchingStatus = NULL;
 static jmethodID sOnGeofenceTransition = NULL;
 static jmethodID sOnGeofenceMonitorStatus = NULL;
 static jmethodID sOnGeofenceAdd = NULL;
@@ -96,6 +97,19 @@ static void BatchingCapabilitiesCallback(int32_t capabilities) {
       sCallbacksObj,
       sOnBatchingCapabilities,
       capabilities
+      );
+  CheckExceptions(sCallbackEnv, __FUNCTION__);
+}
+
+static void BatchingStatusCallback(int32_t status) {
+  if(!IsValidCallbackThread()) {
+    return;
+  }
+
+  sCallbackEnv->CallVoidMethod(
+      sCallbacksObj,
+      sOnBatchingStatus,
+      status
       );
   CheckExceptions(sCallbackEnv, __FUNCTION__);
 }
@@ -175,6 +189,10 @@ static void ClassInit(JNIEnv* env, jclass clazz) {
         clazz,
         "onBatchingCapabilities",
         "(I)V");
+    sOnBatchingStatus = env->GetMethodID(
+            clazz,
+            "onBatchingStatus",
+            "(I)V");
     sOnGeofencingCapabilities = env->GetMethodID(
             clazz,
             "onGeofencingCapabilities",
@@ -558,7 +576,8 @@ FlpCallbacks sFlpCallbacks = {
   AcquireWakelock,
   ReleaseWakelock,
   SetThreadEvent,
-  BatchingCapabilitiesCallback
+  BatchingCapabilitiesCallback,
+  BatchingStatusCallback
 };
 
 static void ReportData(char* data, int length) {

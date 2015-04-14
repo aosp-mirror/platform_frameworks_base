@@ -136,6 +136,20 @@ public class FlpHardwareProvider {
         maybeSendCapabilities();
     }
 
+    private void onBatchingStatus(int status) {
+        IFusedLocationHardwareSink sink;
+        synchronized (mLocationSinkLock) {
+            sink = mLocationSink;
+        }
+        try {
+            if (sink != null) {
+                sink.onStatusChanged(status);
+            }
+        } catch (RemoteException e) {
+            Log.e(TAG, "RemoteException calling onBatchingStatus");
+        }
+    }
+
     private void maybeSendCapabilities() {
         IFusedLocationHardwareSink sink;
         boolean haveBatchingCapabilities;
