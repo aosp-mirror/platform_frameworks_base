@@ -3370,7 +3370,7 @@ public class Editor {
         // Parent's (TextView) previous position in window
         private int mLastParentX, mLastParentY;
         // Previous text character offset
-        private int mPreviousOffset = -1;
+        protected int mPreviousOffset = -1;
         // Previous text character offset
         private boolean mPositionHasChanged = true;
         // Minimum touch target size for handles
@@ -3830,8 +3830,6 @@ public class Editor {
     }
 
     private class SelectionStartHandleView extends HandleView {
-        // The previous offset this handle was at.
-        private int mPrevOffset;
         // Indicates whether the cursor is making adjustments within a word.
         private boolean mInWord = false;
         // Offset to track difference between touch and word boundary.
@@ -3879,7 +3877,7 @@ public class Editor {
             int end = getWordEnd(offset, true);
             int start = getWordStart(offset);
 
-            if (offset < mPrevOffset) {
+            if (offset < mPreviousOffset) {
                 // User is increasing the selection.
                 if (!mInWord || currLine < mPrevLine) {
                     // We're not in a word, or we're on a different line so we'll expand by
@@ -3888,21 +3886,19 @@ public class Editor {
                     if (offset <= end - offsetToWord || currLine < mPrevLine) {
                         offset = start;
                     } else {
-                        offset = mPrevOffset;
+                        offset = mPreviousOffset;
                     }
                 }
-                mPrevOffset = offset;
                 mTouchWordOffset = Math.max(trueOffset - offset, 0);
                 mInWord = !isStartBoundary(offset);
                 positionCursor = true;
-            } else if (offset - mTouchWordOffset > mPrevOffset) {
+            } else if (offset - mTouchWordOffset > mPreviousOffset) {
                 // User is shrinking the selection.
                 if (currLine > mPrevLine) {
                     // We're on a different line, so we'll snap to word boundaries.
                     offset = end;
                 }
                 offset -= mTouchWordOffset;
-                mPrevOffset = offset;
                 mInWord = !isEndBoundary(offset);
                 positionCursor = true;
             }
@@ -3936,8 +3932,6 @@ public class Editor {
     }
 
     private class SelectionEndHandleView extends HandleView {
-        // The previous offset this handle was at.
-        private int mPrevOffset;
         // Indicates whether the cursor is making adjustments within a word.
         private boolean mInWord = false;
         // Offset to track difference between touch and word boundary.
@@ -3986,7 +3980,7 @@ public class Editor {
             int end = getWordEnd(offset, true);
             int start = getWordStart(offset);
 
-            if (offset > mPrevOffset) {
+            if (offset > mPreviousOffset) {
                 // User is increasing the selection.
                 if (!mInWord || currLine > mPrevLine) {
                     // We're not in a word, or we're on a different line so we'll expand by
@@ -3995,21 +3989,19 @@ public class Editor {
                     if (offset >= start + midPoint || currLine > mPrevLine) {
                         offset = end;
                     } else {
-                        offset = mPrevOffset;
+                        offset = mPreviousOffset;
                     }
                 }
-                mPrevOffset = offset;
                 mTouchWordOffset = Math.max(offset - trueOffset, 0);
                 mInWord = !isEndBoundary(offset);
                 positionCursor = true;
-            } else if (offset + mTouchWordOffset < mPrevOffset) {
+            } else if (offset + mTouchWordOffset < mPreviousOffset) {
                 // User is shrinking the selection.
                 if (currLine > mPrevLine) {
                     // We're on a different line, so we'll snap to word boundaries.
                     offset = getWordStart(offset);
                 }
                 offset += mTouchWordOffset;
-                mPrevOffset = offset;
                 positionCursor = true;
                 mInWord = !isStartBoundary(offset);
             }
