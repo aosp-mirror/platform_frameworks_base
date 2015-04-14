@@ -21,6 +21,7 @@ import android.util.Log;
 import android.media.MediaCodecInfo;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Map;
 
 /**
  * Allows you to enumerate available codecs, each specified as a {@link MediaCodecInfo} object,
@@ -61,13 +62,19 @@ final public class MediaCodecList {
         return sRegularCodecInfos[index];
     }
 
+    /* package private */ static final Map<String, Object> getGlobalSettings() {
+        return sGlobalSettings;
+    }
+
     private static Object sInitLock = new Object();
     private static MediaCodecInfo[] sAllCodecInfos;
     private static MediaCodecInfo[] sRegularCodecInfos;
+    private static Map<String, Object> sGlobalSettings;
 
     private static final void initCodecList() {
         synchronized (sInitLock) {
             if (sRegularCodecInfos == null) {
+                sGlobalSettings = native_getGlobalSettings();
                 int count = native_getCodecCount();
                 ArrayList<MediaCodecInfo> regulars = new ArrayList<MediaCodecInfo>();
                 ArrayList<MediaCodecInfo> all = new ArrayList<MediaCodecInfo>();
@@ -111,6 +118,8 @@ final public class MediaCodecList {
 
     /* package private */ static native final MediaCodecInfo.CodecCapabilities
         getCodecCapabilities(int index, String type);
+
+    /* package private */ static native final Map<String, Object> native_getGlobalSettings();
 
     /* package private */ static native final int findCodecByName(String codec);
 
