@@ -1,0 +1,67 @@
+page.title=Designed for Families
+page.metaDescription=Designed for Families helps you make your apps and games more discoverable to families.
+page.image=/distribute/images/about-dff-sm.jpg
+meta.tags="families, googleplay, distribution"
+page.tags="families"
+
+@jd:body
+
+<p>
+  In several weeks, a new family-focused experience on Google Play will give
+  users new ways to browse, search, and discover high quality apps and games
+  for their families.
+</p>
+
+<p>
+  To support a more family-friendly store, developers are invited to opt-in
+  family-focused apps and games to the new Designed for Families program. Apps
+  that meet the <a href=
+  "https://support.google.com/googleplay/android-developer/answer/6184502">program
+  requirements</a> will be shown in the new family experience so that
+  parents can find suitable, trusted, high-quality apps and games more easily.
+</p>
+
+<img src="{@docRoot}distribute/images/about-dff-sm.jpg">
+
+<p>
+  Opt-in your apps and games today using the tools and processes you currently
+  use to manage your apps in the Developer Console. Your apps in the program
+  can benefit from enhanced discoverability in addition to maintaining their
+  existing categories, rankings, and reviews elsewhere on the Google Play
+  store.
+</p>
+
+<h2 id="elibibility">Eligibility</h2>
+
+<p>
+  Apps in the family-friendly experience on Google Play will be more
+  discoverable by parents and families, who expect the apps to be age
+  appropriate. The Designed for Families program is designed to be inclusive of
+  apps that are made for kids as well as those that can be enjoyed by the
+  entire family. To address this audience, there are specific guidelines and
+  policies your apps need to meet, which will be assessed in an app content
+  review.
+</p>
+
+<p>
+  Make sure that you're familiar with the policies that your app must comply
+  with. These include <a href=
+  "http://play.google.com/about/developer-content-policy.html">content
+  policies</a>, the <a href=
+  "http://play.google.com/about/developer-distribution-agreement.html">Developer
+  Distribution Agreement</a>, and the <a href=
+  "https://play.google.com/intl/ALL_us/about/families/developer-distribution-agreement-addendum.html">
+  Designed for Families DDA Addendum</a>.
+</p>
+
+<p>
+  Your app must also meet the <a href=
+  "https://support.google.com/googleplay/android-developer/answer/6184502">Designed
+  for Families program requirements</a> listed in the Google Play Developer
+  Help Center.
+</p>
+
+<div class="paging-links" style="padding-top:.75em;">
+  <a href="{@docRoot}distribute/googleplay/families/start.html" class=
+  "next-class-link">Next: Opt-In</a>
+</div>
