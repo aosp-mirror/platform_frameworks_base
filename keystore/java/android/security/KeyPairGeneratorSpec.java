@@ -52,6 +52,11 @@ import javax.security.auth.x500.X500Principal;
  */
 public final class KeyPairGeneratorSpec implements AlgorithmParameterSpec {
 
+    private static final X500Principal DEFAULT_CERT_SUBJECT = new X500Principal("CN=fake");
+    private static final BigInteger DEFAULT_CERT_SERIAL_NUMBER = new BigInteger("1");
+    private static final Date DEFAULT_CERT_NOT_BEFORE = new Date(0L); // Jan 1 1970
+    private static final Date DEFAULT_CERT_NOT_AFTER = new Date(2461449600000L); // Jan 1 2048
+
     private final Context mContext;
 
     private final String mKeystoreAlias;
@@ -144,20 +149,27 @@ public final class KeyPairGeneratorSpec implements AlgorithmParameterSpec {
             throw new IllegalArgumentException("context == null");
         } else if (TextUtils.isEmpty(keyStoreAlias)) {
             throw new IllegalArgumentException("keyStoreAlias must not be empty");
-        } else if (subjectDN == null) {
-            throw new IllegalArgumentException("subjectDN == null");
-        } else if (serialNumber == null) {
-            throw new IllegalArgumentException("serialNumber == null");
-        } else if (startDate == null) {
-            throw new IllegalArgumentException("startDate == null");
-        } else if (endDate == null) {
-            throw new IllegalArgumentException("endDate == null");
-        } else if (endDate.before(startDate)) {
-            throw new IllegalArgumentException("endDate < startDate");
         } else if ((userAuthenticationValidityDurationSeconds < 0)
                 && (userAuthenticationValidityDurationSeconds != -1)) {
             throw new IllegalArgumentException(
                     "userAuthenticationValidityDurationSeconds must not be negative");
+        }
+
+        if (subjectDN == null) {
+            subjectDN = DEFAULT_CERT_SUBJECT;
+        }
+        if (startDate == null) {
+            startDate = DEFAULT_CERT_NOT_BEFORE;
+        }
+        if (endDate == null) {
+            endDate = DEFAULT_CERT_NOT_AFTER;
+        }
+        if (serialNumber == null) {
+            serialNumber = DEFAULT_CERT_SERIAL_NUMBER;
+        }
+
+        if (endDate.before(startDate)) {
+            throw new IllegalArgumentException("endDate < startDate");
         }
 
         mContext = context;
@@ -559,6 +571,10 @@ public final class KeyPairGeneratorSpec implements AlgorithmParameterSpec {
         /**
          * Sets the subject used for the self-signed certificate of the
          * generated key pair.
+         *
+         * <p>The subject must be specified on API Level
+         * {@link android.os.Build.VERSION_CODES#LOLLIPOP_MR1 LOLLIPOP_MR1} and older platforms. On
+         * newer platforms the subject defaults to {@code CN=fake} if not specified.
          */
         public Builder setSubject(X500Principal subject) {
             if (subject == null) {
@@ -571,6 +587,10 @@ public final class KeyPairGeneratorSpec implements AlgorithmParameterSpec {
         /**
          * Sets the serial number used for the self-signed certificate of the
          * generated key pair.
+         *
+         * <p>The serial number must be specified on API Level
+         * {@link android.os.Build.VERSION_CODES#LOLLIPOP_MR1 LOLLIPOP_MR1} and older platforms. On
+         * newer platforms the serial number defaults to {@code 1} if not specified.
          */
         public Builder setSerialNumber(BigInteger serialNumber) {
             if (serialNumber == null) {
@@ -583,6 +603,10 @@ public final class KeyPairGeneratorSpec implements AlgorithmParameterSpec {
         /**
          * Sets the start of the validity period for the self-signed certificate
          * of the generated key pair.
+         *
+         * <p>The date must be specified on API Level
+         * {@link android.os.Build.VERSION_CODES#LOLLIPOP_MR1 LOLLIPOP_MR1} and older platforms. On
+         * newer platforms the date defaults to {@code Jan 1 1970} if not specified.
          */
         public Builder setStartDate(Date startDate) {
             if (startDate == null) {
@@ -595,6 +619,10 @@ public final class KeyPairGeneratorSpec implements AlgorithmParameterSpec {
         /**
          * Sets the end of the validity period for the self-signed certificate
          * of the generated key pair.
+         *
+         * <p>The date must be specified on API Level
+         * {@link android.os.Build.VERSION_CODES#LOLLIPOP_MR1 LOLLIPOP_MR1} and older platforms. On
+         * newer platforms the date defaults to {@code Jan 1 2048} if not specified.
          */
         public Builder setEndDate(Date endDate) {
             if (endDate == null) {
