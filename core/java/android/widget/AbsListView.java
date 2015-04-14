@@ -3116,6 +3116,25 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         }
     }
 
+    private boolean performStylusButtonPressAction(MotionEvent ev) {
+        if (ev.getToolType(0) == MotionEvent.TOOL_TYPE_STYLUS
+                && ev.isButtonPressed(MotionEvent.BUTTON_SECONDARY)
+                && mChoiceMode == CHOICE_MODE_MULTIPLE_MODAL && mChoiceActionMode == null) {
+            final View child = getChildAt(mMotionPosition - mFirstPosition);
+            if (child != null) {
+                final int longPressPosition = mMotionPosition;
+                final long longPressId = mAdapter.getItemId(mMotionPosition);
+                if (performLongPress(child, longPressPosition, longPressId)) {
+                    mTouchMode = TOUCH_MODE_REST;
+                    setPressed(false);
+                    child.setPressed(false);
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
     boolean performLongPress(final View child,
             final int longPressPosition, final long longPressId) {
         // CHOICE_MODE_MULTIPLE_MODAL takes over long press.
@@ -3757,8 +3776,8 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         }
 
         if (mTouchMode == TOUCH_MODE_DOWN && mMotionPosition != INVALID_POSITION
-                && performButtonActionOnTouchDown(ev)) {
-            removeCallbacks(mPendingCheckForTap);
+                && (performButtonActionOnTouchDown(ev) || performStylusButtonPressAction(ev))) {
+                removeCallbacks(mPendingCheckForTap);
         }
     }
 
@@ -3800,6 +3819,11 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                     mTouchMode = TOUCH_MODE_DONE_WAITING;
                     updateSelectorState();
                 } else if (motionView != null) {
+                    if (performStylusButtonPressAction(ev)) {
+                        removeCallbacks(mPendingCheckForTap);
+                        removeCallbacks(mPendingCheckForLongPress);
+                    }
+
                     // Still within bounds, update the hotspot.
                     final float[] point = mTmpPoint;
                     point[0] = x;
