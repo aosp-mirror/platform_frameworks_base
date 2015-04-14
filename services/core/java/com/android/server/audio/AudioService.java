@@ -5577,8 +5577,9 @@ public class AudioService extends IAudioService.Stub {
     @Override
     public void setVolumePolicy(VolumePolicy policy) {
         enforceVolumeController("set volume policy");
-        if (policy != null) {
+        if (policy != null && !policy.equals(mVolumePolicy)) {
             mVolumePolicy = policy;
+            if (DEBUG_VOL) Log.d(TAG, "Volume policy changed: " + mVolumePolicy);
         }
     }
 

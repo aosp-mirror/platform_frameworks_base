@@ -19,6 +19,8 @@ package android.media;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import java.util.Objects;
+
 /** @hide */
 public final class VolumePolicy implements Parcelable {
     public static final VolumePolicy DEFAULT = new VolumePolicy(false, false, true, 400);
@@ -50,6 +52,23 @@ public final class VolumePolicy implements Parcelable {
                 + ",volumeUpToExitSilent=" + volumeUpToExitSilent
                 + ",doNotDisturbWhenSilent=" + doNotDisturbWhenSilent
                 + ",vibrateToSilentDebounce=" + vibrateToSilentDebounce + "]";
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(volumeDownToEnterSilent, volumeUpToExitSilent, doNotDisturbWhenSilent,
+                vibrateToSilentDebounce);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (!(o instanceof VolumePolicy)) return false;
+        if (o == this) return true;
+        final VolumePolicy other = (VolumePolicy) o;
+        return other.volumeDownToEnterSilent == volumeDownToEnterSilent
+                && other.volumeUpToExitSilent == volumeUpToExitSilent
+                && other.doNotDisturbWhenSilent == doNotDisturbWhenSilent
+                && other.vibrateToSilentDebounce == vibrateToSilentDebounce;
     }
 
     @Override

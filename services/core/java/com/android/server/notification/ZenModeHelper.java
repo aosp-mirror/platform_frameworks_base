@@ -501,7 +501,7 @@ public class ZenModeHelper {
                     if (isChange && policy.doNotDisturbWhenSilent) {
                         if (mZenMode != Global.ZEN_MODE_NO_INTERRUPTIONS
                                 && mZenMode != Global.ZEN_MODE_ALARMS) {
-                            newZen = Global.ZEN_MODE_NO_INTERRUPTIONS;
+                            newZen = Global.ZEN_MODE_ALARMS;
                         }
                     }
                     break;
