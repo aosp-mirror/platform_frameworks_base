@@ -36,6 +36,7 @@ import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.Log;
 
+import com.android.systemui.Prefs;
 import com.android.systemui.R;
 import com.android.systemui.SystemUI;
 import com.android.systemui.qs.tiles.DndTile;
@@ -172,18 +173,40 @@ public class VolumeUI extends SystemUI {
         private static final String DISABLE = "com.android.systemui.vui.DISABLE";
         private static final String EXTRA_COMPONENT = "component";
 
+        private static final String PREF = "com.android.systemui.PREF";
+        private static final String EXTRA_KEY = "key";
+        private static final String EXTRA_VALUE = "value";
+
         public void start() {
             final IntentFilter filter = new IntentFilter();
             filter.addAction(ENABLE);
             filter.addAction(DISABLE);
+            filter.addAction(PREF);
             mContext.registerReceiver(this, filter, null, mHandler);
         }
 
         @Override
         public void onReceive(Context context, Intent intent) {
             final String action = intent.getAction();
+            if (PREF.equals(action)) {
+                final String key = intent.getStringExtra(EXTRA_KEY);
+                if (key != null && intent.getExtras() != null) {
+                    final Object value = intent.getExtras().get(EXTRA_VALUE);
+                    if (value == null) {
+                        Prefs.remove(mContext, key);
+                    } else if (value instanceof Boolean) {
+                        Prefs.putBoolean(mContext, key, (Boolean) value);
+                    } else if (value instanceof Integer) {
+                        Prefs.putInt(mContext, key, (Integer) value);
+                    } else if (value instanceof Long) {
+                        Prefs.putLong(mContext, key, (Long) value);
+                    }
+                }
+                return;
+            }
             final ComponentName component = intent.getParcelableExtra(EXTRA_COMPONENT);
-            final boolean current = component.equals(mVolumeControllerService.getComponent());
+            final boolean current = component != null
+                    && component.equals(mVolumeControllerService.getComponent());
             if (ENABLE.equals(action) && component != null) {
                 if (!current) {
                     showServiceActivationDialog(component);

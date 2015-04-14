@@ -24,6 +24,8 @@
         android:id="@+id/volume_zen_switch_bar"
         android:layout_width="match_parent"
         android:layout_height="@dimen/volume_button_size"
+        android:layout_marginStart="4dp"
+        android:layout_marginEnd="4dp"
         android:clickable="true"
         android:orientation="horizontal" >
 
@@ -49,6 +51,7 @@
             android:layout_width="wrap_content"
             android:layout_height="fill_parent"
             android:layout_marginEnd="11dp" />
+
     </LinearLayout>
 
     <RelativeLayout
@@ -56,8 +59,8 @@
         android:layout_width="match_parent"
         android:layout_height="@dimen/volume_button_size"
         android:layout_marginStart="@dimen/volume_button_size"
-        android:paddingEnd="3dp"
-        android:paddingStart="3dp" >
+        android:paddingEnd="7dp"
+        android:paddingStart="7dp" >
 
         <TextView
             android:id="@+id/volume_zen_panel_summary_line_1"
@@ -79,6 +82,8 @@
         android:id="@+id/volume_zen_mode_panel_buttons"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginStart="4dp"
+        android:layout_marginEnd="4dp"
         android:gravity="end" >
 
         <TextView

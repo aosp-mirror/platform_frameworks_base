@@ -17,6 +17,7 @@
 package com.android.systemui.volume;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.res.Configuration;
 import android.media.AudioManager;
 import android.media.IRemoteVolumeController;
@@ -74,6 +75,12 @@ public class VolumePanelComponent implements VolumeComponent {
             }
 
             @Override
+            public void onZenPrioritySettings() {
+                mHandler.removeCallbacks(mStartZenPrioritySettings);
+                mHandler.post(mStartZenPrioritySettings);
+            }
+
+            @Override
             public void onInteraction() {
                 final KeyguardViewMediator kvm = mSysui.getComponent(KeyguardViewMediator.class);
                 if (kvm != null) {
@@ -126,12 +133,23 @@ public class VolumePanelComponent implements VolumeComponent {
         mPanel.postDismiss(0);
     }
 
+    private void startSettings(Intent intent) {
+        mSysui.getComponent(PhoneStatusBar.class).startActivityDismissingKeyguard(intent,
+                true /* onlyProvisioned */, true /* dismissShade */);
+        mPanel.postDismiss(mDismissDelay);
+    }
+
     private final Runnable mStartZenSettings = new Runnable() {
         @Override
         public void run() {
-            mSysui.getComponent(PhoneStatusBar.class).startActivityDismissingKeyguard(
-                    ZenModePanel.ZEN_SETTINGS, true /* onlyProvisioned */, true /* dismissShade */);
-            mPanel.postDismiss(mDismissDelay);
+            startSettings(ZenModePanel.ZEN_SETTINGS);
+        }
+    };
+
+    private final Runnable mStartZenPrioritySettings = new Runnable() {
+        @Override
+        public void run() {
+            startSettings(ZenModePanel.ZEN_PRIORITY_SETTINGS);
         }
     };
 

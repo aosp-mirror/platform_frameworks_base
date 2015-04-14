@@ -151,6 +151,10 @@
         <item name="android:gravity">center</item>
     </style>
 
+    <style name="TextAppearance.QS.DetailButton.White">
+        <item name="android:textColor">@color/qs_detail_button_white</item>
+    </style>
+
     <style name="TextAppearance.QS.DetailEmpty">
         <item name="android:textSize">@dimen/qs_detail_empty_text_size</item>
         <item name="android:textColor">@color/qs_subhead</item>

@@ -17,11 +17,13 @@
 package com.android.systemui.volume;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.res.Configuration;
 import android.media.AudioManager;
 import android.media.VolumePolicy;
 import android.os.Bundle;
 import android.os.Handler;
+import android.provider.Settings;
 
 import com.android.systemui.SystemUI;
 import com.android.systemui.keyguard.KeyguardViewMediator;
@@ -53,12 +55,7 @@ public class VolumeDialogComponent implements VolumeComponent {
             }
         };
         mZenModeController = zen;
-        mDialog = new VolumeDialog(context, mController, zen) {
-            @Override
-            protected void onZenSettingsClickedH() {
-                startZenSettings();
-            }
-        };
+        mDialog = new VolumeDialog(context, mController, zen, mVolumeDialogCallback);
         applyConfiguration();
     }
 
@@ -113,8 +110,26 @@ public class VolumeDialogComponent implements VolumeComponent {
         mDialog.dump(pw);
     }
 
-    private void startZenSettings() {
-        mSysui.getComponent(PhoneStatusBar.class).startActivityDismissingKeyguard(
-                ZenModePanel.ZEN_SETTINGS, true /* onlyProvisioned */, true /* dismissShade */);
+    private void startSettings(Intent intent) {
+        mSysui.getComponent(PhoneStatusBar.class).startActivityDismissingKeyguard(intent,
+                true /* onlyProvisioned */, true /* dismissShade */);
     }
+
+    private final VolumeDialog.Callback mVolumeDialogCallback = new VolumeDialog.Callback() {
+        @Override
+        public void onSettingsClicked() {
+            startSettings(new Intent(Settings.ACTION_NOTIFICATION_SETTINGS));
+        }
+
+        @Override
+        public void onZenSettingsClicked() {
+            startSettings(ZenModePanel.ZEN_SETTINGS);
+        }
+
+        @Override
+        public void onZenPrioritySettingsClicked() {
+            startSettings(ZenModePanel.ZEN_PRIORITY_SETTINGS);
+        }
+    };
+
 }
