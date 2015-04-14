@@ -87,7 +87,8 @@ var RESOURCE_COLLECTIONS = {
       "distribute/googleplay/auto.html",
       "distribute/googleplay/tv.html",
       "distribute/googleplay/wear.html",
-      "distribute/googleplay/edu/about.html"
+      "distribute/googleplay/edu/about.html",
+      "distribute/googleplay/families/about.html"
     ]
   },
   "distribute/essentials": {
