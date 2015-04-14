@@ -4655,7 +4655,7 @@ public class PackageParser {
 
     private static boolean copyNeeded(int flags, Package p,
             PackageUserState state, Bundle metaData, int userId) {
-        if (userId != 0) {
+        if (userId != UserHandle.USER_OWNER) {
             // We always need to copy for other users, since we need
             // to fix up the uid.
             return true;
@@ -4737,11 +4737,9 @@ public class PackageParser {
 
         // Make shallow copy so we can store the metadata/libraries safely
         ApplicationInfo ai = new ApplicationInfo(p.applicationInfo);
-        if (userId != 0) {
-            ai.uid = UserHandle.getUid(userId, ai.uid);
-            ai.dataDir = PackageManager.getDataDirForUser(ai.volumeUuid, ai.packageName, userId)
-                    .getAbsolutePath();
-        }
+        ai.uid = UserHandle.getUid(userId, ai.uid);
+        ai.dataDir = PackageManager.getDataDirForUser(ai.volumeUuid, ai.packageName, userId)
+                .getAbsolutePath();
         if ((flags & PackageManager.GET_META_DATA) != 0) {
             ai.metaData = p.mAppMetaData;
         }
@@ -4766,11 +4764,9 @@ public class PackageParser {
         // This is only used to return the ResolverActivity; we will just always
         // make a copy.
         ai = new ApplicationInfo(ai);
-        if (userId != 0) {
-            ai.uid = UserHandle.getUid(userId, ai.uid);
-            ai.dataDir = PackageManager.getDataDirForUser(ai.volumeUuid, ai.packageName, userId)
-                    .getAbsolutePath();
-        }
+        ai.uid = UserHandle.getUid(userId, ai.uid);
+        ai.dataDir = PackageManager.getDataDirForUser(ai.volumeUuid, ai.packageName, userId)
+                .getAbsolutePath();
         if (state.stopped) {
             ai.flags |= ApplicationInfo.FLAG_STOPPED;
         } else {
