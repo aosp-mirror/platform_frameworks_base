@@ -7286,6 +7286,8 @@ package android.content {
     ctor public ComponentName(android.os.Parcel);
     method public android.content.ComponentName clone();
     method public int compareTo(android.content.ComponentName);
+    method public static android.content.ComponentName createRelative(java.lang.String, java.lang.String);
+    method public static android.content.ComponentName createRelative(android.content.Context, java.lang.String);
     method public int describeContents();
     method public java.lang.String flattenToShortString();
     method public java.lang.String flattenToString();

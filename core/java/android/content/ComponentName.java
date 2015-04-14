@@ -18,6 +18,7 @@ package android.content;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.text.TextUtils;
 
 import java.io.PrintWriter;
 import java.lang.Comparable;
@@ -35,6 +36,56 @@ import java.lang.Comparable;
 public final class ComponentName implements Parcelable, Cloneable, Comparable<ComponentName> {
     private final String mPackage;
     private final String mClass;
+
+    /**
+     * Create a new component identifier where the class name may be specified
+     * as either absolute or relative to the containing package.
+     *
+     * <p>Relative package names begin with a <code>'.'</code> character. For a package
+     * <code>"com.example"</code> and class name <code>".app.MyActivity"</code> this method
+     * will return a ComponentName with the package <code>"com.example"</code>and class name
+     * <code>"com.example.app.MyActivity"</code>. Fully qualified class names are also
+     * permitted.</p>
+     *
+     * @param pkg the name of the package the component exists in
+     * @param cls the name of the class inside of <var>pkg</var> that implements
+     *            the component
+     * @return the new ComponentName
+     */
+    public static ComponentName createRelative(String pkg, String cls) {
+        if (TextUtils.isEmpty(cls)) {
+            throw new IllegalArgumentException("class name cannot be empty");
+        }
+
+        final String fullName;
+        if (cls.charAt(0) == '.') {
+            // Relative to the package. Prepend the package name.
+            fullName = pkg + cls;
+        } else {
+            // Fully qualified package name.
+            fullName = cls;
+        }
+        return new ComponentName(pkg, fullName);
+    }
+
+    /**
+     * Create a new component identifier where the class name may be specified
+     * as either absolute or relative to the containing package.
+     *
+     * <p>Relative package names begin with a <code>'.'</code> character. For a package
+     * <code>"com.example"</code> and class name <code>".app.MyActivity"</code> this method
+     * will return a ComponentName with the package <code>"com.example"</code>and class name
+     * <code>"com.example.app.MyActivity"</code>. Fully qualified class names are also
+     * permitted.</p>
+     *
+     * @param pkg a Context for the package implementing the component
+     * @param cls the name of the class inside of <var>pkg</var> that implements
+     *            the component
+     * @return the new ComponentName
+     */
+    public static ComponentName createRelative(Context pkg, String cls) {
+        return createRelative(pkg.getPackageName(), cls);
+    }
 
     /**
      * Create a new component identifier.
