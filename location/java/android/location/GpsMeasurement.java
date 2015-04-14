@@ -80,6 +80,8 @@ public class GpsMeasurement implements Parcelable {
     private static final int HAS_TIME_FROM_LAST_BIT = (1<<14);
     private static final int HAS_DOPPLER_SHIFT = (1<<15);
     private static final int HAS_DOPPLER_SHIFT_UNCERTAINTY = (1<<16);
+    private static final int HAS_USED_IN_FIX = (1<<17);
+    private static final int GPS_MEASUREMENT_HAS_UNCORRECTED_PSEUDORANGE_RATE = (1<<18);
 
     /**
      * The indicator is not available or it is unknown.
@@ -137,10 +139,17 @@ public class GpsMeasurement implements Parcelable {
     public static final short STATE_TOW_DECODED = (1<<3);
 
     /**
+     * The state of the GPS receiver contains millisecond ambiguity.
+     *
+     * @hide
+     */
+    public static final short STATE_MSEC_AMBIGUOUS = (1<<4);
+
+    /**
      * All the GPS receiver state flags.
      */
-    private static final short STATE_ALL =
-            STATE_CODE_LOCK | STATE_BIT_SYNC | STATE_SUBFRAME_SYNC | STATE_TOW_DECODED;
+    private static final short STATE_ALL = STATE_CODE_LOCK | STATE_BIT_SYNC | STATE_SUBFRAME_SYNC
+            | STATE_TOW_DECODED | STATE_MSEC_AMBIGUOUS;
 
     /**
      * The state of the 'Accumulated Delta Range' is invalid or unknown.
@@ -295,6 +304,9 @@ public class GpsMeasurement implements Parcelable {
         if ((mState & STATE_TOW_DECODED) == STATE_TOW_DECODED) {
             builder.append("TowDecoded|");
         }
+        if ((mState & STATE_MSEC_AMBIGUOUS) == STATE_MSEC_AMBIGUOUS) {
+            builder.append("MsecAmbiguous");
+        }
         int remainingStates = mState & ~STATE_ALL;
         if (remainingStates > 0) {
             builder.append("Other(");
@@ -361,6 +373,15 @@ public class GpsMeasurement implements Parcelable {
     /**
      * Gets the Pseudorange rate at the timestamp in m/s.
      * The reported value includes {@link #getPseudorangeRateUncertaintyInMetersPerSec()}.
+     *
+     * The correction of a given Pseudorange Rate value includes corrections from receiver and
+     * satellite clock frequency errors.
+     * {@link #isPseudorangeRateCorrected()} identifies the type of value reported.
+     *
+     * A positive 'uncorrected' value indicates that the SV is moving away from the receiver.
+     * The sign of the 'uncorrected' Pseudorange Rate and its relation to the sign of
+     * {@link #getDopplerShiftInHz()} is given by the equation:
+     *      pseudorange rate = -k * doppler shift   (where k is a constant)
      */
     public double getPseudorangeRateInMetersPerSec() {
         return mPseudorangeRateInMetersPerSec;
@@ -371,6 +392,18 @@ public class GpsMeasurement implements Parcelable {
      */
     public void setPseudorangeRateInMetersPerSec(double value) {
         mPseudorangeRateInMetersPerSec = value;
+    }
+
+    /**
+     * See {@link #getPseudorangeRateInMetersPerSec()} for more details.
+     *
+     * @return {@code true} if {@link #getPseudorangeRateInMetersPerSec()} contains a corrected
+     *         value, {@code false} if it contains an uncorrected value.
+     *
+     * @hide
+     */
+    public boolean isPseudorangeRateCorrected() {
+        return !isFlagSet(GPS_MEASUREMENT_HAS_UNCORRECTED_PSEUDORANGE_RATE);
     }
 
     /**
@@ -437,6 +470,11 @@ public class GpsMeasurement implements Parcelable {
      * The reported value includes {@link #getAccumulatedDeltaRangeUncertaintyInMeters()}.
      *
      * The availability of the value is represented by {@link #getAccumulatedDeltaRangeState()}.
+     *
+     * A positive value indicates that the SV is moving away from the receiver.
+     * The sign of {@link #getAccumulatedDeltaRangeInMeters()} and its relation to the sign of
+     * {@link #getCarrierPhase()} is given by the equation:
+     *          accumulated delta range = -k * carrier phase    (where k is a constant)
      */
     public double getAccumulatedDeltaRangeInMeters() {
         return mAccumulatedDeltaRangeInMeters;
@@ -452,6 +490,8 @@ public class GpsMeasurement implements Parcelable {
     /**
      * Gets the accumulated delta range's uncertainty (1-Sigma) in meters.
      * The uncertainty is represented as an absolute (single sided) value.
+     *
+     * The status of the value is represented by {@link #getAccumulatedDeltaRangeState()}.
      */
     public double getAccumulatedDeltaRangeUncertaintyInMeters() {
         return mAccumulatedDeltaRangeUncertaintyInMeters;
@@ -460,7 +500,7 @@ public class GpsMeasurement implements Parcelable {
     /**
      * Sets the accumulated delta range's uncertainty (1-sigma) in meters.
      *
-     * The availability of the value is represented by {@link #getAccumulatedDeltaRangeState()}.
+     * The status of the value is represented by {@link #getAccumulatedDeltaRangeState()}.
      */
     public void setAccumulatedDeltaRangeUncertaintyInMeters(double value) {
         mAccumulatedDeltaRangeUncertaintyInMeters = value;
@@ -1235,6 +1275,10 @@ public class GpsMeasurement implements Parcelable {
                 mPseudorangeRateInMetersPerSec,
                 "PseudorangeRateUncertaintyInMetersPerSec",
                 mPseudorangeRateUncertaintyInMetersPerSec));
+        builder.append(String.format(
+                format,
+                "PseudorangeRateIsCorrected",
+                isPseudorangeRateCorrected()));
 
         builder.append(String.format(
                 format,
