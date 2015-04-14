@@ -22,10 +22,12 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.mtp.MtpStorage;
+import android.net.Uri;
 import android.os.Environment;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.UserHandle;
+import android.provider.DocumentsContract;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.DebugUtils;
@@ -45,6 +47,8 @@ import java.io.File;
  * @hide
  */
 public class VolumeInfo implements Parcelable {
+    public static final String EXTRA_VOLUME_ID = "android.os.storage.extra.VOLUME_ID";
+
     /** Stub volume representing internal private storage */
     public static final String ID_PRIVATE_INTERNAL = "private";
     /** Real volume representing internal emulated storage */
@@ -101,6 +105,7 @@ public class VolumeInfo implements Parcelable {
     /** Framework state */
     public final int mtpIndex;
     public String nickname;
+    public String diskId;
 
     public VolumeInfo(String id, int type, int mtpIndex) {
         this.id = Preconditions.checkNotNull(id);
@@ -120,6 +125,7 @@ public class VolumeInfo implements Parcelable {
         path = parcel.readString();
         mtpIndex = parcel.readInt();
         nickname = parcel.readString();
+        diskId = parcel.readString();
     }
 
     public static @NonNull String getEnvironmentForState(int state) {
@@ -228,6 +234,34 @@ public class VolumeInfo implements Parcelable {
                 fsUuid, envState);
     }
 
+    // TODO: avoid this layering violation
+    private static final String DOCUMENT_AUTHORITY = "com.android.externalstorage.documents";
+    private static final String DOCUMENT_ROOT_PRIMARY_EMULATED = "primary";
+
+    /**
+     * Build an intent to browse the contents of this volume. Only valid for
+     * {@link #TYPE_EMULATED} or {@link #TYPE_PUBLIC}.
+     */
+    public Intent buildBrowseIntent() {
+        final Uri uri;
+        if (type == VolumeInfo.TYPE_PUBLIC) {
+            uri = DocumentsContract.buildRootUri(DOCUMENT_AUTHORITY, fsUuid);
+        } else if (VolumeInfo.ID_EMULATED_INTERNAL.equals(id)) {
+            uri = DocumentsContract.buildRootUri(DOCUMENT_AUTHORITY,
+                    DOCUMENT_ROOT_PRIMARY_EMULATED);
+        } else if (type == VolumeInfo.TYPE_EMULATED) {
+            // TODO: build intent once supported
+            uri = null;
+        } else {
+            throw new IllegalArgumentException();
+        }
+
+        final Intent intent = new Intent(DocumentsContract.ACTION_BROWSE_DOCUMENT_ROOT);
+        intent.addCategory(Intent.CATEGORY_DEFAULT);
+        intent.setData(uri);
+        return intent;
+    }
+
     @Override
     public String toString() {
         final CharArrayWriter writer = new CharArrayWriter();
@@ -250,6 +284,8 @@ public class VolumeInfo implements Parcelable {
         pw.println();
         pw.printPair("path", path);
         pw.printPair("mtpIndex", mtpIndex);
+        pw.printPair("nickname", nickname);
+        pw.printPair("diskId", diskId);
         pw.decreaseIndent();
         pw.println();
     }
@@ -296,5 +332,6 @@ public class VolumeInfo implements Parcelable {
         parcel.writeString(path);
         parcel.writeInt(mtpIndex);
         parcel.writeString(nickname);
+        parcel.writeString(diskId);
     }
 }

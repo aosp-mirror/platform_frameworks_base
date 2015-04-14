@@ -2878,51 +2878,44 @@
     <string name="candidates_style"><u>candidates</u></string>
 
     <!-- External media notification strings -->
-    <!-- Shown when external media is being checked [CHAR LIMIT=30] -->
-    <string name="ext_media_checking_notification_title" product="nosdcard">Preparing USB storage</string>
-    <!-- Shown when external media is being checked -->
-    <string name="ext_media_checking_notification_title" product="default">Preparing SD card</string>
-    <string name="ext_media_checking_notification_message">Checking for errors.</string>
+    <skip />
 
-    <!-- Shown when external media is blank (or unsupported filesystem) [CHAR LIMIT=30] -->
-    <string name="ext_media_nofs_notification_title" product="nosdcard">Blank USB storage</string>
-    <!-- Shown when external media is blank (or unsupported filesystem) -->
-    <string name="ext_media_nofs_notification_title" product="default">Blank SD card</string>
-    <!-- Shown when USB storage cannot be read.  [CHAR LIMIT=NONE] -->
-    <string name="ext_media_nofs_notification_message" product="nosdcard">USB storage is blank or has unsupported filesystem.</string>
-    <string name="ext_media_nofs_notification_message" product="default">SD card is blank or has unsupported filesystem.</string>
+    <!-- Notification title when external media is being checked [CHAR LIMIT=30] -->
+    <string name="ext_media_checking_notification_title">Preparing <xliff:g id="name" example="SD card">%s</xliff:g></string>
+    <!-- Notification body when external media is being checked [CHAR LIMIT=NONE] -->
+    <string name="ext_media_checking_notification_message">Checking for errors</string>
 
-    <!-- Shown when external media is unmountable (corrupt)) [CHAR LIMIT=30] -->
-    <string name="ext_media_unmountable_notification_title" product="nosdcard">Damaged USB storage</string>
-    <!-- Shown when external media is unmountable (corrupt)) -->
-    <string name="ext_media_unmountable_notification_title" product="default">Damaged SD card</string>
-    <!-- Shown when USB storage cannot be read.  [CHAR LIMIT=NONE] -->
-    <string name="ext_media_unmountable_notification_message" product="nosdcard">USB storage is damaged. Try reformatting it.</string>
-    <string name="ext_media_unmountable_notification_message" product="default">SD card is damaged. Try reformatting it.</string>
+    <!-- Notification body when new external media is detected [CHAR LIMIT=NONE] -->
+    <string name="ext_media_new_notification_message">New <xliff:g id="name" example="SD card">%s</xliff:g> detected</string>
+    <!-- Notification body when external media is ready for use [CHAR LIMIT=NONE] -->
+    <string name="ext_media_ready_notification_message">For transferring photos and media</string>
 
-    <!-- Shown when external media is unsafely removed [CHAR LIMIT=30] -->
-    <string name="ext_media_badremoval_notification_title" product="nosdcard">USB storage unexpectedly removed</string>
-    <!-- Shown when external media is unsafely removed -->
-    <string name="ext_media_badremoval_notification_title" product="default">SD card unexpectedly removed</string>
-    <!-- Shown when external media is unsafely removed.  [CHAR LIMIT=NONE] -->
-    <string name="ext_media_badremoval_notification_message" product="nosdcard">Unmount USB storage before removing to avoid data loss.</string>
-    <string name="ext_media_badremoval_notification_message" product="default">Unmount SD card before removing to avoid data loss.</string>
+    <!-- Notification title when external media is unmountable (corrupt) [CHAR LIMIT=30] -->
+    <string name="ext_media_unmountable_notification_title">Damaged <xliff:g id="name" example="SD card">%s</xliff:g></string>
+    <!-- Notification body when external media is unmountable (corrupt) [CHAR LIMIT=NONE] -->
+    <string name="ext_media_unmountable_notification_message"><xliff:g id="name" example="SD card">%s</xliff:g> is damaged; try reformatting it</string>
 
-    <!-- Shown when external media has been safely removed [CHAR LIMIT=30] -->
-    <string name="ext_media_safe_unmount_notification_title" product="nosdcard">USB storage safe to remove</string>
-    <!-- Shown when external media has been safely removed -->
-    <string name="ext_media_safe_unmount_notification_title" product="default">SD card safe to remove</string>
-    <!-- Shown when external media has been safely removed.  [CHAR LIMIT=NONE] -->
-    <string name="ext_media_safe_unmount_notification_message" product="nosdcard">You can safely remove USB storage.</string>
-    <string name="ext_media_safe_unmount_notification_message" product="default">You can safely remove SD card.</string>
+    <!-- Notification title when external media is unsafely removed [CHAR LIMIT=30] -->
+    <string name="ext_media_badremoval_notification_title"><xliff:g id="name" example="SD card">%s</xliff:g> unexpectedly removed</string>
+    <!-- Notification body when external media is unsafely removed [CHAR LIMIT=NONE] -->
+    <string name="ext_media_badremoval_notification_message">Unmount <xliff:g id="name" example="SD card">%s</xliff:g> before removing to avoid data loss</string>
 
-    <!-- Shown when external media is missing [CHAR LIMIT=30] -->
-    <string name="ext_media_nomedia_notification_title" product="nosdcard">Removed USB storage</string>
-    <!-- Shown when external media is missing -->
-    <string name="ext_media_nomedia_notification_title" product="default">Removed SD card</string>
-    <!-- Shown when external media is missing.  [CHAR LIMIT=NONE] -->
-    <string name="ext_media_nomedia_notification_message" product="nosdcard">USB storage removed. Insert new media.</string>
-    <string name="ext_media_nomedia_notification_message" product="default">SD card removed. Insert a new one.</string>
+    <!-- Notification title when external media is missing [CHAR LIMIT=30] -->
+    <string name="ext_media_nomedia_notification_title">Removed <xliff:g id="name" example="SD card">%s</xliff:g></string>
+    <!-- Notification body when external media is missing [CHAR LIMIT=NONE] -->
+    <string name="ext_media_nomedia_notification_message"><xliff:g id="name" example="SD card">%s</xliff:g> removed; insert a new one</string>
+
+    <!-- Notification title when external media is unmounting [CHAR LIMIT=30] -->
+    <string name="ext_media_unmounting_notification_title">Still ejecting <xliff:g id="name" example="SD card">%s</xliff:g>\u2026</string>
+    <!-- Notification body when external media is unmounting [CHAR LIMIT=NONE] -->
+    <string name="ext_media_unmounting_notification_message">Don\'t remove</string>
+
+    <!-- Notification action to setup external media [CHAR LIMIT=20] -->
+    <string name="ext_media_init_action">Setup</string>
+    <!-- Notification action to unmount external media [CHAR LIMIT=20] -->
+    <string name="ext_media_unmount_action">Eject</string>
+    <!-- Notification action to browse external media [CHAR LIMIT=20] -->
+    <string name="ext_media_browse_action">Explore</string>
 
     <!-- Shown in LauncherActivity when the requested target Intent didn't return any matching Activities, leaving the list empty. -->
     <string name="activity_list_empty">No matching activities found.</string>

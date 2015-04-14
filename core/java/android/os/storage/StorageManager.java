@@ -35,7 +35,6 @@ import android.util.Log;
 import android.util.SparseArray;
 
 import com.android.internal.os.SomeArgs;
-import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.Preconditions;
 
 import java.io.File;
@@ -456,18 +455,6 @@ public class StorageManager {
     }
 
     /** {@hide} */
-    public @Nullable DiskInfo findDiskByVolumeId(String volId) {
-        Preconditions.checkNotNull(volId);
-        // TODO; go directly to service to make this faster
-        for (DiskInfo disk : getDisks()) {
-            if (ArrayUtils.contains(disk.volumes, volId)) {
-                return disk;
-            }
-        }
-        return null;
-    }
-
-    /** {@hide} */
     public @Nullable VolumeInfo findVolumeById(String id) {
         Preconditions.checkNotNull(id);
         // TODO; go directly to service to make this faster
@@ -501,17 +488,14 @@ public class StorageManager {
     }
 
     /** {@hide} */
-    public @Nullable String getBestVolumeDescription(String volId) {
-        String descrip = null;
+    public @Nullable String getBestVolumeDescription(VolumeInfo vol) {
+        String descrip = vol.getDescription();
 
-        final VolumeInfo vol = findVolumeById(volId);
-        if (vol != null) {
-            descrip = vol.getDescription();
-        }
-
-        final DiskInfo disk = findDiskByVolumeId(volId);
-        if (disk != null && TextUtils.isEmpty(descrip)) {
-            descrip = disk.getDescription();
+        if (vol.diskId != null) {
+            final DiskInfo disk = findDiskById(vol.diskId);
+            if (disk != null && TextUtils.isEmpty(descrip)) {
+                descrip = disk.getDescription();
+            }
         }
 
         return descrip;

@@ -33,6 +33,8 @@ import java.io.CharArrayWriter;
  * @hide
  */
 public class DiskInfo implements Parcelable {
+    public static final String EXTRA_DISK_ID = "android.os.storage.extra.DISK_ID";
+
     public static final int FLAG_ADOPTABLE = 1 << 0;
     public static final int FLAG_DEFAULT_PRIMARY = 1 << 1;
     public static final int FLAG_SD = 1 << 2;
@@ -42,7 +44,7 @@ public class DiskInfo implements Parcelable {
     public final int flags;
     public long size;
     public String label;
-    public String[] volumes;
+    public String[] volumeIds;
 
     public DiskInfo(String id, int flags) {
         this.id = Preconditions.checkNotNull(id);
@@ -54,7 +56,7 @@ public class DiskInfo implements Parcelable {
         flags = parcel.readInt();
         size = parcel.readLong();
         label = parcel.readString();
-        volumes = parcel.readStringArray();
+        volumeIds = parcel.readStringArray();
     }
 
     public String getDescription() {
@@ -66,6 +68,18 @@ public class DiskInfo implements Parcelable {
         } else {
             return null;
         }
+    }
+
+    public boolean isSd() {
+        return (flags & FLAG_SD) != 0;
+    }
+
+    public boolean isUsb() {
+        return (flags & FLAG_USB) != 0;
+    }
+
+    public boolean isAdoptable() {
+        return (flags & FLAG_ADOPTABLE) != 0;
     }
 
     @Override
@@ -82,7 +96,7 @@ public class DiskInfo implements Parcelable {
         pw.printPair("flags", DebugUtils.flagsToString(getClass(), "FLAG_", flags));
         pw.printPair("size", size);
         pw.printPair("label", label);
-        pw.printPair("volumes", volumes);
+        pw.printPair("volumeIds", volumeIds);
         pw.decreaseIndent();
         pw.println();
     }
@@ -122,6 +136,6 @@ public class DiskInfo implements Parcelable {
         parcel.writeInt(this.flags);
         parcel.writeLong(size);
         parcel.writeString(label);
-        parcel.writeStringArray(volumes);
+        parcel.writeStringArray(volumeIds);
     }
 }
