@@ -20,6 +20,7 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
+import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.content.DialogInterface;
@@ -27,7 +28,9 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.text.Html;
 
+import com.android.documentsui.CopyService;
 import com.android.documentsui.model.DocumentInfo;
+import com.android.documentsui.model.DocumentStack;
 
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
@@ -40,9 +43,10 @@ public class FailureDialogFragment extends DialogFragment
     private static final String TAG = "FailureDialogFragment";
 
     private int mFailure;
-    private ArrayList<Uri> mFailedSrcList;
+    private ArrayList<DocumentInfo> mFailedSrcList;
 
-    public static void show(FragmentManager fm, int failure, ArrayList<Uri> failedSrcList) {
+    public static void show(FragmentManager fm, int failure,
+            ArrayList<DocumentInfo> failedSrcList, DocumentStack dstStack) {
         // TODO: Add support for other failures than copy.
         if (failure != CopyService.FAILURE_COPY) {
             return;
@@ -62,7 +66,11 @@ public class FailureDialogFragment extends DialogFragment
 
     @Override
     public void onClick(DialogInterface dialog, int whichButton) {
-      // TODO: Pass mFailure and mFailedSrcList to the parent fragment.
+      if (whichButton == DialogInterface.BUTTON_POSITIVE) {
+          CopyService.start(getActivity(), mFailedSrcList,
+                  (DocumentStack) getActivity().getIntent().getParcelableExtra(
+                          CopyService.EXTRA_STACK));
+      }
     }
 
     @Override
@@ -73,15 +81,8 @@ public class FailureDialogFragment extends DialogFragment
         mFailedSrcList = getArguments().getParcelableArrayList(CopyService.EXTRA_SRC_LIST);
 
         final StringBuilder list = new StringBuilder("<p>");
-        for (Uri documentUri : mFailedSrcList) {
-            try {
-                final DocumentInfo documentInfo = DocumentInfo.fromUri(
-                    getActivity().getContentResolver(), documentUri);
-                list.append(String.format("&#8226; %s<br>", documentInfo.displayName));
-            }
-            catch (FileNotFoundException ignore) {
-                // Source file most probably gone.
-            }
+        for (DocumentInfo documentInfo : mFailedSrcList) {
+            list.append(String.format("&#8226; %s<br>", documentInfo.displayName));
         }
         list.append("</p>");
         final String message = String.format(getString(R.string.copy_failure_alert_content),
@@ -90,7 +91,6 @@ public class FailureDialogFragment extends DialogFragment
         return new AlertDialog.Builder(getActivity())
             .setTitle(getString(R.string.copy_failure_alert_title))
             .setMessage(Html.fromHtml(message))
-            // TODO: Implement retrying the copy operation.
             .setPositiveButton(R.string.retry, this)
             .setNegativeButton(android.R.string.cancel, this)
             .setIcon(android.R.drawable.ic_dialog_alert)
