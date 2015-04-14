@@ -156,10 +156,13 @@ final class HotplugDetectionAction extends HdmiCecFeatureAction {
         int index = -1;
         while ((index = removed.nextSetBit(index + 1)) != -1) {
             if (index == Constants.ADDR_AUDIO_SYSTEM) {
-                ++mAvrStatusCount;
-                Slog.w(TAG, "Ack not returned from AVR. count: " + mAvrStatusCount);
-                if (mAvrStatusCount < AVR_COUNT_MAX) {
-                    continue;
+                HdmiDeviceInfo avr = tv().getAvrDeviceInfo();
+                if (avr != null && tv().isConnected(avr.getPortId())) {
+                    ++mAvrStatusCount;
+                    Slog.w(TAG, "Ack not returned from AVR. count: " + mAvrStatusCount);
+                    if (mAvrStatusCount < AVR_COUNT_MAX) {
+                        continue;
+                    }
                 }
             }
             Slog.v(TAG, "Remove device by hot-plug detection:" + index);
