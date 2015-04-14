@@ -3,6 +3,14 @@ page.metaDescription=Take advantage of Android's flexible layout system and crea
 
 @jd:body
 
+<a class="notice-designers-material"
+  href="http://www.google.com/design/spec/layout/principles.html">
+  <div>
+    <h3>Material Design</h3>
+    <p>Layout Principles<p>
+  </div>
+</a>
+
 <p>Android powers hundreds of millions of phones, tablets, and other devices in a wide variety of screen sizes and
 form factors. By taking advantage of Android's flexible layout system, you can create apps that
 gracefully scale from large tablets to smaller phones.</p>
@@ -15,12 +23,14 @@ gracefully scale from large tablets to smaller phones.</p>
   <div class="layout-content-col span-4">
 
 <h4>Be flexible</h4>
+
 <p>Stretch and compress your layouts to accommodate various heights and widths.</p>
 
   </div>
   <div class="layout-content-col span-5">
 
 <h4>Optimize layouts</h4>
+
 <p>On larger devices, take advantage of extra screen real estate. Create compound views that combine
 multiple views to reveal more content and ease navigation.</p>
 
@@ -37,6 +47,15 @@ ensure that your app looks great on any device.</p>
   <img src="{@docRoot}design/media/devices_displays_density@2x.png" alt="" height="160" />
 
 <h4>Strategies</h4>
+
+<a class="notice-designers-material"
+  href="http://www.google.com/design/spec/layout/structure.html">
+  <div>
+    <h3>Material Design</h3>
+    <p>Layout Structure<p>
+  </div>
+</a>
+
 <p>So where do you begin when designing for multiple screens? One approach is to work in the base
 standard (normal size and <acronym title="Medium density (160 dpi)">MDPI</acronym>) and scale it up or
 down for the other buckets. Another approach is to start with the device with the largest screen

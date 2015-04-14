@@ -2,6 +2,14 @@ page.title=Progress &amp; Activity
 page.tags=progressbar,download,network
 @jd:body
 
+<a class="notice-designers-material"
+  href="http://www.google.com/design/spec/components/progress-activity.html">
+  <div>
+    <h3>Material Design</h3>
+    <p>Progress and Activity<p>
+  </div>
+</a>
+
 <p>Progress bars and activity indicators signal to users that something is happening that will take a moment.</p>
 <h2 id="progress">Progress bars</h2>
 

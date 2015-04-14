@@ -2,6 +2,15 @@ page.title=App Structure
 page.tags=navigation,layout,tablet
 @jd:body
 
+
+<a class="notice-designers-material"
+  href="http://www.google.com/design/spec/patterns/app-structure.html">
+  <div>
+    <h3>Material Design</h3>
+    <p>App Structure<p>
+  </div>
+</a>
+
     <p>Apps come in many varieties that address very different needs. For example:</p>
 <ul>
 <li>Apps such as Calculator or Camera that are built around a single focused activity handled from a
@@ -63,7 +72,7 @@ layouts that are visually engaging and appropriate for the data type and screen 
     <div class="figure-caption">
       Play Music allows navigation among artists, albums, and playlists through rich content display.
       It is also enriched with tailored recommendations and promotions that surface content of interest
-      to the user. Search is readily available from the action bar. 
+      to the user. Search is readily available from the action bar.
     </div>
 
   </div>
@@ -92,7 +101,7 @@ important actions.</p>
     <img src="{@docRoot}design/media/app_structure_gmail.png">
     <div class="figure-caption">
       A calendar is about productivity, so an efficient, easy-to-skim view with higher data density works
-      well. Navigation supports switching views of day, week, month, and agenda views. 
+      well. Navigation supports switching views of day, week, month, and agenda views.
     </div>
 
   </div>

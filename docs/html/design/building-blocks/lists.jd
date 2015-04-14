@@ -2,10 +2,11 @@ page.title=Lists
 page.tags=listview,layout
 @jd:body
 
-<a class="notice-developers" href="{@docRoot}guide/topics/ui/layout/listview.html">
+<a class="notice-designers-material"
+  href="http://www.google.com/design/spec/components/lists.html">
   <div>
-    <h3>Developer Docs</h3>
-    <p>List View</p>
+    <h3>Material Design</h3>
+    <p>Lists<p>
   </div>
 </a>
 
@@ -22,7 +23,7 @@ well as drilldown navigation.</p>
   </div>
   <div class="layout-content-col span-4 with-callouts">
 
-<ol>
+<ol style="margin-bottom: 60px;">
 <li>
 <h4>Section Divider</h4>
 <p>Use section dividers to organize the content of your list into groups and facilitate scanning.</p>
@@ -34,6 +35,22 @@ well as drilldown navigation.</p>
  buttons.</p>
 </li>
 </ol>
+
+<a class="notice-developers" href="{@docRoot}guide/topics/ui/layout/listview.html">
+  <div>
+    <h3>Developer Docs</h3>
+    <p>List View</p>
+  </div>
+</a>
+
+<a class="notice-designers-material"
+  href="http://www.google.com/design/spec/components/lists-controls.html">
+  <div>
+    <h3>Material Design</h3>
+    <p>Lists: Controls<p>
+  </div>
+</a>
+
 
   </div>
 </div>

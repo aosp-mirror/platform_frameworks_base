@@ -2,6 +2,14 @@ page.title=Spinners
 page.tags=spinner,dropdown
 @jd:body
 
+<a class="notice-designers-material"
+  href="http://www.google.com/design/spec/components/menus.html">
+  <div>
+    <h3>Material Design</h3>
+    <p>Menus<p>
+  </div>
+</a>
+
 <a class="notice-developers" href="{@docRoot}guide/topics/ui/controls/spinner.html">
   <div>
     <h3>Developer Docs</h3>

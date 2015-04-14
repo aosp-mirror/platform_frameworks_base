@@ -7,6 +7,14 @@ everyone else's. In Android, your app can shine as an extension of your brand. <
 
 <h2 id="color">Color</h2>
 
+<a class="notice-designers-material"
+  href="http://www.google.com/design/spec/style/color.html#color-ui-color-application">
+  <div>
+    <h3>Material Design</h3>
+    <p>UI Color Application<p>
+  </div>
+</a>
+
 <p>Use your brand color for accent by overriding the Android framework's default blue in UI elements like checkboxes, progress bars, radio buttons, sliders, tabs, and scroll indicators.</p>
 
 <p>Look for opportunities to use high-contrast color for emphasis, for example, as the background color of the action bar or a primary button. But don't go overboard: not all actions are equal, so use it only for the one or two most important things.</p>
@@ -62,17 +70,32 @@ and app name in the action bar.</p>
       Example of a the logo in the action bar. This works well in cases where the brand's logo matches the name of the app.
     </div>
   </div>
-</div> 
+</div>
 
 <h2 id="logo">Icons</h2>
+
+<a class="notice-designers-material" href="http://www.google.com/design/spec/style/icons.html">
+  <div>
+    <h3>Material Design</h3>
+    <p>Icons<p>
+  </div>
+</a>
+
+<p>If you have icons that you're already using for your app on other platforms
+and they have a distinctive look intended to fit your brand, use them on your
+Android app as well. <strong>If you take this approach, make sure your brand styling is
+applied to every single icon in your app.</strong></p>
 
 
 <div class="layout-content-row">
   <div class="layout-content-col span-6">
-    <p>If you have icons that you're already using for your app on other platforms
-    and they have a distinctive look intended to fit your brand, use them on your
-    Android app as well. <strong>If you take this approach, make sure your brand styling is
-    applied to every single icon in your app</strong>.</p>
+    <p>One exception: For any icon in your existing set where the symbol is different from
+    Android's, use Android's symbol but give it your brand's styling. That way, users will
+    understand what the purpose of the icon is based on what they've learned in other
+    Android apps (Design principle:
+    <a href="{@docRoot}design/get-started/principles.html#give-me-tricks">Give me tricks that
+    work everywhere</a>). But the icon will still look like it belongs with all of
+    your other icons as a part of your brand.</p>
 
   </div>
 
@@ -81,13 +104,6 @@ and app name in the action bar.</p>
     </div>
   </div>
 </div>
-  <p>One exception: For any icon in your existing set where the symbol is different from
-  Android's, use Android's symbol but give it your brand's styling. That way, users will
-  understand what the purpose of the icon is based on what they've learned in other
-  Android apps (Design principle:
-  <a href="{@docRoot}design/get-started/principles.html#give-me-tricks">Give me tricks that
-  work everywhere</a>). But the icon will still look like it belongs with all of
-  your other icons as a part of your brand.</p>
 
 <div class="layout-content-row">
   <div class="layout-content-col span-6">

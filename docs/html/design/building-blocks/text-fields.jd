@@ -2,6 +2,15 @@ page.title=Text Fields
 page.tags=text,edittext,input
 @jd:body
 
+
+<a class="notice-designers-material"
+  href="http://www.google.com/design/spec/components/text-fields.html">
+  <div>
+    <h3>Material Design</h3>
+    <p>Text Fields<p>
+  </div>
+</a>
+
 <a class="notice-developers" href="{@docRoot}guide/topics/ui/controls/text.html">
   <div>
     <h3>Developer Docs</h3>
