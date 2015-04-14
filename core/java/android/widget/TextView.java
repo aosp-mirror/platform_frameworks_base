@@ -9275,6 +9275,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 return TextDirectionHeuristics.RTL;
             case TEXT_DIRECTION_LOCALE:
                 return TextDirectionHeuristics.LOCALE;
+            case TEXT_DIRECTION_FIRST_STRONG_LTR:
+                return TextDirectionHeuristics.FIRSTSTRONG_LTR;
+            case TEXT_DIRECTION_FIRST_STRONG_RTL:
+                return TextDirectionHeuristics.FIRSTSTRONG_RTL;
         }
     }
 
