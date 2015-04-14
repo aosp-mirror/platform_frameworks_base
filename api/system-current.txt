@@ -5763,6 +5763,7 @@ package android.app.admin {
     method public int getKeyguardDisabledFeatures(android.content.ComponentName);
     method public int getMaximumFailedPasswordsForWipe(android.content.ComponentName);
     method public long getMaximumTimeToLock(android.content.ComponentName);
+    method public android.app.admin.OtaPolicy getOtaPolicy();
     method public long getPasswordExpiration(android.content.ComponentName);
     method public long getPasswordExpirationTimeout(android.content.ComponentName);
     method public int getPasswordHistoryLength(android.content.ComponentName);
@@ -5820,6 +5821,7 @@ package android.app.admin {
     method public void setMasterVolumeMuted(android.content.ComponentName, boolean);
     method public void setMaximumFailedPasswordsForWipe(android.content.ComponentName, int);
     method public void setMaximumTimeToLock(android.content.ComponentName, long);
+    method public void setOtaPolicy(android.content.ComponentName, android.app.admin.OtaPolicy);
     method public void setPasswordExpirationTimeout(android.content.ComponentName, long);
     method public void setPasswordHistoryLength(android.content.ComponentName, int);
     method public void setPasswordMinimumLength(android.content.ComponentName, int);
@@ -5849,6 +5851,7 @@ package android.app.admin {
     method public void wipeData(int);
     field public static final java.lang.String ACTION_ADD_DEVICE_ADMIN = "android.app.action.ADD_DEVICE_ADMIN";
     field public static final java.lang.String ACTION_MANAGED_PROFILE_PROVISIONED = "android.app.action.MANAGED_PROFILE_PROVISIONED";
+    field public static final java.lang.String ACTION_OTA_POLICY_CHANGED = "android.app.action.OTA_POLICY_CHANGED";
     field public static final java.lang.String ACTION_PROVISION_MANAGED_PROFILE = "android.app.action.PROVISION_MANAGED_PROFILE";
     field public static final java.lang.String ACTION_SEND_DEVICE_INITIALIZER_STATUS = "android.app.action.SEND_DEVICE_INITIALIZER_STATUS";
     field public static final java.lang.String ACTION_SET_NEW_PASSWORD = "android.app.action.SET_NEW_PASSWORD";
@@ -5919,6 +5922,23 @@ package android.app.admin {
     field public static final int RESET_PASSWORD_REQUIRE_ENTRY = 1; // 0x1
     field public static final int WIPE_EXTERNAL_STORAGE = 1; // 0x1
     field public static final int WIPE_RESET_PROTECTION_DATA = 2; // 0x2
+  }
+
+  public class OtaPolicy {
+    ctor public OtaPolicy();
+    method public int getInstallWindowEnd();
+    method public int getInstallWindowStart();
+    method public int getPolicyType();
+    method public void setAutomaticInstallPolicy();
+    method public void setPostponeInstallPolicy();
+    method public void setWindowedInstallPolicy(int, int) throws android.app.admin.OtaPolicy.InvalidWindowException;
+    field public static final int TYPE_INSTALL_AUTOMATIC = 1; // 0x1
+    field public static final int TYPE_INSTALL_WINDOWED = 2; // 0x2
+    field public static final int TYPE_POSTPONE = 3; // 0x3
+  }
+
+  public static class OtaPolicy.InvalidWindowException extends java.lang.Exception {
+    ctor public OtaPolicy.InvalidWindowException(java.lang.String);
   }
 
 }

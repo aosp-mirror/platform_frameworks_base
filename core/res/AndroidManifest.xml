@@ -311,6 +311,7 @@
     <protected-broadcast android:name="android.internal.policy.action.BURN_IN_PROTECTION" />
     <protected-broadcast android:name="android.service.persistentdata.action.WIPE_IF_ALLOWED" />
 
+    <protected-broadcast android:name="android.app.action.OTA_POLICY_CHANGED" />
     <!-- ====================================================================== -->
     <!--                          RUNTIME PERMISSIONS                           -->
     <!-- ====================================================================== -->
