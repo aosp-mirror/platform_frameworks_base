@@ -36,6 +36,7 @@ public class AudioMix {
     private int mRouteFlags;
     private String mRegistrationId;
     private int mMixType = MIX_TYPE_INVALID;
+    private int mMixState = MIX_STATE_DISABLED;
 
     /**
      * All parameters are guaranteed valid through the Builder.
@@ -48,6 +49,7 @@ public class AudioMix {
         mMixType = rule.getTargetMixType();
     }
 
+    // ROUTE_FLAG_* values to keep in sync with frameworks/av/include/media/AudioPolicy.h
     /**
      * An audio mix behavior where the output of the mix is sent to the original destination of
      * the audio signal, i.e. an output device for an output mix, or a recording for an input mix.
@@ -62,6 +64,7 @@ public class AudioMix {
     @SystemApi
     public static final int ROUTE_FLAG_LOOP_BACK = 0x1 << 1;
 
+    // MIX_TYPE_* values to keep in sync with frameworks/av/include/media/AudioPolicy.h
     /**
      * @hide
      * Invalid mix type, default value.
@@ -77,6 +80,39 @@ public class AudioMix {
      * Mix type indicating recording streams are mixed.
      */
     public static final int MIX_TYPE_RECORDERS = 1;
+
+
+    // MIX_STATE_* values to keep in sync with frameworks/av/include/media/AudioPolicy.h
+    /**
+     * @hide
+     * State of a mix before its policy is enabled.
+     */
+    @SystemApi
+    public static final int MIX_STATE_DISABLED = -1;
+    /**
+     * @hide
+     * State of a mix when there is no audio to mix.
+     */
+    @SystemApi
+    public static final int MIX_STATE_IDLE = 0;
+    /**
+     * @hide
+     * State of a mix that is actively mixing audio.
+     */
+    @SystemApi
+    public static final int MIX_STATE_MIXING = 1;
+
+    /**
+     * @hide
+     * The current mixing state.
+     * @return one of {@link #MIX_STATE_DISABLED}, {@link #MIX_STATE_IDLE},
+     *          {@link #MIX_STATE_MIXING}.
+     */
+    @SystemApi
+    public int getMixState() {
+        return mMixState;
+    }
+
 
     int getRouteFlags() {
         return mRouteFlags;

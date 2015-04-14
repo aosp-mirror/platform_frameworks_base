@@ -17855,6 +17855,10 @@ package android.media.audiofx {
 package android.media.audiopolicy {
 
   public class AudioMix {
+    method public int getMixState();
+    field public static final int MIX_STATE_DISABLED = -1; // 0xffffffff
+    field public static final int MIX_STATE_IDLE = 0; // 0x0
+    field public static final int MIX_STATE_MIXING = 1; // 0x1
     field public static final int ROUTE_FLAG_LOOP_BACK = 2; // 0x2
     field public static final int ROUTE_FLAG_RENDER = 1; // 0x1
   }
