@@ -252,6 +252,11 @@
     </family>
     <family>
         <fileset>
+            <file>NotoSansBamum-Regular.ttf</file>
+        </fileset>
+    </family>
+    <family>
+        <fileset>
             <file>NotoSansBatak-Regular.ttf</file>
         </fileset>
     </family>
@@ -312,7 +317,27 @@
     </family>
     <family>
         <fileset>
+            <file>NotoSansLisu-Regular.ttf</file>
+        </fileset>
+    </family>
+    <family>
+        <fileset>
+            <file>NotoSansMandaic-Regular.ttf</file>
+        </fileset>
+    </family>
+    <family>
+        <fileset>
             <file>NotoSansMeeteiMayek-Regular.ttf</file>
+        </fileset>
+    </family>
+    <family>
+        <fileset>
+            <file>NotoSansNewTaiLue-Regular.ttf</file>
+        </fileset>
+    </family>
+    <family>
+        <fileset>
+            <file>NotoSansNKo-Regular.ttf</file>
         </fileset>
     </family>
     <family>
@@ -342,6 +367,11 @@
     </family>
     <family>
         <fileset>
+            <file>NotoSansSyriacEstrangela-Regular.ttf</file>
+        </fileset>
+    </family>
+    <family>
+        <fileset>
             <file>NotoSansTagbanwa-Regular.ttf</file>
         </fileset>
     </family>
@@ -358,6 +388,11 @@
     <family>
         <fileset>
             <file>NotoSansTifinagh-Regular.ttf</file>
+        </fileset>
+    </family>
+    <family>
+        <fileset>
+            <file>NotoSansVai-Regular.ttf</file>
         </fileset>
     </family>
     <family>
@@ -411,12 +446,17 @@
         </fileset>
     </family>
     <!--
-        Noto Sans Tai Le is intentionally kept last, to make sure it doesn't override
+        Tai Le and Mongolian are intentionally kept last, to make sure they don't override
         the East Asian punctuation for Chinese.
     -->
     <family>
         <fileset>
             <file>NotoSansTaiLe-Regular.ttf</file>
+        </fileset>
+    </family>
+    <family>
+        <fileset>
+            <file>NotoSansMongolian-Regular.ttf</file>
         </fileset>
     </family>
 </familyset>
