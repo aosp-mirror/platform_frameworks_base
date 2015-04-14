@@ -1540,6 +1540,8 @@ public class AudioTrack
     /**
      * Writes the audio data to the audio sink for playback (streaming mode),
      * or copies audio data for later playback (static buffer mode).
+     * The format specified in the AudioTrack constructor should be
+     * {@link AudioFormat#ENCODING_PCM_8BIT} to correspond to the data in the array.
      * In streaming mode, will block until all data has been written to the audio sink.
      * In static buffer mode, copies the data to the buffer starting at offset 0.
      * Note that the actual playback of this data might occur after this function
@@ -1556,11 +1558,47 @@ public class AudioTrack
      *    {@link AudioManager#ERROR_DEAD_OBJECT} if the AudioTrack is not valid anymore and
      *    needs to be recreated.
      */
+    public int write(@NonNull byte[] audioData, int offsetInBytes, int sizeInBytes) {
+        return write(audioData, offsetInBytes, sizeInBytes, WRITE_BLOCKING);
+    }
 
-    public int write(byte[] audioData, int offsetInBytes, int sizeInBytes) {
+    /**
+     * Writes the audio data to the audio sink for playback (streaming mode),
+     * or copies audio data for later playback (static buffer mode).
+     * The format specified in the AudioTrack constructor should be
+     * {@link AudioFormat#ENCODING_PCM_8BIT} to correspond to the data in the array.
+     * In streaming mode, will block until all data has been written to the audio sink.
+     * In static buffer mode, copies the data to the buffer starting at offset 0.
+     * Note that the actual playback of this data might occur after this function
+     * returns. This function is thread safe with respect to {@link #stop} calls,
+     * in which case all of the specified data might not be written to the audio sink.
+     *
+     * @param audioData the array that holds the data to play.
+     * @param offsetInBytes the offset expressed in bytes in audioData where the data to play
+     *    starts.
+     * @param sizeInBytes the number of bytes to read in audioData after the offset.
+     * @param writeMode one of {@link #WRITE_BLOCKING}, {@link #WRITE_NON_BLOCKING}. It has no
+     *     effect in static mode.
+     *     <br>With {@link #WRITE_BLOCKING}, the write will block until all data has been written
+     *         to the audio sink.
+     *     <br>With {@link #WRITE_NON_BLOCKING}, the write will return immediately after
+     *     queuing as much audio data for playback as possible without blocking.
+     * @return the number of bytes that were written or {@link #ERROR_INVALID_OPERATION}
+     *    if the object wasn't properly initialized, or {@link #ERROR_BAD_VALUE} if
+     *    the parameters don't resolve to valid data and indexes, or
+     *    {@link AudioManager#ERROR_DEAD_OBJECT} if the AudioTrack is not valid anymore and
+     *    needs to be recreated.
+     */
+    public int write(@NonNull byte[] audioData, int offsetInBytes, int sizeInBytes,
+            @WriteMode int writeMode) {
 
         if (mState == STATE_UNINITIALIZED || mAudioFormat == AudioFormat.ENCODING_PCM_FLOAT) {
             return ERROR_INVALID_OPERATION;
+        }
+
+        if ((writeMode != WRITE_BLOCKING) && (writeMode != WRITE_NON_BLOCKING)) {
+            Log.e(TAG, "AudioTrack.write() called with invalid blocking mode");
+            return ERROR_BAD_VALUE;
         }
 
         if ( (audioData == null) || (offsetInBytes < 0 ) || (sizeInBytes < 0)
@@ -1570,7 +1608,7 @@ public class AudioTrack
         }
 
         int ret = native_write_byte(audioData, offsetInBytes, sizeInBytes, mAudioFormat,
-                true /*isBlocking*/);
+                writeMode == WRITE_BLOCKING);
 
         if ((mDataLoadMode == MODE_STATIC)
                 && (mState == STATE_NO_STATIC_DATA)
@@ -1582,10 +1620,11 @@ public class AudioTrack
         return ret;
     }
 
-
     /**
      * Writes the audio data to the audio sink for playback (streaming mode),
      * or copies audio data for later playback (static buffer mode).
+     * The format specified in the AudioTrack constructor should be
+     * {@link AudioFormat#ENCODING_PCM_16BIT} to correspond to the data in the array.
      * In streaming mode, will block until all data has been written to the audio sink.
      * In static buffer mode, copies the data to the buffer starting at offset 0.
      * Note that the actual playback of this data might occur after this function
@@ -1602,11 +1641,47 @@ public class AudioTrack
      *    {@link AudioManager#ERROR_DEAD_OBJECT} if the AudioTrack is not valid anymore and
      *    needs to be recreated.
      */
+    public int write(@NonNull short[] audioData, int offsetInShorts, int sizeInShorts) {
+        return write(audioData, offsetInShorts, sizeInShorts, WRITE_BLOCKING);
+    }
 
-    public int write(short[] audioData, int offsetInShorts, int sizeInShorts) {
+    /**
+     * Writes the audio data to the audio sink for playback (streaming mode),
+     * or copies audio data for later playback (static buffer mode).
+     * The format specified in the AudioTrack constructor should be
+     * {@link AudioFormat#ENCODING_PCM_16BIT} to correspond to the data in the array.
+     * In streaming mode, will block until all data has been written to the audio sink.
+     * In static buffer mode, copies the data to the buffer starting at offset 0.
+     * Note that the actual playback of this data might occur after this function
+     * returns. This function is thread safe with respect to {@link #stop} calls,
+     * in which case all of the specified data might not be written to the audio sink.
+     *
+     * @param audioData the array that holds the data to play.
+     * @param offsetInShorts the offset expressed in shorts in audioData where the data to play
+     *     starts.
+     * @param sizeInShorts the number of shorts to read in audioData after the offset.
+     * @param writeMode one of {@link #WRITE_BLOCKING}, {@link #WRITE_NON_BLOCKING}. It has no
+     *     effect in static mode.
+     *     <br>With {@link #WRITE_BLOCKING}, the write will block until all data has been written
+     *         to the audio sink.
+     *     <br>With {@link #WRITE_NON_BLOCKING}, the write will return immediately after
+     *     queuing as much audio data for playback as possible without blocking.
+     * @return the number of shorts that were written or {@link #ERROR_INVALID_OPERATION}
+     *    if the object wasn't properly initialized, or {@link #ERROR_BAD_VALUE} if
+     *    the parameters don't resolve to valid data and indexes, or
+     *    {@link AudioManager#ERROR_DEAD_OBJECT} if the AudioTrack is not valid anymore and
+     *    needs to be recreated.
+     */
+    public int write(@NonNull short[] audioData, int offsetInShorts, int sizeInShorts,
+            @WriteMode int writeMode) {
 
         if (mState == STATE_UNINITIALIZED || mAudioFormat == AudioFormat.ENCODING_PCM_FLOAT) {
             return ERROR_INVALID_OPERATION;
+        }
+
+        if ((writeMode != WRITE_BLOCKING) && (writeMode != WRITE_NON_BLOCKING)) {
+            Log.e(TAG, "AudioTrack.write() called with invalid blocking mode");
+            return ERROR_BAD_VALUE;
         }
 
         if ( (audioData == null) || (offsetInShorts < 0 ) || (sizeInShorts < 0)
@@ -1615,7 +1690,8 @@ public class AudioTrack
             return ERROR_BAD_VALUE;
         }
 
-        int ret = native_write_short(audioData, offsetInShorts, sizeInShorts, mAudioFormat);
+        int ret = native_write_short(audioData, offsetInShorts, sizeInShorts, mAudioFormat,
+                writeMode == WRITE_BLOCKING);
 
         if ((mDataLoadMode == MODE_STATIC)
                 && (mState == STATE_NO_STATIC_DATA)
@@ -1627,10 +1703,11 @@ public class AudioTrack
         return ret;
     }
 
-
     /**
      * Writes the audio data to the audio sink for playback (streaming mode),
      * or copies audio data for later playback (static buffer mode).
+     * The format specified in the AudioTrack constructor should be
+     * {@link AudioFormat#ENCODING_PCM_FLOAT} to correspond to the data in the array.
      * In static buffer mode, copies the data to the buffer starting at offset 0,
      * and the write mode is ignored.
      * In streaming mode, the blocking behavior will depend on the write mode.
@@ -1654,9 +1731,9 @@ public class AudioTrack
      * @param sizeInFloats the number of floats to read in audioData after the offset.
      * @param writeMode one of {@link #WRITE_BLOCKING}, {@link #WRITE_NON_BLOCKING}. It has no
      *     effect in static mode.
-     *     <BR>With {@link #WRITE_BLOCKING}, the write will block until all data has been written
+     *     <br>With {@link #WRITE_BLOCKING}, the write will block until all data has been written
      *         to the audio sink.
-     *     <BR>With {@link #WRITE_NON_BLOCKING}, the write will return immediately after
+     *     <br>With {@link #WRITE_NON_BLOCKING}, the write will return immediately after
      *     queuing as much audio data for playback as possible without blocking.
      * @return the number of floats that were written, or {@link #ERROR_INVALID_OPERATION}
      *    if the object wasn't properly initialized, or {@link #ERROR_BAD_VALUE} if
@@ -1664,7 +1741,7 @@ public class AudioTrack
      *    {@link AudioManager#ERROR_DEAD_OBJECT} if the AudioTrack is not valid anymore and
      *    needs to be recreated.
      */
-    public int write(float[] audioData, int offsetInFloats, int sizeInFloats,
+    public int write(@NonNull float[] audioData, int offsetInFloats, int sizeInFloats,
             @WriteMode int writeMode) {
 
         if (mState == STATE_UNINITIALIZED) {
@@ -1727,7 +1804,7 @@ public class AudioTrack
      *     {@link AudioManager#ERROR_DEAD_OBJECT} if the AudioTrack is not valid anymore and
      *     needs to be recreated.
      */
-    public int write(ByteBuffer audioData, int sizeInBytes,
+    public int write(@NonNull ByteBuffer audioData, int sizeInBytes,
             @WriteMode int writeMode) {
 
         if (mState == STATE_UNINITIALIZED) {
@@ -2017,7 +2094,8 @@ public class AudioTrack
                                                boolean isBlocking);
 
     private native final int native_write_short(short[] audioData,
-                                                int offsetInShorts, int sizeInShorts, int format);
+                                                int offsetInShorts, int sizeInShorts, int format,
+                                                boolean isBlocking);
 
     private native final int native_write_float(float[] audioData,
                                                 int offsetInFloats, int sizeInFloats, int format,
