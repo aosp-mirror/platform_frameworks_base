@@ -239,7 +239,12 @@ public final class GeofenceHardwareImpl {
                     case GeofenceHardware.MONITORING_TYPE_GPS_HARDWARE:
                         return CAPABILITY_GNSS;
                     case GeofenceHardware.MONITORING_TYPE_FUSED_HARDWARE:
-                        return mCapabilities;
+                        if (mVersion >= FIRST_VERSION_WITH_CAPABILITIES) {
+                            return mCapabilities;
+                        }
+                        // This was the implied capability on old FLP HAL versions that didn't
+                        // have the capability callback.
+                        return CAPABILITY_GNSS;
                 }
                 break;
         }
