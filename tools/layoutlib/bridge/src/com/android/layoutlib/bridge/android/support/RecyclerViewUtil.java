@@ -18,8 +18,8 @@ package com.android.layoutlib.bridge.android.support;
 
 import com.android.annotations.NonNull;
 import com.android.annotations.Nullable;
-import com.android.ide.common.rendering.api.IProjectCallback;
 import com.android.ide.common.rendering.api.LayoutLog;
+import com.android.ide.common.rendering.api.LayoutlibCallback;
 import com.android.ide.common.rendering.api.SessionParams;
 import com.android.layoutlib.bridge.Bridge;
 import com.android.layoutlib.bridge.android.BridgeContext;
@@ -30,7 +30,6 @@ import android.view.View;
 import android.widget.LinearLayout;
 
 import java.lang.reflect.Method;
-import java.util.HashMap;
 
 import static com.android.layoutlib.bridge.util.ReflectionUtils.*;
 
@@ -61,7 +60,7 @@ public class RecyclerViewUtil {
     public static void setAdapter(@NonNull View recyclerView, @NonNull BridgeContext context,
             @NonNull SessionParams params) {
         try {
-            setLayoutManager(recyclerView, context, params.getProjectCallback());
+            setLayoutManager(recyclerView, context, params.getLayoutlibCallback());
             Object adapter = createAdapter(params);
             setProperty(recyclerView, CN_ADAPTER, adapter, "setAdapter");
         } catch (ReflectionException e) {
@@ -71,7 +70,7 @@ public class RecyclerViewUtil {
     }
 
     private static void setLayoutManager(@NonNull View recyclerView, @NonNull BridgeContext context,
-            @NonNull IProjectCallback callback) throws ReflectionException {
+            @NonNull LayoutlibCallback callback) throws ReflectionException {
         Object cookie = context.getCookie(recyclerView);
         assert cookie == null || cookie instanceof LayoutManagerType || cookie instanceof String;
         if (!(cookie instanceof LayoutManagerType)) {
@@ -90,7 +89,7 @@ public class RecyclerViewUtil {
 
     @Nullable
     private static Object createLayoutManager(@Nullable LayoutManagerType type,
-            @NonNull Context context, @NonNull IProjectCallback callback)
+            @NonNull Context context, @NonNull LayoutlibCallback callback)
             throws ReflectionException {
         if (type == null) {
             type = LayoutManagerType.getDefault();
@@ -109,7 +108,7 @@ public class RecyclerViewUtil {
             return null;
         }
         try {
-            return params.getProjectCallback().loadView(CN_ADAPTER, new Class[0], new Object[0]);
+            return params.getLayoutlibCallback().loadView(CN_ADAPTER, new Class[0], new Object[0]);
         } catch (Exception e) {
             throw new ReflectionException(e);
         }

@@ -646,7 +646,7 @@ public final class BridgeTypedArray extends TypedArray {
                 if (isFrameworkId) {
                     idValue = Bridge.getResourceId(ResourceType.ID, idName);
                 } else {
-                    idValue = mContext.getProjectCallback().getResourceId(ResourceType.ID, idName);
+                    idValue = mContext.getLayoutlibCallback().getResourceId(ResourceType.ID, idName);
                 }
                 return idValue == null ? defValue : idValue;
             }
@@ -666,7 +666,7 @@ public final class BridgeTypedArray extends TypedArray {
             idValue = Bridge.getResourceId(resValue.getResourceType(),
                     resValue.getName());
         } else {
-            idValue = mContext.getProjectCallback().getResourceId(
+            idValue = mContext.getLayoutlibCallback().getResourceId(
                     resValue.getResourceType(), resValue.getName());
         }
 

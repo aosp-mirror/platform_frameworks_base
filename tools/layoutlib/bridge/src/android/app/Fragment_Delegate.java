@@ -16,7 +16,7 @@
 
 package android.app;
 
-import com.android.ide.common.rendering.api.IProjectCallback;
+import com.android.ide.common.rendering.api.LayoutlibCallback;
 import com.android.tools.layoutlib.annotations.LayoutlibDelegate;
 
 import android.content.Context;
@@ -30,19 +30,19 @@ import android.os.Bundle;
  *
  * The methods being re-implemented are the ones responsible for instantiating Fragment objects.
  * Because the classes of these objects are found in the project, these methods need access to
- * {@link IProjectCallback} object. They are however static methods, so the callback is set
- * before the inflation through {@link #setProjectCallback(IProjectCallback)}.
+ * {@link LayoutlibCallback} object. They are however static methods, so the callback is set
+ * before the inflation through {@link #setLayoutlibCallback(LayoutlibCallback)}.
  */
 public class Fragment_Delegate {
 
-    private static IProjectCallback sProjectCallback;
+    private static LayoutlibCallback sLayoutlibCallback;
 
     /**
-     * Sets the current {@link IProjectCallback} to be used to instantiate classes coming
+     * Sets the current {@link LayoutlibCallback} to be used to instantiate classes coming
      * from the project being rendered.
      */
-    public static void setProjectCallback(IProjectCallback projectCallback) {
-        sProjectCallback = projectCallback;
+    public static void setLayoutlibCallback(LayoutlibCallback layoutlibCallback) {
+        sLayoutlibCallback = layoutlibCallback;
     }
 
     /**
@@ -62,17 +62,17 @@ public class Fragment_Delegate {
      * This is currently just used to get its ClassLoader.
      * @param fname The class name of the fragment to instantiate.
      * @param args Bundle of arguments to supply to the fragment, which it
-     * can retrieve with {@link #getArguments()}.  May be null.
+     * can retrieve with {@link Fragment#getArguments()}.  May be null.
      * @return Returns a new fragment instance.
-     * @throws InstantiationException If there is a failure in instantiating
+     * @throws Fragment.InstantiationException If there is a failure in instantiating
      * the given fragment class.  This is a runtime exception; it is not
      * normally expected to happen.
      */
     @LayoutlibDelegate
     /*package*/ static Fragment instantiate(Context context, String fname, Bundle args) {
         try {
-            if (sProjectCallback != null) {
-                Fragment f = (Fragment) sProjectCallback.loadView(fname,
+            if (sLayoutlibCallback != null) {
+                Fragment f = (Fragment) sLayoutlibCallback.loadView(fname,
                         new Class[0], new Object[0]);
 
                 if (args != null) {
