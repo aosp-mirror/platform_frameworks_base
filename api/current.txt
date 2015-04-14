@@ -17805,6 +17805,7 @@ package android.media.tv {
     method public final int getType();
     method public final float getVideoFrameRate();
     method public final int getVideoHeight();
+    method public final float getVideoPixelAspectRatio();
     method public final int getVideoWidth();
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator<android.media.tv.TvTrackInfo> CREATOR;
@@ -17823,6 +17824,7 @@ package android.media.tv {
     method public final android.media.tv.TvTrackInfo.Builder setLanguage(java.lang.String);
     method public final android.media.tv.TvTrackInfo.Builder setVideoFrameRate(float);
     method public final android.media.tv.TvTrackInfo.Builder setVideoHeight(int);
+    method public final android.media.tv.TvTrackInfo.Builder setVideoPixelAspectRatio(float);
     method public final android.media.tv.TvTrackInfo.Builder setVideoWidth(int);
   }
 
