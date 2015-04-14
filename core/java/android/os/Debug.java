@@ -1115,7 +1115,7 @@ href="{@docRoot}guide/developing/tools/traceview.html">Traceview: A Graphical Lo
 
     /**
      * Returns a map of the names/values of the runtime statistics
-     * that {@link #getRuntimeStat()} supports.
+     * that {@link #getRuntimeStat(String)} supports.
      *
      * @return a map of the names/values of the supported runtime statistics.
      * @hide
