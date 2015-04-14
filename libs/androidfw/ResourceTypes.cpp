@@ -17,6 +17,16 @@
 #define LOG_TAG "ResourceType"
 //#define LOG_NDEBUG 0
 
+#include <ctype.h>
+#include <memory.h>
+#include <stddef.h>
+#include <stdint.h>
+#include <stdlib.h>
+#include <string.h>
+
+#include <limits>
+#include <type_traits>
+
 #include <androidfw/ByteBucketArray.h>
 #include <androidfw/ResourceTypes.h>
 #include <androidfw/TypeWrappers.h>
@@ -27,16 +37,9 @@
 #include <utils/String16.h>
 #include <utils/String8.h>
 
-#ifdef HAVE_ANDROID_OS
+#ifdef __ANDROID__
 #include <binder/TextOutput.h>
 #endif
-
-#include <stdlib.h>
-#include <string.h>
-#include <memory.h>
-#include <ctype.h>
-#include <stdint.h>
-#include <stddef.h>
 
 #ifndef INT32_MAX
 #define INT32_MAX ((int32_t)(2147483647))
@@ -4551,8 +4554,7 @@ static bool parse_unit(const char* str, Res_value* outValue,
     return false;
 }
 
-
-bool ResTable::stringToInt(const char16_t* s, size_t len, Res_value* outValue)
+bool U16StringToInt(const char16_t* s, size_t len, Res_value* outValue)
 {
     while (len > 0 && isspace16(*s)) {
         s++;
@@ -4564,7 +4566,7 @@ bool ResTable::stringToInt(const char16_t* s, size_t len, Res_value* outValue)
     }
 
     size_t i = 0;
-    int32_t val = 0;
+    int64_t val = 0;
     bool neg = false;
 
     if (*s == '-') {
@@ -4576,28 +4578,50 @@ bool ResTable::stringToInt(const char16_t* s, size_t len, Res_value* outValue)
         return false;
     }
 
+    static_assert(std::is_same<uint32_t, Res_value::data_type>::value,
+                  "Res_value::data_type has changed. The range checks in this "
+                  "function are no longer correct.");
+
     // Decimal or hex?
-    if (s[i] == '0' && s[i+1] == 'x') {
-        if (outValue)
-            outValue->dataType = outValue->TYPE_INT_HEX;
+    bool isHex;
+    if (len > 1 && s[i] == '0' && s[i+1] == 'x') {
+        isHex = true;
         i += 2;
+
+        if (neg) {
+            return false;
+        }
+
+        if (i == len) {
+            // Just u"0x"
+            return false;
+        }
+
         bool error = false;
         while (i < len && !error) {
             val = (val*16) + get_hex(s[i], &error);
             i++;
+
+            if (val > std::numeric_limits<uint32_t>::max()) {
+                return false;
+            }
         }
         if (error) {
             return false;
         }
     } else {
-        if (outValue)
-            outValue->dataType = outValue->TYPE_INT_DEC;
+        isHex = false;
         while (i < len) {
             if (s[i] < '0' || s[i] > '9') {
                 return false;
             }
             val = (val*10) + s[i]-'0';
             i++;
+
+            if ((neg && -val < std::numeric_limits<int32_t>::min()) ||
+                (!neg && val > std::numeric_limits<int32_t>::max())) {
+                return false;
+            }
         }
     }
 
@@ -4607,13 +4631,21 @@ bool ResTable::stringToInt(const char16_t* s, size_t len, Res_value* outValue)
         i++;
     }
 
-    if (i == len) {
-        if (outValue)
-            outValue->data = val;
-        return true;
+    if (i != len) {
+        return false;
     }
 
-    return false;
+    if (outValue) {
+        outValue->dataType =
+            isHex ? outValue->TYPE_INT_HEX : outValue->TYPE_INT_DEC;
+        outValue->data = static_cast<Res_value::data_type>(val);
+    }
+    return true;
+}
+
+bool ResTable::stringToInt(const char16_t* s, size_t len, Res_value* outValue)
+{
+    return U16StringToInt(s, len, outValue);
 }
 
 bool ResTable::stringToFloat(const char16_t* s, size_t len, Res_value* outValue)
