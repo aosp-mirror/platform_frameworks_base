@@ -221,4 +221,6 @@ interface IDevicePolicyManager {
     void sendDeviceInitializerStatus(int statusCode, String description);
     void setOtaPolicy(in ComponentName who, in PersistableBundle policy);
     PersistableBundle getOtaPolicy();
+
+    boolean setKeyguardEnabledState(in ComponentName admin, boolean enabled);
 }

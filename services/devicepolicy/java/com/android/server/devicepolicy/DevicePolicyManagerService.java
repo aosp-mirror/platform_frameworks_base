@@ -5808,6 +5808,28 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
     }
 
+    @Override
+    public boolean setKeyguardEnabledState(ComponentName who, boolean enabled) {
+        Preconditions.checkNotNull(who, "ComponentName is null");
+        synchronized (this) {
+            getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_DEVICE_OWNER);
+        }
+        final int userId = UserHandle.getCallingUserId();
+        LockPatternUtils utils = new LockPatternUtils(mContext);
+
+        // disallow disabling the keyguard if a password is currently set
+        if (!enabled && utils.isSecure(userId)) {
+            return false;
+        }
+        long ident = Binder.clearCallingIdentity();
+        try {
+            utils.setLockScreenDisabled(!enabled, userId);
+        } finally {
+            Binder.restoreCallingIdentity(ident);
+        }
+        return true;
+    }
+
     /**
      * We need to update the internal state of whether a user has completed setup once. After
      * that, we ignore any changes that reset the Settings.Secure.USER_SETUP_COMPLETE changes
