@@ -41,6 +41,12 @@ public class VolumeDialogComponent implements VolumeComponent {
     private final VolumeDialogController mController;
     private final ZenModeController mZenModeController;
     private final VolumeDialog mDialog;
+    private final VolumePolicy mVolumePolicy = new VolumePolicy(
+            true,  // volumeDownToEnterSilent
+            true,  // volumeUpToExitSilent
+            true,  // doNotDisturbWhenSilent
+            400    // vibrateToSilentDebounce
+    );
 
     public VolumeDialogComponent(SystemUI sysui, Context context, Handler handler,
             ZenModeController zen) {
@@ -77,7 +83,7 @@ public class VolumeDialogComponent implements VolumeComponent {
         mDialog.setZenFooter(true);
         mDialog.setAutomute(true);
         mDialog.setSilentMode(false);
-        mController.setVolumePolicy(VolumePolicy.DEFAULT);
+        mController.setVolumePolicy(mVolumePolicy);
         mController.showDndTile(false);
     }
 

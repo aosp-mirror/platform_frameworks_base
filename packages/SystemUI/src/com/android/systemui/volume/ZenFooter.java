@@ -217,8 +217,7 @@ public class ZenFooter extends LinearLayout {
         public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
             if (D.BUG) Log.d(TAG, "onCheckedChanged " + isChecked);
             if (isChecked != isZen()) {
-                final int newZen = isChecked ? Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS
-                        : Global.ZEN_MODE_OFF;
+                final int newZen = isChecked ? Global.ZEN_MODE_ALARMS : Global.ZEN_MODE_OFF;
                 mZen = newZen;  // this one's optimistic
                 setFooterExpanded(isChecked);
                 mController.setZen(newZen, null, TAG);

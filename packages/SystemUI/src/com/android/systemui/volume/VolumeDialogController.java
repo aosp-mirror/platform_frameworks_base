@@ -99,7 +99,7 @@ public class VolumeDialogController {
 
     private boolean mEnabled;
     private boolean mDestroyed;
-    private VolumePolicy mVolumePolicy = new VolumePolicy(true, true, false, 400);
+    private VolumePolicy mVolumePolicy;
     private boolean mShowDndTile = false;
 
     public VolumeDialogController(Context context, ComponentName component) {
@@ -147,6 +147,7 @@ public class VolumeDialogController {
 
     public void setVolumePolicy(VolumePolicy policy) {
         mVolumePolicy = policy;
+        if (mVolumePolicy == null) return;
         try {
             mAudio.setVolumePolicy(mVolumePolicy);
         } catch (NoSuchMethodError e) {
