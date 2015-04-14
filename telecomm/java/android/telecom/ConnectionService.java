@@ -415,6 +415,12 @@ public abstract class ConnectionService extends Service {
                     Connection.capabilitiesToString(connectionCapabilities));
             mAdapter.setConnectionCapabilities(id, connectionCapabilities);
         }
+
+        @Override
+        public void onStatusHintsChanged(Conference conference, StatusHints statusHints) {
+            String id = mIdByConference.get(conference);
+            mAdapter.setStatusHints(id, statusHints);
+        }
     };
 
     private final Connection.Listener mConnectionListener = new Connection.Listener() {
@@ -884,7 +890,8 @@ public abstract class ConnectionService extends Service {
                     conference.getState(),
                     conference.getConnectionCapabilities(),
                     connectionIds,
-                    conference.getConnectTimeMillis());
+                    conference.getConnectTimeMillis(),
+                    conference.getStatusHints());
             mAdapter.addConferenceCall(id, parcelableConference);
 
             // Go through any child calls and set the parent.

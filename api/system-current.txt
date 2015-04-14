@@ -29995,6 +29995,7 @@ package android.telecom {
     method public final android.telecom.PhoneAccountHandle getPhoneAccountHandle();
     method public android.telecom.Connection getPrimaryConnection();
     method public final int getState();
+    method public final android.telecom.StatusHints getStatusHints();
     method public void onAudioStateChanged(android.telecom.AudioState);
     method public void onConnectionAdded(android.telecom.Connection);
     method public void onDisconnect();
@@ -30013,6 +30014,7 @@ package android.telecom {
     method public final void setConnectionCapabilities(int);
     method public final void setDisconnected(android.telecom.DisconnectCause);
     method public final void setOnHold();
+    method public final void setStatusHints(android.telecom.StatusHints);
     field public static long CONNECT_TIME_NOT_SPECIFIED;
     field protected android.telecom.PhoneAccountHandle mPhoneAccount;
   }

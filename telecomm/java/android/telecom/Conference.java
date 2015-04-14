@@ -49,6 +49,7 @@ public abstract class Conference implements IConferenceable {
         public void onDestroyed(Conference conference) {}
         public void onConnectionCapabilitiesChanged(
                 Conference conference, int connectionCapabilities) {}
+        public void onStatusHintsChanged(Conference conference, StatusHints statusHints) {}
     }
 
     private final Set<Listener> mListeners = new CopyOnWriteArraySet<>();
@@ -66,6 +67,7 @@ public abstract class Conference implements IConferenceable {
     private int mConnectionCapabilities;
     private String mDisconnectMessage;
     private long mConnectTimeMillis = CONNECT_TIME_NOT_SPECIFIED;
+    private StatusHints mStatusHints;
 
     private final Connection.Listener mConnectionDeathListener = new Connection.Listener() {
         @Override
@@ -483,5 +485,24 @@ public abstract class Conference implements IConferenceable {
             c.removeConnectionListener(mConnectionDeathListener);
         }
         mConferenceableConnections.clear();
+    }
+
+    /**
+     * Sets the label and icon status to display in the InCall UI.
+     *
+     * @param statusHints The status label and icon to set.
+     */
+    public final void setStatusHints(StatusHints statusHints) {
+        mStatusHints = statusHints;
+        for (Listener l : mListeners) {
+            l.onStatusHintsChanged(this, statusHints);
+        }
+    }
+
+    /**
+     * @return The status hints for this conference.
+     */
+    public final StatusHints getStatusHints() {
+        return mStatusHints;
     }
 }
