@@ -332,10 +332,12 @@ public class RenderScript {
       rsnClosureSetGlobal(mContext, closureID, fieldID, value, size);
     }
 
-    native long rsnScriptGroup2Create(long con, String cachePath, long[] closures);
-    synchronized long nScriptGroup2Create(String cachePath, long[] closures) {
+    native long rsnScriptGroup2Create(long con, String name, String cachePath,
+                                      long[] closures);
+    synchronized long nScriptGroup2Create(String name, String cachePath,
+                                          long[] closures) {
       validate();
-      return rsnScriptGroup2Create(mContext, cachePath, closures);
+      return rsnScriptGroup2Create(mContext, name, cachePath, closures);
     }
 
     native void rsnScriptGroup2Execute(long con, long groupID);
