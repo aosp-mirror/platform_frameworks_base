@@ -256,7 +256,7 @@ public class PowerProfile {
                 final Double[] values = (Double[]) data;
                 if (values.length > level && level >= 0) {
                     return values[level];
-                } else if (level < 0) {
+                } else if (level < 0 || values.length == 0) {
                     return 0;
                 } else {
                     return values[values.length - 1];
