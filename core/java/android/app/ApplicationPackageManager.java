@@ -17,6 +17,8 @@
 package android.app;
 
 import android.annotation.DrawableRes;
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.StringRes;
 import android.annotation.XmlRes;
 import android.content.ComponentName;
@@ -733,13 +735,16 @@ final class ApplicationPackageManager extends PackageManager {
         }
     }
 
-    @Override public Drawable getDrawable(String packageName, @DrawableRes int resid,
-                                          ApplicationInfo appInfo) {
-        ResourceName name = new ResourceName(packageName, resid);
-        Drawable dr = getCachedIcon(name);
-        if (dr != null) {
-            return dr;
+    @Nullable
+    @Override
+    public Drawable getDrawable(String packageName, @DrawableRes int resId,
+            @Nullable ApplicationInfo appInfo) {
+        final ResourceName name = new ResourceName(packageName, resId);
+        final Drawable cachedIcon = getCachedIcon(name);
+        if (cachedIcon != null) {
+            return cachedIcon;
         }
+
         if (appInfo == null) {
             try {
                 appInfo = getApplicationInfo(packageName, sDefaultFlags);
@@ -747,36 +752,44 @@ final class ApplicationPackageManager extends PackageManager {
                 return null;
             }
         }
-        try {
-            Resources r = getResourcesForApplication(appInfo);
-            dr = r.getDrawable(resid);
-            if (false) {
-                RuntimeException e = new RuntimeException("here");
-                e.fillInStackTrace();
-                Log.w(TAG, "Getting drawable 0x" + Integer.toHexString(resid)
-                      + " from package " + packageName
-                      + ": app scale=" + r.getCompatibilityInfo().applicationScale
-                      + ", caller scale=" + mContext.getResources().getCompatibilityInfo().applicationScale,
-                      e);
+
+        if (resId != 0) {
+            try {
+                final Resources r = getResourcesForApplication(appInfo);
+                final Drawable dr = r.getDrawable(resId, null);
+                if (dr != null) {
+                    putCachedIcon(name, dr);
+                }
+
+                if (false) {
+                    RuntimeException e = new RuntimeException("here");
+                    e.fillInStackTrace();
+                    Log.w(TAG, "Getting drawable 0x" + Integer.toHexString(resId)
+                                    + " from package " + packageName
+                                    + ": app scale=" + r.getCompatibilityInfo().applicationScale
+                                    + ", caller scale=" + mContext.getResources()
+                                    .getCompatibilityInfo().applicationScale,
+                            e);
+                }
+                if (DEBUG_ICONS)
+                    Log.v(TAG, "Getting drawable 0x"
+                            + Integer.toHexString(resId) + " from " + r
+                            + ": " + dr);
+            } catch (NameNotFoundException e) {
+                Log.w("PackageManager", "Failure retrieving resources for "
+                        + appInfo.packageName);
+            } catch (Resources.NotFoundException e) {
+                Log.w("PackageManager", "Failure retrieving resources for "
+                        + appInfo.packageName + ": " + e.getMessage());
+            } catch (Exception e) {
+                // If an exception was thrown, fall through to return
+                // default icon.
+                Log.w("PackageManager", "Failure retrieving icon 0x"
+                        + Integer.toHexString(resId) + " in package "
+                        + packageName, e);
             }
-            if (DEBUG_ICONS) Log.v(TAG, "Getting drawable 0x"
-                                   + Integer.toHexString(resid) + " from " + r
-                                   + ": " + dr);
-            putCachedIcon(name, dr);
-            return dr;
-        } catch (NameNotFoundException e) {
-            Log.w("PackageManager", "Failure retrieving resources for "
-                  + appInfo.packageName);
-        } catch (Resources.NotFoundException e) {
-            Log.w("PackageManager", "Failure retrieving resources for "
-                  + appInfo.packageName + ": " + e.getMessage());
-        } catch (RuntimeException e) {
-            // If an exception was thrown, fall through to return
-            // default icon.
-            Log.w("PackageManager", "Failure retrieving icon 0x"
-                  + Integer.toHexString(resid) + " in package "
-                  + packageName, e);
         }
+
         return null;
     }
 
@@ -923,19 +936,21 @@ final class ApplicationPackageManager extends PackageManager {
         return label;
     }
 
-    @Override public Resources getResourcesForActivity(
-        ComponentName activityName) throws NameNotFoundException {
+    @Override
+    public Resources getResourcesForActivity(ComponentName activityName)
+            throws NameNotFoundException {
         return getResourcesForApplication(
             getActivityInfo(activityName, sDefaultFlags).applicationInfo);
     }
 
-    @Override public Resources getResourcesForApplication(
-        ApplicationInfo app) throws NameNotFoundException {
+    @Override
+    public Resources getResourcesForApplication(@NonNull ApplicationInfo app)
+            throws NameNotFoundException {
         if (app.packageName.equals("system")) {
             return mContext.mMainThread.getSystemContext().getResources();
         }
         final boolean sameUid = (app.uid == Process.myUid());
-        Resources r = mContext.mMainThread.getTopLevelResources(
+        final Resources r = mContext.mMainThread.getTopLevelResources(
                 sameUid ? app.sourceDir : app.publicSourceDir,
                 sameUid ? app.splitSourceDirs : app.splitPublicSourceDirs,
                 app.resourceDirs, app.sharedLibraryFiles, Display.DEFAULT_DISPLAY,
@@ -946,8 +961,9 @@ final class ApplicationPackageManager extends PackageManager {
         throw new NameNotFoundException("Unable to open " + app.publicSourceDir);
     }
 
-    @Override public Resources getResourcesForApplication(
-        String appPackageName) throws NameNotFoundException {
+    @Override
+    public Resources getResourcesForApplication(String appPackageName)
+            throws NameNotFoundException {
         return getResourcesForApplication(
             getApplicationInfo(appPackageName, sDefaultFlags));
     }
@@ -999,13 +1015,14 @@ final class ApplicationPackageManager extends PackageManager {
         mPM = pm;
     }
 
-    private Drawable getCachedIcon(ResourceName name) {
+    @Nullable
+    private Drawable getCachedIcon(@NonNull ResourceName name) {
         synchronized (sSync) {
-            WeakReference<Drawable.ConstantState> wr = sIconCache.get(name);
+            final WeakReference<Drawable.ConstantState> wr = sIconCache.get(name);
             if (DEBUG_ICONS) Log.v(TAG, "Get cached weak drawable ref for "
                                    + name + ": " + wr);
             if (wr != null) {   // we have the activity
-                Drawable.ConstantState state = wr.get();
+                final Drawable.ConstantState state = wr.get();
                 if (state != null) {
                     if (DEBUG_ICONS) {
                         Log.v(TAG, "Get cached drawable state for " + name + ": " + state);
@@ -1025,9 +1042,9 @@ final class ApplicationPackageManager extends PackageManager {
         return null;
     }
 
-    private void putCachedIcon(ResourceName name, Drawable dr) {
+    private void putCachedIcon(@NonNull ResourceName name, @NonNull Drawable dr) {
         synchronized (sSync) {
-            sIconCache.put(name, new WeakReference<Drawable.ConstantState>(dr.getConstantState()));
+            sIconCache.put(name, new WeakReference<>(dr.getConstantState()));
             if (DEBUG_ICONS) Log.v(TAG, "Added cached drawable state for " + name + ": " + dr);
         }
     }
