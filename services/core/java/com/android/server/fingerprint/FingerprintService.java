@@ -358,6 +358,11 @@ public class FingerprintService extends SystemService {
         return result;
     }
 
+    public boolean hasEnrolledFingerprints(int groupId) {
+        ContentResolver resolver = mContext.getContentResolver();
+        return FingerprintUtils.getFingerprintIdsForUser(resolver, groupId).length > 0;
+    }
+
     void checkPermission(String permission) {
         getContext().enforceCallingOrSelfPermission(permission,
                 "Must have " + permission + " permission.");
@@ -571,6 +576,13 @@ public class FingerprintService extends SystemService {
         public List<Fingerprint> getEnrolledFingerprints(int groupId) {
             checkPermission(USE_FINGERPRINT);
             return FingerprintService.this.getEnrolledFingerprints(groupId);
+        }
+
+        @Override
+        // Binder call
+        public boolean hasEnrolledFingerprints(int groupId) {
+            checkPermission(USE_FINGERPRINT);
+            return FingerprintService.this.hasEnrolledFingerprints(groupId);
         }
     }
 

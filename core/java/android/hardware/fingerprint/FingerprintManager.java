@@ -535,9 +535,9 @@ public class FingerprintManager {
      *
      * @hide
      */
-    public List<Fingerprint> getEnrolledFingerprints() {
+    public List<Fingerprint> getEnrolledFingerprints(int userId) {
         if (mService != null) try {
-            return mService.getEnrolledFingerprints(getCurrentUserId());
+            return mService.getEnrolledFingerprints(userId);
         } catch (RemoteException e) {
             Log.v(TAG, "Remote exception in getEnrolledFingerprints: ", e);
         }
@@ -545,10 +545,33 @@ public class FingerprintManager {
     }
 
     /**
-     * Determine if fingerprint hardware is present and functional.
-     * @return true if hardware is present and functional, false otherwise.
+     * Obtain the list of enrolled fingerprints templates.
+     * @return list of current fingerprint items
      *
      * @hide
+     */
+    public List<Fingerprint> getEnrolledFingerprints() {
+        return getEnrolledFingerprints(UserHandle.myUserId());
+    }
+
+    /**
+     * Determine if there is at least one fingerprint enrolled.
+     *
+     * @return true if at least one fingerprint is enrolled, false otherwise
+     */
+    public boolean hasEnrolledFingerprints() {
+        if (mService != null) try {
+            return mService.hasEnrolledFingerprints(UserHandle.myUserId());
+        } catch (RemoteException e) {
+            Log.v(TAG, "Remote exception in getEnrolledFingerprints: ", e);
+        }
+        return false;
+    }
+
+    /**
+     * Determine if fingerprint hardware is present and functional.
+     *
+     * @return true if hardware is present and functional, false otherwise.
      */
     public boolean isHardwareDetected() {
         if (mService != null) {

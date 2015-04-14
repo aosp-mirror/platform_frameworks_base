@@ -14064,6 +14064,8 @@ package android.hardware.fingerprint {
 
   public class FingerprintManager {
     method public void authenticate(android.hardware.fingerprint.FingerprintManager.CryptoObject, android.os.CancellationSignal, android.hardware.fingerprint.FingerprintManager.AuthenticationCallback, int);
+    method public boolean hasEnrolledFingerprints();
+    method public boolean isHardwareDetected();
     field public static final int FINGERPRINT_ACQUIRED_GOOD = 0; // 0x0
     field public static final int FINGERPRINT_ACQUIRED_IMAGER_DIRTY = 3; // 0x3
     field public static final int FINGERPRINT_ACQUIRED_INSUFFICIENT = 2; // 0x2
