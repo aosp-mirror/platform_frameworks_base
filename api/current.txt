@@ -29744,6 +29744,7 @@ package android.telecom {
     method public java.util.List<android.telecom.PhoneAccountHandle> getCallCapablePhoneAccounts();
     method public android.telecom.PhoneAccount getPhoneAccount(android.telecom.PhoneAccountHandle);
     method public boolean handleMmi(java.lang.String);
+    method public boolean handleMmi(java.lang.String, android.telecom.PhoneAccountHandle);
     method public boolean isInCall();
     method public void showInCallScreen(boolean);
     field public static final java.lang.String ACTION_SHOW_CALL_ACCESSIBILITY_SETTINGS = "android.telecom.action.SHOW_CALL_ACCESSIBILITY_SETTINGS";

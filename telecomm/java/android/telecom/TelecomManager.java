@@ -532,19 +532,6 @@ public class TelecomManager {
     }
 
     /**
-     * Determine whether the device has more than one account registered that can make and receive
-     * phone calls.
-     *
-     * @return {@code true} if the device has more than one account registered and {@code false}
-     * otherwise.
-     * @hide
-     */
-    @SystemApi
-    public boolean hasMultipleCallCapableAccounts() {
-        return getCallCapablePhoneAccounts().size() > 1;
-    }
-
-    /**
      *  Returns a list of all {@link PhoneAccount}s registered for the calling package.
      *
      * @return A list of {@code PhoneAccountHandle} objects.
@@ -680,6 +667,15 @@ public class TelecomManager {
 
     /**
      * Remove all Accounts that belong to the calling package from the system.
+     * @hide
+     */
+    @SystemApi
+    public void clearPhoneAccounts() {
+        clearAccounts();
+    }
+    /**
+     * Remove all Accounts that belong to the calling package from the system.
+     * @deprecated Use {@link #clearPhoneAccounts()} instead.
      * @hide
      */
     @SystemApi
@@ -1017,10 +1013,8 @@ public class TelecomManager {
      * @param accountHandle The handle for the account the MMI code should apply to.
      * @param dialString The digits to dial.
      * @return True if the digits were processed as an MMI code, false otherwise.
-     * @hide
      */
-    @SystemApi
-    public boolean handleMmi(PhoneAccountHandle accountHandle, String dialString) {
+    public boolean handleMmi(String dialString, PhoneAccountHandle accountHandle) {
         ITelecomService service = getTelecomService();
         if (service != null) {
             try {

@@ -32258,7 +32258,8 @@ package android.telecom {
     method public void addNewIncomingCall(android.telecom.PhoneAccountHandle, android.os.Bundle);
     method public void addNewUnknownCall(android.telecom.PhoneAccountHandle, android.os.Bundle);
     method public void cancelMissedCallsNotification();
-    method public void clearAccounts();
+    method public deprecated void clearAccounts();
+    method public void clearPhoneAccounts();
     method public boolean endCall();
     method public android.net.Uri getAdnUriForPhoneAccount(android.telecom.PhoneAccountHandle);
     method public java.util.List<android.telecom.PhoneAccountHandle> getAllPhoneAccountHandles();
@@ -32275,8 +32276,7 @@ package android.telecom {
     method public java.util.List<android.telecom.PhoneAccountHandle> getPhoneAccountsSupportingScheme(java.lang.String);
     method public java.util.List<android.telecom.PhoneAccountHandle> getRegisteredConnectionManagers();
     method public boolean handleMmi(java.lang.String);
-    method public boolean handleMmi(android.telecom.PhoneAccountHandle, java.lang.String);
-    method public boolean hasMultipleCallCapableAccounts();
+    method public boolean handleMmi(java.lang.String, android.telecom.PhoneAccountHandle);
     method public boolean hasVoiceMailNumber(android.telecom.PhoneAccountHandle);
     method public boolean isInCall();
     method public boolean isRinging();
