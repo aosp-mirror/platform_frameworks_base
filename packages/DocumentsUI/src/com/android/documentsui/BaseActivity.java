@@ -37,6 +37,12 @@ abstract class BaseActivity extends Activity {
     public static String ACTION_OPEN_COPY_DESTINATION_STRING =
         "com.android.documentsui.OPEN_COPY_DESTINATION";
 
+    /**
+     * Extra boolean flag for ACTION_OPEN_COPY_DESTINATION_STRING, which
+     * specifies if the destination directory needs to create new directory or not.
+     */
+    public static String EXTRA_DIRECTORY_COPY = "com.android.documentsui.DIRECTORY_COPY";
+
     public abstract State getDisplayState();
     public abstract RootInfo getCurrentRoot();
     public abstract void onStateChanged();
@@ -77,6 +83,7 @@ abstract class BaseActivity extends Activity {
         public boolean showAdvanced = false;
         public boolean stackTouched = false;
         public boolean restored = false;
+        public boolean directoryCopy = false;
 
         /** Current user navigation stack; empty implies recents. */
         public DocumentStack stack = new DocumentStack();

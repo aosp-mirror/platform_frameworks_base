@@ -265,6 +265,10 @@ public class DocumentsActivity extends BaseActivity {
         } else {
             mState.showSize = LocalPreferences.getDisplayFileSize(this);
         }
+        if (mState.action == ACTION_OPEN_COPY_DESTINATION) {
+            mState.directoryCopy = intent.getBooleanExtra(
+                    BaseActivity.EXTRA_DIRECTORY_COPY, false);
+        }
     }
 
     private class RestoreRootTask extends AsyncTask<Void, Void, RootInfo> {

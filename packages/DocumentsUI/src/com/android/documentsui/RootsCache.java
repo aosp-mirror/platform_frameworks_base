@@ -367,6 +367,9 @@ public class RootsCache {
             if (!state.showAdvanced && advanced) continue;
             // Exclude non-local devices when local only
             if (state.localOnly && !localOnly) continue;
+            // Exclude downloads roots that don't support directory creation
+            // TODO: Add flag to check the root supports directory creation or not.
+            if (state.directoryCopy && root.isDownloads()) continue;
             // Only show empty roots when creating
             if ((state.action != State.ACTION_CREATE ||
                  state.action != State.ACTION_OPEN_TREE ||
