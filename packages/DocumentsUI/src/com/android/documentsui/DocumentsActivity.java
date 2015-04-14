@@ -906,7 +906,7 @@ public class DocumentsActivity extends BaseActivity {
             if (pick != null) {
                 final CharSequence displayName = (mState.stack.size() <= 1) ? root.title
                         : cwd.displayName;
-                pick.setPickTarget(cwd, displayName);
+                pick.setPickTarget(mState.action, cwd, displayName);
             }
         }
 

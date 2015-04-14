@@ -21,12 +21,19 @@
     android:baselineAligned="false"
     android:gravity="center_vertical"
     android:minHeight="?android:attr/listPreferredItemHeightSmall">
-
+    <Button
+        android:id="@android:id/button2"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:text="@android:string/cancel"
+        android:visibility="gone"
+        style="?android:attr/buttonBarNegativeButtonStyle" />
     <Button
         android:id="@android:id/button1"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="match_parent"
+        android:layout_weight="1"
         android:textAllCaps="false"
         style="?android:attr/buttonBarPositiveButtonStyle" />
-
 </LinearLayout>
