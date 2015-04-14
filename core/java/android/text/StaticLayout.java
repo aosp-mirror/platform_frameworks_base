@@ -811,7 +811,7 @@ public class StaticLayout extends Layout {
                 float sum = 0;
                 int i;
 
-                for (i = len; i >= 0; i--) {
+                for (i = len; i > 0; i--) {
                     float w = widths[i - 1 + lineStart - widthStart];
 
                     if (w + sum + ellipsisWidth > avail) {
