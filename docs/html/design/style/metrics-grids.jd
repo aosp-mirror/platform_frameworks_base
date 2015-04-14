@@ -5,6 +5,16 @@ meta.tags="multiple screens, layout, tablets"
 page.image=/design/media/metrics_closeup.png
 @jd:body
 
+
+<a class="notice-designers-material"
+  href="http://www.google.com/design/spec/layout/metrics-keylines.html">
+  <div>
+    <h3>Material Design</h3>
+    <p>Metrics and Keylines<p>
+  </div>
+</a>
+
+
 <p>Devices vary not only in physical size, but also in screen density (<acronym title="Dots per
 inch">DPI</acronym>). To simplify the way you design for multiple screens, think of each device as
 falling into a particular size bucket and density bucket:</p>

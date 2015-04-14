@@ -41,6 +41,14 @@ effectively down-scales your HDPI assets by 1/2 to match the expected size.</p>
 
 <h2 id="launcher">Launcher</h2>
 
+<a class="notice-designers-material"
+  href="http://www.google.com/design/spec/style/icons.html#icons-product-icons">
+  <div>
+    <h3>Material Design</h3>
+    <p>Product Icons<p>
+  </div>
+</a>
+
 <p>The launcher icon is the visual representation of your app on the Home or All Apps screen. Since the
 user can change the Home screen's wallpaper, make sure that your launcher icon is clearly visible on
 any type of background.</p>
@@ -122,6 +130,14 @@ from above, so that users perceive some depth.</p>
 
 
 <h2 id="action-bar">Action Bar</h2>
+
+<a class="notice-designers-material"
+  href="http://www.google.com/design/spec/style/icons.html#icons-system-icons">
+  <div>
+    <h3>Material Design</h3>
+    <p>System Icons<p>
+  </div>
+</a>
 
 <p>
 
@@ -220,6 +236,14 @@ Disabled: <strong>30%</strong> opacity</p>
 
 <h2 id="small-contextual">Small / Contextual Icons</h2>
 
+<a class="notice-designers-material"
+  href="http://www.google.com/design/spec/style/icons.html#icons-system-icons">
+  <div>
+    <h3>Material Design</h3>
+    <p>System Icons<p>
+  </div>
+</a>
+
 <p>Within the body of your app, use small icons to surface actions and/or provide status for specific
 items. For example, in the Gmail app, each message has a star icon that marks the message as
 important.</p>
@@ -299,6 +323,15 @@ the background.</p>
 
 
 <h2 id="notification">Notification Icons</h2>
+
+<a class="notice-designers-material"
+  href="http://www.google.com/design/spec/style/icons.html#icons-system-icons">
+  <div>
+    <h3>Material Design</h3>
+    <p>System Icons<p>
+  </div>
+</a>
+
 
 <p>If your app generates notifications, provide an icon that the system can display in the status bar
 whenever a new notification is available.</p>

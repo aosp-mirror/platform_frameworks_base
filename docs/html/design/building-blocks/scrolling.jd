@@ -2,6 +2,7 @@ page.title=Scrolling
 page.tags=scrollview,listview
 @jd:body
 
+
 <p>Scrolling allows the user to navigate to content in the overflow using a swipe gesture. The
 scrolling speed is proportional to the speed of the gesture.</p>
 <h2 id="indicator">Scroll Indicator</h2>

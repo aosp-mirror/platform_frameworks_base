@@ -2,6 +2,14 @@ page.title=Dialogs
 page.tags=dialog,alert,popup,toast
 @jd:body
 
+<a class="notice-designers-material"
+  href="http://www.google.com/design/spec/components/dialogs.html">
+  <div>
+    <h3>Material Design</h3>
+    <p>Dialogs<p>
+  </div>
+</a>
+
 <a class="notice-developers" href="{@docRoot}guide/topics/ui/dialogs.html">
   <div>
     <h3>Developer Docs</h3>
@@ -35,7 +43,7 @@ user to adjust settings or enter text.</p>
   <h4>Action buttons</h4>
   <p>Action buttons are typically Cancel and/or OK, with OK indicating the preferred or most likely action. However, if the options consist of specific actions such as Close or Wait rather than a confirmation or cancellation of the action described in the content, then all the buttons should be active verbs. Order actions following these rules:</p>
     <ul>
-    
+
     <li>The dismissive action of a dialog is always on the left. Dismissive actions return to the user to the previous state.</li>
     <li>The affirmative actions are on the right. Affirmative actions continue progress toward the user goal that triggered the dialog.</li>
     </ul>
@@ -151,6 +159,15 @@ advances the workflow, and simply touching outside the popup dismisses it.</p>
 <p>Toasts provide lightweight feedback about an operation in a small popup. For example, navigating
 away from an email before you send it triggers a "Draft saved" toast to let you know that you can
 continue editing later. Toasts automatically disappear after a timeout.</p>
+
+<a class="notice-designers-material left"
+  href="http://www.google.com/design/spec/components/snackbars-toasts.html">
+  <div>
+    <h3>Material Design</h3>
+    <p>Toasts<p>
+  </div>
+</a>
+
 
 <a class="notice-developers left" href="{@docRoot}guide/topics/ui/notifiers/toasts.html">
   <div>

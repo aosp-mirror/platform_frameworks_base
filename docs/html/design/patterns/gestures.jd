@@ -2,6 +2,14 @@ page.title=Gestures
 page.tags=gesture,input,touch
 @jd:body
 
+<a class="notice-designers-material"
+   href="http://www.google.com/design/spec/patterns/gestures.html">
+  <div>
+    <h3>Material Design</h3>
+    <p>Gestures<p>
+  </div>
+</a>
+
 <p>Gestures allow users to interact with your app by manipulating the screen objects you provide. The
 following table shows the core gesture set that is supported in Android.</p>
 
@@ -92,7 +100,7 @@ following table shows the core gesture set that is supported in Android.</p>
       </li>
     </ul>
   </div>
-  
+
 </div>
 
 
