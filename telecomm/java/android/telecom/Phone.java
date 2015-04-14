@@ -244,6 +244,8 @@ public final class Phone {
      * become active, and the touch screen and display will be turned off when the user's face
      * is detected to be in close proximity to the screen. This operation is a no-op on devices
      * that do not have a proximity sensor.
+     *
+     * @hide
      */
     public final void setProximitySensorOn() {
         mInCallAdapter.turnProximitySensorOn();
@@ -257,6 +259,8 @@ public final class Phone {
      * @param screenOnImmediately If true, the screen will be turned on immediately if it was
      * previously off. Otherwise, the screen will only be turned on after the proximity sensor
      * is no longer triggered.
+     *
+     * @hide
      */
     public final void setProximitySensorOff(boolean screenOnImmediately) {
         mInCallAdapter.turnProximitySensorOff(screenOnImmediately);
