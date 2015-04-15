@@ -205,12 +205,19 @@ public abstract class InCallService extends Service {
     public static abstract class VideoCall {
 
         /**
-         * Sets a listener to invoke callback methods in the InCallUI after performing video
-         * telephony actions.
+         * Registers a callback to receive c ommands and state changes for video calls.
          *
-         * @param videoCallListener The call video client.
+         * @param callback The vdieo call callback.
          */
-        public abstract void setVideoCallListener(VideoCall.Listener videoCallListener);
+        public abstract void registerCallback(VideoCall.Callback callback);
+
+        /**
+         * @deprecated Use {@code VideoCall#registerCallback} instead.
+         */
+        @Deprecated
+        public void setVideoCallListener(VideoCall.Listener videoCallListener) {
+            registerCallback(videoCallListener);
+        }
 
         /**
          * Sets the camera to be used for video recording in a video call.
@@ -253,7 +260,7 @@ public abstract class InCallService extends Service {
         /**
          * Issues a request to modify the properties of the current session.  The request is sent to
          * the remote device where it it handled by
-         * {@link VideoCall.Listener#onSessionModifyRequestReceived}.
+         * {@link VideoCall.Callback#onSessionModifyRequestReceived}.
          * Some examples of session modification requests: upgrade call from audio to video,
          * downgrade call from video to audio, pause video.
          *
@@ -265,9 +272,9 @@ public abstract class InCallService extends Service {
          * Provides a response to a request to change the current call session video
          * properties.
          * This is in response to a request the InCall UI has received via
-         * {@link VideoCall.Listener#onSessionModifyRequestReceived}.
+         * {@link VideoCall.Callback#onSessionModifyRequestReceived}.
          * The response is handled on the remove device by
-         * {@link VideoCall.Listener#onSessionModifyResponseReceived}.
+         * {@link VideoCall.Callback#onSessionModifyResponseReceived}.
          *
          * @param responseProfile The response call video properties.
          */
@@ -276,14 +283,14 @@ public abstract class InCallService extends Service {
         /**
          * Issues a request to the video provider to retrieve the camera capabilities.
          * Camera capabilities are reported back to the caller via
-         * {@link VideoCall.Listener#onCameraCapabilitiesChanged(CameraCapabilities)}.
+         * {@link VideoCall.Callback#onCameraCapabilitiesChanged(CameraCapabilities)}.
          */
         public abstract void requestCameraCapabilities();
 
         /**
          * Issues a request to the video telephony framework to retrieve the cumulative data usage for
          * the current call.  Data usage is reported back to the caller via
-         * {@link VideoCall.Listener#onCallDataUsageChanged}.
+         * {@link VideoCall.Callback#onCallDataUsageChanged}.
          */
         public abstract void requestCallDataUsage();
 
@@ -296,9 +303,9 @@ public abstract class InCallService extends Service {
         public abstract void setPauseImage(String uri);
 
         /**
-         * Listener class which invokes callbacks after video call actions occur.
+         * Callback class which invokes callbacks after video call actions occur.
          */
-        public static abstract class Listener {
+        public static abstract class Callback {
             /**
              * Called when a session modification request is received from the remote device.
              * The remote request is sent via
@@ -376,5 +383,11 @@ public abstract class InCallService extends Service {
             public abstract void onCameraCapabilitiesChanged(
                     CameraCapabilities cameraCapabilities);
         }
+
+        /**
+         * @deprecated Use {@code VideoCall.Callback} instead.
+         */
+        @Deprecated
+        public static abstract class Listener extends Callback { }
     }
 }
