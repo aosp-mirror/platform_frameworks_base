@@ -166,12 +166,21 @@ public class VideoCallImpl extends VideoCall {
         mVideoProvider.asBinder().linkToDeath(mDeathRecipient, 0);
 
         mBinder = new VideoCallListenerBinder();
-        mVideoProvider.setVideoCallback(mBinder);
+        mVideoProvider.addVideoCallback(mBinder);
     }
 
     /** {@inheritDoc} */
     public void setVideoCallListener(VideoCall.Listener videoCallListener) {
         mVideoCallListener = videoCallListener;
+    }
+
+    /** {@inheritDoc} */
+    public void removeVideoCallListener() {
+        mVideoCallListener = null;
+        try {
+            mVideoProvider.removeVideoCallback(mBinder);
+        } catch (RemoteException e) {
+        }
     }
 
     /** {@inheritDoc} */

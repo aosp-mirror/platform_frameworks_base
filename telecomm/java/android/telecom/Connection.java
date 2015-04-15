@@ -28,6 +28,7 @@ import android.view.Surface;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -445,7 +446,7 @@ public abstract class Connection implements IConferenceable {
          */
         public static final int SESSION_MODIFY_REQUEST_REJECTED_BY_REMOTE = 5;
 
-        private static final int MSG_SET_VIDEO_CALLBACK = 1;
+        private static final int MSG_ADD_VIDEO_CALLBACK = 1;
         private static final int MSG_SET_CAMERA = 2;
         private static final int MSG_SET_PREVIEW_SURFACE = 3;
         private static final int MSG_SET_DISPLAY_SURFACE = 4;
@@ -456,11 +457,16 @@ public abstract class Connection implements IConferenceable {
         private static final int MSG_REQUEST_CAMERA_CAPABILITIES = 9;
         private static final int MSG_REQUEST_CONNECTION_DATA_USAGE = 10;
         private static final int MSG_SET_PAUSE_IMAGE = 11;
+        private static final int MSG_REMOVE_VIDEO_CALLBACK = 12;
 
         private final VideoProvider.VideoProviderHandler
                 mMessageHandler = new VideoProvider.VideoProviderHandler();
         private final VideoProvider.VideoProviderBinder mBinder;
-        private IVideoCallback mVideoCallback;
+
+        /**
+         * Stores a list of the video callbacks, keyed by IBinder.
+         */
+        private HashMap<IBinder, IVideoCallback> mVideoCallbacks = new HashMap<>();
 
         /**
          * Default handler used to consolidate binder method calls onto a single thread.
@@ -469,9 +475,29 @@ public abstract class Connection implements IConferenceable {
             @Override
             public void handleMessage(Message msg) {
                 switch (msg.what) {
-                    case MSG_SET_VIDEO_CALLBACK:
-                        mVideoCallback = IVideoCallback.Stub.asInterface((IBinder) msg.obj);
+                    case MSG_ADD_VIDEO_CALLBACK: {
+                        IBinder binder = (IBinder) msg.obj;
+                        IVideoCallback callback = IVideoCallback.Stub
+                                .asInterface((IBinder) msg.obj);
+                        if (mVideoCallbacks.containsKey(binder)) {
+                            Log.i(this, "addVideoProvider - skipped; already present.");
+                            break;
+                        }
+                        mVideoCallbacks.put(binder, callback);
+                        Log.i(this, "addVideoProvider  "+ mVideoCallbacks.size());
                         break;
+                    }
+                    case MSG_REMOVE_VIDEO_CALLBACK: {
+                        IBinder binder = (IBinder) msg.obj;
+                        IVideoCallback callback = IVideoCallback.Stub
+                                .asInterface((IBinder) msg.obj);
+                        if (!mVideoCallbacks.containsKey(binder)) {
+                            Log.i(this, "removeVideoProvider - skipped; not present.");
+                            break;
+                        }
+                        mVideoCallbacks.remove(binder);
+                        break;
+                    }
                     case MSG_SET_CAMERA:
                         onSetCamera((String) msg.obj);
                         break;
@@ -512,9 +538,14 @@ public abstract class Connection implements IConferenceable {
          * IVideoProvider stub implementation.
          */
         private final class VideoProviderBinder extends IVideoProvider.Stub {
-            public void setVideoCallback(IBinder videoCallbackBinder) {
+            public void addVideoCallback(IBinder videoCallbackBinder) {
                 mMessageHandler.obtainMessage(
-                        MSG_SET_VIDEO_CALLBACK, videoCallbackBinder).sendToTarget();
+                        MSG_ADD_VIDEO_CALLBACK, videoCallbackBinder).sendToTarget();
+            }
+
+            public void removeVideoCallback(IBinder videoCallbackBinder) {
+                mMessageHandler.obtainMessage(
+                        MSG_REMOVE_VIDEO_CALLBACK, videoCallbackBinder).sendToTarget();
             }
 
             public void setCamera(String cameraId) {
@@ -652,21 +683,23 @@ public abstract class Connection implements IConferenceable {
         public abstract void onSetPauseImage(String uri);
 
         /**
-         * Invokes callback method defined in In-Call UI.
+         * Invokes callback method defined in listening {@link InCallService} implementations.
          *
          * @param videoProfile The requested video connection profile.
          */
         public void receiveSessionModifyRequest(VideoProfile videoProfile) {
-            if (mVideoCallback != null) {
+            if (mVideoCallbacks != null) {
                 try {
-                    mVideoCallback.receiveSessionModifyRequest(videoProfile);
+                    for (IVideoCallback callback : mVideoCallbacks.values()) {
+                        callback.receiveSessionModifyRequest(videoProfile);
+                    }
                 } catch (RemoteException ignored) {
                 }
             }
         }
 
         /**
-         * Invokes callback method defined in In-Call UI.
+         * Invokes callback method defined in listening {@link InCallService} implementations.
          *
          * @param status Status of the session modify request.  Valid values are
          *               {@link VideoProvider#SESSION_MODIFY_REQUEST_SUCCESS},
@@ -677,17 +710,19 @@ public abstract class Connection implements IConferenceable {
          */
         public void receiveSessionModifyResponse(int status,
                 VideoProfile requestedProfile, VideoProfile responseProfile) {
-            if (mVideoCallback != null) {
+            if (mVideoCallbacks != null) {
                 try {
-                    mVideoCallback.receiveSessionModifyResponse(
-                            status, requestedProfile, responseProfile);
+                    for (IVideoCallback callback : mVideoCallbacks.values()) {
+                        callback.receiveSessionModifyResponse(status, requestedProfile,
+                                responseProfile);
+                    }
                 } catch (RemoteException ignored) {
                 }
             }
         }
 
         /**
-         * Invokes callback method defined in In-Call UI.
+         * Invokes callback method defined in listening {@link InCallService} implementations.
          *
          * Valid values are: {@link VideoProvider#SESSION_EVENT_RX_PAUSE},
          * {@link VideoProvider#SESSION_EVENT_RX_RESUME},
@@ -697,66 +732,76 @@ public abstract class Connection implements IConferenceable {
          * @param event The event.
          */
         public void handleCallSessionEvent(int event) {
-            if (mVideoCallback != null) {
+            if (mVideoCallbacks != null) {
                 try {
-                    mVideoCallback.handleCallSessionEvent(event);
+                    for (IVideoCallback callback : mVideoCallbacks.values()) {
+                        callback.handleCallSessionEvent(event);
+                    }
                 } catch (RemoteException ignored) {
                 }
             }
         }
 
         /**
-         * Invokes callback method defined in In-Call UI.
+         * Invokes callback method defined in listening {@link InCallService} implementations.
          *
          * @param width  The updated peer video width.
          * @param height The updated peer video height.
          */
         public void changePeerDimensions(int width, int height) {
-            if (mVideoCallback != null) {
+            if (mVideoCallbacks != null) {
                 try {
-                    mVideoCallback.changePeerDimensions(width, height);
+                    for (IVideoCallback callback : mVideoCallbacks.values()) {
+                        callback.changePeerDimensions(width, height);
+                    }
                 } catch (RemoteException ignored) {
                 }
             }
         }
 
         /**
-         * Invokes callback method defined in In-Call UI.
+         * Invokes callback method defined in listening {@link InCallService} implementations.
          *
          * @param dataUsage The updated data usage.
          */
         public void changeCallDataUsage(long dataUsage) {
-            if (mVideoCallback != null) {
+            if (mVideoCallbacks != null) {
                 try {
-                    mVideoCallback.changeCallDataUsage(dataUsage);
+                    for (IVideoCallback callback : mVideoCallbacks.values()) {
+                        callback.changeCallDataUsage(dataUsage);
+                    }
                 } catch (RemoteException ignored) {
                 }
             }
         }
 
         /**
-         * Invokes callback method defined in In-Call UI.
+         * Invokes callback method defined in listening {@link InCallService} implementations.
          *
          * @param cameraCapabilities The changed camera capabilities.
          */
         public void changeCameraCapabilities(CameraCapabilities cameraCapabilities) {
-            if (mVideoCallback != null) {
+            if (mVideoCallbacks != null) {
                 try {
-                    mVideoCallback.changeCameraCapabilities(cameraCapabilities);
+                    for (IVideoCallback callback : mVideoCallbacks.values()) {
+                        callback.changeCameraCapabilities(cameraCapabilities);
+                    }
                 } catch (RemoteException ignored) {
                 }
             }
         }
 
         /**
-         * Invokes callback method defined in In-Call UI.
+         * Invokes callback method defined in listening {@link InCallService} implementations.
          *
          * @param videoQuality The updated video quality.
          */
         public void changeVideoQuality(int videoQuality) {
-            if (mVideoCallback != null) {
+            if (mVideoCallbacks != null) {
                 try {
-                    mVideoCallback.changeVideoQuality(videoQuality);
+                    for (IVideoCallback callback : mVideoCallbacks.values()) {
+                        callback.changeVideoQuality(videoQuality);
+                    }
                 } catch (RemoteException ignored) {
                 }
             }

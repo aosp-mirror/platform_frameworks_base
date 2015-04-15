@@ -311,7 +311,7 @@ public final class RemoteConnection {
         public VideoProvider(IVideoProvider videoProviderBinder) {
             mVideoProviderBinder = videoProviderBinder;
             try {
-                mVideoProviderBinder.setVideoCallback(mVideoCallbackServant.getStub().asBinder());
+                mVideoProviderBinder.addVideoCallback(mVideoCallbackServant.getStub().asBinder());
             } catch (RemoteException e) {
             }
         }

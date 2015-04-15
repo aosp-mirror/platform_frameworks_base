@@ -46,6 +46,7 @@ public final class ParcelableCall implements Parcelable {
     private final int mCallerDisplayNamePresentation;
     private final GatewayInfo mGatewayInfo;
     private final PhoneAccountHandle mAccountHandle;
+    private final boolean mIsVideoCallProviderChanged;
     private final IVideoProvider mVideoCallProvider;
     private InCallService.VideoCall mVideoCall;
     private final String mParentCallId;
@@ -70,6 +71,7 @@ public final class ParcelableCall implements Parcelable {
             int callerDisplayNamePresentation,
             GatewayInfo gatewayInfo,
             PhoneAccountHandle accountHandle,
+            boolean isVideoCallProviderChanged,
             IVideoProvider videoCallProvider,
             String parentCallId,
             List<String> childCallIds,
@@ -91,6 +93,7 @@ public final class ParcelableCall implements Parcelable {
         mCallerDisplayNamePresentation = callerDisplayNamePresentation;
         mGatewayInfo = gatewayInfo;
         mAccountHandle = accountHandle;
+        mIsVideoCallProviderChanged = isVideoCallProviderChanged;
         mVideoCallProvider = videoCallProvider;
         mParentCallId = parentCallId;
         mChildCallIds = childCallIds;
@@ -243,6 +246,18 @@ public final class ParcelableCall implements Parcelable {
         return mCallSubstate;
     }
 
+    /**
+     * Indicates to the receiver of the {@link ParcelableCall} whether a change has occurred in the
+     * {@link android.telecom.InCallService.VideoCall} associated with this call.  Since
+     * {@link #getVideoCall()} creates a new {@link VideoCallImpl}, it is useful to know whether
+     * the provider has changed (which can influence whether it is accessed).
+     *
+     * @return {@code true} if the video call changed, {@code false} otherwise.
+     */
+    public boolean isVideoCallProviderChanged() {
+        return mIsVideoCallProviderChanged;
+    }
+
     /** Responsible for creating ParcelableCall objects for deserialized Parcels. */
     public static final Parcelable.Creator<ParcelableCall> CREATOR =
             new Parcelable.Creator<ParcelableCall> () {
@@ -263,6 +278,7 @@ public final class ParcelableCall implements Parcelable {
             int callerDisplayNamePresentation = source.readInt();
             GatewayInfo gatewayInfo = source.readParcelable(classLoader);
             PhoneAccountHandle accountHandle = source.readParcelable(classLoader);
+            boolean isVideoCallProviderChanged = source.readByte() == 1;
             IVideoProvider videoCallProvider =
                     IVideoProvider.Stub.asInterface(source.readStrongBinder());
             String parentCallId = source.readString();
@@ -288,6 +304,7 @@ public final class ParcelableCall implements Parcelable {
                     callerDisplayNamePresentation,
                     gatewayInfo,
                     accountHandle,
+                    isVideoCallProviderChanged,
                     videoCallProvider,
                     parentCallId,
                     childCallIds,
@@ -326,6 +343,7 @@ public final class ParcelableCall implements Parcelable {
         destination.writeInt(mCallerDisplayNamePresentation);
         destination.writeParcelable(mGatewayInfo, 0);
         destination.writeParcelable(mAccountHandle, 0);
+        destination.writeByte((byte) (mIsVideoCallProviderChanged ? 1 : 0));
         destination.writeStrongBinder(
                 mVideoCallProvider != null ? mVideoCallProvider.asBinder() : null);
         destination.writeString(mParentCallId);
