@@ -2,8 +2,17 @@ page.title=Touch Feedback
 page.tags=input,button
 @jd:body
 
-    <div class="layout-content-row" style="margin-bottom: -100px">
-  <div class="layout-content-col span-7">
+<div class="layout-content-row" style="margin-bottom: -100px">
+<div class="layout-content-col span-7">
+
+<a class="notice-designers-material"
+  href="http://www.google.com/design/spec/animation/responsive-interaction.html">
+  <div>
+    <h3>Material Design</h3>
+    <p>Responsive Interaction<p>
+  </div>
+</a>
+
 
 <p>Use illumination and dimming to respond to touches, reinforce the resulting behaviors
 of gestures, and indicate what actions are enabled and disabled.</p>

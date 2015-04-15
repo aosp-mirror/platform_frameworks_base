@@ -12,6 +12,7 @@ and implementation.</p>
 <div class="layout-content-row">
   <div class="layout-content-col span-5">
 
+
 <p>Drag and drop your way to beautifully designed Android apps. The stencils feature the
 rich typography, colors, interactive controls, and icons found throughout Android, along with
 phone and tablet outlines to frame your creations. Source files for icons and controls are also
@@ -23,15 +24,31 @@ available.</p>
     <img src="{@docRoot}design/media/downloads_stencils.png">
 
   </div>
-  <div class="layout-content-col span-4">
 
+  <div class="layout-content-col span-4">
+    <a class="notice-designers-material"
+      style="width:218px;"
+      href="http://www.google.com/design/spec/resources/layout-templates.html">
+      <div>
+        <h3>Material Design</h3>
+        <p>Layout Templates<p>
+      </div>
+    </a>
+  </div>
+
+  <div class="layout-content-col span-4">
+    <a class="notice-designers-material"
+      style="width:218px;"
+      href="http://www.google.com/design/spec/resources/sticker-sheets-icons.html">
+      <div>
+        <h3>Material Design</h3>
+        <p>Sticker Sheets<p>
+      </div>
+    </a>
+  </div>
+
+  <div class="layout-content-col span-4">
 <p>
-  <!--<a class="download-button"  onClick="ga('send', 'event', 'Design', 'Download', 'Fireworks Stencil');"
-    href="{@docRoot}downloads/design/Android_Design_Fireworks_Stencil_20120814.png">Adobe&reg; Fireworks&reg; PNG Stencil</a>
-  <a class="download-button"  onClick="ga('send', 'event', 'Design', 'Download', 'Illustrator Stencil');"
-    href="{@docRoot}downloads/design/Android_Design_Illustrator_Vectors_20120814.ai">Adobe&reg; Illustrator&reg; Stencil</a>
-  <a class="download-button"  onClick="ga('send', 'event', 'Design', 'Download', 'OmniGraffle Stencil');"
-    href="{@docRoot}downloads/design/Android_Design_OmniGraffle_Stencil_20120814.graffle">Omni&reg; OmniGraffle&reg; Stencil</a>-->
   <a class="download-button"  onClick="ga('send', 'event', 'Design', 'Download', 'Photoshop Sources');"
     href="{@docRoot}downloads/design/Android_Design_Stencils_Sources_20131106.zip">Adobe&reg; Photoshop&reg; Stencils and Sources</a>
 </p>
@@ -61,6 +78,18 @@ modify to match your theme, plus source files.</p>
     <img src="{@docRoot}design/media/iconography_actionbar_style.png">
 
   </div>
+
+  <div class="layout-content-col span-4">
+    <a class="notice-designers-material"
+      style="width:218px;"
+      href="http://www.google.com/design/spec/resources/sticker-sheets-icons.html">
+      <div>
+        <h3>Material Design</h3>
+        <p>Sticker Sheets<p>
+      </div>
+    </a>
+  </div>
+
   <div class="layout-content-col span-4">
 
 <p>
@@ -238,6 +267,18 @@ requirements of UI and high-resolution screens.</p>
     <img src="{@docRoot}design/media/downloads_roboto_specimen_preview.png">
 
   </div>
+
+  <div class="layout-content-col span-4">
+    <a class="notice-designers-material"
+      style="width:218px;"
+      href="http://www.google.com/design/spec/resources/roboto-noto-fonts.html">
+      <div>
+        <h3>Material Design</h3>
+        <p>Roboto Font<p>
+      </div>
+    </a>
+  </div>
+
   <div class="layout-content-col span-4">
 
 <p>
@@ -264,6 +305,18 @@ shade that can be used as a complement when needed.</p>
     <img src="{@docRoot}design/media/downloads_color_swatches.png">
 
   </div>
+
+  <div class="layout-content-col span-4">
+    <a class="notice-designers-material"
+      style="width:218px;"
+      href="http://www.google.com/design/spec/resources/color-palettes.html">
+      <div>
+        <h3>Material Design</h3>
+        <p>Color Palettes<p>
+      </div>
+    </a>
+  </div>
+
   <div class="layout-content-col span-4">
 
 <p>
