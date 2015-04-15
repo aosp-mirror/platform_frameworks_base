@@ -860,19 +860,22 @@ public class PopupWindow {
     }
 
     /**
-     * Set the layout type for this window. Should be one of the TYPE constants defined in
-     * {@link WindowManager.LayoutParams}.
+     * Set the layout type for this window. This value will be passed through to
+     * {@link WindowManager.LayoutParams#type} therefore the value should match any value
+     * {@link WindowManager.LayoutParams#type} accepts.
      *
      * @param layoutType Layout type for this window.
-     * @hide
+     *
+     * @see WindowManager.LayoutParams#type
      */
     public void setWindowLayoutType(int layoutType) {
         mWindowLayoutType = layoutType;
     }
 
     /**
-     * @return The layout type for this window.
-     * @hide
+     * Returns the layout type for this window.
+     *
+     * @see #setWindowLayoutType(int)
      */
     public int getWindowLayoutType() {
         return mWindowLayoutType;
