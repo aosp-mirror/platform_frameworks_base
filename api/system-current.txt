@@ -2054,6 +2054,7 @@ package android {
     field public static final int TextAppearance_Material_Widget_ActionMode_Title = 16974355; // 0x1030213
     field public static final int TextAppearance_Material_Widget_ActionMode_Title_Inverse = 16974356; // 0x1030214
     field public static final int TextAppearance_Material_Widget_Button = 16974357; // 0x1030215
+    field public static final int TextAppearance_Material_Widget_Button_Inverse = 16974565; // 0x10302e5
     field public static final int TextAppearance_Material_Widget_DropDownHint = 16974358; // 0x1030216
     field public static final int TextAppearance_Material_Widget_DropDownItem = 16974359; // 0x1030217
     field public static final int TextAppearance_Material_Widget_EditText = 16974360; // 0x1030218
