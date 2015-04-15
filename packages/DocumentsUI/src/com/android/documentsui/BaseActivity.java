@@ -33,16 +33,6 @@ import com.android.documentsui.model.RootInfo;
 import com.google.common.collect.Maps;
 
 abstract class BaseActivity extends Activity {
-    /** Intent action name to open copy destination. */
-    public static String ACTION_OPEN_COPY_DESTINATION_STRING =
-        "com.android.documentsui.OPEN_COPY_DESTINATION";
-
-    /**
-     * Extra boolean flag for ACTION_OPEN_COPY_DESTINATION_STRING, which
-     * specifies if the destination directory needs to create new directory or not.
-     */
-    public static String EXTRA_DIRECTORY_COPY = "com.android.documentsui.DIRECTORY_COPY";
-
     public abstract State getDisplayState();
     public abstract RootInfo getCurrentRoot();
     public abstract void onStateChanged();
@@ -60,6 +50,18 @@ abstract class BaseActivity extends Activity {
 
     public static BaseActivity get(Fragment fragment) {
         return (BaseActivity) fragment.getActivity();
+    }
+
+    public static abstract class DocumentsIntent {
+        /** Intent action name to open copy destination. */
+        public static String ACTION_OPEN_COPY_DESTINATION =
+                "com.android.documentsui.OPEN_COPY_DESTINATION";
+
+        /**
+         * Extra boolean flag for ACTION_OPEN_COPY_DESTINATION_STRING, which
+         * specifies if the destination directory needs to create new directory or not.
+         */
+        public static String EXTRA_DIRECTORY_COPY = "com.android.documentsui.DIRECTORY_COPY";
     }
 
     public static class State implements android.os.Parcelable {

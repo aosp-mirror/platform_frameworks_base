@@ -237,7 +237,7 @@ public class DocumentsActivity extends BaseActivity {
             mState.action = ACTION_MANAGE;
         } else if (DocumentsContract.ACTION_BROWSE_DOCUMENT_ROOT.equals(action)) {
             mState.action = ACTION_BROWSE;
-        } else if (ACTION_OPEN_COPY_DESTINATION_STRING.equals(action)) {
+        } else if (DocumentsIntent.ACTION_OPEN_COPY_DESTINATION.equals(action)) {
             mState.action = ACTION_OPEN_COPY_DESTINATION;
         }
 
@@ -267,7 +267,7 @@ public class DocumentsActivity extends BaseActivity {
         }
         if (mState.action == ACTION_OPEN_COPY_DESTINATION) {
             mState.directoryCopy = intent.getBooleanExtra(
-                    BaseActivity.EXTRA_DIRECTORY_COPY, false);
+                    BaseActivity.DocumentsIntent.EXTRA_DIRECTORY_COPY, false);
         }
     }
 

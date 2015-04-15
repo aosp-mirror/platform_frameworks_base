@@ -683,7 +683,7 @@ public class DirectoryFragment extends Fragment {
         // Pop up a dialog to pick a destination.  This is inadequate but works for now.
         // TODO: Implement a picker that is to spec.
         final Intent intent = new Intent(
-                BaseActivity.ACTION_OPEN_COPY_DESTINATION_STRING,
+                BaseActivity.DocumentsIntent.ACTION_OPEN_COPY_DESTINATION,
                 Uri.EMPTY,
                 getActivity(),
                 DocumentsActivity.class);
@@ -694,7 +694,7 @@ public class DirectoryFragment extends Fragment {
                 break;
             }
         }
-        intent.putExtra(BaseActivity.EXTRA_DIRECTORY_COPY, directoryCopy);
+        intent.putExtra(BaseActivity.DocumentsIntent.EXTRA_DIRECTORY_COPY, directoryCopy);
         startActivityForResult(intent, REQUEST_COPY_DESTINATION);
     }
 
