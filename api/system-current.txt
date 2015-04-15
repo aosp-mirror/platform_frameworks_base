@@ -24388,7 +24388,6 @@ package android.os {
   public class Binder implements android.os.IBinder {
     ctor public Binder();
     method public void attachInterface(android.os.IInterface, java.lang.String);
-    method public static final void blockUntilThreadAvailable();
     method public static final long clearCallingIdentity();
     method public void dump(java.io.FileDescriptor, java.lang.String[]);
     method protected void dump(java.io.FileDescriptor, java.io.PrintWriter, java.lang.String[]);
