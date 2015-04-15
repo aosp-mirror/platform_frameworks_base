@@ -190,7 +190,7 @@ public class CopyService extends IntentService {
         final Intent cancelIntent = new Intent(this, CopyService.class);
         cancelIntent.putExtra(EXTRA_CANCEL, mJobId);
         mProgressBuilder.addAction(R.drawable.ic_cab_cancel,
-                getString(R.string.cancel), PendingIntent.getService(this, 0,
+                getString(android.R.string.cancel), PendingIntent.getService(this, 0,
                         cancelIntent, PendingIntent.FLAG_ONE_SHOT));
 
         // Send an initial progress notification.
