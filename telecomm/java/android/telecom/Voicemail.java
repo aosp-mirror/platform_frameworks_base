@@ -16,7 +16,6 @@
 
 package android.telecom;
 
-import android.annotation.SystemApi;
 import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -26,7 +25,6 @@ import android.os.Parcelable;
  *
  * @hide
  */
-@SystemApi
 public class Voicemail implements Parcelable {
     private final Long mTimestamp;
     private final String mNumber;
