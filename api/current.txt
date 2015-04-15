@@ -14780,6 +14780,7 @@ package android.media {
     method public int getChannelConfiguration();
     method public int getChannelCount();
     method public static int getMinBufferSize(int, int, int);
+    method public int getNativeFrameCount() throws java.lang.IllegalStateException;
     method public int getNotificationMarkerPosition();
     method public int getPositionNotificationPeriod();
     method public int getRecordingState();

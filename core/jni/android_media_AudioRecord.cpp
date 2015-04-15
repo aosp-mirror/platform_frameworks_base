@@ -524,6 +524,17 @@ static jint android_media_AudioRecord_readInDirectBuffer(JNIEnv *env,  jobject t
 
 
 // ----------------------------------------------------------------------------
+static jint android_media_AudioRecord_get_native_frame_count(JNIEnv *env,  jobject thiz) {
+    sp<AudioRecord> lpRecorder = getAudioRecord(env, thiz);
+    if (lpRecorder == NULL) {
+        jniThrowException(env, "java/lang/IllegalStateException",
+            "Unable to retrieve AudioRecord pointer for getNativeFrameCount()");
+        return (jint)AUDIO_JAVA_ERROR;
+    }
+    return lpRecorder->frameCount();
+}
+
+// ----------------------------------------------------------------------------
 static jint android_media_AudioRecord_set_marker_pos(JNIEnv *env,  jobject thiz,
         jint markerPos) {
 
@@ -629,6 +640,8 @@ static JNINativeMethod gMethods[] = {
                              "([FIIZ)I", (void *)android_media_AudioRecord_readInFloatArray},
     {"native_read_in_direct_buffer","(Ljava/lang/Object;I)I",
                                        (void *)android_media_AudioRecord_readInDirectBuffer},
+    {"native_get_native_frame_count",
+                             "()I",    (void *)android_media_AudioRecord_get_native_frame_count},
     {"native_set_marker_pos","(I)I",   (void *)android_media_AudioRecord_set_marker_pos},
     {"native_get_marker_pos","()I",    (void *)android_media_AudioRecord_get_marker_pos},
     {"native_set_pos_update_period",
