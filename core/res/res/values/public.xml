@@ -2665,4 +2665,7 @@
   <public type="attr" name="durationScaleHint" />
 
   <public type="attr" name="lockTaskMode" />
+
+  <public type="attr" name="leftIndents" />
+  <public type="attr" name="rightIndents" />
 </resources>

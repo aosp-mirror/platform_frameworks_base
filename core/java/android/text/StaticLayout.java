@@ -165,6 +165,19 @@ public class StaticLayout extends Layout {
             return this;
         }
 
+        public Builder setIndents(int[] leftIndents, int[] rightIndents) {
+            int leftLen = leftIndents == null ? 0 : leftIndents.length;
+            int rightLen = rightIndents == null ? 0 : rightIndents.length;
+            int[] indents = new int[Math.max(leftLen, rightLen)];
+            for (int i = 0; i < indents.length; i++) {
+                int leftMargin = i < leftLen ? leftIndents[i] : 0;
+                int rightMargin = i < rightLen ? rightIndents[i] : 0;
+                indents[i] = leftMargin + rightMargin;
+            }
+            nSetIndents(mNativePtr, indents);
+            return this;
+        }
+
         /**
          * Measurement and break iteration is done in native code. The protocol for using
          * the native code is as follows.
@@ -1008,6 +1021,8 @@ public class StaticLayout extends Layout {
     /* package */ static native long nLoadHyphenator(String patternData);
 
     private static native void nSetLocale(long nativePtr, String locale, long nativeHyphenator);
+
+    private static native void nSetIndents(long nativePtr, int[] indents);
 
     // Set up paragraph text and settings; done as one big method to minimize jni crossings
     private static native void nSetupParagraph(long nativePtr, char[] text, int length,

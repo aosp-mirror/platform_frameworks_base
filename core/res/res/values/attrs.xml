@@ -4322,6 +4322,10 @@
             <!-- Line breaking stratgegy balances line lengths. -->
             <enum name="balanced" value="2" />
         </attr>
+        <!-- Array of indents, one dimension value per line, left side. -->
+        <attr name="leftIndents" format="reference" />
+        <!-- Array of indents, one dimension value per line, right side. -->
+        <attr name="rightIndents" format="reference" />
     </declare-styleable>
     <declare-styleable name="TextViewAppearance">
         <!-- Base text color, typeface, size, and style. -->

@@ -132,6 +132,13 @@ static void nSetLocale(JNIEnv* env, jclass, jlong nativePtr, jstring javaLocaleN
     }
 }
 
+static void nSetIndents(JNIEnv* env, jclass, jlong nativePtr, jintArray indents) {
+    ScopedIntArrayRO indentArr(env, indents);
+    std::vector<float> indentVec(indentArr.get(), indentArr.get() + indentArr.size());
+    LineBreaker* b = reinterpret_cast<LineBreaker*>(nativePtr);
+    b->setIndents(indentVec);
+}
+
 // Basically similar to Paint.getTextRunAdvances but with C++ interface
 static jfloat nAddStyleRun(JNIEnv* env, jclass, jlong nativePtr,
         jlong nativePaint, jlong nativeTypeface, jint start, jint end, jboolean isRtl) {
@@ -171,6 +178,7 @@ static JNINativeMethod gMethods[] = {
     {"nLoadHyphenator", "(Ljava/lang/String;)J", (void*) nLoadHyphenator},
     {"nSetLocale", "(JLjava/lang/String;J)V", (void*) nSetLocale},
     {"nSetupParagraph", "(J[CIFIF[III)V", (void*) nSetupParagraph},
+    {"nSetIndents", "(J[I)V", (void*) nSetIndents},
     {"nAddStyleRun", "(JJJIIZ)F", (void*) nAddStyleRun},
     {"nAddMeasuredRun", "(JII[F)V", (void*) nAddMeasuredRun},
     {"nAddReplacementRun", "(JIIF)V", (void*) nAddReplacementRun},
