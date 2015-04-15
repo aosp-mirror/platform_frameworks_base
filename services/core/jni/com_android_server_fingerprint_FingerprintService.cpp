@@ -136,14 +136,15 @@ static jint nativeEnroll(JNIEnv* env, jobject clazz, jbyteArray token, jint grou
         ALOG(LOG_VERBOSE, LOG_TAG, "nativeEnroll() : invalid token size %d\n", tokenSize);
         return -1;
     }
-    int ret = gContext.device->enroll(gContext.device, (hw_auth_token_t*) tokenData, groupId, timeout);
+    int ret = gContext.device->enroll(gContext.device,
+            reinterpret_cast<const hw_auth_token_t*>(tokenData), groupId, timeout);
     env->ReleaseByteArrayElements(token, tokenData, 0);
     return reinterpret_cast<jint>(ret);
 }
 
-static jint nativePreEnroll(JNIEnv* env, jobject clazz) {
+static jlong nativePreEnroll(JNIEnv* env, jobject clazz) {
     uint64_t ret = gContext.device->pre_enroll(gContext.device);
-    ALOG(LOG_VERBOSE, LOG_TAG, "nativePreEnroll(), result = %" PRId64 "\n", ret);
+    // ALOG(LOG_VERBOSE, LOG_TAG, "nativePreEnroll(), result = %llx", ret);
     return reinterpret_cast<jlong>((int64_t)ret);
 }
 
