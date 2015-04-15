@@ -139,7 +139,7 @@
     <dimen name="timepicker_selector_radius">20dp</dimen>
     <dimen name="timepicker_selector_stroke">2dp</dimen>
     <dimen name="timepicker_center_dot_radius">3dp</dimen>
-    <dimen name="timepicker_selector_dot_radius">3dp</dimen>
+    <dimen name="timepicker_selector_dot_radius">2dp</dimen>
     <dimen name="timepicker_text_inset_normal">22dp</dimen>
     <dimen name="timepicker_text_inset_inner">58dp</dimen>
     <dimen name="timepicker_text_size_normal">16sp</dimen>
