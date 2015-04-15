@@ -115,7 +115,16 @@ public class AppIdleController extends StateController
 
     @Override
     public void dumpControllerState(PrintWriter pw) {
-        // TODO:
+        pw.println("AppIdle");
+        pw.println("Plugged In: " + mPluggedIn);
+        synchronized (mTrackedTasks) {
+            for (JobStatus task : mTrackedTasks) {
+                pw.print(task.job.getService().getPackageName());
+                pw.print(":idle=" + !task.appNotIdleConstraintSatisfied.get());
+                pw.print(", ");
+            }
+            pw.println();
+        }
     }
 
     @Override
