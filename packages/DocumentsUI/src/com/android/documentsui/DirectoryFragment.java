@@ -687,6 +687,14 @@ public class DirectoryFragment extends Fragment {
                 Uri.EMPTY,
                 getActivity(),
                 DocumentsActivity.class);
+        boolean directoryCopy = false;
+        for (DocumentInfo info : docs) {
+            if (Document.MIME_TYPE_DIR.equals(info.mimeType)) {
+                directoryCopy = true;
+                break;
+            }
+        }
+        intent.putExtra(BaseActivity.EXTRA_DIRECTORY_COPY, directoryCopy);
         startActivityForResult(intent, REQUEST_COPY_DESTINATION);
     }
 
