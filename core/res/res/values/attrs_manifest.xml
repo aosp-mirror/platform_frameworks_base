@@ -501,8 +501,15 @@
     <attr name="excludeFromRecents" format="boolean" />
 
     <!-- Specify that an Activity should be shown over the lock screen and,
-         in a multiuser environment, across all users' windows -->
+         in a multiuser environment, across all users' windows.
+         @deprecated use {@link android.R.attr#showForAllUsers} instead. -->
     <attr name="showOnLockScreen" format="boolean" />
+
+    <!-- Specify that an Activity should be shown even if the current/foreground user
+         is different from the user of the Activity. This will also force the
+         <code>android.view.LayoutParams.FLAG_SHOW_WHEN_LOCKED</code> flag
+         to be set for all windows of this activity -->
+    <attr name="showForAllUsers" format="boolean" />
 
     <!-- Specify the authorities under which this content provider can be
          found.  Multiple authorities may be supplied by separating them
@@ -1761,6 +1768,7 @@
         <attr name="alwaysRetainTaskState" />
         <attr name="stateNotNeeded" />
         <attr name="excludeFromRecents" />
+        <!-- @deprecated use {@link android.R.attr#showForAllUsers} instead. -->
         <attr name="showOnLockScreen" />
         <!-- Specify whether the activity is enabled or not (that is, can be instantiated by the system).
              It can also be specified for an application as a whole, in which case a value of "false"
@@ -1789,6 +1797,7 @@
         <attr name="resumeWhilePausing" />
         <attr name="resizeableActivity" />
         <attr name="lockTaskMode" />
+        <attr name="showForAllUsers" />
     </declare-styleable>
 
     <!-- The <code>activity-alias</code> tag declares a new

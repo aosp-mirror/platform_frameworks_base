@@ -107,9 +107,9 @@ class Task {
         }
     }
 
-    boolean showWhenLocked() {
+    boolean showForAllUsers() {
         final int tokensCount = mAppTokens.size();
-        return (tokensCount != 0) && mAppTokens.get(tokensCount - 1).showWhenLocked;
+        return (tokensCount != 0) && mAppTokens.get(tokensCount - 1).showForAllUsers;
     }
 
     @Override

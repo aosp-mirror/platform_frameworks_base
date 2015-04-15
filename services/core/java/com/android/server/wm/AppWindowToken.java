@@ -56,7 +56,7 @@ class AppWindowToken extends WindowToken {
     boolean appFullscreen;
     int requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
     boolean layoutConfigChanges;
-    boolean showWhenLocked;
+    boolean showForAllUsers;
 
     // The input dispatching timeout for this application token in nanoseconds.
     long inputDispatchingTimeoutNanos;

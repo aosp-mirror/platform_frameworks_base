@@ -223,11 +223,12 @@ public class ActivityInfo extends ComponentInfo
      */
     public static final int FLAG_HARDWARE_ACCELERATED = 0x0200;
     /**
-     * Value for {@link #flags}: true when the application can be displayed over the lockscreen
-     * and consequently over all users' windows.
+     * Value for {@link #flags}: true when the application can be displayed for all users
+     * regardless of if the user of the application is the current user. Set from the
+     * {@link android.R.attr#showForAllUsers} attribute.
      * @hide
      */
-    public static final int FLAG_SHOW_ON_LOCK_SCREEN = 0x0400;
+    public static final int FLAG_SHOW_FOR_ALL_USERS = 0x0400;
     /**
      * Bit in {@link #flags} corresponding to an immersive activity
      * that wishes not to be interrupted by notifications.

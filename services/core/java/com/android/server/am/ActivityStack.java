@@ -16,7 +16,7 @@
 
 package com.android.server.am;
 
-import static android.content.pm.ActivityInfo.FLAG_SHOW_ON_LOCK_SCREEN;
+import static android.content.pm.ActivityInfo.FLAG_SHOW_FOR_ALL_USERS;
 
 import static com.android.server.am.ActivityManagerDebugConfig.*;
 
@@ -375,7 +375,7 @@ final class ActivityStack {
     }
 
     boolean okToShowLocked(ActivityRecord r) {
-        return isCurrentProfileLocked(r.userId) || (r.info.flags & FLAG_SHOW_ON_LOCK_SCREEN) != 0;
+        return isCurrentProfileLocked(r.userId) || (r.info.flags & FLAG_SHOW_FOR_ALL_USERS) != 0;
     }
 
     final ActivityRecord topRunningActivityLocked(ActivityRecord notTop) {
@@ -624,7 +624,7 @@ final class ActivityStack {
 
             for (int activityNdx = activities.size() - 1; activityNdx >= 0; --activityNdx) {
                 ActivityRecord r = activities.get(activityNdx);
-                if (notCurrentUserTask && (r.info.flags & FLAG_SHOW_ON_LOCK_SCREEN) == 0) {
+                if (notCurrentUserTask && (r.info.flags & FLAG_SHOW_FOR_ALL_USERS) == 0) {
                     return null;
                 }
                 if (!r.finishing && r.intent.getComponent().equals(cls) && r.userId == userId) {
@@ -2024,7 +2024,7 @@ final class ActivityStack {
         // Now put task at top.
         int taskNdx = mTaskHistory.size();
         final boolean notShownWhenLocked =
-                (newActivity != null && (newActivity.info.flags & FLAG_SHOW_ON_LOCK_SCREEN) == 0)
+                (newActivity != null && (newActivity.info.flags & FLAG_SHOW_FOR_ALL_USERS) == 0)
                 || (newActivity == null && task.topRunningActivityLocked(null) == null);
         if (!isCurrentProfileLocked(task.userId) && notShownWhenLocked) {
             // Put non-current user tasks below current user tasks.
@@ -2074,7 +2074,7 @@ final class ActivityStack {
                         r.putInHistory();
                         mWindowManager.addAppToken(task.mActivities.indexOf(r), r.appToken,
                                 r.task.taskId, mStackId, r.info.screenOrientation, r.fullscreen,
-                                (r.info.flags & ActivityInfo.FLAG_SHOW_ON_LOCK_SCREEN) != 0,
+                                (r.info.flags & ActivityInfo.FLAG_SHOW_FOR_ALL_USERS) != 0,
                                 r.userId, r.info.configChanges, task.voiceSession != null,
                                 r.mLaunchTaskBehind);
                         if (VALIDATE_TOKENS) {
@@ -2138,7 +2138,7 @@ final class ActivityStack {
             }
             mWindowManager.addAppToken(task.mActivities.indexOf(r),
                     r.appToken, r.task.taskId, mStackId, r.info.screenOrientation, r.fullscreen,
-                    (r.info.flags & ActivityInfo.FLAG_SHOW_ON_LOCK_SCREEN) != 0, r.userId,
+                    (r.info.flags & ActivityInfo.FLAG_SHOW_FOR_ALL_USERS) != 0, r.userId,
                     r.info.configChanges, task.voiceSession != null, r.mLaunchTaskBehind);
             boolean doShow = true;
             if (newTask) {
@@ -2190,7 +2190,7 @@ final class ActivityStack {
             // because there is nothing for it to animate on top of.
             mWindowManager.addAppToken(task.mActivities.indexOf(r), r.appToken,
                     r.task.taskId, mStackId, r.info.screenOrientation, r.fullscreen,
-                    (r.info.flags & ActivityInfo.FLAG_SHOW_ON_LOCK_SCREEN) != 0, r.userId,
+                    (r.info.flags & ActivityInfo.FLAG_SHOW_FOR_ALL_USERS) != 0, r.userId,
                     r.info.configChanges, task.voiceSession != null, r.mLaunchTaskBehind);
             ActivityOptions.abort(options);
             options = null;

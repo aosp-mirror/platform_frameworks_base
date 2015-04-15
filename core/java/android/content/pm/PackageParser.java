@@ -3099,8 +3099,9 @@ public class PackageParser {
             a.info.flags |= ActivityInfo.FLAG_FINISH_ON_CLOSE_SYSTEM_DIALOGS;
         }
 
-        if (sa.getBoolean(R.styleable.AndroidManifestActivity_showOnLockScreen, false)) {
-            a.info.flags |= ActivityInfo.FLAG_SHOW_ON_LOCK_SCREEN;
+        if (sa.getBoolean(R.styleable.AndroidManifestActivity_showOnLockScreen, false)
+                || sa.getBoolean(R.styleable.AndroidManifestActivity_showForAllUsers, false)) {
+            a.info.flags |= ActivityInfo.FLAG_SHOW_FOR_ALL_USERS;
         }
 
         if (sa.getBoolean(R.styleable.AndroidManifestActivity_immersive, false)) {
