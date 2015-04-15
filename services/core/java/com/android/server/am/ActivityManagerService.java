@@ -33,7 +33,6 @@ import static com.android.server.am.TaskRecord.INVALID_TASK_ID;
 import static com.android.server.am.TaskRecord.LOCK_TASK_AUTH_DONT_LOCK;
 import static com.android.server.am.TaskRecord.LOCK_TASK_AUTH_LAUNCHABLE;
 import static com.android.server.am.TaskRecord.LOCK_TASK_AUTH_PINNABLE;
-import static com.android.server.am.TaskRecord.LOCK_TASK_AUTH_WHITELISTED;
 import static org.xmlpull.v1.XmlPullParser.END_DOCUMENT;
 import static org.xmlpull.v1.XmlPullParser.START_TAG;
 
@@ -8658,6 +8657,17 @@ public final class ActivityManagerService extends ActivityManagerNative
     public int getLockTaskModeState() {
         synchronized (this) {
             return mStackSupervisor.getLockTaskModeState();
+        }
+    }
+
+    @Override
+    public void showLockTaskEscapeMessage(IBinder token) {
+        synchronized (this) {
+            final ActivityRecord r = ActivityRecord.forTokenLocked(token);
+            if (r == null) {
+                return;
+            }
+            mStackSupervisor.showLockTaskEscapeMessageLocked(r.task);
         }
     }
 

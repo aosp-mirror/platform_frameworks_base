@@ -3584,6 +3584,7 @@ package android.app {
     method public boolean shouldUpRecreateTask(android.content.Intent);
     method public final deprecated void showDialog(int);
     method public final deprecated boolean showDialog(int, android.os.Bundle);
+    method public void showLockTaskEscapeMessage();
     method public android.view.ActionMode startActionMode(android.view.ActionMode.Callback);
     method public android.view.ActionMode startActionMode(android.view.ActionMode.Callback, int);
     method public void startActivityForResult(android.content.Intent, int);

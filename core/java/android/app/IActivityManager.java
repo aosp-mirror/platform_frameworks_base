@@ -467,6 +467,8 @@ public interface IActivityManager extends IInterface {
 
     public int getLockTaskModeState() throws RemoteException;
 
+    public void showLockTaskEscapeMessage(IBinder token) throws RemoteException;
+
     public void setTaskDescription(IBinder token, ActivityManager.TaskDescription values)
             throws RemoteException;
     public void setTaskResizeable(int taskId, boolean resizeable) throws RemoteException;
@@ -834,4 +836,5 @@ public interface IActivityManager extends IInterface {
     int NOTE_ALARM_START_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+291;
     int NOTE_ALARM_FINISH_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+292;
     int GET_PACKAGE_PROCESS_STATE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+293;
+    int SHOW_LOCK_TASK_ESCAPE_MESSAGE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+294;
 }

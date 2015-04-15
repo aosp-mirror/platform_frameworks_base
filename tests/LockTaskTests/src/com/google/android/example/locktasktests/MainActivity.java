@@ -6,7 +6,6 @@ import android.app.ActivityManager;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 
 public class MainActivity extends Activity {
@@ -17,13 +16,16 @@ public class MainActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        setBackgroundOnLockTaskMode();
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        setBackgroundOnLockTaskMode();
+        ActivityManager activityManager =
+                (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
+        final int color = activityManager.getLockTaskModeState() !=
+                ActivityManager.LOCK_TASK_MODE_NONE ? 0xFFFFC0C0 : 0xFFFFFFFF;
+        findViewById(R.id.root_launch).setBackgroundColor(color);
     }
 
     public void onButtonPressed(View v) {
@@ -47,12 +49,7 @@ public class MainActivity extends Activity {
         startActivity(intent);
     }
 
-    private void setBackgroundOnLockTaskMode() {
-        ActivityManager activityManager =
-                (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
-        final int color =
-                activityManager.getLockTaskModeState() != ActivityManager.LOCK_TASK_MODE_NONE ?
-                        0xFFFFC0C0 : 0xFFFFFFFF;
-        findViewById(R.id.root_launch).setBackgroundColor(color);
+    public void onToast(View v) {
+        showLockTaskEscapeMessage();
     }
 }

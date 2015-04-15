@@ -21,47 +21,61 @@ import android.app.ActivityManager;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.view.View;
 import android.widget.EditText;
 
 public class LaunchActivity extends Activity {
 
-    EditText mEditText;
+    Runnable mBackgroundPolling;
+    boolean mRunning;
+    Handler mHandler;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_launch);
-        setBackgroundOnLockTaskMode();
+        mBackgroundPolling = new Runnable() {
+            @Override
+            public void run() {
+                if (!mRunning) {
+                    return;
+                }
+                ActivityManager activityManager =
+                        (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
+                final int color = activityManager.getLockTaskModeState() !=
+                        ActivityManager.LOCK_TASK_MODE_NONE ? 0xFFFFC0C0 : 0xFFFFFFFF;
+                findViewById(R.id.root_launch).setBackgroundColor(color);
+                mHandler.postDelayed(this, 1000);
+            }
+        };
+        mHandler = new Handler(Looper.getMainLooper());
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        setBackgroundOnLockTaskMode();
+        mRunning = true;
+        mBackgroundPolling.run();
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        mRunning = false;
     }
 
     public void onTryLock(View view) {
         startLockTask();
-        setBackgroundOnLockTaskMode();
     }
 
     public void onTryUnlock(View view) {
         stopLockTask();
-        setBackgroundOnLockTaskMode();
     }
 
     public void onLaunchMain(View view) {
         Intent intent = new Intent(this, MainActivity.class);
         startActivity(intent);
-    }
-
-    private void setBackgroundOnLockTaskMode() {
-        ActivityManager activityManager =
-                (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
-        final int color =
-                activityManager.getLockTaskModeState() != ActivityManager.LOCK_TASK_MODE_NONE ?
-                        0xFFFFC0C0 : 0xFFFFFFFF;
-        findViewById(R.id.root_launch).setBackgroundColor(color);
     }
 }
