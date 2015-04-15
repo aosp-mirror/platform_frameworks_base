@@ -25,6 +25,7 @@ import android.util.ArrayMap;
 import android.view.View;
 
 import com.android.systemui.statusbar.phone.NotificationGroupManager;
+import com.android.systemui.statusbar.policy.HeadsUpManager;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -37,6 +38,7 @@ import java.util.Comparator;
 public class NotificationData {
 
     private final Environment mEnvironment;
+    private HeadsUpManager mHeadsUpManager;
 
     public static final class Entry {
         public String key;
@@ -98,43 +100,47 @@ public class NotificationData {
     private RankingMap mRankingMap;
     private final Ranking mTmpRanking = new Ranking();
 
+    public void setHeadsUpManager(HeadsUpManager headsUpManager) {
+        mHeadsUpManager = headsUpManager;
+    }
+
     private final Comparator<Entry> mRankingComparator = new Comparator<Entry>() {
         private final Ranking mRankingA = new Ranking();
         private final Ranking mRankingB = new Ranking();
 
         @Override
         public int compare(Entry a, Entry b) {
-            // Upsort current media notification.
             String mediaNotification = mEnvironment.getCurrentMediaNotificationKey();
             boolean aMedia = a.key.equals(mediaNotification);
             boolean bMedia = b.key.equals(mediaNotification);
-            if (aMedia != bMedia) {
-                return aMedia ? -1 : 1;
-            }
 
             final StatusBarNotification na = a.notification;
             final StatusBarNotification nb = b.notification;
 
-            // Upsort PRIORITY_MAX system notifications
             boolean aSystemMax = na.getNotification().priority >= Notification.PRIORITY_MAX &&
                     isSystemNotification(na);
             boolean bSystemMax = nb.getNotification().priority >= Notification.PRIORITY_MAX &&
                     isSystemNotification(nb);
-            if (aSystemMax != bSystemMax) {
-                return aSystemMax ? -1 : 1;
-            }
+            int d = nb.getScore() - na.getScore();
 
-            // RankingMap as received from NoMan.
-            if (mRankingMap != null) {
+            boolean isHeadsUp = a.row.isHeadsUp();
+            if (isHeadsUp != b.row.isHeadsUp()) {
+                return isHeadsUp ? -1 : 1;
+            } else if (isHeadsUp) {
+                // Provide consistent ranking with headsUpManager
+                return mHeadsUpManager.compare(a, b);
+            } else if (aMedia != bMedia) {
+                // Upsort current media notification.
+                return aMedia ? -1 : 1;
+            } else if (aSystemMax != bSystemMax) {
+                // Upsort PRIORITY_MAX system notifications
+                return aSystemMax ? -1 : 1;
+            } else if (mRankingMap != null) {
+                // RankingMap as received from NoMan
                 mRankingMap.getRanking(a.key, mRankingA);
                 mRankingMap.getRanking(b.key, mRankingB);
                 return mRankingA.getRank() - mRankingB.getRank();
-            }
-
-            int d = nb.getScore() - na.getScore();
-            if (a.interruption != b.interruption) {
-                return a.interruption ? -1 : 1;
-            } else if (d != 0) {
+            } if (d != 0) {
                 return d;
             } else {
                 return (int) (nb.getNotification().when - na.getNotification().when);

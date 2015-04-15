@@ -18,6 +18,7 @@ package com.android.systemui.statusbar.phone;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
+import android.animation.PropertyValuesHolder;
 import android.animation.ValueAnimator;
 import android.content.Context;
 import android.graphics.Color;
@@ -29,13 +30,18 @@ import android.view.animation.Interpolator;
 
 import com.android.systemui.R;
 import com.android.systemui.statusbar.BackDropView;
+import com.android.systemui.statusbar.ExpandableNotificationRow;
+import com.android.systemui.statusbar.NotificationData;
 import com.android.systemui.statusbar.ScrimView;
+import com.android.systemui.statusbar.policy.HeadsUpManager;
+import com.android.systemui.statusbar.stack.StackStateAnimator;
 
 /**
  * Controls both the scrim behind the notifications and in front of the notifications (when a
  * security method gets shown).
  */
-public class ScrimController implements ViewTreeObserver.OnPreDrawListener {
+public class ScrimController implements ViewTreeObserver.OnPreDrawListener,
+        HeadsUpManager.OnHeadsUpChangedListener {
     public static final long ANIMATION_DURATION = 220;
 
     private static final float SCRIM_BEHIND_ALPHA = 0.62f;
@@ -43,10 +49,13 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener {
     private static final float SCRIM_BEHIND_ALPHA_UNLOCKING = 0.2f;
     private static final float SCRIM_IN_FRONT_ALPHA = 0.75f;
     private static final int TAG_KEY_ANIM = R.id.scrim;
+    private static final int TAG_HUN_START_ALPHA = R.id.hun_scrim_alpha_start;
+    private static final int TAG_HUN_END_ALPHA = R.id.hun_scrim_alpha_end;
 
     private final ScrimView mScrimBehind;
     private final ScrimView mScrimInFront;
     private final UnlockMethodCache mUnlockMethodCache;
+    private final View mHeadsUpScrim;
 
     private boolean mKeyguardShowing;
     private float mFraction;
@@ -70,15 +79,22 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener {
     private float mDozeBehindAlpha;
     private float mCurrentInFrontAlpha;
     private float mCurrentBehindAlpha;
+    private float mCurrentHeadsUpAlpha = 1;
+    private int mAmountOfPinnedHeadsUps;
+    private float mTopHeadsUpDragAmount;
+    private View mDraggedHeadsUpView;
 
-    public ScrimController(ScrimView scrimBehind, ScrimView scrimInFront, boolean scrimSrcEnabled) {
+    public ScrimController(ScrimView scrimBehind, ScrimView scrimInFront, View headsUpScrim,
+            boolean scrimSrcEnabled) {
         mScrimBehind = scrimBehind;
         mScrimInFront = scrimInFront;
+        mHeadsUpScrim = headsUpScrim;
         final Context context = scrimBehind.getContext();
         mUnlockMethodCache = UnlockMethodCache.getInstance(context);
         mLinearOutSlowInInterpolator = AnimationUtils.loadInterpolator(context,
                 android.R.interpolator.linear_out_slow_in);
         mScrimSrcEnabled = scrimSrcEnabled;
+        updateHeadsUpScrim(false);
     }
 
     public void setKeyguardShowing(boolean showing) {
@@ -217,7 +233,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener {
         }
     }
 
-    private void setScrimColor(ScrimView scrim, float alpha) {
+    private void setScrimColor(View scrim, float alpha) {
         Object runningAnim = scrim.getTag(TAG_KEY_ANIM);
         if (runningAnim instanceof ValueAnimator) {
             ((ValueAnimator) runningAnim).cancel();
@@ -236,25 +252,34 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener {
     }
 
     private float getCurrentScrimAlpha(View scrim) {
-        return scrim == mScrimBehind ? mCurrentBehindAlpha : mCurrentInFrontAlpha;
+        return scrim == mScrimBehind ? mCurrentBehindAlpha
+                : scrim == mScrimInFront ? mCurrentInFrontAlpha
+                : mCurrentHeadsUpAlpha;
     }
 
     private void setCurrentScrimAlpha(View scrim, float alpha) {
         if (scrim == mScrimBehind) {
             mCurrentBehindAlpha = alpha;
-        } else {
+        } else if (scrim == mScrimInFront) {
             mCurrentInFrontAlpha = alpha;
+        } else {
+            alpha = Math.max(0.0f, Math.min(1.0f, alpha));
+            mCurrentHeadsUpAlpha = alpha;
         }
     }
 
-    private void updateScrimColor(ScrimView scrim) {
+    private void updateScrimColor(View scrim) {
         float alpha1 = getCurrentScrimAlpha(scrim);
-        float alpha2 = getDozeAlpha(scrim);
-        float alpha = 1 - (1 - alpha1) * (1 - alpha2);
-        scrim.setScrimColor(Color.argb((int) (alpha * 255), 0, 0, 0));
+        if (scrim instanceof ScrimView) {
+            float alpha2 = getDozeAlpha(scrim);
+            float alpha = 1 - (1 - alpha1) * (1 - alpha2);
+            ((ScrimView) scrim).setScrimColor(Color.argb((int) (alpha * 255), 0, 0, 0));
+        } else {
+            scrim.setAlpha(alpha1);
+        }
     }
 
-    private void startScrimAnimation(final ScrimView scrim, float target) {
+    private void startScrimAnimation(final View scrim, float target) {
         float current = getCurrentScrimAlpha(scrim);
         ValueAnimator anim = ValueAnimator.ofFloat(current, target);
         anim.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
@@ -319,5 +344,85 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener {
     private void updateScrimBehindDrawingMode() {
         boolean asSrc = mBackDropView.getVisibility() != View.VISIBLE && mScrimSrcEnabled;
         mScrimBehind.setDrawAsSrc(asSrc);
+    }
+
+    @Override
+    public void OnPinnedHeadsUpExistChanged(boolean exist, boolean changeImmediatly) {
+    }
+
+    @Override
+    public void OnHeadsUpPinnedChanged(ExpandableNotificationRow headsUp, boolean isHeadsUp) {
+        if (isHeadsUp) {
+            mAmountOfPinnedHeadsUps++;
+        } else {
+            mAmountOfPinnedHeadsUps--;
+            if (headsUp == mDraggedHeadsUpView) {
+                mDraggedHeadsUpView = null;
+                mTopHeadsUpDragAmount = 0.0f;
+            }
+        }
+        updateHeadsUpScrim(true);
+    }
+
+    @Override
+    public void OnHeadsUpStateChanged(NotificationData.Entry entry, boolean isHeadsUp) {
+    }
+
+    private void updateHeadsUpScrim(boolean animate) {
+        float alpha = calculateHeadsUpAlpha();
+        ValueAnimator previousAnimator = StackStateAnimator.getChildTag(mHeadsUpScrim,
+                TAG_KEY_ANIM);
+        float animEndValue = -1;
+        if (previousAnimator != null) {
+            if ((animate || alpha == mCurrentHeadsUpAlpha)) {
+                // lets cancel any running animators
+                previousAnimator.cancel();
+            }
+            animEndValue = StackStateAnimator.getChildTag(mHeadsUpScrim,
+                    TAG_HUN_START_ALPHA);
+        }
+        if (alpha != mCurrentHeadsUpAlpha && alpha != animEndValue) {
+            if (animate) {
+                startScrimAnimation(mHeadsUpScrim, alpha);
+                mHeadsUpScrim.setTag(TAG_HUN_START_ALPHA, mCurrentHeadsUpAlpha);
+                mHeadsUpScrim.setTag(TAG_HUN_END_ALPHA, alpha);
+            } else {
+                if (previousAnimator != null) {
+                    float previousStartValue = StackStateAnimator.getChildTag(mHeadsUpScrim,
+                            TAG_HUN_START_ALPHA);
+                   float previousEndValue = StackStateAnimator.getChildTag(mHeadsUpScrim,
+                           TAG_HUN_END_ALPHA);
+                    // we need to increase all animation keyframes of the previous animator by the
+                    // relative change to the end value
+                    PropertyValuesHolder[] values = previousAnimator.getValues();
+                    float relativeDiff = alpha - previousEndValue;
+                    float newStartValue = previousStartValue + relativeDiff;
+                    values[0].setFloatValues(newStartValue, alpha);
+                    mHeadsUpScrim.setTag(TAG_HUN_START_ALPHA, newStartValue);
+                    mHeadsUpScrim.setTag(TAG_HUN_END_ALPHA, alpha);
+                    previousAnimator.setCurrentPlayTime(previousAnimator.getCurrentPlayTime());
+                } else {
+                    // update the alpha directly
+                    setCurrentScrimAlpha(mHeadsUpScrim, alpha);
+                    updateScrimColor(mHeadsUpScrim);
+                }
+            }
+        }
+    }
+
+    public void setTopHeadsUpDragAmount(View draggedHeadsUpView, float topHeadsUpDragAmount) {
+        mTopHeadsUpDragAmount = topHeadsUpDragAmount;
+        mDraggedHeadsUpView = draggedHeadsUpView;
+        updateHeadsUpScrim(false);
+    }
+
+    private float calculateHeadsUpAlpha() {
+        if (mAmountOfPinnedHeadsUps >= 2) {
+            return 1.0f;
+        } else if (mAmountOfPinnedHeadsUps == 0) {
+            return 0.0f;
+        } else {
+            return 1.0f - mTopHeadsUpDragAmount;
+        }
     }
 }

@@ -118,6 +118,7 @@ public abstract class ExpandableView extends FrameLayout {
                 setContentHeight(initialHeight);
             }
         }
+        updateClipping();
     }
 
     /**

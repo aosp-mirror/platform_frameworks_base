@@ -147,7 +147,7 @@
     <integer name="heads_up_default_snooze_length_ms">60000</integer>
 
     <!-- Minimum display time for a heads up notification, in milliseconds. -->
-    <integer name="heads_up_notification_minimum_time">3000</integer>
+    <integer name="heads_up_notification_minimum_time">2000</integer>
 
     <!-- milliseconds before the heads up notification accepts touches. -->
     <integer name="heads_up_sensitivity_delay">700</integer>

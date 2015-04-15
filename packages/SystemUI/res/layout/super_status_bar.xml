@@ -46,6 +46,13 @@
         android:layout_height="match_parent"
         android:importantForAccessibility="no" />
 
+    <com.android.systemui.statusbar.AlphaOptimizedView
+        android:id="@+id/heads_up_scrim"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/heads_up_scrim_height"
+        android:background="@drawable/heads_up_scrim"
+        android:importantForAccessibility="no"/>
+
     <include layout="@layout/status_bar"
         android:layout_width="match_parent"
         android:layout_height="@dimen/status_bar_height" />

@@ -123,19 +123,7 @@ public class TvStatusBar extends BaseStatusBar {
     }
 
     @Override
-    public void scheduleHeadsUpDecay(long delay) {
-    }
-
-    @Override
-    public void scheduleHeadsUpOpen() {
-    }
-
-    @Override
-    public void scheduleHeadsUpEscalation() {
-    }
-
-    @Override
-    public void scheduleHeadsUpClose() {
+    public void escalateHeadsUp() {
     }
 
     @Override

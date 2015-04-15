@@ -157,8 +157,7 @@ public class PanelBar extends FrameLayout {
         if (DEBUG) LOG("panelExpansionChanged: start state=%d panel=%s", mState, panel.getName());
         mPanelExpandedFractionSum = 0f;
         for (PanelView pv : mPanels) {
-            boolean visible = pv.getExpandedHeight() > 0;
-            pv.setVisibility(visible ? View.VISIBLE : View.GONE);
+            pv.setVisibility(expanded ? View.VISIBLE : View.INVISIBLE);
             // adjust any other panels that may be partially visible
             if (expanded) {
                 if (mState == STATE_CLOSED) {
@@ -167,7 +166,7 @@ public class PanelBar extends FrameLayout {
                 }
                 fullyClosed = false;
                 final float thisFrac = pv.getExpandedFraction();
-                mPanelExpandedFractionSum += (visible ? thisFrac : 0);
+                mPanelExpandedFractionSum += thisFrac;
                 if (DEBUG) LOG("panelExpansionChanged:  -> %s: f=%.1f", pv.getName(), thisFrac);
                 if (panel == pv) {
                     if (thisFrac == 1f) fullyOpenedPanel = panel;
@@ -196,7 +195,6 @@ public class PanelBar extends FrameLayout {
             } else {
                 pv.resetViews();
                 pv.setExpandedFraction(0); // just in case
-                pv.setVisibility(View.GONE);
                 pv.cancelPeek();
             }
         }
