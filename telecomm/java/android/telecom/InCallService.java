@@ -17,6 +17,7 @@
 package android.telecom;
 
 import android.annotation.SdkConstant;
+import android.annotation.SystemApi;
 import android.app.Service;
 import android.content.Intent;
 import android.os.Handler;
@@ -30,6 +31,8 @@ import com.android.internal.telecom.IInCallAdapter;
 import com.android.internal.telecom.IInCallService;
 
 import java.lang.String;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * This service is implemented by any app that wishes to provide the user-interface for managing
@@ -63,6 +66,7 @@ public abstract class InCallService extends Service {
             switch (msg.what) {
                 case MSG_SET_IN_CALL_ADAPTER:
                     mPhone = new Phone(new InCallAdapter((IInCallAdapter) msg.obj));
+                    mPhone.addListener(mPhoneListener);
                     onPhoneCreated(mPhone);
                     break;
                 case MSG_ADD_CALL:
@@ -144,6 +148,39 @@ public abstract class InCallService extends Service {
         }
     }
 
+    private Phone.Listener mPhoneListener = new Phone.Listener() {
+        /** ${inheritDoc} */
+        @Override
+        public void onAudioStateChanged(Phone phone, AudioState audioState) {
+            InCallService.this.onAudioStateChanged(audioState);
+        }
+
+        /** ${inheritDoc} */
+        @Override
+        public void onBringToForeground(Phone phone, boolean showDialpad) {
+            InCallService.this.onBringToForeground(showDialpad);
+        }
+
+        /** ${inheritDoc} */
+        @Override
+        public void onCallAdded(Phone phone, Call call) {
+            InCallService.this.onCallAdded(call);
+        }
+
+        /** ${inheritDoc} */
+        @Override
+        public void onCallRemoved(Phone phone, Call call) {
+            InCallService.this.onCallRemoved(call);
+        }
+
+        /** ${inheritDoc} */
+        @Override
+        public void onCanAddCallChanged(Phone phone, boolean canAddCall) {
+            InCallService.this.onCanAddCallChanged(canAddCall);
+        }
+
+    };
+
     private Phone mPhone;
 
     public InCallService() {
@@ -161,8 +198,14 @@ public abstract class InCallService extends Service {
             mPhone = null;
 
             oldPhone.destroy();
+            // destroy sets all the calls to disconnected if any live ones still exist. Therefore,
+            // it is important to remove the Listener *after* the call to destroy so that
+            // InCallService.on* callbacks are appropriately called.
+            oldPhone.removeListener(mPhoneListener);
+
             onPhoneDestroyed(oldPhone);
         }
+
         return false;
     }
 
@@ -172,9 +215,63 @@ public abstract class InCallService extends Service {
      * @return The {@code Phone} object associated with this {@code InCallService}, or {@code null}
      *         if the {@code InCallService} is not in a state where it has an associated
      *         {@code Phone}.
+     * @hide
      */
+    @SystemApi
     public final Phone getPhone() {
         return mPhone;
+    }
+
+    /**
+     * Obtains the current list of {@code Call}s to be displayed by this in-call experience.
+     *
+     * @return A list of the relevant {@code Call}s.
+     */
+    public final List<Call> getCalls() {
+        return mPhone == null ? Collections.<Call>emptyList() : mPhone.getCalls();
+    }
+
+    /**
+     * Returns if the device can support additional calls.
+     *
+     * @return Whether the phone supports adding more calls.
+     */
+    public final boolean canAddCall() {
+        return mPhone == null ? false : mPhone.canAddCall();
+    }
+
+    /**
+     * Obtains the current phone call audio state.
+     *
+     * @return An object encapsulating the audio state. Returns null if the service is not
+     *         fully initialized.
+     */
+    public final AudioState getAudioState() {
+        return mPhone == null ? null : mPhone.getAudioState();
+    }
+
+    /**
+     * Sets the microphone mute state. When this request is honored, there will be change to
+     * the {@link #getAudioState()}.
+     *
+     * @param state {@code true} if the microphone should be muted; {@code false} otherwise.
+     */
+    public final void setMuted(boolean state) {
+        if (mPhone != null) {
+            mPhone.setMuted(state);
+        }
+    }
+
+    /**
+     * Sets the audio route (speaker, bluetooth, etc...).  When this request is honored, there will
+     * be change to the {@link #getAudioState()}.
+     *
+     * @param route The audio route to use.
+     */
+    public final void setAudioRoute(int route) {
+        if (mPhone != null) {
+            mPhone.setAudioRoute(route);
+        }
     }
 
     /**
@@ -184,7 +281,9 @@ public abstract class InCallService extends Service {
      * of the {@code InCallService}.
      *
      * @param phone The {@code Phone} object associated with this {@code InCallService}.
+     * @hide
      */
+    @SystemApi
     public void onPhoneCreated(Phone phone) {
     }
 
@@ -195,8 +294,61 @@ public abstract class InCallService extends Service {
      * call to {@link #onPhoneCreated(Phone)}.
      *
      * @param phone The {@code Phone} object associated with this {@code InCallService}.
+     * @hide
      */
+    @SystemApi
     public void onPhoneDestroyed(Phone phone) {
+    }
+
+    /**
+     * Called when the audio state changes.
+     *
+     * @param audioState The new {@link AudioState}.
+     */
+    public void onAudioStateChanged(AudioState audioState) {
+    }
+
+    /**
+     * Called to bring the in-call screen to the foreground. The in-call experience should
+     * respond immediately by coming to the foreground to inform the user of the state of
+     * ongoing {@code Call}s.
+     *
+     * @param showDialpad If true, put up the dialpad when the screen is shown.
+     */
+    public void onBringToForeground(boolean showDialpad) {
+    }
+
+    /**
+     * Called when a {@code Call} has been added to this in-call session. The in-call user
+     * experience should add necessary state listeners to the specified {@code Call} and
+     * immediately start to show the user information about the existence
+     * and nature of this {@code Call}. Subsequent invocations of {@link #getCalls()} will
+     * include this {@code Call}.
+     *
+     * @param call A newly added {@code Call}.
+     */
+    public void onCallAdded(Call call) {
+    }
+
+    /**
+     * Called when a {@code Call} has been removed from this in-call session. The in-call user
+     * experience should remove any state listeners from the specified {@code Call} and
+     * immediately stop displaying any information about this {@code Call}.
+     * Subsequent invocations of {@link #getCalls()} will no longer include this {@code Call}.
+     *
+     * @param call A newly removed {@code Call}.
+     */
+    public void onCallRemoved(Call call) {
+    }
+
+    /**
+     * Called when the ability to add more calls changes.  If the phone cannot
+     * support more calls then {@code canAddCall} is set to {@code false}.  If it can, then it
+     * is set to {@code true}. This can be used to control the visibility of UI to add more calls.
+     *
+     * @param canAddCall Indicates whether an additional call can be added.
+     */
+    public void onCanAddCallChanged(boolean canAddCall) {
     }
 
     /**
@@ -378,8 +530,7 @@ public abstract class InCallService extends Service {
              *
              * @param cameraCapabilities The changed camera capabilities.
              */
-            public abstract void onCameraCapabilitiesChanged(
-                    CameraCapabilities cameraCapabilities);
+            public abstract void onCameraCapabilitiesChanged(CameraCapabilities cameraCapabilities);
         }
     }
 }
