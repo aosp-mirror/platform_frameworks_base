@@ -218,43 +218,28 @@
     <string name="android_system_label" msgid="6577375335728551336">"‏Android سسٹم"</string>
     <string name="user_owner_label" msgid="6465364741001216388">"ذاتی ایپس"</string>
     <string name="managed_profile_label" msgid="6260850669674791528">"دفتر"</string>
-    <!-- no translation found for permgrouplab_contacts (3657758145679177612) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_contacts (1437393511338346185) -->
-    <skip />
-    <!-- no translation found for permgrouplab_location (7275582855722310164) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_location (536889867433972794) -->
-    <skip />
+    <string name="permgrouplab_contacts" msgid="3657758145679177612">"رابطے"</string>
+    <string name="permgroupdesc_contacts" msgid="1437393511338346185">"اپنے رابطوں تک رسائی حاصل کریں اور ان میں ترمیم کریں"</string>
+    <string name="permgrouplab_location" msgid="7275582855722310164">"مقام"</string>
+    <string name="permgroupdesc_location" msgid="536889867433972794">"اپنے مقام تک رسائی حاصل کریں"</string>
     <string name="permgrouplab_socialInfo" msgid="5799096623412043791">"آپ کی سوشل معلومات"</string>
     <string name="permgroupdesc_socialInfo" msgid="7129842457611643493">"اپنے رابطوں اور سوشل کنکشنز کے بارے میں معلومات تک براہ راست رسائی۔"</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"کیلنڈر"</string>
-    <!-- no translation found for permgroupdesc_calendar (2116049656685591803) -->
-    <skip />
-    <!-- no translation found for permgrouplab_sms (228308803364967808) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_sms (3695085582674524761) -->
-    <skip />
-    <!-- no translation found for permgrouplab_dictionary (8114410334955871144) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_dictionary (7586787746354378335) -->
-    <skip />
+    <string name="permgroupdesc_calendar" msgid="2116049656685591803">"اپنے کیلنڈر تک رسائی حاصل کریں اور اس میں ترمیم کریں"</string>
+    <string name="permgrouplab_sms" msgid="228308803364967808">"SMS"</string>
+    <string name="permgroupdesc_sms" msgid="3695085582674524761">"‏SMS تک رسائی حاصل کریں اور اس میں ترمیم کریں"</string>
+    <string name="permgrouplab_dictionary" msgid="8114410334955871144">"صارف کی لغت"</string>
+    <string name="permgroupdesc_dictionary" msgid="7586787746354378335">"صارف کی لغت میں الفاظ پڑھیں یا لکھیں۔"</string>
     <string name="permgrouplab_bookmarks" msgid="1949519673103968229">"بُک مارکس اور سرگزشت"</string>
     <string name="permgroupdesc_bookmarks" msgid="4169771606257963028">"بک مارکس اور براؤزر کی سرگزشت تک براہ راست رسائی۔"</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"مائکروفون"</string>
-    <!-- no translation found for permgroupdesc_microphone (1296196977187629181) -->
-    <skip />
+    <string name="permgroupdesc_microphone" msgid="1296196977187629181">"آلہ کا مائیکروفون استعمال کریں"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"کیمرا"</string>
-    <!-- no translation found for permgroupdesc_camera (2429930670410559293) -->
-    <skip />
-    <!-- no translation found for permgrouplab_phone (5229115638567440675) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_phone (2016641188146068700) -->
-    <skip />
-    <!-- no translation found for permgrouplab_sensors (7416703484233940260) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_sensors (2987451839455524494) -->
-    <skip />
+    <string name="permgroupdesc_camera" msgid="2429930670410559293">"آلہ کا کیمرہ استعمال کریں"</string>
+    <string name="permgrouplab_phone" msgid="5229115638567440675">"فون"</string>
+    <string name="permgroupdesc_phone" msgid="2016641188146068700">"آلہ کا ٹیلیفونی استعمال کریں"</string>
+    <string name="permgrouplab_sensors" msgid="7416703484233940260">"سینسرز"</string>
+    <string name="permgroupdesc_sensors" msgid="2987451839455524494">"سینسرز اور ویئرایبلز تک رسائی حاصل کریں"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"ونڈو مواد کی بازیافت کریں"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"کسی ایسے ونڈو کے مواد کا معائنہ کریں جس کے ساتھ آپ تعامل کر رہے ہیں۔"</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"ٹچ کے ذریعے دریافت کریں کو آن کریں"</string>
@@ -444,15 +429,21 @@
     <string name="fingerprint_acquired_partial" msgid="735082772341716043">"جزوی فنگر پرنٹ کی شناخت ہوئی۔ براہ کرم دوبارہ کوشش کریں۔"</string>
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"فنگر پرنٹ پر کارروائی نہیں کی جا سکی۔ براہ کرم دوبارہ کوشش کریں۔"</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"فنگر پرنٹ سینسر گندا ہے۔ براہ کرم صاف کریں اور دوبارہ کوشش کریں۔"</string>
-    <string name="fingerprint_acquired_too_fast" msgid="5303368850245663580">"انگلی کو کافی تیزی سے ہٹا لیا گیا۔ براہ کرم دوبارہ کوشش کریں۔"</string>
+    <!-- no translation found for fingerprint_acquired_too_fast (6470642383109155969) -->
+    <skip />
     <string name="fingerprint_acquired_too_slow" msgid="7381891107120721078">"انگلی کو بہت آہستہ ہٹا لیا گیا۔ براہ کرم دوبارہ کوشش کریں۔"</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
-    <string name="fingerprint_error_unable_to_process" msgid="4232401562838100026">"کارروائی کرنے سے قاصر ہے۔ دوبارہ کوشش کریں۔"</string>
-    <string name="fingerprint_error_hw_not_available" msgid="6162709753784993771">"ہارڈ ویئر دستیاب نہیں ہے۔"</string>
+    <!-- no translation found for fingerprint_error_hw_not_available (7955921658939936596) -->
+    <skip />
     <string name="fingerprint_error_no_space" msgid="1055819001126053318">"فنگر پرنٹ اسٹور نہیں کیا جا سکتا ہے۔ براہ کرم ایک موجودہ فنگر پرنٹ ہٹائیں۔"</string>
     <string name="fingerprint_error_timeout" msgid="3927186043737732875">"فنگر پرنٹ کی میعاد ختم ہوگئی۔ دوبارہ کوشش کریں۔"</string>
-    <string name="fingerprint_error_vendor" msgid="3175724710791609491">"فنگر پرنٹ کی میعاد ختم ہوگئی۔ دوبارہ کوشش کریں۔"</string>
+    <!-- no translation found for fingerprint_error_canceled (4402024612660774395) -->
+    <skip />
+    <!-- no translation found for fingerprint_error_lockout (5536934748136933450) -->
+    <skip />
+    <!-- no translation found for fingerprint_error_unable_to_process (6107816084103552441) -->
+    <skip />
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"مطابقت پذیری کی ترتیبات پڑھیں"</string>
@@ -461,6 +452,8 @@
     <string name="permdesc_writeSyncSettings" msgid="8956262591306369868">"‏ایپ کو کسی اکاؤنٹ کیلئے مطابقت پذیری کی ترتیبات میں ترمیم کرنے کی اجازت دیتا ہے۔ مثلا، کسی اکاؤنٹ کے ساتھ People ایپ کی مطابقت پذیری فعال کرنے کیلئے اسے استعمال کیا جاسکتا ہے۔"</string>
     <string name="permlab_readSyncStats" msgid="7396577451360202448">"مطابقت پذیری کے اعداد و شمار پڑھیں"</string>
     <string name="permdesc_readSyncStats" msgid="1510143761757606156">"ایپ کو کسی اکاؤنٹ کیلئے مطابقت پذیری کے اعداد و شمار، بشمول مطابقت پذیری کے ایونٹس اور جس قدر ڈیٹا مطابقت پذیر ہے اس کی سرگزشت کو پڑھنے کی اجازت دیتا ہے۔"</string>
+    <string name="permlab_subscribedFeedsWrite" msgid="9015246325408209296">"سبسکرائب کردہ فیڈز لکھیں"</string>
+    <string name="permdesc_subscribedFeedsWrite" msgid="6928930188826089413">"ایپ کو فی الحال مطابقت پذیر کیے ہوئے آپ کے فیڈز میں ترمیم کرنے کی اجازت دیتا ہے۔ نقصان دہ ایپس مطابقت پذیر کیے ہوئے آپ کے فیڈز کو تبدیل کر سکتی ہیں۔"</string>
     <string name="permlab_readDictionary" msgid="4107101525746035718">"لغت میں اپنے ذریعہ شامل کردہ اصطلاحات کو پڑھیں"</string>
     <string name="permdesc_readDictionary" msgid="659614600338904243">"ایپ کو وہ سبھی الفاظ، نام اور فقرے پڑھنے کی اجازت دیتا ہے جو صارف نے صارف کی لغت میں محفوظ کیے ہو سکتے ہیں۔"</string>
     <string name="permlab_writeDictionary" msgid="2183110402314441106">"صارف کے ذریعہ متعین کردہ لغت میں الفاظ شامل کریں"</string>
@@ -635,7 +628,8 @@
     <string name="lockscreen_instructions_when_pattern_enabled" msgid="46154051614126049">"غیر مقفل کرنے کیلئے مینو دبائیں یا ہنگامی کال کریں۔"</string>
     <string name="lockscreen_instructions_when_pattern_disabled" msgid="686260028797158364">"غیر مقفل کرنے کیلئے مینو دبائیں۔"</string>
     <string name="lockscreen_pattern_instructions" msgid="7478703254964810302">"غیر مقفل کرنے کیلئے پیٹرن کو ڈرا کریں"</string>
-    <string name="lockscreen_emergency_call" msgid="5347633784401285225">"ہنگامی کال"</string>
+    <!-- no translation found for lockscreen_emergency_call (5298642613417801888) -->
+    <skip />
     <string name="lockscreen_return_to_call" msgid="5244259785500040021">"کال پر واپس جائیں"</string>
     <string name="lockscreen_pattern_correct" msgid="9039008650362261237">"صحیح!"</string>
     <string name="lockscreen_pattern_wrong" msgid="4317955014948108794">"دوبارہ کوشش کریں"</string>
@@ -1035,29 +1029,36 @@
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="candidates_style" msgid="4333913089637062257"><u>"امیدواران"</u></string>
-    <string name="ext_media_checking_notification_title" product="nosdcard" msgid="3449816005351468560">"‏USB اسٹوریج تیار ہو رہا ہے"</string>
-    <string name="ext_media_checking_notification_title" product="default" msgid="5457603418970994050">"‏SD کارڈ تیار ہو رہا ہے"</string>
-    <string name="ext_media_checking_notification_message" msgid="8287319882926737053">"خرابیاں چیک کر رہا ہے۔"</string>
-    <string name="ext_media_nofs_notification_title" product="nosdcard" msgid="7788040745686229307">"‏خالی USB اسٹوریج"</string>
-    <string name="ext_media_nofs_notification_title" product="default" msgid="780477838241212997">"‏خالی SD کارڈ"</string>
-    <string name="ext_media_nofs_notification_message" product="nosdcard" msgid="7840121067427269500">"‏USB اسٹوریج خالی ہے یا اس میں غیر تعاون یافتہ فائل سسٹم ہے۔"</string>
-    <string name="ext_media_nofs_notification_message" product="default" msgid="8641065641786923604">"‏SD کارڈ خالی ہے یا اس میں غیر تعاون یافتہ فائل سسٹم ہے۔"</string>
-    <string name="ext_media_unmountable_notification_title" product="nosdcard" msgid="2090046769532713563">"‏خراب USB اسٹوریج"</string>
-    <string name="ext_media_unmountable_notification_title" product="default" msgid="6410723906019100189">"‏خراب SD کارڈ"</string>
-    <string name="ext_media_unmountable_notification_message" product="nosdcard" msgid="1795917578395333280">"‏USB اسٹوریج خراب ہوگیا ہے۔ اسے دوبارہ فارمیٹ کرنے کی کوشش کریں۔"</string>
-    <string name="ext_media_unmountable_notification_message" product="default" msgid="1753898567525568253">"‏SD کارڈ خراب ہو گیا ہے۔ اسے دوبارہ فارمیٹ کرنے کی کوشش کریں۔"</string>
-    <string name="ext_media_badremoval_notification_title" product="nosdcard" msgid="1661683031330951073">"‏USB اسٹوریج اچانک ہٹا دیا گیا"</string>
-    <string name="ext_media_badremoval_notification_title" product="default" msgid="6872152882604407837">"‏SD کارڈ غیر متوقع طور پر ہٹا دیا گیا"</string>
-    <string name="ext_media_badremoval_notification_message" product="nosdcard" msgid="4329848819865594241">"‏ڈیٹا ضائع ہونے سے بچانے کیلئے ہٹانے سے پہلے USB اسٹوریج کو اَن ماؤنٹ کریں۔"</string>
-    <string name="ext_media_badremoval_notification_message" product="default" msgid="7260183293747448241">"‏ڈیٹا ضائع ہونے سے بچانے کیلئے ہٹانے سے پہلے SD کارڈ کو اَن ماؤنٹ کریں۔"</string>
-    <string name="ext_media_safe_unmount_notification_title" product="nosdcard" msgid="3967973893270360230">"‏USB اسٹوریج کو ہٹانا محفوظ ہے"</string>
-    <string name="ext_media_safe_unmount_notification_title" product="default" msgid="6729801130790616200">"‏SD کارڈ ہٹانا محفوظ ہے"</string>
-    <string name="ext_media_safe_unmount_notification_message" product="nosdcard" msgid="6142195361606493530">"‏آپ محفوظ طریقے سے USB اسٹوریج ہٹا سکتے ہیں۔"</string>
-    <string name="ext_media_safe_unmount_notification_message" product="default" msgid="568841278138377604">"‏آپ محفوظ طریقے سے SD کارڈ ہٹا سکتے ہیں۔"</string>
-    <string name="ext_media_nomedia_notification_title" product="nosdcard" msgid="4486377230140227651">"‏USB اسٹوریج کو ہٹا دیا گیا"</string>
-    <string name="ext_media_nomedia_notification_title" product="default" msgid="8902518030404381318">"‏SD کارڈ ہٹا دیا گیا"</string>
-    <string name="ext_media_nomedia_notification_message" product="nosdcard" msgid="6921126162580574143">"‏USB اسٹوریج کو ہٹا دیا گیا۔ نئے میڈیا داخل کریں۔"</string>
-    <string name="ext_media_nomedia_notification_message" product="default" msgid="3870120652983659641">"‏SD کارڈ ہٹا دیا گیا۔ ایک نیا کارڈ داخل کریں۔"</string>
+    <!-- no translation found for ext_media_checking_notification_title (5734005953288045806) -->
+    <skip />
+    <!-- no translation found for ext_media_checking_notification_message (4747432538578886744) -->
+    <skip />
+    <!-- no translation found for ext_media_new_notification_message (7589986898808506239) -->
+    <skip />
+    <!-- no translation found for ext_media_ready_notification_message (4083398150380114462) -->
+    <skip />
+    <!-- no translation found for ext_media_unmountable_notification_title (4863279349863279603) -->
+    <skip />
+    <!-- no translation found for ext_media_unmountable_notification_message (7391672496565685690) -->
+    <skip />
+    <!-- no translation found for ext_media_badremoval_notification_title (3206248947375505416) -->
+    <skip />
+    <!-- no translation found for ext_media_badremoval_notification_message (380176703346946313) -->
+    <skip />
+    <!-- no translation found for ext_media_nomedia_notification_title (1704840188641749091) -->
+    <skip />
+    <!-- no translation found for ext_media_nomedia_notification_message (6471542972147056586) -->
+    <skip />
+    <!-- no translation found for ext_media_unmounting_notification_title (640674168454809372) -->
+    <skip />
+    <!-- no translation found for ext_media_unmounting_notification_message (4182843895023357756) -->
+    <skip />
+    <!-- no translation found for ext_media_init_action (8317198948634872507) -->
+    <skip />
+    <!-- no translation found for ext_media_unmount_action (1121883233103278199) -->
+    <skip />
+    <!-- no translation found for ext_media_browse_action (8322172381028546087) -->
+    <skip />
     <string name="activity_list_empty" msgid="1675388330786841066">"کوئی مماثل سرگرمیاں نہیں ملیں۔"</string>
     <string name="permlab_route_media_output" msgid="1642024455750414694">"میڈیا آؤٹ پٹ کی سمت طے کریں"</string>
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"کسی ایپلیکیشن کو دوسرے خارجی آلات تک میڈیا آؤٹ پٹ کا راستہ بنانے کی اجازت دیتا ہے۔"</string>
@@ -1252,7 +1253,6 @@
     <string name="display_manager_overlay_display_name" msgid="5142365982271620716">"‏اوور لے ‎#<xliff:g id="ID">%1$d</xliff:g>"</string>
     <string name="display_manager_overlay_display_title" msgid="652124517672257172">"<xliff:g id="NAME">%1$s</xliff:g>: <xliff:g id="WIDTH">%2$d</xliff:g>x<xliff:g id="HEIGHT">%3$d</xliff:g>, <xliff:g id="DPI">%4$d</xliff:g> dpi"</string>
     <string name="display_manager_overlay_display_secure_suffix" msgid="6022119702628572080">"، محفوظ"</string>
-    <string name="kg_emergency_call_label" msgid="684946192523830531">"ہنگامی کال"</string>
     <string name="kg_forgot_pattern_button_text" msgid="8852021467868220608">"پیٹرن بھول گئے"</string>
     <string name="kg_wrong_pattern" msgid="1850806070801358830">"غلط پیٹرن"</string>
     <string name="kg_wrong_password" msgid="2333281762128113157">"غلط پاس ورڈ"</string>
@@ -1448,17 +1448,12 @@
     </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> تک"</string>
     <string name="zen_mode_forever" msgid="7420011936770086993">"جب تک آپ اسے آف نہ کر دیں"</string>
-    <!-- no translation found for zen_mode_rule_name_combination (191109939968076477) -->
-    <skip />
+    <string name="zen_mode_rule_name_combination" msgid="191109939968076477">"<xliff:g id="FIRST">%1$s</xliff:g> / <xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"سکیڑیں"</string>
-    <!-- no translation found for zen_mode_feature_name (289097150786114338) -->
-    <skip />
-    <!-- no translation found for zen_mode_downtime_feature_name (2626974636779860146) -->
-    <skip />
-    <!-- no translation found for zen_mode_default_weeknights_name (2069189413656431610) -->
-    <skip />
-    <!-- no translation found for zen_mode_default_weekends_name (2377398437072017011) -->
-    <skip />
+    <string name="zen_mode_feature_name" msgid="289097150786114338">"مداخلتیں مسدود کریں"</string>
+    <string name="zen_mode_downtime_feature_name" msgid="2626974636779860146">"ڈاؤن ٹائم"</string>
+    <string name="zen_mode_default_weeknights_name" msgid="2069189413656431610">"ہفتہ کی راتوں کو"</string>
+    <string name="zen_mode_default_weekends_name" msgid="2377398437072017011">"ویک اینڈز کو"</string>
     <string name="muted_by" msgid="6147073845094180001">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> کے ذریعے خاموش کردہ"</string>
     <string name="system_error_wipe_data" msgid="6608165524785354962">"آپ کے آلہ میں ایک داخلی مسئلہ ہے اور جب تک آپ فیکٹری ڈیٹا کو دوبارہ ترتیب نہیں دے دیتے ہیں، ہوسکتا ہے کہ یہ غیر مستحکم رہے۔"</string>
     <string name="system_error_manufacturer" msgid="8086872414744210668">"آپ کے آلہ میں ایک داخلی مسئلہ ہے۔ تفصیلات کیلئے اپنے مینوفیکچرر سے رابطہ کریں۔"</string>
@@ -1468,11 +1463,9 @@
     <string name="stk_cc_ss_to_dial" msgid="2151304435775557162">"‏SS درخواست میں ترمیم کر کے DIAL درخواست بنا دی گئی ہے۔"</string>
     <string name="stk_cc_ss_to_ussd" msgid="3951862188105305589">"‏SS درخواست میں ترمیم کر کے USSD درخواست بنا دی گئی ہے۔"</string>
     <string name="stk_cc_ss_to_ss" msgid="5470768854991452695">"‏SS درخواست میں ترمیم کر کے نئی SS درخواست بنا دی گئی ہے۔"</string>
-    <!-- no translation found for usb_midi_peripheral_name (7221113987741003817) -->
-    <skip />
+    <string name="usb_midi_peripheral_name" msgid="7221113987741003817">"‏Android USB پیرفرل پورٹ"</string>
     <string name="usb_midi_peripheral_manufacturer_name" msgid="7176526170008970168">"Android"</string>
-    <!-- no translation found for usb_midi_peripheral_product_name (4971827859165280403) -->
-    <skip />
+    <string name="usb_midi_peripheral_product_name" msgid="4971827859165280403">"‏USB پیرفرل پورٹ"</string>
     <string name="floating_toolbar_open_overflow_description" msgid="4797287862999444631">"مزید اختیارات"</string>
     <string name="floating_toolbar_close_overflow_description" msgid="559796923090723804">"اوورفلو بند کریں"</string>
 </resources>

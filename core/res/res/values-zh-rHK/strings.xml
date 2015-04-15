@@ -218,42 +218,28 @@
     <string name="android_system_label" msgid="6577375335728551336">"Android 系統"</string>
     <string name="user_owner_label" msgid="6465364741001216388">"個人應用程式"</string>
     <string name="managed_profile_label" msgid="6260850669674791528">"公司"</string>
-    <!-- no translation found for permgrouplab_contacts (3657758145679177612) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_contacts (1437393511338346185) -->
-    <skip />
-    <!-- no translation found for permgrouplab_location (7275582855722310164) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_location (536889867433972794) -->
-    <skip />
+    <string name="permgrouplab_contacts" msgid="3657758145679177612">"通訊錄"</string>
+    <string name="permgroupdesc_contacts" msgid="1437393511338346185">"存取和修改您的聯絡人"</string>
+    <string name="permgrouplab_location" msgid="7275582855722310164">"位置"</string>
+    <string name="permgroupdesc_location" msgid="536889867433972794">"存取您的位置"</string>
     <string name="permgrouplab_socialInfo" msgid="5799096623412043791">"您的社交資訊"</string>
     <string name="permgroupdesc_socialInfo" msgid="7129842457611643493">"直接存取您的聯絡人資訊和社交網站資訊。"</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"日曆"</string>
-    <!-- no translation found for permgroupdesc_calendar (2116049656685591803) -->
-    <skip />
-    <!-- no translation found for permgrouplab_sms (228308803364967808) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_sms (3695085582674524761) -->
-    <skip />
+    <string name="permgroupdesc_calendar" msgid="2116049656685591803">"存取和修改您的日曆"</string>
+    <string name="permgrouplab_sms" msgid="228308803364967808">"短訊"</string>
+    <string name="permgroupdesc_sms" msgid="3695085582674524761">"存取和修改短訊"</string>
     <string name="permgrouplab_dictionary" msgid="8114410334955871144">"使用者字典"</string>
-    <!-- no translation found for permgroupdesc_dictionary (7586787746354378335) -->
-    <skip />
+    <string name="permgroupdesc_dictionary" msgid="7586787746354378335">"讀取或寫入使用者字典中的字詞。"</string>
     <string name="permgrouplab_bookmarks" msgid="1949519673103968229">"書籤和記錄"</string>
     <string name="permgroupdesc_bookmarks" msgid="4169771606257963028">"直接存取書籤和瀏覽器紀錄。"</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"麥克風"</string>
-    <!-- no translation found for permgroupdesc_microphone (1296196977187629181) -->
-    <skip />
+    <string name="permgroupdesc_microphone" msgid="1296196977187629181">"使用裝置上的麥克風"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"相機"</string>
-    <!-- no translation found for permgroupdesc_camera (2429930670410559293) -->
-    <skip />
-    <!-- no translation found for permgrouplab_phone (5229115638567440675) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_phone (2016641188146068700) -->
-    <skip />
-    <!-- no translation found for permgrouplab_sensors (7416703484233940260) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_sensors (2987451839455524494) -->
-    <skip />
+    <string name="permgroupdesc_camera" msgid="2429930670410559293">"使用裝置上的相機"</string>
+    <string name="permgrouplab_phone" msgid="5229115638567440675">"電話"</string>
+    <string name="permgroupdesc_phone" msgid="2016641188146068700">"使用裝置上的電話"</string>
+    <string name="permgrouplab_sensors" msgid="7416703484233940260">"感應器"</string>
+    <string name="permgroupdesc_sensors" msgid="2987451839455524494">"存取感應器和穿戴式裝置"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"擷取視窗內容"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"檢查您使用中的視窗內容。"</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"開啟「輕觸探索」功能"</string>
@@ -443,15 +429,21 @@
     <string name="fingerprint_acquired_partial" msgid="735082772341716043">"只偵測到部分指紋。請再試一次。"</string>
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"無法處理指紋。請再試一次。"</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"指紋感應器不乾淨。請清潔後再試一次。"</string>
-    <string name="fingerprint_acquired_too_fast" msgid="5303368850245663580">"手指移動太快。請再試一次。"</string>
+    <!-- no translation found for fingerprint_acquired_too_fast (6470642383109155969) -->
+    <skip />
     <string name="fingerprint_acquired_too_slow" msgid="7381891107120721078">"手指移動太慢。請再試一次。"</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
-    <string name="fingerprint_error_unable_to_process" msgid="4232401562838100026">"無法處理。請再試一次。"</string>
-    <string name="fingerprint_error_hw_not_available" msgid="6162709753784993771">"硬件無法使用。"</string>
+    <!-- no translation found for fingerprint_error_hw_not_available (7955921658939936596) -->
+    <skip />
     <string name="fingerprint_error_no_space" msgid="1055819001126053318">"指紋無法儲存。請移除現有指紋。"</string>
     <string name="fingerprint_error_timeout" msgid="3927186043737732875">"指紋已逾時。請再試一次。"</string>
-    <string name="fingerprint_error_vendor" msgid="3175724710791609491">"指紋已逾時。請再試一次。"</string>
+    <!-- no translation found for fingerprint_error_canceled (4402024612660774395) -->
+    <skip />
+    <!-- no translation found for fingerprint_error_lockout (5536934748136933450) -->
+    <skip />
+    <!-- no translation found for fingerprint_error_unable_to_process (6107816084103552441) -->
+    <skip />
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"讀取同步處理設定"</string>
@@ -460,6 +452,8 @@
     <string name="permdesc_writeSyncSettings" msgid="8956262591306369868">"允許應用程式修改帳戶的同步設定，例如讓「通訊錄」應用程式與某個帳戶保持同步。"</string>
     <string name="permlab_readSyncStats" msgid="7396577451360202448">"讀取同步處理統計資料"</string>
     <string name="permdesc_readSyncStats" msgid="1510143761757606156">"允許應用程式讀取帳戶的同步統計資料，包括同步活動記錄，以及保持同步的資料量。"</string>
+    <string name="permlab_subscribedFeedsWrite" msgid="9015246325408209296">"寫入訂閱的資訊提供"</string>
+    <string name="permdesc_subscribedFeedsWrite" msgid="6928930188826089413">"允許應用程式修改目前已同步的資訊提供。惡意應用程式可能會更改已同步的資訊提供。"</string>
     <string name="permlab_readDictionary" msgid="4107101525746035718">"讀取加入字典中的字詞"</string>
     <string name="permdesc_readDictionary" msgid="659614600338904243">"允許應用程式讀取使用者儲存在使用者字典中的所有字詞、名稱和詞組。"</string>
     <string name="permlab_writeDictionary" msgid="2183110402314441106">"將字詞加入使用者定義字典"</string>
@@ -634,7 +628,7 @@
     <string name="lockscreen_instructions_when_pattern_enabled" msgid="46154051614126049">"按選單鍵解鎖或撥打緊急電話。"</string>
     <string name="lockscreen_instructions_when_pattern_disabled" msgid="686260028797158364">"按選單鍵解鎖。"</string>
     <string name="lockscreen_pattern_instructions" msgid="7478703254964810302">"畫出解鎖圖形以解除鎖定螢幕"</string>
-    <string name="lockscreen_emergency_call" msgid="5347633784401285225">"緊急電話"</string>
+    <string name="lockscreen_emergency_call" msgid="5298642613417801888">"緊急撥號"</string>
     <string name="lockscreen_return_to_call" msgid="5244259785500040021">"返回通話"</string>
     <string name="lockscreen_pattern_correct" msgid="9039008650362261237">"正確！"</string>
     <string name="lockscreen_pattern_wrong" msgid="4317955014948108794">"再試一次"</string>
@@ -1034,29 +1028,35 @@
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="candidates_style" msgid="4333913089637062257"><u>"待選項目"</u></string>
-    <string name="ext_media_checking_notification_title" product="nosdcard" msgid="3449816005351468560">"正在準備 USB 儲存裝置"</string>
-    <string name="ext_media_checking_notification_title" product="default" msgid="5457603418970994050">"正在準備 SD 卡"</string>
-    <string name="ext_media_checking_notification_message" msgid="8287319882926737053">"正在檢查錯誤。"</string>
-    <string name="ext_media_nofs_notification_title" product="nosdcard" msgid="7788040745686229307">"USB 儲存裝置無內容"</string>
-    <string name="ext_media_nofs_notification_title" product="default" msgid="780477838241212997">"SD 卡為空白"</string>
-    <string name="ext_media_nofs_notification_message" product="nosdcard" msgid="7840121067427269500">"USB 儲存裝置空白，或使用不受支援的檔案系統。"</string>
-    <string name="ext_media_nofs_notification_message" product="default" msgid="8641065641786923604">"SD 記憶卡空白，或使用不受支援的檔案系統。"</string>
-    <string name="ext_media_unmountable_notification_title" product="nosdcard" msgid="2090046769532713563">"USB 儲存裝置已損壞"</string>
-    <string name="ext_media_unmountable_notification_title" product="default" msgid="6410723906019100189">"SD 卡已損壞"</string>
-    <string name="ext_media_unmountable_notification_message" product="nosdcard" msgid="1795917578395333280">"USB 儲存裝置已損壞。請嘗試將儲存裝置重新格式化。"</string>
-    <string name="ext_media_unmountable_notification_message" product="default" msgid="1753898567525568253">"SD 記憶卡已損壞。請嘗試將記憶卡重新格式化。"</string>
-    <string name="ext_media_badremoval_notification_title" product="nosdcard" msgid="1661683031330951073">"USB 儲存裝置未正常移除"</string>
-    <string name="ext_media_badremoval_notification_title" product="default" msgid="6872152882604407837">"SD 卡突然遭移除"</string>
-    <string name="ext_media_badremoval_notification_message" product="nosdcard" msgid="4329848819865594241">"請先卸載 USB 儲存裝置，再將其移除，以免資料遺失。"</string>
-    <string name="ext_media_badremoval_notification_message" product="default" msgid="7260183293747448241">"請先卸載 SD 卡，再將其移除，以免資料遺失。"</string>
-    <string name="ext_media_safe_unmount_notification_title" product="nosdcard" msgid="3967973893270360230">"現在可安全移除 USB 儲存裝置"</string>
-    <string name="ext_media_safe_unmount_notification_title" product="default" msgid="6729801130790616200">"可安全移除 SD 卡"</string>
-    <string name="ext_media_safe_unmount_notification_message" product="nosdcard" msgid="6142195361606493530">"您現在可以安全移除 USB 儲存裝置。"</string>
-    <string name="ext_media_safe_unmount_notification_message" product="default" msgid="568841278138377604">"您現在可以安全地移除 SD 卡。"</string>
-    <string name="ext_media_nomedia_notification_title" product="nosdcard" msgid="4486377230140227651">"USB 儲存裝置已移除"</string>
-    <string name="ext_media_nomedia_notification_title" product="default" msgid="8902518030404381318">"已移除 SD 卡"</string>
-    <string name="ext_media_nomedia_notification_message" product="nosdcard" msgid="6921126162580574143">"USB 儲存裝置已移除，請插入新媒體。"</string>
-    <string name="ext_media_nomedia_notification_message" product="default" msgid="3870120652983659641">"SD 卡已移除，請插入新的 SD 卡。"</string>
+    <!-- no translation found for ext_media_checking_notification_title (5734005953288045806) -->
+    <skip />
+    <string name="ext_media_checking_notification_message" msgid="4747432538578886744">"正在檢查錯誤"</string>
+    <!-- no translation found for ext_media_new_notification_message (7589986898808506239) -->
+    <skip />
+    <!-- no translation found for ext_media_ready_notification_message (4083398150380114462) -->
+    <skip />
+    <!-- no translation found for ext_media_unmountable_notification_title (4863279349863279603) -->
+    <skip />
+    <!-- no translation found for ext_media_unmountable_notification_message (7391672496565685690) -->
+    <skip />
+    <!-- no translation found for ext_media_badremoval_notification_title (3206248947375505416) -->
+    <skip />
+    <!-- no translation found for ext_media_badremoval_notification_message (380176703346946313) -->
+    <skip />
+    <!-- no translation found for ext_media_nomedia_notification_title (1704840188641749091) -->
+    <skip />
+    <!-- no translation found for ext_media_nomedia_notification_message (6471542972147056586) -->
+    <skip />
+    <!-- no translation found for ext_media_unmounting_notification_title (640674168454809372) -->
+    <skip />
+    <!-- no translation found for ext_media_unmounting_notification_message (4182843895023357756) -->
+    <skip />
+    <!-- no translation found for ext_media_init_action (8317198948634872507) -->
+    <skip />
+    <!-- no translation found for ext_media_unmount_action (1121883233103278199) -->
+    <skip />
+    <!-- no translation found for ext_media_browse_action (8322172381028546087) -->
+    <skip />
     <string name="activity_list_empty" msgid="1675388330786841066">"找不到相符的活動。"</string>
     <string name="permlab_route_media_output" msgid="1642024455750414694">"轉送媒體輸出"</string>
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"允許應用程式將媒體輸出轉送至其他外部裝置。"</string>
@@ -1251,7 +1251,6 @@
     <string name="display_manager_overlay_display_name" msgid="5142365982271620716">"重疊效果 #<xliff:g id="ID">%1$d</xliff:g>"</string>
     <string name="display_manager_overlay_display_title" msgid="652124517672257172">"<xliff:g id="NAME">%1$s</xliff:g>：<xliff:g id="WIDTH">%2$d</xliff:g>x<xliff:g id="HEIGHT">%3$d</xliff:g>，<xliff:g id="DPI">%4$d</xliff:g> dpi"</string>
     <string name="display_manager_overlay_display_secure_suffix" msgid="6022119702628572080">"(安全)"</string>
-    <string name="kg_emergency_call_label" msgid="684946192523830531">"緊急電話"</string>
     <string name="kg_forgot_pattern_button_text" msgid="8852021467868220608">"忘記圖案"</string>
     <string name="kg_wrong_pattern" msgid="1850806070801358830">"圖案錯誤"</string>
     <string name="kg_wrong_password" msgid="2333281762128113157">"密碼錯誤"</string>
@@ -1447,17 +1446,12 @@
     </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"完成時間：<xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_forever" msgid="7420011936770086993">"直至您關閉這項設定"</string>
-    <!-- no translation found for zen_mode_rule_name_combination (191109939968076477) -->
-    <skip />
+    <string name="zen_mode_rule_name_combination" msgid="191109939968076477">"<xliff:g id="FIRST">%1$s</xliff:g>/<xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"收合"</string>
-    <!-- no translation found for zen_mode_feature_name (289097150786114338) -->
-    <skip />
-    <!-- no translation found for zen_mode_downtime_feature_name (2626974636779860146) -->
-    <skip />
-    <!-- no translation found for zen_mode_default_weeknights_name (2069189413656431610) -->
-    <skip />
-    <!-- no translation found for zen_mode_default_weekends_name (2377398437072017011) -->
-    <skip />
+    <string name="zen_mode_feature_name" msgid="289097150786114338">"封鎖干擾"</string>
+    <string name="zen_mode_downtime_feature_name" msgid="2626974636779860146">"停機時間"</string>
+    <string name="zen_mode_default_weeknights_name" msgid="2069189413656431610">"星期一至星期五晚"</string>
+    <string name="zen_mode_default_weekends_name" msgid="2377398437072017011">"週末"</string>
     <string name="muted_by" msgid="6147073845094180001">"靜音設定者：<xliff:g id="THIRD_PARTY">%1$s</xliff:g>"</string>
     <string name="system_error_wipe_data" msgid="6608165524785354962">"您裝置的系統發生問題，回復原廠設定後即可解決該問題。"</string>
     <string name="system_error_manufacturer" msgid="8086872414744210668">"您裝置的系統發生問題，請聯絡您的製造商瞭解詳情。"</string>
@@ -1467,11 +1461,9 @@
     <string name="stk_cc_ss_to_dial" msgid="2151304435775557162">"SS 要求已修改為 DIAL 要求。"</string>
     <string name="stk_cc_ss_to_ussd" msgid="3951862188105305589">"SS 要求已修改為 USSD 要求。"</string>
     <string name="stk_cc_ss_to_ss" msgid="5470768854991452695">"SS 要求已修改為新的 SS 要求。"</string>
-    <!-- no translation found for usb_midi_peripheral_name (7221113987741003817) -->
-    <skip />
+    <string name="usb_midi_peripheral_name" msgid="7221113987741003817">"Android USB 外端連接埠"</string>
     <string name="usb_midi_peripheral_manufacturer_name" msgid="7176526170008970168">"Android"</string>
-    <!-- no translation found for usb_midi_peripheral_product_name (4971827859165280403) -->
-    <skip />
+    <string name="usb_midi_peripheral_product_name" msgid="4971827859165280403">"USB 外端連接埠"</string>
     <string name="floating_toolbar_open_overflow_description" msgid="4797287862999444631">"更多選項"</string>
     <string name="floating_toolbar_close_overflow_description" msgid="559796923090723804">"關閉工具列溢位功能"</string>
 </resources>

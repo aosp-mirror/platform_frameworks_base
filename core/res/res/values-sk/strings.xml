@@ -220,42 +220,28 @@
     <string name="android_system_label" msgid="6577375335728551336">"Systém Android"</string>
     <string name="user_owner_label" msgid="6465364741001216388">"Osobné aplikácie"</string>
     <string name="managed_profile_label" msgid="6260850669674791528">"Práca"</string>
-    <!-- no translation found for permgrouplab_contacts (3657758145679177612) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_contacts (1437393511338346185) -->
-    <skip />
-    <!-- no translation found for permgrouplab_location (7275582855722310164) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_location (536889867433972794) -->
-    <skip />
+    <string name="permgrouplab_contacts" msgid="3657758145679177612">"Kontakty"</string>
+    <string name="permgroupdesc_contacts" msgid="1437393511338346185">"prístup ku kontaktom a ich úprava"</string>
+    <string name="permgrouplab_location" msgid="7275582855722310164">"Poloha"</string>
+    <string name="permgroupdesc_location" msgid="536889867433972794">"prístup k polohe"</string>
     <string name="permgrouplab_socialInfo" msgid="5799096623412043791">"Vaše sociálne informácie"</string>
     <string name="permgroupdesc_socialInfo" msgid="7129842457611643493">"Priamy prístup k informáciám o vašich kontaktoch a sociálnych prepojeniach."</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"Kalendár"</string>
-    <!-- no translation found for permgroupdesc_calendar (2116049656685591803) -->
-    <skip />
-    <!-- no translation found for permgrouplab_sms (228308803364967808) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_sms (3695085582674524761) -->
-    <skip />
+    <string name="permgroupdesc_calendar" msgid="2116049656685591803">"prístup ku kalendáru a jeho úprava"</string>
+    <string name="permgrouplab_sms" msgid="228308803364967808">"SMS"</string>
+    <string name="permgroupdesc_sms" msgid="3695085582674524761">"prístup k správam SMS a ich úprava"</string>
     <string name="permgrouplab_dictionary" msgid="8114410334955871144">"Používateľský slovník"</string>
-    <!-- no translation found for permgroupdesc_dictionary (7586787746354378335) -->
-    <skip />
+    <string name="permgroupdesc_dictionary" msgid="7586787746354378335">"Čítanie a zadávanie slov v používateľskom slovníku."</string>
     <string name="permgrouplab_bookmarks" msgid="1949519673103968229">"Záložky a história"</string>
     <string name="permgroupdesc_bookmarks" msgid="4169771606257963028">"Priamy prístup k záložkám a histórii prehliadača."</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"Mikrofón"</string>
-    <!-- no translation found for permgroupdesc_microphone (1296196977187629181) -->
-    <skip />
+    <string name="permgroupdesc_microphone" msgid="1296196977187629181">"používanie mikrofónu zariadenia"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"Fotoaparát"</string>
-    <!-- no translation found for permgroupdesc_camera (2429930670410559293) -->
-    <skip />
-    <!-- no translation found for permgrouplab_phone (5229115638567440675) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_phone (2016641188146068700) -->
-    <skip />
-    <!-- no translation found for permgrouplab_sensors (7416703484233940260) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_sensors (2987451839455524494) -->
-    <skip />
+    <string name="permgroupdesc_camera" msgid="2429930670410559293">"používanie fotoaparátu zariadenia"</string>
+    <string name="permgrouplab_phone" msgid="5229115638567440675">"Telefón"</string>
+    <string name="permgroupdesc_phone" msgid="2016641188146068700">"používanie telefonických služieb zariadenia"</string>
+    <string name="permgrouplab_sensors" msgid="7416703484233940260">"Senzory"</string>
+    <string name="permgroupdesc_sensors" msgid="2987451839455524494">"prístup k senzorom a nositeľným zariadeniam"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Načítať obsah okna"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Preskúmať obsah okna s ktorým interagujete."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Zapnúť funkciu Preskúmanie dotykom"</string>
@@ -445,15 +431,21 @@
     <string name="fingerprint_acquired_partial" msgid="735082772341716043">"Podarilo sa rozpoznať iba časť odtlačku prsta. Skúste to znova."</string>
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"Odtlačok prsta sa nepodarilo spracovať. Skúste to znova."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"Snímač odtlačkov je špinavý. Vyčistite ho a skúste to znova."</string>
-    <string name="fingerprint_acquired_too_fast" msgid="5303368850245663580">"Pohli ste prstom príliš rýchlo. Skúste to znova."</string>
+    <!-- no translation found for fingerprint_acquired_too_fast (6470642383109155969) -->
+    <skip />
     <string name="fingerprint_acquired_too_slow" msgid="7381891107120721078">"Pohli ste prstom príliš pomaly. Skúste to znova."</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
-    <string name="fingerprint_error_unable_to_process" msgid="4232401562838100026">"Došlo k chybe spracovania. Skúste to znova."</string>
-    <string name="fingerprint_error_hw_not_available" msgid="6162709753784993771">"Hardvér nie je k dispozícii"</string>
+    <!-- no translation found for fingerprint_error_hw_not_available (7955921658939936596) -->
+    <skip />
     <string name="fingerprint_error_no_space" msgid="1055819001126053318">"Odtlačok prsta nie je možné uložiť. Odstráňte existujúci odtlačok."</string>
     <string name="fingerprint_error_timeout" msgid="3927186043737732875">"Časový limit rozpoznania odtlačku vypršal. Skúste to znova."</string>
-    <string name="fingerprint_error_vendor" msgid="3175724710791609491">"Časový limit rozpoznania odtlačku vypršal. Skúste to znova."</string>
+    <!-- no translation found for fingerprint_error_canceled (4402024612660774395) -->
+    <skip />
+    <!-- no translation found for fingerprint_error_lockout (5536934748136933450) -->
+    <skip />
+    <!-- no translation found for fingerprint_error_unable_to_process (6107816084103552441) -->
+    <skip />
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"čítať nastavenia synchronizácie"</string>
@@ -462,6 +454,8 @@
     <string name="permdesc_writeSyncSettings" msgid="8956262591306369868">"Umožňuje aplikácii upraviť nastavenia synchronizácie v účte. Pomocou tohto povolenia je možné napríklad povoliť synchronizáciu aplikácie Ľudia s účtom."</string>
     <string name="permlab_readSyncStats" msgid="7396577451360202448">"čítať štatistické údaje o synchronizácii"</string>
     <string name="permdesc_readSyncStats" msgid="1510143761757606156">"Umožňuje aplikácii čítať štatistické informácie o synchronizácii v účte vrátane histórie uskutočnených synchronizácií a informácií o množstve synchronizovaných údajov."</string>
+    <string name="permlab_subscribedFeedsWrite" msgid="9015246325408209296">"zapisovať odoberané informačné kanály"</string>
+    <string name="permdesc_subscribedFeedsWrite" msgid="6928930188826089413">"Umožňuje aplikácii upraviť vaše aktuálne synchronizované informačné kanály. Škodlivé aplikácie môžu synchronizované informačné kanály zmeniť."</string>
     <string name="permlab_readDictionary" msgid="4107101525746035718">"čítať výrazy pridané do slovníka"</string>
     <string name="permdesc_readDictionary" msgid="659614600338904243">"Umožňuje aplikácii čítať všetky slová, názvy a frázy, ktoré mohol používateľ uložiť do svojho slovníka."</string>
     <string name="permlab_writeDictionary" msgid="2183110402314441106">"pridať slová do slovníka definovaného používateľom"</string>
@@ -636,7 +630,8 @@
     <string name="lockscreen_instructions_when_pattern_enabled" msgid="46154051614126049">"Ak chcete odomknúť telefón alebo uskutočniť tiesňové volanie, stlačte Menu."</string>
     <string name="lockscreen_instructions_when_pattern_disabled" msgid="686260028797158364">"Telefón odomknete stlačením tlačidla Menu."</string>
     <string name="lockscreen_pattern_instructions" msgid="7478703254964810302">"Odomknite nakreslením vzoru"</string>
-    <string name="lockscreen_emergency_call" msgid="5347633784401285225">"Tiesňové volanie"</string>
+    <!-- no translation found for lockscreen_emergency_call (5298642613417801888) -->
+    <skip />
     <string name="lockscreen_return_to_call" msgid="5244259785500040021">"Zavolať späť"</string>
     <string name="lockscreen_pattern_correct" msgid="9039008650362261237">"Správne!"</string>
     <string name="lockscreen_pattern_wrong" msgid="4317955014948108794">"Skúsiť znova"</string>
@@ -1048,29 +1043,36 @@
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" AÁÄBCČDĎDZDŽEÉFGHCHIÍJKLĽMNŇOÓÔPRŔSŠTŤUÚVWXYÝZŽ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="candidates_style" msgid="4333913089637062257"><u>"kandidáti"</u></string>
-    <string name="ext_media_checking_notification_title" product="nosdcard" msgid="3449816005351468560">"Príprava uklad. priestoru USB"</string>
-    <string name="ext_media_checking_notification_title" product="default" msgid="5457603418970994050">"Príprava karty SD"</string>
-    <string name="ext_media_checking_notification_message" msgid="8287319882926737053">"Kontrola chýb."</string>
-    <string name="ext_media_nofs_notification_title" product="nosdcard" msgid="7788040745686229307">"Prázdny ukladací priestor USB"</string>
-    <string name="ext_media_nofs_notification_title" product="default" msgid="780477838241212997">"Prázdna karta SD"</string>
-    <string name="ext_media_nofs_notification_message" product="nosdcard" msgid="7840121067427269500">"Ukladací priestor USB je prázdny alebo obsahuje nepodporovaný systém súborov."</string>
-    <string name="ext_media_nofs_notification_message" product="default" msgid="8641065641786923604">"Karta SD je prázdna alebo obsahuje nepodporovaný systém súborov."</string>
-    <string name="ext_media_unmountable_notification_title" product="nosdcard" msgid="2090046769532713563">"Ukl. priestor USB je poškodený"</string>
-    <string name="ext_media_unmountable_notification_title" product="default" msgid="6410723906019100189">"Poškodená karta SD"</string>
-    <string name="ext_media_unmountable_notification_message" product="nosdcard" msgid="1795917578395333280">"Ukladací priestor USB je poškodený. Skúste ho preformátovať."</string>
-    <string name="ext_media_unmountable_notification_message" product="default" msgid="1753898567525568253">"Karta SD je poškodená. Skúste ju preformátovať."</string>
-    <string name="ext_media_badremoval_notification_title" product="nosdcard" msgid="1661683031330951073">"Ukl. priestor USB nečakane odstránený"</string>
-    <string name="ext_media_badremoval_notification_title" product="default" msgid="6872152882604407837">"Karta SD bola neočakávane odobraná"</string>
-    <string name="ext_media_badremoval_notification_message" product="nosdcard" msgid="4329848819865594241">"Ak chcete zabrániť strate údajov, ukladací priestor USB pred odobratím odpojte."</string>
-    <string name="ext_media_badremoval_notification_message" product="default" msgid="7260183293747448241">"Ak chcete zabrániť strate údajov, kartu SD pred odobratím odpojte."</string>
-    <string name="ext_media_safe_unmount_notification_title" product="nosdcard" msgid="3967973893270360230">"Ukl. priestor USB môžete odobrať"</string>
-    <string name="ext_media_safe_unmount_notification_title" product="default" msgid="6729801130790616200">"Kartu SD je možné bezpečne odobrať"</string>
-    <string name="ext_media_safe_unmount_notification_message" product="nosdcard" msgid="6142195361606493530">"Ukladací priestor USB môžete bezpečne odstrániť."</string>
-    <string name="ext_media_safe_unmount_notification_message" product="default" msgid="568841278138377604">"Kartu SD je možné bezpečne odobrať."</string>
-    <string name="ext_media_nomedia_notification_title" product="nosdcard" msgid="4486377230140227651">"Ukl. priestor USB odstránený"</string>
-    <string name="ext_media_nomedia_notification_title" product="default" msgid="8902518030404381318">"Karta SD bola odobraná"</string>
-    <string name="ext_media_nomedia_notification_message" product="nosdcard" msgid="6921126162580574143">"Ukladací priestor USB odstránený. Vložte nové médium."</string>
-    <string name="ext_media_nomedia_notification_message" product="default" msgid="3870120652983659641">"Karta SD bola odobraná. Vložte novú kartu."</string>
+    <!-- no translation found for ext_media_checking_notification_title (5734005953288045806) -->
+    <skip />
+    <!-- no translation found for ext_media_checking_notification_message (4747432538578886744) -->
+    <skip />
+    <!-- no translation found for ext_media_new_notification_message (7589986898808506239) -->
+    <skip />
+    <!-- no translation found for ext_media_ready_notification_message (4083398150380114462) -->
+    <skip />
+    <!-- no translation found for ext_media_unmountable_notification_title (4863279349863279603) -->
+    <skip />
+    <!-- no translation found for ext_media_unmountable_notification_message (7391672496565685690) -->
+    <skip />
+    <!-- no translation found for ext_media_badremoval_notification_title (3206248947375505416) -->
+    <skip />
+    <!-- no translation found for ext_media_badremoval_notification_message (380176703346946313) -->
+    <skip />
+    <!-- no translation found for ext_media_nomedia_notification_title (1704840188641749091) -->
+    <skip />
+    <!-- no translation found for ext_media_nomedia_notification_message (6471542972147056586) -->
+    <skip />
+    <!-- no translation found for ext_media_unmounting_notification_title (640674168454809372) -->
+    <skip />
+    <!-- no translation found for ext_media_unmounting_notification_message (4182843895023357756) -->
+    <skip />
+    <!-- no translation found for ext_media_init_action (8317198948634872507) -->
+    <skip />
+    <!-- no translation found for ext_media_unmount_action (1121883233103278199) -->
+    <skip />
+    <!-- no translation found for ext_media_browse_action (8322172381028546087) -->
+    <skip />
     <string name="activity_list_empty" msgid="1675388330786841066">"Nenašli sa žiadne zodpovedajúce aktivity."</string>
     <string name="permlab_route_media_output" msgid="1642024455750414694">"Smerovanie výstupu médií"</string>
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"Umožňuje aplikácii smerovať výstup médií do ďalších externých zariadení."</string>
@@ -1267,7 +1269,6 @@
     <string name="display_manager_overlay_display_name" msgid="5142365982271620716">"Prekrytie č. <xliff:g id="ID">%1$d</xliff:g>"</string>
     <string name="display_manager_overlay_display_title" msgid="652124517672257172">"<xliff:g id="NAME">%1$s</xliff:g>: <xliff:g id="WIDTH">%2$d</xliff:g> x <xliff:g id="HEIGHT">%3$d</xliff:g>, <xliff:g id="DPI">%4$d</xliff:g> dpi"</string>
     <string name="display_manager_overlay_display_secure_suffix" msgid="6022119702628572080">", zabezpečené"</string>
-    <string name="kg_emergency_call_label" msgid="684946192523830531">"Tiesňové volanie"</string>
     <string name="kg_forgot_pattern_button_text" msgid="8852021467868220608">"Nepamätám si vzor"</string>
     <string name="kg_wrong_pattern" msgid="1850806070801358830">"Nesprávny vzor"</string>
     <string name="kg_wrong_password" msgid="2333281762128113157">"Nesprávne heslo"</string>
@@ -1473,17 +1474,12 @@
     </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"Do <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_forever" msgid="7420011936770086993">"Dokým túto funkciu nevypnete"</string>
-    <!-- no translation found for zen_mode_rule_name_combination (191109939968076477) -->
-    <skip />
+    <string name="zen_mode_rule_name_combination" msgid="191109939968076477">"<xliff:g id="FIRST">%1$s</xliff:g> / <xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"Zbaliť"</string>
-    <!-- no translation found for zen_mode_feature_name (289097150786114338) -->
-    <skip />
-    <!-- no translation found for zen_mode_downtime_feature_name (2626974636779860146) -->
-    <skip />
-    <!-- no translation found for zen_mode_default_weeknights_name (2069189413656431610) -->
-    <skip />
-    <!-- no translation found for zen_mode_default_weekends_name (2377398437072017011) -->
-    <skip />
+    <string name="zen_mode_feature_name" msgid="289097150786114338">"Blokovanie prerušení"</string>
+    <string name="zen_mode_downtime_feature_name" msgid="2626974636779860146">"Odstávka"</string>
+    <string name="zen_mode_default_weeknights_name" msgid="2069189413656431610">"Noci cez týždeň"</string>
+    <string name="zen_mode_default_weekends_name" msgid="2377398437072017011">"Víkendy"</string>
     <string name="muted_by" msgid="6147073845094180001">"Stlmené aplikáciou <xliff:g id="THIRD_PARTY">%1$s</xliff:g>"</string>
     <string name="system_error_wipe_data" msgid="6608165524785354962">"Vo vašom zariadení došlo k internému problému. Môže byť nestabilné, kým neobnovíte jeho továrenské nastavenia."</string>
     <string name="system_error_manufacturer" msgid="8086872414744210668">"Vo vašom zariadení došlo k internému problému. Ak chcete získať podrobné informácie, obráťte sa na jeho výrobcu."</string>
@@ -1493,11 +1489,9 @@
     <string name="stk_cc_ss_to_dial" msgid="2151304435775557162">"Žiadosť SS bola upravená na žiadosť DIAL."</string>
     <string name="stk_cc_ss_to_ussd" msgid="3951862188105305589">"Žiadosť SS bola upravená na žiadosť USSD."</string>
     <string name="stk_cc_ss_to_ss" msgid="5470768854991452695">"Žiadosť SS bola upravená na novú žiadosť SS."</string>
-    <!-- no translation found for usb_midi_peripheral_name (7221113987741003817) -->
-    <skip />
+    <string name="usb_midi_peripheral_name" msgid="7221113987741003817">"Port USB pre periférne zariadenia s Androidom"</string>
     <string name="usb_midi_peripheral_manufacturer_name" msgid="7176526170008970168">"Android"</string>
-    <!-- no translation found for usb_midi_peripheral_product_name (4971827859165280403) -->
-    <skip />
+    <string name="usb_midi_peripheral_product_name" msgid="4971827859165280403">"Port USB pre periférne zariadenia"</string>
     <string name="floating_toolbar_open_overflow_description" msgid="4797287862999444631">"Ďalšie možnosti"</string>
     <string name="floating_toolbar_close_overflow_description" msgid="559796923090723804">"Zatvoriť rozbaľovaciu ponuku"</string>
 </resources>

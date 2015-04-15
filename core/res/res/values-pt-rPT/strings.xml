@@ -218,42 +218,28 @@
     <string name="android_system_label" msgid="6577375335728551336">"Sistema Android"</string>
     <string name="user_owner_label" msgid="6465364741001216388">"Aplicações pessoais"</string>
     <string name="managed_profile_label" msgid="6260850669674791528">"Trabalho"</string>
-    <!-- no translation found for permgrouplab_contacts (3657758145679177612) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_contacts (1437393511338346185) -->
-    <skip />
-    <!-- no translation found for permgrouplab_location (7275582855722310164) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_location (536889867433972794) -->
-    <skip />
+    <string name="permgrouplab_contacts" msgid="3657758145679177612">"Contactos"</string>
+    <string name="permgroupdesc_contacts" msgid="1437393511338346185">"aceder e modificar os contactos"</string>
+    <string name="permgrouplab_location" msgid="7275582855722310164">"Localização"</string>
+    <string name="permgroupdesc_location" msgid="536889867433972794">"aceder à sua localização"</string>
     <string name="permgrouplab_socialInfo" msgid="5799096623412043791">"As suas informações sociais"</string>
     <string name="permgroupdesc_socialInfo" msgid="7129842457611643493">"Acesso direto às informações sobre os seus contactos e ligações sociais."</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"Calendário"</string>
-    <!-- no translation found for permgroupdesc_calendar (2116049656685591803) -->
-    <skip />
-    <!-- no translation found for permgrouplab_sms (228308803364967808) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_sms (3695085582674524761) -->
-    <skip />
+    <string name="permgroupdesc_calendar" msgid="2116049656685591803">"aceder e modificar o calendário"</string>
+    <string name="permgrouplab_sms" msgid="228308803364967808">"SMS"</string>
+    <string name="permgroupdesc_sms" msgid="3695085582674524761">"aceder e modificar SMS"</string>
     <string name="permgrouplab_dictionary" msgid="8114410334955871144">"Dicionário do Utilizador"</string>
-    <!-- no translation found for permgroupdesc_dictionary (7586787746354378335) -->
-    <skip />
+    <string name="permgroupdesc_dictionary" msgid="7586787746354378335">"Ler ou escrever palavras no dicionário do utilizador."</string>
     <string name="permgrouplab_bookmarks" msgid="1949519673103968229">"Marcadores e Histórico"</string>
     <string name="permgroupdesc_bookmarks" msgid="4169771606257963028">"Acesso direto aos marcadores e histórico do navegador."</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"Microfone"</string>
-    <!-- no translation found for permgroupdesc_microphone (1296196977187629181) -->
-    <skip />
+    <string name="permgroupdesc_microphone" msgid="1296196977187629181">"utilizar o microfone do dispositivo"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"Câmara"</string>
-    <!-- no translation found for permgroupdesc_camera (2429930670410559293) -->
-    <skip />
-    <!-- no translation found for permgrouplab_phone (5229115638567440675) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_phone (2016641188146068700) -->
-    <skip />
-    <!-- no translation found for permgrouplab_sensors (7416703484233940260) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_sensors (2987451839455524494) -->
-    <skip />
+    <string name="permgroupdesc_camera" msgid="2429930670410559293">"utilizar a câmara do dispositivo"</string>
+    <string name="permgrouplab_phone" msgid="5229115638567440675">"Telemóvel"</string>
+    <string name="permgroupdesc_phone" msgid="2016641188146068700">"utilizar a telefonia do dispositivo"</string>
+    <string name="permgrouplab_sensors" msgid="7416703484233940260">"Sensores"</string>
+    <string name="permgroupdesc_sensors" msgid="2987451839455524494">"aceder a sensores e a dispositivos de vestir"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Obter conteúdo da janela"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Inspecionar o conteúdo de uma janela com a qual está a interagir."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Ativar Explorar Através do Toque"</string>
@@ -443,15 +429,21 @@
     <string name="fingerprint_acquired_partial" msgid="735082772341716043">"Impressão digital detetada. Tente novamente."</string>
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"Não foi possível processar a impressão digital. Tente novamente."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"O sensor de impressões digitais está sujo. Limpe-o e tente novamente."</string>
-    <string name="fingerprint_acquired_too_fast" msgid="5303368850245663580">"O dedo moveu-se demasiado rápido. Tente novamente."</string>
+    <!-- no translation found for fingerprint_acquired_too_fast (6470642383109155969) -->
+    <skip />
     <string name="fingerprint_acquired_too_slow" msgid="7381891107120721078">"O dedo moveu-se demasiado devagar. Tente novamente."</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
-    <string name="fingerprint_error_unable_to_process" msgid="4232401562838100026">"Não é possível processar. Tente novamente."</string>
-    <string name="fingerprint_error_hw_not_available" msgid="6162709753784993771">"Hardware não disponível."</string>
+    <!-- no translation found for fingerprint_error_hw_not_available (7955921658939936596) -->
+    <skip />
     <string name="fingerprint_error_no_space" msgid="1055819001126053318">"Não é possível armazenar a impressão digital. Remova uma impressão digital existente."</string>
     <string name="fingerprint_error_timeout" msgid="3927186043737732875">"Foi atingido o limite de tempo da impressão digital. Tente novamente."</string>
-    <string name="fingerprint_error_vendor" msgid="3175724710791609491">"Foi atingido o limite de tempo da impressão digital. Tente novamente."</string>
+    <!-- no translation found for fingerprint_error_canceled (4402024612660774395) -->
+    <skip />
+    <!-- no translation found for fingerprint_error_lockout (5536934748136933450) -->
+    <skip />
+    <!-- no translation found for fingerprint_error_unable_to_process (6107816084103552441) -->
+    <skip />
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"ler definições de sincronização"</string>
@@ -460,6 +452,8 @@
     <string name="permdesc_writeSyncSettings" msgid="8956262591306369868">"Permite que uma aplicação modifique as definições de sincronização de uma conta. Por exemplo, pode ser utilizada para ativar a sincronização da aplicação Pessoas com uma conta."</string>
     <string name="permlab_readSyncStats" msgid="7396577451360202448">"ler estatísticas de sincronização"</string>
     <string name="permdesc_readSyncStats" msgid="1510143761757606156">"Permite que uma aplicação leia o estado de sincronização de uma conta, incluindo o histórico de eventos de sincronização e a quantidade de dados sincronizados."</string>
+    <string name="permlab_subscribedFeedsWrite" msgid="9015246325408209296">"escrever feeds subscritos"</string>
+    <string name="permdesc_subscribedFeedsWrite" msgid="6928930188826089413">"Permite à aplicação modificar os feeds atualmente sincronizados. Isto pode permitir a uma aplicação maliciosa alterar os seus feeds sincronizados."</string>
     <string name="permlab_readDictionary" msgid="4107101525746035718">"ler os termos adicionados ao dicionário"</string>
     <string name="permdesc_readDictionary" msgid="659614600338904243">"Permite que a aplicação leia todas as palavras, nomes e expressões que o utilizador possa ter guardado no dicionário do utilizador."</string>
     <string name="permlab_writeDictionary" msgid="2183110402314441106">"adicionar palavras ao dicionário definido pelo utilizador"</string>
@@ -634,7 +628,8 @@
     <string name="lockscreen_instructions_when_pattern_enabled" msgid="46154051614126049">"Prima Menu para desbloquear ou efectuar uma chamada de emergência."</string>
     <string name="lockscreen_instructions_when_pattern_disabled" msgid="686260028797158364">"Prima Menu para desbloquear."</string>
     <string name="lockscreen_pattern_instructions" msgid="7478703254964810302">"Desenhar padrão para desbloquear"</string>
-    <string name="lockscreen_emergency_call" msgid="5347633784401285225">"Chamada de emergência"</string>
+    <!-- no translation found for lockscreen_emergency_call (5298642613417801888) -->
+    <skip />
     <string name="lockscreen_return_to_call" msgid="5244259785500040021">"Regressar à chamada"</string>
     <string name="lockscreen_pattern_correct" msgid="9039008650362261237">"Correcto!"</string>
     <string name="lockscreen_pattern_wrong" msgid="4317955014948108794">"Tentar novamente"</string>
@@ -1034,29 +1029,35 @@
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="candidates_style" msgid="4333913089637062257"><u>"candidatos"</u></string>
-    <string name="ext_media_checking_notification_title" product="nosdcard" msgid="3449816005351468560">"Preparar armazenamento USB"</string>
-    <string name="ext_media_checking_notification_title" product="default" msgid="5457603418970994050">"A preparar cartão SD"</string>
-    <string name="ext_media_checking_notification_message" msgid="8287319882926737053">"A verificar a presença de erros."</string>
-    <string name="ext_media_nofs_notification_title" product="nosdcard" msgid="7788040745686229307">"Armazenamento USB vazio"</string>
-    <string name="ext_media_nofs_notification_title" product="default" msgid="780477838241212997">"Cartão SD vazio"</string>
-    <string name="ext_media_nofs_notification_message" product="nosdcard" msgid="7840121067427269500">"A memória de armazenamento USB está vazia ou tem um sistema de ficheiros não suportado."</string>
-    <string name="ext_media_nofs_notification_message" product="default" msgid="8641065641786923604">"O cartão SD está vazio ou tem um sistema de ficheiros não suportado."</string>
-    <string name="ext_media_unmountable_notification_title" product="nosdcard" msgid="2090046769532713563">"Armazenamento USB danificado"</string>
-    <string name="ext_media_unmountable_notification_title" product="default" msgid="6410723906019100189">"Cartão SD danificado"</string>
-    <string name="ext_media_unmountable_notification_message" product="nosdcard" msgid="1795917578395333280">"A memória de armazenamento USB está danificada. Tente reformatá-la."</string>
-    <string name="ext_media_unmountable_notification_message" product="default" msgid="1753898567525568253">"O cartão SD está danificado. Tente reformatá-lo."</string>
-    <string name="ext_media_badremoval_notification_title" product="nosdcard" msgid="1661683031330951073">"Armaz. USB removido inesperad."</string>
-    <string name="ext_media_badremoval_notification_title" product="default" msgid="6872152882604407837">"Cartão SD removido de forma inesperada"</string>
-    <string name="ext_media_badremoval_notification_message" product="nosdcard" msgid="4329848819865594241">"Desmonte o armazenamento USB antes de removê-lo para evitar a perda de dados."</string>
-    <string name="ext_media_badremoval_notification_message" product="default" msgid="7260183293747448241">"Desmonte o cartão SD antes de retirá-lo para evitar a perda de dados."</string>
-    <string name="ext_media_safe_unmount_notification_title" product="nosdcard" msgid="3967973893270360230">"Seguro remover armaz. USB"</string>
-    <string name="ext_media_safe_unmount_notification_title" product="default" msgid="6729801130790616200">"É seguro retirar o cartão SD"</string>
-    <string name="ext_media_safe_unmount_notification_message" product="nosdcard" msgid="6142195361606493530">"Pode remover o armazenamento USB com segurança."</string>
-    <string name="ext_media_safe_unmount_notification_message" product="default" msgid="568841278138377604">"Pode remover o cartão SD com segurança."</string>
-    <string name="ext_media_nomedia_notification_title" product="nosdcard" msgid="4486377230140227651">"Armazenamento USB removido"</string>
-    <string name="ext_media_nomedia_notification_title" product="default" msgid="8902518030404381318">"Cartão SD removido"</string>
-    <string name="ext_media_nomedia_notification_message" product="nosdcard" msgid="6921126162580574143">"O armazenamento USB foi removido. Insira um novo suporte de dados."</string>
-    <string name="ext_media_nomedia_notification_message" product="default" msgid="3870120652983659641">"Cartão SD removido. Insira um novo cartão."</string>
+    <!-- no translation found for ext_media_checking_notification_title (5734005953288045806) -->
+    <skip />
+    <string name="ext_media_checking_notification_message" msgid="4747432538578886744">"A verificar a presença de erros"</string>
+    <!-- no translation found for ext_media_new_notification_message (7589986898808506239) -->
+    <skip />
+    <!-- no translation found for ext_media_ready_notification_message (4083398150380114462) -->
+    <skip />
+    <!-- no translation found for ext_media_unmountable_notification_title (4863279349863279603) -->
+    <skip />
+    <!-- no translation found for ext_media_unmountable_notification_message (7391672496565685690) -->
+    <skip />
+    <!-- no translation found for ext_media_badremoval_notification_title (3206248947375505416) -->
+    <skip />
+    <!-- no translation found for ext_media_badremoval_notification_message (380176703346946313) -->
+    <skip />
+    <!-- no translation found for ext_media_nomedia_notification_title (1704840188641749091) -->
+    <skip />
+    <!-- no translation found for ext_media_nomedia_notification_message (6471542972147056586) -->
+    <skip />
+    <!-- no translation found for ext_media_unmounting_notification_title (640674168454809372) -->
+    <skip />
+    <!-- no translation found for ext_media_unmounting_notification_message (4182843895023357756) -->
+    <skip />
+    <!-- no translation found for ext_media_init_action (8317198948634872507) -->
+    <skip />
+    <!-- no translation found for ext_media_unmount_action (1121883233103278199) -->
+    <skip />
+    <!-- no translation found for ext_media_browse_action (8322172381028546087) -->
+    <skip />
     <string name="activity_list_empty" msgid="1675388330786841066">"Não foi encontrada nenhuma atividade correspondente."</string>
     <string name="permlab_route_media_output" msgid="1642024455750414694">"Encaminhar saída de som multimédia"</string>
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"Permite que a aplicação encaminhe a saída de som multimédia para outros dispositivos externos."</string>
@@ -1251,7 +1252,6 @@
     <string name="display_manager_overlay_display_name" msgid="5142365982271620716">"Sobreposição #<xliff:g id="ID">%1$d</xliff:g>"</string>
     <string name="display_manager_overlay_display_title" msgid="652124517672257172">"<xliff:g id="NAME">%1$s</xliff:g>: <xliff:g id="WIDTH">%2$d</xliff:g>x<xliff:g id="HEIGHT">%3$d</xliff:g>, <xliff:g id="DPI">%4$d</xliff:g> ppp"</string>
     <string name="display_manager_overlay_display_secure_suffix" msgid="6022119702628572080">", protegido"</string>
-    <string name="kg_emergency_call_label" msgid="684946192523830531">"Chamada de emergência"</string>
     <string name="kg_forgot_pattern_button_text" msgid="8852021467868220608">"Esqueceu-se da Sequência"</string>
     <string name="kg_wrong_pattern" msgid="1850806070801358830">"Sequência Incorreta"</string>
     <string name="kg_wrong_password" msgid="2333281762128113157">"Palavra-passe Incorreta"</string>
@@ -1447,17 +1447,12 @@
     </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"Até às <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_forever" msgid="7420011936770086993">"Até que o utilizador desative"</string>
-    <!-- no translation found for zen_mode_rule_name_combination (191109939968076477) -->
-    <skip />
+    <string name="zen_mode_rule_name_combination" msgid="191109939968076477">"<xliff:g id="FIRST">%1$s</xliff:g>/<xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"Reduzir"</string>
-    <!-- no translation found for zen_mode_feature_name (289097150786114338) -->
-    <skip />
-    <!-- no translation found for zen_mode_downtime_feature_name (2626974636779860146) -->
-    <skip />
-    <!-- no translation found for zen_mode_default_weeknights_name (2069189413656431610) -->
-    <skip />
-    <!-- no translation found for zen_mode_default_weekends_name (2377398437072017011) -->
-    <skip />
+    <string name="zen_mode_feature_name" msgid="289097150786114338">"Bloquear interrupções"</string>
+    <string name="zen_mode_downtime_feature_name" msgid="2626974636779860146">"Período de inatividade"</string>
+    <string name="zen_mode_default_weeknights_name" msgid="2069189413656431610">"Noites de dias úteis"</string>
+    <string name="zen_mode_default_weekends_name" msgid="2377398437072017011">"Fins de semana"</string>
     <string name="muted_by" msgid="6147073845094180001">"Som desativado por <xliff:g id="THIRD_PARTY">%1$s</xliff:g>"</string>
     <string name="system_error_wipe_data" msgid="6608165524785354962">"Existe um problema interno no seu dispositivo e pode ficar instável até efetuar uma reposição de dados de fábrica."</string>
     <string name="system_error_manufacturer" msgid="8086872414744210668">"Existe um problema interno no seu dispositivo. Contacte o fabricante para obter mais informações."</string>
@@ -1467,11 +1462,9 @@
     <string name="stk_cc_ss_to_dial" msgid="2151304435775557162">"O pedido SS foi modificado para um pedido DIAL."</string>
     <string name="stk_cc_ss_to_ussd" msgid="3951862188105305589">"O pedido SS foi modificado para um pedido USSD."</string>
     <string name="stk_cc_ss_to_ss" msgid="5470768854991452695">"O pedido SS foi modificado para um novo pedido SS."</string>
-    <!-- no translation found for usb_midi_peripheral_name (7221113987741003817) -->
-    <skip />
+    <string name="usb_midi_peripheral_name" msgid="7221113987741003817">"Porta periférica USB para Android"</string>
     <string name="usb_midi_peripheral_manufacturer_name" msgid="7176526170008970168">"Android"</string>
-    <!-- no translation found for usb_midi_peripheral_product_name (4971827859165280403) -->
-    <skip />
+    <string name="usb_midi_peripheral_product_name" msgid="4971827859165280403">"Porta periférica USB"</string>
     <string name="floating_toolbar_open_overflow_description" msgid="4797287862999444631">"Mais opções"</string>
     <string name="floating_toolbar_close_overflow_description" msgid="559796923090723804">"Fechar excesso"</string>
 </resources>

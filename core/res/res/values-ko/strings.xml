@@ -218,42 +218,28 @@
     <string name="android_system_label" msgid="6577375335728551336">"Android 시스템"</string>
     <string name="user_owner_label" msgid="6465364741001216388">"개인 앱"</string>
     <string name="managed_profile_label" msgid="6260850669674791528">"직장"</string>
-    <!-- no translation found for permgrouplab_contacts (3657758145679177612) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_contacts (1437393511338346185) -->
-    <skip />
-    <!-- no translation found for permgrouplab_location (7275582855722310164) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_location (536889867433972794) -->
-    <skip />
+    <string name="permgrouplab_contacts" msgid="3657758145679177612">"주소록"</string>
+    <string name="permgroupdesc_contacts" msgid="1437393511338346185">"내 주소록 액세스 및 수정"</string>
+    <string name="permgrouplab_location" msgid="7275582855722310164">"위치"</string>
+    <string name="permgroupdesc_location" msgid="536889867433972794">"내 위치 액세스"</string>
     <string name="permgrouplab_socialInfo" msgid="5799096623412043791">"소셜 정보"</string>
     <string name="permgroupdesc_socialInfo" msgid="7129842457611643493">"내 연락처 및 소셜 친구의 개인 정보에 직접 액세스합니다."</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"캘린더"</string>
-    <!-- no translation found for permgroupdesc_calendar (2116049656685591803) -->
-    <skip />
-    <!-- no translation found for permgrouplab_sms (228308803364967808) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_sms (3695085582674524761) -->
-    <skip />
+    <string name="permgroupdesc_calendar" msgid="2116049656685591803">"내 캘린더 액세스 및 수정"</string>
+    <string name="permgrouplab_sms" msgid="228308803364967808">"SMS"</string>
+    <string name="permgroupdesc_sms" msgid="3695085582674524761">"SMS 액세스 및 수정"</string>
     <string name="permgrouplab_dictionary" msgid="8114410334955871144">"사용자 사전"</string>
-    <!-- no translation found for permgroupdesc_dictionary (7586787746354378335) -->
-    <skip />
+    <string name="permgroupdesc_dictionary" msgid="7586787746354378335">"사용자 사전의 단어를 읽거나 씁니다."</string>
     <string name="permgrouplab_bookmarks" msgid="1949519673103968229">"북마크 및 기록"</string>
     <string name="permgroupdesc_bookmarks" msgid="4169771606257963028">"북마크 및 브라우저 기록에 직접 액세스합니다."</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"마이크"</string>
-    <!-- no translation found for permgroupdesc_microphone (1296196977187629181) -->
-    <skip />
+    <string name="permgroupdesc_microphone" msgid="1296196977187629181">"기기 마이크 사용"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"카메라"</string>
-    <!-- no translation found for permgroupdesc_camera (2429930670410559293) -->
-    <skip />
-    <!-- no translation found for permgrouplab_phone (5229115638567440675) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_phone (2016641188146068700) -->
-    <skip />
-    <!-- no translation found for permgrouplab_sensors (7416703484233940260) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_sensors (2987451839455524494) -->
-    <skip />
+    <string name="permgroupdesc_camera" msgid="2429930670410559293">"기기 카메라 사용"</string>
+    <string name="permgrouplab_phone" msgid="5229115638567440675">"전화"</string>
+    <string name="permgroupdesc_phone" msgid="2016641188146068700">"기기 전화 기능 사용"</string>
+    <string name="permgrouplab_sensors" msgid="7416703484233940260">"센서"</string>
+    <string name="permgroupdesc_sensors" msgid="2987451839455524494">"센서 및 웨어러블 액세스"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"창 콘텐츠 가져오기"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"상호작용 중인 창의 콘텐츠를 검사합니다."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"터치하여 탐색 사용"</string>
@@ -443,15 +429,21 @@
     <string name="fingerprint_acquired_partial" msgid="735082772341716043">"지문이 일부만 인식되었습니다. 다시 시도해 주세요."</string>
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"지문을 인식할 수 없습니다. 다시 시도해 주세요."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"지문 센서를 깨끗이 닦고 다시 시도하세요."</string>
-    <string name="fingerprint_acquired_too_fast" msgid="5303368850245663580">"손가락을 너무 빨리 움직였습니다. 다시 시도해 주세요."</string>
+    <!-- no translation found for fingerprint_acquired_too_fast (6470642383109155969) -->
+    <skip />
     <string name="fingerprint_acquired_too_slow" msgid="7381891107120721078">"손가락을 너무 느리게 움직였습니다. 다시 시도해 주세요."</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
-    <string name="fingerprint_error_unable_to_process" msgid="4232401562838100026">"인식할 수 없습니다. 다시 시도하세요."</string>
-    <string name="fingerprint_error_hw_not_available" msgid="6162709753784993771">"하드웨어를 사용할 수 없습니다."</string>
+    <!-- no translation found for fingerprint_error_hw_not_available (7955921658939936596) -->
+    <skip />
     <string name="fingerprint_error_no_space" msgid="1055819001126053318">"지문을 저장할 수 없습니다. 기존 지문을 삭제하세요."</string>
     <string name="fingerprint_error_timeout" msgid="3927186043737732875">"지문 인식 시간이 초과되었습니다. 다시 시도하세요."</string>
-    <string name="fingerprint_error_vendor" msgid="3175724710791609491">"지문 인식 시간이 초과되었습니다. 다시 시도하세요."</string>
+    <!-- no translation found for fingerprint_error_canceled (4402024612660774395) -->
+    <skip />
+    <!-- no translation found for fingerprint_error_lockout (5536934748136933450) -->
+    <skip />
+    <!-- no translation found for fingerprint_error_unable_to_process (6107816084103552441) -->
+    <skip />
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"동기화 설정 읽기"</string>
@@ -460,6 +452,8 @@
     <string name="permdesc_writeSyncSettings" msgid="8956262591306369868">"앱이 계정의 동기화 설정을 수정할 수 있도록 허용합니다. 예를 들어, 계정에서 주소록 앱을 동기화할 목적으로 앱이 사용될 수 있습니다."</string>
     <string name="permlab_readSyncStats" msgid="7396577451360202448">"동기화 통계 읽기"</string>
     <string name="permdesc_readSyncStats" msgid="1510143761757606156">"앱이 동기화된 일정의 기록이나 동기화된 데이터의 양 등을 포함하여 계정의 동기화 통계를 읽을 수 있도록 허용합니다."</string>
+    <string name="permlab_subscribedFeedsWrite" msgid="9015246325408209296">"가입 피드 작성"</string>
+    <string name="permdesc_subscribedFeedsWrite" msgid="6928930188826089413">"앱이 현재 동기화된 피드를 수정할 수 있도록 허용합니다. 이 경우 악성 앱이 동기화된 피드를 변경할 수 있습니다."</string>
     <string name="permlab_readDictionary" msgid="4107101525746035718">"사전에 추가한 단어 읽기"</string>
     <string name="permdesc_readDictionary" msgid="659614600338904243">"앱이 사용자 사전에 저장하고 있는 모든 단어, 이름, 문구 등을 읽을 수 있도록 허용합니다."</string>
     <string name="permlab_writeDictionary" msgid="2183110402314441106">"사용자 정의 사전에 단어 추가"</string>
@@ -634,7 +628,7 @@
     <string name="lockscreen_instructions_when_pattern_enabled" msgid="46154051614126049">"비상 전화를 걸거나 잠금해제하려면 메뉴를 누르세요."</string>
     <string name="lockscreen_instructions_when_pattern_disabled" msgid="686260028797158364">"잠금해제하려면 메뉴를 누르세요."</string>
     <string name="lockscreen_pattern_instructions" msgid="7478703254964810302">"잠금해제를 위해 패턴 그리기"</string>
-    <string name="lockscreen_emergency_call" msgid="5347633784401285225">"비상 전화"</string>
+    <string name="lockscreen_emergency_call" msgid="5298642613417801888">"긴급 전화"</string>
     <string name="lockscreen_return_to_call" msgid="5244259785500040021">"통화로 돌아가기"</string>
     <string name="lockscreen_pattern_correct" msgid="9039008650362261237">"맞습니다."</string>
     <string name="lockscreen_pattern_wrong" msgid="4317955014948108794">"다시 시도"</string>
@@ -1034,29 +1028,35 @@
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="candidates_style" msgid="4333913089637062257"><u>"가능한 원인"</u></string>
-    <string name="ext_media_checking_notification_title" product="nosdcard" msgid="3449816005351468560">"USB 저장소 준비 중"</string>
-    <string name="ext_media_checking_notification_title" product="default" msgid="5457603418970994050">"SD 카드 준비 중"</string>
-    <string name="ext_media_checking_notification_message" msgid="8287319882926737053">"오류 확인 중입니다."</string>
-    <string name="ext_media_nofs_notification_title" product="nosdcard" msgid="7788040745686229307">"USB 저장소 비어 있음"</string>
-    <string name="ext_media_nofs_notification_title" product="default" msgid="780477838241212997">"빈 SD 카드"</string>
-    <string name="ext_media_nofs_notification_message" product="nosdcard" msgid="7840121067427269500">"USB 저장소가 비어 있거나 지원되지 않는 파일 시스템을 사용합니다."</string>
-    <string name="ext_media_nofs_notification_message" product="default" msgid="8641065641786923604">"SD 카드가 비어 있거나 지원되지 않는 파일 시스템을 사용합니다."</string>
-    <string name="ext_media_unmountable_notification_title" product="nosdcard" msgid="2090046769532713563">"USB 저장소 손상됨"</string>
-    <string name="ext_media_unmountable_notification_title" product="default" msgid="6410723906019100189">"손상된 SD 카드"</string>
-    <string name="ext_media_unmountable_notification_message" product="nosdcard" msgid="1795917578395333280">"USB 저장소가 손상되었습니다. 다시 포맷하시기 바랍니다."</string>
-    <string name="ext_media_unmountable_notification_message" product="default" msgid="1753898567525568253">"SD 카드가 손상되었습니다. 다시 포맷하시기 바랍니다."</string>
-    <string name="ext_media_badremoval_notification_title" product="nosdcard" msgid="1661683031330951073">"USB 저장소가 예기치 않게 제거됨"</string>
-    <string name="ext_media_badremoval_notification_title" product="default" msgid="6872152882604407837">"SD 카드가 예상치 않게 제거되었습니다."</string>
-    <string name="ext_media_badremoval_notification_message" product="nosdcard" msgid="4329848819865594241">"데이터 손실을 피하려면 USB 저장소를 제거하기 전에 마운트 해제합니다."</string>
-    <string name="ext_media_badremoval_notification_message" product="default" msgid="7260183293747448241">"데이터 손실을 피하려면 SD 카드를 제거하기 전에 마운트 해제합니다."</string>
-    <string name="ext_media_safe_unmount_notification_title" product="nosdcard" msgid="3967973893270360230">"USB 저장소 안전하게 제거"</string>
-    <string name="ext_media_safe_unmount_notification_title" product="default" msgid="6729801130790616200">"SD 카드 제거 가능"</string>
-    <string name="ext_media_safe_unmount_notification_message" product="nosdcard" msgid="6142195361606493530">"USB 저장소를 안전하게 제거할 수 있습니다."</string>
-    <string name="ext_media_safe_unmount_notification_message" product="default" msgid="568841278138377604">"안전하게 SD 카드를 제거할 수 있습니다."</string>
-    <string name="ext_media_nomedia_notification_title" product="nosdcard" msgid="4486377230140227651">"USB 저장소 제거됨"</string>
-    <string name="ext_media_nomedia_notification_title" product="default" msgid="8902518030404381318">"SD 카드 없음"</string>
-    <string name="ext_media_nomedia_notification_message" product="nosdcard" msgid="6921126162580574143">"USB 저장소를 제거했습니다. 새 미디어를 삽입하세요."</string>
-    <string name="ext_media_nomedia_notification_message" product="default" msgid="3870120652983659641">"SD 카드가 없습니다.  SD 카드를 넣으세요."</string>
+    <!-- no translation found for ext_media_checking_notification_title (5734005953288045806) -->
+    <skip />
+    <string name="ext_media_checking_notification_message" msgid="4747432538578886744">"오류 확인 중"</string>
+    <!-- no translation found for ext_media_new_notification_message (7589986898808506239) -->
+    <skip />
+    <!-- no translation found for ext_media_ready_notification_message (4083398150380114462) -->
+    <skip />
+    <!-- no translation found for ext_media_unmountable_notification_title (4863279349863279603) -->
+    <skip />
+    <!-- no translation found for ext_media_unmountable_notification_message (7391672496565685690) -->
+    <skip />
+    <!-- no translation found for ext_media_badremoval_notification_title (3206248947375505416) -->
+    <skip />
+    <!-- no translation found for ext_media_badremoval_notification_message (380176703346946313) -->
+    <skip />
+    <!-- no translation found for ext_media_nomedia_notification_title (1704840188641749091) -->
+    <skip />
+    <!-- no translation found for ext_media_nomedia_notification_message (6471542972147056586) -->
+    <skip />
+    <!-- no translation found for ext_media_unmounting_notification_title (640674168454809372) -->
+    <skip />
+    <!-- no translation found for ext_media_unmounting_notification_message (4182843895023357756) -->
+    <skip />
+    <!-- no translation found for ext_media_init_action (8317198948634872507) -->
+    <skip />
+    <!-- no translation found for ext_media_unmount_action (1121883233103278199) -->
+    <skip />
+    <!-- no translation found for ext_media_browse_action (8322172381028546087) -->
+    <skip />
     <string name="activity_list_empty" msgid="1675388330786841066">"일치하는 활동이 없습니다."</string>
     <string name="permlab_route_media_output" msgid="1642024455750414694">"미디어 출력 연결"</string>
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"앱이 미디어 출력을 기타 외부 기기에 연결할 수 있도록 허용합니다."</string>
@@ -1251,7 +1251,6 @@
     <string name="display_manager_overlay_display_name" msgid="5142365982271620716">"<xliff:g id="ID">%1$d</xliff:g>번째 오버레이"</string>
     <string name="display_manager_overlay_display_title" msgid="652124517672257172">"<xliff:g id="NAME">%1$s</xliff:g>: <xliff:g id="WIDTH">%2$d</xliff:g>x<xliff:g id="HEIGHT">%3$d</xliff:g>, <xliff:g id="DPI">%4$d</xliff:g> dpi"</string>
     <string name="display_manager_overlay_display_secure_suffix" msgid="6022119702628572080">", 보안"</string>
-    <string name="kg_emergency_call_label" msgid="684946192523830531">"긴급 통화"</string>
     <string name="kg_forgot_pattern_button_text" msgid="8852021467868220608">"패턴을 잊음"</string>
     <string name="kg_wrong_pattern" msgid="1850806070801358830">"잘못된 패턴"</string>
     <string name="kg_wrong_password" msgid="2333281762128113157">"잘못된 비밀번호"</string>
@@ -1447,17 +1446,12 @@
     </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g>까지"</string>
     <string name="zen_mode_forever" msgid="7420011936770086993">"이 기능을 사용 중지할 때까지"</string>
-    <!-- no translation found for zen_mode_rule_name_combination (191109939968076477) -->
-    <skip />
+    <string name="zen_mode_rule_name_combination" msgid="191109939968076477">"<xliff:g id="FIRST">%1$s</xliff:g> / <xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"접기"</string>
-    <!-- no translation found for zen_mode_feature_name (289097150786114338) -->
-    <skip />
-    <!-- no translation found for zen_mode_downtime_feature_name (2626974636779860146) -->
-    <skip />
-    <!-- no translation found for zen_mode_default_weeknights_name (2069189413656431610) -->
-    <skip />
-    <!-- no translation found for zen_mode_default_weekends_name (2377398437072017011) -->
-    <skip />
+    <string name="zen_mode_feature_name" msgid="289097150786114338">"알림 차단"</string>
+    <string name="zen_mode_downtime_feature_name" msgid="2626974636779860146">"다운타임"</string>
+    <string name="zen_mode_default_weeknights_name" msgid="2069189413656431610">"평일 밤"</string>
+    <string name="zen_mode_default_weekends_name" msgid="2377398437072017011">"주말"</string>
     <string name="muted_by" msgid="6147073845094180001">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g>에서 알림음 음소거"</string>
     <string name="system_error_wipe_data" msgid="6608165524785354962">"사용 중인 기기 내부에 문제가 발생했습니다. 초기화할 때까지 불안정할 수 있습니다."</string>
     <string name="system_error_manufacturer" msgid="8086872414744210668">"사용 중인 기기 내부에 문제가 발생했습니다. 자세한 내용은 제조업체에 문의하세요."</string>
@@ -1467,11 +1461,9 @@
     <string name="stk_cc_ss_to_dial" msgid="2151304435775557162">"SS 요청이 DIAL 요청으로 수정됩니다."</string>
     <string name="stk_cc_ss_to_ussd" msgid="3951862188105305589">"SS 요청이 USSD 요청으로 수정됩니다."</string>
     <string name="stk_cc_ss_to_ss" msgid="5470768854991452695">"SS 요청이 새로운 SS 요청으로 수정됩니다."</string>
-    <!-- no translation found for usb_midi_peripheral_name (7221113987741003817) -->
-    <skip />
+    <string name="usb_midi_peripheral_name" msgid="7221113987741003817">"Android USB 주변기기 포트"</string>
     <string name="usb_midi_peripheral_manufacturer_name" msgid="7176526170008970168">"Android"</string>
-    <!-- no translation found for usb_midi_peripheral_product_name (4971827859165280403) -->
-    <skip />
+    <string name="usb_midi_peripheral_product_name" msgid="4971827859165280403">"USB 주변기기 포트"</string>
     <string name="floating_toolbar_open_overflow_description" msgid="4797287862999444631">"옵션 더보기"</string>
-    <string name="floating_toolbar_close_overflow_description" msgid="559796923090723804">"더보기 닫기"</string>
+    <string name="floating_toolbar_close_overflow_description" msgid="559796923090723804">"오버플로우 닫기"</string>
 </resources>

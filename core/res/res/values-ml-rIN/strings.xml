@@ -218,43 +218,28 @@
     <string name="android_system_label" msgid="6577375335728551336">"Android സിസ്റ്റം"</string>
     <string name="user_owner_label" msgid="6465364741001216388">"വ്യക്തിഗത അപ്ലിക്കേഷനുകൾ"</string>
     <string name="managed_profile_label" msgid="6260850669674791528">"ഔദ്യോഗിക പ്രൊഫൈൽ"</string>
-    <!-- no translation found for permgrouplab_contacts (3657758145679177612) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_contacts (1437393511338346185) -->
-    <skip />
-    <!-- no translation found for permgrouplab_location (7275582855722310164) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_location (536889867433972794) -->
-    <skip />
+    <string name="permgrouplab_contacts" msgid="3657758145679177612">"കോൺടാക്റ്റുകൾ"</string>
+    <string name="permgroupdesc_contacts" msgid="1437393511338346185">"നിങ്ങളുടെ കോൺടാക്റ്റുകൾ ആക്‌സസ്സ് ചെയ്‌ത് പരിഷ്‌ക്കരിക്കുക"</string>
+    <string name="permgrouplab_location" msgid="7275582855722310164">"ലൊക്കേഷൻ"</string>
+    <string name="permgroupdesc_location" msgid="536889867433972794">"നിങ്ങളുടെ ലൊക്കേഷൻ ആക്‌സസ്സ് ചെയ്യുക"</string>
     <string name="permgrouplab_socialInfo" msgid="5799096623412043791">"നിങ്ങളുടെ സോഷ്യൽ വിവരം"</string>
     <string name="permgroupdesc_socialInfo" msgid="7129842457611643493">"നിങ്ങളുടെ കോൺടാക്റ്റുകളേയും സോഷ്യൽ കണക്ഷനുകളേയും സംബന്ധിച്ച വിവരങ്ങളിലേക്കുള്ള നേരിട്ടുള്ള ആക്‌സസ്സ്."</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"കലണ്ടർ"</string>
-    <!-- no translation found for permgroupdesc_calendar (2116049656685591803) -->
-    <skip />
-    <!-- no translation found for permgrouplab_sms (228308803364967808) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_sms (3695085582674524761) -->
-    <skip />
-    <!-- no translation found for permgrouplab_dictionary (8114410334955871144) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_dictionary (7586787746354378335) -->
-    <skip />
+    <string name="permgroupdesc_calendar" msgid="2116049656685591803">"നിങ്ങളുടെ കലണ്ടർ ആക്‌സസ്സ് ചെയ്‌ത് പരിഷ്‌ക്കരിക്കുക"</string>
+    <string name="permgrouplab_sms" msgid="228308803364967808">"SMS"</string>
+    <string name="permgroupdesc_sms" msgid="3695085582674524761">"SMS ആക്‌സസ്സുചെയ്‌ത് പരിഷ്‌ക്കരിക്കുക"</string>
+    <string name="permgrouplab_dictionary" msgid="8114410334955871144">"ഉപയോക്തൃ നിഘണ്ടു"</string>
+    <string name="permgroupdesc_dictionary" msgid="7586787746354378335">"ഉപയോക്തൃ നിഘണ്ടുവിലെ പദങ്ങൾ വായിക്കുകയോ എഴുതുകയോ ചെയ്യുക."</string>
     <string name="permgrouplab_bookmarks" msgid="1949519673103968229">"ബുക്ക്‌മാർക്കുകളും ചരിത്രവും"</string>
     <string name="permgroupdesc_bookmarks" msgid="4169771606257963028">"ബുക്ക്‌മാർക്കുകളിലേക്കും ബ്രൗസർ ചരിത്രത്തിലേക്കുമുള്ള നേരിട്ടുള്ള ആക്‌സസ്സ്."</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"മൈക്രോഫോണ്‍"</string>
-    <!-- no translation found for permgroupdesc_microphone (1296196977187629181) -->
-    <skip />
+    <string name="permgroupdesc_microphone" msgid="1296196977187629181">"ഉപകരണ മൈക്രോഫോൺ ഉപയോഗിക്കുക"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"ക്യാമറ"</string>
-    <!-- no translation found for permgroupdesc_camera (2429930670410559293) -->
-    <skip />
-    <!-- no translation found for permgrouplab_phone (5229115638567440675) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_phone (2016641188146068700) -->
-    <skip />
-    <!-- no translation found for permgrouplab_sensors (7416703484233940260) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_sensors (2987451839455524494) -->
-    <skip />
+    <string name="permgroupdesc_camera" msgid="2429930670410559293">"ഉപകരണ ക്യാമറ ഉപയോഗിക്കുക"</string>
+    <string name="permgrouplab_phone" msgid="5229115638567440675">"ഫോണ്‍"</string>
+    <string name="permgroupdesc_phone" msgid="2016641188146068700">"ഉപകരണ ടെലിഫോണി ഉപയോഗിക്കുക"</string>
+    <string name="permgrouplab_sensors" msgid="7416703484233940260">"സെൻസറുകൾ"</string>
+    <string name="permgroupdesc_sensors" msgid="2987451839455524494">"സെൻസറുകളും ധരിക്കാനാകുന്നവയും ആക്‌സസ്സ് ചെയ്യുക"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"വിൻഡോ ഉള്ളടക്കം വീണ്ടെടുക്കുക"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"നിങ്ങൾ സംവദിക്കുന്ന ഒരു വിൻഡോയുടെ ഉള്ളടക്കം പരിശോധിക്കുക."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"സ്‌പർശനം വഴി പര്യവേക്ഷണം ചെയ്യുക ഓൺ ചെയ്യുക"</string>
@@ -444,15 +429,21 @@
     <string name="fingerprint_acquired_partial" msgid="735082772341716043">"വിരലടയാളം ഭാഗികമായി തിരിച്ചറിഞ്ഞു. വീണ്ടും ശ്രമിക്കുക."</string>
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"വിരലടയാളം പ്രോസസ്സ് ചെയ്യാനായില്ല. വീണ്ടും ശ്രമിക്കുക."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"വിരലടയാള സെൻസറിന് വൃത്തിയില്ല. അത് ശുചിയാക്കി വീണ്ടും ശ്രമിക്കുക."</string>
-    <string name="fingerprint_acquired_too_fast" msgid="5303368850245663580">"വിരൽ വേഗത്തിൽ നീക്കി. വീണ്ടും ശ്രമിക്കുക."</string>
+    <!-- no translation found for fingerprint_acquired_too_fast (6470642383109155969) -->
+    <skip />
     <string name="fingerprint_acquired_too_slow" msgid="7381891107120721078">"വിരൽ പതുക്കെ നീക്കി. വീണ്ടും ശ്രമിക്കുക."</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
-    <string name="fingerprint_error_unable_to_process" msgid="4232401562838100026">"പ്രോസസ്സ് ചെയ്യാനാവുന്നില്ല. വീണ്ടും ശ്രമിക്കുക."</string>
-    <string name="fingerprint_error_hw_not_available" msgid="6162709753784993771">"ഹാർഡ്‌വെയർ ലഭ്യമല്ല."</string>
+    <!-- no translation found for fingerprint_error_hw_not_available (7955921658939936596) -->
+    <skip />
     <string name="fingerprint_error_no_space" msgid="1055819001126053318">"വിരലടയാളം സംഭരിക്കാനാവില്ല. നിലവിലുള്ള വിരലടയാളം നീക്കംചെയ്യുക."</string>
     <string name="fingerprint_error_timeout" msgid="3927186043737732875">"വിരലടയാളം നൽകേണ്ട സമയം കഴിഞ്ഞു. വീണ്ടും ശ്രമിക്കുക."</string>
-    <string name="fingerprint_error_vendor" msgid="3175724710791609491">"വിരലടയാളം നൽകേണ്ട സമയം കഴിഞ്ഞു. വീണ്ടും ശ്രമിക്കുക."</string>
+    <!-- no translation found for fingerprint_error_canceled (4402024612660774395) -->
+    <skip />
+    <!-- no translation found for fingerprint_error_lockout (5536934748136933450) -->
+    <skip />
+    <!-- no translation found for fingerprint_error_unable_to_process (6107816084103552441) -->
+    <skip />
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"സമന്വയ ക്രമീകരണങ്ങൾ റീഡുചെയ്യുക"</string>
@@ -461,6 +452,8 @@
     <string name="permdesc_writeSyncSettings" msgid="8956262591306369868">"ഒരു അക്കൗണ്ടിനായി സമന്വയ ക്രമീകരണങ്ങൾ പരിഷ്‌ക്കരിക്കാൻ അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു. ഉദാഹരണത്തിന്, ആളുകൾ അപ്ലിക്കേഷൻ ഒരു അക്കൗണ്ടിൽ സമന്വയിപ്പിക്കുന്നത് പ്രവർത്തനക്ഷമമാക്കാൻ ഇത് ഉപയോഗിക്കാം."</string>
     <string name="permlab_readSyncStats" msgid="7396577451360202448">"സമന്വയ സ്ഥിതിവിവരണക്കണക്കുകൾ വായിക്കുക"</string>
     <string name="permdesc_readSyncStats" msgid="1510143761757606156">"സമന്വയ ഇവന്റുകളുടെ ചരിത്രവും ഡാറ്റ എത്രത്തോളം സമന്വയിപ്പിച്ചുവെന്നതും ഉൾപ്പെടെ, ഒരു അക്കൗണ്ടിനായി സമന്വയ സ്ഥിതിവിവരക്കണക്കുകൾ റീഡുചെയ്യാൻ അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
+    <string name="permlab_subscribedFeedsWrite" msgid="9015246325408209296">"സബ്‌സ്ക്രൈബ് ചെയ്‌ത ഫീഡുകൾ എഴുതുക"</string>
+    <string name="permdesc_subscribedFeedsWrite" msgid="6928930188826089413">"നിലവിൽ സമന്വയിപ്പിച്ച ഫീഡുകളെക്കുറിച്ചുള്ള വിശദാംശങ്ങൾ നേടുന്നതിന് അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു. ദോഷകരമായ അപ്ലിക്കേഷനുകൾ, നിങ്ങളുടെ സമന്വയിപ്പിച്ച ഫീഡുകളെ മാറ്റിയേക്കാം."</string>
     <string name="permlab_readDictionary" msgid="4107101525746035718">"നിഘണ്ടുവിൽ നിങ്ങൾ ചേർത്ത പദങ്ങൾ വായിക്കുക"</string>
     <string name="permdesc_readDictionary" msgid="659614600338904243">"ഉപയോക്തൃ നിഘണ്ടുവിൽ ഉപയോക്താവ് സംഭരിച്ചിരിക്കാനിടയുള്ള എല്ലാ പദങ്ങളും പേരുകളും വാക്യങ്ങളും വായിക്കാൻ അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
     <string name="permlab_writeDictionary" msgid="2183110402314441106">"ഉപയോക്തൃ നിർവചിത നിഘണ്ടുവിൽ പദങ്ങൾ ചേർക്കുക"</string>
@@ -635,7 +628,8 @@
     <string name="lockscreen_instructions_when_pattern_enabled" msgid="46154051614126049">"അൺലോക്ക് ചെയ്യുന്നതിനായി മെനു അമർത്തുക അല്ലെങ്കിൽ അടിയന്തര കോൾ വിളിക്കുക."</string>
     <string name="lockscreen_instructions_when_pattern_disabled" msgid="686260028797158364">"അൺലോക്കുചെയ്യാൻ മെനു അമർത്തുക."</string>
     <string name="lockscreen_pattern_instructions" msgid="7478703254964810302">"അൺലോക്ക് ചെയ്യാൻ പാറ്റേൺ വരയ്‌ക്കുക"</string>
-    <string name="lockscreen_emergency_call" msgid="5347633784401285225">"അടിയന്തര കോൾ"</string>
+    <!-- no translation found for lockscreen_emergency_call (5298642613417801888) -->
+    <skip />
     <string name="lockscreen_return_to_call" msgid="5244259785500040021">"കോളിലേക്ക് മടങ്ങുക"</string>
     <string name="lockscreen_pattern_correct" msgid="9039008650362261237">"ശരി!"</string>
     <string name="lockscreen_pattern_wrong" msgid="4317955014948108794">"വീണ്ടും ശ്രമിക്കുക"</string>
@@ -1035,29 +1029,36 @@
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="candidates_style" msgid="4333913089637062257"><u>"കാൻഡിഡേറ്റുകൾ"</u></string>
-    <string name="ext_media_checking_notification_title" product="nosdcard" msgid="3449816005351468560">"USB സംഭരണം തയ്യാറാക്കുന്നു"</string>
-    <string name="ext_media_checking_notification_title" product="default" msgid="5457603418970994050">"SD കാർഡ് തയ്യാറാക്കുന്നു"</string>
-    <string name="ext_media_checking_notification_message" msgid="8287319882926737053">"പിശകുകൾക്കായി പരിശോധിക്കുന്നു."</string>
-    <string name="ext_media_nofs_notification_title" product="nosdcard" msgid="7788040745686229307">"USB സംഭരണം ശൂന്യമാണ്"</string>
-    <string name="ext_media_nofs_notification_title" product="default" msgid="780477838241212997">"SD കാർഡ് ശൂന്യമാണ്"</string>
-    <string name="ext_media_nofs_notification_message" product="nosdcard" msgid="7840121067427269500">"USB സംഭരണം ശൂന്യമാണ് അല്ലെങ്കിൽ അതിന് പിന്തുണയ്‌ക്കാത്ത ഫയൽ സിസ്റ്റമുണ്ട്."</string>
-    <string name="ext_media_nofs_notification_message" product="default" msgid="8641065641786923604">"SD കാർഡ് ശൂന്യമാണ് അല്ലെങ്കിൽ അതിന് പിന്തുണയ്‌ക്കാത്ത ഫയൽ സിസ്റ്റമുണ്ട്."</string>
-    <string name="ext_media_unmountable_notification_title" product="nosdcard" msgid="2090046769532713563">"കേടായ USB സംഭരണം"</string>
-    <string name="ext_media_unmountable_notification_title" product="default" msgid="6410723906019100189">"കേടായ SD കാർഡ്"</string>
-    <string name="ext_media_unmountable_notification_message" product="nosdcard" msgid="1795917578395333280">"USB സംഭരണം കേടായതാണ്. അത് വീണ്ടും ഫോർമാറ്റുചെയ്യുന്നത് പരീക്ഷിക്കുക."</string>
-    <string name="ext_media_unmountable_notification_message" product="default" msgid="1753898567525568253">"SD കാർഡ് കേടായതാണ്. അത് വീണ്ടും ഫോർമാറ്റുചെയ്യുന്നത് പരീക്ഷിക്കുക."</string>
-    <string name="ext_media_badremoval_notification_title" product="nosdcard" msgid="1661683031330951073">"USB സംഭരണം അപ്രതീക്ഷിതമായി നീക്കംചെയ്‌തു"</string>
-    <string name="ext_media_badremoval_notification_title" product="default" msgid="6872152882604407837">"SD കാർഡ് അപ്രതീക്ഷിതമായി നീക്കംചെയ്‌തു"</string>
-    <string name="ext_media_badremoval_notification_message" product="nosdcard" msgid="4329848819865594241">"ഡാറ്റാ നഷ്‌ടം ഒഴിവാക്കുന്നതിനായി നീക്കംചെയ്യുന്നതിനുമുമ്പ് USB സംഭരണം അൺമൗണ്ടുചെയ്യുക."</string>
-    <string name="ext_media_badremoval_notification_message" product="default" msgid="7260183293747448241">"ഡാറ്റാ നഷ്‌ടം ഒഴിവാക്കുന്നതിനായി നീക്കംചെയ്യുന്നതിനുമുമ്പ് SD കാർഡ് അൺമൗണ്ടുചെയ്യുക."</string>
-    <string name="ext_media_safe_unmount_notification_title" product="nosdcard" msgid="3967973893270360230">"USB സംഭരണം സുരക്ഷിതമായി നീക്കംചെയ്യാം"</string>
-    <string name="ext_media_safe_unmount_notification_title" product="default" msgid="6729801130790616200">"SD കാർഡ് സുരക്ഷിതമായി നീക്കംചെയ്യാം"</string>
-    <string name="ext_media_safe_unmount_notification_message" product="nosdcard" msgid="6142195361606493530">"നിങ്ങൾക്ക് സുരക്ഷിതമായി USB സംഭരണം നീക്കംചെയ്യാം."</string>
-    <string name="ext_media_safe_unmount_notification_message" product="default" msgid="568841278138377604">"നിങ്ങൾക്ക് സുരക്ഷിതമായി SD കാർഡ് നീക്കംചെയ്യാം."</string>
-    <string name="ext_media_nomedia_notification_title" product="nosdcard" msgid="4486377230140227651">"USB സംഭരണം നീക്കംചെയ്‌തു"</string>
-    <string name="ext_media_nomedia_notification_title" product="default" msgid="8902518030404381318">"SD കാർഡ് നീക്കംചെയ്‌തു"</string>
-    <string name="ext_media_nomedia_notification_message" product="nosdcard" msgid="6921126162580574143">"USB സംഭരണം നീക്കംചെയ്‌തു. പുതിയ മീഡിയ ചേർക്കുക."</string>
-    <string name="ext_media_nomedia_notification_message" product="default" msgid="3870120652983659641">"SD കാർഡ് നീക്കംചെയ്‌തു. പുതിയതൊന്ന് ചേർക്കുക."</string>
+    <!-- no translation found for ext_media_checking_notification_title (5734005953288045806) -->
+    <skip />
+    <!-- no translation found for ext_media_checking_notification_message (4747432538578886744) -->
+    <skip />
+    <!-- no translation found for ext_media_new_notification_message (7589986898808506239) -->
+    <skip />
+    <!-- no translation found for ext_media_ready_notification_message (4083398150380114462) -->
+    <skip />
+    <!-- no translation found for ext_media_unmountable_notification_title (4863279349863279603) -->
+    <skip />
+    <!-- no translation found for ext_media_unmountable_notification_message (7391672496565685690) -->
+    <skip />
+    <!-- no translation found for ext_media_badremoval_notification_title (3206248947375505416) -->
+    <skip />
+    <!-- no translation found for ext_media_badremoval_notification_message (380176703346946313) -->
+    <skip />
+    <!-- no translation found for ext_media_nomedia_notification_title (1704840188641749091) -->
+    <skip />
+    <!-- no translation found for ext_media_nomedia_notification_message (6471542972147056586) -->
+    <skip />
+    <!-- no translation found for ext_media_unmounting_notification_title (640674168454809372) -->
+    <skip />
+    <!-- no translation found for ext_media_unmounting_notification_message (4182843895023357756) -->
+    <skip />
+    <!-- no translation found for ext_media_init_action (8317198948634872507) -->
+    <skip />
+    <!-- no translation found for ext_media_unmount_action (1121883233103278199) -->
+    <skip />
+    <!-- no translation found for ext_media_browse_action (8322172381028546087) -->
+    <skip />
     <string name="activity_list_empty" msgid="1675388330786841066">"പൊരുത്തമുള്ള പ്രവർത്തനങ്ങളൊന്നും കണ്ടെത്തിയില്ല."</string>
     <string name="permlab_route_media_output" msgid="1642024455750414694">"മീഡിയ ഔട്ട്പുട്ട് റൂട്ടുചെയ്യുക"</string>
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"മീഡിയ ഔട്ട്‌പുട്ടിനെ മറ്റ് ബാഹ്യ ഉപകരണങ്ങളിലേക്ക് റൂട്ടുചെയ്യാൻ ഒരു അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
@@ -1252,7 +1253,6 @@
     <string name="display_manager_overlay_display_name" msgid="5142365982271620716">"ഓവർലേ #<xliff:g id="ID">%1$d</xliff:g>"</string>
     <string name="display_manager_overlay_display_title" msgid="652124517672257172">"<xliff:g id="NAME">%1$s</xliff:g>: <xliff:g id="WIDTH">%2$d</xliff:g>x<xliff:g id="HEIGHT">%3$d</xliff:g>, <xliff:g id="DPI">%4$d</xliff:g> dpi"</string>
     <string name="display_manager_overlay_display_secure_suffix" msgid="6022119702628572080">", സുരക്ഷിതമാക്കുക"</string>
-    <string name="kg_emergency_call_label" msgid="684946192523830531">"അടിയന്തര കോൾ"</string>
     <string name="kg_forgot_pattern_button_text" msgid="8852021467868220608">"പാറ്റേൺ മറന്നു"</string>
     <string name="kg_wrong_pattern" msgid="1850806070801358830">"പാറ്റേൺ തെറ്റാണ്"</string>
     <string name="kg_wrong_password" msgid="2333281762128113157">"പാസ്‌വേഡ് തെറ്റാണ്"</string>
@@ -1448,17 +1448,12 @@
     </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> വരെ"</string>
     <string name="zen_mode_forever" msgid="7420011936770086993">"നിങ്ങൾ ഇത് ഓ‌ഫാക്കും വരെ"</string>
-    <!-- no translation found for zen_mode_rule_name_combination (191109939968076477) -->
-    <skip />
+    <string name="zen_mode_rule_name_combination" msgid="191109939968076477">"<xliff:g id="FIRST">%1$s</xliff:g> / <xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"ചുരുക്കുക"</string>
-    <!-- no translation found for zen_mode_feature_name (289097150786114338) -->
-    <skip />
-    <!-- no translation found for zen_mode_downtime_feature_name (2626974636779860146) -->
-    <skip />
-    <!-- no translation found for zen_mode_default_weeknights_name (2069189413656431610) -->
-    <skip />
-    <!-- no translation found for zen_mode_default_weekends_name (2377398437072017011) -->
-    <skip />
+    <string name="zen_mode_feature_name" msgid="289097150786114338">"തടസ്സങ്ങൾ തടയുക"</string>
+    <string name="zen_mode_downtime_feature_name" msgid="2626974636779860146">"പ്രവർത്തനരഹിതമായ സമയം"</string>
+    <string name="zen_mode_default_weeknights_name" msgid="2069189413656431610">"ശനിയാഴ്‌ചയും ഞായറാഴ്‌ചയും അല്ലാത്ത ദിവസങ്ങളിലെ രാത്രികൾ"</string>
+    <string name="zen_mode_default_weekends_name" msgid="2377398437072017011">"വാരാന്ത്യങ്ങൾ"</string>
     <string name="muted_by" msgid="6147073845094180001">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g>, മ്യൂട്ടുചെയ്‌തു"</string>
     <string name="system_error_wipe_data" msgid="6608165524785354962">"നിങ്ങളുടെ ഉപകരണത്തിൽ ഒരു ആന്തരിക പ്രശ്‌നമുണ്ട്, ഫാക്‌ടറി വിവര പുനഃസജ്ജീകരണം ചെയ്യുന്നതുവരെ ഇതു അസ്ഥിരമായിരിക്കാനിടയുണ്ട്."</string>
     <string name="system_error_manufacturer" msgid="8086872414744210668">"നിങ്ങളുടെ ഉപകരണത്തിൽ ഒരു ആന്തരിക പ്രശ്‌നമുണ്ട്. വിശദാംശങ്ങൾക്കായി നിർമ്മാതാവിനെ ബന്ധപ്പെടുക."</string>
@@ -1468,11 +1463,9 @@
     <string name="stk_cc_ss_to_dial" msgid="2151304435775557162">"SS അഭ്യർത്ഥന, DIAL അഭ്യർത്ഥനയായി പരിഷ്‌ക്കരിച്ചു."</string>
     <string name="stk_cc_ss_to_ussd" msgid="3951862188105305589">"SS അഭ്യർത്ഥന, USSD അഭ്യർത്ഥനയായി പരിഷ്‌ക്കരിച്ചു."</string>
     <string name="stk_cc_ss_to_ss" msgid="5470768854991452695">"SS അഭ്യർത്ഥന, പുതിയ SS അഭ്യർത്ഥനയായി പരിഷ്‌ക്കരിച്ചു."</string>
-    <!-- no translation found for usb_midi_peripheral_name (7221113987741003817) -->
-    <skip />
+    <string name="usb_midi_peripheral_name" msgid="7221113987741003817">"Android USB പെരിഫറൽ പോർട്ട്"</string>
     <string name="usb_midi_peripheral_manufacturer_name" msgid="7176526170008970168">"Android"</string>
-    <!-- no translation found for usb_midi_peripheral_product_name (4971827859165280403) -->
-    <skip />
+    <string name="usb_midi_peripheral_product_name" msgid="4971827859165280403">"USB പെരിഫറൽ പോർട്ട്"</string>
     <string name="floating_toolbar_open_overflow_description" msgid="4797287862999444631">"കൂടുതല്‍ ഓപ്ഷനുകള്‍"</string>
     <string name="floating_toolbar_close_overflow_description" msgid="559796923090723804">"ഓവർഫ്ലോ അടയ്‌ക്കുക"</string>
 </resources>

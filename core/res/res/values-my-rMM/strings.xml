@@ -218,43 +218,28 @@
     <string name="android_system_label" msgid="6577375335728551336">"Android စနစ်"</string>
     <string name="user_owner_label" msgid="6465364741001216388">"ကိုယ်ပိုင် appများ"</string>
     <string name="managed_profile_label" msgid="6260850669674791528">"အလုပ်"</string>
-    <!-- no translation found for permgrouplab_contacts (3657758145679177612) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_contacts (1437393511338346185) -->
-    <skip />
-    <!-- no translation found for permgrouplab_location (7275582855722310164) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_location (536889867433972794) -->
-    <skip />
+    <string name="permgrouplab_contacts" msgid="3657758145679177612">"အဆက်အသွယ်များ"</string>
+    <string name="permgroupdesc_contacts" msgid="1437393511338346185">"သင့် အဆက်အသွယ်များအား ဝင်ရောက်သုံးရန်နှင့် ပြင်ဆင်ရန်"</string>
+    <string name="permgrouplab_location" msgid="7275582855722310164">"တည်နေရာ"</string>
+    <string name="permgroupdesc_location" msgid="536889867433972794">"သင်၏ တည်နေရာအား ဝင်ရောက်သုံးရန်"</string>
     <string name="permgrouplab_socialInfo" msgid="5799096623412043791">"သင်၏ ဆိုရှယ် သတင်းအချက်အလက်"</string>
     <string name="permgroupdesc_socialInfo" msgid="7129842457611643493">"သင်၏ အဆက်အသွယ်များနှင့် ဆိုရှယ်လ် အဆက်အသွယ်များအား၏ သတင်းအချက်အလက်များအား တိုက်ရိုက်အသုံးပြုခွင့် ရယူရန်"</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"ပြက္ခဒိန်"</string>
-    <!-- no translation found for permgroupdesc_calendar (2116049656685591803) -->
-    <skip />
-    <!-- no translation found for permgrouplab_sms (228308803364967808) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_sms (3695085582674524761) -->
-    <skip />
-    <!-- no translation found for permgrouplab_dictionary (8114410334955871144) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_dictionary (7586787746354378335) -->
-    <skip />
+    <string name="permgroupdesc_calendar" msgid="2116049656685591803">"သင်၏ ပြက္ခဒိန်သို့ ဝင်ရောက်သုံးရန်နှင့် ပြင်ဆင်ရန်"</string>
+    <string name="permgrouplab_sms" msgid="228308803364967808">"စာတိုစနစ်"</string>
+    <string name="permgroupdesc_sms" msgid="3695085582674524761">"SMS အား ဝင်ရောက်သုံးရန်နှင့် ပြင်ဆင်ရန်"</string>
+    <string name="permgrouplab_dictionary" msgid="8114410334955871144">"သုံးစွဲသူ အဘိဓာန်"</string>
+    <string name="permgroupdesc_dictionary" msgid="7586787746354378335">"သုံးစွဲသူ အဘိဓာန်တွင် စာလုံးများ ဖတ်ရန် သို့မဟုတ် ရေးရန်"</string>
     <string name="permgrouplab_bookmarks" msgid="1949519673103968229">"မှတ်တမ်း နှင့် အမှတ်အသား နေရာများ"</string>
     <string name="permgroupdesc_bookmarks" msgid="4169771606257963028">"ဘရောင်ဇာ မှတ်တမ်း နှင့် အမှတ်နေရာများအား တိုက်ရိုက် ရယူရန်"</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"မိုက်ခရိုဖုန်း"</string>
-    <!-- no translation found for permgroupdesc_microphone (1296196977187629181) -->
-    <skip />
+    <string name="permgroupdesc_microphone" msgid="1296196977187629181">"စက်ကိရိယာ၏ မိုက်ကရိုဖုန်းအား သုံးရန်"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"ကင်မရာ"</string>
-    <!-- no translation found for permgroupdesc_camera (2429930670410559293) -->
-    <skip />
-    <!-- no translation found for permgrouplab_phone (5229115638567440675) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_phone (2016641188146068700) -->
-    <skip />
-    <!-- no translation found for permgrouplab_sensors (7416703484233940260) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_sensors (2987451839455524494) -->
-    <skip />
+    <string name="permgroupdesc_camera" msgid="2429930670410559293">"စက်ကိရိယာ၏ ကင်မရာအား သုံးရန်"</string>
+    <string name="permgrouplab_phone" msgid="5229115638567440675">"ဖုန်း"</string>
+    <string name="permgroupdesc_phone" msgid="2016641188146068700">"စက်ကိရိယာ၏ ဖုန်းခေါ်မှုဆိုင်ရာများအား သုံးရန်"</string>
+    <string name="permgrouplab_sensors" msgid="7416703484233940260">"အာရုံခံကိရိယာများ"</string>
+    <string name="permgroupdesc_sensors" msgid="2987451839455524494">"အာရုံခံကိရိယာများနှင့် wearable  များအား ဝင်ရောက်သုံးရန်"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"ဝင်းဒိုးမှာပါရှိသည်များကို ထုတ်ယူခြင်း"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"သင် အပြန်အလှန်လုပ်နေသော ဝင်းဒိုးမှာပါရှိသည်များကို သေချာစွာ ကြည့်ရှုစစ်ဆေးပါ"</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"ထိတို့ခြင်းဖြင့် ရှာဖွေပေးနိုင်တာကို ဖွင့်လိုက်ပါ"</string>
@@ -444,15 +429,21 @@
     <string name="fingerprint_acquired_partial" msgid="735082772341716043">"လက်ဗွေရဦ တစ်ပိုင်းတစ်စ တွေ့ရှိသည်။ ကျေးဇူးပြု၍ ထပ်မံကြိုးစားပါ။"</string>
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"လက်ဗွေရာယူခြင်း မဆောင်ရွက်နိုင်ပါ။ ထပ်မံကြိုးစားပါ။"</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"လက်ဗွေရာဖတ်ကိရိယာ ညစ်ပေနေသည်။ ကျေးဇူးပြု၍ ရှင်းလင်းကာ ထပ်မံကြိုးစားပါ။"</string>
-    <string name="fingerprint_acquired_too_fast" msgid="5303368850245663580">"လက်ရွှေ့လျားခြင်း အလွန်မြန်သည်။ ကျေးဇူးပြု၍ ထပ်မံကြိုးစားပါ။"</string>
+    <!-- no translation found for fingerprint_acquired_too_fast (6470642383109155969) -->
+    <skip />
     <string name="fingerprint_acquired_too_slow" msgid="7381891107120721078">"လက်ရွှေ့လျားခြင်း အလွန်နှေးသည်။ ကျေးဇူးပြု၍ ထပ်မံကြိုးစားပါ။"</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
-    <string name="fingerprint_error_unable_to_process" msgid="4232401562838100026">"လုပ်ဆောင်၍မရပါ။ ထပ်မံကြိုးစားပါ။"</string>
-    <string name="fingerprint_error_hw_not_available" msgid="6162709753784993771">"ပစ္စည်းမရနိုင်ပါ။"</string>
+    <!-- no translation found for fingerprint_error_hw_not_available (7955921658939936596) -->
+    <skip />
     <string name="fingerprint_error_no_space" msgid="1055819001126053318">"လက်ဗွေရာ သိုလှောင်၍မရပါ။ ကျေးဇူးပြု၍ ရှိပြီးလက်ဗွေရာအား ဖယ်ရှားပါ။"</string>
     <string name="fingerprint_error_timeout" msgid="3927186043737732875">"လက်ဗွေရာအချိန်ကုန် သွားပါသည်။ ထပ်မံကြိုးစားပါ။"</string>
-    <string name="fingerprint_error_vendor" msgid="3175724710791609491">"လက်ဗွေရာအချိန်ကုန် သွားပါသည်။ ထပ်မံကြိုးစားပါ။"</string>
+    <!-- no translation found for fingerprint_error_canceled (4402024612660774395) -->
+    <skip />
+    <!-- no translation found for fingerprint_error_lockout (5536934748136933450) -->
+    <skip />
+    <!-- no translation found for fingerprint_error_unable_to_process (6107816084103552441) -->
+    <skip />
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"ထပ်တူပြုအဆင်အပြင်အားဖတ်ခြင်း"</string>
@@ -461,6 +452,8 @@
     <string name="permdesc_writeSyncSettings" msgid="8956262591306369868">"အကောင့်တစ်ခုအတွက် ထပ်တူညီအောင်လုပ်သော ဆက်တင်များကို ပြင်ရန် အပလီကေးရှင်းကို ခွင့်ပြုရန်။ ဥပမာ People အပလီကေးရှင်း က အကောင့်တစ်ခုနှင့် ထပ်တူညီအောင် လုပ်ဆောင်ခြင်းအား ဖွင့်ရန် သုံးနိုင်သည်။"</string>
     <string name="permlab_readSyncStats" msgid="7396577451360202448">"ထပ်တူကူးခြင်း ကိန်းဂဏန်းအချက်အလက်များကို ဖတ်ခြင်း"</string>
     <string name="permdesc_readSyncStats" msgid="1510143761757606156">"အပလီကေးရှင်းအား အကောင့်တစ်ခု၏ ထပ်တူညီအောင် လုပ်ဆောင်မှု အခြေအနေ (ပြီးခဲ့သော အဖြစ်အပျက်၊ ဒေတာ ပမာဏ ပါဝင်မှု များအပါအဝင်)ကို ဖတ်ရှုခွင့် ပြုပါ။"</string>
+    <string name="permlab_subscribedFeedsWrite" msgid="9015246325408209296">"အမည်သွင်းထားသောဖိဖ့်များကို ရေးခြင်း"</string>
+    <string name="permdesc_subscribedFeedsWrite" msgid="6928930188826089413">"appအား လောလောဆယ် စင့်က် လုပ်ပြီးသား ထည့်သွင်းမှုများကို မွမ်းမံခွင့် ပြုသည်။ ကြံဖန် appများက သင်၏ စင့်က် လုပ်ပြီးသား ထည့်သွင်းမှုများကို ပြောင်းပစ်နိုင်သည်။"</string>
     <string name="permlab_readDictionary" msgid="4107101525746035718">"အဘိဓာန်သို့ သင့် ထည့်ထားသည်များအား ဖတ်ခြင်း"</string>
     <string name="permdesc_readDictionary" msgid="659614600338904243">"အပလီကေးရှင်းအား အဘိဓာန်တွင် သိမ်းဆည်းထားသော စာလုံးအားလုံး၊ နာမည်များနှင့် စာစုများ ဖတ်ရှုခွင့် ပြုရန်"</string>
     <string name="permlab_writeDictionary" msgid="2183110402314441106">"သုံးစွဲသူ၏ အဘိဓာန် ထဲသို့ စာလုံးများ ထည့်ခြင်း"</string>
@@ -635,7 +628,7 @@
     <string name="lockscreen_instructions_when_pattern_enabled" msgid="46154051614126049">"ဖွင့်ရန်သို့မဟုတ်အရေးပေါ်ခေါ်ဆိုခြင်းပြုလုပ်ရန် မီနူးကိုနှိပ်ပါ"</string>
     <string name="lockscreen_instructions_when_pattern_disabled" msgid="686260028797158364">"မီးနူးကို နှိပ်ခြင်းဖြင့် သော့ဖွင့်ပါ"</string>
     <string name="lockscreen_pattern_instructions" msgid="7478703254964810302">"ဖွင့်ရန်ပုံစံဆွဲပါ"</string>
-    <string name="lockscreen_emergency_call" msgid="5347633784401285225">"အရေးပေါ်ခေါ်ဆိုရန်"</string>
+    <string name="lockscreen_emergency_call" msgid="5298642613417801888">"အရေးပေါ်"</string>
     <string name="lockscreen_return_to_call" msgid="5244259785500040021">"ခေါ်ဆိုမှုထံပြန်သွားရန်"</string>
     <string name="lockscreen_pattern_correct" msgid="9039008650362261237">"မှန်ပါသည်"</string>
     <string name="lockscreen_pattern_wrong" msgid="4317955014948108794">"ထပ် စမ်းပါ"</string>
@@ -1035,29 +1028,36 @@
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="candidates_style" msgid="4333913089637062257"><u>"ရွေးချယ်ခံမည့်သူ"</u></string>
-    <string name="ext_media_checking_notification_title" product="nosdcard" msgid="3449816005351468560">"USBသိမ်းဆည်းသည့်အရာအားအဆင်သင့်စေရန်ပြုလုပ်ခြင်း"</string>
-    <string name="ext_media_checking_notification_title" product="default" msgid="5457603418970994050">"SDကဒ်အအဆင်သင့်စေရန်ပြုလုပ်ခြင်း"</string>
-    <string name="ext_media_checking_notification_message" msgid="8287319882926737053">"မှားယွင်းမှုရှိမရှိစစ်ခြင်း"</string>
-    <string name="ext_media_nofs_notification_title" product="nosdcard" msgid="7788040745686229307">"USBသိမ်းဆည်းမှု၌ ဘာမှမရှိပါ"</string>
-    <string name="ext_media_nofs_notification_title" product="default" msgid="780477838241212997">"SDကဒ်ထဲ၌ဘာမှမရှိပါ"</string>
-    <string name="ext_media_nofs_notification_message" product="nosdcard" msgid="7840121067427269500">"USB ဖြင့် သိုလှောင်မှု ထဲမှာ ဘာမှ မရှိ သို့မဟုတ် ဖိုင် စနစ်က လက်ခံနိုင်သော စနစ်မဟုတ်ပါ"</string>
-    <string name="ext_media_nofs_notification_message" product="default" msgid="8641065641786923604">"SD ကဒ်ထဲမှာ ဘာမှ မရှိ သို့မဟုတ် ဖိုင် စနစ်က လက်ခံနိုင်သော စနစ်မဟုတ်ပါ"</string>
-    <string name="ext_media_unmountable_notification_title" product="nosdcard" msgid="2090046769532713563">"USBသိမ်းဆည်းမှုပျက်စီးနေသည်"</string>
-    <string name="ext_media_unmountable_notification_title" product="default" msgid="6410723906019100189">"SDကဒ်ပျက်စီးနေသည်"</string>
-    <string name="ext_media_unmountable_notification_message" product="nosdcard" msgid="1795917578395333280">"USBစိုလှောင်ရာ ပျက်စီးနေပါသည်။ ပြန်လည် ဖောမက် ချကြည့်ပါ"</string>
-    <string name="ext_media_unmountable_notification_message" product="default" msgid="1753898567525568253">"SD ကဒ် ပျက်စီးနေပါသည်။ ပြန်လည် ဖောမက် ချကြည့်ပါ"</string>
-    <string name="ext_media_badremoval_notification_title" product="nosdcard" msgid="1661683031330951073">"မရည်ရွယ်ပဲ USBသိုလှောင်ကိရိယာဖယ်ရှားသည်"</string>
-    <string name="ext_media_badremoval_notification_title" product="default" msgid="6872152882604407837">"မထင်မှတ်ပဲSDကဒ်ဖြုတ်သည်"</string>
-    <string name="ext_media_badremoval_notification_message" product="nosdcard" msgid="4329848819865594241">"ဒေတာမဆုံးရှုံးစေရန် မပြုတ်ခင် USB သိမ်းဆည်းခြင်းအား မဖြုတ်ပါနှင့်"</string>
-    <string name="ext_media_badremoval_notification_message" product="default" msgid="7260183293747448241">"ဒေတာမဆုံးရှုံးစေရန် မပြုတ်ခင် SDကဒ်အားမတပ်ရန်"</string>
-    <string name="ext_media_safe_unmount_notification_title" product="nosdcard" msgid="3967973893270360230">"USB ကိရိယာအား ဖြုတ်နိုင်သည်"</string>
-    <string name="ext_media_safe_unmount_notification_title" product="default" msgid="6729801130790616200">"အန္တရာယ်ကင်းစွာSDကဒ်အား ဖယ်နိုင်ပါပြီ"</string>
-    <string name="ext_media_safe_unmount_notification_message" product="nosdcard" msgid="6142195361606493530">"USBသိမ်းဆည်းသည့်အရာအား အန္တရာယ်ကင်းစွာဖယ်နိုင်ပါပြီ"</string>
-    <string name="ext_media_safe_unmount_notification_message" product="default" msgid="568841278138377604">"SDကဒ်အား အန္တရာယ်ကင်းစွာဖယ်နိုင်ပါပြီ"</string>
-    <string name="ext_media_nomedia_notification_title" product="nosdcard" msgid="4486377230140227651">"USBသိုလှောင်ကိရိယာအား ဖြုတ်သည်"</string>
-    <string name="ext_media_nomedia_notification_title" product="default" msgid="8902518030404381318">"SDကဒ်ဖယ်ထားသည်"</string>
-    <string name="ext_media_nomedia_notification_message" product="nosdcard" msgid="6921126162580574143">"USBသိမ်းဆည်းသည့်အရာ ဖယ်ရှားလိုက်သည်။ နောက်မီဒီယာအသစ်တခုအားထည့်ပါ။"</string>
-    <string name="ext_media_nomedia_notification_message" product="default" msgid="3870120652983659641">"SDကဒ်အားဖယ်ရှားလိုက်သည်။ နောက်အသစ်တခုအားထည့်ပါ။"</string>
+    <!-- no translation found for ext_media_checking_notification_title (5734005953288045806) -->
+    <skip />
+    <!-- no translation found for ext_media_checking_notification_message (4747432538578886744) -->
+    <skip />
+    <!-- no translation found for ext_media_new_notification_message (7589986898808506239) -->
+    <skip />
+    <!-- no translation found for ext_media_ready_notification_message (4083398150380114462) -->
+    <skip />
+    <!-- no translation found for ext_media_unmountable_notification_title (4863279349863279603) -->
+    <skip />
+    <!-- no translation found for ext_media_unmountable_notification_message (7391672496565685690) -->
+    <skip />
+    <!-- no translation found for ext_media_badremoval_notification_title (3206248947375505416) -->
+    <skip />
+    <!-- no translation found for ext_media_badremoval_notification_message (380176703346946313) -->
+    <skip />
+    <!-- no translation found for ext_media_nomedia_notification_title (1704840188641749091) -->
+    <skip />
+    <!-- no translation found for ext_media_nomedia_notification_message (6471542972147056586) -->
+    <skip />
+    <!-- no translation found for ext_media_unmounting_notification_title (640674168454809372) -->
+    <skip />
+    <!-- no translation found for ext_media_unmounting_notification_message (4182843895023357756) -->
+    <skip />
+    <!-- no translation found for ext_media_init_action (8317198948634872507) -->
+    <skip />
+    <!-- no translation found for ext_media_unmount_action (1121883233103278199) -->
+    <skip />
+    <!-- no translation found for ext_media_browse_action (8322172381028546087) -->
+    <skip />
     <string name="activity_list_empty" msgid="1675388330786841066">"တိုက်ဆိုင်သော ပြုလုပ်ချက် ရှာမတွေ့ပါ"</string>
     <string name="permlab_route_media_output" msgid="1642024455750414694">"မီဒီယာထွက်ပေါက်အား လမ်းလွှဲပြောင်းခြင်း"</string>
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"အပလီကေးရှင်းအား မီဒီယာ ထုတ်လွှတ်မှုကို အခြားပြင်ပ စက်ပစ္စည်းများသို့ လွှဲပြောင်းခွင့်ပြုပါ"</string>
@@ -1252,7 +1252,6 @@
     <string name="display_manager_overlay_display_name" msgid="5142365982271620716">"အပေါ်မှ ထပ်သောအရာ #<xliff:g id="ID">%1$d</xliff:g>"</string>
     <string name="display_manager_overlay_display_title" msgid="652124517672257172">"<xliff:g id="NAME">%1$s</xliff:g>: <xliff:g id="WIDTH">%2$d</xliff:g>x<xliff:g id="HEIGHT">%3$d</xliff:g>, <xliff:g id="DPI">%4$d</xliff:g>  dpi"</string>
     <string name="display_manager_overlay_display_secure_suffix" msgid="6022119702628572080">", လုံခြုံသော"</string>
-    <string name="kg_emergency_call_label" msgid="684946192523830531">"အရေးပေါ် ခေါ်ဆိုမှု"</string>
     <string name="kg_forgot_pattern_button_text" msgid="8852021467868220608">"ပုံဖော်မှုအား မေ့လျော့ခြင်း"</string>
     <string name="kg_wrong_pattern" msgid="1850806070801358830">"ပုံဆွဲအမှား"</string>
     <string name="kg_wrong_password" msgid="2333281762128113157">"စကားဝှက်အမှား"</string>

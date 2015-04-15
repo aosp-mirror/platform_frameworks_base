@@ -218,43 +218,28 @@
     <string name="android_system_label" msgid="6577375335728551336">"एन्ड्रोइड प्रणाली"</string>
     <string name="user_owner_label" msgid="6465364741001216388">"व्यक्तिगत अनुप्रयोगहरू"</string>
     <string name="managed_profile_label" msgid="6260850669674791528">"काम"</string>
-    <!-- no translation found for permgrouplab_contacts (3657758145679177612) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_contacts (1437393511338346185) -->
-    <skip />
-    <!-- no translation found for permgrouplab_location (7275582855722310164) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_location (536889867433972794) -->
-    <skip />
+    <string name="permgrouplab_contacts" msgid="3657758145679177612">"सम्पर्कहरू"</string>
+    <string name="permgroupdesc_contacts" msgid="1437393511338346185">"तपाईँको सम्पर्कहरू पहुँच र परिमार्जन गर्नुहोस्"</string>
+    <string name="permgrouplab_location" msgid="7275582855722310164">"स्थान"</string>
+    <string name="permgroupdesc_location" msgid="536889867433972794">"तपाईँको स्थान पहुँच गर्नुहोस्"</string>
     <string name="permgrouplab_socialInfo" msgid="5799096623412043791">"तपाईँको सामाजिक सूचना"</string>
     <string name="permgroupdesc_socialInfo" msgid="7129842457611643493">"तपाईँको सम्पर्कहरू र सामाजिक जडानहरूको बारेको जानकारीमा सिधा पहुँच पुर्‍याउनुहोस्।"</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"पात्रो"</string>
-    <!-- no translation found for permgroupdesc_calendar (2116049656685591803) -->
-    <skip />
-    <!-- no translation found for permgrouplab_sms (228308803364967808) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_sms (3695085582674524761) -->
-    <skip />
-    <!-- no translation found for permgrouplab_dictionary (8114410334955871144) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_dictionary (7586787746354378335) -->
-    <skip />
+    <string name="permgroupdesc_calendar" msgid="2116049656685591803">"तपाईँको पात्रो पहुँच र परिमार्जन गर्नुहोस्"</string>
+    <string name="permgrouplab_sms" msgid="228308803364967808">"SMS"</string>
+    <string name="permgroupdesc_sms" msgid="3695085582674524761">"SMS पहुँच र परिमार्जन गर्नुहोस्"</string>
+    <string name="permgrouplab_dictionary" msgid="8114410334955871144">"प्रयोगकर्ता शब्दकोश"</string>
+    <string name="permgroupdesc_dictionary" msgid="7586787746354378335">"प्रयोगकर्ता शब्दकोशमा शब्दहरू पढ्नुहोस् वा लेख्नुहोस्।"</string>
     <string name="permgrouplab_bookmarks" msgid="1949519673103968229">"बुकमार्कहरू र इतिहास"</string>
     <string name="permgroupdesc_bookmarks" msgid="4169771606257963028">"बुकमार्कहरू र ब्राउजर इतिहासमा सिधा पहुँच।"</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"माइक्रोफोन"</string>
-    <!-- no translation found for permgroupdesc_microphone (1296196977187629181) -->
-    <skip />
+    <string name="permgroupdesc_microphone" msgid="1296196977187629181">"यन्त्र माइक्रोफोन प्रयोग गर्नुहोस्"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"क्यामेरा"</string>
-    <!-- no translation found for permgroupdesc_camera (2429930670410559293) -->
-    <skip />
-    <!-- no translation found for permgrouplab_phone (5229115638567440675) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_phone (2016641188146068700) -->
-    <skip />
-    <!-- no translation found for permgrouplab_sensors (7416703484233940260) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_sensors (2987451839455524494) -->
-    <skip />
+    <string name="permgroupdesc_camera" msgid="2429930670410559293">"यन्त्र क्यामेरा प्रयोग गर्नुहोस्"</string>
+    <string name="permgrouplab_phone" msgid="5229115638567440675">"फोन"</string>
+    <string name="permgroupdesc_phone" msgid="2016641188146068700">"यन्त्र टेलिफोनी प्रयोग गर्नुहोस्"</string>
+    <string name="permgrouplab_sensors" msgid="7416703484233940260">"सेन्सरहरू"</string>
+    <string name="permgroupdesc_sensors" msgid="2987451839455524494">"सेन्सर र पहिरनयोग्यहरू पहुँच गर्नुहोस्"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"विन्डो सामग्रीको पुनःबहाली गर्नुहोस्।"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"तपाईँको अन्तरक्रिया भइरहेको विन्डोको सामग्रीको निरीक्षण गर्नुहोस्।"</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"छोएर गरिने खोजलाई सुचारु गर्नुहोस्"</string>
@@ -444,15 +429,21 @@
     <string name="fingerprint_acquired_partial" msgid="735082772341716043">"आंशिक औठाछाप पत्ता लाग्यो। कृपया फेरि प्रयास गर्नुहोस्।"</string>
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"औठाछाप प्रशोधन गर्न सकिएन। कृपया फेरि प्रयास गर्नुहोस्।"</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"औँठाछाप सेन्सर फोहोर छ। कृपया सफा गरेर फेरि प्रयास गर्नुहोस्।"</string>
-    <string name="fingerprint_acquired_too_fast" msgid="5303368850245663580">"औंला निकै छिटो सारियो। कृपया फेरि प्रयास गर्नुहोस्।"</string>
+    <!-- no translation found for fingerprint_acquired_too_fast (6470642383109155969) -->
+    <skip />
     <string name="fingerprint_acquired_too_slow" msgid="7381891107120721078">"औंला निकै ढिला सारियो। कृपया फेरि प्रयास गर्नुहोस्।"</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
-    <string name="fingerprint_error_unable_to_process" msgid="4232401562838100026">"प्रसोधन गर्न असमर्थ। फेरि प्रयास गर्नुहोस्।"</string>
-    <string name="fingerprint_error_hw_not_available" msgid="6162709753784993771">"हार्डवेयर उपलब्ध छैन।"</string>
+    <!-- no translation found for fingerprint_error_hw_not_available (7955921658939936596) -->
+    <skip />
     <string name="fingerprint_error_no_space" msgid="1055819001126053318">"औँठाछाप भण्डारण गर्न सकिँदैन। कृपया अवस्थित औठाछाप हटाउनुहोस्।"</string>
     <string name="fingerprint_error_timeout" msgid="3927186043737732875">"औँठाछापको समय सकिएको छ। फेरि प्रयास गर्नुहोस्।"</string>
-    <string name="fingerprint_error_vendor" msgid="3175724710791609491">"औँठाछापको समय सकिएको छ। फेरि प्रयास गर्नुहोस्।"</string>
+    <!-- no translation found for fingerprint_error_canceled (4402024612660774395) -->
+    <skip />
+    <!-- no translation found for fingerprint_error_lockout (5536934748136933450) -->
+    <skip />
+    <!-- no translation found for fingerprint_error_unable_to_process (6107816084103552441) -->
+    <skip />
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"समीकरण सेटिङहरू पढ्नुहोस्"</string>
@@ -461,6 +452,8 @@
     <string name="permdesc_writeSyncSettings" msgid="8956262591306369868">"अनुप्रयोगहरूलाई खाताको लागि सिङ्क सेटिङहरू परिमार्जन गर्न अनुमति दिन्छ। उदाहरणको लागि, यो खातासँग व्यक्ति अनुप्रयोगको सिङ्क सक्षम गर्न प्रयोग गर्न सकिन्छ।"</string>
     <string name="permlab_readSyncStats" msgid="7396577451360202448">"सिङ्क तथ्याङ्कहरू पढ्नुहोस्"</string>
     <string name="permdesc_readSyncStats" msgid="1510143761757606156">"अनुप्रयोगलाई खाताको लागि समीकरणको आँकडा समीकरण घटनाहरूको  इतिहास र समीकरण गरिएको डेटाको मापन समेत, पढ्न अनुमति दिन्छ।"</string>
+    <string name="permlab_subscribedFeedsWrite" msgid="9015246325408209296">"सदस्य बनाइका फिडहरू लेख्नुहोस्"</string>
+    <string name="permdesc_subscribedFeedsWrite" msgid="6928930188826089413">"तपाईँका भर्खरै सिङ्क फिडहरूलाई परिमार्जन गर्नको लागि अनुप्रयोगलाई अनुमति दिन्छ। तपाईँको सिङ्क फिडहरूलाई परिवर्तन गर्नको लागि यसले  खराब अनुप्रयोगलाई अनुमति दिन सक्छ।"</string>
     <string name="permlab_readDictionary" msgid="4107101525746035718">"तपाईँले शब्दकोशमा थपेका शब्दहरू पढ्नुहोस्"</string>
     <string name="permdesc_readDictionary" msgid="659614600338904243">"अनुप्रयोगलाई प्रयोगकर्ताले प्रयोगकर्ता शब्दकोशमा भण्डारण गरेका हुन सक्ने सबै शब्दहरू, नामहरू र पदावलीहरू पढ्न अनुमति दिन्छ।"</string>
     <string name="permlab_writeDictionary" msgid="2183110402314441106">"प्रयोगकर्ता-परिभाषित शब्दकोशमा शब्दहरू थप्नुहोस्।"</string>
@@ -635,7 +628,8 @@
     <string name="lockscreen_instructions_when_pattern_enabled" msgid="46154051614126049">"अनलक वा आपतकालीन कल गर्न मेनु थिच्नुहोस्।"</string>
     <string name="lockscreen_instructions_when_pattern_disabled" msgid="686260028797158364">"अनलक गर्न मेनु थिच्नुहोस्।"</string>
     <string name="lockscreen_pattern_instructions" msgid="7478703254964810302">"अनलक गर्नु ढाँचा खिच्नुहोस्"</string>
-    <string name="lockscreen_emergency_call" msgid="5347633784401285225">"आपतकालीन कलहरू"</string>
+    <!-- no translation found for lockscreen_emergency_call (5298642613417801888) -->
+    <skip />
     <string name="lockscreen_return_to_call" msgid="5244259785500040021">"कलमा फर्किनुहोस्"</string>
     <string name="lockscreen_pattern_correct" msgid="9039008650362261237">"सही!"</string>
     <string name="lockscreen_pattern_wrong" msgid="4317955014948108794">"फेरि प्रयास गर्नुहोस्"</string>
@@ -1041,29 +1035,36 @@
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="candidates_style" msgid="4333913089637062257"><u>"उम्मेदवार"</u></string>
-    <string name="ext_media_checking_notification_title" product="nosdcard" msgid="3449816005351468560">"USB भण्डारणको तयारी हुँदै"</string>
-    <string name="ext_media_checking_notification_title" product="default" msgid="5457603418970994050">"SD कार्ड तयार गर्दै"</string>
-    <string name="ext_media_checking_notification_message" msgid="8287319882926737053">"त्रुटिहरूको लागि जाँच गर्दै।"</string>
-    <string name="ext_media_nofs_notification_title" product="nosdcard" msgid="7788040745686229307">"रिक्त USB भण्डारण"</string>
-    <string name="ext_media_nofs_notification_title" product="default" msgid="780477838241212997">"खाली SD कार्ड"</string>
-    <string name="ext_media_nofs_notification_message" product="nosdcard" msgid="7840121067427269500">"USB भण्डारण खाली वा असमर्थित फाइल प्रणाली छ।"</string>
-    <string name="ext_media_nofs_notification_message" product="default" msgid="8641065641786923604">"SD कार्ड खाली छ अथवा समर्थन नगरिएको फाइल प्रणाली छ।"</string>
-    <string name="ext_media_unmountable_notification_title" product="nosdcard" msgid="2090046769532713563">"बिग्रिएको USB भण्डारण"</string>
-    <string name="ext_media_unmountable_notification_title" product="default" msgid="6410723906019100189">"बिग्रिएको SD कार्ड"</string>
-    <string name="ext_media_unmountable_notification_message" product="nosdcard" msgid="1795917578395333280">"USB भण्डारण बिग्रिएको छ। यसलाई पुनःफर्म्याट गर्न प्रयास गर्नुहोस।"</string>
-    <string name="ext_media_unmountable_notification_message" product="default" msgid="1753898567525568253">"SD कार्ड बिग्रिएको छ। यसलाई पुनःफर्म्याट गर्न प्रयास गर्नुहोस।"</string>
-    <string name="ext_media_badremoval_notification_title" product="nosdcard" msgid="1661683031330951073">"USB भण्डारण अप्रत्याशित रूपमा हटाइएको छ"</string>
-    <string name="ext_media_badremoval_notification_title" product="default" msgid="6872152882604407837">"SD कार्ड अनपेक्षित रूपमा हटाइयो"</string>
-    <string name="ext_media_badremoval_notification_message" product="nosdcard" msgid="4329848819865594241">"डेटा गुम्नबाट रोक्नको लागि USB भण्डारण हटाउनुअघि अनमाउन्ट गर्नुहोस्।"</string>
-    <string name="ext_media_badremoval_notification_message" product="default" msgid="7260183293747448241">"डेटा नाश हुनबाट बच्न SD कार्डलाई निकाल्नुभन्दा पहिला अनमाउन्ट गर्नुहोस्।"</string>
-    <string name="ext_media_safe_unmount_notification_title" product="nosdcard" msgid="3967973893270360230">"USB भण्डारण हटाउनको लागि सुरक्षित छ"</string>
-    <string name="ext_media_safe_unmount_notification_title" product="default" msgid="6729801130790616200">"SD कार्ड हटाउन सुरक्षित छ।"</string>
-    <string name="ext_media_safe_unmount_notification_message" product="nosdcard" msgid="6142195361606493530">"तपाईं सुरक्षित रूपमा USB भण्डारण हटाउन सक्नुहुने छ।"</string>
-    <string name="ext_media_safe_unmount_notification_message" product="default" msgid="568841278138377604">"तपाईँ SD कार्ड सुरक्षित रूपमा हटाउन सक्नु हुन्छ।"</string>
-    <string name="ext_media_nomedia_notification_title" product="nosdcard" msgid="4486377230140227651">"USB भण्डारण हटाइयो"</string>
-    <string name="ext_media_nomedia_notification_title" product="default" msgid="8902518030404381318">"हटाइएको SD कार्ड"</string>
-    <string name="ext_media_nomedia_notification_message" product="nosdcard" msgid="6921126162580574143">"USD भण्डारण हटाइयो। नयाँ मिडिया घुसाउनुहोस्।"</string>
-    <string name="ext_media_nomedia_notification_message" product="default" msgid="3870120652983659641">"SD कार्ड हटाइयो। एउटा नयाँ छिराउनुहोस्।"</string>
+    <!-- no translation found for ext_media_checking_notification_title (5734005953288045806) -->
+    <skip />
+    <!-- no translation found for ext_media_checking_notification_message (4747432538578886744) -->
+    <skip />
+    <!-- no translation found for ext_media_new_notification_message (7589986898808506239) -->
+    <skip />
+    <!-- no translation found for ext_media_ready_notification_message (4083398150380114462) -->
+    <skip />
+    <!-- no translation found for ext_media_unmountable_notification_title (4863279349863279603) -->
+    <skip />
+    <!-- no translation found for ext_media_unmountable_notification_message (7391672496565685690) -->
+    <skip />
+    <!-- no translation found for ext_media_badremoval_notification_title (3206248947375505416) -->
+    <skip />
+    <!-- no translation found for ext_media_badremoval_notification_message (380176703346946313) -->
+    <skip />
+    <!-- no translation found for ext_media_nomedia_notification_title (1704840188641749091) -->
+    <skip />
+    <!-- no translation found for ext_media_nomedia_notification_message (6471542972147056586) -->
+    <skip />
+    <!-- no translation found for ext_media_unmounting_notification_title (640674168454809372) -->
+    <skip />
+    <!-- no translation found for ext_media_unmounting_notification_message (4182843895023357756) -->
+    <skip />
+    <!-- no translation found for ext_media_init_action (8317198948634872507) -->
+    <skip />
+    <!-- no translation found for ext_media_unmount_action (1121883233103278199) -->
+    <skip />
+    <!-- no translation found for ext_media_browse_action (8322172381028546087) -->
+    <skip />
     <string name="activity_list_empty" msgid="1675388330786841066">"कुनै मिल्ने गतिविधि पाइएन।"</string>
     <string name="permlab_route_media_output" msgid="1642024455750414694">"मिडिया परिणाम दिशानिर्देश गर्नुहोस्"</string>
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"मिडिया परिणामलाई अन्य बाहिरी उपकरणहरूसँग लैजानको लागि अनुप्रयोगलाई अनुमति दिन्छ।"</string>
@@ -1258,7 +1259,6 @@
     <string name="display_manager_overlay_display_name" msgid="5142365982271620716">"आवरण #<xliff:g id="ID">%1$d</xliff:g>"</string>
     <string name="display_manager_overlay_display_title" msgid="652124517672257172">"<xliff:g id="NAME">%1$s</xliff:g>: <xliff:g id="WIDTH">%2$d</xliff:g>x<xliff:g id="HEIGHT">%3$d</xliff:g>, <xliff:g id="DPI">%4$d</xliff:g> dpi"</string>
     <string name="display_manager_overlay_display_secure_suffix" msgid="6022119702628572080">", सुरक्षित"</string>
-    <string name="kg_emergency_call_label" msgid="684946192523830531">"आपतकालीन कल"</string>
     <string name="kg_forgot_pattern_button_text" msgid="8852021467868220608">"ढाँचा बिर्सनु भयो"</string>
     <string name="kg_wrong_pattern" msgid="1850806070801358830">"गलत ढाँचा"</string>
     <string name="kg_wrong_password" msgid="2333281762128113157">"गलत पासवर्ड"</string>
@@ -1433,7 +1433,7 @@
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"पिन निकाल्नुअघि PIN सोध्नुहोस्"</string>
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"पिन निकाल्नुअघि खोल्ने रूपरेखा सोध्नुहोस्"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"पिन निकाल्नुअघि पासवर्ड सोध्नुहोस्"</string>
-    <string name="package_installed_device_owner" msgid="8420696545959087545">"तपाईँको प्रशासकले स्थापना गरिएको"</string>
+    <string name="package_installed_device_owner" msgid="8420696545959087545">"तपाईँको प्रशासकद्वारा स्थापना गरिएको"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"तपाईँको प्रशासकद्वारा हटाइएको"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"ब्याट्रीको आयु सुधार्न, ब्याट्री रक्षकले तपाईँको यन्त्रको कार्यसम्पादन घटाउँछ र भाइब्रेसन, स्थान सेवा र बहुसंख्यक पृष्ठभूमि डेटा सीमित गर्दछ। इमेल, सन्देश, र अन्य अनुप्रयोगहरू जुन सिङ्कमा भर पर्छन् अद्यावधिक नहुन सक्छन् जबसम्म तपाईँ तिनीहरूलाई खोल्नुहुन्न\n\n ब्याट्री रक्षक स्वत: निस्कृय हुन्छ जब तपाईँको यन्त्र चार्ज हुँदै हुन्छ।"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
@@ -1473,5 +1473,5 @@
     <string name="usb_midi_peripheral_manufacturer_name" msgid="7176526170008970168">"Android"</string>
     <string name="usb_midi_peripheral_product_name" msgid="4971827859165280403">"USB परिधीय पोर्ट"</string>
     <string name="floating_toolbar_open_overflow_description" msgid="4797287862999444631">"थप विकल्पहरू"</string>
-    <string name="floating_toolbar_close_overflow_description" msgid="559796923090723804">"अतिप्रवाह बन्द गर्नुहोस्"</string>
+    <string name="floating_toolbar_close_overflow_description" msgid="559796923090723804">"ओभरफ्लो बन्द गर्नुहोस्"</string>
 </resources>
