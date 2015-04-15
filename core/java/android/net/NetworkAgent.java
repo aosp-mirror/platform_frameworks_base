@@ -104,7 +104,7 @@ public abstract class NetworkAgent extends Handler {
     public static final int EVENT_UID_RANGES_REMOVED = BASE + 6;
 
     /**
-     * Sent by ConnectivitySerice to the NetworkAgent to inform the agent of the
+     * Sent by ConnectivityService to the NetworkAgent to inform the agent of the
      * networks status - whether we could use the network or could not, due to
      * either a bad network configuration (no internet link) or captive portal.
      *
@@ -119,8 +119,20 @@ public abstract class NetworkAgent extends Handler {
      * Sent by the NetworkAgent to ConnectivityService to indicate this network was
      * explicitly selected.  This should be sent before the NetworkInfo is marked
      * CONNECTED so it can be given special treatment at that time.
+     *
+     * obj = boolean indicating whether to use this network even if unvalidated
      */
     public static final int EVENT_SET_EXPLICITLY_SELECTED = BASE + 8;
+
+    /**
+     * Sent by ConnectivityService to the NetworkAgent to inform the agent of
+     * whether the network should in the future be used even if not validated.
+     * This decision is made by the user, but it is the network transport's
+     * responsibility to remember it.
+     *
+     * arg1 = 1 if true, 0 if false
+     */
+    public static final int CMD_SAVE_ACCEPT_UNVALIDATED = BASE + 9;
 
     public NetworkAgent(Looper looper, Context context, String logTag, NetworkInfo ni,
             NetworkCapabilities nc, LinkProperties lp, int score) {
@@ -191,6 +203,9 @@ public abstract class NetworkAgent extends Handler {
                 networkStatus(msg.arg1);
                 break;
             }
+            case CMD_SAVE_ACCEPT_UNVALIDATED: {
+                saveAcceptUnvalidated(msg.arg1 != 0);
+            }
         }
     }
 
@@ -258,10 +273,16 @@ public abstract class NetworkAgent extends Handler {
     /**
      * Called by the bearer to indicate this network was manually selected by the user.
      * This should be called before the NetworkInfo is marked CONNECTED so that this
-     * Network can be given special treatment at that time.
+     * Network can be given special treatment at that time. If {@code acceptUnvalidated} is
+     * {@code true}, then the system will switch to this network. If it is {@code false} and the
+     * network cannot be validated, the system will ask the user whether to switch to this network.
+     * If the user confirms and selects "don't ask again", then the system will call
+     * {@link #saveAcceptUnvalidated} to persist the user's choice. Thus, if the transport ever
+     * calls this method with {@code acceptUnvalidated} set to {@code false}, it must also implement
+     * {@link #saveAcceptUnvalidated} to respect the user's choice.
      */
-    public void explicitlySelected() {
-        queueOrSendMessage(EVENT_SET_EXPLICITLY_SELECTED, 0);
+    public void explicitlySelected(boolean acceptUnvalidated) {
+        queueOrSendMessage(EVENT_SET_EXPLICITLY_SELECTED, acceptUnvalidated);
     }
 
     /**
@@ -288,6 +309,16 @@ public abstract class NetworkAgent extends Handler {
      * generate false negatives if we lose ip connectivity before the link is torn down.
      */
     protected void networkStatus(int status) {
+    }
+
+    /**
+     * Called when the user asks to remember the choice to use this network even if unvalidated.
+     * The transport is responsible for remembering the choice, and the next time the user connects
+     * to the network, should explicitlySelected with {@code acceptUnvalidated} set to {@code true}.
+     * This method will only be called if {@link #explicitlySelected} was called with
+     * {@code acceptUnvalidated} set to {@code false}.
+     */
+    protected void saveAcceptUnvalidated(boolean accept) {
     }
 
     protected void log(String s) {

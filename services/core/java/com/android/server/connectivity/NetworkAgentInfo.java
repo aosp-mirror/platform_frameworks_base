@@ -68,7 +68,10 @@ public class NetworkAgentInfo {
     private static final int UNVALIDATED_SCORE_PENALTY = 40;
 
     // Score for explicitly connected network.
-    private static final int EXPLICITLY_SELECTED_NETWORK_SCORE = 100;
+    //
+    // This ensures that a) the explicitly selected network is never trumped by anything else, and
+    // b) the explicitly selected network is never torn down.
+    private static final int MAXIMUM_NETWORK_SCORE = 100;
 
     // The list of NetworkRequests being satisfied by this Network.
     public final SparseArray<NetworkRequest> networkRequests = new SparseArray<NetworkRequest>();
@@ -120,13 +123,18 @@ public class NetworkAgentInfo {
         // score.  The NetworkScore class would provide a nice place to centralize score constants
         // so they are not scattered about the transports.
 
-        int score = currentScore;
+        // If this network is explicitly selected and the user has decided to use it even if it's
+        // unvalidated, give it the maximum score. Also give it the maximum score if it's explicitly
+        // selected and we're trying to see what its score could be. This ensures that we don't tear
+        // down an explicitly selected network before the user gets a chance to prefer it when
+        // a higher-scoring network (e.g., Ethernet) is available.
+        if (networkMisc.explicitlySelected && (networkMisc.acceptUnvalidated || pretendValidated)) {
+            return MAXIMUM_NETWORK_SCORE;
+        }
 
+        int score = currentScore;
         if (!everValidated && !pretendValidated) score -= UNVALIDATED_SCORE_PENALTY;
         if (score < 0) score = 0;
-
-        if (networkMisc.explicitlySelected) score = EXPLICITLY_SELECTED_NETWORK_SCORE;
-
         return score;
     }
 
@@ -153,7 +161,9 @@ public class NetworkAgentInfo {
                 networkCapabilities + "}  Score{" + getCurrentScore() + "}  " +
                 "everValidated{" + everValidated + "}  lastValidated{" + lastValidated + "}  " +
                 "created{" + created + "}  " +
-                "explicitlySelected{" + networkMisc.explicitlySelected + "} }";
+                "explicitlySelected{" + networkMisc.explicitlySelected + "} " +
+                "acceptUnvalidated{" + networkMisc.acceptUnvalidated + "} " +
+                "}";
     }
 
     public String name() {
