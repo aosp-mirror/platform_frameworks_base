@@ -630,7 +630,7 @@
     <string name="permlab_locationUpdates" msgid="7785408253364335740">"styra meddelanden för platsuppdatering"</string>
     <string name="permdesc_locationUpdates" msgid="1120741557891438876">"Tillåter att appen aktiverar/inaktiverar meddelanden om platsuppdateringar från radion. Används inte av vanliga appar."</string>
     <string name="permlab_checkinProperties" msgid="7855259461268734914">"få åtkomst till incheckningsegenskaper"</string>
-    <string name="permdesc_checkinProperties" msgid="4024526968630194128">"Tillåter att appen får läs/skrivåtkomst till egenskaper som läggs upp via incheckningstjänsten. Används inte av vanliga appar."</string>
+    <string name="permdesc_checkinProperties" msgid="4024526968630194128">"Tillåter att appen får läs/skrivåtkomst till egenskaper som laddas upp via incheckningstjänsten. Används inte av vanliga appar."</string>
     <string name="permlab_bindGadget" msgid="776905339015863471">"välja widgetar"</string>
     <string name="permdesc_bindGadget" msgid="8261326938599049290">"Tillåter att appen meddelar systemet vilka widgetar som kan användas av vilka appar. Med den här behörigheten kan andra appar få åtkomst till personliga uppgifter. Används inte av vanliga appar."</string>
     <string name="permlab_modifyPhoneState" msgid="8423923777659292228">"ändra telefonstatus"</string>
