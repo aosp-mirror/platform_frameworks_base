@@ -296,8 +296,6 @@ public final class BluetoothSap implements BluetoothProfile {
      * Set priority of the profile
      *
      * <p> The device should already be paired.
-     *  Priority can be one of {@link #PRIORITY_ON} or
-     * {@link #PRIORITY_OFF},
      *
      * @param device Paired bluetooth device
      * @param priority
@@ -324,10 +322,6 @@ public final class BluetoothSap implements BluetoothProfile {
 
     /**
      * Get the priority of the profile.
-     *
-     * <p> The priority can be any of:
-     * {@link #PRIORITY_AUTO_CONNECT}, {@link #PRIORITY_OFF},
-     * {@link #PRIORITY_ON}, {@link #PRIORITY_UNDEFINED}
      *
      * @param device Bluetooth device
      * @return priority of the device
