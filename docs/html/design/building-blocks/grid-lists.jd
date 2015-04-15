@@ -4,6 +4,15 @@ page.tags=gridview,layout,listview
 
 <img src="{@docRoot}design/media/gridview_overview.png">
 
+
+<a class="notice-designers-material"
+  href="http://www.google.com/design/spec/components/grid-lists.html">
+  <div>
+    <h3>Material Design</h3>
+    <p>Grid lists<p>
+  </div>
+</a>
+
 <a class="notice-developers" href="{@docRoot}guide/topics/ui/layout/gridview.html">
   <div>
     <h3>Developer Docs</h3>
