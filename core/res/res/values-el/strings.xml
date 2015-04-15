@@ -218,42 +218,28 @@
     <string name="android_system_label" msgid="6577375335728551336">"Σύστημα Android"</string>
     <string name="user_owner_label" msgid="6465364741001216388">"Προσωπικές εφαρμογές"</string>
     <string name="managed_profile_label" msgid="6260850669674791528">"Εργασία"</string>
-    <!-- no translation found for permgrouplab_contacts (3657758145679177612) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_contacts (1437393511338346185) -->
-    <skip />
-    <!-- no translation found for permgrouplab_location (7275582855722310164) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_location (536889867433972794) -->
-    <skip />
+    <string name="permgrouplab_contacts" msgid="3657758145679177612">"Επαφές"</string>
+    <string name="permgroupdesc_contacts" msgid="1437393511338346185">"πρόσβαση και τροποποίηση των επαφών σας"</string>
+    <string name="permgrouplab_location" msgid="7275582855722310164">"Τοποθεσία"</string>
+    <string name="permgroupdesc_location" msgid="536889867433972794">"πρόσβαση στην τοποθεσία σας"</string>
     <string name="permgrouplab_socialInfo" msgid="5799096623412043791">"Οι κοινωνικές πληροφορίες σας"</string>
     <string name="permgroupdesc_socialInfo" msgid="7129842457611643493">"Άμεση πρόσβαση σε πληροφορίες σχετικά με τις επαφές και τις κοινωνικές συνδέσεις σας."</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"Ημερολόγιο"</string>
-    <!-- no translation found for permgroupdesc_calendar (2116049656685591803) -->
-    <skip />
-    <!-- no translation found for permgrouplab_sms (228308803364967808) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_sms (3695085582674524761) -->
-    <skip />
+    <string name="permgroupdesc_calendar" msgid="2116049656685591803">"πρόσβαση και τροποποίηση του ημερολογίου σας"</string>
+    <string name="permgrouplab_sms" msgid="228308803364967808">"SMS"</string>
+    <string name="permgroupdesc_sms" msgid="3695085582674524761">"πρόσβαση και τροποποίηση SMS"</string>
     <string name="permgrouplab_dictionary" msgid="8114410334955871144">"Λεξικό χρήστη"</string>
-    <!-- no translation found for permgroupdesc_dictionary (7586787746354378335) -->
-    <skip />
+    <string name="permgroupdesc_dictionary" msgid="7586787746354378335">"Ανάγνωση ή εγγραφή λέξεων στο λεξικό χρήστη."</string>
     <string name="permgrouplab_bookmarks" msgid="1949519673103968229">"Σελιδοδείκτες και ιστορικό"</string>
     <string name="permgroupdesc_bookmarks" msgid="4169771606257963028">"Άμεση πρόσβαση σε σελιδοδείκτες και ιστορικού προγράμματος περιήγησης."</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"Μικρόφωνο"</string>
-    <!-- no translation found for permgroupdesc_microphone (1296196977187629181) -->
-    <skip />
+    <string name="permgroupdesc_microphone" msgid="1296196977187629181">"χρήση μικροφώνου συσκευής"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"Κάμερα"</string>
-    <!-- no translation found for permgroupdesc_camera (2429930670410559293) -->
-    <skip />
-    <!-- no translation found for permgrouplab_phone (5229115638567440675) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_phone (2016641188146068700) -->
-    <skip />
-    <!-- no translation found for permgrouplab_sensors (7416703484233940260) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_sensors (2987451839455524494) -->
-    <skip />
+    <string name="permgroupdesc_camera" msgid="2429930670410559293">"χρήση της κάμερας της συσκευής"</string>
+    <string name="permgrouplab_phone" msgid="5229115638567440675">"Τηλέφωνο"</string>
+    <string name="permgroupdesc_phone" msgid="2016641188146068700">"χρήση τηλεφωνίας συσκευής"</string>
+    <string name="permgrouplab_sensors" msgid="7416703484233940260">"Αισθητήρες"</string>
+    <string name="permgroupdesc_sensors" msgid="2987451839455524494">"αισθητήρες πρόσβασης και φορετές συσκευές"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Ανάκτηση του περιεχομένου του παραθύρου"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Έλεγχος του περιεχομένου ενός παραθύρου με το οποίο αλληλεπιδράτε."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Ενεργοποίηση της \"Εξερεύνησης με άγγιγμα\""</string>
@@ -443,15 +429,21 @@
     <string name="fingerprint_acquired_partial" msgid="735082772341716043">"Εντοπίστηκε μερικό μοναδικό χαρακτηριστικό. Δοκιμάστε ξανά."</string>
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"Δεν ήταν δυνατή η επεξεργασία του μοναδικού χαρακτηριστικού. Δοκιμάστε ξανά."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"Ο αισθητήρας μοναδικού χαρακτηριστικού δεν είναι καθαρός. Καθαρίστε τον και δοκιμάστε ξανά."</string>
-    <string name="fingerprint_acquired_too_fast" msgid="5303368850245663580">"Πολύ γρήγορη κίνηση δαχτύλου. Δοκιμάστε ξανά."</string>
+    <!-- no translation found for fingerprint_acquired_too_fast (6470642383109155969) -->
+    <skip />
     <string name="fingerprint_acquired_too_slow" msgid="7381891107120721078">"Πολύ αργή κίνηση δαχτύλου. Δοκιμάστε ξανά."</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
-    <string name="fingerprint_error_unable_to_process" msgid="4232401562838100026">"Δεν είναι δυνατή η επεξεργασία. Δοκιμάστε ξανά."</string>
-    <string name="fingerprint_error_hw_not_available" msgid="6162709753784993771">"Ο εξοπλισμός δεν είναι διαθέσιμος."</string>
+    <!-- no translation found for fingerprint_error_hw_not_available (7955921658939936596) -->
+    <skip />
     <string name="fingerprint_error_no_space" msgid="1055819001126053318">"Δεν είναι δυνατή η αποθήκευση μοναδικού χαρακτηριστικού. Καταργήστε το υπάρχον μοναδικό χαρακτηριστικό."</string>
     <string name="fingerprint_error_timeout" msgid="3927186043737732875">"Λήξη χρονικού ορίου μοναδικού χαρακτηριστικού. Δοκιμάστε ξανά."</string>
-    <string name="fingerprint_error_vendor" msgid="3175724710791609491">"Λήξη χρονικού ορίου μοναδικού χαρακτηριστικού. Δοκιμάστε ξανά."</string>
+    <!-- no translation found for fingerprint_error_canceled (4402024612660774395) -->
+    <skip />
+    <!-- no translation found for fingerprint_error_lockout (5536934748136933450) -->
+    <skip />
+    <!-- no translation found for fingerprint_error_unable_to_process (6107816084103552441) -->
+    <skip />
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"ανάγνωση ρυθμίσεων συγχρονισμού"</string>
@@ -460,6 +452,8 @@
     <string name="permdesc_writeSyncSettings" msgid="8956262591306369868">"Επιτρέπει σε μια εφαρμογή την τροποποίηση των ρυθμίσεων συγχρονισμού για έναν λογαριασμό. Για παράδειγμα, αυτό μπορεί να χρησιμοποιηθεί για να ενεργοποιηθεί ο συγχρονισμός της εφαρμογής \"Άτομα\" με έναν λογαριασμό."</string>
     <string name="permlab_readSyncStats" msgid="7396577451360202448">"ανάγνωση στατιστικών συγχρονισμού"</string>
     <string name="permdesc_readSyncStats" msgid="1510143761757606156">"Επιτρέπει σε μια εφαρμογή την ανάγνωση των στατιστικών στοιχείων συγχρονισμού για έναν λογαριασμό, συμπεριλαμβανομένων του ιστορικού των συμβάντων συγχρονισμού και του όγκου των δεδομένων που συγχρονίζονται."</string>
+    <string name="permlab_subscribedFeedsWrite" msgid="9015246325408209296">"εγγραφή ροών δεδομένων στις οποίες έχετε εγγραφεί"</string>
+    <string name="permdesc_subscribedFeedsWrite" msgid="6928930188826089413">"Επιτρέπει στην εφαρμογή να τροποποιήσει τις ροές δεδομένων, με τις οποίες είστε συγχρονισμένοι αυτήν τη στιγμή. Τυχόν κακόβουλες εφαρμογές ενδέχεται να αλλάξουν τις συγχρονισμένες ροές δεδομένων σας."</string>
     <string name="permlab_readDictionary" msgid="4107101525746035718">"ανάγνωση όρων που έχετε προσθέσει στο λεξικό"</string>
     <string name="permdesc_readDictionary" msgid="659614600338904243">"Επιτρέπει στην εφαρμογή την ανάγνωση όλων των λέξεων, των ονομάτων και φράσεων, τα οποία ο χρήστης ενδέχεται να έχει αποθηκεύσει στο λεξικό χρήστη."</string>
     <string name="permlab_writeDictionary" msgid="2183110402314441106">"προσθήκη λέξεων στο καθορισμένο από το χρήστη λεξικό"</string>
@@ -634,7 +628,8 @@
     <string name="lockscreen_instructions_when_pattern_enabled" msgid="46154051614126049">"Πατήστε \"Menu\" για ξεκλείδωμα ή για κλήση έκτακτης ανάγκης."</string>
     <string name="lockscreen_instructions_when_pattern_disabled" msgid="686260028797158364">"Πατήστε \"Μενού\" για ξεκλείδωμα."</string>
     <string name="lockscreen_pattern_instructions" msgid="7478703254964810302">"Σχεδιασμός μοτίβου για ξεκλείδωμα"</string>
-    <string name="lockscreen_emergency_call" msgid="5347633784401285225">"Κλήση έκτακτης ανάγκης"</string>
+    <!-- no translation found for lockscreen_emergency_call (5298642613417801888) -->
+    <skip />
     <string name="lockscreen_return_to_call" msgid="5244259785500040021">"Επιστροφή στην κλήση"</string>
     <string name="lockscreen_pattern_correct" msgid="9039008650362261237">"Σωστό!"</string>
     <string name="lockscreen_pattern_wrong" msgid="4317955014948108794">"Προσπαθήστε ξανά"</string>
@@ -1034,29 +1029,35 @@
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="candidates_style" msgid="4333913089637062257"><u>"υποψήφιοι"</u></string>
-    <string name="ext_media_checking_notification_title" product="nosdcard" msgid="3449816005351468560">"Προετοιμασία αποθ. χώρου USB"</string>
-    <string name="ext_media_checking_notification_title" product="default" msgid="5457603418970994050">"Προετοιμασία κάρτας SD"</string>
-    <string name="ext_media_checking_notification_message" msgid="8287319882926737053">"Έλεγχος για σφάλματα."</string>
-    <string name="ext_media_nofs_notification_title" product="nosdcard" msgid="7788040745686229307">"Κενός αποθηκευτικός χώρος USB"</string>
-    <string name="ext_media_nofs_notification_title" product="default" msgid="780477838241212997">"Κενή κάρτα SD"</string>
-    <string name="ext_media_nofs_notification_message" product="nosdcard" msgid="7840121067427269500">"Ο χώρος αποθήκευσης USB είναι κενός ή διαθέτει μη υποστηριζόμενο σύστημα αρχείων."</string>
-    <string name="ext_media_nofs_notification_message" product="default" msgid="8641065641786923604">"Η κάρτα SD είναι κενή ή διαθέτει μη υποστηριζόμενο σύστημα αρχείων."</string>
-    <string name="ext_media_unmountable_notification_title" product="nosdcard" msgid="2090046769532713563">"Βλάβη αποθηκευτικού χώρου USB"</string>
-    <string name="ext_media_unmountable_notification_title" product="default" msgid="6410723906019100189">"Κατεστραμμένη κάρτα SD"</string>
-    <string name="ext_media_unmountable_notification_message" product="nosdcard" msgid="1795917578395333280">"Ο χώρος αποθήκευσης USB είναι κατεστραμμένος. Δοκιμάστε να τον διαμορφώσετε ξανά."</string>
-    <string name="ext_media_unmountable_notification_message" product="default" msgid="1753898567525568253">"Η κάρτα SD είναι κατεστραμμένη. Δοκιμάστε να τη διαμορφώσετε ξανά."</string>
-    <string name="ext_media_badremoval_notification_title" product="nosdcard" msgid="1661683031330951073">"Μη αναμ. κατάργ. απ. χώρου USB"</string>
-    <string name="ext_media_badremoval_notification_title" product="default" msgid="6872152882604407837">"Μη αναμενόμενη αφαίρεση κάρτας SD"</string>
-    <string name="ext_media_badremoval_notification_message" product="nosdcard" msgid="4329848819865594241">"Αποπροσαρτήστε τον αποθηκευτικό χώρο USB πριν τον αφαιρέσετε για την αποφυγή απώλειας δεδομένων."</string>
-    <string name="ext_media_badremoval_notification_message" product="default" msgid="7260183293747448241">"Αποπροσαρτήστε την κάρτα SD πριν την αφαιρέσετε για την αποφυγή απώλειας δεδομένων."</string>
-    <string name="ext_media_safe_unmount_notification_title" product="nosdcard" msgid="3967973893270360230">"Ασφαλ. κατάργ. αποθ. χώρου USB"</string>
-    <string name="ext_media_safe_unmount_notification_title" product="default" msgid="6729801130790616200">"Η κάρτα SD μπορεί να αφαιρεθεί με ασφάλεια"</string>
-    <string name="ext_media_safe_unmount_notification_message" product="nosdcard" msgid="6142195361606493530">"Μπορείτε να καταργήσετε τον αποθηκευτικό χώρο USB με ασφάλεια."</string>
-    <string name="ext_media_safe_unmount_notification_message" product="default" msgid="568841278138377604">"Μπορείτε να αφαιρέσετε με ασφάλεια της κάρτα SD."</string>
-    <string name="ext_media_nomedia_notification_title" product="nosdcard" msgid="4486377230140227651">"Ο αποθ. χώρος USB καταργήθηκε"</string>
-    <string name="ext_media_nomedia_notification_title" product="default" msgid="8902518030404381318">"Η κάρτα SD αφαιρέθηκε"</string>
-    <string name="ext_media_nomedia_notification_message" product="nosdcard" msgid="6921126162580574143">"Ο αποθηκευτικός χώρος USB καταργήθηκε. Εισαγάγετε νέα πολυμέσα."</string>
-    <string name="ext_media_nomedia_notification_message" product="default" msgid="3870120652983659641">"Αφαιρέθηκε η κάρτα SD. Τοποθετήστε μια νέα κάρτα."</string>
+    <!-- no translation found for ext_media_checking_notification_title (5734005953288045806) -->
+    <skip />
+    <string name="ext_media_checking_notification_message" msgid="4747432538578886744">"Έλεγχος για σφάλματα"</string>
+    <!-- no translation found for ext_media_new_notification_message (7589986898808506239) -->
+    <skip />
+    <!-- no translation found for ext_media_ready_notification_message (4083398150380114462) -->
+    <skip />
+    <!-- no translation found for ext_media_unmountable_notification_title (4863279349863279603) -->
+    <skip />
+    <!-- no translation found for ext_media_unmountable_notification_message (7391672496565685690) -->
+    <skip />
+    <!-- no translation found for ext_media_badremoval_notification_title (3206248947375505416) -->
+    <skip />
+    <!-- no translation found for ext_media_badremoval_notification_message (380176703346946313) -->
+    <skip />
+    <!-- no translation found for ext_media_nomedia_notification_title (1704840188641749091) -->
+    <skip />
+    <!-- no translation found for ext_media_nomedia_notification_message (6471542972147056586) -->
+    <skip />
+    <!-- no translation found for ext_media_unmounting_notification_title (640674168454809372) -->
+    <skip />
+    <!-- no translation found for ext_media_unmounting_notification_message (4182843895023357756) -->
+    <skip />
+    <!-- no translation found for ext_media_init_action (8317198948634872507) -->
+    <skip />
+    <!-- no translation found for ext_media_unmount_action (1121883233103278199) -->
+    <skip />
+    <!-- no translation found for ext_media_browse_action (8322172381028546087) -->
+    <skip />
     <string name="activity_list_empty" msgid="1675388330786841066">"Δεν βρέθηκαν δραστηριότητες που να συμφωνούν με τα κριτήρια."</string>
     <string name="permlab_route_media_output" msgid="1642024455750414694">"Διαγραφή διαδρομής δεδομένων εξόδου μέσων"</string>
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"Επιτρέπει σε μια εφαρμογή τη διαγραφή διαδρομής δεδομένων εξόδου μέσων σε άλλες εξωτερικές συσκευές."</string>
@@ -1251,7 +1252,6 @@
     <string name="display_manager_overlay_display_name" msgid="5142365982271620716">"Επικάλυψη #<xliff:g id="ID">%1$d</xliff:g>"</string>
     <string name="display_manager_overlay_display_title" msgid="652124517672257172">"<xliff:g id="NAME">%1$s</xliff:g>: <xliff:g id="WIDTH">%2$d</xliff:g>x<xliff:g id="HEIGHT">%3$d</xliff:g>, <xliff:g id="DPI">%4$d</xliff:g> dpi"</string>
     <string name="display_manager_overlay_display_secure_suffix" msgid="6022119702628572080">", ασφαλές"</string>
-    <string name="kg_emergency_call_label" msgid="684946192523830531">"Κλήσεις επείγουσας ανάγκης"</string>
     <string name="kg_forgot_pattern_button_text" msgid="8852021467868220608">"Ξεχάσατε το μοτίβο"</string>
     <string name="kg_wrong_pattern" msgid="1850806070801358830">"Εσφαλμένο μοτίβο"</string>
     <string name="kg_wrong_password" msgid="2333281762128113157">"Εσφαλμένος κωδικός πρόσβασης"</string>

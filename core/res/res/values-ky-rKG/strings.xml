@@ -326,43 +326,28 @@
     <skip />
     <string name="user_owner_label" msgid="6465364741001216388">"Жеке колдономолор"</string>
     <string name="managed_profile_label" msgid="6260850669674791528">"Жумуш"</string>
-    <!-- no translation found for permgrouplab_contacts (3657758145679177612) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_contacts (1437393511338346185) -->
-    <skip />
-    <!-- no translation found for permgrouplab_location (7275582855722310164) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_location (536889867433972794) -->
-    <skip />
+    <string name="permgrouplab_contacts" msgid="3657758145679177612">"Байланыштар"</string>
+    <string name="permgroupdesc_contacts" msgid="1437393511338346185">"байланыштарыңызга кирип, өзгөртүңүз"</string>
+    <string name="permgrouplab_location" msgid="7275582855722310164">"Жайгашкан жер"</string>
+    <string name="permgroupdesc_location" msgid="536889867433972794">"жайгашкан жериңизге кирүү"</string>
     <string name="permgrouplab_socialInfo" msgid="5799096623412043791">"Сиздин социалдык маалыматыңыз"</string>
     <string name="permgroupdesc_socialInfo" msgid="7129842457611643493">"Сиздин байланыштарыңыз жана социалдык байланыштарыңыз тууралуу маалыматтарга түз жетки алуу."</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"Күнбарак"</string>
-    <!-- no translation found for permgroupdesc_calendar (2116049656685591803) -->
-    <skip />
-    <!-- no translation found for permgrouplab_sms (228308803364967808) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_sms (3695085582674524761) -->
-    <skip />
-    <!-- no translation found for permgrouplab_dictionary (8114410334955871144) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_dictionary (7586787746354378335) -->
-    <skip />
+    <string name="permgroupdesc_calendar" msgid="2116049656685591803">"жылнаамаңызга кирип, өзгөртүңүз"</string>
+    <string name="permgrouplab_sms" msgid="228308803364967808">"SMS"</string>
+    <string name="permgroupdesc_sms" msgid="3695085582674524761">"SMS\'ке кирип, өзгөртүү"</string>
+    <string name="permgrouplab_dictionary" msgid="8114410334955871144">"Колдонуучунун сөздүгү"</string>
+    <string name="permgroupdesc_dictionary" msgid="7586787746354378335">"Колдонуучунун сөздүгүндөгү сөздөрдү окуу же жазуу"</string>
     <string name="permgrouplab_bookmarks" msgid="1949519673103968229">"Бүктөмөлөр жана тарых"</string>
     <string name="permgroupdesc_bookmarks" msgid="4169771606257963028">"Бүктөмөлөргө же серепчи тарыхына түз жетки алуу."</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"Микрофон"</string>
-    <!-- no translation found for permgroupdesc_microphone (1296196977187629181) -->
-    <skip />
+    <string name="permgroupdesc_microphone" msgid="1296196977187629181">"түзмөктүн микрофонун колдонуу"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"Камера"</string>
-    <!-- no translation found for permgroupdesc_camera (2429930670410559293) -->
-    <skip />
-    <!-- no translation found for permgrouplab_phone (5229115638567440675) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_phone (2016641188146068700) -->
-    <skip />
-    <!-- no translation found for permgrouplab_sensors (7416703484233940260) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_sensors (2987451839455524494) -->
-    <skip />
+    <string name="permgroupdesc_camera" msgid="2429930670410559293">"түзмөктүн камерасын колдонуу"</string>
+    <string name="permgrouplab_phone" msgid="5229115638567440675">"Телефон"</string>
+    <string name="permgroupdesc_phone" msgid="2016641188146068700">"түзмөктүн телефониясын колдонуу"</string>
+    <string name="permgrouplab_sensors" msgid="7416703484233940260">"Сенсорлор"</string>
+    <string name="permgroupdesc_sensors" msgid="2987451839455524494">"сенсорлор менен тагынмаларга кирүү"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Терезе мазмунун алуу"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Сиз иштеп жаткан терезенин мазмунун изилдөө."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Сыйпалап изилдөөнү жандыруу"</string>
@@ -572,15 +557,21 @@
     <string name="fingerprint_acquired_partial" msgid="735082772341716043">"Манжа изи жарым-жартылай аныкталды. Кайра аракет кылыңыз."</string>
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"Манжа изи иштелбей койду. Кайра аракет кылыңыз."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"Манжа изинин сенсору кирдеп калган. Тазалап, кайра аракет кылыңыз."</string>
-    <string name="fingerprint_acquired_too_fast" msgid="5303368850245663580">"Манжа өтө тез жылдырылды. Кайра аракет кылыңыз."</string>
+    <!-- no translation found for fingerprint_acquired_too_fast (6470642383109155969) -->
+    <skip />
     <string name="fingerprint_acquired_too_slow" msgid="7381891107120721078">"Манжа өтө жай жылдырылды. Кайра аракет кылыңыз."</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
-    <string name="fingerprint_error_unable_to_process" msgid="4232401562838100026">"Иштетилбей жатат. Кайра аракет кылыңыз."</string>
-    <string name="fingerprint_error_hw_not_available" msgid="6162709753784993771">"Аппараттык камсыздоо жеткиликтүү эмес."</string>
+    <!-- no translation found for fingerprint_error_hw_not_available (7955921658939936596) -->
+    <skip />
     <string name="fingerprint_error_no_space" msgid="1055819001126053318">"Манжа изин сактоо мүмкүн эмес. Учурдагы манжа изин алып салыңыз."</string>
     <string name="fingerprint_error_timeout" msgid="3927186043737732875">"Манжа изин күтүү мөөнөтү бүттү. Кайра аракет кылыңыз."</string>
-    <string name="fingerprint_error_vendor" msgid="3175724710791609491">"Манжа изин күтүү мөөнөтү бүттү. Кайра аракет кылыңыз."</string>
+    <!-- no translation found for fingerprint_error_canceled (4402024612660774395) -->
+    <skip />
+    <!-- no translation found for fingerprint_error_lockout (5536934748136933450) -->
+    <skip />
+    <!-- no translation found for fingerprint_error_unable_to_process (6107816084103552441) -->
+    <skip />
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <!-- no translation found for permlab_readSyncSettings (6201810008230503052) -->
@@ -591,6 +582,9 @@
     <!-- no translation found for permlab_readSyncStats (7396577451360202448) -->
     <skip />
     <string name="permdesc_readSyncStats" msgid="1510143761757606156">"Колдонмого эсептин статистикасын, синхрондоштуруу тарыхын, анын ичинде, канча берилиштер синхрондошкондугун окуганга уруксат берет."</string>
+    <!-- no translation found for permlab_subscribedFeedsWrite (9015246325408209296) -->
+    <skip />
+    <string name="permdesc_subscribedFeedsWrite" msgid="6928930188826089413">"Колдонмого учурда шайкештештирилген каналдарыңызды өзгөртүү мүмкүнчүлүгүн берет. Кесепеттүү колдонмолор шайкештештирилген каналдарыңызды өзгөртүп салышы мүмкүн."</string>
     <string name="permlab_readDictionary" msgid="4107101525746035718">"сөздүккө кошкон терминдериңизди окуу"</string>
     <string name="permdesc_readDictionary" msgid="659614600338904243">"Колдонмого колдонуучу сөздүгүндө сакталган бардык сөздөрдү, аттарды жана фразаларды окуганга уруксат берет."</string>
     <string name="permlab_writeDictionary" msgid="2183110402314441106">"колдонуучунун сөздүгүнө сөздөрдү кошуу"</string>
@@ -836,7 +830,7 @@
     <skip />
     <!-- no translation found for lockscreen_pattern_instructions (7478703254964810302) -->
     <skip />
-    <!-- no translation found for lockscreen_emergency_call (5347633784401285225) -->
+    <!-- no translation found for lockscreen_emergency_call (5298642613417801888) -->
     <skip />
     <!-- no translation found for lockscreen_return_to_call (5244259785500040021) -->
     <skip />
@@ -1384,47 +1378,35 @@
     <skip />
     <!-- no translation found for candidates_style (4333913089637062257) -->
     <skip />
-    <!-- no translation found for ext_media_checking_notification_title (3449816005351468560) -->
+    <!-- no translation found for ext_media_checking_notification_title (5734005953288045806) -->
     <skip />
-    <!-- no translation found for ext_media_checking_notification_title (5457603418970994050) -->
+    <!-- no translation found for ext_media_checking_notification_message (4747432538578886744) -->
     <skip />
-    <!-- no translation found for ext_media_checking_notification_message (8287319882926737053) -->
+    <!-- no translation found for ext_media_new_notification_message (7589986898808506239) -->
     <skip />
-    <!-- no translation found for ext_media_nofs_notification_title (7788040745686229307) -->
+    <!-- no translation found for ext_media_ready_notification_message (4083398150380114462) -->
     <skip />
-    <!-- no translation found for ext_media_nofs_notification_title (780477838241212997) -->
+    <!-- no translation found for ext_media_unmountable_notification_title (4863279349863279603) -->
     <skip />
-    <string name="ext_media_nofs_notification_message" product="nosdcard" msgid="7840121067427269500">"USB сактагыч актай бош же анын файл системасы колдоого алынбайт."</string>
-    <string name="ext_media_nofs_notification_message" product="default" msgid="8641065641786923604">"SD-карта актай же анын файл системасы колдоого алынбайт."</string>
-    <!-- no translation found for ext_media_unmountable_notification_title (2090046769532713563) -->
+    <!-- no translation found for ext_media_unmountable_notification_message (7391672496565685690) -->
     <skip />
-    <!-- no translation found for ext_media_unmountable_notification_title (6410723906019100189) -->
+    <!-- no translation found for ext_media_badremoval_notification_title (3206248947375505416) -->
     <skip />
-    <string name="ext_media_unmountable_notification_message" product="nosdcard" msgid="1795917578395333280">"USB сактагыч бүлүнгөн. Аны кайра форматтап көрүңүз."</string>
-    <string name="ext_media_unmountable_notification_message" product="default" msgid="1753898567525568253">"SD-карта бүлүнгөн. Аны кайра форматтап көрүңүз."</string>
-    <!-- no translation found for ext_media_badremoval_notification_title (1661683031330951073) -->
+    <!-- no translation found for ext_media_badremoval_notification_message (380176703346946313) -->
     <skip />
-    <!-- no translation found for ext_media_badremoval_notification_title (6872152882604407837) -->
+    <!-- no translation found for ext_media_nomedia_notification_title (1704840188641749091) -->
     <skip />
-    <!-- no translation found for ext_media_badremoval_notification_message (4329848819865594241) -->
+    <!-- no translation found for ext_media_nomedia_notification_message (6471542972147056586) -->
     <skip />
-    <!-- no translation found for ext_media_badremoval_notification_message (7260183293747448241) -->
+    <!-- no translation found for ext_media_unmounting_notification_title (640674168454809372) -->
     <skip />
-    <!-- no translation found for ext_media_safe_unmount_notification_title (3967973893270360230) -->
+    <!-- no translation found for ext_media_unmounting_notification_message (4182843895023357756) -->
     <skip />
-    <!-- no translation found for ext_media_safe_unmount_notification_title (6729801130790616200) -->
+    <!-- no translation found for ext_media_init_action (8317198948634872507) -->
     <skip />
-    <!-- no translation found for ext_media_safe_unmount_notification_message (6142195361606493530) -->
+    <!-- no translation found for ext_media_unmount_action (1121883233103278199) -->
     <skip />
-    <!-- no translation found for ext_media_safe_unmount_notification_message (568841278138377604) -->
-    <skip />
-    <!-- no translation found for ext_media_nomedia_notification_title (4486377230140227651) -->
-    <skip />
-    <!-- no translation found for ext_media_nomedia_notification_title (8902518030404381318) -->
-    <skip />
-    <!-- no translation found for ext_media_nomedia_notification_message (6921126162580574143) -->
-    <skip />
-    <!-- no translation found for ext_media_nomedia_notification_message (3870120652983659641) -->
+    <!-- no translation found for ext_media_browse_action (8322172381028546087) -->
     <skip />
     <string name="activity_list_empty" msgid="1675388330786841066">"Туура келген аракеттер табылбады."</string>
     <string name="permlab_route_media_output" msgid="1642024455750414694">"Медиа чыгарылышын багыттоо"</string>
@@ -1685,7 +1667,6 @@
     <string name="display_manager_overlay_display_name" msgid="5142365982271620716">"Катмар №<xliff:g id="ID">%1$d</xliff:g>"</string>
     <string name="display_manager_overlay_display_title" msgid="652124517672257172">"<xliff:g id="NAME">%1$s</xliff:g>: <xliff:g id="WIDTH">%2$d</xliff:g>x<xliff:g id="HEIGHT">%3$d</xliff:g>, <xliff:g id="DPI">%4$d</xliff:g> dpi"</string>
     <string name="display_manager_overlay_display_secure_suffix" msgid="6022119702628572080">", корголгон"</string>
-    <string name="kg_emergency_call_label" msgid="684946192523830531">"Куткаруучуларга чалуу"</string>
     <string name="kg_forgot_pattern_button_text" msgid="8852021467868220608">"Үлгү унутулду"</string>
     <string name="kg_wrong_pattern" msgid="1850806070801358830">"Үлгү туура эмес"</string>
     <string name="kg_wrong_password" msgid="2333281762128113157">"Сырсөз туура эмес"</string>
@@ -1881,17 +1862,12 @@
     </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> чейин"</string>
     <string name="zen_mode_forever" msgid="7420011936770086993">"Бул өчүрүлгөнгө чейин"</string>
-    <!-- no translation found for zen_mode_rule_name_combination (191109939968076477) -->
-    <skip />
+    <string name="zen_mode_rule_name_combination" msgid="191109939968076477">"<xliff:g id="FIRST">%1$s</xliff:g>/<xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"Жыйнап коюу"</string>
-    <!-- no translation found for zen_mode_feature_name (289097150786114338) -->
-    <skip />
-    <!-- no translation found for zen_mode_downtime_feature_name (2626974636779860146) -->
-    <skip />
-    <!-- no translation found for zen_mode_default_weeknights_name (2069189413656431610) -->
-    <skip />
-    <!-- no translation found for zen_mode_default_weekends_name (2377398437072017011) -->
-    <skip />
+    <string name="zen_mode_feature_name" msgid="289097150786114338">"Үзгүлтүккө учуратууларды бөгөттөө"</string>
+    <string name="zen_mode_downtime_feature_name" msgid="2626974636779860146">"Аракетсиз убакыт"</string>
+    <string name="zen_mode_default_weeknights_name" msgid="2069189413656431610">"Иш түндөрү"</string>
+    <string name="zen_mode_default_weekends_name" msgid="2377398437072017011">"Дем алыш күндөрү"</string>
     <string name="muted_by" msgid="6147073845094180001">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> тарабынан үнсүздөлдү"</string>
     <string name="system_error_wipe_data" msgid="6608165524785354962">"Түзмөгүңүздө ички көйгөй бар жана ал баштапкы абалга кайтарылмайынча туруктуу иштебей коюшу мүмкүн."</string>
     <string name="system_error_manufacturer" msgid="8086872414744210668">"Түзмөгүңүздө ички көйгөй бар. Анын чоо-жайын билүү үчүн өндүрүүчүңүзгө кайрылыңыз."</string>
@@ -1901,11 +1877,9 @@
     <string name="stk_cc_ss_to_dial" msgid="2151304435775557162">"SS сурамы DIAL сурамына өзгөртүлдү."</string>
     <string name="stk_cc_ss_to_ussd" msgid="3951862188105305589">"SS сурамы USSD сурамына өзгөртүлдү."</string>
     <string name="stk_cc_ss_to_ss" msgid="5470768854991452695">"SS сурамы жаңы SS сурамына өзгөртүлдү."</string>
-    <!-- no translation found for usb_midi_peripheral_name (7221113987741003817) -->
-    <skip />
+    <string name="usb_midi_peripheral_name" msgid="7221113987741003817">"Android USB Сырткы оюкча"</string>
     <string name="usb_midi_peripheral_manufacturer_name" msgid="7176526170008970168">"Android"</string>
-    <!-- no translation found for usb_midi_peripheral_product_name (4971827859165280403) -->
-    <skip />
+    <string name="usb_midi_peripheral_product_name" msgid="4971827859165280403">"USB Сырткы оюкча"</string>
     <string name="floating_toolbar_open_overflow_description" msgid="4797287862999444631">"Дагы параметрлер"</string>
     <string name="floating_toolbar_close_overflow_description" msgid="559796923090723804">"Ашып-ташууну жабуу"</string>
 </resources>

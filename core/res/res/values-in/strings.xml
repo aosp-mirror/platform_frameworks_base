@@ -218,42 +218,28 @@
     <string name="android_system_label" msgid="6577375335728551336">"Sistem Android"</string>
     <string name="user_owner_label" msgid="6465364741001216388">"Aplikasi pribadi"</string>
     <string name="managed_profile_label" msgid="6260850669674791528">"Kantor"</string>
-    <!-- no translation found for permgrouplab_contacts (3657758145679177612) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_contacts (1437393511338346185) -->
-    <skip />
-    <!-- no translation found for permgrouplab_location (7275582855722310164) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_location (536889867433972794) -->
-    <skip />
+    <string name="permgrouplab_contacts" msgid="3657758145679177612">"Kontak"</string>
+    <string name="permgroupdesc_contacts" msgid="1437393511338346185">"mengakses dan memodifikasi kontak"</string>
+    <string name="permgrouplab_location" msgid="7275582855722310164">"Lokasi"</string>
+    <string name="permgroupdesc_location" msgid="536889867433972794">"mengakses lokasi Anda"</string>
     <string name="permgrouplab_socialInfo" msgid="5799096623412043791">"Informasi sosial Anda"</string>
     <string name="permgroupdesc_socialInfo" msgid="7129842457611643493">"Akses langsung ke informasi tentang kontak dan hubungan sosial Anda."</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"Kalender"</string>
-    <!-- no translation found for permgroupdesc_calendar (2116049656685591803) -->
-    <skip />
-    <!-- no translation found for permgrouplab_sms (228308803364967808) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_sms (3695085582674524761) -->
-    <skip />
+    <string name="permgroupdesc_calendar" msgid="2116049656685591803">"mengakses dan memodifikasi kalender"</string>
+    <string name="permgrouplab_sms" msgid="228308803364967808">"SMS"</string>
+    <string name="permgroupdesc_sms" msgid="3695085582674524761">"mengakses dan memodifikasi SMS"</string>
     <string name="permgrouplab_dictionary" msgid="8114410334955871144">"Kamus Pengguna"</string>
-    <!-- no translation found for permgroupdesc_dictionary (7586787746354378335) -->
-    <skip />
+    <string name="permgroupdesc_dictionary" msgid="7586787746354378335">"Membaca atau menulis kata dalam kamus pengguna."</string>
     <string name="permgrouplab_bookmarks" msgid="1949519673103968229">"Bookmark dan Riwayat"</string>
     <string name="permgroupdesc_bookmarks" msgid="4169771606257963028">"Akses langsung ke bookmark dan riwayat browser."</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"Mikrofon"</string>
-    <!-- no translation found for permgroupdesc_microphone (1296196977187629181) -->
-    <skip />
+    <string name="permgroupdesc_microphone" msgid="1296196977187629181">"menggunakan mikrofon perangkat"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"Kamera"</string>
-    <!-- no translation found for permgroupdesc_camera (2429930670410559293) -->
-    <skip />
-    <!-- no translation found for permgrouplab_phone (5229115638567440675) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_phone (2016641188146068700) -->
-    <skip />
-    <!-- no translation found for permgrouplab_sensors (7416703484233940260) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_sensors (2987451839455524494) -->
-    <skip />
+    <string name="permgroupdesc_camera" msgid="2429930670410559293">"menggunakan kamera perangkat"</string>
+    <string name="permgrouplab_phone" msgid="5229115638567440675">"Telepon"</string>
+    <string name="permgroupdesc_phone" msgid="2016641188146068700">"menggunakan teleponi perangkat"</string>
+    <string name="permgrouplab_sensors" msgid="7416703484233940260">"Sensor"</string>
+    <string name="permgroupdesc_sensors" msgid="2987451839455524494">"mengakses sensor dan perangkat yang dapat dikenakan"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Mengambil konten jendela"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Memeriksa konten jendela tempat Anda berinteraksi."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Mengaktifkan Jelajahi dengan Sentuhan"</string>
@@ -443,15 +429,21 @@
     <string name="fingerprint_acquired_partial" msgid="735082772341716043">"Sebagian sidik jari terdeteksi. Coba lagi."</string>
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"Tidak dapat memproses sidik jari. Coba lagi."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"Sensor sidik jari kotor. Bersihkan dan coba lagi."</string>
-    <string name="fingerprint_acquired_too_fast" msgid="5303368850245663580">"Jari digerakkan terlalu cepat. Coba lagi."</string>
+    <!-- no translation found for fingerprint_acquired_too_fast (6470642383109155969) -->
+    <skip />
     <string name="fingerprint_acquired_too_slow" msgid="7381891107120721078">"Jari digerakkan terlalu lambat. Coba lagi."</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
-    <string name="fingerprint_error_unable_to_process" msgid="4232401562838100026">"Tidak dapat memproses. Coba lagi."</string>
-    <string name="fingerprint_error_hw_not_available" msgid="6162709753784993771">"Perangkat keras tidak tersedia."</string>
+    <!-- no translation found for fingerprint_error_hw_not_available (7955921658939936596) -->
+    <skip />
     <string name="fingerprint_error_no_space" msgid="1055819001126053318">"Sidik jari tidak dapat disimpan. Hapus sidik jari yang ada."</string>
     <string name="fingerprint_error_timeout" msgid="3927186043737732875">"Waktu sidik jari habis. Coba lagi."</string>
-    <string name="fingerprint_error_vendor" msgid="3175724710791609491">"Waktu sidik jari habis. Coba lagi."</string>
+    <!-- no translation found for fingerprint_error_canceled (4402024612660774395) -->
+    <skip />
+    <!-- no translation found for fingerprint_error_lockout (5536934748136933450) -->
+    <skip />
+    <!-- no translation found for fingerprint_error_unable_to_process (6107816084103552441) -->
+    <skip />
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"baca setelan sinkron"</string>
@@ -460,6 +452,8 @@
     <string name="permdesc_writeSyncSettings" msgid="8956262591306369868">"Memungkinkan aplikasi mengubah setelan sinkronisasi untuk sebuah akun. Misalnya, izin ini dapat digunakan untuk mengaktifkan sinkronisasi dari aplikasi Orang dengan sebuah akun."</string>
     <string name="permlab_readSyncStats" msgid="7396577451360202448">"statistika baca sinkron"</string>
     <string name="permdesc_readSyncStats" msgid="1510143761757606156">"Memungkinkan aplikasi membaca statistik sinkronisasi untuk sebuah akun, termasuk riwayat kejadian sinkronisasi dan berapa banyak data yang disinkronkan."</string>
+    <string name="permlab_subscribedFeedsWrite" msgid="9015246325408209296">"tuliskan umpan langganan"</string>
+    <string name="permdesc_subscribedFeedsWrite" msgid="6928930188826089413">"Mengizinkan apl memodifikasi umpan Anda yang disinkronkan saat ini. Apl berbahaya dapat mengubah umpan Anda yang disinkronkan."</string>
     <string name="permlab_readDictionary" msgid="4107101525746035718">"baca istilah yang Anda tambahkan ke kamus"</string>
     <string name="permdesc_readDictionary" msgid="659614600338904243">"Memungkinkan aplikasi membaca semua kata, nama, dan frasa yang mungkin disimpan oleh pengguna di kamus pengguna."</string>
     <string name="permlab_writeDictionary" msgid="2183110402314441106">"Menambahkan kata ke kamus yang ditentukan pengguna"</string>
@@ -634,7 +628,8 @@
     <string name="lockscreen_instructions_when_pattern_enabled" msgid="46154051614126049">"Tekan Menu untuk membuka atau melakukan panggilan darurat."</string>
     <string name="lockscreen_instructions_when_pattern_disabled" msgid="686260028797158364">"Tekan Menu untuk membuka."</string>
     <string name="lockscreen_pattern_instructions" msgid="7478703254964810302">"Buat pola untuk membuka"</string>
-    <string name="lockscreen_emergency_call" msgid="5347633784401285225">"Panggilan darurat"</string>
+    <!-- no translation found for lockscreen_emergency_call (5298642613417801888) -->
+    <skip />
     <string name="lockscreen_return_to_call" msgid="5244259785500040021">"Kembali ke panggilan"</string>
     <string name="lockscreen_pattern_correct" msgid="9039008650362261237">"Perbaiki!"</string>
     <string name="lockscreen_pattern_wrong" msgid="4317955014948108794">"Coba lagi"</string>
@@ -1034,29 +1029,36 @@
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="candidates_style" msgid="4333913089637062257"><u>"calon"</u></string>
-    <string name="ext_media_checking_notification_title" product="nosdcard" msgid="3449816005351468560">"Menyiapkan penyimpanan USB"</string>
-    <string name="ext_media_checking_notification_title" product="default" msgid="5457603418970994050">"Menyiapkan kartu SD"</string>
-    <string name="ext_media_checking_notification_message" msgid="8287319882926737053">"Memeriksa kesalahan."</string>
-    <string name="ext_media_nofs_notification_title" product="nosdcard" msgid="7788040745686229307">"Penyimpanan USB kosong"</string>
-    <string name="ext_media_nofs_notification_title" product="default" msgid="780477838241212997">"Kartu SD kosong"</string>
-    <string name="ext_media_nofs_notification_message" product="nosdcard" msgid="7840121067427269500">"Penyimpanan USB kosong atau sistem berkasnya tidak didukung."</string>
-    <string name="ext_media_nofs_notification_message" product="default" msgid="8641065641786923604">"Kartu SD kosong atau memiliki sistem file yang tidak didukung."</string>
-    <string name="ext_media_unmountable_notification_title" product="nosdcard" msgid="2090046769532713563">"Penyimpanan USB rusak"</string>
-    <string name="ext_media_unmountable_notification_title" product="default" msgid="6410723906019100189">"Kartu SD rusak"</string>
-    <string name="ext_media_unmountable_notification_message" product="nosdcard" msgid="1795917578395333280">"Penyimpanan USB rusak. Coba diformat ulang."</string>
-    <string name="ext_media_unmountable_notification_message" product="default" msgid="1753898567525568253">"Kartu SD rusak. Coba diformat ulang."</string>
-    <string name="ext_media_badremoval_notification_title" product="nosdcard" msgid="1661683031330951073">"Penyimpanan USB dilepas secara tidak sengaja"</string>
-    <string name="ext_media_badremoval_notification_title" product="default" msgid="6872152882604407837">"Kartu SD tiba-tiba dicabut"</string>
-    <string name="ext_media_badremoval_notification_message" product="nosdcard" msgid="4329848819865594241">"Lepas penyimpanan USB sebelum menghapus untuk menghindari kehilangan data."</string>
-    <string name="ext_media_badremoval_notification_message" product="default" msgid="7260183293747448241">"Lepaskan kartu SD sebelum mencabutnya untuk mencegah hilangnya data."</string>
-    <string name="ext_media_safe_unmount_notification_title" product="nosdcard" msgid="3967973893270360230">"Penyimpanan USB aman untuk dilepas"</string>
-    <string name="ext_media_safe_unmount_notification_title" product="default" msgid="6729801130790616200">"Kartu SD aman dicabut"</string>
-    <string name="ext_media_safe_unmount_notification_message" product="nosdcard" msgid="6142195361606493530">"Anda dapat melepas penyimpanan USB dengan aman."</string>
-    <string name="ext_media_safe_unmount_notification_message" product="default" msgid="568841278138377604">"Anda dapat melepaskan kartu SD dengan aman."</string>
-    <string name="ext_media_nomedia_notification_title" product="nosdcard" msgid="4486377230140227651">"Penyimpanan USB dihapus"</string>
-    <string name="ext_media_nomedia_notification_title" product="default" msgid="8902518030404381318">"Cabut kartu SD"</string>
-    <string name="ext_media_nomedia_notification_message" product="nosdcard" msgid="6921126162580574143">"Penyimpanan USB dihapus. Masukkan media baru."</string>
-    <string name="ext_media_nomedia_notification_message" product="default" msgid="3870120652983659641">"Kartu SD dicabut. Masukkan yang baru."</string>
+    <!-- no translation found for ext_media_checking_notification_title (5734005953288045806) -->
+    <skip />
+    <!-- no translation found for ext_media_checking_notification_message (4747432538578886744) -->
+    <skip />
+    <!-- no translation found for ext_media_new_notification_message (7589986898808506239) -->
+    <skip />
+    <!-- no translation found for ext_media_ready_notification_message (4083398150380114462) -->
+    <skip />
+    <!-- no translation found for ext_media_unmountable_notification_title (4863279349863279603) -->
+    <skip />
+    <!-- no translation found for ext_media_unmountable_notification_message (7391672496565685690) -->
+    <skip />
+    <!-- no translation found for ext_media_badremoval_notification_title (3206248947375505416) -->
+    <skip />
+    <!-- no translation found for ext_media_badremoval_notification_message (380176703346946313) -->
+    <skip />
+    <!-- no translation found for ext_media_nomedia_notification_title (1704840188641749091) -->
+    <skip />
+    <!-- no translation found for ext_media_nomedia_notification_message (6471542972147056586) -->
+    <skip />
+    <!-- no translation found for ext_media_unmounting_notification_title (640674168454809372) -->
+    <skip />
+    <!-- no translation found for ext_media_unmounting_notification_message (4182843895023357756) -->
+    <skip />
+    <!-- no translation found for ext_media_init_action (8317198948634872507) -->
+    <skip />
+    <!-- no translation found for ext_media_unmount_action (1121883233103278199) -->
+    <skip />
+    <!-- no translation found for ext_media_browse_action (8322172381028546087) -->
+    <skip />
     <string name="activity_list_empty" msgid="1675388330786841066">"Tidak ditemukan aktivitas yang sesuai."</string>
     <string name="permlab_route_media_output" msgid="1642024455750414694">"Menentukan rute keluaran media"</string>
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"Memungkinkan aplikasi menentukan rute keluaran media ke perangkat eksternal lainnya."</string>
@@ -1251,7 +1253,6 @@
     <string name="display_manager_overlay_display_name" msgid="5142365982271620716">"Hamparan #<xliff:g id="ID">%1$d</xliff:g>"</string>
     <string name="display_manager_overlay_display_title" msgid="652124517672257172">"<xliff:g id="NAME">%1$s</xliff:g>: <xliff:g id="WIDTH">%2$d</xliff:g>x<xliff:g id="HEIGHT">%3$d</xliff:g>, <xliff:g id="DPI">%4$d</xliff:g> dpi"</string>
     <string name="display_manager_overlay_display_secure_suffix" msgid="6022119702628572080">", aman"</string>
-    <string name="kg_emergency_call_label" msgid="684946192523830531">"Panggilan darurat"</string>
     <string name="kg_forgot_pattern_button_text" msgid="8852021467868220608">"Lupa Pola?"</string>
     <string name="kg_wrong_pattern" msgid="1850806070801358830">"Pola Salah"</string>
     <string name="kg_wrong_password" msgid="2333281762128113157">"Sandi Salah"</string>

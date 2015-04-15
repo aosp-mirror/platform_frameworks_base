@@ -218,43 +218,28 @@
     <string name="android_system_label" msgid="6577375335728551336">"Android सिस्‍टम"</string>
     <string name="user_owner_label" msgid="6465364741001216388">"वैयक्तिक अॅप्स"</string>
     <string name="managed_profile_label" msgid="6260850669674791528">"कार्य"</string>
-    <!-- no translation found for permgrouplab_contacts (3657758145679177612) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_contacts (1437393511338346185) -->
-    <skip />
-    <!-- no translation found for permgrouplab_location (7275582855722310164) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_location (536889867433972794) -->
-    <skip />
+    <string name="permgrouplab_contacts" msgid="3657758145679177612">"संपर्क"</string>
+    <string name="permgroupdesc_contacts" msgid="1437393511338346185">"आपल्‍या संपर्कांमध्‍ये प्रवेश करा आणि सुधारित करा"</string>
+    <string name="permgrouplab_location" msgid="7275582855722310164">"स्थान"</string>
+    <string name="permgroupdesc_location" msgid="536889867433972794">"आपल्‍या स्थानामध्‍ये प्रवेश करा"</string>
     <string name="permgrouplab_socialInfo" msgid="5799096623412043791">"आपली सामाजिक माहिती"</string>
     <string name="permgroupdesc_socialInfo" msgid="7129842457611643493">"आपले संपर्क आणि सामाजिक कनेक्शनविषयीच्या माहितीवर प्रत्यक्ष प्रवेश करेल."</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"कॅलेंडर"</string>
-    <!-- no translation found for permgroupdesc_calendar (2116049656685591803) -->
-    <skip />
-    <!-- no translation found for permgrouplab_sms (228308803364967808) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_sms (3695085582674524761) -->
-    <skip />
-    <!-- no translation found for permgrouplab_dictionary (8114410334955871144) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_dictionary (7586787746354378335) -->
-    <skip />
+    <string name="permgroupdesc_calendar" msgid="2116049656685591803">"आपल्‍या कॅलेंडरमध्‍ये प्रवेश करा आणि सुधारित करा"</string>
+    <string name="permgrouplab_sms" msgid="228308803364967808">"SMS"</string>
+    <string name="permgroupdesc_sms" msgid="3695085582674524761">"SMS मध्‍ये प्रवेश करा आणि सुधारित करा"</string>
+    <string name="permgrouplab_dictionary" msgid="8114410334955871144">"वापरकर्ता शब्दकोश"</string>
+    <string name="permgroupdesc_dictionary" msgid="7586787746354378335">"वापरकर्ता शब्दकोशामध्‍ये शब्द वाचा किंवा लिहा."</string>
     <string name="permgrouplab_bookmarks" msgid="1949519673103968229">"बुकमार्क आणि इतिहास"</string>
     <string name="permgroupdesc_bookmarks" msgid="4169771606257963028">"बुकमार्कवर आणि ब्राउझर इतिहासावर प्रत्यक्ष प्रवेश करेल."</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"मायक्रोफोन"</string>
-    <!-- no translation found for permgroupdesc_microphone (1296196977187629181) -->
-    <skip />
+    <string name="permgroupdesc_microphone" msgid="1296196977187629181">"डिव्‍हाइस मायक्रोफोनचा वापर करा"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"कॅमेरा"</string>
-    <!-- no translation found for permgroupdesc_camera (2429930670410559293) -->
-    <skip />
-    <!-- no translation found for permgrouplab_phone (5229115638567440675) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_phone (2016641188146068700) -->
-    <skip />
-    <!-- no translation found for permgrouplab_sensors (7416703484233940260) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_sensors (2987451839455524494) -->
-    <skip />
+    <string name="permgroupdesc_camera" msgid="2429930670410559293">"डिव्‍हाइस कॅमेरा वापरा"</string>
+    <string name="permgrouplab_phone" msgid="5229115638567440675">"फोन"</string>
+    <string name="permgroupdesc_phone" msgid="2016641188146068700">"डिव्हाइस टेलिफोनी वापरा"</string>
+    <string name="permgrouplab_sensors" msgid="7416703484233940260">"सेन्सर"</string>
+    <string name="permgroupdesc_sensors" msgid="2987451839455524494">"सेन्सर आणि घालण्‍यायोग्यमध्ये प्रवेश करा"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"विंडो सामग्री पुनर्प्राप्त करा"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"आपण परस्‍परसंवाद करीत असलेल्‍या विंडोची सामग्री तपासा."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"स्पर्श करून अन्वेषण चालू करा"</string>
@@ -444,15 +429,21 @@
     <string name="fingerprint_acquired_partial" msgid="735082772341716043">"आंशिक फिंगरप्रिंट आढळली. कृपया पुन्हा प्रयत्न करा."</string>
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"फिंगरप्रिंटवर प्रक्रिया करणे शक्य झाले नाही. कृपया पुन्हा प्रयत्न करा."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"फिंगरप्रिंट सेन्सर खराब आहे. कृपया साफ करा आणि पुन्हा प्रयत्न करा."</string>
-    <string name="fingerprint_acquired_too_fast" msgid="5303368850245663580">"बोट लवकर हलविले. कृपया पुन्हा प्रयत्न करा."</string>
+    <!-- no translation found for fingerprint_acquired_too_fast (6470642383109155969) -->
+    <skip />
     <string name="fingerprint_acquired_too_slow" msgid="7381891107120721078">"बोट हळू हलविले. कृपया पुन्हा प्रयत्न करा."</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
-    <string name="fingerprint_error_unable_to_process" msgid="4232401562838100026">"प्रक्रिया करण्यात अयशस्वी. पुन्हा प्रयत्न करा."</string>
-    <string name="fingerprint_error_hw_not_available" msgid="6162709753784993771">"हार्डवेअर उपलब्ध नाही."</string>
+    <!-- no translation found for fingerprint_error_hw_not_available (7955921658939936596) -->
+    <skip />
     <string name="fingerprint_error_no_space" msgid="1055819001126053318">"फिंगरप्रिंट संचयित केले जाऊ शकत नाही. कृपया विद्यमान फिंगरप्रिंट काढा."</string>
     <string name="fingerprint_error_timeout" msgid="3927186043737732875">"फिंगरप्रिंट कालबाह्य झाले. पुन्हा प्रयत्न करा."</string>
-    <string name="fingerprint_error_vendor" msgid="3175724710791609491">"फिंगरप्रिंट कालबाह्य झाले. पुन्हा प्रयत्न करा."</string>
+    <!-- no translation found for fingerprint_error_canceled (4402024612660774395) -->
+    <skip />
+    <!-- no translation found for fingerprint_error_lockout (5536934748136933450) -->
+    <skip />
+    <!-- no translation found for fingerprint_error_unable_to_process (6107816084103552441) -->
+    <skip />
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"संकालन सेटिंग्‍ज वाचा"</string>
@@ -461,6 +452,8 @@
     <string name="permdesc_writeSyncSettings" msgid="8956262591306369868">"खात्यासाठी संकालन सेटिंग्ज सुधारित करण्यासाठी अॅप ला अनुमती देते. उदाहरणार्थ, हे खात्यासह लोकांच्या अॅप चे संकालन सक्षम करण्यासाठी वापरले जाऊ शकते."</string>
     <string name="permlab_readSyncStats" msgid="7396577451360202448">"संकालन आकडेवारी वाचा"</string>
     <string name="permdesc_readSyncStats" msgid="1510143761757606156">"संकालन इव्हेंटचा इतिहास आणि किती डेटाचे संकालन केले आहे यासह, खात्याची संकालन स्थिती वाचण्यासाठी अॅप ला अनुमती देते."</string>
+    <string name="permlab_subscribedFeedsWrite" msgid="9015246325408209296">"सदस्यता घेतलेली फीड लिहा"</string>
+    <string name="permdesc_subscribedFeedsWrite" msgid="6928930188826089413">"आपली सध्याची संकालित केलेली फीड सुधारित करण्यासाठी अॅप ला अनुमती देते. दुर्भावनापूर्ण अॅप्स आपली संकालित केलेली फीड बदलू शकतात."</string>
     <string name="permlab_readDictionary" msgid="4107101525746035718">"आपण शब्दकोशात जोडलेल्या अटी वाचा"</string>
     <string name="permdesc_readDictionary" msgid="659614600338904243">"वापरकर्ता शब्दकोशात वापरकर्ता संचयित करू शकतो असे सर्व शब्द, नावे आणि वाक्यांश वाचण्यासाठी अॅप ला अनुमती देते."</string>
     <string name="permlab_writeDictionary" msgid="2183110402314441106">"वापरकर्ता-परिभाषित शब्दकोशामध्ये शब्द जोडा"</string>
@@ -635,7 +628,8 @@
     <string name="lockscreen_instructions_when_pattern_enabled" msgid="46154051614126049">"अनलॉक करण्‍यासाठी मेनू दाबा किंवा आणीबाणीचा कॉल करा."</string>
     <string name="lockscreen_instructions_when_pattern_disabled" msgid="686260028797158364">"अनलॉक करण्यासाठी मेनू दाबा."</string>
     <string name="lockscreen_pattern_instructions" msgid="7478703254964810302">"अनलॉक करण्यासाठी नमुना काढा"</string>
-    <string name="lockscreen_emergency_call" msgid="5347633784401285225">"आणीबाणीचा कॉल"</string>
+    <!-- no translation found for lockscreen_emergency_call (5298642613417801888) -->
+    <skip />
     <string name="lockscreen_return_to_call" msgid="5244259785500040021">"कॉलवर परत या"</string>
     <string name="lockscreen_pattern_correct" msgid="9039008650362261237">"अचूक!"</string>
     <string name="lockscreen_pattern_wrong" msgid="4317955014948108794">"पुन्हा प्रयत्न करा"</string>
@@ -1035,29 +1029,36 @@
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="candidates_style" msgid="4333913089637062257"><u>"उमेदवार"</u></string>
-    <string name="ext_media_checking_notification_title" product="nosdcard" msgid="3449816005351468560">"USB संचयन तयार करीत आहे"</string>
-    <string name="ext_media_checking_notification_title" product="default" msgid="5457603418970994050">"SD कार्ड तयार करीत आहे"</string>
-    <string name="ext_media_checking_notification_message" msgid="8287319882926737053">"त्रुटींसाठी तपासत आहे"</string>
-    <string name="ext_media_nofs_notification_title" product="nosdcard" msgid="7788040745686229307">"रिक्त USB संचयन"</string>
-    <string name="ext_media_nofs_notification_title" product="default" msgid="780477838241212997">"रिक्त SD कार्ड"</string>
-    <string name="ext_media_nofs_notification_message" product="nosdcard" msgid="7840121067427269500">"USB संचयन रिक्त आहे किंवा त्यात असमर्थित फाइलसिस्टम आहे."</string>
-    <string name="ext_media_nofs_notification_message" product="default" msgid="8641065641786923604">"SD कार्ड रिक्त आहे किंवा त्यात असमर्थित फाइलसिस्टम आहे."</string>
-    <string name="ext_media_unmountable_notification_title" product="nosdcard" msgid="2090046769532713563">"हानी झालेले USB संचयन"</string>
-    <string name="ext_media_unmountable_notification_title" product="default" msgid="6410723906019100189">"हानी झालेले SD कार्ड"</string>
-    <string name="ext_media_unmountable_notification_message" product="nosdcard" msgid="1795917578395333280">"USB संचयन बिघडला आहे. त्याला पुन्हा फॉर्मेट करून पहा."</string>
-    <string name="ext_media_unmountable_notification_message" product="default" msgid="1753898567525568253">"SD कार्ड बिघडला आहे. त्याला पुन्हा फॉर्मेट करून पहा."</string>
-    <string name="ext_media_badremoval_notification_title" product="nosdcard" msgid="1661683031330951073">"USB संचयन अनपेक्षितरित्‍या काढले"</string>
-    <string name="ext_media_badremoval_notification_title" product="default" msgid="6872152882604407837">"SD कार्ड अनपेक्षितरित्या काढले"</string>
-    <string name="ext_media_badremoval_notification_message" product="nosdcard" msgid="4329848819865594241">"डेटा गमावणे टाळण्‍यासाठी काढण्‍यापूर्वी USB संचयन अनमाउंट करा."</string>
-    <string name="ext_media_badremoval_notification_message" product="default" msgid="7260183293747448241">"डेटा गमावणे टाळण्‍यासाठी काढण्‍यापूर्वी SD कार्ड अनमाउंट करा."</string>
-    <string name="ext_media_safe_unmount_notification_title" product="nosdcard" msgid="3967973893270360230">"USB संचयन काढण्‍यासाठी सुरक्षित"</string>
-    <string name="ext_media_safe_unmount_notification_title" product="default" msgid="6729801130790616200">"SD कार्ड काढण्यासाठी सुरक्षित आहे"</string>
-    <string name="ext_media_safe_unmount_notification_message" product="nosdcard" msgid="6142195361606493530">"आपण सुरक्षितपणे USB संचयन काढू शकता."</string>
-    <string name="ext_media_safe_unmount_notification_message" product="default" msgid="568841278138377604">"आपण सुरक्षितपणे SD कार्ड काढू शकता."</string>
-    <string name="ext_media_nomedia_notification_title" product="nosdcard" msgid="4486377230140227651">"USB संचयन काढले"</string>
-    <string name="ext_media_nomedia_notification_title" product="default" msgid="8902518030404381318">"SD कार्ड काढले"</string>
-    <string name="ext_media_nomedia_notification_message" product="nosdcard" msgid="6921126162580574143">"USB संचयन काढले. नवीन मीडिया घाला."</string>
-    <string name="ext_media_nomedia_notification_message" product="default" msgid="3870120652983659641">"SD कार्ड काढले. एक नवीन घाला."</string>
+    <!-- no translation found for ext_media_checking_notification_title (5734005953288045806) -->
+    <skip />
+    <!-- no translation found for ext_media_checking_notification_message (4747432538578886744) -->
+    <skip />
+    <!-- no translation found for ext_media_new_notification_message (7589986898808506239) -->
+    <skip />
+    <!-- no translation found for ext_media_ready_notification_message (4083398150380114462) -->
+    <skip />
+    <!-- no translation found for ext_media_unmountable_notification_title (4863279349863279603) -->
+    <skip />
+    <!-- no translation found for ext_media_unmountable_notification_message (7391672496565685690) -->
+    <skip />
+    <!-- no translation found for ext_media_badremoval_notification_title (3206248947375505416) -->
+    <skip />
+    <!-- no translation found for ext_media_badremoval_notification_message (380176703346946313) -->
+    <skip />
+    <!-- no translation found for ext_media_nomedia_notification_title (1704840188641749091) -->
+    <skip />
+    <!-- no translation found for ext_media_nomedia_notification_message (6471542972147056586) -->
+    <skip />
+    <!-- no translation found for ext_media_unmounting_notification_title (640674168454809372) -->
+    <skip />
+    <!-- no translation found for ext_media_unmounting_notification_message (4182843895023357756) -->
+    <skip />
+    <!-- no translation found for ext_media_init_action (8317198948634872507) -->
+    <skip />
+    <!-- no translation found for ext_media_unmount_action (1121883233103278199) -->
+    <skip />
+    <!-- no translation found for ext_media_browse_action (8322172381028546087) -->
+    <skip />
     <string name="activity_list_empty" msgid="1675388330786841066">"कोणतेही जुळणारे क्रियाकलाप आढळले नाहीत."</string>
     <string name="permlab_route_media_output" msgid="1642024455750414694">"मीडिया आउटपुट मार्गस्थ करा"</string>
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"अन्य बाह्य डिव्हाइसेसवरील रूट मीडिया आउटपुट वर अनुप्रयोगास अनुमती देते."</string>
@@ -1252,7 +1253,6 @@
     <string name="display_manager_overlay_display_name" msgid="5142365982271620716">"आच्छादन #<xliff:g id="ID">%1$d</xliff:g>"</string>
     <string name="display_manager_overlay_display_title" msgid="652124517672257172">"<xliff:g id="NAME">%1$s</xliff:g>: <xliff:g id="WIDTH">%2$d</xliff:g>x<xliff:g id="HEIGHT">%3$d</xliff:g>, <xliff:g id="DPI">%4$d</xliff:g> dpi"</string>
     <string name="display_manager_overlay_display_secure_suffix" msgid="6022119702628572080">", सुरक्षित"</string>
-    <string name="kg_emergency_call_label" msgid="684946192523830531">"आणीबाणीचा कॉल"</string>
     <string name="kg_forgot_pattern_button_text" msgid="8852021467868220608">"नमुना विसरलात"</string>
     <string name="kg_wrong_pattern" msgid="1850806070801358830">"चुकीचा नमुना"</string>
     <string name="kg_wrong_password" msgid="2333281762128113157">"चुकीचा संकेतशब्द"</string>
@@ -1448,17 +1448,12 @@
     </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> पर्यंत"</string>
     <string name="zen_mode_forever" msgid="7420011936770086993">"आपण हे बंद करेपर्यंत"</string>
-    <!-- no translation found for zen_mode_rule_name_combination (191109939968076477) -->
-    <skip />
+    <string name="zen_mode_rule_name_combination" msgid="191109939968076477">"<xliff:g id="FIRST">%1$s</xliff:g> / <xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"संक्षिप्त करा"</string>
-    <!-- no translation found for zen_mode_feature_name (289097150786114338) -->
-    <skip />
-    <!-- no translation found for zen_mode_downtime_feature_name (2626974636779860146) -->
-    <skip />
-    <!-- no translation found for zen_mode_default_weeknights_name (2069189413656431610) -->
-    <skip />
-    <!-- no translation found for zen_mode_default_weekends_name (2377398437072017011) -->
-    <skip />
+    <string name="zen_mode_feature_name" msgid="289097150786114338">"व्यत्यय अवरोधित करा"</string>
+    <string name="zen_mode_downtime_feature_name" msgid="2626974636779860146">"कार्य न करण्याचा कालावधी"</string>
+    <string name="zen_mode_default_weeknights_name" msgid="2069189413656431610">"आठवड्याच्या रात्री"</string>
+    <string name="zen_mode_default_weekends_name" msgid="2377398437072017011">"सप्‍ताह अखेर"</string>
     <string name="muted_by" msgid="6147073845094180001">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> द्वारे नि:शब्द केले"</string>
     <string name="system_error_wipe_data" msgid="6608165524785354962">"आपल्‍या डिव्‍हाइसमध्‍ये अंतर्गत समस्‍या आहे आणि आपला फॅक्‍टरी डेटा रीसेट होईपर्यंत ती अस्‍थिर असू शकते."</string>
     <string name="system_error_manufacturer" msgid="8086872414744210668">"आपल्‍या डिव्‍हाइसमध्‍ये अंतर्गत समस्‍या आहे. तपशीलांसाठी आपल्‍या निर्मात्याशी संपर्क साधा."</string>
@@ -1468,11 +1463,9 @@
     <string name="stk_cc_ss_to_dial" msgid="2151304435775557162">"SS विनंती डायल विनंतीवर सुधारित केली आहे."</string>
     <string name="stk_cc_ss_to_ussd" msgid="3951862188105305589">"SS विनंती USSD विनंतीवर सुधारित केली आहे."</string>
     <string name="stk_cc_ss_to_ss" msgid="5470768854991452695">"SS विनंती नवीन SS विनंतीवर सुधारित केली आहे."</string>
-    <!-- no translation found for usb_midi_peripheral_name (7221113987741003817) -->
-    <skip />
+    <string name="usb_midi_peripheral_name" msgid="7221113987741003817">"Android USB परिधीय पोर्ट"</string>
     <string name="usb_midi_peripheral_manufacturer_name" msgid="7176526170008970168">"Android"</string>
-    <!-- no translation found for usb_midi_peripheral_product_name (4971827859165280403) -->
-    <skip />
+    <string name="usb_midi_peripheral_product_name" msgid="4971827859165280403">"USB परिधीय पोर्ट"</string>
     <string name="floating_toolbar_open_overflow_description" msgid="4797287862999444631">"अधिक पर्याय"</string>
     <string name="floating_toolbar_close_overflow_description" msgid="559796923090723804">"ओव्हरफ्लो बंद करा"</string>
 </resources>

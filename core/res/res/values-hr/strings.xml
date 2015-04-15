@@ -219,42 +219,28 @@
     <string name="android_system_label" msgid="6577375335728551336">"Sustav Android"</string>
     <string name="user_owner_label" msgid="6465364741001216388">"Osobne aplikacije"</string>
     <string name="managed_profile_label" msgid="6260850669674791528">"Posao"</string>
-    <!-- no translation found for permgrouplab_contacts (3657758145679177612) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_contacts (1437393511338346185) -->
-    <skip />
-    <!-- no translation found for permgrouplab_location (7275582855722310164) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_location (536889867433972794) -->
-    <skip />
+    <string name="permgrouplab_contacts" msgid="3657758145679177612">"Kontakti"</string>
+    <string name="permgroupdesc_contacts" msgid="1437393511338346185">"pristup kontaktima i njihova izmjena"</string>
+    <string name="permgrouplab_location" msgid="7275582855722310164">"Lokacija"</string>
+    <string name="permgroupdesc_location" msgid="536889867433972794">"pristup vašoj lokaciji"</string>
     <string name="permgrouplab_socialInfo" msgid="5799096623412043791">"Informacije o vašoj društvenoj aktivnosti"</string>
     <string name="permgroupdesc_socialInfo" msgid="7129842457611643493">"Izravan pristup informacijama o kontaktima i društvenim vezama."</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"Kalendar"</string>
-    <!-- no translation found for permgroupdesc_calendar (2116049656685591803) -->
-    <skip />
-    <!-- no translation found for permgrouplab_sms (228308803364967808) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_sms (3695085582674524761) -->
-    <skip />
+    <string name="permgroupdesc_calendar" msgid="2116049656685591803">"pristup kalendaru i njegova izmjena"</string>
+    <string name="permgrouplab_sms" msgid="228308803364967808">"SMS"</string>
+    <string name="permgroupdesc_sms" msgid="3695085582674524761">"pristup SMS-ovima i njihova izmjena"</string>
     <string name="permgrouplab_dictionary" msgid="8114410334955871144">"Korisnički rječnik"</string>
-    <!-- no translation found for permgroupdesc_dictionary (7586787746354378335) -->
-    <skip />
+    <string name="permgroupdesc_dictionary" msgid="7586787746354378335">"Čitanje ili pisanje riječi u korisničkom rječniku."</string>
     <string name="permgrouplab_bookmarks" msgid="1949519673103968229">"Oznake i povijest"</string>
     <string name="permgroupdesc_bookmarks" msgid="4169771606257963028">"Izravan pristup oznakama i povijest preglednika."</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"Mikrofon"</string>
-    <!-- no translation found for permgroupdesc_microphone (1296196977187629181) -->
-    <skip />
+    <string name="permgroupdesc_microphone" msgid="1296196977187629181">"upotreba mikrofona uređaja"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"Fotoaparat"</string>
-    <!-- no translation found for permgroupdesc_camera (2429930670410559293) -->
-    <skip />
-    <!-- no translation found for permgrouplab_phone (5229115638567440675) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_phone (2016641188146068700) -->
-    <skip />
-    <!-- no translation found for permgrouplab_sensors (7416703484233940260) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_sensors (2987451839455524494) -->
-    <skip />
+    <string name="permgroupdesc_camera" msgid="2429930670410559293">"upotreba fotoaparata uređaja"</string>
+    <string name="permgrouplab_phone" msgid="5229115638567440675">"Telefon"</string>
+    <string name="permgroupdesc_phone" msgid="2016641188146068700">"upotreba telefonske veze na uređaju"</string>
+    <string name="permgrouplab_sensors" msgid="7416703484233940260">"Senzori"</string>
+    <string name="permgroupdesc_sensors" msgid="2987451839455524494">"pristup senzorima i nosivim uređajima"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Dohvaćanje sadržaja prozora"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Istražite sadržaj prozora koji upotrebljavate."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Uključivanje značajke Istraži dodirom"</string>
@@ -444,15 +430,21 @@
     <string name="fingerprint_acquired_partial" msgid="735082772341716043">"Otkriven je djelomični otisak prsta. Pokušajte ponovo."</string>
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"Obrada otiska prsta nije uspjela. Pokušajte ponovo."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"Senzor otiska prsta nije čist. Očistite ga i pokušajte ponovo."</string>
-    <string name="fingerprint_acquired_too_fast" msgid="5303368850245663580">"Prebrzo pomicanje prsta. Pokušajte ponovo."</string>
+    <!-- no translation found for fingerprint_acquired_too_fast (6470642383109155969) -->
+    <skip />
     <string name="fingerprint_acquired_too_slow" msgid="7381891107120721078">"Presporo pomicanje prsta. Pokušajte ponovo."</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
-    <string name="fingerprint_error_unable_to_process" msgid="4232401562838100026">"Nije obrađeno. Pokušajte ponovo."</string>
-    <string name="fingerprint_error_hw_not_available" msgid="6162709753784993771">"Hardver nije dostupan."</string>
+    <!-- no translation found for fingerprint_error_hw_not_available (7955921658939936596) -->
+    <skip />
     <string name="fingerprint_error_no_space" msgid="1055819001126053318">"Otisak prsta nije pohranjen. Uklonite postojeći otisak prsta."</string>
     <string name="fingerprint_error_timeout" msgid="3927186043737732875">"Isteklo je vrijeme čekanja za otisak prsta. Pokušajte ponovo."</string>
-    <string name="fingerprint_error_vendor" msgid="3175724710791609491">"Isteklo je vrijeme čekanja za otisak prsta. Pokušajte ponovo."</string>
+    <!-- no translation found for fingerprint_error_canceled (4402024612660774395) -->
+    <skip />
+    <!-- no translation found for fingerprint_error_lockout (5536934748136933450) -->
+    <skip />
+    <!-- no translation found for fingerprint_error_unable_to_process (6107816084103552441) -->
+    <skip />
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"čitanje postavki sinkronizacije"</string>
@@ -461,6 +453,8 @@
     <string name="permdesc_writeSyncSettings" msgid="8956262591306369868">"Aplikaciji omogućuje izmjenu postavki sinkronizacije za račun. Na primjer, to se može upotrijebiti za omogućavanje sinkronizacije aplikacije Osobe s računom."</string>
     <string name="permlab_readSyncStats" msgid="7396577451360202448">"čitanje statistike o sinkronizaciji"</string>
     <string name="permdesc_readSyncStats" msgid="1510143761757606156">"Aplikaciji omogućuje čitanje statistika sinkronizacije za račun, uključujući povijest sinkronizacije te količinu sinkroniziranih podataka."</string>
+    <string name="permlab_subscribedFeedsWrite" msgid="9015246325408209296">"pisanje pretplaćenih feedova"</string>
+    <string name="permdesc_subscribedFeedsWrite" msgid="6928930188826089413">"Omogućuje aplikaciji promjenu vaših trenutačno sinkroniziranih feedova. Zlonamjerne aplikacije mogu promijeniti vaše sinkronizirane feedove."</string>
     <string name="permlab_readDictionary" msgid="4107101525746035718">"čitanje pojmova koje ste dodali u rječnik"</string>
     <string name="permdesc_readDictionary" msgid="659614600338904243">"Aplikaciji omogućuje čitanje svih riječi, imena i fraza koje je korisnik pohranio u korisničkom rječniku."</string>
     <string name="permlab_writeDictionary" msgid="2183110402314441106">"dodavanje riječi u rječnik koji je izradio korisnik"</string>
@@ -635,7 +629,8 @@
     <string name="lockscreen_instructions_when_pattern_enabled" msgid="46154051614126049">"Pritisnite Izbornik za otključavanje ili pozivanje hitnih službi."</string>
     <string name="lockscreen_instructions_when_pattern_disabled" msgid="686260028797158364">"Pritisnite Izbornik za otključavanje."</string>
     <string name="lockscreen_pattern_instructions" msgid="7478703254964810302">"Iscrtajte uzorak za otključavanje"</string>
-    <string name="lockscreen_emergency_call" msgid="5347633784401285225">"Hitan poziv"</string>
+    <!-- no translation found for lockscreen_emergency_call (5298642613417801888) -->
+    <skip />
     <string name="lockscreen_return_to_call" msgid="5244259785500040021">"Uzvrati poziv"</string>
     <string name="lockscreen_pattern_correct" msgid="9039008650362261237">"Ispravno!"</string>
     <string name="lockscreen_pattern_wrong" msgid="4317955014948108794">"Pokušajte ponovo"</string>
@@ -1041,29 +1036,36 @@
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="candidates_style" msgid="4333913089637062257"><u>"kandidati"</u></string>
-    <string name="ext_media_checking_notification_title" product="nosdcard" msgid="3449816005351468560">"Pripremanje memorije USB"</string>
-    <string name="ext_media_checking_notification_title" product="default" msgid="5457603418970994050">"Priprema SD kartice"</string>
-    <string name="ext_media_checking_notification_message" msgid="8287319882926737053">"Traženje pogrešaka."</string>
-    <string name="ext_media_nofs_notification_title" product="nosdcard" msgid="7788040745686229307">"Prazna memorija USB"</string>
-    <string name="ext_media_nofs_notification_title" product="default" msgid="780477838241212997">"Prazna SD kartica"</string>
-    <string name="ext_media_nofs_notification_message" product="nosdcard" msgid="7840121067427269500">"USB pohrana prazna je ili ima nepodržani datotečni sustav."</string>
-    <string name="ext_media_nofs_notification_message" product="default" msgid="8641065641786923604">"SD kartica prazna je ili ima nepodržani datotečni sustav."</string>
-    <string name="ext_media_unmountable_notification_title" product="nosdcard" msgid="2090046769532713563">"Oštećena USB memorija"</string>
-    <string name="ext_media_unmountable_notification_title" product="default" msgid="6410723906019100189">"Oštećena SD kartica"</string>
-    <string name="ext_media_unmountable_notification_message" product="nosdcard" msgid="1795917578395333280">"USB pohrana oštećena je. Pokušajte ju ponovo formatirati."</string>
-    <string name="ext_media_unmountable_notification_message" product="default" msgid="1753898567525568253">"SD kartica oštećena je. Pokušajte ju ponovo formatirati."</string>
-    <string name="ext_media_badremoval_notification_title" product="nosdcard" msgid="1661683031330951073">"Memorija USB nenadano uklonjena"</string>
-    <string name="ext_media_badremoval_notification_title" product="default" msgid="6872152882604407837">"SD kartica neočekivano je uklonjena"</string>
-    <string name="ext_media_badremoval_notification_message" product="nosdcard" msgid="4329848819865594241">"Isključite USB memoriju na siguran način prije uklanjanja kako biste izbjegli gubitak podataka."</string>
-    <string name="ext_media_badremoval_notification_message" product="default" msgid="7260183293747448241">"SD karticu isključite na siguran način prije uklanjanja kako biste izbjegli gubitak podataka."</string>
-    <string name="ext_media_safe_unmount_notification_title" product="nosdcard" msgid="3967973893270360230">"Sigurno uklanjanje memorije USB"</string>
-    <string name="ext_media_safe_unmount_notification_title" product="default" msgid="6729801130790616200">"SD kartica može se ukloniti na siguran način"</string>
-    <string name="ext_media_safe_unmount_notification_message" product="nosdcard" msgid="6142195361606493530">"USB memoriju možete sigurno ukloniti."</string>
-    <string name="ext_media_safe_unmount_notification_message" product="default" msgid="568841278138377604">"Možete ukloniti SD karticu na siguran način."</string>
-    <string name="ext_media_nomedia_notification_title" product="nosdcard" msgid="4486377230140227651">"Memorija USB uklonjena"</string>
-    <string name="ext_media_nomedia_notification_title" product="default" msgid="8902518030404381318">"Uklonjena SD kartica"</string>
-    <string name="ext_media_nomedia_notification_message" product="nosdcard" msgid="6921126162580574143">"Memorija USB uklonjena. Umetnite novi medij."</string>
-    <string name="ext_media_nomedia_notification_message" product="default" msgid="3870120652983659641">"SD kartica je uklonjena. Umetnite novu."</string>
+    <!-- no translation found for ext_media_checking_notification_title (5734005953288045806) -->
+    <skip />
+    <!-- no translation found for ext_media_checking_notification_message (4747432538578886744) -->
+    <skip />
+    <!-- no translation found for ext_media_new_notification_message (7589986898808506239) -->
+    <skip />
+    <!-- no translation found for ext_media_ready_notification_message (4083398150380114462) -->
+    <skip />
+    <!-- no translation found for ext_media_unmountable_notification_title (4863279349863279603) -->
+    <skip />
+    <!-- no translation found for ext_media_unmountable_notification_message (7391672496565685690) -->
+    <skip />
+    <!-- no translation found for ext_media_badremoval_notification_title (3206248947375505416) -->
+    <skip />
+    <!-- no translation found for ext_media_badremoval_notification_message (380176703346946313) -->
+    <skip />
+    <!-- no translation found for ext_media_nomedia_notification_title (1704840188641749091) -->
+    <skip />
+    <!-- no translation found for ext_media_nomedia_notification_message (6471542972147056586) -->
+    <skip />
+    <!-- no translation found for ext_media_unmounting_notification_title (640674168454809372) -->
+    <skip />
+    <!-- no translation found for ext_media_unmounting_notification_message (4182843895023357756) -->
+    <skip />
+    <!-- no translation found for ext_media_init_action (8317198948634872507) -->
+    <skip />
+    <!-- no translation found for ext_media_unmount_action (1121883233103278199) -->
+    <skip />
+    <!-- no translation found for ext_media_browse_action (8322172381028546087) -->
+    <skip />
     <string name="activity_list_empty" msgid="1675388330786841066">"Nisu pronađene podudarne radnje."</string>
     <string name="permlab_route_media_output" msgid="1642024455750414694">"Usmjeravanje medijskog izlaza"</string>
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"Aplikaciji omogućuje usmjeravanje medijskog izlaza na druge vanjske uređaje."</string>
@@ -1259,7 +1261,6 @@
     <string name="display_manager_overlay_display_name" msgid="5142365982271620716">"Preklapanje br. <xliff:g id="ID">%1$d</xliff:g>"</string>
     <string name="display_manager_overlay_display_title" msgid="652124517672257172">"<xliff:g id="NAME">%1$s</xliff:g>: <xliff:g id="WIDTH">%2$d</xliff:g> x <xliff:g id="HEIGHT">%3$d</xliff:g>, <xliff:g id="DPI">%4$d</xliff:g> dpi"</string>
     <string name="display_manager_overlay_display_secure_suffix" msgid="6022119702628572080">", sigurno"</string>
-    <string name="kg_emergency_call_label" msgid="684946192523830531">"Hitan poziv"</string>
     <string name="kg_forgot_pattern_button_text" msgid="8852021467868220608">"Zaboravili ste obrazac"</string>
     <string name="kg_wrong_pattern" msgid="1850806070801358830">"Pogrešan obrazac"</string>
     <string name="kg_wrong_password" msgid="2333281762128113157">"Pogrešna zaporka"</string>
@@ -1460,17 +1461,12 @@
     </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"Do <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_forever" msgid="7420011936770086993">"Dok ne isključite"</string>
-    <!-- no translation found for zen_mode_rule_name_combination (191109939968076477) -->
-    <skip />
+    <string name="zen_mode_rule_name_combination" msgid="191109939968076477">"<xliff:g id="FIRST">%1$s</xliff:g>/<xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"Sažmi"</string>
-    <!-- no translation found for zen_mode_feature_name (289097150786114338) -->
-    <skip />
-    <!-- no translation found for zen_mode_downtime_feature_name (2626974636779860146) -->
-    <skip />
-    <!-- no translation found for zen_mode_default_weeknights_name (2069189413656431610) -->
-    <skip />
-    <!-- no translation found for zen_mode_default_weekends_name (2377398437072017011) -->
-    <skip />
+    <string name="zen_mode_feature_name" msgid="289097150786114338">"Blokiranje prekida"</string>
+    <string name="zen_mode_downtime_feature_name" msgid="2626974636779860146">"Prekid rada"</string>
+    <string name="zen_mode_default_weeknights_name" msgid="2069189413656431610">"Noći radnih dana"</string>
+    <string name="zen_mode_default_weekends_name" msgid="2377398437072017011">"Vikend"</string>
     <string name="muted_by" msgid="6147073845094180001">"Zvuk je isklj. treća strana <xliff:g id="THIRD_PARTY">%1$s</xliff:g>"</string>
     <string name="system_error_wipe_data" msgid="6608165524785354962">"Na vašem uređaju postoji interni problem i možda neće biti stabilan dok ga ne vratite na tvorničko stanje."</string>
     <string name="system_error_manufacturer" msgid="8086872414744210668">"Na vašem uređaju postoji interni problem. Obratite se proizvođaču za više pojedinosti."</string>
@@ -1480,11 +1476,9 @@
     <string name="stk_cc_ss_to_dial" msgid="2151304435775557162">"SS zahtjev izmijenjen je u DIAL zahtjev."</string>
     <string name="stk_cc_ss_to_ussd" msgid="3951862188105305589">"SS zahtjev izmijenjen je u USSD zahtjev."</string>
     <string name="stk_cc_ss_to_ss" msgid="5470768854991452695">"SS zahtjev izmijenjen je u novi SS zahtjev."</string>
-    <!-- no translation found for usb_midi_peripheral_name (7221113987741003817) -->
-    <skip />
+    <string name="usb_midi_peripheral_name" msgid="7221113987741003817">"Androidov USB priključak za periferne uređaje"</string>
     <string name="usb_midi_peripheral_manufacturer_name" msgid="7176526170008970168">"Android"</string>
-    <!-- no translation found for usb_midi_peripheral_product_name (4971827859165280403) -->
-    <skip />
+    <string name="usb_midi_peripheral_product_name" msgid="4971827859165280403">"USB priključak za periferne uređaje"</string>
     <string name="floating_toolbar_open_overflow_description" msgid="4797287862999444631">"Više opcija"</string>
     <string name="floating_toolbar_close_overflow_description" msgid="559796923090723804">"Zatvori dodatni izbornik"</string>
 </resources>
