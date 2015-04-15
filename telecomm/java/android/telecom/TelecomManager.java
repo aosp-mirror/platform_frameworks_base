@@ -364,6 +364,7 @@ public class TelecomManager {
      * exists no user-chosen default {@code PhoneAccount}.
      *
      * @return The user outgoing phone account selected by the user.
+     * @hide
      */
     public PhoneAccountHandle getUserSelectedOutgoingPhoneAccount() {
         try {
