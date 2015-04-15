@@ -407,7 +407,7 @@ public final class Call {
          * periodically, but user interfaces should not rely on this to display any "call time
          * clock".
          */
-        public long getConnectTimeMillis() {
+        public final long getConnectTimeMillis() {
             return mConnectTimeMillis;
         }
 

@@ -177,7 +177,7 @@ public abstract class InCallService extends Service {
      *         if the {@code InCallService} is not in a state where it has an associated
      *         {@code Phone}.
      */
-    public Phone getPhone() {
+    public final Phone getPhone() {
         return mPhone;
     }
 
