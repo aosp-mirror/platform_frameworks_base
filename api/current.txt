@@ -4328,9 +4328,11 @@ package android.app {
     method public boolean getAllowReturnTransitionOverlap();
     method public final android.os.Bundle getArguments();
     method public final android.app.FragmentManager getChildFragmentManager();
+    method public android.content.Context getContext();
     method public android.transition.Transition getEnterTransition();
     method public android.transition.Transition getExitTransition();
     method public final android.app.FragmentManager getFragmentManager();
+    method public final java.lang.Object getHost();
     method public final int getId();
     method public android.app.LoaderManager getLoaderManager();
     method public final android.app.Fragment getParentFragment();
@@ -4360,7 +4362,8 @@ package android.app {
     method public final boolean isVisible();
     method public void onActivityCreated(android.os.Bundle);
     method public void onActivityResult(int, int, android.content.Intent);
-    method public void onAttach(android.app.Activity);
+    method public void onAttach(android.content.Context);
+    method public deprecated void onAttach(android.app.Activity);
     method public void onConfigurationChanged(android.content.res.Configuration);
     method public boolean onContextItemSelected(android.view.MenuItem);
     method public void onCreate(android.os.Bundle);
@@ -4374,7 +4377,8 @@ package android.app {
     method public void onDetach();
     method public void onHiddenChanged(boolean);
     method public deprecated void onInflate(android.util.AttributeSet, android.os.Bundle);
-    method public void onInflate(android.app.Activity, android.util.AttributeSet, android.os.Bundle);
+    method public void onInflate(android.content.Context, android.util.AttributeSet, android.os.Bundle);
+    method public deprecated void onInflate(android.app.Activity, android.util.AttributeSet, android.os.Bundle);
     method public void onLowMemory();
     method public boolean onOptionsItemSelected(android.view.MenuItem);
     method public void onOptionsMenuClosed(android.view.Menu);
@@ -4439,6 +4443,64 @@ package android.app {
 
   public static abstract interface FragmentBreadCrumbs.OnBreadCrumbClickListener {
     method public abstract boolean onBreadCrumbClick(android.app.FragmentManager.BackStackEntry, int);
+  }
+
+  public abstract class FragmentContainer {
+    ctor public FragmentContainer();
+    method public abstract android.view.View onFindViewById(int);
+    method public abstract boolean onHasView();
+  }
+
+  public class FragmentController {
+    method public void attachHost(android.app.Fragment);
+    method public static final android.app.FragmentController createController(android.app.FragmentHostCallback<?>);
+    method public void dispatchActivityCreated();
+    method public void dispatchConfigurationChanged(android.content.res.Configuration);
+    method public boolean dispatchContextItemSelected(android.view.MenuItem);
+    method public void dispatchCreate();
+    method public boolean dispatchCreateOptionsMenu(android.view.Menu, android.view.MenuInflater);
+    method public void dispatchDestroy();
+    method public void dispatchDestroyView();
+    method public void dispatchLowMemory();
+    method public boolean dispatchOptionsItemSelected(android.view.MenuItem);
+    method public void dispatchOptionsMenuClosed(android.view.Menu);
+    method public void dispatchPause();
+    method public boolean dispatchPrepareOptionsMenu(android.view.Menu);
+    method public void dispatchResume();
+    method public void dispatchStart();
+    method public void dispatchStop();
+    method public void dispatchTrimMemory(int);
+    method public void doLoaderDestroy();
+    method public void doLoaderStart();
+    method public void doLoaderStop(boolean);
+    method public void dumpLoaders(java.lang.String, java.io.FileDescriptor, java.io.PrintWriter, java.lang.String[]);
+    method public boolean execPendingActions();
+    method public android.app.Fragment findFragmentByWho(java.lang.String);
+    method public android.app.FragmentManager getFragmentManager();
+    method public android.app.LoaderManager getLoaderManager();
+    method public void noteStateNotSaved();
+    method public android.view.View onCreateView(android.view.View, java.lang.String, android.content.Context, android.util.AttributeSet);
+    method public void reportLoaderStart();
+    method public void restoreAllState(android.os.Parcelable, java.util.List<android.app.Fragment>);
+    method public void restoreLoaderNonConfig(android.util.ArrayMap<java.lang.String, android.app.LoaderManager>);
+    method public android.util.ArrayMap<java.lang.String, android.app.LoaderManager> retainLoaderNonConfig();
+    method public java.util.List<android.app.Fragment> retainNonConfig();
+    method public android.os.Parcelable saveAllState();
+  }
+
+  public abstract class FragmentHostCallback extends android.app.FragmentContainer {
+    ctor public FragmentHostCallback(android.content.Context, android.os.Handler, int);
+    method public void onDump(java.lang.String, java.io.FileDescriptor, java.io.PrintWriter, java.lang.String[]);
+    method public android.view.View onFindViewById(int);
+    method public abstract E onGetHost();
+    method public android.view.LayoutInflater onGetLayoutInflater();
+    method public int onGetWindowAnimations();
+    method public boolean onHasView();
+    method public boolean onHasWindowAnimations();
+    method public void onInvalidateOptionsMenu();
+    method public boolean onShouldSaveFragmentState(android.app.Fragment);
+    method public void onStartActivityFromFragment(android.app.Fragment, android.content.Intent, int, android.os.Bundle);
+    method public boolean onUseFragmentManagerInflaterFactory();
   }
 
   public abstract class FragmentManager {
