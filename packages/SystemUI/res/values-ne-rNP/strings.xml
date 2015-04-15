@@ -167,6 +167,8 @@
     <string name="accessibility_desc_lock_screen" msgid="5625143713611759164">"स्क्रीन बन्द गर्नुहोस्।"</string>
     <string name="accessibility_desc_settings" msgid="3417884241751434521">"सेटिङहरू"</string>
     <string name="accessibility_desc_recent_apps" msgid="4876900986661819788">"सारांश।"</string>
+    <!-- no translation found for accessibility_desc_confirm (3446792278337969766) -->
+    <skip />
     <string name="accessibility_quick_settings_user" msgid="1104846699869476855">"प्रयोगकर्ता <xliff:g id="USER">%s</xliff:g>।"</string>
     <string name="accessibility_quick_settings_wifi" msgid="5518210213118181692">"<xliff:g id="SIGNAL">%1$s</xliff:g>।"</string>
     <string name="accessibility_quick_settings_wifi_changed_off" msgid="8716484460897819400">"वाइफाइ बन्द गरियो।"</string>
@@ -301,6 +303,10 @@
     <string name="description_direction_up" msgid="7169032478259485180">"<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>को लागि माथि धिसार्नुहोस्"</string>
     <string name="description_direction_left" msgid="7207478719805562165">"स्लाइड <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>को लागि बायाँ।"</string>
     <string name="zen_no_interruptions_with_warning" msgid="4396898053735625287">"कुनै रुकावट छैन। चेतावनी समेत छैन।"</string>
+    <!-- no translation found for zen_priority_introduction (7253045784560169993) -->
+    <skip />
+    <!-- no translation found for zen_priority_customize_button (7948043278226955063) -->
+    <skip />
     <string name="zen_no_interruptions" msgid="7970973750143632592">"कुनै रुकावटहरू छैन"</string>
     <string name="zen_important_interruptions" msgid="3477041776609757628">"प्राथमिकता रुकावटहरूमा मात्र"</string>
     <string name="zen_alarms" msgid="5055668280767657759">"अलार्महरू मात्र"</string>
@@ -336,6 +342,12 @@
     <string name="guest_wipe_session_message" msgid="8476238178270112811">"तपाईँ आफ्नो सत्र जारी गर्न चाहनुहुन्छ?"</string>
     <string name="guest_wipe_session_wipe" msgid="5065558566939858884">"सुरु गर्नुहोस्"</string>
     <string name="guest_wipe_session_dontwipe" msgid="1401113462524894716">"हो, जारी राख्नुहोस्"</string>
+    <!-- no translation found for guest_notification_title (1585278533840603063) -->
+    <skip />
+    <!-- no translation found for guest_notification_text (7513706222848825467) -->
+    <skip />
+    <!-- no translation found for guest_notification_remove_action (8820670703892101990) -->
+    <skip />
     <string name="user_add_user_title" msgid="4553596395824132638">"नयाँ प्रयोगकर्ता थप्नुहुन्छ?"</string>
     <string name="user_add_user_message_short" msgid="2161624834066214559">"जब तपाईँले नयाँ प्रयोगकर्ता थप्नुहुन्छ, त्यस प्रयोगकर्ताले आफ्नो स्थान स्थापना गर्न पर्ने छ।\n\nकुनै पनि प्रयोगकर्ताले सबै अन्य प्रयोगकर्ताहरूका लागि अनुप्रयोगहरू अद्यावधिक गर्न सक्छन्।"</string>
     <string name="battery_saver_notification_title" msgid="237918726750955859">"ब्याट्रि सेभर चालु छ"</string>
@@ -388,4 +400,6 @@
     <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g> भोल्यूम संवाद हो"</string>
     <string name="volumeui_notification_text" msgid="1826889705095768656">"मूल पुनर्स्थापना गर्न छुनुहोस्।"</string>
     <string name="volume_zen_switch_text" msgid="8149183012610587643">"@*Android: स्ट्रिङ/zen_mode_feature_name"</string>
+    <!-- no translation found for managed_profile_foreground_toast (3199278359979281097) -->
+    <skip />
 </resources>

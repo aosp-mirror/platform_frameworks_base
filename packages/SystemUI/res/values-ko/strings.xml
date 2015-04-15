@@ -167,6 +167,8 @@
     <string name="accessibility_desc_lock_screen" msgid="5625143713611759164">"화면을 잠급니다."</string>
     <string name="accessibility_desc_settings" msgid="3417884241751434521">"설정"</string>
     <string name="accessibility_desc_recent_apps" msgid="4876900986661819788">"최근 사용"</string>
+    <!-- no translation found for accessibility_desc_confirm (3446792278337969766) -->
+    <skip />
     <string name="accessibility_quick_settings_user" msgid="1104846699869476855">"사용자 <xliff:g id="USER">%s</xliff:g>"</string>
     <string name="accessibility_quick_settings_wifi" msgid="5518210213118181692">"<xliff:g id="SIGNAL">%1$s</xliff:g>."</string>
     <string name="accessibility_quick_settings_wifi_changed_off" msgid="8716484460897819400">"Wi-Fi가 사용 중지되었습니다."</string>
@@ -301,6 +303,10 @@
     <string name="description_direction_up" msgid="7169032478259485180">"<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>하려면 위로 슬라이드"</string>
     <string name="description_direction_left" msgid="7207478719805562165">"<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>하려면 왼쪽으로 슬라이드"</string>
     <string name="zen_no_interruptions_with_warning" msgid="4396898053735625287">"어떤 방해도 받지 않습니다. 알람도 울리지 않습니다."</string>
+    <!-- no translation found for zen_priority_introduction (7253045784560169993) -->
+    <skip />
+    <!-- no translation found for zen_priority_customize_button (7948043278226955063) -->
+    <skip />
     <string name="zen_no_interruptions" msgid="7970973750143632592">"모든 알림 차단"</string>
     <string name="zen_important_interruptions" msgid="3477041776609757628">"최우선 알림만 수신"</string>
     <string name="zen_alarms" msgid="5055668280767657759">"알람만 수신"</string>
@@ -336,6 +342,12 @@
     <string name="guest_wipe_session_message" msgid="8476238178270112811">"세션을 계속 진행하시겠습니까?"</string>
     <string name="guest_wipe_session_wipe" msgid="5065558566939858884">"다시 시작"</string>
     <string name="guest_wipe_session_dontwipe" msgid="1401113462524894716">"예, 계속합니다."</string>
+    <!-- no translation found for guest_notification_title (1585278533840603063) -->
+    <skip />
+    <!-- no translation found for guest_notification_text (7513706222848825467) -->
+    <skip />
+    <!-- no translation found for guest_notification_remove_action (8820670703892101990) -->
+    <skip />
     <string name="user_add_user_title" msgid="4553596395824132638">"새 사용자를 추가할까요?"</string>
     <string name="user_add_user_message_short" msgid="2161624834066214559">"추가된 새로운 사용자는 자신의 공간을 설정해야 합니다.\n\n모든 사용자는 다른 사용자들을 위하여 앱을 업데이트할 수 있습니다."</string>
     <string name="battery_saver_notification_title" msgid="237918726750955859">"배터리 세이버 사용 중"</string>
@@ -387,6 +399,7 @@
     <string name="volumeui_prompt_deny" msgid="5720663643411696731">"거부"</string>
     <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g>은(는) 볼륨 대화입니다."</string>
     <string name="volumeui_notification_text" msgid="1826889705095768656">"원본을 복원하려면 터치하세요."</string>
-    <!-- no translation found for volume_zen_switch_text (8149183012610587643) -->
+    <string name="volume_zen_switch_text" msgid="8149183012610587643">"@*android:string/zen_mode_feature_name"</string>
+    <!-- no translation found for managed_profile_foreground_toast (3199278359979281097) -->
     <skip />
 </resources>

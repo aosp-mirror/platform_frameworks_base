@@ -167,6 +167,8 @@
     <string name="accessibility_desc_lock_screen" msgid="5625143713611759164">"Lock screen."</string>
     <string name="accessibility_desc_settings" msgid="3417884241751434521">"Mga Setting"</string>
     <string name="accessibility_desc_recent_apps" msgid="4876900986661819788">"Overview"</string>
+    <!-- no translation found for accessibility_desc_confirm (3446792278337969766) -->
+    <skip />
     <string name="accessibility_quick_settings_user" msgid="1104846699869476855">"User na si <xliff:g id="USER">%s</xliff:g>."</string>
     <string name="accessibility_quick_settings_wifi" msgid="5518210213118181692">"<xliff:g id="SIGNAL">%1$s</xliff:g>."</string>
     <string name="accessibility_quick_settings_wifi_changed_off" msgid="8716484460897819400">"Na-off ang wifi."</string>
@@ -301,6 +303,10 @@
     <string name="description_direction_up" msgid="7169032478259485180">"Mag-slide pataas para sa <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
     <string name="description_direction_left" msgid="7207478719805562165">"Mag-slide pakaliwa para sa <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
     <string name="zen_no_interruptions_with_warning" msgid="4396898053735625287">"Walang mga pagkaantala. Kahit mga alarma."</string>
+    <!-- no translation found for zen_priority_introduction (7253045784560169993) -->
+    <skip />
+    <!-- no translation found for zen_priority_customize_button (7948043278226955063) -->
+    <skip />
     <string name="zen_no_interruptions" msgid="7970973750143632592">"Walang mga paggambala"</string>
     <string name="zen_important_interruptions" msgid="3477041776609757628">"Mga may priyoridad na paggambala lang"</string>
     <string name="zen_alarms" msgid="5055668280767657759">"Mga alarm lang"</string>
@@ -336,6 +342,12 @@
     <string name="guest_wipe_session_message" msgid="8476238178270112811">"Gusto mo bang ipagpatuloy ang iyong session?"</string>
     <string name="guest_wipe_session_wipe" msgid="5065558566939858884">"Magsimulang muli"</string>
     <string name="guest_wipe_session_dontwipe" msgid="1401113462524894716">"Oo, magpatuloy"</string>
+    <!-- no translation found for guest_notification_title (1585278533840603063) -->
+    <skip />
+    <!-- no translation found for guest_notification_text (7513706222848825467) -->
+    <skip />
+    <!-- no translation found for guest_notification_remove_action (8820670703892101990) -->
+    <skip />
     <string name="user_add_user_title" msgid="4553596395824132638">"Magdagdag ng bagong user?"</string>
     <string name="user_add_user_message_short" msgid="2161624834066214559">"Kapag nagdagdag ka ng bagong user, kailangang i-set up ng taong iyon ang kanyang espasyo.\n\nAng sinumang user ay maaaring mag-update ng mga app para sa lahat ng iba pang user."</string>
     <string name="battery_saver_notification_title" msgid="237918726750955859">"Naka-on ang tagatipid ng baterya"</string>
@@ -388,4 +400,6 @@
     <string name="volumeui_notification_title" msgid="4906770126345910955">"Ang <xliff:g id="APP_NAME">%1$s</xliff:g> ang volume dialog"</string>
     <string name="volumeui_notification_text" msgid="1826889705095768656">"Pindutin upang ibalik ang orihinal."</string>
     <string name="volume_zen_switch_text" msgid="8149183012610587643">"@*android:string/zen_mode_feature_name"</string>
+    <!-- no translation found for managed_profile_foreground_toast (3199278359979281097) -->
+    <skip />
 </resources>
