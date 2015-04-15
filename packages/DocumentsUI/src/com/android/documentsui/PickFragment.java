@@ -16,6 +16,8 @@
 
 package com.android.documentsui;
 
+import android.R.string;
+import android.app.Activity;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
@@ -40,6 +42,7 @@ public class PickFragment extends Fragment {
 
     private View mContainer;
     private Button mPick;
+    private Button mCancel;
 
     public static void show(FragmentManager fm) {
         final PickFragment fragment = new PickFragment();
@@ -61,7 +64,10 @@ public class PickFragment extends Fragment {
         mPick = (Button) mContainer.findViewById(android.R.id.button1);
         mPick.setOnClickListener(mPickListener);
 
-        setPickTarget(null, null);
+        mCancel = (Button) mContainer.findViewById(android.R.id.button2);
+        mCancel.setOnClickListener(mCancelListener);
+
+        setPickTarget(0, null, null);
 
         return mContainer;
     }
@@ -74,18 +80,43 @@ public class PickFragment extends Fragment {
         }
     };
 
-    public void setPickTarget(DocumentInfo pickTarget, CharSequence displayName) {
-        mPickTarget = pickTarget;
+    private View.OnClickListener mCancelListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            final BaseActivity activity = BaseActivity.get(PickFragment.this);
+            activity.setResult(Activity.RESULT_CANCELED);
+            activity.finish();
+        }
+    };
 
+    /**
+     * @param action Which action defined in BaseActivity.State is the picker shown for.
+     */
+    public void setPickTarget(int action,
+                              DocumentInfo pickTarget,
+                              CharSequence displayName) {
         if (mContainer != null) {
-            if (mPickTarget != null) {
+            if (pickTarget != null) {
                 mContainer.setVisibility(View.VISIBLE);
                 final Locale locale = getResources().getConfiguration().locale;
-                final String raw = getString(R.string.menu_select).toUpperCase(locale);
-                mPick.setText(TextUtils.expandTemplate(raw, displayName));
+                switch (action) {
+                    case BaseActivity.State.ACTION_OPEN_TREE:
+                        final String raw = getString(R.string.menu_select).toUpperCase(locale);
+                        mPick.setText(TextUtils.expandTemplate(raw, displayName));
+                        mCancel.setVisibility(View.GONE);
+                        break;
+                    case BaseActivity.State.ACTION_OPEN_COPY_DESTINATION:
+                        mPick.setText(getString(R.string.button_copy).toUpperCase(locale));
+                        mCancel.setVisibility(View.VISIBLE);
+                        break;
+                    default:
+                        throw new IllegalArgumentException("Illegal action for PickFragment.");
+                }
+
             } else {
                 mContainer.setVisibility(View.GONE);
             }
         }
+        mPickTarget = pickTarget;
     }
 }

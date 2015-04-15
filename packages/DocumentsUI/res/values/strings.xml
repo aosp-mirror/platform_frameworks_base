@@ -65,6 +65,9 @@
     <!-- Menu item that hides the sizes of displayed files [CHAR LIMIT=24] -->
     <string name="menu_file_size_hide">Hide file size</string>
 
+    <!-- Button label that copies files to the current directory [CHAR LIMIT=48] -->
+    <string name="button_copy">Copy</string>
+
     <!-- Action mode title summarizing the number of documents selected [CHAR LIMIT=32] -->
     <string name="mode_selected_count"><xliff:g id="count" example="3">%1$d</xliff:g> selected</string>
 
@@ -112,8 +115,6 @@
     <!-- Title of dialog when prompting user to select an app to share documents with [CHAR LIMIT=32] -->
     <string name="share_via">Share via</string>
 
-    <!-- Title of the cancel button [CHAR LIMIT=24] -->
-    <string name="cancel">Cancel</string>
     <!-- Title of the copy notification [CHAR LIMIT=24] -->
     <string name="copy_notification_title">Copying files</string>
     <!-- Text shown on the copy notification to indicate remaining time, in minutes [CHAR LIMIT=24] -->
