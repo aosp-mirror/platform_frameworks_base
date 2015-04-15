@@ -57,6 +57,10 @@ public class CopyService extends IntentService {
     private static final String EXTRA_CANCEL = "com.android.documentsui.CANCEL";
     public static final String EXTRA_SRC_LIST = "com.android.documentsui.SRC_LIST";
     public static final String EXTRA_STACK = "com.android.documentsui.STACK";
+    public static final String EXTRA_FAILURE = "com.android.documentsui.FAILURE";
+
+    // TODO: Move it to a shared file when more operations are implemented.
+    public static final int FAILURE_COPY = 1;
 
     private NotificationManager mNotificationManager;
     private Notification.Builder mProgressBuilder;
@@ -66,7 +70,7 @@ public class CopyService extends IntentService {
     private volatile boolean mIsCancelled;
     // Parameters of the copy job. Requests to an IntentService are serialized so this code only
     // needs to deal with one job at a time.
-    private final List<Uri> mFailedFiles;
+    private final ArrayList<Uri> mFailedFiles;
     private long mBatchSize;
     private long mBytesCopied;
     private long mStartTime;
@@ -128,7 +132,23 @@ public class CopyService extends IntentService {
             mNotificationManager.cancel(mJobId, 0);
 
             if (mFailedFiles.size() > 0) {
-                // TODO: Display a notification when an error has occurred.
+                final Context context = getApplicationContext();
+                final Intent navigateIntent = new Intent(context, StandaloneActivity.class);
+                navigateIntent.putExtra(EXTRA_STACK, (Parcelable) stack);
+                navigateIntent.putExtra(EXTRA_FAILURE, FAILURE_COPY);
+                navigateIntent.putParcelableArrayListExtra(EXTRA_SRC_LIST, mFailedFiles);
+
+                final Notification.Builder errorBuilder = new Notification.Builder(this)
+                        .setContentTitle(context.getResources().
+                                getQuantityString(R.plurals.copy_error_notification_title,
+                                        mFailedFiles.size(), mFailedFiles.size()))
+                        .setContentText(getString(R.string.notification_touch_for_details))
+                        .setContentIntent(PendingIntent.getActivity(context, 0, navigateIntent,
+                                PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_ONE_SHOT))
+                        .setCategory(Notification.CATEGORY_ERROR)
+                        .setSmallIcon(R.drawable.ic_menu_copy)
+                        .setAutoCancel(true);
+                mNotificationManager.notify(mJobId, 0, errorBuilder.build());
             }
 
             // TODO: Display a toast if the copy was cancelled.
@@ -158,13 +178,14 @@ public class CopyService extends IntentService {
 
         final Context context = getApplicationContext();
         final Intent navigateIntent = new Intent(context, StandaloneActivity.class);
-        navigateIntent.putExtra(EXTRA_STACK, (Parcelable)stack);
+        navigateIntent.putExtra(EXTRA_STACK, (Parcelable) stack);
 
         mProgressBuilder = new Notification.Builder(this)
                 .setContentTitle(getString(R.string.copy_notification_title))
                 .setContentIntent(PendingIntent.getActivity(context, 0, navigateIntent, 0))
                 .setCategory(Notification.CATEGORY_PROGRESS)
-                .setSmallIcon(R.drawable.ic_menu_copy).setOngoing(true);
+                .setSmallIcon(R.drawable.ic_menu_copy)
+                .setOngoing(true);
 
         final Intent cancelIntent = new Intent(this, CopyService.class);
         cancelIntent.putExtra(EXTRA_CANCEL, mJobId);

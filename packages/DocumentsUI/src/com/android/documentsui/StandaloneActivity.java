@@ -63,6 +63,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.Toolbar;
 
+import com.android.documentsui.FailureDialogFragment;
 import com.android.documentsui.RecentsProvider.ResumeColumns;
 import com.android.documentsui.model.DocumentInfo;
 import com.android.documentsui.model.DocumentStack;
@@ -73,6 +74,7 @@ import libcore.io.IoUtils;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
@@ -153,6 +155,13 @@ public class StandaloneActivity extends BaseActivity {
         RootsFragment.show(getFragmentManager(), null);
         if (!mState.restored) {
             new RestoreStackTask().execute();
+            final Intent intent = getIntent();
+            final int failure = intent.getIntExtra(CopyService.EXTRA_FAILURE, 0);
+            if (failure != 0) {
+                final ArrayList<Uri> failedSrcList = intent.getParcelableArrayListExtra(
+                        CopyService.EXTRA_SRC_LIST);
+                FailureDialogFragment.show(getFragmentManager(), failure, failedSrcList);
+            }
         } else {
             onCurrentDirectoryChanged(ANIM_NONE);
         }

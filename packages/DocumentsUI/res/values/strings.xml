@@ -126,5 +126,17 @@
     </plurals>
     <!-- Text shown on the copy notification while DocumentsUI performs setup in preparation for copying files [CHAR LIMIT=32] -->
     <string name="copy_preparing">Preparing for copy\u2026</string>
-
+    <!-- Title of the copy error notification [CHAR LIMIT=48] -->
+    <plurals name="copy_error_notification_title">
+      <item quantity="one">Error copying <xliff:g id="count" example="1">%1$d</xliff:g> file.</item>
+      <item quantity="other">Error copying <xliff:g id="count" example="1">%1$d</xliff:g> files.</item>
+    </plurals>
+    <!-- Second line for notifications saying that more information will be shown after touching [CHAR LIMIT=48] -->
+    <string name="notification_touch_for_details">Touch to view details</string>
+    <!-- Label of a dialog button for retrying a failed operation [CHAR LIMIT=24] -->
+    <string name="retry">Retry</string>
+    <!-- Title of the copying failure alert dialog. [CHAR LIMIT=48] -->
+    <string name="copy_failure_alert_title">Error copying files</string>
+    <!-- Contents of the copying failure alert dialog. [CHAR LIMIT=48] -->
+    <string name="copy_failure_alert_content">Following files are not copied: <xliff:g id="list">%1$s</xliff:g></string>
 </resources>
