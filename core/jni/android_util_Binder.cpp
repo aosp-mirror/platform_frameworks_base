@@ -807,6 +807,11 @@ static void android_os_Binder_destroy(JNIEnv* env, jobject obj)
     }
 }
 
+static void android_os_Binder_blockUntilThreadAvailable(JNIEnv* env, jobject clazz)
+{
+    return IPCThreadState::self()->blockUntilThreadAvailable();
+}
+
 // ----------------------------------------------------------------------------
 
 static const JNINativeMethod gBinderMethods[] = {
@@ -819,7 +824,8 @@ static const JNINativeMethod gBinderMethods[] = {
     { "getThreadStrictModePolicy", "()I", (void*)android_os_Binder_getThreadStrictModePolicy },
     { "flushPendingCommands", "()V", (void*)android_os_Binder_flushPendingCommands },
     { "init", "()V", (void*)android_os_Binder_init },
-    { "destroy", "()V", (void*)android_os_Binder_destroy }
+    { "destroy", "()V", (void*)android_os_Binder_destroy },
+    { "blockUntilThreadAvailable", "()V", (void*)android_os_Binder_blockUntilThreadAvailable }
 };
 
 const char* const kBinderPathName = "android/os/Binder";
