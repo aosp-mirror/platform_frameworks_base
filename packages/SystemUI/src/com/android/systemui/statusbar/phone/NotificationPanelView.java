@@ -537,7 +537,7 @@ public class NotificationPanelView extends PanelView implements
             mExpansionIsFromHeadsUp = true;
             return true;
         }
-        if (onQsIntercept(event)) {
+        if (!isShadeCollapsed() && onQsIntercept(event)) {
             return true;
         }
         return super.onInterceptTouchEvent(event);
@@ -708,7 +708,7 @@ public class NotificationPanelView extends PanelView implements
             mInitialTouchY = event.getX();
             mInitialTouchX = event.getY();
         }
-        if (mExpandedHeight != 0) {
+        if (!isShadeCollapsed()) {
             handleQsDown(event);
         }
         if (!mQsExpandImmediate && mQsTracking) {
@@ -1446,7 +1446,7 @@ public class NotificationPanelView extends PanelView implements
         updateHeader();
         updateUnlockIcon();
         updateNotificationTranslucency();
-        mHeadsUpManager.setIsExpanded(expandedHeight != 0);
+        mHeadsUpManager.setIsExpanded(!isShadeCollapsed());
         mNotificationStackScroller.setShadeExpanded(!isShadeCollapsed());
         if (DEBUG) {
             invalidate();
@@ -1668,8 +1668,7 @@ public class NotificationPanelView extends PanelView implements
         mHeadsUpManager.onExpandingFinished();
         mIsExpanding = false;
         mScrollYOverride = -1;
-        // TODO: look into whether this is still correct
-        if (mExpandedHeight == 0f) {
+        if (isShadeCollapsed()) {
             setListening(false);
         } else {
             setListening(true);
@@ -2171,7 +2170,7 @@ public class NotificationPanelView extends PanelView implements
 
     @Override
     protected boolean isShadeCollapsed() {
-        return mExpandedHeight == 0 || mHeadsUpManager.hasPinnedHeadsUp();
+        return mExpandedHeight == 0;
     }
 
     @Override

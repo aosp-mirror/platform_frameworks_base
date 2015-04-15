@@ -234,7 +234,7 @@ public abstract class PanelView extends FrameLayout {
         final float y = event.getY(pointerIndex);
 
         if (event.getActionMasked() == MotionEvent.ACTION_DOWN) {
-            mGestureWaitForTouchSlop = mExpandedHeight == 0f;
+            mGestureWaitForTouchSlop = isShadeCollapsed();
         }
         boolean waitForTouchSlop = hasConflictingGestures() || mGestureWaitForTouchSlop;
 
@@ -242,7 +242,7 @@ public abstract class PanelView extends FrameLayout {
             case MotionEvent.ACTION_DOWN:
                 startExpandMotion(x, y, false /* startTracking */, mExpandedHeight);
                 mJustPeeked = false;
-                mPanelClosedOnDown = mExpandedHeight == 0.0f;
+                mPanelClosedOnDown = isShadeCollapsed();
                 mHasLayoutedSinceDown = false;
                 mUpdateFlingOnLayout = false;
                 mMotionAborted = false;
@@ -260,7 +260,7 @@ public abstract class PanelView extends FrameLayout {
                             || mPeekPending || mPeekAnimator != null;
                     onTrackingStarted();
                 }
-                if (mExpandedHeight == 0) {
+                if (isShadeCollapsed()) {
                     schedulePeek();
                 }
                 break;
@@ -448,7 +448,7 @@ public abstract class PanelView extends FrameLayout {
                 mTouchSlopExceeded = false;
                 mJustPeeked = false;
                 mMotionAborted = false;
-                mPanelClosedOnDown = mExpandedHeight == 0.0f;
+                mPanelClosedOnDown = isShadeCollapsed();
                 mHasLayoutedSinceDown = false;
                 mUpdateFlingOnLayout = false;
                 mTouchAboveFalsingThreshold = false;
@@ -730,7 +730,6 @@ public abstract class PanelView extends FrameLayout {
     }
 
     public boolean isFullyCollapsed() {
-        // TODO: look into whether this is still correct with HUN's
         return mExpandedHeight <= 0;
     }
 
