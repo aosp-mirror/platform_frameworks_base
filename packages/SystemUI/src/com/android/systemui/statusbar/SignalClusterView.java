@@ -20,6 +20,8 @@ import android.content.Context;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
+import android.graphics.drawable.Animatable;
+import android.graphics.drawable.Drawable;
 import android.telephony.SubscriptionInfo;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -165,12 +167,13 @@ public class SignalClusterView
     }
 
     @Override
-    public void setMobileDataIndicators(boolean visible, int strengthIcon, int typeIcon,
-            String contentDescription, String typeContentDescription, boolean isTypeIconWide,
-            int subId) {
+    public void setMobileDataIndicators(boolean visible, int strengthIcon, int darkStrengthIcon,
+            int typeIcon, String contentDescription, String typeContentDescription,
+            boolean isTypeIconWide, int subId) {
         PhoneState state = getOrInflateState(subId);
         state.mMobileVisible = visible;
         state.mMobileStrengthId = strengthIcon;
+        state.mMobileDarkStrengthId = darkStrengthIcon;
         state.mMobileTypeId = typeIcon;
         state.mMobileDescription = contentDescription;
         state.mMobileTypeDescription = typeContentDescription;
@@ -360,7 +363,7 @@ public class SignalClusterView
     private class PhoneState {
         private final int mSubId;
         private boolean mMobileVisible = false;
-        private int mMobileStrengthId = 0, mMobileTypeId = 0;
+        private int mMobileStrengthId = 0, mMobileDarkStrengthId = 0, mMobileTypeId = 0;
         private boolean mIsMobileTypeIconWide;
         private String mMobileDescription, mMobileTypeDescription;
 
@@ -384,7 +387,23 @@ public class SignalClusterView
         public boolean apply(boolean isSecondaryIcon) {
             if (mMobileVisible && !mIsAirplaneMode) {
                 mMobile.setImageResource(mMobileStrengthId);
+                Drawable mobileDrawable = mMobile.getDrawable();
+                if (mobileDrawable instanceof Animatable) {
+                    Animatable ad = (Animatable) mobileDrawable;
+                    if (!ad.isRunning()) {
+                        ad.start();
+                    }
+                }
+
                 mMobileDark.setImageResource(mMobileStrengthId);
+                Drawable mobileDarkDrawable = mMobileDark.getDrawable();
+                if (mobileDarkDrawable instanceof Animatable) {
+                    Animatable ad = (Animatable) mobileDarkDrawable;
+                    if (!ad.isRunning()) {
+                        ad.start();
+                    }
+                }
+
                 mMobileType.setImageResource(mMobileTypeId);
                 mMobileGroup.setContentDescription(mMobileTypeDescription
                         + " " + mMobileDescription);
@@ -401,8 +420,9 @@ public class SignalClusterView
             mMobileDark.setPaddingRelative(mIsMobileTypeIconWide ? mWideTypeIconStartPadding : 0,
                     0, 0, 0);
 
-            if (DEBUG) Log.d(TAG, String.format("mobile: %s sig=%d typ=%d",
-                        (mMobileVisible ? "VISIBLE" : "GONE"), mMobileStrengthId, mMobileTypeId));
+            if (DEBUG) Log.d(TAG, String.format("mobile: %s sig=%d dark=%d typ=%d",
+                        (mMobileVisible ? "VISIBLE" : "GONE"), mMobileStrengthId,
+                        mMobileDarkStrengthId, mMobileTypeId));
 
             mMobileType.setVisibility(mMobileTypeId != 0 ? View.VISIBLE : View.GONE);
 

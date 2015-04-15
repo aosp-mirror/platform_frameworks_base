@@ -68,6 +68,42 @@ class TelephonyIcons {
           R.drawable.stat_sys_signal_4_fully }
     };
 
+    //CarrierNetworkChange
+    static final int[][] TELEPHONY_CARRIER_NETWORK_CHANGE = {
+            { R.drawable.stat_sys_signal_carrier_network_change_animation,
+              R.drawable.stat_sys_signal_carrier_network_change_animation,
+              R.drawable.stat_sys_signal_carrier_network_change_animation,
+              R.drawable.stat_sys_signal_carrier_network_change_animation },
+            { R.drawable.stat_sys_signal_carrier_network_change_animation,
+              R.drawable.stat_sys_signal_carrier_network_change_animation,
+              R.drawable.stat_sys_signal_carrier_network_change_animation,
+              R.drawable.stat_sys_signal_carrier_network_change_animation }
+        };
+
+    static final int[][] TELEPHONY_CARRIER_NETWORK_CHANGE_DARK = {
+            { R.drawable.stat_sys_signal_dark_carrier_network_change_animation,
+              R.drawable.stat_sys_signal_dark_carrier_network_change_animation,
+              R.drawable.stat_sys_signal_dark_carrier_network_change_animation,
+              R.drawable.stat_sys_signal_dark_carrier_network_change_animation },
+            { R.drawable.stat_sys_signal_dark_carrier_network_change_animation,
+              R.drawable.stat_sys_signal_dark_carrier_network_change_animation,
+              R.drawable.stat_sys_signal_dark_carrier_network_change_animation,
+              R.drawable.stat_sys_signal_dark_carrier_network_change_animation }
+        };
+
+    static final int[][] QS_TELEPHONY_CARRIER_NETWORK_CHANGE = {
+        { R.drawable.ic_qs_signal_carrier_network_change_animation,
+          R.drawable.ic_qs_signal_carrier_network_change_animation,
+          R.drawable.ic_qs_signal_carrier_network_change_animation,
+          R.drawable.ic_qs_signal_carrier_network_change_animation,
+          R.drawable.ic_qs_signal_carrier_network_change_animation },
+        { R.drawable.ic_qs_signal_carrier_network_change_animation,
+          R.drawable.ic_qs_signal_carrier_network_change_animation,
+          R.drawable.ic_qs_signal_carrier_network_change_animation,
+          R.drawable.ic_qs_signal_carrier_network_change_animation,
+          R.drawable.ic_qs_signal_carrier_network_change_animation }
+    };
+
     static final int[] QS_DATA_R = {
         R.drawable.ic_qs_signal_r,
         R.drawable.ic_qs_signal_r
@@ -202,11 +238,34 @@ class TelephonyIcons {
     static final int ICON_3G = R.drawable.stat_sys_data_fully_connected_3g;
     static final int ICON_4G = R.drawable.stat_sys_data_fully_connected_4g;
     static final int ICON_1X = R.drawable.stat_sys_data_fully_connected_1x;
+    static final int ICON_CARRIER_NETWORK_CHANGE =
+            R.drawable.stat_sys_signal_carrier_network_change_animation;
+    static final int ICON_CARRIER_NETWORK_CHANGE_DARK =
+            R.drawable.stat_sys_signal_dark_carrier_network_change_animation;
 
     static final int QS_ICON_LTE = R.drawable.ic_qs_signal_lte;
     static final int QS_ICON_3G = R.drawable.ic_qs_signal_3g;
     static final int QS_ICON_4G = R.drawable.ic_qs_signal_4g;
     static final int QS_ICON_1X = R.drawable.ic_qs_signal_1x;
+    static final int QS_ICON_CARRIER_NETWORK_CHANGE =
+            R.drawable.ic_qs_signal_carrier_network_change_animation;
+
+    static final MobileIconGroup CARRIER_NETWORK_CHANGE = new MobileIconGroup(
+            "CARRIER_NETWORK_CHANGE",
+            TelephonyIcons.TELEPHONY_CARRIER_NETWORK_CHANGE,
+            TelephonyIcons.TELEPHONY_CARRIER_NETWORK_CHANGE_DARK,
+            TelephonyIcons.QS_TELEPHONY_CARRIER_NETWORK_CHANGE,
+            AccessibilityContentDescriptions.PHONE_SIGNAL_STRENGTH,
+            0, 0,
+            TelephonyIcons.ICON_CARRIER_NETWORK_CHANGE,
+            TelephonyIcons.ICON_CARRIER_NETWORK_CHANGE_DARK,
+            TelephonyIcons.QS_ICON_CARRIER_NETWORK_CHANGE,
+            AccessibilityContentDescriptions.PHONE_SIGNAL_STRENGTH[0],
+            R.string.accessibility_carrier_network_change_mode,
+            0,
+            false,
+            null
+            );
 
     static final MobileIconGroup THREE_G = new MobileIconGroup(
             "3G",

@@ -704,6 +704,13 @@ public class NetworkControllerImpl extends BroadcastReceiver
                 controller.getState().enabled = show;
                 controller.notifyListeners();
             }
+            String carrierNetworkChange = args.getString("carriernetworkchange");
+            if (carrierNetworkChange != null) {
+                boolean show = carrierNetworkChange.equals("show");
+                for (MobileSignalController controller : mMobileSignalControllers.values()) {
+                    controller.setCarrierNetworkChangeMode(show);
+                }
+            }
         }
     }
 
@@ -718,9 +725,9 @@ public class NetworkControllerImpl extends BroadcastReceiver
     public interface SignalCluster {
         void setWifiIndicators(boolean visible, int strengthIcon, String contentDescription);
 
-        void setMobileDataIndicators(boolean visible, int strengthIcon, int typeIcon,
-                String contentDescription, String typeContentDescription, boolean isTypeIconWide,
-                int subId);
+        void setMobileDataIndicators(boolean visible, int strengthIcon, int darkStrengthIcon,
+                int typeIcon, String contentDescription, String typeContentDescription,
+                boolean isTypeIconWide, int subId);
         void setSubs(List<SubscriptionInfo> subs);
         void setNoSims(boolean show);
 

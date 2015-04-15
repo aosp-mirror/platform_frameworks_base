@@ -279,7 +279,7 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
 
         // TODO: Verify all fields.
         Mockito.verify(mSignalCluster, Mockito.atLeastOnce()).setMobileDataIndicators(
-                visibleArg.capture(), iconArg.capture(), typeIconArg.capture(),
+                visibleArg.capture(), iconArg.capture(), iconArg.capture(), typeIconArg.capture(),
                 ArgumentCaptor.forClass(String.class).capture(),
                 ArgumentCaptor.forClass(String.class).capture(),
                 ArgumentCaptor.forClass(Boolean.class).capture(),
