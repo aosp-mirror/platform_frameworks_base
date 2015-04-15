@@ -1803,13 +1803,17 @@ public class Camera {
         public Point mouth = null;
     }
 
-    // Error codes match the enum in include/ui/Camera.h
-
     /**
      * Unspecified camera error.
      * @see Camera.ErrorCallback
      */
     public static final int CAMERA_ERROR_UNKNOWN = 1;
+
+    /**
+     * Camera was disconnected due to use by higher priority user.
+     * @see Camera.ErrorCallback
+     */
+    public static final int CAMERA_ERROR_EVICTED = 2;
 
     /**
      * Media server died. In this case, the application must release the
