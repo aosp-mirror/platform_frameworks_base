@@ -39,7 +39,7 @@ struct JMediaSync : public RefBase {
 
     status_t updateQueuedAudioData(int sizeInBytes, int64_t presentationTimeUs);
 
-    void setPlaybackRate(float rate);
+    status_t setPlaybackRate(float rate);
 
     sp<const MediaClock> getMediaClock();
 
