@@ -62,23 +62,17 @@ public class GpsNavigationMessage implements Parcelable {
 
     /**
      * The Navigation Message Status is 'unknown'.
-     *
-     * @hide
      */
     public static final short STATUS_UNKNOWN = 0;
 
     /**
      * The Navigation Message was received without any parity error in its navigation words.
-     *
-     * @hide
      */
     public static final short STATUS_PARITY_PASSED = (1<<0);
 
     /**
      * The Navigation Message was received with words that failed parity check, but the receiver was
      * able to correct those words.
-     *
-     * @hide
      */
     public static final short STATUS_PARITY_REBUILT = (1<<1);
 
@@ -220,8 +214,6 @@ public class GpsNavigationMessage implements Parcelable {
 
     /**
      * Gets the Status of the navigation message contained in the object.
-     *
-     * @hide
      */
     public short getStatus() {
         return mStatus;
@@ -229,8 +221,6 @@ public class GpsNavigationMessage implements Parcelable {
 
     /**
      * Sets the status of the navigation message.
-     *
-     * @hide
      */
     public void setStatus(short value) {
         mStatus = value;
