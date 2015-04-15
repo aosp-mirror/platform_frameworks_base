@@ -289,6 +289,7 @@ void SkiaCanvasProxy::onDrawPosText(const void* text, size_t byteLength, const S
     //       but even more conservative bounds if this  is too slow.
     SkRect bounds;
     glyphs.paint.measureText(glyphs.glyphIDs, glyphs.count << 1, &bounds);
+    bounds.offset(x, y);
 
     SK_COMPILE_ASSERT(sizeof(SkPoint) == sizeof(float)*2, SkPoint_is_no_longer_2_floats);
     mCanvas->drawText(glyphs.glyphIDs, &posArray[0].fX, glyphs.count, glyphs.paint, x, y,
