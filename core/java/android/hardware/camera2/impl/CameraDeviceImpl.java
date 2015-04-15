@@ -605,6 +605,29 @@ public class CameraDeviceImpl extends CameraDevice {
         }
     }
 
+    public void prepare(Surface surface) throws CameraAccessException {
+        synchronized(mInterfaceLock) {
+            int streamId = -1;
+            for (int i = 0; i < mConfiguredOutputs.size(); i++) {
+                if (surface == mConfiguredOutputs.valueAt(i).getSurface()) {
+                    streamId = mConfiguredOutputs.keyAt(i);
+                    break;
+                }
+            }
+            if (streamId == -1) {
+                throw new IllegalArgumentException("Surface is not part of this session");
+            }
+            try {
+                mRemoteDevice.prepare(streamId);
+            } catch (CameraRuntimeException e) {
+                throw e.asChecked();
+            } catch (RemoteException e) {
+                // impossible
+                return;
+            }
+        }
+    }
+
     public int capture(CaptureRequest request, CaptureCallback callback, Handler handler)
             throws CameraAccessException {
         if (DEBUG) {
@@ -1054,6 +1077,14 @@ public class CameraDeviceImpl extends CameraDevice {
          *
          */
         public void onIdle(CameraDevice camera) {
+            // Default empty implementation
+        }
+
+        /**
+         * The method called when the camera device has finished preparing
+         * an output Surface
+         */
+        public void onSurfacePrepared(Surface surface) {
             // Default empty implementation
         }
     }
@@ -1641,6 +1672,31 @@ public class CameraDeviceImpl extends CameraDevice {
                     checkAndFireSequenceComplete();
                 }
             }
+        }
+
+        @Override
+        public void onPrepared(int streamId) {
+            final OutputConfiguration output;
+            final StateCallbackKK sessionCallback;
+
+            if (DEBUG) {
+                Log.v(TAG, "Stream " + streamId + " is prepared");
+            }
+
+            synchronized(mInterfaceLock) {
+                output = mConfiguredOutputs.get(streamId);
+                sessionCallback = mSessionStateCallback;
+            }
+
+            if (sessionCallback == null) return;
+
+            if (output == null) {
+                Log.w(TAG, "onPrepared invoked for unknown output Surface");
+                return;
+            }
+            final Surface surface = output.getSurface();
+
+            sessionCallback.onSurfacePrepared(surface);
         }
 
         /**
