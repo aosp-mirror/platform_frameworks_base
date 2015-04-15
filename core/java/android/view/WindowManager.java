@@ -164,13 +164,14 @@ public interface WindowManager extends ViewManager {
          * be used by applications, and a special permission is required
          * to use them.
          * </ul>
-         * 
+         *
          * @see #TYPE_BASE_APPLICATION
          * @see #TYPE_APPLICATION
          * @see #TYPE_APPLICATION_STARTING
          * @see #TYPE_APPLICATION_PANEL
          * @see #TYPE_APPLICATION_MEDIA
          * @see #TYPE_APPLICATION_SUB_PANEL
+         * @see #TYPE_APPLICATION_ABOVE_SUB_PANEL
          * @see #TYPE_APPLICATION_ATTACHED_DIALOG
          * @see #TYPE_STATUS_BAR
          * @see #TYPE_SEARCH_BAR
@@ -193,6 +194,7 @@ public interface WindowManager extends ViewManager {
             @ViewDebug.IntToString(from = TYPE_APPLICATION_PANEL, to = "TYPE_APPLICATION_PANEL"),
             @ViewDebug.IntToString(from = TYPE_APPLICATION_MEDIA, to = "TYPE_APPLICATION_MEDIA"),
             @ViewDebug.IntToString(from = TYPE_APPLICATION_SUB_PANEL, to = "TYPE_APPLICATION_SUB_PANEL"),
+            @ViewDebug.IntToString(from = TYPE_APPLICATION_ABOVE_SUB_PANEL, to = "TYPE_APPLICATION_ABOVE_SUB_PANEL"),
             @ViewDebug.IntToString(from = TYPE_APPLICATION_ATTACHED_DIALOG, to = "TYPE_APPLICATION_ATTACHED_DIALOG"),
             @ViewDebug.IntToString(from = TYPE_APPLICATION_MEDIA_OVERLAY, to = "TYPE_APPLICATION_MEDIA_OVERLAY"),
             @ViewDebug.IntToString(from = TYPE_STATUS_BAR, to = "TYPE_STATUS_BAR"),
@@ -260,40 +262,40 @@ public interface WindowManager extends ViewManager {
          * End of types of application windows.
          */
         public static final int LAST_APPLICATION_WINDOW = 99;
-    
+
         /**
          * Start of types of sub-windows.  The {@link #token} of these windows
          * must be set to the window they are attached to.  These types of
          * windows are kept next to their attached window in Z-order, and their
          * coordinate space is relative to their attached window.
          */
-        public static final int FIRST_SUB_WINDOW        = 1000;
-    
+        public static final int FIRST_SUB_WINDOW = 1000;
+
         /**
          * Window type: a panel on top of an application window.  These windows
          * appear on top of their attached window.
          */
-        public static final int TYPE_APPLICATION_PANEL  = FIRST_SUB_WINDOW;
-    
+        public static final int TYPE_APPLICATION_PANEL = FIRST_SUB_WINDOW;
+
         /**
          * Window type: window for showing media (such as video).  These windows
          * are displayed behind their attached window.
          */
-        public static final int TYPE_APPLICATION_MEDIA  = FIRST_SUB_WINDOW+1;
-    
+        public static final int TYPE_APPLICATION_MEDIA = FIRST_SUB_WINDOW + 1;
+
         /**
          * Window type: a sub-panel on top of an application window.  These
          * windows are displayed on top their attached window and any
          * {@link #TYPE_APPLICATION_PANEL} panels.
          */
-        public static final int TYPE_APPLICATION_SUB_PANEL = FIRST_SUB_WINDOW+2;
+        public static final int TYPE_APPLICATION_SUB_PANEL = FIRST_SUB_WINDOW + 2;
 
         /** Window type: like {@link #TYPE_APPLICATION_PANEL}, but layout
          * of the window happens as that of a top-level window, <em>not</em>
          * as a child of its container.
          */
-        public static final int TYPE_APPLICATION_ATTACHED_DIALOG = FIRST_SUB_WINDOW+3;
-        
+        public static final int TYPE_APPLICATION_ATTACHED_DIALOG = FIRST_SUB_WINDOW + 3;
+
         /**
          * Window type: window for showing overlays on top of media windows.
          * These windows are displayed between TYPE_APPLICATION_MEDIA and the
@@ -301,19 +303,26 @@ public interface WindowManager extends ViewManager {
          * is a big ugly hack so:
          * @hide
          */
-        public static final int TYPE_APPLICATION_MEDIA_OVERLAY  = FIRST_SUB_WINDOW+4;
-    
+        public static final int TYPE_APPLICATION_MEDIA_OVERLAY  = FIRST_SUB_WINDOW + 4;
+
+        /**
+         * Window type: a above sub-panel on top of an application window and it's
+         * sub-panel windows. These windows are displayed on top of their attached window
+         * and any {@link #TYPE_APPLICATION_SUB_PANEL} panels.
+         */
+        public static final int TYPE_APPLICATION_ABOVE_SUB_PANEL = FIRST_SUB_WINDOW + 5;
+
         /**
          * End of types of sub-windows.
          */
-        public static final int LAST_SUB_WINDOW         = 1999;
-        
+        public static final int LAST_SUB_WINDOW = 1999;
+
         /**
          * Start of system-specific window types.  These are not normally
          * created by applications.
          */
         public static final int FIRST_SYSTEM_WINDOW     = 2000;
-    
+
         /**
          * Window type: the status bar.  There can be only one status bar
          * window; it is placed at the top of the screen, and all other

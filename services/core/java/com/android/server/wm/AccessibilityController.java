@@ -339,6 +339,7 @@ final class AccessibilityController {
                         case WindowManager.LayoutParams.TYPE_APPLICATION_PANEL:
                         case WindowManager.LayoutParams.TYPE_APPLICATION_MEDIA:
                         case WindowManager.LayoutParams.TYPE_APPLICATION_SUB_PANEL:
+                        case WindowManager.LayoutParams.TYPE_APPLICATION_ABOVE_SUB_PANEL:
                         case WindowManager.LayoutParams.TYPE_APPLICATION_ATTACHED_DIALOG:
                         case WindowManager.LayoutParams.TYPE_SEARCH_BAR:
                         case WindowManager.LayoutParams.TYPE_PHONE:
