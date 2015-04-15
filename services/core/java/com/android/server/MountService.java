@@ -16,6 +16,13 @@
 
 package com.android.server;
 
+import static com.android.internal.util.XmlUtils.readIntAttribute;
+import static com.android.internal.util.XmlUtils.readStringAttribute;
+import static com.android.internal.util.XmlUtils.writeIntAttribute;
+import static com.android.internal.util.XmlUtils.writeStringAttribute;
+import static org.xmlpull.v1.XmlPullParser.END_DOCUMENT;
+import static org.xmlpull.v1.XmlPullParser.START_TAG;
+
 import android.Manifest;
 import android.app.ActivityManagerNative;
 import android.app.AppOpsManager;
@@ -55,9 +62,13 @@ import android.os.storage.StorageVolume;
 import android.os.storage.VolumeInfo;
 import android.text.TextUtils;
 import android.util.ArrayMap;
+import android.util.AtomicFile;
+import android.util.DebugUtils;
 import android.util.Log;
 import android.util.Slog;
+import android.util.Xml;
 
+import libcore.io.IoUtils;
 import libcore.util.EmptyArray;
 import libcore.util.HexEncoding;
 
@@ -66,14 +77,21 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.IMediaContainerService;
 import com.android.internal.os.SomeArgs;
 import com.android.internal.util.ArrayUtils;
+import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.Preconditions;
 import com.android.server.NativeDaemonConnector.Command;
 import com.android.server.NativeDaemonConnector.SensitiveArg;
 import com.android.server.pm.PackageManagerService;
 
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
+import org.xmlpull.v1.XmlSerializer;
+
 import java.io.File;
 import java.io.FileDescriptor;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -214,6 +232,57 @@ class MountService extends IMountService.Stub
         public static final int FstrimCompleted                = 700;
     }
 
+    private static final String TAG_VOLUMES = "volumes";
+    private static final String TAG_VOLUME = "volume";
+    private static final String ATTR_TYPE = "type";
+    private static final String ATTR_FS_UUID = "fsUuid";
+    private static final String ATTR_NICKNAME = "nickname";
+    private static final String ATTR_USER_FLAGS = "userFlags";
+
+    private final AtomicFile mMetadataFile;
+
+    private static class VolumeMetadata {
+        public final int type;
+        public final String fsUuid;
+        public String nickname;
+        public int userFlags;
+
+        public VolumeMetadata(int type, String fsUuid) {
+            this.type = type;
+            this.fsUuid = Preconditions.checkNotNull(fsUuid);
+        }
+
+        public static VolumeMetadata read(XmlPullParser in) throws IOException {
+            final int type = readIntAttribute(in, ATTR_TYPE);
+            final String fsUuid = readStringAttribute(in, ATTR_FS_UUID);
+            final VolumeMetadata meta = new VolumeMetadata(type, fsUuid);
+            meta.nickname = readStringAttribute(in, ATTR_NICKNAME);
+            meta.userFlags = readIntAttribute(in, ATTR_USER_FLAGS);
+            return meta;
+        }
+
+        public static void write(XmlSerializer out, VolumeMetadata meta) throws IOException {
+            out.startTag(null, TAG_VOLUME);
+            writeIntAttribute(out, ATTR_TYPE, meta.type);
+            writeStringAttribute(out, ATTR_FS_UUID, meta.fsUuid);
+            writeStringAttribute(out, ATTR_NICKNAME, meta.nickname);
+            writeIntAttribute(out, ATTR_USER_FLAGS, meta.userFlags);
+            out.endTag(null, TAG_VOLUME);
+        }
+
+        public void dump(IndentingPrintWriter pw) {
+            pw.println("VolumeMetadata:");
+            pw.increaseIndent();
+            pw.printPair("type", DebugUtils.valueToString(VolumeInfo.class, "TYPE_", type));
+            pw.printPair("fsUuid", fsUuid);
+            pw.printPair("nickname", nickname);
+            pw.printPair("userFlags",
+                    DebugUtils.flagsToString(VolumeInfo.class, "USER_FLAG_", userFlags));
+            pw.decreaseIndent();
+            pw.println();
+        }
+    }
+
     /**
      * <em>Never</em> hold the lock while performing downcalls into vold, since
      * unsolicited events can suddenly appear to update data structures.
@@ -222,10 +291,17 @@ class MountService extends IMountService.Stub
 
     @GuardedBy("mLock")
     private int[] mStartedUsers = EmptyArray.INT;
+
+    /** Map from disk ID to disk */
     @GuardedBy("mLock")
     private ArrayMap<String, DiskInfo> mDisks = new ArrayMap<>();
+    /** Map from volume ID to disk */
     @GuardedBy("mLock")
     private ArrayMap<String, VolumeInfo> mVolumes = new ArrayMap<>();
+
+    /** Map from UUID to metadata */
+    @GuardedBy("mLock")
+    private ArrayMap<String, VolumeMetadata> mMetadata = new ArrayMap<>();
 
     private DiskInfo findDiskById(String id) {
         synchronized (mLock) {
@@ -258,6 +334,15 @@ class MountService extends IMountService.Stub
             }
         }
         throw new IllegalArgumentException("No volume found for path " + path);
+    }
+
+    private VolumeMetadata findOrCreateMetadataLocked(VolumeInfo vol) {
+        VolumeMetadata meta = mMetadata.get(vol.fsUuid);
+        if (meta == null) {
+            meta = new VolumeMetadata(vol.type, vol.fsUuid);
+            mMetadata.put(meta.fsUuid, meta);
+        }
+        return meta;
     }
 
     private static int sNextMtpIndex = 1;
@@ -799,6 +884,7 @@ class MountService extends IMountService.Stub
                 if (vol != null) {
                     vol.fsType = cooked[2];
                 }
+                mCallbacks.notifyVolumeMetadataChanged(vol.clone());
                 break;
             }
             case VoldResponseCode.VOLUME_FS_UUID_CHANGED: {
@@ -807,6 +893,8 @@ class MountService extends IMountService.Stub
                 if (vol != null) {
                     vol.fsUuid = cooked[2];
                 }
+                refreshMetadataLocked();
+                mCallbacks.notifyVolumeMetadataChanged(vol.clone());
                 break;
             }
             case VoldResponseCode.VOLUME_FS_LABEL_CHANGED: {
@@ -815,6 +903,7 @@ class MountService extends IMountService.Stub
                 if (vol != null) {
                     vol.fsLabel = cooked[2];
                 }
+                mCallbacks.notifyVolumeMetadataChanged(vol.clone());
                 break;
             }
             case VoldResponseCode.VOLUME_PATH_CHANGED: {
@@ -901,6 +990,25 @@ class MountService extends IMountService.Stub
         }
     }
 
+    /**
+     * Refresh latest metadata into any currently active {@link VolumeInfo}.
+     */
+    private void refreshMetadataLocked() {
+        final int size = mVolumes.size();
+        for (int i = 0; i < size; i++) {
+            final VolumeInfo vol = mVolumes.valueAt(i);
+            final VolumeMetadata meta = mMetadata.get(vol.fsUuid);
+
+            if (meta != null) {
+                vol.nickname = meta.nickname;
+                vol.userFlags = meta.userFlags;
+            } else {
+                vol.nickname = null;
+                vol.userFlags = 0;
+            }
+        }
+    }
+
     private void enforcePermission(String perm) {
         mContext.enforceCallingOrSelfPermission(perm, perm);
     }
@@ -949,6 +1057,13 @@ class MountService extends IMountService.Stub
             mLastMaintenance = mLastMaintenanceFile.lastModified();
         }
 
+        mMetadataFile = new AtomicFile(
+                new File(Environment.getSystemSecureDirectory(), "storage.xml"));
+
+        synchronized (mLock) {
+            readMetadataLocked();
+        }
+
         /*
          * Create the connection to vold with a maximum queue of twice the
          * amount of containers we'd ever expect to have. This keeps an
@@ -970,6 +1085,61 @@ class MountService extends IMountService.Stub
     private void systemReady() {
         mSystemReady = true;
         mHandler.obtainMessage(H_SYSTEM_READY).sendToTarget();
+    }
+
+    private void readMetadataLocked() {
+        mMetadata.clear();
+
+        FileInputStream fis = null;
+        try {
+            fis = mMetadataFile.openRead();
+            final XmlPullParser in = Xml.newPullParser();
+            in.setInput(fis, null);
+
+            int type;
+            while ((type = in.next()) != END_DOCUMENT) {
+                if (type == START_TAG) {
+                    final String tag = in.getName();
+                    if (TAG_VOLUME.equals(tag)) {
+                        final VolumeMetadata meta = VolumeMetadata.read(in);
+                        mMetadata.put(meta.fsUuid, meta);
+                    }
+                }
+            }
+        } catch (FileNotFoundException e) {
+            // Missing metadata is okay, probably first boot
+        } catch (IOException e) {
+            Slog.wtf(TAG, "Failed reading metadata", e);
+        } catch (XmlPullParserException e) {
+            Slog.wtf(TAG, "Failed reading metadata", e);
+        } finally {
+            IoUtils.closeQuietly(fis);
+        }
+    }
+
+    private void writeMetadataLocked() {
+        FileOutputStream fos = null;
+        try {
+            fos = mMetadataFile.startWrite();
+
+            XmlSerializer out = new FastXmlSerializer();
+            out.setOutput(fos, "utf-8");
+            out.startDocument(null, true);
+            out.startTag(null, TAG_VOLUMES);
+            final int size = mMetadata.size();
+            for (int i = 0; i < size; i++) {
+                final VolumeMetadata meta = mMetadata.valueAt(i);
+                VolumeMetadata.write(out, meta);
+            }
+            out.endTag(null, TAG_VOLUMES);
+            out.endDocument();
+
+            mMetadataFile.finishWrite(fos);
+        } catch (IOException e) {
+            if (fos != null) {
+                mMetadataFile.failWrite(fos);
+            }
+        }
     }
 
     /**
@@ -1122,6 +1292,36 @@ class MountService extends IMountService.Stub
             mConnector.execute("volume", "partition", diskId, "mixed", ratio);
         } catch (NativeDaemonConnectorException e) {
             throw e.rethrowAsParcelableException();
+        }
+    }
+
+    @Override
+    public void setVolumeNickname(String volId, String nickname) {
+        enforcePermission(android.Manifest.permission.MOUNT_UNMOUNT_FILESYSTEMS);
+        waitForReady();
+
+        synchronized (mLock) {
+            final VolumeInfo vol = findVolumeById(volId);
+            final VolumeMetadata meta = findOrCreateMetadataLocked(vol);
+            meta.nickname = nickname;
+            refreshMetadataLocked();
+            writeMetadataLocked();
+            mCallbacks.notifyVolumeMetadataChanged(vol.clone());
+        }
+    }
+
+    @Override
+    public void setVolumeUserFlags(String volId, int flags, int mask) {
+        enforcePermission(android.Manifest.permission.MOUNT_UNMOUNT_FILESYSTEMS);
+        waitForReady();
+
+        synchronized (mLock) {
+            final VolumeInfo vol = findVolumeById(volId);
+            final VolumeMetadata meta = findOrCreateMetadataLocked(vol);
+            meta.userFlags = (meta.userFlags & ~mask) | (flags & mask);
+            refreshMetadataLocked();
+            writeMetadataLocked();
+            mCallbacks.notifyVolumeMetadataChanged(vol.clone());
         }
     }
 
@@ -1909,7 +2109,12 @@ class MountService extends IMountService.Stub
     }
 
     @Override
-    public VolumeInfo[] getVolumes() {
+    public VolumeInfo[] getVolumes(int flags) {
+        if ((flags & StorageManager.FLAG_ALL_METADATA) != 0) {
+            // TODO: implement support for returning all metadata
+            throw new UnsupportedOperationException();
+        }
+
         synchronized (mLock) {
             final VolumeInfo[] res = new VolumeInfo[mVolumes.size()];
             for (int i = 0; i < mVolumes.size(); i++) {
@@ -2422,6 +2627,7 @@ class MountService extends IMountService.Stub
     private static class Callbacks extends Handler {
         private static final int MSG_STORAGE_STATE_CHANGED = 1;
         private static final int MSG_VOLUME_STATE_CHANGED = 2;
+        private static final int MSG_VOLUME_METADATA_CHANGED = 3;
 
         private final RemoteCallbackList<IMountServiceListener>
                 mCallbacks = new RemoteCallbackList<>();
@@ -2465,6 +2671,10 @@ class MountService extends IMountService.Stub
                     callback.onVolumeStateChanged((VolumeInfo) args.arg1, args.argi2, args.argi3);
                     break;
                 }
+                case MSG_VOLUME_METADATA_CHANGED: {
+                    callback.onVolumeMetadataChanged((VolumeInfo) args.arg1);
+                    break;
+                }
             }
         }
 
@@ -2482,6 +2692,12 @@ class MountService extends IMountService.Stub
             args.argi2 = oldState;
             args.argi3 = newState;
             obtainMessage(MSG_VOLUME_STATE_CHANGED, args).sendToTarget();
+        }
+
+        private void notifyVolumeMetadataChanged(VolumeInfo vol) {
+            final SomeArgs args = SomeArgs.obtain();
+            args.arg1 = vol;
+            obtainMessage(MSG_VOLUME_METADATA_CHANGED, args).sendToTarget();
         }
     }
 
@@ -2537,6 +2753,15 @@ class MountService extends IMountService.Stub
             for (int i = 0; i < mVolumes.size(); i++) {
                 final VolumeInfo vol = mVolumes.valueAt(i);
                 vol.dump(pw);
+            }
+            pw.decreaseIndent();
+
+            pw.println();
+            pw.println("Metadata:");
+            pw.increaseIndent();
+            for (int i = 0; i < mMetadata.size(); i++) {
+                final VolumeMetadata meta = mMetadata.valueAt(i);
+                meta.dump(pw);
             }
             pw.decreaseIndent();
         }

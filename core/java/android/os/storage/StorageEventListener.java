@@ -40,4 +40,7 @@ public class StorageEventListener {
 
     public void onVolumeStateChanged(VolumeInfo vol, int oldState, int newState) {
     }
+
+    public void onVolumeMetadataChanged(VolumeInfo vol) {
+    }
 }

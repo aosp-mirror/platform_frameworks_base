@@ -70,6 +70,9 @@ public class StorageManager {
     /** {@hide} */
     public static final String PROP_PRIMARY_PHYSICAL = "ro.vold.primary_physical";
 
+    /** {@hide} */
+    public static final int FLAG_ALL_METADATA = 1 << 0;
+
     private final Context mContext;
     private final ContentResolver mResolver;
 
@@ -83,6 +86,7 @@ public class StorageManager {
             Handler.Callback {
         private static final int MSG_STORAGE_STATE_CHANGED = 1;
         private static final int MSG_VOLUME_STATE_CHANGED = 2;
+        private static final int MSG_VOLUME_METADATA_CHANGED = 3;
 
         final StorageEventListener mCallback;
         final Handler mHandler;
@@ -103,6 +107,10 @@ public class StorageManager {
                     return true;
                 case MSG_VOLUME_STATE_CHANGED:
                     mCallback.onVolumeStateChanged((VolumeInfo) args.arg1, args.argi2, args.argi3);
+                    args.recycle();
+                    return true;
+                case MSG_VOLUME_METADATA_CHANGED:
+                    mCallback.onVolumeMetadataChanged((VolumeInfo) args.arg1);
                     args.recycle();
                     return true;
             }
@@ -131,6 +139,13 @@ public class StorageManager {
             args.argi2 = oldState;
             args.argi3 = newState;
             mHandler.obtainMessage(MSG_VOLUME_STATE_CHANGED, args).sendToTarget();
+        }
+
+        @Override
+        public void onVolumeMetadataChanged(VolumeInfo vol) {
+            final SomeArgs args = SomeArgs.obtain();
+            args.arg1 = vol;
+            mHandler.obtainMessage(MSG_VOLUME_METADATA_CHANGED, args).sendToTarget();
         }
     }
 
@@ -480,8 +495,13 @@ public class StorageManager {
 
     /** {@hide} */
     public @NonNull List<VolumeInfo> getVolumes() {
+        return getVolumes(0);
+    }
+
+    /** {@hide} */
+    public @NonNull List<VolumeInfo> getVolumes(int flags) {
         try {
-            return Arrays.asList(mMountService.getVolumes());
+            return Arrays.asList(mMountService.getVolumes(flags));
         } catch (RemoteException e) {
             throw e.rethrowAsRuntimeException();
         }
@@ -550,6 +570,35 @@ public class StorageManager {
     public void partitionMixed(String diskId, int ratio) {
         try {
             mMountService.partitionMixed(diskId, ratio);
+        } catch (RemoteException e) {
+            throw e.rethrowAsRuntimeException();
+        }
+    }
+
+    /** {@hide} */
+    public void setVolumeNickname(String volId, String nickname) {
+        try {
+            mMountService.setVolumeNickname(volId, nickname);
+        } catch (RemoteException e) {
+            throw e.rethrowAsRuntimeException();
+        }
+    }
+
+    /** {@hide} */
+    public void setVolumeInited(String volId, boolean inited) {
+        try {
+            mMountService.setVolumeUserFlags(volId, inited ? VolumeInfo.USER_FLAG_INITED : 0,
+                    VolumeInfo.USER_FLAG_INITED);
+        } catch (RemoteException e) {
+            throw e.rethrowAsRuntimeException();
+        }
+    }
+
+    /** {@hide} */
+    public void setVolumeSnoozed(String volId, boolean snoozed) {
+        try {
+            mMountService.setVolumeUserFlags(volId, snoozed ? VolumeInfo.USER_FLAG_SNOOZED : 0,
+                    VolumeInfo.USER_FLAG_SNOOZED);
         } catch (RemoteException e) {
             throw e.rethrowAsRuntimeException();
         }

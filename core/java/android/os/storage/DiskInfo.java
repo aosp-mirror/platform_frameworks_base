@@ -16,6 +16,7 @@
 
 package android.os.storage;
 
+import android.annotation.NonNull;
 import android.content.res.Resources;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -57,6 +58,10 @@ public class DiskInfo implements Parcelable {
         size = parcel.readLong();
         label = parcel.readString();
         volumeIds = parcel.readStringArray();
+    }
+
+    public @NonNull String getId() {
+        return id;
     }
 
     public String getDescription() {

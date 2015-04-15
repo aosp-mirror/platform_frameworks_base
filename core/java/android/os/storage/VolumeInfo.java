@@ -71,6 +71,9 @@ public class VolumeInfo implements Parcelable {
     public static final int FLAG_PRIMARY = 1 << 0;
     public static final int FLAG_VISIBLE = 1 << 1;
 
+    public static final int USER_FLAG_INITED = 1 << 0;
+    public static final int USER_FLAG_SNOOZED = 1 << 1;
+
     private static SparseArray<String> sStateToEnvironment = new SparseArray<>();
     private static ArrayMap<String, String> sEnvironmentToBroadcast = new ArrayMap<>();
 
@@ -104,8 +107,9 @@ public class VolumeInfo implements Parcelable {
 
     /** Framework state */
     public final int mtpIndex;
-    public String nickname;
     public String diskId;
+    public String nickname;
+    public int userFlags = 0;
 
     public VolumeInfo(String id, int type, int mtpIndex) {
         this.id = Preconditions.checkNotNull(id);
@@ -124,8 +128,9 @@ public class VolumeInfo implements Parcelable {
         fsLabel = parcel.readString();
         path = parcel.readString();
         mtpIndex = parcel.readInt();
-        nickname = parcel.readString();
         diskId = parcel.readString();
+        nickname = parcel.readString();
+        userFlags = parcel.readInt();
     }
 
     public static @NonNull String getEnvironmentForState(int state) {
@@ -143,6 +148,30 @@ public class VolumeInfo implements Parcelable {
 
     public static @Nullable String getBroadcastForState(int state) {
         return getBroadcastForEnvironment(getEnvironmentForState(state));
+    }
+
+    public @NonNull String getId() {
+        return id;
+    }
+
+    public @Nullable String getDiskId() {
+        return diskId;
+    }
+
+    public int getType() {
+        return type;
+    }
+
+    public int getState() {
+        return state;
+    }
+
+    public @Nullable String getFsUuid() {
+        return fsUuid;
+    }
+
+    public @Nullable String getNickname() {
+        return nickname;
     }
 
     public @Nullable String getDescription() {
@@ -165,6 +194,14 @@ public class VolumeInfo implements Parcelable {
         return (flags & FLAG_VISIBLE) != 0;
     }
 
+    public boolean isInited() {
+        return (userFlags & USER_FLAG_INITED) != 0;
+    }
+
+    public boolean isSnoozed() {
+        return (userFlags & USER_FLAG_SNOOZED) != 0;
+    }
+
     public boolean isVisibleToUser(int userId) {
         if (type == TYPE_PUBLIC && userId == this.userId) {
             return isVisible();
@@ -173,6 +210,10 @@ public class VolumeInfo implements Parcelable {
         } else {
             return false;
         }
+    }
+
+    public File getPath() {
+        return new File(path);
     }
 
     public File getPathForUser(int userId) {
@@ -284,8 +325,9 @@ public class VolumeInfo implements Parcelable {
         pw.println();
         pw.printPair("path", path);
         pw.printPair("mtpIndex", mtpIndex);
-        pw.printPair("nickname", nickname);
         pw.printPair("diskId", diskId);
+        pw.printPair("nickname", nickname);
+        pw.printPair("userFlags", DebugUtils.flagsToString(getClass(), "USER_FLAG_", userFlags));
         pw.decreaseIndent();
         pw.println();
     }
@@ -331,7 +373,8 @@ public class VolumeInfo implements Parcelable {
         parcel.writeString(fsLabel);
         parcel.writeString(path);
         parcel.writeInt(mtpIndex);
-        parcel.writeString(nickname);
         parcel.writeString(diskId);
+        parcel.writeString(nickname);
+        parcel.writeInt(userFlags);
     }
 }
