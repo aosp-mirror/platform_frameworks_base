@@ -27,6 +27,7 @@ interface IStatusBarService
     void expandNotificationsPanel();
     void collapsePanels();
     void disable(int what, IBinder token, String pkg);
+    void disableForUser(int what, IBinder token, String pkg, int userId);
     void setIcon(String slot, String iconPackage, int iconId, int iconLevel, String contentDescription);
     void setIconVisibility(String slot, boolean visible);
     void removeIcon(String slot);

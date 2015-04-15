@@ -4210,4 +4210,20 @@ public class DevicePolicyManager {
             return false;
         }
     }
+
+    /**
+     * Called by device owner to set the enabled state of the status bar. Disabling the status
+     * bar blocks notifications, quick settings and other screen overlays that allow escaping from
+     * a single use device.
+     *
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
+     * @param enabled New state of the status bar.
+     */
+    public void setStatusBarEnabledState(ComponentName admin, boolean enabled) {
+        try {
+            mService.setStatusBarEnabledState(admin, enabled);
+        } catch (RemoteException re) {
+            Log.w(TAG, "Failed talking with device policy service", re);
+        }
+    }
 }

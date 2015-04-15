@@ -79,7 +79,7 @@ public class StatusBarManagerService extends IStatusBarService.Stub {
 
         public void binderDied() {
             Slog.i(TAG, "binder died for pkg=" + pkg);
-            disableInternal(userId, 0, token, pkg);
+            disableForUser(0, token, pkg, userId);
             token.unlinkToDeath(this, 0);
         }
     }
@@ -194,10 +194,11 @@ public class StatusBarManagerService extends IStatusBarService.Stub {
 
     @Override
     public void disable(int what, IBinder token, String pkg) {
-        disableInternal(mCurrentUserId, what, token, pkg);
+        disableForUser(what, token, pkg, mCurrentUserId);
     }
 
-    private void disableInternal(int userId, int what, IBinder token, String pkg) {
+    @Override
+    public void disableForUser(int what, IBinder token, String pkg, int userId) {
         enforceStatusBar();
 
         synchronized (mLock) {
