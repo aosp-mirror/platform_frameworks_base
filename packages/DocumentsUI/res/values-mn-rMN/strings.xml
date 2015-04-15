@@ -38,6 +38,8 @@
     <string name="menu_advanced_hide" product="default" msgid="4845869969015718848">"SD картыг нуух"</string>
     <string name="menu_file_size_show" msgid="3240323619260823076">"Файлын хэмжээг харуулах"</string>
     <string name="menu_file_size_hide" msgid="8881975928502581042">"Файлын хэмжээг нуух"</string>
+    <!-- no translation found for button_copy (8706475544635021302) -->
+    <skip />
     <string name="mode_selected_count" msgid="459111894725594625">"<xliff:g id="COUNT">%1$d</xliff:g> сонгогдсон"</string>
     <string name="sort_name" msgid="9183560467917256779">"Нэрээр"</string>
     <string name="sort_date" msgid="586080032956151448">"Өөрчлөгдсөн огноогоор"</string>
@@ -57,13 +59,20 @@
     <string name="toast_no_application" msgid="1339885974067891667">"Файлыг нээх боломжгүй"</string>
     <string name="toast_failed_delete" msgid="2180678019407244069">"Зарим документуудыг устгах боломжгүй"</string>
     <string name="share_via" msgid="8966594246261344259">"Дараахаар дамжуулан хуваалцах"</string>
-    <string name="cancel" msgid="6442560571259935130">"Цуцлах"</string>
     <string name="copy_notification_title" msgid="6374299806748219777">"Файлуудыг хуулж байна"</string>
     <string name="copy_remaining" msgid="6283790937387975095">"<xliff:g id="DURATION">%s</xliff:g> үлдсэн"</string>
     <plurals name="copy_begin" formatted="false" msgid="9071199452634086365">
       <item quantity="other"> <xliff:g id="COUNT_1">%1$d</xliff:g> файлуудыг хуулж байна.</item>
       <item quantity="one"> <xliff:g id="COUNT_0">%1$d</xliff:g> файл хуулж байна.</item>
     </plurals>
-    <!-- no translation found for copy_preparing (3896202461003039386) -->
+    <string name="copy_preparing" msgid="3896202461003039386">"Хуулбарлахад бэлтгэж байна..."</string>
+    <!-- no translation found for copy_error_notification_title (4911333304372840735) -->
+    <!-- no translation found for notification_touch_for_details (4483108577842961665) -->
+    <skip />
+    <!-- no translation found for retry (7564024179122207376) -->
+    <skip />
+    <!-- no translation found for copy_failure_alert_title (616726451967793549) -->
+    <skip />
+    <!-- no translation found for copy_failure_alert_content (2655232627616241542) -->
     <skip />
 </resources>

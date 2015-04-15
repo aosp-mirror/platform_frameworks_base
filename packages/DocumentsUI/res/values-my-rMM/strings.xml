@@ -38,6 +38,8 @@
     <string name="menu_advanced_hide" product="default" msgid="4845869969015718848">"SD ကဒ် ဖျောက်ပါ"</string>
     <string name="menu_file_size_show" msgid="3240323619260823076">"ဖိုင်အရွယ်အစား ပြပါ"</string>
     <string name="menu_file_size_hide" msgid="8881975928502581042">"ဖိုင်အရွယ်အစား ဖျောက်ပါ"</string>
+    <!-- no translation found for button_copy (8706475544635021302) -->
+    <skip />
     <string name="mode_selected_count" msgid="459111894725594625">"<xliff:g id="COUNT">%1$d</xliff:g> ခရွေးချယ်ပြီး"</string>
     <string name="sort_name" msgid="9183560467917256779">"အမည်ဖြင့်"</string>
     <string name="sort_date" msgid="586080032956151448">"ပြင်ဆင်မှု ရက်စွဲဖြင့်"</string>
@@ -57,7 +59,6 @@
     <string name="toast_no_application" msgid="1339885974067891667">"ဖိုင်အား ဖွင့်မရပါ"</string>
     <string name="toast_failed_delete" msgid="2180678019407244069">"တချို့ စာရွက်စာတန်းများ မဖျက်စီးနိုင်ပါ"</string>
     <string name="share_via" msgid="8966594246261344259">"မှ ဝေမျှပါ"</string>
-    <string name="cancel" msgid="6442560571259935130">"ထားတော့"</string>
     <string name="copy_notification_title" msgid="6374299806748219777">"ဖိုင်များကူယူနေသည်"</string>
     <string name="copy_remaining" msgid="6283790937387975095">"<xliff:g id="DURATION">%s</xliff:g> ကျန်ရှိသည်"</string>
     <plurals name="copy_begin" formatted="false" msgid="9071199452634086365">
@@ -65,4 +66,13 @@
       <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> ဖိုင် ကူးယူနေသည်။</item>
     </plurals>
     <string name="copy_preparing" msgid="3896202461003039386">"မိတ္တူကူးရန်ပြင်ဆင်နေ..."</string>
+    <!-- no translation found for copy_error_notification_title (4911333304372840735) -->
+    <!-- no translation found for notification_touch_for_details (4483108577842961665) -->
+    <skip />
+    <!-- no translation found for retry (7564024179122207376) -->
+    <skip />
+    <!-- no translation found for copy_failure_alert_title (616726451967793549) -->
+    <skip />
+    <!-- no translation found for copy_failure_alert_content (2655232627616241542) -->
+    <skip />
 </resources>

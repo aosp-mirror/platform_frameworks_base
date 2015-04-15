@@ -38,6 +38,8 @@
     <string name="menu_advanced_hide" product="default" msgid="4845869969015718848">"Sembunyikan kartu SD"</string>
     <string name="menu_file_size_show" msgid="3240323619260823076">"Tampilkan ukuran file"</string>
     <string name="menu_file_size_hide" msgid="8881975928502581042">"Sembunyikan ukuran file"</string>
+    <!-- no translation found for button_copy (8706475544635021302) -->
+    <skip />
     <string name="mode_selected_count" msgid="459111894725594625">"<xliff:g id="COUNT">%1$d</xliff:g> dipilih"</string>
     <string name="sort_name" msgid="9183560467917256779">"Menurut nama"</string>
     <string name="sort_date" msgid="586080032956151448">"Menurut tanggal diubah"</string>
@@ -57,7 +59,6 @@
     <string name="toast_no_application" msgid="1339885974067891667">"Tidak dapat membuka file"</string>
     <string name="toast_failed_delete" msgid="2180678019407244069">"Tidak dapat menghapus beberapa dokumen"</string>
     <string name="share_via" msgid="8966594246261344259">"Bagikan melalui"</string>
-    <string name="cancel" msgid="6442560571259935130">"Batal"</string>
     <string name="copy_notification_title" msgid="6374299806748219777">"Menyalin file"</string>
     <string name="copy_remaining" msgid="6283790937387975095">"<xliff:g id="DURATION">%s</xliff:g> lagi"</string>
     <plurals name="copy_begin" formatted="false" msgid="9071199452634086365">
@@ -65,4 +66,13 @@
       <item quantity="one">Menyalin <xliff:g id="COUNT_0">%1$d</xliff:g> file.</item>
     </plurals>
     <string name="copy_preparing" msgid="3896202461003039386">"Menyiapkan salinan..."</string>
+    <!-- no translation found for copy_error_notification_title (4911333304372840735) -->
+    <!-- no translation found for notification_touch_for_details (4483108577842961665) -->
+    <skip />
+    <!-- no translation found for retry (7564024179122207376) -->
+    <skip />
+    <!-- no translation found for copy_failure_alert_title (616726451967793549) -->
+    <skip />
+    <!-- no translation found for copy_failure_alert_content (2655232627616241542) -->
+    <skip />
 </resources>

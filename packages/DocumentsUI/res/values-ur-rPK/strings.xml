@@ -38,6 +38,8 @@
     <string name="menu_advanced_hide" product="default" msgid="4845869969015718848">"‏SD کارڈ چھپائیں"</string>
     <string name="menu_file_size_show" msgid="3240323619260823076">"فائل سائز دکھائیں"</string>
     <string name="menu_file_size_hide" msgid="8881975928502581042">"فائل سائز چھپائیں"</string>
+    <!-- no translation found for button_copy (8706475544635021302) -->
+    <skip />
     <string name="mode_selected_count" msgid="459111894725594625">"<xliff:g id="COUNT">%1$d</xliff:g> کو منتخب کیا گیا"</string>
     <string name="sort_name" msgid="9183560467917256779">"نام کے لحاظ سے"</string>
     <string name="sort_date" msgid="586080032956151448">"ترمیم کی تاریخ کے لحاظ سے"</string>
@@ -57,13 +59,20 @@
     <string name="toast_no_application" msgid="1339885974067891667">"فائل نہيں کھول سکتے ہیں"</string>
     <string name="toast_failed_delete" msgid="2180678019407244069">"کچھ دستاویزات کو حذف کرنے سے قاصر"</string>
     <string name="share_via" msgid="8966594246261344259">"اشتراک کریں بذریعہ"</string>
-    <string name="cancel" msgid="6442560571259935130">"منسوخ کریں"</string>
     <string name="copy_notification_title" msgid="6374299806748219777">"فائلیں کاپی ہو رہی ہیں"</string>
     <string name="copy_remaining" msgid="6283790937387975095">"<xliff:g id="DURATION">%s</xliff:g> باقی ہے"</string>
     <plurals name="copy_begin" formatted="false" msgid="9071199452634086365">
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> فائلیں کاپی کی جا رہی ہیں۔</item>
       <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> فائل کاپی کی جا رہی ہے۔</item>
     </plurals>
-    <!-- no translation found for copy_preparing (3896202461003039386) -->
+    <string name="copy_preparing" msgid="3896202461003039386">"کاپی کیلئے تیار ہو رہا ہے…"</string>
+    <!-- no translation found for copy_error_notification_title (4911333304372840735) -->
+    <!-- no translation found for notification_touch_for_details (4483108577842961665) -->
+    <skip />
+    <!-- no translation found for retry (7564024179122207376) -->
+    <skip />
+    <!-- no translation found for copy_failure_alert_title (616726451967793549) -->
+    <skip />
+    <!-- no translation found for copy_failure_alert_content (2655232627616241542) -->
     <skip />
 </resources>
