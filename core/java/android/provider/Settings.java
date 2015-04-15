@@ -7720,6 +7720,13 @@ public final class Settings {
          * @hide
          */
         public static final String NEW_CONTACT_AGGREGATOR = "new_contact_aggregator";
+
+        /**
+         * Whether to enable contacts metadata syncing or not
+         * The value 1 - enable, 0 - disable
+         * @hide
+         */
+        public static final String CONTACT_METADATA_SYNC = "contact_metadata_sync";
     }
 
     /**
