@@ -190,6 +190,17 @@ public class Watchdog extends Thread {
         }
     }
 
+    /** Monitor for checking the availability of binder threads. The monitor will block until
+     * there is a binder thread available to process in coming IPCs to make sure other processes
+     * can still communicate with the service.
+     */
+    private static final class BinderThreadMonitor implements Watchdog.Monitor {
+        @Override
+        public void monitor() {
+            Binder.blockUntilThreadAvailable();
+        }
+    }
+
     public interface Monitor {
         void monitor();
     }
@@ -227,6 +238,9 @@ public class Watchdog extends Thread {
         // And the display thread.
         mHandlerCheckers.add(new HandlerChecker(DisplayThread.getHandler(),
                 "display thread", DEFAULT_TIMEOUT));
+
+        // Initialize monitor for Binder threads.
+        addMonitor(new BinderThreadMonitor());
     }
 
     public void init(Context context, ActivityManagerService activity) {
