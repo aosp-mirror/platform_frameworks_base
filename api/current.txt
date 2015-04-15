@@ -28331,6 +28331,7 @@ package android.telecom {
 
   public class TelecomManager {
     method public void cancelMissedCallsNotification();
+    method public android.telecom.PhoneAccountHandle getDefaultOutgoingPhoneAccount(java.lang.String);
     method public android.telecom.PhoneAccount getPhoneAccount(android.telecom.PhoneAccountHandle);
     method public boolean handleMmi(java.lang.String);
     method public boolean handleMmi(java.lang.String, android.telecom.PhoneAccountHandle);

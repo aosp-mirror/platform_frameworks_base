@@ -352,9 +352,7 @@ public class TelecomManager {
      * @param uriScheme The URI scheme.
      * @return The {@link PhoneAccountHandle} corresponding to the user-chosen default for outgoing
      * phone calls for a specified URI scheme.
-     * @hide
      */
-    @SystemApi
     public PhoneAccountHandle getDefaultOutgoingPhoneAccount(String uriScheme) {
         try {
             if (isServiceConnected()) {
