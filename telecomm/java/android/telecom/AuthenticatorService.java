@@ -28,6 +28,8 @@ import android.os.IBinder;
 /**
  * A generic stub account authenticator service often used for sync adapters that do not directly
  * involve accounts.
+ *
+ * @hide
  */
 public class AuthenticatorService extends Service {
     private static Authenticator mAuthenticator;

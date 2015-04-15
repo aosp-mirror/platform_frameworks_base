@@ -22,6 +22,8 @@ import android.os.Parcelable;
 
 /**
  * Represents a single voicemail stored in the voicemail content provider.
+ *
+ * @hide
  */
 public class Voicemail implements Parcelable {
     private final Long mTimestamp;
