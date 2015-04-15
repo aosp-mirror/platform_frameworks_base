@@ -99,7 +99,7 @@ static void hal_notify_callback(fingerprint_msg_t msg) {
             arg1 = msg.data.authenticated.finger.fid;
             arg2 = msg.data.authenticated.finger.gid;
             if (arg1 != 0) {
-                notifyKeystore(&msg.data.authenticated.hat,
+                notifyKeystore(reinterpret_cast<uint8_t *>(&msg.data.authenticated.hat),
                         sizeof(msg.data.authenticated.hat));
             }
             break;
