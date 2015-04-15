@@ -815,6 +815,7 @@ package android {
     field public static final int listSeparatorTextViewStyle = 16843272; // 0x1010208
     field public static final int listViewStyle = 16842868; // 0x1010074
     field public static final int listViewWhiteStyle = 16842869; // 0x1010075
+    field public static final int lockTaskMode = 16844013; // 0x10104ed
     field public static final int logo = 16843454; // 0x10102be
     field public static final int longClickable = 16842982; // 0x10100e6
     field public static final int loopViews = 16843527; // 0x1010307

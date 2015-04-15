@@ -1638,10 +1638,13 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
     private void updateLockTaskPackagesLocked(DevicePolicyData policy, int userId) {
         IActivityManager am = ActivityManagerNative.getDefault();
+        long ident = Binder.clearCallingIdentity();
         try {
             am.updateLockTaskPackages(userId, policy.mLockTaskPackages.toArray(new String[0]));
         } catch (RemoteException e) {
             // Not gonna happen.
+        } finally {
+            Binder.restoreCallingIdentity(ident);
         }
     }
 
