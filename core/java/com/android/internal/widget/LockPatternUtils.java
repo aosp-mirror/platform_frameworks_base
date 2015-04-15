@@ -472,6 +472,8 @@ public class LockPatternUtils {
             updateEncryptionPassword(StorageManager.CRYPT_TYPE_DEFAULT, null);
         }
 
+        setCredentialRequiredToDecrypt(false);
+
         getDevicePolicyManager().setActivePasswordState(
                 DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED, 0, 0, 0, 0, 0, 0, 0, userHandle);
 
