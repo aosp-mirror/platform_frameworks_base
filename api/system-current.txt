@@ -30679,9 +30679,9 @@ package android.telecom {
     method public java.util.List<android.telecom.PhoneAccountHandle> getPhoneAccountsSupportingScheme(java.lang.String);
     method public java.util.List<android.telecom.PhoneAccountHandle> getRegisteredConnectionManagers();
     method public android.telecom.PhoneAccountHandle getSimCallManager();
+    method public java.lang.String getVoiceMailNumber(android.telecom.PhoneAccountHandle);
     method public boolean handleMmi(java.lang.String);
     method public boolean handleMmi(java.lang.String, android.telecom.PhoneAccountHandle);
-    method public boolean hasVoiceMailNumber(android.telecom.PhoneAccountHandle);
     method public boolean isInCall();
     method public boolean isRinging();
     method public boolean isTtySupported();
