@@ -40,6 +40,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -262,12 +263,24 @@ public final class ApduServiceInfo implements Parcelable {
      * for that category.
      * @return List of AIDs registered by the service
      */
-    public ArrayList<String> getAids() {
+    public List<String> getAids() {
         final ArrayList<String> aids = new ArrayList<String>();
         for (AidGroup group : getAidGroups()) {
             aids.addAll(group.aids);
         }
         return aids;
+    }
+
+    public List<String> getPrefixAids() {
+        final ArrayList<String> prefixAids = new ArrayList<String>();
+        for (AidGroup group : getAidGroups()) {
+            for (String aid : group.aids) {
+                if (aid.endsWith("*")) {
+                    prefixAids.add(aid);
+                }
+            }
+        }
+        return prefixAids;
     }
 
     /**
