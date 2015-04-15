@@ -80,6 +80,11 @@ public abstract class CarrierMessagingService extends Service {
      */
     public static final int DOWNLOAD_STATUS_ERROR = 2;
 
+    /**
+     * Flag to request SMS delivery status report.
+     */
+    public static final int SEND_FLAG_REQUEST_DELIVERY_STATUS = 1;
+
     private final ICarrierMessagingWrapper mWrapper = new ICarrierMessagingWrapper();
 
     /**
@@ -103,14 +108,54 @@ public abstract class CarrierMessagingService extends Service {
 
     /**
      * Override this method to intercept text SMSs sent from the device.
+     * @deprecated Override {@link #onSendTextSms} below instead.
      *
      * @param text the text to send
      * @param subId SMS subscription ID of the SIM
      * @param destAddress phone number of the recipient of the message
      * @param callback result callback. Call with a {@link SendSmsResult}.
      */
+    @Deprecated
     public void onSendTextSms(
             @NonNull String text, int subId, @NonNull String destAddress,
+            @NonNull ResultCallback<SendSmsResult> callback) {
+        // optional
+        try {
+            callback.onReceiveResult(new SendSmsResult(SEND_STATUS_RETRY_ON_CARRIER_NETWORK, 0));
+        } catch (RemoteException ex) {
+        }
+    }
+
+    /**
+     * Override this method to intercept text SMSs sent from the device.
+     *
+     * @param text the text to send
+     * @param subId SMS subscription ID of the SIM
+     * @param destAddress phone number of the recipient of the message
+     * @param sendSmsFlag Flag for sending SMS. Acceptable values are 0 and
+     *        {@link #SEND_FLAG_REQUEST_DELIVERY_STATUS}.
+     * @param callback result callback. Call with a {@link SendSmsResult}.
+     */
+    public void onSendTextSms(
+            @NonNull String text, int subId, @NonNull String destAddress,
+            int sendSmsFlag, @NonNull ResultCallback<SendSmsResult> callback) {
+        // optional
+        onSendTextSms(text, subId, destAddress, callback);
+    }
+
+    /**
+     * Override this method to intercept binary SMSs sent from the device.
+     * @deprecated Override {@link #onSendDataSms} below instead.
+     *
+     * @param data the binary content
+     * @param subId SMS subscription ID of the SIM
+     * @param destAddress phone number of the recipient of the message
+     * @param destPort the destination port
+     * @param callback result callback. Call with a {@link SendSmsResult}.
+     */
+    @Deprecated
+    public void onSendDataSms(@NonNull byte[] data, int subId,
+            @NonNull String destAddress, int destPort,
             @NonNull ResultCallback<SendSmsResult> callback) {
         // optional
         try {
@@ -126,14 +171,34 @@ public abstract class CarrierMessagingService extends Service {
      * @param subId SMS subscription ID of the SIM
      * @param destAddress phone number of the recipient of the message
      * @param destPort the destination port
+     * @param sendSmsFlag Flag for sending SMS. Acceptable values are 0 and
+     *        {@link #SEND_FLAG_REQUEST_DELIVERY_STATUS}.
      * @param callback result callback. Call with a {@link SendSmsResult}.
      */
     public void onSendDataSms(@NonNull byte[] data, int subId,
-            @NonNull String destAddress, int destPort,
+            @NonNull String destAddress, int destPort, int sendSmsFlag,
             @NonNull ResultCallback<SendSmsResult> callback) {
         // optional
+        onSendDataSms(data, subId, destAddress, destPort, callback);
+    }
+
+    /**
+     * Override this method to intercept long SMSs sent from the device.
+     * @deprecated Override {@link #onSendMultipartTextSms} below instead.
+     *
+     * @param parts a {@link List} of the message parts
+     * @param subId SMS subscription ID of the SIM
+     * @param destAddress phone number of the recipient of the message
+     * @param callback result callback. Call with a {@link SendMultipartSmsResult}.
+     */
+    @Deprecated
+    public void onSendMultipartTextSms(@NonNull List<String> parts,
+            int subId, @NonNull String destAddress,
+            @NonNull ResultCallback<SendMultipartSmsResult> callback) {
+        // optional
         try {
-            callback.onReceiveResult(new SendSmsResult(SEND_STATUS_RETRY_ON_CARRIER_NETWORK, 0));
+            callback.onReceiveResult(
+                    new SendMultipartSmsResult(SEND_STATUS_RETRY_ON_CARRIER_NETWORK, null));
         } catch (RemoteException ex) {
         }
     }
@@ -144,17 +209,15 @@ public abstract class CarrierMessagingService extends Service {
      * @param parts a {@link List} of the message parts
      * @param subId SMS subscription ID of the SIM
      * @param destAddress phone number of the recipient of the message
+     * @param sendSmsFlag Flag for sending SMS. Acceptable values are 0 and
+     *        {@link #SEND_FLAG_REQUEST_DELIVERY_STATUS}.
      * @param callback result callback. Call with a {@link SendMultipartSmsResult}.
      */
     public void onSendMultipartTextSms(@NonNull List<String> parts,
-            int subId, @NonNull String destAddress,
+            int subId, @NonNull String destAddress, int sendSmsFlag,
             @NonNull ResultCallback<SendMultipartSmsResult> callback) {
         // optional
-        try {
-            callback.onReceiveResult(
-                    new SendMultipartSmsResult(SEND_STATUS_RETRY_ON_CARRIER_NETWORK, null));
-        } catch (RemoteException ex) {
-        }
+        onSendMultipartTextSms(parts, subId, destAddress, callback);
     }
 
     /**
@@ -355,8 +418,9 @@ public abstract class CarrierMessagingService extends Service {
 
         @Override
         public void sendTextSms(String text, int subId, String destAddress,
-                                final ICarrierMessagingCallback callback) {
-            onSendTextSms(text, subId, destAddress, new ResultCallback<SendSmsResult>() {
+                int sendSmsFlag, final ICarrierMessagingCallback callback) {
+            onSendTextSms(text, subId, destAddress, sendSmsFlag,
+                    new ResultCallback<SendSmsResult>() {
                     @Override
                     public void onReceiveResult(final SendSmsResult result) throws RemoteException {
                         callback.onSendSmsComplete(result.getSendStatus(), result.getMessageRef());
@@ -366,8 +430,9 @@ public abstract class CarrierMessagingService extends Service {
 
         @Override
         public void sendDataSms(byte[] data, int subId, String destAddress, int destPort,
-                                final ICarrierMessagingCallback callback) {
-            onSendDataSms(data, subId, destAddress, destPort, new ResultCallback<SendSmsResult>() {
+                int sendSmsFlag, final ICarrierMessagingCallback callback) {
+            onSendDataSms(data, subId, destAddress, destPort, sendSmsFlag,
+                    new ResultCallback<SendSmsResult>() {
                     @Override
                     public void onReceiveResult(final SendSmsResult result) throws RemoteException {
                         callback.onSendSmsComplete(result.getSendStatus(), result.getMessageRef());
@@ -377,8 +442,8 @@ public abstract class CarrierMessagingService extends Service {
 
         @Override
         public void sendMultipartTextSms(List<String> parts, int subId, String destAddress,
-                                         final ICarrierMessagingCallback callback) {
-                onSendMultipartTextSms(parts, subId, destAddress,
+                int sendSmsFlag, final ICarrierMessagingCallback callback) {
+            onSendMultipartTextSms(parts, subId, destAddress, sendSmsFlag,
                         new ResultCallback<SendMultipartSmsResult>() {
                                 @Override
                                 public void onReceiveResult(final SendMultipartSmsResult result)

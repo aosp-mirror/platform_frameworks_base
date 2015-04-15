@@ -30860,13 +30860,17 @@ package android.service.carrier {
     method public android.os.IBinder onBind(android.content.Intent);
     method public void onDownloadMms(android.net.Uri, int, android.net.Uri, android.service.carrier.CarrierMessagingService.ResultCallback<java.lang.Integer>);
     method public void onFilterSms(android.service.carrier.MessagePdu, java.lang.String, int, int, android.service.carrier.CarrierMessagingService.ResultCallback<java.lang.Boolean>);
-    method public void onSendDataSms(byte[], int, java.lang.String, int, android.service.carrier.CarrierMessagingService.ResultCallback<android.service.carrier.CarrierMessagingService.SendSmsResult>);
+    method public deprecated void onSendDataSms(byte[], int, java.lang.String, int, android.service.carrier.CarrierMessagingService.ResultCallback<android.service.carrier.CarrierMessagingService.SendSmsResult>);
+    method public void onSendDataSms(byte[], int, java.lang.String, int, int, android.service.carrier.CarrierMessagingService.ResultCallback<android.service.carrier.CarrierMessagingService.SendSmsResult>);
     method public void onSendMms(android.net.Uri, int, android.net.Uri, android.service.carrier.CarrierMessagingService.ResultCallback<android.service.carrier.CarrierMessagingService.SendMmsResult>);
-    method public void onSendMultipartTextSms(java.util.List<java.lang.String>, int, java.lang.String, android.service.carrier.CarrierMessagingService.ResultCallback<android.service.carrier.CarrierMessagingService.SendMultipartSmsResult>);
-    method public void onSendTextSms(java.lang.String, int, java.lang.String, android.service.carrier.CarrierMessagingService.ResultCallback<android.service.carrier.CarrierMessagingService.SendSmsResult>);
+    method public deprecated void onSendMultipartTextSms(java.util.List<java.lang.String>, int, java.lang.String, android.service.carrier.CarrierMessagingService.ResultCallback<android.service.carrier.CarrierMessagingService.SendMultipartSmsResult>);
+    method public void onSendMultipartTextSms(java.util.List<java.lang.String>, int, java.lang.String, int, android.service.carrier.CarrierMessagingService.ResultCallback<android.service.carrier.CarrierMessagingService.SendMultipartSmsResult>);
+    method public deprecated void onSendTextSms(java.lang.String, int, java.lang.String, android.service.carrier.CarrierMessagingService.ResultCallback<android.service.carrier.CarrierMessagingService.SendSmsResult>);
+    method public void onSendTextSms(java.lang.String, int, java.lang.String, int, android.service.carrier.CarrierMessagingService.ResultCallback<android.service.carrier.CarrierMessagingService.SendSmsResult>);
     field public static final int DOWNLOAD_STATUS_ERROR = 2; // 0x2
     field public static final int DOWNLOAD_STATUS_OK = 0; // 0x0
     field public static final int DOWNLOAD_STATUS_RETRY_ON_CARRIER_NETWORK = 1; // 0x1
+    field public static final int SEND_FLAG_REQUEST_DELIVERY_STATUS = 1; // 0x1
     field public static final int SEND_STATUS_ERROR = 2; // 0x2
     field public static final int SEND_STATUS_OK = 0; // 0x0
     field public static final int SEND_STATUS_RETRY_ON_CARRIER_NETWORK = 1; // 0x1
