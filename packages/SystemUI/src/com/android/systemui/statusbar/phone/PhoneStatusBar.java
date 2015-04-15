@@ -73,7 +73,6 @@ import android.util.DisplayMetrics;
 import android.util.EventLog;
 import android.util.Log;
 import android.view.Display;
-import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -101,13 +100,13 @@ import com.android.systemui.EventLogConstants;
 import com.android.systemui.EventLogTags;
 import com.android.systemui.Prefs;
 import com.android.systemui.R;
+import com.android.systemui.assist.AssistGestureManager;
 import com.android.systemui.doze.DozeHost;
 import com.android.systemui.doze.DozeLog;
 import com.android.systemui.keyguard.KeyguardViewMediator;
 import com.android.systemui.qs.QSPanel;
 import com.android.systemui.recents.ScreenPinningRequest;
 import com.android.systemui.statusbar.ActivatableNotificationView;
-import com.android.systemui.assist.AssistGestureManager;
 import com.android.systemui.statusbar.BackDropView;
 import com.android.systemui.statusbar.BaseStatusBar;
 import com.android.systemui.statusbar.CommandQueue;
@@ -702,7 +701,11 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
 
         ScrimView scrimBehind = (ScrimView) mStatusBarWindow.findViewById(R.id.scrim_behind);
         ScrimView scrimInFront = (ScrimView) mStatusBarWindow.findViewById(R.id.scrim_in_front);
-        mScrimController = new ScrimController(scrimBehind, scrimInFront, mScrimSrcModeEnabled);
+        View headsUpScrim = mStatusBarWindow.findViewById(R.id.heads_up_scrim);
+        mScrimController = new ScrimController(scrimBehind, scrimInFront, headsUpScrim,
+                mScrimSrcModeEnabled);
+        mHeadsUpManager.addListener(mScrimController);
+        mStackScroller.setScrimController(mScrimController);
         mScrimController.setBackDropView(mBackdrop);
         mStatusBarView.setScrimController(mScrimController);
         mDozeScrimController = new DozeScrimController(mScrimController, context);
@@ -1846,7 +1849,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     }
 
     @Override
-    public void OnHeadsUpPinned(ExpandableNotificationRow headsUp) {
+    public void OnHeadsUpPinnedChanged(ExpandableNotificationRow headsUp, boolean isHeadsUp) {
     }
 
     @Override

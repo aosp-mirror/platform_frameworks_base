@@ -48,6 +48,7 @@ import com.android.systemui.statusbar.StackScrollerDecorView;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.phone.NotificationGroupManager;
 import com.android.systemui.statusbar.phone.PhoneStatusBar;
+import com.android.systemui.statusbar.phone.ScrimController;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.statusbar.policy.ScrollAdapter;
 
@@ -225,6 +226,7 @@ public class NotificationStackScrollLayout extends ViewGroup
             = new HashSet<>();
     private HeadsUpManager mHeadsUpManager;
     private boolean mTrackingHeadsUp;
+    private ScrimController mScrimController;
 
     public NotificationStackScrollLayout(Context context) {
         this(context, null);
@@ -608,6 +610,10 @@ public class NotificationStackScrollLayout extends ViewGroup
 
     @Override
     public boolean updateSwipeProgress(View animView, boolean dismissable, float swipeProgress) {
+        if (isPinnedHeadsUp(animView) && canChildBeDismissed(animView)) {
+            mScrimController.setTopHeadsUpDragAmount(animView,
+                    Math.min(Math.abs(swipeProgress - 1.0f), 1.0f));
+        }
         return false;
     }
 
@@ -1870,7 +1876,7 @@ public class NotificationStackScrollLayout extends ViewGroup
             boolean isHeadsUp = eventPair.second;
             int type = AnimationEvent.ANIMATION_TYPE_HEADS_UP_OTHER;
             boolean onBottom = false;
-            if (!row.isInShade() && !isHeadsUp) {
+            if (!mIsExpanded && !isHeadsUp) {
                 type = AnimationEvent.ANIMATION_TYPE_HEADS_UP_DISAPPEAR;
             } else if (mAddedHeadsUpChildren.contains(row) || (!row.isInShade() && !mIsExpanded)) {
                 if (!row.isInShade() || shouldHunAppearFromBottom(row)) {
@@ -2712,6 +2718,10 @@ public class NotificationStackScrollLayout extends ViewGroup
 
     public void setTrackingHeadsUp(boolean trackingHeadsUp) {
         mTrackingHeadsUp = trackingHeadsUp;
+    }
+
+    public void setScrimController(ScrimController scrimController) {
+        mScrimController = scrimController;
     }
 
     /**

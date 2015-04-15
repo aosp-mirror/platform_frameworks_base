@@ -25,7 +25,6 @@ import android.provider.Settings;
 import android.util.ArrayMap;
 import android.util.Log;
 import android.util.Pools;
-import android.view.View;
 import android.view.ViewTreeObserver;
 import android.view.accessibility.AccessibilityEvent;
 
@@ -100,7 +99,6 @@ public class HeadsUpManager implements ViewTreeObserver.OnComputeInternalInsetsL
         mMinimumDisplayTime = resources.getInteger(R.integer.heads_up_notification_minimum_time);
         mHeadsUpNotificationDecay = resources.getInteger(R.integer.heads_up_notification_decay);
         mClock = new Clock();
-        // TODO: shadow mSwipeHelper.setMaxSwipeProgress(mMaxAlpha);
 
         mSnoozeLengthMs = Settings.Global.getInt(context.getContentResolver(),
                 SETTING_HEADS_UP_SNOOZE_LENGTH_MS, mDefaultSnoozeLengthMs);
@@ -156,7 +154,7 @@ public class HeadsUpManager implements ViewTreeObserver.OnComputeInternalInsetsL
         if (alert) {
             HeadsUpEntry headsUpEntry = mHeadsUpEntries.get(headsUp.key);
             headsUpEntry.updateEntry();
-            setEntryToShade(headsUpEntry, mIsExpanded);
+            setEntryToShade(headsUpEntry, mIsExpanded, false /* justAdded */, false);
         }
     }
 
@@ -167,24 +165,22 @@ public class HeadsUpManager implements ViewTreeObserver.OnComputeInternalInsetsL
         headsUpEntry.setEntry(entry);
         mHeadsUpEntries.put(entry.key, headsUpEntry);
         entry.row.setHeadsUp(true);
-        if (!entry.row.isInShade() && mIsExpanded) {
-            setEntryToShade(headsUpEntry, true);
-        }
-        updatePinnedHeadsUpState(false /*forceImmediate */);
+        setEntryToShade(headsUpEntry, mIsExpanded /* inShade */, true /* justAdded */, false);
         for (OnHeadsUpChangedListener listener : mListeners) {
             listener.OnHeadsUpStateChanged(entry, true);
         }
         entry.row.sendAccessibilityEvent(AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED);
     }
 
-    private void setEntryToShade(HeadsUpEntry headsUpEntry, boolean inShade) {
+    private void setEntryToShade(HeadsUpEntry headsUpEntry, boolean inShade, boolean justAdded,
+            boolean forceImmediate) {
         ExpandableNotificationRow row = headsUpEntry.entry.row;
-        if (row.isInShade() != inShade) {
+        if (row.isInShade() != inShade || justAdded) {
             row.setInShade(inShade);
-            updatePinnedHeadsUpState(false /* forceImmediate */);
-            if (!inShade) {
-                for (OnHeadsUpChangedListener listener :mListeners) {
-                    listener.OnHeadsUpPinned(row);
+            if (!justAdded || !inShade) {
+                updatePinnedHeadsUpState(forceImmediate);
+                for (OnHeadsUpChangedListener listener : mListeners) {
+                    listener.OnHeadsUpPinnedChanged(row, !inShade);
                 }
             }
         }
@@ -196,7 +192,8 @@ public class HeadsUpManager implements ViewTreeObserver.OnComputeInternalInsetsL
         mEntryPool.release(remove);
         entry.row.sendAccessibilityEvent(AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED);
         entry.row.setHeadsUp(false);
-        updatePinnedHeadsUpState(false /* forceImmediate */);
+        setEntryToShade(remove, true /* inShade */, false /* justAdded */,
+                false /* forceImmediate */);
         for (OnHeadsUpChangedListener listener : mListeners) {
             listener.OnHeadsUpStateChanged(entry, false);
         }
@@ -323,12 +320,6 @@ public class HeadsUpManager implements ViewTreeObserver.OnComputeInternalInsetsL
         return false;
     }
 
-    public boolean updateSwipeProgress(View animView, boolean dismissable, float swipeProgress) {
-        // TODO: handle the shadow
-        //getBackground().setAlpha((int) (255 * swipeProgress));
-        return false;
-    }
-
     public void onComputeInternalInsets(ViewTreeObserver.InternalInsetsInfo info) {
         if (!mIsExpanded && mHasPinnedHeadsUp) {
             int minX = Integer.MAX_VALUE;
@@ -403,9 +394,9 @@ public class HeadsUpManager implements ViewTreeObserver.OnComputeInternalInsetsL
     public void releaseAllToShade() {
         for (String key: mHeadsUpEntries.keySet()) {
             HeadsUpEntry entry = mHeadsUpEntries.get(key);
-            entry.entry.row.setInShade(true);
+            setEntryToShade(entry, true /* toShade */, false /* justAdded */,
+                    true /* forceImmediate */);
         }
-        updatePinnedHeadsUpState(true /* forceImmediate */);
     }
 
     public void onExpandingFinished() {
@@ -522,7 +513,7 @@ public class HeadsUpManager implements ViewTreeObserver.OnComputeInternalInsetsL
 
     public interface OnHeadsUpChangedListener {
         void OnPinnedHeadsUpExistChanged(boolean exist, boolean changeImmediatly);
-        void OnHeadsUpPinned(ExpandableNotificationRow headsUp);
+        void OnHeadsUpPinnedChanged(ExpandableNotificationRow headsUp, boolean isHeadsUp);
         void OnHeadsUpStateChanged(NotificationData.Entry entry, boolean isHeadsUp);
     }
 }

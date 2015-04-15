@@ -1176,8 +1176,8 @@ public class NotificationPanelView extends PanelView implements
         updateEmptyShadeView();
         mQsNavbarScrim.setVisibility(mStatusBarState == StatusBarState.SHADE && mQsExpanded
                 && !mStackScrollerOverscrolling && mQsScrimEnabled
-                        ? View.VISIBLE
-                        : View.INVISIBLE);
+                ? View.VISIBLE
+                : View.INVISIBLE);
         if (mKeyguardUserSwitcher != null && mQsExpanded && !mStackScrollerOverscrolling) {
             mKeyguardUserSwitcher.hideIfNotSimple(true /* animate */);
         }
@@ -1520,6 +1520,9 @@ public class NotificationPanelView extends PanelView implements
         float alpha;
         if (mExpandingFromHeadsUp || mHeadsUpManager.hasPinnedHeadsUp()) {
             alpha = 1f;
+            if (mNotificationStackScroller.getLayerType() == LAYER_TYPE_HARDWARE) {
+                mNotificationStackScroller.setLayerType(LAYER_TYPE_NONE, null);
+            }
         } else {
             alpha = (getNotificationsTopY() + mNotificationStackScroller.getItemHeight())
                     / (mQsMinExpansionHeight + mNotificationStackScroller.getBottomStackPeekSize()
@@ -2155,8 +2158,10 @@ public class NotificationPanelView extends PanelView implements
     }
 
     @Override
-    public void OnHeadsUpPinned(ExpandableNotificationRow headsUp) {
-        mNotificationStackScroller.generateHeadsUpAnimation(headsUp, true);
+    public void OnHeadsUpPinnedChanged(ExpandableNotificationRow headsUp, boolean isHeadsUp) {
+        if (isHeadsUp) {
+            mNotificationStackScroller.generateHeadsUpAnimation(headsUp, true);
+        }
     }
 
     @Override
