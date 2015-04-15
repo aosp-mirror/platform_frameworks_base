@@ -60,6 +60,28 @@ public class GpsNavigationMessage implements Parcelable {
      */
     public static final byte TYPE_CNAV2 = 4;
 
+    /**
+     * The Navigation Message Status is 'unknown'.
+     *
+     * @hide
+     */
+    public static final short STATUS_UNKNOWN = 0;
+
+    /**
+     * The Navigation Message was received without any parity error in its navigation words.
+     *
+     * @hide
+     */
+    public static final short STATUS_PARITY_PASSED = (1<<0);
+
+    /**
+     * The Navigation Message was received with words that failed parity check, but the receiver was
+     * able to correct those words.
+     *
+     * @hide
+     */
+    public static final short STATUS_PARITY_REBUILT = (1<<1);
+
     // End enumerations in sync with gps.h
 
     private byte mType;
@@ -67,6 +89,7 @@ public class GpsNavigationMessage implements Parcelable {
     private short mMessageId;
     private short mSubmessageId;
     private byte[] mData;
+    private short mStatus;
 
     GpsNavigationMessage() {
         initialize();
@@ -81,6 +104,7 @@ public class GpsNavigationMessage implements Parcelable {
         mMessageId = navigationMessage.mMessageId;
         mSubmessageId = navigationMessage.mSubmessageId;
         mData = navigationMessage.mData;
+        mStatus = navigationMessage.mStatus;
     }
 
     /**
@@ -194,6 +218,41 @@ public class GpsNavigationMessage implements Parcelable {
         mData = value;
     }
 
+    /**
+     * Gets the Status of the navigation message contained in the object.
+     *
+     * @hide
+     */
+    public short getStatus() {
+        return mStatus;
+    }
+
+    /**
+     * Sets the status of the navigation message.
+     *
+     * @hide
+     */
+    public void setStatus(short value) {
+        mStatus = value;
+    }
+
+    /**
+     * Gets a string representation of the 'status'.
+     * For internal and logging use only.
+     */
+    private String getStatusString() {
+        switch (mStatus) {
+            case STATUS_UNKNOWN:
+                return "Unknown";
+            case STATUS_PARITY_PASSED:
+                return "ParityPassed";
+            case STATUS_PARITY_REBUILT:
+                return "ParityRebuilt";
+            default:
+                return "<Invalid:" + mStatus + ">";
+        }
+    }
+
     public static final Creator<GpsNavigationMessage> CREATOR =
             new Creator<GpsNavigationMessage>() {
         @Override
@@ -209,6 +268,13 @@ public class GpsNavigationMessage implements Parcelable {
             byte[] data = new byte[dataLength];
             parcel.readByteArray(data);
             navigationMessage.setData(data);
+
+            if (parcel.dataAvail() >= Integer.SIZE) {
+                int status = parcel.readInt();
+                navigationMessage.setStatus((short) status);
+            } else {
+                navigationMessage.setStatus(STATUS_UNKNOWN);
+            }
 
             return navigationMessage;
         }
@@ -226,6 +292,7 @@ public class GpsNavigationMessage implements Parcelable {
         parcel.writeInt(mSubmessageId);
         parcel.writeInt(mData.length);
         parcel.writeByteArray(mData);
+        parcel.writeInt(mStatus);
     }
 
     @Override
@@ -240,6 +307,7 @@ public class GpsNavigationMessage implements Parcelable {
 
         builder.append(String.format(format, "Type", getTypeString()));
         builder.append(String.format(format, "Prn", mPrn));
+        builder.append(String.format(format, "Status", getStatusString()));
         builder.append(String.format(format, "MessageId", mMessageId));
         builder.append(String.format(format, "SubmessageId", mSubmessageId));
 
@@ -261,5 +329,6 @@ public class GpsNavigationMessage implements Parcelable {
         mMessageId = -1;
         mSubmessageId = -1;
         mData = EMPTY_ARRAY;
+        mStatus = STATUS_UNKNOWN;
     }
 }
