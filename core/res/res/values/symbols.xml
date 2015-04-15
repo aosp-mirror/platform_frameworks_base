@@ -1886,14 +1886,17 @@
   <java-symbol type="string" name="ext_media_badremoval_notification_title" />
   <java-symbol type="string" name="ext_media_checking_notification_message" />
   <java-symbol type="string" name="ext_media_checking_notification_title" />
-  <java-symbol type="string" name="ext_media_nofs_notification_message" />
-  <java-symbol type="string" name="ext_media_nofs_notification_title" />
   <java-symbol type="string" name="ext_media_nomedia_notification_message" />
   <java-symbol type="string" name="ext_media_nomedia_notification_title" />
-  <java-symbol type="string" name="ext_media_safe_unmount_notification_message" />
-  <java-symbol type="string" name="ext_media_safe_unmount_notification_title" />
   <java-symbol type="string" name="ext_media_unmountable_notification_message" />
   <java-symbol type="string" name="ext_media_unmountable_notification_title" />
+  <java-symbol type="string" name="ext_media_unmounting_notification_message" />
+  <java-symbol type="string" name="ext_media_unmounting_notification_title" />
+  <java-symbol type="string" name="ext_media_new_notification_message" />
+  <java-symbol type="string" name="ext_media_ready_notification_message" />
+  <java-symbol type="string" name="ext_media_init_action" />
+  <java-symbol type="string" name="ext_media_unmount_action" />
+  <java-symbol type="string" name="ext_media_browse_action" />
   <java-symbol type="string" name="usb_storage_error_message" />
   <java-symbol type="string" name="usb_storage_message" />
   <java-symbol type="string" name="usb_storage_notification_message" />

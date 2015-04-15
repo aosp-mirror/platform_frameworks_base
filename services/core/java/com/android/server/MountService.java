@@ -740,19 +740,29 @@ class MountService extends IMountService.Stub
             }
             case VoldResponseCode.DISK_VOLUME_CREATED: {
                 if (cooked.length != 3) break;
-                final DiskInfo disk = mDisks.get(cooked[1]);
+                final String diskId = cooked[1];
                 final String volId = cooked[2];
+                final DiskInfo disk = mDisks.get(diskId);
                 if (disk != null) {
-                    disk.volumes = ArrayUtils.appendElement(String.class, disk.volumes, volId);
+                    disk.volumeIds = ArrayUtils.appendElement(String.class, disk.volumeIds, volId);
+                }
+                final VolumeInfo vol = mVolumes.get(volId);
+                if (vol != null) {
+                    vol.diskId = diskId;
                 }
                 break;
             }
             case VoldResponseCode.DISK_VOLUME_DESTROYED: {
                 if (cooked.length != 3) break;
-                final DiskInfo disk = mDisks.get(cooked[1]);
+                final String diskId = cooked[1];
                 final String volId = cooked[2];
+                final DiskInfo disk = mDisks.get(diskId);
                 if (disk != null) {
-                    disk.volumes = ArrayUtils.removeElement(String.class, disk.volumes, volId);
+                    disk.volumeIds = ArrayUtils.removeElement(String.class, disk.volumeIds, volId);
+                }
+                final VolumeInfo vol = mVolumes.get(volId);
+                if (vol != null) {
+                    vol.diskId = null;
                 }
                 break;
             }
