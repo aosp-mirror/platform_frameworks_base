@@ -20,7 +20,10 @@ import android.app.Notification;
 import android.app.Notification.Action;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.UserHandle;
 import android.os.storage.DiskInfo;
 import android.os.storage.StorageEventListener;
@@ -38,6 +41,8 @@ public class StorageNotification extends SystemUI {
 
     private static final int NOTIF_ID = 0x53544f52; // STOR
 
+    private static final String ACTION_SNOOZE_VOLUME = "com.android.systemui.action.SNOOZE_VOLUME";
+
     // TODO: delay some notifications to avoid bumpy fast operations
     // TODO: annoy user when private media is missing
 
@@ -49,6 +54,25 @@ public class StorageNotification extends SystemUI {
         public void onVolumeStateChanged(VolumeInfo vol, int oldState, int newState) {
             onVolumeStateChangedInternal(vol, oldState, newState);
         }
+
+        @Override
+        public void onVolumeMetadataChanged(VolumeInfo vol) {
+            // Avoid kicking notifications when getting early metadata before
+            // mounted. If already mounted, we're being kicked because of a
+            // nickname or init'ed change.
+            if (vol.getState() == VolumeInfo.STATE_MOUNTED) {
+                onVolumeStateChangedInternal(vol, vol.getState(), vol.getState());
+            }
+        }
+    };
+
+    private final BroadcastReceiver mSnoozeReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            // TODO: kick this onto background thread
+            final String volId = intent.getStringExtra(VolumeInfo.EXTRA_VOLUME_ID);
+            mStorageManager.setVolumeSnoozed(volId, true);
+        }
     };
 
     @Override
@@ -58,23 +82,26 @@ public class StorageNotification extends SystemUI {
         mStorageManager = mContext.getSystemService(StorageManager.class);
         mStorageManager.registerListener(mListener);
 
+        mContext.registerReceiver(mSnoozeReceiver, new IntentFilter(ACTION_SNOOZE_VOLUME),
+                android.Manifest.permission.MOUNT_UNMOUNT_FILESYSTEMS, null);
+
         // Kick current state into place
         final List<VolumeInfo> vols = mStorageManager.getVolumes();
         for (VolumeInfo vol : vols) {
-            onVolumeStateChangedInternal(vol, vol.state, vol.state);
+            onVolumeStateChangedInternal(vol, vol.getState(), vol.getState());
         }
     }
 
     public void onVolumeStateChangedInternal(VolumeInfo vol, int oldState, int newState) {
         // We only care about public volumes
-        if (vol.type != VolumeInfo.TYPE_PUBLIC) {
+        if (vol.getType() != VolumeInfo.TYPE_PUBLIC) {
             return;
         }
 
         Log.d(TAG, vol.toString());
 
         // New state means we tear down any old notifications
-        mNotificationManager.cancelAsUser(vol.id, NOTIF_ID, UserHandle.ALL);
+        mNotificationManager.cancelAsUser(vol.getId(), NOTIF_ID, UserHandle.ALL);
 
         switch (newState) {
             case VolumeInfo.STATE_UNMOUNTED:
@@ -106,7 +133,7 @@ public class StorageNotification extends SystemUI {
     }
 
     private void onVolumeMounting(VolumeInfo vol) {
-        final DiskInfo disk = mStorageManager.findDiskById(vol.diskId);
+        final DiskInfo disk = mStorageManager.findDiskById(vol.getDiskId());
         final CharSequence title = mContext.getString(
                 R.string.ext_media_checking_notification_title, disk.getDescription());
         final CharSequence text = mContext.getString(
@@ -119,13 +146,16 @@ public class StorageNotification extends SystemUI {
                 .setOngoing(true)
                 .build();
 
-        mNotificationManager.notifyAsUser(vol.id, NOTIF_ID, notif, UserHandle.ALL);
+        mNotificationManager.notifyAsUser(vol.getId(), NOTIF_ID, notif, UserHandle.ALL);
     }
 
     private void onVolumeMounted(VolumeInfo vol) {
-        final DiskInfo disk = mStorageManager.findDiskById(vol.diskId);
+        // Don't annoy when user dismissed in past
+        if (vol.isSnoozed()) return;
+
+        final DiskInfo disk = mStorageManager.findDiskById(vol.getDiskId());
         final Notification notif;
-        if (disk.isAdoptable()) {
+        if (disk.isAdoptable() && !vol.isInited()) {
             final CharSequence title = disk.getDescription();
             final CharSequence text = mContext.getString(
                     R.string.ext_media_new_notification_message, disk.getDescription());
@@ -136,6 +166,7 @@ public class StorageNotification extends SystemUI {
                             buildInitPendingIntent(vol)))
                     .addAction(new Action(0, mContext.getString(R.string.ext_media_unmount_action),
                             buildUnmountPendingIntent(vol)))
+                    .setDeleteIntent(buildSnoozeIntent(vol))
                     .setCategory(Notification.CATEGORY_SYSTEM)
                     .build();
 
@@ -150,12 +181,13 @@ public class StorageNotification extends SystemUI {
                             buildBrowsePendingIntent(vol)))
                     .addAction(new Action(0, mContext.getString(R.string.ext_media_unmount_action),
                             buildUnmountPendingIntent(vol)))
+                    .setDeleteIntent(buildSnoozeIntent(vol))
                     .setCategory(Notification.CATEGORY_SYSTEM)
                     .setPriority(Notification.PRIORITY_LOW)
                     .build();
         }
 
-        mNotificationManager.notifyAsUser(vol.id, NOTIF_ID, notif, UserHandle.ALL);
+        mNotificationManager.notifyAsUser(vol.getId(), NOTIF_ID, notif, UserHandle.ALL);
     }
 
     private void onVolumeFormatting(VolumeInfo vol) {
@@ -163,7 +195,7 @@ public class StorageNotification extends SystemUI {
     }
 
     private void onVolumeUnmounting(VolumeInfo vol) {
-        final DiskInfo disk = mStorageManager.findDiskById(vol.diskId);
+        final DiskInfo disk = mStorageManager.findDiskById(vol.getDiskId());
         final CharSequence title = mContext.getString(
                 R.string.ext_media_unmounting_notification_title, disk.getDescription());
         final CharSequence text = mContext.getString(
@@ -176,11 +208,11 @@ public class StorageNotification extends SystemUI {
                 .setOngoing(true)
                 .build();
 
-        mNotificationManager.notifyAsUser(vol.id, NOTIF_ID, notif, UserHandle.ALL);
+        mNotificationManager.notifyAsUser(vol.getId(), NOTIF_ID, notif, UserHandle.ALL);
     }
 
     private void onVolumeUnmountable(VolumeInfo vol) {
-        final DiskInfo disk = mStorageManager.findDiskById(vol.diskId);
+        final DiskInfo disk = mStorageManager.findDiskById(vol.getDiskId());
         final CharSequence title = mContext.getString(
                 R.string.ext_media_unmountable_notification_title, disk.getDescription());
         final CharSequence text = mContext.getString(
@@ -192,7 +224,7 @@ public class StorageNotification extends SystemUI {
                 .setCategory(Notification.CATEGORY_ERROR)
                 .build();
 
-        mNotificationManager.notifyAsUser(vol.id, NOTIF_ID, notif, UserHandle.ALL);
+        mNotificationManager.notifyAsUser(vol.getId(), NOTIF_ID, notif, UserHandle.ALL);
     }
 
     private void onVolumeRemoved(VolumeInfo vol) {
@@ -201,7 +233,7 @@ public class StorageNotification extends SystemUI {
             return;
         }
 
-        final DiskInfo disk = mStorageManager.findDiskById(vol.diskId);
+        final DiskInfo disk = mStorageManager.findDiskById(vol.getDiskId());
         final CharSequence title = mContext.getString(
                 R.string.ext_media_nomedia_notification_title, disk.getDescription());
         final CharSequence text = mContext.getString(
@@ -212,7 +244,7 @@ public class StorageNotification extends SystemUI {
                 .setCategory(Notification.CATEGORY_ERROR)
                 .build();
 
-        mNotificationManager.notifyAsUser(vol.id, NOTIF_ID, notif, UserHandle.ALL);
+        mNotificationManager.notifyAsUser(vol.getId(), NOTIF_ID, notif, UserHandle.ALL);
     }
 
     private Notification.Builder buildNotificationBuilder(CharSequence title, CharSequence text) {
@@ -229,28 +261,49 @@ public class StorageNotification extends SystemUI {
         final Intent intent = new Intent();
         intent.setClassName("com.android.settings",
                 "com.android.settings.deviceinfo.StorageWizardInit");
-        intent.putExtra(VolumeInfo.EXTRA_VOLUME_ID, vol.id);
-        return PendingIntent.getActivityAsUser(mContext, 0, intent, 0, null, UserHandle.CURRENT);
+        intent.putExtra(VolumeInfo.EXTRA_VOLUME_ID, vol.getId());
+
+        final int requestKey = vol.getId().hashCode();
+        return PendingIntent.getActivityAsUser(mContext, requestKey, intent,
+                PendingIntent.FLAG_CANCEL_CURRENT, null, UserHandle.CURRENT);
     }
 
     private PendingIntent buildUnmountPendingIntent(VolumeInfo vol) {
         final Intent intent = new Intent();
         intent.setClassName("com.android.settings",
                 "com.android.settings.deviceinfo.StorageUnmountReceiver");
-        intent.putExtra(VolumeInfo.EXTRA_VOLUME_ID, vol.id);
-        return PendingIntent.getBroadcastAsUser(mContext, 0, intent, 0, UserHandle.CURRENT);
+        intent.putExtra(VolumeInfo.EXTRA_VOLUME_ID, vol.getId());
+
+        final int requestKey = vol.getId().hashCode();
+        return PendingIntent.getBroadcastAsUser(mContext, requestKey, intent,
+                PendingIntent.FLAG_CANCEL_CURRENT, UserHandle.CURRENT);
     }
 
     private PendingIntent buildBrowsePendingIntent(VolumeInfo vol) {
         final Intent intent = vol.buildBrowseIntent();
-        return PendingIntent.getActivityAsUser(mContext, 0, intent, 0, null, UserHandle.CURRENT);
+
+        final int requestKey = vol.getId().hashCode();
+        return PendingIntent.getActivityAsUser(mContext, requestKey, intent,
+                PendingIntent.FLAG_CANCEL_CURRENT, null, UserHandle.CURRENT);
     }
 
     private PendingIntent buildDetailsPendingIntent(VolumeInfo vol) {
         final Intent intent = new Intent();
         intent.setClassName("com.android.settings",
                 "com.android.settings.Settings$StorageVolumeSettingsActivity");
-        intent.putExtra(VolumeInfo.EXTRA_VOLUME_ID, vol.id);
-        return PendingIntent.getActivityAsUser(mContext, 0, intent, 0, null, UserHandle.CURRENT);
+        intent.putExtra(VolumeInfo.EXTRA_VOLUME_ID, vol.getId());
+
+        final int requestKey = vol.getId().hashCode();
+        return PendingIntent.getActivityAsUser(mContext, requestKey, intent,
+                PendingIntent.FLAG_CANCEL_CURRENT, null, UserHandle.CURRENT);
+    }
+
+    private PendingIntent buildSnoozeIntent(VolumeInfo vol) {
+        final Intent intent = new Intent(ACTION_SNOOZE_VOLUME);
+        intent.putExtra(VolumeInfo.EXTRA_VOLUME_ID, vol.getId());
+
+        final int requestKey = vol.getId().hashCode();
+        return PendingIntent.getBroadcastAsUser(mContext, requestKey, intent,
+                PendingIntent.FLAG_CANCEL_CURRENT, UserHandle.CURRENT);
     }
 }

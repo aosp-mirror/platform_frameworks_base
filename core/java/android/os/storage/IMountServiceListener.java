@@ -91,6 +91,13 @@ public interface IMountServiceListener extends IInterface {
                     reply.writeNoException();
                     return true;
                 }
+                case TRANSACTION_onVolumeMetadataChanged: {
+                    data.enforceInterface(DESCRIPTOR);
+                    final VolumeInfo vol = (VolumeInfo) data.readParcelable(null);
+                    onVolumeMetadataChanged(vol);
+                    reply.writeNoException();
+                    return true;
+                }
             }
             return super.onTransact(code, data, reply, flags);
         }
@@ -175,6 +182,22 @@ public interface IMountServiceListener extends IInterface {
                     _data.recycle();
                 }
             }
+
+            @Override
+            public void onVolumeMetadataChanged(VolumeInfo vol) throws RemoteException {
+                Parcel _data = Parcel.obtain();
+                Parcel _reply = Parcel.obtain();
+                try {
+                    _data.writeInterfaceToken(DESCRIPTOR);
+                    _data.writeParcelable(vol, 0);
+                    mRemote.transact(Stub.TRANSACTION_onVolumeMetadataChanged, _data, _reply,
+                            android.os.IBinder.FLAG_ONEWAY);
+                    _reply.readException();
+                } finally {
+                    _reply.recycle();
+                    _data.recycle();
+                }
+            }
         }
 
         static final int TRANSACTION_onUsbMassStorageConnectionChanged = (IBinder.FIRST_CALL_TRANSACTION + 0);
@@ -182,6 +205,7 @@ public interface IMountServiceListener extends IInterface {
         static final int TRANSACTION_onStorageStateChanged = (IBinder.FIRST_CALL_TRANSACTION + 1);
 
         static final int TRANSACTION_onVolumeStateChanged = (IBinder.FIRST_CALL_TRANSACTION + 2);
+        static final int TRANSACTION_onVolumeMetadataChanged = (IBinder.FIRST_CALL_TRANSACTION + 3);
     }
 
     /**
@@ -204,4 +228,6 @@ public interface IMountServiceListener extends IInterface {
 
     public void onVolumeStateChanged(VolumeInfo vol, int oldState, int newState)
             throws RemoteException;
+
+    public void onVolumeMetadataChanged(VolumeInfo vol) throws RemoteException;
 }
