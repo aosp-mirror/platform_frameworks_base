@@ -122,7 +122,7 @@ public final class Phone {
 
         InCallService.VideoCall videoCall = call.getVideoCall();
         if (videoCall != null) {
-            videoCall.removeVideoCallListener();
+            videoCall.unregisterCallback();
         }
         fireCallRemoved(call);
     }
@@ -178,7 +178,7 @@ public final class Phone {
         for (Call call : mCalls) {
             InCallService.VideoCall videoCall = call.getVideoCall();
             if (videoCall != null) {
-                videoCall.removeVideoCallListener();
+                videoCall.unregisterCallback();
             }
             if (call.getState() != Call.STATE_DISCONNECTED) {
                 call.internalSetDisconnected();

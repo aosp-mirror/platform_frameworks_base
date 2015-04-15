@@ -16,6 +16,7 @@
 
 package android.telecom;
 
+import android.annotation.SystemApi;
 import android.net.Uri;
 import android.os.Bundle;
 
@@ -501,7 +502,7 @@ public final class Call {
         }
     }
 
-    public static abstract class Listener {
+    public static abstract class Callback {
         /**
          * Invoked when the state of this {@code Call} has changed. See {@link #getState()}.
          *
@@ -585,13 +586,21 @@ public final class Call {
         public void onConferenceableCallsChanged(Call call, List<Call> conferenceableCalls) {}
     }
 
+    /**
+     * @deprecated Use {@code Call.Callback} instead.
+     * @hide
+     */
+    @Deprecated
+    @SystemApi
+    public static abstract class Listener extends Callback { }
+
     private final Phone mPhone;
     private final String mTelecomCallId;
     private final InCallAdapter mInCallAdapter;
     private final List<String> mChildrenIds = new ArrayList<>();
     private final List<Call> mChildren = new ArrayList<>();
     private final List<Call> mUnmodifiableChildren = Collections.unmodifiableList(mChildren);
-    private final List<Listener> mListeners = new CopyOnWriteArrayList<>();
+    private final List<Callback> mCallbacks = new CopyOnWriteArrayList<>();
     private final List<Call> mConferenceableCalls = new ArrayList<>();
     private final List<Call> mUnmodifiableConferenceableCalls =
             Collections.unmodifiableList(mConferenceableCalls);
@@ -686,8 +695,8 @@ public final class Call {
      * {@code Call} will temporarily pause playing the tones for a pre-defined period of time.
      *
      * If the DTMF string contains a {@link TelecomManager#DTMF_CHARACTER_WAIT} symbol, this
-     * {@code Call} will pause playing the tones and notify listeners via
-     * {@link Listener#onPostDialWait(Call, String)}. At this point, the in-call app
+     * {@code Call} will pause playing the tones and notify callbacks via
+     * {@link Callback#onPostDialWait(Call, String)}. At this point, the in-call app
      * should display to the user an indication of this state and an affordance to continue
      * the postdial sequence. When the user decides to continue the postdial sequence, the in-call
      * app should invoke the {@link #postDialContinue(boolean)} method.
@@ -828,24 +837,51 @@ public final class Call {
     }
 
     /**
+     * Registers a callback to this {@code Call}.
+     *
+     * @param callback A {@code Callback}.
+     */
+    public void registerCallback(Callback callback) {
+        mCallbacks.add(callback);
+    }
+
+    /**
+     * Unregisters a callback from this {@code Call}.
+     *
+     * @param callback A {@code Callback}.
+     */
+    public void unregisterCallback(Callback callback) {
+        if (callback != null) {
+            mCallbacks.remove(callback);
+        }
+    }
+
+    /**
      * Adds a listener to this {@code Call}.
      *
      * @param listener A {@code Listener}.
+     * @deprecated Use {@link #registerCallback} instead.
+     * @hide
      */
+    @Deprecated
+    @SystemApi
     public void addListener(Listener listener) {
-        mListeners.add(listener);
+        registerCallback(listener);
     }
 
     /**
      * Removes a listener from this {@code Call}.
      *
      * @param listener A {@code Listener}.
+     * @deprecated Use {@link #unregisterCallback} instead.
+     * @hide
      */
+    @Deprecated
+    @SystemApi
     public void removeListener(Listener listener) {
-        if (listener != null) {
-            mListeners.remove(listener);
-        }
+        unregisterCallback(listener);
     }
+
 
     /** {@hide} */
     Call(Phone phone, String telecomCallId, InCallAdapter inCallAdapter) {
@@ -978,56 +1014,56 @@ public final class Call {
     }
 
     private void fireStateChanged(int newState) {
-        for (Listener listener : mListeners) {
-            listener.onStateChanged(this, newState);
+        for (Callback callback : mCallbacks) {
+            callback.onStateChanged(this, newState);
         }
     }
 
     private void fireParentChanged(Call newParent) {
-        for (Listener listener : mListeners) {
-            listener.onParentChanged(this, newParent);
+        for (Callback callback : mCallbacks) {
+            callback.onParentChanged(this, newParent);
         }
     }
 
     private void fireChildrenChanged(List<Call> children) {
-        for (Listener listener : mListeners) {
-            listener.onChildrenChanged(this, children);
+        for (Callback callback : mCallbacks) {
+            callback.onChildrenChanged(this, children);
         }
     }
 
     private void fireDetailsChanged(Details details) {
-        for (Listener listener : mListeners) {
-            listener.onDetailsChanged(this, details);
+        for (Callback callback : mCallbacks) {
+            callback.onDetailsChanged(this, details);
         }
     }
 
     private void fireCannedTextResponsesLoaded(List<String> cannedTextResponses) {
-        for (Listener listener : mListeners) {
-            listener.onCannedTextResponsesLoaded(this, cannedTextResponses);
+        for (Callback callback : mCallbacks) {
+            callback.onCannedTextResponsesLoaded(this, cannedTextResponses);
         }
     }
 
     private void fireVideoCallChanged(InCallService.VideoCall videoCall) {
-        for (Listener listener : mListeners) {
-            listener.onVideoCallChanged(this, videoCall);
+        for (Callback callback : mCallbacks) {
+            callback.onVideoCallChanged(this, videoCall);
         }
     }
 
     private void firePostDialWait(String remainingPostDialSequence) {
-        for (Listener listener : mListeners) {
-            listener.onPostDialWait(this, remainingPostDialSequence);
+        for (Callback callback : mCallbacks) {
+            callback.onPostDialWait(this, remainingPostDialSequence);
         }
     }
 
     private void fireCallDestroyed() {
-        for (Listener listener : mListeners) {
-            listener.onCallDestroyed(this);
+        for (Callback callback : mCallbacks) {
+            callback.onCallDestroyed(this);
         }
     }
 
     private void fireConferenceableCallsChanged() {
-        for (Listener listener : mListeners) {
-            listener.onConferenceableCallsChanged(this, mUnmodifiableConferenceableCalls);
+        for (Callback callback : mCallbacks) {
+            callback.onConferenceableCallsChanged(this, mUnmodifiableConferenceableCalls);
         }
     }
 
