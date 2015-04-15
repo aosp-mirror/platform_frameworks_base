@@ -55,6 +55,7 @@ import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
 
 import javax.crypto.SecretKey;
@@ -116,11 +117,15 @@ public class AndroidKeyStore extends KeyStoreSpi {
                 throw new UnrecoverableKeyException("Key algorithm unknown");
             }
 
-            int keymasterDigest =
-                    keyCharacteristics.hwEnforced.getInt(KeymasterDefs.KM_TAG_DIGEST, -1);
-            if (keymasterDigest == -1) {
-                keymasterDigest =
-                        keyCharacteristics.swEnforced.getInt(KeymasterDefs.KM_TAG_DIGEST, -1);
+            List<Integer> keymasterDigests =
+                    keyCharacteristics.getInts(KeymasterDefs.KM_TAG_DIGEST);
+            int keymasterDigest;
+            if (keymasterDigests.isEmpty()) {
+                keymasterDigest = -1;
+            } else {
+                // More than one digest can be permitted for this key. Use the first one to form the
+                // JCA key algorithm name.
+                keymasterDigest = keymasterDigests.get(0);
             }
 
             String keyAlgorithmString;
