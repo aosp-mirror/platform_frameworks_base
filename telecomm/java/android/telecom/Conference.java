@@ -16,7 +16,6 @@
 
 package android.telecom;
 
-import android.annotation.SystemApi;
 import android.telecom.Connection.VideoProvider;
 
 import java.util.ArrayList;
@@ -29,9 +28,7 @@ import java.util.concurrent.CopyOnWriteArraySet;
 
 /**
  * Represents a conference call which can contain any number of {@link Connection} objects.
- * @hide
  */
-@SystemApi
 public abstract class Conference implements IConferenceable {
 
     /**
@@ -487,7 +484,7 @@ public abstract class Conference implements IConferenceable {
      *
      * @return The time the {@code Conference} has been connected.
      */
-    public long getConnectTimeMillis() {
+    public final long getConnectTimeMillis() {
         return mConnectTimeMillis;
     }
 

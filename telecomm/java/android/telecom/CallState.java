@@ -16,17 +16,12 @@
 
 package android.telecom;
 
-import android.annotation.SystemApi;
-
 /**
  * Defines call-state constants of the different states in which a call can exist. Although states
  * have the notion of normal transitions, due to the volatile nature of telephony systems, code
  * that uses these states should be resilient to unexpected state changes outside of what is
  * considered traditional.
- *
- * {@hide}
  */
-@SystemApi
 public final class CallState {
 
     private CallState() {}

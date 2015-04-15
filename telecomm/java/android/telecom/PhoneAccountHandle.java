@@ -16,7 +16,6 @@
 
 package android.telecom;
 
-import android.annotation.SystemApi;
 import android.content.ComponentName;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -47,8 +46,6 @@ public class PhoneAccountHandle implements Parcelable {
         this(componentName, id, Process.myUserHandle());
     }
 
-    /** @hide */
-    @SystemApi
     public PhoneAccountHandle(
             ComponentName componentName,
             String id,
@@ -91,9 +88,7 @@ public class PhoneAccountHandle implements Parcelable {
 
     /**
      * @return the {@link UserHandle} to use when connecting to this PhoneAccount.
-     * @hide
      */
-    @SystemApi
     public UserHandle getUserHandle() {
         return mUserHandle;
     }

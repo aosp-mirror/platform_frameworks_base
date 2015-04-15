@@ -19,7 +19,6 @@ package android.telecom;
 import com.android.internal.telecom.IVideoCallback;
 import com.android.internal.telecom.IVideoProvider;
 
-import android.annotation.SystemApi;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.IBinder;
@@ -44,9 +43,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * Implementations are then responsible for updating the state of the {@code Connection}, and
  * must call {@link #destroy()} to signal to the framework that the {@code Connection} is no
  * longer used and associated resources may be recovered.
- * @hide
  */
-@SystemApi
 public abstract class Connection implements IConferenceable {
 
     public static final int STATE_INITIALIZING = 0;
@@ -376,7 +373,6 @@ public abstract class Connection implements IConferenceable {
         public void onCallSubstateChanged(Connection c, int substate) {}
     }
 
-    /** @hide */
     public static abstract class VideoProvider {
 
         /**
@@ -1129,7 +1125,6 @@ public abstract class Connection implements IConferenceable {
         }
     }
 
-    /** @hide */
     public final VideoProvider getVideoProvider() {
         return mVideoProvider;
     }
@@ -1586,6 +1581,7 @@ public abstract class Connection implements IConferenceable {
 
     /**
      * Notifies listeners that a conference call has been started.
+     * @hide
      */
     protected void notifyConferenceStarted() {
         for (Listener l : mListeners) {

@@ -18,7 +18,6 @@ package android.telecom;
 
 import com.android.internal.telecom.IConnectionService;
 
-import android.annotation.SystemApi;
 import android.os.RemoteException;
 
 import java.util.ArrayList;
@@ -30,9 +29,7 @@ import java.util.concurrent.CopyOnWriteArraySet;
 
 /**
  * Represents a conference call which can contain any number of {@link Connection} objects.
- * @hide
  */
-@SystemApi
 public final class RemoteConference {
 
     public abstract static class Callback {
