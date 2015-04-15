@@ -5116,6 +5116,7 @@ package android.app {
     method public void cancel(int);
     method public void cancel(java.lang.String, int);
     method public void cancelAll();
+    method public android.service.notification.StatusBarNotification[] getActiveNotifications();
     method public android.app.NotificationManager.Policy getNotificationPolicy(android.app.NotificationManager.Policy.Token);
     method public boolean isNotificationPolicyTokenValid(android.app.NotificationManager.Policy.Token);
     method public void notify(int, android.app.Notification);

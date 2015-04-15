@@ -23,6 +23,7 @@ import android.app.Notification.Builder;
 import android.app.NotificationManager.Policy.Token;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.pm.ParceledListSlice;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -35,10 +36,12 @@ import android.os.StrictMode;
 import android.os.UserHandle;
 import android.provider.Settings.Global;
 import android.service.notification.IConditionListener;
+import android.service.notification.StatusBarNotification;
 import android.service.notification.ZenModeConfig;
 import android.util.Log;
 
 import java.util.Objects;
+import java.util.List;
 
 /**
  * Class to notify the user of events that happen.  This is how you tell
@@ -642,4 +645,30 @@ public class NotificationManager
         }
     }
 
+    /**
+     * Recover a list of active notifications: ones that have been posted by the calling app that
+     * have not yet been dismissed by the user or {@link #cancel(String, int)}ed by the app.
+     *
+     * Each notification is embedded in a {@link StatusBarNotification} object, including the
+     * original <code>tag</code> and <code>id</code> supplied to
+     * {@link #notify(String, int, Notification) notify()}
+     * (via {@link StatusBarNotification#getTag() getTag()} and
+     * {@link StatusBarNotification#getId() getId()}) as well as a copy of the original
+     * {@link Notification} object (via {@link StatusBarNotification#getNotification()}).
+     *
+     * @return An array of {@link StatusBarNotification}.
+     */
+    public StatusBarNotification[] getActiveNotifications() {
+        final INotificationManager service = getService();
+        final String pkg = mContext.getPackageName();
+        try {
+            final ParceledListSlice<StatusBarNotification> parceledList
+                    = service.getAppActiveNotifications(pkg, UserHandle.myUserId());
+            final List<StatusBarNotification> list = parceledList.getList();
+            return list.toArray(new StatusBarNotification[list.size()]);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Unable to talk to notification manager. Woe!", e);
+        }
+        return new StatusBarNotification[0];
+    }
 }

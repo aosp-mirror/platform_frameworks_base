@@ -1282,6 +1282,44 @@ public class NotificationManagerService extends SystemService {
         }
 
         /**
+         * Public API for getting a list of current notifications for the calling package/uid.
+         *
+         * @returns A list of all the package's notifications, in natural order.
+         */
+        @Override
+        public ParceledListSlice<StatusBarNotification> getAppActiveNotifications(String pkg,
+                int incomingUserId) {
+            checkCallerIsSystemOrSameApp(pkg);
+            int userId = ActivityManager.handleIncomingUser(Binder.getCallingPid(),
+                    Binder.getCallingUid(), incomingUserId, true, false,
+                    "getAppActiveNotifications", pkg);
+
+            final int N = mNotificationList.size();
+            final ArrayList<StatusBarNotification> list = new ArrayList<StatusBarNotification>(N);
+
+            synchronized (mNotificationList) {
+                for (int i = 0; i < N; i++) {
+                    final StatusBarNotification sbn = mNotificationList.get(i).sbn;
+                    if (sbn.getPackageName().equals(pkg) && sbn.getUserId() == userId) {
+                        // We could pass back a cloneLight() but clients might get confused and
+                        // try to send this thing back to notify() again, which would not work
+                        // very well.
+                        final StatusBarNotification sbnOut = new StatusBarNotification(
+                                sbn.getPackageName(),
+                                sbn.getOpPkg(),
+                                sbn.getId(), sbn.getTag(), sbn.getUid(), sbn.getInitialPid(),
+                                0, // hide score from apps
+                                sbn.getNotification().clone(),
+                                sbn.getUser(), sbn.getPostTime());
+                        list.add(sbnOut);
+                    }
+                }
+            }
+
+            return new ParceledListSlice<StatusBarNotification>(list);
+        }
+
+        /**
          * System-only API for getting a list of recent (cleared, no longer shown) notifications.
          *
          * Requires ACCESS_NOTIFICATIONS which is signature|system.
