@@ -38,7 +38,7 @@ public abstract class Conference implements IConferenceable {
      * Used to indicate that the conference connection time is not specified.  If not specified,
      * Telecom will set the connect time.
      */
-    public static long CONNECT_TIME_NOT_SPECIFIED = 0;
+    public static final long CONNECT_TIME_NOT_SPECIFIED = 0;
 
     /** @hide */
     public abstract static class Listener {
@@ -63,7 +63,7 @@ public abstract class Conference implements IConferenceable {
     private final List<Connection> mUnmodifiableConferenceableConnections =
             Collections.unmodifiableList(mConferenceableConnections);
 
-    protected PhoneAccountHandle mPhoneAccount;
+    private PhoneAccountHandle mPhoneAccount;
     private AudioState mAudioState;
     private int mState = Connection.STATE_NEW;
     private DisconnectCause mDisconnectCause;
@@ -114,11 +114,6 @@ public abstract class Conference implements IConferenceable {
      */
     public final int getState() {
         return mState;
-    }
-
-    /** @hide */
-    @Deprecated public final int getCapabilities() {
-        return getConnectionCapabilities();
     }
 
     /**
@@ -299,11 +294,6 @@ public abstract class Conference implements IConferenceable {
      */
     public final DisconnectCause getDisconnectCause() {
         return mDisconnectCause;
-    }
-
-    /** @hide */
-    @Deprecated public final void setCapabilities(int connectionCapabilities) {
-        setConnectionCapabilities(connectionCapabilities);
     }
 
     /**

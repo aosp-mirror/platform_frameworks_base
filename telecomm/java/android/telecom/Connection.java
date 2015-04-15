@@ -994,11 +994,6 @@ public abstract class Connection implements IConferenceable {
         return mConnectionCapabilities;
     }
 
-    /** @hide */
-    @SystemApi @Deprecated public final int getCallCapabilities() {
-        return getConnectionCapabilities();
-    }
-
     /**
      * Sets the value of the {@link #getAddress()} property.
      *
@@ -1200,11 +1195,6 @@ public abstract class Connection implements IConferenceable {
                 l.onRingbackRequested(this, ringback);
             }
         }
-    }
-
-    /** @hide */
-    @SystemApi @Deprecated public final void setCallCapabilities(int connectionCapabilities) {
-        setConnectionCapabilities(connectionCapabilities);
     }
 
     /**
