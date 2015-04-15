@@ -181,6 +181,8 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
 
     private PreciseCallState mPreciseCallState = new PreciseCallState();
 
+    private boolean mCarrierNetworkChangeState = false;
+
     private PreciseDataConnectionState mPreciseDataConnectionState =
                 new PreciseDataConnectionState();
 
@@ -607,6 +609,13 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
                             remove(r.binder);
                         }
                     }
+                    if ((events & PhoneStateListener.LISTEN_CARRIER_NETWORK_CHANGE) != 0) {
+                        try {
+                            r.callback.onCarrierNetworkChange(mCarrierNetworkChangeState);
+                        } catch (RemoteException ex) {
+                            remove(r.binder);
+                        }
+                    }
                 }
             }
         } else {
@@ -788,6 +797,31 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
             handleRemoveListLocked();
         }
         broadcastSignalStrengthChanged(signalStrength, subId);
+    }
+
+    @Override
+    public void notifyCarrierNetworkChange(boolean active) {
+        if (!checkNotifyPermissionOrCarrierPrivilege("notifyCarrierNetworkChange()")) {
+            return;
+        }
+        if (VDBG) {
+            log("notifyCarrierNetworkChange: active=" + active);
+        }
+
+        synchronized (mRecords) {
+            mCarrierNetworkChangeState = active;
+            for (Record r : mRecords) {
+                if (r.matchPhoneStateListenerEvent(
+                        PhoneStateListener.LISTEN_CARRIER_NETWORK_CHANGE)) {
+                    try {
+                        r.callback.onCarrierNetworkChange(active);
+                    } catch (RemoteException ex) {
+                        mRemoveList.add(r.binder);
+                    }
+                }
+            }
+            handleRemoveListLocked();
+        }
     }
 
     public void notifyCellInfo(List<CellInfo> cellInfo) {
@@ -1422,14 +1456,42 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
                 android.Manifest.permission.READ_PRECISE_PHONE_STATE);
     }
 
+    private boolean checkNotifyPermissionOrCarrierPrivilege(String method) {
+        if  (checkNotifyPermission() || checkCarrierPrivilege()) {
+            return true;
+        }
+
+        String msg = "Modify Phone State or Carrier Privilege Permission Denial: " + method
+                + " from pid=" + Binder.getCallingPid() + ", uid=" + Binder.getCallingUid();
+        if (DBG) log(msg);
+        return false;
+    }
+
     private boolean checkNotifyPermission(String method) {
-        if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
-                == PackageManager.PERMISSION_GRANTED) {
+        if (checkNotifyPermission()) {
             return true;
         }
         String msg = "Modify Phone State Permission Denial: " + method + " from pid="
                 + Binder.getCallingPid() + ", uid=" + Binder.getCallingUid();
         if (DBG) log(msg);
+        return false;
+    }
+
+    private boolean checkNotifyPermission() {
+        return mContext.checkCallingOrSelfPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
+                == PackageManager.PERMISSION_GRANTED;
+    }
+
+    private boolean checkCarrierPrivilege() {
+        TelephonyManager tm = TelephonyManager.getDefault();
+        String[] pkgs = mContext.getPackageManager().getPackagesForUid(Binder.getCallingUid());
+        for (String pkg : pkgs) {
+            if (tm.checkCarrierPrivilegesForPackage(pkg) ==
+                    TelephonyManager.CARRIER_PRIVILEGE_STATUS_HAS_ACCESS) {
+                return true;
+            }
+        }
+
         return false;
     }
 

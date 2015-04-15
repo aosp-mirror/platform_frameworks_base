@@ -69,4 +69,5 @@ interface ITelephonyRegistry {
     void notifyVoLteServiceStateChanged(in VoLteServiceState lteState);
     void notifyOemHookRawEventForSubscriber(in int subId, in byte[] rawData);
     void notifySubscriptionInfoChanged();
+    void notifyCarrierNetworkChange(in boolean active);
 }

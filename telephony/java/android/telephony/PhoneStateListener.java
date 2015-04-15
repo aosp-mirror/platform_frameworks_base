@@ -219,6 +219,15 @@ public class PhoneStateListener {
      */
     public static final int LISTEN_OEM_HOOK_RAW_EVENT                       = 0x00008000;
 
+    /**
+     * Listen for carrier network changes indicated by a carrier app.
+     *
+     * @see #onCarrierNetworkRequest
+     * @see TelephonyManager#notifyCarrierNetworkChange(boolean)
+     * @hide
+     */
+    public static final int LISTEN_CARRIER_NETWORK_CHANGE                   = 0x00010000;
+
      /*
      * Subscription used to listen to the phone state changes
      * @hide
@@ -320,6 +329,9 @@ public class PhoneStateListener {
                         break;
                     case LISTEN_OEM_HOOK_RAW_EVENT:
                         PhoneStateListener.this.onOemHookRawEvent((byte[])msg.obj);
+                        break;
+                    case LISTEN_CARRIER_NETWORK_CHANGE:
+                        PhoneStateListener.this.onCarrierNetworkChange((boolean)msg.obj);
                         break;
 
                 }
@@ -500,6 +512,22 @@ public class PhoneStateListener {
     }
 
     /**
+     * Callback invoked when telephony has received notice from a carrier
+     * app that a network action that could result in connectivity loss
+     * has been requested by an app using
+     * {@link android.telephony.TelephonyManager#notifyCarrierNetworkChange(boolean)}
+     *
+     * @param active Whether the carrier network change is or shortly
+     *               will be active. This value is true to indicate
+     *               showing alternative UI and false to stop.
+     *
+     * @hide
+     */
+    public void onCarrierNetworkChange(boolean active) {
+        // default implementation empty
+    }
+
+    /**
      * The callback methods need to be called on the handler thread where
      * this object was created.  If the binder did that for us it'd be nice.
      */
@@ -574,6 +602,10 @@ public class PhoneStateListener {
 
         public void onOemHookRawEvent(byte[] rawData) {
             Message.obtain(mHandler, LISTEN_OEM_HOOK_RAW_EVENT, 0, 0, rawData).sendToTarget();
+        }
+
+        public void onCarrierNetworkChange(boolean active) {
+            Message.obtain(mHandler, LISTEN_CARRIER_NETWORK_CHANGE, 0, 0, active).sendToTarget();
         }
     };
 
