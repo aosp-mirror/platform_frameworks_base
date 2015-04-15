@@ -4257,7 +4257,13 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             if (deviceId != 0) {
                 searchEvent = new SearchEvent(InputDevice.getDevice(deviceId));
             }
-            result = cb.onSearchRequested(searchEvent);
+            try {
+                result = cb.onSearchRequested(searchEvent);
+            } catch (AbstractMethodError e) {
+                Log.e(TAG, "WindowCallback " + cb.getClass().getName() + " does not implement"
+                        + " method onSearchRequested(SearchEvent); fa", e);
+                result = cb.onSearchRequested();
+            }
         }
         if (!result && (getContext().getResources().getConfiguration().uiMode
                 & Configuration.UI_MODE_TYPE_MASK) == Configuration.UI_MODE_TYPE_TELEVISION) {
