@@ -54,6 +54,9 @@ interface IFingerprintService {
     // Get a pre-enrollment authentication token
     long preEnroll(IBinder token);
 
+    // Determine if a user has at least one enrolled fingerprint
+    boolean hasEnrolledFingerprints(int groupId);
+
     // Gets the number of hardware devices
     // int getHardwareDeviceCount();
 
