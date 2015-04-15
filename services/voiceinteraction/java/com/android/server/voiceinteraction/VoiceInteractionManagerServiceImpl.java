@@ -135,11 +135,11 @@ class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConne
         mContext.registerReceiver(mBroadcastReceiver, filter, null, handler);
     }
 
-    public boolean showSessionLocked(int callingPid, int callingUid, Bundle args, int flags,
+    public boolean showSessionLocked(Bundle args, int flags,
             IVoiceInteractionSessionShowCallback showCallback) {
         if (mActiveSession == null) {
             mActiveSession = new VoiceInteractionSessionConnection(mLock, mSessionComponentName,
-                    mUser, mContext, this, callingPid, callingUid);
+                    mUser, mContext, this, mInfo.getServiceInfo().applicationInfo.uid);
         }
         return mActiveSession.showLocked(args, flags, showCallback);
     }
@@ -196,7 +196,7 @@ class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConne
         }
     }
 
-    public void finishLocked(int callingPid, int callingUid, IBinder token) {
+    public void finishLocked(IBinder token) {
         if (mActiveSession == null || token != mActiveSession.mToken) {
             Slog.w(TAG, "finish does not match active session");
             return;
@@ -267,7 +267,7 @@ class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConne
     @Override
     public void sessionConnectionGone(VoiceInteractionSessionConnection connection) {
         synchronized (mLock) {
-            finishLocked(connection.mCallingPid, connection.mCallingUid, connection.mToken);
+            finishLocked(connection.mToken);
         }
     }
 }

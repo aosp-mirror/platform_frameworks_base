@@ -393,12 +393,9 @@ public class VoiceInteractionManagerService extends SystemService {
                     throw new SecurityException(
                             "Caller is not the current voice interaction service");
                 }
-                final int callingPid = Binder.getCallingPid();
-                final int callingUid = Binder.getCallingUid();
                 final long caller = Binder.clearCallingIdentity();
                 try {
-                    mImpl.showSessionLocked(callingPid, callingUid, args, flags,
-                            null /* showCallback */);
+                    mImpl.showSessionLocked(args, flags, null /* showCallback */);
                 } finally {
                     Binder.restoreCallingIdentity(caller);
                 }
@@ -432,12 +429,9 @@ public class VoiceInteractionManagerService extends SystemService {
                     Slog.w(TAG, "showSessionFromSession without running voice interaction service");
                     return false;
                 }
-                final int callingPid = Binder.getCallingPid();
-                final int callingUid = Binder.getCallingUid();
                 final long caller = Binder.clearCallingIdentity();
                 try {
-                    return mImpl.showSessionLocked(callingPid, callingUid, sessionArgs, flags,
-                            null /* showCallback */);
+                    return mImpl.showSessionLocked(sessionArgs, flags, null /* showCallback */);
                 } finally {
                     Binder.restoreCallingIdentity(caller);
                 }
@@ -506,11 +500,9 @@ public class VoiceInteractionManagerService extends SystemService {
                     Slog.w(TAG, "finish without running voice interaction service");
                     return;
                 }
-                final int callingPid = Binder.getCallingPid();
-                final int callingUid = Binder.getCallingUid();
                 final long caller = Binder.clearCallingIdentity();
                 try {
-                    mImpl.finishLocked(callingPid, callingUid, token);
+                    mImpl.finishLocked(token);
                 } finally {
                     Binder.restoreCallingIdentity(caller);
                 }
@@ -708,11 +700,9 @@ public class VoiceInteractionManagerService extends SystemService {
                             + "service");
                     return;
                 }
-                final int callingPid = Binder.getCallingPid();
-                final int callingUid = Binder.getCallingUid();
                 final long caller = Binder.clearCallingIdentity();
                 try {
-                    mImpl.showSessionLocked(callingPid, callingUid, new Bundle() /* sessionArgs */,
+                    mImpl.showSessionLocked(new Bundle() /* sessionArgs */,
                             VoiceInteractionService.START_SOURCE_ASSIST_GESTURE
                                     | VoiceInteractionService.START_WITH_ASSIST
                                     | VoiceInteractionService.START_WITH_SCREENSHOT,

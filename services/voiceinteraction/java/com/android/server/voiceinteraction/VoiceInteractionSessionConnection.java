@@ -59,7 +59,6 @@ final class VoiceInteractionSessionConnection implements ServiceConnection {
     final int mUser;
     final Context mContext;
     final Callback mCallback;
-    final int mCallingPid;
     final int mCallingUid;
     final IActivityManager mAm;
     final IWindowManager mIWindowManager;
@@ -139,13 +138,12 @@ final class VoiceInteractionSessionConnection implements ServiceConnection {
     };
 
     public VoiceInteractionSessionConnection(Object lock, ComponentName component, int user,
-            Context context, Callback callback, int callingPid, int callingUid) {
+            Context context, Callback callback, int callingUid) {
         mLock = lock;
         mSessionComponentName = component;
         mUser = user;
         mContext = context;
         mCallback = callback;
-        mCallingPid = callingPid;
         mCallingUid = callingUid;
         mAm = ActivityManagerNative.getDefault();
         mIWindowManager = IWindowManager.Stub.asInterface(
