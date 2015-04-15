@@ -189,6 +189,7 @@ public class Binder implements IBinder {
     /**
      * Call blocks until the number of executing binder threads is less
      * than the maximum number of binder threads allowed for this process.
+     * @hide
      */
     public static final native void blockUntilThreadAvailable();
 
