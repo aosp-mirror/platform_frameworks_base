@@ -1783,6 +1783,10 @@
         <enum name="KEYCODE_TV_MEDIA_CONTEXT_MENU" value="257" />
         <enum name="KEYCODE_TV_TIMER_PROGRAMMING" value="258" />
         <enum name="KEYCODE_HELP" value="259" />
+        <enum name="KEYCODE_NAVIGATE_PREVIOUS" value="260" />
+        <enum name="KEYCODE_NAVIGATE_NEXT" value="261" />
+        <enum name="KEYCODE_NAVIGATE_IN" value="262" />
+        <enum name="KEYCODE_NAVIGATE_OUT" value="263" />
     </attr>
 
     <!-- ***************************************************************** -->

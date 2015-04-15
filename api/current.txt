@@ -34917,6 +34917,10 @@ package android.view {
     field public static final int KEYCODE_MUSIC = 209; // 0xd1
     field public static final int KEYCODE_MUTE = 91; // 0x5b
     field public static final int KEYCODE_N = 42; // 0x2a
+    field public static final int KEYCODE_NAVIGATE_IN = 262; // 0x106
+    field public static final int KEYCODE_NAVIGATE_NEXT = 261; // 0x105
+    field public static final int KEYCODE_NAVIGATE_OUT = 263; // 0x107
+    field public static final int KEYCODE_NAVIGATE_PREVIOUS = 260; // 0x104
     field public static final int KEYCODE_NOTIFICATION = 83; // 0x53
     field public static final int KEYCODE_NUM = 78; // 0x4e
     field public static final int KEYCODE_NUMPAD_0 = 144; // 0x90
