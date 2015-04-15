@@ -20,6 +20,10 @@
         android:color="?attr/colorControlActivated"
         android:alpha="?attr/disabledAlpha" />
     <item
+        android:state_focused="true"
+        android:color="?attr/colorControlActivated"
+        android:alpha="?attr/disabledAlpha" />
+    <item
         android:color="?attr/colorControlNormal"
         android:alpha="?attr/disabledAlpha" />
 </selector>
