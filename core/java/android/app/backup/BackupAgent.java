@@ -283,6 +283,7 @@ public abstract class BackupAgent extends ContextWrapper {
         // all of the ones we will be traversing
         String rootDir = new File(appInfo.dataDir).getCanonicalPath();
         String filesDir = getFilesDir().getCanonicalPath();
+        String nobackupDir = getNoBackupFilesDir().getCanonicalPath();
         String databaseDir = getDatabasePath("foo").getParentFile().getCanonicalPath();
         String sharedPrefsDir = getSharedPrefsFile("foo").getParentFile().getCanonicalPath();
         String cacheDir = getCacheDir().getCanonicalPath();
@@ -304,6 +305,7 @@ public abstract class BackupAgent extends ContextWrapper {
         filterSet.add(databaseDir);
         filterSet.add(sharedPrefsDir);
         filterSet.add(filesDir);
+        filterSet.add(nobackupDir);
         fullBackupFileTree(packageName, FullBackup.ROOT_TREE_TOKEN, rootDir, filterSet, data);
 
         // Now do the same for the files dir, db dir, and shared prefs dir
