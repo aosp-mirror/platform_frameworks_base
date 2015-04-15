@@ -1,0 +1,32 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/root_launch"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    tools:context="com.google.android.example.locktasktests.LaunchActivity" >
+
+    <Button
+        android:id="@+id/button_try_lock"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:onClick="onTryLock"
+        android:text="@string/try_lock" />
+    <Button
+        android:id="@+id/button_try_unlock"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:onClick="onTryUnlock"
+        android:text="@string/try_unlock" />
+    <Button
+        android:id="@+id/button_launch_main"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:onClick="onLaunchMain"
+        android:text="@string/launch_main" />
+
+</LinearLayout>

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">Lock Task Tests</string>
+    <string name="title_activity_default">LockDefaultActivity</string>
+    <string name="title_activity_never">LockTaskNeverActivity</string>
+    <string name="title_activity_whitelist">LockWhitelistedActivity</string>
+    <string name="title_activity_always">LockAtLaunchActivity</string>
+    <string name="launch_default">android:lockTaskMode=\n
+            \"lockTaskModeDefault\"\n
+            Pinnable from Overview.</string>
+    <string name="launch_never">android:lockTaskMode=\n
+            \"lockTaskModeNever\"\n
+            Not Lockable or Pinnable.</string>
+    <string name="launch_whitelist">android:lockTaskMode=\n\"lockTaskModeIfWhitelisted\"\n
+            Lockable if whitelisted, Pinnable.\n
+            Use SampleDeviceOwner app to set whitelist.</string>
+    <string name="launch_always">android:lockTaskMode=\n
+            \"lockTaskModeAlways\"\n
+            Launches into lock mode.</string>
+    <string name="launch_main">launch MainActivity (as activity)"</string>
+    <string name="try_lock">Call startLockMode()</string>
+    <string name="try_unlock">Call stopLockMode()</string>
+
+</resources>
