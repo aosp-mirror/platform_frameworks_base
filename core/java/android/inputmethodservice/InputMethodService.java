@@ -1440,7 +1440,8 @@ public class InputMethodService extends AbstractInputMethodService {
 
     void showWindowInner(boolean showInput) {
         boolean doShowInput = false;
-        boolean wasVisible = mWindowVisible;
+        final int previousImeWindowStatus =
+                (mWindowVisible ? IME_ACTIVE : 0) | (isInputViewShown() ? IME_VISIBLE : 0);
         mWindowVisible = true;
         if (!mShowInputRequested) {
             if (mInputStarted) {
@@ -1485,9 +1486,12 @@ public class InputMethodService extends AbstractInputMethodService {
             startExtractingText(false);
         }
 
-        if (!wasVisible) {
+        final int nextImeWindowStatus = IME_ACTIVE | (isInputViewShown() ? IME_VISIBLE : 0);
+        if (previousImeWindowStatus != nextImeWindowStatus) {
+            mImm.setImeWindowStatus(mToken, nextImeWindowStatus, mBackDisposition);
+        }
+        if ((previousImeWindowStatus & IME_ACTIVE) == 0) {
             if (DEBUG) Log.v(TAG, "showWindow: showing!");
-            mImm.setImeWindowStatus(mToken, IME_ACTIVE, mBackDisposition);
             onWindowShown();
             mWindow.show();
         }
