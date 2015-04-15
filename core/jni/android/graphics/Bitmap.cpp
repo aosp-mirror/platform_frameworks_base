@@ -857,6 +857,13 @@ static void Bitmap_prepareToDraw(JNIEnv* env, jobject, jlong bitmapHandle) {
     bitmap->unlockPixels();
 }
 
+static jlong Bitmap_refPixelRef(JNIEnv* env, jobject, jlong bitmapHandle) {
+    SkBitmap* bitmap = reinterpret_cast<SkBitmap*>(bitmapHandle);
+    SkPixelRef* pixelRef = bitmap ? bitmap->pixelRef() : nullptr;
+    SkSafeRef(pixelRef);
+    return reinterpret_cast<jlong>(pixelRef);
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 static JNINativeMethod gBitmapMethods[] = {
@@ -896,6 +903,7 @@ static JNINativeMethod gBitmapMethods[] = {
                                             (void*)Bitmap_copyPixelsFromBuffer },
     {   "nativeSameAs",             "(JJ)Z", (void*)Bitmap_sameAs },
     {   "nativePrepareToDraw",      "(J)V", (void*)Bitmap_prepareToDraw },
+    {   "nativeRefPixelRef",        "(J)J", (void*)Bitmap_refPixelRef },
 };
 
 int register_android_graphics_Bitmap(JNIEnv* env)
