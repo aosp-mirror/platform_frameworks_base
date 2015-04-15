@@ -97,7 +97,6 @@ public class PickFragment extends Fragment {
                               CharSequence displayName) {
         if (mContainer != null) {
             if (pickTarget != null) {
-                mContainer.setVisibility(View.VISIBLE);
                 final Locale locale = getResources().getConfiguration().locale;
                 switch (action) {
                     case BaseActivity.State.ACTION_OPEN_TREE:
@@ -112,7 +111,9 @@ public class PickFragment extends Fragment {
                     default:
                         throw new IllegalArgumentException("Illegal action for PickFragment.");
                 }
-
+            }
+            if (pickTarget != null && pickTarget.isCreateSupported()) {
+                mContainer.setVisibility(View.VISIBLE);
             } else {
                 mContainer.setVisibility(View.GONE);
             }
