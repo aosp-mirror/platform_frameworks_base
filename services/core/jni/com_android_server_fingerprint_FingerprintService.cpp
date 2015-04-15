@@ -26,6 +26,7 @@
 #include <utils/String16.h>
 #include <utils/Looper.h>
 #include <keystore/IKeystoreService.h>
+#include <keystore/keystore.h> // for error code
 
 #include <hardware/hardware.h>
 #include <hardware/fingerprint.h>
@@ -74,8 +75,9 @@ static void notifyKeystore(uint8_t *auth_token, size_t auth_token_length) {
         sp<IBinder> binder = sm->getService(String16("android.security.keystore"));
         sp<IKeystoreService> service = interface_cast<IKeystoreService>(binder);
         if (service != NULL) {
-            if (service->addAuthToken(auth_token, auth_token_length) != NO_ERROR) {
-                ALOGE("Falure sending auth token to KeyStore");
+            status_t ret = service->addAuthToken(auth_token, auth_token_length);
+            if (ret != ResponseCode::NO_ERROR) {
+                ALOGE("Falure sending auth token to KeyStore: %d", ret);
             }
         } else {
             ALOGE("Unable to communicate with KeyStore");
