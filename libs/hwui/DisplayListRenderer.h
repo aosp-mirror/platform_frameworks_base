@@ -100,7 +100,7 @@ public:
     // Bitmap-based
     void drawBitmap(const SkBitmap* bitmap, const SkPaint* paint);
     // TODO: move drawPatch() to Canvas.h
-    void drawPatch(const SkBitmap* bitmap, const Res_png_9patch* patch,
+    void drawPatch(const SkBitmap& bitmap, const Res_png_9patch* patch,
             float left, float top, float right, float bottom, const SkPaint* paint);
 
     // Shapes
@@ -347,7 +347,7 @@ private:
         return cachedRegion;
     }
 
-    inline const SkBitmap* refBitmap(const SkBitmap* bitmap) {
+    inline const SkBitmap* refBitmap(const SkBitmap& bitmap) {
         // Note that this assumes the bitmap is immutable. There are cases this won't handle
         // correctly, such as creating the bitmap from scratch, drawing with it, changing its
         // contents, and drawing again. The only fix would be to always copy it the first time,

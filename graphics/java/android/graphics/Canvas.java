@@ -1335,7 +1335,7 @@ public class Canvas {
      */
     public void drawBitmap(@NonNull Bitmap bitmap, float left, float top, @Nullable Paint paint) {
         throwIfCannotDraw(bitmap);
-        native_drawBitmap(mNativeCanvasWrapper, bitmap.getSkBitmap(), left, top,
+        native_drawBitmap(mNativeCanvasWrapper, bitmap, left, top,
                 paint != null ? paint.getNativeInstance() : 0, mDensity, mScreenDensity, bitmap.mDensity);
     }
 
@@ -1381,7 +1381,7 @@ public class Canvas {
           bottom = src.bottom;
       }
 
-      native_drawBitmap(mNativeCanvasWrapper, bitmap.getSkBitmap(), left, top, right, bottom,
+      native_drawBitmap(mNativeCanvasWrapper, bitmap, left, top, right, bottom,
               dst.left, dst.top, dst.right, dst.bottom, nativePaint, mScreenDensity,
               bitmap.mDensity);
   }
@@ -1428,7 +1428,7 @@ public class Canvas {
             bottom = src.bottom;
         }
 
-        native_drawBitmap(mNativeCanvasWrapper, bitmap.getSkBitmap(), left, top, right, bottom,
+        native_drawBitmap(mNativeCanvasWrapper, bitmap, left, top, right, bottom,
             dst.left, dst.top, dst.right, dst.bottom, nativePaint, mScreenDensity,
             bitmap.mDensity);
     }
@@ -1509,7 +1509,7 @@ public class Canvas {
      * @param paint  May be null. The paint used to draw the bitmap
      */
     public void drawBitmap(@NonNull Bitmap bitmap, @NonNull Matrix matrix, @Nullable Paint paint) {
-        nativeDrawBitmapMatrix(mNativeCanvasWrapper, bitmap.getSkBitmap(), matrix.ni(),
+        nativeDrawBitmapMatrix(mNativeCanvasWrapper, bitmap, matrix.ni(),
                 paint != null ? paint.getNativeInstance() : 0);
     }
 
@@ -1564,7 +1564,7 @@ public class Canvas {
             // no mul by 2, since we need only 1 color per vertex
             checkRange(colors.length, colorOffset, count);
         }
-        nativeDrawBitmapMesh(mNativeCanvasWrapper, bitmap.getSkBitmap(), meshWidth, meshHeight,
+        nativeDrawBitmapMesh(mNativeCanvasWrapper, bitmap, meshWidth, meshHeight,
                 verts, vertOffset, colors, colorOffset,
                 paint != null ? paint.getNativeInstance() : 0);
     }
@@ -2052,13 +2052,13 @@ public class Canvas {
     private static native void native_drawPath(long nativeCanvas,
                                                long nativePath,
                                                long nativePaint);
-    private native void native_drawBitmap(long nativeCanvas, long nativeBitmap,
+    private native void native_drawBitmap(long nativeCanvas, Bitmap bitmap,
                                                  float left, float top,
                                                  long nativePaintOrZero,
                                                  int canvasDensity,
                                                  int screenDensity,
                                                  int bitmapDensity);
-    private native void native_drawBitmap(long nativeCanvas, long nativeBitmap,
+    private native void native_drawBitmap(long nativeCanvas, Bitmap bitmap,
             float srcLeft, float srcTop, float srcRight, float srcBottom,
             float dstLeft, float dstTop, float dstRight, float dstBottom,
             long nativePaintOrZero, int screenDensity, int bitmapDensity);
@@ -2068,11 +2068,11 @@ public class Canvas {
                                                  boolean hasAlpha,
                                                  long nativePaintOrZero);
     private static native void nativeDrawBitmapMatrix(long nativeCanvas,
-                                                      long nativeBitmap,
+                                                      Bitmap bitmap,
                                                       long nativeMatrix,
                                                       long nativePaint);
     private static native void nativeDrawBitmapMesh(long nativeCanvas,
-                                                    long nativeBitmap,
+                                                    Bitmap bitmap,
                                                     int meshWidth, int meshHeight,
                                                     float[] verts, int vertOffset,
                                                     int[] colors, int colorOffset,
