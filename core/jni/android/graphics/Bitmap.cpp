@@ -488,24 +488,33 @@ static jobject Bitmap_createFromParcel(JNIEnv* env, jobject, jobject parcel) {
         return NULL;
     }
 
-    SkBitmap* bitmap = new SkBitmap;
+    SkAutoTDelete<SkBitmap> bitmap(new SkBitmap);
 
-    bitmap->setConfig(config, width, height, rowBytes);
+    if (!bitmap->setConfig(config, width, height, rowBytes)) {
+        return NULL;
+    }
 
     SkColorTable* ctable = NULL;
     if (config == SkBitmap::kIndex8_Config) {
         int count = p->readInt32();
+        if (count < 0 || count > 256) {
+            // The data is corrupt, since SkColorTable enforces a value between 0 and 256,
+            // inclusive.
+            return NULL;
+        }
         if (count > 0) {
             size_t size = count * sizeof(SkPMColor);
             const SkPMColor* src = (const SkPMColor*)p->readInplace(size);
+            if (src == NULL) {
+                return NULL;
+            }
             ctable = new SkColorTable(src, count);
         }
     }
 
-    jbyteArray buffer = GraphicsJNI::allocateJavaPixelRef(env, bitmap, ctable);
+    jbyteArray buffer = GraphicsJNI::allocateJavaPixelRef(env, bitmap.get(), ctable);
     if (NULL == buffer) {
         SkSafeUnref(ctable);
-        delete bitmap;
         return NULL;
     }
 
@@ -517,7 +526,6 @@ static jobject Bitmap_createFromParcel(JNIEnv* env, jobject, jobject parcel) {
     android::status_t status = p->readBlob(size, &blob);
     if (status) {
         doThrowRE(env, "Could not read bitmap from parcel blob.");
-        delete bitmap;
         return NULL;
     }
 
@@ -527,8 +535,8 @@ static jobject Bitmap_createFromParcel(JNIEnv* env, jobject, jobject parcel) {
 
     blob.release();
 
-    return GraphicsJNI::createBitmap(env, bitmap, buffer, getPremulBitmapCreateFlags(isMutable),
-            NULL, NULL, density);
+    return GraphicsJNI::createBitmap(env, bitmap.detach(), buffer,
+            getPremulBitmapCreateFlags(isMutable), NULL, NULL, density);
 }
 
 static jboolean Bitmap_writeToParcel(JNIEnv* env, jobject,
