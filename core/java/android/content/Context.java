@@ -3077,6 +3077,15 @@ public abstract class Context {
      */
     public static final String RADIO_SERVICE = "radio";
 
+    /**
+     * Use with {@link #getSystemService} to retrieve a
+     * {@link android.media.AudioDevicesManager} for handling device enumeration & notification.
+     *
+     * @see #getSystemService
+     * @see android.media.AudioDevicesManager
+     */
+    public static final String AUDIO_DEVICES_SERVICE = "audio_devices_manager";
+
 
     /**
      * Determine whether the given permission is allowed for a particular

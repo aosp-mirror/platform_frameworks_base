@@ -17,7 +17,7 @@
 package android.media.audiofx;
 
 import android.annotation.IntDef;
-import android.media.AudioDevice;
+import android.media.AudioDeviceInfo;
 import android.media.AudioFormat;
 import android.media.audiofx.AudioEffect;
 import android.util.Log;
@@ -204,7 +204,7 @@ public class Virtualizer extends AudioEffect {
         // convert channel mask to internal native representation
         paramsConverter.putInt(AudioFormat.convertChannelOutMaskToNativeMask(channelMask));
         // convert Java device type to internal representation
-        paramsConverter.putInt(AudioDevice.convertDeviceTypeToInternalDevice(deviceType));
+        paramsConverter.putInt(AudioDeviceInfo.convertDeviceTypeToInternalDevice(deviceType));
         // allocate an array to store the results
         byte[] result = new byte[nbChannels * 4/*int to byte*/ * 3/*for mask, azimuth, elevation*/];
 
@@ -305,9 +305,9 @@ public class Virtualizer extends AudioEffect {
             throws IllegalArgumentException {
         switch (virtualizationMode) {
             case VIRTUALIZATION_MODE_BINAURAL:
-                return AudioDevice.TYPE_WIRED_HEADPHONES;
+                return AudioDeviceInfo.TYPE_WIRED_HEADPHONES;
             case VIRTUALIZATION_MODE_TRANSAURAL:
-                return AudioDevice.TYPE_BUILTIN_SPEAKER;
+                return AudioDeviceInfo.TYPE_BUILTIN_SPEAKER;
             default:
                 throw (new IllegalArgumentException(
                         "Virtualizer: illegal virtualization mode " + virtualizationMode));
@@ -317,7 +317,7 @@ public class Virtualizer extends AudioEffect {
     private static int getDeviceForModeForce(@ForceVirtualizationMode int virtualizationMode)
             throws IllegalArgumentException {
         if (virtualizationMode == VIRTUALIZATION_MODE_AUTO) {
-            return AudioDevice.TYPE_UNKNOWN;
+            return AudioDeviceInfo.TYPE_UNKNOWN;
         } else {
             return getDeviceForModeQuery(virtualizationMode);
         }
@@ -325,24 +325,24 @@ public class Virtualizer extends AudioEffect {
 
     private static int deviceToMode(int deviceType) {
         switch (deviceType) {
-            case AudioDevice.TYPE_WIRED_HEADSET:
-            case AudioDevice.TYPE_WIRED_HEADPHONES:
-            case AudioDevice.TYPE_BLUETOOTH_SCO:
-            case AudioDevice.TYPE_BUILTIN_EARPIECE:
+            case AudioDeviceInfo.TYPE_WIRED_HEADSET:
+            case AudioDeviceInfo.TYPE_WIRED_HEADPHONES:
+            case AudioDeviceInfo.TYPE_BLUETOOTH_SCO:
+            case AudioDeviceInfo.TYPE_BUILTIN_EARPIECE:
                 return VIRTUALIZATION_MODE_BINAURAL;
-            case AudioDevice.TYPE_BUILTIN_SPEAKER:
-            case AudioDevice.TYPE_LINE_ANALOG:
-            case AudioDevice.TYPE_LINE_DIGITAL:
-            case AudioDevice.TYPE_BLUETOOTH_A2DP:
-            case AudioDevice.TYPE_HDMI:
-            case AudioDevice.TYPE_HDMI_ARC:
-            case AudioDevice.TYPE_USB_DEVICE:
-            case AudioDevice.TYPE_USB_ACCESSORY:
-            case AudioDevice.TYPE_DOCK:
-            case AudioDevice.TYPE_FM:
-            case AudioDevice.TYPE_AUX_LINE:
+            case AudioDeviceInfo.TYPE_BUILTIN_SPEAKER:
+            case AudioDeviceInfo.TYPE_LINE_ANALOG:
+            case AudioDeviceInfo.TYPE_LINE_DIGITAL:
+            case AudioDeviceInfo.TYPE_BLUETOOTH_A2DP:
+            case AudioDeviceInfo.TYPE_HDMI:
+            case AudioDeviceInfo.TYPE_HDMI_ARC:
+            case AudioDeviceInfo.TYPE_USB_DEVICE:
+            case AudioDeviceInfo.TYPE_USB_ACCESSORY:
+            case AudioDeviceInfo.TYPE_DOCK:
+            case AudioDeviceInfo.TYPE_FM:
+            case AudioDeviceInfo.TYPE_AUX_LINE:
                 return VIRTUALIZATION_MODE_TRANSAURAL;
-            case AudioDevice.TYPE_UNKNOWN:
+            case AudioDeviceInfo.TYPE_UNKNOWN:
             default:
                 return VIRTUALIZATION_MODE_OFF;
         }
@@ -433,7 +433,7 @@ public class Virtualizer extends AudioEffect {
             throws IllegalStateException, IllegalArgumentException, UnsupportedOperationException {
         // convert Java device type to internal representation
         int deviceType = getDeviceForModeForce(virtualizationMode);
-        int internalDevice = AudioDevice.convertDeviceTypeToInternalDevice(deviceType);
+        int internalDevice = AudioDeviceInfo.convertDeviceTypeToInternalDevice(deviceType);
 
         int status = setParameter(PARAM_FORCE_VIRTUALIZATION_MODE, internalDevice);
 
@@ -470,7 +470,7 @@ public class Virtualizer extends AudioEffect {
         int[] value = new int[1];
         int status = getParameter(PARAM_VIRTUALIZATION_MODE, value);
         if (status >= 0) {
-            return deviceToMode(AudioDevice.convertInternalDeviceToDeviceType(value[0]));
+            return deviceToMode(AudioDeviceInfo.convertInternalDeviceToDeviceType(value[0]));
         } else if (status == AudioEffect.ERROR_BAD_VALUE) {
             return VIRTUALIZATION_MODE_OFF;
         } else {

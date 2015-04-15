@@ -55,6 +55,7 @@ import android.location.CountryDetector;
 import android.location.ICountryDetector;
 import android.location.ILocationManager;
 import android.location.LocationManager;
+import android.media.AudioDevicesManager;
 import android.media.AudioManager;
 import android.media.MediaRouter;
 import android.media.midi.IMidiManager;
@@ -692,6 +693,13 @@ final class SystemServiceRegistry {
             @Override
             public RadioManager createService(ContextImpl ctx) {
                 return new RadioManager(ctx);
+            }});
+
+        registerService(Context.AUDIO_DEVICES_SERVICE, AudioDevicesManager.class,
+                new CachedServiceFetcher<AudioDevicesManager>() {
+            @Override
+            public AudioDevicesManager createService(ContextImpl ctx) {
+                return new AudioDevicesManager(ctx);
             }});
     }
 
