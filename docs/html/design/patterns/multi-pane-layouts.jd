@@ -5,6 +5,14 @@ page.metaDescription=Design guide with examples of how to flatten navigation and
 @jd:body
 
 
+<a class="notice-designers-material"
+  href="http://www.google.com/design/spec/layout/structure.html#structure-ui-regions">
+  <div>
+    <h3>Material Design</h3>
+    <p>UI Regions and Guidance<p>
+  </div>
+</a>
+
 <a class="notice-developers" href="{@docRoot}training/basics/fragments/index.html">
   <div>
     <h3>Developer Docs</h3>
@@ -47,7 +55,7 @@ you can use to adjust the layout after orientation change while keeping function
   <div class="layout-content-col span-8">
 
     <img src="{@docRoot}design/media/multipane_stretch.png">
-    
+
   </div>
   <div class="layout-content-col span-5">
 
@@ -61,7 +69,7 @@ you can use to adjust the layout after orientation change while keeping function
   <div class="layout-content-col span-8">
 
     <img src="{@docRoot}design/media/multipane_stack.png">
-    
+
   </div>
   <div class="layout-content-col span-5">
 
@@ -75,7 +83,7 @@ you can use to adjust the layout after orientation change while keeping function
   <div class="layout-content-col span-8">
 
     <img src="{@docRoot}design/media/multipane_expand.png">
-    
+
   </div>
   <div class="layout-content-col span-5">
 
@@ -89,7 +97,7 @@ you can use to adjust the layout after orientation change while keeping function
   <div class="layout-content-col span-8">
 
     <img src="{@docRoot}design/media/multipane_show.png">
-    
+
   </div>
   <div class="layout-content-col span-5">
 

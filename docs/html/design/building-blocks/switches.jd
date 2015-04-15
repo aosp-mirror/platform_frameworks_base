@@ -2,6 +2,14 @@ page.title=Switches
 page.tags=switch,checkbox,radiobutton,button
 @jd:body
 
+<a class="notice-designers-material"
+  href="http://www.google.com/design/spec/components/selection-controls.html">
+  <div>
+    <h3>Material Design</h3>
+    <p>Selection Controls<p>
+  </div>
+</a>
+
 <p>Switches allow the user to select options. There are three kinds of switches: checkboxes, radio
 buttons, and on/off switches.</p>
 
