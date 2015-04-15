@@ -5817,12 +5817,12 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         final int userId = UserHandle.getCallingUserId();
         LockPatternUtils utils = new LockPatternUtils(mContext);
 
-        // disallow disabling the keyguard if a password is currently set
-        if (!enabled && utils.isSecure(userId)) {
-            return false;
-        }
         long ident = Binder.clearCallingIdentity();
         try {
+            // disallow disabling the keyguard if a password is currently set
+            if (!enabled && utils.isSecure(userId)) {
+                return false;
+            }
             utils.setLockScreenDisabled(!enabled, userId);
         } finally {
             Binder.restoreCallingIdentity(ident);
