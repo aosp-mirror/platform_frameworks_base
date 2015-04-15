@@ -81,10 +81,6 @@ public class Canvas {
      */
     protected int mScreenDensity = Bitmap.DENSITY_NONE;
 
-    // Used by native code
-    @SuppressWarnings("UnusedDeclaration")
-    private int mSurfaceFormat;
-
     /**
      * Flag for drawTextRun indicating left-to-right run direction.
      * @hide
@@ -137,7 +133,7 @@ public class Canvas {
     public Canvas() {
         if (!isHardwareAccelerated()) {
             // 0 means no native bitmap
-            mNativeCanvasWrapper = initRaster(0);
+            mNativeCanvasWrapper = initRaster(null);
             mFinalizer = new CanvasFinalizer(mNativeCanvasWrapper);
         } else {
             mFinalizer = null;
@@ -158,7 +154,7 @@ public class Canvas {
             throw new IllegalStateException("Immutable bitmap passed to Canvas constructor");
         }
         throwIfCannotDraw(bitmap);
-        mNativeCanvasWrapper = initRaster(bitmap.getSkBitmap());
+        mNativeCanvasWrapper = initRaster(bitmap);
         mFinalizer = new CanvasFinalizer(mNativeCanvasWrapper);
         mBitmap = bitmap;
         mDensity = bitmap.mDensity;
@@ -215,7 +211,7 @@ public class Canvas {
         }
 
         if (bitmap == null) {
-            native_setBitmap(mNativeCanvasWrapper, 0, false);
+            native_setBitmap(mNativeCanvasWrapper, null);
             mDensity = Bitmap.DENSITY_NONE;
         } else {
             if (!bitmap.isMutable()) {
@@ -223,18 +219,11 @@ public class Canvas {
             }
             throwIfCannotDraw(bitmap);
 
-            native_setBitmap(mNativeCanvasWrapper, bitmap.getSkBitmap(), true);
+            native_setBitmap(mNativeCanvasWrapper, bitmap);
             mDensity = bitmap.mDensity;
         }
 
         mBitmap = bitmap;
-    }
-
-    /**
-     * setBitmap() variant for native callers with a raw bitmap handle.
-     */
-    private void setNativeBitmap(long bitmapHandle) {
-        native_setBitmap(mNativeCanvasWrapper, bitmapHandle, false);
     }
 
     /**
@@ -1976,10 +1965,9 @@ public class Canvas {
      */
     public static native void freeTextLayoutCaches();
 
-    private static native long initRaster(long nativeBitmapOrZero);
+    private static native long initRaster(Bitmap bitmap);
     private static native void native_setBitmap(long canvasHandle,
-                                                long bitmapHandle,
-                                                boolean copyState);
+                                                Bitmap bitmap);
     private static native boolean native_isOpaque(long canvasHandle);
     private static native int native_getWidth(long canvasHandle);
     private static native int native_getHeight(long canvasHandle);

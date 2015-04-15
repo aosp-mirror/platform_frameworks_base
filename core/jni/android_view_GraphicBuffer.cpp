@@ -67,11 +67,6 @@ static struct {
     jfieldID bottom;
 } gRectClassInfo;
 
-static struct {
-    jfieldID mSurfaceFormat;
-    jmethodID setNativeBitmap;
-} gCanvasClassInfo;
-
 #define GET_INT(object, field) \
     env->GetIntField(object, field)
 
@@ -196,13 +191,9 @@ static jboolean android_view_GraphicBuffer_lockCanvas(JNIEnv* env, jobject,
         bitmap.setPixels(NULL);
     }
 
-    SET_INT(canvas, gCanvasClassInfo.mSurfaceFormat, buffer->getPixelFormat());
-    INVOKEV(canvas, gCanvasClassInfo.setNativeBitmap, reinterpret_cast<jlong>(&bitmap));
-
-    SkRect clipRect;
-    clipRect.set(rect.left, rect.top, rect.right, rect.bottom);
-    SkCanvas* nativeCanvas = GraphicsJNI::getNativeCanvas(env, canvas);
-    nativeCanvas->clipRect(clipRect);
+    Canvas* nativeCanvas = GraphicsJNI::getNativeCanvas(env, canvas);
+    nativeCanvas->setBitmap(bitmap);
+    nativeCanvas->clipRect(rect.left, rect.top, rect.right, rect.bottom);
 
     if (dirtyRect) {
         INVOKEV(dirtyRect, gRectClassInfo.set,
@@ -217,7 +208,8 @@ static jboolean android_view_GraphicBuffer_unlockCanvasAndPost(JNIEnv* env, jobj
 
     GraphicBufferWrapper* wrapper =
                 reinterpret_cast<GraphicBufferWrapper*>(wrapperHandle);
-    INVOKEV(canvas, gCanvasClassInfo.setNativeBitmap, (jlong)0);
+    Canvas* nativeCanvas = GraphicsJNI::getNativeCanvas(env, canvas);
+    nativeCanvas->setBitmap(SkBitmap());
 
     if (wrapper) {
         status_t status = wrapper->buffer->unlock();
@@ -301,10 +293,6 @@ int register_android_view_GraphicBuffer(JNIEnv* env) {
     gRectClassInfo.top = GetFieldIDOrDie(env, clazz, "top", "I");
     gRectClassInfo.right = GetFieldIDOrDie(env, clazz, "right", "I");
     gRectClassInfo.bottom = GetFieldIDOrDie(env, clazz, "bottom", "I");
-
-    clazz = FindClassOrDie(env, "android/graphics/Canvas");
-    gCanvasClassInfo.mSurfaceFormat = GetFieldIDOrDie(env, clazz, "mSurfaceFormat", "I");
-    gCanvasClassInfo.setNativeBitmap = GetMethodIDOrDie(env, clazz, "setNativeBitmap", "(J)V");
 
     return RegisterMethodsOrDie(env, kClassPathName, gMethods, NELEM(gMethods));
 }

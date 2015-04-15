@@ -360,7 +360,7 @@ public class ThreadedRenderer extends HardwareRenderer {
     @Override
     boolean copyLayerInto(final HardwareLayer layer, final Bitmap bitmap) {
         return nCopyLayerInto(mNativeProxy,
-                layer.getDeferredLayerUpdater(), bitmap.getSkBitmap());
+                layer.getDeferredLayerUpdater(), bitmap);
     }
 
     @Override
@@ -531,7 +531,7 @@ public class ThreadedRenderer extends HardwareRenderer {
 
     private static native long nCreateTextureLayer(long nativeProxy);
     private static native void nBuildLayer(long nativeProxy, long node);
-    private static native boolean nCopyLayerInto(long nativeProxy, long layer, long bitmap);
+    private static native boolean nCopyLayerInto(long nativeProxy, long layer, Bitmap bitmap);
     private static native void nPushLayerUpdate(long nativeProxy, long layer);
     private static native void nCancelLayerUpdate(long nativeProxy, long layer);
     private static native void nDetachSurfaceTexture(long nativeProxy, long layer);

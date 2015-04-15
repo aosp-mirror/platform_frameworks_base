@@ -42,7 +42,7 @@ LOCAL_SHARED_LIBRARIES := \
     libusbhost \
     libjhead \
     libexif \
-    libstagefright_amrnb_common \
+    libstagefright_amrnb_common
 
 LOCAL_REQUIRED_MODULES := \
     libjhead_jni
@@ -54,6 +54,7 @@ LOCAL_C_INCLUDES += \
     external/libexif/ \
     external/tremor/Tremor \
     frameworks/base/core/jni \
+    frameworks/base/libs/hwui \
     frameworks/av/media/libmedia \
     frameworks/av/media/libstagefright \
     frameworks/av/media/libstagefright/codecs/amrnb/enc/src \

@@ -373,7 +373,7 @@ SkColorType GraphicsJNI::getNativeBitmapColorType(JNIEnv* env, jobject jconfig) 
     return legacyBitmapConfigToColorType(c);
 }
 
-SkCanvas* GraphicsJNI::getNativeCanvas(JNIEnv* env, jobject canvas) {
+android::Canvas* GraphicsJNI::getNativeCanvas(JNIEnv* env, jobject canvas) {
     SkASSERT(env);
     SkASSERT(canvas);
     SkASSERT(env->IsInstanceOf(canvas, gCanvas_class));
@@ -381,9 +381,7 @@ SkCanvas* GraphicsJNI::getNativeCanvas(JNIEnv* env, jobject canvas) {
     if (!canvasHandle) {
         return NULL;
     }
-    SkCanvas* c = reinterpret_cast<android::Canvas*>(canvasHandle)->asSkCanvas();
-    SkASSERT(c);
-    return c;
+    return reinterpret_cast<android::Canvas*>(canvasHandle);
 }
 
 SkRegion* GraphicsJNI::getNativeRegion(JNIEnv* env, jobject region)
