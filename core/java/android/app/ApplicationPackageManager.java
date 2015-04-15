@@ -771,10 +771,12 @@ final class ApplicationPackageManager extends PackageManager {
                                     .getCompatibilityInfo().applicationScale,
                             e);
                 }
-                if (DEBUG_ICONS)
+                if (DEBUG_ICONS) {
                     Log.v(TAG, "Getting drawable 0x"
                             + Integer.toHexString(resId) + " from " + r
                             + ": " + dr);
+                }
+                return dr;
             } catch (NameNotFoundException e) {
                 Log.w("PackageManager", "Failure retrieving resources for "
                         + appInfo.packageName);
