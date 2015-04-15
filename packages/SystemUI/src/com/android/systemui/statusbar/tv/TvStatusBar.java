@@ -121,7 +121,7 @@ public class TvStatusBar extends BaseStatusBar {
     }
 
     @Override
-    public void escalateHeadsUp() {
+    public void maybeEscalateHeadsUp() {
     }
 
     @Override

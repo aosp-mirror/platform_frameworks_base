@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011 The Android Open Source Project
+ * Copyright (C) 2015 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,11 +35,16 @@ import com.android.systemui.statusbar.phone.PhoneStatusBar;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Stack;
 import java.util.TreeSet;
 
+/**
+ * A manager which handles heads up notifications which is a special mode where
+ * they simply peek from the top of the screen.
+ */
 public class HeadsUpManager implements ViewTreeObserver.OnComputeInternalInsetsListener {
     private static final String TAG = "HeadsUpManager";
     private static final boolean DEBUG = false;
@@ -48,7 +53,7 @@ public class HeadsUpManager implements ViewTreeObserver.OnComputeInternalInsetsL
     private final int mHeadsUpNotificationDecay;
     private final int mMinimumDisplayTime;
 
-    private final int mTouchSensitivityDelay;
+    private final int mTouchAcceptanceDelay;
     private final ArrayMap<String, Long> mSnoozedPackages;
     private final HashSet<OnHeadsUpChangedListener> mListeners = new HashSet<>();
     private final int mDefaultSnoozeLengthMs;
@@ -67,12 +72,11 @@ public class HeadsUpManager implements ViewTreeObserver.OnComputeInternalInsetsL
 
         @Override
         public boolean release(HeadsUpEntry instance) {
-            instance.removeAutoCancelCallbacks();
+            instance.reset();
             mPoolObjects.push(instance);
             return true;
         }
     };
-
 
     private PhoneStatusBar mBar;
     private int mSnoozeLengthMs;
@@ -86,13 +90,12 @@ public class HeadsUpManager implements ViewTreeObserver.OnComputeInternalInsetsL
     private boolean mTrackingHeadsUp;
     private HashSet<NotificationData.Entry> mEntriesToRemoveAfterExpand = new HashSet<>();
     private boolean mIsExpanded;
-    private boolean mHasPinnedHeadsUp;
+    private boolean mHasPinnedNotification;
     private int[] mTmpTwoArray = new int[2];
 
     public HeadsUpManager(final Context context, ViewTreeObserver observer) {
         Resources resources = context.getResources();
-        mTouchSensitivityDelay = resources.getInteger(R.integer.heads_up_sensitivity_delay);
-        if (DEBUG) Log.v(TAG, "create() " + mTouchSensitivityDelay);
+        mTouchAcceptanceDelay = resources.getInteger(R.integer.touch_acceptance_delay);
         mSnoozedPackages = new ArrayMap<>();
         mDefaultSnoozeLengthMs = resources.getInteger(R.integer.heads_up_default_snooze_length_ms);
         mSnoozeLengthMs = mDefaultSnoozeLengthMs;
@@ -116,7 +119,6 @@ public class HeadsUpManager implements ViewTreeObserver.OnComputeInternalInsetsL
         context.getContentResolver().registerContentObserver(
                 Settings.Global.getUriFor(SETTING_HEADS_UP_SNOOZE_LENGTH_MS), false,
                 mSettingsObserver);
-        if (DEBUG) Log.v(TAG, "mSnoozeLengthMs = " + mSnoozeLengthMs);
         observer.addOnComputeInternalInsetsListener(this);
     }
 
@@ -154,7 +156,7 @@ public class HeadsUpManager implements ViewTreeObserver.OnComputeInternalInsetsL
         if (alert) {
             HeadsUpEntry headsUpEntry = mHeadsUpEntries.get(headsUp.key);
             headsUpEntry.updateEntry();
-            setEntryToShade(headsUpEntry, mIsExpanded, false /* justAdded */, false);
+            setEntryPinned(headsUpEntry, !mIsExpanded /* isPinned */);
         }
     }
 
@@ -165,22 +167,23 @@ public class HeadsUpManager implements ViewTreeObserver.OnComputeInternalInsetsL
         headsUpEntry.setEntry(entry);
         mHeadsUpEntries.put(entry.key, headsUpEntry);
         entry.row.setHeadsUp(true);
-        setEntryToShade(headsUpEntry, mIsExpanded /* inShade */, true /* justAdded */, false);
+        setEntryPinned(headsUpEntry, !mIsExpanded /* isPinned */);
         for (OnHeadsUpChangedListener listener : mListeners) {
-            listener.OnHeadsUpStateChanged(entry, true);
+            listener.onHeadsUpStateChanged(entry, true);
         }
         entry.row.sendAccessibilityEvent(AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED);
     }
 
-    private void setEntryToShade(HeadsUpEntry headsUpEntry, boolean inShade, boolean justAdded,
-            boolean forceImmediate) {
+    private void setEntryPinned(HeadsUpEntry headsUpEntry, boolean isPinned) {
         ExpandableNotificationRow row = headsUpEntry.entry.row;
-        if (row.isInShade() != inShade || justAdded) {
-            row.setInShade(inShade);
-            if (!justAdded || !inShade) {
-                updatePinnedHeadsUpState(forceImmediate);
-                for (OnHeadsUpChangedListener listener : mListeners) {
-                    listener.OnHeadsUpPinnedChanged(row, !inShade);
+        if (row.isPinned() != isPinned) {
+            row.setPinned(isPinned);
+            updatePinnedMode();
+            for (OnHeadsUpChangedListener listener : mListeners) {
+                if (isPinned) {
+                    listener.onHeadsUpPinned(row);
+                } else {
+                    listener.onHeadsUpUnPinned(row);
                 }
             }
         }
@@ -189,24 +192,23 @@ public class HeadsUpManager implements ViewTreeObserver.OnComputeInternalInsetsL
     private void removeHeadsUpEntry(NotificationData.Entry entry) {
         HeadsUpEntry remove = mHeadsUpEntries.remove(entry.key);
         mSortedEntries.remove(remove);
-        mEntryPool.release(remove);
         entry.row.sendAccessibilityEvent(AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED);
         entry.row.setHeadsUp(false);
-        setEntryToShade(remove, true /* inShade */, false /* justAdded */,
-                false /* forceImmediate */);
+        setEntryPinned(remove, false /* isPinned */);
         for (OnHeadsUpChangedListener listener : mListeners) {
-            listener.OnHeadsUpStateChanged(entry, false);
+            listener.onHeadsUpStateChanged(entry, false);
         }
+        mEntryPool.release(remove);
     }
 
-    private void updatePinnedHeadsUpState(boolean forceImmediate) {
-        boolean hasPinnedHeadsUp = hasPinnedHeadsUpInternal();
-        if (hasPinnedHeadsUp == mHasPinnedHeadsUp) {
+    private void updatePinnedMode() {
+        boolean hasPinnedNotification = hasPinnedNotificationInternal();
+        if (hasPinnedNotification == mHasPinnedNotification) {
             return;
         }
-        mHasPinnedHeadsUp = hasPinnedHeadsUp;
-        for (OnHeadsUpChangedListener listener :mListeners) {
-            listener.OnPinnedHeadsUpExistChanged(hasPinnedHeadsUp, forceImmediate);
+        mHasPinnedNotification = hasPinnedNotification;
+        for (OnHeadsUpChangedListener listener : mListeners) {
+            listener.onPinnedModeChanged(hasPinnedNotification);
         }
     }
 
@@ -222,7 +224,7 @@ public class HeadsUpManager implements ViewTreeObserver.OnComputeInternalInsetsL
             releaseImmediately(key);
             return true;
         } else {
-            getHeadsUpEntry(key).hideAsSoonAsPossible();
+            getHeadsUpEntry(key).removeAsSoonAsPossible();
             return false;
         }
     }
@@ -245,14 +247,13 @@ public class HeadsUpManager implements ViewTreeObserver.OnComputeInternalInsetsL
         return mHeadsUpEntries.containsKey(key);
     }
 
-
     /**
      * Push any current Heads Up notification down into the shade.
      */
     public void releaseAllImmediately() {
         if (DEBUG) Log.v(TAG, "releaseAllImmediately");
-        HashSet<String> keys = new HashSet<>(mHeadsUpEntries.keySet());
-        for (String key: keys) {
+        ArrayList<String> keys = new ArrayList<>(mHeadsUpEntries.keySet());
+        for (String key : keys) {
             releaseImmediately(key);
         }
     }
@@ -280,7 +281,7 @@ public class HeadsUpManager implements ViewTreeObserver.OnComputeInternalInsetsL
     }
 
     public void snooze() {
-        for (String key: mHeadsUpEntries.keySet()) {
+        for (String key : mHeadsUpEntries.keySet()) {
             HeadsUpEntry entry = mHeadsUpEntries.get(key);
             String packageName = entry.entry.notification.getPackageName();
             mSnoozedPackages.put(snoozeKey(packageName, mUser),
@@ -310,8 +311,11 @@ public class HeadsUpManager implements ViewTreeObserver.OnComputeInternalInsetsL
     }
 
     /**
+     * Decides whether a click is invalid for a notification, i.e it has not been shown long enough
+     * that a user might have consciously clicked on it.
+     *
      * @param key the key of the touched notification
-     * @return whether the touch is valid and should not be discarded
+     * @return whether the touch is invalid and should be discarded
      */
     public boolean shouldSwallowClick(String key) {
         HeadsUpEntry entry = mHeadsUpEntries.get(key);
@@ -322,14 +326,14 @@ public class HeadsUpManager implements ViewTreeObserver.OnComputeInternalInsetsL
     }
 
     public void onComputeInternalInsets(ViewTreeObserver.InternalInsetsInfo info) {
-        if (!mIsExpanded && mHasPinnedHeadsUp) {
+        if (!mIsExpanded && mHasPinnedNotification) {
             int minX = Integer.MAX_VALUE;
             int maxX = 0;
             int minY = Integer.MAX_VALUE;
             int maxY = 0;
-            for (HeadsUpEntry entry: mSortedEntries) {
+            for (HeadsUpEntry entry : mSortedEntries) {
                 ExpandableNotificationRow row = entry.entry.row;
-                if (!row.isInShade()) {
+                if (row.isPinned()) {
                     row.getLocationOnScreen(mTmpTwoArray);
                     minX = Math.min(minX, mTmpTwoArray[0]);
                     minY = Math.min(minY, 0);
@@ -349,7 +353,7 @@ public class HeadsUpManager implements ViewTreeObserver.OnComputeInternalInsetsL
 
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         pw.println("HeadsUpManager state:");
-        pw.print("  mTouchSensitivityDelay="); pw.println(mTouchSensitivityDelay);
+        pw.print("  mTouchAcceptanceDelay="); pw.println(mTouchAcceptanceDelay);
         pw.print("  mSnoozeLengthMs="); pw.println(mSnoozeLengthMs);
         pw.print("  now="); pw.println(SystemClock.elapsedRealtime());
         pw.print("  mUser="); pw.println(mUser);
@@ -365,38 +369,32 @@ public class HeadsUpManager implements ViewTreeObserver.OnComputeInternalInsetsL
     }
 
     public boolean hasPinnedHeadsUp() {
-        return mHasPinnedHeadsUp;
+        return mHasPinnedNotification;
     }
 
-    private boolean hasPinnedHeadsUpInternal() {
-        for (String key: mHeadsUpEntries.keySet()) {
+    private boolean hasPinnedNotificationInternal() {
+        for (String key : mHeadsUpEntries.keySet()) {
             HeadsUpEntry entry = mHeadsUpEntries.get(key);
-            if (!entry.entry.row.isInShade()) {
+            if (entry.entry.row.isPinned()) {
                 return true;
             }
         }
         return false;
     }
 
-    public void addSwipedOutKey(String key) {
+    /**
+     * Notifies that a notification was swiped out and will be removed.
+     *
+     * @param key the notification key
+     */
+    public void addSwipedOutNotification(String key) {
         mSwipedOutKeys.add(key);
     }
 
-    public float getHighestPinnedHeadsUp() {
-        float max = 0;
-        for (HeadsUpEntry entry: mSortedEntries) {
-            if (!entry.entry.row.isInShade()) {
-                max = Math.max(max, entry.entry.row.getActualHeight());
-            }
-        }
-        return max;
-    }
-
-    public void releaseAllToShade() {
-        for (String key: mHeadsUpEntries.keySet()) {
+    public void unpinAll() {
+        for (String key : mHeadsUpEntries.keySet()) {
             HeadsUpEntry entry = mHeadsUpEntries.get(key);
-            setEntryToShade(entry, true /* toShade */, false /* justAdded */,
-                    true /* forceImmediate */);
+            setEntryPinned(entry, false /* isPinned */);
         }
     }
 
@@ -420,7 +418,7 @@ public class HeadsUpManager implements ViewTreeObserver.OnComputeInternalInsetsL
         if (isExpanded != mIsExpanded) {
             mIsExpanded = isExpanded;
             if (isExpanded) {
-                releaseAllToShade();
+                unpinAll();
             }
         }
     }
@@ -430,6 +428,12 @@ public class HeadsUpManager implements ViewTreeObserver.OnComputeInternalInsetsL
         return topEntry != null ? topEntry.entry.row.getHeadsUpHeight() : 0;
     }
 
+    /**
+     * Compare two entries and decide how they should be ranked.
+     *
+     * @return -1 if the first argument should be ranked higher than the second, 1 if the second
+     * one should be ranked higher and 0 if they are equal.
+     */
     public int compare(NotificationData.Entry a, NotificationData.Entry b) {
         HeadsUpEntry aEntry = getHeadsUpEntry(a.key);
         HeadsUpEntry bEntry = getHeadsUpEntry(b.key);
@@ -439,6 +443,11 @@ public class HeadsUpManager implements ViewTreeObserver.OnComputeInternalInsetsL
         return aEntry.compareTo(bEntry);
     }
 
+
+    /**
+     * This represents a notification and how long it is in a heads up mode. It also manages its
+     * lifecycle automatically when created.
+     */
     public class HeadsUpEntry implements Comparable<HeadsUpEntry> {
         public NotificationData.Entry entry;
         public long postTime;
@@ -449,7 +458,7 @@ public class HeadsUpManager implements ViewTreeObserver.OnComputeInternalInsetsL
             this.entry = entry;
 
             // The actual post time will be just after the heads-up really slided in
-            postTime = mClock.currentTimeMillis() + mTouchSensitivityDelay;
+            postTime = mClock.currentTimeMillis() + mTouchAcceptanceDelay;
             mRemoveHeadsUpRunnable = new Runnable() {
                 @Override
                 public void run() {
@@ -467,7 +476,7 @@ public class HeadsUpManager implements ViewTreeObserver.OnComputeInternalInsetsL
             long currentTime = mClock.currentTimeMillis();
             earliestRemovaltime = currentTime + mMinimumDisplayTime;
             postTime = Math.max(postTime, currentTime);
-            removeAutoCancelCallbacks();
+            removeAutoRemovalCallbacks();
             if (canEntryDecay()) {
                 long finishTime = postTime + mHeadsUpNotificationDecay;
                 long removeDelay = Math.max(finishTime - currentTime, mMinimumDisplayTime);
@@ -487,7 +496,7 @@ public class HeadsUpManager implements ViewTreeObserver.OnComputeInternalInsetsL
                             : -1;
         }
 
-        public void removeAutoCancelCallbacks() {
+        public void removeAutoRemovalCallbacks() {
             mHandler.removeCallbacks(mRemoveHeadsUpRunnable);
         }
 
@@ -495,10 +504,16 @@ public class HeadsUpManager implements ViewTreeObserver.OnComputeInternalInsetsL
             return earliestRemovaltime < mClock.currentTimeMillis();
         }
 
-        public void hideAsSoonAsPossible() {
-            removeAutoCancelCallbacks();
+        public void removeAsSoonAsPossible() {
+            removeAutoRemovalCallbacks();
             mHandler.postDelayed(mRemoveHeadsUpRunnable,
                     earliestRemovaltime - mClock.currentTimeMillis());
+        }
+
+        public void reset() {
+            removeAutoRemovalCallbacks();
+            entry = null;
+            mRemoveHeadsUpRunnable = null;
         }
     }
 
@@ -519,8 +534,29 @@ public class HeadsUpManager implements ViewTreeObserver.OnComputeInternalInsetsL
     }
 
     public interface OnHeadsUpChangedListener {
-        void OnPinnedHeadsUpExistChanged(boolean exist, boolean changeImmediatly);
-        void OnHeadsUpPinnedChanged(ExpandableNotificationRow headsUp, boolean isHeadsUp);
-        void OnHeadsUpStateChanged(NotificationData.Entry entry, boolean isHeadsUp);
+        /**
+         * The state whether there exist pinned heads-ups or not changed.
+         *
+         * @param inPinnedMode whether there are any pinned heads-ups
+         */
+        void onPinnedModeChanged(boolean inPinnedMode);
+
+        /**
+         * A notification was just pinned to the top.
+         */
+        void onHeadsUpPinned(ExpandableNotificationRow headsUp);
+
+        /**
+         * A notification was just unpinned from the top.
+         */
+        void onHeadsUpUnPinned(ExpandableNotificationRow headsUp);
+
+        /**
+         * A notification just became a heads up or turned back to its normal state.
+         *
+         * @param entry the entry of the changed notification
+         * @param isHeadsUp whether the notification is now a headsUp notification
+         */
+        void onHeadsUpStateChanged(NotificationData.Entry entry, boolean isHeadsUp);
     }
 }
