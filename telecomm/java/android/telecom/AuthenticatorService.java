@@ -19,7 +19,6 @@ import android.accounts.AbstractAccountAuthenticator;
 import android.accounts.Account;
 import android.accounts.AccountAuthenticatorResponse;
 import android.accounts.NetworkErrorException;
-import android.annotation.SystemApi;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
@@ -32,7 +31,6 @@ import android.os.IBinder;
  *
  * @hide
  */
-@SystemApi
 public class AuthenticatorService extends Service {
     private static Authenticator mAuthenticator;
 
