@@ -48,11 +48,12 @@ public final class TvTrackInfo implements Parcelable {
     private final int mVideoWidth;
     private final int mVideoHeight;
     private final float mVideoFrameRate;
+    private final float mVideoPixelAspectRatio;
     private final Bundle mExtra;
 
     private TvTrackInfo(int type, String id, String language, String description,
             int audioChannelCount, int audioSampleRate, int videoWidth, int videoHeight,
-            float videoFrameRate, Bundle extra) {
+            float videoFrameRate, float videoPixelAspectRatio, Bundle extra) {
         mType = type;
         mId = id;
         mLanguage = language;
@@ -62,6 +63,7 @@ public final class TvTrackInfo implements Parcelable {
         mVideoWidth = videoWidth;
         mVideoHeight = videoHeight;
         mVideoFrameRate = videoFrameRate;
+        mVideoPixelAspectRatio = videoPixelAspectRatio;
         mExtra = extra;
     }
 
@@ -75,6 +77,7 @@ public final class TvTrackInfo implements Parcelable {
         mVideoWidth = in.readInt();
         mVideoHeight = in.readInt();
         mVideoFrameRate = in.readFloat();
+        mVideoPixelAspectRatio = in.readFloat();
         mExtra = in.readBundle();
     }
 
@@ -162,6 +165,17 @@ public final class TvTrackInfo implements Parcelable {
     }
 
     /**
+     * Returns the pixel aspect ratio (the ratio of a pixel's width to its height) of the video.
+     * Valid only for {@link #TYPE_VIDEO} tracks.
+     */
+    public final float getVideoPixelAspectRatio() {
+        if (mType != TYPE_VIDEO) {
+            throw new IllegalStateException("Not a video track");
+        }
+        return mVideoPixelAspectRatio;
+    }
+
+    /**
      * Returns the extra information about the current track.
      */
     public final Bundle getExtra() {
@@ -190,6 +204,7 @@ public final class TvTrackInfo implements Parcelable {
         dest.writeInt(mVideoWidth);
         dest.writeInt(mVideoHeight);
         dest.writeFloat(mVideoFrameRate);
+        dest.writeFloat(mVideoPixelAspectRatio);
         dest.writeBundle(mExtra);
     }
 
@@ -219,6 +234,7 @@ public final class TvTrackInfo implements Parcelable {
         private int mVideoWidth;
         private int mVideoHeight;
         private float mVideoFrameRate;
+        private float mVideoPixelAspectRatio = 1.0f;
         private Bundle mExtra;
 
         /**
@@ -332,6 +348,26 @@ public final class TvTrackInfo implements Parcelable {
         }
 
         /**
+         * Sets the pixel aspect ratio (the ratio of a pixel's width to its height) of the video.
+         * Valid only for {@link #TYPE_VIDEO} tracks.
+         * <p>
+         * This is needed for applications to be able to scale the video properly for some video
+         * formats such as 720x576 4:3 and 720x576 16:9 where pixels are not square. By default,
+         * applications assume the value of 1.0 (square pixels), so it is not necessary to set the
+         * pixel aspect ratio for most video formats.
+         * </p>
+         *
+         * @param videoPixelAspectRatio The pixel aspect ratio of the video.
+         */
+        public final Builder setVideoPixelAspectRatio(float videoPixelAspectRatio) {
+            if (mType != TYPE_VIDEO) {
+                throw new IllegalStateException("Not a video track");
+            }
+            mVideoPixelAspectRatio = videoPixelAspectRatio;
+            return this;
+        }
+
+        /**
          * Sets the extra information about the current track.
          *
          * @param extra The extra information.
@@ -348,7 +384,8 @@ public final class TvTrackInfo implements Parcelable {
          */
         public TvTrackInfo build() {
             return new TvTrackInfo(mType, mId, mLanguage, mDescription, mAudioChannelCount,
-                    mAudioSampleRate, mVideoWidth, mVideoHeight, mVideoFrameRate, mExtra);
+                    mAudioSampleRate, mVideoWidth, mVideoHeight, mVideoFrameRate,
+                    mVideoPixelAspectRatio, mExtra);
         }
     }
 }
