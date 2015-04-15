@@ -56,7 +56,6 @@
     <string name="keyguard_accessibility_next_alarm" msgid="7269583073750518672">"Nakatakda ang susunod na alarm para sa <xliff:g id="ALARM">%1$s</xliff:g>"</string>
     <string name="keyboardview_keycode_delete" msgid="3337914833206635744">"Tanggalin"</string>
     <string name="keyboardview_keycode_enter" msgid="2985864015076059467">"Enter"</string>
-    <string name="kg_emergency_call_label" msgid="635955021540347194">"Emergency"</string>
     <string name="kg_forgot_pattern_button_text" msgid="8852021467868220608">"Nakalimutan ang Pattern"</string>
     <string name="kg_wrong_pattern" msgid="1850806070801358830">"Maling Pattern"</string>
     <string name="kg_wrong_password" msgid="2333281762128113157">"Maling Password"</string>
