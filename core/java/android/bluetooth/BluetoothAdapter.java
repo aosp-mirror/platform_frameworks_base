@@ -121,9 +121,6 @@ public final class BluetoothAdapter {
      * {@link #STATE_TURNING_ON},
      * {@link #STATE_ON},
      * {@link #STATE_TURNING_OFF},
-     * {@link #STATE_BLE_TURNING_ON},
-     * {@link #STATE_BLE_ON},
-     * {@link #STATE_BLE_TURNING_OFF},
      */
     public static final String EXTRA_STATE =
             "android.bluetooth.adapter.extra.STATE";
@@ -134,9 +131,6 @@ public final class BluetoothAdapter {
      * {@link #STATE_TURNING_ON},
      * {@link #STATE_ON},
      * {@link #STATE_TURNING_OFF},
-     * {@link #STATE_BLE_TURNING_ON},
-     * {@link #STATE_BLE_ON},
-     * {@link #STATE_BLE_TURNING_OFF},
      */
     public static final String EXTRA_PREVIOUS_STATE =
             "android.bluetooth.adapter.extra.PREVIOUS_STATE";
