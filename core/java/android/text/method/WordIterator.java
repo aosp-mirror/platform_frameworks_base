@@ -95,6 +95,45 @@ public class WordIterator implements Selection.PositionIterator {
         } while (true);
     }
 
+    /** {@inheritDoc} */
+    public boolean isBoundary(int offset) {
+        int shiftedOffset = offset - mOffsetShift;
+        checkOffsetIsValid(shiftedOffset);
+        return mIterator.isBoundary(shiftedOffset);
+    }
+
+    /**
+     * Returns the position of next boundary after the given offset. Returns
+     * {@code DONE} if there is no boundary after the given offset.
+     *
+     * @param offset the given start position to search from.
+     * @return the position of the last boundary preceding the given offset.
+     */
+    public int nextBoundary(int offset) {
+        int shiftedOffset = offset - mOffsetShift;
+        shiftedOffset = mIterator.following(shiftedOffset);
+        if (shiftedOffset == BreakIterator.DONE) {
+            return BreakIterator.DONE;
+        }
+        return shiftedOffset + mOffsetShift;
+    }
+
+    /**
+     * Returns the position of boundary preceding the given offset or
+     * {@code DONE} if the given offset specifies the starting position.
+     *
+     * @param offset the given start position to search from.
+     * @return the position of the last boundary preceding the given offset.
+     */
+    public int prevBoundary(int offset) {
+        int shiftedOffset = offset - mOffsetShift;
+        shiftedOffset = mIterator.preceding(shiftedOffset);
+        if (shiftedOffset == BreakIterator.DONE) {
+            return BreakIterator.DONE;
+        }
+        return shiftedOffset + mOffsetShift;
+    }
+
     /** If <code>offset</code> is within a word, returns the index of the first character of that
      * word, otherwise returns BreakIterator.DONE.
      *
