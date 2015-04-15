@@ -3943,7 +3943,7 @@
     <string name="toolbar_collapse_description">Collapse</string>
 
     <!-- Zen mode - feature name. [CHAR LIMIT=40] -->
-    <string name="zen_mode_feature_name">Block interruptions</string>
+    <string name="zen_mode_feature_name">Do not disturb</string>
 
     <!-- Zen mode - downtime legacy feature name. [CHAR LIMIT=40] -->
     <string name="zen_mode_downtime_feature_name">Downtime</string>
