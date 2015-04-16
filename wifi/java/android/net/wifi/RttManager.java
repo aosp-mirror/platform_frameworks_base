@@ -808,7 +808,7 @@ public class RttManager {
         if (mRttCapabilities == null) {
             if(getRttCapabilities() == null) {
                 Log.e(TAG, "Can not get RTT capabilities");
-                //throw new IllegalStateException("RTT chip is not working");
+                throw new IllegalStateException("RTT chip is not working");
             }
         }
 
@@ -865,6 +865,15 @@ public class RttManager {
 
         return true;
     }
+
+    /**
+     * Request to start an RTT ranging
+     *
+     * @param params  -- RTT request Parameters
+     * @param listener -- Call back to inform RTT result
+     * @exception throw IllegalArgumentException when params are illegal
+     *            throw IllegalStateException when RttCapabilities do not exist
+     */
 
     public void startRanging(RttParams[] params, RttListener listener) {
         int index  = 0;
