@@ -18173,7 +18173,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             // flag not set, setMeasuredDimension() was not invoked, we raise
             // an exception to warn the developer
             if ((mPrivateFlags & PFLAG_MEASURED_DIMENSION_SET) != PFLAG_MEASURED_DIMENSION_SET) {
-                throw new IllegalStateException("onMeasure() did not set the"
+                throw new IllegalStateException("View with id " + getId() + ": "
+                        + getClass().getName() + "#onMeasure() did not set the"
                         + " measured dimension by calling"
                         + " setMeasuredDimension()");
             }
