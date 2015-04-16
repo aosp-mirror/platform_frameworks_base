@@ -18,8 +18,6 @@ package com.android.server.am;
 
 import android.bluetooth.BluetoothActivityEnergyInfo;
 import android.bluetooth.BluetoothAdapter;
-import android.bluetooth.BluetoothHeadset;
-import android.bluetooth.BluetoothProfile;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
@@ -40,7 +38,6 @@ import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.os.WorkSource;
-import android.telephony.DataConnectionRealTimeInfo;
 import android.telephony.SignalStrength;
 import android.telephony.TelephonyManager;
 import android.util.Slog;
@@ -71,8 +68,6 @@ public final class BatteryStatsService extends IBatteryStats.Stub
     final BatteryStatsImpl mStats;
     final BatteryStatsHandler mHandler;
     Context mContext;
-    private boolean mBluetoothPendingStats;
-    private BluetoothHeadset mBluetoothHeadset;
     PowerManagerInternal mPowerManagerInternal;
 
     class BatteryStatsHandler extends Handler implements BatteryStatsImpl.ExternalStatsSync {
@@ -615,56 +610,6 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         enforceCallingPermission();
         synchronized (mStats) {
             mStats.noteWifiRssiChangedLocked(newRssi);
-        }
-    }
-
-    public void noteBluetoothOn() {
-        enforceCallingPermission();
-        BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
-        if (adapter != null) {
-            adapter.getProfileProxy(mContext, mBluetoothProfileServiceListener,
-                                    BluetoothProfile.HEADSET);
-        }
-        synchronized (mStats) {
-            if (mBluetoothHeadset != null) {
-                mStats.noteBluetoothOnLocked();
-                mStats.setBtHeadset(mBluetoothHeadset);
-            } else {
-                mBluetoothPendingStats = true;
-            }
-        }
-    }
-
-    private BluetoothProfile.ServiceListener mBluetoothProfileServiceListener =
-        new BluetoothProfile.ServiceListener() {
-        public void onServiceConnected(int profile, BluetoothProfile proxy) {
-            mBluetoothHeadset = (BluetoothHeadset) proxy;
-            synchronized (mStats) {
-                if (mBluetoothPendingStats) {
-                    mStats.noteBluetoothOnLocked();
-                    mStats.setBtHeadset(mBluetoothHeadset);
-                    mBluetoothPendingStats = false;
-                }
-            }
-        }
-
-        public void onServiceDisconnected(int profile) {
-            mBluetoothHeadset = null;
-        }
-    };
-
-    public void noteBluetoothOff() {
-        enforceCallingPermission();
-        synchronized (mStats) {
-            mBluetoothPendingStats = false;
-            mStats.noteBluetoothOffLocked();
-        }
-    }
-    
-    public void noteBluetoothState(int bluetoothState) {
-        enforceCallingPermission();
-        synchronized (mStats) {
-            mStats.noteBluetoothStateLocked(bluetoothState);
         }
     }
 

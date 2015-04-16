@@ -63,7 +63,7 @@ public class WifiPowerEstimator extends PowerCalculator {
         mTotalAppWifiRunningTimeMs += app.wifiRunningTimeMs;
         final double wifiLockPower = (app.wifiRunningTimeMs * mWifiPowerOn) / (1000*60*60);
 
-        final long wifiScanTimeMs = u.getWifiScanTime(rawRealtimeUs, statsType);
+        final long wifiScanTimeMs = u.getWifiScanTime(rawRealtimeUs, statsType) / 1000;
         final double wifiScanPower = (wifiScanTimeMs * mWifiPowerScan) / (1000*60*60);
 
         double wifiBatchScanPower = 0;

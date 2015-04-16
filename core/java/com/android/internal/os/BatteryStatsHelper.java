@@ -136,6 +136,14 @@ public final class BatteryStatsHelper {
                 profile.getAveragePower(PowerProfile.POWER_WIFI_CONTROLLER_TX) != 0;
     }
 
+    public static boolean checkHasBluetoothPowerReporting(BatteryStats stats,
+                                                          PowerProfile profile) {
+        return stats.hasBluetoothActivityReporting() &&
+                profile.getAveragePower(PowerProfile.POWER_BLUETOOTH_CONTROLLER_IDLE) != 0 &&
+                profile.getAveragePower(PowerProfile.POWER_BLUETOOTH_CONTROLLER_RX) != 0 &&
+                profile.getAveragePower(PowerProfile.POWER_BLUETOOTH_CONTROLLER_TX) != 0;
+    }
+
     public BatteryStatsHelper(Context context) {
         this(context, true);
     }
@@ -256,7 +264,8 @@ public final class BatteryStatsHelper {
     }
 
     public static String makemAh(double power) {
-        if (power < .00001) return String.format("%.8f", power);
+        if (power == 0) return "0";
+        else if (power < .00001) return String.format("%.8f", power);
         else if (power < .0001) return String.format("%.7f", power);
         else if (power < .001) return String.format("%.6f", power);
         else if (power < .01) return String.format("%.5f", power);
@@ -342,7 +351,11 @@ public final class BatteryStatsHelper {
         mWifiPowerCalculator.reset();
 
         if (mBluetoothPowerCalculator == null) {
-            mBluetoothPowerCalculator = new BluetoothPowerCalculator();
+            if (checkHasBluetoothPowerReporting(mStats, mPowerProfile)) {
+                mBluetoothPowerCalculator = new BluetoothPowerCalculator();
+            } else {
+                mBluetoothPowerCalculator = new BluetoothPowerCalculator();
+            }
         }
         mBluetoothPowerCalculator.reset();
 
