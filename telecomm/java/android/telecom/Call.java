@@ -234,7 +234,6 @@ public final class Call {
         private final int mVideoState;
         private final StatusHints mStatusHints;
         private final Bundle mExtras;
-        private final int mCallSubstate;
 
         /**
          * Whether the supplied capabilities  supports the specified capability.
@@ -431,14 +430,6 @@ public final class Call {
             return mExtras;
         }
 
-        /**
-         * @return The substate of the {@code Call}.
-         * @hide
-         */
-        public int getCallSubstate() {
-            return mCallSubstate;
-        }
-
         @Override
         public boolean equals(Object o) {
             if (o instanceof Details) {
@@ -457,8 +448,7 @@ public final class Call {
                         Objects.equals(mGatewayInfo, d.mGatewayInfo) &&
                         Objects.equals(mVideoState, d.mVideoState) &&
                         Objects.equals(mStatusHints, d.mStatusHints) &&
-                        Objects.equals(mExtras, d.mExtras) &&
-                        Objects.equals(mCallSubstate, d.mCallSubstate);
+                        Objects.equals(mExtras, d.mExtras);
             }
             return false;
         }
@@ -478,8 +468,7 @@ public final class Call {
                     Objects.hashCode(mGatewayInfo) +
                     Objects.hashCode(mVideoState) +
                     Objects.hashCode(mStatusHints) +
-                    Objects.hashCode(mExtras) +
-                    Objects.hashCode(mCallSubstate);
+                    Objects.hashCode(mExtras);
         }
 
         /** {@hide} */
@@ -496,8 +485,7 @@ public final class Call {
                 GatewayInfo gatewayInfo,
                 int videoState,
                 StatusHints statusHints,
-                Bundle extras,
-                int callSubstate) {
+                Bundle extras) {
             mHandle = handle;
             mHandlePresentation = handlePresentation;
             mCallerDisplayName = callerDisplayName;
@@ -511,7 +499,6 @@ public final class Call {
             mVideoState = videoState;
             mStatusHints = statusHints;
             mExtras = extras;
-            mCallSubstate = callSubstate;
         }
     }
 
@@ -925,8 +912,7 @@ public final class Call {
                 parcelableCall.getGatewayInfo(),
                 parcelableCall.getVideoState(),
                 parcelableCall.getStatusHints(),
-                parcelableCall.getExtras(),
-                parcelableCall.getCallSubstate());
+                parcelableCall.getExtras());
         boolean detailsChanged = !Objects.equals(mDetails, details);
         if (detailsChanged) {
             mDetails = details;

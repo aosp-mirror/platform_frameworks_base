@@ -81,6 +81,4 @@ oneway interface IConnectionServiceAdapter {
     void setConferenceableConnections(String callId, in List<String> conferenceableCallIds);
 
     void addExistingConnection(String callId, in ParcelableConnection connection);
-
-    void setCallSubstate(String callId, int callSubstate);
 }

@@ -556,13 +556,6 @@ public abstract class ConnectionService extends Service {
                 mAdapter.setIsConferenced(id, conferenceId);
             }
         }
-
-        @Override
-        public void onCallSubstateChanged(Connection c, int callSubstate) {
-            String id = mIdByConnection.get(c);
-            Log.d(this, "Adapter set call substate %d", callSubstate);
-            mAdapter.setCallSubstate(id, callSubstate);
-        }
     };
 
     /** {@inheritDoc} */
@@ -632,8 +625,7 @@ public abstract class ConnectionService extends Service {
                         connection.getAudioModeIsVoip(),
                         connection.getStatusHints(),
                         connection.getDisconnectCause(),
-                        createIdList(connection.getConferenceables()),
-                        connection.getCallSubstate()));
+                        createIdList(connection.getConferenceables())));
     }
 
     private void abort(String callId) {
@@ -956,7 +948,7 @@ public abstract class ConnectionService extends Service {
                     connection.getAudioModeIsVoip(),
                     connection.getStatusHints(),
                     connection.getDisconnectCause(),
-                    emptyList, connection.getCallSubstate());
+                    emptyList);
             mAdapter.addExistingConnection(id, parcelableConnection);
         }
     }
