@@ -43,6 +43,7 @@ import android.graphics.drawable.shapes.Shape;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.AttributeSet;
+import android.util.MathUtils;
 import android.util.Pools.SynchronizedPool;
 import android.view.Gravity;
 import android.view.RemotableViewMethod;
@@ -1341,23 +1342,22 @@ public class ProgressBar extends View {
     }
 
     @android.view.RemotableViewMethod
-    synchronized void setProgress(int progress, boolean fromUser) {
+    synchronized boolean setProgress(int progress, boolean fromUser) {
         if (mIndeterminate) {
-            return;
+            // Not applicable.
+            return false;
         }
 
-        if (progress < 0) {
-            progress = 0;
+        progress = MathUtils.constrain(progress, 0, mMax);
+
+        if (progress == mProgress) {
+            // No change from current.
+            return false;
         }
 
-        if (progress > mMax) {
-            progress = mMax;
-        }
-
-        if (progress != mProgress) {
-            mProgress = progress;
-            refreshProgress(R.id.progress, mProgress, fromUser);
-        }
+        mProgress = progress;
+        refreshProgress(R.id.progress, mProgress, fromUser);
+        return true;
     }
 
     /**

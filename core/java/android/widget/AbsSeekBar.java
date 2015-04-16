@@ -703,9 +703,9 @@ public abstract class AbsSeekBar extends ProgressBar {
                     // fallthrough
                 case KeyEvent.KEYCODE_DPAD_RIGHT:
                     increment = isLayoutRtl() ? -increment : increment;
-                    int progress = getProgress() + increment;
-                    if (progress > 0 && progress < getMax()) {
-                        setProgress(progress, true);
+
+                    // Let progress bar handle clamping values.
+                    if (setProgress(getProgress() + increment, true)) {
                         onKeyChange();
                         return true;
                     }
@@ -729,10 +729,10 @@ public abstract class AbsSeekBar extends ProgressBar {
         if (isEnabled()) {
             final int progress = getProgress();
             if (progress > 0) {
-                info.addAction(AccessibilityNodeInfo.ACTION_SCROLL_BACKWARD);
+                info.addAction(AccessibilityNodeInfo.AccessibilityAction.ACTION_SCROLL_BACKWARD);
             }
             if (progress < getMax()) {
-                info.addAction(AccessibilityNodeInfo.ACTION_SCROLL_FORWARD);
+                info.addAction(AccessibilityNodeInfo.AccessibilityAction.ACTION_SCROLL_FORWARD);
             }
         }
     }
@@ -743,29 +743,26 @@ public abstract class AbsSeekBar extends ProgressBar {
         if (super.performAccessibilityActionInternal(action, arguments)) {
             return true;
         }
+
         if (!isEnabled()) {
             return false;
         }
-        final int progress = getProgress();
-        final int increment = Math.max(1, Math.round((float) getMax() / 5));
-        switch (action) {
-            case AccessibilityNodeInfo.ACTION_SCROLL_BACKWARD: {
-                if (progress <= 0) {
-                    return false;
-                }
-                setProgress(progress - increment, true);
+
+        if (action == AccessibilityNodeInfo.ACTION_SCROLL_FORWARD
+                || action == AccessibilityNodeInfo.ACTION_SCROLL_BACKWARD) {
+            int increment = Math.max(1, Math.round((float) getMax() / 5));
+            if (action == AccessibilityNodeInfo.ACTION_SCROLL_BACKWARD) {
+                increment = -increment;
+            }
+
+            // Let progress bar handle clamping values.
+            if (setProgress(getProgress() + increment, true)) {
                 onKeyChange();
                 return true;
             }
-            case AccessibilityNodeInfo.ACTION_SCROLL_FORWARD: {
-                if (progress >= getMax()) {
-                    return false;
-                }
-                setProgress(progress + increment, true);
-                onKeyChange();
-                return true;
-            }
+            return false;
         }
+
         return false;
     }
 
