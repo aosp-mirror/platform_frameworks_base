@@ -780,6 +780,12 @@ public final class HdmiControlService extends SystemService {
         return false;
     }
 
+    @ServiceThreadOnly
+    boolean isConnected(int portId) {
+        assertRunOnServiceThread();
+        return mCecController.isConnected(portId);
+    }
+
     void runOnServiceThread(Runnable runnable) {
         mHandler.post(runnable);
     }

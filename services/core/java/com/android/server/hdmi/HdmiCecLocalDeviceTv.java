@@ -913,6 +913,12 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
         }
     }
 
+    @ServiceThreadOnly
+    boolean isConnected(int portId) {
+        assertRunOnServiceThread();
+        return mService.isConnected(portId);
+    }
+
     private void notifyArcStatusToAudioService(boolean enabled) {
         // Note that we don't set any name to ARC.
         mService.getAudioManager().setWiredDeviceConnectionState(
