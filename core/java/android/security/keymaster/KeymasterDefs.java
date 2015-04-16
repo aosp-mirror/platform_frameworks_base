@@ -118,9 +118,9 @@ public final class KeymasterDefs {
     public static final int KM_DIGEST_SHA_2_512 = 6;
 
     // Key origins.
-    public static final int KM_ORIGIN_HARDWARE = 0;
-    public static final int KM_ORIGIN_SOFTWARE = 1;
+    public static final int KM_ORIGIN_GENERATED = 0;
     public static final int KM_ORIGIN_IMPORTED = 2;
+    public static final int KM_ORIGIN_UNKNOWN = 3;
 
     // Key usability requirements.
     public static final int KM_BLOB_STANDALONE = 0;
