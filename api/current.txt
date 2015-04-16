@@ -20,6 +20,7 @@ package android {
     field public static final java.lang.String BATTERY_STATS = "android.permission.BATTERY_STATS";
     field public static final java.lang.String BIND_ACCESSIBILITY_SERVICE = "android.permission.BIND_ACCESSIBILITY_SERVICE";
     field public static final java.lang.String BIND_APPWIDGET = "android.permission.BIND_APPWIDGET";
+    field public static final java.lang.String BIND_CARRIER_CONFIG_SERVICE = "android.permission.BIND_CARRIER_CONFIG_SERVICE";
     field public static final java.lang.String BIND_CARRIER_MESSAGING_SERVICE = "android.permission.BIND_CARRIER_MESSAGING_SERVICE";
     field public static final java.lang.String BIND_CHOOSER_TARGET_SERVICE = "android.permission.BIND_CHOOSER_TARGET_SERVICE";
     field public static final java.lang.String BIND_DEVICE_ADMIN = "android.permission.BIND_DEVICE_ADMIN";
@@ -7741,6 +7742,7 @@ package android.content {
     field public static final java.lang.String BLUETOOTH_SERVICE = "bluetooth";
     field public static final java.lang.String CAMERA_SERVICE = "camera";
     field public static final java.lang.String CAPTIONING_SERVICE = "captioning";
+    field public static final java.lang.String CARRIER_CONFIG_SERVICE = "carrier_config";
     field public static final java.lang.String CLIPBOARD_SERVICE = "clipboard";
     field public static final java.lang.String CONNECTIVITY_SERVICE = "connectivity";
     field public static final java.lang.String CONSUMER_IR_SERVICE = "consumer_ir";
@@ -28509,6 +28511,26 @@ package android.security {
 
 package android.service.carrier {
 
+  public abstract class CarrierConfigService extends android.app.Service {
+    ctor public CarrierConfigService();
+    method public final android.os.IBinder onBind(android.content.Intent);
+    method public abstract android.os.Bundle onLoadConfig(android.service.carrier.CarrierIdentifier);
+    field public static final java.lang.String SERVICE_INTERFACE = "android.service.carrier.CarrierConfigService";
+  }
+
+  public class CarrierIdentifier implements android.os.Parcelable {
+    ctor public CarrierIdentifier(java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String);
+    method public int describeContents();
+    method public java.lang.String getGid1();
+    method public java.lang.String getGid2();
+    method public java.lang.String getImsi();
+    method public java.lang.String getMcc();
+    method public java.lang.String getMnc();
+    method public java.lang.String getSpn();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator<android.service.carrier.CarrierIdentifier> CREATOR;
+  }
+
   public abstract class CarrierMessagingService extends android.app.Service {
     ctor public CarrierMessagingService();
     method public android.os.IBinder onBind(android.content.Intent);
@@ -30480,6 +30502,18 @@ package android.telecom {
 }
 
 package android.telephony {
+
+  public class CarrierConfigManager {
+    method public android.os.Bundle getConfig();
+    method public android.os.Bundle getConfigForSubId(int);
+    method public void reloadCarrierConfigForSubId(int);
+    field public static final java.lang.String ACTION_CARRIER_CONFIG_CHANGED = "android.telephony.action.CARRIER_CONFIG_CHANGED";
+    field public static final java.lang.String BOOL_CARRIER_VOLTE_AVAILABLE = "bool_carrier_volte_available";
+    field public static final java.lang.String BOOL_CARRIER_VOLTE_PROVISIONED = "bool_carrier_volte_provisioned";
+    field public static final java.lang.String BOOL_CARRIER_VOLTE_TTY_SUPPORTED = "bool_carrier_volte_tty_supported";
+    field public static final java.lang.String BOOL_SHOW_APN_SETTING_CDMA = "bool_show_apn_setting_cdma";
+    field public static final java.lang.String INT_VOLTE_REPLACEMENT_RAT = "int_volte_replacement_rat";
+  }
 
   public final class CellIdentityCdma implements android.os.Parcelable {
     method public int describeContents();

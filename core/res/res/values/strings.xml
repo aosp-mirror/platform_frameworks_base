@@ -1323,6 +1323,108 @@
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_use_sip">Allows the app to make and receive SIP calls.</string>
 
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permlab_register_sim_subscription">register new telecom SIM connections</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_register_sim_subscription">Allows the app to register new telecom SIM connections.</string>
+
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permlab_register_call_provider">register new telecom connections</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_register_call_provider">Allows the app to register new telecom connections.</string>
+
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permlab_connection_manager">manage telecom connections</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_connection_manager">Allows the app to manage telecom connections.</string>
+
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permlab_bind_incall_service">interact with in-call screen</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_bind_incall_service">Allows the app to control when and how the user sees the in-call screen.</string>
+
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permlab_bind_connection_service">interact with telephony services</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_bind_connection_service">Allows the app to interact with telephony services to make/receive calls.</string>
+
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permlab_control_incall_experience">provide an in-call user experience</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_control_incall_experience">Allows the app to provide an in-call user experience.</string>
+
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permlab_readNetworkUsageHistory">read historical network usage</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_readNetworkUsageHistory">Allows the app to read historical network usage for specific networks and apps.</string>
+
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permlab_manageNetworkPolicy">manage network policy</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_manageNetworkPolicy">Allows the app to manage network policies and define app-specific rules.</string>
+
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permlab_modifyNetworkAccounting">modify network usage accounting</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_modifyNetworkAccounting">Allows the app to modify how network usage is accounted against apps. Not for use by normal apps.</string>
+
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permlab_accessNotifications">access notifications</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_accessNotifications">Allows the app to retrieve, examine, and clear notifications, including those posted by other apps.</string>
+
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permlab_bindNotificationListenerService">bind to a notification listener service</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_bindNotificationListenerService">Allows the holder to bind to the top-level interface of a notification listener service. Should never be needed for normal apps.</string>
+
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permlab_bindConditionProviderService">bind to a condition provider service</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_bindConditionProviderService">Allows the holder to bind to the top-level interface of a condition provider service. Should never be needed for normal apps.</string>
+
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permlab_bindDreamService">bind to a dream service</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_bindDreamService">Allows the holder to bind to the top-level interface of a dream service. Should never be needed for normal apps.</string>
+
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permlab_invokeCarrierSetup">invoke the carrier-provided configuration app</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_invokeCarrierSetup">Allows the holder to invoke the carrier-provided configuration app. Should never be needed for normal apps.</string>
+
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permlab_accessNetworkConditions">listen for observations on network conditions</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_accessNetworkConditions">Allows an application to listen for observations on network conditions. Should never be needed for normal apps.</string>
+
+    <string name="permlab_setInputCalibration">change input device calibration</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_setInputCalibration">Allows the app to modify the calibration parameters of the touch screen. Should never be needed for normal apps.</string>
+
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permlab_accessDrmCertificates">access DRM certificates</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_accessDrmCertificates">Allows an application to provision and use DRM certficates. Should never be needed for normal apps.</string>
+
+    <string name="permlab_handoverStatus">Receive Android Beam transfer status</string>
+    <string name="permdesc_handoverStatus">Allows this application to receive information about current Android Beam transfers</string>
+
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permlab_removeDrmCertificates">remove DRM certificates</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_removeDrmCertificates">Allows an application to remove DRM certficates. Should never be needed for normal apps.</string>
+
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permlab_bindCarrierMessagingService">bind to a carrier messaging service</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_bindCarrierMessagingService">Allows the holder to bind to the top-level interface of a carrier messaging service. Should never be needed for normal apps.</string>
+
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permlab_bindCarrierConfigService">bind to a carrier config service</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_bindCarrierConfigService">Allows the holder to bind to a carrier config service. Should never be needed for normal apps.</string>
+
     <!-- Policy administration -->
 
     <!-- Title of policy access to limiting the user's password choices -->

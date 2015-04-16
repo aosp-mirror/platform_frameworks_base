@@ -209,6 +209,7 @@ LOCAL_SRC_FILES += \
 	core/java/android/os/IUserManager.aidl \
 	core/java/android/os/IVibratorService.aidl \
 	core/java/android/security/IKeystoreService.aidl \
+	core/java/android/service/carrier/ICarrierConfigService.aidl \
 	core/java/android/service/carrier/ICarrierMessagingCallback.aidl \
 	core/java/android/service/carrier/ICarrierMessagingService.aidl \
 	core/java/android/service/gatekeeper/IGateKeeperService.aidl \
@@ -390,15 +391,16 @@ LOCAL_SRC_FILES += \
 	telephony/java/com/android/ims/internal/IImsVideoCallCallback.aidl \
 	telephony/java/com/android/ims/internal/IImsVideoCallProvider.aidl \
 	telephony/java/com/android/ims/ImsConfigListener.aidl \
+	telephony/java/com/android/internal/telephony/ICarrierConfigLoader.aidl \
+	telephony/java/com/android/internal/telephony/IMms.aidl \
+	telephony/java/com/android/internal/telephony/IOnSubscriptionsChangedListener.aidl \
 	telephony/java/com/android/internal/telephony/IPhoneStateListener.aidl \
 	telephony/java/com/android/internal/telephony/IPhoneSubInfo.aidl \
+	telephony/java/com/android/internal/telephony/ISms.aidl \
+	telephony/java/com/android/internal/telephony/ISub.aidl \
 	telephony/java/com/android/internal/telephony/ITelephony.aidl \
 	telephony/java/com/android/internal/telephony/ITelephonyRegistry.aidl \
-	telephony/java/com/android/internal/telephony/IOnSubscriptionsChangedListener.aidl \
-	telephony/java/com/android/internal/telephony/ISms.aidl \
 	telephony/java/com/android/internal/telephony/IWapPushManager.aidl \
-	telephony/java/com/android/internal/telephony/ISub.aidl \
-	telephony/java/com/android/internal/telephony/IMms.aidl \
 	wifi/java/android/net/wifi/IWifiManager.aidl \
 	wifi/java/android/net/wifi/passpoint/IWifiPasspointManager.aidl \
 	wifi/java/android/net/wifi/p2p/IWifiP2pManager.aidl \
@@ -549,6 +551,7 @@ aidl_files := \
 	frameworks/base/core/java/android/view/textservice/SpellCheckerInfo.aidl \
 	frameworks/base/core/java/android/view/textservice/SentenceSuggestionsInfo.aidl \
 	frameworks/base/core/java/android/view/textservice/SuggestionsInfo.aidl \
+	frameworks/base/core/java/android/service/carrier/CarrierIdentifier.aidl \
 	frameworks/base/core/java/android/service/carrier/MessagePdu.aidl \
 	frameworks/base/core/java/android/service/notification/StatusBarNotification.aidl \
 	frameworks/base/core/java/android/service/chooser/ChooserTarget.aidl \

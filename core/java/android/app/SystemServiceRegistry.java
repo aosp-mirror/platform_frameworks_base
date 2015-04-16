@@ -105,6 +105,7 @@ import android.hardware.fingerprint.IFingerprintService;
 import android.service.persistentdata.IPersistentDataBlockService;
 import android.service.persistentdata.PersistentDataBlockManager;
 import android.telecom.TelecomManager;
+import android.telephony.CarrierConfigManager;
 import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
 import android.util.Log;
@@ -418,6 +419,13 @@ final class SystemServiceRegistry {
             @Override
             public SubscriptionManager createService(ContextImpl ctx) {
                 return new SubscriptionManager(ctx.getOuterContext());
+            }});
+
+        registerService(Context.CARRIER_CONFIG_SERVICE, CarrierConfigManager.class,
+                new CachedServiceFetcher<CarrierConfigManager>() {
+            @Override
+            public CarrierConfigManager createService(ContextImpl ctx) {
+                return new CarrierConfigManager();
             }});
 
         registerService(Context.TELECOM_SERVICE, TelecomManager.class,
