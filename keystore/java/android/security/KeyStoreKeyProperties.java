@@ -217,7 +217,7 @@ public abstract class KeyStoreKeyProperties {
     }
 
     @Retention(RetentionPolicy.SOURCE)
-    @IntDef({Origin.GENERATED, Origin.IMPORTED})
+    @IntDef({Origin.GENERATED, Origin.IMPORTED, Origin.UNKNOWN})
     public @interface OriginEnum {}
 
     /**
@@ -235,8 +235,6 @@ public abstract class KeyStoreKeyProperties {
         /**
          * Origin of the key is unknown. This can occur only for keys backed by an old TEE
          * implementation which does not record origin information.
-         *
-         * @hide
          */
         public static final int UNKNOWN = 1 << 2;
 

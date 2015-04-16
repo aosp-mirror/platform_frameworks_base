@@ -28469,6 +28469,7 @@ package android.security {
   public static abstract class KeyStoreKeyProperties.Origin {
     field public static final int GENERATED = 1; // 0x1
     field public static final int IMPORTED = 2; // 0x2
+    field public static final int UNKNOWN = 4; // 0x4
   }
 
   public static abstract class KeyStoreKeyProperties.OriginEnum implements java.lang.annotation.Annotation {
