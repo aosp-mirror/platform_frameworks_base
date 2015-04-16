@@ -1064,7 +1064,7 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
 
     private void findStatusBar(RenderResources resources, DisplayMetrics metrics) {
         boolean windowFullscreen = getBooleanThemeValue(resources,
-                "windowFullscreen", false, !isThemeAppCompat(resources));
+                "windowFullscreen", false, true);
 
         if (!windowFullscreen && !mWindowIsFloating) {
             // default value
