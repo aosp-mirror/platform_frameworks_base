@@ -16,6 +16,7 @@
 
 package android.content.res;
 
+import com.android.annotations.Nullable;
 import com.android.ide.common.rendering.api.AttrResourceValue;
 import com.android.ide.common.rendering.api.LayoutLog;
 import com.android.ide.common.rendering.api.RenderResources;
@@ -40,8 +41,11 @@ import android.view.LayoutInflater_Delegate;
 import android.view.ViewGroup.LayoutParams;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Map;
+
+import static com.android.ide.common.rendering.api.RenderResources.*;
 
 /**
  * Custom implementation of TypedArray to handle non compiled resources.
@@ -55,6 +59,11 @@ public final class BridgeTypedArray extends TypedArray {
     private final ResourceValue[] mResourceData;
     private final String[] mNames;
     private final boolean[] mIsFramework;
+
+    // Contains ids that are @empty. We still store null in mResourceData for that index, since we
+    // want to save on the check against empty, each time a resource value is requested.
+    @Nullable
+    private int[] mEmptyIds;
 
     public BridgeTypedArray(BridgeResources resources, BridgeContext context, int len,
             boolean platformFile) {
@@ -90,16 +99,29 @@ public final class BridgeTypedArray extends TypedArray {
         // fills TypedArray.mIndices which is used to implement getIndexCount/getIndexAt
         // first count the array size
         int count = 0;
+        ArrayList<Integer> emptyIds = null;
         for (int i = 0; i < mResourceData.length; i++) {
             ResourceValue data = mResourceData[i];
             if (data != null) {
-                if (RenderResources.REFERENCE_NULL.equals(data.getValue())) {
-                    // No need to store this resource value. This saves needless checking for
-                    // "@null" every time  an attribute is requested.
+                String dataValue = data.getValue();
+                if (REFERENCE_NULL.equals(dataValue) || REFERENCE_UNDEFINED.equals(dataValue)) {
                     mResourceData[i] = null;
+                } else if (REFERENCE_EMPTY.equals(dataValue)) {
+                    mResourceData[i] = null;
+                    if (emptyIds == null) {
+                        emptyIds = new ArrayList<Integer>(4);
+                    }
+                    emptyIds.add(i);
                 } else {
                     count++;
                 }
+            }
+        }
+
+        if (emptyIds != null) {
+            mEmptyIds = new int[emptyIds.size()];
+            for (int i = 0; i < emptyIds.size(); i++) {
+                mEmptyIds[i] = emptyIds.get(i);
             }
         }
 
@@ -624,7 +646,7 @@ public final class BridgeTypedArray extends TypedArray {
                 if (isFrameworkId) {
                     idValue = Bridge.getResourceId(ResourceType.ID, idName);
                 } else {
-                    idValue = mContext.getProjectCallback().getResourceId(ResourceType.ID, idName);
+                    idValue = mContext.getLayoutlibCallback().getResourceId(ResourceType.ID, idName);
                 }
                 return idValue == null ? defValue : idValue;
             }
@@ -644,7 +666,7 @@ public final class BridgeTypedArray extends TypedArray {
             idValue = Bridge.getResourceId(resValue.getResourceType(),
                     resValue.getName());
         } else {
-            idValue = mContext.getProjectCallback().getResourceId(
+            idValue = mContext.getLayoutlibCallback().getResourceId(
                     resValue.getResourceType(), resValue.getName());
         }
 
@@ -746,6 +768,12 @@ public final class BridgeTypedArray extends TypedArray {
     @Override
     public boolean hasValue(int index) {
         return index >= 0 && index < mResourceData.length && mResourceData[index] != null;
+    }
+
+    @Override
+    public boolean hasValueOrEmpty(int index) {
+        return hasValue(index) || index >= 0 && index < mResourceData.length &&
+                mEmptyIds != null && Arrays.binarySearch(mEmptyIds, index) >= 0;
     }
 
     /**

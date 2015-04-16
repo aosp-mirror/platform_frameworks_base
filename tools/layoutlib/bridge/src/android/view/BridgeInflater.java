@@ -16,7 +16,7 @@
 
 package android.view;
 
-import com.android.ide.common.rendering.api.IProjectCallback;
+import com.android.ide.common.rendering.api.LayoutlibCallback;
 import com.android.ide.common.rendering.api.LayoutLog;
 import com.android.ide.common.rendering.api.MergeCookie;
 import com.android.ide.common.rendering.api.ResourceReference;
@@ -46,7 +46,7 @@ import static com.android.layoutlib.bridge.android.BridgeContext.getBaseContext;
  */
 public final class BridgeInflater extends LayoutInflater {
 
-    private final IProjectCallback mProjectCallback;
+    private final LayoutlibCallback mLayoutlibCallback;
     private boolean mIsInMerge = false;
     private ResourceReference mResourceReference;
 
@@ -64,21 +64,21 @@ public final class BridgeInflater extends LayoutInflater {
         super(original, newContext);
         newContext = getBaseContext(newContext);
         if (newContext instanceof BridgeContext) {
-            mProjectCallback = ((BridgeContext) newContext).getProjectCallback();
+            mLayoutlibCallback = ((BridgeContext) newContext).getLayoutlibCallback();
         } else {
-            mProjectCallback = null;
+            mLayoutlibCallback = null;
         }
     }
 
     /**
-     * Instantiate a new BridgeInflater with an {@link IProjectCallback} object.
+     * Instantiate a new BridgeInflater with an {@link LayoutlibCallback} object.
      *
      * @param context The Android application context.
-     * @param projectCallback the {@link IProjectCallback} object.
+     * @param layoutlibCallback the {@link LayoutlibCallback} object.
      */
-    public BridgeInflater(Context context, IProjectCallback projectCallback) {
+    public BridgeInflater(Context context, LayoutlibCallback layoutlibCallback) {
         super(context);
-        mProjectCallback = projectCallback;
+        mLayoutlibCallback = layoutlibCallback;
         mConstructorArgs[0] = context;
     }
 
@@ -167,12 +167,13 @@ public final class BridgeInflater extends LayoutInflater {
 
             ResourceValue value = null;
 
+            @SuppressWarnings("deprecation")
             Pair<ResourceType, String> layoutInfo = Bridge.resolveResourceId(resource);
             if (layoutInfo != null) {
                 value = bridgeContext.getRenderResources().getFrameworkResource(
                         ResourceType.LAYOUT, layoutInfo.getSecond());
             } else {
-                layoutInfo = mProjectCallback.resolveResourceId(resource);
+                layoutInfo = mLayoutlibCallback.resolveResourceId(resource);
 
                 if (layoutInfo != null) {
                     value = bridgeContext.getRenderResources().getProjectResource(
@@ -203,7 +204,7 @@ public final class BridgeInflater extends LayoutInflater {
     }
 
     private View loadCustomView(String name, AttributeSet attrs) throws Exception {
-        if (mProjectCallback != null) {
+        if (mLayoutlibCallback != null) {
             // first get the classname in case it's not the node name
             if (name.equals("view")) {
                 name = attrs.getAttributeValue(null, "class");
@@ -211,7 +212,7 @@ public final class BridgeInflater extends LayoutInflater {
 
             mConstructorArgs[1] = attrs;
 
-            Object customView = mProjectCallback.loadView(name, mConstructorSignature,
+            Object customView = mLayoutlibCallback.loadView(name, mConstructorSignature,
                     mConstructorArgs);
 
             if (customView instanceof View) {

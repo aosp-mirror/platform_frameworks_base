@@ -16,10 +16,6 @@
 
 package com.android.layoutlib.bridge.impl;
 
-import static com.android.ide.common.rendering.api.Result.Status.ERROR_LOCK_INTERRUPTED;
-import static com.android.ide.common.rendering.api.Result.Status.ERROR_TIMEOUT;
-import static com.android.ide.common.rendering.api.Result.Status.SUCCESS;
-
 import com.android.ide.common.rendering.api.HardwareConfig;
 import com.android.ide.common.rendering.api.LayoutLog;
 import com.android.ide.common.rendering.api.RenderParams;
@@ -42,6 +38,10 @@ import android.view.inputmethod.InputMethodManager_Accessor;
 
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
+
+import static com.android.ide.common.rendering.api.Result.Status.ERROR_LOCK_INTERRUPTED;
+import static com.android.ide.common.rendering.api.Result.Status.ERROR_TIMEOUT;
+import static com.android.ide.common.rendering.api.Result.Status.SUCCESS;
 
 /**
  * Base class for rendering action.
@@ -120,7 +120,7 @@ public abstract class RenderAction<T extends RenderParams> extends FrameworkReso
 
         // build the context
         mContext = new BridgeContext(mParams.getProjectKey(), metrics, resources,
-                mParams.getAssets(), mParams.getProjectCallback(), getConfiguration(),
+                mParams.getAssets(), mParams.getLayoutlibCallback(), getConfiguration(),
                 mParams.getTargetSdkVersion(), mParams.isRtlSupported());
 
         setUp();
