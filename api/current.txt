@@ -16295,7 +16295,7 @@ package android.media {
 
   public final class MediaSync {
     ctor public MediaSync();
-    method public void configureAudioTrack(android.media.AudioTrack, int);
+    method public void configureAudioTrack(android.media.AudioTrack);
     method public void configureSurface(android.view.Surface);
     method public final android.view.Surface createInputSurface();
     method public boolean getTimestamp(android.media.MediaTimestamp);
