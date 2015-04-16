@@ -46,7 +46,7 @@ public class VideoCallImpl extends VideoCall {
 
     private final IVideoProvider mVideoProvider;
     private final VideoCallListenerBinder mBinder;
-    private VideoCall.Listener mVideoCallListener;
+    private VideoCall.Callback mCallback;
 
     private IBinder.DeathRecipient mDeathRecipient = new IBinder.DeathRecipient() {
         @Override
@@ -109,14 +109,14 @@ public class VideoCallImpl extends VideoCall {
     private final Handler mHandler = new Handler(Looper.getMainLooper()) {
         @Override
         public void handleMessage(Message msg) {
-            if (mVideoCallListener == null) {
+            if (mCallback == null) {
                 return;
             }
 
             SomeArgs args;
             switch (msg.what) {
                 case MSG_RECEIVE_SESSION_MODIFY_REQUEST:
-                    mVideoCallListener.onSessionModifyRequestReceived((VideoProfile) msg.obj);
+                    mCallback.onSessionModifyRequestReceived((VideoProfile) msg.obj);
                     break;
                 case MSG_RECEIVE_SESSION_MODIFY_RESPONSE:
                     args = (SomeArgs) msg.obj;
@@ -125,34 +125,34 @@ public class VideoCallImpl extends VideoCall {
                         VideoProfile requestProfile = (VideoProfile) args.arg2;
                         VideoProfile responseProfile = (VideoProfile) args.arg3;
 
-                        mVideoCallListener.onSessionModifyResponseReceived(
+                        mCallback.onSessionModifyResponseReceived(
                                 status, requestProfile, responseProfile);
                     } finally {
                         args.recycle();
                     }
                     break;
                 case MSG_HANDLE_CALL_SESSION_EVENT:
-                    mVideoCallListener.onCallSessionEvent((int) msg.obj);
+                    mCallback.onCallSessionEvent((int) msg.obj);
                     break;
                 case MSG_CHANGE_PEER_DIMENSIONS:
                     args = (SomeArgs) msg.obj;
                     try {
                         int width = (int) args.arg1;
                         int height = (int) args.arg2;
-                        mVideoCallListener.onPeerDimensionsChanged(width, height);
+                        mCallback.onPeerDimensionsChanged(width, height);
                     } finally {
                         args.recycle();
                     }
                     break;
                 case MSG_CHANGE_CALL_DATA_USAGE:
-                    mVideoCallListener.onCallDataUsageChanged((long) msg.obj);
+                    mCallback.onCallDataUsageChanged((long) msg.obj);
                     break;
                 case MSG_CHANGE_CAMERA_CAPABILITIES:
-                    mVideoCallListener.onCameraCapabilitiesChanged(
+                    mCallback.onCameraCapabilitiesChanged(
                             (CameraCapabilities) msg.obj);
                     break;
                 case MSG_CHANGE_VIDEO_QUALITY:
-                    mVideoCallListener.onVideoQualityChanged(msg.arg1);
+                    mCallback.onVideoQualityChanged(msg.arg1);
                     break;
                 default:
                     break;
@@ -170,8 +170,8 @@ public class VideoCallImpl extends VideoCall {
     }
 
     /** {@inheritDoc} */
-    public void setVideoCallListener(VideoCall.Listener videoCallListener) {
-        mVideoCallListener = videoCallListener;
+    public void registerCallback(VideoCall.Callback callback) {
+        mCallback = callback;
     }
 
     /** {@inheritDoc} */
