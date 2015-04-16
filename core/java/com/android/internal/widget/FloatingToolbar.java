@@ -1070,7 +1070,8 @@ public final class FloatingToolbar {
     private static PopupWindow createPopupWindow(View content) {
         ViewGroup popupContentHolder = new LinearLayout(content.getContext());
         PopupWindow popupWindow = new PopupWindow(popupContentHolder);
-        popupWindow.setWindowLayoutType(WindowManager.LayoutParams.TYPE_APPLICATION_SUB_PANEL);
+        popupWindow.setWindowLayoutType(
+                WindowManager.LayoutParams.TYPE_APPLICATION_ABOVE_SUB_PANEL);
         popupWindow.setAnimationStyle(0);
         popupWindow.setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
         content.setLayoutParams(new ViewGroup.LayoutParams(
