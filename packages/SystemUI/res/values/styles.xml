@@ -138,9 +138,8 @@
         <item name="android:textColor">@color/system_accent_color</item>
     </style>
 
-    <style name="TextAppearance.QS.VolumeSuppressor">
+    <style name="TextAppearance.QS.Introduction">
         <item name="android:textSize">14sp</item>
-        <item name="android:textColor">@color/qs_tile_text</item>
     </style>
 
     <style name="TextAppearance.QS.DetailButton">
@@ -226,12 +225,6 @@
         <item name="android:padding">12dp</item>
         <item name="android:background">@drawable/btn_borderless_rect</item>
         <item name="android:gravity">center</item>
-    </style>
-
-    <!-- Window animations used for volume panel. -->
-    <style name="VolumePanelAnimation">
-        <item name="android:windowEnterAnimation">@*android:anim/popup_enter_material</item>
-        <item name="android:windowExitAnimation">@*android:anim/popup_exit_material</item>
     </style>
 
     <style name="TextAppearance.Material.Notification.Parenthetical"

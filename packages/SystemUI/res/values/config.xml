@@ -276,9 +276,6 @@
     <!-- Doze: alpha to apply to small icons when dozing -->
     <integer name="doze_small_icon_alpha">222</integer><!-- 87% of 0xff -->
 
-    <!-- Volume: time to delay dismissing the volume panel after a click is performed -->
-    <integer name="volume_panel_dismiss_delay">200</integer>
-
     <!-- Hotspot tile: number of days to show after feature is used. -->
     <integer name="days_to_show_hotspot_tile">30</integer>
 

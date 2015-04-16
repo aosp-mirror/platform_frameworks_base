@@ -31,7 +31,6 @@ import android.content.res.Configuration;
 import android.media.AudioManager;
 import android.media.session.MediaSessionManager;
 import android.os.Handler;
-import android.os.SystemProperties;
 import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.Log;
@@ -52,8 +51,6 @@ public class VolumeUI extends SystemUI {
     private static final String TAG = "VolumeUI";
     private static boolean LOGD = Log.isLoggable(TAG, Log.DEBUG);
 
-    private static final boolean USE_OLD_VOLUME = SystemProperties.getBoolean("volume.old", false);
-
     private final Handler mHandler = new Handler();
     private final Receiver mReceiver = new Receiver();
     private final RestorationNotification mRestorationNotification = new RestorationNotification();
@@ -64,8 +61,7 @@ public class VolumeUI extends SystemUI {
     private MediaSessionManager mMediaSessionManager;
     private ServiceMonitor mVolumeControllerService;
 
-    private VolumePanelComponent mOldVolume;
-    private VolumeDialogComponent mNewVolume;
+    private VolumeDialogComponent mVolumeComponent;
 
     @Override
     public void start() {
@@ -77,8 +73,7 @@ public class VolumeUI extends SystemUI {
         mMediaSessionManager = (MediaSessionManager) mContext
                 .getSystemService(Context.MEDIA_SESSION_SERVICE);
         final ZenModeController zenController = new ZenModeControllerImpl(mContext, mHandler);
-        mOldVolume = new VolumePanelComponent(this, mContext, mHandler, zenController);
-        mNewVolume = new VolumeDialogComponent(this, mContext, null, zenController);
+        mVolumeComponent = new VolumeDialogComponent(this, mContext, null, zenController);
         putComponent(VolumeComponent.class, getVolumeComponent());
         mReceiver.start();
         mVolumeControllerService = new ServiceMonitor(TAG, LOGD,
@@ -88,7 +83,7 @@ public class VolumeUI extends SystemUI {
     }
 
     private VolumeComponent getVolumeComponent() {
-        return USE_OLD_VOLUME ? mOldVolume : mNewVolume;
+        return mVolumeComponent;
     }
 
     @Override
@@ -235,7 +230,7 @@ public class VolumeUI extends SystemUI {
                     .putExtra(Receiver.EXTRA_COMPONENT, component);
             mNotificationManager.notify(R.id.notification_volumeui,
                     new Notification.Builder(mContext)
-                            .setSmallIcon(R.drawable.ic_ringer_audible)
+                            .setSmallIcon(R.drawable.ic_volume_media)
                             .setWhen(0)
                             .setShowWhen(false)
                             .setOngoing(true)
