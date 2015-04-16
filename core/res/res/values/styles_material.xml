@@ -289,6 +289,10 @@ please see styles_device_defaults.xml.
     <style name="TextAppearance.Material.Widget"/>
     <style name="TextAppearance.Material.Widget.Button" parent="TextAppearance.Material.Button" />
 
+    <style name="TextAppearance.Material.Widget.Button.Inverse">
+        <item name="textColor">?attr/textColorPrimaryInverse</item>
+    </style>
+
     <style name="TextAppearance.Material.Widget.EditText">
         <item name="textColor">?attr/textColorPrimaryInverse</item>
         <item name="textColorHint">?attr/textColorHintInverse</item>
@@ -461,7 +465,8 @@ please see styles_device_defaults.xml.
 
     <!-- Colored bordered ink button -->
     <style name="Widget.Material.Button.Colored">
-        <item name="backgroundTint">@color/btn_colored_material</item>
+        <item name="background">@drawable/btn_colored_material</item>
+        <item name="textAppearance">@style/TextAppearance.Material.Widget.Button.Inverse</item>
     </style>
 
     <!-- Small bordered ink button -->
