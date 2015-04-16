@@ -363,9 +363,9 @@ public abstract class InCallService extends Service {
     public static abstract class VideoCall {
 
         /**
-         * Registers a callback to receive c ommands and state changes for video calls.
+         * Registers a callback to receive commands and state changes for video calls.
          *
-         * @param callback The vdieo call callback.
+         * @param callback The video call callback.
          */
         public abstract void registerCallback(VideoCall.Callback callback);
 
