@@ -67,7 +67,7 @@ apply plugin: 'com.android.application'
 
 dependencies {
     compile 'com.android.support:appcompat-v7:21.0.3'
-    <strong>compile 'com.google.android.gms:play-services:7.0.0'</strong>
+    <strong>compile 'com.google.android.gms:play-services:7.3.0'</strong>
 }
 </pre>
 <p>Be sure you update this version number each time Google Play services is updated.</p>
@@ -98,14 +98,14 @@ example, to include only the Google Fit and Android Wear APIs, replace the follo
 <code>build.gradle</code> file:</p>
 
 <pre class="no-pretty-print">
-compile 'com.google.android.gms:play-services:7.0.0'
+compile 'com.google.android.gms:play-services:7.3.0'
 </pre>
 
 <p>with these lines:</p>
 
 <pre class="no-pretty-print">
-compile 'com.google.android.gms:play-services-fitness:7.0.0'
-compile 'com.google.android.gms:play-services-wearable:7.0.0'
+compile 'com.google.android.gms:play-services-fitness:7.3.0'
+compile 'com.google.android.gms:play-services-wearable:7.3.0'
 </pre>
 
 <p>Table 1 shows a list of the separate APIs that you can include when compiling your app, and
@@ -123,75 +123,75 @@ you include an API that does have a separate library.)</p>
   </tr>
   <tr>
     <td>Google+</td>
-    <td>com.google.android.gms:play-services-plus:7.0.0</td>
+    <td>com.google.android.gms:play-services-plus:7.3.0</td>
   </tr>
   <tr>
     <td>Google Account Login</td>
-    <td>com.google.android.gms:play-services-identity:7.0.0</td>
+    <td>com.google.android.gms:play-services-identity:7.3.0</td>
   </tr>
   <tr>
     <td>Google Actions, Base Client Library</td>
-    <td>com.google.android.gms:play-services-base:7.0.0</td>
+    <td>com.google.android.gms:play-services-base:7.3.0</td>
   </tr>
   <tr>
     <td>Google App Indexing</td>
-    <td>com.google.android.gms:play-services-appindexing:7.0.0</td>
+    <td>com.google.android.gms:play-services-appindexing:7.3.0</td>
   </tr>
   <tr>
     <td>Google Analytics</td>
-    <td>com.google.android.gms:play-services-analytics:7.0.0</td>
+    <td>com.google.android.gms:play-services-analytics:7.3.0</td>
   </tr>
     <tr>
     <td>Google Cast</td>
-    <td>com.google.android.gms:play-services-cast:7.0.0</td>
+    <td>com.google.android.gms:play-services-cast:7.3.0</td>
   </tr>
   <tr>
     <td>Google Cloud Messaging</td>
-    <td>com.google.android.gms:play-services-gcm:7.0.0</td>
+    <td>com.google.android.gms:play-services-gcm:7.3.0</td>
   </tr>
   <tr>
     <td>Google Drive</td>
-    <td>com.google.android.gms:play-services-drive:7.0.0</td>
+    <td>com.google.android.gms:play-services-drive:7.3.0</td>
   </tr>
   <tr>
     <td>Google Fit</td>
-    <td>com.google.android.gms:play-services-fitness:7.0.0</td>
+    <td>com.google.android.gms:play-services-fitness:7.3.0</td>
   </tr>
   <tr>
     <td>Google Location, Activity Recognition, and Places</td>
-    <td>com.google.android.gms:play-services-location:7.0.0</td>
+    <td>com.google.android.gms:play-services-location:7.3.0</td>
   </tr>
   <tr>
     <td>Google Maps</td>
-    <td>com.google.android.gms:play-services-maps:7.0.0</td>
+    <td>com.google.android.gms:play-services-maps:7.3.0</td>
   </tr>
   <tr>
     <td>Google Mobile Ads</td>
-    <td>com.google.android.gms:play-services-ads:7.0.0</td>
+    <td>com.google.android.gms:play-services-ads:7.3.0</td>
   </tr>
   <tr>
     <td>Google Nearby</td>
-    <td>com.google.android.gms:play-services-nearby:7.0.0</td>
+    <td>com.google.android.gms:play-services-nearby:7.3.0</td>
   </tr>
   <tr>
     <td>Google Panorama Viewer</td>
-    <td>com.google.android.gms:play-services-panorama:7.0.0</td>
+    <td>com.google.android.gms:play-services-panorama:7.3.0</td>
   </tr>
   <tr>
     <td>Google Play Game services</td>
-    <td>com.google.android.gms:play-services-games:7.0.0</td>
+    <td>com.google.android.gms:play-services-games:7.3.0</td>
   </tr>
   <tr>
     <td>SafetyNet</td>
-    <td>com.google.android.gms:play-services-safetynet:7.0.0</td>
+    <td>com.google.android.gms:play-services-safetynet:7.3.0</td>
   </tr>
   <tr>
     <td>Google Wallet</td>
-    <td>com.google.android.gms:play-services-wallet:7.0.0</td>
+    <td>com.google.android.gms:play-services-wallet:7.3.0</td>
   </tr>
   <tr>
     <td>Android Wear</td>
-    <td>com.google.android.gms:play-services-wearable:7.0.0</td>
+    <td>com.google.android.gms:play-services-wearable:7.3.0</td>
   </tr>
 </table>
 
