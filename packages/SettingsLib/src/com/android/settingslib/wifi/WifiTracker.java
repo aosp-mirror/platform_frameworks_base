@@ -220,12 +220,19 @@ public class WifiTracker {
         /** Lookup table to more quickly update AccessPoints by only considering objects with the
          * correct SSID.  Maps SSID -> List of AccessPoints with the given SSID.  */
         Multimap<String, AccessPoint> apMap = new Multimap<String, AccessPoint>();
+        WifiConfiguration connectionConfig = null;
 
         final List<WifiConfiguration> configs = mWifiManager.getConfiguredNetworks();
         if (configs != null) {
             mSavedNetworksExist = configs.size() != 0;
             for (WifiConfiguration config : configs) {
+                if (mLastInfo != null && mLastInfo.getNetworkId() == config.networkId) {
+                    connectionConfig = config;
+                }
                 if (config.selfAdded && config.numAssociation == 0) {
+                    continue;
+                }
+                if (config.isPasspoint()) {
                     continue;
                 }
                 AccessPoint accessPoint = getCachedOrCreate(config);
@@ -264,6 +271,15 @@ public class WifiTracker {
                     if (mLastInfo != null && mLastNetworkInfo != null) {
                         accessPoint.update(mLastInfo, mLastNetworkInfo);
                     }
+
+                    if (mLastInfo != null && mLastInfo.getBSSID() != null
+                            && mLastInfo.getBSSID().equals(result.BSSID)
+                            && connectionConfig != null && connectionConfig.isPasspoint()) {
+                        /* This network is connected via this passpoint config */
+                        /* SSID match is not going to work for it; so update explicitly */
+                        accessPoint.update(connectionConfig);
+                    }
+
                     mAccessPoints.add(accessPoint);
                     apMap.put(accessPoint.getSsid(), accessPoint);
                 }

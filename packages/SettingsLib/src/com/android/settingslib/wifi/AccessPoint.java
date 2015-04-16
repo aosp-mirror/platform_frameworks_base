@@ -26,6 +26,7 @@ import android.net.wifi.WifiConfiguration.KeyMgmt;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.util.Log;
 import android.util.LruCache;
 
@@ -274,8 +275,10 @@ public class AccessPoint implements Comparable<AccessPoint> {
         StringBuilder summary = new StringBuilder();
 
         if (isActive()) { // This is the active connection
+            String passpointProvider = (mConfig != null && mConfig.isPasspoint()) ?
+                    mConfig.providerFriendlyName : null;
             summary.append(getSummary(mContext, getDetailedState(),
-                    networkId == WifiConfiguration.INVALID_NETWORK_ID));
+                    networkId == WifiConfiguration.INVALID_NETWORK_ID, passpointProvider));
         } else if (mConfig != null
                 && mConfig.hasNoInternetAccess()) {
             summary.append(mContext.getString(R.string.wifi_no_internet));
@@ -559,7 +562,11 @@ public class AccessPoint implements Comparable<AccessPoint> {
     }
 
     void loadConfig(WifiConfiguration config) {
-        ssid = (config.SSID == null ? "" : removeDoubleQuotes(config.SSID));
+        if (config.isPasspoint())
+            ssid = config.providerFriendlyName;
+        else
+            ssid = (config.SSID == null ? "" : removeDoubleQuotes(config.SSID));
+            
         security = getSecurity(config);
         networkId = config.networkId;
         mConfig = config;
@@ -643,11 +650,21 @@ public class AccessPoint implements Comparable<AccessPoint> {
         return reorder;
     }
 
+    void update(WifiConfiguration config) {
+        mConfig = config;
+    }
+    
     public static String getSummary(Context context, String ssid, DetailedState state,
-            boolean isEphemeral) {
+            boolean isEphemeral, String passpointProvider) {
         if (state == DetailedState.CONNECTED && isEphemeral && ssid == null) {
-            // Special case for connected + ephemeral networks.
-            return context.getString(R.string.connected_via_wfa);
+            if (TextUtils.isEmpty(passpointProvider) == false) {
+                // Special case for connected + ephemeral networks.
+                String format = context.getString(R.string.connected_via_passpoint);
+                return String.format(format, passpointProvider);
+            } else if (isEphemeral && ssid == null) {
+                // Special case for connected + ephemeral networks.
+                return context.getString(R.string.connected_via_wfa);
+            }
         }
 
         String[] formats = context.getResources().getStringArray((ssid == null)
@@ -661,7 +678,12 @@ public class AccessPoint implements Comparable<AccessPoint> {
     }
 
     public static String getSummary(Context context, DetailedState state, boolean isEphemeral) {
-        return getSummary(context, null, state, isEphemeral);
+        return getSummary(context, null, state, isEphemeral, null);
+    }
+
+    public static String getSummary(Context context, DetailedState state, boolean isEphemeral,
+            String passpointProvider) {
+        return getSummary(context, null, state, isEphemeral, passpointProvider);
     }
 
     public static String convertToQuotedString(String string) {
