@@ -24729,6 +24729,8 @@ package android.os {
     method public static long getNativeHeapFreeSize();
     method public static long getNativeHeapSize();
     method public static long getPss();
+    method public static java.lang.String getRuntimeStat(java.lang.String);
+    method public static java.util.Map<java.lang.String, java.lang.String> getRuntimeStats();
     method public static deprecated int getThreadAllocCount();
     method public static deprecated int getThreadAllocSize();
     method public static deprecated int getThreadExternalAllocCount();
