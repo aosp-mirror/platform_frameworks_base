@@ -16,6 +16,7 @@ struct Flag {
     std::function<void(const StringPiece&)> action;
     bool required;
     bool* flagResult;
+    bool flagValueWhenSet;
     bool parsed;
 };
 
@@ -25,18 +26,19 @@ static std::vector<std::string> sArgs;
 void optionalFlag(const StringPiece& name, const StringPiece& description,
                   std::function<void(const StringPiece&)> action) {
     sFlags.push_back(
-            Flag{ name.toString(), description.toString(), action, false, nullptr, false });
+            Flag{ name.toString(), description.toString(), action, false, nullptr, false, false });
 }
 
 void requiredFlag(const StringPiece& name, const StringPiece& description,
                   std::function<void(const StringPiece&)> action) {
     sFlags.push_back(
-            Flag{ name.toString(), description.toString(), action, true, nullptr, false });
+            Flag{ name.toString(), description.toString(), action, true, nullptr, false, false });
 }
 
-void optionalSwitch(const StringPiece& name, const StringPiece& description, bool* result) {
-    sFlags.push_back(
-            Flag{ name.toString(), description.toString(), {}, false, result, false });
+void optionalSwitch(const StringPiece& name, const StringPiece& description, bool resultWhenSet,
+                    bool* result) {
+    sFlags.push_back(Flag{
+            name.toString(), description.toString(), {}, false, result, resultWhenSet, false });
 }
 
 void usageAndDie(const StringPiece& command) {
@@ -73,7 +75,7 @@ void parse(int argc, char** argv, const StringPiece& command) {
                 match = true;
                 flag.parsed = true;
                 if (flag.flagResult) {
-                    *flag.flagResult = true;
+                    *flag.flagResult = flag.flagValueWhenSet;
                 } else {
                     i++;
                     if (i >= argc) {

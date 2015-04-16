@@ -49,6 +49,8 @@
 #include <unordered_set>
 #include <utils/Errors.h>
 
+constexpr const char* kAaptVersionStr = "2.0-alpha";
+
 using namespace aapt;
 
 void printTable(const ResourceTable& table) {
@@ -318,7 +320,13 @@ struct AaptOptions {
     // Whether to output verbose details about
     // compilation.
     bool verbose = false;
+
+    // Whether or not to auto-version styles or layouts
+    // referencing attributes defined in a newer SDK
+    // level than the style or layout is defined for.
+    bool versionStylesAndLayouts = true;
 };
+
 
 bool compileXml(const AaptOptions& options, const std::shared_ptr<ResourceTable>& table,
                 const CompileItem& item, std::queue<CompileItem>* outQueue, ZipFile* outApk) {
@@ -333,10 +341,12 @@ bool compileXml(const AaptOptions& options, const std::shared_ptr<ResourceTable>
     // No resolver, since we are not compiling attributes here.
     XmlFlattener flattener(table, {});
 
-    // We strip attributes that do not belong in this version of the resource.
-    // Non-version qualified resources have an implicit version 1 requirement.
     XmlFlattener::Options xmlOptions;
-    xmlOptions.maxSdkAttribute = item.config.sdkVersion ? item.config.sdkVersion : 1;
+    if (options.versionStylesAndLayouts) {
+        // We strip attributes that do not belong in this version of the resource.
+        // Non-version qualified resources have an implicit version 1 requirement.
+        xmlOptions.maxSdkAttribute = item.config.sdkVersion ? item.config.sdkVersion : 1;
+    }
 
     std::shared_ptr<BindingXmlPullParser> binding;
     std::shared_ptr<XmlPullParser> parser = std::make_shared<SourceXmlPullParser>(in);
@@ -526,7 +536,10 @@ static AaptOptions prepareArgs(int argc, char** argv) {
 
     AaptOptions options;
 
-    if (command == "link") {
+    if (command == "--version" || command == "version") {
+        std::cout << kAaptVersionStr << std::endl;
+        exit(0);
+    } else if (command == "link") {
         options.phase = AaptOptions::Phase::Link;
     } else if (command == "compile") {
         options.phase = AaptOptions::Phase::Compile;
@@ -544,6 +557,8 @@ static AaptOptions prepareArgs(int argc, char** argv) {
                 [&options](const StringPiece& arg) {
                     options.bindingOutput = Source{ arg.toString() };
                 });
+        flag::optionalSwitch("--no-version", "Disables automatic style and layout versioning",
+                             false, &options.versionStylesAndLayouts);
 
     } else if (options.phase == AaptOptions::Phase::Link) {
         flag::requiredFlag("--manifest", "AndroidManifest.xml of your app",
@@ -568,8 +583,8 @@ static AaptOptions prepareArgs(int argc, char** argv) {
     });
 
     bool help = false;
-    flag::optionalSwitch("-v", "enables verbose logging", &options.verbose);
-    flag::optionalSwitch("-h", "displays this help menu", &help);
+    flag::optionalSwitch("-v", "enables verbose logging", true, &options.verbose);
+    flag::optionalSwitch("-h", "displays this help menu", true, &help);
 
     // Build the command string for output (eg. "aapt2 compile").
     std::string fullCommand = "aapt2";
@@ -896,7 +911,9 @@ bool compile(const AaptOptions& options, const std::shared_ptr<ResourceTable>& t
     }
 
     // Version all styles referencing attributes outside of their specified SDK version.
-    versionStylesForCompat(table);
+    if (options.versionStylesAndLayouts) {
+        versionStylesForCompat(table);
+    }
 
     // Open the output APK file for writing.
     ZipFile outApk;
