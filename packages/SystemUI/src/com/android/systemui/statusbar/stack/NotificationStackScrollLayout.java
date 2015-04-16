@@ -220,7 +220,6 @@ public class NotificationStackScrollLayout extends ViewGroup
     private PhoneStatusBar mPhoneStatusBar;
     private int[] mTempInt2 = new int[2];
     private boolean mGenerateChildOrderChangedEvent;
-    private boolean mRemoveAnimationEnabled;
     private HashSet<Runnable> mAnimationFinishedRunnables = new HashSet<>();
     private HashSet<Pair<ExpandableNotificationRow, Boolean>> mHeadsUpChangeAnimations
             = new HashSet<>();
@@ -1630,16 +1629,11 @@ public class NotificationStackScrollLayout extends ViewGroup
         ((ExpandableView) child).setOnHeightChangedListener(null);
         mCurrentStackScrollState.removeViewStateForView(child);
         updateScrollStateForRemovedChild(child);
-        if (mRemoveAnimationEnabled) {
-            boolean animationGenerated = generateRemoveAnimation(child);
-            if (animationGenerated && !mSwipedOutViews.contains(child)) {
-                // Add this view to an overlay in order to ensure that it will still be temporary
-                // drawn when removed
-                getOverlay().add(child);
-            }
-        } else {
-            // TODO: handle this more cleanly when HEADS-up and the shade are merged
-            requestAnimateEverything();
+        boolean animationGenerated = generateRemoveAnimation(child);
+        if (animationGenerated && !mSwipedOutViews.contains(child)) {
+            // Add this view to an overlay in order to ensure that it will still be temporary
+            // drawn when removed
+            getOverlay().add(child);
         }
         updateAnimationState(false, child);
 
@@ -2629,10 +2623,6 @@ public class NotificationStackScrollLayout extends ViewGroup
             }
         }
         return touchY > mIntrinsicPadding;
-    }
-
-    public void setRemoveAnimationEnabled(boolean enabled) {
-        mRemoveAnimationEnabled = enabled;
     }
 
     private void updateExpandButtons() {
