@@ -909,37 +909,25 @@
     <string name="disconnect_vpn">Disconnect VPN</string>
 
     <!-- Monitoring dialog device owner body text [CHAR LIMIT=400] -->
-    <string name="monitoring_description_device_owned">This device is managed by:\n<xliff:g id="organization">%1$s</xliff:g>\n\nYour administrator can monitor your device and network activity, including emails, apps and secure websites.\n\nFor more information, contact your administrator.</string>
-
-    <!-- Monitoring dialog non-legacy VPN text [CHAR LIMIT=400] -->
-    <string name="monitoring_description_vpn">You gave \"<xliff:g id="application">%1$s</xliff:g>\" permission to set up a VPN connection.\n\nThis app can monitor your device and network activity, including emails, apps and secure websites.</string>
-
-    <!-- Monitoring dialog legacy VPN text [CHAR LIMIT=400] -->
-    <string name="monitoring_description_legacy_vpn">You\'re connected to a VPN (\"<xliff:g id="application">%1$s</xliff:g>\").\n\nYour VPN service provider can monitor your device and network activity including emails, apps, and secure websites.</string>
-
-    <!-- Monitoring dialog non-legacy VPN with device owner text [CHAR LIMIT=400] -->
-    <string name="monitoring_description_vpn_device_owned">This device is managed by:\n<xliff:g id="organization">%1$s</xliff:g>\n\nYour administrator is capable of monitoring your network activity including emails, apps, and secure websites. For more information, contact your administrator.\n\nAlso, you gave \"<xliff:g id="application">%2$s</xliff:g>\" permission to set up a VPN connection. This app can monitor network activity too.</string>
-
-    <!-- Monitoring dialog legacy VPN with device owner text [CHAR LIMIT=400] -->
-    <string name="monitoring_description_legacy_vpn_device_owned">This device is managed by:\n<xliff:g id="organization">%1$s</xliff:g>\n\nYour administrator is capable of monitoring your network activity including emails, apps, and secure websites. For more information, contact your administrator.\n\nAlso, you\'re connected to a VPN (\"<xliff:g id="application">%2$s</xliff:g>\"). Your VPN service provider can monitor network activity too.</string>
+    <string name="monitoring_description_device_owned">Your device is managed by <xliff:g id="organization">%1$s</xliff:g>.\n\nYour administrator can monitor and manage settings, corporate access, apps, data associated with your device, and your device\'s location information. For more information, contact your administrator.</string>
 
     <!-- Monitoring dialog profile owner body text [CHAR LIMIT=400] -->
-    <string name="monitoring_description_profile_owned">This profile is managed by:\n<xliff:g id="organization">%1$s</xliff:g>\n\nYour administrator can monitor your device and network activity, including emails, apps and secure websites.\n\nFor more information, contact your administrator.</string>
+    <string name="monitoring_description_profile_owned">Your work profile is managed by <xliff:g id="organization">%1$s</xliff:g>.\n\nYour administrator is capable of monitoring your network activity including emails, apps and secure websites.\n\nFor more information, contact your administrator.</string>
 
     <!-- Monitoring dialog device and profile owner body text [CHAR LIMIT=400] -->
-    <string name="monitoring_description_device_and_profile_owned">This device is managed by:\n<xliff:g id="organization">%1$s</xliff:g>\nYour profile is managed by:\n<xliff:g id="organization">%2$s</xliff:g>\n\nYour administrator can monitor your device and network activity, including emails, apps and secure websites.\n\nFor more information, contact your administrator.</string>
+    <string name="monitoring_description_device_and_profile_owned">Your device is managed by:\n<xliff:g id="organization">%1$s</xliff:g>.\nYour work profile is managed by:\n<xliff:g id="organization">%2$s</xliff:g>.\n\nYour administrator can monitor your device and network activity, including emails, apps and secure websites.\n\nFor more information, contact your administrator.</string>
 
-    <!-- Monitoring dialog non-legacy VPN with profile owner text [CHAR LIMIT=400] -->
-    <string name="monitoring_description_vpn_profile_owned">This profile is managed by:\n<xliff:g id="organization">%1$s</xliff:g>\n\nYour administrator is capable of monitoring your network activity including emails, apps, and secure websites. For more information, contact your administrator.\n\nAlso, you gave \"<xliff:g id="application">%2$s</xliff:g>\" permission to set up a VPN connection. This app can monitor network activity too.</string>
+    <!-- Monitoring dialog VPN text [CHAR LIMIT=400] -->
+    <string name="monitoring_description_vpn">You gave an app permission to set up a VPN connection.\n\nThis app can monitor your device and network activity, including emails, apps and secure websites.</string>
 
-    <!-- Monitoring dialog legacy VPN with profile owner text [CHAR LIMIT=400] -->
-    <string name="monitoring_description_legacy_vpn_profile_owned">This profile is managed by:\n<xliff:g id="organization">%1$s</xliff:g>\n\nYour administrator is capable of monitoring your network activity including emails, apps, and secure websites. For more information, contact your administrator.\n\nAlso, you\'re connected to a VPN (\"<xliff:g id="application">%2$s</xliff:g>\"). Your VPN service provider can monitor network activity too.</string>
+    <!-- Monitoring dialog VPN with device owner text [CHAR LIMIT=400] -->
+    <string name="monitoring_description_vpn_device_owned">Your device is managed by <xliff:g id="organization">%1$s</xliff:g>.\n\nYour administrator can monitor and manage settings, corporate access, apps, data associated with your device, and your device\'s location information.\n\nYou\'re connected to a VPN, which can monitor your network activity, including emails, apps, and websites.\n\nFor more information, contact your administrator.</string>
 
-    <!-- Monitoring dialog non-legacy VPN with device and profile owner text [CHAR LIMIT=400] -->
-    <string name="monitoring_description_vpn_device_and_profile_owned">This device is managed by:\n<xliff:g id="organization">%1$s</xliff:g>\nYour profile is managed by:\n<xliff:g id="organization">%2$s</xliff:g>\n\nYour administrator is capable of monitoring your network activity including emails, apps, and secure websites. For more information, contact your administrator.\n\nAlso, you gave \"<xliff:g id="application">%3$s</xliff:g>\" permission to set up a VPN connection. This app can monitor network activity too.</string>
+    <!-- Monitoring dialog VPN with profile owner text [CHAR LIMIT=400] -->
+    <string name="monitoring_description_vpn_profile_owned">Your work profile is managed by <xliff:g id="organization">%1$s</xliff:g>.\n\nYour administrator is capable of monitoring your network activity including emails, apps, and secure websites.\n\nFor more information, contact your administrator.\n\nYou\'re also connected to a VPN, which can monitor your network activity.</string>
 
-    <!-- Monitoring dialog legacy VPN with device and profile owner text [CHAR LIMIT=400] -->
-    <string name="monitoring_description_legacy_vpn_device_and_profile_owned">This device is managed by:\n<xliff:g id="organization">%1$s</xliff:g>\nYour profile is managed by:\n<xliff:g id="organization">%2$s</xliff:g>\n\nYour administrator is capable of monitoring your network activity including emails, apps, and secure websites. For more information, contact your administrator.\n\nAlso, you\'re connected to a VPN (\"<xliff:g id="application">%3$s</xliff:g>\"). Your VPN service provider can monitor network activity too.</string>
+    <!-- Monitoring dialog VPN with device and profile owner text [CHAR LIMIT=400] -->
+    <string name="monitoring_description_vpn_device_and_profile_owned">Your device is managed by <xliff:g id="organization">%1$s</xliff:g>.\nYour work profile is managed by:\n<xliff:g id="organization">%2$s</xliff:g>.\n\nYour administrator is capable of monitoring your network activity including emails, apps, and secure websites.\n\nFor more information, contact your administrator.\n\nYou\'re also connected to a VPN, which can monitor your personal network activity</string>
 
     <!-- Indication on the keyguard that appears when the user disables trust agents until the next time they unlock manually. [CHAR LIMIT=NONE] -->
     <string name="keyguard_indication_trust_disabled">Device will stay locked until you manually unlock</string>
