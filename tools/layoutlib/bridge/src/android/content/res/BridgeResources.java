@@ -16,8 +16,8 @@
 
 package android.content.res;
 
-import com.android.ide.common.rendering.api.IProjectCallback;
 import com.android.ide.common.rendering.api.LayoutLog;
+import com.android.ide.common.rendering.api.LayoutlibCallback;
 import com.android.ide.common.rendering.api.ResourceValue;
 import com.android.layoutlib.bridge.Bridge;
 import com.android.layoutlib.bridge.BridgeConstants;
@@ -49,7 +49,7 @@ import java.io.InputStream;
 public final class BridgeResources extends Resources {
 
     private BridgeContext mContext;
-    private IProjectCallback mProjectCallback;
+    private LayoutlibCallback mLayoutlibCallback;
     private boolean[] mPlatformResourceFlag = new boolean[1];
     private TypedValue mTmpValue = new TypedValue();
 
@@ -94,12 +94,12 @@ public final class BridgeResources extends Resources {
             AssetManager assets,
             DisplayMetrics metrics,
             Configuration config,
-            IProjectCallback projectCallback) {
+            LayoutlibCallback layoutlibCallback) {
         return Resources.mSystem = new BridgeResources(context,
                 assets,
                 metrics,
                 config,
-                projectCallback);
+                layoutlibCallback);
     }
 
     /**
@@ -109,16 +109,16 @@ public final class BridgeResources extends Resources {
     public static void disposeSystem() {
         if (Resources.mSystem instanceof BridgeResources) {
             ((BridgeResources)(Resources.mSystem)).mContext = null;
-            ((BridgeResources)(Resources.mSystem)).mProjectCallback = null;
+            ((BridgeResources)(Resources.mSystem)).mLayoutlibCallback = null;
         }
         Resources.mSystem = null;
     }
 
     private BridgeResources(BridgeContext context, AssetManager assets, DisplayMetrics metrics,
-            Configuration config, IProjectCallback projectCallback) {
+            Configuration config, LayoutlibCallback layoutlibCallback) {
         super(assets, metrics, config);
         mContext = context;
-        mProjectCallback = projectCallback;
+        mLayoutlibCallback = layoutlibCallback;
     }
 
     public BridgeTypedArray newTypeArray(int numEntries, boolean platformFile) {
@@ -138,8 +138,8 @@ public final class BridgeResources extends Resources {
         }
 
         // didn't find a match in the framework? look in the project.
-        if (mProjectCallback != null) {
-            resourceInfo = mProjectCallback.resolveResourceId(id);
+        if (mLayoutlibCallback != null) {
+            resourceInfo = mLayoutlibCallback.resolveResourceId(id);
 
             if (resourceInfo != null) {
                 platformResFlag_out[0] = false;
@@ -151,11 +151,6 @@ public final class BridgeResources extends Resources {
         }
 
         return null;
-    }
-
-    @Override
-    public Drawable getDrawable(int id) throws NotFoundException {
-        return getDrawable(id, null);
     }
 
     @Override
@@ -257,7 +252,7 @@ public final class BridgeResources extends Resources {
             try {
                 // check if the current parser can provide us with a custom parser.
                 if (mPlatformResourceFlag[0] == false) {
-                    parser = mProjectCallback.getParser(value);
+                    parser = mLayoutlibCallback.getParser(value);
                 }
 
                 // create a new one manually if needed.
@@ -692,8 +687,8 @@ public final class BridgeResources extends Resources {
         Pair<ResourceType, String> resourceInfo = Bridge.resolveResourceId(id);
 
         // if the name is unknown in the framework, get it from the custom view loader.
-        if (resourceInfo == null && mProjectCallback != null) {
-            resourceInfo = mProjectCallback.resolveResourceId(id);
+        if (resourceInfo == null && mLayoutlibCallback != null) {
+            resourceInfo = mLayoutlibCallback.resolveResourceId(id);
         }
 
         String message = null;

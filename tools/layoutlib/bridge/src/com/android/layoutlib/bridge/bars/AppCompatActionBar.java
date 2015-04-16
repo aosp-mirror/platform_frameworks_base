@@ -70,7 +70,7 @@ public class AppCompatActionBar extends BridgeActionBar {
         try {
             Class[] constructorParams = {View.class};
             Object[] constructorArgs = {getDecorContent()};
-            mWindowDecorActionBar = params.getProjectCallback().loadView(WINDOW_ACTION_BAR_CLASS,
+            mWindowDecorActionBar = params.getLayoutlibCallback().loadView(WINDOW_ACTION_BAR_CLASS,
                     constructorParams, constructorArgs);
 
             mWindowActionBarClass = mWindowDecorActionBar == null ? null :
