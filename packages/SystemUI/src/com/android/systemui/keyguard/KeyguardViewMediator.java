@@ -505,6 +505,11 @@ public class KeyguardViewMediator extends SystemUI {
         public boolean isInputRestricted() {
             return KeyguardViewMediator.this.isInputRestricted();
         }
+
+        @Override
+        public boolean isScreenOn() {
+            return mScreenOn;
+        }
     };
 
     public void userActivity() {

@@ -58,12 +58,12 @@ import android.hardware.fingerprint.FingerprintManager;
 import android.hardware.fingerprint.FingerprintManager.AuthenticationCallback;
 import android.hardware.fingerprint.FingerprintUtils;
 import android.hardware.fingerprint.FingerprintManager.AuthenticationResult;
+import android.service.trust.TrustAgentService;
 import android.telephony.SubscriptionInfo;
 import android.telephony.SubscriptionManager;
 import android.telephony.SubscriptionManager.OnSubscriptionsChangedListener;
 import android.telephony.TelephonyManager;
 import android.util.Log;
-import android.util.Slog;
 import android.util.SparseBooleanArray;
 
 import com.google.android.collect.Lists;
@@ -245,15 +245,14 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
     private SparseBooleanArray mUserFaceUnlockRunning = new SparseBooleanArray();
 
     @Override
-    public void onTrustChanged(boolean enabled, int userId, boolean initiatedByUser) {
+    public void onTrustChanged(boolean enabled, int userId, int flags) {
         mUserHasTrust.put(userId, enabled);
-
         for (int i = 0; i < mCallbacks.size(); i++) {
             KeyguardUpdateMonitorCallback cb = mCallbacks.get(i).get();
             if (cb != null) {
                 cb.onTrustChanged(userId);
-                if (enabled && initiatedByUser) {
-                    cb.onTrustInitiatedByUser(userId);
+                if (enabled && flags != 0) {
+                    cb.onTrustGrantedWithFlags(flags, userId);
                 }
             }
         }

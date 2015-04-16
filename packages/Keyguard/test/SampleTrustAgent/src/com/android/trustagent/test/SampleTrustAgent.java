@@ -38,7 +38,7 @@ public class SampleTrustAgent extends TrustAgentService
      * <pre>
      * $ adb shell am broadcast -a action.sample_trust_agent.grant_trust\
      *  -e extra.message SampleTrust\
-     *  --el extra.duration 1000 --ez extra.init_by_user false
+     *  --el extra.duration 1000 --ez extra.init_by_user false --ez extra.dismiss_keyguard false
      * </pre>
      */
     private static final boolean ALLOW_EXTERNAL_BROADCASTS = false;
@@ -51,6 +51,7 @@ public class SampleTrustAgent extends TrustAgentService
     private static final String EXTRA_MESSAGE = "extra.message";
     private static final String EXTRA_DURATION = "extra.duration";
     private static final String EXTRA_INITIATED_BY_USER = "extra.init_by_user";
+    private static final String EXTRA_DISMISS_KEYGUARD = "extra.dismiss_keyguard";
 
     private static final String PREFERENCE_REPORT_UNLOCK_ATTEMPTS
             = "preference.report_unlock_attempts";
@@ -141,10 +142,17 @@ public class SampleTrustAgent extends TrustAgentService
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
             if (ACTION_GRANT_TRUST.equals(action)) {
+                int flags = 0;
+                if (intent.getBooleanExtra(EXTRA_INITIATED_BY_USER, false)) {
+                    flags |= TrustAgentService.FLAG_GRANT_TRUST_INITIATED_BY_USER;
+                }
+                if (intent.getBooleanExtra(EXTRA_DISMISS_KEYGUARD, false)) {
+                    flags |= TrustAgentService.FLAG_GRANT_TRUST_DISMISS_KEYGUARD;
+                }
+
                 try {
                     grantTrust(intent.getStringExtra(EXTRA_MESSAGE),
-                            intent.getLongExtra(EXTRA_DURATION, 0),
-                            intent.getBooleanExtra(EXTRA_INITIATED_BY_USER, false));
+                            intent.getLongExtra(EXTRA_DURATION, 0), flags);
                 } catch (IllegalStateException e) {
                     logAndShowToast("IllegalStateException: " + e.getMessage());
                 }

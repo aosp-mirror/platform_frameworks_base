@@ -17,6 +17,7 @@
 package android.service.trust;
 
 import android.Manifest;
+import android.annotation.IntDef;
 import android.annotation.SdkConstant;
 import android.annotation.SystemApi;
 import android.app.Service;
@@ -32,6 +33,8 @@ import android.os.RemoteException;
 import android.util.Log;
 import android.util.Slog;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.List;
 
 /**
@@ -69,6 +72,7 @@ import java.util.List;
  */
 @SystemApi
 public class TrustAgentService extends Service {
+
     private final String TAG = TrustAgentService.class.getSimpleName() +
             "[" + getClass().getSimpleName() + "]";
     private static final boolean DEBUG = false;
@@ -85,6 +89,34 @@ public class TrustAgentService extends Service {
      * agent.
      */
     public static final String TRUST_AGENT_META_DATA = "android.service.trust.trustagent";
+
+
+    /**
+     * Flag for {@link #grantTrust(CharSequence, long, int)} indicating that trust is being granted
+     * as the direct result of user action - such as solving a security challenge. The hint is used
+     * by the system to optimize the experience. Behavior may vary by device and release, so
+     * one should only set this parameter if it meets the above criteria rather than relying on
+     * the behavior of any particular device or release.
+     */
+    public static final int FLAG_GRANT_TRUST_INITIATED_BY_USER = 1 << 0;
+
+    /**
+     * Flag for {@link #grantTrust(CharSequence, long, int)} indicating that the agent would like
+     * to dismiss the keyguard. When using this flag, the {@code TrustAgentService} must ensure
+     * it is only set in response to a direct user action with the expectation of dismissing the
+     * keyguard.
+     */
+    public static final int FLAG_GRANT_TRUST_DISMISS_KEYGUARD = 1 << 1;
+
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(flag = true,
+            value = {
+                    FLAG_GRANT_TRUST_INITIATED_BY_USER,
+                    FLAG_GRANT_TRUST_DISMISS_KEYGUARD,
+            })
+    public @interface GrantTrustFlags {}
+
 
     private static final int MSG_UNLOCK_ATTEMPT = 1;
     private static final int MSG_CONFIGURE = 2;
@@ -228,11 +260,35 @@ public class TrustAgentService extends Service {
      *    direct result of user action - such as solving a security challenge. The hint is used
      *    by the system to optimize the experience. Behavior may vary by device and release, so
      *    one should only set this parameter if it meets the above criteria rather than relying on
-     *    the behavior of any particular device or release.
+     *    the behavior of any particular device or release. Corresponds to
+     *    {@link #FLAG_GRANT_TRUST_INITIATED_BY_USER}.
+     * @throws IllegalStateException if the agent is not currently managing trust.
+     *
+     * @deprecated use {@link #grantTrust(CharSequence, long, int)} instead.
+     */
+    @Deprecated
+    public final void grantTrust(
+            final CharSequence message, final long durationMs, final boolean initiatedByUser) {
+        grantTrust(message, durationMs, initiatedByUser ? FLAG_GRANT_TRUST_INITIATED_BY_USER : 0);
+    }
+
+    /**
+     * Call to grant trust on the device.
+     *
+     * @param message describes why the device is trusted, e.g. "Trusted by location".
+     * @param durationMs amount of time in milliseconds to keep the device in a trusted state.
+     *    Trust for this agent will automatically be revoked when the timeout expires unless
+     *    extended by a subsequent call to this function. The timeout is measured from the
+     *    invocation of this function as dictated by {@link SystemClock#elapsedRealtime())}.
+     *    For security reasons, the value should be no larger than necessary.
+     *    The value may be adjusted by the system as necessary to comply with a policy controlled
+     *    by the system or {@link DevicePolicyManager} restrictions. See {@link #onTrustTimeout()}
+     *    for determining when trust expires.
+     * @param flags TBDocumented
      * @throws IllegalStateException if the agent is not currently managing trust.
      */
     public final void grantTrust(
-            final CharSequence message, final long durationMs, final boolean initiatedByUser) {
+            final CharSequence message, final long durationMs, @GrantTrustFlags final int flags) {
         synchronized (mLock) {
             if (!mManagingTrust) {
                 throw new IllegalStateException("Cannot grant trust if agent is not managing trust."
@@ -240,7 +296,7 @@ public class TrustAgentService extends Service {
             }
             if (mCallback != null) {
                 try {
-                    mCallback.grantTrust(message.toString(), durationMs, initiatedByUser);
+                    mCallback.grantTrust(message.toString(), durationMs, flags);
                 } catch (RemoteException e) {
                     onError("calling enableTrust()");
                 }
@@ -250,7 +306,7 @@ public class TrustAgentService extends Service {
                 mPendingGrantTrustTask = new Runnable() {
                     @Override
                     public void run() {
-                        grantTrust(message, durationMs, initiatedByUser);
+                        grantTrust(message, durationMs, flags);
                     }
                 };
             }

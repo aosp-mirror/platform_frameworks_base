@@ -19,6 +19,7 @@ package com.android.server.trust;
 import android.content.ComponentName;
 import android.os.SystemClock;
 import android.os.UserHandle;
+import android.service.trust.TrustAgentService;
 import android.util.TimeUtils;
 
 import java.io.PrintWriter;
@@ -48,20 +49,20 @@ public class TrustArchive {
         // grantTrust
         final String message;
         final long duration;
-        final boolean userInitiated;
+        final int flags;
 
         // managingTrust
         final boolean managingTrust;
 
         private Event(int type, int userId, ComponentName agent, String message,
-                long duration, boolean userInitiated, boolean managingTrust) {
+                long duration, int flags, boolean managingTrust) {
             this.type = type;
             this.userId = userId;
             this.agent = agent;
             this.elapsedTimestamp = SystemClock.elapsedRealtime();
             this.message = message;
             this.duration = duration;
-            this.userInitiated = userInitiated;
+            this.flags = flags;
             this.managingTrust = managingTrust;
         }
     }
@@ -69,33 +70,33 @@ public class TrustArchive {
     ArrayDeque<Event> mEvents = new ArrayDeque<Event>();
 
     public void logGrantTrust(int userId, ComponentName agent, String message,
-            long duration, boolean userInitiated) {
+            long duration, int flags) {
         addEvent(new Event(TYPE_GRANT_TRUST, userId, agent, message, duration,
-                userInitiated, false));
+                flags, false));
     }
 
     public void logRevokeTrust(int userId, ComponentName agent) {
-        addEvent(new Event(TYPE_REVOKE_TRUST, userId, agent, null, 0, false, false));
+        addEvent(new Event(TYPE_REVOKE_TRUST, userId, agent, null, 0, 0, false));
     }
 
     public void logTrustTimeout(int userId, ComponentName agent) {
-        addEvent(new Event(TYPE_TRUST_TIMEOUT, userId, agent, null, 0, false, false));
+        addEvent(new Event(TYPE_TRUST_TIMEOUT, userId, agent, null, 0, 0, false));
     }
 
     public void logAgentDied(int userId, ComponentName agent) {
-        addEvent(new Event(TYPE_AGENT_DIED, userId, agent, null, 0, false, false));
+        addEvent(new Event(TYPE_AGENT_DIED, userId, agent, null, 0, 0, false));
     }
 
     public void logAgentConnected(int userId, ComponentName agent) {
-        addEvent(new Event(TYPE_AGENT_CONNECTED, userId, agent, null, 0, false, false));
+        addEvent(new Event(TYPE_AGENT_CONNECTED, userId, agent, null, 0, 0, false));
     }
 
     public void logAgentStopped(int userId, ComponentName agent) {
-        addEvent(new Event(TYPE_AGENT_STOPPED, userId, agent, null, 0, false, false));
+        addEvent(new Event(TYPE_AGENT_STOPPED, userId, agent, null, 0, 0, false));
     }
 
     public void logManagingTrust(int userId, ComponentName agent, boolean managing) {
-        addEvent(new Event(TYPE_MANAGING_TRUST, userId, agent, null, 0, false, managing));
+        addEvent(new Event(TYPE_MANAGING_TRUST, userId, agent, null, 0, 0, managing));
     }
 
     private void addEvent(Event e) {
@@ -129,8 +130,8 @@ public class TrustArchive {
             }
             switch (ev.type) {
                 case TYPE_GRANT_TRUST:
-                    writer.printf(", message=\"%s\", duration=%s, initiatedByUser=%d",
-                            ev.message, formatDuration(ev.duration), ev.userInitiated ? 1 : 0);
+                    writer.printf(", message=\"%s\", duration=%s, flags=%s",
+                            ev.message, formatDuration(ev.duration), dumpGrantFlags(ev.flags));
                     break;
                 case TYPE_MANAGING_TRUST:
                     writer.printf(", managingTrust=" + ev.managingTrust);
@@ -183,5 +184,21 @@ public class TrustArchive {
             default:
                 return "Unknown(" + type + ")";
         }
+    }
+
+    private String dumpGrantFlags(int flags) {
+        StringBuilder sb = new StringBuilder();
+        if ((flags & TrustAgentService.FLAG_GRANT_TRUST_INITIATED_BY_USER) != 0) {
+            if (sb.length() != 0) sb.append('|');
+            sb.append("INITIATED_BY_USER");
+        }
+        if ((flags & TrustAgentService.FLAG_GRANT_TRUST_DISMISS_KEYGUARD) != 0) {
+            if (sb.length() != 0) sb.append('|');
+            sb.append("DISMISS_KEYGUARD");
+        }
+        if (sb.length() == 0) {
+            sb.append('0');
+        }
+        return sb.toString();
     }
 }
