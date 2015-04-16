@@ -197,6 +197,8 @@ public class GpsLocationProvider implements LocationProviderInterface {
     private static final int REMOVE_LISTENER = 9;
     private static final int INJECT_NTP_TIME_FINISHED = 10;
     private static final int DOWNLOAD_XTRA_DATA_FINISHED = 11;
+    private static final int SUBSCRIPTION_OR_SIM_CHANGED = 12;
+    private static final int INITIALIZE_HANDLER = 13;
 
     // Request setid
     private static final int AGPS_RIL_REQUEST_SETID_IMSI = 1;
@@ -338,8 +340,12 @@ public class GpsLocationProvider implements LocationProviderInterface {
     // True if gps should be disabled (used to support battery saver mode in settings).
     private boolean mDisableGps = false;
 
-    // properties loaded from PROPERTIES_FILE
+    /**
+     * Properties loaded from PROPERTIES_FILE.
+     * It must be accessed only inside {@link #mHandler}.
+     */
     private Properties mProperties;
+
     private String mSuplServerHost;
     private int mSuplServerPort = TCP_MIN_PORT;
     private String mC2KServerHost;
@@ -462,7 +468,7 @@ public class GpsLocationProvider implements LocationProviderInterface {
             new OnSubscriptionsChangedListener() {
         @Override
         public void onSubscriptionsChanged() {
-            subscriptionOrSimChanged(mContext);
+            sendMessage(SUBSCRIPTION_OR_SIM_CHANGED, 0, null);
         }
     };
 
@@ -627,52 +633,21 @@ public class GpsLocationProvider implements LocationProviderInterface {
         mBatteryStats = IBatteryStats.Stub.asInterface(ServiceManager.getService(
                 BatteryStats.SERVICE_NAME));
 
-        // Load GPS configuration.
+        // Construct internal handler
+        mHandler = new ProviderHandler(looper);
+
+        // Load GPS configuration and register listeners in the background:
+        // some operations, such as opening files and registering broadcast receivers, can take a
+        // relative long time, so the ctor() is kept to create objects needed by this instance,
+        // while IO initialization and registration is delegated to our internal handler
+        // this approach is just fine because events are posted to our handler anyway
         mProperties = new Properties();
-        reloadGpsProperties(mContext, mProperties);
+        sendMessage(INITIALIZE_HANDLER, 0, null);
 
         // Create a GPS net-initiated handler.
         mNIHandler = new GpsNetInitiatedHandler(context,
                                                 mNetInitiatedListener,
                                                 mSuplEsEnabled);
-
-        // TODO: When this object "finishes" we should unregister by invoking
-        // SubscriptionManager.getInstance(mContext).unregister(mOnSubscriptionsChangedListener);
-        // This is not strictly necessary because it will be unregistered if the
-        // notification fails but it is good form.
-
-        // Register for SubscriptionInfo list changes which is guaranteed
-        // to invoke onSubscriptionsChanged the first time.
-        SubscriptionManager.from(mContext)
-            .addOnSubscriptionsChangedListener(mOnSubscriptionsChangedListener);
-
-        // construct handler, listen for events
-        mHandler = new ProviderHandler(looper);
-        listenForBroadcasts();
-
-        // also listen for PASSIVE_PROVIDER updates
-        mHandler.post(new Runnable() {
-            @Override
-            public void run() {
-                LocationManager locManager =
-                        (LocationManager) mContext.getSystemService(Context.LOCATION_SERVICE);
-                final long minTime = 0;
-                final float minDistance = 0;
-                final boolean oneShot = false;
-                LocationRequest request = LocationRequest.createFromDeprecatedProvider(
-                        LocationManager.PASSIVE_PROVIDER,
-                        minTime,
-                        minDistance,
-                        oneShot);
-                // Don't keep track of this request since it's done on behalf of other clients
-                // (which are kept track of separately).
-                request.setHideFromAppOps(true);
-                locManager.requestLocationUpdates(
-                        request,
-                        new NetworkLocationListener(),
-                        mHandler.getLooper());
-            }
-        });
 
         mListenerHelper = new GpsStatusListenerHelper(mHandler) {
             @Override
@@ -729,33 +704,6 @@ public class GpsLocationProvider implements LocationProviderInterface {
                 return isEnabled();
             }
         };
-    }
-
-    private void listenForBroadcasts() {
-        IntentFilter intentFilter = new IntentFilter();
-        intentFilter.addAction(Intents.DATA_SMS_RECEIVED_ACTION);
-        intentFilter.addDataScheme("sms");
-        intentFilter.addDataAuthority("localhost","7275");
-        mContext.registerReceiver(mBroadcastReceiver, intentFilter, null, mHandler);
-
-        intentFilter = new IntentFilter();
-        intentFilter.addAction(Intents.WAP_PUSH_RECEIVED_ACTION);
-        try {
-            intentFilter.addDataType("application/vnd.omaloc-supl-init");
-        } catch (IntentFilter.MalformedMimeTypeException e) {
-            Log.w(TAG, "Malformed SUPL init mime type");
-        }
-        mContext.registerReceiver(mBroadcastReceiver, intentFilter, null, mHandler);
-
-        intentFilter = new IntentFilter();
-        intentFilter.addAction(ALARM_WAKEUP);
-        intentFilter.addAction(ALARM_TIMEOUT);
-        intentFilter.addAction(ConnectivityManager.CONNECTIVITY_ACTION_IMMEDIATE);
-        intentFilter.addAction(PowerManager.ACTION_POWER_SAVE_MODE_CHANGED);
-        intentFilter.addAction(Intent.ACTION_SCREEN_OFF);
-        intentFilter.addAction(Intent.ACTION_SCREEN_ON);
-        intentFilter.addAction(SIM_STATE_CHANGED);
-        mContext.registerReceiver(mBroadcastReceiver, intentFilter, null, mHandler);
     }
 
     /**
@@ -2012,13 +1960,85 @@ public class GpsLocationProvider implements LocationProviderInterface {
                 case UPDATE_LOCATION:
                     handleUpdateLocation((Location)msg.obj);
                     break;
+                case SUBSCRIPTION_OR_SIM_CHANGED:
+                    subscriptionOrSimChanged(mContext);
+                    break;
+                case INITIALIZE_HANDLER:
+                    initialize();
+                    break;
             }
             if (msg.arg2 == 1) {
                 // wakelock was taken for this message, release it
                 mWakeLock.release();
             }
         }
-    };
+
+        /**
+         * This method is bound to {@link #GpsLocationProvider(Context, ILocationManager, Looper)}.
+         * It is in charge of loading properties and registering for events that will be posted to
+         * this handler.
+         */
+        private void initialize() {
+            // load default GPS configuration
+            // (this configuration might change in the future based on SIM changes)
+            reloadGpsProperties(mContext, mProperties);
+
+            // TODO: When this object "finishes" we should unregister by invoking
+            // SubscriptionManager.getInstance(mContext).unregister(mOnSubscriptionsChangedListener);
+            // This is not strictly necessary because it will be unregistered if the
+            // notification fails but it is good form.
+
+            // Register for SubscriptionInfo list changes which is guaranteed
+            // to invoke onSubscriptionsChanged the first time.
+            SubscriptionManager.from(mContext)
+                    .addOnSubscriptionsChangedListener(mOnSubscriptionsChangedListener);
+
+            // listen for events
+            IntentFilter intentFilter = new IntentFilter();
+            intentFilter.addAction(Intents.DATA_SMS_RECEIVED_ACTION);
+            intentFilter.addDataScheme("sms");
+            intentFilter.addDataAuthority("localhost","7275");
+            mContext.registerReceiver(mBroadcastReceiver, intentFilter, null, this);
+
+            intentFilter = new IntentFilter();
+            intentFilter.addAction(Intents.WAP_PUSH_RECEIVED_ACTION);
+            try {
+                intentFilter.addDataType("application/vnd.omaloc-supl-init");
+            } catch (IntentFilter.MalformedMimeTypeException e) {
+                Log.w(TAG, "Malformed SUPL init mime type");
+            }
+            mContext.registerReceiver(mBroadcastReceiver, intentFilter, null, this);
+
+            intentFilter = new IntentFilter();
+            intentFilter.addAction(ALARM_WAKEUP);
+            intentFilter.addAction(ALARM_TIMEOUT);
+            intentFilter.addAction(ConnectivityManager.CONNECTIVITY_ACTION_IMMEDIATE);
+            intentFilter.addAction(PowerManager.ACTION_POWER_SAVE_MODE_CHANGED);
+            intentFilter.addAction(Intent.ACTION_SCREEN_OFF);
+            intentFilter.addAction(Intent.ACTION_SCREEN_ON);
+            intentFilter.addAction(SIM_STATE_CHANGED);
+            mContext.registerReceiver(mBroadcastReceiver, intentFilter, null, this);
+
+            // listen for PASSIVE_PROVIDER updates
+            LocationManager locManager =
+                    (LocationManager) mContext.getSystemService(Context.LOCATION_SERVICE);
+            long minTime = 0;
+            float minDistance = 0;
+            boolean oneShot = false;
+            LocationRequest request = LocationRequest.createFromDeprecatedProvider(
+                    LocationManager.PASSIVE_PROVIDER,
+                    minTime,
+                    minDistance,
+                    oneShot);
+            // Don't keep track of this request since it's done on behalf of other clients
+            // (which are kept track of separately).
+            request.setHideFromAppOps(true);
+            locManager.requestLocationUpdates(
+                    request,
+                    new NetworkLocationListener(),
+                    getLooper());
+        }
+    }
 
     private final class NetworkLocationListener implements LocationListener {
         @Override
