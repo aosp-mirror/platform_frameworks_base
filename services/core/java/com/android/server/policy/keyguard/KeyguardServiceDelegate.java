@@ -145,6 +145,9 @@ public class KeyguardServiceDelegate {
             if (mKeyguardState.bootCompleted) {
                 mKeyguardService.onBootCompleted();
             }
+            if (mKeyguardState.occluded) {
+                mKeyguardService.setOccluded(mKeyguardState.occluded);
+            }
         }
 
         @Override
