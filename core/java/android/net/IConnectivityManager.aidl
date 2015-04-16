@@ -43,6 +43,7 @@ import com.android.internal.net.VpnProfile;
 /** {@hide} */
 interface IConnectivityManager
 {
+    Network getActiveNetwork();
     NetworkInfo getActiveNetworkInfo();
     NetworkInfo getActiveNetworkInfoForUid(int uid);
     NetworkInfo getNetworkInfo(int networkType);
@@ -95,7 +96,7 @@ interface IConnectivityManager
 
     void reportInetCondition(int networkType, int percentage);
 
-    void reportBadNetwork(in Network network);
+    void reportNetworkConnectivity(in Network network, boolean hasConnectivity);
 
     ProxyInfo getGlobalProxy();
 
@@ -121,8 +122,6 @@ interface IConnectivityManager
 
     void captivePortalCheckCompleted(in NetworkInfo info, boolean isCaptivePortal);
 
-    int findConnectionTypeForIface(in String iface);
-
     int checkMobileProvisioning(int suggestedTimeOutMs);
 
     String getMobileProvisioningUrl();
@@ -137,7 +136,7 @@ interface IConnectivityManager
 
     void unregisterNetworkFactory(in Messenger messenger);
 
-    void registerNetworkAgent(in Messenger messenger, in NetworkInfo ni, in LinkProperties lp,
+    int registerNetworkAgent(in Messenger messenger, in NetworkInfo ni, in LinkProperties lp,
             in NetworkCapabilities nc, int score, in NetworkMisc misc);
 
     NetworkRequest requestNetwork(in NetworkCapabilities networkCapabilities,

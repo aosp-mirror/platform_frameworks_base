@@ -18,6 +18,7 @@ package android.bluetooth;
 
 import android.os.Handler;
 import android.os.ParcelUuid;
+import android.util.Log;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -66,10 +67,11 @@ import java.io.IOException;
  */
 public final class BluetoothServerSocket implements Closeable {
 
+    private static final String TAG = "BluetoothServerSocket";
     /*package*/ final BluetoothSocket mSocket;
     private Handler mHandler;
     private int mMessage;
-    private final int mChannel;
+    private int mChannel;
 
     /**
      * Construct a socket for incoming connections.
@@ -84,6 +86,9 @@ public final class BluetoothServerSocket implements Closeable {
             throws IOException {
         mChannel = port;
         mSocket = new BluetoothSocket(type, -1, auth, encrypt, null, port, null);
+        if(port == BluetoothAdapter.SOCKET_CHANNEL_AUTO_STATIC_NO_SDP) {
+            mSocket.setExcludeSdp(true);
+        }
     }
 
     /**
@@ -98,6 +103,7 @@ public final class BluetoothServerSocket implements Closeable {
     /*package*/ BluetoothServerSocket(int type, boolean auth, boolean encrypt, ParcelUuid uuid)
             throws IOException {
         mSocket = new BluetoothSocket(type, -1, auth, encrypt, null, -1, uuid);
+        // TODO: This is the same as mChannel = -1 - is this intentional?
         mChannel = mSocket.getPort();
     }
 
@@ -153,11 +159,55 @@ public final class BluetoothServerSocket implements Closeable {
     /*package*/ void setServiceName(String ServiceName) {
         mSocket.setServiceName(ServiceName);
     }
+
     /**
      * Returns the channel on which this socket is bound.
      * @hide
      */
     public int getChannel() {
         return mChannel;
+    }
+
+    /**
+     * Sets the channel on which future sockets are bound.
+     * Currently used only when a channel is auto generated.
+     */
+    /*package*/ void setChannel(int newChannel) {
+        /* TODO: From a design/architecture perspective this is wrong.
+         *       The bind operation should be conducted through this class
+         *       and the resulting port should be kept in mChannel, and
+         *       not set from BluetoothAdapter. */
+        if(mSocket != null) {
+            if(mSocket.getPort() != newChannel) {
+                Log.w(TAG,"The port set is different that the underlying port. mSocket.getPort(): "
+                            + mSocket.getPort() + " requested newChannel: " + newChannel);
+            }
+        }
+        mChannel = newChannel;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("ServerSocket: Type: ");
+        switch(mSocket.getConnectionType()) {
+            case BluetoothSocket.TYPE_RFCOMM:
+            {
+                sb.append("TYPE_RFCOMM");
+                break;
+            }
+            case BluetoothSocket.TYPE_L2CAP:
+            {
+                sb.append("TYPE_L2CAP");
+                break;
+            }
+            case BluetoothSocket.TYPE_SCO:
+            {
+                sb.append("TYPE_SCO");
+                break;
+            }
+        }
+        sb.append(" Channel: ").append(mChannel);
+        return sb.toString();
     }
 }

@@ -73,4 +73,39 @@ public interface ObexTransport {
 
     DataOutputStream openDataOutputStream() throws IOException;
 
+    /**
+     * Must return the maximum allowed OBEX packet that can be sent over
+     * the transport. For L2CAP this will be the Max SDU reported by the
+     * peer device.
+     * The returned value will be used to set the outgoing OBEX packet
+     * size. Therefore this value shall not change.
+     * For RFCOMM or other transport types where the OBEX packets size
+     * is unrelated to the transport packet size, return -1;
+     * @return the maximum allowed OBEX packet that can be send over
+     *         the transport. Or -1 in case of don't care.
+     */
+    int getMaxTransmitPacketSize();
+
+    /**
+     * Must return the maximum allowed OBEX packet that can be received over
+     * the transport. For L2CAP this will be the Max SDU configured for the
+     * L2CAP channel.
+     * The returned value will be used to validate the incoming packet size
+     * values.
+     * For RFCOMM or other transport types where the OBEX packets size
+     * is unrelated to the transport packet size, return -1;
+     * @return the maximum allowed OBEX packet that can be send over
+     *         the transport. Or -1 in case of don't care.
+     */
+    int getMaxReceivePacketSize();
+
+    /**
+     * Shall return true if the transport in use supports SRM.
+     * @return
+     *        <code>true</code> if SRM operation is supported, and is to be enabled.
+     *        <code>false</code> if SRM operations are not supported, or should not be used.
+     */
+    boolean isSrmSupported();
+
+
 }
