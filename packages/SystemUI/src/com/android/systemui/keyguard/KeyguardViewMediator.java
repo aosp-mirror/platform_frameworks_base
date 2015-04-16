@@ -867,6 +867,12 @@ public class KeyguardViewMediator extends SystemUI {
      */
     private void handleSetOccluded(boolean isOccluded) {
         synchronized (KeyguardViewMediator.this) {
+            if (mHiding && isOccluded) {
+                // We're in the process of going away but WindowManager wants to show a
+                // SHOW_WHEN_LOCKED activity instead.
+                startKeyguardExitAnimation(0, 0);
+            }
+
             if (mOccluded != isOccluded) {
                 mOccluded = isOccluded;
                 mStatusBarKeyguardViewManager.setOccluded(isOccluded);
