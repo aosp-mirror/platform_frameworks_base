@@ -80,15 +80,6 @@ public class StandaloneActivity extends BaseActivity {
 
         final Context context = this;
 
-        // Strongly define our horizontal dimension; we leave vertical as
-        final WindowManager.LayoutParams a = getWindow().getAttributes();
-
-        final Point size = new Point();
-        getWindowManager().getDefaultDisplay().getSize(size);
-        // a.width = (int) res.getFraction(R.dimen.dialog_width, size.x, size.x);
-
-        getWindow().setAttributes(a);
-
         mDirectoryContainer = (DirectoryContainerView) findViewById(R.id.container_directory);
 
         mState = (icicle != null)

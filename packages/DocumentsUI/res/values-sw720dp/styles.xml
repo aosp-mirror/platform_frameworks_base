@@ -16,6 +16,11 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <style name="DialogWhenReallyLarge" parent="@*android:style/Theme.Material.DayNight.Dialog.FixedSize" />
+    <style name="DialogWhenReallyLarge" parent="@*android:style/Theme.Material.DayNight.Dialog">
+        <!-- We do not specify width of window here because the max size of
+             floating window specified by windowFixedWidthis is limited. -->
+        <item name="*android:windowFixedHeightMajor">80%</item>
+        <item name="*android:windowFixedHeightMinor">90%</item>
+    </style>
 
 </resources>
