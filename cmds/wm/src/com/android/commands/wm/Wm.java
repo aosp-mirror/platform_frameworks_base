@@ -24,6 +24,7 @@ import android.graphics.Rect;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.util.AndroidException;
+import android.util.DisplayMetrics;
 import android.view.Display;
 import android.view.IWindowManager;
 import com.android.internal.os.BaseCommand;
@@ -45,21 +46,27 @@ public class Wm extends BaseCommand {
         (new Wm()).run(args);
     }
 
+    @Override
     public void onShowUsage(PrintStream out) {
         out.println(
                 "usage: wm [subcommand] [options]\n" +
-                "       wm size [reset|WxH]\n" +
+                "       wm size [reset|WxH|WdpxHdp]\n" +
                 "       wm density [reset|DENSITY]\n" +
                 "       wm overscan [reset|LEFT,TOP,RIGHT,BOTTOM]\n" +
+                "       wm scaling [off|auto]\n" +
                 "\n" +
                 "wm size: return or override display size.\n" +
+                "         width and height in pixels unless suffixed with 'dp'.\n" +
                 "\n" +
                 "wm density: override display density.\n" +
                 "\n" +
-                "wm overscan: set overscan area for display.\n"
+                "wm overscan: set overscan area for display.\n" +
+                "\n" +
+                "wm scaling: set display scaling mode.\n"
                 );
     }
 
+    @Override
     public void onRun() throws Exception {
         mWm = IWindowManager.Stub.asInterface(ServiceManager.checkService(
                         Context.WINDOW_SERVICE));
@@ -76,6 +83,8 @@ public class Wm extends BaseCommand {
             runDisplayDensity();
         } else if (op.equals("overscan")) {
             runDisplayOverscan();
+        } else if (op.equals("scaling")) {
+            runDisplayScaling();
         } else {
             showError("Error: unknown command '" + op + "'");
             return;
@@ -85,6 +94,7 @@ public class Wm extends BaseCommand {
     private void runDisplaySize() throws Exception {
         String size = nextArg();
         int w, h;
+        boolean scale = true;
         if (size == null) {
             Point initialSize = new Point();
             Point baseSize = new Point();
@@ -109,8 +119,8 @@ public class Wm extends BaseCommand {
             String wstr = size.substring(0, div);
             String hstr = size.substring(div+1);
             try {
-                w = Integer.parseInt(wstr);
-                h = Integer.parseInt(hstr);
+                w = parseDimension(wstr);
+                h = parseDimension(hstr);
             } catch (NumberFormatException e) {
                 System.err.println("Error: bad number " + e);
                 return;
@@ -192,5 +202,33 @@ public class Wm extends BaseCommand {
             mWm.setOverscan(Display.DEFAULT_DISPLAY, rect.left, rect.top, rect.right, rect.bottom);
         } catch (RemoteException e) {
         }
+    }
+
+    private void runDisplayScaling() throws Exception {
+        String scalingStr = nextArgRequired();
+        if ("auto".equals(scalingStr)) {
+            mWm.setForcedDisplayScalingMode(Display.DEFAULT_DISPLAY, 0);
+        } else if ("off".equals(scalingStr)) {
+            mWm.setForcedDisplayScalingMode(Display.DEFAULT_DISPLAY, 1);
+        } else {
+            System.err.println("Error: scaling must be 'auto' or 'off'");
+        }
+    }
+
+    private int parseDimension(String s) throws NumberFormatException {
+        if (s.endsWith("px")) {
+            return Integer.parseInt(s.substring(0, s.length() - 2));
+        }
+        if (s.endsWith("dp")) {
+            int density;
+            try {
+                density = mWm.getBaseDisplayDensity(Display.DEFAULT_DISPLAY);
+            } catch (RemoteException e) {
+                density = DisplayMetrics.DENSITY_DEFAULT;
+            }
+            return Integer.parseInt(s.substring(0, s.length() - 2)) * density /
+                    DisplayMetrics.DENSITY_DEFAULT;
+        }
+        return Integer.parseInt(s);
     }
 }

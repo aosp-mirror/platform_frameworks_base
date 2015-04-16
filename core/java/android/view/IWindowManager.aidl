@@ -70,6 +70,7 @@ interface IWindowManager
     int getBaseDisplayDensity(int displayId);
     void setForcedDisplayDensity(int displayId, int density);
     void clearForcedDisplayDensity(int displayId);
+    void setForcedDisplayScalingMode(int displayId, int mode); // 0 = auto, 1 = disable
 
     void setOverscan(int displayId, int left, int top, int right, int bottom);
 

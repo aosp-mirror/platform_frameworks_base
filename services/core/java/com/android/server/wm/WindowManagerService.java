@@ -7249,8 +7249,15 @@ public class WindowManagerService extends IWindowManager.Stub
             displayInfo.getLogicalMetrics(mRealDisplayMetrics,
                     CompatibilityInfo.DEFAULT_COMPATIBILITY_INFO, null);
             displayInfo.getAppMetrics(mDisplayMetrics);
+            if (displayContent.mDisplayScalingDisabled) {
+                displayInfo.flags |= Display.FLAG_SCALING_DISABLED;
+            } else {
+                displayInfo.flags &= ~Display.FLAG_SCALING_DISABLED;
+            }
+
             mDisplayManagerInternal.setDisplayInfoOverrideFromWindowManager(
                     displayContent.getDisplayId(), displayInfo);
+
             displayContent.mBaseDisplayRect.set(0, 0, dw, dh);
         }
         if (false) {
@@ -7547,7 +7554,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
         synchronized(mWindowMap) {
             final DisplayContent displayContent = getDefaultDisplayContentLocked();
-            readForcedDisplaySizeAndDensityLocked(displayContent);
+            readForcedDisplayPropertiesLocked(displayContent);
             mDisplayReady = true;
         }
 
@@ -8320,7 +8327,47 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
-    private void readForcedDisplaySizeAndDensityLocked(final DisplayContent displayContent) {
+    @Override
+    public void setForcedDisplayScalingMode(int displayId, int mode) {
+        if (mContext.checkCallingOrSelfPermission(
+                android.Manifest.permission.WRITE_SECURE_SETTINGS) !=
+                PackageManager.PERMISSION_GRANTED) {
+            throw new SecurityException("Must hold permission " +
+                    android.Manifest.permission.WRITE_SECURE_SETTINGS);
+        }
+        if (displayId != Display.DEFAULT_DISPLAY) {
+            throw new IllegalArgumentException("Can only set the default display");
+        }
+        final long ident = Binder.clearCallingIdentity();
+        try {
+            synchronized(mWindowMap) {
+                final DisplayContent displayContent = getDisplayContentLocked(displayId);
+                if (displayContent != null) {
+                    if (mode < 0 || mode > 1) {
+                        mode = 0;
+                    }
+                    setForcedDisplayScalingModeLocked(displayContent, mode);
+                    Settings.Global.putInt(mContext.getContentResolver(),
+                            Settings.Global.DISPLAY_SCALING_FORCE, mode);
+                }
+            }
+        } finally {
+            Binder.restoreCallingIdentity(ident);
+        }
+    }
+
+    private void setForcedDisplayScalingModeLocked(DisplayContent displayContent,
+            int mode) {
+        Slog.i(TAG, "Using display scaling mode: " + (mode == 0 ? "auto" : "off"));
+
+        synchronized(displayContent.mDisplaySizeLock) {
+            displayContent.mDisplayScalingDisabled = (mode != 0);
+        }
+        reconfigureDisplayLocked(displayContent);
+    }
+
+    private void readForcedDisplayPropertiesLocked(final DisplayContent displayContent) {
+        // Display size.
         String sizeStr = Settings.Global.getString(mContext.getContentResolver(),
                 Settings.Global.DISPLAY_SIZE_FORCED);
         if (sizeStr == null || sizeStr.length() == 0) {
@@ -8345,6 +8392,8 @@ public class WindowManagerService extends IWindowManager.Stub
                 }
             }
         }
+
+        // Display density.
         String densityStr = Settings.Global.getString(mContext.getContentResolver(),
                 Settings.Global.DISPLAY_DENSITY_FORCED);
         if (densityStr == null || densityStr.length() == 0) {
@@ -8361,6 +8410,16 @@ public class WindowManagerService extends IWindowManager.Stub
                     }
                 }
             } catch (NumberFormatException ex) {
+            }
+        }
+
+        // Display scaling mode.
+        int mode = Settings.Global.getInt(mContext.getContentResolver(),
+                Settings.Global.DISPLAY_SCALING_FORCE, 0);
+        if (mode != 0) {
+            synchronized(displayContent.mDisplaySizeLock) {
+                Slog.i(TAG, "FORCED DISPLAY SCALING DISABLED");
+                displayContent.mDisplayScalingDisabled = true;
             }
         }
     }
