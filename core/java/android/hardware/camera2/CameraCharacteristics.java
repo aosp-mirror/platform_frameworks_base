@@ -603,10 +603,9 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
     /**
      * <p>List of available high speed video size and fps range configurations
      * supported by the camera device, in the format of (width, height, fps_min, fps_max).</p>
-     * <p>When HIGH_SPEED_VIDEO is supported in {@link CameraCharacteristics#CONTROL_AVAILABLE_SCENE_MODES android.control.availableSceneModes},
-     * this metadata will list the supported high speed video size and fps range
-     * configurations. All the sizes listed in this configuration will be a subset
-     * of the sizes reported by StreamConfigurationMap#getOutputSizes for processed
+     * <p>When HIGH_SPEED_VIDEO is supported in {@link CameraCharacteristics#CONTROL_AVAILABLE_SCENE_MODES android.control.availableSceneModes}, this metadata
+     * will list the supported high speed video size and fps range configurations. All the sizes
+     * listed in this configuration will be a subset of the sizes reported by {@link android.hardware.camera2.params.StreamConfigurationMap#getOutputSizes } for processed
      * non-stalling formats.</p>
      * <p>For the high speed video use case, where the application will set
      * {@link CaptureRequest#CONTROL_SCENE_MODE android.control.sceneMode} to HIGH_SPEED_VIDEO in capture requests, the application must
@@ -1116,11 +1115,12 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * into the 3 stream types as below:</p>
      * <ul>
      * <li>Processed (but stalling): any non-RAW format with a stallDurations &gt; 0.
-     * Typically JPEG format (ImageFormat#JPEG).</li>
-     * <li>Raw formats: ImageFormat#RAW_SENSOR, ImageFormat#RAW10, ImageFormat#RAW12,
-     * and ImageFormat#RAW_OPAQUE.</li>
+     *   Typically {@link android.graphics.ImageFormat#JPEG JPEG format}.</li>
+     * <li>Raw formats: {@link android.graphics.ImageFormat#RAW_SENSOR RAW_SENSOR}, {@link android.graphics.ImageFormat#RAW10 RAW10}, or {@link android.graphics.ImageFormat#RAW12 RAW12}.</li>
      * <li>Processed (but not-stalling): any non-RAW format without a stall duration.
-     * Typically ImageFormat#YUV_420_888, ImageFormat#NV21, ImageFormat#YV12.</li>
+     *   Typically {@link android.graphics.ImageFormat#YUV_420_888 YUV_420_888},
+     *   {@link android.graphics.ImageFormat#NV21 NV21}, or
+     *   {@link android.graphics.ImageFormat#YV12 YV12}.</li>
      * </ul>
      * <p><b>Range of valid values:</b><br></p>
      * <p>For processed (and stalling) format streams, &gt;= 1.</p>
@@ -1148,10 +1148,9 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * be any <code>RAW</code> and supported format provided by {@link CameraCharacteristics#SCALER_STREAM_CONFIGURATION_MAP android.scaler.streamConfigurationMap}.</p>
      * <p>In particular, a <code>RAW</code> format is typically one of:</p>
      * <ul>
-     * <li>ImageFormat#RAW_SENSOR</li>
-     * <li>ImageFormat#RAW10</li>
-     * <li>ImageFormat#RAW12</li>
-     * <li>Opaque <code>RAW</code></li>
+     * <li>{@link android.graphics.ImageFormat#RAW_SENSOR RAW_SENSOR}</li>
+     * <li>{@link android.graphics.ImageFormat#RAW10 RAW10}</li>
+     * <li>{@link android.graphics.ImageFormat#RAW12 RAW12}</li>
      * </ul>
      * <p>LEGACY mode devices ({@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL android.info.supportedHardwareLevel} <code>==</code> LEGACY)
      * never support raw streams.</p>
@@ -1180,13 +1179,13 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * <p>Processed (but not-stalling) is defined as any non-RAW format without a stall duration.
      * Typically:</p>
      * <ul>
-     * <li>ImageFormat#YUV_420_888</li>
-     * <li>ImageFormat#NV21</li>
-     * <li>ImageFormat#YV12</li>
-     * <li>Implementation-defined formats, i.e. StreamConfiguration#isOutputSupportedFor(Class)</li>
+     * <li>{@link android.graphics.ImageFormat#YUV_420_888 YUV_420_888}</li>
+     * <li>{@link android.graphics.ImageFormat#NV21 NV21}</li>
+     * <li>{@link android.graphics.ImageFormat#YV12 YV12}</li>
+     * <li>Implementation-defined formats, i.e. {@link android.hardware.camera2.params.StreamConfigurationMap#isOutputSupportedFor(Class) }</li>
      * </ul>
-     * <p>For full guarantees, query StreamConfigurationMap#getOutputStallDuration with
-     * a processed format -- it will return 0 for a non-stalling stream.</p>
+     * <p>For full guarantees, query {@link android.hardware.camera2.params.StreamConfigurationMap#getOutputStallDuration } with a
+     * processed format -- it will return 0 for a non-stalling stream.</p>
      * <p>LEGACY devices will support at least 2 processing/non-stalling streams.</p>
      * <p><b>Range of valid values:</b><br></p>
      * <p>&gt;= 3
@@ -1212,10 +1211,11 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * the camera device. Using more streams simultaneously may require more hardware and
      * CPU resources that will consume more power. The image format for this kind of an output stream can
      * be any non-<code>RAW</code> and supported format provided by {@link CameraCharacteristics#SCALER_STREAM_CONFIGURATION_MAP android.scaler.streamConfigurationMap}.</p>
-     * <p>A processed and stalling format is defined as any non-RAW format with a stallDurations &gt; 0.
-     * Typically only the <code>JPEG</code> format (ImageFormat#JPEG) is a stalling format.</p>
-     * <p>For full guarantees, query StreamConfigurationMap#getOutputStallDuration with
-     * a processed format -- it will return a non-0 value for a stalling stream.</p>
+     * <p>A processed and stalling format is defined as any non-RAW format with a stallDurations
+     * &gt; 0.  Typically only the {@link android.graphics.ImageFormat#JPEG JPEG format} is a
+     * stalling format.</p>
+     * <p>For full guarantees, query {@link android.hardware.camera2.params.StreamConfigurationMap#getOutputStallDuration } with a
+     * processed format -- it will return a non-0 value for a stalling stream.</p>
      * <p>LEGACY devices will support up to 1 processing/stalling stream.</p>
      * <p><b>Range of valid values:</b><br></p>
      * <p>&gt;= 1</p>
@@ -1232,10 +1232,9 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * <p>The maximum numbers of any type of input streams
      * that can be configured and used simultaneously by a camera device.</p>
      * <p>When set to 0, it means no input stream is supported.</p>
-     * <p>The image format for a input stream can be any supported
-     * format returned by StreamConfigurationMap#getInputFormats. When using an
-     * input stream, there must be at least one output stream
-     * configured to to receive the reprocessed images.</p>
+     * <p>The image format for a input stream can be any supported format returned by {@link android.hardware.camera2.params.StreamConfigurationMap#getInputFormats }. When using an
+     * input stream, there must be at least one output stream configured to to receive the
+     * reprocessed images.</p>
      * <p>When an input stream and some output streams are used in a reprocessing request,
      * only the input buffer will be used to produce these output stream buffers, and a
      * new sensor image will not be captured.</p>
@@ -1352,7 +1351,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
 
     /**
      * <p>A list of all keys that the camera device has available
-     * to use with CaptureRequest.</p>
+     * to use with {@link android.hardware.camera2.CaptureRequest }.</p>
      * <p>Attempting to set a key into a CaptureRequest that is not
      * listed here will result in an invalid request and will be rejected
      * by the camera device.</p>
@@ -1370,7 +1369,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
 
     /**
      * <p>A list of all keys that the camera device has available
-     * to use with CaptureResult.</p>
+     * to use with {@link android.hardware.camera2.CaptureResult }.</p>
      * <p>Attempting to get a key from a CaptureResult that is not
      * listed here will always return a <code>null</code> value. Getting a key from
      * a CaptureResult that is listed here will generally never return a <code>null</code>
@@ -1396,7 +1395,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
 
     /**
      * <p>A list of all keys that the camera device has available
-     * to use with CameraCharacteristics.</p>
+     * to use with {@link android.hardware.camera2.CameraCharacteristics }.</p>
      * <p>This entry follows the same rules as
      * android.request.availableResultKeys (except that it applies for
      * CameraCharacteristics instead of CaptureResult). See above for more
@@ -1535,34 +1534,31 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * </thead>
      * <tbody>
      * <tr>
-     * <td align="left">PRIVATE (ImageFormat#PRIVATE)</td>
-     * <td align="left">JPEG</td>
+     * <td align="left">{@link android.graphics.ImageFormat#PRIVATE }</td>
+     * <td align="left">{@link android.graphics.ImageFormat#JPEG }</td>
      * <td align="left">OPAQUE_REPROCESSING</td>
      * </tr>
      * <tr>
-     * <td align="left">PRIVATE</td>
-     * <td align="left">YUV_420_888</td>
+     * <td align="left">{@link android.graphics.ImageFormat#PRIVATE }</td>
+     * <td align="left">{@link android.graphics.ImageFormat#YUV_420_888 }</td>
      * <td align="left">OPAQUE_REPROCESSING</td>
      * </tr>
      * <tr>
-     * <td align="left">YUV_420_888</td>
-     * <td align="left">JPEG</td>
+     * <td align="left">{@link android.graphics.ImageFormat#YUV_420_888 }</td>
+     * <td align="left">{@link android.graphics.ImageFormat#JPEG }</td>
      * <td align="left">YUV_REPROCESSING</td>
      * </tr>
      * <tr>
-     * <td align="left">YUV_420_888</td>
-     * <td align="left">YUV_420_888</td>
+     * <td align="left">{@link android.graphics.ImageFormat#YUV_420_888 }</td>
+     * <td align="left">{@link android.graphics.ImageFormat#YUV_420_888 }</td>
      * <td align="left">YUV_REPROCESSING</td>
      * </tr>
      * </tbody>
      * </table>
-     * <p>PRIVATE refers to a device-internal format that is not directly application-visible.
-     * A PRIVATE input surface can be acquired by
-     * ImageReader.newOpaqueInstance(width, height, maxImages).
-     * For a OPAQUE_REPROCESSING-capable camera device, using the PRIVATE format
-     * as either input or output will never hurt maximum frame rate (i.e.
-     * StreamConfigurationMap#getOutputStallDuration(format, size) is always 0),
-     * where format is ImageFormat#PRIVATE.</p>
+     * <p>PRIVATE refers to a device-internal format that is not directly application-visible.  A
+     * PRIVATE input surface can be acquired by {@link android.media.ImageReader#newOpaqueInstance }.</p>
+     * <p>For a OPAQUE_REPROCESSING-capable camera device, using the PRIVATE format as either input
+     * or output will never hurt maximum frame rate (i.e.  {@link android.hardware.camera2.params.StreamConfigurationMap#getOutputStallDuration getOutputStallDuration(ImageFormat.PRIVATE, size)} is always 0),</p>
      * <p>Attempting to configure an input stream with output streams not
      * listed as available in this map is not valid.</p>
      * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
@@ -1680,7 +1676,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * android.scaler.availableStallDurations for more details about
      * calculating the max frame rate.</p>
      * <p>(Keep in sync with
-     * StreamConfigurationMap#getOutputMinFrameDuration)</p>
+     * {@link android.hardware.camera2.params.StreamConfigurationMap#getOutputMinFrameDuration })</p>
      * <p><b>Units</b>: (format, width, height, ns) x n</p>
      * <p>This key is available on all devices.</p>
      *
@@ -1734,12 +1730,13 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * ignored).</p>
      * <p>The following formats may always have a stall duration:</p>
      * <ul>
-     * <li>ImageFormat#JPEG</li>
-     * <li>ImageFormat#RAW_SENSOR</li>
+     * <li>{@link android.graphics.ImageFormat#JPEG }</li>
+     * <li>{@link android.graphics.ImageFormat#RAW_SENSOR }</li>
      * </ul>
      * <p>The following formats will never have a stall duration:</p>
      * <ul>
-     * <li>ImageFormat#YUV_420_888</li>
+     * <li>{@link android.graphics.ImageFormat#YUV_420_888 }</li>
+     * <li>{@link android.graphics.ImageFormat#RAW10 }</li>
      * </ul>
      * <p>All other formats may or may not have an allowed stall duration on
      * a per-capability basis; refer to {@link CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES android.request.availableCapabilities}
@@ -1747,7 +1744,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * <p>See {@link CaptureRequest#SENSOR_FRAME_DURATION android.sensor.frameDuration} for more information about
      * calculating the max frame rate (absent stalls).</p>
      * <p>(Keep up to date with
-     * StreamConfigurationMap#getOutputStallDuration(int, Size) )</p>
+     * {@link android.hardware.camera2.params.StreamConfigurationMap#getOutputStallDuration } )</p>
      * <p><b>Units</b>: (format, width, height, ns) x n</p>
      * <p>This key is available on all devices.</p>
      *
@@ -1786,57 +1783,57 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * </thead>
      * <tbody>
      * <tr>
-     * <td align="center">JPEG</td>
+     * <td align="center">{@link android.graphics.ImageFormat#JPEG }</td>
      * <td align="center">{@link CameraCharacteristics#SENSOR_INFO_ACTIVE_ARRAY_SIZE android.sensor.info.activeArraySize}</td>
      * <td align="center">Any</td>
      * <td align="center"></td>
      * </tr>
      * <tr>
-     * <td align="center">JPEG</td>
+     * <td align="center">{@link android.graphics.ImageFormat#JPEG }</td>
      * <td align="center">1920x1080 (1080p)</td>
      * <td align="center">Any</td>
      * <td align="center">if 1080p &lt;= activeArraySize</td>
      * </tr>
      * <tr>
-     * <td align="center">JPEG</td>
+     * <td align="center">{@link android.graphics.ImageFormat#JPEG }</td>
      * <td align="center">1280x720 (720)</td>
      * <td align="center">Any</td>
      * <td align="center">if 720p &lt;= activeArraySize</td>
      * </tr>
      * <tr>
-     * <td align="center">JPEG</td>
+     * <td align="center">{@link android.graphics.ImageFormat#JPEG }</td>
      * <td align="center">640x480 (480p)</td>
      * <td align="center">Any</td>
      * <td align="center">if 480p &lt;= activeArraySize</td>
      * </tr>
      * <tr>
-     * <td align="center">JPEG</td>
+     * <td align="center">{@link android.graphics.ImageFormat#JPEG }</td>
      * <td align="center">320x240 (240p)</td>
      * <td align="center">Any</td>
      * <td align="center">if 240p &lt;= activeArraySize</td>
      * </tr>
      * <tr>
-     * <td align="center">YUV_420_888</td>
+     * <td align="center">{@link android.graphics.ImageFormat#YUV_420_888 }</td>
      * <td align="center">all output sizes available for JPEG</td>
      * <td align="center">FULL</td>
      * <td align="center"></td>
      * </tr>
      * <tr>
-     * <td align="center">YUV_420_888</td>
+     * <td align="center">{@link android.graphics.ImageFormat#YUV_420_888 }</td>
      * <td align="center">all output sizes available for JPEG, up to the maximum video size</td>
      * <td align="center">LIMITED</td>
      * <td align="center"></td>
      * </tr>
      * <tr>
-     * <td align="center">IMPLEMENTATION_DEFINED</td>
+     * <td align="center">{@link android.graphics.ImageFormat#PRIVATE }</td>
      * <td align="center">same as YUV_420_888</td>
      * <td align="center">Any</td>
      * <td align="center"></td>
      * </tr>
      * </tbody>
      * </table>
-     * <p>Refer to {@link CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES android.request.availableCapabilities} for additional
-     * mandatory stream configurations on a per-capability basis.</p>
+     * <p>Refer to {@link CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES android.request.availableCapabilities} and {@link android.hardware.camera2.CameraDevice#createCaptureSession } for additional mandatory
+     * stream configurations on a per-capability basis.</p>
      * <p>This key is available on all devices.</p>
      *
      * @see CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL
@@ -1973,8 +1970,8 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * <p>Attempting to use frame durations beyond the maximum will result in the frame
      * duration being clipped to the maximum. See that control for a full definition of frame
      * durations.</p>
-     * <p>Refer to StreamConfigurationMap#getOutputMinFrameDuration(int,Size) for the minimum
-     * frame duration values.</p>
+     * <p>Refer to {@link android.hardware.camera2.params.StreamConfigurationMap#getOutputMinFrameDuration }
+     * for the minimum frame duration values.</p>
      * <p><b>Units</b>: Nanoseconds</p>
      * <p><b>Range of valid values:</b><br>
      * For FULL capability devices
@@ -2707,8 +2704,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * <p>See {@link CaptureRequest#SENSOR_FRAME_DURATION android.sensor.frameDuration} and
      * android.scaler.availableStallDurations for more details about
      * calculating the max frame rate.</p>
-     * <p>(Keep in sync with
-     * StreamConfigurationMap#getOutputMinFrameDuration)</p>
+     * <p>(Keep in sync with {@link android.hardware.camera2.params.StreamConfigurationMap#getOutputMinFrameDuration })</p>
      * <p><b>Units</b>: (format, width, height, ns) x n</p>
      * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
      * <p><b>Limited capability</b> -
