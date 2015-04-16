@@ -126,7 +126,7 @@
             android:lineSpacingMultiplier="1.20029"
             android:layout_toStartOf="@id/zen_introduction_confirm"
             android:text="@string/zen_priority_introduction"
-            android:textAppearance="@style/TextAppearance.QS.VolumeSuppressor" />
+            android:textAppearance="@style/TextAppearance.QS.Introduction" />
 
         <TextView
             android:id="@+id/zen_introduction_customize"

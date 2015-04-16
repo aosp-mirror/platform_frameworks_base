@@ -344,15 +344,6 @@
     <!-- The chevron padding to the circle when hinting -->
     <dimen name="hint_chevron_circle_padding">16dp</dimen>
 
-    <!-- Volume panel dialog y offset -->
-    <dimen name="volume_panel_top">0dp</dimen>
-
-    <!-- Volume panel dialog width -->
-    <dimen name="volume_panel_width">344dp</dimen>
-
-    <!-- Volume panel z depth -->
-    <dimen name="volume_panel_z">3dp</dimen>
-
     <!-- Distance between notifications and header when they are considered to be colliding. -->
     <dimen name="header_notifications_collide_distance">48dp</dimen>
 
