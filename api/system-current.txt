@@ -32418,7 +32418,6 @@ package android.telecom {
     method public abstract void setDisplaySurface(android.view.Surface);
     method public abstract void setPauseImage(java.lang.String);
     method public abstract void setPreviewSurface(android.view.Surface);
-    method public deprecated void setVideoCallListener(android.telecom.InCallService.VideoCall.Listener);
     method public abstract void setZoom(float);
   }
 
@@ -32431,10 +32430,6 @@ package android.telecom {
     method public abstract void onSessionModifyRequestReceived(android.telecom.VideoProfile);
     method public abstract void onSessionModifyResponseReceived(int, android.telecom.VideoProfile, android.telecom.VideoProfile);
     method public abstract void onVideoQualityChanged(int);
-  }
-
-  public static abstract deprecated class InCallService.VideoCall.Listener extends android.telecom.InCallService.VideoCall.Callback {
-    ctor public InCallService.VideoCall.Listener();
   }
 
   public final deprecated class Phone {
