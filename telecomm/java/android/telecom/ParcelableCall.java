@@ -54,7 +54,6 @@ public final class ParcelableCall implements Parcelable {
     private final int mVideoState;
     private final List<String> mConferenceableCallIds;
     private final Bundle mExtras;
-    private int mCallSubstate;
 
     public ParcelableCall(
             String id,
@@ -76,8 +75,7 @@ public final class ParcelableCall implements Parcelable {
             StatusHints statusHints,
             int videoState,
             List<String> conferenceableCallIds,
-            Bundle extras,
-            int callSubstate) {
+            Bundle extras) {
         mId = id;
         mState = state;
         mDisconnectCause = disconnectCause;
@@ -98,7 +96,6 @@ public final class ParcelableCall implements Parcelable {
         mVideoState = videoState;
         mConferenceableCallIds = Collections.unmodifiableList(conferenceableCallIds);
         mExtras = extras;
-        mCallSubstate = callSubstate;
     }
 
     /** The unique ID of the call. */
@@ -235,14 +232,6 @@ public final class ParcelableCall implements Parcelable {
         return mExtras;
     }
 
-    /**
-     * The call substate.
-     * @return The substate of the call.
-     */
-    public int getCallSubstate() {
-        return mCallSubstate;
-    }
-
     /** Responsible for creating ParcelableCall objects for deserialized Parcels. */
     public static final Parcelable.Creator<ParcelableCall> CREATOR =
             new Parcelable.Creator<ParcelableCall> () {
@@ -273,7 +262,6 @@ public final class ParcelableCall implements Parcelable {
             List<String> conferenceableCallIds = new ArrayList<>();
             source.readList(conferenceableCallIds, classLoader);
             Bundle extras = source.readParcelable(classLoader);
-            int callSubstate = source.readInt();
             return new ParcelableCall(
                     id,
                     state,
@@ -294,8 +282,7 @@ public final class ParcelableCall implements Parcelable {
                     statusHints,
                     videoState,
                     conferenceableCallIds,
-                    extras,
-                    callSubstate);
+                    extras);
         }
 
         @Override
@@ -334,7 +321,6 @@ public final class ParcelableCall implements Parcelable {
         destination.writeInt(mVideoState);
         destination.writeList(mConferenceableCallIds);
         destination.writeParcelable(mExtras, 0);
-        destination.writeInt(mCallSubstate);
     }
 
     @Override
