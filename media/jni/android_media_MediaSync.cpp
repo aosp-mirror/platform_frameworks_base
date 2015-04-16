@@ -71,8 +71,8 @@ status_t JMediaSync::createInputSurface(
     return mSync->createInputSurface(bufferProducer);
 }
 
-void JMediaSync::setPlaybackRate(float rate) {
-    mSync->setPlaybackRate(rate);
+status_t JMediaSync::setPlaybackRate(float rate) {
+    return mSync->setPlaybackRate(rate);
 }
 
 sp<const MediaClock> JMediaSync::getMediaClock() {
@@ -115,15 +115,23 @@ static void android_media_MediaSync_release(JNIEnv *env, jobject thiz) {
 static void throwExceptionAsNecessary(
         JNIEnv *env, status_t err, const char *msg = NULL) {
     switch (err) {
-        case INVALID_OPERATION:
-            jniThrowException(env, "java/lang/IllegalStateException", msg);
+        case NO_ERROR:
             break;
 
         case BAD_VALUE:
             jniThrowException(env, "java/lang/IllegalArgumentException", msg);
             break;
 
+        case NO_INIT:
+        case INVALID_OPERATION:
         default:
+            if (err > 0) {
+                break;
+            }
+            AString msgWithErrorCode(msg);
+            msgWithErrorCode.append(" error:");
+            msgWithErrorCode.append(err);
+            jniThrowException(env, "java/lang/IllegalStateException", msgWithErrorCode.c_str());
             break;
     }
 }
@@ -295,7 +303,11 @@ static void android_media_MediaSync_native_setPlaybackRate(
         return;
     }
 
-    sync->setPlaybackRate(rate);
+    status_t err = sync->setPlaybackRate(rate);
+    if (err != NO_ERROR) {
+        throwExceptionAsNecessary(env, err);
+        return;
+    }
 }
 
 static void android_media_MediaSync_native_finalize(JNIEnv *env, jobject thiz) {
