@@ -114,6 +114,11 @@ public class MobileSignalController extends SignalController<
         setInetCondition(inetCondition);
     }
 
+    public void setCarrierNetworkChangeMode(boolean carrierNetworkChangeMode) {
+        mCurrentState.carrierNetworkChangeMode = carrierNetworkChangeMode;
+        notifyListenersIfNecessary();
+    }
+
     /**
      * Start listening for phone state changes.
      */
@@ -123,7 +128,8 @@ public class MobileSignalController extends SignalController<
                         | PhoneStateListener.LISTEN_SIGNAL_STRENGTHS
                         | PhoneStateListener.LISTEN_CALL_STATE
                         | PhoneStateListener.LISTEN_DATA_CONNECTION_STATE
-                        | PhoneStateListener.LISTEN_DATA_ACTIVITY);
+                        | PhoneStateListener.LISTEN_DATA_ACTIVITY
+                        | PhoneStateListener.LISTEN_CARRIER_NETWORK_CHANGE);
     }
 
     /**
@@ -201,8 +207,12 @@ public class MobileSignalController extends SignalController<
                         && !mCurrentState.isEmergency,
                         getQsCurrentIconId(), contentDescription,
                         qsTypeIcon,
-                        mCurrentState.dataConnected && mCurrentState.activityIn,
-                        mCurrentState.dataConnected && mCurrentState.activityOut,
+                        mCurrentState.dataConnected
+                            && !mCurrentState.carrierNetworkChangeMode
+                            && mCurrentState.activityIn,
+                        mCurrentState.dataConnected
+                            && !mCurrentState.carrierNetworkChangeMode
+                            && mCurrentState.activityOut,
                         dataContentDescription,
                         mCurrentState.isEmergency ? null : mCurrentState.networkName,
                         // Only wide if actually showing something.
@@ -215,6 +225,7 @@ public class MobileSignalController extends SignalController<
             mSignalClusters.get(i).setMobileDataIndicators(
                     mCurrentState.enabled && !mCurrentState.airplaneMode,
                     getCurrentIconId(),
+                    getCurrentDarkIconId(),
                     typeIcon,
                     contentDescription,
                     dataContentDescription,
@@ -222,6 +233,10 @@ public class MobileSignalController extends SignalController<
                     icons.mIsWide && typeIcon != 0,
                     mSubscriptionInfo.getSubscriptionId());
         }
+    }
+
+    private int getCurrentDarkIconId() {
+        return getCurrentIconId(false /* light */);
     }
 
     @Override
@@ -268,6 +283,10 @@ public class MobileSignalController extends SignalController<
         } else {
             return mServiceState != null && mServiceState.getRoaming();
         }
+    }
+
+    private boolean isCarrierNetworkChangeActive() {
+        return !hasService() && mCurrentState.carrierNetworkChangeMode;
     }
 
     public void handleBroadcast(Intent intent) {
@@ -351,7 +370,9 @@ public class MobileSignalController extends SignalController<
         mCurrentState.dataConnected = mCurrentState.connected
                 && mDataState == TelephonyManager.DATA_CONNECTED;
 
-        if (isRoaming()) {
+        if (isCarrierNetworkChangeActive()) {
+            mCurrentState.iconGroup = TelephonyIcons.CARRIER_NETWORK_CHANGE;
+        } else if (isRoaming()) {
             mCurrentState.iconGroup = TelephonyIcons.ROAMING;
         }
         if (isEmergencyOnly() != mCurrentState.isEmergency) {
@@ -363,6 +384,7 @@ public class MobileSignalController extends SignalController<
                 && mServiceState.getOperatorAlphaShort() != null) {
             mCurrentState.networkName = mServiceState.getOperatorAlphaShort();
         }
+
         notifyListenersIfNecessary();
     }
 
@@ -428,6 +450,16 @@ public class MobileSignalController extends SignalController<
             }
             setActivity(direction);
         }
+
+        @Override
+        public void onCarrierNetworkChange(boolean active) {
+            if (DEBUG) {
+                Log.d(mTag, "onCarrierNetworkChange: active=" + active);
+            }
+            mCurrentState.carrierNetworkChangeMode = active;
+
+            updateTelephony();
+        }
     };
 
     static class MobileIconGroup extends SignalController.IconGroup {
@@ -440,8 +472,17 @@ public class MobileSignalController extends SignalController<
                 int sbNullState, int qsNullState, int sbDiscState, int qsDiscState,
                 int discContentDesc, int dataContentDesc, int dataType, boolean isWide,
                 int[] qsDataType) {
-            super(name, sbIcons, qsIcons, contentDesc, sbNullState, qsNullState, sbDiscState,
-                    qsDiscState, discContentDesc);
+            this(name, sbIcons, sbIcons, qsIcons, contentDesc, sbNullState, qsNullState,
+                    sbDiscState, sbDiscState, qsDiscState, discContentDesc, dataContentDesc,
+                    dataType, isWide, qsDataType);
+        }
+
+        public MobileIconGroup(String name, int[][] sbIcons, int[][] sbDarkIcons, int[][] qsIcons,
+                int[] contentDesc, int sbNullState, int qsNullState, int sbDiscState,
+                int sbDarkDiscState, int qsDiscState, int discContentDesc, int dataContentDesc,
+                int dataType, boolean isWide, int[] qsDataType) {
+            super(name, sbIcons, sbDarkIcons, qsIcons, contentDesc, sbNullState, qsNullState,
+                    sbDiscState, sbDarkDiscState, qsDiscState, discContentDesc);
             mDataContentDescription = dataContentDesc;
             mDataType = dataType;
             mIsWide = isWide;
@@ -455,6 +496,7 @@ public class MobileSignalController extends SignalController<
         boolean dataConnected;
         boolean isEmergency;
         boolean airplaneMode;
+        boolean carrierNetworkChangeMode;
         int inetForNetwork;
 
         @Override
@@ -467,6 +509,7 @@ public class MobileSignalController extends SignalController<
             inetForNetwork = state.inetForNetwork;
             isEmergency = state.isEmergency;
             airplaneMode = state.airplaneMode;
+            carrierNetworkChangeMode = state.carrierNetworkChangeMode;
         }
 
         @Override
@@ -478,7 +521,8 @@ public class MobileSignalController extends SignalController<
             builder.append("dataConnected=").append(dataConnected).append(',');
             builder.append("inetForNetwork=").append(inetForNetwork).append(',');
             builder.append("isEmergency=").append(isEmergency).append(',');
-            builder.append("airplaneMode=").append(airplaneMode);
+            builder.append("airplaneMode=").append(airplaneMode).append(',');
+            builder.append("carrierNetworkChangeMode=").append(carrierNetworkChangeMode);
         }
 
         @Override
@@ -489,6 +533,7 @@ public class MobileSignalController extends SignalController<
                     && ((MobileState) o).dataConnected == dataConnected
                     && ((MobileState) o).isEmergency == isEmergency
                     && ((MobileState) o).airplaneMode == airplaneMode
+                    && ((MobileState) o).carrierNetworkChangeMode == carrierNetworkChangeMode
                     && ((MobileState) o).inetForNetwork == inetForNetwork;
         }
     }

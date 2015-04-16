@@ -38,6 +38,7 @@ import android.widget.TextView;
 
 import com.android.systemui.FontSizeUtils;
 import com.android.systemui.R;
+import com.android.systemui.qs.QSTile.AnimationIcon;
 import com.android.systemui.qs.QSTile.State;
 
 import java.util.Objects;
@@ -315,8 +316,9 @@ public class QSTileView extends ViewGroup {
             iv.setImageDrawable(d);
             iv.setTag(R.id.qs_icon_tag, state.icon);
             if (d instanceof Animatable) {
-                if (!iv.isShown()) {
-                    ((Animatable) d).stop(); // skip directly to end state
+                Animatable a = (Animatable) d;
+                if (state.icon instanceof AnimationIcon && !iv.isShown()) {
+                    a.stop(); // skip directly to end state
                 }
             }
         }

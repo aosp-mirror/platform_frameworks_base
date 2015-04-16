@@ -18,6 +18,7 @@ package com.android.systemui.qs;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.drawable.Animatable;
 import android.graphics.drawable.AnimatedVectorDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Handler;
@@ -325,7 +326,7 @@ public abstract class QSTile<TState extends State> implements Listenable {
     public static class ResourceIcon extends Icon {
         private static final SparseArray<Icon> ICONS = new SparseArray<Icon>();
 
-        private final int mResId;
+        protected final int mResId;
 
         private ResourceIcon(int resId) {
             mResId = resId;
@@ -342,7 +343,11 @@ public abstract class QSTile<TState extends State> implements Listenable {
 
         @Override
         public Drawable getDrawable(Context context) {
-            return context.getDrawable(mResId);
+            Drawable d = context.getDrawable(mResId);
+            if (d instanceof Animatable) {
+                ((Animatable) d).start();
+            }
+            return d;
         }
 
         @Override
@@ -370,7 +375,7 @@ public abstract class QSTile<TState extends State> implements Listenable {
         @Override
         public Drawable getDrawable(Context context) {
             // workaround: get a clean state for every new AVD
-            final AnimatedVectorDrawable d = (AnimatedVectorDrawable) super.getDrawable(context)
+            final AnimatedVectorDrawable d = (AnimatedVectorDrawable) context.getDrawable(mResId)
                     .getConstantState().newDrawable();
             d.start();
             if (mAllowAnimation) {

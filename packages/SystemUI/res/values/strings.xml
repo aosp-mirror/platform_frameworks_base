@@ -359,6 +359,9 @@
     <!-- Content description of the airplane mode icon for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_airplane_mode">Airplane mode.</string>
 
+    <!-- Content description of the carrier network changing icon for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
+    <string name="accessibility_carrier_network_change_mode">Carrier network changing.</string>
+
     <!-- Content description of the battery level icon for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_battery_level">Battery <xliff:g id="number">%d</xliff:g> percent.</string>
 
