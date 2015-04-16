@@ -1116,11 +1116,12 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         if (shadeEntry == null) {
             return;
         }
-        if (mUseHeadsUp && shouldInterrupt(notification)) {
+        boolean isHeadsUped = mUseHeadsUp && shouldInterrupt(notification);
+        if (isHeadsUped) {
             mHeadsUpManager.showNotification(shadeEntry);
         }
 
-        if (notification.getNotification().fullScreenIntent != null) {
+        if (!isHeadsUped && notification.getNotification().fullScreenIntent != null) {
             // Stop screensaver if the notification has a full-screen intent.
             // (like an incoming phone call)
             awakenDreams();
