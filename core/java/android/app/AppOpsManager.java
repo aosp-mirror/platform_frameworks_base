@@ -438,14 +438,14 @@ public class AppOpsManager {
             null, // neighboring cells shares the coarse location perm
             android.Manifest.permission.CALL_PHONE,
             android.Manifest.permission.READ_SMS,
-            android.Manifest.permission.WRITE_SMS,
+            null, // no permission required for writing sms
             android.Manifest.permission.RECEIVE_SMS,
             android.Manifest.permission.RECEIVE_EMERGENCY_BROADCAST,
             android.Manifest.permission.RECEIVE_MMS,
             android.Manifest.permission.RECEIVE_WAP_PUSH,
             android.Manifest.permission.SEND_SMS,
             android.Manifest.permission.READ_SMS,
-            android.Manifest.permission.WRITE_SMS,
+            null, // no permission required for writing icc sms
             android.Manifest.permission.WRITE_SETTINGS,
             android.Manifest.permission.SYSTEM_ALERT_WINDOW,
             android.Manifest.permission.ACCESS_NOTIFICATIONS,

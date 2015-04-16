@@ -156,7 +156,6 @@ package android {
     field public static final java.lang.String WRITE_PROFILE = "android.permission.WRITE_PROFILE";
     field public static final java.lang.String WRITE_SECURE_SETTINGS = "android.permission.WRITE_SECURE_SETTINGS";
     field public static final java.lang.String WRITE_SETTINGS = "android.permission.WRITE_SETTINGS";
-    field public static final java.lang.String WRITE_SMS = "android.permission.WRITE_SMS";
     field public static final deprecated java.lang.String WRITE_SOCIAL_STREAM = "android.permission.WRITE_SOCIAL_STREAM";
     field public static final java.lang.String WRITE_SYNC_SETTINGS = "android.permission.WRITE_SYNC_SETTINGS";
     field public static final java.lang.String WRITE_USER_DICTIONARY = "android.permission.WRITE_USER_DICTIONARY";

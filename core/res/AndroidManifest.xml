@@ -417,13 +417,6 @@
         android:description="@string/permdesc_readSms"
         android:protectionLevel="dangerous" />
 
-    <!-- Allows an application to write SMS messages. -->
-    <permission android:name="android.permission.WRITE_SMS"
-        android:permissionGroup="android.permission-group.SMS"
-        android:label="@string/permlab_writeSms"
-        android:description="@string/permdesc_writeSms"
-        android:protectionLevel="dangerous" />
-
     <!-- Allows an application to receive WAP push messages. -->
     <permission android:name="android.permission.RECEIVE_WAP_PUSH"
         android:permissionGroup="android.permission-group.SMS"

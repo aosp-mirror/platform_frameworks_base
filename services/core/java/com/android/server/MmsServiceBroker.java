@@ -372,7 +372,6 @@ public class MmsServiceBroker extends SystemService {
         @Override
         public Uri importTextMessage(String callingPkg, String address, int type, String text,
                 long timestampMillis, boolean seen, boolean read) throws RemoteException {
-            mContext.enforceCallingPermission(Manifest.permission.WRITE_SMS, "Import SMS message");
             if (getAppOpsManager().noteOp(AppOpsManager.OP_WRITE_SMS, Binder.getCallingUid(),
                     callingPkg) != AppOpsManager.MODE_ALLOWED) {
                 // Silently fail AppOps failure due to not being the default SMS app
@@ -387,7 +386,6 @@ public class MmsServiceBroker extends SystemService {
         public Uri importMultimediaMessage(String callingPkg, Uri contentUri,
                 String messageId, long timestampSecs, boolean seen, boolean read)
                         throws RemoteException {
-            mContext.enforceCallingPermission(Manifest.permission.WRITE_SMS, "Import MMS message");
             if (getAppOpsManager().noteOp(AppOpsManager.OP_WRITE_SMS, Binder.getCallingUid(),
                     callingPkg) != AppOpsManager.MODE_ALLOWED) {
                 // Silently fail AppOps failure due to not being the default SMS app
@@ -401,8 +399,6 @@ public class MmsServiceBroker extends SystemService {
         @Override
         public boolean deleteStoredMessage(String callingPkg, Uri messageUri)
                 throws RemoteException {
-            mContext.enforceCallingPermission(Manifest.permission.WRITE_SMS,
-                    "Delete SMS/MMS message");
             if (getAppOpsManager().noteOp(AppOpsManager.OP_WRITE_SMS, Binder.getCallingUid(),
                     callingPkg) != AppOpsManager.MODE_ALLOWED) {
                 return false;
@@ -413,7 +409,6 @@ public class MmsServiceBroker extends SystemService {
         @Override
         public boolean deleteStoredConversation(String callingPkg, long conversationId)
                 throws RemoteException {
-            mContext.enforceCallingPermission(Manifest.permission.WRITE_SMS, "Delete conversation");
             if (getAppOpsManager().noteOp(AppOpsManager.OP_WRITE_SMS, Binder.getCallingUid(),
                     callingPkg) != AppOpsManager.MODE_ALLOWED) {
                 return false;
@@ -424,8 +419,10 @@ public class MmsServiceBroker extends SystemService {
         @Override
         public boolean updateStoredMessageStatus(String callingPkg, Uri messageUri,
                 ContentValues statusValues) throws RemoteException {
-            mContext.enforceCallingPermission(Manifest.permission.WRITE_SMS,
-                    "Update SMS/MMS message");
+            if (getAppOpsManager().noteOp(AppOpsManager.OP_WRITE_SMS, Binder.getCallingUid(),
+                    callingPkg) != AppOpsManager.MODE_ALLOWED) {
+                return false;
+            }
             return getServiceGuarded()
                     .updateStoredMessageStatus(callingPkg, messageUri, statusValues);
         }
@@ -433,8 +430,10 @@ public class MmsServiceBroker extends SystemService {
         @Override
         public boolean archiveStoredConversation(String callingPkg, long conversationId,
                 boolean archived) throws RemoteException {
-            mContext.enforceCallingPermission(Manifest.permission.WRITE_SMS,
-                    "Update SMS/MMS message");
+            if (getAppOpsManager().noteOp(AppOpsManager.OP_WRITE_SMS, Binder.getCallingUid(),
+                    callingPkg) != AppOpsManager.MODE_ALLOWED) {
+                return false;
+            }
             return getServiceGuarded()
                     .archiveStoredConversation(callingPkg, conversationId, archived);
         }
@@ -442,7 +441,6 @@ public class MmsServiceBroker extends SystemService {
         @Override
         public Uri addTextMessageDraft(String callingPkg, String address, String text)
                 throws RemoteException {
-            mContext.enforceCallingPermission(Manifest.permission.WRITE_SMS, "Add SMS draft");
             if (getAppOpsManager().noteOp(AppOpsManager.OP_WRITE_SMS, Binder.getCallingUid(),
                     callingPkg) != AppOpsManager.MODE_ALLOWED) {
                 // Silently fail AppOps failure due to not being the default SMS app
@@ -455,7 +453,6 @@ public class MmsServiceBroker extends SystemService {
         @Override
         public Uri addMultimediaMessageDraft(String callingPkg, Uri contentUri)
                 throws RemoteException {
-            mContext.enforceCallingPermission(Manifest.permission.WRITE_SMS, "Add MMS draft");
             if (getAppOpsManager().noteOp(AppOpsManager.OP_WRITE_SMS, Binder.getCallingUid(),
                     callingPkg) != AppOpsManager.MODE_ALLOWED) {
                 // Silently fail AppOps failure due to not being the default SMS app
@@ -468,8 +465,6 @@ public class MmsServiceBroker extends SystemService {
         @Override
         public void sendStoredMessage(int subId, String callingPkg, Uri messageUri,
                 Bundle configOverrides, PendingIntent sentIntent) throws RemoteException {
-            mContext.enforceCallingPermission(Manifest.permission.SEND_SMS,
-                    "Send stored MMS message");
             if (getAppOpsManager().noteOp(AppOpsManager.OP_SEND_SMS, Binder.getCallingUid(),
                     callingPkg) != AppOpsManager.MODE_ALLOWED) {
                 return;
@@ -480,7 +475,6 @@ public class MmsServiceBroker extends SystemService {
 
         @Override
         public void setAutoPersisting(String callingPkg, boolean enabled) throws RemoteException {
-            mContext.enforceCallingPermission(Manifest.permission.WRITE_SMS, "Set auto persist");
             if (getAppOpsManager().noteOp(AppOpsManager.OP_WRITE_SMS, Binder.getCallingUid(),
                     callingPkg) != AppOpsManager.MODE_ALLOWED) {
                 return;

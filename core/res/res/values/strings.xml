@@ -685,21 +685,6 @@
       SMS messages, regardless of content or confidentiality.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_writeSms">edit your text messages (SMS or MMS)</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_writeSms" product="tablet">Allows the app to write
-      to SMS messages stored on your tablet or SIM card. Malicious apps
-      may delete your messages.</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_writeSms" product="tv">Allows the app to write
-      to SMS messages stored on your TV or SIM card. Malicious apps
-      may delete your messages.</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_writeSms" product="default">Allows the app to write
-      to SMS messages stored on your phone or SIM card. Malicious apps
-      may delete your messages.</string>
-
-    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_receiveWapPush">receive text messages (WAP)</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_receiveWapPush">Allows the app to receive and process
