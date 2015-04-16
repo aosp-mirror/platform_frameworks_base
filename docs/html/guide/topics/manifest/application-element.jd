@@ -32,6 +32,7 @@ page.title=&lt;application&gt;
              android:<a href="#testOnly">testOnly</a>=["true" | "false"]
              android:<a href="#theme">theme</a>="<i>resource or theme</i>"
              android:<a href="#uioptions">uiOptions</a>=["none" | "splitActionBarWhenNarrow"]
+             android:<a href="#usesCleartextTraffic">usesCleartextTraffic</a>=["true" | "false"]
              android:<a href="#vmSafeMode">vmSafeMode</a>=["true" | "false"] &gt;
     . . .
 &lt;/application&gt;</pre></dd>
@@ -444,6 +445,32 @@ together.</td></tr>
   <p>For more information about the action bar, see the <a
 href="{@docRoot}guide/topics/ui/actionbar.html">Action Bar</a> developer guide.</p>
   <p>This attribute was added in API level 14.</p>
+</dd>
+
+<dt><a name="usesCleartextTraffic"></a>{@code android:usesCleartextTraffic}</dt>
+<dd>Indicates whether the app intends to use cleartext network traffic, such as cleartext HTTP.
+The default value is {@code "true"}.
+
+<p>When the attribute is set to {@code "false"}, platform components (for example, HTTP and FTP
+stacks, {@link android.webkit.WebView}, {@link android.app.DownloadManager},
+{@link android.media.MediaPlayer}) will refuse the app's requests to use cleartext traffic.
+Third-party libraries are strongly encouraged to honor this setting as well. The key reason for
+avoiding cleartext traffic is the lack of confidentiality, authenticity, and protections against
+tampering: a network attacker can eavesdrop on transmitted data and also modify it without being
+detected.
+
+<p>This flag is honored on a best effort basis because it's impossible to prevent all cleartext
+traffic from Android applications given the level of access provided to them. For example, there's
+no expectation that the {@link java.net.Socket} API will honor this flag because it cannot
+determine whether its traffic is in cleartext. However, most network traffic from applications is
+handled by higher-level network stacks/components which can honor this flag by either reading it
+from {@link android.content.pm.ApplicationInfo#flags ApplicationInfo.flags} or
+{@link android.security.NetworkSecurityPolicy#isCleartextTrafficPermitted() NetworkSecurityPolicy.isCleartextTrafficPermitted()}.
+
+<p>During app development, StrictMode can be used to identify any cleartext traffic from the app: see
+{@link android.os.StrictMode.VmPolicy.Builder#detectCleartextNetwork() StrictMode.VmPolicy.Builder.detectCleartextNetwork()}.
+
+<p>This attribute was added in API level 23.</p>
 </dd>
 
 <dt><a name="vmSafeMode"></a>{@code android:vmSafeMode}</dt>
